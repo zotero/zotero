@@ -612,8 +612,8 @@ var Zotero_Browser = new function() {
 	
 	this.openTranslatePanel = function(el, event) {
 		var panel = document.getElementById("zotero-save-panel");
+		document.getAnonymousNodes(panel)[0].style.transition = "none";
 		panel.hidden = false;
-		panel.openPopup(el, "bottomcenter topright");
 		
 		var iframe = document.getElementById("zotero-save-iframe"),
 			webNav = iframe.webNavigation;
@@ -629,6 +629,10 @@ var Zotero_Browser = new function() {
 			doc.defaultView.ZoteroData = {
 				"translate":tab.page.translate,
 				"translators":tab.page.translators
+			};
+			
+			doc.defaultView.Actions.loaded = function() {
+				panel.openPopup(el, "bottomcenter topright");
 			};
 		};
 		iframe.addEventListener("DOMContentLoaded", listener, true);

@@ -517,98 +517,100 @@ var Builder = {
 $("#main-page").on("pageinit", function() {
 	var header = "navbar";
 	
-	RecentlyUsed.get().then(Builder.recentlyUsedList);
-	
-	CollectionList.getLibraries().then(function(libraries) {
-		Builder.sortCollections(libraries);
-		var listview = $("#main-page-list-view");
-		Builder.divider(listview, "Libraries");
-		Builder.collectionList(listview, libraries);
-	});
-	
-	LookupEngines.get().then(function(lookupEngines) {
-		// If no lookup engines, don't show navbar
-		if(!lookupEngines.length) {
-			header = "header";
-			$("#navbar").hide();
-			$("#header").show();
-			return;
-		}
-	
-		// Create CSS styles for icons
-		var style = "";
-		for(var i=0; i<lookupEngines.length; i++) {
-			style += ".ui-icon-locate-engine-"+i+" { "+
-				"background-image: url("+lookupEngines[i].icon+"); "+
-				"width: 16px; "+
-				"height: 16px; "+
-				"border-radius: 0; "+
-				"background-color: transparent; "+
-			"}";
-		}
+	Q.all([
+		RecentlyUsed.get().then(Builder.recentlyUsedList),
 		
-		// Add CSS styles to document
-		var styleNode = document.createElement('style');
-		styleNode.type = "text/css";
-		if("styleSheet" in styleNode) {	// IE
-			styleNode.styleSheet.cssText = style;
-		} else {						// Other browsers
-			styleNode.appendChild(document.createTextNode(style));
-		}
-		document.getElementsByTagName('head')[0].appendChild(styleNode);
+		CollectionList.getLibraries().then(function(libraries) {
+			Builder.sortCollections(libraries);
+			var listview = $("#main-page-list-view");
+			Builder.divider(listview, "Libraries");
+			Builder.collectionList(listview, libraries);
+		}),
 		
-		// Add buttons
-		var lookupButtons = $(document.createElement("div"));
-		lookupButtons.attr({"data-role":"controlgroup"});
-		for(var i=0; i<lookupEngines.length; i++) {
-			var a = $(document.createElement("a"));
-			a.text(lookupEngines[i].name);
-			a.attr({"data-role":"button", "data-mini":"true", "data-icon":"locate-engine-"+i});
-			a.on("click", EventHandlers.lookupSelect);
-			lookupButtons.append(a);
-		}
-		$("#lookup").append(lookupButtons).trigger("create");
-	});
-	
-	Translators.get().then(function(translators) {
-		// Add buttons
-		var fieldset = $(document.createElement("fieldset"));
-		fieldset.attr({"data-role":"controlgroup", "data-mini":"true"});
-		for(var i=0; i<translators.length; i++) {
-			var translator = translators[i],
-				input = $(document.createElement("input")),
+		LookupEngines.get().then(function(lookupEngines) {
+			// If no lookup engines, don't show navbar
+			if(!lookupEngines.length) {
+				header = "header";
+				$("#navbar").hide();
+				$("#header").show();
+				return;
+			}
+		
+			// Create CSS styles for icons
+			var style = "";
+			for(var i=0; i<lookupEngines.length; i++) {
+				style += ".ui-icon-locate-engine-"+i+" { "+
+					"background-image: url("+lookupEngines[i].icon+"); "+
+					"width: 16px; "+
+					"height: 16px; "+
+					"border-radius: 0; "+
+					"background-color: transparent; "+
+				"}";
+			}
+			
+			// Add CSS styles to document
+			var styleNode = document.createElement('style');
+			styleNode.type = "text/css";
+			if("styleSheet" in styleNode) {	// IE
+				styleNode.styleSheet.cssText = style;
+			} else {						// Other browsers
+				styleNode.appendChild(document.createTextNode(style));
+			}
+			document.getElementsByTagName('head')[0].appendChild(styleNode);
+			
+			// Add buttons
+			var lookupButtons = $(document.createElement("div"));
+			lookupButtons.attr({"data-role":"controlgroup"});
+			for(var i=0; i<lookupEngines.length; i++) {
+				var a = $(document.createElement("a"));
+				a.text(lookupEngines[i].name);
+				a.attr({"data-role":"button", "data-mini":"true", "data-icon":"locate-engine-"+i});
+				a.on("click", EventHandlers.lookupSelect);
+				lookupButtons.append(a);
+			}
+			$("#lookup").append(lookupButtons).trigger("create");
+		}),
+		
+		Translators.get().then(function(translators) {
+			// Add buttons
+			var fieldset = $(document.createElement("fieldset"));
+			fieldset.attr({"data-role":"controlgroup", "data-mini":"true"});
+			for(var i=0; i<translators.length; i++) {
+				var translator = translators[i],
+					input = $(document.createElement("input")),
+					label = $(document.createElement("label"));
+				// TODO localize
+				label.text('Using "'+translator.label+'"');
+				label.attr({"for":translator.translatorID});
+				input.addClass("translator");
+				input.attr({"name":"translatorID",
+					"id":translator.translatorID,
+					"value":translator.translatorID,
+					"type":"radio"});
+				if(i === 0) input.attr("checked", "1");
+				fieldset.append(input, label);
+			}
+			
+			var input = $(document.createElement("input")),
 				label = $(document.createElement("label"));
 			// TODO localize
-			label.text('Using "'+translator.label+'"');
-			label.attr({"for":translator.translatorID});
+			label.text('As Web Page Item');
+			label.attr({"for":"webpage"});
 			input.addClass("translator");
 			input.attr({"name":"translatorID",
-				"id":translator.translatorID,
-				"value":translator.translatorID,
+				"id":"webpage",
+				"value":"webpage",
 				"type":"radio"});
 			if(i === 0) input.attr("checked", "1");
 			fieldset.append(input, label);
-		}
-		
-		var input = $(document.createElement("input")),
-			label = $(document.createElement("label"));
-		// TODO localize
-		label.text('As Web Page Item');
-		label.attr({"for":"webpage"});
-		input.addClass("translator");
-		input.attr({"name":"translatorID",
-			"id":"webpage",
-			"value":"webpage",
-			"type":"radio"});
-		if(i === 0) input.attr("checked", "1");
-		fieldset.append(input, label);
-		
-		$("#translators").append(fieldset).trigger("create");
-		
-		// Resize window
-		var newHeight = document.getElementById(header).clientHeight+document.getElementById("save").clientHeight;
-		if(newHeight !== window.innerHeight) {
-			Actions.resize(window.innerWidth, newHeight);
-		}
-	}).end();
+			
+			$("#translators").append(fieldset).trigger("create");
+			
+			// Resize window
+			var newHeight = document.getElementById(header).clientHeight+document.getElementById("save").clientHeight;
+			if(newHeight !== window.innerHeight) {
+				Actions.resize(window.innerWidth, newHeight);
+			}
+		})
+	]).then(Actions.loaded());
 });
