@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.381",
+    PROCESSOR_VERSION: "1.0.382",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -1371,7 +1371,7 @@ CSL.Output.Queue.prototype.renderBlobs = function (blobs, delim, has_more) {
                     str = state.fun.decorate[params[0]][params[1]](state, str, params[2]);
                 }
             }
-            str = blob.strings.prefix + str + blob.strings.suffix;
+            str = txt_esc(blob.strings.prefix) + str + txt_esc(blob.strings.suffix);
             var addme = "";
             if (blob.status === CSL.END) {
                 addme = txt_esc(blob.range_prefix);
