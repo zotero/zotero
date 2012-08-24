@@ -144,6 +144,7 @@ Zotero.LANGUAGE_NAMES = {
 	"ja-JP": "Japanese",
 	"km": "Khmer",
 	"ko-KR": "Korean",
+	"lt-LT": "Lithuanian",
 	"mn-MN": "Mongolian",
 	"nb-NO": "Norwegian Bokmål",
 	"nl-NL": "Dutch",
