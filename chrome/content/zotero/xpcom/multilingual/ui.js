@@ -192,7 +192,6 @@ Zotero.setupLocale = function(document) {
 
 		var availableLocales = toolkitChromeReg.getLocalesForPackage("zotero");
 		
-		
 		// Render locale menulist
 		const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
@@ -211,8 +210,16 @@ Zotero.setupLocale = function(document) {
 
 		// Get the list of locales and assign names to each item
 		var locales = [];
-		while(availableLocales.hasMore()) {
-			var locale = availableLocales.getNext();
+        var extraLocaleList = ["lt-LT"];
+        var extraLocaleCount = localeList.length;
+        var locale;
+ 		while(extraLocaleCount) {
+		    if (availableLocales.hasMore()) {
+			    locale = availableLocales.getNext();
+            } else {
+                extraLocaleCount += -1;
+                locale = extraLocaleList[extraLocaleCount];
+            }
 			locales.push({value: locale, label: Zotero.LANGUAGE_NAMES[locale]});
 			if (locale == selectedLocale) {
 				// Is this the current locale?
@@ -255,8 +262,16 @@ Zotero.setupLocale = function(document) {
 
 		// Get the list of locales and assign names to each item
 		var locales = [];
-		while(availableLocales.hasMore()) {
-			var locale = availableLocales.getNext();
+		var extraLocaleList = ["lt-LT"];
+		var extraLocaleCount = localeList.length;
+		var locale;
+ 		while(extraLocaleCount) {
+			if (availableLocales.hasMore()) {
+				locale = availableLocales.getNext();
+			} else {
+				extraLocaleCount += -1;
+				locale = extraLocaleList[extraLocaleCount];
+			}
 			locales.push({value: locale, label: Zotero.LANGUAGE_NAMES[locale]});
 			if (locale == selectedLocale) {
 				// Is this the current locale?
@@ -266,9 +281,9 @@ Zotero.setupLocale = function(document) {
 		}
 		// Sort the list by name
 		locales.sort( function(a,b){return a.label.localeCompare(b.label)} );
-        for (var i = 0, ilen = locales.length; i < ilen; i += 1) {
-            Zotero.LANGUAGE_INDEX[locales[i].value] = i;
-        }
+		for (var i = 0, ilen = locales.length; i < ilen; i += 1) {
+			Zotero.LANGUAGE_INDEX[locales[i].value] = i;
+		}
 		// Render the list
 		for (var i = 0, ilen = locales.length; i < ilen; i += 1) {
 			var locale = locales[i];
@@ -292,7 +307,7 @@ Zotero.switchLocale = function(document) {
 		
 		// Write preferred locale to local user config
 		var prefs = Components.classes["@mozilla.org/preferences-service;1"].
-                    getService(Components.interfaces.nsIPrefBranch);
+					getService(Components.interfaces.nsIPrefBranch);
 		prefs.setCharPref("general.useragent.locale", newLocale);
 		
 		// Ignore the locale suggested by the OS
@@ -300,10 +315,10 @@ Zotero.switchLocale = function(document) {
 
 		// Restart application
 		var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
-                     .getService(Components.interfaces.nsIAppStartup);
+					 .getService(Components.interfaces.nsIAppStartup);
 
 		appStartup.quit(Components.interfaces.nsIAppStartup.eRestart |
-         		        Components.interfaces.nsIAppStartup.eAttemptQuit);
+		 				Components.interfaces.nsIAppStartup.eAttemptQuit);
 		
 	} catch(err) {
 	
@@ -315,25 +330,25 @@ Zotero.switchLocale = function(document) {
 Zotero.setCitationLanguages = function (obj, citeproc) {
 	var segments = ['Persons', 'Institutions', 'Titles', 'Publishers', 'Places'];
 	for (var i = 0, ilen = segments.length; i < ilen; i += 1) {
-        var settings = Zotero.Prefs.get("csl.citation" + segments[i]);
-        if (settings) {
-            settings = settings.split(",");
-        } else {
-            settings = ['orig']
-        }
+		var settings = Zotero.Prefs.get("csl.citation" + segments[i]);
+		if (settings) {
+			settings = settings.split(",");
+		} else {
+			settings = ['orig']
+		}
 		obj['citationLangPrefs'+segments[i]] = settings;
 	}
-    obj.citationAffixes = null;
-    var affixes = Zotero.Prefs.get("csl.citationAffixes");
-    if (affixes) {
-        affixes = affixes.split("|");
-        if (affixes.length === 40) {
-            obj.citationAffixes = affixes;
-        }
-    }
-    if (!obj.citationAffixes) {
-        obj.citationAffixes = [,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,];
-    }
+	obj.citationAffixes = null;
+	var affixes = Zotero.Prefs.get("csl.citationAffixes");
+	if (affixes) {
+		affixes = affixes.split("|");
+		if (affixes.length === 40) {
+			obj.citationAffixes = affixes;
+		}
+	}
+	if (!obj.citationAffixes) {
+		obj.citationAffixes = [,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,];
+	}
 	obj.citationTransliteration = [];
 	obj.citationTranslation = [];
 	obj.citationSort = [];
@@ -361,35 +376,35 @@ Zotero.setCitationLanguages = function (obj, citeproc) {
 }
 
 Zotero.isRTL = function(langs) {
-    rtl = false;
-    for (var i = langs.length - 1; i > -1; i += -1) {
-        var langTag = langs[i];
-        if (langTag) {
-            langTag = langTag.replace(/^([-a-zA-Z0-9]+).*/,"$1");
-        }
-        if (langTag) {
-            var taglst = langTag.split("-");
-            if (["ar", "he", "fa", "ur", "yi", "ps", "syr"].indexOf(taglst[0]) > -1) {
-                rtl = true;
-                for (var i = 1, ilen = taglst.length; i < ilen; i += 1) {
-                    if (taglst[i].length > 3) {
-                        rtl = false;
-                    }
-                }
-            }
-            // If there is something that looks like a language tag
-            // set on the field, it had better be valid. Should always
-            // be so, since string input is not allowed.
-            break;
-        }
-    }
+	rtl = false;
+	for (var i = langs.length - 1; i > -1; i += -1) {
+		var langTag = langs[i];
+		if (langTag) {
+			langTag = langTag.replace(/^([-a-zA-Z0-9]+).*/,"$1");
+		}
+		if (langTag) {
+			var taglst = langTag.split("-");
+			if (["ar", "he", "fa", "ur", "yi", "ps", "syr"].indexOf(taglst[0]) > -1) {
+				rtl = true;
+				for (var i = 1, ilen = taglst.length; i < ilen; i += 1) {
+					if (taglst[i].length > 3) {
+						rtl = false;
+					}
+				}
+			}
+			// If there is something that looks like a language tag
+			// set on the field, it had better be valid. Should always
+			// be so, since string input is not allowed.
+			break;
+		}
+	}
 	return rtl;
 }
 
 Zotero.setRTL = function(node, langs) {
-    if (Zotero.isRTL(langs)) {
-        node.setAttribute("style", "direction:rtl !important;");
-    } else {
-        node.setAttribute("style", "direction:ltr !important;");
-    }
+	if (Zotero.isRTL(langs)) {
+		node.setAttribute("style", "direction:rtl !important;");
+	} else {
+		node.setAttribute("style", "direction:ltr !important;");
+	}
 };
