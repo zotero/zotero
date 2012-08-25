@@ -144,7 +144,7 @@ Zotero.LANGUAGE_NAMES = {
 	"ja-JP": "Japanese",
 	"km": "Khmer",
 	"ko-KR": "Korean",
-	"lt-LT": "Lithuanian",
+	"lt": "Lithuanian",
 	"mn-MN": "Mongolian",
 	"nb-NO": "Norwegian Bokmål",
 	"nl-NL": "Dutch",
@@ -210,16 +210,9 @@ Zotero.setupLocale = function(document) {
 
 		// Get the list of locales and assign names to each item
 		var locales = [];
-        var extraLocaleList = ["lt-LT"];
-        var extraLocaleCount = localeList.length;
         var locale;
- 		while(extraLocaleCount) {
-		    if (availableLocales.hasMore()) {
-			    locale = availableLocales.getNext();
-            } else {
-                extraLocaleCount += -1;
-                locale = extraLocaleList[extraLocaleCount];
-            }
+ 		while(availableLocales.hasMore()) {
+			locale = availableLocales.getNext();
 			locales.push({value: locale, label: Zotero.LANGUAGE_NAMES[locale]});
 			if (locale == selectedLocale) {
 				// Is this the current locale?
@@ -262,8 +255,8 @@ Zotero.setupLocale = function(document) {
 
 		// Get the list of locales and assign names to each item
 		var locales = [];
-		var extraLocaleList = ["lt-LT"];
-		var extraLocaleCount = localeList.length;
+		var extraLocaleList = ["lt"];
+		var extraLocaleCount = extraLocaleList.length;
 		var locale;
  		while(extraLocaleCount) {
 			if (availableLocales.hasMore()) {
