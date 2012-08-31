@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.385",
+    PROCESSOR_VERSION: "1.0.386",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -8194,7 +8194,7 @@ CSL.Node.text = {
                     func = function (state, Item, item) {
                         var gender = state.opt.gender[Item.type];
                         var term = this.strings.term;
-                        term = state.getTerm(term, form, plural, gender);
+                        term = state.getTerm(term, form, plural, gender, false, ("accessed" === term));
                         var myterm;
                         if (term !== "") {
                             flag = state.tmp.group_context.value();
@@ -11170,7 +11170,7 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
                             } else {
                                 middle[0][1] = middle[0][1].replace(/\\/, "", "g");
                             }
-                        } else {
+                        } else if (elements[i].indexOf(" ") === -1) {
                             count = count + 1;
                         }
                     }
