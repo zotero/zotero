@@ -57,7 +57,8 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.383",
+    PROCESSOR_VERSION: "1.0.384",
+    PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -11099,9 +11100,6 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
         if (num.slice(0, 1) === '"' && num.slice(-1) === '"') {
             num = num.slice(1, -1);
         }
-        if (num.indexOf("&") > -1 || num.indexOf("--") > -1) {
-            this.tmp.shadow_numbers[variable].plural = 1;
-        }
         if ("locator" === variable
             && ["bill","gazette","legislation","treaty"].indexOf(type) > -1) {
             num = num.split(CSL.STATUTE_SUBDIV_PLAIN_REGEX)[0];
@@ -11135,12 +11133,12 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
             var odd = ((i%2) === 0);
             if (odd) {
                 if (elements[i]) {
-                    if (elements[i].match(/[0-9]/)) {
+                    if (elements[i].match(/(?:[0-9]|[xivcmlXIVCML])/)) {
                         if (elements[i - 1] && elements[i - 1].match(/^\s*\\*[\-\u2013]+\s*$/)) {
                             var middle = this.tmp.shadow_numbers[variable].values.slice(-1);
                             if (middle[0][1].indexOf("\\") == -1) {
-                                if (elements[i - 2] && ("" + elements[i - 2]).match(/[a-zA-Z]*[0-9]+$/)
-                                    && elements[i].match(/^[a-zA-Z]*[0-9]+/)) {
+                                if (elements[i - 2] && ("" + elements[i - 2]).match(/(:?[a-zA-Z]*[0-9]+$|^[ivxlcmIVXLCM]+$)/)
+                                    && elements[i].match(/(?:^[a-zA-Z]*[0-9]+|^[ivxlcmIVXLCM]+$)/)) {
                                     var start = this.tmp.shadow_numbers[variable].values.slice(-2);
                                     middle[0][1] = this.getTerm(rangeType + "-range-delimiter");
                                     if (this.opt[rangeType + "-range-format"] ) {
