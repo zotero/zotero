@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.386",
+    PROCESSOR_VERSION: "1.0.387",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -2266,7 +2266,7 @@ CSL.Engine = function (sys, style, lang, forceLang) {
     this.opt = new CSL.Engine.Opt();
     this.tmp = new CSL.Engine.Tmp();
     this.build = new CSL.Engine.Build();
-    this.fun = new CSL.Engine.Fun();
+    this.fun = new CSL.Engine.Fun(this);
     this.configure = new CSL.Engine.Configure();
     this.citation_sort = new CSL.Engine.CitationSort();
     this.bibliography_sort = new CSL.Engine.BibliographySort();
@@ -3178,11 +3178,11 @@ CSL.Engine.Tmp = function () {
     this.strip_periods = 0;
     this.shadow_numbers = {};
 };
-CSL.Engine.Fun = function () {
+CSL.Engine.Fun = function (state) {
     this.match = new  CSL.Util.Match();
     this.suffixator = new CSL.Util.Suffixator(CSL.SUFFIX_CHARS);
     this.romanizer = new CSL.Util.Romanizer();
-    this.ordinalizer = new CSL.Util.Ordinalizer();
+    this.ordinalizer = new CSL.Util.Ordinalizer(state);
     this.long_ordinalizer = new CSL.Util.LongOrdinalizer();
 };
 CSL.Engine.Build = function () {
@@ -4700,6 +4700,7 @@ CSL.Engine.prototype.localeSet = function (myxml, lang_in, lang_out) {
         this.locale[lang_out].opts = {};
         this.locale[lang_out].opts["skip-words"] = CSL.SKIP_WORDS;
         this.locale[lang_out].dates = {};
+        this.locale[lang_out].ordinals101 = false;
     }
     locale = this.sys.xml.makeXml();
     if (this.sys.xml.nodeNameIs(myxml, 'locale')) {
@@ -4722,11 +4723,32 @@ CSL.Engine.prototype.localeSet = function (myxml, lang_in, lang_out) {
         this.opt.gender[type] = gender;
     }
     nodes = this.sys.xml.getNodesByName(locale, 'term');
+    var ordinals101 = {"last-digit":{},"last-two-digits":{},"whole-number":{}};
+    var ordinals101_toggle = false;
     for (pos = 0, len = this.sys.xml.numberofnodes(nodes); pos < len; pos += 1) {
         term = nodes[pos];
         termname = this.sys.xml.getAttributeValue(term, 'name');
         if (termname === "sub verbo") {
             termname = "sub-verbo";
+        }
+        if (termname.slice(0,7) === "ordinal") {
+            var termstring = this.sys.xml.getNodeValue(term);
+            if (termname === "ordinal") {
+                ordinals101_toggle = true;
+            } else {
+                var match = this.sys.xml.getAttributeValue(term, 'match');
+                var termstub = termname.slice(8);
+                if (!match) {
+                    match = "last-two-digits";
+                    if (termstub.slice(0,1) === "0") {
+                        match = "last-digit";
+                    }
+                }
+                if (termstub.slice(0,1) === "0") {
+                    termstub = termstub.slice(1);
+                }
+                ordinals101[match][termstub] = termname;
+            }
         }
         if ("undefined" === typeof this.locale[lang_out].terms[termname]) {
             this.locale[lang_out].terms[termname] = {};
@@ -4756,6 +4778,9 @@ CSL.Engine.prototype.localeSet = function (myxml, lang_in, lang_out) {
         } else {
             target[form] = this.sys.xml.getNodeValue(term);
         }
+    }
+    if (ordinals101_toggle) {
+        this.locale[lang_out].ordinals101 = ordinals101;
     }
     for (termname in this.locale[lang_out].terms) {
         if (this.locale[lang_out].terms.hasOwnProperty(termname)) {
@@ -11003,37 +11028,58 @@ CSL.Util.LongOrdinalizer.prototype.format = function (num, gender) {
     this.state.tmp.cite_renders_content = true;
     return ret;
 };
-CSL.Util.Ordinalizer = function () {};
-CSL.Util.Ordinalizer.prototype.init = function (state) {
+CSL.Util.Ordinalizer = function (state) {
+    this.state = state;
     this.suffixes = {};
-    for (var i = 0, ilen = 3; i < ilen; i += 1) {
-        var gender = [undefined, "masculine", "feminine"][i];
-        this.suffixes[gender] = [];
-        for (var j = 1; j < 5; j += 1) {
-            var ordinal = state.getTerm("ordinal-0" + j, "long", false, gender);
-            if ("undefined" === typeof ordinal) {
-                delete this.suffixes[gender];
-                break;
+};
+CSL.Util.Ordinalizer.prototype.init = function () {
+    if (!this.suffixes[this.state.opt.lang]) {
+        this.suffixes[this.state.opt.lang] = {};
+        for (var i = 0, ilen = 3; i < ilen; i += 1) {
+            var gender = [undefined, "masculine", "feminine"][i];
+            this.suffixes[this.state.opt.lang][gender] = [];
+            for (var j = 1; j < 5; j += 1) {
+                var ordinal = this.state.getTerm("ordinal-0" + j, "long", false, gender);
+                if ("undefined" === typeof ordinal) {
+                    delete this.suffixes[this.state.opt.lang][gender];
+                    break;
+                }
+                this.suffixes[this.state.opt.lang][gender].push(ordinal);            
             }
-            this.suffixes[gender].push(ordinal);            
         }
     }
 };
 CSL.Util.Ordinalizer.prototype.format = function (num, gender) {
     var str;
     num = parseInt(num, 10);
-    str = num.toString();
-    if ((num / 10) % 10 === 1 || (num > 10 && num < 20)) {
-        str += this.suffixes[gender][3];
-    } else if (num % 10 === 1 && num % 100 !== 11) {
-        str += this.suffixes[gender][0];
-    } else if (num % 10 === 2 && num % 100 !== 12) {
-        str += this.suffixes[gender][1];
-    } else if (num % 10 === 3 && num % 100 !== 13) {
-        str += this.suffixes[gender][2];
+    str = "" + num;
+    var suffix = "";
+    if (this.state.locale[this.state.opt.lang].ordinals101) {
+        suffix = this.state.getTerm("ordinal");
+        if (this.state.locale[this.state.opt.lang].ordinals101["whole-number"][str]) {
+            suffix = this.state.getTerm(this.state.locale[this.state.opt.lang].ordinals101["whole-number"][str]);
+        } else if (this.state.locale[this.state.opt.lang].ordinals101["last-two-digits"][str.slice(str.length - 2)]) {
+            suffix = this.state.getTerm(this.state.locale[this.state.opt.lang].ordinals101["last-two-digits"][str.slice(str.length - 2)]);
+        } else if (str === "0" && this.state.locale[this.state.opt.lang].ordinals101["last-two-digits"][str.slice(str.length - 1)]) {
+            suffix = this.state.getTerm(this.state.locale[this.state.opt.lang].ordinals101["last-two-digits"]["00"]);
+        } else if (this.state.locale[this.state.opt.lang].ordinals101["last-digit"][str.slice(str.length - 1)]) {
+            suffix = this.state.getTerm(this.state.locale[this.state.opt.lang].ordinals101["last-digit"][str.slice(str.length - 1)]);
+        }
     } else {
-        str += this.suffixes[gender][3];
+        this.state.fun.ordinalizer.init();
+        if ((num / 10) % 10 === 1 || (num > 10 && num < 20)) {
+            suffix = this.suffixes[this.state.opt.lang][gender][3];
+        } else if (num % 10 === 1 && num % 100 !== 11) {
+            suffix = this.suffixes[this.state.opt.lang][gender][0];
+        } else if (num % 10 === 2 && num % 100 !== 12) {
+            suffix = this.suffixes[this.state.opt.lang][gender][1];
+        } else if (num % 10 === 3 && num % 100 !== 13) {
+            suffix = this.suffixes[this.state.opt.lang][gender][2];
+        } else {
+            suffix = this.suffixes[this.state.opt.lang][gender][3];
+        }
     }
+    str = str += suffix;
     return str;
 };
 CSL.Util.Romanizer = function () {};
