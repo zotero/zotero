@@ -193,8 +193,15 @@ Zotero.Integration = new function() {
 			if(callback) callback(_integrationVersionsOK);
 		}
 	
-		Components.utils.import("resource://gre/modules/AddonManager.jsm");
-		AddonManager.getAddonsByIDs(INTEGRATION_PLUGINS, _checkAddons);
+		if(Zotero.isFx4) {
+			Components.utils.import("resource://gre/modules/AddonManager.jsm");
+			AddonManager.getAddonsByIDs(INTEGRATION_PLUGINS, _checkAddons);
+		} else {
+			var extMan = Components.classes['@mozilla.org/extensions/manager;1'].
+				getService(Components.interfaces.nsIExtensionManager);
+			_checkAddons([extMan.getItemForID(id) for each(id in INTEGRATION_PLUGINS)]);
+		}
+
 	}
 	
 	/**
