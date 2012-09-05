@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.387",
+    PROCESSOR_VERSION: "1.0.388",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -4700,7 +4700,7 @@ CSL.Engine.prototype.localeSet = function (myxml, lang_in, lang_out) {
         this.locale[lang_out].opts = {};
         this.locale[lang_out].opts["skip-words"] = CSL.SKIP_WORDS;
         this.locale[lang_out].dates = {};
-        this.locale[lang_out].ordinals101 = false;
+        this.locale[lang_out].ord = {'1.0.1':false,keys:{}};
     }
     locale = this.sys.xml.makeXml();
     if (this.sys.xml.nodeNameIs(myxml, 'locale')) {
@@ -4721,6 +4721,13 @@ CSL.Engine.prototype.localeSet = function (myxml, lang_in, lang_out) {
         var type = this.sys.xml.getAttributeValue(typenode, 'name');
         var gender = this.sys.xml.getAttributeValue(typenode, 'gender');
         this.opt.gender[type] = gender;
+    }
+    var hasCslOrdinals101 = this.sys.xml.getNodesByName(locale, 'term', 'ordinal').length;
+    if (hasCslOrdinals101) {
+        for (var key in this.locale[lang_out].ord.keys) {
+            delete this.locale[lang_out].terms[key];
+        }
+        this.locale[lang_out].ord = {"1.0.1":false,keys:{}};
     }
     nodes = this.sys.xml.getNodesByName(locale, 'term');
     var ordinals101 = {"last-digit":{},"last-two-digits":{},"whole-number":{}};
@@ -4749,6 +4756,7 @@ CSL.Engine.prototype.localeSet = function (myxml, lang_in, lang_out) {
                 }
                 ordinals101[match][termstub] = termname;
             }
+            this.locale[lang_out].ord.keys[termname] = true;
         }
         if ("undefined" === typeof this.locale[lang_out].terms[termname]) {
             this.locale[lang_out].terms[termname] = {};
@@ -4780,17 +4788,15 @@ CSL.Engine.prototype.localeSet = function (myxml, lang_in, lang_out) {
         }
     }
     if (ordinals101_toggle) {
-        this.locale[lang_out].ordinals101 = ordinals101;
+        this.locale[lang_out].ord['1.0.1'] = ordinals101;
     }
     for (termname in this.locale[lang_out].terms) {
-        if (this.locale[lang_out].terms.hasOwnProperty(termname)) {
-            for (i = 0, ilen = 2; i < ilen; i += 1) {
-                genderform = CSL.GENDERS[i];
-                if (this.locale[lang_out].terms[termname][genderform]) {
-                    for (form in this.locale[lang_out].terms[termname]) {
-                        if (!this.locale[lang_out].terms[termname][genderform][form]) {
-                            this.locale[lang_out].terms[termname][genderform][form] = this.locale[lang_out].terms[termname][form];
-                        }
+        for (i = 0, ilen = 2; i < ilen; i += 1) {
+            genderform = CSL.GENDERS[i];
+            if (this.locale[lang_out].terms[termname][genderform]) {
+                for (form in this.locale[lang_out].terms[termname]) {
+                    if (!this.locale[lang_out].terms[termname][genderform][form]) {
+                        this.locale[lang_out].terms[termname][genderform][form] = this.locale[lang_out].terms[termname][form];
                     }
                 }
             }
@@ -11054,16 +11060,16 @@ CSL.Util.Ordinalizer.prototype.format = function (num, gender) {
     num = parseInt(num, 10);
     str = "" + num;
     var suffix = "";
-    if (this.state.locale[this.state.opt.lang].ordinals101) {
+    if (this.state.locale[this.state.opt.lang].ord["1.0.1"]) {
         suffix = this.state.getTerm("ordinal");
-        if (this.state.locale[this.state.opt.lang].ordinals101["whole-number"][str]) {
-            suffix = this.state.getTerm(this.state.locale[this.state.opt.lang].ordinals101["whole-number"][str]);
-        } else if (this.state.locale[this.state.opt.lang].ordinals101["last-two-digits"][str.slice(str.length - 2)]) {
-            suffix = this.state.getTerm(this.state.locale[this.state.opt.lang].ordinals101["last-two-digits"][str.slice(str.length - 2)]);
-        } else if (str === "0" && this.state.locale[this.state.opt.lang].ordinals101["last-two-digits"][str.slice(str.length - 1)]) {
-            suffix = this.state.getTerm(this.state.locale[this.state.opt.lang].ordinals101["last-two-digits"]["00"]);
-        } else if (this.state.locale[this.state.opt.lang].ordinals101["last-digit"][str.slice(str.length - 1)]) {
-            suffix = this.state.getTerm(this.state.locale[this.state.opt.lang].ordinals101["last-digit"][str.slice(str.length - 1)]);
+        if (this.state.locale[this.state.opt.lang].ord["1.0.1"]["whole-number"][str]) {
+            suffix = this.state.getTerm(this.state.locale[this.state.opt.lang].ord["1.0.1"]["whole-number"][str],false,0,gender);
+        } else if (this.state.locale[this.state.opt.lang].ord["1.0.1"]["last-two-digits"][str.slice(str.length - 2)]) {
+            suffix = this.state.getTerm(this.state.locale[this.state.opt.lang].ord["1.0.1"]["last-two-digits"][str.slice(str.length - 2)],false,0,gender);
+        } else if (str === "0" && this.state.locale[this.state.opt.lang].ord["1.0.1"]["last-two-digits"][str.slice(str.length - 1)]) {
+            suffix = this.state.getTerm(this.state.locale[this.state.opt.lang].ord["1.0.1"]["last-two-digits"]["00"],false,0,gender);
+        } else if (this.state.locale[this.state.opt.lang].ord["1.0.1"]["last-digit"][str.slice(str.length - 1)]) {
+            suffix = this.state.getTerm(this.state.locale[this.state.opt.lang].ord["1.0.1"]["last-digit"][str.slice(str.length - 1)],false,0,gender);
         }
     } else {
         this.state.fun.ordinalizer.init();
