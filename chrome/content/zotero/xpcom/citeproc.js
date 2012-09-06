@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.390",
+    PROCESSOR_VERSION: "1.0.391",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -2032,17 +2032,21 @@ CSL.DateParser = function () {
             slst = txt.split(jiysplitter);
             lst = [];
             mm = txt.match(jiymatcher);
-            var mmx = [];
-            for (pos = 0, len = mm.length; pos < len; pos += 1) {
-                mmx = mmx.concat(mm[pos].match(/([^0-9]+)([0-9]+)/).slice(1));
-            }
-            for (pos = 0, len = slst.length; pos < len; pos += 1) {
-                lst.push(slst[pos]);
-                if (pos !== (len - 1)) {
-                    mmpos = (pos * 2);
-                    lst.push(mmx[mmpos]);
-                    lst.push(mmx[mmpos + 1]);
+            if (mm) {
+                var mmx = [];
+                for (pos = 0, len = mm.length; pos < len; pos += 1) {
+                    mmx = mmx.concat(mm[pos].match(/([^0-9]+)([0-9]+)/).slice(1));
                 }
+                for (pos = 0, len = slst.length; pos < len; pos += 1) {
+                    lst.push(slst[pos]);
+                    if (pos !== (len - 1)) {
+                        mmpos = (pos * 2);
+                        lst.push(mmx[mmpos]);
+                        lst.push(mmx[mmpos + 1]);
+                    }
+                }
+            } else {
+                lst = slst;
             }
             l = lst.length;
             for    (pos = 1; pos < l; pos += 3) {
