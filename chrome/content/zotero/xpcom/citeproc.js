@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.392",
+    PROCESSOR_VERSION: "1.0.393",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -5702,13 +5702,23 @@ CSL.Node.label = {
             };
             this.execs.push(func);
         } else {
+            var namevars = state.build.names_variables.slice(-1)[0];
             if (!state.build.name_label) {
                 state.build.name_label = {};
             }
+            for (var i = 0, ilen = namevars.length; i < ilen; i += 1) {
+                if (!state.build.name_label[namevars[i]]) {
+                    state.build.name_label[namevars[i]] = {};
+                }
+            }
             if (!state.build.name_flag) {
-                state.build.name_label.before = this;
+                for (var i = 0, ilen = namevars.length; i < ilen; i += 1) {
+                    state.build.name_label[namevars[i]].before = this;
+                }
             } else {
-                state.build.name_label.after = this;
+                for (var i = 0, ilen = namevars.length; i < ilen; i += 1) {
+                    state.build.name_label[namevars[i]].after = this;
+                }
             }
         }
         target.push(this);
@@ -6039,7 +6049,7 @@ CSL.NameOutput.prototype.outputNames = function () {
 };
 CSL.NameOutput.prototype._applyLabels = function (blob, v) {
     var txt;
-    if (!this.label) {
+    if (!this.label || !this.label[v]) {
         return blob;
     }
     var plural = 0;
@@ -6054,36 +6064,36 @@ CSL.NameOutput.prototype._applyLabels = function (blob, v) {
             plural = 1;
         }
     }
-    if (this.label.before) {
-        if ("number" === typeof this.label.before.strings.plural) {
-            plural = this.label.before.strings.plural;
+    if (this.label[v].before) {
+        if ("number" === typeof this.label[v].before.strings.plural) {
+            plural = this.label[v].before.strings.plural;
         }
-        txt = this._buildLabel(v, plural, "before");
+        txt = this._buildLabel(v, plural, "before", v);
         this.state.output.openLevel("empty");
-        this.state.output.append(txt, this.label.before, true);
+        this.state.output.append(txt, this.label[v].before, true);
         this.state.output.append(blob, "literal", true);
         this.state.output.closeLevel("empty");
         blob = this.state.output.pop();
     }
-    if (this.label.after) {
-        if ("number" === typeof this.label.after.strings.plural) {
-            plural = this.label.after.strings.plural;
+    if (this.label[v].after) {
+        if ("number" === typeof this.label[v].after.strings.plural) {
+            plural = this.label[v].after.strings.plural;
         }
-        txt = this._buildLabel(v, plural, "after");
+        txt = this._buildLabel(v, plural, "after", v);
         this.state.output.openLevel("empty");
         this.state.output.append(blob, "literal", true);
-        this.state.output.append(txt, this.label.after, true);
+        this.state.output.append(txt, this.label[v].after, true);
         this.state.output.closeLevel("empty");
         blob = this.state.output.pop();
     }
     return blob;
 };
-CSL.NameOutput.prototype._buildLabel = function (term, plural, position) {
+CSL.NameOutput.prototype._buildLabel = function (term, plural, position, v) {
     if (this.common_term) {
         term = this.common_term;
     }
     var ret = false;
-    var node = this.label[position];
+    var node = this.label[v][position];
     if (node) {
         ret = CSL.castLabel(this.state, node, term, plural, CSL.TOLERANT);
     }
@@ -6542,11 +6552,11 @@ CSL.NameOutput.prototype.setCommonTerm = function () {
         return false;
     }
     var has_term = false;
-    if (this.label) {
-        if (this.label.before) {
-            has_term = this.state.getTerm(this.common_term, this.label.before.strings.form, 0);
-        } else if (this.label.after) {
-            has_term = this.state.getTerm(this.common_term, this.label.after.strings.form, 0);
+    if (this.label && this.label[this.variables[0]]) {
+        if (this.label[this.variables[0]].before) {
+            has_term = this.state.getTerm(this.common_term, this.label[this.variables[0]].before.strings.form, 0);
+        } else if (this.label[this.variables[0]].after) {
+            has_term = this.state.getTerm(this.common_term, this.label[this.variables[0]].after.strings.form, 0);
         }
     }
     if (!this.state.locale[this.state.opt.lang].terms[this.common_term]
@@ -7859,6 +7869,10 @@ CSL.Node.names = {
             state.fixOpt(this, "names-delimiter", "delimiter");
         }
         if (this.tokentype === CSL.SINGLETON) {
+            state.build.names_variables.push(this.variables);
+            for (var i = 0, ilen = this.variables.length; i < ilen; i += 1) {
+                state.build.name_label[this.variables[i]] = state.build.name_label[state.build.names_variables.slice(0)[0]];
+            }
             func = function (state, Item, item) {
                 state.nameOutput.reinit(this);
             };
@@ -7867,6 +7881,11 @@ CSL.Node.names = {
         if (this.tokentype === CSL.START) {
             state.build.names_flag = true;
             state.build.names_level += 1;
+            if (state.build.names_level === 1) {
+                state.build.names_variables = [];
+                state.build.name_label = {};
+            }
+            state.build.names_variables.push(this.variables);
             func = function (state, Item, item) {
                 state.tmp.can_substitute.push(true);
                 state.parallel.StartVariable("names");
@@ -7885,6 +7904,7 @@ CSL.Node.names = {
             state.build.names_level += -1;
             this.label = state.build.name_label;
             state.build.name_label = undefined;
+            state.build.names_variables.pop();
             var mywith = "with";
             var with_default_prefix = "";
             var with_suffix = "";
@@ -7950,7 +7970,9 @@ CSL.Node.names = {
                     state.tmp.can_substitute.replace(false, CSL.LITERAL);
                 }
                 state.parallel.CloseVariable("names");
-                state.tmp.can_block_substitute = false;
+                if (state.tmp.can_substitute.mystack.length === 1) {
+                    state.tmp.can_block_substitute = false;
+                }
             };
             this.execs.push(func);
             state.build.name_flag = false;
