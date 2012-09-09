@@ -2533,6 +2533,8 @@ Zotero.Integration.Session.prototype.deleteCitation = function(index) {
 Zotero.Integration.Session.prototype.getBibliography = function() {
 	this.updateUncitedItems();
 	
+	if(Zotero.Utilities.isEmpty(this.citationsByItemID)) return false;
+	
 	// generate bibliography
 	var bib = this.style.makeBibliography();
 	
