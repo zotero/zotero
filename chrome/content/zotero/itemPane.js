@@ -50,11 +50,28 @@ var ZoteroItemPane = new function() {
 	
 	
 	function updateRelatedTab (relatedTab, count) {
-		var relatedLabel = relatedTab.getAttribute('label').replace(/(.*?)\s*\([0-9]+\)$/,"$1");
 		if (count) {
-			relatedTab.setAttribute('label', relatedLabel + ' (' + count + ')');
+			relatedTab.setAttribute('has-content', 'true');
 		} else {
-			relatedTab.setAttribute('label', relatedLabel + ' (0)');
+			relatedTab.setAttribute('has-content', 'false');
+		}
+	}
+	
+	function updateTagsTab (tagsTab, count) {
+		//var relatedLabel = relatedTab.getAttribute('label').replace(/(.*?)\s*\([0-9]\)$/,"$1");
+		if (count) {
+			tagsTab.setAttribute('has-content', 'true');
+		} else {
+			tagsTab.setAttribute('has-content', 'false');
+		}
+	}
+	
+	function updateNotesTab (notesTab, count) {
+		//var relatedLabel = relatedTab.getAttribute('label').replace(/(.*?)\s*\([0-9]\)$/,"$1");
+		if (count) {
+			notesTab.setAttribute('has-content', 'true');
+		} else {
+			notesTab.setAttribute('has-content', 'false');
 		}
 	}
 	
@@ -62,7 +79,7 @@ var ZoteroItemPane = new function() {
 	 * Load an item
 	 */
 	this.viewItem = function (item, mode, index) {
-		if (!index) {
+		if (!index || index < 0 || index > 3) {
 			index = 0;
 		}
 		
@@ -163,19 +180,39 @@ var ZoteroItemPane = new function() {
 			// Update the related items count on the tab when any panel is opened or modified.
 			var relatedTab = document.getElementById('zotero-tab-related');
 			var deletedItems = Zotero.Items.getDeleted(item.libraryID, true);
-			var count = 0;
+			var related = 0;
 			for (var i = 0, ilen = item.relatedItemsBidirectional.length; i < ilen; i += 1) {
 				if (deletedItems.indexOf(item.relatedItemsBidirectional[i]) > -1) {
 					continue;
 				}
-				count += 1;
+				related += 1;
 			}
-			updateRelatedTab(relatedTab, count);
+			updateRelatedTab(relatedTab, related);
+
 			if (box.getAttribute('id') == "zotero-editpane-related") {
 				// Attach the tab update function and the tab to the related box for its use
 				box.relatedTab = relatedTab;
 				box.updateRelatedTab = updateRelatedTab;
 			}
+
+		    // TAGS: Update the tags items count on the tab when any panel is opened or modified.
+		    var tagsTab = document.getElementById('zotero-tab-tags');
+		    var tags = item.getTags() ? item.getTags().length : 0;
+		    updateTagsTab(tagsTab, tags);
+		    if (box.getAttribute('id') == "zotero-editpane-tags") {
+			    box.tagsTab = tagsTab;
+			    box.updateTagsTab = updateTagsTab;
+		    }
+		    
+ 		    // NOTES: Update the notes items count on the tab when any panel is opened or modified.
+		    var notesTab = document.getElementById('zotero-tab-notes');
+		    var notes = item.getNotes() ? item.getNotes().length : 0;
+		    updateNotesTab(notesTab, notes);
+		    if (box.getAttribute('id') == "zotero-editpane-notes") {
+			    // Attach the tab update function and the tab to the notes box for its use
+			    box.notesTab = notesTab;
+			    box.updateNotesTab = updateNotesTab;
+		    }
 		}
 		// XXXXX The trunk works with a straight assignment here.
 		//box.item = item;
@@ -214,6 +251,10 @@ var ZoteroItemPane = new function() {
 		}
 		
 		_notesLabel.value = Zotero.getString(str, [c]);
+		//Actualise l'affichage qd une note est ajoutée
+		if (this.updateNotesTab) {
+			this.updateNotesTab(this.notesTab, c);
+		}
 	}
 }   
 
