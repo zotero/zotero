@@ -91,7 +91,7 @@
 
 <!ENTITY zotero.toolbar.newItem.label					"New Item">
 <!ENTITY zotero.toolbar.moreItemTypes.label			"More">
-<!ENTITY zotero.toolbar.newItemFromPage.label			"Create New Item from Current Page">
+<!ENTITY zotero.toolbar.newItemFromPage.label			"Create Web Page Item from Current Page">
 <!ENTITY zotero.toolbar.lookup.label				"Add Item by Identifier">
 <!ENTITY zotero.toolbar.removeItem.label				"Remove Item…">
 <!ENTITY zotero.toolbar.newCollection.label			"New Collection…">
