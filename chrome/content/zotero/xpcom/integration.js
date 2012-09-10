@@ -2167,7 +2167,7 @@ Zotero.Integration.Session.prototype.getCitationField = function(citation) {
 		
 			// add itemData only if requested
 			if(this.data.prefs.storeReferences) {
-				serializeCitationItem.itemData = citationItem.item;
+				serializeCitationItem.itemData = Zotero.Cite.System.retrieveItem(citationItem.id);
 				addSchema = true;
 			}
 		}
@@ -2506,6 +2506,8 @@ Zotero.Integration.Session.prototype.deleteCitation = function(index) {
  */
 Zotero.Integration.Session.prototype.getBibliography = function() {
 	this.updateUncitedItems();
+	
+	if(Zotero.Utilities.isEmpty(this.citationsByItemID)) return false;
 	
 	// generate bibliography
 	var bib = this.style.makeBibliography();

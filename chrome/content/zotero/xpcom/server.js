@@ -383,9 +383,12 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 		
 		// pass to endpoint
 		if((endpoint.init.length ? endpoint.init.length : endpoint.init.arity) === 3) {
+			const uaRe = /[\r\n]User-Agent: +([^\r\n]+)/i;
+			var m = uaRe.exec(this.header);
 			var url = {
 				"pathname":this.pathname,
-				"query":this.query ? Zotero.Server.decodeQueryString(this.query.substr(1)) : {}
+				"query":this.query ? Zotero.Server.decodeQueryString(this.query.substr(1)) : {},
+				"userAgent":m && m[1]
 			};
 			
 			endpoint.init(url, decodedData, sendResponseCallback);
