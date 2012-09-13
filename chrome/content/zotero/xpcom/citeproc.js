@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.393",
+    PROCESSOR_VERSION: "1.0.394",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -6520,11 +6520,12 @@ CSL.NameOutput.prototype._runDisambigNames = function (lst, pos) {
             var val = this.state.tmp.disambig_settings.givens[pos][i];
             if (val === 1 && 
                 this.state.opt["givenname-disambiguation-rule"] === "by-cite" && 
-                "undefined" === typeof this.name.strings["initialize-with"]) {
+                ("undefined" === typeof this.name.strings["initialize-with"]
+                 || "undefined" === typeof lst[i].given)) {
                 val = 2;
             }
             param = val;
-            if (this.state.opt["disambiguate-add-givenname"]) {
+            if (this.state.opt["disambiguate-add-givenname"] && lst[i].given) {
                 param = this.state.registry.namereg.evalname("" + this.Item.id, lst[i], i, param, this.name.strings.form, this.name.strings["initialize-with"]);
             }
         } else {
@@ -12148,10 +12149,10 @@ CSL.Output.Formats.prototype.text = {
     "@display/indent": function (state, str) {
         return "\n    "+str;
     },
-    "@url/true": function (state, str) {
+    "@URL/true": function (state, str) {
         return str;
     },
-    "@doi/true": function (state, str) {
+    "@DOI/true": function (state, str) {
         return str;
     }
 };
@@ -12201,7 +12202,7 @@ CSL.Output.Formats.prototype.rtf = {
     "@quotes/false": false,
     "bibstart":"{\\rtf ",
     "bibend":"}",
-    "@display/block":"%%STRING%%\\line\r\n",
+    "@display/block": "\\line{}%%STRING%%\\line\r\n",
     "@bibliography/entry": function(state,str){
         return str;
     },
@@ -12214,10 +12215,10 @@ CSL.Output.Formats.prototype.rtf = {
     "@display/indent": function (state, str) {
         return "\n\\tab "+str;
     },
-    "@url/true": function (state, str) {
+    "@URL/true": function (state, str) {
         return str;
     },
-    "@doi/true": function (state, str) {
+    "@DOI/true": function (state, str) {
         return str;
     }
 };
@@ -13009,8 +13010,6 @@ CSL.Disambiguation.prototype.incrementDisambig = function () {
             && ("number" != typeof this.givensMax || "undefined" === typeof this.base.givens[this.gnameset][this.gname] || this.base.givens[this.gnameset][this.gname] === this.givensMax)) {
             maxed = true;
         }
-    }
-    if ("disYears" === this.modes[this.modeindex]) {
     }
     return maxed;
 };
