@@ -49,32 +49,14 @@ var ZoteroItemPane = new function() {
 	}
 	
 	
-	function updateRelatedTab (relatedTab, count) {
+	function updateItemTab (itemTab, count) {
 		if (count) {
-			relatedTab.setAttribute('has-content', 'true');
+			itemTab.setAttribute('has-content', 'true');
 		} else {
-			relatedTab.setAttribute('has-content', 'false');
+			itemTab.setAttribute('has-content', 'false');
 		}
 	}
-	
-	function updateTagsTab (tagsTab, count) {
-		//var relatedLabel = relatedTab.getAttribute('label').replace(/(.*?)\s*\([0-9]\)$/,"$1");
-		if (count) {
-			tagsTab.setAttribute('has-content', 'true');
-		} else {
-			tagsTab.setAttribute('has-content', 'false');
-		}
-	}
-	
-	function updateNotesTab (notesTab, count) {
-		//var relatedLabel = relatedTab.getAttribute('label').replace(/(.*?)\s*\([0-9]\)$/,"$1");
-		if (count) {
-			notesTab.setAttribute('has-content', 'true');
-		} else {
-			notesTab.setAttribute('has-content', 'false');
-		}
-	}
-	
+		
 	/*
 	 * Load an item
 	 */
@@ -187,31 +169,28 @@ var ZoteroItemPane = new function() {
 				}
 				related += 1;
 			}
-			updateRelatedTab(relatedTab, related);
-
+			updateItemTab(relatedTab, related);
 			if (box.getAttribute('id') == "zotero-editpane-related") {
-				// Attach the tab update function and the tab to the related box for its use
 				box.relatedTab = relatedTab;
-				box.updateRelatedTab = updateRelatedTab;
+				box.updateRelatedTab = updateItemTab;
 			}
 
 		    // TAGS: Update the tags items count on the tab when any panel is opened or modified.
 		    var tagsTab = document.getElementById('zotero-tab-tags');
 		    var tags = item.getTags() ? item.getTags().length : 0;
-		    updateTagsTab(tagsTab, tags);
+		    updateItemTab(tagsTab, tags);
 		    if (box.getAttribute('id') == "zotero-editpane-tags") {
 			    box.tagsTab = tagsTab;
-			    box.updateTagsTab = updateTagsTab;
+			    box.updateTagsTab = updateItemTab;
 		    }
 		    
  		    // NOTES: Update the notes items count on the tab when any panel is opened or modified.
 		    var notesTab = document.getElementById('zotero-tab-notes');
 		    var notes = item.getNotes() ? item.getNotes().length : 0;
-		    updateNotesTab(notesTab, notes);
+		    updateItemTab(notesTab, notes);
 		    if (box.getAttribute('id') == "zotero-editpane-notes") {
-			    // Attach the tab update function and the tab to the notes box for its use
 			    box.notesTab = notesTab;
-			    box.updateNotesTab = updateNotesTab;
+			    box.updateNotesTab = updateItemTab;
 		    }
 		}
 		// XXXXX The trunk works with a straight assignment here.
