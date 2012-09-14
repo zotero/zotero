@@ -204,7 +204,7 @@ Zotero.Translate.ItemSaver.prototype = {
 	},
 	
 	"_saveAttachmentFile":function(attachment, parentID) {
-		const urlRe = /(([A-Za-z]+):\/\/[^\s]*)/i;
+		const urlRe = /(([a-z]+):\/\/[^\s]*)/i;
 		Zotero.debug("Translate: Adding attachment", 4);
 			
 		if(!attachment.url && !attachment.path) {
@@ -216,7 +216,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			// see if this is actually a file URL
 			var m = urlRe.exec(attachment.url);
 			var protocol = m ? m[2].toLowerCase() : "";
-			if(protocol == "file") {
+			if(protocol == "file" || protocol == "") {
 				attachment.path = attachment.url;
 				attachment.url = false;
 			} else if(protocol != "http" && protocol != "https") {
@@ -275,7 +275,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			var uri = IOService.newURI(path, "", this._baseURI);
 		}
 		catch (e) {
-			var msg = "Error parsing attachment path: " + attachment.path;
+			var msg = "Error parsing attachment path: " + path;
 			Zotero.logError(msg);
 			Zotero.debug("Translate: " + msg, 2);
 			return false;
@@ -284,14 +284,14 @@ Zotero.Translate.ItemSaver.prototype = {
 		try {
 			var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
 			if (file.path == '/') {
-				var msg = "Error parsing attachment path: " + attachment.path;
+				var msg = "Error parsing attachment path: " + path;
 				Zotero.logError(msg);
 				Zotero.debug("Translate: " + msg, 2);
 				return false;
 			}
 		}
 		catch (e) {
-			var msg = "Error getting file from attachment path: " + attachment.path;
+			var msg = "Error getting file from attachment path: " + path;
 			Zotero.logError(msg);
 			Zotero.debug("Translate: " + msg, 2);
 			return false;
