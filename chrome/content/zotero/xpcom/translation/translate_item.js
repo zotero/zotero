@@ -215,8 +215,8 @@ Zotero.Translate.ItemSaver.prototype = {
 		if(!attachment.path) {
 			// see if this is actually a file URL
 			var m = urlRe.exec(attachment.url);
-			var protocol = m ? m[2].toLowerCase() : "";
-			if(protocol == "file" || protocol == "") {
+			var protocol = m ? m[2].toLowerCase() : "file";
+			if(protocol == "file") {
 				attachment.path = attachment.url;
 				attachment.url = false;
 			} else if(protocol != "http" && protocol != "https") {
