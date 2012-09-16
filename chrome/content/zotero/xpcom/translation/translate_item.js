@@ -406,6 +406,8 @@ Zotero.Translate.ItemSaver.prototype = {
 			
 			if(!creator.firstName && !creator.lastName) {
 				Zotero.debug("Translate: Silently dropping empty creator");
+				item.creators.splice(i,1);
+				i--;
 				continue;
 			}
 			
