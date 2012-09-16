@@ -257,7 +257,7 @@
 				<body>
 					<![CDATA[
 						if (count == null) {
-							var count = this.item.relatedItemsBidirectional.length;
+							count = this.item.relatedItemsBidirectional.length;
 						}
 						
 						var str = 'pane.item.related.count.';
@@ -273,6 +273,9 @@
 								break;
 						}
 						this.id('seeAlsoNum').value = Zotero.getString(str, [count]);
+						if (this.updateRelatedTab) {
+							this.updateRelatedTab(this.relatedTab, count);
+						}
 					]]>
 				</body>
 			</method>
