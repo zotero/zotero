@@ -569,6 +569,9 @@
 						
 						this.id('tagsNum').value = Zotero.getString(str, [count]);
 						this.count = count;
+						if (this.updateTagsTab) {
+							this.updateTagsTab(this.tagsTab, count);
+						}
 					]]>
 				</body>
 			</method>
