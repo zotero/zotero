@@ -262,7 +262,7 @@ Zotero.Utilities = {
 			throw "cleanDOI: argument must be a string";
 		}
 		
-		return x.match(/10\.[0-9]{4,}\/[^\s]*[^\s\.,]/);
+		return x.match(/10\.[0-9]{4,}\/[^\s]*[^\s\.,]/)[0];
 	},
 
 	/**

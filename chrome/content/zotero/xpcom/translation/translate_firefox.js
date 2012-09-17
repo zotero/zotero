@@ -56,7 +56,13 @@ Zotero.Translate.DOMWrapper = new function() {
 	};
 	
 	function isXrayWrapper(x) {
-		return /XrayWrapper/.exec(x.toString());
+		try {
+			return x.toString().indexOf("XrayWrapper") !== -1;
+		} catch(e) {
+			// The toString() implementation could theoretically throw. But it never
+			// throws for Xray, so we can just assume non-xray in that case.
+			return false;
+		}
 	}
 	
 	// We can't call apply() directy on Xray-wrapped functions, so we have to be
@@ -134,6 +140,26 @@ Zotero.Translate.DOMWrapper = new function() {
 			return crawlProtoChain(Object.getPrototypeOf(obj), fn);
 	};
 	
+	/*
+	 * We want to waive the __exposedProps__ security check for SpecialPowers-wrapped
+	 * objects. We do this by creating a proxy singleton that just always returns 'rw'
+	 * for any property name.
+	 */
+	function ExposedPropsWaiverHandler() {
+		// NB: XPConnect denies access if the relevant member of __exposedProps__ is not
+		// enumerable.
+		var _permit = { value: 'rw', writable: false, configurable: false, enumerable: true };
+		return {
+			getOwnPropertyDescriptor: function(name) { return _permit; },
+			getPropertyDescriptor: function(name) { return _permit; },
+			getOwnPropertyNames: function() { throw Error("Can't enumerate ExposedPropsWaiver"); },
+			getPropertyNames: function() { throw Error("Can't enumerate ExposedPropsWaiver"); },
+			enumerate: function() { throw Error("Can't enumerate ExposedPropsWaiver"); },
+			defineProperty: function(name) { throw Error("Can't define props on ExposedPropsWaiver"); },
+			delete: function(name) { throw Error("Can't delete props from ExposedPropsWaiver"); }
+		};
+	};
+	ExposedPropsWaiver = Proxy.create(ExposedPropsWaiverHandler());
 	
 	function SpecialPowersHandler(obj, overrides) {
 		this.wrappedObject = obj;
@@ -147,6 +173,9 @@ Zotero.Translate.DOMWrapper = new function() {
 		// Handle our special API.
 		if (name == "SpecialPowers_wrappedObject")
 			return { value: this.wrappedObject, writeable: false, configurable: false, enumerable: false };
+		// Handle __exposedProps__.
+		if (name == "__exposedProps__")
+			return { value: ExposedPropsWaiver, writable: false, configurable: false, enumerable: false };
 	
 		// In general, we want Xray wrappers for content DOM objects, because waiving
 		// Xray gives us Xray waiver wrappers that clamp the principal when we cross
@@ -240,10 +269,12 @@ Zotero.Translate.DOMWrapper = new function() {
 	};
 	
 	SpecialPowersHandler.prototype.getOwnPropertyDescriptor = function(name) {
+		Zotero.debug("Getting own property desc "+name);
 		return this.doGetPropertyDescriptor(name, true);
 	};
 	
 	SpecialPowersHandler.prototype.getPropertyDescriptor = function(name) {
+		Zotero.debug("Getting property desc "+name);
 		return this.doGetPropertyDescriptor(name, false);
 	};
 	
@@ -311,14 +342,13 @@ Zotero.Translate.DOMWrapper = new function() {
 		var filt = function(name) { return t.getPropertyDescriptor(name).enumerable; };
 		return this.getPropertyNames().filter(filt);
 	};
+
 	/*
 	 * END SPECIAL POWERS WRAPPING CODE
 	 */
 	
 	/**
-	 * Abstracts DOM wrapper support for avoiding XOWs<br/>
-	 * In Firefox 3.6, we use FX36DOMWrapper, defined below<br/>
-	 * In Firefox 4+, we use some proxy code taken from Special Powers
+	 * Abstracts DOM wrapper support for avoiding XOWs
 	 * @param {XPCCrossOriginWrapper} obj
 	 * @return {Object} An obj that is no longer Xrayed
 	 */
@@ -355,13 +385,6 @@ Zotero.Translate.DOMWrapper = new function() {
  * @param {Zotero.Translate} translate
  * @param {String|window} sandboxLocation
  */
-
-
-/**
- * @class Manages the translator sandbox
- * @param {Zotero.Translate} translate
- * @param {String|window} sandboxLocation
- */
 Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	this.sandbox = new Components.utils.Sandbox(sandboxLocation);
 	this.sandbox.Zotero = {};
@@ -375,6 +398,7 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 		this.sandbox.DOMParser = "wrappedJSObject" in sandboxLocation
 			? sandboxLocation.wrappedJSObject.DOMParser : sandboxLocation.DOMParser;
 	} else {
+		var sandbox = this.sandbox;
 		this.sandbox.DOMParser = function() {
 			var uri, principal;
 			// get URI
@@ -399,8 +423,6 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 				this.parseFromString = function(str, contentType) {
 					return Zotero.Translate.DOMWrapper.wrap(_DOMParser.parseFromString(str, contentType));
 				}
-			} else {
-				this.parseFromString = function(str, contentType) _DOMParser.parseFromString(str, contentType);
 			}
 		}
 	};
@@ -434,22 +456,34 @@ Zotero.Translate.SandboxManager.prototype = {
 	 */
 	"importObject":function(object, passAsFirstArgument, attachTo) {
 		if(!attachTo) attachTo = this.sandbox.Zotero;
-		var newExposedProps = false;
-		if(!object.__exposedProps__) newExposedProps = {};
-		for(var key in (newExposedProps ? object : object.__exposedProps__)) {
+		var me = this;
+		if("__exposedProps__" in object) {
+			var newExposedProps = false,
+				exposedProps = object.__exposedProps__,
+				iterate = object.__exposedProps__;
+		} else {
+			var newExposedProps = true,
+				exposedProps = {},
+				iterate = object;
+		}
+		
+		for(var key in iterate) {
 			let localKey = key;
-			if(newExposedProps) newExposedProps[localKey] = "r";
+			if(newExposedProps) exposedProps[localKey] = "r";
 			
 			var type = typeof object[localKey];
 			var isFunction = type === "function";
 			var isObject = typeof object[localKey] === "object";
 			if(isFunction || isObject) {
 				if(isFunction) {
-					if(passAsFirstArgument) {
-						attachTo[localKey] = object[localKey].bind(object, passAsFirstArgument);
-					} else {
-						attachTo[localKey] = object[localKey].bind(object);
-					}
+					attachTo[localKey] = function() {
+						var args = Array.prototype.slice.apply(arguments);
+						if(passAsFirstArgument) args.unshift(passAsFirstArgument);
+						var retval = object[localKey].apply(object, args);
+						if(typeof retval !== "object" || retval === null
+								|| "__exposedProps__" in retval) return retval;
+						return me._copyObject(retval);
+					};
 				} else {
 					attachTo[localKey] = {};
 				}
@@ -463,11 +497,39 @@ Zotero.Translate.SandboxManager.prototype = {
 			}
 		}
 		
-		if(newExposedProps) {
-			attachTo.__exposedProps__ = newExposedProps;
-		} else {
-			attachTo.__exposedProps__ = object.__exposedProps__;
+		attachTo.__exposedProps__ = exposedProps;
+	},
+	
+	/**
+	 * Copies a JavaScript object to this sandbox
+	 * @param {Object} obj
+	 * @return {Object}
+	 */
+	"_copyObject":function(obj, wm) {
+		var str = Object.prototype.toString.call(obj);
+		if(!obj.hasOwnProperty || (str !== "[object Object]" && str !== "[object Array]")) {
+			return obj;
 		}
+		Zotero.debug(str);
+		if(!wm) wm = new WeakMap();
+		
+		var obj2 = (obj instanceof Array ? new this.sandbox.Array() : new this.sandbox.Object());
+		for(var i in obj) {
+			if(!obj.hasOwnProperty(i)) continue;
+			
+			var prop1 = obj[i];
+			if(typeof prop1 === "object" && prop1 !== null) {
+				var prop2 = wm.get(prop1);
+				if(prop2 === undefined) {
+					prop2 = this._copyObject(prop1, wm);
+					wm.set(prop1, prop2);
+				}
+				obj2[i] = prop2;
+			} else {
+				obj2[i] = prop1;
+			}
+		}
+		return obj2;
 	}
 }
 

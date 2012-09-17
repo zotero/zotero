@@ -2098,7 +2098,10 @@ Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
 /**
  * Pass search item to detect* and do* functions
  */
-Zotero.Translate.Search.prototype._getParameters = function() { return [this.search]; };
+Zotero.Translate.Search.prototype._getParameters = function() {
+	if(Zotero.isFx) return [this._sandboxManager.sandbox.Zotero._transferItem(JSON.stringify(this.search))];
+	return [this.search];
+};
 
 /**
  * Extract sandbox location from translator target
