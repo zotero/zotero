@@ -514,6 +514,7 @@ Zotero.Translate.SandboxManager.prototype = {
 		if(!wm) wm = new WeakMap();
 		
 		var obj2 = (obj instanceof Array ? new this.sandbox.Array() : new this.sandbox.Object());
+		obj2.__proto__ = obj.__proto__;
 		for(var i in obj) {
 			if(!obj.hasOwnProperty(i)) continue;
 			
