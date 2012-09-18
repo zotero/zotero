@@ -31,8 +31,9 @@
  * @param {String|nsIURI} uri URI of page to manage cookies for (cookies for domains that are not 
  *                     subdomains of this URI are ignored)
  * @param {String} cookieData Cookies with which to initiate the sandbox
+ * @param {String} userAgent User agent to use for sandboxed requests
  */
-Zotero.CookieSandbox = function(browser, uri, cookieData) {
+Zotero.CookieSandbox = function(browser, uri, cookieData, userAgent) {
 	this._observerService = Components.classes["@mozilla.org/observer-service;1"].
 		getService(Components.interfaces.nsIObserverService);
 	
@@ -53,6 +54,8 @@ Zotero.CookieSandbox = function(browser, uri, cookieData) {
 			this._cookies[key] = value;
 		}
 	}
+	
+	if(userAgent) this.userAgent = userAgent;
 	
 	Zotero.CookieSandbox.Observer.register();
 	if(browser) {
@@ -204,6 +207,10 @@ Zotero.CookieSandbox.Observer = new function() {
 				channel.setRequestHeader("Cookie2", "", false);
 				Zotero.debug("CookieSandbox: Cleared cookies to be sent to "+channelURI, 5);
 				return;
+			}
+			
+			if(trackedBy.userAgent) {
+				channel.setRequestHeader("User-Agent", trackedBy.userAgent, false);
 			}
 			
 			// add cookies to be sent to this domain

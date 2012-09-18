@@ -410,6 +410,12 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 		
 		for each(var part in parts) {
 			this.addCondition('blockStart');
+			
+			// If search string is 8 characters, see if this is a item key
+			if (operator == 'contains' && part.text.length == 8) {
+				this.addCondition('key', 'is', part.text, false);
+			}
+			
 			if (condition == 'quicksearch-titleCreatorYear') {
 				this.addCondition('title', operator, part.text, false);
 				this.addCondition('year', operator, part.text, false);
@@ -2176,6 +2182,19 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'items',
 				field: 'libraryID',
+				special: true,
+				noLoad: true
+			},
+			
+			{
+				name: 'key',
+				operators: {
+					is: true,
+					isNot: true,
+					beginsWith: true
+				},
+				table: 'items',
+				field: 'key',
 				special: true,
 				noLoad: true
 			},

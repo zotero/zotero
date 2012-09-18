@@ -1371,7 +1371,7 @@ Zotero.Translate.Base.prototype = {
 					"for(var key in this) {"+
 					"if("+createArrays+".indexOf(key) !== -1) {"+
 						"for each(var item in this[key]) {"+
-							"for(var key2 in item[key2]) {"+
+							"for(var key2 in item) {"+
 								"if(typeof item[key2] === 'xml') {"+
 									"item[key2] = item[key2].toString();"+
 								"}"+
