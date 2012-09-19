@@ -696,7 +696,7 @@ Zotero.Schema = new function(){
 						Zotero.File.getValidFileName(entry.label)) + fileExt;
 					// Use translatorID if name still isn't ASCII (e.g., Cyrillic)
 					if (!fileName.match(/^[\x00-\x7f]+$/)) {
-						fileName = entry.translatorID + fileExt;
+						fileName = translatorID + fileExt;
 					}
 					
 					var destFile = destDir.clone();
