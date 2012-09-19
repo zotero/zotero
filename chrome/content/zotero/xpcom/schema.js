@@ -692,7 +692,12 @@ Zotero.Schema = new function(){
 						}
 					}
 					
-					var fileName = Zotero.File.getValidFileName(entry.label) + fileExt;
+					var fileName = Zotero.Utilities.removeDiacritics(
+						Zotero.File.getValidFileName(entry.label)) + fileExt;
+					// Use translatorID if name still isn't ASCII (e.g., Cyrillic)
+					if (!fileName.match(/^[\x00-\x7f]+$/)) {
+						fileName = entry.translatorID + fileExt;
+					}
 					
 					var destFile = destDir.clone();
 					destFile.append(fileName);
@@ -815,7 +820,12 @@ Zotero.Schema = new function(){
 				}
 				
 				if (mode == 'translator') {
-					var fileName = Zotero.File.getValidFileName(newObj[titleField]) + fileExt
+					var fileName = Zotero.Utilities.removeDiacritics(
+						Zotero.File.getValidFileName(newObj[titleField])) + fileExt;
+					// Use translatorID if name still isn't ASCII (e.g., Cyrillic)
+					if (!fileName.match(/^[\x00-\x7f]+$/)) {
+						fileName = newObj.translatorID + fileExt;
+					}
 				}
 				else if (mode == 'style') {
 					var fileName = file.leafName;
