@@ -401,6 +401,7 @@ Zotero.Translate.ItemSaver.prototype = {
 	},
 	
 	"_saveCreators":function(item, newItem) {
+		var creatorIndex = 0;
 		for(var i=0; i<item.creators.length; i++) {
 			var creator = item.creators[i];
 			
@@ -451,7 +452,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				var creatorID = creator.save();
 			}
 			
-			newItem.setCreator(i, creator, creatorTypeID);
+			newItem.setCreator(creatorIndex++, creator, creatorTypeID);
 		}
 	},
 	
