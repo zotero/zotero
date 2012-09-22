@@ -202,27 +202,46 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	var rows = Zotero.DB.query(sql, [this._libraryID, Zotero.ItemFields.getID('DOI')]);
 	processRows();
 	
-	var creatorRowsCache = {};
-	
-	// Match on normalized title
-	var sql = "SELECT itemID, value as checkvalue FROM items JOIN itemData USING (itemID) "
-				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND fieldID BETWEEN 110 AND 113 "
-				+ "AND itemTypeID NOT IN (1, 14, 16, 17, 20) "
-				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
-				+ "ORDER BY checkvalue COLLATE locale";
-	var rows = Zotero.DB.query(sql, [this._libraryID]);
-    // Legal types, which might have no title, and for which parallel
-    // referencing is common.
+	// For legal types we ignore the title but we're fussy about other stuff
+	//
+	// 15 = section
+	// 36 = code
+	// 43 = reporter
+	// 44 = court
+	// 55 = codeNumber
+	// 93 = billNumber
+	// 94 = codeVolume
+	// 97 = reporterVolume
+	// 98 = firstPage
+	// 101 = publicLawNumber
+	//
 	var sql = "SELECT itemID, group_concat(value, '::') as checkvalue FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND fieldID IN (15, 36, 43, 55, 93, 94, 97, 98, 101, 110, 111, 112, 113) "
+				+ "WHERE libraryID=? AND fieldID IN (15, 36, 43, 44, 55, 93, 94, 97, 98, 101) "
 				+ "AND itemTypeID IN (16, 17, 20) "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
                 + "GROUP BY itemID "
 				+ "ORDER BY checkvalue COLLATE locale";
-    var newrows = Zotero.DB.query(sql, [this._libraryID]);
-	rows = rows.concat(newrows);
+	var rows = Zotero.DB.query(sql, [this._libraryID]);
+	processRows();
+
+	var creatorRowsCache = {};
+	// Match on normalized title
+	// Return NULL if no title, otherwise catenate title and edition
+	var sql = "SELECT itemID, CASE "
+				+ "WHEN maxID>6 THEN realvalue "
+				+ "ELSE NULL "
+			+ "END as checkvalue "
+			+ "FROM (SELECT itemID, max(fieldID) AS maxID, group_concat(value, '::') AS realvalue "
+				+ "FROM items JOIN itemData USING (itemID) "
+				+ "JOIN itemDataValues USING (valueID) "
+				+ "WHERE libraryID=? AND (fieldID BETWEEN 110 AND 113 OR fieldID=6) "
+				+ "AND itemTypeID NOT IN (1, 14, 16, 17, 20) "
+				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
+				+ "GROUP BY itemID) "
+			+ "ORDER BY checkvalue COLLATE locale";
+	var rows = Zotero.DB.query(sql, [this._libraryID]);
+
 	processRows(function (a, b) {
 		var aTitle = normalizeString(a.checkvalue);
 		var bTitle = normalizeString(b.checkvalue);
