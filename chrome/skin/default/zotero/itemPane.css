@@ -12,8 +12,8 @@
 {
 	margin-top: 0 !important;
 	margin-bottom: 0 !important;
-	font-weight: bold !important;
-	color: #888888;
+	/* font-weight: bold !important; */
+	/* color: #888888; */
 }
 
 #zotero-view-tabbox tabs tab .tab-text
@@ -22,10 +22,47 @@
 	margin-bottom: .25em !important;
 }
 
+
+/* 
+   The result of an evening spent fiddling with CSS. Basically derived from these
+   pages, with a healthy dose of trial and error:
+
+     http://www.curtisgibby.com/blog/2011/03/tweaking-firefox-tab-colors-part-2-the-firefox-4-edition/
+     https://developer.mozilla.org/en-US/docs/CSS/linear-gradient
+*/
+/* Bloated tab colors */
 #zotero-view-tabbox tabs tab[has-content="true"]
 {
-	color: #000000;
+ -moz-appearance: none;
+ background-color:#d8f1d8 !important; /* what we had before -- the tiny little strip at the top */
+ background-image: -moz-linear-gradient(bottom,rgba(10%,10%,10%,.4) 1px,transparent 1px), /* the line on the bottom */
+ -moz-linear-gradient(0deg,#a6dfa6,#8dd68d) !important; /* the main color we're adding */
 }
+
+/* Bloated tab hover colors */
+#zotero-view-tabbox tabs tab[has-content="true"]:hover
+{
+ background-image: -moz-linear-gradient(bottom,rgba(10%,10%,10%,.4) 1px,transparent 1px),
+ -moz-linear-gradient(0deg,#bfe8bf,#a6dfa6) !important;
+}
+ 
+/*  Bloated tab active colors */
+#zotero-view-tabbox tabs tab[has-content="true"][selected="true"]
+{
+ background-image: -moz-linear-gradient(0deg,#a6dfa6,#c6ebc6,#a6dfa6) !important; /* no bottom line for active tab */
+ border-right: 2px solid #eeeeee !important;
+}
+
+
+/*
+
+#zotero-view-tabbox tabs tab[has-content="true"]
+{
+    -moz-appearance: none !important;
+    background-color: rgba(12, 97, 17, 0.5) !important;
+    background-color: #ff0000 !important;
+}
+*/
 
 #zotero-view-item
 {
