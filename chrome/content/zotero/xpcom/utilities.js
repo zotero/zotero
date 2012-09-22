@@ -79,7 +79,8 @@ const CSL_TEXT_MAPPINGS = {
 	"references":["history"],
 	"shortTitle":["shortTitle"],
 	"journalAbbreviation":["journalAbbreviation"],
-	"language":["language"]
+	"language":["language"],
+	"key":["key"]
 }
 
 /*

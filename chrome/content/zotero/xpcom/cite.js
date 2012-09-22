@@ -59,6 +59,10 @@ Zotero.Cite.System.retrieveItem = function(item) {
 		if(variable == "URL" && ignoreURL) continue;
 		for each(var field in fields) {
 			var value = zoteroItem.getField(field, false, true).toString();
+			if (field === "key") {
+				cslItem["key"] = value;
+				break;
+			}
 			var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(zoteroItem.itemTypeID, field);
 			if (!fieldID) {
 				var fieldID = Zotero.ItemFields.getID(field);
