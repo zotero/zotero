@@ -45,6 +45,7 @@ const CSL_NAMES_MAPPINGS = {
 
 /*
  * Mappings for text variables
+ * (system_id to key mapping is actually hard-wired in cite.js)
  */
 const CSL_TEXT_MAPPINGS = {
 	"title":["title"],
@@ -79,8 +80,7 @@ const CSL_TEXT_MAPPINGS = {
 	"references":["history"],
 	"shortTitle":["shortTitle"],
 	"journalAbbreviation":["journalAbbreviation"],
-	"language":["language"],
-	"key":["key"]
+	"language":["language"]
 }
 
 /*
