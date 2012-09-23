@@ -139,9 +139,8 @@ Zotero.MultiField.prototype.merge = function (otherItem, shy) {
 				if (this._keys[fieldID][langTag] != otherItem.multi._keys[fieldID][langTag]) {
 					if (!this.parent._changedItemData) {
 						this.parent._changedItemData = {};
-					}
-					if (!this.parent._changedItemData.alt) {
-						this.parent._changedItemData.alt = {};
+	   					this.parent._changedItemData.main = {};
+	   					this.parent._changedItemData.alt = {};
 					}
 					this._keys[fieldID][langTag] = otherItem.multi._keys[fieldID][langTag];
 					this.parent._changedItemData.alt[fieldID] = true;
@@ -162,9 +161,8 @@ Zotero.MultiField.prototype.clone = function (parent) {
 	var clone = new Zotero.MultiField(parent);
 	if (!clone.parent._changedItemData) {
 		clone.parent._changedItemData = {};
-	}
-	if (!clone.parent._changedItemData.alt) {
-		clone.parent._changedItemData.alt = {};
+	   	clone.parent._changedItemData.main = {};
+	   	clone.parent._changedItemData.alt = {};
 	}
 	for (var fieldID in this._lsts) {
 		clone._lsts[fieldID] = this._lsts[fieldID].slice();
