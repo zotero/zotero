@@ -448,6 +448,10 @@ var Zotero_File_Interface = new function() {
 		var citation = {"citationItems":[{id:item.id} for each(item in items)], properties:{}};
 		
 		// add HTML
+		// Optionally turn on HTML wrapper
+		if (Zotero.Prefs.get("export.quickCopy.linkOption")) {
+			style.sys.wrapCitationEntry = style.sys.wrapCitationEntryHtml;
+		}
 		var bibliography = style.previewCitationCluster(citation, [], [], "html");
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
@@ -457,8 +461,16 @@ var Zotero_File_Interface = new function() {
 		
 		// add text (or HTML source)
 		if(!asHTML) {
+			// Optionally turn on text wrapper
+			if (Zotero.Prefs.get("export.quickCopy.linkOption")) {
+				style.sys.wrapCitationEntry = style.sys.wrapCitationEntryText;
+			}
 			var bibliography = style.previewCitationCluster(citation, [], [], "text");
 		}
+		
+		// Force wrapper off
+		style.sys.wrapCitationEntry = false;
+		
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;

@@ -395,8 +395,19 @@ Zotero.QuickCopy = new function() {
 				var csl = Zotero.Styles.get(format).csl;
 				csl.updateItems([item.id for each(item in items)]);
 				var citation = {citationItems:[{id:item.id} for each(item in items)], properties:{}};
+				
+				if (Zotero.Prefs.get("export.quickCopy.linkOption")) {
+					csl.sys.wrapCitationEntry = csl.sys.wrapCitationEntryHtml;
+				}
 				var html = csl.previewCitationCluster(citation, [], [], "html"); 
+				
+				if (Zotero.Prefs.get("export.quickCopy.linkOption")) {
+					csl.sys.wrapCitationEntry = csl.sys.wrapCitationEntryText;
+				}
 				var text = csl.previewCitationCluster(citation, [], [], "text"); 
+				
+				csl.sys.wrapCitationEntry = false;
+				
 			} else {
 				var style = Zotero.Styles.get(format);
 				var html = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, "html");

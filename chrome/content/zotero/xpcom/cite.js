@@ -53,16 +53,18 @@ Zotero.Cite.System.retrieveItem = function(item) {
 		}
 	};
 
+    if (!zoteroItem.libraryID) {
+        cslItem.system_id = "0_" + zoteroItem.key;
+    } else {
+        cslItem.system_id = zoteroItem.libraryID + "_" + zoteroItem.key;
+    }
+
 	// get all text variables (there must be a better way)
 	for(var variable in CSL_TEXT_MAPPINGS) {
 		var fields = CSL_TEXT_MAPPINGS[variable];
 		if(variable == "URL" && ignoreURL) continue;
 		for each(var field in fields) {
 			var value = zoteroItem.getField(field, false, true).toString();
-			if (field === "key") {
-				cslItem["key"] = value;
-				break;
-			}
 			var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(zoteroItem.itemTypeID, field);
 			if (!fieldID) {
 				var fieldID = Zotero.ItemFields.getID(field);
@@ -199,6 +201,18 @@ Zotero.Cite.System.retrieveLocale = function(lang) {
 	converterStream.close();
 	return str.value;
 };
+
+Zotero.Cite.System.wrapCitationEntryHtml = function (str, item_id) {
+	return Zotero.Prefs.get("export.quickCopy.wrapCitationHtml")
+		.replace("%%STRING%%", str)
+		.replace("%%ITEM_ID%%", item_id);
+}
+
+Zotero.Cite.System.wrapCitationEntryText = function (str, item_id) {
+	return Zotero.Prefs.get("export.quickCopy.wrapCitationText")
+		.replace("%%STRING%%", str)
+		.replace("%%ITEM_ID%%", item_id);
+}
 
 Zotero.Cite.System.getAbbreviations = function() {
 	return {};

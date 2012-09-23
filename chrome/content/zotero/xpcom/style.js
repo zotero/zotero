@@ -510,6 +510,18 @@ function() {
         citeproc.opt.development_extensions.static_statute_locator = true;
         citeproc.opt.development_extensions.clobber_locator_if_no_statute_section = false;
         citeproc.opt.development_extensions.handle_parallel_articles = true;
+        if (Zotero.Prefs.get("export.quickCopy.linkOption")) {
+            // This gets the processor ready for applying wrappers.
+            //
+            // The function required to invoke wrappers is set only
+            // in getContentFromItems() [quickCopy.js] and 
+            // copyCitationToClipboard() [fileInterface.js]
+            // from functions stored in cite.js.
+            // Output templates are set in Zotero preferences, as
+            // extensions.zotero.export.quickCopy.wrapCitationHtml
+            // and extensions.zotero.export.quickCopy.wrapCitationText
+            citeproc.opt.development_extensions.apply_citation_wrapper = true;
+        }
 
 		return citeproc;
 	} catch(e) {

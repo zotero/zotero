@@ -875,7 +875,7 @@ function ChromeExtensionHandler() {
 				// open Zotero pane
 				win.ZoteroPane.show();
 				
-				if(!id) return;
+				if(!id) return "closeWindow";
 				
 				var lkh = Zotero.Items.parseLibraryKeyHash(id);
 				if (lkh) {
@@ -888,7 +888,7 @@ function ChromeExtensionHandler() {
 					var msg = "Item " + id + " not found in zotero://select";
 					Zotero.debug(msg, 2);
 					Components.utils.reportError(msg);
-					return;
+					return "closeWindow";
 				}
 				
 				if (win.ZoteroOverlay) {
@@ -899,6 +899,8 @@ function ChromeExtensionHandler() {
 				return "closeWindow";
 			}
 			catch (e){
+				// Could maybe deliver an error page to the
+				// browser rather than throwing an error in JS.
 				Zotero.debug(e);
 				throw (e);
 			}
