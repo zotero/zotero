@@ -230,6 +230,9 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	var creatorRowsCache = {};
 	// Match on normalized title
 	// Return NULL if no title, otherwise catenate title and edition
+	// 
+	// 6 = edition
+	// 5 = issue
 	var sql = "SELECT itemID, CASE "
 				+ "WHEN maxID>6 THEN realvalue "
 				+ "ELSE NULL "
@@ -237,7 +240,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 			+ "FROM (SELECT itemID, max(fieldID) AS maxID, group_concat(value, '::') AS realvalue "
 				+ "FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND (fieldID BETWEEN 110 AND 113 OR fieldID=6) "
+				+ "WHERE libraryID=? AND fieldID in (5, 6, 110, 111, 112, 113) "
 				+ "AND itemTypeID NOT IN (1, 14, 16, 17, 20) "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
 				+ "GROUP BY itemID) "
