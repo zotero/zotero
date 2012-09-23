@@ -98,8 +98,11 @@ Zotero.MultiField.prototype.changeLangTag = function (oldTag, newTag, field) {
 	}
 	if (!oldTag || oldTag === this.main[fieldID]) {
 		this.main[fieldID] = newTag;
-	   	this.parent._changedItemData = {};
-	   	this.parent._changedItemData.main = {};
+		if (!this.parent._changedItemData) {
+	   		this.parent._changedItemData = {};
+	   		this.parent._changedItemData.main = {};
+	   		this.parent._changedItemData.alt = {};
+		}
 		this.parent._changedItemData.main[fieldID] = true;
 	} else if (this._keys[fieldID] && this._keys[fieldID][oldTag]) {
 		for (var i = 0, ilen = this._lsts[fieldID].length; i < ilen; i += 1) {
@@ -110,8 +113,11 @@ Zotero.MultiField.prototype.changeLangTag = function (oldTag, newTag, field) {
 		}
 		this._keys[fieldID][newTag] = this._keys[fieldID][oldTag];
 		this._keys[fieldID][oldTag] = '';
-	   	this.parent._changedItemData = {};
-	   	this.parent._changedItemData.alt = {};
+		if (!this.parent._changedItemData) {
+	   		this.parent._changedItemData = {};
+	   		this.parent._changedItemData.main = {};
+	   		this.parent._changedItemData.alt = {};
+		}
 		this.parent._changedItemData.alt[fieldID] = true;
 	}
 };
