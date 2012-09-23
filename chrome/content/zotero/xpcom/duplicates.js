@@ -215,7 +215,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	// 98 = firstPage
 	// 101 = publicLawNumber
 	//
-	var sql = "SELECT itemID, group_concat(value, '::') as checkvalue FROM items JOIN itemData USING (itemID) "
+	var sql = "SELECT itemID, group_concat(value, '::') as value FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
 				+ "WHERE libraryID=? AND fieldID IN (15, 36, 43, 44, 55, 93, 94, 97, 98, 101) "
 				+ "AND itemTypeID IN (16, 17, 20) "
