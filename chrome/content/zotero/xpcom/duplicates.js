@@ -215,15 +215,13 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	// 98 = firstPage
 	// 101 = publicLawNumber
 	//
-	var sql = "SELECT itemID, checkvalue as value "
-			+ "FROM (SELECT itemID, group_concat(value, '::') as checkvalue FROM items JOIN itemData USING (itemID) "
+	var sql = "SELECT itemID, group_concat(itemDataValues.value, '::') as value FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
 				+ "WHERE libraryID=? AND fieldID IN (15, 36, 43, 44, 55, 93, 94, 97, 98, 101) "
 				+ "AND itemTypeID IN (16, 17, 20) "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
                 + "GROUP BY itemID "
-				+ "ORDER BY checkvalue COLLATE locale) "
-			+ "ORDER BY value COLLATE locale");
+				+ "ORDER BY itemDataValues.value COLLATE locale";
 	var rows = Zotero.DB.query(sql, [this._libraryID]);
 	processRows();
 
