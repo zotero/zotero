@@ -939,10 +939,10 @@ Zotero.Item.prototype.setField = function(field, value, loadIn, lang, force_top)
 		if (Zotero.multiFieldIds[fieldID] && lang && lang !== this.multi.main[fieldID]) {
 			if (!this._changedItemData.alt[fieldID]) {
 				this._changedItemData.alt[fieldID] = true;
-		}
+			}
 		} else {
 			this._changedItemData.main[fieldID] = true;
-	}
+		}
 	}
 
 	return true;
