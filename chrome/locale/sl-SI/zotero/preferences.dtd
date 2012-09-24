@@ -143,6 +143,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopiraj kot HTML">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Privzeta izhodna oblika:">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Onemogoči Hitro kopiranje, če vlečem več kot">
+<!ENTITY zotero.preferences.quickCopy.linkOption "Include Zotero link wrappers in QuickCopy citations">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Opomba: Oblikovanje besedila bo na Mac OS X izgubljeno.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domena/pot">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(npr. wikipedia.org)">

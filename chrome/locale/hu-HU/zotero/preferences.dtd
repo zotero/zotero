@@ -143,6 +143,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Másolás HTML-ként">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Alapértelmezett kimeneti formátum">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "A gyorsmásolás kikapcsolása, amikor az elemek száma több, mint">
+<!ENTITY zotero.preferences.quickCopy.linkOption "Include Zotero link wrappers in QuickCopy citations">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Megjegyzés: A formázás Mac OS X alatt elveszik.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(pl: wikipedia.org)">

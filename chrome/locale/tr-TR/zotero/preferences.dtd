@@ -143,6 +143,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTML olarak kopyala">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Varsayılan Çıktı Biçimi:">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "defadan daha fazla sürüklendiğinde Çauk Kopyalamayı seçilemez kıl">
+<!ENTITY zotero.preferences.quickCopy.linkOption "Include Zotero link wrappers in QuickCopy citations">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Uyarı: Zengin-metin biçimi Mac OS X'de kaybolacaktır.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Etki alanı/Yol">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(ör. wikipedia.org)">

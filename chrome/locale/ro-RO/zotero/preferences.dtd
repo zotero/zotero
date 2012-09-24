@@ -143,6 +143,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copiază ca HTML">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Stil implicit de formatare:">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Dezactivează Copierea rapidă în timpul tragerii a mai mult de">
+<!ENTITY zotero.preferences.quickCopy.linkOption "Include Zotero link wrappers in QuickCopy citations">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Notă: Formatarea RTF se va pierde pe Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domeniu/Cale">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(ex. wikipedia.org)">

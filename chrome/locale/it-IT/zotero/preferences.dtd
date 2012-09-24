@@ -143,6 +143,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copia in formato HTML">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Formato di output predefinito">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Disabilita la copia veloce quando si trascinano più di">
+<!ENTITY zotero.preferences.quickCopy.linkOption "Include Zotero link wrappers in QuickCopy citations">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Nota: la formattazione RTF verrà persa su Mac OS X">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Dominio o percorso">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(per es. wikipedia.org)">

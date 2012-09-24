@@ -143,6 +143,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copiar como HTML">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Formato de salida normal:">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Disable Quick Copy when dragging more than">
+<!ENTITY zotero.preferences.quickCopy.linkOption "Include Zotero link wrappers in QuickCopy citations">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Nota: en Mac OS X, el texto se copiará sin formato.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Dominio/camino">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(p.ej. wikipedia.org)">

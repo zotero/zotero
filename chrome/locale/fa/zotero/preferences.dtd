@@ -143,6 +143,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "رونوشت به صورت HTML">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "قالب خروجی پیش‌فرض:">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "غیر فعال کردن رونوشت سریع در زمان کشیدن بیش از ">
+<!ENTITY zotero.preferences.quickCopy.linkOption "Include Zotero link wrappers in QuickCopy citations">
 <!ENTITY zotero.preferences.quickCopy.macWarning "تذکر: قالب‌بندی Rich-text در Mac OS X از بین خواهد رفت.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "دامنه/مسیر">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(مثال: wikipedia.org)">
