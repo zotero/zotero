@@ -437,7 +437,8 @@ var Zotero_File_Interface = new function() {
 	 *
 	 * if |asHTML| is true, copy HTML source as text
 	 */
-	function copyCitationToClipboard(items, style, asHTML) {
+	function copyCitationToClipboard(items, style, asHTML, extras) {
+		// Recognize label, locator and affix data if requested.
 		// copy to clipboard
 		var transferable = Components.classes["@mozilla.org/widget/transferable;1"].
 						   createInstance(Components.interfaces.nsITransferable);
@@ -445,7 +446,13 @@ var Zotero_File_Interface = new function() {
 							   getService(Components.interfaces.nsIClipboard);
 		
 		var style = Zotero.Styles.get(style).csl;
-		var citation = {"citationItems":[{id:item.id} for each(item in items)], properties:{}};
+
+		var citation;
+		if (extras) {
+			citation = {"citationItems":extras, properties:{}};
+		} else {
+			citation = {"citationItems":[{id:item.id} for each(item in items)], properties:{}};
+		}
 		
 		// add HTML
 		// Optionally turn on HTML wrapper

@@ -1835,13 +1835,60 @@ var ZoteroPane = new function()
 		// tried it the OS X clipboard seemed to be getting text vs. HTML wrong,
 		// automatically converting text/html to plaintext rather than using
 		// text/unicode. (That may be fixable, however.)
+
+		var url = (window.content && window.content.location ? window.content.location.href : null);
+		var [mode, format] = Zotero.QuickCopy.getFormatFromURL(url).split('=');
+		var [mode, contentType] = mode.split('/');
+		
+		var extras = undefined;
 		var canCopy = false;
-		for each(var item in items) {
-			if (item.isRegularItem()) {
-				canCopy = true;
-				break;
+		if (mode === 'bibliography' && asCitations) {
+			// When copying citations against a note, use the parent item
+			// Save locator and cite suffix info on extras
+			extras = [];
+			for (var i = 0, ilen = items.length; i < ilen; i += 1) {
+				var item = items[i];
+				var extra = {};
+				if (item.isNote()) {
+					var parentID = item.getSource();
+					if (parentID) {
+						items[i] = Zotero.Items.get(parentID);
+					}
+					var note = item.getNote();
+					if (note) {
+						note = note.replace(/<[^>]+>/g, "");
+						note = note.replace(/&nbsp;/g, " ");
+						note = note.split("\n");
+						for (var j = 0, jlen = note.length; j < jlen; j += 1) {
+							if (["p."].indexOf(note[j].split(/\s+/)[0]) > -1) {
+								extra.locator_txt = note[j];
+							} else if (note[j].slice(0, 1) === "=") {
+								extra.suffix_txt = '("' + note[j].slice(1).replace(/^\s+/, "") + '")';
+								break;
+							} else if (note[j].slice(0, 1) === "~") {
+								extra.suffix_txt = '(' + note[j].slice(1).replace(/^\s+/, "") + ')';
+								break;
+							} else if (note[j].replace(/\s+/, "")) {
+								break;
+							}
+						}
+					}
+				}
+				if (items[i].isRegularItem()) {
+					extra.id = items[i].id;
+					extras.push(extra);
+					canCopy = true;
+				}
+			}
+		} else {
+			for each(var item in items) {
+				if (item.isRegularItem()) {
+					canCopy = true;
+					break;
+				}
 			}
 		}
+
 		if (!canCopy) {
 			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 									.getService(Components.interfaces.nsIPromptService);
@@ -1849,13 +1896,9 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		var url = (window.content && window.content.location ? window.content.location.href : null);
-		var [mode, format] = Zotero.QuickCopy.getFormatFromURL(url).split('=');
-		var [mode, contentType] = mode.split('/');
-		
 		if (mode == 'bibliography') {
 			if (asCitations) {
-				Zotero_File_Interface.copyCitationToClipboard(items, format, contentType == 'html');
+				Zotero_File_Interface.copyCitationToClipboard(items, format, contentType == 'html', extras);
 			}
 			else {
 				Zotero_File_Interface.copyItemsToClipboard(items, format, contentType == 'html');

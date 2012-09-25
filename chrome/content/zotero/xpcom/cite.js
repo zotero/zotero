@@ -53,11 +53,11 @@ Zotero.Cite.System.retrieveItem = function(item) {
 		}
 	};
 
-    if (!zoteroItem.libraryID) {
-        cslItem.system_id = "0_" + zoteroItem.key;
-    } else {
-        cslItem.system_id = zoteroItem.libraryID + "_" + zoteroItem.key;
-    }
+	if (!zoteroItem.libraryID) {
+		cslItem.system_id = "0_" + zoteroItem.key;
+	} else {
+		cslItem.system_id = zoteroItem.libraryID + "_" + zoteroItem.key;
+	}
 
 	// get all text variables (there must be a better way)
 	for(var variable in CSL_TEXT_MAPPINGS) {
@@ -202,15 +202,31 @@ Zotero.Cite.System.retrieveLocale = function(lang) {
 	return str.value;
 };
 
-Zotero.Cite.System.wrapCitationEntryHtml = function (str, item_id) {
+Zotero.Cite.System.wrapCitationEntryHtml = function (str, item_id, locator_txt, suffix_txt) {
+	if (!locator_txt) {
+		locator_txt = "";
+	}
+	if (!suffix_txt) {
+		suffix_txt = "";
+	}
 	return Zotero.Prefs.get("export.quickCopy.wrapCitationHtml")
 		.replace("%%STRING%%", str)
+		.replace("%%LOCATOR%%", locator_txt)
+		.replace("%%SUFFIX%%", suffix_txt)
 		.replace("%%ITEM_ID%%", item_id);
 }
 
-Zotero.Cite.System.wrapCitationEntryText = function (str, item_id) {
+Zotero.Cite.System.wrapCitationEntryText = function (str, item_id, locator_txt, suffix_txt) {
+	if (!locator_txt) {
+		locator_txt = "";
+	}
+	if (!suffix_txt) {
+		suffix_txt = "";
+	}
 	return Zotero.Prefs.get("export.quickCopy.wrapCitationText")
 		.replace("%%STRING%%", str)
+		.replace("%%LOCATOR%%", locator_txt)
+		.replace("%%SUFFIX%%", suffix_txt)
 		.replace("%%ITEM_ID%%", item_id);
 }
 
