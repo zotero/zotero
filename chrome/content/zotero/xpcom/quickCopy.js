@@ -184,7 +184,7 @@ Zotero.QuickCopy = new function() {
 			// This code is duplicated from zoteroPane.js.
 			var extras = undefined;
 
-			if (modified) {
+			if (modified &&  Zotero.Prefs.get("export.quickCopy.linkOption")) {
 				allNotes = false;
 				extras = [];
 				for (var i = 0, ilen = items.length; i < ilen; i += 1) {

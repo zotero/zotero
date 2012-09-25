@@ -1842,7 +1842,7 @@ var ZoteroPane = new function()
 		
 		var extras = undefined;
 		var canCopy = false;
-		if (mode === 'bibliography' && asCitations) {
+		if (mode === 'bibliography' && asCitations && Zotero.Prefs.get("export.quickCopy.linkOption")) {
 			// When copying citations against a note, use the parent item
 			// Save locator and cite suffix info on extras
 			extras = [];
