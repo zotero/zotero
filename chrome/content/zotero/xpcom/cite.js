@@ -209,7 +209,7 @@ Zotero.Cite.System.wrapCitationEntryHtml = function (str, item_id, locator_txt, 
 	if (!suffix_txt) {
 		suffix_txt = "";
 	}
-	return Zotero.Prefs.get("export.quickCopy.wrapCitationHtml")
+	return Zotero.Prefs.get("export.quickCopy.citationWrapperHtml")
 		.replace("%%STRING%%", str)
 		.replace("%%LOCATOR%%", locator_txt)
 		.replace("%%SUFFIX%%", suffix_txt)
@@ -223,7 +223,7 @@ Zotero.Cite.System.wrapCitationEntryText = function (str, item_id, locator_txt, 
 	if (!suffix_txt) {
 		suffix_txt = "";
 	}
-	return Zotero.Prefs.get("export.quickCopy.wrapCitationText")
+	return Zotero.Prefs.get("export.quickCopy.citationWrapperText")
 		.replace("%%STRING%%", str)
 		.replace("%%LOCATOR%%", locator_txt)
 		.replace("%%SUFFIX%%", suffix_txt)
