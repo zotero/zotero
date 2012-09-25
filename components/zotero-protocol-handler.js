@@ -891,7 +891,7 @@ function ChromeExtensionHandler() {
 					return "closeWindow";
 				}
 				
-				if (win.ZoteroOverlay) {
+				if (win.ZoteroOverlay && Zotero.isLinux) {
 					win.ZoteroOverlay.toggleDisplay();
 					win.ZoteroPane.onCollectionSelected();
 				}
@@ -1147,7 +1147,7 @@ ChromeExtensionHandler.prototype = {
 					
 					var extChannel = ext.newChannel(uri);
 					
-					if (extChannel === "closeWindow") {
+					if (extChannel === "closeWindow" && Zotero.isLinux) {
 						// Extension does not want to show a page, use one that closes immediately
 						var chromeURI = chromeService.newURI(CLOSE_CHROME_URL, null, null);
 						var extChannel = chromeService.newChannel(chromeURI);
