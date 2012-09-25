@@ -179,13 +179,57 @@ Zotero.QuickCopy = new function() {
 			// Move notes to separate array
 			var allNotes = true;
 			var notes = [];
-			for (var i=0; i<items.length; i++) {
-				if (items[i].isNote()) {
-					notes.push(items.splice(i, 1)[0]);
-					i--;
+
+			// Run default block or get extras, depending on mode
+			// This code is duplicated from zoteroPane.js.
+			var extras = undefined;
+
+			if (modified) {
+				allNotes = false;
+				extras = [];
+				for (var i = 0, ilen = items.length; i < ilen; i += 1) {
+					var item = items[i];
+					var extra = {};
+					if (item.isNote()) {
+						var parentID = item.getSource();
+						if (parentID) {
+							items[i] = Zotero.Items.get(parentID);
+						}
+						var note = item.getNote();
+						if (note) {
+							note = note.replace(/<[^>]+>/g, "");
+							note = note.replace(/&nbsp;/g, " ");
+							note = note.split("\n");
+							for (var j = 0, jlen = note.length; j < jlen; j += 1) {
+								if (["p."].indexOf(note[j].split(/\s+/)[0]) > -1) {
+									extra.locator_txt = note[j];
+								} else if (note[j].slice(0, 1) === "=") {
+									extra.suffix_txt = '("' + note[j].slice(1).replace(/^\s+/, "") + '")';
+									break;
+								} else if (note[j].slice(0, 1) === "~") {
+									extra.suffix_txt = '(' + note[j].slice(1).replace(/^\s+/, "") + ')';
+									break;
+								} else if (note[j].replace(/\s+/, "")) {
+									break;
+								}
+							}
+						}
+					}
+					if (items[i].isRegularItem()) {
+						extra.id = items[i].id;
+						extras.push(extra);
+					}
 				}
-				else {
-					allNotes = false;
+			} else {
+				for (var i=0; i<items.length; i++) {
+					if (items[i].isNote()) {
+						notes.push(items.splice(i, 1)[0]);
+						i--;
+					}
+					else {
+						allNotes = false;
+						
+					}
 				}
 			}
 			
@@ -394,8 +438,13 @@ Zotero.QuickCopy = new function() {
 			if (modified) {
 				var csl = Zotero.Styles.get(format).csl;
 				csl.updateItems([item.id for each(item in items)]);
-				var citation = {citationItems:[{id:item.id} for each(item in items)], properties:{}};
-				
+
+				var citation;
+				if (extras) {
+					citation = {citationItems:extras, properties:{}};
+				} else {
+					citation = {citationItems:[{id:item.id} for each(item in items)], properties:{}};
+				}
 				if (Zotero.Prefs.get("export.quickCopy.linkOption")) {
 					csl.sys.wrapCitationEntry = csl.sys.wrapCitationEntryHtml;
 				}
