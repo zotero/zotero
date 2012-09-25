@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.395",
+    PROCESSOR_VERSION: "1.0.396",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -5732,21 +5732,25 @@ CSL.Node.label = {
 CSL.Node.layout = {
     build: function (state, target) {
         var func, prefix_token, suffix_token, tok;
-		if (this.tokentype === CSL.START) {
-			func = function (state, Item) {
-				if (state.opt.development_extensions.apply_citation_wrapper
-					&& state.sys.wrapCitationEntry
-					&& !state.tmp.just_looking
-					&& Item.system_id 
-					&& state.tmp.area === "citation") { 
-					cite_entry = new CSL.Token("group", CSL.START);
-					cite_entry.decorations = [["@cite", "entry"]];
-					state.output.startTag("cite_entry", cite_entry);
-					state.output.current.value().item_id = Item.system_id;
-				}
-			}
-			this.execs.push(func);
-		}
+        if (this.tokentype === CSL.START) {
+            func = function (state, Item, item) {
+                if (state.opt.development_extensions.apply_citation_wrapper
+                    && state.sys.wrapCitationEntry
+                    && !state.tmp.just_looking
+                    && Item.system_id 
+                    && state.tmp.area === "citation") { 
+                    cite_entry = new CSL.Token("group", CSL.START);
+                    cite_entry.decorations = [["@cite", "entry"]];
+                    state.output.startTag("cite_entry", cite_entry);
+                    state.output.current.value().item_id = Item.system_id;
+                    if (item) {
+                        state.output.current.value().locator_txt = item.locator_txt;
+                        state.output.current.value().suffix_txt = item.suffix_txt;
+                    }
+                }
+            }
+            this.execs.push(func);
+        }
         if (this.tokentype === CSL.START && !state.tmp.cite_affixes) {
             func = function (state, Item) {
                 state.tmp.done_vars = [];
@@ -5884,16 +5888,16 @@ CSL.Node.layout = {
                     state.output.closeLevel();
                 };
                 this.execs.push(func);
-				func = function (state, Item) {
-					if (state.opt.development_extensions.apply_citation_wrapper
-						&& state.sys.wrapCitationEntry
-						&& !state.tmp.just_looking
-						&& Item.system_id 
-						&& state.tmp.area === "citation") { 
-						state.output.endTag(); // closes citation link wrapper
-					}
-				}
-				this.execs.push(func);
+                func = function (state, Item) {
+                    if (state.opt.development_extensions.apply_citation_wrapper
+                        && state.sys.wrapCitationEntry
+                        && !state.tmp.just_looking
+                        && Item.system_id 
+                        && state.tmp.area === "citation") { 
+                        state.output.endTag(); // closes citation link wrapper
+                    }
+                }
+                this.execs.push(func);
                 target.push(this);
                 state.build.layout_flag = false;
                 state.build.layout_locale_flag = false;
@@ -12098,7 +12102,7 @@ CSL.Output.Formats.prototype.html = {
     },
     "@quotes/false": false,
     "@cite/entry": function (state, str) {
-        return state.sys.wrapCitationEntry(str, this.item_id);
+        return state.sys.wrapCitationEntry(str, this.item_id, this.locator_txt, this.suffix_txt);
 	},
     "@bibliography/entry": function (state, str) {
         var insert = "";
@@ -12168,7 +12172,7 @@ CSL.Output.Formats.prototype.text = {
     },
     "@quotes/false": false,
     "@cite/entry": function (state, str) {
-		return state.sys.wrapCitationEntry(str, this.item_id);
+		return state.sys.wrapCitationEntry(str, this.item_id, this.locator_txt, this.suffix_txt);
 	},
     "@bibliography/entry": function (state, str) {
         return str+"\n";
@@ -12243,7 +12247,7 @@ CSL.Output.Formats.prototype.rtf = {
         return str;
 	},
     "@cite/entry": function (state, str) {
-		return state.sys.wrapCitationEntry(str, this.item_id);
+		return state.sys.wrapCitationEntry(str, this.item_id, this.locator_txt, this.suffix_txt);
 	},
     "@bibliography/entry": function(state,str){
         return str;
