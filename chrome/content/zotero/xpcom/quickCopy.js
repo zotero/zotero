@@ -200,18 +200,23 @@ Zotero.QuickCopy = new function() {
 							note = note.replace(/<[^>]+>/g, "");
 							note = note.replace(/&nbsp;/g, " ");
 							note = note.split("\n");
+							var summary = "";
+							var quote = "";
 							for (var j = 0, jlen = note.length; j < jlen; j += 1) {
 								if (["p."].indexOf(note[j].split(/\s+/)[0]) > -1) {
 									extra.locator_txt = note[j];
 								} else if (note[j].slice(0, 1) === "=") {
-									extra.suffix_txt = '("' + note[j].slice(1).replace(/^\s+/, "") + '")';
-									break;
+									quote += note[j].slice(1).replace(/^\s+/, "").replace(/\s+$/, "") + " ";
 								} else if (note[j].slice(0, 1) === "~") {
-									extra.suffix_txt = '(' + note[j].slice(1).replace(/^\s+/, "") + ')';
-									break;
+									summary += note[j].slice(1).replace(/^\s+/, "").replace(/\s+$/, "") + " ";
 								} else if (note[j].replace(/\s+/, "")) {
 									break;
 								}
+							}
+							if (quote) {
+								extra.suffix_txt = '("' + quote.replace(/\s+$/, "") + '")';
+							} else if (summary) {
+								extra.suffix_txt = '(' + summary.replace(/\s+$/, "") + ')';
 							}
 						}
 					}
@@ -228,7 +233,6 @@ Zotero.QuickCopy = new function() {
 					}
 					else {
 						allNotes = false;
-						
 					}
 				}
 			}
