@@ -282,16 +282,16 @@ var ZoteroPane = new function()
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", itemTypes[i].localized);
 			menuitem.setAttribute("tooltiptext", "");
-            var mydata = {};
-            var mytype;
-            if (itemTypes[i].realID) {
-			    mytype = itemTypes[i].realID;
-                mydata.extra = '{:type:' + itemTypes[i].id + '} ';
-            } else {
-			    mytype = itemTypes[i].id;
-            }
-            let type = mytype;
-            let data = mydata;
+			var mydata = {};
+			var mytype;
+			if (itemTypes[i].realID) {
+				mytype = itemTypes[i].realID;
+				mydata.extra = '{:type:' + itemTypes[i].id + '} ';
+			} else {
+				mytype = itemTypes[i].id;
+			}
+			let type = mytype;
+			let data = mydata;
 			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, data, null, true); }, false);
 			moreMenu.appendChild(menuitem);
 		}
@@ -332,16 +332,16 @@ var ZoteroPane = new function()
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", itemTypes[i].localized);
 			menuitem.setAttribute("tooltiptext", "");
-            var mydata = {};
-            var mytype;
-            if (itemTypes[i].realID) {
-			    mytype = itemTypes[i].realID;
-                mydata.extra = '{:type:' + itemTypes[i].id + '} ';
-            } else {
-			    mytype = itemTypes[i].id;
-            }
-            let type = mytype;
-            let data = mydata;
+			var mydata = {};
+			var mytype;
+			if (itemTypes[i].realID) {
+				mytype = itemTypes[i].realID;
+				mydata.extra = '{:type:' + itemTypes[i].id + '} ';
+			} else {
+				mytype = itemTypes[i].id;
+			}
+			let type = mytype;
+			let data = mydata;
 			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, data, null, true); }, false);
 			menuitem.className = "zotero-tb-add";
 			addMenu.insertBefore(menuitem, separator);
@@ -2622,7 +2622,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		if (tree.id == 'zotero-collections-tree') {                                                    
+		if (tree.id == 'zotero-collections-tree') {
 			// Ignore triple clicks for collections
 			if (event.detail != 2) {
 				return;

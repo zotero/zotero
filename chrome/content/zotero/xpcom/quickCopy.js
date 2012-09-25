@@ -147,7 +147,7 @@ Zotero.QuickCopy = new function() {
 	 * |items| is an array of Zotero.Item objects
 	 *
 	 * |format| is a Quick Copy format string
-	 *    (e.g. "bibliography=http://purl.org/net/xbiblio/csl/styles/apa.csl")
+	 *	(e.g. "bibliography=http://purl.org/net/xbiblio/csl/styles/apa.csl")
 	 *
 	 * |callback| is only necessary if using an export format and should be
 	 * a function suitable for Zotero.Translate.setHandler, taking parameters
