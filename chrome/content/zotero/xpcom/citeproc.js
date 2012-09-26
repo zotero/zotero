@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.396",
+    PROCESSOR_VERSION: "1.0.398",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -2236,7 +2236,7 @@ CSL.DateParser = function () {
         for (i = 0, ilen = lst.length; i < ilen; i += 1) {
             lst[i] = parseInt(lst[i], 10);
         }
-        if (lst.length === 1) {
+        if (lst.length === 1 || (lst.length === 2 && !lst[1])) {
             ret[("month" + suff)] = "" + lst[0];
         } else if (lst.length === 2) {
             if (lst[this.monthguess] > 12) {
@@ -4458,7 +4458,12 @@ CSL.getCitationCluster = function (inputList, citationID) {
             use_layout_suffix = use_layout_suffix.slice(1);
         }
         this.output.nestedBraces = false;
-        result = txt_esc(this.citation.opt.layout_prefix) + result + txt_esc(use_layout_suffix);
+        if (!(this.opt.development_extensions.apply_citation_wrapper
+            && this.sys.wrapCitationEntry
+            && !this.tmp.just_looking
+              && this.tmp.area === "citation")) { 
+			result = txt_esc(this.citation.opt.layout_prefix) + result + txt_esc(use_layout_suffix);
+		}
         if (!this.tmp.suppress_decorations) {
             len = this.citation.opt.layout_decorations.length;
             for (pos = 0; pos < len; pos += 1) {
