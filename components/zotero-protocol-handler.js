@@ -872,10 +872,14 @@ function ChromeExtensionHandler() {
 					win.restore();
 				}
 				
-				// open Zotero pane
-				win.ZoteroPane.show();
-				
-				if(!id) return "closeWindow";
+				if (win.ZoteroPane) {
+					win.ZoteroPane.show();
+				}
+                
+				if(!id) {
+					Zotero.debug("XXX return no id");
+					return;
+				}
 				
 				var lkh = Zotero.Items.parseLibraryKeyHash(id);
 				if (lkh) {
@@ -888,15 +892,19 @@ function ChromeExtensionHandler() {
 					var msg = "Item " + id + " not found in zotero://select";
 					Zotero.debug(msg, 2);
 					Components.utils.reportError(msg);
-					return "closeWindow";
+					Zotero.debug("XXX return zotero://select not found");
+					return;
 				}
 				
-				if (win.ZoteroOverlay && Zotero.isLinux) {
-					win.ZoteroOverlay.toggleDisplay();
-					win.ZoteroPane.onCollectionSelected();
-				}
-				win.ZoteroPane.selectItem(item.id);
-				return "closeWindow";
+				// open Zotero tab or pane
+				if (win.ZoteroPane && win.ZoteroOverlay) {
+					if (win.ZoteroPane.itemsView && win.ZoteroPane.collectionsView) {
+						win.ZoteroPane.selectItem(item.id);
+					}
+					Zotero.debug("XXX return closeWindow");
+					return "closeWindow";
+                }
+                return;
 			}
 			catch (e){
 				// Could maybe deliver an error page to the
