@@ -436,7 +436,10 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 				else {
 					var splits = Zotero.Fulltext.semanticSplitter(part.text);
 					for each(var split in splits) {
+						// still needed? 
 						this.addCondition('fulltextWord', operator, split, false);
+						// added to allow searching item attachments in quicksearch
+						this.addCondition('fulltextContent', operator, split, false);
 					}
 				}
 			}
