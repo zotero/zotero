@@ -612,6 +612,9 @@
 						
 						this.id('tagsNum').value = Zotero.getString(str, [count]);
 						this.count = count;
+
+						//also update the tab
+						document.getElementById('zotero-editpane-tags-tab').count = count;
 					]]>
 				</body>
 			</method>

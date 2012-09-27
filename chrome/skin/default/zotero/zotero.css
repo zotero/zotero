@@ -66,6 +66,11 @@ textbox[type="styled"]
 	-moz-binding: url('chrome://zotero/content/bindings/styled-textbox.xml#styled-textbox');
 }
 
+tab[type="counter"]
+{
+	-moz-binding: url('chrome://zotero/content/bindings/tab-counter.xml#tab-with-counter');
+}
+
 zoteroattachmentbox
 {
 	-moz-binding: url('chrome://zotero/content/bindings/attachmentbox.xml#attachment-box');
@@ -305,4 +310,11 @@ label.zotero-text-link {
 
 #zotero-note-window {
 	padding-bottom: 4px;
+}
+
+/* itemPane tabs with counters */
+tabbox#zotero-view-tabbox tab[type=counter] label.tab-counter {
+	text-align: center;
+	width: 1.9em;
+	margin: 0em 0em 0em 0.2em
 }

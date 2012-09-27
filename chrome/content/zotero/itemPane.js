@@ -26,7 +26,7 @@
 var ZoteroItemPane = new function() {
 	this.onLoad = onLoad;
 	
-	var _lastItem, _itemBox, _notesLabel, _notesButton, _notesList, _tagsBox, _relatedBox;
+	var _lastItem, _itemBox, _notesLabel, _notesButton, _notesList, _tagsBox, _relatedBox, _tabs;
 	
 	function onLoad()
 	{
@@ -45,6 +45,11 @@ var ZoteroItemPane = new function() {
 		_notesList = document.getElementById('zotero-editpane-dynamic-notes');
 		_tagsBox = document.getElementById('zotero-editpane-tags');
 		_relatedBox = document.getElementById('zotero-editpane-related');
+		_tabs = {
+			notes: document.getElementById('zotero-editpane-notes-tab'),
+			tags: document.getElementById('zotero-editpane-tags-tab'),
+			related: document.getElementById('zotero-editpane-related-tab')
+		};
 	}
 	
 	
@@ -86,6 +91,12 @@ var ZoteroItemPane = new function() {
 		}
 		
 		_lastItem = item;
+
+		// update tag, note, and related counts
+		var noteIDs = item.getNotes();
+		_tabs.notes.count = noteIDs.length;
+		_tabs.tags.count = item.getTags().length;
+		_tabs.related.count = item.relatedItemsBidirectional.length;
 		
 		if (index == 1) {
 			var editable = ZoteroPane_Local.canEdit();
@@ -95,7 +106,7 @@ var ZoteroItemPane = new function() {
 				_notesList.removeChild(_notesList.firstChild);
 			}
 			
-			var notes = Zotero.Items.get(item.getNotes());
+			var notes = Zotero.Items.get(noteIDs);
 			if (notes.length) {
 				for(var i = 0; i < notes.length; i++) {
 					let id = notes[i].id;

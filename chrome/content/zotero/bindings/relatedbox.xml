@@ -273,6 +273,9 @@
 								break;
 						}
 						this.id('seeAlsoNum').value = Zotero.getString(str, [count]);
+
+						//also update the tab
+						document.getElementById('zotero-editpane-related-tab').count = count;
 					]]>
 				</body>
 			</method>
