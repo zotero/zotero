@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.398",
+    PROCESSOR_VERSION: "1.0.399",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -3131,6 +3131,7 @@ CSL.Engine.Opt = function () {
     this.development_extensions.handle_parallel_articles = false;
     this.development_extensions.thin_non_breaking_space_html_hack = false;
     this.development_extensions.apply_citation_wrapper = false;
+    this.development_extensions.main_title_from_short_title = false;
     this.nodenames = [];
     this.gender = {};
     this['cite-lang-prefs'] = {
@@ -8362,7 +8363,9 @@ CSL.Node.text = {
                 } else if (this.variables_real.length) {
                     func = function (state, Item, item) {
                         var parallel_variable = this.variables[0];
-                        if (parallel_variable === "title" && form === "short") {
+                        if (parallel_variable === "title" 
+                            && form === "short" 
+                            && !state.opt.development_extensions.main_title_from_short_title) {
                             parallel_variable = "shortTitle";
                         }
                         state.parallel.StartVariable(parallel_variable);
@@ -9719,7 +9722,7 @@ CSL.Transform = function (state) {
         return false;
     }
     function getOutputFunction(variables, myabbrev_family, abbreviation_fallback, alternative_varname, transform_fallback) {
-		var localesets;
+        var localesets;
         var langPrefs = CSL.LangPrefsMap[variables[0]];
         if (!langPrefs) {
             localesets = false;
@@ -9731,13 +9734,16 @@ CSL.Transform = function (state) {
             if (!variables[0] || (!Item[variables[0]] && !Item[alternative_varname])) {
                 return null;
             }
-		    var slot = {primary:false, secondary:false, tertiary:false};
-		    if (state.tmp.area.slice(-5) === "_sort") {
-			    slot.primary = 'locale-sort';
-		    } else {
-			    if (localesets) {
-				    var slotnames = ["primary", "secondary", "tertiary"];
-				    for (var i = 0, ilen = slotnames.length; i < ilen; i += 1) {
+            if (variables[0] === "title" && state.opt.development_extensions.main_title_from_short_title) {
+                alternative_varname = false;
+            }
+            var slot = {primary:false, secondary:false, tertiary:false};
+            if (state.tmp.area.slice(-5) === "_sort") {
+                slot.primary = 'locale-sort';
+            } else {
+                if (localesets) {
+                    var slotnames = ["primary", "secondary", "tertiary"];
+                    for (var i = 0, ilen = slotnames.length; i < ilen; i += 1) {
                         if (localesets.length - 1 <  i) {
                             break;
                         }
@@ -9749,13 +9755,13 @@ CSL.Transform = function (state) {
                     slot.primary = 'locale-orig';
                 }
             }
-			if ((state.tmp.area !== "bibliography"
-				 && !(state.tmp.area === "citation"
-					  && state.opt.xclass === "note"
-					  && item && !item.position))) {
-				slot.secondary = false;
-				slot.tertiary = false;
-			}
+            if ((state.tmp.area !== "bibliography"
+                 && !(state.tmp.area === "citation"
+                      && state.opt.xclass === "note"
+                      && item && !item.position))) {
+                slot.secondary = false;
+                slot.tertiary = false;
+            }
             if (state.tmp["publisher-list"]) {
                 if (variables[0] === "publisher") {
                     state.tmp["publisher-token"] = this;
@@ -9770,16 +9776,16 @@ CSL.Transform = function (state) {
             if (publisherCheck(this, Item, primary, myabbrev_family)) {
                 return null;
             }
-			secondary = false;
-			tertiary = false;
-			if (slot.secondary) {
-				res = getTextSubField(Item, variables[0], slot.secondary, false, res.usedOrig);
+            secondary = false;
+            tertiary = false;
+            if (slot.secondary) {
+                res = getTextSubField(Item, variables[0], slot.secondary, false, res.usedOrig);
                 secondary = res.name;
-			}
-			if (slot.tertiary) {
-				res = getTextSubField(Item, variables[0], slot.tertiary, false, res.usedOrig);
+            }
+            if (slot.tertiary) {
+                res = getTextSubField(Item, variables[0], slot.tertiary, false, res.usedOrig);
                 tertiary = res.name;
-			}
+            }
             if (myabbrev_family) {
                 primary = abbreviate(state, Item, alternative_varname, primary, myabbrev_family, true);
                 if (primary) {
@@ -9854,7 +9860,7 @@ CSL.Transform = function (state) {
                         state.parallel.cite[variables[0] + ":tertiary"] = {blobs:[[blob_obj, blobs_pos]]};
                     }
                 }
-				state.output.closeLevel();
+                state.output.closeLevel();
             } else {
                 state.output.append(primary, primary_tok);
             }
