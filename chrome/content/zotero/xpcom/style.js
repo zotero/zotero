@@ -510,6 +510,7 @@ function() {
         citeproc.opt.development_extensions.static_statute_locator = true;
         citeproc.opt.development_extensions.clobber_locator_if_no_statute_section = false;
         citeproc.opt.development_extensions.handle_parallel_articles = true;
+        citeproc.opt.development_extensions.main_title_from_short_title = true;
         if (Zotero.Prefs.get("export.quickCopy.linkOption")) {
             // This gets the processor ready for applying wrappers.
             //
