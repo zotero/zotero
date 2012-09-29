@@ -44,7 +44,7 @@
 					var v = parseInt(val, 10);
 					if(!isNaN(v) && v >= 0) {
 						this.setAttribute('count', v);
-						document.getAnonymousElementByAttribute(this, 'class', 'tab-counter').value = '(' + v + ')';
+						document.getAnonymousElementByAttribute(this, 'class', 'tab-counter').value = v;
 					}
 				]]>
 				</setter>

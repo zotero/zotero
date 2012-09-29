@@ -20,6 +20,20 @@
 	margin-bottom: .25em !important;
 }
 
+/* itemPane tabs with counters */
+tabbox#zotero-view-tabbox tab[type=counter] label.tab-counter {
+	width: 1.4em;
+	margin: 0em 0em 0em 0.3em;
+	font-size: 80%;
+	padding-bottom: 1ex;
+	font-weight: bold;
+}
+
+tabbox#zotero-view-tabbox tab[type=counter][count="0"] label.tab-counter {
+	color: #bbbbbb;
+	font-weight: normal;
+}
+
 #zotero-view-item
 {
 	padding: 1.5em .25em .25em;
