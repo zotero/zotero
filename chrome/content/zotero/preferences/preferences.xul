@@ -752,7 +752,7 @@ To add a new preference:
 			</hbox>
 			
 			<hbox>
-				<button label="&zotero.preferences.attachments.resetBasePath;" oncommand="Zotero.Prefs.set('baseAttachmentPath', '');"/>
+				<button label="&zotero.preferences.attachments.resetBasePath;" oncommand="clearBaseAttachmentPath();"/>
 			</hbox>
 			
 		</groupbox>
