@@ -385,8 +385,13 @@ Zotero.Translate.ItemSaver.prototype = {
 				// try to map from base field
 				if(Zotero.ItemFields.isBaseField(fieldID)) {
 					fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, fieldID);
+					
+					// Skip mapping if item field already exists
+					var fieldName = Zotero.ItemFields.getName(fieldID);
+					if(item[fieldName]) continue;
+					
 					if(fieldID) {
-						Zotero.debug("Translate: Mapping "+field+" to "+Zotero.ItemFields.getName(fieldID), 5);	
+						Zotero.debug("Translate: Mapping "+field+" to "+fieldName, 5);	
 					}
 				}
 				
