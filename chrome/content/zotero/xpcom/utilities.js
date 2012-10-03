@@ -1264,7 +1264,7 @@ Zotero.Utilities = {
 				if((itemFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, fieldID))) {
 					var fieldName = Zotero.ItemFields.getName(itemFieldID);
 					// Only map if item field does not exist
-					if(!newItem[fieldName]) newItem[fieldName] = val;
+					if(fieldName !== field && !newItem[fieldName]) newItem[fieldName] = val;
 					continue;	// already know this is valid
 				}
 				

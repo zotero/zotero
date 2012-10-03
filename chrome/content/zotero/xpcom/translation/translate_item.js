@@ -388,7 +388,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					
 					// Skip mapping if item field already exists
 					var fieldName = Zotero.ItemFields.getName(fieldID);
-					if(item[fieldName]) continue;
+					if(fieldName !== field && item[fieldName]) continue;
 					
 					if(fieldID) {
 						Zotero.debug("Translate: Mapping "+field+" to "+fieldName, 5);	
