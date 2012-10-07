@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.399",
+    PROCESSOR_VERSION: "1.0.400",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -907,7 +907,7 @@ CSL.getSortCompare = function () {
         CSL.debug("Using collation sort");
     } catch (e) {
         strcmp = function (a, b) {
-            return a.localeCompare(b);
+            return a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase());
         };
     }
     if (!strcmp("\u3044", "\u3046")) {
@@ -6029,7 +6029,9 @@ CSL.NameOutput.prototype.outputNames = function () {
         }
         var varblob = this.joinFreetersAndInstitutionSets([this.freeters[v], institutions]);
         if (varblob) {
-            varblob = this._applyLabels(varblob, v);
+            if (this.state.tmp.area.slice(-5) !== "_sort") {
+                varblob = this._applyLabels(varblob, v);
+            }
             blob_list.push(varblob);
         }
         if (this.common_term) {
@@ -9933,7 +9935,7 @@ CSL.Parallel = function (state) {
     this.try_cite = true;
     this.use_parallels = false;
     this.midVars = ["section", "volume", "container-title", "collection-number", "issue", "page-first", "page", "number"];
-    this.ignoreVarsLawGeneral = ["first-reference-note-number", "locator", "label","page-first","page"];
+    this.ignoreVarsLawGeneral = ["first-reference-note-number", "locator", "label","page-first","page","genre"];
     this.ignoreVarsOrders = ["first-reference-note-number"];
     this.ignoreVarsOther = ["first-reference-note-number", "locator", "label","section","page-first","page"];
 };
