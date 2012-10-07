@@ -16,6 +16,10 @@ Zotero.EXTENDED_TYPES = {
 	"treaty":{
 		"realID":20,
 		"data":{realID:20,id:"treaty",name:"treaty",localized:"Treaty"}
+	},
+	"regulation":{
+		"realID":20,
+		"data":{realID:20,id:"regulation",name:"regulation",localized:"Regulation"}
 	}
 };
 
