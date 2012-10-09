@@ -351,7 +351,11 @@ Zotero.Attachments = new function(){
 				var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
 							.createInstance(Components.interfaces.nsIURL);
 				nsIURL.spec = url;
-				wbp.saveURI(nsIURL, null, null, null, null, file);
+				try {
+					wbp.saveURI(nsIURL, null, null, null, null, file);
+				} catch(e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
+					wbp.saveURI(nsIURL, null, null, null, null, file, null);
+				}
 				
 				return attachmentItem;
 			}
