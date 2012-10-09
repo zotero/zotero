@@ -456,34 +456,22 @@ Zotero.Translate.SandboxManager.prototype = {
 	 */
 	"importObject":function(object, passAsFirstArgument, attachTo) {
 		if(!attachTo) attachTo = this.sandbox.Zotero;
-		var me = this;
-		if("__exposedProps__" in object) {
-			var newExposedProps = false,
-				exposedProps = object.__exposedProps__,
-				iterate = object.__exposedProps__;
-		} else {
-			var newExposedProps = true,
-				exposedProps = {},
-				iterate = object;
-		}
-		
-		for(var key in iterate) {
+		var newExposedProps = false;
+		if(!object.__exposedProps__) newExposedProps = {};
+		for(var key in (newExposedProps ? object : object.__exposedProps__)) {
 			let localKey = key;
-			if(newExposedProps) exposedProps[localKey] = "r";
+			if(newExposedProps) newExposedProps[localKey] = "r";
 			
 			var type = typeof object[localKey];
 			var isFunction = type === "function";
 			var isObject = typeof object[localKey] === "object";
 			if(isFunction || isObject) {
 				if(isFunction) {
-					attachTo[localKey] = function() {
-						var args = Array.prototype.slice.apply(arguments);
-						if(passAsFirstArgument) args.unshift(passAsFirstArgument);
-						var retval = object[localKey].apply(object, args);
-						if(typeof retval !== "object" || retval === null
-								|| "__exposedProps__" in retval) return retval;
-						return me._copyObject(retval);
-					};
+					if(passAsFirstArgument) {
+						attachTo[localKey] = object[localKey].bind(object, passAsFirstArgument);
+					} else {
+						attachTo[localKey] = object[localKey].bind(object);
+					}
 				} else {
 					attachTo[localKey] = {};
 				}
@@ -497,40 +485,11 @@ Zotero.Translate.SandboxManager.prototype = {
 			}
 		}
 		
-		attachTo.__exposedProps__ = exposedProps;
-	},
-	
-	/**
-	 * Copies a JavaScript object to this sandbox
-	 * @param {Object} obj
-	 * @return {Object}
-	 */
-	"_copyObject":function(obj, wm) {
-		var str = Object.prototype.toString.call(obj);
-		if(!obj.hasOwnProperty || (str !== "[object Object]" && str !== "[object Array]")) {
-			return obj;
+		if(newExposedProps) {
+			attachTo.__exposedProps__ = newExposedProps;
+		} else {
+			attachTo.__exposedProps__ = object.__exposedProps__;
 		}
-		Zotero.debug(str);
-		if(!wm) wm = new WeakMap();
-		
-		var obj2 = (obj instanceof Array ? new this.sandbox.Array() : new this.sandbox.Object());
-		obj2.__proto__ = obj.__proto__;
-		for(var i in obj) {
-			if(!obj.hasOwnProperty(i)) continue;
-			
-			var prop1 = obj[i];
-			if(typeof prop1 === "object" && prop1 !== null) {
-				var prop2 = wm.get(prop1);
-				if(prop2 === undefined) {
-					prop2 = this._copyObject(prop1, wm);
-					wm.set(prop1, prop2);
-				}
-				obj2[i] = prop2;
-			} else {
-				obj2[i] = prop1;
-			}
-		}
-		return obj2;
 	}
 }
 
