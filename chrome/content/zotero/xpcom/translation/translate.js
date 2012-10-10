@@ -432,13 +432,17 @@ Zotero.Translate.Sandbox = {
 		 * @param {Object} items An set of id => name pairs in object format
 		 */
 		"selectItems":function(translate, items, callback) {
+			function transferObject(obj) {
+				return Zotero.isFx ? translate._sandboxManager.sandbox.JSON.parse(JSON.stringify(obj)) : obj;
+			}
+			
 			if(Zotero.Utilities.isEmpty(items)) {
 				throw new Error("Translator called select items with no items");
 			}
 			
 			if(translate._selectedItems) {
 				// if we have a set of selected items for this translation, use them
-				return translate._selectedItems;
+				return transferObject(translate._selectedItems);
 			} else if(translate._handlers.select) {
 					// whether the translator supports asynchronous selectItems
 					var haveAsyncCallback = !!callback;
@@ -452,7 +456,7 @@ Zotero.Translate.Sandbox = {
 						// up to pop off the async process
 						var newCallback = function(selectedItems) {
 							callbackExecuted = true;
-							callback(selectedItems);
+							callback(transferObject(selectedItems));
 							if(haveAsyncHandler) translate.decrementAsyncProcesses("Zotero.selectItems()");
 						};
 					} else {
@@ -464,7 +468,7 @@ Zotero.Translate.Sandbox = {
 							if(haveAsyncHandler) {
 								translate.translate(translate._libraryID, translate._saveAttachments, selectedItems);
 							} else {
-								returnedItems = selectedItems;
+								returnedItems = transferObject(selectedItems);
 							}
 						};
 					}
@@ -476,7 +480,7 @@ Zotero.Translate.Sandbox = {
 							"Please pass items as to the callback provided as the third argument to "+
 							"the handler.");
 						
-						returnedItems = returnValue;
+						returnedItems = transferObject(returnValue);
 						haveAsyncHandler = false;
 					} else {
 						// if we don't have returnedItems set already, the handler is asynchronous
@@ -495,7 +499,7 @@ Zotero.Translate.Sandbox = {
 					} else {
 						translate._debug("COMPAT WARNING: No callback was provided for "+
 							"Zotero.selectItems(). When executed outside of Firefox, a selectItems() call "+
-							"will require that this translator to be called multiple times.", 1);
+							"will require this translator to be called multiple times.", 1);
 						
 						if(haveAsyncHandler) {
 							// The select handler is asynchronous, but this translator doesn't support
