@@ -160,7 +160,7 @@ Zotero.Translators = new function() {
 		if(m) {
 			// First, drop the 0- if it exists (this is an III invention)
 			var host = m[2];
-			if(host.substr(0, 2) === "0-") host = substr(2);
+			if(host.substr(0, 2) === "0-") host = host.substr(2);
 			var hostnames = host.split(".");
 			for(var i=1; i<hostnames.length-2; i++) {
 				if(TLDS[hostnames[i].toLowerCase()]) {

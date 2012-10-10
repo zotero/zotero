@@ -1125,7 +1125,7 @@ Zotero.Sync.Server = new function () {
 		catch (e) {
 			Zotero.debug(e);
 			var msg = Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"
-						+ Zotero.getString('sync.error.loginManagerCorrupted2', Zotero.appName);
+						+ Zotero.getString('sync.error.loginManagerCorrupted2', [Zotero.appName, Zotero.appName]);
 			alert(msg);
 			return '';
 		}

@@ -70,7 +70,8 @@ Zotero.MIMETypeHandler = new function () {
 			// Not even trying
 			this.addHandler("ris", _importHandler, true);
 		}
-		this.addHandler("text/x-csl", function(a1, a2) { Zotero.Styles.install(a1, a2) });
+		this.addHandler("application/vnd.citationstyles.style+xml", function(a1, a2) { Zotero.Styles.install(a1, a2) });
+		this.addHandler("text/x-csl", function(a1, a2) { Zotero.Styles.install(a1, a2) }); // deprecated
 		this.addHandler("application/x-zotero-schema", Zotero.Schema.importSchema);
 		this.addHandler("application/x-zotero-settings", Zotero.Prefs.importSettings);
 	}

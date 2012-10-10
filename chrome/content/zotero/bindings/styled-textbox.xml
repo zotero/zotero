@@ -231,10 +231,9 @@
 							output = output.replace(entry[0], entry[1], "g");
 						}
 						
-						output = Zotero.Utilities.unescapeHTML(
-								output.replace(" ", "&nbsp;", "g"))
-							.replace(highcharRe,
-								function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+"{}" });
+						output = Zotero.Utilities.unescapeHTML(output.replace(" ", "&nbsp;", "g"))
+							.replace("\u00A0", " ", "g")
+							.replace(highcharRe, function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+"{}" });
 						output = Zotero.Utilities.trim(output);
 					}
 					
