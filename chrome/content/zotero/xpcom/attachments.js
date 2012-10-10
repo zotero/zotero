@@ -354,6 +354,8 @@ Zotero.Attachments = new function(){
 				try {
 					wbp.saveURI(nsIURL, null, null, null, null, file);
 				} catch(e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
+					// https://bugzilla.mozilla.org/show_bug.cgi?id=794602
+					// XXX Always use when we no longer support Firefox < 18
 					wbp.saveURI(nsIURL, null, null, null, null, file, null);
 				}
 				
@@ -626,7 +628,13 @@ Zotero.Attachments = new function(){
 						throw (e);
 					}
 				});
-				wbp.saveURI(nsIURL, null, null, null, null, file);
+				try {
+					wbp.saveURI(nsIURL, null, null, null, null, file);
+				} catch(e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
+					// https://bugzilla.mozilla.org/show_bug.cgi?id=794602
+					// XXX Always use when we no longer support Firefox < 18
+					wbp.saveURI(nsIURL, null, null, null, null, file, null);
+				}
 			}
 			
 			// Add to collections
