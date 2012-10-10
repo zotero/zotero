@@ -562,7 +562,7 @@ Zotero_RecognizePDF.Recognizer.prototype._selectItems = function(/**Zotero.Trans
 		/**Object*/ items, /**Function**/ callback) {
 	for(var i in items) {
 		var obj = {};
-		obj[i] = items;
+		obj[i] = items[i];
 		callback(obj);
 		return;
 	}
