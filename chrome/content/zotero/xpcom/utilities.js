@@ -370,7 +370,7 @@ Zotero.Utilities = {
 		return result;
 	},
 
-	"composeDoc":function(doc, title, object, suppressURL) {
+	"composeDoc":function(doc, titleOrHead, object, suppressURL) {
 		var o;
 		var content = false;
 		// (object) is either a single DOM element, a DOM
@@ -395,13 +395,16 @@ Zotero.Utilities = {
 		}
 
 		// Cast a namespace object
-		var myns = doc.documentElement.namespaceURI;
+		// var myns = doc.documentElement.namespaceURI;
+		var myns = "http://www.w3.org/1999/xhtml"
 
 		// Cast a document type for a new custom-spun HTML document
-		var newDoctype = doc.implementation.createDocumentType("html:html", "-//W3C//DTD HTML 4.01 Transitional//EN", "http://www.w3.org/TR/html4/loose.dtd");
+		//var newDocType = doc.implementation.createDocumentType("html:html", "-//W3C//DTD HTML 4.01 Transitional//EN", "http://www.w3.org/TR/html4/loose.dtd");
+
+		var newDocType = doc.implementation.createDocumentType('html', '', '');
 
 		// Create an empty HTML document
-		var newDoc = doc.implementation.createDocument(myns, 'html', newDoctype);
+		var newDoc = doc.implementation.createDocument('http://www.w3.org/1999/xhtml', 'html', newDocType);
 
 		// Get the HTML section of the document, into which we will insert things.
 		var html = newDoc.getElementsByTagName("html")[0];
@@ -410,7 +413,14 @@ Zotero.Utilities = {
 		// fill in some details in both; create a base
 		// element and give in a URL ending in html.
 		// merge the two, and insert into the html element
-		var head = newDoc.createElementNS(myns, "head");
+		var head, title;
+		if ("string" === typeof titleOrHead) {
+			head = newDoc.createElementNS(myns, "head");
+			title = titleOrHead
+		} else if ("object" === typeof titleOrHead) {
+			head = titleOrHead.cloneNode(true);
+			title = titleOrHead.getElementsByTagName("title")[0].textContent;
+		}
 		var base = newDoc.createElementNS(myns, "base");
 		var header_title = newDoc.createElementNS(myns, "title");
 		header_title_text = newDoc.createTextNode(title);
@@ -482,7 +492,6 @@ Zotero.Utilities = {
 
 		// Insert the body into the document HTML node
 		html.appendChild(body);
-
 		return newDoc;
 	},
 
