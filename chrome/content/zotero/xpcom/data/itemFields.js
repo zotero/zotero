@@ -358,6 +358,8 @@ Zotero.ItemFields = new function() {
 		var fields = [
 			'abstractNote',
 			'extra',
+			'caseName',
+			'court',
 			
 			// TEMP - NSF
 			'address'
