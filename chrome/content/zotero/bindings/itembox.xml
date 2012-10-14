@@ -2837,7 +2837,11 @@
 							throw ("Invalid transform mode '" + mode + "' in zoteroitembox.textTransform()");
 					}
 					this._setFieldValue(label, newVal);
-					this._modifyField(label.getAttribute('fieldname'), newVal, this.saveOnEdit);
+					var fieldName = label.getAttribute('fieldname');
+					if (!fieldName) {
+						fieldName = label.parentNode.getAttribute('fieldname');
+					}
+					this._modifyField(fieldName, newVal, this.saveOnEdit);
 
 				]]>
 				</body>
