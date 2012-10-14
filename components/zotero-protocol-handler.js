@@ -39,6 +39,8 @@ Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 // for any other well known chrome URL in the browser installation
 const DUMMY_CHROME_URL = "chrome://mozapps/content/xpinstall/xpinstallConfirm.xul";
 
+// A page that closes itself immediately
+const CLOSE_CHROME_URL = "chrome://zotero/content/tools/closeWindow.xul";
 
 function ChromeExtensionHandler() {
 	this.wrappedJSObject = this;
@@ -889,7 +891,12 @@ function ChromeExtensionHandler() {
 					return;
 				}
 				
+				if (win.ZoteroOverlay) {
+					win.ZoteroOverlay.toggleDisplay();
+					win.ZoteroPane.onCollectionSelected();
+				}
 				win.ZoteroPane.selectItem(item.id);
+				return "closeWindow";
 			}
 			catch (e){
 				Zotero.debug(e);
@@ -1111,6 +1118,10 @@ ChromeExtensionHandler.prototype = {
 		var chromeService = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
 			.getService(Components.interfaces.nsIProtocolHandler);
 		
+		var Zotero = Components.classes["@zotero.org/Zotero;1"]
+			.getService(Components.interfaces.nsISupports)
+			.wrappedJSObject;
+			
 		var newChannel = null;
 		
 		try {
@@ -1133,8 +1144,14 @@ ChromeExtensionHandler.prototype = {
 					}
 					
 					var extChannel = ext.newChannel(uri);
-					// Extension returned null, so cancel request
-					if (!extChannel) {
+					
+					if (extChannel === "closeWindow") {
+						// Extension does not want to show a page, use one that closes immediately
+						var chromeURI = chromeService.newURI(CLOSE_CHROME_URL, null, null);
+						var extChannel = chromeService.newChannel(chromeURI);
+						var chromeRequest = extChannel.QueryInterface(Components.interfaces.nsIRequest);
+					} else if (!extChannel) {
+						// Extension returned null, so cancel request
 						var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
 						var extChannel = chromeService.newChannel(chromeURI);
 						var chromeRequest = extChannel.QueryInterface(Components.interfaces.nsIRequest);
