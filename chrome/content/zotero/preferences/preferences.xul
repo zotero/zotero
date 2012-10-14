@@ -501,6 +501,7 @@ To add a new preference:
 		<preferences>
 			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
 			<preference id="pref-quickCopy-dragLimit" name="extensions.zotero.export.quickCopy.dragLimit" type="int"/>
+			<preference id="pref-quickCopy-linkOption" name="extensions.zotero.export.quickCopy.linkOption" type="bool"/>
 		</preferences>
 		
 		<groupbox id="zotero-prefpane-export-groupbox">
@@ -527,6 +528,8 @@ To add a new preference:
 				<textbox preference="pref-quickCopy-dragLimit" size="3"/>
 				<label value="&zotero.preferences.items;" flex="1"/>
 			</hbox>
+			<checkbox id="zotero-quickCopy-linkWrapOption" label="&zotero.preferences.quickCopy.linkOption;"
+				preference="pref-quickCopy-linkOption"/>
 		</groupbox>
 		
 		<groupbox>

@@ -480,7 +480,21 @@ function() {
 	}
 	
 	try {
-		return new Zotero.CiteProc.CSL.Engine(Zotero.Cite.System, xml, locale);
+		var citeproc = new Zotero.CiteProc.CSL.Engine(Zotero.Cite.System, xml, locale);
+        if (Zotero.Prefs.get("export.quickCopy.linkOption")) {
+            // This gets the processor ready for applying wrappers.
+            //
+            // The function required to invoke wrappers is set only
+            // in getContentFromItems() [quickCopy.js] and 
+            // copyCitationToClipboard() [fileInterface.js]
+            // from functions stored in cite.js.
+            // Output templates are set in Zotero preferences, as
+            // extensions.zotero.export.quickCopy.wrapCitationHtml
+            // and extensions.zotero.export.quickCopy.wrapCitationText
+            citeproc.opt.development_extensions.apply_citation_wrapper = true;
+        }
+		citeproc.opt.development_extensions.apply_citation_wrapper = true;
+		return citeproc;
 	} catch(e) {
 		Zotero.logError(e);
 		throw e;

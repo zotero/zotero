@@ -39,6 +39,8 @@ Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 // for any other well known chrome URL in the browser installation
 const DUMMY_CHROME_URL = "chrome://mozapps/content/xpinstall/xpinstallConfirm.xul";
 
+// A page that closes itself immediately
+const CLOSE_CHROME_URL = "chrome://zotero/content/tools/closeWindow.xul";
 
 function ChromeExtensionHandler() {
 	this.wrappedJSObject = this;
@@ -870,10 +872,13 @@ function ChromeExtensionHandler() {
 					win.restore();
 				}
 				
-				// open Zotero pane
-				win.ZoteroPane.show();
-				
-				if(!id) return;
+				if (win.ZoteroPane) {
+					win.ZoteroPane.show();
+				}
+                
+				if(!id) {
+					return;
+				}
 				
 				var lkh = Zotero.Items.parseLibraryKeyHash(id);
 				if (lkh) {
@@ -889,9 +894,18 @@ function ChromeExtensionHandler() {
 					return;
 				}
 				
-				win.ZoteroPane.selectItem(item.id);
+				// open Zotero tab or pane
+				if (win.ZoteroPane) {
+					if (win.ZoteroPane.itemsView && win.ZoteroPane.collectionsView) {
+						win.ZoteroPane.selectItem(item.id);
+					}
+					return "closeWindow";
+                }
+                return;
 			}
 			catch (e){
+				// Could maybe deliver an error page to the
+				// browser rather than throwing an error in JS.
 				Zotero.debug(e);
 				throw (e);
 			}
@@ -1111,6 +1125,10 @@ ChromeExtensionHandler.prototype = {
 		var chromeService = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
 			.getService(Components.interfaces.nsIProtocolHandler);
 		
+		var Zotero = Components.classes["@zotero.org/Zotero;1"]
+			.getService(Components.interfaces.nsISupports)
+			.wrappedJSObject;
+			
 		var newChannel = null;
 		
 		try {
@@ -1133,8 +1151,14 @@ ChromeExtensionHandler.prototype = {
 					}
 					
 					var extChannel = ext.newChannel(uri);
-					// Extension returned null, so cancel request
-					if (!extChannel) {
+					
+					if (extChannel === "closeWindow") {
+						// Extension does not want to show a page, use one that closes immediately
+						var chromeURI = chromeService.newURI(CLOSE_CHROME_URL, null, null);
+						var extChannel = chromeService.newChannel(chromeURI);
+						var chromeRequest = extChannel.QueryInterface(Components.interfaces.nsIRequest);
+					} else if (!extChannel) {
+						// Extension returned null, so cancel request
 						var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
 						var extChannel = chromeService.newChannel(chromeURI);
 						var chromeRequest = extChannel.QueryInterface(Components.interfaces.nsIRequest);
