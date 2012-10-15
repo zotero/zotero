@@ -41,6 +41,7 @@ Zotero.HTTP = new function() {
 	 *         <li>cookieSandbox - The sandbox from which cookies should be taken</li>
 	 *         <li>dontCache - If set, specifies that the request should not be fulfilled
 	 *             from the cache</li>
+	 *         <li>debug - Log response text and status code</li>
 	 *     </ul>
 	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
 	 * @return {Promise} A promise resolved with the XMLHttpRequest object if the request
@@ -50,11 +51,15 @@ Zotero.HTTP = new function() {
 	this.promise = function promise(method, url, options) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
-			var disp = url.clone();
-			if (disp.password) {
-				disp.password = "********";
+			var dispURL = url.clone();
+			if (dispURL.password) {
+				dispURL.password = "********";
 			}
 			url = url.spec;
+			dispURL = dispURL.spec;
+		}
+		else {
+			var dispURL = url;
 		}
 		
 		if(options && options.body) {
@@ -66,14 +71,14 @@ Zotero.HTTP = new function() {
 			Zotero.debug("HTTP "+method+" "
 				+ (options.body.length > 1024 ?
 					bodyStart + '... (' + options.body.length + ' chars)' : bodyStart)
-				+ " to " + (disp ? disp.spec : url));
+				+ " to " + dispURL);
 		} else {
-			Zotero.debug("HTTP GET " + url);
+			Zotero.debug("HTTP GET " + dispURL);
 		}
 		
 		if (this.browserIsOffline()) {
 			return Q.fcall(function() {
-				Zotero.debug("HTTP GET " + url + " failed: Browser is offline");
+				Zotero.debug("HTTP GET " + dispURL + " failed: Browser is offline");
 				throw new this.BrowserOfflineException();
 			});
 		}
@@ -112,11 +117,14 @@ Zotero.HTTP = new function() {
 		
 		xmlhttp.onloadend = function() {
 			var status = xmlhttp.status;
+			if(options && options.debug && xmlhttp.responseText) {
+				Zotero.debug(xmlhttp.responseText);
+			}
 			if(status >= 200 && status < 300) {
-				Zotero.debug("HTTP GET " + url + " succeeded");
+				Zotero.debug("HTTP GET " + dispURL + " succeeded (" + xmlhttp.status + ")");
 				deferred.resolve(xmlhttp);
 			} else {
-				Zotero.debug("HTTP GET " + url + " failed: Unexpected status code "+xmlhttp.status);
+				Zotero.debug("HTTP GET " + dispURL + " failed: Unexpected status code " + xmlhttp.status);
 				deferred.reject(new Zotero.HTTP.UnexpectedStatusException(xmlhttp));
 			}
 		};
