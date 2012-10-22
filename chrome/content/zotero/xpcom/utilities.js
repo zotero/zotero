@@ -36,8 +36,10 @@ const CSL_NAMES_MAPPINGS = {
 	"editor":"editor",
 	"bookAuthor":"container-author",
 	"composer":"composer",
+	"director":"director",
 	"interviewer":"interviewer",
 	"recipient":"recipient",
+	"reviewedAuthor":"reviewed-author",
 	"seriesEditor":"collection-editor",
 	"translator":"translator"
 }
@@ -57,12 +59,15 @@ const CSL_TEXT_MAPPINGS = {
 	"volume":["volume"],
 	"issue":["issue"],
 	"number-of-volumes":["numberOfVolumes"],
-	"number-of-pages":["numPages"],
+	"number-of-pages":["numPages"],	
 	"edition":["edition"],
 	"version":["version"],
 	"section":["section"],
-	"genre":["type", "artworkSize"], /* artworkSize should move to SQL mapping tables, or added as a CSL variable */
+	"genre":["type"],
+	"source":["libraryCatalog"],
+	"dimension": ["artworkSize", "runningTime"], 
 	"medium":["medium", "system"],
+	"scale":["scale"],
 	"archive":["archive"],
 	"archive_location":["archiveLocation"],
 	"event":["meetingName", "conferenceName"], /* these should be mapped to the same base field in SQL mapping tables */
@@ -71,6 +76,7 @@ const CSL_TEXT_MAPPINGS = {
 	"URL":["url"],
 	"DOI":["DOI"],
 	"ISBN":["ISBN"],
+	"ISSN":["ISSN"],
 	"call-number":["callNumber"],
 	"note":["extra"],
 	"number":["number"],
