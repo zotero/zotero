@@ -328,7 +328,7 @@ box.appendChild(attachmentMark);
 											"document.getBindingParent(this).remove('" + related[i].id + "');");
 										remove.setAttribute('class','zotero-clicky zotero-clicky-minus');
 									} else {
-										var remove = document.createNode("hbox");
+										var remove = document.createElement("hbox");
 										remove.setAttribute("width", "18")
 									}
 									var row = document.createElement("row");
