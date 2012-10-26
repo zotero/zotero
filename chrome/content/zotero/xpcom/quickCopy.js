@@ -449,12 +449,16 @@ Zotero.QuickCopy = new function() {
 				} else {
 					citation = {citationItems:[{id:item.id} for each(item in items)], properties:{}};
 				}
-				if (Zotero.Prefs.get("export.quickCopy.linkOption")) {
-					csl.sys.wrapCitationEntry = csl.sys.wrapCitationEntryHtml;
+				if (Zotero.Prefs.get("export.quickCopy.linkOption") && !Zotero.Prefs.get("export.quickCopy.linkOptionDisable")) {
+					if (Zotero.Prefs.get("export.quickCopy.linkOptionHTML")) {
+						csl.sys.wrapCitationEntry = csl.sys.wrapCitationEntryHtml;
+					} else {
+						csl.sys.wrapCitationEntry = csl.sys.wrapCitationEntryText;
+					}
 				}
 				var html = csl.previewCitationCluster(citation, [], [], "html"); 
 				
-				if (Zotero.Prefs.get("export.quickCopy.linkOption")) {
+				if (Zotero.Prefs.get("export.quickCopy.linkOption") && !Zotero.Prefs.get("export.quickCopy.linkOptionDisable")) {
 					csl.sys.wrapCitationEntry = csl.sys.wrapCitationEntryText;
 				}
 				var text = csl.previewCitationCluster(citation, [], [], "text"); 

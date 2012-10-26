@@ -456,8 +456,12 @@ var Zotero_File_Interface = new function() {
 		
 		// add HTML
 		// Optionally turn on HTML wrapper
-		if (Zotero.Prefs.get("export.quickCopy.linkOption")) {
-			style.sys.wrapCitationEntry = style.sys.wrapCitationEntryHtml;
+		if (Zotero.Prefs.get("export.quickCopy.linkOption") && !Zotero.Prefs.get("export.quickCopy.linkOptionDisable")) {
+			if (Zotero.Prefs.get("export.quickCopy.linkOptionHTML")) {
+				style.sys.wrapCitationEntry = style.sys.wrapCitationEntryHtml;
+			} else {
+				style.sys.wrapCitationEntry = style.sys.wrapCitationEntryText;
+			}
 		}
 		var bibliography = style.previewCitationCluster(citation, [], [], "html");
 		var str = Components.classes["@mozilla.org/supports-string;1"].
@@ -469,7 +473,7 @@ var Zotero_File_Interface = new function() {
 		// add text (or HTML source)
 		if(!asHTML) {
 			// Optionally turn on text wrapper
-			if (Zotero.Prefs.get("export.quickCopy.linkOption")) {
+			if (Zotero.Prefs.get("export.quickCopy.linkOption") && !Zotero.Prefs.get("export.quickCopy.linkOptionDisable")) {
 				style.sys.wrapCitationEntry = style.sys.wrapCitationEntryText;
 			}
 			var bibliography = style.previewCitationCluster(citation, [], [], "text");

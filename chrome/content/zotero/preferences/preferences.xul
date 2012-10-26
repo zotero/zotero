@@ -519,17 +519,19 @@ To add a new preference:
 			<separator class="thin"/>
 			
 			<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
-				oncommand="buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : '');"/>
-			
-			<vbox id="zotero-prefpane-export-siteSettings"/>
-			
+				oncommand="buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : '');updateQuickCopyHTMLCheckbox();"/>
+
+			<checkbox id="zotero-quickCopy-linkWrapOption" label="&zotero.preferences.quickCopy.linkOption;"
+					preference="pref-quickCopy-linkOption"/>
+
 			<hbox align="center">
 				<label value="&zotero.preferences.quickCopy.dragLimit;"/>
 				<textbox preference="pref-quickCopy-dragLimit" size="3"/>
 				<label value="&zotero.preferences.items;" flex="1"/>
 			</hbox>
-			<checkbox id="zotero-quickCopy-linkWrapOption" label="&zotero.preferences.quickCopy.linkOption;"
-				preference="pref-quickCopy-linkOption"/>
+			
+			<vbox id="zotero-prefpane-export-siteSettings"/>
+			
 		</groupbox>
 		
 		<groupbox>

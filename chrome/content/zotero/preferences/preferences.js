@@ -675,12 +675,15 @@ function updateQuickCopyHTMLCheckbox() {
 	var format = document.getElementById('zotero-quickCopy-menu').value;
 	var mode, contentType;
 	
+	var linkCheckbox = document.getElementById('zotero-quickCopy-linkWrapOption');
+
 	var checkbox = document.getElementById('zotero-quickCopy-copyAsHTML');
 	[mode, format] = format.split('=');
 	[mode, contentType] = mode.split('/');
 	
-	checkbox.checked = contentType == 'html';
-	checkbox.disabled = mode != 'bibliography';
+	checkbox.checked = contentType === 'html';
+	checkbox.disabled = mode !== 'bibliography';
+	linkCheckbox.disabled = mode !== 'bibliography';
 }
 
 function showQuickCopySiteEditor(index) {
