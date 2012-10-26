@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.401",
+    PROCESSOR_VERSION: "1.0.402",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -7425,7 +7425,9 @@ CSL.NameOutput.prototype.getStaticOrder = function (name, refresh) {
         static_ordering_val = true;
     } else if (this._isRomanesque(name) === 0) {
         static_ordering_val = true;
-    } else if (name.multi && name.multi.main && name.multi.main.slice(0,2) == 'vn') {
+    } else if ((!name.multi || !name.multi.main) && this.Item.language && ['vi', 'hu'].indexOf(this.Item.language) > -1) {
+        static_ordering_val = true;
+    } else if (name.multi && name.multi.main && ['vi', 'hu'].indexOf(name.multi.main.slice(0,2)) > -1) {
         static_ordering_val = true;
     } else {
         if (this.state.opt['auto-vietnamese-names']
