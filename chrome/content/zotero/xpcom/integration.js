@@ -2310,7 +2310,9 @@ Zotero.Integration.Session.prototype.lookupItems = function(citation, index) {
 			}
 		} else {
 			if(citationItem.key) {
-				zoteroItem = Zotero.Items.getByKey(citationItem.key);
+				var m = ("" + citationItem.key).match(/(?:([0-9]+)_)*(.*)/);
+				var libraryID = m[1] === "0" ? null : m[1];
+				zoteroItem = Zotero.Items.getByLibraryAndKey(libraryID, m[2]);
 			} else if(citationItem.itemID) {
 				zoteroItem = Zotero.Items.get(citationItem.itemID);
 			} else if(citationItem.id) {
@@ -2743,7 +2745,9 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 		} else {
 			for(var itemID in documentData.uncited) {
 				// if not yet in item set, add to item set
-				var zoteroItem = Zotero.Items.getByKey(itemID);
+				var m = ("" + itemID).match(/(?:([0-9]+)_)*(.*)/);
+				var libraryID = m[1] === "0" ? null : m[1];
+				var zoteroItem = Zotero.Items.getByLibraryAndKey(libraryID, m[2]);
 				if(!zoteroItem) zoteroItem = Zotero.Items.get(itemID);
 				if(zoteroItem) this.uncitedItems[zoteroItem.id] = true;
 			}
@@ -2771,7 +2775,9 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 		} else {
 			// old style hash
 			for(var itemID in documentData.custom) {
-				var zoteroItem = Zotero.Items.getByKey(itemID);
+				var m = ("" + itemID).match(/(?:([0-9]+)_)*(.*)/);
+				var libraryID = m[1] === "0" ? null : m[1];
+				var zoteroItem = Zotero.Items.getByLibraryAndKey(libraryID, m[2]);
 				if(!zoteroItem) zoteroItem = Zotero.Items.get(itemID);
 				if(!zoteroItem) continue;
 				
