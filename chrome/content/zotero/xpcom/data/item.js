@@ -4804,6 +4804,8 @@ Zotero.Item.prototype.isCollection = function() {
 
 Zotero.Item.prototype.toArray = function (mode) {
 	Zotero.debug('Zotero.Item.toArray() is deprecated -- use Zotero.Item.serialize()');
+
+    Zotero.debug("XXX Serializing multi data with toArray()!! Wheee!");
 	
 	if (this.id || this.key) {
 		if (!this._primaryDataLoaded) {
@@ -4855,8 +4857,9 @@ Zotero.Item.prototype.toArray = function (mode) {
 	// appropriately as required.
 	// (construct above is to force use of formatted form of dates,
 	// which don't have multilingual variants in DB)
-	for (var key in this.multi.main) {
-		arr.multi.main[key] = this.multi.main[key];
+	for (var fieldID in this.multi.main) {
+		var fieldName = Zotero.ItemFields.getName(fieldID);
+		arr.multi.main[fieldName] = this.multi.main[fieldID];
 	}
 	for (var fieldID in this.multi._keys) {
 		var fieldName = Zotero.ItemFields.getName(fieldID);
@@ -4898,15 +4901,15 @@ Zotero.Item.prototype.toArray = function (mode) {
 			creator.multi._lst = creators[i].multi._lst.slice();
 			creator.multi._key = {};
 			for each (var langTag in creators[i].multi._lst) {
-					if (!creators[i].multi._key[langTag]) {
-						creator.multi._key[langTag] = {};
-					}
-					creator.multi._key[langTag] = {
-						lastName: creators[i].multi._key[langTag].lastName,
-						firstName: creators[i].multi._key[langTag].firstName
-					}
+				if (!creators[i].multi._key[langTag]) {
+					creator.multi._key[langTag] = {};
 				}
-			creator.multi.main = creators[i].languageTag;
+				creator.multi._key[langTag] = {
+					lastName: creators[i].multi._key[langTag].lastName,
+					firstName: creators[i].multi._key[langTag].firstName
+				}
+			}
+			creator.multi.main = creators[i].multi.main;
 			arr.creators.push(creator);
 		}
 	}
