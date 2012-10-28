@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.402",
+    PROCESSOR_VERSION: "1.0.403",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -1067,6 +1067,9 @@ CSL.Output.Queue.prototype.closeLevel = function (name) {
 CSL.Output.Queue.prototype.append = function (str, tokname, notSerious, ignorePredecessor, noStripPeriods) {
     var token, blob, curr;
     var useblob = true;
+    if (notSerious) {
+        ignorePredecessor = true;
+    }
     if (this.state.tmp["doing-macro-with-date"]) {
         if (tokname !== "macro-with-date") {
             return false;
@@ -1109,6 +1112,8 @@ CSL.Output.Queue.prototype.append = function (str, tokname, notSerious, ignorePr
         str = str.replace(/\s+'/g, "  \'").replace(/^'/g, " \'");
         if (!ignorePredecessor) {
             this.state.tmp.term_predecessor = true;
+        } else if (notSerious) {
+            this.state.tmp.term_predecessor_name = true;
         }
     }
     blob = new CSL.Blob(str, token);
@@ -1126,6 +1131,8 @@ CSL.Output.Queue.prototype.append = function (str, tokname, notSerious, ignorePr
     if ("string" === typeof blob.blobs) {
         if (!ignorePredecessor) {
             this.state.tmp.term_predecessor = true;
+        } else if (notSerious) {
+            this.state.tmp.term_predecessor_name = true;
         }
     }
     if (!notSerious) {
@@ -6049,6 +6056,9 @@ CSL.NameOutput.prototype.outputNames = function () {
     this.state.output.closeLevel("empty");
     var blob = this.state.output.pop();
     this.state.output.append(blob, this.names);
+    if (this.state.tmp.term_predecessor_name) {
+        this.state.tmp.term_predecessor = true;
+    }
     this.state.tmp.name_node.top = this.state.output.current.value();
     if (variables[0] !== "authority") {
         var name_node_string = [];
@@ -7099,6 +7109,9 @@ CSL.NameOutput.prototype._renderOnePersonalName = function (value, pos, i) {
             merged = this._join([family, second], sort_sep);
             blob = this._join([merged, suffix], sort_sep);
         } else {
+            if (!this.state.tmp.term_predecessor && non_dropping_particle) {
+                non_dropping_particle.blobs = CSL.Output.Formatters["capitalize-first"](this.state, non_dropping_particle.blobs)
+            }
             first = this._join([non_dropping_particle, family], " ");
             if (first && this.family) {
                 first.strings.prefix = this.family.strings.prefix;
@@ -7117,6 +7130,15 @@ CSL.NameOutput.prototype._renderOnePersonalName = function (value, pos, i) {
             if (["'","\u02bc","\u2019"].indexOf(name["dropping-particle"].slice(-1)) > -1) {
                 family = this._join([dropping_particle, family], "");
                 dropping_particle = false;
+            }
+        }
+        if (!this.state.tmp.term_predecessor) {
+            if (!given) {
+                if (!dropping_particle && non_dropping_particle) {
+                    non_dropping_particle.blobs = CSL.Output.Formatters["capitalize-first"](this.state, non_dropping_particle.blobs)
+                } else if (dropping_particle) {
+                    dropping_particle.blobs = CSL.Output.Formatters["capitalize-first"](this.state, dropping_particle.blobs)
+                }
             }
         }
         second = this._join([dropping_particle, non_dropping_particle, family], " ");
