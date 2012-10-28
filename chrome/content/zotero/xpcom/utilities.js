@@ -221,7 +221,7 @@ Zotero.Utilities = {
 	 * @param {String} val Field value
 	 * @param {String} languageTag RFC 5646 language tag
 	 */
-	"setMultiField":function (obj, field, val, languageTag) {
+	"setMultiField":function (obj, field, val, languageTag, defaultLanguage) {
 		// Validate parameters
 		if ("string" !== typeof val) {
 			throw "Invalid value for multilingual field";
@@ -247,7 +247,7 @@ Zotero.Utilities = {
 		// Set field value
 		if (!obj[field]) {
 			obj[field] = val;
-			if (languageTag) {
+			if (languageTag && languageTag !== defaultLanguage) {
 				obj.multi.main[field] = languageTag;
 			}
 		} else if (languageTag) {
@@ -270,7 +270,7 @@ Zotero.Utilities = {
 	 * @param {String} child Child creator object to be added
 	 * @param {String} languageTag RFC 5646 language tag
 	 */
-	"setMultiCreator":function (obj, child, languageTag, creatorType) {
+	"setMultiCreator":function (obj, child, languageTag, creatorType, defaultLanguage) {
 		// Validate parameters
 		if ("object" !== typeof obj) {
 			throw "Multilingual creator parent must be an object";
@@ -298,7 +298,7 @@ Zotero.Utilities = {
 			obj.lastName = child.lastName;
 			obj.firstName = child.firstName;
 			obj.creatorType = creatorType;
-			if (languageTag) {
+			if (languageTag && languageTag !== defaultLanguage) {
 				obj.multi.main = languageTag;
 			}
 		} else  if (languageTag) {
