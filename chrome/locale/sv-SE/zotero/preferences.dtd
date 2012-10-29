@@ -143,6 +143,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopiera som HTML">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Standardformat på utdata">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Stäng av snabbkopiering om fler än ... filer är markerade.">
+<!ENTITY zotero.preferences.quickCopy.linkCitationFormReverse "Use citation form as default">
 <!ENTITY zotero.preferences.quickCopy.linkOption "Include Zotero link wrappers in QuickCopy citations">
 <!ENTITY zotero.preferences.quickCopy.macWarning "OBS: Rich-text-format försvinner i Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domän/sökväg">

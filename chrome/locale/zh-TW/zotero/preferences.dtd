@@ -143,6 +143,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "當成 HTML 複製">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "預設輸出格式：">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "拖放超過多少個項目時，停用快速複製：">
+<!ENTITY zotero.preferences.quickCopy.linkCitationFormReverse "Use citation form as default">
 <!ENTITY zotero.preferences.quickCopy.linkOption "Include Zotero link wrappers in QuickCopy citations">
 <!ENTITY zotero.preferences.quickCopy.macWarning "注意！在 Mac OS X 平台下會失去富文本的格式。">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "網域／路徑">

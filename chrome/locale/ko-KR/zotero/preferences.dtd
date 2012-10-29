@@ -143,6 +143,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTML로 복사">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "기본 출력 형식:">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "다음 이상 끌을 경우 빠른 복사 동작 안함:">
+<!ENTITY zotero.preferences.quickCopy.linkCitationFormReverse "Use citation form as default">
 <!ENTITY zotero.preferences.quickCopy.linkOption "Include Zotero link wrappers in QuickCopy citations">
 <!ENTITY zotero.preferences.quickCopy.macWarning "주: Rich-text 형식은 Mac OS X 상에선 손실됩니다.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "도메인/경로">
