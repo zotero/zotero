@@ -667,8 +667,9 @@ Zotero.HTTP = new function() {
 		 * @inner
 		 */
 		var onLoad = function() {
-			var doc = hiddenBrowser.contentDocument,
-				url = doc.location.href.toString();
+			var doc = hiddenBrowser.contentDocument;
+			if(!doc) return;
+			var url = doc.location.href.toString();
 			if(url == "about:blank") return;
 			if(doc.readyState === "loading" && firedLoadEvent < 120) {
 				// Try again in a second	

@@ -402,14 +402,13 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 		this.sandbox.DOMParser = function() {
 			var uri, principal;
 			// get URI
-			// DEBUG: In Fx 4 we can just use document.nodePrincipal, but in Fx 3.6 this doesn't work
 			if(typeof sandboxLocation === "string") {	// if sandbox specified by URI
-				// if sandbox specified by URI, get codebase principal from security manager
 				var secMan = Services.scriptSecurityManager;
-				principal = (secMan.getCodebasePrincipal || secMan.getSimpleCodebasePrincipal)
-					(Services.io.newURI(sandboxLocation, "UTF-8", null));
+				uri = Services.io.newURI(sandboxLocation, "UTF-8", null);
+				principal = (secMan.getCodebasePrincipal || secMan.getSimpleCodebasePrincipal)(uri);
 			} else {									// if sandbox specified by DOM document
-				uri = sandboxLocation.document.nodePrincipal;
+				principal = sandboxLocation.document.nodePrincipal;
+				uri = sandboxLocation.document.documentURIObject;
 			}
 			
 			// initialize DOM parser
@@ -419,13 +418,11 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 			
 			// expose parseFromString
 			this.__exposedProps__ = {"parseFromString":"r"};
-			if(Zotero.isFx5) {
-				this.parseFromString = function(str, contentType) {
-					return Zotero.Translate.DOMWrapper.wrap(_DOMParser.parseFromString(str, contentType));
-				}
+			this.parseFromString = function(str, contentType) {
+				return Zotero.Translate.SandboxManager.Fx5DOMWrapper(_DOMParser.parseFromString(str, contentType));
 			}
-		}
-	};
+		};
+	}
 	this.sandbox.DOMParser.__exposedProps__ = {"prototype":"r"};
 	this.sandbox.DOMParser.prototype = {};
 	this.sandbox.XMLSerializer = function() {
