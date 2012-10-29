@@ -522,13 +522,13 @@ To add a new preference:
 			<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
 				oncommand="buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : '');updateQuickCopyHTMLCheckbox();"/>
 
-            <hbox align="left">
-              <checkbox id="zotero-quickCopy-linkWrapOption" label="&zotero.preferences.quickCopy.linkOption;"
-                    oncommand="updateQuickCopyHTMLCheckbox();"
+			<hbox align="left">
+			  <checkbox id="zotero-quickCopy-linkWrapOption" label="&zotero.preferences.quickCopy.linkOption;"
+					oncommand="updateQuickCopyHTMLCheckbox();"
 					preference="pref-quickCopy-linkOption"/>
-              <checkbox id="zotero-quickCopy-linkWrapCitationFormReverse" label="&zotero.preferences.quickCopy.linkCitationFormReverse;"
+			  <checkbox id="zotero-quickCopy-linkWrapCitationFormReverse" label="&zotero.preferences.quickCopy.linkCitationFormReverse;"
 					preference="pref-quickCopy-linkCitationFormReverse"/>
-            </hbox>
+			</hbox>
 
 			<hbox align="center">
 				<label value="&zotero.preferences.quickCopy.dragLimit;"/>
