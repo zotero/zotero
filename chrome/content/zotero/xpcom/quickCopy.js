@@ -163,6 +163,10 @@ Zotero.QuickCopy = new function() {
 			return false;
 		}
 		
+		if (Zotero.Prefs.get("export.quickCopy.linkOption") && Zotero.Prefs.get("export.quickCopy.linkCitationFormReverse")) {
+			modified = !modified;
+		}
+
 		var [mode, format] = format.split('=');
 		var [mode, contentType] = mode.split('/');
 		

@@ -502,6 +502,7 @@ To add a new preference:
 			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
 			<preference id="pref-quickCopy-dragLimit" name="extensions.zotero.export.quickCopy.dragLimit" type="int"/>
 			<preference id="pref-quickCopy-linkOption" name="extensions.zotero.export.quickCopy.linkOption" type="bool"/>
+			<preference id="pref-quickCopy-linkCitationFormReverse" name="extensions.zotero.export.quickCopy.linkCitationFormReverse" type="bool"/>
 		</preferences>
 		
 		<groupbox id="zotero-prefpane-export-groupbox">
@@ -521,8 +522,13 @@ To add a new preference:
 			<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
 				oncommand="buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : '');updateQuickCopyHTMLCheckbox();"/>
 
-			<checkbox id="zotero-quickCopy-linkWrapOption" label="&zotero.preferences.quickCopy.linkOption;"
+            <hbox align="left">
+              <checkbox id="zotero-quickCopy-linkWrapOption" label="&zotero.preferences.quickCopy.linkOption;"
+                    oncommand="updateQuickCopyHTMLCheckbox();"
 					preference="pref-quickCopy-linkOption"/>
+              <checkbox id="zotero-quickCopy-linkWrapCitationFormReverse" label="&zotero.preferences.quickCopy.linkCitationFormReverse;"
+					preference="pref-quickCopy-linkCitationFormReverse"/>
+            </hbox>
 
 			<hbox align="center">
 				<label value="&zotero.preferences.quickCopy.dragLimit;"/>

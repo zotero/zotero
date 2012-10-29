@@ -676,14 +676,22 @@ function updateQuickCopyHTMLCheckbox() {
 	var mode, contentType;
 	
 	var linkCheckbox = document.getElementById('zotero-quickCopy-linkWrapOption');
+	var linkModeCheckbox = document.getElementById('zotero-quickCopy-linkWrapCitationFormReverse');
 
 	var checkbox = document.getElementById('zotero-quickCopy-copyAsHTML');
 	[mode, format] = format.split('=');
 	[mode, contentType] = mode.split('/');
 	
 	checkbox.checked = contentType === 'html';
+	if (!(mode === 'bibliography')) {
+		linkCheckbox.checked = false;
+	}
 	checkbox.disabled = mode !== 'bibliography';
 	linkCheckbox.disabled = mode !== 'bibliography';
+	linkModeCheckbox.disabled = mode !== 'bibliography';
+	if (!linkCheckbox.checked) {
+		linkModeCheckbox.disabled = true;
+	}
 }
 
 function showQuickCopySiteEditor(index) {
