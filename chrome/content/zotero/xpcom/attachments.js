@@ -359,6 +359,8 @@ Zotero.Attachments = new function(){
 					wbp.saveURI(nsIURL, null, null, null, null, file, null);
 				}
 				
+				if(callback) callback(attachmentItem);
+				
 				return attachmentItem;
 			}
 			catch (e){
