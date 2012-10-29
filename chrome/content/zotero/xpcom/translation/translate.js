@@ -2465,7 +2465,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 			}
 		}
 		
-		return containerElements;
+		return this._expose(containerElements);
 	},
 	
 	/**
@@ -2498,7 +2498,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		for(var i in this._dataStore.subjectIndex) {
 			returnArray.push(this._dataStore.subjectIndex[i][0].subject);
 		}
-		return returnArray;
+		return this._expose(returnArray);
 	},
 	
 	/**
@@ -2514,7 +2514,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		for(var i=0; i<statements.length; i++) {
 			returnArray.push(statements[i].predicate.uri);
 		}
-		return returnArray;
+		return this._expose(returnArray);
 	},
 	
 	/**
@@ -2530,7 +2530,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		for(var i=0; i<statements.length; i++) {
 			returnArray.push(statements[i].predicate.uri);
 		}
-		return returnArray;
+		return this._expose(returnArray);
 	},
 	
 	/**
@@ -2548,7 +2548,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		for(var i=0; i<statements.length; i++) {
 			returnArray.push(statements[i].subject);
 		}
-		return returnArray;
+		return this._expose(returnArray);
 	},
 	
 	/**
@@ -2566,7 +2566,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		for(var i=0; i<statements.length; i++) {
 			returnArray.push(statements[i].object.termType == "literal" ? statements[i].object.toString() : statements[i].object);
 		}
-		return returnArray;
+		return this._expose(returnArray);
 	},
 	
 	/**
@@ -2593,6 +2593,19 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		for(var i=0; i<statements.length; i++) {
 			returnArray.push([statements[i].subject, statements[i].predicate, (statements[i].object.termType == "literal" ? statements[i].object.toString() : statements[i].object)]);
 		}
-		return returnArray;
+		return this._expose(returnArray);
+	},
+	
+	/**
+	 * Set output so that it can be exposed to content in Firefox
+	 */
+	"_expose":function(arr) {
+		if(!Zotero.isFx || !arr instanceof Array) return arr;
+		var ep = {};
+		for(var i=0; i<arr.length; i++) {
+			ep[i] = "rw";
+		}
+		Object.defineProperty(arr, "__exposedProps__", {"value":ep});
+		return arr;
 	}
 };
