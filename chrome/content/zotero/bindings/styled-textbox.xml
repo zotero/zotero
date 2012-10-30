@@ -362,7 +362,7 @@
 					var matchTo = null;
 					var listener = function(e) {
 						var win = self._iframe.contentWindow;
-						var SJOW = self._iframe.contentWindow.wrappedJSObject;
+						var SJOW = win.wrappedJSObject;
 						
 						// only fire if the target matches, or _zoteroMatchTo, which we set last
 						// time the target matched, matches
@@ -386,6 +386,49 @@
 							return;
 						}
 						
+						if (!SJOW.zoteroInit) {
+							SJOW.zoteroInit = function(editor) {
+								self._editor = editor;
+								if (self._value) {
+									self.value = self._value;
+								}
+								if (self._focus) {
+									self._iframe.focus();
+									self._editor.focus();
+									self._focus = false;
+								}
+								
+								// Add CSS rules to notes
+								if (self.mode == 'note') {
+									var css = "body#zotero-tinymce-note.mceContentBody, "
+										+ "body#zotero-tinymce-note.mceContentBody p, "
+										+ "body#zotero-tinymce-note.mceContentBody th, "
+										+ "body#zotero-tinymce-note.mceContentBody td, "
+										+ "body#zotero-tinymce-note.mceContentBody pre { "
+											+ "font-size: "
+											+ Zotero.Prefs.get('note.fontSize') + "px; "
+										+ "} "
+										+ "body#zotero-tinymce-note.mceContentBody, "
+										+ "body#zotero-tinymce-note.mceContentBody p { "
+											+ "font-family: "
+											+ Zotero.Prefs.get('note.fontFamily') + "; "
+										+ "}"
+										+ Zotero.Prefs.get('note.css');
+									
+									var doc = editor.contentDocument;
+									var head = doc.getElementsByTagName("head")[0];
+									var style = doc.createElement("style");
+									style.innerHTML = css;
+									head.appendChild(style);
+								}
+								
+								// Dispatch a tinymceInitialized event
+								var ev = document.createEvent('HTMLEvents');
+								ev.initEvent('tinymceInitialized', true, true);
+								self.dispatchEvent(ev);
+							};
+						}
+						
 						var editor = SJOW.tinyMCE.get("tinymce");
 						if (!editor) {
 							Zotero.debug("editor not ready");
@@ -405,59 +448,16 @@
 							self._iframe.removeEventListener("DOMContentLoaded", listener, false);
 						}
 						
-						var onInitFunction = function() {
-							self._editor = editor;
-							if (self._value) {
-								self.value = self._value;
-							}
-							if (self._focus) {
-								self._iframe.focus();
-								self._editor.focus();
-								self._focus = false;
-							}
-							
-							// Add CSS rules to notes
-							if (self.mode == 'note') {
-								var css = "body#zotero-tinymce-note.mceContentBody, "
-									+ "body#zotero-tinymce-note.mceContentBody p, "
-									+ "body#zotero-tinymce-note.mceContentBody th, "
-									+ "body#zotero-tinymce-note.mceContentBody td, "
-									+ "body#zotero-tinymce-note.mceContentBody pre { "
-										+ "font-size: "
-										+ Zotero.Prefs.get('note.fontSize') + "px; "
-									+ "} "
-									+ "body#zotero-tinymce-note.mceContentBody, "
-									+ "body#zotero-tinymce-note.mceContentBody p { "
-										+ "font-family: "
-										+ Zotero.Prefs.get('note.fontFamily') + "; "
-									+ "}"
-									+ Zotero.Prefs.get('note.css');
-								
-								var doc = editor.contentDocument;
-								var head = doc.getElementsByTagName("head")[0];
-								var style = doc.createElement("style");
-								style.innerHTML = css;
-								head.appendChild(style);
-							}
-							
-							// Dispatch a tinymceInitialized event
-							var ev = document.createEvent('HTMLEvents');
-							ev.initEvent('tinymceInitialized', true, true);
-							self.dispatchEvent(ev);
-						};
-						onInitFunction.__exposedProps__ = {"apply":"r"};
-						editor.onInit.add(onInitFunction);
-						
 						if (self._eventHandler) {
-							self._iframe.contentWindow.wrappedJSObject.zoteroHandleEvent = self._eventHandler;
+							win.wrappedJSObject.zoteroHandleEvent = self._eventHandler;
 						}
 						
 						// Run Cut/Copy/Paste with chrome privileges
-						self._iframe.contentWindow.wrappedJSObject.zoteroExecCommand = function (doc, command, ui, value) {
+						win.wrappedJSObject.zoteroExecCommand = function (doc, command, ui, value) {
 							return doc.execCommand(command, ui, value);
 						}
 						
-						self._iframe.contentWindow.wrappedJSObject.zoteroFixWindow = function (win) {
+						win.wrappedJSObject.zoteroFixWindow = function (win) {
 							win.locationbar.visible = false;
 							win.statusbar.visible = false;
 						}
