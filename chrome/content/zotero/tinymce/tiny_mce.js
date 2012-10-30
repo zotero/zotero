@@ -12,7 +12,9 @@
 		releaseDate : '2012-09-20',
 
 		_init : function() {
-			var t = this, d = document, na = navigator, ua = na.userAgent, i, nl, n, base, p, v;
+			// Modified by Dan S./Zotero
+			//var t = this, d = document, na = navigator, ua = na.userAgent, i, nl, n, base, p, v;
+			var t = this, d = document, na = navigator, ua = "Gecko " + na.platform, i, nl, n, base, p, v;
 
 			t.isOpera = win.opera && opera.buildNumber;
 
