@@ -4805,8 +4805,6 @@ Zotero.Item.prototype.isCollection = function() {
 Zotero.Item.prototype.toArray = function (mode) {
 	Zotero.debug('Zotero.Item.toArray() is deprecated -- use Zotero.Item.serialize()');
 
-    Zotero.debug("XXX Serializing multi data with toArray()!! Wheee!");
-	
 	if (this.id || this.key) {
 		if (!this._primaryDataLoaded) {
 			this.loadPrimaryData(true);
