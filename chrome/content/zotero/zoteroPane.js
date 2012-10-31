@@ -745,7 +745,7 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		if (!this.canEdit()) {
+		if (!this.canEditLibrary()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -1088,7 +1088,24 @@ var ZoteroPane = new function()
 		];
 		for(var i=0; i<disableIfNoEdit.length; i++) {
 			var el = document.getElementById(disableIfNoEdit[i]);
-			if(itemgroup.editable) {
+			
+			// If a trash is selected, new collection depends on the
+			// editability of the library
+			if (itemgroup.isTrash() &&
+					disableIfNoEdit[i] == 'cmd_zotero_newCollection') {
+				if (itemgroup.ref.libraryID) {
+					var overrideEditable =
+						Zotero.Libraries.isEditable(itemgroup.ref.libraryID);
+				}
+				else {
+					var overrideEditable = true;
+				}
+			}
+			else {
+				var overrideEditable = false;
+			}
+			
+			if (itemgroup.editable || overrideEditable) {
 				if(el.hasAttribute("disabled")) el.removeAttribute("disabled");
 			} else {
 				el.setAttribute("disabled", "true");
@@ -3564,8 +3581,7 @@ var ZoteroPane = new function()
 	
 	
 	/**
-	 * Test if the user can edit the currently selected library/collection,
-	 * and display an error if not
+	 * Test if the user can edit the currently selected view
 	 *
 	 * @param	{Integer}	[row]
 	 *
@@ -3583,8 +3599,28 @@ var ZoteroPane = new function()
 	
 	
 	/**
-	 * Test if the user can edit the currently selected library/collection,
-	 * and display an error if not
+	 * Test if the user can edit the parent library of the selected view
+	 *
+	 * @param	{Integer}	[row]
+	 * @return	{Boolean}		TRUE if user can edit, FALSE if not
+	 */
+	this.canEditLibrary = function (row) {
+		// Currently selected row
+		if (row === undefined) {
+			row = this.collectionsView.selection.currentIndex;
+		}
+		
+		var itemGroup = this.collectionsView._getItemAtRow(row);
+		// TODO: isEditable for user library should just return true
+		if (itemGroup.ref.libraryID) {
+			return Zotero.Libraries.isEditable(itemGroup.ref.libraryID);
+		}
+		return true;
+	}
+	
+	
+	/**
+	 * Test if the user can edit the currently selected library/collection
 	 *
 	 * @param	{Integer}	[row]
 	 *
