@@ -2585,7 +2585,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		
 		var returnArray = [];
 		for(var i=0; i<statements.length; i++) {
-			returnArray.push([statements[i].subject, statements[i].predicate, (statements[i].object.termType == "literal" ? statements[i].object.toString() : statements[i].object)]);
+			returnArray.push([statements[i].subject, statements[i].predicate, (statements[i].object.termType == "literal" ? statements[i].object.toString() : statements[i].object), statements[i].object.lang]);
 		}
 		return returnArray;
 	}
