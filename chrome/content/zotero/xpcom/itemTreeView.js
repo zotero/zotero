@@ -174,6 +174,10 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 		// in overlay.js::onCollectionSelected()
 		this.listener = listener;
 		tree.addEventListener('keypress', listener, false);
+		// This seems to be the only way to prevent Enter/Return
+		// from toggle row open/close. The event is handled by
+		// handleKeyPress() in zoteroPane.js.
+		tree._handleEnter = function () {};
 		
 		this.sort();
 		

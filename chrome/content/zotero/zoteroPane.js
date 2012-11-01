@@ -664,6 +664,19 @@ var ZoteroPane = new function()
 				event.preventDefault();
 				return;
 			}
+			else if (event.keyCode == event.DOM_VK_RETURN) {
+				var items = this.itemsView.getSelectedItems();
+				// Don't do anything if more than 20 items selected
+				if (!items.length || items.length > 20) {
+					return;
+				}
+				ZoteroPane_Local.viewItems(items, event);
+				// These don't seem to do anything. Instead we override
+				// the tree binding's _handleEnter method in itemTreeView.js.
+				//event.preventDefault();
+				//event.stopPropagation();
+				return;
+			}
 		}
 	}
 	
@@ -2607,72 +2620,23 @@ var ZoteroPane = new function()
 			}
 		}
 		else if (tree.id == 'zotero-items-tree') {
-			var viewOnDoubleClick = Zotero.Prefs.get('viewOnDoubleClick');
-			
 			// Expand/collapse on triple-click
-			if (viewOnDoubleClick) {
-				if (event.detail == 3) {
-					tree.view.toggleOpenState(tree.view.selection.currentIndex);
-					return;
-				}
-				
-				// Don't expand/collapse on double-click
-				event.stopPropagation();
+			if (!Zotero.Prefs.get('viewOnDoubleClick')) {
+				return;
 			}
+			
+			if (event.detail == 3) {
+				tree.view.toggleOpenState(tree.view.selection.currentIndex);
+				return;
+			}
+			
+			// Don't expand/collapse on double-click
+			event.stopPropagation();
 			
 			if (tree.view && tree.view.selection.currentIndex > -1) {
 				var item = ZoteroPane_Local.getSelectedItems()[0];
 				if (item) {
-					if (item.isRegularItem()) {
-						if (itemGroup.isBucket()) {
-							var uri = itemGroup.ref.getItemURI(item);
-							ZoteroPane_Local.loadURI(uri);
-							event.stopPropagation();
-							return;
-						}
-						
-						if (!viewOnDoubleClick) {
-							return;
-						}
-						
-						var uri = Components.classes["@mozilla.org/network/standard-url;1"].
-								createInstance(Components.interfaces.nsIURI);
-						var snapID = item.getBestAttachment();
-						if (snapID) {
-							spec = Zotero.Items.get(snapID).getLocalFileURL();
-							if (spec) {
-								uri.spec = spec;
-								if (uri.scheme && uri.scheme == 'file') {
-									ZoteroPane_Local.viewAttachment(snapID, event);
-									return;
-								}
-							}
-						}
-						
-						var uri = item.getField('url');
-						if (!uri) {
-							var doi = item.getField('DOI');
-							if (doi) {
-								// Pull out DOI, in case there's a prefix
-								doi = Zotero.Utilities.cleanDOI(doi);
-								if (doi) {
-									uri = "http://dx.doi.org/" + encodeURIComponent(doi);
-								}
-							}
-						}
-						if (uri) {
-							ZoteroPane_Local.loadURI(uri);
-						}
-					}
-					else if (item.isNote()) {
-						if (!ZoteroPane_Local.collectionsView.editable) {
-							return;
-						}
-						document.getElementById('zotero-view-note-button').doCommand();
-					}
-					else if (item.isAttachment()) {
-						ZoteroPane_Local.viewSelectedAttachment(event);
-					}
+					ZoteroPane_Local.viewItems([item], event);
 				}
 			}
 		}
@@ -3375,6 +3339,57 @@ var ZoteroPane = new function()
 		}
 		else {
 			Zotero.Attachments.importFromDocument(window.content.document, itemID);
+		}
+	}
+	
+	
+	this.viewItems = function (items, event) {
+		if (items.length > 1) {
+			if (!event || (!event.metaKey && !event.shiftKey)) {
+				event = { metaKey: true, shiftKey: true };
+			}
+		}
+		
+		for each(var item in items) {
+			if (item.isRegularItem()) {
+				var uri = Components.classes["@mozilla.org/network/standard-url;1"]
+							.createInstance(Components.interfaces.nsIURI);
+				var snapID = item.getBestAttachment();
+				if (snapID) {
+					spec = Zotero.Items.get(snapID).getLocalFileURL();
+					if (spec) {
+						uri.spec = spec;
+						if (uri.scheme && uri.scheme == 'file') {
+							ZoteroPane_Local.viewAttachment(snapID, event);
+							continue;
+						}
+					}
+				}
+				
+				var uri = item.getField('url');
+				if (!uri) {
+					var doi = item.getField('DOI');
+					if (doi) {
+						// Pull out DOI, in case there's a prefix
+						doi = Zotero.Utilities.cleanDOI(doi);
+						if (doi) {
+							uri = "http://dx.doi.org/" + encodeURIComponent(doi);
+						}
+					}
+				}
+				if (uri) {
+					ZoteroPane_Local.loadURI(uri, event);
+				}
+			}
+			else if (item.isNote()) {
+				if (!ZoteroPane_Local.collectionsView.editable) {
+					continue;
+				}
+				document.getElementById('zotero-view-note-button').doCommand();
+			}
+			else if (item.isAttachment()) {
+				ZoteroPane_Local.viewAttachment(item.id, event);
+			}
 		}
 	}
 	
