@@ -509,6 +509,19 @@ var ZoteroPane = new function()
 			
 			return;
 		}
+		else if (from == 'zotero-items-tree') {
+			// Focus TinyMCE explicitly on tab key, since the normal focusing
+			// doesn't work right
+			if (!event.shiftKey && event.keyCode == event.DOM_VK_TAB) {
+				var deck = document.getElementById('zotero-item-pane-content');
+				if (deck.selectedPanel.id == 'zotero-view-note') {
+					setTimeout(function () {
+						document.getElementById('zotero-note-editor').focus();
+					}, 0);
+				}
+			}
+			return;
+		}
 		
 		// Ignore keystrokes if Zotero pane is closed
 		var zoteroPane = document.getElementById('zotero-pane-stack');
