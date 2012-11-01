@@ -1373,7 +1373,7 @@ Zotero.Attachments = new function(){
 			var win = doc.defaultView;
 			if(win) {
 				win = win.wrappedJSObject;
-				if(win && "PDFJS" in win && win.PDFJS.isFirefoxExtension) {
+				if(win && "PDFJS" in win) {
 					return true;
 				}
 			}
