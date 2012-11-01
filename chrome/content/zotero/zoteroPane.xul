@@ -142,7 +142,7 @@
 					<toolbarbutton id="zotero-tb-item-from-page" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItemFromPage.label;" command="cmd_zotero_newItemFromCurrentPage"/>
 					<toolbarbutton id="zotero-tb-lookup" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" type="panel">
 						<panel id="zotero-lookup-panel" type="arrow" onpopupshown="Zotero_Lookup.onShowing()"
-								onpopuphidden="Zotero_Lookup.onHidden()">
+								onpopuphidden="Zotero_Lookup.onHidden(event)">
 							<vbox>
 								<description>&zotero.lookup.description;</description>
 								<stack>
