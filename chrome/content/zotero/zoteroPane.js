@@ -1463,7 +1463,7 @@ var ZoteroPane = new function()
 		var id = newItem.save();
 		
 		var newItem = Zotero.Items.get(id);
-		item.clone(false, newItem);
+		item.clone(false, newItem, false, !Zotero.Prefs.get('groups.copyTags'));
 		newItem.save();
 		
 		if (this.itemsView._itemGroup.isCollection() && !newItem.getSource()) {

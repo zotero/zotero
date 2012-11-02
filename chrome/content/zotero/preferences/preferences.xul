@@ -64,6 +64,7 @@ To add a new preference:
 			<preference id="pref-groups-copyChildNotes" name="extensions.zotero.groups.copyChildNotes" type="bool"/>
 			<preference id="pref-groups-copyChildFileAttachments" name="extensions.zotero.groups.copyChildFileAttachments" type="bool"/>
 			<preference id="pref-groups-copyChildLinks" name="extensions.zotero.groups.copyChildLinks" type="bool"/>
+			<preference id="pref-groups-copyTags" name="extensions.zotero.groups.copyTags" type="bool"/>
 		</preferences>
 		
 		<groupbox id="zotero-prefpane-general-groupbox">
@@ -148,6 +149,7 @@ To add a new preference:
 				<checkbox label="&zotero.preferences.groups.childNotes;" preference="pref-groups-copyChildNotes"/>
 				<checkbox label="&zotero.preferences.groups.childFiles;" preference="pref-groups-copyChildFileAttachments"/>
 				<checkbox label="&zotero.preferences.groups.childLinks;" preference="pref-groups-copyChildLinks"/>
+				<checkbox label="&zotero.preferences.groups.tags;" preference="pref-groups-copyTags"/>
 			</vbox>
 		</groupbox>
 		

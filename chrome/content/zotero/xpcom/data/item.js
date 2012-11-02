@@ -3873,16 +3873,21 @@ Zotero.Item.prototype.multiDiff = function (otherItems, ignoreFields) {
 /**
  * Returns an unsaved copy of the item
  *
- * @param	{Boolean}		[includePrimary=false]
- * @param	{Zotero.Item}	[newItem=null]			Target item for clone (used to pass a saved
- *														item for duplicating items with tags)
- * @param	{Boolean}		[unsaved=false]			Skip properties that require a saved object (e.g., tags)
+ * @param  {Boolean}       [includePrimary=false]
+ * @param  {Zotero.Item}   [newItem=null]         Target item for clone (used to pass a saved
+ *                                                    item for duplicating items with tags)
+ * @param  {Boolean}       [unsaved=false]        Skip properties that require a saved object (e.g., tags)
+ * @param  {Boolean}       [skipTags=false]       Skip tags (implied by 'unsaved')
  */
-Zotero.Item.prototype.clone = function(includePrimary, newItem, unsaved) {
+Zotero.Item.prototype.clone = function(includePrimary, newItem, unsaved, skipTags) {
 	Zotero.debug('Cloning item ' + this.id);
 	
 	if (includePrimary && newItem) {
 		throw ("includePrimary and newItem parameters are mutually exclusive in Zotero.Item.clone()");
+	}
+	
+	if (unsaved) {
+		skipTags = true;
 	}
 	
 	Zotero.DB.beginTransaction();
@@ -4024,7 +4029,7 @@ Zotero.Item.prototype.clone = function(includePrimary, newItem, unsaved) {
 		}
 	}
 	
-	if (!unsaved && obj.tags) {
+	if (!skipTags && obj.tags) {
 		for each(var tag in obj.tags) {
 			if (sameLibrary) {
 				newItem.addTagByID(tag.primary.tagID);
