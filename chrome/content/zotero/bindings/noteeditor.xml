@@ -268,11 +268,28 @@
 				<body>
 				<![CDATA[
 					switch (event.keyCode) {
-						// Insert tab manually
 						case 9:
-							if (event.shiftKey || event.ctrlKey || event.altKey) {
+							if (event.ctrlKey || event.altKey) {
 								return;
 							}
+							
+							event.stopPropagation();
+							event.preventDefault();
+							
+							// On shift-tab, focus the element specified in
+							// the 'previousfocus' attribute
+							if (event.shiftKey) {
+								let id = this.getAttribute('previousfocus');
+								if (id) {
+									setTimeout(function () {
+										document.getElementById(id).focus();
+									}, 0);
+								}
+								return;
+							}
+							
+							// Insert tab manually
+							//
 							// From http://kb.mozillazine.org/Inserting_text_at_cursor
 							try {
 								var command = "cmd_insertText";
@@ -288,9 +305,6 @@
 							catch (e) {
 								Zotero.debug("Can't do cmd_insertText!\n" + e, 1);
 							}
-							
-							event.stopPropagation();
-							event.preventDefault();
 							
 							// DEBUG: is there a better way to prevent blur()?
 							setTimeout(function() { event.target.focus(); }, 1);

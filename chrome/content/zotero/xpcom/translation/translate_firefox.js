@@ -453,7 +453,8 @@ Zotero.Translate.SandboxManager.prototype = {
 	 */
 	"importObject":function(object, passAsFirstArgument, attachTo) {
 		if(!attachTo) attachTo = this.sandbox.Zotero;
-		var newExposedProps = false;
+		var newExposedProps = false,
+			sandbox = this.sandbox;
 		if(!object.__exposedProps__) newExposedProps = {};
 		for(var key in (newExposedProps ? object : object.__exposedProps__)) {
 			let localKey = key;
@@ -464,11 +465,16 @@ Zotero.Translate.SandboxManager.prototype = {
 			var isObject = typeof object[localKey] === "object";
 			if(isFunction || isObject) {
 				if(isFunction) {
-					if(passAsFirstArgument) {
-						attachTo[localKey] = object[localKey].bind(object, passAsFirstArgument);
-					} else {
-						attachTo[localKey] = object[localKey].bind(object);
-					}
+					attachTo[localKey] = function() {
+						var args = Array.prototype.slice.apply(arguments);
+						if(passAsFirstArgument) args.unshift(passAsFirstArgument);
+						var out = object[localKey].apply(object, args);
+						if(out instanceof Array) {
+							// Copy to sandbox
+							out = sandbox.Array.prototype.slice.apply(out);
+						}
+						return out;
+					};
 				} else {
 					attachTo[localKey] = {};
 				}

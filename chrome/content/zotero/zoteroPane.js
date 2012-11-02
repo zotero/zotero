@@ -502,6 +502,19 @@ var ZoteroPane = new function()
 			
 			return;
 		}
+		else if (from == 'zotero-items-tree') {
+			// Focus TinyMCE explicitly on tab key, since the normal focusing
+			// doesn't work right
+			if (!event.shiftKey && event.keyCode == event.DOM_VK_TAB) {
+				var deck = document.getElementById('zotero-item-pane-content');
+				if (deck.selectedPanel.id == 'zotero-view-note') {
+					setTimeout(function () {
+						document.getElementById('zotero-note-editor').focus();
+					}, 0);
+				}
+			}
+			return;
+		}
 		
 		// Ignore keystrokes if Zotero pane is closed
 		var zoteroPane = document.getElementById('zotero-pane-stack');
@@ -657,6 +670,19 @@ var ZoteroPane = new function()
 				event.preventDefault();
 				return;
 			}
+			else if (event.keyCode == event.DOM_VK_RETURN) {
+				var items = this.itemsView.getSelectedItems();
+				// Don't do anything if more than 20 items selected
+				if (!items.length || items.length > 20) {
+					return;
+				}
+				ZoteroPane_Local.viewItems(items, event);
+				// These don't seem to do anything. Instead we override
+				// the tree binding's _handleEnter method in itemTreeView.js.
+				//event.preventDefault();
+				//event.stopPropagation();
+				return;
+			}
 		}
 	}
 	
@@ -738,7 +764,7 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		if (!this.canEdit()) {
+		if (!this.canEditLibrary()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -1087,7 +1113,24 @@ var ZoteroPane = new function()
 		];
 		for(var i=0; i<disableIfNoEdit.length; i++) {
 			var el = document.getElementById(disableIfNoEdit[i]);
-			if(itemgroup.editable) {
+			
+			// If a trash is selected, new collection depends on the
+			// editability of the library
+			if (itemgroup.isTrash() &&
+					disableIfNoEdit[i] == 'cmd_zotero_newCollection') {
+				if (itemgroup.ref.libraryID) {
+					var overrideEditable =
+						Zotero.Libraries.isEditable(itemgroup.ref.libraryID);
+				}
+				else {
+					var overrideEditable = true;
+				}
+			}
+			else {
+				var overrideEditable = false;
+			}
+			
+			if (itemgroup.editable || overrideEditable) {
 				if(el.hasAttribute("disabled")) el.removeAttribute("disabled");
 			} else {
 				el.setAttribute("disabled", "true");
@@ -2602,66 +2645,23 @@ var ZoteroPane = new function()
 			}
 		}
 		else if (tree.id == 'zotero-items-tree') {
-			var viewOnDoubleClick = Zotero.Prefs.get('viewOnDoubleClick');
-			
 			// Expand/collapse on triple-click
-			if (viewOnDoubleClick) {
-				if (event.detail == 3) {
-					tree.view.toggleOpenState(tree.view.selection.currentIndex);
-					return;
-				}
-				
-				// Don't expand/collapse on double-click
-				event.stopPropagation();
+			if (!Zotero.Prefs.get('viewOnDoubleClick')) {
+				return;
 			}
+			
+			if (event.detail == 3) {
+				tree.view.toggleOpenState(tree.view.selection.currentIndex);
+				return;
+			}
+			
+			// Don't expand/collapse on double-click
+			event.stopPropagation();
 			
 			if (tree.view && tree.view.selection.currentIndex > -1) {
 				var item = ZoteroPane_Local.getSelectedItems()[0];
 				if (item) {
-					if (item.isRegularItem()) {
-						if (itemGroup.isBucket()) {
-							var uri = itemGroup.ref.getItemURI(item);
-							ZoteroPane_Local.loadURI(uri);
-							event.stopPropagation();
-							return;
-						}
-						
-						if (!viewOnDoubleClick) {
-							return;
-						}
-						
-						var uri = Components.classes["@mozilla.org/network/standard-url;1"].
-								createInstance(Components.interfaces.nsIURI);
-						var snapID = item.getBestAttachment();
-						if (snapID) {
-							ZoteroPane_Local.viewAttachment(snapID, event);
-							return;
-						}
-						
-						var uri = item.getField('url');
-						if (!uri) {
-							var doi = item.getField('DOI');
-							if (doi) {
-								// Pull out DOI, in case there's a prefix
-								doi = Zotero.Utilities.cleanDOI(doi);
-								if (doi) {
-									uri = "http://dx.doi.org/" + encodeURIComponent(doi);
-								}
-							}
-						}
-						if (uri) {
-							ZoteroPane_Local.loadURI(uri);
-						}
-					}
-					else if (item.isNote()) {
-						if (!ZoteroPane_Local.collectionsView.editable) {
-							return;
-						}
-						document.getElementById('zotero-view-note-button').doCommand();
-					}
-					else if (item.isAttachment()) {
-						ZoteroPane_Local.viewSelectedAttachment(event);
-					}
+					ZoteroPane_Local.viewItems([item], event);
 				}
 			}
 		}
@@ -3368,6 +3368,51 @@ var ZoteroPane = new function()
 	}
 	
 	
+	this.viewItems = function (items, event) {
+		if (items.length > 1) {
+			if (!event || (!event.metaKey && !event.shiftKey)) {
+				event = { metaKey: true, shiftKey: true };
+			}
+		}
+		
+		for each(var item in items) {
+			if (item.isRegularItem()) {
+				var uri = Components.classes["@mozilla.org/network/standard-url;1"]
+							.createInstance(Components.interfaces.nsIURI);
+				var snapID = item.getBestAttachment();
+				if (snapID) {
+					ZoteroPane_Local.viewAttachment(snapID, event);
+					continue;
+				}
+				
+				var uri = item.getField('url');
+				if (!uri) {
+					var doi = item.getField('DOI');
+					if (doi) {
+						// Pull out DOI, in case there's a prefix
+						doi = Zotero.Utilities.cleanDOI(doi);
+						if (doi) {
+							uri = "http://dx.doi.org/" + encodeURIComponent(doi);
+						}
+					}
+				}
+				if (uri) {
+					ZoteroPane_Local.loadURI(uri, event);
+				}
+			}
+			else if (item.isNote()) {
+				if (!ZoteroPane_Local.collectionsView.editable) {
+					continue;
+				}
+				document.getElementById('zotero-view-note-button').doCommand();
+			}
+			else if (item.isAttachment()) {
+				ZoteroPane_Local.viewAttachment(item.id, event);
+			}
+		}
+	}
+	
+	
 	function viewAttachment(itemIDs, event, noLocateOnMissing, forceExternalViewer) {
 		// If view isn't editable, don't show Locate button, since the updated
 		// path couldn't be sent back up
@@ -3591,8 +3636,7 @@ var ZoteroPane = new function()
 	
 	
 	/**
-	 * Test if the user can edit the currently selected library/collection,
-	 * and display an error if not
+	 * Test if the user can edit the currently selected view
 	 *
 	 * @param	{Integer}	[row]
 	 *
@@ -3610,8 +3654,28 @@ var ZoteroPane = new function()
 	
 	
 	/**
-	 * Test if the user can edit the currently selected library/collection,
-	 * and display an error if not
+	 * Test if the user can edit the parent library of the selected view
+	 *
+	 * @param	{Integer}	[row]
+	 * @return	{Boolean}		TRUE if user can edit, FALSE if not
+	 */
+	this.canEditLibrary = function (row) {
+		// Currently selected row
+		if (row === undefined) {
+			row = this.collectionsView.selection.currentIndex;
+		}
+		
+		var itemGroup = this.collectionsView._getItemAtRow(row);
+		// TODO: isEditable for user library should just return true
+		if (itemGroup.ref.libraryID) {
+			return Zotero.Libraries.isEditable(itemGroup.ref.libraryID);
+		}
+		return true;
+	}
+	
+	
+	/**
+	 * Test if the user can edit the currently selected library/collection
 	 *
 	 * @param	{Integer}	[row]
 	 *

@@ -14,11 +14,18 @@
 	<vbox id="zotero-bibliography-container">
 		<groupbox>
 			<caption label="&zotero.bibliography.style.label;"/>
-			<listbox id="style-listbox" oncommand="Zotero_File_Interface_Bibliography.styleChanged()"/>
+			<listbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
 		</groupbox>
 		<groupbox>
-			<caption label="&zotero.bibliography.output.label;"/>
-			<radiogroup id="output-radio">
+			<caption label="&zotero.bibliography.outputMode;"/>
+			<radiogroup id="output-mode-radio">
+				<radio id="citation"/>
+				<radio id="bibliography" label="&zotero.bibliography.bibliography;"/>
+			</radiogroup>
+		</groupbox>
+		<groupbox>
+			<caption label="&zotero.bibliography.outputMethod;"/>
+			<radiogroup id="output-method-radio">
 				<radio id="save-as-rtf" label="&zotero.bibliography.saveAsRTF.label;"/>
 				<radio id="save-as-html" label="&zotero.bibliography.saveAsHTML.label;"/>
 				<radio id="copy-to-clipboard" label="&zotero.bibliography.copyToClipboard.label;"/>

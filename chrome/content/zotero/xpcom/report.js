@@ -70,12 +70,17 @@ Zotero.Report = new function() {
 				// Independent note
 				if (arr['note']) {
 					content += '\n';
-					if (arr.note.substr(0, 1024).match(/<p[^>]*>/)) {
-						content += arr.note + '\n';
+					
+					// If not valid XML, display notes with entities encoded
+					var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+							.createInstance(Components.interfaces.nsIDOMParser);
+					var doc = parser.parseFromString(arr.note, "application/xml");
+					if (doc.documentElement.tagName == 'parsererror') {
+						content += '<p class="plaintext">' + escapeXML(arr.note) + '</p>\n';
 					}
-					// Wrap plaintext notes in <p>
+					// Otherwise render markup normally
 					else {
-						content += '<p class="plaintext">' + arr.note + '</p>\n';
+						content += arr.note + '\n';
 					}
 				}
 			}
@@ -92,12 +97,16 @@ Zotero.Report = new function() {
 					for each(var note in arr.reportChildren.notes) {
 						content += '<li id="i' + note.itemID + '">\n';
 						
-						if (note.note.substr(0, 1024).match(/<p[^>]*>/)) {
-							content += note.note + '\n';
-						}
-						// Wrap plaintext notes in <p>
-						else {
+						// If not valid XML, display notes with entities encoded
+						var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+								.createInstance(Components.interfaces.nsIDOMParser);
+						var doc = parser.parseFromString(note.note, "application/xml");
+						if (doc.documentElement.tagName == 'parsererror') {
 							content += '<p class="plaintext">' + escapeXML(note.note) + '</p>\n';
+						}
+						// Otherwise render markup normally
+						else {
+							content += note.note + '\n';
 						}
 						
 						// Child note tags
