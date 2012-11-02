@@ -489,30 +489,43 @@ var Zotero_File_Interface = new function() {
 		var newDialog = window.openDialog("chrome://zotero/content/bibliography.xul",
 			"_blank","chrome,modal,centerscreen", io);
 		
-		if(!io.output) return;
+		if(!io.method) return;
 		
 		// determine output format
 		var format = "html";
-		if(io.output == "save-as-rtf") {
+		if(io.method == "save-as-rtf") {
 			format = "rtf";
 		}
 		
 		// generate bibliography
 		try {
-			if(io.output == 'copy-to-clipboard') {
-				copyItemsToClipboard(items, io.style);
+			if(io.method == 'copy-to-clipboard') {
+				if (io.mode == 'citation') {
+					copyCitationToClipboard(items, io.style);
+				}
+				else {
+					copyItemsToClipboard(items, io.style);
+				}
 				return;
 			}
 			else {
-				var style = Zotero.Styles.get(io.style);
-				var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, format);
+				if (io.mode == 'citation') {
+					var csl = Zotero.Styles.get(format).csl;
+					csl.updateItems([item.id for each(item in items)]);
+					var citation = {citationItems:[{id:item.id} for each(item in items)], properties:{}};
+					var bibliography = csl.previewCitationCluster(citation, [], [], "html");
+				}
+				else {
+					var style = Zotero.Styles.get(io.style);
+					var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, format);
+				}
 			}
 		} catch(e) {
 			window.alert(Zotero.getString("fileInterface.bibliographyGenerationError"));
 			throw(e);
 		}
 		
-		if(io.output == "print") {
+		if(io.method == "print") {
 			// printable bibliography, using a hidden browser
 			var browser = Zotero.Browser.createHiddenBrowser(window);
 			
@@ -549,7 +562,7 @@ var Zotero_File_Interface = new function() {
 			browser.addEventListener("pageshow", listener, false);
 			browser.loadURIWithFlags("data:text/html;charset=utf-8,"+encodeURI(bibliography),
 				Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, "utf-8", null);
-		} else if(io.output == "save-as-html") {
+		} else if(io.method == "save-as-html") {
 			var fStream = _saveBibliography(name, "HTML");
 			
 			if(fStream !== false) {			
@@ -575,7 +588,7 @@ var Zotero_File_Interface = new function() {
 				os.close();
 				fStream.close();
 			}
-		} else if(io.output == "save-as-rtf") {
+		} else if(io.method == "save-as-rtf") {
 			var fStream = _saveBibliography(name, "RTF");
 			if(fStream !== false) {
 				fStream.write(bibliography, bibliography.length);
