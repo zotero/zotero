@@ -347,9 +347,9 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 				try {
 					var co = Zotero.OpenURL.createContextObject(Zotero.Items.get(itemID), "1.0");
 					if(!co) continue;
-					output.push('  <span class="Z3988" title="'+
+					output.push('  <div class="forget-me-not" style="hidden:true;"><span class="Z3988" title="'+
 						co.replace("&", "&amp;", "g").replace("<", "&lt;", "g").replace(">", "&gt;", "g")+
-						'"/>\n');
+						'"/></div>\n');
 				} catch(e) {
 					Zotero.logError(e);
 				}
