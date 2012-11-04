@@ -40,7 +40,8 @@ const CSL_NAMES_MAPPINGS = {
 	"interviewer":"interviewer",
 	"recipient":"recipient",
 	"seriesEditor":"collection-editor",
-	"translator":"translator"
+	"translator":"translator",
+	"contributor":"contributor"
 }
 
 /*
