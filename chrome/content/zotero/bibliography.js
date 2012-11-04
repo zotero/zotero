@@ -146,7 +146,6 @@ var Zotero_File_Interface_Bibliography = new function() {
 					citationPrefNode.selectedItem = selectedCitationPrefNode;
 				}
 			}
-			citationLangSet(citationPrefNames[i], true);
 		}
 
 		var langPrefs = document.getElementById('lang-prefs');
@@ -380,7 +379,6 @@ var Zotero_File_Interface_Bibliography = new function() {
 
     function citationLangSet (name, init, radioClick) {
 		var settings = _io['citationLangPrefs'+name];
-        Zotero.debug("XXX citationLangSet() "+name+" "+init+" "+radioClick);
 	    if (!settings || !settings[0]) {
 		    settings = ['orig'];
 	    }
@@ -425,10 +423,8 @@ var Zotero_File_Interface_Bibliography = new function() {
                 } else if (radioClick && nodes[i].id === translitID) {
                     // true invokes a quash of the affixes
                     if (currentPrimaryID === translitID) {
-                        Zotero.debug("XXX ONE");
                         citationSetAffixes(nodes[i]);
                     } else {
-                        Zotero.debug("XXX TWO");
                         citationSetAffixes(nodes[i], null, true);
                     }
                 } else {
@@ -439,7 +435,6 @@ var Zotero_File_Interface_Bibliography = new function() {
     }
 
     function citationSetAffixes (node, affixNode, quashPrimaryAffixes) {
-        Zotero.debug("XXX in citationSetAffixes() "+node+" "+affixNode+" "+quashPrimaryAffixes);
         if (!node) {
             var node = document.popupNode;
         }
@@ -473,7 +468,6 @@ var Zotero_File_Interface_Bibliography = new function() {
                 affixListPush(types[i], "checkbox", forms[j], affixList, "suffix");
             }
         }
-        Zotero.debug("XXX citationAffixes saved: "+affixList);
 		_io['citationAffixes'] = affixList;
     }
 
@@ -499,7 +493,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	    var forms = ['orig', 'translit', 'translat'];
         var count = 0;
         for (var i = 0, ilen = types.length; i < ilen; i += 1) {
-        count =  citationGetAffixesAction(types[i], "radio", "translit", affixList, count);
+            count =  citationGetAffixesAction(types[i], "radio", "translit", affixList, count);
             
             for (var j = 0, jlen = forms.length; j < jlen; j += 1) {
                 count = citationGetAffixesAction(types[i], "checkbox", forms[j], affixList, count);
