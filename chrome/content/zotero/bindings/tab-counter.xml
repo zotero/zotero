@@ -34,7 +34,7 @@
 			<xul:hbox class="tab-middle box-inherit" xbl:inherits="align,dir,pack,orient,selected" flex="1">
 				<xul:image class="tab-icon" xbl:inherits="validate,src=image" role="presentation"/>
 				<xul:label class="tab-text" xbl:inherits="value=label,accesskey,crop,disabled" flex="1" role="presentation"/>
-				<xul:label class="tab-counter" xbl:inherits="disabled" role="presentation"/>
+				<xul:image class="tab-counter" xbl:inherits="disabled" role="presentation"/>
 			</xul:hbox>
 		</content>
 		<implementation>
@@ -42,9 +42,11 @@
 				<setter>
 				<![CDATA[
 					var v = parseInt(val, 10);
-					if(!isNaN(v) && v >= 0) {
+					if(!isNaN(v) && v == 0) {
 						this.setAttribute('count', v);
-						document.getAnonymousElementByAttribute(this, 'class', 'tab-counter').value = '(' + v + ')';
+					}
+					else if(!isNaN(v) && v > 0) {
+						this.setAttribute('count', v);
 					}
 				]]>
 				</setter>

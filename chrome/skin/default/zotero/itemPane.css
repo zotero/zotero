@@ -20,6 +20,15 @@
 	margin-bottom: .25em !important;
 }
 
+/* itemPane tabs with counters (bullets) */
+tabbox#zotero-view-tabbox tab[type=counter] .tab-counter {
+list-style-image: url('chrome://zotero/skin/bullet_orange.png');
+}
+
+tabbox#zotero-view-tabbox tab[type=counter][count="0"] .tab-counter {
+list-style-image: url('chrome://zotero/skin/bullet_grey.png');
+}
+
 #zotero-view-item
 {
 	padding: 1.5em .25em .25em;
