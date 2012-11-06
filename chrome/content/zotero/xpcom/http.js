@@ -512,10 +512,9 @@ Zotero.HTTP = new function() {
 						exception(e);
 						return;
 					} else {
+						if(!dontDelete) Zotero.Browser.deleteHiddenBrowser(hiddenBrowsers);
 						throw(e);
 					}
-				} finally {
-					doLoad();
 				}
 			} else {
 				if(!dontDelete) Zotero.Browser.deleteHiddenBrowser(hiddenBrowsers);
@@ -530,8 +529,8 @@ Zotero.HTTP = new function() {
 		var onLoad = function(e) {
 			var hiddenBrowser = e.currentTarget,
 				doc = hiddenBrowser.contentDocument;
-			if(!doc || doc !== e.target) return;
-			var url = doc.location.href.toString();
+			if(!doc) return;
+			var url = doc.documentURI;
 			if(url === "about:blank") return;
 			if(doc.readyState === "loading" && (firedLoadEvent++) < 120) {
 				// Try again in a second
