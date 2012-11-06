@@ -509,16 +509,9 @@ var Zotero_File_Interface = new function() {
 				return;
 			}
 			else {
-				if (io.mode == 'citation') {
-					var csl = Zotero.Styles.get(format).csl;
-					csl.updateItems([item.id for each(item in items)]);
-					var citation = {citationItems:[{id:item.id} for each(item in items)], properties:{}};
-					var bibliography = csl.previewCitationCluster(citation, [], [], "html");
-				}
-				else {
-					var style = Zotero.Styles.get(io.style);
-					var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, format);
-				}
+				var style = Zotero.Styles.get(io.style);
+				var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style,
+					items, format, io.mode === "citation");
 			}
 		} catch(e) {
 			window.alert(Zotero.getString("fileInterface.bibliographyGenerationError"));
