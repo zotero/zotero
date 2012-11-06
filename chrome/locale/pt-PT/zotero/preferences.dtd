@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "nós descendentes">
 <!ENTITY zotero.preferences.groups.childFiles "retratos descendentes e arquivos importados">
 <!ENTITY zotero.preferences.groups.childLinks "ligações descendentes">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 

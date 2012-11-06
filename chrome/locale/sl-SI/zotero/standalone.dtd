@@ -1,17 +1,17 @@
-<!ENTITY preferencesCmdMac.label "Preferences…">
+<!ENTITY preferencesCmdMac.label "Nastavitve ...">
 <!ENTITY preferencesCmdMac.commandkey ",">
-<!ENTITY servicesMenuMac.label "Services">
-<!ENTITY hideThisAppCmdMac.label "Hide &brandShortName;">
-<!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Hide Others">
-<!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "Show All">
-<!ENTITY quitApplicationCmdMac.label "Quit Zotero">
-<!ENTITY quitApplicationCmdMac.key "Q">
+<!ENTITY servicesMenuMac.label "Storitve">
+<!ENTITY hideThisAppCmdMac.label "Skrij ">
+<!ENTITY hideThisAppCmdMac.commandkey "S">
+<!ENTITY hideOtherAppsCmdMac.label "Skrij druge">
+<!ENTITY hideOtherAppsCmdMac.commandkey "S">
+<!ENTITY showAllAppsCmdMac.label "Pokaži vse">
+<!ENTITY quitApplicationCmdMac.label "Izhod iz Zotera">
+<!ENTITY quitApplicationCmdMac.key "z">
 
 
-<!ENTITY fileMenu.label "File">
-<!ENTITY fileMenu.accesskey "F">
+<!ENTITY fileMenu.label "Datoteka">
+<!ENTITY fileMenu.accesskey "D">
 <!ENTITY saveCmd.label "Save…">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
@@ -20,82 +20,82 @@
 <!ENTITY printCmd.label "Print…">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "U">
-<!ENTITY closeCmd.label "Close">
+<!ENTITY closeCmd.label "Zapri">
 <!ENTITY closeCmd.key "W">
-<!ENTITY closeCmd.accesskey "C">
-<!ENTITY quitApplicationCmdWin.label "Exit">
-<!ENTITY quitApplicationCmdWin.accesskey "x">
-<!ENTITY quitApplicationCmd.label "Quit">
-<!ENTITY quitApplicationCmd.accesskey "Q">
+<!ENTITY closeCmd.accesskey "Z">
+<!ENTITY quitApplicationCmdWin.label "Zapri">
+<!ENTITY quitApplicationCmdWin.accesskey "r">
+<!ENTITY quitApplicationCmd.label "Izhod">
+<!ENTITY quitApplicationCmd.accesskey "z">
 
 
-<!ENTITY editMenu.label "Edit">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Undo">
+<!ENTITY editMenu.label "Uredi">
+<!ENTITY editMenu.accesskey "R">
+<!ENTITY undoCmd.label "Razveljavi">
 <!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Redo">
+<!ENTITY undoCmd.accesskey "R">
+<!ENTITY redoCmd.label "Ponovi">
 <!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Cut">
+<!ENTITY redoCmd.accesskey "P">
+<!ENTITY cutCmd.label "Izreži">
 <!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Copy">
+<!ENTITY cutCmd.accesskey "z">
+<!ENTITY copyCmd.label "Kopiraj">
 <!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
-<!ENTITY copyCitationCmd.label "Copy Citation">
-<!ENTITY copyBibliographyCmd.label "Copy Bibliography">
-<!ENTITY pasteCmd.label "Paste">
+<!ENTITY copyCmd.accesskey "K">
+<!ENTITY copyCitationCmd.label "Kopiraj citat">
+<!ENTITY copyBibliographyCmd.label "Kopiraj bibliografijo">
+<!ENTITY pasteCmd.label "Prilepi">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Delete">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Select All">
+<!ENTITY deleteCmd.label "Izbriši">
+<!ENTITY deleteCmd.key "b">
+<!ENTITY deleteCmd.accesskey "b">
+<!ENTITY selectAllCmd.label "Izberi vse">
 <!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Options…">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Preferences">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Find">
+<!ENTITY selectAllCmd.accesskey "z">
+<!ENTITY preferencesCmd.label "Možnosti ...">
+<!ENTITY preferencesCmd.accesskey "M">
+<!ENTITY preferencesCmdUnix.label "Nastavitve">
+<!ENTITY preferencesCmdUnix.accesskey "N">
+<!ENTITY findCmd.label "Najdi">
 <!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
-<!ENTITY bidiSwitchPageDirectionItem.label "Switch Page Direction">
-<!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
-<!ENTITY bidiSwitchTextDirectionItem.label "Switch Text Direction">
-<!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
-<!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
+<!ENTITY findCmd.commandkey "N">
+<!ENTITY bidiSwitchPageDirectionItem.label "Preklopi smer strani">
+<!ENTITY bidiSwitchPageDirectionItem.accesskey "t">
+<!ENTITY bidiSwitchTextDirectionItem.label "Preklopi smer besedila">
+<!ENTITY bidiSwitchTextDirectionItem.accesskey "b">
+<!ENTITY bidiSwitchTextDirectionItem.commandkey "b">
 
 
-<!ENTITY toolsMenu.label "Tools">
-<!ENTITY toolsMenu.accesskey "T">
-<!ENTITY addons.label "Add-ons">
+<!ENTITY toolsMenu.label "Orodja">
+<!ENTITY toolsMenu.accesskey "d">
+<!ENTITY addons.label "Dodatki">
 
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minimize">
-<!ENTITY bringAllToFront.label "Bring All to Front">
-<!ENTITY zoomWindow.label "Zoom">
-<!ENTITY windowMenu.label "Window">
+<!ENTITY minimizeWindow.key "k">
+<!ENTITY minimizeWindow.label "Skrči">
+<!ENTITY bringAllToFront.label "Postavi vse v ospredje">
+<!ENTITY zoomWindow.label "Povečava">
+<!ENTITY windowMenu.label "Okno">
 
 
-<!ENTITY helpMenu.label "Help">
-<!ENTITY helpMenu.accesskey "H">
+<!ENTITY helpMenu.label "Pomoč">
+<!ENTITY helpMenu.accesskey "m">
 
 
-<!ENTITY helpMenuWin.label "Help">
-<!ENTITY helpMenuWin.accesskey "H">
+<!ENTITY helpMenuWin.label "Pomoč">
+<!ENTITY helpMenuWin.accesskey "m">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "About &brandShortName;">
-<!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "Support and Documentation">
-<!ENTITY productHelp.accesskey "H">
-<!ENTITY helpTroubleshootingInfo.label "Troubleshooting Information">
-<!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Submit Feedback…">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Report Errors to Zotero…">
-<!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpCheckForUpdates.label "Check for Updates…">
-<!ENTITY helpCheckForUpdates.accesskey "U">
+<!ENTITY aboutProduct.label "O programu &brandShortName;">
+<!ENTITY aboutProduct.accesskey "O">
+<!ENTITY productHelp.label "Podpora in dokumentacija">
+<!ENTITY productHelp.accesskey "d">
+<!ENTITY helpTroubleshootingInfo.label "Reševanje težav ...">
+<!ENTITY helpTroubleshootingInfo.accesskey "R">
+<!ENTITY helpFeedbackPage.label "Povratne informacije ...">
+<!ENTITY helpFeedbackPage.accesskey "I">
+<!ENTITY helpReportErrors.label "Poročaj o napakah Zoteru ...">
+<!ENTITY helpReportErrors.accesskey "P">
+<!ENTITY helpCheckForUpdates.label "Poišči posodobitve ...">
+<!ENTITY helpCheckForUpdates.accesskey "s">

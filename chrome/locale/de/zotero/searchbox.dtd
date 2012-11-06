@@ -5,7 +5,7 @@
 <!ENTITY zotero.search.joinMode.all "allen">
 <!ENTITY zotero.search.joinMode.suffix "der folgenden:">
 
-<!ENTITY zotero.search.recursive.label "Unterverzeichnisse durchsuchen">
+<!ENTITY zotero.search.recursive.label "Untersammlungen durchsuchen">
 <!ENTITY zotero.search.noChildren "Nur Einträge der obersten Ebene anzeigen">
 <!ENTITY zotero.search.includeParentsAndChildren "Über- und untergeordnete Einträge von Treffern einschließen">
 

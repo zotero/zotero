@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "notas associadas">
 <!ENTITY zotero.preferences.groups.childFiles "cópias instantâneas e arquivos importados associados">
 <!ENTITY zotero.preferences.groups.childLinks "links associados">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "Abrir URL">
 

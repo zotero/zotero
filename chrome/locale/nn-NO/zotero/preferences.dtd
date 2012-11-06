@@ -9,7 +9,7 @@
 <!ENTITY zotero.preferences.userInterface "Brukargrensesnitt">
 <!ENTITY zotero.preferences.showIn "Opna Zotero i:">
 <!ENTITY zotero.preferences.showIn.browserPane "Ramme i nettlesaren">
-<!ENTITY zotero.preferences.showIn.separateTab "Eigen fane">
+<!ENTITY zotero.preferences.showIn.separateTab "Eiga fane">
 <!ENTITY zotero.preferences.showIn.appTab "App-fane">
 <!ENTITY zotero.preferences.statusBarIcon "Ikon på statuslinje:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Ingen">
@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "child notes">
 <!ENTITY zotero.preferences.groups.childFiles "child snapshots and imported files">
 <!ENTITY zotero.preferences.groups.childLinks "child links">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "Opne URL">
 
@@ -110,8 +111,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Tittel">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Oppdatert">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Hent fleire stilar …">
 
@@ -154,9 +155,9 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avansert">
 
-<!ENTITY zotero.preferences.prefpane.locate "Locate">
+<!ENTITY zotero.preferences.prefpane.locate "Lokaliser">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
-<!ENTITY zotero.preferences.locate.description "Description">
+<!ENTITY zotero.preferences.locate.description "Skildring">
 <!ENTITY zotero.preferences.locate.name "Name">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
 <!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">

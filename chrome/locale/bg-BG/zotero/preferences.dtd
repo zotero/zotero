@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "Дъщерни бележки">
 <!ENTITY zotero.preferences.groups.childFiles "Дъщерни">
 <!ENTITY zotero.preferences.groups.childLinks "Дъщерни връзки">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 

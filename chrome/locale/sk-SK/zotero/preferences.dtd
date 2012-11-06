@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "vložené poznámky">
 <!ENTITY zotero.preferences.groups.childFiles "vložené snímky a importované súbory">
 <!ENTITY zotero.preferences.groups.childLinks "vložené odkazy">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -159,7 +160,7 @@
 <!ENTITY zotero.preferences.locate.description "Popis">
 <!ENTITY zotero.preferences.locate.name "Meno">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Vyhľadávací motor rozširuje schopnosť rozbaľovacej ponuky lokalizácie v paneli informácií. Aktivované vyhľadávacie motory v zozname dole sa pridajú do rozbaľovacej ponuky a použijú sa na lokalizáciu zdrojov z vašej knižnice na webe.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
+<!ENTITY zotero.preferences.locate.addDescription "Pre pridanie vyhľadávacieho motora, ktorý sa nenachádza na zozname, navštívte želaný vyhľadávací motor vo vašom prehliadači a zvoľte  &#34;Pridať&#34; z ponuky Lokalizovať v Zotere.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Obnoviť predvolené">
 
 <!ENTITY zotero.preferences.charset "Kódovanie znakov">

@@ -131,9 +131,11 @@
 <!ENTITY zotero.selectitems.cancel.label "Цуцлах">
 <!ENTITY zotero.selectitems.select.label "ОК">
 
-<!ENTITY zotero.bibliography.title "Create Bibliography">
+<!ENTITY zotero.bibliography.title "Create Citation/Bibliography">
 <!ENTITY zotero.bibliography.style.label "Citation Style:">
-<!ENTITY zotero.bibliography.output.label "Output Format">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF-р хадгалах">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML-р хадгалах">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copy to Clipboard">

@@ -133,7 +133,9 @@
 
 <!ENTITY zotero.bibliography.title "Направи библиографију">
 <!ENTITY zotero.bibliography.style.label "Стил цитата:">
-<!ENTITY zotero.bibliography.output.label "Излазни формат">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Сними као RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Сними као HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Умножи">

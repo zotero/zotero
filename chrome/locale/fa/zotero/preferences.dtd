@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "یادداشت‌های وابسته">
 <!ENTITY zotero.preferences.groups.childFiles "تصاویر لحظه‌ای و پرونده‌های درون‌برد شده">
 <!ENTITY zotero.preferences.groups.childLinks "پیوندهای وابسته">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 

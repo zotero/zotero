@@ -133,7 +133,9 @@
 
 <!ENTITY zotero.bibliography.title "参考文献目録を作成">
 <!ENTITY zotero.bibliography.style.label "引用スタイル:">
-<!ENTITY zotero.bibliography.output.label "出力フォーマット">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF として保存">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML として保存">
 <!ENTITY zotero.bibliography.copyToClipboard.label "クリップボードにコピー">

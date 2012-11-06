@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "child notes">
 <!ENTITY zotero.preferences.groups.childFiles "child snapshots and imported files">
 <!ENTITY zotero.preferences.groups.childLinks "child links">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -136,7 +137,7 @@
 <!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
 <!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
 <!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
-<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
+<!ENTITY zotero.preferences.proxies.transparent "Enable proxy redirection">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
 <!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
@@ -152,14 +153,14 @@
 <!ENTITY zotero.preferences.proxies.f_variable "&#37;f - The filename (e.g., index.html)">
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
 
-<!ENTITY zotero.preferences.prefpane.advanced "Gevorderd">
+<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
 
 <!ENTITY zotero.preferences.prefpane.locate "Locate">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
 <!ENTITY zotero.preferences.locate.description "Description">
 <!ENTITY zotero.preferences.locate.name "Name">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select &#34;Add&#34; from Zotero's Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
 
 <!ENTITY zotero.preferences.charset "Character Encoding">

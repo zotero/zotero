@@ -133,7 +133,9 @@
 
 <!ENTITY zotero.bibliography.title "Créer une bibliographie">
 <!ENTITY zotero.bibliography.style.label "Style de citation :">
-<!ENTITY zotero.bibliography.output.label "Format de sortie">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Enregistrer au format RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Enregistrer au format HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copier dans le presse-papiers">

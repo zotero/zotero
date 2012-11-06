@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "niiden alaiset muistiinpanot">
 <!ENTITY zotero.preferences.groups.childFiles "niiden alaiset tilannekuvat ja tuodut tiedostot">
 <!ENTITY zotero.preferences.groups.childLinks "niiden alaiset linkit">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 

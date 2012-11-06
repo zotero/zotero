@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "bijbehorende aantekeningen">
 <!ENTITY zotero.preferences.groups.childFiles "bijbehorende snapshots en geïmporteerde bestanden">
 <!ENTITY zotero.preferences.groups.childLinks "bijbehorende koppelingen">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 

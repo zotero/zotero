@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "note copil">
 <!ENTITY zotero.preferences.groups.childFiles "instantanee copil și fișiere importate">
 <!ENTITY zotero.preferences.groups.childLinks "legături copil">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "Deschide URL">
 

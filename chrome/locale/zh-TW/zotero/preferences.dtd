@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "子筆記">
 <!ENTITY zotero.preferences.groups.childFiles "子快照與匯入的檔案">
 <!ENTITY zotero.preferences.groups.childLinks "子鏈結">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "開啟網址">
 

@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "kapcsolódó jegyzetek">
 <!ENTITY zotero.preferences.groups.childFiles "kapcsolódó pillanatfelvételek és importált fájlok">
 <!ENTITY zotero.preferences.groups.childLinks "kapcsolódó hivatkozások">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 

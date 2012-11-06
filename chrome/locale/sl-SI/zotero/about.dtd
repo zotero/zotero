@@ -1,6 +1,6 @@
 <!ENTITY zotero.version "različica">
 <!ENTITY zotero.createdby "Avtor:">
-<!ENTITY zotero.director "Director:">
+<!ENTITY zotero.director "Režiser:">
 <!ENTITY zotero.directors "Vodje:">
 <!ENTITY zotero.developers "Razvijalci:">
 <!ENTITY zotero.alumni "Alumni:">
@@ -9,4 +9,4 @@
 <!ENTITY zotero.executiveProducer "Izvršni producent:">
 <!ENTITY zotero.thanks "Posebna zahvala:">
 <!ENTITY zotero.about.close "Zapri">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Več zahval in zaslužnih">
