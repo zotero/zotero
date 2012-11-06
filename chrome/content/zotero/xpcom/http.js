@@ -492,38 +492,33 @@ Zotero.HTTP = new function() {
 		// (Approximately) how many seconds to wait if the document is left in the loading state and
 		// pageshow is called before we call pageshow with an incomplete document
 		const LOADING_STATE_TIMEOUT = 120;
-		
-		var firedLoadEvent;
-		/**
-		 * Removes event listener for the load event and deletes the hidden browser
-		 */
-		var removeListeners = function() {
-			hiddenBrowser.removeEventListener(loadEvent, onLoad, true);
-			if(!dontDelete) Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-		}
+		var firedLoadEvent = 0;
 		
 		/**
 		 * Loads the next page
 		 * @inner
 		 */
 		var doLoad = function() {
-			if(urls.length) {
-				var url = urls.shift();
+			if(currentURL < urls.length) {
+				var url = urls[currentURL],
+					hiddenBrowser = hiddenBrowsers[currentURL];
 				firedLoadEvent = 0;
+				currentURL++;
 				try {
-					Zotero.debug("loading "+url);
+					Zotero.debug("Zotero.HTTP.processDocuments: Loading "+url);
 					hiddenBrowser.loadURI(url);
 				} catch(e) {
-					removeListeners();
 					if(exception) {
 						exception(e);
 						return;
 					} else {
 						throw(e);
 					}
+				} finally {
+					doLoad();
 				}
 			} else {
-				removeListeners();
+				if(!dontDelete) Zotero.Browser.deleteHiddenBrowser(hiddenBrowsers);
 				if(done) done();
 			}
 		};
@@ -532,46 +527,49 @@ Zotero.HTTP = new function() {
 		 * Callback to be executed when a page load completes
 		 * @inner
 		 */
-		var onLoad = function() {
-			var doc = hiddenBrowser.contentDocument;
-			if(!doc) return;
+		var onLoad = function(e) {
+			var hiddenBrowser = e.currentTarget,
+				doc = hiddenBrowser.contentDocument;
+			if(!doc || doc !== e.target) return;
 			var url = doc.location.href.toString();
-			if(url == "about:blank") return;
-			if(doc.readyState === "loading" && firedLoadEvent < 120) {
-				// Try again in a second	
-				firedLoadEvent++;
-				Zotero.setTimeout(onLoad, 1000);
+			if(url === "about:blank") return;
+			if(doc.readyState === "loading" && (firedLoadEvent++) < 120) {
+				// Try again in a second
+				Zotero.setTimeout(onLoad.bind(this, e), 1000);
 				return;
 			}
-			if(url !== prevUrl) {	// Just in case it fires too many times
-				prevUrl = url;
-				try {
-					processor(doc);
-				} catch(e) {
-					removeListeners();
-					if(exception) {
-						exception(e);
-						return;
-					} else {
-						throw(e);
-					}
+			
+			Zotero.debug("Zotero.HTTP.processDocuments: "+url+" loaded");
+			hiddenBrowser.removeEventListener("pageshow", onLoad, true);
+			
+			try {
+				processor(doc);
+			} catch(e) {
+				if(exception) {
+					exception(e);
+					return;
+				} else {
+					throw(e);
 				}
+			} finally {
 				doLoad();
 			}
 		};
 		
 		if(typeof(urls) == "string") urls = [urls];
 		
-		var prevUrl;
-		var loadEvent = Zotero.isFx2 ? "load" : "pageshow";
-		
-		var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
-		hiddenBrowser.addEventListener(loadEvent, onLoad, true);
-		if(cookieSandbox) cookieSandbox.attachToBrowser(hiddenBrowser);
+		var hiddenBrowsers = [],
+			currentURL = 0;
+		for(var i=0; i<urls.length; i++) {
+			var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
+			if(cookieSandbox) cookieSandbox.attachToBrowser(hiddenBrowser);
+			hiddenBrowser.addEventListener("pageshow", onLoad, true);
+			hiddenBrowsers[i] = hiddenBrowser;
+		}
 		
 		doLoad();
 		
-		return hiddenBrowser;
+		return hiddenBrowsers.length === 1 ? hiddenBrowsers[0] : hiddenBrowsers.slice();
 	}
 	
 	/**

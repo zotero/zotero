@@ -2423,17 +2423,22 @@ Zotero.Browser = new function() {
 		hiddenBrowser.docShell.allowJavascript = true;
 		hiddenBrowser.docShell.allowMetaRedirects = false;
 		hiddenBrowser.docShell.allowPlugins = false;
-		Zotero.debug("created hidden browser ("
+		Zotero.debug("Created hidden browser ("
 			+ (win.document.getElementsByTagName('browser').length - 1) + ")");
 		return hiddenBrowser;
 	}
 	
-	function deleteHiddenBrowser(myBrowser) {
-		myBrowser.stop();
-		myBrowser.destroy();
-		myBrowser.parentNode.removeChild(myBrowser);
-		myBrowser = null;
-		Zotero.debug("deleted hidden browser");
+	function deleteHiddenBrowser(myBrowsers) {
+		if(!myBrowsers instanceof Array) myBrowsers = [myBrowsers];
+		for(var i=0; i<myBrowsers.length; i++) {
+			var myBrowser = myBrowsers[i];
+			myBrowser.stop();
+			myBrowser.destroy();
+			myBrowser.parentNode.removeChild(myBrowser);
+			myBrowser = null;
+			Zotero.debug("Deleted hidden browser ("
+				+ (win.document.getElementsByTagName('browser').length - 1) + ")");
+		}
 	}
 }
 
