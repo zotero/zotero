@@ -132,7 +132,9 @@
 
 <!ENTITY zotero.bibliography.title "创建文献目录">
 <!ENTITY zotero.bibliography.style.label "引文样式:">
-<!ENTITY zotero.bibliography.output.label "输出格式">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "另存为 RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "另存为 HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "复制到剪贴板">

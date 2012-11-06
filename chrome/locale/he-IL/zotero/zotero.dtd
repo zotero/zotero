@@ -132,7 +132,9 @@
 
 <!ENTITY zotero.bibliography.title "צור ביבליוגרפיה">
 <!ENTITY zotero.bibliography.style.label "Citation Style:">
-<!ENTITY zotero.bibliography.output.label "Output Format">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "שמור כ-RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "שמור כ-HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copy to Clipboard">

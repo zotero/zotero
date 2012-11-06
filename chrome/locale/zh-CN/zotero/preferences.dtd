@@ -1,7 +1,7 @@
 <!ENTITY zotero.preferences.title "Zotero 首选项">
 
 <!ENTITY zotero.preferences.default "默认:">
-<!ENTITY zotero.preferences.items "items">
+<!ENTITY zotero.preferences.items "项目">
 <!ENTITY zotero.preferences.period ".">
 
 <!ENTITY zotero.preferences.prefpane.general "常规">
@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "child notes">
 <!ENTITY zotero.preferences.groups.childFiles "child snapshots and imported files">
 <!ENTITY zotero.preferences.groups.childLinks "child links">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 

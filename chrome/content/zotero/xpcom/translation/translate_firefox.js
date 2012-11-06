@@ -419,7 +419,7 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 			// expose parseFromString
 			this.__exposedProps__ = {"parseFromString":"r"};
 			this.parseFromString = function(str, contentType) {
-				return Zotero.Translate.SandboxManager.Fx5DOMWrapper(_DOMParser.parseFromString(str, contentType));
+				return Zotero.Translate.DOMWrapper.wrap(_DOMParser.parseFromString(str, contentType));
 			}
 		};
 	}
@@ -454,7 +454,8 @@ Zotero.Translate.SandboxManager.prototype = {
 	"importObject":function(object, passAsFirstArgument, attachTo) {
 		if(!attachTo) attachTo = this.sandbox.Zotero;
 		var newExposedProps = false,
-			sandbox = this.sandbox;
+			sandbox = this.sandbox,
+			me = this;
 		if(!object.__exposedProps__) newExposedProps = {};
 		for(var key in (newExposedProps ? object : object.__exposedProps__)) {
 			let localKey = key;
@@ -468,12 +469,7 @@ Zotero.Translate.SandboxManager.prototype = {
 					attachTo[localKey] = function() {
 						var args = Array.prototype.slice.apply(arguments);
 						if(passAsFirstArgument) args.unshift(passAsFirstArgument);
-						var out = object[localKey].apply(object, args);
-						if(out instanceof Array) {
-							// Copy to sandbox
-							out = sandbox.Array.prototype.slice.apply(out);
-						}
-						return out;
+						return me._copyObject(object[localKey].apply(object, args));
 					};
 				} else {
 					attachTo[localKey] = {};
@@ -493,6 +489,38 @@ Zotero.Translate.SandboxManager.prototype = {
 		} else {
 			attachTo.__exposedProps__ = object.__exposedProps__;
 		}
+	},
+	
+	/**
+	 * Copies a JavaScript object to this sandbox
+	 * @param {Object} obj
+	 * @return {Object}
+	 */
+	"_copyObject":function(obj, wm) {
+		if(typeof obj !== "object" || obj === null
+				|| (obj.__proto__ !== Object.prototype && obj.__proto__ !== Array.prototype)
+				|| "__exposedProps__" in obj || "__wrappedDOMObject" in obj) {
+			return obj;
+		}
+		if(!wm) wm = new WeakMap();
+		var obj2 = (obj instanceof Array ? this.sandbox.Array() : this.sandbox.Object());
+		for(var i in obj) {
+			if(!obj.hasOwnProperty(i)) continue;
+			
+			var prop1 = obj[i];
+			if(typeof prop1 === "object" && prop1 !== null
+					&& (prop1.__proto__ === Object.prototype || prop1.__proto__ === Array.prototype)) {
+				var prop2 = wm.get(prop1);
+				if(prop2 === undefined) {
+					prop2 = this._copyObject(prop1, wm);
+					wm.set(prop1, prop2);
+				}
+				obj2[i] = prop2;
+			} else {
+				obj2[i] = prop1;
+			}
+		}
+		return obj2;
 	}
 }
 

@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "หมายเหตุรายการลูก">
 <!ENTITY zotero.preferences.groups.childFiles "ภาพหน้าจอและแฟ้มที่นำเข้าของรายการลูก">
 <!ENTITY zotero.preferences.groups.childLinks "ลิงค์ลูก">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "เปิดยูอาแอล">
 

@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "potomne notatki">
 <!ENTITY zotero.preferences.groups.childFiles "potomne zrzuty ekranu i zaimportowane pliki">
 <!ENTITY zotero.preferences.groups.childLinks "potomne linki">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "openURL">
 

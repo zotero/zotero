@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "les notes enfants">
 <!ENTITY zotero.preferences.groups.childFiles "les captures d'écran et fichiers importés enfants">
 <!ENTITY zotero.preferences.groups.childLinks "les liens enfants">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -136,7 +137,7 @@
 <!ENTITY zotero.preferences.proxies.desc_before_link "Zotero redirigera les requêtes de manière transparente à travers les serveurs mandataires enregistrés. Consultez la">
 <!ENTITY zotero.preferences.proxies.desc_link "documentation concernant les serveurs mandataires">
 <!ENTITY zotero.preferences.proxies.desc_after_link "pour plus d'information.">
-<!ENTITY zotero.preferences.proxies.transparent "Retenir automatiquement les ressources atteintes par l'entremise d'un serveur mandataire">
+<!ENTITY zotero.preferences.proxies.transparent "Activer la redirection par un serveur mandataire">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Reconnaître automatiquement les ressources passant par un serveur mandataire">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Désactiver la redirection par un serveur mandataire lorsque mon nom de domaine contient ">
 <!ENTITY zotero.preferences.proxies.configured "Serveurs mandataires configurés">

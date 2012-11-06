@@ -132,7 +132,9 @@
 
 <!ENTITY zotero.bibliography.title "สร้างบรรณานุกรม">
 <!ENTITY zotero.bibliography.style.label "รูปแบบการอ้างอิง:">
-<!ENTITY zotero.bibliography.output.label "รูปแบบการส่งออก">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "บันทึกเป็น RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "บันทึกเป็น HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "ทำสำเนาไปคลิปบอร์ด">

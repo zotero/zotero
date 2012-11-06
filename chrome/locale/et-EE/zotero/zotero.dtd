@@ -132,7 +132,9 @@
 
 <!ENTITY zotero.bibliography.title "Bibliograafia loomine">
 <!ENTITY zotero.bibliography.style.label "Viite stiil:">
-<!ENTITY zotero.bibliography.output.label "Väljundformaat">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Salvestada RTF-ina">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Salvestada HTML-ina">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Lõikepuhvrisse kopeerimine">

@@ -1,4 +1,4 @@
-<!ENTITY preferencesCmdMac.label "Preferences…">
+<!ENTITY preferencesCmdMac.label "Innstillingar">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Services">
 <!ENTITY hideThisAppCmdMac.label "Gøym &brandShortName;">
@@ -10,7 +10,7 @@
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 
-<!ENTITY fileMenu.label "Fila">
+<!ENTITY fileMenu.label "Fil">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Save…">
 <!ENTITY saveCmd.key "S">

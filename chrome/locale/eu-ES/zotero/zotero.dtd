@@ -132,7 +132,9 @@
 
 <!ENTITY zotero.bibliography.title "Bibliografia sortu">
 <!ENTITY zotero.bibliography.style.label "Erreferentzia estiloa:">
-<!ENTITY zotero.bibliography.output.label "Irteerako formatua">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF gisa gorde">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML gisa gorde">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Arbelera kopiatu">

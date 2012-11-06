@@ -7,17 +7,17 @@
 <!ENTITY zotero.preferences.prefpane.general "Splošno">
 
 <!ENTITY zotero.preferences.userInterface "Uporabniški vmesnik">
-<!ENTITY zotero.preferences.showIn "Load Zotero in:">
-<!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
-<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn "Naloži Zotero v:">
+<!ENTITY zotero.preferences.showIn.browserPane "podoknu brskalnika">
+<!ENTITY zotero.preferences.showIn.separateTab "ločenem zavihku">
+<!ENTITY zotero.preferences.showIn.appTab "zavihku programa">
 <!ENTITY zotero.preferences.statusBarIcon "Ikona v vrstici stanja:">
 <!ENTITY zotero.preferences.statusBarIcon.none "brez">
 <!ENTITY zotero.preferences.fontSize "Velikost pisave:">
 <!ENTITY zotero.preferences.fontSize.small "majhna">
 <!ENTITY zotero.preferences.fontSize.medium "srednja">
 <!ENTITY zotero.preferences.fontSize.large "velika">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fontSize.xlarge "ogromna">
 <!ENTITY zotero.preferences.fontSize.notes "Velikost pisave opomb:">
 
 <!ENTITY zotero.preferences.miscellaneous "Razno">
@@ -30,14 +30,15 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Samodejno naredi posnetek pri ustvarjanju vnosov s spletnih strani">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Samodejno pripni pridružene PDF-je in druge datoteke pri shranjevanju vnosov">
 <!ENTITY zotero.preferences.automaticTags "Samodejno označi vnose s ključnimi besedami in predmetnimi naslovi">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Samodejno odstrani iz koša vse izbrisano pred več kot">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dnevi">
 
 <!ENTITY zotero.preferences.groups "Skupine">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Pri kopiranju med knjižnicami vključi:">
 <!ENTITY zotero.preferences.groups.childNotes "otroške opombe">
 <!ENTITY zotero.preferences.groups.childFiles "otroške slike stanj in uvožene datoteke">
 <!ENTITY zotero.preferences.groups.childLinks "otroške povezave">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "Odpri URL">
 
@@ -53,7 +54,7 @@
 <!ENTITY zotero.preferences.sync.createAccount "Ustvari račun">
 <!ENTITY zotero.preferences.sync.lostPassword "Ste pozabili geslo?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Uskladi samodejno">
-<!ENTITY zotero.preferences.sync.about "About Syncing">
+<!ENTITY zotero.preferences.sync.about "O usklajevanju">
 <!ENTITY zotero.preferences.sync.fileSyncing "Usklajevanje datotek">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Uskladi datoteke priponk v Moji knjižnici s/z">
@@ -101,17 +102,17 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Izhodna oblika">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Onemogoči Hitro kopiranje, če vlečem več kot">
 
-<!ENTITY zotero.preferences.prefpane.cite "Cite">
-<!ENTITY zotero.preferences.cite.styles "Styles">
-<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
+<!ENTITY zotero.preferences.prefpane.cite "Citiraj">
+<!ENTITY zotero.preferences.cite.styles "Slogi">
+<!ENTITY zotero.preferences.cite.wordProcessors "Urejevalniki besedil">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Trenutno ni nameščen noben vtičnik za urejevalnike besedil.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Pridobi vtičnike za urejevalnike besedil ...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Uporabi klasično pogovorno okno Dodaj citat">
 
-<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Upravitelj slogov">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Naslov">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Posodobljeno">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Dobi dodatne sloge ...">
 
@@ -137,8 +138,8 @@
 <!ENTITY zotero.preferences.proxies.desc_link "dokumentacijo o posredovalnih strežnikih,">
 <!ENTITY zotero.preferences.proxies.desc_after_link "kjer najdete več informacij.">
 <!ENTITY zotero.preferences.proxies.transparent "Transparentno preusmeri zahteve prek poprej uporabljenih posredovalnih strežnikov">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Samodejno prepoznaj posredovane vire">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Onemogoči preusmerjanje s posredovanjem, če ime moje domene vsebuje">
 <!ENTITY zotero.preferences.proxies.configured "Nastavljeni posredovalni strežniki">
 <!ENTITY zotero.preferences.proxies.hostname "Ime gostitelja">
 <!ENTITY zotero.preferences.proxies.scheme "Shema">
@@ -154,13 +155,13 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Napredno">
 
-<!ENTITY zotero.preferences.prefpane.locate "Locate">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
-<!ENTITY zotero.preferences.locate.description "Description">
-<!ENTITY zotero.preferences.locate.name "Name">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
+<!ENTITY zotero.preferences.prefpane.locate "Lociraj">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Upravitelj pogona iskanja člankov">
+<!ENTITY zotero.preferences.locate.description "Opis">
+<!ENTITY zotero.preferences.locate.name "Ime">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "Iskalnik razširi zmogljivost spustnega polja Lociraj v podoknu Podatki. Če omogočite iskalnike na spodnjem seznamu, bodo dodani v spustno polje in boste z njimi lahko na spletu našli vire iz svoje knjižnice.">
 <!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
-<!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
+<!ENTITY zotero.preferences.locate.restoreDefaults "Obnovi privzeto">
 
 <!ENTITY zotero.preferences.charset "Kodiranje znakov">
 <!ENTITY zotero.preferences.charset.importCharset "Uvozi kodiranje znakov">
@@ -186,6 +187,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Počisti izhod">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Objavi na strežniku Zotero">
 
-<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
+<!ENTITY zotero.preferences.openAboutConfig "Odpri about:config">
+<!ENTITY zotero.preferences.openCSLEdit "Odpri urejevalnik CSL">
+<!ENTITY zotero.preferences.openCSLPreview "Odpri predloge CSL">

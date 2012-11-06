@@ -133,7 +133,9 @@
 
 <!ENTITY zotero.bibliography.title "Luo kirjallisuusluettelo">
 <!ENTITY zotero.bibliography.style.label "Sitaattityyli:">
-<!ENTITY zotero.bibliography.output.label "Kohdemuoto">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Tallenna RTF-muodossa">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Tallenna HTML-muodossa">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Kopioi leikepöydälle">

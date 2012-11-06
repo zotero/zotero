@@ -1431,7 +1431,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
 		var id = newItem.save();
 		newItem = Zotero.Items.get(id);
-		item.clone(false, newItem);
+		item.clone(false, newItem, false, !Zotero.Prefs.get('groups.copyTags'));
 		newItem.save();
 		//var id = newItem.save();
 		//var newItem = Zotero.Items.get(id);

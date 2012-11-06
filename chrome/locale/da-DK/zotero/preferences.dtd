@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "underliggende Noter">
 <!ENTITY zotero.preferences.groups.childFiles "underliggende &quot;Snapshots&quot; og importerede filer">
 <!ENTITY zotero.preferences.groups.childLinks "underliggende links">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 

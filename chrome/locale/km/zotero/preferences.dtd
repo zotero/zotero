@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "កំណត់ត្រាកម្ជាប់">
 <!ENTITY zotero.preferences.groups.childFiles "រូបភាពកម្ជាប់ និង ឯកសារនាំចូល">
 <!ENTITY zotero.preferences.groups.childLinks "កម្ជាប់រណប">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "បើកគេហទំព័រ">
 

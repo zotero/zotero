@@ -38,7 +38,7 @@
 <!ENTITY zotero.notes.separate "Uredi v ločenem oknu">
 
 <!ENTITY zotero.toolbar.duplicate.label "Pokaži dvojnike">
-<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.collections.showUnfiledItems "Pokaži nerazvrščene elemente">
 
 <!ENTITY zotero.items.itemType "Vrsta vnosa">
 <!ENTITY zotero.items.type_column "Vrsta">
@@ -51,7 +51,7 @@
 <!ENTITY zotero.items.journalAbbr_column "Okrajšava revije">
 <!ENTITY zotero.items.language_column "Jezik">
 <!ENTITY zotero.items.accessDate_column "Dostopano">
-<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.libraryCatalog_column "Knjižnični katalog">
 <!ENTITY zotero.items.callNumber_column "Številka klica">
 <!ENTITY zotero.items.rights_column "Pravice">
 <!ENTITY zotero.items.dateAdded_column "Dodano dne">
@@ -62,11 +62,11 @@
 <!ENTITY zotero.items.menu.attach "Dodaj priponko">
 <!ENTITY zotero.items.menu.attach.snapshot "Pripni posnetek trenutne strani">
 <!ENTITY zotero.items.menu.attach.link "Pripni povezavo na trenutno stran">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
+<!ENTITY zotero.items.menu.attach.link.uri "URI pripni povezavo ...">
 <!ENTITY zotero.items.menu.attach.file "Pripni shranjeno kopijo datoteke ...">
 <!ENTITY zotero.items.menu.attach.fileLink "Pripni povezavo do datoteke ...">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.restoreToLibrary "Obnovi v knjižnico">
 <!ENTITY zotero.items.menu.duplicateItem "Podvoji izbrani vnos">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 
@@ -94,7 +94,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Podpora in dokumentacija">
 <!ENTITY zotero.toolbar.about.label "O Zoteru">
 <!ENTITY zotero.toolbar.advancedSearch "Napredno izkanje">
-<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
+<!ENTITY zotero.toolbar.tab.tooltip "Preklopi med načini zavihkov">
 <!ENTITY zotero.toolbar.openURL.label "Najdi">
 <!ENTITY zotero.toolbar.openURL.tooltip "Poišči v krajevni knjižnici">
 
@@ -102,11 +102,11 @@
 <!ENTITY zotero.item.attachment.file.show "Pokaži datoteko">
 <!ENTITY zotero.item.textTransform "Preoblikuj besedilo">
 <!ENTITY zotero.item.textTransform.titlecase "Velike Začetnice">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.sentencecase "Kot v stavku">
 
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newNote "Nova opomba">
 <!ENTITY zotero.toolbar.note.standalone "Nova samostojna opomba">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
+<!ENTITY zotero.toolbar.note.child "Dodaj podrejeno opombo">
 <!ENTITY zotero.toolbar.lookup "Išči po identifikatorju ...">
 <!ENTITY zotero.toolbar.attachment.linked "Povezava na datoteko ...">
 <!ENTITY zotero.toolbar.attachment.add "Shrani kopijo datoteke ...">
@@ -132,7 +132,9 @@
 
 <!ENTITY zotero.bibliography.title "Ustvari bibliografijo">
 <!ENTITY zotero.bibliography.style.label "Slog navajanja:">
-<!ENTITY zotero.bibliography.output.label "Izhodni zapis">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Shrani kot RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Shrani kot HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Kopiraj na odložišče">
@@ -179,13 +181,13 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Oblikuj z uporabo:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Zaznamki">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and LibreOffice, but may be accidentally modified. For &#xA;compatibility reasons, citations cannot be inserted into footnotes or endnotes when this option is selected.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Zaznamki se ohranijo v Microsoft Word in OpenOffice/LibreOffice, se pa lahko ponesreči spremenijo. Iz razlogov združljivosti citatov ni mogoče vstavljati v sprotne ali končne opombe, če je izbrana ta možnost.">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Sklice shrani v dokumentu">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Shranjevanje sklicev v dokumentu malce poveča velikost datoteke, vendar omogoča skupno rabo dokumenta z drugimi, četudi ne uporabljajo skupine Zotero. Zotero 3.0 ali kasnejši je potreben za posodabljanje dokumentov, ki jih ustvarite s to možnostjo.">
 
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.showEditor.label "Pokaži urejevalnik">
+<!ENTITY zotero.integration.classicView.label "Klasični pogled">
 
 <!ENTITY zotero.integration.references.label "Sklici v bibliografiji">
 
@@ -242,6 +244,6 @@
 <!ENTITY zotero.file.choose.label "Izberite datoteko ...">
 <!ENTITY zotero.file.noneSelected.label "Izbrana ni nobena datoteka">
 
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.label "Shrani na Zotero">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "V trenutno izbrano knjižnico priponk ni mogoče shraniti. Element bo namesto tega shranjen v vašo knjižnico.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "Če želite uporabiti to funkcijo, morate najprej namestiti orodja PDF v nastavitvah Zotera.">

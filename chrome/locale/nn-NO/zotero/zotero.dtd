@@ -63,8 +63,8 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Legg til snapshot av gjeldande side">
 <!ENTITY zotero.items.menu.attach.link "Legg til lenkje til gjeldande side">
 <!ENTITY zotero.items.menu.attach.link.uri "Legg ved lenkje til URI …">
-<!ENTITY zotero.items.menu.attach.file "Legg ved lagra kopi av fila …">
-<!ENTITY zotero.items.menu.attach.fileLink "Legg ved lenkje til fila …">
+<!ENTITY zotero.items.menu.attach.file "Legg ved lagra kopi av fil …">
+<!ENTITY zotero.items.menu.attach.fileLink "Legg ved lenkje til fil …">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Gjenopprett til bibliotek">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliser det valde elementet">
@@ -132,7 +132,9 @@
 
 <!ENTITY zotero.bibliography.title "Lag bibliografi">
 <!ENTITY zotero.bibliography.style.label "Siteringsstil:">
-<!ENTITY zotero.bibliography.output.label "Output-format">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Lagra som RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Lagra som HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Kopier til utklippstavle">
@@ -233,7 +235,7 @@
 <!ENTITY zotero.rtfScan.citationsPage.description "Sjå over lista over attkjende siteringar under for å stadfesta at Zotero har kopla siteringane rett. Ukopla eller tvetydige siteringar må rettast før du kan gå vidare.">
 <!ENTITY zotero.rtfScan.stylePage.label "Dokumentformatering">
 <!ENTITY zotero.rtfScan.formatPage.label "Formaterer siteringar">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero leser og formaterer RTF-fila. Ha tolmod.">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero les og formaterer RTF-fila. Ha tolmod.">
 <!ENTITY zotero.rtfScan.completePage.label "RTF-skann fullført">
 <!ENTITY zotero.rtfScan.completePage.description "Dokumentet er gjennomlest og prosessert. Kontroller at det er formatert rett.">
 <!ENTITY zotero.rtfScan.inputFile.label "Fil å lesa">

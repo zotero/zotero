@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "الملاحظات الفرعية">
 <!ENTITY zotero.preferences.groups.childFiles "اللقطات الفرعية والملفات المستوردة">
 <!ENTITY zotero.preferences.groups.childLinks "الروابط الفرعية">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "الرابط المفتوح">
 

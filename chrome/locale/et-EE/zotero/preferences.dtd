@@ -38,6 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "seotud märkused">
 <!ENTITY zotero.preferences.groups.childFiles "seotud momentülesvõtted ja imporditud failid">
 <!ENTITY zotero.preferences.groups.childLinks "seotud lingid">
+<!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
