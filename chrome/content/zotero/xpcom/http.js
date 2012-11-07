@@ -534,7 +534,7 @@ Zotero.HTTP = new function() {
 			if(url === "about:blank") return;
 			if(doc.readyState === "loading" && (firedLoadEvent++) < 120) {
 				// Try again in a second
-				Zotero.setTimeout(onLoad.bind(this, e), 1000);
+				Zotero.setTimeout(onLoad.bind(this, {"currentTarget":hiddenBrowser}), 1000);
 				return;
 			}
 			
