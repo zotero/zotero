@@ -42,10 +42,7 @@
 				<setter>
 				<![CDATA[
 					var v = parseInt(val, 10);
-					if(!isNaN(v) && v == 0) {
-						this.setAttribute('count', v);
-					}
-					else if(!isNaN(v) && v > 0) {
+					if(!isNaN(v) && v >= 0) {
 						this.setAttribute('count', v);
 					}
 				]]>
