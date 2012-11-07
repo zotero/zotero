@@ -2429,7 +2429,7 @@ Zotero.Browser = new function() {
 	}
 	
 	function deleteHiddenBrowser(myBrowsers) {
-		if(!myBrowsers instanceof Array) myBrowsers = [myBrowsers];
+		if(!(myBrowsers instanceof Array)) myBrowsers = [myBrowsers];
 		for(var i=0; i<myBrowsers.length; i++) {
 			var myBrowser = myBrowsers[i];
 			myBrowser.stop();
