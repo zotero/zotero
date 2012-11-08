@@ -308,6 +308,11 @@
 	list-style-image: url('chrome://zotero/skin/toolbar-lookup.png');
 }
 
+#zotero-lookup-multiline-progress
+{
+	height: 2em;
+}
+
 #zotero-tb-item-from-page
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-item-from-page.png');

@@ -92,9 +92,7 @@ const Zotero_Lookup = new function () {
 			collection = ZoteroPane_Local.getSelectedCollection();
 		} catch(e) {}
 
-		textBox.style.opacity = 0.5;
-		textBox.disabled = true;
-		document.getElementById("zotero-lookup-progress").setAttribute("collapsed", false);
+		Zotero_Lookup.toggleProgress(true);
 
 		var item;
 		while(item = items.pop()) {
@@ -111,9 +109,7 @@ const Zotero_Lookup = new function () {
 					successful += success;
 
 					if(!notDone) {	//i.e. done
-						textBox.style.opacity = 1;
-						textBox.disabled = false;
-						document.getElementById("zotero-lookup-progress").setAttribute("collapsed", true);
+						Zotero_Lookup.toggleProgress(false);
 						if(successful) {
 							document.getElementById("zotero-lookup-panel").hidePopup();
 						} else {
@@ -147,8 +143,9 @@ const Zotero_Lookup = new function () {
 		if(keyCode === 13 || keyCode === 14) {
 			if(search) {
 				Zotero_Lookup.accept(textBox);
+				event.stopImmediatePropagation();
 			} else if(!multiline) {	//switch to multiline
-				var mlTextbox = Zotero_Lookup.switchToMultiline(textBox);
+				var mlTextbox = Zotero_Lookup.toggleMultiline(true);
 				mlTextbox.value = mlTextbox.value + '\n';
 			}
 		} else if(keyCode == event.DOM_VK_ESCAPE) {
@@ -162,11 +159,9 @@ const Zotero_Lookup = new function () {
 	 */
 	this.onShowing = function() {
 		document.getElementById("zotero-lookup-panel").style.padding = "10px";
-		
-		document.getElementById("zotero-lookup-progress").hidden = false;
-		var identifierElement = document.getElementById("zotero-lookup-textbox");
-		identifierElement.style.opacity = 1;
-		identifierElement.disabled = false;
+
+		var identifierElement = Zotero_Lookup.toggleMultiline(false);
+		Zotero_Lookup.toggleProgress(false);
 		identifierElement.focus();
 	}
 	
@@ -174,15 +169,10 @@ const Zotero_Lookup = new function () {
 	 * Cancels the popup and resets fields
 	 */
 	this.onHidden = function() {
-		var txtBox = document.getElementById("zotero-lookup-textbox");
-		var mlTextbox = document.getElementById("zotero-lookup-textbox-multiline");
+		var txtBox = Zotero_Lookup.toggleMultiline(false);
+		var mlTextbox = document.getElementById("zotero-lookup-multiline-textbox");
 		txtBox.value = "";
 		mlTextbox.value = "";
-		//switch back to single line textbox
-		mlTextbox.setAttribute("collapsed", true);
-		document.getElementById("zotero-lookup-buttons").setAttribute("collapsed", true);
-		txtBox.setAttribute("collapsed", false);
-		txtBox.focus();
 	}
 
 	/**
@@ -190,7 +180,7 @@ const Zotero_Lookup = new function () {
 	 */
 	this.adjustTextbox = function(txtBox) {
 		if(txtBox.value.trim().match(/[\r\n]/)) {
-			Zotero_Lookup.switchToMultiline(txtBox);
+			Zotero_Lookup.toggleMultiline(true);
 		} else {
 			//since we ignore trailing and leading newlines, we should also trim them for display
 			//can't use trim, because then we cannot add leading/trailing spaces to the single line textbox
@@ -201,15 +191,42 @@ const Zotero_Lookup = new function () {
 	/**
 	 * Performs the switch to multiline textbox and returns that textbox
 	 */
-	this.switchToMultiline = function(txtBox) {
+	this.toggleMultiline = function(on) {
+		var mlPanel = document.getElementById("zotero-lookup-multiline");
+		var mlTxtBox = document.getElementById("zotero-lookup-multiline-textbox");
+		var slPanel = document.getElementById("zotero-lookup-singleLine");
+		var slTxtBox = document.getElementById("zotero-lookup-textbox");
+		var source = on ? slTxtBox : mlTxtBox;
+		var dest = on ? mlTxtBox : slTxtBox;
+
+		if((mlPanel.collapsed && !on) || (!mlPanel.collapsed && on)) return dest;
+
 		//copy over the value
-		var mlTextbox = document.getElementById("zotero-lookup-textbox-multiline");
-		mlTextbox.value = txtBox.value;
+		dest.value = source.value;
+
 		//switch textboxes
-		txtBox.setAttribute("collapsed", true);
-		mlTextbox.setAttribute("collapsed", false);
-		mlTextbox.focus();
-		document.getElementById("zotero-lookup-buttons").setAttribute("collapsed", false);
-		return mlTextbox;
+		mlPanel.setAttribute("collapsed", !on);
+		slPanel.setAttribute("collapsed", !!on);
+		dest.focus();
+		return dest;
+	}
+
+	this.toggleProgress = function(on) {
+		//single line
+		var txtBox = document.getElementById("zotero-lookup-textbox");
+		txtBox.style.opacity = on ? 0.5 : 1;
+		txtBox.disabled = !!on;
+		document.getElementById("zotero-lookup-progress").setAttribute("collapsed", !on);
+
+		//multiline
+		document.getElementById("zotero-lookup-multiline-textbox").disabled = !!on;
+		document.getElementById("zotero-lookup-multiline-progress").setAttribute("collapsed", !on);
+	}
+
+	this.getActivePanel = function() {
+		var mlPanel = document.getElementById("zotero-lookup-multiline");
+		if(mlPanel.collapsed) return document.getElementById("zotero-lookup-singleLine");
+
+		return mlPanel;
 	}
 }
