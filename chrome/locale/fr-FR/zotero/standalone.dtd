@@ -29,7 +29,7 @@
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Edit">
+<!ENTITY editMenu.label "Édition">
 <!ENTITY editMenu.accesskey "n">
 <!ENTITY undoCmd.label "Annuler">
 <!ENTITY undoCmd.key "Z">

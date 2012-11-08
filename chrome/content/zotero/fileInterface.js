@@ -432,7 +432,7 @@ var Zotero_File_Interface = new function() {
 	 *
 	 * Does not check that items are actual references (and not notes or attachments)
 	 */
-	function copyItemsToClipboard(items, style, asHTML) {
+	function copyItemsToClipboard(items, style, asHTML, asCitations) {
 		// copy to clipboard
 		var transferable = Components.classes["@mozilla.org/widget/transferable;1"].
 						   createInstance(Components.interfaces.nsITransferable);
@@ -441,7 +441,7 @@ var Zotero_File_Interface = new function() {
 		var style = Zotero.Styles.get(style);
 		
 		// add HTML
-		var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, "html");
+		var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, "html", asCitations);
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -450,7 +450,7 @@ var Zotero_File_Interface = new function() {
 		
 		// add text (or HTML source)
 		if(!asHTML) {
-			var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, "text");
+			var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, "text", asCitations);
 		}
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
@@ -532,25 +532,12 @@ var Zotero_File_Interface = new function() {
 		// generate bibliography
 		try {
 			if(io.method == 'copy-to-clipboard') {
-				if (io.mode == 'citation') {
-					copyCitationToClipboard(items, io.style);
-				}
-				else {
-					copyItemsToClipboard(items, io.style);
-				}
-				return;
+				copyItemsToClipboard(items, io.style, false, io.mode === "citation");
 			}
 			else {
-				if (io.mode == 'citation') {
-					var csl = Zotero.Styles.get(format).csl;
-					csl.updateItems([item.id for each(item in items)]);
-					var citation = {citationItems:[{id:item.id} for each(item in items)], properties:{}};
-					var bibliography = csl.previewCitationCluster(citation, [], [], "html");
-				}
-				else {
-					var style = Zotero.Styles.get(io.style);
-					var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, format);
-				}
+				var style = Zotero.Styles.get(io.style);
+				var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style,
+					items, format, io.mode === "citation");
 			}
 		} catch(e) {
 			window.alert(Zotero.getString("fileInterface.bibliographyGenerationError"));

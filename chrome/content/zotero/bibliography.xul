@@ -19,7 +19,7 @@
 		<groupbox>
 			<caption label="&zotero.bibliography.outputMode;"/>
 			<radiogroup id="output-mode-radio">
-				<radio id="citation"/>
+				<radio id="citations"/>
 				<radio id="bibliography" label="&zotero.bibliography.bibliography;"/>
 			</radiogroup>
 		</groupbox>

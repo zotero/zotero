@@ -176,13 +176,13 @@ var Zotero_File_Interface_Bibliography = new function() {
 		//
 		
 		// Change label to "Citation" or "Note" depending on style class
-		if(document.getElementById("citation")) {
+		if(document.getElementById("citations")) {
 			if(Zotero.Styles.get(selectedStyle).class == "note") {
-				var label = Zotero.getString('citation.note');
+				var label = Zotero.getString('citation.notes');
 			} else {
-				var label = Zotero.getString('citation.citation');
+				var label = Zotero.getString('citation.citations');
 			}
-			document.getElementById("citation").label = label;
+			document.getElementById("citations").label = label;
 		}
 	}
 

@@ -626,7 +626,8 @@ Zotero.HTTP = new function() {
 		// (Approximately) how many seconds to wait if the document is left in the loading state and
 		// pageshow is called before we call pageshow with an incomplete document
 		const LOADING_STATE_TIMEOUT = 120;
-		var firedLoadEvent = 0;
+		var firedLoadEvent = 0,
+			loaded = false;
 		
 		/**
 		 * Loads the next page
@@ -637,6 +638,7 @@ Zotero.HTTP = new function() {
 				var url = urls[currentURL],
 					hiddenBrowser = hiddenBrowsers[currentURL];
 				firedLoadEvent = 0;
+				loaded = false;
 				currentURL++;
 				try {
 					Zotero.debug("Zotero.HTTP.processDocuments: Loading "+url);
@@ -646,10 +648,9 @@ Zotero.HTTP = new function() {
 						exception(e);
 						return;
 					} else {
+						if(!dontDelete) Zotero.Browser.deleteHiddenBrowser(hiddenBrowsers);
 						throw(e);
 					}
-				} finally {
-					doLoad();
 				}
 			} else {
 				if(!dontDelete) Zotero.Browser.deleteHiddenBrowser(hiddenBrowsers);
@@ -662,19 +663,21 @@ Zotero.HTTP = new function() {
 		 * @inner
 		 */
 		var onLoad = function(e) {
+			if(loaded) return;
 			var hiddenBrowser = e.currentTarget,
 				doc = hiddenBrowser.contentDocument;
-			if(!doc || doc !== e.target) return;
-			var url = doc.location.href.toString();
+			if(!doc) return;
+			var url = doc.documentURI;
 			if(url === "about:blank") return;
 			if(doc.readyState === "loading" && (firedLoadEvent++) < 120) {
 				// Try again in a second
-				Zotero.setTimeout(onLoad.bind(this, e), 1000);
+				Zotero.setTimeout(onLoad.bind(this, {"currentTarget":hiddenBrowser}), 1000);
 				return;
 			}
 			
 			Zotero.debug("Zotero.HTTP.processDocuments: "+url+" loaded");
 			hiddenBrowser.removeEventListener("pageshow", onLoad, true);
+			loaded = true;
 			
 			try {
 				processor(doc);

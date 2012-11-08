@@ -2418,6 +2418,8 @@ Zotero.DragDrop = {
  * Functions for creating and destroying hidden browser objects
  **/
 Zotero.Browser = new function() {
+	var nBrowsers = 0;
+	
 	this.createHiddenBrowser = createHiddenBrowser;
 	this.deleteHiddenBrowser = deleteHiddenBrowser;
 	
@@ -2445,21 +2447,19 @@ Zotero.Browser = new function() {
 		hiddenBrowser.docShell.allowJavascript = true;
 		hiddenBrowser.docShell.allowMetaRedirects = false;
 		hiddenBrowser.docShell.allowPlugins = false;
-		Zotero.debug("Created hidden browser ("
-			+ (win.document.getElementsByTagName('browser').length - 1) + ")");
+		Zotero.debug("Created hidden browser (" + (nBrowsers++) + ")");
 		return hiddenBrowser;
 	}
 	
 	function deleteHiddenBrowser(myBrowsers) {
-		if(!myBrowsers instanceof Array) myBrowsers = [myBrowsers];
+		if(!(myBrowsers instanceof Array)) myBrowsers = [myBrowsers];
 		for(var i=0; i<myBrowsers.length; i++) {
 			var myBrowser = myBrowsers[i];
 			myBrowser.stop();
 			myBrowser.destroy();
 			myBrowser.parentNode.removeChild(myBrowser);
 			myBrowser = null;
-			Zotero.debug("Deleted hidden browser ("
-				+ (win.document.getElementsByTagName('browser').length - 1) + ")");
+			Zotero.debug("Deleted hidden browser (" + (--nBrowsers) + ")");
 		}
 	}
 }

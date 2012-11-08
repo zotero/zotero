@@ -69,13 +69,15 @@ Zotero.Cite = {
 	 * @param {String} format The format of the output (html, text, or rtf)
 	 * @return {String} Bibliography or item list in specified format
 	 */
-	"makeFormattedBibliographyOrCitationList":function(style, items, format) {
+	"makeFormattedBibliographyOrCitationList":function(style, items, format, asCitationList) {
 		var cslEngine = style.csl;
 		cslEngine.setOutputFormat(format);
 		cslEngine.updateItems([item.id for each(item in items)]);
-		
-		var bibliography = Zotero.Cite.makeFormattedBibliography(cslEngine, format);
-		if(bibliography) return bibliography;
+				
+		if(!asCitationList) {
+			var bibliography = Zotero.Cite.makeFormattedBibliography(cslEngine, format);
+			if(bibliography) return bibliography;
+		}
 		
 		var styleClass = style.class;
 		var citations = [cslEngine.appendCitationCluster({"citationItems":[{"id":item.id}], "properties":{}}, true)[0][1]
