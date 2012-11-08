@@ -673,7 +673,15 @@ var wpdDOMSaver = {
 		}
 		return content;
 	},   
-			  	           	       
+
+	//register filename, so we don't overwrite them later
+	registerFile : function(newFileName, sourceURL, content) {
+		this.fileInfo[newFileName] = {
+			url: sourceURL,
+			downloaded: content
+		}
+	},
+	
   // is the file registered (e.g. downloaded)?	       
 	isFileRegistered : function(newFileName)
 	{
@@ -722,17 +730,16 @@ var wpdDOMSaver = {
       var newFileName = aURL.fileName.toLowerCase();
 		  if ( !newFileName ) newFileName = "untitled";
 		  newFileName = wpdCommon.getValidFileName(newFileName);            
-		  // same name but different location? 
+		  // same name but different location?
 		  newFileName = this.checkForEqualFilenames(newFileName,aURLSpec); 
-		                     
 		  // is the file already registered (processed) ?
 		  if ( this.isFileRegistered(newFileName)==false ) {
-		  	// No -> we have to download and register the file 
-		  	this.fileInfo[newFileName] = new Array("url","downloaded");
-		  	this.fileInfo[newFileName]["url"] = aURLSpec;                
-		  	this.fileInfo[newFileName]["downloaded"] = true;
-		  	if (aDownload) 
-		  	  this.fileInfo[newFileName]["downloaded"] = wpdCommon.downloadFile(aURLSpec,this.currentDir+newFileName);  		  
+		  	if (aDownload) {
+		  	  aDownload = wpdCommon.downloadFile(aURLSpec,this.currentDir+newFileName);
+			} else {
+			  aDownload = true;
+			}
+		  	this.registerFile(newFileName, aURLSpec, aDownload);
 		  }                                     		  		               
 		  return newFileName;				  
 		} catch(ex) {  
@@ -990,27 +997,29 @@ var wpdDOMSaver = {
   // (".html" will be added)
 	saveDocumentHTML: function(aDocument,aFileName)
 	{   
-	  Zotero.debug("[wpdDOMSaver.saveDocumentHTML]: "+this.currentDir+aFileName+".html");                           				
+	  Zotero.debug("[wpdDOMSaver.saveDocumentHTML]: "+this.currentDir+aFileName+".html");
+	  //register as a downloaded file, so other downloads don't overwrite it
+	  this.registerFile(aFileName + ".html", aDocument.location.href, true);
 	  this.curDocument = aDocument;         
 	  this.curCharacterSet = aDocument.characterSet;     
 	  var charset=this.curCharacterSet;                        	  	  
 	  // we get the html node without childs and add the head and body trees
 	  // manually so we are sure that we have a correct html file                  	  	  	 
-		var rootNode = aDocument.getElementsByTagName("html")[0].cloneNode(false);          		
+	  var rootNode = aDocument.getElementsByTagName("html")[0].cloneNode(false);          		
 
-		try {
-			var headNode = aDocument.getElementsByTagName("head")[0].cloneNode(true);     
-			rootNode.appendChild(headNode);
-			rootNode.appendChild(aDocument.createTextNode("\n"));
-		} catch(ex) { }  		  
-		try {            
-      this.curBody=aDocument.body.cloneNode(true);
-	  } catch(ex) {         
+	  try {
+		var headNode = aDocument.getElementsByTagName("head")[0].cloneNode(true);     
+		rootNode.appendChild(headNode);
+		rootNode.appendChild(aDocument.createTextNode("\n"));
+	  } catch(ex) { }  		  
+	  try {            
+        this.curBody=aDocument.body.cloneNode(true);
+	  } catch(ex) {
 	    this.curBody=aDocument.getElementsByTagName("body")[0].cloneNode(true);
 	  }  	                                                    	  
 	  rootNode.appendChild(this.curBody);
-		rootNode.appendChild(aDocument.createTextNode("\n"));				
-    
+	  rootNode.appendChild(aDocument.createTextNode("\n"));				
+
     // now the processing of the dom nodes (changing hrefs, downloading...)
 	  this.processDOMRecursively(rootNode);      
 	  
@@ -1034,7 +1043,6 @@ var wpdDOMSaver = {
     
 	// "var " added by Dan S. for Zotero
     var HTMLText = this.generateHTMLString(aDocument,rootNode);
-    
 		// convert the DOM String to the desired Charset                         
 		if (this.option["encodeUTF8"]) {
 		  HTMLText = wpdCommon.ConvertFromUnicode16(HTMLText,"UTF-8");

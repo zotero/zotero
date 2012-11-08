@@ -630,7 +630,7 @@ var wpdCommon = {
 	                                       
 	// write the String Buffer (str_Buffer) to a file (str_Filename)
 	writeFile : function(str_Buffer,str_Filename)
-  {      
+  {
   	if (MODE_SIMULATE) return true;
     try{
       var obj_File = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
@@ -699,7 +699,7 @@ var wpdCommon = {
   // download aSourceURL to aTargetFilename                              
   // (works also on local files...)
   downloadFile : function (aSourceURL,aTargetFilename)
-  {  
+  {
   	if (MODE_SIMULATE) return true; 	                 	    
     try {       
     	//new obj_URI object
