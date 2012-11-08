@@ -20,19 +20,13 @@
 	margin-bottom: .25em !important;
 }
 
-/* itemPane tabs with counters */
-tabbox#zotero-view-tabbox tab[type=counter] label.tab-counter {
-	text-align: center;
-	width: 1.4em;
-	margin: 0em 0em 0.1em 0.2em;
-//	font-size: 80%;
-//	padding-bottom: 1ex;
-//	font-weight: bold;
+/* itemPane tabs with bullets */
+tabbox#zotero-view-tabbox tab[type=indicator] image.tab-indicator {
+	list-style-image: url('chrome://zotero/skin/bullet_orange.png');
 }
 
-tabbox#zotero-view-tabbox tab[type=counter][count="0"] label.tab-counter {
-	color: #bbbbbb;
-	font-weight: normal;
+tabbox#zotero-view-tabbox tab[type=indicator][count="0"] image.tab-indicator {
+	list-style-image: url('chrome://zotero/skin/bullet_grey.png');
 }
 
 #zotero-view-item

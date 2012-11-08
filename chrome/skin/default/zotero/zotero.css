@@ -66,9 +66,9 @@ textbox[type="styled"]
 	-moz-binding: url('chrome://zotero/content/bindings/styled-textbox.xml#styled-textbox');
 }
 
-tab[type="counter"]
+tab[type="indicator"]
 {
-	-moz-binding: url('chrome://zotero/content/bindings/tab-counter.xml#tab-with-counter');
+	-moz-binding: url('chrome://zotero/content/bindings/tab-indicator.xml#tab-with-indicator');
 }
 
 zoteroattachmentbox

@@ -29,12 +29,12 @@
 <bindings 	xmlns="http://www.mozilla.org/xbl"
 			xmlns:xbl="http://www.mozilla.org/xbl"
 			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<binding id="tab-with-counter" extends="chrome://global/content/bindings/tabbox.xml#tab">
+	<binding id="tab-with-indicator" extends="chrome://global/content/bindings/tabbox.xml#tab">
 		<content>
 			<xul:hbox class="tab-middle box-inherit" xbl:inherits="align,dir,pack,orient,selected" flex="1">
 				<xul:image class="tab-icon" xbl:inherits="validate,src=image" role="presentation"/>
 				<xul:label class="tab-text" xbl:inherits="value=label,accesskey,crop,disabled" flex="1" role="presentation"/>
-				<xul:label class="tab-counter" xbl:inherits="disabled" role="presentation"/>
+				<xul:image class="tab-indicator" xbl:inherits="disabled" role="presentation"/>
 			</xul:hbox>
 		</content>
 		<implementation>
@@ -44,7 +44,6 @@
 					var v = parseInt(val, 10);
 					if(!isNaN(v) && v >= 0) {
 						this.setAttribute('count', v);
-						document.getAnonymousElementByAttribute(this, 'class', 'tab-counter').value = v;
 					}
 				]]>
 				</setter>

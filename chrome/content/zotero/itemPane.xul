@@ -54,9 +54,9 @@
 				<arrowscrollbox allowevents="true" class="tabbrowser-arrowscrollbox" orient="horizontal">
 					<tabs>
 						<tab label="&zotero.tabs.info.label;"/>
-						<tab type="counter" id="zotero-editpane-notes-tab" label="&zotero.tabs.notes.label;"/>
-						<tab type="counter" id="zotero-editpane-tags-tab" label="&zotero.tabs.tags.label;"/>
-						<tab type="counter" id="zotero-editpane-related-tab" label="&zotero.tabs.related.label;"/>
+						<tab type="indicator" id="zotero-editpane-notes-tab" label="&zotero.tabs.notes.label;"/>
+						<tab type="indicator" id="zotero-editpane-tags-tab" label="&zotero.tabs.tags.label;"/>
+						<tab type="indicator" id="zotero-editpane-related-tab" label="&zotero.tabs.related.label;"/>
 					</tabs>
 				</arrowscrollbox>
 					<tabpanels id="zotero-view-item" flex="1">
