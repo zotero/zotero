@@ -312,9 +312,3 @@ label.zotero-text-link {
 	padding-bottom: 4px;
 }
 
-/* itemPane tabs with counters */
-tabbox#zotero-view-tabbox tab[type=counter] label.tab-counter {
-	text-align: center;
-	width: 1.9em;
-	margin: 0em 0em 0em 0.2em
-}
