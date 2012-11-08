@@ -492,7 +492,8 @@ Zotero.HTTP = new function() {
 		// (Approximately) how many seconds to wait if the document is left in the loading state and
 		// pageshow is called before we call pageshow with an incomplete document
 		const LOADING_STATE_TIMEOUT = 120;
-		var firedLoadEvent = 0;
+		var firedLoadEvent = 0,
+			loaded = false;
 		
 		/**
 		 * Loads the next page
@@ -503,6 +504,7 @@ Zotero.HTTP = new function() {
 				var url = urls[currentURL],
 					hiddenBrowser = hiddenBrowsers[currentURL];
 				firedLoadEvent = 0;
+				loaded = false;
 				currentURL++;
 				try {
 					Zotero.debug("Zotero.HTTP.processDocuments: Loading "+url);
@@ -527,6 +529,7 @@ Zotero.HTTP = new function() {
 		 * @inner
 		 */
 		var onLoad = function(e) {
+			if(loaded) return;
 			var hiddenBrowser = e.currentTarget,
 				doc = hiddenBrowser.contentDocument;
 			if(!doc) return;
@@ -540,6 +543,7 @@ Zotero.HTTP = new function() {
 			
 			Zotero.debug("Zotero.HTTP.processDocuments: "+url+" loaded");
 			hiddenBrowser.removeEventListener("pageshow", onLoad, true);
+			loaded = true;
 			
 			try {
 				processor(doc);
