@@ -95,6 +95,11 @@ const CSL_DATE_MAPPINGS_LAW = {
 	"original-date":"date",
 	"accessed":"accessDate"
 }
+const CSL_DATE_MAPPINGS_PATENT = {
+	"issued":"issueDate",
+	"original-date":"filingDate",
+	"accessed":"accessDate"
+}
 
 /*
  * Mappings for types
@@ -1482,7 +1487,6 @@ Zotero.Utilities = {
 		
 		var typeID = Zotero.ItemTypes.getID(item.itemType);
 		if(!typeID) {
-			Zotero.debug("itemToServerJSON: Invalid itemType "+item.itemType+"; using webpage");
 			item.itemType = "webpage";
 			typeID = Zotero.ItemTypes.getID(item.itemType);
 		}
@@ -1687,11 +1691,14 @@ Zotero.Utilities = {
 		}
 		
 		// get date variables
-        if (["legal_case"].indexOf(cslType) > -1) {
-            var CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
-        } else {
-            var CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
-        }
+		var CSL_DATE_MAPPINGS;
+		if (["legal_case","legislation"].indexOf(cslType) > -1) {
+			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
+		} else if ("patent" === cslType) {
+			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_PATENT;
+		} else {
+			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
+		}
 		for(var variable in CSL_DATE_MAPPINGS) {
 			var date = item[CSL_DATE_MAPPINGS[variable]];
 			if(date) {
@@ -1804,11 +1811,14 @@ Zotero.Utilities = {
 		}
 		
 		// get date variables
-        if (["legal_case"].indexOf(item.type) > -1) {
-            var CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
-        } else {
-            var CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
-        }
+		var CSL_DATE_MAPPINGS;
+		if (["legal_case","legislation"].indexOf(item.type) > -1) {
+			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
+		} else if ("patent" === cslType) {
+			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_PATENT;
+		} else {
+			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
+		}
 		for(var variable in CSL_DATE_MAPPINGS) {
 			if(variable in cslItem) {
 				var field = CSL_DATE_MAPPINGS[variable],
