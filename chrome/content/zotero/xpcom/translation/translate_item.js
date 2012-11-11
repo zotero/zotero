@@ -334,11 +334,13 @@ Zotero.Translate.ItemSaver.prototype = {
 			Zotero.debug("Translate: Not adding attachment: no URL specified", 2);
 		} else {
 			// Determine whether to save an attachment
-			if(attachment.document
-					|| (attachment.mimeType && attachment.mimeType == "text/html")) {
-				if(!Zotero.Prefs.get("automaticSnapshots")) return;
-			} else {
-				if(!Zotero.Prefs.get("downloadAssociatedFiles")) return;
+			if(attachment.snapshot !== false) {
+				if(attachment.document
+						|| (attachment.mimeType && attachment.mimeType == "text/html")) {
+					if(!Zotero.Prefs.get("automaticSnapshots")) return;
+				} else {
+					if(!Zotero.Prefs.get("downloadAssociatedFiles")) return;
+				}
 			}
 			
 			if(attachment.document) {
