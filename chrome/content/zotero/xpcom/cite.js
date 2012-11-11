@@ -115,7 +115,7 @@ Zotero.Cite.System.retrieveItem = function(item) {
 		if (!nameObj.multi) {
 			nameObj.multi = {};
 			nameObj.multi._key = {};
-            nameObj.multi.main = creator.multi.main;
+			nameObj.multi.main = creator.multi.main;
 		}
 		for (var langTag in creator.multi._key) {
 			if (Zotero.Prefs.get('csl.enableInstitutionFormatting')) {

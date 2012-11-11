@@ -344,26 +344,26 @@ Zotero.Utilities = {
 	 * Retrieves the list of available content languages
 	 */
 	"languageList":function (item) {
-        // XXXX This should really be placed behind a cache in
-        // CachedLanguages(). Code needs a general tidying up.
-        if (item) {
-            var itemLanguages = {};
-            var insertSql = "INSERT INTO zlsTags VALUES (?,?,?)";
-            var snoopSql = "SELECT COUNT (*) FROM zlsTags WHERE tag=?";
-            for (var fieldID in item.multi._keys) {
-                for (var langTag in item.multi._keys[fieldID]) {
-                    itemLanguages[langTag] = true;
-                }
-                if (item.multi.main[fieldID]) {
-                    itemLanguages[item.multi.main[fieldID]] = true;
-                }
-            }
-            for (var tag in itemLanguages) {
-                if (!Zotero.DB.valueQuery(snoopSql, [tag])) {
-	                Zotero.DB.query(insertSql, [tag,tag,null]);
-                }
-            }
-        }
+		// XXXX This should really be placed behind a cache in
+		// CachedLanguages(). Code needs a general tidying up.
+		if (item) {
+			var itemLanguages = {};
+			var insertSql = "INSERT INTO zlsTags VALUES (?,?,?)";
+			var snoopSql = "SELECT COUNT (*) FROM zlsTags WHERE tag=?";
+			for (var fieldID in item.multi._keys) {
+				for (var langTag in item.multi._keys[fieldID]) {
+					itemLanguages[langTag] = true;
+				}
+				if (item.multi.main[fieldID]) {
+					itemLanguages[item.multi.main[fieldID]] = true;
+				}
+			}
+			for (var tag in itemLanguages) {
+				if (!Zotero.DB.valueQuery(snoopSql, [tag])) {
+					Zotero.DB.query(insertSql, [tag,tag,null]);
+				}
+			}
+		}
 		var sql = 'SELECT nickname,tag from zlsTags';
 		var result = Zotero.DB.query(sql);
 		if (result) {
@@ -987,9 +987,9 @@ Zotero.Utilities = {
 		
 		// split words
 		var words = string.split(delimiterRegexp);
-        var stringWithoutV = string.replace(/([^A-Za-z])v([^A-Za-z])/, "$1$2");
+		var stringWithoutV = string.replace(/([^A-Za-z])v([^A-Za-z])/, "$1$2");
 		var isUpperCase = stringWithoutV.toUpperCase() == stringWithoutV;
-    
+	
 		var newString = "";
 		var delimiterOffset = words[0].length;
 		var lastWordIndex = words.length-1;
@@ -1003,15 +1003,15 @@ Zotero.Utilities = {
 				// only use if word does not already possess some capitalization
 				if(isUpperCase || words[i] == lowerCaseVariant) {
 					if(
-                        alwaysLowerCase.indexOf(lowerCaseVariant.replace(/[^a-zA-Z]+/, "")) != -1
-                        || (
-						    // a skip word
-						    skipWords.indexOf(lowerCaseVariant.replace(/[^a-zA-Z]+/, "")) != -1
-						    // not first word, or last word if not #2 forcing for case names
-						        && i != 0 && i != lastWordIndex
-						    // does not follow a colon
-						        && (previousWordIndex == -1 || words[previousWordIndex][words[previousWordIndex].length-1] != ":")
-                        )
+						alwaysLowerCase.indexOf(lowerCaseVariant.replace(/[^a-zA-Z]+/, "")) != -1
+						|| (
+							// a skip word
+							skipWords.indexOf(lowerCaseVariant.replace(/[^a-zA-Z]+/, "")) != -1
+							// not first word, or last word if not #2 forcing for case names
+								&& i != 0 && i != lastWordIndex
+							// does not follow a colon
+								&& (previousWordIndex == -1 || words[previousWordIndex][words[previousWordIndex].length-1] != ":")
+						)
 					) {
 						words[i] = lowerCaseVariant;
 					} else {
