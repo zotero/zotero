@@ -963,7 +963,7 @@ function ChromeExtensionHandler() {
 		
 		this.name = uri;
 		this.URI = ioService.newURI(uri, "UTF-8", null);
-		this.owner = secMan.getCodebasePrincipal(this.URI);
+		this.owner = (secMan.getCodebasePrincipal || secMan.getSimpleCodebasePrincipal)(this.URI);
 		this._isPending = true;
 		
 		var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
