@@ -57,14 +57,21 @@ Zotero.Translators = new function() {
 		_initialized = true;
 		
 		// Build caches
-		for(var i in translators) {
-			var translator = new Zotero.Translator(translators[i]);
-			_translators[translator.translatorID] = translator;
-			
-			for(var type in TRANSLATOR_TYPES) {
-				if(translator.translatorType & TRANSLATOR_TYPES[type]) {
-					_cache[type].push(translator);
+		for(var i=0; i<translators.length; i++) {
+			try {
+				var translator = new Zotero.Translator(translators[i]);
+				_translators[translator.translatorID] = translator;
+				
+				for(var type in TRANSLATOR_TYPES) {
+					if(translator.translatorType & TRANSLATOR_TYPES[type]) {
+						_cache[type].push(translator);
+					}
 				}
+			} catch(e) {
+				Zotero.logError(e);
+				try {
+					Zotero.logError("Could not load translator "+JSON.stringify(translators[i]));
+				} catch(e) {}
 			}
 		}
 		
@@ -268,7 +275,6 @@ Zotero.Translators = new function() {
 						// check whether newTranslator is actually newer than the existing
 						// translator, and if not, don't update
 						if(Zotero.Date.sqlToDate(newTranslator.lastUpdated) < Zotero.Date.sqlToDate(oldTranslator.lastUpdated)) {
-							Zotero.debug("Translators: Received older version of "+newTranslator.label+" from repo ("+newTranslator.lastUpdated+" vs. "+oldTranslator.lastUpdated+")");
 							continue;
 						}
 						
@@ -298,7 +304,8 @@ Zotero.Translators = new function() {
 		
 		// Store
 		if(Zotero.isChrome || Zotero.isSafari) {
-			localStorage["translatorMetadata"] = JSON.stringify(serializedTranslators);
+			var serialized = JSON.stringify(serializedTranslators);
+			Zotero.debug("Translators: Saved updated translator list ("+localStorage["translatorMetadata"].length+" characters)");
 		}
 		
 		// Reinitialize
@@ -415,7 +422,7 @@ Zotero.Translator.prototype.init = function(info) {
 	
 	if(this.browserSupport.indexOf(Zotero.browser) !== -1) {
 		this.runMode = Zotero.Translator.RUN_MODE_IN_BROWSER;
-	} else if(!Zotero.isServer) {
+	} else {
 		this.runMode = Zotero.Translator.RUN_MODE_ZOTERO_STANDALONE;
 	}
 	
