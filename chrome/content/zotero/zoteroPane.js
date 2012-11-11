@@ -240,6 +240,13 @@ var ZoteroPane = new function()
 			sep.nextSibling.nextSibling.hidden = false;
 			sep.nextSibling.nextSibling.nextSibling.hidden = false;
 		}
+		
+		if (Zotero.openPane) {
+			Zotero.openPane = false;
+			setTimeout(function () {
+				ZoteroPane_Local.show();
+			}, 0);
+		}
 	}
 	
 	

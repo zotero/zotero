@@ -409,6 +409,13 @@ ZoteroCommandLineHandler.prototype = {
 				}
 			}
 		}
+		// handler to open Zotero pane at startup in Zotero for Firefox
+		else {
+			var zPaneOpen = cmdLine.handleFlag("ZoteroPaneOpen", false);
+			if (zPaneOpen) {
+                this.Zotero.openPane = true;
+            }
+        }
 	},
 	
 	contractID: "@mozilla.org/commandlinehandler/general-startup;1?type=zotero",
