@@ -85,7 +85,7 @@ var WPD_CRLFBUG = true;
 // the ConvertToEntities XPCOM function for generating usual
 // HTML Entities...
 // (this is precisely not a bug but a concept failure)
-var WPD_ENTITYBUG = true;
+var WPD_ENTITYBUG = false;
 
 // CSSSCROLLBUG: The css "scroll" property of "background" is
 // loosing the zero vertical position leading to a false
@@ -106,7 +106,7 @@ var WPD_CSSBACKGROUNDPOSITIONBUG = true;
 // leave the doctype at the original position  before the
 // HTML tag <HTML> and insert the doctype entry  a second
 // time below the <HTML> tag...
-var WPD_DOCTYPEBUG = true;
+var WPD_DOCTYPEBUG = false;
 
 // JAVASCRIPTSRCBUG: Deleting the "src" attribute together
 // with the whole <SCRIPT> tag may result in unexpected
@@ -665,6 +665,16 @@ var wpdDOMSaver = {
 		return content;
 	},
 
+	//given a file name and source URL (optional) with content (optional)
+	//returns a unique file name and registers it
+	getUniqueFileNameAndRegister: function(fileName, sourceURL, content) {
+		fileName = this.checkForEqualFilenames(
+			wpdCommon.getValidFileName(fileName).toLowerCase(),
+			sourceURL);
+		this.registerFile(fileName, sourceURL, content);
+		return fileName;
+	},
+
 	//register filename, so we don't overwrite them later
 	registerFile: function (newFileName, sourceURL, content) {
 		this.fileInfo[newFileName] = {
@@ -679,20 +689,27 @@ var wpdDOMSaver = {
 		return false;
 	},
 
+	isDownloaded: function(fileName) {
+		if(!this.fileInfo[fileName]) return;
+		return this.fileInfo[fileName].downloaded;
+	},
+
 	// check for equal Filenames with different locations
-	// if this is the case, we generate a new name...
+	// if this is the case, we generate a new name
+	// if no aURLSpec is passed, this generates a unique file name
 	checkForEqualFilenames: function (newFileName, aURLSpec) {
 		if (this.isFileRegistered(newFileName)) {
-			if (this.fileInfo[newFileName]["url"] != aURLSpec) {
+			if (!aURLSpec || this.fileInfo[newFileName]["url"] != aURLSpec) {
 				// the file is already registered but from a different location
 				// => probably not the same file, so we have to find a different name it (e.g. filename_001.ext)
 				var seq = 1;
 				var fileLR = wpdCommon.splitFileName(newFileName);
 				if (!fileLR[1]) fileLR[1] = "dat";
+				newFileName = fileLR[0] + "_" + wpdCommon.addLeftZeros(seq++, 3) + "." + fileLR[1];
 				while (this.fileInfo[newFileName] != undefined) {
 					// is the file already registered with the new name?
-					if (this.fileInfo[newFileName]["url"] == aURLSpec) return newFileName; // Yes -> so it�s already downloaded and we are finished
-					newFileName = fileLR[0] + "_" + wpdCommon.addLeftZeros(++seq, 3) + "." + fileLR[1]; // No -> "increment" filename
+					if (aURLSpec && this.fileInfo[newFileName]["url"] == aURLSpec) return newFileName; // Yes -> so it�s already downloaded and we are finished
+					newFileName = fileLR[0] + "_" + wpdCommon.addLeftZeros(seq++, 3) + "." + fileLR[1]; // No -> "increment" filename
 				}
 			}
 		}
@@ -715,9 +732,9 @@ var wpdDOMSaver = {
 			if (!newFileName) newFileName = "untitled";
 			newFileName = wpdCommon.getValidFileName(newFileName);
 			// same name but different location?
-			newFileName = this.checkForEqualFilenames(newFileName, aURLSpec);
+			newFileName = this.getUniqueFileNameAndRegister(newFileName, aURLSpec);
 			// is the file already registered (processed) ?
-			if (this.isFileRegistered(newFileName) == false) {
+			if (!this.isDownloaded(newFileName)) {
 				if (aDownload) {
 					aDownload = wpdCommon.downloadFile(aURLSpec, this.currentDir + newFileName);
 				} else {
@@ -739,7 +756,7 @@ var wpdDOMSaver = {
 		rootNode.firstChild.appendChild(aDocument.createTextNode("\n"));
 
 		newLinkNode.setAttribute("media", "all");
-		newLinkNode.setAttribute("href", aFileName + ".css");
+		newLinkNode.setAttribute("href", aFileName);
 		newLinkNode.setAttribute("type", "text/css");
 		newLinkNode.setAttribute("rel", "stylesheet");
 
@@ -907,9 +924,11 @@ var wpdDOMSaver = {
 	// wrapper HTML File which references "aDocument"
 	// ("aFileName" is the filename without(!) extension)
 	saveDocumentFile: function (aDocument, aFileName) {
-		Zotero.debug("[wpdDOMSaver.saveDocumentFile]: " + aFileName);
+		Zotero.debug("[wpdDOMSaver.saveDocumentFile]: Saving file from " + this.currentURL);
+		aFileName = this.download(this.currentURL, true)
+		Zotero.debug("[wpdDOMSaver.saveDocumentFile]: Saved to " + aFileName);
 
-		return this.download(this.currentURL, true)
+		return aFileName;
 		/* Wrapper file disabled by Dan S. for Zotero
 		var aFileURL = aDocument.location.href;
 
@@ -951,11 +970,12 @@ var wpdDOMSaver = {
 				} else {
 					CSSText = wpdCommon.ConvertFromUnicode16(CSSText, this.curCharacterSet);
 				}
-				Zotero.debug("[wpdDOMSaver.saveDocumentCSS]: " + this.currentDir + aFileName + ".css");
+				aFileName = this.getUniqueFileNameAndRegister(aFileName + ".css");
+				Zotero.debug("[wpdDOMSaver.saveDocumentCSS]: " + this.currentDir + aFileName);
 				// write css file
-				var CSSFile = this.currentDir + aFileName + ".css";
+				var CSSFile = this.currentDir + aFileName;
 				if (!wpdCommon.writeFile(CSSText, CSSFile)) wpdCommon.addError("[wpdDOMSaver.saveDocumentCSS]: could not write CSS File\n");
-				return true;
+				return aFileName;
 			}
 		}
 		return false;
@@ -966,9 +986,11 @@ var wpdDOMSaver = {
 	// "aFileName" is the filename without(!) extension
 	// (".html" will be added)
 	saveDocumentHTML: function (aDocument, aFileName) {
-		Zotero.debug("[wpdDOMSaver.saveDocumentHTML]: " + this.currentDir + aFileName + ".html");
-		//register as a downloaded file, so other downloads don't overwrite it
-		this.registerFile(aFileName + ".html", aDocument.location.href, true);
+		aFileName = this.getUniqueFileNameAndRegister(aFileName + ".html");
+		var aFileNameNoExt = wpdCommon.splitFileName(aFileName)[0];
+
+		Zotero.debug("[wpdDOMSaver.saveDocumentHTML]: " + this.currentDir + aFileName);
+
 		this.curDocument = aDocument;
 		this.curCharacterSet = aDocument.characterSet;
 		var charset = this.curCharacterSet;
@@ -993,7 +1015,8 @@ var wpdDOMSaver = {
 		this.processDOMRecursively(rootNode);
 
 		// write css file and add css node with the new css filename in the DOM Tree
-		if (this.saveDocumentCSS(aDocument, aFileName)) this.createCSSFileNode(aDocument, rootNode, aFileName);
+		var cssFileName = this.saveDocumentCSS(aDocument, aFileNameNoExt);
+		if (cssFileName) this.createCSSFileNode(aDocument, rootNode, cssFileName);
 
 		// create meta information (version, base_url, url, date/time)
 		if (this.option["metainfo"]) this.createMetaInformation(aDocument, rootNode);
@@ -1020,10 +1043,10 @@ var wpdDOMSaver = {
 		this.curCharacterSet = charset;
 
 		// and write the file...
-		var HTMLFile = this.currentDir + aFileName + ".html";
+		var HTMLFile = this.currentDir + aFileName;
 		if (!wpdCommon.writeFile(HTMLText, HTMLFile)) wpdCommon.addError("[wpdDOMSaver.saveDocumentHTML]: could not write HTML File\n");
 
-		return aFileName + ".html";
+		return aFileName;
 	},
 
 	// Decides the calling of SaveDocumentFile or saveDocumentHTML

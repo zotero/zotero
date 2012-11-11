@@ -435,8 +435,9 @@ var wpdCommon = {
 	nodeToHTMLString: function (aNode) {
 		if (aNode == null) return "";
 		var tag = "<" + aNode.nodeName.toLowerCase();
-		for (var i = 0; i < aNode.attributes.length; i++)
-		tag += ' ' + aNode.attributes[i].name + '="' + aNode.attributes[i].value + '"';
+		for (var i = 0; i < aNode.attributes.length; i++) {
+			tag += ' ' + aNode.attributes[i].name + '="' + aNode.attributes[i].value + '"';
+		}
 		tag += ">\n";
 		return tag + aNode.innerHTML + "</" + aNode.nodeName.toLowerCase() + ">\n";
 	},
