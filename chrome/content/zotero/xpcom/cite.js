@@ -141,11 +141,14 @@ Zotero.Cite.System.retrieveItem = function(item) {
 	}
 
 	// get date variables
-    if (["legal_case"].indexOf(cslType) > -1) {
-        var CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
-    } else {
-        var CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
-    }
+	var CSL_DATE_MAPPINGS;
+	if (["legal_case","legislation"].indexOf(cslType) > -1) {
+		CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
+	} else if ("patent" === cslType) {
+		CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_PATENT;
+	} else {
+		CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
+	}
 	for(var variable in CSL_DATE_MAPPINGS) {
 		var date = zoteroItem.getField(CSL_DATE_MAPPINGS[variable], false, true);
 		if(date) {
