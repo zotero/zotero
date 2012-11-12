@@ -351,8 +351,7 @@ var wpdDOMSaver = {
 							} catch (ex) {}
 						}
 						var aFileName = this.download(aNode.src, aDownload);
-						// Changed by Dan S. for Zotero -- see this.repairRelativeLinks()
-						if (aFileName) aNode.setAttribute("src", this.relativeLinkFix(aFileName));
+						if (aFileName) aNode.setAttribute("src", aFileName);
 					} else {
 						return wpdCommon.removeNodeFromParent(aNode);
 					}
@@ -361,8 +360,7 @@ var wpdDOMSaver = {
 					// for embedding different data sources in the html page
 					if (this.option["format"]) {
 						var aFileName = this.download(aNode.data, true);
-						// Changed by Dan S. for Zotero -- see this.repairRelativeLinks()
-						if (aFileName) aNode.setAttribute("data", this.relativeLinkFix(aFileName));
+						if (aFileName) aNode.setAttribute("data", aFileName);
 					} else {
 						return wpdCommon.removeNodeFromParent(aNode);
 					}
@@ -370,8 +368,7 @@ var wpdDOMSaver = {
 				case "body":
 					if (this.option["format"]) {
 						var aFileName = this.download(aNode.background, true);
-						// Changed by Dan S. for Zotero -- see this.repairRelativeLinks()
-						if (aFileName) aNode.setAttribute("background", this.relativeLinkFix(aFileName));
+						if (aFileName) aNode.setAttribute("background", aFileName);
 					} else {
 						aNode.removeAttribute("background");
 						aNode.removeAttribute("bgcolor");
@@ -384,8 +381,7 @@ var wpdDOMSaver = {
 				case "td":
 					if (this.option["format"]) {
 						var aFileName = this.download(aNode.getAttribute("background"), true);
-						// Changed by Dan S. for Zotero -- see this.repairRelativeLinks()
-						if (aFileName) aNode.setAttribute("background", this.relativeLinkFix(aFileName));
+						if (aFileName) aNode.setAttribute("background", aFileName);
 					} else {
 						aNode.removeAttribute("background");
 						aNode.removeAttribute("bgcolor");
@@ -395,8 +391,7 @@ var wpdDOMSaver = {
 					if (aNode.type.toLowerCase() == "image") {
 						if (this.option["format"]) {
 							var aFileName = this.download(aNode.src, true);
-							// Changed by Dan S. for Zotero -- see this.repairRelativeLinks()
-							if (aFileName) aNode.setAttribute("src", this.relativeLinkFix(aFileName));
+							if (aFileName) aNode.setAttribute("src", aFileName);
 						} else {
 							aNode.setAttribute("type", "button");
 							aNode.removeAttribute("src");
@@ -413,12 +408,10 @@ var wpdDOMSaver = {
 						return wpdCommon.removeNodeFromParent(aNode);
 					} else if ((aNode.getAttribute("rel").toLowerCase() == "shortcut icon") || (aNode.getAttribute("rel").toLowerCase() == "icon")) {
 						var aFileName = this.download(aNode.href, true);
-						// Changed by Dan S. for Zotero -- see this.repairRelativeLinks()
-						if (aFileName) aNode.setAttribute("href", this.relativeLinkFix(aFileName));
+						if (aFileName) aNode.setAttribute("href", aFileName);
 					} else if (aNode.getAttribute("rel").toLowerCase() == "fontdef") {
 						var aFileName = this.download(aNode.src, true);
-						// Changed by Dan S. for Zotero -- see this.repairRelativeLinks()
-						if (aFileName) aNode.setAttribute("src", this.relativeLinkFix(aFileName));
+						if (aFileName) aNode.setAttribute("src", aFileName);
 					} else {
 						aNode.setAttribute("href", aNode.href);
 					}
@@ -435,8 +428,7 @@ var wpdDOMSaver = {
 					if (this.option["script"]) {
 						if (aNode.hasAttribute("src")) {
 							var aFileName = this.download(aNode.src, true);
-							// Changed by Dan S. for Zotero -- see this.repairRelativeLinks()
-							if (aFileName) aNode.setAttribute("src", this.relativeLinkFix(aFileName));
+							if (aFileName) aNode.setAttribute("src", aFileName);
 						}
 					} else {
 						if (WPD_JAVASCRIPTSRCBUG && aNode.hasAttribute("src")) {
@@ -573,20 +565,6 @@ var wpdDOMSaver = {
 		}
 		return aHTMLText;
 	},
-
-
-	relativeLinkFix: function (aFileName) {
-		return "about:blank?" + aFileName;
-	},
-
-	// Added by Dan S. for Zotero to restore relative links,
-	// which are prepended with "about:blank?" to fix a bug in Scrapbook/WPD
-	// that sending an invalid request to the server when the img src
-	// is a relative link to a file in a different directory
-	repairRelativeLinks: function (aHTMLText) {
-		return aHTMLText.replace(/(src)="about:blank\?([^"]*)"/g, '$1="$2"');
-	},
-
 
 	// process the CSS text of one stylesheet element
 	processCSSText: function (aCSStext, aCSShref, inline) {
@@ -806,9 +784,6 @@ var wpdDOMSaver = {
 		// replace the &amp; added by the innerHTML method
 		// because we have already generated all entities
 		if (WPD_ENTITYBUG) HTMLText = HTMLText.replace(/&amp;/g, "&");
-
-		// Added by Dan S. for Zotero
-		HTMLText = this.repairRelativeLinks(HTMLText);
 
 		return this.repairInlineCSS(HTMLText);
 	},
