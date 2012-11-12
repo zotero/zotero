@@ -922,6 +922,8 @@ Zotero.ItemTreeView.prototype.unregister = function()
 
 Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 {
+	if(column.element.getAttribute('ignore') == 'true') return;
+
 	var obj = this._getItemAtRow(row);
 	
 	var val;
@@ -2328,7 +2330,7 @@ Zotero.ItemTreeView.prototype.getVisibleFields = function() {
 	var columns = [];
 	for (var i=0, len=this._treebox.columns.count; i<len; i++) {
 		var col = this._treebox.columns.getColumnAt(i);
-		if (col.element.getAttribute('hidden') != 'true') {
+		if (col.element.getAttribute('ignore') != 'true' && col.element.getAttribute('hidden') != 'true') {
 			columns.push(col.id.substring(20));
 		}
 	}

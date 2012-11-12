@@ -349,12 +349,14 @@
 									id="zotero-items-column-title" primary="true"
 									label="&zotero.items.title_column;"
 									minwidth="100"
+									width="300"
 									zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter" resizeafter="grow"/>
 								<treecol
 									id="zotero-items-column-firstCreator"
 									label="&zotero.items.creator_column;"
 									minwidth="50"
+									width="100"
 									zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter" resizeafter="grow"/>
 								<treecol
@@ -541,6 +543,7 @@
 									src="chrome://zotero/skin/attach-small.png"
 									fixed="true"
 									zotero-persist="ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter" resizeafter="grow"/>
 								<treecol
 									id="zotero-items-column-numNotes" hidden="true"
 									class="treecol-image"
@@ -548,6 +551,12 @@
 									src="chrome://zotero/skin/treeitem-note-small.png"
 									fixed="true"
 									zotero-persist="ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter" resizeafter="grow"/>
+								<treecol
+									id="zotero-items-column-filler"
+									ignore="true"
+									flex="1"
+									ignoreincolumnpicker="true"/>
 							</treecols>
 							<treechildren/>
 						</tree>
