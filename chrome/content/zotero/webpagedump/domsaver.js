@@ -496,7 +496,7 @@ var wpdDOMSaver = {
 						// currentURL to the URL of the frame document and afterwards back to the baseURL
 						if (this.frameNumber < this.frameList.length) {
 							var newFileName = this.saveDocumentEx(this.frameList[this.frameNumber++].document, this.name + "_" + this.frameNumber);
-							aNode.setAttribute("src", newFileName);
+							aNode.setAttribute("src", this.relativeLinkFix(newFileName));
 						}
 					} catch (ex) {
 						wpdCommon.addError("[wpdCommon.processDOMNode]:\n -> aNode.nodeName: " + aNode.nodeName + "\n -> " + ex);
@@ -574,7 +574,9 @@ var wpdDOMSaver = {
 		return aHTMLText;
 	},
 
-
+	// While we're replacing references with local file paths,
+	// we don't want to have the browser try and fetch them
+	// We prefix them with 'about:blank?' and remove later via repairRelativeLinks
 	relativeLinkFix: function (aFileName) {
 		return "about:blank?" + aFileName;
 	},
@@ -584,7 +586,7 @@ var wpdDOMSaver = {
 	// that sending an invalid request to the server when the img src
 	// is a relative link to a file in a different directory
 	repairRelativeLinks: function (aHTMLText) {
-		return aHTMLText.replace(/(src)="about:blank\?([^"]*)"/g, '$1="$2"');
+		return aHTMLText.replace(/(src|background|data|href)="about:blank\?([^"]*)"/g, '$1="$2"');
 	},
 
 
