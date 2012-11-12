@@ -50,7 +50,7 @@ Zotero_Ingester_Interface_SelectItems.init = function() {
 		var item = this.io.dataIn[i];
 
 		var title, checked = false;
-		if(typeof(item) != "string" && item.title != undefined) {
+		if(item && typeof(item) == "object" && item.title !== undefined) {
 			title = item.title;
 			checked = !!item.checked;
 		} else {
