@@ -819,6 +819,11 @@ function ChromeExtensionHandler() {
 					var fileURI = ph.newFileURI(file);
 				}
 				var channel = ioService.newChannelFromURI(fileURI);
+				//set originalURI so that it seems like we're serving from zotero:// protocol
+				//this is necessary to allow url() links to work from within css files
+				//otherwise they try to link to files on the file:// protocol, which is not allowed
+				channel.originalURI = uri;
+
 				return channel;
 			}
 			catch (e) {
