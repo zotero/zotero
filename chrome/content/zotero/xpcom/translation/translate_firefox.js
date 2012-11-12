@@ -32,6 +32,7 @@ const BOMs = {
 }
 
 Components.utils.import("resource://gre/modules/NetUtil.jsm");
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 /**
  * @class Manages the translator sandbox
