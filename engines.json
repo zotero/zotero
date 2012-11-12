@@ -25,19 +25,5 @@
 			"": "http://a9.com/-/spec/opensearch/1.1/"
 		},
 		"_iconSourceURI": "http://scholar.google.com/favicon.ico"
-	},
-	{
-		"name": "Pubget Lookup",
-		"alias": "Pubget",
-		"_urlTemplate": "http://pubget.com/openurl?rft.title={rft:title}&rft.issue={rft:issue?}&rft.spage={rft:spage?}&rft.epage={rft:epage?}&rft.issn={rft:issn?}&rft.jtitle={rft:stitle?}&doi={z:DOI?}",
-		"description": "Pubget Article Lookup",
-		"hidden": true,
-		"_urlParams": [],
-		"_urlNamespaces": {
-			"rft": "info:ofi/fmt:kev:mtx:journal",
-			"z": "http://www.zotero.org/namespaces/openSearch#",
-			"": "http://a9.com/-/spec/opensearch/1.1/"
-		},
-		"_iconSourceURI": "http://pubget.com/favicon.ico"
 	}
 ]
