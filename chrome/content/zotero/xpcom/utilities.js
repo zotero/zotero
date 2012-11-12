@@ -267,6 +267,45 @@ Zotero.Utilities = {
 	},
 
 	/**
+	 * Clean and validate ISBN.
+	 * Return isbn if valid, otherwise return false
+	 */
+	"cleanISBN":function(/**String*/ isbn) {
+		isbn = isbn.replace(/[^x\d]+/ig, '').toUpperCase();
+
+		if(isbn.length == 10) {
+			// Verify ISBN-10 checksum
+			var sum = 0;
+			for (var i = 0; i < 9; i++) {
+				if(isbn[i] == 'X') return false;	//X can only be a check digit
+				sum += isbn[i] * (10-i);
+			}
+			//check digit might be 'X'
+			sum += (isbn[9] == 'X')? 10 : isbn[9]*1;
+
+			return (sum % 11 == 0) ? isbn : false;
+		}
+
+		isbn = isbn.replace(/X/g, '');	//get rid of Xs
+
+		if(isbn.length == 13) {
+			// ISBN-13 should start with 978 or 979 i.e. GS1 for book publishing industry
+			var prefix = isbn.slice(0,3);
+			if (prefix != "978" && prefix != "979") return false;
+
+			// Verify checksum
+			var sum = 0;
+			for (var i = 0; i < 12; i+=2) sum += isbn[i]*1;	//to make sure it's int
+			for (i = 1; i < 12; i+=2) sum += isbn[i]*3;
+			sum += isbn[12]*1; //add the check digit
+
+			return (sum % 10 == 0 )? isbn : false;
+		}
+
+		return false;
+	},
+
+	/**
 	 * Convert plain text to HTML by replacing special characters and replacing newlines with BRs or
 	 * P tags
 	 * @param {String} str Plain text string
