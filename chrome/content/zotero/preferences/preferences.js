@@ -1189,7 +1189,13 @@ function downloadPDFTool(tool, version, callback) {
 	
 	wbp.progressListener = progressListener;
 	Zotero.debug("Saving " + uri.spec + " to " + fileURL.spec);
-	wbp.saveURI(uri, null, null, null, null, fileURL);
+	try {
+		wbp.saveURI(uri, null, null, null, null, fileURL);
+	} catch(e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=794602
+		// XXX Always use when we no longer support Firefox < 18
+		wbp.saveURI(uri, null, null, null, null, fileURL, null);
+	}
 }
 
 
