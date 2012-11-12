@@ -422,7 +422,11 @@ Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
 		var newItems = {};
 		var haveItems = false;
 		for(var i in items) {
-			newItems[i] = items[i];
+			if(items[i] && typeof(items[i]) == "object" && items[i].title !== undefined) {
+				newItems[i] = items[i].title;
+			} else {
+				newItems[i] = items[i];
+			}
 			haveItems = true;
 			
 			// only save one item if "items":"multiple" (as opposed to an array of items)
@@ -546,7 +550,11 @@ Zotero_TranslatorTester.prototype.newTest = function(doc, testReadyCallback) {
 		
 		var newItems = {};
 		for(var i in items) {
-			newItems[i] = items[i];
+			if(items[i] && typeof(items[i]) == "object" && items[i].title !== undefined) {
+				newItems[i] = items[i].title;
+			} else {
+				newItems[i] = items[i];
+			}
 			break;
 		}
 		
