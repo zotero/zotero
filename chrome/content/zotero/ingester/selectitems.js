@@ -47,11 +47,21 @@ Zotero_Ingester_Interface_SelectItems.init = function() {
 	var listbox = document.getElementById("zotero-selectitems-links");
 	
 	for(var i in this.io.dataIn) {	// we could use a tree for this if we wanted to
+		var item = this.io.dataIn[i];
+
+		var title, checked = false;
+		if(typeof(item) != "string" && item.title != undefined) {
+			title = item.title;
+			checked = !!item.checked;
+		} else {
+			title = item;
+		}
+
 		var itemNode = document.createElement("listitem");
 		itemNode.setAttribute("type", "checkbox");
 		itemNode.setAttribute("value", i);
-		itemNode.setAttribute("label", this.io.dataIn[i]);
-		itemNode.setAttribute("checked", false);
+		itemNode.setAttribute("label", title);
+		itemNode.setAttribute("checked", checked);
 		listbox.appendChild(itemNode);
 	}
 }
