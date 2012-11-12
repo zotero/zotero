@@ -1257,9 +1257,12 @@ const ZOTERO_CONFIG = {
 	 */
 	this.getInstalledExtensions = function(callback) {
 		function onHaveInstalledAddons(installed) {
+			installed.sort(function(a, b) {
+				return ((a.appDisabled || a.userDisabled) ? 1 : 0) -
+					((b.appDisabled || b.userDisabled) ? 1 : 0);
+			});
 			var addons = [];
 			for each(var addon in installed) {
-				if(addon.appDisabled || addon.userDisabled) continue;
 				switch (addon.id) {
 					case "zotero@chnm.gmu.edu":
 					case "{972ce4c6-7e08-4474-a285-3208198ce6fd}": // Default theme
@@ -1267,7 +1270,9 @@ const ZOTERO_CONFIG = {
 				}
 				
 				addons.push(addon.name + " (" + addon.version
-					+ (addon.type != 2 ? ", " + addon.type : "") + ")");
+					+ (addon.type != 2 ? ", " + addon.type : "")
+					+ ((addon.appDisabled || addon.userDisabled) ? ", disabled" : "")
+					+ ")");
 			}
 			callback(addons);
 		}
