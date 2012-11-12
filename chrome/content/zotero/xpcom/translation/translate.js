@@ -595,6 +595,17 @@ Zotero.Translate.Sandbox = {
 						}
 					}
 				}
+				
+				// Remap attachment (but not link) URLs
+				var properToProxy = translate.translator[0].properToProxy;
+				if(properToProxy && item.attachments) {
+					for(var i=0; i<item.attachments.length; i++) {
+						var attachment = item.attachments[i];
+						if(attachment.snapshot !== false && attachment.url) {
+							attachment.url = properToProxy(attachment.url);
+						}
+					}
+				}
 			}
 			
 			// call super

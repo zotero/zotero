@@ -1253,6 +1253,10 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 */
 	this.getInstalledExtensions = function(callback) {
 		function onHaveInstalledAddons(installed) {
+			installed.sort(function(a, b) {
+				return ((a.appDisabled || a.userDisabled) ? 1 : 0) -
+					((b.appDisabled || b.userDisabled) ? 1 : 0);
+			});
 			var addons = [];
 			for each(var addon in installed) {
 				switch (addon.id) {
@@ -1262,7 +1266,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				}
 				
 				addons.push(addon.name + " (" + addon.version
-					+ (addon.type != 2 ? ", " + addon.type : "") + ")");
+					+ (addon.type != 2 ? ", " + addon.type : "")
+					+ ((addon.appDisabled || addon.userDisabled) ? ", disabled" : "")
+					+ ")");
 			}
 			callback(addons);
 		}
