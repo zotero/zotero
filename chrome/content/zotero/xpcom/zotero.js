@@ -1259,6 +1259,7 @@ const ZOTERO_CONFIG = {
 		function onHaveInstalledAddons(installed) {
 			var addons = [];
 			for each(var addon in installed) {
+				if(addon.appDisabled || addon.userDisabled) continue;
 				switch (addon.id) {
 					case "zotero@chnm.gmu.edu":
 					case "{972ce4c6-7e08-4474-a285-3208198ce6fd}": // Default theme
