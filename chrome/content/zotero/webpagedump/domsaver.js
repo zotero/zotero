@@ -164,7 +164,8 @@ var wpdDOMSaver = {
 
 		// Split fileName in Path and Name
 
-		this.name = wpdCommon.getFileLeafName(fileName); // extract fileName from filePath
+		this.name = wpdCommon.getValidFileName(
+			wpdCommon.getFileLeafName(fileName)); // extract fileName from filePath
 		this.currentDir = wpdCommon.getFilePath(fileName); // only directory
 		this.name = wpdCommon.splitFileName(this.name)[0]; // no extension!
 
@@ -221,7 +222,7 @@ var wpdDOMSaver = {
 	// resolve the javascript links inside the attributes (e.g. onclick,...)
 	normalizeJavaScriptLink: function (aNode, aAttr) {
 		var val = aNode.getAttribute(aAttr); // get the attribute value and check for link stuff
-		if (!val.match(/\(\'([^\']+)\'/)) return aNode;
+		if (!val || !val.match(/\(\'([^\']+)\'/)) return aNode;
 		val = RegExp.$1;
 		if (val.indexOf("/") == -1 && val.indexOf(".") == -1) return aNode;
 		val = wpdCommon.resolveURL(this.currentURL, val); // it is a link -> resolve and set the URL to the local URL
@@ -409,9 +410,12 @@ var wpdDOMSaver = {
 				case "link":
 					// could containt urls (icon, stylesheet and fontdef)
 					// We have to remove nodes with the stylesheet attribute because they will be added later
-					if ((aNode.getAttribute("rel").toLowerCase() == "stylesheet") && (aNode.getAttribute("href").indexOf("chrome://") == -1)) {
+					if(!aNode.hasAttribute("rel")) return aNode;
+					if (aNode.getAttribute("rel").toLowerCase() == "stylesheet"
+							&& (aNode.hasAttribute("href") && aNode.getAttribute("href").indexOf("chrome://") == -1)) {
 						return wpdCommon.removeNodeFromParent(aNode);
-					} else if ((aNode.getAttribute("rel").toLowerCase() == "shortcut icon") || (aNode.getAttribute("rel").toLowerCase() == "icon")) {
+					} else if (aNode.getAttribute("rel").toLowerCase() == "shortcut icon"
+							|| aNode.getAttribute("rel").toLowerCase() == "icon") {
 						var aFileName = this.download(aNode.href, true);
 						// Changed by Dan S. for Zotero -- see this.repairRelativeLinks()
 						if (aFileName) aNode.setAttribute("href", this.relativeLinkFix(aFileName));
@@ -730,7 +734,6 @@ var wpdDOMSaver = {
 			// generate a filename
 			var newFileName = aURL.fileName.toLowerCase();
 			if (!newFileName) newFileName = "untitled";
-			newFileName = wpdCommon.getValidFileName(newFileName);
 			// same name but different location?
 			newFileName = this.getUniqueFileNameAndRegister(newFileName, aURLSpec);
 			// is the file already registered (processed) ?
@@ -1074,7 +1077,7 @@ var wpdDOMSaver = {
 	// (be sure to call the init function at the top of this file before)
 	saveHTMLDocument: function () {
 		try {
-			this.saveDocumentEx(this.document, this.name);
+			return this.saveDocumentEx(this.document, this.name);
 		} catch (ex) {
 			wpdCommon.addError("[wpdDOMSaver.saveHTMLDocument]\n -> " + ex);
 		}

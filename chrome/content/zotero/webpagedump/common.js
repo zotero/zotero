@@ -54,6 +54,8 @@ var WPD_DEFAULTHEIGHT = 768;
 
 var WPD_MAXUIERRORCOUNT = 8;
 
+// maximum character length for a valid file name (excluding extension)
+var WPD_MAX_FILENAME_LENGTH = 100;
 
 /*function wpdGetTopBrowserWindow()
 {
@@ -353,15 +355,10 @@ var wpdCommon = {
 	},
 
 	// replace illegal characters
+	// and shorten long file names
 	getValidFileName: function (aFileName) {
-		aFileName = aFileName.replace(/[\"\?!~`]+/g, "");
-		aFileName = aFileName.replace(/[\*\&]+/g, "+");
-		aFileName = aFileName.replace(/[\\\/\|\:;]+/g, "-");
-		aFileName = aFileName.replace(/[\<]+/g, "(");
-		aFileName = aFileName.replace(/[\>]+/g, ")");
-		aFileName = aFileName.replace(/[\s]+/g, "_");
-		aFileName = aFileName.replace(/[%]+/g, "@");
-		return aFileName;
+		aFileName = Zotero.File.getValidFileName(aFileName).toLowerCase();
+		return Zotero.File.truncateFileName(aFileName, WPD_MAX_FILENAME_LENGTH);
 	},
 
 	getURL: function () {
