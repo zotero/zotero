@@ -305,8 +305,14 @@ Zotero.Translators = new function() {
 	 * @param	{String}		label
 	 * @return	{String}
 	 */
-	this.getFileNameFromLabel = function(label) {
-		return Zotero.File.getValidFileName(label) + ".js";
+	this.getFileNameFromLabel = function(label, alternative) {
+		var fileName = Zotero.Utilities.removeDiacritics(
+			Zotero.File.getValidFileName(label)) + ".js";
+		// Use translatorID if name still isn't ASCII (e.g., Cyrillic)
+		if (alternative && !fileName.match(/^[\x00-\x7f]+$/)) {
+			fileName = alternative + ".js";
+		}
+		return fileName;
 	}
 	
 	/**
@@ -361,7 +367,9 @@ Zotero.Translators = new function() {
 			throw ("code not provided in Zotero.Translators.save()");
 		}
 		
-		var fileName = Zotero.Translators.getFileNameFromLabel(metadata.label);
+		var fileName = Zotero.Translators.getFileNameFromLabel(
+			metadata.label, metadata.translatorID
+		);
 		var destFile = Zotero.getTranslatorsDirectory();
 		destFile.append(fileName);
 		
