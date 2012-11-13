@@ -92,7 +92,7 @@
               <menuitem label="&lt;i&gt;...&lt;/i&gt;" value="&lt;i&gt;|&lt;/i&gt;" oncommand="Zotero_File_Interface_Bibliography.citationSetAffixes(null, this);"/>
             </menupopup>
             <menupopup id="citation-secondary-affix-menu" 
-                       onpopupshowing="if (!document.popupNode.disabled &amp;&amp; !document.popupNode.checked) {Zotero_File_Interface_Bibliography.citationSecondary();return true;} else {Zotero_File_Interface_Bibliography.citationSecondary();return false;}" position="after_start">
+                       onpopupshowing="if (!document.popupNode.disabled &amp;&amp; !document.popupNode.checked) {Zotero_File_Interface_Bibliography.citationSecondary(document.popupNode);return true;} else {Zotero_File_Interface_Bibliography.citationSecondary(document.popupNode);return false;}" position="after_start">
               <menuitem label=", ..." value=", |" oncommand="Zotero_File_Interface_Bibliography.citationSetAffixes(null, this);"/>
               <menuitem label="[...]" value=" [|]" oncommand="Zotero_File_Interface_Bibliography.citationSetAffixes(null, this);"/>
               <menuitem label="(...)" value=" (|)" oncommand="Zotero_File_Interface_Bibliography.citationSetAffixes(null, this);"/>

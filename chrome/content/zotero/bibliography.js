@@ -138,14 +138,18 @@ var Zotero_File_Interface_Bibliography = new function() {
 		var citationPrefNames = ['Persons', 'Institutions', 'Titles', 'Publishers', 'Places'];
 		for (var i = 0, ilen = citationPrefNames.length; i < ilen; i += 1) {
 			var prefname = citationPrefNames[i].toLowerCase();
-			var citationPrefNode = document.getElementById(prefname + '-radio');
-			if (citationPrefNode) {
-				citationLangSet(citationPrefNames[i], true);
-				if (_io['citationLangPrefs'+citationPrefNames[i]] && _io['citationLangPrefs'+citationPrefNames[i]].length) {
-					var selectedCitationPrefNode = document.getElementById(prefname + "-radio-" + _io['citationLangPrefs'+citationPrefNames[i]][0]);
-					citationPrefNode.selectedItem = selectedCitationPrefNode;
-				}
-			}
+            var citationRoleNames = ["orig","translit","translat"];
+			citationLangSet(citationPrefNames[i], true);
+            for (var j = 0, jlen = citationRoleNames.length; j < jlen; j += 1) {
+                var rolename = citationRoleNames[j];
+			    var citationPrefNode = document.getElementById(prefname + '-radio-orig');
+                if (citationPrefNode) {
+				    if (_io['citationLangPrefs'+citationPrefNames[i]] && _io['citationLangPrefs'+citationPrefNames[i]].length) {
+					    var selectedCitationPrefNode = document.getElementById(prefname + "-radio-" + _io['citationLangPrefs'+citationPrefNames[i]][0]);
+					    selectedCitationPrefNode.checked = true;
+				    }
+                }
+            }
 		}
 
 		var langPrefs = document.getElementById('lang-prefs');
@@ -324,7 +328,7 @@ var Zotero_File_Interface_Bibliography = new function() {
     }
 
     function citationPrimary(node) {
-	    var lst = node.id.split('-');
+	    var lst = node.getAttribute("id").split('-');
 	    var base = lst[0];
         var primarySetting = lst[2];
 		var settings = _io['citationLangPrefs'+capFirst(base)];
@@ -336,10 +340,9 @@ var Zotero_File_Interface_Bibliography = new function() {
 	    citationLangSet(capFirst(base), true, true);
     }
 
-	function citationSecondary() {
+	function citationSecondary(node) {
 		//Zotero.debug("XXX == citationSecondary() ==");
-		var node = document.popupNode;
-		var lst = node.id.split('-');
+		var lst = node.getAttribute("id").split('-');
 		var lowerBase = lst[0];
 		var upperBase = lst[0][0].toUpperCase() + lst[0].slice(1);
 		var addme = false;
@@ -398,8 +401,6 @@ var Zotero_File_Interface_Bibliography = new function() {
             var translitNode = document.getElementById(translitID);
             nodes.push(translitNode);
             
-            Zotero.debug();
-
             for (var i = 0, ilen = forms.length; i < ilen; i += 1) {
                 nodes.push(document.getElementById(base + "-checkbox-" + forms[i]));
             }
