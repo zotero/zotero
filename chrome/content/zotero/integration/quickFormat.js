@@ -757,13 +757,11 @@ var Zotero_QuickFormat = new function () {
 			}
 		
 			if(!referenceHeight && firstReference) {
-				referenceHeight = firstReference.scrollHeight;
-				if(firstReference === referenceBox.lastChild) referenceHeight += 1;
+				referenceHeight = firstReference.scrollHeight + 1;
 			}
 			
 			if(!separatorHeight && firstSeparator) {
-				separatorHeight = firstSeparator.scrollHeight;
-				if(firstSeparator === referenceBox.lastChild) separatorHeight += 1;
+				separatorHeight = firstSeparator.scrollHeight + 1;
 			}
 			
 			if(!panelFrameHeight) {
