@@ -1814,9 +1814,9 @@ Zotero.Utilities = {
 		
 		// get date variables
 		var CSL_DATE_MAPPINGS;
-		if (["legal_case","legislation"].indexOf(item.type) > -1) {
+		if (["legal_case","legislation"].indexOf(cslItem.type) > -1) {
 			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
-		} else if ("patent" === cslType) {
+		} else if ("patent" === cslItem.type) {
 			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_PATENT;
 		} else {
 			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
