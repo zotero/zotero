@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.407",
+    PROCESSOR_VERSION: "1.0.408",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -906,6 +906,7 @@ CSL.getSortCompare = function () {
         };
         CSL.debug("Using collation sort");
     } catch (e) {
+        CSL.debug("Using localeCompare sort");
         strcmp = function (a, b) {
             return a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase());
         };
@@ -4246,6 +4247,8 @@ CSL.getSpliceDelimiter = function (last_collapsed, pos) {
         this.tmp.splice_delimiter = this.citation.opt["after-collapse-delimiter"];
     } else if (this.tmp.have_collapsed && this.opt.xclass === "in-text" && this.opt.update_mode !== CSL.NUMERIC) {
         this.tmp.splice_delimiter = ", ";
+    } else if (this.tmp.use_cite_group_delimiter) {
+        this.tmp.splice_delimiter = this.citation.opt.cite_group_delimiter;
     } else if (this.tmp.cite_locales[pos - 1]) {
         var alt_affixes = this.tmp.cite_affixes[this.tmp.cite_locales[pos - 1]];
         if (alt_affixes && alt_affixes.delimiter) {
@@ -4913,8 +4916,10 @@ CSL.Node.citation = {
         }
         if (this.tokentype === CSL.END) {
             state.opt.grouped_sort = state.opt.xclass === "in-text" 
-                && state.citation.opt.collapse 
-                && state.citation.opt.collapse.length
+                && (state.citation.opt.collapse 
+                    && state.citation.opt.collapse.length)
+                || (state.citation.opt.cite_group_delimiter
+                    && state.citation.opt.cite_group_delimiter.length)
                 && state.opt.update_mode !== CSL.POSITION
                 && state.opt.update_mode !== CSL.NUMERIC;
             if (state.opt.grouped_sort 
@@ -6164,7 +6169,9 @@ CSL.NameOutput.prototype._collapseAuthor = function () {
     }
     if ((this.item && this.item["suppress-author"] && this._first_creator_variable == this.variables[0])
         || (this.state[this.state.tmp.area].opt.collapse 
-            && this.state[this.state.tmp.area].opt.collapse.length)) {
+            && this.state[this.state.tmp.area].opt.collapse.length)
+        || (this.state[this.state.tmp.area].opt.cite_group_delimiter 
+            && this.state[this.state.tmp.area].opt.cite_group_delimiter.length)) {
         if (this.state.tmp.authorstring_request) {
             mystr = "";
             myqueue = this.state.tmp.name_node.top.blobs.slice(-1)[0].blobs;
@@ -6175,7 +6182,7 @@ CSL.NameOutput.prototype._collapseAuthor = function () {
             this.state.tmp.offset_characters = oldchars;
             this.state.registry.authorstrings[this.Item.id] = mystr;
         } else if (!this.state.tmp.just_looking
-            && !this.state.tmp.suppress_decorations) {
+                   && !this.state.tmp.suppress_decorations && (this.item["suppress-author"] || (this.state[this.state.tmp.area].opt.collapse && this.state[this.state.tmp.area].opt.collapse.length) || this.state[this.state.tmp.area].opt.cite_group_delimiter && this.state[this.state.tmp.area].opt.cite_group_delimiter)) {
             mystr = "";
             myqueue = this.state.tmp.name_node.top.blobs.slice(-1)[0].blobs;
             oldchars = this.state.tmp.offset_characters;
@@ -6183,9 +6190,12 @@ CSL.NameOutput.prototype._collapseAuthor = function () {
                 mystr = this.state.output.string(this.state, myqueue, false);
             }
             if (mystr === this.state.tmp.last_primary_names_string) {
-                this.state.tmp.name_node.top.blobs.pop();
-                this.state.tmp.name_node.children = [];
-                this.state.tmp.offset_characters = oldchars;
+                if (this.item["suppress-author"] || (this.state[this.state.tmp.area].opt.collapse && this.state[this.state.tmp.area].opt.collapse.length)) {
+                    this.state.tmp.name_node.top.blobs.pop();
+                    this.state.tmp.name_node.children = [];
+                    this.state.tmp.offset_characters = oldchars;
+                }
+                this.state.tmp.use_cite_group_delimiter = false;
             } else {
                 this.state.tmp.last_primary_names_string = mystr;
                 if (this.variables.indexOf(this._first_creator_variable) > -1 && this.item && this.item["suppress-author"] && this.Item.type !== "legal_case") {
@@ -6195,6 +6205,9 @@ CSL.NameOutput.prototype._collapseAuthor = function () {
                     this.state.tmp.term_predecessor = false;
                 }
                 this.state.tmp.have_collapsed = false;
+                if (this.state[this.state.tmp.area].opt.cite_group_delimiter && this.state[this.state.tmp.area].opt.cite_group_delimiter) {
+                    this.state.tmp.use_cite_group_delimiter = true;
+                }
             }
         }
     }
@@ -9268,6 +9281,11 @@ CSL.Attributes["@givenname-disambiguation-rule"] = function (state, arg) {
 CSL.Attributes["@collapse"] = function (state, arg) {
     if (arg) {
         state[this.name].opt.collapse = arg;
+    }
+};
+CSL.Attributes["@cite-group-delimiter"] = function (state, arg) {
+    if (arg) {
+        state[state.tmp.area].opt.cite_group_delimiter = arg;
     }
 };
 CSL.Attributes["@names-delimiter"] = function (state, arg) {
