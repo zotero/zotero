@@ -65,7 +65,7 @@ const CSL_TEXT_MAPPINGS = {
 	"section":["section"],
 	"genre":["type"],
 	"source":["libraryCatalog"],
-	"dimension": ["artworkSize", "runningTime"], 
+	"dimensions": ["artworkSize", "runningTime"], 
 	"medium":["medium", "system"],
 	"scale":["scale"],
 	"archive":["archive"],
