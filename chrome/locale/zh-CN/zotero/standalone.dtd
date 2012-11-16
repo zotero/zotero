@@ -29,7 +29,7 @@
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "退出">
+<!ENTITY editMenu.label "编辑">
 <!ENTITY editMenu.accesskey "E">
 <!ENTITY undoCmd.label "撤销">
 <!ENTITY undoCmd.key "Z">
