@@ -153,7 +153,7 @@
 					<toolbarbutton id="zotero-tb-item-from-page" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItemFromPage.label;" command="cmd_zotero_newItemFromCurrentPage"/>
 					<toolbarbutton id="zotero-tb-lookup" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" type="panel">
 						<panel id="zotero-lookup-panel" type="arrow" onpopupshown="Zotero_Lookup.onShowing()"
-								onpopuphidden="Zotero_Lookup.onHidden()">
+								onpopuphidden="Zotero_Lookup.onHidden(event)">
 							<vbox>
 								<description>&zotero.lookup.description;</description>
 								<stack>
@@ -342,6 +342,7 @@
 							id="zotero-items-tree" context="zotero-itemmenu"
 							enableColumnDrag="true"
 							onfocus="if (ZoteroPane_Local.itemsView.rowCount &amp;&amp; !ZoteroPane_Local.itemsView.selection.count) { ZoteroPane_Local.itemsView.selection.select(0); }"
+							onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
 							onkeypress="ZoteroPane_Local.handleKeyPress(event, this.id)"
 							onselect="ZoteroPane_Local.itemSelected(event)"
 							ondragstart="if (event.target.localName == 'treechildren') { ZoteroPane_Local.itemsView.onDragStart(event); }"

@@ -105,9 +105,24 @@ var Zotero_File_Interface_Bibliography = new function() {
 		
 		// ONLY FOR bibliography.xul: export options
 		if(document.getElementById("save-as-rtf")) {
+			var settings = Zotero.Prefs.get("export.bibliographySettings");
+			try {
+				settings = JSON.parse(settings);
+				var mode = settings.mode;
+				var method = settings.method;
+			}
+			// If not JSON, assume it's the previous format-as-a-string
+			catch (e) {
+				method = settings;
+			}
+			if (!mode) mode = "bibliography";
+			if (!method) method = "save-as-rtf";
+			
 			// restore saved bibliographic settings
-			document.getElementById('output-radio').selectedItem =
-				document.getElementById(Zotero.Prefs.get("export.bibliographySettings"));
+			document.getElementById('output-mode-radio').selectedItem =
+				document.getElementById(mode);
+			document.getElementById('output-method-radio').selectedItem =
+				document.getElementById(method);
 		}
 		
 		// ONLY FOR integrationDocPrefs.xul: update status of displayAs, set
@@ -187,7 +202,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	}
 
 	/*
-	 * ONLY FOR integrationDocPrefs.xul: called when style is changed
+	 * Called when style is changed
 	 */
 	function styleChanged(index) {
 		//Zotero.debug("XXX == styleChanged() ==");
@@ -201,6 +216,10 @@ var Zotero_File_Interface_Bibliography = new function() {
 		
 		var selectedStyle = selectedItem.getAttribute('value');
 		
+		//
+		// For integrationDocPrefs.xul
+		//
+		
 		// update status of displayAs box based on style class
 		if(document.getElementById("displayAs")) {
 			var isNote = Zotero.Styles.get(selectedStyle).class == "note";
@@ -213,17 +232,33 @@ var Zotero_File_Interface_Bibliography = new function() {
 			document.getElementById("bookmarks").disabled = isNote;
 			document.getElementById("bookmarks-caption").disabled = isNote;
 		}
+		
+		//
+		// For bibliography.xul
+		//
+		
+		// Change label to "Citation" or "Note" depending on style class
+		if(document.getElementById("citations")) {
+			if(Zotero.Styles.get(selectedStyle).class == "note") {
+				var label = Zotero.getString('citation.notes');
+			} else {
+				var label = Zotero.getString('citation.citations');
+			}
+			document.getElementById("citations").label = label;
+		}
 	}
 
 	function acceptSelection() {
 		//Zotero.debug("XXX == acceptSelection() ==");
 		// collect code
 		_io.style = document.getElementById("style-listbox").selectedItem.value;
-		if(document.getElementById("output-radio")) {
+		if(document.getElementById("output-method-radio")) {
 			// collect settings
-			_io.output = document.getElementById("output-radio").selectedItem.id;
+			_io.mode = document.getElementById("output-mode-radio").selectedItem.id;
+			_io.method = document.getElementById("output-method-radio").selectedItem.id;
 			// save settings
-			Zotero.Prefs.set("export.bibliographySettings", _io.output);
+			Zotero.Prefs.set("export.bibliographySettings",
+				JSON.stringify({ mode: _io.mode, method: _io.method }));
 		}
 		
 		// ONLY FOR integrationDocPrefs.xul: collect displayAs

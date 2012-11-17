@@ -255,7 +255,9 @@
 			// Check if we should use the new auto process method			
 			if (getParam(ed, "paste_auto_cleanup_on_paste")) {
 				// Is it's Opera or older FF use key handler
-				if (tinymce.isOpera || /Firefox\/2/.test(navigator.userAgent)) {
+				// Modified by Dan S./Zotero
+				//if (tinymce.isOpera || /Firefox\/2/.test(navigator.userAgent)) {
+				if (false) {
 					ed.onKeyDown.add(function(ed, e) {
 						if (((tinymce.isMac ? e.metaKey : e.ctrlKey) && e.keyCode == 86) || (e.shiftKey && e.keyCode == 45))
 							grabContent(e);

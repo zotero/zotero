@@ -48,6 +48,7 @@ pref("extensions.zotero.viewOnDoubleClick", true);
 pref("extensions.zotero.groups.copyChildLinks", true);
 pref("extensions.zotero.groups.copyChildFileAttachments", true);
 pref("extensions.zotero.groups.copyChildNotes", true);
+pref("extensions.zotero.groups.copyTags", true);
 
 pref("extensions.zotero.backup.numBackups", 2);
 pref("extensions.zotero.backup.interval", 1440);

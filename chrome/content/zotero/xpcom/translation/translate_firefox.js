@@ -32,6 +32,7 @@ const BOMs = {
 }
 
 Components.utils.import("resource://gre/modules/NetUtil.jsm");
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 /**
  * @class Manages the translator sandbox
@@ -45,21 +46,16 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	// import functions missing from global scope into Fx sandbox
 	this.sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
 	this.sandbox.DOMParser = function() {
+		var uri, principal;
 		// get URI
-		// DEBUG: In Fx 4 we can just use document.nodePrincipal, but in Fx 3.6 this doesn't work
 		if(typeof sandboxLocation === "string") {	// if sandbox specified by URI
-			var uri = sandboxLocation;
+			var secMan = Services.scriptSecurityManager;
+			uri = Services.io.newURI(sandboxLocation, "UTF-8", null);
+			principal = (secMan.getCodebasePrincipal || secMan.getSimpleCodebasePrincipal)(uri);
 		} else {									// if sandbox specified by DOM document
-			var uri = sandboxLocation.location.toString();
+			principal = sandboxLocation.document.nodePrincipal;
+			uri = sandboxLocation.document.documentURIObject;
 		}
-		
-		// get principal from URI
-		var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
-				.getService(Components.interfaces.nsIScriptSecurityManager);
-		var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService);
-		uri = ioService.newURI(uri, "UTF-8", null);
-		var principal = secMan.getCodebasePrincipal(uri);
 		
 		// initialize DOM parser
 		var _DOMParser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
@@ -68,12 +64,8 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 		
 		// expose parseFromString
 		this.__exposedProps__ = {"parseFromString":"r"};
-		if(Zotero.isFx5) {
-			this.parseFromString = function(str, contentType) {
-				return Zotero.Translate.SandboxManager.Fx5DOMWrapper(_DOMParser.parseFromString(str, contentType));
-			}
-		} else {
-			this.parseFromString = function(str, contentType) _DOMParser.parseFromString(str, contentType);
+		this.parseFromString = function(str, contentType) {
+			return Zotero.Translate.SandboxManager.Fx5DOMWrapper(_DOMParser.parseFromString(str, contentType));
 		}
 	};
 	this.sandbox.DOMParser.__exposedProps__ = {"prototype":"r"};
@@ -125,6 +117,7 @@ Zotero.Translate.SandboxManager.Fx5DOMWrapper = function(obj, parent) {
 	val.__wrappedDOMObject = obj;
 	val.__exposedProps__ = {};
 	for(var prop in obj) {
+		if(prop === "prototype") continue;
 		let localProp = prop,
 			cachedWrapper;
 		val.__exposedProps__[localProp] = "r";
@@ -158,7 +151,9 @@ Zotero.Translate.SandboxManager.prototype = {
 	 */
 	"importObject":function(object, passAsFirstArgument, attachTo) {
 		if(!attachTo) attachTo = this.sandbox.Zotero;
-		var newExposedProps = false;
+		var newExposedProps = false,
+			sandbox = this.sandbox,
+			me = this;
 		if(!object.__exposedProps__) newExposedProps = {};
 		for(var key in (newExposedProps ? object : object.__exposedProps__)) {
 			let localKey = key;
@@ -169,30 +164,11 @@ Zotero.Translate.SandboxManager.prototype = {
 			var isObject = typeof object[localKey] === "object";
 			if(isFunction || isObject) {
 				if(isFunction) {
-					if(Zotero.isFx4) {
-						if(passAsFirstArgument) {
-							attachTo[localKey] = object[localKey].bind(object, passAsFirstArgument);
-						} else {
-							attachTo[localKey] = object[localKey].bind(object);
-						}
-					} else {
-						attachTo[localKey] = function() {
-							if(passAsFirstArgument) {
-								var args = new Array(arguments.length+1);
-								args[0] = passAsFirstArgument;
-								var offset = 1;
-							} else {
-								var args = new Array(arguments.length);
-								var offset = 0;
-							}
-							
-							for(var i=0, nArgs=arguments.length; i<nArgs; i++) {
-								args[i+offset] = arguments[i];
-							}
-							
-							return object[localKey].apply(object, args);
-						};
-					}
+					attachTo[localKey] = function() {
+						var args = Array.prototype.slice.apply(arguments);
+						if(passAsFirstArgument) args.unshift(passAsFirstArgument);
+						return me._copyObject(object[localKey].apply(object, args));
+					};
 				} else {
 					attachTo[localKey] = {};
 				}
@@ -211,6 +187,38 @@ Zotero.Translate.SandboxManager.prototype = {
 		} else {
 			attachTo.__exposedProps__ = object.__exposedProps__;
 		}
+	},
+	
+	/**
+	 * Copies a JavaScript object to this sandbox
+	 * @param {Object} obj
+	 * @return {Object}
+	 */
+	"_copyObject":function(obj, wm) {
+		if(typeof obj !== "object" || obj === null
+				|| (obj.__proto__ !== Object.prototype && obj.__proto__ !== Array.prototype)
+				|| "__exposedProps__" in obj || "__wrappedDOMObject" in obj) {
+			return obj;
+		}
+		if(!wm) wm = new WeakMap();
+		var obj2 = (obj instanceof Array ? this.sandbox.Array() : this.sandbox.Object());
+		for(var i in obj) {
+			if(!obj.hasOwnProperty(i)) continue;
+			
+			var prop1 = obj[i];
+			if(typeof prop1 === "object" && prop1 !== null
+					&& (prop1.__proto__ === Object.prototype || prop1.__proto__ === Array.prototype)) {
+				var prop2 = wm.get(prop1);
+				if(prop2 === undefined) {
+					prop2 = this._copyObject(prop1, wm);
+					wm.set(prop1, prop2);
+				}
+				obj2[i] = prop2;
+			} else {
+				obj2[i] = prop1;
+			}
+		}
+		return obj2;
 	}
 }
 

@@ -100,8 +100,6 @@ var Zotero_QuickFormat = new function () {
 				}
 			}
 			
-			window.sizeToContent();
-			
 			// Nodes for citation properties panel
 			panel = document.getElementById("citation-properties");
 			panelPrefix = document.getElementById("prefix");
@@ -129,8 +127,8 @@ var Zotero_QuickFormat = new function () {
 	this.onLoad = function(event) {
 		if(event.target !== document) return;		
 		// make sure we are visible
-		window.setTimeout(function() {	
-			if(!Zotero.isFx4) window.sizeToContent();
+		window.setTimeout(function() {
+			window.resizeTo(window.outerWidth, qfb.clientHeight);
 			var screenX = window.screenX;
 			var screenY = window.screenY;
 			var xRange = [window.screen.availLeft, window.screen.width-window.outerWidth];
@@ -740,7 +738,6 @@ var Zotero_QuickFormat = new function () {
 			qfs.removeAttribute("multiline");
 			window.sizeToContent();
 		}
-		
 		var panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
 		
 		if(numReferences || numSeparators) {
@@ -760,13 +757,11 @@ var Zotero_QuickFormat = new function () {
 			}
 		
 			if(!referenceHeight && firstReference) {
-				referenceHeight = firstReference.scrollHeight;
-				if(firstReference === referenceBox.lastChild) referenceHeight += 1;
+				referenceHeight = firstReference.scrollHeight + 1;
 			}
 			
 			if(!separatorHeight && firstSeparator) {
-				separatorHeight = firstSeparator.scrollHeight;
-				if(firstSeparator === referenceBox.lastChild) separatorHeight += 1;
+				separatorHeight = firstSeparator.scrollHeight + 1;
 			}
 			
 			if(!panelFrameHeight) {
@@ -802,7 +797,7 @@ var Zotero_QuickFormat = new function () {
 		}
 		
 		referencePanel.openPopup(document.documentElement, "after_start", 15,
-			null, false, false, null);
+			qfb.clientHeight-window.clientHeight, false, false, null);
 		
 		if(!Zotero.isMac && !Zotero.isWin) {
 			// reinstate noautohide after the window is shown

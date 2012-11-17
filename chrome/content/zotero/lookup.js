@@ -120,7 +120,9 @@ const Zotero_Lookup = new function () {
 	/**
 	 * Cancels the popup and resets fields
 	 */
-	this.onHidden = function() {
-		document.getElementById("zotero-lookup-textbox").value = "";
+	this.onHidden = function(event) {
+		if (event.target.id == 'zotero-lookup-panel') {
+			document.getElementById("zotero-lookup-textbox").value = "";
+		}
 	}
 }

@@ -315,6 +315,7 @@ Zotero.ItemFields = new function() {
 			'archive',
 			'archiveLocation',
 			'language',
+			'programmingLanguage',
 			'rights',
 			
 			// TEMP - NSF

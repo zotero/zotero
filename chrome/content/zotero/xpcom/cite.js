@@ -282,14 +282,18 @@ Zotero.Cite.getBibliographyFormatParameters = function(bib) {
  * @param {Zotero.Style} style The style to use
  * @param {Zotero.Item[]} items An array of items
  * @param {String} format The format of the output
+ * @param {Boolean} asCitationList Whether to return a list of formatted citations even if
+ *    the style defines a bibliography
  */
-Zotero.Cite.makeFormattedBibliographyOrCitationList = function(style, items, format) {
+Zotero.Cite.makeFormattedBibliographyOrCitationList = function(style, items, format, asCitationList) {
 	var cslEngine = style.csl;
 	cslEngine.setOutputFormat(format);
 	cslEngine.updateItems([item.id for each(item in items)]);
 	
-	var bibliography = Zotero.Cite.makeFormattedBibliography(cslEngine, format);
-	if(bibliography) return bibliography;
+	if(!asCitationList) {
+		var bibliography = Zotero.Cite.makeFormattedBibliography(cslEngine, format);
+		if(bibliography) return bibliography;
+	}
 	
 	var styleClass = style.class;
 	var citations = [cslEngine.appendCitationCluster({"citationItems":[{"id":item.id}], "properties":{}}, true)[0][1]

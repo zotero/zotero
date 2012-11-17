@@ -239,7 +239,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			var newItem = Zotero.Items.get(myID);
 		} else {
 			var file = this._parsePath(attachment.path);
-			if(!file || !file.exists()) return;
+			if(!file) return;
 			
 			if (attachment.url) {
 				var myID = Zotero.Attachments.importSnapshotFromFile(file,
@@ -297,13 +297,15 @@ Zotero.Translate.ItemSaver.prototype = {
 			return false;
 		}
 		
-		if(!file.exists() && path[0] !== "/" && path.substr(0, 5).toLowerCase() !== "file:") {
+		if(file.exists()) {
+			return file;
+		} else if(path[0] !== "/" && path.substr(0, 5).toLowerCase() !== "file:") {
 			// This looks like a relative path, but it might actually be an absolute path, because
 			// some people are not quite there.
 			var newFile = this._parsePath("/"+path);
-			if(newFile.exists()) return newFile;
+			if(newFile && newFile.exists()) return newFile;
 		}
-		return file;
+		return false;
 	},
 	
 	"_saveAttachmentDownload":function(attachment, parentID) {
@@ -313,11 +315,13 @@ Zotero.Translate.ItemSaver.prototype = {
 			Zotero.debug("Translate: Not adding attachment: no URL specified", 2);
 		} else {
 			// Determine whether to save an attachment
-			if(attachment.document
-					|| (attachment.mimeType && attachment.mimeType == "text/html")) {
-				if(!Zotero.Prefs.get("automaticSnapshots")) return;
-			} else {
-				if(!Zotero.Prefs.get("downloadAssociatedFiles")) return;
+			if(attachment.snapshot !== false) {
+				if(attachment.document
+						|| (attachment.mimeType && attachment.mimeType == "text/html")) {
+					if(!Zotero.Prefs.get("automaticSnapshots")) return;
+				} else {
+					if(!Zotero.Prefs.get("downloadAssociatedFiles")) return;
+				}
 			}
 			
 			if(attachment.document && "__wrappedDOMObject" in attachment.document) {
