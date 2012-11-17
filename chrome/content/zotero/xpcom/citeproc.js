@@ -6195,7 +6195,9 @@ CSL.NameOutput.prototype._collapseAuthor = function () {
                     this.state.tmp.name_node.children = [];
                     this.state.tmp.offset_characters = oldchars;
                 }
-                this.state.tmp.use_cite_group_delimiter = false;
+                if (this.state[this.state.tmp.area].opt.cite_group_delimiter && this.state[this.state.tmp.area].opt.cite_group_delimiter) {
+                    this.state.tmp.use_cite_group_delimiter = true;
+                }
             } else {
                 this.state.tmp.last_primary_names_string = mystr;
                 if (this.variables.indexOf(this._first_creator_variable) > -1 && this.item && this.item["suppress-author"] && this.Item.type !== "legal_case") {
@@ -6206,7 +6208,7 @@ CSL.NameOutput.prototype._collapseAuthor = function () {
                 }
                 this.state.tmp.have_collapsed = false;
                 if (this.state[this.state.tmp.area].opt.cite_group_delimiter && this.state[this.state.tmp.area].opt.cite_group_delimiter) {
-                    this.state.tmp.use_cite_group_delimiter = true;
+                    this.state.tmp.use_cite_group_delimiter = false;
                 }
             }
         }
