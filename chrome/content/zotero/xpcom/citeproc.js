@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.408",
+    PROCESSOR_VERSION: "1.0.409",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -2669,6 +2669,24 @@ CSL.Engine.prototype.retrieveItem = function (id) {
 			Item.legislation_id = legislation_id.join("::");
         }
     }
+    Item["title-short"] = Item.shortTitle;
+    if (Item.title && this.sys.getAbbreviation) {
+        var jurisdiction = this.transform.loadAbbreviation(Item.jurisdiction, "title", Item.title);
+        if (this.transform.abbrevs[jurisdiction].title) {
+            if (this.transform.abbrevs[jurisdiction].title[Item.title]) {
+                Item["title-short"] = this.transform.abbrevs[jurisdiction].title[Item.title];
+            }
+        }
+    }
+    Item["container-title-short"] = Item.journalAbbreviation;
+    if (Item["container-title"] && this.sys.getAbbreviation) {
+        var jurisdiction = this.transform.loadAbbreviation(Item.jurisdiction, "title", Item["container-title"]);
+        if (this.transform.abbrevs[jurisdiction].title) {
+            if (this.transform.abbrevs[jurisdiction].title[Item["container-title"]]) {
+                Item["container-title-short"] = this.transform.abbrevs[jurisdiction].title[Item["container-title"]];
+            }
+        }
+    }
     return Item;
 };
 CSL.Engine.prototype.setOpt = function (token, name, value) {
@@ -3547,6 +3565,12 @@ CSL.getBibliographyEntries = function (bibsection) {
             for (i = 0, ilen = rule.triggers.length; i < ilen; i += 1) {
                 if (clonedItem[rule.triggers[i]]) {
                     delete clonedItem[rule.triggers[i]];
+                    if (rule.triggers[i] === "title-short") {
+                        delete clonedItem.shortTitle;
+                    }
+                    if (rule.triggers[i] === "container-title-short") {
+                        delete clonedItem.journalAbbreviation;
+                    }
                 }
             }
             var newID = clonedItem.id + ":gen";
@@ -7998,7 +8022,7 @@ CSL.Node.names = {
             }
             state.build.names_level += -1;
             this.label = state.build.name_label;
-            state.build.name_label = undefined;
+            state.build.name_label = {};
             state.build.names_variables.pop();
             var mywith = "with";
             var with_default_prefix = "";
@@ -9665,9 +9689,6 @@ CSL.Transform = function (state) {
             myabbrev_family = "institution-part";
         }
         if (["genre", "event", "medium"].indexOf(myabbrev_family) > -1) {
-            myabbrev_family = "title";
-        }
-        if (["title-short"].indexOf(myabbrev_family) > -1) {
             myabbrev_family = "title";
         }
         value = "";
