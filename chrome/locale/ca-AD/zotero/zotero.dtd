@@ -5,8 +5,11 @@
 <!ENTITY zotero.annotate.toolbar.expand.label "Expandeix totes les anotacions">
 <!ENTITY zotero.annotate.toolbar.highlight.label "Marca el text">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Desmarca el text">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Desa al portaretalls">
 <!ENTITY zotero.bibliography.output.label "Format de sortida">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
 <!ENTITY zotero.bibliography.print.label "Imprimeix">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Desa com a HTML">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Desa com a RTF">
@@ -83,15 +86,23 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Majúscules o minúscules">
 <!ENTITY zotero.item.textTransform.titlecase "Tipus Frase">
 <!ENTITY zotero.items.accessDate_column "Accedit">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.archive_column "Archive">
 <!ENTITY zotero.items.callNumber_column "Codi de Catàleg">
+<!ENTITY zotero.items.court_column "Court">
 <!ENTITY zotero.items.creator_column "Creador">
 <!ENTITY zotero.items.dateAdded_column "Data d&apos;incorporació">
 <!ENTITY zotero.items.dateModified_column "Data de modificació">
 <!ENTITY zotero.items.date_column "Data">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.issue_column "Issue">
 <!ENTITY zotero.items.itemType "Tipus d'ítem">
 <!ENTITY zotero.items.journalAbbr_column "Abreviatura de la revista">
 <!ENTITY zotero.items.language_column "Llengua">
 <!ENTITY zotero.items.libraryCatalog_column "Catàleg de la biblioteca">
+<!ENTITY zotero.items.medium_column "Medium/Format">
 <!ENTITY zotero.items.menu.addTag "Add Tag">
 <!ENTITY zotero.items.menu.attach "Afegeix un adjunt">
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
@@ -108,13 +119,21 @@
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaura a la Biblioteca">
 <!ENTITY zotero.items.menu.showInLibrary "Mostra a la Biblioteca">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
 <!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.place_column "Place">
 <!ENTITY zotero.items.publication_column "Publicació">
 <!ENTITY zotero.items.publisher_column "Editorial">
 <!ENTITY zotero.items.reporter_column "Reporter">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 <!ENTITY zotero.items.rights_column "Drets">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.title_column "Títol">
 <!ENTITY zotero.items.type_column "Tipus">
+<!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Any">
 <!ENTITY zotero.lookup.description "Introduïu l'ISBN, DOI, o PMID per cercar en el quadre tot seguit.">
 <!ENTITY zotero.moreEncodings.label "Més codificacions">

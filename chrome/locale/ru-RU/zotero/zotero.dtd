@@ -5,8 +5,11 @@
 <!ENTITY zotero.annotate.toolbar.expand.label "Развернуть все аннотации">
 <!ENTITY zotero.annotate.toolbar.highlight.label "Выделить текст">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Снять выделение текста">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Скопировать в буфер обмена">
 <!ENTITY zotero.bibliography.output.label "Выходной формат">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
 <!ENTITY zotero.bibliography.print.label "Распечатать">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Сохранить как HTML">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Сохранить как RTF">
@@ -83,15 +86,23 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.textTransform.titlecase "Заглавные буквы">
 <!ENTITY zotero.items.accessDate_column "Дата доступа">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.archive_column "Archive">
 <!ENTITY zotero.items.callNumber_column "Шифр">
+<!ENTITY zotero.items.court_column "Court">
 <!ENTITY zotero.items.creator_column "Создатель">
 <!ENTITY zotero.items.dateAdded_column "Дата добавления">
 <!ENTITY zotero.items.dateModified_column "Дата изменения">
 <!ENTITY zotero.items.date_column "Дата">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.issue_column "Issue">
 <!ENTITY zotero.items.itemType "Тип документа">
 <!ENTITY zotero.items.journalAbbr_column "Сокращ. журнала">
 <!ENTITY zotero.items.language_column "Язык">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.medium_column "Medium/Format">
 <!ENTITY zotero.items.menu.addTag "Add Tag">
 <!ENTITY zotero.items.menu.attach "Добавить приложение">
 <!ENTITY zotero.items.menu.attach.file "Прикрепить копию файла...">
@@ -108,13 +119,21 @@
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.showInLibrary "Показать в библиотеке">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
 <!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.place_column "Place">
 <!ENTITY zotero.items.publication_column "Публикация">
 <!ENTITY zotero.items.publisher_column "Издатель">
 <!ENTITY zotero.items.reporter_column "Reporter">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 <!ENTITY zotero.items.rights_column "Права">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.title_column "Название">
 <!ENTITY zotero.items.type_column "Тип">
+<!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Год">
 <!ENTITY zotero.lookup.description "Введите ISBN, DOI или PMID для поиска в следующее поле.">
 <!ENTITY zotero.moreEncodings.label "Ещё кодировки">

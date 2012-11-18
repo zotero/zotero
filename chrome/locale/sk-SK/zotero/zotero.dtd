@@ -5,8 +5,11 @@
 <!ENTITY zotero.annotate.toolbar.expand.label "Rozbaliť všetky anotácie">
 <!ENTITY zotero.annotate.toolbar.highlight.label "Zvýrazniť text">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Zrušiť zvýraznenie">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Skopírovať do schránky">
 <!ENTITY zotero.bibliography.output.label "Výstupný formát">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
 <!ENTITY zotero.bibliography.print.label "Tlačiť">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Uložiť ako HTML">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Uložiť ako RTF">
@@ -83,15 +86,23 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.textTransform.titlecase "Prvé Veľké">
 <!ENTITY zotero.items.accessDate_column "Citované">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.archive_column "Archive">
 <!ENTITY zotero.items.callNumber_column "Signatúra">
+<!ENTITY zotero.items.court_column "Court">
 <!ENTITY zotero.items.creator_column "Autor">
 <!ENTITY zotero.items.dateAdded_column "Pridané dňa">
 <!ENTITY zotero.items.dateModified_column "Upravené dňa">
 <!ENTITY zotero.items.date_column "Dátum">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.issue_column "Issue">
 <!ENTITY zotero.items.itemType "Typ položky">
 <!ENTITY zotero.items.journalAbbr_column "Skratka periodika">
 <!ENTITY zotero.items.language_column "Jazyk">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.medium_column "Medium/Format">
 <!ENTITY zotero.items.menu.addTag "Add Tag">
 <!ENTITY zotero.items.menu.attach "Vložiť prílohu">
 <!ENTITY zotero.items.menu.attach.file "Vložiť kópiu miestneho súboru">
@@ -108,13 +119,21 @@
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.showInLibrary "Zobraziť v knižnici">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
 <!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.place_column "Place">
 <!ENTITY zotero.items.publication_column "Publikácia">
 <!ENTITY zotero.items.publisher_column "Vydavateľ">
 <!ENTITY zotero.items.reporter_column "Reporter">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 <!ENTITY zotero.items.rights_column "Práva">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.title_column "Názov">
 <!ENTITY zotero.items.type_column "Typ">
+<!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Rok">
 <!ENTITY zotero.lookup.description "Zadajte do poľa ISBN, DOI alebo PMID podľa ktorého chcete vyhľadávať.">
 <!ENTITY zotero.moreEncodings.label "Viac">

@@ -5,8 +5,11 @@
 <!ENTITY zotero.annotate.toolbar.expand.label "Rozwiń wszystkie adnotacje">
 <!ENTITY zotero.annotate.toolbar.highlight.label "Wyróżnij tekst">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Zdejmij wyróżnienie">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Kopiuj do schowka">
 <!ENTITY zotero.bibliography.output.label "Format wyjściowy">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
 <!ENTITY zotero.bibliography.print.label "Drukuj">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Zapisz jako HTML">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Zapisz jako RTF">
@@ -83,15 +86,23 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.textTransform.titlecase "Kapitaliki">
 <!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.archive_column "Archive">
 <!ENTITY zotero.items.callNumber_column "Numer klasyfikacyjny">
+<!ENTITY zotero.items.court_column "Court">
 <!ENTITY zotero.items.creator_column "Twórca">
 <!ENTITY zotero.items.dateAdded_column "Data dodania">
 <!ENTITY zotero.items.dateModified_column "Data modyfikacji">
 <!ENTITY zotero.items.date_column "Data">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.issue_column "Issue">
 <!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "Język">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.medium_column "Medium/Format">
 <!ENTITY zotero.items.menu.addTag "Add Tag">
 <!ENTITY zotero.items.menu.attach "Add Attachment">
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
@@ -108,13 +119,21 @@
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.showInLibrary "Wyświetl w bibliotece">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
 <!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.place_column "Place">
 <!ENTITY zotero.items.publication_column "Publication">
 <!ENTITY zotero.items.publisher_column "Wydawca">
 <!ENTITY zotero.items.reporter_column "Reporter">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 <!ENTITY zotero.items.rights_column "Prawa autorskie">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.title_column "Tytuł">
 <!ENTITY zotero.items.type_column "Typ">
+<!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Rok">
 <!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">

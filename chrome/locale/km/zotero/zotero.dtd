@@ -5,8 +5,11 @@
 <!ENTITY zotero.annotate.toolbar.expand.label "ពង្រីកចំណារពន្យល់">
 <!ENTITY zotero.annotate.toolbar.highlight.label "បន្លិចពណ៌អត្ថបទ">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "ដោះបន្លិចពណ៌អត្ថបទ">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
 <!ENTITY zotero.bibliography.copyToClipboard.label "ចម្លងទៅកាន់កន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
 <!ENTITY zotero.bibliography.output.label "ទម្រង់ទិន្នផល">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
 <!ENTITY zotero.bibliography.print.label "បោះពុម្ពចេញ">
 <!ENTITY zotero.bibliography.saveAsHTML.label "ទាញរក្សាទុកជាអេចធីអេមអិល">
 <!ENTITY zotero.bibliography.saveAsRTF.label "ទាញរក្សាទុកជាអ៊ែរធីអែហ្វ">
@@ -83,15 +86,23 @@
 <!ENTITY zotero.item.textTransform.sentencecase "ចំណងជើងអក្សរតូច">
 <!ENTITY zotero.item.textTransform.titlecase "ចំណងជើងអក្សរធំ">
 <!ENTITY zotero.items.accessDate_column "ចូលមើល">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.archive_column "Archive">
 <!ENTITY zotero.items.callNumber_column "លេខហៅ">
+<!ENTITY zotero.items.court_column "Court">
 <!ENTITY zotero.items.creator_column "អ្នកនិពន្ធ">
 <!ENTITY zotero.items.dateAdded_column "កាលបរិច្ឆេទបញ្ចូល">
 <!ENTITY zotero.items.dateModified_column "កាលបរិច្ឆេទកែតម្រូវ">
 <!ENTITY zotero.items.date_column "កាលបរិច្ឆេទ">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.issue_column "Issue">
 <!ENTITY zotero.items.itemType "ប្រភេទឯកសារ">
 <!ENTITY zotero.items.journalAbbr_column "អក្សរកាត់ទនានុប្បវត្តិ">
 <!ENTITY zotero.items.language_column "ភាសា">
 <!ENTITY zotero.items.libraryCatalog_column "កាតាឡុកបណ្ណាល័យ">
+<!ENTITY zotero.items.medium_column "Medium/Format">
 <!ENTITY zotero.items.menu.addTag "Add Tag">
 <!ENTITY zotero.items.menu.attach "បន្ថែមឯកសារកម្ជាប់">
 <!ENTITY zotero.items.menu.attach.file "ភ្ជាប់ឯកសារចម្លងចូលទុក...">
@@ -108,13 +119,21 @@
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "ស្តារទៅកាន់បណ្ណាល័យវិញ">
 <!ENTITY zotero.items.menu.showInLibrary "បង្ហាញនៅក្នុងបណ្ណាល័យ">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
 <!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.place_column "Place">
 <!ENTITY zotero.items.publication_column "បោះពុម្ពផ្សាយ">
 <!ENTITY zotero.items.publisher_column "អ្នកបោះពុម្ព">
 <!ENTITY zotero.items.reporter_column "Reporter">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 <!ENTITY zotero.items.rights_column "សិទ្ធិ">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.title_column "ចំណងជើង">
 <!ENTITY zotero.items.type_column "ប្រភេទ">
+<!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "ឆ្នាំ">
 <!ENTITY zotero.lookup.description "សូមបញ្ចូលអាយអេសប៊ីអិន ឌីអូអាយ ឬ ភីអេមអាយឌី ដើម្បីរកមើលនៅក្នុងប្រអប់ខាងក្រោមៈ">
 <!ENTITY zotero.moreEncodings.label "បញ្ចូលកូដបន្ថែម">

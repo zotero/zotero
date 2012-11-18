@@ -5,8 +5,11 @@
 <!ENTITY zotero.annotate.toolbar.expand.label "Tüm Dipnotları Genişlet">
 <!ENTITY zotero.annotate.toolbar.highlight.label "Metni Vurgula">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Menti Vurgulama">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Pano'ya Kopyala">
 <!ENTITY zotero.bibliography.output.label "Çıktı Formatı">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
 <!ENTITY zotero.bibliography.print.label "Yazdır">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML olarak Kaydet">
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF olarak Kaydet">
@@ -83,15 +86,23 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.textTransform.titlecase "Başlık Biçimi">
 <!ENTITY zotero.items.accessDate_column "Erişildi">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.archive_column "Archive">
 <!ENTITY zotero.items.callNumber_column "Yer Numarası">
+<!ENTITY zotero.items.court_column "Court">
 <!ENTITY zotero.items.creator_column "Yaratan">
 <!ENTITY zotero.items.dateAdded_column "Eklendiği Tarih">
 <!ENTITY zotero.items.dateModified_column "Değiştirildiği Tarih">
 <!ENTITY zotero.items.date_column "Tarih">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.issue_column "Issue">
 <!ENTITY zotero.items.itemType "Eser Türü">
 <!ENTITY zotero.items.journalAbbr_column "Dergi Kısaltması">
 <!ENTITY zotero.items.language_column "Dil">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.medium_column "Medium/Format">
 <!ENTITY zotero.items.menu.addTag "Add Tag">
 <!ENTITY zotero.items.menu.attach "Eklenti Ekle">
 <!ENTITY zotero.items.menu.attach.file "Dosyanın Kaydedilen Kopyasını  Ekle">
@@ -108,13 +119,21 @@
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.showInLibrary "Kitaplıkta Göster">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
 <!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.place_column "Place">
 <!ENTITY zotero.items.publication_column "Yayın">
 <!ENTITY zotero.items.publisher_column "Yayıncı">
 <!ENTITY zotero.items.reporter_column "Reporter">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 <!ENTITY zotero.items.rights_column "Telif">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.title_column "Başlık">
 <!ENTITY zotero.items.type_column "Tür">
+<!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Yıl">
 <!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">

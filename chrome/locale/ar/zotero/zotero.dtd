@@ -5,8 +5,11 @@
 <!ENTITY zotero.annotate.toolbar.expand.label "بسط جميع التعليقات">
 <!ENTITY zotero.annotate.toolbar.highlight.label "تمييز النص">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "إلغاء تمييز النص">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
 <!ENTITY zotero.bibliography.copyToClipboard.label "نسخ للحافظة">
 <!ENTITY zotero.bibliography.output.label "شكل المخرجات">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
 <!ENTITY zotero.bibliography.print.label "طباعة">
 <!ENTITY zotero.bibliography.saveAsHTML.label "حفظ كملف  HTML">
 <!ENTITY zotero.bibliography.saveAsRTF.label "حفظ كملف  RTF">
@@ -83,15 +86,23 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.textTransform.titlecase "حرف كبير في بداية كل كلمة">
 <!ENTITY zotero.items.accessDate_column "تاريخ الدخول">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.archive_column "Archive">
 <!ENTITY zotero.items.callNumber_column "الرقم العام">
+<!ENTITY zotero.items.court_column "Court">
 <!ENTITY zotero.items.creator_column "المؤلف">
 <!ENTITY zotero.items.dateAdded_column "تاريخ الإضافة">
 <!ENTITY zotero.items.dateModified_column "تاريخ التعديل">
 <!ENTITY zotero.items.date_column "التاريخ">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.issue_column "Issue">
 <!ENTITY zotero.items.itemType "نوع العنصر">
 <!ENTITY zotero.items.journalAbbr_column "اختصار دورية">
 <!ENTITY zotero.items.language_column "اللغة">
 <!ENTITY zotero.items.libraryCatalog_column "فهرس المكتبة">
+<!ENTITY zotero.items.medium_column "Medium/Format">
 <!ENTITY zotero.items.menu.addTag "Add Tag">
 <!ENTITY zotero.items.menu.attach "اضافة مرفق">
 <!ENTITY zotero.items.menu.attach.file "إرفاق نسخة من ملف مخزن...">
@@ -108,13 +119,21 @@
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.showInLibrary "عرض في المكتبة">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
 <!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.place_column "Place">
 <!ENTITY zotero.items.publication_column "النشر">
 <!ENTITY zotero.items.publisher_column "الناشر">
 <!ENTITY zotero.items.reporter_column "Reporter">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 <!ENTITY zotero.items.rights_column "الملكية الفكرية">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.title_column "العنوان">
 <!ENTITY zotero.items.type_column "النوع">
+<!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "السنة">
 <!ENTITY zotero.lookup.description "ادخل الترقيم الدولي الموحد للكتاب او معرف مقالات الميدلاين او معرف الوثيقة الرقمية.">
 <!ENTITY zotero.moreEncodings.label "المزيد من الترميزات">
