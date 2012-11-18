@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "bijbehorende snapshots en geïmporteerde bestanden">
 <!ENTITY zotero.preferences.groups.childLinks "bijbehorende koppelingen">
 <!ENTITY zotero.preferences.groups.childNotes "bijbehorende aantekeningen">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Bij het kopiëren van objecten tussen bibliotheken, kopieer ook:">
 <!ENTITY zotero.preferences.items "objecten">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Aanpassingen worden pas zichtbaar in nieuwe vensters">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Niet geïndexeerd:">
 <!ENTITY zotero.preferences.search.indexStats.words "Woorden:">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF-indexering">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "Zotero laden in:">
 <!ENTITY zotero.preferences.showIn.appTab "App-tabblad">
 <!ENTITY zotero.preferences.showIn.browserPane "Zotero-paneel">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "Account aanmaken">
 <!ENTITY zotero.preferences.sync.fileSyncing "Bestandssynchronisatie">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Synchroniseer bestanden in groepsbibliotheken met Zotero-opslag">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synchroniseer bestanden in Mijn Bibliotheek met">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Door het gebruiken van Zotero-opslag gaat u akkoord met de bijbehorende">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "Wachtwoord vergeten?">
 <!ENTITY zotero.preferences.sync.password "Wachtwoord:">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Herstellen…">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Volledige synchronisatie met de Zotero-server">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Lokale Zotero-gegevens samenvoegen met de gegevens op de Zotero-server (houdt geen rekening met synchronisatiegeschiedenis).">

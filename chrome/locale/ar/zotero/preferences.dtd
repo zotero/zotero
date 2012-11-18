@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "اللقطات الفرعية والملفات المستوردة">
 <!ENTITY zotero.preferences.groups.childLinks "الروابط الفرعية">
 <!ENTITY zotero.preferences.groups.childNotes "الملاحظات الفرعية">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "عند نسخ العناصر بين المكتبات، يجب ان تتضمن العناصر على:">
 <!ENTITY zotero.preferences.items "عناصر">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "يتم تفعيل التغييرات في النوافذ الجديدة فقط">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "غير مكشف:">
 <!ENTITY zotero.preferences.search.indexStats.words "الكلمات:">
 <!ENTITY zotero.preferences.search.pdfIndexing "تكشيف ملفات PDF">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "عرض زوتيرو في:">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.showIn.browserPane "جزء التصفح">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "تسجيل اشتراك جديد">
 <!ENTITY zotero.preferences.sync.fileSyncing "تزامن الملفات">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "نبذة عن تزامن الملفات">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "قم بمزامنة الملفات المرفقة في مجموعة المكتبات باستخدام مساحة تخزين زوتيرو">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "قم بمزامنة الملفات المرفقة في مكتبتي باستخدام">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "باستخدامك مساحة تخزين زوتيرو، فإنك توافق على الالتزام بكافة">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "الرابط:">
 <!ENTITY zotero.preferences.sync.lostPassword "نسيت كلمة المرور؟">
 <!ENTITY zotero.preferences.sync.password "كلمة المرور:">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "إعادة التعيين...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "التزامن الكامل مع خادم زوتيرو">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "دمج بيانات زوتيرو المحلية مع البيانات من خادم التزامن، مع تجاهل سجل التزامن.">

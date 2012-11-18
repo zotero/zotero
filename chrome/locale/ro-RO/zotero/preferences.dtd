@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "instantanee copil și fișiere importate">
 <!ENTITY zotero.preferences.groups.childLinks "legături copil">
 <!ENTITY zotero.preferences.groups.childNotes "note copil">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Când se copiază itemii între biblioteci se vor include:">
 <!ENTITY zotero.preferences.items "itemi">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Schimbările vor putea fi vizualizate doar într-o fereastră nouă">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Neindexate:">
 <!ENTITY zotero.preferences.search.indexStats.words "Cuvinte:">
 <!ENTITY zotero.preferences.search.pdfIndexing "Indexare PDF">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "Load Zotero in:">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "Creează cont">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sincronizare fișier">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "Despre sincronizarea fișierelor">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Sincronizare fișiere anexate într-un grup de biblioteci folosind depozitul Zotero">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sincronizare fișiere anexate în Biblioteca mea folosind">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Dacă folosești depozitul Zotero, ești de acord să fii conectat la">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "Ai uitat parola?">
 <!ENTITY zotero.preferences.sync.password "Parolă:">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Resetare...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Sincronizare completă cu serverul Zotero">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Unește datele locale din Zotero cu datele de pe serverul de sincronizare, ignorând istoria sincronizărilor.">

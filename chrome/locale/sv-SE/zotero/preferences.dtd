@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "tillhörande sparade hemsidor och lokala filer">
 <!ENTITY zotero.preferences.groups.childLinks "tillhörande länkar">
 <!ENTITY zotero.preferences.groups.childNotes "tillhörande anteckningar">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "När källor kopieras mellan bibliotek, ta med:">
 <!ENTITY zotero.preferences.items "Källor">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Ändringar gäller bara i nya fönster">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Ej indexerat:">
 <!ENTITY zotero.preferences.search.indexStats.words "Ord:">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF-indexering">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "Ladda Zotero i:">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.showIn.browserPane "Webbläsarfönstret">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "Skapa konto">
 <!ENTITY zotero.preferences.sync.fileSyncing "Filsynkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "Om filsynkronisering">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Synkronisera bifogade filer i gruppens bibliotek med Zotero storage">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synkronisera bifogade filer i mitt bibliotek med:">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Genom att använda Zotero Storage går du med på deras">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "Glömt lösenord?">
 <!ENTITY zotero.preferences.sync.password "Lösenord:">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Återställ...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Komplett synkronisering med Zotero Server">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Sätt ihop lokala Zoterodata med data från synkroniseringsservern, utan att ta hänsyn till historik.">

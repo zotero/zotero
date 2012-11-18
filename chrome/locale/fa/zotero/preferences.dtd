@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "تصاویر لحظه‌ای و پرونده‌های درون‌برد شده">
 <!ENTITY zotero.preferences.groups.childLinks "پیوندهای وابسته">
 <!ENTITY zotero.preferences.groups.childNotes "یادداشت‌های وابسته">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "در زمان رونوشت‌بردای آیتم‌ها بین کتابخانه‌ها این موارد هم رونوشت‌برداری شوند:">
 <!ENTITY zotero.preferences.items "آیتم‌">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "تغییرات فقط در پنجره‌های جدید اعمال می‌شوند">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "بدون نمایه:">
 <!ENTITY zotero.preferences.search.indexStats.words "کلمات:">
 <!ENTITY zotero.preferences.search.pdfIndexing "نمایه‌سازی از PDF">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "نمایش زوترو در:">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.showIn.browserPane "قاب مرورگر">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "ساخت حساب کاربری">
 <!ENTITY zotero.preferences.sync.fileSyncing "همزمان‌‌سازی پرونده‌ها">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "درباره همزمان‌‌سازی پرونده‌ها">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "همزمان‌‌سازی پرونده‌های پیوست در کتابخانه‌های گروهی با استفاده از سامانه ذخیره زوترو (Zotero storage)">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "همزمان‌‌سازی پرونده‌های پیوست در کتابخانه با استفاده از ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "با استفاده از سامانه ذخیره زوترو (Zotero storage) می‌پذیرید که تابع">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "آدرس:">
 <!ENTITY zotero.preferences.sync.lostPassword "گذرواژه را فراموش کرده‌اید؟">
 <!ENTITY zotero.preferences.sync.password "گذرواژه:">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "بازنشانی...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "همزمان‌‌سازی کامل با کارگزار زوترو">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "تلفیق اطلاعات محلی زوترو با اطلاعات کارگزار همزمان‌‌سازی و نادیده گرفتن تاریخچه همزمان‌‌سازی.">

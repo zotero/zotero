@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "child snapshots and imported files">
 <!ENTITY zotero.preferences.groups.childLinks "child links">
 <!ENTITY zotero.preferences.groups.childNotes "child notes">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "When copying items between libraries, include:">
 <!ENTITY zotero.preferences.items "항목">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "새 창에서만 변경한 효과가 나타납니다">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "색인 안됨:">
 <!ENTITY zotero.preferences.search.indexStats.words "단어:">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF 색인">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "Load Zotero in:">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "계정 생성">
 <!ENTITY zotero.preferences.sync.fileSyncing "파일 동기화">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "파일 동기화란">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Zotero 저장소를 사용해 그룹 라이브러리내 첨부 파일을 동기화">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "비밀번호를 분실하셨나요?">
 <!ENTITY zotero.preferences.sync.password "비밀번호:">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "재설정...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Zotero 서버와 전체 동기화">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local Zotero data with data from the sync server, ignoring sync history.">

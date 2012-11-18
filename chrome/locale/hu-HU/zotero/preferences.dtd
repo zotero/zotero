@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "kapcsolódó pillanatfelvételek és importált fájlok">
 <!ENTITY zotero.preferences.groups.childLinks "kapcsolódó hivatkozások">
 <!ENTITY zotero.preferences.groups.childNotes "kapcsolódó jegyzetek">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Amikor könyvtárak között másol elemeket, az alábbiakat másolja:">
 <!ENTITY zotero.preferences.items "elemek">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "A változások csak az új ablakokban érvényesülnek">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Nincs indexelve">
 <!ENTITY zotero.preferences.search.indexStats.words "Szavak száma:">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF indexelés">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "Load Zotero in:">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "Új felhasználói fiók">
 <!ENTITY zotero.preferences.sync.fileSyncing "Fájlok szinkronizálása">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "Bővebben a fájlok szinkronizálásáról">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "A csoport könyvtárához tartozó fájlok szinkronizálása a Zotero tárhely használatával">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "A könyvtáramban található fájlok szinkronizálása">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "A Zotero tárhely használata esetén elfogadom a">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "Elveszett jelszó?">
 <!ENTITY zotero.preferences.sync.password "Jelszó:">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Visszaállítás">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Teljes szinkornizáció a Zotero szerverrel">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "A helyi adatok összefésülése a szerveren található adatokkal, a szinkronizációs előzmények figyelmen kívül hagyása.">

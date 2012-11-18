@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "alt görüntüler ve içeri aktarılan dosyalar">
 <!ENTITY zotero.preferences.groups.childLinks "alt bağlantılar">
 <!ENTITY zotero.preferences.groups.childNotes "alt notlar">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Kütüphaneler arası eserler kopyalanırken, ekle:">
 <!ENTITY zotero.preferences.items "Eserler">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Değişiklikler yeni açılan pencerelerde etkili olacaktır.">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Dizinlenmemiş:">
 <!ENTITY zotero.preferences.search.indexStats.words "Kelimeler:">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF Dizinleme">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "Load Zotero in:">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "Hesap Yarat">
 <!ENTITY zotero.preferences.sync.fileSyncing "Dosya Eşlemesi">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "Dosya Eşleme Hakkında">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Zotero deposunu kullanan kütüphane gruplarının ekli dosyalarını eşle">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Kütüphanemde kullanılan ekli dosyaları eşle">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero depolamayı kullanarak sınırlamalarını kabul edersiniz">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "Unutulan Şifre?">
 <!ENTITY zotero.preferences.sync.password "Şifre:">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Sıfırla...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Zetoro Sunucu ile Tam Eşleme">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Eşleme geçmişini gözetmeksiniz, yerel Zotero verisini sunucudaki veri ile birleştir.">

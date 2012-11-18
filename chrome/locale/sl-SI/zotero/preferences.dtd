@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "otroške slike stanj in uvožene datoteke">
 <!ENTITY zotero.preferences.groups.childLinks "otroške povezave">
 <!ENTITY zotero.preferences.groups.childNotes "otroške opombe">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Pri kopiranju med knjižnicami vključi:">
 <!ENTITY zotero.preferences.items "elementov">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Spremembe veljajo le v novih oknih">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Neindeksirano:">
 <!ENTITY zotero.preferences.search.indexStats.words "Besed:">
 <!ENTITY zotero.preferences.search.pdfIndexing "Indeksiranje PDF">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "Load Zotero in:">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "Ustvari račun">
 <!ENTITY zotero.preferences.sync.fileSyncing "Usklajevanje datotek">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "O usklajevanju datotek">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Uskladi datoteke priponk v skupinskih knjižnicah s shrambo Zotero">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Uskladi datoteke priponk v Moji knjižnici s/z">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Če uporabljate shrambo Zotero, se strinjate z njenimi">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "Ste pozabili geslo?">
 <!ENTITY zotero.preferences.sync.password "Geslo:">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Ponastavi ...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Polna uskladitev s strežnikom Zotero">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Spoji krajevne podatke Zotero s podatki s strežnika Zotero, pri čemer prezri zgodovino usklajevanja.">

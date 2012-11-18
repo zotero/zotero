@@ -71,6 +71,8 @@
 <!ENTITY hideThisAppCmdMac.label "隱藏 &brandShortName;">
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "最小化">
+<!ENTITY pageSetupCmd.accesskey "U">
+<!ENTITY pageSetupCmd.label "Page Setup…">
 <!ENTITY pasteCmd.accesskey "P">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "貼上">
@@ -80,6 +82,9 @@
 <!ENTITY preferencesCmdMac.label "偏好設定...">
 <!ENTITY preferencesCmdUnix.accesskey "n">
 <!ENTITY preferencesCmdUnix.label "偏好設定">
+<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.key "P">
+<!ENTITY printCmd.label "Print…">
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY productHelp.label "支援及說明文件">
 <!ENTITY quitApplicationCmd.accesskey "Q">
@@ -91,6 +96,9 @@
 <!ENTITY redoCmd.accesskey "R">
 <!ENTITY redoCmd.key "Y">
 <!ENTITY redoCmd.label "重做">
+<!ENTITY saveCmd.accesskey "A">
+<!ENTITY saveCmd.key "S">
+<!ENTITY saveCmd.label "Save…">
 <!ENTITY selectAllCmd.accesskey "A">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.label "全選">

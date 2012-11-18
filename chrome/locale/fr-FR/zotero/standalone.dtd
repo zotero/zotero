@@ -71,6 +71,8 @@
 <!ENTITY hideThisAppCmdMac.label "Cacher &brandShortName;">
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimiser">
+<!ENTITY pageSetupCmd.accesskey "U">
+<!ENTITY pageSetupCmd.label "Page Setup…">
 <!ENTITY pasteCmd.accesskey "o">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "Coller">
@@ -80,6 +82,9 @@
 <!ENTITY preferencesCmdMac.label "Préférences...">
 <!ENTITY preferencesCmdUnix.accesskey "f">
 <!ENTITY preferencesCmdUnix.label "Préférences">
+<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.key "P">
+<!ENTITY printCmd.label "Print…">
 <!ENTITY productHelp.accesskey "A">
 <!ENTITY productHelp.label "Assistance et documentation">
 <!ENTITY quitApplicationCmd.accesskey "Q">
@@ -91,6 +96,9 @@
 <!ENTITY redoCmd.accesskey "R">
 <!ENTITY redoCmd.key "Y">
 <!ENTITY redoCmd.label "Rétablir">
+<!ENTITY saveCmd.accesskey "A">
+<!ENTITY saveCmd.key "S">
+<!ENTITY saveCmd.label "Save…">
 <!ENTITY selectAllCmd.accesskey "T">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.label "Tout sélectionner">

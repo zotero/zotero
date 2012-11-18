@@ -71,6 +71,8 @@
 <!ENTITY hideThisAppCmdMac.label "Oculta &brandShortName;">
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimitza">
+<!ENTITY pageSetupCmd.accesskey "U">
+<!ENTITY pageSetupCmd.label "Page Setup…">
 <!ENTITY pasteCmd.accesskey "P">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "Enganxa">
@@ -80,6 +82,9 @@
 <!ENTITY preferencesCmdMac.label "Preferències">
 <!ENTITY preferencesCmdUnix.accesskey "n">
 <!ENTITY preferencesCmdUnix.label "Preferències...">
+<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.key "P">
+<!ENTITY printCmd.label "Print…">
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY productHelp.label "Assistència i documentació">
 <!ENTITY quitApplicationCmd.accesskey "Q">
@@ -91,6 +96,9 @@
 <!ENTITY redoCmd.accesskey "R">
 <!ENTITY redoCmd.key "Y">
 <!ENTITY redoCmd.label "Refes">
+<!ENTITY saveCmd.accesskey "A">
+<!ENTITY saveCmd.key "S">
+<!ENTITY saveCmd.label "Save…">
 <!ENTITY selectAllCmd.accesskey "A">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.label "Selecciona tot">

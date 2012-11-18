@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "រូបភាពកម្ជាប់ និង ឯកសារនាំចូល">
 <!ENTITY zotero.preferences.groups.childLinks "កម្ជាប់រណប">
 <!ENTITY zotero.preferences.groups.childNotes "កំណត់ត្រាកម្ជាប់">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "នៅពេលចម្លងឯកសារពីបណ្ណាល័យមួយទៅបណ្ណាល័យមួយទៀត ត្រូវបញ្ចូលទាំង:">
 <!ENTITY zotero.preferences.items "ឯកសារ">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "បំលាស់ប្តូរអាចមានសុពលភាពនៅលើវីនដូយ៍ថ្មីតែប៉ុណ្ណោះ">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "មិនបានដាក់លិបិក្រម:">
 <!ENTITY zotero.preferences.search.indexStats.words "ពាក្យ:">
 <!ENTITY zotero.preferences.search.pdfIndexing "ដាក់លិបិក្រមអ៊ែរឌីអែហ្វ">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "ហ្ស៊ូតេរ៉ូផ្ទុកនៅក្នុងៈ">
 <!ENTITY zotero.preferences.showIn.appTab "ផ្ទាំងបន្ទាត់ថេប">
 <!ENTITY zotero.preferences.showIn.browserPane "ផ្ទាំងកម្មវិធីរុករក">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "បង្កើតគណនី">
 <!ENTITY zotero.preferences.sync.fileSyncing "ឯកសារកំពុងធ្វើសមកាលកម្ម">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "ធ្វើសមកាលកម្មមឯកសារភ្ជាប់នៅក្នុងបណ្ណាល័យក្រុមដោយប្រើបន្ទុកហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "ធ្វើសមកាលកម្មឯកសារកម្ជាប់ក្នុងស្វ័យបណ្ណាល័យ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "តាមរយៈការប្រើបន្ទុកហ្ស៊ូតេរ៉ូ អ្នកត្រូវគោរពទៅតាម">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "គេហទំព័រ:">
 <!ENTITY zotero.preferences.sync.lostPassword "ភ្លេចលេខសម្ងាត់?">
 <!ENTITY zotero.preferences.sync.password "លេខសម្ងាត់:">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "កំណត់រៀបចំជាថ្មី...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "ធ្វើសមកាលកម្មពេញលេញជាមួយម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "បញ្ចូលទិន្នន័យហ្ស៊ូតេរ៉ូមូលដ្ឋានជាមួយនិងម៉ាស៊ីនបម្រើសមកាលកម្មដោយមិនគិតអំពីប្រវត្តិសមកាលកម្ម។">

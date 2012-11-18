@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "instantànies descendents i fitxers importats">
 <!ENTITY zotero.preferences.groups.childLinks "enllaços descendents">
 <!ENTITY zotero.preferences.groups.childNotes "notes descendents">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Quan copiï ítems entre les biblioteques, inclou:">
 <!ENTITY zotero.preferences.items "ítems">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Els canvis tenen efecte només en noves finestres">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Sense indexar:">
 <!ENTITY zotero.preferences.search.indexStats.words "Paraules:">
 <!ENTITY zotero.preferences.search.pdfIndexing "Indexat de PDF">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "Carrega Zotero en:">
 <!ENTITY zotero.preferences.showIn.appTab "Pestanya d'aplicacions">
 <!ENTITY zotero.preferences.showIn.browserPane "Subfinestra del navegador">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "Crea un compte">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sincronització dels fitxers">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Sincronitza els fitxers adjunts de les biblioteques de grup mitjançant l'enmagatzenatge de Zotero">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sincronitza els fitxers adjunts de La meva biblioteca mitjançant">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Amb l'ús de l'emmagatzematge de Zotero, vostè accepta quedar obligat pels seus">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "Has oblidat la contrasenya?">
 <!ENTITY zotero.preferences.sync.password "Contrasenya">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Reinicia...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Sincronització completa amb el Servidor de Zotero">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Fusionar les dades locals de Zotero amb dades del servidor de sincronització tot ignorant la història de sincronització.">

@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "дочерние снимки и импортированные файлы">
 <!ENTITY zotero.preferences.groups.childLinks "дочерние ссылки">
 <!ENTITY zotero.preferences.groups.childNotes "дочерние заметки">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "При копировании документов между библиотеками, включать:">
 <!ENTITY zotero.preferences.items "документа(-ов)">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Изменения вступят в силу только в новых окнах">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Непроиндексированных:">
 <!ENTITY zotero.preferences.search.indexStats.words "Слов:">
 <!ENTITY zotero.preferences.search.pdfIndexing "Индексация PDF">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "Load Zotero in:">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "Создать учётную запись">
 <!ENTITY zotero.preferences.sync.fileSyncing "Синхронизация файлов">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "О синхронизации Файлов">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Синхронизировать файлы приложений в групповых библиотеках, используя хранилище Zotero">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Синхронизировать файлы приложений в Моей Библиотеке, используя:">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Используя хранилище Zotero, вы соглашаетесь быть связанными его">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "Забыли пароль?">
 <!ENTITY zotero.preferences.sync.password "Пароль:">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Сбросить...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Полная синхронизация с сервером Zotero">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Объединить локальные данные Zotero c данными с сервера, игнорируя историю синхронизации">

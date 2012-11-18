@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "seotud momentülesvõtted ja imporditud failid">
 <!ENTITY zotero.preferences.groups.childLinks "seotud lingid">
 <!ENTITY zotero.preferences.groups.childNotes "seotud märkused">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Kirjete kopeerimisel raamatukogude vahel lisada:">
 <!ENTITY zotero.preferences.items "kirjet">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Muutused saavad nähtavaks alles uues aknas">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Indekseerimata:">
 <!ENTITY zotero.preferences.search.indexStats.words "Sõnu:">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF indekseerimine">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "Laadida Zotero:">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.showIn.browserPane "Brauseri paanil">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "Loo kasutaja">
 <!ENTITY zotero.preferences.sync.fileSyncing "Failide sünkroonimine">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "Failide sünkroonimise kohta">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Minu grupi raamatukogus olevate lisade sünkroonimine kasutades Zotero hoidlat">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Minu raamatukogus olevate lisade sünkroonimine kasutades">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Kasutades Zotero hoidlat, nõustute järgmiste">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "Salasõna kadunud?">
 <!ENTITY zotero.preferences.sync.password "Salasõna:">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Algseadistada...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Zotero serveriga täissünkroonimine">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Liita kohalikele Zotero andmetele sünkroon-serveris olevad andmed, jättes tähelepanuta sünkroonimise ajaloo">

@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "子快照與匯入的檔案">
 <!ENTITY zotero.preferences.groups.childLinks "子鏈結">
 <!ENTITY zotero.preferences.groups.childNotes "子筆記">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "在各圖書館之間複製項目時，包含：">
 <!ENTITY zotero.preferences.items "項目">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "改變只會在新開的視窗中生效">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "尚未建立索引：">
 <!ENTITY zotero.preferences.search.indexStats.words "字詞數：">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF 索引">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "Load Zotero in:">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "建立帳戶">
 <!ENTITY zotero.preferences.sync.fileSyncing "檔案同步中">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "使用 Zotero storage 時，將圖書館中的附加檔案同步">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "同步「我的圖書館」中的附加檔案時，採用">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "使用 Zotero storage，您同意被它的">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "遺失密碼？">
 <!ENTITY zotero.preferences.sync.password "密碼：">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "重設……">
 <!ENTITY zotero.preferences.sync.reset.fullSync "與 Zotero 伺服器完全同步">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "將本機的 Zotero 資料與來自同步伺服器的資料合併，忽略同步歷史。">

@@ -49,6 +49,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "dceřiné snímky a importované soubory">
 <!ENTITY zotero.preferences.groups.childLinks "dceřiné odkazy">
 <!ENTITY zotero.preferences.groups.childNotes "dceřiné poznámky">
+<!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Při kopírování položek mezi knihovnami zahrnout:">
 <!ENTITY zotero.preferences.items "položky">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Změny se projeví jen v nových oknech">
@@ -158,6 +159,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Neindexováno:">
 <!ENTITY zotero.preferences.search.indexStats.words "Slov:">
 <!ENTITY zotero.preferences.search.pdfIndexing "Indexování PDF">
+<!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "Load Zotero in:">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
@@ -168,6 +170,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "Vytvořit účet">
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronizace souborů">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "Více o synchronizaci souborů">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Synchronizovat přílohy ve skupinových knihovnách pomocí úložiště Zotera">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "K synchronizaci příloh v Mojí knihovně použít">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Použitím úložiště Zotera souhlasíte s">
@@ -175,6 +180,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "Ztracené heslo?">
 <!ENTITY zotero.preferences.sync.password "Heslo:">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Reset...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Plně synchronizovat se Zotero Serverem">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Sloučit lokální data Zotera s daty ze synchronizačního serveru (nebude se brát v potaz historie synchronizací).">

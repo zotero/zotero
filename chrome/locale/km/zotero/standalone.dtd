@@ -71,6 +71,8 @@
 <!ENTITY hideThisAppCmdMac.label "លាក់​ និង ឈ្មោះម៉ាក;">
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "អប្បបរមា">
+<!ENTITY pageSetupCmd.accesskey "U">
+<!ENTITY pageSetupCmd.label "Page Setup…">
 <!ENTITY pasteCmd.accesskey "P">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "បិទភ្ជាប់">
@@ -80,6 +82,9 @@
 <!ENTITY preferencesCmdMac.label "ជម្រើសអាទិភាព…">
 <!ENTITY preferencesCmdUnix.accesskey "n">
 <!ENTITY preferencesCmdUnix.label "ជម្រើសអាទិភាព">
+<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.key "P">
+<!ENTITY printCmd.label "Print…">
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY productHelp.label "គាំទ្រ និង ឯកសារ">
 <!ENTITY quitApplicationCmd.accesskey "Q">
@@ -91,6 +96,9 @@
 <!ENTITY redoCmd.accesskey "R">
 <!ENTITY redoCmd.key "Y">
 <!ENTITY redoCmd.label "បកទៅមុខ">
+<!ENTITY saveCmd.accesskey "A">
+<!ENTITY saveCmd.key "S">
+<!ENTITY saveCmd.label "Save…">
 <!ENTITY selectAllCmd.accesskey "A">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.label "ជ្រើសរើសទាំងអស់">
