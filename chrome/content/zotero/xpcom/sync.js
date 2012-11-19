@@ -1284,13 +1284,13 @@ Zotero.Sync.Server = new function () {
 			if (response.firstChild.tagName == 'error') {
 				if (response.firstChild.getAttribute('code') == 'INVALID_LOGIN') {
 					var e = new Zotero.Error(Zotero.getString('sync.error.invalidLogin'), "INVALID_SYNC_LOGIN");
-					_error(e, true);
+					_error(e, false, true);
 				}
-				_error(response.firstChild.firstChild.nodeValue, true);
+				_error(response.firstChild.firstChild.nodeValue, false, true);
 			}
 			
 			if (_sessionID) {
-				_error("Session ID already set in Zotero.Sync.Server.login()", true)
+				_error("Session ID already set in Zotero.Sync.Server.login()", false, true)
 			}
 			
 			// <response><sessionID>[abcdefg0-9]{32}</sessionID></response>
@@ -1299,7 +1299,7 @@ Zotero.Sync.Server = new function () {
 			var re = /^[abcdefg0-9]{32}$/;
 			if (!re.test(_sessionID)) {
 				_sessionID = null;
-				_error('Invalid session ID received from server', true);
+				_error('Invalid session ID received from server', false, true);
 			}
 			
 			
