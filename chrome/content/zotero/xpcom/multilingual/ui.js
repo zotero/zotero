@@ -241,9 +241,9 @@ Zotero.setupLocale = function(document) {
 /////
 
 		var availableLocales = toolkitChromeReg.getLocalesForPackage("zotero");
-		var selectedLocale = Zotero.Prefs.get('csl.locale');
+		var selectedLocale = Zotero.Prefs.get('export.bibliographyLocale');
 		if (!selectedLocale) {
-			Zotero.Prefs.set('csl.locale', 'en-US');
+			Zotero.Prefs.set('export.bibliographyLocale', 'en-US');
 		}
 
 		var localeMenulist = document.getElementById("locale-menulist");

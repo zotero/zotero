@@ -760,7 +760,7 @@ To add a new preference:
 				</row>
 				<row>
 				  <caption label="&zotero.preferences.lang.csl;"/>
-				  <menulist id="locale-menulist" onselect="var lang = this.selectedItem.value;Zotero.Prefs.set('csl.locale', lang)">
+				  <menulist id="locale-menulist" onselect="var lang = this.selectedItem.value;Zotero.Prefs.set('export.bibliographyLocale', lang)">
 				  </menulist>
 				</row>
 			  </rows>
