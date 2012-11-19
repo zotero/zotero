@@ -2619,6 +2619,42 @@ Zotero.Sync.Server.Data = new function() {
 		
 		if (_timeToYield()) yield true;
 		
+		
+		// TEMP: Resend tags requested by server
+		try {
+			if (xml.fixtags.length()) {
+				for each(var tagsNode in xml.fixtags.tags) {
+					var libraryID = _libID(tagsNode.@libraryID);
+					if (libraryID && !Zotero.Libraries.isEditable(libraryID)) {
+						continue;
+					}
+					var tagsKeys = tagsNode.toString().split(' ');
+					for each(var key in tagsKeys) {
+						var sql = "SELECT tagID FROM tags WHERE libraryID=? AND key=?";
+						var tagID = Zotero.DB.valueQuery(sql, [libraryID, key]);
+						
+						var sql = "SELECT COUNT(*) FROM itemTags WHERE tagID=?";
+						if (Zotero.DB.valueQuery(sql, [tagID])) {
+							var sql = "UPDATE tags SET clientDateModified=CURRENT_TIMESTAMP "
+								+ "WHERE tagID=?";
+							Zotero.DB.query(sql, [tagID]);
+							syncSession.addToUpdated({
+								objectType: 'tag',
+								libraryID: libraryID,
+								key: key
+							});
+						}
+					}
+				}
+			}
+		}
+		catch (e) {
+			Components.utils.reportError(e);
+			Zotero.debug(e);
+		}
+		if (_timeToYield()) yield true;
+		
+		
 		// Get unmodified creators embedded within items -- this is necessary if, say,
 		// a creator was deleted locally and appears in a new/modified item remotely
 		var embeddedCreators = {};
