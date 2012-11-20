@@ -35,7 +35,7 @@ const ZOTERO_CONFIG = {
 	API_URL: 'https://api.zotero.org/',
 	PREF_BRANCH: 'extensions.zotero.',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "3.0.9.SOURCE"
+	VERSION: "3.0.10.SOURCE"
 };
 
 // Commonly used imports accessible anywhere

@@ -1263,13 +1263,13 @@ Zotero.Sync.Server = new function () {
 			if (response.firstChild.tagName == 'error') {
 				if (response.firstChild.getAttribute('code') == 'INVALID_LOGIN') {
 					var e = new Zotero.Error(Zotero.getString('sync.error.invalidLogin'), "INVALID_SYNC_LOGIN");
-					_error(e, true);
+					_error(e, false, true);
 				}
-				_error(response.firstChild.firstChild.nodeValue, true);
+				_error(response.firstChild.firstChild.nodeValue, false, true);
 			}
 			
 			if (_sessionID) {
-				_error("Session ID already set in Zotero.Sync.Server.login()", true)
+				_error("Session ID already set in Zotero.Sync.Server.login()", false, true)
 			}
 			
 			// <response><sessionID>[abcdefg0-9]{32}</sessionID></response>
@@ -1278,7 +1278,7 @@ Zotero.Sync.Server = new function () {
 			var re = /^[abcdefg0-9]{32}$/;
 			if (!re.test(_sessionID)) {
 				_sessionID = null;
-				_error('Invalid session ID received from server', true);
+				_error('Invalid session ID received from server', false, true);
 			}
 			
 			
@@ -2583,6 +2583,42 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		if (_timeToYield()) yield true;
+		
+		
+		// TEMP: Resend tags requested by server
+		try {
+			if (xml.fixtags.length()) {
+				for each(var tagsNode in xml.fixtags.tags) {
+					var libraryID = _libID(tagsNode.@libraryID);
+					if (libraryID && !Zotero.Libraries.isEditable(libraryID)) {
+						continue;
+					}
+					var tagsKeys = tagsNode.toString().split(' ');
+					for each(var key in tagsKeys) {
+						var sql = "SELECT tagID FROM tags WHERE libraryID=? AND key=?";
+						var tagID = Zotero.DB.valueQuery(sql, [libraryID, key]);
+						
+						var sql = "SELECT COUNT(*) > 0 FROM itemTags WHERE tagID=?";
+						if (Zotero.DB.valueQuery(sql, [tagID])) {
+							var sql = "UPDATE tags SET clientDateModified=CURRENT_TIMESTAMP "
+								+ "WHERE tagID=?";
+							Zotero.DB.query(sql, [tagID]);
+							syncSession.addToUpdated({
+								objectType: 'tag',
+								libraryID: libraryID,
+								key: key
+							});
+						}
+					}
+				}
+			}
+		}
+		catch (e) {
+			Components.utils.reportError(e);
+			Zotero.debug(e);
+		}
+		if (_timeToYield()) yield true;
+		
 		
 		// Get unmodified creators embedded within items -- this is necessary if, say,
 		// a creator was deleted locally and appears in a new/modified item remotely

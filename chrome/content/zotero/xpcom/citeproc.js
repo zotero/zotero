@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.407",
+    PROCESSOR_VERSION: "1.0.409",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -906,6 +906,7 @@ CSL.getSortCompare = function () {
         };
         CSL.debug("Using collation sort");
     } catch (e) {
+        CSL.debug("Using localeCompare sort");
         strcmp = function (a, b) {
             return a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase());
         };
@@ -2668,6 +2669,24 @@ CSL.Engine.prototype.retrieveItem = function (id) {
 			Item.legislation_id = legislation_id.join("::");
         }
     }
+    Item["title-short"] = Item.shortTitle;
+    if (Item.title && this.sys.getAbbreviation) {
+        var jurisdiction = this.transform.loadAbbreviation(Item.jurisdiction, "title", Item.title);
+        if (this.transform.abbrevs[jurisdiction].title) {
+            if (this.transform.abbrevs[jurisdiction].title[Item.title]) {
+                Item["title-short"] = this.transform.abbrevs[jurisdiction].title[Item.title];
+            }
+        }
+    }
+    Item["container-title-short"] = Item.journalAbbreviation;
+    if (Item["container-title"] && this.sys.getAbbreviation) {
+        var jurisdiction = this.transform.loadAbbreviation(Item.jurisdiction, "title", Item["container-title"]);
+        if (this.transform.abbrevs[jurisdiction].title) {
+            if (this.transform.abbrevs[jurisdiction].title[Item["container-title"]]) {
+                Item["container-title-short"] = this.transform.abbrevs[jurisdiction].title[Item["container-title"]];
+            }
+        }
+    }
     return Item;
 };
 CSL.Engine.prototype.setOpt = function (token, name, value) {
@@ -3546,6 +3565,12 @@ CSL.getBibliographyEntries = function (bibsection) {
             for (i = 0, ilen = rule.triggers.length; i < ilen; i += 1) {
                 if (clonedItem[rule.triggers[i]]) {
                     delete clonedItem[rule.triggers[i]];
+                    if (rule.triggers[i] === "title-short") {
+                        delete clonedItem.shortTitle;
+                    }
+                    if (rule.triggers[i] === "container-title-short") {
+                        delete clonedItem.journalAbbreviation;
+                    }
                 }
             }
             var newID = clonedItem.id + ":gen";
@@ -4246,6 +4271,8 @@ CSL.getSpliceDelimiter = function (last_collapsed, pos) {
         this.tmp.splice_delimiter = this.citation.opt["after-collapse-delimiter"];
     } else if (this.tmp.have_collapsed && this.opt.xclass === "in-text" && this.opt.update_mode !== CSL.NUMERIC) {
         this.tmp.splice_delimiter = ", ";
+    } else if (this.tmp.use_cite_group_delimiter) {
+        this.tmp.splice_delimiter = this.citation.opt.cite_group_delimiter;
     } else if (this.tmp.cite_locales[pos - 1]) {
         var alt_affixes = this.tmp.cite_affixes[this.tmp.cite_locales[pos - 1]];
         if (alt_affixes && alt_affixes.delimiter) {
@@ -4913,8 +4940,10 @@ CSL.Node.citation = {
         }
         if (this.tokentype === CSL.END) {
             state.opt.grouped_sort = state.opt.xclass === "in-text" 
-                && state.citation.opt.collapse 
-                && state.citation.opt.collapse.length
+                && (state.citation.opt.collapse 
+                    && state.citation.opt.collapse.length)
+                || (state.citation.opt.cite_group_delimiter
+                    && state.citation.opt.cite_group_delimiter.length)
                 && state.opt.update_mode !== CSL.POSITION
                 && state.opt.update_mode !== CSL.NUMERIC;
             if (state.opt.grouped_sort 
@@ -6164,7 +6193,9 @@ CSL.NameOutput.prototype._collapseAuthor = function () {
     }
     if ((this.item && this.item["suppress-author"] && this._first_creator_variable == this.variables[0])
         || (this.state[this.state.tmp.area].opt.collapse 
-            && this.state[this.state.tmp.area].opt.collapse.length)) {
+            && this.state[this.state.tmp.area].opt.collapse.length)
+        || (this.state[this.state.tmp.area].opt.cite_group_delimiter 
+            && this.state[this.state.tmp.area].opt.cite_group_delimiter.length)) {
         if (this.state.tmp.authorstring_request) {
             mystr = "";
             myqueue = this.state.tmp.name_node.top.blobs.slice(-1)[0].blobs;
@@ -6175,7 +6206,7 @@ CSL.NameOutput.prototype._collapseAuthor = function () {
             this.state.tmp.offset_characters = oldchars;
             this.state.registry.authorstrings[this.Item.id] = mystr;
         } else if (!this.state.tmp.just_looking
-            && !this.state.tmp.suppress_decorations) {
+                   && !this.state.tmp.suppress_decorations && (this.item["suppress-author"] || (this.state[this.state.tmp.area].opt.collapse && this.state[this.state.tmp.area].opt.collapse.length) || this.state[this.state.tmp.area].opt.cite_group_delimiter && this.state[this.state.tmp.area].opt.cite_group_delimiter)) {
             mystr = "";
             myqueue = this.state.tmp.name_node.top.blobs.slice(-1)[0].blobs;
             oldchars = this.state.tmp.offset_characters;
@@ -6183,9 +6214,14 @@ CSL.NameOutput.prototype._collapseAuthor = function () {
                 mystr = this.state.output.string(this.state, myqueue, false);
             }
             if (mystr === this.state.tmp.last_primary_names_string) {
-                this.state.tmp.name_node.top.blobs.pop();
-                this.state.tmp.name_node.children = [];
-                this.state.tmp.offset_characters = oldchars;
+                if (this.item["suppress-author"] || (this.state[this.state.tmp.area].opt.collapse && this.state[this.state.tmp.area].opt.collapse.length)) {
+                    this.state.tmp.name_node.top.blobs.pop();
+                    this.state.tmp.name_node.children = [];
+                    this.state.tmp.offset_characters = oldchars;
+                }
+                if (this.state[this.state.tmp.area].opt.cite_group_delimiter && this.state[this.state.tmp.area].opt.cite_group_delimiter) {
+                    this.state.tmp.use_cite_group_delimiter = true;
+                }
             } else {
                 this.state.tmp.last_primary_names_string = mystr;
                 if (this.variables.indexOf(this._first_creator_variable) > -1 && this.item && this.item["suppress-author"] && this.Item.type !== "legal_case") {
@@ -6195,6 +6231,9 @@ CSL.NameOutput.prototype._collapseAuthor = function () {
                     this.state.tmp.term_predecessor = false;
                 }
                 this.state.tmp.have_collapsed = false;
+                if (this.state[this.state.tmp.area].opt.cite_group_delimiter && this.state[this.state.tmp.area].opt.cite_group_delimiter) {
+                    this.state.tmp.use_cite_group_delimiter = false;
+                }
             }
         }
     }
@@ -7983,7 +8022,7 @@ CSL.Node.names = {
             }
             state.build.names_level += -1;
             this.label = state.build.name_label;
-            state.build.name_label = undefined;
+            state.build.name_label = {};
             state.build.names_variables.pop();
             var mywith = "with";
             var with_default_prefix = "";
@@ -9270,6 +9309,11 @@ CSL.Attributes["@collapse"] = function (state, arg) {
         state[this.name].opt.collapse = arg;
     }
 };
+CSL.Attributes["@cite-group-delimiter"] = function (state, arg) {
+    if (arg) {
+        state[state.tmp.area].opt.cite_group_delimiter = arg;
+    }
+};
 CSL.Attributes["@names-delimiter"] = function (state, arg) {
     state.setOpt(this, "names-delimiter", arg);
 };
@@ -9645,9 +9689,6 @@ CSL.Transform = function (state) {
             myabbrev_family = "institution-part";
         }
         if (["genre", "event", "medium"].indexOf(myabbrev_family) > -1) {
-            myabbrev_family = "title";
-        }
-        if (["title-short"].indexOf(myabbrev_family) > -1) {
             myabbrev_family = "title";
         }
         value = "";

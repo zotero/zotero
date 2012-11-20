@@ -302,6 +302,7 @@ Zotero.Attachments = new function(){
 							var errString = "Downloaded PDF did not have MIME type "
 								+ "'application/pdf' in Attachments.importFromURL()";
 							Zotero.debug(errString, 2);
+							Zotero.debug(str);
 							attachmentItem.erase();
 							if(callback) callback(false, new Error(errString));
 							return;
