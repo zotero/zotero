@@ -80,7 +80,7 @@ Zotero.Report = new function() {
 					// If not valid XML, display notes with entities encoded
 					var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 							.createInstance(Components.interfaces.nsIDOMParser);
-					var doc = parser.parseFromString(arr.note, "application/xml");
+					var doc = parser.parseFromString('<div>' + arr.note + '</div>', "application/xml");
 					if (doc.documentElement.tagName == 'parsererror') {
 						content += '<p class="plaintext">' + escapeXML(arr.note) + '</p>\n';
 					}
@@ -106,7 +106,7 @@ Zotero.Report = new function() {
 						// If not valid XML, display notes with entities encoded
 						var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 								.createInstance(Components.interfaces.nsIDOMParser);
-						var doc = parser.parseFromString(note.note, "application/xml");
+						var doc = parser.parseFromString('<div>' + note.note + '</div>', "application/xml");
 						if (doc.documentElement.tagName == 'parsererror') {
 							content += '<p class="plaintext">' + escapeXML(note.note) + '</p>\n';
 						}
