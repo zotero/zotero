@@ -41,9 +41,8 @@ Zotero.Report = new function() {
 	
 	
 	function generateHTMLDetails(items, combineChildItems) {
-		var content = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" ';
-        content += '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\n';
-		content += '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">\n';
+		var content = '<!DOCTYPE html>\n';
+		content += '<html>\n';
 		content += '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n';
 		content += '<title>' + Zotero.getString('report.title.default') + '</title>\n';
 		content += '<link rel="stylesheet" type="text/css" href="zotero://report/detail.css"/>\n';
@@ -80,8 +79,9 @@ Zotero.Report = new function() {
 					// If not valid XML, display notes with entities encoded
 					var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 							.createInstance(Components.interfaces.nsIDOMParser);
-					var doc = parser.parseFromString('<div>' + arr.note + '</div>', "application/xml");
+					var doc = parser.parseFromString('<div>' + arr.note.replace(/&nbsp;/g, "&#160;") + '</div>', "application/xml");
 					if (doc.documentElement.tagName == 'parsererror') {
+						Zotero.debug(doc.documentElement.textContent, 2);
 						content += '<p class="plaintext">' + escapeXML(arr.note) + '</p>\n';
 					}
 					// Otherwise render markup normally
@@ -106,8 +106,9 @@ Zotero.Report = new function() {
 						// If not valid XML, display notes with entities encoded
 						var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 								.createInstance(Components.interfaces.nsIDOMParser);
-						var doc = parser.parseFromString('<div>' + note.note + '</div>', "application/xml");
+						var doc = parser.parseFromString('<div>' + note.note.replace(/&nbsp;/g, "&#160;") + '</div>', "application/xml");
 						if (doc.documentElement.tagName == 'parsererror') {
+							Zotero.debug(doc.documentElement.textContent, 2);
 							content += '<p class="plaintext">' + escapeXML(note.note) + '</p>\n';
 						}
 						// Otherwise render markup normally
