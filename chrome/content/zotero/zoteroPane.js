@@ -2712,22 +2712,25 @@ var ZoteroPane = new function()
 			}
 		}
 		else if (tree.id == 'zotero-items-tree') {
-			// Expand/collapse on triple-click
-			if (!Zotero.Prefs.get('viewOnDoubleClick')) {
-				return;
+			var viewOnDoubleClick = Zotero.Prefs.get('viewOnDoubleClick');
+			if (viewOnDoubleClick) {
+				// Expand/collapse on triple-click, though the double-click
+				// will still trigger
+				if (event.detail == 3) {
+					tree.view.toggleOpenState(tree.view.selection.currentIndex);
+					return;
+				}
+				
+				// Don't expand/collapse on double-click
+				event.stopPropagation();
 			}
-			
-			if (event.detail == 3) {
-				tree.view.toggleOpenState(tree.view.selection.currentIndex);
-				return;
-			}
-			
-			// Don't expand/collapse on double-click
-			event.stopPropagation();
 			
 			if (tree.view && tree.view.selection.currentIndex > -1) {
 				var item = ZoteroPane_Local.getSelectedItems()[0];
 				if (item) {
+					if (!viewOnDoubleClick && item.isRegularItem()) {
+						return;
+					}
 					ZoteroPane_Local.viewItems([item], event);
 				}
 			}

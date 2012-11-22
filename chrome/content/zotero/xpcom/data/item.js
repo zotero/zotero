@@ -892,7 +892,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn, lang, force_top)
 			|| (
 				value
 				&& (!lang || lang === this.multi.main[fieldID])
-				&& this._itemData[fieldID] == value
+				    && (this._itemData[fieldID] + "") === (value + "")
 				)
 			|| (
 				value
@@ -3350,6 +3350,7 @@ Zotero.Item.prototype.relinkAttachmentFile = function(file, skipItemUpdate) {
 		this._skipModTimeUpdate = true;
 	}
 	this.save();
+	this._skipModTimeUpdate = false;
 	
 	return false;
 }
@@ -3423,7 +3424,7 @@ Zotero.Item.prototype.__defineSetter__('attachmentLinkMode', function (val) {
 				+ "' in Zotero.Item.attachmentLinkMode setter");
 	}
 	
-	if (val === this._attachmentLinkMode) {
+	if (val === this.attachmentLinkMode) {
 		return;
 	}
 	
@@ -3475,7 +3476,7 @@ Zotero.Item.prototype.__defineSetter__('attachmentMIMEType', function (val) {
 		val = '';
 	}
 	
-	if (val == this._attachmentMIMEType) {
+	if (val == this.attachmentMIMEType) {
 		return;
 	}
 	
@@ -3530,7 +3531,7 @@ Zotero.Item.prototype.__defineSetter__('attachmentCharset', function (val) {
 		val = null;
 	}
 	
-	if (val == this._attachmentCharset) {
+	if (val == this.attachmentCharset) {
 		return;
 	}
 	
@@ -3578,7 +3579,7 @@ Zotero.Item.prototype.__defineSetter__('attachmentPath', function (val) {
 		val = '';
 	}
 	
-	if (val == this._attachmentPath) {
+	if (val == this.attachmentPath) {
 		return;
 	}
 	
@@ -3636,7 +3637,7 @@ Zotero.Item.prototype.__defineSetter__('attachmentSyncState', function (val) {
 				+ "' in Zotero.Item.attachmentSyncState setter");
 	}
 	
-	if (val == this._attachmentSyncState) {
+	if (val == this.attachmentSyncState) {
 		return;
 	}
 	
