@@ -232,7 +232,7 @@ Zotero.Attachments = new function(){
 				};
 				Zotero.Attachments.importFromDocument(browser.contentDocument,
 					sourceItemID, forceTitle, parentCollectionIDs, importCallback, libraryID);
-			}, undefined, undefined, true);
+			}, undefined, undefined, true, cookieSandbox);
 		};
 		
 		// Save using remote web browser persist
