@@ -31,6 +31,7 @@ Zotero.File = new function(){
 	this.getContentsFromURL = getContentsFromURL;
 	this.putContents = putContents;
 	this.getValidFileName = getValidFileName;
+	this.truncateFileName = truncateFileName;
 	this.copyToUnique = this.copyToUnique;
 	this.getCharsetFromFile = getCharsetFromFile;
 	this.addCharsetListener = addCharsetListener;
@@ -226,7 +227,7 @@ Zotero.File = new function(){
 		// URL encode when saving attachments that trigger this
 		fileName = fileName.replace(/[\/\\\?%\*:|"<>]/g, '');
 		// Replace newlines and tabs (which shouldn't be in the string in the first place) with spaces
-		fileName = fileName.replace(/[\n\t]/g, ' ');
+		fileName = fileName.replace(/[\r\n\t]+/g, ' ');
 		// Replace various thin spaces
 		fileName = fileName.replace(/[\u2000-\u200A]/g, ' ');
 		// Replace zero-width spaces
@@ -235,13 +236,44 @@ Zotero.File = new function(){
 			// Strip characters not valid in XML, since they won't sync and they're probably unwanted
 			fileName = fileName.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/g, '');
 		}
-		// Don't allow blank filename
-		if (!fileName) {
+		// Don't allow blank or illegal filenames
+		if (!fileName || fileName == '.' || fileName == '..') {
 			fileName = '_';
 		}
 		return fileName;
 	}
 	
+	/**
+	 * Truncate a filename (excluding the extension) to the given total length
+	 * If the "extension" is longer than 20 characters,
+	 * it is treated as part of the file name
+	 */
+	function truncateFileName(fileName, maxLength) {
+		if(!fileName || (fileName + '').length <= maxLength) return fileName;
+
+		var parts = (fileName + '').split(/\.(?=[^\.]+$)/);
+		var fn = parts[0];
+		var ext = parts[1];
+		//if the file starts with a period , use the whole file
+		//the whole file name might also just be a period
+		if(!fn) {
+			fn = '.' + (ext || '');
+		}
+
+		//treat long extensions as part of the file name
+		if(ext && ext.length > 20) {
+			fn += '.' + ext;
+			ext = undefined;
+		}
+
+		if(ext === undefined) {	//there was no period in the whole file name
+			ext = '';
+		} else {
+			ext = '.' + ext;
+		}
+
+		return fn.substr(0,maxLength-ext.length) + ext;
+	}
 	
 	/*
 	 * Not implemented, but it'd sure be great if it were
