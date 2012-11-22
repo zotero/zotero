@@ -162,7 +162,7 @@ Zotero.CookieSandbox.Observer = new function() {
 				}
 			}
 			
-			if(!trackedBy) {
+			if(trackedBy) {
 				tested = true;
 			} else {
 				// try the browser
