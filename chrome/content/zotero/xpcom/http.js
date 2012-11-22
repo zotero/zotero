@@ -57,7 +57,7 @@ Zotero.HTTP = new function() {
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
-		if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(xmlhttp);
+		if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(xmlhttp.getInterface(Components.interfaces.nsIInterfaceRequestor));
 		xmlhttp.send(null);
 		
 		return xmlhttp;
@@ -142,7 +142,7 @@ Zotero.HTTP = new function() {
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
-		if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(xmlhttp);
+		if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(xmlhttp.getInterface(Components.interfaces.nsIInterfaceRequestor));
 		xmlhttp.send(body);
 		
 		return xmlhttp;
@@ -221,7 +221,7 @@ Zotero.HTTP = new function() {
 			_stateChange(xmlhttp, onDone);
 		};
 		
-		if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(xmlhttp);
+		if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(xmlhttp.getInterface(Components.interfaces.nsIInterfaceRequestor));
 		xmlhttp.send(null);
 		
 		return xmlhttp;

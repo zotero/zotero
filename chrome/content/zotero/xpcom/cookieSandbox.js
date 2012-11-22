@@ -102,7 +102,8 @@ Zotero.CookieSandbox.prototype = {
 	 * @param {nsIInterfaceRequestor} ir
 	 */
 	"attachToInterfaceRequestor": function(ir) {
-		Zotero.CookieSandbox.Observer.trackedInterfaceRequestors.set(ir.QueryInterface(Components.interfaces.nsIInterfaceRequestor), this);
+		Zotero.CookieSandbox.Observer.trackedInterfaceRequestors.push(Components.utils.getWeakReference(ir.QueryInterface(Components.interfaces.nsIInterfaceRequestor)));
+		Zotero.CookieSandbox.Observer.trackedInterfaceRequestorSandboxes.push(this);
 	}
 }
 
@@ -125,7 +126,8 @@ Zotero.CookieSandbox.Observer = new function() {
 	 */
 	this.register = function(CookieSandbox) {
 		this.trackedBrowsers = new WeakMap();
-		this.trackedInterfaceRequestors = new WeakMap();
+		this.trackedInterfaceRequestors = [];
+		this.trackedInterfaceRequestorSandboxes = [];
 		
 		if(!observing) {
 			Zotero.debug("CookieSandbox: Registering observers");
@@ -145,8 +147,22 @@ Zotero.CookieSandbox.Observer = new function() {
 		
 		// try the notification callbacks
 		if(notificationCallbacks) {
-			trackedBy = this.trackedInterfaceRequestors.get(notificationCallbacks);
-			if(trackedBy) {
+			for(var i=0; i<this.trackedInterfaceRequestors.length; i++) {
+				// Interface requestors are stored as weak references, so we have to see
+				// if they still point to something
+				var ir = this.trackedInterfaceRequestors[i].get();
+				if(!ir) {
+					// The interface requestor is gone, so remove it from the list
+					this.trackedInterfaceRequestors.splice(i--, 1);
+					this.trackedInterfaceRequestorSandboxes.splice(i--, 1);
+				} else if(ir == notificationCallbacks) {
+					// We are tracking this interface requestor
+					trackedBy = this.trackedInterfaceRequestorSandboxes[i];
+					break;
+				}
+			}
+			
+			if(!trackedBy) {
 				tested = true;
 			} else {
 				// try the browser
