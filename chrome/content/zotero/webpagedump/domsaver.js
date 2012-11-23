@@ -675,7 +675,7 @@ var wpdDOMSaver = {
 	//returns a unique file name and registers it
 	getUniqueFileNameAndRegister: function(fileName, sourceURL, content) {
 		fileName = this.checkForEqualFilenames(
-			wpdCommon.getValidFileName(fileName).toLowerCase(),
+			wpdCommon.getValidFileName(fileName),
 			sourceURL);
 		this.registerFile(fileName, sourceURL, content);
 		return fileName;
@@ -683,7 +683,7 @@ var wpdDOMSaver = {
 
 	//register filename, so we don't overwrite them later
 	registerFile: function (newFileName, sourceURL, content) {
-		this.fileInfo[newFileName] = {
+		this.fileInfo[newFileName.toLowerCase()] = {
 			url: sourceURL,
 			downloaded: content
 		}
@@ -691,11 +691,12 @@ var wpdDOMSaver = {
 
 	// is the file registered (e.g. downloaded)?
 	isFileRegistered: function (newFileName) {
-		if (this.fileInfo[newFileName] != undefined) return true;
+		if (this.fileInfo[newFileName.toLowerCase()] != undefined) return true;
 		return false;
 	},
 
 	isDownloaded: function(fileName) {
+		fileName = fileName.toLowerCase();
 		if(!this.fileInfo[fileName]) return;
 		return this.fileInfo[fileName].downloaded;
 	},
@@ -705,16 +706,16 @@ var wpdDOMSaver = {
 	// if no aURLSpec is passed, this generates a unique file name
 	checkForEqualFilenames: function (newFileName, aURLSpec) {
 		if (this.isFileRegistered(newFileName)) {
-			if (!aURLSpec || this.fileInfo[newFileName]["url"] != aURLSpec) {
+			if (!aURLSpec || this.fileInfo[newFileName.toLowerCase()]["url"] != aURLSpec) {
 				// the file is already registered but from a different location
 				// => probably not the same file, so we have to find a different name it (e.g. filename_001.ext)
 				var seq = 1;
 				var fileLR = wpdCommon.splitFileName(newFileName);
 				if (!fileLR[1]) fileLR[1] = "dat";
 				newFileName = fileLR[0] + "_" + wpdCommon.addLeftZeros(seq++, 3) + "." + fileLR[1];
-				while (this.fileInfo[newFileName] != undefined) {
+				while (this.fileInfo[newFileName.toLowerCase()] != undefined) {
 					// is the file already registered with the new name?
-					if (aURLSpec && this.fileInfo[newFileName]["url"] == aURLSpec) return newFileName; // Yes -> so it�s already downloaded and we are finished
+					if (aURLSpec && this.fileInfo[newFileName.toLowerCase()]["url"] == aURLSpec) return newFileName; // Yes -> so it's already downloaded and we are finished
 					newFileName = fileLR[0] + "_" + wpdCommon.addLeftZeros(seq++, 3) + "." + fileLR[1]; // No -> "increment" filename
 				}
 			}
@@ -734,7 +735,7 @@ var wpdDOMSaver = {
 			var aURL = wpdCommon.convertURLToObject(aURLSpec);
 
 			// generate a filename
-			var newFileName = aURL.fileName.toLowerCase();
+			var newFileName = aURL.fileName;
 			if (!newFileName) newFileName = "untitled";
 			// same name but different location?
 			newFileName = this.getUniqueFileNameAndRegister(newFileName, aURLSpec);

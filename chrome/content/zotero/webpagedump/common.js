@@ -357,7 +357,7 @@ var wpdCommon = {
 	// replace illegal characters
 	// and shorten long file names
 	getValidFileName: function (aFileName) {
-		aFileName = Zotero.File.getValidFileName(aFileName).toLowerCase();
+		aFileName = Zotero.File.getValidFileName(aFileName);
 		return Zotero.File.truncateFileName(aFileName, WPD_MAX_FILENAME_LENGTH);
 	},
 

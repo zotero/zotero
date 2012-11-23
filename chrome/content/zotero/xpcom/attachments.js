@@ -547,8 +547,9 @@ Zotero.Attachments = new function(){
 			file.initWithFile(destDir);
 
 			var fileName = Zotero.File.truncateFileName(
-												_getFileNameFromURL(url, mimeType).toLowerCase(),
-												100); //make sure this matches WPD settings in webpagedump/common.js
+				_getFileNameFromURL(url, mimeType),
+				100 //make sure this matches WPD settings in webpagedump/common.js
+			);
 			file.append(fileName)
 
 			if (mimeType == 'application/pdf') {
