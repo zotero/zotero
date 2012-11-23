@@ -232,7 +232,7 @@ Zotero.Attachments = new function(){
 				};
 				Zotero.Attachments.importFromDocument(browser.contentDocument,
 					sourceItemID, forceTitle, parentCollectionIDs, importCallback, libraryID);
-			}, undefined, undefined, true);
+			}, undefined, undefined, true, cookieSandbox);
 		};
 		
 		// Save using remote web browser persist
@@ -573,10 +573,13 @@ Zotero.Attachments = new function(){
 			var file = Components.classes["@mozilla.org/file/local;1"].
 					createInstance(Components.interfaces.nsILocalFile);
 			file.initWithFile(destDir);
-			
-			var fileName = _getFileNameFromURL(url, mimeType);
-			file.append(fileName);
-			
+
+			var fileName = Zotero.File.truncateFileName(
+				_getFileNameFromURL(url, mimeType),
+				100 //make sure this matches WPD settings in webpagedump/common.js
+			);
+			file.append(fileName)
+
 			if (mimeType == 'application/pdf') {
 				var f = function() {
 					Zotero.Fulltext.indexPDF(file, itemID);
@@ -605,10 +608,10 @@ Zotero.Attachments = new function(){
 				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
 					.getService(Components.interfaces.mozIJSSubScriptLoader)
 					.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js", wpd);
-				
+
 				wpd.wpdDOMSaver.init(file.path, document);
 				wpd.wpdDOMSaver.saveHTMLDocument();
-				
+
 				attachmentItem.attachmentPath = this.getPath(
 					file, Zotero.Attachments.LINK_MODE_IMPORTED_URL
 				);
@@ -1201,10 +1204,7 @@ Zotero.Attachments = new function(){
 			nsIURL.fileBaseName = nsIURL.fileBaseName + '.' + tld;
 		}
 		
-		// Pass unencoded name to getValidFileName() so that '%20' isn't stripped to '20'
-		nsIURL.fileBaseName = Zotero.File.getValidFileName(decodeURIComponent(nsIURL.fileBaseName));
-		
-		return decodeURIComponent(nsIURL.fileName);
+		return Zotero.File.getValidFileName(decodeURIComponent(nsIURL.fileName));
 	}
 	
 	

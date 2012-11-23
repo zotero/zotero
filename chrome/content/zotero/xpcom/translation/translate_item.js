@@ -233,6 +233,7 @@ Zotero.Translate.ItemSaver.prototype = {
 						(attachment.title ? attachment.title : undefined));
 			} catch(e) {
 				Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
+				Zotero.logError(e);
 				return;
 			}
 			Zotero.debug("Translate: Created attachment; id is "+myID, 4);
@@ -345,6 +346,7 @@ Zotero.Translate.ItemSaver.prototype = {
 								(attachment.title ? attachment.title : undefined));
 					} catch(e) {
 						Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
+						Zotero.logError(e);
 					}
 				}
 			} else {
@@ -354,6 +356,7 @@ Zotero.Translate.ItemSaver.prototype = {
 						Zotero.Attachments.importFromDocument(attachment.document, parentID, attachment.title);
 					} catch(e) {
 						Zotero.debug("Translate: Error attaching document", 2);
+						Zotero.logError(e);
 					}
 				// Save attachment if snapshot pref enabled or not HTML
 				// (in which case downloadAssociatedFiles applies)
@@ -368,6 +371,7 @@ Zotero.Translate.ItemSaver.prototype = {
 							fileBaseName, null, mimeType, this._libraryID, null, this._cookieSandbox);
 					} catch(e) {
 						Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
+						Zotero.logError(e);
 					}
 				}
 			}
