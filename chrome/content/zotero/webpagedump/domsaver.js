@@ -164,7 +164,8 @@ var wpdDOMSaver = {
 
 		// Split fileName in Path and Name
 
-		this.name = wpdCommon.getFileLeafName(fileName); // extract fileName from filePath
+		this.name = wpdCommon.getValidFileName(
+			wpdCommon.getFileLeafName(fileName)); // extract fileName from filePath
 		this.currentDir = wpdCommon.getFilePath(fileName); // only directory
 		this.name = wpdCommon.splitFileName(this.name)[0]; // no extension!
 
@@ -221,7 +222,7 @@ var wpdDOMSaver = {
 	// resolve the javascript links inside the attributes (e.g. onclick,...)
 	normalizeJavaScriptLink: function (aNode, aAttr) {
 		var val = aNode.getAttribute(aAttr); // get the attribute value and check for link stuff
-		if (!val.match(/\(\'([^\']+)\'/)) return aNode;
+		if (!val || !val.match(/\(\'([^\']+)\'/)) return aNode;
 		val = RegExp.$1;
 		if (val.indexOf("/") == -1 && val.indexOf(".") == -1) return aNode;
 		val = wpdCommon.resolveURL(this.currentURL, val); // it is a link -> resolve and set the URL to the local URL
@@ -409,9 +410,12 @@ var wpdDOMSaver = {
 				case "link":
 					// could containt urls (icon, stylesheet and fontdef)
 					// We have to remove nodes with the stylesheet attribute because they will be added later
-					if ((aNode.getAttribute("rel").toLowerCase() == "stylesheet") && (aNode.getAttribute("href").indexOf("chrome://") == -1)) {
+					if(!aNode.hasAttribute("rel")) return aNode;
+					if (aNode.getAttribute("rel").toLowerCase() == "stylesheet"
+							&& (aNode.hasAttribute("href") && aNode.getAttribute("href").indexOf("chrome://") == -1)) {
 						return wpdCommon.removeNodeFromParent(aNode);
-					} else if ((aNode.getAttribute("rel").toLowerCase() == "shortcut icon") || (aNode.getAttribute("rel").toLowerCase() == "icon")) {
+					} else if (aNode.getAttribute("rel").toLowerCase() == "shortcut icon"
+							|| aNode.getAttribute("rel").toLowerCase() == "icon") {
 						var aFileName = this.download(aNode.href, true);
 						// Changed by Dan S. for Zotero -- see this.repairRelativeLinks()
 						if (aFileName) aNode.setAttribute("href", this.relativeLinkFix(aFileName));
@@ -671,7 +675,7 @@ var wpdDOMSaver = {
 	//returns a unique file name and registers it
 	getUniqueFileNameAndRegister: function(fileName, sourceURL, content) {
 		fileName = this.checkForEqualFilenames(
-			wpdCommon.getValidFileName(fileName).toLowerCase(),
+			wpdCommon.getValidFileName(fileName),
 			sourceURL);
 		this.registerFile(fileName, sourceURL, content);
 		return fileName;
@@ -679,7 +683,7 @@ var wpdDOMSaver = {
 
 	//register filename, so we don't overwrite them later
 	registerFile: function (newFileName, sourceURL, content) {
-		this.fileInfo[newFileName] = {
+		this.fileInfo[newFileName.toLowerCase()] = {
 			url: sourceURL,
 			downloaded: content
 		}
@@ -687,11 +691,12 @@ var wpdDOMSaver = {
 
 	// is the file registered (e.g. downloaded)?
 	isFileRegistered: function (newFileName) {
-		if (this.fileInfo[newFileName] != undefined) return true;
+		if (this.fileInfo[newFileName.toLowerCase()] != undefined) return true;
 		return false;
 	},
 
 	isDownloaded: function(fileName) {
+		fileName = fileName.toLowerCase();
 		if(!this.fileInfo[fileName]) return;
 		return this.fileInfo[fileName].downloaded;
 	},
@@ -701,16 +706,16 @@ var wpdDOMSaver = {
 	// if no aURLSpec is passed, this generates a unique file name
 	checkForEqualFilenames: function (newFileName, aURLSpec) {
 		if (this.isFileRegistered(newFileName)) {
-			if (!aURLSpec || this.fileInfo[newFileName]["url"] != aURLSpec) {
+			if (!aURLSpec || this.fileInfo[newFileName.toLowerCase()]["url"] != aURLSpec) {
 				// the file is already registered but from a different location
 				// => probably not the same file, so we have to find a different name it (e.g. filename_001.ext)
 				var seq = 1;
 				var fileLR = wpdCommon.splitFileName(newFileName);
 				if (!fileLR[1]) fileLR[1] = "dat";
 				newFileName = fileLR[0] + "_" + wpdCommon.addLeftZeros(seq++, 3) + "." + fileLR[1];
-				while (this.fileInfo[newFileName] != undefined) {
+				while (this.fileInfo[newFileName.toLowerCase()] != undefined) {
 					// is the file already registered with the new name?
-					if (aURLSpec && this.fileInfo[newFileName]["url"] == aURLSpec) return newFileName; // Yes -> so it�s already downloaded and we are finished
+					if (aURLSpec && this.fileInfo[newFileName.toLowerCase()]["url"] == aURLSpec) return newFileName; // Yes -> so it's already downloaded and we are finished
 					newFileName = fileLR[0] + "_" + wpdCommon.addLeftZeros(seq++, 3) + "." + fileLR[1]; // No -> "increment" filename
 				}
 			}
@@ -730,9 +735,8 @@ var wpdDOMSaver = {
 			var aURL = wpdCommon.convertURLToObject(aURLSpec);
 
 			// generate a filename
-			var newFileName = aURL.fileName.toLowerCase();
+			var newFileName = aURL.fileName;
 			if (!newFileName) newFileName = "untitled";
-			newFileName = wpdCommon.getValidFileName(newFileName);
 			// same name but different location?
 			newFileName = this.getUniqueFileNameAndRegister(newFileName, aURLSpec);
 			// is the file already registered (processed) ?
@@ -1076,7 +1080,7 @@ var wpdDOMSaver = {
 	// (be sure to call the init function at the top of this file before)
 	saveHTMLDocument: function () {
 		try {
-			this.saveDocumentEx(this.document, this.name);
+			return this.saveDocumentEx(this.document, this.name);
 		} catch (ex) {
 			wpdCommon.addError("[wpdDOMSaver.saveHTMLDocument]\n -> " + ex);
 		}
