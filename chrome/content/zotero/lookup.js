@@ -45,27 +45,30 @@ const Zotero_Lookup = new function () {
 		//then try ISBNs
 		if(!items.length) {
 			//first try replacing dashes
-			ids = identifier.replace(/[\u002D\u00AD\u2010-\u2015\u2212]+/g, "");	//hyphens and dashes
+			ids = identifier.replace(/[\u002D\u00AD\u2010-\u2015\u2212]+/g, "")	//hyphens and dashes
+											.toUpperCase();
 
-			var ISBN_RE = /(?:\D|^)(\d{10}|\d{13})(?!\d)/g;
+			var ISBN_RE = /(?:\D|^)(97[89]\d{10}|\d{9}[\dX])(?!\d)/g;
 			var isbn;
 
 			while(isbn = ISBN_RE.exec(ids)) {
-				items.push({itemType:"book", ISBN:isbn[1]});
+				isbn = Zotero.Utilities.cleanISBN(isbn[1]);
+				if(isbn) items.push({itemType:"book", ISBN:isbn});
 			}
 
 			//now try spaces
 			if(!items.length) {
 				ids = ids.replace(/[ \u00A0]+/g, "");	//space + non-breaking space
 				while(isbn = ISBN_RE.exec(ids)) {
-					items.push({itemType:"book", ISBN:isbn[1]});
+					isbn = Zotero.Utilities.cleanISBN(isbn[1]);
+					if(isbn) items.push({itemType:"book", ISBN:isbn});
 				}
 			}
 		}
 
 		//finally try for PMID
 		if(!items.length) {
-			// PMID; right now, PMIDs are 8 digits, so there doesn't seem like we will need to
+			// PMID; right now, PMIDs are 8 digits, so it doesn't seem like we will need to
 			// discriminate for a fairly long time
 			var PMID_RE = /(?:\D|^)(\d{8})(?!\d)/g;
 			var pmid;
@@ -82,22 +85,24 @@ const Zotero_Lookup = new function () {
 			return false;
 		}
 
-		var notDone = items.length;	 //counter for asynchronous fetching
-		var successful = 0;					//counter for successful retrievals
-
 		var libraryID = null;
 		var collection = false;
 		try {
 			libraryID = ZoteroPane_Local.getSelectedLibraryID();
 			collection = ZoteroPane_Local.getSelectedCollection();
-		} catch(e) {}
+		} catch(e) {
+			/** TODO: handle this **/
+		}
+
+		var notDone = items.length;	 //counter for asynchronous fetching
+		var successful = 0;					//counter for successful retrievals
 
 		Zotero_Lookup.toggleProgress(true);
 
 		var item;
 		while(item = items.pop()) {
 			(function(item) {
-				var translate = new Zotero.Translate("search");
+				var translate = new Zotero.Translate.Search();
 				translate.setSearch(item);
 
 				// be lenient about translators
