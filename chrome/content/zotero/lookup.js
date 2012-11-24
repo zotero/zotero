@@ -32,13 +32,15 @@ const Zotero_Lookup = new function () {
 	 * Performs a lookup by DOI, PMID, or ISBN
 	 */
 	this.accept = function(textBox) {
+		var foundIDs = [];	//keep track of identifiers to avoid duplicates
 		var identifier = textBox.value;
 		//first look for DOIs
 		var ids = identifier.split(/[\s\u00A0]+/);	//whitespace + non-breaking space
 		var items = [], doi;
 		for(var i=0, n=ids.length; i<n; i++) {
-			if(doi = Zotero.Utilities.cleanDOI(ids[i])) {
+			if((doi = Zotero.Utilities.cleanDOI(ids[i])) && foundIDs.indexOf(doi) == -1) {
 				items.push({itemType:"journalArticle", DOI:doi});
+				foundIDs.push(doi);
 			}
 		}
 
@@ -53,7 +55,10 @@ const Zotero_Lookup = new function () {
 
 			while(isbn = ISBN_RE.exec(ids)) {
 				isbn = Zotero.Utilities.cleanISBN(isbn[1]);
-				if(isbn) items.push({itemType:"book", ISBN:isbn});
+				if(isbn && foundIDs.indexOf(isbn) == -1) {
+					items.push({itemType:"book", ISBN:isbn});
+					foundIDs.push(isbn);
+				}
 			}
 
 			//now try spaces
@@ -61,7 +66,10 @@ const Zotero_Lookup = new function () {
 				ids = ids.replace(/[ \u00A0]+/g, "");	//space + non-breaking space
 				while(isbn = ISBN_RE.exec(ids)) {
 					isbn = Zotero.Utilities.cleanISBN(isbn[1]);
-					if(isbn) items.push({itemType:"book", ISBN:isbn});
+					if(isbn && foundIDs.indexOf(isbn) == -1) {
+						items.push({itemType:"book", ISBN:isbn});
+						foundIDs.push(isbn);
+					}
 				}
 			}
 		}
@@ -72,8 +80,9 @@ const Zotero_Lookup = new function () {
 			// discriminate for a fairly long time
 			var PMID_RE = /(?:\D|^)(\d{8})(?!\d)/g;
 			var pmid;
-			while(pmid = PMID_RE.exec(identifier)) {
+			while((pmid = PMID_RE.exec(identifier)) && foundIDs.indexOf(pmid) == -1) {
 				items.push({itemType:"journalArticle", contextObject:"rft_id=info:pmid/"+pmid[1]});
+				foundIDs.push(pmid);
 			}
 		}
 
