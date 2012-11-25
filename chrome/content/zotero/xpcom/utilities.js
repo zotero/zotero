@@ -1189,6 +1189,12 @@ Zotero.Utilities = {
 	 * uniqueFields array
 	 */
 	"itemToExportFormat":function(item) {
+		const CREATE_ARRAYS = ['creators', 'notes', 'tags', 'seeAlso', 'attachments'];
+		for(var i=0; i<CREATE_ARRAYS.length; i++) {
+			var createArray = CREATE_ARRAYS[i];
+			if(!item[createArray]) item[createArray] = [];
+		}
+		
 		item.uniqueFields = {};
 		
 		// get base fields, not just the type-specific ones
