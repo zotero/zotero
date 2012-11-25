@@ -1112,11 +1112,11 @@ Zotero.Utilities = {
 	 */
 	"varDump":function(arr,level,maxLevel,parentObjects,path) {
 		var dumped_text = "";
-		if (!level){
+		if (level === undefined){
 			level = 0;
 		}
 
-		if (!maxLevel) {
+		if (maxLevel === undefined) {
 			maxLevel = 4;
 		}
 
@@ -1139,7 +1139,12 @@ Zotero.Utilities = {
 			}
 
 			for (var item in arr) {
-				var value = arr[item];
+				try {
+					var value = arr[item];
+				} catch(e) {
+					dumped_text += level_padding + "'" + item + "' => <<Access Denied>>\n";
+					continue;
+				}
 				
 				if (typeof(value) == 'object') { // If it is an array
 					//check for recursion
@@ -1159,9 +1164,13 @@ Zotero.Utilities = {
 
 					dumped_text += level_padding + "'" + item + "' => " + openBrace;
 					//only recurse if there's anything in the object, purely cosmetical
-					for(var i in value) {
-						dumped_text += "\n" + Zotero.Utilities.varDump(value,level+1,maxLevel,parentObjects.concat([value]),path.concat([item])) + level_padding;
-						break;
+					try {
+						for(var i in value) {
+							dumped_text += "\n" + Zotero.Utilities.varDump(value,level+1,maxLevel,parentObjects.concat([value]),path.concat([item])) + level_padding;
+							break;
+						}
+					} catch(e) {
+						dumped_text += "<<Error processing object:\n" + e + ">>\n";
 					}
 					dumped_text += closeBrace + "\n";
 				}
