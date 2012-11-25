@@ -195,7 +195,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		var desc;
 		
 		// Hack for overriding some properties
-		if (name in this.overrides)
+		if (this.overrides.hasOwnProperty(name))
 			return this.overrides[name];
 		// Case 1: Own Properties.
 		//
@@ -270,12 +270,10 @@ Zotero.Translate.DOMWrapper = new function() {
 	};
 	
 	SpecialPowersHandler.prototype.getOwnPropertyDescriptor = function(name) {
-		Zotero.debug("Getting own property desc "+name);
 		return this.doGetPropertyDescriptor(name, true);
 	};
 	
 	SpecialPowersHandler.prototype.getPropertyDescriptor = function(name) {
-		Zotero.debug("Getting property desc "+name);
 		return this.doGetPropertyDescriptor(name, false);
 	};
 	
