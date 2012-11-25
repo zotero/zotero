@@ -185,6 +185,7 @@ Zotero.Translate.Sandbox = {
 			Zotero.debug("Translate: Creating translate instance of type "+type+" in sandbox");
 			var translation = Zotero.Translate.newInstance(type);
 			translation._parentTranslator = translate;
+			translation._originalLocation = translate._originalLocation || {};
 			
 			if(translation instanceof Zotero.Translate.Export && !(translation instanceof Zotero.Translate.Export)) {
 				throw(new Error("Only export translators may call other export translators"));
@@ -1519,6 +1520,12 @@ Zotero.Translate.Web.prototype.Sandbox = Zotero.Translate.Sandbox._inheritFromBa
 Zotero.Translate.Web.prototype.setDocument = function(doc) {
 	this.document = doc;
 	this.setLocation(doc.location.href);
+	if(!this._originalLocation) {
+		this._originalLocation = {
+			protocol: doc.location.protocol,
+			host: doc.location.host
+		};
+	}
 }
 
 /**
