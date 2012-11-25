@@ -232,9 +232,9 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	
 	if(Zotero.isFx) {
 		var translate = this._translate;
-		if(translate.document) {
-			var protocol = translate.document.location.protocol,
-				host = translate.document.location.host;
+		if(translate._originalLocation) {
+			var protocol = translate._originalLocation.protocol,
+				host = translate._originalLocation.host;
 		} else {
 			var url = Components.classes["@mozilla.org/network/io-service;1"] 
 					.getService(Components.interfaces.nsIIOService)
