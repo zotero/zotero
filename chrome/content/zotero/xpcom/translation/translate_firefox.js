@@ -164,7 +164,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	
 	function SpecialPowersHandler(obj, overrides) {
 		this.wrappedObject = obj;
-		this.overrides = overrides ? overrides : {};
+		this.overrides = overrides;
 	};
 	
 	// Allow us to transitively maintain the membrane by wrapping descriptors
@@ -195,7 +195,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		var desc;
 		
 		// Hack for overriding some properties
-		if (name in this.overrides)
+		if (this.overrides !== undefined && name in this.overrides)
 			return this.overrides[name];
 		// Case 1: Own Properties.
 		//
@@ -318,7 +318,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		// the base object, and no Xray vision for the rest of the way up.
 		var obj = this.wrappedObject;
 		var props = [];
-		props = doGetOwnPropertyNames(this.overrides, props);
+		props = doGetOwnPropertyNames(this.overrides !== undefined ? this.overrides : {}, props);
 		while (obj) {
 			props = doGetOwnPropertyNames(obj, props);
 			obj = Object.getPrototypeOf(XPCNativeWrapper.unwrap(obj));
