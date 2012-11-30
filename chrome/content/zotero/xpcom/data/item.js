@@ -3873,16 +3873,7 @@ Zotero.Item.prototype.getBestAttachment = function() {
 	if (!this.isRegularItem()) {
 		throw ("getBestAttachment() can only be called on regular items");
 	}
-
-	var url = this.getField('url');
-
-	var sql = "SELECT IA.itemID FROM itemAttachments IA NATURAL JOIN items I "
-		+ "LEFT JOIN itemData ID ON (IA.itemID=ID.itemID AND fieldID=1) "
-		+ "LEFT JOIN itemDataValues IDV ON (ID.valueID=IDV.valueID) "
-		+ "WHERE sourceItemID=? AND linkMode NOT IN (?) "
-		+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
-		+ "ORDER BY value=? DESC, mimeType='application/pdf' DESC, dateAdded ASC";
-	return Zotero.DB.valueQuery(sql, [this.id, Zotero.Attachments.LINK_MODE_LINKED_URL, url]);
+	return this.getBestAttachments()[0];
 }
 
 /*
