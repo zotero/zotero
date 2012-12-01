@@ -187,9 +187,9 @@ Zotero.Server.Connector.SavePage.prototype = {
 	 * @param {Object} data POST data or GET query string
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
-	"init":function(data, sendResponseCallback) {
+	"init":function(url, data, sendResponseCallback) {
 		this.sendResponse = sendResponseCallback;
-		Zotero.Server.Connector.Detect.prototype.init.apply(this, [data, sendResponseCallback])
+		Zotero.Server.Connector.Detect.prototype.init.apply(this, [url, data, sendResponseCallback])
 	},
 
 	/**
