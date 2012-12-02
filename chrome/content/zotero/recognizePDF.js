@@ -310,7 +310,7 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 	Zotero.debug(allText);
 	var m = Zotero.Utilities.cleanDOI(allText);
 	if(m) {
-		this._DOI = m[0];
+		this._DOI = m;
 	}
 	
 	// Use only first column from multi-column lines
