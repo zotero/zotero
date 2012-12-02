@@ -3176,7 +3176,8 @@ Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
 		var sql = "SELECT path FROM itemAttachments WHERE itemID=?";
 		var path = Zotero.DB.valueQuery(sql, this.id);
 		if (!path) {
-			path = '';
+			this._attachmentPath = '';
+			return this._attachmentPath;
 		}
 		
 		this._attachmentPath = path;
@@ -3196,9 +3197,8 @@ Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
 			return '';
 		}
 	
-		var taggedRelativePath = this._attachmentPath;
-		var pattern = RegExp('^'+Zotero.Attachments.BASE_PATH_PLACEHOLDER);
-        var relativePath = taggedRelativePath.replace(pattern,'');
+        var relativePath = this._attachmentPath.substr(
+        	Zotero.Attachments.BASE_PATH_PLACEHOLDER.length);
 		var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
 			.createInstance(Components.interfaces.nsILocalFile);
 		attachmentFile.setRelativeDescriptor(baseDir,relativePath);

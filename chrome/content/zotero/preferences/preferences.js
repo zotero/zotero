@@ -126,9 +126,6 @@ function chooseBaseAttachmentPath() {
 			.getService(Components.interfaces.nsIWindowMediator);
 	var win = wm.getMostRecentWindow('navigator:browser');
 	
-	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-		.getService(Components.interfaces.nsIPromptService);
-	
 	//Prompt user to choose new base path
 	var nsIFilePicker = Components.interfaces.nsIFilePicker;
 	var fp = Components.classes["@mozilla.org/filepicker;1"]
@@ -179,6 +176,10 @@ function chooseBaseAttachmentPath() {
 	}
 	
 	//Confirm change of the base path
+	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+		.getService(Components.interfaces.nsIPromptService);
+	
+	var confirmTitle=Zotero.getString('attachmentBasePath.confirmNewPath.title');
 	var confirmString;
 	switch (newRelativeAttachmentIDs.length) {
 		case 0:
@@ -191,7 +192,7 @@ function chooseBaseAttachmentPath() {
 			confirmString=Zotero.getString('attachmentBasePath.confirmNewPath.plural',
 				newRelativeAttachmentIDs.length);
 	}
-	if (!confirm(confirmString)) {
+	if (!ps.confirm(null,confirmTitle,confirmString)) {
 		return false;
 	}
 	
@@ -239,6 +240,10 @@ function clearBaseAttachmentPath() {
 	
 	//Confirm the clearing of the base path and restoring of relative paths to absolute
 	//ones with the user.
+	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+		.getService(Components.interfaces.nsIPromptService);
+	
+	var confirmTitle=Zotero.getString('attachmentBasePath.clearBasePath.title');
 	var confirmString;
 	switch (relativeAttachmentIDs.length) {
 		case 0:
@@ -251,7 +256,7 @@ function clearBaseAttachmentPath() {
 			confirmString=Zotero.getString('attachmentBasePath.clearBasePath.plural',
 				relativeAttachmentIDs.length);
 	}
-	if (!confirm(confirmString)) {
+	if (!ps.confirm(null,confirmTitle,confirmString)) {
 		return false;
 	}
 	
