@@ -2791,7 +2791,7 @@
 
 					if(field === 'creator') {
 						// Reset creator mode settings here so that flex attribute gets reset
-						this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), false);
+						this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
 
 						if(Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
 							var creatorTypeLabels = document.getAnonymousNodes(this)[0].getElementsByClassName("creator-type-label");
@@ -2806,11 +2806,6 @@
 						}
 						this._focusNextField(focusMode, focusBox, this._lastTabIndex, this._tabDirection == -1);
 					}
-
-					// OOOOO: This should not be necessary, but we
-					// lose the servantLang attribute otherwise.
-					//this.refresh();
-
 				}
 				// Thrown errors don't seem to show up within XBL without explicit logging
 				catch (e) {
