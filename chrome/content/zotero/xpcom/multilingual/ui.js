@@ -376,10 +376,10 @@ Zotero.isRTL = function(langs) {
 	rtl = false;
 	for (var i = langs.length - 1; i > -1; i += -1) {
 		var langTag = langs[i];
-		if (langTag) {
+		if (langTag && "string" === typeof langTag) {
 			langTag = langTag.replace(/^([-a-zA-Z0-9]+).*/,"$1");
 		}
-		if (langTag) {
+		if (langTag && "string" === typeof langTag) {
 			var taglst = langTag.split("-");
 			if (["ar", "he", "fa", "ur", "yi", "ps", "syr"].indexOf(taglst[0]) > -1) {
 				rtl = true;
