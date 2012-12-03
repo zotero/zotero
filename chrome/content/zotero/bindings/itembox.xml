@@ -400,7 +400,7 @@
 							if (e.stack) {
 								var lines = e.stack.split('\n');
 								for (var i=0, ilen=lines.length; i < ilen; i++) {
-        							if (lines[i].match(/^\s*[A-Za-z0-9\-_\$]+\(/)) {
+									if (lines[i].match(/^\s*[A-Za-z0-9\-_\$]+\(/)) {
 										callstack.push(lines[i]);
 									}
 								}
@@ -1167,7 +1167,7 @@
 					newrow.parentNode.lastChild.firstChild.firstChild.click();
 //Zotero.debug("XXX openMultiCreatorRow() [done]");
 				]]>
-                </body>
+				</body>
 			</method>
 
 
@@ -1283,6 +1283,7 @@
 						)
 					);
 					firstlast.lastChild.setAttribute('servantLang', languageTag);
+					// flex is set in switchCreatorMode(), invoked below.
 
 					Zotero.setRTL(firstlast.lastChild, [languageTag]);
 					
@@ -1301,13 +1302,14 @@
 						)
 					);
 					firstlast.lastChild.setAttribute('servantLang', languageTag);
+					// flex is set in switchCreatorMode(), invoked below.
 
 					Zotero.setRTL(firstlast.lastChild, [languageTag]);
 
 					if (creator.fieldMode) {
 						firstlast.lastChild.setAttribute('hidden', true);
-                        firstlast.setAttribute("tooltiptext", lastName);
 					}
+
 					this._tabIndexMaxCreators = Math.max(this._tabIndexMaxCreators, tabindex);
 
 					hbox.appendChild(firstlast);
@@ -1543,8 +1545,27 @@
 					var button = row.lastChild.lastChild.previousSibling.previousSibling;
 					var hbox = button.previousSibling;
 					var lastName = hbox.firstChild;
+					lastName.setAttribute("flex", "0");
 					var comma = hbox.firstChild.nextSibling;
 					var firstName = hbox.lastChild;
+					firstName.setAttribute("flex", "0");
+					// get item box width
+					lastName.setAttribute("flex", "1");
+					firstName.setAttribute("flex", "1");
+					var computedStyle = window.getComputedStyle(row, null);
+					var boxWidth = computedStyle.getPropertyValue('width');
+					lastName.setAttribute("flex", "0");
+					firstName.setAttribute("flex", "0");
+
+						var originalLastName = lastName.value;
+						var originalFirstName = firstName.value;
+						lastName.value = "dummy";
+						lastName.value = originalLastName;
+						firstName.value = "dummy";
+						firstName.value = originalFirstName;
+
+
+
 					// Switch to single-field mode
 					if (fieldMode == 1) {
 						button.style.backgroundImage = 'url("chrome://zotero/skin/textfield-dual.png")';
@@ -1554,8 +1575,10 @@
 						// button.setAttribute('onclick', "document.getBindingParent(this).switchAllCreatorModes(this.parentNode.parentNode, 0, true)");
 						button.setAttribute('onclick', "document.getBindingParent(this).switchAllCreatorModes(this.parentNode.parentNode, 0, false, true)");
 						lastName.setAttribute('flex', '1');
+						firstName.setAttribute('flex', '0');
 						delete lastName.style.width;
 						delete lastName.style.maxWidth;
+						lastName.setAttribute("tooltiptext", lastName.value);
 						
 						// Remove firstname field from tabindex
 						var tab = parseInt(firstName.getAttribute('ztabindex'));
@@ -1588,17 +1611,12 @@
 						// For r9096
 						//button.setAttribute('onclick', "document.getBindingParent(this).switchAllCreatorModes(this.parentNode.parentNode, 1, true)");
 						button.setAttribute('onclick', "document.getBindingParent(this).switchAllCreatorModes(this.parentNode.parentNode, 1, false, true)");
-						lastName.setAttribute('flex', '0');
 						
 						// appropriately truncate lastName
-						
-						// get item box width
-						var computedStyle = window.getComputedStyle(this, null);
-						var boxWidth = computedStyle.getPropertyValue('width');
 						// get field label width
 						var computedStyle = window.getComputedStyle(row.firstChild, null);
 						var leftHboxWidth = computedStyle.getPropertyValue('width');
-						// get last name width
+						// get natural last name width
 						computedStyle = window.getComputedStyle(lastName, null);
 						var lastNameWidth = computedStyle.getPropertyValue('width');
 						if(boxWidth.substr(-2) === 'px'
@@ -1608,16 +1626,65 @@
 							boxWidth = parseInt(boxWidth);
 							leftHboxWidth = parseInt(leftHboxWidth);
 							lastNameWidth = parseInt(lastNameWidth);
-							var maxWidth = boxWidth-leftHboxWidth-140;
+							if (button.getAttribute("hidden")) {
+								var fixedSpace = 77;
+							} else {
+								var fixedSpace = 100;
+							}
+							var maxWidth = boxWidth-leftHboxWidth-fixedSpace-35;
 							if(lastNameWidth > maxWidth) {
-								//lastName.style.width = maxWidth+"px";
-								//lastName.style.maxWidth = maxWidth+"px";
+								lastName.style.width = maxWidth+"px";
+								lastName.style.maxWidth = maxWidth+"px";
+								lastName.setAttribute("tooltiptext", lastName.value);
 							} else {
 								delete lastName.style.width;
 								delete lastName.style.maxWidth;
+								lastName.removeAttribute("tooltiptext");
+							}
+							// get natural first name width
+							lastName.style.minWidth = "40px";
+							lastName.setAttribute('flex', '0');
+
+						var originalLastName = lastName.value;
+						var originalFirstName = firstName.value;
+						lastName.value = "dummy";
+						lastName.value = originalLastName;
+						firstName.value = "dummy";
+						firstName.value = originalFirstName;
+ 
+						computedStyle = window.getComputedStyle(lastName, null);
+						var lastNameWidth = computedStyle.getPropertyValue('width');
+							computedStyle = window.getComputedStyle(firstName, null);
+							lastNameWidth = parseInt(lastNameWidth);
+
+							var firstNameWidth = computedStyle.getPropertyValue('width');
+							firstNameWidth = parseInt(firstNameWidth);
+
+							if (firstNameWidth > (boxWidth-leftHboxWidth-fixedSpace-lastNameWidth)) {
+								//firstName.style.width = "40px";
+								//firstName.style.maxWidth = "40px";
+								firstName.setAttribute("tooltiptext", firstName.value);
+							} else {
+								firstName.removeAttribute("tooltiptext");
+								delete firstName.style.width;
+								delete firstName.style.maxWidth;
 							}
 						}
 						
+						// Now set the flex and midwidth attributes in earnest
+						lastName.style.minWidth = "40px";
+						lastName.setAttribute('flex', '0');
+
+						firstName.style.minWidth = "40px";
+						firstName.setAttribute('flex', '1');
+						
+						var originalLastName = lastName.value;
+						var originalFirstName = firstName.value;
+						lastName.value = "dummy";
+						lastName.value = originalLastName;
+						firstName.value = "dummy";
+						firstName.value = originalFirstName;
+
 						// Add firstname field to tabindex
 						var tab = parseInt(lastName.getAttribute('ztabindex'));
 						firstName.setAttribute('ztabindex', tab + 1);
@@ -2012,10 +2079,10 @@
 						}
 					}
 					
-					// ???
-					if (fieldName && fieldName.indexOf('firstName') != -1) {
-						valueElement.setAttribute('flex', '1');
-					}
+					// XXXXX
+					//if (fieldName && fieldName.indexOf('firstName') != -1) {
+					//	valueElement.setAttribute('flex', '1');
+					//}
 					
 					var firstSpace = valueText.indexOf(" ");
 					
@@ -2105,7 +2172,16 @@
 					var fieldName = elem.getAttribute('fieldname');
 					var tabindex = elem.getAttribute('ztabindex');
 					
-					var [field, creatorIndex, creatorField] = fieldName.split('-');
+					if (fieldName) {
+						var m = fieldName.match(/^([a-zA-Z]*)(?:-([0-9])+-(firstName|lastName))*$/);
+						if (m) {
+							var field = m[1];
+							if (m[2]) {
+								var creatorIndex = m[2];
+								var creatorField = m[3];
+							}
+						}
+					}
 
 					var langs = [this.itemLanguage];
 
@@ -2176,12 +2252,22 @@
 					t.setAttribute('value', value);
 					t.setAttribute('fieldname', fieldName);
 					t.setAttribute('ztabindex', tabindex);
-					t.setAttribute('flex', '1');
+					t.setAttribute("flex", "1");
 
 					Zotero.setRTL(t, langs);
 					
-					if (creatorField=='lastName') {
+					if (field === 'creator') {
 						t.setAttribute('fieldMode', elem.getAttribute('fieldMode'));
+						if (creatorField=='lastName') {
+							elem.parentNode.lastChild.style.minWidth = "40px";
+							elem.parentNode.lastChild.style.maxWidth = "40px";
+							elem.parentNode.lastChild.style.width = "40px";
+							elem.parentNode.lastChild.setAttribute('flex', '1');
+						} else {
+							elem.parentNode.firstChild.style.minWidth = "40px";
+							elem.parentNode.firstChild.style.maxWidth = "40px";
+							elem.parentNode.firstChild.style.width = "40px";
+						}
 					}
 					
 					var fieldNameX = fieldName.replace(/-.*$/,"");
@@ -2215,7 +2301,6 @@
 					}
 					
 					t.select();
-					t.setAttribute('flex', '1');
 					
 					t.addEventListener('blur', function (event) {
 						document.getBindingParent(this).blurHandler(this);
@@ -2442,7 +2527,6 @@
 				<![CDATA[
 //Zotero.debug("XXX hideEditor() [start]");
 				try {
-
 					/*
 					var textbox = Zotero.getAncestorByTagName(t, 'textbox');
 					if (!textbox){
@@ -2472,12 +2556,23 @@
 					
 					//var value = t.value;
 					var value = textbox.value;
-					
+
 					var elem;
-					var [field, creatorIndex, creatorField] = fieldName.split('-');
 					
+					if (fieldName) {
+						var m = fieldName.match(/^([a-zA-Z]*)(?:-([0-9])+-(firstName|lastName))*$/);
+						if (m) {
+							var field = m[1];
+							if (m[2]) {
+								var creatorIndex = m[2];
+								var creatorField = m[3];
+							}
+						}
+					}
+
 					// Creator fields
 					if (field == 'creator') {
+
 
 						var otherFields = this.getCreatorFields(row);
 
@@ -2518,6 +2613,17 @@
 						// (prevents change to fieldMode when field is saved
 						// with no change twice in succession)
 						elem.setAttribute('fieldMode',textbox.getAttribute('fieldMode'));
+
+						var box = textbox.parentNode;
+						if (creatorField=='lastName') {
+							box.lastChild.style.minWidth = null;
+							box.lastChild.style.maxWidth = null;
+							box.lastChild.style.width = null;
+						} else {
+							box.firstChild.style.minWidth = null;
+							box.firstChild.style.maxWidth = null;
+							box.firstChild.style.width = null;
+						}
 					}
 					
 					// Tags
@@ -2684,14 +2790,13 @@
 						);
 					}
 					
-					textbox.setAttribute('flex', '1');
 					var box = textbox.parentNode;
 					box.replaceChild(elem,textbox);
 
 					if(field === 'creator') {
 						// Reset creator mode settings here so that flex attribute gets reset
-						this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
-						
+						this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), false);
+
 						if(Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
 							var creatorTypeLabels = document.getAnonymousNodes(this)[0].getElementsByClassName("creator-type-label");
 							document.getElementById("zotero-author-guidance").show(creatorTypeLabels[creatorTypeLabels.length-1]);
@@ -3096,7 +3201,7 @@ if (oldCreator.id) {
 				</body>
 			</method>
 
-            <method name="swapNames">
+			<method name="swapNames">
 				<body>
 				<![CDATA[
 					var myelem = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode
@@ -3104,14 +3209,14 @@ if (oldCreator.id) {
 					var elem = myelem.parentNode.firstChild.lastChild;
 					var creatorIndex = parseInt(elem.getAttribute('fieldname').split('-')[1]);
 					var row = Zotero.getAncestorByTagName(elem, 'row');
-                    var fields = this.getCreatorFields(row);
-                    var lastName = fields.lastName;
-                    var firstName = fields.firstName;
-                    fields.lastName = firstName;
-                    fields.firstName = lastName;
+					var fields = this.getCreatorFields(row);
+					var lastName = fields.lastName;
+					var firstName = fields.firstName;
+					fields.lastName = firstName;
+					fields.firstName = lastName;
 					this.modifyCreator(creatorIndex, fields, false, true);
-                    this.item.save();
-                    this.refresh();
+					this.item.save();
+					this.refresh();
 				]]>
 				</body>
 			</method>
@@ -3156,7 +3261,7 @@ if (oldCreator.id) {
 
 						this.item._changedCreators[index] = true;
 						this.item._changedAltCreators[index] = successor.multi._key;
-                        
+						
 						this.item._changedCreators[index + 1] = true;
 						this.item._changedAltCreators[index + 1] = creator.multi._key;
 					}
@@ -3481,20 +3586,20 @@ if (oldCreator.id) {
 								
 								var item = document.getBindingParent(this).item;
 								var exists = item.hasCreatorAt(index);
-                                var numCreators = item.numCreators();
+								var numCreators = item.numCreators();
 								var moreCreators = numCreators > index + 1;
 
-                                var hideMoveSep = false;
-                                var hideMoveUp = false;
-                                var hideMoveDown = false;
-                                if (2 > item.numCreators) {
-                                    hideMoveSep = true;
-                                    hideMoveUp = true;
-                                    hideMoveDown = true;
-                                } else {
-                                    hideMoveDown = !moreCreators;
-                                    hideMoveUp = (index == 0);
-                                }
+								var hideMoveSep = false;
+								var hideMoveUp = false;
+								var hideMoveDown = false;
+								if (2 > item.numCreators) {
+									hideMoveSep = true;
+									hideMoveUp = true;
+									hideMoveDown = true;
+								} else {
+									hideMoveDown = !moreCreators;
+									hideMoveUp = (index == 0);
+								}
 
 								document.getElementById('zotero-creator-move-sep').setAttribute('hidden', hideMoveSep);
 								document.getElementById('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
