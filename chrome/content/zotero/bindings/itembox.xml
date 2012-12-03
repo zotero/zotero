@@ -1642,7 +1642,7 @@
 								lastName.removeAttribute("tooltiptext");
 							}
 							// get natural first name width
-							lastName.style.minWidth = "40px";
+							//lastName.style.minWidth = "40px";
 							lastName.setAttribute('flex', '0');
 
 						var originalLastName = lastName.value;
@@ -1672,7 +1672,7 @@
 						}
 						
 						// Now set the flex and midwidth attributes in earnest
-						lastName.style.minWidth = "40px";
+						//lastName.style.minWidth = "40px";
 						lastName.setAttribute('flex', '0');
 
 						firstName.style.minWidth = "40px";
@@ -2259,14 +2259,10 @@
 					if (field === 'creator') {
 						t.setAttribute('fieldMode', elem.getAttribute('fieldMode'));
 						if (creatorField=='lastName') {
-							elem.parentNode.lastChild.style.minWidth = "40px";
 							elem.parentNode.lastChild.style.maxWidth = "40px";
-							elem.parentNode.lastChild.style.width = "40px";
 							elem.parentNode.lastChild.setAttribute('flex', '1');
 						} else {
-							elem.parentNode.firstChild.style.minWidth = "40px";
 							elem.parentNode.firstChild.style.maxWidth = "40px";
-							elem.parentNode.firstChild.style.width = "40px";
 						}
 					}
 					
