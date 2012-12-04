@@ -2573,10 +2573,38 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		var statements = this._dataStore.statementsMatching(this._getResource(resource), this._getResource(property));
 		if(!statements.length) return false;
 
+		var returnArray = [];
 		if (preserveObject) {
-			var returnArray = [s.object for each(s in statements)];
+			for(var i=0; i<statements.length; i++) {
+				// The object will evaporate if pushed through literally.
+				//
+				// Plan A: Figure out why values are disappearing, fix it,
+				// and use the native object.
+				//
+				// Plan B: Reduce to elements, key on an object, and
+				// then push as a set.
+                //
+                // Plan B works in the short term. Worth asking whether
+                // it is the Right Way.
+				//
+				var obj = {};
+				for (var k in statements[i].object) {
+					obj[k] = statements[i].object[k];
+				}
+				returnArray.push(obj);
+			}
 		} else {
-			var returnArray = [(s.object.termType == "literal" ? s.object.toString() : s.object) for each(s in statements)];
+			for(var i=0; i<statements.length; i++) {
+				if (statements[i].object.termType == "literal") {
+					returnArray.push(statements[i].object.toString())
+				} else {
+					var obj = {};
+					for (var k in statements[i].object) {
+						obj[k] = statements[i].object[k];
+					}
+					returnArray.push(obj);
+				}
+			}
 		}
 		return returnArray;
 	},
