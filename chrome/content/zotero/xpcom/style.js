@@ -119,20 +119,22 @@ Zotero.Styles = new function() {
 	 */
 	this.get = function(id) {
 		// Map some obsolete styles to current ones
-		var mappings = {
+		const MAPPINGS = {
 			"http://www.zotero.org/styles/chicago-note": "http://www.zotero.org/styles/chicago-note-bibliography",
 			"http://www.zotero.org/styles/mhra_note_without_bibliography": "http://www.zotero.org/styles/mhra",
 			"http://www.zotero.org/styles/aaa": "http://www.zotero.org/styles/american-anthropological-association",
 			"http://www.zotero.org/styles/ama": "http://www.zotero.org/styles/american-medical-association",
 			"http://www.zotero.org/styles/nlm": "http://www.zotero.org/styles/national-library-of-medicine"
 		};
-		if(mappings[id]) {
-			Zotero.debug("Mapping " + id + " to " + mappings[id]);
-			id = mappings[id];
+
+		if(!_initialized) this.init();
+
+		if(MAPPINGS.hasOwnProperty(id) && _styles[MAPPINGS[id]]) {
+			Zotero.debug("Mapping " + id + " to " + MAPPINGS[id]);
+			return _styles[MAPPINGS[id]];
 		}
 		
-		if(!_initialized) this.init();
-		return _styles[id] ? _styles[id] : false;
+		return _styles[id] || false;
 	}
 	
 	/**
