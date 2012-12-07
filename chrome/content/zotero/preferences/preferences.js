@@ -1343,6 +1343,10 @@ function updateTranslators() {
 				var label = Zotero.getString('zotero.preferences.update.error');
 			}
 			button.setAttribute('label', label);
+			
+			if (updated) {
+				refreshStylesList();
+			}
 		}
 	});
 }

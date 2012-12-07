@@ -942,16 +942,6 @@ Zotero.Schema = new function(){
 	 * @param	{Function}	callback
 	 */
 	this.updateFromRepository = function (force, callback) {
-		// Little hack to manually update CSLs from repo on upgrades
-		if (!force && Zotero.Prefs.get('automaticScraperUpdates')) {
-			var syncTargetVersion = 3; // increment this when releasing new version that requires it
-			var syncVersion = this.getDBVersion('sync');
-			if (syncVersion < syncTargetVersion) {
-				force = true;
-				var forceCSLUpdate = true;
-			}
-		}
-		
 		if (!force){
 			if (_remoteUpdateInProgress) {
 				Zotero.debug("A remote update is already in progress -- not checking repository");
@@ -978,7 +968,7 @@ Zotero.Schema = new function(){
 				return false;
 			}
 		}
-			
+		
 		if (_localUpdateInProgress) {
 			Zotero.debug('A local update is already in progress -- delaying repository check', 4);
 			_setRepositoryTimer(600);
@@ -1016,14 +1006,27 @@ Zotero.Schema = new function(){
 			else {
 				url += '&m=1';
 			}
-			
-			// Force updating of all public CSLs
-			if (forceCSLUpdate) {
-				url += '&cslup=' + syncTargetVersion;
-			}
 		}
 		
-		var get = Zotero.HTTP.doGet(url, function (xmlhttp) {
+		// Send list of installed styles
+		var styles = Zotero.Styles.getAll();
+		var styleTimestamps = [];
+		for (var id in styles) {
+			var updated = Zotero.Date.sqlToDate(styles[id].updated);
+			updated = updated ? updated.getTime() / 1000 : 0;
+			var selfLink = styles[id].url;
+			var data = {
+				id: id,
+				updated: updated
+			};
+			if (selfLink) {
+				data.url = selfLink;
+			}
+			styleTimestamps.push(data);
+		}
+		var body = 'styles=' + encodeURIComponent(JSON.stringify(styleTimestamps));
+		
+		var get = Zotero.HTTP.doPost(url, body, function (xmlhttp) {
 			var updated = _updateFromRepositoryCallback(xmlhttp, !!force);
 			if (callback) {
 				callback(xmlhttp, updated)
@@ -1538,16 +1541,7 @@ Zotero.Schema = new function(){
 		
 		Zotero.DB.beginTransaction();
 		
-		try {
-			var re = /cslup=([0-9]+)/;
-			var matches = re.exec(xmlhttp.channel.URI.spec);
-			if (matches) {
-				_updateDBVersion('sync', matches[1]);
-			}
-		}
-		catch (e) {
-			Zotero.debug(e);
-		}
+		// TODO: clear DB version 'sync' from removed _updateDBVersion()
 		
 		// Store the timestamp provided by the server
 		_updateDBVersion('repository', currentTime);
@@ -1708,7 +1702,7 @@ Zotero.Schema = new function(){
 		var uri = xmlnode.getAttribute('id');
 		
 		// Delete local style if CSL code is empty
-		if (!xmlnode.getElementsByTagName('csl')[0].firstChild) {
+		if (!xmlnode.firstChild) {
 			var style = Zotero.Styles.get(uri);
 			if (style) {
 				style.file.remove(null);
@@ -1716,7 +1710,25 @@ Zotero.Schema = new function(){
 			return;
 		}
 		
-		var str = xmlnode.getElementsByTagName('csl')[0].firstChild.nodeValue;
+		// Remove renamed styles
+		if (uri == 'http://www.zotero.org/styles/american-medical-association') {
+			var oldID = 'http://www.zotero.org/styles/ama';
+			var style = Zotero.Styles.get(oldID);
+			if (style && style.file.exists()) {
+				Zotero.debug("Deleting renamed style '" + oldID + "'");
+				style.file.remove(false);
+			}
+		}
+		else if (uri == 'http://www.zotero.org/styles/national-library-of-medicine') {
+			var oldID = 'http://www.zotero.org/styles/nlm';
+			var style = Zotero.Styles.get(oldID);
+			if (style && style.file.exists()) {
+				Zotero.debug("Deleting renamed style '" + oldID + "'");
+				style.file.remove(false);
+			}
+		}
+		
+		var str = xmlnode.firstChild.nodeValue;
 		var style = Zotero.Styles.get(uri);
 		if (style) {
 			if (style.file.exists()) {

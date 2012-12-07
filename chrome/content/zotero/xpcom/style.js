@@ -122,7 +122,9 @@ Zotero.Styles = new function() {
 		var mappings = {
 			"http://www.zotero.org/styles/chicago-note": "http://www.zotero.org/styles/chicago-note-bibliography",
 			"http://www.zotero.org/styles/mhra_note_without_bibliography": "http://www.zotero.org/styles/mhra",
-			"http://www.zotero.org/styles/aaa": "http://www.zotero.org/styles/american-anthropological-association"
+			"http://www.zotero.org/styles/aaa": "http://www.zotero.org/styles/american-anthropological-association",
+			"http://www.zotero.org/styles/ama": "http://www.zotero.org/styles/american-medical-association",
+			"http://www.zotero.org/styles/nlm": "http://www.zotero.org/styles/national-library-of-medicine"
 		};
 		if(mappings[id]) {
 			Zotero.debug("Mapping " + id + " to " + mappings[id]);
@@ -382,6 +384,7 @@ Zotero.Styles = new function() {
  * @class Represents a style file and its metadata
  * @property {nsIFile} file The path to the style file
  * @property {String} styleID
+ * @property {String} url The URL where the style can be found (rel="self")
  * @property {String} type "csl" for CSL styles
  * @property {String} title
  * @property {String} updated SQL-style date updated
@@ -412,6 +415,9 @@ Zotero.Style = function(arg) {
 	}
 				
 	this.styleID = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:id[1]',
+		Zotero.Styles.ns);
+	this.url = Zotero.Utilities.xpathText(doc,
+		'/csl:style/csl:info[1]/csl:link[@rel="self"][1]/@href',
 		Zotero.Styles.ns);
 	this.title = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:title[1]',
 		Zotero.Styles.ns);
