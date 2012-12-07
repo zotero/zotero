@@ -1015,7 +1015,7 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 				this._session.setData(data);
 			} catch(e) {
 				// make sure style is defined
-				if(e instanceof Zotero.Integration.DisplayException && e.name === "invalidStyle") {
+				if(e instanceof Zotero.Exception.Alert && e.name === "integration.error.invalidStyle") {
 					return this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
 					this._app.secondaryFieldType).then(function(status) {			
 						me._doc.setDocumentData(me._session.data.serializeXML());
@@ -1688,7 +1688,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field) {
 		if(code) {
 			var [type, content] = this.getCodeTypeAndContent(code);
 			if(type != INTEGRATION_TYPE_ITEM) {			
-				throw new Zotero.Integration.DisplayException("notInCitation");
+				throw new Zotero.Exception.Alert("integration.error.notInCitation");
 			}
 			
 			try {
@@ -2032,7 +2032,7 @@ Zotero.Integration.Session.prototype.setData = function(data) {
 		} catch(e) {
 			Zotero.logError(e);
 			data.style.styleID = undefined;
-			throw new Zotero.Integration.DisplayException("invalidStyle");
+			throw new Zotero.Exception.Alert("integration.error.invalidStyle");
 		}
 		
 		return true;
