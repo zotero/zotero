@@ -369,7 +369,11 @@ var ZoteroPane = new function()
 		if(this.collectionsView) this.collectionsView.unregister();
 		if(this.itemsView) this.itemsView.unregister();
 		
-		observerService.removeObserver(_reloadObserver, "zotero-reloaded");
+        try {
+		    observerService.removeObserver(_reloadObserver, "zotero-reloaded");
+        } catch (e) {
+            Zotero.debug("Warning: failure removing observer on window close.");
+        }
 	}
 	
 	/**
