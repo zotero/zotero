@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.410",
+    PROCESSOR_VERSION: "1.0.411",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -2719,6 +2719,9 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
         var value = false;
         if (["bill","gazette","legislation","treaty"].indexOf(Item.type) > -1) {
             item.force_pluralism = 0;
+            if (!item.label) {
+                item.label = "page"
+            }
             var loci = ["section","","",""];
             var split;
             if (Item.section) {
