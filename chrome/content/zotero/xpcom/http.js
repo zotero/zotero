@@ -7,10 +7,10 @@ Zotero.HTTP = new function() {
 	 * Exception returned for unexpected status when promise* is used
 	 * @constructor
 	 */
-	this.UnexpectedStatusException = function(xmlhttp) {
+	this.UnexpectedStatusException = function(xmlhttp, msg) {
 		this.xmlhttp = xmlhttp;
 		this.status = xmlhttp.status;
-		this.message = "XMLHttpRequest received unexpected status "+this.status;
+		this.message = msg;
 	};
 	
 	this.UnexpectedStatusException.prototype.toString = function() {
@@ -41,12 +41,13 @@ Zotero.HTTP = new function() {
 	 *         <li>cookieSandbox - The sandbox from which cookies should be taken</li>
 	 *         <li>dontCache - If set, specifies that the request should not be fulfilled
 	 *             from the cache</li>
+	 *         <li>successCodes - HTTP status codes that are considered successful</li>
 	 *         <li>debug - Log response text and status code</li>
 	 *     </ul>
 	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
 	 * @return {Promise} A promise resolved with the XMLHttpRequest object if the request
 	 *     succeeds, or rejected if the browser is offline or a non-2XX status response
-	 *     code is received.
+	 *     code is received (or a code not in options.successCodes if provided).
 	 */
 	this.promise = function promise(method, url, options) {
 		if (url instanceof Components.interfaces.nsIURI) {
@@ -73,12 +74,13 @@ Zotero.HTTP = new function() {
 					bodyStart + '... (' + options.body.length + ' chars)' : bodyStart)
 				+ " to " + dispURL);
 		} else {
-			Zotero.debug("HTTP GET " + dispURL);
+			Zotero.debug("HTTP " + method + " " + dispURL);
 		}
 		
 		if (this.browserIsOffline()) {
 			return Q.fcall(function() {
-				Zotero.debug("HTTP GET " + dispURL + " failed: Browser is offline");
+				Zotero.debug("HTTP " + method + " " + dispURL + " failed: "
+					+ "Browser is offline");
 				throw new this.BrowserOfflineException();
 			});
 		}
@@ -88,6 +90,13 @@ Zotero.HTTP = new function() {
 		// Prevent certificate/authentication dialogs from popping up
 		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open(method, url, true);
+		
+		if (method == 'PUT') {
+			// Some servers (e.g., Jungle Disk DAV) return a 200 response code
+			// with Content-Length: 0, which triggers a "no element found" error
+			// in Firefox, so we override to text
+			xmlhttp.overrideMimeType("text/plain");
+		}
 		
 		// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
 		var channel = xmlhttp.channel;
@@ -117,15 +126,29 @@ Zotero.HTTP = new function() {
 		
 		xmlhttp.onloadend = function() {
 			var status = xmlhttp.status;
-			if(options && options.debug && xmlhttp.responseText) {
-				Zotero.debug(xmlhttp.responseText);
+			
+			if (options && options.successCodes) {
+				var success = options.successCodes.indexOf(status) != -1;
 			}
-			if(status >= 200 && status < 300) {
-				Zotero.debug("HTTP GET " + dispURL + " succeeded (" + xmlhttp.status + ")");
+			else {
+				var success = status >= 200 && status < 300;
+			}
+			
+			if(success) {
+				if (options && options.debug) {
+					Zotero.debug("HTTP " + method + " " + dispURL
+						+ " succeeded with " + xmlhttp.status);
+					Zotero.debug(xmlhttp.responseText);
+				}
 				deferred.resolve(xmlhttp);
 			} else {
-				Zotero.debug("HTTP GET " + dispURL + " failed: Unexpected status code " + xmlhttp.status);
-				deferred.reject(new Zotero.HTTP.UnexpectedStatusException(xmlhttp));
+				var msg = "HTTP " + method + " " + dispURL + " failed: "
+					+ "Unexpected status code " + xmlhttp.status;
+				Zotero.debug(msg, 1);
+				if (options && options.debug) {
+					Zotero.debug(xmlhttp.responseText);
+				}
+				deferred.reject(new Zotero.HTTP.UnexpectedStatusException(xmlhttp, msg));
 			}
 		};
 		
