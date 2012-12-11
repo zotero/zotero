@@ -770,7 +770,7 @@
 				<body>
 				<![CDATA[
 					this.onDragOver = function (event) {
-						Zotero.debug(event.dataTransfer.mozTypesAt(0));
+						//Zotero.debug(event.dataTransfer.mozTypesAt(0));
 						if (!event.dataTransfer.getData('zotero/item')) {
 							return;
 						}
