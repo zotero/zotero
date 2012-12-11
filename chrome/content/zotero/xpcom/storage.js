@@ -327,7 +327,7 @@ Zotero.Sync.Storage = new function () {
 		switch (Zotero.Sync.Storage.getSyncState(item.id)) {
 			case this.SYNC_STATE_TO_DOWNLOAD:
 			case this.SYNC_STATE_FORCE_DOWNLOAD:
-				var queue = Zotero.Sync.Storage.QueueManager.get('download', library);
+				var queue = 'download';
 				var callbacks = {
 					onStart: function (request) {
 						return mode.downloadFile(request);
@@ -337,7 +337,7 @@ Zotero.Sync.Storage = new function () {
 			
 			case this.SYNC_STATE_TO_UPLOAD:
 			case this.SYNC_STATE_FORCE_UPLOAD:
-				var queue = Zotero.Sync.Storage.QueueManager.get('upload', library);
+				var queue = 'upload';
 				var callbacks = {
 					onStart: function (request) {
 						return mode.uploadFile(request);
@@ -350,10 +350,13 @@ Zotero.Sync.Storage = new function () {
 				return;
 		}
 		
+		var queue = Zotero.Sync.Storage.QueueManager.get(queue, library);
 		var request = new Zotero.Sync.Storage.Request(
 			(item.libraryID ? item.libraryID : 0) + '/' + item.key, callbacks
 		);
-		request.setMaxSize(Zotero.Attachments.getTotalFileSize(item));
+		if (queue == 'upload') {
+			request.setMaxSize(Zotero.Attachments.getTotalFileSize(item));
+		}
 		queue.addRequest(request, highPriority);
 	};
 	

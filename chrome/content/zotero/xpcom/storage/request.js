@@ -31,7 +31,7 @@
  * @param  {Function}  onStart  Callback to run when request starts
  */
 Zotero.Sync.Storage.Request = function (name, callbacks) {
-	//Zotero.debug("Initializing request '" + name + "'");
+	Zotero.debug("Initializing request '" + name + "'");
 	
 	this.callbacks = ['onStart', 'onProgress'];
 	

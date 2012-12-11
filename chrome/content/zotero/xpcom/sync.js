@@ -616,6 +616,10 @@ Zotero.Sync.Runner = new function () {
 	
 	
 	this.error = function (e) {
+		if (typeof e == 'string') {
+			e = new Error(e);
+			e.status = 'error';
+		}
 		Components.utils.reportError(e);
 		Zotero.debug(e, 1);
 		Zotero.Sync.Runner.setSyncIcon(e);
