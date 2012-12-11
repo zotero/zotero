@@ -674,7 +674,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	
 	this._disabledCheck();
 	
-	//Zotero.debug("Setting field '" + field + "' to '" + value + "' (loadIn: " + (loadIn ? 'true' : 'false') + ")");
+	//Zotero.debug("Setting field '" + field + "' to '" + value + "' (loadIn: " + (loadIn ? 'true' : 'false') + ") for item " + this.id + " ");
 	
 	if (!field) {
 		throw ("Field not specified in Item.setField()");
@@ -1609,6 +1609,7 @@ Zotero.Item.prototype.save = function() {
 				'libraryID',
 				'key'
 			];
+			
 			for each(var field in updateFields) {
 				if (this._changedPrimaryData && this._changedPrimaryData[field]) {
 					sql += field + '=?, ';
@@ -3000,7 +3001,6 @@ Zotero.Item.prototype.__defineSetter__('attachmentLinkMode', function (val) {
 	if (val === this.attachmentLinkMode) {
 		return;
 	}
-	
 	if (!this._changedAttachmentData) {
 		this._changedAttachmentData = {};
 	}

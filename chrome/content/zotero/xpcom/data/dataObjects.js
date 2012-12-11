@@ -112,7 +112,7 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 		}
 		else {
 			sql += "libraryID";
-			if (libraryID) {
+			if (libraryID && libraryID !== '0') {
 				sql += "=? ";
 				params.push(libraryID);
 			}

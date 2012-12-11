@@ -59,7 +59,7 @@
   padding-top: 1px;
 }
 
-#zotero-tb-sync-warning[error=true]
+#zotero-tb-sync-error[error=true]
 {
 	margin-bottom: 2px;
 }

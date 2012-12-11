@@ -156,6 +156,11 @@ zoteroguidancepanel
 	-moz-binding: url('chrome://zotero/content/bindings/columnpicker.xml#extended-columnpicker');
 }
 
+zoterofilesyncstatus {
+	-moz-binding: url('chrome://zotero/content/bindings/filesyncstatus.xml#file-sync-status');
+}
+
+
 label.zotero-text-link {
 	-moz-binding: url('chrome://zotero/content/bindings/text-link.xml#text-link');
 	-moz-user-focus: normal;

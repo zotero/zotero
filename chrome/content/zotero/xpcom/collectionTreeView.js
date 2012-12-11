@@ -240,7 +240,7 @@ Zotero.CollectionTreeView.prototype.reload = function()
  */
 Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 {
-	if ((!ids || ids.length == 0) && action != 'refresh') {
+	if ((!ids || ids.length == 0) && action != 'refresh' && action != 'redraw') {
 		return;
 	}
 	
@@ -251,6 +251,11 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 	
 	if (action == 'refresh' && type == 'trash') {
 		this._trashNotEmpty[ids[0]] = !!Zotero.Items.getDeleted(ids[0]).length;
+		return;
+	}
+	
+	if (action == 'redraw') {
+		this._treebox.invalidate();
 		return;
 	}
 	
@@ -420,8 +425,12 @@ Zotero.CollectionTreeView.prototype.getCellText = function(row, column)
 {
 	var obj = this._getItemAtRow(row);
 	
-	if(column.id == "zotero-collections-name-column")
+	if (column.id == 'zotero-collections-name-column') {
 		return obj.getName();
+	}
+	else if (column.id == 'zotero-collections-sync-status-column') {
+		return "";
+	}
 	else
 		return "";
 }
@@ -430,7 +439,41 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 {
 	var itemGroup = this._getItemAtRow(row);
 	var collectionType = itemGroup.type;
+	
+	if (collectionType == 'group') {
+		collectionType = 'library';
+	}
+	
+	// Show sync icons only in library rows
+	if (collectionType != 'library' && col.index != 0) {
+		return '';
+	}
+	
 	switch (collectionType) {
+		case 'library':
+			if (col.id == 'zotero-collections-sync-status-column') {
+				if (itemGroup.isLibrary(true)) {
+					var libraryID = itemGroup.isLibrary() ? 0 : itemGroup.ref.libraryID;
+					var errors = Zotero.Sync.Runner.getErrors(libraryID);
+					if (errors) {
+						var e = Zotero.Sync.Runner.getPrimaryError(errors);
+						switch (e.status) {
+						case 'warning':
+							var image = 'error';
+							break;
+							
+						default:
+							var image = 'exclamation';
+							break;
+						}
+						
+						return 'chrome://zotero/skin/' + image + '.png';
+					}
+				}
+				return '';
+			}
+			break;
+		
 		case 'trash':
 			if (this._trashNotEmpty[itemGroup.ref.libraryID ? itemGroup.ref.libraryID : 0]) {
 				collectionType += '-full';
@@ -446,7 +489,7 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 			}
 			break;
 		
-		case 'group':
+		
 			collectionType = 'library';
 			break;
 		

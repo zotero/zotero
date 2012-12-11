@@ -83,12 +83,9 @@ Zotero.URI = new function () {
 	 * Get path portion of library URI (e.g., users/6 or groups/1)
 	 */
 	this.getLibraryPath = function (libraryID) {
-		if (libraryID) {
-			var libraryType = Zotero.Libraries.getType(libraryID);
-		}
-		else {
-			libraryType = 'user';
-		}
+		libraryID = libraryID ? parseInt(libraryID) : 0;
+		var libraryType = Zotero.Libraries.getType(libraryID);
+		
 		switch (libraryType) {
 			case 'user':
 				var id = Zotero.userID;

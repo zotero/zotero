@@ -26,159 +26,62 @@
 
 Zotero.Sync.Storage.Mode = function () {};
 
-Zotero.Sync.Storage.Mode.prototype.__defineGetter__('enabled', function () {
-	try {
-		return this._enabled;
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
-});
-
 Zotero.Sync.Storage.Mode.prototype.__defineGetter__('verified', function () {
-	try {
-		return this._verified;
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
-});
-
-Zotero.Sync.Storage.Mode.prototype.__defineGetter__('active', function () {
-	try {
-		return this._enabled && this._verified && this._initFromPrefs();
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
+	return this._verified;
 });
 
 Zotero.Sync.Storage.Mode.prototype.__defineGetter__('username', function () {
-	try {
-		return this._username;
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
+	return this._username;
 });
 
 Zotero.Sync.Storage.Mode.prototype.__defineGetter__('password', function () {
-	try {
-		return this._password;
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
+	return this._password;
 });
 
 Zotero.Sync.Storage.Mode.prototype.__defineSetter__('password', function (val) {
-	try {
-		this._password = val;
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
+	this._password = val;
 });
 
 Zotero.Sync.Storage.Mode.prototype.init = function () {
-	try {
-		return this._init();
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
-}
-
-Zotero.Sync.Storage.Mode.prototype.initFromPrefs = function () {
-	try {
-		return this._initFromPrefs();
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
+	return this._init();
 }
 
 Zotero.Sync.Storage.Mode.prototype.sync = function (observer) {
-	Zotero.Sync.Storage.sync(this.name, observer);
+	return Zotero.Sync.Storage.sync(this.name, observer);
 }
 
 Zotero.Sync.Storage.Mode.prototype.downloadFile = function (request) {
-	try {
-		this._downloadFile(request);
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
+	return this._downloadFile(request);
 }
 
 Zotero.Sync.Storage.Mode.prototype.uploadFile = function (request) {
-	try {
-		this._uploadFile(request);
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
+	return this._uploadFile(request);
 }
 
-Zotero.Sync.Storage.Mode.prototype.getLastSyncTime = function (callback) {
-	try {
-		this._getLastSyncTime(callback);
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
+Zotero.Sync.Storage.Mode.prototype.getLastSyncTime = function (libraryID) {
+	return this._getLastSyncTime(libraryID);
 }
 
 Zotero.Sync.Storage.Mode.prototype.setLastSyncTime = function (callback, useLastSyncTime) {
-	try {
-		this._setLastSyncTime(callback, useLastSyncTime);
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
+	return this._setLastSyncTime(callback, useLastSyncTime);
 }
 
 Zotero.Sync.Storage.Mode.prototype.checkServer = function (callback) {
-	try {
-		return this._checkServer(callback);
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
+	return this._checkServer(callback);
 }
 
 Zotero.Sync.Storage.Mode.prototype.checkServerCallback = function (uri, status, window, skipSuccessMessage) {
-	try {
-		return this._checkServerCallback(uri, status, window, skipSuccessMessage);
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
+	return this._checkServerCallback(uri, status, window, skipSuccessMessage);
 }
 
 Zotero.Sync.Storage.Mode.prototype.cacheCredentials = function (callback) {
-	try {
-		return this._cacheCredentials(callback);
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
+	return this._cacheCredentials(callback);
 }
 
 Zotero.Sync.Storage.Mode.prototype.purgeDeletedStorageFiles = function (callback) {
-	try {
-		this._purgeDeletedStorageFiles(callback);
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
+	return this._purgeDeletedStorageFiles(callback);
 }
 
 Zotero.Sync.Storage.Mode.prototype.purgeOrphanedStorageFiles = function (callback) {
-	try {
-		this._purgeOrphanedStorageFiles(callback);
-	}
-	catch (e) {
-		Zotero.Sync.Storage.EventManager.error(e);
-	}
+	return this._purgeOrphanedStorageFiles(callback);
 }

@@ -36,6 +36,7 @@ Zotero.Sync.Storage = new function () {
 	
 	this.SUCCESS = 1;
 	this.ERROR_NO_URL = -1;
+	this.ERROR_NO_USERNAME = -2;
 	this.ERROR_NO_PASSWORD = -3;
 	this.ERROR_OFFLINE = -4;
 	this.ERROR_UNREACHABLE = -5;
@@ -68,10 +69,9 @@ Zotero.Sync.Storage = new function () {
 		compressed: 0,
 		uncompressed: 0,
 		get ratio() {
-			return Math.round(
-				(Zotero.Sync.Storage.compressionTracker.uncompressed - 
+			return (Zotero.Sync.Storage.compressionTracker.uncompressed - 
 				Zotero.Sync.Storage.compressionTracker.compressed) /
-				Zotero.Sync.Storage.compressionTracker.uncompressed * 100);
+				Zotero.Sync.Storage.compressionTracker.uncompressed;
 		}
 	}
 	
@@ -80,134 +80,302 @@ Zotero.Sync.Storage = new function () {
 	//
 	var _syncInProgress;
 	var _updatesInProgress;
-	var _changesMade;
-	var _resyncOnFinish;
+	var _itemDownloadPercentages = {};
+	
+	
+	this.sync = function (libraries) {
+		if (libraries) {
+			Zotero.debug("Starting file sync for libraries " + libraries);
+		}
+		else {
+			Zotero.debug("Starting file sync");
+		}
+		
+		var self = this;
+		
+		var libraryModes = {};
+		var librarySyncTimes = {};
+		
+		// Get personal library file sync mode
+		return Q.fcall(function () {
+			// TODO: Make sure modes are active
+			
+			if (libraries && libraries.indexOf(0) == -1) {
+				return;
+			}
+			
+			if (Zotero.Sync.Storage.ZFS.includeUserFiles) {
+				libraryModes[0] = Zotero.Sync.Storage.ZFS;
+				return;
+			}
+			
+			if (Zotero.Sync.Storage.WebDAV.includeUserFiles) {
+				if (!Zotero.Sync.Storage.WebDAV.verified) {
+					Zotero.debug("WebDAV file sync is not active");
+					
+					// Try to verify server now if it hasn't been
+					return mode.checkServerPromise()
+						.then(function () {
+							libraryModes[0] = Zotero.Sync.Storage.WebDAV;
+						});
+				}
+				
+				libraryModes[0] = Zotero.Sync.Storage.WebDAV;
+				return;
+			}
+		})
+		.then(function () {
+			// Get group library file sync modes
+			if (Zotero.Sync.Storage.ZFS.includeGroupFiles) {
+				var groups = Zotero.Groups.getAll();
+				for each(var group in groups) {
+					if (libraries && libraries.indexOf(group.libraryID) == -1) {
+						continue;
+					}
+					// TODO: if library file syncing enabled
+					libraryModes[group.libraryID] = Zotero.Sync.Storage.ZFS;
+				}
+			}
+			
+			// Cache auth credentials for each mode
+			var modes = [];
+			var promises = [];
+			for each(var mode in libraryModes) {
+				if (modes.indexOf(mode) == -1) {
+					modes.push(mode);
+					promises.push(mode.cacheCredentials());
+				}
+			}
+			return Q.allResolved(promises)
+			.then(function () {
+				var promises = [];
+				for (var libraryID in libraryModes) {
+					libraryID = parseInt(libraryID);
+					// Get the last sync time for each library
+					if (self.downloadOnSync(libraryID)) {
+						promises.push(Q.allResolved(
+							[libraryID, libraryModes[libraryID].getLastSyncTime(libraryID)]
+						));
+					}
+					// If download-as-needed, we don't need the last sync time
+					else {
+						promises.push(Q.allResolved(
+							[libraryID, null]
+						));
+					}
+				}
+				// 'promises' is an array of promises for arrays containing promises
+				// for a libraryID and the last sync time for that library
+				return Q.allResolved(promises);
+			});
+		})
+		.then(function (promises) {
+			if (!promises.length) {
+				Zotero.debug("No libraries are active for file sync");
+				return [];
+			}
+			
+			promises.forEach(function (p) {
+				p = p.valueOf();
+				var libraryID = p[0].valueOf();
+				Zotero.debug(libraryID);
+				if (p[1].isFulfilled()) {
+					librarySyncTimes[libraryID] = p[1].valueOf();
+				}
+				else {
+					// TODO: error log of some sort
+					//librarySyncTimes[libraryID] = p[1].valueOf().exception;
+					Components.utils.reportError(p[1].valueOf().exception);
+				}
+			});
+			
+			// Queue files to download and upload from each library
+			for (var libraryID in librarySyncTimes) {
+				var lastSyncTime = librarySyncTimes[libraryID];
+				libraryID = parseInt(libraryID);
+				
+				self.checkForUpdatedFiles(null, libraryID);
+				
+				var downloadAll = self.downloadOnSync(libraryID);
+				
+				// Forced downloads happen even in on-demand mode
+				var sql = "SELECT COUNT(*) FROM items "
+					+ "JOIN itemAttachments USING (itemID) "
+					+ "WHERE libraryID=? AND syncState=?";
+				var downloadForced = !!Zotero.DB.valueQuery(
+					sql,
+					[
+						libraryID == 0 ? null : libraryID,
+						Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD
+					]
+				);
+				
+				// If we don't have any forced downloads, we can skip
+				// downloads if the last sync time hasn't changed
+				if (downloadAll && !downloadForced && lastSyncTime) {
+					var version = self.getStoredLastSyncTime(
+						libraryModes[libraryID], libraryID
+						);
+					if (version == lastSyncTime) {
+						Zotero.debug("Last " + libraryModes[libraryID].name
+							+ " sync time hasn't changed for library "
+							+ libraryID + " -- skipping file downloads");
+						downloadAll = false;
+					}
+				}
+				
+				if (downloadAll || downloadForced) {
+					Zotero.debug(downloadAll);
+					for each(var itemID in _getFilesToDownload(libraryID, !downloadAll)) {
+						var item = Zotero.Items.get(itemID);
+						self.queueItem(item);
+					}
+				}
+				
+				// Get files to upload
+				for each(var itemID in _getFilesToUpload(libraryID)) {
+					var item = Zotero.Items.get(itemID);
+					self.queueItem(item);
+				}
+			}
+			
+			// TODO: change to start() for each library, with allResolved()
+			// for the whole set and all() for each library
+			return Zotero.Sync.Storage.QueueManager.start();
+		})
+		.then(function (promises) {
+			Zotero.debug('Queue manager is finished');
+			
+			var changedLibraries = [];
+			
+			var finalPromises = [];
+			
+			promises.forEach(function (promise) {
+				var result = promise.valueOf();
+				if (promise.isFulfilled()) {
+					Zotero.debug("File " + result.type + " sync finished "
+						+ "for library " + result.libraryID);
+					Zotero.debug(result);
+					if (result.localChanges) {
+						changedLibraries.push(result.libraryID);
+					}
+					finalPromises.push(Q.allResolved([
+						result.libraryID,
+						libraryModes[result.libraryID].setLastSyncTime(
+							result.libraryID,
+							result.remoteChanges
+								? false : librarySyncTimes[result.libraryID]
+						)
+					]));
+				}
+				else {
+					result = result.exception;
+					Zotero.debug("File " + result.type + " sync failed "
+						+ "for library " + result.libraryID);
+					
+					finalPromises.push([result.libraryID, promise]);
+				}
+			});
+			
+			if (promises.length && !changedLibraries.length) {
+				Zotero.debug("No local changes made during file sync");
+			}
+			
+			return Q.allResolved(finalPromises)
+				.then(function (promises) {
+					var results = {
+						changesMade: !!changedLibraries.length,
+						errors: []
+					};
+					
+					promises.forEach(function (p) {
+						// If this is a promise, get an array
+						if (Q.isPromise(p)) {
+							p = p.valueOf();
+						}
+						var libraryID = p[0].valueOf();
+						if (p[1].isRejected()) {
+							var result = p[1].valueOf();
+							result = result.exception;
+							if (typeof result == 'string') {
+								result = new Error(result);
+							}
+							result.libraryID = libraryID;
+							results.errors.push(result);
+						}
+					});
+					
+					return results;
+				});
+		});
+	}
 	
 	
 	//
 	// Public methods
 	//
-	this.sync = function (modeName, observer) {
-		var mode = getModeFromName(modeName);
-		
-		if (!observer) {
-			throw new Error("Observer not provided");
+	this.queueItem = function (item, highPriority) {
+		if (item.libraryID) {
+			var library = item.libraryID;
+			var mode = Zotero.Sync.Storage.ZFS;
 		}
-		registerDefaultObserver(modeName);
-		Zotero.Sync.Storage.EventManager.registerObserver(observer, true, modeName);
-		
-		if (!mode.active) {
-			if (!mode.enabled) {
-				Zotero.debug(mode.name + " file sync is not enabled");
-				Zotero.Sync.Storage.EventManager.skip();
-				return;
-			}
-			
-			Zotero.debug(mode.name + " file sync is not active");
-			
-			// Try to verify server now if it hasn't been
-			if (!mode.verified) {
-				mode.checkServer(function (uri, status) {
-					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								   .getService(Components.interfaces.nsIWindowMediator);
-					var lastWin = wm.getMostRecentWindow("navigator:browser");
-					
-					var success = mode.checkServerCallback(uri, status, lastWin, true);
-					if (success) {
-						Zotero.debug(mode.name + " file sync is successfully set up");
-						Zotero.Sync.Storage.sync(mode.name);
+		else {
+			var library = 0;
+			var mode = Zotero.Sync.Storage.ZFS.includeUserFiles
+				? Zotero.Sync.Storage.ZFS : Zotero.Sync.Storage.WebDAV;
+		}
+		switch (Zotero.Sync.Storage.getSyncState(item.id)) {
+			case this.SYNC_STATE_TO_DOWNLOAD:
+			case this.SYNC_STATE_FORCE_DOWNLOAD:
+				var queue = Zotero.Sync.Storage.QueueManager.get('download', library);
+				var callbacks = {
+					onStart: function (request) {
+						return mode.downloadFile(request);
 					}
-					else {
-						Zotero.debug(mode.name + " verification failed");
-						
-						var e = new Zotero.Error(
-							Zotero.getString('sync.storage.error.verificationFailed', mode.name),
-							0,
-							{
-								dialogButtonText: Zotero.getString('sync.openSyncPreferences'),
-								dialogButtonCallback: function () {
-									var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-											   .getService(Components.interfaces.nsIWindowMediator);
-									var lastWin = wm.getMostRecentWindow("navigator:browser");
-									lastWin.ZoteroPane.openPreferences('zotero-prefpane-sync');
-								}
-							}
-						);
-						Zotero.Sync.Storage.EventManager.error(e, true);
+				};
+				break;
+			
+			case this.SYNC_STATE_TO_UPLOAD:
+			case this.SYNC_STATE_FORCE_UPLOAD:
+				var queue = Zotero.Sync.Storage.QueueManager.get('upload', library);
+				var callbacks = {
+					onStart: function (request) {
+						return mode.uploadFile(request);
 					}
-				});
-			}
+				}; 
+				break;
 			
-			return;
-		}
-		
-		if (!mode.includeUserFiles && !mode.includeGroupFiles) {
-			Zotero.debug("No libraries are enabled for " + mode.name + " syncing");
-			Zotero.Sync.Storage.EventManager.skip();
-			return;
-		}
-		
-		if (_syncInProgress) {
-			Zotero.Sync.Storage.EventManager.error(
-				"File sync operation already in progress"
-			);
-		}
-		
-		Zotero.debug("Beginning " + mode.name + " file sync");
-		_syncInProgress = true;
-		_changesMade = false;
-		
-		try {
-			Zotero.Sync.Storage.checkForUpdatedFiles(
-				null,
-				null,
-				mode.includeUserFiles && Zotero.Sync.Storage.downloadOnSync(),
-				mode.includeGroupFiles && Zotero.Sync.Storage.downloadOnSync('groups')
-			);
-		}
-		catch (e) {
-			Zotero.Sync.Storage.EventManager.error(e);
-		}
-		
-		var self = this;
-		
-		mode.getLastSyncTime(function (lastSyncTime) {
-			// Register the observers again to make sure they're active when we
-			// start the queues. (They'll only be registered once.) Observers are
-			// cleared when all queues finish, so without this another sync
-			// process (e.g., on-demand download) could finish and clear all
-			// observers while getLastSyncTime() is running.
-			registerDefaultObserver(modeName);
-			Zotero.Sync.Storage.EventManager.registerObserver(observer, true, modeName);
-			
-			var download = true;
-			
-			var sql = "SELECT COUNT(*) FROM itemAttachments WHERE syncState=?";
-			var force = !!Zotero.DB.valueQuery(sql, Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD);
-			
-			if (!force && lastSyncTime) {
-				var sql = "SELECT version FROM version WHERE schema='storage_" + modeName + "'";
-				var version = Zotero.DB.valueQuery(sql);
-				if (version == lastSyncTime) {
-					Zotero.debug("Last " + mode.name + " sync time hasn't changed -- skipping file download step");
-					download = false;
-				}
-			}
-			
-			try {
-				var activeDown = download ? _downloadFiles(mode) : false;
-				var activeUp = _uploadFiles(mode);
-			}
-			catch (e) {
-				Zotero.Sync.Storage.EventManager.error(e);
-			}
-			
-			if (!activeDown && !activeUp) {
-				Zotero.Sync.Storage.EventManager.skip();
+			case false:
+				Zotero.debug("Sync state for item " + item.id + " not found", 2);
 				return;
-			}
-		});
-	}
+		}
+		
+		var request = new Zotero.Sync.Storage.Request(
+			(item.libraryID ? item.libraryID : 0) + '/' + item.key, callbacks
+		);
+		request.setMaxSize(Zotero.Attachments.getTotalFileSize(item));
+		queue.addRequest(request, highPriority);
+	};
+	
+	
+	this.getStoredLastSyncTime = function (mode, libraryID) {
+		var sql = "SELECT version FROM version WHERE schema=?";
+		return Zotero.DB.valueQuery(
+			sql, "storage_" + mode.name.toLowerCase() + "_" + libraryID
+		);
+	};
+	
+	
+	this.setStoredLastSyncTime = function (mode, libraryID, time) {
+		var sql = "REPLACE INTO version SET version=? WHERE schema=?";
+		Zotero.DB.query(
+			sql,
+			[
+				time,
+				"storage_" + mode.name.toLowerCase() + "_" + libraryID
+			]
+		);
+	};
 	
 	
 	/**
@@ -233,10 +401,8 @@ Zotero.Sync.Storage = new function () {
 				break;
 			
 			default:
-				Zotero.Sync.Storage.EventManager.error(
-					"Invalid sync state '" + syncState
-						+ "' in Zotero.Sync.Storage.setSyncState()"
-				);
+				throw "Invalid sync state '" + syncState
+					+ "' in Zotero.Sync.Storage.setSyncState()"
 		}
 		
 		var sql = "UPDATE itemAttachments SET syncState=? WHERE itemID=?";
@@ -253,9 +419,8 @@ Zotero.Sync.Storage = new function () {
 		var sql = "SELECT storageModTime FROM itemAttachments WHERE itemID=?";
 		var mtime = Zotero.DB.valueQuery(sql, itemID);
 		if (mtime === false) {
-			Zotero.Sync.Storage.EventManager.error(
-				"Item " + itemID + " not found in Zotero.Sync.Storage.getSyncedModificationTime()"
-			);
+			throw "Item " + itemID + " not found in "
+				+ "Zotero.Sync.Storage.getSyncedModificationTime()";
 		}
 		return mtime;
 	}
@@ -298,9 +463,8 @@ Zotero.Sync.Storage = new function () {
 		var sql = "SELECT storageHash FROM itemAttachments WHERE itemID=?";
 		var hash = Zotero.DB.valueQuery(sql, itemID);
 		if (hash === false) {
-			Zotero.Sync.Storage.EventManager.error(
-				"Item " + itemID + " not found in Zotero.Sync.Storage.getSyncedHash()"
-			);
+			throw "Item " + itemID + " not found in "
+				+ "Zotero.Sync.Storage.getSyncedHash()";
 		}
 		return hash;
 	}
@@ -374,7 +538,7 @@ Zotero.Sync.Storage = new function () {
 	 */
 	this.downloadAsNeeded = function (libraryID) {
 		// Personal library
-		if (libraryID == null) {
+		if (!libraryID) {
 			return Zotero.Prefs.get('sync.storage.downloadMode.personal') == 'on-demand';
 		}
 		// Group library (groupID or 'groups')
@@ -389,7 +553,7 @@ Zotero.Sync.Storage = new function () {
 	 */
 	this.downloadOnSync = function (libraryID) {
 		// Personal library
-		if (libraryID == null) {
+		if (!libraryID) {
 			return Zotero.Prefs.get('sync.storage.downloadMode.personal') == 'on-sync';
 		}
 		// Group library (groupID or 'groups')
@@ -401,14 +565,10 @@ Zotero.Sync.Storage = new function () {
 	
 	
 	/**
-	 * Scans local files and marks any that have changed as 0 for uploading
-	 * and any that are missing as 1 for downloading
+	 * Scans local files and marks any that have changed for uploading
+	 * and any that are missing for downloading
 	 *
-	 * Also marks missing files for downloading
-	 *
-	 * @param	{Integer[]}	[itemIDs]		An optional set of item ids to check
-	 * @param	{Object}	[itemModTimes]	Item mod times indexed by item ids
-	 *											appearing in itemIDs; if set,
+	 * @param	{Object}	[itemModTimes]	Item mod times indexed by item ids;
 	 *											items with stored mod times
 	 *											that differ from the provided
 	 *											time but file mod times
@@ -419,30 +579,25 @@ Zotero.Sync.Storage = new function () {
 	 * @return	{Boolean}					TRUE if any items changed state,
 	 *											FALSE otherwise
 	 */
-	this.checkForUpdatedFiles = function (itemIDs, itemModTimes, includeUserFiles, includeGroupFiles) {
-		Zotero.debug("Checking for locally changed attachment files");
-		// check for current ops?
+	this.checkForUpdatedFiles = function (itemModTimes, libraryID) {
+		var msg = "Checking for locally changed attachment files";
 		
-		if (itemIDs) {
-			if (includeUserFiles || includeGroupFiles) {
-				throw new Error("includeUserFiles and includeGroupFiles are not allowed when itemIDs");
+		if (typeof libraryID != 'undefined') {
+			msg += " in library " + libraryID;
+			if (itemModTimes) {
+				throw new Error("libraryID is not allowed when itemIDs is set");
 			}
 		}
 		else {
-			if (!includeUserFiles && !includeGroupFiles) {
+			if (!itemModTimes) {
 				return false;
 			}
 		}
-		
-		if (itemModTimes && !itemIDs) {
-			throw new Error("itemModTimes can only be set if itemIDs is an array");
-		}
+		Zotero.debug(msg);
 		
 		var changed = false;
 		
-		if (!itemIDs) {
-			itemIDs = [];
-		}
+		var itemIDs = Object.keys(itemModTimes ? itemModTimes : {});
 		
 		// Can only handle 999 bound parameters at a time
 		var numIDs = itemIDs.length;
@@ -457,18 +612,17 @@ Zotero.Sync.Storage = new function () {
 			var sql = "SELECT itemID, linkMode, path, storageModTime, storageHash, syncState "
 						+ "FROM itemAttachments JOIN items USING (itemID) "
 						+ "WHERE linkMode IN (?,?) AND syncState IN (?,?)";
-			if (includeUserFiles && !includeGroupFiles) {
-				sql += " AND libraryID IS NULL";
-			}
-			else if (!includeUserFiles && includeGroupFiles) {
-				sql += " AND libraryID IS NOT NULL";
-			}
-			var params = [
+			var params = [];
+			params.push(
 				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
 				Zotero.Attachments.LINK_MODE_IMPORTED_URL,
 				Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD,
 				Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
-			];
+			);
+			if (typeof libraryID != 'undefined') {
+				sql += " AND libraryID=?";
+				params.push(libraryID == 0 ? null : libraryID);
+			}
 			if (chunk.length) {
 				sql += " AND itemID IN (" + chunk.map(function () '?').join() + ")";
 				params = params.concat(chunk);
@@ -481,13 +635,19 @@ Zotero.Sync.Storage = new function () {
 		}
 		while (done < numIDs);
 		
-		if (!rows) {
-			Zotero.debug("No to-upload or in-sync files found");
+		// If no files, or everything is already marked for download,
+		// we don't need to do anything
+		if (!rows.length) {
+			var msg = "No in-sync or to-upload files found";
+			if (typeof libraryID != 'undefined') {
+				msg += " in library " + libraryID;
+			}
+			Zotero.debug(msg);
 			Zotero.DB.commitTransaction();
 			return changed;
 		}
 		
-		// Index data by item id
+		// Index attachment data by item id
 		var itemIDs = [];
 		var attachmentData = {};
 		for each(var row in rows) {
@@ -501,48 +661,51 @@ Zotero.Sync.Storage = new function () {
 				state: row.syncState
 			};
 		}
-		if (itemIDs.length == 0) {
-			Zotero.DB.commitTransaction();
-			return changed;
-		}
-		
-		rows = undefined;
+		rows = null;
 		
 		var updatedStates = {};
 		var items = Zotero.Items.get(itemIDs);
 		for each(var item in items) {
+			var lk = libraryID + "/" + item.key;
+			Zotero.debug("Checking attachment file for item " + lk);
 			var file = item.getFile(attachmentData[item.id]);
 			if (!file) {
-				Zotero.debug("Marking attachment " + item.id + " as missing");
+				Zotero.debug("Marking attachment " + lk + " as missing");
 				updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
+				continue;
+			}
+			
+			// If file is already marked for upload, skip check. Even if this
+			// is download-marking mode (itemModTimes) and the file was
+			// changed remotely, conflicts are checked at upload time, so we
+			// don't need to worry about it here.
+			if (attachmentData[item.id].state == Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD) {
 				continue;
 			}
 			
 			var fmtime = item.attachmentModificationTime;
 			
-			//Zotero.debug("Stored mtime is " + attachmentData[item.id].mtime);
-			//Zotero.debug("File mtime is " + fmtime);
+			Zotero.debug("Stored mtime is " + attachmentData[item.id].mtime);
+			Zotero.debug("File mtime is " + fmtime);
 			
 			// Download-marking mode
 			if (itemModTimes) {
-				Zotero.debug("Item mod time is " + itemModTimes[item.id]);
+				Zotero.debug("Remote mod time for item " + lk + " is " + itemModTimes[item.id]);
 				
-				// Ignore attachments whose storage mod times haven't changed
+				// Ignore attachments whose stored mod times haven't changed
 				if (row.storageModTime == itemModTimes[id]) {
 					Zotero.debug("Storage mod time (" + row.storageModTime + ") "
-						+ "hasn't changed for attachment " + id);
+						+ "hasn't changed for item " + lk);
 					continue;
 				}
 				
-				Zotero.debug("Marking attachment " + item.id + " for download");
+				Zotero.debug("Marking attachment " + lk + " for download");
 				updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
-				
-				continue;
 			}
 			
 			var mtime = attachmentData[item.id].mtime;
 			
-			// If stored time matches file, it hasn't changed
+			// If stored time matches file, it hasn't changed locally
 			if (mtime == fmtime) {
 				continue;
 			}
@@ -550,8 +713,9 @@ Zotero.Sync.Storage = new function () {
 			// Allow floored timestamps for filesystems that don't support
 			// millisecond precision (e.g., HFS+)
 			if (Math.floor(mtime / 1000) * 1000 == fmtime || Math.floor(fmtime / 1000) * 1000 == mtime) {
-				Zotero.debug("File mod times are within one-second precision (" + fmtime + " ≅ " + mtime + ") "
-					+ "for " + file.leafName + " -- ignoring");
+				Zotero.debug("File mod times are within one-second precision "
+					+ "(" + fmtime + " ≅ " + mtime + ") for " + file.leafName
+					+ " for item " + lk + " -- ignoring");
 				continue;
 			}
 			
@@ -561,13 +725,9 @@ Zotero.Sync.Storage = new function () {
 					// And check with one-second precision as well
 					|| Math.abs(fmtime - Math.floor(mtime / 1000) * 1000) == 3600000
 					|| Math.abs(Math.floor(fmtime / 1000) * 1000 - mtime) == 3600000) {
-				Zotero.debug("File mod time (" + fmtime + ") is exactly one hour off remote file (" + mtime + ") "
+				Zotero.debug("File mod time (" + fmtime + ") is exactly one "
+					+ "hour off remote file (" + mtime + ") for item " + lk
 					+ "-- assuming time zone issue and skipping upload");
-				continue;
-			}
-			
-			// If file is already marked for upload, skip
-			if (attachmentData[item.id].state == Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD) {
 				continue;
 			}
 			
@@ -577,12 +737,13 @@ Zotero.Sync.Storage = new function () {
 				Zotero.debug(f.path);
 			}
 			else {
-				Zotero.debug("File missing before getting hash");
+				Zotero.debug("File for item " + lk + " missing before getting hash");
 			}
 			var fileHash = item.attachmentHash;
 			if (attachmentData[item.id].hash && attachmentData[item.id].hash == fileHash) {
 				Zotero.debug("Mod time didn't match (" + fmtime + "!=" + mtime + ") "
-					+ "but hash did for " + file.leafName + " -- updating file mod time");
+					+ "but hash did for " + file.leafName + " for item " + lk
+					+ " -- updating file mod time");
 				try {
 					file.lastModifiedTime = attachmentData[item.id].mtime;
 				}
@@ -592,8 +753,9 @@ Zotero.Sync.Storage = new function () {
 				continue;
 			}
 			
-			Zotero.debug("Marking attachment " + item.id + " as changed ("
-				+ mtime + " != " + fmtime + ")");
+			// Mark file for upload
+			Zotero.debug("Marking attachment " + lk + " as changed "
+				+ "(" + mtime + " != " + fmtime + ")");
 			updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD;
 		}
 		
@@ -605,8 +767,6 @@ Zotero.Sync.Storage = new function () {
 		if (!changed) {
 			Zotero.debug("No synced files have changed locally");
 		}
-		
-		//throw ('foo');
 		
 		Zotero.DB.commitTransaction();
 		return changed;
@@ -622,7 +782,8 @@ Zotero.Sync.Storage = new function () {
 		var itemID = item.id;
 		var mode = getModeFromLibrary(item.libraryID);
 		
-		if (!mode || !mode.active) {
+		// TODO: verify WebDAV on-demand?
+		if (!mode || !mode.verified) {
 			Zotero.debug("File syncing is not active for item's library -- skipping download");
 			return false;
 		}
@@ -635,75 +796,40 @@ Zotero.Sync.Storage = new function () {
 			Zotero.debug("File already exists -- replacing");
 		}
 		
-		var setup = function () {
-			Zotero.Sync.Storage.EventManager.registerObserver({
-				onSuccess: function () _syncInProgress = false,
-				
-				onSkip: function () _syncInProgress = false,
-				
-				onStop: function () _syncInProgress = false,
-				
-				onError: function (e) {
-					Zotero.Sync.Runner.setSyncIcon('error', e);
-					error(e);
-					requestCallbacks.onStop();
-				}
-			}, false, "downloadFile");
-			
-			try {
-				var queue = Zotero.Sync.Storage.QueueManager.get('download');
-				
-				var isRunning = queue.isRunning();
-				if (!isRunning) {
-					_syncInProgress = true;
-					
-					// Reset the sync icon
-					Zotero.Sync.Runner.setSyncIcon();
-				}
-			}
-			catch (e) {
-				Zotero.Sync.Storage.EventManager.error(e);
+		// TODO: start sync icon in cacheCredentials
+		return Q.fcall(function () {
+			return mode.cacheCredentials();
+		})
+		.then(function () {
+			// TODO: start sync icon
+			var library = item.libraryID;
+			if (!library) {
+				library = 0;
 			}
 			
-			return isRunning;
-		};
-		
-		var run = function () {
-			// We have to perform setup again at the same time that we add the
-			// request, because otherwise a sync process could complete while
-			// cacheCredentials() is running and clear the event handlers.
-			var isRunning = setup();
+			var queue = Zotero.Sync.Storage.QueueManager.get(
+				'download', library
+			);
 			
-			try {
-				var queue = Zotero.Sync.Storage.QueueManager.get('download');
-				
-				if (!requestCallbacks) {
-					requestCallbacks = {};
-				}
-				var onStart = function (request) {
-					mode.downloadFile(request);
-				};
-				requestCallbacks.onStart = requestCallbacks.onStart
-											? [onStart, requestCallbacks.onStart]
-											: onStart;
-				
-				var request = new Zotero.Sync.Storage.Request(
-					item.libraryID + '/' + item.key, requestCallbacks
-				);
-				
-				queue.addRequest(request, isRunning);
+			if (!requestCallbacks) {
+				requestCallbacks = {};
 			}
-			catch (e) {
-				Zotero.Sync.Storage.EventManager.error(e);
-			}
-		};
-		
-		setup();
-		mode.cacheCredentials(function () {
-			run();
+			var onStart = function (request) {
+				return mode.downloadFile(request);
+			};
+			requestCallbacks.onStart = requestCallbacks.onStart
+										? [onStart, requestCallbacks.onStart]
+										: onStart;
+			
+			var request = new Zotero.Sync.Storage.Request(
+				library + '/' + item.key, requestCallbacks
+			);
+			
+			queue.addRequest(request, true);
+			queue.start();
+			
+			return request.promise;
 		});
-		
-		return true;
 	}
 	
 	
@@ -718,19 +844,19 @@ Zotero.Sync.Storage = new function () {
 		var funcName = "Zotero.Sync.Storage.processDownload()";
 		
 		if (!data) {
-			Zotero.Sync.Storage.EventManager.error("|data| not set in " + funcName);
+			throw "'data' not set in " + funcName;
 		}
 		
 		if (!data.item) {
-			Zotero.Sync.Storage.EventManager.error("|data.item| not set in " + funcName);
+			throw "'data.item' not set in " + funcName;
 		}
 		
 		if (!data.syncModTime) {
-			Zotero.Sync.Storage.EventManager.error("|data.syncModTime| not set in " + funcName);
+			throw "'data.syncModTime' not set in " + funcName;
 		}
 		
 		if (!data.compressed && !data.syncHash) {
-			Zotero.Sync.Storage.EventManager.error("|data.syncHash| is required if  |data.compressed| is false in " + funcName);
+			throw "'data.syncHash' is required if 'data.compressed' is false in " + funcName;
 		}
 		
 		var item = data.item;
@@ -750,13 +876,15 @@ Zotero.Sync.Storage = new function () {
 		// and mark for updated
 		var file = item.getFile();
 		if (newFile && file.leafName != newFile.leafName) {
+			// Bypass library access check
 			_updatesInProgress = true;
 			
 			// If library isn't editable but filename was changed, update
 			// database without updating the item's mod time, which would result
 			// in a library access error
 			if (!Zotero.Items.editCheck(item)) {
-				Zotero.debug("File renamed without library access -- updating itemAttachments path", 3);
+				Zotero.debug("File renamed without library access -- "
+					+ "updating itemAttachments path", 3);
 				item.relinkAttachmentFile(newFile, true);
 				var useCurrentModTime = false;
 			}
@@ -779,16 +907,16 @@ Zotero.Sync.Storage = new function () {
 			// elsewhere but the renamed file wasn't synced, so the ZIP doesn't
 			// contain a file with the known name
 			var missingFile = item.getFile(null, true);
-			Components.utils.reportError("File '" + missingFile.leafName + "' not found after processing download "
+			Components.utils.reportError("File '" + missingFile.leafName
+				+ "' not found after processing download "
 				+ item.libraryID + "/" + item.key + " in " + funcName);
-			return;
+			return false;
 		}
 		
 		Zotero.DB.beginTransaction();
-		var syncState = Zotero.Sync.Storage.getSyncState(item.id);
 		
-		
-		var updateItem = syncState != 1;
+		//var syncState = Zotero.Sync.Storage.getSyncState(item.id);
+		//var updateItem = syncState != this.SYNC_STATE_TO_DOWNLOAD;
 		var updateItem = false;
 		
 		try {
@@ -798,7 +926,7 @@ Zotero.Sync.Storage = new function () {
 				// Reset hash and sync state
 				Zotero.Sync.Storage.setSyncedHash(item.id, null);
 				Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD);
-				_resyncOnFinish = true;
+				this.queueItem(item);
 			}
 			else {
 				file.lastModifiedTime = syncModTime;
@@ -816,29 +944,89 @@ Zotero.Sync.Storage = new function () {
 		
 		Zotero.Sync.Storage.setSyncedModificationTime(item.id, syncModTime, updateItem);
 		Zotero.DB.commitTransaction();
-		_changesMade = true;
+		
+		return true;
 	}
 	
 	
-	this.checkServer = function (modeName, callback) {
-		Zotero.Sync.Storage.EventManager.registerObserver({
-			onSuccess: function () {},
-			onError: function (e) {
-				Zotero.debug(e, 1);
-				callback(null, null, function () {
-					// If there's an error, just display that
-					Zotero.Utilities.Internal.errorPrompt(Zotero.getString('general.error'), e);
-				});
-				return true;
+	this.checkServerPromise = function (mode) {
+		var deferred = Q.defer();
+		mode.checkServer(function (uri, status) {
+			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						   .getService(Components.interfaces.nsIWindowMediator);
+			var lastWin = wm.getMostRecentWindow("navigator:browser");
+			
+			var success = mode.checkServerCallback(uri, status, lastWin, true);
+			if (success) {
+				Zotero.debug(mode.name + " file sync is successfully set up");
+				Q.resolve();
 			}
-		}, false, "checkServer");
-		
-		var mode = getModeFromName(modeName);
-		return mode.checkServer(function (uri, status) {
-			callback(uri, status, function () {
-				mode.checkServerCallback(uri, status);
-			});
+			else {
+				Zotero.debug(mode.name + " verification failed");
+				
+				var e = new Zotero.Error(
+					Zotero.getString('sync.storage.error.verificationFailed', mode.name),
+					0,
+					{
+						dialogButtonText: Zotero.getString('sync.openSyncPreferences'),
+						dialogButtonCallback: function () {
+							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+									   .getService(Components.interfaces.nsIWindowMediator);
+							var lastWin = wm.getMostRecentWindow("navigator:browser");
+							lastWin.ZoteroPane.openPreferences('zotero-prefpane-sync');
+						}
+					}
+				);
+				
+				Q.reject(e);
+			}
 		});
+		return deferred.promise;
+	}
+	
+	
+	this.getItemDownloadImageNumber = function (item) {
+		var numImages = 64;
+		
+		var lk = (item.libraryID ? item.libraryID : 0) + "/" + item.key;
+		
+		if (typeof _itemDownloadPercentages[lk] == 'undefined') {
+			return false;
+		}
+		
+		var percentage = _itemDownloadPercentages[lk];
+		return Math.round(percentage / 100 * (numImages - 1)) + 1;
+	}
+	
+	
+	this.setItemDownloadPercentage = function (libraryKey, percentage) {
+		Zotero.debug("Setting image download percentage to " + percentage
+			+ " for item " + libraryKey);
+		
+		if (percentage !== false) {
+			_itemDownloadPercentages[libraryKey] = percentage;
+		}
+		else {
+			delete _itemDownloadPercentages[libraryKey];
+		}
+		
+		var libraryID, key;
+		[libraryID, key] = libraryKey.split("/");
+		var item = Zotero.Items.getByLibraryAndKey(libraryID, key);
+		Zotero.Notifier.trigger('redraw', 'item', item.id, { column: "hasAttachment" });
+		
+		var parent = item.getSource();
+		if (parent) {
+			var parentItem = Zotero.Items.get(parent);
+			var parentLibraryKey = libraryID + "/" + parentItem.key;
+			if (percentage !== false) {
+				_itemDownloadPercentages[parentLibraryKey] = percentage;
+			}
+			else {
+				delete _itemDownloadPercentages[parentLibraryKey];
+			}
+			Zotero.Notifier.trigger('redraw', 'item', parentItem.id, { column: "hasAttachment" });
+		}
 	}
 	
 	
@@ -880,9 +1068,6 @@ Zotero.Sync.Storage = new function () {
 	
 	this.getItemFromRequestName = function (name) {
 		var [libraryID, key] = name.split('/');
-		if (libraryID == "null") {
-			libraryID = null;
-		}
 		return Zotero.Items.getByLibraryAndKey(libraryID, key);
 	}
 	
@@ -890,137 +1075,29 @@ Zotero.Sync.Storage = new function () {
 	//
 	// Private methods
 	//
-	function getModeFromName(modeName) {
-		return Zotero.Sync.Storage[modeName];
-	}
-	
-	
 	function getModeFromLibrary(libraryID) {
 		if (libraryID === undefined) {
 			throw new Error("libraryID not provided");
 		}
 		
 		// Personal library
-		if (libraryID === null) {
-			if (!Zotero.Prefs.get('sync.storage.enabled')) {
-				Zotero.debug('disabled');
-				return false;
+		if (!libraryID) {
+			if (Zotero.Sync.Storage.ZFS.includeUserFiles) {
+				return Zotero.Sync.Storage.ZFS;
 			}
-			
-			var protocol = Zotero.Prefs.get('sync.storage.protocol');
-			switch (protocol) {
-				case 'zotero':
-					return getModeFromName('ZFS');
-				
-				case 'webdav':
-					return getModeFromName('WebDAV');
-				
-				default:
-					throw new Error("Invalid storage protocol '" + protocol + "'");
+			if (Zotero.Sync.Storage.WebDAV.includeUserFiles) {
+				return Zotero.Sync.Storage.WebDAV;
 			}
+			return false;
 		}
 		
 		// Group library
 		else {
-			if (!Zotero.Prefs.get('sync.storage.groups.enabled')) {
-				return false;
+			if (Zotero.Sync.Storage.ZFS.includeGroupFiles) {
+				return Zotero.Sync.Storage.ZFS;
 			}
-			
-			return getModeFromName('ZFS');
-		}
-	}
-	
-	
-	/**
-	 * Starts download of all attachments marked for download
-	 *
-	 * @return	{Boolean}
-	 */
-	function _downloadFiles(mode) {
-		if (!_syncInProgress) {
-			_syncInProgress = true;
-		}
-		
-		var includeUserFiles = mode.includeUserFiles && Zotero.Sync.Storage.downloadOnSync();
-		var includeGroupFiles = mode.includeGroupFiles && Zotero.Sync.Storage.downloadOnSync('groups');
-		
-		if (!includeUserFiles && !includeGroupFiles) {
-			Zotero.debug("No libraries are enabled for on-sync downloading");
 			return false;
 		}
-		
-		var downloadFileIDs = _getFilesToDownload(includeUserFiles, includeGroupFiles);
-		if (!downloadFileIDs) {
-			Zotero.debug("No files to download");
-			return false;
-		}
-		
-		// Check for active operations?
-		
-		var queue = Zotero.Sync.Storage.QueueManager.get('download');
-		
-		for each(var itemID in downloadFileIDs) {
-			var item = Zotero.Items.get(itemID);
-			if (Zotero.Sync.Storage.getSyncState(itemID) !=
-						Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD
-					&& Zotero.Sync.Storage.isFileModified(itemID)) {
-				Zotero.debug("File for attachment " + itemID + " has been modified");
-				Zotero.Sync.Storage.setSyncState(itemID, this.SYNC_STATE_TO_UPLOAD);
-				continue;
-			}
-			
-			var request = new Zotero.Sync.Storage.Request(
-				item.libraryID + '/' + item.key,
-				{
-					onStart: function (request) {
-						mode.downloadFile(request);
-					}
-				}
-			);
-			queue.addRequest(request);
-		}
-		
-		return true;
-	}
-	
-	
-	/**
-	 * Start upload of all attachments marked for upload
-	 *
-	 * @return	{Boolean}
-	 */
-	function _uploadFiles(mode) {
-		if (!_syncInProgress) {
-			_syncInProgress = true;
-		}
-		
-		var uploadFileIDs = _getFilesToUpload(mode.includeUserFiles, mode.includeGroupFiles);
-		if (!uploadFileIDs) {
-			Zotero.debug("No files to upload");
-			return false;
-		}
-		
-		// Check for active operations?
-		var queue = Zotero.Sync.Storage.QueueManager.get('upload');
-		
-		Zotero.debug(uploadFileIDs.length + " file(s) to upload");
-		
-		for each(var itemID in uploadFileIDs) {
-			var item = Zotero.Items.get(itemID);
-			
-			var request = new Zotero.Sync.Storage.Request(
-				item.libraryID + '/' + item.key,
-				{
-					onStart: function (request) {
-						mode.uploadFile(request);
-					}
-				}
-			);
-			request.progressMax = Zotero.Attachments.getTotalFileSize(item, true);
-			queue.addRequest(request);
-		}
-		
-		return true;
 	}
 	
 	
@@ -1520,7 +1597,7 @@ Zotero.Sync.Storage = new function () {
 			if (fileList.length == 0) {
 				Zotero.debug('No files to add -- removing zip file');
 				tmpFile.remove(null);
-				request.finish();
+				request.stop();
 				return false;
 			}
 			
@@ -1533,6 +1610,7 @@ Zotero.Sync.Storage = new function () {
 			return true;
 		}
 		catch (e) {
+			Zotero.debug(e, 1);
 			request.error(e);
 			return false;
 		}
@@ -1572,35 +1650,30 @@ Zotero.Sync.Storage = new function () {
 	
 
 	/**
-	 * Get files marked as ready to upload
+	 * Get files marked as ready to download
 	 *
 	 * @inner
 	 * @return	{Number[]}	Array of attachment itemIDs
 	 */
-	function _getFilesToDownload(includeUserFiles, includeGroupFiles) {
-		if (!includeUserFiles && !includeGroupFiles) {
-			Zotero.Sync.Storage.EventManager.error(
-				"At least one of includeUserFiles or includeGroupFiles must be set "
-					+ "in Zotero.Sync.Storage._getFilesToDownload()"
-			);
-		}
-		
+	function _getFilesToDownload(libraryID, forcedOnly) {
 		var sql = "SELECT itemID FROM itemAttachments JOIN items USING (itemID) "
-					+ "WHERE syncState IN (?,?) "
-					// Skip attachments with empty path, which can't be saved
-					+ "AND path!=''";
-		if (includeUserFiles && !includeGroupFiles) {
-			sql += " AND libraryID IS NULL";
+					+ "WHERE libraryID=? AND syncState IN (?";
+		var params = [
+			libraryID == 0 ? null : libraryID,
+			Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD
+		];
+		if (!forcedOnly) {
+			sql += ",?";
+			params.push(Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD);
 		}
-		else if (!includeUserFiles && includeGroupFiles) {
-			sql += " AND libraryID IS NOT NULL";
+		sql += ") "
+			// Skip attachments with empty path, which can't be saved
+			+ "AND path!=''";
+		var itemIDs = Zotero.DB.columnQuery(sql, params);
+		if (!itemIDs) {
+			return [];
 		}
-		return Zotero.DB.columnQuery(sql,
-			[
-				Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD,
-				Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD
-			]
-		);
+		return itemIDs;
 	}
 	
 	
@@ -1610,30 +1683,27 @@ Zotero.Sync.Storage = new function () {
 	 * @inner
 	 * @return	{Number[]}	Array of attachment itemIDs
 	 */
-	function _getFilesToUpload(includeUserFiles, includeGroupFiles) {
-		if (!includeUserFiles && !includeGroupFiles) {
-			Zotero.Sync.Storage.EventManager.error(
-				"At least one of includeUserFiles or includeGroupFiles must be set "
-					+ "in Zotero.Sync.Storage._getFilesToUpload()"
-			);
-		}
-		
+	function _getFilesToUpload(libraryID) {
 		var sql = "SELECT itemID FROM itemAttachments JOIN items USING (itemID) "
 			+ "WHERE syncState IN (?,?) AND linkMode IN (?,?)";
-		if (includeUserFiles && !includeGroupFiles) {
-			sql += " AND libraryID IS NULL";
+		var params = [
+			Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD,
+			Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD,
+			Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+			Zotero.Attachments.LINK_MODE_IMPORTED_URL
+		];
+		if (typeof libraryID != 'undefined') {
+			sql += " AND libraryID=?";
+			params.push(libraryID == 0 ? null : libraryID);
 		}
-		else if (!includeUserFiles && includeGroupFiles) {
-			sql += " AND libraryID IS NOT NULL";
+		else {
+			throw new Error("libraryID not specified");
 		}
-		return Zotero.DB.columnQuery(sql,
-			[
-				Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD,
-				Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD,
-				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
-				Zotero.Attachments.LINK_MODE_IMPORTED_URL
-			]
-		);
+		var itemIDs = Zotero.DB.columnQuery(sql, params);
+		if (!itemIDs) {
+			return [];
+		}
+		return itemIDs;
 	}
 	
 	
@@ -1653,63 +1723,6 @@ Zotero.Sync.Storage = new function () {
 		
 		var sql = "SELECT key FROM storageDeleteLog WHERE timestamp<?";
 		return Zotero.DB.columnQuery(sql, ts);
-	}
-	
-	
-	function registerDefaultObserver(modeName) {
-		var finish = function (cancelled, skipSuccessFile) {
-			// Upload success file when done
-			if (!_resyncOnFinish && !skipSuccessFile) {
-				// If we finished successfully and didn't upload any files, save the
-				// last sync time locally rather than setting a new one on the server,
-				// since we don't want other clients to check for new files
-				var uploadQueue = Zotero.Sync.Storage.QueueManager.get('upload', true);
-				var useLastSyncTime = !uploadQueue || (!cancelled && uploadQueue.lastTotalRequests == 0);
-				
-				getModeFromName(modeName).setLastSyncTime(function () {
-					finish(cancelled, true);
-				}, useLastSyncTime);
-				return false;
-			}
-			
-			Zotero.debug(modeName + " sync is complete");
-			
-			_syncInProgress = false;
-			
-			if (_resyncOnFinish) {
-				Zotero.debug("Force-resyncing items in conflict");
-				_resyncOnFinish = false;
-				Zotero.Sync.Storage.sync(modeName);
-				return false;
-			}
-			
-			if (cancelled) {
-				Zotero.Sync.Storage.EventManager.stop();
-			}
-			else if (!_changesMade) {
-				Zotero.debug("No changes made during storage sync");
-				Zotero.Sync.Storage.EventManager.skip();
-			}
-			else {
-				Zotero.Sync.Storage.EventManager.success();
-			}
-			
-			return true;
-		};
-		
-		Zotero.Sync.Storage.EventManager.registerObserver({
-			onSuccess: function () finish(),
-			
-			onSkip: function () {
-				_syncInProgress = false
-			},
-			
-			onStop: function () finish(true),
-			
-			onError: function (e) error(e),
-			
-			onChangesMade: function () _changesMade = true
-		}, false, "default");
 	}
 	
 	
@@ -1808,7 +1821,7 @@ Zotero.Sync.Storage.ZipWriterObserver.prototype = {
 		Zotero.Sync.Storage.compressionTracker.compressed += this._zipWriter.file.fileSize;
 		Zotero.Sync.Storage.compressionTracker.uncompressed += originalSize;
 		Zotero.debug("Average compression so far: "
-			+ Zotero.Sync.Storage.compressionTracker.ratio + "%");
+			+ Math.round(Zotero.Sync.Storage.compressionTracker.ratio * 100) + "%");
 		
 		this._callback(this._data);
 	}

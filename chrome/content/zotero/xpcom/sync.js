@@ -505,12 +505,12 @@ Zotero.Sync.Runner = new function () {
 	
 	var _autoSyncTimer;
 	var _queue;
-	var _running;
 	var _background;
 	
 	var _lastSyncStatus;
 	var _currentSyncStatusLabel;
 	var _currentLastSyncLabel;
+	var _errorsByLibrary = {};
 	
 	var _warning = null;
 	
@@ -526,16 +526,9 @@ Zotero.Sync.Runner = new function () {
 			this.clearSyncTimeout(); // DEBUG: necessary?
 			var msg = "Zotero cannot sync while " + Zotero.appName + " is in offline mode.";
 			var e = new Zotero.Error(msg, 0, { dialogButtonText: null })
-			this.setSyncIcon('error', e);
-			return false;
-		}
-		
-		if (_running) {
-			// TODO: show status in all windows
-			var msg = "A sync process is already running. To view progress, check "
-				+ "the window in which the sync began or restart " + Zotero.appName + ".";
-			var e = new Zotero.Error(msg, 0, { dialogButtonText: null, frontWindowOnly: true })
-			this.setSyncIcon('error', e);
+			Components.utils.reportError(e);
+			Zotero.debug(e, 1);
+			this.setSyncIcon(e);
 			return false;
 		}
 		
@@ -543,7 +536,6 @@ Zotero.Sync.Runner = new function () {
 		Zotero.purgeDataObjects(true);
 		
 		_background = !!background;
-		_running = true;
 		this.setSyncIcon('animate');
 		
 		var finalCallbacks = {
@@ -554,61 +546,30 @@ Zotero.Sync.Runner = new function () {
 		};
 		
 		var storageSync = function () {
-			var syncNeeded = false;
-			
 			Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.syncingFiles'));
 			
-			var zfsSync = function (skipSyncNeeded) {
-				Zotero.Sync.Storage.ZFS.sync({
-					// ZFS success
-					onSuccess: function () {
-						setTimeout(function () {
-							Zotero.Sync.Server.sync(finalCallbacks);
-						}, 0);
-					},
-					
-					// ZFS skip
-					onSkip: function () {
-						setTimeout(function () {
-							if (skipSyncNeeded) {
-								Zotero.Sync.Server.sync(finalCallbacks);
-							}
-							else {
-								Zotero.Sync.Runner.stop();
-							}
-						}, 0);
-					},
-					
-					// ZFS cancel
-					onStop: function () {
-						setTimeout(function () {
-							Zotero.Sync.Runner.stop();
-						}, 0);
-					},
-					
-					// ZFS failure
-					onError: Zotero.Sync.Runner.error,
-					
-					onWarning: Zotero.Sync.Runner.warning
-				})
-			};
-			
-			Zotero.Sync.Storage.WebDAV.sync({
-				// WebDAV success
-				onSuccess: function () {
-					zfsSync(true);
-				},
+			Zotero.Sync.Storage.sync()
+			.then(function (results) {
+				Zotero.debug("File sync is finished");
 				
-				// WebDAV skip
-				onSkip: function () {
-					zfsSync();
-				},
+				if (results.errors.length) {
+					Zotero.Sync.Runner.setErrors(results.errors);
+					
+					return;
+				}
 				
-				// WebDAV cancel
-				onStop: Zotero.Sync.Runner.stop,
-				
-				// WebDAV failure
-				onError: Zotero.Sync.Runner.error
+				if (results.changesMade) {
+					Zotero.debug("Changes made during file sync "
+						+ "-- performing additional data sync");
+					Zotero.Sync.Server.sync(finalCallbacks);
+				}
+				else {
+					Zotero.Sync.Runner.stop();
+				}
+			})
+			.fail(function (e) {
+				Zotero.debug("File sync failed", 1);
+				Zotero.Sync.Runner.error(e);
 			});
 		};
 		
@@ -620,23 +581,26 @@ Zotero.Sync.Runner = new function () {
 			onSkip: storageSync,
 			
 			// Sync 1 stop
-			onStop: Zotero.Sync.Runner.stop,
+			onStop: function () {
+				Zotero.Sync.Runner.stop();
+			},
 			
 			// Sync 1 error
-			onError: Zotero.Sync.Runner.error
+			onError: function (e) {
+				Zotero.Sync.Runner.error(e);
+			}
 		});
 	}
 	
 	
 	this.stop = function () {
 		if (_warning) {
-			Zotero.Sync.Runner.setSyncIcon('warning', _warning);
+			Zotero.Sync.Runner.setSyncIcon(_warning);
 			_warning = null;
 		}
 		else {
 			Zotero.Sync.Runner.setSyncIcon();
 		}
-		_running = false;
 	}
 	
 	
@@ -644,14 +608,17 @@ Zotero.Sync.Runner = new function () {
 	 * Log a warning, but don't throw an error
 	 */
 	this.warning = function (e) {
+		Zotero.debug(e, 2);
 		Components.utils.reportError(e);
+		e.status = 'warning';
 		_warning = e;
 	}
 	
 	
 	this.error = function (e) {
-		Zotero.Sync.Runner.setSyncIcon('error', e);
-		_running = false;
+		Components.utils.reportError(e);
+		Zotero.debug(e, 1);
+		Zotero.Sync.Runner.setSyncIcon(e);
 		throw (e);
 	}
 	
@@ -740,60 +707,85 @@ Zotero.Sync.Runner = new function () {
 	}
 	
 	
-	this.setSyncIcon = function (status, e) {
-		var message;
-		var buttonText;
-		var buttonCallback;
-		var frontWindowOnly = false;
+	/**
+	 * Trigger updating of the main sync icon, the sync error icon, and
+	 * library-specific sync error icons across all windows
+	 */
+	this.setErrors = function (errors) {
+		Zotero.debug(errors);
+		errors = [this.parseSyncError(e) for each(e in errors)];
+		Zotero.debug(errors);
+		_errorsByLibrary = {};
 		
-		status = status ? status : '';
+		var primaryError = this.getPrimaryError(errors);
+		Zotero.debug(primaryError);
+		this.setSyncIcon(primaryError);
 		
-		switch (status) {
-			case '':
-			case 'animate':
-			case 'warning':
-			case 'error':
-				break;
+		// Store other errors by libraryID to be shown in the source list
+		for each(var e in errors) {
+			// Skip non-library-specific errors
+			if (typeof e.libraryID == 'undefined') {
+				continue;
+			}
 			
-			default:
-				throw ("Invalid sync icon status '" + status
-						+ "' in Zotero.Sync.Runner.setSyncIcon()");
+			if (!_errorsByLibrary[e.libraryID]) {
+				_errorsByLibrary[e.libraryID] = [];
+			}
+			_errorsByLibrary[e.libraryID].push(e);
 		}
 		
-		if (e) {
-			if (e.data) {
-				if (e.data.dialogText) {
-					message = e.data.dialogText;
-				}
-				if (typeof e.data.dialogButtonText != 'undefined') {
-					buttonText = e.data.dialogButtonText;
-					buttonCallback = e.data.dialogButtonCallback;
-				}
-				if (e.data.frontWindowOnly) {
-					frontWindowOnly = e.data.frontWindowOnly;
-				}
+		// Refresh source list
+		Zotero.Notifier.trigger('redraw', 'collection', []);
+	}
+	
+	
+	this.getErrors = function (libraryID) {
+		if (!_errorsByLibrary[libraryID]) {
+			return false;
+		}
+		return _errorsByLibrary[libraryID];
+	}
+	
+	
+	this.getPrimaryError = function (errors) {
+		errors = [this.parseSyncError(e) for each(e in errors)];
+		
+		// Set highest priority error as the primary (sync error icon)
+		var statusPriorities = {
+			info: 1,
+			warning: 2,
+			error: 3,
+			upgrade: 4,
+			
+			// Skip these
+			animate: -1
+		};
+		var primaryError = false;
+		for each(var error in errors) {
+			if (!error.status || statusPriorities[error.status] == -1) {
+				continue;
 			}
-			if (!message) {
-				if (e.message) {
-					message = e.message;
-				}
-				else {
-					message = e;
-				}
+			if (!primaryError || statusPriorities[error.status]
+						> statusPriorities[primaryError.status]) {
+				primaryError = error;
 			}
 		}
+		return primaryError;
+	}
+	
+	
+	/**
+	 * Set the main sync error icon across all windows
+	 */
+	this.setSyncIcon = function (e) {
+		e = this.parseSyncError(e);
 		
-		var upgradeRequired = false;
 		if (Zotero.Sync.Server.upgradeRequired) {
-			upgradeRequired = true;
+			e.status = 'upgrade';
 			Zotero.Sync.Server.upgradeRequired = false;
 		}
 		
-		if (status == 'error') {
-			var errorsLogged = Zotero.getErrors().length > 0;
-		}
-		
-		if (frontWindowOnly) {
+		if (e.frontWindowOnly) {
 			// Fake an nsISimpleEnumerator with just the topmost window
 			var enumerator = {
 				_returned: false,
@@ -820,100 +812,17 @@ Zotero.Sync.Runner = new function () {
 		
 		while (enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
-			if(!win.ZoteroPane) continue;
-			var warning = win.ZoteroPane.document.getElementById('zotero-tb-sync-warning');
-			var icon = win.ZoteroPane.document.getElementById('zotero-tb-sync');
+			if (!win.ZoteroPane) continue;
+			var doc = win.ZoteroPane.document;
 			
-			if (status == 'warning' || status == 'error') {
-				icon.setAttribute('status', '');
-				warning.hidden = false;
-				if (upgradeRequired) {
-					warning.setAttribute('mode', 'upgrade');
-					buttonText = null;
-				}
-				else {
-					warning.setAttribute('mode', status);
-				}
-				warning.tooltipText = message;
-				warning.onclick = function () {
-					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								.getService(Components.interfaces.nsIWindowMediator);
-					var win = wm.getMostRecentWindow("navigator:browser");
-					
-					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-											.getService(Components.interfaces.nsIPromptService);
-					// Warning
-					if (status == 'warning') {
-						var title = Zotero.getString('general.warning');
-						
-						// If secondary button not specified, just use an alert
-						if (!buttonText) {
-							ps.alert(null, title, message);
-							return;
-						}
-						
-						var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
-											+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
-						var index = ps.confirmEx(
-							null,
-							title,
-							message,
-							buttonFlags,
-							"",
-							buttonText,
-							"", null, {}
-						);
-						
-						if (index == 1) {
-							setTimeout(function () { buttonCallback(); }, 1);
-						}
-					}
-					
-					// Error
-					else if (status == 'error') {
-						// Probably not necessary, but let's be sure
-						if (!errorsLogged) {
-							Components.utils.reportError(message);
-						}
-						
-						if (typeof buttonText == 'undefined') {
-							buttonText = Zotero.getString('errorReport.reportError');
-							buttonCallback = function () {
-								win.ZoteroPane.reportErrors();
-							}
-						}
-						// If secondary button is explicitly null, just use an alert
-						else if (buttonText === null) {
-							ps.alert(null, title, message);
-							return;
-						}
-						
-						var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
-											+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
-						var index = ps.confirmEx(
-							null,
-							Zotero.getString('general.error'),
-							message,
-							buttonFlags,
-							"",
-							buttonText,
-							"", null, {}
-						);
-						
-						if (index == 1) {
-							setTimeout(function () { buttonCallback(); }, 1);
-						}
-					}
-				}
-			}
-			else {
-				icon.setAttribute('status', status);
-				warning.hidden = true;
-				warning.onclick = null;
-			}
+			var button = doc.getElementById('zotero-tb-sync-error');
+			this.setErrorIcon(button, [e]);
 			
+			var syncIcon = doc.getElementById('zotero-tb-sync');
+			// Update sync icon state
+			syncIcon.setAttribute('status', e.status ? e.status : "");
 			// Disable button while spinning
-			icon.disabled = status == 'animate';
+			syncIcon.disabled = e.status == 'animate';
 		}
 		
 		// Clear status
@@ -921,6 +830,9 @@ Zotero.Sync.Runner = new function () {
 	}
 	
 	
+	/**
+	 * Set the sync icon tooltip message
+	 */
 	this.setSyncStatus = function (msg) {
 		_lastSyncStatus = msg;
 		
@@ -928,6 +840,132 @@ Zotero.Sync.Runner = new function () {
 		if (_currentSyncStatusLabel) {
 			_updateSyncStatusLabel();
 		}
+	}
+	
+	
+	this.parseSyncError = function (e) {
+		if (!e) {
+			return { parsed: true };
+		}
+		
+		var parsed = {
+			parsed: true
+		};
+		
+		// In addition to actual errors, string states (e.g., 'animate')
+		// can be passed
+		if (typeof e == 'string') {
+			parsed.status = e;
+			return parsed;
+		}
+		
+		// Already parsed
+		if (e.parsed) {
+			return e;
+		}
+		
+		if (typeof e.libraryID != 'undefined') {
+			parsed.libraryID = e.libraryID;
+		}
+		parsed.status = e.status ? e.status : 'error';
+		
+		if (e.data) {
+			if (e.data.dialogText) {
+				parsed.message = e.data.dialogText;
+			}
+			if (typeof e.data.dialogButtonText != 'undefined') {
+				parsed.buttonText = e.data.dialogButtonText;
+				parsed.buttonCallback = e.data.dialogButtonCallback;
+			}
+		}
+		if (!parsed.message) {
+			parsed.message = e.message ? e.message : e;
+		}
+		
+		parsed.frontWindowOnly = !!(e && e.data && e.data.frontWindowOnly);
+		
+		return parsed;
+	}
+	
+	
+	/**
+	 * Set the state of the sync error icon and add an onclick to populate
+	 * the error panel
+	 */
+	this.setErrorIcon = function (icon, errors) {
+		if (!errors || !errors.length) {
+			icon.hidden = true;
+			icon.onclick = null;
+			return;
+		}
+		
+		// TEMP: for now, use the first error
+		var e = this.getPrimaryError(errors);
+		
+		if (!e.status) {
+			icon.hidden = true;
+			icon.onclick = null;
+			return;
+		}
+		
+		icon.hidden = false;
+		icon.setAttribute('mode', e.status);
+		icon.onclick = function () {
+			var doc = this.ownerDocument;
+			
+			var panel = Zotero.Sync.Runner.updateErrorPanel(doc, errors);
+			
+			panel.openPopup(this, "after_end", 4, 0, false, false);
+		}
+	}
+	
+	
+	this.updateErrorPanel = function (doc, errors) {
+		var panel = doc.getElementById('zotero-sync-error-panel');
+		var panelContent = doc.getElementById('zotero-sync-error-panel-content');
+		var panelButtons = doc.getElementById('zotero-sync-error-panel-buttons');
+		
+		// Clear existing panel content
+		while (panelContent.hasChildNodes()) {
+			panelContent.removeChild(panelContent.firstChild);
+		}
+		while (panelButtons.hasChildNodes()) {
+			panelButtons.removeChild(panelButtons.firstChild);
+		}
+		
+		// TEMP: for now, we only show one error
+		var e = errors.concat().shift();
+		e = this.parseSyncError(e);
+		
+		var desc = doc.createElement('description');
+		desc.textContent = e.message;
+		panelContent.appendChild(desc);
+		
+		// If not an error and there's no explicit button text, don't show
+		// button to report errors
+		if (e.status != 'error' && typeof e.buttonText == 'undefined') {
+			e.buttonText = null;
+		}
+		
+		if (e.buttonText !== null) {
+			if (typeof e.buttonText == 'undefined') {
+				var buttonText = Zotero.getString('errorReport.reportError');
+				var buttonCallback = function () {
+					doc.defaultView.ZoteroPane.reportErrors();
+				};
+			}
+			else {
+				var buttonText = e.buttonText;
+				var buttonCallback = e.buttonCallback;
+			}
+			
+			var button = doc.createElement('button');
+			button.setAttribute('label', buttonText);
+			button.onclick = buttonCallback;
+			panelButtons.appendChild(button);
+		}
+		
+		return panel;
 	}
 	
 	
@@ -1440,7 +1478,7 @@ Zotero.Sync.Server = new function () {
 				Zotero.suppressUIUpdates = true;
 				_updatesInProgress = true;
 				
-				var errorHandler = function (e) {
+				var errorHandler = function (e, rethrow) {
 					Zotero.DB.rollbackTransaction();
 					
 					Zotero.UnresponsiveScriptIndicator.enable();
@@ -1451,6 +1489,9 @@ Zotero.Sync.Server = new function () {
 					Zotero.suppressUIUpdates = false;
 					_updatesInProgress = false;
 					
+					if (rethrow) {
+						throw (e);
+					}
 					_error(e);
 				}
 				
@@ -1662,7 +1703,7 @@ Zotero.Sync.Server = new function () {
 					Zotero.pumpGenerator(gen, false, errorHandler);
 				}
 				catch (e) {
-					errorHandler(e);
+					errorHandler(e, true);
 				}
 			}
 			catch (e) {
@@ -2987,17 +3028,16 @@ Zotero.Sync.Server.Data = new function() {
 							obj.attachmentSyncState =
 								Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
 						}
-						// Set existing attachments mtime update check
+						// Set existing attachments for mtime update check
 						else {
 							var mtime = objectNode.getAttribute('storageModTime');
 							if (mtime) {
-								var lk = Zotero.Items.getLibraryKeyHash(obj)
 								// Convert previously used Unix timestamps to ms-based timestamps
 								if (mtime < 10000000000) {
 									Zotero.debug("Converting Unix timestamp '" + mtime + "' to milliseconds");
 									mtime = mtime * 1000;
 								}
-								itemStorageModTimes[lk] = parseInt(mtime);
+								itemStorageModTimes[obj.id] = parseInt(mtime);
 							}
 						}
 					}
@@ -3313,18 +3353,8 @@ Zotero.Sync.Server.Data = new function() {
 			
 			// Check mod times and hashes of updated items against stored values to see
 			// if they've been updated elsewhere and mark for download if so
-			if (type == 'item') {
-				var ids = [];
-				var modTimes = {};
-				for (var libraryKeyHash in itemStorageModTimes) {
-					var lk = Zotero.Items.parseLibraryKeyHash(libraryKeyHash);
-					var item = Zotero.Items.getByLibraryAndKey(lk.libraryID, lk.key);
-					ids.push(item.id);
-					modTimes[item.id] = itemStorageModTimes[libraryKeyHash];
-				}
-				if (ids.length > 0) {
-					Zotero.Sync.Storage.checkForUpdatedFiles(ids, modTimes);
-				}
+			if (type == 'item' && Object.keys(itemStorageModTimes).length) {
+				Zotero.Sync.Storage.checkForUpdatedFiles(itemStorageModTimes);
 			}
 		}
 		

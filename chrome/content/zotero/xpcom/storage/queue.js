@@ -26,13 +26,14 @@
 /**
  * Queue for storage sync transfer requests
  *
- * @param	{String}		name		Queue name (e.g., 'download' or 'upload')
+ * @param	{String}		type		Queue type (e.g., 'download' or 'upload')
  */
-Zotero.Sync.Storage.Queue = function (name) {
-	Zotero.debug("Initializing " + name + " queue");
+Zotero.Sync.Storage.Queue = function (type, libraryID) {
+	Zotero.debug("Initializing " + type + " queue for library " + libraryID);
 	
 	// Public properties
-	this.name = name;
+	this.type = type;
+	this.libraryID = libraryID;
 	this.maxConcurrentRequests = 1;
 	this.activeRequests = 0;
 	this.totalRequests = 0;
@@ -42,16 +43,25 @@ Zotero.Sync.Storage.Queue = function (name) {
 	this._highPriority = [];
 	this._running = false;
 	this._stopping = false;
+	this._finished = false;
+	this._error = false;
 	this._finishedReqs = 0;
-	this._lastTotalRequests = 0;
+	this._localChanges = false;
+	this._remoteChanges = false;
+	this._conflicts = [];
 }
 
-Zotero.Sync.Storage.Queue.prototype.__defineGetter__('Name', function () {
-	return this.name[0].toUpperCase() + this.name.substr(1);
+Zotero.Sync.Storage.Queue.prototype.__defineGetter__('name', function () {
+	return this.type + "/" + this.libraryID;
+});
+
+Zotero.Sync.Storage.Queue.prototype.__defineGetter__('Type', function () {
+	return this.type[0].toUpperCase() + this.type.substr(1);
 });
 
 Zotero.Sync.Storage.Queue.prototype.__defineGetter__('running', function () this._running);
 Zotero.Sync.Storage.Queue.prototype.__defineGetter__('stopping', function () this._stopping);
+Zotero.Sync.Storage.Queue.prototype.__defineGetter__('finished', function () this._finished);
 
 Zotero.Sync.Storage.Queue.prototype.__defineGetter__('unfinishedRequests', function () {
 	return this.totalRequests - this.finishedRequests;
@@ -73,22 +83,51 @@ Zotero.Sync.Storage.Queue.prototype.__defineSetter__('finishedRequests', functio
 	
 	// Last request
 	if (val == this.totalRequests) {
-		Zotero.debug(this.Name + " queue is done");
+		Zotero.debug(this.Type + " queue is done for library " + this.libraryID);
 		
 		// DEBUG info
 		Zotero.debug("Active requests: " + this.activeRequests);
 		
 		if (this.activeRequests) {
-			throw new Error(this.Name + " queue can't be done if there are active requests");
+			throw new Error(this.Type + " queue for library " + this.libraryID
+				+ " can't be done if there are active requests");
 		}
 		
 		this._running = false;
 		this._stopping = false;
+		this._finished = true;
 		this._requests = {};
 		this._highPriority = [];
-		this._finishedReqs = 0;
-		this._lastTotalRequests = this.totalRequests;
-		this.totalRequests = 0;
+		
+		var localChanges = this._localChanges;
+		var remoteChanges = this._remoteChanges;
+		var conflicts = this._conflicts.concat();
+		this._localChanges = false;
+		this._remoteChanges = false;
+		this._conflicts = [];
+		
+		if (!this._error) {
+			Zotero.debug("Resolving promise for queue " + this.name);
+			Zotero.debug(this._localChanges);
+			Zotero.debug(this._remoteChanges);
+			Zotero.debug(this._conflicts);
+			
+			this._deferred.resolve({
+				libraryID: this.libraryID,
+				type: this.type,
+				localChanges: localChanges,
+				remoteChanges: remoteChanges,
+				conflicts: conflicts
+			});
+		}
+		else {
+			Zotero.debug("Rejecting promise for queue " + this.name);
+			var e = this._error;
+			this._error = false;
+			e.libraryID = this.libraryID;
+			e.type = this.type;
+			this._deferred.reject(e);
+		}
 		
 		return;
 	}
@@ -97,10 +136,6 @@ Zotero.Sync.Storage.Queue.prototype.__defineSetter__('finishedRequests', functio
 		return;
 	}
 	this.advance();
-});
-
-Zotero.Sync.Storage.Queue.prototype.__defineGetter__('lastTotalRequests', function () {
-	return this._lastTotalRequests;
 });
 
 Zotero.Sync.Storage.Queue.prototype.__defineGetter__('queuedRequests', function () {
@@ -118,6 +153,9 @@ Zotero.Sync.Storage.Queue.prototype.__defineGetter__('remaining', function () {
 Zotero.Sync.Storage.Queue.prototype.__defineGetter__('percentage', function () {
 	if (this.totalRequests == 0) {
 		return 0;
+	}
+	if (this._finished) {
+		return 100;
 	}
 	
 	var completedRequests = 0;
@@ -144,9 +182,13 @@ Zotero.Sync.Storage.Queue.prototype.isStopping = function () {
  * @param {Boolean} highPriority  Add or move request to high priority queue
  */
 Zotero.Sync.Storage.Queue.prototype.addRequest = function (request, highPriority) {
+	if (this._finished) {
+		this.reset();
+	}
+	
 	request.queue = this;
 	var name = request.name;
-	Zotero.debug("Queuing " + this.name + " request '" + name + "'");
+	Zotero.debug("Queuing " + this.type + " request '" + name + "' for library " + this.libraryID);
 	
 	if (this._requests[name]) {
 		if (highPriority) {
@@ -166,9 +208,21 @@ Zotero.Sync.Storage.Queue.prototype.addRequest = function (request, highPriority
 	if (highPriority) {
 		this._highPriority.push(name);
 	}
-	
-	this.advance();
 }
+
+
+Zotero.Sync.Storage.Queue.prototype.start = function () {
+	if (!this._deferred || this._deferred.promise.isResolved()) {
+		Zotero.debug("Creating deferred for queue " + this.name);
+		this._deferred = Q.defer();
+	}
+	// The queue manager needs to know what queues were running in the
+	// current session
+	Zotero.Sync.Storage.QueueManager.addCurrentQueue(this);
+	this.advance();
+	return this._deferred.promise;
+}
+
 
 
 /**
@@ -176,46 +230,111 @@ Zotero.Sync.Storage.Queue.prototype.addRequest = function (request, highPriority
  */
 Zotero.Sync.Storage.Queue.prototype.advance = function () {
 	this._running = true;
+	this._finished = false;
 	
 	if (this._stopping) {
-		Zotero.debug(this.Name + " queue is being stopped in "
-			+ "Zotero.Sync.Storage.Queue.advance()", 2);
+		Zotero.debug(this.Type + " queue for library " + this.libraryID
+			+ "is being stopped in Zotero.Sync.Storage.Queue.advance()", 2);
 		return;
 	}
 	
 	if (!this.queuedRequests) {
-		Zotero.debug("No remaining requests in " + this.name + " queue ("
+		Zotero.debug("No remaining requests in " + this.type
+			+ " queue for library " + this.libraryID + " ("
 			+ this.activeRequests + " active, "
 			+ this.finishedRequests + " finished)");
 		return;
 	}
 	
 	if (this.activeRequests >= this.maxConcurrentRequests) {
-		Zotero.debug(this.Name + " queue is busy ("
-			+ this.activeRequests + "/" + this.maxConcurrentRequests + ")");
+		Zotero.debug(this.Type + " queue for library " + this.libraryID
+			+ " is busy (" + this.activeRequests + "/"
+			+ this.maxConcurrentRequests + ")");
 		return;
 	}
+	
+	
 	
 	// Start the first unprocessed request
 	
 	// Try the high-priority queue first
-	var name, request;
+	var self = this;
+	var request, name;
 	while (name = this._highPriority.shift()) {
 		request = this._requests[name];
-		if (!request.isRunning() && !request.isFinished()) {
-			request.start();
-			this.advance();
-			return;
+		if (request.isRunning() || request.isFinished()) {
+			continue;
 		}
+		
+		let requestName = name;
+		
+		Q.fcall(function () {
+			var promise = request.start();
+			self.advance();
+			return promise;
+		})
+		.then(function (result) {
+			if (result.localChanges) {
+				self._localChanges = true;
+			}
+			if (result.remoteChanges) {
+				self._remoteChanges = true;
+			}
+			if (result.conflict) {
+				self.addConflict(
+					requestName,
+					result.conflict.local,
+					result.conflict.remote
+				);
+			}
+		})
+		.fail(function (e) {
+			self.error(e);
+		});
+		
+		return;
 	}
 	
 	// And then others
-	for each(request in this._requests) {
-		if (!request.isRunning() && !request.isFinished()) {
-			request.start();
-			this.advance();
-			return;
+	for each(var request in this._requests) {
+		if (request.isRunning() || request.isFinished()) {
+			continue;
 		}
+		
+		let requestName = request.name;
+		
+		// This isn't in an fcall() because the request needs to get marked
+		// as running immediately so that it doesn't get run again by a
+		// subsequent advance() call.
+		try {
+			var promise = request.start();
+			self.advance();
+		}
+		catch (e) {
+			self.error(e);
+		}
+		
+		Q.when(promise)
+		.then(function (result) {
+			if (result.localChanges) {
+				self._localChanges = true;
+			}
+			if (result.remoteChanges) {
+				self._remoteChanges = true;
+			}
+			if (result.conflict) {
+				self.addConflict(
+					requestName,
+					result.conflict.local,
+					result.conflict.remote
+				);
+			}
+		})
+		.fail(function (e) {
+			self.error(e);
+		});
+		
+		return;
 	}
 }
 
@@ -225,8 +344,26 @@ Zotero.Sync.Storage.Queue.prototype.updateProgress = function () {
 }
 
 
+Zotero.Sync.Storage.Queue.prototype.addConflict = function (requestName, localData, remoteData) {
+	Zotero.debug('===========');
+	Zotero.debug(localData);
+	Zotero.debug(remoteData);
+	
+	this._conflicts.push({
+		name: requestName,
+		localData: localData,
+		remoteData: remoteData
+	});
+}
+
+
 Zotero.Sync.Storage.Queue.prototype.error = function (e) {
-	Zotero.Sync.Storage.EventManager.error(e);
+	if (!this._error) {
+		this._error = e;
+	}
+	Zotero.debug(e, 1);
+	Components.utils.reportError(e.message ? e.message : e);
+	this.stop();
 }
 
 
@@ -235,13 +372,17 @@ Zotero.Sync.Storage.Queue.prototype.error = function (e) {
  */
 Zotero.Sync.Storage.Queue.prototype.stop = function () {
 	if (!this._running) {
-		Zotero.debug(this.Name + " queue is not running");
+		Zotero.debug(this.Type + " queue for library " + this.libraryID
+			+ " is not running");
 		return;
 	}
 	if (this._stopping) {
-		Zotero.debug("Already stopping " + this.name + " queue");
+		Zotero.debug("Already stopping " + this.type + " queue for library "
+			+ this.libraryID);
 		return;
 	}
+	
+	Zotero.debug("Stopping " + this.type + " queue for library " + this.libraryID);
 	
 	// If no requests, finish manually
 	/*if (this.activeRequests == 0) {
@@ -255,4 +396,13 @@ Zotero.Sync.Storage.Queue.prototype.stop = function () {
 			request.stop();
 		}
 	}
+	
+	Zotero.debug("Queue is stopped");
+}
+
+
+Zotero.Sync.Storage.Queue.prototype.reset = function () {
+	this._finished = false;
+	this._finishedReqs = 0;
+	this.totalRequests = 0;
 }

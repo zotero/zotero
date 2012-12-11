@@ -153,6 +153,7 @@ var ZoteroPane = new function()
 		var collectionsTree = document.getElementById('zotero-collections-tree');
 		collectionsTree.view = ZoteroPane_Local.collectionsView;
 		collectionsTree.controllers.appendController(new Zotero.CollectionTreeCommandController(collectionsTree));
+		collectionsTree.addEventListener("mousedown", ZoteroPane_Local.onTreeMouseDown, true);
 		collectionsTree.addEventListener("click", ZoteroPane_Local.onTreeClick, true);
 		
 		var itemsTree = document.getElementById('zotero-items-tree');
@@ -2509,11 +2510,32 @@ var ZoteroPane = new function()
 		var t = event.originalTarget;
 		var tree = t.parentNode;
 		
-		var itemGroup = ZoteroPane_Local.getItemGroup();
+		var row = {}, col = {}, obj = {};
+		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
+		if (row.value == -1) {
+			return;
+		}
+		
+		var itemGroup = ZoteroPane_Local.collectionsView._getItemAtRow(row.value);
+		
+		// Prevent the tree's select event from being called for a click
+		// on a library sync error icon
+		if (tree.id == 'zotero-collections-tree') {
+			if (itemGroup.isLibrary(true)) {
+				if (col.value.id == 'zotero-collections-sync-status-column') {
+					var libraryID = itemGroup.isLibrary() ? 0 : itemGroup.ref.libraryID;
+					var errors = Zotero.Sync.Runner.getErrors(libraryID);
+					if (errors) {
+						event.stopPropagation();
+						return;
+					}
+				}
+			}
+		}
 		
 		// Automatically select all equivalent items when clicking on an item
 		// in duplicates view
-		if (itemGroup.isDuplicates() && tree.id == 'zotero-items-tree') {
+		else if (tree.id == 'zotero-items-tree' && itemGroup.isDuplicates()) {
 			// Trigger only on primary-button single clicks with modifiers
 			// (so that items can still be selected and deselected manually)
 			if (!event || event.detail != 1 || event.button != 0 || event.metaKey || event.shiftKey) {
@@ -2558,22 +2580,52 @@ var ZoteroPane = new function()
 		
 		var tree = t.parentNode;
 		
+		var row = {}, col = {}, obj = {};
+		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
+		
 		// We care only about primary-button double and triple clicks
 		if (!event || (event.detail != 2 && event.detail != 3) || event.button != 0) {
+			if (row.value == -1) {
+				return;
+			}
+			var itemGroup = ZoteroPane_Local.collectionsView._getItemAtRow(row.value);
+			
+			// Show the error panel when clicking a library-specific
+			// sync error icon
+			if (itemGroup.isLibrary(true)) {
+				if (col.value.id == 'zotero-collections-sync-status-column') {
+					var libraryID = itemGroup.isLibrary() ? 0 : itemGroup.ref.libraryID;
+					var errors = Zotero.Sync.Runner.getErrors(libraryID);
+					if (!errors) {
+						return;
+					}
+					
+					var panel = Zotero.Sync.Runner.updateErrorPanel(window.document, errors);
+					
+					var anchor = document.getElementById('zotero-collections-tree-shim');
+					
+					var x = {}, y = {}, width = {}, height = {};
+					tree.treeBoxObject.getCoordsForCellItem(row.value, col.value, 'image', x, y, width, height);
+					
+					x = x.value + Math.round(width.value / 2);
+					y = y.value + height.value + 3;
+					
+					panel.openPopup(anchor, "after_start", x, y, false, false);
+				}
+				
+				return;
+			}
+			
 			// The Mozilla tree binding fires select() in mousedown(),
 			// but if when it gets to click() the selection differs from
 			// what it expects (say, because multiple items had been
-			// selected during mousedown()), it fires select() again.
-			// We prevent that here.
-			var itemGroup = ZoteroPane_Local.getItemGroup();
-			if (itemGroup.isDuplicates() && tree.id == 'zotero-items-tree') {
+			// selected during mousedown(), as is the case in duplicates mode),
+			// it fires select() again. We prevent that here.
+			else if (itemGroup.isDuplicates() && tree.id == 'zotero-items-tree') {
 				if (event.metaKey || event.shiftKey) {
 					return;
 				}
 				
-				// Allow twisty click to work in duplicates mode
-				var row = {}, col = {}, obj = {};
-				tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
 				if (obj.value == 'twisty') {
 					return;
 				}
@@ -2596,9 +2648,6 @@ var ZoteroPane = new function()
 				return;
 			}
 		}
-		
-		var row = {}, col = {}, obj = {};
-		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
 		
 		// obj.value == 'cell'/'text'/'image'
 		if (!obj.value) {
@@ -3424,6 +3473,8 @@ var ZoteroPane = new function()
 	
 	
 	function viewAttachment(itemIDs, event, noLocateOnMissing, forceExternalViewer) {
+		Components.utils.import("resource://zotero/q.js");
+		
 		// If view isn't editable, don't show Locate button, since the updated
 		// path couldn't be sent back up
 		if (!this.collectionsView.editable) {
@@ -3478,38 +3529,39 @@ var ZoteroPane = new function()
 				}
 			}
 			else {
-				if (item.isImportedAttachment() && Zotero.Sync.Storage.downloadAsNeeded(item.libraryID)) {
-					let downloadedItem = item;
-					var started = Zotero.Sync.Storage.downloadFile(item, {
-						onStart: function (request) {
-							if (!(request instanceof Zotero.Sync.Storage.Request)) {
-								throw new Error("Invalid request object");
-							}
-						},
-						
-						onProgress: function (progress, progressMax) {
-							
-						},
-						
-						onStop: function () {
-							if (!downloadedItem.getFile()) {
-								ZoteroPane_Local.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
-								return;
-							}
-							
-							// check if unchanged?
-							// maybe not necessary, since we'll get an error if there's an error
-							
-							ZoteroPane_Local.viewAttachment(downloadedItem.id, event, false, forceExternalViewer);
-						},
-					});
-					
-					if (started) {
-						continue;
-					}
+				if (!item.isImportedAttachment() || !Zotero.Sync.Storage.downloadAsNeeded(item.libraryID)) {
+					this.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
+					return;
 				}
 				
-				this.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
+				let downloadedItem = item;
+				Q.fcall(function () {
+					return Zotero.Sync.Storage.downloadFile(
+						downloadedItem,
+						{
+							onProgress: function (progress, progressMax) {}
+						});
+				})
+				.then(function () {
+					if (!downloadedItem.getFile()) {
+						ZoteroPane_Local.showAttachmentNotFoundDialog(downloadedItem.id, noLocateOnMissing);
+						return;
+					}
+					
+					// check if unchanged?
+					// maybe not necessary, since we'll get an error if there's an error
+					
+					
+					Zotero.Notifier.trigger('redraw', 'item', []);
+					
+					ZoteroPane_Local.viewAttachment(downloadedItem.id, event, false, forceExternalViewer);
+				})
+				.fail(function (e) {
+					// TODO: show error somewhere else
+					Zotero.debug(e, 1);
+					ZoteroPane_Local.syncAlert(e);
+				})
+				.end();
 			}
 		}
 	}
@@ -3742,6 +3794,83 @@ var ZoteroPane = new function()
 			this.relinkAttachment(itemID);
 		}
 	}
+	
+	
+	this.syncAlert = function (e) {
+		e = Zotero.Sync.Runner.parseSyncError(e);
+		
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+					.getService(Components.interfaces.nsIPromptService);
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
+							+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+		
+		// Warning
+		if (e.status == 'warning') {
+			var title = Zotero.getString('general.warning');
+			
+			// If secondary button not specified, just use an alert
+			if (e.buttonText) {
+				var buttonText = e.buttonText;
+			}
+			else {
+				ps.alert(null, title, e.message);
+				return;
+			}
+			
+			var index = ps.confirmEx(
+				null,
+				title,
+				e.message,
+				buttonFlags,
+				"",
+				buttonText,
+				"", null, {}
+			);
+			
+			if (index == 1) {
+				setTimeout(function () { buttonCallback(); }, 1);
+			}
+		}
+		// Error
+		else if (e.status == 'error') {
+			var title = Zotero.getString('general.error');
+			
+			// If secondary button is explicitly null, just use an alert
+			if (buttonText === null) {
+				ps.alert(null, title, e.message);
+				return;
+			}
+			
+			if (typeof buttonText == 'undefined') {
+				var buttonText = Zotero.getString('errorReport.reportError');
+				var buttonCallback = function () {
+					ZoteroPane.reportErrors();
+				};
+			}
+			else {
+				var buttonText = e.buttonText;
+				var buttonCallback = e.buttonCallback;
+			}
+			
+			var index = ps.confirmEx(
+				null,
+				title,
+				e.message,
+				buttonFlags,
+				"",
+				buttonText,
+				"", null, {}
+			);
+			
+			if (index == 1) {
+				setTimeout(function () { buttonCallback(); }, 1);
+			}
+		}
+		// Upgrade
+		else if (e.status == 'upgrade') {
+			ps.alert(null, "", e.message);
+		}
+	};
 	
 	
 	this.createParentItemsFromSelected = function () {

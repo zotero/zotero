@@ -344,9 +344,29 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	var savedSelection = this.saveSelection();
 	var previousRow = false;
 	
-	// Redraw the tree (for tag color changes)
+	// Redraw the tree (for tag color and progress changes)
 	if (action == 'redraw') {
-		this._treebox.invalidate();
+		// Redraw specific rows
+		if (type == 'item' && ids.length) {
+			// Redraw specific cells
+			if (extraData && extraData.column) {
+				var col = this._treebox.columns.getNamedColumn(
+					'zotero-items-column-' + extraData.column
+				);
+				for each(var id in ids) {
+					this._treebox.invalidateCell(this._itemRowMap[id], col);
+				}
+			}
+			else {
+				for each(var id in ids) {
+					this._treebox.invalidateRow(this._itemRowMap[id]);
+				}
+			}
+		}
+		// Redraw the whole tree
+		else {
+			this._treebox.invalidate();
+		}
 		return;
 	}
 	
@@ -849,6 +869,12 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 		if (this._itemGroup.isTrash()) return false;
 		
 		var treerow = this._getItemAtRow(row);
+		
+		if ((!this.isContainer(row) || !this.isContainerOpen(row))
+				&& Zotero.Sync.Storage.getItemDownloadImageNumber(treerow.ref)) {
+			return '';
+		}
+		
 		if (treerow.level === 0) {
 			if (treerow.ref.isRegularItem()) {
 				switch (treerow.ref.getBestAttachmentState()) {
@@ -2746,7 +2772,8 @@ Zotero.ItemTreeView.prototype.getRowProperties = function(row, prop) {
 }
 Zotero.ItemTreeView.prototype.getColumnProperties = function(col, prop) { }
 Zotero.ItemTreeView.prototype.getCellProperties = function(row, col, prop) {
-	var itemID = this._getItemAtRow(row).ref.id;
+	var treeRow = this._getItemAtRow(row);
+	var itemID = treeRow.ref.id;
 	
 	// Set tag colors
 	//
@@ -2766,6 +2793,30 @@ Zotero.ItemTreeView.prototype.getCellProperties = function(row, col, prop) {
 		var aServ = Components.classes["@mozilla.org/atom-service;1"].
 			getService(Components.interfaces.nsIAtomService);
 		prop.AppendElement(aServ.getAtom("contextRow"));
+	}
+	
+	// Mark hasAttachment column, which needs special image handling
+	if (col.id == 'zotero-items-column-hasAttachment') {
+		var aServ = Components.classes["@mozilla.org/atom-service;1"].
+				getService(Components.interfaces.nsIAtomService);
+		prop.AppendElement(aServ.getAtom("hasAttachment"));
+		
+		// Don't show pie for open parent items, since we show it for the
+		// child item
+		if (this.isContainer(row) && this.isContainerOpen(row)) {
+			return;
+		}
+		
+		var num = Zotero.Sync.Storage.getItemDownloadImageNumber(treeRow.ref);
+		//var num = Math.round(new Date().getTime() % 10000 / 10000 * 64);
+		if (num !== false) {
+			if (!aServ) {
+				var aServ = Components.classes["@mozilla.org/atom-service;1"].
+						getService(Components.interfaces.nsIAtomService);
+			}
+			prop.AppendElement(aServ.getAtom("pie"));
+			prop.AppendElement(aServ.getAtom("pie" + num));
+		}
 	}
 }
 

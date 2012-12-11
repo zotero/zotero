@@ -192,32 +192,22 @@
 								value="0" tooltip="zotero-tb-sync-progress-tooltip">
 							</progressmeter>
 							<tooltip id="zotero-tb-sync-progress-tooltip" noautohide="true">
-								<grid>
-									<columns>
-										<column/>
-										<column/>
-									</columns>
-									<rows>
-										<row>
-											<label value="&zotero.sync.storage.progress;"/>
-											<label id="zotero-tb-sync-progress-tooltip-progress"/>
-										</row>
-										<row>
-											<label value="&zotero.sync.storage.downloads;"/>
-											<label
-												id="zotero-tb-sync-progress-tooltip-downloads"/>
-										</row>
-										<row>
-											<label value="&zotero.sync.storage.uploads;"/>
-											<label
-												id="zotero-tb-sync-progress-tooltip-uploads"/>
-										</row>
-									</rows>
-								</grid>
+								<hbox id="zotero-tb-sync-progress-tooltip-progress">
+									<label value="&zotero.sync.storage.progress;"/>
+									<label/>
+								</hbox>
+								<zoterofilesyncstatus id="zotero-tb-sync-progress-status"/>
 							</tooltip>
 						</hbox>
 					</hbox>
-					<toolbarbutton id="zotero-tb-sync-warning" hidden="true"/>
+					<toolbarbutton id="zotero-tb-sync-error" hidden="true"/>
+					<!-- We put this here, but it's used for all sync errors -->
+					<panel id="zotero-sync-error-panel" type="arrow">
+						<vbox>
+							<hbox id="zotero-sync-error-panel-content"/>
+							<hbox id="zotero-sync-error-panel-buttons"/>
+						</vbox>
+					</panel>
 					<toolbarbutton id="zotero-tb-sync" class="zotero-tb-button" tooltip="_child"
 							oncommand="Zotero.Sync.Server.canAutoResetClient = true; Zotero.Sync.Server.manualSyncRequired = false; Zotero.Sync.Runner.sync()">
 						<tooltip
@@ -292,6 +282,10 @@
 			
 			<hbox id="zotero-trees" flex="1">
 				<vbox id="zotero-collections-pane" zotero-persist="width">
+					<!-- This is used for positioning the sync error icon panel
+							under specific tree cells, which don't exist as
+							elements on their own -->
+					<box id="zotero-collections-tree-shim"/>
 					<!-- This extra vbox prevents the toolbar from getting compressed when resizing
 							the tag selector to max height -->
 					<tree id="zotero-collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
@@ -308,6 +302,9 @@
 								id="zotero-collections-name-column"
 								flex="1"
 								primary="true"
+								hideheader="true"/>
+							<treecol
+								id="zotero-collections-sync-status-column"
 								hideheader="true"/>
 						</treecols>
 						<treechildren/>

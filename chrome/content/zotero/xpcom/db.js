@@ -402,7 +402,8 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 	}
 	else {
 		if (checkParams && numParams > 0) {
-			throw ("No parameters provided for query containing placeholders");
+			throw ("No parameters provided for query containing placeholders "
+				+ "[QUERY: " + sql + "]");
 		}
 	}
 	return statement;
