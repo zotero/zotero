@@ -22,7 +22,7 @@
     
     ***** END LICENSE BLOCK *****
 */
-const CONNECTOR_API_VERSION = 2;
+const CONNECTOR_API_VERSION = 2.1;
 
 Zotero.Server.Connector = function() {};
 Zotero.Server.Connector._waitingForSelection = {};
@@ -306,6 +306,9 @@ Zotero.Server.Connector.SavePage.prototype = {
  *
  * Accepts:
  *		items - an array of JSON format items
+ *		attachmentMode - add items as files ('file') or download ('download'),
+ *					     optional, default is 'download'
+ *					     (see ItemSaver.ATTACHMENT_MODE_*)
  * Returns:
  *		201 response code with item in body.
  */
@@ -334,13 +337,25 @@ Zotero.Server.Connector.SaveItem.prototype = {
 		
 		var cookieSandbox = data["uri"] ? new Zotero.CookieSandbox(null, data["uri"],
 			data["cookie"] || "", url.userAgent) : null;
+
+		var attachmentMode =
+			Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD;
+		var requestedAttachmentMode = data["attachmentMode"];
+		if (requestedAttachmentMode && requestedAttachmentMode.toUpperCase) {
+			var attachmentModeName =
+				"ATTACHMENT_MODE_" + requestedAttachmentMode.toUpperCase();
+			if (Zotero.Translate.ItemSaver[attachmentModeName]) {
+				attachmentMode = Zotero.Translate.ItemSaver[attachmentModeName];
+			}
+		}
+
 		for(var i=0; i<data.items.length; i++) {
 			Zotero.Server.Connector.AttachmentProgressManager.add(data.items[i].attachments);
 		}
 		
 		// save items
 		var itemSaver = new Zotero.Translate.ItemSaver(libraryID,
-			Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD, 1, undefined, cookieSandbox);
+			attachmentMode, 1, undefined, cookieSandbox);
 		itemSaver.saveItems(data.items, function(returnValue, newItems) {
 			if(returnValue) {
 				try {
