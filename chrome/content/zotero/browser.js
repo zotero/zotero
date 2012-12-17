@@ -794,7 +794,8 @@ Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, transla
 		// if there's already a scrapable page in the browser window, and it's
 		// still there, ensure it is actually part of the page, then return
 		if(this.page.translators && this.page.translators.length && this.page.document.location) {
-			if(this.page.document.defaultView && !this.page.document.defaultView.closed) {
+			if(this.page.document.defaultView && !this.page.document.defaultView.closed
+				&& this.page.document.location.href != translate.document.location.href) {
 				// if it is still there, switch translation to take place on 
 				if(!translators.length || this.page.translators[0].priority <= translators[0].priority) return;
 			} else {
