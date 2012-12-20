@@ -265,7 +265,7 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 					if(!co) continue;
 					output.push('  <span class="Z3988" title="'+
 						co.replace("&", "&amp;", "g").replace("<", "&lt;", "g").replace(">", "&gt;", "g")+
-						'"/>\n');
+						'"/><spanclosetaghack/>\n');
 				} catch(e) {
 					Zotero.logError(e);
 				}
@@ -378,7 +378,7 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 			}
 			
 			//Zotero.debug(xml);
-			str = xml.toXMLString();
+			str = xml.toXMLString().replace("/><spanclosetaghack/>", "></span>", "g");
 		} finally {
 			XML.prettyPrinting = true;
 			XML.ignoreWhitespace = true;
