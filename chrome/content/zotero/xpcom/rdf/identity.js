@@ -298,7 +298,7 @@ We replace the bigger with the smaller.
       ix[h].push(st); // Set of things with this as subject, etc
     }
 
-    //tabulator.log.debug("ADDING    {"+subj+" "+pred+" "+obj+"} "+why);
+    //$rdf.log.debug("ADDING    {"+subj+" "+pred+" "+obj+"} "+why);
     this.statements.push(st);
     return st;
   }; //add
@@ -394,6 +394,7 @@ We replace the bigger with the smaller.
           break;
       }
     }
+    //$rdf.log.debug("Matched: \n" + results.join('\n'));
     return results;
   }; // statementsMatching
   /** remove a particular statement from the bank **/
