@@ -2364,7 +2364,8 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 			"datatype": perm,
 			"termType": "r",
 			"id": "r",	//this is managed by RDF store
-			"toString": "r"
+			"toString": "r",
+			"toNT": "r"
 		};
 		return obj;
 	},
