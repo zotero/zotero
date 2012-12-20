@@ -310,7 +310,7 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 	Zotero.debug(allText);
 	var m = Zotero.Utilities.cleanDOI(lines.slice(0,80).join('\n'));
 	if(m) {
-		this._DOI = m[0];
+		this._DOI = m;
 	} else { // dont look for ISBNs if we found a DOI
 		var isbns = this._findISBNs(allText);
 		if(isbns.length > 0) {

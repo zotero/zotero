@@ -277,7 +277,10 @@ Zotero.Utilities = {
 	 * Return isbn if valid, otherwise return false
 	 */
 	"cleanISBN":function(/**String*/ isbn) {
-		isbn = isbn.replace(/[^x\d]+/ig, '').toUpperCase();
+		isbn = isbn.replace(/[^0-9a-z]+/ig, '').toUpperCase()	//we only want to ignore punctuation, spaces
+						.match(/(?:97[89][0-9]{10}|[0-9]{9}[0-9X])/);	//13 digit or 10 digit
+		if(!isbn) return false;
+		isbn = isbn[0];
 
 		if(isbn.length == 10) {
 			// Verify ISBN-10 checksum
@@ -292,17 +295,11 @@ Zotero.Utilities = {
 			return (sum % 11 == 0) ? isbn : false;
 		}
 
-		isbn = isbn.replace(/X/g, '');	//get rid of Xs
-
 		if(isbn.length == 13) {
-			// ISBN-13 should start with 978 or 979 i.e. GS1 for book publishing industry
-			var prefix = isbn.slice(0,3);
-			if (prefix != "978" && prefix != "979") return false;
-
 			// Verify checksum
 			var sum = 0;
 			for (var i = 0; i < 12; i+=2) sum += isbn[i]*1;	//to make sure it's int
-			for (i = 1; i < 12; i+=2) sum += isbn[i]*3;
+			for (var i = 1; i < 12; i+=2) sum += isbn[i]*3;
 			sum += isbn[12]*1; //add the check digit
 
 			return (sum % 10 == 0 )? isbn : false;
@@ -1112,11 +1109,11 @@ Zotero.Utilities = {
 	 */
 	"varDump":function(arr,level,maxLevel,parentObjects,path) {
 		var dumped_text = "";
-		if (!level){
+		if (level === undefined){
 			level = 0;
 		}
 
-		if (!maxLevel) {
+		if (maxLevel === undefined) {
 			maxLevel = 4;
 		}
 
@@ -1139,7 +1136,12 @@ Zotero.Utilities = {
 			}
 
 			for (var item in arr) {
-				var value = arr[item];
+				try {
+					var value = arr[item];
+				} catch(e) {
+					dumped_text += level_padding + "'" + item + "' => <<Access Denied>>\n";
+					continue;
+				}
 				
 				if (typeof(value) == 'object') { // If it is an array
 					//check for recursion
@@ -1159,9 +1161,13 @@ Zotero.Utilities = {
 
 					dumped_text += level_padding + "'" + item + "' => " + openBrace;
 					//only recurse if there's anything in the object, purely cosmetical
-					for(var i in value) {
-						dumped_text += "\n" + Zotero.Utilities.varDump(value,level+1,maxLevel,parentObjects.concat([value]),path.concat([item])) + level_padding;
-						break;
+					try {
+						for(var i in value) {
+							dumped_text += "\n" + Zotero.Utilities.varDump(value,level+1,maxLevel,parentObjects.concat([value]),path.concat([item])) + level_padding;
+							break;
+						}
+					} catch(e) {
+						dumped_text += "<<Error processing object:\n" + e + ">>\n";
 					}
 					dumped_text += closeBrace + "\n";
 				}

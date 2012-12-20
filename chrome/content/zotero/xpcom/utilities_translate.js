@@ -231,15 +231,13 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	}
 	
 	if(Zotero.isFx) {
-		var translate = this._translate;
-		if(translate.document) {
-			var protocol = translate.document.location.protocol,
-				host = translate.document.location.host;
-		} else {
+		if(typeof translate._sandboxLocation === "object") {
+			var protocol = translate._sandboxLocation.location.protocol,
+				host = translate._sandboxLocation.location.host;
+        } else {
 			var url = Components.classes["@mozilla.org/network/io-service;1"] 
 					.getService(Components.interfaces.nsIIOService)
-					.newURI(typeof translate._sandboxLocation === "object" ?
-						translate._sandboxLocation.location : translate._sandboxLocation, null, null),
+					.newURI(translate._sandboxLocation, null, null),
 				protocol = url.scheme+":",
 				host = url.host;
 		}
