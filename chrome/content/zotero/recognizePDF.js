@@ -243,7 +243,7 @@ Zotero_RecognizePDF.Recognizer = function () {}
  *	(function will be passed image as URL and must return text of CAPTCHA)
  */
 Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, callback, captchaCallback) {
-	const MAX_PAGES = 3;
+	const MAX_PAGES = 5;
 	
 	this._libraryID = libraryID;
 	this._callback = callback;
@@ -315,9 +315,9 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 	
 	// Use only first column from multi-column lines
 	const lineRe = /^\s*([^\s]+(?: [^\s]+)+)/;
-	for(var i=0; i<lines.length; i++) {
+	for(var i=0; i<lines.length && cleanedLines.length<30; i++) {
 		var m = lineRe.exec(lines[i]);
-		if(m) {
+		if(m && m[1].split(' ').length > 3) {
 			cleanedLines.push(m[1]);
 			cleanedLineLengths.push(m[1].length);
 		}
@@ -334,8 +334,8 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 		
 		// pick lines within 4 chars of the median (this is completely arbitrary)
 		this._goodLines = [];
-		var uBound = medianLength + 4;
-		var lBound = medianLength - 4;
+		var uBound = medianLength + 6;
+		var lBound = medianLength - 6;
 		for (var i=0; i<lineLengthsLength; i++) {
 			if(cleanedLineLengths[i] > lBound && cleanedLineLengths[i] < uBound) {
 				// Strip quotation marks so they don't mess up search query quoting
@@ -344,7 +344,7 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 			}
 		}
 		
-		this._startLine = this._iteration = 0;
+		this._nextLine = this._iteration = 0;
 		this._queryGoogle();
 	}
 }
@@ -354,7 +354,7 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
  * @private
  */
 Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
-	if(this._iteration > 3 || this._startLine >= this._goodLines.length) {
+	if(this._iteration > 3 || !this._goodLines.length) {
 		try {
 			if(this._hiddenBrowser) Zotero.Browser.deleteHiddenBrowser(me._hiddenBrowser);
 		} catch(e) {}
@@ -385,8 +385,17 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 	} else {
 		// take the relevant parts of some lines (exclude hyphenated word)
 		var queryStringWords = 0;
-		while(queryStringWords < 25 && this._startLine < this._goodLines.length) {
-			var words = this._goodLines[this._startLine].split(/\s+/);
+		while(queryStringWords < 25) {
+			/**a bit of a hack. We're relying on the same test being applied above.
+			 * But this way we don't have to rewrite the same error reporting code
+			 */
+			if(!this._goodLines.length) this._queryGoogle();
+
+			var words = this._goodLines.splice(this._nextLine,1)[0].split(/\s+/);
+			//Try to avoid picking adjacent strings so the odds of them appearing in another
+			// document quoting our document is low. Every 7th line is a magic value
+			this._nextLine = (this._nextLine + 7) % this._goodLines.length;
+
 			// get rid of first and last words
 			words.shift();
 			words.pop();
@@ -403,7 +412,6 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 				queryStringWords += words.length;
 				queryString += '"'+words.join(" ")+'" ';
 			}
-			this._startLine++;
 		}
 		
 		Zotero.debug("RecognizePDF: Query string "+queryString);
