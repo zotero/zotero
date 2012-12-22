@@ -293,10 +293,7 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 	intlStream.QueryInterface(Components.interfaces.nsIUnicharLineInputStream);
 	
 	// get the lines in this sample
-	var lines = [],
-		cleanedLines = [],
-		cleanedLineLengths = [],
-		str = {};
+	var lines = [], str = {};
 	while(intlStream.readLine(str)) {
 		var line = str.value.trim();
 		if(line) lines.push(line);
@@ -304,17 +301,57 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 	
 	inputStream.close();
 	cacheFile.remove(false);
-	
+
+	var me = this;
+
 	// look for DOI
 	var allText = lines.join("\n");
 	Zotero.debug(allText);
 	var m = Zotero.Utilities.cleanDOI(allText);
 	if(m) {
-		this._DOI = m;
+		this._queryDOI(m, function() {
+			me._cleanLines(lines, me._queryGoogle);
+		});
+	} else {
+		this._cleanLines(lines, me._queryGoogle);
 	}
-	
+}
+
+/**
+ * Looks up item by DOI
+ * @private
+ * @param {String} doi DOI to search for
+ * @param {Function} onFail Callback function to call if a DOI is not found
+ */
+Zotero_RecognizePDF.Recognizer.prototype._queryDOI = function(doi, onFail) {
+	var me = this;
+	var translate = new Zotero.Translate.Search();
+	translate.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
+	var item = {"itemType":"journalArticle", "DOI":doi};
+	translate.setSearch(item);
+	translate.setHandler("itemDone", function(translate, item) {
+		me._callback(item);
+	});
+	translate.setHandler("select", function(translate, items, callback) {
+		return me._selectItems(translate, items, callback);
+	});
+	translate.setHandler("done", function(translate, success) {
+		if(!success) onFail.call(me);
+	});
+	translate.translate(this._libraryID, false);
+}
+
+/**
+ * Prepares a list of lines that can be used for querying
+ * The lines are stored in this._goodLines
+ * @private
+ * @param {String[]} lines Array of lines
+ * @param {Function} callback A callback function to be called on completing
+ */
+Zotero_RecognizePDF.Recognizer.prototype._cleanLines = function(lines, callback) {
 	// Use only first column from multi-column lines
 	const lineRe = /^\s*([^\s]+(?: [^\s]+)+)/;
+	var cleanedLines = [], cleanedLineLengths = [];
 	for(var i=0; i<lines.length && cleanedLines.length<30; i++) {
 		var m = lineRe.exec(lines[i]);
 		if(m && m[1].split(' ').length > 3) {
@@ -345,8 +382,21 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 		}
 		
 		this._nextLine = this._iteration = 0;
-		this._queryGoogle();
+		callback.call(this);
 	}
+}
+
+/**
+ * Deletes hidden browser and sends a failure message to this_callback
+ * @private
+ * @param {String} msg Message to be sent to this._callback
+ */
+Zotero_RecognizePDF.Recognizer.prototype._deleteBrowserAndFail = function(msg) {
+	var me = this;
+	try {
+		if(this._hiddenBrowser) Zotero.Browser.deleteHiddenBrowser(me._hiddenBrowser);
+	} catch(e) {}
+	this._callback(false, msg);
 }
 
 /**
@@ -355,101 +405,80 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
  */
 Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 	if(this._iteration > 3 || !this._goodLines.length) {
-		try {
-			if(this._hiddenBrowser) Zotero.Browser.deleteHiddenBrowser(me._hiddenBrowser);
-		} catch(e) {}
-		this._callback(false, "recognizePDF.noMatches");
+		this._deleteBrowserAndFail("recognizePDF.noMatches");
 		return;
 	}
 	this._iteration++;
 
 	var queryString = "";
 	var me = this;
-	if(this._DOI) {
-		// use CrossRef to look for DOI
-		var translate = new Zotero.Translate.Search();
-		translate.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
-		var item = {"itemType":"journalArticle", "DOI":this._DOI};
-		translate.setSearch(item);
-		translate.setHandler("itemDone", function(translate, item) {
-			me._callback(item);
-		});
-		translate.setHandler("select", function(translate, items, callback) {
-			return me._selectItems(translate, items, callback);
-		});
-		translate.setHandler("done", function(translate, success) {
-			if(!success) me._queryGoogle();
-		});
-		translate.translate(this._libraryID, false);
-		delete this._DOI;
-	} else {
-		// take the relevant parts of some lines (exclude hyphenated word)
-		var queryStringWords = 0;
-		while(queryStringWords < 25) {
-			/**a bit of a hack. We're relying on the same test being applied above.
-			 * But this way we don't have to rewrite the same error reporting code
-			 */
-			if(!this._goodLines.length) this._queryGoogle();
 
-			var words = this._goodLines.splice(this._nextLine,1)[0].split(/\s+/);
-			//Try to avoid picking adjacent strings so the odds of them appearing in another
-			// document quoting our document is low. Every 7th line is a magic value
-			this._nextLine = (this._nextLine + 7) % this._goodLines.length;
+	// take the relevant parts of some lines (exclude hyphenated word)
+	var queryStringWords = 0;
+	while(queryStringWords < 25) {
+		if(!this._goodLines.length) {
+			this._deleteBrowserAndFail("recognizePDF.noMatches");
+			return;
+		}
 
-			// get rid of first and last words
-			words.shift();
-			words.pop();
-			// make sure there are no long words (probably OCR mistakes)
-			var skipLine = false;
-			for(var i=0; i<words.length; i++) {
-				if(words[i].length > 20) {
-					skipLine = true;
-					break;
-				}
-			}
-			// add words to query
-			if(!skipLine && words.length) {
-				queryStringWords += words.length;
-				queryString += '"'+words.join(" ")+'" ';
+		var words = this._goodLines.splice(this._nextLine,1)[0].split(/\s+/);
+		//Try to avoid picking adjacent strings so the odds of them appearing in another
+		// document quoting our document is low. Every 7th line is a magic value
+		this._nextLine = (this._nextLine + 7) % this._goodLines.length;
+
+		// get rid of first and last words
+		words.shift();
+		words.pop();
+		// make sure there are no long words (probably OCR mistakes)
+		var skipLine = false;
+		for(var i=0; i<words.length; i++) {
+			if(words[i].length > 20) {
+				skipLine = true;
+				break;
 			}
 		}
-		
-		Zotero.debug("RecognizePDF: Query string "+queryString);
-		
-		// pass query string to Google Scholar and translate
-		var url = "http://scholar.google.com/scholar?q="+encodeURIComponent(queryString)+"&hl=en&lr=&btnG=Search";
-		if(!this._hiddenBrowser) {
-			this._hiddenBrowser = Zotero.Browser.createHiddenBrowser();
-			this._hiddenBrowser.docShell.allowImages = false;
+		// add words to query
+		if(!skipLine && words.length) {
+			queryStringWords += words.length;
+			queryString += '"'+words.join(" ")+'" ';
 		}
-		
-		var translate = new Zotero.Translate.Web();
-		var savedItem = false;
-		translate.setTranslator("57a00950-f0d1-4b41-b6ba-44ff0fc30289");
-		translate.setHandler("itemDone", function(translate, item) {
-			Zotero.Browser.deleteHiddenBrowser(me._hiddenBrowser);
-			savedItem = true;
-			me._callback(item);
-		});
-		translate.setHandler("select", function(translate, items, callback) {
-			me._selectItems(translate, items, callback);
-		});
-		translate.setHandler("done", function(translate, success) {
-			if(!success || !savedItem) me._queryGoogle();
-		});
-		translate.setHandler("translators", function(translate, detected) { 
-				if(detected.length) {
-					translate.translate(me._libraryID, false);
-				} else {
-					me._queryGoogle();
-				}
-		});
-		
-		this._hiddenBrowser.addEventListener("pageshow", function() { me._scrape(translate) }, true);
-		
-		this._hiddenBrowser.loadURIWithFlags(url,
-			Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, null, null);
 	}
+	
+	Zotero.debug("RecognizePDF: Query string "+queryString);
+	
+	// pass query string to Google Scholar and translate
+	var url = "http://scholar.google.com/scholar?q="+encodeURIComponent(queryString)+"&hl=en&lr=&btnG=Search";
+	if(!this._hiddenBrowser) {
+		this._hiddenBrowser = Zotero.Browser.createHiddenBrowser();
+		this._hiddenBrowser.docShell.allowImages = false;
+	}
+	
+	var translate = new Zotero.Translate.Web();
+	var savedItem = false;
+	translate.setTranslator("57a00950-f0d1-4b41-b6ba-44ff0fc30289");
+	translate.setHandler("itemDone", function(translate, item) {
+		Zotero.Browser.deleteHiddenBrowser(me._hiddenBrowser);
+		savedItem = true;
+		me._callback(item);
+	});
+	translate.setHandler("select", function(translate, items, callback) {
+		me._selectItems(translate, items, callback);
+	});
+	translate.setHandler("done", function(translate, success) {
+		if(!success || !savedItem) me._queryGoogle();
+	});
+	translate.setHandler("translators", function(translate, detected) { 
+			if(detected.length) {
+				translate.translate(me._libraryID, false);
+			} else {
+				me._queryGoogle();
+			}
+	});
+	
+	this._hiddenBrowser.addEventListener("pageshow", function() { me._scrape(translate) }, true);
+	
+	this._hiddenBrowser.loadURIWithFlags(url,
+		Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, null, null);
 }
 
 /**
