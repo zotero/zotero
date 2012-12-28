@@ -2122,7 +2122,7 @@ Zotero.SearchConditions = new function(){
 					contains: true,
 					doesNotContain: true
 				},
-				table: 'itemData',
+				table: '(SELECT * FROM itemData UNION SELECT itemID,fieldID,valueID FROM itemDataAlt)',
 				field: 'value',
 				aliases: Zotero.DB.columnQuery("SELECT fieldName FROM fieldsCombined " +
 					"WHERE fieldName NOT IN ('accessDate', 'date', 'pages', " +
