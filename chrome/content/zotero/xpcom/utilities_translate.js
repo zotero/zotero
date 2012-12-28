@@ -354,6 +354,40 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
 	}, headers, responseCharset, translate.cookieSandbox ? translate.cookieSandbox : undefined);
 }
 
+/**
+ * Already documented in Zotero.HTTP
+ * @ignore
+ */
+Zotero.Utilities.Translate.prototype.doHead = function(url, onDone, headers) {
+	var translate = this._translate;
+	url = translate.resolveURL(url);
+	
+	translate.incrementAsyncProcesses("Zotero.Utilities.Translate#doHead");
+	var xmlhttp = Zotero.HTTP.doHead(url, function(xmlhttp) {
+		//build a list of useful headers
+		var headers = {
+			'Allow': xmlhttp.getResponseHeader('Allow'),
+			'Content-Encoding': xmlhttp.getResponseHeader('Content-Encoding'),
+			'Content-Language': xmlhttp.getResponseHeader('Content-Language'),
+			'Content-Length': xmlhttp.getResponseHeader('Content-Length'),
+			'Content-Disposition': xmlhttp.getResponseHeader('Content-Disposition'),
+			'Content-Type': xmlhttp.getResponseHeader('Content-Type'),
+			'Last-Modified': xmlhttp.getResponseHeader('Last-Modified'),
+			'Warning': xmlhttp.getResponseHeader('Warning'),
+			//Set-Cookie intentionally omitted for privacy and security
+			//not exactly headers, but useful anyway
+			'status': xmlhttp.status,
+			'statusText': xmlhttp.statusText
+		};
+		try {
+			onDone(headers);
+			translate.decrementAsyncProcesses("Zotero.Utilities.Translate#doHead");
+		} catch(e) {
+			translate.complete(false, e);
+		}
+	}, headers, translate.cookieSandbox ? translate.cookieSandbox : undefined);
+}
+
 Zotero.Utilities.Translate.prototype.__exposedProps__ = {"HTTP":"r"};
 for(var j in Zotero.Utilities.Translate.prototype) {
 	if(typeof Zotero.Utilities.Translate.prototype[j] === "function" && j[0] !== "_" && j != "Translate") {
