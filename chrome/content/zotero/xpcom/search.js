@@ -2097,7 +2097,7 @@ Zotero.SearchConditions = new function(){
 					contains: true,
 					doesNotContain: true
 				},
-				table: 'itemCreators',
+				table: '(SELECT * FROM itemCreators UNION SELECT itemID,creatorID,creatorTypeID,orderIndex FROM itemCreatorsAlt)',
 				field: "TRIM(firstName || ' ' || lastName)"
 			},
 			
@@ -2109,7 +2109,7 @@ Zotero.SearchConditions = new function(){
 					contains: true,
 					doesNotContain: true
 				},
-				table: 'itemCreators',
+				table: '(SELECT * FROM itemCreators UNION SELECT itemID,creatorID,creatorTypeID,orderIndex FROM itemCreatorsAlt)',
 				field: 'lastName',
 				special: true
 			},
