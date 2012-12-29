@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.411",
+    PROCESSOR_VERSION: "1.0.412",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -2667,6 +2667,17 @@ CSL.Engine.prototype.retrieveItem = function (id) {
 				}
 			}
 			Item.legislation_id = legislation_id.join("::");
+        }
+    }
+    if (this.opt.development_extensions.main_title_from_short_title) {
+        Item["title-main"] = Item.title;
+        Item["title-sub"] = false;
+        if (Item.title && Item.shortTitle) {
+            offset = Item.shortTitle.length;
+            if (Item.title.slice(0,offset) === Item.shortTitle && Item.title.slice(offset).match(/^\s*:/)) {
+                Item["title-main"] = Item.title.slice(0,offset).replace(/\s+$/,"");
+                Item["title-sub"] = Item.title.slice(offset).replace(/^\s*:\s*/,"");
+            }
         }
     }
     Item["title-short"] = Item.shortTitle;
@@ -8454,8 +8465,7 @@ CSL.Node.text = {
                     func = function (state, Item, item) {
                         var parallel_variable = this.variables[0];
                         if (parallel_variable === "title" 
-                            && form === "short" 
-                            && !state.opt.development_extensions.main_title_from_short_title) {
+                            && form === "short") { 
                             parallel_variable = "shortTitle";
                         }
                         state.parallel.StartVariable(parallel_variable);
@@ -9825,9 +9835,6 @@ CSL.Transform = function (state) {
             var primary, secondary, tertiary, primary_tok, group_tok, key;
             if (!variables[0] || (!Item[variables[0]] && !Item[alternative_varname])) {
                 return null;
-            }
-            if (variables[0] === "title" && state.opt.development_extensions.main_title_from_short_title) {
-                alternative_varname = false;
             }
             var slot = {primary:false, secondary:false, tertiary:false};
             if (state.tmp.area.slice(-5) === "_sort") {
