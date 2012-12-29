@@ -637,7 +637,7 @@ var wpdDOMSaver = {
 	// FONT_FACE_RULE = 5,
 	// PAGE_RULE = 6
 	processCSSRecursively: function (aCSS) {
-		if (aCSS.disabled) return "";
+		if (!aCSS || aCSS.disabled) return "";
 		var content = "";
 		var medium = aCSS.media.mediaText;
 		if (medium != "" && medium.indexOf("screen") < 0 && medium.indexOf("all") < 0) {
@@ -970,8 +970,9 @@ var wpdDOMSaver = {
 		if (this.option["format"]) {
 			var myStyleSheets = aDocument.styleSheets;
 			// get all style sheets to "CSSText"
-			for (var i = 0; i < myStyleSheets.length; i++)
-			CSSText += this.processCSSRecursively(myStyleSheets[i]);
+			for (var i = 0; i < myStyleSheets.length; i++) {
+				CSSText += this.processCSSRecursively(myStyleSheets[i]);
+			}
 			if (CSSText) {
 				// don't forget to convert the CSS String to the document charset..
 				// (necessary for e.g. font-family)

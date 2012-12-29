@@ -1045,7 +1045,7 @@ Zotero.Translate.Base.prototype = {
 		this._currentState = "translate";
 		
 		if(!this.translator || !this.translator.length) {
-			throw new Error("Failed: no translator specified");
+			this.complete(false, new Error("No translator specified"));
 		}
 		
 		this._libraryID = libraryID;
@@ -2093,8 +2093,8 @@ Zotero.Translate.Search.prototype.setTranslator = function(translator) {
  */
 Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
 	if(this._currentState == "translate" && (!this.newItems || !this.newItems.length)) {
-		Zotero.debug("Translate: Could not find a result using "+this.translator[0].label+": \n"
-					  +this._generateErrorString(error), 3);
+		Zotero.debug("Translate: Could not find a result using "+this.translator[0].label, 3);
+		if(error) Zotero.debug(this._generateErrorString(error), 3);
 		if(this.translator.length > 1) {
 			this.translator.shift();
 			this.translate(this._libraryID, this._saveAttachments);

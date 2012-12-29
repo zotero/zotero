@@ -191,6 +191,12 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 			Zotero.ItemFields.getID('ISBN')
 		]
 	);
+	var isbnCache = {};
+	if (rows) {
+		for each(var row in rows) {
+			isbnCache[row.itemID] = row.value;
+		}
+	}
 	processRows();
 	
 	// DOI
@@ -200,6 +206,12 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
 				+ "ORDER BY value";
 	var rows = Zotero.DB.query(sql, [this._libraryID, Zotero.ItemFields.getID('DOI')]);
+	var doiCache = {};
+	if (rows) {
+		for each(var row in rows) {
+			doiCache[row.itemID] = row.value;
+		}
+	}
 	processRows();
 	
 	// For legal types we ignore the title but we're fussy about other stuff
@@ -227,6 +239,26 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	var rows = Zotero.DB.query(sql, [this._libraryID]);
 	processRows();
 
+	// Get years
+	var dateFields = [Zotero.ItemFields.getID('date')].concat(
+		Zotero.ItemFields.getTypeFieldsFromBase('date')
+	);
+	var sql = "SELECT itemID, SUBSTR(value, 1, 4) AS year FROM items "
+				+ "JOIN itemData USING (itemID) "
+				+ "JOIN itemDataValues USING (valueID) "
+				+ "WHERE libraryID=? AND fieldID IN ("
+				+ dateFields.map(function () '?').join() + ") "
+				+ "AND SUBSTR(value, 1, 4) != '0000' "
+				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
+				+ "ORDER BY value";
+	var rows = Zotero.DB.query(sql, [this._libraryID].concat(dateFields));
+	var yearCache = {};
+	if (rows) {
+		for each(var row in rows) {
+			yearCache[row.itemID] = row.year;
+		}
+	}
+	
 	var creatorRowsCache = {};
 	// Match on normalized title
 	// Return NULL if no title, otherwise catenate title and edition
@@ -260,8 +292,29 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 			return -1;
 		}
 		
+		// If both items have a DOI and they don't match, it's not a dupe
+		if (typeof doiCache[a.itemID] != 'undefined'
+				&& typeof doiCache[b.itemID] != 'undefined'
+				&& doiCache[a.itemID] != doiCache[b.itemID]) {
+			return -1;
+		}
+		
+		// If both items have an ISBN and they don't match, it's not a dupe
+		if (typeof isbnCache[a.itemID] != 'undefined'
+				&& typeof isbnCache[b.itemID] != 'undefined'
+				&& isbnCache[a.itemID] != isbnCache[b.itemID]) {
+			return -1;
+		}
+		
+		// If both items have a year and they're off by more than one, it's not a dupe
+		if (typeof yearCache[a.itemID] != 'undefined'
+				&& typeof yearCache[b.itemID] != 'undefined'
+				&& Math.abs(yearCache[a.itemID] - yearCache[b.itemID]) > 1) {
+			return -1;
+		}
+		
 		// Check for at least one match on last name + first initial of first name
-		if (creatorRowsCache[a.itemID] != undefined) {
+		if (typeof creatorRowsCache[a.itemID] != 'undefined') {
 			aCreatorRows = creatorRowsCache[a.itemID];
 		}
 		else {
@@ -274,7 +327,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 		}
 		
 		// Check for at least one match on last name + first initial of first name
-		if (creatorRowsCache[b.itemID] != undefined) {
+		if (typeof creatorRowsCache[b.itemID] != 'undefined') {
 			bCreatorRows = creatorRowsCache[b.itemID];
 		}
 		else {
