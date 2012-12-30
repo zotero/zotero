@@ -364,9 +364,8 @@
 					}
 					for (var i = 0, ilen = menu.childNodes.length; i < ilen; i += 1) {
 						if (multi && multi.hasLang(menu.childNodes[i].getAttribute('value'),fieldname)) {
-							menu.childNodes[i].setAttribute('hidden', true);
-						} else {
-							menu.childNodes[i].setAttribute('hidden', false);
+							menu.childNodes[i].setAttribute('disabled', true);
+							menu.childNodes[i].setAttribute('onclick', "return false");
 						}
 					}
 					return true;
