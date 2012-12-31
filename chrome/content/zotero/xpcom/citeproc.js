@@ -3103,19 +3103,6 @@ CSL.Engine.prototype.setAbbreviations = function (arg) {
         this.sys.setAbbreviations(arg);
     }
 };
-CSL.Engine.prototype.setEnglishLocaleEscapes = function (arg) {
-    if ("string" === typeof arg) {
-        arg = arg.split(/\s+,\s+/);
-    }
-    if (!arg || !arg.length) {
-        arg = [];
-    }
-    for (var i = 0, ilen = arg.length; i < ilen; i += 1) {
-        if (this.opt.english_locale_escapes.indexOf(arg[i]) === -1) {
-            this.opt.english_locale_escapes.push(arg[i]);
-        }
-    }
-};
 CSL.Engine.Opt = function () {
     this.has_disambiguate = false;
     this.mode = "html";
@@ -3209,7 +3196,6 @@ CSL.Engine.Opt = function () {
     this.citation_number_slug = false;
     this.max_number_of_names = 0;
     this.trigraph = "Aaaa00:AaAa00:AaAA00:AAAA00";
-    this.english_locale_escapes = [];
     this.development_extensions = {};
     this.development_extensions.field_hack = true;
     this.development_extensions.locator_date_and_revision = true;
@@ -9513,21 +9499,6 @@ CSL.Attributes["@text-case"] = function (state, arg) {
                 var default_locale = state.opt["default-locale"][0].slice(0, 2);
                 if (Item.jurisdiction) {
                     this.strings["text-case"] = "passthrough";
-                } else if (Item.language) {
-                    m = Item.language.match(/^\s*([A-Za-z]{2})(?:$|-| )/);
-                    if (!m) {
-                        this.strings["text-case"] = "passthrough";
-                    } else if (m[1].toLowerCase() !== "en") {
-                        this.strings["text-case"] = "passthrough";
-                        for (var i = 0, ilen = state.opt.english_locale_escapes.length; i < ilen; i += 1) {
-                            var escaper = state.opt.english_locale_escapes[i];
-                            if (m[1].slice(0, escaper.length).toLowerCase() === escaper) {
-                                this.strings["text-case"] = arg;
-                            }
-                        }
-                    }
-                } else if (default_locale !== "en") {
-                    this.strings["text-case"] = "passthrough";
                 }
             }
         }
@@ -9790,31 +9761,41 @@ CSL.Transform = function (state) {
         } 
         return value;
     }
+    function getFieldLocale(Item,field) {
+        var ret = state.opt["default-locale"][0].slice(0, 2)
+        if (Item.language) {
+            m = ("" + Item.language).match(/^([a-zA-Z]{2})(?:$|-.*| .*)/);
+            if (m) {
+                ret = m[1];
+            } else {
+                ret = "tlh";
+            }
+        }
+        if (Item.multi && Item.multi && Item.multi.main) {
+            ret = Item.multi.main[field];
+        }
+        if (state.opt.development_extensions.normalize_lang_keys_to_lowercase) {
+            ret = ret.toLowerCase();
+        }
+        return ret;
+    };
     function getTextSubField(Item, field, locale_type, use_default, stopOrig) {
         var m, lst, opt, o, oo, pos, key, ret, len, myret, opts;
         var usedOrig = stopOrig;
         if (!Item[field]) {
             return {name:"", usedOrig:stopOrig};
         }
-        ret = {name:"", usedOrig:stopOrig};
+        ret = {name:"", usedOrig:stopOrig,locale:getFieldLocale(Item,field)};
         opts = state.opt[locale_type];
         if (locale_type === 'locale-orig') {
             if (stopOrig) {
                 ret = {name:"", usedOrig:stopOrig};
             } else {
-                var main_locale = state.opt["default-locale"][0].slice(0, 2)
-                if (Item.multi && Item.multi && Item.multi.main) {
-                    main_locale = Item.multi.main[field];
-                }
-                ret = {name:Item[field], usedOrig:false, locale:main_locale};
+                ret = {name:Item[field], usedOrig:false, locale:getFieldLocale(Item,field)};
             }
             return ret;
         } else if (use_default && ("undefined" === typeof opts || opts.length === 0)) {
-            var main_locale = state.opt["default-locale"][0].slice(0, 2)
-            if (Item.multi && Item.multi && Item.multi.main) {
-                main_locale = Item.multi.main[field];
-            }
-            return {name:Item[field], usedOrig:true, locale:main_locale};
+            return {name:Item[field], usedOrig:true, locale:getFieldLocale(Item,field)};
         }
         for (var i = 0, ilen = opts.length; i < ilen; i += 1) {
             opt = opts[i];
@@ -9830,11 +9811,7 @@ CSL.Transform = function (state) {
             }
         }
         if (!ret.name && use_default) {
-            var main_locale = state.opt["default-locale"][0].slice(0, 2)
-            if (Item.multi && Item.multi && Item.multi.main) {
-                main_locale = Item.multi.main[field];
-            }
-            ret = {name:Item[field], usedOrig:true, locale:main_locale};
+            ret = {name:Item[field], usedOrig:true, locale:getFieldLocale(Item,field)};
         }
         return ret;
     }
@@ -9992,12 +9969,12 @@ CSL.Transform = function (state) {
                     primary_tok.decorations.push(["@font-style", "italic"])
                 }
             }
+            if (primary_locale !== "en" && primary_tok.strings["text-case"] === "title") {
+                primary_tok.strings["text-case"] = "passthrough";
+            }
             if (secondary || tertiary) {
                 state.output.openLevel("empty");
                 primary_tok.strings.suffix = "";
-                if (primary_locale !== "en") {
-                    primary_tok.strings["text-case"] = "passthrough";
-                }
                 state.output.append(primary, primary_tok);
                 if (secondary) {
                     secondary_tok = CSL.Util.cloneToken(template_tok);
@@ -10011,7 +9988,7 @@ CSL.Transform = function (state) {
                             secondary_tok.decorations = secondary_tok.decorations.slice(0, i).concat(secondary_tok.decorations.slice(i + 1))
                         }
                     }
-                    if (secondary_locale !== "en") {
+                    if (secondary_locale !== "en" && secondary_tok.strings["text-case"] === "title") {
                         secondary_tok.strings["text-case"] = "passthrough";
                     }
                     state.output.append(secondary, secondary_tok);
@@ -10034,7 +10011,7 @@ CSL.Transform = function (state) {
                             tertiary_tok.decorations = tertiary_tok.decorations.slice(0, i).concat(tertiary_tok.decorations.slice(i + 1))
                         }
                     }
-                    if (tertiary_locale !== "en") {
+                    if (tertiary_locale !== "en" && tertiary_tok.strings["text-case"] === "title") {
                         tertiary_tok.strings["text-case"] = "passthrough";
                     }
                     state.output.append(tertiary, tertiary_tok);
