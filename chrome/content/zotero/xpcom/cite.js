@@ -49,6 +49,7 @@ Zotero.Cite.System.retrieveItem = function(item) {
 		'id':zoteroItem.id,
 		'type':cslType,
 		'multi':{
+			'main':{},
 			'_keys':{}
 		}
 	};
@@ -75,6 +76,9 @@ Zotero.Cite.System.retrieveItem = function(item) {
 					value = value.substr(1, value.length-2);
 				}
 				cslItem[variable] = value;
+				if (zoteroItem.multi.main[fieldID]) {
+					cslItem.multi.main[variable] = zoteroItem.multi.main[fieldID]
+				}
 				if (zoteroItem.multi._keys[fieldID]) {
 					cslItem.multi._keys[variable] = {};
 					for (var langTag in zoteroItem.multi._keys[fieldID]) {
