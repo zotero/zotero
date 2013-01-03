@@ -239,7 +239,7 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped,
 	if (Zotero.multiFieldIds[fieldID]) {
 		var value = this.multi.get(fieldID, language, honorEmpty);
 	} else {
-	var value = this._itemData[fieldID] ? this._itemData[fieldID] : '';
+		var value = this._itemData[fieldID] ? this._itemData[fieldID] : '';
 	}
 	
 	if (!unformatted) {
@@ -271,6 +271,26 @@ Zotero.Item.prototype.getUsedFields = function(asNames) {
 		return [];
 	}
 	return fields;
+}
+
+/**
+ * @param	{Boolean}				asNames
+ * @return	{Integer{}|String[]}
+ */
+Zotero.Item.prototype.getUsedMultiFields = function(asNames) {
+	if (!this.id) {
+		return [];
+	}
+	var sql = "SELECT fieldID,languageTag FROM itemDataAlt WHERE itemID=?";
+	if (asNames) {
+	    sql = "SELECT fieldID FROM itemDataAlt WHERE itemID=?";
+		sql = "SELECT fieldName,languageTag FROM fields NATURAL JOIN itemDataAlt WHERE fieldID IN (" + sql + ")";
+	}
+	var rows = Zotero.DB.query(sql, this.id);
+	if (!rows) {
+		return [];
+	}
+	return rows;
 }
 
 
@@ -492,6 +512,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 			
 			for each(var oldFieldID in obsoleteFields) {
 				// Try to get a base type for this field
+
 				var baseFieldID =
 					Zotero.ItemFields.getBaseIDFromTypeAndField(oldItemTypeID, oldFieldID);
 				
@@ -4864,7 +4885,9 @@ Zotero.Item.prototype.toArray = function (mode) {
 		}
 		for (var languageTag in this.multi._keys[fieldID]) {
 			arr.multi._keys[fieldName][languageTag] = this.multi._keys[fieldID][languageTag];
-			arr.multi._lsts[fieldName].push(languageTag);
+            if (arr.multi._lsts[fieldName].indexOf(languageTag) === -1) {
+			    arr.multi._lsts[fieldName].push(languageTag);
+            }
 		}
 	}
 
@@ -5020,21 +5043,24 @@ Zotero.Item.prototype.serialize = function(mode) {
 	// Item metadata
 	for (var i in this._itemData) {
 		arr.fields[Zotero.ItemFields.getName(i)] = this.getField(i) + '';
+    }
 
-
-		// OOOOO: Have to serialize the multi object here as well.
-		for (var fieldID in this.multi.main) {
-			arr.multi.main[fieldID] = this.multi.main[fieldID];
+	// OOOOO: Have to serialize the multi object here as well.
+	for (var fieldID in this.multi.main) {
+		var fieldName = Zotero.ItemFields.getName(fieldID);
+		arr.multi.main[fieldName] = this.multi.main[fieldID];
+	}
+	for (var fieldID in this.multi._keys) {
+		var fieldName = Zotero.ItemFields.getName(fieldID);
+		if (!arr.multi._keys[fieldName]) {
+			arr.multi._keys[fieldName] = {};
+			arr.multi._lsts[fieldName] = [];
 		}
-		for (var fieldID in this.multi._keys) {
-			if (!arr.multi._keys[fieldID]) {
-				arr.multi._keys[fieldID] = {};
-				arr.multi._lsts[fieldID] = [];
-			}
-			for (var langTag in this.multi._keys[fieldID]) {
-				arr.multi._keys[fieldID][langTag] = this.multi._keys[fieldID][langTag];
-				arr.multi._lsts[fieldID].push(langTag);
-			}
+		for (var langTag in this.multi._keys[fieldID]) {
+			arr.multi._keys[fieldName][langTag] = this.multi._keys[fieldID][langTag];
+            if (arr.multi._lsts[fieldName].indexOf(langTag) === -1) {
+				arr.multi._lsts[fieldName].push(langTag);
+            }
 		}
 	}
 	

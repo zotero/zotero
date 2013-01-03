@@ -23,98 +23,89 @@ Zotero.EXTENDED_TYPES = {
 	}
 };
 
+// Oh, shit. This is going to be a short-term nightmare.
+//
+// Add these fields to system.sql
+// Provide a parallel linked table with "spoof" flags.
+// In item.js, divert spoofed entries (and multilingual variants!) to the Extra field
+//   for save
+//   for read
+// Pray to God that it doesn't affect sync
+
+Zotero.EXTENDED_CREATORS = {
+    "patent":{
+        "recipient":"recipient"
+    }
+}
+
 Zotero.EXTENDED_FIELDS = {
-	"article-newspaper": {
-		"fields": [
-			"original-date"
-		],
-		"jurisdiction": true
+	"newspaperArticle": {
+        "jurisdiction":"jurisdiction",
+        "dateDecided":"original-date"
 	},
 	"bill": {
-		"fields": [
-			"author", 
-			"collection-number", 
-			"event", 
-			"event-date", 
-			"genre", 
-			"original-author", 
-			"volume",
-            "archive_location"
-		], 
-		"jurisdiction": true, 
-		"types": [
-			"gazette", 
-			"treaty"
-		]
+        "jurisdiction":"jurisdiction",
+        "resolutionLabel":"event",
+        "assemblyNumber":"collection-number",
+        "sessionType":"genre",
+        "archiveLocation":"archive_location",
+        "reporter":"container-title"
 	}, 
-	"book": {
-		"types": [
-			"classic", 
-			"periodical"
-		]
-	}, 
-	"broadcast": {
-		"fields": [
-			"director", 
-			"genre"
-		]
-	}, 
-	"graphic": {
-		"fields": [
-			"container-title"
-		]
-	}, 
-	"legal_case": {
-		"fields": [
-			"archive", 
-			"archive_location", 
-			"collection-number", 
-			"event-place", 
-			"genre", 
-			"issue", 
-			"issued", 
-			"original-date"
-		],
-		"jurisdiction": true
-	}, 
-	"legislation": {
-		"fields": [
-			"collection-number", 
-			"genre", 
-			"issued", 
-			"publisher", 
-			"volume"
-		],
-		"jurisdiction": true 
-	}, 
-	"map": {
-		"fields": [
-			"scale"
-		]
+	"artwork": {
+        "publicationTitle":"container-title"
 	}, 
 	"patent": {
+		"jurisdiction":"jurisdiction",
+        "priorityDate":"original-date"
+	}, 
+	"Xlegal_case": {
 		"fields": [
-			"original-date", 
-			"recipient"
+			{"csl":"archive","zotero":""}, 
+			{"csl":"archive_location","zotero":""}, 
+			{"csl":"collection-number","zotero":""}, 
+			{"csl":"event-place","zotero":""}, 
+			{"csl":"genre","zotero":""}, 
+			{"csl":"issue","zotero":""}, 
+		    {"csl":"jurisdiction","zotero":"jurisdiction"},
+			{"csl":"issued","zotero":""}, 
+			{"csl":"original-date","zotero":""}
+		]
+	}, 
+	"Xlegislation": {
+		"fields": [
+			{"csl":"collection-number","zotero":""}, 
+			{"csl":"genre","zotero":""}, 
+			{"csl":"publisher","zotero":""}, 
+			{"csl":"volume","zotero":""},
+		    {"csl":"jurisdiction","zotero":"jurisdiction"},
+			{"csl":"issued","zotero":""} 
+		]
+	}, 
+	"Xmap": {
+		"fields": [
+			{"csl":"scale","zotero":""}
+		]
+	}, 
+	"Xpersonal_communication": {
+		"fields": [
+			{"csl":"genre","zotero":""}
+		]
+	}, 
+	"Xreport": {
+		"fields": [
+		    {"csl":"jurisdiction","zotero":"jurisdiction"}
+        ]
+	}, 
+	"Xsong": {
+		"fields": [
+			{"csl":"container-title","zotero":""}, 
+			{"csl":"publisher","zotero":""}, 
+			{"csl":"section","zotero":""}
 		],
-		"jurisdiction": true
-	}, 
-	"personal_communication": {
-		"fields": [
-			"genre"
-		]
-	}, 
-	"report": {
-		"jurisdiction": true
-	}, 
-	"song": {
-		"fields": [
-			"container-title", 
-			"issued", 
-			"original-date", 
-			"publisher", 
-			"section"
-		]
+		"dates": [
+			{"csl":"issued","zotero":""}, 
+			{"csl":"original-date","zotero":""}
+        ]
 	}
 }
 

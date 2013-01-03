@@ -272,6 +272,7 @@
 							if (!this.id(conditions[i]['name'] + '-tooltip')) {
 								var fieldName = null;
 								try {
+                                    Zotero.debug("YYY run getLocalizedString() from zoterosearch.xml ...");
 									fieldName = Zotero.ItemFields.getLocalizedString(null, conditions[i].name);
 								}
 								catch (e) {}

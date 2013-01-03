@@ -67,13 +67,14 @@ const CSL_TEXT_MAPPINGS = {
 	"version":["version"],
 	"section":["section"],
 	"genre":["type"],
+	"chapter-number":["session"],
 	"source":["libraryCatalog"],
 	"dimensions": ["artworkSize", "runningTime"], 
 	"medium":["medium", "system"],
 	"scale":["scale"],
 	"archive":["archive"],
 	"archive_location":["archiveLocation"],
-	"event":["meetingName", "conferenceName"], /* these should be mapped to the same base field in SQL mapping tables */
+	"event":["meetingName", "conferenceName", "resolutionLabel"], /* these should be mapped to the same base field in SQL mapping tables */
 	"event-place":["place"],
 	"archive-place":["place"],
 	"abstract":["abstractNote"],
@@ -87,24 +88,17 @@ const CSL_TEXT_MAPPINGS = {
 	"references":["history"],
 	"shortTitle":["shortTitle"],
 	"journalAbbreviation":["journalAbbreviation"],
-	"language":["language"]
+	"language":["language"],
 }
 
 /*
  * Mappings for dates
- */
-const CSL_DATE_MAPPINGS_VANILLA = {
-	"issued":"date",
-	"accessed":"accessDate"
-}
-const CSL_DATE_MAPPINGS_LAW = {
-	"original-date":"date",
-	"accessed":"accessDate"
-}
-const CSL_DATE_MAPPINGS_PATENT = {
-	"issued":"issueDate",
-	"original-date":"filingDate",
-	"accessed":"accessDate"
+*/
+const CSL_DATE_MAPPINGS = {
+    "issued":["date"],
+	"original-date":["newsCaseDate","priorityDate"],
+	"submitted":["filingDate"],
+	"accessed":["accessDate"]
 }
 
 /*
@@ -145,6 +139,18 @@ const CSL_TYPE_MAPPINGS = {
 	'podcast':"song",			// ??
 	'computerProgram':"book"		// ??
 };
+
+/**
+ * Force Fields
+*/
+const CSL_FORCE_FIELD_CONTENT = {
+    "tvBroadcast":{
+        "genre":"television broadcast"
+    },
+    "radioBroadcast":{
+        "genre":"radio broadcast"
+    }
+}
 
 /**
  * @class Functions for text manipulation and other miscellaneous purposes
@@ -1700,6 +1706,7 @@ Zotero.Utilities = {
 				} else {
 					var fieldID = Zotero.ItemFields.getID(field),
 						baseMapping
+
 					if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)
 							&& (baseMapping = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, fieldID))) {
 						value = item[Zotero.ItemTypes.getName(baseMapping)];
@@ -1751,14 +1758,6 @@ Zotero.Utilities = {
 		}
 		
 		// get date variables
-		var CSL_DATE_MAPPINGS;
-		if (["legal_case","legislation"].indexOf(cslType) > -1) {
-			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
-		} else if ("patent" === cslType) {
-			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_PATENT;
-		} else {
-			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
-		}
 		for(var variable in CSL_DATE_MAPPINGS) {
 			var date = item[CSL_DATE_MAPPINGS[variable]];
 			if(date) {
@@ -1871,14 +1870,6 @@ Zotero.Utilities = {
 		}
 		
 		// get date variables
-		var CSL_DATE_MAPPINGS;
-		if (["legal_case","legislation"].indexOf(cslItem.type) > -1) {
-			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
-		} else if ("patent" === cslItem.type) {
-			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_PATENT;
-		} else {
-			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
-		}
 		for(var variable in CSL_DATE_MAPPINGS) {
 			if(variable in cslItem) {
 				var field = CSL_DATE_MAPPINGS[variable],

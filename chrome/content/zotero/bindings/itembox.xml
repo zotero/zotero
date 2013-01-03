@@ -326,6 +326,7 @@
 			
 
 			<method name="refreshLanguages">
+				<parameter name="node"/>
 				<body>
 				<![CDATA[
 					var i, ilen;
@@ -352,8 +353,7 @@
 						return false;
 					}
 					// Hide languages that are already used.
-					var elem = document.popupNode;
-					var row = Zotero.getAncestorByTagName(elem, 'row');
+					var row = Zotero.getAncestorByTagName(node, 'row');
 					var fieldstring = row.firstChild.getAttribute('fieldname');
 					var fieldname = fieldstring.split('-')[0];
 					var multi = this.item.multi;
@@ -564,8 +564,10 @@
 						}
 						
 						if (fieldName) {
+                            Zotero.debug("YYY itembox.xml [1] "+this.item.itemTypeID);
 							label.setAttribute("value", prefix +
 								Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, fieldName) + ":");
+                            Zotero.debug("YYY   done");
 						}
 						
 						// TEMP - NSF (homepage)
@@ -982,12 +984,19 @@
 					var row = document.createElement("row");
 					
 					// Add click event to row
-					// OOOOO: Is there really a fieldname on value ever?
-					if (this._rowIsClickable(value.getAttribute('fieldname'))) {
+                    var fieldname = value.getAttribute('fieldname');
+					if (this._rowIsClickable(fieldname)) {
 						row.className = 'zotero-clicky';
-						row.addEventListener('click', function (event) {
-							document.getBindingParent(this).clickHandler(this);
-						}, false);
+						// Is this branch necessary, is it used?
+						if (fieldname == 'jurisdiction') {
+							row.addEventListener('click', function (event) {
+								document.getBindingParent(this).setJurisdictionMenu(this);
+							}, false);
+						} else {
+							row.addEventListener('click', function (event) {
+								document.getBindingParent(this).clickHandler(this);
+							}, false);
+						}
 					}
 
 					row.appendChild(label);
@@ -1409,7 +1418,9 @@
 				<body>
 				<![CDATA[
 					var label = document.createElement("label");
+                    Zotero.debug("YYY itembox.xml [2] "+this.item.itemTypeID);
 					label.setAttribute("value", Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, field) + ':');
+                    Zotero.debug("YYY    done");
 					label.setAttribute("fieldname", field);
 					label.setAttribute("onclick", "this.nextSibling.firstChild.blur()");
 					
@@ -1859,10 +1870,12 @@
 						}
 						
 						var fieldNames = "";
+                        Zotero.debug("YYY itembox.xml [3] "+this.item.itemTypeID);
 						for (var i=0; i<fieldsToDelete.length; i++) {
 							fieldNames += "\n - " +
 								Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, fieldsToDelete[i]);
 						}
+                        Zotero.debug("YYY   done");
 						
 						var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 							.getService(Components.interfaces.nsIPromptService);
@@ -1921,7 +1934,9 @@
 					);
 					ab.parentNode.replaceChild(elem, ab);
 					
+                    Zotero.debug("YYY itembox.xml [4] "+this.item.itemTypeID);
 					var text = Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, 'abstractNote') + ':';
+                    Zotero.debug("YYY    done");
 					// Add '(...)' before "Abstract:" for collapsed abstracts
 					if (valueText && cur) {
 						text = '(...) ' + text;
@@ -2011,16 +2026,19 @@
 					
 					if (this._fieldIsClickable(fieldName)) {
 						valueElement.setAttribute('ztabindex', tabindex);
-						valueElement.addEventListener('click', function (event) {
-							/* Skip right-click on Windows */
-							if (event.button) {
-								return;
-							}
-							document.getBindingParent(this).clickHandler(this);
-						}, false);
+						if (fieldName == 'jurisdiction') {
+							valueElement.setAttribute("popup","jurisdiction-menu");
+						} else {
+							valueElement.addEventListener('click', function (event) {
+								/* Skip right-click on Windows */
+								if (event.button) {
+									return;
+								}
+								document.getBindingParent(this).clickHandler(this);
+							}, false);
+						}
 						valueElement.className = 'zotero-clicky';
 					}
-					
 					switch (fieldName) {
 						case 'itemType':
 							valueText = Zotero.ItemTypes.getLocalizedString(valueText);
@@ -2072,9 +2090,6 @@
 								Zotero.ItemFields.isFieldOfBase(fieldID, 'title') ||
 								Zotero.ItemFields.isFieldOfBase(fieldID, 'publicationTitle'))) {
 							valueElement.setAttribute('contextmenu', 'zotero-field-transform-menu');
-						}
-						if (this.editable && shortFieldName == 'extra') {
-							valueElement.setAttribute('contextmenu', 'extra-menu');
 						}
 					}
 					
@@ -3433,35 +3448,6 @@ if (oldCreator.id) {
 				</body>
 			</method>
 
-			<method name="setExtraMenus">
-			  <parameter name="menupop"/>
-			  <body>
-				<![CDATA[
-					 var itemType = Zotero.ItemTypes.getName(this.item.itemTypeID)
-					 cslType = Zotero.Utilities.getCslTypeFromItemType(itemType);
-					 var extensions = Zotero.EXTENDED_FIELDS[cslType];
-					 var nodes = {};
-					 nodes.jurisdiction = menupop.firstChild;
-					 nodes.fields = nodes.jurisdiction.nextSibling;
-					 var showSomething = false;
-					 if (extensions) {
-					 	for (var key in nodes) {
-							if (extensions[key]) {
-								showSomething = true;
-								nodes[key].setAttribute("hidden", false);
-							} else {
-								nodes[key].setAttribute("hidden", true);
-							}
-						}
-						return showSomething;
-					} else {
-						return false;
-					}
-				]]>
-			  </body>
-			</method>
-
-
 			<method name="setJurisdictionMenu">
 			  <parameter name="menupop"/>
 			  <parameter name="anchorKey"/>
@@ -3491,61 +3477,20 @@ if (oldCreator.id) {
 						}
 					}
 				]]>
-			  </body>
-			</method>
+              </body>
+            </method>
 
 			<method name="setJurisdictionKey">
 			  <parameter name="key"/>
 			  <body>
 				<![CDATA[
-					this.popFieldValueFromExtra("jurisdiction");
-					this.setFieldValueInExtra("jurisdiction", key);
+					//this.popFieldValueFromExtra("jurisdiction");
+					//this.setFieldValueInExtra("jurisdiction", key);
+                    alert("HELLO!");
 					this.item.save();
-					this.refresh();
 				]]>
 			  </body>
 			</method>
-
-			<method name="setExtraFieldsMenu">
-			  <parameter name="menupop"/>
-			  <body>
-				<![CDATA[
-					var itemType = Zotero.ItemTypes.getName(this.item.itemTypeID);
-					var cslType = Zotero.Utilities.getCslTypeFromItemType(itemType);
-					var extensions = Zotero.EXTENDED_FIELDS[cslType];
-					while (menupop.childNodes.length) {
-						menupop.removeChild(menupop.lastChild);
-					}
-					if (extensions && extensions.fields) {
-						for (var i = 0, ilen=extensions.fields.length; i < ilen; i += 1) {
-							var elem = document.createElement("menuitem");
-							elem.setAttribute("label", extensions.fields[i]);
-							menupop.appendChild(elem);
-							
-							elem.setAttribute("oncommand", "return document.getBindingParent(this).editExtraField('"+extensions.fields[i]+"');");
-						}
-					}
-					return true;
-				]]>
-			  </body>
-			</method>
-
-			<method name="editExtraField">
-			  <parameter name="extraFieldName"/>
-			  <body>
-				<![CDATA[
-					var value = this.popFieldValueFromExtra(extraFieldName);
-					var io = {label:extraFieldName,value:value};
-					window.openDialog('chrome://zotero/content/editExtraField.xul', 'mlz-edit-extra', 'centerscreen,modal', io);
-					if (io.value) {
-						this.setFieldValueInExtra(extraFieldName, io.value);
-					}
-					this.item.save();
-					this.refresh();
-				]]>
-			  </body>
-			</method>
-
 
 		</implementation>
 		
@@ -3555,7 +3500,7 @@ if (oldCreator.id) {
 				<popupset>
 				  <menupopup id="multi-spawn-popup" 
 							 position="after_start"
-							 onpopupshowing="return document.getBindingParent(this).refreshLanguages();">
+							 onpopupshowing="return document.getBindingParent(this).refreshLanguages(document.popupNode);">
 					<label id="zotero-lang-add" 
 						   style="font-weight:bold;" 
 						   value="&zotero.items.menu.addTag;"/>
@@ -3570,7 +3515,7 @@ if (oldCreator.id) {
 				  </menupopup>
 				  <menupopup id="creator-type-menu" position="after_start"
 						onpopupshowing="var typeBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
-								var haslang = document.getBindingParent(this).refreshLanguages();
+								var haslang = document.getBindingParent(this).refreshLanguages(document.popupNode);
 								document.getElementById('zotero-creator-lang-menu').setAttribute('hidden', !haslang);
 								var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 								
@@ -3651,24 +3596,11 @@ if (oldCreator.id) {
 							</menupopup>
 						</menu>
 					</menupopup>
-					<menupopup id="extra-menu"
-							   position="after_start"
-							   onpopupshowing="return document.getBindingParent(this).setExtraMenus(this);">
-					  <menu label="Jurisdiction">
-						<menupopup onpopupshowing="var item = document.getBindingParent(this).item;
-						var itemType = Zotero.ItemTypes.getName(item.itemTypeID);
-						 var cslType = Zotero.Utilities.getCslTypeFromItemType(itemType);
-						 var extensions = Zotero.EXTENDED_FIELDS[cslType];
-						 if (extensions &amp;&amp; extensions.jurisdiction) {
-						 	return document.getBindingParent(this).setJurisdictionMenu(this);
-						 } else {
-						 	return false;
-						 };"/>
-					  </menu>
-					  <menu label="Supplementary fields">
-						<menupopup onpopupshowing="return document.getBindingParent(this).setExtraFieldsMenu(this)"/>
-					  </menu>
-					</menupopup>
+                    <menupopup id="jurisdiction-menu"
+						position="after_start" 
+						onpopupshowing="document.getBindingParent(this).setJurisdictionMenu(this);"/>
+
+
 					<zoteroguidancepanel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
 				</popupset>
 				<grid flex="1">
