@@ -30,14 +30,13 @@ Zotero.ZlsValidator = function () {
 	}
 
 	this.validate = function (tag) {
-		Zotero.debug("Zotero.ZlsValidator.validate:", 3);
+		//Zotero.debug("zls: Zotero.ZlsValidator.validate: "+tag, 3);
 		this.tag = tag;
 		this.tagdata = false;
 		this.remnant = [];
 		if (this._cache[tag]) {
-			this.tagdata = this._cache[tag];
-			Zotero.debug("Tagdata from cache:", 3);
-			Zotero.debug(this.tagdata, 3);
+			this.tagdata = this._cache[tag].slice();
+			//Zotero.debug("zls: Tagdata from cache:"+this.tagdata, 3);
 			return true;
 		}
 		
@@ -50,10 +49,10 @@ Zotero.ZlsValidator = function () {
 			// items remain. Loop within getVariant()
 			// itself seems safest.
 			this.getVariant();
-			this._cache[tag] = this.tagdata;
+			this._cache[tag] = this.tagdata.slice();
 			return true;
 		} catch (e) {
-			Zotero.debug("Language tag validation failed: "+e);
+			Zotero.debug("zls: Language tag validation failed: "+e);
 			return false;
 		}
 	};
@@ -159,7 +158,7 @@ Zotero.ZlsValidator = function () {
 		var res = Zotero.DB.rowQuery(sql, [primary,'language','collection']);
 		if (res) {
 			res.type = 'primary';
-			this.tagdata = [res];
+			this.tagdata = [{type:'primary',subtag:res.subtag,description:res.description}];
 		} else {
 			this.tagdata = false;
 		}
@@ -178,7 +177,7 @@ Zotero.ZlsValidator = function () {
 		var res = Zotero.DB.rowQuery(sql,['script',this.remnant[0]]);
 		if (res) {
 			res.type = 'script';
-			this.tagdata.push(res);
+			this.tagdata.push({type:'script',subtag:res.subtag,description:res.description});
 			this.remnant = this.remnant.slice(1);
 		};
 	};
@@ -197,7 +196,7 @@ Zotero.ZlsValidator = function () {
 		var res = Zotero.DB.rowQuery(sql,['region',this.remnant[0]]);
 		if (res) {
 			res.type = 'region';
-			this.tagdata.push(res);
+			this.tagdata.push({type:'region',subtag:res.subtag,description:res.description});
 			this.remnant = this.remnant.slice(1);
 		}
 	};
@@ -242,7 +241,7 @@ Zotero.ZlsValidator = function () {
 		var res = Zotero.DB.rowQuery(sql,['variant',this.remnant[0]]);		
 		if (res) {
 			res.type = 'variant';
-			this.tagdata.push(res);
+			this.tagdata.push({type:'variant',subtag:res.subtag,description:res.description});
 			this.remnant = this.remnant.slice(1);
 		};
 	};
