@@ -352,7 +352,7 @@
 						return false;
 					}
 					// Hide languages that are already used.
-					var elem = document.popupNode;
+					var elem = document.triggerNode;
 					var row = Zotero.getAncestorByTagName(elem, 'row');
 					var fieldstring = row.firstChild.getAttribute('fieldname');
 					var fieldname = fieldstring.split('-')[0];
@@ -1007,7 +1007,7 @@
 			  <parameter name="language"/>
 				<body>
 				  <![CDATA[
-					var elem = document.popupNode;
+					var elem = document.triggerNode;
 					var row = Zotero.getAncestorByTagName(elem, 'row');
 
 
@@ -1025,7 +1025,7 @@
 			  <parameter name="language"/>
 				<body>
 				  <![CDATA[
-					var elem = document.popupNode;
+					var elem = document.triggerNode;
 					var row = Zotero.getAncestorByTagName(elem, 'row');
 					var fieldstring = row.firstChild.getAttribute('fieldname');
 					var servantLang = row.firstChild.getAttribute('servantLang');
@@ -3008,7 +3008,7 @@
 				<body>
 				<![CDATA[
 //Zotero.debug("XXX modifyCreatorType()");
-					var row = document.popupNode.localName == 'hbox' ? document.popupNode.parentNode : document.popupNode.parentNode.parentNode;
+					var row = document.triggerNode.localName == 'hbox' ? document.triggerNode.parentNode : document.triggerNode.parentNode.parentNode;
 					var fieldstring = row.firstChild.getAttribute('fieldname');
 					var index = fieldstring.split('-')[1];
 					var fieldStringSuffix = fieldstring.split('-')[2];
@@ -3194,7 +3194,7 @@ if (oldCreator.id) {
 			<method name="swapNames">
 				<body>
 				<![CDATA[
-					var myelem = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode
+					var myelem = document.triggerNode.localName == 'hbox' ? document.triggerNode : document.triggerNode.parentNode
 ;
 					var elem = myelem.parentNode.firstChild.lastChild;
 					var creatorIndex = parseInt(elem.getAttribute('fieldname').split('-')[1]);
@@ -3217,7 +3217,7 @@ if (oldCreator.id) {
 				<body>
 				<![CDATA[
 //Zotero.debug("XXX moveCreator()");
-					var typeBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
+					var typeBox = document.triggerNode.localName == 'hbox' ? document.triggerNode : document.triggerNode.parentNode;
 					var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 
 					if (index === 0 && moveUp) {
@@ -3569,7 +3569,7 @@ if (oldCreator.id) {
 					</vbox>
 				  </menupopup>
 				  <menupopup id="creator-type-menu" position="after_start"
-						onpopupshowing="var typeBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
+						onpopupshowing="var typeBox = document.triggerNode.localName == 'hbox' ? document.triggerNode : document.triggerNode.parentNode;
 								var haslang = document.getBindingParent(this).refreshLanguages();
 								document.getElementById('zotero-creator-lang-menu').setAttribute('hidden', !haslang);
 								var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
@@ -3622,14 +3622,14 @@ if (oldCreator.id) {
 						<menu label="&zotero.item.textTransform;">
 						  <menupopup>
 								<menuitem label="&zotero.item.textTransform.titlecase;" class="menuitem-non-iconic"
-									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'title')"/>
+									oncommand="document.getBindingParent(this).textTransform(document.triggerNode, 'title')"/>
 								<menuitem label="&zotero.item.textTransform.sentencecase;" class="menuitem-non-iconic"
-									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'sentence')"/>
+									oncommand="document.getBindingParent(this).textTransform(document.triggerNode, 'sentence')"/>
 						  </menupopup>
 						</menu>
 					</menupopup>
 					<menupopup id="creator-transform-menu"
-						onpopupshowing="var myBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
+						onpopupshowing="var myBox = document.triggerNode.localName == 'hbox' ? document.triggerNode : document.triggerNode.parentNode;
 										var typeBox = myBox.parentNode.firstChild.lastChild;
 										var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);								
 										var item = document.getBindingParent(this).item;
