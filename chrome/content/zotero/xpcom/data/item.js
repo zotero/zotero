@@ -641,6 +641,20 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 			}
 		}
 	}
+
+	// Set default jurisdiction if necessary
+	var jurisdictionID = Zotero.ItemFields.getID("jurisdiction");
+	if (this._itemData[jurisdictionID] === null) {
+		var jurisdictionDefault = Zotero.Prefs.get("import.jurisdictionDefault");
+		var jurisdictionFallback = Zotero.Prefs.get("import.jurisdictionFallback");
+		if (jurisdictionDefault) {
+			this.setField(jurisdictionID,jurisdictionDefault);
+		} else if (jurisdictionFallback) {
+			this.setField(jurisdictionID,jurisdictionFallback);
+		} else {
+			this.setField(jurisdictionID,"us");
+		}
+	}
 	
 	if (loadIn) {
 		this._itemDataLoaded = false;
