@@ -22,7 +22,7 @@ textbox
 	margin: -1px 0 -1px 1px;
 }
 
-#item-type-menu
+#item-type-menu, #jurisdiction-menu
 {
 	padding: 0 0 0 1px !important;
 	margin: 0 5px 0 1px !important;
