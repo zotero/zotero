@@ -1069,7 +1069,7 @@ Zotero.Utilities = {
 	 **/
 	"randomString":function(len, chars) {
 		if (!chars) {
-			chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghiklmnopqrstuvwxyz";
+			chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 		}
 		if (!len) {
 			len = 8;
