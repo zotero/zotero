@@ -294,6 +294,7 @@
 			</property>
 			
 			<property name="itemTypeMenu" onget="return this._id('item-type-menu')"/>
+			<property name="jurisdictionMenu" onget="return this._id('jurisdiction-menu')"/>
 			
 			<!-- Private properties -->
 			<property name="_dynamicFields" onget="return this._id('dynamic-fields')"/>
@@ -959,6 +960,41 @@
 				</body>
 			</method>
 			
+			<method name="buildJurisdictionMenu">
+			  <body>
+				<![CDATA[
+					if (!this.item) {
+						return;
+					}
+					
+					try {
+						this.jurisdictionMenu.removeAllItems();
+					} catch (e) {
+						return;
+					}
+
+					var data = Zotero.Jurisdiction.getListData();
+					
+					var pos = 0;
+					for (var i=0; i<data.length; i++) {
+						var value = data[i][0];
+						var label = data[i][1];
+						var nickname = data[i][2];
+						if (nickname) {
+							subunits = Zotero.Jurisdiction.getListData(value);
+							for (var j=0,jlen=subunits.length;j<jlen;j+=1) {
+								this.jurisdictionMenu.appendItem(nickname+": "+subunits[j][1],subunits[j][0])
+							}
+						} else {
+							this.jurisdictionMenu.appendItem(label, value);
+						}
+						//this.updateJurisdictionMenuSelection();
+					}
+					return true;
+				]]>
+              </body>
+            </method>
+
 			
 			<method name="updateItemTypeMenuSelection">
 				<body>
@@ -967,6 +1003,20 @@
 					for (var i=0, len=listitems.length; i < len; i++) {
 						if (listitems[i].getAttribute('value') == this.item.itemTypeID) {
 							this.itemTypeMenu.selectedIndex = i;
+						}
+					}
+				]]>
+				</body>
+			</method>
+			
+			<method name="updateJurisdictionMenuSelection">
+				<body>
+				<![CDATA[
+					var listitems = this.jurisdictionMenu.firstChild.childNodes;
+					var jurisdiction = this.item.getField("jurisdiction");
+					for (var i=0, len=listitems.length; i < len; i++) {
+						if (listitems[i].getAttribute('value') == jurisdiction) {
+							this.jurisdictionMenu.selectedIndex = i;
 						}
 					}
 				]]>
@@ -987,21 +1037,23 @@
                     var fieldname = value.getAttribute('fieldname');
 					if (this._rowIsClickable(fieldname)) {
 						row.className = 'zotero-clicky';
-						// Is this branch necessary, is it used?
-						if (fieldname == 'jurisdiction') {
-							row.addEventListener('click', function (event) {
-								document.getBindingParent(this).setJurisdictionMenu(this);
-							}, false);
-						} else {
-							row.addEventListener('click', function (event) {
-								document.getBindingParent(this).clickHandler(this);
-							}, false);
-						}
+						row.addEventListener('click', function (event) {
+							document.getBindingParent(this).clickHandler(this);
+						}, false);
 					}
 
 					row.appendChild(label);
 					row.appendChild(value);
-
+					if (fieldname == 'jurisdiction') {
+						var jurisdictionDefault = document.createElement("checkbox");
+						jurisdictionDefault.setAttribute("label","default");
+						jurisdictionDefault.setAttribute("id","jurisdiction-default");
+						jurisdictionDefault.setAttribute("oncommand","document.getBindingParent(this).jurisdictionDefaultCommand(this);");
+						if (this.item.getField("jurisdiction") === Zotero.Prefs.get("import.jurisdictionDefault")) {
+							jurisdictionDefault.setAttribute("checked",true);
+						}
+						row.appendChild(jurisdictionDefault);
+					}
 					if (beforeElement) {
 						this._dynamicFields.insertBefore(row, this._beforeRow);
 					} else {
@@ -1012,11 +1064,27 @@
 				</body>
 			</method>
 			
+			<method name="jurisdictionDefaultCommand">
+			  <parameter name="node"/>
+			  <body>
+				<![CDATA[
+					var checked = node.getAttribute("checked");
+					if (checked) {
+						var jurisdictionNode = document.getElementById("jurisdiction-menu");
+						var jurisdiction = jurisdictionNode.getAttribute("value");
+						Zotero.Prefs.set("import.jurisdictionDefault",jurisdiction);
+					} else {
+						Zotero.Prefs.set("import.jurisdictionDefault","");
+					}
+				]]>
+			  </body>
+			</method>
+
 			<method name="alterMulti">
 			  <parameter name="language"/>
 				<body>
 				  <![CDATA[
-					var elem = document.popupNode;
+					var elem = document.triggerNode;
 					var row = Zotero.getAncestorByTagName(elem, 'row');
 
 
@@ -1034,7 +1102,7 @@
 			  <parameter name="language"/>
 				<body>
 				  <![CDATA[
-					var elem = document.popupNode;
+					var elem = document.triggerNode;
 					var row = Zotero.getAncestorByTagName(elem, 'row');
 					var fieldstring = row.firstChild.getAttribute('fieldname');
 					var servantLang = row.firstChild.getAttribute('servantLang');
@@ -1418,9 +1486,7 @@
 				<body>
 				<![CDATA[
 					var label = document.createElement("label");
-                    Zotero.debug("YYY itembox.xml [2] "+this.item.itemTypeID);
 					label.setAttribute("value", Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, field) + ':');
-                    Zotero.debug("YYY    done");
 					label.setAttribute("fieldname", field);
 					label.setAttribute("onclick", "this.nextSibling.firstChild.blur()");
 					
@@ -1811,7 +1877,6 @@
 				<parameter name="menu"/>
 				<body>
 				<![CDATA[
-					Zotero.debug("XXX menu label: "+menu.label);
 					var fakeItemTypeID;
 					var oldFakeItemTypeID = this.popFieldValueFromExtra("type");
 					if (Zotero.EXTENDED_TYPES[itemTypeID]) {
@@ -2015,7 +2080,12 @@
 					var useVbox = (fieldName != 'abstractNote' || abstractAsVbox)
 						&& Zotero.ItemFields.isMultiline(fieldName);
 					
-					if (useVbox) {
+					if (fieldName === 'jurisdiction') {
+						var valueElement = document.createElement("menulist");
+						var menupopup = document.createElement("menupopup");
+						valueElement.appendChild(menupopup);
+					}
+					else if (useVbox) {
 						var valueElement = document.createElement("vbox");
 					}
 					else {
@@ -2023,11 +2093,36 @@
 					}
 					valueElement.setAttribute('fieldname', fieldName);
 					valueElement.setAttribute('flex', 1);
+					valueElement.setAttribute('ztabindex', tabindex);
 					
 					if (this._fieldIsClickable(fieldName)) {
-						valueElement.setAttribute('ztabindex', tabindex);
 						if (fieldName == 'jurisdiction') {
-							valueElement.setAttribute("popup","jurisdiction-menu");
+							valueElement.setAttribute("id","jurisdiction-menu");
+							var value = this.item.getField("jurisdiction");
+							valueElement.setAttribute("class", "zotero-clicky");
+							valueElement.setAttribute("value", value);
+							valueElement.setAttribute("label", Zotero.Jurisdiction.getLabelFromKey(value));
+							valueElement.setAttribute("oncommand","this.focus(); this.open = true;");
+							valueElement.setAttribute("onkeypress","if (event.keyCode == event.DOM_VK_TAB) { document.getBindingParent(this).jurisdictionMenuTab(event); }");
+							valueElement.addEventListener('popupshowing', function (event) {
+								jurisdictionMenu = document.getBindingParent(this).jurisdictionMenu;
+								if (jurisdictionMenu.itemCount == 0) {
+									document.getBindingParent(this).buildJurisdictionMenu();
+								}
+								else {
+									document.getBindingParent(this).updateJurisdictionMenuSelection();
+								}
+								jurisdictionMenu.open = true;
+								return true;
+							}, false);
+							valueElement.addEventListener('select', function (event) {
+								/* Skip right-click on Windows */
+								if (event.button) {
+									return;
+								}
+								document.getBindingParent(this).setJurisdictionKey();
+							}, false);
+							return valueElement;
 						} else {
 							valueElement.addEventListener('click', function (event) {
 								/* Skip right-click on Windows */
@@ -2093,16 +2188,15 @@
 						}
 					}
 					
-					// XXXXX
-					//if (fieldName && fieldName.indexOf('firstName') != -1) {
-					//	valueElement.setAttribute('flex', '1');
-					//}
-					
 					var firstSpace = valueText.indexOf(" ");
 					
 					// To support newlines in 'extra' fields, we use multiple
 					// <description> elements inside a vbox
-					if (useVbox) {
+					if (fieldName === 'jurisdiction') {
+						// Already set up above
+						// default check-box is set elsewhere in this code
+					}
+					else if (useVbox) {
 						var lines = valueText.split("\n");
 						for (var i = 0; i < lines.length; i++) {
 							var descriptionNode = document.createElement("description");
@@ -2408,6 +2502,7 @@
 				<parameter name="event"/>
 				<body>
 				<![CDATA[
+						 Zotero.debug("BBB OKAY: "+event.shiftKey);
 					var target = event.target;
 					var focused = document.commandDispatcher.focusedElement;
 
@@ -2530,7 +2625,28 @@
  				</body>
 			</method>
 			
+			<method name="jurisdictionMenuTab">
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+					var elem = event.target;
+					var ztabindex = elem.getAttribute("ztabindex");
+					var tabindex = parseInt(elem.getAttribute("ztabindex"),10);
+					if (!event.shiftKey) {
+						tabindex += 1;
+					} else {
+						// Shift-tab
+						tabindex += -1;
+					}
+					var nextelem = this._dynamicFields.getElementsByAttribute("ztabindex",tabindex)[0];
+					nextelem.click();
+					event.preventDefault();
+ 				]]>
+ 				</body>
+			</method>
 			
+			
+
 			<method name="hideEditor">
 				<parameter name="textbox"/>
 				<body>
@@ -3023,7 +3139,7 @@
 				<body>
 				<![CDATA[
 //Zotero.debug("XXX modifyCreatorType()");
-					var row = document.popupNode.localName == 'hbox' ? document.popupNode.parentNode : document.popupNode.parentNode.parentNode;
+					var row = document.triggerNode.localName == 'hbox' ? document.triggerNode.parentNode : document.triggerNode.parentNode.parentNode;
 					var fieldstring = row.firstChild.getAttribute('fieldname');
 					var index = fieldstring.split('-')[1];
 					var fieldStringSuffix = fieldstring.split('-')[2];
@@ -3209,7 +3325,7 @@ if (oldCreator.id) {
 			<method name="swapNames">
 				<body>
 				<![CDATA[
-					var myelem = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode
+					var myelem = document.triggerNode.localName == 'hbox' ? document.triggerNode : document.triggerNode.parentNode
 ;
 					var elem = myelem.parentNode.firstChild.lastChild;
 					var creatorIndex = parseInt(elem.getAttribute('fieldname').split('-')[1]);
@@ -3232,7 +3348,7 @@ if (oldCreator.id) {
 				<body>
 				<![CDATA[
 //Zotero.debug("XXX moveCreator()");
-					var typeBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
+					var typeBox = document.triggerNode.localName == 'hbox' ? document.triggerNode : document.triggerNode.parentNode;
 					var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 
 					if (index === 0 && moveUp) {
@@ -3307,7 +3423,7 @@ if (oldCreator.id) {
 				<parameter name="back"/>
 				<body>
 				<![CDATA[
-//Zotero.debug("XXX focusNextField() [start]");
+//Zotero.debug("XXX focusNextField() [start]: "+mode+" "+box+" "+tabindex+" "+back);
 					tabindex = parseInt(tabindex);
 					if (back)
 					{
@@ -3393,7 +3509,7 @@ if (oldCreator.id) {
 							var next = box.getElementsByAttribute('ztabindex', nextIndex);
 							if (!next[0])
 							{
-								Zotero.debug("XXX Next field not found!!!");
+								Zotero.debug("Next field not found!!!");
 								return this._focusNextField(mode, box, nextIndex, back);
 							}
 							break;
@@ -3448,45 +3564,20 @@ if (oldCreator.id) {
 				</body>
 			</method>
 
-			<method name="setJurisdictionMenu">
-			  <parameter name="menupop"/>
-			  <parameter name="anchorKey"/>
+			<method name="setJurisdictionKey">
 			  <body>
 				<![CDATA[
-					var data = Zotero.Jurisdiction.getListData(anchorKey);
-					if (menupop.childNodes.length === 0) {
-						for (var i = 0, ilen = data.length; i < ilen; i += 1) {
-							if (data[i][2]) {
-								// Submenu
-								var submenu = document.createElement("menu");
-								submenu.setAttribute("label", data[i][1]);
-								menupop.appendChild(submenu);
-								subpop = document.createElement("menupopup");
-								submenu.appendChild(subpop);
-								subpop.setAttribute("onpopupshowing",
-													"return document.getBindingParent(this).setJurisdictionMenu(this,\""+data[i][0]+"\");");
-							} else {
-								// Country/institution code selector
-								var elem = document.createElement("menuitem");
-								elem.setAttribute("label", data[i][1]);
-								elem.setAttribute("class", "menuitem-non-iconic");
-								elem.setAttribute("oncommand",
-													"document.getBindingParent(this).setJurisdictionKey(\""+data[i][0]+"\");");
-							}
-							menupop.appendChild(elem);
+					var node = document.getElementById('jurisdiction-menu');
+					var value = node.getAttribute('value');
+					var jurisdictionDefaultNode = document.getElementById('jurisdiction-default');
+					if (jurisdictionDefaultNode) {
+						if (value == Zotero.Prefs.get("import.jurisdictionDefault")) {
+							jurisdictionDefaultNode.setAttribute("checked",true);
+						} else {
+							jurisdictionDefaultNode.setAttribute("checked",false);
 						}
 					}
-				]]>
-              </body>
-            </method>
-
-			<method name="setJurisdictionKey">
-			  <parameter name="key"/>
-			  <body>
-				<![CDATA[
-					//this.popFieldValueFromExtra("jurisdiction");
-					//this.setFieldValueInExtra("jurisdiction", key);
-                    alert("HELLO!");
+					this.item.setField("jurisdiction",value);
 					this.item.save();
 				]]>
 			  </body>
@@ -3500,7 +3591,7 @@ if (oldCreator.id) {
 				<popupset>
 				  <menupopup id="multi-spawn-popup" 
 							 position="after_start"
-							 onpopupshowing="return document.getBindingParent(this).refreshLanguages(document.popupNode);">
+							 onpopupshowing="return document.getBindingParent(this).refreshLanguages(document.triggerNode);">
 					<label id="zotero-lang-add" 
 						   style="font-weight:bold;" 
 						   value="&zotero.items.menu.addTag;"/>
@@ -3514,8 +3605,8 @@ if (oldCreator.id) {
 					</vbox>
 				  </menupopup>
 				  <menupopup id="creator-type-menu" position="after_start"
-						onpopupshowing="var typeBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
-								var haslang = document.getBindingParent(this).refreshLanguages(document.popupNode);
+						onpopupshowing="var typeBox = document.triggerNode.localName == 'hbox' ? document.triggerNode : document.triggerNode.parentNode;
+								var haslang = document.getBindingParent(this).refreshLanguages(document.triggerNode);
 								document.getElementById('zotero-creator-lang-menu').setAttribute('hidden', !haslang);
 								var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 								
@@ -3567,14 +3658,14 @@ if (oldCreator.id) {
 						<menu label="&zotero.item.textTransform;">
 						  <menupopup>
 								<menuitem label="&zotero.item.textTransform.titlecase;" class="menuitem-non-iconic"
-									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'title')"/>
+									oncommand="document.getBindingParent(this).textTransform(document.triggerNode, 'title')"/>
 								<menuitem label="&zotero.item.textTransform.sentencecase;" class="menuitem-non-iconic"
-									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'sentence')"/>
+									oncommand="document.getBindingParent(this).textTransform(document.triggerNode, 'sentence')"/>
 						  </menupopup>
 						</menu>
 					</menupopup>
 					<menupopup id="creator-transform-menu"
-						onpopupshowing="var myBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
+						onpopupshowing="var myBox = document.triggerNode.localName == 'hbox' ? document.triggerNode : document.triggerNode.parentNode;
 										var typeBox = myBox.parentNode.firstChild.lastChild;
 										var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);								
 										var item = document.getBindingParent(this).item;
@@ -3596,11 +3687,6 @@ if (oldCreator.id) {
 							</menupopup>
 						</menu>
 					</menupopup>
-                    <menupopup id="jurisdiction-menu"
-						position="after_start" 
-						onpopupshowing="document.getBindingParent(this).setJurisdictionMenu(this);"/>
-
-
 					<zoteroguidancepanel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
 				</popupset>
 				<grid flex="1">
