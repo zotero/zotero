@@ -270,9 +270,6 @@ var ZoteroPane = new function()
 				localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
 			});
 		}
-		for (var key in Zotero.EXTENDED_TYPES) {
-			itemTypes.push(Zotero.EXTENDED_TYPES[key].data);
-		}
 		var collation = Zotero.getLocaleCollation();
 		itemTypes.sort(function(a, b) {
 			return collation.compareString(1, a.localized, b.localized);
@@ -319,9 +316,6 @@ var ZoteroPane = new function()
 				name: t[i].name,
 				localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
 			});
-		}
-		for (var key in Zotero.EXTENDED_TYPES) {
-			itemTypes.push(Zotero.EXTENDED_TYPES[key].data);
 		}
 		var collation = Zotero.getLocaleCollation();
 		itemTypes.sort(function(a, b) {
