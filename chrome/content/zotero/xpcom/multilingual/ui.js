@@ -23,19 +23,43 @@ Zotero.EXTENDED_TYPES = {
 	}
 };
 
-// Oh, shit. This is going to be a short-term nightmare.
-//
-// Add these fields to system.sql
-// Provide a parallel linked table with "spoof" flags.
-// In item.js, divert spoofed entries (and multilingual variants!) to the Extra field
-//   for save
-//   for read
-// Pray to God that it doesn't affect sync
-
 Zotero.EXTENDED_CREATORS = {
     "patent":{
         "recipient":"recipient"
     }
+}
+
+Zotero.EXTENDED_TYPES = {
+	"gazette":{
+		"base":"statute",
+		"fields":{
+			"jurisdiction":"jurisdiction",
+			"publicationDate":"publication-date",
+			"volume":"volume",
+			"publisher":"publisher"
+		}
+	},
+    "classic":{
+		"base":"statute",
+		"fields":{
+		}
+	},
+    "hearing":{
+		"base":"statute",
+		"fields":{
+		}
+	},
+    "periodical":{
+		"base":"statute",
+		"fields":{
+		}
+	},
+    "treaty":{
+		"base":"statute",
+		"fields":{
+		}
+	},
+
 }
 
 Zotero.EXTENDED_FIELDS = {
@@ -58,53 +82,45 @@ Zotero.EXTENDED_FIELDS = {
 		"jurisdiction":"jurisdiction",
         "priorityDate":"original-date"
 	}, 
-	"Xlegal_case": {
-		"fields": [
-			{"csl":"archive","zotero":""}, 
-			{"csl":"archive_location","zotero":""}, 
-			{"csl":"collection-number","zotero":""}, 
-			{"csl":"event-place","zotero":""}, 
-			{"csl":"genre","zotero":""}, 
-			{"csl":"issue","zotero":""}, 
-		    {"csl":"jurisdiction","zotero":"jurisdiction"},
-			{"csl":"issued","zotero":""}, 
-			{"csl":"original-date","zotero":""}
-		]
+	"legal_case": {
+		"fields": {
+			"archive":"archive",
+			"archiveLocation":"archive_location",
+			"yearAsVolume":"collection-number",
+			"jurisdiction":"jurisdiction",
+			"publicationDate":"publication-date",
+			"place":"event-place",
+			"supplementName":"genre",
+			"issue":"issue"
+		}
 	}, 
-	"Xlegislation": {
-		"fields": [
-			{"csl":"collection-number","zotero":""}, 
-			{"csl":"genre","zotero":""}, 
-			{"csl":"publisher","zotero":""}, 
-			{"csl":"volume","zotero":""},
-		    {"csl":"jurisdiction","zotero":"jurisdiction"},
-			{"csl":"issued","zotero":""} 
-		]
+	"legislation": {
+		"fields": {
+			"publicationDate":"publication-date",
+			"jurisdiction":"jurisdiction",
+			"volume":"volume",
+			"publisher":"publisher",
+			"reign":"genre",
+			"yearAsVolume":"collection-number"
+		}
 	}, 
-	"Xmap": {
+	"audioRecording": {
+		"fields": {
+			"album":"container-title",
+			"opus":"section",
+			"originalDate":"original-date"
+			"publisher":"publisher"
+		}
+	},
+	"podcast": {
+		"fields": {
+			"originalDate":"original-date"
+			"publisher":"publisher"
+		}
+	},
+	"report": {
 		"fields": [
-			{"csl":"scale","zotero":""}
-		]
-	}, 
-	"Xpersonal_communication": {
-		"fields": [
-			{"csl":"genre","zotero":""}
-		]
-	}, 
-	"Xreport": {
-		"fields": [
-		    {"csl":"jurisdiction","zotero":"jurisdiction"}
-        ]
-	}, 
-	"Xsong": {
-		"fields": [
-			{"csl":"container-title","zotero":""}, 
-			{"csl":"publisher","zotero":""}, 
-			{"csl":"section","zotero":""}
-		],
-		"dates": [
-			{"csl":"issued","zotero":""}, 
-			{"csl":"original-date","zotero":""}
+		    "jurisdiction":"jurisdiction"
         ]
 	}
 }
