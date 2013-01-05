@@ -1,28 +1,5 @@
 // Extended fields needed to support the MLZ styles
 
-Zotero.EXTENDED_TYPES = {
-	"classic":{
-		"realID":2,
-		"data":{realID:2,id:"classic",name:"classic",localized:"Classic"}
-	},
-	"periodical":{
-		"realID":2,
-		"data":{realID:2,id:"periodical",name:"periodical",localized:"Periodical"}
-	},
-	"gazette":{
-		"realID":20,
-		"data":{realID:20,id:"gazette",name:"gazette",localized:"Gazette"}
-	},
-	"treaty":{
-		"realID":20,
-		"data":{realID:20,id:"treaty",name:"treaty",localized:"Treaty"}
-	},
-	"regulation":{
-		"realID":20,
-		"data":{realID:20,id:"regulation",name:"regulation",localized:"Regulation"}
-	}
-};
-
 Zotero.EXTENDED_CREATORS = {
     "patent":{
         "recipient":"recipient"
@@ -30,36 +7,11 @@ Zotero.EXTENDED_CREATORS = {
 }
 
 Zotero.EXTENDED_TYPES = {
-	"gazette":{
-		"base":"statute",
-		"fields":{
-			"jurisdiction":"jurisdiction",
-			"publicationDate":"publication-date",
-			"volume":"volume",
-			"publisher":"publisher"
-		}
-	},
-    "classic":{
-		"base":"statute",
-		"fields":{
-		}
-	},
-    "hearing":{
-		"base":"statute",
-		"fields":{
-		}
-	},
-    "periodical":{
-		"base":"statute",
-		"fields":{
-		}
-	},
-    "treaty":{
-		"base":"statute",
-		"fields":{
-		}
-	},
-
+	"gazette":"statute",
+    "regulation":"statute",
+    "classic":"book",
+    "periodical":"document",
+    "treaty":"statute"
 }
 
 Zotero.EXTENDED_FIELDS = {
@@ -75,6 +27,14 @@ Zotero.EXTENDED_FIELDS = {
         "archiveLocation":"archive_location",
         "reporter":"container-title"
 	}, 
+    "hearing":{
+		"jurisdiction":"jurisdiction",
+		"assemblyNumber":"collection-number",
+		"resolutionLabel":"event",
+		"sessionType":"genre",
+		"archiveLocation":"archive_location",
+		"reporter":"container-title"
+	},
 	"artwork": {
         "publicationTitle":"container-title"
 	}, 
@@ -83,45 +43,40 @@ Zotero.EXTENDED_FIELDS = {
         "priorityDate":"original-date"
 	}, 
 	"legal_case": {
-		"fields": {
-			"archive":"archive",
-			"archiveLocation":"archive_location",
-			"yearAsVolume":"collection-number",
-			"jurisdiction":"jurisdiction",
-			"publicationDate":"publication-date",
-			"place":"event-place",
-			"supplementName":"genre",
-			"issue":"issue"
-		}
+		"archive":"archive",
+		"archiveLocation":"archive_location",
+		"yearAsVolume":"collection-number",
+		"jurisdiction":"jurisdiction",
+		"publicationDate":"publication-date",
+		"place":"event-place",
+		"supplementName":"genre",
+		"issue":"issue"
 	}, 
-	"legislation": {
-		"fields": {
-			"publicationDate":"publication-date",
-			"jurisdiction":"jurisdiction",
-			"volume":"volume",
-			"publisher":"publisher",
-			"reign":"genre",
-			"yearAsVolume":"collection-number"
-		}
+	"statute": {
+		"jurisdiction":"jurisdiction",
+		"publisher":"publisher",
+		"publicationDate":"publication-date",
+		"reign":"genre",
+		"regnalYear":"collection-number"
 	}, 
 	"audioRecording": {
-		"fields": {
-			"album":"container-title",
-			"opus":"section",
-			"originalDate":"original-date"
-			"publisher":"publisher"
-		}
+		"album":"container-title",
+		"opus":"section",
+		"originalDate":"original-date",
+		"publisher":"publisher"
 	},
 	"podcast": {
-		"fields": {
-			"originalDate":"original-date"
-			"publisher":"publisher"
-		}
+		"originalDate":"original-date",
+		"publisher":"publisher"
 	},
 	"report": {
-		"fields": [
-		    "jurisdiction":"jurisdiction"
-        ]
+		"jurisdiction":"jurisdiction"
+	},
+	"gazette": {
+		"jurisdiction":"jurisdiction"
+	},
+	"regulation": {
+		"jurisdiction":"jurisdiction"
 	}
 }
 

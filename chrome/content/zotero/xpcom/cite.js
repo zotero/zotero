@@ -185,6 +185,14 @@ Zotero.Cite.System.retrieveItem = function(item) {
         }
     }
 
+	// Force remap
+	if (CSL_FORCE_REMAP[itemType]) {
+		for (var variable in CSL_FORCE_REMAP[itemType]) {
+			cslItem[CSL_FORCE_REMAP[itemType][variable]] = cslItem[variable];
+			delete cslItem[variable];
+		}
+	}
+
 	//this._cache[zoteroItem.id] = cslItem;
 	return cslItem;
 };

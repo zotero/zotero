@@ -59,7 +59,7 @@ const CSL_TEXT_MAPPINGS = {
 	"publisher-place":["place"],
 	"authority":["court", "legislativeBody"],
 	"page":["pages"],
-	"volume":["volume"],
+	"volume":["volume","codeNumber"],
 	"issue":["issue"],
 	"number-of-volumes":["numberOfVolumes"],
 	"number-of-pages":["numPages"],	
@@ -137,7 +137,12 @@ const CSL_TYPE_MAPPINGS = {
 	'tvBroadcast':"broadcast",
 	'radioBroadcast':"broadcast",
 	'podcast':"song",			// ??
-	'computerProgram':"book"		// ??
+	'computerProgram':"book",		// ??
+	'periodical':'periodical',
+	'gazette':'gazette',
+	'regulation':'regulation',
+	'classic':'classic',
+	'treaty':'treaty'
 };
 
 /**
@@ -145,12 +150,25 @@ const CSL_TYPE_MAPPINGS = {
 */
 const CSL_FORCE_FIELD_CONTENT = {
     "tvBroadcast":{
-        "genre":"television broadcast"
+        "genre":"TV broadcast"
     },
     "radioBroadcast":{
         "genre":"radio broadcast"
+    },
+    "instantMessage":{
+        "genre":"instant message"
+    },
+    "email":{
+        "genre":"email"
     }
 }
+
+const CSL_FORCE_REMAP = {
+	"periodical":{
+		"title":"container-title"
+	}
+}
+
 
 /**
  * @class Functions for text manipulation and other miscellaneous purposes

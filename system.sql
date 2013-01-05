@@ -242,6 +242,8 @@ INSERT INTO itemTypes VALUES (36,'dictionaryEntry',NULL,1);
 INSERT INTO itemTypes VALUES (1261,'gazette',NULL,1);
 INSERT INTO itemTypes VALUES (1262,'treaty',NULL,1);
 INSERT INTO itemTypes VALUES (1263,'regulation',NULL,1);
+INSERT INTO itemTypes VALUES (1264,'classic',NULL,1);
+INSERT INTO itemTypes VALUES (1265,'periodical',NULL,1);
 
 INSERT INTO fields VALUES (1,'url',NULL);
 INSERT INTO fields VALUES (2,'rights',NULL);
@@ -361,7 +363,10 @@ INSERT INTO fields VALUES (1271,'supplementName',NULL);
 INSERT INTO fields VALUES (1272,'originalDate',NULL);
 INSERT INTO fields VALUES (1273,'album',NULL);
 INSERT INTO fields VALUES (1274,'opus',NULL);
+INSERT INTO fields VALUES (1275,'meetingNumber',NULL);
+INSERT INTO fields VALUES (1276,'committeeFullname',NULL);
 
+-- book
 INSERT INTO itemTypeFields VALUES (2, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (2, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (2, 3, NULL, 3);
@@ -384,6 +389,7 @@ INSERT INTO itemTypeFields VALUES (2, 62, NULL, 19);
 INSERT INTO itemTypeFields VALUES (2, 18, NULL, 20);
 INSERT INTO itemTypeFields VALUES (2, 2, NULL, 21);
 INSERT INTO itemTypeFields VALUES (2, 22, NULL, 22);
+
 INSERT INTO itemTypeFields VALUES (3, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (3, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (3, 115, NULL, 3);
@@ -407,6 +413,7 @@ INSERT INTO itemTypeFields VALUES (3, 62, NULL, 20);
 INSERT INTO itemTypeFields VALUES (3, 18, NULL, 21);
 INSERT INTO itemTypeFields VALUES (3, 2, NULL, 22);
 INSERT INTO itemTypeFields VALUES (3, 22, NULL, 23);
+
 INSERT INTO itemTypeFields VALUES (4, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (4, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (4, 12, NULL, 3);
@@ -430,6 +437,7 @@ INSERT INTO itemTypeFields VALUES (4, 62, NULL, 20);
 INSERT INTO itemTypeFields VALUES (4, 18, NULL, 21);
 INSERT INTO itemTypeFields VALUES (4, 2, NULL, 22);
 INSERT INTO itemTypeFields VALUES (4, 22, NULL, 23);
+
 INSERT INTO itemTypeFields VALUES (5, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (5, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (5, 12, NULL, 3);
@@ -507,6 +515,7 @@ INSERT INTO itemTypeFields VALUES (8, 18, NULL, 12);
 INSERT INTO itemTypeFields VALUES (8, 2, NULL, 13);
 INSERT INTO itemTypeFields VALUES (8, 22, NULL, 14);
 
+
 INSERT INTO itemTypeFields VALUES (9, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (9, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (9, 66, NULL, 3);
@@ -523,6 +532,7 @@ INSERT INTO itemTypeFields VALUES (9, 62, NULL, 13);
 INSERT INTO itemTypeFields VALUES (9, 18, NULL, 14);
 INSERT INTO itemTypeFields VALUES (9, 2, NULL, 15);
 INSERT INTO itemTypeFields VALUES (9, 22, NULL, 16);
+
 INSERT INTO itemTypeFields VALUES (10, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (10, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (10, 14, NULL, 3);
@@ -537,6 +547,7 @@ INSERT INTO itemTypeFields VALUES (10, 62, NULL, 11);
 INSERT INTO itemTypeFields VALUES (10, 18, NULL, 12);
 INSERT INTO itemTypeFields VALUES (10, 2, NULL, 13);
 INSERT INTO itemTypeFields VALUES (10, 22, NULL, 14);
+
 INSERT INTO itemTypeFields VALUES (11, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (11, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (11, 21, NULL, 3);
@@ -615,16 +626,16 @@ INSERT INTO itemTypeFields VALUES (16, 110, NULL, 1);  -- title
 INSERT INTO itemTypeFields VALUES (16, 90, NULL, 2);   -- abstract
 INSERT INTO itemTypeFields VALUES (16, 1261, NULL, 3); -- jurisdiction
 INSERT INTO itemTypeFields VALUES (16, 116, NULL, 4);  -- short title
-INSERT INTO itemTypeFields VALUES (16, 41, NULL, 5);   -- legislative body
+INSERT INTO itemTypeFields VALUES (16, 41, NULL, 5);   -- legislativeBody
 INSERT INTO itemTypeFields VALUES (16, 1263, NULL, 6); -- resolution label
 INSERT INTO itemTypeFields VALUES (16, 1262, NULL, 7); -- assembly number
 INSERT INTO itemTypeFields VALUES (16, 1264, NULL, 8); -- session type
 INSERT INTO itemTypeFields VALUES (16, 40, NULL, 9);   -- session
 INSERT INTO itemTypeFields VALUES (16, 93, NULL, 10);  -- bill number
-INSERT INTO itemTypeFields VALUES (16, 15, NULL, 11);  -- section
-INSERT INTO itemTypeFields VALUES (16, 19, NULL, 12);  -- archive locator
-INSERT INTO itemTypeFields VALUES (16, 43, NULL, 13);  -- reporter
-INSERT INTO itemTypeFields VALUES (16, 14, NULL, 14);  -- date
+INSERT INTO itemTypeFields VALUES (16, 14, NULL, 11);  -- date
+INSERT INTO itemTypeFields VALUES (16, 15, NULL, 12);  -- section
+INSERT INTO itemTypeFields VALUES (16, 19, NULL, 13);  -- archive locator
+INSERT INTO itemTypeFields VALUES (16, 43, NULL, 14);  -- reporter
 INSERT INTO itemTypeFields VALUES (16, 87, NULL, 15);  -- language
 INSERT INTO itemTypeFields VALUES (16, 1, NULL, 16);   -- url
 INSERT INTO itemTypeFields VALUES (16, 27, NULL, 17);  -- access date
@@ -657,24 +668,33 @@ INSERT INTO itemTypeFields VALUES (17, 42, NULL, 22);   -- history
 INSERT INTO itemTypeFields VALUES (17, 2, NULL, 23);    -- rights
 INSERT INTO itemTypeFields VALUES (17, 22, NULL, 24);   -- extra
 
-INSERT INTO itemTypeFields VALUES (18, 110, NULL, 1);
-INSERT INTO itemTypeFields VALUES (18, 90, NULL, 2);
-INSERT INTO itemTypeFields VALUES (18, 46, NULL, 3);
-INSERT INTO itemTypeFields VALUES (18, 7, NULL, 4);
-INSERT INTO itemTypeFields VALUES (18, 8, NULL, 5);
-INSERT INTO itemTypeFields VALUES (18, 45, NULL, 6);
-INSERT INTO itemTypeFields VALUES (18, 99, NULL, 7);
-INSERT INTO itemTypeFields VALUES (18, 10, NULL, 8);
-INSERT INTO itemTypeFields VALUES (18, 41, NULL, 9);
-INSERT INTO itemTypeFields VALUES (18, 40, NULL, 10);
-INSERT INTO itemTypeFields VALUES (18, 42, NULL, 11);
-INSERT INTO itemTypeFields VALUES (18, 14, NULL, 12);
-INSERT INTO itemTypeFields VALUES (18, 87, NULL, 13);
-INSERT INTO itemTypeFields VALUES (18, 116, NULL, 14);
-INSERT INTO itemTypeFields VALUES (18, 1, NULL, 15);
-INSERT INTO itemTypeFields VALUES (18, 27, NULL, 16);
-INSERT INTO itemTypeFields VALUES (18, 2, NULL, 17);
-INSERT INTO itemTypeFields VALUES (18, 22, NULL, 18);
+-- hearing
+INSERT INTO itemTypeFields VALUES (18, 110, NULL, 1);  -- title
+INSERT INTO itemTypeFields VALUES (18, 90, NULL, 2);   -- abstract
+INSERT INTO itemTypeFields VALUES (18, 1261, NULL, 3); -- jurisdiction
+INSERT INTO itemTypeFields VALUES (18, 116, NULL, 4);  -- shortTitle
+INSERT INTO itemTypeFields VALUES (18, 1276, NULL, 5); -- committeeFullname
+INSERT INTO itemTypeFields VALUES (18, 1275, NULL, 6); -- meetingNumber
+INSERT INTO itemTypeFields VALUES (18, 1263, NULL, 7); -- resolutionLabel
+INSERT INTO itemTypeFields VALUES (18, 1262, NULL, 8); -- assemblyNumber
+INSERT INTO itemTypeFields VALUES (18, 1264, NULL, 9); -- session type
+INSERT INTO itemTypeFields VALUES (18, 40, NULL, 10);  -- session
+INSERT INTO itemTypeFields VALUES (18, 14, NULL, 11);  -- date
+INSERT INTO itemTypeFields VALUES (18, 10, NULL, 12);  -- pages
+INSERT INTO itemTypeFields VALUES (18, 19, NULL, 13);  -- archiveLocation
+INSERT INTO itemTypeFields VALUES (18, 43, NULL, 14);  -- reporter
+INSERT INTO itemTypeFields VALUES (18, 8, NULL, 15);   -- publisher
+INSERT INTO itemTypeFields VALUES (18, 87, NULL, 16);  -- language
+INSERT INTO itemTypeFields VALUES (18, 1, NULL, 17);   -- url
+INSERT INTO itemTypeFields VALUES (18, 27, NULL, 18);  -- accessed
+INSERT INTO itemTypeFields VALUES (18, 45, NULL, 19);  -- numberOfVolumes
+INSERT INTO itemTypeFields VALUES (18, 42, NULL, 20);  -- history
+INSERT INTO itemTypeFields VALUES (18, 7, NULL, 21);   -- place
+INSERT INTO itemTypeFields VALUES (18, 41, NULL, 22);  -- legislativeBody
+INSERT INTO itemTypeFields VALUES (18, 46, NULL, 23);  -- committee    
+INSERT INTO itemTypeFields VALUES (18, 99, NULL, 24);  -- documentNumber
+INSERT INTO itemTypeFields VALUES (18, 2, NULL, 25);   -- rights
+INSERT INTO itemTypeFields VALUES (18, 22, NULL, 26);  -- extra
 
 -- patent
 INSERT INTO itemTypeFields VALUES (19, 110, NULL, 1);  -- title
@@ -717,9 +737,9 @@ INSERT INTO itemTypeFields VALUES (20, 1268, NULL, 13); -- publicationDate
 INSERT INTO itemTypeFields VALUES (20, 87, NULL, 14);   -- language
 INSERT INTO itemTypeFields VALUES (20, 1, NULL, 15);    -- url
 INSERT INTO itemTypeFields VALUES (20, 27, NULL, 16);   -- accessed
-INSERT INTO itemTypeFields VALUES (20, 101, NULL, 17);  -- publicLawNumber
-INSERT INTO itemTypeFields VALUES (20, 40, NULL, 18);   -- session
-INSERT INTO itemTypeFields VALUES (20, 42, NULL, 19);   -- history
+INSERT INTO itemTypeFields VALUES (20, 101, NULL, 17);  -- publicLawNumber  Deprecated
+INSERT INTO itemTypeFields VALUES (20, 40, NULL, 18);   -- session          Deprecated
+INSERT INTO itemTypeFields VALUES (20, 42, NULL, 19);   -- history          Deprecated
 INSERT INTO itemTypeFields VALUES (20, 2, NULL, 20);    -- rights
 INSERT INTO itemTypeFields VALUES (20, 22, NULL, 21);   -- extra
 
@@ -779,6 +799,7 @@ INSERT INTO itemTypeFields VALUES (24, 27, NULL, 7);  -- accessed
 INSERT INTO itemTypeFields VALUES (24, 2, NULL, 8);   -- rights
 INSERT INTO itemTypeFields VALUES (24, 22, NULL, 9);  -- extra
 
+-- forumPost
 INSERT INTO itemTypeFields VALUES (25, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (25, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (25, 104, NULL, 3);
@@ -817,6 +838,7 @@ INSERT INTO itemTypeFields VALUES (26, 27, NULL, 22);   -- accessed
 INSERT INTO itemTypeFields VALUES (26, 2, NULL, 23);    -- rights
 INSERT INTO itemTypeFields VALUES (26, 22, NULL, 24);   -- extra
 
+
 INSERT INTO itemTypeFields VALUES (27, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (27, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (27, 74, NULL, 3);
@@ -829,6 +851,7 @@ INSERT INTO itemTypeFields VALUES (27, 87, NULL, 9);
 INSERT INTO itemTypeFields VALUES (27, 116, NULL, 10);
 INSERT INTO itemTypeFields VALUES (27, 2, NULL, 11);
 INSERT INTO itemTypeFields VALUES (27, 22, NULL, 12);
+
 INSERT INTO itemTypeFields VALUES (28, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (28, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (28, 63, NULL, 3);
@@ -927,6 +950,7 @@ INSERT INTO itemTypeFields VALUES (32, 62, NULL, 16);
 INSERT INTO itemTypeFields VALUES (32, 18, NULL, 17);
 INSERT INTO itemTypeFields VALUES (32, 27, NULL, 18);
 INSERT INTO itemTypeFields VALUES (32, 22, NULL, 19);
+
 INSERT INTO itemTypeFields VALUES (33, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (33, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (33, 14, NULL, 3);
@@ -949,20 +973,23 @@ INSERT INTO itemTypeFields VALUES (33, 62, NULL, 19);
 INSERT INTO itemTypeFields VALUES (33, 18, NULL, 20);
 INSERT INTO itemTypeFields VALUES (33, 2, NULL, 21);
 INSERT INTO itemTypeFields VALUES (33, 22, NULL, 22);
-INSERT INTO itemTypeFields VALUES (34, 110, NULL, 1);
-INSERT INTO itemTypeFields VALUES (34, 90, NULL, 2);
-INSERT INTO itemTypeFields VALUES (34, 8, NULL, 3);
-INSERT INTO itemTypeFields VALUES (34, 14, NULL, 4);
-INSERT INTO itemTypeFields VALUES (34, 87, NULL, 5);
-INSERT INTO itemTypeFields VALUES (34, 116, NULL, 6);
-INSERT INTO itemTypeFields VALUES (34, 1, NULL, 7);
-INSERT INTO itemTypeFields VALUES (34, 27, NULL, 8);
-INSERT INTO itemTypeFields VALUES (34, 123, NULL, 9);
-INSERT INTO itemTypeFields VALUES (34, 19, NULL, 10);
-INSERT INTO itemTypeFields VALUES (34, 62, NULL, 11);
-INSERT INTO itemTypeFields VALUES (34, 18, NULL, 12);
-INSERT INTO itemTypeFields VALUES (34, 2, NULL, 13);
-INSERT INTO itemTypeFields VALUES (34, 22, NULL, 14);
+
+-- document
+INSERT INTO itemTypeFields VALUES (34, 110, NULL, 1);  -- title
+INSERT INTO itemTypeFields VALUES (34, 90, NULL, 2);   -- abstract
+INSERT INTO itemTypeFields VALUES (34, 8, NULL, 3);    -- publisher
+INSERT INTO itemTypeFields VALUES (34, 14, NULL, 4);   -- date
+INSERT INTO itemTypeFields VALUES (34, 87, NULL, 5);   -- language
+INSERT INTO itemTypeFields VALUES (34, 116, NULL, 6);  -- shortTitle
+INSERT INTO itemTypeFields VALUES (34, 1, NULL, 7);    -- url
+INSERT INTO itemTypeFields VALUES (34, 27, NULL, 8);   -- accessed
+INSERT INTO itemTypeFields VALUES (34, 123, NULL, 9);  -- archive
+INSERT INTO itemTypeFields VALUES (34, 19, NULL, 10);  -- archiveLocation
+INSERT INTO itemTypeFields VALUES (34, 62, NULL, 11);  -- libraryCatalog
+INSERT INTO itemTypeFields VALUES (34, 18, NULL, 12);  -- callNumber
+INSERT INTO itemTypeFields VALUES (34, 2, NULL, 13);   -- rights
+INSERT INTO itemTypeFields VALUES (34, 22, NULL, 14);  -- extra
+
 INSERT INTO itemTypeFields VALUES (35, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (35, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (35, 85, NULL, 3);
@@ -986,6 +1013,7 @@ INSERT INTO itemTypeFields VALUES (35, 62, NULL, 20);
 INSERT INTO itemTypeFields VALUES (35, 18, NULL, 21);
 INSERT INTO itemTypeFields VALUES (35, 2, NULL, 22);
 INSERT INTO itemTypeFields VALUES (35, 22, NULL, 23);
+
 INSERT INTO itemTypeFields VALUES (36, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (36, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (36, 86, NULL, 3);
@@ -1015,25 +1043,21 @@ INSERT INTO itemTypeFields VALUES (1261, 112, NULL, 1);   -- nameOfAct
 INSERT INTO itemTypeFields VALUES (1261, 90, NULL, 2);    -- abstract
 INSERT INTO itemTypeFields VALUES (1261, 1261, NULL, 3);  -- jurisdiction
 INSERT INTO itemTypeFields VALUES (1261, 116, NULL, 4);   -- shortTitle
-INSERT INTO itemTypeFields VALUES (1261, 36, NULL, 5);    -- code
-INSERT INTO itemTypeFields VALUES (1261, 55, NULL, 6);    -- codeNumber [map to volume]
-INSERT INTO itemTypeFields VALUES (1261, 10, NULL, 7);    -- pages
-INSERT INTO itemTypeFields VALUES (1261, 100, NULL, 8);   -- dateEnacted
-INSERT INTO itemTypeFields VALUES (1261, 15, NULL, 9);    -- section
-INSERT INTO itemTypeFields VALUES (1261, 1269, NULL, 10); -- reign
-INSERT INTO itemTypeFields VALUES (1261, 1270, NULL, 11); -- regnalYear
-INSERT INTO itemTypeFields VALUES (1261, 8, NULL, 12);    -- publisher
-INSERT INTO itemTypeFields VALUES (1261, 1268, NULL, 13); -- publicationDate
-INSERT INTO itemTypeFields VALUES (1261, 87, NULL, 14);   -- language
-INSERT INTO itemTypeFields VALUES (1261, 1, NULL, 15);    -- url
-INSERT INTO itemTypeFields VALUES (1261, 27, NULL, 16);   -- accessed
-INSERT INTO itemTypeFields VALUES (1261, 101, NULL, 17);  -- publicLawNumber
-INSERT INTO itemTypeFields VALUES (1261, 40, NULL, 18);   -- session
-INSERT INTO itemTypeFields VALUES (1261, 42, NULL, 19);   -- history
+INSERT INTO itemTypeFields VALUES (1261, 101, NULL, 5);   -- publicLawNumber
+INSERT INTO itemTypeFields VALUES (1261, 36, NULL, 6);    -- code                       REPORTER
+INSERT INTO itemTypeFields VALUES (1261, 55, NULL, 7);    -- codeNumber [map to volume]
+INSERT INTO itemTypeFields VALUES (1261, 10, NULL, 8);    -- pages
+INSERT INTO itemTypeFields VALUES (1261, 100, NULL, 9);   -- dateEnacted
+INSERT INTO itemTypeFields VALUES (1261, 15, NULL, 10);   -- section
+INSERT INTO itemTypeFields VALUES (1261, 87, NULL, 11);   -- language
+INSERT INTO itemTypeFields VALUES (1261, 1, NULL, 12);    -- url
+INSERT INTO itemTypeFields VALUES (1261, 27, NULL, 13);   -- accessed
+INSERT INTO itemTypeFields VALUES (1261, 40, NULL, 14);   -- session           Deprecated
+INSERT INTO itemTypeFields VALUES (1261, 42, NULL, 15);   -- history           Deprecated
 INSERT INTO itemTypeFields VALUES (1261, 2, NULL, 20);    -- rights
 INSERT INTO itemTypeFields VALUES (1261, 22, NULL, 21);   -- extra
 
--- treaty
+-- treaty (which type to use as template? statute?)
 INSERT INTO itemTypeFields VALUES (1262, 112, NULL, 1);   -- nameOfAct
 INSERT INTO itemTypeFields VALUES (1262, 90, NULL, 2);    -- abstract
 INSERT INTO itemTypeFields VALUES (1262, 1261, NULL, 3);  -- jurisdiction
@@ -1056,28 +1080,64 @@ INSERT INTO itemTypeFields VALUES (1262, 42, NULL, 19);   -- history
 INSERT INTO itemTypeFields VALUES (1262, 2, NULL, 20);    -- rights
 INSERT INTO itemTypeFields VALUES (1262, 22, NULL, 21);   -- extra
 
--- regulation
+-- regulation (clone of gazette)
 INSERT INTO itemTypeFields VALUES (1263, 112, NULL, 1);   -- nameOfAct
 INSERT INTO itemTypeFields VALUES (1263, 90, NULL, 2);    -- abstract
 INSERT INTO itemTypeFields VALUES (1263, 1261, NULL, 3);  -- jurisdiction
 INSERT INTO itemTypeFields VALUES (1263, 116, NULL, 4);   -- shortTitle
-INSERT INTO itemTypeFields VALUES (1263, 36, NULL, 5);    -- code
-INSERT INTO itemTypeFields VALUES (1263, 55, NULL, 6);    -- codeNumber [map to volume]
-INSERT INTO itemTypeFields VALUES (1263, 10, NULL, 7);    -- pages
-INSERT INTO itemTypeFields VALUES (1263, 100, NULL, 8);   -- dateEnacted
-INSERT INTO itemTypeFields VALUES (1263, 15, NULL, 9);    -- section
-INSERT INTO itemTypeFields VALUES (1263, 1269, NULL, 10); -- reign
-INSERT INTO itemTypeFields VALUES (1263, 1270, NULL, 11); -- regnalYear
-INSERT INTO itemTypeFields VALUES (1263, 8, NULL, 12);    -- publisher
-INSERT INTO itemTypeFields VALUES (1263, 1268, NULL, 13); -- publicationDate
-INSERT INTO itemTypeFields VALUES (1263, 87, NULL, 14);   -- language
-INSERT INTO itemTypeFields VALUES (1263, 1, NULL, 15);    -- url
-INSERT INTO itemTypeFields VALUES (1263, 27, NULL, 16);   -- accessed
-INSERT INTO itemTypeFields VALUES (1263, 101, NULL, 17);  -- publicLawNumber
-INSERT INTO itemTypeFields VALUES (1263, 40, NULL, 18);   -- session
-INSERT INTO itemTypeFields VALUES (1263, 42, NULL, 19);   -- history
+INSERT INTO itemTypeFields VALUES (1263, 101, NULL, 5);   -- publicLawNumber
+INSERT INTO itemTypeFields VALUES (1263, 36, NULL, 6);    -- code                       REPORTER
+INSERT INTO itemTypeFields VALUES (1263, 55, NULL, 7);    -- codeNumber [map to volume]
+INSERT INTO itemTypeFields VALUES (1263, 10, NULL, 8);    -- pages
+INSERT INTO itemTypeFields VALUES (1263, 100, NULL, 9);   -- dateEnacted
+INSERT INTO itemTypeFields VALUES (1263, 15, NULL, 10);   -- section
+INSERT INTO itemTypeFields VALUES (1263, 87, NULL, 11);   -- language
+INSERT INTO itemTypeFields VALUES (1263, 1, NULL, 12);    -- url
+INSERT INTO itemTypeFields VALUES (1263, 27, NULL, 13);   -- accessed
+INSERT INTO itemTypeFields VALUES (1263, 40, NULL, 14);   -- session           Deprecated
+INSERT INTO itemTypeFields VALUES (1263, 42, NULL, 15);   -- history           Deprecated
 INSERT INTO itemTypeFields VALUES (1263, 2, NULL, 20);    -- rights
 INSERT INTO itemTypeFields VALUES (1263, 22, NULL, 21);   -- extra
+
+-- classic (clone of book)
+INSERT INTO itemTypeFields VALUES (1264, 110, NULL, 1);
+INSERT INTO itemTypeFields VALUES (1264, 90, NULL, 2);
+INSERT INTO itemTypeFields VALUES (1264, 3, NULL, 3);
+INSERT INTO itemTypeFields VALUES (1264, 30, NULL, 4);
+INSERT INTO itemTypeFields VALUES (1264, 4, NULL, 5);
+INSERT INTO itemTypeFields VALUES (1264, 45, NULL, 6);
+INSERT INTO itemTypeFields VALUES (1264, 6, NULL, 7);
+INSERT INTO itemTypeFields VALUES (1264, 7, NULL, 8);
+INSERT INTO itemTypeFields VALUES (1264, 8, NULL, 9);
+INSERT INTO itemTypeFields VALUES (1264, 14, NULL, 10);
+INSERT INTO itemTypeFields VALUES (1264, 118, NULL, 11);
+INSERT INTO itemTypeFields VALUES (1264, 87, NULL, 12);
+INSERT INTO itemTypeFields VALUES (1264, 11, NULL, 13);
+INSERT INTO itemTypeFields VALUES (1264, 116, NULL, 14);
+INSERT INTO itemTypeFields VALUES (1264, 1, NULL, 15);
+INSERT INTO itemTypeFields VALUES (1264, 27, NULL, 16);
+INSERT INTO itemTypeFields VALUES (1264, 123, NULL, 17);
+INSERT INTO itemTypeFields VALUES (1264, 19, NULL, 18);
+INSERT INTO itemTypeFields VALUES (1264, 62, NULL, 19);
+INSERT INTO itemTypeFields VALUES (1264, 18, NULL, 20);
+INSERT INTO itemTypeFields VALUES (1264, 2, NULL, 21);
+INSERT INTO itemTypeFields VALUES (1264, 22, NULL, 22);
+
+-- periodical (clone of document)
+INSERT INTO itemTypeFields VALUES (1265, 110, NULL, 1);  -- title
+INSERT INTO itemTypeFields VALUES (1265, 90, NULL, 2);   -- abstract
+INSERT INTO itemTypeFields VALUES (1265, 8, NULL, 3);    -- publisher
+INSERT INTO itemTypeFields VALUES (1265, 14, NULL, 4);   -- date
+INSERT INTO itemTypeFields VALUES (1265, 87, NULL, 5);   -- language
+INSERT INTO itemTypeFields VALUES (1265, 116, NULL, 6);  -- shortTitle
+INSERT INTO itemTypeFields VALUES (1265, 1, NULL, 7);    -- url
+INSERT INTO itemTypeFields VALUES (1265, 27, NULL, 8);   -- accessed
+INSERT INTO itemTypeFields VALUES (1265, 123, NULL, 9);  -- archive
+INSERT INTO itemTypeFields VALUES (1265, 19, NULL, 10);  -- archiveLocation
+INSERT INTO itemTypeFields VALUES (1265, 62, NULL, 11);  -- libraryCatalog
+INSERT INTO itemTypeFields VALUES (1265, 18, NULL, 12);  -- callNumber
+INSERT INTO itemTypeFields VALUES (1265, 2, NULL, 13);   -- rights
+INSERT INTO itemTypeFields VALUES (1265, 22, NULL, 14);  -- extra
 
 INSERT INTO baseFieldMappings VALUES (16, 4, 94); -- bill/volume/codeVolume
 INSERT INTO baseFieldMappings VALUES (17, 4, 97); -- case/volume/reporterVolume

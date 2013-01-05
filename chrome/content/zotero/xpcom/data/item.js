@@ -245,7 +245,7 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped,
 	if (!unformatted) {
 		// Multipart date fields
 		// TEMP - filingDate
-		if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || ['filingDate','priorityDate','publicationDate','originalDate'].indexOf(field) > -1)) {
+		if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || ['filingDate','priorityDate','publicationDate','originalDate'].indexOf(field) > -1) {
 			var value = Zotero.Date.multipartToStr(value);
 		}
 	}
