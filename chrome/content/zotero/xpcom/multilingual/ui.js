@@ -90,6 +90,9 @@ Zotero.EXTENDED_FIELDS = {
 		"openingDate":"available-date",
 		"adoptionDate":"original-date",
 		"signingDate":"event-date"
+	},
+	"classic":{
+		"volume":"volume"
 	}
 }
 

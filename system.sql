@@ -1126,6 +1126,7 @@ INSERT INTO itemTypeFields VALUES (1264, 7, NULL, 15);   -- place           Depr
 INSERT INTO itemTypeFields VALUES (1264, 2, NULL, 16);   -- rights
 INSERT INTO itemTypeFields VALUES (1264, 22, NULL, 17);  -- extra
 
+
 -- [NEW] periodical (clone of document)
 INSERT INTO itemTypeFields VALUES (1265, 110, NULL, 1);  -- title
 INSERT INTO itemTypeFields VALUES (1265, 90, NULL, 2);   -- abstract
