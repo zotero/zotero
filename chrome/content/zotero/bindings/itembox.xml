@@ -718,21 +718,16 @@
 					// or at beginning
 					var titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
 					field = this._dynamicFields.getElementsByAttribute('fieldname', Zotero.ItemFields.getName(titleFieldID)).item(0);
-					Zotero.debug("FUCK 1: "+field);
 					if (!field) {
-						Zotero.debug("FUCK 2");
 						field = this._dynamicFields.getElementsByAttribute('fieldname', 'itemType').item(0);
-						Zotero.debug("FUCK 2: "+field);
 					}
 					if (field) {
-						Zotero.debug("FUCK 3");
 						this._beforeRow = field.parentNode.nextSibling;
 						//while (this._beforeRow.firstChild.getAttribute('servantLang')) {
 						//	this._beforeRow = this._beforeRow.nextSibling;
 						//}
 					}
 					else {
-						Zotero.debug("FUCK 4");
 						this._beforeRow = this._dynamicFields.firstChild;
 					}
 					
