@@ -43,14 +43,15 @@ Zotero.EXTENDED_FIELDS = {
         "priorityDate":"original-date"
 	}, 
 	"legal_case": {
-		"archive":"archive",
-		"archiveLocation":"archive_location",
-		"yearAsVolume":"collection-number",
 		"jurisdiction":"jurisdiction",
-		"publicationDate":"publication-date",
 		"place":"event-place",
+		"yearAsVolume":"collection-number",
+		"publisher": "publisher",
+		"publicationDate":"publication-date",
 		"supplementName":"genre",
-		"issue":"issue"
+		"issue":"issue",
+		"archive":"archive",
+		"archiveLocation":"archive_location"
 	}, 
 	"statute": {
 		"jurisdiction":"jurisdiction",
