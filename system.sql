@@ -676,7 +676,7 @@ INSERT INTO itemTypeFields VALUES (18, 110, NULL, 1);  -- title
 INSERT INTO itemTypeFields VALUES (18, 90, NULL, 2);   -- abstract
 INSERT INTO itemTypeFields VALUES (18, 1261, NULL, 3); -- jurisdiction      [ADDED]
 INSERT INTO itemTypeFields VALUES (18, 116, NULL, 4);  -- shortTitle
-INSERT INTO itemTypeFields VALUES (18, 1276, NULL, 5); -- committeeFullname [ADDED]
+INSERT INTO itemTypeFields VALUES (18, 46, NULL, 5);   -- committee
 INSERT INTO itemTypeFields VALUES (18, 1275, NULL, 6); -- meetingNumber     [ADDED]
 INSERT INTO itemTypeFields VALUES (18, 1263, NULL, 7); -- resolutionLabel   [ADDED]
 INSERT INTO itemTypeFields VALUES (18, 1262, NULL, 8); -- assemblyNumber    [ADDED]
@@ -684,8 +684,8 @@ INSERT INTO itemTypeFields VALUES (18, 1264, NULL, 9); -- session type      [ADD
 INSERT INTO itemTypeFields VALUES (18, 40, NULL, 10);  -- session
 INSERT INTO itemTypeFields VALUES (18, 14, NULL, 11);  -- date
 INSERT INTO itemTypeFields VALUES (18, 10, NULL, 12);  -- pages
-INSERT INTO itemTypeFields VALUES (18, 19, NULL, 13);  -- archiveLocation
-INSERT INTO itemTypeFields VALUES (18, 43, NULL, 14);  -- reporter
+INSERT INTO itemTypeFields VALUES (18, 19, NULL, 13);  -- archiveLocation   [ADDED]
+INSERT INTO itemTypeFields VALUES (18, 43, NULL, 14);  -- reporter          [ADDED]
 INSERT INTO itemTypeFields VALUES (18, 8, NULL, 15);   -- publisher
 INSERT INTO itemTypeFields VALUES (18, 87, NULL, 16);  -- language
 INSERT INTO itemTypeFields VALUES (18, 1, NULL, 17);   -- url
@@ -694,10 +694,31 @@ INSERT INTO itemTypeFields VALUES (18, 45, NULL, 19);  -- numberOfVolumes   Depr
 INSERT INTO itemTypeFields VALUES (18, 42, NULL, 20);  -- history           Deprecated
 INSERT INTO itemTypeFields VALUES (18, 7, NULL, 21);   -- place             Deprecated
 INSERT INTO itemTypeFields VALUES (18, 41, NULL, 22);  -- legislativeBody   Deprecated
-INSERT INTO itemTypeFields VALUES (18, 46, NULL, 23);  -- committee         Deprecated
-INSERT INTO itemTypeFields VALUES (18, 99, NULL, 24);  -- documentNumber    Deprecated
-INSERT INTO itemTypeFields VALUES (18, 2, NULL, 25);   -- rights
-INSERT INTO itemTypeFields VALUES (18, 22, NULL, 26);  -- extra
+INSERT INTO itemTypeFields VALUES (18, 99, NULL, 23);  -- documentNumber    Deprecated
+INSERT INTO itemTypeFields VALUES (18, 2, NULL, 24);   -- rights
+INSERT INTO itemTypeFields VALUES (18, 22, NULL, 25);  -- extra
+
+-- hearing
+-- VIEW ONLY
+INSERT INTO itemTypeFields VALUES (18, 110, NULL, 1);
+INSERT INTO itemTypeFields VALUES (18, 90, NULL, 2);
+INSERT INTO itemTypeFields VALUES (18, 46, NULL, 3);
+INSERT INTO itemTypeFields VALUES (18, 7, NULL, 4);
+INSERT INTO itemTypeFields VALUES (18, 8, NULL, 5);
+INSERT INTO itemTypeFields VALUES (18, 45, NULL, 6);
+INSERT INTO itemTypeFields VALUES (18, 99, NULL, 7);
+INSERT INTO itemTypeFields VALUES (18, 10, NULL, 8);
+INSERT INTO itemTypeFields VALUES (18, 41, NULL, 9);
+INSERT INTO itemTypeFields VALUES (18, 40, NULL, 10);
+INSERT INTO itemTypeFields VALUES (18, 42, NULL, 11);
+INSERT INTO itemTypeFields VALUES (18, 14, NULL, 12);
+INSERT INTO itemTypeFields VALUES (18, 87, NULL, 13);
+INSERT INTO itemTypeFields VALUES (18, 116, NULL, 14);
+INSERT INTO itemTypeFields VALUES (18, 1, NULL, 15);
+INSERT INTO itemTypeFields VALUES (18, 27, NULL, 16);
+INSERT INTO itemTypeFields VALUES (18, 2, NULL, 17);
+INSERT INTO itemTypeFields VALUES (18, 22, NULL, 18);
+
 
 -- patent
 INSERT INTO itemTypeFields VALUES (19, 110, NULL, 1);   -- title
