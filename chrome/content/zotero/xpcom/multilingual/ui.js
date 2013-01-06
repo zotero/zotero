@@ -83,10 +83,10 @@ Zotero.EXTENDED_FIELDS = {
 		"publicationDate":"publication-date"
 	},
 	"treaty": {
-		"jurisdiction":"jurisdiction",
 		"reporter":"container-title",
 		"volume":"volume",
 		"pages":"page",
+		"section":"section",
 		"openingDate":"available-date",
 		"adoptionDate":"original-date",
 		"signingDate":"event-date"

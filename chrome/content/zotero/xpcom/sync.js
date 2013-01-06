@@ -3878,24 +3878,28 @@ Zotero.Sync.Server.Data = new function() {
         var multifields = false;
         var extracreators = false;
         var multicreators = false;
-		var xtype = false;
 		// Save off the type in case it changes below
-		var itemType = item.primary.itemType
+		var localItemType = item.primary.itemType;
+		var syncItemType = localItemType;
 		// Apply extended type if needed
-		if (Zotero.EXTENDED_TYPES[item.primary.itemType]) {
-			xtype = item.primary.itemType;
-			item.primary.itemType = Zotero.EXTENDED_TYPES[item.primary.itemType];
+		if (Zotero.EXTENDED_TYPES[localItemType]) {
+			syncItemType = Zotero.EXTENDED_TYPES[localItemType];
+			item.primary.itemTypeID = Zotero.ItemTypes.getID(syncItemType);
+			item.primary.itemType = syncItemType;
+			Zotero.debug("BBB sync type: "+syncItemType);
+			Zotero.debug("BBB   local type: "+localItemType);
 		}
         // Get extended fields, if any
-        if (Zotero.EXTENDED_FIELDS[item.primary.itemType]) {
+        if (Zotero.EXTENDED_FIELDS[localItemType]) {
             for (var field in item.fields) {
-                if (Zotero.EXTENDED_FIELDS[item.primary.itemType][field]) {
+                if (Zotero.EXTENDED_FIELDS[localItemType][field]) {
                     if (item.fields[field]) {
                         if (!extrafields) {
                             extrafields = {};
                         }
                         extrafields[field] = item.fields[field];
                         delete item.fields[field];
+						Zotero.debug("BBB     deleted: "+field);
                     }
                 }
             }
@@ -3915,10 +3919,10 @@ Zotero.Sync.Server.Data = new function() {
         // data mismatch in multicreators
 		if (item.creators) {
 			var deletecreatoridx = item.creators.length;
-			if (Zotero.EXTENDED_CREATORS[item.primary.itemType]) {
+			if (Zotero.EXTENDED_CREATORS[localItemType]) {
 				for (var i=item.creators.length-1; i>-1; i += -1) {
 					creator = item.creators[i];
-					if (Zotero.EXTENDED_CREATORS[item.primary.itemType][creator.creatorType]) {
+					if (Zotero.EXTENDED_CREATORS[localItemType][creator.creatorType]) {
 						if (!extracreators) {
 							extracreators = [];
 						}
@@ -3964,10 +3968,10 @@ Zotero.Sync.Server.Data = new function() {
 			item.creators = item.creators.slice(0,deletecreatoridx);
         }
         // If data exists, add it to the extra field
-        if (extrafields || multifields || extracreators || multicreators || xtype) {
-            supp = {type:itemType};
-			if (xtype) {
-				supp.xtype = xtype;
+        if (extrafields || multifields || extracreators || multicreators || syncItemType === localItemType) {
+            supp = {type:syncItemType};
+			if (syncItemType !== localItemType) {
+				supp.xtype = localItemType;
 			}
             if (extrafields) {
                 supp.extrafields = extrafields;
@@ -3990,6 +3994,7 @@ Zotero.Sync.Server.Data = new function() {
                 item.fields.extra = "";
             }
             item.fields.extra = "mlzsync:" + supplen + supp + item.fields.extra;
+			Zotero.debug("BBB    sending extra: "+item.fields.extra);
         }
 
 		xml.@libraryID = item.primary.libraryID ? item.primary.libraryID : Zotero.libraryID;
@@ -4124,7 +4129,9 @@ Zotero.Sync.Server.Data = new function() {
 				xml.related = keys.join(' ');
 			}
 		}
-		
+	
+		dump("NNN SHIT: "+xml.toXMLString()+"\n");
+	
 		return xml;
 	}
 	
