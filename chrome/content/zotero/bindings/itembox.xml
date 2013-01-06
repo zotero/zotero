@@ -716,14 +716,9 @@
 					// Creator rows
 					// Place, in order of preference, after title, after type,
 					// or at beginning
-					var shortTitleFieldID = Zotero.ItemFields.getID('shortTitle');
 					var titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
 
-					var field = this._dynamicFields.getElementsByAttribute('fieldname', Zotero.ItemFields.getName(shortTitleFieldID)).item(0);
-
-					if (!field || (field.parentNode.previousSibling.firstChild.getAttribute('fieldname') !== Zotero.ItemFields.getName(titleFieldID))) {
-						field = this._dynamicFields.getElementsByAttribute('fieldname', Zotero.ItemFields.getName(titleFieldID)).item(0);
-					}
+					field = this._dynamicFields.getElementsByAttribute('fieldname', Zotero.ItemFields.getName(titleFieldID)).item(0);
 
 					if (!field) {
 						field = this._dynamicFields.getElementsByAttribute('fieldname', 'itemType').item(0);

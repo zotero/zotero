@@ -68,7 +68,7 @@ Zotero.EXTENDED_FIELDS = {
 		"publisher":"publisher"
 	},
 	"podcast": {
-		"originalDate":"original-date",
+		"date":"issued",
 		"publisher":"publisher"
 	},
 	"report": {

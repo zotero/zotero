@@ -4201,7 +4201,7 @@ Zotero.Sync.Server.Data = new function() {
                 }
             }
         }
-        if (obj && obj.type === itemType) {
+        if (obj && itemTypeID === data.itemTypeID) {
 			if (obj.xtype) {
 				xItemTypeID = Zotero.ItemTypes.getID(obj.xtype);
 				if (xItemTypeID) {
