@@ -239,11 +239,11 @@ INSERT INTO itemTypes VALUES (33,'conferencePaper',NULL,1);
 INSERT INTO itemTypes VALUES (34,'document',NULL,2);
 INSERT INTO itemTypes VALUES (35,'encyclopediaArticle',NULL,1);
 INSERT INTO itemTypes VALUES (36,'dictionaryEntry',NULL,1);
-INSERT INTO itemTypes VALUES (1261,'gazette',NULL,1);
-INSERT INTO itemTypes VALUES (1262,'treaty',NULL,1);
-INSERT INTO itemTypes VALUES (1263,'regulation',NULL,1);
-INSERT INTO itemTypes VALUES (1264,'classic',NULL,1);
-INSERT INTO itemTypes VALUES (1265,'periodical',NULL,1);
+INSERT INTO itemTypes VALUES (1261,'gazette',NULL,1);           -- [ADDED]
+INSERT INTO itemTypes VALUES (1262,'treaty',NULL,1);            -- [ADDED]
+INSERT INTO itemTypes VALUES (1263,'regulation',NULL,1);        -- [ADDED]
+INSERT INTO itemTypes VALUES (1264,'classic',NULL,1);           -- [ADDED]
+INSERT INTO itemTypes VALUES (1265,'periodical',NULL,1);        -- [ADDED]
 
 INSERT INTO fields VALUES (1,'url',NULL);
 INSERT INTO fields VALUES (2,'rights',NULL);
@@ -349,25 +349,25 @@ INSERT INTO fields VALUES (120,'issuingAuthority',NULL);
 INSERT INTO fields VALUES (121,'filingDate',NULL);
 INSERT INTO fields VALUES (122,'genre',NULL);
 INSERT INTO fields VALUES (123,'archive',NULL);
-INSERT INTO fields VALUES (1261,'jurisdiction',NULL);
-INSERT INTO fields VALUES (1262,'assemblyNumber',NULL);
-INSERT INTO fields VALUES (1263,'resolutionLabel',NULL);
-INSERT INTO fields VALUES (1264,'sessionType',NULL);
-INSERT INTO fields VALUES (1265,'newsCaseDate',NULL);
-INSERT INTO fields VALUES (1266,'priorityDate',NULL);
-INSERT INTO fields VALUES (1267,'yearAsVolume',NULL);
-INSERT INTO fields VALUES (1268,'publicationDate',NULL);
-INSERT INTO fields VALUES (1269,'reign',NULL);
-INSERT INTO fields VALUES (1270,'regnalYear',NULL);
-INSERT INTO fields VALUES (1271,'supplementName',NULL);
-INSERT INTO fields VALUES (1272,'originalDate',NULL);
-INSERT INTO fields VALUES (1273,'album',NULL);
-INSERT INTO fields VALUES (1274,'opus',NULL);
-INSERT INTO fields VALUES (1275,'meetingNumber',NULL);
-INSERT INTO fields VALUES (1276,'committeeFullname',NULL);
-INSERT INTO fields VALUES (1277,'signingDate',NULL);
-INSERT INTO fields VALUES (1278,'openingDate',NULL);
-INSERT INTO fields VALUES (1279,'adoptionDate',NULL);
+INSERT INTO fields VALUES (1261,'jurisdiction',NULL);         -- [ADDED]
+INSERT INTO fields VALUES (1262,'assemblyNumber',NULL);       -- [ADDED]
+INSERT INTO fields VALUES (1263,'resolutionLabel',NULL);      -- [ADDED]
+INSERT INTO fields VALUES (1264,'sessionType',NULL);          -- [ADDED]
+INSERT INTO fields VALUES (1265,'newsCaseDate',NULL);         -- [ADDED]
+INSERT INTO fields VALUES (1266,'priorityDate',NULL);         -- [ADDED]
+INSERT INTO fields VALUES (1267,'yearAsVolume',NULL);         -- [ADDED]
+INSERT INTO fields VALUES (1268,'publicationDate',NULL);      -- [ADDED]
+INSERT INTO fields VALUES (1269,'reign',NULL);                -- [ADDED]
+INSERT INTO fields VALUES (1270,'regnalYear',NULL);           -- [ADDED]
+INSERT INTO fields VALUES (1271,'supplementName',NULL);       -- [ADDED]
+INSERT INTO fields VALUES (1272,'originalDate',NULL);         -- [ADDED]
+INSERT INTO fields VALUES (1273,'album',NULL);                -- [ADDED]
+INSERT INTO fields VALUES (1274,'opus',NULL);                 -- [ADDED]
+INSERT INTO fields VALUES (1275,'meetingNumber',NULL);        -- [ADDED]
+INSERT INTO fields VALUES (1276,'committeeFullname',NULL);    -- [ADDED]
+INSERT INTO fields VALUES (1277,'signingDate',NULL);          -- [ADDED]
+INSERT INTO fields VALUES (1278,'openingDate',NULL);          -- [ADDED]
+INSERT INTO fields VALUES (1279,'adoptionDate',NULL);         -- [ADDED]
 
 -- book
 INSERT INTO itemTypeFields VALUES (2, 110, NULL, 1);
