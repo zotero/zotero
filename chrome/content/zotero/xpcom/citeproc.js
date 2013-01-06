@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.414",
+    PROCESSOR_VERSION: "1.0.415",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -9771,7 +9771,7 @@ CSL.Transform = function (state) {
                 ret = "tlh";
             }
         }
-        if (Item.multi && Item.multi && Item.multi.main) {
+        if (Item.multi && Item.multi && Item.multi.main && Item.multi.main[field]) {
             ret = Item.multi.main[field];
         }
         if (state.opt.development_extensions.normalize_lang_keys_to_lowercase) {
