@@ -36,7 +36,7 @@ Zotero.EXTENDED_FIELDS = {
 		"reporter":"container-title"
 	},
 	"artwork": {
-        "publicationTitle":"container-title"
+        "websiteTitle":"container-title"
 	}, 
 	"patent": {
 		"jurisdiction":"jurisdiction",

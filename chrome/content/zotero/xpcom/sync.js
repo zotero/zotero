@@ -3913,54 +3913,56 @@ Zotero.Sync.Server.Data = new function() {
         }
         // Normalize the sequence of any extra creators to avoid
         // data mismatch in multicreators
-        var deletecreatoridx = item.creators.length;
-        if (Zotero.EXTENDED_CREATORS[item.primary.itemType]) {
-            for (var i=item.creators.length-1; i>-1; i += -1) {
-                creator = item.creators[i];
-                if (Zotero.EXTENDED_CREATORS[item.primary.itemType][creator.creatorType]) {
-                    if (!extracreators) {
-                        extracreators = [];
-                    }
-		            if (!creator.libraryID) {
+		if (item.creators) {
+			var deletecreatoridx = item.creators.length;
+			if (Zotero.EXTENDED_CREATORS[item.primary.itemType]) {
+				for (var i=item.creators.length-1; i>-1; i += -1) {
+					creator = item.creators[i];
+					if (Zotero.EXTENDED_CREATORS[item.primary.itemType][creator.creatorType]) {
+						if (!extracreators) {
+							extracreators = [];
+						}
+						if (!creator.libraryID) {
                             creator.libraryID = 0;
-                    }
-                    extracreators.push(creator);
-                    item.creators = item.creators.slice(0,i).concat(item.creators.slice(i+1))
-                    deletecreatoridx += -1;
-                }
-            }
-            if (extracreators) {
-                item.creators = item.creators.concat(extracreators);
-            }
-        }
-        // Get multi creator data
-        for (var i=0,ilen=item.creators.length; i<ilen; i+=1) {
-            var multicreatorset = false;
-            var creator = item.creators[i];
-            for (var key in creator.multi._key) {
-                multicreatorset = creator.multi;
-                break;
-            }
-            if (!multicreatorset && creator.multi.main) {
-                multicreatorset = creator.multi;
-            }
-            if (multicreatorset) {
+						}
+						extracreators.push(creator);
+						item.creators = item.creators.slice(0,i).concat(item.creators.slice(i+1))
+						deletecreatoridx += -1;
+					}
+				}
+				if (extracreators) {
+					item.creators = item.creators.concat(extracreators);
+				}
+			}
+			// Get multi creator data
+			for (var i=0,ilen=item.creators.length; i<ilen; i+=1) {
+				var multicreatorset = false;
+				var creator = item.creators[i];
+				for (var key in creator.multi._key) {
+					multicreatorset = creator.multi;
+					break;
+				}
+				if (!multicreatorset && creator.multi.main) {
+					multicreatorset = creator.multi;
+				}
+				if (multicreatorset) {
                 if (!multicreators) {
                     multicreators = {};
                 }
-                multicreatorset.fieldMode = creator.fieldMode;
-                multicreators[i] = multicreatorset;
-            }
+					multicreatorset.fieldMode = creator.fieldMode;
+					multicreators[i] = multicreatorset;
+				}
+			}
+			// Remove multi segment from extracreators to avoid
+			// storing it twice
+			if (extracreators) {
+				for (var i=0,ilen=extracreators.length; i<ilen; i+=1) {
+					delete extracreators[i].multi;
+				}
+			}
+			// Remove extracreators from main object
+			item.creators = item.creators.slice(0,deletecreatoridx);
         }
-        // Remove multi segment from extracreators to avoid
-        // storing it twice
-        if (extracreators) {
-            for (var i=0,ilen=extracreators.length; i<ilen; i+=1) {
-                delete extracreators[i].multi;
-            }
-        }
-        // Remove extracreators from main object
-        item.creators = item.creators.slice(0,deletecreatoridx);
         // If data exists, add it to the extra field
         if (extrafields || multifields || extracreators || multicreators || xtype) {
             supp = {type:itemType};

@@ -3072,7 +3072,11 @@
 				<body>
 				<![CDATA[
 //Zotero.debug("XXX modifyCreatorType()");
-					var row = document.triggerNode.localName == 'hbox' ? document.triggerNode.parentNode : document.triggerNode.parentNode.parentNode;
+					var triggerNode = document.triggerNode;
+					if (!triggerNode) {
+						triggerNode = document.popupNode;
+					}
+					var row = triggerNode.localName == 'hbox' ? triggerNode.parentNode : triggerNode.parentNode.parentNode;
 					var fieldstring = row.firstChild.getAttribute('fieldname');
 					var index = fieldstring.split('-')[1];
 					var fieldStringSuffix = fieldstring.split('-')[2];
