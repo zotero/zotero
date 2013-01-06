@@ -464,16 +464,16 @@ INSERT INTO itemTypeFields VALUES (5, 22, NULL, 18);
 INSERT INTO itemTypeFields VALUES (6, 110, NULL, 1);   -- title
 INSERT INTO itemTypeFields VALUES (6, 90, NULL, 2);    -- abstract
 INSERT INTO itemTypeFields VALUES (6, 12, NULL, 3);    -- publicationTitle
-INSERT INTO itemTypeFields VALUES (6, 14, NULL, 4);    -- date (-> issued)
+INSERT INTO itemTypeFields VALUES (6, 14, NULL, 4);    -- date (issued)
 INSERT INTO itemTypeFields VALUES (6, 7, NULL, 5);     -- place
 INSERT INTO itemTypeFields VALUES (6, 6, NULL, 6);     -- issue
 INSERT INTO itemTypeFields VALUES (6, 15, NULL, 7);    -- section
 INSERT INTO itemTypeFields VALUES (6, 10, NULL, 8);    -- pages
 INSERT INTO itemTypeFields VALUES (6, 87, NULL, 9);    -- language
 INSERT INTO itemTypeFields VALUES (6, 116, NULL, 10);  -- shortTitle
-INSERT INTO itemTypeFields VALUES (6, 1261, NULL, 11); -- jurisdiction
+INSERT INTO itemTypeFields VALUES (6, 1261, NULL, 11); -- jurisdiction        [ADDED]
 INSERT INTO itemTypeFields VALUES (6, 44, NULL, 12);   -- court
-INSERT INTO itemTypeFields VALUES (6, 1265, NULL, 13); -- newsCaseDate (-> original-date)
+INSERT INTO itemTypeFields VALUES (6, 1265, NULL, 13); -- newsCaseDate        [ADDED] (original-date)
 INSERT INTO itemTypeFields VALUES (6, 13, NULL, 14);   -- ISSN
 INSERT INTO itemTypeFields VALUES (6, 1, NULL, 15);    -- url
 INSERT INTO itemTypeFields VALUES (6, 27, NULL, 16);   -- accessed
@@ -574,12 +574,12 @@ INSERT INTO itemTypeFields VALUES (12, 110, NULL, 1); -- title
 INSERT INTO itemTypeFields VALUES (12, 90, NULL, 2);  -- abstract
 INSERT INTO itemTypeFields VALUES (12, 59, NULL, 3);  -- artworkMedium
 INSERT INTO itemTypeFields VALUES (12, 61, NULL, 4);  -- artworkSize
-INSERT INTO itemTypeFields VALUES (12, 91, NULL, 5);  -- websiteTitle
+INSERT INTO itemTypeFields VALUES (12, 91, NULL, 5);  -- websiteTitle    [ADDED]
 INSERT INTO itemTypeFields VALUES (12, 14, NULL, 6);  -- date
 INSERT INTO itemTypeFields VALUES (12, 87, NULL, 7);  -- language
 INSERT INTO itemTypeFields VALUES (12, 116, NULL, 8); -- shortTitle
 INSERT INTO itemTypeFields VALUES (12, 123, NULL, 9); -- archive
-INSERT INTO itemTypeFields VALUES (12, 19, NULL, 10);  -- archiveLocation
+INSERT INTO itemTypeFields VALUES (12, 19, NULL, 10); -- archiveLocation
 INSERT INTO itemTypeFields VALUES (12, 62, NULL, 11); -- library catalog
 INSERT INTO itemTypeFields VALUES (12, 18, NULL, 12); -- call number
 INSERT INTO itemTypeFields VALUES (12, 1, NULL, 13);  -- url
@@ -614,7 +614,7 @@ INSERT INTO itemTypeFields VALUES (15, 14, NULL, 8);    -- date
 INSERT INTO itemTypeFields VALUES (15, 10, NULL, 9);    -- pages
 INSERT INTO itemTypeFields VALUES (15, 87, NULL, 10);   -- language
 INSERT INTO itemTypeFields VALUES (15, 116, NULL, 11);  -- shortTitle
-INSERT INTO itemTypeFields VALUES (15, 1261, NULL, 12); -- jurisdiction
+INSERT INTO itemTypeFields VALUES (15, 1261, NULL, 12); -- jurisdiction     [ADDED]
 INSERT INTO itemTypeFields VALUES (15, 1, NULL, 13);    -- url
 INSERT INTO itemTypeFields VALUES (15, 27, NULL, 14);   -- accessed
 INSERT INTO itemTypeFields VALUES (15, 123, NULL, 15);  -- archive
@@ -627,18 +627,18 @@ INSERT INTO itemTypeFields VALUES (15, 22, NULL, 20);   -- extra
 -- bill
 INSERT INTO itemTypeFields VALUES (16, 110, NULL, 1);  -- title
 INSERT INTO itemTypeFields VALUES (16, 90, NULL, 2);   -- abstract
-INSERT INTO itemTypeFields VALUES (16, 1261, NULL, 3); -- jurisdiction
+INSERT INTO itemTypeFields VALUES (16, 1261, NULL, 3); -- jurisdiction      [ADDED]
 INSERT INTO itemTypeFields VALUES (16, 116, NULL, 4);  -- short title
 INSERT INTO itemTypeFields VALUES (16, 41, NULL, 5);   -- legislativeBody
-INSERT INTO itemTypeFields VALUES (16, 1263, NULL, 6); -- resolution label
-INSERT INTO itemTypeFields VALUES (16, 1262, NULL, 7); -- assembly number
-INSERT INTO itemTypeFields VALUES (16, 1264, NULL, 8); -- session type
+INSERT INTO itemTypeFields VALUES (16, 1263, NULL, 6); -- resolution label  [ADDED]
+INSERT INTO itemTypeFields VALUES (16, 1262, NULL, 7); -- assembly number   [ADDED]
+INSERT INTO itemTypeFields VALUES (16, 1264, NULL, 8); -- session type      [ADDED]
 INSERT INTO itemTypeFields VALUES (16, 40, NULL, 9);   -- session
 INSERT INTO itemTypeFields VALUES (16, 93, NULL, 10);  -- bill number
 INSERT INTO itemTypeFields VALUES (16, 14, NULL, 11);  -- date
 INSERT INTO itemTypeFields VALUES (16, 15, NULL, 12);  -- section
-INSERT INTO itemTypeFields VALUES (16, 19, NULL, 13);  -- archive locator
-INSERT INTO itemTypeFields VALUES (16, 43, NULL, 14);  -- reporter
+INSERT INTO itemTypeFields VALUES (16, 19, NULL, 13);  -- archive locator   [ADDED]
+INSERT INTO itemTypeFields VALUES (16, 43, NULL, 14);  -- reporter          [ADDED]
 INSERT INTO itemTypeFields VALUES (16, 87, NULL, 15);  -- language
 INSERT INTO itemTypeFields VALUES (16, 1, NULL, 16);   -- url
 INSERT INTO itemTypeFields VALUES (16, 27, NULL, 17);  -- access date
@@ -670,25 +670,6 @@ INSERT INTO itemTypeFields VALUES (17, 27, NULL, 21);   -- accessed
 INSERT INTO itemTypeFields VALUES (17, 42, NULL, 22);   -- history
 INSERT INTO itemTypeFields VALUES (17, 2, NULL, 23);    -- rights
 INSERT INTO itemTypeFields VALUES (17, 22, NULL, 24);   -- extra
-
--- case
--- VIEW ONLY
-INSERT INTO itemTypeFields VALUES (17, 111, NULL, 1);
-INSERT INTO itemTypeFields VALUES (17, 90, NULL, 2);
-INSERT INTO itemTypeFields VALUES (17, 43, NULL, 3);
-INSERT INTO itemTypeFields VALUES (17, 97, NULL, 4);
-INSERT INTO itemTypeFields VALUES (17, 44, NULL, 5);
-INSERT INTO itemTypeFields VALUES (17, 117, NULL, 6);
-INSERT INTO itemTypeFields VALUES (17, 98, NULL, 7);
-INSERT INTO itemTypeFields VALUES (17, 42, NULL, 8);
-INSERT INTO itemTypeFields VALUES (17, 96, NULL, 9);
-INSERT INTO itemTypeFields VALUES (17, 87, NULL, 10);
-INSERT INTO itemTypeFields VALUES (17, 116, NULL, 11);
-INSERT INTO itemTypeFields VALUES (17, 1, NULL, 12);
-INSERT INTO itemTypeFields VALUES (17, 27, NULL, 13);
-INSERT INTO itemTypeFields VALUES (17, 2, NULL, 14);
-INSERT INTO itemTypeFields VALUES (17, 22, NULL, 15);
-
 
 -- hearing
 INSERT INTO itemTypeFields VALUES (18, 110, NULL, 1);  -- title
