@@ -33,7 +33,8 @@ Zotero.EXTENDED_FIELDS = {
 		"resolutionLabel":"event",
 		"sessionType":"genre",
 		"archiveLocation":"archive_location",
-		"reporter":"container-title"
+		"reporter":"container-title",
+		"meetingNumber":"chapter-number"
 	},
 	"artwork": {
         "websiteTitle":"container-title"
@@ -42,7 +43,7 @@ Zotero.EXTENDED_FIELDS = {
 		"jurisdiction":"jurisdiction",
         "priorityDate":"original-date"
 	}, 
-	"legal_case": {
+	"case": {
 		"jurisdiction":"jurisdiction",
 		"place":"event-place",
 		"yearAsVolume":"collection-number",
