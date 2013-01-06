@@ -1033,8 +1033,9 @@
 					}
 
 					row.appendChild(label);
-					row.appendChild(value);
 					if (fieldname == 'jurisdiction') {
+						var boxedvalue = document.createElement("hbox");
+						boxedvalue.appendChild(value);
 						var jurisdictionDefault = document.createElement("checkbox");
 						jurisdictionDefault.setAttribute("label","default");
 						jurisdictionDefault.setAttribute("id","jurisdiction-default");
@@ -1042,7 +1043,10 @@
 						if (this.item.getField("jurisdiction") === Zotero.Prefs.get("import.jurisdictionDefault")) {
 							jurisdictionDefault.setAttribute("checked",true);
 						}
-						row.appendChild(jurisdictionDefault);
+						boxedvalue.appendChild(jurisdictionDefault);
+						row.appendChild(boxedvalue);
+					} else {
+						row.appendChild(value);
 					}
 					if (beforeElement) {
 						this._dynamicFields.insertBefore(row, this._beforeRow);
