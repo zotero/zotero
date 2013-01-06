@@ -96,7 +96,15 @@ Zotero.ItemFields = new function() {
 		
 		// Hack in alternate field labels for spoofed types
 		if (itemType == '1262' && field === 'date') {
+			// treaty
 			return Zotero.getString("itemFields.effectiveDate");
+		} else if (itemType == '1263' || itemType == '1261') {
+			// regulation or gazette
+			if (field === 'code') {
+				return Zotero.getString("itemFields.reporter");
+			} else if (field === 'codeNumber') {
+				return Zotero.getString("itemFields.volume");
+			}
 		}
 
 		// TODO: different labels for different item types
