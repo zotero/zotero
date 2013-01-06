@@ -245,7 +245,7 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped,
 	if (!unformatted) {
 		// Multipart date fields
 		// TEMP - filingDate
-		if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || ['filingDate','priorityDate','publicationDate','originalDate'].indexOf(field) > -1) {
+		if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || ['filingDate','priorityDate','publicationDate','originalDate','signingDate','openingDate','adoptionDate'].indexOf(field) > -1) {
 			var value = Zotero.Date.multipartToStr(value);
 		}
 	}
@@ -887,7 +887,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn, lang, force_top)
 	if (!loadIn) {
 		// Save date field as multipart date
 		// TEMP - filingDate
-		if ((Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || ['filingDate','priorityDate','publicationDate','originalDate'].indexOf(field) > -1)
+		if ((Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || ['filingDate','priorityDate','publicationDate','originalDate','signingDate','openingDate','adoptionDate'].indexOf(field) > -1)
 			&& !Zotero.Date.isMultipart(value)) {
 			value = Zotero.Date.strToMultipart(value);
 		}

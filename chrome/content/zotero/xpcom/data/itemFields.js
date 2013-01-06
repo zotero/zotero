@@ -94,6 +94,11 @@ Zotero.ItemFields = new function() {
 				return Zotero.getString("itemFields." + field);
 		}
 		
+		// Hack in alternate field labels for spoofed types
+		if (itemType == '1262' && field === 'date') {
+			return Zotero.getString("itemFields.effectiveDate");
+		}
+
 		// TODO: different labels for different item types
 		
 		try {

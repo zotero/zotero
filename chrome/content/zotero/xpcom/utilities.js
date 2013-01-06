@@ -98,7 +98,10 @@ const CSL_DATE_MAPPINGS = {
     "issued":["date"],
 	"original-date":["newsCaseDate","priorityDate"],
 	"submitted":["filingDate"],
-	"accessed":["accessDate"]
+	"accessed":["accessDate"],
+	"available-date":["openingDate"],
+	"original-date":["adoptionDate"],
+	"event-date":["signingDate"]
 }
 
 /*
