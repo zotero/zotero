@@ -714,29 +714,29 @@ INSERT INTO itemTypeFields VALUES (19, 87, NULL, 11);  -- language
 INSERT INTO itemTypeFields VALUES (19, 116, NULL, 12); -- shortTitle
 INSERT INTO itemTypeFields VALUES (19, 1, NULL, 13);   -- url
 INSERT INTO itemTypeFields VALUES (19, 27, NULL, 14);  -- accessed
-INSERT INTO itemTypeFields VALUES (19, 48, NULL, 15);  -- Assignee (legacy)
-INSERT INTO itemTypeFields VALUES (19, 7, NULL, 16);   -- Place (legacy)
-INSERT INTO itemTypeFields VALUES (19, 102, NULL, 17); -- Country (legacy)
-INSERT INTO itemTypeFields VALUES (19, 120, NULL, 18); -- Issuing Authority (legacy)
-INSERT INTO itemTypeFields VALUES (19, 53, NULL, 19);  -- References (legacy)
-INSERT INTO itemTypeFields VALUES (19, 54, NULL, 20);  -- Legal Status (legacy)
+INSERT INTO itemTypeFields VALUES (19, 48, NULL, 15);  -- Assignee             Deprecated
+INSERT INTO itemTypeFields VALUES (19, 7, NULL, 16);   -- Place                Deprecated
+INSERT INTO itemTypeFields VALUES (19, 102, NULL, 17); -- Country              Deprecated
+INSERT INTO itemTypeFields VALUES (19, 120, NULL, 18); -- Issuing Authority    Deprecated
+INSERT INTO itemTypeFields VALUES (19, 53, NULL, 19);  -- References           Deprecated
+INSERT INTO itemTypeFields VALUES (19, 54, NULL, 20);  -- Legal Status         Deprecated
 INSERT INTO itemTypeFields VALUES (19, 2, NULL, 21);   -- rights
 INSERT INTO itemTypeFields VALUES (19, 22, NULL, 22);  -- extra
 
 -- statute
 INSERT INTO itemTypeFields VALUES (20, 112, NULL, 1);   -- nameOfAct
 INSERT INTO itemTypeFields VALUES (20, 90, NULL, 2);    -- abstract
-INSERT INTO itemTypeFields VALUES (20, 1261, NULL, 3);  -- jurisdiction [ADDED]
+INSERT INTO itemTypeFields VALUES (20, 1261, NULL, 3);  -- jurisdiction     [ADDED]
 INSERT INTO itemTypeFields VALUES (20, 116, NULL, 4);   -- shortTitle
 INSERT INTO itemTypeFields VALUES (20, 36, NULL, 5);    -- code
-INSERT INTO itemTypeFields VALUES (20, 55, NULL, 6);    -- codeNumber [map to volume]
+INSERT INTO itemTypeFields VALUES (20, 55, NULL, 6);    -- codeNumber (volume)
 INSERT INTO itemTypeFields VALUES (20, 10, NULL, 7);    -- pages
 INSERT INTO itemTypeFields VALUES (20, 100, NULL, 8);   -- dateEnacted
 INSERT INTO itemTypeFields VALUES (20, 15, NULL, 9);    -- section
-INSERT INTO itemTypeFields VALUES (20, 1269, NULL, 10); -- reign [ADDED]
-INSERT INTO itemTypeFields VALUES (20, 1270, NULL, 11); -- regnalYear [ADDED]
-INSERT INTO itemTypeFields VALUES (20, 8, NULL, 12);    -- publisher [ADDED]
-INSERT INTO itemTypeFields VALUES (20, 1268, NULL, 13); -- publicationDate [ADDED]
+INSERT INTO itemTypeFields VALUES (20, 1269, NULL, 10); -- reign            [ADDED]
+INSERT INTO itemTypeFields VALUES (20, 1270, NULL, 11); -- regnalYear       [ADDED]
+INSERT INTO itemTypeFields VALUES (20, 8, NULL, 12);    -- publisher        [ADDED]
+INSERT INTO itemTypeFields VALUES (20, 1268, NULL, 13); -- publicationDate  [ADDED]
 INSERT INTO itemTypeFields VALUES (20, 87, NULL, 14);   -- language
 INSERT INTO itemTypeFields VALUES (20, 1, NULL, 15);    -- url
 INSERT INTO itemTypeFields VALUES (20, 27, NULL, 16);   -- accessed
@@ -818,7 +818,7 @@ INSERT INTO itemTypeFields VALUES (25, 22, NULL, 11);
 -- audioRecording
 INSERT INTO itemTypeFields VALUES (26, 110, NULL, 1);   -- title
 INSERT INTO itemTypeFields VALUES (26, 90, NULL, 2);    -- abstract
-INSERT INTO itemTypeFields VALUES (26, 1273, NULL, 3);  -- album
+INSERT INTO itemTypeFields VALUES (26, 1273, NULL, 3);  -- album                [ADDED]
 INSERT INTO itemTypeFields VALUES (26, 71, NULL, 4);    -- audioRecordingFormat
 INSERT INTO itemTypeFields VALUES (26, 28, NULL, 5);    -- seriesTitle
 INSERT INTO itemTypeFields VALUES (26, 4, NULL, 6);     -- volume
@@ -826,8 +826,9 @@ INSERT INTO itemTypeFields VALUES (26, 45, NULL, 7);    -- numberOfVolumes
 INSERT INTO itemTypeFields VALUES (26, 7, NULL, 8);     -- place
 INSERT INTO itemTypeFields VALUES (26, 72, NULL, 9);    -- label
 INSERT INTO itemTypeFields VALUES (26, 14, NULL, 10);   -- date
-INSERT INTO itemTypeFields VALUES (26, 1274, NULL, 11); -- opus
-INSERT INTO itemTypeFields VALUES (26, 1272, NULL, 12); -- originalDate
+INSERT INTO itemTypeFields VALUES (26, 1274, NULL, 11); -- opus                 [ADDED]
+INSERT INTO itemTypeFields VALUES (26, 8, NULL, 12);    -- publisher            [ADDED]
+INSERT INTO itemTypeFields VALUES (26, 1272, NULL, 12); -- originalDate         [ADDED]
 INSERT INTO itemTypeFields VALUES (26, 77, NULL, 13);   -- runningTime
 INSERT INTO itemTypeFields VALUES (26, 87, NULL, 14);   -- language
 INSERT INTO itemTypeFields VALUES (26, 11, NULL, 15);   -- ISBN
@@ -840,7 +841,6 @@ INSERT INTO itemTypeFields VALUES (26, 1, NULL, 21);    -- url
 INSERT INTO itemTypeFields VALUES (26, 27, NULL, 22);   -- accessed
 INSERT INTO itemTypeFields VALUES (26, 2, NULL, 23);    -- rights
 INSERT INTO itemTypeFields VALUES (26, 22, NULL, 24);   -- extra
-
 
 INSERT INTO itemTypeFields VALUES (27, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (27, 90, NULL, 2);
