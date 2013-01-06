@@ -11,7 +11,7 @@ Zotero.EXTENDED_TYPES = {
     "regulation":"statute",
     "classic":"book",
     "periodical":"document",
-    "treaty":"book"
+    "treaty":"document"
 }
 
 Zotero.EXTENDED_FIELDS = {
@@ -79,7 +79,13 @@ Zotero.EXTENDED_FIELDS = {
 		"jurisdiction":"jurisdiction"
 	},
 	"treaty": {
-		"jurisdiction":"jurisdiction"
+		"jurisdiction":"jurisdiction",
+		"reporter":"container-title",
+		"volume":"volume",
+		"pages":"page",
+		"openingDate":"available-date",
+		"adoptionDate":"original-date",
+		"signingDate":"event-date"
 	}
 }
 

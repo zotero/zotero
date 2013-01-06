@@ -1063,26 +1063,25 @@ INSERT INTO itemTypeFields VALUES (1261, 22, NULL, 21);   -- extra
 -- treaty (derived from document)
 INSERT INTO itemTypeFields VALUES (1262, 110, NULL, 1);  -- title
 INSERT INTO itemTypeFields VALUES (1262, 90, NULL, 2);   -- abstract
-INSERT INTO itemTypeFields VALUES (1262, 1261, NULL, 3);  -- jurisdiction [ADDED]
-INSERT INTO itemTypeFields VALUES (1262, 116, NULL, 4);  -- shortTitle
-INSERT INTO itemTypeFields VALUES (1262, 43, NULL, 5);  -- reporter [ADDED]
-INSERT INTO itemTypeFields VALUES (1262, 4, NULL, 6);  -- volume [ADDED]
-INSERT INTO itemTypeFields VALUES (1262, 10, NULL, 7);  -- pages [ADDED]
-INSERT INTO itemTypeFields VALUES (1262, 1278, NULL, 8);  -- openingDate [ADDED]
-INSERT INTO itemTypeFields VALUES (1262, 1279, NULL, 9);  -- adoptionDate [ADDED]
-INSERT INTO itemTypeFields VALUES (1262, 1277, NULL, 10);  -- signingDate [ADDED]
-INSERT INTO itemTypeFields VALUES (1262, 14, NULL, 11);   -- date (effective date)
-INSERT INTO itemTypeFields VALUES (1262, 15, NULL, 12);  -- section [ADDED]
-INSERT INTO itemTypeFields VALUES (1262, 87, NULL, 13);   -- language
-INSERT INTO itemTypeFields VALUES (1262, 1, NULL, 14);    -- url
-INSERT INTO itemTypeFields VALUES (1262, 27, NULL, 15);   -- accessed
-INSERT INTO itemTypeFields VALUES (1262, 123, NULL, 16);  -- archive
-INSERT INTO itemTypeFields VALUES (1262, 19, NULL, 17);  -- archiveLocation
-INSERT INTO itemTypeFields VALUES (1262, 62, NULL, 18);  -- libraryCatalog   Deprecated
-INSERT INTO itemTypeFields VALUES (1262, 18, NULL, 19);  -- callNumber       Deprecated
-INSERT INTO itemTypeFields VALUES (1262, 8, NULL, 20);    -- publisher        Deprecated
-INSERT INTO itemTypeFields VALUES (1262, 2, NULL, 21);   -- rights
-INSERT INTO itemTypeFields VALUES (1262, 22, NULL, 22);  -- extra
+INSERT INTO itemTypeFields VALUES (1262, 116, NULL, 3);  -- shortTitle
+INSERT INTO itemTypeFields VALUES (1262, 43, NULL, 4);  -- reporter [ADDED]
+INSERT INTO itemTypeFields VALUES (1262, 4, NULL, 5);  -- volume [ADDED]
+INSERT INTO itemTypeFields VALUES (1262, 10, NULL, 6);  -- pages [ADDED]
+INSERT INTO itemTypeFields VALUES (1262, 1278, NULL, 7);  -- openingDate [ADDED]
+INSERT INTO itemTypeFields VALUES (1262, 1279, NULL, 8);  -- adoptionDate [ADDED]
+INSERT INTO itemTypeFields VALUES (1262, 1277, NULL, 9);  -- signingDate [ADDED]
+INSERT INTO itemTypeFields VALUES (1262, 14, NULL, 10);   -- date (effective date)
+INSERT INTO itemTypeFields VALUES (1262, 15, NULL, 11);  -- section [ADDED]
+INSERT INTO itemTypeFields VALUES (1262, 87, NULL, 12);   -- language
+INSERT INTO itemTypeFields VALUES (1262, 1, NULL, 13);    -- url
+INSERT INTO itemTypeFields VALUES (1262, 27, NULL, 14);   -- accessed
+INSERT INTO itemTypeFields VALUES (1262, 123, NULL, 15);  -- archive
+INSERT INTO itemTypeFields VALUES (1262, 19, NULL, 16);  -- archiveLocation
+INSERT INTO itemTypeFields VALUES (1262, 62, NULL, 17);  -- libraryCatalog   Deprecated
+INSERT INTO itemTypeFields VALUES (1262, 18, NULL, 18);  -- callNumber       Deprecated
+INSERT INTO itemTypeFields VALUES (1262, 8, NULL, 19);    -- publisher        Deprecated
+INSERT INTO itemTypeFields VALUES (1262, 2, NULL, 20);   -- rights
+INSERT INTO itemTypeFields VALUES (1262, 22, NULL, 21);  -- extra
 
 -- regulation (clone of gazette)
 INSERT INTO itemTypeFields VALUES (1263, 112, NULL, 1);   -- nameOfAct
@@ -1103,29 +1102,24 @@ INSERT INTO itemTypeFields VALUES (1263, 42, NULL, 15);   -- history           D
 INSERT INTO itemTypeFields VALUES (1263, 2, NULL, 20);    -- rights
 INSERT INTO itemTypeFields VALUES (1263, 22, NULL, 21);   -- extra
 
--- classic (clone of book)
-INSERT INTO itemTypeFields VALUES (1264, 110, NULL, 1);
-INSERT INTO itemTypeFields VALUES (1264, 90, NULL, 2);
-INSERT INTO itemTypeFields VALUES (1264, 3, NULL, 3);
-INSERT INTO itemTypeFields VALUES (1264, 30, NULL, 4);
-INSERT INTO itemTypeFields VALUES (1264, 4, NULL, 5);
-INSERT INTO itemTypeFields VALUES (1264, 45, NULL, 6);
-INSERT INTO itemTypeFields VALUES (1264, 6, NULL, 7);
-INSERT INTO itemTypeFields VALUES (1264, 7, NULL, 8);
-INSERT INTO itemTypeFields VALUES (1264, 8, NULL, 9);
-INSERT INTO itemTypeFields VALUES (1264, 14, NULL, 10);
-INSERT INTO itemTypeFields VALUES (1264, 118, NULL, 11);
-INSERT INTO itemTypeFields VALUES (1264, 87, NULL, 12);
-INSERT INTO itemTypeFields VALUES (1264, 11, NULL, 13);
-INSERT INTO itemTypeFields VALUES (1264, 116, NULL, 14);
-INSERT INTO itemTypeFields VALUES (1264, 1, NULL, 15);
-INSERT INTO itemTypeFields VALUES (1264, 27, NULL, 16);
-INSERT INTO itemTypeFields VALUES (1264, 123, NULL, 17);
-INSERT INTO itemTypeFields VALUES (1264, 19, NULL, 18);
-INSERT INTO itemTypeFields VALUES (1264, 62, NULL, 19);
-INSERT INTO itemTypeFields VALUES (1264, 18, NULL, 20);
-INSERT INTO itemTypeFields VALUES (1264, 2, NULL, 21);
-INSERT INTO itemTypeFields VALUES (1264, 22, NULL, 22);
+-- classic (derived from manuscript)
+INSERT INTO itemTypeFields VALUES (1264, 110, NULL, 1);  -- title
+INSERT INTO itemTypeFields VALUES (1264, 90, NULL, 2);   -- abstract
+INSERT INTO itemTypeFields VALUES (1264, 4, NULL, 3);    -- volume          [ADDED]
+INSERT INTO itemTypeFields VALUES (1264, 14, NULL, 4);   -- date            
+INSERT INTO itemTypeFields VALUES (1264, 118, NULL, 5);  -- numPages
+INSERT INTO itemTypeFields VALUES (1264, 87, NULL, 6);   -- language
+INSERT INTO itemTypeFields VALUES (1264, 116, NULL, 7);  -- shortTitle
+INSERT INTO itemTypeFields VALUES (1264, 1, NULL, 8);    -- url
+INSERT INTO itemTypeFields VALUES (1264, 27, NULL, 9);  -- accessed
+INSERT INTO itemTypeFields VALUES (1264, 123, NULL, 10); -- archive
+INSERT INTO itemTypeFields VALUES (1264, 19, NULL, 11);  -- archiveLocation
+INSERT INTO itemTypeFields VALUES (1264, 62, NULL, 12);  -- libraryCatalog
+INSERT INTO itemTypeFields VALUES (1264, 18, NULL, 13);  -- callNumber
+INSERT INTO itemTypeFields VALUES (1264, 66, NULL, 14);   -- manuscriptType  Deprecated
+INSERT INTO itemTypeFields VALUES (1264, 7, NULL, 15);    -- place           Deprecated
+INSERT INTO itemTypeFields VALUES (1264, 2, NULL, 16);   -- rights
+INSERT INTO itemTypeFields VALUES (1264, 22, NULL, 17);  -- extra
 
 -- periodical (clone of document)
 INSERT INTO itemTypeFields VALUES (1265, 110, NULL, 1);  -- title
@@ -1356,7 +1350,29 @@ INSERT INTO itemTypeCreatorTypes VALUES(36,2,0);
 INSERT INTO itemTypeCreatorTypes VALUES(36,3,0);
 INSERT INTO itemTypeCreatorTypes VALUES(36,4,0);
 INSERT INTO itemTypeCreatorTypes VALUES(36,5,0);
-
+-- For spoofed types, clone creator assignments from master type
+-- gazette (statute)
+INSERT INTO itemTypeCreatorTypes VALUES(1261,1,1);
+INSERT INTO itemTypeCreatorTypes VALUES(1261,2,0);
+-- treaty (document)
+INSERT INTO itemTypeCreatorTypes VALUES(1262,1,1);
+INSERT INTO itemTypeCreatorTypes VALUES(1262,2,0);
+INSERT INTO itemTypeCreatorTypes VALUES(1262,3,0);
+INSERT INTO itemTypeCreatorTypes VALUES(1262,4,0);
+INSERT INTO itemTypeCreatorTypes VALUES(1262,27,0);
+-- regulation (statute)
+INSERT INTO itemTypeCreatorTypes VALUES(1263,1,1);
+INSERT INTO itemTypeCreatorTypes VALUES(1263,2,0);
+-- classic (manuscript)
+INSERT INTO itemTypeCreatorTypes VALUES(1264,1,1);
+INSERT INTO itemTypeCreatorTypes VALUES(1264,2,0);
+INSERT INTO itemTypeCreatorTypes VALUES(1264,4,0);
+-- periodical (document)
+INSERT INTO itemTypeCreatorTypes VALUES(1265,1,1);
+INSERT INTO itemTypeCreatorTypes VALUES(1265,2,0);
+INSERT INTO itemTypeCreatorTypes VALUES(1265,3,0);
+INSERT INTO itemTypeCreatorTypes VALUES(1265,4,0);
+INSERT INTO itemTypeCreatorTypes VALUES(1265,27,0);
 
 INSERT INTO "fileTypes" VALUES(1, 'webpage');
 INSERT INTO "fileTypes" VALUES(2, 'image');
