@@ -1615,7 +1615,7 @@ Zotero.Sync.Server = new function () {
 								// Callback when compressed data is available
 								var bufferUploader = function (data) {
 									var gzurl = url + '?gzip=1';
-									
+									dump("NNN BODY: "+body);
 									var oldLen = body.length;
 									var newLen = data.length;
 									var savings = Math.round(((oldLen - newLen) / oldLen) * 100)
@@ -3884,10 +3884,7 @@ Zotero.Sync.Server.Data = new function() {
 		// Apply extended type if needed
 		if (Zotero.EXTENDED_TYPES[localItemType]) {
 			syncItemType = Zotero.EXTENDED_TYPES[localItemType];
-			item.primary.itemTypeID = Zotero.ItemTypes.getID(syncItemType);
 			item.primary.itemType = syncItemType;
-			Zotero.debug("BBB sync type: "+syncItemType);
-			Zotero.debug("BBB   local type: "+localItemType);
 		}
         // Get extended fields, if any
         if (Zotero.EXTENDED_FIELDS[localItemType]) {
@@ -3899,7 +3896,6 @@ Zotero.Sync.Server.Data = new function() {
                         }
                         extrafields[field] = item.fields[field];
                         delete item.fields[field];
-						Zotero.debug("BBB     deleted: "+field);
                     }
                 }
             }
@@ -3994,7 +3990,6 @@ Zotero.Sync.Server.Data = new function() {
                 item.fields.extra = "";
             }
             item.fields.extra = "mlzsync:" + supplen + supp + item.fields.extra;
-			Zotero.debug("BBB    sending extra: "+item.fields.extra);
         }
 
 		xml.@libraryID = item.primary.libraryID ? item.primary.libraryID : Zotero.libraryID;
@@ -4092,9 +4087,9 @@ Zotero.Sync.Server.Data = new function() {
 			var libraryID = item.creators[index].libraryID ? item.creators[index].libraryID : defaultLibraryID;
 			var key = item.creators[index].key;
 			if (!key) {
-				Zotero.debug('==========');
-				Zotero.debug(index);
-				Zotero.debug(item);
+				//Zotero.debug('==========');
+				//Zotero.debug(index);
+				//Zotero.debug(item);
 				throw ("Creator key not set for item in Zotero.Sync.Server.sync()");
 			}
 			newCreator.@libraryID = libraryID;
@@ -4212,7 +4207,9 @@ Zotero.Sync.Server.Data = new function() {
 			if (obj.xtype) {
 				xItemTypeID = Zotero.ItemTypes.getID(obj.xtype);
 				if (xItemTypeID) {
+					// Type already set on item, use changeToType() method
 					data.itemTypeID = xItemTypeID;
+					item.setType(xItemTypeID);
 				}
 			}
             if (obj.extrafields) {
@@ -4233,7 +4230,7 @@ Zotero.Sync.Server.Data = new function() {
                     item.setField(fieldName, item.getField(fieldName), false, obj.multifields.main[fieldName], true);
                 }
             }
-            item.setField("extra", extra.slice(offset+4));
+            item.setField("extra", extra.slice(offset+12));
 			changedFields.extra = true;
         }
 

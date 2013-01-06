@@ -1201,6 +1201,8 @@ INSERT INTO baseFieldMappings VALUES (31, 109, 80); -- podcast/medium/audioFileT
 INSERT INTO baseFieldMappings VALUES (17, 110, 111); -- case/title/caseName
 INSERT INTO baseFieldMappings VALUES (20, 110, 112); -- statute/title/nameOfAct
 INSERT INTO baseFieldMappings VALUES (21, 110, 113); -- email/title/subject
+INSERT INTO baseFieldMappings VALUES (1261, 110, 112); -- gazette/title/nameOfAct
+INSERT INTO baseFieldMappings VALUES (1263, 110, 112); -- regulation/title/nameOfAct
 
 INSERT INTO creatorTypes VALUES(1, "author");
 INSERT INTO creatorTypes VALUES(2, "contributor");

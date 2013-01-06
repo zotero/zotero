@@ -9,7 +9,7 @@ Zotero.EXTENDED_CREATORS = {
 Zotero.EXTENDED_TYPES = {
 	"gazette":"statute",
     "regulation":"statute",
-    "classic":"book",
+    "classic":"manuscript",
     "periodical":"document",
     "treaty":"document"
 }
