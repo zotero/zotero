@@ -723,9 +723,9 @@
 					}
 					if (field) {
 						this._beforeRow = field.parentNode.nextSibling;
-						//while (this._beforeRow.firstChild.getAttribute('servantLang')) {
-						//	this._beforeRow = this._beforeRow.nextSibling;
-						//}
+						while (this._beforeRow.firstChild.getAttribute('servantLang')) {
+							this._beforeRow = this._beforeRow.nextSibling;
+						}
 					}
 					else {
 						this._beforeRow = this._dynamicFields.firstChild;
@@ -1066,30 +1066,12 @@
 			  </body>
 			</method>
 
-			<method name="alterMulti">
-			  <parameter name="language"/>
-				<body>
-				  <![CDATA[
-					var elem = document.triggerNode;
-					var row = Zotero.getAncestorByTagName(elem, 'row');
-
-
-					// Here is where we distinguish the two ...
-// Remember that we need to add back another menu build in refreshLanguages, but this
-// time to build a menu that will be refreshed on every field click, regardless
-// of whether there has been an update to the language list.
-
-				]]>
-				</body>
-			</method>
-
-
 			<method name="openMultiRow">
 			  <parameter name="language"/>
 				<body>
 				  <![CDATA[
-					var elem = document.triggerNode;
-					var row = Zotero.getAncestorByTagName(elem, 'row');
+					var triggerNode = document.triggerNode ? document.triggerNode : document.popupNode;
+					var row = Zotero.getAncestorByTagName(triggerNode, 'row');
 					var fieldstring = row.firstChild.getAttribute('fieldname');
 					var servantLang = row.firstChild.getAttribute('servantLang');
 					if (this._leftClick) {
@@ -3064,10 +3046,7 @@
 				<body>
 				<![CDATA[
 //Zotero.debug("XXX modifyCreatorType()");
-					var triggerNode = document.triggerNode;
-					if (!triggerNode) {
-						triggerNode = document.popupNode;
-					}
+					var triggerNode = document.triggerNode ? document.triggerNode : document.popupNode;
 					var row = triggerNode.localName == 'hbox' ? triggerNode.parentNode : triggerNode.parentNode.parentNode;
 					var fieldstring = row.firstChild.getAttribute('fieldname');
 					var index = fieldstring.split('-')[1];
@@ -3254,7 +3233,8 @@ if (oldCreator.id) {
 			<method name="swapNames">
 				<body>
 				<![CDATA[
-					var myelem = document.triggerNode.localName == 'hbox' ? document.triggerNode : document.triggerNode.parentNode
+					var triggerNode = document.triggerNode ? document.triggerNode : document.popupNode;
+					var myelem = triggerNode.localName == 'hbox' ? triggerNode : triggerNode.parentNode
 ;
 					var elem = myelem.parentNode.firstChild.lastChild;
 					var creatorIndex = parseInt(elem.getAttribute('fieldname').split('-')[1]);
@@ -3277,7 +3257,8 @@ if (oldCreator.id) {
 				<body>
 				<![CDATA[
 //Zotero.debug("XXX moveCreator()");
-					var typeBox = document.triggerNode.localName == 'hbox' ? document.triggerNode : document.triggerNode.parentNode;
+					var triggerNode = document.triggerNode ? document.triggerNode : document.popupNode;
+					var typeBox = triggerNode.localName == 'hbox' ? triggerNode : triggerNode.parentNode;
 					var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 
 					if (index === 0 && moveUp) {
@@ -3520,7 +3501,7 @@ if (oldCreator.id) {
 				<popupset>
 				  <menupopup id="multi-spawn-popup" 
 							 position="after_start"
-							 onpopupshowing="return document.getBindingParent(this).refreshLanguages(document.triggerNode);">
+							 onpopupshowing="var triggerNode = document.triggerNode ? document.triggerNode : document.popupNode;return document.getBindingParent(this).refreshLanguages(triggerNode);">
 					<label id="zotero-lang-add" 
 						   style="font-weight:bold;" 
 						   value="&zotero.items.menu.addTag;"/>
@@ -3534,8 +3515,8 @@ if (oldCreator.id) {
 					</vbox>
 				  </menupopup>
 				  <menupopup id="creator-type-menu" position="after_start"
-						onpopupshowing="var typeBox = document.triggerNode.localName == 'hbox' ? document.triggerNode : document.triggerNode.parentNode;
-								var haslang = document.getBindingParent(this).refreshLanguages(document.triggerNode);
+						onpopupshowing="					var triggerNode = document.triggerNode ? document.triggerNode : document.popupNode;var typeBox = triggerNode.localName == 'hbox' ? triggerNode : triggerNode.parentNode;
+								var haslang = document.getBindingParent(this).refreshLanguages(triggerNode);
 								document.getElementById('zotero-creator-lang-menu').setAttribute('hidden', !haslang);
 								var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 								
@@ -3587,14 +3568,14 @@ if (oldCreator.id) {
 						<menu label="&zotero.item.textTransform;">
 						  <menupopup>
 								<menuitem label="&zotero.item.textTransform.titlecase;" class="menuitem-non-iconic"
-									oncommand="document.getBindingParent(this).textTransform(document.triggerNode, 'title')"/>
+									oncommand="var triggerNode = document.triggerNode ? document.triggerNode : document.popupNode;document.getBindingParent(this).textTransform(triggerNode, 'title')"/>
 								<menuitem label="&zotero.item.textTransform.sentencecase;" class="menuitem-non-iconic"
-									oncommand="document.getBindingParent(this).textTransform(document.triggerNode, 'sentence')"/>
+									oncommand="var triggerNode = document.triggerNode ? document.triggerNode : document.popupNode;document.getBindingParent(this).textTransform(triggerNode, 'sentence')"/>
 						  </menupopup>
 						</menu>
 					</menupopup>
 					<menupopup id="creator-transform-menu"
-						onpopupshowing="var myBox = document.triggerNode.localName == 'hbox' ? document.triggerNode : document.triggerNode.parentNode;
+						onpopupshowing="var triggerNode = document.triggerNode ? document.triggerNode : document.popupNode;var myBox = triggerNode.localName == 'hbox' ? triggerNode : triggerNode.parentNode;
 										var typeBox = myBox.parentNode.firstChild.lastChild;
 										var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);								
 										var item = document.getBindingParent(this).item;
