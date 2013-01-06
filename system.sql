@@ -674,13 +674,13 @@ INSERT INTO itemTypeFields VALUES (17, 22, NULL, 24);   -- extra
 -- hearing
 INSERT INTO itemTypeFields VALUES (18, 110, NULL, 1);  -- title
 INSERT INTO itemTypeFields VALUES (18, 90, NULL, 2);   -- abstract
-INSERT INTO itemTypeFields VALUES (18, 1261, NULL, 3); -- jurisdiction
+INSERT INTO itemTypeFields VALUES (18, 1261, NULL, 3); -- jurisdiction      [ADDED]
 INSERT INTO itemTypeFields VALUES (18, 116, NULL, 4);  -- shortTitle
-INSERT INTO itemTypeFields VALUES (18, 1276, NULL, 5); -- committeeFullname
-INSERT INTO itemTypeFields VALUES (18, 1275, NULL, 6); -- meetingNumber
-INSERT INTO itemTypeFields VALUES (18, 1263, NULL, 7); -- resolutionLabel
-INSERT INTO itemTypeFields VALUES (18, 1262, NULL, 8); -- assemblyNumber
-INSERT INTO itemTypeFields VALUES (18, 1264, NULL, 9); -- session type
+INSERT INTO itemTypeFields VALUES (18, 1276, NULL, 5); -- committeeFullname [ADDED]
+INSERT INTO itemTypeFields VALUES (18, 1275, NULL, 6); -- meetingNumber     [ADDED]
+INSERT INTO itemTypeFields VALUES (18, 1263, NULL, 7); -- resolutionLabel   [ADDED]
+INSERT INTO itemTypeFields VALUES (18, 1262, NULL, 8); -- assemblyNumber    [ADDED]
+INSERT INTO itemTypeFields VALUES (18, 1264, NULL, 9); -- session type      [ADDED]
 INSERT INTO itemTypeFields VALUES (18, 40, NULL, 10);  -- session
 INSERT INTO itemTypeFields VALUES (18, 14, NULL, 11);  -- date
 INSERT INTO itemTypeFields VALUES (18, 10, NULL, 12);  -- pages
@@ -690,38 +690,40 @@ INSERT INTO itemTypeFields VALUES (18, 8, NULL, 15);   -- publisher
 INSERT INTO itemTypeFields VALUES (18, 87, NULL, 16);  -- language
 INSERT INTO itemTypeFields VALUES (18, 1, NULL, 17);   -- url
 INSERT INTO itemTypeFields VALUES (18, 27, NULL, 18);  -- accessed
-INSERT INTO itemTypeFields VALUES (18, 45, NULL, 19);  -- numberOfVolumes
-INSERT INTO itemTypeFields VALUES (18, 42, NULL, 20);  -- history
-INSERT INTO itemTypeFields VALUES (18, 7, NULL, 21);   -- place
-INSERT INTO itemTypeFields VALUES (18, 41, NULL, 22);  -- legislativeBody
-INSERT INTO itemTypeFields VALUES (18, 46, NULL, 23);  -- committee    
-INSERT INTO itemTypeFields VALUES (18, 99, NULL, 24);  -- documentNumber
+INSERT INTO itemTypeFields VALUES (18, 45, NULL, 19);  -- numberOfVolumes   Deprecated
+INSERT INTO itemTypeFields VALUES (18, 42, NULL, 20);  -- history           Deprecated
+INSERT INTO itemTypeFields VALUES (18, 7, NULL, 21);   -- place             Deprecated
+INSERT INTO itemTypeFields VALUES (18, 41, NULL, 22);  -- legislativeBody   Deprecated
+INSERT INTO itemTypeFields VALUES (18, 46, NULL, 23);  -- committee         Deprecated
+INSERT INTO itemTypeFields VALUES (18, 99, NULL, 24);  -- documentNumber    Deprecated
 INSERT INTO itemTypeFields VALUES (18, 2, NULL, 25);   -- rights
 INSERT INTO itemTypeFields VALUES (18, 22, NULL, 26);  -- extra
 
 -- patent
-INSERT INTO itemTypeFields VALUES (19, 110, NULL, 1);  -- title
-INSERT INTO itemTypeFields VALUES (19, 90, NULL, 2);   -- abstract
-INSERT INTO itemTypeFields VALUES (19, 1261, NULL, 3); -- Jurisdiction (replaces issuingAuthority)
-INSERT INTO itemTypeFields VALUES (19, 50, NULL, 4);   -- Patent number
-INSERT INTO itemTypeFields VALUES (19, 52, NULL, 5);   -- issueDate
-INSERT INTO itemTypeFields VALUES (19, 103, NULL, 6);  -- Application Number
-INSERT INTO itemTypeFields VALUES (19, 121, NULL, 7);  -- Filing Date (submitted)
-INSERT INTO itemTypeFields VALUES (19, 51, NULL, 8);   -- Priority Numbers
-INSERT INTO itemTypeFields VALUES (19, 1266, NULL, 9); -- Priority Date (original-date)
-INSERT INTO itemTypeFields VALUES (19, 10, NULL, 10);  -- Pages
-INSERT INTO itemTypeFields VALUES (19, 87, NULL, 11);  -- language
-INSERT INTO itemTypeFields VALUES (19, 116, NULL, 12); -- shortTitle
-INSERT INTO itemTypeFields VALUES (19, 1, NULL, 13);   -- url
-INSERT INTO itemTypeFields VALUES (19, 27, NULL, 14);  -- accessed
-INSERT INTO itemTypeFields VALUES (19, 48, NULL, 15);  -- Assignee             Deprecated
-INSERT INTO itemTypeFields VALUES (19, 7, NULL, 16);   -- Place                Deprecated
-INSERT INTO itemTypeFields VALUES (19, 102, NULL, 17); -- Country              Deprecated
-INSERT INTO itemTypeFields VALUES (19, 120, NULL, 18); -- Issuing Authority    Deprecated
-INSERT INTO itemTypeFields VALUES (19, 53, NULL, 19);  -- References           Deprecated
-INSERT INTO itemTypeFields VALUES (19, 54, NULL, 20);  -- Legal Status         Deprecated
-INSERT INTO itemTypeFields VALUES (19, 2, NULL, 21);   -- rights
-INSERT INTO itemTypeFields VALUES (19, 22, NULL, 22);  -- extra
+INSERT INTO itemTypeFields VALUES (19, 110, NULL, 1);   -- title
+INSERT INTO itemTypeFields VALUES (19, 90, NULL, 2);    -- abstract
+INSERT INTO itemTypeFields VALUES (19, 1261, NULL, 3);  -- Jurisdiction        [ADDED]
+INSERT INTO itemTypeFields VALUES (19, 120, NULL, 18);  -- Issuing Authority
+INSERT INTO itemTypeFields VALUES (19, 7, NULL, 16);    -- Place
+INSERT INTO itemTypeFields VALUES (19, 50, NULL, 4);    -- Patent number
+INSERT INTO itemTypeFields VALUES (19, 52, NULL, 5);    -- issueDate
+INSERT INTO itemTypeFields VALUES (19, 103, NULL, 6);   -- Application Number
+INSERT INTO itemTypeFields VALUES (19, 121, NULL, 7);   -- Filing Date                 (submitted)
+INSERT INTO itemTypeFields VALUES (19, 51, NULL, 8);    -- Priority Numbers
+INSERT INTO itemTypeFields VALUES (19, 1266, NULL, 9);  -- Priority Date       [ADDED] (original-date)
+INSERT INTO itemTypeFields VALUES (19, 10, NULL, 10);   -- Pages
+INSERT INTO itemTypeFields VALUES (19, 54, NULL, 20);   -- Legal Status
+INSERT INTO itemTypeFields VALUES (19, 87, NULL, 11);   -- language
+INSERT INTO itemTypeFields VALUES (19, 116, NULL, 12);  -- shortTitle
+INSERT INTO itemTypeFields VALUES (19, 1, NULL, 13);    -- url
+INSERT INTO itemTypeFields VALUES (19, 27, NULL, 14);   -- accessed
+INSERT INTO itemTypeFields VALUES (19, 48, NULL, 15);   -- Assignee             Deprecated
+INSERT INTO itemTypeFields VALUES (19, 102, NULL, 17);  -- Country              Deprecated
+INSERT INTO itemTypeFields VALUES (19, 53, NULL, 19);   -- References           Deprecated
+INSERT INTO itemTypeFields VALUES (19, 2, NULL, 21);    -- rights
+INSERT INTO itemTypeFields VALUES (19, 22, NULL, 22);   -- extra
+
+
 
 -- statute
 INSERT INTO itemTypeFields VALUES (20, 112, NULL, 1);   -- nameOfAct

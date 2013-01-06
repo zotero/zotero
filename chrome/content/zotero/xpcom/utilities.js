@@ -57,7 +57,7 @@ const CSL_TEXT_MAPPINGS = {
 	"collection-number":["seriesNumber"],
 	"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
 	"publisher-place":["place"],
-	"authority":["court", "legislativeBody"],
+	"authority":["court", "legislativeBody", "issuingAuthority"],
 	"page":["pages"],
 	"volume":["volume","codeNumber"],
 	"issue":["issue"],
