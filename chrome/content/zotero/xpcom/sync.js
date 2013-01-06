@@ -3878,6 +3878,14 @@ Zotero.Sync.Server.Data = new function() {
         var multifields = false;
         var extracreators = false;
         var multicreators = false;
+		var xtype = false;
+		// Save off the type in case it changes below
+		var itemType = item.primary.itemType
+		// Apply extended type if needed
+		if (Zotero.EXTENDED_TYPES[item.primary.itemType]) {
+			xtype = item.primary.itemType;
+			item.primary.itemType = Zotero.EXTENDED_TYPES[item.primary.itemType];
+		}
         // Get extended fields, if any
         if (Zotero.EXTENDED_FIELDS[item.primary.itemType]) {
             for (var field in item.fields) {
@@ -3954,8 +3962,11 @@ Zotero.Sync.Server.Data = new function() {
         // Remove extracreators from main object
         item.creators = item.creators.slice(0,deletecreatoridx);
         // If data exists, add it to the extra field
-        if (extrafields || multifields || extracreators || multicreators) {
-            supp = {};
+        if (extrafields || multifields || extracreators || multicreators || xtype) {
+            supp = {type:itemType};
+			if (xtype) {
+				supp.xtype = xtype;
+			}
             if (extrafields) {
                 supp.extrafields = extrafields;
             }
@@ -4170,7 +4181,8 @@ Zotero.Sync.Server.Data = new function() {
 
         // Unserialize data stored as JSON on the extra field, and
         // attach to the object before delivery to Zotero.
-        obj = false;
+        var obj = false;
+		var itemTypeID = false;
         if (extra) {
             var m = extra.match(/^mlzsync:([0-9]{4})/);
             if (m) {
@@ -4179,13 +4191,21 @@ Zotero.Sync.Server.Data = new function() {
                 if (objstr) {
                     try {
                         obj = JSON.parse(objstr);
+						// Save type ID for comparison
+						itemTypeID = Zotero.ItemTypes.getID(obj.type);
                     } catch (e) {
                         Zotero.debug("Multilingual sync: Parse error on "+objstr);
                     }
                 }
             }
         }
-        if (obj) {
+        if (obj && obj.type === itemType) {
+			if (obj.xtype) {
+				xItemTypeID = Zotero.ItemTypes.getID(obj.xtype);
+				if (xItemTypeID) {
+					data.itemTypeID = xItemTypeID;
+				}
+			}
             if (obj.extrafields) {
                 for (var fieldName in obj.extrafields) {
 			        item.setField(fieldName, obj.extrafields[fieldName]);
@@ -4221,7 +4241,6 @@ Zotero.Sync.Server.Data = new function() {
 		}
         // Remove multifields that are not present in the sync
         for each(var data in item.getUsedMultiFields(true)) {
-            Zotero.debug("XXXohgosh USED: "+data.fieldName+" "+data.languageTag);
             if (!obj || !obj.multifields || !obj.multifields._keys[data.fieldName] || !obj.multifields._keys[data.fieldName][data.languageTag]) {
                 item.setField(data.fieldName,false,false,data.languageTag);
             }
