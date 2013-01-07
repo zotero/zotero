@@ -3573,7 +3573,7 @@ if (oldCreator.id) {
 				  </menupopup>
 				  <menupopup id="creator-type-menu" position="after_start"
 						onpopupshowing="var triggerNode = document.triggerNode ? document.triggerNode : document.popupNode;var typeBox = triggerNode.localName == 'hbox' ? triggerNode : triggerNode.parentNode;
-								var haslang = document.getBindingParent(this).refreshLanguages(triggerNode);
+								var haslang = document.getBindingParent(this).refreshLanguages(typeBox);
 								document.getElementById('zotero-creator-lang-menu').setAttribute('hidden', !haslang);
 								var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 								
