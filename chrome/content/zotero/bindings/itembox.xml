@@ -326,6 +326,7 @@
 			
 
 			<method name="refreshLanguages">
+				<parameter name="node"/>
 				<body>
 				<![CDATA[
 					var i, ilen;
@@ -352,8 +353,7 @@
 						return false;
 					}
 					// Hide languages that are already used.
-					var triggerNode = document.triggerNode ? document.triggerNode : document.popupNode;
-					var row = Zotero.getAncestorByTagName(triggerNode, 'row');
+					var row = Zotero.getAncestorByTagName(node, 'row');
 					var fieldstring = row.firstChild.getAttribute('fieldname');
 					var fieldname = fieldstring.split('-')[0];
 					var multi = this.item.multi;
@@ -3558,7 +3558,7 @@ if (oldCreator.id) {
 				<popupset>
 				  <menupopup id="multi-spawn-popup" 
 							 position="after_start"
-							 onpopupshowing="return document.getBindingParent(this).refreshLanguages();">
+							 onpopupshowing="var triggerNode = document.triggerNode ? document.triggerNode : document.popupNode;return document.getBindingParent(this).refreshLanguages(triggerNode);">
 					<label id="zotero-lang-add" 
 						   style="font-weight:bold;" 
 						   value="&zotero.items.menu.addTag;"/>
@@ -3573,7 +3573,7 @@ if (oldCreator.id) {
 				  </menupopup>
 				  <menupopup id="creator-type-menu" position="after_start"
 						onpopupshowing="var triggerNode = document.triggerNode ? document.triggerNode : document.popupNode;var typeBox = triggerNode.localName == 'hbox' ? triggerNode : triggerNode.parentNode;
-								var haslang = document.getBindingParent(this).refreshLanguages();
+								var haslang = document.getBindingParent(this).refreshLanguages(triggerNode);
 								document.getElementById('zotero-creator-lang-menu').setAttribute('hidden', !haslang);
 								var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 								
