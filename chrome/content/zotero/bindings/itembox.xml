@@ -327,7 +327,7 @@
 			
 
 			<method name="refreshLanguages">
-                <parameter name="node"/>
+				<parameter name="node"/>
 				<body>
 				<![CDATA[
 					var i, ilen;
