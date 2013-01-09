@@ -91,6 +91,8 @@ Zotero.Translate.ItemSaver.prototype = {
 		});
 	},
 	
+	// ALL CODE BELOW THIS POINT IS EXECUTED ONLY IN NON-FIREFOX ENVIRONMENTS
+	
 	/**
 	 * Saves items to server
 	 * @param items Items in Zotero.Item.toArray() format
