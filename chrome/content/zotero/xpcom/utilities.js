@@ -54,7 +54,7 @@ const CSL_TEXT_MAPPINGS = {
 	"title":["title"],
 	"container-title":["publicationTitle",  "reporter", "code"], /* reporter and code should move to SQL mapping tables */
 	"collection-title":["seriesTitle", "series"],
-	"collection-number":["seriesNumber"],
+	"collection-number":["seriesNumber","assemblyNumber"],
 	"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
 	"publisher-place":["place"],
 	"authority":["court", "legislativeBody", "issuingAuthority", "committee"],
@@ -67,7 +67,7 @@ const CSL_TEXT_MAPPINGS = {
 	"version":["version"],
 	"section":["section"],
 	"genre":["type"],
-	"chapter-number":["session"],
+	"chapter-number":["session","meetingNumber"],
 	"source":["libraryCatalog"],
 	"dimensions": ["artworkSize", "runningTime"], 
 	"medium":["medium", "system"],

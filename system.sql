@@ -1167,9 +1167,13 @@ INSERT INTO baseFieldMappings VALUES (36, 12, 86); -- dictionaryEntry/publicatio
 INSERT INTO baseFieldMappings VALUES (16, 12, 43); -- bill/publicationTitle/reporter
 INSERT INTO baseFieldMappings VALUES (17, 12, 43); -- case/publicationTitle/reporter
 INSERT INTO baseFieldMappings VALUES (18, 12, 43); -- hearing/publicationTitle/reporter
+INSERT INTO baseFieldMappings VALUES (26, 12, 1273); -- audioRecording/publicationTitle/album
+INSERT INTO baseFieldMappings VALUES (12, 12, 91); -- artwork/publicationTitle/websiteTitle
 INSERT INTO baseFieldMappings VALUES (17, 14, 96); -- case/date/dateDecided
 INSERT INTO baseFieldMappings VALUES (19, 14, 52); -- patent/date/issueDate
 INSERT INTO baseFieldMappings VALUES (20, 14, 100); -- statute/date/dateEnacted
+INSERT INTO baseFieldMappings VALUES (1261, 14, 100); -- gazette/date/dateEnacted
+INSERT INTO baseFieldMappings VALUES (1263, 14, 100); -- regulation/date/dateEnacted
 INSERT INTO baseFieldMappings VALUES (16, 30, 1262); -- bill/seriesNumber/assemblyNumber
 INSERT INTO baseFieldMappings VALUES (15, 60, 92); -- report/number/reportNumber
 INSERT INTO baseFieldMappings VALUES (16, 60, 93); -- bill/number/billNumber
@@ -1177,12 +1181,15 @@ INSERT INTO baseFieldMappings VALUES (17, 60, 117); -- case/number/docketNumber
 INSERT INTO baseFieldMappings VALUES (18, 60, 99); -- hearing/number/documentNumber
 INSERT INTO baseFieldMappings VALUES (19, 60, 50); -- patent/number/patentNumber
 INSERT INTO baseFieldMappings VALUES (20, 60, 101); -- statute/number/publicLawNumber
+INSERT INTO baseFieldMappings VALUES (1261, 60, 101); -- gazette/number/publicLawNumber
+INSERT INTO baseFieldMappings VALUES (1263, 60, 101); -- regulation/number/publicLawNumber
 INSERT INTO baseFieldMappings VALUES (29, 60, 105); -- tvBroadcast/number/episodeNumber
 INSERT INTO baseFieldMappings VALUES (30, 60, 105); -- radioBroadcast/number/episodeNumber
 INSERT INTO baseFieldMappings VALUES (31, 60, 105); -- podcast/number/episodeNumber
 INSERT INTO baseFieldMappings VALUES (7, 108, 69); -- thesis/type/thesisType
 INSERT INTO baseFieldMappings VALUES (8, 108, 65); -- letter/type/letterType
 INSERT INTO baseFieldMappings VALUES (9, 108, 66); -- manuscript/type/manuscriptType
+INSERT INTO baseFieldMappings VALUES (1264, 108, 66); -- classic/type/manuscriptType
 INSERT INTO baseFieldMappings VALUES (11, 108, 122); -- film/type/genre
 INSERT INTO baseFieldMappings VALUES (13, 108, 70); -- webpage/type/websiteType
 INSERT INTO baseFieldMappings VALUES (15, 108, 32); -- report/type/reportType
@@ -1191,6 +1198,7 @@ INSERT INTO baseFieldMappings VALUES (23, 108, 70); -- blogPost/type/websiteType
 INSERT INTO baseFieldMappings VALUES (25, 108, 79); -- forumPost/type/postType
 INSERT INTO baseFieldMappings VALUES (27, 108, 74); -- presentation/type/presentationType
 INSERT INTO baseFieldMappings VALUES (16, 108, 1264); -- bill/type/sessionType
+INSERT INTO baseFieldMappings VALUES (18, 108, 1264); -- hearing/type/sessionType
 INSERT INTO baseFieldMappings VALUES (10, 109, 64); -- interview/medium/interviewMedium
 INSERT INTO baseFieldMappings VALUES (11, 109, 63); -- film/medium/videoRecordingFormat
 INSERT INTO baseFieldMappings VALUES (12, 109, 59); -- artwork/medium/artworkMedium

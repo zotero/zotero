@@ -543,7 +543,6 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 				}
 				this._changedItemData[oldFieldID] = true;
 				*/
-				Zotero.debug("XXX Attempting to clear field: "+oldFieldID);
 				this.setField(oldFieldID, false);
 			}
 		}
@@ -623,6 +622,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 	// Initialize this._itemData with type-specific fields
 	this._itemData = {};
 	var fields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
+
 	for each(var fieldID in fields) {
 		this._itemData[fieldID] = null;
 	}
@@ -642,20 +642,6 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		}
 	}
 
-	// Set default jurisdiction if necessary
-	var jurisdictionID = Zotero.ItemFields.getID("jurisdiction");
-	if (this._itemData[jurisdictionID] === null) {
-		var jurisdictionDefault = Zotero.Prefs.get("import.jurisdictionDefault");
-		var jurisdictionFallback = Zotero.Prefs.get("import.jurisdictionFallback");
-		if (jurisdictionDefault) {
-			this.setField(jurisdictionID,jurisdictionDefault);
-		} else if (jurisdictionFallback) {
-			this.setField(jurisdictionID,jurisdictionFallback);
-		} else {
-			this.setField(jurisdictionID,"us");
-		}
-	}
-	
 	if (loadIn) {
 		this._itemDataLoaded = false;
 	}
@@ -747,6 +733,27 @@ Zotero.Item.prototype.inCollection = function(collectionID) {
 	return !!parseInt(Zotero.DB.valueQuery("SELECT COUNT(*) "
 		+ "FROM collectionItems WHERE collectionID=" + collectionID + " AND "
 		+ "itemID=" + this.id));
+}
+
+Zotero.Item.prototype.setJurisdiction = function (value) {
+	var jurisdictionID = Zotero.ItemFields.getID('jurisdiction');
+	var fields = Zotero.ItemFields.getItemTypeFields(this.itemTypeID);
+	if (fields.indexOf(jurisdictionID) > -1) {
+		var itemType = Zotero.ItemTypes.getName(this.itemTypeID);
+		if (["report","journalArticle"].indexOf(itemType) === -1) {
+			if (!this.getField(jurisdictionID)) {
+				var jurisdictionDefault = Zotero.Prefs.get("import.jurisdictionDefault");
+				var jurisdictionFallback = Zotero.Prefs.get("import.jurisdictionFallback");
+				if (jurisdictionDefault) {
+					this.setField(jurisdictionID,jurisdictionDefault);
+				} else if (jurisdictionFallback) {
+					this.setField(jurisdictionID,jurisdictionFallback);
+				} else {
+					this.setField(jurisdictionID,"us");
+				}
+			}
+		}
+	}
 }
 
 /*
@@ -1119,17 +1126,7 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate, language
 		} else if (!title && code) {
 			if (volume) {
 				strParts.push(volume);
-			} else {
-                // Temporary hack, until volume becomes available
-                // on code type
-                var extra = this.getField('extra');
-                if (extra) {
-                    var m = extra.match(/{:volume: *([0-9]+) *}/);
-                    if (m) {
-                        strParts.push(m[1]);
-                    }
-                }
-            }
+			}
 			strParts.push(code);
 		}
 		if (section) {
@@ -1502,7 +1499,6 @@ Zotero.Item.prototype.removeRelatedItem = function (itemID) {
  */
 
 Zotero.Item.prototype.save = function(checkFields) {
-	Zotero.debug("XXX item.save()");
 	var itemID, valueID;
 	Zotero.Items.editCheck(this);
 	
@@ -4899,9 +4895,9 @@ Zotero.Item.prototype.toArray = function (mode) {
 		}
 		for (var languageTag in this.multi._keys[fieldID]) {
 			arr.multi._keys[fieldName][languageTag] = this.multi._keys[fieldID][languageTag];
-            if (arr.multi._lsts[fieldName].indexOf(languageTag) === -1) {
-			    arr.multi._lsts[fieldName].push(languageTag);
-            }
+			if (arr.multi._lsts[fieldName].indexOf(languageTag) === -1) {
+				arr.multi._lsts[fieldName].push(languageTag);
+			}
 		}
 	}
 
@@ -5057,7 +5053,7 @@ Zotero.Item.prototype.serialize = function(mode) {
 	// Item metadata
 	for (var i in this._itemData) {
 		arr.fields[Zotero.ItemFields.getName(i)] = this.getField(i) + '';
-    }
+	}
 
 	// OOOOO: Have to serialize the multi object here as well.
 	for (var fieldID in this.multi.main) {
@@ -5072,9 +5068,9 @@ Zotero.Item.prototype.serialize = function(mode) {
 		}
 		for (var langTag in this.multi._keys[fieldID]) {
 			arr.multi._keys[fieldName][langTag] = this.multi._keys[fieldID][langTag];
-            if (arr.multi._lsts[fieldName].indexOf(langTag) === -1) {
+			if (arr.multi._lsts[fieldName].indexOf(langTag) === -1) {
 				arr.multi._lsts[fieldName].push(langTag);
-            }
+			}
 		}
 	}
 	

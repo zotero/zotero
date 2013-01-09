@@ -1,47 +1,47 @@
 // Extended fields needed to support the MLZ styles
 
 Zotero.EXTENDED_CREATORS = {
-    "patent":{
-        "recipient":"recipient"
-    }
+	"patent":{
+		"recipient":"recipient"
+	}
 }
 
 Zotero.EXTENDED_TYPES = {
 	"gazette":"statute",
-    "regulation":"statute",
-    "classic":"manuscript",
-    "periodical":"document",
-    "treaty":"document"
+	"regulation":"statute",
+	"classic":"manuscript",
+	"periodical":"document",
+	"treaty":"document"
 }
 
 Zotero.EXTENDED_FIELDS = {
 	"newspaperArticle": {
-        "jurisdiction":"jurisdiction",
-        "dateDecided":"original-date"
+		"jurisdiction":"jurisdiction",
+		"dateDecided":"original-date"
 	},
 	"bill": {
-        "jurisdiction":"jurisdiction",
-        "resolutionLabel":"event",
-        "assemblyNumber":"collection-number",
-        "sessionType":"genre",
-        "archiveLocation":"archive_location",
-        "reporter":"container-title"
+		"jurisdiction":"jurisdiction",
+		"resolutionLabel":"event",
+		"assemblyNumber":"collection-number",
+		"sessionType":"genre",
+		"archiveLocation":"archive_location",
+		"reporter":"container-title"
 	}, 
-    "hearing":{
+	"hearing":{
 		"jurisdiction":"jurisdiction",
 		"assemblyNumber":"collection-number",
 		"resolutionLabel":"event",
 		"sessionType":"genre",
 		"archiveLocation":"archive_location",
 		"reporter":"container-title",
-		"meetingNumber":"chapter-number"
+		"meetingName":"chapter-number"
 	},
 	"artwork": {
-        "websiteTitle":"container-title"
+		"websiteTitle":"container-title"
 	}, 
 	"patent": {
 		"jurisdiction":"jurisdiction",
-        "priorityDate":"original-date"
+		"priorityDate":"original-date"
 	}, 
 	"case": {
 		"jurisdiction":"jurisdiction",
@@ -149,14 +149,14 @@ Zotero.LANGUAGE_NAMES = {
 }
 
 Zotero.DOCUMENT_MULTI_PREFERENCES = [
-    "citationTranslation",
-    "citationTransliteration",
-    "citationSort",
-    "citationLangPrefsPersons",
-    "citationLangPrefsInstitutions",
-    "citationLangPrefsTitles",
-    "citationLangPrefsPublishers",
-    "citationLangPrefsPlaces"
+	"citationTranslation",
+	"citationTransliteration",
+	"citationSort",
+	"citationLangPrefsPersons",
+	"citationLangPrefsInstitutions",
+	"citationLangPrefsTitles",
+	"citationLangPrefsPublishers",
+	"citationLangPrefsPlaces"
 ];
 
 Zotero.LANGUAGE_INDEX = {}
@@ -192,7 +192,7 @@ Zotero.setupLocale = function(document) {
 
 		// Get the list of locales and assign names to each item
 		var locales = [];
-        var locale;
+		var locale;
  		while(availableLocales.hasMore()) {
 			locale = availableLocales.getNext();
 			locales.push({value: locale, label: Zotero.LANGUAGE_NAMES[locale]});
@@ -204,9 +204,9 @@ Zotero.setupLocale = function(document) {
 		}
 		// Sort the list by name
 		locales.sort( function(a,b){return a.label.localeCompare(b.label)} );
-        for (var i = 0, ilen = locales.length; i < ilen; i += 1) {
-            Zotero.LANGUAGE_INDEX[locales[i].value] = i;
-        }
+		for (var i = 0, ilen = locales.length; i < ilen; i += 1) {
+			Zotero.LANGUAGE_INDEX[locales[i].value] = i;
+		}
 		// Render the list
 		for (var i = 0, ilen = locales.length; i < ilen; i += 1) {
 			var locale = locales[i];

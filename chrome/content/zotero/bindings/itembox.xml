@@ -954,7 +954,11 @@
 					} catch (e) {
 						return;
 					}
-
+					
+					var itemType = Zotero.ItemTypes.getName(this.item.itemTypeID);
+					if (["report","newspaperArticle"].indexOf(itemType) > -1) {
+						this.jurisdictionMenu.appendItem("", "");
+					}
 					var data = Zotero.Jurisdiction.getListData();
 					
 					var pos = 0;
@@ -974,8 +978,8 @@
 					}
 					return true;
 				]]>
-              </body>
-            </method>
+			  </body>
+			</method>
 
 			
 			<method name="updateItemTypeMenuSelection">
@@ -1016,7 +1020,7 @@
 					var row = document.createElement("row");
 					
 					// Add click event to row
-                    var fieldname = value.getAttribute('fieldname');
+					var fieldname = value.getAttribute('fieldname');
 					if (this._rowIsClickable(fieldname)) {
 						row.className = 'zotero-clicky';
 						row.addEventListener('click', function (event) {
@@ -1855,12 +1859,10 @@
 						}
 						
 						var fieldNames = "";
-                        Zotero.debug("YYY itembox.xml [3] "+this.item.itemTypeID);
 						for (var i=0; i<fieldsToDelete.length; i++) {
 							fieldNames += "\n - " +
 								Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, fieldsToDelete[i]);
 						}
-                        Zotero.debug("YYY   done");
 						
 						var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 							.getService(Components.interfaces.nsIPromptService);
@@ -1870,7 +1872,30 @@
 							promptService.confirm(null,
 								Zotero.getString('pane.item.changeType.title'),
 								Zotero.getString('pane.item.changeType.text') + "\n" + fieldNames)) {
+
 						this.item.setType(itemTypeID);
+						
+						// Force jurisdiction value if required
+						var jurisdictionID = Zotero.ItemFields.getID('jurisdiction');
+						var fields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
+						if (fields.indexOf(jurisdictionID) > -1) {
+							var itemType = Zotero.ItemTypes.getName(itemTypeID);
+							if (["report","journalArticle"].indexOf(itemType) === -1) {
+								if (!this.item.getField(jurisdictionID)) {
+									var jurisdictionDefault = Zotero.Prefs.get("import.jurisdictionDefault");
+									var jurisdictionFallback = Zotero.Prefs.get("import.jurisdictionFallback");
+									if (jurisdictionDefault) {
+										this.item.setField(jurisdictionID,jurisdictionDefault);
+									} else if (jurisdictionFallback) {
+										this.item.setField(jurisdictionID,jurisdictionFallback);
+									} else {
+										this.item.setField(jurisdictionID,"us");
+									}
+								}
+							}
+						}
+
+
 						
 						if (this.saveOnEdit) {
 							this.item.save();
@@ -1904,9 +1929,7 @@
 					);
 					ab.parentNode.replaceChild(elem, ab);
 					
-                    Zotero.debug("YYY itembox.xml [4] "+this.item.itemTypeID);
 					var text = Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, 'abstractNote') + ':';
-                    Zotero.debug("YYY    done");
 					// Add '(...)' before "Abstract:" for collapsed abstracts
 					if (valueText && cur) {
 						text = '(...) ' + text;
@@ -2003,10 +2026,12 @@
 					if (this._fieldIsClickable(fieldName)) {
 						if (fieldName == 'jurisdiction') {
 							valueElement.setAttribute("id","jurisdiction-menu");
-							var value = this.item.getField("jurisdiction");
+							var value = this.item.getField("jurisdiction",true);
 							valueElement.setAttribute("class", "zotero-clicky");
-							valueElement.setAttribute("value", value);
-							valueElement.setAttribute("label", Zotero.Jurisdiction.getLabelFromKey(value));
+							if (value) {
+								valueElement.setAttribute("value", value);
+								valueElement.setAttribute("label", Zotero.Jurisdiction.getLabelFromKey(value));
+							}
 							valueElement.setAttribute("oncommand","this.focus(); this.open = true;");
 							valueElement.setAttribute("onkeypress","if (event.keyCode == event.DOM_VK_TAB) { document.getBindingParent(this).jurisdictionMenuTab(event); }");
 							valueElement.addEventListener('popupshowing', function (event) {
@@ -2409,7 +2434,6 @@
 				<parameter name="event"/>
 				<body>
 				<![CDATA[
-						 Zotero.debug("BBB OKAY: "+event.shiftKey);
 					var target = event.target;
 					var focused = document.commandDispatcher.focusedElement;
 
