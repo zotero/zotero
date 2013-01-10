@@ -3487,6 +3487,142 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE IF EXISTS creatorDataAlt");
 				}
 
+				if (i==77 && dbMultilingualVersion==1) {
+
+					Zotero.DB.query("CREATE TEMPORARY TABLE extraData (itemID INTEGER, itemTypeID INTEGER, oldKey TEXT, fieldName TEXT, value TEXT)");
+                    var sqlExtra = "INSERT INTO extraData VALUES (?, ?, ?, ?, ?)"
+
+                    Zotero.debug("BBB i="+i+", dbMultilingualVersion="+dbMultilingualVersion);
+                    // Add oldItemTypeID / newItemTypeID ?
+					var extras = Zotero.DB.query("SELECT itemID,itemTypeID,value FROM items NATURAL JOIN itemData NATURAL JOIN itemDataValues WHERE fieldID=22 AND value LIKE '%{:%'");
+                    for each(row in extras) {
+                        var s = row.value;
+                        var lst = s.split(/({:[-a-z]+:[^}]+})/);
+                        // GREAT! So the moves and remaps are now known for certain.
+                        // Need to do the same for creators.
+                        // Then we just specify our inserts, working from ui.js (which
+                        // drives the sync reshuffle, and so is tested and known to work).
+                        // After that, it's just SQL and testing.
+                        for (var j=lst.length-2; j>-1; j += -2) {
+                            var m = lst[j].match(/{:([-a-z]+):\s*([^}]+)\s*}/);
+                            // Check if our key is known. If not, do not pop. So ... we need that mapping table.
+                            var mappingTable = {};
+                            mappingTable["classic"] = {
+                                typeConv:"classic",
+                                description:"book -> manuscript",
+                                fieldRemap:[],
+                                fieldRemove:[3,4,6,8,11,30,45],
+                                fieldInserts:{},
+                                creatorMoves:{},
+                                creatorInserts:{}
+                            };
+                            mappingTable["periodical"] = {
+                                typeConv:"periodical",
+                                description:"book -> document",
+                                fieldRemap:[],
+                                fieldRemove:[3,4,6,7,11,30,45,118],
+                                fieldInserts:{},
+                                creatorMoves:{},
+                                creatorInserts:{}
+                            };
+                            mappingTable["treaty"] = {
+                                typeConv:"treaty",
+                                description:"statute -> document",
+                                fieldRemap:[[100,14],[112,110]],
+                                fieldRemove:[10,15,36,40,42,55,100,101,112],
+                                fieldInserts:{},
+                                creatorMoves:{},
+                                creatorInserts:{}
+                            };
+                            mappingTable["gazette"] = {
+                                typeConv:"gazette",
+                                description:"statute -> gazette",
+                                fieldSaves:[],
+                                fieldMoves:[],
+                                fieldInserts:{},
+                                creatorMoves:{},
+                                creatorInserts:{}
+                            };
+                            mappingTable["regulation"] = {
+                                typeConv:"regulation",
+                                description:"statute -> regulation",
+                                fieldSaves:[],
+                                fieldMoves:[],
+                                fieldInserts:{},
+                                creatorMoves:{},
+                                creatorInserts:{}
+                            };
+                            mappingTable["regulation"] = {
+                                typeConv:"regulation",
+                                description:"statute -> statute",
+                                fieldSaves:[],
+                                fieldMoves:[],
+                                fieldInserts:{},
+                                creatorMoves:{},
+                                creatorInserts:{}
+                            };
+                            mappingTable["regulation"] = {
+                                typeConv:"regulation",
+                                description:"statute -> statute",
+                                fieldSaves:[],
+                                fieldMoves:[],
+                                fieldInserts:{},
+                                creatorMoves:{},
+                                creatorInserts:{}
+                            };
+                            mappingTable["regulation"] = {
+                                typeConv:"regulation",
+                                description:"statute -> statute",
+                                fieldSaves:[],
+                                fieldMoves:[],
+                                fieldInserts:{},
+                                creatorMoves:{},
+                                creatorInserts:{}
+                            };
+                            mappingTable["regulation"] = {
+                                typeConv:"regulation",
+                                description:"statute -> statute",
+                                fieldSaves:[],
+                                fieldMoves:[],
+                                fieldInserts:{},
+                                creatorMoves:{},
+                                creatorInserts:{}
+                            };
+                            mappingTable[2] = {};
+                            mappingTable[2] = {};
+                            mappingTable[2] = {};
+                            mappingTable[2] = {};
+                            mappingTable[2] = {};
+                            mappingTable[2] = {};
+                            // Okay. In the temp table, we want the following:
+                            // - 
+                            Zotero.DB.query(sqlExtra, [row.itemID, row.itemTypeID, m[1], "NEW KEY", m[2]]);
+                            // For the mapping tables, we need to handle the following:
+                            // - Per-type, old CSL field -> Zotero field correspondences
+                            // - per-type, old CSL creator -> Zotero creator correspondences
+                            // - Dropped field lists for type conversions (to move them to Extra if present)
+
+                            // For functions we need:
+                            // - To modify the itemTypeID
+                            // - To establish field data and attach to an item
+                            // - To establish a creator and attach to item
+                            // - To restore leftover content to the Extra field
+                            // - To move field content to extra.
+                            // - To move creator content to extra.
+                            // - To update the timestamp (to trigger sync on the item)
+
+                            // To avoid constraint failures, we probably need to capture itemData
+                            // and itemCreators to a temporary tables, change the type, and then 
+                            // rebuild the item creators and fields from the temporary tables.
+                            // Would be nice to avoid this, though. 
+                        }
+                    }
+                    var rows = Zotero.DB.query("SELECT * FROM extraData");
+                    for each(row in rows) {
+                        Zotero.debug("BBB extraData row: "+row.itemID+" "+row.itemTypeID+" "+row.oldKey+" "+row.fieldName+" "+row.value);
+                    }
+                }
+
 				Zotero.wait();
 			}
 			
@@ -3494,11 +3630,11 @@ Zotero.Schema = new function(){
 				_updateDBVersion('userdata', 76);
 			} else {
 
-			// TODO
-			//
-			// Replace customBaseFieldMappings to fix FK fields/customField -> customFields->customFieldID
-			// If libraryID set, make sure no relations still use a local user key, and then remove on-error code in sync.js
-			
+			    // TODO
+			    //
+			    // Replace customBaseFieldMappings to fix FK fields/customField -> customFields->customFieldID
+			    // If libraryID set, make sure no relations still use a local user key, and then remove on-error code in sync.js
+
 			_updateDBVersion('userdata', toVersion);
 			}
 			_updateDBVersion('multilingual', toMultilingualVersion);
