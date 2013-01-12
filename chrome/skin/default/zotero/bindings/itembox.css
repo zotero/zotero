@@ -96,17 +96,11 @@ row > vbox > description
 	margin: 0 !important;
 }
 
-hbox.zotero-date-field-status
-{
-	margin-right: 7px !important;
-}
-
-hbox.zotero-date-field-status > label
+#zotero-date-field-status
 {
 	font-weight: bold;
 	color: #666;
-	margin: 0 0 0 1px !important;
-	padding: 0 1px 0 1px !important;
+	padding: 0 10px 0 1px !important;
 }
 
 #item-type-menu

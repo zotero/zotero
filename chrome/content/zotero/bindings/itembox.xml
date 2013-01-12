@@ -847,30 +847,19 @@
 					elem.setAttribute('flex', 1);
 					
 					// y-m-d status indicator
-					var datebox = document.createElement('hbox');
-					datebox.className = 'zotero-date-field-status';
-					var year = document.createElement('label');
-					var month = document.createElement('label');
-					var day = document.createElement('label');
-					year.setAttribute('value', Zotero.getString('date.abbreviation.year'));
-					month.setAttribute('value', Zotero.getString('date.abbreviation.month'));
-					day.setAttribute('value', Zotero.getString('date.abbreviation.day'));
-					
-					// Display the date parts we have and hide the others
-					var sqldate = Zotero.Date.multipartToSQL(value);
-					year.setAttribute('hidden', !Zotero.Date.sqlHasYear(sqldate));
-					month.setAttribute('hidden', !Zotero.Date.sqlHasMonth(sqldate));
-					day.setAttribute('hidden', !Zotero.Date.sqlHasDay(sqldate));
-					
-					datebox.appendChild(year);
-					datebox.appendChild(month);
-					datebox.appendChild(day);
+					var ymd = document.createElement('label');
+					ymd.id = 'zotero-date-field-status';
+					ymd.setAttribute(
+						'value',
+						Zotero.Date.strToDate(Zotero.Date.multipartToStr(value))
+							.order.split('').join(' ')
+					);
 					
 					var hbox = document.createElement('hbox');
 					hbox.setAttribute('flex', 1);
 					hbox.className = "date-box";
 					hbox.appendChild(elem);
-					hbox.appendChild(datebox);
+					hbox.appendChild(ymd);
 					
 					this.addDynamicRow(label, hbox);
 				]]>

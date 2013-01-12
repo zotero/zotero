@@ -240,7 +240,10 @@ Zotero.Date = new function(){
 			string = Zotero.Date.dateToSQL(new Date(new Date().getTime() + 86400000)).substr(0, 10);
 		}
 		
-		var date = new Object();
+		var date = {
+			order: ''
+		};
+		var parts = [];
 		
 		// skip empty things
 		if(!string) {
@@ -261,12 +264,16 @@ Zotero.Date = new function(){
 				date.year = m[2];
 				date.month = m[4];
 				date.day = m[6];
+				date.order += m[2] ? 'y' : '';
+				date.order += m[4] ? 'm' : '';
+				date.order += m[6] ? 'd' : '';
 			} else if(m[2] && !m[4] && m[6]) {
 				date.month = m[2];
 				date.year = m[6];
+				date.order += m[2] ? 'm' : '';
+				date.order += m[6] ? 'y' : '';
 			} else {
 				// local style date (middle or little endian)
-				date.year = m[6];
 				var country = Zotero.locale ? Zotero.locale.substr(3) : "US";
 				if(country == "US" ||	// The United States
 				   country == "FM" ||	// The Federated States of Micronesia
@@ -274,10 +281,16 @@ Zotero.Date = new function(){
 				   country == "PH") {	// The Philippines
 					date.month = m[2];
 					date.day = m[4];
+					date.order += m[2] ? 'm' : '';
+					date.order += m[4] ? 'd' : '';
 				} else {
 					date.month = m[4];
 					date.day = m[2];
+					date.order += m[2] ? 'd' : '';
+					date.order += m[4] ? 'm' : '';
 				}
+				date.year = m[6];
+				date.order += 'y';
 			}
 			
 			if(date.year) date.year = parseInt(date.year, 10);
@@ -290,6 +303,10 @@ Zotero.Date = new function(){
 					var tmp = date.day;
 					date.day = date.month
 					date.month = tmp;
+					date.order = date.order.replace('m', 'D')
+						.replace('d', 'M')
+						.replace('D', 'd')
+						.replace('M', 'm');
 				}
 			}
 			
@@ -313,25 +330,39 @@ Zotero.Date = new function(){
 				if(date.month) date.month--;		// subtract one for JS style
 				Zotero.debug("DATE: retrieved with algorithms: "+JSON.stringify(date));
 				
-				date.part = m[1]+m[7];
+				parts.push(
+					{ part: m[1], before: true },
+					{ part: m[7] }
+				);
 			} else {
 				// give up; we failed the sanity check
 				Zotero.debug("DATE: algorithms failed sanity check");
-				date = {"part":string};
+				var date = {
+					order: ''
+				};
+				parts.push({ part: string });
 			}
 		} else {
 			Zotero.debug("DATE: could not apply algorithms");
-			date.part = string;
+			parts.push({ part: string });
 		}
 		
 		// couldn't find something with the algorithms; use regexp
 		// YEAR
 		if(!date.year) {
-			var m = _yearRe.exec(date.part);
-			if(m) {
-				date.year = m[2];
-				date.part = m[1]+m[3];
-				Zotero.debug("DATE: got year ("+date.year+", "+date.part+")");
+			for (var i in parts) {
+				var m = _yearRe.exec(parts[i].part);
+				if (m) {
+					date.year = m[2];
+					date.order = _insertDateOrderPart(date.order, 'y', parts[i]);
+					parts.splice(
+						i, 1,
+						{ part: m[1], before: true },
+						{ part: m[3] }
+					);
+					Zotero.debug("DATE: got year (" + date.year + ", " + JSON.stringify(parts) + ")");
+					break;
+				}
 			}
 		}
 		
@@ -351,12 +382,20 @@ Zotero.Date = new function(){
 				_monthRe = new RegExp("^(.*)\\b("+months.join("|")+")[^ ]*(?: (.*)$|$)", "i");
 			}
 			
-			var m = _monthRe.exec(date.part);
-			if(m) {
-				// Modulo 12 in case we have multiple languages
-				date.month = months.indexOf(m[2].toLowerCase()) % 12;
-				date.part = m[1]+m[3];
-				Zotero.debug("DATE: got month ("+date.month+", "+date.part+")");
+			for (var i in parts) {
+				var m = _monthRe.exec(parts[i].part);
+				if (m) {
+					// Modulo 12 in case we have multiple languages
+					date.month = months.indexOf(m[2].toLowerCase()) % 12;
+					date.order = _insertDateOrderPart(date.order, 'm', parts[i]);
+					parts.splice(
+						i, 1,
+						{ part: m[1], before: "m" },
+						{ part: m[3], after: "m" }
+					);
+					Zotero.debug("DATE: got month (" + date.month + ", " + JSON.stringify(parts) + ")");
+					break;
+				}
 			}
 		}
 		
@@ -368,24 +407,37 @@ Zotero.Date = new function(){
 				_dayRe = new RegExp("\\b([0-9]{1,2})(?:"+daySuffixes+")?\\b(.*)", "i");
 			}
 			
-			var m = _dayRe.exec(date.part);
-			if(m) {
-				var day = parseInt(m[1], 10);
-				// Sanity check
-				if (day <= 31) {
-					date.day = day;
-					if(m.index > 0) {
-						date.part = date.part.substr(0, m.index);
-						if(m[2]) {
-							date.part += " "+m[2];;
+			for (var i in parts) {
+				var m = _dayRe.exec(parts[i].part);
+				if (m) {
+					var day = parseInt(m[1], 10);
+					// Sanity check
+					if (day <= 31) {
+						date.day = day;
+						date.order = _insertDateOrderPart(date.order, 'd', parts[i]);
+						if(m.index > 0) {
+							var part = parts[i].part.substr(0, m.index);
+							if(m[2]) {
+								part += " " + m[2];;
+							}
+						} else {
+							var part = m[2];
 						}
-					} else {
-						date.part = m[2];
+						parts.splice(
+							i, 1,
+							{ part: part }
+						);
+						Zotero.debug("DATE: got day (" + date.day + ", " + JSON.stringify(parts) + ")");
+						break;
 					}
-					
-					Zotero.debug("DATE: got day ("+date.day+", "+date.part+")");
 				}
 			}
+		}
+		
+		// Concatenate date parts
+		date.part = '';
+		for (var i in parts) {
+			date.part += parts[i].part + ' ';
 		}
 		
 		// clean up date part
@@ -399,6 +451,36 @@ Zotero.Date = new function(){
 		
 		return date;
 	}
+	
+	
+	function _insertDateOrderPart(dateOrder, part, partOrder) {
+		if (!dateOrder) {
+			return part;
+		}
+		if (partOrder.before === true) {
+			return part + dateOrder;
+		}
+		if (partOrder.after === true) {
+			return dateOrder + part;
+		}
+		if (partOrder.before) {
+			var pos = dateOrder.indexOf(partOrder.before);
+			if (pos == -1) {
+				return dateOrder;
+			}
+			return dateOrder.replace(new RegExp("(" + partOrder.before + ")"), part + '$1');
+		}
+		if (partOrder.after) {
+			var pos = dateOrder.indexOf(partOrder.after);
+			if (pos == -1) {
+				return dateOrder + part;
+			}
+			return dateOrder.replace(new RegExp("(" + partOrder.after + ")"), '$1' + part);
+		}
+		return dateOrder + part;
+	}
+	
+	
 	
 	/**
 	 * does pretty formatting of a date object returned by strToDate()
