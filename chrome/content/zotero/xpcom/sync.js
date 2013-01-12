@@ -1615,7 +1615,6 @@ Zotero.Sync.Server = new function () {
 								// Callback when compressed data is available
 								var bufferUploader = function (data) {
 									var gzurl = url + '?gzip=1';
-									dump("NNN BODY: "+body);
 									var oldLen = body.length;
 									var newLen = data.length;
 									var savings = Math.round(((oldLen - newLen) / oldLen) * 100)
@@ -3964,7 +3963,7 @@ Zotero.Sync.Server.Data = new function() {
 			item.creators = item.creators.slice(0,deletecreatoridx);
         }
         // If data exists, add it to the extra field
-        if (extrafields || multifields || extracreators || multicreators || syncItemType === localItemType) {
+        if (extrafields || multifields || extracreators || multicreators || syncItemType !== localItemType) {
             supp = {type:syncItemType};
 			if (syncItemType !== localItemType) {
 				supp.xtype = localItemType;
@@ -3989,7 +3988,7 @@ Zotero.Sync.Server.Data = new function() {
             if (!item.fields.extra) {
                 item.fields.extra = "";
             }
-            item.fields.extra = "mlzsync:" + supplen + supp + item.fields.extra;
+            item.fields.extra = "mlzsync1:" + supplen + supp + item.fields.extra;
         }
 
 		xml.@libraryID = item.primary.libraryID ? item.primary.libraryID : Zotero.libraryID;
@@ -4124,9 +4123,7 @@ Zotero.Sync.Server.Data = new function() {
 				xml.related = keys.join(' ');
 			}
 		}
-	
-		dump("NNN SHIT: "+xml.toXMLString()+"\n");
-	
+        dump("BBB "+xml.toXMLString()+"\n");
 		return xml;
 	}
 	
@@ -4188,10 +4185,10 @@ Zotero.Sync.Server.Data = new function() {
         var obj = false;
 		var itemTypeID = false;
         if (extra) {
-            var m = extra.match(/^mlzsync:([0-9]{4})/);
+            var m = extra.match(/^mlzsync1:([0-9]{4})/);
             if (m) {
                 var offset = parseInt(m[1],10);
-                objstr = extra.slice(12,offset+12);
+                objstr = extra.slice(13,offset+13);
                 if (objstr) {
                     try {
                         obj = JSON.parse(objstr);
@@ -4230,7 +4227,7 @@ Zotero.Sync.Server.Data = new function() {
                     item.setField(fieldName, item.getField(fieldName), false, obj.multifields.main[fieldName], true);
                 }
             }
-            item.setField("extra", extra.slice(offset+12));
+            item.setField("extra", extra.slice(offset+13));
 			changedFields.extra = true;
         }
 

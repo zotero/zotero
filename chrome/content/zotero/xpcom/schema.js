@@ -3694,9 +3694,6 @@ Zotero.Schema = new function(){
                             var cslKey = m[1];
                             var val = m[2];
 
-                            // XXX TODO: if a valid mlzsync: prefix exists on the item in the local
-                            // database, issue a notice that the user should do a Restore From Server?
-
                             // If a type is specified, convert the item, convert fields, and remove unused fields to Extra
                             if (typeMap[m[2]]) {
                                 t = typeMap[m[2]];
@@ -3818,9 +3815,9 @@ Zotero.Schema = new function(){
                                     // Insert value if necessary and get creatorID
                                     if (!hasCreatorID) {
                                         if (!row.libraryID) {
-                                            Zotero.DB.query("INSERT INTO creators VALUES (NULL, ?, 0, 0, 0, NULL, ?)",[creatorDataID,row.key]);
+                                            Zotero.DB.query("INSERT INTO creators VALUES (NULL, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, ?)",[creatorDataID,row.key]);
                                         } else {
-                                            Zotero.DB.query("INSERT INTO creators VALUES (NULL, ?, 0, 0, 0, ?, ?)",[creatorDataID,row.libraryID,row.key]);
+                                            Zotero.DB.query("INSERT INTO creators VALUES (NULL, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?)",[creatorDataID,row.libraryID,row.key]);
                                         }
                                     }
                                     var creatorID;
@@ -3865,8 +3862,13 @@ Zotero.Schema = new function(){
                             } else {
                                 Zotero.DB.query("DELETE from itemData WHERE itemID=? AND fieldID=?",[row.itemID,22]);
                             }
+                            // Mark actioned items with current timestamp to force sync-up
+                            Zotero.DB.query("UPDATE items SET clientDateModified=CURRENT_TIMESTAMP WHERE itemID=?",[row.itemID]);
                         }
                     }
+                    // Mark items that already have our mlzsync1: preflag with their creation date timestamp
+                    // to force sync-down
+                    Zotero.DB.query("UPDATE items SET dateModified=dateAdded,clientDateModified=dateAdded WHERE itemID IN (SELECT itemID FROM items NATURAL JOIN itemData NATURAL JOIN itemDataValues WHERE value LIKE 'mlzsync1:%')");
                 }
 
 				Zotero.wait();
