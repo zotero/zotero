@@ -105,7 +105,15 @@ Zotero.ItemFields = new function() {
 			} else if (field === 'codeNumber') {
 				return Zotero.getString("itemFields.volume");
 			}
-		}
+		} else if (itemType == '16') {
+            if (field === 'code') {
+                return Zotero.getString("itemFields.reporter");
+            } else if (field === 'codeVolume') {
+                return Zotero.getString("itemFields.volume");
+            } else if (field === 'codePages') {
+                return Zotero.getString("itemFields.pages");
+            }
+        }
 
 		// TODO: different labels for different item types
 		

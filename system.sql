@@ -640,12 +640,15 @@ INSERT INTO itemTypeFields VALUES (16, 93, NULL, 10);  -- bill number
 INSERT INTO itemTypeFields VALUES (16, 14, NULL, 11);  -- date
 INSERT INTO itemTypeFields VALUES (16, 15, NULL, 12);  -- section
 INSERT INTO itemTypeFields VALUES (16, 19, NULL, 13);  -- archive locator   [ADDED]
-INSERT INTO itemTypeFields VALUES (16, 43, NULL, 14);  -- reporter          [ADDED]
-INSERT INTO itemTypeFields VALUES (16, 87, NULL, 15);  -- language
-INSERT INTO itemTypeFields VALUES (16, 1, NULL, 16);   -- url
-INSERT INTO itemTypeFields VALUES (16, 27, NULL, 17);  -- access date
-INSERT INTO itemTypeFields VALUES (16, 2, NULL, 18);   -- rights
-INSERT INTO itemTypeFields VALUES (16, 22, NULL, 19);  -- extra
+INSERT INTO itemTypeFields VALUES (16, 36, NULL, 14);  -- code            (relabel as reporter)
+INSERT INTO itemTypeFields VALUES (16, 94, NULL, 15);  -- codeVolume      (relabel as volume)
+INSERT INTO itemTypeFields VALUES (16, 95, NULL, 16);  -- codePages       (relabel as pages)
+INSERT INTO itemTypeFields VALUES (16, 87, NULL, 17);  -- language
+INSERT INTO itemTypeFields VALUES (16, 1, NULL, 18);   -- url
+INSERT INTO itemTypeFields VALUES (16, 27, NULL, 19);  -- access date
+INSERT INTO itemTypeFields VALUES (16, 42, NULL, 20);  -- history
+INSERT INTO itemTypeFields VALUES (16, 2, NULL, 21);   -- rights
+INSERT INTO itemTypeFields VALUES (16, 22, NULL, 22);  -- extra
 
 -- case
 INSERT INTO itemTypeFields VALUES (17, 111, NULL, 1);   -- caseName
