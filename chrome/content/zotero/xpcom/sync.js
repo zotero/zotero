@@ -4145,7 +4145,7 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		// TODO: add custom item types
-		
+
 		var data = {};
 		if (!skipPrimary) {
 			data.libraryID = _getLibraryID(xmlItem.@libraryID.toString(), defaultLibraryID);
@@ -4173,7 +4173,7 @@ Zotero.Sync.Server.Data = new function() {
         var extra = false;
 		for each(var field in xmlItem.field) {
 			var fieldName = field.@name.toString();
-			item.setField(fieldName, field.toString());
+			item.setField(fieldName, field.toString(), false);
             if (fieldName === "extra") {
                 extra = field.toString();
             }
@@ -4243,9 +4243,13 @@ Zotero.Sync.Server.Data = new function() {
 			}
 		}
         // Remove multifields that are not present in the sync
-        for each(var data in item.getUsedMultiFields(true)) {
-            if (!obj || !obj.multifields || !obj.multifields._keys[data.fieldName] || !obj.multifields._keys[data.fieldName][data.languageTag]) {
-                item.setField(data.fieldName,false,false,data.languageTag);
+        // (but only if there is some evidence that multilingual is being used -- if not,
+        // leave multilingual fields in place for safety)
+        if (obj && obj.multifields) {
+            for each(var data in item.getUsedMultiFields(true)) {
+                if (!obj.multifields._keys[data.fieldName] || !obj.multifields._keys[data.fieldName][data.languageTag]) {
+                    item.setField(data.fieldName,false,false,data.languageTag);
+                }
             }
         }
 		
