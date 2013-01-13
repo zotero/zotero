@@ -3985,10 +3985,12 @@ Zotero.Sync.Server.Data = new function() {
             while (supplen.length < 4) {
                 supplen = "0" + supplen;
             }
-            if (!item.fields.extra) {
-                item.fields.extra = "";
+            if ((item.fields.extra||supp) && (item.fields.extra && !item.fields.extra.match(/^mlzsync[0-9]:/))) {
+                if (!item.fields.extra) {
+                    item.fields.extra = "";
+                }
+                item.fields.extra = "mlzsync1:" + supplen + supp + item.fields.extra;
             }
-            item.fields.extra = "mlzsync1:" + supplen + supp + item.fields.extra;
         }
 
 		xml.@libraryID = item.primary.libraryID ? item.primary.libraryID : Zotero.libraryID;
@@ -4163,12 +4165,16 @@ Zotero.Sync.Server.Data = new function() {
 		
 		var changedFields = {};
 		
+        Zotero.debug("PPP data.itemTypeID="+data.itemTypeID+", xml-itemType="+xmlItem.@itemType.toString());
+
 		// Primary data
 		for (var field in data) {
 			item.setField(field, data[field]);
 			changedFields[field] = true;
 		}
 		
+        dump("PPP xml: "+xmlItem.toXMLString());
+
 		// Item data
         var extra = false;
 		for each(var field in xmlItem.field) {
@@ -4185,11 +4191,14 @@ Zotero.Sync.Server.Data = new function() {
         var obj = false;
 		var itemTypeID = false;
         if (extra) {
+            Zotero.debug("PPP     has extra");
             var m = extra.match(/^mlzsync1:([0-9]{4})/);
             if (m) {
+                Zotero.debug("PPP     has mlzsync1:");
                 var offset = parseInt(m[1],10);
                 objstr = extra.slice(13,offset+13);
                 if (objstr) {
+                    Zotero.debug("PPP     has objstr: "+objstr);
                     try {
                         obj = JSON.parse(objstr);
 						// Save type ID for comparison
@@ -4197,9 +4206,11 @@ Zotero.Sync.Server.Data = new function() {
                     } catch (e) {
                         Zotero.debug("Multilingual sync: Parse error on "+objstr);
                     }
+                    Zotero.debug("PPP     has itemTypeID: "+itemTypeID);
                 }
             }
         }
+        Zotero.debug("PPP     has obj: "+obj);
         if (obj && itemTypeID === data.itemTypeID) {
 			if (obj.xtype) {
 				xItemTypeID = Zotero.ItemTypes.getID(obj.xtype);
