@@ -4245,9 +4245,9 @@ Zotero.Sync.Server.Data = new function() {
         // Remove multifields that are not present in the sync
         // (but only if there is some evidence that multilingual is being used -- if not,
         // leave multilingual fields in place for safety)
-        if (obj && obj.multifields) {
-            for each(var data in item.getUsedMultiFields(true)) {
-                if (!obj.multifields._keys[data.fieldName] || !obj.multifields._keys[data.fieldName][data.languageTag]) {
+        for each(var field in previousFields) {
+            for (var langTag in item.multi._keys[field]) {
+                if (!obj || !obj.multifields || !obj.multifields._keys[data.fieldName] || !obj.multifields._keys[data.fieldName][data.languageTag]) {
                     item.setField(data.fieldName,false,false,data.languageTag);
                 }
             }

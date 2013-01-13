@@ -3863,7 +3863,7 @@ Zotero.Schema = new function(){
                                 Zotero.DB.query("DELETE from itemData WHERE itemID=? AND fieldID=?",[row.itemID,22]);
                             }
                             // Mark actioned items with current timestamp to force sync-up
-                            Zotero.DB.query("UPDATE items SET clientDateModified=CURRENT_TIMESTAMP WHERE itemID=?",[row.itemID]);
+                            Zotero.DB.query("UPDATE items SET clientDateModified=DATETIME('now') WHERE itemID=?",[row.itemID]);
                         }
                     }
                     // XXXX: This didn't work out very well
@@ -3886,7 +3886,7 @@ Zotero.Schema = new function(){
                     //Zotero.Sync.Server.lastLocalSyncTime = timestamp;
                     //Zotero.Sync.Server.lastRemoteSyncTime = timestamp;
                     //Zotero.debug("BBB lastLocalSyncTime after: "+Zotero.Sync.Server.lastLocalSyncTime);
-                    //Zotero.DB.query("UPDATE items SET dateModified=dateAdded,clientDateModified=dateAdded WHERE itemID IN (SELECT itemID FROM items NATURAL JOIN itemData NATURAL JOIN itemDataValues WHERE fieldID=22 AND value LIKE 'mlzsync1:%')");
+                    Zotero.DB.query("UPDATE items SET dateModified=DATETIME('now') WHERE itemID IN (SELECT itemID FROM items NATURAL JOIN itemData NATURAL JOIN itemDataValues WHERE fieldID=22 AND value LIKE 'mlzsync1:%')");
                 }
 
 				Zotero.wait();
