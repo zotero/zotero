@@ -3881,10 +3881,10 @@ Zotero.Schema = new function(){
                         timestamp += -60;
                     }
                     Zotero.debug("BBB lastLocalSyncTime before: "+Zotero.Sync.Server.lastLocalSyncTime);
-                    Zotero.Sync.Server.lastLocalSyncTime = timestamp;
+                    //Zotero.Sync.Server.lastLocalSyncTime = timestamp;
                     Zotero.Sync.Server.lastRemoteSyncTime = timestamp;
                     Zotero.debug("BBB lastLocalSyncTime after: "+Zotero.Sync.Server.lastLocalSyncTime);
-                    //Zotero.DB.query("UPDATE items SET dateModified=dateAdded,clientDateModified=dateAdded WHERE itemID IN (SELECT itemID FROM items NATURAL JOIN itemData NATURAL JOIN itemDataValues WHERE fieldID=22 AND value LIKE 'mlzsync1:%')");
+                    Zotero.DB.query("UPDATE items SET dateModified=dateAdded,clientDateModified=dateAdded WHERE itemID IN (SELECT itemID FROM items NATURAL JOIN itemData NATURAL JOIN itemDataValues WHERE fieldID=22 AND value LIKE 'mlzsync1:%')");
                 }
 
 				Zotero.wait();
