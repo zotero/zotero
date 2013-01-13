@@ -3868,7 +3868,23 @@ Zotero.Schema = new function(){
                     }
                     // Mark items that already have our mlzsync1: preflag with their creation date timestamp
                     // to force sync-down
-                    Zotero.DB.query("UPDATE items SET dateModified=dateAdded,clientDateModified=dateAdded WHERE itemID IN (SELECT itemID FROM items NATURAL JOIN itemData NATURAL JOIN itemDataValues WHERE value LIKE 'mlzsync1:%')");
+                    // We obtain the minimum value of clientDateModified for these items,
+                    // set our sync time record to that time, and roll back modification
+                    // dates on these items to the value of dateAdded. This should trigger
+                    // a sync-down and reinstall for these items only.
+                    var clientDateModifiedMin = Zotero.DB.valueQuery("SELECT MIN(clientDateModified) FROM items WHERE itemID IN (SELECT itemID FROM items NATURAL JOIN itemData NATURAL JOIN itemDataValues WHERE fieldID=22 AND value LIKE 'mlzsync1:%')");
+                    Zotero.debug("BBB clientDateModifiedMin: "+clientDateModifiedMin);
+                    var timestamp = new Date(clientDateModifiedMin.replace(/-/g,"/")).getTime();
+                    timestamp = timestamp / 1000;
+                    Zotero.debug("BBB as timestamp: "+timestamp);
+                    if (timestamp > 61) {
+                        timestamp += -60;
+                    }
+                    Zotero.debug("BBB lastLocalSyncTime before: "+Zotero.Sync.Server.lastLocalSyncTime);
+                    Zotero.Sync.Server.lastLocalSyncTime = timestamp;
+                    Zotero.Sync.Server.lastRemoteSyncTime = timestamp;
+                    Zotero.debug("BBB lastLocalSyncTime after: "+Zotero.Sync.Server.lastLocalSyncTime);
+                    //Zotero.DB.query("UPDATE items SET dateModified=dateAdded,clientDateModified=dateAdded WHERE itemID IN (SELECT itemID FROM items NATURAL JOIN itemData NATURAL JOIN itemDataValues WHERE fieldID=22 AND value LIKE 'mlzsync1:%')");
                 }
 
 				Zotero.wait();
