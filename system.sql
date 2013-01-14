@@ -682,7 +682,7 @@ INSERT INTO itemTypeFields VALUES (18, 90, NULL, 2);   -- abstract
 INSERT INTO itemTypeFields VALUES (18, 1261, NULL, 3); -- jurisdiction      [ADDED]
 INSERT INTO itemTypeFields VALUES (18, 116, NULL, 4);  -- shortTitle
 INSERT INTO itemTypeFields VALUES (18, 46, NULL, 5);   -- committee
-INSERT INTO itemTypeFields VALUES (18, 1275, NULL, 6); -- meetingNumber     [ADDED]
+INSERT INTO itemTypeFields VALUES (18, 75, NULL, 6);   -- meetingName     [ADDED]
 INSERT INTO itemTypeFields VALUES (18, 1263, NULL, 7); -- resolutionLabel   [ADDED]
 INSERT INTO itemTypeFields VALUES (18, 1262, NULL, 8); -- assemblyNumber    [ADDED]
 INSERT INTO itemTypeFields VALUES (18, 1264, NULL, 9); -- session type      [ADDED]
