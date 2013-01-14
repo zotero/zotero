@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.414",
+    PROCESSOR_VERSION: "1.0.416",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
@@ -9771,7 +9771,7 @@ CSL.Transform = function (state) {
                 ret = "tlh";
             }
         }
-        if (Item.multi && Item.multi && Item.multi.main) {
+        if (Item.multi && Item.multi && Item.multi.main && Item.multi.main[field]) {
             ret = Item.multi.main[field];
         }
         if (state.opt.development_extensions.normalize_lang_keys_to_lowercase) {
@@ -10877,21 +10877,9 @@ CSL.Util.Names.doInitialize = function (state, namelist, terminator, mode) {
             namelist[i] = " " + n;
         }
     }
-    var ret = CSL.Util.Names.stripRight(namelist.join(""));
-    ret = ret.replace(/\s*\-\s*/g, "-").replace(/\s+/g, " ");
+    var ret = namelist.join("");
+    ret = ret.replace(/\s+$/,"").replace(/\s*\-\s*/g, "-").replace(/\s+/g, " ");
     return ret;
-};
-CSL.Util.Names.stripRight = function (str) {
-    var end, pos, len;
-    end = 0;
-    len = str.length - 1;
-    for (pos = len; pos > -1; pos += -1) {
-        if (str[pos] !== " ") {
-            end = pos + 1;
-            break;
-        }
-    }
-    return str.slice(0, end);
 };
 CSL.Util.Names.getRawName = function (name) {
     var ret = [];
