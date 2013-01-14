@@ -52,9 +52,9 @@ const CSL_NAMES_MAPPINGS = {
  */
 const CSL_TEXT_MAPPINGS = {
 	"title":["title"],
-	"container-title":["publicationTitle",  "reporter", "code"], /* reporter and code should move to SQL mapping tables */
+	"container-title":["publicationTitle",  "reporter", "code", "album", "websiteTitle"], /* reporter and code should move to SQL mapping tables */
 	"collection-title":["seriesTitle", "series"],
-	"collection-number":["seriesNumber","assemblyNumber"],
+	"collection-number":["seriesNumber","assemblyNumber","regnalYear","yearAsVolume"],
 	"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
 	"publisher-place":["place"],
 	"authority":["court", "legislativeBody", "issuingAuthority", "committee"],
@@ -65,9 +65,9 @@ const CSL_TEXT_MAPPINGS = {
 	"number-of-pages":["numPages"],	
 	"edition":["edition"],
 	"version":["version"],
-	"section":["section"],
-	"genre":["type"],
-	"chapter-number":["session","meetingNumber"],
+	"section":["section","opus"],
+	"genre":["type","reign","supplementName","sessionType"],
+	"chapter-number":["session","meetingName"],
 	"source":["libraryCatalog"],
 	"dimensions": ["artworkSize", "runningTime"], 
 	"medium":["medium", "system"],
@@ -89,6 +89,11 @@ const CSL_TEXT_MAPPINGS = {
 	"shortTitle":["shortTitle"],
 	"journalAbbreviation":["journalAbbreviation"],
 	"language":["language"],
+    "jurisdiction":["jurisdiction"],
+    "available-date":["openingDate"],
+	"original-date":["originalDate","adoptionDate","dateDecided"],
+	"event-date":"signingDate",
+    "publication-date":"publicationDate"
 }
 
 /*
