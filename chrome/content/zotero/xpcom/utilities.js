@@ -85,28 +85,26 @@ const CSL_TEXT_MAPPINGS = {
 	"call-number":["callNumber"],
 	"note":["extra"],
 	"number":["number"],
+	"rank-number":["priorityNumbers"],
+	"pending-number":["applicationNumber"],
 	"references":["history"],
 	"shortTitle":["shortTitle"],
 	"journalAbbreviation":["journalAbbreviation"],
 	"language":["language"],
-    "jurisdiction":["jurisdiction"],
-    "available-date":["openingDate"],
-	"original-date":["originalDate","adoptionDate","dateDecided"],
-	"event-date":"signingDate",
-    "publication-date":"publicationDate"
+	"jurisdiction":["jurisdiction"]
 }
 
 /*
  * Mappings for dates
 */
 const CSL_DATE_MAPPINGS = {
-    "issued":["date"],
-	"original-date":["newsCaseDate","priorityDate"],
+	"issued":["date"],
+	"original-date":["newsCaseDate","priorityDate","originalDate","adoptionDate","dateDecided"],
 	"submitted":["filingDate"],
 	"accessed":["accessDate"],
 	"available-date":["openingDate"],
-	"original-date":["adoptionDate"],
-	"event-date":["signingDate"]
+	"event-date":["signingDate"],
+	"publication-date":["publicationDate"]
 }
 
 /*
