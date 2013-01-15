@@ -2632,28 +2632,26 @@ Zotero.Sync.Server.Data = new function() {
 		
 		// TEMP: Resend tags requested by server
 		try {
-			if (xml.fixtags.length()) {
-				for each(var tagsNode in xml.fixtags.tags) {
-					var libraryID = _libID(tagsNode.@libraryID);
-					if (libraryID && !Zotero.Libraries.isEditable(libraryID)) {
-						continue;
-					}
-					var tagsKeys = tagsNode.toString().split(' ');
-					for each(var key in tagsKeys) {
-						var sql = "SELECT tagID FROM tags WHERE libraryID=? AND key=?";
-						var tagID = Zotero.DB.valueQuery(sql, [libraryID, key]);
-						
-						var sql = "SELECT COUNT(*) > 0 FROM itemTags WHERE tagID=?";
-						if (Zotero.DB.valueQuery(sql, [tagID])) {
-							var sql = "UPDATE tags SET clientDateModified=CURRENT_TIMESTAMP "
-								+ "WHERE tagID=?";
-							Zotero.DB.query(sql, [tagID]);
-							syncSession.addToUpdated({
-								objectType: 'tag',
-								libraryID: libraryID,
-								key: key
-							});
-						}
+			for each(var tagsNode in updatedNode.xpath("fixtags/tags")) {
+				var libraryID = _libID(tagsNode.getAttribute('libraryID'));
+				if (libraryID && !Zotero.Libraries.isEditable(libraryID)) {
+					continue;
+				}
+				var tagsKeys = tagsNode.textContent.split(' ');
+				for each(var key in tagsKeys) {
+					var sql = "SELECT tagID FROM tags WHERE libraryID=? AND key=?";
+					var tagID = Zotero.DB.valueQuery(sql, [libraryID, key]);
+					
+					var sql = "SELECT COUNT(*) > 0 FROM itemTags WHERE tagID=?";
+					if (Zotero.DB.valueQuery(sql, [tagID])) {
+						var sql = "UPDATE tags SET clientDateModified=CURRENT_TIMESTAMP "
+							+ "WHERE tagID=?";
+						Zotero.DB.query(sql, [tagID]);
+						syncSession.addToUpdated({
+							objectType: 'tag',
+							libraryID: libraryID,
+							key: key
+						});
 					}
 				}
 			}
