@@ -50,7 +50,8 @@
 				}
 				
 				var styles = Zotero.Styles.getAll();
-				for each(var style in styles) {
+				for(var p in styles) {
+					var style = styles[p];
 					if (style.source) {
 						continue;
 					}
@@ -58,7 +59,8 @@
 				}
 				var pageList = document.getElementById('zotero-csl-page-type');
 				var locators = Zotero.Cite.labels;
-				for each(var type in locators) {
+				for(var p in locators) {
+					var type = locators[p];
 					var locator = type;
 					locator = locator[0].toUpperCase()+locator.substr(1);
 					pageList.appendItem(locator, type);

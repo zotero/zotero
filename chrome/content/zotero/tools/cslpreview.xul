@@ -65,7 +65,8 @@
 					var styles = Zotero.Styles.getAll();
 					// XXX needs its own string really for the title!
 					var str = '<html><head><title></title></head><body><h1>Citation/Bibliography list<h1>';
-					for each(var style in styles) {
+					for(var p in styles) {
+						var style = styles[p];
 						if (style.source) {
 							continue;
 						}
@@ -105,7 +106,8 @@
 					return '';
 				}
 				var terms = new Object();
-				for each(var cat in style.categories) {
+				for(var p in style.categories) {
+					var cat = style.categories[p];
 					Zotero.debug("TERM is " + cat.toString());
 					terms[cat.toString()] = true;
 				}
@@ -120,15 +122,19 @@
 				var styleEngine = style.csl;
 				
 				// Generate multiple citations
+				var itemIDs = [];
+				for(var item in items) itemIDs.push({"id":items[item].id});
 				var citations = styleEngine.previewCitationCluster(
-					{"citationItems":[{"id":item.id} for each(item in items)], "properties":{}},
+					{"citationItems":itemIDs, "properties":{}},
 					[], [], "html");
 			
 				// Generate bibliography
 				if(!style.hasBibliography) {
 					var bibliography = '';
 				} else {
-					styleEngine.updateItems([item.id for each(item in items)]);
+					var itemIDs = [];
+					for(var item in items) itemIDs.push(items[item].id);
+					styleEngine.updateItems(itemIDs);
 					var bibliography = '<p>' + Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
 				}
 				

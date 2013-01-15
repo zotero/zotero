@@ -204,7 +204,8 @@
 						}
 						
 						// Preserve small caps and underlining
-						for each (var tagspec in this._rtfRexMap){
+						for(var p in this._rtfRexMap){
+							var tagspec = this._rtfRexMap[p];
 							var l = output.split(/(<\/?span[^>]*>)/);
 							var current_level = 0;
 							var tag_level = [];
@@ -227,8 +228,8 @@
 							output = l.join("");
 						}
 						
-						for each(var entry in this._htmlToRtfMap) {
-							output = output.replace(entry[0], entry[1], "g");
+						for(var entry in this._htmlToRtfMap) {
+							output = output.replace(this._htmlToRtfMap[entry][0], this._htmlToRtfMap[entry][1], "g");
 						}
 						
 						output = Zotero.Utilities.unescapeHTML(output.replace(" ", "&nbsp;", "g"))
@@ -295,12 +296,13 @@
 								html = html.replace(this._rtfMap[needle], needle, "g");
 							}
 						}
-						for each (var tagspec in this._rtfRexMap){
+						for(var p in this._rtfRexMap){
+							var tagspec = this._rtfRexMap[p];
 							html = html.replace(tagspec[2], tagspec[0], "g");
 							html = html.replace(tagspec[3], "</span>", "g");
 						}
-						for each(var entry in this._rtfToHtmlMap) {
-							html = html.replace(entry[0], entry[1], "g");
+						for(var entry in this._rtfToHtmlMap) {
+							html = html.replace(this._rtfToHtmlMap[entry][0], this._rtfToHtmlMap[entry][1], "g");
 						}
 						html = '<div style="'+bodyStyle+'"><p>'+html+"</p></div>";
 					}
@@ -371,8 +373,8 @@
 						
 						if (!SJOW.tinyMCE) {
 							var exts = Zotero.getInstalledExtensions(function(exts) {
-								for each(var ext in exts) {
-									if (ext.indexOf('NoScript') != -1) {
+								for(var ext in exts) {
+									if (exts[ext].indexOf('NoScript') != -1) {
 										var warning = win.document.getElementById('noScriptWarning');
 										var str = "The NoScript extension is preventing Zotero "
 											+ "from displaying notes. To use NoScript and Zotero together, "

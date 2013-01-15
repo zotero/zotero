@@ -73,8 +73,8 @@ var Zotero_Report_Interface = new function() {
 		}
 		
 		var keyHashes = [];
-		for each(var item in items) {
-			keyHashes.push(Zotero.Items.getLibraryKeyHash(item));
+		for(var item in items) {
+			keyHashes.push(Zotero.Items.getLibraryKeyHash(items[item]));
 		}
 		
 		ZoteroPane_Local.loadURI('zotero://report/items/' + keyHashes.join('-') + '/html/report.html', event);

@@ -141,7 +141,8 @@ Zotero.Annotate = new function() {
 			} else {
 				var browsers = win.document.getElementsByTagNameNS(XUL_NAMESPACE, "browser");
 			}
-			for each(var browser in browsers) {
+			for(var p in browsers) {
+				var browser = browsers[p];
 				if(browser.currentURI) {
 					if(browser.currentURI.spec == annotationURL) {
 						if(haveBrowser) {
@@ -364,7 +365,8 @@ Zotero.Annotate.Path.prototype.fromNode = function(node, offset) {
 					// is still part of the first text node
 					if(sibling.getAttribute) {
 						// get offset of all child nodes
-						for each(var child in sibling.childNodes) {
+						for(var p in sibling.childNodes) {
+							var child = sibling.childNodes[p];
 							if(child && child.nodeType == TEXT_TYPE) {
 								this.offset += child.nodeValue.length;
 							}
@@ -711,8 +713,8 @@ Zotero.Annotations.prototype.unhighlight = function(selectedRange) {
  * Refereshes display of annotations (useful if page is reloaded)
  */
 Zotero.Annotations.prototype.refresh = function() {
-	for each(var annotation in this.annotations) {
-		annotation.display();
+	for(var annotation in this.annotations) {
+		this.annotations[annotation].display();
 	}
 }
 
@@ -725,15 +727,16 @@ Zotero.Annotations.prototype.save = function() {
 		Zotero.DB.query("DELETE FROM highlights WHERE itemID = ?", [this.itemID]);
 		
 		// save highlights
-		for each(var highlight in this.highlights) {
+		for(var p in this.highlights) {
+			var highlight = this.highlights[p]
 			if(highlight) highlight.save();
 		}
 		
 		// save annotations
-		for each(var annotation in this.annotations) {
+		for(var annotation in this.annotations) {
 			// Don't drop all annotations if one is broken (due to ~3.0 glitch)
 			try {
-				annotation.save();
+				this.annotations[annotation].save();
 			}
 			catch(e) {
 				Zotero.debug(e);
@@ -754,17 +757,17 @@ Zotero.Annotations.prototype.save = function() {
 Zotero.Annotations.prototype.load = function() {
 	// load annotations
 	var rows = Zotero.DB.query("SELECT * FROM annotations WHERE itemID = ?", [this.itemID]);
-	for each(var row in rows) {
+	for(var row in rows) {
 		var annotation = this.createAnnotation();
-		annotation.initWithDBRow(row);
+		annotation.initWithDBRow(rows[row]);
 	}
 	
 	// load highlights
 	var rows = Zotero.DB.query("SELECT * FROM highlights WHERE itemID = ?", [this.itemID]);
-	for each(var row in rows) {
+	for(var row in rows) {
 		try {
 			var highlight = new Zotero.Highlight(this);
-			highlight.initWithDBRow(row);
+			highlight.initWithDBRow(rows[row]);
 			this.highlights.push(highlight);
 		} catch(e) {
 			Zotero.debug("Annotate: could not load highlight");
@@ -778,16 +781,16 @@ Zotero.Annotations.prototype.load = function() {
 Zotero.Annotations.prototype.toggleCollapsed = function() {
 	// look to see if there are any collapsed annotations
 	var status = true;
-	for each(var annotation in this.annotations) {
-		if(annotation.collapsed) {
+	for(var annotation in this.annotations) {
+		if(this.annotations[annotation].collapsed) {
 			status = false;
 			break;
 		}
 	}
 	
 	// set status on all annotations
-	for each(var annotation in this.annotations) {
-		annotation.setCollapsed(status);
+	for(var annotation in this.annotations) {
+		this.annotations[annotation].setCollapsed(status);
 	}
 }
 
@@ -1621,7 +1624,8 @@ Zotero.Highlight.prototype._highlightSpaceBetween = function(start, end) {
 			node = node.nextSibling;
 		}
 		
-		for each(var textNode in textArray) {
+		for(var p in textArray) {
+			var textNode = textArray[p];
 			if(firstSpan) {
 				this._highlightTextNode(textNode);
 			} else {

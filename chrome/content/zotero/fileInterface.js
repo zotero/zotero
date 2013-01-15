@@ -339,7 +339,9 @@ var Zotero_File_Interface = new function() {
 	 */
 	function _importDone(obj, worked) {
 		// add items to import collection
-		_importCollection.addItems([item.id for each(item in obj.newItems)]);
+		var itemIDs = [];
+		for(var p in obj.newItems) itemIDs.push(obj.newItems[p].id);
+		_importCollection.addItems(itemIDs);
 		
 		Zotero.DB.commitTransaction();
 		
@@ -445,7 +447,9 @@ var Zotero_File_Interface = new function() {
 							   getService(Components.interfaces.nsIClipboard);
 		
 		var style = Zotero.Styles.get(style).csl;
-		var citation = {"citationItems":[{id:item.id} for each(item in items)], properties:{}};
+		var itemIDs = [];
+		for(var p in items) itemIDs.push({id: items[p].id});
+		var citation = {"citationItems":itemIDs, properties:{}};
 		
 		// add HTML
 		var bibliography = style.previewCitationCluster(citation, [], [], "html");
@@ -474,8 +478,8 @@ var Zotero_File_Interface = new function() {
 	function _doBibliographyOptions(name, items) {
 		// make sure at least one item is not a standalone note or attachment
 		var haveRegularItem = false;
-		for each(var item in items) {
-			if (item.isRegularItem()) {
+		for(var item in items) {
+			if (items[item].isRegularItem()) {
 				haveRegularItem = true;
 				break;
 			}

@@ -279,8 +279,8 @@ Zotero.Attachments = new function(){
 				// Add to collections
 				if (parentCollectionIDs){
 					var ids = Zotero.flattenArguments(parentCollectionIDs);
-					for each(var id in ids){
-						var col = Zotero.Collections.get(id);
+					for(var id in ids){
+						var col = Zotero.Collections.get(ids[id]);
 						col.addItem(itemID);
 					}
 				}
@@ -459,8 +459,8 @@ Zotero.Attachments = new function(){
 		// Add to collections
 		if (parentCollectionIDs){
 			var ids = Zotero.flattenArguments(parentCollectionIDs);
-			for each(var id in ids){
-				var col = Zotero.Collections.get(id);
+			for(var id in ids){
+				var col = Zotero.Collections.get(ids[id]);
 				col.addItem(itemID);
 			}
 		}
@@ -638,8 +638,8 @@ Zotero.Attachments = new function(){
 			// Add to collections
 			if (parentCollectionIDs){
 				var ids = Zotero.flattenArguments(parentCollectionIDs);
-				for each(var id in ids){
-					var col = Zotero.Collections.get(id);
+				for(var id in ids){
+					var col = Zotero.Collections.get(ids[id]);
 					col.addItem(itemID);
 				}
 			}
@@ -757,8 +757,8 @@ Zotero.Attachments = new function(){
 					// Add to collections
 					if (parentCollectionIDs){
 						var ids = Zotero.flattenArguments(parentCollectionIDs);
-						for each(var id in ids){
-							var col = Zotero.Collections.get(id);
+						for(var id in ids){
+							var col = Zotero.Collections.get(ids[id]);
 							col.addItem(itemID);
 						}
 					}

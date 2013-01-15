@@ -207,7 +207,8 @@ function populateOpenURLResolvers() {
 	
 	openURLResolvers = Zotero.OpenURL.discoverResolvers();
 	var i = 0;
-	for each(var r in openURLResolvers) {
+	for(var p in openURLResolvers) {
+		var r = openURLResolvers[p];
 		openURLMenu.insertItemAt(i, r.name);
 		if (r.url == Zotero.Prefs.get('openURL.resolver') && r.version == Zotero.Prefs.get('openURL.version')) {
 			openURLMenu.selectedIndex = i;
@@ -624,7 +625,8 @@ function buildQuickCopyFormatDropDown(menulist, contentType, currentFormat) {
 	
 	// add styles to list
 	var styles = Zotero.Styles.getVisible();
-	for each(var style in styles) {
+	for(var p in styles) {
+		var style = styles[p];
 		var baseVal = 'bibliography=' + style.styleID;
 		var val = 'bibliography' + (contentType == 'html' ? '/html' : '') + '=' + style.styleID;
 		var itemNode = document.createElement("menuitem");
@@ -1669,7 +1671,8 @@ function refreshStylesList(cslID) {
 	
 	var selectIndex = false;
 	var i = 0;
-	for each(var style in styles) {
+	for(var p in styles) {
+		var style = styles[p];
 		var treeitem = document.createElement('treeitem');
 		var treerow = document.createElement('treerow');
 		var titleCell = document.createElement('treecell');

@@ -26,9 +26,9 @@
 		
 		setup : function (ed) {
 			var commands = ["Cut", "Copy", "Paste"];
-			for each(var command in commands) {
-				let cmd = command;
-				ed.addCommand(command, function (ui, value) {
+			for(var command in commands) {
+				let cmd = commands[command];
+				ed.addCommand(cmd, function (ui, value) {
 					zoteroExecCommand(ed.getDoc(), cmd, ui, value);
 				});
 			}

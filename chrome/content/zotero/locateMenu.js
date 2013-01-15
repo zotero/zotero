@@ -72,7 +72,8 @@ var Zotero_LocateMenu = new function() {
 		}
 		
 		if(installableLocateEngines.length) {
-			for each(var locateEngine in installableLocateEngines) {
+			for(var p in installableLocateEngines) {
+				var locateEngine = installableLocateEngines[p];
 				var menuitem = document.createElement("menuitem");
 				menuitem.setAttribute("label", locateEngine.label);
 				menuitem.setAttribute("class", "menuitem-iconic");
@@ -146,10 +147,10 @@ var Zotero_LocateMenu = new function() {
 		var optionsToShow = {};
 		
 		// check which view options are available
-		for each(var item in selectedItems) {
+		for(var item in selectedItems) {
 			for(var viewOption in ViewOptions) {
 				if(!optionsToShow[viewOption]) {
-					optionsToShow[viewOption] = ViewOptions[viewOption].canHandleItem(item);
+					optionsToShow[viewOption] = ViewOptions[viewOption].canHandleItem(selectedItems[item]);
 				}
 			}
 		}
@@ -171,7 +172,7 @@ var Zotero_LocateMenu = new function() {
 		}
 		
 		if(addExtraOptions) {
-			for each(var viewOption in [key for(key in optionsToShow) if(key[0] === "_")]) {
+			for(var viewOption in optionsToShow) {
 				if(viewOption[0] !== "_" || !optionsToShow[viewOption]) continue;
 				locateMenu.insertBefore(_addViewOption(selectedItems, viewOption.substr(1),
 					ViewOptions[viewOption], showIcons), lastNode);
@@ -191,10 +192,11 @@ var Zotero_LocateMenu = new function() {
 		var availableEngines = [];
 		
 		// check which engines can translate an item
-		for each(var engine in customEngines) {
+		for(var p in customEngines) {
+			var engine = customEngines[p];
 			// require a submission for at least one selected item
-			for each(var item in selectedItems) {
-				if(engine.getItemSubmission(item)) {
+			for(var item in selectedItems) {
+				if(engine.getItemSubmission(selectedItems[item])) {
 					availableEngines.push(engine);
 					break;
 				}
@@ -216,7 +218,8 @@ var Zotero_LocateMenu = new function() {
 			locateFn = this.locateItem;
 		}
 		
-		for each(var engine in engines) {
+		for(var p in engines) {
+			var engine = engines[p];
 			var menuitem = _createMenuItem(engine.name, null, engine.description);
 			menuitem.setAttribute("class", "menuitem-iconic");
 			menuitem.setAttribute("image", engine.icon);
@@ -245,7 +248,8 @@ var Zotero_LocateMenu = new function() {
 		if(!window.Zotero_Browser || !window.Zotero_Browser.tabbrowser) return locateEngines;
 		
 		var links = Zotero_Browser.tabbrowser.selectedBrowser.contentDocument.getElementsByTagName("link");
-		for each(var link in links) {
+		for(var p in links) {
+			var link = links[p]
 			if(!link.getAttribute) continue;
 			var rel = link.getAttribute("rel");
 			if(rel && rel === "search") {
@@ -286,8 +290,8 @@ var Zotero_LocateMenu = new function() {
 		
 		var urls = [];
 		var postDatas = [];
-		for each(var item in selectedItems) {
-			var submission = selectedEngine.getItemSubmission(item);
+		for(var item in selectedItems) {
+			var submission = selectedEngine.getItemSubmission(selectedItems[item]);
 			if(submission) {
 				urls.push(submission.uri.spec);
 				postDatas.push(submission.postData);
@@ -346,8 +350,8 @@ var Zotero_LocateMenu = new function() {
 		
 		this.handleItems = function(items, event) {
 			var attachments = [];
-			for each(var item in items) {
-				var attachment = _getFirstAttachmentWithMIMEType(item, this._mimeTypes);
+			for(var item in items) {
+				var attachment = _getFirstAttachmentWithMIMEType(items[item], this._mimeTypes);
 				if(attachment) attachments.push(attachment.id);
 			}
 			
@@ -356,7 +360,8 @@ var Zotero_LocateMenu = new function() {
 		
 		function _getFirstAttachmentWithMIMEType(item, mimeTypes) {
 			var attachments = (item.isAttachment() ? [item] : Zotero.Items.get(item.getBestAttachments()));
-			for each(var attachment in attachments) {
+			for(var p in attachments) {
+				var attachment = attachments[p];
 				if(mimeTypes.indexOf(attachment.attachmentMIMEType) !== -1
 					&& attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) return attachment;
 			}
@@ -374,8 +379,12 @@ var Zotero_LocateMenu = new function() {
 		this.canHandleItem = function(item) _getURL(item) !== false;
 		
 		this.handleItems = function(items, event) {
-			var urls = [_getURL(item) for each(item in items)];
-			ZoteroPane_Local.loadURI([url for each(url in urls) if(url)], event);
+			var urls = [];
+			for(var item in items) {
+				var url = _getURL(items[item]);
+				if(url) urls.push(url);
+			}
+			ZoteroPane_Local.loadURI(urls, event);
 		}
 		
 		function _getURL(item) {
@@ -393,7 +402,9 @@ var Zotero_LocateMenu = new function() {
 				var attachments = item.getAttachments();
 				if(attachments) {
 					// look through url fields for non-file:/// attachments
-					for each(var attachment in Zotero.Items.get(attachments)) {
+					attachments = Zotero.Items.get(attachments);
+					for(var p in attachments) {
+						var attachment = attachments[p];
 						var urlField = attachment.getField('url');
 						if(urlField) return urlField;
 					}
@@ -439,8 +450,8 @@ var Zotero_LocateMenu = new function() {
 		
 		this.handleItems = function(items, event) {
 			var attachments = [];
-			for each(var item in items) {
-				var attachment = _getFile(item);
+			for(var item in items) {
+				var attachment = _getFile(items[item]);
 				if(attachment) attachments.push(attachment.id);
 			}
 			
@@ -449,7 +460,8 @@ var Zotero_LocateMenu = new function() {
 		
 		function _getFile(item) {
 			var attachments = (item.isAttachment() ? [item] : Zotero.Items.get(item.getBestAttachments()));
-			for each(var attachment in attachments) {
+			for(var p in attachments) {
+				var attachment = attachments[p];
 				if(!ViewOptions.snapshot.canHandleItem(attachment)
 						&& !ViewOptions.pdf.canHandleItem(attachment)
 						&& attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) {
@@ -477,8 +489,8 @@ var Zotero_LocateMenu = new function() {
 		
 		this.handleItems = function(items, event) {
 			var attachments = [];
-			for each(var item in items) {
-				var attachment = _getBestNonNativeAttachment(item);
+			for(var item in items) {
+				var attachment = _getBestNonNativeAttachment(items[item]);
 				if(attachment) attachments.push(attachment.id);
 			}
 			
@@ -487,7 +499,8 @@ var Zotero_LocateMenu = new function() {
 		
 		function _getBestNonNativeAttachment(item) {
 			var attachments = (item.isAttachment() ? [item] : Zotero.Items.get(item.getBestAttachments()));
-			for each(var attachment in attachments) {
+			for(var p in attachments) {
+				var attachment = attachments[p];
 				if(attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) {
 					var file = attachment.getFile();
 					if(file) {
@@ -533,8 +546,8 @@ var Zotero_LocateMenu = new function() {
 		}
 		
 		this.handleItems = function(items, event) {
-			for each(var item in items) {
-				var attachment = _getBestFile(item);
+			for(var item in items) {
+				var attachment = _getBestFile(items[item]);
 				if(attachment) {
 					ZoteroPane_Local.showAttachmentInFilesystem(attachment.id);
 				}
@@ -561,7 +574,8 @@ var Zotero_LocateMenu = new function() {
 		this.canHandleItem = function(item) item.isRegularItem();
 		this.handleItems = function(items, event) {
 			var urls = [];
-			for each(var item in items) {
+			for(var p in items) {
+				var item = items[p];
 				if(!item.isRegularItem()) continue;
 				var url = Zotero.OpenURL.resolve(item);
 				if(url) urls.push(url);

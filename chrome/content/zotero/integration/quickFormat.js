@@ -79,7 +79,8 @@ var Zotero_QuickFormat = new function () {
 			var locators = Zotero.Cite.labels;
 			var menu = document.getElementById("locator-label");
 			var labelList = document.getElementById("locator-label-popup");
-			for each(var locator in locators) {
+			for(var p in locators) {
+				var locator = locators[p];
 				// TODO localize
 				var locatorLabel = locator[0].toUpperCase()+locator.substr(1);
 				
@@ -295,7 +296,12 @@ var Zotero_QuickFormat = new function () {
 					for(var i=0, iCount=citedItems.length; i<iCount; i++) {
 						// Generate a string to search for each item
 						var item = citedItems[i],
-							itemStr = [creator.ref.firstName+" "+creator.ref.lastName for each(creator in item.getCreators())];
+						itemStr = [];
+						var creators = item.getCreators();
+						for(var p in creators) {
+							var creator = creators[p];
+							itemStr.push(creator.ref.firstName+" "+creator.ref.lastName);
+						}
 						itemStr = itemStr.concat([item.getField("title"), item.getField("date", true, true).substr(0, 4)]).join(" ");
 						
 						// See if words match
@@ -388,8 +394,8 @@ var Zotero_QuickFormat = new function () {
 		// Also take into account items cited in this citation. This means that the sorting isn't
 		// exactly by # of items cited from each library, but maybe it's better this way.
 		_updateCitationObject();
-		for each(var citationItem in io.citation.citationItems) {
-			var citedItem = Zotero.Cite.getItem(citationItem.id);
+		for(var citationItem in io.citation.citationItems) {
+			var citedItem = Zotero.Cite.getItem(io.citation.citationItems[citationItem].id);
 			if(!citedItem.cslItemID) {
 				var libraryID = citedItem.libraryID ? citedItem.libraryID : 0;
 				if(libraryID in nCitedItemsFromLibrary) {
@@ -767,8 +773,9 @@ var Zotero_QuickFormat = new function () {
 			if(!panelFrameHeight) {
 				panelFrameHeight = referencePanel.boxObject.height - referencePanel.clientHeight;
 				var computedStyle = window.getComputedStyle(referenceBox, null);
-				for each(var attr in ["border-top-width", "border-bottom-width"]) {
-					var val = computedStyle.getPropertyValue(attr);
+				var ATTRIBUTES = ["border-top-width", "border-bottom-width"];
+				for(var attr in ATTRIBUTES) {
+					var val = computedStyle.getPropertyValue(ATTRIBUTES[attr]);
 					if(val) {
 						var m = pixelRe.exec(val);
 						if(m) panelFrameHeight += parseInt(m[1], 10);

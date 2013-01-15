@@ -441,8 +441,8 @@
 						pane.objectbox.clickable = true;
 						var fieldIDs = Zotero.ItemFields.getItemTypeFields(value);
 						var fieldNames = ['itemType'];
-						for each(var field in fieldIDs) {
-							fieldNames.push(Zotero.ItemFields.getName(field));
+						for(var field in fieldIDs) {
+							fieldNames.push(Zotero.ItemFields.getName(fieldIDs[field]));
 						}
 						otherPane.objectbox.clickableFields = fieldNames;
 						otherPane.objectbox.clickable = false;

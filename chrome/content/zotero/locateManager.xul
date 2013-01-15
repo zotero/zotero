@@ -151,7 +151,8 @@ To add a new preference:
 			// repopulate tree with available engines
 			var engines = Zotero.LocateManager.getEngines();
 			var i = 0;
-			for each(var engine in engines) {
+			for(var p in engines) {
+				var engine = engines[p];
 				var treeitem = document.createElement('treeitem');
 				var treerow = document.createElement('treerow');
 				var checkboxCell = document.createElement('treecell');
@@ -175,7 +176,8 @@ To add a new preference:
 			}
 			
 			// restore ranges
-			for each(var range in ranges) {
+			for(var p in ranges) {
+				var range = ranges[p];
 				if(range[1] <= engines.length-1) {
 					tree.view.selection.rangedSelect(range[0], range[1], true);
 				}
@@ -231,7 +233,8 @@ To add a new preference:
 				hidden = false;
 			}
 			
-			[engine.hidden = hidden for each(engine in Zotero.LocateManager.getEngines())];
+			var engines = Zotero.LocateManager.getEngines();
+			for(var engine in engines) engines[engine].hidden = hidden ;
 
 			refreshLocateEnginesList();
 		}

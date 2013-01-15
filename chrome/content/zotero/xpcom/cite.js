@@ -55,8 +55,8 @@ Zotero.Cite.System.retrieveItem = function(item) {
 	for(var variable in CSL_TEXT_MAPPINGS) {
 		var fields = CSL_TEXT_MAPPINGS[variable];
 		if(variable == "URL" && ignoreURL) continue;
-		for each(var field in fields) {
-			var value = zoteroItem.getField(field, false, true).toString();
+		for(var field in fields) {
+			var value = zoteroItem.getField(fields[field], false, true).toString();
 			if(value != "") {
 				// Strip enclosing quotes
 				if(value.match(Zotero.Cite.System._quotedRegexp)) {
@@ -71,7 +71,8 @@ Zotero.Cite.System.retrieveItem = function(item) {
 	// separate name variables
 	var authorID = Zotero.CreatorTypes.getPrimaryIDForType(zoteroItem.itemTypeID);
 	var creators = zoteroItem.getCreators();
-	for each(var creator in creators) {
+	for(var p in creators) {
+		var creator = creators[p];
 		if(creator.creatorTypeID == authorID) {
 			var creatorType = "author";
 		} else {
@@ -197,7 +198,13 @@ Zotero.Cite.getBibliographyFormatParameters = function(bib) {
 Zotero.Cite.makeFormattedBibliographyOrCitationList = function(style, items, format, asCitationList) {
 	var cslEngine = style.csl;
 	cslEngine.setOutputFormat(format);
-	cslEngine.updateItems([item.id for each(item in items)]);
+	var itemIDs = [];
+	var itemIdObjs = [];
+	for(var item in items) {
+		itemIDs.push(items[item].id);
+		itemIdObjs.push({"id": items[item].id});
+	}
+	cslEngine.updateItems(itemIDs);
 	
 	if(!asCitationList) {
 		var bibliography = Zotero.Cite.makeFormattedBibliography(cslEngine, format);
@@ -205,8 +212,7 @@ Zotero.Cite.makeFormattedBibliographyOrCitationList = function(style, items, for
 	}
 	
 	var styleClass = style.class;
-	var citations = [cslEngine.appendCitationCluster({"citationItems":[{"id":item.id}], "properties":{}}, true)[0][1]
-		for each(item in items)];
+	var citations = [cslEngine.appendCitationCluster({"citationItems":itemIdObjs, "properties":{}}, true)[0][1]];
 	
 	if(styleClass == "note") {
 		if(format == "html") {
@@ -259,9 +265,9 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 			output.push(bib[1][i]);
 			
 			// add COinS
-			for each(var itemID in bib[0].entry_ids[i]) {
+			for(var itemID in bib[0].entry_ids[i]) {
 				try {
-					var co = Zotero.OpenURL.createContextObject(Zotero.Items.get(itemID), "1.0");
+					var co = Zotero.OpenURL.createContextObject(Zotero.Items.get(bib[0].entry_ids[i][itemID]), "1.0");
 					if(!co) continue;
 					output.push('  <span class="Z3988" title="'+
 						co.replace("&", "&amp;", "g").replace("<", "&lt;", "g").replace(">", "&gt;", "g")+
@@ -330,7 +336,8 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 			var divs = xml..div.(@class == "csl-entry");
 			var num = divs.length();
 			var i = 0;
-			for each(var div in divs) {
+			for(var p in divs) {
+				var div = divs[p];
 				var first = i == 0;
 				var last = i == num - 1;
 				
@@ -352,7 +359,8 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 			var rightPadding = .5;
 			
 			// div.csl-left-margin
-			for each(var div in leftMarginDivs) {
+			for(var p in leftMarginDivs) {
+				var div = leftMarginDivs[p]
 				div.@style = "float: left; padding-right: " + rightPadding + "em;";
 				
 				// Right-align the labels if aligning second line, since it looks
@@ -410,7 +418,9 @@ Zotero.Cite.getItem = function(id) {
 	var slashIndex;
 	
 	if(id instanceof Array) {
-		return [Zotero.Cite.getItem(anId) for each(anId in id)];
+		var items = [];
+		for(var anId in id) items.push(Zotero.Cite.getItem(id[anId]));
+		return items;
 	} else if(typeof id === "string" && (slashIndex = id.indexOf("/")) !== -1) {		
 		var sessionID = id.substr(0, slashIndex),
 			session = Zotero.Integration.sessions[sessionID],
