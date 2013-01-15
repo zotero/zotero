@@ -528,7 +528,7 @@
 									&& !Zotero.Items.isPrimaryField(fieldName)
 									&& (Zotero.ItemFields.isFieldOfBase(Zotero.ItemFields.getID(fieldName), 'date')
 										// TEMP - filingDate
-										|| ['filingDate','priorityDate','publicationDate','originalDate','signingDate','openingDate','adoptionDate'].indexOf(fieldName) > -1)
+										|| ['filingDate','priorityDate','publicationDate','originalDate','signingDate','openingDate','adoptionDate','newsCaseDate'].indexOf(fieldName) > -1)
 									// TEMP - NSF
 									&& fieldName != 'dateSent') {
 								this.addDateRow(fieldNames[i], this.item.getField(fieldName, true), tabindex);
@@ -2106,7 +2106,7 @@
 						// Display the SQL date as a tooltip for date fields
 						// TEMP - filingDate
 						if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') 
-							|| ['filingDate','priorityDate','publicationDate','originalDate','signingDate','openingDate','adoptionDate'].indexOf(fieldName) > -1) {
+							|| ['filingDate','priorityDate','publicationDate','originalDate','signingDate','openingDate','adoptionDate','newsCaseDate'].indexOf(fieldName) > -1) {
 
 							valueElement.setAttribute('tooltiptext',
 								Zotero.Date.multipartToSQL(this.item.getField(fieldName, true)));

@@ -243,7 +243,7 @@ INSERT INTO itemTypes VALUES (1261,'gazette',NULL,1);           -- [ADDED]
 INSERT INTO itemTypes VALUES (1262,'treaty',NULL,1);            -- [ADDED]
 INSERT INTO itemTypes VALUES (1263,'regulation',NULL,1);        -- [ADDED]
 INSERT INTO itemTypes VALUES (1264,'classic',NULL,1);           -- [ADDED]
-INSERT INTO itemTypes VALUES (1265,'periodical',NULL,1);        -- [ADDED]
+-- INSERT INTO itemTypes VALUES (1265,'periodical',NULL,1);        -- [ADDED]
 
 INSERT INTO fields VALUES (1,'url',NULL);
 INSERT INTO fields VALUES (2,'rights',NULL);
@@ -472,7 +472,7 @@ INSERT INTO itemTypeFields VALUES (6, 10, NULL, 8);    -- pages
 INSERT INTO itemTypeFields VALUES (6, 87, NULL, 9);    -- language
 INSERT INTO itemTypeFields VALUES (6, 116, NULL, 10);  -- shortTitle
 INSERT INTO itemTypeFields VALUES (6, 1261, NULL, 11); -- jurisdiction        [ADDED]
-INSERT INTO itemTypeFields VALUES (6, 44, NULL, 12);   -- court
+INSERT INTO itemTypeFields VALUES (6, 44, NULL, 12);   -- court               [ADDED]
 INSERT INTO itemTypeFields VALUES (6, 1265, NULL, 13); -- newsCaseDate        [ADDED] (original-date)
 INSERT INTO itemTypeFields VALUES (6, 13, NULL, 14);   -- ISSN
 INSERT INTO itemTypeFields VALUES (6, 1, NULL, 15);    -- url

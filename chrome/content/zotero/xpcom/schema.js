@@ -3677,7 +3677,7 @@ Zotero.Schema = new function(){
                     typeFieldsMap["6"] = {
                         fieldInsert: {
                             "jurisdiction":1261,
-                            "original-date":96
+                            "original-date":1265
                         },
                         creatorInsert: {}
                     };

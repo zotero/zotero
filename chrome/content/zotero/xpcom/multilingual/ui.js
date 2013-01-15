@@ -16,7 +16,8 @@ Zotero.EXTENDED_TYPES = {
 Zotero.EXTENDED_FIELDS = {
 	"newspaperArticle": {
 		"jurisdiction":"jurisdiction",
-		"dateDecided":"original-date"
+		"newsCaseDate":"original-date",
+        "court":44
 	},
 	"bill": {
 		"jurisdiction":"jurisdiction",

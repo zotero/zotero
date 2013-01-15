@@ -4188,7 +4188,7 @@ Zotero.Sync.Server.Data = new function() {
 
         // Merge field content of an mlzsync1: prefix on the extra field
         // into the item
-        Zotero.Sync.Server.Data(item,data,extra,changedFields);
+        var obj = Zotero.Sync.Server.Data.decodeMlzFields(item,data,extra,changedFields);
 
 		var previousFields = item.getUsedFields(true);
 		for each(var field in previousFields) {
