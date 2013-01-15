@@ -56,7 +56,6 @@ const xpcomFilesLocal = [
 	'annotate',
 	'attachments',
 	'cite',
-	'commons',
 	'cookieSandbox',
 	'data_access',
 	'data/dataObjects',

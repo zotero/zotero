@@ -182,31 +182,6 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 		}
 	}
 	
-	if (this.hideSources.indexOf('commons') == -1 && Zotero.Commons.enabled) {
-		this._showRow(new Zotero.ItemGroup('separator', false));
-		var header = {
-			id: "commons-header",
-			label: "Commons", // TODO: localize
-			expand: function (buckets) {
-				var show = function (buckets) {
-					for each(var bucket in buckets) {
-						self._showRow(new Zotero.ItemGroup('bucket', bucket), 1);
-					}
-				}
-				if (buckets) {
-					show(buckets);
-				}
-				else {
-					Zotero.Commons.getBuckets(show);
-				}
-			}
-		};
-		this._showRow(new Zotero.ItemGroup('header', header), null, null, commonsExpand);
-		if (commonsExpand) {
-			header.expand();
-		}
-	}
-	
 	try {
 		this._refreshHashMap();
 	}

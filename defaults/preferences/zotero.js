@@ -119,11 +119,6 @@ pref("extensions.zotero.httpServer.port", 23119);	// ascii "ZO"
 // Zeroconf
 pref("extensions.zotero.zeroconf.server.enabled", false);
 
-// Zotero Commons
-pref("extensions.zotero.commons.enabled", false);
-pref("extensions.zotero.commons.accessKey", '');
-pref("extensions.zotero.commons.secretKey", '');
-
 // Annotation settings
 pref("extensions.zotero.annotations.warnOnClose", true);
 

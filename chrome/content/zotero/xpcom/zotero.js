@@ -2069,21 +2069,7 @@ Zotero.Prefs = new function(){
 			return;
 		}
 		
-		var xml = new XML(str);
-		
-		var commonsEnable = xml.setting.(@id == 'commons-enable');
-		if (commonsEnable == 'true') {
-			Zotero.Commons.enabled = true;
-			Zotero.Commons.accessKey = xml.setting.(@id == 'commons-accessKey').toString();
-			Zotero.Commons.secretKey = xml.setting.(@id == 'commons-secretKey').toString();
-		}
-		else if (commonsEnable == 'false') {
-			Zotero.Commons.enabled = false;
-			Zotero.Commons.accessKey = '';
-			Zotero.Commons.secretKey = '';
-		}
-		// This is kind of a hack
-		Zotero.Notifier.trigger('refresh', 'collection', []);
+		// TODO: parse settings XML
 	}
 	
 	
