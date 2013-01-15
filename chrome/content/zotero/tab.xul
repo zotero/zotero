@@ -25,7 +25,7 @@
 		xmlns:xhtml="http://www.w3.org/1999/xhtml" disablefastfind="true"
 		flex="1"> 
 	
-	<script type="application/javascript" src="tab.js"/>
+	<script type="application/javascript;version=1.8" src="tab.js"/>
 	<script type="application/javascript"
 		src="chrome://global/content/contentAreaUtils.js"/>
 	<xhtml:link rel="shortcut icon"

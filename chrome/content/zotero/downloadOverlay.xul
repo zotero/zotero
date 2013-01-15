@@ -35,8 +35,8 @@
 <overlay id="zotero-download-overlay" 
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
-	<script type="application/x-javascript" src="include.js"/>
-	<script type="application/x-javascript" src="downloadOverlay.js"/>
+	<script src="include.js" type="application/javascript;version=1.8"/>
+	<script src="downloadOverlay.js" type="application/javascript;version=1.8"/>
 	<radiogroup id="mode">
 		<vbox id="zotero-container" flex="1" hidden="true">
 			<radio id="zotero-radio" label="&zotero.downloadManager.label;" disabled="true"/>

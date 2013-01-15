@@ -14,10 +14,10 @@
 	id="zotero-export-options"
 	onload="Zotero_File_Interface_Export.init()">
 	
-	<script src="include.js"/>
-	<script src="charsetMenu.js"/>
-	<script src="exportOptions.js"/>
-	<script type="application/javascript">
+	<script src="include.js" type="application/javascript;version=1.8"/>
+	<script src="charsetMenu.js" type="application/javascript;version=1.8"/>
+	<script src="exportOptions.js" type="application/javascript;version=1.8"/>
+	<script type="application/javascript;version=1.8">
 	<![CDATA[
 		var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
 		observerService.notifyObservers(null, "charsetmenu-selected", "other");

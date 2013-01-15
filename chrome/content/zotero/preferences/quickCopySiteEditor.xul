@@ -34,10 +34,10 @@
 	onload="sizeToContent();"
 	ondialogaccept="Zotero_QuickCopySiteEditor.onAccept();">
 	
-	<script src="chrome://zotero/content/include.js"/>
-	<script src="preferences.js"/>
+	<script src="chrome://zotero/content/include.js" type="application/javascript;version=1.8"/>
+	<script src="preferences.js" type="application/javascript;version=1.8"/>
 	
-	<script>
+	<script type="application/javascript;version=1.8">
 	<![CDATA[
 		var Zotero_QuickCopySiteEditor = new function () {
 			this.onAccept = onAccept;

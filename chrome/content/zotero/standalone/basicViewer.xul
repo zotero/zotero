@@ -51,8 +51,8 @@
 	<script type="application/javascript" src="chrome://global/content/contentAreaUtils.js"/>
 	<script type="application/javascript" src="chrome://global/content/printUtils.js"/>
 	<script type="application/javascript" src="chrome://global/content/inlineSpellCheckUI.js"/>
-	<script type="application/javascript" src="chrome://zotero/content/include.js"/>
-	<script type="application/javascript" src="basicViewer.js"/>
+	<script type="application/javascript;version=1.8" src="chrome://zotero/content/include.js"/>
+	<script type="application/javascript;version=1.8" src="basicViewer.js"/>
 	
 	<commandset id="mainCommandSet">
 		<!--FILE-->

@@ -4,6 +4,6 @@
 	
 	<textbox id="header-search" hidden="true"/>
 	<page id="addons-page">
-		<script type="application/javascript" src="chrome://zotero/content/standalone/extensionsOverlay.js"/>
+		<script type="application/javascript;version=1.8" src="chrome://zotero/content/standalone/extensionsOverlay.js"/>
 	</page>
 </overlay>

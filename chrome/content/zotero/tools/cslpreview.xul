@@ -33,9 +33,9 @@
 	onload="Zotero_CSL_Preview.init();"
 	title="Zotero Preview pane">
 	
-	<script src="chrome://zotero/content/include.js"/>
+	<script src="chrome://zotero/content/include.js" type="application/javascript;version=1.8"/>
 	
-	<script>
+	<script type="application/javascript;version=1.8">
 	<![CDATA[
 		default xml namespace = "http://purl.org/net/xbiblio/csl";
 

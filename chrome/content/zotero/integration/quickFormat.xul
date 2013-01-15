@@ -41,7 +41,7 @@
 	onkeypress="Zotero_QuickFormat.onKeyPress(event)"
 	onunload="Zotero_QuickFormat.onUnload()">
 	
-	<script src="../include.js"/>
+	<script src="../include.js" type="application/javascript;version=1.8"/>
 	<script src="windowDraggingUtils.js" type="text/javascript;version=1.8"/>
 	<script src="quickFormat.js" type="text/javascript;version=1.8"/>
 	

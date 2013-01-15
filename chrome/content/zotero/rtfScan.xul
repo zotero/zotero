@@ -8,9 +8,9 @@
 	title="&zotero.rtfScan.title;" width="700" height="550"
 	id="zotero-rtfScan">
 	
-	<script src="include.js"/>
-	<script src="bibliography.js"/>
-	<script src="rtfScan.js"/>
+	<script src="include.js" type="application/javascript;version=1.8"/>
+	<script src="bibliography.js" type="application/javascript;version=1.8"/>
+	<script src="rtfScan.js" type="application/javascript;version=1.8"/>
 	
 	<wizardpage id="intro-page" label="&zotero.rtfScan.introPage.label;"
 	onpageshow="Zotero_RTFScan.introPageShowing()"

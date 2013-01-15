@@ -95,8 +95,8 @@ To add a new preference:
 		</groupbox>
 	</prefpane>
 	
-	<script src="chrome://zotero/content/include.js"></script>
-	<script type="application/javascript">
+	<script src="chrome://zotero/content/include.js" type="application/javascript;version=1.8"></script>
+	<script type="application/javascript;version=1.8">
 	<![CDATA[
 		function treeClick(event) {
 			// We only care about primary button double and triple clicks

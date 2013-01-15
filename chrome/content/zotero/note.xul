@@ -13,9 +13,9 @@
 	persist="screenX screenY width height"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-	<script src="include.js"/>
-	<script src="itemPane.js"/>
-	<script src="note.js"/>
+	<script src="include.js" type="application/javascript;version=1.8"/>
+	<script src="itemPane.js" type="application/javascript;version=1.8"/>
+	<script src="note.js" type="application/javascript;version=1.8"/>
 
 	<keyset>
 		<key id="key_close" key="W" modifiers="accel" command="cmd_close"/>

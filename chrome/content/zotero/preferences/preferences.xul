@@ -832,13 +832,13 @@ To add a new preference:
 	
 	<!-- These mess up the prefwindow (more) if they come before the prefpanes
 	 https://bugzilla.mozilla.org/show_bug.cgi?id=296418 -->
-	<script src="chrome://zotero/content/include.js"></script>
-	<script src="chrome://zotero/content/charsetMenu.js"></script>
-	<script type="application/javascript">
+	<script src="chrome://zotero/content/include.js" type="application/javascript;version=1.8"></script>
+	<script src="chrome://zotero/content/charsetMenu.js" type="application/javascript;version=1.8"></script>
+	<script type="application/javascript;version=1.8">
 	<![CDATA[
 		var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
 		observerService.notifyObservers(null, "charsetmenu-selected", "other");
 	]]>
 	</script>
-	<script src="preferences.js"/>
+	<script src="preferences.js" type="application/javascript;version=1.8"/>
 </prefwindow>

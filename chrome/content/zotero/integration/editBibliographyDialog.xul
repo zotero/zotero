@@ -48,9 +48,9 @@
 	ondialogextra1="Zotero_Bibliography_Dialog.revert()"
 	ondialogextra2="Zotero_Bibliography_Dialog.revertAll()">
 	
-	<script src="../include.js"/>
-	<script src="../selectItemsDialog.js"/>
-	<script src="editBibliographyDialog.js"/>
+	<script src="../include.js" type="application/javascript;version=1.8"/>
+	<script src="../selectItemsDialog.js" type="application/javascript;version=1.8"/>
+	<script src="editBibliographyDialog.js" type="application/javascript;version=1.8"/>
 	
 	<vbox id="zotero-select-items-container" flex="1">
 		<vbox flex="1">

@@ -8,8 +8,8 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	style="padding:2em">
 	
-	<script src="../include.js"/>
-	<script src="modtime.js"/>
+	<script src="../include.js" type="application/javascript;version=1.8"/>
+	<script src="modtime.js" type="application/javascript;version=1.8"/>
 	
 	<box/>
 </window>
