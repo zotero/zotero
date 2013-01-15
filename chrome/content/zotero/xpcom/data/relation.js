@@ -105,7 +105,7 @@ Zotero.Relation.prototype._set = function (field, val) {
 Zotero.Relation.prototype.exists = function () {
 	if (this.id) {
 		var sql = "SELECT COUNT(*) FROM relations WHERE relationID=?";
-		return !!Zotero_DB::valueQuery(sql, this.id);
+		return !!Zotero.DB.valueQuery(sql, this.id);
 	}
 	
 	if (this.libraryID && this.subject && this.predicate && this.object) {
