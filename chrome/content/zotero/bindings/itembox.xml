@@ -1880,7 +1880,7 @@
 						var fields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
 						if (fields.indexOf(jurisdictionID) > -1) {
 							var itemType = Zotero.ItemTypes.getName(itemTypeID);
-							if (["report","journalArticle"].indexOf(itemType) === -1) {
+							if (["report","journalArticle","hearing"].indexOf(itemType) === -1) {
 								if (!this.item.getField(jurisdictionID)) {
 									var jurisdictionDefault = Zotero.Prefs.get("import.jurisdictionDefault");
 									var jurisdictionFallback = Zotero.Prefs.get("import.jurisdictionFallback");

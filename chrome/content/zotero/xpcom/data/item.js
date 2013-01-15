@@ -1111,14 +1111,19 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate, language
 			title += ']';
 		}
 	}
-	else if (itemTypeID == 16 || itemTypeID == 20) {
+	else if ([16,18,20,1261,1263].indexOf(itemTypeID) > -1) {
 		var strParts = [];
 		// Not needed, this mapping seems to be handled by higher layers.
 		//if (itemTypeID == 20) {
 		//	title = this.getField('nameOfAct');
 		//}
 		var volume = this.getField('volume');
-		var code = this.getField('code');
+        var code;
+        if (itemTypeID == 18) {
+		    code = this.getField('reporter');
+        } else {
+		    code = this.getField('code');
+        }
 		var section = this.getField('section');
 
 		if (title) {
@@ -5233,7 +5238,6 @@ Zotero.Item.prototype._loadCreators = function() {
 		};
 
 	}
-	
 	return true;
 }
 
@@ -5293,8 +5297,19 @@ Zotero.Item.prototype._loadItemData = function() {
 			this._itemData[fieldID] = false;
 		}
 	}
-	
+
 	this._itemDataLoaded = true;
+
+    if (this._itemData[22] && this._itemData[22].slice(0, 9) === 'mlzsync1:') {
+        var data = {itemTypeID:this._itemTypeID};
+        var obj = Zotero.Sync.Server.Data.decodeMlzFields(this,data,this._itemData[22],{});
+        if (obj) {
+            Zotero.Sync.Server.Data.removeMlzFieldDeletes(this,obj,itemTypeFields);
+            Zotero.Sync.Server.Data.decodeMlzCreators(this,obj,this._creators.length);
+            Zotero.Sync.Server.Data.removeMlzCreatorDeletes(this,obj);
+        }
+    }
+    this.mlzDecodeDataObject = obj;
 }
 
 

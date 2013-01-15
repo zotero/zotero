@@ -67,7 +67,7 @@ const CSL_TEXT_MAPPINGS = {
 	"version":["version"],
 	"section":["section","opus"],
 	"genre":["type","reign","supplementName","sessionType"],
-	"chapter-number":["session","meetingName"],
+	"chapter-number":["session","meetingNumber"],
 	"source":["libraryCatalog"],
 	"dimensions": ["artworkSize", "runningTime"], 
 	"medium":["medium", "system"],
@@ -129,7 +129,7 @@ const CSL_TYPE_MAPPINGS = {
 	'report':"report",
 	'bill':"bill",
 	'case':"legal_case",
-	'hearing':"bill",				// ??
+	'hearing':"hearing",				// ??
 	'patent':"patent",
 	'statute':"legislation",		// ??
 	'email':"personal_communication",
@@ -139,7 +139,7 @@ const CSL_TYPE_MAPPINGS = {
 	'forumPost':"post",
 	'audioRecording':"song",		// ??
 	'presentation':"speech",
-	'videoRecording':"motion_picture",
+	'videoRecording':"video",
 	'tvBroadcast':"broadcast",
 	'radioBroadcast':"broadcast",
 	'podcast':"song",			// ??

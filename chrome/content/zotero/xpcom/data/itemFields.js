@@ -95,23 +95,27 @@ Zotero.ItemFields = new function() {
 		}
 		
 		// Hack in alternate field labels for spoofed types
-		if (itemType == '1262' && field === 'date') {
+		if (itemType == '1262' && fieldName === 'date') {
 			// treaty
 			return Zotero.getString("itemFields.effectiveDate");
 		} else if (itemType == '1263' || itemType == '1261') {
 			// regulation or gazette
-			if (field === 'code') {
+			if (fieldName === 'code') {
 				return Zotero.getString("itemFields.reporter");
-			} else if (field === 'codeNumber') {
+			} else if (fieldName === 'codeNumber') {
 				return Zotero.getString("itemFields.volume");
 			}
 		} else if (itemType == '16') {
-            if (field === 'code') {
+            if (fieldName === 'code') {
                 return Zotero.getString("itemFields.reporter");
-            } else if (field === 'codeVolume') {
+            } else if (fieldName === 'codeVolume') {
                 return Zotero.getString("itemFields.volume");
-            } else if (field === 'codePages') {
+            } else if (fieldName === 'codePages') {
                 return Zotero.getString("itemFields.pages");
+            }
+        } else if (itemType == '18') {
+            if (fieldName === 'documentNumber') {
+                return Zotero.getString("itemFields.billOrDocumentNumber");
             }
         }
 

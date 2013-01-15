@@ -2517,7 +2517,11 @@ Zotero.Sync.Server.Data = new function() {
 	this.xmlToSearch = xmlToSearch;
 	this.tagToXML = tagToXML;
 	this.xmlToTag = xmlToTag;
-	
+    this.decodeMlzFields = decodeMlzFields;
+    this.removeMlzFieldDeletes = removeMlzFieldDeletes;
+    this.decodeMlzCreators = decodeMlzCreators;
+    this.removeMlzCreatorDeletes = removeMlzCreatorDeletes;
+
 	var _noMergeTypes = ['search'];
 	
 	default xml namespace = '';
@@ -4182,56 +4186,9 @@ Zotero.Sync.Server.Data = new function() {
 			changedFields[fieldName] = true;
 		}
 
-        // Unserialize data stored as JSON on the extra field, and
-        // attach to the object before delivery to Zotero.
-        var obj = false;
-		var itemTypeID = false;
-        if (extra) {
-            var m = extra.match(/^mlzsync1:([0-9]{4})/);
-            if (m) {
-                var offset = parseInt(m[1],10);
-                objstr = extra.slice(13,offset+13);
-                if (objstr) {
-                    try {
-                        obj = JSON.parse(objstr);
-						// Save type ID for comparison
-						itemTypeID = Zotero.ItemTypes.getID(obj.type);
-                    } catch (e) {
-                        Zotero.debug("Multilingual sync: Parse error on "+objstr);
-                    }
-                }
-            }
-        }
-        if (obj && itemTypeID === data.itemTypeID) {
-			if (obj.xtype) {
-				xItemTypeID = Zotero.ItemTypes.getID(obj.xtype);
-				if (xItemTypeID) {
-					// Type already set on item, use changeToType() method
-					data.itemTypeID = xItemTypeID;
-					item.setType(xItemTypeID);
-				}
-			}
-            if (obj.extrafields) {
-                for (var fieldName in obj.extrafields) {
-			        item.setField(fieldName, obj.extrafields[fieldName]);
-			        changedFields[fieldName] = true;
-                }
-            }
-            if (obj.multifields) {
-                for (var fieldName in obj.multifields._keys) {
-                    for (var lang in obj.multifields._keys[fieldName]) {
-                        item.setField(fieldName, obj.multifields._keys[fieldName][lang], false, lang);
-                    }
-                }
-                // Reset lang of headline fields
-                item.multi.main = {};
-                for (var fieldName in obj.multifields.main) {
-                    item.setField(fieldName, item.getField(fieldName), false, obj.multifields.main[fieldName], true);
-                }
-            }
-            item.setField("extra", extra.slice(offset+13));
-			changedFields.extra = true;
-        }
+        // Merge field content of an mlzsync1: prefix on the extra field
+        // into the item
+        Zotero.Sync.Server.Data(item,data,extra,changedFields);
 
 		var previousFields = item.getUsedFields(true);
 		for each(var field in previousFields) {
@@ -4247,13 +4204,7 @@ Zotero.Sync.Server.Data = new function() {
         // Remove multifields that are not present in the sync
         // (but only if there is some evidence that multilingual is being used -- if not,
         // leave multilingual fields in place for safety)
-        for each(var field in previousFields) {
-            for (var langTag in item.multi._keys[field]) {
-                if (!obj || !obj.multifields || !obj.multifields._keys[data.fieldName] || !obj.multifields._keys[data.fieldName][data.languageTag]) {
-                    item.setField(data.fieldName,false,false,data.languageTag);
-                }
-            }
-        }
+        Zotero.Sync.Server.Data.removeMlzFieldDeletes(item,obj,previousFields);
 		
 		// Deleted item flag
 		var deleted = xmlItem.@deleted.toString();
@@ -4286,6 +4237,127 @@ Zotero.Sync.Server.Data = new function() {
 			i++;
             pos = i;
 		}
+
+        // Merge creator content of an mlzsync1: prefix on the extra field
+        // into the item
+        Zotero.Sync.Server.Data.decodeMlzCreators(item,obj,pos);
+        Zotero.Sync.Server.Data.removeMlzCreatorDeletes(item,obj);
+
+		// Remove item's remaining creators not in XML
+		var numCreators = item.numCreators();
+		var rem = numCreators - i;
+		for (var j=0; j<rem; j++) {
+			// Keep removing last creator
+			item.removeCreator(i);
+		}
+		
+		// Both notes and attachments might have parents and notes
+		if (item.isNote() || item.isAttachment()) {
+			var sourceItemKey = xmlItem.@sourceItem.toString();
+			item.setSourceKey(sourceItemKey ? sourceItemKey : false);
+			item.setNote(xmlItem.note.toString());
+		}
+		
+		// Attachment metadata
+		if (item.isAttachment()) {
+			item.attachmentLinkMode = parseInt(xmlItem.@linkMode);
+			item.attachmentMIMEType = xmlItem.@mimeType.toString();
+			item.attachmentCharset = xmlItem.@charset.toString();
+			if (item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) { 
+				item.attachmentPath = xmlItem.path.toString();
+			}
+		}
+		
+		// Related items
+		var related = xmlItem.related.toString();
+		var relatedIDs = [];
+		if (related) {
+			related = related.split(' ');
+			for each(var key in related) {
+				var relItem = Zotero.Items.getByLibraryAndKey(item.libraryID, key);
+				if (!relItem) {
+					var msg = "Related item " + item.libraryID + "/" + key
+						+ " doesn't exist in Zotero.Sync.Server.Data.xmlToItem()";
+					var e = new Zotero.Error(msg, "MISSING_OBJECT");
+					throw (e);
+				}
+				relatedIDs.push(relItem.id);
+			}
+		}
+		item.relatedItems = relatedIDs;
+		return item;
+	}
+
+    function decodeMlzFields (item,primaryFields,extra,changedFields) {
+        // Unserialize data stored as JSON on the extra field, and
+        // attach to the object before delivery to Zotero.
+        var obj = false;
+		var itemTypeID = false;
+        if (extra) {
+            var m = extra.match(/^mlzsync1:([0-9]{4})/);
+            if (m) {
+                var offset = parseInt(m[1],10);
+                objstr = extra.slice(13,offset+13);
+                if (objstr) {
+                    try {
+                        obj = JSON.parse(objstr);
+						// Save type ID for comparison
+						itemTypeID = Zotero.ItemTypes.getID(obj.type);
+                    } catch (e) {
+                        Zotero.debug("Multilingual sync: Parse error on "+objstr);
+                    }
+                }
+            }
+        }
+        if (obj && itemTypeID === primaryFields.itemTypeID) {
+			if (obj.xtype) {
+				xItemTypeID = Zotero.ItemTypes.getID(obj.xtype);
+				if (xItemTypeID) {
+					// Type already set on item, use changeToType() method
+					primaryFields.itemTypeID = xItemTypeID;
+					item.setType(xItemTypeID);
+				}
+			}
+            if (obj.extrafields) {
+                for (var fieldName in obj.extrafields) {
+			        item.setField(fieldName, obj.extrafields[fieldName]);
+			        changedFields[fieldName] = true;
+                }
+            }
+            if (obj.multifields) {
+                for (var fieldName in obj.multifields._keys) {
+                    for (var lang in obj.multifields._keys[fieldName]) {
+                        item.setField(fieldName, obj.multifields._keys[fieldName][lang], false, lang);
+                    }
+                }
+                // Reset lang of headline fields
+                item.multi.main = {};
+                for (var fieldName in obj.multifields.main) {
+                    item.setField(fieldName, item.getField(fieldName), false, obj.multifields.main[fieldName], true);
+                }
+            }
+            item.setField("extra", extra.slice(offset+13));
+			changedFields.extra = true;
+        }
+        // Not used it sync, but used in item.js when converting
+        // pre-synced records
+        return obj;
+    }
+
+    function removeMlzFieldDeletes(item,obj,previousFields) {
+        // Remove multifields that are not present in the sync
+        // (but only if there is some evidence that multilingual is being used -- if not,
+        // leave multilingual fields in place for safety)
+        for each(var field in previousFields) {
+            for (var langTag in item.multi._keys[field]) {
+                if (!obj || !obj.multifields || !obj.multifields._keys[data.fieldName] || !obj.multifields._keys[data.fieldName][data.languageTag]) {
+                    item.setField(data.fieldName,false,false,data.languageTag);
+                }
+            }
+        }
+    }
+
+    function decodeMlzCreators (item,obj,pos) {
 		// Cast and set extracreators
         if (obj && obj.extracreators) {
             for (var i=0,ilen=obj.extracreators.length; i<ilen; i+=1) {
@@ -4333,6 +4405,9 @@ Zotero.Sync.Server.Data = new function() {
                 }
             }
         }
+    }
+
+	function removeMlzCreatorDeletes(item,obj) {
         // Remove multicreators that are not present in the sync
         var creators = item.getCreators();
         for (var i=0,ilen=creators.length; i<ilen; i+=1) {
@@ -4343,53 +4418,7 @@ Zotero.Sync.Server.Data = new function() {
                 }
             }
         }
-
-
-		// Remove item's remaining creators not in XML
-		var numCreators = item.numCreators();
-		var rem = numCreators - i;
-		for (var j=0; j<rem; j++) {
-			// Keep removing last creator
-			item.removeCreator(i);
-		}
-		
-		// Both notes and attachments might have parents and notes
-		if (item.isNote() || item.isAttachment()) {
-			var sourceItemKey = xmlItem.@sourceItem.toString();
-			item.setSourceKey(sourceItemKey ? sourceItemKey : false);
-			item.setNote(xmlItem.note.toString());
-		}
-		
-		// Attachment metadata
-		if (item.isAttachment()) {
-			item.attachmentLinkMode = parseInt(xmlItem.@linkMode);
-			item.attachmentMIMEType = xmlItem.@mimeType.toString();
-			item.attachmentCharset = xmlItem.@charset.toString();
-			if (item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) { 
-				item.attachmentPath = xmlItem.path.toString();
-			}
-		}
-		
-		// Related items
-		var related = xmlItem.related.toString();
-		var relatedIDs = [];
-		if (related) {
-			related = related.split(' ');
-			for each(var key in related) {
-				var relItem = Zotero.Items.getByLibraryAndKey(item.libraryID, key);
-				if (!relItem) {
-					var msg = "Related item " + item.libraryID + "/" + key
-						+ " doesn't exist in Zotero.Sync.Server.Data.xmlToItem()";
-					var e = new Zotero.Error(msg, "MISSING_OBJECT");
-					throw (e);
-				}
-				relatedIDs.push(relItem.id);
-			}
-		}
-		item.relatedItems = relatedIDs;
-		return item;
-	}
-	
+    }
 	
 	function removeMissingRelatedItems(xmlNode) {
 		var libraryID = parseInt(xmlNode.@libraryID);

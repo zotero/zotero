@@ -451,7 +451,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		var jurisdictionID = Zotero.ItemFields.getID('jurisdiction');
 		var fields = Zotero.ItemFields.getItemTypeFields(typeID);
 		if (fields.indexOf(jurisdictionID) > -1) {
-			if (["report","journalArticle"].indexOf(item.itemType) === -1) {
+			if (["report","journalArticle","hearing"].indexOf(item.itemType) === -1) {
 				if (!newItem.getField(jurisdictionID)) {
 					var jurisdictionDefault = Zotero.Prefs.get("import.jurisdictionDefault");
 					var jurisdictionFallback = Zotero.Prefs.get("import.jurisdictionFallback");

@@ -3503,12 +3503,12 @@ Zotero.Schema = new function(){
                         creatorRemove:[3,5]
                     };
                     typeMap["periodical"] = {
-                        newItemTypeID:1265,
+                        newItemTypeID:2,
                         oldItemTypeID:2,
                         fieldRemap:{},
-                        fieldRemove:[3,4,6,7,11,30,45,118],
+                        fieldRemove:[],
                         creatorRemap:{},
-                        creatorRemove:[5]
+                        creatorRemove:[]
                             };
                     typeMap["treaty"] = {
                         newItemTypeID:1262,
@@ -3653,7 +3653,7 @@ Zotero.Schema = new function(){
                             "genre":1264,
                             "archive_location":19,
                             "container-title":43,
-                            "chapter-number":75
+                            "chapter-number":1275
                         },
                         creatorInsert: {}
                     };

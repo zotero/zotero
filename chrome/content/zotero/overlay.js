@@ -1,7 +1,7 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2009 Center for History and New Media
+    Copyright © 2009 Center for History and New dia
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
     

@@ -10,7 +10,6 @@ Zotero.EXTENDED_TYPES = {
 	"gazette":"statute",
 	"regulation":"statute",
 	"classic":"manuscript",
-	"periodical":"document",
 	"treaty":"document"
 }
 
