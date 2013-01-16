@@ -873,14 +873,15 @@ INSERT INTO itemTypeFields VALUES (28, 77, NULL, 10);
 INSERT INTO itemTypeFields VALUES (28, 87, NULL, 11);
 INSERT INTO itemTypeFields VALUES (28, 11, NULL, 12);
 INSERT INTO itemTypeFields VALUES (28, 116, NULL, 13);
-INSERT INTO itemTypeFields VALUES (28, 1, NULL, 14);
-INSERT INTO itemTypeFields VALUES (28, 27, NULL, 15);
-INSERT INTO itemTypeFields VALUES (28, 123, NULL, 16);
-INSERT INTO itemTypeFields VALUES (28, 19, NULL, 17);
-INSERT INTO itemTypeFields VALUES (28, 62, NULL, 18);
-INSERT INTO itemTypeFields VALUES (28, 18, NULL, 19);
-INSERT INTO itemTypeFields VALUES (28, 2, NULL, 20);
-INSERT INTO itemTypeFields VALUES (28, 22, NULL, 21);
+INSERT INTO itemTypeFields VALUES (28, 91, NULL, 14);
+INSERT INTO itemTypeFields VALUES (28, 1, NULL, 15);
+INSERT INTO itemTypeFields VALUES (28, 27, NULL, 16);
+INSERT INTO itemTypeFields VALUES (28, 123, NULL, 17);
+INSERT INTO itemTypeFields VALUES (28, 19, NULL, 18);
+INSERT INTO itemTypeFields VALUES (28, 62, NULL, 19);
+INSERT INTO itemTypeFields VALUES (28, 18, NULL, 20);
+INSERT INTO itemTypeFields VALUES (28, 2, NULL, 21);
+INSERT INTO itemTypeFields VALUES (28, 22, NULL, 22);
 
 -- tvBroadcast
 INSERT INTO itemTypeFields VALUES (29, 110, NULL, 1);  -- title
@@ -1245,6 +1246,7 @@ INSERT INTO creatorTypes VALUES(26, "podcaster");
 INSERT INTO creatorTypes VALUES(27, "reviewedAuthor");
 INSERT INTO creatorTypes VALUES(28, "cosponsor");
 INSERT INTO creatorTypes VALUES(29, "bookAuthor");
+INSERT INTO creatorTypes VALUES(1261, "testimonyBy");
 
 INSERT INTO itemTypeCreatorTypes VALUES(2,1,1);
 INSERT INTO itemTypeCreatorTypes VALUES(2,2,0);
@@ -1301,7 +1303,8 @@ INSERT INTO itemTypeCreatorTypes VALUES(16,2,0);
 INSERT INTO itemTypeCreatorTypes VALUES(17,1,1);
 INSERT INTO itemTypeCreatorTypes VALUES(17,13,0);
 INSERT INTO itemTypeCreatorTypes VALUES(17,2,0);
-INSERT INTO itemTypeCreatorTypes VALUES(18,2,1);
+INSERT INTO itemTypeCreatorTypes VALUES(18,1261,1);
+INSERT INTO itemTypeCreatorTypes VALUES(18,2,0);
 INSERT INTO itemTypeCreatorTypes VALUES(19,14,1);
 INSERT INTO itemTypeCreatorTypes VALUES(19,2,0);
 INSERT INTO itemTypeCreatorTypes VALUES(19,15,0);
