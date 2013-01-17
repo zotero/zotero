@@ -218,10 +218,18 @@ Zotero.setupLocale = function(document) {
 
 /////
 
-		var availableLocales = toolkitChromeReg.getLocalesForPackage("zotero");
+		// XXXX This is wrong. This should be a list of actually available CSL
+		// locales derived from files under chrome/content/zotero/locale/csl,
+        // but I have no idea how to obtain that list from Firefox.
+
+		//var availableLocales = toolkitChromeReg.getLocalesForPackage("zotero");
+		var availableLocales = [];
+        for (var key in Zotero.CiteProc.CSL.LANG_BASES) {
+            availableLocales.push(key);
+        }
 		var selectedLocale = Zotero.Prefs.get('export.bibliographyLocale');
-		if (!selectedLocale) {
-			Zotero.Prefs.set('export.bibliographyLocale', 'en-US');
+		if (!selectedLocale || !availableLocales[selectedLocale]) {
+			Zotero.Prefs.set('export.bibliographyLocale', 'en');
 		}
 
 		var localeMenulist = document.getElementById("locale-menulist");
@@ -236,29 +244,19 @@ Zotero.setupLocale = function(document) {
 		var selectedItem = null;
 
 		// Get the list of locales and assign names to each item
-		var locales = [];
-		var extraLocaleList = ["lt"];
-		var extraLocaleCount = extraLocaleList.length;
 		var locale;
- 		while(extraLocaleCount) {
-			if (availableLocales.hasMore()) {
-				locale = availableLocales.getNext();
-			} else {
-				extraLocaleCount += -1;
-				locale = extraLocaleList[extraLocaleCount];
-			}
-			locales.push({value: locale, label: Zotero.LANGUAGE_NAMES[locale]});
+        var locales = [];
+        for (var i=0, ilen=availableLocales.length; i<ilen; i += 1) {
+            locale = availableLocales[i];
+			locales.push({value: locale, label: locale});
 			if (locale == selectedLocale) {
 				// Is this the current locale?
-				localeMenulist.setAttribute('label', Zotero.LANGUAGE_NAMES[locale]);
+				localeMenulist.setAttribute('label', locale);
 				localeMenulist.setAttribute('value', locale);
 			}
-		}
+        }
 		// Sort the list by name
 		locales.sort( function(a,b){return a.label.localeCompare(b.label)} );
-		for (var i = 0, ilen = locales.length; i < ilen; i += 1) {
-			Zotero.LANGUAGE_INDEX[locales[i].value] = i;
-		}
 		// Render the list
 		for (var i = 0, ilen = locales.length; i < ilen; i += 1) {
 			var locale = locales[i];
@@ -268,7 +266,7 @@ Zotero.setupLocale = function(document) {
 			menupopup.appendChild(menuitem);
 		}
 	} catch (err) {
-		Zotero.debug ("XXX Failed to render locale menulist: " + err);	
+		Zotero.debug ("PPP Failed to render locale menulist: " + err);	
 	}	
 }
 
