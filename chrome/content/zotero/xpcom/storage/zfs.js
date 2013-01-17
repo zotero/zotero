@@ -237,31 +237,29 @@ Zotero.Sync.Storage.ZFS = (function () {
 		
 		return Zotero.HTTP.promise("POST", uri, { body: body, debug: true })
 			.then(function (req) {
-				try {
-					// Strip XML declaration and convert to E4X
-					var xml = new XML(Zotero.Utilities.trim(req.responseText.replace(/<\?xml.*\?>/, '')));
-				}
-				catch (e) {
+				if (!req.responseXML) {
 					throw new Error("Invalid response retrieving file upload parameters");
 				}
 				
-				if (xml.name() != 'upload' && xml.name() != 'exists') {
+				var rootTag = req.responseXML.documentElement.tagName;
+				
+				if (rootTag != 'upload' && rootTag != 'exists') {
 					throw new Error("Invalid response retrieving file upload parameters");
 				}
 				
 				// File was already available, so uploading isn't required
-				if (xml.name() == 'exists') {
+				if (rootTag == 'exists') {
 					existsCallback();
 					return false;
 				}
 				
-				var url = xml.url.toString();
-				var uploadKey = xml.key.toString();
+				var url = req.responseXML.getElementsByTagName('url')[0].textContent;
+				var uploadKey = req.responseXML.getElementsByTagName('key')[0].textContent;
 				var params = {}, p = '';
-				for each(var param in xml.params.children()) {
-					params[param.name()] = param.toString();
+				var paramNodes = req.responseXML.getElementsByTagName('params')[0].childNodes;
+				for (var i = 0; i < paramNodes.length; i++) {
+					params[paramNodes[i].tagName] = paramNodes[i].textContent;
 				}
-				Zotero.debug(params);
 				return uploadCallback(item, url, uploadKey, params);
 			})
 			.fail(function (e) {

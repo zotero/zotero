@@ -68,21 +68,15 @@ Zotero.Sync.Storage.WebDAV = (function () {
 					return false;
 				}
 				
-				try {
-					var xml = new XML(req.responseText);
-				}
-				catch (e) {
-					Zotero.debug(e);
-					var xml = null;
-				}
-				
-				if (xml) {
-					Zotero.debug(xml.children().length());
-				}
-				
-				if (xml && xml.children().length()) {
+				if (req.responseXML) {
 					// TODO: other stuff, but this makes us forward-compatible
-					mtime = xml.mtime.toString();
+					try {
+						var mtime = req.responseXML.getElementsByTagName('mtime')[0]
+					}
+					catch (e) {
+						Zotero.debug(e);
+						var mtime = "";
+					}
 					var seconds = false;
 				}
 				else {
@@ -139,12 +133,12 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		var mtime = item.attachmentModificationTime;
 		var hash = item.attachmentHash;
 		
-		var prop = <properties version="1">
-			<mtime>{mtime}</mtime>
-			<hash>{hash}</hash>
-		</properties>;
+		var prop = '<properties version="1">'
+			+ '<mtime>' + mtime + '</mtime>'
+			+ '<hash>' + hash + '</hash>'
+			+ '</properties>';
 		
-		return Zotero.HTTP.promise("PUT", uri, prop.toXMLString(),
+		return Zotero.HTTP.promise("PUT", uri, prop,
 				{ debug: true, successCodes: [200, 201, 204] })
 			.then(function (req) {
 				return { mtime: mtime, hash: hash };
@@ -1130,16 +1124,10 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		
 		var requestHolder = { request: null };
 		
-		var prolog = '<?xml version="1.0" encoding="utf-8" ?>\n';
-		var D = new Namespace("D", "DAV:");
-		var nsDeclarations = 'xmlns:' + D.prefix + '=' + '"' + D.uri + '"';
-		
-		var requestXML = new XML('<D:propfind ' + nsDeclarations + '/>');
-		requestXML.D::prop = '';
-		// IIS 5.1 requires at least one property in PROPFIND
-		requestXML.D::prop.D::getcontentlength = '';
-		
-		var xmlstr = prolog + requestXML.toXMLString();
+		var xmlstr = "<propfind xmlns='DAV:'><prop>"
+			// IIS 5.1 requires at least one property in PROPFIND
+			+ "<getcontentlength/>"
+			+ "</prop></propfind>";
 		
 		// Test whether URL is WebDAV-enabled
 		var request = Zotero.HTTP.doOptions(uri, function (req) {
@@ -1586,15 +1574,9 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		var uri = this.rootURI;
 		var path = uri.path;
 		
-		var prolog = '<?xml version="1.0" encoding="utf-8" ?>\n';
-		var D = new Namespace("D", "DAV:");
-		var nsDeclarations = 'xmlns:' + D.prefix + '=' + '"' + D.uri + '"';
-		
-		var requestXML = new XML('<D:propfind ' + nsDeclarations + '/>');
-		requestXML.D::prop = '';
-		requestXML.D::prop.D::getlastmodified = '';
-		
-		var xmlstr = prolog + requestXML.toXMLString();
+		var xmlstr = "<propfind xmlns='DAV:'><prop>"
+			+ "<getlastmodified/>"
+			+ "</prop></propfind>";
 		
 		var lastSyncDate = new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000);
 		
@@ -1603,13 +1585,16 @@ Zotero.Sync.Storage.WebDAV = (function () {
 				
 			var funcName = "Zotero.Sync.Storage.purgeOrphanedStorageFiles()";
 			
-			// Strip XML declaration and convert to E4X
-			var xml = new XML(req.responseText.replace(/<\?xml.*\?>/, ''));
+			var responseNode = req.responseXML.documentElement;
+			responseNode.xpath = function (path) {
+				return Zotero.Utilities.xpath(this, path, { D: 'DAV:' });
+			};
 			
 			var deleteFiles = [];
 			var trailingSlash = !!path.match(/\/$/);
-			for each(var response in xml.D::response) {
-				var href = response.D::href.toString();
+			for each(var response in responseNode.xpath("response")) {
+				var href = Zotero.Utilities.xpath(response, "href", { D: 'DAV:' });
+				href = href.length ? href[0] : ''
 				
 				// Strip trailing slash if there isn't one on the root path
 				if (!trailingSlash) {
@@ -1672,7 +1657,10 @@ Zotero.Sync.Storage.WebDAV = (function () {
 				Zotero.debug("Checking orphaned file " + file);
 				
 				// TODO: Parse HTTP date properly
-				var lastModified = response..*::getlastmodified.toString();
+				var lastModified = Zotero.Utilities.xpath(
+					response, "//getlastmodified", { D: 'DAV:' }
+				);
+				lastModified = lastModified.length ? lastModified[0] : ''
 				lastModified = Zotero.Date.strToISO(lastModified);
 				lastModified = Zotero.Date.sqlToDate(lastModified);
 				
