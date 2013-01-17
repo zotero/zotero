@@ -683,23 +683,23 @@ INSERT INTO itemTypeFields VALUES (18, 1261, NULL, 3); -- jurisdiction      [ADD
 INSERT INTO itemTypeFields VALUES (18, 116, NULL, 4);  -- shortTitle
 INSERT INTO itemTypeFields VALUES (18, 46, NULL, 5);   -- committee
 INSERT INTO itemTypeFields VALUES (18, 1275, NULL, 6);   -- meetingNumber     [ADDED]
-INSERT INTO itemTypeFields VALUES (18, 1263, NULL, 7); -- resolutionLabel   [ADDED]
-INSERT INTO itemTypeFields VALUES (18, 1262, NULL, 8); -- assemblyNumber    [ADDED]
-INSERT INTO itemTypeFields VALUES (18, 1264, NULL, 9); -- session type      [ADDED]
-INSERT INTO itemTypeFields VALUES (18, 40, NULL, 10);  -- session
-INSERT INTO itemTypeFields VALUES (18, 14, NULL, 11);  -- date
-INSERT INTO itemTypeFields VALUES (18, 10, NULL, 12);  -- pages
-INSERT INTO itemTypeFields VALUES (18, 19, NULL, 13);  -- archiveLocation   [ADDED]
-INSERT INTO itemTypeFields VALUES (18, 43, NULL, 14);  -- reporter          [ADDED]
-INSERT INTO itemTypeFields VALUES (18, 8, NULL, 15);   -- publisher
-INSERT INTO itemTypeFields VALUES (18, 87, NULL, 16);  -- language
-INSERT INTO itemTypeFields VALUES (18, 1, NULL, 17);   -- url
-INSERT INTO itemTypeFields VALUES (18, 27, NULL, 18);  -- accessed
-INSERT INTO itemTypeFields VALUES (18, 45, NULL, 19);  -- numberOfVolumes   Deprecated
-INSERT INTO itemTypeFields VALUES (18, 42, NULL, 20);  -- history           Deprecated
-INSERT INTO itemTypeFields VALUES (18, 7, NULL, 21);   -- place             Deprecated
-INSERT INTO itemTypeFields VALUES (18, 41, NULL, 22);  -- legislativeBody   Deprecated
-INSERT INTO itemTypeFields VALUES (18, 99, NULL, 23);  -- documentNumber    Deprecated
+INSERT INTO itemTypeFields VALUES (18, 41, NULL, 7);  -- legislativeBody  
+INSERT INTO itemTypeFields VALUES (18, 1263, NULL, 8); -- resolutionLabel   [ADDED]
+INSERT INTO itemTypeFields VALUES (18, 1262, NULL, 9); -- assemblyNumber    [ADDED]
+INSERT INTO itemTypeFields VALUES (18, 1264, NULL, 10); -- session type      [ADDED]
+INSERT INTO itemTypeFields VALUES (18, 40, NULL, 11);  -- session
+INSERT INTO itemTypeFields VALUES (18, 99, NULL, 12);  -- documentNumber
+INSERT INTO itemTypeFields VALUES (18, 14, NULL, 13);  -- date
+INSERT INTO itemTypeFields VALUES (18, 10, NULL, 14);  -- pages
+INSERT INTO itemTypeFields VALUES (18, 19, NULL, 15);  -- archiveLocation   [ADDED]
+INSERT INTO itemTypeFields VALUES (18, 43, NULL, 16);  -- reporter          [ADDED]
+INSERT INTO itemTypeFields VALUES (18, 8, NULL, 17);   -- publisher
+INSERT INTO itemTypeFields VALUES (18, 87, NULL, 18);  -- language
+INSERT INTO itemTypeFields VALUES (18, 1, NULL, 19);   -- url
+INSERT INTO itemTypeFields VALUES (18, 27, NULL, 20);  -- accessed
+INSERT INTO itemTypeFields VALUES (18, 45, NULL, 21);  -- numberOfVolumes   Deprecated
+INSERT INTO itemTypeFields VALUES (18, 42, NULL, 22);  -- history           Deprecated
+INSERT INTO itemTypeFields VALUES (18, 7, NULL, 23);   -- place             Deprecated
 INSERT INTO itemTypeFields VALUES (18, 2, NULL, 24);   -- rights
 INSERT INTO itemTypeFields VALUES (18, 22, NULL, 25);  -- extra
 
@@ -739,14 +739,14 @@ INSERT INTO itemTypeFields VALUES (20, 55, NULL, 6);    -- codeNumber (volume)
 INSERT INTO itemTypeFields VALUES (20, 10, NULL, 7);    -- pages
 INSERT INTO itemTypeFields VALUES (20, 100, NULL, 8);   -- dateEnacted
 INSERT INTO itemTypeFields VALUES (20, 15, NULL, 9);    -- section
-INSERT INTO itemTypeFields VALUES (20, 1269, NULL, 10); -- reign            [ADDED]
-INSERT INTO itemTypeFields VALUES (20, 1270, NULL, 11); -- regnalYear       [ADDED]
-INSERT INTO itemTypeFields VALUES (20, 8, NULL, 12);    -- publisher        [ADDED]
-INSERT INTO itemTypeFields VALUES (20, 1268, NULL, 13); -- publicationDate  [ADDED]
-INSERT INTO itemTypeFields VALUES (20, 87, NULL, 14);   -- language
-INSERT INTO itemTypeFields VALUES (20, 1, NULL, 15);    -- url
-INSERT INTO itemTypeFields VALUES (20, 27, NULL, 16);   -- accessed
-INSERT INTO itemTypeFields VALUES (20, 101, NULL, 17);  -- publicLawNumber  Deprecated
+INSERT INTO itemTypeFields VALUES (20, 101, NULL, 10);  -- publicLawNumber
+INSERT INTO itemTypeFields VALUES (20, 1269, NULL, 11); -- reign            [ADDED]
+INSERT INTO itemTypeFields VALUES (20, 1270, NULL, 12); -- regnalYear       [ADDED]
+INSERT INTO itemTypeFields VALUES (20, 8, NULL, 13);    -- publisher        [ADDED]
+INSERT INTO itemTypeFields VALUES (20, 1268, NULL, 14); -- publicationDate  [ADDED]
+INSERT INTO itemTypeFields VALUES (20, 87, NULL, 15);   -- language
+INSERT INTO itemTypeFields VALUES (20, 1, NULL, 16);    -- url
+INSERT INTO itemTypeFields VALUES (20, 27, NULL, 17);   -- accessed
 INSERT INTO itemTypeFields VALUES (20, 40, NULL, 18);   -- session          Deprecated
 INSERT INTO itemTypeFields VALUES (20, 42, NULL, 19);   -- history          Deprecated
 INSERT INTO itemTypeFields VALUES (20, 2, NULL, 20);    -- rights

@@ -1876,6 +1876,27 @@
 						this.item.setType(itemTypeID);
 						
 						// Force jurisdiction value if required
+                        this.forceJurisdiction(itemTypeID);
+						
+						if (this.saveOnEdit) {
+							this.item.save();
+							this.refresh();
+						}
+						else {
+							this.refresh();
+						}
+						return true;
+					}
+					return false;
+				]]>
+				</body>
+			</method>
+			
+			<method name="forceJurisdiction">
+				<parameter name="itemTypeID"/>
+				<body>
+				<![CDATA[
+                        // XXXX Factor this out to a function. It will be used in two places.
 						var jurisdictionID = Zotero.ItemFields.getID('jurisdiction');
 						var fields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
 						if (fields.indexOf(jurisdictionID) > -1) {
@@ -1894,23 +1915,10 @@
 								}
 							}
 						}
-
-
-						
-						if (this.saveOnEdit) {
-							this.item.save();
-							this.refresh();
-						}
-						else {
-							this.refresh();
-						}
-						return true;
-					}
-					return false;
 				]]>
 				</body>
 			</method>
-			
+
 			
 			<method name="toggleAbstractExpand">
 				<parameter name="label"/>
@@ -2026,6 +2034,8 @@
 					if (this._fieldIsClickable(fieldName)) {
 						if (fieldName == 'jurisdiction') {
 							valueElement.setAttribute("id","jurisdiction-menu");
+                            // XXXX Set default here if req.
+                            this.forceJurisdiction(this.item.itemTypeID);
 							var value = this.item.getField("jurisdiction",true);
 							valueElement.setAttribute("class", "zotero-clicky");
 							if (value) {
