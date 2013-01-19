@@ -1721,7 +1721,8 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 	var errorString = Zotero.Translate.Base.prototype.complete.apply(this, [returnValue, error]);
 	
 	// Report translation failure if we failed
-	if(oldState == "translate" && errorString && this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
+	if(oldState == "translate" && errorString && !this._parentTranslator && this.translator.length
+		&& this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
 		// Don't report failure if in private browsing mode
 		if(Zotero.isFx && !Zotero.isBookmarklet && !Zotero.isStandalone) {
 			var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
