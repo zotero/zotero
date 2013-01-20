@@ -402,7 +402,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 			}
 			
 			if(callAgain) {
-				me.doGet(urls, processor, done);
+				me.doGet(urls, processor, done, responseCharset);
 			} else {
 				if(done) {
 					done();
