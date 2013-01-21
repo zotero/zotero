@@ -247,7 +247,7 @@ Zotero.Styles = new function() {
 				'/csl:style/csl:info[1]/csl:link[@rel="source" or @rel="independent-parent"][1]/@href',
 				Zotero.Styles.ns);
 			if(source == styleID) {
-				throw Zotero.Exception.Alert("styles.installError", origin,
+				throw new Zotero.Exception.Alert("styles.installError", origin,
 					"styles.install.title", "Style references itself as source");
 			}
 			
