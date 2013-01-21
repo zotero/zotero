@@ -1454,7 +1454,7 @@ const ZOTERO_CONFIG = {
 	 * @param	{Integer}	[timeout=50]		Maximum number of milliseconds to wait
 	 */
 	this.wait = function (timeout) {
-		if (!timeout) {
+		if (timeout === undefined) {
 			timeout = 50;
 		}
 		var mainThread = Zotero.mainThread;
