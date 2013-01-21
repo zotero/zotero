@@ -1699,5 +1699,11 @@ Zotero.Utilities = {
 		}
 		return Zotero.ItemTypes.getImageSrc(attachment.mimeType === "application/pdf"
 							? "attachment-pdf" : "attachment-snapshot");
-	}
+	},
+
+	/**
+	 * Provides unicode support and other additional features for regular expressions
+	 * See https://github.com/slevithan/xregexp for usage
+	 */
+	 "XRegExp": XRegExp
 }
