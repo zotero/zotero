@@ -1,7 +1,7 @@
 /*!
  * XRegExp.matchRecursive 3.0.0-pre
  * <http://xregexp.com/>
- * Steven Levithan © 2009-2012 MIT License
+ * Steven Levithan Â© 2009-2012 MIT License
  */
 
 (function(XRegExp) {
