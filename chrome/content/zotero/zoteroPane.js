@@ -1504,10 +1504,11 @@ var ZoteroPane = new function()
 	/*
 	 * Remove, trash, or delete item(s), depending on context
 	 *
-	 * @param	{Boolean}	[force=false]	Trash or delete even if in a collection or search,
-	 *										or trash without prompt in library
+	 * @param  {Boolean}  [force=false]     Trash or delete even if in a collection or search,
+	 *                                      or trash without prompt in library
+	 * @param  {Boolean}  [fromMenu=false]  If triggered from context menu, which always prompts for deletes
 	 */
-	this.deleteSelectedItems = function (force) {
+	this.deleteSelectedItems = function (force, fromMenu) {
 		if (!this.itemsView || !this.itemsView.selection.count) {
 			return;
 		}
@@ -1533,7 +1534,7 @@ var ZoteroPane = new function()
 		
 		if (itemGroup.isLibrary(true)) {
 			// In library, don't prompt if meta key was pressed
-			var prompt = force ? false : toTrash;
+			var prompt = (force && !fromMenu) ? false : toTrash;
 		}
 		else if (itemGroup.isCollection()) {
 			// In collection, only prompt if trashing

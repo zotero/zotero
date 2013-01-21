@@ -35,14 +35,12 @@ Zotero.HTTP = new function() {
 	 * @param {nsIURI|String}	url				URL to request
 	 * @param {Object} [options] Options for HTTP request:<ul>
 	 *         <li>body - The body of a POST request</li>
-	 *         <li>responseType - The type of the response. See XHR 2 documentation for
-	 *             legal values</li>
-	 *         <li>responseCharset - The charset the response should be interpreted as</li>
 	 *         <li>cookieSandbox - The sandbox from which cookies should be taken</li>
-	 *         <li>dontCache - If set, specifies that the request should not be fulfilled
-	 *             from the cache</li>
-	 *         <li>successCodes - HTTP status codes that are considered successful</li>
 	 *         <li>debug - Log response text and status code</li>
+	 *         <li>dontCache - If set, specifies that the request should not be fulfilled from the cache</li>
+	 *         <li>responseType - The type of the response. See XHR 2 documentation for legal values</li>
+	 *         <li>responseCharset - The charset the response should be interpreted as</li>
+	 *         <li>successCodes - HTTP status codes that are considered successful</li>
 	 *     </ul>
 	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
 	 * @return {Promise} A promise resolved with the XMLHttpRequest object if the request
@@ -111,6 +109,11 @@ Zotero.HTTP = new function() {
 		// Disable caching if requested
 		if(options && options.dontCache) {
 			channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
+		}
+
+		// Set responseType
+		if(options && options.responseType) {
+			xmlhttp.responseType = options.responseType;
 		}
 		
 		// Send headers
@@ -773,4 +776,74 @@ Zotero.HTTP = new function() {
 			break;
 		}
 	}
+
+	/**
+	 * Mimics the window.location/document.location interface, given an nsIURL
+	 * @param {nsIURL} url
+	 */
+	this.Location = function(url) {
+		this._url = url;
+		this.hash = url.ref ? "#"+url.ref : "";
+		this.host = url.hostPort;
+		this.hostname = url.host;
+		this.href = url.spec;
+		this.pathname = url.filePath;
+		this.port = (url.schemeIs("https") ? 443 : 80);
+		this.protocol = url.scheme+":";
+		this.search = url.query ? "?"+url.query : "";
+	};
+	this.Location.prototype = {
+		"toString":function() {
+			return this.href;
+		},
+		"__exposedProps__":{
+			"hash":"r",
+			"host":"r",
+			"hostname":"r",
+			"href":"r",
+			"pathname":"r",
+			"port":"r",
+			"protocol":"r",
+			"search":"r",
+			"toString":"r"
+		}
+	};
+
+	/**
+	 * Mimics an HTMLWindow given an nsIURL
+	 * @param {nsIURL} url
+	 */
+	this.Window = function(url) {
+		this._url = url;
+		this.top = this;
+		this.location = Zotero.HTTP.Location(url);
+	};
+	this.Window.prototype.__exposedProps__ = {
+		"top":"r",
+		"location":"r"
+	};
+
+	/**
+	 * Wraps an HTMLDocument object returned by XMLHttpRequest DOMParser to make it look more like it belongs
+	 * to a browser. This is necessary if the document is to be passed to Zotero.Translate.
+	 * @param {HTMLDocument} doc Document returned by 
+	 * @param {nsIURL|String} url
+	 */
+	 this.wrapDocument = function(doc, url) {
+	 	if(typeof url !== "object") {
+	 		url = Services.io.newURI(url, null, null).QueryInterface(Components.interfaces.nsIURL);
+		}
+
+		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+             .createInstance(Components.interfaces.nsIDOMParser);
+		var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
+			.getService(Components.interfaces.nsIScriptSecurityManager);
+		parser.init(secMan.getCodebasePrincipal(url), url, url);
+		return Zotero.Translate.DOMWrapper.wrap(doc, {
+			"documentURI":{ "enumerable":true, "value":url.spec },
+			"URL":{ "enumerable":true, "value":url.spec },
+			"location":{ "enumerable":true, "value":(new Zotero.HTTP.Location(url)) },
+			"defaultView":{ "enumerable":true, "value":(new Zotero.HTTP.Window(url)) }
+		});
+	 }
 }

@@ -907,7 +907,7 @@ Zotero.Utilities = {
 		for(var i in obj) {
 			if(!obj.hasOwnProperty(i)) continue;
 			
-			if(typeof obj[i] === "object") {
+			if(typeof obj[i] === "object" && obj[i] !== null) {
 				obj2[i] = Zotero.Utilities.deepCopy(obj[i]);
 			} else {
 				obj2[i] = obj[i];
@@ -1089,7 +1089,7 @@ Zotero.Utilities = {
 	 **/
 	"randomString":function(len, chars) {
 		if (!chars) {
-			chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+			chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 		}
 		if (!len) {
 			len = 8;
@@ -1159,7 +1159,7 @@ Zotero.Utilities = {
 						closeBrace = ']';
 					}
 
-					dumped_text += level_padding + "'" + item + "' => " + openBrace;
+					dumped_text += level_padding + "'" + item + "' => " + type + ' ' + openBrace;
 					//only recurse if there's anything in the object, purely cosmetical
 					try {
 						for(var i in value) {

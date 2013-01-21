@@ -1560,7 +1560,7 @@ Zotero.Translate.Web.prototype._getTranslatorsGetPotentialTranslators = function
 Zotero.Translate.Web.prototype._getSandboxLocation = function() {
 	if(this._parentTranslator) {
 		return this._parentTranslator._sandboxLocation;
-	} else if(this.document.defaultView) {
+	} else if(this.document.defaultView && this.document.defaultView.toString() === "[object Window]") {
 		return this.document.defaultView;
 	} else {
 		return this.document.location.toString();

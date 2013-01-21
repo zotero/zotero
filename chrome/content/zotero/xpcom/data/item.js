@@ -2513,7 +2513,10 @@ Zotero.Item.prototype.setNote = function(text) {
 		throw ("text must be a string in Zotero.Item.setNote() (was " + typeof text + ")");
 	}
 	
-	text = Zotero.Utilities.trim(text);
+	text = text
+		// Strip control characters
+		.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+		.trim();
 	
 	var oldText = this.getNote();
 	if (text == oldText) {

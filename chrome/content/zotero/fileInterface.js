@@ -532,12 +532,12 @@ var Zotero_File_Interface = new function() {
 		// generate bibliography
 		try {
 			if(io.method == 'copy-to-clipboard') {
-				copyItemsToClipboard(items, io.style, false, io.mode === "citation");
+				copyItemsToClipboard(items, io.style, false, io.mode === "citations");
 			}
 			else {
 				var style = Zotero.Styles.get(io.style);
 				var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style,
-					items, format, io.mode === "citation");
+					items, format, io.mode === "citations");
 			}
 		} catch(e) {
 			window.alert(Zotero.getString("fileInterface.bibliographyGenerationError"));

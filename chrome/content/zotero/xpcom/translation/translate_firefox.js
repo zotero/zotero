@@ -447,8 +447,10 @@ Zotero.Translate.SandboxManager.prototype = {
 	 * Imports an object into the sandbox
 	 *
 	 * @param {Object} object Object to be imported (under Zotero)
-	 * @param {Boolean} passTranslateAsFirstArgument Whether the translate instance should be passed
-	 *     as the first argument to the function.
+	 * @param {*} [passTranslateAsFirstArgument] An argument to pass
+	 *              as the first argument to the function.
+	 * @param {Object} [attachTo] The object to attach `object` to.
+	 *                    Defaults to this.sandbox.Zotero
 	 */
 	"importObject":function(object, passAsFirstArgument, attachTo) {
 		if(!attachTo) attachTo = this.sandbox.Zotero;

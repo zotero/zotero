@@ -153,8 +153,9 @@ Zotero.CookieSandbox.Observer = new function() {
 				var ir = this.trackedInterfaceRequestors[i].get();
 				if(!ir) {
 					// The interface requestor is gone, so remove it from the list
-					this.trackedInterfaceRequestors.splice(i--, 1);
-					this.trackedInterfaceRequestorSandboxes.splice(i--, 1);
+					this.trackedInterfaceRequestors.splice(i, 1);
+					this.trackedInterfaceRequestorSandboxes.splice(i, 1);
+					i--;
 				} else if(ir == notificationCallbacks) {
 					// We are tracking this interface requestor
 					trackedBy = this.trackedInterfaceRequestorSandboxes[i];

@@ -80,7 +80,6 @@ Zotero.Exception.Alert = function(name, params, title, cause) {
 	this.params = params || [];
 	this._title = title || "general.error";
 	this.cause = cause;
-	return this;
 };
 
 Zotero.Exception.Alert.prototype = {
@@ -110,7 +109,7 @@ Zotero.Exception.Alert.prototype = {
 	 * Gets the error string
 	 */
 	"toString":function() {
-		return this.cause.toString() || this.message;
+		return this.cause ? this.cause.toString() : this.message;
 	},
 	
 	/**
