@@ -352,7 +352,7 @@ Zotero_RecognizePDF.Recognizer.prototype._cleanLines = function(lines, callback)
 	// Use only first column from multi-column lines
 	const lineRe = /^\s*([^\s]+(?: [^\s]+)+)/;
 	var cleanedLines = [], cleanedLineLengths = [];
-	for(var i=0; i<lines.length && cleanedLines.length<30; i++) {
+	for(var i=0; i<lines.length && cleanedLines.length<100; i++) {
 		var m = lineRe.exec(lines[i]);
 		if(m && m[1].split(' ').length > 3) {
 			cleanedLines.push(m[1]);
