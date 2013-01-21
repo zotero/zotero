@@ -171,6 +171,27 @@ Zotero.Translate.Sandbox = {
 		},
 		
 		/**
+		 * Gets a hidden preference that can be defined by hiddenPrefs in translator header
+		 *
+		 * @param {Zotero.Translate} translate
+		 * @param {String} pref Prefernce to be retrieved
+		 */
+		"getHiddenPref":function(translate, pref) {
+			if(typeof(pref) != "string") {
+				throw(new Error("getPref: preference must be a string"));
+			}
+
+			var hp = translate._hiddenPrefs || {};	//_hiddenPrefs should already be {} if undefined
+
+			var value;
+			try {
+				value = Zotero.Prefs.get('translators.' + pref);
+			} catch(e) {}
+
+			return (value !== undefined ? value : hp[pref]);
+		},
+		
+		/**
 		 * For loading other translators and accessing their methods
 		 * 
 		 * @param {Zotero.Translate} translate
@@ -1331,6 +1352,7 @@ Zotero.Translate.Base.prototype = {
 		this._runningAsyncProcesses = 0;
 		this._returnValue = undefined;
 		this._aborted = false;
+		this._hiddenPrefs = translator.hiddenPrefs;
 		this.saveQueue = [];
 		
 		Zotero.debug("Translate: Parsing code for "+translator.label, 4);
