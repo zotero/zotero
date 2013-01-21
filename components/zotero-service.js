@@ -206,6 +206,20 @@ function makeZoteroContext(isConnector) {
 		.getService(Ci.mozIJSSubScriptLoader)
 		.loadSubScript("chrome://zotero/content/xpcom/citeproc.js", zContext.Zotero.CiteProc);
 	
+	//Load XRegExp object into Zotero.XRegExp
+	//This needs to be loaded before Zotero.Utilities so it gets included in Zotero.Utilities.Translate
+	//The files that need to be loaded are defined in the init.js file
+	var xregexpContext = {};
+	Cc["@mozilla.org/moz/jssubscript-loader;1"]
+		.getService(Ci.mozIJSSubScriptLoader)
+		.loadSubScript("chrome://zotero/content/xpcom/xregexp/init.js", xregexpContext);
+	for(var i=0; i<xregexpContext.load.length; i++) {
+		Cc["@mozilla.org/moz/jssubscript-loader;1"]
+		.getService(Ci.mozIJSSubScriptLoader)
+		.loadSubScript("chrome://zotero/content/xpcom/xregexp/" + xregexpContext.load[i] + ".js", xregexpContext);
+	}
+	zContext.Zotero.XRegExp = xregexpContext.XRegExp;
+	
 	// Load remaining xpcomFiles
 	for (var i=1; i<xpcomFilesAll.length; i++) {
 		try {
