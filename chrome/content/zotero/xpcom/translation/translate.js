@@ -179,12 +179,13 @@ Zotero.Translate.Sandbox = {
 		 */	 
 		"loadTranslator":function(translate, type) {
 			const setDefaultHandlers = function(translate, translation) {
-				if(Zotero.Utilities.isEmpty(translation._handlers)) {
-					if(type !== "export") {
-						translation.setHandler("itemDone", function(obj, item) {
-							translate.Sandbox._itemDone(translate, item);
-						});
-					}
+				if(type !== "export"
+					&& (!translation._handlers['itemDone'] || !translation._handlers['itemDone'].length)) {
+					translation.setHandler("itemDone", function(obj, item) {
+						translate.Sandbox._itemDone(translate, item);
+					});
+				}
+				if(!translation._handlers['selectItems'] || !translation._handlers['selectItems'].length) {
 					translation.setHandler("selectItems", translate._handlers["selectItems"]);
 				}
 			}
