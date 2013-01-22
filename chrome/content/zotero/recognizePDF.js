@@ -458,6 +458,8 @@ Zotero_RecognizePDF.ItemRecognizer.prototype._recognizeItem = function() {
 		
 		itemTitle.setAttribute("label", newItem.getField("title"));
 		itemIcon.setAttribute("src", SUCCESS_IMAGE);
+		
+		me._recognizeItem();
 	}, function(error) {
 		Zotero.debug(error);
 		Zotero.logError(error);
