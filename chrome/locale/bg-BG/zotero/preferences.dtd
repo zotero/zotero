@@ -128,7 +128,6 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Копирани на цитати за избраните записите в клипборда">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копиране на избраните записи в клипборда">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Внос от Клипборда">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Приоритет в случай на конфликт в клавишните комбинации.">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Промените ще се отразят само в новите прозорци">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Проксита">

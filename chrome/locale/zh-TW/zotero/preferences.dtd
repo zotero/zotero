@@ -128,7 +128,6 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "複製選取項目的引用文獻到剪貼簿">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "複製選取項目到剪貼簿">
 <!ENTITY zotero.preferences.keys.importFromClipboard "從剪貼簿匯入">
-<!ENTITY zotero.preferences.keys.overrideGlobal "嘗試蓋過相衝突的快速鍵">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "改變只會在新開的視窗中生效">
 
 <!ENTITY zotero.preferences.prefpane.proxies "代理伺服器">

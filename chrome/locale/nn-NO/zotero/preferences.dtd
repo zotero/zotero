@@ -128,7 +128,6 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier dei valde siteringane til utklipptavla.">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopier dei valde elementa til utklipptavla.">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Forsøk å overstyra snøggtastar i konflikt">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Endringar gjeld berre for nye vindauge">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">

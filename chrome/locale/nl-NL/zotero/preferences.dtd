@@ -128,7 +128,6 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Verwijzingen van geselecteerde objecten naar klembord kopiëren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Geselecteerde objecten naar klembord kopiëren">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importeren vanaf klembord">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Probeer voorrang te krijgen bij conflicterende sneltoetsen">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Aanpassingen worden pas zichtbaar in nieuwe vensters">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxy's">

@@ -128,7 +128,6 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopeerida valitud kirje tsiteeringud lõikepuhvrisse">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopeerida valitud kirjed lõikepuhvrisse">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Lõikepuhvrist importimine">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Võistlevate kiirvaliku klahvide korraldamine">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Muutused saavad nähtavaks alles uues aknas">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proksid">
