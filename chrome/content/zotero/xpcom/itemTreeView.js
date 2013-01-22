@@ -1733,18 +1733,16 @@ Zotero.ItemTreeView.prototype.setFilter = function(type, data) {
 	var savedOpenState = this.saveOpenState();
 	var savedFirstRow = this.saveFirstRow();
 	
-	var isDirty;
 	switch (type) {
 		case 'search':
-			isDirty = this._itemGroup.setSearch(data);
+			this._itemGroup.setSearch(data);
 			break;
 		case 'tags':
-			isDirty = this._itemGroup.setTags(data);
+			this._itemGroup.setTags(data);
 			break;
 		default:
 			throw ('Invalid filter type in setFilter');
 	}
-	if(!isDirty) return false;
 	var oldCount = this.rowCount;
 	this.refresh();
 	
@@ -1759,7 +1757,6 @@ Zotero.ItemTreeView.prototype.setFilter = function(type, data) {
 	
 	//Zotero.debug('Running callbacks in itemTreeView.setFilter()', 4);
 	this._runCallbacks();
-	return true;
 }
 
 

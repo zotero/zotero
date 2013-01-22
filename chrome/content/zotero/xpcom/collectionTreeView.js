@@ -2198,19 +2198,14 @@ Zotero.ItemGroup.prototype.getChildTags = function() {
 
 Zotero.ItemGroup.prototype.setSearch = function(searchText)
 {
-	if(searchText === this.searchText) return false;
 	Zotero.ItemGroupCache.clear();
 	this.searchText = searchText;
-	return true;
 }
 
 Zotero.ItemGroup.prototype.setTags = function(tags)
 {
-	if((!tags || Zotero.Utilities.isEmpty(tags))
-		&& (!this.tags || Zotero.Utilities.isEmpty(this.tags))) return false;
 	Zotero.ItemGroupCache.clear();
-	this.tags = Zotero.Utilities.deepCopy(tags);
-	return true;
+	this.tags = tags;
 }
 
 /*
