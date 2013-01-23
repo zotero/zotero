@@ -671,7 +671,7 @@ var Zotero_File_Interface = new function() {
 				.redraw();
 			
 			// Process redraw event
-			Zotero.mainThread.processNextEvent(false);
+			Zotero.wait(0);
 		} finally {
 			// Close nested event queue
 			if(eventQueuePushed) Zotero.mainThread.popEventQueue();
