@@ -1876,7 +1876,7 @@
 						this.item.setType(itemTypeID);
 						
 						// Force jurisdiction value if required
-                        this.forceJurisdiction(itemTypeID);
+						this.forceJurisdiction(itemTypeID);
 						
 						if (this.saveOnEdit) {
 							this.item.save();
@@ -1896,12 +1896,12 @@
 				<parameter name="itemTypeID"/>
 				<body>
 				<![CDATA[
-                        // XXXX Factor this out to a function. It will be used in two places.
+						// XXXX Factor this out to a function. It will be used in two places.
 						var jurisdictionID = Zotero.ItemFields.getID('jurisdiction');
 						var fields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
 						if (fields.indexOf(jurisdictionID) > -1) {
 							var itemType = Zotero.ItemTypes.getName(itemTypeID);
-							if (["report","journalArticle","hearing"].indexOf(itemType) === -1) {
+							if (["report","journalArticle"].indexOf(itemType) === -1) {
 								if (!this.item.getField(jurisdictionID)) {
 									var jurisdictionDefault = Zotero.Prefs.get("import.jurisdictionDefault");
 									var jurisdictionFallback = Zotero.Prefs.get("import.jurisdictionFallback");
@@ -2034,13 +2034,17 @@
 					if (this._fieldIsClickable(fieldName)) {
 						if (fieldName == 'jurisdiction') {
 							valueElement.setAttribute("id","jurisdiction-menu");
-                            // XXXX Set default here if req.
-                            this.forceJurisdiction(this.item.itemTypeID);
+							// XXXX Set default here if req.
+							this.forceJurisdiction(this.item.itemTypeID);
 							var value = this.item.getField("jurisdiction",true);
 							valueElement.setAttribute("class", "zotero-clicky");
 							if (value) {
-								valueElement.setAttribute("value", value);
-								valueElement.setAttribute("label", Zotero.Jurisdiction.getLabelFromKey(value));
+								var label = Zotero.Jurisdiction.getLabelFromKey(value);
+								if (!label) {
+									label = value;
+									valueElement.setAttribute("style","background:yellow;");
+								}
+								valueElement.setAttribute("label", label);
 							}
 							valueElement.setAttribute("oncommand","this.focus(); this.open = true;");
 							valueElement.setAttribute("onkeypress","if (event.keyCode == event.DOM_VK_TAB) { document.getBindingParent(this).jurisdictionMenuTab(event); }");
@@ -3522,6 +3526,7 @@ if (oldCreator.id) {
 						}
 					}
 					this.item.setField("jurisdiction",value);
+					node.setAttribute("style","");
 					this.item.save();
 				]]>
 			  </body>

@@ -39,7 +39,7 @@
 	
 	<script src="include.js"/>
 	<script src="zoteroPane.js" type="application/javascript;version=1.8"/>
-    <script src="fileInterface.js"/>
+	<script src="fileInterface.js"/>
 	<script src="reportInterface.js"/>
 	<script src="timelineInterface.js"/>
 	<script src="recognizePDF.js"/>
@@ -103,14 +103,9 @@
 					<toolbarbutton id="zotero-tb-group-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
 					<spacer flex="1"/>
 					<vbox>
-                        <hbox>
-						  <label value="Multilingual" style="margin:0;padding:0;font-size:smaller;color: blue;font-weight:bold;"/>
-						  <label value=" (testing only)" style="margin:0;padding:0;font-size:smaller;color: blue;"/>
-                        </hbox>
-                        <hbox>
-                          <label value="Click here for info" style="margin:0;padding:0;font-size:smaller;background:white;text-decoration:none;border:1px solid black;" class="text-link" href="http://citationstylist.org/announcements/" 
-/>
-                        </hbox>
+						<hbox>
+						  <label value="MLZ: ReadMe" style="margin:0;padding:0 0.4em 0 0.4em;border-radius:0.5em 0.5em;background:white;text-decoration:none;border:1px solid black;" class="text-link" onclick="ZoteroPane_Local.openMlzWelcomeDialog()" />
+						</hbox>
 					</vbox>
 					<spacer flex="1"/>
 					<toolbarbutton id="zotero-tb-actions-menu" class="zotero-tb-button" tooltiptext="&zotero.toolbar.actions.label;" type="menu">

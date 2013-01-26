@@ -106,18 +106,18 @@ Zotero.ItemFields = new function() {
 				return Zotero.getString("itemFields.volume");
 			}
 		} else if (itemType == '16') {
-            if (fieldName === 'code') {
-                return Zotero.getString("itemFields.reporter");
-            } else if (fieldName === 'codeVolume') {
-                return Zotero.getString("itemFields.volume");
-            } else if (fieldName === 'codePages') {
-                return Zotero.getString("itemFields.pages");
-            }
-        } else if (itemType == '18') {
-            if (fieldName === 'documentNumber') {
-                return Zotero.getString("itemFields.billOrDocumentNumber");
-            }
-        }
+			if (fieldName === 'code') {
+				return Zotero.getString("itemFields.reporter");
+			} else if (fieldName === 'codeVolume') {
+				return Zotero.getString("itemFields.volume");
+			} else if (fieldName === 'codePages') {
+				return Zotero.getString("itemFields.pages");
+			}
+		} else if (itemType == '18') {
+			if (fieldName === 'documentNumber') {
+				return Zotero.getString("itemFields.billOrDocumentNumber");
+			}
+		}
 
 		// TODO: different labels for different item types
 		
@@ -137,9 +137,9 @@ Zotero.ItemFields = new function() {
 		}
 
 		if (_fields[field].label) {
-            // NOTE: if a field label is missing from the locale, the item
-            // panel will skip this block and crash on getBaseIDFromTypeAndField()
-            // in the block below, with a null itemType.
+			// NOTE: if a field label is missing from the locale, the item
+			// panel will skip this block and crash on getBaseIDFromTypeAndField()
+			// in the block below, with a null itemType.
 			return _fields[field].label;
 		}
 		else {
@@ -231,7 +231,7 @@ Zotero.ItemFields = new function() {
 		
 		var baseFieldID = this.getID(baseField);
 		if (!baseFieldID) {
-			throw ("Invalid field '" + baseField + '" for base field in ItemFields.getFieldIDFromTypeAndBase()');
+			throw ("Invalid field '" + baseField + '" for base field in ItemFields.isFieldOfBase()');
 		}
 		
 		if (fieldID == baseFieldID) {

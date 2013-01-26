@@ -146,7 +146,11 @@ Zotero.Cite.System.retrieveItem = function(item) {
 
 	// get date variables
 	for(var variable in CSL_DATE_MAPPINGS) {
-		var date = zoteroItem.getField(CSL_DATE_MAPPINGS[variable], false, true);
+		var date;
+		for each(var zVar in CSL_DATE_MAPPINGS[variable]) {
+			date = zoteroItem.getField(zVar, false, true);
+			break;
+		}
 		if(date) {
 			if (Zotero.Prefs.get('hackUseCiteprocJsDateParser')) {
 				var raw = Zotero.Date.multipartToStr(date);
@@ -178,12 +182,12 @@ Zotero.Cite.System.retrieveItem = function(item) {
 		}
 	}
 
-    // Force Fields
-    if (CSL_FORCE_FIELD_CONTENT[itemType]) {
-        for (var variable in CSL_FORCE_FIELD_CONTENT[itemType]) {
-            cslItem[variable] = CSL_FORCE_FIELD_CONTENT[itemType][variable];
-        }
-    }
+	// Force Fields
+	if (CSL_FORCE_FIELD_CONTENT[itemType]) {
+		for (var variable in CSL_FORCE_FIELD_CONTENT[itemType]) {
+			cslItem[variable] = CSL_FORCE_FIELD_CONTENT[itemType][variable];
+		}
+	}
 
 	// Force remap
 	if (CSL_FORCE_REMAP[itemType]) {

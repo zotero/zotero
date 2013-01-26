@@ -155,18 +155,21 @@ const CSL_TYPE_MAPPINGS = {
  * Force Fields
 */
 const CSL_FORCE_FIELD_CONTENT = {
-    "tvBroadcast":{
-        "genre":"TV broadcast"
-    },
-    "radioBroadcast":{
-        "genre":"radio broadcast"
-    },
-    "instantMessage":{
-        "genre":"instant message"
-    },
-    "email":{
-        "genre":"email"
-    }
+	"tvBroadcast":{
+		"genre":"television broadcast"
+	},
+	"radioBroadcast":{
+		"genre":"radio broadcast"
+	},
+	"instantMessage":{
+		"genre":"instant message"
+	},
+	"email":{
+		"genre":"email"
+	},
+	"podcast":{
+		"genre":"podcast"
+	}
 }
 
 const CSL_FORCE_REMAP = {

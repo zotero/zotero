@@ -2517,10 +2517,10 @@ Zotero.Sync.Server.Data = new function() {
 	this.xmlToSearch = xmlToSearch;
 	this.tagToXML = tagToXML;
 	this.xmlToTag = xmlToTag;
-    this.decodeMlzFields = decodeMlzFields;
-    this.removeMlzFieldDeletes = removeMlzFieldDeletes;
-    this.decodeMlzCreators = decodeMlzCreators;
-    this.removeMlzCreatorDeletes = removeMlzCreatorDeletes;
+	this.decodeMlzFields = decodeMlzFields;
+	this.removeMlzFieldDeletes = removeMlzFieldDeletes;
+	this.decodeMlzCreators = decodeMlzCreators;
+	this.removeMlzCreatorDeletes = removeMlzCreatorDeletes;
 
 	var _noMergeTypes = ['search'];
 	
@@ -2751,7 +2751,7 @@ Zotero.Sync.Server.Data = new function() {
 					isNewObject = false;
 					
 					var objDate = Zotero.Date.sqlToDate(obj.dateModified, true);
-					
+
 					// Local object has been modified since last sync
 					if ((objDate > lastLocalSyncDate &&
 								objDate < Zotero.Sync.Server.nextLocalSyncDate)
@@ -2760,7 +2760,7 @@ Zotero.Sync.Server.Data = new function() {
 							// date equal to Zotero.Sync.Server.nextLocalSyncDate
 							// and therefore excluded above
 							|| syncSession.objectInUpdated(obj)) {
-						
+
 						Zotero.debug("Local " + type + " " + obj.id
 								+ " has been modified since last sync", 4);
 						
@@ -2782,7 +2782,7 @@ Zotero.Sync.Server.Data = new function() {
 							}
 							Zotero.Sync.Server.Data.removeMissingRelatedItems(xmlNode);
 						}
-						
+
 						var remoteObj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode, null, null, defaultLibraryID);
 
 						// Some types we don't bother to reconcile
@@ -2807,7 +2807,7 @@ Zotero.Sync.Server.Data = new function() {
 									continue;
 									
 								case 'item':
-									var diff = obj.diff(remoteObj, false, ["dateAdded", "dateModified"]);
+								var diff = obj.diff(remoteObj, false, ["dateAdded", "dateModified"]);
 									Zotero.debug('Diff:');
 									Zotero.debug(diff);
 									if (!diff) {
@@ -2876,7 +2876,6 @@ Zotero.Sync.Server.Data = new function() {
 									}
 									continue;
 							}
-							
 							// TODO: order reconcile by parent/child?
 							
 							if (!skipCR) {
@@ -2906,7 +2905,7 @@ Zotero.Sync.Server.Data = new function() {
 						libraryID: libraryID,
 						key: key
 					};
-					
+
 					if (syncSession.objectInDeleted(fakeObj)) {
 						// TODO: non-merged items
 						
@@ -2953,7 +2952,6 @@ Zotero.Sync.Server.Data = new function() {
 						relatedItemsStore[objLibraryKeyHash] = missing;
 					}
 				}
-				
 				// Create or overwrite locally
 				//
 				// If we skipped CR above, we already have an object to use
@@ -3001,7 +2999,6 @@ Zotero.Sync.Server.Data = new function() {
 				else {
 					toSave.push(obj);
 				}
-				
 				if (type == 'item') {
 					// Make sure none of the item's creators are marked as
 					// deleted, which could happen if a creator was deleted
@@ -3158,7 +3155,6 @@ Zotero.Sync.Server.Data = new function() {
 				if (_timeToYield()) yield true;
 			}
 			
-			
 			//
 			// Reconcile objects that have changed locally and remotely
 			//
@@ -3285,7 +3281,6 @@ Zotero.Sync.Server.Data = new function() {
 					if (_timeToYield()) yield true;
 				}
 			}
-			
 			// Delete
 			Zotero.debug('Deleting merged ' + types);
 			if (toDelete.length) {
@@ -3873,14 +3868,14 @@ Zotero.Sync.Server.Data = new function() {
 		var xml = <item/>;
 		var item = item.serialize();
 
-        // Serialize extra fields as JSON, bundle into extra field
-        // with multilingual content, and delete before proceeding
-        // with sync.
-        var supp = false;
-        var extrafields = false;
-        var multifields = false;
-        var extracreators = false;
-        var multicreators = false;
+		// Serialize extra fields as JSON, bundle into extra field
+		// with multilingual content, and delete before proceeding
+		// with sync.
+		var supp = false;
+		var extrafields = false;
+		var multifields = false;
+		var extracreators = false;
+		var multicreators = false;
 		// Save off the type in case it changes below
 		var localItemType = item.primary.itemType;
 		var syncItemType = localItemType;
@@ -3889,33 +3884,33 @@ Zotero.Sync.Server.Data = new function() {
 			syncItemType = Zotero.EXTENDED_TYPES[localItemType];
 			item.primary.itemType = syncItemType;
 		}
-        // Get extended fields, if any
-        if (Zotero.EXTENDED_FIELDS[localItemType]) {
-            for (var field in item.fields) {
-                if (Zotero.EXTENDED_FIELDS[localItemType][field]) {
-                    if (item.fields[field]) {
-                        if (!extrafields) {
-                            extrafields = {};
-                        }
-                        extrafields[field] = item.fields[field];
-                        delete item.fields[field];
-                    }
-                }
-            }
-        }
-        // Get multi field data, if any
-        for (var key in item.multi.main) {
-            multifields = item.multi;
-            break;
-        }
-        if (!multifields) {
-            for (var key in item.multi._keys) {
-                multifields = item.multi;
-                break;
-            }
-        }
-        // Normalize the sequence of any extra creators to avoid
-        // data mismatch in multicreators
+		// Get extended fields, if any
+		if (Zotero.EXTENDED_FIELDS[localItemType]) {
+			for (var field in item.fields) {
+				if (Zotero.EXTENDED_FIELDS[localItemType][field]) {
+					if (item.fields[field]) {
+						if (!extrafields) {
+							extrafields = {};
+						}
+						extrafields[field] = item.fields[field];
+						delete item.fields[field];
+					}
+				}
+			}
+		}
+		// Get multi field data, if any
+		for (var key in item.multi.main) {
+			multifields = item.multi;
+			break;
+		}
+		if (!multifields) {
+			for (var key in item.multi._keys) {
+				multifields = item.multi;
+				break;
+			}
+		}
+		// Normalize the sequence of any extra creators to avoid
+		// data mismatch in multicreators
 		if (item.creators) {
 			var deletecreatoridx = item.creators.length;
 			if (Zotero.EXTENDED_CREATORS[localItemType]) {
@@ -3926,7 +3921,7 @@ Zotero.Sync.Server.Data = new function() {
 							extracreators = [];
 						}
 						if (!creator.libraryID) {
-                            creator.libraryID = 0;
+							creator.libraryID = 0;
 						}
 						extracreators.push(creator);
 						item.creators = item.creators.slice(0,i).concat(item.creators.slice(i+1))
@@ -3949,9 +3944,9 @@ Zotero.Sync.Server.Data = new function() {
 					multicreatorset = creator.multi;
 				}
 				if (multicreatorset) {
-                if (!multicreators) {
-                    multicreators = {};
-                }
+                    if (!multicreators) {
+                        multicreators = {};
+                    }
 					multicreatorset.fieldMode = creator.fieldMode;
 					multicreators[i] = multicreatorset;
 				}
@@ -3989,7 +3984,7 @@ Zotero.Sync.Server.Data = new function() {
             while (supplen.length < 4) {
                 supplen = "0" + supplen;
             }
-            if ((item.fields.extra||supp) && (item.fields.extra && !item.fields.extra.match(/^mlzsync[0-9]:/))) {
+            if ((item.fields.extra||supp) && !(item.fields.extra && item.fields.extra.match(/^mlzsync[0-9]:/))) {
                 if (!item.fields.extra) {
                     item.fields.extra = "";
                 }
@@ -4129,7 +4124,7 @@ Zotero.Sync.Server.Data = new function() {
 				xml.related = keys.join(' ');
 			}
 		}
-        dump("BBB "+xml.toXMLString()+"\n");
+        //dump("BBB "+xml.toXMLString()+"\n");
 		return xml;
 	}
 	
@@ -4171,6 +4166,9 @@ Zotero.Sync.Server.Data = new function() {
 		
 		// Primary data
 		for (var field in data) {
+            // We apparently lack a toggle to block loading of multi data?
+            // The multi fields are the SAME on both the remote and local object,
+            // even when they differ in their original locations.
 			item.setField(field, data[field]);
 			changedFields[field] = true;
 		}
@@ -4186,10 +4184,7 @@ Zotero.Sync.Server.Data = new function() {
 			changedFields[fieldName] = true;
 		}
 
-        // Merge field content of an mlzsync1: prefix on the extra field
-        // into the item
-        var obj = Zotero.Sync.Server.Data.decodeMlzFields(item,data,extra,changedFields);
-
+        // HERE is where the purge comes in.
 		var previousFields = item.getUsedFields(true);
 		for each(var field in previousFields) {
 			if (!changedFields[field] &&
@@ -4201,11 +4196,18 @@ Zotero.Sync.Server.Data = new function() {
 				item.setField(field, false);
 			}
 		}
-        // Remove multifields that are not present in the sync
-        // (but only if there is some evidence that multilingual is being used -- if not,
-        // leave multilingual fields in place for safety)
-        Zotero.Sync.Server.Data.removeMlzFieldDeletes(item,obj,previousFields);
-		
+
+        // Merge field content of an mlzsync1: prefix on the extra field
+        // into the item
+        var obj = Zotero.Sync.Server.Data.decodeMlzFields(item,data,extra,changedFields);
+
+        // RIGHT!!! So now we have the fields explicitly set
+        // from the sync item held in changedFields.
+
+        // We need to do the same thing for multi and main, working
+        // from the extra-field parse-out, and everything will work.
+        removeMlzFieldDeletes(item,data,obj);
+
 		// Deleted item flag
 		var deleted = xmlItem.@deleted.toString();
 		item.deleted = (deleted == 'true' || deleted == "1");
@@ -4291,13 +4293,13 @@ Zotero.Sync.Server.Data = new function() {
     function decodeMlzFields (item,primaryFields,extra,changedFields) {
         // Unserialize data stored as JSON on the extra field, and
         // attach to the object before delivery to Zotero.
-        var obj = false;
+        var obj = {};
 		var itemTypeID = false;
         if (extra) {
             var m = extra.match(/^mlzsync1:([0-9]{4})/);
             if (m) {
                 var offset = parseInt(m[1],10);
-                objstr = extra.slice(13,offset+13);
+                var objstr = extra.slice(13,offset+13);
                 if (objstr) {
                     try {
                         obj = JSON.parse(objstr);
@@ -4344,14 +4346,23 @@ Zotero.Sync.Server.Data = new function() {
         return obj;
     }
 
-    function removeMlzFieldDeletes(item,obj,previousFields) {
+    function removeMlzFieldDeletes(item,data,obj) {
         // Remove multifields that are not present in the sync
         // (but only if there is some evidence that multilingual is being used -- if not,
         // leave multilingual fields in place for safety)
-        for each(var field in previousFields) {
-            for (var langTag in item.multi._keys[field]) {
-                if (!obj || !obj.multifields || !obj.multifields._keys[data.fieldName] || !obj.multifields._keys[data.fieldName][data.languageTag]) {
-                    item.setField(data.fieldName,false,false,data.languageTag);
+		var previousMultiMains = item.getUsedMultiMains(true);
+        for each(var f in previousMultiMains) {
+            if ((!obj.multifields || !obj.multifields.main[f.fieldName]) && Zotero.ItemFields.isValidForType(f.fieldID, data.itemTypeID)) {
+                delete item.multi.main[f.fieldID];
+            }
+        }
+		var previousMultiFields = item.getUsedMultiFields(true);
+        for each(var f in previousMultiFields) {
+            if ((!obj.multifields || !obj.multifields._keys[f.fieldName]) && Zotero.ItemFields.isValidForType(f.fieldID, data.itemTypeID)) {
+                item.setField(f.fieldName,false,false,f.languageTag);
+            } else if (!obj.multifields._keys[f.fieldName][f.languageTag]) {
+                if (item.multi._keys[f.fieldName]) {
+                    item.setField(f.fieldName,false,false,f.languageTag);
                 }
             }
         }

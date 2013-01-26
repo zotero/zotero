@@ -277,16 +277,30 @@ Zotero.Item.prototype.getUsedFields = function(asNames) {
  * @param	{Boolean}				asNames
  * @return	{Integer{}|String[]}
  */
+Zotero.Item.prototype.getUsedMultiMains = function() {
+	if (!this.id) {
+		return [];
+	}
+	sql = "SELECT fieldID FROM itemDataMain WHERE itemID=?";
+	sql = "SELECT DISTINCT fieldName,fieldID,languageTag FROM fields NATURAL JOIN itemDataMain WHERE itemID=? AND fieldID IN (" + sql + ")";
+	var rows = Zotero.DB.query(sql, [this.id,this.id]);
+	if (!rows) {
+		return [];
+	}
+	return rows;
+}
 Zotero.Item.prototype.getUsedMultiFields = function(asNames) {
 	if (!this.id) {
 		return [];
 	}
-	var sql = "SELECT fieldID,languageTag FROM itemDataAlt WHERE itemID=?";
+	var sql = "SELECT DISTINCT fieldID,languageTag FROM itemDataAlt WHERE itemID=?";
 	if (asNames) {
-	    sql = "SELECT fieldID FROM itemDataAlt WHERE itemID=?";
-		sql = "SELECT fieldName,languageTag FROM fields NATURAL JOIN itemDataAlt WHERE fieldID IN (" + sql + ")";
+		// "";
+		sql = "SELECT DISTINCT fieldName,fieldID,languageTag FROM fields NATURAL JOIN itemDataAlt WHERE fieldID IN (SELECT fieldID FROM itemDataAlt WHERE itemID=20)"
+		sql = "SELECT fieldID FROM itemDataAlt WHERE itemID=?";
+		sql = "SELECT DISTINCT fieldName,fieldID,languageTag FROM fields NATURAL JOIN itemDataAlt WHERE itemID=? AND fieldID IN (" + sql + ")";
 	}
-	var rows = Zotero.DB.query(sql, this.id);
+	var rows = Zotero.DB.query(sql, [this.id,this.id]);
 	if (!rows) {
 		return [];
 	}
@@ -735,6 +749,7 @@ Zotero.Item.prototype.inCollection = function(collectionID) {
 		+ "itemID=" + this.id));
 }
 
+/*
 Zotero.Item.prototype.setJurisdiction = function (value) {
 	var jurisdictionID = Zotero.ItemFields.getID('jurisdiction');
 	var fields = Zotero.ItemFields.getItemTypeFields(this.itemTypeID);
@@ -755,6 +770,7 @@ Zotero.Item.prototype.setJurisdiction = function (value) {
 		}
 	}
 }
+*/
 
 /*
  * Set a field value, loading existing itemData first if necessary
@@ -914,7 +930,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn, lang, force_top)
 		// Do nothing if:
 		// (1) The field is empty and so is the value; or
 		// (2) No lang is specified OR the specified lang is the lang of the main field; AND
-		//     value is not nil and matches the main field value; or
+		//	 value is not nil and matches the main field value; or
 		// (3) Lang is specified AND value is not nil and matches the corresponding 
 		//     multi field value
 		// OOOOO: See multilingual/container for structure of multi object.
@@ -934,7 +950,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn, lang, force_top)
 			|| (
 				value
 				&& (!lang || lang === this.multi.main[fieldID])
-				    && (this._itemData[fieldID] + "") === (value + "")
+					&& (this._itemData[fieldID] + "") === (value + "")
 				)
 			|| (
 				value
@@ -1118,12 +1134,12 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate, language
 		//	title = this.getField('nameOfAct');
 		//}
 		var volume = this.getField('volume');
-        var code;
-        if (itemTypeID == 18) {
-		    code = this.getField('reporter');
-        } else {
-		    code = this.getField('code');
-        }
+		var code;
+		if (itemTypeID == 18) {
+			code = this.getField('reporter');
+		} else {
+			code = this.getField('code');
+		}
 		var section = this.getField('section');
 
 		if (title) {
@@ -4274,7 +4290,7 @@ Zotero.Item.prototype.diff = function (item, includeMatches, ignoreFields) {
 	var otherData = item.serialize();
 	
 	var numDiffs = Zotero.Items.diff(thisData, otherData, diff, includeMatches);
-	
+
 	diff[0].creators = [];
 	diff[1].creators = [];
 	// TODO: creators?
@@ -5263,6 +5279,8 @@ Zotero.Item.prototype._loadItemData = function() {
 		throw ('ItemID not set for object before attempting to load data');
 	}
 	
+	Zotero.DB.beginTransaction();
+
 	// OOOOO: This needs to grab field item data with hints
 	// necessary to allot data to correct locations within
 	// the Zotero item.
@@ -5290,6 +5308,14 @@ Zotero.Item.prototype._loadItemData = function() {
 		this.setField(field.fieldID, field.value, true, field.languageTag);
 	}
 	
+	try {
+		Zotero.DB.commitTransaction();
+	}
+	catch (e) {
+        Zotero.DB.rollbackTransaction();
+        throw(e);
+    }
+
 	// Mark nonexistent fields as loaded
 	var itemTypeFields = Zotero.ItemFields.getItemTypeFields(this.itemTypeID);
 	for each(var fieldID in itemTypeFields) {
@@ -5300,16 +5326,14 @@ Zotero.Item.prototype._loadItemData = function() {
 
 	this._itemDataLoaded = true;
 
-    if (this._itemData[22] && this._itemData[22].slice(0, 9) === 'mlzsync1:') {
-        var data = {itemTypeID:this._itemTypeID};
-        var obj = Zotero.Sync.Server.Data.decodeMlzFields(this,data,this._itemData[22],{});
-        if (obj) {
-            Zotero.Sync.Server.Data.removeMlzFieldDeletes(this,obj,itemTypeFields);
-            Zotero.Sync.Server.Data.decodeMlzCreators(this,obj,this._creators.length);
-            Zotero.Sync.Server.Data.removeMlzCreatorDeletes(this,obj);
-        }
-    }
-    this.mlzDecodeDataObject = obj;
+	// This does need to run from this position, to avoid a fatal loop.
+	if (this._itemData[22] && this._itemData[22].slice(0, 9) === 'mlzsync1:') {
+		var data = {itemTypeID:this._itemTypeID};
+		var obj = Zotero.Sync.Server.Data.decodeMlzFields(this,data,this._itemData[22],{});
+		if (obj) {
+			Zotero.Sync.Server.Data.decodeMlzCreators(this,obj,this._creators.length);
+		}
+	}
 }
 
 
