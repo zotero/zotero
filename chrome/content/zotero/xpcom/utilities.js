@@ -309,6 +309,28 @@ Zotero.Utilities = {
 	},
 
 	/**
+	 * Clean and validate ISSN.
+	 * Return issn if valid, otherwise return false
+	 */
+	"cleanISSN":function(/**String*/ issn) {
+		issn = issn.replace(/[^0-9a-z]+/ig, '').toUpperCase()	//we only want to ignore punctuation, spaces
+						.match(/[0-9]{7}[0-9X]/);	//13 digit or 10 digit
+		if(!issn) return false;
+		issn = issn[0];
+
+		// Verify ISBN-10 checksum
+		var sum = 0;
+		for (var i = 0; i < 7; i++) {
+			if(issn[i] == 'X') return false;	//X can only be a check digit
+			sum += issn[i] * (8-i);
+		}
+		//check digit might be 'X'
+		sum += (issn[9] == 'X')? 10 : issn[9]*1;
+
+		return (sum % 11 == 0) ? issn.substring(0,4) + '-' + issn.substring(4) : false;
+	},
+	
+	/**
 	 * Convert plain text to HTML by replacing special characters and replacing newlines with BRs or
 	 * P tags
 	 * @param {String} str Plain text string
