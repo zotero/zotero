@@ -426,7 +426,7 @@ Zotero.Translators = new function() {
  *     s = Safari (WebKit & Nitro/Squirrelfish Extreme)
  *     i = Internet Explorer
  *     b = Bookmarklet
- *     v = Server (requires server translation when using a bookmarklet)
+ *     v = Server
  * @property {Object} configOptions Configuration options for import/export
  * @property {Object} displayOptions Display options for export
  * @property {Object} hiddenPrefs Hidden preferences configurable through about:config

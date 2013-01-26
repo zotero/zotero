@@ -366,8 +366,7 @@ Zotero.Translators.CodeGetter.prototype.getCodeFor = function(i) {
 
 const TRANSLATOR_REQUIRED_PROPERTIES = ["translatorID", "translatorType", "label", "creator", "target",
 		"priority", "lastUpdated"];
-var TRANSLATOR_PASSING_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["displayOptions", "configOptions",
-		"hiddenPrefs", "browserSupport", "code", "runMode"]);
+var TRANSLATOR_PASSING_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browserSupport", "code", "runMode"]);
 var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browserSupport"]);
 /**
  * @class Represents an individual translator
@@ -386,7 +385,7 @@ var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browser
  *     s = Safari (WebKit & Nitro/Squirrelfish Extreme)
  *     i = Internet Explorer
  *     b = Bookmarklet
- *     v = Server (requires server translation when using a bookmarklet)
+ *     v = Server
  * @property {Object} configOptions Configuration options for import/export
  * @property {Object} displayOptions Display options for export
  * @property {Object} hiddenPrefs Hidden preferences configurable through about:config
@@ -421,10 +420,6 @@ Zotero.Translator.prototype.init = function(info) {
 	} else {
 		this.runMode = Zotero.Translator.RUN_MODE_ZOTERO_STANDALONE;
 	}
-	
-	this._configOptions = info["configOptions"] ? info["configOptions"] : {};
-	this._displayOptions = info["displayOptions"] ? info["displayOptions"] : {};
-	this._hiddenPrefs = info["hiddenPrefs"] ? info["hiddenPrefs"] : {};
 	
 	if(this.translatorType & TRANSLATOR_TYPES["import"]) {
 		// compile import regexp to match only file extension
@@ -465,16 +460,6 @@ Zotero.Translator.prototype.getCode = function(callback) {
 		}
 	);
 }
-
-Zotero.Translator.prototype.__defineGetter__("displayOptions", function() {
-	return Zotero.Utilities.deepCopy(this._displayOptions);
-});
-Zotero.Translator.prototype.__defineGetter__("configOptions", function() {
-	return Zotero.Utilities.deepCopy(this._configOptions);
-});
-Zotero.Translator.prototype.__defineGetter__("hiddenPrefs", function() {
-	return Zotero.Utilities.deepCopy(this._hiddenPrefs);
-});
 
 /**
  * Log a translator-related error

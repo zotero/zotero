@@ -181,7 +181,7 @@ Zotero.Translate.Sandbox = {
 				throw(new Error("getPref: preference must be a string"));
 			}
 
-			var hp = translate._hiddenPrefs || {};	//_hiddenPrefs should already be {} if undefined
+			var hp = translate._translatorInfo.hiddenPrefs || {};
 
 			var value;
 			try {
@@ -757,6 +757,7 @@ Zotero.Translate.Base.prototype = {
 	"init":function() {
 		this._handlers = [];
 		this._currentState = null;
+		this._translatorInfo = null;
 		this.document = null;
 		this.location = null;
 	},
@@ -786,7 +787,6 @@ Zotero.Translate.Base.prototype = {
 		}
 		
 		this.translator = null;
-		this._setDisplayOptions = null;
 		
 		if(typeof(translator) == "object") {	// passed an object and not an ID
 			if(translator.translatorID) {
@@ -1352,7 +1352,6 @@ Zotero.Translate.Base.prototype = {
 		this._runningAsyncProcesses = 0;
 		this._returnValue = undefined;
 		this._aborted = false;
-		this._hiddenPrefs = translator.hiddenPrefs;
 		this.saveQueue = [];
 		
 		Zotero.debug("Translate: Parsing code for "+translator.label, 4);
@@ -1366,6 +1365,7 @@ Zotero.Translate.Base.prototype = {
 			this.complete(false, e);
 			return;
 		}
+		this._translatorInfo = this._sandboxManager.sandbox.ZOTERO_TRANSLATOR_INFO;
 		
 		if(callback) callback();
 	},
@@ -1848,7 +1848,7 @@ Zotero.Translate.Import.prototype._loadTranslator = function(translator, callbac
  * Prepare translator IO
  */
 Zotero.Translate.Import.prototype._loadTranslatorPrepareIO = function(translator, callback) {
-	var configOptions = this._sandboxManager.sandbox.ZOTERO_TRANSLATOR_INFO.configOptions;
+	var configOptions = this._translatorInfo.configOptions;
 	var dataMode = configOptions ? configOptions["dataMode"] : "";
 	
 	var me = this;
