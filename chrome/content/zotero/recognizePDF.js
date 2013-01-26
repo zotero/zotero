@@ -69,7 +69,7 @@ var Zotero_RecognizePDF = new function() {
 	 */
 	this.recognize = function(file, libraryID) {
 		const MAX_PAGES = 7;
-		const GOOGLE_SCHOLAR_QUERY_DELAY = 1500; // in ms
+		const GOOGLE_SCHOLAR_QUERY_DELAY = 2000; // in ms
 		
 		return _extractText(file, MAX_PAGES).then(function(lines) {
 			// Look for DOI - Use only first 80 lines to avoid catching article references
@@ -138,8 +138,12 @@ var Zotero_RecognizePDF = new function() {
 					}
 				}
 				
-				var nextLine = 0;
-				var queryGoogle = function() {
+				var nextLine = 0,
+				limited = false,
+				queryGoogle = function() {
+					// Once we hit the CAPTCHA once, don't keep trying
+					if(limited) throw new Zotero.Exception.Alert("recognizePDF.limit");
+
 					// Take the relevant parts of some lines (exclude hyphenated word)
 					var queryString = "", queryStringWords = 0;
 					while(queryStringWords < 25) {
@@ -180,11 +184,17 @@ var Zotero_RecognizePDF = new function() {
 						return Zotero.HTTP.promise("GET", url, {"responseType":"document"})
 					})
 					.then(function(xmlhttp) {
-						var deferred = Q.defer();
-						
-						var translate = new Zotero.Translate.Web();
+						if(Zotero.Utilities.xpath(doc, "//form[@action='Captcha']").length) {
+							// Hit CAPTCHA
+							limited = true;
+							throw new Zotero.Exception.Alert("recognizePDF.limit");
+						}
+
+						var doc = xmlhttp.response,
+							deferred = Q.defer(),
+							translate = new Zotero.Translate.Web();
 						translate.setTranslator("57a00950-f0d1-4b41-b6ba-44ff0fc30289");
-						translate.setDocument(Zotero.HTTP.wrapDocument(xmlhttp.response, url));
+						translate.setDocument(Zotero.HTTP.wrapDocument(doc, url));
 						translate.setHandler("translators", function(translate, detected) {
 							if(detected.length) {
 								deferred.resolve(_promiseTranslate(translate, libraryID));
@@ -197,6 +207,7 @@ var Zotero_RecognizePDF = new function() {
 						return deferred.promise;
 					}, function(e) {
 						if(e instanceof Zotero.HTTP.UnexpectedStatusException && e.status == 403) {
+							// Hit hard block
 							throw new Zotero.Exception.Alert("recognizePDF.limit");
 						}
 						throw e;
