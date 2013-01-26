@@ -128,7 +128,6 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "رونوشت یادکرد آیتم‌های انتخاب شده به حافظه موقت">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "رونوشت آیتم‌های انتخاب شده به حافظه موقت">
 <!ENTITY zotero.preferences.keys.importFromClipboard "درون‌برد از حافظه موقت">
-<!ENTITY zotero.preferences.keys.overrideGlobal "تلاش برای لغو کلیدهای میان‌بر ناسازگار">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "تغییرات فقط در پنجره‌های جدید اعمال می‌شوند">
 
 <!ENTITY zotero.preferences.prefpane.proxies "پیشکارها">

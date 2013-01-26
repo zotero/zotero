@@ -128,7 +128,6 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copier les citations du document sélectionné dans le presse-papiers">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copier les documents sélectionnés dans le presse-papiers">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importer du presse-papiers">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Essayer de gérer les conflits de raccourcis">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Les modifications ne prennent effet que dans les nouvelles fenêtres.">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Serveurs mandataires">

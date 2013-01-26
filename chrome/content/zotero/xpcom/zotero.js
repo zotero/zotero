@@ -2239,6 +2239,7 @@ Zotero.Keys = new function() {
 		for each(var action in actions) {
 			var action = action.substr(5); // strips 'keys.'
 			if (action == 'overrideGlobal') {
+				Zotero.Prefs.clear('keys.overrideGlobal');
 				continue;
 			}
 			_keys[Zotero.Prefs.get('keys.' + action)] = action;
@@ -2263,42 +2264,6 @@ Zotero.Keys = new function() {
 				keyElem.setAttribute('key', zKey);
 				if (useShift) {
 					keyElem.setAttribute('modifiers', 'accel shift');
-				}
-			}
-		}
-		
-		if (Zotero.Prefs.get('keys.overrideGlobal')) {
-			var keys = document.getElementsByTagName('key');
-			for each(var key in keys) {
-				try {
-					var id = key.getAttribute('id');
-				}
-				// A couple keys are always invalid
-				catch (e) {
-					continue;
-				}
-				
-				if (id == 'key_openZotero') {
-					continue;
-				}
-				
-				var mods = key.getAttribute('modifiers').split(/[\,\s]/);
-				var second = useShift ? 'shift' : 'alt';
-				// Key doesn't match a Zotero shortcut
-				if (mods.length != 2 || !((mods[0] == 'accel' && mods[1] == second) ||
-						(mods[0] == second && mods[1] == 'accel'))) {
-					continue;
-				}
-				
-				if (_keys[key.getAttribute('key')] || key.getAttribute('key') == zKey) {
-					// Don't override Redo on Fx3 Mac, since Redo and Zotero can coexist
-					if (zKey == 'Z' && key.getAttribute('key') == 'Z'
-							&& id == 'key_redo' && Zotero.isFx3 && Zotero.isMac) {
-						continue;
-					}
-					
-					Zotero.debug('Removing key ' + id + ' with accesskey ' + key.getAttribute('key'));
-					key.parentNode.removeChild(key);
 				}
 			}
 		}

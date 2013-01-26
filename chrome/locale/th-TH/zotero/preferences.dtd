@@ -128,7 +128,6 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "ทำสำเนารายการอ้างอิงที่เลือกไว้ไปยังคลิปบอร์ด">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "ทำสำเนารายการไปยังคลิปบอร์ด">
 <!ENTITY zotero.preferences.keys.importFromClipboard "นำเข้าจากคลิปบอร์ด">
-<!ENTITY zotero.preferences.keys.overrideGlobal "พยายามครอบงำทางลัดที่ขัดแย้งกัน">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "การเปลี่ยนแปลงจะมีผลกับหน้าต่างใหม่เท่านั้น">
 
 <!ENTITY zotero.preferences.prefpane.proxies "พร็อกซี่">

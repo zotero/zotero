@@ -159,6 +159,27 @@ Zotero.Translate.Sandbox = {
 		},
 		
 		/**
+		 * Gets a hidden preference that can be defined by hiddenPrefs in translator header
+		 *
+		 * @param {Zotero.Translate} translate
+		 * @param {String} pref Prefernce to be retrieved
+		 */
+		"getHiddenPref":function(translate, pref) {
+			if(typeof(pref) != "string") {
+				throw(new Error("getPref: preference must be a string"));
+			}
+
+			var hp = translate._translatorInfo.hiddenPrefs || {};
+
+			var value;
+			try {
+				value = Zotero.Prefs.get('translators.' + pref);
+			} catch(e) {}
+
+			return (value !== undefined ? value : hp[pref]);
+		},
+		
+		/**
 		 * For loading other translators and accessing their methods
 		 * 
 		 * @param {Zotero.Translate} translate
@@ -733,6 +754,7 @@ Zotero.Translate.Base.prototype = {
 	"init":function() {
 		this._handlers = [];
 		this._currentState = null;
+		this._translatorInfo = null;
 		this.document = null;
 		this.location = null;
 	},
@@ -762,7 +784,6 @@ Zotero.Translate.Base.prototype = {
 		}
 		
 		this.translator = null;
-		this._setDisplayOptions = null;
 		
 		if(typeof(translator) == "object") {	// passed an object and not an ID
 			if(translator.translatorID) {
@@ -1357,6 +1378,7 @@ Zotero.Translate.Base.prototype = {
 			this.complete(false, e);
 			return;
 		}
+		this._translatorInfo = this._sandboxManager.sandbox.ZOTERO_TRANSLATOR_INFO;
 		
 		if(callback) callback();
 	},
@@ -1827,7 +1849,7 @@ Zotero.Translate.Import.prototype._loadTranslator = function(translator, callbac
  * Prepare translator IO
  */
 Zotero.Translate.Import.prototype._loadTranslatorPrepareIO = function(translator, callback) {
-	var configOptions = this._sandboxManager.sandbox.ZOTERO_TRANSLATOR_INFO.configOptions;
+	var configOptions = this._translatorInfo.configOptions;
 	var dataMode = configOptions ? configOptions["dataMode"] : "";
 	
 	var me = this;

@@ -128,7 +128,6 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopírovať vybrané citácie do schránky">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopírovať vybrané položky do schránky">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importovať zo schránky">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Pokúsiť sa získať kontrolu v prípade konfliktu skratiek s inými rozšíreniami.">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Zmeny sa prejavia iba v novo otvorených oknách.">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxy">

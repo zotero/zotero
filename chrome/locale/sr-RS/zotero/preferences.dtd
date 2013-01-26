@@ -128,7 +128,6 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Умножи изабрани предмет цитата у списак исечака">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Умножи изабране ставке у списак исечака">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Покушај да премостиш сукобљене пречице">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Промене су постављене само у новом прозору">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">

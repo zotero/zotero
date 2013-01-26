@@ -60,7 +60,6 @@ pref("extensions.zotero.lastLongTagDelimiter", ";");
 pref("extensions.zotero.tagCloud", false);
 
 // Keyboard shortcuts
-pref("extensions.zotero.keys.overrideGlobal", false);
 pref("extensions.zotero.keys.openZotero", 'Z');
 pref("extensions.zotero.keys.toggleFullscreen", 'F');
 pref("extensions.zotero.keys.library", 'L');

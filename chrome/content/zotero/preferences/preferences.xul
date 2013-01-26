@@ -641,7 +641,6 @@ To add a new preference:
 			<preference id="pref-keys-copySelectedItemCitationsToClipboard" name="extensions.zotero.keys.copySelectedItemCitationsToClipboard" type="string"/>
 			<preference id="pref-keys-copySelectedItemsToClipboard" name="extensions.zotero.keys.copySelectedItemsToClipboard" type="string"/>
 			<preference id="pref-keys-importFromClipboard" name="extensions.zotero.keys.importFromClipboard" type="string"/>
-			<preference id="pref-keys-overrideGlobal" name="extensions.zotero.keys.overrideGlobal" type="bool"/>
 		</preferences>
 		
 		<grid>
@@ -713,8 +712,6 @@ To add a new preference:
 				</row>
 			</rows>
 		</grid>
-		
-		<checkbox label="&zotero.preferences.keys.overrideGlobal;" preference="pref-keys-overrideGlobal"/>
 		
 		<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
 		

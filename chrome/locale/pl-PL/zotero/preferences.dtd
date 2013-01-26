@@ -128,7 +128,6 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiuje wybrane odnośniki bibliograficzne do schowka">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiuj zaznaczony element do schowka">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importuj ze schowka">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Spróbuj pominąć powtarzające się skróty">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Zmiany zostaną zastosowane w nowym oknie">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Serwery proxy">

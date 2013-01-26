@@ -1664,7 +1664,7 @@ Zotero.Schema = new function(){
 			metadata.browserSupport = browserSupport;
 		}
 		
-		for each(var attr in ["configOptions", "displayOptions"]) {
+		for each(var attr in ["configOptions", "displayOptions", "hiddenPrefs"]) {
 			try {
 				var tags = xmlnode.getElementsByTagName(attr);
 				if(tags.length && tags[0].firstChild) {
