@@ -28,10 +28,6 @@
  */
 Components.utils.import("resource://zotero/q.js");
 
-const SUCCESS_IMAGE = "chrome://zotero/skin/tick.png";
-const FAILURE_IMAGE = "chrome://zotero/skin/cross.png";
-const LOADING_IMAGE = "chrome://global/skin/icons/loading_16.png";
-
 /**
  * Front end for recognizing PDFs
  * @namespace
@@ -73,6 +69,7 @@ var Zotero_RecognizePDF = new function() {
 	 */
 	this.recognize = function(file, libraryID) {
 		const MAX_PAGES = 7;
+		const GOOGLE_SCHOLAR_QUERY_DELAY = 1500; // in ms
 		
 		return _extractText(file, MAX_PAGES).then(function(lines) {
 			// Look for DOI - Use only first 80 lines to avoid catching article references
@@ -173,9 +170,15 @@ var Zotero_RecognizePDF = new function() {
 					
 					Zotero.debug("RecognizePDF: Query string "+queryString);
 					
-					// pass query string to Google Scholar and translate
-					var url = "http://scholar.google.com/scholar?q="+encodeURIComponent(queryString)+"&hl=en&lr=&btnG=Search";
-					return Zotero.HTTP.promise("GET", url, {"responseType":"document"})
+					var url = "http://scholar.google.com/scholar?q="+encodeURIComponent(queryString)+"&hl=en&lr=&btnG=Search",
+						delay = GOOGLE_SCHOLAR_QUERY_DELAY - (Date.now() - Zotero.HTTP.lastGoogleScholarQueryTime);
+
+					// Delay 
+					return (delay > 0 ? Q.delay(delay) : Q.when())
+					.then(function() {
+						Zotero.HTTP.lastGoogleScholarQueryTime = Date.now();
+						return Zotero.HTTP.promise("GET", url, {"responseType":"document"})
+					})
 					.then(function(xmlhttp) {
 						var deferred = Q.defer();
 						
@@ -186,7 +189,7 @@ var Zotero_RecognizePDF = new function() {
 							if(detected.length) {
 								deferred.resolve(_promiseTranslate(translate, libraryID));
 							} else {
-								deferred.reject("Detection with Google Scholar failed");
+								deferred.reject(new Zotero.Exception.Alert("recognizePDF.noMatches"));
 							}
 						});
 						translate.getTranslators();
@@ -194,7 +197,7 @@ var Zotero_RecognizePDF = new function() {
 						return deferred.promise;
 					}, function(e) {
 						if(e instanceof Zotero.HTTP.UnexpectedStatusException && e.status == 403) {
-							throw new Zotero.Exception.Alert("recognizePDF.recognizePDF.limit");
+							throw new Zotero.Exception.Alert("recognizePDF.limit");
 						}
 						throw e;
 					});
@@ -421,6 +424,10 @@ Zotero_RecognizePDF.ItemRecognizer.prototype._onWindowLoaded = function() {
  * @private
  */
 Zotero_RecognizePDF.ItemRecognizer.prototype._recognizeItem = function() {
+	const SUCCESS_IMAGE = "chrome://zotero/skin/tick.png";
+	const FAILURE_IMAGE = "chrome://zotero/skin/cross.png";
+	const LOADING_IMAGE = "chrome://global/skin/icons/loading_16.png";
+
 	if(!this._items.length) {
 		this._done();
 		return;

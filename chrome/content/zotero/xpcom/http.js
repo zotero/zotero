@@ -3,6 +3,8 @@
  * @namespace
  */
 Zotero.HTTP = new function() {
+	this.lastGoogleScholarQueryTime = 0;
+
 	/**
 	 * Exception returned for unexpected status when promise* is used
 	 * @constructor
