@@ -9,6 +9,9 @@ pref("extensions.zotero.hackUseCiteprocJsDateParser", false);
 pref("extensions.zotero.firstRun2", true);
 pref("extensions.zotero@chnm.gmu.edu.description", "chrome://zotero/locale/zotero.properties");
 
+pref("extensions.zotero.import.jurisdictionFallback", "us");
+pref("extensions.zotero.import.jurisdictionDefault", "");
+
 pref("extensions.zotero.useDataDir", false);
 pref("extensions.zotero.dataDir", '');
 pref("extensions.zotero.lastDataDir", '');

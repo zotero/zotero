@@ -52,28 +52,29 @@ const CSL_NAMES_MAPPINGS = {
  */
 const CSL_TEXT_MAPPINGS = {
 	"title":["title"],
-	"container-title":["publicationTitle",  "reporter", "code"], /* reporter and code should move to SQL mapping tables */
+	"container-title":["publicationTitle",  "reporter", "code", "album", "websiteTitle"], /* reporter and code should move to SQL mapping tables */
 	"collection-title":["seriesTitle", "series"],
-	"collection-number":["seriesNumber"],
+	"collection-number":["seriesNumber","assemblyNumber","regnalYear","yearAsVolume"],
 	"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
 	"publisher-place":["place"],
-	"authority":["court", "legislativeBody"],
+	"authority":["court", "legislativeBody", "issuingAuthority", "committee"],
 	"page":["pages"],
-	"volume":["volume"],
+	"volume":["volume","codeNumber"],
 	"issue":["issue"],
 	"number-of-volumes":["numberOfVolumes"],
 	"number-of-pages":["numPages"],	
 	"edition":["edition"],
 	"version":["version"],
-	"section":["section"],
-	"genre":["type"],
+	"section":["section","opus"],
+	"genre":["type","reign","supplementName","sessionType"],
+	"chapter-number":["session","meetingNumber"],
 	"source":["libraryCatalog"],
 	"dimensions": ["artworkSize", "runningTime"], 
 	"medium":["medium", "system"],
 	"scale":["scale"],
 	"archive":["archive"],
 	"archive_location":["archiveLocation"],
-	"event":["meetingName", "conferenceName"], /* these should be mapped to the same base field in SQL mapping tables */
+	"event":["meetingName", "conferenceName", "resolutionLabel"], /* these should be mapped to the same base field in SQL mapping tables */
 	"event-place":["place"],
 	"archive-place":["place"],
 	"abstract":["abstractNote"],
@@ -84,27 +85,26 @@ const CSL_TEXT_MAPPINGS = {
 	"call-number":["callNumber"],
 	"note":["extra"],
 	"number":["number"],
+	"rank-number":["priorityNumbers"],
+	"pending-number":["applicationNumber"],
 	"references":["history"],
 	"shortTitle":["shortTitle"],
 	"journalAbbreviation":["journalAbbreviation"],
-	"language":["language"]
+	"language":["language"],
+	"jurisdiction":["jurisdiction"]
 }
 
 /*
  * Mappings for dates
- */
-const CSL_DATE_MAPPINGS_VANILLA = {
-	"issued":"date",
-	"accessed":"accessDate"
-}
-const CSL_DATE_MAPPINGS_LAW = {
-	"original-date":"date",
-	"accessed":"accessDate"
-}
-const CSL_DATE_MAPPINGS_PATENT = {
-	"issued":"issueDate",
-	"original-date":"filingDate",
-	"accessed":"accessDate"
+*/
+const CSL_DATE_MAPPINGS = {
+	"issued":["date"],
+	"original-date":["newsCaseDate","priorityDate","originalDate","adoptionDate","dateDecided"],
+	"submitted":["filingDate"],
+	"accessed":["accessDate"],
+	"available-date":["openingDate"],
+	"event-date":["signingDate"],
+	"publication-date":["publicationDate"]
 }
 
 /*
@@ -129,7 +129,7 @@ const CSL_TYPE_MAPPINGS = {
 	'report':"report",
 	'bill':"bill",
 	'case':"legal_case",
-	'hearing':"bill",				// ??
+	'hearing':"hearing",				// ??
 	'patent':"patent",
 	'statute':"legislation",		// ??
 	'email':"personal_communication",
@@ -139,12 +139,45 @@ const CSL_TYPE_MAPPINGS = {
 	'forumPost':"post",
 	'audioRecording':"song",		// ??
 	'presentation':"speech",
-	'videoRecording':"motion_picture",
+	'videoRecording':"video",
 	'tvBroadcast':"broadcast",
 	'radioBroadcast':"broadcast",
 	'podcast':"song",			// ??
-	'computerProgram':"book"		// ??
+	'computerProgram':"book",		// ??
+	'periodical':'periodical',
+	'gazette':'gazette',
+	'regulation':'regulation',
+	'classic':'classic',
+	'treaty':'treaty'
 };
+
+/**
+ * Force Fields
+*/
+const CSL_FORCE_FIELD_CONTENT = {
+	"tvBroadcast":{
+		"genre":"television broadcast"
+	},
+	"radioBroadcast":{
+		"genre":"radio broadcast"
+	},
+	"instantMessage":{
+		"genre":"instant message"
+	},
+	"email":{
+		"genre":"email"
+	},
+	"podcast":{
+		"genre":"podcast"
+	}
+}
+
+const CSL_FORCE_REMAP = {
+	"periodical":{
+		"title":"container-title"
+	}
+}
+
 
 /**
  * @class Functions for text manipulation and other miscellaneous purposes
@@ -1700,6 +1733,7 @@ Zotero.Utilities = {
 				} else {
 					var fieldID = Zotero.ItemFields.getID(field),
 						baseMapping
+
 					if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)
 							&& (baseMapping = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, fieldID))) {
 						value = item[Zotero.ItemTypes.getName(baseMapping)];
@@ -1751,14 +1785,6 @@ Zotero.Utilities = {
 		}
 		
 		// get date variables
-		var CSL_DATE_MAPPINGS;
-		if (["legal_case","legislation"].indexOf(cslType) > -1) {
-			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
-		} else if ("patent" === cslType) {
-			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_PATENT;
-		} else {
-			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
-		}
 		for(var variable in CSL_DATE_MAPPINGS) {
 			var date = item[CSL_DATE_MAPPINGS[variable]];
 			if(date) {
@@ -1871,14 +1897,6 @@ Zotero.Utilities = {
 		}
 		
 		// get date variables
-		var CSL_DATE_MAPPINGS;
-		if (["legal_case","legislation"].indexOf(cslItem.type) > -1) {
-			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
-		} else if ("patent" === cslItem.type) {
-			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_PATENT;
-		} else {
-			CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
-		}
 		for(var variable in CSL_DATE_MAPPINGS) {
 			if(variable in cslItem) {
 				var field = CSL_DATE_MAPPINGS[variable],

@@ -382,13 +382,14 @@ Zotero.Translate.ItemSaver.prototype = {
 		// fields that should be handled differently
 		const skipFields = ["note", "notes", "itemID", "attachments", "tags", "seeAlso",
 							"itemType", "complete", "creators", "multi"];
-		
+
 		var typeID = Zotero.ItemTypes.getID(item.itemType);
 		var itemLanguage = undefined;
 		var defaultLanguage;
 		if (item.language) {
 			itemLanguage = item.language.split(/\s*[; ]\s*/)[0];
 		}
+
 		var fieldID;
 		for(var field in item) {
 			// loop through item fields
@@ -446,6 +447,25 @@ Zotero.Translate.ItemSaver.prototype = {
 				}
 			}
 		}
+		
+		var jurisdictionID = Zotero.ItemFields.getID('jurisdiction');
+		var fields = Zotero.ItemFields.getItemTypeFields(typeID);
+		if (fields.indexOf(jurisdictionID) > -1) {
+			if (["report","journalArticle"].indexOf(item.itemType) === -1) {
+				if (!newItem.getField(jurisdictionID)) {
+					var jurisdictionDefault = Zotero.Prefs.get("import.jurisdictionDefault");
+					var jurisdictionFallback = Zotero.Prefs.get("import.jurisdictionFallback");
+					if (jurisdictionDefault) {
+						newItem.setField(jurisdictionID,jurisdictionDefault);
+					} else if (jurisdictionFallback) {
+						newItem.setField(jurisdictionID,jurisdictionFallback);
+					} else {
+						newItem.setField(jurisdictionID,"us");
+					}
+				}
+			}
+		}
+
 	},
 	
 	"_saveCreators":function(item, newItem) {

@@ -270,9 +270,6 @@ var ZoteroPane = new function()
 				localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
 			});
 		}
-		for (var key in Zotero.EXTENDED_TYPES) {
-			itemTypes.push(Zotero.EXTENDED_TYPES[key].data);
-		}
 		var collation = Zotero.getLocaleCollation();
 		itemTypes.sort(function(a, b) {
 			return collation.compareString(1, a.localized, b.localized);
@@ -320,9 +317,6 @@ var ZoteroPane = new function()
 				localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
 			});
 		}
-		for (var key in Zotero.EXTENDED_TYPES) {
-			itemTypes.push(Zotero.EXTENDED_TYPES[key].data);
-		}
 		var collation = Zotero.getLocaleCollation();
 		itemTypes.sort(function(a, b) {
 			return collation.compareString(1, a.localized, b.localized);
@@ -369,11 +363,11 @@ var ZoteroPane = new function()
 		if(this.collectionsView) this.collectionsView.unregister();
 		if(this.itemsView) this.itemsView.unregister();
 		
-        try {
-		    observerService.removeObserver(_reloadObserver, "zotero-reloaded");
-        } catch (e) {
-            Zotero.debug("Warning: failure removing observer on window close.");
-        }
+		try {
+			observerService.removeObserver(_reloadObserver, "zotero-reloaded");
+		} catch (e) {
+			Zotero.debug("Warning: failure removing observer on window close.");
+		}
 	}
 	
 	/**
@@ -4083,6 +4077,13 @@ var ZoteroPane = new function()
 	 */
 	this.openAboutDialog = function() {
 		window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome');
+	}
+	
+	/**
+	 * Opens the MLZ Welcome dialog
+	 */
+	this.openMlzWelcomeDialog = function() {
+		window.openDialog('chrome://zotero/content/mlzwelcome.xul', 'mlzwelcome', 'chrome');
 	}
 	
 	/**

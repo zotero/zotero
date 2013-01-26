@@ -109,7 +109,7 @@ hbox.zotero-date-field-status > label
 	padding: 0 1px 0 1px !important;
 }
 
-#item-type-menu
+#item-type-menu, #jurisdiction-menu
 {
 	-moz-appearance: none;
 	color: black;
@@ -126,18 +126,18 @@ hbox.zotero-date-field-status > label
 	background-color: transparent;
 }
 
-#item-type-menu > .menulist-label-box
+#item-type-menu > .menulist-label-box, #jurisdiction-menu > .menulist-label-box
 {
 	-moz-box-flex: 0 !important;
 }
 
-#item-type-menu > .menulist-label-box, #item-type-menu > .menulist-label-box > .menulist-label
+#item-type-menu > .menulist-label-box, #item-type-menu > .menulist-label-box > .menulist-label, #jurisdiction-menu > .menulist-label-box, #jurisdiction-menu > .menulist-label-box > .menulist-label
 {
 	margin: 0 !important;
 	padding: 0 !important;
 }
 
-#item-type-menu > .menulist-dropmarker
+#item-type-menu > .menulist-dropmarker, #jurisdiction-menu > .menulist-dropmarker
 {
 	display: none;
 }

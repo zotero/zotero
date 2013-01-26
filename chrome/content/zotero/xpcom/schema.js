@@ -3487,6 +3487,399 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE IF EXISTS creatorDataAlt");
 				}
 
+				if (i==77 && dbMultilingualVersion==1) {
+
+					// Date field IDs
+					var dateFieldIDs = [14, 27, 52, 96, 100, 121, 1265, 1266, 1268, 1272, 1277, 1278, 1279];
+
+					// Mapping table for type conversions
+					var typeMap = {};
+					typeMap["classic"] = {
+						newItemTypeID:1264,
+						oldItemTypeID:2,
+						fieldRemap:{},
+						fieldRemove:[3,4,6,8,11,30,45],
+						creatorRemap:{},
+						creatorRemove:[3,5]
+					};
+					typeMap["periodical"] = {
+						newItemTypeID:2,
+						oldItemTypeID:2,
+						fieldRemap:{},
+						fieldRemove:[],
+						creatorRemap:{},
+						creatorRemove:[]
+							};
+					typeMap["treaty"] = {
+						newItemTypeID:1262,
+						oldItemTypeID:20,
+						fieldRemap:{
+							"100":14,
+							"112":110,
+							"36":43,
+							"55":4
+						},
+						fieldRemove:[36,40,42,101],
+						creatorRemap:{},
+						creatorRemove:[]
+					};
+					typeMap["gazette"] = {
+						newItemTypeID:1261,
+						oldItemTypeID:20,
+						fieldRemap:{},
+						fieldRemove:[],
+						creatorRemap:{},
+						creatorRemove:[]
+					};
+					typeMap["regulation"] = {
+						newItemTypeID:1263,
+						oldItemTypeID:20,
+						fieldRemap:{},
+						fieldRemove:[],
+						creatorRemap:{},
+						creatorRemove:[]
+					};
+
+					// Mapping table for field and creator inserts
+					var typeFieldsMap = {}
+					// classic
+					typeFieldsMap["1264"] = {
+						fieldInsert: {"volume":4},
+						creatorInsert: {}
+					};
+					// treaty
+					typeFieldsMap["1262"] = {
+						fieldInsert: {
+							"container-title":43,
+							"volume":4,
+							"page":10,
+							"available-date":1278,
+							"original-date":1279,
+							"event-date":1277
+						},
+						creatorInsert: {}
+					};
+					// regulation
+					typeFieldsMap["1263"] = {
+						fieldInsert: {
+							"jurisdiction":1261,
+							"publisher":8,
+							"issued":1268
+						},
+						creatorInsert: {}
+					};
+					// gazette
+					typeFieldsMap["1261"] = {
+						fieldInsert: {
+							"jurisdiction":1261,
+							"volume":55
+						},
+						creatorInsert: {}
+					};
+					// report
+					typeFieldsMap["15"] = {
+						fieldInsert: {
+							"jurisdiction":1261
+						},
+						creatorInsert: {}
+					};
+					// podcast
+					typeFieldsMap["31"] = {
+						fieldInsert: {
+							"issued":14,
+							"publisher":8
+						},
+						creatorInsert: {}
+					};
+					// audioRecording
+					typeFieldsMap["26"] = {
+						fieldInsert: {
+							"container-title":1273,
+							"issued":14,
+							"original-date":1272,
+							"publisher":8,
+							"section":1274
+						},
+						creatorInsert: {}
+					};
+					// statute
+					typeFieldsMap["20"] = {
+						fieldInsert: {
+							"jurisdiction":1261,
+							"collection-number":1270,
+							"genre":1269,
+							"issued":1268,
+							"publisher":8,
+							"volume":55
+						},
+						creatorInsert: {}
+					};
+					// case
+					typeFieldsMap["17"] = {
+						fieldInsert: {
+							"jurisdiction":1261,
+							"archive":123,
+							"archive_location":19,
+							"collection-number":1267,
+							"event-place":7,
+							"genre":1271,
+							"issue":5,
+							"issued":1268,
+							"original-date":14
+						},
+						creatorInsert: {}
+					};
+					// patent
+					typeFieldsMap["19"] = {
+						fieldInsert: {
+							"jurisdiction":1261,
+							"original-date":1266
+						},
+						creatorInsert: {"recipient":16}
+					};
+					// artwork
+					typeFieldsMap["12"] = {
+						fieldInsert: {
+							"container-title":91
+						},
+						creatorInsert: {}
+					};
+					// hearing
+					typeFieldsMap["18"] = {
+						fieldInsert: {
+							"jurisdiction":1261,
+							"collection-number":1262,
+							"event":1263,
+							"genre":1264,
+							"archive_location":19,
+							"container-title":43,
+							"chapter-number":1275
+						},
+						creatorInsert: {}
+					};
+					// bill
+					typeFieldsMap["16"] = {
+						fieldInsert: {
+							"jurisdiction":1261,
+							"event":1263,
+							"collection-number":1262,
+							"genre":1264,
+							"archive_location":19,
+							"container-title":43,
+							"volume":94
+						},
+						creatorInsert: {
+							"author":12,
+							"original-author":12
+						}
+					};
+					// newspaperArticle
+					typeFieldsMap["6"] = {
+						fieldInsert: {
+							"jurisdiction":1261,
+							"original-date":1265
+						},
+						creatorInsert: {}
+					};
+					// Do not touch records that have already been converted
+					var extras = Zotero.DB.query("SELECT itemID,libraryID,key,itemTypeID,value FROM items NATURAL JOIN itemData NATURAL JOIN itemDataValues WHERE fieldID=22 AND NOT value LIKE 'mlzsync1:%' AND value LIKE '%{:%'");
+					var t;
+					for each(row in extras) {
+						var itemTypeID = row.itemTypeID;
+						// Fetch the Extra field content
+						var extra = row.value;
+						var extraSupp = "";
+						var lst = extra.split(/({:[-_a-z]+:[^}]+})/);
+						for (var j=lst.length-2; j>-1; j += -2) {
+							var m = lst[j].match(/{:([-_a-z]+):\s*([^}]+)\s*}/);
+							var cslKey = m[1];
+							var val = m[2];
+
+							// If a type is specified, convert the item, convert fields, and remove unused fields to Extra
+							if (typeMap[m[2]]) {
+								t = typeMap[m[2]];
+								itemTypeID = t.newItemTypeID;
+								// Change item type ID
+								Zotero.DB.query("UPDATE items SET itemTypeID=? WHERE itemID=? AND itemTypeID=?",[t.newItemTypeID,row.itemID,t.oldItemTypeID]);
+								// Change field IDs
+								for (var oFieldID in t.fieldRemap) {
+									Zotero.DB.query("UPDATE itemData SET fieldID=? WHERE itemID=? AND fieldID=?",[t.fieldRemap[oFieldID],row.itemID,oFieldID]);
+								}
+								// Change creator type IDs
+								for (var oCreatorTypeID in t.creatorRemap) {
+
+									Zotero.DB.query("UPDATE itemCreators SET creatorTypeID=? WHERE itemID=? AND creatorTypeID=?",[t.creatorRemap[oCreatorTypeID],row.itemID,oCreatorTypeID]);
+								}
+								// Remove creators (just a variation on remap in this case)
+								for each(var oCreatorTypeID in t.creatorRemove) {
+									Zotero.DB.query("UPDATE itemCreators SET creatorTypeID=? WHERE itemID=? AND creatorTypeID=?",[2,row.itemID,oCreatorTypeID]);
+								}
+								// Remove fields to Extra
+								var fieldIDs = [];
+								var fieldSQL = [];
+								for each(var fieldID in t.fieldRemove) {
+									fieldIDs.push(fieldID);
+									fieldSQL.push('?');
+								}
+								if (fieldIDs.length) {
+									fieldSQL = fieldSQL.join(",")
+									var sql = "SELECT itemID,fieldName,fieldID,value FROM items NATURAL JOIN itemData NATURAL JOIN fields NATURAL JOIN itemDataValues WHERE itemID=? AND itemTypeID=? AND fieldID IN ("+fieldSQL+")";
+									var removeFields = Zotero.DB.query(sql,[row.itemID,t.newItemTypeID].concat(fieldIDs));
+									for (var j in removeFields) {
+										var removeFieldInfo = removeFields[j];
+										// Append the data to the Extra field content
+										extraSupp = extraSupp + " [" + Zotero.getString("itemFields."+removeFieldInfo.fieldName)+": "+removeFieldInfo.value+"]";
+										// Remove field row
+										Zotero.DB.query("DELETE FROM itemData WHERE itemID=? AND fieldID=?",[row.itemID,removeFieldInfo.fieldID]);
+									}
+								}
+								// Removing type hack code from Extra
+								var m = extra.match(/(.*){:type:[^}]+}\s*(.*)/);
+								if (m) {
+									extra = m[1] + m[2];
+								}
+							}
+						}
+						for (var j=lst.length-2; j>-1; j += -2) {
+							var m = lst[j].match(/{:([-_a-z]+):\s*([^}]+)\s*}/);
+							var cslKey = m[1];
+							var cslKeyVal = m[2];
+
+							if (typeFieldsMap[itemTypeID]) {
+								t = typeFieldsMap[itemTypeID];
+								if (t.fieldInsert[cslKey]) {
+
+									if (dateFieldIDs.indexOf(t.fieldInsert[cslKey]) > -1) {
+										if (!cslKeyVal.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2} .*/)) {
+											cslKeyVal = "0000-00-00 "+cslKeyVal;
+										}
+									}
+									var hasFieldData = Zotero.DB.valueQuery("SELECT COUNT(*) FROM itemData WHERE itemID=? AND fieldID=?",[row.itemID,t.fieldInsert[cslKey]]);
+									if (hasFieldData) {
+										// Append to field? Or abort and leave on Extra? The latter, for now.
+									} else {
+										var hasDataValue = Zotero.DB.valueQuery("SELECT COUNT(*) FROM itemDataValues WHERE value=?",[cslKeyVal]);
+										if (!hasDataValue) {
+											Zotero.DB.query("INSERT INTO itemDataValues VALUES (NULL,?)",[cslKeyVal]);
+										}
+										var valueID = Zotero.DB.valueQuery("SELECT valueID FROM itemDataValues WHERE value=?",[cslKeyVal]);
+										Zotero.DB.query("INSERT INTO itemData VALUES (?, ?, ?)",[row.itemID,t.fieldInsert[cslKey],valueID]);
+										// Remove variable hack code from Extra
+										// XXX Build a compiled regexp with the variable name
+										var rex = new RegExp("(.*){:" + cslKey + ":[^}]+}\s*(.*)");
+										var m = extra.match(rex);
+										if (m) {
+											extra = m[1] + m[2];
+										}
+									}
+								}
+								if (t.creatorInsert[cslKey]) {
+									// Split the value to firstName and lastName and set fieldMode to 1 or 0
+									var l = cslKeyVal.split(/\s*\|\|\s*/);
+									var lastName = l[0];
+									var firstName = l[1] ? l[1] : "";
+									if (!lastName) {
+										continue;
+									}
+									var fieldMode = 1;
+									if (firstName) {
+										fieldMode = 0;
+									}
+									// Look in creatorData for an entry with matching firstName and lastName, or matching combined
+									var hasNameData;
+									if (fieldMode) {
+										hasNameData = Zotero.DB.valueQuery("SELECT COUNT(*) FROM creatorData WHERE firstName IS NULL AND lastName=? AND fieldMode=?",[lastName,fieldMode]);
+									} else {
+										hasNameData = Zotero.DB.valueQuery("SELECT COUNT(*) FROM creatorData WHERE firstName=? AND lastName=? AND fieldMode=?",[firstName,lastName,fieldMode]);
+									}
+									if (!hasNameData) {
+										if (fieldMode === 1) {
+											Zotero.DB.query("INSERT INTO creatorData VALUES (NULL, NULL, ?, NULL, ?, NULL)",[lastName,fieldMode]);
+										} else {
+											Zotero.DB.query("INSERT INTO creatorData VALUES (NULL, ?, ?, NULL, ?, NULL)",[firstName,lastName,fieldMode]);
+										}
+									}
+									// Insert value if necessary and get creatorDataID
+									var creatorDataID;
+									if (fieldMode === 1) {
+										creatorDataID = Zotero.DB.valueQuery("SELECT creatorDataID FROM creatorData WHERE firstName IS NULL AND lastName=? AND fieldMode=?",[lastName,fieldMode]);
+									} else {
+										creatorDataID = Zotero.DB.valueQuery("SELECT creatorDataID FROM creatorData WHERE firstName=? AND lastName=? AND fieldMode=?",[firstName,lastName,fieldMode]);
+									}
+									// Look in creators IN THIS LIBRARY for creatorDataID
+									var hasCreatorID;
+									if (!row.libraryID) {
+										hasCreatorID = Zotero.DB.valueQuery("SELECT COUNT(*) FROM creators WHERE key=? AND libraryID IS NULL AND creatorDataID=?",[row.key,creatorDataID])
+									} else {
+										hasCreatorID = Zotero.DB.valueQuery("SELECT COUNT(*) FROM creators WHERE key=? AND libraryID=? AND creatorDataID=?",[row.key,row.libraryID,creatorDataID])
+									}
+									// Insert value if necessary and get creatorID
+									if (!hasCreatorID) {
+										if (!row.libraryID) {
+											Zotero.DB.query("INSERT INTO creators VALUES (NULL, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, ?)",[creatorDataID,row.key]);
+										} else {
+											Zotero.DB.query("INSERT INTO creators VALUES (NULL, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?)",[creatorDataID,row.libraryID,row.key]);
+										}
+									}
+									var creatorID;
+									if (!row.libraryID) {
+										creatorID = Zotero.DB.valueQuery("SELECT creatorID FROM creators WHERE creatorDataID=? AND libraryID IS NULL AND key=?",[creatorDataID,row.key]);
+									} else {
+										creatorID = Zotero.DB.valueQuery("SELECT creatorID FROM creators WHERE creatorDataID=? AND libraryID=? AND key=?",[creatorDataID,row.libraryID,row.key]);
+									}
+									
+									// Look in itemCreators on this itemID for creatorID with the same creatorTypeID
+									var hasItemCreator = Zotero.DB.valueQuery("SELECT COUNT(*) FROM itemCreators WHERE itemID=? AND creatorID=? AND creatorTypeID=?",[row.itemID,creatorID,t.creatorInsert[cslKey]]);
+									// If it's not already in there, insert it, incrementing the orderIndex
+									if (!hasItemCreator) {
+										var maxIndex = Zotero.DB.valueQuery("SELECT MAX(orderIndex) FROM itemCreators WHERE itemID=?",[row.itemID]);
+										maxIndex += 1;
+										Zotero.DB.query("INSERT INTO itemCreators VALUES (?, ?, ?, ?)",[row.itemID,creatorID,t.creatorInsert[cslKey],maxIndex]);
+									}
+									// Remove variable hack code from Extra
+									// XXX Build a compiled regexp with the variable name
+									var rex = new RegExp("(.*){:" + cslKey + ":[^}]+}\s*(.*)");
+									var m = extra.match(rex);
+									if (m) {
+										extra = m[1] + m[2];
+									}
+								}
+							}
+						}
+						// Remove actioned items from Extra, and append the data from those that were removed.
+						extra += extraSupp;
+						if (extra !== row.value) {
+							if (extra) {
+								// Get a data ID for the new content
+								var hasValueID = Zotero.DB.valueQuery("SELECT COUNT(*) FROM itemDataValues WHERE value=?",[extra]);
+								var valueID;
+								if (!hasValueID) {
+									Zotero.DB.query("INSERT INTO itemDataValues VALUES (NULL, ?)",[extra]);
+								}
+								valueID = Zotero.DB.valueQuery("SELECT valueID FROM itemDataValues WHERE value=?",[extra]);
+								// Set the data ID on itemData
+								Zotero.DB.query("UPDATE itemData SET valueID=? WHERE itemID=? AND fieldID=?",[valueID,row.itemID,22]);
+								
+							} else {
+								Zotero.DB.query("DELETE from itemData WHERE itemID=? AND fieldID=?",[row.itemID,22]);
+							}
+							// Mark actioned items with current timestamp to force sync-up
+							Zotero.DB.query("UPDATE items SET dateModified=? WHERE itemID=?",[Zotero.DB.transactionDateTime,row.itemID]);
+							Zotero.DB.query("UPDATE items SET clientDateModified=? WHERE itemID=?",[Zotero.DB.transactionDateTime,row.itemID]);
+						}
+					}
+					// Force update of any entries with multilingual content
+					var sql = "SELECT itemID FROM items"
+						+ " WHERE"
+						+ " itemID in (SELECT DISTINCT itemID FROM itemDataAlt) OR"
+						+ " itemID in (SELECT DISTINCT itemID FROM itemCreatorsAlt)";
+					var localMulti = Zotero.DB.query(sql);
+					for each(row in localMulti) {
+						Zotero.DB.query("UPDATE items SET dateModified=? WHERE itemID=?",[Zotero.DB.transactionDateTime,row.itemID]);
+						Zotero.DB.query("UPDATE items SET clientDateModified=? WHERE itemID=?",[Zotero.DB.transactionDateTime,row.itemID]);
+					}
+				}
+
 				Zotero.wait();
 			}
 			
@@ -3494,12 +3887,12 @@ Zotero.Schema = new function(){
 				_updateDBVersion('userdata', 76);
 			} else {
 
-			// TODO
-			//
-			// Replace customBaseFieldMappings to fix FK fields/customField -> customFields->customFieldID
-			// If libraryID set, make sure no relations still use a local user key, and then remove on-error code in sync.js
-			
-			_updateDBVersion('userdata', toVersion);
+				// TODO
+				//
+				// Replace customBaseFieldMappings to fix FK fields/customField -> customFields->customFieldID
+				// If libraryID set, make sure no relations still use a local user key, and then remove on-error code in sync.js
+
+			    _updateDBVersion('userdata', toVersion);
 			}
 			_updateDBVersion('multilingual', toMultilingualVersion);
 			

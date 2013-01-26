@@ -1,120 +1,98 @@
 // Extended fields needed to support the MLZ styles
 
-Zotero.EXTENDED_TYPES = {
-	"classic":{
-		"realID":2,
-		"data":{realID:2,id:"classic",name:"classic",localized:"Classic"}
-	},
-	"periodical":{
-		"realID":2,
-		"data":{realID:2,id:"periodical",name:"periodical",localized:"Periodical"}
-	},
-	"gazette":{
-		"realID":20,
-		"data":{realID:20,id:"gazette",name:"gazette",localized:"Gazette"}
-	},
-	"treaty":{
-		"realID":20,
-		"data":{realID:20,id:"treaty",name:"treaty",localized:"Treaty"}
-	},
-	"regulation":{
-		"realID":20,
-		"data":{realID:20,id:"regulation",name:"regulation",localized:"Regulation"}
+Zotero.EXTENDED_CREATORS = {
+	"patent":{
+		"recipient":"recipient"
 	}
-};
+}
+
+Zotero.EXTENDED_TYPES = {
+	"gazette":"statute",
+	"regulation":"statute",
+	"classic":"manuscript",
+	"treaty":"document"
+}
 
 Zotero.EXTENDED_FIELDS = {
-	"article-newspaper": {
-		"fields": [
-			"original-date"
-		],
-		"jurisdiction": true
+	"newspaperArticle": {
+		"jurisdiction":"jurisdiction",
+		"newsCaseDate":"original-date",
+        "court":"authority"
 	},
 	"bill": {
-		"fields": [
-			"author", 
-			"collection-number", 
-			"event", 
-			"event-date", 
-			"genre", 
-			"original-author", 
-			"volume",
-            "archive_location"
-		], 
-		"jurisdiction": true, 
-		"types": [
-			"gazette", 
-			"treaty"
-		]
+		"jurisdiction":"jurisdiction",
+		"resolutionLabel":"event",
+		"assemblyNumber":"collection-number",
+		"sessionType":"genre",
+		"archiveLocation":"archive_location",
+		"reporter":"container-title"
 	}, 
-	"book": {
-		"types": [
-			"classic", 
-			"periodical"
-		]
-	}, 
-	"broadcast": {
-		"fields": [
-			"director", 
-			"genre"
-		]
-	}, 
-	"graphic": {
-		"fields": [
-			"container-title"
-		]
-	}, 
-	"legal_case": {
-		"fields": [
-			"archive", 
-			"archive_location", 
-			"collection-number", 
-			"event-place", 
-			"genre", 
-			"issue", 
-			"issued", 
-			"original-date"
-		],
-		"jurisdiction": true
-	}, 
-	"legislation": {
-		"fields": [
-			"collection-number", 
-			"genre", 
-			"issued", 
-			"publisher", 
-			"volume"
-		],
-		"jurisdiction": true 
-	}, 
-	"map": {
-		"fields": [
-			"scale"
-		]
+	"hearing":{
+		"jurisdiction":"jurisdiction",
+		"assemblyNumber":"collection-number",
+		"resolutionLabel":"event",
+		"sessionType":"genre",
+		"archiveLocation":"archive_location",
+		"reporter":"container-title",
+		"meetingName":"chapter-number"
+	},
+	"artwork": {
+		"websiteTitle":"container-title"
 	}, 
 	"patent": {
-		"fields": [
-			"original-date", 
-			"recipient"
-		],
-		"jurisdiction": true
+		"jurisdiction":"jurisdiction",
+		"priorityDate":"original-date"
 	}, 
-	"personal_communication": {
-		"fields": [
-			"genre"
-		]
+	"case": {
+		"jurisdiction":"jurisdiction",
+		"place":"event-place",
+		"yearAsVolume":"collection-number",
+		"publisher": "publisher",
+		"publicationDate":"publication-date",
+		"supplementName":"genre",
+		"issue":"issue",
+		"archive":"archive",
+		"archiveLocation":"archive_location"
 	}, 
+	"statute": {
+		"jurisdiction":"jurisdiction",
+		"publisher":"publisher",
+		"publicationDate":"publication-date",
+		"reign":"genre",
+		"regnalYear":"collection-number"
+	}, 
+	"audioRecording": {
+		"album":"container-title",
+		"opus":"section",
+		"originalDate":"original-date",
+		"publisher":"publisher"
+	},
+	"podcast": {
+		"date":"issued",
+		"publisher":"publisher"
+	},
 	"report": {
-		"jurisdiction": true
-	}, 
-	"song": {
-		"fields": [
-			"container-title", 
-			"issued", 
-			"original-date", 
-			"publisher", 
-			"section"
-		]
+		"jurisdiction":"jurisdiction"
+	},
+	"gazette": {
+		"jurisdiction":"jurisdiction"
+	},
+	"regulation": {
+		"jurisdiction":"jurisdiction",
+		"publisher":"publisher",
+		"publicationDate":"publication-date"
+	},
+	"treaty": {
+		"reporter":"container-title",
+		"volume":"volume",
+		"pages":"page",
+		"section":"section",
+		"openingDate":"available-date",
+		"adoptionDate":"original-date",
+		"signingDate":"event-date"
+	},
+	"classic":{
+		"volume":"volume"
 	}
 }
 
@@ -171,14 +149,14 @@ Zotero.LANGUAGE_NAMES = {
 }
 
 Zotero.DOCUMENT_MULTI_PREFERENCES = [
-    "citationTranslation",
-    "citationTransliteration",
-    "citationSort",
-    "citationLangPrefsPersons",
-    "citationLangPrefsInstitutions",
-    "citationLangPrefsTitles",
-    "citationLangPrefsPublishers",
-    "citationLangPrefsPlaces"
+	"citationTranslation",
+	"citationTransliteration",
+	"citationSort",
+	"citationLangPrefsPersons",
+	"citationLangPrefsInstitutions",
+	"citationLangPrefsTitles",
+	"citationLangPrefsPublishers",
+	"citationLangPrefsPlaces"
 ];
 
 Zotero.LANGUAGE_INDEX = {}
@@ -214,61 +192,9 @@ Zotero.setupLocale = function(document) {
 
 		// Get the list of locales and assign names to each item
 		var locales = [];
-        var locale;
+		var locale;
  		while(availableLocales.hasMore()) {
 			locale = availableLocales.getNext();
-			locales.push({value: locale, label: Zotero.LANGUAGE_NAMES[locale]});
-			if (locale == selectedLocale) {
-				// Is this the current locale?
-				localeMenulist.setAttribute('label', Zotero.LANGUAGE_NAMES[locale]);
-				localeMenulist.setAttribute('value', locale);
-			}
-		}
-		// Sort the list by name
-		locales.sort( function(a,b){return a.label.localeCompare(b.label)} );
-        for (var i = 0, ilen = locales.length; i < ilen; i += 1) {
-            Zotero.LANGUAGE_INDEX[locales[i].value] = i;
-        }
-		// Render the list
-		for (var i = 0, ilen = locales.length; i < ilen; i += 1) {
-			var locale = locales[i];
-			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("value", locale.value);
-			menuitem.setAttribute("label", locale.label);	
-			menupopup.appendChild(menuitem);
-		}
-
-/////
-
-		var availableLocales = toolkitChromeReg.getLocalesForPackage("zotero");
-		var selectedLocale = Zotero.Prefs.get('export.bibliographyLocale');
-		if (!selectedLocale) {
-			Zotero.Prefs.set('export.bibliographyLocale', 'en-US');
-		}
-
-		var localeMenulist = document.getElementById("locale-menulist");
-		// Wipe out any existing menupopup
-		if (localeMenulist.firstChild) {
-			localeMenulist.removeChild(firstChild);
-		}
-		// Set empty popup
-		var menupopup = document.createElement('menupopup');
-		localeMenulist.appendChild(menupopup);
-		
-		var selectedItem = null;
-
-		// Get the list of locales and assign names to each item
-		var locales = [];
-		var extraLocaleList = ["lt"];
-		var extraLocaleCount = extraLocaleList.length;
-		var locale;
- 		while(extraLocaleCount) {
-			if (availableLocales.hasMore()) {
-				locale = availableLocales.getNext();
-			} else {
-				extraLocaleCount += -1;
-				locale = extraLocaleList[extraLocaleCount];
-			}
 			locales.push({value: locale, label: Zotero.LANGUAGE_NAMES[locale]});
 			if (locale == selectedLocale) {
 				// Is this the current locale?
@@ -289,8 +215,58 @@ Zotero.setupLocale = function(document) {
 			menuitem.setAttribute("label", locale.label);	
 			menupopup.appendChild(menuitem);
 		}
+
+/////
+
+		// XXXX This is wrong. This should be a list of actually available CSL
+		// locales derived from files under chrome/content/zotero/locale/csl,
+        // but I have no idea how to obtain that list from Firefox.
+
+		//var availableLocales = toolkitChromeReg.getLocalesForPackage("zotero");
+		var availableLocales = [];
+        for (var key in Zotero.CiteProc.CSL.LANG_BASES) {
+            availableLocales.push(key);
+        }
+		var selectedLocale = Zotero.Prefs.get('export.bibliographyLocale');
+		if (!selectedLocale || !availableLocales[selectedLocale]) {
+			Zotero.Prefs.set('export.bibliographyLocale', 'en');
+		}
+
+		var localeMenulist = document.getElementById("locale-menulist");
+		// Wipe out any existing menupopup
+		if (localeMenulist.firstChild) {
+			localeMenulist.removeChild(firstChild);
+		}
+		// Set empty popup
+		var menupopup = document.createElement('menupopup');
+		localeMenulist.appendChild(menupopup);
+		
+		var selectedItem = null;
+
+		// Get the list of locales and assign names to each item
+		var locale;
+        var locales = [];
+        for (var i=0, ilen=availableLocales.length; i<ilen; i += 1) {
+            locale = availableLocales[i];
+			locales.push({value: locale, label: locale});
+			if (locale == selectedLocale) {
+				// Is this the current locale?
+				localeMenulist.setAttribute('label', locale);
+				localeMenulist.setAttribute('value', locale);
+			}
+        }
+		// Sort the list by name
+		locales.sort( function(a,b){return a.label.localeCompare(b.label)} );
+		// Render the list
+		for (var i = 0, ilen = locales.length; i < ilen; i += 1) {
+			var locale = locales[i];
+			var menuitem = document.createElement("menuitem");
+			menuitem.setAttribute("value", locale.value);
+			menuitem.setAttribute("label", locale.label);	
+			menupopup.appendChild(menuitem);
+		}
 	} catch (err) {
-		Zotero.debug ("XXX Failed to render locale menulist: " + err);	
+		Zotero.debug ("PPP Failed to render locale menulist: " + err);	
 	}	
 }
 

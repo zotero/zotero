@@ -145,16 +145,12 @@ Zotero.Cite.System.retrieveItem = function(item) {
 	}
 
 	// get date variables
-	var CSL_DATE_MAPPINGS;
-	if (["legal_case","legislation"].indexOf(cslType) > -1) {
-		CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
-	} else if ("patent" === cslType) {
-		CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_PATENT;
-	} else {
-		CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
-	}
 	for(var variable in CSL_DATE_MAPPINGS) {
-		var date = zoteroItem.getField(CSL_DATE_MAPPINGS[variable], false, true);
+		var date;
+		for each(var zVar in CSL_DATE_MAPPINGS[variable]) {
+			date = zoteroItem.getField(zVar, false, true);
+			break;
+		}
 		if(date) {
 			if (Zotero.Prefs.get('hackUseCiteprocJsDateParser')) {
 				var raw = Zotero.Date.multipartToStr(date);
@@ -183,6 +179,21 @@ Zotero.Cite.System.retrieveItem = function(item) {
 					cslItem[variable] = {"literal":date};
 				}
 			}
+		}
+	}
+
+	// Force Fields
+	if (CSL_FORCE_FIELD_CONTENT[itemType]) {
+		for (var variable in CSL_FORCE_FIELD_CONTENT[itemType]) {
+			cslItem[variable] = CSL_FORCE_FIELD_CONTENT[itemType][variable];
+		}
+	}
+
+	// Force remap
+	if (CSL_FORCE_REMAP[itemType]) {
+		for (var variable in CSL_FORCE_REMAP[itemType]) {
+			cslItem[CSL_FORCE_REMAP[itemType][variable]] = cslItem[variable];
+			delete cslItem[variable];
 		}
 	}
 

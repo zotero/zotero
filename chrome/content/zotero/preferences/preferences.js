@@ -1951,7 +1951,7 @@ function refreshScriptMenu () {
 		var res = Zotero.DB.query(sql,['script']);
 		for (var i = 0, ilen = res.length; i < ilen; i += 1) {
 			var item = document.createElement('menuitem');
-			item.setAttribute('label',res[i].description);
+			item.setAttribute('label',res[i].description+" -- "+res[i].subtag);
 			item.setAttribute('id',res[i].subtag+'::script');
 			item.setAttribute('onclick','selectScript(this);');
 			box.appendChild(item);
@@ -1961,6 +1961,7 @@ function refreshScriptMenu () {
 };
 
 function selectScript(node) {
+    Zotero.debug("zls: selectScript()");
 	var parent = node.parentNode;
 	var hiddenItemId = parent.getAttribute('hidden-item');
 	if (hiddenItemId) {
@@ -1994,6 +1995,7 @@ function selectVariant(node) {
 
 function handleDependentLanguageRowInsert (tag) {
 	var validator = Zotero.zlsValidator;
+    Zotero.debug("zls: tag for validation: ("+tag+")");
 	var res = validator.validate(tag);
 	if (res) {
 		insertLanguageRow(validator.tagdata);
