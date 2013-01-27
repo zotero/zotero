@@ -167,9 +167,9 @@ To add a new preference:
 			<preference id="pref-sync-username" name="extensions.zotero.sync.server.username" type="string" instantApply="true"/>
 			<preference id="pref-storage-enabled" name="extensions.zotero.sync.storage.enabled" type="bool"/>
 			<preference id="pref-storage-protocol" name="extensions.zotero.sync.storage.protocol" type="string" onchange="unverifyStorageServer()"/>
-			<preference id="pref-storage-scheme" name="extensions.zotero.sync.storage.scheme" type="string"/>
-			<preference id="pref-storage-url" name="extensions.zotero.sync.storage.url" type="string" instantApply="true"/>
-			<preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string" instantApply="true"/>
+			<preference id="pref-storage-scheme" name="extensions.zotero.sync.storage.scheme" type="string" instantApply="true"/>
+			<preference id="pref-storage-url" name="extensions.zotero.sync.storage.url" type="string"/>
+			<preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string"/>
 			<preference id="pref-group-storage-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
 		</preferences>
 		
@@ -272,9 +272,8 @@ To add a new preference:
 										<label value="://"/>
 										<textbox id="storage-url" flex="1"
 											preference="pref-storage-url"
-											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); verifyStorageServer(); }"
-											onsynctopreference="unverifyStorageServer();"
-											onchange="this.value = this.value.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, '')"/>
+											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout(verifyStorageServer, 1); }"
+											onchange="unverifyStorageServer(); this.value = this.value.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, ''); Zotero.Prefs.set('extensions.zotero.sync.storage.url', this.value)"/>
 										<label value="/zotero/"/>
 									</hbox>
 								</row>
@@ -284,8 +283,7 @@ To add a new preference:
 										<textbox id="storage-username"
 											preference="pref-storage-username"
 											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout(verifyStorageServer, 1); }"
-											onsynctopreference="unverifyStorageServer();"
-											onchange="var pass = document.getElementById('storage-password'); if (pass.value) { Zotero.Sync.Storage.Session.WebDAV.prototype.password = pass.value; }"/>
+											onchange="unverifyStorageServer(); Zotero.Prefs.set('extensions.zotero.sync.storage.username', this.value); var pass = document.getElementById('storage-password'); if (pass.value) { Zotero.Sync.Storage.Session.WebDAV.prototype.password = pass.value; }"/>
 									</hbox>
 								</row>
 								<row>
@@ -293,8 +291,7 @@ To add a new preference:
 									<hbox>
 										<textbox id="storage-password" flex="0" type="password"
 											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout(verifyStorageServer, 1); }"
-											oninput="unverifyStorageServer()"
-											onchange="Zotero.Sync.Storage.Session.WebDAV.prototype.password = this.value"/>
+											onchange="unverifyStorageServer(); Zotero.Sync.Storage.Session.WebDAV.prototype.password = this.value"/>
 									</hbox>
 								</row>
 								<row>
