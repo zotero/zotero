@@ -62,8 +62,8 @@ var ZoteroAdvancedSearch = new function() {
 				
 				// FIXME: Hack to exclude group libraries for now
 				var groups = Zotero.Groups.getAll();
-				for each(var group in groups) {
-					s2.addCondition('libraryID', 'isNot', group.libraryID);
+				for(var group in groups) {
+					s2.addCondition('libraryID', 'isNot', groups[group].libraryID);
 				}
 				
 				var ids = s2.search();

@@ -274,8 +274,8 @@
 						// Check tags against filter
 						if (this._hasFilter) {
 							var inFilter = false;
-							for each(var tagID in tagIDs) {
-								if (this._filter[tagID]) {
+							for(var tagID in tagIDs) {
+								if (this._filter[tagIDs[tagID]]) {
 									inFilter = true;
 									break;
 								}
@@ -285,8 +285,8 @@
 						// Check tags against scope
 						if (this._hasScope) {
 							var inScope = false;
-							for each(var tagID in tagIDs) {
-								if (this._scope[tagID]) {
+							for(var tagID in tagIDs) {
+								if (this._scope[tagIDs[tagID]]) {
 									inScope = true;
 									break;
 								}
@@ -488,8 +488,8 @@
 						this._tags = Zotero.Tags.getAll(this._types, this.libraryID);
 						
 						for (var tag in this.selection) {
-							for each(var tag2 in this._tags) {
-								if (tag == tag2) {
+							for(var tag2 in this._tags) {
+								if (tag == this._tags[tag2]) {
 									var found = true;
 									break;
 								}
@@ -692,9 +692,9 @@
 						
 						// Add other ids with same tag
 						var ids = Zotero.Tags.getIDs(oldName, this.libraryID);
-						for each(var id in ids) {
-							if (tagIDs.indexOf(id) == -1) {
-								tagIDs.push(id);
+						for(var id in ids) {
+							if (tagIDs.indexOf(ids[id]) == -1) {
+								tagIDs.push(ids[id]);
 							}
 						}
 						
@@ -821,12 +821,12 @@
 							var value = node.getAttribute('value');
 						}
 						
-						for each(var item in items) {
+						for(var item in items) {
 							if (tagID) {
-								item.addTagByID(tagID);
+								items[item].addTagByID(tagID);
 							}
 							else {
-								item.addTag(value);
+								items[item].addTag(value);
 							}
 						}
 						

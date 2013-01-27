@@ -72,10 +72,10 @@ var Zotero_Bibliography_Dialog = new function () {
 		var clearListItems = false;
 		var itemsToSelect = [];
 		if(selectedItemIDs.length) {
-			for each(var itemID in selectedItemIDs) {
+			for(var itemID in selectedItemIDs) {
 				var itemIndexToSelect = false;
 				for(var i in bibEditInterface.bibliography[0].entry_ids) {
-					if(bibEditInterface.bibliography[0].entry_ids[i].indexOf(itemID) !== -1) {
+					if(bibEditInterface.bibliography[0].entry_ids[i].indexOf(selectedItemIDs[itemID]) !== -1) {
 						itemIndexToSelect = i;
 						continue;
 					}
@@ -99,7 +99,7 @@ var Zotero_Bibliography_Dialog = new function () {
 			_addButton.disabled = true;
 			_removeButton.disabled = false;
 			_updateRevertButtonStatus();
-			[_itemList.toggleItemSelection(item) for each(item in itemsToSelect)];
+			for(var item in itemsToSelect) _itemList.toggleItemSelection(itemsToSelect[item]);
 			_itemList.ensureIndexIsVisible(itemsToSelect[0]);
 		}
 		_suppressAllSelectEvents = false;
@@ -135,8 +135,9 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * Adds references to the reference list
 	 */
 	this.add = function() {
-		for each(var itemID in itemsView.getSelectedItems(true)) {
-			bibEditInterface.add(itemID);
+		var selectedItems = itemsView.getSelectedItems(true);
+		for(var itemID in selectedItems) {
+			bibEditInterface.add(selectedItems[itemID]);
 		}
 		document.getElementById("add").disabled = true;
 		_loadItems();
@@ -184,8 +185,9 @@ var Zotero_Bibliography_Dialog = new function () {
 		
 		if(regenerate != 0) return;
 		
-		for each(var itemID in _getSelectedListItemIDs()) {
-			bibEditInterface.revert(itemID);
+		var selectedItems = _getSelectedListItemIDs();
+		for(var itemID in selectedItems) {
+			bibEditInterface.revert(selectedItems[selectedItems[itemID]]);
 		}
 		
 		_updatePreview();
@@ -199,8 +201,8 @@ var Zotero_Bibliography_Dialog = new function () {
 		
 		// if cited in bibliography, warn before removing
 		var isCited = false;
-		for each(var itemID in selectedListItemIDs) {
-			isCited |= bibEditInterface.isCited(itemID);
+		for(var itemID in selectedListItemIDs) {
+			isCited |= bibEditInterface.isCited(selectedListItemIDs[itemID]);
 		}
 		if(isCited) {			
 			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
@@ -218,8 +220,8 @@ var Zotero_Bibliography_Dialog = new function () {
 		}
 		
 		// remove
-		for each(var itemID in selectedListItemIDs) {
-			bibEditInterface.remove(itemID);
+		for(var itemID in selectedListItemIDs) {
+			bibEditInterface.remove(selectedListItemIDs[itemID]);
 		}
 		_loadItems();
 	}
@@ -250,8 +252,10 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * Gets selected item IDs from list box on right
 	 */
 	function _getSelectedListItemIDs() {
-		return [bibEditInterface.bibliography[0].entry_ids[item.value][0]
-		        for each(item in _itemList.selectedItems)];
+		var ids = [];
+		for(var item in _itemList.selectedItems)
+			ids.push(bibEditInterface.bibliography[0].entry_ids[_itemList.selectedItems[item].value][0]);
+		return ids;
 	}
 	
 	/**
@@ -260,8 +264,8 @@ var Zotero_Bibliography_Dialog = new function () {
 	function _updateRevertButtonStatus() {
 		_revertButton.disabled = true;
 		var selectedListItemIDs = _getSelectedListItemIDs();
-		for each(var itemID in selectedListItemIDs) {
-			if(bibEditInterface.isEdited(itemID)) {
+		for(var itemID in selectedListItemIDs) {
+			if(bibEditInterface.isEdited(selectedListItemIDs[itemID])) {
 				_revertButton.disabled = false;
 				break;
 			}
@@ -302,7 +306,8 @@ var Zotero_Bibliography_Dialog = new function () {
 	 */
 	function _loadItems() {
 		var itemIDs = bibEditInterface.bibliography[0].entry_ids;
-		var items = [Zotero.Cite.getItem(itemID[0]) for each(itemID in itemIDs)];
+		var items = [];
+		for(var itemID in itemIDs) items.push(Zotero.Cite.getItem(itemIDs[itemID][0]));
 		
 		// delete all existing items from list
 		var itemList = document.getElementById("item-list");

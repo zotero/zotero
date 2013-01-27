@@ -341,7 +341,11 @@ var Zotero_RTFScan = new function() {
 				var m = initialRe.exec(firstName);
 				if(m) {
 					var initials = firstName.replace(/[^A-Z]/g, "");
-					var itemInitials = [name[0].toUpperCase() for each (name in itemCreator.ref.firstName.split(/ +/g))].join("");
+					var nameParts = itemCreator.ref.firstName.split(/ +/g);
+					var itemInitials = '';
+					for(var i=0, n=nameParts.length; i<n; i++) {
+						itemInitials += nameParts[i][0].toUpperCase();
+					}
 					if(initials != itemInitials) return false;
 				} else {
 					// not all initials; verify that the first name matches
@@ -457,8 +461,8 @@ var Zotero_RTFScan = new function() {
 	 */
 	function _refreshCanAdvance() {
 		var canAdvance = true;
-		for each(var itemList in citationItemIDs) {
-			if(itemList.length != 1) {
+		for(var itemList in citationItemIDs) {
+			if(citationItemIDs[itemList].length != 1) {
 				canAdvance = false;
 				break;
 			}

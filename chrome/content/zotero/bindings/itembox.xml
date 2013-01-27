@@ -309,8 +309,8 @@
 					
 					// Manual field order
 					if (this._fieldOrder.length) {
-						for each(var field in this._fieldOrder) {
-							fieldNames.push(field);
+						for(var field in this._fieldOrder) {
+							fieldNames.push(this._fieldOrder[field]);
 						}
 					}
 					// Get field order from database
@@ -440,7 +440,8 @@
 							
 							var popup = button.appendChild(document.createElement("menupopup"));
 							
-							for each(var v in this._fieldAlternatives[fieldName]) {
+							for(var u in this._fieldAlternatives[fieldName]) {
+								var v = this._fieldAlternatives[fieldName][u];
 								var menuitem = document.createElement("menuitem");
 								var sv = Zotero.Utilities.ellipsize(v, 60);
 								menuitem.setAttribute('label', sv);

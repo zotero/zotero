@@ -312,9 +312,9 @@
 								label.setAttribute('value', Zotero.getString('searchConditions.tooltip.fields'));
 								fieldRow.appendChild(label);
 								var vbox = document.createElement('vbox');
-								for each(var str in localized) {
+								for(var str in localized) {
 									var label = document.createElement('label')
-									label.setAttribute('value', str);
+									label.setAttribute('value', localized[str]);
 									vbox.appendChild(label);
 								}
 								fieldRow.appendChild(vbox);
