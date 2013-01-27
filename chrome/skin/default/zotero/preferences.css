@@ -8,6 +8,10 @@
 .translit-secondary {
 }
 
+.compact label {
+    margin: 0;
+}
+
 .translit-primary label {
 	margin: 0 0 0 0;
 }

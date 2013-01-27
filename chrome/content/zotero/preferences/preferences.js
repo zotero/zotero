@@ -2110,23 +2110,27 @@ function addLangRow(parent, nickname, tagdata) {
 	var newrow = document.createElement('row');
 	newrow.setAttribute('id', tag+'::row');
 	newrow.setAttribute("class", "compact");
-	
+    //newrow.setAttribute("minwidth","600");
+    //newrow.setAttribute("maxwidth","600");	
 	// Set nickname
 
 	var firsthbox = document.createElement('hbox');
 	firsthbox.setAttribute('class', 'zotero-clicky');
 	firsthbox.setAttribute("flex", "1");
+	firsthbox.setAttribute("style", "border:1px solid red;");
 	firsthbox.setAttribute('onclick', 'showNicknameEditor(this.firstChild)');
-	var valbox = document.createElement('description');
-	valbox.setAttribute("width", "100");
+	var valbox = document.createElement('label');
+	//valbox.setAttribute("width", "100");
 	//valbox.setAttribute("style", "font-size:larger;");
-	valbox.textContent = nickname;
+	valbox.setAttribute("flex","1");
+	valbox.setAttribute("value",nickname);
 	firsthbox.appendChild(valbox);
 	newrow.appendChild(firsthbox);
 
 	var secondhbox = document.createElement('hbox');
-	secondhbox.setAttribute('minwidth', '150');
-	secondhbox.setAttribute('maxwidth', '150');
+	secondhbox.setAttribute("style", "border:1px solid red;");
+	//secondhbox.setAttribute('minwidth', '150');
+	//secondhbox.setAttribute('maxwidth', '150');
 	// Set tags
 	if (tagdata.length) {
 		addSubtag(secondhbox, tagdata[0]);		
@@ -2139,6 +2143,7 @@ function addLangRow(parent, nickname, tagdata) {
 	newrow.appendChild(secondhbox);
 
 	var thirdhbox = document.createElement('hbox');
+	thirdhbox.setAttribute("style", "border:1px solid red;");
 	var removeButton = document.createElement('label');
 	removeButton.setAttribute('value', "-");
 	removeButton.setAttribute('class', 'zotero-clicky zotero-clicky-minus');
@@ -2358,7 +2363,7 @@ function showNicknameEditor (label) {
 	var parent = label.parentNode;
 	parent.setAttribute('onclick',false);
 	var textbox = document.createElement('textbox');
-	textbox.setAttribute('value',label.textContent);
+	textbox.setAttribute('value',label.value);
 	textbox.setAttribute('oncommand','hideNicknameEditor(this)');
 	textbox.setAttribute('width','80');
 	textbox.setAttribute('onkeypress', 'handleLangKeypress(event,"simpleEdit")');
@@ -2375,10 +2380,9 @@ function hideNicknameEditor (textbox) {
 	var newval = textbox.value;
 	var parent = textbox.parentNode;
 	parent.setAttribute('onclick', 'showNicknameEditor(this.firstChild)');
-	var label = document.createElement('description');
-	label.textContent = newval;
-	label.setAttribute('style', 'font-size:larger;');
-	label.setAttribute("width", "100");
+	var label = document.createElement('label');
+	label.setAttribute("value",newval);
+	label.setAttribute("flex", "1");
 	parent.replaceChild(label, textbox);
 	var sql = 'UPDATE zlsTags SET nickname=? WHERE nickname=?';
 	Zotero.DB.query(sql,[newval,oldval]);
@@ -2409,6 +2413,7 @@ function addSelectors (row, tag) {
 			newselector.setAttribute("onmouseover", "setLanguageRoleHighlight(['translat-primary', 'translat-secondary', 'translat'],true);");
 			newselector.setAttribute("onmouseout", "setLanguageRoleHighlight(['translat-primary', 'translat-secondary', 'translat'],false);");
 		}
+	    newselector.setAttribute("style", "border:1px solid red;");
 		row.appendChild(newselector);
 	}
 }

@@ -1215,102 +1215,98 @@ To add a new preference:
 		  </vbox>
 		</hbox>
       </groupbox>
-	  <vbox>
+	  <groupbox>
 		<grid>
 		  <columns>
-			<column minwidth="250" maxwidth="250"/>
-			<column minwidth="80" maxwidth="80"/>
-			<column minwidth="157" maxwidth="157"/>
-			<column minwidth="250" maxwidth="250"/>
+			<column minwidth="310" maxwidth="310"/>
+			<column minwidth="150" maxwidth="150"/>
+			<column minwidth="225" maxwidth="225"/>
 		  </columns>
 		  <rows>
 			<row>
-			  <groupbox>
-				<textbox emptytext="&zotero.preferences.lang.addLanguage;"
-						 type="autocomplete"
-						 autocompletesearch="zotero"
-						 autocompletesearchparam="zlsPrimary/"
-						 onkeypress="handleLangKeypress(event)"
-						 ontextentered="handleLangAutoCompleteSelect(this)"/>
-				<grid>
-				  <columns>
-					<column minwidth="90" maxwidth="90"/>
-					<column style="margin:0px 0.5em 0px 0.5em;"/>
-					<column flex="1"/>
-				  </columns>
-				  <rows id="language-tags-header">
-					<row>
-					  <caption label="&zotero.preferences.lang.nickname;"/>
-					  <label value="&zotero.preferences.lang.tag;" style="font-weight:bold;"/>
-					  <hbox/>
-					</row>
-				  </rows>
-				</grid>
-			  </groupbox>
-			  <hbox flex="1"/>
-			  <groupbox>
-				<hbox>
-				  <hbox flex="1"/>
-				  <label value="&zotero.preferences.lang.insideZotero;" style="font-weight:bold;font-size:larger;"/>
-				  <hbox flex="1"/>
-				</hbox>
-				<hbox style="background:#b7b7b7;min-height:3px;margin:0px;"/>
-				<grid>
-				  <columns>
-					<column minwidth="18" maxwidth="18"/>
-					<column minwidth="73" maxwidth="73"/>
-					<column />
-				  </columns>
-				  <rows id="zotero-languages-header">
-					<row>
-					  <hbox flex="1"/>
-					  <caption label="&zotero.preferences.lang.sorting;" style="font-size:smaller;margin-top:0.5em;"/>
-					  <caption label="&zotero.preferences.lang.display;" style="font-size:smaller;margin-top:0.5em;"/>
-					</row>
-				  </rows>
-				</grid>
-			  </groupbox>
-			  <groupbox>
-				<hbox>
-				  <hbox flex="1"/>
-				  <label value="&zotero.preferences.lang.inCitationsAndBibliographies;" style="font-weight:bold;font-size:larger;"/>
-				  <hbox flex="1"/>
-				</hbox>
-				<hbox style="background:#b7b7b7;min-height:3px;margin:0px;"/>
-				<grid>
-				  <columns>
-					<column minwidth="88" maxwidth="88"/>
-					<column minwidth="94" maxwidth="94"/>
-					<column minwidth="20" maxwidth="20"/>
-				  </columns>
-				  <rows id="citation-languages-header">
-					<row>
-					  <caption label="&zotero.preferences.lang.transliteration;" style="font-size:smaller;margin-top:0.5em;"/>
-					  <caption label="&zotero.preferences.lang.translation;" style="font-size:smaller;margin-top:0.5em;"/>
-					  <caption label="&zotero.preferences.lang.sorting;" style="font-size:smaller;margin-top:0.5em;"/>
-					</row>
-				  </rows>
-				</grid>
-			  </groupbox>
-			</row>
-		  </rows>
-		</grid>
-	  </vbox>
-	  <vbox minheight="180" maxheight="180" style="overflow:auto;">
-		<grid>
-		  <columns>
+              <textbox emptytext="&zotero.preferences.lang.addLanguage;"
+                       type="autocomplete"
+                       autocompletesearch="zotero"
+                       autocompletesearchparam="zlsPrimary/"
+                       onkeypress="handleLangKeypress(event)"
+                       ontextentered="handleLangAutoCompleteSelect(this)"/>
+              <hbox style="border-bottom:2px solid #999999;margin:0 5px 0 5px;">
+                <hbox flex="1"/>
+                <label value="&zotero.preferences.lang.insideZotero;" style="font-weight:bold;font-size:larger;"/>
+                <hbox flex="1"/>
+              </hbox>
+              <hbox style="border-bottom:2px solid #999999;margin:0 5px 0 5px;">
+                <hbox flex="1"/>
+                <label value="&zotero.preferences.lang.inCitationsAndBibliographies;" style="font-weight:bold;font-size:larger;"/>
+                <hbox flex="1"/>
+              </hbox>
+            </row>
+          </rows>
+        </grid>
+        <grid>
+          <columns>
 			<column minwidth="120" maxwidth="120"/>
-			<column minwidth="170" maxwidth="170"/>
-			<column/>
-			<column flex="1"/>
-			<column flex="1"/>
-			<column flex="1"/>
-			<column flex="1"/>
-			<column flex="1"/>
-		  </columns>
-		  <rows id="language-rows"/>
-		</grid>
-	  </vbox>
+			<column minwidth="120" maxwidth="120"/>
+			<column minwidth="70" maxwidth="70"/>
+			<column minwidth="70" maxwidth="70"/>
+			<column minwidth="80" maxwidth="80"/>
+			<column minwidth="100" maxwidth="100"/>
+			<column minwidth="75" maxwidth="75"/>
+			<column minwidth="50" maxwidth="50"/>
+          </columns>
+          <rows>
+            <row class="compact" style="margin:0px !important;">
+              <label flex="1" value="&zotero.preferences.lang.nickname;" style="font-weight:bold;border:1px solid black;"/>
+              <label flex="1" value="&zotero.preferences.lang.tag;" style="font-weight:bold;border:1px solid black;"/>
+              <hbox flex="1"/>
+              <hbox flex="1">
+                <hbox flex="1"/>
+                <label value="&zotero.preferences.lang.sorting;" style="border:1px solid red;"/>
+                <hbox flex="1"/>
+              </hbox>
+              <hbox flex="1">
+                <hbox flex="1"/>
+                <label value="&zotero.preferences.lang.display;" style="border:1px solid red;"/>
+                <hbox flex="1"/>
+              </hbox>
+              <hbox flex="1">
+                <hbox flex="1"/>
+                <label value="&zotero.preferences.lang.transliteration;" style="border:1px solid red;"/>
+                <hbox flex="1"/>
+              </hbox>
+              <hbox flex="1">
+                <hbox flex="1"/>
+                <label value="&zotero.preferences.lang.translation;" style="border:1px solid red;"/>
+                <hbox flex="1"/>
+              </hbox>
+              <hbox flex="1">
+                <hbox flex="1"/>
+                <label value="&zotero.preferences.lang.sorting;" style="border:1px solid red;"/>
+                <hbox flex="1"/>
+              </hbox>
+            </row>
+          </rows>
+        </grid>
+	  </groupbox>
+      <groupbox>
+        <hbox>
+          <vbox style="overflow:auto;height:250px;">
+            <grid>
+              <columns>
+                <column minwidth="120" maxwidth="120"/>
+                <column minwidth="120" maxwidth="120"/>
+                <column minwidth="70" maxwidth="70"/>
+                <column minwidth="70" maxwidth="70"/>
+                <column minwidth="80" maxwidth="80"/>
+                <column minwidth="95" maxwidth="95"/>
+                <column minwidth="75" maxwidth="75"/>
+                <column minwidth="55" maxwidth="55"/>
+              </columns>
+              <rows id="language-rows"/>
+            </grid>
+          </vbox>
+        </hbox>
+      </groupbox>
 	</prefpane>
 	
 	<prefpane id="zotero-prefpane-advanced"
