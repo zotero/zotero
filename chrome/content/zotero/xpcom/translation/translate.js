@@ -699,7 +699,7 @@ Zotero.Translate.Sandbox = {
 		 * @return {SandboxCollection}
 		 */
 		"nextCollection":function(translate) {
-			if(!translate.translator[0].configOptions.getCollections) {
+			if(!translate._translatorInfo.configOptions || !translate._translatorInfo.configOptions.getCollections) {
 				throw(new Error("getCollections configure option not set; cannot retrieve collection"));
 			}
 			
@@ -1098,7 +1098,7 @@ Zotero.Translate.Base.prototype = {
 		}
 		
 		// set display options to default if they don't exist
-		if(!this._displayOptions) this._displayOptions = this.translator[0].displayOptions;
+		if(!this._displayOptions) this._displayOptions = this._translatorInfo.displayOptions || {};
 		
 		// prepare translation
 		this._prepareTranslation();
@@ -2016,7 +2016,8 @@ Zotero.Translate.Export.prototype._prepareTranslation = function() {
 	
 	// initialize ItemGetter
 	this._itemGetter = new Zotero.Translate.ItemGetter();
-	var getCollections = this.translator[0].configOptions.getCollections ? this.translator[0].configOptions.getCollections : false;
+	var configOptions = this._translatorInfo.configOptions || {},
+		getCollections = configOptions.getCollections || false;
 	if(this._collection) {
 		this._itemGetter.setCollection(this._collection, getCollections);
 		delete this._collection;
@@ -2037,12 +2038,12 @@ Zotero.Translate.Export.prototype._prepareTranslation = function() {
 	// callbacks to be consistent with import, but they are synchronous, so we ignore them)
 	if(!this.location) {
 		this._io = new Zotero.Translate.IO.String(null, this.path ? this.path : "");
-		this._io.init(this.translator[0].configOptions["dataMode"], function() {});
+		this._io.init(configOptions["dataMode"], function() {});
 	} else if(!Zotero.Translate.IO.Write) {
 		throw new Error("Writing to files is not supported in this build of Zotero.");
 	} else {
 		this._io = new Zotero.Translate.IO.Write(this.location);
-		this._io.init(this.translator[0].configOptions["dataMode"],
+		this._io.init(configOptions["dataMode"],
 			this._displayOptions["exportCharset"] ? this._displayOptions["exportCharset"] : null,
 			function() {});
 	}
