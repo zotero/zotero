@@ -305,7 +305,8 @@ Zotero.Translators = new function() {
 		// Store
 		if(Zotero.isChrome || Zotero.isSafari) {
 			var serialized = JSON.stringify(serializedTranslators);
-			Zotero.debug("Translators: Saved updated translator list ("+localStorage["translatorMetadata"].length+" characters)");
+			localStorage["translatorMetadata"] = serialized;
+			Zotero.debug("Translators: Saved updated translator list ("+serialized.length+" characters)");
 		}
 		
 		// Reinitialize
