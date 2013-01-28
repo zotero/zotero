@@ -189,7 +189,7 @@ Zotero_TranslatorTester = function(translator, type, debugCallback) {
  * Removes document objects, which contain cyclic references, and other fields to be ignored from items
  * @param {Object} Item, in the format returned by Zotero.Item.serialize()
  */
-Zotero_TranslatorTester._sanitizeItem = function(item, testItem) {
+Zotero_TranslatorTester._sanitizeItem = function(item, testItem, keepValidFields) {
 	// remove cyclic references 
 	if(item.attachments && item.attachments.length) {
 		// don't actually test URI equality
@@ -244,7 +244,7 @@ Zotero_TranslatorTester._sanitizeItem = function(item, testItem) {
 	}
 	
 	// remove fields to be ignored
-	if("accessDate" in item) delete item.accessDate;
+	if(!keepValidFields && "accessDate" in item) delete item.accessDate;
 
 	//sort tags, if they're still there
 	if(item.tags && typeof item.tags === "object" && "sort" in item.tags) item.tags.sort();
@@ -510,10 +510,10 @@ Zotero_TranslatorTester.prototype._checkResult = function(test, translate, retur
 			var testItem = Zotero_TranslatorTester._sanitizeItem(test.items[i], true);
 			var translatedItem = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
 			
-			if(!this._compare(testItem, translatedItem)) {
+			if(!Zotero_TranslatorTester._compare(testItem, translatedItem)) {
 				// Show diff
 				this._debug(this, "TranslatorTester: Data mismatch detected:");
-				this._debug(this, this._generateDiff(testItem, translatedItem));
+				this._debug(this, Zotero_TranslatorTester._generateDiff(testItem, translatedItem));
 				
 				// Save items. This makes it easier to correct tests automatically.
 				var m = translate.newItems.length;
@@ -598,7 +598,7 @@ Zotero_TranslatorTester.prototype._createTest = function(translate, multipleMode
 /**
  * Compare items or sets thereof
  */
-Zotero_TranslatorTester.prototype._compare = function(a, b) {
+Zotero_TranslatorTester._compare = function(a, b) {
 	// If a is false, comparisons always succeed. This allows us to explicitly set that
 	// certain properties are allowed.
 	if(a === false) return true;
@@ -612,7 +612,7 @@ Zotero_TranslatorTester.prototype._compare = function(a, b) {
 		for(var key in a) {
 			if(!a.hasOwnProperty(key)) continue;
 			if(a[key] !== false && !b.hasOwnProperty(key)) return false;
-			if(!this._compare(a[key], b[key])) return false;
+			if(!Zotero_TranslatorTester._compare(a[key], b[key])) return false;
 		}
 		for(var key in b) {
 			if(!b.hasOwnProperty(key)) continue;
@@ -629,7 +629,7 @@ Zotero_TranslatorTester.prototype._compare = function(a, b) {
 /**
  * Generate a diff of items
  */
-Zotero_TranslatorTester.prototype._generateDiff = new function() {
+Zotero_TranslatorTester._generateDiff = new function() {
 	function show(a, action, prefix, indent) {
 		if((typeof a === "object" && a !== null) || typeof a === "function") {
 			var isArray = Object.prototype.toString.apply(a) === "[object Array]",
