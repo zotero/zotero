@@ -488,7 +488,8 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 Zotero_RecognizePDF.Recognizer.prototype._scrape = function(/**Zotero.Translate*/ translate) {
 	if(this._hiddenBrowser.contentDocument.location.href == "about:blank") return;
 	
-	if(this._hiddenBrowser.contentDocument.title == "403 Forbidden") {
+	if(Zotero.Utilities.xpath(this._hiddenBrowser.contentDocument, "//form[@action='Captcha']").length ||
+		this._hiddenBrowser.contentDocument.location.toString().indexOf("/sorry") !== -1) {
 		// hit the captcha
 		/*
 		var forms = this._hiddenBrowser.contentDocument.getElementsByTagName("form");
