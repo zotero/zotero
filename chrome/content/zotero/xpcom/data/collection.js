@@ -966,7 +966,7 @@ Zotero.Collection.prototype.erase = function(deleteItems) {
 	
 	// Remove relations
 	var uri = Zotero.URI.getCollectionURI(this);
-	Zotero.Relations.eraseByURIPrefix(uri);
+	Zotero.Relations.eraseByURI(uri);
 	
 	var placeholders = collections.map(function () '?').join();
 	
