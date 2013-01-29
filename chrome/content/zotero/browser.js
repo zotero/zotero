@@ -46,6 +46,7 @@ var Zotero_Browser = new function() {
 	this.toggleCollapsed = toggleCollapsed;
 	this.chromeLoad = chromeLoad;
 	this.contentLoad = contentLoad;
+	this.itemUpdated = itemUpdated;
 	this.contentHide = contentHide;
 	this.tabClose = tabClose;
 	this.resize = resize;
@@ -344,7 +345,7 @@ var Zotero_Browser = new function() {
 		if(isHTML) {
 			var contentWin = doc.defaultView;
 			if(!contentWin.haveZoteroEventListener) {
-				contentWin.addEventListener("ZoteroItemUpdated", itemUpdated, false);
+				contentWin.addEventListener("ZoteroItemUpdated", function(event) { itemUpdated(event.originalTarget) }, false);
 				contentWin.haveZoteroEventListener = true;
 			}
 		}
@@ -380,14 +381,13 @@ var Zotero_Browser = new function() {
 	/**
 	 * Called when item should be updated due to a DOM event
 	 */
-	function itemUpdated(event) {
+	function itemUpdated(doc) {
 		try {
-		var doc = event.originalTarget;
-		var rootDoc = (doc instanceof HTMLDocument ? doc.defaultView.top.document : doc);
-		var browser = Zotero_Browser.tabbrowser.getBrowserForDocument(rootDoc);
-		var tab = _getTabObject(browser);
-		if(doc == tab.page.document || doc == rootDoc) tab.clear();
-		tab.detectTranslators(rootDoc, doc);
+			var rootDoc = (doc instanceof HTMLDocument ? doc.defaultView.top.document : doc);
+			var browser = Zotero_Browser.tabbrowser.getBrowserForDocument(rootDoc);
+			var tab = _getTabObject(browser);
+			if(doc == tab.page.document || doc == rootDoc) tab.clear();
+			tab.detectTranslators(rootDoc, doc);
 		} catch(e) {
 			Zotero.debug(e);
 		}
@@ -649,6 +649,7 @@ Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
 		var translate = new Zotero.Translate.Web();
 		translate.setDocument(doc);
 		translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
+		translate.setHandler("pageModified", function(translate, doc) { Zotero_Browser.itemUpdated(doc) });
 		translate.getTranslators(true);
 	} else if(doc.documentURI.substr(0, 7) == "file://") {
 		this._attemptLocalFileImport(doc);
