@@ -3370,14 +3370,10 @@ var ZoteroPane = new function()
 				if(forceExternalViewer !== undefined) {
 					var externalViewer = forceExternalViewer;
 				} else {
-					var mimeType = item.attachmentMIMEType;
-					// If no MIME type specified, try to detect again (I guess in case
-					// we've gotten smarter since the file was imported?)
-					if (!mimeType) {
-						mimeType = Zotero.MIME.getMIMETypeFromFile(file);
-						
-						// TODO: update DB with new info
-					}
+					var mimeType = Zotero.MIME.getMIMETypeFromFile(file);
+					
+					//var mimeType = attachment.attachmentMIMEType;
+					// TODO: update DB with new info if changed?
 					
 					var ext = Zotero.File.getExtension(file);
 					var externalViewer = Zotero.isStandalone || (!Zotero.MIME.hasNativeHandler(mimeType, ext) &&

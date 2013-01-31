@@ -4315,7 +4315,7 @@ Zotero.Item.prototype.erase = function() {
 	
 	// Remove relations (except for merge tracker)
 	var uri = Zotero.URI.getItemURI(this);
-	Zotero.Relations.eraseByURIPrefix(uri, [Zotero.Relations.deletedItemPredicate]);
+	Zotero.Relations.eraseByURI(uri, [Zotero.Relations.deletedItemPredicate]);
 	
 	Zotero.DB.query('DELETE FROM annotations WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM highlights WHERE itemID=?', this.id);
