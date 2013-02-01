@@ -208,13 +208,21 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	var translate = this._translate;
 	if(exception) {
 		var myException = function(e) {
+			var browserDeleted;
 			try {
 				exception(e);
 			} catch(e) {
 				try {
 					Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
 				} catch(e) {}
+				browserDeleted = true;
 				translate.complete(false, e);
+			}
+			
+			if(!browserDeleted) {
+				try {
+					Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+				} catch(e) {}
 			}
 		}
 	} else {
