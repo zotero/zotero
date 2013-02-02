@@ -1261,27 +1261,27 @@ To add a new preference:
               <hbox flex="1"/>
               <hbox flex="1">
                 <hbox flex="1"/>
-                <label value="&zotero.preferences.lang.sorting;" style="border:1px solid red;"/>
+                <label value="&zotero.preferences.lang.sorting;"/>
                 <hbox flex="1"/>
               </hbox>
               <hbox flex="1">
                 <hbox flex="1"/>
-                <label value="&zotero.preferences.lang.display;" style="border:1px solid red;"/>
+                <label value="&zotero.preferences.lang.display;"/>
                 <hbox flex="1"/>
               </hbox>
               <hbox flex="1">
                 <hbox flex="1"/>
-                <label value="&zotero.preferences.lang.transliteration;" style="border:1px solid red;"/>
+                <label value="&zotero.preferences.lang.transliteration;"/>
                 <hbox flex="1"/>
               </hbox>
               <hbox flex="1">
                 <hbox flex="1"/>
-                <label value="&zotero.preferences.lang.translation;" style="border:1px solid red;"/>
+                <label value="&zotero.preferences.lang.translation;"/>
                 <hbox flex="1"/>
               </hbox>
               <hbox flex="1">
                 <hbox flex="1"/>
-                <label value="&zotero.preferences.lang.sorting;" style="border:1px solid red;"/>
+                <label value="&zotero.preferences.lang.sorting;"/>
                 <hbox flex="1"/>
               </hbox>
             </row>
