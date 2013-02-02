@@ -144,6 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Dokumentindstillinger">
 <!ENTITY zotero.integration.addEditCitation.title "Tilføj/rediger reference">
 <!ENTITY zotero.integration.editBibliography.title "Rediger referenceliste">
+<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Fremgang">
 

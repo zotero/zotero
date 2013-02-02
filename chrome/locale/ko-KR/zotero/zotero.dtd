@@ -144,6 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "문서 환경설정">
 <!ENTITY zotero.integration.addEditCitation.title "인용 추가/편집">
 <!ENTITY zotero.integration.editBibliography.title "참고문헌 목록 편집">
+<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
 
 <!ENTITY zotero.progress.title "진행">
 
