@@ -135,8 +135,19 @@ Zotero.Notifier = new function(){
 			
 			// Merge extraData keys
 			if (extraData) {
-				for (var dataID in extraData) {
-					_queue[type][event].data[dataID] = extraData[dataID];
+				for each(var id in ids) {
+					if (!_queue[type][event].data[id]) {
+						_queue[type][event].data[id] = {};
+					}
+					if (extraData[id]) {
+						for (var dataID in extraData[id]) {
+							_queue[type][event].data[id][dataID] = extraData[id][dataID];
+						}
+					} else {
+						for (var dataID in extraData) {
+							_queue[type][event].data[id][dataID] = extraData[dataID];
+						}
+					}
 				}
 			}
 			
