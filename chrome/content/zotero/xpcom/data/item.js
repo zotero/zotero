@@ -64,7 +64,7 @@ Zotero.Item.prototype._init = function () {
 	this._itemDataLoaded = false;
 	this._relatedItemsLoaded = false;
 	
-	this._changed = false;
+	this._changed = {};
 	this._changedPrimaryData = false;
 	this._changedItemData = false;
 	this._changedCreators = false;
@@ -74,7 +74,7 @@ Zotero.Item.prototype._init = function () {
 	this._changedAttachmentData = false;
 	
 	this._skipModTimeUpdate = false;
-	this._previousData = null;
+	this._previousData = {};
 	
 	this._deleted = null;
 	this._noteTitle = null;
@@ -412,7 +412,7 @@ Zotero.Item.prototype.loadFromRow = function(row, reload) {
  * Check if any data fields have changed since last save
  */
 Zotero.Item.prototype.hasChanged = function() {
-	return !!(this._changed
+	return !!(Object.keys(this._changed).length
 		|| this._changedPrimaryData
 		|| this._changedItemData
 		|| this._changedCreators
@@ -554,7 +554,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 	
 	if (copiedFields) {
 		for each(var f in copiedFields) {
-			this.setField(f[0], f[1]);
+			this.setField(f[0], f[1], true);
 		}
 	}
 	
@@ -562,6 +562,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		this._itemDataLoaded = false;
 	}
 	else {
+		this._markFieldChange('itemType', Zotero.ItemTypes.getName(oldItemTypeID));
 		if (!this._changedPrimaryData) {
 			this._changedPrimaryData = {};
 		}
@@ -720,10 +721,9 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		if (this['_' + field] != value) {
 			Zotero.debug("Field '" + field + "' has changed from '" + this['_' + field] + "' to '" + value + "'", 4);
 			
-			// Save a copy of the object before modifying
-			if (this.id && this.exists() && !this._previousData) {
-				this._previousData = this.serialize();
-			}
+			// Save a copy of the field before modifying
+			this._markFieldChange(field, this['_' + field]);
+			
 			if (field == 'itemTypeID') {
 				this.setType(value, loadIn);
 			}
@@ -808,10 +808,10 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 			return false;
 		}
 		
-		// Save a copy of the object before modifying
-		if (this.id && this.exists() && !this._previousData) {
-			this._previousData = this.serialize();
-		}
+		// Save a copy of the field before modifying
+		this._markFieldChange(
+			Zotero.ItemFields.getName(field), this._itemData[fieldID]
+		);
 	}
 	
 	this._itemData[fieldID] = value;
@@ -1052,15 +1052,20 @@ Zotero.Item.prototype.setCreator = function(orderIndex, creator, creatorTypeIDOr
 		return false;
 	}
 	
+	// Save copy of old creators for notifier
+	if (!this._changedCreators) {
+		this._changedCreators = {};
+		
+		var oldCreators = this._getOldCreators()
+		this._markFieldChange('creators', oldCreators);
+	}
+	this._changedCreators[orderIndex] = true;
+	
 	this._creators[orderIndex] = {
 		ref: creator,
 		creatorTypeID: creatorTypeID
 	};
 	
-	if (!this._changedCreators) {
-		this._changedCreators = {};
-	}
-	this._changedCreators[orderIndex] = true;
 	return true;
 }
 
@@ -1083,6 +1088,14 @@ Zotero.Item.prototype.removeCreator = function(orderIndex) {
 		Zotero.Prefs.set('purge.creators', true);
 	}
 	
+	// Save copy of old creators for notifier
+	if (!this._changedCreators) {
+		this._changedCreators = {};
+		
+		var oldCreators = this._getOldCreators();
+		this._markFieldChange('creators', oldCreators);
+	}
+	
 	// Shift creator orderIndexes down, going to length+1 so we clear the last one
 	for (var i=orderIndex, max=this._creators.length+1; i<max; i++) {
 		var next = this._creators[i+1] ? this._creators[i+1] : false;
@@ -1093,9 +1106,6 @@ Zotero.Item.prototype.removeCreator = function(orderIndex) {
 			this._creators.splice(i, 1);
 		}
 		
-		if (!this._changedCreators) {
-			this._changedCreators = {};
-		}
 		this._changedCreators[i] = true;
 	}
 	
@@ -1167,7 +1177,8 @@ Zotero.Item.prototype.addRelatedItem = function (itemID) {
 	}
 	*/
 	
-	this._prepFieldChange('relatedItems');
+	this._markFieldChange('related', current);
+	this._changed.relatedItems = true;
 	this._relatedItems.push(item);
 	return true;
 }
@@ -1189,7 +1200,8 @@ Zotero.Item.prototype.removeRelatedItem = function (itemID) {
 		return false;
 	}
 	
-	this._prepFieldChange('relatedItems');
+	this._markFieldChange('related', current);
+	this._changed.relatedItems = true;
 	this._relatedItems.splice(index, 1);
 	return true;
 }
@@ -1506,9 +1518,7 @@ Zotero.Item.prototype.save = function() {
 				}
 				
 				var newSourceItemNotifierData = {};
-				newSourceItemNotifierData[newSourceItem.id] = {
-					old: newSourceItem.serialize()
-				};
+				//newSourceItemNotifierData[newSourceItem.id] = {};
 				Zotero.Notifier.trigger('modify', 'item', newSourceItem.id, newSourceItemNotifierData);
 				
 				switch (Zotero.ItemTypes.getName(this.itemTypeID)) {
@@ -1528,16 +1538,13 @@ Zotero.Item.prototype.save = function() {
 				var newids = [];
 				var currentIDs = this._getRelatedItems(true);
 				
-				if (this._previousData && this._previousData.related) {
-					for each(var id in this._previousData.related) {
-						if (currentIDs.indexOf(id) == -1) {
-							removed.push(id);
-						}
+				for each(var id in this._previousData.related) {
+					if (currentIDs.indexOf(id) == -1) {
+						removed.push(id);
 					}
 				}
 				for each(var id in currentIDs) {
-					if (this._previousData && this._previousData.related &&
-							this._previousData.related.indexOf(id) != -1) {
+					if (this._previousData.related.indexOf(id) != -1) {
 						continue;
 					}
 					newids.push(id);
@@ -1882,7 +1889,9 @@ Zotero.Item.prototype.save = function() {
 				Zotero.DB.query(sql, bindParams);
 			}
 			
-			Zotero.Notifier.trigger('modify', 'item', this.id, { old: this._previousData });
+			var notifierData = {};
+			notifierData[this.id] = { changed: this._previousData };
+			Zotero.Notifier.trigger('modify', 'item', this.id, notifierData);
 			
 			// Parent
 			if (this._changedSource) {
@@ -1905,22 +1914,16 @@ Zotero.Item.prototype.save = function() {
 					}
 					
 					var newSourceItemNotifierData = {};
-					newSourceItemNotifierData[newSourceItem.id] = {
-						old: newSourceItem.serialize()
-					};
+					//newSourceItemNotifierData[newSourceItem.id] = {};
 					Zotero.Notifier.trigger('modify', 'item', newSourceItem.id, newSourceItemNotifierData);
 				}
 				
-				if (this._previousData) {
-					var oldSourceItemKey = this._previousData.sourceItemKey;
-					if (oldSourceItemKey) {
-						var oldSourceItem = Zotero.Items.getByLibraryAndKey(this.libraryID, oldSourceItemKey);
-					}
+				var oldSourceItemKey = this._previousData.parent;
+				if (oldSourceItemKey) {
+					var oldSourceItem = Zotero.Items.getByLibraryAndKey(this.libraryID, oldSourceItemKey);
 					if (oldSourceItem) {
 						var oldSourceItemNotifierData = {};
-						oldSourceItemNotifierData[oldSourceItem.id] = {
-							old: oldSourceItem.serialize()
-						};
+						//oldSourceItemNotifierData[oldSourceItem.id] = {};
 						Zotero.Notifier.trigger('modify', 'item', oldSourceItem.id, oldSourceItemNotifierData);
 					}
 					else if (oldSourceItemKey) {
@@ -1929,6 +1932,7 @@ Zotero.Item.prototype.save = function() {
 							+ " didn't exist in Zotero.Item.save()", 2);
 					}
 				}
+				
 				
 				
 				// If this was an independent item, remove from any collections
@@ -2003,16 +2007,13 @@ Zotero.Item.prototype.save = function() {
 				var newids = [];
 				var currentIDs = this._getRelatedItems(true);
 				
-				if (this._previousData && this._previousData.related) {
-					for each(var id in this._previousData.related) {
-						if (currentIDs.indexOf(id) == -1) {
-							removed.push(id);
-						}
+				for each(var id in this._previousData.related) {
+					if (currentIDs.indexOf(id) == -1) {
+						removed.push(id);
 					}
 				}
 				for each(var id in currentIDs) {
-					if (this._previousData && this._previousData.related &&
-							this._previousData.related.indexOf(id) != -1) {
+					if (this._previousData.related.indexOf(id) != -1) {
 						continue;
 					}
 					newids.push(id);
@@ -2243,12 +2244,9 @@ Zotero.Item.prototype.setSource = function(sourceItemID) {
 		return false;
 	}
 	
-	if (this.id && this.exists() && !this._previousData) {
-		this._previousData = this.serialize();
-	}
-	
-	this._sourceItem = sourceItemID ? parseInt(sourceItemID) : false;
+	this._markFieldChange('parentItem', this.getSourceKey());
 	this._changedSource = true;
+	this._sourceItem = sourceItemID ? parseInt(sourceItemID) : false;
 	
 	return true;
 }
@@ -2280,12 +2278,9 @@ Zotero.Item.prototype.setSourceKey = function(sourceItemKey) {
 		return false;
 	}
 	
-	if (this.id && this.exists() && !this._previousData) {
-		this._previousData = this.serialize();
-	}
-	
-	this._sourceItem = sourceItemKey ? sourceItemKey : false;
+	this._markFieldChange('parentItem', oldSourceItemKey);
 	this._changedSource = true;
+	this._sourceItem = sourceItemKey ? sourceItemKey : false;
 	
 	return true;
 }
@@ -2452,12 +2447,10 @@ Zotero.Item.prototype.setNote = function(text) {
 		return false;
 	}
 	
-	if (this.id && this.exists() && !this._previousData) {
-		this._previousData = this.serialize();
-	}
-	
 	this._noteText = text;
 	this._noteTitle = Zotero.Notes.noteToTitle(text);
+	
+	this._markFieldChange('note', oldText);
 	this._changedNote = true;
 	
 	return true;
@@ -4096,7 +4089,7 @@ Zotero.Item.prototype.erase = function() {
 		var sourceItemID = Zotero.DB.valueQuery(sql);
 		if (sourceItemID) {
 			var sourceItem = Zotero.Items.get(sourceItemID);
-			changedItemsNotifierData[sourceItem.id] = { old: sourceItem.serialize() };
+			//changedItemsNotifierData[sourceItem.id] = {};
 			if (!this.deleted) {
 				sourceItem.decrementNoteCount();
 			}
@@ -4110,7 +4103,7 @@ Zotero.Item.prototype.erase = function() {
 		var sourceItemID = Zotero.DB.valueQuery(sql);
 		if (sourceItemID) {
 			var sourceItem = Zotero.Items.get(sourceItemID);
-			changedItemsNotifierData[sourceItem.id] = { old: sourceItem.serialize() };
+			//changedItemsNotifierData[sourceItem.id] = {};
 			if (!this.deleted) {
 				sourceItem.decrementAttachmentCount();
 			}
@@ -4157,7 +4150,7 @@ Zotero.Item.prototype.erase = function() {
 	for each(var id in relateds) {
 		var relatedItem = Zotero.Items.get(id);
 		if (changedItems.indexOf(id) != -1) {
-			changedItemsNotifierData[id] = { old: relatedItem.serialize() };
+			//changedItemsNotifierData[id] = {};
 			changedItems.push(id);
 		}
 	}
@@ -4753,7 +4746,8 @@ Zotero.Item.prototype._setRelatedItems = function (itemIDs) {
 	
 	// Mark as changed if new or removed ids
 	if (newIDs.length > 0 || oldIDs.length != currentIDs.length) {
-		this._prepFieldChange('relatedItems');
+		this._markFieldChange('related', currentIDs);
+		this._changed.relatedItems = true
 	}
 	else {
 		Zotero.debug('Related items not changed in Zotero.Item._setRelatedItems()', 4);
@@ -4769,17 +4763,58 @@ Zotero.Item.prototype._setRelatedItems = function (itemIDs) {
 }
 
 
-// TODO: use for stuff other than related items
-Zotero.Item.prototype._prepFieldChange = function (field) {
-	if (!this._changed) {
-		this._changed = {};
+/**
+ * The creator has already been changed in itembox.xml before being passed
+ * to setCreator()/removeCreator(), so we have to reach in and get its
+ * previousData, and ideally try to detect when this private data structure
+ * has changed, which it almost certainly will. I am so sorry.
+ */
+Zotero.Item.prototype._getOldCreators = function () {
+	var oldCreators = [];
+	for (var i in this._creators) {
+		if (this._creators[i].ref._changed) {
+			if (!this._creators[i].ref._previousData
+					&& !this._creators[i].ref._previousData.fields) {
+				Components.utils.reportError("Previous creator data not available in expected form");
+				oldCreators.push(false);
+				continue;
+			}
+			var c = this._creators[i].ref._previousData.fields;
+		}
+		else {
+			var c = this._creators[i].ref;
+		}
+		
+		var old = {
+			// Convert creatorTypeIDs to text
+			creatorType: Zotero.CreatorTypes.getName(
+				this._creators[i].creatorTypeID
+			)
+		};
+		
+		if (c.fieldMode) {
+			// In 'fields' there's just 'name' for single-field mode
+			old.name = typeof c.name == 'undefined' ? c.lastName : c.name;
+		}
+		else {
+			old.firstName = c.firstName;
+			old.lastName = c.lastName;
+		}
+		oldCreators.push(old);
 	}
-	this._changed[field] = true;
-	
-	// Save a copy of the data before changing
-	if (this.id && this.exists() && !this._previousData) {
-		this._previousData = this.serialize();
+	return oldCreators;
+}
+
+
+/**
+ * Save old version of data that's being changed, to pass to the notifier
+ */
+Zotero.Item.prototype._markFieldChange = function (field, oldValue) {
+	// Only save if item already exists and field not already changed
+	if (!this.id || !this.exists() || this._previousData[field]) {
+		return;
 	}
+	this._previousData[field] = oldValue;
 }
 
 
