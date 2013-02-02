@@ -144,6 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Dokumentu honetako ezaugarriak">
 <!ENTITY zotero.integration.addEditCitation.title "Erreferentzia gehitu/editatu">
 <!ENTITY zotero.integration.editBibliography.title "Bibliografia editatu">
+<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Aurrerapena">
 

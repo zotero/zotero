@@ -144,6 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Ustawienia dokumentu">
 <!ENTITY zotero.integration.addEditCitation.title "Dodaj/Edytuj odnośnik bibliograficzny">
 <!ENTITY zotero.integration.editBibliography.title "Edytuj bibliografię">
+<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Postęp">
 

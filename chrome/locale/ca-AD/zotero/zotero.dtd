@@ -144,6 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Preferències del document">
 <!ENTITY zotero.integration.addEditCitation.title "Afegeix/Edita cita">
 <!ENTITY zotero.integration.editBibliography.title "Edita bibliografia">
+<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Progrés">
 
