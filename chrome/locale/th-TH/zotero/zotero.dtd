@@ -144,6 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "ค่าตั้งพึงใจเกี่ยวกับแฟ้มเอกสาร">
 <!ENTITY zotero.integration.addEditCitation.title "เพิ่ม/แก้ไขการอ้างอิง">
 <!ENTITY zotero.integration.editBibliography.title "แก้ไขบรรณานุกรม">
+<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
 
 <!ENTITY zotero.progress.title "ความคืบหน้า">
 

@@ -144,6 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Dokumenteigenskapar">
 <!ENTITY zotero.integration.addEditCitation.title "Legg til/endra henvisning">
 <!ENTITY zotero.integration.editBibliography.title "Rediger bibliografi">
+<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Framgang">
 

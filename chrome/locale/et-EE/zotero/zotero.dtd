@@ -144,6 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Dokumendi sätted">
 <!ENTITY zotero.integration.addEditCitation.title "Lisa/toimeta viidet">
 <!ENTITY zotero.integration.editBibliography.title "Toimeta bibliograafiat">
+<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Progress">
 
