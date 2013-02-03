@@ -1345,6 +1345,7 @@ Zotero.Attachments = new function(){
 				// Chain fulltext indexer inside the charset callback,
 				// since it's asynchronous and a prerequisite
 				Zotero.Fulltext.indexDocument(browser.contentDocument, itemID);
+				Zotero.Browser.deleteHiddenBrowser(browser);
 			}
 			
 			// Since the callback can be called during an import process that uses
