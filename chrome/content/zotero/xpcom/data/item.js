@@ -80,6 +80,8 @@ Zotero.Item.prototype._init = function () {
 	this._noteTitle = null;
 	this._noteText = null;
 	this._noteAccessTime = null;
+	this._cachedAttachments = null;
+	this._cachedNotes = null;
 	
 	this._attachmentLinkMode = null;
 	this._attachmentMIMEType = null;
@@ -1862,6 +1864,13 @@ Zotero.Item.prototype.save = function() {
 					];
 				}
 				Zotero.DB.query(sql, bindParams);
+				
+				// Clear cached child notes of the parent. If the note
+				// moved between parents, the old one will be cleared
+				// when changing the note count below
+				if (parent) {
+					Zotero.Items.get(parent).clearCachedNotes();
+				}
 			}
 			
 			
@@ -1887,6 +1896,13 @@ Zotero.Item.prototype.save = function() {
 					this.id
 				];
 				Zotero.DB.query(sql, bindParams);
+				
+				// Clear cached child attachments of the parent. If the note
+				// moved between parents, the old one will be cleared
+				// when changing the note count below
+				if (parent) {
+					Zotero.Items.get(parent).clearCachedAttachments();
+				}
 			}
 			
 			var notifierData = {};
@@ -2293,11 +2309,18 @@ Zotero.Item.prototype.setSourceKey = function(sourceItemKey) {
 ////////////////////////////////////////////////////////
 Zotero.Item.prototype.incrementNoteCount = function() {
 	this._numNotes++;
+	this._cachedNotes = null;
 }
 
 
 Zotero.Item.prototype.decrementNoteCount = function() {
 	this._numNotes--;
+	this._cachedNotes = null;
+}
+
+
+Zotero.Item.prototype.clearCachedNotes = function () {
+	this._cachedNotes = null;
 }
 
 
@@ -2472,6 +2495,23 @@ Zotero.Item.prototype.getNotes = function(includeTrashed) {
 		return [];
 	}
 	
+	// Get the right cache array
+	if (!this._cachedNotes) {
+		this._cachedNotes = {
+			chronologicalWithTrashed: null,
+			chronologicalWithoutTrashed: null,
+			alphabeticalWithTrashed: null,
+			alphabeticalWithoutTrashed: null
+		};
+	}
+	var cache = this._cachedNotes;
+	var cacheKey = (Zotero.Prefs.get('sortNotesChronologically')
+			? 'chronological' : 'alphabetical')
+		+ 'With' + (includeTrashed ? '' : 'out') + 'Trashed';
+	if (cache[cacheKey] !== null) {
+		return cache[cacheKey];
+	}
+	
 	var sql = "SELECT N.itemID, title FROM itemNotes N NATURAL JOIN items "
 		+ "WHERE sourceItemID=?";
 	if (!includeTrashed) {
@@ -2481,11 +2521,14 @@ Zotero.Item.prototype.getNotes = function(includeTrashed) {
 	if (Zotero.Prefs.get('sortNotesChronologically')) {
 		sql += " ORDER BY dateAdded";
 		var results = Zotero.DB.columnQuery(sql, this.id);
-		return results ? results : [];
+		results = results ? results : [];
+		cache[cacheKey] = results;
+		return results;
 	}
 	
 	var notes = Zotero.DB.query(sql, this.id);
 	if (!notes) {
+		cache[cacheKey] = [];
 		return [];
 	}
 	
@@ -2502,6 +2545,7 @@ Zotero.Item.prototype.getNotes = function(includeTrashed) {
 	for each(var note in notes) {
 		noteIDs.push(note.itemID);
 	}
+	cache[cacheKey] = noteIDs;
 	return noteIDs;
 }
 
@@ -2516,11 +2560,18 @@ Zotero.Item.prototype.getNotes = function(includeTrashed) {
 ///////////////////////////////////////////////////////
 Zotero.Item.prototype.incrementAttachmentCount = function() {
 	this._numAttachments++;
+	this._cachedAttachments = null;
 }
 
 
 Zotero.Item.prototype.decrementAttachmentCount = function() {
 	this._numAttachments--;
+	this._cachedAttachments = null;
+}
+
+
+Zotero.Item.prototype.clearCachedAttachments = function () {
+	this._cachedAttachments = null;
 }
 
 
@@ -3276,7 +3327,24 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 	if (!this.id) {
 		return [];
 	}
-	 
+	
+	// Get the right cache array
+	if (!this._cachedAttachments) {
+		this._cachedAttachments = {
+			chronologicalWithTrashed: null,
+			chronologicalWithoutTrashed: null,
+			alphabeticalWithTrashed: null,
+			alphabeticalWithoutTrashed: null
+		};
+	}
+	var cache = this._cachedAttachments;
+	var cacheKey = (Zotero.Prefs.get('sortAttachmentsChronologically')
+			? 'chronological' : 'alphabetical')
+		+ 'With' + (includeTrashed ? '' : 'out') + 'Trashed';
+	if (cache[cacheKey] !== null) {
+		return cache[cacheKey];
+	}
+	
 	var sql = "SELECT A.itemID, value AS title FROM itemAttachments A "
 		+ "NATURAL JOIN items I LEFT JOIN itemData ID "
 		+ "ON (fieldID=110 AND A.itemID=ID.itemID) "
@@ -3290,11 +3358,14 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 	if (Zotero.Prefs.get('sortAttachmentsChronologically')) {
 		sql +=  " ORDER BY dateAdded";
 		var results = Zotero.DB.columnQuery(sql, this.id);
-		return results ? results : [];
+		results = results ? results : [];
+		cache[cacheKey] = results;
+		return results;
 	}
 	
 	var attachments = Zotero.DB.query(sql, this.id);
 	if (!attachments) {
+		cache[cacheKey] = [];
 		return [];
 	}
 	
@@ -3309,6 +3380,7 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 	for each(var attachment in attachments) {
 		attachmentIDs.push(attachment.itemID);
 	}
+	cache[cacheKey] = attachmentIDs;
 	return attachmentIDs;
 }
 
