@@ -49,6 +49,12 @@ To add a new preference:
 				<preference id="pref-showIn" name="extensions.zotero.showIn" type="int"/>
 				<preference id="pref-statusBarIcon" name="extensions.zotero.statusBarIcon" type="int"/>
 				<preference id="pref-launchNonNativeFiles" name="extensions.zotero.launchNonNativeFiles" type="bool"/>
+				<preference id="pref-zoteroDotOrgVersionHeader"
+					name="extensions.zotero.zoteroDotOrgVersionHeader"
+					type="bool"/>
+				<preference id="pref-parseEndNoteMIMETypes"
+					name="extensions.zotero.parseEndNoteMIMETypes"
+					type="bool" onchange="Zotero.MIMETypeHandler.init()"/>
 			</preferences>
 			<groupbox id="zotero-prefpane-general-groupbox">
 				<grid id="zotero-prefpane-general-grid">
@@ -77,11 +83,18 @@ To add a new preference:
 				</grid>
 			</groupbox>
 			<groupbox id="zotero-prefpane-miscellaneous-groupbox">
+				<checkbox label="&zotero.preferences.zoteroDotOrgVersionHeader;"
+					tooltiptext="&zotero.preferences.zoteroDotOrgVersionHeader.tooltip;"
+					preference="pref-zoteroDotOrgVersionHeader"
+					insertbefore="automaticSnapshots-checkbox"/>
 				<checkbox id="launchNonNativeFiles-checkbox"
-					insertbefore="parse-ris-checkbox"
 					preference="pref-launchNonNativeFiles"
 					onsyncfrompreference="return !document.getElementById(this.getAttribute('preference')).value"
-					onsynctopreference="return !this.checked"/>
+					onsynctopreference="return !this.checked"
+					insertbefore="automaticSnapshots-checkbox"/>
+				<checkbox label="&zotero.preferences.parseRISRefer;"
+					preference="pref-parseEndNoteMIMETypes"
+					insertbefore="automaticSnapshots-checkbox"/>
 			</groupbox>
 		</prefpane>
 		
