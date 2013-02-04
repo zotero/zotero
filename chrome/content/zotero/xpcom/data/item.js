@@ -770,7 +770,11 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		return true;
 	}
 	
-	if (!Zotero.ItemFields.isValidForType(fieldID, this.itemTypeID)) {
+	if (value === "") {
+		value = false;
+	}
+	
+	if (value !== false && !Zotero.ItemFields.isValidForType(fieldID, this.itemTypeID)) {
 		var msg = "'" + field + "' is not a valid field for type " + this.itemTypeID;
 		
 		if (loadIn) {
@@ -806,7 +810,9 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		}
 		
 		// If existing value, make sure it's actually changing
-		if ((this._itemData[fieldID] + "") === (value + "")) {
+		if ((typeof this._itemData[fieldID] == 'undefined' && value === false)
+				|| (typeof this._itemData[fieldID] != 'undefined'
+					&& this._itemData[fieldID] === value)) {
 			return false;
 		}
 		
