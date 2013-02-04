@@ -143,6 +143,7 @@
 <!ENTITY zotero.integration.docPrefs.title "ドキュメントの設定">
 <!ENTITY zotero.integration.addEditCitation.title "出典表記を追加・編集">
 <!ENTITY zotero.integration.editBibliography.title "参考文献目録を編集">
+<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
 
 <!ENTITY zotero.progress.title "進行">
 

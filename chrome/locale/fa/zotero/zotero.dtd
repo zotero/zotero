@@ -143,6 +143,7 @@
 <!ENTITY zotero.integration.docPrefs.title "تنظیمات سند">
 <!ENTITY zotero.integration.addEditCitation.title "افزودن/ویرایش یادکرد">
 <!ENTITY zotero.integration.editBibliography.title "ویرایش کتابنامه">
+<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
 
 <!ENTITY zotero.progress.title "پیشرفت">
 

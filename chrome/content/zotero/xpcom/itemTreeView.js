@@ -231,6 +231,14 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	
 	this._searchMode = this._itemGroup.isSearchMode();
 	
+	if (!this.selection.selectEventsSuppressed) {
+		var unsuppress = this.selection.selectEventsSuppressed = true;
+		this._treebox.beginUpdateBatch();
+	}
+	var savedSelection = this.saveSelection();
+	var savedOpenState = this.saveOpenState();
+	var savedFirstRow = this.saveFirstRow();
+	
 	var oldRows = this.rowCount;
 	this._dataItems = [];
 	this._searchItemIDs = {}; // items matching the search
@@ -315,6 +323,15 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	
 	if (usiDisabled) {
 		Zotero.UnresponsiveScriptIndicator.enable();
+	}
+	
+	this.rememberOpenState(savedOpenState);
+	this.rememberFirstRow(savedFirstRow);
+	this.rememberSelection(savedSelection);
+	this.expandMatchParents();
+	if (unsuppress) {
+		this._treebox.endUpdateBatch();
+		this.selection.selectEventsSuppressed = false;
 	}
 	
 	yield false;
@@ -425,6 +442,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	}
 	
 	this.selection.selectEventsSuppressed = true;
+	this._treebox.beginUpdateBatch();
 	
 	if ((action == 'remove' && !itemGroup.isLibrary(true))
 			|| action == 'delete' || action == 'trash') {
@@ -607,9 +625,20 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		// Otherwise re-run the search, which refreshes the item list
 		else
 		{
-			// For item adds, clear quicksearch
+			// For item adds, clear the quicksearch, unless all the new items
+			// are child items
 			if (activeWindow && type == 'item') {
-				quicksearch.value = '';
+				var clear = false;
+				var items = Zotero.Items.get(ids);
+				for each(var item in items) {
+					if (!item.getSource()) {
+						clear = true;
+						break;
+					}
+				}
+				if (clear) {
+					quicksearch.value = '';
+				}
 			}
 			quicksearch.doCommand();
 			madeChanges = true;
@@ -755,6 +784,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		this.rememberSelection(savedSelection);
 	}
 	
+	this._treebox.endUpdateBatch();
 	this.selection.selectEventsSuppressed = false;
 }
 
@@ -1462,6 +1492,11 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	}
 	
 	// Need to close all containers before sorting
+	if (!this.selection.selectEventsSuppressed) {
+		var unsuppress = this.selection.selectEventsSuppressed = true;
+		this._treebox.beginUpdateBatch();
+	}
+	var savedSelection = this.saveSelection();
 	var openItemIDs = this.saveOpenState(true);
 	
 	// Single-row sort
@@ -1505,6 +1540,12 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	this._refreshHashMap();
 	
 	this.rememberOpenState(openItemIDs);
+	this.rememberSelection(savedSelection);
+	
+	if (unsuppress) {
+		this.selection.selectEventsSuppressed = false;
+		this._treebox.endUpdateBatch();
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1720,7 +1761,7 @@ Zotero.ItemTreeView.prototype.deleteSelection = function (force)
 
 
 /*
- * Set the tags filter on the view
+ * Set the search/tags filter on the view
  */
 Zotero.ItemTreeView.prototype.setFilter = function(type, data) {
 	if (!this._treebox || !this._treebox.treeBody) {
@@ -1729,9 +1770,7 @@ Zotero.ItemTreeView.prototype.setFilter = function(type, data) {
 	}
 	
 	this.selection.selectEventsSuppressed = true;
-	var savedSelection = this.saveSelection();
-	var savedOpenState = this.saveOpenState();
-	var savedFirstRow = this.saveFirstRow();
+	this._treebox.beginUpdateBatch();
 	
 	switch (type) {
 		case 'search':
@@ -1748,11 +1787,7 @@ Zotero.ItemTreeView.prototype.setFilter = function(type, data) {
 	
 	this.sort();
 	
-	this.rememberOpenState(savedOpenState);
-	this.expandMatchParents();
-	this.rememberFirstRow(savedFirstRow);
-	this.rememberSelection(savedSelection);
-	this._treebox.invalidate();
+	this._treebox.endUpdateBatch();
 	this.selection.selectEventsSuppressed = false;
 	
 	//Zotero.debug('Running callbacks in itemTreeView.setFilter()', 4);
@@ -1833,6 +1868,10 @@ Zotero.ItemTreeView.prototype.rememberSelection = function(selection)
 {	
 	this.selection.clearSelection();
 	
+	if (!this.selection.selectEventsSuppressed) {
+		var unsuppress = this.selection.selectEventsSuppressed = true;
+		this._treebox.beginUpdateBatch();
+	}
 	for(var i=0; i < selection.length; i++)
 	{
 		if (this._itemRowMap[selection[i]] != null) {
@@ -1859,6 +1898,10 @@ Zotero.ItemTreeView.prototype.rememberSelection = function(selection)
 			}
 		}
 	}
+	if (unsuppress) {
+		this._treebox.endUpdateBatch();
+		this.selection.selectEventsSuppressed = false;
+	}
 }
 
 
@@ -1878,6 +1921,12 @@ Zotero.ItemTreeView.prototype.selectSearchMatches = function () {
 
 Zotero.ItemTreeView.prototype.saveOpenState = function(close) {
 	var itemIDs = [];
+	if (close) {
+		if (!this.selection.selectEventsSuppressed) {
+			var unsuppress = this.selection.selectEventsSuppressed = true;
+			this._treebox.beginUpdateBatch();
+		}
+	}
 	for (var i=0; i<this._dataItems.length; i++) {
 		if (this.isContainer(i) && this.isContainerOpen(i)) {
 			itemIDs.push(this._getItemAtRow(i).ref.id);
@@ -1888,6 +1937,10 @@ Zotero.ItemTreeView.prototype.saveOpenState = function(close) {
 	}
 	if (close) {
 		this._refreshHashMap();
+		if (unsuppress) {
+			this._treebox.endUpdateBatch();
+			this.selection.selectEventsSuppressed = false;
+		}
 	}
 	return itemIDs;
 }
@@ -1907,13 +1960,19 @@ Zotero.ItemTreeView.prototype.rememberOpenState = function(itemIDs) {
 		return a - b;
 	});
 	
-	this._treebox.beginUpdateBatch();
+	if (!this.selection.selectEventsSuppressed) {
+		var unsuppress = this.selection.selectEventsSuppressed = true;
+		this._treebox.beginUpdateBatch();
+	}
 	// Reopen from bottom up
 	for (var i=rowsToOpen.length-1; i>=0; i--) {
 		this.toggleOpenState(rowsToOpen[i], true);
 	}
-	this._treebox.endUpdateBatch();
 	this._refreshHashMap();
+	if (unsuppress) {
+		this._treebox.endUpdateBatch();
+		this.selection.selectEventsSuppressed = false;
+	}
 }
 
 
@@ -1928,7 +1987,10 @@ Zotero.ItemTreeView.prototype.expandMatchParents = function () {
 		hash[id] = true;
 	}
 	
-	this._treebox.beginUpdateBatch();
+	if (!this.selection.selectEventsSuppressed) {
+		var unsuppress = this.selection.selectEventsSuppressed = true;
+		this._treebox.beginUpdateBatch();
+	}
 	for (var i=0; i<this.rowCount; i++) {
 		var id = this._getItemAtRow(i).ref.id;
 		if (hash[id] && this.isContainer(i) && !this.isContainerOpen(i)) {
@@ -1936,7 +1998,10 @@ Zotero.ItemTreeView.prototype.expandMatchParents = function () {
 		}
 	}
 	this._refreshHashMap();
-	this._treebox.endUpdateBatch();
+	if (unsuppress) {
+		this._treebox.endUpdateBatch();
+		this.selection.selectEventsSuppressed = false;
+	}
 }
 
 
@@ -1957,7 +2022,7 @@ Zotero.ItemTreeView.prototype.rememberFirstRow = function(firstRow) {
 
 
 Zotero.ItemTreeView.prototype.expandAllRows = function() {
-	this.selection.selectEventsSuppressed = true;
+	var unsuppress = this.selection.selectEventsSuppressed = true;
 	this._treebox.beginUpdateBatch();
 	for (var i=0; i<this.rowCount; i++) {
 		if (this.isContainer(i) && !this.isContainerOpen(i)) {
@@ -1971,6 +2036,7 @@ Zotero.ItemTreeView.prototype.expandAllRows = function() {
 
 
 Zotero.ItemTreeView.prototype.collapseAllRows = function() {
+	var unsuppress = this.selection.selectEventsSuppressed = true;
 	this._treebox.beginUpdateBatch();
 	for (var i=0; i<this.rowCount; i++) {
 		if (this.isContainer(i) && this.isContainerOpen(i)) {
@@ -1979,11 +2045,13 @@ Zotero.ItemTreeView.prototype.collapseAllRows = function() {
 	}
 	this._refreshHashMap();
 	this._treebox.endUpdateBatch();
+	this.selection.selectEventsSuppressed = false;
 }
 
 
 Zotero.ItemTreeView.prototype.expandSelectedRows = function() {
 	var start = {}, end = {};
+	this.selection.selectEventsSuppressed = true;
 	this._treebox.beginUpdateBatch();
 	for (var i = 0, len = this.selection.getRangeCount(); i<len; i++) {
 		this.selection.getRangeAt(i, start, end);
@@ -1995,11 +2063,13 @@ Zotero.ItemTreeView.prototype.expandSelectedRows = function() {
 	}
 	this._refreshHashMap();
 	this._treebox.endUpdateBatch();
+	this.selection.selectEventsSuppressed = false;
 }
 
 
 Zotero.ItemTreeView.prototype.collapseSelectedRows = function() {
 	var start = {}, end = {};
+	this.selection.selectEventsSuppressed = true;
 	this._treebox.beginUpdateBatch();
 	for (var i = 0, len = this.selection.getRangeCount(); i<len; i++) {
 		this.selection.getRangeAt(i, start, end);
@@ -2011,6 +2081,7 @@ Zotero.ItemTreeView.prototype.collapseSelectedRows = function() {
 	}
 	this._refreshHashMap();
 	this._treebox.endUpdateBatch();
+	this.selection.selectEventsSuppressed = false;
 }
 
 

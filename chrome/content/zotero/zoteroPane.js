@@ -3300,6 +3300,7 @@ var ZoteroPane = new function()
 		
 		for each(var item in items) {
 			if (item.isRegularItem()) {
+				// Prefer local file attachments
 				var uri = Components.classes["@mozilla.org/network/standard-url;1"]
 							.createInstance(Components.interfaces.nsIURI);
 				var snapID = item.getBestAttachment();
@@ -3308,6 +3309,7 @@ var ZoteroPane = new function()
 					continue;
 				}
 				
+				// Fall back to URI field, then DOI
 				var uri = item.getField('url');
 				if (!uri) {
 					var doi = item.getField('DOI');
@@ -3319,6 +3321,16 @@ var ZoteroPane = new function()
 						}
 					}
 				}
+				
+				// Fall back to first attachment link
+				if (!uri) {
+					var link = item.getAttachments()[0];
+					if (link) {
+						link = Zotero.Items.get(link);
+						if (link) uri = link.getField('url');
+					}
+				}
+				
 				if (uri) {
 					ZoteroPane_Local.loadURI(uri, event);
 				}

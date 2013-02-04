@@ -746,9 +746,10 @@ Zotero.HTTP = new function() {
 	/**
 	 * Handler for XMLHttpRequest state change
 	 *
-	 * @param {nsIXMLHttpRequest} XMLHttpRequest whose state just changed
-	 * @param {Function} [onDone] Callback for request completion
+	 * @param {nsIXMLHttpRequest} xmlhttp XMLHttpRequest whose state just changed
+	 * @param {Function} [callback] Callback for request completion
 	 * @param {String} [responseCharset] Character set to force on the response
+	 * @param {*} [data] Data to be passed back to callback as the second argument
 	 * @private
 	 */
 	function _stateChange(xmlhttp, callback, responseCharset, data) {

@@ -143,6 +143,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Lastnosti dokumenta">
 <!ENTITY zotero.integration.addEditCitation.title "Dodaj/uredi navedek">
 <!ENTITY zotero.integration.editBibliography.title "Uredi bibliografijo">
+<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Napredek">
 

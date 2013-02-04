@@ -143,6 +143,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Dokumentvoorkeure">
 <!ENTITY zotero.integration.addEditCitation.title "Voeg by/redigeer aanhaling">
 <!ENTITY zotero.integration.editBibliography.title "Redigeer bronnelys">
+<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Vordering">
 

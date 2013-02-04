@@ -143,6 +143,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Ajustes de documento">
 <!ENTITY zotero.integration.addEditCitation.title "Añadir o modificar cita">
 <!ENTITY zotero.integration.editBibliography.title "Modificar bibliografía">
+<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Progreso">
 

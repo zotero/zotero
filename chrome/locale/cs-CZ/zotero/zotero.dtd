@@ -143,6 +143,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Vlastnosti dokumentu">
 <!ENTITY zotero.integration.addEditCitation.title "Přidat/Upravit citaci">
 <!ENTITY zotero.integration.editBibliography.title "Upravit bibliografii">
+<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Postup">
 

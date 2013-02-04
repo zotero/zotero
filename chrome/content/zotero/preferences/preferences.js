@@ -90,6 +90,14 @@ function init()
 		rows[i].firstChild.nextSibling.value = Zotero.isMac ? 'Cmd+Shift+' : 'Ctrl+Alt+';
 	}
 	
+	// JS-based strings
+	var checkbox = document.getElementById('launchNonNativeFiles-checkbox');
+	if (checkbox ) {
+		checkbox.label = Zotero.getString(
+			'zotero.preferences.launchNonNativeFiles', Zotero.appName
+		);
+	}
+	
 	updateStorageSettings(null, null, true);
 	updateWordProcessorInstructions();
 	refreshStylesList();
