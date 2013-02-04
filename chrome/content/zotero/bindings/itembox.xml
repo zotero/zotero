@@ -975,6 +975,7 @@
 
 					row.appendChild(label);
 					if (fieldname == 'jurisdiction') {
+                        value.setAttribute("tooltiptext", value.getAttribute("label"));
 						var boxedvalue = document.createElement("hbox");
 						boxedvalue.appendChild(value);
 						var jurisdictionDefault = document.createElement("checkbox");
