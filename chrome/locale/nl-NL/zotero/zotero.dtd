@@ -76,6 +76,7 @@
 <!ENTITY zotero.integration.prefs.lang.transliteration "Transliteration">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Het bewaren van referenties in uw document maakt het bestand iets groter, maar maakt het mogelijk om uw document te delen met andere zonder gebruik te maken van een Zotero-groep. Zotero 3.0 of nieuwer is nodig om dit type documenten bij te werken.">
 <!ENTITY zotero.integration.prefs.storeReferences.label "Referenties in document bewaren">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 <!ENTITY zotero.integration.references.label "Referenties in bibliografie">
 <!ENTITY zotero.integration.showEditor.label "Editor tonen">
 <!ENTITY zotero.item.add "Toevoegen">

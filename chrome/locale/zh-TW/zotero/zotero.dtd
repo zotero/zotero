@@ -76,6 +76,7 @@
 <!ENTITY zotero.integration.prefs.lang.transliteration "Transliteration">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "將參考文獻存在文件中會讓檔案大一點，但可以讓你在不使用Zotero群組下和別人分享文件。更新用這個選項建立的文件需要Zotero 3.0以上的版本。">
 <!ENTITY zotero.integration.prefs.storeReferences.label "將參考文獻存在文件中">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 <!ENTITY zotero.integration.references.label "參考書目中的參考文獻">
 <!ENTITY zotero.integration.showEditor.label "顯示編輯器">
 <!ENTITY zotero.item.add "加入">

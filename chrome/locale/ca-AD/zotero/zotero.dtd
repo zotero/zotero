@@ -76,6 +76,7 @@
 <!ENTITY zotero.integration.prefs.lang.transliteration "Transliteration">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "L'emmagatzematge de les referències en el document augmenta lleugerament la mida del fitxer, però li permet compartir el seu document amb altres persones sense necessitat d'utilitzar un grup de Zotero. Per actualitzar els documents creats amb aquesta opció és necessari Zotero 3.0 o versions posteriors.">
 <!ENTITY zotero.integration.prefs.storeReferences.label "Emmagatzema les referències al document">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 <!ENTITY zotero.integration.references.label "Referències a la bibliografia">
 <!ENTITY zotero.integration.showEditor.label "Mostra l'editor">
 <!ENTITY zotero.item.add "Afegeix">

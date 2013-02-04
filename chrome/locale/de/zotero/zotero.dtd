@@ -76,6 +76,7 @@
 <!ENTITY zotero.integration.prefs.lang.transliteration "Transliteration">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Das Speichern der Literaturangaben im Dokument erhöht die Dateigröße geringfügig, aber erlaubt es Ihnen, Ihr Dokument mit anderen zu teilen, ohne dass sie Zotero Groups verwenden müssen. Zotero 3.0 oder neuer ist notwendig, um Dokumente, die mit dieser Option erstellt wurden, zu aktualisieren.">
 <!ENTITY zotero.integration.prefs.storeReferences.label "Literaturangaben im Dokument speichen">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 <!ENTITY zotero.integration.references.label "Literaturangaben in Bibliographie">
 <!ENTITY zotero.integration.showEditor.label "Editor anzeigen">
 <!ENTITY zotero.item.add "Hinzufügen">

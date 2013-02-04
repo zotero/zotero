@@ -76,6 +76,7 @@
 <!ENTITY zotero.integration.prefs.lang.transliteration "Transliteration">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Salvare i riferimenti nel documento ne aumenta leggermente la dimensione, ma ti permette di condividerlo con altre persone senza necessità di usare un gruppo Zotero. È necessario usare Zotero 3.0 o versioni successive per modificare documenti creati con questa modalità.">
 <!ENTITY zotero.integration.prefs.storeReferences.label "Salva i riferimenti nel documento">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 <!ENTITY zotero.integration.references.label "Citazioni bibliografiche">
 <!ENTITY zotero.integration.showEditor.label "Mostra l'editor">
 <!ENTITY zotero.item.add "Aggiungi">

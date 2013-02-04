@@ -76,6 +76,7 @@
 <!ENTITY zotero.integration.prefs.lang.transliteration "Transliteration">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "ការដាក់កំណត់យោងក្នុងឯកសាររបស់អ្នកនឹងបង្កើនទំហំឯកសារ ប៉ុន្តែវានឹងអនុញ្ញាតឲអ្នកអាចចែករំលែកឯកសារជាមួយអ្នកដទៃដោយមិនចាំបាច់ប្រើហ្ស៊ូតេរ៉ូជាក្រុម។​ ហ្ស៊ូតេរ៉ូកំណែថ្មីចាប់ពី ៣.០ ឡើងទៅ​ តម្រូវឲធ្វើទំនើបកម្មឯកសារដែលបានបង្កើតសម្រាប់ជម្រើសនេះ។">
 <!ENTITY zotero.integration.prefs.storeReferences.label "ដាក់កំណត់យោងក្នុងឯកសារ">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 <!ENTITY zotero.integration.references.label "កំណត់យោងក្នុងគន្ថនិទេ្ទស">
 <!ENTITY zotero.integration.showEditor.label "បង្ហាញកំណែតម្រូវ">
 <!ENTITY zotero.item.add "បន្ថែម">
