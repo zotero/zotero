@@ -294,7 +294,6 @@
 			</property>
 			
 			<property name="itemTypeMenu" onget="return this._id('item-type-menu')"/>
-			<property name="jurisdictionMenu" onget="return this._id('jurisdiction-menu')"/>
 			
 			<!-- Private properties -->
 			<property name="_dynamicFields" onget="return this._id('dynamic-fields')"/>
@@ -942,46 +941,6 @@
 				</body>
 			</method>
 			
-			<method name="buildJurisdictionMenu">
-			  <body>
-				<![CDATA[
-					if (!this.item) {
-						return;
-					}
-					
-					try {
-						this.jurisdictionMenu.removeAllItems();
-					} catch (e) {
-						return;
-					}
-					
-					var itemType = Zotero.ItemTypes.getName(this.item.itemTypeID);
-					if (["report","newspaperArticle"].indexOf(itemType) > -1) {
-						this.jurisdictionMenu.appendItem("", "");
-					}
-					var data = Zotero.Jurisdiction.getListData();
-					
-					var pos = 0;
-					for (var i=0; i<data.length; i++) {
-						var value = data[i][0];
-						var label = data[i][1];
-						var nickname = data[i][2];
-						if (nickname) {
-							subunits = Zotero.Jurisdiction.getListData(value);
-							for (var j=0,jlen=subunits.length;j<jlen;j+=1) {
-								this.jurisdictionMenu.appendItem(nickname+": "+subunits[j][1],subunits[j][0])
-							}
-						} else {
-							this.jurisdictionMenu.appendItem(label, value);
-						}
-						//this.updateJurisdictionMenuSelection();
-					}
-					return true;
-				]]>
-			  </body>
-			</method>
-
-			
 			<method name="updateItemTypeMenuSelection">
 				<body>
 				<![CDATA[
@@ -989,20 +948,6 @@
 					for (var i=0, len=listitems.length; i < len; i++) {
 						if (listitems[i].getAttribute('value') == this.item.itemTypeID) {
 							this.itemTypeMenu.selectedIndex = i;
-						}
-					}
-				]]>
-				</body>
-			</method>
-			
-			<method name="updateJurisdictionMenuSelection">
-				<body>
-				<![CDATA[
-					var listitems = this.jurisdictionMenu.firstChild.childNodes;
-					var jurisdiction = this.item.getField("jurisdiction");
-					for (var i=0, len=listitems.length; i < len; i++) {
-						if (listitems[i].getAttribute('value') == jurisdiction) {
-							this.jurisdictionMenu.selectedIndex = i;
 						}
 					}
 				]]>
@@ -1993,6 +1938,130 @@
 			</method>
 
 
+			<method name="showJurisdictionEditor">
+				<parameter name="node"/>
+				<body>
+				<![CDATA[
+                    var tabindex = node.getAttribute("ztabindex");
+
+                    var value = node.getAttribute('label');
+                    var textbox = document.createElement('textbox');
+                    textbox.setAttribute("ztabindex", tabindex);
+                    textbox.setAttribute('value',value);
+                    textbox.setAttribute("oldComment",node.getAttribute("value"));
+                    textbox.setAttribute("oldValue",node.getAttribute("label"));
+                    textbox.setAttribute("flex","1");
+                    textbox.setAttribute('emptytext','Enter a jurisdiction');
+                    textbox.setAttribute('type','autocomplete');
+                    textbox.setAttribute('autocompletesearch','zotero');
+                    textbox.setAttribute('autocompletesearchparam','jurisdictions');
+                    textbox.setAttribute('onkeypress','document.getBindingParent(this).handleJurisdictionKeypress(event);');
+                    textbox.setAttribute('ontextentered','document.getBindingParent(this).handleJurisdictionAutoCompleteSelect(this)');
+                    node.parentNode.replaceChild(textbox, node)
+                    textbox.addEventListener('blur', function (event) {
+                    	document.getBindingParent(this).hideJurisdictionEditor(this);
+                    }, false);
+                     textbox.select();
+					this._tabDirection = false;
+					this._lastTabIndex = tabindex;
+				]]>
+				</body>
+			</method>
+
+
+			<method name="handleJurisdictionKeypress">
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+                   //alert(textbox.mController);
+                   var target = event.target;
+                   var focused = document.commandDispatcher.focusedElement;
+					
+                   switch (event.keyCode) {
+                     case event.DOM_VK_ESCAPE:
+                     case event.DOM_VK_RETURN:
+                       event.preventDefault();
+                       event.target.blur();
+                       break;
+                     case event.DOM_VK_TAB:
+                       this._tabDirection = event.shiftKey ? -1 : 1;
+                       this._focusNextField('info', this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
+                       event.preventDefault();
+                       return true;
+                   }
+                   return false;
+				]]>
+				</body>
+			</method>
+
+			<method name="hideJurisdictionEditor">
+				<parameter name="node"/>
+				<parameter name="result"/>
+				<body>
+				<![CDATA[
+                  if (!result) {
+                  	result = {val:node.getAttribute("oldValue"),comment:node.getAttribute("oldComment")};
+                  }
+                  var tabindex = node.setAttribute("ztabindex", tabindex);
+
+                  var valueElement = document.createElement("menulist");
+                  valueElement.setAttribute("id","jurisdiction-menu");
+                  valueElement.setAttribute("ztabindex", tabindex);
+                  valueElement.setAttribute("flex","1");
+                  valueElement.setAttribute("class", "zotero-clicky");
+                  valueElement.setAttribute("onclick","document.getBindingParent(this).showJurisdictionEditor(this);");
+                  valueElement.setAttribute("value",result.comment);
+                  valueElement.setAttribute("label",result.val);
+                  valueElement.setAttribute("tooltiptext",result.val);
+                  node.parentNode.replaceChild(valueElement,node);
+                  this.setJurisdictionKey(result.comment);
+/*
+					if (this._tabDirection) {
+						if (!focusMode) {
+							var focusMode = 'info';
+							var focusBox = this._dynamicFields;
+						}
+						this._focusNextField(focusMode, focusBox, this._lastTabIndex, this._tabDirection == -1);
+					}
+*/
+				]]>
+				</body>
+			</method>
+
+
+			<method name="handleJurisdictionAutoCompleteSelect">
+				<parameter name="textbox"/>
+				<body>
+				<![CDATA[
+                  var result;
+                  if (textbox.value) {
+                   	// Comment is the tag code, value is the tag description
+                   	result = this.getJurisdictionResult(textbox);
+                  }
+                  // Close editor
+                  // comment = key
+                  // val = description
+                  this.hideJurisdictionEditor(textbox, result);
+				]]>
+				</body>
+			</method>
+
+			<method name="getJurisdictionResult">
+				<parameter name="textbox"/>
+				<body>
+				<![CDATA[
+                  var controller = textbox.controller;
+                  for (var i=0; i<controller.matchCount; i++) {
+                  	if (controller.getValueAt(i) == textbox.value) {
+                    	return {val:controller.getValueAt(i),comment:controller.getCommentAt(i)};
+                    }
+                  }
+                  return false;
+				]]>
+				</body>
+			</method>
+
+
 			<method name="createValueElement">
 				<parameter name="valueText"/>
 				<parameter name="fieldName"/>
@@ -2018,8 +2087,6 @@
 					
 					if (fieldName === 'jurisdiction') {
 						var valueElement = document.createElement("menulist");
-						var menupopup = document.createElement("menupopup");
-						valueElement.appendChild(menupopup);
 					}
 					else if (useVbox) {
 						var valueElement = document.createElement("vbox");
@@ -2033,39 +2100,22 @@
 					
 					if (this._fieldIsClickable(fieldName)) {
 						if (fieldName == 'jurisdiction') {
+
 							valueElement.setAttribute("id","jurisdiction-menu");
+                            
 							// XXXX Set default here if req.
 							this.forceJurisdiction(this.item.itemTypeID);
 							var value = this.item.getField("jurisdiction",true);
 							valueElement.setAttribute("class", "zotero-clicky");
 							if (value) {
-								var label = Zotero.Jurisdiction.getLabelFromKey(value);
+                            	var label = Zotero.DB.valueQuery("SELECT jurisdictionName FROM jurisdictions WHERE jurisdictionID=?",[value]);
 								if (!label) {
 									label = value;
 									valueElement.setAttribute("style","background:yellow;");
 								}
 								valueElement.setAttribute("label", label);
 							}
-							valueElement.setAttribute("oncommand","this.focus(); this.open = true;");
-							valueElement.setAttribute("onkeypress","if (event.keyCode == event.DOM_VK_TAB) { document.getBindingParent(this).jurisdictionMenuTab(event); }");
-							valueElement.addEventListener('popupshowing', function (event) {
-								jurisdictionMenu = document.getBindingParent(this).jurisdictionMenu;
-								if (jurisdictionMenu.itemCount == 0) {
-									document.getBindingParent(this).buildJurisdictionMenu();
-								}
-								else {
-									document.getBindingParent(this).updateJurisdictionMenuSelection();
-								}
-								jurisdictionMenu.open = true;
-								return true;
-							}, false);
-							valueElement.addEventListener('select', function (event) {
-								/* Skip right-click on Windows */
-								if (event.button) {
-									return;
-								}
-								document.getBindingParent(this).setJurisdictionKey();
-							}, false);
+							valueElement.setAttribute("onclick","document.getBindingParent(this).showJurisdictionEditor(this);");
 							return valueElement;
 						} else {
 							valueElement.addEventListener('click', function (event) {
@@ -2138,11 +2188,7 @@
 					
 					// To support newlines in 'extra' fields, we use multiple
 					// <description> elements inside a vbox
-					if (fieldName === 'jurisdiction') {
-						// Already set up above
-						// default check-box is set elsewhere in this code
-					}
-					else if (useVbox) {
+					if (useVbox) {
 						var lines = valueText.split("\n");
 						for (var i = 0; i < lines.length; i++) {
 							var descriptionNode = document.createElement("description");
@@ -3471,7 +3517,6 @@ if (oldCreator.id) {
 							break;
 					}
 					next[0].click();
-					
 					// DEBUG: next[0] is always equal to the target element,
 					// but for some reason it's necessary to scroll to the next
 					// element when moving forward for the target element to
@@ -3512,19 +3557,18 @@ if (oldCreator.id) {
 			</method>
 
 			<method name="setJurisdictionKey">
+              <parameter name="key"/>
 			  <body>
 				<![CDATA[
-					var node = document.getElementById('jurisdiction-menu');
-					var value = node.getAttribute('value');
 					var jurisdictionDefaultNode = document.getElementById('jurisdiction-default');
-					if (jurisdictionDefaultNode) {
-						if (value == Zotero.Prefs.get("import.jurisdictionDefault")) {
+					if (key && jurisdictionDefaultNode) {
+						if (key && key == Zotero.Prefs.get("import.jurisdictionDefault")) {
 							jurisdictionDefaultNode.setAttribute("checked",true);
 						} else {
 							jurisdictionDefaultNode.setAttribute("checked",false);
 						}
 					}
-					this.item.setField("jurisdiction",value);
+					this.item.setField("jurisdiction",key);
 					node.setAttribute("style","");
 					this.item.save();
 				]]>

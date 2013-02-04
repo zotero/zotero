@@ -99,6 +99,19 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 			};
 			break;
 		
+		case 'jurisdictions':
+			var sql = 'SELECT jurisdictionID as comment,jurisdictionName as val FROM jurisdictions '
+				+ 'WHERE jurisdictionName LIKE ?'
+			var sqlParams = ['%' + searchString + '%'];
+			statement = this._zotero.DB.getStatement(sql, sqlParams);
+			var resultsCallback = function (results) {
+				var collation = self._zotero.getLocaleCollation();
+				results.sort(function(a, b) {
+					return collation.compareString(1, a, b);
+				});
+			};
+			break;
+		
 		case 'tag':
 			var sql = "SELECT DISTINCT name AS val, NULL AS comment FROM tags WHERE name LIKE ?";
 			var sqlParams = [searchString + '%'];
