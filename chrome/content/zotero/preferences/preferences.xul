@@ -117,7 +117,7 @@ To add a new preference:
 			<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
 		</groupbox>
 		
-		<groupbox>
+		<groupbox id="zotero-prefpane-miscellaneous-groupbox">
 			<caption label="&zotero.preferences.miscellaneous;"/>
 			
 			<hbox align="center">
@@ -129,11 +129,10 @@ To add a new preference:
 			<checkbox label="&zotero.preferences.zoteroDotOrgVersionHeader;"
 				tooltiptext="&zotero.preferences.zoteroDotOrgVersionHeader.tooltip;"
 				preference="pref-zoteroDotOrgVersionHeader"/>
-			<checkbox label="&zotero.preferences.parseRISRefer;" preference="pref-parseEndNoteMIMETypes"/>
+			<checkbox id="parse-ris-checkbox" label="&zotero.preferences.parseRISRefer;" preference="pref-parseEndNoteMIMETypes"/>
 			<checkbox label="&zotero.preferences.automaticSnapshots;" preference="pref-automaticSnapshots"/>
 			<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
 			<checkbox label="&zotero.preferences.automaticTags;" preference="pref-automaticTags"/>
-			
 			<hbox align="center">
 				<label value="&zotero.preferences.trashAutoEmptyDaysPre;"/>
 				<textbox size="2" preference="pref-trashAutoEmptyDays"/>

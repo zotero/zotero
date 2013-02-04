@@ -48,6 +48,7 @@ To add a new preference:
 			<preferences id="zotero-prefpane-general-preferences">
 				<preference id="pref-showIn" name="extensions.zotero.showIn" type="int"/>
 				<preference id="pref-statusBarIcon" name="extensions.zotero.statusBarIcon" type="int"/>
+				<preference id="pref-launchNonNativeFiles" name="extensions.zotero.launchNonNativeFiles" type="bool"/>
 			</preferences>
 			<groupbox id="zotero-prefpane-general-groupbox">
 				<grid id="zotero-prefpane-general-grid">
@@ -74,6 +75,13 @@ To add a new preference:
 						</row>
 					</rows>
 				</grid>
+			</groupbox>
+			<groupbox id="zotero-prefpane-miscellaneous-groupbox">
+				<checkbox id="launchNonNativeFiles-checkbox"
+					insertbefore="parse-ris-checkbox"
+					preference="pref-launchNonNativeFiles"
+					onsyncfrompreference="return !document.getElementById(this.getAttribute('preference')).value"
+					onsynctopreference="return !this.checked"/>
 			</groupbox>
 		</prefpane>
 		
