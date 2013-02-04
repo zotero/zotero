@@ -599,9 +599,20 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		// Otherwise re-run the search, which refreshes the item list
 		else
 		{
-			// For item adds, clear quicksearch
+			// For item adds, clear the quicksearch, unless all the new items
+			// are child items
 			if (activeWindow && type == 'item') {
-				quicksearch.value = '';
+				var clear = false;
+				var items = Zotero.Items.get(ids);
+				for each(var item in items) {
+					if (!item.getSource()) {
+						clear = true;
+						break;
+					}
+				}
+				if (clear) {
+					quicksearch.value = '';
+				}
 			}
 			quicksearch.doCommand();
 			madeChanges = true;
