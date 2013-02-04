@@ -33,7 +33,7 @@
 <window
 	id="quick-format-dialog"
 	orient="vertical"
-	title="Quick Format Citation"
+	title="&zotero.integration.quickFormatDialog.title;"
 	width="600" 
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"

@@ -1513,10 +1513,11 @@ var ZoteroPane = new function()
 	/*
 	 * Remove, trash, or delete item(s), depending on context
 	 *
-	 * @param	{Boolean}	[force=false]	Trash or delete even if in a collection or search,
-	 *										or trash without prompt in library
+	 * @param  {Boolean}  [force=false]     Trash or delete even if in a collection or search,
+	 *                                      or trash without prompt in library
+	 * @param  {Boolean}  [fromMenu=false]  If triggered from context menu, which always prompts for deletes
 	 */
-	this.deleteSelectedItems = function (force) {
+	this.deleteSelectedItems = function (force, fromMenu) {
 		if (!this.itemsView || !this.itemsView.selection.count) {
 			return;
 		}
@@ -1542,7 +1543,7 @@ var ZoteroPane = new function()
 		
 		if (itemGroup.isLibrary(true)) {
 			// In library, don't prompt if meta key was pressed
-			var prompt = force ? false : toTrash;
+			var prompt = (force && !fromMenu) ? false : toTrash;
 		}
 		else if (itemGroup.isCollection()) {
 			// In collection, only prompt if trashing
@@ -3445,6 +3446,7 @@ var ZoteroPane = new function()
 		
 		for each(var item in items) {
 			if (item.isRegularItem()) {
+				// Prefer local file attachments
 				var uri = Components.classes["@mozilla.org/network/standard-url;1"]
 							.createInstance(Components.interfaces.nsIURI);
 				var snapID = item.getBestAttachment();
@@ -3459,6 +3461,7 @@ var ZoteroPane = new function()
 					}
 				}
 				
+				// Fall back to URI field, then DOI
 				var uri = item.getField('url');
 				if (!uri) {
 					var doi = item.getField('DOI');
@@ -3470,6 +3473,16 @@ var ZoteroPane = new function()
 						}
 					}
 				}
+				
+				// Fall back to first attachment link
+				if (!uri) {
+					var link = item.getAttachments()[0];
+					if (link) {
+						link = Zotero.Items.get(link);
+						if (link) uri = link.getField('url');
+					}
+				}
+				
 				if (uri) {
 					ZoteroPane_Local.loadURI(uri, event);
 				}
@@ -3519,14 +3532,10 @@ var ZoteroPane = new function()
 				if(forceExternalViewer !== undefined) {
 					var externalViewer = forceExternalViewer;
 				} else {
-					var mimeType = attachment.attachmentMIMEType;
-					// If no MIME type specified, try to detect again (I guess in case
-					// we've gotten smarter since the file was imported?)
-					if (!mimeType) {
-						mimeType = Zotero.MIME.getMIMETypeFromFile(file);
-						
-						// TODO: update DB with new info
-					}
+					var mimeType = Zotero.MIME.getMIMETypeFromFile(file);
+					
+					//var mimeType = attachment.attachmentMIMEType;
+					// TODO: update DB with new info if changed?
 					
 					var ext = Zotero.File.getExtension(file);
 					var externalViewer = Zotero.isStandalone || (!Zotero.MIME.hasNativeHandler(mimeType, ext) &&

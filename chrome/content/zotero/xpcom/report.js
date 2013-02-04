@@ -79,7 +79,14 @@ Zotero.Report = new function() {
 					// If not valid XML, display notes with entities encoded
 					var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 							.createInstance(Components.interfaces.nsIDOMParser);
-					var doc = parser.parseFromString('<div>' + arr.note.replace(/&nbsp;/g, "&#160;") + '</div>', "application/xml");
+					var doc = parser.parseFromString('<div>'
+						+ arr.note
+							// &nbsp; isn't valid in HTML
+							.replace(/&nbsp;/g, "&#160;")
+							// Strip control characters (for notes that were
+							// added before item.setNote() started doing this)
+							.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+					+ '</div>', "application/xml");
 					if (doc.documentElement.tagName == 'parsererror') {
 						Zotero.debug(doc.documentElement.textContent, 2);
 						content += '<p class="plaintext">' + escapeXML(arr.note) + '</p>\n';
@@ -106,7 +113,13 @@ Zotero.Report = new function() {
 						// If not valid XML, display notes with entities encoded
 						var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 								.createInstance(Components.interfaces.nsIDOMParser);
-						var doc = parser.parseFromString('<div>' + note.note.replace(/&nbsp;/g, "&#160;") + '</div>', "application/xml");
+						var doc = parser.parseFromString('<div>'
+							+ note.note
+								.replace(/&nbsp;/g, "&#160;")
+								// Strip control characters (for notes that were
+								// added before item.setNote() started doing this)
+								.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+						 + '</div>', "application/xml");
 						if (doc.documentElement.tagName == 'parsererror') {
 							Zotero.debug(doc.documentElement.textContent, 2);
 							content += '<p class="plaintext">' + escapeXML(note.note) + '</p>\n';

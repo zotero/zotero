@@ -222,7 +222,7 @@ Zotero.Translators = new function() {
 			if(m) {
 				// First, drop the 0- if it exists (this is an III invention)
 				var host = m[2];
-				if(host.substr(0, 2) === "0-") host = substr(2);
+				if(host.substr(0, 2) === "0-") host = host.substr(2);
 				var hostnames = host.split(".");
 				for(var i=1; i<hostnames.length-2; i++) {
 					if(TLDS[hostnames[i].toLowerCase()]) {
@@ -425,8 +425,11 @@ Zotero.Translators = new function() {
  *     c = Google Chrome (WebKit & V8)
  *     s = Safari (WebKit & Nitro/Squirrelfish Extreme)
  *     i = Internet Explorer
+ *     b = Bookmarklet
+ *     v = Server
  * @property {Object} configOptions Configuration options for import/export
  * @property {Object} displayOptions Display options for export
+ * @property {Object} hiddenPrefs Hidden preferences configurable through about:config
  * @property {Boolean} inRepository Whether the translator may be found in the repository
  * @property {String} lastUpdated SQL-style date and time of translator's last update
  * @property {String} code The executable JavaScript for the translator
@@ -490,6 +493,8 @@ Zotero.Translator = function(file, json, code) {
 	
 	this._configOptions = info["configOptions"] ? info["configOptions"] : {};
 	this._displayOptions = info["displayOptions"] ? info["displayOptions"] : {};
+	this._hiddenPrefs = info["hiddenPrefs"] ? info["hiddenPrefs"] : {};
+	
 	this.browserSupport = info["browserSupport"] ? info["browserSupport"] : "g";
 	this.runMode = Zotero.Translator.RUN_MODE_IN_BROWSER;
 	
@@ -542,6 +547,9 @@ Zotero.Translator.prototype.__defineGetter__("displayOptions", function() {
 });
 Zotero.Translator.prototype.__defineGetter__("configOptions", function() {
 	return Zotero.Utilities.deepCopy(this._configOptions);
+});
+Zotero.Translator.prototype.__defineGetter__("hiddenPrefs", function() {
+	return Zotero.Utilities.deepCopy(this._hiddenPrefs);
 });
 
 /**

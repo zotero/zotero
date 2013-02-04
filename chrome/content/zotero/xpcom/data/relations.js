@@ -185,8 +185,10 @@ Zotero.Relations = new function () {
 		var sql = "SELECT ROWID FROM relations WHERE (subject LIKE ? OR object LIKE ?)";
 		var params = [prefix, prefix];
 		if (ignorePredicates) {
-			sql += " AND predicate != ?";
-			params = params.concat(ignorePredicates);
+			for each(var ignorePredicate in ignorePredicates) {
+				sql += " AND predicate != ?";
+				params.push(ignorePredicate);
+			}
 		}
 		var ids = Zotero.DB.columnQuery(sql, params);
 		
@@ -199,11 +201,18 @@ Zotero.Relations = new function () {
 	}
 	
 	
-	this.eraseByURI = function (uri) {
+	this.eraseByURI = function (uri, ignorePredicates) {
 		Zotero.DB.beginTransaction();
 		
-		var sql = "SELECT ROWID FROM relations WHERE subject=? OR object=?";
-		var ids = Zotero.DB.columnQuery(sql, [uri, uri]);
+		var sql = "SELECT ROWID FROM relations WHERE (subject=? OR object=?)";
+		var params = [uri, uri];
+		if (ignorePredicates) {
+			for each(var ignorePredicate in ignorePredicates) {
+				sql += " AND predicate != ?";
+				params.push(ignorePredicate);
+			}
+		}
+		var ids = Zotero.DB.columnQuery(sql, params);
 		
 		for each(var id in ids) {
 			var relation = this.get(id);

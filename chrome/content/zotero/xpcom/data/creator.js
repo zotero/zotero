@@ -567,8 +567,7 @@ Zotero.Creator.prototype._checkValue = function (field, value) {
 			break;
 			
 		case 'key':
-			var re = /^[23456789ABCDEFGHIJKMNPQRSTUVWXTZ]{8}$/
-			if (!re.test(value)) {
+			if (!Zotero.ID.isValidKey(value)) {
 				this._invalidValueError(field, value);
 			}
 			break;

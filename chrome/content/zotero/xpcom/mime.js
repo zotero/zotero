@@ -29,11 +29,8 @@ Zotero.MIME = new function(){
 	this.getPrimaryExtension = getPrimaryExtension;
 	this.sniffForMIMEType = sniffForMIMEType;
 	this.sniffForBinary = sniffForBinary;
-	this.getMIMETypeFromData = getMIMETypeFromData;
-	this.getMIMETypeFromFile = getMIMETypeFromFile;
 	this.hasNativeHandler = hasNativeHandler;
 	this.hasInternalHandler = hasInternalHandler;
-	this.fileHasInternalHandler = fileHasInternalHandler;
 	
 	// Magic numbers
 	var _snifferEntries = [
@@ -54,6 +51,41 @@ Zotero.MIME = new function(){
 		["FLV", "video/x-flv", 0]
 		
 	];
+	
+	var _extensions = {
+		// MS Office
+		'doc': 'application/msword',
+		'dot': 'application/msword',
+		'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+		'dotx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
+		'docm': 'application/vnd.ms-word.document.macroEnabled.12',
+		'dotm': 'application/vnd.ms-word.template.macroEnabled.12',
+		'xls': 'application/vnd.ms-excel',
+		'xlt': 'application/vnd.ms-excel',
+		'xla': 'application/vnd.ms-excel',
+		'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+		'xltx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
+		'xlsm': 'application/vnd.ms-excel.sheet.macroEnabled.12',
+		'xltm': 'application/vnd.ms-excel.template.macroEnabled.12',
+		'xlam': 'application/vnd.ms-excel.addin.macroEnabled.12',
+		'xlsb': 'application/vnd.ms-excel.sheet.binary.macroEnabled.12',
+		'ppt': 'application/vnd.ms-powerpoint',
+		'pot': 'application/vnd.ms-powerpoint',
+		'pps': 'application/vnd.ms-powerpoint',
+		'ppa': 'application/vnd.ms-powerpoint',
+		'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+		'potx': 'application/vnd.openxmlformats-officedocument.presentationml.template',
+		'ppsx': 'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+		'ppam': 'application/vnd.ms-powerpoint.addin.macroEnabled.12',
+		'pptm': 'application/vnd.ms-powerpoint.presentation.macroEnabled.12',
+		'potm': 'application/vnd.ms-powerpoint.template.macroEnabled.12',
+		'ppsm': 'application/vnd.ms-powerpoint.slideshow.macroEnabled.12',
+		
+		// OpenOffice/LibreOffice
+		'odt': 'application/vnd.oasis.opendocument.text',
+		
+		'pdf': 'application/pdf'
+	};
 	
 	var _textTypes = {
 		'application/xhtml+xml': true,
@@ -245,22 +277,19 @@ Zotero.MIME = new function(){
 	 *
 	 * ext is an optional file extension hint if data sniffing is unsuccessful
 	 */
-	function getMIMETypeFromData(str, ext){
+	this.getMIMETypeFromData = function (str, ext){
 		var mimeType = sniffForMIMEType(str);
 		if (mimeType){
 			Zotero.debug('Detected MIME type ' + mimeType);
 			return mimeType;
 		}
 		
-		try {
-			if (ext) {
-				var mimeType = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"]
-					.getService(Components.interfaces.nsIMIMEService).getTypeFromExtension(ext);
-				Zotero.debug('Got MIME type ' + mimeType + ' from extension');
+		if (ext) {
+			mimeType = this.getMIMETypeFromExtension(ext);
+			if (mimeType) {
 				return mimeType;
 			}
 		}
-		catch (e) {}
 		
 		var mimeType = sniffForBinary(str);
 		Zotero.debug('Cannot determine MIME type from magic number or extension -- settling for ' + mimeType);
@@ -268,15 +297,34 @@ Zotero.MIME = new function(){
 	}
 	
 	
+	this.getMIMETypeFromExtension = function (ext) {
+		var type = false;
+		
+		if (_extensions[ext]) {
+			var type = _extensions[ext];
+		}
+		else {
+			try {
+				var type = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"]
+					.getService(Components.interfaces.nsIMIMEService).getTypeFromExtension(ext);
+			}
+			catch (e) {}
+		}
+		
+		Zotero.debug("Got MIME type " + type + " from extension '" + ext + "'");
+		return type;
+	}
+	
+	
 	/*
 	 * Try to determine the MIME type of the file, using a few different
 	 * techniques
 	 */
-	function getMIMETypeFromFile(file){
+	this.getMIMETypeFromFile = function (file) {
 		var str = Zotero.File.getSample(file);
 		var ext = Zotero.File.getExtension(file);
 		
-		return getMIMETypeFromData(str, ext);
+		return this.getMIMETypeFromData(str, ext);
 	}
 	
 	
@@ -378,8 +426,8 @@ Zotero.MIME = new function(){
 	}
 	
 	
-	function fileHasInternalHandler(file){
-		var mimeType = getMIMETypeFromFile(file);
+	this.fileHasInternalHandler = function (file){
+		var mimeType = this.getMIMETypeFromFile(file);
 		var ext = Zotero.File.getExtension(file);
 		return hasInternalHandler(mimeType, ext);
 	}

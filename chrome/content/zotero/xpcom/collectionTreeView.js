@@ -1872,10 +1872,10 @@ Zotero.ItemGroupCache = {
 	"clear":function() {
 		this.lastItemGroup = null;
 		this.lastSearch = null;
-		this.lastTempTable = null;
 		if(this.lastTempTable) {
 			Zotero.DB.query("DROP TABLE "+this.lastTempTable);
 		}
+		this.lastTempTable = null;
 		this.lastResults = null;
 	}
 };

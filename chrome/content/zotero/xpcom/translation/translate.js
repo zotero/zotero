@@ -171,6 +171,27 @@ Zotero.Translate.Sandbox = {
 		},
 		
 		/**
+		 * Gets a hidden preference that can be defined by hiddenPrefs in translator header
+		 *
+		 * @param {Zotero.Translate} translate
+		 * @param {String} pref Prefernce to be retrieved
+		 */
+		"getHiddenPref":function(translate, pref) {
+			if(typeof(pref) != "string") {
+				throw(new Error("getPref: preference must be a string"));
+			}
+
+			var hp = translate._translatorInfo.hiddenPrefs || {};
+
+			var value;
+			try {
+				value = Zotero.Prefs.get('translators.' + pref);
+			} catch(e) {}
+
+			return (value !== undefined ? value : hp[pref]);
+		},
+		
+		/**
 		 * For loading other translators and accessing their methods
 		 * 
 		 * @param {Zotero.Translate} translate
@@ -179,12 +200,13 @@ Zotero.Translate.Sandbox = {
 		 */	 
 		"loadTranslator":function(translate, type) {
 			const setDefaultHandlers = function(translate, translation) {
-				if(Zotero.Utilities.isEmpty(translation._handlers)) {
-					if(type !== "export") {
-						translation.setHandler("itemDone", function(obj, item) {
-							translate.Sandbox._itemDone(translate, item);
-						});
-					}
+				if(type !== "export"
+					&& (!translation._handlers['itemDone'] || !translation._handlers['itemDone'].length)) {
+					translation.setHandler("itemDone", function(obj, item) {
+						translate.Sandbox._itemDone(translate, item);
+					});
+				}
+				if(!translation._handlers['selectItems'] || !translation._handlers['selectItems'].length) {
 					translation.setHandler("selectItems", translate._handlers["selectItems"]);
 				}
 			}
@@ -735,6 +757,7 @@ Zotero.Translate.Base.prototype = {
 	"init":function() {
 		this._handlers = [];
 		this._currentState = null;
+		this._translatorInfo = null;
 		this.document = null;
 		this.location = null;
 	},
@@ -764,7 +787,6 @@ Zotero.Translate.Base.prototype = {
 		}
 		
 		this.translator = null;
-		this._setDisplayOptions = null;
 		
 		if(typeof(translator) == "object") {	// passed an object and not an ID
 			if(translator.translatorID) {
@@ -1046,6 +1068,7 @@ Zotero.Translate.Base.prototype = {
 		
 		if(!this.translator || !this.translator.length) {
 			this.complete(false, new Error("No translator specified"));
+			return;
 		}
 		
 		this._libraryID = libraryID;
@@ -1342,6 +1365,7 @@ Zotero.Translate.Base.prototype = {
 			this.complete(false, e);
 			return;
 		}
+		this._translatorInfo = this._sandboxManager.sandbox.ZOTERO_TRANSLATOR_INFO;
 		
 		if(callback) callback();
 	},
@@ -1720,7 +1744,8 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 	var errorString = Zotero.Translate.Base.prototype.complete.apply(this, [returnValue, error]);
 	
 	// Report translation failure if we failed
-	if(oldState == "translate" && errorString && this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
+	if(oldState == "translate" && errorString && !this._parentTranslator && this.translator.length
+		&& this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
 		// Don't report failure if in private browsing mode
 		if(Zotero.isFx && !Zotero.isBookmarklet && !Zotero.isStandalone) {
 			var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
@@ -1823,7 +1848,7 @@ Zotero.Translate.Import.prototype._loadTranslator = function(translator, callbac
  * Prepare translator IO
  */
 Zotero.Translate.Import.prototype._loadTranslatorPrepareIO = function(translator, callback) {
-	var configOptions = this._sandboxManager.sandbox.ZOTERO_TRANSLATOR_INFO.configOptions;
+	var configOptions = this._translatorInfo.configOptions;
 	var dataMode = configOptions ? configOptions["dataMode"] : "";
 	
 	var me = this;
@@ -2092,7 +2117,8 @@ Zotero.Translate.Search.prototype.setTranslator = function(translator) {
  * translation fails
  */
 Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
-	if(this._currentState == "translate" && (!this.newItems || !this.newItems.length)) {
+	if(this._currentState == "translate" && (!this.newItems || !this.newItems.length)
+		&& this.translator.length) { //length is 0 only when translate was called without translators
 		Zotero.debug("Translate: Could not find a result using "+this.translator[0].label, 3);
 		if(error) Zotero.debug(this._generateErrorString(error), 3);
 		if(this.translator.length > 1) {

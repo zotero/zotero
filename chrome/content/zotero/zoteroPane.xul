@@ -280,7 +280,7 @@
 					<menuseparator/>
 					<menuitem label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane_Local.duplicateSelectedItem();"/>
 					<menuitem oncommand="ZoteroPane_Local.deleteSelectedItems();"/>
-					<menuitem oncommand="ZoteroPane_Local.deleteSelectedItems(true);"/>
+					<menuitem oncommand="ZoteroPane_Local.deleteSelectedItems(true, true);"/>
 					<menuitem label="&zotero.items.menu.restoreToLibrary;" oncommand="ZoteroPane_Local.restoreSelectedItems();"/>
 					<menuitem label="&zotero.items.menu.mergeItems;" oncommand="ZoteroPane_Local.mergeSelectedItems();"/>
 					<menuseparator/>

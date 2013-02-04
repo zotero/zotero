@@ -88,8 +88,15 @@ Zotero.ID_Tracker = function () {
 	
 	
 	function getKey() {
-		var baseString = "23456789ABCDEFGHIJKMNPQRSTUVWXTZ";
+		// TODO: add 'L' and 'Y' after 3.0.11 cut-off
+		var baseString = "23456789ABCDEFGHIJKMNPQRSTUVWXZ";
 		return Zotero.randomString(8, baseString);
+	}
+	
+	
+	this.isValidKey = function (value) {
+		var re = /^[23456789ABCDEFGHIJKLMNPQRSTUVWXYZ]{8}$/
+		return re.test(value);
 	}
 	
 	

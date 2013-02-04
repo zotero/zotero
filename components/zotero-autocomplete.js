@@ -124,6 +124,9 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 			statement = this._zotero.DB.getStatement(sql, sqlParams);
 			
 			var resultsCallback = function (results) {
+				if (!results) {
+					return;
+				}
 				var collation = self._zotero.getLocaleCollation();
 				results.sort(function(a, b) {
 					return collation.compareString(1, a.val, b.val);
