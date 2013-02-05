@@ -2125,7 +2125,6 @@ function addLangRow(parent, nickname, tagdata) {
 	var firsthbox = document.createElement('hbox');
 	firsthbox.setAttribute('class', 'zotero-clicky');
 	firsthbox.setAttribute("flex", "1");
-	firsthbox.setAttribute("style", "border:1px solid red;");
 	firsthbox.setAttribute('onclick', 'showNicknameEditor(this.firstChild)');
 	var valbox = document.createElement('label');
 	//valbox.setAttribute("width", "100");
@@ -2136,7 +2135,6 @@ function addLangRow(parent, nickname, tagdata) {
 	newrow.appendChild(firsthbox);
 
 	var secondhbox = document.createElement('hbox');
-	secondhbox.setAttribute("style", "border:1px solid red;");
 	//secondhbox.setAttribute('minwidth', '150');
 	//secondhbox.setAttribute('maxwidth', '150');
 	// Set tags
@@ -2151,7 +2149,6 @@ function addLangRow(parent, nickname, tagdata) {
 	newrow.appendChild(secondhbox);
 
 	var thirdhbox = document.createElement('hbox');
-	thirdhbox.setAttribute("style", "border:1px solid red;");
 	var removeButton = document.createElement('label');
 	removeButton.setAttribute('value', "-");
 	removeButton.setAttribute('class', 'zotero-clicky zotero-clicky-minus');
@@ -2421,7 +2418,6 @@ function addSelectors (row, tag) {
 			newselector.setAttribute("onmouseover", "setLanguageRoleHighlight(['translat-primary', 'translat-secondary', 'translat'],true);");
 			newselector.setAttribute("onmouseout", "setLanguageRoleHighlight(['translat-primary', 'translat-secondary', 'translat'],false);");
 		}
-	    newselector.setAttribute("style", "border:1px solid red;");
 		row.appendChild(newselector);
 	}
 }

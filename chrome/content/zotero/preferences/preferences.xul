@@ -1245,8 +1245,8 @@ To add a new preference:
           </columns>
           <rows>
             <row class="compact" style="margin:0px !important;">
-              <label flex="1" value="&zotero.preferences.lang.nickname;" style="font-weight:bold;border:1px solid black;"/>
-              <label flex="1" value="&zotero.preferences.lang.tag;" style="font-weight:bold;border:1px solid black;"/>
+              <label flex="1" value="&zotero.preferences.lang.nickname;" style="font-weight:bold;"/>
+              <label flex="1" value="&zotero.preferences.lang.tag;" style="font-weight:bold;"/>
               <hbox flex="1"/>
               <hbox flex="1">
                 <hbox flex="1"/>
