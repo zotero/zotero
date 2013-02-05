@@ -2020,7 +2020,7 @@
                   valueElement.setAttribute("label",result.val);
                   valueElement.setAttribute("tooltiptext",result.val);
                   node.parentNode.replaceChild(valueElement,node);
-                  this.setJurisdictionKey(result.comment);
+                  this.setJurisdictionKey(result.comment, valueElement);
 /*
 					if (this._tabDirection) {
 						if (!focusMode) {
@@ -2120,6 +2120,7 @@
 									valueElement.setAttribute("style","background:yellow;");
 								}
 								valueElement.setAttribute("label", label);
+								valueElement.setAttribute("value", value);
 							}
 							valueElement.setAttribute("onclick","document.getBindingParent(this).showJurisdictionEditor(this);");
 							return valueElement;
@@ -3564,6 +3565,7 @@ if (oldCreator.id) {
 
 			<method name="setJurisdictionKey">
               <parameter name="key"/>
+              <parameter name="node"/>
 			  <body>
 				<![CDATA[
 					var jurisdictionDefaultNode = document.getElementById('jurisdiction-default');
