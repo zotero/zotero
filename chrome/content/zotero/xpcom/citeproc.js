@@ -57,8 +57,9 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.422",
+    PROCESSOR_VERSION: "1.0.425",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
+    LOCATOR_LABELS_REGEXP: new RegExp("^((art|ch|Ch|subch|col|fig|l|n|no|op|p|pp|para|subpara|pt|r|sec|subsec|Sec|sv|sch|tit|vrs|vol)\\.)\\s+(.*)"),
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -76,7 +77,16 @@ var CSL = {
         "subsec.": "subsection",
         "Sec.": "Section",
         "sch.": "schedule",
-        "tit.": "title"
+        "tit.": "title",
+        "col.": "column",
+        "fig.": "figure",
+        "l.": "line",
+        "n.": "note",
+        "no.": "number",
+        "op.": "opus",
+        "sv.": "sub-verbo",
+        "vrs.": "verse",
+        "vol.": "volume"
     },
     STATUTE_SUBDIV_STRINGS_REVERSE: {
         "article": "art.",
@@ -92,7 +102,42 @@ var CSL = {
         "subsection": "subsec.",
         "Section": "Sec.",
         "schedule": "sch.",
-        "title": "tit."
+        "title": "tit.",
+        "column": "col.",
+        "figure": "fig.",
+        "line": "l.",
+        "note": "n.",
+        "number": "no.",
+        "opus": "op.",
+        "sub-verbo": "sv.",
+        "verse": "vrs.",
+        "volume": "vol."
+    },
+    LOCATOR_LABELS_MAP: {
+        "art": "article",
+        "ch": "chapter",
+        "Ch": "Chapter",
+        "subch": "subchapter",
+        "col": "column",
+        "fig": "figure",
+        "l": "line",
+        "n": "note",
+        "no": "issue",
+        "op": "opus",
+        "p": "page",
+        "pp": "page",
+        "para": "paragraph",
+        "subpara": "subparagraph",
+        "pt": "part",
+        "r": "rule",
+		"sec": "section",
+		"subsec": "subsection",
+        "Sec": "Section",
+		"sv": "sub-verbo",
+        "sch": "schedule",
+        "tit": "title",
+        "vrs": "verse",
+        "vol": "volume"
     },
     NestedBraces: [
         ["(", "["],
@@ -479,33 +524,6 @@ var CSL = {
         "\u02C1": "\u0295",
         "\u06E5": "\u0648",
         "\u06E6": "\u064A"
-    },
-    LOCATOR_LABELS_REGEXP: new RegExp("^((art|ch|Ch|subch|col|fig|l|n|no|op|p|pp|para|subpara|pt|r|sec|subsec|Sec|sv|sch|tit|vrs|vol)\\.)\\s+(.*)"),
-    LOCATOR_LABELS_MAP: {
-        "art": "article",
-        "ch": "chapter",
-        "Ch": "Chapter",
-        "subch": "subchapter",
-        "col": "column",
-        "fig": "figure",
-        "l": "line",
-        "n": "note",
-        "no": "issue",
-        "op": "opus",
-        "p": "page",
-        "pp": "page",
-        "para": "paragraph",
-        "subpara": "subparagraph",
-        "pt": "part",
-        "r": "rule",
-		"sec": "section",
-		"subsec": "subsection",
-        "Sec": "Section",
-		"sv": "sub-verbo",
-        "sch": "schedule",
-        "tit": "title",
-        "vrs": "verse",
-        "vol": "volume"
     },
     SUPERSCRIPTS_REGEXP: new RegExp("[\u00AA\u00B2\u00B3\u00B9\u00BA\u02B0\u02B1\u02B2\u02B3\u02B4\u02B5\u02B6\u02B7\u02B8\u02E0\u02E1\u02E2\u02E3\u02E4\u1D2C\u1D2D\u1D2E\u1D30\u1D31\u1D32\u1D33\u1D34\u1D35\u1D36\u1D37\u1D38\u1D39\u1D3A\u1D3C\u1D3D\u1D3E\u1D3F\u1D40\u1D41\u1D42\u1D43\u1D44\u1D45\u1D46\u1D47\u1D48\u1D49\u1D4A\u1D4B\u1D4C\u1D4D\u1D4F\u1D50\u1D51\u1D52\u1D53\u1D54\u1D55\u1D56\u1D57\u1D58\u1D59\u1D5A\u1D5B\u1D5C\u1D5D\u1D5E\u1D5F\u1D60\u1D61\u2070\u2071\u2074\u2075\u2076\u2077\u2078\u2079\u207A\u207B\u207C\u207D\u207E\u207F\u2120\u2122\u3192\u3193\u3194\u3195\u3196\u3197\u3198\u3199\u319A\u319B\u319C\u319D\u319E\u319F\u02C0\u02C1\u06E5\u06E6]", "g"),
     locale: {},
@@ -904,6 +922,9 @@ CSL_CHROME.prototype.flagDateMacros = function(myxml) {
     }
 };
 CSL.getSortCompare = function () {
+    if (CSL.stringCompare) {
+        return CSL.stringCompare;
+    }
     var strcmp;
     var sortCompare;
     try {
@@ -2279,6 +2300,9 @@ CSL.Engine = function (sys, style, lang, forceLang) {
     }
     if (CSL.getAbbreviation) {
         this.sys.getAbbreviation = CSL.getAbbreviation;
+    }
+    if (this.sys.stringCompare) {
+        CSL.stringCompare = this.sys.stringCompare;
     }
     this.sys.AbbreviationSegments = CSL.AbbreviationSegments;
     this.parallel = new CSL.Parallel(this);
@@ -7852,7 +7876,11 @@ CSL.dateAsSortKey = function (state, Item, isMacro) {
             }
             state.output.append(CSL.Util.Dates[elem.slice(0, 4)].numeric(state, (prefix + yr)), macroFlag);
         } else {
-            state.output.append(CSL.Util.Dates[e]["numeric-leading-zeros"](state, value), macroFlag);
+            value = CSL.Util.Dates[e]["numeric-leading-zeros"](state, value);
+            if (!value) {
+                value = "00";
+            }
+            state.output.append(value, macroFlag);
         }
     }
 };
