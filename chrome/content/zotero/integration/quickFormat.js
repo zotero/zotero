@@ -470,7 +470,7 @@ var Zotero_QuickFormat = new function () {
 		
 		var author, authorDate = "";
 		if(item.firstCreator) author = authorDate = item.firstCreator;
-		var date = item.getField("date", true);
+		var date = item.getField("date", true, true);
 		if(date && (date = date.substr(0, 4)) !== "0000") {
 			authorDate += " ("+date+")";
 		}
@@ -590,14 +590,13 @@ var Zotero_QuickFormat = new function () {
 		var title, delimiter;
 		var str = item.getField("firstCreator");
 		
-		// Title, if no creator
-		if(!str) {
-			// TODO localize quotes
-			str = '"'+item.getField("title")+'"';
+		// Title, if no creator (getDisplayTitle in order to get case, e-mail, statute which don't have a title field)
+ 		if(!str) {
+			str = Zotero.getString("punctuation.openingQMark") + item.getDisplayTitle() + Zotero.getString("punctuation.closingQMark");
 		}
 		
 		// Date
-		var date = item.getField("date", true);
+		var date = item.getField("date", true, true);
 		if(date && (date = date.substr(0, 4)) !== "0000") {
 			str += ", "+date;
 		}
