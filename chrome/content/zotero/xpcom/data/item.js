@@ -1546,24 +1546,8 @@ Zotero.Item.prototype.save = function() {
 				var newids = [];
 				var currentIDs = this._getRelatedItems(true);
 				
-				for each(var id in this._previousData.related) {
-					if (currentIDs.indexOf(id) == -1) {
-						removed.push(id);
-					}
-				}
 				for each(var id in currentIDs) {
-					if (this._previousData.related.indexOf(id) != -1) {
-						continue;
-					}
 					newids.push(id);
-				}
-				
-				if (removed.length) {
-					var sql = "DELETE FROM itemSeeAlso WHERE itemID=? "
-						+ "AND linkedItemID IN ("
-						+ removed.map(function () '?').join()
-						+ ")";
-					Zotero.DB.query(sql, [itemID].concat(removed));
 				}
 				
 				if (newids.length) {
