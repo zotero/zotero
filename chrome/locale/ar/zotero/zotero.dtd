@@ -63,11 +63,11 @@
 <!ENTITY zotero.items.menu.attach "اضافة مرفق">
 <!ENTITY zotero.items.menu.attach.snapshot "إرفاق لقطة للصفحة الحالية">
 <!ENTITY zotero.items.menu.attach.link "إرفاق رابط للصفحة الحالية">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
+<!ENTITY zotero.items.menu.attach.link.uri "ربط الرابط بالمسار...">
 <!ENTITY zotero.items.menu.attach.file "إرفاق نسخة من ملف مخزن...">
 <!ENTITY zotero.items.menu.attach.fileLink "إرفاق ارتباط لملف...">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.restoreToLibrary "استعادة المكتبة">
 <!ENTITY zotero.items.menu.duplicateItem "تكرار العنصر المحدد">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 
@@ -103,11 +103,11 @@
 <!ENTITY zotero.item.attachment.file.show "عرض الملف">
 <!ENTITY zotero.item.textTransform "تغيير حالة النص">
 <!ENTITY zotero.item.textTransform.titlecase "حرف كبير في بداية كل كلمة">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.sentencecase "حالة الجملة">
 
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newNote "ملاحظة جديدة">
 <!ENTITY zotero.toolbar.note.standalone "ملاحظة جديدة مستقلة بذاتها">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
+<!ENTITY zotero.toolbar.note.child "إضافة ملاحظة تابعة">
 <!ENTITY zotero.toolbar.lookup "بحث بواسطة معرف العنصر...">
 <!ENTITY zotero.toolbar.attachment.linked "ارتباط تشعبي لملف...">
 <!ENTITY zotero.toolbar.attachment.add "تخزين نسخة من ملف...">
@@ -144,7 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "تفضيلات المستند">
 <!ENTITY zotero.integration.addEditCitation.title "اضافة/تحرير استشهاد مرجعي">
 <!ENTITY zotero.integration.editBibliography.title "تحرير ببليوجرافية">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 
 <!ENTITY zotero.progress.title "التقدم">
 
@@ -185,11 +185,11 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "الاشارات المرجعية">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "الاشارات المرجعية هي خاصية متاحة عبر مايكروسوفت وورد و اوبن اوفيس ولكنها قد تكون عرضة للتغيير الغير مقصود. ولأسباب تتعلق &#xA;بالتوافق، فالاستشهادات المرجعية لا يمكن ادراجها في الحواشي السفلية او التعليقات الختامية عند تحديد هذا الخيار.">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.prefs.storeReferences.label "تخزين المراجع في الوثيقة">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
 
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.showEditor.label "عرض المحرر">
+<!ENTITY zotero.integration.classicView.label "عرض تقليدي">
 
 <!ENTITY zotero.integration.references.label "المراجع الواردة في قائمة المراجع المستشهد بها">
 

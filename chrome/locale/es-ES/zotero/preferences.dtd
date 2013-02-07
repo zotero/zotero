@@ -128,6 +128,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar las citas para los ítems seleccionados al portapapeles">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar los ítems seleccionados al portapapeles">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importar desde el portapapeles">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Intentar suprimir los atajos de otras aplicaciones que coincidan">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Los cambios tendrán efecto sólo en las ventanas nuevas">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Servidores Proxies">
@@ -136,7 +137,7 @@
 <!ENTITY zotero.preferences.proxies.desc_before_link "Zotero transparentemente redirigirá las peticiones a través de los servidores proxies guardados. Consulte la">
 <!ENTITY zotero.preferences.proxies.desc_link "Documentación del servidor proxy">
 <!ENTITY zotero.preferences.proxies.desc_after_link "para mayor información.">
-<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
+<!ENTITY zotero.preferences.proxies.transparent "Habilitar el redireccionamiento del servidor proxy">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Automáticamente reconocer recursos proxificados">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Deshabilitar el redireccionamiento del servidor proxy cuando el nombre del dominio contenga">
 <!ENTITY zotero.preferences.proxies.configured "Servidores proxies configurados">
@@ -159,7 +160,7 @@
 <!ENTITY zotero.preferences.locate.description "Descripción">
 <!ENTITY zotero.preferences.locate.name "Nombre">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Un motor de búsqueda amplía la capacidad de la lista desplegable Localizar en el panel de información. Habilitando dichos motores de búsqueda a la lista de abajo, éstas se agregarán a la lista desplegable y se pueden utilizar para localizar los recursos de su biblioteca en la red.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
+<!ENTITY zotero.preferences.locate.addDescription "Para añadir un motor de búsqueda que no está en la lista, visita en tu navegador el motor de búsqueda y selecciona &#34;Añadir&#34; desde el menú Localizar de Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restaurar configuración por omisión">
 
 <!ENTITY zotero.preferences.charset "Codificación de caracteres">

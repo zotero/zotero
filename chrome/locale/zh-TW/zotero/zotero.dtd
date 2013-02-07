@@ -144,7 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "文件的偏好設定">
 <!ENTITY zotero.integration.addEditCitation.title "新增／編輯引用文獻">
 <!ENTITY zotero.integration.editBibliography.title "編輯參考書目">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 
 <!ENTITY zotero.progress.title "進度">
 

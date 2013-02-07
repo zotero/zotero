@@ -69,10 +69,10 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaurer vers la bibliothèque">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliquer le document sélectionné">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.mergeItems "Fusionner les documents…">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choisissez la version du document à utiliser comme document maître :">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Sélectionnez les champs à conserver depuis les autres versions du document :">
 
 <!ENTITY zotero.toolbar.newItem.label "Nouveau document">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Plus">
@@ -102,7 +102,7 @@
 <!ENTITY zotero.item.add "Ajouter">
 <!ENTITY zotero.item.attachment.file.show "Localiser le fichier">
 <!ENTITY zotero.item.textTransform "Transformer le texte">
-<!ENTITY zotero.item.textTransform.titlecase "Initiales En Majuscule">
+<!ENTITY zotero.item.textTransform.titlecase "Initiales En Majuscules">
 <!ENTITY zotero.item.textTransform.sentencecase "Lettre capitale en début de phrase">
 
 <!ENTITY zotero.toolbar.newNote "Nouvelle note">
@@ -133,9 +133,9 @@
 
 <!ENTITY zotero.bibliography.title "Créer une bibliographie">
 <!ENTITY zotero.bibliography.style.label "Style de citation :">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Mode de création :">
+<!ENTITY zotero.bibliography.bibliography "Bibliographie">
+<!ENTITY zotero.bibliography.outputMethod "Méthode de création :">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Enregistrer au format RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Enregistrer au format HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copier dans le presse-papiers">
@@ -144,7 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Préférences du document">
 <!ENTITY zotero.integration.addEditCitation.title "Ajouter/Modifier la citation">
 <!ENTITY zotero.integration.editBibliography.title "Modifier la bibliographie">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Mise en forme rapide des citations">
 
 <!ENTITY zotero.progress.title "Progression">
 
@@ -163,7 +163,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Supprimer l'auteur">
 <!ENTITY zotero.citation.prefix.label "Préfixe :">
 <!ENTITY zotero.citation.suffix.label "Suffixe :">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.editorWarning.label "Avertissement : Si vous modifiez une référence dans l'éditeur, elle ne sera plus mise à jour pour refléter les changements dans votre base de données ou dans le style de citation.">
 
 <!ENTITY zotero.richText.italic.label "Italique">
 <!ENTITY zotero.richText.bold.label "Gras">
@@ -182,8 +182,8 @@
 <!ENTITY zotero.integration.prefs.endnotes.label "notes de fin">
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Formater en utilisant :">
-<!ENTITY zotero.integration.prefs.bookmarks.label "les marque-pages">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Les marque-pages sont conservés entre Microsoft Word et OpenOffice, mais peuvent être modifiés accidentellement. Pour des raisons de compatibilité, les citations ne peuvent pas être insérées dans des notes de bas de page ou de fin lorsque cette option est sélectionnée.">
+<!ENTITY zotero.integration.prefs.bookmarks.label "Signets">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Les signets sont conservés entre Microsoft Word et OpenOffice/LibreOffice, mais peuvent être modifiés accidentellement. Pour des raisons de compatibilité, les citations ne peuvent pas être insérées dans des notes de bas de page ou de fin lorsque cette option est sélectionnée.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Stocker les références dans le document">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Stocker les références dans votre document augmentera la taille du fichier mais vous permettra de partager votre document avec d'autres sans utiliser un groupe Zotero. Zotero 3.0 ou suivant est nécessaire pour mettre à jour des documents créés avec cette option.">

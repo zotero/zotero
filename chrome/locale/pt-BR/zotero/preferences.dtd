@@ -38,7 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "notas associadas">
 <!ENTITY zotero.preferences.groups.childFiles "cópias instantâneas e arquivos importados associados">
 <!ENTITY zotero.preferences.groups.childLinks "links associados">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "etiquetas">
 
 <!ENTITY zotero.preferences.openurl.caption "Abrir URL">
 
@@ -59,7 +59,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Endereço:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sincronizar arquivos anexos em Minha Biblioteca usando">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Sincronizar arquivos anexos em bibliotecas de grupo usando o armazenamento Zotero">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "Sobre a sincronização do arquivo">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Ao utilizar o armazenamento Zotero, você concorda em aderir a seus">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "termos e condições">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Sincronização completa com o servidor Zotero">
@@ -120,7 +120,7 @@
 
 <!ENTITY zotero.preferences.keys.openZotero "Abrir/Fechar painel Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Modo Tela Cheia">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Concentrar o painel Bibliotecas">
 <!ENTITY zotero.preferences.keys.quicksearch "Pesquisa rápida">
 <!ENTITY zotero.preferences.keys.newItem "Criar um novo item">
 <!ENTITY zotero.preferences.keys.newNote "Criar uma nova nota">
@@ -128,6 +128,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar citações de item selecionado para a área de transferência">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar itens selecionados para a área de transferência">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importar da área de transferência">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Tentar sobrescrefer conflitos de teclas de atalho">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Mudanças tem efeito apenas em novas janelas">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">

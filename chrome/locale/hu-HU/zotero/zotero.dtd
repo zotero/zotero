@@ -144,7 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Dokumentum beállításai">
 <!ENTITY zotero.integration.addEditCitation.title "Hivatkozás hozzáadása/szerkesztése">
 <!ENTITY zotero.integration.editBibliography.title "Bibliográfia szerkesztése">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Folyamatban">
 

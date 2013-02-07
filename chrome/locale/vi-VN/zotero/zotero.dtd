@@ -144,7 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Các tùy chọn về Tài liệu">
 <!ENTITY zotero.integration.addEditCitation.title "Thêm/Soạn thảo Trích dẫn">
 <!ENTITY zotero.integration.editBibliography.title "Soạn thảo Thư tịch">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Tiến triển">
 

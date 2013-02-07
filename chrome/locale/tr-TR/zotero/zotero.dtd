@@ -144,7 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Döküman Tercihleri">
 <!ENTITY zotero.integration.addEditCitation.title "Gönderme Ekle/Düzenle">
 <!ENTITY zotero.integration.editBibliography.title "Kaynakça Düzenle">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 
 <!ENTITY zotero.progress.title "İşlem">
 

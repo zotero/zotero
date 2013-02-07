@@ -1,6 +1,6 @@
 <!ENTITY zotero.preferences.title "การปรับแต่ง Zotero">
 
-<!ENTITY zotero.preferences.default "พื้นฐาน:">
+<!ENTITY zotero.preferences.default "ค่าโดยปริยาย:">
 <!ENTITY zotero.preferences.items "รายการ">
 <!ENTITY zotero.preferences.period ".">
 
@@ -17,7 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "เล็ก">
 <!ENTITY zotero.preferences.fontSize.medium "กลาง">
 <!ENTITY zotero.preferences.fontSize.large "ใหญ่">
-<!ENTITY zotero.preferences.fontSize.xlarge "ใหญ่ที่สุด">
+<!ENTITY zotero.preferences.fontSize.xlarge "ใหญ่พิเศษ">
 <!ENTITY zotero.preferences.fontSize.notes "ขนาดตัวอักษรของหมายเหตุ">
 
 <!ENTITY zotero.preferences.miscellaneous "อื่น ๆ">
@@ -31,7 +31,7 @@
 <!ENTITY zotero.preferences.downloadAssociatedFiles "แนบไฟล์ PDF และไฟล์อื่นโดยอัตโนมัติเมื่อบันทึกรายการ">
 <!ENTITY zotero.preferences.automaticTags "สร้างแท็กด้วยคำสำคัญและหัวเรื่องโดยอัตโนมัติ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "ล้างรายการที่เคยลบและเก็บไว้ในถังขยะนานกว่า">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "วัน">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "วันที่แล้ว">
 
 <!ENTITY zotero.preferences.groups "กลุ่ม">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "เมื่อสำเนารายการระหว่างไลบรารี่ ให้รวมถึง:">
@@ -40,35 +40,35 @@
 <!ENTITY zotero.preferences.groups.childLinks "ลิงค์ลูก">
 <!ENTITY zotero.preferences.groups.tags "tags">
 
-<!ENTITY zotero.preferences.openurl.caption "เปิดยูอาแอล">
+<!ENTITY zotero.preferences.openurl.caption "URL แบบเปิด">
 
 <!ENTITY zotero.preferences.openurl.search "ค้นหาตัวแก้ปัญหา">
 <!ENTITY zotero.preferences.openurl.custom "กำหนดเอง">
 <!ENTITY zotero.preferences.openurl.server "ตัวแก้ปัญหา:">
 <!ENTITY zotero.preferences.openurl.version "รุ่น:">
 
-<!ENTITY zotero.preferences.prefpane.sync "ซิงค์">
+<!ENTITY zotero.preferences.prefpane.sync "ประสานข้อมูล">
 <!ENTITY zotero.preferences.sync.username "ชื่อผู้ใช้:">
 <!ENTITY zotero.preferences.sync.password "รหัสผ่าน:">
-<!ENTITY zotero.preferences.sync.syncServer "ประสานเข้ากับเครื่องบริการของ Zotero">
+<!ENTITY zotero.preferences.sync.syncServer "ประสานข้อมูลกับเครื่องบริการของ Zotero">
 <!ENTITY zotero.preferences.sync.createAccount "สร้างบัญชีผู้ใช้">
 <!ENTITY zotero.preferences.sync.lostPassword "รหัสผ่านหาย?">
-<!ENTITY zotero.preferences.sync.syncAutomatically "ซิงค์อัตโนมัติ">
-<!ENTITY zotero.preferences.sync.about "เกี่ยวกับการซิงค์">
-<!ENTITY zotero.preferences.sync.fileSyncing "ซิงค์ไฟล์">
+<!ENTITY zotero.preferences.sync.syncAutomatically "ประสานข้อมูลโดยอัตโนมัติ">
+<!ENTITY zotero.preferences.sync.about "เกี่ยวกับการประสานข้อมูล">
+<!ENTITY zotero.preferences.sync.fileSyncing "ประสานข้อมูลในแฟ้ม">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "ซิงค์ไฟล์แนบในไลบรารี่โดยใช้">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "ประสานแฟ้มแนบในกลุ่มไลบรารี่โดยใช้ที่เก็บของ Zotero">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "ประสานข้อมูลในแฟ้มแนบในไลบรารี่โดยใช้">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "ประสานข้อมูลในแฟ้มแนบในกลุ่มไลบรารี่โดยใช้ที่เก็บของ Zotero">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "คุณยอมรับเงื่อนไขการใช้ที่เก็บของ Zotero">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "เงื่อนไขและข้อกำหนด">
-<!ENTITY zotero.preferences.sync.reset.fullSync "ทำการประสานทั้งหมดกับเครื่องบริการของ Zotero">
+<!ENTITY zotero.preferences.sync.reset.fullSync "ประสานข้อมูลทั้งหมดกับเครื่องบริการของ Zotero">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "ผนวกข้อมูลในเครื่องด้วยข้อมูลจากเครื่องบริการโดยไม่สนใจประวัติการประสาน">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "เรียกคืนจากเครื่องบริการ Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "ล้างข้อมูลในเครื่องนี้แล้วเรียกคืนจากเครื่องบริการ Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "ส่งข้อมูลคืนเครื่องบริการ Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "ล้างข้อมูลในเครื่องบริการ Zotero แล้วบันทึกทับด้วยข้อมูลจากเครื่องนี้">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "ตั้งค่าประวัติการซิงค์ไฟล์">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "ตั้งค่าประวัติการประสานข้อมูลแฟ้มใหม่">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "ตรวจสอบข้อมูลบนเซิร์ฟเวอร์สำหรับไฟล์แนบทั้งหมดในเครื่อง">
 <!ENTITY zotero.preferences.sync.reset.button "ตั้งค่าใหม่...">
 
@@ -89,7 +89,7 @@
 <!ENTITY zotero.preferences.prefpane.export "ส่งออก">
 
 <!ENTITY zotero.preferences.citationOptions.caption "ตัวเลือกการอ้างอิง">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "รวม URLS ของบทความในเอกสารอ้างอิง">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "รวม URLs ของบทความในเอกสารอ้างอิง">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "เมื่อไม่ใช้งานตัวเลือกนี้ Zotero จะรวม URLs เมื่ออ้างถึงวารสาร นิตยสารและหนังสือพิมพ์เฉพาะกรณีที่บทความนั้นไม่มีเลขหน้าเท่านั้น">
 
 <!ENTITY zotero.preferences.quickCopy.caption "ทำสำเนาอย่างเร็ว">
@@ -97,7 +97,7 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "ทำสำเนาเป็น HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "หมายเหตุ: การจัดหน้าจะสูญหายไปบน Mac OS X">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "ตั้งค่าที่ตั้งเฉพาะ:">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "โดเมน">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "โดเมน/พาธ">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(เช่น wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "รูปแบบแฟ้มส่งออก">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "ไม่ใช้การสำเนาแบบด่วนเมื่อลากรายการมากกว่า">
@@ -112,7 +112,7 @@
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "ตัวจัดการรูปแบบ">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "ชื่อเรื่อง">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "ปรับให้เป็นปัจจุบัน">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "ปรับเป็นรุ่นปัจจุบันแล้ว">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "เลือกใช้รูปแบบเพิ่มเติม...">
 
@@ -128,6 +128,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "ทำสำเนารายการอ้างอิงที่เลือกไว้ไปยังคลิปบอร์ด">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "ทำสำเนารายการไปยังคลิปบอร์ด">
 <!ENTITY zotero.preferences.keys.importFromClipboard "นำเข้าจากคลิปบอร์ด">
+<!ENTITY zotero.preferences.keys.overrideGlobal "พยายามครอบงำทางลัดที่ขัดแย้งกัน">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "การเปลี่ยนแปลงจะมีผลกับหน้าต่างใหม่เท่านั้น">
 
 <!ENTITY zotero.preferences.prefpane.proxies "พร็อกซี่">

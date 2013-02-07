@@ -69,10 +69,10 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "ライブラリへ復帰させる">
 <!ENTITY zotero.items.menu.duplicateItem "選択されたアイテムを複製">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.mergeItems "アイテムを統合する...">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "土台として用いるアイテムのヴァージョンを選んでください:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "このアイテムの他のヴァージョンから維持すべきフィールドを選択してください:">
 
 <!ENTITY zotero.toolbar.newItem.label "新規アイテム">
 <!ENTITY zotero.toolbar.moreItemTypes.label "その他">
@@ -133,9 +133,9 @@
 
 <!ENTITY zotero.bibliography.title "参考文献目録を作成">
 <!ENTITY zotero.bibliography.style.label "引用スタイル:">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "出力モード:">
+<!ENTITY zotero.bibliography.bibliography "参考文献目録">
+<!ENTITY zotero.bibliography.outputMethod "出力方法:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF として保存">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML として保存">
 <!ENTITY zotero.bibliography.copyToClipboard.label "クリップボードにコピー">
@@ -144,7 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "ドキュメントの設定">
 <!ENTITY zotero.integration.addEditCitation.title "出典表記を追加・編集">
 <!ENTITY zotero.integration.editBibliography.title "参考文献目録を編集">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "出典表記の簡易フォーマット">
 
 <!ENTITY zotero.progress.title "進行">
 
@@ -163,7 +163,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "著者名の非表示">
 <!ENTITY zotero.citation.prefix.label "接頭辞:">
 <!ENTITY zotero.citation.suffix.label "接尾辞:">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.editorWarning.label "警告: エディタの中で出典表記を編集すると、データベース側、または引用スタイルの変更を反映した自動更新が行われなくなります。">
 
 <!ENTITY zotero.richText.italic.label "斜体">
 <!ENTITY zotero.richText.bold.label "太字">

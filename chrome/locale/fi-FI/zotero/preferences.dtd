@@ -128,6 +128,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopioi valittujen nimikkeiden sitaatit leikepöydälle">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopioi valitut nimikkeet leikepöydälle">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Tuo leikepöydältä">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Yritä ohittaa keskenään ristiriitaiset pikanäppäimet">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Muutokset tulevat voimaan vasta uusissa ikkunoissa">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Välityspalvelimet">

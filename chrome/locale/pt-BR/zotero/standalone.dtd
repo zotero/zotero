@@ -12,12 +12,12 @@
 
 <!ENTITY fileMenu.label "Arquivo">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "Salvar...">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "Configurar página...">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "Imprimir...">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "U">
 <!ENTITY closeCmd.label "Fechar">

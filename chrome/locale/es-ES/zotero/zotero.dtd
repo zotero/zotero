@@ -89,7 +89,7 @@
 <!ENTITY zotero.toolbar.import.label "Importar...">
 <!ENTITY zotero.toolbar.importFromClipboard "Importar desde el portapapeles">
 <!ENTITY zotero.toolbar.export.label "Exportar biblioteca...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
+<!ENTITY zotero.toolbar.rtfScan.label "Escaneado RTF...">
 <!ENTITY zotero.toolbar.timeline.label "Crear una cronografía">
 <!ENTITY zotero.toolbar.preferences.label "Preferencias...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Soporte y documentación">
@@ -144,7 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Ajustes de documento">
 <!ENTITY zotero.integration.addEditCitation.title "Añadir o modificar cita">
 <!ENTITY zotero.integration.editBibliography.title "Modificar bibliografía">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Progreso">
 
@@ -229,17 +229,17 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Citas ambiguas">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Citas mapeadas">
 <!ENTITY zotero.rtfScan.introPage.label "Introducción">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero puede extraer y reformatear citas e insertar una bibliografía en ficheros RTF. La característica de escaneado RTF actualmente soporta citas en los siguientes tipos de formato:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Para empezar, seleccione un archivo de ingreso RTF y un archivo de salida abajo:">
 <!ENTITY zotero.rtfScan.scanPage.label "Escaneando por citas">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero está escaneando su documento por citas. Por favor, sea paciente.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Verificando ítems citados">
-<!ENTITY zotero.rtfScan.citationsPage.description "Por favor, verifiqye">
+<!ENTITY zotero.rtfScan.citationsPage.description "Por favor, revisa la lista de citas reconocidas más abajo para asegurarse de que Zotero ha seleccionado los ítems correspondientes de manera correcta. Cualquier cita ambigua o incorrecta debe ser corregida antes de proceder con el siguiente paso.">
 <!ENTITY zotero.rtfScan.stylePage.label "Formato de documento">
 <!ENTITY zotero.rtfScan.formatPage.label "Formato de citas">
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero está procesando y dando formato a su archivo RTF. Por favor, sea paciente.">
 <!ENTITY zotero.rtfScan.completePage.label "Escaneado RTF completado">
-<!ENTITY zotero.rtfScan.completePage.description "Su documebto ha sido escaneado y procesado. Por favor, asegúrese que esté con el formato correcto.">
+<!ENTITY zotero.rtfScan.completePage.description "Su documento ha sido escaneado y procesado. Por favor, asegúrese que esté con el formato correcto.">
 <!ENTITY zotero.rtfScan.inputFile.label "Archivo de entrada">
 <!ENTITY zotero.rtfScan.outputFile.label "Archivo de salida">
 

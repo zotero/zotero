@@ -38,7 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "les notes enfants">
 <!ENTITY zotero.preferences.groups.childFiles "les captures d'écran et fichiers importés enfants">
 <!ENTITY zotero.preferences.groups.childLinks "les liens enfants">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "les marqueurs">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -59,7 +59,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Adresse :">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synchroniser les fichiers joints de Ma bibliothèque en utilisant">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Synchroniser les fichiers joints dans les bibliothèques de groupe en utilisant le stockage de Zotero">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "À propos de la synchronisation des fichiers">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "En utilisant le stockage de Zotero, vous acceptez d'être lié par ses">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "modalités et conditions">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Synchronisation complète avec le serveur Zotero">
@@ -120,7 +120,7 @@
 
 <!ENTITY zotero.preferences.keys.openZotero "Ouvrir/fermer le panneau Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Bascule du mode plein écran">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Bascule vers le panneau Ma Bibliothèque">
 <!ENTITY zotero.preferences.keys.quicksearch "Recherche rapide">
 <!ENTITY zotero.preferences.keys.newItem "Créer un nouveau document">
 <!ENTITY zotero.preferences.keys.newNote "Créer une nouvelle note">
@@ -128,6 +128,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copier les citations du document sélectionné dans le presse-papiers">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copier les documents sélectionnés dans le presse-papiers">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importer du presse-papiers">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Essayer de gérer les conflits de raccourcis">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Les modifications ne prennent effet que dans les nouvelles fenêtres.">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Serveurs mandataires">

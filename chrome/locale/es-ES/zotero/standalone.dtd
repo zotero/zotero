@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Ocultar otros">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Mostrar todo">
-<!ENTITY quitApplicationCmdMac.label "Salir Zotero">
+<!ENTITY quitApplicationCmdMac.label "Salir de Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 
@@ -87,7 +87,7 @@
 <!ENTITY helpMenuWin.label "Ayuda">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "Acerca &brandShortName;">
+<!ENTITY aboutProduct.label "Acerca de &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Soporte y documentación">
 <!ENTITY productHelp.accesskey "H">

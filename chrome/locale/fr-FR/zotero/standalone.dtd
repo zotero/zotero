@@ -1,4 +1,4 @@
-<!ENTITY preferencesCmdMac.label "Préférences...">
+<!ENTITY preferencesCmdMac.label "Préférences…">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Services">
 <!ENTITY hideThisAppCmdMac.label "Cacher &brandShortName;">
@@ -12,14 +12,14 @@
 
 <!ENTITY fileMenu.label "Fichier">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "Enregistrer…">
 <!ENTITY saveCmd.key "S">
-<!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Page Setup…">
-<!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY saveCmd.accesskey "E">
+<!ENTITY pageSetupCmd.label "Mise en page…">
+<!ENTITY pageSetupCmd.accesskey "M">
+<!ENTITY printCmd.label "Imprimer…">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "Fermer">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "r">
@@ -54,7 +54,7 @@
 <!ENTITY selectAllCmd.label "Tout sélectionner">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "T">
-<!ENTITY preferencesCmd.label "Options...">
+<!ENTITY preferencesCmd.label "Options…">
 <!ENTITY preferencesCmd.accesskey "i">
 <!ENTITY preferencesCmdUnix.label "Préférences">
 <!ENTITY preferencesCmdUnix.accesskey "f">

@@ -1,7 +1,7 @@
 <!ENTITY preferencesCmdMac.label "Nastavitve ...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Storitve">
-<!ENTITY hideThisAppCmdMac.label "Skrij ">
+<!ENTITY hideThisAppCmdMac.label "Skrij &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "S">
 <!ENTITY hideOtherAppsCmdMac.label "Skrij druge">
 <!ENTITY hideOtherAppsCmdMac.commandkey "S">
@@ -12,19 +12,19 @@
 
 <!ENTITY fileMenu.label "Datoteka">
 <!ENTITY fileMenu.accesskey "D">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "Shrani ...">
 <!ENTITY saveCmd.key "S">
-<!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Page Setup…">
-<!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY saveCmd.accesskey "S">
+<!ENTITY pageSetupCmd.label "Priprava strani ...">
+<!ENTITY pageSetupCmd.accesskey "r">
+<!ENTITY printCmd.label "Natisni ...">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "N">
 <!ENTITY closeCmd.label "Zapri">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "Z">
-<!ENTITY quitApplicationCmdWin.label "Zapri">
-<!ENTITY quitApplicationCmdWin.accesskey "r">
+<!ENTITY quitApplicationCmdWin.label "Izhod">
+<!ENTITY quitApplicationCmdWin.accesskey "h">
 <!ENTITY quitApplicationCmd.label "Izhod">
 <!ENTITY quitApplicationCmd.accesskey "z">
 
