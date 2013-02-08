@@ -160,7 +160,7 @@
 <!ENTITY zotero.preferences.locate.description "Description">
 <!ENTITY zotero.preferences.locate.name "Nom">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Un moteur de recherche étend les capacités du menu Localiser du panneau d'information. En activant des moteurs de recherche dans la liste ci-dessous, ils seront ajoutés au menu déroulant et pourront être utilisés pour localiser des ressources de votre bibliothèque sur le Web.">
-<!ENTITY zotero.preferences.locate.addDescription "Pour ajouter un moteur de recherche absent de la liste, allez sur le moteur de recherche voulu dans votre navigateur et sélectionnez 'Ajoutez' dans la barre de recherche de Firefox. À la réouverture de ce panneau de préférences vous aurez une option pour activer le nouveau moteur de recherche.">
+<!ENTITY zotero.preferences.locate.addDescription "Pour ajouter un moteur de recherche absent de la liste, allez sur le moteur de recherche voulu dans votre navigateur et sélectionnez &#34;Ajoutez&#34; dans le menu &#34;Localiser&#34; de Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Rétablir les moteurs par défaut">
 
 <!ENTITY zotero.preferences.charset "Codage de caractères">
@@ -168,7 +168,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Afficher l'option de codage de caractères à l'exportation">
 
 <!ENTITY zotero.preferences.dataDir "Emplacement du répertoire contenant les données">
-<!ENTITY zotero.preferences.dataDir.useProfile "Utiliser le répertoire de profil de Firefox">
+<!ENTITY zotero.preferences.dataDir.useProfile "Utiliser le répertoire de profil">
 <!ENTITY zotero.preferences.dataDir.custom "Personnalisé :">
 <!ENTITY zotero.preferences.dataDir.choose "Sélectionner…">
 <!ENTITY zotero.preferences.dataDir.reveal "Afficher le répertoire contenant les données">

@@ -38,7 +38,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "zugehörige Notizen">
 <!ENTITY zotero.preferences.groups.childFiles "zugehörige Schnappschüsse und importierte Dateien">
 <!ENTITY zotero.preferences.groups.childLinks "zugehörige Links">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "Tags">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -59,7 +59,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Angehängte Dateien in Meine Bibliothek synchronisieren mit:">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Angehängte Dateien in Gruppen-Bibliotheken mit Zotero Storage synchronisieren">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "Über die Dateisynchronisierung">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Wenn Sie Zotero Storage benutzen, erklären Sie sich einverstanden mit den">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "allgemeinen Geschäftsbedingungen">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Komplette Synchronisierung mit Zotero-Server">
@@ -120,7 +120,7 @@
 
 <!ENTITY zotero.preferences.keys.openZotero "Zotero-Panel öffnen/schließen">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Vollbild-Modus an/aus">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus auf Bibliotheksspalte">
 <!ENTITY zotero.preferences.keys.quicksearch "Schnellsuche">
 <!ENTITY zotero.preferences.keys.newItem "Neuen Eintrag erstellen">
 <!ENTITY zotero.preferences.keys.newNote "Neue Notiz erstellen">

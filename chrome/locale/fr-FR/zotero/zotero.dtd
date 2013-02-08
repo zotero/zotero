@@ -26,7 +26,7 @@
 <!ENTITY zotero.upgrade.changeLogAfterLink "pour découvrir les nouveautés.">
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Ajouter la sélection à la note Zotero">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Créer une note Zotero à partir de la sélection">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Créer un document Zotero et une note à partir de la sélection">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "Enregistrer le lien en tant que document Zotero">
 <!ENTITY zotero.contextMenu.saveImageAsItem "Enregistrer l'image en tant que document Zotero">
 
