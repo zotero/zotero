@@ -1939,7 +1939,7 @@ Zotero.Item.prototype.save = function() {
 					Zotero.Notifier.trigger('modify', 'item', newSourceItem.id, newSourceItemNotifierData);
 				}
 				
-				var oldSourceItemKey = this._previousData.parent;
+				var oldSourceItemKey = this._previousData.parentItem;
 				if (oldSourceItemKey) {
 					var oldSourceItem = Zotero.Items.getByLibraryAndKey(this.libraryID, oldSourceItemKey);
 					if (oldSourceItem) {
