@@ -434,6 +434,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 	}
 	
 	var oldItemTypeID = this._itemTypeID;
+	var newNotifierFields = [];
 	
 	if (oldItemTypeID) {
 		if (loadIn) {
@@ -459,6 +460,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 				var shortTitleFieldID = Zotero.ItemFields.getID('shortTitle');
 				if (this._itemData[bookTitleFieldID] && !this._itemData[titleFieldID]) {
 					copiedFields.push([titleFieldID, this._itemData[bookTitleFieldID]]);
+					newNotifierFields.push(titleFieldID);
 					if (this._itemData[shortTitleFieldID]) {
 						this.setField(shortTitleFieldID, false);
 					}
@@ -499,6 +501,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 			var shortTitleFieldID = Zotero.ItemFields.getID('shortTitle');
 			if (this._itemData[titleFieldID]) {
 				copiedFields.push([bookTitleFieldID, this._itemData[titleFieldID]]);
+				newNotifierFields.push(bookTitleFieldID);
 				this.setField(titleFieldID, false);
 			}
 			if (this._itemData[shortTitleFieldID]) {
@@ -556,7 +559,19 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 	
 	if (copiedFields) {
 		for each(var f in copiedFields) {
-			this.setField(f[0], f[1], true);
+			// For fields that we moved to different fields in the new type
+			// (e.g., book -> bookTitle), mark the old value as explicitly
+			// false in previousData (since otherwise it would be null)
+			if (newNotifierFields.indexOf(f[0]) != -1) {
+				this._markFieldChange(Zotero.ItemFields.getName(f[0]), false);
+				this.setField(f[0], f[1]);
+			}
+			// For fields that haven't changed, clear from previousData
+			// after setting
+			else {
+				this.setField(f[0], f[1]);
+				this._clearFieldChange(Zotero.ItemFields.getName(f[0]));
+			}
 		}
 	}
 	
@@ -4873,10 +4888,15 @@ Zotero.Item.prototype._getOldCreators = function () {
  */
 Zotero.Item.prototype._markFieldChange = function (field, oldValue) {
 	// Only save if item already exists and field not already changed
-	if (!this.id || !this.exists() || this._previousData[field]) {
+	if (!this.id || !this.exists() || typeof this._previousData[field] != 'undefined') {
 		return;
 	}
 	this._previousData[field] = oldValue;
+}
+
+
+Zotero.Item.prototype._clearFieldChange = function (field) {
+	delete this._previousData[field];
 }
 
 
