@@ -983,7 +983,12 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 												callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
 												return;
 											
-											// IIS 6+ configured not to serve extensionless files or .prop files
+											// This can happen with cloud storage services
+											// backed by S3 or other eventually consistent
+											// data stores.
+											//
+											// This can also be from IIS 6+, which is configured
+											// not to serve extensionless files or .prop files
 											// http://support.microsoft.com/kb/326965
 											case 404:
 												callback(uri, Zotero.Sync.Storage.ERROR_FILE_MISSING_AFTER_UPLOAD);
@@ -1208,9 +1213,15 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServerCallback = function (uri
 		
 		case Zotero.Sync.Storage.ERROR_FILE_MISSING_AFTER_UPLOAD:
 			// TODO: localize
-			var errorTitle = "WebDAV Server Configuration Error";
-			var errorMessage = "Your WebDAV server must be configured to serve files without extensions "
-				+ "and files with .prop extensions in order to work with Zotero.";
+			var errorTitle = Zotero.getString("general.warning");
+			var errorMessage = "A potential problem was found with your WebDAV server.\n\n"
+				+ "An uploaded file was not immediately available for download. There may be a "
+				+ "short delay between when you upload files and when they become available, "
+				+ "particularly if you are using a cloud storage service.\n\n"
+				+ "If Zotero file syncing appears to work normally, "
+				+ "you can ignore this message. "
+				+ "If you have trouble, please post to the Zotero Forums.";
+			Zotero.Prefs.set("sync.storage.verified", true);
 			break;
 		
 		case Zotero.Sync.Storage.ERROR_SERVER_ERROR:
