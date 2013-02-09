@@ -1,23 +1,26 @@
 <?xml version="1.0"?>
-<RDF:RDF xmlns:NS1="http://www.mozilla.org/2004/em-rdf#"
-         xmlns:NC="http://home.netscape.com/NC-rdf#"
-         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-  <RDF:Description RDF:about="urn:mozilla:extension:zotero@chnm.gmu.edu"
-                   NS1:signature="MIGTMA0GCSqGSIb3DQEBDQUAA4GBAKHLObI6g+kjPjNA9X4gEBIY2NF7N+HLsjBX/fqDAr/fJQEVrU3ySpQLydw5ffOCcfxeNCslBCMB48rYdfe8pCYmrdIlHnBhb/ESENtxZgWEByp2Rjszt8gIB6rADHmlwZbB1HKsgYeqjXK7xA5WzF+Ru84LnqziZ/ByEP+Pl3WX">
-    <NS1:updates RDF:resource="rdf:#$zh6jL3"/>
-  </RDF:Description>
-  <RDF:Description RDF:about="rdf:#$Dh6jL3"
-                   NS1:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
-                   NS1:minVersion="3.6"
-                   NS1:maxVersion="18.*"
-                   NS1:updateLink="http://gsl-nagoya-u.net/http/pub/zotero-multi-2.xpi"
-                   NS1:updateInfoURL="http://gsl-nagoya-u.net/http/pub/zotero-multi-2.xhtml"
-                   NS1:updateHash="sha1:3185552c3ccb833abe8cfe4f109cf8d2b47d6628" />
-  <RDF:Description RDF:about="rdf:#$Ah6jL3"
-                   NS1:version="3.0.11m317">
-    <NS1:targetApplication RDF:resource="rdf:#$Dh6jL3"/>
-  </RDF:Description>
-  <RDF:Seq RDF:about="rdf:#$zh6jL3">
-    <RDF:li RDF:resource="rdf:#$Ah6jL3"/>
-  </RDF:Seq>
+<RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns="http://www.mozilla.org/2004/em-rdf#">
+<!-- Zotero Extension -->
+<RDF:Description about="urn:mozilla:extension:zotero@chnm.gmu.edu">
+  <updates>
+    <RDF:Seq>
+      <RDF:li>
+        <RDF:Description>
+          <version>3.0.12m##REVISION##</version>
+          <targetApplication>
+            <RDF:Description>
+              <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
+              <minVersion>3.6</minVersion>
+              <maxVersion>18.*</maxVersion>
+              <updateLink>http://gsl-nagoya-u.net/http/pub/zotero-multi-3.xpi</updateLink>
+			  <updateInfoURL>http://gsl-nagoya-u.net/http/pub/zotero-multi-3.xhtml</updateInfoURL>
+              <updateHash>sha1:##SHA1HASH##</updateHash>
+            </RDF:Description>
+          </targetApplication>
+        </RDF:Description>
+      </RDF:li>
+    </RDF:Seq>
+  </updates>
+</RDF:Description>
 </RDF:RDF>
