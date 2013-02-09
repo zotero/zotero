@@ -14,5 +14,5 @@
 <!ENTITY zotero.search.search "חיפוש">
 <!ENTITY zotero.search.textModes.phrase "ביטוי">
 <!ENTITY zotero.search.textModes.phraseBinary "ביטוי (כולל קבצים בינאריים)">
-<!ENTITY zotero.search.textModes.regexp "Regexp">
+<!ENTITY zotero.search.textModes.regexp "ביטוי רגולרי">
 <!ENTITY zotero.search.textModes.regexpCS "Regexp (case-sensitive)">
