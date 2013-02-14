@@ -422,6 +422,45 @@ Zotero.Server.Connector.SelectItems.prototype = {
 }
 
 /**
+ * Returns selected collection
+ *
+ * Accepts:
+ *		
+ * Returns:
+ *		200 response code with collection id and name
+ */
+Zotero.Server.Connector.GetSelectedCollection = function() {};
+Zotero.Server.Endpoints["/connector/getSelectedCollection"] = Zotero.Server.Connector.GetSelectedCollection;
+Zotero.Server.Connector.GetSelectedCollection.prototype = {
+	"supportedMethods":["POST"],
+	"supportedDataTypes":["application/json"],
+	
+	/**
+	 * Returns selected collection (id and name) or selected library (name only)
+	 * @param {Object} GET query string
+	 * @param {Function} sendResponseCallback function to send HTTP response
+	 */
+	"init":function(data, sendResponseCallback) {
+		var zp = Zotero.getActiveZoteroPane();
+		try {
+			var collection = zp.getSelectedCollection();
+			var libraryID = zp.getSelectedLibraryID();
+		} catch(e) {}
+		
+		if(collection) {
+			sendResponseCallback(200, "application/json",
+				JSON.stringify({id: collection.id, name: collection.name}));
+		} else if(libraryID !== undefined) {
+			var libraryName = libraryID ? Zotero.Libraries.getName(libraryID)
+														: Zotero.getString('pane.collections.library')
+			sendResponseCallback(200, "application/json", JSON.stringify({name: libraryName}));
+		} else {
+			sendResponseCallback(404);
+		}
+	}
+}
+
+/**
  * Get code for a translator
  *
  * Accepts:
