@@ -1387,7 +1387,8 @@ Zotero.Translate.Base.prototype = {
 				"this.itemType = itemType;"+
 				"for(var i=0, n=createArrays.length; i<n; i++) {"+
 					"this[createArrays[i]] = [];"+
-				"}"+
+				"};"+
+                "this.multi = {main:{},_lsts:{},_keys:{}}"+
 		"};";
 		
 		if(this instanceof Zotero.Translate.Export || this instanceof Zotero.Translate.Import) {
