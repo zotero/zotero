@@ -68,10 +68,10 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaurar para biblioteca">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicar item selecionado">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.mergeItems "Fundir ítens...">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Escolha a versão do ítem para usar como elemento principal:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Selecione campos para evitar outras versões do ítem:">
 
 <!ENTITY zotero.toolbar.newItem.label "Confirmar">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mais">
@@ -132,9 +132,9 @@
 
 <!ENTITY zotero.bibliography.title "Criar bibliografia">
 <!ENTITY zotero.bibliography.style.label "Estilo de citação:">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Modo de saída:">
+<!ENTITY zotero.bibliography.bibliography "Bibliografia">
+<!ENTITY zotero.bibliography.outputMethod "Método de saída:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Salvar como RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Salvar como HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copiar para Área de Transferência">
@@ -143,7 +143,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Preferências do documento">
 <!ENTITY zotero.integration.addEditCitation.title "Adicionar/Modificar citação">
 <!ENTITY zotero.integration.editBibliography.title "Editar bibliografia">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Formato de citação">
 
 <!ENTITY zotero.progress.title "Progresso">
 
@@ -162,7 +162,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Suprimir o autor">
 <!ENTITY zotero.citation.prefix.label "Prefixo:">
 <!ENTITY zotero.citation.suffix.label "Sufixo:">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.editorWarning.label "Aviso: se você modificar a citação no editor, ela não será mais atualizada de acordo com as mudanças na sua base de dados ou no estilo de citação.">
 
 <!ENTITY zotero.richText.italic.label "Itálico">
 <!ENTITY zotero.richText.bold.label "Negrito">

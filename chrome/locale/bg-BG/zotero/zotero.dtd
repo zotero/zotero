@@ -143,7 +143,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Настройки на докумета">
 <!ENTITY zotero.integration.addEditCitation.title "Добавя/редактира на цитат">
 <!ENTITY zotero.integration.editBibliography.title "Редактира на библиографията">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Напредък">
 

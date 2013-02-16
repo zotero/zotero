@@ -144,7 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "ជម្រើសរចនាបថសម្រាប់យោងឯកសារ">
 <!ENTITY zotero.integration.addEditCitation.title "បន្ថែម ឬ កែតម្រូវអាគតដ្ឋាន">
 <!ENTITY zotero.integration.editBibliography.title "កែតម្រូវគន្ថនិទេ្ទស">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 
 <!ENTITY zotero.progress.title "កំពុងដំណើរ">
 

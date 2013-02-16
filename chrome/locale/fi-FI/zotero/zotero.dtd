@@ -144,7 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Asiakirjan asetukset">
 <!ENTITY zotero.integration.addEditCitation.title "Lisää/muokkaa sitaatti">
 <!ENTITY zotero.integration.editBibliography.title "Muokkaa lähdeluetteloa">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Eteneminen">
 

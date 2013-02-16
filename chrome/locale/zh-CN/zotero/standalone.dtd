@@ -1,12 +1,12 @@
-<!ENTITY preferencesCmdMac.label "参数…">
+<!ENTITY preferencesCmdMac.label "首选项…">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "服务">
-<!ENTITY hideThisAppCmdMac.label "隐藏短标题">
+<!ENTITY hideThisAppCmdMac.label "隐藏&brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
 <!ENTITY hideOtherAppsCmdMac.label "隐藏其它">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "显示所有">
-<!ENTITY quitApplicationCmdMac.label "退出">
+<!ENTITY quitApplicationCmdMac.label "退出Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 
@@ -34,7 +34,7 @@
 <!ENTITY undoCmd.label "撤销">
 <!ENTITY undoCmd.key "Z">
 <!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "重复">
+<!ENTITY redoCmd.label "重做">
 <!ENTITY redoCmd.key "Y">
 <!ENTITY redoCmd.accesskey "R">
 <!ENTITY cutCmd.label "剪切">
@@ -43,20 +43,20 @@
 <!ENTITY copyCmd.label "复制">
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.accesskey "C">
-<!ENTITY copyCitationCmd.label "复制条目">
-<!ENTITY copyBibliographyCmd.label "复制参考书目">
+<!ENTITY copyCitationCmd.label "复制引文">
+<!ENTITY copyBibliographyCmd.label "复制文献目录">
 <!ENTITY pasteCmd.label "粘贴">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.accesskey "P">
 <!ENTITY deleteCmd.label "删除">
 <!ENTITY deleteCmd.key "D">
 <!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "选择所有">
+<!ENTITY selectAllCmd.label "全选">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
 <!ENTITY preferencesCmd.label "选项…">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "参数">
+<!ENTITY preferencesCmdUnix.label "首选项">
 <!ENTITY preferencesCmdUnix.accesskey "n">
 <!ENTITY findCmd.label "查找">
 <!ENTITY findCmd.accesskey "F">
@@ -87,7 +87,7 @@
 <!ENTITY helpMenuWin.label "帮助">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "关于短标题">
+<!ENTITY aboutProduct.label "关于&brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "支持与文档">
 <!ENTITY productHelp.accesskey "H">
@@ -95,7 +95,7 @@
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "提交反馈…">
 <!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "报告错误…">
+<!ENTITY helpReportErrors.label "向 Zotero 报告错误…">
 <!ENTITY helpReportErrors.accesskey "R">
 <!ENTITY helpCheckForUpdates.label "检查更新…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

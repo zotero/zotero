@@ -17,7 +17,7 @@
 <!ENTITY zotero.upgrade.autoBackup "ฐานข้อมูลปัจจุบันของท่านจะได้รับการทำสำรองไว้โดยอัตโนมัติ ก่อนที่จะมีการเปลี่ยนแปลงใด ๆ เกิดขึ้น">
 <!ENTITY zotero.upgrade.majorUpgrade "นี่คือการปรับให้ทันสมัยครั้งสำคัญ">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "ต้องมั่นใจว่าคุณได้ทบทวน">
-<!ENTITY zotero.upgrade.majorUpgradeLink "คำแนะนำการปรับให้ทันสมัย">
+<!ENTITY zotero.upgrade.majorUpgradeLink "คำแนะนำการอัพเกรด">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "ก่อนที่จะทำต่อ">
 <!ENTITY zotero.upgrade.upgradeInProgress "โปรดรอจนกว่าจะบวนการอัพเกรดจะเสร็จสิ้น ซึ่งอาจใช้เวลาหลายนาที">
 <!ENTITY zotero.upgrade.upgradeSucceeded "ฐานข้อมูล Zotero ของท่านได้รับการปรับให้เป็นรุ่นปัจจุบันแล้ว">
@@ -33,27 +33,27 @@
 <!ENTITY zotero.tabs.info.label "ข้อมูลข่าวสาร">
 <!ENTITY zotero.tabs.notes.label "หมายเหตุ">
 <!ENTITY zotero.tabs.attachments.label "ไฟล์แนบ">
-<!ENTITY zotero.tabs.tags.label "ป้าย">
-<!ENTITY zotero.tabs.related.label "เกี่ยวโยงกับ">
+<!ENTITY zotero.tabs.tags.label "แท็ก">
+<!ENTITY zotero.tabs.related.label "เชื่อมโยงกับ">
 <!ENTITY zotero.notes.separate "แก้ไขในหน้าต่างแยกต่างหาก">
 
 <!ENTITY zotero.toolbar.duplicate.label "แสดงรายการซ้ำ">
 <!ENTITY zotero.collections.showUnfiledItems "แสดงรายการที่ไม่ได้จัดกลุ่ม">
 
 <!ENTITY zotero.items.itemType "ประเภทรายการ">
-<!ENTITY zotero.items.type_column "รูปแบบ">
+<!ENTITY zotero.items.type_column "ประเภท">
 <!ENTITY zotero.items.title_column "ชื่อเรื่อง">
 <!ENTITY zotero.items.creator_column "ผู้สร้าง">
 <!ENTITY zotero.items.date_column "วันที่">
 <!ENTITY zotero.items.year_column "ปี">
 <!ENTITY zotero.items.publisher_column "ผู้เผยแพร่">
 <!ENTITY zotero.items.publication_column "ชื่อวารสาร">
-<!ENTITY zotero.items.journalAbbr_column "ชื่อวารสารแบบย่อ">
+<!ENTITY zotero.items.journalAbbr_column "ชื่อย่อวารสาร">
 <!ENTITY zotero.items.language_column "ภาษา">
 <!ENTITY zotero.items.accessDate_column "เข้าถึงเมื่อ">
 <!ENTITY zotero.items.libraryCatalog_column "บัตรรายการ">
 <!ENTITY zotero.items.callNumber_column "เลขหมู่">
-<!ENTITY zotero.items.rights_column "ลิขสิทธิ์">
+<!ENTITY zotero.items.rights_column "สิทธิ์">
 <!ENTITY zotero.items.dateAdded_column "วันที่เพิ่ม">
 <!ENTITY zotero.items.dateModified_column "วันที่แก้ไข">
 
@@ -63,7 +63,7 @@
 <!ENTITY zotero.items.menu.attach.snapshot "แนบภาพหน้าจอของหน้าเว็บปัจจุบัน">
 <!ENTITY zotero.items.menu.attach.link "แนบลิงค์ไปยังหน้าเว็บปัจจุบัน">
 <!ENTITY zotero.items.menu.attach.link.uri "แนบลิงค์ไปยัง URI…">
-<!ENTITY zotero.items.menu.attach.file "สำเนาแฟ้มข้อมูลที่จัดเก็บไว้...">
+<!ENTITY zotero.items.menu.attach.file "แนบแฟ้มพร้อมสำเนาจัดเก็บไว้...">
 <!ENTITY zotero.items.menu.attach.fileLink "แนบลิงค์ไปยังแฟ้มข้อมูล...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "เรียกคืนกลับไลบรารี่">
@@ -137,13 +137,13 @@
 <!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "บันทึกเป็น RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "บันทึกเป็น HTML">
-<!ENTITY zotero.bibliography.copyToClipboard.label "ทำสำเนาไปคลิปบอร์ด">
+<!ENTITY zotero.bibliography.copyToClipboard.label "สำเนาไปยังคลิปบอร์ด">
 <!ENTITY zotero.bibliography.print.label "พิมพ์">
 
 <!ENTITY zotero.integration.docPrefs.title "ค่าตั้งพึงใจเกี่ยวกับแฟ้มเอกสาร">
 <!ENTITY zotero.integration.addEditCitation.title "เพิ่ม/แก้ไขการอ้างอิง">
 <!ENTITY zotero.integration.editBibliography.title "แก้ไขบรรณานุกรม">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 
 <!ENTITY zotero.progress.title "ความคืบหน้า">
 
@@ -180,7 +180,7 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "เชิงอรรถ">
 <!ENTITY zotero.integration.prefs.endnotes.label "อ้างอิงท้ายเรื่อง">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "รูปแบบที่ใช้">
+<!ENTITY zotero.integration.prefs.formatUsing.label "รูปแบบที่ใช้:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "คั่นหน้า">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "คั่นหน้าถูกคงไว้ผ่านไมโครซอฟท์เวิร์ดและโอเพ่นออฟฟิศ แต่อาจมีการเปลี่ยนแปลงได้โดยบังเอิญ สำหรับ &#xA;เหตุผลการเข้ากันได้ การอ้างอิงไม่สามารถแทรกในเชิงอรรถหรืออ้างอิงท้ายเรื่องเมื่อตัวเลือกนี้ถูกเลือก">
 
@@ -194,9 +194,9 @@
 
 <!ENTITY zotero.sync.button "ประสานกับเครื่องบริการ Zotero">
 <!ENTITY zotero.sync.error "การประสานมีความผิดพลาด">
-<!ENTITY zotero.sync.storage.progress "ความคืบหน้า">
-<!ENTITY zotero.sync.storage.downloads "ดาวน์โหลด">
-<!ENTITY zotero.sync.storage.uploads "อัพโหลด">
+<!ENTITY zotero.sync.storage.progress "ความคืบหน้า:">
+<!ENTITY zotero.sync.storage.downloads "ดาวน์โหลด:">
+<!ENTITY zotero.sync.storage.uploads "อัพโหลด:">
 
 <!ENTITY zotero.sync.longTagFixer.followingTagTooLong "แท็กต่อไปนี้ในไลบรารี่ของคุณยาวเกินไปที่จะประสานกับเครื่องบริการ Zotero">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "ประสานแท็กต้องมีความยาวน้อยกว่า 256 ตัวอักษร">

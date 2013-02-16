@@ -68,10 +68,10 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Gjenopprett til bibliotek">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliser det valde elementet">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.mergeItems "Slå saman element…">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Velj felt som skal behaldast frå andre versjonar av elementet:">
 
 <!ENTITY zotero.toolbar.newItem.label "Nytt element">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Meir">
@@ -133,7 +133,7 @@
 <!ENTITY zotero.bibliography.title "Lag bibliografi">
 <!ENTITY zotero.bibliography.style.label "Siteringsstil:">
 <!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.bibliography "Bibliografi">
 <!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Lagra som RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Lagra som HTML">
@@ -143,7 +143,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Dokumenteigenskapar">
 <!ENTITY zotero.integration.addEditCitation.title "Legg til/endra henvisning">
 <!ENTITY zotero.integration.editBibliography.title "Rediger bibliografi">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Framgang">
 
@@ -162,7 +162,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Utelat forfattar">
 <!ENTITY zotero.citation.prefix.label "Prefiks:">
 <!ENTITY zotero.citation.suffix.label "Suffiks:">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.editorWarning.label "Åtvaring: Dersom du endrar ein referanse i redigeringsmodusen vil han etterpå ikkje bli oppdatert med endringar frå databasen eller siteringsstilen.">
 
 <!ENTITY zotero.richText.italic.label "Kursiv">
 <!ENTITY zotero.richText.bold.label "Feit">

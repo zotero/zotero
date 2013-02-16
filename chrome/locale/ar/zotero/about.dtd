@@ -1,6 +1,6 @@
 <!ENTITY zotero.version "الإصدار">
 <!ENTITY zotero.createdby "تم انشاؤه بواسطة:">
-<!ENTITY zotero.director "Director:">
+<!ENTITY zotero.director "المخرج:">
 <!ENTITY zotero.directors "المديرين:">
 <!ENTITY zotero.developers "المطورين:">
 <!ENTITY zotero.alumni "الخريجين:">
@@ -9,4 +9,4 @@
 <!ENTITY zotero.executiveProducer "المنتج التنفيذي:">
 <!ENTITY zotero.thanks "شكر خاص:">
 <!ENTITY zotero.about.close "إغلاق">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "المزيد من الشكر والتقدير">

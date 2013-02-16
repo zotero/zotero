@@ -128,6 +128,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "ចម្លងអាគតដ្ឋានឯកសារដែលបានជ្រើសរើសទៅកាន់កន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "ចម្លងឯកសារដែលបានជ្រើសរើសកន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
 <!ENTITY zotero.preferences.keys.importFromClipboard "ទាញឯកសារចេញពីកន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
+<!ENTITY zotero.preferences.keys.overrideGlobal "ព្យាយាមជំនះផ្លូវកាត់ដែលមានការទង្គិច">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "បំលាស់ប្តូរអាចមានសុពលភាពនៅលើវីនដូយ៍ថ្មីតែប៉ុណ្ណោះ">
 
 <!ENTITY zotero.preferences.prefpane.proxies "សិទ្ធិប្រទាន">

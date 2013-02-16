@@ -10,7 +10,7 @@
 <!ENTITY zotero.errorReport.submitted "Poročilo o napaki je bilo oddano.">
 <!ENTITY zotero.errorReport.reportID "ID poročila:">
 <!ENTITY zotero.errorReport.postToForums "Opišite težavo z ID-jem tega poročila na forumih Zotero (forums.zotero.org), skupaj s potrebnimi koraki za priklic takšne napake.">
-<!ENTITY zotero.errorReport.notReviewed "Poročila o napaki ponavadi niso vsa pregledana, razen če o njih sporočite na forum.">
+<!ENTITY zotero.errorReport.notReviewed "Poročila o napaki ponavadi niso vsa pregledana, razen če o njih poročate na forumu.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Namestili ste novejšo različico razširitve Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Vašo zbirko podatkov Zotero je potrebno nadgraditi, da bo delovala z novejšo različico.">
@@ -38,7 +38,7 @@
 <!ENTITY zotero.notes.separate "Uredi v ločenem oknu">
 
 <!ENTITY zotero.toolbar.duplicate.label "Pokaži dvojnike">
-<!ENTITY zotero.collections.showUnfiledItems "Pokaži nerazvrščene elemente">
+<!ENTITY zotero.collections.showUnfiledItems "Pokaži nerazvrščene vnose">
 
 <!ENTITY zotero.items.itemType "Vrsta vnosa">
 <!ENTITY zotero.items.type_column "Vrsta">
@@ -62,16 +62,16 @@
 <!ENTITY zotero.items.menu.attach "Dodaj priponko">
 <!ENTITY zotero.items.menu.attach.snapshot "Pripni posnetek trenutne strani">
 <!ENTITY zotero.items.menu.attach.link "Pripni povezavo na trenutno stran">
-<!ENTITY zotero.items.menu.attach.link.uri "URI pripni povezavo ...">
+<!ENTITY zotero.items.menu.attach.link.uri "URI-ju pripni povezavo ...">
 <!ENTITY zotero.items.menu.attach.file "Pripni shranjeno kopijo datoteke ...">
 <!ENTITY zotero.items.menu.attach.fileLink "Pripni povezavo do datoteke ...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Obnovi v knjižnico">
 <!ENTITY zotero.items.menu.duplicateItem "Podvoji izbrani vnos">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.mergeItems "Spoji vnose ...">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Izberite različico vnosa, ki naj bo osrednja:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Izberite polja, ki jih želite izvzeti iz drugih različic vnosa:">
 
 <!ENTITY zotero.toolbar.newItem.label "Nov vnos">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Dodatno">
@@ -116,7 +116,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Brez značk za prikaz">
 <!ENTITY zotero.tagSelector.filter "Filter:">
 <!ENTITY zotero.tagSelector.showAutomatic "Pokaži samodejno">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Prikaži vse značke v tej knjižnici">
 <!ENTITY zotero.tagSelector.selectVisible "Izberi vidno">
 <!ENTITY zotero.tagSelector.clearVisible "Ne izberi vidno">
 <!ENTITY zotero.tagSelector.clearAll "Ne izberi ničesar">
@@ -132,9 +132,9 @@
 
 <!ENTITY zotero.bibliography.title "Ustvari bibliografijo">
 <!ENTITY zotero.bibliography.style.label "Slog navajanja:">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Izhodni način:">
+<!ENTITY zotero.bibliography.bibliography "Bibliografija">
+<!ENTITY zotero.bibliography.outputMethod "Izhodna metoda:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Shrani kot RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Shrani kot HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Kopiraj na odložišče">
@@ -143,7 +143,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Lastnosti dokumenta">
 <!ENTITY zotero.integration.addEditCitation.title "Dodaj/uredi navedek">
 <!ENTITY zotero.integration.editBibliography.title "Uredi bibliografijo">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Hitro oblikovanje citata">
 
 <!ENTITY zotero.progress.title "Napredek">
 
@@ -162,7 +162,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Prikrij avtorja">
 <!ENTITY zotero.citation.prefix.label "Predpona:">
 <!ENTITY zotero.citation.suffix.label "Pripona:">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.editorWarning.label "Opozorilo: če spremenite citat v urejevalniku, se ne bo več posodobil in odseval sprememb iz vaše zbirke podatkov ali sloga citiranja.">
 
 <!ENTITY zotero.richText.italic.label "Ležeče">
 <!ENTITY zotero.richText.bold.label "Krepko">
@@ -182,7 +182,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Oblikuj z uporabo:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Zaznamki">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Zaznamki se ohranijo v Microsoft Word in OpenOffice/LibreOffice, se pa lahko ponesreči spremenijo. Iz razlogov združljivosti citatov ni mogoče vstavljati v sprotne ali končne opombe, če je izbrana ta možnost.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Zaznamki se ohranijo v Microsoft Word in LibreOffice, se pa lahko ponesreči spremenijo. Iz razlogov združljivosti citatov ni mogoče vstavljati v sprotne ali končne opombe, če je izbrana ta možnost.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Sklice shrani v dokumentu">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Shranjevanje sklicev v dokumentu malce poveča velikost datoteke, vendar omogoča skupno rabo dokumenta z drugimi, četudi ne uporabljajo skupine Zotero. Zotero 3.0 ali kasnejši je potreben za posodabljanje dokumentov, ki jih ustvarite s to možnostjo.">
@@ -246,5 +246,5 @@
 <!ENTITY zotero.file.noneSelected.label "Izbrana ni nobena datoteka">
 
 <!ENTITY zotero.downloadManager.label "Shrani na Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "V trenutno izbrano knjižnico priponk ni mogoče shraniti. Element bo namesto tega shranjen v vašo knjižnico.">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "V trenutno izbrano knjižnico priponk ni mogoče shraniti. Vnos bo namesto tega shranjen v vašo knjižnico.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Če želite uporabiti to funkcijo, morate najprej namestiti orodja PDF v nastavitvah Zotera.">

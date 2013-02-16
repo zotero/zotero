@@ -128,6 +128,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Seçili Eserin Göndermelerini Pano'ya Kopyala">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Seçilen eserleri panoya kopyala">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Panodan içeri aktar">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Çelişen kısayolların üzerine yazdırmayı dene">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Değişiklikler yeni açılan pencerelerde etkili olacaktır.">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Vekil Sunucular">

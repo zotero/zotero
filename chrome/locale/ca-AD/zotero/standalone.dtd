@@ -12,12 +12,12 @@
 
 <!ENTITY fileMenu.label "Fitxer">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "Desa...">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "Format de pàgina...">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "Imprimeix...">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "U">
 <!ENTITY closeCmd.label "Tanca">
@@ -31,10 +31,10 @@
 
 <!ENTITY editMenu.label "Edita">
 <!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Desfes">
+<!ENTITY undoCmd.label "Desfés">
 <!ENTITY undoCmd.key "Z">
 <!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Refes">
+<!ENTITY redoCmd.label "Refés">
 <!ENTITY redoCmd.key "Y">
 <!ENTITY redoCmd.accesskey "R">
 <!ENTITY cutCmd.label "Retalla">
@@ -75,7 +75,7 @@
 
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimitza">
-<!ENTITY bringAllToFront.label "Porta tot al front">
+<!ENTITY bringAllToFront.label "Porta tot al davant">
 <!ENTITY zoomWindow.label "Amplia">
 <!ENTITY windowMenu.label "Finestra">
 
@@ -87,7 +87,7 @@
 <!ENTITY helpMenuWin.label "Ajuda">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "Al voltant de &brandShortName;">
+<!ENTITY aboutProduct.label "Quant a &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Assistència i documentació">
 <!ENTITY productHelp.accesskey "H">

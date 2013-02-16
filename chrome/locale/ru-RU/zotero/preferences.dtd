@@ -128,6 +128,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Скопировать цитаты из выбранного документа в буфер обмена">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копировать выбранные документы в буфер обмена">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Импортировать из буфера обмена">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Попытаться переопределить конфликтующие комбинации клавиш">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Изменения вступят в силу только в новых окнах">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Прокси">

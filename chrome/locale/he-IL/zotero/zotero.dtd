@@ -1,9 +1,9 @@
 <!ENTITY zotero.general.optional "(Optional)">
-<!ENTITY zotero.general.note "Note:">
-<!ENTITY zotero.general.selectAll "Select All">
+<!ENTITY zotero.general.note "פתק:">
+<!ENTITY zotero.general.selectAll "בחר הכל">
 <!ENTITY zotero.general.deselectAll "Deselect All">
-<!ENTITY zotero.general.edit "Edit">
-<!ENTITY zotero.general.delete "Delete">
+<!ENTITY zotero.general.edit "ערוך">
+<!ENTITY zotero.general.delete "מחק">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Please wait while the error report is submitted.">
@@ -32,22 +32,22 @@
 
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Notes">
-<!ENTITY zotero.tabs.attachments.label "Attachments">
-<!ENTITY zotero.tabs.tags.label "Tags">
+<!ENTITY zotero.tabs.attachments.label "צרופות">
+<!ENTITY zotero.tabs.tags.label "תגיות">
 <!ENTITY zotero.tabs.related.label "Related">
 <!ENTITY zotero.notes.separate "Edit in a separate window">
 
-<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
+<!ENTITY zotero.toolbar.duplicate.label "הצג כפילויות">
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
 
 <!ENTITY zotero.items.itemType "Item Type">
-<!ENTITY zotero.items.type_column "Type">
+<!ENTITY zotero.items.type_column "סוג">
 <!ENTITY zotero.items.title_column "כותרת">
 <!ENTITY zotero.items.creator_column "יוצר">
 <!ENTITY zotero.items.date_column "תאריך">
 <!ENTITY zotero.items.year_column "שנה">
-<!ENTITY zotero.items.publisher_column "Publisher">
-<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.publisher_column "מוציא לאור">
+<!ENTITY zotero.items.publication_column "הוצאה לאור">
 <!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "שפה">
 <!ENTITY zotero.items.accessDate_column "Accessed">
@@ -58,7 +58,7 @@
 <!ENTITY zotero.items.dateModified_column "תאריך שינוי">
 
 <!ENTITY zotero.items.menu.showInLibrary "הצג בספרייה">
-<!ENTITY zotero.items.menu.attach.note "Add Note">
+<!ENTITY zotero.items.menu.attach.note "הוסף פתק">
 <!ENTITY zotero.items.menu.attach "Add Attachment">
 <!ENTITY zotero.items.menu.attach.snapshot "Attach Snapshot of Current Page">
 <!ENTITY zotero.items.menu.attach.link "Attach Link to Current Page">
@@ -99,12 +99,12 @@
 <!ENTITY zotero.toolbar.openURL.tooltip "Find through your local library">
 
 <!ENTITY zotero.item.add "הוספה">
-<!ENTITY zotero.item.attachment.file.show "Show File">
+<!ENTITY zotero.item.attachment.file.show "הצג קובץ">
 <!ENTITY zotero.item.textTransform "Transform Text">
 <!ENTITY zotero.item.textTransform.titlecase "Title Case">
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newNote "פתק חדש">
 <!ENTITY zotero.toolbar.note.standalone "New Standalone Note">
 <!ENTITY zotero.toolbar.note.child "Add Child Note">
 <!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
@@ -131,7 +131,7 @@
 <!ENTITY zotero.selectitems.select.label "אישור">
 
 <!ENTITY zotero.bibliography.title "צור ביבליוגרפיה">
-<!ENTITY zotero.bibliography.style.label "Citation Style:">
+<!ENTITY zotero.bibliography.style.label "סגנון ציטוט">
 <!ENTITY zotero.bibliography.outputMode "Output Mode:">
 <!ENTITY zotero.bibliography.bibliography "Bibliography">
 <!ENTITY zotero.bibliography.outputMethod "Output Method:">
@@ -143,7 +143,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Document Preferences">
 <!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
 <!ENTITY zotero.integration.editBibliography.title "ערוך ביבליוגרפיה">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 
 <!ENTITY zotero.progress.title "Progress">
 
@@ -166,7 +166,7 @@
 
 <!ENTITY zotero.richText.italic.label "Italic">
 <!ENTITY zotero.richText.bold.label "מודגש">
-<!ENTITY zotero.richText.underline.label "Underline">
+<!ENTITY zotero.richText.underline.label "קו תחתי">
 <!ENTITY zotero.richText.superscript.label "Superscript">
 <!ENTITY zotero.richText.subscript.label "Subscript">
 
@@ -181,21 +181,21 @@
 <!ENTITY zotero.integration.prefs.endnotes.label "Endnotes">
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Format Using:">
-<!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
+<!ENTITY zotero.integration.prefs.bookmarks.label "סימניות">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
 
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.showEditor.label "הצג עורך">
+<!ENTITY zotero.integration.classicView.label "תצוגה קלאסית">
 
 <!ENTITY zotero.integration.references.label "References in Bibliography">
 
 <!ENTITY zotero.sync.button "Sync with Zotero Server">
 <!ENTITY zotero.sync.error "Sync Error">
-<!ENTITY zotero.sync.storage.progress "Progress:">
-<!ENTITY zotero.sync.storage.downloads "Downloads:">
+<!ENTITY zotero.sync.storage.progress "התקדמות:">
+<!ENTITY zotero.sync.storage.downloads "הורדות:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
 
 <!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
@@ -212,17 +212,17 @@
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
 <!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
+<!ENTITY zotero.proxy.recognized.ignore.label "התעלם">
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
-<!ENTITY zotero.recognizePDF.cancel.label "Cancel">
+<!ENTITY zotero.recognizePDF.cancel.label "ביטול">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
 <!ENTITY zotero.recognizePDF.itemName.label "Item Name">
 <!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
 
 <!ENTITY zotero.rtfScan.title "RTF Scan">
-<!ENTITY zotero.rtfScan.cancel.label "Cancel">
-<!ENTITY zotero.rtfScan.citation.label "Citation">
+<!ENTITY zotero.rtfScan.cancel.label "בטל">
+<!ENTITY zotero.rtfScan.citation.label "ציטוט">
 <!ENTITY zotero.rtfScan.itemName.label "Item Name">
 <!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
@@ -230,7 +230,7 @@
 <!ENTITY zotero.rtfScan.introPage.label "Introduction">
 <!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
 <!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
-<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
+<!ENTITY zotero.rtfScan.scanPage.label "סורק אחר ציטוטים">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
 <!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">

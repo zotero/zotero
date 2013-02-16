@@ -10,7 +10,7 @@
 <!ENTITY zotero.search.includeParentsAndChildren "Inclou pares i descendents dels elements coincidents">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
-<!ENTITY zotero.search.textModes.phraseBinary "Frase (també dins dels arxius binaris)">
+<!ENTITY zotero.search.textModes.phraseBinary "Frase (també dins dels fitxers binaris)">
 <!ENTITY zotero.search.textModes.regexp "Expressió regular">
 <!ENTITY zotero.search.textModes.regexpCS "Expressió regular (distingeix entre majúscules i minúscules)">
 

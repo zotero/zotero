@@ -575,6 +575,10 @@ Zotero.Translate.Sandbox = {
 					item.accessDate = "CURRENT_TIMESTAMP";
 				}
 				
+				//consider type-specific "title" alternatives
+				var altTitle = Zotero.ItemFields.getName(Zotero.ItemFields.getFieldIDFromTypeAndBase(item.itemType, 'title'));
+				if(altTitle && item[altTitle]) item.title = item[altTitle];
+				
 				if(!item.title) {
 					translate.complete(false, new Error("No title specified for item"));
 					return;

@@ -1,13 +1,13 @@
-<!ENTITY preferencesCmdMac.label "Preferences…">
+<!ENTITY preferencesCmdMac.label "تفضيلات ...">
 <!ENTITY preferencesCmdMac.commandkey ",">
-<!ENTITY servicesMenuMac.label "Services">
-<!ENTITY hideThisAppCmdMac.label "Hide &brandShortName;">
-<!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Hide Others">
-<!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "Show All">
-<!ENTITY quitApplicationCmdMac.label "إنهاء زوتيرو">
-<!ENTITY quitApplicationCmdMac.key "Q">
+<!ENTITY servicesMenuMac.label "خدمات">
+<!ENTITY hideThisAppCmdMac.label "إخفاء اسم العلامة التجارية القصيرة؛">
+<!ENTITY hideThisAppCmdMac.commandkey "ا">
+<!ENTITY hideOtherAppsCmdMac.label "اخفاء الأخرى">
+<!ENTITY hideOtherAppsCmdMac.commandkey "ا">
+<!ENTITY showAllAppsCmdMac.label "عرض الكل">
+<!ENTITY quitApplicationCmdMac.label "خروج من زوتيرو">
+<!ENTITY quitApplicationCmdMac.key "خ">
 
 
 <!ENTITY fileMenu.label "ملف">
@@ -43,8 +43,8 @@
 <!ENTITY copyCmd.label "نسخ">
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.accesskey "س">
-<!ENTITY copyCitationCmd.label "Copy Citation">
-<!ENTITY copyBibliographyCmd.label "Copy Bibliography">
+<!ENTITY copyCitationCmd.label "نسخ الاقتباس">
+<!ENTITY copyBibliographyCmd.label "نسخ قائمة المراجع">
 <!ENTITY pasteCmd.label "لصق">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.accesskey "ل">
@@ -58,7 +58,7 @@
 <!ENTITY preferencesCmd.accesskey "ي">
 <!ENTITY preferencesCmdUnix.label "تفضيلات">
 <!ENTITY preferencesCmdUnix.accesskey "ف">
-<!ENTITY findCmd.label "Find">
+<!ENTITY findCmd.label "اعثر">
 <!ENTITY findCmd.accesskey "F">
 <!ENTITY findCmd.commandkey "f">
 <!ENTITY bidiSwitchPageDirectionItem.label "تغيير اتجاه الصفحة">
@@ -68,34 +68,34 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY toolsMenu.label "Tools">
+<!ENTITY toolsMenu.label "أدوات">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY addons.label "Add-ons">
+<!ENTITY addons.label "ملحقات">
 
 
 <!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minimize">
-<!ENTITY bringAllToFront.label "Bring All to Front">
-<!ENTITY zoomWindow.label "Zoom">
-<!ENTITY windowMenu.label "Window">
+<!ENTITY minimizeWindow.label "تصغير">
+<!ENTITY bringAllToFront.label "أحضر الكل للأمام">
+<!ENTITY zoomWindow.label "تقريب">
+<!ENTITY windowMenu.label "نافذة">
 
 
-<!ENTITY helpMenu.label "Help">
-<!ENTITY helpMenu.accesskey "H">
+<!ENTITY helpMenu.label "مساعدة">
+<!ENTITY helpMenu.accesskey "م">
 
 
-<!ENTITY helpMenuWin.label "Help">
-<!ENTITY helpMenuWin.accesskey "H">
-<!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "About &brandShortName;">
+<!ENTITY helpMenuWin.label "مساعدة">
+<!ENTITY helpMenuWin.accesskey "م">
+<!ENTITY helpMac.commandkey "؟">
+<!ENTITY aboutProduct.label "حول اسم العلامة التجارية القصير؛">
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "Support and Documentation">
+<!ENTITY productHelp.label "مساعدة ووثائق">
 <!ENTITY productHelp.accesskey "H">
-<!ENTITY helpTroubleshootingInfo.label "Troubleshooting Information">
-<!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Submit Feedback…">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Report Errors to Zotero…">
-<!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpCheckForUpdates.label "Check for Updates…">
-<!ENTITY helpCheckForUpdates.accesskey "U">
+<!ENTITY helpTroubleshootingInfo.label "معلومات المساعدة والتنويه">
+<!ENTITY helpTroubleshootingInfo.accesskey "م">
+<!ENTITY helpFeedbackPage.label "ارسال ملاحظات">
+<!ENTITY helpFeedbackPage.accesskey "ر">
+<!ENTITY helpReportErrors.label "بلغ عن علة في Zotero…">
+<!ENTITY helpReportErrors.accesskey "ب">
+<!ENTITY helpCheckForUpdates.label "تحقق من التحديثات">
+<!ENTITY helpCheckForUpdates.accesskey "ت">

@@ -25,12 +25,12 @@
 <!ENTITY zotero.upgrade.changeLogLink "Changelog">
 <!ENTITY zotero.upgrade.changeLogAfterLink "för att se vad som är nytt eller ändrat.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Lägg till det valda till en Zotero-anteckning">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Lägg markeringen till Zotero-anteckning">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Skapa en Zotero-anteckning av det valda">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "Spara länk som en Zotero-källa">
 <!ENTITY zotero.contextMenu.saveImageAsItem "Spara bild som en Zotero-källa">
 
-<!ENTITY zotero.tabs.info.label "Info">
+<!ENTITY zotero.tabs.info.label "Information">
 <!ENTITY zotero.tabs.notes.label "Anteckningar">
 <!ENTITY zotero.tabs.attachments.label "Bilagor">
 <!ENTITY zotero.tabs.tags.label "Etiketter">
@@ -63,21 +63,21 @@
 <!ENTITY zotero.items.menu.attach "Lägg till bilaga">
 <!ENTITY zotero.items.menu.attach.snapshot "Bifoga sparad kopia av aktuell sida">
 <!ENTITY zotero.items.menu.attach.link "Bifoga länk till aktuell sida">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
+<!ENTITY zotero.items.menu.attach.link.uri "Bifoga länk till URI...">
 <!ENTITY zotero.items.menu.attach.file "Bifoga sparad kopia av filen...">
 <!ENTITY zotero.items.menu.attach.fileLink "Bifoga länk till fil...">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.restoreToLibrary "Återställ till bibliotek">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicera vald post">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.mergeItems "Sammanfoga källor">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Välj vilken version av källan som ska vara utgångspunkt:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Välj fält att behålla från andra versioner av källan:">
 
 <!ENTITY zotero.toolbar.newItem.label "Ny post">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mer">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Skapa ny post från aktuell sida">
-<!ENTITY zotero.toolbar.lookup.label "Lägg till källa via registreringsnummer">
+<!ENTITY zotero.toolbar.lookup.label "Lägg till källa via referensnummer">
 <!ENTITY zotero.toolbar.removeItem.label "Radera källa...">
 <!ENTITY zotero.toolbar.newCollection.label "Ny samling...">
 <!ENTITY zotero.toolbar.newGroup "Ny grupp...">
@@ -95,7 +95,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Hjälp och dokumentation">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Avancerad sökning">
-<!ENTITY zotero.toolbar.tab.tooltip "Växla tabläge">
+<!ENTITY zotero.toolbar.tab.tooltip "Växla flikläge">
 <!ENTITY zotero.toolbar.openURL.label "Hitta">
 <!ENTITY zotero.toolbar.openURL.tooltip "Hitta på ditt lokala bibliotek">
 
@@ -103,12 +103,12 @@
 <!ENTITY zotero.item.attachment.file.show "Visa fil">
 <!ENTITY zotero.item.textTransform "Omvandla text">
 <!ENTITY zotero.item.textTransform.titlecase "engelsk titelskrivning">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.sentencecase "Vanlig versalisering">
 
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newNote "Ny anteckning">
 <!ENTITY zotero.toolbar.note.standalone "Ny fristående anteckning">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
-<!ENTITY zotero.toolbar.lookup "Sök med registreringsnummer...">
+<!ENTITY zotero.toolbar.note.child "Lägg till underliggande anteckning">
+<!ENTITY zotero.toolbar.lookup "Sök med referensnummer...">
 <!ENTITY zotero.toolbar.attachment.linked "Länk till fil...">
 <!ENTITY zotero.toolbar.attachment.add "Lagra kopia av fil...">
 <!ENTITY zotero.toolbar.attachment.weblink "Spara länk till aktuell sida">
@@ -129,13 +129,13 @@
 <!ENTITY zotero.selectitems.title "Välj källor">
 <!ENTITY zotero.selectitems.intro.label "Välj vilka källor du vill lägga till i ditt bibliotek">
 <!ENTITY zotero.selectitems.cancel.label "Ångra">
-<!ENTITY zotero.selectitems.select.label "OK">
+<!ENTITY zotero.selectitems.select.label "Ok">
 
 <!ENTITY zotero.bibliography.title "Skapa källförteckning">
 <!ENTITY zotero.bibliography.style.label "Referensstil">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Utmatningsläge">
+<!ENTITY zotero.bibliography.bibliography "Källförteckning">
+<!ENTITY zotero.bibliography.outputMethod "Utmatningsmetod">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Spara som RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Spara som HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Kopiera till urklipp">
@@ -144,7 +144,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Dokumentinställningar">
 <!ENTITY zotero.integration.addEditCitation.title "Lägg till/redigera källhänvisning">
 <!ENTITY zotero.integration.editBibliography.title "Redigera källförteckning">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Citering med snabbformat">
 
 <!ENTITY zotero.progress.title "Förlopp">
 
@@ -163,7 +163,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Dölj författare">
 <!ENTITY zotero.citation.prefix.label "Prefix:">
 <!ENTITY zotero.citation.suffix.label "Suffix:">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.editorWarning.label "Varning: Om du redigerar ett citat i redigeraren så kommer det inte längre uppdateras för att spegla förändringar i databasen eller citeringsstilen.">
 
 <!ENTITY zotero.richText.italic.label "Kursiv">
 <!ENTITY zotero.richText.bold.label "Fet">
@@ -185,11 +185,11 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bokmärken">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmärken sparas i Microsoft Word och OpenOffice, men kan ändras av misstag.">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Lagra referenserna i dokumentet">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "När du lagerar referenserna i dokument ökar filstorleken något, men det ger dig möjligheten att dela dokumentet till andra utan att använda en Zotero-grupp. Zotero 3.0 eller senare krävs för att redigera dokument som skapats med detta tillval.">
 
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.showEditor.label "Visa redigerare">
+<!ENTITY zotero.integration.classicView.label "Klassisk vy">
 
 <!ENTITY zotero.integration.references.label "Innehåll i källförteckningen">
 
@@ -246,6 +246,6 @@
 <!ENTITY zotero.file.choose.label "Välj fil...">
 <!ENTITY zotero.file.noneSelected.label "Ingen fil vald">
 
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.label "Spara till Zotero">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Bilagor kan inte läggas till det valda biblioteket. Istället kommer källas att sparas i &quot;Mitt bibliotek&quot;.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "För att använda denna funktion måste du först installera PDF-verktygen. Du hittar detta tillval i Inställningar.">

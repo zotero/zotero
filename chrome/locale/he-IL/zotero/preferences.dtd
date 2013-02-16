@@ -9,7 +9,7 @@
 <!ENTITY zotero.preferences.userInterface "ממשק משתמש">
 <!ENTITY zotero.preferences.showIn "Load Zotero in:">
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
-<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
+<!ENTITY zotero.preferences.showIn.separateTab "לשונית נפרדת">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
 <!ENTITY zotero.preferences.statusBarIcon.none "None">
@@ -40,7 +40,7 @@
 <!ENTITY zotero.preferences.groups.childLinks "child links">
 <!ENTITY zotero.preferences.groups.tags "tags">
 
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+<!ENTITY zotero.preferences.openurl.caption "פתח קישור">
 
 <!ENTITY zotero.preferences.openurl.search "Search for resolvers">
 <!ENTITY zotero.preferences.openurl.custom "מותאם אישית...">
@@ -48,15 +48,15 @@
 <!ENTITY zotero.preferences.openurl.version "גירסה:">
 
 <!ENTITY zotero.preferences.prefpane.sync "Sync">
-<!ENTITY zotero.preferences.sync.username "Username:">
-<!ENTITY zotero.preferences.sync.password "Password:">
+<!ENTITY zotero.preferences.sync.username "שם משתמש:">
+<!ENTITY zotero.preferences.sync.password "סיסמה:">
 <!ENTITY zotero.preferences.sync.syncServer "Zotero Sync Server">
-<!ENTITY zotero.preferences.sync.createAccount "Create Account">
+<!ENTITY zotero.preferences.sync.createAccount "נוצר חשבון">
 <!ENTITY zotero.preferences.sync.lostPassword "Lost Password?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sync automatically">
 <!ENTITY zotero.preferences.sync.about "About Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing "File Syncing">
-<!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
+<!ENTITY zotero.preferences.sync.fileSyncing.url "קישור:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Sync attachment files in group libraries using Zotero storage">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
@@ -73,7 +73,7 @@
 <!ENTITY zotero.preferences.sync.reset.button "Reset...">
 
 
-<!ENTITY zotero.preferences.prefpane.search "Search">
+<!ENTITY zotero.preferences.prefpane.search "חיפוש">
 <!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
 <!ENTITY zotero.preferences.search.indexStats "סטטיסטיקות אינדקס">
@@ -86,7 +86,7 @@
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
 
-<!ENTITY zotero.preferences.prefpane.export "Export">
+<!ENTITY zotero.preferences.prefpane.export "יצוא">
 
 <!ENTITY zotero.preferences.citationOptions.caption "אפשרויות ציטוט">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
@@ -102,16 +102,16 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "פורמט פלט">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Disable Quick Copy when dragging more than">
 
-<!ENTITY zotero.preferences.prefpane.cite "Cite">
-<!ENTITY zotero.preferences.cite.styles "Styles">
-<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
+<!ENTITY zotero.preferences.prefpane.cite "צטט">
+<!ENTITY zotero.preferences.cite.styles "סגנונות">
+<!ENTITY zotero.preferences.cite.wordProcessors "מעבדי תמלילים">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 
-<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.cite.styles.styleManager "מנהל סגנונות">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "כותרת">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
@@ -128,6 +128,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">

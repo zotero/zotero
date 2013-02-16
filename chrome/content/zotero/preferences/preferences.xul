@@ -268,7 +268,7 @@ To add a new preference:
 										<textbox id="storage-url" flex="1"
 											preference="pref-storage-url"
 											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout(verifyStorageServer, 1); }"
-											onchange="unverifyStorageServer(); this.value = this.value.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, ''); Zotero.Prefs.set('extensions.zotero.sync.storage.url', this.value)"/>
+											onchange="unverifyStorageServer(); this.value = this.value.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, ''); Zotero.Prefs.set('sync.storage.url', this.value)"/>
 										<label value="/zotero/"/>
 									</hbox>
 								</row>
@@ -278,7 +278,7 @@ To add a new preference:
 										<textbox id="storage-username"
 											preference="pref-storage-username"
 											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout(verifyStorageServer, 1); }"
-											onchange="unverifyStorageServer(); Zotero.Prefs.set('extensions.zotero.sync.storage.username', this.value); var pass = document.getElementById('storage-password'); if (pass.value) { Zotero.Sync.Storage.WebDAV.password = pass.value; }"/>
+											onchange="unverifyStorageServer(); Zotero.Prefs.set('sync.storage.username', this.value); var pass = document.getElementById('storage-password'); if (pass.value) { Zotero.Sync.Storage.WebDAV.password = pass.value; }"/>
 									</hbox>
 								</row>
 								<row>

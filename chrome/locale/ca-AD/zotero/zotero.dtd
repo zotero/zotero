@@ -57,29 +57,29 @@
 <!ENTITY zotero.items.dateAdded_column "Data d&apos;incorporació">
 <!ENTITY zotero.items.dateModified_column "Data de modificació">
 
-<!ENTITY zotero.items.menu.showInLibrary "Mostra a la Biblioteca">
+<!ENTITY zotero.items.menu.showInLibrary "Mostra a la biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Afegeix nota">
 <!ENTITY zotero.items.menu.attach "Afegeix un adjunt">
-<!ENTITY zotero.items.menu.attach.snapshot "Adjunta captura de la pàgina actual">
+<!ENTITY zotero.items.menu.attach.snapshot "Adjunta la captura de la pàgina actual">
 <!ENTITY zotero.items.menu.attach.link "Adjunta enllaç a la pàgina actual">
 <!ENTITY zotero.items.menu.attach.link.uri "Adjunta un enllaç a l'identificador uniforme de recursos...">
-<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
-<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+<!ENTITY zotero.items.menu.attach.file "Adjunta la còpia emmagatzemada del fitxer...">
+<!ENTITY zotero.items.menu.attach.fileLink "Adjunta un enllaç al fitxer...">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restaura a la Biblioteca">
+<!ENTITY zotero.items.menu.restoreToLibrary "Restaura a la biblioteca">
 <!ENTITY zotero.items.menu.duplicateItem "Duplica l&apos;element seleccionat">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.mergeItems "Combina els ítems...">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Tria la versió de l'ítem com a ítem prinicpal:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
 
-<!ENTITY zotero.toolbar.newItem.label "Nou element">
+<!ENTITY zotero.toolbar.newItem.label "Element nou">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Més">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Crea un nou element a partir de la pàgina actual">
 <!ENTITY zotero.toolbar.lookup.label "Afegeix un ítem segons l'identificador">
-<!ENTITY zotero.toolbar.removeItem.label "Esborra element...">
+<!ENTITY zotero.toolbar.removeItem.label "Esborra l'element...">
 <!ENTITY zotero.toolbar.newCollection.label "Nova col·lecció...">
-<!ENTITY zotero.toolbar.newGroup "New Group...">
+<!ENTITY zotero.toolbar.newGroup "Grup nou...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nova subcol·lecció...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nova cerca desada...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Buida la paperera">
@@ -87,7 +87,7 @@
 <!ENTITY zotero.toolbar.actions.label "Accions">
 <!ENTITY zotero.toolbar.import.label "Importa...">
 <!ENTITY zotero.toolbar.importFromClipboard "Importa del porta-retalls">
-<!ENTITY zotero.toolbar.export.label "Exporta Biblioteca...">
+<!ENTITY zotero.toolbar.export.label "Exporta la biblioteca...">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
 <!ENTITY zotero.toolbar.timeline.label "Crea línia del temps">
 <!ENTITY zotero.toolbar.preferences.label "Preferències...">
@@ -99,7 +99,7 @@
 <!ENTITY zotero.toolbar.openURL.tooltip "Cerca&apos;l a la teva biblioteca local">
 
 <!ENTITY zotero.item.add "Afegeix">
-<!ENTITY zotero.item.attachment.file.show "Mostra arxiu">
+<!ENTITY zotero.item.attachment.file.show "Mostra el fitxer">
 <!ENTITY zotero.item.textTransform "Transforma el text">
 <!ENTITY zotero.item.textTransform.titlecase "Tipus Frase">
 <!ENTITY zotero.item.textTransform.sentencecase "Majúscules o minúscules">
@@ -108,42 +108,42 @@
 <!ENTITY zotero.toolbar.note.standalone "Nova nota independent">
 <!ENTITY zotero.toolbar.note.child "Afegeix una nota descendent">
 <!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
-<!ENTITY zotero.toolbar.attachment.linked "Enllaç a l&apos;arxiu...">
+<!ENTITY zotero.toolbar.attachment.linked "Enllaç al fitxer...">
 <!ENTITY zotero.toolbar.attachment.add "Emmagatzema copia de l&apos;arxiu...">
-<!ENTITY zotero.toolbar.attachment.weblink "Desa enllaç a la pàgina actual">
-<!ENTITY zotero.toolbar.attachment.snapshot "Captura pàgina actual">
+<!ENTITY zotero.toolbar.attachment.weblink "Desa l'enllaç a la pàgina actual">
+<!ENTITY zotero.toolbar.attachment.snapshot "Captura la pàgina actual">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "No hi ha etiquetes per mostrar">
-<!ENTITY zotero.tagSelector.filter "Filte:">
+<!ENTITY zotero.tagSelector.filter "Filtre:">
 <!ENTITY zotero.tagSelector.showAutomatic "Mostra automàtic">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.selectVisible "Selecciona les visibles">
-<!ENTITY zotero.tagSelector.clearVisible "Deselecciona les visibles">
-<!ENTITY zotero.tagSelector.clearAll "Deselecciona-ho tot">
-<!ENTITY zotero.tagSelector.renameTag "Reanomena etiqueta...">
-<!ENTITY zotero.tagSelector.deleteTag "Esborra etiqueta...">
+<!ENTITY zotero.tagSelector.clearVisible "Desselecciona les visibles">
+<!ENTITY zotero.tagSelector.clearAll "Desselecciona-ho tot">
+<!ENTITY zotero.tagSelector.renameTag "Reanomena l'etiqueta...">
+<!ENTITY zotero.tagSelector.deleteTag "Esborra l'etiqueta...">
 
 <!ENTITY zotero.lookup.description "Introduïu l'ISBN, DOI, o PMID per cercar en el quadre tot seguit.">
 
 <!ENTITY zotero.selectitems.title "Selecciona elements">
-<!ENTITY zotero.selectitems.intro.label "Selecciona els elements que vols afegir a la teva biblioteca">
-<!ENTITY zotero.selectitems.cancel.label "Cancela">
+<!ENTITY zotero.selectitems.intro.label "Selecciona els elements que vols afegir a la biblioteca">
+<!ENTITY zotero.selectitems.cancel.label "Cancel·la">
 <!ENTITY zotero.selectitems.select.label "D'acord">
 
-<!ENTITY zotero.bibliography.title "Crea Bibliografia">
+<!ENTITY zotero.bibliography.title "Crea cita / bibliografia">
 <!ENTITY zotero.bibliography.style.label "Estil de cites:">
 <!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.bibliography "Bibliografia">
 <!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Desa com a RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Desa com a HTML">
-<!ENTITY zotero.bibliography.copyToClipboard.label "Desa al portaretalls">
+<!ENTITY zotero.bibliography.copyToClipboard.label "Desa al porta-retalls">
 <!ENTITY zotero.bibliography.print.label "Imprimeix">
 
 <!ENTITY zotero.integration.docPrefs.title "Preferències del document">
-<!ENTITY zotero.integration.addEditCitation.title "Afegeix/Edita cita">
-<!ENTITY zotero.integration.editBibliography.title "Edita bibliografia">
-<!ENTITY zotero.integration.quickFormatDialog.title			"Quick Format Citation">
+<!ENTITY zotero.integration.addEditCitation.title "Afegeix / Edita cita">
+<!ENTITY zotero.integration.editBibliography.title "Edita la bibliografia">
+<!ENTITY zotero.integration.quickFormatDialog.title "Cita de format ràpid">
 
 <!ENTITY zotero.progress.title "Progrés">
 
@@ -157,12 +157,12 @@
 <!ENTITY zotero.citation.keepSorted.label "Mantingues les fonts ordenades">
 
 <!ENTITY zotero.citation.page "Pàgina">
-<!ENTITY zotero.citation.paragraph "Paragraf">
+<!ENTITY zotero.citation.paragraph "Paràgraf">
 <!ENTITY zotero.citation.line "Línia">
-<!ENTITY zotero.citation.suppressAuthor.label "Suprimeix autor">
+<!ENTITY zotero.citation.suppressAuthor.label "Suprimeix l'autor">
 <!ENTITY zotero.citation.prefix.label "Prefix:">
 <!ENTITY zotero.citation.suffix.label "Sufix:">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.editorWarning.label "Avís: Si editeu la cita a l'editor de cites no s'actualitzarà més i no reflectirà els canvis en la base de dades o de l'estil de cita.">
 
 <!ENTITY zotero.richText.italic.label "Cursiva">
 <!ENTITY zotero.richText.bold.label "Negreta">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.integration.prefs.endnotes.label "Notes finals">
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Format utilitzat:">
-<!ENTITY zotero.integration.prefs.bookmarks.label "Adreçes d&apos;interès">
+<!ENTITY zotero.integration.prefs.bookmarks.label "Adreces d&apos;interès">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Les adreces d&apos;interès es conserven entre Microsoft Word i OpenOffice però poden veure&apos;s accidentalment modificades.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Emmagatzema les referències al document">
@@ -242,7 +242,7 @@
 <!ENTITY zotero.rtfScan.inputFile.label "Fitxer d'entrada">
 <!ENTITY zotero.rtfScan.outputFile.label "Fitxer de sortida">
 
-<!ENTITY zotero.file.choose.label "Choose File...">
+<!ENTITY zotero.file.choose.label "Tria un fitxer...">
 <!ENTITY zotero.file.noneSelected.label "No s'ha seleccionat cap fitxer">
 
 <!ENTITY zotero.downloadManager.label "Desa a Zotero">
