@@ -119,7 +119,7 @@ Zotero.HTTP = new function() {
 		}
 		
 		// Send headers
-		var headers = {};
+		var headers = (options && options.headers) || {};
 		if (options && options.body && !headers["Content-Type"]) {
 			headers["Content-Type"] = "application/x-www-form-urlencoded";
 		}
