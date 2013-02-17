@@ -441,6 +441,21 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 				}
 			}
 			
+			if (condition == 'quicksearch-totallyEverything') {
+				this.addCondition('annotation', operator, part.text, false);
+				
+				if (part.inQuotes) {
+					this.addCondition('fulltextContent', operator, part.text, false);
+				}
+				else {
+					var splits = Zotero.Fulltext.semanticSplitter(part.text);
+					for each(var split in splits) {
+						this.addCondition('fulltextWord', operator, split, false);
+					}
+				}
+				this.addCondition('includeParentsAndChildren','true');
+			}
+			
 			this.addCondition('blockEnd');
 		}
 		
@@ -1911,6 +1926,17 @@ Zotero.SearchConditions = new function(){
 			
 			{
 				name: 'quicksearch-everything',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				},
+				noLoad: true
+			},
+			
+			{
+				name: 'quicksearch-totallyEverything',
 				operators: {
 					is: true,
 					isNot: true,

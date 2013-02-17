@@ -1800,6 +1800,10 @@ const ZOTERO_CONFIG = {
 			
 			everything: {
 				label: "Everything"
+			},
+
+			totallyEverything: {
+				label: "Everything by families"
 			}
 		};
 		
