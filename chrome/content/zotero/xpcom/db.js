@@ -1123,6 +1123,11 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 		Zotero.DB.query("PRAGMA locking_mode=NORMAL");
 	}
 	
+	// Set page cache size to 8MB
+	var pageSize = Zotero.DB.valueQuery("PRAGMA page_size");
+	var cacheSize = 8192000 / pageSize;
+	Zotero.DB.query("PRAGMA cache_size=" + cacheSize);
+	
 	// Register idle and shutdown handlers to call this.observe() for DB backup
 	var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
 			.getService(Components.interfaces.nsIIdleService);

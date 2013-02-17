@@ -2283,11 +2283,6 @@ Zotero.Schema = new function(){
 					
 					Zotero.wait();
 					
-					// Set page cache size to 8MB
-					var pageSize = Zotero.DB.valueQuery("PRAGMA page_size");
-					var cacheSize = 8192000 / pageSize;
-					Zotero.DB.query("PRAGMA default_cache_size=" + cacheSize);
-					
 					// Orphaned child attachment
 					Zotero.DB.query("UPDATE itemAttachments SET sourceItemID=NULL WHERE sourceItemID NOT IN (SELECT itemID FROM items)");
 					Zotero.DB.query("UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID NOT IN (SELECT itemID FROM items)");
