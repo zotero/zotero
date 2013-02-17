@@ -640,8 +640,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			}
 		}
 		
-		Zotero.DB.startDummyStatement();
-		
 		// Populate combined tables for custom types and fields -- this is likely temporary
 		if (!upgraded && !updated) {
 			Zotero.Schema.updateCustomTables();
