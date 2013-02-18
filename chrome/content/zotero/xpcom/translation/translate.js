@@ -1310,16 +1310,18 @@ Zotero.Translate.Base.prototype = {
 		
 		var me = this;
 		this._loadTranslator(this._potentialTranslators[0],
-			function() { me._detectTranslatorLoaded() });
+			function() { me._detectTranslatorLoaded(me._potentialTranslators[0]) });
 	},
 	
 	/**
 	 * Runs detect code for a translator
 	 */
-	"_detectTranslatorLoaded":function() {
+	"_detectTranslatorLoaded":function(translator) {
 		this._prepareDetection();
 		
 		this.incrementAsyncProcesses("Zotero.Translate#getTranslators");
+		
+		this.translator = [translator];
 		
 		try {
 			var returnValue = this._sandboxManager.sandbox["detect"+this._entryFunctionSuffix].apply(null, this._getParameters());
