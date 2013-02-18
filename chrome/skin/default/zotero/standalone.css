@@ -2,3 +2,8 @@
 #zotero-tb-fullscreen, #zotero-fullscreen-close-separator, #zotero-close-button {
 	display: none;
 }
+
+#main-window {
+	min-width: 915px;
+	min-height: 300px;
+}

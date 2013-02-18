@@ -120,15 +120,6 @@ Zotero.Connector = new function() {
 			});
 		}
 	}
-
-	// saner descriptions of some HTTP error codes
-	this.EXCEPTION_NOT_AVAILABLE = 0;
-	this.EXCEPTION_BAD_REQUEST = 400;
-	this.EXCEPTION_NO_ENDPOINT = 404;
-	this.EXCEPTION_INCOMPATIBLE_VERSION = 412;
-	this.EXCEPTION_CONNECTOR_INTERNAL = 500;
-	this.EXCEPTION_METHOD_NOT_IMPLEMENTED = 501;
-	this.EXCEPTION_CODES = [0, 400, 404, 412, 500, 501];
 	
 	/**
 	 * Sends the XHR to execute an RPC call.
@@ -146,8 +137,7 @@ Zotero.Connector = new function() {
 		
 		var newCallback = function(req) {
 			try {
-				var isOnline = req.status !== Zotero.Connector.EXCEPTION_NOT_AVAILABLE
-					&& req.status !== Zotero.Connector.EXCEPTION_INCOMPATIBLE_VERSION;
+				var isOnline = req.status !== 0 && req.status !== 403 && req.status !== 412;
 				
 				if(Zotero.Connector.isOnline !== isOnline) {
 					Zotero.Connector.isOnline = isOnline;
@@ -156,7 +146,7 @@ Zotero.Connector = new function() {
 					}
 				}
 				
-				if(Zotero.Connector.EXCEPTION_CODES.indexOf(req.status) !== -1) {
+				if(req.status == 0 || req.status >= 400) {
 					Zotero.debug("Connector: Method "+method+" failed with status "+req.status);
 					if(callback) callback(false, req.status);
 					
