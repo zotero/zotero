@@ -1167,6 +1167,8 @@ Zotero.Translate.Base.prototype = {
 		if(!returnValue && error) errorString = this._generateErrorString(error);
 		
 		if(oldState === "detect") {
+			if(this._clearTranslator) delete this.translator;
+			
 			if(this._potentialTranslators.length) {
 				var lastTranslator = this._potentialTranslators.shift();
 				var lastProperToProxyFunction = this._properToProxyFunctions ? this._properToProxyFunctions.shift() : null;
@@ -1321,7 +1323,10 @@ Zotero.Translate.Base.prototype = {
 		
 		this.incrementAsyncProcesses("Zotero.Translate#getTranslators");
 		
-		this.translator = [translator];
+		if(!this.translator) {
+			this.translator = [translator];
+			this._clearTranslator = true;
+		}
 		
 		try {
 			var returnValue = this._sandboxManager.sandbox["detect"+this._entryFunctionSuffix].apply(null, this._getParameters());
