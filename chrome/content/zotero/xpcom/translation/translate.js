@@ -1167,7 +1167,10 @@ Zotero.Translate.Base.prototype = {
 		if(!returnValue && error) errorString = this._generateErrorString(error);
 		
 		if(oldState === "detect") {
-			if(this._clearTranslator) delete this.translator;
+			if(this._clearTranslator) {
+				delete this.translator;
+				delete this._clearTranslator;
+			}
 			
 			if(this._potentialTranslators.length) {
 				var lastTranslator = this._potentialTranslators.shift();
