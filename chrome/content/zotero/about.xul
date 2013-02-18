@@ -13,7 +13,7 @@
 	onload="moveToAlertPosition(); sizeToContent();"
 	ondialogaccept="return true;">
 	
-	<script src="include.js" type="application/javascript;version=1.8"/>
+	<script src="include.js"/>
 	
 	<vbox id="aboutcontent">
 		<label id="name" value="Zotero"/>
@@ -21,7 +21,7 @@
 			<label class="zotero-text-link" href="http://zotero.org" value="http://zotero.org"/>
 		</hbox>
 		<label id="version" value="&zotero.version; "/>
-		<script type="application/javascript;version=1.8">
+		<script>
 			document.getElementById('version').value += Zotero.version;
 		</script>
 		<hbox>

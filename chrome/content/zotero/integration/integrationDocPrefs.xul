@@ -40,8 +40,8 @@
 	persist="screenX screenY"
 	style="width: 600px">
 	
-	<script src="../include.js" type="application/javascript;version=1.8"/>
-	<script src="../bibliography.js" type="application/javascript;version=1.8"/>
+	<script src="../include.js"/>
+	<script src="../bibliography.js"/>
 	<vbox id="zotero-bibliography-container">
 		<groupbox>
 			<caption label="&zotero.bibliography.style.label;"/>

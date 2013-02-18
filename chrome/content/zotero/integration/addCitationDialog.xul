@@ -49,9 +49,9 @@
 	ondialogextra2="Zotero_Citation_Dialog.toggleEditor()"
 	ondialogextra1="Zotero_Citation_Dialog.toggleMultipleSources()">
 	
-	<script src="../include.js" type="application/javascript;version=1.8"/>
-	<script src="../selectItemsDialog.js" type="application/javascript;version=1.8"/>
-	<script src="addCitationDialog.js" type="application/javascript;version=1.8"/>
+	<script src="../include.js"/>
+	<script src="../selectItemsDialog.js"/>
+	<script src="addCitationDialog.js"/>
 	
 	<vbox id="zotero-select-items-container" flex="1">
 		<vbox flex="1">

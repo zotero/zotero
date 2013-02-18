@@ -29,7 +29,7 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<script src="include.js" type="application/javascript;version=1.8"/>
+	<script src="include.js"/>
 	<script src="itemPane.js" type="application/javascript;version=1.8"/>
 	
 	<vbox id="zotero-item-pane" zotero-persist="width">

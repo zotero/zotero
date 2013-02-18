@@ -20,8 +20,8 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	windowtype="zotero:search">
 	
-	<script src="include.js" type="application/javascript;version=1.8"/>
-	<script src="advancedSearch.js" type="application/javascript;version=1.8"/>
+	<script src="include.js"/>
+	<script src="advancedSearch.js"/>
 	
 	<vbox id="zotero-search-box-container" flex="1">
 	

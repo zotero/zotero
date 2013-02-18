@@ -38,8 +38,8 @@
 	onwizardcancel="return Zotero_Merge_Window.onCancel()"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
-	<script src="include.js" type="application/javascript;version=1.8"/>
-	<script src="merge.js" type="application/javascript;version=1.8"/>
+	<script src="include.js"/>
+	<script src="merge.js"/>
 	
 	<wizardpage onpageshow="Zotero_Merge_Window.init()"
 			onpagerewound="Zotero_Merge_Window.onBack(); return false"

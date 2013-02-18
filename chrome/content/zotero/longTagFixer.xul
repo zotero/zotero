@@ -10,8 +10,8 @@
 		ondialogaccept="Zotero_Long_Tag_Fixer.save()"
 		title="&zotero.sync.error;">
 	
-	<script src="include.js" type="application/javascript;version=1.8"/>
-	<script src="longTagFixer.js" type="application/javascript;version=1.8"/>
+	<script src="include.js"/>
+	<script src="longTagFixer.js"/>
 	
 	<label value="&zotero.sync.longTagFixer.followingTagTooLong;"/>
 	<groupbox>

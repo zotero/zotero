@@ -34,8 +34,8 @@
 	onload="Zotero_ProxyEditor.load();"
 	ondialogaccept="return Zotero_ProxyEditor.accept();">
 	
-	<script src="chrome://zotero/content/include.js" type="application/javascript;version=1.8"/>
-	<script src="proxyEditor.js" type="application/javascript;version=1.8"/>
+	<script src="chrome://zotero/content/include.js"/>
+	<script src="proxyEditor.js"/>
 
 	<checkbox id="zotero-proxies-multiSite" label="&zotero.preferences.proxies.multiSite;"
 		oncommand="Zotero_ProxyEditor.multiSiteChanged()"/>

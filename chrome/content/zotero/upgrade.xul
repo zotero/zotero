@@ -9,7 +9,7 @@
 <wizard id="zotero-schema-upgrade" title="Zotero Upgrade Wizard"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
-	<script type="application/javascript;version=1.8">
+	<script>
 	<![CDATA[
 		var Zotero_Schema_Upgrade = new function() {
 			this.init = init;

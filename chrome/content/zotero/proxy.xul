@@ -8,8 +8,8 @@
 	ondialogaccept="Zotero_Proxy_Dialog.accept()" ondialogcancel="Zotero_Proxy_Dialog.cancel()"
 	onload="Zotero_Proxy_Dialog.init()">
 	
-	<script src="include.js" type="application/javascript;version=1.8"/>
-	<script src="proxy.js" type="application/javascript;version=1.8"/>
+	<script src="include.js"/>
+	<script src="proxy.js"/>
 	
 	<vbox flex="1" style="width:510px">
 		<hbox align="start">

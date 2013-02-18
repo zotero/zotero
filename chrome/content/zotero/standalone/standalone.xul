@@ -48,7 +48,7 @@
 				title="&brandShortName;"
 				width="915" height="500"
 				persist="screenX screenY width height sizemode"> 
-	<script type="application/javascript;version=1.8" src="standalone.js"/>
+	<script type="application/javascript" src="standalone.js"/>
 	<script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
 	<script type="application/javascript" src="chrome://global/content/contentAreaUtils.js"/>
 	<script type="application/javascript" src="chrome://global/content/inlineSpellCheckUI.js"/>

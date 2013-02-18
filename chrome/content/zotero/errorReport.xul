@@ -9,7 +9,7 @@
 <wizard xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	id="zotero-error-report" title="Zotero Error Report">
 	
-	<script type="application/javascript;version=1.8">
+	<script>
 	<![CDATA[
 		var Zotero_Error_Report = new function() {
 			this.init = init;
