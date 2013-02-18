@@ -37,14 +37,14 @@
 <overlay id="zotero"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
-	<script src="include.js" type="application/javascript;version=1.8"/>
+	<script src="include.js"/>
 	<script src="zoteroPane.js" type="application/javascript;version=1.8"/>
-    <script src="fileInterface.js" type="application/javascript;version=1.8"/>
-	<script src="reportInterface.js" type="application/javascript;version=1.8"/>
-	<script src="timelineInterface.js" type="application/javascript;version=1.8"/>
-	<script src="recognizePDF.js" type="application/javascript;version=1.8"/>
+    <script src="fileInterface.js"/>
+	<script src="reportInterface.js"/>
+	<script src="timelineInterface.js"/>
+	<script src="recognizePDF.js"/>
 	<script src="browser.js" type="application/javascript;version=1.8"/>
-	<script src="lookup.js" type="application/javascript;version=1.8"/>
+	<script src="lookup.js"/>
 	<script src="locateMenu.js" type="application/javascript;version=1.8"/>
 	
 	<commandset id="mainCommandSet">
