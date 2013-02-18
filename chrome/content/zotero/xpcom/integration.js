@@ -301,7 +301,7 @@ Zotero.Integration = new function() {
 				}
 				
 				inProgress = Zotero.Integration.currentWindow = false;
-			}).end();
+			}).done();
 		};
 	};
 	
@@ -1833,7 +1833,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	 */
 	"_updateSession":function _updateSession(resolveErrors) {
 		var me = this;
-		if(this._sessionUpdatePromise && this._sessionUpdatePromise.isResolved()) {
+		if(this._sessionUpdatePromise && this._sessionUpdatePromise.isFulfilled()) {
 			// Session has already been updated. If we were deferring resolving an error,
 			// and we are supposed to resolve it now, then do that
 			if(this._sessionUpdateError) {
@@ -1881,7 +1881,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 						me._sessionUpdateDeferreds[i].reject(err);
 					}
 					throw err;
-				}).end();
+				}).done();
 			}
 			
 			return deferred.promise;
@@ -1916,7 +1916,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	 *     Receives a number from 0 to 100 indicating current status.
 	 */
 	"accept":function(progressCallback) {
-		if(!this._acceptDeferred.promise.isResolved()) {
+		if(!this._acceptDeferred.promise.isFulfilled()) {
 			this._acceptDeferred.resolve(progressCallback);
 		}
 	},

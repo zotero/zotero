@@ -3433,7 +3433,7 @@ var ZoteroPane = new function()
 					Zotero.debug(e, 1);
 					ZoteroPane_Local.syncAlert(e);
 				})
-				.end();
+				.done();
 			}
 		}
 	}

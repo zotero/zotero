@@ -312,7 +312,7 @@ var Zotero_QuickFormat = new function () {
 				}
 				
 				_updateItemList(citedItems, citedItemsMatchingSearch, searchResultIDs, isAsync);
-			}).end();
+			}).done();
 			
 			if(!completed) {
 				// We are going to have to wait until items have been retrieved from the document.

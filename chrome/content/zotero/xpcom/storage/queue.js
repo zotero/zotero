@@ -212,7 +212,7 @@ Zotero.Sync.Storage.Queue.prototype.addRequest = function (request, highPriority
 
 
 Zotero.Sync.Storage.Queue.prototype.start = function () {
-	if (!this._deferred || this._deferred.promise.isResolved()) {
+	if (!this._deferred || this._deferred.promise.isFulfilled()) {
 		Zotero.debug("Creating deferred for queue " + this.name);
 		this._deferred = Q.defer();
 	}

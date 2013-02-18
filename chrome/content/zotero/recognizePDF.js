@@ -493,7 +493,7 @@ Zotero_RecognizePDF.ItemRecognizer.prototype._recognizeItem = function() {
 	}).fin(function() {
 		// scroll to this item
 		me._progressWindow.document.getElementById("tree").treeBoxObject.scrollToRow(Math.max(0, me._itemTotal-me._items.length-5));
-	}).end();
+	}).done();
 }
 
 /**
