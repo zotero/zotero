@@ -1,4 +1,4 @@
--- 32
+-- 34
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -663,18 +663,19 @@ INSERT INTO itemTypeFields VALUES (17, 1267, NULL, 9);  -- yearAsVolume     [ADD
 INSERT INTO itemTypeFields VALUES (17, 97, NULL, 10);   -- reporterVolume
 INSERT INTO itemTypeFields VALUES (17, 98, NULL, 11);   -- firstPage
 INSERT INTO itemTypeFields VALUES (17, 96, NULL, 12);   -- dateDecided
-INSERT INTO itemTypeFields VALUES (17, 8, NULL, 13);    -- publisher        [ADDED]
-INSERT INTO itemTypeFields VALUES (17, 1268, NULL, 14); -- publicationDate  [ADDED]
-INSERT INTO itemTypeFields VALUES (17, 1271, NULL, 15); -- supplementName   [ADDED]
-INSERT INTO itemTypeFields VALUES (17, 5, NULL, 16);    -- issue            [ADDED]
-INSERT INTO itemTypeFields VALUES (17, 123, NULL, 17);  -- archive          [ADDED]
-INSERT INTO itemTypeFields VALUES (17, 19, NULL, 18);   -- archiveLocation  [ADDED]
-INSERT INTO itemTypeFields VALUES (17, 87, NULL, 19);   -- language
-INSERT INTO itemTypeFields VALUES (17, 1, NULL, 20);    -- url
-INSERT INTO itemTypeFields VALUES (17, 27, NULL, 21);   -- accessed
-INSERT INTO itemTypeFields VALUES (17, 42, NULL, 22);   -- history
-INSERT INTO itemTypeFields VALUES (17, 2, NULL, 23);    -- rights
-INSERT INTO itemTypeFields VALUES (17, 22, NULL, 24);   -- extra
+INSERT INTO itemTypeFields VALUES (17, 1269, NULL, 13); -- reign            [ADDED]
+INSERT INTO itemTypeFields VALUES (17, 8, NULL, 14);    -- publisher        [ADDED]
+INSERT INTO itemTypeFields VALUES (17, 1268, NULL, 15); -- publicationDate  [ADDED]
+INSERT INTO itemTypeFields VALUES (17, 1271, NULL, 16); -- supplementName   [ADDED]
+INSERT INTO itemTypeFields VALUES (17, 5, NULL, 17);    -- issue            [ADDED]
+INSERT INTO itemTypeFields VALUES (17, 123, NULL, 18);  -- archive          [ADDED]
+INSERT INTO itemTypeFields VALUES (17, 19, NULL, 19);   -- archiveLocation  [ADDED]
+INSERT INTO itemTypeFields VALUES (17, 87, NULL, 20);   -- language
+INSERT INTO itemTypeFields VALUES (17, 1, NULL, 21);    -- url
+INSERT INTO itemTypeFields VALUES (17, 27, NULL, 22);   -- accessed
+INSERT INTO itemTypeFields VALUES (17, 42, NULL, 23);   -- history
+INSERT INTO itemTypeFields VALUES (17, 2, NULL, 24);    -- rights
+INSERT INTO itemTypeFields VALUES (17, 22, NULL, 25);   -- extra
 
 -- hearing
 INSERT INTO itemTypeFields VALUES (18, 110, NULL, 1);  -- title
