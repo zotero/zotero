@@ -685,7 +685,7 @@ const ZOTERO_CONFIG = {
 		// XXXZ Load quick-service key sets for identifying multilingualized fields
 		// XXXZ ... _after_ creating the database.
 		// This should really all be done with a call to Zotero.Multi module.
-		var multiBaseFields = ['title', 'shortTitle','publicationTitle', 'series', 'seriesTitle', 'seriesText','publisher', 'reporter', 'court','place','edition','archive','archiveLocation','committee','docketNumber'];
+		var multiBaseFields = ['title', 'shortTitle','publicationTitle', 'series', 'seriesTitle', 'seriesText','publisher', 'reporter', 'court','place','edition','archive','archiveLocation','committee','docketNumber','reign'];
 		Zotero.multiFieldIds = {};
 		Zotero.multiFieldNames = {};
 		sql = "SELECT fieldID FROM fields " +
