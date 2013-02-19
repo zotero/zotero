@@ -1660,7 +1660,6 @@ Zotero.Sync.Storage = new function () {
 			
 			//Zotero.debug("Adding file " + fileName);
 			
-			fileName = Zotero.Utilities.Internal.Base64.encode(fileName) + "%ZB64";
 			zipWriter.addEntryFile(
 				fileName,
 				Components.interfaces.nsIZipWriter.COMPRESSION_DEFAULT,
