@@ -55,8 +55,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			)
 			.then(function (req) {
 				checkResponse(req);
-			})
-			.then(function (req) {
+				
 				var funcName = "Zotero.Sync.Storage.WebDAV.getStorageModificationTime()";
 				
 				// mod_speling can return 300s for 404s with base name matches
@@ -839,7 +838,6 @@ Zotero.Sync.Storage.WebDAV = (function () {
 				
 				if (!mdate) {
 					Zotero.debug("Remote file not found for item " + Zotero.Items.getLibraryKeyHash(item));
-					request.finish();
 					return false;
 				}
 				
@@ -977,7 +975,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			return self._cacheCredentials();
 		})
 			.then(function () {
-				var lastSyncURI = this.rootURI;
+				var lastSyncURI = self.rootURI;
 				lastSyncURI.spec += "lastsync";
 				return Zotero.HTTP.promise("GET", lastSyncURI,
 					{ debug: true, successCodes: [200, 404] });
@@ -1064,9 +1062,8 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		
 		return Zotero.HTTP.promise("OPTIONS", this.rootURI)
 		.then(function (req) {
-			return checkResponse(req);
-		})
-		.then(function () {
+			checkResponse(req);
+			
 			Zotero.debug("Credentials are cached");
 			_cachedCredentials = true;
 		})

@@ -567,10 +567,11 @@ Zotero.Sync.Runner = new function () {
 					Zotero.Sync.Runner.stop();
 				}
 			})
-			.fail(function (e) {
+			.catch(function (e) {
 				Zotero.debug("File sync failed", 1);
 				Zotero.Sync.Runner.error(e);
-			});
+			})
+			.done();
 		};
 		
 		Zotero.Sync.Server.sync({
@@ -620,7 +621,6 @@ Zotero.Sync.Runner = new function () {
 			e = new Error(e);
 			e.status = 'error';
 		}
-		Components.utils.reportError(e);
 		Zotero.debug(e, 1);
 		Zotero.Sync.Runner.setSyncIcon(e);
 		throw (e);
@@ -883,6 +883,7 @@ Zotero.Sync.Runner = new function () {
 			}
 		}
 		if (!parsed.message) {
+			// TODO: include file name and line?
 			parsed.message = e.message ? e.message : e;
 		}
 		
