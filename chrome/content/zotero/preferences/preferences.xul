@@ -726,15 +726,15 @@ To add a new preference:
 			<preference id="pref-openURL-version" name="extensions.zotero.openURL.version" type="string"/>
 		</preferences>
 		
-		<tabbox>
+		<tabbox id="zotero-prefpane-advanced-tabs">
 			<tabs>
 				<!-- TODO: localize -->
 				<tab label="General"/>
 				<tab label="Files and Folders"/>
 			</tabs>
 			
-			<tabpanels>
-				<tabpanel orient="vertical">
+			<tabpanels id="zotero-prefpane-advanced-tabpanels">
+				<tabpanel id="zotero-prefpane-advanced-general-tab" orient="vertical">
 					<groupbox>
 						<caption label="&zotero.preferences.debugOutputLogging;"/>
 						
@@ -790,9 +790,9 @@ To add a new preference:
 						</hbox>
 					</groupbox>
 					
-					<groupbox>
+					<groupbox id="zotero-prefpane-advanced-miscellaneous">
 						<caption label="&zotero.preferences.miscellaneous;"/>
-						<hbox align="center">
+						<hbox id="zotero-prefpane-advanced-openbuttons" align="center">
 							<button id="openAboutConfig" label="&zotero.preferences.openAboutConfig;" oncommand="openInViewer('about:config')"/>
 							<button id="openCSLEdit" label="&zotero.preferences.openCSLEdit;" oncommand="openInViewer('chrome://zotero/content/tools/csledit.xul', true)"/>
 							<button id="openCSLPreview" label="&zotero.preferences.openCSLPreview;" oncommand="openInViewer('chrome://zotero/content/tools/cslpreview.xul', true)"/>
