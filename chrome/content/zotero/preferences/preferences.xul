@@ -726,118 +726,130 @@ To add a new preference:
 			<preference id="pref-openURL-version" name="extensions.zotero.openURL.version" type="string"/>
 		</preferences>
 		
-		<groupbox>
-			<caption label="&zotero.preferences.attachments;"/>
+		<tabbox>
+			<tabs>
+				<!-- TODO: localize -->
+				<tab label="General"/>
+				<tab label="Files and Folders"/>
+			</tabs>
 			
-			<!-- This doesn't wrap without an explicit width -->
-			<vbox>
-				<description width="45em">&zotero.preferences.attachments.message;</description>
-			</vbox>
-			
-			<hbox>
-				<label value="&zotero.preferences.attachments.basePath;"/>
-				<textbox id="baseAttachmentPath" preference="pref-baseAttachmentPath" onsyncfrompreference="return getBaseAttachmentPath();" readonly="true" flex="1"/>
-				<button label="&zotero.preferences.attachments.selectBasePath;" oncommand="var file = chooseBaseAttachmentPath(); if (!file) { event.stopPropagation(); }"/>
-			</hbox>
-			
-			<hbox>
-				<button label="&zotero.preferences.attachments.resetBasePath;" oncommand="clearBaseAttachmentPath();"/>
-			</hbox>
-			
-		</groupbox>
-		
-		<groupbox>
-			<caption label="&zotero.preferences.dataDir;"/>
-			
-			<radiogroup id="dataDir" preference="pref-useDataDir" onsyncfrompreference="onDataDirLoad();" onsynctopreference="return onDataDirUpdate(event);">
-				<radio label="&zotero.preferences.dataDir.useProfile;" value="false"/>
-				<hbox>
-					<radio label="&zotero.preferences.dataDir.custom;" value="true"/>
-					<textbox id="dataDirPath" preference="pref-dataDir" onsyncfrompreference="return getDataDirPath();" readonly="true" flex="1"/>
-					<button label="&zotero.preferences.dataDir.choose;" oncommand="var file = Zotero.chooseZoteroDirectory(true); if (!file) { event.stopPropagation(); }"/>
-				</hbox>
-			</radiogroup>
-			
-			<hbox>
-				<button label="&zotero.preferences.dataDir.reveal;" oncommand="revealDataDirectory()"/>
-			</hbox>
-		</groupbox>
-		
-		<groupbox>
-			<caption label="&zotero.preferences.dbMaintenance;"/>
-			
-			<hbox>
-				<button label="&zotero.preferences.dbMaintenance.integrityCheck;" oncommand="runIntegrityCheck()"/>
-				<button label="&zotero.preferences.dbMaintenance.resetTranslators;" oncommand="resetTranslators()"/>
-				<button label="&zotero.preferences.dbMaintenance.resetStyles;" oncommand="resetStyles()"/>
-			</hbox>
-		</groupbox>
-		
-		<groupbox>
-			<caption label="&zotero.preferences.debugOutputLogging;"/>
-			
-			<!-- This doesn't wrap without an explicit width -->
-			<vbox>
-				<description width="45em">&zotero.preferences.debugOutputLogging.message;</description>
-			</vbox>
-			
-			<hbox align="center">
-				<button id="debug-output-enable" oncommand="Zotero_Preferences.Debug_Output.toggleStore()"/>
-				<label id="debug-output-lines" style="margin-right: 0"/>
-				<label value="&zotero.preferences.debugOutputLogging.linesLogged;"/>
-				<checkbox preference="pref-debug-output-enableAfterRestart" label="&zotero.preferences.debugOutputLogging.enableAfterRestart;" style="margin-left: 1.5em"/>
-			</hbox>
-			
-			<hbox align="center">
-				<button id="debug-output-view" label="&zotero.preferences.debugOutputLogging.viewOutput;" oncommand="Zotero_Preferences.Debug_Output.view()"/>
-				<button id="debug-output-clear" label="&zotero.preferences.debugOutputLogging.clearOutput;" oncommand="Zotero_Preferences.Debug_Output.clear()"/>
-				<button id="debug-output-submit" label="&zotero.preferences.debugOutputLogging.submitToServer;" oncommand="Zotero_Preferences.Debug_Output.submit()"/>
-				<progressmeter id="debug-output-submit-progress" mode="undetermined" hidden="true"/>
-			</hbox>
-		</groupbox>
-		
-		<groupbox>
-			<caption label="&zotero.preferences.openurl.caption;"/>
-			
-			<hbox align="center">
-				<!-- vbox prevents some weird vertical stretching of the menulist -->
-				<vbox flex="1">
-					<menulist id="openURLMenu" oncommand="onOpenURLSelected();">
-						<menupopup>
-							<menuseparator/>
-							<menuitem label="&zotero.preferences.openurl.custom;" value="custom" selected="true"/>
-						</menupopup>
-					</menulist>
-				</vbox>
-				<button id="openURLSearchButton" label="&zotero.preferences.openurl.search;" oncommand="populateOpenURLResolvers()"/>
-			</hbox>
-			
-			<hbox align="center">
-				<label value="&zotero.preferences.openurl.server;"/>
-				<textbox id="openURLServerField" flex="1" oninput="onOpenURLCustomized();" preference="pref-openURL-resolver"/>
-			</hbox>
-		
-			<hbox align="center">
-				<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
-				<menulist id="openURLVersionMenu" oncommand="onOpenURLCustomized();" preference="pref-openURL-version">
-					<menupopup>
-						<menuitem label="0.1" value="0.1"/>
-						<menuitem label="1.0" value="1.0"/>
-					</menupopup>
-				</menulist>
-			</hbox>
-		</groupbox>
-		
-		<groupbox>
-			<caption label="&zotero.preferences.miscellaneous;"/>
-			<hbox align="center">
-				<button id="openAboutConfig" label="&zotero.preferences.openAboutConfig;" oncommand="openInViewer('about:config')"/>
-				<button id="openCSLEdit" label="&zotero.preferences.openCSLEdit;" oncommand="openInViewer('chrome://zotero/content/tools/csledit.xul', true)"/>
-				<button id="openCSLPreview" label="&zotero.preferences.openCSLPreview;" oncommand="openInViewer('chrome://zotero/content/tools/cslpreview.xul', true)"/>
-			</hbox>
-		</groupbox>
-		
-		<separator/>
+			<tabpanels>
+				<tabpanel orient="vertical">
+					<groupbox>
+						<caption label="&zotero.preferences.debugOutputLogging;"/>
+						
+						<!-- This doesn't wrap without an explicit width -->
+						<vbox>
+							<description width="45em">&zotero.preferences.debugOutputLogging.message;</description>
+						</vbox>
+						
+						<hbox align="center">
+							<button id="debug-output-enable" oncommand="Zotero_Preferences.Debug_Output.toggleStore()"/>
+							<label id="debug-output-lines" style="margin-right: 0"/>
+							<label value="&zotero.preferences.debugOutputLogging.linesLogged;"/>
+							<checkbox preference="pref-debug-output-enableAfterRestart" label="&zotero.preferences.debugOutputLogging.enableAfterRestart;" style="margin-left: 1.5em"/>
+						</hbox>
+						
+						<hbox align="center">
+							<button id="debug-output-view" label="&zotero.preferences.debugOutputLogging.viewOutput;" oncommand="Zotero_Preferences.Debug_Output.view()"/>
+							<button id="debug-output-clear" label="&zotero.preferences.debugOutputLogging.clearOutput;" oncommand="Zotero_Preferences.Debug_Output.clear()"/>
+							<button id="debug-output-submit" label="&zotero.preferences.debugOutputLogging.submitToServer;" oncommand="Zotero_Preferences.Debug_Output.submit()"/>
+							<progressmeter id="debug-output-submit-progress" mode="undetermined" hidden="true"/>
+						</hbox>
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.openurl.caption;"/>
+						
+						<hbox align="center">
+							<!-- vbox prevents some weird vertical stretching of the menulist -->
+							<vbox flex="1">
+								<menulist id="openURLMenu" oncommand="onOpenURLSelected();">
+									<menupopup>
+										<menuseparator/>
+										<menuitem label="&zotero.preferences.openurl.custom;" value="custom" selected="true"/>
+									</menupopup>
+								</menulist>
+							</vbox>
+							<button id="openURLSearchButton" label="&zotero.preferences.openurl.search;" oncommand="populateOpenURLResolvers()"/>
+						</hbox>
+						
+						<hbox align="center">
+							<label value="&zotero.preferences.openurl.server;"/>
+							<textbox id="openURLServerField" flex="1" oninput="onOpenURLCustomized();" preference="pref-openURL-resolver"/>
+						</hbox>
+					
+						<hbox align="center">
+							<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
+							<menulist id="openURLVersionMenu" oncommand="onOpenURLCustomized();" preference="pref-openURL-version">
+								<menupopup>
+									<menuitem label="0.1" value="0.1"/>
+									<menuitem label="1.0" value="1.0"/>
+								</menupopup>
+							</menulist>
+						</hbox>
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.miscellaneous;"/>
+						<hbox align="center">
+							<button id="openAboutConfig" label="&zotero.preferences.openAboutConfig;" oncommand="openInViewer('about:config')"/>
+							<button id="openCSLEdit" label="&zotero.preferences.openCSLEdit;" oncommand="openInViewer('chrome://zotero/content/tools/csledit.xul', true)"/>
+							<button id="openCSLPreview" label="&zotero.preferences.openCSLPreview;" oncommand="openInViewer('chrome://zotero/content/tools/cslpreview.xul', true)"/>
+						</hbox>
+					</groupbox>
+				</tabpanel>
+				
+				<tabpanel orient="vertical">
+					<groupbox>
+						<caption label="&zotero.preferences.attachments;"/>
+						
+						<!-- This doesn't wrap without an explicit width -->
+						<vbox>
+							<description width="45em">&zotero.preferences.attachments.message;</description>
+						</vbox>
+						
+						<hbox>
+							<label value="&zotero.preferences.attachments.basePath;"/>
+							<textbox id="baseAttachmentPath" preference="pref-baseAttachmentPath" onsyncfrompreference="return getBaseAttachmentPath();" readonly="true" flex="1"/>
+							<button label="&zotero.preferences.attachments.selectBasePath;" oncommand="var file = chooseBaseAttachmentPath(); if (!file) { event.stopPropagation(); }"/>
+						</hbox>
+						
+						<hbox>
+							<button label="&zotero.preferences.attachments.resetBasePath;" oncommand="clearBaseAttachmentPath();"/>
+						</hbox>
+						
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.dataDir;"/>
+						
+						<radiogroup id="dataDir" preference="pref-useDataDir" onsyncfrompreference="onDataDirLoad();" onsynctopreference="return onDataDirUpdate(event);">
+							<radio label="&zotero.preferences.dataDir.useProfile;" value="false"/>
+							<hbox>
+								<radio label="&zotero.preferences.dataDir.custom;" value="true"/>
+								<textbox id="dataDirPath" preference="pref-dataDir" onsyncfrompreference="return getDataDirPath();" readonly="true" flex="1"/>
+								<button label="&zotero.preferences.dataDir.choose;" oncommand="var file = Zotero.chooseZoteroDirectory(true); if (!file) { event.stopPropagation(); }"/>
+							</hbox>
+						</radiogroup>
+						
+						<hbox>
+							<button label="&zotero.preferences.dataDir.reveal;" oncommand="revealDataDirectory()"/>
+						</hbox>
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.dbMaintenance;"/>
+						
+						<hbox>
+							<button label="&zotero.preferences.dbMaintenance.integrityCheck;" oncommand="runIntegrityCheck()"/>
+							<button label="&zotero.preferences.dbMaintenance.resetTranslators;" oncommand="resetTranslators()"/>
+							<button label="&zotero.preferences.dbMaintenance.resetStyles;" oncommand="resetStyles()"/>
+						</hbox>
+					</groupbox>
+				</tabpanel>
+			</tabpanels>
+		</tabbox>
 	</prefpane>
 	
 	<!-- These mess up the prefwindow (more) if they come before the prefpanes
