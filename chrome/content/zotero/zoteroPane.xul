@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <!--
     ***** BEGIN LICENSE BLOCK *****
     
@@ -39,7 +39,7 @@
 	
 	<script src="include.js"/>
 	<script src="zoteroPane.js" type="application/javascript;version=1.8"/>
-    <script src="fileInterface.js"/>
+	<script src="fileInterface.js"/>
 	<script src="reportInterface.js"/>
 	<script src="timelineInterface.js"/>
 	<script src="recognizePDF.js"/>
@@ -145,10 +145,19 @@
 								onpopuphidden="Zotero_Lookup.onHidden(event)">
 							<vbox>
 								<description>&zotero.lookup.description;</description>
-								<stack>
-									<progressmeter id="zotero-lookup-progress" mode="undetermined" hidden="true"/>
-									<textbox id="zotero-lookup-textbox" onkeypress="return Zotero_Lookup.onKeyPress(event)" flex="1"/>
-								</stack>
+								<vbox id="zotero-lookup-singleLine">
+									<stack>
+										<progressmeter id="zotero-lookup-progress" mode="undetermined" collapsed="true"/>
+										<textbox id="zotero-lookup-textbox" onkeypress="return Zotero_Lookup.onKeyPress(event, this)" oninput="Zotero_Lookup.adjustTextbox(this)" flex="1" newlines="pasteintact"/>
+									</stack>
+								</vbox>
+								<vbox id="zotero-lookup-multiline" collapsed="true">
+									<textbox id="zotero-lookup-multiline-textbox" onkeypress="return Zotero_Lookup.onKeyPress(event, this)" multiline="true" rows="5" wrap="off" flex="1"/>
+									<hbox align="start" id="zotero-lookup-buttons" class="zotero-button-clear-image">
+										<button label="&zotero.lookup.button.search;" align="start" oncommand="Zotero_Lookup.accept(document.getElementById('zotero-lookup-multiline-textbox'))"/>
+										<progressmeter id="zotero-lookup-multiline-progress" mode="undetermined" collapsed="true" flex="1"/>
+									</hbox>
+								</vbox>
 							</vbox>
 						</panel>
 					</toolbarbutton>
