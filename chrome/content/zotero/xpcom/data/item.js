@@ -1042,9 +1042,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn, lang, force_top)
  * square braces (e.g. "[Letter to Thoreau]")
  */
 
-// OOOOO: Should we really be selecting language here?
-
-Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate, language) {
+Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 
 	// XXXX Should the argument be recognized?
 	var language = Zotero.CachedLanguagePreferences.zoteroDisplay;
@@ -1124,7 +1122,7 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate, language
 	}
 	else if (itemTypeID == 17) { // 'case' itemTypeID
 		if (title) { // common law cases always have case names, but come from multiple reporters
-			var reporter = this.getField('reporter');
+			var reporter = this.getField('reporter', false, true, language);
 			if (reporter) { 
 				title = Zotero.localeJoin([title, '(' + reporter + ')']);
 			}
@@ -1134,7 +1132,7 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate, language
 			var strParts = [];
 			var caseinfo = "";
 			
-			var part = this.getField('court');
+			var part = this.getField('court', false, true, language);
 			if (part) {
 				strParts.push(part);
 			}
@@ -1163,9 +1161,9 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate, language
 		var volume = this.getField('volume');
 		var code;
 		if (itemTypeID == 18) {
-			code = this.getField('reporter');
+			code = this.getField('reporter', false, true, language);
 		} else {
-			code = this.getField('code');
+			code = this.getField('code', false, true, language);
 		}
 		var section = this.getField('section');
 
