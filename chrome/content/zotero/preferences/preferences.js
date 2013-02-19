@@ -375,6 +375,10 @@ function verifyStorageServer() {
 	var onDone = false;
 	
 	Zotero.Sync.Storage.WebDAV.checkServer()
+	// Get the XMLHttpRequest for possible cancelling
+	.progress(function (obj) {
+		request = obj.xmlhttp;
+	})
 	.finally(function () {
 		verifyButton.hidden = false;
 		abortButton.hidden = true;
@@ -425,9 +429,6 @@ function verifyStorageServer() {
 				}, 1);
 			}
 		}
-	})
-	.progress(function (obj) {
-		request = obj.request;
 	})
 	.catch(function (e) {
 		Zotero.debug("WebDAV verification failed");

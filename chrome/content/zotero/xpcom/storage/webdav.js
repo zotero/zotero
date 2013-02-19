@@ -1290,11 +1290,12 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_OFFLINE]);
 		}
 		
-		// Pass request to progress handler
-		var obj = {};
-		obj.request = request;
-		deferred.notify(obj)
-		
+		// Pass XMLHttpRequest to progress handler
+		setTimeout(function () {
+			var obj = {};
+			obj.xmlhttp = request;
+			deferred.notify(obj)
+		}, 0);
 		
 		return deferred.promise;
 	};
