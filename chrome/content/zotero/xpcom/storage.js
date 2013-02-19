@@ -114,10 +114,10 @@ Zotero.Sync.Storage = new function () {
 					Zotero.debug("WebDAV file sync is not active");
 					
 					// Try to verify server now if it hasn't been
-					return mode.checkServerPromise()
-						.then(function () {
-							libraryModes[0] = Zotero.Sync.Storage.WebDAV;
-						});
+					return Zotero.Sync.Storage.checkServerPromise(Zotero.Sync.Storage.WebDAV)
+					.then(function () {
+						libraryModes[0] = Zotero.Sync.Storage.WebDAV;
+					});
 				}
 				
 				libraryModes[0] = Zotero.Sync.Storage.WebDAV;
@@ -178,7 +178,6 @@ Zotero.Sync.Storage = new function () {
 			promises.forEach(function (p) {
 				p = p.valueOf();
 				var libraryID = p[0].valueOf();
-				Zotero.debug(libraryID);
 				if (p[1].isFulfilled()) {
 					librarySyncTimes[libraryID] = p[1].valueOf();
 				}
@@ -953,18 +952,14 @@ Zotero.Sync.Storage = new function () {
 	
 	
 	this.checkServerPromise = function (mode) {
-		var deferred = Q.defer();
-		mode.checkServer(function (uri, status) {
+		return mode.checkServer()
+		.spread(function (uri, status) {
 			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 						   .getService(Components.interfaces.nsIWindowMediator);
 			var lastWin = wm.getMostRecentWindow("navigator:browser");
 			
 			var success = mode.checkServerCallback(uri, status, lastWin, true);
-			if (success) {
-				Zotero.debug(mode.name + " file sync is successfully set up");
-				Q.resolve();
-			}
-			else {
+			if (!success) {
 				Zotero.debug(mode.name + " verification failed");
 				
 				var e = new Zotero.Error(
@@ -980,11 +975,13 @@ Zotero.Sync.Storage = new function () {
 						}
 					}
 				);
-				
-				Q.reject(e);
+				throw e;
 			}
+		})
+		.then(function () {
+			Zotero.debug(mode.name + " file sync is successfully set up");
+			Zotero.Prefs.set("sync.storage.verified", true);
 		});
-		return deferred.promise;
 	}
 	
 	

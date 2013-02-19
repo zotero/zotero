@@ -371,38 +371,83 @@ function verifyStorageServer() {
 	abortButton.hidden = false;
 	progressMeter.hidden = false;
 	
-	var requestHolder = Zotero.Sync.Storage.WebDAV.checkServer(function (uri, status, callback) {
+	var request = null;
+	var onDone = false;
+	
+	Zotero.Sync.Storage.WebDAV.checkServer()
+	.finally(function () {
 		verifyButton.hidden = false;
 		abortButton.hidden = true;
 		progressMeter.hidden = true;
-		
+	})
+	.spread(function (uri, status) {
 		switch (status) {
 			case Zotero.Sync.Storage.ERROR_NO_URL:
-				setTimeout(function () {
+				onDone = function () {
 					urlField.focus();
-				}, 1);
+				};
 				break;
 			
 			case Zotero.Sync.Storage.ERROR_NO_USERNAME:
-				setTimeout(function () {
+				onDone = function () {
 					usernameField.focus();
-				}, 1);
+				};
 				break;
 			
 			case Zotero.Sync.Storage.ERROR_NO_PASSWORD:
-				setTimeout(function () {
-					passwordField.focus();
-				}, 1);
+			case Zotero.Sync.Storage.ERROR_AUTH_FAILED:
+				onDone = function () {
+					passwordField.focus;
+				}
 				break;
 		}
 		
-		Zotero.Sync.Storage.WebDAV.checkServerCallback(uri, status, window);
-	});
+		return Zotero.Sync.Storage.WebDAV.checkServerCallback(uri, status, window);
+	})
+	.then(function (success) {
+		if (success) {
+			Zotero.debug("WebDAV verification succeeded");
+			
+			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+				.getService(Components.interfaces.nsIPromptService);
+			promptService.alert(
+				window,
+				Zotero.getString('sync.storage.serverConfigurationVerified'),
+				Zotero.getString('sync.storage.fileSyncSetUp')
+			);
+			Zotero.Prefs.set("sync.storage.verified", true);
+		}
+		else {
+			Zotero.debug("WebDAV verification failed");
+			if (onDone) {
+				setTimeout(function () {
+					onDone();
+				}, 1);
+			}
+		}
+	})
+	.progress(function (obj) {
+		request = obj.request;
+	})
+	.catch(function (e) {
+		Zotero.debug("WebDAV verification failed");
+		Zotero.debug(e, 1);
+		Components.utils.reportError(e);
+		Zotero.Utilities.Internal.errorPrompt(Zotero.getString('general.error'), e);
+		
+		if (onDone) {
+			setTimeout(function () {
+				onDone();
+			}, 1);
+		}
+	})
+	.done();
 	
 	abortButton.onclick = function () {
-		if (requestHolder.request) {
-			requestHolder.request.onreadystatechange = undefined;
-			requestHolder.request.abort();
+		if (request) {
+			Zotero.debug("Cancelling verification request");
+			request.onreadystatechange = undefined;
+			request.abort();
 			verifyButton.hidden = false;
 			abortButton.hidden = true;
 			progressMeter.hidden = true;
