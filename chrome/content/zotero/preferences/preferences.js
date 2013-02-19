@@ -397,8 +397,8 @@ function verifyStorageServer() {
 			case Zotero.Sync.Storage.ERROR_NO_PASSWORD:
 			case Zotero.Sync.Storage.ERROR_AUTH_FAILED:
 				onDone = function () {
-					passwordField.focus;
-				}
+					passwordField.focus();
+				};
 				break;
 		}
 		
