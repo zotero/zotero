@@ -553,8 +553,11 @@ Zotero.Sync.Runner = new function () {
 				Zotero.debug("File sync is finished");
 				
 				if (results.errors.length) {
+					Zotero.debug(results.errors, 1);
+					for each(var e in results.errors) {
+						Components.utils.reportError(e);
+					}
 					Zotero.Sync.Runner.setErrors(results.errors);
-					
 					return;
 				}
 				
@@ -716,9 +719,7 @@ Zotero.Sync.Runner = new function () {
 	 * library-specific sync error icons across all windows
 	 */
 	this.setErrors = function (errors) {
-		Zotero.debug(errors);
 		errors = [this.parseSyncError(e) for each(e in errors)];
-		Zotero.debug(errors);
 		_errorsByLibrary = {};
 		
 		var primaryError = this.getPrimaryError(errors);

@@ -289,6 +289,7 @@ Zotero.Sync.Storage = new function () {
 							]));
 						}
 						else {
+							result = result.exception;
 							Zotero.debug("File " + result.type + " sync failed "
 								+ "for library " + libraryID);
 							finalPromises.push([libraryID, queuePromise]);
@@ -378,7 +379,7 @@ Zotero.Sync.Storage = new function () {
 		var request = new Zotero.Sync.Storage.Request(
 			(item.libraryID ? item.libraryID : 0) + '/' + item.key, callbacks
 		);
-		if (queue == 'upload') {
+		if (queue.type == 'upload') {
 			request.setMaxSize(Zotero.Attachments.getTotalFileSize(item));
 		}
 		queue.addRequest(request, highPriority);
