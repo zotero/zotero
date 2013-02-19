@@ -2596,12 +2596,30 @@ var ZoteroPane = new function()
 			pane: paneID,
 			action: action
 		};
-		window.openDialog('chrome://zotero/content/preferences/preferences.xul',
-			'zotero-prefs',
-			'chrome,titlebar,toolbar,centerscreen,'
-				+ Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal',
-			io
-		);
+		
+		var win = null;
+		// If window is already open, just focus it
+		if (!action) {
+			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+				.getService(Components.interfaces.nsIWindowMediator);
+			var enumerator = wm.getEnumerator("zotero:pref");
+			if (enumerator.hasMoreElements()) {
+				var win = enumerator.getNext();
+				win.focus();
+				if (paneID) {
+					var pane = win.document.getElementsByAttribute('id', paneID)[0];
+					pane.parentElement.showPane(pane);
+				}
+			}
+		}
+		if (!win) {
+			window.openDialog('chrome://zotero/content/preferences/preferences.xul',
+				'zotero-prefs',
+				'chrome,titlebar,toolbar,centerscreen,'
+					+ Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal',
+				io
+			);
+		}
 	}
 	
 	
