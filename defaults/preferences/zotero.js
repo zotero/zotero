@@ -35,6 +35,7 @@ pref("extensions.zotero.openURL.version","1.0");
 pref("extensions.zotero.parseEndNoteMIMETypes",true);
 pref("extensions.zotero.automaticSnapshots",true);
 pref("extensions.zotero.downloadAssociatedFiles",true);
+pref("extensions.zotero.newWebItemTag","New");
 pref("extensions.zotero.reportTranslationFailure",true);
 pref("extensions.zotero.automaticTags",true);
 pref("extensions.zotero.fontSize", "1.0");
