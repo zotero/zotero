@@ -49,6 +49,7 @@ Zotero.EXTENDED_FIELDS = {
 		"yearAsVolume":"collection-number",
 		"publisher": "publisher",
 		"publicationDate":"publication-date",
+		"reign":"genre",
 		"supplementName":"genre",
 		"issue":"issue",
 		"archive":"archive",
