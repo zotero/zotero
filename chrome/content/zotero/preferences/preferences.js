@@ -129,16 +129,13 @@ function init()
 	}
 }
 
+
 function chooseBaseAttachmentPath() {
-	var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			.getService(Components.interfaces.nsIWindowMediator);
-	var win = wm.getMostRecentWindow('navigator:browser');
-	
 	//Prompt user to choose new base path
 	var nsIFilePicker = Components.interfaces.nsIFilePicker;
 	var fp = Components.classes["@mozilla.org/filepicker;1"]
 				.createInstance(nsIFilePicker);
-	fp.init(win, Zotero.getString('attachmentBasePath.selectDir'), nsIFilePicker.modeGetFolder);
+	fp.init(window, Zotero.getString('attachmentBasePath.selectDir'), nsIFilePicker.modeGetFolder);
 	fp.appendFilters(nsIFilePicker.filterAll);
 	if (fp.show() != nsIFilePicker.returnOK) {
 		return false;
@@ -149,10 +146,7 @@ function chooseBaseAttachmentPath() {
 	var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=? AND path LIKE '" + 
 		Zotero.Attachments.BASE_PATH_PLACEHOLDER  + "%'";
 	var params=[Zotero.Attachments.LINK_MODE_LINKED_FILE];
-	var oldRelativeAttachmentIDs = Zotero.DB.columnQuery(sql,params);
-	if (!oldRelativeAttachmentIDs) {
-		oldRelativeAttachmentIDs=[];
-	}
+	var oldRelativeAttachmentIDs = Zotero.DB.columnQuery(sql, params) || [];
 	
 	//Find all attachments on the new base path
 	var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=?";
@@ -187,26 +181,43 @@ function chooseBaseAttachmentPath() {
 	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 		.getService(Components.interfaces.nsIPromptService);
 	
-	var confirmTitle=Zotero.getString('attachmentBasePath.confirmNewPath.title');
-	var confirmString;
+	var strPrefix = 'attachmentBasePath.confirmNewPath.';
+	var confirmTitle = Zotero.getString(strPrefix + 'title');
+	var confirmString = Zotero.getString(strPrefix + 'message');
 	switch (newRelativeAttachmentIDs.length) {
 		case 0:
-			confirmString=Zotero.getString('attachmentBasePath.confirmNewPath.none');
 			break;
+		
 		case 1:
-			confirmString=Zotero.getString('attachmentBasePath.confirmNewPath.singular');
+			confirmString += "\n\n" + Zotero.getString(strPrefix + 'existingAttachments.singular');
 			break;
+		
 		default:
-			confirmString=Zotero.getString('attachmentBasePath.confirmNewPath.plural',
+			confirmString += "\n\n" + Zotero.getString(strPrefix + 'existingAttachments.plural',
 				newRelativeAttachmentIDs.length);
 	}
-	if (!ps.confirm(null,confirmTitle,confirmString)) {
+	
+	var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+	var index = ps.confirmEx(
+		null,
+		confirmTitle,
+		confirmString,
+		buttonFlags,
+		Zotero.getString(strPrefix + 'button'),
+		null,
+		null,
+		null,
+		{}
+	);
+	
+	if (index == 1) {
 		return false;
 	}
 	
 	// Set new data directory
+	Zotero.debug("Setting new base directory");
 	Zotero.Prefs.set('baseAttachmentPath', basePathFile.persistentDescriptor);
-	Zotero.Prefs.set('lastDataDir', basePathFile.path);
 	Zotero.Prefs.set('saveRelativeAttachmentPath', true);
 	//Save all attachments on base path so that their paths become relative
 	var tempAttachment;
@@ -218,14 +229,13 @@ function chooseBaseAttachmentPath() {
 		tempAttachment._changedAttachmentData.path = true;
 		tempAttachment.save();
 	}
-	
 	return basePathFile.path;
 }
 
-function getBaseAttachmentPath() {
+function getBaseAttachmentPath(asFile) {
 	var desc = Zotero.Prefs.get('baseAttachmentPath');
 	if (desc == '') {
-		return '';
+		return asFile ? null : '';
 	}
 	
 	var file = Components.classes["@mozilla.org/file/local;1"].
@@ -234,9 +244,9 @@ function getBaseAttachmentPath() {
 		file.persistentDescriptor = desc;
 	}
 	catch (e) {
-		return '';
+		return asFile ? null : '';
 	}
-	return file.path;
+	return asFile ? file : file.path;
 }
 
 function clearBaseAttachmentPath() {
@@ -244,32 +254,50 @@ function clearBaseAttachmentPath() {
 	var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=? AND path LIKE '" + 
 		Zotero.Attachments.BASE_PATH_PLACEHOLDER  + "%'";
 	var params=[Zotero.Attachments.LINK_MODE_LINKED_FILE];
-	var relativeAttachmentIDs = Zotero.DB.columnQuery(sql,params);
+	var relativeAttachmentIDs = Zotero.DB.columnQuery(sql, params) || [];
 	
 	//Confirm the clearing of the base path and restoring of relative paths to absolute
 	//ones with the user.
 	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 		.getService(Components.interfaces.nsIPromptService);
 	
-	var confirmTitle=Zotero.getString('attachmentBasePath.clearBasePath.title');
-	var confirmString;
+	var strPrefix = 'attachmentBasePath.clearBasePath.';
+	var confirmTitle = Zotero.getString(strPrefix + 'title');
+	var confirmString = Zotero.getString(strPrefix + 'message');
 	switch (relativeAttachmentIDs.length) {
 		case 0:
-			confirmString=Zotero.getString('attachmentBasePath.clearBasePath.none');
 			break;
+		
 		case 1:
-			confirmString=Zotero.getString('attachmentBasePath.clearBasePath.singular');
+			confirmString += "\n\n" + Zotero.getString(strPrefix + 'existingAttachments.singular');
 			break;
+		
 		default:
-			confirmString=Zotero.getString('attachmentBasePath.clearBasePath.plural',
+			confirmString += "\n\n" + Zotero.getString(strPrefix + 'existingAttachments.plural',
 				relativeAttachmentIDs.length);
 	}
-	if (!ps.confirm(null,confirmTitle,confirmString)) {
+	
+	var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+	var index = ps.confirmEx(
+		window,
+		confirmTitle,
+		confirmString,
+		buttonFlags,
+		Zotero.getString(strPrefix + 'button'),
+		null,
+		null,
+		null,
+		{}
+	);
+	
+	if (index == 1) {
 		return false;
 	}
 	
 	//Set saveRelativeAttachmentPath preference to false and then resave all relative
 	//attachments so that their absolute paths are stored.
+	Zotero.debug('Clearing base directory');
 	Zotero.Prefs.set('saveRelativeAttachmentPath', false);
 	var tempAttachment;
 	for (var index=0; index<relativeAttachmentIDs.length; index++) {
@@ -280,8 +308,21 @@ function clearBaseAttachmentPath() {
 		tempAttachment._changedAttachmentData.path = true;
 		tempAttachment.save();
 	} 
-
 	Zotero.Prefs.set('baseAttachmentPath', '');
+}
+
+function updateBaseAttachmentPathUI() {
+	var filefield = document.getElementById('baseAttachmentPath');
+	var file = getBaseAttachmentPath(true);
+	filefield.file = file;
+	if (file) {
+		filefield.label = file.path;
+	}
+	else {
+		filefield.label = '';
+	}
+	
+	document.getElementById('resetBasePath').disabled = !Zotero.Prefs.get('baseAttachmentPath');
 }
 
 function onDataDirLoad() {

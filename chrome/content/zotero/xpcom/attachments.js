@@ -28,7 +28,7 @@ Zotero.Attachments = new function(){
 	this.LINK_MODE_IMPORTED_URL = 1;
 	this.LINK_MODE_LINKED_FILE = 2;
 	this.LINK_MODE_LINKED_URL = 3;
-	this.BASE_PATH_PLACEHOLDER = '<BASE_ATTACHMENT_PATH>';
+	this.BASE_PATH_PLACEHOLDER = 'attachments:';
 	
 	this.importFromFile = importFromFile;
 	this.linkFromFile = linkFromFile;

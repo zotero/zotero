@@ -802,21 +802,30 @@ To add a new preference:
 				
 				<tabpanel orient="vertical">
 					<groupbox>
-						<caption label="&zotero.preferences.attachments;"/>
+						<caption label="&zotero.preferences.attachmentBaseDir.caption;"/>
 						
 						<!-- This doesn't wrap without an explicit width -->
 						<vbox>
-							<description width="45em">&zotero.preferences.attachments.message;</description>
+							<description width="45em">&zotero.preferences.attachmentBaseDir.message;</description>
 						</vbox>
 						
-						<hbox>
-							<label value="&zotero.preferences.attachments.basePath;"/>
-							<textbox id="baseAttachmentPath" preference="pref-baseAttachmentPath" onsyncfrompreference="return getBaseAttachmentPath();" readonly="true" flex="1"/>
-							<button label="&zotero.preferences.attachments.selectBasePath;" oncommand="var file = chooseBaseAttachmentPath(); if (!file) { event.stopPropagation(); }"/>
+						<hbox align="center">
+							<label value="&zotero.preferences.attachmentBaseDir.basePath;"/>
+							<filefield id="baseAttachmentPath"
+								preference="pref-baseAttachmentPath"
+								onsyncfrompreference="updateBaseAttachmentPathUI()"
+								preference-editable="true"
+								readonly="true"
+								flex="1"
+								tabindex="-1"/>
+							<button label="&zotero.preferences.attachmentBaseDir.selectBasePath;"
+								oncommand="chooseBaseAttachmentPath()"/>
 						</hbox>
 						
 						<hbox>
-							<button label="&zotero.preferences.attachments.resetBasePath;" oncommand="clearBaseAttachmentPath();"/>
+							<button id="resetBasePath"
+								label="&zotero.preferences.attachmentBaseDir.resetBasePath;"
+								oncommand="clearBaseAttachmentPath()"/>
 						</hbox>
 						
 					</groupbox>
