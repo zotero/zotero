@@ -578,6 +578,11 @@ Zotero.Translate.Sandbox = {
 					item.accessDate = "CURRENT_TIMESTAMP";
 				}
 				
+				// Add a "New" tag to the item
+				if(Zotero.Prefs.get("newWebItemTag")) {
+					item.tags.push(Zotero.Prefs.get("newWebItemTag"));
+				}
+				
 				//consider type-specific "title" alternatives
 				var altTitle = Zotero.ItemFields.getName(Zotero.ItemFields.getFieldIDFromTypeAndBase(item.itemType, 'title'));
 				if(altTitle && item[altTitle]) item.title = item[altTitle];
