@@ -177,6 +177,12 @@
 <!ENTITY zotero.preferences.dataDir.choose				"Choose...">
 <!ENTITY zotero.preferences.dataDir.reveal				"Show Data Directory">
 
+<!ENTITY zotero.preferences.attachmentBaseDir.caption        "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message        "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath       "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath  "Revert to Absolute Paths…">
+
 <!ENTITY zotero.preferences.dbMaintenance							"Database Maintenance">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck			"Check Database Integrity">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles	"Reset Translators and Styles...">

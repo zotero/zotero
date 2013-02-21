@@ -3396,6 +3396,7 @@ var ZoteroPane = new function()
 			}
 			
 			var file = item.getFile();
+			Zotero.debug("Opening " + file.path);
 			if (file) {
 				if(forceExternalViewer !== undefined) {
 					var externalViewer = forceExternalViewer;
