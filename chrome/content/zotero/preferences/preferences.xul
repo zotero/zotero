@@ -813,19 +813,19 @@ To add a new preference:
 							<label value="&zotero.preferences.attachmentBaseDir.basePath;"/>
 							<filefield id="baseAttachmentPath"
 								preference="pref-baseAttachmentPath"
-								onsyncfrompreference="updateBaseAttachmentPathUI()"
+								onsyncfrompreference="Zotero_Preferences.Attachment_Base_Directory.updateUI()"
 								preference-editable="true"
 								readonly="true"
 								flex="1"
 								tabindex="-1"/>
 							<button label="&zotero.preferences.attachmentBaseDir.selectBasePath;"
-								oncommand="chooseBaseAttachmentPath()"/>
+								oncommand="Zotero_Preferences.Attachment_Base_Directory.choosePath()"/>
 						</hbox>
 						
 						<hbox>
 							<button id="resetBasePath"
 								label="&zotero.preferences.attachmentBaseDir.resetBasePath;"
-								oncommand="clearBaseAttachmentPath()"/>
+								oncommand="Zotero_Preferences.Attachment_Base_Directory.clearPath()"/>
 						</hbox>
 						
 					</groupbox>
