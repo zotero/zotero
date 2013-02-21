@@ -3245,17 +3245,16 @@ Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
 	var pathIsRelative = false;
 	
 	if (this._attachmentPath !== null)  {
-		pathIsRelative = (this._attachmentPath.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER)==0);
-		pathIsRelative = (pathIsRelative && this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE);
-		
-		
+		pathIsRelative = this._attachmentPath.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0
+			&& this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE;
 		if (!pathIsRelative) {
 			return this._attachmentPath;
 		}
 	} 
 	else if (!this.id) {
 		return '';
-	} else {	
+	}
+	else {
 		var sql = "SELECT path FROM itemAttachments WHERE itemID=?";
 		var path = Zotero.DB.valueQuery(sql, this.id);
 		if (!path) {
@@ -3265,8 +3264,8 @@ Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
 		
 		this._attachmentPath = path;
 		
-		pathIsRelative = (path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER)==0);
-		pathIsRelative = (pathIsRelative && this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE);
+		pathIsRelative = path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0
+			&& this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE;
 	}
 	
 	if (pathIsRelative) {
@@ -3286,8 +3285,9 @@ Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
 			return '';
 		}
 		
-        var relativePath = this._attachmentPath.substr(
-        	Zotero.Attachments.BASE_PATH_PLACEHOLDER.length);
+		var relativePath = this._attachmentPath.substr(
+			Zotero.Attachments.BASE_PATH_PLACEHOLDER.length
+		);
 		var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
 			.createInstance(Components.interfaces.nsILocalFile);
 		attachmentFile.setRelativeDescriptor(baseDir,relativePath);
