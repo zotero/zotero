@@ -269,6 +269,32 @@ Zotero.File = new function(){
 	
 	
 	/**
+	 * Check whether a directory is an ancestor directory of another directory/file
+	 */
+	this.directoryContains = function (dir, file) {
+		if (!dir.isDirectory()) {
+			throw new Error("dir must be a directory");
+		}
+		
+		if (dir.exists()) {
+			dir.normalize();
+		}
+		if (file.exists()) {
+			file.normalize();
+		}
+		
+		if (!dir.path) {
+			throw new Error("dir.path is empty");
+		}
+		if (!file.path) {
+			throw new Error("file.path is empty");
+		}
+		
+		return file.path.indexOf(dir.path) == 0;
+	}
+	
+	
+	/**
 	 * Strip potentially invalid characters
 	 *
 	 * See http://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words

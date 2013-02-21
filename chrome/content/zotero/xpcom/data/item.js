@@ -1522,21 +1522,37 @@ Zotero.Item.prototype.save = function() {
 				var path = this.attachmentPath;
 				var syncState = this.attachmentSyncState;
 				
-				//Save attachment in base attachment path as relative path
-				if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-					var basePath = Zotero.Prefs.get('baseAttachmentPath');
-					if (basePath!='' && Zotero.Prefs.get('saveRelativeAttachmentPath')) {
-						var baseDir = Components.classes["@mozilla.org/file/local;1"]
+				// Save attachment within attachment base directory as relative path
+				if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE && path) {
+					let basePath = Zotero.Prefs.get('baseAttachmentPath');
+					if (basePath != '' && Zotero.Prefs.get('saveRelativeAttachmentPath')) {
+						let baseDir = Components.classes["@mozilla.org/file/local;1"]
 							.createInstance(Components.interfaces.nsILocalFile);
-						baseDir.initWithPath(basePath);
+						try {
+							baseDir.persistentDescriptor = basePath;
+						}
+						catch (e) {
+							Zotero.debug(e, 1);
+							Components.utils.reportError(e);
+							baseDir = null;
+						}
 						
-						var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
-							.createInstance(Components.interfaces.nsILocalFile);
-						attachmentFile.initWithPath(path);
-						
-						if (baseDir.contains(attachmentFile,false)) {
-							path = Zotero.Attachments.BASE_PATH_PLACEHOLDER
-								+attachmentFile.getRelativeDescriptor(baseDir);
+						if (baseDir) {
+							let attachmentFile = Components.classes["@mozilla.org/file/local;1"]
+								.createInstance(Components.interfaces.nsILocalFile);
+							try {
+								attachmentFile.initWithPath(path);
+							}
+							catch (e) {
+								Zotero.debug(e, 1);
+								Components.utils.reportError(e);
+								attachmentFile = null;
+							}
+							
+							if (attachmentFile && Zotero.File.directoryContains(baseDir, attachmentFile)) {
+								path = Zotero.Attachments.BASE_PATH_PLACEHOLDER
+									+ attachmentFile.getRelativeDescriptor(baseDir);
+							}
 						}
 					}
 				}
@@ -1935,21 +1951,37 @@ Zotero.Item.prototype.save = function() {
 				var path = this.attachmentPath;
 				var syncState = this.attachmentSyncState;
 				
-				//Save attachment in base attachment path as relative path
-				if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-					var basePath = Zotero.Prefs.get('baseAttachmentPath');
-					if (basePath!='' && Zotero.Prefs.get('saveRelativeAttachmentPath')) {
-						var baseDir = Components.classes["@mozilla.org/file/local;1"]
+				// Save attachment within attachment base directory as relative path
+				if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE && path) {
+					let basePath = Zotero.Prefs.get('baseAttachmentPath');
+					if (basePath != '' && Zotero.Prefs.get('saveRelativeAttachmentPath')) {
+						let baseDir = Components.classes["@mozilla.org/file/local;1"]
 							.createInstance(Components.interfaces.nsILocalFile);
-						baseDir.initWithPath(basePath);
+						try {
+							baseDir.persistentDescriptor = basePath;
+						}
+						catch (e) {
+							Zotero.debug(e, 1);
+							Components.utils.reportError(e);
+							baseDir = null;
+						}
 						
-						var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
-							.createInstance(Components.interfaces.nsILocalFile);
-						attachmentFile.initWithPath(path);
-						
-						if (baseDir.contains(attachmentFile,false)) {
-							path = Zotero.Attachments.BASE_PATH_PLACEHOLDER
-								+attachmentFile.getRelativeDescriptor(baseDir);
+						if (baseDir) {
+							let attachmentFile = Components.classes["@mozilla.org/file/local;1"]
+								.createInstance(Components.interfaces.nsILocalFile);
+							try {
+								attachmentFile.initWithPath(path);
+							}
+							catch (e) {
+								Zotero.debug(e, 1);
+								Components.utils.reportError(e);
+								attachmentFile = null;
+							}
+							
+							if (attachmentFile && Zotero.File.directoryContains(baseDir, attachmentFile)) {
+								path = Zotero.Attachments.BASE_PATH_PLACEHOLDER
+									+ attachmentFile.getRelativeDescriptor(baseDir);
+							}
 						}
 					}
 				}
@@ -3238,16 +3270,22 @@ Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
 	}
 	
 	if (pathIsRelative) {
-		var baseDir = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
 		var basePath = Zotero.Prefs.get('baseAttachmentPath');
-		if (basePath != '') {
-			baseDir.initWithPath(basePath);
-		} else {
-			//If the base path has been cleared, don't try to recreate the full attachment path
+		// If the base path has been cleared, don't try to recreate the full attachment path
+		if (basePath == '') {
 			return '';
 		}
-	
+		var baseDir = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		try {
+			baseDir.persistentDescriptor = basePath;
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+			return '';
+		}
+		
         var relativePath = this._attachmentPath.substr(
         	Zotero.Attachments.BASE_PATH_PLACEHOLDER.length);
 		var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
@@ -3283,6 +3321,21 @@ Zotero.Item.prototype.__defineSetter__('attachmentPath', function (val) {
 	this._changedAttachmentData.path = true;
 	this._attachmentPath = val;
 });
+
+
+/**
+ * Force an update of the attachment path and resave the item
+ *
+ * This is used when changing the attachment base directory, since relative
+ * path handling is done on item save.
+ */
+Zotero.Item.prototype.updateAttachmentPath = function () {
+	if (!this._changedAttachmentData) {
+		this._changedAttachmentData = {};
+	}
+	this._changedAttachmentData.path = true;
+	this.save();
+};
 
 
 Zotero.Item.prototype.__defineGetter__('attachmentSyncState', function () {

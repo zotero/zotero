@@ -131,16 +131,39 @@ function init()
 
 
 function chooseBaseAttachmentPath() {
+	// Get existing base directory
+	var oldBasePath = Zotero.Prefs.get('baseAttachmentPath');
+	if (oldBasePath) {
+		var oldBasePathFile = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		try {
+			oldBasePathFile.persistentDescriptor = oldBasePath;
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+			oldBasePathFile = null;
+		}
+	}
+	
 	//Prompt user to choose new base path
 	var nsIFilePicker = Components.interfaces.nsIFilePicker;
 	var fp = Components.classes["@mozilla.org/filepicker;1"]
 				.createInstance(nsIFilePicker);
+	if (oldBasePathFile) {
+		fp.displayDirectory = oldBasePathFile;
+	}
 	fp.init(window, Zotero.getString('attachmentBasePath.selectDir'), nsIFilePicker.modeGetFolder);
 	fp.appendFilters(nsIFilePicker.filterAll);
 	if (fp.show() != nsIFilePicker.returnOK) {
 		return false;
 	}
-	var basePathFile = fp.file;
+	var newBasePathFile = fp.file;
+	
+	if (oldBasePathFile && oldBasePathFile.equals(newBasePathFile)) {
+		Zotero.debug("Base directory hasn't changed");
+		return false;
+	}
 	
 	//Find all current attachments with relative attachment paths
 	var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=? AND path LIKE '" + 
@@ -152,28 +175,49 @@ function chooseBaseAttachmentPath() {
 	var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=?";
 	var params=[Zotero.Attachments.LINK_MODE_LINKED_FILE];
 	var allAttachments = Zotero.DB.columnQuery(sql,params);
-	var newRelativeAttachmentIDs = [];
+	var newAttachmentPaths = {};
+	var numNewAttachments = 0;
+	var numOldAttachments = 0;
 	var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
 		.createInstance(Components.interfaces.nsILocalFile);
-	var tempAttachmentID,tempAttachment;
-	for (var index=0; index<allAttachments.length; index++) {
-		tempAttachmentID=allAttachments[index];
-		
-		//Don't count current relative attachment paths.  
-		if (oldRelativeAttachmentIDs.indexOf(tempAttachmentID)!=-1) {
-			continue;
-		}
+	for (let i=0; i<allAttachments.length; i++) {
+		let attachmentID = allAttachments[i];
 		
 		try {
-			tempAttachment=Zotero.Items.get(tempAttachmentID);
-			attachmentFile.initWithPath(tempAttachment.attachmentPath);
+			let attachment = Zotero.Items.get(attachmentID);
+			attachmentFile.persistentDescriptor = attachment.attachmentPath;
 		}
 		catch (e) {
 			//Don't deal with bad attachment paths.  Just skip them.
 			continue;
 		}
-		if (basePathFile.contains(attachmentFile,false)) {
-			newRelativeAttachmentIDs.push(allAttachments[index]);
+		
+		// If a file with the same relative path exists within the new base directory,
+		// don't touch the attachment, since it will continue to work
+		let isExistingRelativeAttachment = oldRelativeAttachmentIDs.indexOf(attachmentID) != -1;
+		if (isExistingRelativeAttachment && oldBasePathFile) {
+			let relFile = attachmentFile.clone();
+			let relPath = attachmentFile.getRelativeDescriptor(oldBasePathFile);
+			relFile.setRelativeDescriptor(newBasePathFile, relPath);
+			if (relFile.exists()) {
+				numNewAttachments++;
+				continue;
+			}
+		}
+		
+		// Files within the new base directory need to be updated to use
+		// relative paths (or, if the new base directory is an ancestor or
+		// descendant of the old one, new relative paths)
+		if (Zotero.File.directoryContains(newBasePathFile, attachmentFile)) {
+			newAttachmentPaths[attachmentID] = isExistingRelativeAttachment
+				? attachmentFile.persistentDescriptor : null;
+			numNewAttachments++;
+		}
+		// Existing relative attachments not within the new base directory
+		// will be converted to absolute paths
+		else if (isExistingRelativeAttachment && oldBasePathFile) {
+			newAttachmentPaths[attachmentID] = attachmentFile.persistentDescriptor;
+			numOldAttachments++;
 		}
 	}
 	
@@ -181,30 +225,43 @@ function chooseBaseAttachmentPath() {
 	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 		.getService(Components.interfaces.nsIPromptService);
 	
-	var strPrefix = 'attachmentBasePath.confirmNewPath.';
-	var confirmTitle = Zotero.getString(strPrefix + 'title');
-	var confirmString = Zotero.getString(strPrefix + 'message');
-	switch (newRelativeAttachmentIDs.length) {
+	var chooseStrPrefix = 'attachmentBasePath.chooseNewPath.';
+	var clearStrPrefix = 'attachmentBasePath.clearBasePath.';
+	var title = Zotero.getString(chooseStrPrefix + 'title');
+	var msg1 = Zotero.getString(chooseStrPrefix + 'message') + "\n\n", msg2 = msg3 = "";
+	switch (numNewAttachments) {
 		case 0:
 			break;
 		
 		case 1:
-			confirmString += "\n\n" + Zotero.getString(strPrefix + 'existingAttachments.singular');
+			msg2 += Zotero.getString(chooseStrPrefix + 'existingAttachments.singular') + " ";
 			break;
 		
 		default:
-			confirmString += "\n\n" + Zotero.getString(strPrefix + 'existingAttachments.plural',
-				newRelativeAttachmentIDs.length);
+			msg2 += Zotero.getString(chooseStrPrefix + 'existingAttachments.plural', numNewAttachments) + " ";
 	}
+	
+	switch (numOldAttachments) {
+		case 0:
+			break;
+		
+		case 1:
+			msg3 += Zotero.getString(clearStrPrefix + 'existingAttachments.singular');
+			break;
+		
+		default:
+			msg3 += Zotero.getString(clearStrPrefix + 'existingAttachments.plural', numOldAttachments);
+	}
+	
 	
 	var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 	var index = ps.confirmEx(
 		null,
-		confirmTitle,
-		confirmString,
+		title,
+		(msg1 + msg2 + msg3).trim(),
 		buttonFlags,
-		Zotero.getString(strPrefix + 'button'),
+		Zotero.getString(chooseStrPrefix + 'button'),
 		null,
 		null,
 		null,
@@ -217,19 +274,21 @@ function chooseBaseAttachmentPath() {
 	
 	// Set new data directory
 	Zotero.debug("Setting new base directory");
-	Zotero.Prefs.set('baseAttachmentPath', basePathFile.persistentDescriptor);
+	Zotero.Prefs.set('baseAttachmentPath', newBasePathFile.persistentDescriptor);
 	Zotero.Prefs.set('saveRelativeAttachmentPath', true);
-	//Save all attachments on base path so that their paths become relative
-	var tempAttachment;
-	for (var index=0; index<newRelativeAttachmentIDs.length; index++) {
-		tempAttachment=Zotero.Items.get(newRelativeAttachmentIDs[index]);
-		if (!tempAttachment._changedAttachmentData) {
-			tempAttachment._changedAttachmentData = {};
+	// Resave all attachments on base path (so that their paths become relative)
+	// and all other relative attachments (so that their paths become absolute)
+	for (let id in newAttachmentPaths) {
+		let attachment = Zotero.Items.get(id);
+		if (newAttachmentPaths[id]) {
+			attachment.attachmentPath = newAttachmentPaths[id];
+			attachment.save();
 		}
-		tempAttachment._changedAttachmentData.path = true;
-		tempAttachment.save();
+		else {
+			attachment.updateAttachmentPath();
+		}
 	}
-	return basePathFile.path;
+	return newBasePathFile.persistentDescriptor;
 }
 
 function getBaseAttachmentPath(asFile) {

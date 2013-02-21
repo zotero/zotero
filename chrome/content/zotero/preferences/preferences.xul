@@ -871,5 +871,5 @@ To add a new preference:
 		observerService.notifyObservers(null, "charsetmenu-selected", "other");
 	]]>
 	</script>
-	<script src="preferences.js"/>
+	<script src="preferences.js" type="application/javascript;version=1.8"/>
 </prefwindow>
