@@ -146,7 +146,6 @@ row > vbox > description
 	background-repeat: no-repeat !important;
 	background-position: center !important;
 	border-width: 0 !important;
-	-moz-border-radius: 4px !important;
 	border-radius: 4px !important;
 }
 

@@ -70,7 +70,7 @@
 	-moz-image-region: rect(0px, 32px, 32px, 0px);
 }
 
-#zotero-items-tree treechildren::-moz-tree-image(hasAttachment,  pie1) { -moz-image-region: rect(0px,   32px, 32px,    0x); }
+#zotero-items-tree treechildren::-moz-tree-image(hasAttachment,  pie1) { -moz-image-region: rect(0px,   32px, 32px,    0px); }
 #zotero-items-tree treechildren::-moz-tree-image(hasAttachment,  pie2) { -moz-image-region: rect(0px,   64px, 32px,   32px); }
 #zotero-items-tree treechildren::-moz-tree-image(hasAttachment,  pie3) { -moz-image-region: rect(0px,   96px, 32px,   64px); }
 #zotero-items-tree treechildren::-moz-tree-image(hasAttachment,  pie4) { -moz-image-region: rect(0px,  128px, 32px,   96px); }

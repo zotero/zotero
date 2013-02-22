@@ -242,7 +242,7 @@ To add a new preference:
 							</menulist>
 						</hbox>
 						
-						<stack id="storage-webdav-settings" style="margin-top: .5em; margin-bottom: .8em; border: 1px gray solid; -moz-border-radius: 3px">
+						<stack id="storage-webdav-settings" style="margin-top: .5em; margin-bottom: .8em; border: 1px gray solid; border-radius: 3px">
 						<!-- Background shading -->
 						<box style="background: black; opacity:.03"/>
 						
