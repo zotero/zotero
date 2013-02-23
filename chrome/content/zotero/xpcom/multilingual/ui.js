@@ -50,6 +50,8 @@ Zotero.EXTENDED_FIELDS = {
 		"publisher": "publisher",
 		"publicationDate":"publication-date",
 		"reign":"genre",
+		"callNumber":"call-number",
+		"filingDate":"submitted",
 		"supplementName":"genre",
 		"issue":"issue",
 		"archive":"archive",
