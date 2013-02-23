@@ -2093,6 +2093,19 @@
 					
 					if (fieldName === 'jurisdiction') {
 						var valueElement = document.createElement("menulist");
+						valueElement.setAttribute("id","jurisdiction-menu");
+						// XXXX Set default here if req.
+						this.forceJurisdiction(this.item.itemTypeID);
+						var value = this.item.getField("jurisdiction",true);
+						if (value) {
+							var label = Zotero.DB.valueQuery("SELECT jurisdictionName FROM jurisdictions WHERE jurisdictionID=?",[value]);
+							if (!label) {
+								label = value;
+								valueElement.setAttribute("style","background:yellow;");
+							}
+							valueElement.setAttribute("label", label);
+							valueElement.setAttribute("value", value);
+						}
 					}
 					else if (useVbox) {
 						var valueElement = document.createElement("vbox");
@@ -2106,23 +2119,8 @@
 					
 					if (this._fieldIsClickable(fieldName)) {
 						if (fieldName == 'jurisdiction') {
-
-							valueElement.setAttribute("id","jurisdiction-menu");
-                            
-							// XXXX Set default here if req.
-							this.forceJurisdiction(this.item.itemTypeID);
-							var value = this.item.getField("jurisdiction",true);
-							valueElement.setAttribute("class", "zotero-clicky");
-							if (value) {
-                            	var label = Zotero.DB.valueQuery("SELECT jurisdictionName FROM jurisdictions WHERE jurisdictionID=?",[value]);
-								if (!label) {
-									label = value;
-									valueElement.setAttribute("style","background:yellow;");
-								}
-								valueElement.setAttribute("label", label);
-								valueElement.setAttribute("value", value);
-							}
 							valueElement.setAttribute("onclick","document.getBindingParent(this).showJurisdictionEditor(this);");
+							valueElement.className = 'zotero-clicky';
 							return valueElement;
 						} else {
 							valueElement.addEventListener('click', function (event) {
