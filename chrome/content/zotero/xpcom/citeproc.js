@@ -57,13 +57,14 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.426",
+    PROCESSOR_VERSION: "1.0.431",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     LOCATOR_LABELS_REGEXP: new RegExp("^((art|ch|Ch|subch|col|fig|l|n|no|op|p|pp|para|subpara|pt|r|sec|subsec|Sec|sv|sch|tit|vrs|vol)\\.)\\s+(.*)"),
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
         "art.": "article",
+        "bk.": "book",
         "ch.": "chapter",
         "Ch.": "Chapter",
         "subch.": "subchapter",
@@ -80,9 +81,10 @@ var CSL = {
         "tit.": "title",
         "col.": "column",
         "fig.": "figure",
+        "fol.": "folio",
         "l.": "line",
         "n.": "note",
-        "no.": "number",
+        "no.": "issue",
         "op.": "opus",
         "sv.": "sub-verbo",
         "vrs.": "verse",
@@ -90,6 +92,7 @@ var CSL = {
     },
     STATUTE_SUBDIV_STRINGS_REVERSE: {
         "article": "art.",
+        "book": "bk.",
         "chapter": "ch.",
         "Chapter": "Ch.",
         "subchapter": "subch.",
@@ -105,21 +108,25 @@ var CSL = {
         "title": "tit.",
         "column": "col.",
         "figure": "fig.",
+        "folio": "fol.",
         "line": "l.",
         "note": "n.",
-        "number": "no.",
+        "issue": "no.",
         "opus": "op.",
         "sub-verbo": "sv.",
+        "sub verbo": "sv.",
         "verse": "vrs.",
         "volume": "vol."
     },
     LOCATOR_LABELS_MAP: {
         "art": "article",
+        "bk": "book",
         "ch": "chapter",
         "Ch": "Chapter",
         "subch": "subchapter",
         "col": "column",
         "fig": "figure",
+        "fol": "folio",
         "l": "line",
         "n": "note",
         "no": "issue",
@@ -1362,9 +1369,13 @@ CSL.Output.Queue.prototype.renderBlobs = function (blobs, delim, has_more) {
     ret_last_char = [];
     use_delim = "";
     len = blobs.length;
+    var start = true;
     for (pos = 0; pos < len; pos += 1) {
         if (blobs[pos].checkNext) {
-            blobs[pos].checkNext(blobs[(pos + 1)]);
+            blobs[pos].checkNext(blobs[(pos + 1)],start);
+            start = false;
+        } else {
+            start = true;
         }
     }
     var doit = true;
@@ -2295,7 +2306,7 @@ CSL.Engine = function (sys, style, lang, forceLang) {
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
-    if ("string" !== typeof style) {
+    if ("undefined" === typeof CSL_JSON && "string" !== typeof style) {
         style = "";
     }
     if (CSL.getAbbreviation) {
@@ -2466,7 +2477,9 @@ CSL.Engine.prototype.getNavi.prototype.getkids = function () {
     currnode = this.nodeList[this.depth][1][this.nodeList[this.depth][0]];
     sneakpeek = this.sys.xml.children(currnode);
     if (this.sys.xml.numberofnodes(sneakpeek) === 0) {
-        CSL.XmlToToken.call(currnode, this.state, CSL.SINGLETON);
+        if (this.depth) {
+            CSL.XmlToToken.call(currnode, this.state, CSL.SINGLETON);
+        }
         return false;
     } else {
         for (pos in sneakpeek) {
@@ -2826,7 +2839,7 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
             }
             var loci = ["section","","",""];
             var split;
-            if (Item.section) {
+            if (this.opt.development_extensions.static_statute_locator && Item.section) {
                 splt = Item.section.replace(/^\s+/,"").replace(/\s+$/, "").split(/\s+/);
                 if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
                     loci[0] = " " + splt[0] + " ";
@@ -3510,6 +3523,9 @@ CSL.Engine.prototype.getCitationLabel = function (Item) {
     var params = this.getTrigraphParams();
     var config = params[0];
     var myname = this.getTerm("reference", "short", 0);
+    if ("undefined" === typeof myname) {
+        myname = "reference";
+    }
     myname = myname.replace(".", "");
     myname = myname.slice(0, 1).toUpperCase() + myname.slice(1);
     for (var i = 0, ilen = CSL.CREATORS.length; i < ilen; i += 1) {
@@ -3572,7 +3588,7 @@ CSL.Engine.prototype.getTrigraphParams = function () {
         var str = ilst[i];
         var config = {authors:[], year:0};
         for (var j = 0, jlen = str.length; j < jlen; j += 1) {
-            switch (str[j]) {
+            switch (str.slice(j,j+1)) {
             case "A":
                 config.authors.push(1);
                 break;
@@ -9589,6 +9605,8 @@ if ("undefined" !== typeof CSL_IS_NODEJS) {
     XML_PARSING = CSL_NODEJS;
 } else if ("undefined" !== typeof CSL_E4X) {
     XML_PARSING = CSL_E4X;
+} else if ("undefined" !== typeof CSL_JSON) {
+    XML_PARSING = CSL_JSON;
 } else {
     XML_PARSING = CSL_CHROME;
 }
@@ -10628,9 +10646,16 @@ CSL.Output.DefaultFormatter = function () {};
 CSL.Output.DefaultFormatter.prototype.format = function (num) {
     return num.toString();
 };
-CSL.NumericBlob.prototype.checkNext = function (next) {
-    if (next && this.id == next.id) {
+CSL.NumericBlob.prototype.checkNext = function (next,start) {
+    if (start) {
         this.status = CSL.START;
+        if ("object" === typeof next) {
+            if (next.num === (this.num + 1)) {
+                next.status = CSL.SUCCESSOR;
+            } else {
+                next.status = CSL.SEEN;
+            }
+        }
     } else if (! next || !next.num || this.type !== next.type || next.num !== (this.num + 1)) {
         if (this.status === CSL.SUCCESSOR_OF_SUCCESSOR) {
             this.status = CSL.END;
@@ -11762,6 +11787,7 @@ CSL.Util.FlipFlopper.prototype.init = function (str, blob) {
 };
 CSL.Util.FlipFlopper.prototype._normalizeString = function (str) {
     var i, ilen;
+    str = str.replace(/\s+'\s+/," ’ ","g");
     if (str.indexOf(this.quotechars[0]) > -1) {
         for (i = 0, ilen = 2; i < ilen; i += 1) {
             if (this.quotechars[i + 2]) {
