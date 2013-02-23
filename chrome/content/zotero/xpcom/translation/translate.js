@@ -593,7 +593,7 @@ Zotero.Translate.Sandbox = {
 				}
 				
 				// create short title
-				if(item.shortTitle === undefined && Zotero.Utilities.fieldIsValidForType("shortTitle", item.itemType)) {		
+				if(item.title && item.shortTitle === undefined && Zotero.Utilities.fieldIsValidForType("shortTitle", item.itemType)) {		
 					// only set if changes have been made
 					var setShortTitle = false;
 					var title = item.title;
