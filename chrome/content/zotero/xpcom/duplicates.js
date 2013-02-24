@@ -117,8 +117,8 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 		}
 		
 		str = Zotero.Utilities.removeDiacritics(str)
-			.replace(/[ !-/:-@[-`{-~]+/g, ' ') // Convert (ASCII) punctuation to spaces
-			.trim()
+			.replace(/[!-/:-@[-`{-~]/g, ' ') // Convert (ASCII) punctuation to spaces
+			.replace(/ +/, ' ') // Normalize spaces
 			.toLowerCase();
 		
 		return str;
@@ -194,7 +194,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	var isbnCache = {};
 	if (rows) {
 		for each(var row in rows) {
-			isbnCache[row.itemID] = row.value.replace(/[^\dX]+/ig, '').toUpperCase(); //ignore formatting
+			isbnCache[row.itemID] = row.value;
 		}
 	}
 	processRows();
@@ -209,7 +209,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	var doiCache = {};
 	if (rows) {
 		for each(var row in rows) {
-			doiCache[row.itemID] = row.value.trim();
+			doiCache[row.itemID] = row.value;
 		}
 	}
 	processRows();
@@ -279,7 +279,6 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 		}
 		
 		// Check for at least one match on last name + first initial of first name
-		var aCreatorRows, bCreatorRows;
 		if (typeof creatorRowsCache[a.itemID] != 'undefined') {
 			aCreatorRows = creatorRowsCache[a.itemID];
 		}
@@ -288,7 +287,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 						+ "JOIN creators USING (creatorID) "
 						+ "JOIN creatorData USING (creatorDataID) "
 						+ "WHERE itemID=? ORDER BY orderIndex LIMIT 10";
-			aCreatorRows = Zotero.DB.query(sql, a.itemID);
+			var aCreatorRows = Zotero.DB.query(sql, a.itemID);
 			creatorRowsCache[a.itemID] = aCreatorRows;
 		}
 		
@@ -301,12 +300,12 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 						+ "JOIN creators USING (creatorID) "
 						+ "JOIN creatorData USING (creatorDataID) "
 						+ "WHERE itemID=? ORDER BY orderIndex LIMIT 10";
-			bCreatorRows = Zotero.DB.query(sql, b.itemID);
+			var bCreatorRows = Zotero.DB.query(sql, b.itemID);
 			creatorRowsCache[b.itemID] = bCreatorRows;
 		}
 		
 		// Match if no creators
-		if (!aCreatorRows && !bCreatorRows) {
+		if (!aCreatorRows && !bCreatorRows.length) {
 			return 1;
 		}
 		
@@ -316,11 +315,11 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 		
 		for each(var aCreatorRow in aCreatorRows) {
 			var aLastName = normalizeString(aCreatorRow.lastName);
-			var aFirstInitial = aCreatorRow.fieldMode == 0 ? normalizeString(aCreatorRow.firstName).charAt(0) : false;
+			var aFirstInitial = aCreatorRow.fieldMode == 0 ? normalizeString(aCreatorRow.firstName.substr(1)) : false;
 			
 			for each(var bCreatorRow in bCreatorRows) {
 				var bLastName = normalizeString(bCreatorRow.lastName);
-				var bFirstInitial = bCreatorRow.fieldMode == 0 ? normalizeString(bCreatorRow.firstName).charAt(0) : false;
+				var bFirstInitial = bCreatorRow.fieldMode == 0 ? normalizeString(bCreatorRow.firstName.substr(1)) : false;
 				
 				if (aLastName === bLastName && aFirstInitial === bFirstInitial) {
 					return 1;
