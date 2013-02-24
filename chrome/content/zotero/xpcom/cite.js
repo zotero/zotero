@@ -509,6 +509,18 @@ Zotero.Cite.Abbreviations = new function() {
 				abbreviationCategories[category] = true;
 			}
 		}
+
+		json = Zotero.File.getContentsFromURL("resource://zotero/schema/abbreviations-medline-transformed.json");
+		var a = JSON.parse(json);
+		a = a.default["container-title"];
+		var b = {},
+			wrong = {};
+		for(var key in a) {
+			Zotero.CiteProc.CSL.getAbbreviation(null, b, "default", "container-title", key);
+			var c = b["default"]["container-title"][key] || key;
+			if(c.toLowerCase() != a[key].toLowerCase()) wrong[key] = c+" vs. "+a[key];
+		}
+		Zotero.debug(wrong);
 	}
 	
 	/**
@@ -516,13 +528,13 @@ Zotero.Cite.Abbreviations = new function() {
 	 */
 	function normalizeKey(key) {
 		// Strip periods, normalize spacing, and convert to lowercase
-		return key.toString().
-			replace(/\ba\b|\band\b|\bthe\b|[\x21-\x2C\/\x3A-\x40\x5B-\x60\\\x7B-\x7E]/ig, "").
+		return key.toString().toLowerCase().
+			replace(/\band\b|\bet\b|\bl[ae]\b|\bthe\b|\b[ld]'\b|[\x21-\x2C.\/\x3A-\x40\x5B-\x60\\\x7B-\x7E]/g, "").
 			replace(/\s+/g, " ").trim();
 	}
 
 	function lookupKey(key) {
-		return key.toLowerCase().replace(/\s*\./g, ".");
+		return key.toLowerCase().replace(/\s*\./g, "." );
 	}
 	
 	/**
@@ -567,24 +579,26 @@ Zotero.Cite.Abbreviations = new function() {
 						if(!(cat = jur[category+"-word"])) continue;
 						
 						// Complete match
-						newWord = cat[lcWord];
-
-						// Partial match
-						for(var k=1; k<=word.length && newWord === undefined; k++) {
-							newWord = cat[lcWord.substr(0, k)+"-"];
-							if(newWord && word.length - newWord.length < 2) {
-								newWord = undefined;
+						if(cat.hasOwnProperty(lcWord)) {
+							newWord = cat[lcWord];
+						} else {
+							// Partial match
+							for(var k=1; k<=word.length && newWord === undefined; k++) {
+								newWord = cat[lcWord.substr(0, k)+"-"];
+								if(newWord && word.length - newWord.length < 1) {
+									newWord = undefined;
+								}
 							}
 						}
 					}
 
 					// Fall back to full word
-					if(newWord === undefined) newWord = word;
+					if(newWord === undefined ) newWord = word;
 
 					words[j] = newWord.substr(0, 1).toUpperCase() + newWord.substr(1);
 				}
 			}
-			abbreviation = words.join("").replace(/\s+/, " ").trim();
+			abbreviation = words.join("").replace(/\s+/g, " ").trim();
 		}
 
 		if(!abbreviation || abbreviation === key) {
