@@ -490,7 +490,18 @@ Zotero.Cite.Abbreviations = new function() {
 	}
 
 	this.loadAbbreviations = function() {
-		var json = Zotero.File.getContentsFromURL("resource://zotero/schema/abbreviations.json");
+		var file = Zotero.getZoteroDirectory();
+		file.append("abbreviations.json");
+
+		var json, origin;
+		if(file.exists()) {
+			json = Zotero.File.getContents(file);
+			origin = file.path;
+		} else {
+			json = Zotero.File.getContentsFromURL("resource://zotero/schema/abbreviations.json");
+			origin = "resource://zotero/schema/abbreviations.json";
+		}
+
 		try {
 			abbreviations = JSON.parse(json);
 		} catch(e) {
@@ -517,7 +528,7 @@ Zotero.Cite.Abbreviations = new function() {
 	function normalizeKey(key) {
 		// Strip periods, normalize spacing, and convert to lowercase
 		return key.toString().toLowerCase().
-			replace(/\band\b|\bet\b|\by\b|\bund\b|\bl[ae]\b|\bthe\b|\b[ld]'\b|[\x21-\x2C.\/\x3A-\x40\x5B-\x60\\\x7B-\x7E]/g, "").
+			replace(/(?:\b|^)(?:and|et|y|und|l[ae]|the|[ld]')(?:\b|$)|[\x21-\x2C.\/\x3A-\x40\x5B-\x60\\\x7B-\x7E]/g, "").
 			replace(/\s+/g, " ").trim();
 	}
 
@@ -530,14 +541,14 @@ Zotero.Cite.Abbreviations = new function() {
 	 */
 	Zotero.CiteProc.CSL.getAbbreviation = function getAbbreviation(listname, obj, jurisdiction, category, key) {
 		if(!Zotero.Prefs.get("cite.automaticTitleAbbreviation")) return;
-		
+
 		init();
 
 		// Short circuit if we know we don't handle this kind of abbreviation
 		if(!abbreviationCategories[category] && !abbreviationCategories[category+"-word"]) return;
 
 		var normalizedKey = normalizeKey(key),
-			lcNormalizedKey = lookupKey(key),
+			lcNormalizedKey = lookupKey(normalizedKey),
 			abbreviation;
 		if(!normalizedKey) return;
 		
