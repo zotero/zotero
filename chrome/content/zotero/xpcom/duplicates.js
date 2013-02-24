@@ -117,8 +117,8 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 		}
 		
 		str = Zotero.Utilities.removeDiacritics(str)
-			.replace(/[!-/:-@[-`{-~]/g, ' ') // Convert (ASCII) punctuation to spaces
-			.replace(/ +/, ' ') // Normalize spaces
+			.replace(/[ !-/:-@[-`{-~]+/g, ' ') // Convert (ASCII) punctuation to spaces
+			.trim()
 			.toLowerCase();
 		
 		return str;
@@ -194,7 +194,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	var isbnCache = {};
 	if (rows) {
 		for each(var row in rows) {
-			isbnCache[row.itemID] = row.value;
+			isbnCache[row.itemID] = (row.value+'').replace(/[^\dX]+/ig, '').toUpperCase(); //ignore formatting
 		}
 	}
 	processRows();
@@ -209,7 +209,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	var doiCache = {};
 	if (rows) {
 		for each(var row in rows) {
-			doiCache[row.itemID] = row.value;
+			doiCache[row.itemID] = row.value.trim();
 		}
 	}
 	processRows();
@@ -241,12 +241,22 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 				+ "JOIN itemDataValues USING (valueID) "
 				+ "WHERE libraryID=? AND fieldID BETWEEN 110 AND 113 "
 				+ "AND itemTypeID NOT IN (1, 14) "
-				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
-				+ "ORDER BY value COLLATE locale";
+				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
 	var rows = Zotero.DB.query(sql, [this._libraryID]);
+	//normalize all values ahead of time
+	rows = rows.map(function(row) {
+							row.value = normalizeString(row.value);
+							return row;
+						});
+	//sort rows by normalized values
+	rows = rows.sort(function(a, b) {
+							if(a.value === b.value) return 0;
+							if(a.value < b.value) return -1;
+							return 1;
+						});
 	processRows(function (a, b) {
-		var aTitle = normalizeString(a.value);
-		var bTitle = normalizeString(b.value);
+		var aTitle = a.value;
+		var bTitle = b.value;
 		
 		// If we stripped one of the strings completely, we can't compare them
 		if (aTitle.length == 0 || bTitle.length == 0) {
@@ -254,31 +264,32 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 		}
 		
 		if (aTitle !== bTitle) {
-			return -1;
+			return -1;	//everything is sorted by title, so if this mismatches, everything following will too
 		}
 		
 		// If both items have a DOI and they don't match, it's not a dupe
 		if (typeof doiCache[a.itemID] != 'undefined'
 				&& typeof doiCache[b.itemID] != 'undefined'
 				&& doiCache[a.itemID] != doiCache[b.itemID]) {
-			return -1;
+			return 0;
 		}
 		
 		// If both items have an ISBN and they don't match, it's not a dupe
 		if (typeof isbnCache[a.itemID] != 'undefined'
 				&& typeof isbnCache[b.itemID] != 'undefined'
 				&& isbnCache[a.itemID] != isbnCache[b.itemID]) {
-			return -1;
+			return 0;
 		}
 		
 		// If both items have a year and they're off by more than one, it's not a dupe
 		if (typeof yearCache[a.itemID] != 'undefined'
 				&& typeof yearCache[b.itemID] != 'undefined'
 				&& Math.abs(yearCache[a.itemID] - yearCache[b.itemID]) > 1) {
-			return -1;
+			return 0;
 		}
 		
 		// Check for at least one match on last name + first initial of first name
+		var aCreatorRows, bCreatorRows;
 		if (typeof creatorRowsCache[a.itemID] != 'undefined') {
 			aCreatorRows = creatorRowsCache[a.itemID];
 		}
@@ -287,7 +298,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 						+ "JOIN creators USING (creatorID) "
 						+ "JOIN creatorData USING (creatorDataID) "
 						+ "WHERE itemID=? ORDER BY orderIndex LIMIT 10";
-			var aCreatorRows = Zotero.DB.query(sql, a.itemID);
+			aCreatorRows = Zotero.DB.query(sql, a.itemID);
 			creatorRowsCache[a.itemID] = aCreatorRows;
 		}
 		
@@ -300,12 +311,12 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 						+ "JOIN creators USING (creatorID) "
 						+ "JOIN creatorData USING (creatorDataID) "
 						+ "WHERE itemID=? ORDER BY orderIndex LIMIT 10";
-			var bCreatorRows = Zotero.DB.query(sql, b.itemID);
+			bCreatorRows = Zotero.DB.query(sql, b.itemID);
 			creatorRowsCache[b.itemID] = bCreatorRows;
 		}
 		
 		// Match if no creators
-		if (!aCreatorRows && !bCreatorRows.length) {
+		if (!aCreatorRows && !bCreatorRows) {
 			return 1;
 		}
 		
@@ -315,11 +326,11 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 		
 		for each(var aCreatorRow in aCreatorRows) {
 			var aLastName = normalizeString(aCreatorRow.lastName);
-			var aFirstInitial = aCreatorRow.fieldMode == 0 ? normalizeString(aCreatorRow.firstName.substr(1)) : false;
+			var aFirstInitial = aCreatorRow.fieldMode == 0 ? normalizeString(aCreatorRow.firstName).charAt(0) : false;
 			
 			for each(var bCreatorRow in bCreatorRows) {
 				var bLastName = normalizeString(bCreatorRow.lastName);
-				var bFirstInitial = bCreatorRow.fieldMode == 0 ? normalizeString(bCreatorRow.firstName.substr(1)) : false;
+				var bFirstInitial = bCreatorRow.fieldMode == 0 ? normalizeString(bCreatorRow.firstName).charAt(0) : false;
 				
 				if (aLastName === bLastName && aFirstInitial === bFirstInitial) {
 					return 1;
