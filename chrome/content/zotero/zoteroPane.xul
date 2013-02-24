@@ -540,7 +540,7 @@
 			
 			<deck id="zotero-pane-overlay-deck" flex="1">
 				<box id="zotero-pane-progress" flex="1" align="center" pack="center">
-					<box style="background: white; -moz-border-radius: 1px; -moz-box-shadow: gray 4px 6px 4px;" width="300" height="30">
+					<box style="background: white; border-radius: 1px; box-shadow: gray 4px 6px 4px;" width="300" height="30">
 						<vbox style="padding:10px" flex="1">
 							<label id="zotero-pane-progress-label"/>
 							<progressmeter id="zotero-pane-progressmeter" mode="undetermined"/>

@@ -553,8 +553,11 @@ Zotero.Sync.Runner = new function () {
 				Zotero.debug("File sync is finished");
 				
 				if (results.errors.length) {
+					Zotero.debug(results.errors, 1);
+					for each(var e in results.errors) {
+						Components.utils.reportError(e);
+					}
 					Zotero.Sync.Runner.setErrors(results.errors);
-					
 					return;
 				}
 				
@@ -567,10 +570,11 @@ Zotero.Sync.Runner = new function () {
 					Zotero.Sync.Runner.stop();
 				}
 			})
-			.fail(function (e) {
+			.catch(function (e) {
 				Zotero.debug("File sync failed", 1);
 				Zotero.Sync.Runner.error(e);
-			});
+			})
+			.done();
 		};
 		
 		Zotero.Sync.Server.sync({
@@ -620,7 +624,6 @@ Zotero.Sync.Runner = new function () {
 			e = new Error(e);
 			e.status = 'error';
 		}
-		Components.utils.reportError(e);
 		Zotero.debug(e, 1);
 		Zotero.Sync.Runner.setSyncIcon(e);
 		throw (e);
@@ -716,9 +719,7 @@ Zotero.Sync.Runner = new function () {
 	 * library-specific sync error icons across all windows
 	 */
 	this.setErrors = function (errors) {
-		Zotero.debug(errors);
 		errors = [this.parseSyncError(e) for each(e in errors)];
-		Zotero.debug(errors);
 		_errorsByLibrary = {};
 		
 		var primaryError = this.getPrimaryError(errors);
@@ -883,6 +884,7 @@ Zotero.Sync.Runner = new function () {
 			}
 		}
 		if (!parsed.message) {
+			// TODO: include file name and line?
 			parsed.message = e.message ? e.message : e;
 		}
 		

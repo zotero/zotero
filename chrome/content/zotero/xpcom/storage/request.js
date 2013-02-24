@@ -208,7 +208,6 @@ Zotero.Sync.Storage.Request.prototype.start = function () {
 		};
 	})
 	.then(function (results) {
-		Zotero.debug('!!!!');
 		Zotero.debug(results);
 		
 		if (results.localChanges) {
@@ -263,7 +262,7 @@ Zotero.Sync.Storage.Request.prototype.isFinished = function () {
  *												(usually total bytes)
  */
 Zotero.Sync.Storage.Request.prototype.onProgress = function (channel, progress, progressMax) {
-	Zotero.debug(progress + "/" + progressMax + " for request " + this.name);
+	//Zotero.debug(progress + "/" + progressMax + " for request " + this.name);
 	
 	if (!this._running) {
 		Zotero.debug("Trying to update finished request " + this.name + " in "
