@@ -148,6 +148,11 @@ var Zotero_RTFScan = new function() {
 		return escape;
 	}
 
+	function escapeHexdec(escape){
+		escape = String.fromCharCode(parseInt(escape.match(/\\\'(..)/)[1], 16));
+		return escape;
+	}
+
 	function _scanRTF() {
 		// set up globals
 		citations = [];
@@ -172,7 +177,9 @@ var Zotero_RTFScan = new function() {
 		// read through RTF file and display items as they're found
 		// we could read the file in chunks, but unless people start having memory issues, it's
 		// probably faster and definitely simpler if we don't
-		contents = Zotero.File.getContents(inputFile).replace(/([^\\\r])\r?\n/, "$1 ").replace("\\'92", "'", "g").replace("\\rquote ", "’").replace(/\\u\d+(\\...)?/g, escapeUTF);;
+		// escape first utf then hexdec characters. E.g. LibreOffice prints both, so we
+		contents = Zotero.File.getContents(inputFile).replace(/([^\\\r])\r?\n/, "$1 ").replace("\\'92", "'", "g").replace("\\rquote ", "’").replace(/(\uc\d+)?\\u\d+(\\\'..)?(\{.*\})?/g, escapeUTF).replace(/(\uc\d+)?\\\'..(\{.*\})?/g, escapeHexdec);
+		
 		var m;
 		var lastCitation = false;
 		while((m = citationRe.exec(contents))) {
