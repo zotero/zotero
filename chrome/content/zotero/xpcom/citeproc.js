@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.431",
+    PROCESSOR_VERSION: "1.0.432",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     LOCATOR_LABELS_REGEXP: new RegExp("^((art|ch|Ch|subch|col|fig|l|n|no|op|p|pp|para|subpara|pt|r|sec|subsec|Sec|sv|sch|tit|vrs|vol)\\.)\\s+(.*)"),
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
@@ -1472,8 +1472,9 @@ CSL.Output.Queue.purgeNearsidePrefixChars = function(myblob, chr) {
         return;
     }
     if ("object" === typeof myblob) {
-        if ((CSL.TERMINAL_PUNCTUATION.indexOf(chr) > -1 && 
-             CSL.TERMINAL_PUNCTUATION.slice(0, -1).indexOf(myblob.strings.prefix.slice(0, 1)) > -1)) {
+        if ((CSL.TERMINAL_PUNCTUATION.indexOf(chr) > -1
+             && CSL.TERMINAL_PUNCTUATION.slice(0, -1).indexOf(myblob.strings.prefix.slice(0, 1)) > -1)
+            && !(myblob.strings.prefix.slice(0,1) === ";" && chr === ".")) {
             myblob.strings.prefix = myblob.strings.prefix.slice(1);
         } else if ("object" === typeof myblob.blobs) {
             CSL.Output.Queue.purgeNearsidePrefixChars(myblob.blobs[0], chr);
