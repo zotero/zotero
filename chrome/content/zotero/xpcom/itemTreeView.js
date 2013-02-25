@@ -507,6 +507,11 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 			for each(var item in items) {
 				var id = item.id;
 				
+				// Make sure row map is up to date
+				// if we made changes in a previous loop
+				if (madeChanges) {
+					this._refreshHashMap();
+				}
 				var row = this._itemRowMap[id];
 				
 				// Deleted items get a modify that we have to ignore when
