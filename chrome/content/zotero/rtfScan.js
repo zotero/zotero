@@ -143,6 +143,11 @@ var Zotero_RTFScan = new function() {
 	/**
 	 * Scans file for citations, then proceeds to next wizard page.
 	 */
+	function escapeUTF(escape){
+		escape = String.fromCharCode(escape.match(/\\u(\d+)/)[1]);
+		return escape;
+	}
+
 	function _scanRTF() {
 		// set up globals
 		citations = [];
@@ -167,7 +172,7 @@ var Zotero_RTFScan = new function() {
 		// read through RTF file and display items as they're found
 		// we could read the file in chunks, but unless people start having memory issues, it's
 		// probably faster and definitely simpler if we don't
-		contents = Zotero.File.getContents(inputFile).replace(/([^\\\r])\r?\n/, "$1 ").replace("\\'92", "'", "g").replace("\\rquote ", "’");
+		contents = Zotero.File.getContents(inputFile).replace(/([^\\\r])\r?\n/, "$1 ").replace("\\'92", "'", "g").replace("\\rquote ", "’").replace(/\\u\d+(\\...)?/g, escapeUTF);;
 		var m;
 		var lastCitation = false;
 		while((m = citationRe.exec(contents))) {
@@ -191,6 +196,7 @@ var Zotero_RTFScan = new function() {
 				var start = citationRe.lastIndex-m[11].length;
 				var end = citationRe.lastIndex;
 			}
+
 			citationString = citationString.replace("\\{", "{", "g").replace("\\}", "}", "g");
 			var suppressAuthor = !m[2];
 			
