@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.432",
+    PROCESSOR_VERSION: "1.0.433",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     LOCATOR_LABELS_REGEXP: new RegExp("^((art|ch|Ch|subch|col|fig|l|n|no|op|p|pp|para|subpara|pt|r|sec|subsec|Sec|sv|sch|tit|vrs|vol)\\.)\\s+(.*)"),
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
@@ -8086,7 +8086,7 @@ CSL.Node.names = {
             state.build.names_variables.push(this.variables);
             func = function (state, Item, item) {
                 state.tmp.can_substitute.push(true);
-                state.parallel.StartVariable("names");
+                state.parallel.StartVariable("names",this.variables[0]);
                 state.nameOutput.init(this);
             };
             this.execs.push(func);
@@ -10190,7 +10190,7 @@ CSL.Parallel.prototype.StartCite = function (Item, item, prevItemID) {
         }
     }
 };
-CSL.Parallel.prototype.StartVariable = function (variable) {
+CSL.Parallel.prototype.StartVariable = function (variable, real_variable) {
     if (this.use_parallels && (this.try_cite || this.force_collapse)) {
         if (variable === "names") {
             this.variable = variable + ":" + this.target;
@@ -10207,7 +10207,10 @@ CSL.Parallel.prototype.StartVariable = function (variable) {
         this.data.value = "";
         this.data.blobs = [];
         var is_mid = this.isMid(variable);
-        if (this.target === "front" && is_mid) {
+        if (real_variable === "authority" && this.variable === "names:front") {
+            this.try_cite = true;
+            this.in_series = false;
+        } else if (this.target === "front" && is_mid) {
             this.target = "mid";
         } else if (this.target === "mid" && !is_mid && this.cite.Item.title && variable !== "names") {
             this.target = "back";
