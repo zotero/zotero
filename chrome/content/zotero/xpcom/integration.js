@@ -2155,6 +2155,9 @@ Zotero.Integration.Session.prototype.getCitationField = function(citation) {
 			serializeCitationItem.id = citationItem.itemData.id;
 			serializeCitationItem.uris = citationItem.uris;
 			
+			// XXX For compatibility with older versions of Zotero; to be removed at a later date
+			serializeCitationItem.uri = serializeCitationItem.uris;
+			
 			// always store itemData, since we have no way to get it back otherwise
 			serializeCitationItem.itemData = citationItem.itemData;
 			addSchema = true;
