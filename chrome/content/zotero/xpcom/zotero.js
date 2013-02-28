@@ -555,17 +555,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			
 			var dir = Zotero.getProfileDirectory();
 			dir.append('zotero');
-			
-			var zs = Zotero.getString('app.standalone');
-			var zf = Zotero.getString('app.firefox');
-			// TODO: localize
-			var msg = "The currently selected data directory is not compatible "
-					+ "with " + zs + ", which can share a database only with "
-					+ zf + " 2.1b3 or later."
-					+ "\n\n"
-					+ "Upgrade to the latest version of " + zf + " first or select a "
-					+ "different data directory for use with " + zs + ".";
-					
+
 			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 						.createInstance(Components.interfaces.nsIPromptService);
 			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
@@ -574,13 +564,12 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				+ ps.BUTTON_POS_2_DEFAULT;
 			var index = ps.confirmEx(
 				null,
-				// TODO: localize
-				"Incompatible Database Version",
-				msg,
+				Zotero.getString('dataDir.incompatibleDbVersion.title'),
+				Zotero.getString('dataDir.incompatibleDbVersion.text'),
 				buttonFlags,
-				"Use Default",
+				Zotero.getString('general.useDefault'),
 				Zotero.getString('dataDir.standaloneMigration.selectCustom'),
-				"Quit",
+				Zotero.getString('general.quit'),
 				null,
 				{}
 			);
@@ -1079,13 +1068,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 					else {
 						var buttonFlags = ps.STD_YES_NO_BUTTONS;
 						var index = ps.confirmEx(null,
-							//Zotero.getString('dataDir.selectedDirEmpty.title'),
-							//Zotero.getString('dataDir.selectedDirEmpty.text'),
-							'Directory Empty',
-							'The directory you selected is empty. To move an existing Zotero data directory, '
-							+ 'you will need to manually copy files from the existing data directory to the new location. '
-							+ 'See http://zotero.org/support/zotero_data for more information.\n\nUse the new directory?',
-							
+							Zotero.getString('dataDir.selectedDirEmpty.title'),
+							Zotero.getString('dataDir.selectedDirEmpty.text'),
 							buttonFlags, null, null, null, null, {});
 						
 						// Not OK -- return to file picker
@@ -1733,15 +1717,15 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		var modes = {
 			titleCreatorYear: {
-				label: "Title, Creator, Year"
+				label: Zotero.getString('quickSearch.mode.titleCreatorYear')
 			},
 			
 			fields: {
-				label: "All Fields & Tags"
+				label: Zotero.getString('quickSearch.mode.fieldsAndTags')
 			},
 			
 			everything: {
-				label: "Everything"
+				label: Zotero.getString('quickSearch.mode.everything')
 			}
 		};
 		

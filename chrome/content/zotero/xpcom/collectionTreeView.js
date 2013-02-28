@@ -161,7 +161,7 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 		this._showRow(new Zotero.ItemGroup('separator', false));
 		var header = {
 			id: "group-libraries-header",
-			label: "Group Libraries", // TODO: localize
+			label: Zotero.getString('pane.collections.groupLibraries'),
 			expand: function (beforeRow, groups) {
 				if (!groups) {
 					var groups = Zotero.Groups.getAll();

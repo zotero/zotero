@@ -5,6 +5,7 @@
 <!ENTITY zotero.general.edit								"Edit">
 <!ENTITY zotero.general.delete 								"Delete">
 
+<!ENTITY zotero.errorReport.title							"Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages				"The error log may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress			"Please wait while the error report is submitted.">
 <!ENTITY zotero.errorReport.submitted						"Your error report has been submitted.">
@@ -12,6 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums					"Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
 <!ENTITY zotero.errorReport.notReviewed					"Error reports are not reviewed unless referred to in the forums.">
 
+<!ENTITY zotero.upgrade.title							"Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.newVersionInstalled				"You have installed a new version of Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired					"Your Zotero database must be upgraded to work with the new version.">
 <!ENTITY zotero.upgrade.autoBackup							"Your existing database will be backed up automatically before any changes are made.">

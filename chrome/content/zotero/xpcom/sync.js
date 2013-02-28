@@ -524,7 +524,7 @@ Zotero.Sync.Runner = new function () {
 		
 		if (Zotero.HTTP.browserIsOffline()){
 			this.clearSyncTimeout(); // DEBUG: necessary?
-			var msg = "Zotero cannot sync while " + Zotero.appName + " is in offline mode.";
+			var msg = "Zotero cannot sync because " + Zotero.getString('general.browserIsOffline', Zotero.appName);
 			var e = new Zotero.Error(msg, 0, { dialogButtonText: null })
 			Components.utils.reportError(e);
 			Zotero.debug(e, 1);
@@ -1838,12 +1838,12 @@ Zotero.Sync.Server = new function () {
 						Zotero.debug(e);
 					}
 					// TODO: localize
-					_error("SSL certificate error connecting to " + host
-						+ "\n\nSee http://zotero.org/support/kb/ssl_certificate_error for more information.",
+					_error(Zotero.getString('sync.storage.error.webdav.sslCertificateError', host) 
+						+ Zotero.getString('sync.error.seeCertificateErrorDoc'),
 						false, noReloadOnFailure);
 				}
 				else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN) == Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
-					_error("SSL connection error", false, noReloadOnFailure);
+					_error(Zotero.getString('sync.error.sslConnectionError'), false, noReloadOnFailure);
 				}
 			}
 			// TODO: localize
@@ -3179,10 +3179,9 @@ Zotero.Sync.Server.Data = new function() {
 				if (Zotero.Sync.Runner.background) {
 					Zotero.Sync.Server.manualSyncRequired = true;
 					
-					// TODO: localize again
-					//Zotero.getString('sync.error.manualInterventionRequired')
-					//Zotero.getString('sync.error.clickSyncIcon')
-					var msg = "Conflicts have suspended automatic syncing.\n\nClick the sync icon to resolve them.";
+					var msg = Zotero.getString('sync.error.manualInterventionRequired')
+					  + "\n\n"
+					  + Zotero.getString('sync.error.clickSyncIcon');
 					var e = new Zotero.Error(msg, 0, { dialogButtonText: null });
 					throw (e);
 				}
