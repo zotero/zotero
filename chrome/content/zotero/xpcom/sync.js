@@ -1837,28 +1837,28 @@ Zotero.Sync.Server = new function () {
 					catch (e) {
 						Zotero.debug(e);
 					}
-					// TODO: localize
-					_error(Zotero.getString('sync.storage.error.webdav.sslCertificateError', host) 
-						+ Zotero.getString('sync.error.seeCertificateErrorDoc'),
+					var kbURL = 'http://zotero.org/support/kb/ssl_certificate_error';
+					_error(Zotero.getString('sync.storage.error.webdav.sslCertificateError', host) + "\n\n"
+						+ Zotero.getString('general.seeForMoreInformation', kbURL),
 						false, noReloadOnFailure);
 				}
 				else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN) == Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
 					_error(Zotero.getString('sync.error.sslConnectionError'), false, noReloadOnFailure);
 				}
 			}
-			// TODO: localize
 			if (xmlhttp.status === 0) {
-				_error('Error connecting to server. Check your Internet connection.', false, noReloadOnFailure);
+				_error(Zotero.getString('sync.error.checkConnection'), false, noReloadOnFailure);
 			}
-			_error('Empty response from server. Please try again in a few minutes.', false, noReloadOnFailure);
+			_error(Zotero.getString('sync.error.emptyResponseServer') + Zotero.getString('general.tryAgainLater'),
+				false, noReloadOnFailure);
 		}
 		
 		if (!xmlhttp.responseXML || !xmlhttp.responseXML.childNodes[0] ||
 				xmlhttp.responseXML.childNodes[0].tagName != 'response' ||
 				!xmlhttp.responseXML.childNodes[0].firstChild) {
 			Zotero.debug(xmlhttp.responseText);
-			// TODO: localize
-			_error('Invalid response from server. Please try again in a few minutes.', xmlhttp.responseText, noReloadOnFailure);
+			_error(Zotero.getString('general.invalidResponseServer') + Zotero.getString('general.tryAgainLater'),
+				xmlhttp.responseText, noReloadOnFailure);
 		}
 		
 		var firstChild = xmlhttp.responseXML.firstChild.firstChild;
@@ -2065,8 +2065,7 @@ Zotero.Sync.Server = new function () {
 				case 'INVALID_TIMESTAMP':
 					var validClock = Zotero.DB.valueQuery("SELECT CURRENT_TIMESTAMP BETWEEN '1970-01-01 00:00:01' AND '2038-01-19 03:14:07'");
 					if (!validClock) {
-						// TODO: localize
-						_error("The system clock is set to an invalid time. You will need to correct this to sync with the Zotero server.");
+						_error(Zotero.getString('sync.error.invalidClock'));
 					}
 					
 					setTimeout(function () {
@@ -2172,37 +2171,20 @@ Zotero.Sync.Server = new function () {
 			+ ps.BUTTON_POS_1_DEFAULT
 			+ ps.BUTTON_DELAY_ENABLE;
 			
-			var msg = "This Zotero database was last synced with a different "
-					+ "zotero.org account ('" + lastUsername + "') from the "
-					+ "current one ('" + username + "'). ";
+			var msg = Zotero.getString('sync.lastSyncWithDifferentAccount', [lastUsername, username]);
 			
 			if (!noServerData) {
-				// TODO: localize
-				msg += "If you continue, local Zotero data will be "
-						+ "combined with data from the '" + username + "' account "
-						+ "stored on the server.";
+				msg += " " + Zotero.getString('sync.localDataWillBeCombined', username);
 				// If there are local groups belonging to the previous user,
 				// we need to remove them
 				if (groups.length) {
-					msg += "Local groups, including any with changed items, will also "
-							+ "be removed.";
+					msg += " " + Zotero.getString('sync.localGroupsWillBeRemoved1');
 				}
-				msg += "\n\n"
-						+ "To avoid combining or losing data, revert to the '"
-						+ lastUsername + "' account or use the Reset options "
-						+ "in the Sync pane of the Zotero preferences.";
-				
-				var syncButtonText = "Sync";
+				msg += "\n\n" + Zotero.getString('sync.avoidCombiningData', lastUsername);
+				var syncButtonText = Zotero.getString('sync.sync');
 			}
 			else if (groups.length) {
-				msg += "If you continue, local groups, including any with changed items, "
-						+ "will be removed and replaced with groups linked to the '"
-						+ username + "' account."
-						+ "\n\n"
-						+ "To avoid losing local changes to groups, be sure you "
-						+ "have synced with the '" + lastUsername + "' account before "
-						+ "syncing with the '" + username + "' account.";
-				
+				msg += " " + Zotero.getString('sync.localGroupsWillBeRemoved2', [username, lastUsername]);
 				var syncButtonText = Zotero.getString('sync.removeGroupsAndSync');
 			}
 			// If there are no local groups and the server is empty,
@@ -2321,9 +2303,8 @@ Zotero.Sync.Server = new function () {
 					// instead of creating its own dialog, but setSyncIcon() doesn't yet provide full control
 					// over dialog title and primary button text/action, which is why this version of the
 					// dialog is a bit uglier than the manual click version
-					// TODO: localize and combine with below
-					var msg = "The Zotero sync server did not accept your username and password.\n\n"
-								+ "Please check that you have entered your zotero.org login information correctly in the Zotero sync preferences.";
+					// TODO: localize (=>done) and combine with below (=>?)
+					var msg = Zotero.getString('sync.error.invalidLogin.text');
 					e.data = {};
 					e.data.dialogText = msg;
 					e.data.dialogButtonText = Zotero.getString('sync.openSyncPreferences');
@@ -2344,15 +2325,13 @@ Zotero.Sync.Server = new function () {
 									.getService(Components.interfaces.nsIPromptService);
 						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 											+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
-						// TODO: localize
 						if (e.error == Zotero.Error.ERROR_SYNC_USERNAME_NOT_SET) {
 							var title = Zotero.getString('sync.error.usernameNotSet');
-							var msg = "You must enter your zotero.org username and password in the Zotero preferences to sync with the Zotero server."
+							var msg = Zotero.getString('sync.error.usernameNotSet.text');
 						}
 						else {
 							var title = Zotero.getString('sync.error.invalidLogin');
-							var msg = "The Zotero sync server did not accept your username and password.\n\n"
-									+ "Please check that you have entered your zotero.org login information correctly in the Zotero sync preferences.";
+							var msg = Zotero.getString('sync.error.invalidLogin.text');
 						}
 						var index = ps.confirmEx(
 							win,
@@ -3648,20 +3627,17 @@ Zotero.Sync.Server.Data = new function() {
 			var remoteDelete = true;
 		}
 		
-		// TODO: localize
-		var msg = "One or more locally deleted Zotero " + itemTypes + " have been "
-			+ "modified remotely since the last sync. ";
+		var msg = Zotero.getString('sync.conflict.autoChange.alert', itemTypes);
 		if (localDelete) {
-			msg += "The remote versions have been kept.";
+			msg += Zotero.getString('sync.conflict.remoteVersionsKept');
 		}
 		else if (remoteDelete) {
-			msg += "The local versions have been kept.";
+			msg += Zotero.getString('sync.conflict.localVersionsKept');
 		}
 		else {
-			msg += "The most recent versions have been kept.";
+			msg += Zotero.getString('sync.conflict.recentVersionsKept');
 		}
-		msg += "\n\nView the " + (Zotero.isStandalone ? "" : "Firefox ")
-				+ "Error Console for the full list of such changes.";
+		msg += Zotero.getString('sync.conflict.viewErrorConsole', (Zotero.isStandalone ? "" : "Firefox "));
 		return msg;
 	}
 	
@@ -3674,42 +3650,35 @@ Zotero.Sync.Server.Data = new function() {
 	 */
 	function _generateAutoChangeLogMessage(itemType, localName, remoteName, remoteMoreRecent) {
 		if (localName === null) {
-			// TODO: localize
-			localName = "[deleted]";
+			localName = Zotero.getString('sync.conflict.deleted');
 			var localDelete = true;
 		}
 		else if (remoteName === null) {
-			remoteName = "[deleted]";
+			remoteName = Zotero.getString('sync.conflict.deleted');
 			var remoteDelete = true;
 		}
 		
-		// TODO: localize
-		var msg = "A Zotero " + itemType + " has changed both locally and "
-			+ "remotely since the last sync:";
-		msg += "\n\n";
-		msg += "Local version: " + localName + "\n";
-		msg += "Remote version: " + remoteName + "\n";
+		var msg = Zotero.getString('sync.conflict.autoChange.log', itemType);
+		msg += Zotero.getString('sync.conflict.localVersion', localName);
+		msg += Zotero.getString('sync.conflict.remoteVersion', remoteName);
 		msg += "\n";
 		if (localDelete) {
-			msg += "The remote version has been kept.";
+			msg += Zotero.getString('sync.conflict.remoteVersionKept');
 		}
 		else if (remoteDelete) {
-			msg += "The local version has been kept.";
+			msg += Zotero.getString('sync.conflict.localVersionKept');
 		}
 		else {
 			var moreRecent = remoteMoreRecent ? remoteName : localName;
-			msg += "The most recent version, '" + moreRecent + "', has been kept.";
+			msg += Zotero.getString('sync.conflict.recentVersionKept', moreRecent);
 		}
 		return msg;
 	}
 	
 	
 	function _generateCollectionItemMergeAlertMessage() {
-		// TODO: localize
-		var msg = "One or more Zotero items have been added to and/or removed "
-			+ "from the same collection on multiple computers since the last sync.\n\n"
-			+ "View the " + (Zotero.isStandalone ? "" : "Firefox ")
-			+ "Error Console for the full list of such changes.";
+		var msg = Zotero.getString('sync.conflict.collectionItemMerge.alert')
+			+ Zotero.getString('sync.conflict.viewErrorConsole', (Zotero.isStandalone ? "" : "Firefox "));
 		return msg;
 	}
 	
@@ -3719,11 +3688,7 @@ Zotero.Sync.Server.Data = new function() {
 	 * @param	{Integer[]}		addedItemIDs
 	 */
 	function _generateCollectionItemMergeLogMessage(collectionName, addedItemIDs) {
-		// TODO: localize
-		var introMsg = "Zotero items in the collection '" + collectionName + "' have been "
-			+ "added and/or removed on multiple computers since the last sync. "
-		
-		introMsg += "The following items have been added to the collection:";
+		var introMsg = Zotero.getString('sync.conflict.collectionItemMerge.log', collectionName);
 		var itemText = [];
 		var max = addedItemIDs.length;
 		for (var i=0; i<max; i++) {
@@ -3747,12 +3712,8 @@ Zotero.Sync.Server.Data = new function() {
 	
 	
 	function _generateTagItemMergeAlertMessage() {
-		// TODO: localize
-		var msg = "One or more Zotero tags have been added to and/or removed from "
-			+ "items on multiple computers since the last sync. "
-			+ "The different sets of tags have been combined.\n\n"
-			+ "View the " + (Zotero.isStandalone ? "" : "Firefox ")
-			+ "Error Console for the full list of such changes.";
+		var msg = Zotero.getString('sync.conflict.tagItemMerge.alert')
+			+ Zotero.getString('sync.conflict.viewErrorConsole', (Zotero.isStandalone ? "" : "Firefox "));
 		return msg;
 	}
 	
@@ -3763,15 +3724,13 @@ Zotero.Sync.Server.Data = new function() {
 	 * @param	{Boolean}		remoteIsTarget
 	 */
 	function _generateTagItemMergeLogMessage(tagName, addedItemIDs, remoteIsTarget) {
-		// TODO: localize
-		var introMsg = "The Zotero tag '" + tagName + "' has been added to and/or "
-			+ "removed from items on multiple computers since the last sync. "
+		var introMsg = Zotero.getString('sync.conflict.tagItemMerge.log', tagName);
 		
 		if (remoteIsTarget) {
-			introMsg += "It has been added to the following remote items:";
+			introMsg += Zotero.getString('sync.conflict.tag.addedToRemote');
 		}
 		else {
-			introMsg += "It has been added to the following local items:";
+			introMsg += Zotero.getString('sync.conflict.tag.addedToLocal');
 		}
 		var itemText = [];
 		for each(var id in addedItemIDs) {
@@ -3936,9 +3895,7 @@ Zotero.Sync.Server.Data = new function() {
 				var path = item.attachment.path;
 				if (path != _xmlize(path)) {
 					var filename = item.attachment.path.substr(8);
-					// TODO: localize
-					var msg = "The filename '" + filename + "' contains invalid characters.\n\nRename the file and try again. "
-						+ "If you rename the file via the OS, you will need to relink it in Zotero.";
+					var msg = Zotero.getString('sync.error.invalidCharsFilename', filename);
 					var e = new Zotero.Error(msg, 0, { dialogButtonText: null });
 					throw (e);
 
