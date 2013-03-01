@@ -1,4 +1,4 @@
--- 35
+-- 37
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -368,6 +368,9 @@ INSERT INTO fields VALUES (1276,'committeeFullname',NULL);    -- [ADDED]
 INSERT INTO fields VALUES (1277,'signingDate',NULL);          -- [ADDED]
 INSERT INTO fields VALUES (1278,'openingDate',NULL);          -- [ADDED]
 INSERT INTO fields VALUES (1279,'adoptionDate',NULL);         -- [ADDED]
+INSERT INTO fields VALUES (1280,'release',NULL);              -- [ADDED]
+INSERT INTO fields VALUES (1281,'regulationType',NULL);              -- [ADDED]
+INSERT INTO fields VALUES (1282,'regulatoryBody',NULL);              -- [ADDED]
 
 -- book
 INSERT INTO itemTypeFields VALUES (2, 110, NULL, 1);
@@ -834,21 +837,22 @@ INSERT INTO itemTypeFields VALUES (26, 4, NULL, 6);     -- volume
 INSERT INTO itemTypeFields VALUES (26, 45, NULL, 7);    -- numberOfVolumes
 INSERT INTO itemTypeFields VALUES (26, 7, NULL, 8);     -- place
 INSERT INTO itemTypeFields VALUES (26, 72, NULL, 9);    -- label
-INSERT INTO itemTypeFields VALUES (26, 14, NULL, 10);   -- date
-INSERT INTO itemTypeFields VALUES (26, 1274, NULL, 11); -- opus                 [ADDED]
-INSERT INTO itemTypeFields VALUES (26, 1272, NULL, 12); -- originalDate         [ADDED]
-INSERT INTO itemTypeFields VALUES (26, 77, NULL, 13);   -- runningTime
-INSERT INTO itemTypeFields VALUES (26, 87, NULL, 14);   -- language
-INSERT INTO itemTypeFields VALUES (26, 11, NULL, 15);   -- ISBN
-INSERT INTO itemTypeFields VALUES (26, 116, NULL, 16);  -- shortTitle
-INSERT INTO itemTypeFields VALUES (26, 123, NULL, 17);  -- archive
-INSERT INTO itemTypeFields VALUES (26, 19, NULL, 18);   -- archiveLocation
-INSERT INTO itemTypeFields VALUES (26, 62, NULL, 19);   -- libraryCatalog
-INSERT INTO itemTypeFields VALUES (26, 18, NULL, 20);   -- callNumber
-INSERT INTO itemTypeFields VALUES (26, 1, NULL, 21);    -- url
-INSERT INTO itemTypeFields VALUES (26, 27, NULL, 22);   -- accessed
-INSERT INTO itemTypeFields VALUES (26, 2, NULL, 23);    -- rights
-INSERT INTO itemTypeFields VALUES (26, 22, NULL, 24);   -- extra
+INSERT INTO itemTypeFields VALUES (26, 1280, NULL, 10);    -- release (ed.)       [ADDED]
+INSERT INTO itemTypeFields VALUES (26, 14, NULL, 11);   -- date
+INSERT INTO itemTypeFields VALUES (26, 1274, NULL, 12); -- opus                 [ADDED]
+INSERT INTO itemTypeFields VALUES (26, 1272, NULL, 13); -- originalDate         [ADDED]
+INSERT INTO itemTypeFields VALUES (26, 77, NULL, 14);   -- runningTime
+INSERT INTO itemTypeFields VALUES (26, 87, NULL, 15);   -- language
+INSERT INTO itemTypeFields VALUES (26, 11, NULL, 16);   -- ISBN
+INSERT INTO itemTypeFields VALUES (26, 116, NULL, 17);  -- shortTitle
+INSERT INTO itemTypeFields VALUES (26, 123, NULL, 18);  -- archive
+INSERT INTO itemTypeFields VALUES (26, 19, NULL, 19);   -- archiveLocation
+INSERT INTO itemTypeFields VALUES (26, 62, NULL, 20);   -- libraryCatalog
+INSERT INTO itemTypeFields VALUES (26, 18, NULL, 21);   -- callNumber
+INSERT INTO itemTypeFields VALUES (26, 1, NULL, 22);    -- url
+INSERT INTO itemTypeFields VALUES (26, 27, NULL, 23);   -- accessed
+INSERT INTO itemTypeFields VALUES (26, 2, NULL, 24);    -- rights
+INSERT INTO itemTypeFields VALUES (26, 22, NULL, 25);   -- extra
 
 INSERT INTO itemTypeFields VALUES (27, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (27, 90, NULL, 2);
@@ -1098,21 +1102,23 @@ INSERT INTO itemTypeFields VALUES (1263, 112, NULL, 1);   -- nameOfAct
 INSERT INTO itemTypeFields VALUES (1263, 90, NULL, 2);    -- abstract
 INSERT INTO itemTypeFields VALUES (1263, 1261, NULL, 3);  -- jurisdiction
 INSERT INTO itemTypeFields VALUES (1263, 116, NULL, 4);   -- shortTitle
-INSERT INTO itemTypeFields VALUES (1263, 101, NULL, 5);   -- publicLawNumber
-INSERT INTO itemTypeFields VALUES (1263, 36, NULL, 6);    -- code           (for reporter)
-INSERT INTO itemTypeFields VALUES (1263, 55, NULL, 7);    -- codeNumber     (for volume)
-INSERT INTO itemTypeFields VALUES (1263, 10, NULL, 8);    -- pages
-INSERT INTO itemTypeFields VALUES (1263, 100, NULL, 9);   -- dateEnacted
-INSERT INTO itemTypeFields VALUES (1263, 15, NULL, 10);   -- section
-INSERT INTO itemTypeFields VALUES (1263, 8, NULL, 11);    -- publisher       [ADDED]
-INSERT INTO itemTypeFields VALUES (1263, 1268, NULL, 12); -- publicationDate [ADDED]
-INSERT INTO itemTypeFields VALUES (1263, 87, NULL, 13);   -- language
-INSERT INTO itemTypeFields VALUES (1263, 1, NULL, 14);    -- url
-INSERT INTO itemTypeFields VALUES (1263, 27, NULL, 15);   -- accessed
-INSERT INTO itemTypeFields VALUES (1263, 40, NULL, 16);   -- session         Deprecated
-INSERT INTO itemTypeFields VALUES (1263, 42, NULL, 17);   -- history         Deprecated
-INSERT INTO itemTypeFields VALUES (1263, 2, NULL, 18);    -- rights
-INSERT INTO itemTypeFields VALUES (1263, 22, NULL, 19);   -- extra
+INSERT INTO itemTypeFields VALUES (1263, 1282, NULL, 5);   -- authority [ADDED]
+INSERT INTO itemTypeFields VALUES (1263, 1281, NULL, 6);   -- regulationType [ADDED]
+INSERT INTO itemTypeFields VALUES (1263, 101, NULL, 7);   -- publicLawNumber
+INSERT INTO itemTypeFields VALUES (1263, 36, NULL, 8);    -- code           (for reporter)
+INSERT INTO itemTypeFields VALUES (1263, 55, NULL, 9);    -- codeNumber     (for volume)
+INSERT INTO itemTypeFields VALUES (1263, 10, NULL, 10);    -- pages
+INSERT INTO itemTypeFields VALUES (1263, 100, NULL, 11);   -- dateEnacted
+INSERT INTO itemTypeFields VALUES (1263, 15, NULL, 12);   -- section
+INSERT INTO itemTypeFields VALUES (1263, 8, NULL, 13);    -- publisher       [ADDED]
+INSERT INTO itemTypeFields VALUES (1263, 1268, NULL, 14); -- publicationDate [ADDED]
+INSERT INTO itemTypeFields VALUES (1263, 87, NULL, 15);   -- language
+INSERT INTO itemTypeFields VALUES (1263, 1, NULL, 16);    -- url
+INSERT INTO itemTypeFields VALUES (1263, 27, NULL, 17);   -- accessed
+INSERT INTO itemTypeFields VALUES (1263, 40, NULL, 18);   -- session         Deprecated
+INSERT INTO itemTypeFields VALUES (1263, 42, NULL, 19);   -- history         Deprecated
+INSERT INTO itemTypeFields VALUES (1263, 2, NULL, 20);    -- rights
+INSERT INTO itemTypeFields VALUES (1263, 22, NULL, 21);   -- extra
 
 -- [NEW] classic (derived from manuscript)
 INSERT INTO itemTypeFields VALUES (1264, 110, NULL, 1);  -- title
@@ -1167,6 +1173,7 @@ INSERT INTO baseFieldMappings VALUES (33, 12, 114); -- conferencePaper/publicati
 INSERT INTO baseFieldMappings VALUES (13, 12, 91); -- webpage/publicationTitle/websiteTitle
 INSERT INTO baseFieldMappings VALUES (23, 12, 107); -- blogPost/publicationTitle/blogTitle
 INSERT INTO baseFieldMappings VALUES (25, 12, 104); -- forumPost/publicationTitle/forumTitle
+INSERT INTO baseFieldMappings VALUES (26, 6, 1280); -- audioRecording/edition/release
 INSERT INTO baseFieldMappings VALUES (29, 12, 119); -- tvBroadcast/publicationTitle/programTitle
 INSERT INTO baseFieldMappings VALUES (30, 12, 119); -- radioBroadcast/publicationTitle/programTitle
 INSERT INTO baseFieldMappings VALUES (35, 12, 85); -- encyclopediaEntry/publicationTitle/encyclopediaTitle
@@ -1206,6 +1213,7 @@ INSERT INTO baseFieldMappings VALUES (25, 108, 79); -- forumPost/type/postType
 INSERT INTO baseFieldMappings VALUES (27, 108, 74); -- presentation/type/presentationType
 INSERT INTO baseFieldMappings VALUES (16, 108, 1264); -- bill/type/sessionType
 INSERT INTO baseFieldMappings VALUES (18, 108, 1264); -- hearing/type/sessionType
+INSERT INTO baseFieldMappings VALUES (1263, 108, 1281); -- regulation/type/regulationType
 INSERT INTO baseFieldMappings VALUES (10, 109, 64); -- interview/medium/interviewMedium
 INSERT INTO baseFieldMappings VALUES (11, 109, 63); -- film/medium/videoRecordingFormat
 INSERT INTO baseFieldMappings VALUES (12, 109, 59); -- artwork/medium/artworkMedium
@@ -1219,6 +1227,7 @@ INSERT INTO baseFieldMappings VALUES (20, 110, 112); -- statute/title/nameOfAct
 INSERT INTO baseFieldMappings VALUES (21, 110, 113); -- email/title/subject
 INSERT INTO baseFieldMappings VALUES (1261, 110, 112); -- gazette/title/nameOfAct
 INSERT INTO baseFieldMappings VALUES (1263, 110, 112); -- regulation/title/nameOfAct
+INSERT INTO baseFieldMappings VALUES (1263, 41, 1282); -- regulation/legislativeBody/regulatoryBody
 
 INSERT INTO creatorTypes VALUES(1, "author");
 INSERT INTO creatorTypes VALUES(2, "contributor");

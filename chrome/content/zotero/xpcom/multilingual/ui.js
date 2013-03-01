@@ -68,7 +68,8 @@ Zotero.EXTENDED_FIELDS = {
 		"album":"container-title",
 		"opus":"section",
 		"originalDate":"original-date",
-		"publisher":"publisher"
+		"publisher":"publisher",
+		"release":"edition"
 	},
 	"podcast": {
 		"date":"issued",
@@ -83,7 +84,9 @@ Zotero.EXTENDED_FIELDS = {
 	"regulation": {
 		"jurisdiction":"jurisdiction",
 		"publisher":"publisher",
-		"publicationDate":"publication-date"
+		"publicationDate":"publication-date",
+		"regulatoryBody":"authority",
+		"regulationType":"genre"
 	},
 	"treaty": {
 		"reporter":"container-title",
