@@ -1353,6 +1353,7 @@ Zotero.Translate.Base.prototype = {
 			this._generateSandbox();
 		}
 		
+		this._currentTranslator = translator;
 		this._runningAsyncProcesses = 0;
 		this._returnValue = undefined;
 		this._aborted = false;
@@ -1440,8 +1441,8 @@ Zotero.Translate.Base.prototype = {
 		this._sandboxManager.sandbox.Zotero.isConnector = Zotero.isConnector || false;
 		this._sandboxManager.sandbox.Zotero.isServer = Zotero.isServer || false;
 		this._sandboxManager.sandbox.Zotero.parentTranslator = this._parentTranslator
-			&& this._parentTranslator.translator && this._parentTranslator.translator[0] ? 
-			this._parentTranslator.translator[0].translatorID : null;
+			&& this._parentTranslator._currentTranslator ? 
+			this._parentTranslator._currentTranslator.translatorID : null;
 		
 		// create shortcuts
 		this._sandboxManager.sandbox.Z = this._sandboxManager.sandbox.Zotero;
