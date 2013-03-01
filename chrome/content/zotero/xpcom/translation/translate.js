@@ -1167,11 +1167,6 @@ Zotero.Translate.Base.prototype = {
 		if(!returnValue && error) errorString = this._generateErrorString(error);
 		
 		if(oldState === "detect") {
-			if(this._clearTranslator) {
-				delete this.translator;
-				delete this._clearTranslator;
-			}
-			
 			if(this._potentialTranslators.length) {
 				var lastTranslator = this._potentialTranslators.shift();
 				var lastProperToProxyFunction = this._properToProxyFunctions ? this._properToProxyFunctions.shift() : null;
@@ -1315,21 +1310,16 @@ Zotero.Translate.Base.prototype = {
 		
 		var me = this;
 		this._loadTranslator(this._potentialTranslators[0],
-			function() { me._detectTranslatorLoaded(me._potentialTranslators[0]) });
+			function() { me._detectTranslatorLoaded() });
 	},
 	
 	/**
 	 * Runs detect code for a translator
 	 */
-	"_detectTranslatorLoaded":function(translator) {
+	"_detectTranslatorLoaded":function() {
 		this._prepareDetection();
 		
 		this.incrementAsyncProcesses("Zotero.Translate#getTranslators");
-		
-		if(!this.translator) {
-			this.translator = [translator];
-			this._clearTranslator = true;
-		}
 		
 		try {
 			var returnValue = this._sandboxManager.sandbox["detect"+this._entryFunctionSuffix].apply(null, this._getParameters());
@@ -1363,6 +1353,7 @@ Zotero.Translate.Base.prototype = {
 			this._generateSandbox();
 		}
 		
+		this._currentTranslator = translator;
 		this._runningAsyncProcesses = 0;
 		this._returnValue = undefined;
 		this._aborted = false;
@@ -1450,8 +1441,8 @@ Zotero.Translate.Base.prototype = {
 		this._sandboxManager.sandbox.Zotero.isConnector = Zotero.isConnector || false;
 		this._sandboxManager.sandbox.Zotero.isServer = Zotero.isServer || false;
 		this._sandboxManager.sandbox.Zotero.parentTranslator = this._parentTranslator
-			&& this._parentTranslator.translator && this._parentTranslator.translator[0] ? 
-			this._parentTranslator.translator[0].translatorID : null;
+			&& this._parentTranslator._currentTranslator ? 
+			this._parentTranslator._currentTranslator.translatorID : null;
 		
 		// create shortcuts
 		this._sandboxManager.sandbox.Z = this._sandboxManager.sandbox.Zotero;
