@@ -1234,7 +1234,8 @@ Zotero.Item.prototype.getCreatorPosition = function(creatorID) {
 	}
 	
 	for (var pos in this._creators) {
-		if (this._creators[pos].creatorID == creatorID) {
+		// was creatorID, which seems wrong
+		if (this._creators[pos].id == creatorID) {
 			return pos;
 		}
 	}
