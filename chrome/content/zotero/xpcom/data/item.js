@@ -5355,8 +5355,6 @@ Zotero.Item.prototype._loadItemData = function() {
 		throw ('ItemID not set for object before attempting to load data');
 	}
 	
-	Zotero.DB.beginTransaction();
-
 	// OOOOO: This needs to grab field item data with hints
 	// necessary to allot data to correct locations within
 	// the Zotero item.
@@ -5384,14 +5382,6 @@ Zotero.Item.prototype._loadItemData = function() {
 		this.setField(field.fieldID, field.value, true, field.languageTag);
 	}
 	
-	try {
-		Zotero.DB.commitTransaction();
-	}
-	catch (e) {
-        Zotero.DB.rollbackTransaction();
-        throw(e);
-    }
-
 	// Mark nonexistent fields as loaded
 	var itemTypeFields = Zotero.ItemFields.getItemTypeFields(this.itemTypeID);
 	for each(var fieldID in itemTypeFields) {
