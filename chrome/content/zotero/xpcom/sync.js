@@ -4407,6 +4407,16 @@ Zotero.Sync.Server.Data = new function() {
                     creator.lastName = multicreator.lastName;
 		            creator.birthYear = multicreator.birthYear;
                     creator.fieldMode = multicreatorset.fieldMode;
+                    if (multicreatorset.fieldMode && multicreatorset._key[lang].firstName) {
+                        Zotero.debug("Warning: Adjusting fieldMode mismatch under creator at position " + pos + " on item " + item.id + ". Probable corruption in item received from server.");
+                        if (creator.lastName) {
+                            creator.lastName = creator.firstName + " " + creator.lastName;
+                        } else {
+                            creator.lastName = creator.firstName;
+                        }
+                        creator.firstName = '';
+                        creator.fieldMode = multicreatorset.fieldMode;
+                    }
 			        item.setCreator(
 				        parseInt(pos,10),
 				        creator,
@@ -4664,7 +4674,7 @@ Zotero.Sync.Server.Data = new function() {
 			creator.dateModified = xmlCreator.@dateModified.toString();
 		}
 		
-		if (xmlCreator.fieldMode == 1) {
+		if (xmlCreator.fieldMode && xmlCreator.fieldMode.toString() == 1) {
 			creator.firstName = '';
 			creator.lastName = xmlCreator.name.toString();
 			creator.fieldMode = 1;
