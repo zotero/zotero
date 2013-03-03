@@ -544,9 +544,11 @@
 						if (languageList.length) {
 							if (Zotero.multiFieldNames[fieldName]) {
 								this.addMultiListener(label);
-								label.setAttribute('popup', 'multi-spawn-popup');
-								label.setAttribute('contextmenu', 'multi-spawn-popup');
-								label.setAttribute('class', 'zotero-alien-clicky');
+								if (this.editable) {
+									label.setAttribute('popup', 'multi-spawn-popup');
+									label.setAttribute('contextmenu', 'multi-spawn-popup');
+									label.setAttribute('class', 'zotero-alien-clicky');
+								}
 							}
 						}
 
@@ -658,16 +660,19 @@
 									Zotero.debug("Invalid language tag: "+key);
 									continue;
 								}
-								this.addMultiListener(label);
-								label.setAttribute('popup', 'multi-spawn-popup');
+								if (this.editable) {
+									this.addMultiListener(label);
+									label.setAttribute('popup', 'multi-spawn-popup');
+								}
 								label.setAttribute('value', nickname);
 								label.className = 'zotero-langy';
 								label.setAttribute('fieldname', fieldNamePlusLang);
 								label.setAttribute('servantLang', key);
-								if (this._clickableFields.indexOf(fieldNamePlusLang) === -1) {
-									this._clickableFields.push(fieldNamePlusLang);
+								if (this.editable) {
+									if (this._clickableFields.indexOf(fieldNamePlusLang) === -1) {
+										this._clickableFields.push(fieldNamePlusLang);
+									}
 								}
-									
 								var valueElement = this.createValueElement(
 									this.item.multi.get(fieldID, key), 
 									fieldNamePlusLang, 
@@ -766,14 +771,19 @@
 												lastCreator,
 												notYetSaved,
 												hasMulti);
-							for (var j = 0, jlen = languageList.length; j < jlen; j += 1) {
-								if (!creator.multi._key[languageList[j].tag]) {
+							// Assure that every language tag exists. Throw an error
+							// on invalid tags.
+							for (var j=0,jlen=creator.multi._lst.length;j<jlen;j+=1) {
+								// getNickname implicitly adds a tag.
+								// Should have a getTag method with the same behaviour.
+								var languageTag = creator.multi._lst[j];
+								var nickname = Zotero.CachedLanguages.getNickname(languageTag);
+								if (!nickname) {
+									Zotero.debug("Invalid language tag: "+languageTag);
 									continue;
-								} else {
-									var myCreator = creator.multi._key[languageList[j].tag];
 								}
+								var myCreator = creator.multi._key[languageTag];
 								this._creatorTabCount++;
-								var languageTag = languageList[j].tag;
 								var defaultRow = false;
 								var multilingualRow = true;
 								if (i === (ilen - 1)) {
@@ -975,7 +985,7 @@
 
 					row.appendChild(label);
 					if (fieldname == 'jurisdiction') {
-                        value.setAttribute("tooltiptext", value.getAttribute("label"));
+						value.setAttribute("tooltiptext", value.getAttribute("label"));
 						var boxedvalue = document.createElement("hbox");
 						boxedvalue.appendChild(value);
 						var jurisdictionDefault = document.createElement("checkbox");
@@ -1208,13 +1218,15 @@
 					var typeBox = document.createElement("hbox");
 					typeBox.setAttribute("typeid", typeID);
 
-					if (!multilingualRow) {
-						typeBox.setAttribute("popup", "creator-type-menu");
-						typeBox.setAttribute("contextmenu", "multi-spawn-popup");
-					} else {
-						typeBox.setAttribute("popup", "multi-spawn-popup");
+					if (this.editable) {
+						if (!multilingualRow) {
+							typeBox.setAttribute("popup", "creator-type-menu");
+							typeBox.setAttribute("contextmenu", "multi-spawn-popup");
+						} else {
+							typeBox.setAttribute("popup", "multi-spawn-popup");
+						}
+						this.addMultiListener(typeBox);
 					}
-					this.addMultiListener(typeBox);
 					if (!multilingualRow) {
 						typeBox.setAttribute("fieldname", 'creator-' + this._creatorCount + '-typeID');
 					} else {
@@ -1231,9 +1243,12 @@
 						} else {
 							typeBox.className = 'creator-type-label zotero-clicky';
 						}
-					}
-					else {
-						typeBox.className = 'creator-type-label';
+					} else {
+						if (multilingualRow) {
+							typeBox.className = 'creator-type-label zotero-langy';
+						} else {
+							typeBox.className = 'creator-type-label';
+						}
 					}
 					
 					if (multilingualRow) {
@@ -1943,26 +1958,26 @@
 				<parameter name="node"/>
 				<body>
 				<![CDATA[
-                    var tabindex = node.getAttribute("ztabindex");
+					var tabindex = node.getAttribute("ztabindex");
 
-                    var value = node.getAttribute('label');
-                    var textbox = document.createElement('textbox');
-                    textbox.setAttribute("ztabindex", tabindex);
-                    textbox.setAttribute('value',value);
-                    textbox.setAttribute("oldComment",node.getAttribute("value"));
-                    textbox.setAttribute("oldValue",node.getAttribute("label"));
-                    textbox.setAttribute("flex","1");
-                    textbox.setAttribute('emptytext','Enter a jurisdiction');
-                    textbox.setAttribute('type','autocomplete');
-                    textbox.setAttribute('autocompletesearch','zotero');
-                    textbox.setAttribute('autocompletesearchparam','jurisdictions');
-                    textbox.setAttribute('onkeypress','document.getBindingParent(this).handleJurisdictionKeypress(event);');
-                    textbox.setAttribute('ontextentered','document.getBindingParent(this).handleJurisdictionAutoCompleteSelect(this)');
-                    node.parentNode.replaceChild(textbox, node)
-                    textbox.addEventListener('blur', function (event) {
-                    	document.getBindingParent(this).hideJurisdictionEditor(this);
-                    }, false);
-                     textbox.select();
+					var value = node.getAttribute('label');
+					var textbox = document.createElement('textbox');
+					textbox.setAttribute("ztabindex", tabindex);
+					textbox.setAttribute('value',value);
+					textbox.setAttribute("oldComment",node.getAttribute("value"));
+					textbox.setAttribute("oldValue",node.getAttribute("label"));
+					textbox.setAttribute("flex","1");
+					textbox.setAttribute('emptytext','Enter a jurisdiction');
+					textbox.setAttribute('type','autocomplete');
+					textbox.setAttribute('autocompletesearch','zotero');
+					textbox.setAttribute('autocompletesearchparam','jurisdictions');
+					textbox.setAttribute('onkeypress','document.getBindingParent(this).handleJurisdictionKeypress(event);');
+					textbox.setAttribute('ontextentered','document.getBindingParent(this).handleJurisdictionAutoCompleteSelect(this)');
+					node.parentNode.replaceChild(textbox, node)
+					textbox.addEventListener('blur', function (event) {
+						document.getBindingParent(this).hideJurisdictionEditor(this);
+					}, false);
+					 textbox.select();
 					this._tabDirection = false;
 					this._lastTabIndex = tabindex;
 				]]>
@@ -1974,23 +1989,23 @@
 				<parameter name="event"/>
 				<body>
 				<![CDATA[
-                   //alert(textbox.mController);
-                   var target = event.target;
-                   var focused = document.commandDispatcher.focusedElement;
+				   //alert(textbox.mController);
+				   var target = event.target;
+				   var focused = document.commandDispatcher.focusedElement;
 					
-                   switch (event.keyCode) {
-                     case event.DOM_VK_ESCAPE:
-                     case event.DOM_VK_RETURN:
-                       event.preventDefault();
-                       event.target.blur();
-                       break;
-                     case event.DOM_VK_TAB:
-                       this._tabDirection = event.shiftKey ? -1 : 1;
-                       this._focusNextField('info', this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
-                       event.preventDefault();
-                       return true;
-                   }
-                   return false;
+				   switch (event.keyCode) {
+					 case event.DOM_VK_ESCAPE:
+					 case event.DOM_VK_RETURN:
+					   event.preventDefault();
+					   event.target.blur();
+					   break;
+					 case event.DOM_VK_TAB:
+					   this._tabDirection = event.shiftKey ? -1 : 1;
+					   this._focusNextField('info', this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
+					   event.preventDefault();
+					   return true;
+				   }
+				   return false;
 				]]>
 				</body>
 			</method>
@@ -2000,27 +2015,27 @@
 				<parameter name="result"/>
 				<body>
 				<![CDATA[
-                  if (!result) {
-                  	var itemType = Zotero.ItemTypes.getName(this.item.itemTypeID);
-                  	if (["report","newspaperArticle"].indexOf(itemType) == -1) {
-                  		result = {val:node.getAttribute("oldValue"),comment:node.getAttribute("oldComment")};
-                  	} else {
-                  		result = {val:"",comment:""};
-                  	}
-                  }
-                  var tabindex = node.setAttribute("ztabindex", tabindex);
+				  if (!result) {
+				  	var itemType = Zotero.ItemTypes.getName(this.item.itemTypeID);
+				  	if (["report","newspaperArticle"].indexOf(itemType) == -1) {
+				  		result = {val:node.getAttribute("oldValue"),comment:node.getAttribute("oldComment")};
+				  	} else {
+				  		result = {val:"",comment:""};
+				  	}
+				  }
+				  var tabindex = node.setAttribute("ztabindex", tabindex);
 
-                  var valueElement = document.createElement("menulist");
-                  valueElement.setAttribute("id","jurisdiction-menu");
-                  valueElement.setAttribute("ztabindex", tabindex);
-                  valueElement.setAttribute("flex","1");
-                  valueElement.setAttribute("class", "zotero-clicky");
-                  valueElement.setAttribute("onclick","document.getBindingParent(this).showJurisdictionEditor(this);");
-                  valueElement.setAttribute("value",result.comment);
-                  valueElement.setAttribute("label",result.val);
-                  valueElement.setAttribute("tooltiptext",result.val);
-                  node.parentNode.replaceChild(valueElement,node);
-                  this.setJurisdictionKey(result.comment, valueElement);
+				  var valueElement = document.createElement("menulist");
+				  valueElement.setAttribute("id","jurisdiction-menu");
+				  valueElement.setAttribute("ztabindex", tabindex);
+				  valueElement.setAttribute("flex","1");
+				  valueElement.setAttribute("class", "zotero-clicky");
+				  valueElement.setAttribute("onclick","document.getBindingParent(this).showJurisdictionEditor(this);");
+				  valueElement.setAttribute("value",result.comment);
+				  valueElement.setAttribute("label",result.val);
+				  valueElement.setAttribute("tooltiptext",result.val);
+				  node.parentNode.replaceChild(valueElement,node);
+				  this.setJurisdictionKey(result.comment, valueElement);
 /*
 					if (this._tabDirection) {
 						if (!focusMode) {
@@ -2039,15 +2054,15 @@
 				<parameter name="textbox"/>
 				<body>
 				<![CDATA[
-                  var result;
-                  if (textbox.value) {
-                   	// Comment is the tag code, value is the tag description
-                   	result = this.getJurisdictionResult(textbox);
-                  }
-                  // Close editor
-                  // comment = key
-                  // val = description
-                  this.hideJurisdictionEditor(textbox, result);
+				  var result;
+				  if (textbox.value) {
+				   	// Comment is the tag code, value is the tag description
+				   	result = this.getJurisdictionResult(textbox);
+				  }
+				  // Close editor
+				  // comment = key
+				  // val = description
+				  this.hideJurisdictionEditor(textbox, result);
 				]]>
 				</body>
 			</method>
@@ -2056,13 +2071,13 @@
 				<parameter name="textbox"/>
 				<body>
 				<![CDATA[
-                  var controller = textbox.controller;
-                  for (var i=0; i<controller.matchCount; i++) {
-                  	if (controller.getValueAt(i) == textbox.value) {
-                    	return {val:controller.getValueAt(i),comment:controller.getCommentAt(i)};
-                    }
-                  }
-                  return false;
+				  var controller = textbox.controller;
+				  for (var i=0; i<controller.matchCount; i++) {
+				  	if (controller.getValueAt(i) == textbox.value) {
+						return {val:controller.getValueAt(i),comment:controller.getCommentAt(i)};
+					}
+				  }
+				  return false;
 				]]>
 				</body>
 			</method>
@@ -3562,8 +3577,8 @@ if (oldCreator.id) {
 			</method>
 
 			<method name="setJurisdictionKey">
-              <parameter name="key"/>
-              <parameter name="node"/>
+			  <parameter name="key"/>
+			  <parameter name="node"/>
 			  <body>
 				<![CDATA[
 					var jurisdictionDefaultNode = document.getElementById('jurisdiction-default');
