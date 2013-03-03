@@ -30,6 +30,8 @@ Zotero.Attachments = new function(){
 	this.LINK_MODE_LINKED_URL = 3;
 	this.BASE_PATH_PLACEHOLDER = 'attachments:';
 	
+	this.SNAPSHOT_MIMETYPES = ["text/html", "application/xhtml+xml"];
+	
 	this.importFromFile = importFromFile;
 	this.linkFromFile = linkFromFile;
 	this.importSnapshotFromFile = importSnapshotFromFile;
@@ -574,7 +576,7 @@ Zotero.Attachments = new function(){
 				};
 			}
 			
-			if (mimeType === 'text/html' || mimeType === 'application/xhtml+xml') {
+			if (this.SNAPSHOT_MIMETYPES.indexOf(mimeType) != -1) {
 				var sync = true;
 				
 				// Load WebPageDump code

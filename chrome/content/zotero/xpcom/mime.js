@@ -330,6 +330,8 @@ Zotero.MIME = new function(){
 				var mimeType = xmlhttp.channel.contentType;
 			}
 			
+			if(!mimeType) mimeType = 'application/octet-stream';	//unknown item type according to RFC 2046 section 4.5.1
+			
 			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
 						.createInstance(Components.interfaces.nsIURL);
 			nsIURL.spec = url;
