@@ -164,10 +164,21 @@ var Zotero_RTFScan = new function() {
 		const creatorSplitRe = /(?:,| *(?:and|\&)) +/g;
 		var citationRe = new RegExp('(\\\\\\{|; )('+creatorRe+',? (?:"([^"]+)(?:,"|",) )?([0-9]{4})[a-z]?)(?:,(?: pp?\.?)? ([^ )]+))?(?=;|\\\\\\})|(([A-Z][^ .,;]+)(,? et al\\.?)? (\\\\\\{([0-9]{4})[a-z]?\\\\\\}))', "gm");
 		
-		// read through RTF file and display items as they're found
-		// we could read the file in chunks, but unless people start having memory issues, it's
-		// probably faster and definitely simpler if we don't
-		contents = Zotero.File.getContents(inputFile).replace(/([^\\\r])\r?\n/, "$1 ").replace("\\'92", "'", "g").replace("\\rquote ", "’");
+		/* read through RTF file and display items as they're found
+		we could read the file in chunks, but unless people start having memory issues, it's
+		probably faster and definitely simpler if we don't.
+		Unescaping:
+		Unescape first utf then hexdec characters. E.g. LibreOffice prints both, so we want to get rid of immediately
+		following hexdec when unescaping utf. According to RTF specs, \ucN specifies the number of ANSI characters that follow the escaped utf to describe it for older RTF readers
+		but I've never actually seen it. \uc0 with empty curly brackets after the escaped character does exist though, so we account for that.
+		Example: For "Schröder" the following sequences will work: Schr\u246\'f6der (Libre Office) Schr\'f6der (e.g. WordPad) Schr\uc0\u246{}der (e.g. Zotero's own output)
+		While the utf unescaping will work for all characters, the hexdec only work until 255 - beyond that RTF seems quite unstable across different implementations anyway.
+		*/
+		contents = Zotero.File.getContents(inputFile).replace(/([^\\\r])\r?\n/, "$1 ").replace("\\'92", "'", "g").replace("\\rquote ", "’").
+			replace(/(\uc0)?\\u(\d+)(\\\'[a-f0-9]{2})?(\{\})?/g, function(){ return String.fromCharCode(arguments[2])}).
+			replace(/(\uc0)?\\\'([a-f0-9]{2})(\{\})?/g, function(){return String.fromCharCode(parseInt(arguments[2], 16))});
+
+		
 		var m;
 		var lastCitation = false;
 		while((m = citationRe.exec(contents))) {
@@ -191,6 +202,7 @@ var Zotero_RTFScan = new function() {
 				var start = citationRe.lastIndex-m[11].length;
 				var end = citationRe.lastIndex;
 			}
+
 			citationString = citationString.replace("\\{", "{", "g").replace("\\}", "}", "g");
 			var suppressAuthor = !m[2];
 			
