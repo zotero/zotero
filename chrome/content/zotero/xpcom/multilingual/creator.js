@@ -29,7 +29,7 @@ Zotero.MultiCreator.prototype.setFields = function (fields, lang) {
 		this._key[lang].firstName = Zotero.MultiCreator.tidy(fields.firstName);
 		this._key[lang].lastName = Zotero.MultiCreator.tidy(fields.lastName);
 		this._key[lang].shortName = Zotero.MultiCreator.tidy(fields.shortName);
-		if ("undefined" !== typeof fields.fieldMode) {
+		if ("undefined" !== typeof this.parent.fieldMode) {
 			this._key[lang].fieldMode = this.parent.fieldMode;
 		}
 		if ("undefined" !== typeof fields.birthYear) {
