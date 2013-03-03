@@ -184,15 +184,16 @@ var Zotero_RecognizePDF = new function() {
 						return Zotero.HTTP.promise("GET", url, {"responseType":"document"})
 					})
 					.then(function(xmlhttp) {
+						var doc = xmlhttp.response,
+							deferred = Q.defer(),
+							translate = new Zotero.Translate.Web();
+
 						if(Zotero.Utilities.xpath(doc, "//form[@action='Captcha']").length) {
 							// Hit CAPTCHA
 							limited = true;
 							throw new Zotero.Exception.Alert("recognizePDF.limit");
 						}
-
-						var doc = xmlhttp.response,
-							deferred = Q.defer(),
-							translate = new Zotero.Translate.Web();
+						
 						translate.setTranslator("57a00950-f0d1-4b41-b6ba-44ff0fc30289");
 						translate.setDocument(Zotero.HTTP.wrapDocument(doc, url));
 						translate.setHandler("translators", function(translate, detected) {
