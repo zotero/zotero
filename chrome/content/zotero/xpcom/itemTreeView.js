@@ -335,7 +335,7 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 		var field = visibleFields[i];
 		switch (field) {
 			case 'hasAttachment':
-			case 'hasNote':
+			case 'numNotes':
 				continue;
 			
 			case 'year':
@@ -897,7 +897,7 @@ Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 	var val;
 	
 	// Image only
-	if (column.id === "zotero-items-column-hasAttachment" || column.id === "zotero-items-column-hasNote") {
+	if (column.id === "zotero-items-column-hasAttachment") {
 		return;
 	}
 	else if(column.id == "zotero-items-column-type")
@@ -907,6 +907,9 @@ Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 	// Year column is just date field truncated
 	else if (column.id == "zotero-items-column-year") {
 		val = obj.getField('date', true).substr(0, 4)
+	}
+	else if (column.id === "zotero-items-column-numNotes") {
+		val = obj.numNotes();
 	}
 	else {
 		var col = column.id.substring(20);
@@ -1058,19 +1061,6 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 			}
 			else {
 				return "chrome://zotero/skin/bullet_blue_empty.png";
-			}
-		}
-	}
-	else if (col.id == 'zotero-items-column-hasNote') {
-		if (this._itemGroup.isTrash()) return false;
-		
-		var treerow = this._getItemAtRow(row);
-		if (treerow.level === 0 && treerow.ref.isRegularItem() && treerow.ref.numNotes(false, true)) {
-			return "chrome://zotero/skin/bullet_yellow.png";
-		}
-		else if (treerow.ref.isAttachment()) {
-			if (treerow.ref.hasNote()) {
-				return "chrome://zotero/skin/bullet_yellow.png";
 			}
 		}
 	}
@@ -1330,12 +1320,11 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			};
 			break;
 		
-		case 'hasNote':
+		case 'numNotes':
 			getField = function (row) {
-				if (!row.ref.isRegularItem()) {
-					return 0;
-				}
-				return row.ref.numNotes(false, true) ? 1 : 0;
+				// Sort descending by default
+				order = !order;
+				return row.numNotes(false, true) || 0;
 			};
 			break;
 		
@@ -3006,4 +2995,11 @@ Zotero.ItemTreeView.TreeRow = function(ref, level, isOpen)
 Zotero.ItemTreeView.TreeRow.prototype.getField = function(field, unformatted)
 {
 	return this.ref.getField(field, unformatted, true);
+}
+
+Zotero.ItemTreeView.TreeRow.prototype.numNotes = function() {
+	if (!this.ref.isRegularItem()) {
+		return '';
+	}
+	return this.ref.numNotes(false, true) || '';
 }

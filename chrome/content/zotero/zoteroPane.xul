@@ -507,7 +507,7 @@
 									zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
 								<treecol
-									id="zotero-items-column-hasNote"
+									id="zotero-items-column-numNotes" hidden="true"
 									class="treecol-image"
 									label="&zotero.tabs.notes.label;"
 									src="chrome://zotero/skin/treeitem-note-small.png"
