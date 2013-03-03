@@ -395,7 +395,7 @@ Zotero.Attachments = new function(){
 			}
 		}
 		
-		if (mimeType) {
+		if (mimeType || mimeType === '') {
 			return process(mimeType, Zotero.MIME.hasNativeHandler(mimeType));
 		}
 		else {
