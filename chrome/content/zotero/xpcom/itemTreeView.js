@@ -1308,10 +1308,15 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		
 		case 'hasAttachment':
 			getField = function (row) {
-				if (!row.ref.isRegularItem()) {
+				if (row.ref.isAttachment()) {
+					var state = row.ref.fileExists ? 1 : -1;
+				}
+				else if (row.ref.isRegularItem()) {
+					var state = row.ref.getBestAttachmentState();
+				}
+				else {
 					return 0;
 				}
-				var state = row.ref.getBestAttachmentState();
 				// Make sort order present, missing, empty when ascending
 				if (state === -1) {
 					state = 2;

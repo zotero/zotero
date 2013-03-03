@@ -232,7 +232,7 @@
 					flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 				<splitter class="tree-splitter"/>
 				<treecol
-					id="zotero-items-column-hasAttachment"
+					id="zotero-items-column-hasAttachment" hidden="true"
 					class="treecol-image"
 					label="&zotero.tabs.attachments.label;"
 					src="chrome://zotero/skin/attach-small.png"
