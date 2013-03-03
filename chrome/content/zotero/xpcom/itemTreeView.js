@@ -37,8 +37,10 @@
 Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 {
 	this.wrappedJSObject = this;
+	this.rowCount = 0;
 	
 	this._initialized = false;
+	this._skipKeypress = false;
 	
 	this._itemGroup = itemGroup;
 	this._sourcesOnly = sourcesOnly;
@@ -50,7 +52,7 @@ Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 	this._needsSort = false;
 	
 	this._dataItems = [];
-	this.rowCount = 0;
+	this._itemImages = {};
 	
 	this._unregisterID = Zotero.Notifier.registerObserver(this, ['item', 'collection-item', 'share-items', 'bucket']);
 }
@@ -136,44 +138,118 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 		
 		// Add a keypress listener for expand/collapse
 		var tree = this._treebox.treeBody.parentNode;
-		var me = this;
+		var self = this;
+		var coloredTagsRE = new RegExp("^[1-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1}$");
 		var listener = function(event) {
+			if (self._skipKeyPress) {
+				self._skipKeyPress = false;
+				return;
+			}
+			
 			// Handle arrow keys specially on multiple selection, since
 			// otherwise the tree just applies it to the last-selected row
 			if (event.keyCode == 39 || event.keyCode == 37) {
-				if (me._treebox.view.selection.count > 1) {
+				if (self._treebox.view.selection.count > 1) {
 					switch (event.keyCode) {
 						case 39:
-							me.expandSelectedRows();
+							self.expandSelectedRows();
 							break;
 							
 						case 37:
-							me.collapseSelectedRows();
+							self.collapseSelectedRows();
 							break;
 					}
 					
 					event.preventDefault();
 				}
-				
 				return;
 			}
 			
-			var key = String.fromCharCode(event.which);
-			if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
-				me.expandAllRows();
-				event.preventDefault();
+			// Ignore other non-character keypresses
+			if (!event.charCode) {
 				return;
 			}
-			else if (key == '-' && !(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)) {
-				me.collapseAllRows();
-				event.preventDefault();
-				return;
-			}
+			
+			event.preventDefault();
+			
+			Q.fcall(function () {
+				var key = String.fromCharCode(event.which);
+				if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
+					self.expandAllRows();
+					return false;
+				}
+				else if (key == '-' && !(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)) {
+					self.collapseAllRows();
+					return false;
+				}
+				else if (coloredTagsRE.test(key)) {
+					let libraryID = self._itemGroup.libraryID;
+					libraryID = libraryID ? parseInt(libraryID) : 0;
+					let position = parseInt(key) - 1;
+					return Zotero.Tags.getColorByPosition(libraryID, position)
+					.then(function (colorData) {
+						// If a color isn't assigned to this number, allow key navigation,
+						// though I'm not sure this is a good idea.
+						if (!colorData) {
+							return true;
+						}
+						
+						var items = self.getSelectedItems();
+						return Zotero.Tags.toggleItemsListTags(libraryID, items, colorData.name)
+						.then(function () {
+							return false;
+						});
+					});
+				}
+				return true;
+			})
+			// We have to disable key navigation on the tree in order to
+			// keep it from acting on the 1-6 keys used for colored tags.
+			// To allow navigation with other keys, we temporarily enable
+			// key navigation and recreate the keyboard event. Since
+			// that will trigger this listener again, we set a flag to
+			// ignore the event, and then clear the flag above when the
+			// event comes in. I see no way this could go wrong...
+			.then(function (resend) {
+				if (!resend) {
+					return;
+				}
+				
+				tree.disableKeyNavigation = false;
+				self._skipKeyPress = true;
+				var nsIDWU = Components.interfaces.nsIDOMWindowUtils
+				var domWindowUtils = event.originalTarget.ownerDocument.defaultView
+					.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+					.getInterface(nsIDWU);
+				var modifiers = 0;
+				if (event.ctrlKey) {
+					modifiers |= nsIDWU.MODIFIER_CTRL;
+				}
+				if (event.shiftKey) {
+					modifiers |= nsIDWU.MODIFIER_SHIFT;
+				}
+				if (event.metaKey) {
+					modifiers |= nsIDWU.MODIFIER_META;
+				}
+				domWindowUtils.sendKeyEvent(
+					'keypress',
+					event.keyCode,
+					event.charCode,
+					modifiers
+				);
+				tree.disableKeyNavigation = true;
+			})
+			.catch(function (e) {
+				Zotero.debug(e, 1);
+				Components.utils.reportError(e);
+			})
+			.done();
 		};
 		// Store listener so we can call removeEventListener()
 		// in overlay.js::onCollectionSelected()
 		this.listener = listener;
-		tree.addEventListener('keypress', listener, false);
+		tree.addEventListener('keypress', listener);
+		
 		// This seems to be the only way to prevent Enter/Return
 		// from toggle row open/close. The event is handled by
 		// handleKeyPress() in zoteroPane.js.
@@ -371,17 +447,22 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 					'zotero-items-column-' + extraData.column
 				);
 				for each(var id in ids) {
+					if (extraData.column == 'title') {
+						delete this._itemImages[id];
+					}
 					this._treebox.invalidateCell(this._itemRowMap[id], col);
 				}
 			}
 			else {
 				for each(var id in ids) {
+					delete this._itemImages[id];
 					this._treebox.invalidateRow(this._itemRowMap[id]);
 				}
 			}
 		}
 		// Redraw the whole tree
 		else {
+			this._itemImages = {};
 			this._treebox.invalidate();
 		}
 		return;
@@ -513,6 +594,8 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 					this._refreshHashMap();
 				}
 				var row = this._itemRowMap[id];
+				// Clear item type icon and tag colors
+				delete this._itemImages[id];
 				
 				// Deleted items get a modify that we have to ignore when
 				// not viewing the trash
@@ -898,7 +981,51 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 {
 	if(col.id == 'zotero-items-column-title')
 	{
-		return this._getItemAtRow(row).ref.getImageSrc();
+		// Get item type icon and tag swatches
+		var item = this._getItemAtRow(row).ref;
+		var itemID = item.id;
+		if (this._itemImages[itemID]) {
+			return this._itemImages[itemID];
+		}
+		var uri = item.getImageSrc();
+		var tags = item.getTags();
+		if (!tags.length) {
+			this._itemImages[itemID] = uri;
+			return uri;
+		}
+		
+		//Zotero.debug("Generating tree image for item " + itemID);
+		
+		var colorData = [];
+		for (let i=0, len=tags.length; i<len; i++) {
+			let libraryIDInt = item.libraryIDInt; // TEMP
+			colorData.push(Zotero.Tags.getColor(libraryIDInt, tags[i].name));
+		}
+		var self = this;
+		Q.all(colorData)
+		.then(function (colorData) {
+			colorData = colorData.filter(function (val) val !== false);
+			if (!colorData.length) {
+				return false;
+			}
+			colorData.sort(function (a, b) {
+				return a.position - b.position;
+			});
+			var colors = colorData.map(function (val) val.color);
+			return Zotero.Tags.generateItemsListImage(colors, uri);
+		})
+		// When the promise is fulfilled, the data URL is ready, so invalidate
+		// the cell to force requesting it again
+		.then(function (dataURL) {
+			self._itemImages[itemID] = dataURL ? dataURL : uri;
+			if (dataURL) {
+				self._treebox.invalidateCell(row, col);
+			}
+		})
+		.done();
+		
+		this._itemImages[itemID] = uri;
+		return uri;
 	}
 	else if (col.id == 'zotero-items-column-hasAttachment') {
 		if (this._itemGroup.isTrash()) return false;
@@ -2830,36 +2957,11 @@ Zotero.ItemTreeView.prototype.onDragExit = function (event) {
 ////////////////////////////////////////////////////////////////////////////////
 
 Zotero.ItemTreeView.prototype.isSeparator = function(row) 						{ return false; }
-Zotero.ItemTreeView.prototype.getRowProperties = function(row, prop) {
-	var treeRow = this._getItemAtRow(row);
-	var itemID = treeRow.ref.id;
-	
-	// Set background color for selected items with colored tags
-	if (this.selection.isSelected(row)) {
-		if (color = Zotero.Tags.getItemColor(itemID)) {
-			var aServ = Components.classes["@mozilla.org/atom-service;1"].
-				getService(Components.interfaces.nsIAtomService);
-			prop.AppendElement(aServ.getAtom("color" + color.substr(1)));
-		}
-	}
-}
-Zotero.ItemTreeView.prototype.getColumnProperties = function(col, prop) { }
+Zotero.ItemTreeView.prototype.getRowProperties = function(row, prop) {}
+Zotero.ItemTreeView.prototype.getColumnProperties = function(col, prop) {}
 Zotero.ItemTreeView.prototype.getCellProperties = function(row, col, prop) {
 	var treeRow = this._getItemAtRow(row);
 	var itemID = treeRow.ref.id;
-	
-	// Set tag colors
-	//
-	// Don't set the text color if the row is selected, in which case the background
-	// color is set in getRowProperties() instead, unless the tree isn't focused,
-	// in which case it's not
-	if (!this.selection.isSelected(row) || !this._treebox.focused) {
-		if (color = Zotero.Tags.getItemColor(itemID)) {
-			var aServ = Components.classes["@mozilla.org/atom-service;1"].
-				getService(Components.interfaces.nsIAtomService);
-			prop.AppendElement(aServ.getAtom("color" + color.substr(1)));
-		}
-	}
 	
 	// Mark items not matching search as context rows, displayed in gray
 	if (this._searchMode && !this._searchItemIDs[itemID]) {

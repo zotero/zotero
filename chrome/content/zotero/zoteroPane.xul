@@ -86,7 +86,6 @@
 	</popup>
 	
 	<stack id="zotero-pane-stack">
-		
 		<!-- Barrier to prevent tabbing into Zotero pane when busy -->
 		<box id="zotero-pane-tab-catcher-top" hidden="true" align="center" pack="center" style="opacity: 0">
 			<checkbox/>
@@ -324,9 +323,11 @@
 				
 				<vbox id="zotero-items-pane" zotero-persist="width" flex="1">
 					<deck id="zotero-items-pane-content" selectedIndex="0" flex="1">
+						<!-- Key navigation is handled by listener in itemTreeView.js -->
 						<tree 
 							id="zotero-items-tree" context="zotero-itemmenu"
 							enableColumnDrag="true"
+							disableKeyNavigation="true"
 							onfocus="if (ZoteroPane_Local.itemsView.rowCount &amp;&amp; !ZoteroPane_Local.itemsView.selection.count) { ZoteroPane_Local.itemsView.selection.select(0); }"
 							onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
 							onkeypress="ZoteroPane_Local.handleKeyPress(event, this.id)"

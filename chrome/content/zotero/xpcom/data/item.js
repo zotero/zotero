@@ -113,6 +113,8 @@ Zotero.Item.prototype.__defineGetter__('itemID', function () {
 });
 Zotero.Item.prototype.__defineSetter__('id', function (val) { this.setField('id', val); });
 Zotero.Item.prototype.__defineGetter__('libraryID', function () { return this.getField('libraryID'); });
+// Temporary until everything expects an integer
+Zotero.Item.prototype.__defineGetter__('libraryIDInt', function () { var libraryID = this.getField('libraryID'); return libraryID ? parseInt(libraryID) : 0; });
 Zotero.Item.prototype.__defineSetter__('libraryID', function (val) { this.setField('libraryID', val); });
 Zotero.Item.prototype.__defineGetter__('key', function () { return this.getField('key'); });
 Zotero.Item.prototype.__defineSetter__('key', function (val) { this.setField('key', val) });

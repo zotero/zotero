@@ -136,8 +136,15 @@
 <!ENTITY zotero.tagSelector.selectVisible			"Select Visible">
 <!ENTITY zotero.tagSelector.clearVisible				"Deselect Visible">
 <!ENTITY zotero.tagSelector.clearAll					"Deselect All">
+<!ENTITY zotero.tagSelector.assignColor              "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag				"Rename Tag…">
 <!ENTITY zotero.tagSelector.deleteTag				"Delete Tag…">
+
+<!ENTITY zotero.tagColorChooser.title          "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.color          "Color:">
+<!ENTITY zotero.tagColorChooser.position       "Position:">
+<!ENTITY zotero.tagColorChooser.setColor       "Set Color">
+<!ENTITY zotero.tagColorChooser.removeColor    "Remove Color">
 
 <!ENTITY zotero.lookup.description				"Enter the ISBN, DOI, or PMID to look up in the box below.">
 

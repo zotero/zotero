@@ -37,6 +37,7 @@
 		<implementation>
 			<field name="clickHandler"/>
 			<field name="_tagColors"/>
+			<field name="_notifierID"/>
 			
 			<!-- Modes are predefined settings groups for particular tasks -->
 			<field name="_mode">"view"</field>
@@ -109,38 +110,64 @@
 				if (this.hasAttribute('mode')) {
 					this.mode = this.getAttribute('mode');
 				}
+				
+				this._notifierID = Zotero.Notifier.registerObserver(this, ['setting']);
 			]]>
 			</constructor>
+			
+			
+			<destructor>
+			<![CDATA[
+				Zotero.Notifier.unregisterObserver(this._notifierID);
+			]]>
+			</destructor>
+			
+			
+			<method name="notify">
+				<parameter name="event"/>
+				<parameter name="type"/>
+				<parameter name="ids"/>
+				<body>
+				<![CDATA[
+					if (type == 'setting') {
+						if (ids.some(function (val) val.split("/")[1] == 'tagColors') && this.item) {
+							this.reload();
+						}
+						return;
+					}
+				]]>
+				</body>
+			</method>
+			
 			
 			<method name="reload">
 				<body>
 					<![CDATA[
+						var self = this;
 						Zotero.debug('Reloading tags');
+						var addButton = self.id('addButton');
+						addButton.hidden = !self.editable;
 						
-						var addButton = this.id('addButton');
-						addButton.hidden = !this.editable;
-						
-						var rows = this.id('tagRows');
-						while(rows.hasChildNodes())
-							rows.removeChild(rows.firstChild);
-						
-						var tags = this.item.getTags();
-						this._tagColors = Zotero.Tags.getColors();
-						
-						if(tags)
-						{
-							for (var i=0; i<tags.length; i++) {
-								this.addDynamicRow(tags[i], i+1);
+						return Zotero.Tags.getColors(self.item.libraryIDInt)
+						.then(function (colors) {
+							self._tagColors = colors;
+							
+							var rows = self.id('tagRows');
+							while(rows.hasChildNodes()) {
+								rows.removeChild(rows.firstChild);
 							}
-							this.updateCount(tags.length);
+							var tags = self.item.getTags();
+							if (tags) {
+								for (var i=0; i<tags.length; i++) {
+									self.addDynamicRow(tags[i], i+1);
+								}
+								
+								//self.fixPopup();
+							}
 							
-							//this.fixPopup();
-							
-							return tags.length;
-						}
-						
-						this.updateCount(0);
-						return 0;
+							self.updateCount(0);
+						})
+						.done();
 					]]>
 				</body>
 			</method>
@@ -264,8 +291,13 @@
 					}
 					
 					// Tag color
-					if (color = this._tagColors[valueText]) {
-						valueElement.setAttribute('style', 'color:' + this._tagColors[valueText]);
+					let color = this._tagColors[valueText];
+					if (color) {
+						valueElement.setAttribute(
+							'style',
+							'color:' + this._tagColors[valueText].color + '; '
+								+ 'font-weight: bold'
+						);
 					}
 					
 					return valueElement;

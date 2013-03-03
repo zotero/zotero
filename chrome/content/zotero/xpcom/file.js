@@ -231,6 +231,27 @@ Zotero.File = new function(){
 		return deferred.promise; 
 	};
 	
+	
+	/**
+	 * Generate a data: URI from an nsIFile
+	 *
+	 * From https://developer.mozilla.org/en-US/docs/data_URIs
+	 */
+	this.generateDataURI = function (file) {
+		var contentType = Components.classes["@mozilla.org/mime;1"]
+			.getService(Components.interfaces.nsIMIMEService)
+			.getTypeFromFile(file);
+		var inputStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+			.createInstance(Components.interfaces.nsIFileInputStream);
+		inputStream.init(file, 0x01, 0600, 0);
+		var stream = Components.classes["@mozilla.org/binaryinputstream;1"]
+			.createInstance(Components.interfaces.nsIBinaryInputStream);
+		stream.setInputStream(inputStream);
+		var encoded = btoa(stream.readBytes(stream.available()));
+		return "data:" + contentType + ";base64," + encoded;
+	}
+	
+	
 	function copyToUnique(file, newFile) {
 		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
 		var newName = newFile.leafName;

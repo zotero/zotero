@@ -52,6 +52,10 @@ Zotero.Sync = new function() {
 				singular: 'Relation',
 				plural: 'Relations'
 			},
+			setting: {
+				singular: 'Setting',
+				plural: 'Settings'
+			}
 		};
 	});
 	
@@ -128,6 +132,10 @@ Zotero.Sync = new function() {
 		}
 		
 		for (var type in this.syncObjects) {
+			if (type == 'setting') {
+				continue;
+			}
+			
 			var Types = this.syncObjects[type].plural; // 'Items'
 			var types = Types.toLowerCase(); // 'items'
 			
@@ -439,9 +447,15 @@ Zotero.Sync.EventListener = new function () {
 					continue;
 				}
 				
-				var oldItem = extraData[ids[i]].old;
-				var libraryID = oldItem.primary.libraryID;
-				var key = oldItem.primary.key;
+				var libraryID, key;
+				if (type == 'setting') {
+					[libraryID, key] = ids[i].split("/");
+				}
+				else {
+					var oldItem = extraData[ids[i]].old;
+					libraryID = oldItem.primary.libraryID;
+					key = oldItem.primary.key;
+				}
 				
 				if (!key) {
 					throw("Key not provided in notifier object in "
@@ -2748,6 +2762,20 @@ Zotero.Sync.Server.Data = new function() {
 			typeloop:
 			for each(var objectNode in updatedNode.xpath(types + "/" + type)) {
 				var libraryID = _libID(objectNode.getAttribute('libraryID'));
+				
+				// Process remote settings
+				if (type == 'setting') {
+					var name = objectNode.getAttribute('name');
+					if (!libraryID) {
+						libraryID = 0;
+					}
+					Zotero.debug("Processing remote setting " + libraryID + "/" + name);
+					var version = objectNode.getAttribute('version');
+					var value = JSON.parse(objectNode.textContent);
+					Zotero.SyncedSettings.setSynchronous(libraryID, name, value, version, true);
+					continue;
+				}
+				
 				var key = objectNode.getAttribute('key');
 				var objLibraryKeyHash = Zotero[Types].makeLibraryKeyHash(libraryID, key);
 				
@@ -3117,6 +3145,18 @@ Zotero.Sync.Server.Data = new function() {
 				for each(var delNode in deletedObjectNodes) {
 					var libraryID = _libID(delNode.getAttribute('libraryID'));
 					var key = delNode.getAttribute('key');
+					
+					// Process remote settings deletions
+					if (type == 'setting') {
+						if (!libraryID) {
+							libraryID = 0;
+						}
+						Zotero.debug("Processing remote setting " + libraryID + "/" + key);
+						Zotero.Sync.EventListener.ignoreDeletions('setting', [libraryID + "/" + key]);
+						Zotero.SyncedSettings.setSynchronous(libraryID, key);
+						continue;
+					}
+					
 					var obj = Zotero[Types].getByLibraryAndKey(libraryID, key);
 					// Object can't be found
 					if (!obj) {
@@ -3391,6 +3431,10 @@ Zotero.Sync.Server.Data = new function() {
 			var types = Types.toLowerCase(); // 'items'
 			var objectsNode = false;
 			
+			if (type == 'setting') {
+				continue;
+			}
+			
 			Zotero.debug("Processing locally changed " + types);
 			
 			var libraryID, key;
@@ -3425,6 +3469,21 @@ Zotero.Sync.Server.Data = new function() {
 					objectsNode.appendChild(elem);
 				}
 			}
+		}
+		
+		// Add unsynced settings
+		var sql = "SELECT libraryID, setting, value FROM syncedSettings WHERE synced=0";
+		var rows = Zotero.DB.query(sql);
+		if (rows) {
+			var settingsNode = doc.createElement('settings');
+			for (var i=0; i<rows.length; i++) {
+				var settingNode = doc.createElement('setting');
+				settingNode.setAttribute('libraryID', rows[i].libraryID ? rows[i].libraryID : Zotero.libraryID);
+				settingNode.setAttribute('name', rows[i].setting);
+				settingNode.appendChild(doc.createTextNode(_xmlize(rows[i].value)));
+				settingsNode.appendChild(settingNode);
+			}
+			docElem.appendChild(settingsNode);
 		}
 		
 		// Deletions

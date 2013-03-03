@@ -664,6 +664,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			Zotero.Server.init();
 		}
 		
+		Zotero.Notifier.registerObserver(Zotero.Tags, 'setting');
+		
 		Zotero.Sync.init();
 		Zotero.Sync.Runner.init();
 		
