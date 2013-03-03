@@ -146,6 +146,7 @@ Zotero.Creator.prototype._set = function (field, val) {
 
 
 Zotero.Creator.prototype.setFields = function (fields) {
+    Zotero.debug("PPPXXX setFields(): "+fields.fieldMode);
 	this.firstName = fields.firstName;
 	this.lastName = fields.lastName;
 	this.fieldMode = fields.fieldMode;
@@ -404,11 +405,11 @@ Zotero.Creator.prototype.serialize = function () {
 	
 	obj.fields = {};
 	if (this.fieldMode == 1) {
-		obj.fields.name = this._lastName;
+		obj.fields.name = this.lastName;
 	}
 	else {
 		obj.fields.firstName = this.firstName;
-		obj.fields.lastName = this._lastName;
+		obj.fields.lastName = this.lastName;
 	}
 	obj.fields.fieldMode = this.fieldMode;
 	obj.fields.shortName = this.shortName;
