@@ -57,7 +57,8 @@ const CSL_TEXT_MAPPINGS = {
 	"collection-number":["seriesNumber","assemblyNumber","regnalYear","yearAsVolume"],
 	"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
 	"publisher-place":["place"],
-	"authority":["court", "legislativeBody", "issuingAuthority", "committee"],
+	"authority":["court", "legislativeBody", "issuingAuthority"],
+	"committee":["committee"],
 	"page":["pages"],
 	"volume":["volume","codeNumber"],
 	"issue":["issue"],
@@ -1777,6 +1778,14 @@ Zotero.Utilities = {
 			}
 		}
 		
+		// Clean up committee/legislativeBody
+		// This won't round-trip. We'll need a separate variable
+		// in CSL for the committee name eventually.
+		if (cslItem.committee && cslItem.authority) {
+			cslItem.authority = [cslItem.authority,cslItem.committee].join("|");
+			delete cslItem.committee;
+		}
+
 		// separate name variables
 		var authorID = Zotero.CreatorTypes.getPrimaryIDForType(item.itemType);
 		var creators = item.creators;

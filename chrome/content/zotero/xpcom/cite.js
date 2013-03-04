@@ -90,6 +90,12 @@ Zotero.Cite.System.retrieveItem = function(item) {
 		}
 	}
 
+	// Clean up committee/legislativeBody
+	if (cslItem.committee && cslItem.authority) {
+		cslItem.authority = [cslItem.authority,cslItem.committee].join("|");
+		delete cslItem.committee;
+	}
+
 	// separate name variables
 	var authorID = Zotero.CreatorTypes.getPrimaryIDForType(zoteroItem.itemTypeID);
 	var creators = zoteroItem.getCreators();
