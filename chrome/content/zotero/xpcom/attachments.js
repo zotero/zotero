@@ -224,7 +224,7 @@ Zotero.Attachments = new function(){
 		var urlRe = /^https?:\/\/[^\s]*$/;
 		var matches = urlRe.exec(url);
 		if (!matches) {
-			if(callback) callback(false);
+			//if(callback) setTimeout(1, function() { callback(false) }); //ensure that callback is asynchronous
 			throw ("Invalid URL '" + url + "' in Zotero.Attachments.importFromURL()");
 		}
 		
@@ -364,8 +364,7 @@ Zotero.Attachments = new function(){
 				}
 				
 				return attachmentItem;
-			}
-			catch (e){
+			} catch (e) {
 				Zotero.DB.rollbackTransaction();
 				
 				try {
@@ -564,6 +563,7 @@ Zotero.Attachments = new function(){
 				var f = function() {
 					Zotero.Fulltext.indexPDF(file, itemID);
 					Zotero.Notifier.trigger('refresh', 'item', itemID);
+					//shouldn't we call the callback here?
 				};
 			}
 			else {
