@@ -364,9 +364,6 @@ var Zotero_File_Interface = new function() {
 				translation.translate(libraryID);
 			}, 0);
 		} else {
-			// TODO: localize and remove fileInterface.fileFormatUnsupported string
-			var unsupportedFormat = "The selected file is not in a supported format.";
-			var viewSupportedFormats = "View Supported Formats...";
 			
 			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 									.getService(Components.interfaces.nsIPromptService);
@@ -375,10 +372,10 @@ var Zotero_File_Interface = new function() {
 			var index = ps.confirmEx(
 				null,
 				"",
-				unsupportedFormat,
+				Zotero.getString("fileInterface.unsupportedFormat"),
 				buttonFlags,
 				null,
-				viewSupportedFormats,
+				Zotero.getString("fileInterface.viewSupportedFormats"),
 				null, null, {}
 			);
 			if (index == 1) {

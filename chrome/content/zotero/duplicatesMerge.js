@@ -44,8 +44,7 @@ var Zotero_Duplicates_Pane = new function () {
 			}
 			
 			if (!item.isRegularItem() || [1,14].indexOf(item.itemTypeID) != -1) {
-				// TODO: localize
-				var msg = "Only top-level full items can be merged.";
+				var msg = Zotero.getString('pane.item.duplicates.onlyTopLevel');
 				ZoteroPane_Local.setItemPaneMessage(msg);
 				return false;
 			}
@@ -57,8 +56,7 @@ var Zotero_Duplicates_Pane = new function () {
 						var msg = Zotero.getString('pane.item.selected.multiple', items.length);
 					}
 					else {
-						// TODO: localize
-						var msg = "Merged items must all be of the same item type.";
+						var msg = Zotero.getString('pane.item.duplicates.onlySameItemType');
 					}
 					ZoteroPane_Local.setItemPaneMessage(msg);
 					return false;
@@ -112,7 +110,7 @@ var Zotero_Duplicates_Pane = new function () {
 			}, 0);
 		}
 		
-		button.label = "Merge " + (otherItems.length + 1) + " items";
+		button.label = Zotero.getString('pane.item.duplicates.mergeItems', (otherItems.length + 1));
 		itembox.hiddenFields = diff ? [] : ['dateAdded', 'dateModified'];
 		fieldSelect.hidden = !diff;
 		

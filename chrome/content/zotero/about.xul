@@ -51,7 +51,7 @@
 				<label class="zotero-text-link" href="http://www.zotero.org/support/credits_and_acknowledgments" value="&zotero.moreCreditsAndAcknowledgements;"/>
 			</vbox>
 			<vbox id="column2">
-				<label class="subhead" value="Citation &amp; Bibliography Processing"/>
+				<label class="subhead" value="&zotero.citationProcessing;"/>
 				<vbox class="subcontent">
 					<label class="zotero-text-link" href="http://citationstyles.org/" value="Citation Style Language"/>
 					<label class="zotero-text-link" href="http://bitbucket.org/fbennett/citeproc-js/" value="citeproc-js (Frank Bennett)"/>

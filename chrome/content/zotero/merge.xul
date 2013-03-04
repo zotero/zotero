@@ -28,7 +28,7 @@
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/merge.css" type="text/css"?>
 
-<!-- <!DOCTYPE window SYSTEM "chrome://zotero/locale/merge.dtd"> -->
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/merge.dtd">
 
 <wizard
 	id="zotero-merge-window"
@@ -44,13 +44,13 @@
 	<wizardpage onpageshow="Zotero_Merge_Window.init()"
 			onpagerewound="Zotero_Merge_Window.onBack(); return false"
 			onpageadvanced="return Zotero_Merge_Window.onNext()"
-			label="Conflict Resolution">
+			label="&zotero.merge.title;">
 		<description id="zotero-merge-instructions"/>
 		<zoteromergegroup flex="1"/>
 		<separator class="thin"/>
 		<hbox id="zotero-step-count">
 			<label id="zotero-merge-num-objects"/>
-			<label value="of"/>
+			<label value="&zotero.merge.of;"/>
 			<label id="zotero-merge-total-objects"/>
 		</hbox>
 	</wizardpage>
