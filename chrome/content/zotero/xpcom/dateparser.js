@@ -312,6 +312,11 @@ Zotero.DateParser = function () {
 		//
 		// Normalize the format and the year if it's a Japanese date
 		//
+	if (txt) {
+        txt = "" + txt;
+        // Remove things that look like times
+        txt = txt.replace(/\s*[0-9]{2}:[0-9]{2}(?::[0-9]+)/,"");
+        m = txt.match(jmd);
 		var m = txt.match(jmd);
 		if (m) {
             txt = txt.replace(/\s+/, "", "g");
@@ -536,6 +541,7 @@ Zotero.DateParser = function () {
 		}
 		return thedate;
 	}
+    }
 
 	// XXXX Should be extended when date ranges are supported in the DB.
 	function convertDateObjectToString (thedate) {
