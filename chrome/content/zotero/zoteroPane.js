@@ -2374,6 +2374,11 @@ var ZoteroPane = new function()
 		var t = event.originalTarget;
 		var tree = t.parentNode;
 		
+		// Ignore click on column headers
+		if (!tree.treeBoxObject) {
+			return;
+		}
+		
 		var row = {}, col = {}, obj = {};
 		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
 		if (row.value == -1) {
