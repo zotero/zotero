@@ -68,20 +68,22 @@ Zotero.Sync.Storage.WebDAV = (function () {
 					return false;
 				}
 				
-				if (req.responseXML) {
-					// TODO: other stuff, but this makes us forward-compatible
-					try {
-						var mtime = req.responseXML.getElementsByTagName('mtime')[0]
-					}
-					catch (e) {
-						Zotero.debug(e);
-						var mtime = "";
-					}
-					var seconds = false;
+				var seconds = false;
+				var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+					.createInstance(Components.interfaces.nsIDOMParser);
+				try {
+					var xml = parser.parseFromString(req.responseText, "text/xml");
+					var mtime = xml.getElementsByTagName('mtime')[0].textContent;
 				}
-				else {
+				catch (e) {
+					Zotero.debug(e);
+					var mtime = false;
+				}
+				
+				// TEMP
+				if (!mtime) {
 					mtime = req.responseText;
-					var seconds = true;
+					seconds = true;
 				}
 				
 				var invalid = false;
@@ -106,13 +108,15 @@ Zotero.Sync.Storage.WebDAV = (function () {
 						+ "' for item " + Zotero.Items.getLibraryKeyHash(item);
 					Zotero.debug(msg, 1);
 					Components.utils.reportError(msg);
-					deleteStorageFiles([item.key + ".prop"]);
-					throw _defaultError;
+					return deleteStorageFiles([item.key + ".prop"])
+					.then(function (results) {
+						throw new Error(_defaultError);
+					});
 				}
 				
 				return new Date(parseInt(mtime));
 			})
-			.fail(function (e) {
+			.catch(function (e) {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
 					Zotero.debug(req.responseText);
 					throw new Error("Unexpected status code " + e.status + " in " + funcName);
@@ -138,8 +142,8 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			+ '<hash>' + hash + '</hash>'
 			+ '</properties>';
 		
-		return Zotero.HTTP.promise("PUT", uri, prop,
-				{ debug: true, successCodes: [200, 201, 204] })
+		return Zotero.HTTP.promise("PUT", uri,
+				{ body: prop, debug: true, successCodes: [200, 201, 204] })
 			.then(function (req) {
 				return { mtime: mtime, hash: hash };
 			})
@@ -385,28 +389,22 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			
 			switch (req.status) {
 				case 201:
-					callback(uri, Zotero.Sync.Storage.SUCCESS);
-					break;
+					return [uri, Zotero.Sync.Storage.SUCCESS];
 				
 				case 401:
-					callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
-					return;
+					return [uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED];
 				
 				case 403:
-					callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
-					return;
+					return [uri, Zotero.Sync.Storage.ERROR_FORBIDDEN];
 				
 				case 405:
-					callback(uri, Zotero.Sync.Storage.ERROR_NOT_ALLOWED);
-					return;
+					return [uri, Zotero.Sync.Storage.ERROR_NOT_ALLOWED];
 				
 				case 500:
-					callback(uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR);
-					return;
+					return [uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR];
 				
 				default:
-					callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
-					return;
+					return [uri, Zotero.Sync.Storage.ERROR_UNKNOWN];
 			}
 		});
 	}
@@ -465,7 +463,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	 *										'deleted', 'missing', and 'error',
 	 *										each containing filenames
 	 */
-	function deleteStorageFiles(files, callback) {
+	function deleteStorageFiles(files) {
 		var results = {
 			deleted: [],
 			missing: [],
@@ -473,119 +471,95 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		};
 		
 		if (files.length == 0) {
-			if (callback) {
-				callback(results);
-			}
-			return;
+			return Q.resolve(results);
 		}
 		
-		for (var i=0; i<files.length; i++) {
-			let last = (i == files.length - 1);
-			let fileName = files[i];
-			
-			let deleteURI = rootURI;
-			// This should never happen, but let's be safe
-			if (!deleteURI.spec.match(/\/$/)) {
-				if (callback) {
-					callback(deleted);
-				}
-				Zotero.Sync.Storage.EventManager.error(
-					"Root URI does not end in slash in "
-						+ "Zotero.Sync.Storage.WebDAV.deleteStorageFiles()"
-				);
-			}
-			deleteURI.QueryInterface(Components.interfaces.nsIURL);
-			deleteURI.fileName = files[i];
-			deleteURI.QueryInterface(Components.interfaces.nsIURI);
-			Zotero.HTTP.WebDAV.doDelete(deleteURI, function (req) {
-				switch (req.status) {
-					case 204:
-					// IIS 5.1 and Sakai return 200
-					case 200:
-						var fileDeleted = true;
-						break;
-					
-					case 404:
-						var fileDeleted = false;
-						break;
-					
-					default:
-						if (last && callback) {
-							callback(results);
-						}
-						
-						results.error.push(fileName);
-						var msg = "An error occurred attempting to delete "
-							+ "'" + fileName
-							+ "' (" + req.status + " " + req.statusText + ").";
-						Zotero.Sync.Storage.EventManager.error(msg);
-				}
-				
-				// If an item file URI, get the property URI
-				var deletePropURI = getPropertyURIFromItemURI(deleteURI);
-				if (!deletePropURI) {
-					if (fileDeleted) {
-						results.deleted.push(fileName);
-					}
-					else {
-						results.missing.push(fileName);
-					}
-					if (last && callback) {
-						callback(results);
-					}
-					return;
-				}
-				
-				// If property file appears separately in delete queue,
-				// remove it, since we're taking care of it here
-				var propIndex = files.indexOf(deletePropURI.fileName);
-				if (propIndex > i) {
-					delete files[propIndex];
-					i--;
-					last = (i == files.length - 1);
-				}
-				
-				// Delete property file
-				Zotero.HTTP.WebDAV.doDelete(deletePropURI, function (req) {
+		let deleteURI = _rootURI.clone();
+		// This should never happen, but let's be safe
+		if (!deleteURI.spec.match(/\/$/)) {
+			throw new Error(
+				"Root URI does not end in slash in "
+				+ "Zotero.Sync.Storage.WebDAV.deleteStorageFiles()"
+			);
+		}
+		
+		results = Q.resolve(results);
+		files.forEach(function (fileName) {
+			results = results.then(function (results) {
+				let deleteURI = _rootURI.clone();
+				deleteURI.QueryInterface(Components.interfaces.nsIURL);
+				deleteURI.fileName = fileName;
+				deleteURI.QueryInterface(Components.interfaces.nsIURI);
+				return Zotero.HTTP.promise("DELETE", deleteURI, { successCodes: [200, 204, 404] })
+				.then(function (req) {
 					switch (req.status) {
 						case 204:
 						// IIS 5.1 and Sakai return 200
 						case 200:
-							results.deleted.push(fileName);
+							var fileDeleted = true;
 							break;
 						
 						case 404:
-							if (fileDeleted) {
-								results.deleted.push(fileName);
-							}
-							else {
-								results.missing.push(fileName);
-							}
+							var fileDeleted = false;
 							break;
-						
-						default:
-							var error = true;
 					}
 					
-					if (last && callback) {
-						callback(results);
+					// If an item file URI, get the property URI
+					var deletePropURI = getPropertyURIFromItemURI(deleteURI);
+					if (!deletePropURI) {
+						if (fileDeleted) {
+							results.deleted.push(fileName);
+						}
+						else {
+							results.missing.push(fileName);
+						}
+						return results;
 					}
 					
-					if (error) {
-						results.error.push(fileName);
-						var msg = "An error occurred attempting to delete "
-							+ "'" + fileName
-							+ "' (" + req.status + " " + req.statusText + ").";
-						Zotero.Sync.Storage.EventManager.error(msg);
+					// If property file appears separately in delete queue,
+					// remove it, since we're taking care of it here
+					var propIndex = files.indexOf(deletePropURI.fileName);
+					if (propIndex > i) {
+						delete files[propIndex];
+						i--;
+						last = (i == files.length - 1);
 					}
+					
+					// Delete property file
+					return Zotero.HTTP.promise("DELETE", deletePropURI, { successCodes: [200, 204, 404] })
+					.then(function (req) {
+						switch (req.status) {
+							case 204:
+							// IIS 5.1 and Sakai return 200
+							case 200:
+								results.deleted.push(fileName);
+								break;
+							
+							case 404:
+								if (fileDeleted) {
+									results.deleted.push(fileName);
+								}
+								else {
+									results.missing.push(fileName);
+								}
+								break;
+						}
+					});
+				})
+				.catch(function (e) {
+					results.error.push(fileName);
+					var msg = "An error occurred attempting to delete "
+						+ "'" + fileName
+						+ "' (" + e.status + " " + e.xmlhttp.statusText + ").";
 				});
 			});
-		}
+		});
+		return results;
 	}
 	
 	
 	/**
-	 * Checks for an invalid SSL certificate and displays a nice error
+	 * Checks for an invalid SSL certificate and throws a nice error
 	 */
 	function checkResponse(req) {
 		var channel = req.channel;
@@ -844,7 +818,6 @@ Zotero.Sync.Storage.WebDAV = (function () {
 				
 				if (!mdate) {
 					Zotero.debug("Remote file not found for item " + Zotero.Items.getLibraryKeyHash(item));
-					request.finish();
 					return false;
 				}
 				
@@ -895,9 +868,10 @@ Zotero.Sync.Storage.WebDAV = (function () {
 								Components.utils.reportError(msg);
 								
 								// Delete the orphaned prop file
-								deleteStorageFiles([item.key + ".prop"]);
-								
-								deferred.resolve(false);
+								deleteStorageFiles([item.key + ".prop"])
+								.finally(function (results) {
+									deferred.resolve(false);
+								});
 								return;
 							}
 							else if (status != 200) {
@@ -981,41 +955,41 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		return Q.fcall(function () {
 			return self._cacheCredentials();
 		})
-		.then(function () {
-			var lastSyncURI = this.rootURI;
-			lastSyncURI.spec += "lastsync";
-			return Zotero.HTTP.promise("GET", lastSyncURI,
-				{ debug: true, successCodes: [200, 404] });
-		})
-		.then(function (req) {
-			if (req.status == 404) {
-				Zotero.debug("No last WebDAV sync time");
-				return null;
-			}
-			
-			var lastModified = req.getResponseHeader("Last-Modified");
-			var date = new Date(lastModified);
-			Zotero.debug("Last successful WebDAV sync was " + date);
-			return Zotero.Date.toUnixTimestamp(date);
-		})
-		.fail(function (e) {
-			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-				if (e.status == 403) {
-					Zotero.debug("Clearing WebDAV authentication credentials", 2);
-					_cachedCredentials = false;
-				}
-				else {
-					throw("Unexpected status code " + e.status + " getting "
-						+ "WebDAV last sync time");
+			.then(function () {
+				var lastSyncURI = self.rootURI;
+				lastSyncURI.spec += "lastsync";
+				return Zotero.HTTP.promise("GET", lastSyncURI,
+					{ debug: true, successCodes: [200, 404] });
+			})
+			.then(function (req) {
+				if (req.status == 404) {
+					Zotero.debug("No last WebDAV sync time");
+					return null;
 				}
 				
-				return Q.reject(e);
-			}
-			// TODO: handle browser offline exception
-			else {
-				throw (e);
-			}
-		});
+				var lastModified = req.getResponseHeader("Last-Modified");
+				var date = new Date(lastModified);
+				Zotero.debug("Last successful WebDAV sync was " + date);
+				return Zotero.Date.toUnixTimestamp(date);
+			})
+			.fail(function (e) {
+				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+					if (e.status == 403) {
+						Zotero.debug("Clearing WebDAV authentication credentials", 2);
+						_cachedCredentials = false;
+					}
+					else {
+						throw("Unexpected status code " + e.status + " getting "
+							+ "WebDAV last sync time");
+					}
+					
+					return Q.reject(e);
+				}
+				// TODO: handle browser offline exception
+				else {
+					throw (e);
+				}
+			});
 	};
 	
 	
@@ -1068,31 +1042,28 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		}
 		
 		return Zotero.HTTP.promise("OPTIONS", this.rootURI)
-			.then(function (req) {
-				// TODO: promisify
-				checkResponse(req);
-				
-				Zotero.debug("Credentials are cached");
-				_cachedCredentials = true;
-			})
-			.fail(function (e) {
-				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					var msg = "Unexpected status code " + e.status + " "
-						+ "for OPTIONS request caching WebDAV credentials";
-					Zotero.debug(msg, 1);
-					Components.utils.reportError(msg);
-					throw new Error(_defaultErrorRestart);
-				}
-				throw e;
-			});
+		.then(function (req) {
+			checkResponse(req);
+			
+			Zotero.debug("Credentials are cached");
+			_cachedCredentials = true;
+		})
+		.fail(function (e) {
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+				var msg = "Unexpected status code " + e.status + " "
+					+ "for OPTIONS request caching WebDAV credentials";
+				Zotero.debug(msg, 1);
+				Components.utils.reportError(msg);
+				throw new Error(_defaultErrorRestart);
+			}
+			throw e;
+		});
 	};
 	
 	
-	/**
-	 * @param	{Function}	callback			Function to pass URI and result value to
-	 * @param	{Object}		errorCallbacks
-	 */
-	obj._checkServer = function (callback) {
+	obj._checkServer = function () {
+		var deferred = Q.defer();
+		
 		try {
 			// Clear URIs
 			this.init();
@@ -1103,26 +1074,22 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		catch (e) {
 			switch (e.name) {
 				case 'Z_ERROR_NO_URL':
-					callback(null, Zotero.Sync.Storage.ERROR_NO_URL);
-					return;
+					deferred.resolve([null, Zotero.Sync.Storage.ERROR_NO_URL]);
 				
 				case 'Z_ERROR_NO_USERNAME':
-					callback(null, Zotero.Sync.Storage.ERROR_NO_USERNAME);
-					return;
+					deferred.resolve([null, Zotero.Sync.Storage.ERROR_NO_USERNAME]);
 				
 				case 'Z_ERROR_NO_PASSWORD':
-					callback(null, Zotero.Sync.Storage.ERROR_NO_PASSWORD);
-					return;
+					deferred.resolve([null, Zotero.Sync.Storage.ERROR_NO_PASSWORD]);
 					
 				default:
 					Zotero.debug(e);
 					Components.utils.reportError(e);
-					callback(null, Zotero.Sync.Storage.ERROR_UNKNOWN);
-					return;
+					deferred.resolve([null, Zotero.Sync.Storage.ERROR_UNKNOWN]);
 			}
+			
+			return deferred.promise;
 		}
-		
-		var requestHolder = { request: null };
 		
 		var xmlstr = "<propfind xmlns='DAV:'><prop>"
 			// IIS 5.1 requires at least one property in PROPFIND
@@ -1133,10 +1100,14 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		var request = Zotero.HTTP.doOptions(uri, function (req) {
 			// Timeout
 			if (req.status == 0) {
-				checkResponse(req);
+				try {
+					checkResponse(req);
+				}
+				catch (e) {
+					deferred.reject(e);
+				}
 				
-				callback(uri, Zotero.Sync.Storage.ERROR_UNREACHABLE);
-				return;
+				return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_UNREACHABLE]);
 			}
 			
 			Zotero.debug(req.getAllResponseHeaders());
@@ -1145,26 +1116,21 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			
 			switch (req.status) {
 				case 400:
-					callback(uri, Zotero.Sync.Storage.ERROR_BAD_REQUEST);
-					return;
+					return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_BAD_REQUEST]);
 				
 				case 401:
-					callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
-					return;
+					return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED]);
 				
 				case 403:
-					callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
-					return;
+					return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FORBIDDEN]);
 				
 				case 500:
-					callback(uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR);
-					return;
+					return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR]);
 			}
 			
 			var dav = req.getResponseHeader("DAV");
 			if (dav == null) {
-				callback(uri, Zotero.Sync.Storage.ERROR_NOT_DAV);
-				return;
+				return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_NOT_DAV]);
 			}
 			
 			// Get the Authorization header used in case we need to do a request
@@ -1209,32 +1175,26 @@ Zotero.Sync.Storage.WebDAV = (function () {
 															switch (req.status) {
 																case 200: // IIS 5.1 and Sakai return 200
 																case 204:
-																	callback(uri, Zotero.Sync.Storage.SUCCESS);
-																	return;
+																	return deferred.resolve([uri, Zotero.Sync.Storage.SUCCESS]);
 																
 																case 401:
-																	callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
-																	return;
+																	return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED]);
 																
 																case 403:
-																	callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
-																	return;
+																	return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FORBIDDEN]);
 																
 																default:
-																	callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
-																	return;
+																	return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_UNKNOWN]);
 															}
 														}
 													);
 													return;
 												
 												case 401:
-													callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
-													return;
+													return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED]);
 												
 												case 403:
-													callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
-													return;
+													return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FORBIDDEN]);
 												
 												// This can happen with cloud storage services
 												// backed by S3 or other eventually consistent
@@ -1244,51 +1204,41 @@ Zotero.Sync.Storage.WebDAV = (function () {
 												// not to serve extensionless files or .prop files
 												// http://support.microsoft.com/kb/326965
 												case 404:
-													callback(uri, Zotero.Sync.Storage.ERROR_FILE_MISSING_AFTER_UPLOAD);
-													return;
+													return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FILE_MISSING_AFTER_UPLOAD]);
 												
 												case 500:
-													callback(uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR);
-													return;
+													return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR]);
 												
 												default:
-													callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
-													return;
+													return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_UNKNOWN]);
 											}
 										}
 									);
 									return;
 								
 								case 401:
-									callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
-									return;
+									return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED]);
 								
 								case 403:
-									callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
-									return;
+									return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FORBIDDEN]);
 								
 								case 500:
-									callback(uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR);
-									return;
+									return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR]);
 								
 								default:
-									callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
-									return;
+									return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_UNKNOWN]);
 							}
 						});
 						return;
 					
 					case 400:
-						callback(uri, Zotero.Sync.Storage.ERROR_BAD_REQUEST);
-						return;
+						return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_BAD_REQUEST]);
 					
 					case 401:
-						callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
-						return;
+						return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED]);
 					
 					case 403:
-						callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
-						return;
+						return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FORBIDDEN]);
 					
 					case 404:
 						// Include Authorization header from /zotero request,
@@ -1309,49 +1259,53 @@ Zotero.Sync.Storage.WebDAV = (function () {
 								switch (req.status) {
 									// Parent directory existed
 									case 207:
-										callback(uri, Zotero.Sync.Storage.ERROR_ZOTERO_DIR_NOT_FOUND);
-										return;
+										return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_ZOTERO_DIR_NOT_FOUND]);
 									
 									case 400:
-										callback(uri, Zotero.Sync.Storage.ERROR_BAD_REQUEST);
-										return;
+										return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_BAD_REQUEST]);
 									
 									case 401:
-										callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
-										return;
+										return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED]);
 									
 									// Parent directory wasn't found either
 									case 404:
-										callback(uri, Zotero.Sync.Storage.ERROR_PARENT_DIR_NOT_FOUND);
-										return;
+										return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_PARENT_DIR_NOT_FOUND]);
 									
 									default:
-										callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
-										return;
+										return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_UNKNOWN]);
 								}
 							},  newHeaders);
 						return;
 					
 					case 500:
-						callback(uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR);
-						return;
+						return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR]);
 						
 					default:
-						callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
-						return;
+						return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_UNKNOWN]);
 				}
 			}, headers);
 		});
 		
 		if (!request) {
-			callback(uri, Zotero.Sync.Storage.ERROR_OFFLINE);
+			return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_OFFLINE]);
 		}
 		
-		requestHolder.request = request;
-		return requestHolder;
+		// Pass XMLHttpRequest to progress handler
+		setTimeout(function () {
+			var obj = {};
+			obj.xmlhttp = request;
+			deferred.notify(obj)
+		}, 0);
+		
+		return deferred.promise;
 	};
 	
 	
+	/**
+	 * Handles the result of WebDAV verification, displaying an alert if necessary.
+	 *
+	 * @return bool True if the verification succeeded, false otherwise
+	 */
 	obj._checkServerCallback = function (uri, status, window, skipSuccessMessage) {
 		var promptService =
 			Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
@@ -1362,14 +1316,6 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		
 		switch (status) {
 			case Zotero.Sync.Storage.SUCCESS:
-				if (!skipSuccessMessage) {
-					promptService.alert(
-						window,
-						Zotero.getString('sync.storage.serverConfigurationVerified'),
-						Zotero.getString('sync.storage.fileSyncSetUp')
-					);
-				}
-				Zotero.Prefs.set("sync.storage.verified", true);
 				return true;
 			
 			case Zotero.Sync.Storage.ERROR_NO_URL:
@@ -1510,27 +1456,23 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	 *
 	 * @param	{Function}	callback		Passed number of files deleted
 	 */
-	obj._purgeDeletedStorageFiles = function (callback) {
+	obj._purgeDeletedStorageFiles = function () {
 		if (!this._active) {
-			return false;
+			return Q(false);
 		}
 		
 		Zotero.debug("Purging deleted storage files");
 		var files = Zotero.Sync.Storage.getDeletedFiles();
 		if (!files) {
 			Zotero.debug("No files to delete remotely");
-			if (callback) {
-				callback();
-			}
-			return false;
+			return Q(false);
 		}
-		
-		// TODO: promisify
 		
 		// Add .zip extension
 		var files = files.map(function (file) file + ".zip");
 		
-		deleteStorageFiles(files, function (results) {
+		return deleteStorageFiles(files)
+		.then(function (results) {
 			// Remove deleted and nonexistent files from storage delete log
 			var toPurge = results.deleted.concat(results.missing);
 			if (toPurge.length > 0) {
@@ -1552,11 +1494,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 				Zotero.DB.commitTransaction();
 			}
 			
-			if (callback) {
-				callback(results.deleted.length);
-			}
-			
-			Zotero.Sync.Storage.EventManager.success();
+			return results.deleted.length;
 		});
 	};
 	
@@ -1683,12 +1621,10 @@ Zotero.Sync.Storage.WebDAV = (function () {
 				}
 			}
 			
-			deleteStorageFiles(deleteFiles, function (results) {
+			deleteStorageFiles(deleteFiles)
+			.then(function (results) {
 				Zotero.Prefs.set("lastWebDAVOrphanPurge", Math.round(new Date().getTime() / 1000))
-				if (callback) {
-					callback(results);
-				}
-				Zotero.Sync.Storage.EventManager.success();
+				Zotero.debug(results);
 			});
 		}, { Depth: 1 });
 	};

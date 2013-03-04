@@ -49,6 +49,8 @@ Zotero.Sync.Storage.Queue = function (type, libraryID) {
 	this._localChanges = false;
 	this._remoteChanges = false;
 	this._conflicts = [];
+	this._cachedPercentage;
+	this._cachedPercentageTime;
 }
 
 Zotero.Sync.Storage.Queue.prototype.__defineGetter__('name', function () {
@@ -158,11 +160,18 @@ Zotero.Sync.Storage.Queue.prototype.__defineGetter__('percentage', function () {
 		return 100;
 	}
 	
+	// Cache percentage for a second
+	if (this._cachedPercentage && (new Date() - this._cachedPercentageTime) < 1000) {
+		return this._cachedPercentage;
+	}
+	
 	var completedRequests = 0;
 	for each(var request in this._requests) {
 		completedRequests += request.percentage / 100;
 	}
-	return Math.round((completedRequests / this.totalRequests) * 100);
+	this._cachedPercentage = Math.round((completedRequests / this.totalRequests) * 100);
+	this._cachedPercentageTime = new Date();
+	return this._cachedPercentage;
 });
 
 
@@ -288,7 +297,7 @@ Zotero.Sync.Storage.Queue.prototype.advance = function () {
 				);
 			}
 		})
-		.fail(function (e) {
+		.catch(function (e) {
 			self.error(e);
 		});
 		
@@ -330,7 +339,7 @@ Zotero.Sync.Storage.Queue.prototype.advance = function () {
 				);
 			}
 		})
-		.fail(function (e) {
+		.catch(function (e) {
 			self.error(e);
 		});
 		
@@ -362,7 +371,6 @@ Zotero.Sync.Storage.Queue.prototype.error = function (e) {
 		this._error = e;
 	}
 	Zotero.debug(e, 1);
-	Components.utils.reportError(e.message ? e.message : e);
 	this.stop();
 }
 

@@ -115,6 +115,7 @@ Zotero.Schema = new function(){
 	 */
 	this.updateSchema = function () {
 		var dbVersion = this.getDBVersion('userdata');
+		var dbVersion2 = this.getDBVersion('userdata2');
 		
 		// 'schema' check is for old (<= 1.0b1) schema system,
 		// 'user' is for pre-1.0b2 'user' table
@@ -133,7 +134,7 @@ Zotero.Schema = new function(){
 			if (dbVersion < schemaVersion){
 				Zotero.DB.backupDatabase(dbVersion);
 				Zotero.wait(1000);
-			}			
+			}
 			
 			Zotero.DB.beginTransaction();
 			
@@ -154,19 +155,20 @@ Zotero.Schema = new function(){
 					 }
 				}
 				
-				var up2 = _updateSchema('system');
+				var up1 = _updateSchema('system');
 				// Update custom tables if they exist so that changes are in place before user data migration
 				if (Zotero.DB.tableExists('customItemTypes')) {
-					this.updateCustomTables(up2);
-				}
-				if(up2) Zotero.wait();
-				var up1 = _migrateUserDataSchema(dbVersion);
-				var up3 = _updateSchema('triggers');
-				// Update custom tables again in case custom fields were changed during user data migration
-				if (up1) {
-					this.updateCustomTables();
+					this.updateCustomTables(up1);
 				}
 				if(up1) Zotero.wait();
+				var up2 = _migrateUserDataSchema(dbVersion);
+				var up3 = _migrateUserDataSchemaSilent(dbVersion2);
+				var up4 = _updateSchema('triggers');
+				if (up2) {
+					// Update custom tables again in case custom fields were changed during user data migration
+					this.updateCustomTables();
+					Zotero.wait()
+				}
 				
 				Zotero.DB.commitTransaction();
 			}
@@ -176,7 +178,7 @@ Zotero.Schema = new function(){
 				throw(e);
 			}
 			
-			if (up1) {
+			if (up2) {
 				// Upgrade seems to have been a success -- delete any previous backups
 				var maxPrevious = dbVersion - 1;
 				var file = Zotero.getZoteroDirectory();
@@ -1353,10 +1355,21 @@ Zotero.Schema = new function(){
 	 * Retrieve the version from the top line of the schema SQL file
 	 */
 	function _getSchemaSQLVersion(schema){
+		// TEMP
+		if (schema == 'userdata2') {
+			schema = 'userdata';
+			var newUserdata = true;
+		}
 		var sql = _getSchemaSQL(schema);
 		
 		// Fetch the schema version from the first line of the file
-		var schemaVersion = sql.match(/^-- ([0-9]+)/)[1];
+		var schemaVersion = parseInt(sql.match(/^-- ([0-9]+)/)[1]);
+		
+		// TEMP: For 'userdata', cap the version at 76
+		// For 'userdata2', versions > 76 are allowed.
+		if (schema == 'userdata' && !newUserdata) {
+			schemaVersion = Math.min(76, schemaVersion);
+		}
 		
 		_schemaVersions[schema] = schemaVersion;
 		return schemaVersion;
@@ -1416,6 +1429,7 @@ Zotero.Schema = new function(){
 			
 			_updateDBVersion('system', _getSchemaSQLVersion('system'));
 			_updateDBVersion('userdata', _getSchemaSQLVersion('userdata'));
+			_updateDBVersion('userdata2', _getSchemaSQLVersion('userdata2'));
 			_updateDBVersion('triggers', _getSchemaSQLVersion('triggers'));
 			
 			if (!Zotero.Schema.skipDefaultData) {
@@ -1761,6 +1775,9 @@ Zotero.Schema = new function(){
 	 */
 	function _migrateUserDataSchema(fromVersion){
 		var toVersion = _getSchemaSQLVersion('userdata');
+		
+		// Only upgrades through version 76 are handled here
+		toVersion = Math.min(76, toVersion);
 		
 		if (fromVersion==toVersion){
 			return false;
@@ -3281,6 +3298,49 @@ Zotero.Schema = new function(){
 				ps.alert(null, title, Zotero.getString('upgrade.couldNotMigrate', Zotero.appName) + "\n\n" + Zotero.getString('upgrade.couldNotMigrate.restart'));
 			}
 			
+			throw(e);
+		}
+		
+		return true;
+	}
+	
+	
+	// TEMP
+	//
+	// TODO: Make this asynchronous, and make it block other SQLite
+	function _migrateUserDataSchemaSilent(fromVersion) {
+		var toVersion = _getSchemaSQLVersion('userdata2');
+		
+		if (!fromVersion) {
+			fromVersion = 76;
+		}
+		
+		if (fromVersion == toVersion) {
+			return false;
+		}
+		
+		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
+		
+		Zotero.DB.beginTransaction();
+		
+		try {
+			// Step through version changes until we reach the current version
+			//
+			// Each block performs the changes necessary to move from the
+			// previous revision to that one.
+			for (var i=fromVersion + 1; i<=toVersion; i++) {
+				if (i == 77) {
+					Zotero.DB.query("CREATE TABLE syncedSettings (\n    setting TEXT NOT NULL,\n    libraryID INT NOT NULL,\n    value NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    synced INT NOT NULL DEFAULT 0,\n    PRIMARY KEY (setting, libraryID)\n)");
+					Zotero.DB.query("INSERT OR IGNORE INTO syncObjectTypes VALUES (7, 'setting')");
+				}
+			}
+			
+			_updateDBVersion('userdata2', toVersion);
+			
+			Zotero.DB.commitTransaction();
+		}
+		catch (e) {
+			Zotero.DB.rollbackTransaction();
 			throw(e);
 		}
 		

@@ -31,12 +31,14 @@ Zotero.Sync.Storage.QueueManager = new function () {
 	this.start = function (libraryID) {
 		if (libraryID === 0 || libraryID) {
 			var queues = this.getAll(libraryID);
+			var suffix = " for library " + libraryID;
 		}
 		else {
 			var queues = this.getAll();
+			var suffix = "";
 		}
 		
-		Zotero.debug("Starting file sync queues");
+		Zotero.debug("Starting file sync queues" + suffix);
 		
 		var promises = [];
 		for each(var queue in queues) {
@@ -48,13 +50,15 @@ Zotero.Sync.Storage.QueueManager = new function () {
 		}
 		
 		if (!promises.length) {
-			Zotero.debug("No files to sync");
+			Zotero.debug("No files to sync" + suffix);
 		}
 		
 		return Q.allResolved(promises)
 			.then(function (promises) {
-				Zotero.debug("All storage queues are finished");
+				Zotero.debug("All storage queues are finished" + suffix);
+				
 				promises.forEach(function (promise) {
+					// Check for conflicts to resolve
 					if (promise.isFulfilled()) {
 						var result = promise.valueOf();
 						if (result.conflicts.length) {
@@ -67,7 +71,6 @@ Zotero.Sync.Storage.QueueManager = new function () {
 						}
 					}
 				});
-				
 				return promises;
 			});
 	};
@@ -125,6 +128,10 @@ Zotero.Sync.Storage.QueueManager = new function () {
 	
 	
 	this.getAll = function (libraryID) {
+		if (typeof libraryID == 'string') {
+			throw new Error("libraryID must be a number or undefined");
+		}
+		
 		var queues = [];
 		for each(var queue in _queues) {
 			if (typeof libraryID == 'undefined' || queue.libraryID === libraryID) {

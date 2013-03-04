@@ -642,7 +642,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 					Zotero.startupError = msg;
 				}
 				else {
-					Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError');
+					Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError') + "\n\n" + e;
 				}
 				Zotero.skipLoading = true;
 				Components.utils.reportError(e);
@@ -663,6 +663,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		if(Zotero.Prefs.get("httpServer.enabled")) {
 			Zotero.Server.init();
 		}
+		
+		Zotero.Notifier.registerObserver(Zotero.Tags, 'setting');
 		
 		Zotero.Sync.init();
 		Zotero.Sync.Runner.init();

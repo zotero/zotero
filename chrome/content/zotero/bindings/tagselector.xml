@@ -27,8 +27,7 @@
 <!DOCTYPE bindings SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <bindings xmlns="http://www.mozilla.org/xbl"
-		  xmlns:xbl="http://www.mozilla.org/xbl"
-		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+		  xmlns:xbl="http://www.mozilla.org/xbl">
 
 	<binding id="tag-selector">
 		<resources>
@@ -77,6 +76,9 @@
 			<property name="libraryID" onget="return this._libraryID">
 				<setter>
 				<![CDATA[
+					// TEMP: libraryIDInt
+					val = val ? parseInt(val) : 0;
+					
 					if (this._libraryID != val) {
 						this._dirty = true;
 					}
@@ -169,7 +171,7 @@
 				<![CDATA[
 					this._initialized = true;
 					this.selection = {};
-					this._notifierID = Zotero.Notifier.registerObserver(this, ['collection-item', 'item-tag', 'tag']);
+					this._notifierID = Zotero.Notifier.registerObserver(this, ['collection-item', 'item-tag', 'tag', 'setting']);
 				]]>
 				</body>
 			</method>
@@ -215,211 +217,211 @@
 					var empty = true;
 					var tagsToggleBox = this.id('tags-toggle');
 					
-					
-					if (fetch || this._dirty) {
-						this._tags = Zotero.Tags.getAll(this._types, this.libraryID);
-						
-						// Remove children
-						tagsToggleBox.textContent = "";
-						
-						var me = this,
-							onTagClick = function(event) { me.handleTagClick(event, this) },
-							lastTag;
-						for (var tagID in this._tags) {
-							var tagInfo = this._tags[tagID],
-								tagName = tagInfo.name;
-							// If the last tag was the same, add this tagID and tagType to it
-							if(lastTag && lastTag.value === tagName) {
-								lastTag.setAttribute('tagID', lastTag.getAttribute('tagID') + '-' + tagID);
-								lastTag.setAttribute('tagType', lastTag.getAttribute('tagType') + '-' + tagName.type);
-								continue;
-							}
+					var self = this;
+					Zotero.Tags.getColors(this.libraryID)
+					.then(function (tagColors) {
+						if (fetch || self._dirty) {
+							self._tags = Zotero.Tags.getAll(self._types, self.libraryID);
 							
-							lastTag = document.createElement('label');
-							lastTag.addEventListener('click', onTagClick, false);
-							lastTag.className = 'zotero-clicky';
+							// Remove children
+							tagsToggleBox.textContent = "";
 							
-							
-							lastTag.setAttribute('value', tagName);
-							lastTag.setAttribute('tagID', tagID);
-							lastTag.setAttribute('tagType', tagInfo.type);
-							if (this.editable) {
-								lastTag.setAttribute('context', 'tag-menu');
-								lastTag.addEventListener('dragover', this.dragObserver.onDragOver, false);
-								lastTag.addEventListener('dragexit', this.dragObserver.onDragExit, false);
-								lastTag.addEventListener('drop', this.dragObserver.onDrop, true);
-							}
-							tagsToggleBox.appendChild(lastTag);
-						}
-						this._dirty = false;
-					}
-					
-					// Set attributes
-					var labels = tagsToggleBox.getElementsByTagName('label');
-					var tagColors = Zotero.Tags.getColors();
-					for (var i=0; i<labels.length; i++){
-						var tagIDs = labels[i].getAttribute('tagID').split('-');
-						
-						// Restore selection
-						if (this.selection[labels[i].value]){
-							labels[i].setAttribute('selected', 'true');
-						}
-						else {
-							labels[i].setAttribute('selected', 'false');
-						}
-						
-						// Check tags against filter
-						if (this._hasFilter) {
-							var inFilter = false;
-							for each(var tagID in tagIDs) {
-								if (this._filter[tagID]) {
-									inFilter = true;
-									break;
+							var lastTag;
+							for (let tagID in self._tags) {
+								let tagButton = self._makeClickableTag(tagID, lastTag, self.editable);
+								if (tagButton) {
+									tagButton.addEventListener('click', function(event) {
+										self.handleTagClick(event, this);
+									});
+									if (self.editable) {
+										tagButton.addEventListener('dragover', self.dragObserver.onDragOver);
+										tagButton.addEventListener('dragexit', self.dragObserver.onDragExit);
+										tagButton.addEventListener('drop', self.dragObserver.onDrop, true);
+									}
+									lastTag = tagButton;
+									tagsToggleBox.appendChild(tagButton);
 								}
 							}
+							self._dirty = false;
 						}
 						
-						// Check tags against scope
-						if (this._hasScope) {
-							var inScope = false;
-							for each(var tagID in tagIDs) {
-								if (this._scope[tagID]) {
-									inScope = true;
-									break;
+						// Set attributes
+						var colorTags = {};
+						var labels = tagsToggleBox.getElementsByTagName('label');
+						for (let i=0; i<labels.length; i++) {
+							var tagIDs = labels[i].getAttribute('tagID').split('-');
+							
+							// Restore selection
+							if (self.selection[labels[i].value]){
+								labels[i].setAttribute('selected', 'true');
+							}
+							else {
+								labels[i].setAttribute('selected', 'false');
+							}
+							
+							// Check tags against filter
+							if (self._hasFilter) {
+								var inFilter = false;
+								for each(var tagID in tagIDs) {
+									if (self._filter[tagID]) {
+										inFilter = true;
+										break;
+									}
 								}
 							}
-						}
-						
-						// If not in filter, hide
-						if (this._hasFilter && !inFilter) {
-							//Zotero.debug(1);
-							labels[i].setAttribute('hidden', true);
-						}
-						else if (this.filterToScope) {
-							if (this._hasScope && inScope) {
-								//Zotero.debug(2);
-								labels[i].setAttribute('inScope', true);
+							
+							// Check tags against scope
+							if (self._hasScope) {
+								var inScope = false;
+								for each(var tagID in tagIDs) {
+									if (self._scope[tagID]) {
+										inScope = true;
+										break;
+									}
+								}
+							}
+							
+							// If not in filter, hide
+							if (self._hasFilter && !inFilter) {
+								labels[i].setAttribute('hidden', true);
+							}
+							else if (self.filterToScope) {
+								if (self._hasScope && inScope) {
+									labels[i].setAttribute('inScope', true);
+									labels[i].setAttribute('hidden', false);
+									empty = false;
+								}
+								else {
+									labels[i].setAttribute('hidden', true);
+									labels[i].setAttribute('inScope', false);
+								}
+							}
+							// Display all
+							else {
+								if (self._hasScope && inScope) {
+									labels[i].setAttribute('inScope', true);
+								}
+								else {
+									labels[i].setAttribute('inScope', false);
+									
+									// If out of scope, make sure it's not selected (otherwise a tag
+									// stays selected after removing an item with that tag from the
+									// current collection)
+									if (self.selection[labels[i].value]) {
+										labels[i].setAttribute('selected', false);
+										delete self.selection[labels[i].value];
+										var doCommand = true;
+									}
+	
+								}
+								
 								labels[i].setAttribute('hidden', false);
 								empty = false;
 							}
+							
+							let colorData = tagColors[labels[i].value];
+							if (colorData) {
+								labels[i].setAttribute(
+									'style', 'color:' + colorData.color + '; ' + 'font-weight: bold'
+								);
+								colorTags[colorData.position] = tagsToggleBox.removeChild(labels[i]);
+								// The HTMLCollection returned by getElementsByTagName() is live,
+								// so since we removed something we need to decrement the counter
+								i--;
+							}
 							else {
-								//Zotero.debug(3);
-								labels[i].setAttribute('hidden', true);
-								labels[i].setAttribute('inScope', false);
+								labels[i].removeAttribute('style');
 							}
 						}
-						// Display all
-						else {
-							if (this._hasScope && inScope) {
-								//Zotero.debug(4);
-								labels[i].setAttribute('inScope', true);
+						
+						// Add color tags to beginning in order
+						var positions = Object.keys(colorTags);
+						positions.sort();
+						for (var i=positions.length-1; i>=0; i--) {
+							tagsToggleBox.insertBefore(colorTags[positions[i]], tagsToggleBox.firstChild);
+						}
+						
+						//start tag cloud code
+						
+						var tagCloud = Zotero.Prefs.get('tagCloud');
+						
+						if(tagCloud) {
+							var labels = tagsToggleBox.getElementsByTagName('label');
+						
+							//loop through displayed labels and find number of linked items
+							var numlinked= [];
+							for (var i=0; i<labels.length; i++){
+								if(labels[i].getAttribute("hidden") != 'true') {
+									var tagIDs = labels[i].getAttribute('tagID').split('-');
+									
+									
+									//replace getLinkedItems() with function that gets linked items within the current collection
+									var linked = self._tags[tagIDs[0]].getLinkedItems();
+									
+									numlinked.push(parseInt(linked.length));
+								}	
 							}
-							else {
-								//Zotero.debug(5);
-								labels[i].setAttribute('inScope', false);
-								
-								// If out of scope, make sure it's not selected (otherwise a tag
-								// stays selected after removing an item with that tag from the
-								// current collection)
-								if (this.selection[labels[i].value]) {
-									labels[i].setAttribute('selected', false);
-									delete this.selection[labels[i].value];
-									var doCommand = true;
-								}
-
+							//
+							numlinked.sort();
+							
+							//Get number of attached items from tag with fewest items
+							var min = numlinked[0];
+							
+							//Get number of attached items from tag with most items
+							var max = numlinked.pop();
+							numlinked.push(max);
+							
+							//Create array of possible tag text sizes
+							var sizes = ["11", "12", "13", "14", "15", "16", "17", "18", "19","20","21","22"];
+							
+							//Number of possible tag sizes
+							var categories = sizes.length;
+							
+							//inc is the size of each size category of tags, in terms of the number of attached items
+							var inc = Math.ceil((max-min)/categories);
+							if(inc<1) {
+								inc = 1;
 							}
 							
-							labels[i].setAttribute('hidden', false);
-							empty = false;
-						}
-						
-						if (color = tagColors[labels[i].value]) {
-							labels[i].setAttribute('style', 'color:' + color);
-						}
-						else {
-							labels[i].removeAttribute('style');
-						}
-					}
-					
-					//start tag cloud code
-					
-					var tagCloud = Zotero.Prefs.get('tagCloud');
-					
-					if(tagCloud) {
-						var labels = tagsToggleBox.getElementsByTagName('label');
-					
-						//loop through displayed labels and find number of linked items
-						var numlinked= [];
-						for (var i=0; i<labels.length; i++){
-							if(labels[i].getAttribute("hidden") != 'true') {
-								var tagIDs = labels[i].getAttribute('tagID').split('-');
-								
-								
-								//replace getLinkedItems() with function that gets linked items within the current collection
-								var linked = this._tags[tagIDs[0]].getLinkedItems();
-								
-								numlinked.push(parseInt(linked.length));
-							}	
-						}
-						//
-						numlinked.sort();
-						
-						//Get number of attached items from tag with fewest items
-						var min = numlinked[0];
-						
-						//Get number of attached items from tag with most items
-						var max = numlinked.pop();
-						numlinked.push(max);
-						
-						//Create array of possible tag text sizes
-						var sizes = ["11", "12", "13", "14", "15", "16", "17", "18", "19","20","21","22"];
-						
-						//Number of possible tag sizes
-						var categories = sizes.length;
-						
-						//inc is the size of each size category of tags, in terms of the number of attached items
-						var inc = Math.ceil((max-min)/categories);
-						if(inc<1) {
-							inc = 1;
-						}
-						
-						for (var i=0; i<labels.length; i++){
-							if(labels[i].getAttribute("hidden") != 'true') {
-								var tagIDs = labels[i].getAttribute('tagID').split('-');
-								
-								
-								//replace getLinkedItems() with function that gets linked items within the current collection
-								var linked = this._tags[tagIDs[0]].getLinkedItems();
-								
-								numlink = linked.length;
-								
-								//range is the difference between how many items this tag has and how many items the smallest tag has
-								var range=(numlink-min);
-								
-								//Divide the range by the size of the categories
-								s=range/inc;
-								
-								if(s==categories) {
-									s=categories-1;
+							for (var i=0; i<labels.length; i++){
+								if(labels[i].getAttribute("hidden") != 'true') {
+									var tagIDs = labels[i].getAttribute('tagID').split('-');
+									
+									
+									//replace getLinkedItems() with function that gets linked items within the current collection
+									var linked = self._tags[tagIDs[0]].getLinkedItems();
+									
+									numlink = linked.length;
+									
+									//range is the difference between how many items this tag has and how many items the smallest tag has
+									var range=(numlink-min);
+									
+									//Divide the range by the size of the categories
+									s=range/inc;
+									
+									if(s==categories) {
+										s=categories-1;
+									}
+									var stylestr = 'font-size:'+sizes[s]+'px;';
+									labels[i].setAttribute('style',stylestr);
 								}
-								var stylestr = 'font-size:'+sizes[s]+'px;';
-								labels[i].setAttribute('style',stylestr);
-							}	
+							}
 						}
-					}
-					
-					//end tag cloud code
-					
-
-					this.updateNumSelected();
-					this._empty = empty;
-					this.id('tags-toggle').setAttribute('collapsed', empty);
-					this.id('no-tags-box').setAttribute('collapsed', !empty);
-					
-					if (doCommand) {
-						Zotero.debug('A selected tag went out of scope -- deselecting');
-						this.doCommand();
-					}
+						
+						//end tag cloud code
+						
+	
+						self.updateNumSelected();
+						self._empty = empty;
+						self.id('tags-toggle').setAttribute('collapsed', empty);
+						self.id('no-tags-box').setAttribute('collapsed', !empty);
+						
+						if (doCommand) {
+							Zotero.debug('A selected tag went out of scope -- deselecting');
+							self.doCommand();
+						}
+					})
+					.done();
 				]]>
 				</body>
 			</method>
@@ -436,6 +438,7 @@
 				]]>
 				</body>
 			</method>
+			
 			
 			<method name="updateNumSelected">
 				<body>
@@ -466,6 +469,13 @@
 				<parameter name="ids"/>
 				<body>
 				<![CDATA[
+					if (type == 'setting') {
+						if (ids.some(function (val) val.split("/")[1] == 'tagColors')) {
+							this.refresh(true);
+						}
+						return;
+					}
+					
 					var itemGroup = ZoteroPane_Local.getItemGroup();
 					
 					// Ignore anything other than deletes in duplicates view
@@ -663,16 +673,20 @@
 							delete this.selection[oldName];
 						}
 						
+						// TODO: redo transaction for async DB
+						var promises = [];
 						Zotero.DB.beginTransaction();
 						
 						for (var i=0; i<tagIDs.length; i++) {
-							Zotero.Tags.rename(tagIDs[i], newName.value);
+							promises.push(Zotero.Tags.rename(tagIDs[i], newName.value));
 						}
 						
 						if (wasSelected) {
 							this.selection[newName.value] = true;
 						}
 						Zotero.DB.commitTransaction();
+						Q.all(promises)
+						.done();
 					}
 				]]>
 				</body>
@@ -719,42 +733,83 @@
 				<![CDATA[
 					tagIDs = tagIDs.split('-');
 					var name = Zotero.Tags.getName(tagIDs[0]);
-					return Zotero.Tags.getColor(name);
+					return Zotero.Tags.getColor(this.libraryID, name)
+					.then(function (colorData) {
+						return colorData ? colorData.color : '#000000';
+					});
 				]]>
 				</body>
 			</method>
 			
 			
-			<method name="setColor">
+			<method name="_makeClickableTag">
+				<parameter name="tagID"/>
+				<parameter name="lastTag"/>
+				<parameter name="editable"/>
+				<body>
+				<![CDATA[
+					var tagInfo = this._tags[tagID], tagName = tagInfo.name;
+					// If the last tag was the same, add this tagID and tagType to it
+					if(lastTag && lastTag.value === tagName) {
+						lastTag.setAttribute('tagID', lastTag.getAttribute('tagID') + '-' + tagID);
+						lastTag.setAttribute('tagType', lastTag.getAttribute('tagType') + '-' + tagInfo.type);
+						return false;
+					}
+					
+					var label = document.createElement('label');
+					label.className = 'zotero-clicky';
+					
+					label.setAttribute('value', tagName);
+					label.setAttribute('tagID', tagID);
+					label.setAttribute('tagType', tagInfo.type);
+					if (editable) {
+						label.setAttribute('context', 'tag-menu');
+					}
+					return label;
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="_openColorPickerWindow">
 				<parameter name="tagIDs"/>
-				<parameter name="color"/>
 				<body>
 				<![CDATA[
 					tagIDs = tagIDs.split('-');
-					var name = Zotero.Tags.getName(tagIDs[0]);
-					Zotero.Tags.setColor(name, color);
 					
-					// Iterate through all windows, updating tag selector and tags box
-					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								.getService(Components.interfaces.nsIWindowMediator);
-					var enumerator = wm.getEnumerator("navigator:browser");
-					while (enumerator.hasMoreElements()) {
-						var win = enumerator.getNext();
-						if (!win.ZoteroPane) continue;
-						
-						var tagSelector = win.ZoteroPane.document.getElementById('zotero-tag-selector');
-						var itemPane = win.ZoteroPane.document.getElementById('zotero-view-item');
-						
-						tagSelector.refresh();
-						
-						if (itemPane.selectedPanel.firstChild.getAttribute('id') == 'zotero-editpane-tags') {
-							var tagsBox = win.ZoteroPane.document.getElementById('zotero-editpane-tags');
-							tagsBox.reload();
+					var io = {
+						libraryID: this.libraryID,
+						name: Zotero.Tags.getName(tagIDs[0])
+					};
+					
+					var self = this;
+					Zotero.Tags.getColors(this.libraryID)
+					.then(function (tagColors) {
+						if (Object.keys(tagColors).length >= Zotero.Tags.MAX_COLORED_TAGS && !tagColors[io.name]) {
+							var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService);
+							ps.alert(null, "", Zotero.getString('pane.tagSelector.maxColoredTags', Zotero.Tags.MAX_COLORED_TAGS));
+							return;
 						}
-					}
+						
+						window.openDialog(
+							'chrome://zotero/content/tagColorChooser.xul',
+							"zotero-tagSelector-colorChooser",
+							"chrome,modal,centerscreen", io
+						);
+						
+						// Dialog cancel
+						if (typeof io.color == 'undefined') {
+							return;
+						}
+						
+						return Zotero.Tags.setColor(self.libraryID, io.name, io.color, io.position);
+					})
+					.done();
 				]]>
 				</body>
 			</method>
+			
 			
 			<method name="focusTextbox">
 				<body>
@@ -854,48 +909,41 @@
 		</implementation>
 		
 		<content>
-			<xul:groupbox flex="1">
-				<xul:menupopup id="tag-menu">
-					<xul:menuitem label="&zotero.tagSelector.renameTag;" oncommand="document.getBindingParent(this).rename(document.popupNode.getAttribute('tagID')); event.stopPropagation()"/>
-					<xul:menuitem label="&zotero.tagSelector.deleteTag;" oncommand="document.getBindingParent(this).delete(document.popupNode.getAttribute('tagID')); event.stopPropagation()"/>
-					<!-- TODO: localized -->
-					<!--
-					<xul:menu label="Assign Color">
-						<xul:menupopup onpopupshowing="var color = document.getBindingParent(this).getColor(document.popupNode.getAttribute('tagID')); this.children[0].color = color">
-							<xul:colorpicker onclick="document.getBindingParent(this).setColor(document.popupNode.getAttribute('tagID'), event.originalTarget.getAttribute('color')); document.getBindingParent(this).id('tag-menu').hidePopup(); event.stopPropagation()"/>
-						</xul:menupopup>
-					</xul:menu>
-					-->
-				</xul:menupopup>
+			<groupbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" flex="1">
+				<menupopup id="tag-menu">
+					<menuitem label="&zotero.tagSelector.assignColor;" oncommand="_openColorPickerWindow(document.popupNode.getAttribute('tagID')); event.stopPropagation()"/>
+					<menuitem label="&zotero.tagSelector.renameTag;" oncommand="document.getBindingParent(this).rename(document.popupNode.getAttribute('tagID')); event.stopPropagation()"/>
+					<menuitem label="&zotero.tagSelector.deleteTag;" oncommand="document.getBindingParent(this).delete(document.popupNode.getAttribute('tagID')); event.stopPropagation()"/>
+				</menupopup>
 				
-				<xul:vbox id="no-tags-box" align="center" pack="center" flex="1">
-					<xul:label value="&zotero.tagSelector.noTagsToDisplay;"/>
-				</xul:vbox>
+				<vbox id="no-tags-box" align="center" pack="center" flex="1">
+					<label value="&zotero.tagSelector.noTagsToDisplay;"/>
+				</vbox>
 				
-				<xul:vbox id="tags-toggle" flex="1"/>
+				<vbox id="tags-toggle" flex="1"/>
 				
-				<xul:vbox id="tag-controls">
-					<xul:hbox>
+				<vbox id="tag-controls">
+					<hbox>
 						<!-- TODO: &zotero.tagSelector.filter; is now unused -->
-						<xul:textbox id="tags-search" flex="1" type="search" timeout="250" dir="reverse"
+						<textbox id="tags-search" flex="1" type="search" timeout="250" dir="reverse"
 							oncommand="document.getBindingParent(this).handleKeyPress(); event.stopPropagation()"
 							onkeypress="if (event.keyCode == event.DOM_VK_ESCAPE) { document.getBindingParent(this).handleKeyPress(true); }"/>
-						<xul:toolbarbutton id="view-settings-menu" tooltiptext="&zotero.toolbar.actions.label;"
+						<toolbarbutton id="view-settings-menu" tooltiptext="&zotero.toolbar.actions.label;"
 								image="chrome://zotero/skin/tag-selector-menu.png" type="menu">
-							<xul:menupopup id="view-settings-popup">
-								<xul:menuitem id="num-selected" disabled="true"/>
-								<xul:menuitem id="deselect-all" label="&zotero.tagSelector.clearAll;"
+							<menupopup id="view-settings-popup">
+								<menuitem id="num-selected" disabled="true"/>
+								<menuitem id="deselect-all" label="&zotero.tagSelector.clearAll;"
 									oncommand="document.getBindingParent(this).clearAll(); event.stopPropagation();"/>
-								<xul:menuseparator/>
-								<xul:menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" autocheck="true" type="checkbox"
+								<menuseparator/>
+								<menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" autocheck="true" type="checkbox"
 									oncommand="var ts = document.getBindingParent(this); ts._dirty = true; ts.setAttribute('showAutomatic', this.getAttribute('checked') == 'true')"/>
-								<xul:menuitem id="display-all-tags" label="&zotero.tagSelector.displayAllInLibrary;" autocheck="true" type="checkbox"
+								<menuitem id="display-all-tags" label="&zotero.tagSelector.displayAllInLibrary;" autocheck="true" type="checkbox"
 									oncommand="document.getBindingParent(this).filterToScope = !(this.getAttribute('checked') == 'true'); event.stopPropagation();"/>
-							</xul:menupopup>
-						</xul:toolbarbutton>
-					</xul:hbox>
-				</xul:vbox>
-			</xul:groupbox>
+							</menupopup>
+						</toolbarbutton>
+					</hbox>
+				</vbox>
+			</groupbox>
 		</content>
 	</binding>
 </bindings>

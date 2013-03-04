@@ -6,6 +6,8 @@
 pref("extensions.zotero.firstRun2", true);
 pref("extensions.zotero@chnm.gmu.edu.description", "chrome://zotero/locale/zotero.properties");
 
+pref("extensions.zotero.saveRelativeAttachmentPath", false);
+pref("extensions.zotero.baseAttachmentPath", '');
 pref("extensions.zotero.useDataDir", false);
 pref("extensions.zotero.dataDir", '');
 pref("extensions.zotero.lastDataDir", '');
@@ -91,8 +93,9 @@ pref("extensions.zotero.export.translatorSettings", 'true,false');
 pref("extensions.zotero.export.lastStyle", 'http://www.zotero.org/styles/chicago-note-bibliography');
 pref("extensions.zotero.export.bibliographySettings", 'save-as-rtf');
 pref("extensions.zotero.export.bibliographyLocale", '');
-pref("extensions.zotero.export.citePaperJournalArticleURL", false);
 pref("extensions.zotero.export.displayCharsetOption", false);
+pref("extensions.zotero.export.citePaperJournalArticleURL", false);
+pref("extensions.zotero.cite.automaticTitleAbbreviation", false);
 pref("extensions.zotero.import.charset", "auto");
 pref("extensions.zotero.import.createNewCollection.fromFileOpenHandler", true);
 pref("extensions.zotero.rtfScan.lastInputFile", "");

@@ -101,6 +101,7 @@ const xpcomFilesLocal = [
 	'storage/mode',
 	'storage/zfs',
 	'storage/webdav',
+	'syncedSettings',
 	'timeline',
 	'uri',
 	'translation/translate_item',

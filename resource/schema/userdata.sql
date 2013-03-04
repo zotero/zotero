@@ -1,4 +1,4 @@
--- 76
+-- 77
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -30,11 +30,22 @@ CREATE TABLE version (
 );
 CREATE INDEX schema ON version(schema);
 
+-- Settings that have to be tied to the local database rather than the profile directory
 CREATE TABLE settings (
     setting TEXT,
     key TEXT,
     value,
     PRIMARY KEY (setting, key)
+);
+
+-- Settings that get synced between Zotero installations
+CREATE TABLE syncedSettings (
+    setting TEXT NOT NULL,
+    libraryID INT NOT NULL,
+    value NOT NULL,
+    version INT NOT NULL DEFAULT 0,
+    synced INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (setting, libraryID)
 );
 
 -- The foundational table; every item collected has a unique record here

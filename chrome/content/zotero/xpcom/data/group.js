@@ -355,6 +355,10 @@ Zotero.Group.prototype.erase = function() {
 	var prefix = "groups/" + this.id;
 	Zotero.Relations.eraseByURIPrefix(Zotero.URI.defaultPrefix + prefix);
 	
+	// Delete settings
+	sql = "DELETE FROM syncedSettings WHERE libraryID=?";
+	Zotero.DB.query(sql, this.libraryID ? parseInt(this.libraryID) : 0);
+	
 	// Delete group
 	sql = "DELETE FROM groups WHERE groupID=?";
 	Zotero.DB.query(sql, this.id)

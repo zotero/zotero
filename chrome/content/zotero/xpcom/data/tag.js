@@ -453,7 +453,7 @@ Zotero.Tag.prototype.save = function (full) {
 					pairs.push(itemID + "-" + tagID);
 				}
 				
-				var tempRemoved = removed;
+				let tempRemoved = removed.concat();
 				
 				do {
 					var chunk = tempRemoved.splice(0, maxItems);

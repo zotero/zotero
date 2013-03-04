@@ -26,13 +26,13 @@
 /**
  * @fileOverview Tools for automatically retrieving a citation for the given PDF
  */
-Components.utils.import("resource://zotero/q.js");
 
 /**
  * Front end for recognizing PDFs
  * @namespace
  */
 var Zotero_RecognizePDF = new function() {
+	Components.utils.import("resource://zotero/q.js");
 	var _progressWindow, _progressIndicator;
 	
 	/**
@@ -184,15 +184,16 @@ var Zotero_RecognizePDF = new function() {
 						return Zotero.HTTP.promise("GET", url, {"responseType":"document"})
 					})
 					.then(function(xmlhttp) {
+						var doc = xmlhttp.response,
+							deferred = Q.defer(),
+							translate = new Zotero.Translate.Web();
+
 						if(Zotero.Utilities.xpath(doc, "//form[@action='Captcha']").length) {
 							// Hit CAPTCHA
 							limited = true;
 							throw new Zotero.Exception.Alert("recognizePDF.limit");
 						}
-
-						var doc = xmlhttp.response,
-							deferred = Q.defer(),
-							translate = new Zotero.Translate.Web();
+						
 						translate.setTranslator("57a00950-f0d1-4b41-b6ba-44ff0fc30289");
 						translate.setDocument(Zotero.HTTP.wrapDocument(doc, url));
 						translate.setHandler("translators", function(translate, detected) {
@@ -363,148 +364,157 @@ var Zotero_RecognizePDF = new function() {
 		}
 		return false;
 	}
-}
 
-/**
- * @class Handles UI, etc. for recognizing multiple items
- */
-Zotero_RecognizePDF.ItemRecognizer = function () {
-	this._stopped = false;
-}
-
-/**
- * Retreives metadata for the PDF items passed, displaying a progress dialog during conversion 
- * and placing the PDFs as a children of the new items
- * @param {Zotero.Item[]} items
- */
-Zotero_RecognizePDF.ItemRecognizer.prototype.recognizeItems = function(items) {
-	var me = this;
-	this._items = items.slice();
-	this._itemTotal = items.length;
-	
-	this._progressWindow = window.openDialog("chrome://zotero/content/pdfProgress.xul", "", "chrome,close=yes,resizable=yes,dependent,dialog,centerscreen");
-	this._progressWindow.addEventListener("pageshow", function() { me._onWindowLoaded() }, false);
-}
-
-/**
- * Halts recognition of PDFs
- */
-Zotero_RecognizePDF.ItemRecognizer.prototype.stop = function() {
-	this._stopped = true;	
-}
-
-/**
- * Called when the progress window has been opened; adds items to the tree and begins recognizing
- * @param
- */
-Zotero_RecognizePDF.ItemRecognizer.prototype._onWindowLoaded = function() {
-	// populate progress window
-	var treechildren = this._progressWindow.document.getElementById("treechildren");
-	for(var i in this._items) {
-		var treeitem = this._progressWindow.document.createElement('treeitem');
-		var treerow = this._progressWindow.document.createElement('treerow');
-		
-		var treecell = this._progressWindow.document.createElement('treecell');
-		treecell.setAttribute("id", "item-"+this._items[i].id+"-icon");
-		treerow.appendChild(treecell);
-		
-		treecell = this._progressWindow.document.createElement('treecell');
-		treecell.setAttribute("label", this._items[i].getField("title"));
-		treerow.appendChild(treecell);
-		
-		treecell = this._progressWindow.document.createElement('treecell');
-		treecell.setAttribute("id", "item-"+this._items[i].id+"-title");
-		treerow.appendChild(treecell);
-		
-		treeitem.appendChild(treerow);
-		treechildren.appendChild(treeitem);
+	/**
+	 * @class Handles UI, etc. for recognizing multiple items
+	 */
+	this.ItemRecognizer = function () {
+		this._items = [];
 	}
-	
-	var me = this;
-	this._progressIndicator = this._progressWindow.document.getElementById("progress-indicator");
-	this._progressWindow.document.getElementById("cancel-button").addEventListener("command", function() {
-		me.stop();
-		me._progressWindow.close();
-	}, false);
-	this._progressWindow.addEventListener("close", function() { me.stop() }, false);
-	this._recognizeItem();
-}
 
-/**
- * Shifts an item off of this._items and recognizes it, then calls itself again if there are more
- * @private
- */
-Zotero_RecognizePDF.ItemRecognizer.prototype._recognizeItem = function() {
-	const SUCCESS_IMAGE = "chrome://zotero/skin/tick.png";
-	const FAILURE_IMAGE = "chrome://zotero/skin/cross.png";
-	const LOADING_IMAGE = "chrome://global/skin/icons/loading_16.png";
+	this.ItemRecognizer.prototype = {
+		"_stopped": false,
+		"_itemsTotal": 0,
+		"_progressWindow": null,
+		"_progressIndicator": null,
 
-	if(!this._items.length) {
-		this._done();
-		return;
+		/**
+		 * Retreives metadata for the PDF items passed, displaying a progress dialog during conversion 
+		 * and placing the PDFs as a children of the new items
+		 * @param {Zotero.Item[]} items
+		 */
+		"recognizeItems": function(items) {
+			var me = this;
+			this._items = items.slice();
+			this._itemTotal = items.length;
+			
+			this._progressWindow = window.openDialog("chrome://zotero/content/pdfProgress.xul", "", "chrome,close=yes,resizable=yes,dependent,dialog,centerscreen");
+			this._progressWindow.addEventListener("pageshow", function() { me._onWindowLoaded() }, false);
+		},
+
+		/**
+		 * Halts recognition of PDFs
+		 */
+		"stop": function() {
+			this._stopped = true;	
+		},
+
+		/**
+		 * Called when the progress window has been opened; adds items to the tree and begins recognizing
+		 * @param
+		 */
+		"_onWindowLoaded": function() {
+			// populate progress window
+			var treechildren = this._progressWindow.document.getElementById("treechildren");
+			for(var i in this._items) {
+				var treeitem = this._progressWindow.document.createElement('treeitem');
+				var treerow = this._progressWindow.document.createElement('treerow');
+				
+				var treecell = this._progressWindow.document.createElement('treecell');
+				treecell.setAttribute("id", "item-"+this._items[i].id+"-icon");
+				treerow.appendChild(treecell);
+				
+				treecell = this._progressWindow.document.createElement('treecell');
+				treecell.setAttribute("label", this._items[i].getField("title"));
+				treerow.appendChild(treecell);
+				
+				treecell = this._progressWindow.document.createElement('treecell');
+				treecell.setAttribute("id", "item-"+this._items[i].id+"-title");
+				treerow.appendChild(treecell);
+				
+				treeitem.appendChild(treerow);
+				treechildren.appendChild(treeitem);
+			}
+			
+			var me = this;
+			this._progressIndicator = this._progressWindow.document.getElementById("progress-indicator");
+			this._progressWindow.document.getElementById("cancel-button").addEventListener("command", function() {
+				me.stop();
+				me._progressWindow.close();
+			}, false);
+			this._progressWindow.addEventListener("close", function() { me.stop() }, false);
+			this._recognizeItem();
+		},
+
+		/**
+		 * Shifts an item off of this._items and recognizes it, then calls itself again if there are more
+		 * @private
+		 */
+		"_recognizeItem": function() {
+			Components.utils.import("resource://zotero/q.js");
+			
+			const SUCCESS_IMAGE = "chrome://zotero/skin/tick.png";
+			const FAILURE_IMAGE = "chrome://zotero/skin/cross.png";
+			const LOADING_IMAGE = "chrome://global/skin/icons/loading_16.png";
+
+			if(!this._items.length) {
+				this._done();
+				return;
+			}
+			
+			this._progressIndicator.value = (this._itemTotal-this._items.length)/this._itemTotal*100;
+			
+			var item = this._items.shift(),
+				itemIcon = this._progressWindow.document.getElementById("item-"+item.id+"-icon"),
+				itemTitle = this._progressWindow.document.getElementById("item-"+item.id+"-title");
+			itemIcon.setAttribute("src", LOADING_IMAGE);
+			
+			var file = item.getFile(), me = this;
+			
+			(file
+			? Zotero_RecognizePDF.recognize(file, item.libraryID)
+			: Q.reject(new Zotero.Exception.Alert("recognizePDF.fileNotFound")))
+			.then(function(newItem) {
+				// If already stopped, delete
+				if(me._stopped) {
+					Zotero.Items.erase(item.id);
+					return;
+				}
+				
+				// put new item in same collections as the old one
+				var itemCollections = item.getCollections();
+				for(var j=0; j<itemCollections.length; j++) {
+					var collection = Zotero.Collections.get(itemCollections[j]);
+					collection.addItem(newItem.id);
+				}
+				
+				// put old item as a child of the new item
+				item.setSource(newItem.id);
+				item.save();
+				
+				itemTitle.setAttribute("label", newItem.getField("title"));
+				itemIcon.setAttribute("src", SUCCESS_IMAGE);
+				
+				me._recognizeItem();
+			}, function(error) {
+				Zotero.debug(error);
+				Zotero.logError(error);
+
+				itemTitle.setAttribute("label", error instanceof Zotero.Exception.Alert ? error.message : Zotero.getString("recognizePDF.error"));
+				itemIcon.setAttribute("src", FAILURE_IMAGE);
+				
+				if(error instanceof Zotero.Exception.Alert && error.name === "recognizePDF.limit") {
+					me._done();
+				} else {
+					me._recognizeItem();
+				}
+			}).fin(function() {
+				// scroll to this item
+				me._progressWindow.document.getElementById("tree").treeBoxObject.scrollToRow(Math.max(0, me._itemTotal-me._items.length-5));
+			}).done();
+		},
+
+		/**
+		 * Cleans up after items are recognized, disabling the cancel button and making the progress window
+		 * close on blur
+		 */
+		"_done": function() {
+			this._progressIndicator.value = 100;
+			this._progressWindow.document.getElementById("cancel-button").label = Zotero.getString("recognizePDF.close.label");
+			var me = this;
+			this._progressWindow.addEventListener("blur",
+				function() { me._progressWindow.setTimeout(function() { me._progressWindow.close() }, 2000) }, false);
+			this._progressWindow.document.getElementById("label").value = Zotero.getString("recognizePDF.complete.label");
+		}
 	}
-	
-	this._progressIndicator.value = (this._itemTotal-this._items.length)/this._itemTotal*100;
-	
-	var item = this._items.shift(),
-		itemIcon = this._progressWindow.document.getElementById("item-"+item.id+"-icon"),
-		itemTitle = this._progressWindow.document.getElementById("item-"+item.id+"-title");
-	itemIcon.setAttribute("src", LOADING_IMAGE);
-	
-	var file = item.getFile(), me = this;
-	
-	(file
-	? Zotero_RecognizePDF.recognize(file, item.libraryID)
-	: Q.reject(new Zotero.Exception.Alert("recognizePDF.fileNotFound")))
-	.then(function(newItem) {
-		// If already stopped, delete
-		if(me._stopped) {
-			Zotero.Items.erase(item.id);
-			return;
-		}
-		
-		// put new item in same collections as the old one
-		var itemCollections = item.getCollections();
-		for(var j=0; j<itemCollections.length; j++) {
-			var collection = Zotero.Collections.get(itemCollections[j]);
-			collection.addItem(newItem.id);
-		}
-		
-		// put old item as a child of the new item
-		item.setSource(newItem.id);
-		item.save();
-		
-		itemTitle.setAttribute("label", newItem.getField("title"));
-		itemIcon.setAttribute("src", SUCCESS_IMAGE);
-		
-		me._recognizeItem();
-	}, function(error) {
-		Zotero.debug(error);
-		Zotero.logError(error);
-
-		itemTitle.setAttribute("label", error instanceof Zotero.Exception.Alert ? error.message : Zotero.getString("recognizePDF.error"));
-		itemIcon.setAttribute("src", FAILURE_IMAGE);
-		
-		if(error instanceof Zotero.Exception.Alert && error.name === "recognizePDF.limit") {
-			me._done();
-		} else {
-			me._recognizeItem();
-		}
-	}).fin(function() {
-		// scroll to this item
-		me._progressWindow.document.getElementById("tree").treeBoxObject.scrollToRow(Math.max(0, me._itemTotal-me._items.length-5));
-	}).done();
-}
-
-/**
- * Cleans up after items are recognized, disabling the cancel button and making the progress window
- * close on blur
- */
-Zotero_RecognizePDF.ItemRecognizer.prototype._done = function() {
-	this._progressIndicator.value = 100;
-	this._progressWindow.document.getElementById("cancel-button").label = Zotero.getString("recognizePDF.close.label");
-	var me = this;
-	this._progressWindow.addEventListener("blur",
-		function() { me._progressWindow.setTimeout(function() { me._progressWindow.close() }, 2000) }, false);
-	this._progressWindow.document.getElementById("label").value = Zotero.getString("recognizePDF.complete.label");
 }

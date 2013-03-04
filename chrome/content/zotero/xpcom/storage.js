@@ -114,10 +114,10 @@ Zotero.Sync.Storage = new function () {
 					Zotero.debug("WebDAV file sync is not active");
 					
 					// Try to verify server now if it hasn't been
-					return mode.checkServerPromise()
-						.then(function () {
-							libraryModes[0] = Zotero.Sync.Storage.WebDAV;
-						});
+					return Zotero.Sync.Storage.checkServerPromise(Zotero.Sync.Storage.WebDAV)
+					.then(function () {
+						libraryModes[0] = Zotero.Sync.Storage.WebDAV;
+					});
 				}
 				
 				libraryModes[0] = Zotero.Sync.Storage.WebDAV;
@@ -147,6 +147,7 @@ Zotero.Sync.Storage = new function () {
 				}
 			}
 			return Q.allResolved(promises)
+			// Get library last-sync times
 			.then(function () {
 				var promises = [];
 				for (var libraryID in libraryModes) {
@@ -175,22 +176,29 @@ Zotero.Sync.Storage = new function () {
 				return [];
 			}
 			
+			var libraryQueues = [];
+			
+			// Get the libraries we have sync times for
 			promises.forEach(function (p) {
 				p = p.valueOf();
-				var libraryID = p[0].valueOf();
-				Zotero.debug(libraryID);
+				let libraryID = p[0].valueOf();
+				let lastSyncTime = p[1].valueOf();
 				if (p[1].isFulfilled()) {
-					librarySyncTimes[libraryID] = p[1].valueOf();
+					librarySyncTimes[libraryID] = lastSyncTime;
 				}
 				else {
-					// TODO: error log of some sort
-					//librarySyncTimes[libraryID] = p[1].valueOf().exception;
-					Components.utils.reportError(p[1].valueOf().exception);
+					let e = lastSyncTime.exception;
+					Zotero.debug(e);
+					Components.utils.reportError(e);
+					// Pass rejected promise through
+					libraryQueues.push(Q.allResolved(
+						[libraryID, lastSyncTime]
+					));
 				}
 			});
 			
 			// Queue files to download and upload from each library
-			for (var libraryID in librarySyncTimes) {
+			for (let libraryID in librarySyncTimes) {
 				var lastSyncTime = librarySyncTimes[libraryID];
 				libraryID = parseInt(libraryID);
 				
@@ -215,7 +223,7 @@ Zotero.Sync.Storage = new function () {
 				if (downloadAll && !downloadForced && lastSyncTime) {
 					var version = self.getStoredLastSyncTime(
 						libraryModes[libraryID], libraryID
-						);
+					);
 					if (version == lastSyncTime) {
 						Zotero.debug("Last " + libraryModes[libraryID].name
 							+ " sync time hasn't changed for library "
@@ -239,41 +247,58 @@ Zotero.Sync.Storage = new function () {
 				}
 			}
 			
-			// TODO: change to start() for each library, with allResolved()
-			// for the whole set and all() for each library
-			return Zotero.Sync.Storage.QueueManager.start();
+			// Start queues for each library
+			for (let libraryID in librarySyncTimes) {
+				libraryID = parseInt(libraryID);
+				libraryQueues.push(Q.allResolved(
+					[libraryID, Zotero.Sync.Storage.QueueManager.start(libraryID)]
+				));
+			}
+			
+			// The promise is done when all libraries are done
+			return Q.allResolved(libraryQueues);
 		})
 		.then(function (promises) {
 			Zotero.debug('Queue manager is finished');
 			
 			var changedLibraries = [];
-			
 			var finalPromises = [];
 			
 			promises.forEach(function (promise) {
-				var result = promise.valueOf();
-				if (promise.isFulfilled()) {
-					Zotero.debug("File " + result.type + " sync finished "
-						+ "for library " + result.libraryID);
-					Zotero.debug(result);
-					if (result.localChanges) {
-						changedLibraries.push(result.libraryID);
-					}
-					finalPromises.push(Q.allResolved([
-						result.libraryID,
-						libraryModes[result.libraryID].setLastSyncTime(
-							result.libraryID,
-							result.remoteChanges
-								? false : librarySyncTimes[result.libraryID]
-						)
-					]));
+				// Discard first allResolved() promise
+				p = promise.valueOf();
+				
+				var libraryID = p[0].valueOf();
+				var libraryQueues = p[1].valueOf();
+				
+				if (p[1].isFulfilled()) {
+					libraryQueues.forEach(function (queuePromise) {
+						let result = queuePromise.valueOf();
+						if (queuePromise.isFulfilled()) {
+							Zotero.debug("File " + result.type + " sync finished "
+								+ "for library " + libraryID);
+							if (result.localChanges) {
+								changedLibraries.push(libraryID);
+							}
+							finalPromises.push(Q.allResolved([
+								libraryID,
+								libraryModes[libraryID].setLastSyncTime(
+									libraryID,
+									result.remoteChanges ? false : librarySyncTimes[libraryID]
+								)
+							]));
+						}
+						else {
+							result = result.exception;
+							Zotero.debug("File " + result.type + " sync failed "
+								+ "for library " + libraryID);
+							finalPromises.push([libraryID, queuePromise]);
+						}
+					});
 				}
 				else {
-					result = result.exception;
-					Zotero.debug("File " + result.type + " sync failed "
-						+ "for library " + result.libraryID);
-					
-					finalPromises.push([result.libraryID, promise]);
+					Zotero.debug("File sync failed for library " + libraryID);
+					finalPromises.push([libraryID, libraryQueues]);
 				}
 			});
 			
@@ -354,7 +379,7 @@ Zotero.Sync.Storage = new function () {
 		var request = new Zotero.Sync.Storage.Request(
 			(item.libraryID ? item.libraryID : 0) + '/' + item.key, callbacks
 		);
-		if (queue == 'upload') {
+		if (queue.type == 'upload') {
 			request.setMaxSize(Zotero.Attachments.getTotalFileSize(item));
 		}
 		queue.addRequest(request, highPriority);
@@ -953,18 +978,14 @@ Zotero.Sync.Storage = new function () {
 	
 	
 	this.checkServerPromise = function (mode) {
-		var deferred = Q.defer();
-		mode.checkServer(function (uri, status) {
+		return mode.checkServer()
+		.spread(function (uri, status) {
 			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 						   .getService(Components.interfaces.nsIWindowMediator);
 			var lastWin = wm.getMostRecentWindow("navigator:browser");
 			
 			var success = mode.checkServerCallback(uri, status, lastWin, true);
-			if (success) {
-				Zotero.debug(mode.name + " file sync is successfully set up");
-				Q.resolve();
-			}
-			else {
+			if (!success) {
 				Zotero.debug(mode.name + " verification failed");
 				
 				var e = new Zotero.Error(
@@ -980,11 +1001,13 @@ Zotero.Sync.Storage = new function () {
 						}
 					}
 				);
-				
-				Q.reject(e);
+				throw e;
 			}
+		})
+		.then(function () {
+			Zotero.debug(mode.name + " file sync is successfully set up");
+			Zotero.Prefs.set("sync.storage.verified", true);
 		});
-		return deferred.promise;
 	}
 	
 	
@@ -1638,7 +1661,6 @@ Zotero.Sync.Storage = new function () {
 			
 			//Zotero.debug("Adding file " + fileName);
 			
-			fileName = Zotero.Utilities.Internal.Base64.encode(fileName) + "%ZB64";
 			zipWriter.addEntryFile(
 				fileName,
 				Components.interfaces.nsIZipWriter.COMPRESSION_DEFAULT,

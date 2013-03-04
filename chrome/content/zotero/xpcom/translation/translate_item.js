@@ -336,15 +336,27 @@ Zotero.Translate.ItemSaver.prototype = {
 			// Determine whether to save an attachment
 			if(attachment.snapshot !== false) {
 				if(attachment.document
-						|| (attachment.mimeType && attachment.mimeType == "text/html")) {
-					if(!Zotero.Prefs.get("automaticSnapshots")) return;
+						|| (attachment.mimeType && Zotero.Attachments.SNAPSHOT_MIMETYPES.indexOf(attachment.mimeType) != -1)) {
+					if(!Zotero.Prefs.get("automaticSnapshots")) {
+						Zotero.debug("Translate: Automatic snapshots are disabled. Skipping.", 4);
+						return;
+					}
 				} else {
-					if(!Zotero.Prefs.get("downloadAssociatedFiles")) return;
+					if(!Zotero.Prefs.get("downloadAssociatedFiles")) {
+						Zotero.debug("Translate: File attachments are disabled. Skipping.", 4);
+						return;
+					}
 				}
 			}
 			
 			if(attachment.document) {
 				attachment.document = Zotero.Translate.DOMWrapper.unwrap(attachment.document);
+				if(!attachment.title) attachment.title = attachment.document.title;
+			}
+			var title = attachment.title || null;
+			if(!title) {
+				// If no title provided, use "Attachment" as title for progress UI (but not for item)
+				attachment.title = Zotero.getString("itemTypes.attachment");
 			}
 			
 			if(attachment.snapshot === false || !this._saveFiles) {
@@ -354,7 +366,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					try {
 						Zotero.Attachments.linkFromURL(attachment.document.location.href, parentID,
 								(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
-								(attachment.title ? attachment.title : attachment.document.title));
+								title);
 						attachmentCallback(attachment, 100);
 					} catch(e) {
 						Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
@@ -362,14 +374,14 @@ Zotero.Translate.ItemSaver.prototype = {
 					}
 					return true;
 				} else {
-					if(!attachment.mimeType || !attachment.title) {
+					if(!attachment.mimeType || !title) {
 						Zotero.debug("Translate: Either mimeType or title is missing; attaching file will be slower", 3);
 					}
 					
 					try {
 						Zotero.Attachments.linkFromURL(attachment.url, parentID,
 								(attachment.mimeType ? attachment.mimeType : undefined),
-								(attachment.title ? attachment.title : undefined));
+								title);
 						attachmentCallback(attachment, 100);
 					} catch(e) {
 						Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
@@ -383,7 +395,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					try {
 						attachment.linkMode = "imported_url";
 						Zotero.Attachments.importFromDocument(attachment.document,
-							parentID, attachment.title, null, function(status, err) {
+							parentID, title, null, function(status, err) {
 								if(status) {
 									attachmentCallback(attachment, 100);
 								} else {
@@ -399,12 +411,24 @@ Zotero.Translate.ItemSaver.prototype = {
 				// Save attachment if snapshot pref enabled or not HTML
 				// (in which case downloadAssociatedFiles applies)
 				} else {
+					if(!attachment.mimeType && attachment.mimeType !== '') {
+						Zotero.debug("Translate: No mimeType specified for a possible snapshot. Trying to determine mimeType.", 4);
+						var me = this;
+						try {
+							Zotero.MIME.getMIMETypeFromURL(attachment.url, function (mimeType, hasNativeHandler) {
+								attachment.mimeType = mimeType || '';
+								me._saveAttachmentDownload(attachment, parentID, attachmentCallback);
+							}, this._cookieSandbox);
+						} catch(e) {
+							Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
+							attachmentCallback(attachment, false, e);
+						}
+						return;
+					}
 					var mimeType = (attachment.mimeType ? attachment.mimeType : null);
-					var title = (attachment.title ? attachment.title : null);
-
 					var fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentID);
 					try {
-						Zotero.debug('Importing attachment from URL');
+						Zotero.debug('Translate: Importing attachment from URL', 4);
 						attachment.linkMode = "imported_url";
 						Zotero.Attachments.importFromURL(attachment.url, parentID, title,
 							fileBaseName, null, mimeType, this._libraryID, function(status, err) {

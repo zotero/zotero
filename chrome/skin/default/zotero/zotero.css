@@ -96,6 +96,14 @@ tagsbox row
 	-moz-box-align:center;
 }
 
+customcolorpicker {
+	-moz-binding: url(chrome://zotero/content/bindings/customcolorpicker.xml#custom-colorpicker);
+}
+
+customcolorpicker[type=button] {
+	-moz-binding: url(chrome://zotero/content/bindings/customcolorpicker.xml#custom-colorpicker-button);
+}
+
 seealsobox
 {
 	-moz-binding: url('chrome://zotero/content/bindings/relatedbox.xml#seealso-box');
@@ -159,7 +167,6 @@ zoteroguidancepanel
 zoterofilesyncstatus {
 	-moz-binding: url('chrome://zotero/content/bindings/filesyncstatus.xml#file-sync-status');
 }
-
 
 label.zotero-text-link {
 	-moz-binding: url('chrome://zotero/content/bindings/text-link.xml#text-link');

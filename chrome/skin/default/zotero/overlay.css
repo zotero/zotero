@@ -52,9 +52,12 @@
 	background-image: none;
 }
 
-#zotero-items-column-hasAttachment, #zotero-items-column-hasNote
-{
+#zotero-items-column-hasAttachment, #zotero-items-column-numNotes {
 	min-width: 21px;
+}
+
+#zotero-items-column-numNotes {
+	text-align: center;
 }
 
 #zotero-items-tree treechildren::-moz-tree-image
@@ -70,7 +73,7 @@
 	-moz-image-region: rect(0px, 32px, 32px, 0px);
 }
 
-#zotero-items-tree treechildren::-moz-tree-image(hasAttachment,  pie1) { -moz-image-region: rect(0px,   32px, 32px,    0x); }
+#zotero-items-tree treechildren::-moz-tree-image(hasAttachment,  pie1) { -moz-image-region: rect(0px,   32px, 32px,    0px); }
 #zotero-items-tree treechildren::-moz-tree-image(hasAttachment,  pie2) { -moz-image-region: rect(0px,   64px, 32px,   32px); }
 #zotero-items-tree treechildren::-moz-tree-image(hasAttachment,  pie3) { -moz-image-region: rect(0px,   96px, 32px,   64px); }
 #zotero-items-tree treechildren::-moz-tree-image(hasAttachment,  pie4) { -moz-image-region: rect(0px,  128px, 32px,   96px); }
@@ -199,149 +202,6 @@
 #zotero-items-tree treechildren::-moz-tree-image(selected, hasAttachment, pie62) { -moz-image-region: rect(32px, 1984px, 64px, 1952px); }
 #zotero-items-tree treechildren::-moz-tree-image(selected, hasAttachment, pie63) { -moz-image-region: rect(32px, 2016px, 64px, 1984px); }
 #zotero-items-tree treechildren::-moz-tree-image(selected, hasAttachment, pie64) { -moz-image-region: rect(32px, 2048px, 64px, 2016px); }
-
-
-/* Set tag colors */
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFFFFFF) { color:#FFFFFF }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFFCCCC) { color:#FFCCCC }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFFCC99) { color:#FFCC99 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFFFF99) { color:#FFFF99 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFFFFCC) { color:#FFFFCC }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color99FF99) { color:#99FF99 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color99FFFF) { color:#99FFFF }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorCCFFFF) { color:#CCFFFF }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorCCCCFF) { color:#CCCCFF }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFFCCFF) { color:#FFCCFF }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorCCCCCC) { color:#CCCCCC }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFF6666) { color:#FF6666 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFF9966) { color:#FF9966 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFFFF66) { color:#FFFF66 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFFFF33) { color:#FFFF33 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color66FF99) { color:#66FF99 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color33FFFF) { color:#33FFFF }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color66FFFF) { color:#66FFFF }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color9999FF) { color:#9999FF }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFF99FF) { color:#FF99FF }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorC0C0C0) { color:#C0C0C0 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFF0000) { color:#FF0000 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFF9900) { color:#FF9900 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFFCC66) { color:#FFCC66 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFFFF00) { color:#FFFF00 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color33FF33) { color:#33FF33 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color66CCCC) { color:#66CCCC }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color33CCFF) { color:#33CCFF }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color6666CC) { color:#6666CC }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorCC66CC) { color:#CC66CC }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color999999) { color:#999999 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorCC0000) { color:#CC0000 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFF6600) { color:#FF6600 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFFCC33) { color:#FFCC33 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorFFCC00) { color:#FFCC00 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color33CC00) { color:#33CC00 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color00CCCC) { color:#00CCCC }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color3366FF) { color:#3366FF }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color6633FF) { color:#6633FF }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorCC33CC) { color:#CC33CC }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color666666) { color:#666666 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color990000) { color:#990000 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorCC6600) { color:#CC6600 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(colorCC9933) { color:#CC9933 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color999900) { color:#999900 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color009900) { color:#009900 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color339999) { color:#339999 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color3333FF) { color:#3333FF }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color6600CC) { color:#6600CC }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color993399) { color:#993399 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color333333) { color:#333333 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color660000) { color:#660000 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color993300) { color:#993300 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color996633) { color:#996633 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color666600) { color:#666600 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color006600) { color:#006600 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color336666) { color:#336666 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color000099) { color:#000099 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color333399) { color:#333399 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color663366) { color:#663366 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color330000) { color:#330000 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color663300) { color:#663300 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color663333) { color:#663333 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color333300) { color:#333300 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color003300) { color:#003300 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color003333) { color:#003333 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color000066) { color:#000066 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color330099) { color:#330099 }
-#zotero-items-tree treechildren::-moz-tree-cell-text(color330033) { color:#330033 }
-
-/* For selected item with colored tags, set the background color instead */
-#zotero-items-tree treechildren::-moz-tree-row(colorFFFFFF,focus) { background:#FFFFFF }
-#zotero-items-tree treechildren::-moz-tree-row(colorFFCCCC,focus) { background:#FFCCCC }
-#zotero-items-tree treechildren::-moz-tree-row(colorFFCC99,focus) { background:#FFCC99 }
-#zotero-items-tree treechildren::-moz-tree-row(colorFFFF99,focus) { background:#FFFF99 }
-#zotero-items-tree treechildren::-moz-tree-row(colorFFFFCC,focus) { background:#FFFFCC }
-#zotero-items-tree treechildren::-moz-tree-row(color99FF99,focus) { background:#99FF99 }
-#zotero-items-tree treechildren::-moz-tree-row(color99FFFF,focus) { background:#99FFFF }
-#zotero-items-tree treechildren::-moz-tree-row(colorCCFFFF,focus) { background:#CCFFFF }
-#zotero-items-tree treechildren::-moz-tree-row(colorCCCCFF,focus) { background:#CCCCFF }
-#zotero-items-tree treechildren::-moz-tree-row(colorFFCCFF,focus) { background:#FFCCFF }
-#zotero-items-tree treechildren::-moz-tree-row(colorCCCCCC,focus) { background:#CCCCCC }
-#zotero-items-tree treechildren::-moz-tree-row(colorFF6666,focus) { background:#FF6666 }
-#zotero-items-tree treechildren::-moz-tree-row(colorFF9966,focus) { background:#FF9966 }
-#zotero-items-tree treechildren::-moz-tree-row(colorFFFF66,focus) { background:#FFFF66 }
-#zotero-items-tree treechildren::-moz-tree-row(colorFFFF33,focus) { background:#FFFF33 }
-#zotero-items-tree treechildren::-moz-tree-row(color66FF99,focus) { background:#66FF99 }
-#zotero-items-tree treechildren::-moz-tree-row(color33FFFF,focus) { background:#33FFFF }
-#zotero-items-tree treechildren::-moz-tree-row(color66FFFF,focus) { background:#66FFFF }
-#zotero-items-tree treechildren::-moz-tree-row(color9999FF,focus) { background:#9999FF }
-#zotero-items-tree treechildren::-moz-tree-row(colorFF99FF,focus) { background:#FF99FF }
-#zotero-items-tree treechildren::-moz-tree-row(colorC0C0C0,focus) { background:#C0C0C0 }
-#zotero-items-tree treechildren::-moz-tree-row(colorFF0000,focus) { background:#FF0000 }
-#zotero-items-tree treechildren::-moz-tree-row(colorFF9900,focus) { background:#FF9900 }
-#zotero-items-tree treechildren::-moz-tree-row(colorFFCC66,focus) { background:#FFCC66 }
-#zotero-items-tree treechildren::-moz-tree-row(colorFFFF00,focus) { background:#FFFF00 }
-#zotero-items-tree treechildren::-moz-tree-row(color33FF33,focus) { background:#33FF33 }
-#zotero-items-tree treechildren::-moz-tree-row(color66CCCC,focus) { background:#66CCCC }
-#zotero-items-tree treechildren::-moz-tree-row(color33CCFF,focus) { background:#33CCFF }
-#zotero-items-tree treechildren::-moz-tree-row(color6666CC,focus) { background:#6666CC }
-#zotero-items-tree treechildren::-moz-tree-row(colorCC66CC,focus) { background:#CC66CC }
-#zotero-items-tree treechildren::-moz-tree-row(color999999,focus) { background:#999999 }
-#zotero-items-tree treechildren::-moz-tree-row(colorCC0000,focus) { background:#CC0000 }
-#zotero-items-tree treechildren::-moz-tree-row(colorFF6600,focus) { background:#FF6600 }
-#zotero-items-tree treechildren::-moz-tree-row(colorFFCC33,focus) { background:#FFCC33 }
-#zotero-items-tree treechildren::-moz-tree-row(colorFFCC00,focus) { background:#FFCC00 }
-#zotero-items-tree treechildren::-moz-tree-row(color33CC00,focus) { background:#33CC00 }
-#zotero-items-tree treechildren::-moz-tree-row(color00CCCC,focus) { background:#00CCCC }
-#zotero-items-tree treechildren::-moz-tree-row(color3366FF,focus) { background:#3366FF }
-#zotero-items-tree treechildren::-moz-tree-row(color6633FF,focus) { background:#6633FF }
-#zotero-items-tree treechildren::-moz-tree-row(colorCC33CC,focus) { background:#CC33CC }
-#zotero-items-tree treechildren::-moz-tree-row(color666666,focus) { background:#666666 }
-#zotero-items-tree treechildren::-moz-tree-row(color990000,focus) { background:#990000 }
-#zotero-items-tree treechildren::-moz-tree-row(colorCC6600,focus) { background:#CC6600 }
-#zotero-items-tree treechildren::-moz-tree-row(colorCC9933,focus) { background:#CC9933 }
-#zotero-items-tree treechildren::-moz-tree-row(color999900,focus) { background:#999900 }
-#zotero-items-tree treechildren::-moz-tree-row(color009900,focus) { background:#009900 }
-#zotero-items-tree treechildren::-moz-tree-row(color339999,focus) { background:#339999 }
-#zotero-items-tree treechildren::-moz-tree-row(color3333FF,focus) { background:#3333FF }
-#zotero-items-tree treechildren::-moz-tree-row(color6600CC,focus) { background:#6600CC }
-#zotero-items-tree treechildren::-moz-tree-row(color993399,focus) { background:#993399 }
-#zotero-items-tree treechildren::-moz-tree-row(color333333,focus) { background:#333333 }
-#zotero-items-tree treechildren::-moz-tree-row(color660000,focus) { background:#660000 }
-#zotero-items-tree treechildren::-moz-tree-row(color993300,focus) { background:#993300 }
-#zotero-items-tree treechildren::-moz-tree-row(color996633,focus) { background:#996633 }
-#zotero-items-tree treechildren::-moz-tree-row(color666600,focus) { background:#666600 }
-#zotero-items-tree treechildren::-moz-tree-row(color006600,focus) { background:#006600 }
-#zotero-items-tree treechildren::-moz-tree-row(color336666,focus) { background:#336666 }
-#zotero-items-tree treechildren::-moz-tree-row(color000099,focus) { background:#000099 }
-#zotero-items-tree treechildren::-moz-tree-row(color333399,focus) { background:#333399 }
-#zotero-items-tree treechildren::-moz-tree-row(color663366,focus) { background:#663366 }
-#zotero-items-tree treechildren::-moz-tree-row(color330000,focus) { background:#330000 }
-#zotero-items-tree treechildren::-moz-tree-row(color663300,focus) { background:#663300 }
-#zotero-items-tree treechildren::-moz-tree-row(color663333,focus) { background:#663333 }
-#zotero-items-tree treechildren::-moz-tree-row(color333300,focus) { background:#333300 }
-#zotero-items-tree treechildren::-moz-tree-row(color003300,focus) { background:#003300 }
-#zotero-items-tree treechildren::-moz-tree-row(color003333,focus) { background:#003333 }
-#zotero-items-tree treechildren::-moz-tree-row(color000066,focus) { background:#000066 }
-#zotero-items-tree treechildren::-moz-tree-row(color330099,focus) { background:#330099 }
-#zotero-items-tree treechildren::-moz-tree-row(color330033,focus) { background:#330033 }
 
 /* Style search results, display non-matches in gray */
 #zotero-items-tree treechildren::-moz-tree-cell-text(contextRow) {
