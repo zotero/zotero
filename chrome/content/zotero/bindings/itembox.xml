@@ -2516,13 +2516,13 @@
                                        } else {
                                            return true;
                                        };">
-						<menu label="&zotero.item.creatorTransform;">
-							<menupopup position="after_start">
+						<!--<menu label="&zotero.item.creatorTransform;">
+							<menupopup position="after_start">-->
 								<menuitem label="&zotero.item.creatorTransform.nameSwap;" class="creator-transform-swap-names"
 									oncommand="document.getBindingParent(this).swapNames();"/>
-							</menupopup>
-						</menu>
-					</menupopup>				
+							<!--</menupopup>
+						</menu>-->
+					</menupopup>
 					<zoteroguidancepanel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
 				</popupset>
 				<grid flex="1">
