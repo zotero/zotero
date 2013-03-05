@@ -355,6 +355,9 @@
 							.getService(Components.interfaces.nsIChromeRegistry);
 					uri = cr.convertChromeURL(uri);
 					
+					// Pass directionality (LTR/RTL) in URL
+					uri.spec += "?dir=" + Zotero.dir;
+					
 					Zotero.debug("Loading " + uri.spec);
 					
 					// Register handler for deferred setting of content

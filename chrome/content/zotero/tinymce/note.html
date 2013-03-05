@@ -25,6 +25,15 @@
 		},
 		
 		setup : function (ed) {
+			// Set text direction
+			var dir = window.location.href.match(/dir=(ltr|rtl)/)[1];
+			ed.settings.directionality = dir;
+			// Include button for opposite direction, to function as a toggle
+			ed.settings.theme_advanced_buttons1 = ed.settings.theme_advanced_buttons1.replace(
+				"%DIR%",
+				"," + dir.split("").reverse().join("")
+			);
+			
 			ed.onInit.add(function (ed) {
 				zoteroInit(ed);
 			});
@@ -40,10 +49,10 @@
 		
 		fix_list_elements : true,
 		fix_table_elements : true,
-		plugins : "paste,contextmenu",
+		plugins : "paste,contextmenu,directionality",
 		
 		// Theme options
-		theme_advanced_buttons1 : "bold,italic,underline,strikethrough,|,sub,sup,|,forecolor,backcolor,|,blockquote,|,link,unlink",
+		theme_advanced_buttons1 : "bold,italic,underline,strikethrough,|,sub,sup,|,forecolor,backcolor,|,blockquote,|,link,unlink,|,%DIR%",
 		theme_advanced_buttons2 : "formatselect,|,justifyleft,justifycenter,justifyright,|,bullist,numlist,outdent,indent,|,removeformat,code",
 		theme_advanced_buttons3 : "",
 		theme_advanced_toolbar_location : "top",
