@@ -712,7 +712,6 @@
 					
 					// Name
 					var firstlast = document.createElement("hbox");
-					firstlast.setAttribute("context", "creator-transform-menu");
 					firstlast.className = 'creator-name-box';
 					firstlast.setAttribute("flex","1");
 					var tabindex = this._tabIndexMinCreators + (this._creatorCount * 2);
@@ -742,6 +741,11 @@
 					if (creator.fieldMode) {
 						firstlast.lastChild.setAttribute('hidden', true);
 					}
+					
+					if (this.editable) {
+						firstlast.setAttribute('contextmenu', 'zotero-creator-transform-menu');
+					}
+					
 					this._tabIndexMaxCreators = Math.max(this._tabIndexMaxCreators, tabindex);
 					
 					hbox.appendChild(firstlast);
@@ -2215,23 +2219,20 @@
 			</method>
 			
 			
-           <method name="swapNames">
-               <body>
-               <![CDATA[
-                   var myelem = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
-                   var elem = myelem.parentNode.firstChild.lastChild;
-                   var creatorIndex = parseInt(elem.getAttribute('fieldname').split('-')[1]);
-                   var row = Zotero.getAncestorByTagName(elem, 'row');
-                   var fields = this.getCreatorFields(row);
-                   var lastName = fields.lastName;
-                   var firstName = fields.firstName;
-                   fields.lastName = firstName;
-                   fields.firstName = lastName;
-                   this.modifyCreator(creatorIndex, fields);
-                   this.item.save();
-               ]]>
-               </body>
-           </method>
+			<method name="swapNames">
+				<body><![CDATA[
+					var row = Zotero.getAncestorByTagName(document.popupNode, 'row');
+					var typeBox = row.getElementsByAttribute('popup', 'creator-type-menu')[0];
+					var creatorIndex = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
+					var fields = this.getCreatorFields(row);
+					var lastName = fields.lastName;
+					var firstName = fields.firstName;
+					fields.lastName = firstName;
+					fields.firstName = lastName;
+					this.modifyCreator(creatorIndex, fields);
+					this.item.save();
+				]]></body>
+			</method>
 			
 			<method name="moveCreator">
 				<parameter name="index"/>
@@ -2501,27 +2502,19 @@
 							</menupopup>
 						</menu>
 					</menupopup>
-					<menupopup id="creator-transform-menu"
-						onpopupshowing="var myBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
-                                       var typeBox = myBox.parentNode.firstChild.lastChild;
-                                       var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);                              
-                                       var item = document.getBindingParent(this).item;
-                                       var exists = item.hasCreatorAt(index);
-                                       if (exists) {
-                                           var fieldMode = item.getCreator(index).ref.fieldMode;
-                                       }
-                                       var hideTransforms = !exists || !!fieldMode;
-                                       if (hideTransforms) {
-                                           return false;
-                                       } else {
-                                           return true;
-                                       };">
-						<!--<menu label="&zotero.item.creatorTransform;">
-							<menupopup position="after_start">-->
-								<menuitem label="&zotero.item.creatorTransform.nameSwap;" class="creator-transform-swap-names"
-									oncommand="document.getBindingParent(this).swapNames();"/>
-							<!--</menupopup>
-						</menu>-->
+					<menupopup id="zotero-creator-transform-menu"
+						onpopupshowing="var row = Zotero.getAncestorByTagName(document.popupNode, 'row');
+							var typeBox = row.getElementsByAttribute('popup', 'creator-type-menu')[0];
+							var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
+							var item = document.getBindingParent(this).item;
+							var exists = item.hasCreatorAt(index);
+							if (exists) {
+								var fieldMode = item.getCreator(index).ref.fieldMode;
+							}
+							var hideTransforms = !exists || !!fieldMode;
+							return !hideTransforms;">
+						<menuitem label="&zotero.item.creatorTransform.nameSwap;"
+							oncommand="document.getBindingParent(this).swapNames();"/>
 					</menupopup>
 					<zoteroguidancepanel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
 				</popupset>
