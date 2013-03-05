@@ -58,10 +58,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 					catch (e) {
 						Zotero.debug("Response headers unavailable");
 					}
-					// TODO: localize?
-					var msg = "A file sync error occurred. Please restart " + Zotero.appName + " and/or your computer and try syncing again.\n\n"
-						+ "If the error persists, there may be a problem with either your computer or your network: security software, proxy server, VPN, etc. "
-						+ "Try disabling any security/firewall software you're using or, if this is a laptop, try from a different network.";
+					var msg = Zotero.getString('sync.storage.error.zfs.restart', Zotero.appName);
 					throw msg;
 				}
 				info.filename = req.getResponseHeader('X-Zotero-Filename');
@@ -268,10 +265,8 @@ Zotero.Sync.Storage.ZFS = (function () {
 						var retry = e.xmlhttp.getResponseHeader('Retry-After');
 						if (retry) {
 							var minutes = Math.round(retry / 60);
-							// TODO: localize
 							var e = new Zotero.Error(
-								"You have too many queued uploads. "
-									+ "Please try again in " + minutes + " minutes.",
+								Zotero.getString('sync.storage.error.zfs.tooManyQueuedUploads', minutes),
 								"ZFS_UPLOAD_QUEUE_LIMIT"
 							);
 							throw e;
@@ -301,11 +296,10 @@ Zotero.Sync.Storage.ZFS = (function () {
 							}
 						}
 						
-						// TODO: localize
 						text += "\n\n" + filename + " (" + Math.round(file.fileSize / 1024) + "KB)";
 						
 						var e = new Zotero.Error(
-							"The file '" + filename + "' would exceed your Zotero File Storage quota",
+							Zotero.getString('sync.storage.error.zfs.fileWouldExceedQuota', filename),
 							"ZFS_OVER_QUOTA",
 							{
 								dialogText: text,

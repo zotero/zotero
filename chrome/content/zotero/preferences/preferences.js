@@ -283,16 +283,11 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 			var account = Zotero.Sync.Server.username;
 			var index = ps.confirmEx(
 				null,
-				// TODO: localize
-				"Purge Attachment Files on Zotero Servers?",
-				
-				"If you plan to use WebDAV for file syncing and you previously synced attachment files in My Library "
-					+ "to the Zotero servers, you can purge those files from the Zotero servers to give you more "
-					+ "storage space for groups.\n\n"
-					+ "You can purge files at any time from your account settings on zotero.org.",
+				Zotero.getString('zotero.preferences.sync.purgeStorage.title'),
+				Zotero.getString('zotero.preferences.sync.purgeStorage.desc'),
 				buttonFlags,
-				"Purge Files Now",
-				"Do Not Purge", null, null, {}
+				Zotero.getString('zotero.preferences.sync.purgeStorage.confirmButton'),
+				Zotero.getString('zotero.preferences.sync.purgeStorage.cancelButton'), null, null, {}
 			);
 			
 			if (index == 0) {
@@ -478,11 +473,9 @@ function handleSyncReset(action) {
 		ps.alert(
 			null,
 			Zotero.getString('general.error'),
-			// TODO: localize
-			"You must enter a username and password in the "
-				+ document.getElementById('zotero-prefpane-sync')
-					.getElementsByTagName('tab')[0].label
-				+ " tab before using the reset options."
+			Zotero.getString('zotero.preferences.sync.reset.userInfoMissing',
+							document.getElementById('zotero-prefpane-sync')
+							.getElementsByTagName('tab')[0].label)
 		);
 		return;
 	}
@@ -496,12 +489,10 @@ function handleSyncReset(action) {
 								+ ps.BUTTON_POS_1_DEFAULT;
 			var index = ps.confirmEx(
 				null,
-				// TODO: localize
 				Zotero.getString('general.warning'),
-				"All data in this copy of Zotero will be erased and replaced with "
-					+ "data belonging to user '" + account + "' on the Zotero server.",
+				Zotero.getString('zotero.preferences.sync.reset.restoreFromServer', account),
 				buttonFlags,
-				"Replace Local Data",
+				Zotero.getString('zotero.preferences.sync.reset.replaceLocalData'),
 				null, null, null, {}
 			);
 			
@@ -524,8 +515,7 @@ function handleSyncReset(action) {
 						var index = ps.confirmEx(
 							null,
 							Zotero.getString('general.restartRequired'),
-							// TODO: localize
-							"Firefox must be restarted to complete the restore process.",
+							Zotero.getString('zotero.preferences.sync.reset.restartToComplete'),
 							buttonFlags,
 							Zotero.getString('general.restartNow'),
 							null, null, null, {}
@@ -557,14 +547,10 @@ function handleSyncReset(action) {
 							+ ps.BUTTON_POS_1_DEFAULT;
 			var index = ps.confirmEx(
 				null,
-				// TODO: localize
 				Zotero.getString('general.warning'),
-				"All data belonging to user '" + account + "' on the Zotero server "
-					+ "will be erased and replaced with data from this copy of Zotero.\n\n"
-					+ "Depending on the size of your library, there may be a delay before "
-					+ "your data is available on the server.",
+				Zotero.getString('zotero.preferences.sync.reset.restoreToServer', account),
 				buttonFlags,
-				"Replace Server Data",
+				Zotero.getString('zotero.preferences.sync.reset.replaceServerData'),
 				null, null, null, {}
 			);
 			
@@ -615,12 +601,10 @@ function handleSyncReset(action) {
 							+ ps.BUTTON_POS_1_DEFAULT;
 			var index = ps.confirmEx(
 				null,
-				// TODO: localize
 				Zotero.getString('general.warning'),
-				"All file sync history will be cleared.\n\n"
-					+ "Any local attachment files that do not exist on the storage server will be uploaded on the next sync.",
+				Zotero.getString('zotero.preferences.sync.reset.fileSyncHistory'),
 				buttonFlags,
-				"Reset",
+				Zotero.getString('general.reset'),
 				null, null, null, {}
 			);
 			
@@ -1509,7 +1493,6 @@ Zotero_Preferences.Debug_Output = {
 	},
 	
 	
-	// TODO: localize
 	submit: function () {
 		document.getElementById('debug-output-submit').disabled = true;
 		document.getElementById('debug-output-submit-progress').hidden = false;
@@ -1534,7 +1517,7 @@ Zotero_Preferences.Debug_Output = {
 				ps.alert(
 					null,
 					Zotero.getString('general.error'),
-					'Invalid response from server'
+					Zotero.getString('general.invalidResponseServer')
 				);
 				return;
 			}
@@ -1543,7 +1526,7 @@ Zotero_Preferences.Debug_Output = {
 				ps.alert(
 					null,
 					Zotero.getString('general.error'),
-					'The server returned an error. Please try again.'
+					Zotero.getString('general.serverError')
 				);
 				return;
 			}
@@ -1551,9 +1534,8 @@ Zotero_Preferences.Debug_Output = {
 			var reportID = reported[0].getAttribute('reportID');
 			ps.alert(
 				null,
-				"Debug Output Submitted",
-				"Debug output has been sent to the Zotero server.\n\n"
-					+ "The Debug ID is D" + reportID + "."
+				Zotero.getString('zotero.preferences.advanced.debug.title'),
+				Zotero.getString('zotero.preferences.advanced.debug.sent', reportID)
 			);
 		}
 		
@@ -1571,10 +1553,8 @@ Zotero_Preferences.Debug_Output = {
 			if (Zotero.HTTP.browserIsOffline()) {
 				ps.alert(
 					null,
-					Zotero.getString(
-						'general.error',
-						Zotero.appName + " is in offline mode."
-					)
+					Zotero.getString('general.error'),
+					Zotero.getString('general.browserIsOffline', Zotero.appName)
 				);
 				return false;
 			}
@@ -1626,7 +1606,7 @@ Zotero_Preferences.Debug_Output = {
 				ps.alert(
 					null,
 					Zotero.getString('general.error'),
-					"An error occurred sending debug output."
+					Zotero.getString('zotero.preferences.advanced.debug.error')
 				);
 			}
 		}

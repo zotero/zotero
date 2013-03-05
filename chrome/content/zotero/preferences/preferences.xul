@@ -343,11 +343,8 @@ To add a new preference:
 				</tabpanel>
 				
 				<tabpanel id="zotero-reset" orient="vertical">
-					<!-- TODO: localize -->
 					<!-- This doesn't wrap without an explicit width, for some reason -->
-					<description width="45em">The following operations are for use only in rare, specific situations and should not be used for general troubleshooting.
-					In many cases, resetting will cause additional problems.
-					See <label style="margin-left: 0; margin-right: 0" class="zotero-text-link" href="http://zotero.org/support/kb/sync_reset_options">Sync Reset Options</label> for more information.</description>
+					<description width="45em">&zotero.preferences.sync.reset.warning1;<label style="margin-left: 0; margin-right: 0" class="zotero-text-link" href="http://zotero.org/support/kb/sync_reset_options">&zotero.preferences.sync.reset.warning2;</label>&zotero.preferences.sync.reset.warning3;</description>
 					
 					<radiogroup id="zotero-reset-sync-group" oncommand="handleSyncResetSelect(this)">
 						<groupbox>
@@ -731,9 +728,8 @@ To add a new preference:
 		
 		<tabbox id="zotero-prefpane-advanced-tabs">
 			<tabs>
-				<!-- TODO: localize -->
-				<tab label="General"/>
-				<tab label="Files and Folders"/>
+				<tab label="&zotero.preferences.prefpane.general;"/>
+				<tab label="&zotero.preferences.advanced.filesAndFolders;"/>
 			</tabs>
 			
 			<tabpanels id="zotero-prefpane-advanced-tabpanels">

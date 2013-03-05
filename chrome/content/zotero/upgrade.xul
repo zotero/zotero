@@ -5,8 +5,7 @@
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
-<!-- TODO: localize -->
-<wizard id="zotero-schema-upgrade" title="Zotero Upgrade Wizard"
+<wizard id="zotero-schema-upgrade" title="&zotero.upgrade.title;"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<script>
