@@ -25,13 +25,6 @@
 
 
 Zotero.Sync.Storage.WebDAV = (function () {
-	// TEMP
-	//This doesn't work (Localized string not available for sync.storage...):
-	//var _defaultError = Zotero.getString('sync.storage.error.webdav.default');
-	//var _defaultErrorRestart = Zotero.getString('sync.storage.error.webdav.defaultRestart', Zotero.appName);
-	var _defaultError = "A WebDAV file sync error occurred. Please try syncing again.\n\nIf you receive this message repeatedly, check your WebDAV server settings in the Sync pane of the Zotero preferences.";
-	var _defaultErrorRestart = "A WebDAV file sync error occurred. Please restart " + Zotero.appName + " and try syncing again.\n\nIf you receive this message repeatedly, check your WebDAV server settings in the Sync pane of the Zotero preferences.";
-	
 	var _initialized = false;
 	var _parentURI;
 	var _rootURI;
@@ -112,7 +105,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 					Components.utils.reportError(msg);
 					return deleteStorageFiles([item.key + ".prop"])
 					.then(function (results) {
-						throw new Error(_defaultError);
+						throw new Error(Zotero.Sync.Storage.WebDAV.defaultError);
 					});
 				}
 				
@@ -642,13 +635,21 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	var obj = new Zotero.Sync.Storage.Mode;
 	obj.name = "WebDAV";
 	
+	Object.defineProperty(obj, "defaultError", {
+		get: function () Zotero.getString('sync.storage.error.webdav.default')
+	});
+	
+	Object.defineProperty(obj, "defaultErrorRestart", {
+		get: function () Zotero.getString('sync.storage.error.webdav.defaultRestart', Zotero.appName)
+	});
+	
 	Object.defineProperty(obj, "includeUserFiles", {
 		get: function () {
 			return Zotero.Prefs.get("sync.storage.enabled") && Zotero.Prefs.get("sync.storage.protocol") == 'webdav';
 		}
 	});
 	obj.includeGroupItems = false;
-		
+	
 	Object.defineProperty(obj, "_verified", {
 		get: function () Zotero.Prefs.get("sync.storage.verified")
 	});
@@ -882,7 +883,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 									+ " in Zotero.Sync.Storage.WebDAV.downloadFile()";
 								Zotero.debug(msg, 1);
 								Components.utils.reportError(msg);
-								deferred.reject(_defaultError);
+								deferred.reject(Zotero.Sync.Storage.WebDAV.defaultError);
 								return;
 							}
 							
@@ -1032,7 +1033,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 				var msg = "Unexpected error code " + req.status + " uploading storage success file";
 				Zotero.debug(msg, 2);
 				Components.utils.reportError(msg);
-				throw _defaultError;
+				throw Zotero.Sync.Storage.WebDAV.defaultError;
 			});
 	};
 	
@@ -1056,7 +1057,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 					+ "for OPTIONS request caching WebDAV credentials";
 				Zotero.debug(msg, 1);
 				Components.utils.reportError(msg);
-				throw new Error(_defaultErrorRestart);
+				throw new Error(Zotero.Sync.Storage.WebDAV.defaultErrorRestart);
 			}
 			throw e;
 		});

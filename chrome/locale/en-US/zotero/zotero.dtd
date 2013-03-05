@@ -233,6 +233,10 @@
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved	"Unchecked tags will not be saved.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted			"The tag will be deleted from all items.">
 
+<!ENTITY zotero.merge.title                           "Conflict Resolution">
+<!ENTITY zotero.merge.of                              "of">
+<!ENTITY zotero.merge.deleted                         "Deleted">
+
 <!ENTITY zotero.proxy.recognized.title					"Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning				"Only add proxies linked from your library, school, or corporate website">
 <!ENTITY zotero.proxy.recognized.warning.secondary		"Adding other proxies allows malicious sites to masquerade as sites you trust."> 

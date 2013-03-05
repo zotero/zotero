@@ -28,7 +28,7 @@
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/merge.css" type="text/css"?>
 
-<!DOCTYPE window SYSTEM "chrome://zotero/locale/merge.dtd">
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <wizard
 	id="zotero-merge-window"

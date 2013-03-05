@@ -478,7 +478,7 @@
 				<xul:box id="object-placeholder"/>
 				<xul:hbox id="delete-box" hidden="true" flex="1"
 						onclick="document.getBindingParent(this).chooseObj(this)">
-					<xul:label value="zotero.merge.deleted"/>
+					<xul:label value="&zotero.merge.deleted;"/>
 				</xul:hbox>
 			</xul:groupbox>
 		</content>
