@@ -274,7 +274,7 @@ var Zotero_Merge_Window = new function () {
 				var msg = Zotero.getString('sync.conflict.itemChanged');
 		}
 		
-		msg += Zotero.getString('sync.conflict.chooseVersionToKeep', buttonName);
+		msg += " " + Zotero.getString('sync.conflict.chooseVersionToKeep', buttonName);
 		
 		document.getElementById('zotero-merge-instructions').value = msg;
 	}

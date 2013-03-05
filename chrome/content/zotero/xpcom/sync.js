@@ -3686,7 +3686,7 @@ Zotero.Sync.Server.Data = new function() {
 			var remoteDelete = true;
 		}
 		
-		var msg = Zotero.getString('sync.conflict.autoChange.alert', itemTypes);
+		var msg = Zotero.getString('sync.conflict.autoChange.alert', itemTypes) + " ";
 		if (localDelete) {
 			msg += Zotero.getString('sync.conflict.remoteVersionsKept');
 		}
@@ -3696,7 +3696,7 @@ Zotero.Sync.Server.Data = new function() {
 		else {
 			msg += Zotero.getString('sync.conflict.recentVersionsKept');
 		}
-		msg += Zotero.getString('sync.conflict.viewErrorConsole', (Zotero.isStandalone ? "" : "Firefox "));
+		msg += "\n\n" + Zotero.getString('sync.conflict.viewErrorConsole', (Zotero.isStandalone ? "" : " Firefox"));
 		return msg;
 	}
 	
@@ -3717,10 +3717,10 @@ Zotero.Sync.Server.Data = new function() {
 			var remoteDelete = true;
 		}
 		
-		var msg = Zotero.getString('sync.conflict.autoChange.log', itemType);
+		var msg = Zotero.getString('sync.conflict.autoChange.log', itemType) + "\n\n";
 		msg += Zotero.getString('sync.conflict.localVersion', localName);
 		msg += Zotero.getString('sync.conflict.remoteVersion', remoteName);
-		msg += "\n";
+		msg += "\n\n";
 		if (localDelete) {
 			msg += Zotero.getString('sync.conflict.remoteVersionKept');
 		}
@@ -3783,7 +3783,7 @@ Zotero.Sync.Server.Data = new function() {
 	 * @param	{Boolean}		remoteIsTarget
 	 */
 	function _generateTagItemMergeLogMessage(tagName, addedItemIDs, remoteIsTarget) {
-		var introMsg = Zotero.getString('sync.conflict.tagItemMerge.log', tagName);
+		var introMsg = Zotero.getString('sync.conflict.tagItemMerge.log', tagName) + " ";
 		
 		if (remoteIsTarget) {
 			introMsg += Zotero.getString('sync.conflict.tag.addedToRemote');

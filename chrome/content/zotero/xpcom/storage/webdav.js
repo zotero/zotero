@@ -1420,7 +1420,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			case Zotero.Sync.Storage.ERROR_SERVER_ERROR:
 				var errorTitle = Zotero.getString('sync.storage.error.webdav.serverConfig.title');
 				var errorMessage = Zotero.getString('sync.storage.error.webdav.serverConfig')
-					+ Zotero.getString('sync.storage.error.checkFileSyncSettings');
+					+ "\n\n" + Zotero.getString('sync.storage.error.checkFileSyncSettings');
 				break;
 			
 			case Zotero.Sync.Storage.ERROR_UNKNOWN:

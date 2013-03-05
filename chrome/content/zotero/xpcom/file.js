@@ -491,7 +491,7 @@ Zotero.File = new function(){
 				// Shows up on some Windows systems
 				|| e.name == 'NS_ERROR_FAILURE') {
 			Zotero.debug(e);
-			str = str + Zotero.getString('file.accessError.cannotBe') + opWord + ".";
+			str = str + " " + Zotero.getString('file.accessError.cannotBe') + " " + opWord + ".";
 			var checkFileWindows = Zotero.getString('file.accessError.message.windows');
 			var checkFileOther = Zotero.getString('file.accessError.message.other');
 			var msg = str + " "
