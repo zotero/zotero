@@ -26,7 +26,9 @@
 
 Zotero.Sync.Storage.WebDAV = (function () {
 	// TEMP
-	// TODO: localize
+	//This doesn't work (Localized string not available for sync.storage...):
+	//var _defaultError = Zotero.getString('sync.storage.error.webdav.default');
+	//var _defaultErrorRestart = Zotero.getString('sync.storage.error.webdav.defaultRestart', Zotero.appName);
 	var _defaultError = "A WebDAV file sync error occurred. Please try syncing again.\n\nIf you receive this message repeatedly, check your WebDAV server settings in the Sync pane of the Zotero preferences.";
 	var _defaultErrorRestart = "A WebDAV file sync error occurred. Please restart " + Zotero.appName + " and try syncing again.\n\nIf you receive this message repeatedly, check your WebDAV server settings in the Sync pane of the Zotero preferences.";
 	
@@ -1409,23 +1411,15 @@ Zotero.Sync.Storage.WebDAV = (function () {
 				return false;
 			
 			case Zotero.Sync.Storage.ERROR_FILE_MISSING_AFTER_UPLOAD:
-				// TODO: localize
 				var errorTitle = Zotero.getString("general.warning");
-				var errorMessage = "A potential problem was found with your WebDAV server.\n\n"
-					+ "An uploaded file was not immediately available for download. There may be a "
-					+ "short delay between when you upload files and when they become available, "
-					+ "particularly if you are using a cloud storage service.\n\n"
-					+ "If Zotero file syncing appears to work normally, "
-					+ "you can ignore this message. "
-					+ "If you have trouble, please post to the Zotero Forums.";
+				var errorMessage = Zotero.getString('sync.storage.error.webdav.fileMissingAfterUpload');
 				Zotero.Prefs.set("sync.storage.verified", true);
 				break;
 			
 			case Zotero.Sync.Storage.ERROR_SERVER_ERROR:
-				// TODO: localize
-				var errorTitle = "WebDAV Server Configuration Error";
-				var errorMessage = "Your WebDAV server returned an internal error."
-					+ "\n\n" + Zotero.getString('sync.storage.error.checkFileSyncSettings');
+				var errorTitle = Zotero.getString('sync.storage.error.webdav.serverConfig.title');
+				var errorMessage = Zotero.getString('sync.storage.error.webdav.serverConfig')
+					+ Zotero.getString('sync.storage.error.checkFileSyncSettings');
 				break;
 			
 			case Zotero.Sync.Storage.ERROR_UNKNOWN:

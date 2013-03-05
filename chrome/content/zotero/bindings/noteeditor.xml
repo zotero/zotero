@@ -410,14 +410,14 @@
 			<method name="updateTagsSummary">
 				<body>
 					<![CDATA[
-						// TODO: localize
 						var v = this.id('tags').summary;
 						
 						if (!v || v == "") {
 							v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
 						}
 						
-						this.id('tagsLabel').value = Zotero.getString('pane.item.tags');
+						this.id('tagsLabel').value = Zotero.getString('itemFields.tags') 
+							+ Zotero.getString('punctuation.colon');
 						this.id('tagsClick').value = v;
 					]]>
 				</body>
@@ -446,7 +446,8 @@
 							v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
 						}
 						
-						this.id('seeAlsoLabel').value = Zotero.getString('pane.item.related');
+						this.id('seeAlsoLabel').value = Zotero.getString('itemFields.related') 
+							+ Zotero.getString('punctuation.colon');
 						this.id('seeAlsoClick').value = v;
 					]]>
 				</body>

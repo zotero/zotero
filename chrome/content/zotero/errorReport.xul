@@ -5,9 +5,8 @@
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
-<!-- TODO: localize -->
 <wizard xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	id="zotero-error-report" title="Zotero Error Report">
+	id="zotero-error-report" title="&zotero.errorReport.title;">
 	
 	<script>
 	<![CDATA[
@@ -69,14 +68,14 @@
 				if (!xmlhttp.responseXML){
 					try {
 						if (xmlhttp.status>1000){
-							alert('No network connection');
+							alert(Zotero.getString('errorReport.noNetworkConnection'));
 						}
 						else {
-							alert('Invalid response from repository');
+							alert(Zotero.getString('errorReport.invalidResponseRepository'));
 						}
 					}
 					catch (e){
-						alert('Repository cannot be contacted');
+						alert(Zotero.getString('errorReport.repoCannotBeContacted'));
 					}
 					
 					wizard.rewind();
@@ -86,7 +85,7 @@
 				
 				var reported = xmlhttp.responseXML.getElementsByTagName('reported');
 				if (reported.length != 1) {
-					alert('Invalid response from repository');
+					alert(Zotero.getString('errorReport.invalidResponseRepository'));
 					wizard.rewind();
 					return;
 				}

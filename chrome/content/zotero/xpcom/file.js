@@ -462,58 +462,49 @@ Zotero.File = new function(){
 	}
 	
 	
-	// TODO: localize
 	this.checkFileAccessError = function (e, file, operation) {
 		if (file) {
-			var str = "The file '" + file.path + "' ";
+			var str = Zotero.getString('file.accessError.theFile', file.path);
 		}
 		else {
-			var str = "A file ";
+			var str = Zotero.getString('file.accessError.aFile');
 		}
 		
 		switch (operation) {
 			case 'create':
-				var opWord = "created";
+				var opWord = Zotero.getString('file.accessError.created');
 				break;
 				
 			case 'update':
-				var opWord = "updated";
+				var opWord = Zotero.getString('file.accessError.updated');
 				break;
 				
 			case 'delete':
-				var opWord = "deleted";
+				var opWord = Zotero.getString('file.accessError.deleted');
 				break;
 				
 			default:
-				var opWord = "updated";
+				var opWord = Zotero.getString('file.accessError.updated');
 		}
 		
 		if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED' || e.name == 'NS_ERROR_FILE_IS_LOCKED'
 				// Shows up on some Windows systems
 				|| e.name == 'NS_ERROR_FAILURE') {
 			Zotero.debug(e);
-			// TODO: localize
-			str = str + "cannot be " + opWord + ".";
-			var checkFileWindows = "Check that the file is not currently "
-				+ "in use and that it is not marked as read-only. To check "
-				+ "all files in your Zotero data directory, right-click on "
-				+ "the 'zotero' directory, click Properties, clear "
-				+ "the Read-Only checkbox, and apply the change to all folders "
-				+ "and files in the directory.";
-			var checkFileOther = "Check that the file is not currently "
-				+ "in use and that its permissions allow write access.";
+			str = str + Zotero.getString('file.accessError.cannotBe') + opWord + ".";
+			var checkFileWindows = Zotero.getString('file.accessError.message.windows');
+			var checkFileOther = Zotero.getString('file.accessError.message.other');
 			var msg = str + " "
 					+ (Zotero.isWin ? checkFileWindows : checkFileOther)
 					+ "\n\n"
-					+ "Restarting your computer or disabling security "
-					+ "software may also help.";
+					+ Zotero.getString('file.accessError.restart');
 			
 			if (operation == 'create') {
 				var e = new Zotero.Error(
 					msg,
 					0,
 					{
-						dialogButtonText: "Show Parent Directory",
+						dialogButtonText: Zotero.getString('file.accessError.showParentDir'),
 						dialogButtonCallback: function () {
 							try {
 								file.parent.QueryInterface(Components.interfaces.nsILocalFile).reveal();
@@ -531,7 +522,7 @@ Zotero.File = new function(){
 					msg,
 					0,
 					{
-						dialogButtonText: "Show File",
+						dialogButtonText: Zotero.getString('locate.showFile.label'),
 						dialogButtonCallback: function () {
 							try {
 								file.QueryInterface(Components.interfaces.nsILocalFile);

@@ -53,9 +53,8 @@ Zotero.Sync.Storage = new function () {
 	this.ERROR_FILE_MISSING_AFTER_UPLOAD = -16;
 	
 	// TEMP
-	// TODO: localize
-	this.__defineGetter__("defaultError", function () "A file sync error occurred. Please try syncing again.\n\nIf you receive this message repeatedly, restart " + Zotero.appName + " and/or your computer and try again. If you continue to receive the message, submit an error report and post the Report ID to a new thread in the Zotero Forums.");
-	this.__defineGetter__("defaultErrorRestart", function () "A file sync error occurred. Please restart " + Zotero.appName + " and/or your computer and try syncing again.\n\nIf you receive this message repeatedly, submit an error report and post the Report ID to a new thread in the Zotero Forums.");
+	this.__defineGetter__("defaultError", function () Zotero.getString('sync.storage.error.default', Zotero.appName));
+	this.__defineGetter__("defaultErrorRestart", function () Zotero.getString('sync.storage.error.defaultRestart', Zotero.appName));
 	
 	//
 	// Public properties
@@ -1189,8 +1188,7 @@ Zotero.Sync.Storage = new function () {
 			// but log a warning and skip the file
 			else if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
 				Zotero.debug(e);
-				var msg = "Error creating file '" + destFile.leafName + "'\n\n"
-					+ "See http://www.zotero.org/support/kb/encrypted_filenames for more information.";
+				var msg = Zotero.getString('sync.storage.error.encryptedFilenames', destFile.leafName); 
 				Components.utils.reportError(msg);
 				return;
 			}
@@ -1394,9 +1392,7 @@ Zotero.Sync.Storage = new function () {
 				// can result in a lower limit -- not much we can do about this,
 				// but log a warning and skip the file
 				else if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
-					// TODO: localize
-					var msg = "Error creating file '" + destFile.leafName + "'. "
-						+ "See http://www.zotero.org/support/kb/encrypted_filenames for more information.";
+					var msg = Zotero.getString('sync.storage.error.encryptedFilenames', destFile.leafName);
 					Components.utils.reportError(msg);
 					continue;
 				}
@@ -1460,9 +1456,7 @@ Zotero.Sync.Storage = new function () {
 						// See above
 						if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
 							Zotero.debug(e);
-							// TODO: localize
-							var msg = "Error creating file '" + destFile.leafName + "'. "
-								+ "See http://www.zotero.org/support/kb/encrypted_filenames for more information.";
+							var msg = Zotero.getString('sync.storage.error.encryptedFilenames', destFile.leafName);
 							Components.utils.reportError(msg);
 							continue;
 						}
