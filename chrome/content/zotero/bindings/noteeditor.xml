@@ -416,7 +416,7 @@
 							v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
 						}
 						
-						this.id('tagsLabel').value = Zotero.getString('itemFields.tags') 
+						this.id('tagsLabel').value = Zotero.getString('itemFields.tags')
 							+ Zotero.getString('punctuation.colon');
 						this.id('tagsClick').value = v;
 					]]>
@@ -446,7 +446,7 @@
 							v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
 						}
 						
-						this.id('seeAlsoLabel').value = Zotero.getString('itemFields.related') 
+						this.id('seeAlsoLabel').value = Zotero.getString('itemFields.related')
 							+ Zotero.getString('punctuation.colon');
 						this.id('seeAlsoClick').value = v;
 					]]>

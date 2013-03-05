@@ -2941,7 +2941,7 @@ var ZoteroPane = new function()
 		var check = {value : false};
 		
 		// TODO: Allow title to be specified?
-		var result = ps.prompt(null, Zotero.getString('pane.items.attach.link.uri.title'), 
+		var result = ps.prompt(null, Zotero.getString('pane.items.attach.link.uri.title'),
 			Zotero.getString('pane.items.attach.link.uri'), input, "", {});
 		if (!result || !input.value) return false;
 		

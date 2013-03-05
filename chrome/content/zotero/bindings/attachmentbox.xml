@@ -255,7 +255,7 @@
 						var pages = Zotero.Fulltext.getPages(this.item.id);
 						var pages = pages ? pages.total : null;
 						if (pages) {
-							this._id("pages-label").value = Zotero.getString('itemFields.pages') 
+							this._id("pages-label").value = Zotero.getString('itemFields.pages')
 								+ Zotero.getString('punctuation.colon');
 							this._id("pages").value = pages;
 							pagesRow.hidden = false;
@@ -477,7 +477,7 @@
 							str = 'general.yes';
 							break;
 					}
-					this._id("index-status-label").value = Zotero.getString('fulltext.indexState.indexed') 
+					this._id("index-status-label").value = Zotero.getString('fulltext.indexState.indexed')
 						+ Zotero.getString('punctuation.colon');
 					indexStatus.value = Zotero.getString(str);
 					

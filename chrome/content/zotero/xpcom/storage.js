@@ -1188,7 +1188,7 @@ Zotero.Sync.Storage = new function () {
 			// but log a warning and skip the file
 			else if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
 				Zotero.debug(e);
-				var msg = Zotero.getString('sync.storage.error.encryptedFilenames', destFile.leafName); 
+				var msg = Zotero.getString('sync.storage.error.encryptedFilenames', destFile.leafName);
 				Components.utils.reportError(msg);
 				return;
 			}
