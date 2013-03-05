@@ -94,7 +94,7 @@
 <!ENTITY zotero.toolbar.newItem.label					"New Item">
 <!ENTITY zotero.toolbar.moreItemTypes.label			"More">
 <!ENTITY zotero.toolbar.newItemFromPage.label			"Create Web Page Item from Current Page">
-<!ENTITY zotero.toolbar.lookup.label				"Add Item by Identifier">
+<!ENTITY zotero.toolbar.lookup.label				"Add Item(s) by Identifier">
 <!ENTITY zotero.toolbar.removeItem.label				"Remove Item…">
 <!ENTITY zotero.toolbar.newCollection.label			"New Collection…">
 <!ENTITY zotero.toolbar.newGroup						"New Group…">
@@ -148,7 +148,8 @@
 <!ENTITY zotero.tagColorChooser.setColor       "Set Color">
 <!ENTITY zotero.tagColorChooser.removeColor    "Remove Color">
 
-<!ENTITY zotero.lookup.description				"Enter the ISBN, DOI, or PMID to look up in the box below.">
+<!ENTITY zotero.lookup.description				"Enter one or more ISBNs, DOIs, or PMIDs to look up in the box below.">
+<!ENTITY zotero.lookup.button.search				"Search">
 
 <!ENTITY zotero.selectitems.title						"Select Items">
 <!ENTITY zotero.selectitems.intro.label				"Select which items you'd like to add to your library">
