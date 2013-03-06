@@ -215,7 +215,6 @@
 						icon.setAttribute('onclick','if (this.nextSibling.inputField){ this.nextSibling.inputField.blur() }');
 						
 						var label = this.createValueElement(name, tabindex);
-						label.className = "zotero-box-label";
 						
 						if (this.editable) {
 							var remove = document.createElement("label");
@@ -260,6 +259,7 @@
 					var valueElement = document.createElement("label");
 					valueElement.setAttribute('fieldname', 'tag');
 					valueElement.setAttribute('flex', 1);
+					valueElement.className = 'zotero-box-label';
 					
 					if (this.clickable) {
 						valueElement.setAttribute('ztabindex', tabindex);
@@ -270,7 +270,7 @@
 							}
 							document.getBindingParent(this).clickHandler(this);
 						}, false);
-						valueElement.className = 'zotero-clicky';
+						valueElement.className += ' zotero-clicky';
 					}
 					
 					this._tabIndexMaxTagsFields = Math.max(this._tabIndexMaxTagsFields, tabindex);
