@@ -1259,6 +1259,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	var collation = Zotero.getLocaleCollation();
 	
 	// Year is really the date field truncated
+	var originalColumnField = columnField;
 	if (columnField == 'year') {
 		columnField = 'date';
 	}
@@ -1284,7 +1285,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	
 	// Get the display field for a row (which might be a placeholder title)
 	var getField;
-	switch (columnField) {
+	switch (originalColumnField) {
 		case 'title':
 			getField = function (row) {
 				var field;
@@ -1331,6 +1332,19 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			};
 			break;
 		
+		case 'year':
+			getField = function (row) {
+				var val = row.getField(columnField, unformatted);
+				if (val) {
+					val = val.substr(0, 4);
+					if (val == '0000') {
+						val = "";
+					}
+				}
+				return val;
+			};
+			break;
+		
 		default:
 			getField = function (row) row.getField(columnField, unformatted);
 	}
@@ -1348,8 +1362,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		
 		switch (columnField) {
 			case 'date':
-				fieldA = a.getField('date', true).substr(0, 10);
-				fieldB = b.getField('date', true).substr(0, 10);
+				fieldA = getField(a).substr(0, 10);
+				fieldB = getField(b).substr(0, 10);
 				
 				cmp = strcmp(fieldA, fieldB);
 				if (cmp !== 0) {
