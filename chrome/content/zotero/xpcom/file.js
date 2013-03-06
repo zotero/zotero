@@ -149,7 +149,7 @@ Zotero.File = new function(){
 	 * @param {nsIFile|nsIInputStream} file The file to read
 	 * @param {String} [charset] The character set; defaults to UTF-8
 	 * @param {Integer} [maxLength] The maximum number of characters to read
-	 * @return {Promise} A promise that is resolved with the contents of the file
+	 * @return {Promise} A Q promise that is resolved with the contents of the file
 	 */
 	this.getContentsAsync = function getContentsAsync(file, charset, maxLength) {
 		charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
@@ -165,6 +165,26 @@ Zotero.File = new function(){
 		});
 		return deferred.promise;
 	};
+	
+	
+	/**
+	 * Get the contents of a binary source asynchronously
+	 *
+	 * @param {nsIURI|nsIFile|string spec|nsIChannel|nsIInputStream} source The source to read
+	 * @return {Promise} A Q promise that is resolved with the contents of the source
+	 */
+	this.getBinaryContentsAsync = function (source) {
+		var deferred = Q.defer();
+		NetUtil.asyncFetch(source, function(inputStream, status) {
+			if (!Components.isSuccessCode(status)) {
+				deferred.reject(new Components.Exception("Source read operation failed", status));
+				return;
+			}
+			
+			deferred.resolve(NetUtil.readInputStreamToString(inputStream, inputStream.available()));
+		});
+		return deferred.promise;
+	}
 	
 	
 	/*
@@ -208,7 +228,7 @@ Zotero.File = new function(){
 	 * @param {String|nsIInputStream} data The string or nsIInputStream to write to the
 	 *     file
 	 * @param {String} [charset] The character set; defaults to UTF-8
-	 * @return {Promise} A promise that is resolved when the file has been written
+	 * @return {Promise} A Q promise that is resolved when the file has been written
 	 */
 	this.putContentsAsync = function putContentsAsync(file, data, charset) {
 		// Create a stream for async stream copying
