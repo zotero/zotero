@@ -603,7 +603,7 @@ Zotero.Tags = new function() {
 				}
 				
 				let id = libraryID + "/" + setting;
-				if (event == 'modify' && extraData[id].changed) {
+				if ((event == 'modify' || event == 'delete') && extraData[id].changed) {
 					var previousTagColors = extraData[id].changed.value;
 				}
 				else {
