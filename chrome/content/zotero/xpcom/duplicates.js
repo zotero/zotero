@@ -243,17 +243,17 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 				+ "AND itemTypeID NOT IN (1, 14) "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
 	var rows = Zotero.DB.query(sql, [this._libraryID]) || [];
-	//normalize all values ahead of time
+	// Normalize all values ahead of time
 	rows = rows.map(function(row) {
-							row.value = normalizeString(row.value);
-							return row;
-						});
-	//sort rows by normalized values
+		row.value = normalizeString(row.value);
+		return row;
+	});
+	// Sort rows by normalized values
 	rows = rows.sort(function(a, b) {
-							if(a.value === b.value) return 0;
-							if(a.value < b.value) return -1;
-							return 1;
-						});
+		if(a.value === b.value) return 0;
+		if(a.value < b.value) return -1;
+		return 1;
+	});
 	processRows(function (a, b) {
 		var aTitle = a.value;
 		var bTitle = b.value;
