@@ -242,7 +242,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 				+ "WHERE libraryID=? AND fieldID BETWEEN 110 AND 113 "
 				+ "AND itemTypeID NOT IN (1, 14) "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
-	var rows = Zotero.DB.query(sql, [this._libraryID]);
+	var rows = Zotero.DB.query(sql, [this._libraryID]) || [];
 	//normalize all values ahead of time
 	rows = rows.map(function(row) {
 							row.value = normalizeString(row.value);
