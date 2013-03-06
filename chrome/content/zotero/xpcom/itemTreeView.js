@@ -170,8 +170,6 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 				return;
 			}
 			
-			event.preventDefault();
-			
 			Q.fcall(function () {
 				var key = String.fromCharCode(event.which);
 				if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
