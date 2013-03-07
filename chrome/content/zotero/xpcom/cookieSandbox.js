@@ -142,7 +142,7 @@ Zotero.CookieSandbox.Observer = new function() {
 	this.observe = function(channel, topic) {
 		channel.QueryInterface(Components.interfaces.nsIHttpChannel);
 		var trackedBy, tested, browser, callbacks,
-			channelURI = channel.URI.spec,
+			channelURI = channel.URI.hostPort,
 			notificationCallbacks = channel.notificationCallbacks;
 		
 		// try the notification callbacks
