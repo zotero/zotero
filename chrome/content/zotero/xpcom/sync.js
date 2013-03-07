@@ -1631,6 +1631,9 @@ Zotero.Sync.Server = new function () {
 								Zotero.Sync.Server.nextLocalSyncDate = false;
 								Zotero.Sync.Server.lastRemoteSyncTime = response.getAttribute('timestamp');
 								
+								var sql = "UPDATE syncedSettings SET synced=1";
+								Zotero.DB.query(sql);
+								
 								//throw('break2');
 								
 								Zotero.DB.commitTransaction();
