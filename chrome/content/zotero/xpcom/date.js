@@ -228,14 +228,15 @@ Zotero.Date = new function(){
 	var _dayRe = null;
 	
 	function strToDate(string) {
-		var date = {};
+		var date = {
+			order: ''
+		};
 		
 		// skip empty things
 		if(!string) {
 			return date;
 		}
 		
-		date.order = '';
 		var parts = [];
 		
 		// Parse 'yesterday'/'today'/'tomorrow'
