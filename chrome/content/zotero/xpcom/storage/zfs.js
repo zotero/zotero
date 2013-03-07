@@ -929,8 +929,15 @@ Zotero.Sync.Storage.ZFS = (function () {
 		
 		var lastSyncURI = this._getLastSyncURI(libraryID);
 		
-		return Zotero.HTTP.promise("POST", lastSyncURI, { debug: true })
+		return Zotero.HTTP.promise("POST", lastSyncURI, { debug: true, successCodes: [200, 404] })
 			.then(function (req) {
+				// Not yet synced
+				//
+				// TODO: Don't call this at all if no files uploaded
+				if (req.status == 404) {
+					return;
+				}
+				
 				var ts = req.responseText;
 				
 				var sql = "REPLACE INTO version VALUES (?, ?)";
