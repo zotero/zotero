@@ -209,7 +209,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	var doiCache = {};
 	if (rows) {
 		for each(var row in rows) {
-			doiCache[row.itemID] = row.value.trim();
+			doiCache[row.itemID] = row.value.toString().trim();
 		}
 	}
 	processRows();
