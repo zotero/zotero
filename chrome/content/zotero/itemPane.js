@@ -49,7 +49,7 @@ var ZoteroItemPane = new function() {
 	
 	
 	/*
-	 * Load an item
+	 * Load a top-level item
 	 */
 	this.viewItem = function (item, mode, index) {
 		if (!index) {
