@@ -434,6 +434,13 @@ Zotero.Cite.System = {
 				}
 			}
 		}
+
+		// extract PMID
+		var extra = zoteroItem.getField("extra", false, true);
+		if(typeof extra === "string") {
+			var m = /(?:^|\n)PMID:\s*([0-9]+)/.exec(extra);
+			if(m) cslItem.PMID = m[1];
+		}
 		
 		//this._cache[zoteroItem.id] = cslItem;
 		return cslItem;
