@@ -43,6 +43,8 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	 * @param	{Function}		callback		Callback f(item, mdate)
 	 */
 	function getStorageModificationTime(item) {
+		var funcName = "Zotero.Sync.Storage.WebDAV.getStorageModificationTime()";
+		
 		var uri = getItemPropertyURI(item);
 		
 		return Zotero.HTTP.promise(
@@ -50,8 +52,6 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			)
 			.then(function (req) {
 				checkResponse(req);
-				
-				var funcName = "Zotero.Sync.Storage.WebDAV.getStorageModificationTime()";
 				
 				// mod_speling can return 300s for 404s with base name matches
 				if (req.status == 404 || req.status == 300) {
@@ -113,7 +113,6 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			})
 			.catch(function (e) {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					Zotero.debug(req.responseText);
 					throw new Error("Unexpected status code " + e.status + " in " + funcName);
 				}
 				throw e;
@@ -266,7 +265,9 @@ Zotero.Sync.Storage.WebDAV = (function () {
 						},
 						onStop: function (httpRequest, status, response, data) {
 							deferred.resolve(
-								onUploadComplete(httpRequest, status, response, data)
+								Q.fcall(function () {
+									return onUploadComplete(httpRequest, status, response, data);
+								})
 							);
 						},
 						onCancel: function (httpRequest, status, data) {
@@ -945,7 +946,11 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		Zotero.Sync.Storage.createUploadFile(
 			request,
 			function (data) {
-				deferred.resolve(processUploadFile(data));
+				deferred.resolve(
+					Q.fcall(function () {
+						return processUploadFile(data);
+					})
+				);
 			}
 		);
 		return deferred.promise;

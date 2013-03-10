@@ -105,22 +105,9 @@ Zotero.Sync.Storage = new function () {
 			
 			if (Zotero.Sync.Storage.ZFS.includeUserFiles) {
 				libraryModes[0] = Zotero.Sync.Storage.ZFS;
-				return;
 			}
-			
-			if (Zotero.Sync.Storage.WebDAV.includeUserFiles) {
-				if (!Zotero.Sync.Storage.WebDAV.verified) {
-					Zotero.debug("WebDAV file sync is not active");
-					
-					// Try to verify server now if it hasn't been
-					return Zotero.Sync.Storage.checkServerPromise(Zotero.Sync.Storage.WebDAV)
-					.then(function () {
-						libraryModes[0] = Zotero.Sync.Storage.WebDAV;
-					});
-				}
-				
+			else if (Zotero.Sync.Storage.WebDAV.includeUserFiles) {
 				libraryModes[0] = Zotero.Sync.Storage.WebDAV;
-				return;
 			}
 		})
 		.then(function () {
@@ -142,15 +129,47 @@ Zotero.Sync.Storage = new function () {
 			for each(var mode in libraryModes) {
 				if (modes.indexOf(mode) == -1) {
 					modes.push(mode);
-					promises.push(mode.cacheCredentials());
+					
+					// Try to verify WebDAV server first if it hasn't been
+					if (mode == Zotero.Sync.Storage.WebDAV
+							&& !Zotero.Sync.Storage.WebDAV.verified) {
+						Zotero.debug("WebDAV file sync is not active");
+						var promise = Zotero.Sync.Storage.checkServerPromise(Zotero.Sync.Storage.WebDAV)
+							.then(function () {
+								mode.cacheCredentials();
+							});
+					}
+					else {
+						var promise = mode.cacheCredentials();
+					}
+					promises.push(Q.allResolved([mode, promise]));
 				}
 			}
 			return Q.allResolved(promises)
 			// Get library last-sync times
-			.then(function () {
+			.then(function (cacheCredentialsPromises) {
 				var promises = [];
+				
+				// Mark WebDAV verification failure as user library error.
+				// We ignore credentials-caching errors for ZFS and let the
+				// later requests fail.
+				cacheCredentialsPromises.forEach(function (p) {
+					p = p.valueOf();
+					let mode = p[0].valueOf();
+					if (mode == Zotero.Sync.Storage.WebDAV) {
+						if (p[1].isRejected()) {
+							promises.push(Q.allResolved(
+								[0, p[1]]
+							));
+							// Skip further syncing of user library
+							delete libraryModes[0];
+						}
+					}
+				});
+				
 				for (var libraryID in libraryModes) {
 					libraryID = parseInt(libraryID);
+					
 					// Get the last sync time for each library
 					if (self.downloadOnSync(libraryID)) {
 						promises.push(Q.allResolved(

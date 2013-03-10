@@ -733,6 +733,10 @@ Zotero.Sync.Runner = new function () {
 	 * library-specific sync error icons across all windows
 	 */
 	this.setErrors = function (errors) {
+		if (!errors) {
+			errors = [];
+		}
+		
 		errors = [this.parseSyncError(e) for each(e in errors)];
 		_errorsByLibrary = {};
 		
@@ -898,8 +902,9 @@ Zotero.Sync.Runner = new function () {
 			}
 		}
 		if (!parsed.message) {
-			// TODO: include file name and line?
 			parsed.message = e.message ? e.message : e;
+			parsed.fileName = e.fileName;
+			parsed.lineNumber = e.lineNumber;
 		}
 		
 		parsed.frontWindowOnly = !!(e && e.data && e.data.frontWindowOnly);
@@ -958,7 +963,11 @@ Zotero.Sync.Runner = new function () {
 		e = this.parseSyncError(e);
 		
 		var desc = doc.createElement('description');
-		desc.textContent = e.message;
+		var msg = e.message;
+		/*if (e.fileName) {
+			msg += '\n\nFile: ' + e.fileName + '\nLine: ' + e.lineNumber;
+		}*/
+		desc.textContent = msg;
 		panelContent.appendChild(desc);
 		
 		// If not an error and there's no explicit button text, don't show
@@ -1356,6 +1365,7 @@ Zotero.Sync.Server = new function () {
 		
 		var self = this;
 		
+		Zotero.Sync.Runner.setErrors();
 		Zotero.Sync.Runner.setSyncIcon('animate');
 		
 		if (!_sessionID) {
