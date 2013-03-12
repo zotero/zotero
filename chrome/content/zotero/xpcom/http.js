@@ -40,6 +40,7 @@ Zotero.HTTP = new function() {
 	 *         <li>cookieSandbox - The sandbox from which cookies should be taken</li>
 	 *         <li>debug - Log response text and status code</li>
 	 *         <li>dontCache - If set, specifies that the request should not be fulfilled from the cache</li>
+	 *         <li>headers - HTTP headers to include in the request</li>
 	 *         <li>responseType - The type of the response. See XHR 2 documentation for legal values</li>
 	 *         <li>responseCharset - The charset the response should be interpreted as</li>
 	 *         <li>successCodes - HTTP status codes that are considered successful</li>

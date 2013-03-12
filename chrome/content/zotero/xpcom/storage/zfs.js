@@ -27,6 +27,9 @@
 Zotero.Sync.Storage.ZFS = (function () {
 	var _rootURI;
 	var _userURI;
+	var _headers = {
+		"Zotero-API-Version" : ZOTERO_CONFIG.API_VERSION
+	};
 	var _cachedCredentials = false;
 	
 	/**
@@ -38,7 +41,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 	function getStorageFileInfo(item) {
 		var funcName = "Zotero.Sync.Storage.ZFS.getStorageFileInfo()";
 		
-		return Zotero.HTTP.promise("GET", getItemInfoURI(item), { successCodes: [200, 404] })
+		return Zotero.HTTP.promise("GET", getItemInfoURI(item), { successCodes: [200, 404], headers: _headers })
 			.then(function (req) {
 				if (req.status == 404) {
 					return false;
@@ -232,7 +235,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 			body += "&zip=1";
 		}
 		
-		return Zotero.HTTP.promise("POST", uri, { body: body, debug: true })
+		return Zotero.HTTP.promise("POST", uri, { body: body, headers: _headers, debug: true })
 			.then(function (req) {
 				if (!req.responseXML) {
 					throw new Error("Invalid response retrieving file upload parameters");
@@ -508,7 +511,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 		var body = "update=" + uploadKey + "&mtime=" + item.attachmentModificationTime;
 		
 		// Register upload on server
-		return Zotero.HTTP.promise("POST", uri, { body: body, successCodes: [204] })
+		return Zotero.HTTP.promise("POST", uri, { body: body, headers: _headers, successCodes: [204] })
 			.then(function (req) {
 				updateItemFileInfo(item);
 				return {
@@ -886,7 +889,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 		})
 		.then(function () {
 			return Zotero.HTTP.promise("GET", lastSyncURI,
-				{ debug: true, successCodes: [200, 404] });
+				{ headers: _headers, successCodes: [200, 404], debug: true });
 		})
 		.then(function (req) {
 			// Not yet synced
@@ -929,7 +932,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 		
 		var lastSyncURI = this._getLastSyncURI(libraryID);
 		
-		return Zotero.HTTP.promise("POST", lastSyncURI, { debug: true, successCodes: [200, 404] })
+		return Zotero.HTTP.promise("POST", lastSyncURI, { headers: _headers, successCodes: [200, 404], debug: true })
 			.then(function (req) {
 				// Not yet synced
 				//
@@ -987,7 +990,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 		// TODO: move to root uri
 		uri.spec += "?auth=1";
 		
-		return Zotero.HTTP.promise("GET", uri).
+		return Zotero.HTTP.promise("GET", uri, { headers: _headers }).
 			then(function (req) {
 				Zotero.debug("Credentials are cached");
 				_cachedCredentials = true;
