@@ -6,7 +6,7 @@
 <!ENTITY zotero.search.joinMode.suffix "de les següents:">
 
 <!ENTITY zotero.search.recursive.label "Cerca dins les subcarpetes">
-<!ENTITY zotero.search.noChildren "Mostra només ítems de nivell superior">
+<!ENTITY zotero.search.noChildren "Mostra només elements de nivell superior">
 <!ENTITY zotero.search.includeParentsAndChildren "Inclou pares i descendents dels elements coincidents">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">

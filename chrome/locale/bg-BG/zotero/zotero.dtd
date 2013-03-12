@@ -5,6 +5,7 @@
 <!ENTITY zotero.general.edit "Редактира">
 <!ENTITY zotero.general.delete "Изтрива">
 
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Дневника с грешките може да съдържа съобщения несвързани с Зотеро.">
 <!ENTITY zotero.errorReport.submissionInProgress "Моля изчакайте докато бъде подаден отчета с грешките.">
 <!ENTITY zotero.errorReport.submitted "Отчета с грешките беше подаден.">
@@ -12,6 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums "Моля оставете съобщение във форумите на Zotero (forums.zotero.org) с идентификационият номер на отчета, описание на проблема и стъпките необходими, за да бъде възпроизведен.">
 <!ENTITY zotero.errorReport.notReviewed "В общият случай, отчетите с грешки няма да бъдат разглеждани, освен ако не са оповестени във форумите.">
 
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.newVersionInstalled "Инсталирахте нова версия на Зотеро.">
 <!ENTITY zotero.upgrade.upgradeRequired "Вашата база дани на Зотеро трябва да бъде осъвременена за да може да работи с новата версия.">
 <!ENTITY zotero.upgrade.autoBackup "Автоматично ще бъде направено копие на вашата база дани, преди да бъдат въвеждани каквито и да било промени.">
@@ -56,6 +58,22 @@
 <!ENTITY zotero.items.rights_column "Права">
 <!ENTITY zotero.items.dateAdded_column "Добавен на">
 <!ENTITY zotero.items.dateModified_column "Променен на">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.issue_column "Issue">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 
 <!ENTITY zotero.items.menu.showInLibrary "Показва в библиотеката">
 <!ENTITY zotero.items.menu.attach.note "Добавя Бележка">
@@ -103,6 +121,7 @@
 <!ENTITY zotero.item.textTransform "Преобразува текст">
 <!ENTITY zotero.item.textTransform.titlecase "Заглавни букви">
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 
 <!ENTITY zotero.toolbar.newNote "New Note">
 <!ENTITY zotero.toolbar.note.standalone "Нова самостоятелна бележка">
@@ -120,10 +139,18 @@
 <!ENTITY zotero.tagSelector.selectVisible "Избор на видимите">
 <!ENTITY zotero.tagSelector.clearVisible "Отказ на видимите">
 <!ENTITY zotero.tagSelector.clearAll "Отказ на всички">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "Преименува отметката...">
 <!ENTITY zotero.tagSelector.deleteTag "Изтрива отметка...">
 
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+
 <!ENTITY zotero.lookup.description "Въведете ISBN, DOI, или PMID за търсене в полето по-долу.">
+<!ENTITY zotero.lookup.button.search "Search">
 
 <!ENTITY zotero.selectitems.title "Избрани записи">
 <!ENTITY zotero.selectitems.intro.label "Изберете кои записи искате да добавите към Вашата библиотека">
@@ -207,6 +234,10 @@
 <!ENTITY zotero.sync.longTagFixer.characters "знаци">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Неотбелязаните отметки няма да бъдат съхранени.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Отметката ще бъде изтрита от всички записи.">
+
+<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.deleted "Deleted">
 
 <!ENTITY zotero.proxy.recognized.title "Проксито е разпознато">
 <!ENTITY zotero.proxy.recognized.warning "Добавяйте само проксита свързани със страницата на вашата библиотека, училище или фирма">

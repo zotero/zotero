@@ -3,6 +3,7 @@
 <!ENTITY zotero.preferences.default "デフォルト:">
 <!ENTITY zotero.preferences.items "アイテム">
 <!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.settings "Settings">
 
 <!ENTITY zotero.preferences.prefpane.general "一般">
 
@@ -59,9 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "マイ・ライブラリーにある添付ファイルを同期するとき右のプログラムを使う:">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Zotero ストレジを利用してグループ・ライブラリの添付ファイルを同期する">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "ファイルの同期について">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero ストレジを使用することにより、次の使用許諾条件に同意することになります。">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "使用許諾条件">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Zoteroサーバと完全に同期（シンク）させる">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "同期の履歴を無視し、ローカル（手元）の Zotero データと同期サーバのデータを融合する。">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero サーバーから復元（リストア）する">
@@ -70,6 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "サーバのデータを全て消去して、ローカル（手元）の Zotero データで上書きする。">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "ファイル同期の履歴を削除する">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "すべてのローカルの添付ファイルに関して、ストレジサーバを強制的に確認する。">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "リセット...">
 
 
@@ -114,6 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "スタイル名">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "更新日">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "他の引用スタイルを入手する...">
 
 <!ENTITY zotero.preferences.prefpane.keys "ショートカットキー">
@@ -154,6 +162,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - あらゆる文字列">
 
 <!ENTITY zotero.preferences.prefpane.advanced "詳細">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 
 <!ENTITY zotero.preferences.prefpane.locate "所在確認">
 <!ENTITY zotero.preferences.locate.locateEngineManager "所在確認エンジンの管理">
@@ -172,6 +181,12 @@
 <!ENTITY zotero.preferences.dataDir.custom "個人設定:">
 <!ENTITY zotero.preferences.dataDir.choose "選択する...">
 <!ENTITY zotero.preferences.dataDir.reveal "データ保管ディレクトリを表示する">
+
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 
 <!ENTITY zotero.preferences.dbMaintenance "データベースの管理">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "データベースの整合性をチェック">

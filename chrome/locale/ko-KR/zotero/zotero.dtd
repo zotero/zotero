@@ -5,6 +5,7 @@
 <!ENTITY zotero.general.edit "편집">
 <!ENTITY zotero.general.delete "삭제">
 
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "오류 로그에는 Zotero와 관련이 없는 메시지가 포함될 수 있습니다.">
 <!ENTITY zotero.errorReport.submissionInProgress "오류 보고가 제출되는 동안 기다려 주세요.">
 <!ENTITY zotero.errorReport.submitted "오류 보고가 제출되었습니다.">
@@ -12,6 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums "Zotero 포럼(forums.zotero.org)에 보고서 ID, 문제 설명, 및 그것을 재연하는데 필요한 순서와 함께 메시지를 게시해주시기 바랍니다.">
 <!ENTITY zotero.errorReport.notReviewed "오류 보고서는 일반적으로 포럼내에서 언급하지 않는 한 재검토하지 않습니다.">
 
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.newVersionInstalled "새 버전의 Zotero를 설치했습니다.">
 <!ENTITY zotero.upgrade.upgradeRequired "Zotero 데이터베이스는 반드시 새 버전으로 작업하기 위해 업그레이드 해야 합니다.">
 <!ENTITY zotero.upgrade.autoBackup "현재의 데이터베이스는 어떤한 변경을 하기 전에 자동으로 백업을 할 겁니다.">
@@ -56,6 +58,22 @@
 <!ENTITY zotero.items.rights_column "권리">
 <!ENTITY zotero.items.dateAdded_column "입력일">
 <!ENTITY zotero.items.dateModified_column "변경일">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.issue_column "Issue">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 
 <!ENTITY zotero.items.menu.showInLibrary "라이브러리로 표시">
 <!ENTITY zotero.items.menu.attach.note "노트 추가">
@@ -103,6 +121,7 @@
 <!ENTITY zotero.item.textTransform "글자 변형">
 <!ENTITY zotero.item.textTransform.titlecase "글차 첫머리는 대문자">
 <!ENTITY zotero.item.textTransform.sentencecase "문장 첫머리는 대문자">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 
 <!ENTITY zotero.toolbar.newNote "새 노트">
 <!ENTITY zotero.toolbar.note.standalone "새로운 독립 노트">
@@ -120,10 +139,18 @@
 <!ENTITY zotero.tagSelector.selectVisible "보이는 것들 선택">
 <!ENTITY zotero.tagSelector.clearVisible "보이는 것들 선택 해제">
 <!ENTITY zotero.tagSelector.clearAll "선택 모두 해제">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "태그 이름 변경...">
 <!ENTITY zotero.tagSelector.deleteTag "태그 지우기...">
 
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+
 <!ENTITY zotero.lookup.description "ISBN, DOI, 또는 PMID를 입력하세요.">
+<!ENTITY zotero.lookup.button.search "Search">
 
 <!ENTITY zotero.selectitems.title "항목 선택">
 <!ENTITY zotero.selectitems.intro.label "라이브러리에 추가하고 싶은 항목 선택">
@@ -207,6 +234,10 @@
 <!ENTITY zotero.sync.longTagFixer.characters "글자">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "체크되지 않은 태그는 저장되지 않습니다.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "해당 태그가 모든 항목으로부터 삭제됩니다.">
+
+<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.deleted "Deleted">
 
 <!ENTITY zotero.proxy.recognized.title "프록시 인식완료">
 <!ENTITY zotero.proxy.recognized.warning "귀하의 도서관 · 학교 · 회사의 웹사이트에 연결된 프록시만 추가하십시오.">

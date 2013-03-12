@@ -5,6 +5,7 @@
 <!ENTITY zotero.general.edit "Düzenle">
 <!ENTITY zotero.general.delete "Sil">
 
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Hata kaydı Zotero ile ilgili olmayan iletileri de içerebilir.">
 <!ENTITY zotero.errorReport.submissionInProgress "Lütfen hata raporu gönderilene kadar bekleyiniz.">
 <!ENTITY zotero.errorReport.submitted "Hata raporu gönderilmiştir.">
@@ -12,6 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums "Lütfen bu Rapor ile ilgili olarak Zotero forumlarına ileti gönderiniz, ayrıca iletinizde sorunun bir tanımı ve sorunu oluşturan adımları da yazınız.">
 <!ENTITY zotero.errorReport.notReviewed "Genellikle hata raporları forumlara gönderilmediği sürece incelenmez.">
 
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.newVersionInstalled "Zotero'nun yeni bir sürümünü kurdunuz.">
 <!ENTITY zotero.upgrade.upgradeRequired "Zotero veri tabanınız yeni sürüm ile birlikte çalışabilmesi için yükseltilmesi gerekir.">
 <!ENTITY zotero.upgrade.autoBackup "Herhangi bir değişiklik yapılmadan önce varolan veri tabanınız otomatik olarak yedeklenecektir.">
@@ -56,6 +58,22 @@
 <!ENTITY zotero.items.rights_column "Telif">
 <!ENTITY zotero.items.dateAdded_column "Eklendiği Tarih">
 <!ENTITY zotero.items.dateModified_column "Değiştirildiği Tarih">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.issue_column "Issue">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 
 <!ENTITY zotero.items.menu.showInLibrary "Kitaplıkta Göster">
 <!ENTITY zotero.items.menu.attach.note "Not Ekle">
@@ -103,6 +121,7 @@
 <!ENTITY zotero.item.textTransform "Metni Dönüştür">
 <!ENTITY zotero.item.textTransform.titlecase "Başlık Biçimi">
 <!ENTITY zotero.item.textTransform.sentencecase "Cümle Biçimi">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 
 <!ENTITY zotero.toolbar.newNote "Yeni Not">
 <!ENTITY zotero.toolbar.note.standalone "Yeni Bağımsız Not">
@@ -120,10 +139,18 @@
 <!ENTITY zotero.tagSelector.selectVisible "Görülebileni Seç">
 <!ENTITY zotero.tagSelector.clearVisible "Gürülebileni Seçme">
 <!ENTITY zotero.tagSelector.clearAll "Hiçbirini Seçme">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "Etiketi Yeniden Adlandır...">
 <!ENTITY zotero.tagSelector.deleteTag "Etiketi Sil...">
 
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+
 <!ENTITY zotero.lookup.description "ISBN, DOI veya PMID'yi girerek aşağıdaki kutuda ara.">
+<!ENTITY zotero.lookup.button.search "Search">
 
 <!ENTITY zotero.selectitems.title "Eser Seç">
 <!ENTITY zotero.selectitems.intro.label "Kitaplığınıza eklemek istediğiniz eserleri seçiniz">
@@ -207,6 +234,10 @@
 <!ENTITY zotero.sync.longTagFixer.characters "karaktere">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Seçilmemiş etiketler kaydedilmeyecek.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etiket tüm eserlerden silinecek.">
+
+<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.deleted "Deleted">
 
 <!ENTITY zotero.proxy.recognized.title "Vekil Sunucu Onaylandı">
 <!ENTITY zotero.proxy.recognized.warning "Yalnızca kütüphane, okul veya kurumsal web siteniz tarafından bağlantı verilen vekil sunucuları ekleyiniz.">

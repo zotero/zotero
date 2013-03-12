@@ -3,6 +3,7 @@
 <!ENTITY zotero.preferences.default "Oletus:">
 <!ENTITY zotero.preferences.items "nimikkeet">
 <!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.settings "Settings">
 
 <!ENTITY zotero.preferences.prefpane.general "Yleistä">
 
@@ -59,9 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Osoite:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synkronoi liitetiedostot Omaan Kirjastoon käyttäen protokollaa">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Synkronoi ryhmäkirjastojen liitetiedostot käyttäen Zoteron tallennustilaa">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Käyttämällä Zoteron tallennustilaa sitoudut samalla siihen liittyviin">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "käyttöehtoihin">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Täydellinen synkronointi Zotero-palvelimen kanssa">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Yhdistä paikallinen Zotero-aineisto synkronointipalvelimen aineiston kanssa jättäen synkronointihistoria huomioimatta">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Palauta aineisto Zotero-palvelimelta">
@@ -70,6 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Poista kaikki palvelimella oleva aineisto ja korvaa se paikallisella Zotero-aineistolla">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Poista tiedostojen synkronointihistoria">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tarkistaa jokaisen paikallisen liitetiedoston löytymisen tallennuspalvelimelta">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Palauta">
 
 
@@ -114,6 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Nimi">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Päivitetty">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Hanki lisää tyylejä...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
@@ -154,6 +162,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Mikä tahansa merkkijono">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Lisäasetukset">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 
 <!ENTITY zotero.preferences.prefpane.locate "Paikanna">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikkelihakumoottorin hallinta">
@@ -172,6 +181,12 @@
 <!ENTITY zotero.preferences.dataDir.custom "Oma asetus:">
 <!ENTITY zotero.preferences.dataDir.choose "Valitse...">
 <!ENTITY zotero.preferences.dataDir.reveal "Näytä datahakemisto">
+
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 
 <!ENTITY zotero.preferences.dbMaintenance "Tietokannan huolto">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Tarkista tietokannan eheys">

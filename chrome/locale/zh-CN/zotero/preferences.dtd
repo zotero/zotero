@@ -3,6 +3,7 @@
 <!ENTITY zotero.preferences.default "默认:">
 <!ENTITY zotero.preferences.items "条目">
 <!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.settings "Settings">
 
 <!ENTITY zotero.preferences.prefpane.general "常规">
 
@@ -35,10 +36,10 @@
 
 <!ENTITY zotero.preferences.groups "群组">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "跨文献库复制条目时, 包括:">
-<!ENTITY zotero.preferences.groups.childNotes "子便签">
+<!ENTITY zotero.preferences.groups.childNotes "子笔记">
 <!ENTITY zotero.preferences.groups.childFiles "子网页截图和导入的文件">
 <!ENTITY zotero.preferences.groups.childLinks "子链接">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "标签">
 
 <!ENTITY zotero.preferences.openurl.caption "打开URL">
 
@@ -59,9 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "同步文献库中的附件,使用:">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "使用 Zotero 云存储同步群组文献库中的附件">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "若使用 Zotero 云存储, 你接受它的">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "条款和条件">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "与 Zotero 服务器进行完整同步">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "将本地数据与同步服务器合并, 并忽略同步历史.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "从 Zotero 服务器恢复">
@@ -70,6 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "删除服务器所有数据并用本地数据覆盖.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重置文件同步历史">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "强制为本地所有附件进行存储服务器检查">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "重置...">
 
 
@@ -114,13 +121,14 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "标题">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "更新于">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "获取更多样式...">
 
 <!ENTITY zotero.preferences.prefpane.keys "快捷键">
 
 <!ENTITY zotero.preferences.keys.openZotero "开/关 Zotero 面板">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "切换全屏模式">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "聚焦文献库面板">
 <!ENTITY zotero.preferences.keys.quicksearch "快速搜索">
 <!ENTITY zotero.preferences.keys.newItem "新建条目">
 <!ENTITY zotero.preferences.keys.newNote "新建笔记">
@@ -154,6 +162,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - 任意字符串">
 
 <!ENTITY zotero.preferences.prefpane.advanced "高级">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 
 <!ENTITY zotero.preferences.prefpane.locate "定位">
 <!ENTITY zotero.preferences.locate.locateEngineManager "文章检索引擎管理器">
@@ -168,10 +177,16 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "导出时显示字符编码选项">
 
 <!ENTITY zotero.preferences.dataDir "数据存储位置">
-<!ENTITY zotero.preferences.dataDir.useProfile "使用 Firefox 配置目录">
+<!ENTITY zotero.preferences.dataDir.useProfile "使用配置目录">
 <!ENTITY zotero.preferences.dataDir.custom "自定义:">
 <!ENTITY zotero.preferences.dataDir.choose "选择...">
 <!ENTITY zotero.preferences.dataDir.reveal "打开数据目录">
+
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 
 <!ENTITY zotero.preferences.dbMaintenance "数据库维护">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "数据库完整性检查">

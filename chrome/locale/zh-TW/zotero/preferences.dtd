@@ -3,6 +3,7 @@
 <!ENTITY zotero.preferences.default "預設：">
 <!ENTITY zotero.preferences.items "項目">
 <!ENTITY zotero.preferences.period "。">
+<!ENTITY zotero.preferences.settings "Settings">
 
 <!ENTITY zotero.preferences.prefpane.general "一般">
 
@@ -38,7 +39,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "子筆記">
 <!ENTITY zotero.preferences.groups.childFiles "子快照與匯入的檔案">
 <!ENTITY zotero.preferences.groups.childLinks "子鏈結">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "標簽">
 
 <!ENTITY zotero.preferences.openurl.caption "開啟網址">
 
@@ -59,9 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "同步「我的圖書館」中的附加檔案時，採用">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "使用 Zotero storage 時，將圖書館中的附加檔案同步">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "使用 Zotero storage，您同意被它的">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "條款與條件 (terms and conditions) 所束縳">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "與 Zotero 伺服器完全同步">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "將本機的 Zotero 資料與來自同步伺服器的資料合併，忽略同步歷史。">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "從 Zotero 伺服器回復">
@@ -70,6 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "刪除所有伺服器上的資料，並以本機的 Zotero 資料覆蓋過去。">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重設檔案同步歷史">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "強制檢查儲存伺服器上所有本機附加的檔案">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "重設……">
 
 
@@ -114,13 +121,14 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "標題">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "已更新">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "文獻樣式語言CSL">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "獲取額外的樣式…">
 
 <!ENTITY zotero.preferences.prefpane.keys "快速鍵">
 
 <!ENTITY zotero.preferences.keys.openZotero "開／關 Zotero 窗格">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "切換全螢幕模式">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "聚焦到書庫窗格">
 <!ENTITY zotero.preferences.keys.quicksearch "快速搜尋">
 <!ENTITY zotero.preferences.keys.newItem "建立一個新的項目">
 <!ENTITY zotero.preferences.keys.newNote "建立一則新的筆記">
@@ -154,6 +162,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - 任何字串">
 
 <!ENTITY zotero.preferences.prefpane.advanced "進階">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 
 <!ENTITY zotero.preferences.prefpane.locate "查詢">
 <!ENTITY zotero.preferences.locate.locateEngineManager "論文查詢引擎管理器">
@@ -172,6 +181,12 @@
 <!ENTITY zotero.preferences.dataDir.custom "自訂：">
 <!ENTITY zotero.preferences.dataDir.choose "選擇…">
 <!ENTITY zotero.preferences.dataDir.reveal "顯示資料目錄">
+
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 
 <!ENTITY zotero.preferences.dbMaintenance "資料庫維修">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "檢查資料庫完整性">

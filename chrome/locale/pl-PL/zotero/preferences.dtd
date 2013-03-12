@@ -3,6 +3,7 @@
 <!ENTITY zotero.preferences.default "Domyślna:">
 <!ENTITY zotero.preferences.items "elementów">
 <!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.settings "Settings">
 
 <!ENTITY zotero.preferences.prefpane.general "Ogólne">
 
@@ -38,7 +39,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "potomne notatki">
 <!ENTITY zotero.preferences.groups.childFiles "potomne zrzuty ekranu i zaimportowane pliki">
 <!ENTITY zotero.preferences.groups.childLinks "potomne linki">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "znaczniki">
 
 <!ENTITY zotero.preferences.openurl.caption "openURL">
 
@@ -59,9 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synchronizuj załączniki w Mojej bibliotece za pomocą">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Synchronizuj pliki załączników w grupach bibliotek za pomocą usługi przechowywania Zotero">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Używając usługi przechowywania w Zotero, zgadzasz się na jej">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "warunki i postanowienia">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Pełna synchronizacja z serwerem Zotero">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Połącz lokalne dane Zotero z danymi z serwera synchronizacji, ignorując historię synchronizacji.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Przywróć z serwera Zotero">
@@ -70,6 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Usuń wszystkie dane na serwerze i nadpisz je lokalnymi danymi Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Wyczyść historię synchronizacji plików">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Wymuś sprawdzenie wszystkich lokalnych załączników na serwerze przechowywania.">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Wyczyść...">
 
 
@@ -114,6 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Nazwa">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Aktualizacja">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Pobierz dodatkowe style...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Skróty klawiaturowe">
@@ -154,13 +162,14 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Jakikolwiek tekst">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Zaawansowane">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 
 <!ENTITY zotero.preferences.prefpane.locate "Wyszukaj">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Zarządzanie silnikami wyszukiwania">
 <!ENTITY zotero.preferences.locate.description "Opis">
 <!ENTITY zotero.preferences.locate.name "Nazwa">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Silnik wyszukiwania rozszerza możliwości menu wyszukiwania w panelu informacji. Włączając silniki wyszukiwania na poniższej liście, zostaną one dodane do rozwijanego i mogą zostać użyte do wyszukiwania zasobów z twojej biblioteki w sieci internet.">
-<!ENTITY zotero.preferences.locate.addDescription "Aby dodać silnik wyszukiwania, którego nie ma na liście, odwiedź określony silnik wyszukiwania w przeglądarce i wybierz 'Dodaj' na pasku wyszukiwania Firefoksare. Kiedy otworzysz ponownie ten panel preferencji, pojawi się tam opcja umożliwiająca włączenie nowego silnika wyszukiwania.">
+<!ENTITY zotero.preferences.locate.addDescription "Aby dodać silnik wyszukiwania, którego nie ma na liście, odwiedź określony silnik wyszukiwania w przeglądarce i wybierz 'Dodaj' na pasku wyszukiwania Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Przywróć domyślne">
 
 <!ENTITY zotero.preferences.charset "Kodowanie znaków">
@@ -168,10 +177,16 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Wyświetl opcje kodowania znaków przy eksporcie">
 
 <!ENTITY zotero.preferences.dataDir "Miejsce przechowywania:">
-<!ENTITY zotero.preferences.dataDir.useProfile "Użyj katalogu profilu Firefoksa">
+<!ENTITY zotero.preferences.dataDir.useProfile "Użyj katalogu profilu">
 <!ENTITY zotero.preferences.dataDir.custom "Określ katalog:">
 <!ENTITY zotero.preferences.dataDir.choose "Przeglądaj">
 <!ENTITY zotero.preferences.dataDir.reveal "Wyświetl katalog bazy danych">
+
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 
 <!ENTITY zotero.preferences.dbMaintenance "Konserwacja bazy danych">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Sprawdź spójność bazy danych">

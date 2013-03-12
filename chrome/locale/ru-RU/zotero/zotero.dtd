@@ -5,6 +5,7 @@
 <!ENTITY zotero.general.edit "Редактировать">
 <!ENTITY zotero.general.delete "Удалить">
 
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Журнал ошибок может содержать сообщения не относящиеся к Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Подождите, пока отчет об ошибке будет отослан.">
 <!ENTITY zotero.errorReport.submitted "Отчет об ошибке отослан.">
@@ -12,6 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums "Пожалуйста, оставьте сообщение на форуме Zotero (forums.zotero.org), указав этот номер отчета, описание проблемы, и какие шаги нужно предпринять чтобы повторить ее.">
 <!ENTITY zotero.errorReport.notReviewed "Отчеты об ошибках не рассматриваются, пока на них не сослались в форуме.">
 
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.newVersionInstalled "Вы установили новую версию Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Ваша база данных Zotero должна быть обновлена для работы с новой версией.">
 <!ENTITY zotero.upgrade.autoBackup "Резервная копия вашей базы данных Zotero будет сделана автоматически до каких-либо изменений.">
@@ -56,6 +58,22 @@
 <!ENTITY zotero.items.rights_column "Права">
 <!ENTITY zotero.items.dateAdded_column "Добавлен">
 <!ENTITY zotero.items.dateModified_column "Изменён">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.issue_column "Issue">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 
 <!ENTITY zotero.items.menu.showInLibrary "Показать в библиотеке">
 <!ENTITY zotero.items.menu.attach.note "Добавить заметку">
@@ -68,10 +86,10 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Восстановить в библиотеке">
 <!ENTITY zotero.items.menu.duplicateItem "Сделать дубликат выбранного документа">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.mergeItems "Объединить документы...">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Выберите версию документа для использования в качестве главной">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Выберите поля для сохранения из других версий документа">
 
 <!ENTITY zotero.toolbar.newItem.label "Новый документ">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Далее">
@@ -103,6 +121,7 @@
 <!ENTITY zotero.item.textTransform "Трансформировать Текст">
 <!ENTITY zotero.item.textTransform.titlecase "Каждое Слово с Заглавной">
 <!ENTITY zotero.item.textTransform.sentencecase "Как в предложении">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 
 <!ENTITY zotero.toolbar.newNote "Новая заметка">
 <!ENTITY zotero.toolbar.note.standalone "Новая отдельная заметка">
@@ -120,10 +139,18 @@
 <!ENTITY zotero.tagSelector.selectVisible "Выбрать видимые">
 <!ENTITY zotero.tagSelector.clearVisible "Отменить выбор видимых">
 <!ENTITY zotero.tagSelector.clearAll "Отменить выбор">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "Переименовать тег…">
 <!ENTITY zotero.tagSelector.deleteTag "Удалить тег…">
 
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+
 <!ENTITY zotero.lookup.description "Введите ISBN, DOI или PMID для поиска в следующее поле.">
+<!ENTITY zotero.lookup.button.search "Search">
 
 <!ENTITY zotero.selectitems.title "Выбрать документы">
 <!ENTITY zotero.selectitems.intro.label "Выбрать, какие документы вы хотите добавить в свою библиотеку">
@@ -132,9 +159,9 @@
 
 <!ENTITY zotero.bibliography.title "Создать библиографию">
 <!ENTITY zotero.bibliography.style.label "Стиль цитирования:">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Режим вывода:">
+<!ENTITY zotero.bibliography.bibliography "Библиография">
+<!ENTITY zotero.bibliography.outputMethod "Метод вывода:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Сохранить как RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Сохранить как HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Скопировать в буфер обмена">
@@ -143,7 +170,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Параметры документа">
 <!ENTITY zotero.integration.addEditCitation.title "Добавить/редактировать цитату">
 <!ENTITY zotero.integration.editBibliography.title "Редактировать библиографию">
-<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Быстрое форматирование цитаты">
 
 <!ENTITY zotero.progress.title "Ход выполнения">
 
@@ -162,7 +189,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Убрать автора">
 <!ENTITY zotero.citation.prefix.label "Префикс:">
 <!ENTITY zotero.citation.suffix.label "Суффикс:">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.editorWarning.label "Предупреждение: Если вы измените цитату в редакторе, она больше не будет обновляться в соответствии с изменениями в базе данных или стиле цитирования">
 
 <!ENTITY zotero.richText.italic.label "Курсив">
 <!ENTITY zotero.richText.bold.label "Полужирный">
@@ -207,6 +234,10 @@
 <!ENTITY zotero.sync.longTagFixer.characters "символам">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Неотмеченные теги не будут сохранены.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Тег будет удалён из всех документов.">
+
+<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.deleted "Deleted">
 
 <!ENTITY zotero.proxy.recognized.title "Прокси определён">
 <!ENTITY zotero.proxy.recognized.warning "Добавляйте только прокси, предоставляемые вашей библиотекой, учебным заведением или корпоративным сайтом.">

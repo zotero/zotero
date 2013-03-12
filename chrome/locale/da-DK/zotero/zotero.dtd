@@ -5,6 +5,7 @@
 <!ENTITY zotero.general.edit "Rediger">
 <!ENTITY zotero.general.delete "Slet">
 
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Logfilen for fejl kan indeholde meddelelser der ikke har med Zotero at gøre.">
 <!ENTITY zotero.errorReport.submissionInProgress "Vent venligst mens fejlrapporten registreres.">
 <!ENTITY zotero.errorReport.submitted "Din fejlrapport er registreret.">
@@ -12,6 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums "Læg venligst en besked på Zoteros fora (forums.zotero.org) med dette Rapport-ID, en beskrivelse af problemet og det der får problemet til at opstå.">
 <!ENTITY zotero.errorReport.notReviewed "Fejlrapporter bliver ikke læst medmindre der henvises til dem i Zoteros fora.">
 
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.newVersionInstalled "Du har installeret en ny version af Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Din Zotero-database skal opgraderes for at virke med den seneste version.">
 <!ENTITY zotero.upgrade.autoBackup "Din nuværende database vil blive sikkerhedskopieret, inden der foretages ændringer.">
@@ -56,6 +58,22 @@
 <!ENTITY zotero.items.rights_column "Rettigheder">
 <!ENTITY zotero.items.dateAdded_column "Tilføjet den">
 <!ENTITY zotero.items.dateModified_column "Ændret den">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.issue_column "Issue">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 
 <!ENTITY zotero.items.menu.showInLibrary "Vis i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Tilføj note">
@@ -103,6 +121,7 @@
 <!ENTITY zotero.item.textTransform "Transformer tekst">
 <!ENTITY zotero.item.textTransform.titlecase "Betydende ord med stort ">
 <!ENTITY zotero.item.textTransform.sentencecase "Første bogstav med stort">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 
 <!ENTITY zotero.toolbar.newNote "Ny note">
 <!ENTITY zotero.toolbar.note.standalone "Ny selvstændig note">
@@ -120,10 +139,18 @@
 <!ENTITY zotero.tagSelector.selectVisible "Vælg de synlige">
 <!ENTITY zotero.tagSelector.clearVisible "Fravælg de synlige">
 <!ENTITY zotero.tagSelector.clearAll "Fravælg alle">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "Omdøb mærkaten...">
 <!ENTITY zotero.tagSelector.deleteTag "Slet mærkaten...">
 
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+
 <!ENTITY zotero.lookup.description "Indtast ISBN, DOI eller PMID for opslag nedenfor.">
+<!ENTITY zotero.lookup.button.search "Search">
 
 <!ENTITY zotero.selectitems.title "Vælg elementer">
 <!ENTITY zotero.selectitems.intro.label "Vælg de elementer, du ønsker at tilføje til dit bibliotek">
@@ -207,6 +234,10 @@
 <!ENTITY zotero.sync.longTagFixer.characters "tegn">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Mærkater, der ikke er markeret, vil ikke blive gemt.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Mærkatet vil blive fjernet fra alle elementer.">
+
+<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.deleted "Deleted">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy registreret">
 <!ENTITY zotero.proxy.recognized.warning "Tilføj kun proxyer, der er knyttet til dit biblioteks, din institutions eller din virksomheds web-sted">

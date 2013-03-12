@@ -3,6 +3,7 @@
 <!ENTITY zotero.preferences.default "Implicite:">
 <!ENTITY zotero.preferences.items "înregistrări">
 <!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.settings "Settings">
 
 <!ENTITY zotero.preferences.prefpane.general "Generale">
 
@@ -10,14 +11,14 @@
 <!ENTITY zotero.preferences.showIn "Încarcă Zotero în:">
 <!ENTITY zotero.preferences.showIn.browserPane "Panou browser">
 <!ENTITY zotero.preferences.showIn.separateTab "Filă separată">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn.appTab "Filă aplicație">
 <!ENTITY zotero.preferences.statusBarIcon "Imaginea din bara de stare:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Niciuna">
 <!ENTITY zotero.preferences.fontSize "Mărime caractere:">
 <!ENTITY zotero.preferences.fontSize.small "Mici">
 <!ENTITY zotero.preferences.fontSize.medium "Medii">
 <!ENTITY zotero.preferences.fontSize.large "Mari">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Mare">
 <!ENTITY zotero.preferences.fontSize.notes "Mărimea fontului pentru notă:">
 
 <!ENTITY zotero.preferences.miscellaneous "Diverse">
@@ -38,7 +39,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "note copil">
 <!ENTITY zotero.preferences.groups.childFiles "instantanee copil și fișiere importate">
 <!ENTITY zotero.preferences.groups.childLinks "legături copil">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "etichete">
 
 <!ENTITY zotero.preferences.openurl.caption "Deschide URL">
 
@@ -59,9 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sincronizare fișiere anexate în Biblioteca mea folosind">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Sincronizare fișiere anexate într-un grup de biblioteci folosind depozitul Zotero">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Dacă folosești depozitul Zotero, ești de acord să fii conectat la">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "termeni și condiții">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Sincronizare completă cu serverul Zotero">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Unește datele locale din Zotero cu datele de pe serverul de sincronizare, ignorând istoria sincronizărilor.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurare de pe serverul Zotero">
@@ -70,6 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Șterge toate datele de pe server și suprascrie cu datele locale din Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Resetează istoria sincronizării fișierelor">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Forțează controlul serverului de stocare pentru toate fișierele locale anexate.">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Resetare...">
 
 
@@ -108,19 +115,20 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Niciu plug-in pentru procesorul de text nu este instalat în acest moment.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Obține plug-in-urile pentru procesorul de text...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Folosește caseta clasică de dialog Adaugă citare">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Manager de stiluri">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titlu">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Actualizat">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Obține stiluri suplimentare...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Scurtături de la tastatură">
 
 <!ENTITY zotero.preferences.keys.openZotero "Deschide/Închide panoul Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Extinde pe tot ecranul">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focalizare Panou de biblioteci">
 <!ENTITY zotero.preferences.keys.quicksearch "Căutare rapidă">
 <!ENTITY zotero.preferences.keys.newItem "Creează o înregistrare nouă">
 <!ENTITY zotero.preferences.keys.newNote "Creează o notă nouă">
@@ -154,6 +162,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Orice șir">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avansate">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localizează">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Manager pentru motorul de căutare a articolelor">
@@ -173,6 +182,12 @@
 <!ENTITY zotero.preferences.dataDir.choose "Alege...">
 <!ENTITY zotero.preferences.dataDir.reveal "Afișează directorul de date">
 
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
+
 <!ENTITY zotero.preferences.dbMaintenance "Întreținerea bazei de date">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Controlează integritatea bazei de date">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Resetează traducători și stiluri...">
@@ -187,6 +202,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Ștergere ieșire">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Trimitere către serverul Zotero">
 
-<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
+<!ENTITY zotero.preferences.openAboutConfig "Deschide about:config">
+<!ENTITY zotero.preferences.openCSLEdit "Deschide editorul CSL">
+<!ENTITY zotero.preferences.openCSLPreview "Deschide Previzualizare CSL">

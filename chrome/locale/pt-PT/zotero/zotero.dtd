@@ -5,6 +5,7 @@
 <!ENTITY zotero.general.edit "Editar">
 <!ENTITY zotero.general.delete "Remover">
 
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "O registo de erros pode incluir mensagens alheias ao Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor aguarde enquanto o relatório de erro é enviado.">
 <!ENTITY zotero.errorReport.submitted "O relatório de erro foi enviado.">
@@ -12,6 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums "Por favor crie uma mensagem nos fóruns do Zotero (em forums.zotero.org) incluindo este ID de Relatório, uma descrição do problema e os passos necessários para o reproduzir.">
 <!ENTITY zotero.errorReport.notReviewed "Relatórios de erro não são geralmente revistos excepto quando mencionados nos fóruns.">
 
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.newVersionInstalled "Instalou uma nova versão do Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "A sua base de dados do Zotero precisa de ser actualizada para poder funcionar com a nova versão.">
 <!ENTITY zotero.upgrade.autoBackup "A base de dados existente será salvaguardada automaticamente antes de se fazer qualquer alteração.">
@@ -56,6 +58,22 @@
 <!ENTITY zotero.items.rights_column "Direitos">
 <!ENTITY zotero.items.dateAdded_column "Data de Adição">
 <!ENTITY zotero.items.dateModified_column "Data de Modificação">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.issue_column "Issue">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 
 <!ENTITY zotero.items.menu.showInLibrary "Mostrar na Biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Adicionar Nota">
@@ -68,10 +86,10 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaurar para a Biblioteca">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicar o Item Seleccionado">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.mergeItems "Fundir itens...">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Escolha a versão do item a usar como item principal:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Seleccione os campos a manter de outras versões do item:">
 
 <!ENTITY zotero.toolbar.newItem.label "Novo Item">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mais">
@@ -103,6 +121,7 @@
 <!ENTITY zotero.item.textTransform "Transformar Texto">
 <!ENTITY zotero.item.textTransform.titlecase "Maiúsculas Iniciais de Título">
 <!ENTITY zotero.item.textTransform.sentencecase "Caixa da frase">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 
 <!ENTITY zotero.toolbar.newNote "Nova Nota">
 <!ENTITY zotero.toolbar.note.standalone "Nova Nota Isolada">
@@ -120,10 +139,18 @@
 <!ENTITY zotero.tagSelector.selectVisible "Marcar Visíveis">
 <!ENTITY zotero.tagSelector.clearVisible "Desmarcar Visíveis">
 <!ENTITY zotero.tagSelector.clearAll "Desmarcar Todos">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "Alterar a Etiqueta...">
 <!ENTITY zotero.tagSelector.deleteTag "Remover a Etiqueta...">
 
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+
 <!ENTITY zotero.lookup.description "Introduzir na caixa abaixo o ISBN, o DOI, ou o PMID a procurar.">
+<!ENTITY zotero.lookup.button.search "Search">
 
 <!ENTITY zotero.selectitems.title "Seleccionar Itens">
 <!ENTITY zotero.selectitems.intro.label "Seleccione os itens que deseja adicionar à sua biblioteca">
@@ -132,9 +159,9 @@
 
 <!ENTITY zotero.bibliography.title "Criar Bibliografia">
 <!ENTITY zotero.bibliography.style.label "Estilo de Citação:">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Modo de Saída:">
+<!ENTITY zotero.bibliography.bibliography "Bibliografia:">
+<!ENTITY zotero.bibliography.outputMethod "Método de Saída:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Guardar como RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Guardar como HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copiar">
@@ -143,7 +170,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Preferências do Documento">
 <!ENTITY zotero.integration.addEditCitation.title "Adicionar/Editar Citação">
 <!ENTITY zotero.integration.editBibliography.title "Editar Bibliografia">
-<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Formatação Rápida da Citação">
 
 <!ENTITY zotero.progress.title "Progresso">
 
@@ -162,7 +189,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Suprimir Autor">
 <!ENTITY zotero.citation.prefix.label "Prefixo:">
 <!ENTITY zotero.citation.suffix.label "Sufixo:">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.editorWarning.label "Aviso: Se editar uma citação no editor, não voltará a ser actualizada para reflectir alterações na sua base de dados ou no estilo de citação.">
 
 <!ENTITY zotero.richText.italic.label "Itálico">
 <!ENTITY zotero.richText.bold.label "Negrito">
@@ -207,6 +234,10 @@
 <!ENTITY zotero.sync.longTagFixer.characters "caracteres">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "As etiquetas por marcar não serão guardadas.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "A etiqueta será removida de todos os itens.">
+
+<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.deleted "Deleted">
 
 <!ENTITY zotero.proxy.recognized.title "Cópia Local Reconhecida">
 <!ENTITY zotero.proxy.recognized.warning "Adicione apenas cópias locais com ligações a partir da sua biblioteca, escola ou sítio Web corporativo">

@@ -5,13 +5,15 @@
 <!ENTITY zotero.general.edit "Modifier">
 <!ENTITY zotero.general.delete "Supprimer">
 
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Le journal des erreurs peut comprendre des messages sans rapport avec Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Veuillez patienter pendant la transmission du rapport d'erreur.">
 <!ENTITY zotero.errorReport.submitted "Le rapport d'erreur a été transmis.">
 <!ENTITY zotero.errorReport.reportID "ID du rapport :">
 <!ENTITY zotero.errorReport.postToForums "Veuillez poster un message sur les forums Zotero (forums.zotero.org) avec cet ID du rapport, une description du problème et les étapes nécessaires pour le reproduire.">
-<!ENTITY zotero.errorReport.notReviewed "Les rapports d'erreurs ne sont généralement pas étudiés sauf sauf s'ils sont référencés dans les forums.">
+<!ENTITY zotero.errorReport.notReviewed "Les rapports d'erreurs ne sont pas étudiés s'ils ne sont pas référencés sur les forums Zotero.">
 
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.newVersionInstalled "Vous avez installé une nouvelle version de Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Votre base de données Zotero doit être mise à jour pour fonctionner avec cette nouvelle version.">
 <!ENTITY zotero.upgrade.autoBackup "Votre base de données actuelle va être sauvegardée automatiquement avant toute modification.">
@@ -56,6 +58,22 @@
 <!ENTITY zotero.items.rights_column "Autorisations">
 <!ENTITY zotero.items.dateAdded_column "Date d'ajout">
 <!ENTITY zotero.items.dateModified_column "Date de modification">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.issue_column "Issue">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 
 <!ENTITY zotero.items.menu.showInLibrary "Afficher dans la bibliothèque">
 <!ENTITY zotero.items.menu.attach.note "Ajouter une note">
@@ -103,6 +121,7 @@
 <!ENTITY zotero.item.textTransform "Transformer le texte">
 <!ENTITY zotero.item.textTransform.titlecase "Initiales En Majuscules">
 <!ENTITY zotero.item.textTransform.sentencecase "Lettre capitale en début de phrase">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 
 <!ENTITY zotero.toolbar.newNote "Nouvelle note">
 <!ENTITY zotero.toolbar.note.standalone "Nouvelle note indépendante">
@@ -120,17 +139,25 @@
 <!ENTITY zotero.tagSelector.selectVisible "Sélectionner ce qui est visible">
 <!ENTITY zotero.tagSelector.clearVisible "Désélectionner ce qui est visible">
 <!ENTITY zotero.tagSelector.clearAll "Tout désélectionner">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "Renommer le marqueur…">
 <!ENTITY zotero.tagSelector.deleteTag "Effacer le marqueur…">
 
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+
 <!ENTITY zotero.lookup.description "Saisir l'ISBN, le DOI ou le PMID à chercher dans la boîte ci-dessous.">
+<!ENTITY zotero.lookup.button.search "Search">
 
 <!ENTITY zotero.selectitems.title "Sélectionner des documents">
 <!ENTITY zotero.selectitems.intro.label "Veuillez sélectionner les documents à ajouter à votre bibliothèque">
 <!ENTITY zotero.selectitems.cancel.label "Annuler">
 <!ENTITY zotero.selectitems.select.label "OK">
 
-<!ENTITY zotero.bibliography.title "Créer une bibliographie">
+<!ENTITY zotero.bibliography.title "Créer une citation/bibliographie">
 <!ENTITY zotero.bibliography.style.label "Style de citation :">
 <!ENTITY zotero.bibliography.outputMode "Mode de création :">
 <!ENTITY zotero.bibliography.bibliography "Bibliographie">
@@ -207,6 +234,10 @@
 <!ENTITY zotero.sync.longTagFixer.characters "caractères">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Les marqueurs non sélectionnés ne seront pas sauvegardés.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Le marqueur sera supprimé de tous les documents.">
+
+<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.deleted "Deleted">
 
 <!ENTITY zotero.proxy.recognized.title "Serveur mandataire identifié">
 <!ENTITY zotero.proxy.recognized.warning "Ajouter uniquement des serveurs mandataires référencés par le site de votre bibliothèque, établissement scolaire ou société">

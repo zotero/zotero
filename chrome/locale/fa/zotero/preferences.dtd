@@ -3,6 +3,7 @@
 <!ENTITY zotero.preferences.default "پیش‌فرض:">
 <!ENTITY zotero.preferences.items "آیتم‌">
 <!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.settings "Settings">
 
 <!ENTITY zotero.preferences.prefpane.general "عمومی">
 
@@ -59,9 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "آدرس:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "همزمان‌‌سازی پرونده‌های پیوست در کتابخانه با استفاده از ">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "همزمان‌‌سازی پرونده‌های پیوست در کتابخانه‌های گروهی با استفاده از سامانه ذخیره زوترو (Zotero storage)">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "با استفاده از سامانه ذخیره زوترو (Zotero storage) می‌پذیرید که تابع">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "شرایط و قوانین آن باشید ">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "همزمان‌‌سازی کامل با کارگزار زوترو">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "تلفیق اطلاعات محلی زوترو با اطلاعات کارگزار همزمان‌‌سازی و نادیده گرفتن تاریخچه همزمان‌‌سازی.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "بازیابی از کارگزار زوترو">
@@ -70,6 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "پاک کردن همه اطلاعات و رونویسی با اطلاعات محلی زوترو">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "پاک کردن تاریخچه همزمان‌‌سازی پرونده‌ها">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Force checking of the storage server for all local attachment files.">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "بازنشانی...">
 
 
@@ -114,6 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "عنوان">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "روزآمد">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "دریافت شیوه‌های بیشتر...">
 
 <!ENTITY zotero.preferences.prefpane.keys "کلیدهای میان‌بر">
@@ -154,6 +162,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - هر نوع رشته">
 
 <!ENTITY zotero.preferences.prefpane.advanced "پیشرفته">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 
 <!ENTITY zotero.preferences.prefpane.locate "مکان‌یابی">
 <!ENTITY zotero.preferences.locate.locateEngineManager "سامان‌دهی مکان‌یاب مقالات">
@@ -172,6 +181,12 @@
 <!ENTITY zotero.preferences.dataDir.custom "محل دلخواه:">
 <!ENTITY zotero.preferences.dataDir.choose "انتخاب...">
 <!ENTITY zotero.preferences.dataDir.reveal "نمایش محل ذخیره اطلاعات">
+
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 
 <!ENTITY zotero.preferences.dbMaintenance "رسیدگی به دادگان">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "بررسی یکپارچگی دادگان">
