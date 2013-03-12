@@ -170,6 +170,8 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 				return;
 			}
 			
+			event.preventDefault();
+			
 			Q.fcall(function () {
 				var key = String.fromCharCode(event.which);
 				if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
@@ -215,13 +217,16 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 				
 				tree.disableKeyNavigation = false;
 				self._skipKeyPress = true;
-				var nsIDWU = Components.interfaces.nsIDOMWindowUtils
+				var nsIDWU = Components.interfaces.nsIDOMWindowUtils;
 				var domWindowUtils = event.originalTarget.ownerDocument.defaultView
 					.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
 					.getInterface(nsIDWU);
 				var modifiers = 0;
+				if (event.altKey) {
+					modifiers |= nsIDWU.MODIFIER_ALT;
+				}
 				if (event.ctrlKey) {
-					modifiers |= nsIDWU.MODIFIER_CTRL;
+					modifiers |= nsIDWU.MODIFIER_CONTROL;
 				}
 				if (event.shiftKey) {
 					modifiers |= nsIDWU.MODIFIER_SHIFT;
