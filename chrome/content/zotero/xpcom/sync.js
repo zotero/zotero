@@ -628,7 +628,7 @@ Zotero.Sync.Runner = new function () {
 	this.warning = function (e) {
 		Zotero.debug(e, 2);
 		Components.utils.reportError(e);
-		e.status = 'warning';
+		e.errorMode = 'warning';
 		_warning = e;
 	}
 	
@@ -636,7 +636,7 @@ Zotero.Sync.Runner = new function () {
 	this.error = function (e) {
 		if (typeof e == 'string') {
 			e = new Error(e);
-			e.status = 'error';
+			e.errorMode = 'error';
 		}
 		Zotero.debug(e, 1);
 		Zotero.Sync.Runner.setSyncIcon(e);
@@ -774,7 +774,7 @@ Zotero.Sync.Runner = new function () {
 		errors = [this.parseSyncError(e) for each(e in errors)];
 		
 		// Set highest priority error as the primary (sync error icon)
-		var statusPriorities = {
+		var errorModes = {
 			info: 1,
 			warning: 2,
 			error: 3,
@@ -785,11 +785,11 @@ Zotero.Sync.Runner = new function () {
 		};
 		var primaryError = false;
 		for each(var error in errors) {
-			if (!error.status || statusPriorities[error.status] == -1) {
+			if (!error.errorMode || errorModes[error.errorMode] == -1) {
 				continue;
 			}
-			if (!primaryError || statusPriorities[error.status]
-						> statusPriorities[primaryError.status]) {
+			if (!primaryError || errorModes[error.errorMode]
+						> errorModes[primaryError.errorMode]) {
 				primaryError = error;
 			}
 		}
@@ -804,7 +804,7 @@ Zotero.Sync.Runner = new function () {
 		e = this.parseSyncError(e);
 		
 		if (Zotero.Sync.Server.upgradeRequired) {
-			e.status = 'upgrade';
+			e.errorMode = 'upgrade';
 			Zotero.Sync.Server.upgradeRequired = false;
 		}
 		
@@ -843,9 +843,9 @@ Zotero.Sync.Runner = new function () {
 			
 			var syncIcon = doc.getElementById('zotero-tb-sync');
 			// Update sync icon state
-			syncIcon.setAttribute('status', e.status ? e.status : "");
+			syncIcon.setAttribute('status', e.errorMode ? e.errorMode : "");
 			// Disable button while spinning
-			syncIcon.disabled = e.status == 'animate';
+			syncIcon.disabled = e.errorMode == 'animate';
 		}
 		
 		// Clear status
@@ -878,7 +878,7 @@ Zotero.Sync.Runner = new function () {
 		// In addition to actual errors, string states (e.g., 'animate')
 		// can be passed
 		if (typeof e == 'string') {
-			parsed.status = e;
+			parsed.errorMode = e;
 			return parsed;
 		}
 		
@@ -890,7 +890,7 @@ Zotero.Sync.Runner = new function () {
 		if (typeof e.libraryID != 'undefined') {
 			parsed.libraryID = e.libraryID;
 		}
-		parsed.status = e.status ? e.status : 'error';
+		parsed.errorMode = e.errorMode ? e.errorMode : 'error';
 		
 		if (e.data) {
 			if (e.data.dialogText) {
@@ -927,14 +927,14 @@ Zotero.Sync.Runner = new function () {
 		// TEMP: for now, use the first error
 		var e = this.getPrimaryError(errors);
 		
-		if (!e.status) {
+		if (!e.errorMode) {
 			icon.hidden = true;
 			icon.onclick = null;
 			return;
 		}
 		
 		icon.hidden = false;
-		icon.setAttribute('mode', e.status);
+		icon.setAttribute('mode', e.errorMode);
 		icon.onclick = function () {
 			var doc = this.ownerDocument;
 			
@@ -972,7 +972,7 @@ Zotero.Sync.Runner = new function () {
 		
 		// If not an error and there's no explicit button text, don't show
 		// button to report errors
-		if (e.status != 'error' && typeof e.buttonText == 'undefined') {
+		if (e.errorMode != 'error' && typeof e.buttonText == 'undefined') {
 			e.buttonText = null;
 		}
 		
