@@ -722,7 +722,7 @@ Zotero.Sync.Storage = new function () {
 		var items = Zotero.Items.get(itemIDs);
 		for each(var item in items) {
 			var lk = libraryID + "/" + item.key;
-			Zotero.debug("Checking attachment file for item " + lk);
+			//Zotero.debug("Checking attachment file for item " + lk);
 			var file = item.getFile(attachmentData[item.id]);
 			if (!file) {
 				Zotero.debug("Marking attachment " + lk + " as missing");
@@ -740,8 +740,8 @@ Zotero.Sync.Storage = new function () {
 			
 			var fmtime = item.attachmentModificationTime;
 			
-			Zotero.debug("Stored mtime is " + attachmentData[item.id].mtime);
-			Zotero.debug("File mtime is " + fmtime);
+			//Zotero.debug("Stored mtime is " + attachmentData[item.id].mtime);
+			//Zotero.debug("File mtime is " + fmtime);
 			
 			// Download-marking mode
 			if (itemModTimes) {
