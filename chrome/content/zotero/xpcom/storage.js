@@ -238,14 +238,23 @@ Zotero.Sync.Storage = new function () {
 				
 				// If we don't have any forced downloads, we can skip
 				// downloads if the last sync time hasn't changed
-				if (downloadAll && !downloadForced && lastSyncTime) {
-					var version = self.getStoredLastSyncTime(
-						libraryModes[libraryID], libraryID
-					);
-					if (version == lastSyncTime) {
-						Zotero.debug("Last " + libraryModes[libraryID].name
-							+ " sync time hasn't changed for library "
-							+ libraryID + " -- skipping file downloads");
+				// or doesn't exist on the server (meaning there are no files)
+				if (downloadAll && !downloadForced) {
+					if (lastSyncTime) {
+						var version = self.getStoredLastSyncTime(
+							libraryModes[libraryID], libraryID
+						);
+						if (version == lastSyncTime) {
+							Zotero.debug("Last " + libraryModes[libraryID].name
+								+ " sync time hasn't changed for library "
+								+ libraryID + " -- skipping file downloads");
+							downloadAll = false;
+						}
+					}
+					else {
+						Zotero.debug("No last " + libraryModes[libraryID].name
+							+ " sync time for library " + libraryID
+							+ " -- skipping file downloads");
 						downloadAll = false;
 					}
 				}
