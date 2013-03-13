@@ -3707,7 +3707,7 @@ var ZoteroPane = new function()
 							+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
 		
 		// Warning
-		if (e.status == 'warning') {
+		if (e.errorMode == 'warning') {
 			var title = Zotero.getString('general.warning');
 			
 			// If secondary button not specified, just use an alert
@@ -3734,7 +3734,7 @@ var ZoteroPane = new function()
 			}
 		}
 		// Error
-		else if (e.status == 'error') {
+		else if (e.errorMode == 'error') {
 			var title = Zotero.getString('general.error');
 			
 			// If secondary button is explicitly null, just use an alert
@@ -3769,7 +3769,7 @@ var ZoteroPane = new function()
 			}
 		}
 		// Upgrade
-		else if (e.status == 'upgrade') {
+		else if (e.errorMode == 'upgrade') {
 			ps.alert(null, "", e.message);
 		}
 	};
