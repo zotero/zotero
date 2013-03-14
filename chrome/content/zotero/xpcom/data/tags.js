@@ -635,7 +635,12 @@ Zotero.Tags = new function() {
 	this.toggleItemsListTags = function (libraryID, items, name) {
 		var self = this;
 		return Q.fcall(function () {
-			var tagIDs = self.getIDs(name, libraryID);
+			var tagIDs = self.getIDs(name, libraryID) || [];
+			// If there's a color setting but no matching tag, don't throw
+			// an error (though ideally this wouldn't be possible).
+			if (!tagIDs.length) {
+				return;
+			}
 			var tags = tagIDs.map(function (tagID) {
 				return Zotero.Tags.get(tagID, true);
 			});
