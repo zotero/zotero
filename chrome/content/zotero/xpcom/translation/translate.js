@@ -644,6 +644,52 @@ Zotero.Translate.Sandbox = {
 			
 			// call super
 			Zotero.Translate.Sandbox.Base._itemDone(translate, item);
+		},
+		
+		/**
+		 * Tells Zotero to monitor changes to the DOM and re-trigger detectWeb
+		 * Can only be set during the detectWeb call
+		 * @param {DOMNode} target Document node to monitor for changes
+		 * @param {MutationObserverInit} [config] specifies which DOM mutations should be reported
+		 */
+		"monitorDOMChanges":function(translate, target, config) {
+			if(translate._currentState != "detect") {
+				Zotero.debug("Translate: monitorDOMChanges can only be called during the 'detect' stage");
+				return;
+			}
+
+			var window = translate.document.defaultView
+			var mutationObserver = window && ( window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver );
+			if(!mutationObserver) {
+				Zotero.debug("Translate: This browser does not support mutation observers.");
+				return;
+			}
+
+			var translator = translate._potentialTranslators[0];
+			if(!translate._registeredDOMObservers[translator.translatorID])
+				translate._registeredDOMObservers[translator.translatorID] = [];
+			var obs = translate._registeredDOMObservers[translator.translatorID];
+
+			//do not re-register observer by the same translator for the same node
+			if(obs.indexOf(target) != -1) {
+				Zotero.debug("Translate: Already monitoring this node");
+				return;
+			}
+
+			obs.push(target);
+
+			var observer = new mutationObserver(function(mutations, observer) {
+				obs.splice(obs.indexOf(target),1);
+				observer.disconnect();
+				
+				Zotero.debug("Translate: Page modified.");
+				//we don't really care what got updated
+				var doc = mutations[0].target.ownerDocument;
+				translate._runHandler("pageModified", doc);
+			});
+
+			observer.observe(target, config || {childList: true, subtree: true});
+			Zotero.debug("Translate: Mutation observer registered on <" + target.nodeName + "> node");
 		}
 	},
 
@@ -852,6 +898,11 @@ Zotero.Translate.Base.prototype = {
 	 *           complete
 	 *   passed: an array of appropriate translators
 	 *   returns: N/A
+	 * pageModified
+	 *   valid: web
+	 *   called: when a web page has been modified
+	 *   passed: the document object for the modified page
+	 *   returns: N/A
 	 * @param {Function} handler Callback function. All handlers will be passed the current
 	 * translate instance as the first argument. The second argument is dependent on the handler.
 	 */
@@ -918,7 +969,7 @@ Zotero.Translate.Base.prototype = {
 		if(this._handlers[type]) {
 			// compile list of arguments
 			if(this._parentTranslator) {
-				// if there is a parent translator, make sure we don't the Zotero.Translate
+				// if there is a parent translator, make sure we don't pass the Zotero.Translate
 				// object, since it could open a security hole
 				var args = [null];
 			} else {
@@ -1358,6 +1409,7 @@ Zotero.Translate.Base.prototype = {
 			this._generateSandbox();
 		}
 		
+		this._currentTranslator = translator;
 		this._runningAsyncProcesses = 0;
 		this._returnValue = undefined;
 		this._aborted = false;
@@ -1446,8 +1498,8 @@ Zotero.Translate.Base.prototype = {
 		this._sandboxManager.sandbox.Zotero.isConnector = Zotero.isConnector || false;
 		this._sandboxManager.sandbox.Zotero.isServer = Zotero.isServer || false;
 		this._sandboxManager.sandbox.Zotero.parentTranslator = this._parentTranslator
-			&& this._parentTranslator.translator && this._parentTranslator.translator[0] ? 
-			this._parentTranslator.translator[0].translatorID : null;
+			&& this._parentTranslator._currentTranslator ? 
+			this._parentTranslator._currentTranslator.translatorID : null;
 		
 		// create shortcuts
 		this._sandboxManager.sandbox.Z = this._sandboxManager.sandbox.Zotero;
@@ -1538,6 +1590,7 @@ Zotero.Translate.Base.prototype = {
  *     this Translate instance.
  */
 Zotero.Translate.Web = function() {
+	this._registeredDOMObservers = {}
 	this.init();
 }
 Zotero.Translate.Web.prototype = new Zotero.Translate.Base();
