@@ -517,6 +517,7 @@ Zotero.Tags = new function() {
 			
 			// Just to be safe, remove colors for tags that don't exist
 			tagColors = tagColors.filter(function (val) {
+				let tagIDs = self.getIDs(val.name, libraryID);
 				// TEMP: handle future getIDs return format change
 				return tagIDs && tagIDs.length;
 			});
