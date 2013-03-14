@@ -1275,8 +1275,7 @@ var ZoteroPane = new function()
 			if (itemGroup.isDuplicates()) {
 				if (!itemGroup.editable) {
 					if (count) {
-						// TODO: localize
-						var msg = "Library write access is required to merge items.";
+						var msg = Zotero.getString('pane.item.duplicates.writeAccessRequired');
 					}
 					else {
 						var msg = Zotero.getString('pane.item.selected.zero');
@@ -1302,7 +1301,7 @@ var ZoteroPane = new function()
 					Zotero_Duplicates_Pane.setItems(this.getSelectedItems(), displayNumItemsOnTypeError);
 				}
 				else {
-					var msg = Zotero.getString('pane.item.selectToMerge');
+					var msg = Zotero.getString('pane.item.duplicates.selectToMerge');
 					this.setItemPaneMessage(msg);
 				}
 			}
@@ -1415,12 +1414,10 @@ var ZoteroPane = new function()
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 		var index = ps.confirmEx(
 			null,
-			// TODO: localize
-			"PDF Tools Not Installed",
-			"To use this feature, you must first install the PDF tools in "
-				+ "the Zotero preferences.",
+			Zotero.getString('pane.item.attachments.PDF.installTools.title'),
+			Zotero.getString('pane.item.attachments.PDF.installTools.text'),
 			buttonFlags,
-			"Open Preferences",
+			Zotero.getString('general.openPreferences'),
 			null, null, null, {}
 		);
 		if (index == 0) {
@@ -2374,6 +2371,11 @@ var ZoteroPane = new function()
 		var t = event.originalTarget;
 		var tree = t.parentNode;
 		
+		// Ignore click on column headers
+		if (!tree.treeBoxObject) {
+			return;
+		}
+		
 		var row = {}, col = {}, obj = {};
 		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
 		if (row.value == -1) {
@@ -2938,9 +2940,9 @@ var ZoteroPane = new function()
 		var input = {};
 		var check = {value : false};
 		
-		// TODO: Localize
 		// TODO: Allow title to be specified?
-		var result = ps.prompt(null, "Attach Link to URI", "Enter a URI:", input, "", {});
+		var result = ps.prompt(null, Zotero.getString('pane.items.attach.link.uri.title'),
+			Zotero.getString('pane.items.attach.link.uri'), input, "", {});
 		if (!result || !input.value) return false;
 		
 		// Create a new attachment
@@ -3705,7 +3707,7 @@ var ZoteroPane = new function()
 							+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
 		
 		// Warning
-		if (e.status == 'warning') {
+		if (e.errorMode == 'warning') {
 			var title = Zotero.getString('general.warning');
 			
 			// If secondary button not specified, just use an alert
@@ -3732,7 +3734,7 @@ var ZoteroPane = new function()
 			}
 		}
 		// Error
-		else if (e.status == 'error') {
+		else if (e.errorMode == 'error') {
 			var title = Zotero.getString('general.error');
 			
 			// If secondary button is explicitly null, just use an alert
@@ -3767,7 +3769,7 @@ var ZoteroPane = new function()
 			}
 		}
 		// Upgrade
-		else if (e.status == 'upgrade') {
+		else if (e.errorMode == 'upgrade') {
 			ps.alert(null, "", e.message);
 		}
 	};

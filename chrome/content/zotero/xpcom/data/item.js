@@ -3753,19 +3753,16 @@ Zotero.Item.prototype.addTag = function(name, type) {
 Zotero.Item.prototype.addTags = function (tags, type) {
 	Zotero.DB.beginTransaction();
 	try {
-		var tagIDArray = [];
-		var tempID = false;
+		var tagIDs = [];
 		for (var i = 0; i < tags.length; i++) {
-			tempID = this.addTag(tags[i], type);
-			if (tempID) {
-				tagIDArray.push(tempID);
+			let id = this.addTag(tags[i], type);
+			if (id) {
+				tagIDs.push(id);
 			}
 		}
 		
-		tagIDArray = (tagIDArray.length>0) ? tagIDArray : false;
-		
 		Zotero.DB.commitTransaction();
-		return tagIDArray;
+		return tagIDs.length > 0 ? tagIDs : false;
 	}
 	catch (e) {
 		Zotero.DB.rollbackTransaction();
@@ -3845,21 +3842,6 @@ Zotero.Item.prototype.getTags = function() {
 Zotero.Item.prototype.getTagIDs = function() {
 	var sql = "SELECT tagID FROM itemTags WHERE itemID=?";
 	return Zotero.DB.columnQuery(sql, this.id);
-}
-
-/**
-* Return the index of tagID in the list of the item's tags sorted in alphabetical order.
-*/
-Zotero.Item.prototype.getTagIndex = function(tagID) {
-	var tags = this.getTags();
-	
-	for (var i=0;i<tags.length;i++) {
-		if (tagID == tags[i].id) {
-			return i;
-		}
-	}
-	
-	return false;
 }
 
 Zotero.Item.prototype.replaceTag = function(oldTagID, newTag) {

@@ -3,7 +3,7 @@
 <!ENTITY servicesMenuMac.label "บริการ">
 <!ENTITY hideThisAppCmdMac.label "ซ่อน &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "ซ่อน">
+<!ENTITY hideOtherAppsCmdMac.label "ซ่อนอื่น ๆ">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "แสดงทั้งหมด">
 <!ENTITY quitApplicationCmdMac.label "ออกจาก Zotero">
@@ -12,12 +12,12 @@
 
 <!ENTITY fileMenu.label "แฟ้ม">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "บันทึก...">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "ตั้งค่าหน้ากระดาษ...">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "พิมพ์...">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "U">
 <!ENTITY closeCmd.label "ปิด">
@@ -25,7 +25,7 @@
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY quitApplicationCmdWin.label "ออกจากโปรแกรม">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
-<!ENTITY quitApplicationCmd.label "เลิก">
+<!ENTITY quitApplicationCmd.label "เลิกใช้">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
@@ -97,5 +97,5 @@
 <!ENTITY helpFeedbackPage.accesskey "S">
 <!ENTITY helpReportErrors.label "รายงานความผิดพลาดให้ Zotero...">
 <!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpCheckForUpdates.label "ตรวจสอบรุ่นปัจจุบัน...">
+<!ENTITY helpCheckForUpdates.label "ตรวจสอบรุ่นล่าสุด...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

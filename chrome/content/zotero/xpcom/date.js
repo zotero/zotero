@@ -228,29 +228,31 @@ Zotero.Date = new function(){
 	var _dayRe = null;
 	
 	function strToDate(string) {
-		// Parse 'yesterday'/'today'/'tomorrow'
-		var lc = (string + '').toLowerCase();
-		if (lc == 'yesterday' || (Zotero.getString && lc === Zotero.getString('date.yesterday'))) {
-			string = Zotero.Date.dateToSQL(new Date(new Date().getTime() - 86400000)).substr(0, 10);
-		}
-		else if (lc == 'today' || (Zotero.getString && lc == Zotero.getString('date.today'))) {
-			string = Zotero.Date.dateToSQL(new Date()).substr(0, 10);
-		}
-		else if (lc == 'tomorrow' || (Zotero.getString && lc == Zotero.getString('date.tomorrow'))) {
-			string = Zotero.Date.dateToSQL(new Date(new Date().getTime() + 86400000)).substr(0, 10);
-		}
-		
 		var date = {
 			order: ''
 		};
-		var parts = [];
 		
 		// skip empty things
 		if(!string) {
 			return date;
 		}
 		
-		string = string.toString().replace(/^\s+/, "").replace(/\s+$/, "").replace(/\s+/, " ");
+		var parts = [];
+		
+		// Parse 'yesterday'/'today'/'tomorrow'
+		var lc = (string + '').toLowerCase();
+		if (lc == 'yesterday' || (Zotero.getString && lc === Zotero.getString('date.yesterday'))) {
+			string = Zotero.Date.dateToSQL(new Date(Date.now() - 1000*60*60*24)).substr(0, 10);
+		}
+		else if (lc == 'today' || (Zotero.getString && lc == Zotero.getString('date.today'))) {
+			string = Zotero.Date.dateToSQL(new Date()).substr(0, 10);
+		}
+		else if (lc == 'tomorrow' || (Zotero.getString && lc == Zotero.getString('date.tomorrow'))) {
+			string = Zotero.Date.dateToSQL(new Date(Date.now() + 1000*60*60*24)).substr(0, 10);
+		}
+		else {
+			string = string.toString().replace(/^\s+|\s+$/g, "").replace(/\s+/, " ");
+		}
 		
 		// first, directly inspect the string
 		var m = _slashRe.exec(string);
@@ -442,12 +444,15 @@ Zotero.Date = new function(){
 		
 		// clean up date part
 		if(date.part) {
-			date.part = date.part.replace(/^[^A-Za-z0-9]+/, "").replace(/[^A-Za-z0-9]+$/, "");
+			date.part = date.part.replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g, "");
 		}
 		
 		if(date.part === "" || date.part == undefined) {
 			delete date.part;
 		}
+		
+		//make sure year is always a string
+		if(date.year || date.year === 0) date.year += '';
 		
 		return date;
 	}

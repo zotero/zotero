@@ -1,8 +1,9 @@
-<!ENTITY zotero.preferences.title "Zotero - Predvoľby">
+<!ENTITY zotero.preferences.title "Predvoľby Zotero">
 
 <!ENTITY zotero.preferences.default "Predvolené:">
 <!ENTITY zotero.preferences.items "položiek">
 <!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.settings "Settings">
 
 <!ENTITY zotero.preferences.prefpane.general "Všeobecné">
 
@@ -38,7 +39,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "vložené poznámky">
 <!ENTITY zotero.preferences.groups.childFiles "vložené snímky a importované súbory">
 <!ENTITY zotero.preferences.groups.childLinks "vložené odkazy">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "značky">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -59,9 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Na synchronizáciu príloh v Mojej knižnici použiť">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Prílohy v skupinových knižniciach synchronizovať prostredníctvom Úložiska Zotero">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Používaním Úložiska Zotero súhlasíte s uvedenými">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "pravidlami a podmienkami">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Úplná synchronizácia so serverom Zotero">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Zlúčiť lokálne dáta s dátami na serveri bez ohľadu predchádzajúce synchronizácie.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Obnoviť dáta zo servera Zotero">
@@ -70,6 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Vymazať všetky dáta na serveri a nahradiť ich lokálnymi.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Vymazať históriu synchronizácie súborov">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Nechať server znovu preveriť, či obsahuje všetky lokálne prílohy.">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Obnoviť...">
 
 
@@ -114,13 +121,14 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Názov">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Aktualizované">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Získať ďalšie štýly...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Klávesové skratky">
 
 <!ENTITY zotero.preferences.keys.openZotero "Otvoriť/zatvoriť Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Prepnúť Zotero do celého okna">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Tabla knižníc Focus">
 <!ENTITY zotero.preferences.keys.quicksearch "Rýchle vyhľadávanie">
 <!ENTITY zotero.preferences.keys.newItem "Vytvoriť novú položku">
 <!ENTITY zotero.preferences.keys.newNote "Vytvoriť novú poznámku">
@@ -154,6 +162,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - ľubovoľný reťazec">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Pokročilé">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 
 <!ENTITY zotero.preferences.prefpane.locate "Lokalizovať">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Správca motora vyhľadávania článkov">
@@ -172,6 +181,12 @@
 <!ENTITY zotero.preferences.dataDir.custom "Vlastné umiestnenie:">
 <!ENTITY zotero.preferences.dataDir.choose "Prehľadávať...">
 <!ENTITY zotero.preferences.dataDir.reveal "Zobraziť priečinok s dátami">
+
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 
 <!ENTITY zotero.preferences.dbMaintenance "Údržba databázy">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Skontrolovať integritu databázy">

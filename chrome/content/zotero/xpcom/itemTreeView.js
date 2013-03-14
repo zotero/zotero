@@ -217,13 +217,16 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 				
 				tree.disableKeyNavigation = false;
 				self._skipKeyPress = true;
-				var nsIDWU = Components.interfaces.nsIDOMWindowUtils
+				var nsIDWU = Components.interfaces.nsIDOMWindowUtils;
 				var domWindowUtils = event.originalTarget.ownerDocument.defaultView
 					.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
 					.getInterface(nsIDWU);
 				var modifiers = 0;
+				if (event.altKey) {
+					modifiers |= nsIDWU.MODIFIER_ALT;
+				}
 				if (event.ctrlKey) {
-					modifiers |= nsIDWU.MODIFIER_CTRL;
+					modifiers |= nsIDWU.MODIFIER_CONTROL;
 				}
 				if (event.shiftKey) {
 					modifiers |= nsIDWU.MODIFIER_SHIFT;
@@ -1261,6 +1264,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	var collation = Zotero.getLocaleCollation();
 	
 	// Year is really the date field truncated
+	var originalColumnField = columnField;
 	if (columnField == 'year') {
 		columnField = 'date';
 	}
@@ -1286,7 +1290,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	
 	// Get the display field for a row (which might be a placeholder title)
 	var getField;
-	switch (columnField) {
+	switch (originalColumnField) {
 		case 'title':
 			getField = function (row) {
 				var field;
@@ -1333,6 +1337,19 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			};
 			break;
 		
+		case 'year':
+			getField = function (row) {
+				var val = row.getField(columnField, unformatted);
+				if (val) {
+					val = val.substr(0, 4);
+					if (val == '0000') {
+						val = "";
+					}
+				}
+				return val;
+			};
+			break;
+		
 		default:
 			getField = function (row) row.getField(columnField, unformatted);
 	}
@@ -1350,8 +1367,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		
 		switch (columnField) {
 			case 'date':
-				fieldA = a.getField('date', true).substr(0, 10);
-				fieldB = b.getField('date', true).substr(0, 10);
+				fieldA = getField(a).substr(0, 10);
+				fieldB = getField(b).substr(0, 10);
 				
 				cmp = strcmp(fieldA, fieldB);
 				if (cmp !== 0) {
@@ -2957,36 +2974,61 @@ Zotero.ItemTreeView.prototype.getCellProperties = function(row, col, prop) {
 	var treeRow = this._getItemAtRow(row);
 	var itemID = treeRow.ref.id;
 	
+	var props = [];
+	
 	// Mark items not matching search as context rows, displayed in gray
 	if (this._searchMode && !this._searchItemIDs[itemID]) {
-		var aServ = Components.classes["@mozilla.org/atom-service;1"].
-			getService(Components.interfaces.nsIAtomService);
-		prop.AppendElement(aServ.getAtom("contextRow"));
+		// <=Fx21
+		if (prop) {
+			var aServ = Components.classes["@mozilla.org/atom-service;1"].
+				getService(Components.interfaces.nsIAtomService);
+			prop.AppendElement(aServ.getAtom("contextRow"));
+		}
+		// Fx22+
+		else {
+			props.push("contextRow");
+		}
 	}
 	
 	// Mark hasAttachment column, which needs special image handling
 	if (col.id == 'zotero-items-column-hasAttachment') {
-		var aServ = Components.classes["@mozilla.org/atom-service;1"].
-				getService(Components.interfaces.nsIAtomService);
-		prop.AppendElement(aServ.getAtom("hasAttachment"));
+		// <=Fx21
+		if (prop) {
+			var aServ = Components.classes["@mozilla.org/atom-service;1"].
+					getService(Components.interfaces.nsIAtomService);
+			prop.AppendElement(aServ.getAtom("hasAttachment"));
+		}
+		// Fx22+
+		else {
+			props.push("hasAttachment");
+		}
 		
 		// Don't show pie for open parent items, since we show it for the
 		// child item
 		if (this.isContainer(row) && this.isContainerOpen(row)) {
-			return;
+			return props.join(" ");
 		}
 		
 		var num = Zotero.Sync.Storage.getItemDownloadImageNumber(treeRow.ref);
 		//var num = Math.round(new Date().getTime() % 10000 / 10000 * 64);
 		if (num !== false) {
-			if (!aServ) {
-				var aServ = Components.classes["@mozilla.org/atom-service;1"].
-						getService(Components.interfaces.nsIAtomService);
+			// <=Fx21
+			if (prop) {
+				if (!aServ) {
+					var aServ = Components.classes["@mozilla.org/atom-service;1"].
+							getService(Components.interfaces.nsIAtomService);
+				}
+				prop.AppendElement(aServ.getAtom("pie"));
+				prop.AppendElement(aServ.getAtom("pie" + num));
 			}
-			prop.AppendElement(aServ.getAtom("pie"));
-			prop.AppendElement(aServ.getAtom("pie" + num));
+			// Fx22+
+			else {
+				props.push("pie", "pie" + num);
+			}
 		}
 	}
+	
+	return props.join(" ");
 }
 
 Zotero.ItemTreeView.TreeRow = function(ref, level, isOpen)

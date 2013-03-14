@@ -5,7 +5,7 @@
 <!ENTITY zotero.search.joinMode.all "todos">
 <!ENTITY zotero.search.joinMode.suffix "dos seguintes:">
 
-<!ENTITY zotero.search.recursive.label "Buscar en subcartafois">
+<!ENTITY zotero.search.recursive.label "Buscar en subcartafoles">
 <!ENTITY zotero.search.noChildren "Só mostrar temas de nivel superior">
 <!ENTITY zotero.search.includeParentsAndChildren "Incluír artigos pais e fillos de artigos coincidentes">
 

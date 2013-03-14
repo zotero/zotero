@@ -5,6 +5,7 @@
 <!ENTITY zotero.general.edit "แก้ไข">
 <!ENTITY zotero.general.delete "ลบ">
 
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "บันทึกความผิดพลาดอาจรวมข้อความที่ไม่เกี่ยวกับ Zotero ไว้ด้วย">
 <!ENTITY zotero.errorReport.submissionInProgress "โปรดรอในระหว่างที่รายงานข้อผิดพลาดกำลังส่งอยู่">
 <!ENTITY zotero.errorReport.submitted "รายงานข้อผิดพลาดได้รับการส่งเรียบร้อยแล้ว">
@@ -12,6 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums "กรุณาลงประกาศข้อความในฟอรั่มของ Zotero (forums.zotero.org) โดยใช้รหัสรายงาน รายละเอียดของปัญหาและขั้นตอนที่ำทำให้เกิดปัญหานั้นอีก">
 <!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.newVersionInstalled "ท่านได้ติดตั้ง Zotero รุ่นใหม่แล้ว">
 <!ENTITY zotero.upgrade.upgradeRequired "ฐานข้อมูล Zotero ของท่าน จำเป็นต้องปรับเป็นรุ่นปัจจุบันก่อนเพื่อให้ทำงานได้กับรุ่นใหม่">
 <!ENTITY zotero.upgrade.autoBackup "ฐานข้อมูลปัจจุบันของท่านจะได้รับการทำสำรองไว้โดยอัตโนมัติ ก่อนที่จะมีการเปลี่ยนแปลงใด ๆ เกิดขึ้น">
@@ -56,6 +58,22 @@
 <!ENTITY zotero.items.rights_column "สิทธิ์">
 <!ENTITY zotero.items.dateAdded_column "วันที่เพิ่ม">
 <!ENTITY zotero.items.dateModified_column "วันที่แก้ไข">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.issue_column "Issue">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 
 <!ENTITY zotero.items.menu.showInLibrary "แสดงในไลบรารี่">
 <!ENTITY zotero.items.menu.attach.note "เพิ่มหมายเหตุ">
@@ -103,6 +121,7 @@
 <!ENTITY zotero.item.textTransform "แปลงแบบอักษร">
 <!ENTITY zotero.item.textTransform.titlecase "แบบชื่อเรื่อง">
 <!ENTITY zotero.item.textTransform.sentencecase "แบบประโยค">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 
 <!ENTITY zotero.toolbar.newNote "หมายเหตุใหม่">
 <!ENTITY zotero.toolbar.note.standalone "หมายเหตุแบบสแตนด์อะโลนใหม่">
@@ -120,10 +139,18 @@
 <!ENTITY zotero.tagSelector.selectVisible "เลือกตามที่เห็น">
 <!ENTITY zotero.tagSelector.clearVisible "ไม่เลือกตามที่เห็น">
 <!ENTITY zotero.tagSelector.clearAll "ไม่เลือกทั้งหมด">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "เปลี่ยนชื่อแท็ก...">
 <!ENTITY zotero.tagSelector.deleteTag "ลบแท็ก...">
 
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+
 <!ENTITY zotero.lookup.description "ป้อน ISBN, DOI หรือ PMID ในกล่องด้านล่างนี้เพื่อค้นหา">
+<!ENTITY zotero.lookup.button.search "Search">
 
 <!ENTITY zotero.selectitems.title "เลือกรายการ">
 <!ENTITY zotero.selectitems.intro.label "เลือกรายการที่ต้องการเพิ่มเข้าไลบรารี่ของคุณ">
@@ -207,6 +234,10 @@
 <!ENTITY zotero.sync.longTagFixer.characters "ตัวอักษร">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "แท็กที่ไม่ได้เลือกจะไม่ถูกบันทึก">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "แท็กจะถูกลบออกจากทุกรายการ">
+
+<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.deleted "Deleted">
 
 <!ENTITY zotero.proxy.recognized.title "จดจำพร็อกซี่">
 <!ENTITY zotero.proxy.recognized.warning "เพียงเพิ่มพร็อกซี่เชื่อมโยงจากเว็บไซต์ห้องสมุด โรงเรียนหรือองค์กรของคุณ">

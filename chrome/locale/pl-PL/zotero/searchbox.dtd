@@ -5,7 +5,7 @@
 <!ENTITY zotero.search.joinMode.all "wszystkie">
 <!ENTITY zotero.search.joinMode.suffix "z następujących:">
 
-<!ENTITY zotero.search.recursive.label "Szukaj w podkatalogach">
+<!ENTITY zotero.search.recursive.label "Szukaj w podkolekcjach">
 <!ENTITY zotero.search.noChildren "Wyświetl tylko elementy główne">
 <!ENTITY zotero.search.includeParentsAndChildren "Zawiera pasujące elementy główne i potomne">
 

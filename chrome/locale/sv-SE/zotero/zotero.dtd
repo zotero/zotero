@@ -5,6 +5,7 @@
 <!ENTITY zotero.general.edit "Ändra">
 <!ENTITY zotero.general.delete "Radera">
 
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Felloggen kan innehålla meddelanden som inte har med Zotero att göra.">
 <!ENTITY zotero.errorReport.submissionInProgress "Var vänlig vänta medan felrapporten skickas.">
 <!ENTITY zotero.errorReport.submitted "Felrapporten har skickats.">
@@ -12,6 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums "Skriv ett meddelande på Zoteros forum (forums.zotero.org) med detta rapport-ID, en beskrivning av problemet, och vad man behöver göra för att få samma fel igen.">
 <!ENTITY zotero.errorReport.notReviewed "Felrapporter brukar inte kontrolleras om ingen skriver om dem på forumen.">
 
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.newVersionInstalled "Du har installerat en ny version av Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Din Zoterodatabas måste uppgraderas för att fungera med den nya versionen.">
 <!ENTITY zotero.upgrade.autoBackup "Din existerande databas kommer att säkerhetskopieras innan några ändringar görs.">
@@ -31,7 +33,7 @@
 <!ENTITY zotero.contextMenu.saveImageAsItem "Spara bild som en Zotero-källa">
 
 <!ENTITY zotero.tabs.info.label "Information">
-<!ENTITY zotero.tabs.notes.label "Anteckningar">
+<!ENTITY zotero.tabs.notes.label "Fotnot">
 <!ENTITY zotero.tabs.attachments.label "Bilagor">
 <!ENTITY zotero.tabs.tags.label "Etiketter">
 <!ENTITY zotero.tabs.related.label "Liknande källor">
@@ -56,7 +58,22 @@
 <!ENTITY zotero.items.rights_column "Rättigheter">
 <!ENTITY zotero.items.dateAdded_column "Tillagt datum">
 <!ENTITY zotero.items.dateModified_column "Ändrat datum">
-<!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.issue_column "Issue">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 
 <!ENTITY zotero.items.menu.showInLibrary "Visa i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Lägg till anteckning">
@@ -104,6 +121,7 @@
 <!ENTITY zotero.item.textTransform "Omvandla text">
 <!ENTITY zotero.item.textTransform.titlecase "engelsk titelskrivning">
 <!ENTITY zotero.item.textTransform.sentencecase "Vanlig versalisering">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 
 <!ENTITY zotero.toolbar.newNote "Ny anteckning">
 <!ENTITY zotero.toolbar.note.standalone "Ny fristående anteckning">
@@ -121,17 +139,25 @@
 <!ENTITY zotero.tagSelector.selectVisible "Välj synliga">
 <!ENTITY zotero.tagSelector.clearVisible "Välj bort synliga">
 <!ENTITY zotero.tagSelector.clearAll "Välj bort alla">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "Ändra namn på etikett...">
 <!ENTITY zotero.tagSelector.deleteTag "Radera etikett...">
 
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+
 <!ENTITY zotero.lookup.description "Skriv ISBN, DOI, eller PMID i sökfältet nedan.">
+<!ENTITY zotero.lookup.button.search "Search">
 
 <!ENTITY zotero.selectitems.title "Välj källor">
 <!ENTITY zotero.selectitems.intro.label "Välj vilka källor du vill lägga till i ditt bibliotek">
 <!ENTITY zotero.selectitems.cancel.label "Ångra">
 <!ENTITY zotero.selectitems.select.label "Ok">
 
-<!ENTITY zotero.bibliography.title "Skapa källförteckning">
+<!ENTITY zotero.bibliography.title "Skapa citering/källförteckning">
 <!ENTITY zotero.bibliography.style.label "Referensstil">
 <!ENTITY zotero.bibliography.outputMode "Utmatningsläge">
 <!ENTITY zotero.bibliography.bibliography "Källförteckning">
@@ -191,7 +217,7 @@
 <!ENTITY zotero.integration.showEditor.label "Visa redigerare">
 <!ENTITY zotero.integration.classicView.label "Klassisk vy">
 
-<!ENTITY zotero.integration.references.label "Innehåll i källförteckningen">
+<!ENTITY zotero.integration.references.label "Referenser i källförteckningen">
 
 <!ENTITY zotero.sync.button "Synkronisera med Zoteros server">
 <!ENTITY zotero.sync.error "Synkroniseringsfel">
@@ -208,6 +234,10 @@
 <!ENTITY zotero.sync.longTagFixer.characters "tecknen">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Omarkerade etiketter kommer inte att sparas.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etiketten kommer att raderas från alla källor.">
+
+<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.deleted "Deleted">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy hittad">
 <!ENTITY zotero.proxy.recognized.warning "Lägg bara till proxies från ditt bibliotek, din skola, eller från ett känt företag">

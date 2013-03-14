@@ -27,6 +27,9 @@
 Zotero.Sync.Storage.ZFS = (function () {
 	var _rootURI;
 	var _userURI;
+	var _headers = {
+		"Zotero-API-Version" : ZOTERO_CONFIG.API_VERSION
+	};
 	var _cachedCredentials = false;
 	
 	/**
@@ -38,7 +41,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 	function getStorageFileInfo(item) {
 		var funcName = "Zotero.Sync.Storage.ZFS.getStorageFileInfo()";
 		
-		return Zotero.HTTP.promise("GET", getItemInfoURI(item), { successCodes: [200, 404] })
+		return Zotero.HTTP.promise("GET", getItemInfoURI(item), { successCodes: [200, 404], headers: _headers })
 			.then(function (req) {
 				if (req.status == 404) {
 					return false;
@@ -58,10 +61,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 					catch (e) {
 						Zotero.debug("Response headers unavailable");
 					}
-					// TODO: localize?
-					var msg = "A file sync error occurred. Please restart " + Zotero.appName + " and/or your computer and try syncing again.\n\n"
-						+ "If the error persists, there may be a problem with either your computer or your network: security software, proxy server, VPN, etc. "
-						+ "Try disabling any security/firewall software you're using or, if this is a laptop, try from a different network.";
+					var msg = Zotero.getString('sync.storage.error.zfs.restart', Zotero.appName);
 					throw msg;
 				}
 				info.filename = req.getResponseHeader('X-Zotero-Filename');
@@ -235,7 +235,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 			body += "&zip=1";
 		}
 		
-		return Zotero.HTTP.promise("POST", uri, { body: body, debug: true })
+		return Zotero.HTTP.promise("POST", uri, { body: body, headers: _headers, debug: true })
 			.then(function (req) {
 				if (!req.responseXML) {
 					throw new Error("Invalid response retrieving file upload parameters");
@@ -268,10 +268,8 @@ Zotero.Sync.Storage.ZFS = (function () {
 						var retry = e.xmlhttp.getResponseHeader('Retry-After');
 						if (retry) {
 							var minutes = Math.round(retry / 60);
-							// TODO: localize
 							var e = new Zotero.Error(
-								"You have too many queued uploads. "
-									+ "Please try again in " + minutes + " minutes.",
+								Zotero.getString('sync.storage.error.zfs.tooManyQueuedUploads', minutes),
 								"ZFS_UPLOAD_QUEUE_LIMIT"
 							);
 							throw e;
@@ -301,11 +299,10 @@ Zotero.Sync.Storage.ZFS = (function () {
 							}
 						}
 						
-						// TODO: localize
 						text += "\n\n" + filename + " (" + Math.round(file.fileSize / 1024) + "KB)";
 						
 						var e = new Zotero.Error(
-							"The file '" + filename + "' would exceed your Zotero File Storage quota",
+							Zotero.getString('sync.storage.error.zfs.fileWouldExceedQuota', filename),
 							"ZFS_OVER_QUOTA",
 							{
 								dialogText: text,
@@ -514,7 +511,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 		var body = "update=" + uploadKey + "&mtime=" + item.attachmentModificationTime;
 		
 		// Register upload on server
-		return Zotero.HTTP.promise("POST", uri, { body: body, successCodes: [204] })
+		return Zotero.HTTP.promise("POST", uri, { body: body, headers: _headers, successCodes: [204] })
 			.then(function (req) {
 				updateItemFileInfo(item);
 				return {
@@ -892,7 +889,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 		})
 		.then(function () {
 			return Zotero.HTTP.promise("GET", lastSyncURI,
-				{ debug: true, successCodes: [200, 404] });
+				{ headers: _headers, successCodes: [200, 404], debug: true });
 		})
 		.then(function (req) {
 			// Not yet synced
@@ -935,8 +932,15 @@ Zotero.Sync.Storage.ZFS = (function () {
 		
 		var lastSyncURI = this._getLastSyncURI(libraryID);
 		
-		return Zotero.HTTP.promise("POST", lastSyncURI, { debug: true })
+		return Zotero.HTTP.promise("POST", lastSyncURI, { headers: _headers, successCodes: [200, 404], debug: true })
 			.then(function (req) {
+				// Not yet synced
+				//
+				// TODO: Don't call this at all if no files uploaded
+				if (req.status == 404) {
+					return;
+				}
+				
 				var ts = req.responseText;
 				
 				var sql = "REPLACE INTO version VALUES (?, ?)";
@@ -986,7 +990,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 		// TODO: move to root uri
 		uri.spec += "?auth=1";
 		
-		return Zotero.HTTP.promise("GET", uri).
+		return Zotero.HTTP.promise("GET", uri, { headers: _headers }).
 			then(function (req) {
 				Zotero.debug("Credentials are cached");
 				_cachedCredentials = true;

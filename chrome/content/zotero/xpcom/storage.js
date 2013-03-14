@@ -53,9 +53,8 @@ Zotero.Sync.Storage = new function () {
 	this.ERROR_FILE_MISSING_AFTER_UPLOAD = -16;
 	
 	// TEMP
-	// TODO: localize
-	this.__defineGetter__("defaultError", function () "A file sync error occurred. Please try syncing again.\n\nIf you receive this message repeatedly, restart " + Zotero.appName + " and/or your computer and try again. If you continue to receive the message, submit an error report and post the Report ID to a new thread in the Zotero Forums.");
-	this.__defineGetter__("defaultErrorRestart", function () "A file sync error occurred. Please restart " + Zotero.appName + " and/or your computer and try syncing again.\n\nIf you receive this message repeatedly, submit an error report and post the Report ID to a new thread in the Zotero Forums.");
+	this.__defineGetter__("defaultError", function () Zotero.getString('sync.storage.error.default', Zotero.appName));
+	this.__defineGetter__("defaultErrorRestart", function () Zotero.getString('sync.storage.error.defaultRestart', Zotero.appName));
 	
 	//
 	// Public properties
@@ -106,22 +105,9 @@ Zotero.Sync.Storage = new function () {
 			
 			if (Zotero.Sync.Storage.ZFS.includeUserFiles) {
 				libraryModes[0] = Zotero.Sync.Storage.ZFS;
-				return;
 			}
-			
-			if (Zotero.Sync.Storage.WebDAV.includeUserFiles) {
-				if (!Zotero.Sync.Storage.WebDAV.verified) {
-					Zotero.debug("WebDAV file sync is not active");
-					
-					// Try to verify server now if it hasn't been
-					return Zotero.Sync.Storage.checkServerPromise(Zotero.Sync.Storage.WebDAV)
-					.then(function () {
-						libraryModes[0] = Zotero.Sync.Storage.WebDAV;
-					});
-				}
-				
+			else if (Zotero.Sync.Storage.WebDAV.includeUserFiles) {
 				libraryModes[0] = Zotero.Sync.Storage.WebDAV;
-				return;
 			}
 		})
 		.then(function () {
@@ -143,15 +129,47 @@ Zotero.Sync.Storage = new function () {
 			for each(var mode in libraryModes) {
 				if (modes.indexOf(mode) == -1) {
 					modes.push(mode);
-					promises.push(mode.cacheCredentials());
+					
+					// Try to verify WebDAV server first if it hasn't been
+					if (mode == Zotero.Sync.Storage.WebDAV
+							&& !Zotero.Sync.Storage.WebDAV.verified) {
+						Zotero.debug("WebDAV file sync is not active");
+						var promise = Zotero.Sync.Storage.checkServerPromise(Zotero.Sync.Storage.WebDAV)
+							.then(function () {
+								mode.cacheCredentials();
+							});
+					}
+					else {
+						var promise = mode.cacheCredentials();
+					}
+					promises.push(Q.allResolved([mode, promise]));
 				}
 			}
 			return Q.allResolved(promises)
 			// Get library last-sync times
-			.then(function () {
+			.then(function (cacheCredentialsPromises) {
 				var promises = [];
+				
+				// Mark WebDAV verification failure as user library error.
+				// We ignore credentials-caching errors for ZFS and let the
+				// later requests fail.
+				cacheCredentialsPromises.forEach(function (p) {
+					p = p.valueOf();
+					let mode = p[0].valueOf();
+					if (mode == Zotero.Sync.Storage.WebDAV) {
+						if (p[1].isRejected()) {
+							promises.push(Q.allResolved(
+								[0, p[1]]
+							));
+							// Skip further syncing of user library
+							delete libraryModes[0];
+						}
+					}
+				});
+				
 				for (var libraryID in libraryModes) {
 					libraryID = parseInt(libraryID);
+					
 					// Get the last sync time for each library
 					if (self.downloadOnSync(libraryID)) {
 						promises.push(Q.allResolved(
@@ -220,14 +238,23 @@ Zotero.Sync.Storage = new function () {
 				
 				// If we don't have any forced downloads, we can skip
 				// downloads if the last sync time hasn't changed
-				if (downloadAll && !downloadForced && lastSyncTime) {
-					var version = self.getStoredLastSyncTime(
-						libraryModes[libraryID], libraryID
-					);
-					if (version == lastSyncTime) {
-						Zotero.debug("Last " + libraryModes[libraryID].name
-							+ " sync time hasn't changed for library "
-							+ libraryID + " -- skipping file downloads");
+				// or doesn't exist on the server (meaning there are no files)
+				if (downloadAll && !downloadForced) {
+					if (lastSyncTime) {
+						var version = self.getStoredLastSyncTime(
+							libraryModes[libraryID], libraryID
+						);
+						if (version == lastSyncTime) {
+							Zotero.debug("Last " + libraryModes[libraryID].name
+								+ " sync time hasn't changed for library "
+								+ libraryID + " -- skipping file downloads");
+							downloadAll = false;
+						}
+					}
+					else {
+						Zotero.debug("No last " + libraryModes[libraryID].name
+							+ " sync time for library " + libraryID
+							+ " -- skipping file downloads");
 						downloadAll = false;
 					}
 				}
@@ -695,7 +722,7 @@ Zotero.Sync.Storage = new function () {
 		var items = Zotero.Items.get(itemIDs);
 		for each(var item in items) {
 			var lk = libraryID + "/" + item.key;
-			Zotero.debug("Checking attachment file for item " + lk);
+			//Zotero.debug("Checking attachment file for item " + lk);
 			var file = item.getFile(attachmentData[item.id]);
 			if (!file) {
 				Zotero.debug("Marking attachment " + lk + " as missing");
@@ -713,8 +740,8 @@ Zotero.Sync.Storage = new function () {
 			
 			var fmtime = item.attachmentModificationTime;
 			
-			Zotero.debug("Stored mtime is " + attachmentData[item.id].mtime);
-			Zotero.debug("File mtime is " + fmtime);
+			//Zotero.debug("Stored mtime is " + attachmentData[item.id].mtime);
+			//Zotero.debug("File mtime is " + fmtime);
 			
 			// Download-marking mode
 			if (itemModTimes) {
@@ -1189,8 +1216,7 @@ Zotero.Sync.Storage = new function () {
 			// but log a warning and skip the file
 			else if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
 				Zotero.debug(e);
-				var msg = "Error creating file '" + destFile.leafName + "'\n\n"
-					+ "See http://www.zotero.org/support/kb/encrypted_filenames for more information.";
+				var msg = Zotero.getString('sync.storage.error.encryptedFilenames', destFile.leafName);
 				Components.utils.reportError(msg);
 				return;
 			}
@@ -1394,9 +1420,7 @@ Zotero.Sync.Storage = new function () {
 				// can result in a lower limit -- not much we can do about this,
 				// but log a warning and skip the file
 				else if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
-					// TODO: localize
-					var msg = "Error creating file '" + destFile.leafName + "'. "
-						+ "See http://www.zotero.org/support/kb/encrypted_filenames for more information.";
+					var msg = Zotero.getString('sync.storage.error.encryptedFilenames', destFile.leafName);
 					Components.utils.reportError(msg);
 					continue;
 				}
@@ -1460,9 +1484,7 @@ Zotero.Sync.Storage = new function () {
 						// See above
 						if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
 							Zotero.debug(e);
-							// TODO: localize
-							var msg = "Error creating file '" + destFile.leafName + "'. "
-								+ "See http://www.zotero.org/support/kb/encrypted_filenames for more information.";
+							var msg = Zotero.getString('sync.storage.error.encryptedFilenames', destFile.leafName);
 							Components.utils.reportError(msg);
 							continue;
 						}

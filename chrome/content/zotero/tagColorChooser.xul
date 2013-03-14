@@ -37,7 +37,7 @@
 	ondialogcancel="Zotero_Tag_Color_Chooser.onDialogCancel()"
 	ondialogextra1="Zotero_Tag_Color_Chooser.onDialogRemoveColor()"
 	onload="Zotero_Tag_Color_Chooser.init()"
-	width="300"
+	width="350"
 	height="140">
 	
 	<script src="include.js"/>

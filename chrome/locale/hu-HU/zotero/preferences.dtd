@@ -3,6 +3,7 @@
 <!ENTITY zotero.preferences.default "Alapértelmezett">
 <!ENTITY zotero.preferences.items "elemek">
 <!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.settings "Settings">
 
 <!ENTITY zotero.preferences.prefpane.general "Általános">
 
@@ -59,9 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "A könyvtáramban található fájlok szinkronizálása">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "A csoport könyvtárához tartozó fájlok szinkronizálása a Zotero tárhely használatával">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "A Zotero tárhely használata esetén elfogadom a">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "felhasználási feltételeket">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Teljes szinkornizáció a Zotero szerverrel">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "A helyi adatok összefésülése a szerveren található adatokkal, a szinkronizációs előzmények figyelmen kívül hagyása.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Visszaállítás a Zotero szerverről">
@@ -70,6 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "A szerveren található adatok törlése és frissítése a helyi adatokkal.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "A szinkronizációs előzmények törlése">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Valamennyi helyi csatolmány ellenőrzése a tárhely szerveren">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Visszaállítás">
 
 
@@ -114,6 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "További stílusok telepítése...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Billentyűparancsok">
@@ -154,6 +162,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Bármilyen szöveg">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Haladó">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 
 <!ENTITY zotero.preferences.prefpane.locate "Locate">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
@@ -172,6 +181,12 @@
 <!ENTITY zotero.preferences.dataDir.custom "Egyéni:">
 <!ENTITY zotero.preferences.dataDir.choose "Tallózás...">
 <!ENTITY zotero.preferences.dataDir.reveal "Az adatkönyvtár mutatása">
+
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 
 <!ENTITY zotero.preferences.dbMaintenance "Adatbázis karbantartás">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Az adatbázis integritásának ellenőrzése">

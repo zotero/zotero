@@ -93,17 +93,24 @@ Zotero.Translate.Sandbox = {
 			delete item.complete;
 			for(var i in item) {
 				var val = item[i];
-				var type = typeof val;
 				if(!val && val !== 0) {
 					// remove null, undefined, and false properties, and convert objects to strings
 					delete item[i];
-				} else if(type === "string") {
-					// trim strings
-					item[i] = val.trim();
-				} else if((type === "object" || type === "xml" || type === "function") && allowedObjects.indexOf(i) === -1) {
-					// convert things that shouldn't be objecst to objects
+					continue;
+				}
+
+				var isObject = typeof val === "object" || typeof val === "xml" || typeof val === "function",
+					shouldBeObject = allowedObjects.indexOf(i) !== -1;
+				if(isObject && !shouldBeObject) {
+					// Convert things that shouldn't be objects to objects
 					translate._debug("Translate: WARNING: typeof "+i+" is "+type+"; converting to string");
 					item[i] = val.toString();
+				} else if(shouldBeObject && !isObject) {
+					translate._debug("Translate: WARNING: typeof "+i+" is "+type+"; converting to array");
+					item[i] = [val];
+				} else if(typeof val === "string") {
+					// trim strings
+					item[i] = val.trim();
 				}
 			}
 			

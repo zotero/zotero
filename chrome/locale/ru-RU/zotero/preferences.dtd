@@ -3,16 +3,17 @@
 <!ENTITY zotero.preferences.default "По умолчанию:">
 <!ENTITY zotero.preferences.items "документа(-ов)">
 <!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.settings "Settings">
 
 <!ENTITY zotero.preferences.prefpane.general "Общие">
 
 <!ENTITY zotero.preferences.userInterface "Интерфейс">
 <!ENTITY zotero.preferences.showIn "Открывать Zotero в:">
-<!ENTITY zotero.preferences.showIn.browserPane "Текущей панеле">
+<!ENTITY zotero.preferences.showIn.browserPane "Текущей панели">
 <!ENTITY zotero.preferences.showIn.separateTab "Отдельной вкладке">
-<!ENTITY zotero.preferences.showIn.appTab "Вкладка приложения">
+<!ENTITY zotero.preferences.showIn.appTab "Вкладке приложения">
 <!ENTITY zotero.preferences.statusBarIcon "Вид в строке состояния:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Ничего">
+<!ENTITY zotero.preferences.statusBarIcon.none "Нет">
 <!ENTITY zotero.preferences.fontSize "Размер шрифта:">
 <!ENTITY zotero.preferences.fontSize.small "Маленький">
 <!ENTITY zotero.preferences.fontSize.medium "Средний">
@@ -38,7 +39,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "дочерние заметки">
 <!ENTITY zotero.preferences.groups.childFiles "дочерние снимки и импортированные файлы">
 <!ENTITY zotero.preferences.groups.childLinks "дочерние ссылки">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "теги">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -59,9 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Синхронизировать файлы приложений в Моей Библиотеке, используя:">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Синхронизировать файлы приложений в групповых библиотеках, используя хранилище Zotero">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Используя хранилище Zotero, вы соглашаетесь быть связанными его">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "условиями использования">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Полная синхронизация с сервером Zotero">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Объединить локальные данные Zotero c данными с сервера, игнорируя историю синхронизации">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Восстановить с сервера Zotero">
@@ -70,6 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Удалить все данные на сервере и перезаписать их локальными данными Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Сбросить историю синхронизации файлов">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Осуществить принудительную проверку наличия в хранилище сервера всех локальных файлов приложений">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Сбросить…">
 
 
@@ -114,13 +121,14 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Название">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Обновлён">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Загрузить дополнительные стили…">
 
 <!ENTITY zotero.preferences.prefpane.keys "Горячие клавиши">
 
 <!ENTITY zotero.preferences.keys.openZotero "Открыть/закрыть панель Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Переключение полноэкранного режима">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Фокус на панели библиотек">
 <!ENTITY zotero.preferences.keys.quicksearch "Быстрый поиск">
 <!ENTITY zotero.preferences.keys.newItem "Создать новый документ">
 <!ENTITY zotero.preferences.keys.newNote "Создать новую заметку">
@@ -154,6 +162,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - любая строка">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Расширенные">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 
 <!ENTITY zotero.preferences.prefpane.locate "Обнаружение">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Диспетчер систем поиска статей">
@@ -172,6 +181,12 @@
 <!ENTITY zotero.preferences.dataDir.custom "Пользовательская:">
 <!ENTITY zotero.preferences.dataDir.choose "Выбрать…">
 <!ENTITY zotero.preferences.dataDir.reveal "Показать папку с данными">
+
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 
 <!ENTITY zotero.preferences.dbMaintenance "Поддержка БД">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Проверить целостность БД">

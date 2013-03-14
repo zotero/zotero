@@ -19,7 +19,7 @@
 <!ENTITY pageSetupCmd.accesskey "U">
 <!ENTITY printCmd.label "Print…">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "إغلاق">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "ق">
@@ -90,7 +90,7 @@
 <!ENTITY aboutProduct.label "حول اسم العلامة التجارية القصير؛">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "مساعدة ووثائق">
-<!ENTITY productHelp.accesskey "H">
+<!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "معلومات المساعدة والتنويه">
 <!ENTITY helpTroubleshootingInfo.accesskey "م">
 <!ENTITY helpFeedbackPage.label "ارسال ملاحظات">

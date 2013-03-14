@@ -161,7 +161,7 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 		this._showRow(new Zotero.ItemGroup('separator', false));
 		var header = {
 			id: "group-libraries-header",
-			label: "Group Libraries", // TODO: localize
+			label: Zotero.getString('pane.collections.groupLibraries'),
 			expand: function (beforeRow, groups) {
 				if (!groups) {
 					var groups = Zotero.Groups.getAll();
@@ -432,7 +432,7 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 					var errors = Zotero.Sync.Runner.getErrors(libraryID);
 					if (errors) {
 						var e = Zotero.Sync.Runner.getPrimaryError(errors);
-						switch (e.status) {
+						switch (e.errorMode) {
 						case 'warning':
 							var image = 'error';
 							break;

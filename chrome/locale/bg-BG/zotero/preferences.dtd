@@ -3,6 +3,7 @@
 <!ENTITY zotero.preferences.default "По подразбиране:">
 <!ENTITY zotero.preferences.items "записи">
 <!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.settings "Settings">
 
 <!ENTITY zotero.preferences.prefpane.general "Общи">
 
@@ -59,9 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Адрес:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Прекачените файлове в Моята Библиотека се синхронизират с">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Синхронизира прекачените файлове в груповите библиотеки с хранилището на Зотеро.">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Използвайки хранилището на Зотеро, Вие се съгласявате да бъдете обвързани с неговите">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "правила и условия">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Пълно синхронизиране със сървъра на Зотеро">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Обединява локалните дани на Зотеро с даните от сървъра, като игнорира историята на предходните синхронизации.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Възстановява Зотеро сървъра">
@@ -70,6 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Изтрива всички дани от сървъра и ги замества с локалната информация.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Изтрива историята на предходните файлови синхронизации">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Принудителна проверка на хранилището за копията на всички локални файлове.">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Възстановява...">
 
 
@@ -114,6 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Инсталира на допълнителни стилове...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Клавишни Комбинации">
@@ -154,6 +162,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Какъвто и да е низ">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Допълнителни">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 
 <!ENTITY zotero.preferences.prefpane.locate "Locate">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
@@ -172,6 +181,12 @@
 <!ENTITY zotero.preferences.dataDir.custom "Потребителски">
 <!ENTITY zotero.preferences.dataDir.choose "Избор...">
 <!ENTITY zotero.preferences.dataDir.reveal "Показва папката с дани">
+
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 
 <!ENTITY zotero.preferences.dbMaintenance "Подръжка на базата дани">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Проверка на цялостта на базата дани">

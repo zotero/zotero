@@ -603,7 +603,7 @@ Zotero.Tags = new function() {
 				}
 				
 				let id = libraryID + "/" + setting;
-				if (event == 'modify' && extraData[id].changed) {
+				if ((event == 'modify' || event == 'delete') && extraData[id].changed) {
 					var previousTagColors = extraData[id].changed.value;
 				}
 				else {
@@ -744,9 +744,8 @@ Zotero.Tags = new function() {
 				.getService(Components.interfaces["nsIChromeRegistry"])
 				.convertChromeURL(uri);
 			
-			let file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
 			var img = new win.Image();
-			img.src = Zotero.File.generateDataURI(file, "image/png");
+			img.src = uri.spec;
 			
 			// Mark that we've started loading
 			var deferred = Q.defer();

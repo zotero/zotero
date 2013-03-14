@@ -12,12 +12,12 @@
 
 <!ENTITY fileMenu.label "Ficheiro">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "Save…">
-<!ENTITY saveCmd.key "S">
+<!ENTITY saveCmd.label "Gardar...">
+<!ENTITY saveCmd.key "G">
 <!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "Configurar a páxina...">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "Imprimir...">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "U">
 <!ENTITY closeCmd.label "Pechar">
@@ -54,7 +54,7 @@
 <!ENTITY selectAllCmd.label "Escoller todo">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Opcións_">
+<!ENTITY preferencesCmd.label "Opcións...">
 <!ENTITY preferencesCmd.accesskey "O">
 <!ENTITY preferencesCmdUnix.label "Preferencias">
 <!ENTITY preferencesCmdUnix.accesskey "n">
@@ -97,5 +97,5 @@
 <!ENTITY helpFeedbackPage.accesskey "S">
 <!ENTITY helpReportErrors.label "Informar de erros a Zotero">
 <!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpCheckForUpdates.label "Comprobar se hai actualizacións_">
+<!ENTITY helpCheckForUpdates.label "Comprobar se hai actualizacións...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

@@ -3,6 +3,7 @@
 <!ENTITY zotero.preferences.default "Standardvärde:">
 <!ENTITY zotero.preferences.items "Källor">
 <!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.settings "Settings">
 
 <!ENTITY zotero.preferences.prefpane.general "Allmänt">
 
@@ -59,9 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synkronisera bifogade filer i mitt bibliotek med:">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Synkronisera bifogade filer i gruppens bibliotek med Zotero Storage">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "Om filsynkronisering">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Genom att använda Zotero Storage går du med på deras">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "avtalsvillkor">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Komplett synkronisering med Zotero Server">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Sammanfoga lokala Zoterodata med data från synkroniseringsservern, utan att ta hänsyn till historik.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Återställ från Zotero Server">
@@ -70,6 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Byt ut allt innehåll på Zotero Server mot lokala Zoterodata.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Återställ filsynkroniseringshistorik">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tvinga Zotero Server att säkerhetskontrollera alla lokala bifogade filer.">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Återställ...">
 
 
@@ -114,6 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Uppdaterad">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Lägg till ytterligare stilar...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Snabbkommandon">
@@ -154,13 +162,14 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Vilken sträng som helst">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avancerat">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 
 <!ENTITY zotero.preferences.prefpane.locate "Hitta">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Hantera sökjänst för artiklar">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Hantera söktjänst för artiklar">
 <!ENTITY zotero.preferences.locate.description "Beskrivning">
 <!ENTITY zotero.preferences.locate.name "Namn">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "En söktjänst förbättrar funktionerna i Hitta-menyn ovanför Infofliken. Genom att aktivera söktjänsterna nedan läggs de till Hitta-menyn och kan användas för att hitta källor på ditt bibliotek eller på nätet.">
-<!ENTITY zotero.preferences.locate.addDescription "För att lägga till en söktjänst som inte finns på listan, gå till söktjänstens hemsida  och lägg till den i Firefox sökruta. När du öppnar den här sidan igen kommer den nya söktjänsten att finnas med på listan.">
+<!ENTITY zotero.preferences.locate.addDescription "För att lägga till en söktjänst som inte finns på listan, gå till söktjänstens hemsida i din webbläsare och välj &#34;Lägg till&#34; från Zoteros Hitta-meny.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Återställ till standard">
 
 <!ENTITY zotero.preferences.charset "Teckenkod">
@@ -168,10 +177,16 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Visa val för teckenkod vid export">
 
 <!ENTITY zotero.preferences.dataDir "Lagringsplats">
-<!ENTITY zotero.preferences.dataDir.useProfile "Använd profilkatalogen för Firefox">
+<!ENTITY zotero.preferences.dataDir.useProfile "Använd profilkatalog">
 <!ENTITY zotero.preferences.dataDir.custom "Egen:">
 <!ENTITY zotero.preferences.dataDir.choose "Välj...">
 <!ENTITY zotero.preferences.dataDir.reveal "Visa datakatalog">
+
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 
 <!ENTITY zotero.preferences.dbMaintenance "Databasunderhåll">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Undersök om databasen är oskadd">

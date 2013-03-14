@@ -5,6 +5,7 @@
 <!ENTITY zotero.general.edit "Endre">
 <!ENTITY zotero.general.delete "Slett">
 
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Denne feilloggen kan innehalde meldingar som ikkje har noko med Zotero å gjere.">
 <!ENTITY zotero.errorReport.submissionInProgress "Vennligst vent medan feilrapporten vert levert.">
 <!ENTITY zotero.errorReport.submitted "Feilrapporten er levert.">
@@ -12,6 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums "Ver god og skriv ei melding i Zotero-foruma (forums.zotero.org) med denne rapport-IDen, ei skildring av problemet og naudsynte steg for å reprodusera problemet.">
 <!ENTITY zotero.errorReport.notReviewed "Feilrapportar vert vanlegvis ikkje kommentert, dersom problemet ikkje vert teke opp i foruma.">
 
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.newVersionInstalled "Du har installert ein ny versjon av Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Zotero-databasen din må oppgraderast for å fungera med den nye versjonen.">
 <!ENTITY zotero.upgrade.autoBackup "Det vert laga ein tryggleikskopi av den eksisterande databasen før han vert oppgradert.">
@@ -56,6 +58,22 @@
 <!ENTITY zotero.items.rights_column "Rettar">
 <!ENTITY zotero.items.dateAdded_column "Lagt til">
 <!ENTITY zotero.items.dateModified_column "Sist endra">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.issue_column "Issue">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 
 <!ENTITY zotero.items.menu.showInLibrary "Vis i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Legg til notat">
@@ -70,7 +88,7 @@
 <!ENTITY zotero.items.menu.duplicateItem "Dupliser det valde elementet">
 <!ENTITY zotero.items.menu.mergeItems "Slå saman element…">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Velj kva versjon som skal vere utgangspunkt:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Velj felt som skal behaldast frå andre versjonar av elementet:">
 
 <!ENTITY zotero.toolbar.newItem.label "Nytt element">
@@ -103,6 +121,7 @@
 <!ENTITY zotero.item.textTransform "Gøyr om tekst">
 <!ENTITY zotero.item.textTransform.titlecase "Tittel-format">
 <!ENTITY zotero.item.textTransform.sentencecase "Store bokstavar etter setningsreglar">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 
 <!ENTITY zotero.toolbar.newNote "Nytt notat">
 <!ENTITY zotero.toolbar.note.standalone "Nytt notat">
@@ -120,10 +139,18 @@
 <!ENTITY zotero.tagSelector.selectVisible "Vel synleg">
 <!ENTITY zotero.tagSelector.clearVisible "Slepp synleg">
 <!ENTITY zotero.tagSelector.clearAll "Slepp alle">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "Gje tagg nytt namn …">
 <!ENTITY zotero.tagSelector.deleteTag "Slett tagg …">
 
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+
 <!ENTITY zotero.lookup.description "Skriv inn ISBN, DOI eller PMID i feltet for å slå opp.">
+<!ENTITY zotero.lookup.button.search "Search">
 
 <!ENTITY zotero.selectitems.title "Vel element">
 <!ENTITY zotero.selectitems.intro.label "Vel kva for einingar du vil leggja til biblioteket ditt">
@@ -207,6 +234,10 @@
 <!ENTITY zotero.sync.longTagFixer.characters "teikn">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Merke som ikkje er kryssa av vert ikkje lagra.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Dette merket vert sletta frå alle elementa.">
+
+<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.deleted "Deleted">
 
 <!ENTITY zotero.proxy.recognized.title "Mellomtenar attkjend">
 <!ENTITY zotero.proxy.recognized.warning "Legg berre til mellomtenarar lenkja til frå biblioteket, skulen eller arbeidsstaden din">

@@ -3,6 +3,7 @@
 <!ENTITY zotero.preferences.default "Varsayılan">
 <!ENTITY zotero.preferences.items "Eserler">
 <!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.settings "Settings">
 
 <!ENTITY zotero.preferences.prefpane.general "Genel">
 
@@ -59,9 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Kitaplığımda kullanılan ekli dosyaları eşle">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Zotero deposunu kullanan kütüphane gruplarının ekli dosyalarını eşle">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero depolamayı kullanarak bunları kabul edersiniz:">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "Şartlar ve Koşullar">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Zetoro Sunucu ile Tam Eşleme">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Eşleme geçmişini gözetmeksiniz, yerel Zotero verisini sunucudaki veri ile birleştir.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero Sunucusundan İçeri Aktar">
@@ -70,6 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sunucudaki tüm verileri sil ve yerel Zotero verisini üzerine yaz.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Dosya Eşleme Geçmişini Sıfırla">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tüm yerel eklenti dosyalar için depolama sunucusunun kontrolünü zorla.">
+<!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Sıfırla...">
 
 
@@ -114,6 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Başlık">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Güncelleştirilme">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Ek stiller indir...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Kısayol Tuşları">
@@ -154,6 +162,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Herhangi bir dizi">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Gelişmiş">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 
 <!ENTITY zotero.preferences.prefpane.locate "Yerini Belirle">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Makale Bakma Motoru Yöneticisi">
@@ -172,6 +181,12 @@
 <!ENTITY zotero.preferences.dataDir.custom "Özel:">
 <!ENTITY zotero.preferences.dataDir.choose "Seç...">
 <!ENTITY zotero.preferences.dataDir.reveal "Veri Dizinini Göster">
+
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 
 <!ENTITY zotero.preferences.dbMaintenance "Veritabanı Bakımı">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Veritabanı Bütünlüğünü Kontrol et">

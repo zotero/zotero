@@ -1,12 +1,12 @@
-<!ENTITY preferencesCmdMac.label "Preferències">
+<!ENTITY preferencesCmdMac.label "Preferències...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Serveis">
 <!ENTITY hideThisAppCmdMac.label "Oculta &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
 <!ENTITY hideOtherAppsCmdMac.label "Oculta els altres">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "Mostra tot">
-<!ENTITY quitApplicationCmdMac.label "Surt de Zotero">
+<!ENTITY showAllAppsCmdMac.label "Mostra-ho tot">
+<!ENTITY quitApplicationCmdMac.label "Surt del Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 
@@ -51,10 +51,10 @@
 <!ENTITY deleteCmd.label "Elimina">
 <!ENTITY deleteCmd.key "D">
 <!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Selecciona tot">
+<!ENTITY selectAllCmd.label "Selecciona-ho tot">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Opcions">
+<!ENTITY preferencesCmd.label "Opcions...">
 <!ENTITY preferencesCmd.accesskey "O">
 <!ENTITY preferencesCmdUnix.label "Preferències...">
 <!ENTITY preferencesCmdUnix.accesskey "n">
@@ -95,7 +95,7 @@
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "Tramet comentaris">
 <!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Informa dels errors a Zotero">
+<!ENTITY helpReportErrors.label "Informa d'errors al Zotero">
 <!ENTITY helpReportErrors.accesskey "R">
 <!ENTITY helpCheckForUpdates.label "Comprova actualitzacions">
 <!ENTITY helpCheckForUpdates.accesskey "U">

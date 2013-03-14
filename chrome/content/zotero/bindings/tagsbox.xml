@@ -36,6 +36,9 @@
 		
 		<implementation>
 			<field name="clickHandler"/>
+			
+			<field name="_lastTabIndex">false</field>
+			<field name="_tabDirection"/>
 			<field name="_tagColors"/>
 			<field name="_notifierID"/>
 			
@@ -74,6 +77,10 @@
 			<property name="item" onget="return this._item;">
 				<setter>
 					<![CDATA[
+						// Don't reload if item hasn't changed
+						if (this._item == val) {
+							return;
+						}
 						this._item = val;
 						this.reload();
 					]]>
@@ -143,11 +150,14 @@
 			<method name="reload">
 				<body>
 					<![CDATA[
-						var self = this;
 						Zotero.debug('Reloading tags');
-						var addButton = self.id('addButton');
-						addButton.hidden = !self.editable;
 						
+						// Cancel field focusing while we're updating
+						this._reloading = true;
+						
+						this.id('addButton').hidden = !this.editable;
+						
+						var self = this;
 						return Zotero.Tags.getColors(self.item.libraryIDInt)
 						.then(function (colors) {
 							self._tagColors = colors;
@@ -161,11 +171,12 @@
 								for (var i=0; i<tags.length; i++) {
 									self.addDynamicRow(tags[i], i+1);
 								}
-								
-								//self.fixPopup();
 							}
 							
 							self.updateCount(0);
+							
+							self._reloading = false;
+							self._focusField();
 						})
 						.done();
 					]]>
@@ -187,49 +198,23 @@
 							name = '';
 						}
 						
-						if (!tabindex)
-						{
-							if (this.id('tagRows').lastChild)
-							{
-								tabindex = parseInt(this.id('tagRows').lastChild.
-									firstChild.nextSibling.getAttribute('ztabindex')) + 1;
-							}
-							else {
-								tabindex = 1;
-							}
+						if (!tabindex) {
+							tabindex = this.id('tagRows').childNodes.length + 1;
 						}
 						
 						var icon = document.createElement("image");
 						icon.className = "zotero-box-icon";
-						var iconFile = 'tag';
-						if (type == 0) {
-							icon.setAttribute('tooltiptext', Zotero.getString('pane.item.tags.icon.user'));
-						}
-						else if (type == 1) {
-							iconFile += '-automatic';
-							icon.setAttribute('tooltiptext', Zotero.getString('pane.item.tags.icon.automatic'));
-						}
-						icon.setAttribute('src', 'chrome://zotero/skin/' + iconFile + '.png');
 						
 						// DEBUG: Why won't just this.nextSibling.blur() work?
 						icon.setAttribute('onclick','if (this.nextSibling.inputField){ this.nextSibling.inputField.blur() }');
 						
 						var label = this.createValueElement(name, tabindex);
-						label.className = "zotero-box-label";
 						
 						if (this.editable) {
 							var remove = document.createElement("label");
 							remove.setAttribute('value','-');
 							remove.setAttribute('class','zotero-clicky zotero-clicky-minus');
-							if (tagID)
-							{
-								remove.setAttribute('ztabindex', -1);
-								remove.setAttribute('onclick',"document.getBindingParent(this).remove('"+ tagID +"');");
-							}
-							else
-							{
-								remove.setAttribute('disabled', true);
-							}
+							remove.setAttribute('tabindex', -1);
 						}
 						
 						var row = document.createElement("row");
@@ -239,16 +224,70 @@
 							row.appendChild(remove);
 						}
 						
-						if (tagID)
-						{
-							row.setAttribute('id', 'tag-' + tagID);
-							row.setAttribute('tagType', type);
-						}
+						this.updateRow(row, tagObj, tabindex);
 						
 						this.id('tagRows').appendChild(row);
+						
 						return row;
 					]]>
 				</body>
+			</method>
+			
+			
+			<method name="updateRow">
+				<parameter name="row"/>
+				<parameter name="tagObj"/>
+				<parameter name="tabindex"/>
+				<body><![CDATA[
+					if (tagObj) {
+						var tagID = tagObj.id;
+						var type = tagObj.type;
+					}
+					
+					var icon = row.firstChild;
+					var label = row.firstChild.nextSibling;
+					if (this.editable) {
+						var remove = row.lastChild;
+					}
+					
+					// Row
+					if (tagObj) {
+						row.setAttribute('id', 'tag-' + tagID);
+						row.setAttribute('tagType', type);
+					}
+					
+					// Icon
+					var iconFile = 'tag';
+					if (type == 0) {
+						icon.setAttribute('tooltiptext', Zotero.getString('pane.item.tags.icon.user'));
+					}
+					else if (type == 1) {
+						iconFile += '-automatic';
+						icon.setAttribute('tooltiptext', Zotero.getString('pane.item.tags.icon.automatic'));
+					}
+					icon.setAttribute('src', 'chrome://zotero/skin/' + iconFile + '.png');
+					
+					// "-" button
+					if (this.editable) {
+						if (tagID) {
+							remove.setAttribute('disabled', false);
+							var self = this;
+							remove.addEventListener('click', function () {
+								self._lastTabIndex = false;
+								document.getBindingParent(this).remove(tagID);
+								
+								// Return focus to items pane
+								var tree = document.getElementById('zotero-items-tree');
+								if (tree) {
+									tree.focus();
+								}
+							});
+						}
+						else {
+							remove.setAttribute('disabled', true);
+						}
+					}
+				]]></body>
 			</method>
 			
 			
@@ -260,6 +299,7 @@
 					var valueElement = document.createElement("label");
 					valueElement.setAttribute('fieldname', 'tag');
 					valueElement.setAttribute('flex', 1);
+					valueElement.className = 'zotero-box-label';
 					
 					if (this.clickable) {
 						valueElement.setAttribute('ztabindex', tabindex);
@@ -270,10 +310,8 @@
 							}
 							document.getBindingParent(this).clickHandler(this);
 						}, false);
-						valueElement.className = 'zotero-clicky';
+						valueElement.className += ' zotero-clicky';
 					}
-					
-					this._tabIndexMaxTagsFields = Math.max(this._tabIndexMaxTagsFields, tabindex);
 					
 					var firstSpace;
 					if (typeof valueText == 'string') {
@@ -308,6 +346,8 @@
 			
 			<method name="showEditor">
 				<parameter name="elem"/>
+				<parameter name="rows"/>
+				<parameter name="value"/>
 				<body>
 				<![CDATA[
 					// Blur any active fields
@@ -323,7 +363,9 @@
 					var tabindex = elem.getAttribute('ztabindex');
 					
 					var tagID = elem.parentNode.getAttribute('id').split('-')[1];
-					var value = tagID ? Zotero.Tags.getName(tagID) : '';
+					if (!value) {
+						var value = tagID ? Zotero.Tags.getName(tagID) : '';
+					}
 					var itemID = Zotero.getAncestorByTagName(elem, 'tagsbox').item.id;
 					
 					var t = document.createElement("textbox");
@@ -331,32 +373,36 @@
 					t.setAttribute('fieldname', fieldName);
 					t.setAttribute('ztabindex', tabindex);
 					t.setAttribute('flex', '1');
-                    t.setAttribute('newlines','pasteintact');
-					
+					t.setAttribute('newlines','pasteintact');
+					// Multi-line
+					if (rows > 1) {
+						t.setAttribute('multiline', true);
+						t.setAttribute('rows', rows);
+					}
 					// Add auto-complete
-					t.setAttribute('type', 'autocomplete');
-					t.setAttribute('autocompletesearch', 'zotero');
-					var suffix = itemID ? itemID : '';
-					t.setAttribute('autocompletesearchparam', fieldName + '/' + suffix);
+					else {
+						t.setAttribute('type', 'autocomplete');
+						t.setAttribute('autocompletesearch', 'zotero');
+						var suffix = itemID ? itemID : '';
+						t.setAttribute('autocompletesearchparam', fieldName + '/' + suffix);
+					}
 					
 					var box = elem.parentNode;
 					box.replaceChild(t, elem);
+					
+					t.setAttribute('onblur', "return document.getBindingParent(this).blurHandler(this)");
+					t.setAttribute('onkeypress', "return document.getBindingParent(this).handleKeyPress(event)");
+					t.setAttribute('onpaste', "return document.getBindingParent(this).handlePaste(event)");
+					
+					this._tabDirection = false;
+					this._lastTabIndex = tabindex;
 					
 					// Prevent error when clicking between a changed field
 					// and another -- there's probably a better way
 					if (!t.select) {
 						return;
 					}
-					
 					t.select();
-					
-					t.addEventListener('blur', function () {
-						document.getBindingParent(this).blurHandler(this);
-					}, false);
-					t.setAttribute('onkeypress', "return document.getBindingParent(this).handleKeyPress(event)");
-					
-					this._tabDirection = false;
-					this._lastTabIndex = tabindex;
 					
 					return t;
 				]]>
@@ -373,23 +419,53 @@
 					
 					switch (event.keyCode) {
 						case event.DOM_VK_RETURN:
+							var multiline = target.getAttribute('multiline');
+							var empty = target.value == "";
+							if (event.shiftKey) {
+								if (!multiline) {
+									var self = this;
+									setTimeout(function () {
+										var val = target.value;
+										if (val !== "") {
+											val += "\n";
+										}
+										self.makeMultiline(target, val, 6);
+									}, 0);
+									return false;
+								}
+								// Submit
+							}
+							else if (multiline) {
+								return true;
+							}
+							
 							var fieldname = 'tag';
 							
-							// Prevent blur on containing textbox
-							// DEBUG: what happens if this isn't present?
-							event.preventDefault();
-							
 							// If last tag row, create new one
-							var row = target.parentNode.parentNode;
-							if (row == row.parentNode.lastChild) {
+							var row = Zotero.getAncestorByTagName(target, 'row');
+							
+							// If non-empty last row, add new row
+							if (row == row.parentNode.lastChild && !empty) {
+								var focusField = true;
 								this._tabDirection = 1;
-								var lastTag = true;
+							}
+							// If empty non-last row, refocus current row
+							else if (row != row.parentNode.lastChild && empty) {
+								var focusField = true;
+							}
+							// If non-empty non-last row, return focus to items pane
+							else {
+								var focusField = false;
+								this._lastTabIndex = false;
 							}
 							
 							focused.blur();
 							
+							if (focusField) {
+								this._focusField();
+							}
 							// Return focus to items pane
-							if (!lastTag) {
+							else {
 								var tree = document.getElementById('zotero-items-tree');
 								if (tree) {
 									tree.focus();
@@ -400,10 +476,16 @@
 							
 						case event.DOM_VK_ESCAPE:
 							// Reset field to original value
-							target.value = target.getAttribute('value');
+							if (target.getAttribute('multiline')) {
+								target.value = "";
+							}
+							else {
+								target.value = target.getAttribute('value');
+							}
 							
 							var tagsbox = Zotero.getAncestorByTagName(focused, 'tagsbox');
 							
+							this._lastTabIndex = false;
 							focused.blur();
 							
 							if (tagsbox) {
@@ -419,14 +501,80 @@
 							return false;
 							
 						case event.DOM_VK_TAB:
+							// If already an empty last row, ignore forward tab
+							if (target.value == "" && !event.shiftKey) {
+								var row = Zotero.getAncestorByTagName(target, 'row');
+								if (row == row.parentNode.lastChild) {
+									return false;
+								}
+							}
+							
 							this._tabDirection = event.shiftKey ? -1 : 1;
 							focused.blur();
+							this._focusField();
 							return false;
 					}
 					
 					return true;
 				]]>
 				</body>
+			</method>
+			
+			<!--
+				Intercept paste, check for newlines, and convert textbox
+				to multiline if necessary
+			-->
+			<method name="handlePaste">
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+					var textbox = event.target;
+					
+					var clip = Components.classes["@mozilla.org/widget/clipboard;1"]
+						.getService(Components.interfaces.nsIClipboard);
+					var trans = Components.classes["@mozilla.org/widget/transferable;1"]
+						.createInstance(Components.interfaces.nsITransferable);
+					trans.addDataFlavor("text/unicode");
+					clip.getData(trans, clip.kGlobalClipboard);
+					var str = {};
+					try {
+						trans.getTransferData("text/unicode", str, {});
+						str = str.value.QueryInterface(Components.interfaces.nsISupportsString).data;
+					}
+					catch (e) {
+						Zotero.debug(e);
+						return true;
+					}
+					
+					var multiline = !!str.trim().match(/\n/);
+					if (multiline) {
+						var self = this;
+						setTimeout(function () {
+							self.makeMultiline(textbox, str.trim());
+						}, 0);
+						// Cancel paste
+						return false;
+					}
+					
+					return true;
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="makeMultiline">
+				<parameter name="textbox"/>
+				<parameter name="value"/>
+				<parameter name="rows"/>
+				<body><![CDATA[
+					// If rows not specified, use one more than lines in input
+					if (!rows) {
+						rows = value.match(/\n/g).length + 1;
+					}
+					textbox = this.showEditor(textbox, rows, value);
+					// Move cursor to end
+					textbox.selectionStart = value.length;
+				]]></body>
 			</method>
 			
 			
@@ -449,7 +597,7 @@
 					
 					var fieldName = 'tag';
 					var tabindex = textbox.getAttribute('ztabindex');
-
+					
 					var value = textbox.value;
 					
 					var tagsbox = Zotero.getAncestorByTagName(textbox, 'tagsbox');
@@ -468,69 +616,74 @@
 					var tagArray = value.split(/\r\n?|\n/);
 					
 					if (saveChanges) {
-						if (id && (tagArray.length < 2)) {
+						// Modifying existing tag
+						if (id && tagArray.length < 2) {
 							if (value) {
-								var origTagIndex = this.item.getTagIndex(id);
-								var changed = tagsbox.replace(id, value);
-								if (changed) {
-									var newTagIndex = this.item.getTagIndex(changed);
-									if (newTagIndex>origTagIndex) {
-										if (this._tabDirection == 1) {
-											this._lastTabIndex--;
-										}
-									}
-									else if (newTagIndex<origTagIndex) {
-										if (this._tabDirection == -1) {
-											this._lastTabIndex++;
-										}
-									}
-								} 
+								var newTagID = tagsbox.replace(id, value);
+								if (newTagID) {
+									id = newTagID;
+								}
+								// Changed tag to existing
 								else if (value != Zotero.Tags.getName(id)) {
 									if (this._tabDirection == 1) {
 										this._lastTabIndex -= 1;
 									}
+									this.reload();
+									return;
 								}
+								else {
+									var unchanged = true;
+								}
+							}
+							// Existing tag cleared
+							else {
+								tagsbox.remove(id);
+								return;
 							}
 						}
-						// New tag
+						// // Multiple tags
+						else if (tagArray.length > 1) {
+							var lastTag = row == row.parentNode.lastChild;
+							
+							Zotero.DB.beginTransaction();
+							
+							// If old tag isn't in array, remove it
+							if (id) {
+								var oldValue = Zotero.Tags.getName(id);
+								if (tagArray.indexOf(oldValue) == -1) {
+									this.item.removeTag(id);
+								}
+							}
+							
+							this.item.addTags(tagArray);
+							
+							Zotero.DB.commitTransaction();
+							
+							// TODO: get tab index right
+							
+							if (lastTag) {
+								this._lastTabIndex = this.item.getTags().length;
+							}
+							
+							this.reload();
+							return;
+						}
+						// Single tag at end
 						else {
-							//Check for newlines or carriage returns used as delimiters
-							//in a series of tags added at once.  Add each tag
-							//separately.
-							if (tagArray.length > 1) {
-								var extremeTag = false;
-								var nextTag = false;
+							id = tagsbox.add(value);
+							// New tag
+							if (id) {
+								// Stay put, since a tag was added above
 								if (this._tabDirection == -1) {
-									if (this._lastTabIndex == 1) {
-										extremeTag = true;
-									} else {
-										nextTag = row.previousSibling.getAttribute('id').split('-')[1];
-									}
-								} else if (this._tabDirection == 1) {
-									if (this._lastTabIndex >= this.item.getTags().length) {
-										extremeTag = true;
-									} else {
-										nextTag = row.nextSibling.getAttribute('id').split('-')[1];
-									}
-								}
-								
-								id = this.item.addTags(tagArray);
-								
-								if (extremeTag) {
-									if (this._tabDirection == 1) {
-										this._lastTabIndex = this.item.getTags().length;
-									} else if (this._tabDirection == -1) {
-										this._lastTabIndex = 2;
-									}
-								} else {
-									this._lastTabIndex = this.item.getTagIndex(nextTag)+1-this._tabDirection;
+									this._tabDirection = false;
 								}
 							}
+							// Already exists
 							else {
-								id = tagsbox.add(value);
-							}
-							if (!id && (this._tabDirection==1)) {
-								this._lastTabIndex--;
+								// Go back one, since we'll remove this below
+								if (this._tabDirection == 1) {
+									this._lastTabIndex--;
+								}
 							}
 						}
 					}
@@ -541,8 +694,55 @@
 							tabindex
 						);
 						
-						var box = textbox.parentNode;
-						box.replaceChild(elem, textbox);
+						var row = textbox.parentNode;
+						row.replaceChild(elem, textbox);
+						
+						this.updateRow(row, Zotero.Tags.get(id), tabindex);
+						
+						if (!unchanged) {
+							// Move row to appropriate place, alphabetically
+							var collation = Zotero.getLocaleCollation();
+							var rows = row.parentNode;
+							var labels = rows.getElementsByAttribute('fieldname', 'tag');
+							
+							rows.removeChild(row);
+							var currentTabIndex = elem.getAttribute('ztabindex');
+							
+							var before = null;
+							var inserted = false;
+							for (var i=0; i<labels.length; i++) {
+								let newTabIndex = i + 1;
+								if (inserted) {
+									labels[i].setAttribute('ztabindex', newTabIndex);
+									continue;
+								}
+								
+								if (collation.compareString(1, value, labels[i].textContent) > 0) {
+									labels[i].setAttribute('ztabindex', newTabIndex);
+									continue;
+								}
+								
+								elem.setAttribute('ztabindex', newTabIndex);
+								rows.insertBefore(row, labels[i].parentNode);
+								inserted = true;
+								
+								// Adjust last tab index
+								if (this._tabDirection == -1) {
+									if (this._lastTabIndex > newTabIndex) {
+										this._lastTabIndex++;
+									}
+								}
+								else if (this._tabDirection == 1) {
+									if (this._lastTabIndex < newTabIndex) {
+										this._lastTabIndex--;
+									}
+								}
+							}
+							if (!inserted) {
+								elem.setAttribute('ztabindex', i + 1);
+								rows.appendChild(row);
+							}
+						}
 					}
 					else {
 						// Just remove the row
@@ -552,12 +752,6 @@
 							var row = rows.removeChild(row);
 						}
 						catch (e) {}
-					}
-					
-					var focusBox = tagsbox;
-					
-					if (this._tabDirection) {
-						this._focusNextField(focusBox, this._lastTabIndex, this._tabDirection == -1);
 					}
 				]]>
 				</body>
@@ -569,6 +763,7 @@
 					<![CDATA[
 						var row = this.addDynamicRow();
 						row.firstChild.nextSibling.click();
+						return row;
 					]]>
 				</body>
 			</method>
@@ -648,29 +843,6 @@
 				</body>
 			</method>
 			
-			
-			<!-- No longer used -->
-			<method name="fixPopup">
-				<body>
-					<![CDATA[
-						// Hack to fix popup close problems after using
-						// autocomplete -- something to do with the popup used
-						// in the XBL autocomplete binding?
-						//
-						// We reset the popup manually if it's showing
-						if (this.parentNode.getAttribute('showing')=='true'){
-							//Zotero.debug('Fixing popup');
-							// The target element is 'tagsLabel', so change the
-							// path if the XUL DOM in the note editor XBL changes
-							this.parentNode.showPopup(
-								this.parentNode.parentNode.previousSibling,
-								-1, -1, 'popup');
-						}
-					]]>
-				</body>
-			</method>
-			
-			
 			<method name="closePopup">
 				<body>
 					<![CDATA[
@@ -683,66 +855,98 @@
 			
 			
 			<!-- 
-				Advance the field focus forward or backward
+				Open the textbox for a particular label
 				
 				Note: We're basically replicating the built-in tabindex functionality,
 				which doesn't work well with the weird label/textbox stuff we're doing.
 				(The textbox being tabbed away from is deleted before the blur()
 				completes, so it doesn't know where it's supposed to go next.)
 			-->
-			<method name="_focusNextField">
-				<parameter name="box"/>
-				<parameter name="tabindex"/>
-				<parameter name="back"/>
+			<method name="_focusField">
 				<body>
 				<![CDATA[
-					tabindex = parseInt(tabindex);
-					if (back) {
-						switch (tabindex) {
-							case 1:
-								return false;
-							
-							default:
-								var nextIndex = tabindex - 1;
+					if (this._reloading) {
+						return;
+					}
+					
+					if (this._lastTabIndex === false) {
+						return;
+					}
+					
+					var maxIndex = this.id('tagRows').childNodes.length + 1;
+					
+					var tabindex = parseInt(this._lastTabIndex);
+					var dir = this._tabDirection;
+					
+					if (dir == 1) {
+						var nextIndex = tabindex + 1;
+					}
+					else if (dir == -1) {
+						if (tabindex == 1) {
+							// Focus Add button
+							this.id('addButton').focus();
+							return false;
 						}
+						var nextIndex = tabindex - 1;
 					}
 					else {
-						switch (tabindex) {
-							case this._tabIndexMaxTagsFields:
-								// In tags box, keep going to create new row
-								var nextIndex = tabindex + 1;
-								break;
-							
-							default:
-								var nextIndex = tabindex + 1;
-						}
+						var nextIndex = tabindex;
 					}
+					
+					nextIndex = Math.min(nextIndex, maxIndex);
 					
 					Zotero.debug('Looking for tabindex ' + nextIndex, 4);
 					
-					var next = document.getAnonymousNodes(box)[0].
-						getElementsByAttribute('ztabindex', nextIndex);
-					if (!next[0]) {
-						next[0] = box.addDynamicRow();
-					}
-					
-					next[0].click();
-					
-					// DEBUG: next[0] is always equal to the target element,
-					// but for some reason it's necessary to scroll to the next
-					// element when moving forward for the target element to
-					// be fully in view
-					if (!back && next[0].parentNode.nextSibling) {
-						var visElem = next[0].parentNode.nextSibling;
+					var next = document.getAnonymousNodes(this)[0]
+						.getElementsByAttribute('ztabindex', nextIndex);
+					if (next.length) {
+						next = next[0];
+						next.click();
 					}
 					else {
-						var visElem = next[0];
+						next = this.new();
+						next = next.firstChild.nextSibling;
 					}
-					this.ensureElementIsVisible(visElem);
 					
-					return true;
+					if (!next) {
+						Components.utils.reportError('Next row not found');
+						return;
+					}
+					
+					this.ensureElementIsVisible(next);
 				]]>
 				</body>
+			</method>
+			
+			
+			<method name="_onAddButtonKeypress">
+				<parameter name="event"/>
+				<body><![CDATA[
+					if (event.keyCode != event.DOM_VK_TAB || event.shiftKey) {
+						return true;
+					}
+					
+					this._lastTabIndex = 0;
+					this._tabDirection = 1;
+					this._focusField();
+					return false;
+				]]></body>
+			</method>
+			
+			
+			<!-- unused -->
+			<method name="getTagIndex">
+				<parameter name="id"/>
+				<body><![CDATA[
+					var rows = this.id('tagRows').getElementsByTagName('row');
+					for (let i=0; i<rows.length; i++) {
+						var row = rows[i].getAttribute('id');
+						if (row && row.split("-")[1] == id) {
+							return i;
+						}
+					}
+					return -1;
+				]]></body>
 			</method>
 			
 			
@@ -778,6 +982,8 @@
 			<method name="blurOpenField">
 				<body>
 				<![CDATA[
+					this._lastTabIndex = false;
+					
 					var textboxes = document.getAnonymousNodes(this)[0].getElementsByTagName('textbox');
 					if (textboxes && textboxes.length) {
 						textboxes[0].inputField.blur();
@@ -800,7 +1006,9 @@
 			<xul:scrollbox xbl:inherits="flex" orient="vertical" style="overflow:auto" class="zotero-box">
 				<xul:hbox align="center">
 					<xul:label id="tagsNum"/>
-					<xul:button id="addButton" label="&zotero.item.add;" oncommand="document.getBindingParent(this).new();" hidden="true"/>
+					<xul:button id="addButton" label="&zotero.item.add;"
+						onkeypress="return document.getBindingParent(this)._onAddButtonKeypress(event)"
+						oncommand="document.getBindingParent(this).new();"/>
 				</xul:hbox>
 				<xul:grid>
 					<xul:columns>

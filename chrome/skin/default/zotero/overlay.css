@@ -226,8 +226,8 @@
 
 #zotero-item-pane
 {
-	width: 335px;
-	min-width: 335px;
+	width: 338px;
+	min-width: 338px;
 }
 
 #zotero-pane .toolbar
@@ -273,6 +273,10 @@
   display: none;
 }
 
+.zotero-button-clear-image {
+  list-style-image: none
+}
+
 #zotero-tb-collection-add
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-collection-add.png');
@@ -309,6 +313,11 @@
 #zotero-tb-lookup
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-lookup.png');
+}
+
+#zotero-lookup-multiline-progress
+{
+	height: 2em;
 }
 
 #zotero-tb-item-from-page

@@ -149,7 +149,7 @@ Zotero.File = new function(){
 	 * @param {nsIFile|nsIInputStream} file The file to read
 	 * @param {String} [charset] The character set; defaults to UTF-8
 	 * @param {Integer} [maxLength] The maximum number of characters to read
-	 * @return {Promise} A promise that is resolved with the contents of the file
+	 * @return {Promise} A Q promise that is resolved with the contents of the file
 	 */
 	this.getContentsAsync = function getContentsAsync(file, charset, maxLength) {
 		charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
@@ -165,6 +165,26 @@ Zotero.File = new function(){
 		});
 		return deferred.promise;
 	};
+	
+	
+	/**
+	 * Get the contents of a binary source asynchronously
+	 *
+	 * @param {nsIURI|nsIFile|string spec|nsIChannel|nsIInputStream} source The source to read
+	 * @return {Promise} A Q promise that is resolved with the contents of the source
+	 */
+	this.getBinaryContentsAsync = function (source) {
+		var deferred = Q.defer();
+		NetUtil.asyncFetch(source, function(inputStream, status) {
+			if (!Components.isSuccessCode(status)) {
+				deferred.reject(new Components.Exception("Source read operation failed", status));
+				return;
+			}
+			
+			deferred.resolve(NetUtil.readInputStreamToString(inputStream, inputStream.available()));
+		});
+		return deferred.promise;
+	}
 	
 	
 	/*
@@ -208,7 +228,7 @@ Zotero.File = new function(){
 	 * @param {String|nsIInputStream} data The string or nsIInputStream to write to the
 	 *     file
 	 * @param {String} [charset] The character set; defaults to UTF-8
-	 * @return {Promise} A promise that is resolved when the file has been written
+	 * @return {Promise} A Q promise that is resolved when the file has been written
 	 */
 	this.putContentsAsync = function putContentsAsync(file, data, charset) {
 		// Create a stream for async stream copying
@@ -462,58 +482,49 @@ Zotero.File = new function(){
 	}
 	
 	
-	// TODO: localize
 	this.checkFileAccessError = function (e, file, operation) {
 		if (file) {
-			var str = "The file '" + file.path + "' ";
+			var str = Zotero.getString('file.accessError.theFile', file.path);
 		}
 		else {
-			var str = "A file ";
+			var str = Zotero.getString('file.accessError.aFile');
 		}
 		
 		switch (operation) {
 			case 'create':
-				var opWord = "created";
+				var opWord = Zotero.getString('file.accessError.created');
 				break;
 				
 			case 'update':
-				var opWord = "updated";
+				var opWord = Zotero.getString('file.accessError.updated');
 				break;
 				
 			case 'delete':
-				var opWord = "deleted";
+				var opWord = Zotero.getString('file.accessError.deleted');
 				break;
 				
 			default:
-				var opWord = "updated";
+				var opWord = Zotero.getString('file.accessError.updated');
 		}
 		
 		if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED' || e.name == 'NS_ERROR_FILE_IS_LOCKED'
 				// Shows up on some Windows systems
 				|| e.name == 'NS_ERROR_FAILURE') {
 			Zotero.debug(e);
-			// TODO: localize
-			str = str + "cannot be " + opWord + ".";
-			var checkFileWindows = "Check that the file is not currently "
-				+ "in use and that it is not marked as read-only. To check "
-				+ "all files in your Zotero data directory, right-click on "
-				+ "the 'zotero' directory, click Properties, clear "
-				+ "the Read-Only checkbox, and apply the change to all folders "
-				+ "and files in the directory.";
-			var checkFileOther = "Check that the file is not currently "
-				+ "in use and that its permissions allow write access.";
+			str = str + " " + Zotero.getString('file.accessError.cannotBe') + " " + opWord + ".";
+			var checkFileWindows = Zotero.getString('file.accessError.message.windows');
+			var checkFileOther = Zotero.getString('file.accessError.message.other');
 			var msg = str + " "
 					+ (Zotero.isWin ? checkFileWindows : checkFileOther)
 					+ "\n\n"
-					+ "Restarting your computer or disabling security "
-					+ "software may also help.";
+					+ Zotero.getString('file.accessError.restart');
 			
 			if (operation == 'create') {
 				var e = new Zotero.Error(
 					msg,
 					0,
 					{
-						dialogButtonText: "Show Parent Directory",
+						dialogButtonText: Zotero.getString('file.accessError.showParentDir'),
 						dialogButtonCallback: function () {
 							try {
 								file.parent.QueryInterface(Components.interfaces.nsILocalFile).reveal();
@@ -531,7 +542,7 @@ Zotero.File = new function(){
 					msg,
 					0,
 					{
-						dialogButtonText: "Show File",
+						dialogButtonText: Zotero.getString('locate.showFile.label'),
 						dialogButtonCallback: function () {
 							try {
 								file.QueryInterface(Components.interfaces.nsILocalFile);
