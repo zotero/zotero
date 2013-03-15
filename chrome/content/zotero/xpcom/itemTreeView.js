@@ -319,7 +319,6 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	}
 	var savedSelection = this.saveSelection();
 	var savedOpenState = this.saveOpenState();
-	var savedFirstRow = this.saveFirstRow();
 	
 	var oldRows = this.rowCount;
 	this._dataItems = [];
@@ -408,7 +407,6 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	}
 	
 	this.rememberOpenState(savedOpenState);
-	this.rememberFirstRow(savedFirstRow);
 	this.rememberSelection(savedSelection);
 	this.expandMatchParents();
 	if (unsuppress) {
