@@ -638,6 +638,7 @@
 					var tabindex = textbox.getAttribute('ztabindex');
 					
 					var oldValue = textbox.getAttribute('value');
+					textbox.value = textbox.value.trim();
 					var value = textbox.value;
 					
 					var tagsbox = Zotero.getAncestorByTagName(textbox, 'tagsbox');
