@@ -188,10 +188,13 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 					let position = parseInt(key) - 1;
 					return Zotero.Tags.getColorByPosition(libraryID, position)
 					.then(function (colorData) {
-						// If a color isn't assigned to this number, allow key navigation,
-						// though I'm not sure this is a good idea.
+						// If a color isn't assigned to this number or any
+						// other numbers, allow key navigation
 						if (!colorData) {
-							return true;
+							return Zotero.Tags.getColors(libraryID)
+							.then(function (colors) {
+								return !Object.keys(colors).length;
+							});
 						}
 						
 						var items = self.getSelectedItems();
