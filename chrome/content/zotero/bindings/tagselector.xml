@@ -279,6 +279,14 @@
 										break;
 									}
 								}
+								
+								// If tag isn't in scope and is still selected,
+								// deselect it
+								if (!inScope && self.selection[labels[i].value]) {
+									labels[i].setAttribute('selected', false);
+									delete self.selection[labels[i].value];
+									var doCommand = true;
+								}
 							}
 							
 							// If not in filter, hide
@@ -303,16 +311,6 @@
 								}
 								else {
 									labels[i].setAttribute('inScope', false);
-									
-									// If out of scope, make sure it's not selected (otherwise a tag
-									// stays selected after removing an item with that tag from the
-									// current collection)
-									if (self.selection[labels[i].value]) {
-										labels[i].setAttribute('selected', false);
-										delete self.selection[labels[i].value];
-										var doCommand = true;
-									}
-	
 								}
 								
 								labels[i].setAttribute('hidden', false);
