@@ -226,9 +226,19 @@
 							// Remove children
 							tagsToggleBox.textContent = "";
 							
-							var lastTag;
+							// Sort by name
+							var orderedTags = [];
+							var collation = Zotero.getLocaleCollation();
 							for (let tagID in self._tags) {
-								let tagButton = self._makeClickableTag(tagID, lastTag, self.editable);
+								orderedTags.push(self._tags[tagID])
+							}
+							orderedTags.sort(function(a, b) {
+								return collation.compareString(1, a.name, b.name);
+							});
+							
+							var lastTag;
+							for (let i=0; i<orderedTags.length; i++) {
+								let tagButton = self._makeClickableTag(orderedTags[i], lastTag, self.editable);
 								if (tagButton) {
 									tagButton.addEventListener('click', function(event) {
 										self.handleTagClick(event, this);
@@ -741,16 +751,16 @@
 			
 			
 			<method name="_makeClickableTag">
-				<parameter name="tagID"/>
+				<parameter name="tagObj"/>
 				<parameter name="lastTag"/>
 				<parameter name="editable"/>
 				<body>
 				<![CDATA[
-					var tagInfo = this._tags[tagID], tagName = tagInfo.name;
+					var tagID = tagObj.id, tagName = tagObj.name, tagType = tagObj.type;
 					// If the last tag was the same, add this tagID and tagType to it
 					if(lastTag && lastTag.value === tagName) {
 						lastTag.setAttribute('tagID', lastTag.getAttribute('tagID') + '-' + tagID);
-						lastTag.setAttribute('tagType', lastTag.getAttribute('tagType') + '-' + tagInfo.type);
+						lastTag.setAttribute('tagType', lastTag.getAttribute('tagType') + '-' + tagType);
 						return false;
 					}
 					
@@ -759,7 +769,7 @@
 					
 					label.setAttribute('value', tagName);
 					label.setAttribute('tagID', tagID);
-					label.setAttribute('tagType', tagInfo.type);
+					label.setAttribute('tagType', tagType);
 					if (editable) {
 						label.setAttribute('context', 'tag-menu');
 					}

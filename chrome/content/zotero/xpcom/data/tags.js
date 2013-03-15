@@ -186,11 +186,6 @@ Zotero.Tags = new function() {
 			return {};
 		}
 		
-		var collation = Zotero.getLocaleCollation();
-		tags.sort(function(a, b) {
-			return collation.compareString(1, a.name, b.name);
-		});
-		
 		var indexed = {};
 		for (var i=0; i<tags.length; i++) {
 			var tag = this.get(tags[i].tagID, true);
