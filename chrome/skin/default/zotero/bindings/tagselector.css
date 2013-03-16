@@ -25,6 +25,7 @@ checkbox
 	padding: 0 .25em 0 .25em !important;
 	-moz-user-focus: ignore;
 	max-width: 250px;
+	border: 1px solid transparent; /* always include border so height is same as zotero-clicky */
 }
 
 /* Visible out-of-scope tags should be grey */
