@@ -329,14 +329,6 @@
 										break;
 									}
 								}
-								
-								// If tag isn't in scope and is still selected,
-								// deselect it
-								if (!inScope && self.selection[name]) {
-									labels[i].setAttribute('selected', false);
-									delete self.selection[name];
-									var doCommand = true;
-								}
 							}
 							
 							// If not in search, hide
@@ -370,6 +362,14 @@
 								labels[i].setAttribute('hidden', false);
 								empty = false;
 							}
+							
+							// If tag isn't in scope and is still selected, deselect it
+							if (labels[i].getAttribute('hidden') == 'true' && self.selection[name]) {
+								labels[i].setAttribute('selected', false);
+								delete self.selection[name];
+								var doCommand = true;
+							}
+
 							
 							// Always show colored tags at top
 							if (colorData) {
