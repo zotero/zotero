@@ -151,8 +151,8 @@
 			
 			<constructor>
 				<![CDATA[
-					this.id('display-all-tags').setAttribute('checked', !this.filterToScope);
 					this.id('show-automatic').setAttribute('checked', this.showAutomatic);
+					this.id('display-all-tags').setAttribute('checked', !this.filterToScope);
 					this.dragObserver = new this._dragObserverConstructor;
 				]]>
 			</constructor>
@@ -1012,15 +1012,28 @@
 							onkeypress="if (event.keyCode == event.DOM_VK_ESCAPE) { document.getBindingParent(this).handleKeyPress(true); }"/>
 						<toolbarbutton id="view-settings-menu" tooltiptext="&zotero.toolbar.actions.label;"
 								image="chrome://zotero/skin/tag-selector-menu.png" type="menu">
-							<menupopup id="view-settings-popup">
+							<menupopup id="view-settings-popup"
+									onpopupshown="/*
+											This is necessary to fix a bug with Display All Tags not
+											being checked if enabled before menuu is shown (OS X only?)
+										*/
+										document.getElementById('show-automatic').setAttribute('checked', document.getBindingParent(this).showAutomatic);
+										document.getElementById('display-all-tags').setAttribute('checked', !document.getBindingParent(this).filterToScope);">
 								<menuitem id="num-selected" disabled="true"/>
 								<menuitem id="deselect-all" label="&zotero.tagSelector.clearAll;"
 									oncommand="document.getBindingParent(this).clearAll(); event.stopPropagation();"/>
 								<menuseparator/>
-								<menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" autocheck="true" type="checkbox"
-									oncommand="var ts = document.getBindingParent(this); ts._dirty = true; ts.setAttribute('showAutomatic', this.getAttribute('checked') == 'true')"/>
-								<menuitem id="display-all-tags" label="&zotero.tagSelector.displayAllInLibrary;" autocheck="true" type="checkbox"
-									oncommand="document.getBindingParent(this).filterToScope = !(this.getAttribute('checked') == 'true'); event.stopPropagation();"/>
+								<menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" type="checkbox"
+									oncommand="var ts = document.getBindingParent(this);
+										ts._dirty = true;
+										var showAutomatic = this.getAttribute('checked') == 'true';
+										ts.setAttribute('showAutomatic', showAutomatic);
+										this.setAttribute('checked', showAutomatic);"/>
+								<menuitem id="display-all-tags" label="&zotero.tagSelector.displayAllInLibrary;" type="checkbox"
+									oncommand="var displayAll = this.getAttribute('checked') == 'true';
+										this.setAttribute('checked', !displayAll);
+										document.getBindingParent(this).filterToScope = !displayAll;
+										event.stopPropagation();"/>
 							</menupopup>
 						</toolbarbutton>
 					</hbox>
