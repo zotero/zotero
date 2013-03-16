@@ -28,16 +28,14 @@ checkbox
 }
 
 /* Visible out-of-scope tags should be grey */
-#tags-toggle label[inScope="false"]
+#tags-toggle label[inScope=false]:not([hasColor=true])
 {
 	color: #666 !important;
 }
 
-/* Don't display clicky effect to out-of-scope icons */
-label.zotero-clicky[inScope="false"]:hover,
-label.zotero-clicky[inScope="false"]:active
+#tags-toggle label[inScope=false][hasColor=true]
 {
-	background: inherit !important;
+	opacity: .6;
 }
 
 #tags-toggle label[draggedOver="true"]
