@@ -147,7 +147,7 @@
 						
 						for (var i=0; i<ids.length; i++) {
 							[itemID, tagID] = ids[i].split('-');
-							if (itemID != this.item.id) {
+							if (!this.item || itemID != this.item.id) {
 								continue;
 							}
 							if (event == 'add') {
@@ -868,6 +868,10 @@
 				<parameter name="count"/>
 				<body>
 					<![CDATA[
+						if (!this.item) {
+							return;
+						}
+						
 						if(typeof count == 'undefined') {
 							var tags = this.item.getTags();
 							if(tags)
