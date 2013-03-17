@@ -300,12 +300,12 @@
 					<tree id="zotero-collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
 						onmouseover="ZoteroPane_Local.collectionsView.setHighlightedRows();"
 						onkeypress="ZoteroPane_Local.handleKeyPress(event, this.id)"
-						onselect="ZoteroPane_Local.onCollectionSelected();" seltype="cell"
+						onselect="ZoteroPane_Local.onCollectionSelected();"
 						ondragstart="if (event.target.localName == 'treechildren') { ZoteroPane_Local.collectionsView.onDragStart(event); }"
 						ondragenter="return ZoteroPane_Local.collectionsView.onDragEnter(event)"
 						ondragover="return ZoteroPane_Local.collectionsView.onDragOver(event)"
 						ondrop="return ZoteroPane_Local.collectionsView.onDrop(event)"
-						flex="1">
+						seltype="single" flex="1">
 						<treecols>
 							<treecol
 								id="zotero-collections-name-column"
