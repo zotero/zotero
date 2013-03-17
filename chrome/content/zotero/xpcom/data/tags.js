@@ -186,11 +186,6 @@ Zotero.Tags = new function() {
 			return {};
 		}
 		
-		var collation = Zotero.getLocaleCollation();
-		tags.sort(function(a, b) {
-			return collation.compareString(1, a.name, b.name);
-		});
-		
 		var indexed = {};
 		for (var i=0; i<tags.length; i++) {
 			var tag = this.get(tags[i].tagID, true);
@@ -475,13 +470,6 @@ Zotero.Tags = new function() {
 				
 				tagColors = tagColors || [];
 				
-				// Remove colors for tags that don't exist
-				tagColors = tagColors.filter(function (val) {
-					var tagIDs = self.getIDs(val.name, libraryID);
-					// TEMP: handle future getIDs return format change
-					return tagIDs && tagIDs.length;
-				});
-				
 				_libraryColors[libraryID] = tagColors;
 				_libraryColorsByName[libraryID] = {};
 				
@@ -514,12 +502,6 @@ Zotero.Tags = new function() {
 		.then(function () {
 			var tagColors = _libraryColors[libraryID];
 			var tagIDs = self.getIDs(name, libraryID);
-			
-			// Just to be safe, remove colors for tags that don't exist
-			tagColors = tagColors.filter(function (val) {
-				// TEMP: handle future getIDs return format change
-				return tagIDs && tagIDs.length;
-			});
 			
 			// Unset
 			if (!color) {
@@ -634,7 +616,12 @@ Zotero.Tags = new function() {
 	this.toggleItemsListTags = function (libraryID, items, name) {
 		var self = this;
 		return Q.fcall(function () {
-			var tagIDs = self.getIDs(name, libraryID);
+			var tagIDs = self.getIDs(name, libraryID) || [];
+			// If there's a color setting but no matching tag, don't throw
+			// an error (though ideally this wouldn't be possible).
+			if (!tagIDs.length) {
+				return;
+			}
 			var tags = tagIDs.map(function (tagID) {
 				return Zotero.Tags.get(tagID, true);
 			});
@@ -834,14 +821,29 @@ Zotero.Tags = new function() {
 	function erase(ids) {
 		ids = Zotero.flattenArguments(ids);
 		
+		var deleted = [];
+		
 		Zotero.DB.beginTransaction();
 		for each(var id in ids) {
 			var tag = this.get(id);
 			if (tag) {
+				deleted.push({
+					libraryID: tag.libraryID ? parseInt(tag.libraryID) : 0,
+					name: tag.name
+				});
 				tag.erase();
 			}
 		}
 		Zotero.DB.commitTransaction();
+		
+		// Also delete tag color setting
+		//
+		// Note that this isn't done in purge(), so the setting will not
+		// be removed if the tag is just removed from all items without
+		// without being explicitly deleted.
+		for (var i in deleted) {
+			this.setColor(deleted[i].libraryID, deleted[i].name, false);
+		}
 	}
 	
 	

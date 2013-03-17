@@ -188,10 +188,13 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 					let position = parseInt(key) - 1;
 					return Zotero.Tags.getColorByPosition(libraryID, position)
 					.then(function (colorData) {
-						// If a color isn't assigned to this number, allow key navigation,
-						// though I'm not sure this is a good idea.
+						// If a color isn't assigned to this number or any
+						// other numbers, allow key navigation
 						if (!colorData) {
-							return true;
+							return Zotero.Tags.getColors(libraryID)
+							.then(function (colors) {
+								return !Object.keys(colors).length;
+							});
 						}
 						
 						var items = self.getSelectedItems();
@@ -316,7 +319,6 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	}
 	var savedSelection = this.saveSelection();
 	var savedOpenState = this.saveOpenState();
-	var savedFirstRow = this.saveFirstRow();
 	
 	var oldRows = this.rowCount;
 	this._dataItems = [];
@@ -405,7 +407,6 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	}
 	
 	this.rememberOpenState(savedOpenState);
-	this.rememberFirstRow(savedFirstRow);
 	this.rememberSelection(savedSelection);
 	this.expandMatchParents();
 	if (unsuppress) {

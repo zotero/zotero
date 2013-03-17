@@ -408,29 +408,15 @@ Zotero.Utilities = {
 				// Create a node and use the textContent property to do unescaping where
 				// possible, because this approach preserves <br/>
 				if(node === undefined) {
-					var platformVersion = Components.classes["@mozilla.org/xre/app-info;1"]
-						.getService(Components.interfaces.nsIXULAppInfo).platformVersion;
-					if(Components.classes["@mozilla.org/xpcom/version-comparator;1"]
-							.getService(Components.interfaces.nsIVersionComparator)
-							.compare(platformVersion, "12.0") >= 0) {
-						var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-							 .createInstance(Components.interfaces.nsIDOMParser);
-						var domDocument = parser.parseFromString("<!DOCTYPE html><html></html>",
-							"text/html");
-						node = domDocument.createElement("div");
-					} else {
-						node = false;
-					}
+					var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+						 .createInstance(Components.interfaces.nsIDOMParser);
+					var domDocument = parser.parseFromString("<!DOCTYPE html><html></html>",
+						"text/html");
+					node = domDocument.createElement("div");
 				}
 				
-				if(node) {
-					node.innerHTML = str;
-					return node.textContent.replace(/ {2,}/g, " ");
-				} else if(!nsIScriptableUnescapeHTML) {
-					nsIScriptableUnescapeHTML = Components.classes["@mozilla.org/feed-unescapehtml;1"]
-						.getService(Components.interfaces.nsIScriptableUnescapeHTML);
-				}
-				return nsIScriptableUnescapeHTML.unescape(str);
+				node.innerHTML = str;
+				return node.textContent.replace(/ {2,}/g, " ");
 			} else if(Zotero.isNode) {
 				/*var doc = require('jsdom').jsdom(str, null, {
 					"features":{

@@ -3869,7 +3869,9 @@ Zotero.Item.prototype.replaceTag = function(oldTagID, newTag) {
 	Zotero.DB.commitTransaction();
 	Zotero.Notifier.trigger('modify', 'item', this.id);
 	Zotero.Notifier.trigger('remove', 'item-tag', this.id + '-' + oldTagID);
-	Zotero.Notifier.trigger('add', 'item-tag', this.id + '-' + id);
+	if (id) {
+		Zotero.Notifier.trigger('add', 'item-tag', this.id + '-' + id);
+	}
 	return id;
 }
 
