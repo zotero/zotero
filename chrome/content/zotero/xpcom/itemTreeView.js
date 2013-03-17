@@ -315,7 +315,7 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	
 	if (!this.selection.selectEventsSuppressed) {
 		var unsuppress = this.selection.selectEventsSuppressed = true;
-		this._treebox.beginUpdateBatch();
+		//this._treebox.beginUpdateBatch();
 	}
 	var savedSelection = this.saveSelection();
 	var savedOpenState = this.saveOpenState();
@@ -410,7 +410,8 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	this.rememberSelection(savedSelection);
 	this.expandMatchParents();
 	if (unsuppress) {
-		this._treebox.endUpdateBatch();
+		// This causes a problem with the row count being wrong between views
+		//this._treebox.endUpdateBatch();
 		this.selection.selectEventsSuppressed = false;
 	}
 	
