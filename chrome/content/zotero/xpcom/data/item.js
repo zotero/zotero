@@ -1861,6 +1861,9 @@ Zotero.Item.prototype.save = function() {
 			}
 			
 			
+			let parentItem = this.getSource();
+			parentItem = parentItem ? Zotero.Items.get(parentItem) : null;
+			
 			if (this._changedDeleted) {
 				if (this.deleted) {
 					sql = "REPLACE INTO deletedItems (itemID) VALUES (?)";
@@ -1880,11 +1883,9 @@ Zotero.Item.prototype.save = function() {
 				}
 				Zotero.DB.query(sql, this.id);
 				
-				var parent = this.getSource();
-				if (parent) {
-					parent = Zotero.Items.get(parent);
-					parent.updateNumNotes();
-					parent.updateBestAttachmentState();
+				if (parentItem) {
+					parentItem.updateNumNotes();
+					parentItem.updateBestAttachmentState();
 				}
 			}
 			
@@ -1926,27 +1927,32 @@ Zotero.Item.prototype.save = function() {
 				}
 				Zotero.DB.query(sql, bindParams);
 				
-				if (this.isAttachment()) {
-					if (parent) {
-						Zotero.Items.get(parent).updateNumNotes();
+				if (parentItem) {
+					// Embedded attachment notes are included in parent note count
+					if (this.isAttachment()) {
+						parentItem.updateNumNotes();
 					}
-				}
-				
-				// Clear cached child notes of the parent. If the note
-				// moved between parents, the old one will be cleared
-				// when changing the note count below
-				if (parent) {
-					Zotero.Items.get(parent).clearCachedNotes();
+					
+					// Clear cached child notes of the parent. If the note
+					// moved between parents, the old one will be cleared
+					// when changing the note count below
+					parentItem.clearCachedNotes();
 				}
 			}
 			
 			
+			//
 			// Attachment
+			//
+			// If attachment title changes, update parent attachments
+			if (this._changedItemData[110] && this.isAttachment() && parentItem) {
+				parentItem.clearCachedAttachments();
+			}
 			if (this._changedAttachmentData) {
 				var sql = "UPDATE itemAttachments SET sourceItemID=?, "
 					+ "linkMode=?, mimeType=?, charsetID=?, path=?, syncState=? "
 					+ "WHERE itemID=?";
-				var parent = this.getSource();
+				let parent = this.getSource();
 				var linkMode = this.attachmentLinkMode;
 				var mimeType = this.attachmentMIMEType;
 				var charsetID = this.attachmentCharset;
@@ -2002,8 +2008,8 @@ Zotero.Item.prototype.save = function() {
 				// Clear cached child attachments of the parent. If the note
 				// moved between parents, the old one will be cleared
 				// when changing the note count below
-				if (parent) {
-					Zotero.Items.get(parent).clearCachedAttachments();
+				if (parentItem) {
+					parentItem.clearCachedAttachments();
 				}
 			}
 			
@@ -2468,8 +2474,15 @@ Zotero.Item.prototype.numNotes = function(includeTrashed, includeEmbedded) {
 	var embedded = 0;
 	if (includeEmbedded) {
 		if ((includeTrashed ? this._numNotesEmbeddedIncludingTrashed : this._numNotesEmbedded) === null) {
-			var sql = "SELECT COUNT(*) FROM itemAttachments IA JOIN itemNotes USING (itemID) "
-				+ "WHERE IA.sourceItemID=? AND note!='' AND note!=?";
+			var sql = "SELECT COUNT(*) FROM itemAttachments IA JOIN itemNotes USING (itemID) WHERE ";
+			// For attachments, include their own embedded notes
+			if (this.isAttachment()) {
+				sql += "IA.itemID=?";
+			}
+			else {
+				sql += "IA.sourceItemID=?";
+			}
+			sql += " AND note!='' AND note!=?";
 			if (!includeTrashed) {
 				sql += " AND itemID NOT IN (SELECT itemID FROM deletedItems)";
 			}
@@ -2483,8 +2496,9 @@ Zotero.Item.prototype.numNotes = function(includeTrashed, includeEmbedded) {
 		}
 	}
 	
-	return this._numNotes + this._numNotesTrashed +
-			(includeTrashed ? this._numNotesEmbeddedIncludingTrashed : this._numNotesEmbedded);
+	return this._numNotes
+		+ (includeTrashed ? this._numNotesTrashed : 0)
+		+ (includeTrashed ? this._numNotesEmbeddedIncludingTrashed : this._numNotesEmbedded);
 }
 
 

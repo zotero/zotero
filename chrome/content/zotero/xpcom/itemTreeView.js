@@ -3046,7 +3046,7 @@ Zotero.ItemTreeView.TreeRow.prototype.getField = function(field, unformatted)
 }
 
 Zotero.ItemTreeView.TreeRow.prototype.numNotes = function() {
-	if (!this.ref.isRegularItem()) {
+	if (this.ref.isNote()) {
 		return '';
 	}
 	return this.ref.numNotes(false, true) || '';
