@@ -814,7 +814,7 @@ Zotero.CollectionTreeView.prototype.getLastViewedRow = function () {
 /*
  *  Delete the selection
  */
-Zotero.CollectionTreeView.prototype.deleteSelection = function()
+Zotero.CollectionTreeView.prototype.deleteSelection = function(deleteItems)
 {
 	if(this.selection.count == 0)
 		return;
@@ -842,14 +842,12 @@ Zotero.CollectionTreeView.prototype.deleteSelection = function()
 	for (var i=0; i<rows.length; i++)
 	{
 		//erase collection from DB:
-		var group = this._getItemAtRow(rows[i]-i);
-		if(group.isCollection())
-		{
-			group.ref.erase();
+		var itemGroup = this._getItemAtRow(rows[i]-i);
+		if (itemGroup.isCollection()) {
+			itemGroup.ref.erase(deleteItems);
 		}
-		else if(group.isSearch())
-		{
-			Zotero.Searches.erase(group.ref['id']);
+		else if (itemGroup.isSearch()) {
+			Zotero.Searches.erase(itemGroup.ref.id);
 		}
 	}
 	this._treebox.endUpdateBatch();

@@ -245,6 +245,7 @@
 					<menuitem label="&zotero.collections.showUnfiledItems;" oncommand="ZoteroPane_Local.setVirtual(ZoteroPane_Local.getSelectedLibraryID(), 'unfiled', true)"/>
 					<menuitem oncommand="ZoteroPane_Local.editSelectedCollection();"/>
 					<menuitem oncommand="ZoteroPane_Local.deleteSelectedCollection();"/>
+					<menuitem oncommand="ZoteroPane_Local.deleteSelectedCollection(true);"/>
 					<menuseparator/>
 					<menuitem oncommand="Zotero_File_Interface.exportCollection();"/>
 					<menuitem oncommand="Zotero_File_Interface.bibliographyFromCollection();"/>

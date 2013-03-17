@@ -961,7 +961,7 @@ Zotero.Collection.prototype.erase = function(deleteItems) {
 		}
 	}
 	if (del.length) {
-		Zotero.Items.erase(del);
+		Zotero.Items.trash(del);
 	}
 	
 	// Remove relations
