@@ -2258,6 +2258,8 @@ Zotero.Translate.IO = {
 			throw "DOMParser error: loading data into data store failed";
 		}
 		
+		nodes.normalize();
+		
 		return nodes;
 	},
 	
