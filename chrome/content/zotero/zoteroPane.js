@@ -2087,7 +2087,7 @@ var ZoteroPane = new function()
 				m.deleteCollection
 			];
 			
-			menu.childNodes[m.deleteCollection].setAttribute('label', Zotero.getString('general.remove'));
+			menu.childNodes[m.deleteCollection].setAttribute('label', Zotero.getString('general.hide'));
 		}
 		else if (itemGroup.isHeader()) {
 			if (itemGroup.ref.id == 'commons-header') {
@@ -2375,7 +2375,7 @@ var ZoteroPane = new function()
 		}
 		
 		// Plural if necessary
-		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.erase' + multiple));
+		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
 		menu.childNodes[m.exportItems].setAttribute('label', Zotero.getString('pane.items.menu.export' + multiple));
 		menu.childNodes[m.createBib].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
 		menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
