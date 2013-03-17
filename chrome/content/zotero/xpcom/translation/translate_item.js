@@ -332,11 +332,32 @@ Zotero.Translate.ItemSaver.prototype = {
 		
 		if(!attachment.url && !attachment.document) {
 			Zotero.debug("Translate: Not adding attachment: no URL specified", 2);
+		} else if(attachment.snapshot !== false
+			&& !Zotero.Prefs.get("downloadAssociatedFiles") && !Zotero.Prefs.get("automaticSnapshots")) {
+			//in case there's no mimeType specified and we're not going to save anything anyway,
+			// we don't want to bother figuring out mimeType below
+			Zotero.debug("Translate: All attachments are disabled. Skipping.", 4);
 		} else {
 			// Determine whether to save an attachment
 			if(attachment.snapshot !== false) {
-				if(attachment.document
-						|| (attachment.mimeType && Zotero.Attachments.SNAPSHOT_MIMETYPES.indexOf(attachment.mimeType) != -1)) {
+				//if it's not a document and we don't have a mimeType,
+				// we need to figure out mimeType before we can decide what to do
+				if(!attachment.document && !attachment.mimeType && attachment.mimeType !== '') {
+					Zotero.debug("Translate: No mimeType specified. Trying to determine mimeType.", 4);
+					var me = this;
+					try {
+						Zotero.MIME.getMIMETypeFromURL(attachment.url, function (mimeType, hasNativeHandler) {
+							attachment.mimeType = mimeType || '';	//so we don't get stuck in an infinite loop
+							//redo _saveAttachmentDownload
+							me._saveAttachmentDownload(attachment, parentID, attachmentCallback);
+						}, this._cookieSandbox);
+					} catch(e) {
+						Zotero.debug("Translate: Error determining mimeType "+attachment.url, 2);
+						attachmentCallback(attachment, false, e);
+					}
+					return;
+				} else if(attachment.document
+						|| Zotero.Attachments.SNAPSHOT_MIMETYPES.indexOf(attachment.mimeType) != -1) {
 					if(!Zotero.Prefs.get("automaticSnapshots")) {
 						Zotero.debug("Translate: Automatic snapshots are disabled. Skipping.", 4);
 						return;
@@ -411,27 +432,12 @@ Zotero.Translate.ItemSaver.prototype = {
 				// Save attachment if snapshot pref enabled or not HTML
 				// (in which case downloadAssociatedFiles applies)
 				} else {
-					if(!attachment.mimeType && attachment.mimeType !== '') {
-						Zotero.debug("Translate: No mimeType specified for a possible snapshot. Trying to determine mimeType.", 4);
-						var me = this;
-						try {
-							Zotero.MIME.getMIMETypeFromURL(attachment.url, function (mimeType, hasNativeHandler) {
-								attachment.mimeType = mimeType || '';
-								me._saveAttachmentDownload(attachment, parentID, attachmentCallback);
-							}, this._cookieSandbox);
-						} catch(e) {
-							Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
-							attachmentCallback(attachment, false, e);
-						}
-						return;
-					}
-					var mimeType = (attachment.mimeType ? attachment.mimeType : null);
 					var fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentID);
 					try {
 						Zotero.debug('Translate: Importing attachment from URL', 4);
 						attachment.linkMode = "imported_url";
 						Zotero.Attachments.importFromURL(attachment.url, parentID, title,
-							fileBaseName, null, mimeType, this._libraryID, function(status, err) {
+							fileBaseName, null, attachment.mimeType, this._libraryID, function(status, err) {
 								// TODO: actually indicate progress during download
 								if(status) {
 									attachmentCallback(attachment, 100);
