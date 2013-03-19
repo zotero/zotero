@@ -591,7 +591,9 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		this._itemDataLoaded = false;
 	}
 	else {
-		if(oldItemTypeID) this._markFieldChange('itemType', Zotero.ItemTypes.getName(oldItemTypeID));
+		if (oldItemTypeID) {
+			this._markFieldChange('itemType', Zotero.ItemTypes.getName(oldItemTypeID));
+		}
 		if (!this._changedPrimaryData) {
 			this._changedPrimaryData = {};
 		}
