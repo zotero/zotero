@@ -755,7 +755,7 @@ Zotero.Sync.Storage = new function () {
 				}
 				
 				Zotero.debug("Marking attachment " + lk + " for download");
-				updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
+				updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD;
 			}
 			
 			var mtime = attachmentData[item.id].mtime;
