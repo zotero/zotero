@@ -1271,6 +1271,12 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		columnField = 'date';
 	}
 	
+	// The visible fields affect the secondary sorting
+	var visibleFields = {};
+	this.getVisibleFields().forEach(function (val) {
+		visibleFields[val] = true;
+	});
+	
 	// Some fields (e.g. dates) need to be retrieved unformatted for sorting
 	switch (columnField) {
 		case 'date':
@@ -1424,12 +1430,31 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		}
 		
 		if (columnField !== 'date') {
-			fieldA = a.getField('date', true).substr(0, 10);
-			fieldB = b.getField('date', true).substr(0, 10);
-			
-			cmp = strcmp(fieldA, fieldB);
-			if (cmp !== 0) {
-				return cmp;
+			// If year is visible and not date, don't use full date
+			if (visibleFields.year && !visibleFields.date) {
+				fieldA = a.getField('date', true).substr(0, 4);
+				if (fieldA == '0000') {
+					fieldA = "";
+				}
+				fieldB = b.getField('date', true).substr(0, 4);
+				if (fieldB == '0000') {
+					fieldB = "";
+				}
+				
+				cmp = strcmp(fieldA, fieldB);
+				if (cmp !== 0) {
+					return cmp;
+				}
+			}
+			// Otherwise use full date, even if Date column is hidden
+			else {
+				fieldA = a.getField('date', true).substr(0, 10);
+				fieldB = b.getField('date', true).substr(0, 10);
+				
+				cmp = strcmp(fieldA, fieldB);
+				if (cmp !== 0) {
+					return cmp;
+				}
 			}
 		}
 		
