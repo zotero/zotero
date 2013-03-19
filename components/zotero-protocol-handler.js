@@ -970,7 +970,6 @@ function ChromeExtensionHandler() {
 	ConnectorChannel.prototype.securityInfo = null;
 	ConnectorChannel.prototype.status = 0;
 	ConnectorChannel.prototype.loadGroup = null;
-	ConnectorChannel.prototype.securityInfo = null;
 	ConnectorChannel.prototype.loadFlags = 393216;
 	
 	ConnectorChannel.prototype.__defineGetter__("originalURI", function() { return this.URI });
