@@ -1433,6 +1433,13 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			}
 		}
 		
+		if (columnField !== 'title') {
+			cmp = collation.compareString(1, b.getField('title', true), a.getField('title', true));
+			if (cmp !== 0) {
+				return cmp;
+			}
+		}
+		
 		fieldA = a.getField('dateModified');
 		fieldB = b.getField('dateModified');
 		return (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
