@@ -1440,8 +1440,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			}
 		}
 		
-		fieldA = a.getField('dateModified');
-		fieldB = b.getField('dateModified');
+		fieldA = a.getField('dateAdded');
+		fieldB = b.getField('dateAdded');
 		return (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
 	}
 	
