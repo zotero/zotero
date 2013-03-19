@@ -1817,12 +1817,23 @@ Zotero.CollectionTreeView.prototype.isSorted = function() 							{ return false;
 Zotero.CollectionTreeView.prototype.isEditable = function(row, idx) 				{ return false; }
 
 /* Set 'highlighted' property on rows set by setHighlightedRows */
-Zotero.CollectionTreeView.prototype.getRowProperties = function(row, props) {
+Zotero.CollectionTreeView.prototype.getRowProperties = function(row, prop) {
+	var props = [];
+	
 	if (this._highlightedRows[row]) {
-		var aServ = Components.classes["@mozilla.org/atom-service;1"].
-			getService(Components.interfaces.nsIAtomService);
-		props.AppendElement(aServ.getAtom("highlighted"));
+		// <=Fx21
+		if (prop) {
+			var aServ = Components.classes["@mozilla.org/atom-service;1"].
+				getService(Components.interfaces.nsIAtomService);
+			prop.AppendElement(aServ.getAtom("highlighted"));
+		}
+		// Fx22+
+		else {
+			props.push("highlighted");
+		}
 	}
+	
+	return props.join(" ");
 }
 
 Zotero.CollectionTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
