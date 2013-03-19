@@ -1287,10 +1287,20 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			var unformatted = false;
 	}
 	
-	// Hash table of fields for which rows with empty values should be displayed last
-	var emptyFirst = {
-		title: true
-	};
+	// Set whether rows with empty values should be displayed last,
+	// which may be different for primary and secondary sorting.
+	var emptyFirst = {};
+	switch (columnField) {
+	case 'title':
+		emptyFirst.title = true;
+		break;
+	
+	// When sorting by title we want empty titles at the top, but if not
+	// sorting by title, empty titles should sort to the bottom so that new
+	// empty items don't get sorted to the middle of the items list.
+	default:
+		emptyFirst.title = false;
+	}
 	
 	// Cache primary values while sorting, since base-field-mapped getField()
 	// calls are relatively expensive
@@ -1459,7 +1469,15 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		}
 		
 		if (columnField !== 'title') {
-			cmp = collation.compareString(1, b.getField('title', true), a.getField('title', true));
+			fieldA = a.getField('title', true);
+			fieldB = b.getField('title', true);
+			
+			if (!emptyFirst.title) {
+				if (fieldA === '' && fieldB !== '') return -1;
+				if (fieldA !== '' && fieldB === '') return 1;
+			}
+			
+			cmp = collation.compareString(1, fieldB, fieldA);
 			if (cmp !== 0) {
 				return cmp;
 			}
