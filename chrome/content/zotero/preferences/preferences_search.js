@@ -411,7 +411,14 @@ Zotero_Preferences.Search = {
 			var browser = info.name; // Returns "Firefox" for Firefox
 			var str = Zotero.getString('general.browserIsOffline', browser);
 		}
-		alert(str);
+		
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.createInstance(Components.interfaces.nsIPromptService);
+		ps.alert(
+			null,
+			Zotero.getString('pane.item.attachments.PDF.installTools.title'),
+			str
+		);
 	},
 	
 	
