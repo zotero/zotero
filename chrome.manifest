@@ -49,8 +49,13 @@ skin		zotero	default		chrome/skin/default/zotero/
 
 overlay	chrome://browser/content/browser.xul	chrome://zotero/content/statusBarOverlay.xul appversion<4.0
 overlay	chrome://browser/content/browser.xul	chrome://zotero/content/overlay.xul
-overlay	chrome://zotero/content/preferences/preferences.xul			chrome://zotero/content/preferences/preferences_firefox.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
+
+overlay chrome://zotero/content/preferences/preferences.xul chrome://zotero/content/preferences/preferences_firefox.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 overlay	chrome://zotero/content/preferences/preferences.xul#cite	chrome://zotero/content/preferences/preferences_firefox.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
+overlay chrome://zotero/content/preferences/preferences_general.xul chrome://zotero/content/preferences/preferences_general_firefox.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
+overlay chrome://zotero/content/preferences/preferences_export.xul chrome://zotero/content/preferences/preferences_export_firefox.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
+overlay chrome://zotero/content/preferences/preferences_advanced.xul chrome://zotero/content/preferences/preferences_advanced_firefox.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
+
 overlay chrome://mozapps/content/downloads/unknownContentType.xul chrome://zotero/content/downloadOverlay.xul
 
 style	chrome://browser/content/browser.xul	chrome://zotero/skin/zotero.css

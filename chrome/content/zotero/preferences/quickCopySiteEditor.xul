@@ -2,7 +2,7 @@
 <!--
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2009 Center for History and New Media
+    Copyright © 2007 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
     
@@ -60,15 +60,21 @@
 		<menulist id="zotero-quickCopy-menu"/>
 		<separator class="thin"/>
 		<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
-			oncommand="buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : '')"/>
+			oncommand="Zotero_Preferences.Export.buildQuickCopyFormatDropDown(
+				document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : ''
+			)"/>
 	</vbox>
 	
 	<script>
 	<![CDATA[
 		var io = window.arguments[0];
 		document.getElementById('zotero-quickCopy-domain').value = io.domain ? io.domain : '';
-		buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), Zotero.QuickCopy.getContentType(io.format), io.format);
-		updateQuickCopyHTMLCheckbox();
+		Zotero_Preferences.Export.buildQuickCopyFormatDropDown(
+			document.getElementById('zotero-quickCopy-menu'),
+			Zotero.QuickCopy.getContentType(io.format),
+			io.format
+		);
+		Zotero_Preferences.Export.updateQuickCopyHTMLCheckbox();
 	]]>
 	</script>
 </dialog>
