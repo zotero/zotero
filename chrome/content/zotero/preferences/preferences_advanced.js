@@ -191,7 +191,8 @@ Zotero_Preferences.Advanced = {
 		var useDataDir = Zotero.Prefs.get('useDataDir');
 		
 		// If triggered from the Choose button, don't show the dialog, since
-		// Zotero.chooseZoteroDirectory() shows its own
+		// Zotero.chooseZoteroDirectory() (called below due to the radio button
+		// change) shows its own
 		if (event.originalTarget && event.originalTarget.tagName == 'button') {
 			return true;
 		}
@@ -200,25 +201,31 @@ Zotero_Preferences.Advanced = {
 			return true;
 		}
 		
-		// If directory not set or invalid, prompt for location
-		if (!this.getDataDirPath()) {
+		// If changing from default to custom
+		if (!useDataDir) {
 			event.stopPropagation();
-			var file = Zotero.chooseZoteroDirectory(true);
+			var file = Zotero.chooseZoteroDirectory(true, false, function () {
+				Zotero_Preferences.openURL('http://zotero.org/support/zotero_data');
+			});
 			radiogroup.selectedIndex = file ? 1 : 0;
 			return !!file;
 		}
 		
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 			.getService(Components.interfaces.nsIPromptService);
-		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
-		var app = Zotero.isStandalone ? Zotero.getString('app.standalone') : Zotero.getString('app.firefox');
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+		var app = Zotero.appName;
 		var index = ps.confirmEx(window,
 			Zotero.getString('general.restartRequired'),
-			Zotero.getString('general.restartRequiredForChange', app),
+			Zotero.getString('general.restartRequiredForChange', app) + '\n\n'
+				+ Zotero.getString('dataDir.moveFilesToNewLocation', app),
 			buttonFlags,
-			Zotero.getString('general.restartNow'),
-			null, null, null, {});
+			Zotero.getString('general.quitApp', app),
+			null,
+			Zotero.getString('general.moreInformation'),
+			null, {});
 		
 		if (index == 0) {
 			useDataDir = !!radiogroup.selectedIndex;
@@ -226,8 +233,10 @@ Zotero_Preferences.Advanced = {
 			Zotero.Prefs.set('useDataDir', useDataDir);
 			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
 					.getService(Components.interfaces.nsIAppStartup);
-			appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit
-				| Components.interfaces.nsIAppStartup.eRestart);
+			appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
+		}
+		else if (index == 2) {
+			Zotero_Preferences.openURL('http://zotero.org/support/zotero_data');
 		}
 		
 		radiogroup.selectedIndex = useDataDir ? 1 : 0;
