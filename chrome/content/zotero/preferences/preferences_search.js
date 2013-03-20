@@ -208,12 +208,12 @@ Zotero_Preferences.Search = {
 							[Zotero.platform, 'zotero.org']) + '\n\n';
 						
 						if (converterVersionAvailable) {
-							tvp = Zotero.getString('zotero.preferences.search.pdf.toolVersionPlatform',
+							let tvp = Zotero.getString('zotero.preferences.search.pdf.toolVersionPlatform',
 								[Zotero.Fulltext.pdfConverterName, converterVersion]);
 							msg += '- ' + tvp + '\n';
 						}
 						if (infoVersionAvailable) {
-							tvp = Zotero.getString('zotero.preferences.search.pdf.toolVersionPlatform',
+							let tvp = Zotero.getString('zotero.preferences.search.pdf.toolVersionPlatform',
 								[Zotero.Fulltext.pdfInfoName, infoVersion]);
 							msg += '- ' + tvp + '\n';
 						}
