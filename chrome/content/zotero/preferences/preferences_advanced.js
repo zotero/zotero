@@ -196,10 +196,6 @@ Zotero_Preferences.Advanced = {
 		if (event.originalTarget && event.originalTarget.tagName == 'button') {
 			return true;
 		}
-		// Fx3.6
-		else if (event.explicitOriginalTarget && event.explicitOriginalTarget.tagName == 'button') {
-			return true;
-		}
 		
 		// If changing from default to custom
 		if (!useDataDir) {
