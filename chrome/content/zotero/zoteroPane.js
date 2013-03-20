@@ -1093,12 +1093,10 @@ var ZoteroPane = new function()
 		
 		var itemgroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
 		
-		/*
 		if (itemgroup.isSeparator()) {
 			document.getElementById('zotero-items-tree').view = this.itemsView = null;
 			return;
 		}
-		*/
 		
 		itemgroup.setSearch('');
 		itemgroup.setTags(getTagSelection());

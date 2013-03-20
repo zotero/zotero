@@ -85,7 +85,7 @@
 <!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
-<!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
+<!ENTITY zotero.items.menu.duplicateItem "Duplicate Item">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">

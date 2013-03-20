@@ -315,7 +315,7 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	
 	if (!this.selection.selectEventsSuppressed) {
 		var unsuppress = this.selection.selectEventsSuppressed = true;
-		this._treebox.beginUpdateBatch();
+		//this._treebox.beginUpdateBatch();
 	}
 	var savedSelection = this.saveSelection();
 	var savedOpenState = this.saveOpenState();
@@ -410,7 +410,8 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	this.rememberSelection(savedSelection);
 	this.expandMatchParents();
 	if (unsuppress) {
-		this._treebox.endUpdateBatch();
+		// This causes a problem with the row count being wrong between views
+		//this._treebox.endUpdateBatch();
 		this.selection.selectEventsSuppressed = false;
 	}
 	
@@ -1270,6 +1271,12 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		columnField = 'date';
 	}
 	
+	// The visible fields affect the secondary sorting
+	var visibleFields = {};
+	this.getVisibleFields().forEach(function (val) {
+		visibleFields[val] = true;
+	});
+	
 	// Some fields (e.g. dates) need to be retrieved unformatted for sorting
 	switch (columnField) {
 		case 'date':
@@ -1280,10 +1287,20 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			var unformatted = false;
 	}
 	
-	// Hash table of fields for which rows with empty values should be displayed last
-	var emptyFirst = {
-		title: true
-	};
+	// Set whether rows with empty values should be displayed last,
+	// which may be different for primary and secondary sorting.
+	var emptyFirst = {};
+	switch (columnField) {
+	case 'title':
+		emptyFirst.title = true;
+		break;
+	
+	// When sorting by title we want empty titles at the top, but if not
+	// sorting by title, empty titles should sort to the bottom so that new
+	// empty items don't get sorted to the middle of the items list.
+	default:
+		emptyFirst.title = false;
+	}
 	
 	// Cache primary values while sorting, since base-field-mapped getField()
 	// calls are relatively expensive
@@ -1423,17 +1440,51 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		}
 		
 		if (columnField !== 'date') {
-			fieldA = a.getField('date', true).substr(0, 10);
-			fieldB = b.getField('date', true).substr(0, 10);
+			// If year is visible and not date, don't use full date
+			if (visibleFields.year && !visibleFields.date) {
+				fieldA = a.getField('date', true).substr(0, 4);
+				if (fieldA == '0000') {
+					fieldA = "";
+				}
+				fieldB = b.getField('date', true).substr(0, 4);
+				if (fieldB == '0000') {
+					fieldB = "";
+				}
+				
+				cmp = strcmp(fieldA, fieldB);
+				if (cmp !== 0) {
+					return cmp;
+				}
+			}
+			// Otherwise use full date, even if Date column is hidden
+			else {
+				fieldA = a.getField('date', true).substr(0, 10);
+				fieldB = b.getField('date', true).substr(0, 10);
+				
+				cmp = strcmp(fieldA, fieldB);
+				if (cmp !== 0) {
+					return cmp;
+				}
+			}
+		}
+		
+		if (columnField !== 'title') {
+			fieldA = a.getField('title', true);
+			fieldB = b.getField('title', true);
 			
-			cmp = strcmp(fieldA, fieldB);
+			if (!emptyFirst.title) {
+				if (fieldA === '' && fieldB !== '') return -1;
+				if (fieldA !== '' && fieldB === '') return 1;
+			}
+			
+			cmp = collation.compareString(1, fieldB, fieldA);
 			if (cmp !== 0) {
 				return cmp;
 			}
 		}
 		
-		fieldA = a.getField('dateModified');
-		fieldB = b.getField('dateModified');
+		fieldA = a.getField('dateAdded');
+		fieldB = b.getField('dateAdded');
 		return (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
 	}
 	
@@ -3046,7 +3097,7 @@ Zotero.ItemTreeView.TreeRow.prototype.getField = function(field, unformatted)
 }
 
 Zotero.ItemTreeView.TreeRow.prototype.numNotes = function() {
-	if (!this.ref.isRegularItem()) {
+	if (this.ref.isNote()) {
 		return '';
 	}
 	return this.ref.numNotes(false, true) || '';

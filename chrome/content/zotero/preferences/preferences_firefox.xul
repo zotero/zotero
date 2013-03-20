@@ -2,7 +2,7 @@
 <!--
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2009 Center for History and New Media
+    Copyright © 2006–2013 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
     
@@ -29,96 +29,8 @@
 <?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/preferences.css"?>
 
-<!--
-
-To add a new preference:
-	1) Add a new <preference> to <preferences>
-	2) Add a XUL control with a 'preference' attribute
-	3) (Optional) Add additional setup/change logic to preferences.js
-	4) (Optional) To add an observer for a preference change,
-		add an appropriate case in the switch statement
-		in Zotero.Prefs.observe()
-
--->
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<prefwindow id="zotero-prefs">
-		<prefpane id="zotero-prefpane-general"
-							label="&zotero.preferences.prefpane.general;"
-							image="chrome://zotero/skin/prefs-general.png">			
-			<preferences id="zotero-prefpane-general-preferences">
-				<preference id="pref-showIn" name="extensions.zotero.showIn" type="int"/>
-				<preference id="pref-statusBarIcon" name="extensions.zotero.statusBarIcon" type="int"/>
-				<preference id="pref-launchNonNativeFiles" name="extensions.zotero.launchNonNativeFiles" type="bool"/>
-				<preference id="pref-parseEndNoteMIMETypes"
-					name="extensions.zotero.parseEndNoteMIMETypes"
-					type="bool" onchange="Zotero.MIMETypeHandler.init()"/>
-			</preferences>
-			<groupbox id="zotero-prefpane-general-groupbox">
-				<grid id="zotero-prefpane-general-grid">
-					<rows id="zotero-prefpane-general-rows">
-						<row position="1">
-							<hbox align="center">
-								<label value="&zotero.preferences.showIn;" control="showAs"/>
-							</hbox>
-							<radiogroup id="showIn" orient="horizontal" preference="pref-showIn" oncommand="handleShowInPreferenceChange()">
-								<radio id="zotero-prefpane-general-showIn-browserPane" label="&zotero.preferences.showIn.browserPane;" value="1"/>
-								<radio id="zotero-prefpane-general-showIn-separateTab" label="&zotero.preferences.showIn.separateTab;" value="2"/>
-								<radio id="zotero-prefpane-general-showIn-appTab" label="&zotero.preferences.showIn.appTab;" value="3"/>
-							</radiogroup>
-						</row>
-						<row position="2" id="zotero-prefpane-general-statusBarIcon-row">
-							<hbox align="center">
-								<label id="statusBarIcon-label" value="&zotero.preferences.statusBarIcon;" control="statusBarIcon"/>
-							</hbox>
-							<radiogroup id="statusBarIcon" orient="horizontal" preference="pref-statusBarIcon">
-								<radio id="statusBarIcon-full" src="chrome://zotero/skin/zotero_status_bar.png" value="2"/>
-								<radio id="statusBarIcon-compact" src="chrome://zotero/skin/zotero_status_bar_compact.png" value="1"/>
-								<radio id="statusBarIcon-none" label="&zotero.preferences.statusBarIcon.none;" value="0"/>
-							</radiogroup>
-						</row>
-					</rows>
-				</grid>
-			</groupbox>
-			<groupbox id="zotero-prefpane-miscellaneous-groupbox">
-				<checkbox id="launchNonNativeFiles-checkbox"
-					preference="pref-launchNonNativeFiles"
-					onsyncfrompreference="return !document.getElementById(this.getAttribute('preference')).value"
-					onsynctopreference="return !this.checked"
-					insertbefore="automaticSnapshots-checkbox"/>
-				<checkbox label="&zotero.preferences.parseRISRefer;"
-					preference="pref-parseEndNoteMIMETypes"
-					insertbefore="automaticSnapshots-checkbox"/>
-			</groupbox>
-		</prefpane>
-		
-		<prefpane id="zotero-prefpane-export"
-							label="&zotero.preferences.prefpane.export;"
-							image="chrome://zotero/skin/prefs-export.png"
-							helpTopic="export">
-			<groupbox id="zotero-prefpane-export-groupbox">
-				<vbox id="zotero-prefpane-export-siteSettings">
-					<separator/>
-					
-					<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings"/>
-					<tree flex="1" id="quickCopy-siteSettings" hidecolumnpicker="true" rows="6" seltype="single"
-							ondblclick="showQuickCopySiteEditor(this.currentIndex)"
-							onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { deleteSelectedQuickCopySite(); }">
-						<treecols>
-							<treecol id="quickCopy-urlColumn" label="&zotero.preferences.quickCopy.siteEditor.domainPath;" flex="1"/>
-							<treecol id="quickCopy-formatColumn" label="&zotero.preferences.quickCopy.siteEditor.outputFormat;" flex="2"/>
-							<treecol id="quickCopy-copyAsHTML" label="HTML"/>
-						</treecols>
-						<treechildren id="quickCopy-siteSettings-rows"/>
-					</tree>
-					<separator class="thin"/>
-					<hbox pack="end">
-						<button label="-" onclick="deleteSelectedQuickCopySite()"/>
-						<button label="+" onclick="showQuickCopySiteEditor()"/>
-					</hbox>
-				</vbox>
-			</groupbox>
-		</prefpane>
-		
 		<prefpane id="zotero-prefpane-proxies"
 							label="&zotero.preferences.prefpane.proxies;"
 							image="chrome://zotero/skin/prefs-proxies.png" position="6"
@@ -130,7 +42,7 @@ To add a new preference:
 				&zotero.preferences.proxies.desc_after_link;
 			</description>
 			
-			<command id="zotero-proxies-update" oncommand="updateProxyPrefs()"/>
+			<command id="zotero-proxies-update" oncommand="Zotero_Preferences.Proxies.updateProxyPrefs()"/>
 			<checkbox id="zotero-proxies-transparent" label="&zotero.preferences.proxies.transparent;"
 				command="zotero-proxies-update"/>
 			<vbox style="margin-left: 1em">
@@ -139,7 +51,7 @@ To add a new preference:
 				<hbox>
 					<checkbox id="zotero-proxies-disableByDomain-checkbox" label="&zotero.preferences.proxies.disableByDomain;"
 						command="zotero-proxies-update"/>
-					<textbox id="zotero-proxies-disableByDomain-textbox" onchange="updateProxyPrefs()"/>
+					<textbox id="zotero-proxies-disableByDomain-textbox" onchange="Zotero_Preferences.Proxies.updateProxyPrefs()"/>
 				</hbox>
 			</vbox>
 			
@@ -147,8 +59,8 @@ To add a new preference:
 				<caption label="&zotero.preferences.proxies.configured;"/>
 				
 				<tree id="proxyTree" hidecolumnpicker="true" rows="6" seltype="single"
-						ondblclick="showProxyEditor(this.currentIndex)" onselect="document.getElementById('proxyTree-delete').disabled = undefined"
-						onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { deleteProxy(); }">
+						ondblclick="Zotero_Preferences.Proxies.showProxyEditor(this.currentIndex)" onselect="document.getElementById('proxyTree-delete').disabled = undefined"
+						onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { Zotero_Preferences.Proxies.deleteProxy(); }">
 					<treecols>
 						<treecol id="proxyTree-hostname" label="&zotero.preferences.proxies.hostname;" flex="1"/>
 						<treecol id="proxyTree-scheme" label="&zotero.preferences.proxies.scheme;" flex="3"/>
@@ -157,35 +69,14 @@ To add a new preference:
 				</tree>
 				<separator class="thin"/>
 				<hbox pack="end">
-					<button disabled="true" id="proxyTree-delete" label="-" onclick="deleteProxy()"/>
-					<button label="+" id="proxyTree-add" onclick="showProxyEditor()"/>
+					<button disabled="true" id="proxyTree-delete" label="-" onclick="Zotero_Preferences.Proxies.deleteProxy()"/>
+					<button label="+" id="proxyTree-add" onclick="Zotero_Preferences.Proxies.showProxyEditor()"/>
 				</hbox>
 			</groupbox>
 			
 			<separator/>
 		</prefpane>
 		
-		<prefpane id="zotero-prefpane-advanced">
-			<preferences id="zotero-prefpane-general-preferences">
-				<preference id="pref-zoteroDotOrgVersionHeader"
-					name="extensions.zotero.zoteroDotOrgVersionHeader"
-					type="bool"/>
-			</preferences>
-			
-			<tabbox id="zotero-prefpane-advanced-tabs">
-				<tabpanels id="zotero-prefpane-advanced-tabpanels">
-					<tabpanel id="zotero-prefpane-advanced-general-tab">
-						<groupbox id="zotero-prefpane-advanced-miscellaneous">
-							<checkbox label="&zotero.preferences.zoteroDotOrgVersionHeader;"
-								tooltiptext="&zotero.preferences.zoteroDotOrgVersionHeader.tooltip;"
-								preference="pref-zoteroDotOrgVersionHeader"
-								insertbefore="zotero-prefpane-advanced-openbuttons"/>
-							<separator class="thin"
-								insertbefore="zotero-prefpane-advanced-openbuttons"/>
-						</groupbox>
-					</tabpanel>
-				</tabpanels>
-			</tabbox>
-		</prefpane>
+		<script src="preferences_proxies.js" type="application/javascript;version=1.8"/>
 	</prefwindow>
 </overlay>

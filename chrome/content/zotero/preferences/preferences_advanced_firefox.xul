@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2006–2013 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<prefpane id="zotero-prefpane-advanced">
+		<preferences id="zotero-prefpane-general-preferences">
+			<preference id="pref-zoteroDotOrgVersionHeader"
+				name="extensions.zotero.zoteroDotOrgVersionHeader"
+				type="bool"/>
+		</preferences>
+		
+		<tabbox id="zotero-prefpane-advanced-tabs">
+			<tabpanels id="zotero-prefpane-advanced-tabpanels">
+				<tabpanel id="zotero-prefpane-advanced-general-tab">
+					<groupbox id="zotero-prefpane-advanced-miscellaneous">
+						<checkbox label="&zotero.preferences.zoteroDotOrgVersionHeader;"
+							tooltiptext="&zotero.preferences.zoteroDotOrgVersionHeader.tooltip;"
+							preference="pref-zoteroDotOrgVersionHeader"
+							insertbefore="zotero-prefpane-advanced-openbuttons"/>
+						<separator class="thin"
+							insertbefore="zotero-prefpane-advanced-openbuttons"/>
+					</groupbox>
+				</tabpanel>
+			</tabpanels>
+		</tabbox>
+	</prefpane>
+</overlay>

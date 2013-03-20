@@ -249,8 +249,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 				
 				// File was already available, so uploading isn't required
 				if (rootTag == 'exists') {
-					existsCallback();
-					return false;
+					return existsCallback();
 				}
 				
 				var url = req.responseXML.getElementsByTagName('url')[0].textContent;
