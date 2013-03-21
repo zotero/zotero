@@ -1,0 +1,1329 @@
+{
+    "ad": {
+        "name": "Andorra"
+    }, 
+    "ae": {
+        "name": "United Arab Emirates"
+    }, 
+    "af": {
+        "name": "Afghanistan"
+    }, 
+    "ag": {
+        "name": "Antigua and Barbuda"
+    }, 
+    "ai": {
+        "name": "Anguilla"
+    }, 
+    "al": {
+        "name": "Albania"
+    }, 
+    "am": {
+        "name": "Armenia"
+    }, 
+    "ao": {
+        "name": "Angola"
+    }, 
+    "aq": {
+        "name": "Antarctica"
+    }, 
+    "ar": {
+        "name": "Argentina"
+    }, 
+    "as": {
+        "name": "American Samoa"
+    }, 
+    "at": {
+        "name": "Austria"
+    }, 
+    "au": {
+        "name": "Australia"
+    }, 
+    "aw": {
+        "name": "Aruba"
+    }, 
+    "ax": {
+        "name": "\u00c5land Islands"
+    }, 
+    "az": {
+        "name": "Azerbaijan"
+    }, 
+    "ba": {
+        "name": "Bosnia and Herzegovina"
+    }, 
+    "bb": {
+        "name": "Barbados"
+    }, 
+    "bd": {
+        "name": "Bangladesh"
+    }, 
+    "be": {
+        "name": "Belgium"
+    }, 
+    "bf": {
+        "name": "Burkina Faso"
+    }, 
+    "bg": {
+        "name": "Bulgaria"
+    }, 
+    "bh": {
+        "name": "Bahrain"
+    }, 
+    "bi": {
+        "name": "Burundi"
+    }, 
+    "bj": {
+        "name": "Benin"
+    }, 
+    "bl": {
+        "name": "Saint Barth\u00e9lemy"
+    }, 
+    "bm": {
+        "name": "Bermuda"
+    }, 
+    "bn": {
+        "name": "Brunei Darussalam"
+    }, 
+    "bo": {
+        "name": "Bolivia"
+    }, 
+    "bq": {
+        "name": "Bonaire"
+    }, 
+    "br": {
+        "name": "Brazil"
+    }, 
+    "bs": {
+        "name": "Bahamas"
+    }, 
+    "bt": {
+        "name": "Bhutan"
+    }, 
+    "bv": {
+        "name": "Bouvet Island"
+    }, 
+    "bw": {
+        "name": "Botswana"
+    }, 
+    "by": {
+        "name": "Belarus"
+    }, 
+    "bz": {
+        "name": "Belize"
+    }, 
+    "ca": {
+        "name": "Canada",
+        "nickname": "Canada",
+        "federal": {
+            "children": {
+                "ca;federal;ab": {
+                    "name": "Alberta"
+                }, 
+                "ca;federal;bc": {
+                    "name": "British Columbia"
+                }, 
+                "ca;federal;mb": {
+                    "name": "Manitoba"
+                }, 
+                "ca;federal;nb": {
+                    "name": "New Brunswick"
+                }, 
+                "ca;federal;nl": {
+                    "name": "Newfoundland"
+                }, 
+                "ca;federal;ns": {
+                    "name": "Nova Scotia"
+                }, 
+                "ca;federal;nt": {
+                    "name": "Northwest Territories"
+                }, 
+                "ca;federal;nu": {
+                    "name": "Nunavut"
+                }, 
+                "ca;federal;on": {
+                    "name": "Ontario"
+                }, 
+                "ca;federal;pe": {
+                    "name": "Prince Edward Island"
+                }, 
+                "ca;federal;qc": {
+                    "name": "Quebec"
+                }, 
+                "ca;federal;sk": {
+                    "name": "Saskatchewan"
+                }, 
+                "ca;federal;yt": {
+                    "name": "Yukon"
+                }
+            }, 
+            "name": "federal"
+        }, 
+        "subunit": {
+            "children": {
+                "ca;ab": {
+                    "name": "Alberta"
+                }, 
+                "ca;bc": {
+                    "name": "British Columbia"
+                }, 
+                "ca;mb": {
+                    "name": "Manitoba"
+                }, 
+                "ca;nb": {
+                    "name": "New Brunswick"
+                }, 
+                "ca;nl": {
+                    "name": "Newfoundland"
+                }, 
+                "ca;ns": {
+                    "name": "Nova Scotia"
+                }, 
+                "ca;nt": {
+                    "name": "Northwest Territories"
+                }, 
+                "ca;nu": {
+                    "name": "Nunavut"
+                }, 
+                "ca;on": {
+                    "name": "Ontario"
+                }, 
+                "ca;pe": {
+                    "name": "Prince Edward Island"
+                }, 
+                "ca;qc": {
+                    "name": "Quebec"
+                }, 
+                "ca;sk": {
+                    "name": "Saskatchewan"
+                }, 
+                "ca;yt": {
+                    "name": "Yukon"
+                }
+            }, 
+            "name": ""
+        }
+    }, 
+    "cc": {
+        "name": "Cocos (Keeling) Islands"
+    }, 
+    "cd": {
+        "name": "Congo (D.R.C.)"
+    }, 
+    "cf": {
+        "name": "Central African Republic"
+    }, 
+    "cg": {
+        "name": "Congo"
+    }, 
+    "ch": {
+        "name": "Switzerland"
+    }, 
+    "ci": {
+        "name": "C\u00f4te D'Ivoire"
+    }, 
+    "ck": {
+        "name": "Cook Islands"
+    }, 
+    "cl": {
+        "name": "Chile"
+    }, 
+    "cm": {
+        "name": "Cameroon"
+    }, 
+    "cn": {
+        "name": "China"
+    }, 
+    "co": {
+        "name": "Colombia"
+    }, 
+    "coe.int": {
+        "name": "Council of Europe",
+        "nickname": "COE",
+        "subunit": {
+            "children": {
+                "coe.int;commission.on.human.rights": {
+                    "name": "Commission on Human Rights"
+                }
+            }, 
+            "name": ""
+        }
+    }, 
+    "cr": {
+        "name": "Costa Rica"
+    }, 
+    "cu": {
+        "name": "Cuba"
+    }, 
+    "cv": {
+        "name": "Cape Verde"
+    }, 
+    "cw": {
+        "name": "Cura\u00e7ao"
+    }, 
+    "cx": {
+        "name": "Christmas Island"
+    }, 
+    "cy": {
+        "name": "Cyprus"
+    }, 
+    "cz": {
+        "name": "Czech Republic"
+    }, 
+    "de": {
+        "name": "Germany"
+    }, 
+    "dj": {
+        "name": "Djibouti"
+    }, 
+    "dk": {
+        "name": "Denmark"
+    }, 
+    "dm": {
+        "name": "Dominica"
+    }, 
+    "do": {
+        "name": "Dominican Republic"
+    }, 
+    "dz": {
+        "name": "Algeria"
+    }, 
+    "ec": {
+        "name": "Ecuador"
+    }, 
+    "ec.lex": {
+        "name": "European Community"
+    }, 
+    "ee": {
+        "name": "Estonia"
+    }, 
+    "eec.lex": {
+        "name": "European Economic Community"
+    }, 
+    "eg": {
+        "name": "Egypt"
+    }, 
+    "eh": {
+        "name": "Western Sahara"
+    }, 
+    "er": {
+        "name": "Eritrea"
+    }, 
+    "es": {
+        "name": "Spain"
+    }, 
+    "et": {
+        "name": "Ethiopia"
+    }, 
+    "europa.eu": {
+        "name": "European Union"
+    }, 
+    "fi": {
+        "name": "Finland"
+    }, 
+    "fj": {
+        "name": "Fiji"
+    }, 
+    "fk": {
+        "name": "Falkland Islands (Malvinas)"
+    }, 
+    "fm": {
+        "name": "Micronesia"
+    }, 
+    "fo": {
+        "name": "Faroe Islands"
+    }, 
+    "fr": {
+        "name": "France"
+    }, 
+    "ga": {
+        "name": "Gabon"
+    }, 
+    "gb": {
+        "name": "United Kingdom",
+        "nickname": "UK",
+        "subunit": {
+            "children": {
+                "gb;england.and.wales": {
+                    "name": "England and Wales"
+                }, 
+                "gb;northern.ireland": {
+                    "name": "Northern Ireland"
+                }, 
+                "gb;scotland": {
+                    "name": "Scotland"
+                }
+            }, 
+            "name": ""
+        }
+    }, 
+    "gd": {
+        "name": "Grenada"
+    }, 
+    "ge": {
+        "name": "Georgia"
+    }, 
+    "gf": {
+        "name": "French Guiana"
+    }, 
+    "gg": {
+        "name": "Guernsey"
+    }, 
+    "gh": {
+        "name": "Ghana"
+    }, 
+    "gi": {
+        "name": "Gibraltar"
+    }, 
+    "gl": {
+        "name": "Greenland"
+    }, 
+    "gm": {
+        "name": "Gambia"
+    }, 
+    "gn": {
+        "name": "Guinea"
+    }, 
+    "gp": {
+        "name": "Guadeloupe"
+    }, 
+    "gq": {
+        "name": "Equatorial Guinea"
+    }, 
+    "gr": {
+        "name": "Greece"
+    }, 
+    "gs": {
+        "name": "South Georgia and the South Sandwich Islands"
+    }, 
+    "gt": {
+        "name": "Guatemala"
+    }, 
+    "gu": {
+        "name": "Guam"
+    }, 
+    "gw": {
+        "name": "Guinea-bissau"
+    }, 
+    "gy": {
+        "name": "Guyana"
+    }, 
+    "hk": {
+        "name": "Hong Kong"
+    }, 
+    "hm": {
+        "name": "Heard Island and Mcdonald Islands"
+    }, 
+    "hn": {
+        "name": "Honduras"
+    }, 
+    "hr": {
+        "name": "Croatia"
+    }, 
+    "ht": {
+        "name": "Haiti"
+    }, 
+    "hu": {
+        "name": "Hungary"
+    }, 
+    "id": {
+        "name": "Indonesia"
+    }, 
+    "ie": {
+        "name": "Ireland"
+    }, 
+    "il": {
+        "name": "Israel"
+    }, 
+    "im": {
+        "name": "Isle Of Man"
+    }, 
+    "imf.org": {
+        "name": "International Monetary Fund"
+    }, 
+    "in": {
+        "name": "India"
+    }, 
+    "io": {
+        "name": "British Indian Ocean Territory"
+    }, 
+    "iq": {
+        "name": "Iraq"
+    }, 
+    "ir": {
+        "name": "Iran"
+    }, 
+    "is": {
+        "name": "Iceland"
+    }, 
+    "it": {
+        "name": "Italy"
+    }, 
+    "je": {
+        "name": "Jersey"
+    }, 
+    "jm": {
+        "name": "Jamaica"
+    }, 
+    "jo": {
+        "name": "Jordan"
+    }, 
+    "jp": {
+        "name": "Japan"
+    }, 
+    "ke": {
+        "name": "Kenya"
+    }, 
+    "kg": {
+        "name": "Kyrgyzstan"
+    }, 
+    "kh": {
+        "name": "Cambodia"
+    }, 
+    "ki": {
+        "name": "Kiribati"
+    }, 
+    "km": {
+        "name": "Comoros"
+    }, 
+    "kn": {
+        "name": "Saint Kitts and Nevis"
+    }, 
+    "kp": {
+        "name": "Korea (D.P.R.K.)"
+    }, 
+    "kr": {
+        "name": "Korea (South Korea) Republic Of"
+    }, 
+    "kw": {
+        "name": "Kuwait"
+    }, 
+    "ky": {
+        "name": "Cayman Islands"
+    }, 
+    "kz": {
+        "name": "Kazakhstan"
+    }, 
+    "la": {
+        "name": "Lao People'S Democratic Republic"
+    }, 
+    "lb": {
+        "name": "Lebanon"
+    }, 
+    "lc": {
+        "name": "Saint Lucia"
+    }, 
+    "li": {
+        "name": "Liechtenstein"
+    }, 
+    "lk": {
+        "name": "Sri Lanka"
+    }, 
+    "lr": {
+        "name": "Liberia"
+    }, 
+    "ls": {
+        "name": "Lesotho"
+    }, 
+    "lt": {
+        "name": "Lithuania"
+    }, 
+    "lu": {
+        "name": "Luxembourg"
+    }, 
+    "lv": {
+        "name": "Latvia"
+    }, 
+    "ly": {
+        "name": "Libya"
+    }, 
+    "ma": {
+        "name": "Morocco"
+    }, 
+    "mc": {
+        "name": "Monaco"
+    }, 
+    "md": {
+        "name": "Moldova"
+    }, 
+    "me": {
+        "name": "Montenegro"
+    }, 
+    "mf": {
+        "name": "Saint Martin (French Part)"
+    }, 
+    "mg": {
+        "name": "Madagascar"
+    }, 
+    "mh": {
+        "name": "Marshall Islands"
+    }, 
+    "mk": {
+        "name": "Macedonia"
+    }, 
+    "ml": {
+        "name": "Mali"
+    }, 
+    "mm": {
+        "name": "Myanmar"
+    }, 
+    "mn": {
+        "name": "Mongolia"
+    }, 
+    "mo": {
+        "name": "Macao"
+    }, 
+    "mp": {
+        "name": "Northern Mariana Islands"
+    }, 
+    "mq": {
+        "name": "Martinique"
+    }, 
+    "mr": {
+        "name": "Mauritania"
+    }, 
+    "ms": {
+        "name": "Montserrat"
+    }, 
+    "mt": {
+        "name": "Malta"
+    }, 
+    "mu": {
+        "name": "Mauritius"
+    }, 
+    "mv": {
+        "name": "Maldives"
+    }, 
+    "mw": {
+        "name": "Malawi"
+    }, 
+    "mx": {
+        "name": "Mexico"
+    }, 
+    "my": {
+        "name": "Malaysia"
+    }, 
+    "mz": {
+        "name": "Mozambique"
+    }, 
+    "na": {
+        "name": "Namibia"
+    }, 
+    "nc": {
+        "name": "New Caledonia"
+    }, 
+    "ne": {
+        "name": "Niger"
+    }, 
+    "nf": {
+        "name": "Norfolk Island"
+    }, 
+    "ng": {
+        "name": "Nigeria"
+    }, 
+    "ni": {
+        "name": "Nicaragua"
+    }, 
+    "nl": {
+        "name": "Netherlands"
+    }, 
+    "no": {
+        "name": "Norway"
+    }, 
+    "np": {
+        "name": "Nepal"
+    }, 
+    "nr": {
+        "name": "Nauru"
+    }, 
+    "nu": {
+        "name": "Niue"
+    }, 
+    "nz": {
+        "name": "New Zealand",
+        "nickname": "NZ",
+        "subunit": {
+            "children": {
+                "nz;maori": {
+                    "name": "Maori Jurisdiction"
+                }
+            }, 
+            "name": ""
+        }
+    }, 
+    "om": {
+        "name": "Oman"
+    }, 
+    "pa": {
+        "name": "Panama"
+    }, 
+    "pe": {
+        "name": "Peru"
+    }, 
+    "pf": {
+        "name": "French Polynesia"
+    }, 
+    "pg": {
+        "name": "Papua New Guinea"
+    }, 
+    "ph": {
+        "name": "Philippines"
+    }, 
+    "pk": {
+        "name": "Pakistan"
+    }, 
+    "pl": {
+        "name": "Poland"
+    }, 
+    "pm": {
+        "name": "Saint Pierre and Miquelon"
+    }, 
+    "pn": {
+        "name": "Pitcairn"
+    }, 
+    "pr": {
+        "name": "Puerto Rico"
+    }, 
+    "ps": {
+        "name": "Palestinian Territory"
+    }, 
+    "pt": {
+        "name": "Portugal"
+    }, 
+    "pw": {
+        "name": "Palau"
+    }, 
+    "py": {
+        "name": "Paraguay"
+    }, 
+    "qa": {
+        "name": "Qatar"
+    }, 
+    "re": {
+        "name": "R\u00e9union"
+    }, 
+    "ro": {
+        "name": "Romania"
+    }, 
+    "rs": {
+        "name": "Serbia"
+    }, 
+    "ru": {
+        "name": "Russian Federation"
+    }, 
+    "rw": {
+        "name": "Rwanda"
+    }, 
+    "sa": {
+        "name": "Saudi Arabia"
+    }, 
+    "sb": {
+        "name": "Solomon Islands"
+    }, 
+    "sc": {
+        "name": "Seychelles"
+    }, 
+    "sd": {
+        "name": "Sudan"
+    }, 
+    "se": {
+        "name": "Sweden"
+    }, 
+    "sg": {
+        "name": "Singapore"
+    }, 
+    "sh": {
+        "name": "Saint Helena"
+    }, 
+    "si": {
+        "name": "Slovenia"
+    }, 
+    "sj": {
+        "name": "Svalbard and Jan Mayen"
+    }, 
+    "sk": {
+        "name": "Slovakia"
+    }, 
+    "sl": {
+        "name": "Sierra Leone"
+    }, 
+    "sm": {
+        "name": "San Marino"
+    }, 
+    "sn": {
+        "name": "Senegal"
+    }, 
+    "so": {
+        "name": "Somalia"
+    }, 
+    "sr": {
+        "name": "Suriname"
+    }, 
+    "st": {
+        "name": "Sao Tome and Principe"
+    }, 
+    "sv": {
+        "name": "El Salvador"
+    }, 
+    "sx": {
+        "name": "Sint Maarten (Dutch Part)"
+    }, 
+    "sy": {
+        "name": "Syrian Arab Republic"
+    }, 
+    "sz": {
+        "name": "Swaziland"
+    }, 
+    "tc": {
+        "name": "Turks and Caicos Islands"
+    }, 
+    "td": {
+        "name": "Chad"
+    }, 
+    "tf": {
+        "name": "French Southern Territories"
+    }, 
+    "tg": {
+        "name": "Togo"
+    }, 
+    "th": {
+        "name": "Thailand"
+    }, 
+    "tj": {
+        "name": "Tajikistan"
+    }, 
+    "tk": {
+        "name": "Tokelau"
+    }, 
+    "tl": {
+        "name": "Timor-leste"
+    }, 
+    "tm": {
+        "name": "Turkmenistan"
+    }, 
+    "tn": {
+        "name": "Tunisia"
+    }, 
+    "to": {
+        "name": "Tonga"
+    }, 
+    "tr": {
+        "name": "Turkey"
+    }, 
+    "tt": {
+        "name": "Trinidad and Tobago"
+    }, 
+    "tv": {
+        "name": "Tuvalu"
+    }, 
+    "tw": {
+        "name": "Taiwan"
+    }, 
+    "tz": {
+        "name": "Tanzania"
+    }, 
+    "ua": {
+        "name": "Ukraine"
+    }, 
+    "ug": {
+        "name": "Uganda"
+    }, 
+    "um": {
+        "name": "United States Minor Outlying Islands"
+    }, 
+    "un.org": {
+        "name": "United Nations"
+    }, 
+    "us": {
+        "name": "United States",
+        "nickname": "US",
+        "federal": {
+            "children": {
+                "us;federal;ak": {
+                    "name": "D. Alaska"
+                }, 
+                "us;federal;al.middle": {
+                    "name": "M.D. Alabama"
+                }, 
+                "us;federal;al.northern": {
+                    "name": "N.D. Alabama"
+                }, 
+                "us;federal;al.southern": {
+                    "name": "S.D. Alabama"
+                }, 
+                "us;federal;ar.eastern": {
+                    "name": "E.D. Arkansas"
+                }, 
+                "us;federal;ar.western": {
+                    "name": "W.D. Arkansas"
+                }, 
+                "us;federal;az": {
+                    "name": "D. Arizona"
+                }, 
+                "us;federal;ca.central": {
+                    "name": "C.D. California"
+                }, 
+                "us;federal;ca.eastern": {
+                    "name": "E.D. California"
+                }, 
+                "us;federal;ca.northern": {
+                    "name": "N.D. California"
+                }, 
+                "us;federal;ca.southern": {
+                    "name": "S.D. California"
+                }, 
+                "us;federal;co": {
+                    "name": "D. Colorado"
+                }, 
+                "us;federal;ct": {
+                    "name": "D. Connecticut"
+                }, 
+                "us;federal;dc": {
+                    "name": "D. District of Columbia"
+                }, 
+                "us;federal;de": {
+                    "name": "D. Delaware"
+                }, 
+                "us;federal;fl.middle": {
+                    "name": "M.D. Florida"
+                }, 
+                "us;federal;fl.northern": {
+                    "name": "N.D. Florida"
+                }, 
+                "us;federal;fl.southern": {
+                    "name": "S.D. Florida"
+                }, 
+                "us;federal;ga.middle": {
+                    "name": "M.D. Georgia"
+                }, 
+                "us;federal;ga.northern": {
+                    "name": "N.D. Georgia"
+                }, 
+                "us;federal;ga.southern": {
+                    "name": "S.D. Georgia"
+                }, 
+                "us;federal;hi": {
+                    "name": "D. Hawaii"
+                }, 
+                "us;federal;ia.northern": {
+                    "name": "N.D. Iowa"
+                }, 
+                "us;federal;ia.southern": {
+                    "name": "S.D. Iowa"
+                }, 
+                "us;federal;id": {
+                    "name": "D. Idaho"
+                }, 
+                "us;federal;il.central": {
+                    "name": "C.D. Illinois"
+                }, 
+                "us;federal;il.northern": {
+                    "name": "N.D. Illinois"
+                }, 
+                "us;federal;il.southern": {
+                    "name": "S.D. Illinois"
+                }, 
+                "us;federal;in.northern": {
+                    "name": "N.D. Indiana"
+                }, 
+                "us;federal;in.southern": {
+                    "name": "S.D. Indiana"
+                }, 
+                "us;federal;ks": {
+                    "name": "D. Kansas"
+                }, 
+                "us;federal;ky.eastern": {
+                    "name": "E.D. Kentucy"
+                }, 
+                "us;federal;ky.western": {
+                    "name": "W.D. Kentucky"
+                }, 
+                "us;federal;la.eastern": {
+                    "name": "E.D. Louisiana"
+                }, 
+                "us;federal;la.middle": {
+                    "name": "M.D. Louisiana"
+                }, 
+                "us;federal;la.western": {
+                    "name": "W.D. Louisiana"
+                }, 
+                "us;federal;ma": {
+                    "name": "D. Massachusetts"
+                }, 
+                "us;federal;md": {
+                    "name": "D. Maryland"
+                }, 
+                "us;federal;me": {
+                    "name": "D. Maine"
+                }, 
+                "us;federal;mi.eastern": {
+                    "name": "E.D. Michigan"
+                }, 
+                "us;federal;mi.western": {
+                    "name": "W.D. Michigan"
+                }, 
+                "us;federal;mn": {
+                    "name": "D. Minnisota"
+                }, 
+                "us;federal;mo.eastern": {
+                    "name": "E.D. Missouri"
+                }, 
+                "us;federal;mo.western": {
+                    "name": "W.D. Missouri"
+                }, 
+                "us;federal;ms.northern": {
+                    "name": "N.D. Mississippi"
+                }, 
+                "us;federal;ms.southern": {
+                    "name": "S.D. Mississippi"
+                }, 
+                "us;federal;mt": {
+                    "name": "D. Montana"
+                }, 
+                "us;federal;nc.eastern": {
+                    "name": "E.D. North Carolina"
+                }, 
+                "us;federal;nc.middle": {
+                    "name": "M.D. North Carolina"
+                }, 
+                "us;federal;nc.western": {
+                    "name": "W.D. North Carolina"
+                }, 
+                "us;federal;nd": {
+                    "name": "D. North Dakota"
+                }, 
+                "us;federal;ne": {
+                    "name": "D. Nebraska"
+                }, 
+                "us;federal;nh": {
+                    "name": "D. New Hampshire"
+                }, 
+                "us;federal;nj": {
+                    "name": "D. New Jersey"
+                }, 
+                "us;federal;nm": {
+                    "name": "D. New Mexico"
+                }, 
+                "us;federal;nv": {
+                    "name": "D. Nevada"
+                }, 
+                "us;federal;ny.eastern": {
+                    "name": "E.D. New York"
+                }, 
+                "us;federal;ny.northern": {
+                    "name": "N.D. New York"
+                }, 
+                "us;federal;ny.southern": {
+                    "name": "S.D. New York"
+                }, 
+                "us;federal;ny.western": {
+                    "name": "W.D. New York"
+                }, 
+                "us;federal;oh.northern": {
+                    "name": "N.D. Ohio"
+                }, 
+                "us;federal;oh.southern": {
+                    "name": "S.D. Ohio"
+                }, 
+                "us;federal;ok.eastern": {
+                    "name": "E.D. Oklahoma"
+                }, 
+                "us;federal;ok.northern": {
+                    "name": "N.D. Oklahoma"
+                }, 
+                "us;federal;ok.western": {
+                    "name": "W.D. Oklahoma"
+                }, 
+                "us;federal;or": {
+                    "name": "D. Oregon"
+                }, 
+                "us;federal;pa.eastern": {
+                    "name": "E.D. Pennsylvania"
+                }, 
+                "us;federal;pa.middle": {
+                    "name": "M.D. Pennsylvania"
+                }, 
+                "us;federal;pa.western": {
+                    "name": "W.D. Pennsylvania"
+                }, 
+                "us;federal;pr": {
+                    "name": "D. Puerto Rico"
+                }, 
+                "us;federal;ri": {
+                    "name": "D. Rhode Island"
+                }, 
+                "us;federal;sc": {
+                    "name": "D. South Carolina"
+                }, 
+                "us;federal;sd": {
+                    "name": "D. South Dakota"
+                }, 
+                "us;federal;tn.eastern": {
+                    "name": "E.D. Tennessee"
+                }, 
+                "us;federal;tn.middle": {
+                    "name": "M.D. Tennessee"
+                }, 
+                "us;federal;tn.western": {
+                    "name": "W.D. Tennessee"
+                }, 
+                "us;federal;tx.eastern": {
+                    "name": "E.D. Texas"
+                }, 
+                "us;federal;tx.northern": {
+                    "name": "N.D. Texas"
+                }, 
+                "us;federal;tx.southern": {
+                    "name": "S.D. Texas"
+                }, 
+                "us;federal;tx.western": {
+                    "name": "W.D. Texas"
+                }, 
+                "us;federal;ut": {
+                    "name": "D. Utah"
+                }, 
+                "us;federal;va.eastern": {
+                    "name": "E.D. Virginia"
+                }, 
+                "us;federal;va.western": {
+                    "name": "W.D. Virginia"
+                }, 
+                "us;federal;vt": {
+                    "name": "D. Vermont"
+                }, 
+                "us;federal;wa.eastern": {
+                    "name": "E.D. Washington"
+                }, 
+                "us;federal;wa.western": {
+                    "name": "W.D. Washington"
+                }, 
+                "us;federal;wi.eastern": {
+                    "name": "E.D. Wisconsin"
+                }, 
+                "us;federal;wi.western": {
+                    "name": "W.D. Wisconsin"
+                }, 
+                "us;federal;wv.northern": {
+                    "name": "N.D. West Virginia"
+                }, 
+                "us;federal;wv.southern": {
+                    "name": "S.D. West Virginia"
+                }, 
+                "us;federal;wy": {
+                    "name": "D. Wyoming"
+                }
+            }, 
+            "name": "federal"
+        },
+        "subunit": {
+            "children": {
+                "us;ak": {
+                    "name": "Alaska"
+                }, 
+                "us;al": {
+                    "name": "Alabama"
+                }, 
+                "us;ar": {
+                    "name": "Arkansas"
+                }, 
+                "us;az": {
+                    "name": "Arizona"
+                }, 
+                "us;ca": {
+                    "name": "California"
+                }, 
+                "us;co": {
+                    "name": "Colorado"
+                }, 
+                "us;ct": {
+                    "name": "Connecticut"
+                }, 
+                "us;dc": {
+                    "name": "District of Columbia"
+                }, 
+                "us;de": {
+                    "name": "Delaware"
+                }, 
+                "us;fl": {
+                    "name": "Florida"
+                }, 
+                "us;ga": {
+                    "name": "Georgia"
+                }, 
+                "us;hi": {
+                    "name": "Hawaii"
+                }, 
+                "us;ia": {
+                    "name": "Iowa"
+                }, 
+                "us;id": {
+                    "name": "Idaho"
+                }, 
+                "us;il": {
+                    "name": "Illinois"
+                }, 
+                "us;in": {
+                    "name": "Indiana"
+                }, 
+                "us;ks": {
+                    "name": "Kansas"
+                }, 
+                "us;ky": {
+                    "name": "Kentucky"
+                }, 
+                "us;la": {
+                    "name": "Louisiana"
+                }, 
+                "us;ma": {
+                    "name": "Massachusetts"
+                }, 
+                "us;md": {
+                    "name": "Maryland"
+                }, 
+                "us;me": {
+                    "name": "Maine"
+                }, 
+                "us;mi": {
+                    "name": "Michigan"
+                }, 
+                "us;mn": {
+                    "name": "Minnisota"
+                }, 
+                "us;mo": {
+                    "name": "Montana"
+                }, 
+                "us;ms": {
+                    "name": "Mississippi"
+                }, 
+                "us;mt": {
+                    "name": "Montana"
+                }, 
+                "us;nc": {
+                    "name": "North Carolina"
+                }, 
+                "us;nd": {
+                    "name": "North Dakota"
+                }, 
+                "us;ne": {
+                    "name": "Nebraska"
+                }, 
+                "us;nh": {
+                    "name": "New Hampshire"
+                }, 
+                "us;nj": {
+                    "name": "New Jersey"
+                }, 
+                "us;nm": {
+                    "name": "New Mexico"
+                }, 
+                "us;nv": {
+                    "name": "Nevada"
+                }, 
+                "us;ny": {
+                    "name": "New York"
+                }, 
+                "us;oh": {
+                    "name": "Ohio"
+                }, 
+                "us;ok": {
+                    "name": "Oklahoma"
+                }, 
+                "us;or": {
+                    "name": "Oregon"
+                }, 
+                "us;pa": {
+                    "name": "Pennsylvania"
+                }, 
+                "us;pr": {
+                    "name": "Puerto Rico"
+                }, 
+                "us;ri": {
+                    "name": "Rhode Island"
+                }, 
+                "us;sc": {
+                    "name": "South Carolina"
+                }, 
+                "us;sd": {
+                    "name": "South Dakota"
+                }, 
+                "us;tn": {
+                    "name": "Tennessee"
+                }, 
+                "us;tx": {
+                    "name": "Texas"
+                }, 
+                "us;ut": {
+                    "name": "Utah"
+                }, 
+                "us;va": {
+                    "name": "Virginia"
+                }, 
+                "us;vt": {
+                    "name": "Vermont"
+                }, 
+                "us;wa": {
+                    "name": "Washington"
+                }, 
+                "us;wi": {
+                    "name": "Wisconsin"
+                }, 
+                "us;wv": {
+                    "name": "West Virginia"
+                }, 
+                "us;wy": {
+                    "name": "Wyoming"
+                }
+            }, 
+            "name": ""
+        }
+    }, 
+    "uy": {
+        "name": "Uruguay"
+    }, 
+    "uz": {
+        "name": "Uzbekistan"
+    }, 
+    "va": {
+        "name": "Holy See (Vatican City State)"
+    }, 
+    "vc": {
+        "name": "Saint Vincent and the Grenadines"
+    }, 
+    "ve": {
+        "name": "Venezuela"
+    }, 
+    "vg": {
+        "name": "Virgin Islands (British)"
+    }, 
+    "vi": {
+        "name": "Virgin Islands (U.S.)"
+    }, 
+    "vn": {
+        "name": "Viet Nam"
+    }, 
+    "vu": {
+        "name": "Vanuatu"
+    }, 
+    "wf": {
+        "name": "Wallis and Futuna"
+    }, 
+    "ws": {
+        "name": "Samoa"
+    }, 
+    "wto.org": {
+        "name": "World Trade Organization"
+    }, 
+    "ye": {
+        "name": "Yemen"
+    }, 
+    "yt": {
+        "name": "Mayotte"
+    }, 
+    "za": {
+        "name": "South Africa"
+    }, 
+    "zm": {
+        "name": "Zambia"
+    }, 
+    "zw": {
+        "name": "Zimbabwe"
+    }
+}
