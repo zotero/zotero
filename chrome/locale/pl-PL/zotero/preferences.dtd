@@ -3,7 +3,7 @@
 <!ENTITY zotero.preferences.default "Domyślna:">
 <!ENTITY zotero.preferences.items "elementów">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Settings">
+<!ENTITY zotero.preferences.settings "Ustawienia">
 
 <!ENTITY zotero.preferences.prefpane.general "Ogólne">
 
@@ -60,14 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synchronizuj załączniki w Mojej bibliotece za pomocą">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Synchronizuj pliki załączników w grupach bibliotek za pomocą usługi przechowywania Zotero">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Pobierz pliki">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "podczas synchronizacji">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "w razie potrzeby">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Używając usługi przechowywania w Zotero, zgadzasz się na jej">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "warunki i postanowienia">
-<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
-<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Poniższe operacje są używane tylko w rzadkich i określonych sytuacjach i nie powinny być używane do rozwiązywania ogólnych problemów z synchronizacją. W wielu przypadkach przywracanie może spowodować dodatkowe problemy. Zobacz">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Opcje przywracania synchronizacji">
+<!ENTITY zotero.preferences.sync.reset.warning3 "aby uzyskać więcej informacji.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Pełna synchronizacja z serwerem Zotero">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Połącz lokalne dane Zotero z danymi z serwera synchronizacji, ignorując historię synchronizacji.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Przywróć z serwera Zotero">
@@ -76,7 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Usuń wszystkie dane na serwerze i nadpisz je lokalnymi danymi Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Wyczyść historię synchronizacji plików">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Wymuś sprawdzenie wszystkich lokalnych załączników na serwerze przechowywania.">
-<!ENTITY zotero.preferences.sync.reset "Reset">
+<!ENTITY zotero.preferences.sync.reset "Przywróć">
 <!ENTITY zotero.preferences.sync.reset.button "Wyczyść...">
 
 
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Nazwa">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Aktualizacja">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatyczne skracanie tytułów czasopism">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Pobierz dodatkowe style...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Skróty klawiaturowe">
@@ -162,7 +162,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Jakikolwiek tekst">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Zaawansowane">
-<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Pliki i katalogi">
 
 <!ENTITY zotero.preferences.prefpane.locate "Wyszukaj">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Zarządzanie silnikami wyszukiwania">
@@ -184,8 +184,8 @@
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
-<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
-<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Katalog podstawowy:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Wybierz...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 
 <!ENTITY zotero.preferences.dbMaintenance "Konserwacja bazy danych">

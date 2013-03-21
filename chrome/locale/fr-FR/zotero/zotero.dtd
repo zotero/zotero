@@ -85,7 +85,7 @@
 <!ENTITY zotero.items.menu.attach.fileLink "Joindre un lien vers le fichier…">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaurer vers la bibliothèque">
-<!ENTITY zotero.items.menu.duplicateItem "Dupliquer le document sélectionné">
+<!ENTITY zotero.items.menu.duplicateItem "Dupliquer le document">
 <!ENTITY zotero.items.menu.mergeItems "Fusionner les documents…">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Choisissez la version du document à utiliser comme document maître :">
