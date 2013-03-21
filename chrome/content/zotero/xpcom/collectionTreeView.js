@@ -403,9 +403,6 @@ Zotero.CollectionTreeView.prototype.getCellText = function(row, column)
 	if (column.id == 'zotero-collections-name-column') {
 		return obj.getName();
 	}
-	else if (column.id == 'zotero-collections-sync-status-column') {
-		return "";
-	}
 	else
 		return "";
 }
@@ -426,27 +423,6 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 	
 	switch (collectionType) {
 		case 'library':
-			if (col.id == 'zotero-collections-sync-status-column') {
-				if (itemGroup.isLibrary(true)) {
-					var libraryID = itemGroup.isLibrary() ? 0 : itemGroup.ref.libraryID;
-					var errors = Zotero.Sync.Runner.getErrors(libraryID);
-					if (errors) {
-						var e = Zotero.Sync.Runner.getPrimaryError(errors);
-						switch (e.errorMode) {
-						case 'warning':
-							var image = 'error';
-							break;
-							
-						default:
-							var image = 'exclamation';
-							break;
-						}
-						
-						return 'chrome://zotero/skin/' + image + '.png';
-					}
-				}
-				return '';
-			}
 			break;
 		
 		case 'trash':
