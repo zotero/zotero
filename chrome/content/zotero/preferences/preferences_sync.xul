@@ -311,6 +311,8 @@
 				</tabpanel>
 			</tabpanels>
 		</tabbox>
+		
+		<separator/>
 	</prefpane>
 	
 	<script src="preferences_sync.js" type="application/javascript;version=1.8"/>
