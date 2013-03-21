@@ -4237,14 +4237,14 @@ Zotero.Sync.Server.Data = new function() {
 
         // Merge field content of an mlzsync1: prefix on the extra field
         // into the item
-        var obj = Zotero.Sync.Server.Data.decodeMlzFields(item,data,extra,changedFields);
+        var obj = this.decodeMlzFields(item,data,extra,changedFields);
 
         // RIGHT!!! So now we have the fields explicitly set
         // from the sync item held in changedFields.
 
         // We need to do the same thing for multi and main, working
         // from the extra-field parse-out, and everything will work.
-        removeMlzFieldDeletes(item,data,obj);
+        this.removeMlzFieldDeletes(item,data,obj);
 
 		// Deleted item flag
 		var deleted = itemNode.getAttribute('deleted');
@@ -4280,8 +4280,8 @@ Zotero.Sync.Server.Data = new function() {
 
         // Merge creator content of an mlzsync1: prefix on the extra field
         // into the item
-        Zotero.Sync.Server.Data.decodeMlzCreators(item,obj,pos);
-        Zotero.Sync.Server.Data.removeMlzCreatorDeletes(item,obj);
+        this.decodeMlzCreators(item,obj,pos);
+        this.removeMlzCreatorDeletes(item,obj);
 
 		// Remove item's remaining creators not in XML
 		var numCreators = item.numCreators();
