@@ -961,9 +961,9 @@ Zotero.Items = new function() {
 			+ "(SELECT COUNT(*) FROM itemAttachments IA WHERE sourceItemID=I.itemID AND "
 			+ "IA.itemID NOT IN (SELECT itemID FROM deletedItems)) AS numAttachments, "
 			+ "(CASE I.itemTypeID WHEN 14 THEN (SELECT sourceItemID FROM itemAttachments IA WHERE IA.itemID=I.itemID) "
-			+ "WHEN 1 THEN (SELECT sourceItemID FROM itemNotes INo WHERE INo.itemID=I.itemID) END) AS sourceItemID "
+			+ "WHEN 1 THEN (SELECT sourceItemID FROM itemNotes INo WHERE INo.itemID=I.itemID) END) AS sourceItemID, "
 			+ getSortCreatorSQL()
-			+ 'FROM items I WHERE 1';
+			+ ' FROM items I WHERE 1';
 		if (arguments[0]) {
 			sql += ' AND I.itemID IN (' + Zotero.join(arguments[0], ',') + ')';
 		}
