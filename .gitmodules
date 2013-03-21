@@ -7,6 +7,3 @@
 [submodule "chrome/content/zotero/locale/csl"]
 	path = chrome/content/zotero/locale/csl
 	url = git@github.com:fbennett/locales.git
-[submodule "mlz-jurisdictions"]
-	path = mlz-jurisdictions
-	url = git@github.com:fbennett/mlz-jurisdictions.git
