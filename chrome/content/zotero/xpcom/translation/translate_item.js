@@ -294,7 +294,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			var uri = IOService.newURI(Zotero.File.encodeFilePath(path), "", this._baseURI);
 		}
 		catch (e) {
-			var msg = "Error parsing attachment path: " + path;
+			var msg = "Error parsing attachment path: " + path + "\n" + e.message;
 			Zotero.logError(msg);
 			Zotero.debug("Translate: " + msg, 2);
 			return false;
@@ -303,14 +303,14 @@ Zotero.Translate.ItemSaver.prototype = {
 		try {
 			var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
 			if (file.path == '/') {
-				var msg = "Error parsing attachment path: " + path;
+				var msg = "Error parsing attachment path: " + path + "\nRoot path returned.";
 				Zotero.logError(msg);
 				Zotero.debug("Translate: " + msg, 2);
 				return false;
 			}
 		}
 		catch (e) {
-			var msg = "Error getting file from attachment path: " + path;
+			var msg = "Error getting file from attachment path: " + path + "\n" + e.message;
 			Zotero.logError(msg);
 			Zotero.debug("Translate: " + msg, 2);
 			return false;
