@@ -1,0 +1,24 @@
+customcolorpicker[type="button"] {
+	width: 38px;
+	height: 24px;
+	border: 1px solid #a7a7a7;
+	background-color: ThreeDFace;
+	padding: 3px;
+	-moz-appearance: button-bevel;
+}
+
+.colorpickertile[hover="true"], .cp-light[hover="true"] {
+	border: 0;
+}
+
+.colorpickertile[selected="true"] {
+	border : 1px outset #C0C0C0;
+}
+
+.colorpickertile[hover="true"]:not([selected="true"]) {
+	border : 1px dotted #A7A7A7;
+}
+
+.cp-light[hover="true"]:not([selected="true"]) {
+  border : 1px dotted #000000;
+}

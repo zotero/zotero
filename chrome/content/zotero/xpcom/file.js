@@ -23,11 +23,18 @@
     ***** END LICENSE BLOCK *****
 */
 
+/**
+ * Functions for reading files
+ * @namespace
+ */
 Zotero.File = new function(){
+	Components.utils.import("resource://zotero/q.js");
+	Components.utils.import("resource://gre/modules/NetUtil.jsm");
+	Components.utils.import("resource://gre/modules/FileUtils.jsm");
+	
 	this.getExtension = getExtension;
 	this.getClosestDirectory = getClosestDirectory;
 	this.getSample = getSample;
-	this.getContents = getContents;
 	this.getContentsFromURL = getContentsFromURL;
 	this.putContents = putContents;
 	this.getValidFileName = getValidFileName;
@@ -85,60 +92,100 @@ Zotero.File = new function(){
 	}
 	
 	
-	function getContents(file, charset, maxLength){
-		var fis = Components.classes["@mozilla.org/network/file-input-stream;1"].
-			createInstance(Components.interfaces.nsIFileInputStream);
-		fis.init(file, 0x01, 0664, 0);
-		
-		if (charset){
-			charset = Zotero.CharacterSets.getName(charset);
+	/**
+	 * Get the contents of a file or input stream
+	 * @param {nsIFile|nsIInputStream} file The file to read
+	 * @param {String} [charset] The character set; defaults to UTF-8
+	 * @param {Integer} [maxLength] The maximum number of bytes to read
+	 * @return {String} The contents of the file
+	 * @deprecated Use {@link Zotero.File.getContentsAsync} when possible
+	 */
+	this.getContents = function getContents(file, charset, maxLength){
+		var fis;
+		if(file instanceof Components.interfaces.nsIInputStream) {
+			fis = file;
+		} else if(file instanceof Components.interfaces.nsIFile) {
+			fis = Components.classes["@mozilla.org/network/file-input-stream;1"].
+				createInstance(Components.interfaces.nsIFileInputStream);
+			fis.init(file, 0x01, 0664, 0);
+		} else {
+            Zotero.debug("WELL, FUCK(1)! "+file);
+            Zotero.debug("WELL, FUCK(2)! "+file.path);
+			throw new Error("File is not an nsIInputStream or nsIFile");
 		}
 		
-		if (!charset){
-			charset = "UTF-8";
-		}
+		charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
+		
+		var blockSize = maxLength ? Math.min(maxLength, 524288) : 524288;
 		
 		const replacementChar
 			= Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
 		var is = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 			.createInstance(Components.interfaces.nsIConverterInputStream);
-		is.init(fis, charset, 4096, replacementChar);
+		is.init(fis, charset, blockSize, replacementChar);
 		var chars = 0;
 		
-		var contents = [], str = {};
-		while (is.readString(4096, str) != 0) {
-			var strLen = str.value.length;
-			
+		var contents = "", str = {};
+		while (is.readString(blockSize, str) !== 0) {
 			if (maxLength) {
+				var strLen = str.value.length;
 				if ((chars + strLen) > maxLength) {
 					var remainder = maxLength - chars;
-					contents.push(str.value.slice(0, remainder));
+					contents += str.value.slice(0, remainder);
 					break;
 				}
 				chars += strLen;
 			}
 			
-			contents.push(str.value);
+			contents += str.value;
 		}
 		
 		is.close();
 		
-		return contents.join('');
-	}
-	
+		return contents;
+	};
 	
 	
 	/**
-	 * Return the contents of a file as a byte array
+	 * Get the contents of a file or input stream asynchronously
+	 * @param {nsIFile|nsIInputStream} file The file to read
+	 * @param {String} [charset] The character set; defaults to UTF-8
+	 * @param {Integer} [maxLength] The maximum number of characters to read
+	 * @return {Promise} A Q promise that is resolved with the contents of the file
 	 */
-	this.getBinaryContents = function (bfile) {
-		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-			.createInstance(Components.interfaces.nsIFileInputStream);
-		istream.init(bfile, -1, -1, false);
-		var bstream = Components.classes["@mozilla.org/binaryinputstream;1"]
-			.createInstance(Components.interfaces.nsIBinaryInputStream);
-		bstream.setInputStream(istream);
-		return bstream.readBytes(bstream.available());
+	this.getContentsAsync = function getContentsAsync(file, charset, maxLength) {
+		charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
+		var deferred = Q.defer(),
+			channel = NetUtil.newChannel(file, charset);
+		NetUtil.asyncFetch(channel, function(inputStream, status) {  
+			if (!Components.isSuccessCode(status)) {
+				deferred.reject(new Components.Exception("File read operation failed", status));
+				return;
+			}
+			
+			deferred.resolve(NetUtil.readInputStreamToString(inputStream, inputStream.available()));
+		});
+		return deferred.promise;
+	};
+	
+	
+	/**
+	 * Get the contents of a binary source asynchronously
+	 *
+	 * @param {nsIURI|nsIFile|string spec|nsIChannel|nsIInputStream} source The source to read
+	 * @return {Promise} A Q promise that is resolved with the contents of the source
+	 */
+	this.getBinaryContentsAsync = function (source) {
+		var deferred = Q.defer();
+		NetUtil.asyncFetch(source, function(inputStream, status) {
+			if (!Components.isSuccessCode(status)) {
+				deferred.reject(new Components.Exception("Source read operation failed", status));
+				return;
+			}
+			
+			deferred.resolve(NetUtil.readInputStreamToString(inputStream, inputStream.available()));
+		});
+		return deferred.promise;
 	}
 	
 	
@@ -151,6 +198,7 @@ Zotero.File = new function(){
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 						.createInstance();
 		xmlhttp.open('GET', url, false);
+		xmlhttp.overrideMimeType("text/plain");
 		xmlhttp.send(null);
 		return xmlhttp.responseText;
 	}
@@ -174,6 +222,55 @@ Zotero.File = new function(){
 		os.close();
 		
 		fos.close();
+	}
+	
+	/**
+	 * Write data to a file asynchronously
+	 * @param {nsIFile} The file to write to
+	 * @param {String|nsIInputStream} data The string or nsIInputStream to write to the
+	 *     file
+	 * @param {String} [charset] The character set; defaults to UTF-8
+	 * @return {Promise} A Q promise that is resolved when the file has been written
+	 */
+	this.putContentsAsync = function putContentsAsync(file, data, charset) {
+		// Create a stream for async stream copying
+		if(!(data instanceof Components.interfaces.nsIInputStream)) {
+			var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
+					createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+			converter.charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
+			data = converter.convertToInputStream(data);
+		}
+		
+		var deferred = Q.defer(),
+			ostream = FileUtils.openSafeFileOutputStream(file);
+		NetUtil.asyncCopy(data, ostream, function(inputStream, status) {  
+			if (!Components.isSuccessCode(status)) {
+				deferred.reject(new Components.Exception("File write operation failed", status));
+				return;
+			}
+			deferred.resolve();
+		});
+		return deferred.promise; 
+	};
+	
+	
+	/**
+	 * Generate a data: URI from an nsIFile
+	 *
+	 * From https://developer.mozilla.org/en-US/docs/data_URIs
+	 */
+	this.generateDataURI = function (file) {
+		var contentType = Components.classes["@mozilla.org/mime;1"]
+			.getService(Components.interfaces.nsIMIMEService)
+			.getTypeFromFile(file);
+		var inputStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+			.createInstance(Components.interfaces.nsIFileInputStream);
+		inputStream.init(file, 0x01, 0600, 0);
+		var stream = Components.classes["@mozilla.org/binaryinputstream;1"]
+			.createInstance(Components.interfaces.nsIBinaryInputStream);
+		stream.setInputStream(inputStream);
+		var encoded = btoa(stream.readBytes(stream.available()));
+		return "data:" + contentType + ";base64," + encoded;
 	}
 	
 	
@@ -211,6 +308,32 @@ Zotero.File = new function(){
 			}
 			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
 		}
+	}
+	
+	
+	/**
+	 * Check whether a directory is an ancestor directory of another directory/file
+	 */
+	this.directoryContains = function (dir, file) {
+		if (!dir.isDirectory()) {
+			throw new Error("dir must be a directory");
+		}
+		
+		if (dir.exists()) {
+			dir.normalize();
+		}
+		if (file.exists()) {
+			file.normalize();
+		}
+		
+		if (!dir.path) {
+			throw new Error("dir.path is empty");
+		}
+		if (!file.path) {
+			throw new Error("file.path is empty");
+		}
+		
+		return file.path.indexOf(dir.path) == 0;
 	}
 	
 	
@@ -361,58 +484,49 @@ Zotero.File = new function(){
 	}
 	
 	
-	// TODO: localize
 	this.checkFileAccessError = function (e, file, operation) {
 		if (file) {
-			var str = "The file '" + file.path + "' ";
+			var str = Zotero.getString('file.accessError.theFile', file.path);
 		}
 		else {
-			var str = "A file ";
+			var str = Zotero.getString('file.accessError.aFile');
 		}
 		
 		switch (operation) {
 			case 'create':
-				var opWord = "created";
+				var opWord = Zotero.getString('file.accessError.created');
 				break;
 				
 			case 'update':
-				var opWord = "updated";
+				var opWord = Zotero.getString('file.accessError.updated');
 				break;
 				
 			case 'delete':
-				var opWord = "deleted";
+				var opWord = Zotero.getString('file.accessError.deleted');
 				break;
 				
 			default:
-				var opWord = "updated";
+				var opWord = Zotero.getString('file.accessError.updated');
 		}
 		
 		if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED' || e.name == 'NS_ERROR_FILE_IS_LOCKED'
 				// Shows up on some Windows systems
 				|| e.name == 'NS_ERROR_FAILURE') {
 			Zotero.debug(e);
-			// TODO: localize
-			str = str + "cannot be " + opWord + ".";
-			var checkFileWindows = "Check that the file is not currently "
-				+ "in use and that it is not marked as read-only. To check "
-				+ "all files in your Zotero data directory, right-click on "
-				+ "the 'zotero' directory, click Properties, clear "
-				+ "the Read-Only checkbox, and apply the change to all folders "
-				+ "and files in the directory.";
-			var checkFileOther = "Check that the file is not currently "
-				+ "in use and that its permissions allow write access.";
+			str = str + " " + Zotero.getString('file.accessError.cannotBe') + " " + opWord + ".";
+			var checkFileWindows = Zotero.getString('file.accessError.message.windows');
+			var checkFileOther = Zotero.getString('file.accessError.message.other');
 			var msg = str + " "
 					+ (Zotero.isWin ? checkFileWindows : checkFileOther)
 					+ "\n\n"
-					+ "Restarting your computer or disabling security "
-					+ "software may also help.";
+					+ Zotero.getString('file.accessError.restart');
 			
 			if (operation == 'create') {
 				var e = new Zotero.Error(
 					msg,
 					0,
 					{
-						dialogButtonText: "Show Parent Directory",
+						dialogButtonText: Zotero.getString('file.accessError.showParentDir'),
 						dialogButtonCallback: function () {
 							try {
 								file.parent.QueryInterface(Components.interfaces.nsILocalFile).reveal();
@@ -430,7 +544,7 @@ Zotero.File = new function(){
 					msg,
 					0,
 					{
-						dialogButtonText: "Show File",
+						dialogButtonText: Zotero.getString('locate.showFile.label'),
 						dialogButtonCallback: function () {
 							try {
 								file.QueryInterface(Components.interfaces.nsILocalFile);

@@ -137,6 +137,7 @@
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Year">
 <!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "Edit in a separate window">
 <!ENTITY zotero.progress.title "Progress">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Notes">
 <!ENTITY zotero.tabs.related.label "Related">
 <!ENTITY zotero.tabs.tags.label "Tags">
+<!ENTITY zotero.tagSelector.assignColor              "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Deselect All">
 <!ENTITY zotero.tagSelector.clearVisible "Deselect Visible">
 <!ENTITY zotero.tagSelector.deleteTag "Delete Tag…">

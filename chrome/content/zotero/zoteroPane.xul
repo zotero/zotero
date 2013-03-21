@@ -86,7 +86,6 @@
 	</popup>
 	
 	<stack id="zotero-pane-stack">
-		
 		<!-- Barrier to prevent tabbing into Zotero pane when busy -->
 		<box id="zotero-pane-tab-catcher-top" hidden="true" align="center" pack="center" style="opacity: 0">
 			<checkbox/>
@@ -151,10 +150,19 @@
 								onpopuphidden="Zotero_Lookup.onHidden(event)">
 							<vbox>
 								<description>&zotero.lookup.description;</description>
-								<stack>
-									<progressmeter id="zotero-lookup-progress" mode="undetermined" hidden="true"/>
-									<textbox id="zotero-lookup-textbox" onkeypress="return Zotero_Lookup.onKeyPress(event)" flex="1"/>
-								</stack>
+								<vbox id="zotero-lookup-singleLine">
+									<stack>
+										<progressmeter id="zotero-lookup-progress" mode="undetermined" collapsed="true"/>
+										<textbox id="zotero-lookup-textbox" onkeypress="return Zotero_Lookup.onKeyPress(event, this)" oninput="Zotero_Lookup.adjustTextbox(this)" flex="1" newlines="pasteintact"/>
+									</stack>
+								</vbox>
+								<vbox id="zotero-lookup-multiline" collapsed="true">
+									<textbox id="zotero-lookup-multiline-textbox" onkeypress="return Zotero_Lookup.onKeyPress(event, this)" multiline="true" rows="5" wrap="off" flex="1"/>
+									<hbox align="start" id="zotero-lookup-buttons" class="zotero-button-clear-image">
+										<button label="&zotero.lookup.button.search;" align="start" oncommand="Zotero_Lookup.accept(document.getElementById('zotero-lookup-multiline-textbox'))"/>
+										<progressmeter id="zotero-lookup-multiline-progress" mode="undetermined" collapsed="true" flex="1"/>
+									</hbox>
+								</vbox>
 							</vbox>
 						</panel>
 					</toolbarbutton>
@@ -198,32 +206,22 @@
 								value="0" tooltip="zotero-tb-sync-progress-tooltip">
 							</progressmeter>
 							<tooltip id="zotero-tb-sync-progress-tooltip" noautohide="true">
-								<grid>
-									<columns>
-										<column/>
-										<column/>
-									</columns>
-									<rows>
-										<row>
-											<label value="&zotero.sync.storage.progress;"/>
-											<label id="zotero-tb-sync-progress-tooltip-progress"/>
-										</row>
-										<row>
-											<label value="&zotero.sync.storage.downloads;"/>
-											<label
-												id="zotero-tb-sync-progress-tooltip-downloads"/>
-										</row>
-										<row>
-											<label value="&zotero.sync.storage.uploads;"/>
-											<label
-												id="zotero-tb-sync-progress-tooltip-uploads"/>
-										</row>
-									</rows>
-								</grid>
+								<hbox id="zotero-tb-sync-progress-tooltip-progress">
+									<label value="&zotero.sync.storage.progress;"/>
+									<label/>
+								</hbox>
+								<zoterofilesyncstatus id="zotero-tb-sync-progress-status"/>
 							</tooltip>
 						</hbox>
 					</hbox>
-					<toolbarbutton id="zotero-tb-sync-warning" hidden="true"/>
+					<toolbarbutton id="zotero-tb-sync-error" hidden="true"/>
+					<!-- We put this here, but it's used for all sync errors -->
+					<panel id="zotero-sync-error-panel" type="arrow">
+						<vbox>
+							<hbox id="zotero-sync-error-panel-content"/>
+							<hbox id="zotero-sync-error-panel-buttons"/>
+						</vbox>
+					</panel>
 					<toolbarbutton id="zotero-tb-sync" class="zotero-tb-button" tooltip="_child"
 							oncommand="Zotero.Sync.Server.canAutoResetClient = true; Zotero.Sync.Server.manualSyncRequired = false; Zotero.Sync.Runner.sync()">
 						<tooltip
@@ -298,6 +296,10 @@
 			
 			<hbox id="zotero-trees" flex="1">
 				<vbox id="zotero-collections-pane" zotero-persist="width">
+					<!-- This is used for positioning the sync error icon panel
+							under specific tree cells, which don't exist as
+							elements on their own -->
+					<box id="zotero-collections-tree-shim"/>
 					<!-- This extra vbox prevents the toolbar from getting compressed when resizing
 							the tag selector to max height -->
 					<tree id="zotero-collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
@@ -314,6 +316,9 @@
 								id="zotero-collections-name-column"
 								flex="1"
 								primary="true"
+								hideheader="true"/>
+							<treecol
+								id="zotero-collections-sync-status-column"
 								hideheader="true"/>
 						</treecols>
 						<treechildren/>
@@ -333,9 +338,11 @@
 				
 				<vbox id="zotero-items-pane" zotero-persist="width" flex="1">
 					<deck id="zotero-items-pane-content" selectedIndex="0" flex="1">
+						<!-- Key navigation is handled by listener in itemTreeView.js -->
 						<tree 
 							id="zotero-items-tree" context="zotero-itemmenu"
 							enableColumnDrag="true"
+							disableKeyNavigation="true"
 							onfocus="if (ZoteroPane_Local.itemsView.rowCount &amp;&amp; !ZoteroPane_Local.itemsView.selection.count) { ZoteroPane_Local.itemsView.selection.select(0); }"
 							onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
 							onkeypress="ZoteroPane_Local.handleKeyPress(event, this.id)"
@@ -346,7 +353,7 @@
 							ondragdrop="return ZoteroPane_Local.itemsView.onDrop(event)"
 							oncommand="ZoteroPane_Local.serializePersist()"
 							flex="1">
-							<treecols>
+							<treecols id="zotero-items-columns-header">
 								<treecol
 									id="zotero-items-column-title" primary="true"
 									label="&zotero.items.title_column;"
@@ -410,11 +417,13 @@
 								<splitter class="tree-splitter"/>
 								<treecol
 									id="zotero-items-column-callNumber" hidden="true"
+									submenu="true"
 									label="&zotero.items.callNumber_column;"
 									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
 								<treecol
 									id="zotero-items-column-rights" hidden="true"
+									submenu="true"
 									label="&zotero.items.rights_column;"
 									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
@@ -429,8 +438,100 @@
 									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
 								<treecol
-									id="zotero-items-column-numChildren"
-									label="&zotero.items.numChildren_column;"
+									id="zotero-items-column-archive" hidden="true"
+									submenu="true"
+									label="&zotero.items.archive_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>								
+								<treecol
+									id="zotero-items-column-archiveLocation" hidden="true"
+									submenu="true"
+									label="&zotero.items.archiveLocation_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-place" hidden="true"
+									submenu="true"
+									label="&zotero.items.place_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-volume" hidden="true"
+									submenu="true"
+									label="&zotero.items.volume_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-edition" hidden="true"
+									submenu="true"
+									label="&zotero.items.edition_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-pages" hidden="true"
+									submenu="true"
+									label="&zotero.items.pages_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-issue" hidden="true"
+									submenu="true"
+									label="&zotero.items.issue_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-series" hidden="true"
+									submenu="true"
+									label="&zotero.items.series_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-seriesTitle" hidden="true"
+									submenu="true"
+									label="&zotero.items.seriesTitle_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-court" hidden="true"
+									submenu="true"
+									label="&zotero.items.court_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-medium" hidden="true"
+									submenu="true"
+									label="&zotero.items.medium_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-genre" hidden="true"
+									submenu="true"
+									label="&zotero.items.genre_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-system" hidden="true"
+									submenu="true"
+									label="&zotero.items.system_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-extra" hidden="true"
+									label="&zotero.items.extra_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-hasAttachment"
+									class="treecol-image"
+									label="&zotero.tabs.attachments.label;"
+									src="chrome://zotero/skin/attach-small.png"
+									zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-numNotes" hidden="true"
+									class="treecol-image"
+									label="&zotero.tabs.notes.label;"
+									src="chrome://zotero/skin/treeitem-note-small.png"
 									zotero-persist="width ordinal hidden sortActive sortDirection"/>
 							</treecols>
 							<treechildren/>
@@ -461,7 +562,7 @@
 			
 			<deck id="zotero-pane-overlay-deck" flex="1">
 				<box id="zotero-pane-progress" flex="1" align="center" pack="center">
-					<box style="background: white; -moz-border-radius: 1px; -moz-box-shadow: gray 4px 6px 4px;" width="300" height="30">
+					<box style="background: white; border-radius: 1px; box-shadow: gray 4px 6px 4px;" width="300" height="30">
 						<vbox style="padding:10px" flex="1">
 							<label id="zotero-pane-progress-label"/>
 							<progressmeter id="zotero-pane-progressmeter" mode="undetermined"/>

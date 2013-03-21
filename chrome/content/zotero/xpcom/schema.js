@@ -31,7 +31,8 @@ Zotero.Schema = new function(){
 	var _dbVersions = [];
 	var _schemaVersions = [];
 	var _repositoryTimer;
-	var _remoteUpdateInProgress = false;
+	var _remoteUpdateInProgress = false,
+		_localUpdateInProgress = false;
 	
 	var self = this;
 	
@@ -56,8 +57,10 @@ Zotero.Schema = new function(){
 	this.userDataUpgradeRequired = function () {
 		var dbVersion = this.getDBVersion('userdata');
 		var schemaVersion = _getSchemaSQLVersion('userdata');
+
+		// MLZ: upgrade if proposed userdata.sql version is greater than
+        // database record, or if multilingual tables do not yet exist.
 		var multilingualVersion = this.getDBVersion('multilingual');
-		
 		return dbVersion && (!multilingualVersion || (dbVersion < schemaVersion));
 	}
 	
@@ -107,7 +110,7 @@ Zotero.Schema = new function(){
 		}
 		
 		return obj.data.success;
-	};
+	}
 	
 	
 	/*
@@ -115,10 +118,14 @@ Zotero.Schema = new function(){
 	 */
 	this.updateSchema = function () {
 		var dbVersion = this.getDBVersion('userdata');
+		var dbVersion2 = this.getDBVersion('userdata2');
+        // MLZ: get multilingual table version record.
 		var dbMultilingualVersion = this.getDBVersion('multilingual');
 		
 		// 'schema' check is for old (<= 1.0b1) schema system,
 		// 'user' is for pre-1.0b2 'user' table
+        // MLZ: doNeedSchema is the original Zotero condition.
+        // doNeedMultilingual checks if multilingual tables must be created.
 		var doNeedSchema = !dbVersion && !this.getDBVersion('schema') && !this.getDBVersion('user');
 		var doNeedMultilingual = !dbMultilingualVersion && !_hasMultilingualTables();
 		if (doNeedSchema || doNeedMultilingual) {
@@ -127,7 +134,7 @@ Zotero.Schema = new function(){
 			_initializeSchema();
 			}
 			if (doNeedMultilingual) {
-				Zotero.debug('Initializing multilingual database tables\n');
+			    Zotero.debug('Initializing multilingual database tables\n');
 				_initializeMultilingualSchema();
 				_updateSchema('zls')
 			}
@@ -135,6 +142,7 @@ Zotero.Schema = new function(){
 		}
 		
 		var schemaVersion = _getSchemaSQLVersion('userdata');
+        // MLZ: make a note of the now-installed multilingual schema version.
 		var schemaMultilingualVersion = _getSchemaSQLVersion('multilingual');
 		
 		try {
@@ -144,7 +152,7 @@ Zotero.Schema = new function(){
 			if (dbVersion < schemaVersion){
 				Zotero.DB.backupDatabase(dbVersion);
 				Zotero.wait(1000);
-			}			
+			}
 			
 			Zotero.DB.beginTransaction();
 			
@@ -165,27 +173,31 @@ Zotero.Schema = new function(){
 					 }
 				}
 				
-				var up2 = _updateSchema('system');
+				var up1 = _updateSchema('system');
 				// Update custom tables if they exist so that changes are in place before user data migration
 				if (Zotero.DB.tableExists('customItemTypes')) {
-					this.updateCustomTables(up2);
+					this.updateCustomTables(up1);
 				}
-				if(up2) Zotero.wait();
+				if(up1) Zotero.wait();
 
+                // MLZ: install multilingual tables if required.
 				if (!Zotero.Schema.getDBVersion('multilingual') && !_hasMultilingualTables()) {
 					_initializeMultilingualSchema();
 				}
 
-				var up1 = _migrateUserDataSchema(dbVersion);
-				var up3 = _updateSchema('triggers');
-				// Update custom tables again in case custom fields were changed during user data migration
-				if (up1) {
+				var up2 = _migrateUserDataSchema(dbVersion);
+				var up3 = _migrateUserDataSchemaSilent(dbVersion2);
+
+				var up4 = _updateSchema('triggers');
+				if (up2) {
+					// Update custom tables again in case custom fields were changed during user data migration
 					this.updateCustomTables();
+					Zotero.wait()
 				}
-				if(up1) Zotero.wait();
 				
-				var up4 = _updateSchema('zls')
-				if (up4) Zotero.wait();
+                // MLZ: update language tables if required.
+				var up5 = _updateSchema('zls')
+				if (up5) Zotero.wait();
 
 				Zotero.DB.commitTransaction();
 			}
@@ -195,7 +207,7 @@ Zotero.Schema = new function(){
 				throw(e);
 			}
 			
-			if (up1) {
+			if (up2) {
 				// Upgrade seems to have been a success -- delete any previous backups
 				var maxPrevious = dbVersion - 1;
 				var file = Zotero.getZoteroDirectory();
@@ -249,8 +261,9 @@ Zotero.Schema = new function(){
 				Zotero.Schema.updateFromRepository();
 			}
 		}, 5000);
-		
-		return up1 || up2 || up3 || up4;
+
+        // MLZ: this return value is now apparently redundant from 4.0
+		//return up1 || up2 || up3 || up4 || up5;
 	}
 	
 	
@@ -456,21 +469,57 @@ Zotero.Schema = new function(){
 		);
 	}
 	
+	
 	/**
 	 * Update styles and translators in data directory with versions from
-	 * ZIP file (XPI) or directory (SVN) in extension directory
+	 * ZIP file (XPI) or directory (source) in extension directory
 	 *
 	 * @param	{String}	[mode]					'translators' or 'styles'
 	 * @param	{Boolean}	[skipDeleteUpdated]		Skip updating of the file deleting version --
 	 *												since deleting uses a single version table key,
 	 * 												it should only be updated the last time through
 	 */
-	this.updateBundledFiles = function (mode, skipDeleteUpdate) {
-
+	this.updateBundledFiles = function(mode, skipDeleteUpdate, runRemoteUpdateWhenComplete) {
+		if(_localUpdateInProgress) return;
+		_localUpdateInProgress = true;
+		
+		// Get path to addon and then call updateBundledFilesCallback, potentially asynchronously
+		if(Zotero.isStandalone) {
+			var appChrome = Components.classes["@mozilla.org/file/directory_service;1"]
+				.getService(Components.interfaces.nsIProperties)
+				.get("AChrom", Components.interfaces.nsIFile);
+			_updateBundledFilesCallback(appChrome.parent, mode, skipDeleteUpdate,
+				runRemoteUpdateWhenComplete);
+		} else {
+			Components.utils.import("resource://gre/modules/AddonManager.jsm");
+			AddonManager.getAddonByID(ZOTERO_CONFIG['GUID'],
+				function(addon) {
+					_updateBundledFilesCallback(
+						addon.getResourceURI().QueryInterface(Components.interfaces.nsIFileURL).file,
+						mode, skipDeleteUpdate, runRemoteUpdateWhenComplete);
+				});
+		}
+	}
+	
+	/**
+	 * Callback to update bundled files, after finding the path to the Zotero install location
+	 */
+	function _updateBundledFilesCallback(installLocation, mode, skipDeleteUpdate,
+			runRemoteUpdateWhenComplete) {
+		_localUpdateInProgress = false;
+		
 		if (!mode) {
-			var up1 = this.updateBundledFiles('translators', true);
-			var up2 = this.updateBundledFiles('styles');
+			var up1 = _updateBundledFilesCallback(installLocation, 'translators', true, false);
+			var up2 = _updateBundledFilesCallback(installLocation, 'styles', false,
+				runRemoteUpdateWhenComplete);
 			return up1 && up2;
+		}
+		
+		var xpiZipReader, isUnpacked = installLocation.isDirectory();
+		if(!isUnpacked) {
+			xpiZipReader = Components.classes["@mozilla.org/libjar/zip-reader;1"]
+					.createInstance(Components.interfaces.nsIZipReader);
+			xpiZipReader.open(installLocation);
 		}
 		
 		switch (mode) {
@@ -495,16 +544,12 @@ Zotero.Schema = new function(){
 		var Mode = mode[0].toUpperCase() + mode.substr(1);
 		var Modes = Mode + "s";
 		
-		var extDir = Zotero.getInstallDirectory();
-		
-		var repotime = extDir.clone();
-		repotime.append('repotime.txt');
-		repotime = Zotero.File.getContents(repotime);
+        // MLZ: temporary
+        Zotero.debug("XXX Before (1)")
+		var repotime = Zotero.File.getContentsFromURL("resource://zotero/schema/repotime.txt");
+        Zotero.debug("  after")
 		var date = Zotero.Date.sqlToDate(repotime, true);
 		repotime = Zotero.Date.toUnixTimestamp(date);
-		
-		var zipFile = extDir.clone();
-		zipFile.append(modes + ".zip");
 		
 		var fileNameRE = new RegExp("^[^\.].+\\" + fileExt + "$");
 		
@@ -530,16 +575,25 @@ Zotero.Schema = new function(){
 		var sql = "SELECT version FROM version WHERE schema='delete'";
 		var lastVersion = Zotero.DB.valueQuery(sql);
 		
-		var deleted = extDir.clone();
-		deleted.append('deleted.txt');
-		// In SVN builds, deleted.txt is in the translators directory
-		if (!deleted.exists()) {
-			deleted = extDir.clone();
-			deleted.append('translators');
+		if(isUnpacked) {
+			var deleted = installLocation.clone();
 			deleted.append('deleted.txt');
+			// In source builds, deleted.txt is in the translators directory
+			if (!deleted.exists()) {
+				deleted = installLocation.clone();
+				deleted.append('translators');
+				deleted.append('deleted.txt');
+			}
+			if (!deleted.exists()) {
+				deleted = false;
+			}
+		} else {
+			var deleted = xpiZipReader.getInputStream("deleted.txt");
 		}
 		
+        Zotero.debug("XXX Before (2)");
 		deleted = Zotero.File.getContents(deleted);
+        Zotero.debug("  done");
 		deleted = deleted.match(/^([^\s]+)/gm);
 		var version = deleted.shift();
 		
@@ -574,6 +628,9 @@ Zotero.Schema = new function(){
 					case 'nlm':
 					case 'vancouver':
 					
+					// Remove update script (included with 3.0 accidentally)
+					case 'update':
+					
 					// Delete renamed/obsolete files
 					case 'chicago-note.csl':
 					case 'mhra_note_without_bibliography.csl':
@@ -583,6 +640,7 @@ Zotero.Schema = new function(){
 					// Be a little more careful with this one, in case someone
 					// created a custom 'aaa' style
 					case 'aaa.csl':
+                        Zotero.debug("XXX Before (3)");
 						var str = Zotero.File.getContents(file, false, 300);
 						if (str.indexOf("<title>American Anthropological Association</title>") != -1) {
 							toDelete.push(file);
@@ -623,26 +681,48 @@ Zotero.Schema = new function(){
 		var sql = "SELECT version FROM version WHERE schema=?";
 		var lastModTime = Zotero.DB.valueQuery(sql, modes);
 		
+		var zipFileName = modes + ".zip", zipFile;
+		if(isUnpacked) {
+			zipFile = installLocation.clone();
+			zipFile.append(zipFileName);
+			if(!zipFile.exists()) zipFile = undefined;
+		} else {
+			if(xpiZipReader.hasEntry(zipFileName)) {
+				zipFile = xpiZipReader.getEntry(zipFileName);
+			}
+		}
+		
 		// XPI installation
-		if (zipFile.exists()) {
+		if (zipFile) {
 			var modTime = Math.round(zipFile.lastModifiedTime / 1000);
 			
 			if (!forceReinstall && lastModTime && modTime <= lastModTime) {
-				Zotero.debug("Installed " + modes + " are up-to-date with " + modes + ".zip");
+				Zotero.debug("Installed " + modes + " are up-to-date with " + zipFileName);
 				return false;
 			}
 			
-			Zotero.debug("Updating installed " + modes + " from " + modes + ".zip");
+			Zotero.debug("Updating installed " + modes + " from " + zipFileName);
 			
 			if (mode == 'translator') {
 				// Parse translators.index
-				var indexFile = extDir.clone();
-				indexFile.append('translators.index');
-				if (!indexFile.exists()) {
-					Components.utils.reportError("translators.index not found in Zotero.Schema.updateBundledFiles()");
-					return false;
+				var indexFile;
+				if(isUnpacked) {
+					indexFile = installLocation.clone();
+					indexFile.append('translators.index');
+					if (!indexFile.exists()) {
+						Components.utils.reportError("translators.index not found in Zotero.Schema.updateBundledFiles()");
+						return false;
+					}
+				} else {
+					if(!xpiZipReader.hasEntry("translators.index")) {
+						Components.utils.reportError("translators.index not found in Zotero.Schema.updateBundledFiles()");
+						return false;
+					}
+					var indexFile = xpiZipReader.getInputStream("translators.index");
 				}
-				var indexFile = Zotero.File.getContents(indexFile);
+				
+                Zotero.debug("XXX Before (4)");
+				indexFile = Zotero.File.getContents(indexFile);
 				indexFile = indexFile.split("\n");
 				var index = {};
 				for each(var line in indexFile) {
@@ -677,8 +757,12 @@ Zotero.Schema = new function(){
 			}
 			
 			var zipReader = Components.classes["@mozilla.org/libjar/zip-reader;1"]
-					.getService(Components.interfaces.nsIZipReader);
-			zipReader.open(zipFile);
+					.createInstance(Components.interfaces.nsIZipReader);
+			if(isUnpacked) {
+				zipReader.open(zipFile);
+			} else {
+				zipReader.openInner(xpiZipReader, zipFileName);
+			}
 			var tmpDir = Zotero.getTempDirectory();
 			
 			if (mode == 'translator') {
@@ -769,10 +853,11 @@ Zotero.Schema = new function(){
 			}
 			
 			zipReader.close();
+			if(xpiZipReader) xpiZipReader.close();
 		}
-		// SVN installation
+		// Source installation
 		else {
-			var sourceDir = extDir.clone();
+			var sourceDir = installLocation.clone();
 			sourceDir.append(modes);
 			if (!sourceDir.exists()) {
 				Components.utils.reportError("No " + modes + " ZIP file or directory "
@@ -786,7 +871,7 @@ Zotero.Schema = new function(){
 			while (entries.hasMoreElements()) {
 				var file = entries.getNext();
 				file.QueryInterface(Components.interfaces.nsIFile);
-				// File might not exist in an SVN build with style symlinks
+				// File might not exist in an source build with style symlinks
 				if (!file.exists()
 						|| !file.leafName.match(fileNameRE)
 						|| file.isDirectory()) {
@@ -799,7 +884,7 @@ Zotero.Schema = new function(){
 				}
 			}
 			
-			// Don't attempt installation for SVN build with missing styles
+			// Don't attempt installation for source build with missing styles
 			if (!sourceFilesExist) {
 				Zotero.debug("No source " + mode + " files exist -- skipping update");
 				return false;
@@ -879,6 +964,13 @@ Zotero.Schema = new function(){
 		Zotero.DB.commitTransaction();
 		
 		Zotero[Modes].init();
+		
+		if (runRemoteUpdateWhenComplete) {
+			// Run a manual scraper update if upgraded and pref set
+			if (Zotero.Prefs.get('automaticScraperUpdates')){
+				Zotero.Schema.updateFromRepository(2);
+			}
+		}
 		return true;
 	}
 	
@@ -891,16 +983,6 @@ Zotero.Schema = new function(){
 	 * @param	{Function}	callback
 	 */
 	this.updateFromRepository = function (force, callback) {
-		// Little hack to manually update CSLs from repo on upgrades
-		if (!force && Zotero.Prefs.get('automaticScraperUpdates')) {
-			var syncTargetVersion = 3; // increment this when releasing new version that requires it
-			var syncVersion = this.getDBVersion('sync');
-			if (syncVersion < syncTargetVersion) {
-				force = true;
-				var forceCSLUpdate = true;
-			}
-		}
-		
 		if (!force){
 			if (_remoteUpdateInProgress) {
 				Zotero.debug("A remote update is already in progress -- not checking repository");
@@ -928,6 +1010,12 @@ Zotero.Schema = new function(){
 			}
 		}
 		
+		if (_localUpdateInProgress) {
+			Zotero.debug('A local update is already in progress -- delaying repository check', 4);
+			_setRepositoryTimer(600);
+			return false;
+		}
+		
 		if (Zotero.locked) {
 			Zotero.debug('Zotero is locked -- delaying repository check', 4);
 			_setRepositoryTimer(600);
@@ -947,7 +1035,7 @@ Zotero.Schema = new function(){
 		var url = ZOTERO_CONFIG['REPOSITORY_URL'] + '/updated?'
 			+ (lastUpdated ? 'last=' + lastUpdated + '&' : '')
 			+ 'version=' + Zotero.version;
-
+		
 		Zotero.debug('Checking repository for updates');
 		
 		_remoteUpdateInProgress = true;
@@ -959,14 +1047,27 @@ Zotero.Schema = new function(){
 			else {
 				url += '&m=1';
 			}
-			
-			// Force updating of all public CSLs
-			if (forceCSLUpdate) {
-				url += '&cslup=' + syncTargetVersion;
-			}
 		}
 		
-		var get = Zotero.HTTP.doGet(url, function (xmlhttp) {
+		// Send list of installed styles
+		var styles = Zotero.Styles.getAll();
+		var styleTimestamps = [];
+		for (var id in styles) {
+			var updated = Zotero.Date.sqlToDate(styles[id].updated);
+			updated = updated ? updated.getTime() / 1000 : 0;
+			var selfLink = styles[id].url;
+			var data = {
+				id: id,
+				updated: updated
+			};
+			if (selfLink) {
+				data.url = selfLink;
+			}
+			styleTimestamps.push(data);
+		}
+		var body = 'styles=' + encodeURIComponent(JSON.stringify(styleTimestamps));
+		
+		var get = Zotero.HTTP.doPost(url, body, function (xmlhttp) {
 			var updated = _updateFromRepositoryCallback(xmlhttp, !!force);
 			if (callback) {
 				callback(xmlhttp, updated)
@@ -1002,22 +1103,13 @@ Zotero.Schema = new function(){
 		translatorsDir.remove(true);
 		Zotero.getTranslatorsDirectory(); // recreate directory
 		Zotero.Translators.init();
-		this.updateBundledFiles('translators');
+		this.updateBundledFiles('translators', null, false);
 		
 		var stylesDir = Zotero.getStylesDirectory();
 		stylesDir.remove(true);
 		Zotero.getStylesDirectory(); // recreate directory
 		Zotero.Styles.init();
-		this.updateBundledFiles('styles');
-		
-		// Run a manual update from repository if pref set
-		if (Zotero.Prefs.get('automaticScraperUpdates')) {
-			this.updateFromRepository(2, function () {
-				if (callback) {
-					callback();
-				}
-			});
-		}
+		this.updateBundledFiles('styles', null, true);
 		
 		if (callback) {
 			callback();
@@ -1302,31 +1394,25 @@ Zotero.Schema = new function(){
 	 * Retrieve the version from the top line of the schema SQL file
 	 */
 	function _getSchemaSQLVersion(schema){
-		if (!schema){
-			throw ('Schema type not provided to _getSchemaSQLVersion()');
+		// TEMP
+		if (schema == 'userdata2') {
+			schema = 'userdata';
+			var newUserdata = true;
 		}
-		
-		var schemaFile = schema + '.sql';
-		
-		if (_schemaVersions[schema]){
-			return _schemaVersions[schema];
-		}
-		
-		var file = Zotero.getInstallDirectory();
-		file.append(schemaFile);
-		
-		// Open an input stream from file
-		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-			.createInstance(Components.interfaces.nsIFileInputStream);
-		istream.init(file, 0x01, 0444, 0);
-		istream.QueryInterface(Components.interfaces.nsILineInputStream);
-		
-		var line = {};
+		var sql = _getSchemaSQL(schema);
 		
 		// Fetch the schema version from the first line of the file
-		istream.readLine(line);
-		var schemaVersion = line.value.match(/-- ([0-9]+)/)[1];
-		istream.close();
+		var schemaVersion = parseInt(sql.match(/^-- ([0-9]+)/)[1]);
+		
+		// TEMP: For 'userdata', cap the version at 76
+		// For 'userdata2', versions > 76 are allowed.
+		if (schema == 'userdata' && !newUserdata) {
+            // MLZ: bump from 76 in Zotero to 77. 
+            // Bump again for further upgrades.
+            // Silent table install for official Zotero 77 is disabled if
+            // table already exists.
+			schemaVersion = Math.min(77, schemaVersion);
+		}
 		
 		_schemaVersions[schema] = schemaVersion;
 		return schemaVersion;
@@ -1343,33 +1429,9 @@ Zotero.Schema = new function(){
 			throw ('Schema type not provided to _getSchemaSQL()');
 		}
 		
-		var schemaFile = schema + '.sql';
-		
-		// We pull the schema from an external file so we only have to process
-		// it when necessary
-		var file = Zotero.getInstallDirectory();
-		file.append(schemaFile);
-		
-		// Open an input stream from file
-		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-			.createInstance(Components.interfaces.nsIFileInputStream);
-		istream.init(file, 0x01, 0444, 0);
-		istream.QueryInterface(Components.interfaces.nsILineInputStream);
-		
-		var line = {}, sql = '', hasmore;
-		
-		// Skip the first line, which contains the schema version
-		istream.readLine(line);
-		//var schemaVersion = line.value.match(/-- ([0-9]+)/)[1];
-		
-		do {
-			hasmore = istream.readLine(line);
-			sql += line.value + "\n";
-		} while(hasmore);
-		
-		istream.close();
-		
-		return sql;
+        Zotero.debug("XXX Before (5)");
+		return Zotero.File.getContentsFromURL("resource://zotero/schema/"+schema+".sql");
+        Zotero.debug("  after")
 	}
 	
 	
@@ -1382,41 +1444,17 @@ Zotero.Schema = new function(){
 	 * Returns the SQL statements as a string for feeding into query()
 	 */
 	function _getDropCommands(schema){
-		if (!schema){
-			throw ('Schema type not provided to _getSchemaSQL()');
+		var sql = _getSchemaSQL(schema);
+		
+		const re = /(?:[\r\n]|^)CREATE (TABLE|INDEX) IF NOT EXISTS ([^\s]+)/;
+		var m, str="";
+		while(matches = re.exec(sql)) {
+			str += "DROP " + matches[1] + " IF EXISTS " + matches[2] + ";\n";
 		}
-		
-		var schemaFile = schema + '.sql';
-		
-		// We pull the schema from an external file so we only have to process
-		// it when necessary
-		var file = Zotero.getInstallDirectory();
-		file.append(schemaFile);
-		
-		// Open an input stream from file
-		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-			.createInstance(Components.interfaces.nsIFileInputStream);
-		istream.init(file, 0x01, 0444, 0);
-		istream.QueryInterface(Components.interfaces.nsILineInputStream);
-		
-		var line = {}, str = '', hasmore;
-		
-		// Skip the first line, which contains the schema version
-		istream.readLine(line);
-		
-		do {
-			hasmore = istream.readLine(line);
-			var matches =
-				line.value.match(/CREATE (TABLE|INDEX) IF NOT EXISTS ([^\s]+)/);
-			if (matches){
-				str += "DROP " + matches[1] + " IF EXISTS " + matches[2] + ";\n";
-			}
-		} while(hasmore);
-		
-		istream.close();
 		
 		return str;
 	}
+	
 	
 	function _initializeMultilingualSchema(){
 		Zotero.DB.beginTransaction();
@@ -1432,7 +1470,7 @@ Zotero.Schema = new function(){
 			throw(e);
 		}
 	}
-	
+ 	
 	/*
 	 * Create new DB schema
 	 */
@@ -1451,6 +1489,7 @@ Zotero.Schema = new function(){
 			
 			_updateDBVersion('system', _getSchemaSQLVersion('system'));
 			_updateDBVersion('userdata', _getSchemaSQLVersion('userdata'));
+			_updateDBVersion('userdata2', _getSchemaSQLVersion('userdata2'));
 			_updateDBVersion('triggers', _getSchemaSQLVersion('triggers'));
 			
 			if (!Zotero.Schema.skipDefaultData) {
@@ -1497,7 +1536,7 @@ Zotero.Schema = new function(){
 		}
 		
 		try {
-			Zotero.Schema.updateBundledFiles();
+			Zotero.Schema.updateBundledFiles(null, null, true);
 		}
 		catch (e) {
 			Zotero.debug(e);
@@ -1537,33 +1576,19 @@ Zotero.Schema = new function(){
 				throw(e);
 			}
 			return true;
-		} else if (dbVersion == 32 && schemaVersion == 31 && !Zotero.Schema.getDBVersion('multilingual')) {
-			_updateDBVersion(schema, schemaVersion);
-			return false;
 		}
+        // MLZ: decommissioning this code use for very early MLZ migrations.
+        // It is not conceivable that instances of the early client schema are still in service.
+        //else if (dbVersion == 32 && schemaVersion == 31 && !Zotero.Schema.getDBVersion('multilingual')) {
+		//	_updateDBVersion(schema, schemaVersion);
+		//	return false;
+		//}
 		
 		throw ("Zotero '" + schema + "' DB version (" + dbVersion
 			+ ") is newer than SQL file (" + schemaVersion + ")");
 	}
 	
 	
-	var _multilingualTables = [
-		"creatorsMulti",
-		"fieldsMulti",
-		"zlsPreferences",
-		"languageTagData",
-		"duplicateCheckList"
-	]
-
-	function _hasMultilingualTables () {
-		for (i = 0, ilen = _multilingualTables.length; i < ilen; i += 1) {
-			if (_tableExists(_multilingualTables[i])) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	function _tableExists (tablename) {
 		var sql = "SELECT count(*) FROM sqlite_master WHERE name=? AND type='table'";
 		if (Zotero.DB.valueQuery(sql, [tablename])) {
@@ -1572,6 +1597,21 @@ Zotero.Schema = new function(){
 			return false;
 		}
 	};
+
+	function _hasMultilingualTables () {
+	    var _multilingualTables = [
+		    "creatorsMulti",
+		    "fieldsMulti",
+		    "zlsPreferences",
+		    "languageTagData"
+	    ]
+		for (i = 0, ilen = _multilingualTables.length; i < ilen; i += 1) {
+			if (_tableExists(_multilingualTables[i])) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	function _hasAllTables (tables) {
 		var result = true;
@@ -1583,6 +1623,17 @@ Zotero.Schema = new function(){
 		return result;
 	}
 
+    // MLZ: protect against repeat upgrades by Zotero update2 functions.
+	function _migrateUserDataSchemaSilentOk (num) {
+        var result = true;
+        if (_tableExists("syncedSettings")) {
+            result = false;
+        }
+        return result;
+    }
+
+    // MLZ: early migration support code. Avoids clash with official Zotero upgrade
+    // functions.
 	function _okMultilingual (num) {
 			switch (num) {
 			case 78:
@@ -1647,16 +1698,7 @@ Zotero.Schema = new function(){
 		
 		Zotero.DB.beginTransaction();
 		
-		try {
-			var re = /cslup=([0-9]+)/;
-			var matches = re.exec(xmlhttp.channel.URI.spec);
-			if (matches) {
-				_updateDBVersion('sync', matches[1]);
-			}
-		}
-		catch (e) {
-			Zotero.debug(e);
-		}
+		// TODO: clear DB version 'sync' from removed _updateDBVersion()
 		
 		// Store the timestamp provided by the server
 		_updateDBVersion('repository', currentTime);
@@ -1817,7 +1859,7 @@ Zotero.Schema = new function(){
 		var uri = xmlnode.getAttribute('id');
 		
 		// Delete local style if CSL code is empty
-		if (!xmlnode.getElementsByTagName('csl')[0].firstChild) {
+		if (!xmlnode.firstChild) {
 			var style = Zotero.Styles.get(uri);
 			if (style) {
 				style.file.remove(null);
@@ -1825,7 +1867,25 @@ Zotero.Schema = new function(){
 			return;
 		}
 		
-		var str = xmlnode.getElementsByTagName('csl')[0].firstChild.nodeValue;
+		// Remove renamed styles
+		if (uri == 'http://www.zotero.org/styles/american-medical-association') {
+			var oldID = 'http://www.zotero.org/styles/ama';
+			var style = Zotero.Styles.get(oldID);
+			if (style && style.file.exists()) {
+				Zotero.debug("Deleting renamed style '" + oldID + "'");
+				style.file.remove(false);
+			}
+		}
+		else if (uri == 'http://www.zotero.org/styles/national-library-of-medicine') {
+			var oldID = 'http://www.zotero.org/styles/nlm';
+			var style = Zotero.Styles.get(oldID);
+			if (style && style.file.exists()) {
+				Zotero.debug("Deleting renamed style '" + oldID + "'");
+				style.file.remove(false);
+			}
+		}
+		
+		var str = xmlnode.firstChild.nodeValue;
 		var style = Zotero.Styles.get(uri);
 		if (style) {
 			if (style.file.exists()) {
@@ -1857,24 +1917,35 @@ Zotero.Schema = new function(){
 	 * Migrate user data schema from an older version, preserving data
 	 */
 	function _migrateUserDataSchema(fromVersion){
+        // MLZ: get multilingual database version record (i.e. multilingual fromVersion)
 		var dbMultilingualVersion = Zotero.Schema.getDBVersion('multilingual');
 		var toVersion = _getSchemaSQLVersion('userdata');
-		
+
+		// MLZ: get multilingual toVersion
 		var toMultilingualVersion = _getSchemaSQLVersion('multilingual');
+
+		// Only upgrades through version 76 are handled here
+        // MLZ: allow higher versions, but disable elements of update2 block
+        // as needed to avoid crash.
+		//toVersion = Math.min(76, toVersion);
 
 		if (fromVersion==toVersion){
 			return false;
 		}
 		
-		if (!dbMultilingualVersion) {
-			var toVersion = 83;
-		}
-
-		if (fromVersion > toVersion && Zotero.Schema.getDBVersion('multilingual')){
+		if (fromVersion > toVersion){
+        // MLZ: decommissioning this early transitional migration hack.
+		//if (!dbMultilingualVersion) {
+		//	var toVersion = 83;
+		//}
+        //
+		//if (fromVersion > toVersion && Zotero.Schema.getDBVersion('multilingual')){
 			throw("Zotero user data DB version is newer than SQL file");
 		}
 		
 		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
+
+        // MLZ: debugging note
 		if (!Zotero.Schema.getDBVersion('multilingual')) {
 			Zotero.debug('Applying multilingual update');
 		}
@@ -1886,8 +1957,6 @@ Zotero.Schema = new function(){
 			//
 			// Each block performs the changes necessary to move from the
 			// previous revision to that one.
-
-
 			for (var i=fromVersion + 1; i<=toVersion; i++){
 				if (i==1){
 					Zotero.DB.query("DELETE FROM version WHERE schema='schema'");
@@ -3338,6 +3407,7 @@ Zotero.Schema = new function(){
 				if (i==74) {
 					Zotero.DB.query("CREATE INDEX deletedItems_dateDeleted ON deletedItems(dateDeleted)");
 				}
+				
 				// 2.1b2
 				if (i==75) {
 					Zotero.DB.query("DROP TABLE IF EXISTS translatorCache");
@@ -3348,6 +3418,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DELETE FROM itemTags WHERE tagID IS NULL");
 				}
 				
+                // MLZ: multilingual updates
 				/*
 				if (i==77 && _okMultilingual(77)) {
 				}
@@ -3879,22 +3950,15 @@ Zotero.Schema = new function(){
 						Zotero.DB.query("UPDATE items SET clientDateModified=? WHERE itemID=?",[Zotero.DB.transactionDateTime,row.itemID]);
 					}
 				}
-
 				Zotero.wait();
 			}
 			
-			if (!dbMultilingualVersion) {
-				_updateDBVersion('userdata', 76);
-			} else {
-
-				// TODO
-				//
-				// Replace customBaseFieldMappings to fix FK fields/customField -> customFields->customFieldID
-				// If libraryID set, make sure no relations still use a local user key, and then remove on-error code in sync.js
-
-			    _updateDBVersion('userdata', toVersion);
-			}
-			_updateDBVersion('multilingual', toMultilingualVersion);
+			// TODO
+			//
+			// Replace customBaseFieldMappings to fix FK fields/customField -> customFields->customFieldID
+			// If libraryID set, make sure no relations still use a local user key, and then remove on-error code in sync.js
+			
+			_updateDBVersion('userdata', toVersion);
 			
 			Zotero.DB.commitTransaction();
 		}
@@ -3927,6 +3991,49 @@ Zotero.Schema = new function(){
 				ps.alert(null, title, Zotero.getString('upgrade.couldNotMigrate', Zotero.appName) + "\n\n" + Zotero.getString('upgrade.couldNotMigrate.restart'));
 			}
 			
+			throw(e);
+		}
+		
+		return true;
+	}
+	
+	
+	// TEMP
+	//
+	// TODO: Make this asynchronous, and make it block other SQLite
+	function _migrateUserDataSchemaSilent(fromVersion) {
+		var toVersion = _getSchemaSQLVersion('userdata2');
+		
+		if (!fromVersion) {
+			fromVersion = 76;
+		}
+		
+		if (fromVersion == toVersion) {
+			return false;
+		}
+		
+		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
+		
+		Zotero.DB.beginTransaction();
+		
+		try {
+			// Step through version changes until we reach the current version
+			//
+			// Each block performs the changes necessary to move from the
+			// previous revision to that one.
+			for (var i=fromVersion + 1; i<=toVersion; i++) {
+				if (i == 77 && _migrateUserDataSchemaSilentOk(i)) {
+					Zotero.DB.query("CREATE TABLE syncedSettings (\n    setting TEXT NOT NULL,\n    libraryID INT NOT NULL,\n    value NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    synced INT NOT NULL DEFAULT 0,\n    PRIMARY KEY (setting, libraryID)\n)");
+					Zotero.DB.query("INSERT OR IGNORE INTO syncObjectTypes VALUES (7, 'setting')");
+				}
+			}
+			
+			_updateDBVersion('userdata2', toVersion);
+			
+			Zotero.DB.commitTransaction();
+		}
+		catch (e) {
+			Zotero.DB.rollbackTransaction();
 			throw(e);
 		}
 		

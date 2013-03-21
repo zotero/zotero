@@ -436,12 +436,7 @@ Zotero.Fulltext = new function(){
 			
 			var args = [file.path, infoFile.path];
 			try {
-				if (!Zotero.isFx36) {
-					proc.runw(true, args, args.length);
-				}
-				else {
-					proc.run(true, args, args.length);
-				}
+				proc.runw(true, args, args.length);
 				var totalPages = this.getTotalPagesFromFile(itemID);
 			}
 			catch (e) {
@@ -472,12 +467,7 @@ Zotero.Fulltext = new function(){
 		}
 		args.push(file.path, cacheFile.path);
 		try {
-			if (!Zotero.isFx36) {
-				proc.runw(true, args, args.length);
-			}
-			else {
-				proc.run(true, args, args.length);
-			}
+			proc.runw(true, args, args.length);
 		}
 		catch (e) {
 			Zotero.debug("Error running pdftotext");

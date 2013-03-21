@@ -24,11 +24,11 @@
 */
 
 Zotero.Notifier = new function(){
-	var _observers = new Zotero.Hash();
+	var _observers = {};
 	var _disabled = false;
 	var _types = [
 		'collection', 'creator', 'search', 'share', 'share-items', 'item',
-		'collection-item', 'item-tag', 'tag', 'group', 'trash', 'bucket', 'relation'
+		'collection-item', 'item-tag', 'tag', 'setting', 'group', 'trash', 'bucket', 'relation'
 	];
 	var _inTransaction;
 	var _locked = false;
@@ -69,18 +69,18 @@ Zotero.Notifier = new function(){
 			var hash = Zotero.randomString(len);
 			tries--;
 		}
-		while (_observers.get(hash));
+		while (_observers[hash]);
 		
 		Zotero.debug('Registering observer for '
 			+ (types ? '[' + types.join() + ']' : 'all types')
 			+ ' in notifier with hash ' + hash + "'", 4);
-		_observers.set(hash, {ref: ref, types: types});
+		_observers[hash] = {ref: ref, types: types};
 		return hash;
 	}
 	
 	function unregisterObserver(hash){
 		Zotero.debug("Unregistering observer in notifier with hash '" + hash + "'", 4);
-		_observers.remove(hash);
+		delete _observers[hash];
 	}
 	
 	/**
@@ -115,7 +115,7 @@ Zotero.Notifier = new function(){
 		var queue = _inTransaction && !force;
 		
 		Zotero.debug("Notifier.trigger('" + event + "', '" + type + "', " + '[' + ids.join() + '])'
-			+ (queue ? " queued" : " called " + "[observers: " + _observers.length + "]"));
+			+ (queue ? " queued" : " called " + "[observers: " + Object.keys(_observers).length + "]"));
 		
 		// Merge with existing queue
 		if (queue) {
@@ -145,20 +145,20 @@ Zotero.Notifier = new function(){
 			return true;
 		}
 		
-		for (var i in _observers.items){
+		for (var i in _observers){
 			Zotero.debug("Calling notify('" + event + "') on observer with hash '" + i + "'", 4);
 			
-			if (!_observers.get(i)) {
+			if (!_observers[i]) {
 				Zotero.debug("Observer no longer exists");
 				continue;
 			}
 			
 			// Find observers that handle notifications for this type (or all types)
-			if (!_observers.get(i).types || _observers.get(i).types.indexOf(type)!=-1){
+			if (!_observers[i].types || _observers[i].types.indexOf(type)!=-1){
 				// Catch exceptions so all observers get notified even if
 				// one throws an error
 				try {
-					_observers.get(i).ref.notify(event, type, ids, extraData);
+					_observers[i].ref.notify(event, type, ids, extraData);
 				}
 				catch (e) {
 					Zotero.debug(e);

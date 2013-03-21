@@ -12,6 +12,8 @@ pref("extensions.zotero@chnm.gmu.edu.description", "chrome://zotero/locale/zoter
 pref("extensions.zotero.import.jurisdictionFallback", "us");
 pref("extensions.zotero.import.jurisdictionDefault", "us");
 
+pref("extensions.zotero.saveRelativeAttachmentPath", false);
+pref("extensions.zotero.baseAttachmentPath", '');
 pref("extensions.zotero.useDataDir", false);
 pref("extensions.zotero.dataDir", '');
 pref("extensions.zotero.lastDataDir", '');
@@ -99,9 +101,11 @@ pref("extensions.zotero.export.translatorSettings", 'true,false');
 pref("extensions.zotero.export.lastStyle", 'http://www.zotero.org/styles/chicago-note-bibliography');
 pref("extensions.zotero.export.bibliographySettings", 'save-as-rtf');
 pref("extensions.zotero.export.bibliographyLocale", '');
-pref("extensions.zotero.export.citePaperJournalArticleURL", false);
 pref("extensions.zotero.export.displayCharsetOption", false);
+pref("extensions.zotero.export.citePaperJournalArticleURL", false);
+pref("extensions.zotero.cite.automaticTitleAbbreviation", false);
 pref("extensions.zotero.import.charset", "auto");
+pref("extensions.zotero.import.createNewCollection.fromFileOpenHandler", true);
 pref("extensions.zotero.rtfScan.lastInputFile", "");
 pref("extensions.zotero.rtfScan.lastOutputFile", "");
 
@@ -141,11 +145,6 @@ pref("extensions.zotero.httpServer.port", 23119);	// ascii "ZO"
 // Zeroconf
 pref("extensions.zotero.zeroconf.server.enabled", false);
 
-// Zotero Commons
-pref("extensions.zotero.commons.enabled", false);
-pref("extensions.zotero.commons.accessKey", '');
-pref("extensions.zotero.commons.secretKey", '');
-
 // Annotation settings
 pref("extensions.zotero.annotations.warnOnClose", true);
 
@@ -163,6 +162,8 @@ pref("extensions.zotero.sync.storage.maxDownloads", 4);
 pref("extensions.zotero.sync.storage.maxUploads", 2);
 pref("extensions.zotero.sync.storage.deleteDelayDays", 30);
 pref("extensions.zotero.sync.storage.groups.enabled", true);
+pref("extensions.zotero.sync.storage.downloadMode.personal", "on-demand");
+pref("extensions.zotero.sync.storage.downloadMode.groups", "on-demand");
 
 // Proxy
 pref("extensions.zotero.proxies.autoRecognize", true);

@@ -161,7 +161,7 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 		this._showRow(new Zotero.ItemGroup('separator', false));
 		var header = {
 			id: "group-libraries-header",
-			label: Zotero.getString('pane.collections.group'),
+			label: Zotero.getString('pane.collections.groupLibraries'),
 			expand: function (beforeRow, groups) {
 				if (!groups) {
 					var groups = Zotero.Groups.getAll();
@@ -179,39 +179,6 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 		if (this._containerState.HG) {
 			this._dataItems[row][1] = true;
 			header.expand(null, groups);
-		}
-	}
-	
-	var shares = Zotero.Zeroconf.instances;
-	if (shares.length) {
-		this._showRow(new Zotero.ItemGroup('separator', false));
-		for each(var share in shares) {
-			this._showRow(new Zotero.ItemGroup('share', share));
-		}
-	}
-	
-	if (this.hideSources.indexOf('commons') == -1 && Zotero.Commons.enabled) {
-		this._showRow(new Zotero.ItemGroup('separator', false));
-		var header = {
-			id: "commons-header",
-			label: "Commons", // TODO: localize
-			expand: function (buckets) {
-				var show = function (buckets) {
-					for each(var bucket in buckets) {
-						self._showRow(new Zotero.ItemGroup('bucket', bucket), 1);
-					}
-				}
-				if (buckets) {
-					show(buckets);
-				}
-				else {
-					Zotero.Commons.getBuckets(show);
-				}
-			}
-		};
-		this._showRow(new Zotero.ItemGroup('header', header), null, null, commonsExpand);
-		if (commonsExpand) {
-			header.expand();
 		}
 	}
 	
@@ -248,7 +215,7 @@ Zotero.CollectionTreeView.prototype.reload = function()
  */
 Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 {
-	if ((!ids || ids.length == 0) && action != 'refresh') {
+	if ((!ids || ids.length == 0) && action != 'refresh' && action != 'redraw') {
 		return;
 	}
 	
@@ -259,6 +226,11 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 	
 	if (action == 'refresh' && type == 'trash') {
 		this._trashNotEmpty[ids[0]] = !!Zotero.Items.getDeleted(ids[0]).length;
+		return;
+	}
+	
+	if (action == 'redraw') {
+		this._treebox.invalidate();
 		return;
 	}
 	
@@ -428,8 +400,12 @@ Zotero.CollectionTreeView.prototype.getCellText = function(row, column)
 {
 	var obj = this._getItemAtRow(row);
 	
-	if(column.id == "zotero-collections-name-column")
+	if (column.id == 'zotero-collections-name-column') {
 		return obj.getName();
+	}
+	else if (column.id == 'zotero-collections-sync-status-column') {
+		return "";
+	}
 	else
 		return "";
 }
@@ -438,7 +414,41 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 {
 	var itemGroup = this._getItemAtRow(row);
 	var collectionType = itemGroup.type;
+	
+	if (collectionType == 'group') {
+		collectionType = 'library';
+	}
+	
+	// Show sync icons only in library rows
+	if (collectionType != 'library' && col.index != 0) {
+		return '';
+	}
+	
 	switch (collectionType) {
+		case 'library':
+			if (col.id == 'zotero-collections-sync-status-column') {
+				if (itemGroup.isLibrary(true)) {
+					var libraryID = itemGroup.isLibrary() ? 0 : itemGroup.ref.libraryID;
+					var errors = Zotero.Sync.Runner.getErrors(libraryID);
+					if (errors) {
+						var e = Zotero.Sync.Runner.getPrimaryError(errors);
+						switch (e.errorMode) {
+						case 'warning':
+							var image = 'error';
+							break;
+							
+						default:
+							var image = 'exclamation';
+							break;
+						}
+						
+						return 'chrome://zotero/skin/' + image + '.png';
+					}
+				}
+				return '';
+			}
+			break;
+		
 		case 'trash':
 			if (this._trashNotEmpty[itemGroup.ref.libraryID ? itemGroup.ref.libraryID : 0]) {
 				collectionType += '-full';
@@ -454,7 +464,7 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 			}
 			break;
 		
-		case 'group':
+		
 			collectionType = 'library';
 			break;
 		
@@ -1282,16 +1292,6 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 			}
 			return true;
 		}
-		else if (dataType == 'zotero/item-xml') {
-			var xml = new XML(data.data);
-			for each(var xmlNode in xml.items.item) {
-				var item = Zotero.Sync.Server.Data.xmlToItem(xmlNode);
-				if (item.isRegularItem() || !item.getSource()) {
-					return true;
-				}
-			}
-			return false;
-		}
 		else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
 			if (itemGroup.isSearch()) {
 				return false;
@@ -1694,24 +1694,6 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		}
 		
 		Zotero.DB.commitTransaction();
-	}
-	else if (dataType == 'zotero/item-xml') {
-		Zotero.DB.beginTransaction();
-		var xml = new XML(data.data);
-		var toAdd = [];
-		for each(var xmlNode in xml.items.item) {
-			var item = Zotero.Sync.Server.Data.xmlToItem(xmlNode, false, true);
-			if (item.isRegularItem() || !item.getSource()) {
-				var id = item.save();
-				toAdd.push(id);
-			}
-		}
-		if (toAdd.length > 0) {
-			this._getItemAtRow(row).ref.addItems(toAdd);
-		}
-		
-		Zotero.DB.commitTransaction();
-		return;
 	}
 	else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
 		if (itemGroup.isWithinGroup()) {

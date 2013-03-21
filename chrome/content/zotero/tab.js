@@ -83,7 +83,7 @@ var ZoteroTab = new function()
 			this.containerWindow.gBrowser.tabContainer.addEventListener("TabSelect", listener, false);
 		}
 		
-		if(Zotero && Zotero.isFx4 && Zotero.Prefs.get("showIn") != 2) {
+		if(Zotero && Zotero.Prefs.get("showIn") != 2) {
 			// on Fx 4, add an event listener so the pinned tab isn't restored on close
 			var pinnedTabCloser = function() {
 				try {
@@ -104,7 +104,7 @@ var ZoteroTab = new function()
 			if(tabs.length > 1) {
 				window.close();
 			} else {
-				if(Zotero.isFx4 && tabs[0].pinned) this.containerWindow.gBrowser.unpinTab(tabs[0]);
+				if(tabs[0].pinned) this.containerWindow.gBrowser.unpinTab(tabs[0]);
 				document.location.replace(this.containerWindow.gHomeButton.getHomePage());
 			}
 			return;

@@ -157,10 +157,9 @@ grid row hbox:first-child
 	margin-right: 10px;
 }
 
-#storage-settings
+.storage-settings-download-options
 {
-	margin-left: 10px;
-	margin-right: 5px;
+	margin-left: 40px;
 }
 
 #storage-verify, #storage-abort, #storage-clean
@@ -180,7 +179,7 @@ grid row hbox:first-child
 	margin-right: .25em;
 }
 
-#storage-terms > label[class=text-link]
+#storage-terms > label[class=zotero-text-link]
 {
 	margin-right: 0;
 }

@@ -1197,8 +1197,20 @@ Zotero.Search.prototype._buildQuery = function(){
 						break;
 					
 					case 'year':
-						condSQL += 'fieldID IN (?) AND ';
 						condSQLParams.push(Zotero.ItemFields.getID('date'));
+						//Add base field
+						var dateFields = Zotero.ItemFields.getTypeFieldsFromBase('date');
+						if (dateFields) {
+							condSQL += 'fieldID IN (?,';																
+							// Add type-specific date fields (dateEnacted, dateDecided, issueDate)
+							for each(var fieldID in dateFields) {
+								condSQL += '?,';
+								condSQLParams.push(fieldID);
+							}
+							condSQL = condSQL.substr(0, condSQL.length - 1);
+							condSQL += ') AND ';
+						}
+					
 						condSQL += "valueID IN (SELECT valueID FROM "
 							+ "itemDataValues WHERE ";
 						

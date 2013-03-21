@@ -266,15 +266,15 @@ var Zotero_Merge_Window = new function () {
 	function _setInstructionsString(buttonName) {
 		switch (_mergeGroup.type) {
 			case 'storagefile':
-				var msg = "The following file has been changed in multiple locations.";
+				var msg = Zotero.getString('sync.conflict.fileChanged');
 				break;
 			
 			default:
-				// TODO: localize and maybe not always call it 'item'
-				var msg = "The following item has been changed in multiple locations.";
+				// TODO: cf. localization: maybe not always call it 'item'
+				var msg = Zotero.getString('sync.conflict.itemChanged');
 		}
 		
-		msg += " Choose the version you would like to keep, and then click " + buttonName + ".";
+		msg += " " + Zotero.getString('sync.conflict.chooseVersionToKeep', buttonName);
 		
 		document.getElementById('zotero-merge-instructions').value = msg;
 	}

@@ -70,7 +70,7 @@ const CSL_TEXT_MAPPINGS = {
 	"genre":["type","reign","supplementName","sessionType"],
 	"chapter-number":["session","meetingNumber"],
 	"source":["libraryCatalog"],
-	"dimensions": ["artworkSize", "runningTime"], 
+	"dimensions": ["artworkSize", "runningTime"],
 	"medium":["medium", "system"],
 	"scale":["scale"],
 	"archive":["archive"],
@@ -620,7 +620,7 @@ Zotero.Utilities = {
 		if(typeof(x) != "string") {
 			throw "cleanDOI: argument must be a string";
 		}
-		
+
 		var doi = x.match(/10\.[0-9]{4,}\/[^\s]*[^\s\.,]/);
 		return doi ? doi[0] : null;
 	},
@@ -722,24 +722,19 @@ Zotero.Utilities = {
 	 * @type String
 	 */
 	 "htmlSpecialChars":function(/**String*/ str) {
-		if (typeof str != 'string') {
-			throw "Argument '" + str + "' must be a string in Zotero.Utilities.htmlSpecialChars()";
-		}
+		if (typeof str != 'string') str = str.toString();
 		
 		if (!str) {
 			return '';
 		}
 		
-		var chars = ['&', '"',"'",'<','>'];
-		var entities = ['amp', 'quot', 'apos', 'lt', 'gt'];
-		
-		var newString = str;
-		for (var i = 0; i < chars.length; i++) {
-			var re = new RegExp(chars[i], 'g');
-			newString = newString.replace(re, '&' + entities[i] + ';');
-		}
-		
-		newString = newString.replace(/&lt;ZOTERO([^\/]+)\/&gt;/g, function (str, p1, offset, s) {
+		return str
+			.replace(/&/g, '&amp;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&apos;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/&lt;ZOTERO([^\/]+)\/&gt;/g, function (str, p1, offset, s) {
 			switch (p1) {
 				case 'BREAK':
 					return '<br/>';
@@ -749,8 +744,6 @@ Zotero.Utilities = {
 					return p1;
 			}
 		});
-		
-		return newString;
 	},
 
 	/**
@@ -1393,29 +1386,52 @@ Zotero.Utilities = {
 			var element = elements[i];
 			
 			// Firefox 5 hack, so we will preserve Fx5DOMWrappers
-			var useFx5DOMWrapper = !!element.__wrappedDOMObject;
-			if(useFx5DOMWrapper) element = element.__wrappedDOMObject;
+			var isWrapped = Zotero.Translate.DOMWrapper && Zotero.Translate.DOMWrapper.isWrapped(element);
+			if(isWrapped) element = Zotero.Translate.DOMWrapper.unwrap(element);
 			
 			if(element.ownerDocument) {
 				var rootDoc = element.ownerDocument;
 			} else if(element.documentElement) {
 				var rootDoc = element;
+			} else if(Zotero.isIE && element.documentElement === null) {
+				// IE: documentElement may be null if there is a parse error. In this
+				// case, we don't match anything to mimic what would happen with DOMParser
+				continue;
 			} else {
 				throw new Error("First argument must be either element(s) or document(s) in Zotero.Utilities.xpath(elements, '"+xpath+"')");
 			}
 			
-			try {
-				var xpathObject = rootDoc.evaluate(xpath, element, nsResolver, 5, // 5 = ORDERED_NODE_ITERATOR_TYPE
-					null);
-			} catch(e) {
-				// rethrow so that we get a stack
-				throw new Error(e.name+": "+e.message);
-			}
-			
-			var newEl;
-			while(newEl = xpathObject.iterateNext()) {
-				// Firefox 5 hack
-				results.push(useFx5DOMWrapper ? Zotero.Translate.SandboxManager.Fx5DOMWrapper(newEl) : newEl);
+			if(!Zotero.isIE || "evaluate" in rootDoc) {
+				try {
+					var xpathObject = rootDoc.evaluate(xpath, element, nsResolver, 5, // 5 = ORDERED_NODE_ITERATOR_TYPE
+						null);
+				} catch(e) {
+					// rethrow so that we get a stack
+					throw new Error(e.name+": "+e.message);
+				}
+				
+				var newEl;
+				while(newEl = xpathObject.iterateNext()) {
+					// Firefox 5 hack
+					results.push(isWrapped ? Zotero.Translate.DOMWrapper.wrap(newEl) : newEl);
+				}
+			} else if("selectNodes" in element) {
+				// We use JavaScript-XPath in IE for HTML documents, but with an XML
+				// document, we need to use selectNodes
+				if(namespaces) {
+					var ieNamespaces = [];
+					for(var i in namespaces) {
+						if(!i) continue;
+						ieNamespaces.push('xmlns:'+i+'="'+Zotero.Utilities.htmlSpecialChars(namespaces[i])+'"');
+					}
+					rootDoc.setProperty("SelectionNamespaces", ieNamespaces.join(" "));
+				}
+				var nodes = element.selectNodes(xpath);
+				for(var i=0; i<nodes.length; i++) {
+					results.push(nodes[i]);
+				}
+			} else {
+				throw new Error("XPath functionality not available");
 			}
 		}
 		
@@ -1438,7 +1454,11 @@ Zotero.Utilities = {
 		
 		var strings = new Array(elements.length);
 		for(var i=0, n=elements.length; i<n; i++) {
-			strings[i] = elements[i].textContent;
+			var el = elements[i];
+			strings[i] = "textContent" in el ? el.textContent
+				: "innerText" in el ? el.innerText
+				: "text" in el ? el.text
+				: el.nodeValue;
 		}
 		
 		return strings.join(delimiter !== undefined ? delimiter : ", ");
@@ -2062,6 +2082,17 @@ Zotero.Utilities = {
 			}
 		}
 		return length;
+	},
+	
+	/**
+	 * Gets the icon for a JSON-style attachment
+	 */
+	"determineAttachmentIcon":function(attachment) {
+		if(attachment.linkMode === "linked_url") {
+			return Zotero.ItemTypes.getImageSrc("attachment-web-link");
+		}
+		return Zotero.ItemTypes.getImageSrc(attachment.mimeType === "application/pdf"
+							? "attachment-pdf" : "attachment-snapshot");
 	},
 
 	/**

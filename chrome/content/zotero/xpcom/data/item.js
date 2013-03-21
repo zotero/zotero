@@ -55,6 +55,9 @@ Zotero.Item.prototype._init = function () {
 	this._firstCreator = null;
 	this._sortCreator = null;
 	this._numNotes = null;
+	this._numNotesTrashed = null;
+	this._numNotesEmbedded = null;
+	this._numNotesEmbeddedIncludingTrashed = null;
 	this._numAttachments = null;
 	
 	this._creators = [];
@@ -79,7 +82,11 @@ Zotero.Item.prototype._init = function () {
 	this._skipModTimeUpdate = false;
 	this._previousData = {};
 	
+	this._bestAttachmentState = null;
+	this._fileExists = null;
+	
 	this._deleted = null;
+	this._hasNote = null;
 	this._noteTitle = null;
 	this._noteText = null;
 	this._noteAccessTime = null;
@@ -111,6 +118,8 @@ Zotero.Item.prototype.__defineGetter__('itemID', function () {
 });
 Zotero.Item.prototype.__defineSetter__('id', function (val) { this.setField('id', val); });
 Zotero.Item.prototype.__defineGetter__('libraryID', function () { return this.getField('libraryID'); });
+// Temporary until everything expects an integer
+Zotero.Item.prototype.__defineGetter__('libraryIDInt', function () { var libraryID = this.getField('libraryID'); return libraryID ? parseInt(libraryID) : 0; });
 Zotero.Item.prototype.__defineSetter__('libraryID', function (val) { this.setField('libraryID', val); });
 Zotero.Item.prototype.__defineGetter__('key', function () { return this.getField('key'); });
 Zotero.Item.prototype.__defineSetter__('key', function (val) { this.setField('key', val) });
@@ -444,6 +453,9 @@ Zotero.Item.prototype.loadFromRow = function(row, reload) {
 				case 'numAttachments':
 					this['_' + col] = row[col] ? parseInt(row[col]) : 0;
 					break;
+				
+				case 'sourceItemID':
+					this['_sourceItem'] = row[col] || false;
 				
 				default:
 					this['_' + col] = row[col] ? row[col] : '';
@@ -803,7 +815,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn, lang, force_top)
 	
 	this._disabledCheck();
 	
-	//Zotero.debug("Setting field '" + field + "' to '" + value + "' (loadIn: " + (loadIn ? 'true' : 'false') + ")");
+	//Zotero.debug("Setting field '" + field + "' to '" + value + "' (loadIn: " + (loadIn ? 'true' : 'false') + ") for item " + this.id + " ");
 	
 	if (!field) {
 		throw ("Field not specified in Item.setField()");
@@ -847,6 +859,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn, lang, force_top)
 			case 'sortCreator':
 			case 'numNotes':
 			case 'numAttachments':
+			case 'sourceItemID':
 				throw ('Primary field ' + field + ' cannot be changed in Zotero.Item.setField()');
 		}
 		
@@ -1841,6 +1854,41 @@ Zotero.Item.prototype.save = function(checkFields) {
 				var path = this.attachmentPath;
 				var syncState = this.attachmentSyncState;
 				
+				// Save attachment within attachment base directory as relative path
+				if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE && path) {
+					let basePath = Zotero.Prefs.get('baseAttachmentPath');
+					if (basePath != '' && Zotero.Prefs.get('saveRelativeAttachmentPath')) {
+						let baseDir = Components.classes["@mozilla.org/file/local;1"]
+							.createInstance(Components.interfaces.nsILocalFile);
+						try {
+							baseDir.persistentDescriptor = basePath;
+						}
+						catch (e) {
+							Zotero.debug(e, 1);
+							Components.utils.reportError(e);
+							baseDir = null;
+						}
+						
+						if (baseDir) {
+							let attachmentFile = Components.classes["@mozilla.org/file/local;1"]
+								.createInstance(Components.interfaces.nsILocalFile);
+							try {
+								attachmentFile.initWithPath(path);
+							}
+							catch (e) {
+								Zotero.debug(e, 1);
+								Components.utils.reportError(e);
+								attachmentFile = null;
+							}
+							
+							if (attachmentFile && Zotero.File.directoryContains(baseDir, attachmentFile)) {
+								path = Zotero.Attachments.BASE_PATH_PLACEHOLDER
+									+ attachmentFile.getRelativeDescriptor(baseDir);
+							}
+						}
+					}
+				}
+				
 				var bindParams = [
 					itemID,
 					parent ? parent : null,
@@ -1943,7 +1991,8 @@ Zotero.Item.prototype.save = function(checkFields) {
 				'libraryID',
 				'key'
 			];
-			for each(field in updateFields) {
+			
+			for each(var field in updateFields) {
 				if (this._changedPrimaryData && this._changedPrimaryData[field]) {
 					sql += field + '=?, ';
 					sqlValues.push(this.getField(field));
@@ -2185,6 +2234,13 @@ Zotero.Item.prototype.save = function(checkFields) {
 					//Zotero.DB.query(sql2, [this.id, 'zotero:isZombieOf']);
 				}
 				Zotero.DB.query(sql, this.id);
+				
+				var parent = this.getSource();
+				if (parent) {
+					parent = Zotero.Items.get(parent);
+					parent.updateNumNotes();
+					parent.updateBestAttachmentState();
+				}
 			}
 			
 			
@@ -2225,6 +2281,12 @@ Zotero.Item.prototype.save = function(checkFields) {
 				}
 				Zotero.DB.query(sql, bindParams);
 				
+				if (this.isAttachment()) {
+					if (parent) {
+						Zotero.Items.get(parent).updateNumNotes();
+					}
+				}
+				
 				// Clear cached child notes of the parent. If the note
 				// moved between parents, the old one will be cleared
 				// when changing the note count below
@@ -2245,6 +2307,41 @@ Zotero.Item.prototype.save = function(checkFields) {
 				var charsetID = this.attachmentCharset;
 				var path = this.attachmentPath;
 				var syncState = this.attachmentSyncState;
+				
+				// Save attachment within attachment base directory as relative path
+				if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE && path) {
+					let basePath = Zotero.Prefs.get('baseAttachmentPath');
+					if (basePath != '' && Zotero.Prefs.get('saveRelativeAttachmentPath')) {
+						let baseDir = Components.classes["@mozilla.org/file/local;1"]
+							.createInstance(Components.interfaces.nsILocalFile);
+						try {
+							baseDir.persistentDescriptor = basePath;
+						}
+						catch (e) {
+							Zotero.debug(e, 1);
+							Components.utils.reportError(e);
+							baseDir = null;
+						}
+						
+						if (baseDir) {
+							let attachmentFile = Components.classes["@mozilla.org/file/local;1"]
+								.createInstance(Components.interfaces.nsILocalFile);
+							try {
+								attachmentFile.initWithPath(path);
+							}
+							catch (e) {
+								Zotero.debug(e, 1);
+								Components.utils.reportError(e);
+								attachmentFile = null;
+							}
+							
+							if (attachmentFile && Zotero.File.directoryContains(baseDir, attachmentFile)) {
+								path = Zotero.Attachments.BASE_PATH_PLACEHOLDER
+									+ attachmentFile.getRelativeDescriptor(baseDir);
+							}
+						}
+					}
+				}
 				
 				var bindParams = [
 					parent ? parent : null,
@@ -2943,9 +3040,10 @@ Zotero.Item.prototype.updateNote = function(text) {
  * Returns number of child notes of item
  *
  * @param	{Boolean}	includeTrashed		Include trashed child items in count
+ * @param	{Boolean}	includeEmbedded		Include notes embedded in attachments
  * @return	{Integer}
  */
-Zotero.Item.prototype.numNotes = function(includeTrashed) {
+Zotero.Item.prototype.numNotes = function(includeTrashed, includeEmbedded) {
 	if (this.isNote()) {
 		throw ("numNotes() cannot be called on items of type 'note'");
 	}
@@ -2954,14 +3052,38 @@ Zotero.Item.prototype.numNotes = function(includeTrashed) {
 		return 0;
 	}
 	
-	var deleted = 0;
-	if (includeTrashed) {
+	if (includeTrashed && this._numNotesTrashed === null) {
 		var sql = "SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=? AND "
 			+ "itemID IN (SELECT itemID FROM deletedItems)";
-		deleted = parseInt(Zotero.DB.valueQuery(sql, this.id));
+		this._numNotesTrashed = parseInt(Zotero.DB.valueQuery(sql, this.id));
+	}
+	var embedded = 0;
+	if (includeEmbedded) {
+		if ((includeTrashed ? this._numNotesEmbeddedIncludingTrashed : this._numNotesEmbedded) === null) {
+			var sql = "SELECT COUNT(*) FROM itemAttachments IA JOIN itemNotes USING (itemID) "
+				+ "WHERE IA.sourceItemID=? AND note!='' AND note!=?";
+			if (!includeTrashed) {
+				sql += " AND itemID NOT IN (SELECT itemID FROM deletedItems)";
+			}
+			var embedded = parseInt(Zotero.DB.valueQuery(sql, [this.id, Zotero.Notes.defaultNote]));
+			if (includeTrashed) {
+				this._numNotesEmbeddedIncludingTrashed = embedded;
+			}
+			else {
+				this._numNotesEmbedded = embedded;
+			}
+		}
 	}
 	
-	return this._numNotes + deleted;
+	return this._numNotes + this._numNotesTrashed +
+			(includeTrashed ? this._numNotesEmbeddedIncludingTrashed : this._numNotesEmbedded);
+}
+
+
+Zotero.Item.prototype.updateNumNotes = function () {
+	this._numNotesTrashed = null;
+	this._numNotesEmbedded = null;
+	this._numNotesEmbeddedIncludingTrashed = null;
 }
 
 
@@ -2994,9 +3116,31 @@ Zotero.Item.prototype.getNoteTitle = function() {
 }
 
 
+Zotero.Item.prototype.hasNote = function () {
+	if (!this.isNote() && !this.isAttachment()) {
+		throw new Error("hasNote() can only be called on notes and attachments");
+	}
+	
+	if (this._hasNote !== null) {
+		return this._hasNote;
+	}
+	
+	if (!this.id) {
+		return false;
+	}
+	
+	var sql = "SELECT COUNT(*) FROM itemNotes WHERE itemID=? "
+				+ "AND note!='' AND note!=?";
+	var hasNote = !!Zotero.DB.valueQuery(sql, [this.id, Zotero.Notes.defaultNote]);
+	
+	this._hasNote = hasNote;
+	return hasNote;
+}
+
+
 /**
-* Get the text of an item note
-**/
+ * Get the text of an item note
+ **/
 Zotero.Item.prototype.getNote = function() {
 	if (!this.isNote() && !this.isAttachment()) {
 		throw ("getNote() can only be called on notes and attachments");
@@ -3020,11 +3164,11 @@ Zotero.Item.prototype.getNote = function() {
 	if (note) {
 		if (!note.substr(0, 36).match(/^<div class="zotero-note znv[0-9]+">/)) {
 			note = Zotero.Utilities.htmlSpecialChars(note);
-			note = '<div class="zotero-note znv1"><p>'
+			note = Zotero.Notes.notePrefix + '<p>'
 					+ note.replace(/\n/g, '</p><p>')
 						.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
 						.replace(/  /g, '&nbsp;&nbsp;')
-				+ '</p></div>';
+				+ '</p>' + Zotero.Notes.noteSuffix;
 			note = note.replace(/<p>\s*<\/p>/g, '<p>&nbsp;</p>');
 			var sql = "UPDATE itemNotes SET note=? WHERE itemID=?";
 			Zotero.DB.query(sql, [note, this.id]);
@@ -3037,7 +3181,6 @@ Zotero.Item.prototype.getNote = function() {
 	}
 	
 	this._noteText = note ? note : '';
-	
 	return this._noteText;
 }
 
@@ -3067,6 +3210,7 @@ Zotero.Item.prototype.setNote = function(text) {
 		return false;
 	}
 	
+	this._hasNote = text !== '';
 	this._noteText = text;
 	this._noteTitle = Zotero.Notes.noteToTitle(text);
 	
@@ -3204,6 +3348,14 @@ Zotero.Item.prototype.isWebAttachment = function() {
 }
 
 
+Zotero.Item.prototype.isFileAttachment = function() {
+	if (!this.isAttachment()) {
+		return false;
+	}
+	return this.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL;
+}
+
+
 /**
  * Returns number of child attachments of item
  *
@@ -3251,6 +3403,18 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 		};
 	}
 	
+	// Update file existence state of this item
+	// and best attachment state of parent item
+	var self = this;
+	var updateAttachmentStates = function (exists) {
+		self._fileExists = exists;
+		
+		if (self.isTopLevelItem()) {
+			return;
+		}
+		Zotero.Items.get(self.getSource()).updateBestAttachmentState();
+	};
+	
 	// No associated files for linked URLs
 	if (row.linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 		return false;
@@ -3258,6 +3422,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 	
 	if (!row.path) {
 		Zotero.debug("Attachment path is empty", 2);
+		updateAttachmentStates(false);
 		return false;
 	}
 	
@@ -3305,6 +3470,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			}
 			catch (e) {
 				Zotero.debug('Invalid persistent descriptor', 2);
+				updateAttachmentStates(false);
 				return false;
 			}
 		}
@@ -3331,6 +3497,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			}
 			catch (e) {
 				Zotero.debug('Invalid relative descriptor', 2);
+				updateAttachmentStates(false);
 				return false;
 			}
 		}
@@ -3338,9 +3505,11 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 	
 	if (!skipExistsCheck && !file.exists()) {
 		Zotero.debug("Attachment file '" + file.path + "' not found", 2);
+		updateAttachmentStates(false);
 		return false;
 	}
 	
+	updateAttachmentStates(true);
 	return file;
 }
 
@@ -3361,6 +3530,19 @@ Zotero.Item.prototype.getFilename = function () {
 	
 	return file.leafName;
 }
+
+
+/**
+ * Cached check for file existence, used for items view
+ *
+ * This is updated only initially and on subsequent getFile() calls.
+ */
+Zotero.Item.prototype.__defineGetter__('fileExists', function () {
+	if (this._fileExists === null) {
+		this.getFile();
+	}
+	return this._fileExists;
+});
 
 
 /*
@@ -3534,7 +3716,6 @@ Zotero.Item.prototype.__defineSetter__('attachmentLinkMode', function (val) {
 	if (val === this.attachmentLinkMode) {
 		return;
 	}
-	
 	if (!this._changedAttachmentData) {
 		this._changedAttachmentData = {};
 	}
@@ -3655,20 +3836,58 @@ Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
 		return undefined;
 	}
 	
-	if (this._attachmentPath !== null) {
-		return this._attachmentPath;
-	}
+	var pathIsRelative = false;
 	
-	if (!this.id) {
+	if (this._attachmentPath !== null)  {
+		pathIsRelative = this._attachmentPath.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0
+			&& this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE;
+		if (!pathIsRelative) {
+			return this._attachmentPath;
+		}
+	} 
+	else if (!this.id) {
 		return '';
 	}
-	
-	var sql = "SELECT path FROM itemAttachments WHERE itemID=?";
-	var path = Zotero.DB.valueQuery(sql, this.id);
-	if (!path) {
-		path = '';
+	else {
+		var sql = "SELECT path FROM itemAttachments WHERE itemID=?";
+		var path = Zotero.DB.valueQuery(sql, this.id);
+		if (!path) {
+			this._attachmentPath = '';
+			return this._attachmentPath;
+		}
+		
+		this._attachmentPath = path;
+		
+		pathIsRelative = path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0
+			&& this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE;
 	}
-	this._attachmentPath = path;
+	
+	if (pathIsRelative) {
+		var basePath = Zotero.Prefs.get('baseAttachmentPath');
+		// If the base path has been cleared, don't try to recreate the full attachment path
+		if (basePath == '') {
+			return '';
+		}
+		var baseDir = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		try {
+			baseDir.persistentDescriptor = basePath;
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+			return '';
+		}
+		
+		var relativePath = this._attachmentPath.substr(
+			Zotero.Attachments.BASE_PATH_PLACEHOLDER.length
+		);
+		var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		attachmentFile.setRelativeDescriptor(baseDir,relativePath);
+		return attachmentFile.persistentDescriptor;
+	}
+	
 	return path;
 });
 
@@ -3696,6 +3915,21 @@ Zotero.Item.prototype.__defineSetter__('attachmentPath', function (val) {
 	this._changedAttachmentData.path = true;
 	this._attachmentPath = val;
 });
+
+
+/**
+ * Force an update of the attachment path and resave the item
+ *
+ * This is used when changing the attachment base directory, since relative
+ * path handling is done on item save.
+ */
+Zotero.Item.prototype.updateAttachmentPath = function () {
+	if (!this._changedAttachmentData) {
+		this._changedAttachmentData = {};
+	}
+	this._changedAttachmentData.path = true;
+	this.save();
+};
 
 
 Zotero.Item.prototype.__defineGetter__('attachmentSyncState', function () {
@@ -3839,11 +4073,6 @@ Zotero.Item.prototype.__defineGetter__('attachmentText', function () {
 		if (cacheFile.exists()) {
 			var str = Zotero.File.getContents(cacheFile);
 			
-			// TODO: remove post-Fx3.0
-			if (!str.trim) {
-				return Zotero.Utilities.trim(str);
-			}
-			
 			return str.trim();
 		}
 		return '';
@@ -3898,11 +4127,6 @@ Zotero.Item.prototype.__defineGetter__('attachmentText', function () {
 	
 	else {
 		return '';
-	}
-	
-	// TODO: remove post-Fx3.0
-	if (!str.trim) {
-		return Zotero.Utilities.trim(str);
 	}
 	
 	return str.trim();
@@ -3990,7 +4214,7 @@ Zotero.Item.prototype.getBestSnapshot = function () {
 }
 
 
-/*
+/**
  * Looks for attachment in the following order: oldest PDF attachment matching parent URL,
  * oldest non-PDF attachment matching parent URL, oldest PDF attachment not matching URL,
  * old non-PDF attachment not matching URL
@@ -4001,15 +4225,36 @@ Zotero.Item.prototype.getBestAttachment = function() {
 	if (!this.isRegularItem()) {
 		throw ("getBestAttachment() can only be called on regular items");
 	}
-	return this.getBestAttachments()[0];
+	var attachments = this.getBestAttachments();
+	return attachments ? attachments[0] : false;
 }
 
-/*
+/**
+ * Returned cached state of best attachment for use in items view
+ *
+ * @return {Integer}  0 (none), 1 (present), -1 (missing)
+ */
+Zotero.Item.prototype.getBestAttachmentState = function () {
+	if (this._bestAttachmentState !== null) {
+		return this._bestAttachmentState;
+	}
+	var itemID = this.getBestAttachment();
+	this._bestAttachmentState = itemID ? (Zotero.Items.get(itemID).fileExists ? 1 : -1) : 0;
+	return this._bestAttachmentState;
+}
+
+
+Zotero.Item.prototype.updateBestAttachmentState = function () {
+	this._bestAttachmentState = null;
+}
+
+
+/**
  * Looks for attachment in the following order: oldest PDF attachment matching parent URL,
  * oldest PDF attachment not matching parent URL, oldest non-PDF attachment matching parent URL,
  * old non-PDF attachment not matching parent URL
  *
- * @return	{Array}		itemIDs for attachments
+ * @return	{Array|FALSE}		itemIDs for attachments, or FALSE if none
  */
 Zotero.Item.prototype.getBestAttachments = function() {
 	if (!this.isRegularItem()) {
@@ -4099,10 +4344,16 @@ Zotero.Item.prototype.addTag = function(name, type) {
 Zotero.Item.prototype.addTags = function (tags, type) {
 	Zotero.DB.beginTransaction();
 	try {
-		for each(var tag in tags) {
-			this.addTag(tag, type);
+		var tagIDs = [];
+		for (var i = 0; i < tags.length; i++) {
+			let id = this.addTag(tags[i], type);
+			if (id) {
+				tagIDs.push(id);
+			}
 		}
+		
 		Zotero.DB.commitTransaction();
+		return tagIDs.length > 0 ? tagIDs : false;
 	}
 	catch (e) {
 		Zotero.DB.rollbackTransaction();
@@ -4961,6 +5212,7 @@ Zotero.Item.prototype.toArray = function (mode) {
 			case 'sortCreator':
 			case 'numNotes':
 			case 'numAttachments':
+			case 'sourceItemID':
 				continue;
 			
 			// For the rest, just copy over
@@ -5139,6 +5391,9 @@ Zotero.Item.prototype.serialize = function(mode) {
 			case 'numNotes':
 			case 'numAttachments':
 				arr.virtual[i] = this['_' + i];
+				continue;
+			
+			case 'sourceItemID':
 				continue;
 			
 			// For the rest, just copy over

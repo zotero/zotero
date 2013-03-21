@@ -45,6 +45,10 @@ Zotero.Libraries = new function () {
 	
 	
 	this.getName = function (libraryID) {
+		if (!libraryID) {
+			return Zotero.getString('pane.collections.library');
+		}
+		
 		var type = this.getType(libraryID);
 		switch (type) {
 			case 'group':
@@ -59,6 +63,9 @@ Zotero.Libraries = new function () {
 	
 	
 	this.getType = function (libraryID) {
+		if (libraryID === 0) {
+			return 'user';
+		}
 		var sql = "SELECT libraryType FROM libraries WHERE libraryID=?";
 		var libraryType = Zotero.DB.valueQuery(sql, libraryID);
 		if (!libraryType) {

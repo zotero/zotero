@@ -106,6 +106,18 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
+	 * Unicode normalization
+	 */
+	"normalize":function(str) {
+		var normalizer = Components.classes["@mozilla.org/intl/unicodenormalizer;1"]
+							.getService(Components.interfaces.nsIUnicodeNormalizer);
+		var obj = {};
+		str = normalizer.NormalizeUnicodeNFC(str, obj);
+		return obj.value;
+	},
+	
+	
+	/**
 	 * Display a prompt from an error with custom buttons and a callback
 	 */
 	"errorPrompt":function(title, e) {
@@ -158,6 +170,35 @@ Zotero.Utilities.Internal = {
 		if (index == 1) {
 			setTimeout(function () { buttonCallback(); }, 1);
 		}
+	},
+	
+	/**
+	 * Launch a process
+	 * @param {nsIFile} cmd Path to command to launch
+	 * @param {String[]} args Arguments given
+	 * @return {Promise} Promise resolved to true if command succeeds, or an error otherwise
+	 */
+	"exec":function(cmd, args) {
+		if(!cmd.isExecutable()) {
+			return Q.reject(cmd.path+" is not an executable");
+		}
+		
+		var proc = Components.classes["@mozilla.org/process/util;1"].
+				createInstance(Components.interfaces.nsIProcess);
+		proc.init(cmd);
+		
+		var deferred = Q.defer();
+		proc.runwAsync(args, args.length, {"observe":function(subject, topic) {
+			if(topic !== "process-finished") {
+				deferred.reject(new Error(cmd.path+" failed"));
+			} else if(proc.exitValue != 0) {
+				deferred.reject(new Error(cmd.path+" returned exit status "+proc.exitValue));
+			} else {
+				deferred.resolve(true);
+			}
+		}});
+		
+		return deferred.promise;
 	}
 }
 

@@ -33,8 +33,10 @@ Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType, d
 		this._cookie = document.cookie;
 	}
 	
-	// Add listener for callbacks
-	if(Zotero.Messaging && !Zotero.Translate.ItemSaver._attachmentCallbackListenerAdded) {
+	// Add listener for callbacks, but only for Safari or the bookmarklet. In Chrome, we
+	// (have to) save attachments from the inject page.
+	if(Zotero.Messaging && !Zotero.Translate.ItemSaver._attachmentCallbackListenerAdded
+			&& (Zotero.isBookmarklet || Zotero.isSafari)) {
 		Zotero.Messaging.addMessageListener("attachmentCallback", function(data) {
 			var id = data[0],
 				status = data[1];
@@ -79,10 +81,23 @@ Zotero.Translate.ItemSaver.prototype = {
 			payload.cookie = this._cookie;
 		}
 		
-		Zotero.Connector.callMethod("saveItems", payload, function(success, status) {
-			if(success !== false) {
+		Zotero.Connector.callMethod("saveItems", payload, function(data, status) {
+			if(data !== false) {
 				Zotero.debug("Translate: Save via Standalone succeeded");
+				var haveAttachments = false;
+				if(data && data.items) {
+					for(var i=0; i<data.items.length; i++) {
+						var attachments = items[i].attachments = data.items[i].attachments;
+						for(var j=0; j<attachments.length; j++) {
+							if(attachments[j].id) {
+								attachmentCallback(attachments[j], 0);
+								haveAttachments = true;
+							}
+						}
+					}
+				}
 				callback(true, items);
+				if(haveAttachments) me._pollForProgress(items, attachmentCallback);
 			} else if(Zotero.isFx) {
 				callback(false, new Error("Save via Standalone failed with "+status));
 			} else {
@@ -94,6 +109,60 @@ Zotero.Translate.ItemSaver.prototype = {
 	// ALL CODE BELOW THIS POINT IS EXECUTED ONLY IN NON-FIREFOX ENVIRONMENTS
 	
 	/**
+	 * Polls for updates to attachment progress
+	 * @param items Items in Zotero.Item.toArray() format
+	 * @param {Function} attachmentCallback A callback that receives information about attachment
+	 *     save progress. The callback will be called as attachmentCallback(attachment, false, error)
+	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
+	 *     attachmentCallback() will be called with all attachments that will be saved 
+	 */
+	"_pollForProgress":function(items, attachmentCallback) {
+		var attachments = [];
+		var progressIDs = [];
+		var previousStatus = [];
+		for(var i=0; i<items.length; i++) {
+			var itemAttachments = items[i].attachments;
+			for(var j=0; j<itemAttachments.length; j++) {
+				if(itemAttachments[j].id) {
+					attachments.push(itemAttachments[j]);
+					progressIDs.push(itemAttachments[j].id);
+					previousStatus.push(0);
+				}
+			}
+		}
+		
+		var nPolls = 0;
+		var poll = function() {
+			Zotero.Connector.callMethod("attachmentProgress", progressIDs, function(currentStatus, status) {
+				if(currentStatus) {
+					for(var i=0; i<attachments.length; i++) {
+						if(currentStatus[i] === 100 || currentStatus[i] === false) {
+							attachmentCallback(attachments[i], currentStatus[i]);
+							attachments.splice(i, 1);
+							progressIDs.splice(i, 1);
+							previousStatus.splice(i, 1);
+							currentStatus.splice(i, 1);
+							i--;
+						} else if(currentStatus[i] !== previousStatus[i]) {
+							attachmentCallback(attachments[i], currentStatus[i]);
+							previousStatus[i] = currentStatus[i];
+						}
+					}
+					
+					if(nPolls++ < 60 && attachments.length) {
+						setTimeout(poll, 1000);
+					}
+				} else {
+					for(var i=0; i<attachments.length; i++) {
+						attachmentCallback(attachments[i], false, "Lost connection to Zotero Standalone");
+					}
+				}
+			});
+		};
+		poll();
+	},
+	
+	/**
 	 * Saves items to server
 	 * @param items Items in Zotero.Item.toArray() format
 	 * @param {Function} callback A callback to be executed when saving is complete. If saving
@@ -103,25 +172,20 @@ Zotero.Translate.ItemSaver.prototype = {
 	 * @param {Function} attachmentCallback A callback that receives information about attachment
 	 *     save progress. The callback will be called as attachmentCallback(attachment, false, error)
 	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
+	 *     attachmentCallback() will be called with all attachments that will be saved 
 	 */
 	"_saveToServer":function(items, callback, attachmentCallback) {
 		var newItems = [], typedArraysSupported = false;
 		try {
-			// Safari <5.2 supports typed arrays, but doesn't support sending them in
-			// an XHR
-			typedArraysSupported = new Uint8Array(1) && (!Zotero.isSafari || window.WebKitBlobBuilder);
+			typedArraysSupported = !!(new Uint8Array(1) && new Blob());
 		} catch(e) {}
+		
 		for(var i=0, n=items.length; i<n; i++) {
 			var item = items[i];
 			newItems.push(Zotero.Utilities.itemToServerJSON(item));
 			if(typedArraysSupported) {
-				// Get rid of attachments that we won't be able to save properly and add ids
 				for(var j=0; j<item.attachments.length; j++) {
-					if(!item.attachments[j].url || item.attachments[j].mimeType === "text/html") {
-						item.attachments.splice(j--, 1);
-					} else {
-						item.attachments[j].id = Zotero.Utilities.randomString();
-					}
+					item.attachments[j].id = Zotero.Utilities.randomString();
 				}
 			} else {
 				item.attachments = [];
@@ -135,24 +199,27 @@ Zotero.Translate.ItemSaver.prototype = {
 			} else {
 				Zotero.debug("Translate: Save to server complete");
 				
-				if(typedArraysSupported) {
-					try {
-						var newKeys = me._getItemKeysFromServerResponse(response);
-					} catch(e) {
-						callback(false, e);
-						return;
-					}
-					
-					for(var i=0; i<items.length; i++) {
-						var item = items[i], key = newKeys[i];
-						if(item.attachments && item.attachments.length) {
-							me._saveAttachmentsToServer(key, me._getFileBaseNameFromItem(item),
-								item.attachments, attachmentCallback);
+				Zotero.Prefs.getCallback(["downloadAssociatedFiles", "automaticSnapshots"],
+				function(prefs) {
+					if(typedArraysSupported) {
+						try {
+							var newKeys = me._getItemKeysFromServerResponse(response);
+						} catch(e) {
+							callback(false, e);
+							return;
+						}
+						
+						for(var i=0; i<items.length; i++) {
+							var item = items[i], key = newKeys[i];
+							if(item.attachments && item.attachments.length) {
+								me._saveAttachmentsToServer(key, me._getFileBaseNameFromItem(item),
+									item.attachments, prefs, attachmentCallback);
+							}
 						}
 					}
-				}
-				
-				callback(true, items);
+					
+					callback(true, items);
+				});
 			}
 		});
 	},
@@ -162,11 +229,12 @@ Zotero.Translate.ItemSaver.prototype = {
 	 * @param {String} itemKey The key of the parent item
 	 * @param {String} baseName A string to use as the base name for attachments
 	 * @param {Object[]} attachments An array of attachment objects
+	 * @param {Object} prefs An object with the values of the downloadAssociatedFiles and automaticSnapshots preferences
 	 * @param {Function} attachmentCallback A callback that receives information about attachment
 	 *     save progress. The callback will be called as attachmentCallback(attachment, false, error)
 	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
 	 */
-	"_saveAttachmentsToServer":function(itemKey, baseName, attachments, attachmentCallback) {
+	"_saveAttachmentsToServer":function(itemKey, baseName, attachments, prefs, attachmentCallback) {
 		var me = this,
 			uploadAttachments = [],
 			retrieveHeadersForAttachments = attachments.length;
@@ -178,6 +246,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		 * @inner
 		 */
 		var createAttachments = function() {
+			if(uploadAttachments.length === 0) return;
 			var attachmentPayload = [];
 			for(var i=0; i<uploadAttachments.length; i++) {
 				var attachment = uploadAttachments[i];
@@ -204,6 +273,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					err = new Error("Unexpected status "+statusCode+" received from server");
 				}
 				
+				Zotero.debug("Finished creating items");
 				for(var i=0; i<uploadAttachments.length; i++) {
 					var attachment = uploadAttachments[i];
 					if(err) {
@@ -211,7 +281,6 @@ Zotero.Translate.ItemSaver.prototype = {
 					} else {
 						attachment.key = newKeys[i];
 						
-						Zotero.debug("Finished creating items");
 						if(attachment.linkMode === "linked_url") {
 							attachmentCallback(attachment, 100);
 						} else if("data" in attachment) {
@@ -220,7 +289,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					}
 				}
 				
-				if(err) throw err;
+				if(err) Zotero.logError(err);
 			});
 		};
 		
@@ -234,6 +303,29 @@ Zotero.Translate.ItemSaver.prototype = {
 				// the host
 				delete attachment.key;
 				delete attachment.data;
+				
+				var isSnapshot = false;
+				if(attachment.mimeType) {
+					switch(attachment.mimeType.toLowerCase()) {
+						case "text/html":
+						case "application/xhtml+xml":
+							isSnapshot = true;
+					}
+				}
+				
+				if((isSnapshot && !prefs.automaticSnapshots) || (!isSnapshot && !prefs.downloadAssociatedFiles)) {
+					// Check preferences to see if we should download this file
+					if(--retrieveHeadersForAttachments === 0) createAttachments();
+					return;
+				} else if(attachment.snapshot === false && attachment.mimeType) {
+					// If we aren't taking a snapshot and we have the MIME type, we don't need
+					// to retrieve anything
+					attachment.linkMode = "linked_url";
+					uploadAttachments.push(attachment);
+					if(attachmentCallback) attachmentCallback(attachment, 0);
+					if(--retrieveHeadersForAttachments === 0) createAttachments();
+					return;
+				}
 				
 				/**
 				 * Checks headers to ensure that they reflect our expectations. When headers have
@@ -251,9 +343,8 @@ Zotero.Translate.ItemSaver.prototype = {
 						status = xhr.status;
 					
 					// Validate status
-					if(status === 0) {
-						// Probably failed due to SOP
-						attachmentCallback(attachment, 50);
+					if(status === 0 || attachment.snapshot === false) {
+						// Failed due to SOP, or we are supposed to be getting a snapshot
 						attachment.linkMode = "linked_url";
 					} else if(status !== 200) {
 						err = new Error("Server returned unexpected status code "+status);
@@ -279,21 +370,23 @@ Zotero.Translate.ItemSaver.prototype = {
 							}
 						}
 						
-						attachment.mimeType = contentType;
-						attachment.linkMode = "imported_url";
-						switch(contentType.toLowerCase()) {
-							case "application/pdf":
-								attachment.filename = baseName+".pdf";
-								break;
-							case "text/html":
-							case "application/xhtml+xml":
-								attachment.filename = baseName+".html";
-								break;
-							default:
-								attachment.filename = baseName;
+						if(!err) {
+							attachment.mimeType = contentType;
+							attachment.linkMode = "imported_url";
+							switch(contentType.toLowerCase()) {
+								case "application/pdf":
+									attachment.filename = baseName+".pdf";
+									break;
+								case "text/html":
+								case "application/xhtml+xml":
+									attachment.filename = baseName+".html";
+									break;
+								default:
+									attachment.filename = baseName;
+							}
+							if(charset) attachment.charset = charset;
+							headersValidated = true;
 						}
-						if(charset) attachment.charset = charset;
-						headersValidated = true;
 					}
 					
 					// If we didn't validate the headers, cancel the request
@@ -311,13 +404,14 @@ Zotero.Translate.ItemSaver.prototype = {
 					// If there was an error, throw it now
 					if(err) {
 						attachmentCallback(attachment, false, err);
-						throw err;
+						Zotero.logError(err);
 					}
+					return headersValidated;
 				};
 				
 				var xhr = new XMLHttpRequest();
-				xhr.open("GET", attachment.url, true);
-				xhr.responseType = "arraybuffer";
+				xhr.open((attachment.snapshot === false ? "HEAD" : "GET"), attachment.url, true);
+				xhr.responseType = (isSnapshot ? "document" : "arraybuffer");
 				xhr.onreadystatechange = function() {
 					if(xhr.readyState !== 4 || !checkHeaders()) return;
 				
@@ -337,9 +431,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				};
 				xhr.send();
 				
-				if(attachmentCallback) {
-					attachmentCallback(attachment, 0);
-				}
+				if(attachmentCallback) attachmentCallback(attachment, 0);
 			})(attachments[i]);
 		}
 	},
@@ -353,6 +445,91 @@ Zotero.Translate.ItemSaver.prototype = {
 	 */
 	"_uploadAttachmentToServer":function(attachment, attachmentCallback) {
 		Zotero.debug("Uploading attachment to server");
+		switch(attachment.mimeType.toLowerCase()) {
+			case "text/html":
+			case "application/xhtml+xml":
+				// It's possible that we didn't know if this was a snapshot until after the
+				// download began. If this is the case, we need to convert it to a document.
+				if(attachment.data instanceof ArrayBuffer) {
+					var me = this,
+						blob = new Blob([attachment.data], {"type":attachment.mimeType}),
+						reader = new FileReader();
+					reader.onloadend = function() {
+						if(reader.error) {
+							attachmentCallback(attachment, false, reader.error);
+						} else {
+							// Convert to an HTML document
+							var result = reader.result, doc;
+							try {
+								// First try using DOMParser
+								doc = (new DOMParser()).parseFromString(result, "text/html");
+							} catch(e) {}
+							
+							// If DOMParser fails, use document.implementation.createHTMLDocument
+							if(!doc) {
+								doc = document.implementation.createHTMLDocument("");
+								var docEl = doc.documentElement;
+								docEl.innerHTML = result;
+								if(docEl.children.length === 1 && docEl.firstElementChild === "html") {
+									doc.replaceChild(docEl.firstElementChild, docEl);
+								}
+							}
+							
+							attachment.data = doc;
+							me._uploadAttachmentToServer(attachment, attachmentCallback);
+						}
+					}
+					reader.readAsText(blob, attachment.charset || "iso-8859-1");
+					return;
+				}
+				
+				// We are now assured that attachment.data is an HTMLDocument, so we can 
+				// add a base tag
+				
+				// Get the head tag
+				var doc = attachment.data,
+					head = doc.getElementsByTagName("head");
+				if(!head.length) {
+					head = doc.createElement("head");
+					var docEl = attachment.data.documentElement;
+					docEl.insertBefore(head, docEl.firstChildElement);
+				} else {
+					head = head[0];
+				}
+				
+				// Add the base tag
+				var base = doc.createElement("base");
+				base.href = attachment.url;
+				head.appendChild(base);
+				
+				// Remove content type tags
+				var metaTags = doc.getElementsByTagName("meta"), metaTag;
+				for(var i=0; i<metaTags.length; i++) {
+					metaTag = metaTags[i];
+					var attr = metaTag.getAttribute("http-equiv");
+					if(attr && attr.toLowerCase() === "content-type") {
+						metaTag.parentNode.removeChild(metaTag);
+					}
+				}
+				
+				// Add UTF-8 content type
+				metaTag = doc.createElement("meta");
+				metaTag.setAttribute("http-equiv", "Content-Type");
+				metaTag.setAttribute("content", attachment.mimeType+"; charset=UTF-8");
+				head.insertBefore(metaTag, head.firstChild);
+				
+				// Serialize document to UTF-8
+				var src = new XMLSerializer().serializeToString(doc),
+					srcLength = Zotero.Utilities.getStringByteLength(src),
+					srcArray = new Uint8Array(srcLength);
+				Zotero.Utilities.stringToUTF8Array(src, srcArray);
+				
+				// Rewrite data
+				attachment.data = srcArray.buffer;
+				attachment.charset = "UTF-8";
+			break;
+		}		
+		
 		var binaryHash = this._md5(new Uint8Array(attachment.data), 0, attachment.data.byteLength),
 			hash = "";
 		for(var i=0; i<binaryHash.length; i++) {
@@ -361,10 +538,17 @@ Zotero.Translate.ItemSaver.prototype = {
 		}
 		attachment.md5 = hash;
 		
-		Zotero.Translate.ItemSaver._attachmentCallbacks[attachment.id] = function(status, error) {
-			attachmentCallback(attachment, status, error);
-		};
-		Zotero.API.uploadAttachment(attachment);
+		if(Zotero.isChrome && !Zotero.isBookmarklet) {
+			// In Chrome, we don't use messaging for Zotero.API.uploadAttachment, since
+			// we can't pass ArrayBuffers to the background page
+			Zotero.API.uploadAttachment(attachment, attachmentCallback.bind(this, attachment));
+		} else {
+			// In Safari and the connectors, we can pass ArrayBuffers
+			Zotero.Translate.ItemSaver._attachmentCallbacks[attachment.id] = function(status, error) {
+				attachmentCallback(attachment, status, error);
+			};
+			Zotero.API.uploadAttachment(attachment);
+		}
 	},
 	
 	/**

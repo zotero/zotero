@@ -42,8 +42,10 @@ Zotero.LocateManager = new function() {
 		_jsonFile = _getLocateFile();
 		
 		if(_jsonFile.exists()) {
+            Zotero.debug("FUCKME BEFORE");
 			_locateEngines = [new LocateEngine(engine)
 				for each(engine in JSON.parse(Zotero.File.getContents(_jsonFile)))];
+            Zotero.debug("  FUCKME AFTER");
 		} else {
 			this.restoreDefaultEngines();
 		}
@@ -68,7 +70,7 @@ Zotero.LocateManager = new function() {
 	 * Gets all default search engines (not currently used)
 	 */
 	this.getDefaultEngines = function() [new LocateEngine(engine)
-				for each(engine in JSON.parse(Zotero.File.getContents(_getDefaultFile())))];
+				for each(engine in JSON.parse(Zotero.File.getContentsFromURL(_getDefaultFile())))];
 	
 	/**
 	 * Returns an array of all search engines
@@ -131,7 +133,8 @@ Zotero.LocateManager = new function() {
 		locateDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
 		
 		// copy default file to new locate dir
-		_getDefaultFile().copyTo(locateDir, LOCATE_FILE_NAME);
+		Zotero.File.putContents(_jsonFile,
+			Zotero.File.getContentsFromURL(_getDefaultFile()));
 		
 		// reread locate engines
 		this.init();
@@ -170,9 +173,7 @@ Zotero.LocateManager = new function() {
 	 * Gets the JSON file containing the engine info for the default engines
 	 */
 	function _getDefaultFile() {
-		var defaultFile = Zotero.getInstallDirectory();
-		defaultFile.append(LOCATE_FILE_NAME);
-		return defaultFile;
+		return "resource://zotero/schema/"+LOCATE_FILE_NAME;
 	}
 	
 	
@@ -347,51 +348,63 @@ Zotero.LocateManager = new function() {
 			  "http://a9.com/-/spec/opensearchdescription/1.1/",
 			  "http://a9.com/-/spec/opensearchdescription/1.0/"
 			];
-
-			var xml = Zotero.Styles.cleanXML(xmlStr);
-			if(OPENSEARCH_NAMESPACES.indexOf(xml.namespace()) === "-1") {
+			
+			var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+					.createInstance(Components.interfaces.nsIDOMParser),
+				doc = parser.parseFromString(xmlStr, "application/xml"),
+				docEl = doc.documentElement,
+				ns = docEl.namespaceURI,
+				xns = {"s":doc.documentElement.namespaceURI,
+					"xmlns":"http://www.w3.org/2000/xmlns"};
+			if(OPENSEARCH_NAMESPACES.indexOf(ns) === -1) {
 				throw "Invalid namespace";
 			}
 			
-			default xml namespace = xml.namespace();
-			
 			// get simple attributes
-			this.alias = xml.ShortName.toString();
-			this.name = xml.LongName.toString();
+			this.alias = Zotero.Utilities.xpathText(docEl, 's:ShortName', xns);
+			this.name = Zotero.Utilities.xpathText(docEl, 's:LongName', xns);
 			if(!this.name) this.name = this.alias;
-			this.description = xml.Description.toString();
+			this.description = Zotero.Utilities.xpathText(docEl, 's:Description', xns);
 			
 			// get the URL template
 			this._urlTemplate = undefined;
-			for each(var urlTag in xml.Url.(@type.toLowerCase() == "text/html")) {
-				if(urlTag.@rel == undefined || urlTag.@rel == "results") {
-					this._urlTemplate = urlTag.@template.toString();
-					break;
-				}
-				this._method = urlTag.@method.toUpperCase() === "POST" ? "POST" : "GET";
+			var urlTags = Zotero.Utilities.xpath(docEl, 's:Url[@type="text/html"]', xns),
+				i = 0;
+			while(urlTags[i].hasAttribute("rel") && urlTags[i].getAttribute("rel") != "results") {
+				i++;
+				if(i == urlTags.length) throw "No Url tag found";
 			}
 			
 			// TODO: better error handling
-			if(!this._urlTemplate) throw "No URL found for required content type";
+			var urlTag = urlTags[i];
+			this._urlTemplate = urlTag.getAttribute("template")
+			this._method = urlTag.getAttribute("method").toString().toUpperCase() === "POST" ? "POST" : "GET";
 			
 			// get namespaces
 			this._urlNamespaces = {};
-			for each(var ns in urlTag.inScopeNamespaces()) {
-				this._urlNamespaces[ns.prefix] = ns.uri;
+			var node = urlTag;
+			while(node && node.attributes) {
+				for(var i=0; i<node.attributes.length; i++) {
+					var attr = node.attributes[i];
+					if(attr.namespaceURI == "http://www.w3.org/2000/xmlns/") {
+						this._urlNamespaces[attr.localName] = attr.nodeValue;
+					}
+				}
+				node = node.parentNode;
 			}
 			
 			// get params
 			this._urlParams = [];
-			for each(var param in urlTag.Param) {
-				this._urlParams[param.@name.toString()] = param.@value.toString();
+			for(var param of Zotero.Utilities.xpath(urlTag, 's:Param', xns)) {
+				this._urlParams[param.getAttribute("name")] = param.getAttribute("value");
 			}
 			
 			// find the icon
 			this._iconSourceURI = iconURL;
-			for each(var img in xml.Image) {
-				if((img.@width == undefined && img.@height == undefined)
-						|| (img.@width.toString() == "16" && img.@height.toString() == "16")) {
-					this._iconSourceURI = img.toString();
+			for(var img of Zotero.Utilities.xpath(docEl, 's:Image', xns)) {
+				if((!img.hasAttribute("width") && !img.hasAttribute("height"))
+						|| (img.getAttribute("width") == "16" && img.getAttribute("height") == "16")) {
+					this._iconSourceURI = img.textContent;
 				}
 			}
 			

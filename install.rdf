@@ -6,31 +6,28 @@
   
     <em:id>zotero@chnm.gmu.edu</em:id>
     <em:name>Zotero</em:name>
-    <em:version>3.0.12m##REVISION##</em:version>
+    <em:version>4.0a1.SOURCE</em:version>
     <em:creator>Center for History and New Media<br/>George Mason University</em:creator>
     <em:contributor>Dan Cohen</em:contributor>
     <em:contributor>Sean Takats</em:contributor>
-    <em:developer>Frank Bennett (multilingual)</em:developer>
     <em:developer>Simon Kornblith</em:developer>
     <em:developer>David Norton</em:developer>
     <em:developer>Dan Stillman</em:developer>
     <em:homepageURL>http://www.zotero.org</em:homepageURL>
     <em:optionsURL>chrome://zotero/content/preferences/preferences.xul</em:optionsURL>
     <em:aboutURL>chrome://zotero/content/about.xul</em:aboutURL>
-    <em:updateURL>http://gsl-nagoya-u.net/http/pub/zotero-multi-3.rdf</em:updateURL>
     <em:iconURL>chrome://zotero/skin/zotero_z_32px.png</em:iconURL>
-    <em:type>2</em:type>
-    <em:unpack>true</em:unpack>
-    <em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJqWvOZqiHGp8hLJI92KIp6t1pKP2Q2t+5glUh7JSl+2pdt8y9ANHT1Bx3YrKDi1xwXJ7FNi4mss5XFqEmuJf2TDn02+V6D0hFsNEsSlkCcsznwnCYzeU8GKAhlgjeXz7YPQswLLSk61af/hIhdYUEyYQbxmIAOHDHgMeRcuYJ+QIDAQAB</em:updateKey>
-
+    <em:updateURL>https://www.zotero.org/download/update-source.rdf</em:updateURL>
+    <em:type>2</em:type> <!-- type=extension --> 
     
+    <!-- Firefox -->
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>3.6</em:minVersion>
-        <em:maxVersion>18.*</em:maxVersion>
+        <em:minVersion>17.0</em:minVersion>
+        <em:maxVersion>21.*</em:maxVersion>
       </Description>
     </em:targetApplication>
     
-</Description>
+  </Description>
 </RDF>

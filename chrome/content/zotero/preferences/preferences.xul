@@ -154,7 +154,7 @@ To add a new preference:
 	
 	<prefpane id="zotero-prefpane-sync"
 						label="&zotero.preferences.prefpane.sync;"
-						onpaneload="document.getElementById('sync-password').value = Zotero.Sync.Server.password; document.getElementById('storage-password').value = Zotero.Sync.Storage.password;"
+						onpaneload="document.getElementById('sync-password').value = Zotero.Sync.Server.password; var pass = Zotero.Sync.Storage.WebDAV.password; if (pass) { document.getElementById('storage-password').value = pass; }"
 						image="chrome://zotero/skin/prefs-sync.png"
 						helpTopic="sync">
 		<preferences>
@@ -165,13 +165,15 @@ To add a new preference:
 			<preference id="pref-storage-scheme" name="extensions.zotero.sync.storage.scheme" type="string" instantApply="true"/>
 			<preference id="pref-storage-url" name="extensions.zotero.sync.storage.url" type="string"/>
 			<preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string"/>
+			<preference id="pref-storage-downloadMode-personal" name="extensions.zotero.sync.storage.downloadMode.personal" type="string"/>
+			<preference id="pref-storage-downloadMode-groups" name="extensions.zotero.sync.storage.downloadMode.groups" type="string"/>
 			<preference id="pref-group-storage-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
 		</preferences>
 		
 		<tabbox>
 			<tabs>
-				<tab label="Settings"/>
-				<tab label="Reset"/>
+				<tab label="&zotero.preferences.settings;"/>
+				<tab label="&zotero.preferences.sync.reset;"/>
 			</tabs>
 			
 			<tabpanels>
@@ -197,6 +199,10 @@ To add a new preference:
 										<textbox id="sync-password" type="password"
 											onchange="Zotero.Sync.Server.password = this.value"/>
 									</row>
+									<row>
+										<box/>
+										<checkbox label="&zotero.preferences.sync.syncAutomatically;" preference="pref-sync-autosync"/>
+									</row>
 									<!--
 									<row>
 										<box/>
@@ -212,29 +218,23 @@ To add a new preference:
 							<hbox style="width:2em"/>
 							
 							<vbox>
+								<label class="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
+								<separator class="thin"/>
 								<label class="zotero-text-link" value="&zotero.preferences.sync.createAccount;" href="http://zotero.org/user/register"/>
 								<separator class="thin"/>
 								<label class="zotero-text-link" value="&zotero.preferences.sync.lostPassword;" href="http://zotero.org/user/lostpassword"/>
 							</vbox>
 						</hbox>
-						
-						<separator class="thin"/>
-						
-						<hbox>
-							<checkbox label="&zotero.preferences.sync.syncAutomatically;" preference="pref-sync-autosync"/>
-						</hbox>
-						
-						<label class="zotero-text-link" style="margin-top:.7em; margin-left: 0" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
 					</groupbox>
 					
 					
-					<groupbox>
+					<groupbox id="storage-settings">
 						<caption label="&zotero.preferences.sync.fileSyncing;"/>
 						
 						<!-- My Library -->
-						<hbox style="margin: 0">
+						<hbox>
 							<checkbox label="&zotero.preferences.sync.fileSyncing.myLibrary;" preference="pref-storage-enabled" oncommand="updateStorageSettings(this.checked, null)"/>
-							<menulist id="storage-protocol" style="margin-left: .5em" preference="pref-storage-protocol" oncommand="updateStorageSettings(null, this.value)">
+							<menulist id="storage-protocol" class="storage-personal" style="margin-left: .5em" preference="pref-storage-protocol" oncommand="updateStorageSettings(null, this.value)">
 								<menupopup>
 									<menuitem label="Zotero" value="zotero"/>
 									<menuitem label="WebDAV" value="webdav"/>
@@ -242,7 +242,7 @@ To add a new preference:
 							</menulist>
 						</hbox>
 						
-						<stack id="storage-webdav-settings" style="margin-top: .5em; margin-bottom: .8em; border: 1px gray solid; -moz-border-radius: 3px">
+						<stack id="storage-webdav-settings" style="margin-top: .5em; margin-bottom: .8em; border: 1px gray solid; border-radius: 3px">
 						<!-- Background shading -->
 						<box style="background: black; opacity:.03"/>
 						
@@ -278,7 +278,7 @@ To add a new preference:
 										<textbox id="storage-username"
 											preference="pref-storage-username"
 											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout(verifyStorageServer, 1); }"
-											onchange="unverifyStorageServer(); Zotero.Prefs.set('sync.storage.username', this.value); var pass = document.getElementById('storage-password'); if (pass.value) { Zotero.Sync.Storage.Session.WebDAV.prototype.password = pass.value; }"/>
+											onchange="unverifyStorageServer(); Zotero.Prefs.set('sync.storage.username', this.value); var pass = document.getElementById('storage-password'); if (pass.value) { Zotero.Sync.Storage.WebDAV.password = pass.value; }"/>
 									</hbox>
 								</row>
 								<row>
@@ -286,7 +286,7 @@ To add a new preference:
 									<hbox>
 										<textbox id="storage-password" flex="0" type="password"
 											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout(verifyStorageServer, 1); }"
-											onchange="unverifyStorageServer(); Zotero.Sync.Storage.Session.WebDAV.prototype.password = this.value"/>
+											onchange="unverifyStorageServer(); Zotero.Sync.Storage.WebDAV.password = this.value;"/>
 									</hbox>
 								</row>
 								<row>
@@ -304,16 +304,35 @@ To add a new preference:
 						
 						</stack>
 						
+						<hbox class="storage-settings-download-options" align="center">
+							<label value="&zotero.preferences.sync.fileSyncing.download;"/>
+							<menulist class="storage-personal" preference="pref-storage-downloadMode-personal" style="margin-left: 0">
+								<menupopup>
+									<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
+									<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
+								</menupopup>
+							</menulist>
+						</hbox>
+						
 						<separator id="storage-separator" class="thin"/>
 						
 						<!-- Group Libraries -->
 						<checkbox label="&zotero.preferences.sync.fileSyncing.groups;"
-								preference="pref-group-storage-enabled" oncommand="setTimeout(function () { updateStorageTerms(); }, 1)"/>
+								preference="pref-group-storage-enabled" oncommand="updateStorageSettingsGroups(this.checked)"/>
+						
+						<hbox class="storage-settings-download-options" align="center">
+							<label value="&zotero.preferences.sync.fileSyncing.download;"/>
+							<menulist class="storage-groups" preference="pref-storage-downloadMode-groups" style="margin-left: 0">
+								<menupopup>
+									<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
+									<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
+								</menupopup>
+							</menulist>
+						</hbox>
 						
 						<separator class="thin"/>
 						
 						<vbox>
-							<label class="zotero-text-link" style="margin-top:.3em; margin-left: 0" value="&zotero.preferences.sync.fileSyncing.about;" href="http://www.zotero.org/support/sync#file_syncing"/>
 							<hbox id="storage-terms" style="margin-top: .4em" align="center">
 								<label>&zotero.preferences.sync.fileSyncing.tos1;</label>
 								<label class="zotero-text-link" href="http://www.digitalscholar.org/z_terms" value="&zotero.preferences.sync.fileSyncing.tos2;"/>
@@ -324,11 +343,8 @@ To add a new preference:
 				</tabpanel>
 				
 				<tabpanel id="zotero-reset" orient="vertical">
-					<!-- TODO: localize -->
 					<!-- This doesn't wrap without an explicit width, for some reason -->
-					<description width="45em">The following operations are for use only in rare, specific situations and should not be used for general troubleshooting.
-					In many cases, resetting will cause additional problems.
-					See <label style="margin-left: 0; margin-right: 0" class="zotero-text-link" href="http://zotero.org/support/kb/sync_reset_options">Sync Reset Options</label> for more information.</description>
+					<description width="45em">&zotero.preferences.sync.reset.warning1;<label style="margin-left: 0; margin-right: 0" class="zotero-text-link" href="http://zotero.org/support/kb/sync_reset_options">&zotero.preferences.sync.reset.warning2;</label>&zotero.preferences.sync.reset.warning3;</description>
 					
 					<radiogroup id="zotero-reset-sync-group" oncommand="handleSyncResetSelect(this)">
 						<groupbox>
@@ -556,8 +572,9 @@ To add a new preference:
 						helpTopic="cite">
 		
 		<preferences id="zotero-preferences-cite">
-			<preference id="pref-cite-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
 			<preference id="pref-cite-useClassicAddCitationDialog" name="extensions.zotero.integration.useClassicAddCitationDialog" type="bool"/>
+			<preference id="pref-cite-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
+			<preference id="pref-cite-automaticTitleAbbreviation" name="extensions.zotero.cite.automaticTitleAbbreviation" type="bool"/>
 		</preferences>
 		
 		<tabbox>
@@ -603,6 +620,8 @@ To add a new preference:
 						<label id="export-citePaperJournalArticleURL" width="45em">
 							&zotero.preferences.export.citePaperJournalArticleURL.description;
 						</label>
+
+						<checkbox label="&zotero.preferences.cite.styles.automaticTitleAbbreviation;" preference="pref-cite-automaticTitleAbbreviation"/>
 					</groupbox>
 				</tabpanel>
 			</tabpanels>
@@ -1303,6 +1322,7 @@ To add a new preference:
 						image="chrome://zotero/skin/prefs-advanced.png"
 						helpTopic="advanced">
 		<preferences>
+			<preference id="pref-baseAttachmentPath" name="extensions.zotero.baseAttachmentPath" type="string"/>
 			<preference id="pref-useDataDir" name="extensions.zotero.useDataDir" type="bool"/>
 			<preference id="pref-dataDir" name="extensions.zotero.dataDir" type="string"/>
 			<preference id="pref-export-displayCharsetOption" name="extensions.zotero.export.displayCharsetOption" type="bool"/>
@@ -1312,98 +1332,138 @@ To add a new preference:
 			<preference id="pref-openURL-version" name="extensions.zotero.openURL.version" type="string"/>
 		</preferences>
 		
-		<groupbox>
-			<caption label="&zotero.preferences.dataDir;"/>
+		<tabbox id="zotero-prefpane-advanced-tabs">
+			<tabs>
+				<tab label="&zotero.preferences.prefpane.general;"/>
+				<tab label="&zotero.preferences.advanced.filesAndFolders;"/>
+			</tabs>
 			
-			<radiogroup id="dataDir" preference="pref-useDataDir" onsyncfrompreference="onDataDirLoad();" onsynctopreference="return onDataDirUpdate(event);">
-				<radio label="&zotero.preferences.dataDir.useProfile;" value="false"/>
-				<hbox>
-					<radio label="&zotero.preferences.dataDir.custom;" value="true"/>
-					<textbox id="dataDirPath" preference="pref-dataDir" onsyncfrompreference="return getDataDirPath();" readonly="true" flex="1"/>
-					<button label="&zotero.preferences.dataDir.choose;" oncommand="var file = Zotero.chooseZoteroDirectory(true); if (!file) { event.stopPropagation(); }"/>
-				</hbox>
-			</radiogroup>
-			
-			<hbox>
-				<button label="&zotero.preferences.dataDir.reveal;" oncommand="revealDataDirectory()"/>
-			</hbox>
-		</groupbox>
-		
-		<groupbox>
-			<caption label="&zotero.preferences.dbMaintenance;"/>
-			
-			<hbox>
-				<button label="&zotero.preferences.dbMaintenance.integrityCheck;" oncommand="runIntegrityCheck()"/>
-				<button label="&zotero.preferences.dbMaintenance.resetTranslators;" oncommand="resetTranslators()"/>
-				<button label="&zotero.preferences.dbMaintenance.resetStyles;" oncommand="resetStyles()"/>
-			</hbox>
-		</groupbox>
-		
-		<groupbox>
-			<caption label="&zotero.preferences.debugOutputLogging;"/>
-			
-			<!-- This doesn't wrap without an explicit width -->
-			<vbox>
-				<description width="45em">&zotero.preferences.debugOutputLogging.message;</description>
-			</vbox>
-			
-			<hbox align="center">
-				<button id="debug-output-enable" oncommand="Zotero_Preferences.Debug_Output.toggleStore()"/>
-				<label id="debug-output-lines" style="margin-right: 0"/>
-				<label value="&zotero.preferences.debugOutputLogging.linesLogged;"/>
-				<checkbox preference="pref-debug-output-enableAfterRestart" label="&zotero.preferences.debugOutputLogging.enableAfterRestart;" style="margin-left: 1.5em"/>
-			</hbox>
-			
-			<hbox align="center">
-				<button id="debug-output-view" label="&zotero.preferences.debugOutputLogging.viewOutput;" oncommand="Zotero_Preferences.Debug_Output.view()"/>
-				<button id="debug-output-clear" label="&zotero.preferences.debugOutputLogging.clearOutput;" oncommand="Zotero_Preferences.Debug_Output.clear()"/>
-				<button id="debug-output-submit" label="&zotero.preferences.debugOutputLogging.submitToServer;" oncommand="Zotero_Preferences.Debug_Output.submit()"/>
-				<progressmeter id="debug-output-submit-progress" mode="undetermined" hidden="true"/>
-			</hbox>
-		</groupbox>
-		
-		<groupbox>
-			<caption label="&zotero.preferences.openurl.caption;"/>
-			
-			<hbox align="center">
-				<!-- vbox prevents some weird vertical stretching of the menulist -->
-				<vbox flex="1">
-					<menulist id="openURLMenu" oncommand="onOpenURLSelected();">
-						<menupopup>
-							<menuseparator/>
-							<menuitem label="&zotero.preferences.openurl.custom;" value="custom" selected="true"/>
-						</menupopup>
-					</menulist>
-				</vbox>
-				<button id="openURLSearchButton" label="&zotero.preferences.openurl.search;" oncommand="populateOpenURLResolvers()"/>
-			</hbox>
-			
-			<hbox align="center">
-				<label value="&zotero.preferences.openurl.server;"/>
-				<textbox id="openURLServerField" flex="1" oninput="onOpenURLCustomized();" preference="pref-openURL-resolver"/>
-			</hbox>
-		
-			<hbox align="center">
-				<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
-				<menulist id="openURLVersionMenu" oncommand="onOpenURLCustomized();" preference="pref-openURL-version">
-					<menupopup>
-						<menuitem label="0.1" value="0.1"/>
-						<menuitem label="1.0" value="1.0"/>
-					</menupopup>
-				</menulist>
-			</hbox>
-		</groupbox>
-		
-		<groupbox>
-			<caption label="&zotero.preferences.miscellaneous;"/>
-			<hbox align="center">
-				<button id="openAboutConfig" label="&zotero.preferences.openAboutConfig;" oncommand="openInViewer('about:config')"/>
-				<button id="openCSLEdit" label="&zotero.preferences.openCSLEdit;" oncommand="openInViewer('chrome://zotero/content/tools/csledit.xul', true)"/>
-				<button id="openCSLPreview" label="&zotero.preferences.openCSLPreview;" oncommand="openInViewer('chrome://zotero/content/tools/cslpreview.xul', true)"/>
-			</hbox>
-		</groupbox>
-		
-		<separator/>
+			<tabpanels id="zotero-prefpane-advanced-tabpanels">
+				<tabpanel id="zotero-prefpane-advanced-general-tab" orient="vertical">
+					<groupbox>
+						<caption label="&zotero.preferences.debugOutputLogging;"/>
+						
+						<!-- This doesn't wrap without an explicit width -->
+						<vbox>
+							<description width="45em">&zotero.preferences.debugOutputLogging.message;</description>
+						</vbox>
+						
+						<hbox align="center">
+							<button id="debug-output-enable" oncommand="Zotero_Preferences.Debug_Output.toggleStore()"/>
+							<label id="debug-output-lines" style="margin-right: 0"/>
+							<label value="&zotero.preferences.debugOutputLogging.linesLogged;"/>
+							<checkbox preference="pref-debug-output-enableAfterRestart" label="&zotero.preferences.debugOutputLogging.enableAfterRestart;" style="margin-left: 1.5em"/>
+						</hbox>
+						
+						<hbox align="center">
+							<button id="debug-output-view" label="&zotero.preferences.debugOutputLogging.viewOutput;" oncommand="Zotero_Preferences.Debug_Output.view()"/>
+							<button id="debug-output-clear" label="&zotero.preferences.debugOutputLogging.clearOutput;" oncommand="Zotero_Preferences.Debug_Output.clear()"/>
+							<button id="debug-output-submit" label="&zotero.preferences.debugOutputLogging.submitToServer;" oncommand="Zotero_Preferences.Debug_Output.submit()"/>
+							<progressmeter id="debug-output-submit-progress" mode="undetermined" hidden="true"/>
+						</hbox>
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.openurl.caption;"/>
+						
+						<hbox align="center">
+							<!-- vbox prevents some weird vertical stretching of the menulist -->
+							<vbox flex="1">
+								<menulist id="openURLMenu" oncommand="onOpenURLSelected();">
+									<menupopup>
+										<menuseparator/>
+										<menuitem label="&zotero.preferences.openurl.custom;" value="custom" selected="true"/>
+									</menupopup>
+								</menulist>
+							</vbox>
+							<button id="openURLSearchButton" label="&zotero.preferences.openurl.search;" oncommand="populateOpenURLResolvers()"/>
+						</hbox>
+						
+						<hbox align="center">
+							<label value="&zotero.preferences.openurl.server;"/>
+							<textbox id="openURLServerField" flex="1" oninput="onOpenURLCustomized();" preference="pref-openURL-resolver"/>
+						</hbox>
+					
+						<hbox align="center">
+							<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
+							<menulist id="openURLVersionMenu" oncommand="onOpenURLCustomized();" preference="pref-openURL-version">
+								<menupopup>
+									<menuitem label="0.1" value="0.1"/>
+									<menuitem label="1.0" value="1.0"/>
+								</menupopup>
+							</menulist>
+						</hbox>
+					</groupbox>
+					
+					<groupbox id="zotero-prefpane-advanced-miscellaneous">
+						<caption label="&zotero.preferences.miscellaneous;"/>
+						<hbox id="zotero-prefpane-advanced-openbuttons" align="center">
+							<button id="openAboutConfig" label="&zotero.preferences.openAboutConfig;" oncommand="openInViewer('about:config')"/>
+							<button id="openCSLEdit" label="&zotero.preferences.openCSLEdit;" oncommand="openInViewer('chrome://zotero/content/tools/csledit.xul', true)"/>
+							<button id="openCSLPreview" label="&zotero.preferences.openCSLPreview;" oncommand="openInViewer('chrome://zotero/content/tools/cslpreview.xul', true)"/>
+						</hbox>
+					</groupbox>
+				</tabpanel>
+				
+				<tabpanel orient="vertical">
+					<groupbox>
+						<caption label="&zotero.preferences.attachmentBaseDir.caption;"/>
+						
+						<!-- This doesn't wrap without an explicit width -->
+						<vbox>
+							<description width="45em">&zotero.preferences.attachmentBaseDir.message;</description>
+						</vbox>
+						
+						<hbox align="center">
+							<label value="&zotero.preferences.attachmentBaseDir.basePath;"/>
+							<filefield id="baseAttachmentPath"
+								preference="pref-baseAttachmentPath"
+								onsyncfrompreference="Zotero_Preferences.Attachment_Base_Directory.updateUI()"
+								preference-editable="true"
+								readonly="true"
+								flex="1"
+								tabindex="-1"/>
+							<button label="&zotero.preferences.attachmentBaseDir.selectBasePath;"
+								oncommand="Zotero_Preferences.Attachment_Base_Directory.choosePath()"/>
+						</hbox>
+						
+						<hbox>
+							<button id="resetBasePath"
+								label="&zotero.preferences.attachmentBaseDir.resetBasePath;"
+								oncommand="Zotero_Preferences.Attachment_Base_Directory.clearPath()"/>
+						</hbox>
+						
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.dataDir;"/>
+						
+						<radiogroup id="dataDir" preference="pref-useDataDir" onsyncfrompreference="onDataDirLoad();" onsynctopreference="return onDataDirUpdate(event);">
+							<radio label="&zotero.preferences.dataDir.useProfile;" value="false"/>
+							<hbox>
+								<radio label="&zotero.preferences.dataDir.custom;" value="true"/>
+								<textbox id="dataDirPath" preference="pref-dataDir" onsyncfrompreference="return getDataDirPath();" readonly="true" flex="1"/>
+								<button label="&zotero.preferences.dataDir.choose;" oncommand="var file = Zotero.chooseZoteroDirectory(true); if (!file) { event.stopPropagation(); }"/>
+							</hbox>
+						</radiogroup>
+						
+						<hbox>
+							<button label="&zotero.preferences.dataDir.reveal;" oncommand="revealDataDirectory()"/>
+						</hbox>
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.dbMaintenance;"/>
+						
+						<hbox>
+							<button label="&zotero.preferences.dbMaintenance.integrityCheck;" oncommand="runIntegrityCheck()"/>
+							<button label="&zotero.preferences.dbMaintenance.resetTranslators;" oncommand="resetTranslators()"/>
+							<button label="&zotero.preferences.dbMaintenance.resetStyles;" oncommand="resetStyles()"/>
+						</hbox>
+					</groupbox>
+				</tabpanel>
+			</tabpanels>
+		</tabbox>
 	</prefpane>
 	
 	<!-- These mess up the prefwindow (more) if they come before the prefpanes
@@ -1416,5 +1476,5 @@ To add a new preference:
 		observerService.notifyObservers(null, "charsetmenu-selected", "other");
 	]]>
 	</script>
-	<script src="preferences.js"/>
+	<script src="preferences.js" type="application/javascript;version=1.8"/>
 </prefwindow>

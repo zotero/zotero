@@ -266,34 +266,32 @@
 					<label value="Simon Kornblith"/>
 					<label value="Faolan Cheslack-Postava"/>
 				</vbox>
-				<label class="subhead" value="&zotero.about.localizations;"/>
+				<label class="subhead" value="&zotero.thanks;"/>
 				<vbox class="subcontent">
-					<vbox id="zotero-translators-list"/>
+					<label class="zotero-text-link" href="http://www.mellon.org/" value="Andrew W. Mellon Foundation"/>
+					<label class="zotero-text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
+					<label class="zotero-text-link" href="http://www.sloan.org/" value="Alfred P. Sloan Foundation"/>
 				</vbox>
 				<label class="zotero-text-link" href="http://www.zotero.org/support/credits_and_acknowledgments" value="&zotero.moreCreditsAndAcknowledgements;"/>
 			</vbox>
 			<vbox id="column2">
-				<label class="subhead" value="Citation &amp; Bibliography Processing"/>
+				<label class="subhead" value="&zotero.citationProcessing;"/>
 				<vbox class="subcontent">
 					<label class="zotero-text-link" href="http://citationstyles.org/" value="Citation Style Language"/>
 					<label class="zotero-text-link" href="http://bitbucket.org/fbennett/citeproc-js/" value="citeproc-js (Frank Bennett)"/>
 				</vbox>
 				<label class="subhead" value="&zotero.about.additionalSoftware;"/>
 				<vbox class="subcontent">
-					<label class="zotero-text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="famfamfam (small icons)"/>
-					<label class="zotero-text-link" href="http://appscript.sourceforge.net/py-appscript/" value="py-appscript (MacWord plug-in IPC)"/>
+					<label class="zotero-text-link" href="http://p.yusukekamiyamane.com/" value="Fugue icons (by Yusuke Kamiyamane)"/>
+					<label class="zotero-text-link" href="http://www.davidashen.net/rnv.html" value="RNV (CSL validation)"/>
+					<label class="zotero-text-link" href="http://documentup.com/kriskowal/q/" value="q (by Kristopher Michael Kowal)"/>
+					<label class="zotero-text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="Silk icons (by Mark James)"/>
 					<label class="zotero-text-link" href="http://simile.mit.edu/timeline/" value="SIMILE Project (Timeline)"/>
 					<label class="zotero-text-link" href="http://www.w3.org/2005/ajar/tab" value="Tabulator (RDF parser)"/>
 					<label class="zotero-text-link" href="http://tango.freedesktop.org/Tango_Desktop_Project" value="Tango Desktop Project (pref icons)"/>
 					<label class="zotero-text-link" href="http://tinymce.moxiecode.com/" value="TinyMCE (rich-text editing)"/>
 					<label class="zotero-text-link" href="http://www.dbai.tuwien.ac.at/user/pollak/webpagedump/" value="WebPageDump (snapshot code)"/>
 					<label class="zotero-text-link" href="http://www.foolabs.com/xpdf/" value="Xpdf (pdftotext)"/>
-				</vbox>
-				<label class="subhead" value="&zotero.thanks;"/>
-				<vbox class="subcontent">
-					<label class="zotero-text-link" href="http://www.mellon.org/" value="Andrew W. Mellon Foundation"/>
-					<label class="zotero-text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
-					<label class="zotero-text-link" href="http://www.sloan.org/" value="Alfred P. Sloan Foundation"/>
 				</vbox>
 			</vbox>
 		</hbox>

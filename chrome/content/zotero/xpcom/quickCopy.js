@@ -243,99 +243,67 @@ Zotero.QuickCopy = new function() {
 			
 			// If all notes, export full content
 			if (allNotes) {
-				var content = [];
-				default xml namespace = '';
-				XML.prettyPrinting = false;
-				XML.ignoreWhitespace = false;
-				var htmlXML = <div class="zotero-notes"/>;
+				var content = [],
+					parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+						.createInstance(Components.interfaces.nsIDOMParser),
+					doc = parser.parseFromString('<div class="zotero-notes"/>', 'text/html'),
+					textDoc = parser.parseFromString('<div class="zotero-notes"/>', 'text/html'),
+					container = doc.documentElement,
+					textContainer = textDoc.documentElement;
 				for (var i=0; i<notes.length; i++) {
-					var noteContent = notes[i].getNote();
-					try {
-						var noteDiv = new XML('<div class="zotero-note">'
-							+ noteContent
-								// &nbsp; is the only HTML entity we allow in
-								// notes, and it's not valid XML
-								.replace(/&nbsp;/g, '&#160;')
-							+ '</div>');
-					}
-					catch (e) {
-						Zotero.debug(e);
-						Zotero.debug("Couldn't parse note as HTML -- try as CDATA", 2);
-						try {
-							var noteDiv = new XML('<div class="zotero-note"><pre><![CDATA[' + noteContent + ']]></pre></div>');
-						}
-						catch (e) {
-							Zotero.debug("Skipping note", 2);
-							continue;
-						}
-					}
-					
-					htmlXML.div += noteDiv;
+					var div = doc.createElement("div");
+					div.className = "zotero-note";
+					div.insertAdjacentHTML('afterbegin', notes[i].getNote());
+					container.appendChild(div);
+					textContainer.appendChild(textDoc.importNode(div, true));
 				}
 				
 				// Raw HTML output
-				var html = htmlXML.toXMLString();
+				var html = container.outerHTML;
 				
-				var textXML = htmlXML.copy();
+				// Add placeholders for newlines between notes
+				if (notes.length > 1) {
+					var divs = Zotero.Utilities.xpath(container, "div"),
+						textDivs = Zotero.Utilities.xpath(textContainer, "div");
+					for (var i=1, len=divs.length; i<len; i++) {
+						var p = doc.createElement("p");
+						p.appendChild(doc.createTextNode("--------------------------------------------------"));
+						container.insertBefore(p, divs[i]);
+						textContainer.insertBefore(textDoc.importNode(p, true), textDivs[i]);
+					}
+				}
+				
+				const BLOCKQUOTE_PREFS = {
+					'export.quickCopy.quoteBlockquotes.richText':doc,
+					'export.quickCopy.quoteBlockquotes.plainText':textDoc
+				};
+				for(var pref in BLOCKQUOTE_PREFS) {
+					if (Zotero.Prefs.get(pref)) {
+						var currentDoc = BLOCKQUOTE_PREFS[pref];
+						// Add quotes around blockquote paragraphs
+						var addOpenQuote = Zotero.Utilities.xpath(currentDoc, "//blockquote/p[1]"),
+							addCloseQuote = Zotero.Utilities.xpath(currentDoc, "//blockquote/p[last()]");
+						for(var i=0; i<addOpenQuote.length; i++) {
+							addOpenQuote[i].insertBefore(currentDoc.createTextNode("\u201c"),
+								addOpenQuote[i].firstChild);
+						}
+						for(var i=0; i<addCloseQuote.length; i++) {
+							addCloseQuote[i].appendChild(currentDoc.createTextNode("\u201d"));
+						}
+					}
+				}
 				
 				//
 				// Text-only adjustments
 				//
 				
-				// Add placeholders for newlines between notes
-				if (notes.length > 1) {
-					var divs = textXML.div;
-					for (var i=0, len=divs.length(); i<len-1; i++) {
-						divs[i].p += <p>--------------------------------------------------</p>;
-					}
-				}
-				
-				if (Zotero.Prefs.get('export.quickCopy.quoteBlockquotes.plainText')) {
-					// Add quotes around blockquote paragraphs
-					var nodes = textXML..blockquote;
-					for (var i in nodes) {
-						for (var j=0, len=nodes[i].p.length(); j<len; j++) {
-							var children = nodes[i].p[j].children();
-							children[0] = '\u201c' + children[0];
-							// Add closing double quotes to final paragraph
-							if (j == len - 1) {
-								children[children.length()-1] +=  '\u201d';
-							}
-						}
-					}
-				}
-				
-				// Replace tags with characters, like Thunderbird
-				//
-				// (It'd be nice to use the OutputFormatted mode of the native
-				// plaintext serializer, which appears to be what TB uses,
-				// but I wasn't able to get it to work from JS.)
-				var map = {
-					strong: "*",
-					em: "/"
-				}
-				for (var tag in map) {
-					var nodes = textXML.descendants(tag);
-					for (var i in nodes) {
-						var children = nodes[i].children();
-						children[0] = map[tag] + children[0];
-						children[children.length()-1] += map[tag];
-					}
-				}
-				
 				// Replace span styles with characters
-				var spanStyleMap = [
-					{
-						re: /text-decoration:\s*underline/,
-						repl: "_"
-					}
-				];
-				for each(var style in spanStyleMap) {
-					var nodes = textXML..span.(style.re.test(@style));
-					for (var i in nodes) {
-						var children = nodes[i].children();
-						children[0] = style.repl + children[0];
-						children[children.length()-1] += style.repl;
+				var spans = textDoc.getElementsByTagName("span");
+				for(var i=0; i<spans.length; i++) {
+					var span = spans[i];
+					if(span.style.textDecoration == "underline") {
+						span.insertBefore(textDoc.createTextNode("_"), span.firstChild);
+						span.appendChild(textDoc.createTextNode("_"));
 					}
 				}
 				
@@ -343,62 +311,37 @@ Zotero.QuickCopy = new function() {
 				// And add spaces for indents
 				//
 				// Placeholder for 4 spaces in final output
-				var ztab = "%%ZOTEROTAB%%";
-				var p = textXML..p;
-				for (var i in p) {
-					var children = p[i].children();
-					// TODO: Be a bit smarter and more flexible about this
-					if (p[i].@style.indexOf("padding-left: 30px") != -1) {
-						children[0] = ztab + children[0];
-					}
-					else if (p[i].@style.indexOf("padding-left: 60px") != -1) {
-						children[0] = ztab + ztab + children[0];
-					}
-					else if (p[i].@style.indexOf("padding-left: 90px") != -1) {
-						children[0] = ztab + ztab + ztab + children[0];
-					}
-					else if (p[i].@style.indexOf("padding-left: 120px") != -1) {
-						children[0] = ztab + ztab + ztab + ztab + children[0];
+				const ZTAB = "%%ZOTEROTAB%%";
+				var ps = textDoc.getElementsByTagName("p");
+				for(var i=0; i<ps.length; i++) {
+					var p = ps[i],
+						paddingLeft = p.style.paddingLeft;
+					Zotero.debug("PADDING LEFT "+paddingLeft);
+					if(paddingLeft && paddingLeft.substr(paddingLeft.length-2) === "px") {
+						var paddingPx = parseInt(paddingLeft, 10),
+							ztabs = "";
+						for(var i=30; i<=paddingPx; i+=30) ztabs += ZTAB;
+						p.insertBefore(textDoc.createTextNode(ztabs), p.firstChild);
 					}
 				}
 				
-				var text = Zotero.Utilities.unescapeHTML(textXML.toXMLString());
-				text = text.replace(new RegExp(ztab, "g"), "    ");
-				
-				text = text.trim();
+				// Use plaintext serializer to output formatted text
+				var docEncoder = Components.classes["@mozilla.org/layout/documentEncoder;1?type=text/html"]
+					.createInstance(Components.interfaces.nsIDocumentEncoder);
+				docEncoder.init(textDoc, "text/plain", docEncoder.OutputFormatted);
+				var text = docEncoder.encodeToString().trim().replace(ZTAB, "    ", "g");
 				
 				//
 				// Adjustments for the HTML copied to the clipboard
 				//
 				
 				// Everything seems to like margin-left better than padding-left
-				var p = htmlXML..p;
-				for (var i in p) {
-					var children = p[i].children();
-					if (p[i].@style.toString().indexOf("padding-left") != -1) {
-						p[i].@style = p[i].@style.toString().replace("padding-left", "margin-left");
-					}
-				}
-				
-				if (notes.length > 1) {
-					var divs = htmlXML.div;
-					for (var i=0, len=divs.length(); i<len-1; i++) {
-						divs[i].p += <p>----------------------------------------------------------------------</p>;
-					}
-				}
-				
-				// Add quotes around blockquote paragraphs
-				if (Zotero.Prefs.get('export.quickCopy.quoteBlockquotes.richText')) {
-					var nodes = htmlXML..blockquote;
-					for (var i in nodes) {
-						for (var j=0, len=nodes[i].p.length(); j<len; j++) {
-							var children = nodes[i].p[j].children();
-							children[0] = '\u201c' + children[0];
-							// Add closing double quotes to final paragraph
-							if (j == len - 1) {
-								children[children.length()-1] +=  '\u201d';
-							}
-						}
+				var ps = Zotero.Utilities.xpath(doc, "p");
+				for(var i=0; i<ps.length; i++) {
+					var p = ps[i];
+					if(p.style.paddingLeft) {
+						p.style.marginLeft = p.style.paddingLeft;
+						p.style.paddingLeft = "";
 					}
 				}
 				
@@ -406,21 +349,16 @@ Zotero.QuickCopy = new function() {
 				//
 				// OO gets it right, so this results in an extra indent
 				if (Zotero.Prefs.get('export.quickCopy.compatibility.indentBlockquotes')) {
-					var p = htmlXML..blockquote.p;
-					for (var i in p) {
-						var children = p[i].children();
-						p[i].@style = "margin-left: 30px";
-					}
+					var ps = Zotero.Utilities.xpath(doc, "//blockquote/p");
+					for(var i=0; i<ps.length; i++) ps[i].style.marginLeft = "30px";
 				}
 				
 				// Add Word Normal style to paragraphs and add double-spacing
 				//
 				// OO inserts the conditional style code as a document comment
 				if (Zotero.Prefs.get('export.quickCopy.compatibility.word')) {
-					var nodes = htmlXML..p;
-					for (var i in nodes) {
-						nodes[i].@class = "msoNormal";
-					}
+					var ps = doc.getElementsByTagName("p");
+					for (var i=0; i<ps.length; i++) ps[i].className = "msoNormal";
 					var copyHTML = "<!--[if gte mso 0]>"
 									+ "<style>"
 									+ "p { margin-top:.1pt;margin-right:0in;margin-bottom:.1pt;margin-left:0in; line-height: 200%; }"
@@ -428,10 +366,10 @@ Zotero.QuickCopy = new function() {
 									+ "blockquote p { margin-left: 11px; margin-right: 11px }"
 									+ "</style>"
 									+ "<![endif]-->\n"
-									+ htmlXML.toXMLString();
+									+ container.outerHTML;
 				}
 				else {
-					var copyHTML = htmlXML.toXMLString();
+					var copyHTML = container.outerHTML;
 				}
 				
 				var content = {

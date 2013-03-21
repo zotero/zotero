@@ -105,7 +105,7 @@ Zotero.Relation.prototype._set = function (field, val) {
 Zotero.Relation.prototype.exists = function () {
 	if (this.id) {
 		var sql = "SELECT COUNT(*) FROM relations WHERE relationID=?";
-		return !!Zotero_DB::valueQuery(sql, this.id);
+		return !!Zotero.DB.valueQuery(sql, this.id);
 	}
 	
 	if (this.libraryID && this.subject && this.predicate && this.object) {
@@ -223,13 +223,23 @@ Zotero.Relation.prototype.erase = function () {
 }
 
 
-Zotero.Relation.prototype.toXML = function () {
-	var xml = <relation/>;
-	xml.@libraryID = this.libraryID;
-	xml.subject = this.subject;
-	xml.predicate = this.predicate;
-	xml.object = this.object;
-	return xml;
+Zotero.Relation.prototype.toXML = function (doc) {
+	var relationXML = doc.createElement('relation');
+	relationXML.setAttribute('libraryID', this.libraryID);
+	
+	var elem = doc.createElement('subject');
+	elem.appendChild(doc.createTextNode(this.subject));
+	relationXML.appendChild(elem);
+	
+	var elem = doc.createElement('predicate');
+	elem.appendChild(doc.createTextNode(this.predicate));
+	relationXML.appendChild(elem);
+	
+	var elem = doc.createElement('object');
+	elem.appendChild(doc.createTextNode(this.object));
+	relationXML.appendChild(elem);
+	
+	return relationXML;
 }
 
 

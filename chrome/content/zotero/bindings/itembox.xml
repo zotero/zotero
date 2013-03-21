@@ -864,7 +864,7 @@
 
 					// Move to next or previous field if (shift-)tab was pressed
 					if (this._lastTabIndex && this._tabDirection) {
-						this._focusNextField('info', this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
+						this._focusNextField(this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
 					}
 //Zotero.debug("XXX === refresh() === [end]");
 				]]>
@@ -2001,7 +2001,7 @@
 					   break;
 					 case event.DOM_VK_TAB:
 					   this._tabDirection = event.shiftKey ? -1 : 1;
-					   this._focusNextField('info', this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
+					   this._focusNextField(this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
 					   event.preventDefault();
 					   return true;
 				   }
@@ -2042,7 +2042,7 @@
 							var focusMode = 'info';
 							var focusBox = this._dynamicFields;
 						}
-						this._focusNextField(focusMode, focusBox, this._lastTabIndex, this._tabDirection == -1);
+						this._focusNextField(focusBox, this._lastTabIndex, this._tabDirection == -1);
 					}
 */
 				]]>
@@ -2548,7 +2548,7 @@
 									// If + button is disabled, just focus next creator row
 									var row = Zotero.getAncestorByTagName(target, 'row');
 									if (row.lastChild.lastChild.disabled) {
-										this._focusNextField('info', this._dynamicFields, this._lastTabIndex, false);
+										this._focusNextField(this._dynamicFields, this._lastTabIndex, false);
 									}
 									else {
 										// TODO: should use current creator type
@@ -2609,7 +2609,7 @@
 									this._deferCreatorSave = true;
 								}
 							}
-							this._focusNextField('info', this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
+							this._focusNextField(this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
 							this._deferCreatorSave = false;
 							event.preventDefault();
 							return true;
@@ -2945,7 +2945,7 @@
 							var focusMode = 'info';
 							var focusBox = this._dynamicFields;
 						}
-						this._focusNextField(focusMode, focusBox, this._lastTabIndex, this._tabDirection == -1);
+						this._focusNextField(focusBox, this._lastTabIndex, this._tabDirection == -1);
 					}
 				}
 				// Thrown errors don't seem to show up within XBL without explicit logging
@@ -3413,7 +3413,7 @@ if (oldCreator.id) {
 				<![CDATA[
 					switch (mode) {
 						case 'info':
-							this._focusNextField('info', this._dynamicFields, 0, false);
+							this._focusNextField(this._dynamicFields, 0, false);
 							break;
 					}
 				]]>
@@ -3430,113 +3430,74 @@ if (oldCreator.id) {
 				completes, so it doesn't know where it's supposed to go next.)
 			-->
 			<method name="_focusNextField">
-				<parameter name="mode"/>
 				<parameter name="box"/>
 				<parameter name="tabindex"/>
 				<parameter name="back"/>
 				<body>
 				<![CDATA[
-//Zotero.debug("XXX focusNextField() [start]: "+mode+" "+box+" "+tabindex+" "+back);
+                    // Was seriously out of line with official Zotero, replaced verbatim
+                    // from official source, 15 March 2013.
 					tabindex = parseInt(tabindex);
+					
 					if (back)
 					{
-						if (mode=='info')
+						switch (tabindex)
 						{
-							switch (tabindex)
-							{
-								case 1:
-									//Zotero.debug('At beginning');
-									document.getElementById('item-type-menu').focus();
-									return false;
-								
-								case this._tabIndexMinCreators:
+							case 1:
+								//Zotero.debug('At beginning');
+								document.getElementById('item-type-menu').focus();
+								return false;
+							
+							case this._tabIndexMinCreators:
+								var nextIndex = 1; // Title field
+								break;
+							
+							case this._tabIndexMinFields:
+								// No creators
+								if (this._tabIndexMaxCreators == 0) {
 									var nextIndex = 1; // Title field
-									break;
-								
-								case this._tabIndexMinFields:
-									// No creators
-									if (this._tabIndexMaxCreators == 0) {
-										var nextIndex = 1; // Title field
-									}
-									else {
-										var nextIndex = this._tabIndexMaxCreators;
-									}
-									break;
-								
-								default:
-									var nextIndex = tabindex - 1;
-							}
-						}
-						else if (mode=='tags')
-						{
-							switch (tabindex)
-							{
-								case 1:
-									return false;
-								
-								default:
-									var nextIndex = tabindex - 1;
-							}
+								}
+								else {
+									var nextIndex = this._tabIndexMaxCreators;
+								}
+								break;
+							
+							default:
+								var nextIndex = tabindex - 1;
 						}
 					}
 					else
 					{
-						if (mode=='info')
+						switch (tabindex)
 						{
-							switch (tabindex)
-							{
-								case 1:
-									var nextIndex = this._tabIndexMinCreators;
-									break;
-								
-								case this._tabIndexMaxCreators:
-									var nextIndex = this._tabIndexMinFields;
-									break;
-								
-								case this._tabIndexMaxInfoFields:
-									//Zotero.debug('At end');
-									return false;
-								
-								default:
-									var nextIndex = tabindex + 1;
-							}
-						}
-						else if (mode=='tags')
-						{
-							switch (tabindex)
-							{
-								case this._tabIndexMaxTagsFields:
-									// In tags box, keep going to create new row
-									var nextIndex = tabindex + 1;
-									break;
-								
-								default:
-									var nextIndex = tabindex + 1;
-							}
+							case 1:
+								var nextIndex = this._tabIndexMinCreators;
+								break;
+							
+							case this._tabIndexMaxCreators:
+								var nextIndex = this._tabIndexMinFields;
+								break;
+							
+							case this._tabIndexMaxFields:
+								//Zotero.debug('At end');
+								return false;
+							
+							default:
+								var nextIndex = tabindex + 1;
 						}
 					}
 					
-					switch (mode)
+					Zotero.debug('Looking for tabindex ' + nextIndex, 4);
+					
+					var next = box.getElementsByAttribute('ztabindex', nextIndex);
+					if (!next[0])
 					{
-						case 'info':
-							var next = box.getElementsByAttribute('ztabindex', nextIndex);
-							if (!next[0])
-							{
-								Zotero.debug("Next field not found!!!");
-								return this._focusNextField(mode, box, nextIndex, back);
-							}
-							break;
-						
-						// Tags pane
-						case 'tags':
-							var next = document.getAnonymousNodes(box)[0].
-								getElementsByAttribute('ztabindex', nextIndex);
-							if (!next[0]) {
-								next[0] = box.addDynamicRow();
-							}
-							break;
+						//Zotero.debug("Next field not found");
+						return this._focusNextField(box, nextIndex, back);
 					}
+					
 					next[0].click();
+					
 					// DEBUG: next[0] is always equal to the target element,
 					// but for some reason it's necessary to scroll to the next
 					// element when moving forward for the target element to

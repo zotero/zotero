@@ -118,22 +118,14 @@ Zotero.MIMETypeHandler = new function () {
 			var checkValue = {"value":false};
 			
 			// make tab-modal dialog (https://developer.mozilla.org/en/Using_tab-modal_prompts)
-			if(Zotero.isFx4) {
-				var prompt = Components.classes["@mozilla.org/prompter;1"]
-					 .getService(Components.interfaces.nsIPromptFactory)
-					 .getPrompt(win, Components.interfaces.nsIPrompt);
-				
-				var bag = prompt.QueryInterface(Components.interfaces.nsIWritablePropertyBag2);
-				bag.setPropertyAsBool("allowTabModal", true);
+			var prompt = Components.classes["@mozilla.org/prompter;1"]
+				 .getService(Components.interfaces.nsIPromptFactory)
+				 .getPrompt(win, Components.interfaces.nsIPrompt);
 			
-				var continueDownload = prompt.confirmCheck(title, text, checkMsg, checkValue);
-			} else {
-				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-						.getService(Components.interfaces.nsIPromptService);
-			
-				var continueDownload = ps.confirmCheck(win, title, text, checkMsg, checkValue);
-			}
-			
+			var bag = prompt.QueryInterface(Components.interfaces.nsIWritablePropertyBag2);
+			bag.setPropertyAsBool("allowTabModal", true);
+		
+			var continueDownload = prompt.confirmCheck(title, text, checkMsg, checkValue);
 			if(!continueDownload) return;
 			if(checkValue.value) {
 				// add to allowed sites if desired
@@ -144,47 +136,21 @@ Zotero.MIMETypeHandler = new function () {
 		var frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
 			getService(Components.interfaces.nsIWindowWatcher).activeWindow;
 		
-		if (Zotero.locked) {
-			frontWindow.Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-			var desc = Zotero.localeJoin([
-				Zotero.getString('general.operationInProgress'), Zotero.getString('general.operationInProgress.waitUntilFinishedAndTryAgain')
-			]);
-			frontWindow.Zotero_Browser.progress.addDescription(desc);
-			frontWindow.Zotero_Browser.progress.show();
-			frontWindow.Zotero_Browser.progress.startCloseTimer(8000);
-			return;
-		}
-		
 		// attempt to import through Zotero.Translate
 		var translation = new Zotero.Translate("import");
 		translation.setLocation(uri);
 		translation.setString(string);
 		
-		frontWindow.Zotero_Browser.progress.show();
-		var libraryID = null;
-		var collection = null;
-		try {
-			libraryID = frontWindow.ZoteroPane.getSelectedLibraryID();
-			collection = frontWindow.ZoteroPane.getSelectedCollection();
-		} catch(e) {}
-		translation.setHandler("itemDone", function(obj, dbItem, item) {
-			frontWindow.Zotero_Browser.itemDone(obj, dbItem, item, collection);
-		});
-		translation.setHandler("done", function(obj, item) {
-			frontWindow.Zotero_Browser.finishScraping(obj, item, collection);
-		});
-		
 		// attempt to retrieve translators
 		var translators = translation.getTranslators();
 		if(!translators.length) {
 			// we lied. we can't really translate this file.
-			frontWindow.Zotero_Browser.progress.close();
 			throw "No translator found for handled RIS, Refer or ISI file"
 		}
 		
 		// translate using first available
 		translation.setTranslator(translators[0]);
-		translation.translate(libraryID);
+		frontWindow.Zotero_Browser.performTranslation(translation);
 	}
 	
 	/**

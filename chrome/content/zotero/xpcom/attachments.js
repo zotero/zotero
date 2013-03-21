@@ -28,6 +28,9 @@ Zotero.Attachments = new function(){
 	this.LINK_MODE_IMPORTED_URL = 1;
 	this.LINK_MODE_LINKED_FILE = 2;
 	this.LINK_MODE_LINKED_URL = 3;
+	this.BASE_PATH_PLACEHOLDER = 'attachments:';
+	
+	this.SNAPSHOT_MIMETYPES = ["text/html", "application/xhtml+xml"];
 	
 	this.importFromFile = importFromFile;
 	this.linkFromFile = linkFromFile;
@@ -88,6 +91,7 @@ Zotero.Attachments = new function(){
 			newFile.append(newName);
 			
 			var mimeType = Zotero.MIME.getMIMETypeFromFile(newFile);
+			
 			
 			attachmentItem.attachmentMIMEType = mimeType;
 			attachmentItem.attachmentPath = this.getPath(newFile, this.LINK_MODE_IMPORTED_FILE);
@@ -220,6 +224,7 @@ Zotero.Attachments = new function(){
 		var urlRe = /^https?:\/\/[^\s]*$/;
 		var matches = urlRe.exec(url);
 		if (!matches) {
+			if(callback) callback(false);
 			throw ("Invalid URL '" + url + "' in Zotero.Attachments.importFromURL()");
 		}
 		
@@ -297,10 +302,12 @@ Zotero.Attachments = new function(){
 						
 						if (mimeType == 'application/pdf' &&
 								Zotero.MIME.sniffForMIMEType(str) != 'application/pdf') {
-							Zotero.debug("Downloaded PDF did not have MIME type "
-								+ "'application/pdf' in Attachments.importFromURL()", 2);
+							var errString = "Downloaded PDF did not have MIME type "
+								+ "'application/pdf' in Attachments.importFromURL()";
+							Zotero.debug(errString, 2);
 							Zotero.debug(str);
 							attachmentItem.erase();
+							if(callback) callback(false, new Error(errString));
 							return;
 						}
 						
@@ -312,6 +319,8 @@ Zotero.Attachments = new function(){
 						
 						Zotero.Notifier.trigger('add', 'item', itemID);
 						Zotero.Notifier.trigger('modify', 'item', sourceItemID);
+				
+						if(callback) callback(attachmentItem);
 						
 						// We don't have any way of knowing that the file
 						// is flushed to disk, so we just wait a second
@@ -326,6 +335,7 @@ Zotero.Attachments = new function(){
 					catch (e) {
 						// Clean up
 						attachmentItem.erase();
+						if(callback) callback(false, e);
 						
 						throw (e);
 					}
@@ -352,8 +362,6 @@ Zotero.Attachments = new function(){
 					// XXX Always use when we no longer support Firefox < 18
 					wbp.saveURI(nsIURL, null, null, null, null, file, null);
 				}
-				
-				if(callback) callback(attachmentItem);
 				
 				return attachmentItem;
 			}
@@ -591,13 +599,12 @@ Zotero.Attachments = new function(){
 					Zotero.Fulltext.indexDocument(document, itemID);
 					Zotero.Notifier.trigger('refresh', 'item', itemID);
 					if (callback) {
-						callback();
+						callback(attachmentItem);
 					}
 				};
 			}
 			
-			if (mimeType === 'text/html' || mimeType === 'application/xhtml+xml') {
-				Zotero.debug('Saving with wpdDOMSaver.saveHTMLDocument()');
+			if (this.SNAPSHOT_MIMETYPES.indexOf(mimeType) != -1) {
 				var sync = true;
 				
 				// Load WebPageDump code
@@ -651,6 +658,7 @@ Zotero.Attachments = new function(){
 						// Clean up
 						var item = Zotero.Items.get(itemID);
 						item.erase();
+						if(callback) callback(false, e);
 						
 						throw (e);
 					}
@@ -1204,6 +1212,23 @@ Zotero.Attachments = new function(){
 			nsIURL.fileBaseName = nsIURL.fileBaseName + '.' + tld;
 		}
 		
+		// Test unencoding fileBaseName
+		try {
+			decodeURIComponent(nsIURL.fileBaseName);
+		}
+		catch (e) {
+			if (e.name == 'URIError') {
+				// If we got a 'malformed URI sequence' while decoding,
+				// use MD5 of fileBaseName
+				nsIURL.fileBaseName = Zotero.Utilities.Internal.md5(nsIURL.fileBaseName, false);
+			}
+			else {
+				throw e;
+			}
+		}
+		
+		// Pass unencoded name to getValidFileName() so that percent-encoded
+		// characters aren't stripped to just numbers
 		return Zotero.File.getValidFileName(decodeURIComponent(nsIURL.fileName));
 	}
 	
@@ -1346,8 +1371,7 @@ Zotero.Attachments = new function(){
 		}
 		
 		var ext = Zotero.File.getExtension(file);
-		if (mimeType.substr(0, 5)!='text/' ||
-			!Zotero.MIME.hasInternalHandler(mimeType, ext)){
+		if (!Zotero.MIME.hasInternalHandler(mimeType, ext)) {
 			return;
 		}
 		

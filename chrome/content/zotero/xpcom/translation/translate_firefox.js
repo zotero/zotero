@@ -1,11 +1,14 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2009 Center for History and New Media
+    Copyright © 2012 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
     
     This file is part of Zotero.
+    
+    Portions of this file are derived from Special Powers code,
+    Copyright (C) 2010 Mozilla Corporation. All Rights Reserved.
     
     Zotero is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -34,6 +37,348 @@ const BOMs = {
 Components.utils.import("resource://gre/modules/NetUtil.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
 
+Zotero.Translate.DOMWrapper = new function() {	
+	/*
+	 * BEGIN SPECIAL POWERS WRAPPING CODE
+	 * https://mxr.mozilla.org/mozilla-central/source/testing/mochitest/tests/SimpleTest/specialpowersAPI.js?raw=1
+	 */
+	function isWrappable(x) {
+		if (typeof x === "object")
+			return x !== null;
+		return typeof x === "function";
+	};
+	
+	function isWrapper(x) {
+		return isWrappable(x) && (typeof x.SpecialPowers_wrappedObject !== "undefined");
+	};
+	
+	function unwrapIfWrapped(x) {
+		return isWrapper(x) ? unwrapPrivileged(x) : x;
+	};
+	
+	function isXrayWrapper(x) {
+		try {
+			return x.toString().indexOf("XrayWrapper") !== -1;
+		} catch(e) {
+			// The toString() implementation could theoretically throw. But it never
+			// throws for Xray, so we can just assume non-xray in that case.
+			return false;
+		}
+	}
+	
+	// We can't call apply() directy on Xray-wrapped functions, so we have to be
+	// clever.
+	function doApply(fun, invocant, args) {
+		return Function.prototype.apply.call(fun, invocant, args);
+	}
+
+	function wrapPrivileged(obj, overrides) {
+	
+		// Primitives pass straight through.
+		if (!isWrappable(obj))
+			return obj;
+	
+		// No double wrapping.
+		if (isWrapper(obj))
+			throw "Trying to double-wrap object!";
+	
+		// Make our core wrapper object.
+		var handler = new SpecialPowersHandler(obj, overrides);
+	
+		// If the object is callable, make a function proxy.
+		if (typeof obj === "function") {
+			var callTrap = function() {
+				// The invocant and arguments may or may not be wrappers. Unwrap them if necessary.
+				var invocant = unwrapIfWrapped(this);
+				var unwrappedArgs = Array.prototype.slice.call(arguments).map(unwrapIfWrapped);
+	
+				return wrapPrivileged(doApply(obj, invocant, unwrappedArgs));
+			};
+			var constructTrap = function() {
+				// The arguments may or may not be wrappers. Unwrap them if necessary.
+				var unwrappedArgs = Array.prototype.slice.call(arguments).map(unwrapIfWrapped);
+	
+				// Constructors are tricky, because we can't easily call apply on them.
+				// As a workaround, we create a wrapper constructor with the same
+				// |prototype| property.
+				var FakeConstructor = function() {
+					doApply(obj, this, unwrappedArgs);
+				};
+				FakeConstructor.prototype = obj.prototype;
+	
+				return wrapPrivileged(new FakeConstructor());
+			};
+	
+			return Proxy.createFunction(handler, callTrap, constructTrap);
+		}
+	
+		// Otherwise, just make a regular object proxy.
+		return Proxy.create(handler);
+	};
+	
+	function unwrapPrivileged(x) {
+	
+		// We don't wrap primitives, so sometimes we have a primitive where we'd
+		// expect to have a wrapper. The proxy pretends to be the type that it's
+		// emulating, so we can just as easily check isWrappable() on a proxy as
+		// we can on an unwrapped object.
+		if (!isWrappable(x))
+			return x;
+	
+		// If we have a wrappable type, make sure it's wrapped.
+		if (!isWrapper(x))
+			throw "Trying to unwrap a non-wrapped object!";
+	
+		// Unwrap.
+		return x.SpecialPowers_wrappedObject;
+	};
+	
+	function crawlProtoChain(obj, fn) {
+		var rv = fn(obj);
+		if (rv !== undefined)
+			return rv;
+		if (Object.getPrototypeOf(obj))
+			return crawlProtoChain(Object.getPrototypeOf(obj), fn);
+	};
+	
+	/*
+	 * We want to waive the __exposedProps__ security check for SpecialPowers-wrapped
+	 * objects. We do this by creating a proxy singleton that just always returns 'rw'
+	 * for any property name.
+	 */
+	function ExposedPropsWaiverHandler() {
+		// NB: XPConnect denies access if the relevant member of __exposedProps__ is not
+		// enumerable.
+		var _permit = { value: 'rw', writable: false, configurable: false, enumerable: true };
+		return {
+			getOwnPropertyDescriptor: function(name) { return _permit; },
+			getPropertyDescriptor: function(name) { return _permit; },
+			getOwnPropertyNames: function() { throw Error("Can't enumerate ExposedPropsWaiver"); },
+			getPropertyNames: function() { throw Error("Can't enumerate ExposedPropsWaiver"); },
+			enumerate: function() { throw Error("Can't enumerate ExposedPropsWaiver"); },
+			defineProperty: function(name) { throw Error("Can't define props on ExposedPropsWaiver"); },
+			delete: function(name) { throw Error("Can't delete props from ExposedPropsWaiver"); }
+		};
+	};
+	ExposedPropsWaiver = Proxy.create(ExposedPropsWaiverHandler());
+	
+	function SpecialPowersHandler(obj, overrides) {
+		this.wrappedObject = obj;
+		this.overrides = overrides ? overrides : {};
+	};
+	
+	// Allow us to transitively maintain the membrane by wrapping descriptors
+	// we return.
+	SpecialPowersHandler.prototype.doGetPropertyDescriptor = function(name, own) {
+	
+		// Handle our special API.
+		if (name == "SpecialPowers_wrappedObject")
+			return { value: this.wrappedObject, writeable: false, configurable: false, enumerable: false };
+		// Handle __exposedProps__.
+		if (name == "__exposedProps__")
+			return { value: ExposedPropsWaiver, writable: false, configurable: false, enumerable: false };
+	
+		// In general, we want Xray wrappers for content DOM objects, because waiving
+		// Xray gives us Xray waiver wrappers that clamp the principal when we cross
+		// compartment boundaries. However, Xray adds some gunk to toString(), which
+		// has the potential to confuse consumers that aren't expecting Xray wrappers.
+		// Since toString() is a non-privileged method that returns only strings, we
+		// can just waive Xray for that case.
+		var obj = name == 'toString' ? XPCNativeWrapper.unwrap(this.wrappedObject)
+																 : this.wrappedObject;
+	
+		//
+		// Call through to the wrapped object.
+		//
+		// Note that we have several cases here, each of which requires special handling.
+		//
+		var desc;
+		
+		// Hack for overriding some properties
+		if (this.overrides.hasOwnProperty(name))
+			return this.overrides[name];
+		// Case 1: Own Properties.
+		//
+		// This one is easy, thanks to Object.getOwnPropertyDescriptor().
+		else if (own)
+			desc = Object.getOwnPropertyDescriptor(obj, name);
+	
+		// Case 2: Not own, not Xray-wrapped.
+		//
+		// Here, we can just crawl the prototype chain, calling
+		// Object.getOwnPropertyDescriptor until we find what we want.
+		//
+		// NB: Make sure to check this.wrappedObject here, rather than obj, because
+		// we may have waived Xray on obj above.
+		else if (!isXrayWrapper(this.wrappedObject))
+			try {
+				desc = crawlProtoChain(obj, function(o) {return Object.getOwnPropertyDescriptor(o, name);});
+			} catch(e) {
+				// we hit bug 560072 if DOM is not wrapped
+				// https://bugzilla.mozilla.org/show_bug.cgi?id=560072
+				if (name in obj) {
+					// same guess as below
+					desc = {value: obj[name], writable: false, configurable: true, enumerable: true};
+				}
+			}
+	
+		// Case 3: Not own, Xray-wrapped.
+		//
+		// This one is harder, because we Xray wrappers are flattened and don't have
+		// a prototype. Xray wrappers are proxies themselves, so we'd love to just call
+		// through to XrayWrapper<Base>::getPropertyDescriptor(). Unfortunately though,
+		// we don't have any way to do that. :-(
+		//
+		// So we first try with a call to getOwnPropertyDescriptor(). If that fails,
+		// we make up a descriptor, using some assumptions about what kinds of things
+		// tend to live on the prototypes of Xray-wrapped objects.
+		else {
+			desc = Object.getOwnPropertyDescriptor(obj, name);
+			if (!desc) {
+				var getter = Object.prototype.__lookupGetter__.call(obj, name);
+				var setter = Object.prototype.__lookupSetter__.call(obj, name);
+				if (getter || setter)
+					desc = {get: getter, set: setter, configurable: true, enumerable: true};
+				else if (name in obj)
+					desc = {value: obj[name], writable: false, configurable: true, enumerable: true};
+			}
+		}
+	
+		// Bail if we've got nothing.
+		if (typeof desc === 'undefined')
+			return undefined;
+	
+		// When accessors are implemented as JSPropertyOps rather than JSNatives (ie,
+		// QuickStubs), the js engine does the wrong thing and treats it as a value
+		// descriptor rather than an accessor descriptor. Jorendorff suggested this
+		// little hack to work around it. See bug 520882.
+		if (desc && 'value' in desc && desc.value === undefined)
+			desc.value = obj[name];
+	
+		// A trapping proxy's properties must always be configurable, but sometimes
+		// this we get non-configurable properties from Object.getOwnPropertyDescriptor().
+		// Tell a white lie.
+		desc.configurable = true;
+	
+		// Transitively maintain the wrapper membrane.
+		function wrapIfExists(key) { if (key in desc) desc[key] = wrapPrivileged(desc[key]); };
+		wrapIfExists('value');
+		wrapIfExists('get');
+		wrapIfExists('set');
+	
+		return desc;
+	};
+	
+	SpecialPowersHandler.prototype.getOwnPropertyDescriptor = function(name) {
+		return this.doGetPropertyDescriptor(name, true);
+	};
+	
+	SpecialPowersHandler.prototype.getPropertyDescriptor = function(name) {
+		return this.doGetPropertyDescriptor(name, false);
+	};
+	
+	function doGetOwnPropertyNames(obj, props) {
+	
+		// Insert our special API. It's not enumerable, but getPropertyNames()
+		// includes non-enumerable properties.
+		var specialAPI = 'SpecialPowers_wrappedObject';
+		if (props.indexOf(specialAPI) == -1)
+			props.push(specialAPI);
+		
+		
+		// Do the normal thing.
+		var flt = function(a) { return props.indexOf(a) == -1; };
+		props = props.concat(Object.getOwnPropertyNames(obj).filter(flt));
+	
+		// If we've got an Xray wrapper, include the expandos as well.
+		if ('wrappedJSObject' in obj)
+			props = props.concat(Object.getOwnPropertyNames(obj.wrappedJSObject)
+													 .filter(flt));
+	
+		return props;
+	}
+	
+	SpecialPowersHandler.prototype.getOwnPropertyNames = function() {
+		return doGetOwnPropertyNames(this.wrappedObject, []);
+	};
+	
+	SpecialPowersHandler.prototype.getPropertyNames = function() {
+	
+		// Manually walk the prototype chain, making sure to add only property names
+		// that haven't been overridden.
+		//
+		// There's some trickiness here with Xray wrappers. Xray wrappers don't have
+		// a prototype, so we need to unwrap them if we want to get all of the names
+		// with Object.getOwnPropertyNames(). But we don't really want to unwrap the
+		// base object, because that will include expandos that are inaccessible via
+		// our implementation of get{,Own}PropertyDescriptor(). So we unwrap just
+		// before accessing the prototype. This ensures that we get Xray vision on
+		// the base object, and no Xray vision for the rest of the way up.
+		var obj = this.wrappedObject;
+		var props = [];
+		props = doGetOwnPropertyNames(this.overrides, props);
+		while (obj) {
+			props = doGetOwnPropertyNames(obj, props);
+			obj = Object.getPrototypeOf(XPCNativeWrapper.unwrap(obj));
+		}
+		return props;
+	};
+	
+	SpecialPowersHandler.prototype.defineProperty = function(name, desc) {
+		return Object.defineProperty(this.wrappedObject, name, desc);
+	};
+	
+	SpecialPowersHandler.prototype.delete = function(name) {
+		return delete this.wrappedObject[name];
+	};
+	
+	SpecialPowersHandler.prototype.fix = function() { return undefined; /* Throws a TypeError. */ };
+	
+	// Per the ES5 spec this is a derived trap, but it's fundamental in spidermonkey
+	// for some reason. See bug 665198.
+	SpecialPowersHandler.prototype.enumerate = function() {
+		var t = this;
+		var filt = function(name) { return t.getPropertyDescriptor(name).enumerable; };
+		return this.getPropertyNames().filter(filt);
+	};
+
+	/*
+	 * END SPECIAL POWERS WRAPPING CODE
+	 */
+	
+	/**
+	 * Abstracts DOM wrapper support for avoiding XOWs
+	 * @param {XPCCrossOriginWrapper} obj
+	 * @return {Object} An obj that is no longer Xrayed
+	 */
+	this.wrap = function(obj, overrides) {
+		if(isWrapper(obj)) return obj;
+		return wrapPrivileged(obj, overrides);
+	};
+	
+	/**
+	 * Unwraps an object
+	 */
+	this.unwrap = function(obj) {
+		if("__wrappedDOMObject" in obj) {
+			return obj.__wrappedDOMObject;
+		} else if(isWrapper(obj)) {
+			return unwrapPrivileged(obj);
+		} else {
+			return obj;
+		}
+	}
+	
+	/**
+	 * Checks whether an object is wrapped by a DOM wrapper
+	 * @param {XPCCrossOriginWrapper} obj
+	 * @return {Boolean} Whether or not the object is wrapped
+	 */
+	this.isWrapped = function(obj) {
+		return "__wrappedDOMObject" in obj || isWrapper(obj);
+	}
+}
+
 /**
  * @class Manages the translator sandbox
  * @param {Zotero.Translate} translate
@@ -45,89 +390,49 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	
 	// import functions missing from global scope into Fx sandbox
 	this.sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
-	this.sandbox.DOMParser = function() {
-		var uri, principal;
-		// get URI
-		if(typeof sandboxLocation === "string") {	// if sandbox specified by URI
-			var secMan = Services.scriptSecurityManager;
-			uri = Services.io.newURI(sandboxLocation, "UTF-8", null);
-			principal = (secMan.getCodebasePrincipal || secMan.getSimpleCodebasePrincipal)(uri);
-		} else {									// if sandbox specified by DOM document
-			principal = sandboxLocation.document.nodePrincipal;
-			uri = sandboxLocation.document.documentURIObject;
-		}
-		
-		// initialize DOM parser
-		var _DOMParser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser);
-		_DOMParser.init(principal, uri, uri);
-		
-		// expose parseFromString
-		this.__exposedProps__ = {"parseFromString":"r"};
-		this.parseFromString = function(str, contentType) {
-			return Zotero.Translate.SandboxManager.Fx5DOMWrapper(_DOMParser.parseFromString(str, contentType));
-		}
-	};
+	if(typeof sandboxLocation === "object" &&
+			("wrappedJSObject" in sandboxLocation
+			? "DOMParser" in sandboxLocation.wrappedJSObject
+			: "DOMParser" in sandboxLocation)) {
+		this.sandbox.DOMParser = "wrappedJSObject" in sandboxLocation
+			? sandboxLocation.wrappedJSObject.DOMParser : sandboxLocation.DOMParser;
+	} else {
+		var sandbox = this.sandbox;
+		this.sandbox.DOMParser = function() {
+			var uri, principal;
+			// get URI
+			if(typeof sandboxLocation === "string") {	// if sandbox specified by URI
+				var secMan = Services.scriptSecurityManager;
+				uri = Services.io.newURI(sandboxLocation, "UTF-8", null);
+				principal = (secMan.getCodebasePrincipal || secMan.getSimpleCodebasePrincipal)(uri);
+			} else {									// if sandbox specified by DOM document
+				principal = sandboxLocation.document.nodePrincipal;
+				uri = sandboxLocation.document.documentURIObject;
+			}
+			
+			// initialize DOM parser
+			var _DOMParser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+				.createInstance(Components.interfaces.nsIDOMParser);
+			_DOMParser.init(principal, uri, uri);
+			
+			// expose parseFromString
+			this.__exposedProps__ = {"parseFromString":"r"};
+			this.parseFromString = function(str, contentType) {
+				return Zotero.Translate.DOMWrapper.wrap(_DOMParser.parseFromString(str, contentType));
+			}
+		};
+	}
 	this.sandbox.DOMParser.__exposedProps__ = {"prototype":"r"};
 	this.sandbox.DOMParser.prototype = {};
 	this.sandbox.XMLSerializer = function() {
 		var s = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
 			.createInstance(Components.interfaces.nsIDOMSerializer);
 		this.serializeToString = function(doc) {
-			return s.serializeToString(doc.__wrappedDOMObject ? doc.__wrappedDOMObject : doc);
+			return s.serializeToString(Zotero.Translate.DOMWrapper.unwrap(doc));
 		};
 	};
 	this.sandbox.XMLSerializer.__exposedProps__ = {"prototype":"r"};
 	this.sandbox.XMLSerializer.prototype = {"__exposedProps__":{"serializeToString":"r"}};
-}
-
-/**
- * A really ugly way of making a DOM object not look like a DOM object, so we can pass it to the
- * sandbox under Firefox 5
- */
-Zotero.Translate.SandboxManager.Fx5DOMWrapper = function(obj, parent) {
-	if(obj === null) {
-		return null;
-	}
-	
-	if(typeof obj === "function") {
-		var me = this;
-		var val = function() {
-			var nArgs = arguments.length;
-			var args = new Array(nArgs);
-			for(var i=0; i<nArgs; i++) {
-				var arg = arguments[i];
-				args[i] = (((typeof arg === "object" && arg !== null)
-						|| typeof arg === "function")
-					&& "__wrappedDOMObject" in arg
-					? arg.__wrappedDOMObject : arg);
-			}
-			return Zotero.Translate.SandboxManager.Fx5DOMWrapper(obj.apply(parent ? parent : null, args));
-		}
-	} else if(typeof obj === "object") {
-		if(val instanceof Array) {
-			var val = [];
-		} else {
-			var val = {};
-		}
-	} else {
-		return obj;
-	}
-	
-	val.__wrappedDOMObject = obj;
-	val.__exposedProps__ = {};
-	for(var prop in obj) {
-		if(prop === "prototype") continue;
-		let localProp = prop,
-			cachedWrapper;
-		val.__exposedProps__[localProp] = "r";
-		val.__defineGetter__(localProp, function() {
-			if(!cachedWrapper) cachedWrapper = Zotero.Translate.SandboxManager.Fx5DOMWrapper(obj[localProp], obj);
-			return cachedWrapper;
-		});
-	}
-	
-	return val;
 }
 
 Zotero.Translate.SandboxManager.prototype = {
@@ -135,11 +440,7 @@ Zotero.Translate.SandboxManager.prototype = {
 	 * Evaluates code in the sandbox
 	 */
 	"eval":function(code, exported, path) {
-		if(Zotero.isFx4) {
-			Components.utils.evalInSandbox(code, this.sandbox, "1.8", path, 1);
-		} else {
-			Components.utils.evalInSandbox(code, this.sandbox);
-		}
+		Components.utils.evalInSandbox(code, this.sandbox, "1.8", path, 1);
 	},
 	
 	/**
@@ -387,7 +688,7 @@ Zotero.Translate.IO.Read = function(file, mode) {
 
 Zotero.Translate.IO.Read.prototype = {
 	"__exposedProps__":{
-		"_getXML":"r",
+		"getXML":"r",
 		"RDF":"r",
 		"read":"r",
 		"setCharacterSet":"r"
@@ -481,18 +782,15 @@ Zotero.Translate.IO.Read.prototype = {
 		return str.value;
 	},
 	
-	"_getXML":function() {
-		if(this._mode == "xml/dom") {
-			try {
-				var xml = Zotero.Translate.IO.parseDOMXML(this._rawStream, this._charset, this.file.fileSize);
-			} catch(e) {
-				this._xmlInvalid = true;
-				throw e;
-			}
-			return (Zotero.isFx5 ? Zotero.Translate.SandboxManager.Fx5DOMWrapper(xml) : xml);
-		} else {
-			return this._readToString().replace(/<\?xml[^>]+\?>/, "");
+	"getXML":function() {
+		if(this.bytesRead !== 0) this._seekToStart(this._charset);
+		try {
+			var xml = Zotero.Translate.IO.parseDOMXML(this._rawStream, this._charset, this.file.fileSize);
+		} catch(e) {
+			this._xmlInvalid = true;
+			throw e;
 		}
+		return (Zotero.isFx ? Zotero.Translate.DOMWrapper.wrap(xml) : xml);
 	},
 	
 	"init":function(newMode, callback) {
@@ -502,7 +800,9 @@ Zotero.Translate.IO.Read.prototype = {
 		this._seekToStart(this._charset);
 		
 		this._mode = newMode;
-		if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1 && !this.RDF) {
+		if(newMode === "xml/e4x") {
+			throw "E4X is not supported";
+		} else if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1 && !this.RDF) {
 			this._initRDF();
 		}
 		

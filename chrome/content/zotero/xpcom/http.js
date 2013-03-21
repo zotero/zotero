@@ -3,18 +3,181 @@
  * @namespace
  */
 Zotero.HTTP = new function() {
-	this.WebDAV = {};
+	this.lastGoogleScholarQueryTime = 0;
+
+	/**
+	 * Exception returned for unexpected status when promise* is used
+	 * @constructor
+	 */
+	this.UnexpectedStatusException = function(xmlhttp, msg) {
+		this.xmlhttp = xmlhttp;
+		this.status = xmlhttp.status;
+		this.message = msg;
+	};
 	
+	this.UnexpectedStatusException.prototype.toString = function() {
+		return this.message;
+	};
 	
 	/**
-	* Send an HTTP GET request via XMLHTTPRequest
-	* 
-	* @param {nsIURI|String}	url				URL to request
-	* @param {Function} 		onDone			Callback to be executed upon request completion
-	* @param {String} 		responseCharset	Character set to force on the response
-	* @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
-	* @return {Boolean} True if the request was sent, or false if the browser is offline
-	*/
+	 * Exception returned if the browser is offline when promise* is used
+	 * @constructor
+	 */
+	this.BrowserOfflineException = function() {
+		this.message = "XMLHttpRequest could not complete because the browser is offline";
+	};
+	this.BrowserOfflineException.prototype.toString = function() {
+		return this.message;
+	};
+	
+	/**
+	 * Get a promise for a HTTP request
+	 * 
+	 * @param {String} method The method of the request ("GET", "POST", "HEAD", or "OPTIONS")
+	 * @param {nsIURI|String}	url				URL to request
+	 * @param {Object} [options] Options for HTTP request:<ul>
+	 *         <li>body - The body of a POST request</li>
+	 *         <li>cookieSandbox - The sandbox from which cookies should be taken</li>
+	 *         <li>debug - Log response text and status code</li>
+	 *         <li>dontCache - If set, specifies that the request should not be fulfilled from the cache</li>
+	 *         <li>headers - HTTP headers to include in the request</li>
+	 *         <li>responseType - The type of the response. See XHR 2 documentation for legal values</li>
+	 *         <li>responseCharset - The charset the response should be interpreted as</li>
+	 *         <li>successCodes - HTTP status codes that are considered successful</li>
+	 *     </ul>
+	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
+	 * @return {Promise} A promise resolved with the XMLHttpRequest object if the request
+	 *     succeeds, or rejected if the browser is offline or a non-2XX status response
+	 *     code is received (or a code not in options.successCodes if provided).
+	 */
+	this.promise = function promise(method, url, options) {
+		if (url instanceof Components.interfaces.nsIURI) {
+			// Don't display password in console
+			var dispURL = url.clone();
+			if (dispURL.password) {
+				dispURL.password = "********";
+			}
+			url = url.spec;
+			dispURL = dispURL.spec;
+		}
+		else {
+			var dispURL = url;
+		}
+		
+		if(options && options.body) {
+			var bodyStart = options.body.substr(0, 1024);
+			// Don't display sync password or session id in console
+			bodyStart = bodyStart.replace(/password=[^&]+/, 'password=********');
+			bodyStart = bodyStart.replace(/sessionid=[^&]+/, 'sessionid=********');
+			
+			Zotero.debug("HTTP "+method+" "
+				+ (options.body.length > 1024 ?
+					bodyStart + '... (' + options.body.length + ' chars)' : bodyStart)
+				+ " to " + dispURL);
+		} else {
+			Zotero.debug("HTTP " + method + " " + dispURL);
+		}
+		
+		if (this.browserIsOffline()) {
+			return Q.fcall(function() {
+				Zotero.debug("HTTP " + method + " " + dispURL + " failed: "
+					+ "Browser is offline");
+				throw new this.BrowserOfflineException();
+			});
+		}
+		
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+					.createInstance();
+		// Prevent certificate/authentication dialogs from popping up
+		xmlhttp.mozBackgroundRequest = true;
+		xmlhttp.open(method, url, true);
+		
+		if (method == 'PUT') {
+			// Some servers (e.g., Jungle Disk DAV) return a 200 response code
+			// with Content-Length: 0, which triggers a "no element found" error
+			// in Firefox, so we override to text
+			xmlhttp.overrideMimeType("text/plain");
+		}
+		
+		// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
+		var channel = xmlhttp.channel;
+		channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
+		channel.forceAllowThirdPartyCookie = true;
+		
+		// Set charset
+		if (options && options.responseCharset) {
+			channel.contentCharset = responseCharset;
+		}
+		
+		// Disable caching if requested
+		if(options && options.dontCache) {
+			channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
+		}
+
+		// Set responseType
+		if(options && options.responseType) {
+			xmlhttp.responseType = options.responseType;
+		}
+		
+		// Send headers
+		var headers = (options && options.headers) || {};
+		if (options && options.body && !headers["Content-Type"]) {
+			headers["Content-Type"] = "application/x-www-form-urlencoded";
+		}
+		for (var header in headers) {
+			xmlhttp.setRequestHeader(header, headers[header]);
+		}
+		
+		var deferred = Q.defer();
+		
+		xmlhttp.onloadend = function() {
+			var status = xmlhttp.status;
+			
+			if (options && options.successCodes) {
+				var success = options.successCodes.indexOf(status) != -1;
+			}
+			else {
+				var success = status >= 200 && status < 300;
+			}
+			
+			if(success) {
+				if (options && options.debug) {
+					Zotero.debug("HTTP " + method + " " + dispURL
+						+ " succeeded with " + xmlhttp.status);
+					Zotero.debug(xmlhttp.responseText);
+				}
+				deferred.resolve(xmlhttp);
+			} else {
+				var msg = "HTTP " + method + " " + dispURL + " failed: "
+					+ "Unexpected status code " + xmlhttp.status;
+				Zotero.debug(msg, 1);
+				if (options && options.debug) {
+					Zotero.debug(xmlhttp.responseText);
+				}
+				deferred.reject(new Zotero.HTTP.UnexpectedStatusException(xmlhttp, msg));
+			}
+		};
+		
+		if(options && options.cookieSandbox) {
+			options.cookieSandbox.attachToInterfaceRequestor(xmlhttp);
+		}
+		
+		xmlhttp.send((options && options.body) || null);
+		
+		return deferred.promise;
+	};
+	
+	/**
+	 * Send an HTTP GET request via XMLHTTPRequest
+	 * 
+	 * @param {nsIURI|String}	url				URL to request
+	 * @param {Function} 		onDone			Callback to be executed upon request completion
+	 * @param {String} 		responseCharset	Character set to force on the response
+	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
+	 * @return {XMLHttpRequest} The XMLHttpRequest object if the request was sent, or
+	 *     false if the browser is offline
+	 * @deprecated Use {@link Zotero.HTTP.promise}
+	 */
 	this.doGet = function(url, onDone, responseCharset, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
@@ -52,8 +215,10 @@ Zotero.HTTP = new function() {
 		// Don't cache GET requests
 		xmlhttp.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 		
+		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
+			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
@@ -64,16 +229,18 @@ Zotero.HTTP = new function() {
 	}
 	
 	/**
-	* Send an HTTP POST request via XMLHTTPRequest
-	*
-	* @param {String} url URL to request
-	* @param {String} body Request body
-	* @param {Function} onDone Callback to be executed upon request completion
-	* @param {String} headers Request HTTP headers
-	* @param {String} responseCharset Character set to force on the response
-	* @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
-	* @return {Boolean} True if the request was sent, or false if the browser is offline
-	*/
+	 * Send an HTTP POST request via XMLHTTPRequest
+	 *
+	 * @param {String} url URL to request
+	 * @param {String} body Request body
+	 * @param {Function} onDone Callback to be executed upon request completion
+	 * @param {String} headers Request HTTP headers
+	 * @param {String} responseCharset Character set to force on the response
+	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
+	 * @return {XMLHttpRequest} The XMLHttpRequest object if the request was sent, or
+	 *     false if the browser is offline
+	 * @deprecated Use {@link Zotero.HTTP.promise}
+	 */
 	this.doPost = function(url, body, onDone, headers, responseCharset, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
@@ -104,7 +271,6 @@ Zotero.HTTP = new function() {
 		// Prevent certificate/authentication dialogs from popping up
 		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open('POST', url, true);
-	
 		// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
 		var channel = xmlhttp.channel;
 		channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
@@ -137,8 +303,10 @@ Zotero.HTTP = new function() {
 			xmlhttp.setRequestHeader(header, headers[header]);
 		}
 		
+		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
-		xmlhttp.onreadystatechange = function(){
+		xmlhttp.onreadystatechange = function() {
+			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
@@ -149,14 +317,16 @@ Zotero.HTTP = new function() {
 	}
 	
 	/**
-	* Send an HTTP HEAD request via XMLHTTPRequest
-	*
-	* @param {String} url URL to request
-	* @param {Function} onDone Callback to be executed upon request completion
-	* @param {Object} requestHeaders HTTP headers to include with request
-	* @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
-	* @return {Boolean} True if the request was sent, or false if the browser is offline
-	*/
+	 * Send an HTTP HEAD request via XMLHTTPRequest
+	 *
+	 * @param {String} url URL to request
+	 * @param {Function} onDone Callback to be executed upon request completion
+	 * @param {Object} requestHeaders HTTP headers to include with request
+	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
+	 * @return {XMLHttpRequest} The XMLHttpRequest object if the request was sent, or
+	 *     false if the browser is offline
+	 * @deprecated Use {@link Zotero.HTTP.promise}
+	 */
 	this.doHead = function(url, onDone, requestHeaders, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
@@ -178,34 +348,15 @@ Zotero.HTTP = new function() {
 		
 		// Workaround for "Accept third-party cookies" being off in Firefox 3.0.1
 		// https://www.zotero.org/trac/ticket/1070
-		if (Zotero.isFx30) {
-			const Cc = Components.classes;
-			const Ci = Components.interfaces;
-			var ds = Cc["@mozilla.org/webshell;1"].
-						createInstance(Components.interfaces.nsIDocShellTreeItem).
-						QueryInterface(Ci.nsIInterfaceRequestor);
-			ds.itemType = Ci.nsIDocShellTreeItem.typeContent;
-			var xmlhttp = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
-							createInstance(Ci.nsIXMLHttpRequest);
-			// Prevent certificate/authentication dialogs from popping up
-			xmlhttp.mozBackgroundRequest = true;
-			xmlhttp.open("HEAD", url, true);
-			xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
-			xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
-		}
-		else {
-			var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-							.createInstance();
-			// Prevent certificate/authentication dialogs from popping up
-			xmlhttp.mozBackgroundRequest = true;
-			xmlhttp.open('HEAD', url, true);
-			// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
-			if (!Zotero.isFx35) {
-				var channel = xmlhttp.channel;
-				channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
-				channel.forceAllowThirdPartyCookie = true;
-			}
-		}
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+						.createInstance();
+		// Prevent certificate/authentication dialogs from popping up
+		xmlhttp.mozBackgroundRequest = true;
+		xmlhttp.open('HEAD', url, true);
+		// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
+		var channel = xmlhttp.channel;
+		channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
+		channel.forceAllowThirdPartyCookie = true;
 		
 		if (requestHeaders) {
 			for (var header in requestHeaders) {
@@ -216,8 +367,10 @@ Zotero.HTTP = new function() {
 		// Don't cache HEAD requests
 		xmlhttp.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 		
+		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
-		xmlhttp.onreadystatechange = function(){
+		xmlhttp.onreadystatechange = function() {
+			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, onDone);
 		};
 		
@@ -233,6 +386,7 @@ Zotero.HTTP = new function() {
 	 * @param	{nsIURI}		url
 	 * @param	{Function}	onDone
 	 * @return	{XMLHTTPRequest}
+	 * @deprecated Use {@link Zotero.HTTP.promise}
 	 */
 	this.doOptions = function (uri, callback) {
 		// Don't display password in console
@@ -251,8 +405,11 @@ Zotero.HTTP = new function() {
 		// Prevent certificate/authentication dialogs from popping up
 		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open('OPTIONS', uri.spec, true);
+		
+		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
+			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(null);
@@ -262,6 +419,8 @@ Zotero.HTTP = new function() {
 	//
 	// WebDAV methods
 	//
+	
+	this.WebDAV = {};
 	
 	/**
 	* Send a WebDAV PROP* request via XMLHTTPRequest
@@ -321,7 +480,10 @@ Zotero.HTTP = new function() {
 		
 		xmlhttp.setRequestHeader("Content-Type", 'text/xml; charset="utf-8"');
 		
+		var useMethodjit = Components.utils.methodjit;
+		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
+			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		
@@ -354,7 +516,10 @@ Zotero.HTTP = new function() {
 		// Prevent certificate/authentication dialogs from popping up
 		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open('MKCOL', uri.spec, true);
+		var useMethodjit = Components.utils.methodjit;
+		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
+			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(null);
@@ -396,7 +561,10 @@ Zotero.HTTP = new function() {
 		// with Content-Length: 0, which triggers a "no element found" error
 		// in Firefox, so we override to text
 		xmlhttp.overrideMimeType("text/plain");
+		var useMethodjit = Components.utils.methodjit;
+		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
+			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(body);
@@ -432,7 +600,10 @@ Zotero.HTTP = new function() {
 		// Firefox 3 throws a "no element found" error even with a
 		// 204 ("No Content") response, so we override to text
 		xmlhttp.overrideMimeType("text/plain");
+		var useMethodjit = Components.utils.methodjit;
+		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
+			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(null);
@@ -607,4 +778,74 @@ Zotero.HTTP = new function() {
 			break;
 		}
 	}
+
+	/**
+	 * Mimics the window.location/document.location interface, given an nsIURL
+	 * @param {nsIURL} url
+	 */
+	this.Location = function(url) {
+		this._url = url;
+		this.hash = url.ref ? "#"+url.ref : "";
+		this.host = url.hostPort;
+		this.hostname = url.host;
+		this.href = url.spec;
+		this.pathname = url.filePath;
+		this.port = (url.schemeIs("https") ? 443 : 80);
+		this.protocol = url.scheme+":";
+		this.search = url.query ? "?"+url.query : "";
+	};
+	this.Location.prototype = {
+		"toString":function() {
+			return this.href;
+		},
+		"__exposedProps__":{
+			"hash":"r",
+			"host":"r",
+			"hostname":"r",
+			"href":"r",
+			"pathname":"r",
+			"port":"r",
+			"protocol":"r",
+			"search":"r",
+			"toString":"r"
+		}
+	};
+
+	/**
+	 * Mimics an HTMLWindow given an nsIURL
+	 * @param {nsIURL} url
+	 */
+	this.Window = function(url) {
+		this._url = url;
+		this.top = this;
+		this.location = Zotero.HTTP.Location(url);
+	};
+	this.Window.prototype.__exposedProps__ = {
+		"top":"r",
+		"location":"r"
+	};
+
+	/**
+	 * Wraps an HTMLDocument object returned by XMLHttpRequest DOMParser to make it look more like it belongs
+	 * to a browser. This is necessary if the document is to be passed to Zotero.Translate.
+	 * @param {HTMLDocument} doc Document returned by 
+	 * @param {nsIURL|String} url
+	 */
+	 this.wrapDocument = function(doc, url) {
+	 	if(typeof url !== "object") {
+	 		url = Services.io.newURI(url, null, null).QueryInterface(Components.interfaces.nsIURL);
+		}
+
+		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+             .createInstance(Components.interfaces.nsIDOMParser);
+		var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
+			.getService(Components.interfaces.nsIScriptSecurityManager);
+		parser.init(secMan.getCodebasePrincipal(url), url, url);
+		return Zotero.Translate.DOMWrapper.wrap(doc, {
+			"documentURI":{ "enumerable":true, "value":url.spec },
+			"URL":{ "enumerable":true, "value":url.spec },
+			"location":{ "enumerable":true, "value":(new Zotero.HTTP.Location(url)) },
+			"defaultView":{ "enumerable":true, "value":(new Zotero.HTTP.Window(url)) }
+		});
+	 }
 }

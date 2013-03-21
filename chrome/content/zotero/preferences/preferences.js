@@ -127,11 +127,6 @@ function init()
 	} else if(document.location.hash == "#cite") {
 		document.getElementById('zotero-prefs').showPane(document.getElementById("zotero-prefpane-cite"));
 	}
-	
-	var showInAppTab;
-	if(!Zotero.isFx4 && (showInAppTab = document.getElementById("zotero-prefpane-general-showIn-appTab"))) {
-		showInAppTab.setAttribute("hidden", "true");
-	}
 }
 
 
@@ -252,6 +247,7 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 		protocol = oldProtocol;
 	}
 	
+	var storageSettings = document.getElementById('storage-settings');
 	var protocolMenu = document.getElementById('storage-protocol');
 	var settings = document.getElementById('storage-webdav-settings');
 	var sep = document.getElementById('storage-separator');
@@ -265,7 +261,12 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 		sep.hidden = true;
 	}
 	
-	protocolMenu.disabled = !enabled;
+	var menulists = storageSettings.getElementsByTagName('menulist');
+	for each(var menulist in menulists) {
+		if (menulist.className == 'storage-personal') {
+			menulist.disabled = !enabled;
+		}
+	}
 	
 	if (!skipWarnings) {
 		// WARN if going between
@@ -282,23 +283,18 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 			var account = Zotero.Sync.Server.username;
 			var index = ps.confirmEx(
 				null,
-				// TODO: localize
-				"Purge Attachment Files on Zotero Servers?",
-				
-				"If you plan to use WebDAV for file syncing and you previously synced attachment files in My Library "
-					+ "to the Zotero servers, you can purge those files from the Zotero servers to give you more "
-					+ "storage space for groups.\n\n"
-					+ "You can purge files at any time from your account settings on zotero.org.",
+				Zotero.getString('zotero.preferences.sync.purgeStorage.title'),
+				Zotero.getString('zotero.preferences.sync.purgeStorage.desc'),
 				buttonFlags,
-				"Purge Files Now",
-				"Do Not Purge", null, null, {}
+				Zotero.getString('zotero.preferences.sync.purgeStorage.confirmButton'),
+				Zotero.getString('zotero.preferences.sync.purgeStorage.cancelButton'), null, null, {}
 			);
 			
 			if (index == 0) {
 				var sql = "INSERT OR IGNORE INTO settings VALUES (?,?,?)";
 				Zotero.DB.query(sql, ['storage', 'zfsPurge', 'user']);
 				
-				Zotero.Sync.Storage.purgeDeletedStorageFiles('zfs', function (success) {
+				Zotero.Sync.Storage.ZFS.purgeDeletedStorageFiles(function (success) {
 					if (success) {
 						ps.alert(
 							null,
@@ -315,6 +311,21 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 					}
 				});
 			}
+		}
+	}
+	
+	setTimeout(function () {
+		updateStorageTerms();
+	}, 1)
+}
+
+
+function updateStorageSettingsGroups(enabled) {
+	var storageSettings = document.getElementById('storage-settings');
+	var menulists = storageSettings.getElementsByTagName('menulist');
+	for each(var menulist in menulists) {
+		if (menulist.className == 'storage-groups') {
+			menulist.disabled = !enabled;
 		}
 	}
 	
@@ -351,42 +362,88 @@ function verifyStorageServer() {
 	var usernameField = document.getElementById("storage-username");
 	var passwordField = document.getElementById("storage-password");
 	
-	var callback = function (uri, status, error) {
-		verifyButton.hidden = false;
-		abortButton.hidden = true;
-		progressMeter.hidden = true;
-		
-		switch (status) {
-			case Zotero.Sync.Storage.ERROR_NO_URL:
-				setTimeout(function () {
-					urlField.focus();
-				}, 1);
-				break;
-			
-			case Zotero.Sync.Storage.ERROR_NO_USERNAME:
-				setTimeout(function () {
-					usernameField.focus();
-				}, 1);
-				break;
-			
-			case Zotero.Sync.Storage.ERROR_NO_PASSWORD:
-				setTimeout(function () {
-					passwordField.focus();
-				}, 1);
-				break;
-		}
-		
-		Zotero.Sync.Storage.checkServerCallback(uri, status, window, false, error);
-	}
-	
 	verifyButton.hidden = true;
 	abortButton.hidden = false;
 	progressMeter.hidden = false;
-	var requestHolder = Zotero.Sync.Storage.checkServer('webdav', callback);
+	
+	var request = null;
+	var onDone = false;
+	
+	Zotero.Sync.Storage.WebDAV.checkServer()
+	// Get the XMLHttpRequest for possible cancelling
+	.progress(function (obj) {
+		request = obj.xmlhttp;
+	})
+	.finally(function () {
+		verifyButton.hidden = false;
+		abortButton.hidden = true;
+		progressMeter.hidden = true;
+	})
+	.spread(function (uri, status) {
+		switch (status) {
+			case Zotero.Sync.Storage.ERROR_NO_URL:
+				onDone = function () {
+					urlField.focus();
+				};
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_NO_USERNAME:
+				onDone = function () {
+					usernameField.focus();
+				};
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_NO_PASSWORD:
+			case Zotero.Sync.Storage.ERROR_AUTH_FAILED:
+				onDone = function () {
+					passwordField.focus();
+				};
+				break;
+		}
+		
+		return Zotero.Sync.Storage.WebDAV.checkServerCallback(uri, status, window);
+	})
+	.then(function (success) {
+		if (success) {
+			Zotero.debug("WebDAV verification succeeded");
+			
+			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+				.getService(Components.interfaces.nsIPromptService);
+			promptService.alert(
+				window,
+				Zotero.getString('sync.storage.serverConfigurationVerified'),
+				Zotero.getString('sync.storage.fileSyncSetUp')
+			);
+			Zotero.Prefs.set("sync.storage.verified", true);
+		}
+		else {
+			Zotero.debug("WebDAV verification failed");
+			if (onDone) {
+				setTimeout(function () {
+					onDone();
+				}, 1);
+			}
+		}
+	})
+	.catch(function (e) {
+		Zotero.debug("WebDAV verification failed");
+		Zotero.debug(e, 1);
+		Components.utils.reportError(e);
+		Zotero.Utilities.Internal.errorPrompt(Zotero.getString('general.error'), e);
+		
+		if (onDone) {
+			setTimeout(function () {
+				onDone();
+			}, 1);
+		}
+	})
+	.done();
+	
 	abortButton.onclick = function () {
-		if (requestHolder.request) {
-			requestHolder.request.onreadystatechange = undefined;
-			requestHolder.request.abort();
+		if (request) {
+			Zotero.debug("Cancelling verification request");
+			request.onreadystatechange = undefined;
+			request.abort();
 			verifyButton.hidden = false;
 			abortButton.hidden = true;
 			progressMeter.hidden = true;
@@ -416,11 +473,9 @@ function handleSyncReset(action) {
 		ps.alert(
 			null,
 			Zotero.getString('general.error'),
-			// TODO: localize
-			"You must enter a username and password in the "
-				+ document.getElementById('zotero-prefpane-sync')
-					.getElementsByTagName('tab')[0].label
-				+ " tab before using the reset options."
+			Zotero.getString('zotero.preferences.sync.reset.userInfoMissing',
+							document.getElementById('zotero-prefpane-sync')
+							.getElementsByTagName('tab')[0].label)
 		);
 		return;
 	}
@@ -434,12 +489,10 @@ function handleSyncReset(action) {
 								+ ps.BUTTON_POS_1_DEFAULT;
 			var index = ps.confirmEx(
 				null,
-				// TODO: localize
 				Zotero.getString('general.warning'),
-				"All data in this copy of Zotero will be erased and replaced with "
-					+ "data belonging to user '" + account + "' on the Zotero server.",
+				Zotero.getString('zotero.preferences.sync.reset.restoreFromServer', account),
 				buttonFlags,
-				"Replace Local Data",
+				Zotero.getString('zotero.preferences.sync.reset.replaceLocalData'),
 				null, null, null, {}
 			);
 			
@@ -462,8 +515,7 @@ function handleSyncReset(action) {
 						var index = ps.confirmEx(
 							null,
 							Zotero.getString('general.restartRequired'),
-							// TODO: localize
-							"Firefox must be restarted to complete the restore process.",
+							Zotero.getString('zotero.preferences.sync.reset.restartToComplete'),
 							buttonFlags,
 							Zotero.getString('general.restartNow'),
 							null, null, null, {}
@@ -495,14 +547,10 @@ function handleSyncReset(action) {
 							+ ps.BUTTON_POS_1_DEFAULT;
 			var index = ps.confirmEx(
 				null,
-				// TODO: localize
 				Zotero.getString('general.warning'),
-				"All data belonging to user '" + account + "' on the Zotero server "
-					+ "will be erased and replaced with data from this copy of Zotero.\n\n"
-					+ "Depending on the size of your library, there may be a delay before "
-					+ "your data is available on the server.",
+				Zotero.getString('zotero.preferences.sync.reset.restoreToServer', account),
 				buttonFlags,
-				"Replace Server Data",
+				Zotero.getString('zotero.preferences.sync.reset.replaceServerData'),
 				null, null, null, {}
 			);
 			
@@ -553,12 +601,10 @@ function handleSyncReset(action) {
 							+ ps.BUTTON_POS_1_DEFAULT;
 			var index = ps.confirmEx(
 				null,
-				// TODO: localize
 				Zotero.getString('general.warning'),
-				"All file sync history will be cleared.\n\n"
-					+ "Any local attachment files that do not exist on the storage server will be uploaded on the next sync.",
+				Zotero.getString('zotero.preferences.sync.reset.fileSyncHistory'),
 				buttonFlags,
-				"Reset",
+				Zotero.getString('general.reset'),
 				null, null, null, {}
 			);
 			
@@ -1346,6 +1392,10 @@ function updateTranslators() {
 				var label = Zotero.getString('zotero.preferences.update.error');
 			}
 			button.setAttribute('label', label);
+			
+			if (updated) {
+				refreshStylesList();
+			}
 		}
 	});
 }
@@ -1454,7 +1504,6 @@ Zotero_Preferences.Debug_Output = {
 	},
 	
 	
-	// TODO: localize
 	submit: function () {
 		document.getElementById('debug-output-submit').disabled = true;
 		document.getElementById('debug-output-submit-progress').hidden = false;
@@ -1479,7 +1528,7 @@ Zotero_Preferences.Debug_Output = {
 				ps.alert(
 					null,
 					Zotero.getString('general.error'),
-					'Invalid response from server'
+					Zotero.getString('general.invalidResponseServer')
 				);
 				return;
 			}
@@ -1488,7 +1537,7 @@ Zotero_Preferences.Debug_Output = {
 				ps.alert(
 					null,
 					Zotero.getString('general.error'),
-					'The server returned an error. Please try again.'
+					Zotero.getString('general.serverError')
 				);
 				return;
 			}
@@ -1496,9 +1545,8 @@ Zotero_Preferences.Debug_Output = {
 			var reportID = reported[0].getAttribute('reportID');
 			ps.alert(
 				null,
-				"Debug Output Submitted",
-				"Debug output has been sent to the Zotero server.\n\n"
-					+ "The Debug ID is D" + reportID + "."
+				Zotero.getString('zotero.preferences.advanced.debug.title'),
+				Zotero.getString('zotero.preferences.advanced.debug.sent', reportID)
 			);
 		}
 		
@@ -1516,10 +1564,8 @@ Zotero_Preferences.Debug_Output = {
 			if (Zotero.HTTP.browserIsOffline()) {
 				ps.alert(
 					null,
-					Zotero.getString(
-						'general.error',
-						Zotero.appName + " is in offline mode."
-					)
+					Zotero.getString('general.error'),
+					Zotero.getString('general.browserIsOffline', Zotero.appName)
 				);
 				return false;
 			}
@@ -1571,7 +1617,7 @@ Zotero_Preferences.Debug_Output = {
 				ps.alert(
 					null,
 					Zotero.getString('general.error'),
-					"An error occurred sending debug output."
+					Zotero.getString('zotero.preferences.advanced.debug.error')
 				);
 			}
 		}
@@ -2513,19 +2559,17 @@ function updateWordProcessorInstructions() {
 }
 
 /**
- * Sets "Status bar icon" to "None" if Zotero is set to load in separate tab on Fx 4
+ * Sets "Status bar icon" to "None" if Zotero is set to load in separate tab
  */
 function handleShowInPreferenceChange() {
 	var showInSeparateTab = document.getElementById("zotero-prefpane-general-showIn-separateTab");
 	var showInAppTab = document.getElementById("zotero-prefpane-general-showIn-appTab");
-	if(Zotero.isFx4) {
-		if(showInAppTab.selected) {
-			document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-none');
-			Zotero.Prefs.set("statusBarIcon", 0);
-		} else if(Zotero.isFx4) {
-			document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-full');
-			Zotero.Prefs.set("statusBarIcon", 2);
-		}
+	if(showInAppTab.selected) {
+		document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-none');
+		Zotero.Prefs.set("statusBarIcon", 0);
+	} else {
+		document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-full');
+		Zotero.Prefs.set("statusBarIcon", 2);
 	}
 }
 
@@ -2756,4 +2800,256 @@ function citationGetAffixesAction(type, boxtype, form, affixList, count) {
 		count += 1;
 	}
 	return count;
+}
+
+Zotero_Preferences.Attachment_Base_Directory = {
+	choosePath: function () {
+		// Get existing base directory
+		var oldBasePath = Zotero.Prefs.get('baseAttachmentPath');
+		if (oldBasePath) {
+			var oldBasePathFile = Components.classes["@mozilla.org/file/local;1"]
+				.createInstance(Components.interfaces.nsILocalFile);
+			try {
+				oldBasePathFile.persistentDescriptor = oldBasePath;
+			}
+			catch (e) {
+				Zotero.debug(e, 1);
+				Components.utils.reportError(e);
+				oldBasePathFile = null;
+			}
+		}
+		
+		//Prompt user to choose new base path
+		var nsIFilePicker = Components.interfaces.nsIFilePicker;
+		var fp = Components.classes["@mozilla.org/filepicker;1"]
+					.createInstance(nsIFilePicker);
+		if (oldBasePathFile) {
+			fp.displayDirectory = oldBasePathFile;
+		}
+		fp.init(window, Zotero.getString('attachmentBasePath.selectDir'), nsIFilePicker.modeGetFolder);
+		fp.appendFilters(nsIFilePicker.filterAll);
+		if (fp.show() != nsIFilePicker.returnOK) {
+			return false;
+		}
+		var newBasePathFile = fp.file;
+		
+		if (oldBasePathFile && oldBasePathFile.equals(newBasePathFile)) {
+			Zotero.debug("Base directory hasn't changed");
+			return false;
+		}
+		
+		// Find all current attachments with relative attachment paths
+		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=? AND path LIKE '"
+			+ Zotero.Attachments.BASE_PATH_PLACEHOLDER  + "%'";
+		var params = [Zotero.Attachments.LINK_MODE_LINKED_FILE];
+		var oldRelativeAttachmentIDs = Zotero.DB.columnQuery(sql, params) || [];
+		
+		//Find all attachments on the new base path
+		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=?";
+		var params = [Zotero.Attachments.LINK_MODE_LINKED_FILE];
+		var allAttachments = Zotero.DB.columnQuery(sql,params);
+		var newAttachmentPaths = {};
+		var numNewAttachments = 0;
+		var numOldAttachments = 0;
+		var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		for (let i=0; i<allAttachments.length; i++) {
+			let attachmentID = allAttachments[i];
+			
+			try {
+				let attachment = Zotero.Items.get(attachmentID);
+				attachmentFile.persistentDescriptor = attachment.attachmentPath;
+			}
+			catch (e) {
+				// Don't deal with bad attachment paths. Just skip them.
+				continue;
+			}
+			
+			// If a file with the same relative path exists within the new base directory,
+			// don't touch the attachment, since it will continue to work
+			let isExistingRelativeAttachment = oldRelativeAttachmentIDs.indexOf(attachmentID) != -1;
+			if (isExistingRelativeAttachment && oldBasePathFile) {
+				let relFile = attachmentFile.clone();
+				let relPath = attachmentFile.getRelativeDescriptor(oldBasePathFile);
+				relFile.setRelativeDescriptor(newBasePathFile, relPath);
+				if (relFile.exists()) {
+					numNewAttachments++;
+					continue;
+				}
+			}
+			
+			// Files within the new base directory need to be updated to use
+			// relative paths (or, if the new base directory is an ancestor or
+			// descendant of the old one, new relative paths)
+			if (Zotero.File.directoryContains(newBasePathFile, attachmentFile)) {
+				newAttachmentPaths[attachmentID] = isExistingRelativeAttachment
+					? attachmentFile.persistentDescriptor : null;
+				numNewAttachments++;
+			}
+			// Existing relative attachments not within the new base directory
+			// will be converted to absolute paths
+			else if (isExistingRelativeAttachment && oldBasePathFile) {
+				newAttachmentPaths[attachmentID] = attachmentFile.persistentDescriptor;
+				numOldAttachments++;
+			}
+		}
+		
+		//Confirm change of the base path
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		
+		var chooseStrPrefix = 'attachmentBasePath.chooseNewPath.';
+		var clearStrPrefix = 'attachmentBasePath.clearBasePath.';
+		var title = Zotero.getString(chooseStrPrefix + 'title');
+		var msg1 = Zotero.getString(chooseStrPrefix + 'message') + "\n\n", msg2 = msg3 = "";
+		switch (numNewAttachments) {
+			case 0:
+				break;
+			
+			case 1:
+				msg2 += Zotero.getString(chooseStrPrefix + 'existingAttachments.singular') + " ";
+				break;
+			
+			default:
+				msg2 += Zotero.getString(chooseStrPrefix + 'existingAttachments.plural', numNewAttachments) + " ";
+		}
+		
+		switch (numOldAttachments) {
+			case 0:
+				break;
+			
+			case 1:
+				msg3 += Zotero.getString(clearStrPrefix + 'existingAttachments.singular');
+				break;
+			
+			default:
+				msg3 += Zotero.getString(clearStrPrefix + 'existingAttachments.plural', numOldAttachments);
+		}
+		
+		
+		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+		var index = ps.confirmEx(
+			null,
+			title,
+			(msg1 + msg2 + msg3).trim(),
+			buttonFlags,
+			Zotero.getString(chooseStrPrefix + 'button'),
+			null,
+			null,
+			null,
+			{}
+		);
+		
+		if (index == 1) {
+			return false;
+		}
+		
+		// Set new data directory
+		Zotero.debug("Setting new base directory");
+		Zotero.Prefs.set('baseAttachmentPath', newBasePathFile.persistentDescriptor);
+		Zotero.Prefs.set('saveRelativeAttachmentPath', true);
+		// Resave all attachments on base path (so that their paths become relative)
+		// and all other relative attachments (so that their paths become absolute)
+		for (let id in newAttachmentPaths) {
+			let attachment = Zotero.Items.get(id);
+			if (newAttachmentPaths[id]) {
+				attachment.attachmentPath = newAttachmentPaths[id];
+				attachment.save();
+			}
+			else {
+				attachment.updateAttachmentPath();
+			}
+		}
+		return newBasePathFile.persistentDescriptor;
+	},
+	
+	
+	getPath: function (asFile) {
+		var desc = Zotero.Prefs.get('baseAttachmentPath');
+		if (desc == '') {
+			return asFile ? null : '';
+		}
+		
+		var file = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		try {
+			file.persistentDescriptor = desc;
+		}
+		catch (e) {
+			return asFile ? null : '';
+		}
+		return asFile ? file : file.path;
+	},
+	
+	
+	clearPath: function () {
+		// Find all current attachments with relative paths
+		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=? AND path LIKE '"
+			+ Zotero.Attachments.BASE_PATH_PLACEHOLDER  + "%'";
+		var params = [Zotero.Attachments.LINK_MODE_LINKED_FILE];
+		var relativeAttachmentIDs = Zotero.DB.columnQuery(sql, params) || [];
+		
+		// Prompt for confirmation
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		
+		var strPrefix = 'attachmentBasePath.clearBasePath.';
+		var title = Zotero.getString(strPrefix + 'title');
+		var msg = Zotero.getString(strPrefix + 'message');
+		switch (relativeAttachmentIDs.length) {
+			case 0:
+				break;
+			
+			case 1:
+				msg += "\n\n" + Zotero.getString(strPrefix + 'existingAttachments.singular');
+				break;
+			
+			default:
+				msg += "\n\n" + Zotero.getString(strPrefix + 'existingAttachments.plural',
+					relativeAttachmentIDs.length);
+		}
+		
+		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+		var index = ps.confirmEx(
+			window,
+			title,
+			msg,
+			buttonFlags,
+			Zotero.getString(strPrefix + 'button'),
+			null,
+			null,
+			null,
+			{}
+		);
+		
+		if (index == 1) {
+			return false;
+		}
+		
+		// Disable relative path saving and then resave all relative
+		// attachments so that their absolute paths are stored
+		Zotero.debug('Clearing base directory');
+		Zotero.Prefs.set('saveRelativeAttachmentPath', false);
+		for (var i=0; i<relativeAttachmentIDs.length; i++) {
+			Zotero.Items.get(relativeAttachmentIDs[i]).updateAttachmentPath();
+		}
+		Zotero.Prefs.set('baseAttachmentPath', '');
+	},
+	
+	
+	updateUI: function () {
+		var filefield = document.getElementById('baseAttachmentPath');
+		var file = this.getPath(true);
+		filefield.file = file;
+		if (file) {
+			filefield.label = file.path;
+		}
+		else {
+			filefield.label = '';
+		}
+		
+		document.getElementById('resetBasePath').disabled = !Zotero.Prefs.get('baseAttachmentPath');
+	}
 }

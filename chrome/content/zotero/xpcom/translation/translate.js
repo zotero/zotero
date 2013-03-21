@@ -93,17 +93,24 @@ Zotero.Translate.Sandbox = {
 			delete item.complete;
 			for(var i in item) {
 				var val = item[i];
-				var type = typeof val;
 				if(!val && val !== 0) {
 					// remove null, undefined, and false properties, and convert objects to strings
 					delete item[i];
-				} else if(type === "string") {
-					// trim strings
-					item[i] = val.trim();
-				} else if((type === "object" || type === "xml" || type === "function") && allowedObjects.indexOf(i) === -1) {
-					// convert things that shouldn't be objecst to objects
+					continue;
+				}
+
+				var isObject = typeof val === "object" || typeof val === "xml" || typeof val === "function",
+					shouldBeObject = allowedObjects.indexOf(i) !== -1;
+				if(isObject && !shouldBeObject) {
+					// Convert things that shouldn't be objects to objects
 					translate._debug("Translate: WARNING: typeof "+i+" is "+type+"; converting to string");
 					item[i] = val.toString();
+				} else if(shouldBeObject && !isObject) {
+					translate._debug("Translate: WARNING: typeof "+i+" is "+type+"; converting to array");
+					item[i] = [val];
+				} else if(typeof val === "string") {
+					// trim strings
+					item[i] = val.trim();
 				}
 			}
 			
@@ -130,28 +137,16 @@ Zotero.Translate.Sandbox = {
 					}
 				}
 			}
+		
+			// Fire itemSaving event
+			translate._runHandler("itemSaving", item);
 			
 			if(translate instanceof Zotero.Translate.Web) {
 				// For web translators, we queue saves
 				translate.saveQueue.push(item);
-				translate._runHandler("itemSaving", item);
 			} else {
-				var newItem;
-				translate._itemSaver.saveItems([item], function(returnValue, data) {
-					if(returnValue) {
-						newItem = data[0];
-						translate.newItems.push(newItem);
-					} else {
-						translate.complete(false, data);
-						throw data;
-					}
-				}, function(arg1, arg2, arg3) {
-					translate._attachmentProgress(arg1, arg2, arg3);
-				});
-				
-				translate._runHandler("itemSaving", item);
-				// pass both the saved item and the original JS array item
-				translate._runHandler("itemDone", newItem, item);
+				// Save items
+				translate._saveItems([item]);
 			}
 		},
 		
@@ -241,7 +236,7 @@ Zotero.Translate.Sandbox = {
 				"getTranslatorObject":"r"
 			};
 			safeTranslator.setSearch = function(arg) {
-				if(Zotero.isFx4 && !Zotero.isBookmarklet) arg = JSON.parse(JSON.stringify(arg));
+				if(!Zotero.isBookmarklet) arg = JSON.parse(JSON.stringify(arg));
 				return translation.setSearch(arg);
 			};
 			safeTranslator.setDocument = function(arg) { return translation.setDocument(arg) };
@@ -460,6 +455,15 @@ Zotero.Translate.Sandbox = {
 			
 			if(Zotero.Utilities.isEmpty(items)) {
 				throw new Error("Translator called select items with no items");
+			}
+			
+			// Some translators pass an array rather than an object to Zotero.selectItems.
+			// This will break messaging outside of Firefox, so we need to fix it.
+			if(Object.prototype.toString.call(items) === "[object Array]") {
+				translate._debug("WARNING: Zotero.selectItems should be called with an object, not an array");
+				var itemsObj = {};
+				for(var i in items) itemsObj[i] = items[i];
+				items = itemsObj;
 			}
 			
 			if(translate._selectedItems) {
@@ -757,7 +761,7 @@ Zotero.Translate.Sandbox = {
 		 * @return {SandboxCollection}
 		 */
 		"nextCollection":function(translate) {
-			if(!translate.translator[0].configOptions.getCollections) {
+			if(!translate._translatorInfo.configOptions || !translate._translatorInfo.configOptions.getCollections) {
 				throw(new Error("getCollections configure option not set; cannot retrieve collection"));
 			}
 			
@@ -1133,7 +1137,8 @@ Zotero.Translate.Base.prototype = {
 		
 		this._libraryID = libraryID;
 		this._saveAttachments = saveAttachments === undefined || saveAttachments;
-		this._attachmentsSaving = [];
+		this._savingAttachments = [];
+		this._savingItems = 0;
 		
 		var me = this;
 		if(typeof this.translator[0] === "object") {
@@ -1160,7 +1165,7 @@ Zotero.Translate.Base.prototype = {
 		}
 		
 		// set display options to default if they don't exist
-		if(!this._displayOptions) this._displayOptions = this.translator[0].displayOptions;
+		if(!this._displayOptions) this._displayOptions = this._translatorInfo.displayOptions || {};
 		
 		// prepare translation
 		this._prepareTranslation();
@@ -1262,14 +1267,11 @@ Zotero.Translate.Base.prototype = {
 			
 			if(returnValue) {
 				if(this.saveQueue.length) {
-					var me = this;
-					this._itemSaver.saveItems(this.saveQueue.slice(),
-						function(returnValue, data) { me._itemsSaved(returnValue, data); },
-						function(arg1, arg2, arg3) { me._attachmentProgress(arg1, arg2, arg3); });
+					this._saveItems(this.saveQueue);
+					this.saveQueue = [];
 					return;
-				} else {
-					this._debug("Translation successful");
 				}
+				this._debug("Translation successful");
 			} else {
 				if(error) {
 					// report error to console
@@ -1295,61 +1297,79 @@ Zotero.Translate.Base.prototype = {
 	},
 	
 	/**
-	 * Callback executed when items have been saved (which may happen asynchronously, if in
-	 * connector)
-	 *
-	 * @param {Boolean} returnValue Whether saving was successful
-	 * @param {Zotero.Item[]|Error} data If returnValue is true, this will be an array of
-	 *                                    Zotero.Item objects. If returnValue is false, this will
-	 *                                    be a string error message.
+	 * Saves items to the database, taking care to defer attachmentProgress notifications
+	 * until after save
 	 */
-	"_itemsSaved":function(returnValue, data) {
-		if(returnValue) {
-			// trigger deferred itemDone events
-			var nItems = data.length;
-			for(var i=0; i<nItems; i++) {
-				this._runHandler("itemDone", data[i], this.saveQueue[i]);
+	"_saveItems":function(items) {
+		var me = this,
+			itemDoneEventsDispatched = false,
+			deferredProgress = [],
+			attachmentsWithProgress = [];
+		
+		this._savingItems++;
+		this._itemSaver.saveItems(items.slice(), function(returnValue, newItems) {	
+			if(returnValue) {
+				// Remove attachments not being saved from item.attachments
+				for(var i=0; i<items.length; i++) {
+					var item = items[i];
+					for(var j=0; j<item.attachments.length; j++) {
+						if(attachmentsWithProgress.indexOf(item.attachments[j]) === -1) {
+							item.attachments.splice(j--, 1);
+						}
+					}
+				}
+				
+				// Trigger itemDone events
+				for(var i=0, nItems = items.length; i<nItems; i++) {
+					me._runHandler("itemDone", newItems[i], items[i]);
+				}
+				
+				// Specify that itemDone event was dispatched, so that we don't defer
+				// attachmentProgress notifications anymore
+				itemDoneEventsDispatched = true;
+				
+				// Run deferred attachmentProgress notifications
+				for(var i=0; i<deferredProgress.length; i++) {
+					me._runHandler("attachmentProgress", deferredProgress[i][0],
+						deferredProgress[i][1], deferredProgress[i][2]);
+				}
+				
+				me.newItems = me.newItems.concat(newItems);
+				me._savingItems--;
+				me._checkIfDone();
+			} else {
+				Zotero.logError(newItems);
+				me.complete(returnValue, newItems);
+			}
+		},
+		function(attachment, progress, error) {
+			var attachmentIndex = me._savingAttachments.indexOf(attachment);
+			if(progress === false || progress === 100) {
+				if(attachmentIndex !== -1) {
+					me._savingAttachments.splice(attachmentIndex, 1);
+				}
+			} else if(attachmentIndex === -1) {
+				me._savingAttachments.push(attachment);
 			}
 			
-			this.saveQueue = [];
-		} else {
-			Zotero.logError(data);
-		}
-		
-		if(returnValue) {
-			this._checkIfDone();
-		} else {
-			this._runHandler("done", returnValue);
-		}
-	},
-	
-	/**
-	 * Callback for attachment progress, passed as third argument to Zotero.ItemSaver#saveItems
-	 *
-	 * @param {Object} attachment Attachment object to be saved. Should remain the same between
-	 *     repeated calls to callback.
-	 * @param {Boolean|Number} progress Percent complete, or false if an error occurred.
-	 * @param {Error} [error] Error, if an error occurred during saving.
-	 */
-	"_attachmentProgress":function(attachment, progress, error) {
-		Zotero.debug("Attachment progress (progress = "+progress+")");
-		Zotero.debug(attachment);
-		var attachmentIndex = this._attachmentsSaving.indexOf(attachment);
-		if((progress === false || progress === 100) && attachmentIndex !== -1) {
-			this._attachmentsSaving.splice(attachmentIndex, 1);
-		} else if(attachmentIndex === -1) {
-			this._attachmentsSaving.push(attachment);
-		}
-		
-		this._runHandler("attachmentProgress", attachment, progress, error);
-		this._checkIfDone();
+			if(itemDoneEventsDispatched) {
+				// itemDone event has already fired, so we can fire attachmentProgress
+				// notifications
+				me._runHandler("attachmentProgress", attachment, progress, error);
+				me._checkIfDone();
+			} else {
+				// Defer until after we fire the itemDone event
+				deferredProgress.push([attachment, progress, error]);
+				attachmentsWithProgress.push(attachment);
+			}
+		});
 	},
 	
 	/**
 	 * Checks if saving done, and if so, fires done event
 	 */
 	"_checkIfDone":function() {
-		if(!this._attachmentsSaving.length) {
+		if(!this._savingItems && !this._savingAttachments.length && !this._currentState) {
 			this._runHandler("done", true);
 		}
 	},
@@ -1451,14 +1471,6 @@ Zotero.Translate.Base.prototype = {
 		if(this instanceof Zotero.Translate.Export || this instanceof Zotero.Translate.Import) {
 			src += "Zotero.Collection = function () {};"+
 			"Zotero.Collection.prototype.complete = function() { Zotero._collectionDone(this); };";
-			if (this instanceof Zotero.Translate.Import) {
-				// https://bugzilla.mozilla.org/show_bug.cgi?id=609143 - can't pass E4X to sandbox in Fx4
-				src += "Zotero.getXML = function() {"+
-					"var xml = Zotero._getXML();"+
-					"if(typeof xml == 'string') { return new XML(xml);}"+
-					"return xml;"+
-				"};";
-			}
 		}
 		
 		if(Zotero.isFx && !Zotero.isBookmarklet) {
@@ -1512,10 +1524,6 @@ Zotero.Translate.Base.prototype = {
 	 * @param {Integer} level Log level (1-5, higher numbers are higher priority)
 	 */
 	"_debug":function(string, level) {
-		if(typeof string === "object" && Zotero.isFx36 && !Zotero.isBookmarklet) {
-			string = new XPCSafeJSObjectWrapper(string);
-		}
-		
 		if(level !== undefined && typeof level !== "number") {
 			Zotero.debug("debug: level must be an integer");
 			return;
@@ -1646,7 +1654,9 @@ Zotero.Translate.Web.prototype._getTranslatorsGetPotentialTranslators = function
 Zotero.Translate.Web.prototype._getSandboxLocation = function() {
 	if(this._parentTranslator) {
 		return this._parentTranslator._sandboxLocation;
-	} else if("defaultView" in this.document) {
+	} else if(this.document.defaultView
+			&& (this.document.defaultView.toString().indexOf("Window") !== -1
+				|| this.document.defaultView.toString().indexOf("XrayWrapper") !== -1)) {
 		return this.document.defaultView;
 	} else {
 		return this.document.location.toString();
@@ -2076,7 +2086,8 @@ Zotero.Translate.Export.prototype._prepareTranslation = function() {
 	
 	// initialize ItemGetter
 	this._itemGetter = new Zotero.Translate.ItemGetter();
-	var getCollections = this.translator[0].configOptions.getCollections ? this.translator[0].configOptions.getCollections : false;
+	var configOptions = this._translatorInfo.configOptions || {},
+		getCollections = configOptions.getCollections || false;
 	if(this._collection) {
 		this._itemGetter.setCollection(this._collection, getCollections);
 		delete this._collection;
@@ -2097,12 +2108,12 @@ Zotero.Translate.Export.prototype._prepareTranslation = function() {
 	// callbacks to be consistent with import, but they are synchronous, so we ignore them)
 	if(!this.location) {
 		this._io = new Zotero.Translate.IO.String(null, this.path ? this.path : "");
-		this._io.init(this.translator[0].configOptions["dataMode"], function() {});
+		this._io.init(configOptions["dataMode"], function() {});
 	} else if(!Zotero.Translate.IO.Write) {
 		throw new Error("Writing to files is not supported in this build of Zotero.");
 	} else {
 		this._io = new Zotero.Translate.IO.Write(this.location);
-		this._io.init(this.translator[0].configOptions["dataMode"],
+		this._io.init(configOptions["dataMode"],
 			this._displayOptions["exportCharset"] ? this._displayOptions["exportCharset"] : null,
 			function() {});
 	}
@@ -2267,7 +2278,7 @@ Zotero.Translate.IO = {
 /**
  * @class Translate backend for translating from a string
  */
-Zotero.Translate.IO.String = function(string, uri, mode) {
+Zotero.Translate.IO.String = function(string, uri) {
 	if(string && typeof string === "string") {
 		this.string = string;
 	} else {
@@ -2284,7 +2295,7 @@ Zotero.Translate.IO.String.prototype = {
 		"read":"r",
 		"write":"r",
 		"setCharacterSet":"r",
-		"_getXML":"r"
+		"getXML":"r"
 	},
 	
 	"_initRDF":function(callback) {
@@ -2358,18 +2369,14 @@ Zotero.Translate.IO.String.prototype = {
 		this.contentLength = this.string.length;
 	},
 	
-	"_getXML":function() {
-		if(this._mode == "xml/dom") {
-			try {
-				var xml = Zotero.Translate.IO.parseDOMXML(this.string);
-			} catch(e) {
-				this._xmlInvalid = true;
-				throw e;
-			}
-			return (Zotero.isFx5 ? Zotero.Translate.SandboxManager.Fx5DOMWrapper(xml) : xml);
-		} else {
-			return this.string.replace(/<\?xml[^>]+\?>/, "");
+	"getXML":function() {
+		try {
+			var xml = Zotero.Translate.IO.parseDOMXML(this.string);
+		} catch(e) {
+			this._xmlInvalid = true;
+			throw e;
 		}
+		return (Zotero.isFx ? Zotero.Translate.DOMWrapper.wrap(xml) : xml);
 	},
 	
 	"init":function(newMode, callback) {
@@ -2377,8 +2384,10 @@ Zotero.Translate.IO.String.prototype = {
 		this._noCR = undefined;
 		
 		this._mode = newMode;
-		if(newMode && (Zotero.Translate.IO.rdfDataModes.indexOf(newMode) !== -1
-				|| newMode.substr(0, 3) === "xml") && this._xmlInvalid) {
+		if(newMode === "xml/e4x") {
+			throw "E4X is not supported";
+		} else if(newMode && (Zotero.Translate.IO.rdfDataModes.indexOf(newMode) !== -1
+				|| newMode.substr(0, 3) === "xml/dom") && this._xmlInvalid) {
 			throw "XML known invalid";
 		} else if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1) {
 			this._initRDF(callback);

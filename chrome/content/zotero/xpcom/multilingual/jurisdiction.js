@@ -1,8 +1,7 @@
 Zotero.Jurisdiction = new function () {
 	const JURISDICTION_FILE_NAME = "jurisdictions.json";
-	const JURISDICTION_DIR_NAME = "mlz-jurisdictions";
 
-	var _jsonFile;
+	var _jsonFileContents;
 	var _jurisdictionObject;
 	var _ios;
 
@@ -12,8 +11,8 @@ Zotero.Jurisdiction = new function () {
 	this.init = function() {
 		_ios = Components.classes["@mozilla.org/network/io-service;1"].
 				  getService(Components.interfaces.nsIIOService);
-		_jsonFile = _getJurisdictionFile();
-		_jurisdictionObject = JSON.parse(Zotero.File.getContents(_jsonFile));
+		_jsonFileContents = Zotero.File.getContentsFromURL("resource://zotero/schema/"+JURISDICTION_FILE_NAME);
+		_jurisdictionObject = JSON.parse(_jsonFileContents);
 	}
 
 	function getListData(keyAnchor) {
@@ -60,11 +59,5 @@ Zotero.Jurisdiction = new function () {
 			pos += -1;
 		}
 		return ret;
-	};
-	function _getJurisdictionFile() {
-		var jurisdictionFile = Zotero.getInstallDirectory();
-		jurisdictionFile.append(JURISDICTION_DIR_NAME);
-		jurisdictionFile.append(JURISDICTION_FILE_NAME);
-		return jurisdictionFile;
 	};
 };

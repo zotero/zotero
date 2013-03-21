@@ -110,7 +110,7 @@ Zotero_File_Exporter.prototype._exportDone = function(obj, worked) {
  * capabilities
  **/
 var Zotero_File_Interface = new function() {
-	var _importCollection, _unlock;
+	var _unlock;
 	
 	this.exportFile = exportFile;
 	this.exportCollection = exportCollection;
@@ -195,7 +195,17 @@ var Zotero_File_Interface = new function() {
 	/**
 	 * Creates Zotero.Translate instance and shows file picker for file import
 	 */
-	function importFile(file) {
+	function importFile(file, createNewCollection) {
+		if(createNewCollection === undefined) {
+			createNewCollection = true;
+		} else if(!createNewCollection) {
+			try {
+				if (!ZoteroPane.collectionsView.editable) {
+					ZoteroPane.collectionsView.selectLibrary(null);
+				}
+			} catch(e) {}
+		}
+		
 		var translation = new Zotero.Translate.Import();
 		if(!file) {
 			var translators = translation.getTranslators();
@@ -220,7 +230,9 @@ var Zotero_File_Interface = new function() {
 		
 		translation.setLocation(file);
 		// get translators again, bc now we can check against the file
-		translation.setHandler("translators", function(obj, item) { _importTranslatorsAvailable(obj, item) });
+		translation.setHandler("translators", function(obj, item) {
+			_importTranslatorsAvailable(obj, item, createNewCollection);
+		});
 		translators = translation.getTranslators();
 	}
 	
@@ -257,15 +269,23 @@ var Zotero_File_Interface = new function() {
 		
 		var translate = new Zotero.Translate.Import();
 		translate.setString(str);
+	
+		try {
+			if (!ZoteroPane.collectionsView.editable) {
+				ZoteroPane.collectionsView.selectLibrary(null);
+			}
+		} catch(e) {}
 		translate.setHandler("translators", function(obj, item) {
-			_importTranslatorsAvailable(obj, item) 
+			_importTranslatorsAvailable(obj, item, false); 
 		});
 		translators = translate.getTranslators();
 	}
 	
 	
-	function _importTranslatorsAvailable(translation, translators) {
+	function _importTranslatorsAvailable(translation, translators, createNewCollection) {
 		if(translators.length) {
+			var importCollection = null, libraryID = null;
+			
 			if(translation.location instanceof Components.interfaces.nsIFile) {
 				var leafName = translation.location.leafName;
 				var collectionName = (translation.location.isDirectory() || leafName.indexOf(".") === -1 ? leafName
@@ -281,14 +301,57 @@ var Zotero_File_Interface = new function() {
 				var collectionName = Zotero.getString("fileInterface.imported")+" "+(new Date()).toLocaleString();
 			}
 			
-			// create a new collection to take in imported items
-			_importCollection = Zotero.Collections.add(collectionName);
+			if(createNewCollection) {
+				// Create a new collection to take imported items
+				importCollection = Zotero.Collections.add(collectionName);
+			} else {
+				// Import into currently selected collection
+				try {
+					libraryID = ZoteroPane.getSelectedLibraryID();
+					importCollection = ZoteroPane.getSelectedCollection();
+				} catch(e) {}
+			}
 			
 			// import items
 			translation.setTranslator(translators[0]);
-			translation.setHandler("collectionDone", _importCollectionDone);
+			
+			if(importCollection) {
+				/*
+				 * Saves collections after they've been imported. Input item is of the 
+				 * type outputted by Zotero.Collection.toArray(); only receives top-level
+				 * collections
+				 */
+				translation.setHandler("collectionDone", function(obj, collection) {
+					collection.parent = importCollection.id;
+					collection.save();
+				});
+			}
+			
 			translation.setHandler("itemDone", Zotero_File_Interface.updateProgress);
-			translation.setHandler("done", _importDone);
+			
+			/*
+			 * closes items imported indicator
+			 */
+			translation.setHandler("done", function(obj, worked) {
+				// add items to import collection
+				if(importCollection) {
+					importCollection.addItems([item.id for each(item in obj.newItems)]);
+				}
+				
+				Zotero.DB.commitTransaction();
+				
+				Zotero_File_Interface.Progress.close();
+				Zotero.UnresponsiveScriptIndicator.enable();
+				
+				if (worked) {
+					if(importCollection) {
+						Zotero.Notifier.trigger('refresh', 'collection', importCollection.id);
+					}
+				} else {
+					if(importCollection) importCollection.erase();
+					window.alert(Zotero.getString("fileInterface.importError"));
+				}
+			});
 			Zotero.UnresponsiveScriptIndicator.disable();
 			
 			// show progress indicator
@@ -298,12 +361,9 @@ var Zotero_File_Interface = new function() {
 			
 			window.setTimeout(function() {
 				Zotero.DB.beginTransaction();
-				translation.translate();
+				translation.translate(libraryID);
 			}, 0);
 		} else {
-			// TODO: localize and remove fileInterface.fileFormatUnsupported string
-			var unsupportedFormat = "The selected file is not in a supported format.";
-			var viewSupportedFormats = "View Supported Formats...";
 			
 			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 									.getService(Components.interfaces.nsIPromptService);
@@ -312,46 +372,15 @@ var Zotero_File_Interface = new function() {
 			var index = ps.confirmEx(
 				null,
 				"",
-				unsupportedFormat,
+				Zotero.getString("fileInterface.unsupportedFormat"),
 				buttonFlags,
 				null,
-				viewSupportedFormats,
+				Zotero.getString("fileInterface.viewSupportedFormats"),
 				null, null, {}
 			);
 			if (index == 1) {
 				ZoteroPane_Local.loadURI("http://zotero.org/support/kb/importing");
 			}
-		}
-	}
-	
-	/*
-	 * Saves collections after they've been imported. Input item is of the type
-	 * outputted by Zotero.Collection.toArray(); only receives top-level
-	 * collections
-	 */
-	function _importCollectionDone(obj, collection) {
-		collection.parent = _importCollection.id;
-		collection.save();
-	}
-	
-	/*
-	 * closes items imported indicator
-	 */
-	function _importDone(obj, worked) {
-		// add items to import collection
-		_importCollection.addItems([item.id for each(item in obj.newItems)]);
-		
-		Zotero.DB.commitTransaction();
-		
-		Zotero_File_Interface.Progress.close();
-		Zotero.UnresponsiveScriptIndicator.enable();
-		
-		if (worked) {
-			Zotero.Notifier.trigger('refresh', 'collection', _importCollection.id);
-		}
-		else {
-			_importCollection.erase();
-			window.alert(Zotero.getString("fileInterface.importError"));
 		}
 	}
 	

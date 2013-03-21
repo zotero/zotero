@@ -124,6 +124,18 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 		return str;
 	}
 	
+	function sortByValue(a, b) {
+		if((a.value === null && b.value !== null)
+			|| (a.value === undefined && b.value !== undefined)
+			|| a.value < b.value) {
+			return -1;
+		}
+		
+		if(a.value === b.value) return 0;
+		
+		return 1;
+	}
+	
 	/**
 	 * @param {Function} compareRows  Comparison function, if not exact match
 	 * @param {Boolean} reprocessMatches  Compare every row against every other,
@@ -181,8 +193,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
 				+ "WHERE libraryID=? AND itemTypeID=? AND fieldID=? "
-				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
-				+ "ORDER BY value";
+				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
 	var rows = Zotero.DB.query(
 		sql,
 		[
@@ -194,25 +205,28 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	var isbnCache = {};
 	if (rows) {
 		for each(var row in rows) {
-			isbnCache[row.itemID] = (row.value+'').replace(/[^\dX]+/ig, '').toUpperCase(); //ignore formatting
+			row.value = (row.value+'').replace(/[^\dX]+/ig, '').toUpperCase(); //ignore formatting
+			isbnCache[row.itemID] = row.value;
 		}
+		rows.sort(sortByValue);
+		processRows();
 	}
-	processRows();
 	
 	// DOI
 	var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND fieldID=? AND REGEXP('^10\.', value) "
-				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
-				+ "ORDER BY value";
+				+ "WHERE libraryID=? AND fieldID=? AND REGEXP('^10\\.', value) "
+				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
 	var rows = Zotero.DB.query(sql, [this._libraryID, Zotero.ItemFields.getID('DOI')]);
 	var doiCache = {};
 	if (rows) {
 		for each(var row in rows) {
-			doiCache[row.itemID] = row.value.trim();
+			row.value = (row.value+'').trim().toUpperCase(); //DOIs are case insensitive
+			doiCache[row.itemID] = row.value;
 		}
+		rows.sort(sortByValue);
+		processRows();
 	}
-	processRows();
 	
 	// For legal types we ignore the title but we're fussy about other stuff
 	//
@@ -278,104 +292,102 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 				+ "GROUP BY itemID) "
 			+ "ORDER BY checkvalue COLLATE locale";
 	var rows = Zotero.DB.query(sql, [this._libraryID]);
-
-	//normalize all values ahead of time
-	rows = rows.map(function(row) {
-							row.value = normalizeString(row.value);
-							return row;
-						});
-	//sort rows by normalized values
-	rows = rows.sort(function(a, b) {
-							if(a.value === b.value) return 0;
-							if(a.value < b.value) return -1;
-							return 1;
-						});
-	processRows(function (a, b) {
-		var aTitle = a.value;
-		var bTitle = b.value;
+	if(rows) {
+		//normalize all values ahead of time
+		rows = rows.map(function(row) {
+			row.value = normalizeString(row.value);
+			return row;
+		});
+		//sort rows by normalized values
+		rows.sort(sortByValue);
 		
-		// If we stripped one of the strings completely, we can't compare them
-		if (aTitle.length == 0 || bTitle.length == 0) {
-			return -1;
-		}
-		
-		if (aTitle !== bTitle) {
-			return -1;	//everything is sorted by title, so if this mismatches, everything following will too
-		}
-		
-		// If both items have a DOI and they don't match, it's not a dupe
-		if (typeof doiCache[a.itemID] != 'undefined'
-				&& typeof doiCache[b.itemID] != 'undefined'
-				&& doiCache[a.itemID] != doiCache[b.itemID]) {
-			return 0;
-		}
-		
-		// If both items have an ISBN and they don't match, it's not a dupe
-		if (typeof isbnCache[a.itemID] != 'undefined'
-				&& typeof isbnCache[b.itemID] != 'undefined'
-				&& isbnCache[a.itemID] != isbnCache[b.itemID]) {
-			return 0;
-		}
-		
-		// If both items have a year and they're off by more than one, it's not a dupe
-		if (typeof yearCache[a.itemID] != 'undefined'
-				&& typeof yearCache[b.itemID] != 'undefined'
-				&& Math.abs(yearCache[a.itemID] - yearCache[b.itemID]) > 1) {
-			return 0;
-		}
-		
-		// Check for at least one match on last name + first initial of first name
-		var aCreatorRows, bCreatorRows;
-		if (typeof creatorRowsCache[a.itemID] != 'undefined') {
-			aCreatorRows = creatorRowsCache[a.itemID];
-		}
-		else {
-			var sql = "SELECT lastName, firstName, fieldMode FROM itemCreators "
-						+ "JOIN creators USING (creatorID) "
-						+ "JOIN creatorData USING (creatorDataID) "
-						+ "WHERE itemID=? ORDER BY orderIndex LIMIT 10";
-			aCreatorRows = Zotero.DB.query(sql, a.itemID);
-			creatorRowsCache[a.itemID] = aCreatorRows;
-		}
-		
-		// Check for at least one match on last name + first initial of first name
-		if (typeof creatorRowsCache[b.itemID] != 'undefined') {
-			bCreatorRows = creatorRowsCache[b.itemID];
-		}
-		else {
-			var sql = "SELECT lastName, firstName, fieldMode FROM itemCreators "
-						+ "JOIN creators USING (creatorID) "
-						+ "JOIN creatorData USING (creatorDataID) "
-						+ "WHERE itemID=? ORDER BY orderIndex LIMIT 10";
-			bCreatorRows = Zotero.DB.query(sql, b.itemID);
-			creatorRowsCache[b.itemID] = bCreatorRows;
-		}
-		
-		// Match if no creators
-		if (!aCreatorRows && !bCreatorRows) {
-			return 1;
-		}
-		
-		if (!aCreatorRows || !bCreatorRows) {
-			return 0;
-		}
-		
-		for each(var aCreatorRow in aCreatorRows) {
-			var aLastName = normalizeString(aCreatorRow.lastName);
-			var aFirstInitial = aCreatorRow.fieldMode == 0 ? normalizeString(aCreatorRow.firstName).charAt(0) : false;
+		processRows(function (a, b) {
+			var aTitle = a.value;
+			var bTitle = b.value;
 			
-			for each(var bCreatorRow in bCreatorRows) {
-				var bLastName = normalizeString(bCreatorRow.lastName);
-				var bFirstInitial = bCreatorRow.fieldMode == 0 ? normalizeString(bCreatorRow.firstName).charAt(0) : false;
+			// If we stripped one of the strings completely, we can't compare them
+			if(!aTitle || !bTitle) {
+				return -1;
+			}
+			
+			if (aTitle !== bTitle) {
+				return -1;	//everything is sorted by title, so if this mismatches, everything following will too
+			}
+			
+			// If both items have a DOI and they don't match, it's not a dupe
+			if (typeof doiCache[a.itemID] != 'undefined'
+					&& typeof doiCache[b.itemID] != 'undefined'
+					&& doiCache[a.itemID] != doiCache[b.itemID]) {
+				return 0;
+			}
+			
+			// If both items have an ISBN and they don't match, it's not a dupe
+			if (typeof isbnCache[a.itemID] != 'undefined'
+					&& typeof isbnCache[b.itemID] != 'undefined'
+					&& isbnCache[a.itemID] != isbnCache[b.itemID]) {
+				return 0;
+			}
+			
+			// If both items have a year and they're off by more than one, it's not a dupe
+			if (typeof yearCache[a.itemID] != 'undefined'
+					&& typeof yearCache[b.itemID] != 'undefined'
+					&& Math.abs(yearCache[a.itemID] - yearCache[b.itemID]) > 1) {
+				return 0;
+			}
+			
+			// Check for at least one match on last name + first initial of first name
+			var aCreatorRows, bCreatorRows;
+			if (typeof creatorRowsCache[a.itemID] != 'undefined') {
+				aCreatorRows = creatorRowsCache[a.itemID];
+			}
+			else {
+				var sql = "SELECT lastName, firstName, fieldMode FROM itemCreators "
+							+ "JOIN creators USING (creatorID) "
+							+ "JOIN creatorData USING (creatorDataID) "
+							+ "WHERE itemID=? ORDER BY orderIndex LIMIT 10";
+				aCreatorRows = Zotero.DB.query(sql, a.itemID);
+				creatorRowsCache[a.itemID] = aCreatorRows;
+			}
+			
+			// Check for at least one match on last name + first initial of first name
+			if (typeof creatorRowsCache[b.itemID] != 'undefined') {
+				bCreatorRows = creatorRowsCache[b.itemID];
+			}
+			else {
+				var sql = "SELECT lastName, firstName, fieldMode FROM itemCreators "
+							+ "JOIN creators USING (creatorID) "
+							+ "JOIN creatorData USING (creatorDataID) "
+							+ "WHERE itemID=? ORDER BY orderIndex LIMIT 10";
+				bCreatorRows = Zotero.DB.query(sql, b.itemID);
+				creatorRowsCache[b.itemID] = bCreatorRows;
+			}
+			
+			// Match if no creators
+			if (!aCreatorRows && !bCreatorRows) {
+				return 1;
+			}
+			
+			if (!aCreatorRows || !bCreatorRows) {
+				return 0;
+			}
+			
+			for each(var aCreatorRow in aCreatorRows) {
+				var aLastName = normalizeString(aCreatorRow.lastName);
+				var aFirstInitial = aCreatorRow.fieldMode == 0 ? normalizeString(aCreatorRow.firstName).charAt(0) : false;
 				
-				if (aLastName === bLastName && aFirstInitial === bFirstInitial) {
-					return 1;
+				for each(var bCreatorRow in bCreatorRows) {
+					var bLastName = normalizeString(bCreatorRow.lastName);
+					var bFirstInitial = bCreatorRow.fieldMode == 0 ? normalizeString(bCreatorRow.firstName).charAt(0) : false;
+					
+					if (aLastName === bLastName && aFirstInitial === bFirstInitial) {
+						return 1;
+					}
 				}
 			}
-		}
-		
-		return 0;
-	}, true);
+			
+			return 0;
+		}, true);
+	}
 	
 	// Match on exact fields
 	/*var fields = [''];

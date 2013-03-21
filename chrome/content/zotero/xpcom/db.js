@@ -402,7 +402,8 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 	}
 	else {
 		if (checkParams && numParams > 0) {
-			throw ("No parameters provided for query containing placeholders");
+			throw ("No parameters provided for query containing placeholders "
+				+ "[QUERY: " + sql + "]");
 		}
 	}
 	return statement;
@@ -1244,16 +1245,17 @@ Zotero.DBConnection.prototype._debug = function (str, level) {
 
 Zotero.DBConnection.prototype._getTypedValue = function (statement, i) {
 	var type = statement.getTypeOfIndex(i);
+	// For performance, we hard-code these constants
 	switch (type) {
-		case statement.VALUE_TYPE_INTEGER:
+		case 1: //VALUE_TYPE_INTEGER
 			return statement.getInt64(i);
-		case statement.VALUE_TYPE_TEXT:
+		case 3: //VALUE_TYPE_TEXT
 			return statement.getUTF8String(i);
-		case statement.VALUE_TYPE_NULL:
+		case 0: //VALUE_TYPE_NULL
 			return null;
-		case statement.VALUE_TYPE_FLOAT:
+		case 2: //VALUE_TYPE_FLOAT
 			return statement.getDouble(i);
-		case statement.VALUE_TYPE_BLOB:
+		case 4: //VALUE_TYPE_BLOB
 			return statement.getBlob(i, {});
 	}
 }
