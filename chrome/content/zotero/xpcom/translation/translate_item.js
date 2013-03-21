@@ -291,7 +291,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		var IOService = Components.classes["@mozilla.org/network/io-service;1"].
 						getService(Components.interfaces.nsIIOService);
 		try {
-			var uri = IOService.newURI(path, "", this._baseURI);
+			var uri = IOService.newURI(Zotero.File.encodeFilePath(path), "", this._baseURI);
 		}
 		catch (e) {
 			var msg = "Error parsing attachment path: " + path;
