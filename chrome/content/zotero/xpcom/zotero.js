@@ -1029,7 +1029,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	}
 	
 	
-	function chooseZoteroDirectory(forceRestartNow, useProfileDir) {
+	function chooseZoteroDirectory(forceQuitNow, useProfileDir, moreInfoCallback) {
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 			.getService(Components.interfaces.nsIWindowMediator);
 		var win = wm.getMostRecentWindow('navigator:browser');
@@ -1057,27 +1057,54 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 						// Warn if non-empty and no zotero.sqlite
 						if (!dbfile.exists()) {
 							var buttonFlags = ps.STD_YES_NO_BUTTONS;
+							if (moreInfoCallback) {
+								buttonFlags += ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+							}
 							var index = ps.confirmEx(null,
 								Zotero.getString('dataDir.selectedDirNonEmpty.title'),
 								Zotero.getString('dataDir.selectedDirNonEmpty.text'),
-								buttonFlags, null, null, null, null, {});
+								buttonFlags,
+								null,
+								null,
+								moreInfoCallback ? Zotero.getString('general.help') : null,
+								null, {});
 							
 							// Not OK -- return to file picker
 							if (index == 1) {
 								continue;
 							}
+							else if (index == 2) {
+								setTimeout(function () {
+									moreInfoCallback();
+								}, 1);
+								return false;
+							}
 						}
 					}
 					else {
 						var buttonFlags = ps.STD_YES_NO_BUTTONS;
+						if (moreInfoCallback) {
+							buttonFlags += ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+						}
 						var index = ps.confirmEx(null,
 							Zotero.getString('dataDir.selectedDirEmpty.title'),
-							Zotero.getString('dataDir.selectedDirEmpty.text'),
-							buttonFlags, null, null, null, null, {});
+							Zotero.getString('dataDir.selectedDirEmpty.text', Zotero.appName) + '\n\n'
+								+ Zotero.getString('dataDir.selectedDirEmpty.useNewDir'),
+							buttonFlags,
+							null,
+							null,
+							moreInfoCallback ? Zotero.getString('general.moreInformation') : null,
+							null, {});
 						
 						// Not OK -- return to file picker
 						if (index == 1) {
 							continue;
+						}
+						else if (index == 2) {
+							setTimeout(function () {
+								moreInfoCallback();
+							}, 1);
+							return false;
 						}
 					}
 					
@@ -1096,23 +1123,23 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		}
 		
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING);
-		if (!forceRestartNow) {
+		if (!forceQuitNow) {
 			buttonFlags += (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
 		}
-		var app = Zotero.isStandalone ? Zotero.getString('app.standalone') : Zotero.getString('app.firefox');
+		var app = Zotero.appName;
 		var index = ps.confirmEx(null,
 			Zotero.getString('general.restartRequired'),
-			Zotero.getString('general.restartRequiredForChange', app),
+			Zotero.getString('general.restartRequiredForChange', app)
+				+ "\n\n" + Zotero.getString('dataDir.moveFilesToNewLocation', app),
 			buttonFlags,
-			Zotero.getString('general.restartNow'),
-			forceRestartNow ? null : Zotero.getString('general.restartLater'),
+			Zotero.getString('general.quitApp', app),
+			forceQuitNow ? null : Zotero.getString('general.restartLater'),
 			null, null, {});
 		
 		if (index == 0) {
 			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
 					.getService(Components.interfaces.nsIAppStartup);
-			appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit
-				| Components.interfaces.nsIAppStartup.eRestart);
+			appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
 		}
 		
 		return useProfileDir ? true : file;

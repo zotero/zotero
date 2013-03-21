@@ -209,13 +209,13 @@
 						</hbox>
 					</hbox>
 					<toolbarbutton id="zotero-tb-sync-error" hidden="true"/>
-					<!-- We put this here, but it's used for all sync errors -->
-					<panel id="zotero-sync-error-panel" type="arrow">
-						<vbox>
-							<hbox id="zotero-sync-error-panel-content"/>
-							<hbox id="zotero-sync-error-panel-buttons"/>
-						</vbox>
-					</panel>
+					
+					<!--
+						We put this here, but it can be used wherever
+						Zotero.Sync.Runner.updateErrorPanel() puts it
+					-->
+					<panel id="zotero-sync-error-panel" type="arrow"/>
+					
 					<toolbarbutton id="zotero-tb-sync" class="zotero-tb-button" tooltip="_child"
 							oncommand="Zotero.Sync.Server.canAutoResetClient = true; Zotero.Sync.Server.manualSyncRequired = false; Zotero.Sync.Runner.sync()">
 						<tooltip
@@ -305,15 +305,12 @@
 						ondragenter="return ZoteroPane_Local.collectionsView.onDragEnter(event)"
 						ondragover="return ZoteroPane_Local.collectionsView.onDragOver(event)"
 						ondrop="return ZoteroPane_Local.collectionsView.onDrop(event)"
-						seltype="single" flex="1">
+						seltype="cell" flex="1">
 						<treecols>
 							<treecol
 								id="zotero-collections-name-column"
 								flex="1"
 								primary="true"
-								hideheader="true"/>
-							<treecol
-								id="zotero-collections-sync-status-column"
 								hideheader="true"/>
 						</treecols>
 						<treechildren/>

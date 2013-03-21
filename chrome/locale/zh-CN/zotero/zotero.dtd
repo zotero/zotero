@@ -5,7 +5,7 @@
 <!ENTITY zotero.general.edit "编辑">
 <!ENTITY zotero.general.delete "删除">
 
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
+<!ENTITY zotero.errorReport.title "Zotero 错误报告">
 <!ENTITY zotero.errorReport.unrelatedMessages "错误日志里可能会包含一些与Zotero无关的信息.">
 <!ENTITY zotero.errorReport.submissionInProgress "正在提交错误报告, 请等待.">
 <!ENTITY zotero.errorReport.submitted "错误报告已经提交.">
@@ -13,7 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums "请到Zotero论坛(forums.zotero.org)发布新帖, 内容包括: 报告ID, 问题描述以任何必要的步骤以重现该问题.">
 <!ENTITY zotero.errorReport.notReviewed "除非在此论坛中提交，错误报告一般不会被看到.">
 
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.title "Zotero 升级向导">
 <!ENTITY zotero.upgrade.newVersionInstalled "您已经安装了一个新版本的Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "为了使用这个新版本您必须升级您的数据库.">
 <!ENTITY zotero.upgrade.autoBackup "在任何实质性的改动前, 您已有的数据库会被自动备份.">
@@ -58,22 +58,22 @@
 <!ENTITY zotero.items.rights_column "版权">
 <!ENTITY zotero.items.dateAdded_column "添加日期">
 <!ENTITY zotero.items.dateModified_column "修改日期">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archive">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.place_column "Place">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Edition">
-<!ENTITY zotero.items.pages_column "Pages">
-<!ENTITY zotero.items.issue_column "Issue">
-<!ENTITY zotero.items.series_column "Series">
-<!ENTITY zotero.items.seriesTitle_column "Series Title">
-<!ENTITY zotero.items.court_column "Court">
-<!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "System">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.extra_column "其它">
+<!ENTITY zotero.items.archive_column "归档">
+<!ENTITY zotero.items.archiveLocation_column "归档位置">
+<!ENTITY zotero.items.place_column "地点">
+<!ENTITY zotero.items.volume_column "卷">
+<!ENTITY zotero.items.edition_column "版">
+<!ENTITY zotero.items.pages_column "页">
+<!ENTITY zotero.items.issue_column "期">
+<!ENTITY zotero.items.series_column "系列">
+<!ENTITY zotero.items.seriesTitle_column "系列标题">
+<!ENTITY zotero.items.court_column "法庭">
+<!ENTITY zotero.items.medium_column "媒介/格式">
+<!ENTITY zotero.items.genre_column "流派">
+<!ENTITY zotero.items.system_column "系统">
+<!ENTITY zotero.items.moreColumns.label "更多列">
+<!ENTITY zotero.items.restoreColumnOrder.label "恢复列顺序">
 
 <!ENTITY zotero.items.menu.showInLibrary "在文献库中显示">
 <!ENTITY zotero.items.menu.attach.note "添加笔记">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.item.textTransform "格式变换">
 <!ENTITY zotero.item.textTransform.titlecase "标题大写">
 <!ENTITY zotero.item.textTransform.sentencecase "句首大写">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
+<!ENTITY zotero.item.creatorTransform.nameSwap "交换 名和姓">
 
 <!ENTITY zotero.toolbar.newNote "新建笔记">
 <!ENTITY zotero.toolbar.note.standalone "新建独立笔记">
@@ -139,18 +139,18 @@
 <!ENTITY zotero.tagSelector.selectVisible "选择可见的">
 <!ENTITY zotero.tagSelector.clearVisible "取消可见的选择">
 <!ENTITY zotero.tagSelector.clearAll "取消全部选择">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
+<!ENTITY zotero.tagSelector.assignColor "指派颜色">
 <!ENTITY zotero.tagSelector.renameTag "重命名标签...">
 <!ENTITY zotero.tagSelector.deleteTag "删除标签...">
 
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
-<!ENTITY zotero.tagColorChooser.color "Color:">
-<!ENTITY zotero.tagColorChooser.position "Position:">
-<!ENTITY zotero.tagColorChooser.setColor "Set Color">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.title "选择标签颜色和位置">
+<!ENTITY zotero.tagColorChooser.color "颜色:">
+<!ENTITY zotero.tagColorChooser.position "位置:">
+<!ENTITY zotero.tagColorChooser.setColor "设置颜色">
+<!ENTITY zotero.tagColorChooser.removeColor "删除颜色">
 
 <!ENTITY zotero.lookup.description "在下面方框中输入ISBN, DOI或PMID来检索文献">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.button.search "检索">
 
 <!ENTITY zotero.selectitems.title "选择条目">
 <!ENTITY zotero.selectitems.intro.label "选择要添加至文献库的条目">
@@ -235,9 +235,9 @@
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "未勾选的标签将不会被保存.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "所有条目中的标签将被删除.">
 
-<!ENTITY zotero.merge.title "Conflict Resolution">
-<!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.title "冲突解决">
+<!ENTITY zotero.merge.of "从">
+<!ENTITY zotero.merge.deleted "已删除">
 
 <!ENTITY zotero.proxy.recognized.title "代理确认">
 <!ENTITY zotero.proxy.recognized.warning "仅添加来自您的图书馆, 学校或公司的链接的代理">

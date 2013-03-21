@@ -59,19 +59,19 @@
 <!ENTITY zotero.items.dateAdded_column "Eklendiği Tarih">
 <!ENTITY zotero.items.dateModified_column "Değiştirildiği Tarih">
 <!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archive_column "Arşiv">
 <!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
 <!ENTITY zotero.items.place_column "Place">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Edition">
-<!ENTITY zotero.items.pages_column "Pages">
-<!ENTITY zotero.items.issue_column "Issue">
-<!ENTITY zotero.items.series_column "Series">
-<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.volume_column "Cilt">
+<!ENTITY zotero.items.edition_column "Baskı">
+<!ENTITY zotero.items.pages_column "Sayfalar">
+<!ENTITY zotero.items.issue_column "Sayı">
+<!ENTITY zotero.items.series_column "Seriler">
+<!ENTITY zotero.items.seriesTitle_column "Seri Başlığı">
 <!ENTITY zotero.items.court_column "Court">
 <!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.genre_column "Tür">
+<!ENTITY zotero.items.system_column "Sistem">
 <!ENTITY zotero.items.moreColumns.label "More Columns">
 <!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 
@@ -144,13 +144,13 @@
 <!ENTITY zotero.tagSelector.deleteTag "Etiketi Sil...">
 
 <!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
-<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.color "Renk">
 <!ENTITY zotero.tagColorChooser.position "Position:">
 <!ENTITY zotero.tagColorChooser.setColor "Set Color">
 <!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
 
 <!ENTITY zotero.lookup.description "ISBN, DOI veya PMID'yi girerek aşağıdaki kutuda ara.">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.button.search "Ara">
 
 <!ENTITY zotero.selectitems.title "Eser Seç">
 <!ENTITY zotero.selectitems.intro.label "Kitaplığınıza eklemek istediğiniz eserleri seçiniz">
@@ -160,7 +160,7 @@
 <!ENTITY zotero.bibliography.title "Bibliyografya Oluştur">
 <!ENTITY zotero.bibliography.style.label "Kaynakça Biçimi:">
 <!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.bibliography "Bibliyografya">
 <!ENTITY zotero.bibliography.outputMethod "Output Method:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF olarak Kaydet">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML olarak Kaydet">
@@ -237,7 +237,7 @@
 
 <!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.deleted "Silindi">
 
 <!ENTITY zotero.proxy.recognized.title "Vekil Sunucu Onaylandı">
 <!ENTITY zotero.proxy.recognized.warning "Yalnızca kütüphane, okul veya kurumsal web siteniz tarafından bağlantı verilen vekil sunucuları ekleyiniz.">

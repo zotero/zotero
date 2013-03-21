@@ -59,11 +59,7 @@ var Zotero_Preferences = {
 		}
 	},
 	
-	openHelpLink: function () {
-		var url = "http://www.zotero.org/support/preferences/";
-		var helpTopic = document.getElementsByTagName("prefwindow")[0].currentPane.helpTopic;
-		url += helpTopic;
-		
+	openURL: function (url, windowName) {
 		// Non-instantApply prefwindows are usually modal, so we can't open in the topmost window,
 		// since it's probably behind the window
 		var instantApply = Zotero.Prefs.get("browser.preferences.instantApply", true);
@@ -88,12 +84,20 @@ var Zotero_Preferences = {
 				var win = ww.openWindow(
 					window,
 					url,
-					"helpWindow",
+					windowName ? windowName : null,
 					"chrome=no,menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes",
 					null
 				);
 			}
 		}
+	},
+	
+	openHelpLink: function () {
+		var url = "http://www.zotero.org/support/preferences/";
+		var helpTopic = document.getElementsByTagName("prefwindow")[0].currentPane.helpTopic;
+		url += helpTopic;
+		
+		this.openURL(url, "helpWindow");
 	},
 	
 	

@@ -76,6 +76,7 @@
 		<!-- Unclear why this is necessary to prevent the menulist from getting cut off -->
 		<separator/>
 		<separator/>
+		<separator/>
 		
 		<script src="preferences_export.js" type="application/javascript;version=1.8"/>
 	</prefpane>
