@@ -110,6 +110,8 @@
 				</rows>
 			</grid>
 		</groupbox>
+		
+		<separator/>
 	</prefpane>
 	
 	<script src="preferences_search.js" type="application/javascript;version=1.8"/>
