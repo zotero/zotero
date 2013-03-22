@@ -32,9 +32,11 @@
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<prefwindow id="zotero-prefs">
 		<prefpane id="zotero-prefpane-proxies"
-							label="&zotero.preferences.prefpane.proxies;"
-							image="chrome://zotero/skin/prefs-proxies.png" position="6"
-							helpTopic="proxies">
+				label="&zotero.preferences.prefpane.proxies;"
+				image="chrome://zotero/skin/prefs-proxies.png"
+				onpaneload="Zotero_Preferences.Proxies.init()"
+				position="6"
+				helpTopic="proxies">
 			<description width="45em" style="font-size: 12px">
 				&zotero.preferences.proxies.desc_before_link;
 				<label class="zotero-text-link" href="http://www.zotero.org/support/proxies"
