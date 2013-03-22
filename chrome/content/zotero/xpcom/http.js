@@ -41,6 +41,7 @@ Zotero.HTTP = new function() {
 	 *         <li>debug - Log response text and status code</li>
 	 *         <li>dontCache - If set, specifies that the request should not be fulfilled from the cache</li>
 	 *         <li>headers - HTTP headers to include in the request</li>
+	 *         <li>requestObserver - Callback to receive XMLHttpRequest after open()</li>
 	 *         <li>responseType - The type of the response. See XHR 2 documentation for legal values</li>
 	 *         <li>responseCharset - The charset the response should be interpreted as</li>
 	 *         <li>successCodes - HTTP status codes that are considered successful</li>
@@ -86,11 +87,18 @@ Zotero.HTTP = new function() {
 			});
 		}
 		
+		var deferred = Q.defer();
+		
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 					.createInstance();
 		// Prevent certificate/authentication dialogs from popping up
 		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open(method, url, true);
+		
+		// Pass the request to a callback
+		if (options && options.requestObserver) {
+			options.requestObserver(xmlhttp);
+		}
 		
 		if (method == 'PUT') {
 			// Some servers (e.g., Jungle Disk DAV) return a 200 response code
@@ -127,8 +135,6 @@ Zotero.HTTP = new function() {
 		for (var header in headers) {
 			xmlhttp.setRequestHeader(header, headers[header]);
 		}
-		
-		var deferred = Q.defer();
 		
 		xmlhttp.onloadend = function() {
 			var status = xmlhttp.status;
