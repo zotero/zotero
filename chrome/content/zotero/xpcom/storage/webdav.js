@@ -43,8 +43,6 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	 * @param	{Function}		callback		Callback f(item, mdate)
 	 */
 	function getStorageModificationTime(item, request) {
-		var funcName = "Zotero.Sync.Storage.WebDAV.getStorageModificationTime()";
-		
 		var uri = getItemPropertyURI(item);
 		
 		return Zotero.HTTP.promise("GET", uri,
@@ -118,7 +116,8 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			})
 			.catch(function (e) {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					throw new Error("Unexpected status code " + e.status + " in " + funcName);
+					throw new Error("HTTP " + e.status + " error from WebDAV "
+						+ "server for GET request");
 				}
 				throw e;
 			});
@@ -146,8 +145,9 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			.then(function (req) {
 				return { mtime: mtime, hash: hash };
 			})
-			.fail(function (e) {
-				throw new Error("Unexpected status code " + e.xmlhttp.status);
+			.catch(function (e) {
+				throw new Error("HTTP " + e.xmlhttp.status
+					+ " from WebDAV server for HTTP PUT");
 			});
 	};
 	
@@ -325,8 +325,9 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			
 			default:
 				Zotero.debug(response);
-				throw ("Unexpected file upload status " + status +
-					" in Zotero.Sync.Storage.WebDAV.onUploadComplete()");
+				throw (Zotero.getString('sync.storage.error.fileUploadFailed') +
+					" " + Zotero.getString('sync.storage.error.checkFileSyncSettings')
+					+ "\n\n" + "HTTP " + status);
 		}
 		
 		return setStorageModificationTime(item)
@@ -884,9 +885,8 @@ Zotero.Sync.Storage.WebDAV = (function () {
 								return;
 							}
 							else if (status != 200) {
-								var msg = "Unexpected status code " + status
-									+ " for request " + data.request.name
-									+ " in Zotero.Sync.Storage.WebDAV.downloadFile()";
+								var msg = "HTTP " + status + " from WebDAV server "
+									+ " while downloading file";
 								Zotero.debug(msg, 1);
 								Components.utils.reportError(msg);
 								deferred.reject(Zotero.Sync.Storage.WebDAV.defaultError);
@@ -992,8 +992,8 @@ Zotero.Sync.Storage.WebDAV = (function () {
 						_cachedCredentials = false;
 					}
 					else {
-						throw("Unexpected status code " + e.status + " getting "
-							+ "WebDAV last sync time");
+						throw("HTTP " + e.status + " error from WebDAV server "
+							+ "for GET request");
 					}
 					
 					return Q.reject(e);
@@ -1039,8 +1039,9 @@ Zotero.Sync.Storage.WebDAV = (function () {
 						}
 					});
 			})
-			.fail(function (e) {
-				var msg = "Unexpected error code " + req.status + " uploading storage success file";
+			.catch(function (e) {
+				var msg = "HTTP " + req.status + " error from WebDAV server "
+					+ "for PUT request";
 				Zotero.debug(msg, 2);
 				Components.utils.reportError(msg);
 				throw Zotero.Sync.Storage.WebDAV.defaultError;
@@ -1063,8 +1064,8 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		})
 		.fail(function (e) {
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-				var msg = "Unexpected status code " + e.status + " "
-					+ "for OPTIONS request caching WebDAV credentials";
+				var msg = "HTTP " + e.status + " error from WebDAV server "
+					+ "for OPTIONS request";
 				Zotero.debug(msg, 1);
 				Components.utils.reportError(msg);
 				throw new Error(Zotero.Sync.Storage.WebDAV.defaultErrorRestart);
