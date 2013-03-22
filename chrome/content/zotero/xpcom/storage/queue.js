@@ -104,9 +104,11 @@ Zotero.Sync.Storage.Queue.prototype.__defineSetter__('finishedRequests', functio
 		var localChanges = this._localChanges;
 		var remoteChanges = this._remoteChanges;
 		var conflicts = this._conflicts.concat();
+		var deferred = this._deferred;
 		this._localChanges = false;
 		this._remoteChanges = false;
 		this._conflicts = [];
+		this._deferred = null;
 		
 		if (!this._error) {
 			Zotero.debug("Resolving promise for queue " + this.name);
@@ -114,7 +116,7 @@ Zotero.Sync.Storage.Queue.prototype.__defineSetter__('finishedRequests', functio
 			Zotero.debug(this._remoteChanges);
 			Zotero.debug(this._conflicts);
 			
-			this._deferred.resolve({
+			deferred.resolve({
 				libraryID: this.libraryID,
 				type: this.type,
 				localChanges: localChanges,
@@ -128,7 +130,7 @@ Zotero.Sync.Storage.Queue.prototype.__defineSetter__('finishedRequests', functio
 			this._error = false;
 			e.libraryID = this.libraryID;
 			e.type = this.type;
-			this._deferred.reject(e);
+			deferred.reject(e);
 		}
 		
 		return;
@@ -368,7 +370,12 @@ Zotero.Sync.Storage.Queue.prototype.addConflict = function (requestName, localDa
 
 Zotero.Sync.Storage.Queue.prototype.error = function (e) {
 	if (!this._error) {
-		this._error = e;
+		if (this.isRunning()) {
+			this._error = e;
+		}
+		else {
+			Zotero.debug("Queue " + this.name + " was no longer running -- not assigning error", 2);
+		}
 	}
 	Zotero.debug(e, 1);
 	this.stop();

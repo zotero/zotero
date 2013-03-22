@@ -42,14 +42,19 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	 * @param	{Zotero.Item}	item
 	 * @param	{Function}		callback		Callback f(item, mdate)
 	 */
-	function getStorageModificationTime(item) {
+	function getStorageModificationTime(item, request) {
 		var funcName = "Zotero.Sync.Storage.WebDAV.getStorageModificationTime()";
 		
 		var uri = getItemPropertyURI(item);
 		
-		return Zotero.HTTP.promise(
-				"GET", uri, { debug: true, successCodes: [200, 300, 404] }
-			)
+		return Zotero.HTTP.promise("GET", uri,
+			{
+				debug: true,
+				successCodes: [200, 300, 404],
+				requestObserver: function (xmlhttp) {
+					request.setChannel(xmlhttp.channel);
+				}
+			})
 			.then(function (req) {
 				checkResponse(req);
 				
@@ -163,7 +168,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		var request = data.request;
 		var item = Zotero.Sync.Storage.getItemFromRequestName(request.name);
 		
-		return getStorageModificationTime(item)
+		return getStorageModificationTime(item, request)
 			.then(function (mdate) {
 				if (!request.isRunning()) {
 					Zotero.debug("Upload request '" + request.name
@@ -812,7 +817,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		}
 		
 		// Retrieve modification time from server to store locally afterwards 
-		return getStorageModificationTime(item)
+		return getStorageModificationTime(item, request)
 			.then(function (mdate) {
 				if (!request.isRunning()) {
 					Zotero.debug("Download request '" + request.name
