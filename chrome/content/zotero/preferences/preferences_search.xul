@@ -60,7 +60,8 @@
 			
 			<separator class="thin"/>
 			
-			<label id="pdftools-required" hidden="true"/>
+			<!-- This doesn't wrap without an explicit width -->
+			<label id="pdftools-required" width="45em" hidden="true"/>
 			
 			<separator class="thin"/>
 			
@@ -70,7 +71,8 @@
 			
 			<separator class="thin"/>
 			
-			<label id="pdftools-documentation-link" hidden="true"/>
+			<!-- This doesn't wrap without an explicit width -->
+			<label id="pdftools-documentation-link" width="45em" hidden="true"/>
 			
 			<separator class="thin"/>
 			
