@@ -180,7 +180,9 @@ Zotero.Styles = new function() {
 			worker = new Worker("resource://zotero/csl-validator.js"); 
 		worker.onmessage = function(event) {
 			if(event.data) {
-				deferred.reject(event.data);
+                // Disable validation pending better information on the code.
+				//deferred.reject(event.data);
+                deferred.resolve();
 			} else {
 				deferred.resolve();
 			}
