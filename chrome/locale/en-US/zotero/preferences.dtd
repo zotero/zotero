@@ -1,9 +1,9 @@
-<!ENTITY zotero.preferences.attachmentBaseDir.caption        "Linked Attachment Base Directory">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
-<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
-
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
@@ -119,9 +119,6 @@
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "Advanced">
-
-
-<!ENTITY zotero.preferences.advanced.filesAndFolders		"Files and Folders">
 <!ENTITY zotero.preferences.prefpane.cite "Cite">
 <!ENTITY zotero.preferences.prefpane.export "Export">
 <!ENTITY zotero.preferences.prefpane.general "General">

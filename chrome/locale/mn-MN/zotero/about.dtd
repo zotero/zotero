@@ -2,13 +2,12 @@
 <!ENTITY zotero.about.close "Close">
 <!ENTITY zotero.about.localizations "Нутагшуулалтууд">
 <!ENTITY zotero.alumni "Жил">
-<!ENTITY zotero.community "Community Support:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Зохион бүтээгч">
 <!ENTITY zotero.developers "Хөгжүүлэгчид">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Захиралууд">
 <!ENTITY zotero.executiveProducer "Гүйцэтгэх найруулагч">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.processing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.thanks "Тусгайлан баярлалаа.">
 <!ENTITY zotero.version "хувилбар">

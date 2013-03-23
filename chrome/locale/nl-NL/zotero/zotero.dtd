@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "Type">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Jaar">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Voer hieronder de op te zoeken ISBN, DOI of PMID in.">
 <!ENTITY zotero.moreEncodings.label "Meer coderingen">
 <!ENTITY zotero.notes.separate "In een nieuw venster bewerken">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Aantekeningen">
 <!ENTITY zotero.tabs.related.label "Gerelateerd">
 <!ENTITY zotero.tabs.tags.label "Labels">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Niets selecteren">
 <!ENTITY zotero.tagSelector.clearVisible "Selectie getoonde labels ongedaan maken">
 <!ENTITY zotero.tagSelector.deleteTag "Label verwijderen…">

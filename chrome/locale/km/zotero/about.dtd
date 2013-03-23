@@ -2,13 +2,12 @@
 <!ENTITY zotero.about.close "បិទ">
 <!ENTITY zotero.about.localizations "ភាសាតាមតំបន់:">
 <!ENTITY zotero.alumni "សហសេវិកតា:">
-<!ENTITY zotero.community "Community Support:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "បង្កើតដោយ:">
 <!ENTITY zotero.developers "អ្នកបង្កើត:">
 <!ENTITY zotero.director "នាយក:">
 <!ENTITY zotero.directors "នាយក:">
 <!ENTITY zotero.executiveProducer "ផលិតករប្រតិបត្តិ:">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "ទំនួលស្គាល់ និង ថ្លែងអំណគុណ">
-<!ENTITY zotero.processing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.thanks "ថ្លែងអំណគុណពិសេស:">
 <!ENTITY zotero.version "កំណែថ្មី">

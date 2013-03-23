@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "Tüüp">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Aasta">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Sisestada otsitava ISBN, DOI või PMID allolevasse lahtrisse.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "Salvestada eraldi aknas">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Märkused">
 <!ENTITY zotero.tabs.related.label "Seotud">
 <!ENTITY zotero.tabs.tags.label "Märksõnad">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Ära vali midagi">
 <!ENTITY zotero.tagSelector.clearVisible "Nähtava valiku eemaldamine">
 <!ENTITY zotero.tagSelector.deleteTag "Lipiku kustutamine...">

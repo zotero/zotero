@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "รูปแบบ">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "ปี">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "Edit in a separate window">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "โน้ต">
 <!ENTITY zotero.tabs.related.label "Related">
 <!ENTITY zotero.tabs.tags.label "ป้าย">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Deselect all">
 <!ENTITY zotero.tagSelector.clearVisible "Deselect visible">
 <!ENTITY zotero.tagSelector.deleteTag "Delete Tag...">

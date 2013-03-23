@@ -2,13 +2,12 @@
 <!ENTITY zotero.about.close "Close">
 <!ENTITY zotero.about.localizations "Översättningar:">
 <!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.community "Community Support:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Skapad av:">
 <!ENTITY zotero.developers "Utvecklare:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Ledare:">
 <!ENTITY zotero.executiveProducer "Produktionsledare:">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.processing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.thanks "Särskilt tack:">
 <!ENTITY zotero.version "Version">

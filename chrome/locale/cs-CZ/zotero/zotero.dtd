@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "Typ">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Rok">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Do políčka níže vložte ISBN, DOI nebo PMID, podle kterého chcete vyhledávat.">
 <!ENTITY zotero.moreEncodings.label "Další kódování">
 <!ENTITY zotero.notes.separate "Upravit v samostatném okně">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Poznámky">
 <!ENTITY zotero.tabs.related.label "Související">
 <!ENTITY zotero.tabs.tags.label "Štítky">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Zrušit výběr všech">
 <!ENTITY zotero.tagSelector.clearVisible "Zrušit výběr viditelných">
 <!ENTITY zotero.tagSelector.deleteTag "Smazat štítek...">

@@ -2,13 +2,12 @@
 <!ENTITY zotero.about.close "Chiudi">
 <!ENTITY zotero.about.localizations "Traduzioni:">
 <!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.community "Community Support:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Creata da:">
 <!ENTITY zotero.developers "Sviluppatori:">
 <!ENTITY zotero.director "Direttore:">
 <!ENTITY zotero.directors "Direttori:">
 <!ENTITY zotero.executiveProducer "Produttore esecutivo:">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Altri riconoscimenti">
-<!ENTITY zotero.processing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.thanks "Ringraziamenti speciali:">
 <!ENTITY zotero.version "Versione">

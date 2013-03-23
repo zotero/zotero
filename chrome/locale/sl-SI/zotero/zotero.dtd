@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "Vrsta">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Leto">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "V spodnje polje vnesite ISBN, DOI ali PMID, potrebno za iskanje.">
 <!ENTITY zotero.moreEncodings.label "Dodatna kodiranja">
 <!ENTITY zotero.notes.separate "Uredi v ločenem oknu">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Opombe">
 <!ENTITY zotero.tabs.related.label "Sorodno">
 <!ENTITY zotero.tabs.tags.label "Značke">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Ne izberi ničesar">
 <!ENTITY zotero.tagSelector.clearVisible "Ne izberi vidno">
 <!ENTITY zotero.tagSelector.deleteTag "Izbriši značko ...">

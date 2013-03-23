@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "Tip">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "An">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Introdu ISBN, DOI sau PMID pentru a căuta în caseta de mai jos.">
 <!ENTITY zotero.moreEncodings.label "Mai multe codificări">
 <!ENTITY zotero.notes.separate "Editează într-o fereastră separată">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Note">
 <!ENTITY zotero.tabs.related.label "Relații">
 <!ENTITY zotero.tabs.tags.label "Etichete">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Deselectează totul">
 <!ENTITY zotero.tagSelector.clearVisible "Deselectează vedere">
 <!ENTITY zotero.tagSelector.deleteTag "Șterge eticheta...">

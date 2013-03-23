@@ -2,13 +2,12 @@
 <!ENTITY zotero.about.close "Close">
 <!ENTITY zotero.about.localizations "Lokalizácia:">
 <!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.community "Community Support:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Vytvorili:">
 <!ENTITY zotero.developers "Vývojári:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Pod vedením:">
 <!ENTITY zotero.executiveProducer "Výkonný producent:">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.processing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.thanks "Špeciálne poďakovanie:">
 <!ENTITY zotero.version "verzia">

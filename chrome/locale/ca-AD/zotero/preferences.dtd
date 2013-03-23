@@ -1,3 +1,9 @@
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
 <!ENTITY zotero.preferences.autoUpdate "Automàticament cerca actualitzacions dels transcriptors">
 <!ENTITY zotero.preferences.automaticSnapshots "Automàticament crea una captura quan es creïn elements des de pàgines web">
 <!ENTITY zotero.preferences.automaticTags "Automàticament etiqueta els elements amb les capçaleres de paraules clau i tema">
@@ -6,6 +12,7 @@
 <!ENTITY zotero.preferences.charset.importCharset "Importa la codificació de caràcters">
 <!ENTITY zotero.preferences.citationOptions.caption "Opcions de cita">
 <!ENTITY zotero.preferences.cite.styles "Estils">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.cite.styles.styleManager "Gestor d'estils">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Títol">
@@ -190,6 +197,9 @@
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Elimina totes les dades locals de Zotero i restaura-les des del servidor de sincronització">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaura al Servidor de Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Elimina totes les dades del servidor i sobreescriu-les amb les dades locals de Zotero.">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronitza automàticament">
 <!ENTITY zotero.preferences.sync.syncServer "Servidor de sincronització de Zotero">
 <!ENTITY zotero.preferences.sync.username "Nom d'usuari">

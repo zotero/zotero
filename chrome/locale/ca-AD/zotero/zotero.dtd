@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "Tipus">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Any">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Introduïu l'ISBN, DOI, o PMID per cercar en el quadre tot seguit.">
 <!ENTITY zotero.moreEncodings.label "Més codificacions">
 <!ENTITY zotero.notes.separate "Edita en una finestra separada">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Notes">
 <!ENTITY zotero.tabs.related.label "Relacionats">
 <!ENTITY zotero.tabs.tags.label "Etiquetes">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Deselecciona-ho tot">
 <!ENTITY zotero.tagSelector.clearVisible "Deselecciona les visibles">
 <!ENTITY zotero.tagSelector.deleteTag "Esborra etiqueta...">

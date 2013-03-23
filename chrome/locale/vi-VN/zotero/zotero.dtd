@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "Loại">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Năm">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "Soạn thảo trong một cửa sổ tách rời">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Ghi chép">
 <!ENTITY zotero.tabs.related.label "Liên quan">
 <!ENTITY zotero.tabs.tags.label "Thẻ">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Bỏ tất cả lựa chọn">
 <!ENTITY zotero.tagSelector.clearVisible "Bỏ lựa chọn các thẻ nhìn thấy được">
 <!ENTITY zotero.tagSelector.deleteTag "Xóa Thẻ...">

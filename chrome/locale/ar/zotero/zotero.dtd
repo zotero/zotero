@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "النوع">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "السنة">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "ادخل الترقيم الدولي الموحد للكتاب او معرف مقالات الميدلاين او معرف الوثيقة الرقمية.">
 <!ENTITY zotero.moreEncodings.label "المزيد من الترميزات">
 <!ENTITY zotero.notes.separate "التحرير في نافذة منفصلة">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "ملاحظات">
 <!ENTITY zotero.tabs.related.label "عناصر ذات صلة">
 <!ENTITY zotero.tabs.tags.label "أوسمة">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "إلغاء تحديد الكل">
 <!ENTITY zotero.tagSelector.clearVisible "إلغاء تحديد العناصر الظاهرة">
 <!ENTITY zotero.tagSelector.deleteTag "حذف الوسم...">

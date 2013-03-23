@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "Врста">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Година">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "Уреди у одвојеном прозору">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Белешке">
 <!ENTITY zotero.tabs.related.label "Сродно">
 <!ENTITY zotero.tabs.tags.label "Ознаке">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Избаци из избора све">
 <!ENTITY zotero.tagSelector.clearVisible "Избаци из избора видљиве">
 <!ENTITY zotero.tagSelector.deleteTag "Избриши ознаку...">

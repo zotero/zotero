@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "Tipo">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Año">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "Modificar en una ventana aparte">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Notas">
 <!ENTITY zotero.tabs.related.label "Relacionado">
 <!ENTITY zotero.tabs.tags.label "Marcas">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Sin selección">
 <!ENTITY zotero.tagSelector.clearVisible "Descartar las visibles">
 <!ENTITY zotero.tagSelector.deleteTag "Borrar marca...">

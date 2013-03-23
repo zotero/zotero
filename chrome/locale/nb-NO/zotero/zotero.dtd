@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "Type">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "År">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "Rediger i separat vindu">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Notater">
 <!ENTITY zotero.tabs.related.label "Relatert">
 <!ENTITY zotero.tabs.tags.label "Tagger">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Slipp alle">
 <!ENTITY zotero.tagSelector.clearVisible "Slipp synlig">
 <!ENTITY zotero.tagSelector.deleteTag "Slett tagg...">

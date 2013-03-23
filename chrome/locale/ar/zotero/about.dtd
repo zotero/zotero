@@ -2,13 +2,12 @@
 <!ENTITY zotero.about.close "Close">
 <!ENTITY zotero.about.localizations "الترجمات:">
 <!ENTITY zotero.alumni "الخريجين:">
-<!ENTITY zotero.community "Community Support:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "تم انشاؤه بواسطة:">
 <!ENTITY zotero.developers "المطورين:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "المديرين:">
 <!ENTITY zotero.executiveProducer "المنتج التنفيذي:">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.processing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.thanks "شكر خاص:">
 <!ENTITY zotero.version "الإصدار">

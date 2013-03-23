@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "형식">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "년">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "아래의 상자에 ISBN, DOI, 또는 PMID를 입력하세요.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "분리 창으로 편집">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "노트">
 <!ENTITY zotero.tabs.related.label "관련 페이지">
 <!ENTITY zotero.tabs.tags.label "태그">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "선택 모두 해제">
 <!ENTITY zotero.tagSelector.clearVisible "보이는 것들 선택 해제">
 <!ENTITY zotero.tagSelector.deleteTag "태그 지우기...">

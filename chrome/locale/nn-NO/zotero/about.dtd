@@ -2,13 +2,12 @@
 <!ENTITY zotero.about.close "Close">
 <!ENTITY zotero.about.localizations "Omsetjingar:">
 <!ENTITY zotero.alumni "Brukarstøtte:">
-<!ENTITY zotero.community "Community Support:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Laga av:">
 <!ENTITY zotero.developers "Utviklarar:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Regissørar:">
 <!ENTITY zotero.executiveProducer "Leiande produsent:">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.processing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.thanks "Spesiell takk til:">
 <!ENTITY zotero.version "versjon">

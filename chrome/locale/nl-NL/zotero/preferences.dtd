@@ -1,3 +1,9 @@
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
 <!ENTITY zotero.preferences.autoUpdate "Automatisch zoeken naar bijgewerkte vertalers">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatisch snapshots nemen bij het maken van objecten van webpagina's">
 <!ENTITY zotero.preferences.automaticTags "Objecten automatisch labelen met trefwoorden en onderwerpen">
@@ -6,6 +12,7 @@
 <!ENTITY zotero.preferences.charset.importCharset "Tekensetcodering importeren">
 <!ENTITY zotero.preferences.citationOptions.caption "Citatie-opties">
 <!ENTITY zotero.preferences.cite.styles "Stijlen">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stijlmanager">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
@@ -190,6 +197,9 @@
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Alle lokale Zotero-gegevens wissen en vervangen door de gegevens van de synchronisatie-server.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Herstellen naar Zotero-server">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Alle gegevens op de server wissen en vervangen door de lokale Zotero-gegevens.">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatisch synchroniseren">
 <!ENTITY zotero.preferences.sync.syncServer "Zotero Synchronisatie-server">
 <!ENTITY zotero.preferences.sync.username "Gebruikersnaam:">

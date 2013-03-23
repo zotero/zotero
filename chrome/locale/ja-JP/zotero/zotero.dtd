@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "種類">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "年">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "別画面で編集する">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "メモ">
 <!ENTITY zotero.tabs.related.label "関連">
 <!ENTITY zotero.tabs.tags.label "タグ">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "全選択の解除">
 <!ENTITY zotero.tagSelector.clearVisible "可視タグの選択を解除">
 <!ENTITY zotero.tagSelector.deleteTag "タグを削除...">

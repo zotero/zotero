@@ -2,13 +2,12 @@
 <!ENTITY zotero.about.close "Close">
 <!ENTITY zotero.about.localizations ":לוקליזציה">
 <!ENTITY zotero.alumni ":בוגרים">
-<!ENTITY zotero.community "Community Support:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby ":נוצר על ידי">
 <!ENTITY zotero.developers ":מפתחים">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors ":במאים">
 <!ENTITY zotero.executiveProducer ":מפיק בפועל">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.processing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.thanks ":תודות מיוחדות">
 <!ENTITY zotero.version "גירסה">

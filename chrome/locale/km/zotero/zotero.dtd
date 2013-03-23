@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "ប្រភេទ">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "ឆ្នាំ">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "សូមបញ្ចូលអាយអេសប៊ីអិន ឌីអូអាយ ឬ ភីអេមអាយឌី ដើម្បីរកមើលនៅក្នុងប្រអប់ខាងក្រោមៈ">
 <!ENTITY zotero.moreEncodings.label "បញ្ចូលកូដបន្ថែម">
 <!ENTITY zotero.notes.separate "កែតម្រូវនៅក្នុងវីនដូយ៍ដោយឡែក">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "កំណត់ត្រា">
 <!ENTITY zotero.tabs.related.label "ពាក់ព័ន្ធ">
 <!ENTITY zotero.tabs.tags.label "ស្លាក">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "ដោះជម្រើសទាំងអស់">
 <!ENTITY zotero.tagSelector.clearVisible "ដោះជម្រើសមើលឃើញ">
 <!ENTITY zotero.tagSelector.deleteTag "លុបស្លាកចោល...">

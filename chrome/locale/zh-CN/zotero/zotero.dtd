@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "类型">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "年">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "独立窗口编辑">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "便笺">
 <!ENTITY zotero.tabs.related.label "相关条目">
 <!ENTITY zotero.tabs.tags.label "标签">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "取消全部选择">
 <!ENTITY zotero.tagSelector.clearVisible "取消可见的选择">
 <!ENTITY zotero.tagSelector.deleteTag "删除标签...">

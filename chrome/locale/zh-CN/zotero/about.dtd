@@ -2,13 +2,12 @@
 <!ENTITY zotero.about.close "Close">
 <!ENTITY zotero.about.localizations "本地化:">
 <!ENTITY zotero.alumni "校友:">
-<!ENTITY zotero.community "Community Support:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "创建者:">
 <!ENTITY zotero.developers "开发者:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "指导者:">
 <!ENTITY zotero.executiveProducer "执行制作人:">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.processing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.thanks "特别感谢:">
 <!ENTITY zotero.version "版本">

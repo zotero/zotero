@@ -2,13 +2,12 @@
 <!ENTITY zotero.about.close "Close">
 <!ENTITY zotero.about.localizations "Tõlked:">
 <!ENTITY zotero.alumni "Kaastöötajad:">
-<!ENTITY zotero.community "Community Support:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Loodud:">
 <!ENTITY zotero.developers "Arendajad:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Juhatajad:">
 <!ENTITY zotero.executiveProducer "Vastutav produtsent:">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.processing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.thanks "Tänud:">
 <!ENTITY zotero.version "versioon">

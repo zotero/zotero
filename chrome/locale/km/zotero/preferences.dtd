@@ -1,3 +1,9 @@
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
 <!ENTITY zotero.preferences.autoUpdate "ស្វែងរកកូដចម្លងទំនើបទាន់សម័យដោយស្វ័យប្រវត្តិ">
 <!ENTITY zotero.preferences.automaticSnapshots "ថតយករូបភាពអត្ថបទចេញពីគេហទំព័រដោយស្វ័យប្រវត្តិ">
 <!ENTITY zotero.preferences.automaticTags "ដាក់ស្លាកឯកសារដោយប្រើពាក្យគន្លឹះ និង ចំណងជើងអត្ថបទដោយស្វ័យប្រវត្តិ">
@@ -6,6 +12,7 @@
 <!ENTITY zotero.preferences.charset.importCharset "ទាញបញ្ចូលកូដអក្សរ">
 <!ENTITY zotero.preferences.citationOptions.caption "ជម្រើសអាគតដ្ឋាន">
 <!ENTITY zotero.preferences.cite.styles "រចនាបថ">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.cite.styles.styleManager "គ្រប់គ្រងរចនាបថ">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "ស៊ីអេសអិល">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "ចំណងជើង">
@@ -190,6 +197,9 @@
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "លុបចោលទិន្នន័យហ្ស៊ូតេរ៉ូមូលដ្ឋានទាំងអស់ និង ស្តារឡើងវិញពីម៉ាស៊ីនបម្រើសមកាលកម្ម">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "ស្តារទៅកាន់ម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "លុបចោលរាល់ទិន្នន័យម៉ាស៊ីនបម្រើទាំងអស់ និង សរសេរលុបពីលើទិន្នន័យហ្ស៊ូតេរ៉ូមូលដ្ឋាន">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.syncAutomatically "ធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ">
 <!ENTITY zotero.preferences.sync.syncServer "ម៉ាស៊ីនបម្រើសមកាលកម្មហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.preferences.sync.username "ឈ្មោះអ្នកប្រើ:">

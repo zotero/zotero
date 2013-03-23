@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "Typ">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "År">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Skriv ISBN, DOI, eller PMID i sökfältet nedan.">
 <!ENTITY zotero.moreEncodings.label "Fler teckenkodningar">
 <!ENTITY zotero.notes.separate "Redigera i ett separat fönster">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Anteckningar">
 <!ENTITY zotero.tabs.related.label "Liknande källor">
 <!ENTITY zotero.tabs.tags.label "Etiketter">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Välj bort alla">
 <!ENTITY zotero.tagSelector.clearVisible "Välj bort synliga">
 <!ENTITY zotero.tagSelector.deleteTag "Radera etikett...">

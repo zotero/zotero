@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "Típus">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Év">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Adja meg az ISBN, DOI vagy PMID azonosítót az alábbi dobozban.">
 <!ENTITY zotero.moreEncodings.label "További karakterkódolások">
 <!ENTITY zotero.notes.separate "Szerkesztés külön ablakban">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Jegyzetek">
 <!ENTITY zotero.tabs.related.label "Kapcsolatok">
 <!ENTITY zotero.tabs.tags.label "Címkék">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Összes címke kiválasztásának megszüntetése">
 <!ENTITY zotero.tagSelector.clearVisible "Látható címkék kiválasztásának megszüntetése">
 <!ENTITY zotero.tagSelector.deleteTag "Címke törlése...">

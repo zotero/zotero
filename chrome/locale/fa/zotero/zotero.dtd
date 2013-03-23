@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "نوع">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "سال">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "شابک،‏ DOI یا PMID را برای جستجو در کادر زیر وارد کنید.">
 <!ENTITY zotero.moreEncodings.label "کدبندی‌های بیشتر">
 <!ENTITY zotero.notes.separate "ویرایش در پنجره مستقل">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "یادداشت‌ها">
 <!ENTITY zotero.tabs.related.label "مرتبط">
 <!ENTITY zotero.tabs.tags.label "برچسب‌ها">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "انتخاب هیچ‌کدام">
 <!ENTITY zotero.tagSelector.clearVisible "عدم انتخاب برچسب‌های پیدا">
 <!ENTITY zotero.tagSelector.deleteTag "حذف برچسب...">

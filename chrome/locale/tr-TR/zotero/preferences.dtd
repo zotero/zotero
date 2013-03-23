@@ -1,3 +1,9 @@
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
 <!ENTITY zotero.preferences.autoUpdate "Güncel çevirmenler için otomatik kontrol yap">
 <!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratılırken sayfa görünümü otomatik olarak kaydet">
 <!ENTITY zotero.preferences.automaticTags "Anahtar kelimeler ve konu başlıkları ile eserleri otomatik olarak etiketle">
@@ -6,6 +12,7 @@
 <!ENTITY zotero.preferences.charset.importCharset "Karakter Kodlamasını içeri aktar">
 <!ENTITY zotero.preferences.citationOptions.caption "Kaynakça Seçenekleri">
 <!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
@@ -190,6 +197,9 @@
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Bütün Zotero verisini sil ve sunucudaki veriyi içeri aktar.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Zotero Sunucusuna İçeri Aktar">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sunucudaki tüm verileri sil ve yerel Zotero verisini üzerine yaz.">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Kendiliğinden eşle">
 <!ENTITY zotero.preferences.sync.syncServer "Zotero Eşleme Sunucusu">
 <!ENTITY zotero.preferences.sync.username "Kullanıcı:">

@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "類型">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "年">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "輸入 ISBN, DOI, 或 PMID 後在下面的方塊中尋找">
 <!ENTITY zotero.moreEncodings.label "更多編碼">
 <!ENTITY zotero.notes.separate "分出一個獨立視窗來編輯">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "筆記">
 <!ENTITY zotero.tabs.related.label "相關的">
 <!ENTITY zotero.tabs.tags.label "標籤">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "取消全部的選取">
 <!ENTITY zotero.tagSelector.clearVisible "取消可見的選取">
 <!ENTITY zotero.tagSelector.deleteTag "刪除標籤…">

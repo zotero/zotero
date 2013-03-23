@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "Mota">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Urtea">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Kuadroan ISBN, DOI, edo PMID zenbakia sartu:">
 <!ENTITY zotero.moreEncodings.label "Kode gehiago">
 <!ENTITY zotero.notes.separate "Editatu lehio berri batean">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Oharrak">
 <!ENTITY zotero.tabs.related.label "Zerikusia">
 <!ENTITY zotero.tabs.tags.label "Estekak">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Guztiak desautatu">
 <!ENTITY zotero.tagSelector.clearVisible "Agerikoak desautatu">
 <!ENTITY zotero.tagSelector.deleteTag "Esteka ezabatu...">

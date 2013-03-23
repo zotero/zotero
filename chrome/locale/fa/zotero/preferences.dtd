@@ -1,3 +1,9 @@
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
 <!ENTITY zotero.preferences.autoUpdate "جستجوی خودکار برای روزآمدسازی مترجم‌ها">
 <!ENTITY zotero.preferences.automaticSnapshots "ساخت خودکار «تصویر لحظه‌ای» در زمان ذخیره صفحات وب">
 <!ENTITY zotero.preferences.automaticTags "برچسب زدن خودکار به آیتم‌ها با استفاده از کلمات کلیدی و موضوع‌ها">
@@ -6,6 +12,7 @@
 <!ENTITY zotero.preferences.charset.importCharset "کدبندی نویسه‌ها در زمان درون‌برد">
 <!ENTITY zotero.preferences.citationOptions.caption "گزینه‌های یادکرد">
 <!ENTITY zotero.preferences.cite.styles "شیوه‌ها">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.cite.styles.styleManager "مدیریت شیوه‌ها">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "عنوان">
@@ -190,6 +197,9 @@
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "پاک کردن همه اطلاعات محلی زوترو و دریافت اطلاعات از کارگزار همزمان‌‌سازی">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "بازنشانی اطلاعات در کارگزار زوترو">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "پاک کردن همه اطلاعات و رونویسی با اطلاعات محلی زوترو">
+<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.syncAutomatically "همزمان‌‌سازی خودکار">
 <!ENTITY zotero.preferences.sync.syncServer "کارگزار همزمان‌‌سازی زوترو">
 <!ENTITY zotero.preferences.sync.username "نام کاربری:">

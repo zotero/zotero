@@ -2,13 +2,12 @@
 <!ENTITY zotero.about.close "Close">
 <!ENTITY zotero.about.localizations "Bản địa hóa:">
 <!ENTITY zotero.alumni "Cựu thành viên:">
-<!ENTITY zotero.community "Community Support:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Một sản phẩm của:">
 <!ENTITY zotero.developers "Phát triển phần mềm:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Giám đốc điều hành:">
 <!ENTITY zotero.executiveProducer "Chủ nhiệm:">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.processing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.thanks "Xin gửi lời cảm ơn đặc biệt tới:">
 <!ENTITY zotero.version "phiên bản">

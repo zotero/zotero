@@ -136,6 +136,7 @@
 <!ENTITY zotero.items.type_column "Tür">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Yıl">
+<!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "Ayrı bir pencerede düzenle">
@@ -199,6 +200,7 @@
 <!ENTITY zotero.tabs.notes.label "Notlar">
 <!ENTITY zotero.tabs.related.label "İligili">
 <!ENTITY zotero.tabs.tags.label "Etiketler">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Hiçbirini Seçme">
 <!ENTITY zotero.tagSelector.clearVisible "Gürülebileni Seçme">
 <!ENTITY zotero.tagSelector.deleteTag "Etiketi Sil...">
