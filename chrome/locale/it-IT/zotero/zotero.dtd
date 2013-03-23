@@ -16,7 +16,7 @@
 <!ENTITY zotero.bibliography.style.label "Stile citazione:">
 <!ENTITY zotero.bibliography.title "Crea bibliografia">
 <!ENTITY zotero.charset.label "Codifica dei caratteri">
-<!ENTITY zotero.citation.editorWarning.label "Editor warning">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 <!ENTITY zotero.citation.keepSorted.label "Mantieni l&apos;ordinamento delle fonti">
 <!ENTITY zotero.citation.line "Riga">
 <!ENTITY zotero.citation.page "Pagina">
@@ -32,8 +32,8 @@
 <!ENTITY zotero.downloadManager.label "Salva in Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Per usare questa funzionalità, è necessario prima installare gli strumenti PDF tramite le impostazioni di Zotero.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "La libreria selezionata non può essere usata per salvare allegati. Questo oggetto sarà salvato nella tua libreria.">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
-<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
 <!ENTITY zotero.errorReport.notReviewed "In genere, i rapporti di errore non vengono esaminati se non sono stati inviati ai forum.">
 <!ENTITY zotero.errorReport.postToForums "Inviare un messaggio ai forum di Zotero (forums.zotero.org)riportando il numero ID del rapporto di errore, una descrizione del problema ed esponendo i passaggi che hanno condotto all&apos;errore.">
 <!ENTITY zotero.errorReport.reportID "ID rapporto:">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.item.add "Aggiungi">
 <!ENTITY zotero.item.attachment.file.show "Visualizza file">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 <!ENTITY zotero.item.textTransform "Modifica testo">
 <!ENTITY zotero.item.textTransform.sentencecase "Maiuscole">
 <!ENTITY zotero.item.textTransform.titlecase "Maiuscolo">
@@ -115,7 +115,7 @@
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Duplica elemento selezionato">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
-<!ENTITY zotero.items.menu.mergeItems "Merge items">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Ripristina nella biblioteca">

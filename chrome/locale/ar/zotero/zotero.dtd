@@ -16,7 +16,7 @@
 <!ENTITY zotero.bibliography.style.label "نمط الاستشهاد:">
 <!ENTITY zotero.bibliography.title "إنشاء ببليوجرافية">
 <!ENTITY zotero.charset.label "ترميز الأحرف">
-<!ENTITY zotero.citation.editorWarning.label "Editor warning">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 <!ENTITY zotero.citation.keepSorted.label "الحفاظ على المصادر مرتبة">
 <!ENTITY zotero.citation.line "سطر">
 <!ENTITY zotero.citation.page "صفحة">
@@ -29,11 +29,11 @@
 <!ENTITY zotero.contextMenu.addTextToNewNote "إنشاء عنصر وملاحظة زوتيرو من التحديد">
 <!ENTITY zotero.contextMenu.saveImageAsItem "حفظ الصورة كعنصر زوتيرو">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "حفظ الرابط كعنصر زوتيرو">
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
+<!ENTITY zotero.downloadManager.label "احفظ في زوتيرو">
 <!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
-<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
 <!ENTITY zotero.errorReport.notReviewed "لن يتم مراجعة تقارير الخطأ ما لم يكن مشار إليها في المنتديات.">
 <!ENTITY zotero.errorReport.postToForums "برجاء كتابة رسالة في منتديات زوتيرو (forums.zotero.org) تتضمن رقم التقرير، ووصف للمشكلة، والخطوات التي تؤدي لظهورها.">
 <!ENTITY zotero.errorReport.reportID "رقم التقرير:">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.general.optional "(اختياري)">
 <!ENTITY zotero.general.selectAll "تحديد الكل">
 <!ENTITY zotero.integration.addEditCitation.title "اضافة/تحرير استشهاد مرجعي">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.classicView.label "عرض تقليدي">
 <!ENTITY zotero.integration.docPrefs.title "تفضيلات المستند">
 <!ENTITY zotero.integration.editBibliography.title "تحرير ببليوجرافية">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "الاشارات المرجعية هي خاصية متاحة عبر مايكروسوفت وورد و اوبن اوفيس ولكنها قد تكون عرضة للتغيير الغير مقصود. ولأسباب تتعلق &#xA;بالتوافق، فالاستشهادات المرجعية لا يمكن ادراجها في الحواشي السفلية او التعليقات الختامية عند تحديد هذا الخيار.">
@@ -75,16 +75,16 @@
 <!ENTITY zotero.integration.prefs.lang.translation "Translation">
 <!ENTITY zotero.integration.prefs.lang.transliteration "Transliteration">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.prefs.storeReferences.label "تخزين المراجع في الوثيقة">
 <!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 <!ENTITY zotero.integration.references.label "المراجع الواردة في قائمة المراجع المستشهد بها">
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.integration.showEditor.label "عرض المحرر">
 <!ENTITY zotero.item.add "اضافة">
 <!ENTITY zotero.item.attachment.file.show "عرض الملف">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 <!ENTITY zotero.item.textTransform "تغيير حالة النص">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.sentencecase "حالة الجملة">
 <!ENTITY zotero.item.textTransform.titlecase "حرف كبير في بداية كل كلمة">
 <!ENTITY zotero.items.accessDate_column "تاريخ الدخول">
 <!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
@@ -109,16 +109,16 @@
 <!ENTITY zotero.items.menu.attach.file "إرفاق نسخة من ملف مخزن...">
 <!ENTITY zotero.items.menu.attach.fileLink "إرفاق ارتباط لملف...">
 <!ENTITY zotero.items.menu.attach.link "إرفاق رابط للصفحة الحالية">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI...">
+<!ENTITY zotero.items.menu.attach.link.uri "ربط الرابط بالمسار...">
 <!ENTITY zotero.items.menu.attach.note "اضافة ملاحظة">
 <!ENTITY zotero.items.menu.attach.snapshot "إرفاق لقطة للصفحة الحالية">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "تكرار العنصر المحدد">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
-<!ENTITY zotero.items.menu.mergeItems "Merge items">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.restoreToLibrary "استعادة المكتبة">
 <!ENTITY zotero.items.menu.showInLibrary "عرض في المكتبة">
 <!ENTITY zotero.items.moreColumns.label "More Columns">
 <!ENTITY zotero.items.numChildren_column "+">
@@ -234,10 +234,10 @@
 <!ENTITY zotero.toolbar.newGroup "مجموعة مشاركة جديدة...">
 <!ENTITY zotero.toolbar.newItem.label "عنصر جديد">
 <!ENTITY zotero.toolbar.newItemFromPage.label "إنشاء عنصر جديد من الصفحة الحالية">
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newNote "ملاحظة جديدة">
 <!ENTITY zotero.toolbar.newSavedSearch.label "بحث محفوظ جديد...">
 <!ENTITY zotero.toolbar.newSubcollection.label "مجموعة عناصر فرعية جديدة...">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
+<!ENTITY zotero.toolbar.note.child "إضافة ملاحظة تابعة">
 <!ENTITY zotero.toolbar.note.standalone "ملاحظة جديدة مستقلة بذاتها">
 <!ENTITY zotero.toolbar.openURL.label "تحديد موقع العنصر">
 <!ENTITY zotero.toolbar.openURL.tooltip "البحث في مكتبتك المحلية">

@@ -40,7 +40,7 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Submit to Zotero Server">
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "View Output">
 <!ENTITY zotero.preferences.default "Verstek:">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Heg geassosieerde PDF&apos;s en ander lêers outomaties aan wanneer items gestoor word">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Heg geassosieerde PDF's en ander lêers outomaties aan wanneer items gestoor word">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
@@ -62,11 +62,11 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Veranderinge vind net in nuwe vensters plaas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopieer geselekteerde items na knipbord">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
 <!ENTITY zotero.preferences.keys.library "Programmateek">
 <!ENTITY zotero.preferences.keys.newItem "Skep nuwe item">
-<!ENTITY zotero.preferences.keys.newNote "Skep &apos;n nuwe nota">
+<!ENTITY zotero.preferences.keys.newNote "Skep 'n nuwe nota">
 <!ENTITY zotero.preferences.keys.openZotero "Open/sluit Zotero-paneel">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Probeer konflikterende snelsleutels oorheers">
 <!ENTITY zotero.preferences.keys.quicksearch "Kitssoektog">
@@ -101,7 +101,7 @@
 <!ENTITY zotero.preferences.lang.transliteration "Transliteration">
 <!ENTITY zotero.preferences.lang.ui "UI:">
 <!ENTITY zotero.preferences.lang.variant "Variant">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select &#34;Add&#34; from Zotero's Locate menu.">
 <!ENTITY zotero.preferences.locate.description "Description">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
@@ -118,7 +118,7 @@
 <!ENTITY zotero.preferences.openurl.version "Weergawe:">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.prefpane.advanced "Gevorderd">
+<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
 <!ENTITY zotero.preferences.prefpane.cite "Cite">
 <!ENTITY zotero.preferences.prefpane.export "Uitvoer">
 <!ENTITY zotero.preferences.prefpane.general "Algemeen">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.p_variable "&#37;p - The path of the proxied page excluding the leading slash (e.g., about/index.html)">
 <!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
 <!ENTITY zotero.preferences.proxies.scheme "Scheme">
-<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
+<!ENTITY zotero.preferences.proxies.transparent "Enable proxy redirection">
 <!ENTITY zotero.preferences.proxies.variables "You may use the following variables in your proxy scheme:">
 <!ENTITY zotero.preferences.quickCopy.caption "Kitskopieer">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">

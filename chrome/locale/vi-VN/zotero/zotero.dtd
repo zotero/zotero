@@ -16,7 +16,7 @@
 <!ENTITY zotero.bibliography.style.label "Văn phong của Trích dẫn">
 <!ENTITY zotero.bibliography.title "Tạo Thư tịch">
 <!ENTITY zotero.charset.label "Character Encoding">
-<!ENTITY zotero.citation.editorWarning.label "Editor warning">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 <!ENTITY zotero.citation.keepSorted.label "Giữ thứ tự sắp xếp của các Tài liệu nguồn">
 <!ENTITY zotero.citation.line "Dòng">
 <!ENTITY zotero.citation.page "Trang">
@@ -32,8 +32,8 @@
 <!ENTITY zotero.downloadManager.label "Save to Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
-<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
 <!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 <!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
 <!ENTITY zotero.errorReport.reportID "ID của Báo cáo:">
@@ -55,7 +55,7 @@
 <!ENTITY zotero.integration.classicView.label "Classic View">
 <!ENTITY zotero.integration.docPrefs.title "Các tùy chọn về Tài liệu">
 <!ENTITY zotero.integration.editBibliography.title "Soạn thảo Thư tịch">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Các bookmarks được giữ nguyên giữa các tài liệu Microsoft Word và LibreOffice, nhưng đôi khi chúng có thể bị thay đổi một cách tình cờ.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Các bookmarks được giữ nguyên giữa các tài liệu Microsoft Word và OpenOffice, nhưng đôi khi chúng có thể bị thay đổi một cách tình cờ.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
 <!ENTITY zotero.integration.prefs.displayAs.label "Hiển thị các trích dẫn dưới dạng:">
 <!ENTITY zotero.integration.prefs.endnotes.label "Chú thích cuối bài">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.item.add "Thêm">
 <!ENTITY zotero.item.attachment.file.show "Hiện thị Tập tin">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 <!ENTITY zotero.item.textTransform "Biến đổi Văn bản">
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.textTransform.titlecase "Viết hoa đầu từ">
@@ -109,13 +109,13 @@
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
 <!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
 <!ENTITY zotero.items.menu.attach.link "Đính kèm Đường dẫn tới Trang hiện tại">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI...">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.note "Tạo một Ghi chép">
 <!ENTITY zotero.items.menu.attach.snapshot "Đính kèm Bản lưu trang Web của Trang hiện tại">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Sao chép Biểu ghi vừa chọn">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
-<!ENTITY zotero.items.menu.mergeItems "Merge items">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
@@ -137,7 +137,7 @@
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Năm">
 <!ENTITY zotero.lookup.button.search "Search">
-<!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
+<!ENTITY zotero.lookup.description "Enter one or more ISBNs, DOIs, or PMIDs to look up in the box below.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "Soạn thảo trong một cửa sổ tách rời">
 <!ENTITY zotero.progress.title "Tiến triển">
@@ -228,7 +228,7 @@
 <!ENTITY zotero.toolbar.import.label "Nhập khẩu...">
 <!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
 <!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
-<!ENTITY zotero.toolbar.lookup.label "Add Item by Identifier">
+<!ENTITY zotero.toolbar.lookup.label "Add Item(s) by Identifier">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Khác">
 <!ENTITY zotero.toolbar.newCollection.label "Bộ sưu tập mới...">
 <!ENTITY zotero.toolbar.newGroup "New Group...">

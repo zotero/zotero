@@ -1,12 +1,12 @@
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY aboutProduct.label "Al voltant de &brandShortName;">
+<!ENTITY aboutProduct.label "Quant a &brandShortName;">
 <!ENTITY addons.label "Complements">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchPageDirectionItem.label "Canvia la direcció de la pàgina">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 <!ENTITY bidiSwitchTextDirectionItem.label "Canvia la direcció del text">
-<!ENTITY bringAllToFront.label "Porta tot al front">
+<!ENTITY bringAllToFront.label "Porta tot al davant">
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.label "Tanca">
@@ -62,7 +62,7 @@
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMenuWin.label "Ajuda">
 <!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpReportErrors.label "Informa dels errors a Zotero">
+<!ENTITY helpReportErrors.label "Informa d'errors al Zotero">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpTroubleshootingInfo.label "Informació de resolució de problemes">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
@@ -72,42 +72,42 @@
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimitza">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "Format de pàgina...">
 <!ENTITY pasteCmd.accesskey "P">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "Enganxa">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmd.label "Opcions">
+<!ENTITY preferencesCmd.label "Opcions...">
 <!ENTITY preferencesCmdMac.commandkey ",">
-<!ENTITY preferencesCmdMac.label "Preferències">
+<!ENTITY preferencesCmdMac.label "Preferències...">
 <!ENTITY preferencesCmdUnix.accesskey "n">
 <!ENTITY preferencesCmdUnix.label "Preferències...">
 <!ENTITY printCmd.accesskey "U">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "Imprimeix...">
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY productHelp.label "Assistència i documentació">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 <!ENTITY quitApplicationCmd.label "Surt">
 <!ENTITY quitApplicationCmdMac.key "Q">
-<!ENTITY quitApplicationCmdMac.label "Surt de Zotero">
+<!ENTITY quitApplicationCmdMac.label "Surt del Zotero">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmdWin.label "Surt">
 <!ENTITY redoCmd.accesskey "R">
 <!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.label "Refes">
+<!ENTITY redoCmd.label "Refés">
 <!ENTITY saveCmd.accesskey "A">
 <!ENTITY saveCmd.key "S">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "Desa...">
 <!ENTITY selectAllCmd.accesskey "A">
 <!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.label "Selecciona tot">
+<!ENTITY selectAllCmd.label "Selecciona-ho tot">
 <!ENTITY servicesMenuMac.label "Serveis">
-<!ENTITY showAllAppsCmdMac.label "Mostra tot">
+<!ENTITY showAllAppsCmdMac.label "Mostra-ho tot">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY toolsMenu.label "Eines">
 <!ENTITY undoCmd.accesskey "U">
 <!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.label "Desfes">
+<!ENTITY undoCmd.label "Desfés">
 <!ENTITY windowMenu.label "Finestra">
 <!ENTITY zoomWindow.label "Amplia">

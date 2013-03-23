@@ -56,13 +56,13 @@
 <!ENTITY zotero.preferences.groups.childFiles "zugehörige Schnappschüsse und importierte Dateien">
 <!ENTITY zotero.preferences.groups.childLinks "zugehörige Links">
 <!ENTITY zotero.preferences.groups.childNotes "zugehörige Notizen">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "Tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Beim Kopieren von Einträgen zwischen Bibliotheken übernehmen:">
 <!ENTITY zotero.preferences.items "Einträge">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Änderungen werden nur in neuen Fenstern wirksam">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Ausgewählte Eintragszitationen in die Zwischenablage kopieren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Ausgewählte Einträge in die Zwischenablage kopieren">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus auf Bibliotheksspalte">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import aus der Zwischenablage">
 <!ENTITY zotero.preferences.keys.library "Bibliothek">
 <!ENTITY zotero.preferences.keys.newItem "Neuen Eintrag erstellen">
@@ -137,15 +137,15 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "für weitere Informationen">
 <!ENTITY zotero.preferences.proxies.desc_before_link "Zotero leitet Anfragen transparent durch gespeicherte Proxys um. Siehe die">
 <!ENTITY zotero.preferences.proxies.desc_link "Proxy-Dokumentation">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Proxy Weiterleitung de-aktivieren bei diesen Domain Bestandteilen">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Proxy-Weiterleitung de-aktivieren bei diesen Domain-Bestandteilen:">
 <!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Dateiname (z. B. index.html)">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Hostname der Proxy-Site (z. B. www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Hostname der Zieladresse (z. B. www.zotero.org)">
 <!ENTITY zotero.preferences.proxies.hostname "Hostname">
 <!ENTITY zotero.preferences.proxies.multiSite "Mehrere Seiten">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Pfad der Proxy-Seite ohne den vorangestellten Slash (z. B. about/index.html)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Pfad der Zieladresse ohne den Querstrich am Anfang (z. B. about/index.html)">
 <!ENTITY zotero.preferences.proxies.proxyOptions "Proxy-Optionen">
 <!ENTITY zotero.preferences.proxies.scheme "Schema">
-<!ENTITY zotero.preferences.proxies.transparent "Proxy Weiterleitung aktivieren">
+<!ENTITY zotero.preferences.proxies.transparent "Proxy-Weiterleitung aktivieren">
 <!ENTITY zotero.preferences.proxies.variables "Sie können die folgenden Variablen in Ihrem Proxy-Schema verwenden:">
 <!ENTITY zotero.preferences.quickCopy.caption "Quick-Copy">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Als HTML kopieren">

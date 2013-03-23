@@ -14,5 +14,5 @@
 <!ENTITY zotero.search.search "Искать">
 <!ENTITY zotero.search.textModes.phrase "Фраза">
 <!ENTITY zotero.search.textModes.phraseBinary "Фраза (вкл. двоичные файлы)">
-<!ENTITY zotero.search.textModes.regexp "Типовое выражение">
-<!ENTITY zotero.search.textModes.regexpCS "Типовое выражение (с учетом регистра)">
+<!ENTITY zotero.search.textModes.regexp "Регулярное выражение">
+<!ENTITY zotero.search.textModes.regexpCS "Регулярное выражение (с учетом регистра)">

@@ -1,17 +1,17 @@
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY aboutProduct.label "About &brandShortName;">
-<!ENTITY addons.label "Add-ons">
+<!ENTITY aboutProduct.label "Om &brandShortName;">
+<!ENTITY addons.label "Tillägg">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchPageDirectionItem.label "Växla sidans läge">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 <!ENTITY bidiSwitchTextDirectionItem.label "Växla textflöde">
-<!ENTITY bringAllToFront.label "Bring All to Front">
+<!ENTITY bringAllToFront.label "Visa alla">
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.label "Stäng">
-<!ENTITY copyBibliographyCmd.label "Copy Bibliography">
-<!ENTITY copyCitationCmd.label "Copy Citation">
+<!ENTITY copyBibliographyCmd.label "Kopiera källförteckning">
+<!ENTITY copyCitationCmd.label "Kopiera citering">
 <!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.label "Kopiera">
@@ -24,14 +24,14 @@
 <!ENTITY editMenu.accesskey "E">
 <!ENTITY editMenu.label "Redigera">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY fileMenu.label "File">
+<!ENTITY fileMenu.label "Fil">
 <!ENTITY findAgainCmd.accesskey "g">
 <!ENTITY findAgainCmd.commandkey "g">
 <!ENTITY findAgainCmd.commandkey2 "VK_F3">
 <!ENTITY findAgainCmd.label "Hitta igen">
 <!ENTITY findCmd.accesskey "F">
 <!ENTITY findCmd.commandkey "f">
-<!ENTITY findCmd.label "Find">
+<!ENTITY findCmd.label "Sök">
 <!ENTITY findOnCmd.accesskey "F">
 <!ENTITY findOnCmd.commandkey "f">
 <!ENTITY findOnCmd.label "Sök på denna sida…">
@@ -53,61 +53,61 @@
 <!ENTITY fullZoomToggleCmd.accesskey "T">
 <!ENTITY fullZoomToggleCmd.label "Zooma endast text">
 <!ENTITY helpCheckForUpdates.accesskey "U">
-<!ENTITY helpCheckForUpdates.label "Check for Updates…">
+<!ENTITY helpCheckForUpdates.label "Sök efter uppdateringar...">
 <!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpFeedbackPage.label "Submit Feedback…">
+<!ENTITY helpFeedbackPage.label "Skicka återkoppling...">
 <!ENTITY helpMac.commandkey "?">
 <!ENTITY helpMenu.accesskey "H">
-<!ENTITY helpMenu.label "Help">
+<!ENTITY helpMenu.label "Hjälp">
 <!ENTITY helpMenuWin.accesskey "H">
-<!ENTITY helpMenuWin.label "Help">
+<!ENTITY helpMenuWin.label "Hjälp">
 <!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpReportErrors.label "Report Errors to Zotero…">
+<!ENTITY helpReportErrors.label "Rapportera fel till Zotero...">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpTroubleshootingInfo.label "Troubleshooting Information">
+<!ENTITY helpTroubleshootingInfo.label "Felsökningsinformation">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Hide Others">
+<!ENTITY hideOtherAppsCmdMac.label "Göm övriga">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideThisAppCmdMac.label "Hide &brandShortName;">
+<!ENTITY hideThisAppCmdMac.label "Göm &brandShortName;">
 <!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minimize">
+<!ENTITY minimizeWindow.label "Minimera">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "Utskriftsformat…">
 <!ENTITY pasteCmd.accesskey "P">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "Klistra in">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmd.label "Val…">
+<!ENTITY preferencesCmd.label "Alternativ…">
 <!ENTITY preferencesCmdMac.commandkey ",">
-<!ENTITY preferencesCmdMac.label "Preferences…">
+<!ENTITY preferencesCmdMac.label "Inställningar...">
 <!ENTITY preferencesCmdUnix.accesskey "n">
 <!ENTITY preferencesCmdUnix.label "Inställningar">
 <!ENTITY printCmd.accesskey "U">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "Skriv ut…">
 <!ENTITY productHelp.accesskey "H">
-<!ENTITY productHelp.label "Support and Documentation">
+<!ENTITY productHelp.label "Hjälp och dokumentation">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 <!ENTITY quitApplicationCmd.label "Avsluta">
 <!ENTITY quitApplicationCmdMac.key "Q">
 <!ENTITY quitApplicationCmdMac.label "Avsluta Zotero">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
-<!ENTITY quitApplicationCmdWin.label "Gå ur">
+<!ENTITY quitApplicationCmdWin.label "Avsluta">
 <!ENTITY redoCmd.accesskey "R">
 <!ENTITY redoCmd.key "Y">
 <!ENTITY redoCmd.label "Gör om">
 <!ENTITY saveCmd.accesskey "A">
 <!ENTITY saveCmd.key "S">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "Spara…">
 <!ENTITY selectAllCmd.accesskey "A">
 <!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.label "Välj alla">
-<!ENTITY servicesMenuMac.label "Services">
-<!ENTITY showAllAppsCmdMac.label "Show All">
+<!ENTITY selectAllCmd.label "Markera allt">
+<!ENTITY servicesMenuMac.label "Tjänster">
+<!ENTITY showAllAppsCmdMac.label "Visa alla">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY toolsMenu.label "Tools">
+<!ENTITY toolsMenu.label "Verktyg">
 <!ENTITY undoCmd.accesskey "U">
 <!ENTITY undoCmd.key "Z">
 <!ENTITY undoCmd.label "Ångra">
-<!ENTITY windowMenu.label "Window">
+<!ENTITY windowMenu.label "Fönster">
 <!ENTITY zoomWindow.label "Zoom">

@@ -1,13 +1,13 @@
 <!ENTITY zotero.about.additionalSoftware "Dodatkowe oprogramowanie i standardy:">
-<!ENTITY zotero.about.close "Close">
+<!ENTITY zotero.about.close "Zamknij">
 <!ENTITY zotero.about.localizations "Lokalizacje:">
 <!ENTITY zotero.alumni "Współtwórcy:">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.citationProcessing "Przetwarzanie cytowań i bibliografii">
 <!ENTITY zotero.createdby "Stworzone przez:">
 <!ENTITY zotero.developers "Twórcy:">
-<!ENTITY zotero.director "Director:">
+<!ENTITY zotero.director "Kierownik:">
 <!ENTITY zotero.directors "Szefowie projektu:">
 <!ENTITY zotero.executiveProducer "Producent wykonawczy:">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Więcej informacji o twórcach i podziękowania">
 <!ENTITY zotero.thanks "Podziękowania:">
 <!ENTITY zotero.version "wersja">

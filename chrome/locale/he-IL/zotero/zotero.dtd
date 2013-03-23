@@ -13,10 +13,10 @@
 <!ENTITY zotero.bibliography.print.label "הדפסה">
 <!ENTITY zotero.bibliography.saveAsHTML.label "שמור כ-HTML">
 <!ENTITY zotero.bibliography.saveAsRTF.label "שמור כ-RTF">
-<!ENTITY zotero.bibliography.style.label "Citation Style:">
+<!ENTITY zotero.bibliography.style.label "סגנון ציטוט">
 <!ENTITY zotero.bibliography.title "צור ביבליוגרפיה">
 <!ENTITY zotero.charset.label "Character Encoding">
-<!ENTITY zotero.citation.editorWarning.label "Editor warning">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 <!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
 <!ENTITY zotero.citation.line "שורה">
 <!ENTITY zotero.citation.page "עמוד">
@@ -32,8 +32,8 @@
 <!ENTITY zotero.downloadManager.label "Save to Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
-<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
 <!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 <!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
 <!ENTITY zotero.errorReport.reportID "Report ID:">
@@ -45,18 +45,18 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "אפשרויות תרגום">
 <!ENTITY zotero.file.choose.label "Choose File...">
 <!ENTITY zotero.file.noneSelected.label "No file selected">
-<!ENTITY zotero.general.delete "Delete">
+<!ENTITY zotero.general.delete "מחק">
 <!ENTITY zotero.general.deselectAll "Deselect All">
-<!ENTITY zotero.general.edit "Edit">
-<!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.edit "ערוך">
+<!ENTITY zotero.general.note "פתק:">
 <!ENTITY zotero.general.optional "(Optional)">
-<!ENTITY zotero.general.selectAll "Select All">
+<!ENTITY zotero.general.selectAll "בחר הכל">
 <!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.classicView.label "תצוגה קלאסית">
 <!ENTITY zotero.integration.docPrefs.title "Document Preferences">
 <!ENTITY zotero.integration.editBibliography.title "ערוך ביבליוגרפיה">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and LibreOffice, but may be accidentally modified.">
-<!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified.">
+<!ENTITY zotero.integration.prefs.bookmarks.label "סימניות">
 <!ENTITY zotero.integration.prefs.displayAs.label "Display Citations As:">
 <!ENTITY zotero.integration.prefs.endnotes.label "Endnotes">
 <!ENTITY zotero.integration.prefs.footnotes.label "Footnotes">
@@ -78,11 +78,11 @@
 <!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
 <!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 <!ENTITY zotero.integration.references.label "References in Bibliography">
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.integration.showEditor.label "הצג עורך">
 <!ENTITY zotero.item.add "הוספה">
-<!ENTITY zotero.item.attachment.file.show "Show File">
+<!ENTITY zotero.item.attachment.file.show "הצג קובץ">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 <!ENTITY zotero.item.textTransform "Transform Text">
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.textTransform.titlecase "Title Case">
@@ -109,13 +109,13 @@
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
 <!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
 <!ENTITY zotero.items.menu.attach.link "Attach Link to Current Page">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI...">
-<!ENTITY zotero.items.menu.attach.note "Add Note">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
+<!ENTITY zotero.items.menu.attach.note "הוסף פתק">
 <!ENTITY zotero.items.menu.attach.snapshot "Attach Snapshot of Current Page">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
-<!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
+<!ENTITY zotero.items.menu.duplicateItem "Duplicate Item">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
-<!ENTITY zotero.items.menu.mergeItems "Merge items">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
@@ -124,8 +124,8 @@
 <!ENTITY zotero.items.numChildren_column "+">
 <!ENTITY zotero.items.pages_column "Pages">
 <!ENTITY zotero.items.place_column "Place">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.publisher_column "Publisher">
+<!ENTITY zotero.items.publication_column "הוצאה לאור">
+<!ENTITY zotero.items.publisher_column "מוציא לאור">
 <!ENTITY zotero.items.reporter_column "Reporter">
 <!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 <!ENTITY zotero.items.rights_column "זכויות">
@@ -133,20 +133,20 @@
 <!ENTITY zotero.items.series_column "Series">
 <!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.title_column "כותרת">
-<!ENTITY zotero.items.type_column "Type">
+<!ENTITY zotero.items.type_column "סוג">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "שנה">
 <!ENTITY zotero.lookup.button.search "Search">
-<!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
+<!ENTITY zotero.lookup.description "Enter one or more ISBNs, DOIs, or PMIDs to look up in the box below.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "Edit in a separate window">
 <!ENTITY zotero.progress.title "Progress">
 <!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
+<!ENTITY zotero.proxy.recognized.ignore.label "התעלם">
 <!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
-<!ENTITY zotero.recognizePDF.cancel.label "Cancel">
+<!ENTITY zotero.recognizePDF.cancel.label "ביטול">
 <!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
 <!ENTITY zotero.recognizePDF.itemName.label "Item Name">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
@@ -155,10 +155,10 @@
 <!ENTITY zotero.richText.italic.label "Italic">
 <!ENTITY zotero.richText.subscript.label "Subscript">
 <!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.underline.label "Underline">
+<!ENTITY zotero.richText.underline.label "קו תחתי">
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
-<!ENTITY zotero.rtfScan.cancel.label "Cancel">
-<!ENTITY zotero.rtfScan.citation.label "Citation">
+<!ENTITY zotero.rtfScan.cancel.label "בטל">
+<!ENTITY zotero.rtfScan.citation.label "ציטוט">
 <!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
 <!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
@@ -173,7 +173,7 @@
 <!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
 <!ENTITY zotero.rtfScan.outputFile.label "Output File">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
-<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
+<!ENTITY zotero.rtfScan.scanPage.label "סורק אחר ציטוטים">
 <!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
 <!ENTITY zotero.rtfScan.title "RTF Scan">
 <!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
@@ -192,14 +192,14 @@
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
-<!ENTITY zotero.sync.storage.downloads "Downloads:">
-<!ENTITY zotero.sync.storage.progress "Progress:">
+<!ENTITY zotero.sync.storage.downloads "הורדות:">
+<!ENTITY zotero.sync.storage.progress "התקדמות:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
-<!ENTITY zotero.tabs.attachments.label "Attachments">
+<!ENTITY zotero.tabs.attachments.label "צרופות">
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Notes">
 <!ENTITY zotero.tabs.related.label "Related">
-<!ENTITY zotero.tabs.tags.label "Tags">
+<!ENTITY zotero.tabs.tags.label "תגיות">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Deselect all">
 <!ENTITY zotero.tagSelector.clearVisible "Deselect visible">
@@ -221,20 +221,20 @@
 <!ENTITY zotero.toolbar.attachment.weblink "שמור קישור לעמוד נוכחי">
 <!ENTITY zotero.toolbar.cancelDuplicatesView.label "Cancel duplicates view">
 <!ENTITY zotero.toolbar.cancelOrphansView.label "Cancel orphans view">
-<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
+<!ENTITY zotero.toolbar.duplicate.label "הצג כפילויות">
 <!ENTITY zotero.toolbar.duplicatesView.label "Duplicates view">
 <!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.export.label "Export Library...">
 <!ENTITY zotero.toolbar.import.label "Import...">
 <!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
 <!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
-<!ENTITY zotero.toolbar.lookup.label "Add Item by Identifier">
+<!ENTITY zotero.toolbar.lookup.label "Add Item(s) by Identifier">
 <!ENTITY zotero.toolbar.moreItemTypes.label "More">
 <!ENTITY zotero.toolbar.newCollection.label "...אוסף חדש">
 <!ENTITY zotero.toolbar.newGroup "New Group...">
 <!ENTITY zotero.toolbar.newItem.label "פריט חדש">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Create New Item from Current Page">
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Create Web Page Item from Current Page">
+<!ENTITY zotero.toolbar.newNote "פתק חדש">
 <!ENTITY zotero.toolbar.newSavedSearch.label "...חיפוש שמור חדש">
 <!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
 <!ENTITY zotero.toolbar.note.child "Add Child Note">

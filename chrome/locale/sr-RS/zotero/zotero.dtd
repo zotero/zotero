@@ -16,7 +16,7 @@
 <!ENTITY zotero.bibliography.style.label "Стил цитата:">
 <!ENTITY zotero.bibliography.title "Направи библиографију">
 <!ENTITY zotero.charset.label "Character Encoding">
-<!ENTITY zotero.citation.editorWarning.label "Editor warning">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 <!ENTITY zotero.citation.keepSorted.label "Држи изворе поредане">
 <!ENTITY zotero.citation.line "Ред">
 <!ENTITY zotero.citation.page "Страна">
@@ -32,8 +32,8 @@
 <!ENTITY zotero.downloadManager.label "Save to Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
-<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
 <!ENTITY zotero.errorReport.notReviewed "Извештаји о грешкама се обично не прегледају, осим ако се не помињу у форумима.">
 <!ENTITY zotero.errorReport.postToForums "Оставите поруку на форуму за Зотеро (forums.zotero.org) са овим бројем извештаја, описом проблема и свим корацима потребним да се понови грешка.">
 <!ENTITY zotero.errorReport.reportID "Број извештаја:">
@@ -55,7 +55,7 @@
 <!ENTITY zotero.integration.classicView.label "Classic View">
 <!ENTITY zotero.integration.docPrefs.title "Поставке документа">
 <!ENTITY zotero.integration.editBibliography.title "Уреди библиографију">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Пречице су сачуване кроз Microsoft Word и LibreOffice, али могу бити нехотично промењене.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Пречице су сачуване кроз Microsoft Word и OpenOffice, али могу бити нехотично промењене.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Пречице">
 <!ENTITY zotero.integration.prefs.displayAs.label "Прикажи цитате као:">
 <!ENTITY zotero.integration.prefs.endnotes.label "Енднота">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.item.add "Додај">
 <!ENTITY zotero.item.attachment.file.show "Прикажи датотеку">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 <!ENTITY zotero.item.textTransform "Преиначи текст">
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.textTransform.titlecase "Величина слова у наслову">
@@ -109,13 +109,13 @@
 <!ENTITY zotero.items.menu.attach.file "Додај сачувану копију датотеке...">
 <!ENTITY zotero.items.menu.attach.fileLink "Приложи везу датотеци...">
 <!ENTITY zotero.items.menu.attach.link "Додај везу до тренутне странице">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI...">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.note "Додај белешку">
 <!ENTITY zotero.items.menu.attach.snapshot "Додај снимак тренутне странице">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Умножи изабрану ставку">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
-<!ENTITY zotero.items.menu.mergeItems "Merge items">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
@@ -137,7 +137,7 @@
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Година">
 <!ENTITY zotero.lookup.button.search "Search">
-<!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
+<!ENTITY zotero.lookup.description "Enter one or more ISBNs, DOIs, or PMIDs to look up in the box below.">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "Уреди у одвојеном прозору">
 <!ENTITY zotero.progress.title "Напредак">
@@ -228,7 +228,7 @@
 <!ENTITY zotero.toolbar.import.label "Увези...">
 <!ENTITY zotero.toolbar.importFromClipboard "Увези из оставе">
 <!ENTITY zotero.toolbar.lookup "Потражи по идентификатору...">
-<!ENTITY zotero.toolbar.lookup.label "Add Item by Identifier">
+<!ENTITY zotero.toolbar.lookup.label "Add Item(s) by Identifier">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Више">
 <!ENTITY zotero.toolbar.newCollection.label "Нова збирка...">
 <!ENTITY zotero.toolbar.newGroup "Нова група...">

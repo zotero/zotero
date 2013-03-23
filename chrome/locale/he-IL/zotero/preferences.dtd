@@ -11,13 +11,13 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
 <!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
 <!ENTITY zotero.preferences.citationOptions.caption "אפשרויות ציטוט">
-<!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.cite.styles "סגנונות">
 <!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
-<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.cite.styles.styleManager "מנהל סגנונות">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "כותרת">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
-<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
+<!ENTITY zotero.preferences.cite.wordProcessors "מעבדי תמלילים">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
@@ -26,7 +26,7 @@
 <!ENTITY zotero.preferences.dataDir.choose "בחר...">
 <!ENTITY zotero.preferences.dataDir.custom "מותאם אישית:">
 <!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
 <!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "בדוק שלמות מסד נתונים">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
@@ -62,7 +62,7 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
 <!ENTITY zotero.preferences.keys.library "ספרייה">
 <!ENTITY zotero.preferences.keys.newItem "צור פריט חדש">
@@ -111,7 +111,7 @@
 <!ENTITY zotero.preferences.openAboutConfig "Open about:config">
 <!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
 <!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
-<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+<!ENTITY zotero.preferences.openurl.caption "פתח קישור">
 <!ENTITY zotero.preferences.openurl.custom "מותאם אישית...">
 <!ENTITY zotero.preferences.openurl.search "Search for resolvers">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
@@ -119,13 +119,13 @@
 <!ENTITY zotero.preferences.parseRISRefer "השתמש ב-Zotero להורדה של קבצי RIS/Refer">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "מתקדם">
-<!ENTITY zotero.preferences.prefpane.cite "Cite">
-<!ENTITY zotero.preferences.prefpane.export "Export">
+<!ENTITY zotero.preferences.prefpane.cite "צטט">
+<!ENTITY zotero.preferences.prefpane.export "יצוא">
 <!ENTITY zotero.preferences.prefpane.general "כללי">
 <!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
 <!ENTITY zotero.preferences.prefpane.locate "Locate">
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
-<!ENTITY zotero.preferences.prefpane.search "Search">
+<!ENTITY zotero.preferences.prefpane.search "חיפוש">
 <!ENTITY zotero.preferences.prefpane.sync "Sync">
 <!ENTITY zotero.preferences.prefpane.sync.reset "Reset">
 <!ENTITY zotero.preferences.prefpane.sync.settings "Settings">
@@ -170,11 +170,11 @@
 <!ENTITY zotero.preferences.showIn "Load Zotero in:">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
-<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
+<!ENTITY zotero.preferences.showIn.separateTab "לשונית נפרדת">
 <!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
 <!ENTITY zotero.preferences.statusBarIcon.none "None">
 <!ENTITY zotero.preferences.sync.about "About Syncing">
-<!ENTITY zotero.preferences.sync.createAccount "Create Account">
+<!ENTITY zotero.preferences.sync.createAccount "נוצר חשבון">
 <!ENTITY zotero.preferences.sync.fileSyncing "File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
@@ -184,9 +184,9 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "terms and conditions">
-<!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
+<!ENTITY zotero.preferences.sync.fileSyncing.url "קישור:">
 <!ENTITY zotero.preferences.sync.lostPassword "Lost Password?">
-<!ENTITY zotero.preferences.sync.password "Password:">
+<!ENTITY zotero.preferences.sync.password "סיסמה:">
 <!ENTITY zotero.preferences.sync.reset "Reset">
 <!ENTITY zotero.preferences.sync.reset.button "Reset...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync with Zotero Server">
@@ -202,7 +202,7 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sync automatically">
 <!ENTITY zotero.preferences.sync.syncServer "Zotero Sync Server">
-<!ENTITY zotero.preferences.sync.username "Username:">
+<!ENTITY zotero.preferences.sync.username "שם משתמש:">
 <!ENTITY zotero.preferences.title "Zotero העדפות">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">

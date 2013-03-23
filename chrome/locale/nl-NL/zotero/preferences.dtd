@@ -56,13 +56,13 @@
 <!ENTITY zotero.preferences.groups.childFiles "bijbehorende snapshots en geïmporteerde bestanden">
 <!ENTITY zotero.preferences.groups.childLinks "bijbehorende koppelingen">
 <!ENTITY zotero.preferences.groups.childNotes "bijbehorende aantekeningen">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "labels">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Bij het kopiëren van objecten tussen bibliotheken, kopieer ook:">
 <!ENTITY zotero.preferences.items "objecten">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Aanpassingen worden pas zichtbaar in nieuwe vensters">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Verwijzingen van geselecteerde objecten naar klembord kopiëren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Geselecteerde objecten naar klembord kopiëren">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importeren vanaf klembord">
 <!ENTITY zotero.preferences.keys.library "Bibliotheek">
 <!ENTITY zotero.preferences.keys.newItem "Nieuw object aanmaken">

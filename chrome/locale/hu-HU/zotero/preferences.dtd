@@ -62,7 +62,7 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "A változások csak az új ablakokban érvényesülnek">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kiválasztott hivatkozás másolása a vágólapra">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kiválasztott elemek másolása a vágólapra">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importálás a vágólapról">
 <!ENTITY zotero.preferences.keys.library "Könyvtár">
 <!ENTITY zotero.preferences.keys.newItem "Új elem létrehozása">

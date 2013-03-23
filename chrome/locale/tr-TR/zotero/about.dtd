@@ -1,13 +1,13 @@
 <!ENTITY zotero.about.additionalSoftware "Üçüncü Parti Yazılımlar ve Standartlar:">
-<!ENTITY zotero.about.close "Close">
+<!ENTITY zotero.about.close "Kapat">
 <!ENTITY zotero.about.localizations "Yerelleştirenler:">
-<!ENTITY zotero.alumni "Mezun:">
+<!ENTITY zotero.alumni "Mezunlar:">
 <!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Yaratan:">
 <!ENTITY zotero.developers "Geliştiriciler:">
-<!ENTITY zotero.director "Director:">
+<!ENTITY zotero.director "Yönetici:">
 <!ENTITY zotero.directors "Yöneticiler:">
 <!ENTITY zotero.executiveProducer "Uygulayıcı Yapımcı:">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Diğer Katılımcılar ve Teşekkürler">
 <!ENTITY zotero.thanks "Özel teşekkürler:">
 <!ENTITY zotero.version "sürüm">

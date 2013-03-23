@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Lisade hankimine...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Ühtegi tekstiredaktori lisa ei ole paigaldatud.">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Tavaline tsitaadi lisamise vorm">
 <!ENTITY zotero.preferences.dataDir "Lao asukoht">
 <!ENTITY zotero.preferences.dataDir.choose "Valida...">
 <!ENTITY zotero.preferences.dataDir.custom "Oma valik:">
@@ -49,7 +49,7 @@
 <!ENTITY zotero.preferences.fontSize.medium "Keskmine">
 <!ENTITY zotero.preferences.fontSize.notes "Märkuse fondisuurus">
 <!ENTITY zotero.preferences.fontSize.small "Väike">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fontSize.xlarge "XL">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Lehekülgede ülemhulk, mida faili kohta indekseeritakse:">
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Tähemärkide ülemhulk, mida faili kohta indekseeritakse:">
 <!ENTITY zotero.preferences.groups "Grupid">
@@ -62,7 +62,7 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Muutused saavad nähtavaks alles uues aknas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopeerida valitud kirje tsiteeringud lõikepuhvrisse">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopeerida valitud kirjed lõikepuhvrisse">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Lõikepuhvrist importimine">
 <!ENTITY zotero.preferences.keys.library "Raamatukogu">
 <!ENTITY zotero.preferences.keys.newItem "Uue kirje loomine">
@@ -101,16 +101,16 @@
 <!ENTITY zotero.preferences.lang.transliteration "Transliteration">
 <!ENTITY zotero.preferences.lang.ui "UI:">
 <!ENTITY zotero.preferences.lang.variant "Variant">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
+<!ENTITY zotero.preferences.locate.addDescription "Otsingumootori lisamiseks külastage vastavat otsingumootorit brauseris ja valige Firefoxi otsinguribalt &#37;Lisa&#37;. Kui te järgmisel korral avate Zotero eelistused, siis on siinsamas dialoogis olemas võimalus seda otsingumootorit rakendada.">
 <!ENTITY zotero.preferences.locate.description "Kirjeldus">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikli otsingumootori haldaja">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Otsingumootor laiendab Otsingu rippmenüü võimalusi infopaneelil. Otsingumootorite rakendamine lisab võimaluse teie raamatukogus leiduvate kirjete otsimiseks webist.">
 <!ENTITY zotero.preferences.locate.name "Nimi">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Algseaded taastada">
 <!ENTITY zotero.preferences.miscellaneous "Mitmesugust">
-<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
+<!ENTITY zotero.preferences.openAboutConfig "Avada about:config">
+<!ENTITY zotero.preferences.openCSLEdit "Avada CSL redaktor">
+<!ENTITY zotero.preferences.openCSLPreview "Avada CSL eelvaade">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 <!ENTITY zotero.preferences.openurl.custom "Kohandatud...">
 <!ENTITY zotero.preferences.openurl.search "Otsida lahendajaid">
@@ -140,7 +140,7 @@
 <!ENTITY zotero.preferences.proxies.disableByDomain "Proksile ümbersuunamine peatada, kui domeeninimi sisaldab ">
 <!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Failinimi (e.g., index.html)">
 <!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Proksitava lehekülje nimi (nt www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.hostname "Hostname">
+<!ENTITY zotero.preferences.proxies.hostname "Hostinimi">
 <!ENTITY zotero.preferences.proxies.multiSite "Mitme-lehekülje">
 <!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Lehekülje rada ilma kaldkriipsuta (nt about/index.html)">
 <!ENTITY zotero.preferences.proxies.proxyOptions "Proksi seaded">
@@ -168,7 +168,7 @@
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF indekseerimine">
 <!ENTITY zotero.preferences.settings "Settings">
 <!ENTITY zotero.preferences.showIn "Laadida Zotero:">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn.appTab "Rakendus tab">
 <!ENTITY zotero.preferences.showIn.browserPane "Brauseri paanil">
 <!ENTITY zotero.preferences.showIn.separateTab "Eraldi">
 <!ENTITY zotero.preferences.statusBarIcon "Staatusriba ikoon:">

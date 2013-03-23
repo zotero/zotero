@@ -6,7 +6,7 @@
 <!ENTITY zotero.search.joinMode.all "tudo">
 <!ENTITY zotero.search.joinMode.any "qualquer">
 <!ENTITY zotero.search.joinMode.prefix "Comparar">
-<!ENTITY zotero.search.joinMode.suffix "do exemplo:">
+<!ENTITY zotero.search.joinMode.suffix "do seguinte:">
 <!ENTITY zotero.search.name "Nome:">
 <!ENTITY zotero.search.noChildren "Mostrar apenas itens no nível mais alto">
 <!ENTITY zotero.search.recursive.label "Pesquisar subpastas">

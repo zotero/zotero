@@ -1,13 +1,13 @@
-<!ENTITY zotero.about.additionalSoftware "ซอฟต์แวร์อื่นและมาตรฐาน:">
-<!ENTITY zotero.about.close "Close">
-<!ENTITY zotero.about.localizations "หลากภาษา:">
+<!ENTITY zotero.about.additionalSoftware "ซอฟต์แวร์จากบุคคลภายนอกและมาตรฐาน:">
+<!ENTITY zotero.about.close "ปิด">
+<!ENTITY zotero.about.localizations "การแปลเป็นภาษาถิ่น:">
 <!ENTITY zotero.alumni "ศิษย์เก่า:">
 <!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
-<!ENTITY zotero.createdby "สร้างโดย:">
+<!ENTITY zotero.createdby "สร้างสรรค์โดย:">
 <!ENTITY zotero.developers "ผู้พัฒนา:">
-<!ENTITY zotero.director "Director:">
+<!ENTITY zotero.director "ผู้ควบคุม:">
 <!ENTITY zotero.directors "ผู้ควบคุม:">
 <!ENTITY zotero.executiveProducer "ผู้อำนวยการสร้างฝ่ายบริหาร:">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "เกียรติยศและกิตติกรรมประกาศ">
 <!ENTITY zotero.thanks "ขอบคุณเป็นพิเศษ:">
 <!ENTITY zotero.version "รุ่น">

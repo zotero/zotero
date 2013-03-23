@@ -9,7 +9,7 @@
 <!ENTITY zotero.search.joinMode.suffix "condition(s) suivante(s) :">
 <!ENTITY zotero.search.name "Nom :">
 <!ENTITY zotero.search.noChildren "Ne montrer que les objets de niveau supérieur">
-<!ENTITY zotero.search.recursive.label "Rechercher dans les sous-dossiers">
+<!ENTITY zotero.search.recursive.label "Rechercher dans les sous-collections">
 <!ENTITY zotero.search.saveSearch "Enregistrer la recherche">
 <!ENTITY zotero.search.search "Rechercher">
 <!ENTITY zotero.search.textModes.phrase "Expression">

@@ -70,7 +70,7 @@
 <!ENTITY hideThisAppCmdMac.commandkey "H">
 <!ENTITY hideThisAppCmdMac.label "លាក់​ និង ឈ្មោះម៉ាក;">
 <!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "អប្បបរមា">
+<!ENTITY minimizeWindow.label "អប្បបរមានីយកម្ម">
 <!ENTITY pageSetupCmd.accesskey "U">
 <!ENTITY pageSetupCmd.label "Page Setup…">
 <!ENTITY pasteCmd.accesskey "P">
@@ -82,7 +82,7 @@
 <!ENTITY preferencesCmdMac.label "ជម្រើសអាទិភាព…">
 <!ENTITY preferencesCmdUnix.accesskey "n">
 <!ENTITY preferencesCmdUnix.label "ជម្រើសអាទិភាព">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "P">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.label "Print…">
 <!ENTITY productHelp.accesskey "H">

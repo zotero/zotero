@@ -1,5 +1,5 @@
 <!ENTITY zotero.about.additionalSoftware "Programas y normativas externos:">
-<!ENTITY zotero.about.close "Close">
+<!ENTITY zotero.about.close "Cerrar">
 <!ENTITY zotero.about.localizations "Traducciones:">
 <!ENTITY zotero.alumni "Eméritos:">
 <!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
@@ -8,6 +8,6 @@
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Directores:">
 <!ENTITY zotero.executiveProducer "Productor ejecutivo:">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Más créditos y reconocimientos">
 <!ENTITY zotero.thanks "Agradecimientos especiales:">
 <!ENTITY zotero.version "versión">

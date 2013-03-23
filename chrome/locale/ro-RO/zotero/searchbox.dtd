@@ -14,5 +14,5 @@
 <!ENTITY zotero.search.search "Caută">
 <!ENTITY zotero.search.textModes.phrase "Expresie">
 <!ENTITY zotero.search.textModes.phraseBinary "Expresie (include fișierele binare)">
-<!ENTITY zotero.search.textModes.regexp "Regexp">
-<!ENTITY zotero.search.textModes.regexpCS "Regexp (diferențiază între caracterele minuscule și cele majuscule)">
+<!ENTITY zotero.search.textModes.regexp "Expresii regulate">
+<!ENTITY zotero.search.textModes.regexpCS "Expresii regulate (diferențiază între caracterele minuscule și cele majuscule)">

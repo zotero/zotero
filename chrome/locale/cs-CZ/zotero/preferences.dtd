@@ -11,17 +11,17 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Zobrazit při exportu možnost zvolit kódování">
 <!ENTITY zotero.preferences.charset.importCharset "Importovat kódování znaků">
 <!ENTITY zotero.preferences.citationOptions.caption "Možnosti citování">
-<!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.cite.styles "Styly">
 <!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
-<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Správce stylů">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
-<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Název">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Aktualizováno">
+<!ENTITY zotero.preferences.cite.wordProcessors "Textové procesory">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Získat doplňky pro textové procesory...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "V současné době nejsou nainstalovány žádné doplňky pro textové procesory.">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Použít pomocí klasického dialogu &quot;Přidat citaci&quot;">
 <!ENTITY zotero.preferences.dataDir "Umístění Datového adresáře">
 <!ENTITY zotero.preferences.dataDir.choose "Vybrat...">
 <!ENTITY zotero.preferences.dataDir.custom "Vlastní:">
@@ -49,20 +49,20 @@
 <!ENTITY zotero.preferences.fontSize.medium "Střední">
 <!ENTITY zotero.preferences.fontSize.notes "Velikost písma poznámek:">
 <!ENTITY zotero.preferences.fontSize.small "Malá">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fontSize.xlarge "Extra velké">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximální počet stran pro indexování na soubor:">
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Maximální počet znaků pro indexování na soubor:">
 <!ENTITY zotero.preferences.groups "Skupiny">
 <!ENTITY zotero.preferences.groups.childFiles "dceřiné snímky a importované soubory">
 <!ENTITY zotero.preferences.groups.childLinks "dceřiné odkazy">
 <!ENTITY zotero.preferences.groups.childNotes "dceřiné poznámky">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "štítky">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Při kopírování položek mezi knihovnami zahrnout:">
 <!ENTITY zotero.preferences.items "položky">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Změny se projeví jen v nových oknech">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopírovat citaci vybrané položky do schránky">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopírovat vybrané položky do schránky">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importovat ze schránky">
 <!ENTITY zotero.preferences.keys.library "Knihovna">
 <!ENTITY zotero.preferences.keys.newItem "Vytvořit novou položku">
@@ -102,15 +102,15 @@
 <!ENTITY zotero.preferences.lang.ui "UI:">
 <!ENTITY zotero.preferences.lang.variant "Variant">
 <!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
-<!ENTITY zotero.preferences.locate.description "Description">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
-<!ENTITY zotero.preferences.locate.name "Name">
-<!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
+<!ENTITY zotero.preferences.locate.description "Popis">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Správce mechanismu pro vyhledávání článků">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "&quot;Mechanismus pro vyhledávání&quot; rozšiřuje možnosti funkce Najít v info panelu. Položky přidané do seznamu níže se přidají do kontextového menu a mohou být použity k nalezení zdrojů z vaší knihovny na webu.">
+<!ENTITY zotero.preferences.locate.name "Jméno">
+<!ENTITY zotero.preferences.locate.restoreDefaults "Obnovit původní nastavení">
 <!ENTITY zotero.preferences.miscellaneous "Různé">
-<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
+<!ENTITY zotero.preferences.openAboutConfig "Otevřít about:config">
+<!ENTITY zotero.preferences.openCSLEdit "Otevřít editor CSL">
+<!ENTITY zotero.preferences.openCSLPreview "Otevřít náhled CSL">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 <!ENTITY zotero.preferences.openurl.custom "Vlastní...">
 <!ENTITY zotero.preferences.openurl.search "Hledat resolvery">
@@ -119,11 +119,11 @@
 <!ENTITY zotero.preferences.parseRISRefer "Použít Zotero pro stažené RIS/Refer soubory">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "Pokročilé">
-<!ENTITY zotero.preferences.prefpane.cite "Cite">
+<!ENTITY zotero.preferences.prefpane.cite "Citování">
 <!ENTITY zotero.preferences.prefpane.export "Export">
 <!ENTITY zotero.preferences.prefpane.general "Obecné">
 <!ENTITY zotero.preferences.prefpane.keys "Klávesové zkratky">
-<!ENTITY zotero.preferences.prefpane.locate "Locate">
+<!ENTITY zotero.preferences.prefpane.locate "Najít">
 <!ENTITY zotero.preferences.prefpane.proxies "Proxy servery">
 <!ENTITY zotero.preferences.prefpane.search "Hledání">
 <!ENTITY zotero.preferences.prefpane.sync "Sync">
@@ -131,13 +131,13 @@
 <!ENTITY zotero.preferences.prefpane.sync.settings "Settings">
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Nějaký řetězec">
 <!ENTITY zotero.preferences.proxies.autoAssociate "Automaticky přiřazovat další adresy">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Automaticky rozpoznávat proxované zdroje">
 <!ENTITY zotero.preferences.proxies.configured "Nastavené proxy servery">
 <!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Cesta k adresáři (např. about/)">
 <!ENTITY zotero.preferences.proxies.desc_after_link ".">
 <!ENTITY zotero.preferences.proxies.desc_before_link "Zotero bude transparentně přesměrovávat požadavky skrz uložené proxy servery. Více informací najdete v">
 <!ENTITY zotero.preferences.proxies.desc_link "dokumentaci k proxy">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Vypnout proxy přesměrování, pokud má doména obsahuje ">
 <!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Jméno (např. index.html)">
 <!ENTITY zotero.preferences.proxies.h_variable "&#37;h - adresa stránky na níž má být přistupováno skrze proxy (např. www.zotero.org)">
 <!ENTITY zotero.preferences.proxies.hostname "Hostname">
@@ -167,13 +167,13 @@
 <!ENTITY zotero.preferences.search.indexStats.words "Slov:">
 <!ENTITY zotero.preferences.search.pdfIndexing "Indexování PDF">
 <!ENTITY zotero.preferences.settings "Settings">
-<!ENTITY zotero.preferences.showIn "Load Zotero in:">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
-<!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
-<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
+<!ENTITY zotero.preferences.showIn "Nahrát Zotero v:">
+<!ENTITY zotero.preferences.showIn.appTab "Panel aplikace">
+<!ENTITY zotero.preferences.showIn.browserPane "Panel prohlížeče">
+<!ENTITY zotero.preferences.showIn.separateTab "Samostatný panel">
 <!ENTITY zotero.preferences.statusBarIcon "Ikona ve stavovém řádku:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Žádná">
-<!ENTITY zotero.preferences.sync.about "About Syncing">
+<!ENTITY zotero.preferences.sync.about "O synchronizaci">
 <!ENTITY zotero.preferences.sync.createAccount "Vytvořit účet">
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronizace souborů">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "Více o synchronizaci souborů">
@@ -204,8 +204,8 @@
 <!ENTITY zotero.preferences.sync.syncServer "Server Zotera pro synchronizaci">
 <!ENTITY zotero.preferences.sync.username "Uživatelské jméno:">
 <!ENTITY zotero.preferences.title "Nastavení aplikace Zotero">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dní">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaticky odstranit položky v koši smazané déle než">
 <!ENTITY zotero.preferences.updateNow "Aktualizovat nyní">
 <!ENTITY zotero.preferences.userInterface "Uživatelské rozhraní">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Umožnit, aby zotero.org upravovalo obsah na základě aktuální verze Zotera.">

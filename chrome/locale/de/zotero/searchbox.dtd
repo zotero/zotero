@@ -9,7 +9,7 @@
 <!ENTITY zotero.search.joinMode.suffix "der folgenden:">
 <!ENTITY zotero.search.name "Name:">
 <!ENTITY zotero.search.noChildren "Nur Einträge der obersten Ebene anzeigen">
-<!ENTITY zotero.search.recursive.label "Unterverzeichnisse durchsuchen">
+<!ENTITY zotero.search.recursive.label "Untersammlungen durchsuchen">
 <!ENTITY zotero.search.saveSearch "Suche speichern">
 <!ENTITY zotero.search.search "Suchen">
 <!ENTITY zotero.search.textModes.phrase "Phrase">

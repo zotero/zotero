@@ -2,14 +2,14 @@
 <!ENTITY zotero.search.date.units.days "días">
 <!ENTITY zotero.search.date.units.months "meses">
 <!ENTITY zotero.search.date.units.years "años">
-<!ENTITY zotero.search.includeParentsAndChildren "Incluír los ítems padres e hijos de los encontrados">
+<!ENTITY zotero.search.includeParentsAndChildren "Incluir los ítems padres e hijos de los ítems encontrados">
 <!ENTITY zotero.search.joinMode.all "todos">
 <!ENTITY zotero.search.joinMode.any "cualquiera de">
 <!ENTITY zotero.search.joinMode.prefix "Patrón">
-<!ENTITY zotero.search.joinMode.suffix "los siguientes:">
+<!ENTITY zotero.search.joinMode.suffix "de los siguientes:">
 <!ENTITY zotero.search.name "Nombre:">
 <!ENTITY zotero.search.noChildren "Mostrar sólo los ítems de primer nivel">
-<!ENTITY zotero.search.recursive.label "Buscar en carpetas interiores">
+<!ENTITY zotero.search.recursive.label "Buscar en subcarpetas">
 <!ENTITY zotero.search.saveSearch "Guardar búsqueda">
 <!ENTITY zotero.search.search "Buscar">
 <!ENTITY zotero.search.textModes.phrase "Frase">

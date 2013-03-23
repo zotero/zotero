@@ -16,7 +16,7 @@
 <!ENTITY zotero.bibliography.style.label "Referentiestijl:">
 <!ENTITY zotero.bibliography.title "Bibliografie aanmaken">
 <!ENTITY zotero.charset.label "Tekensetcodering">
-<!ENTITY zotero.citation.editorWarning.label "Editor warning">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 <!ENTITY zotero.citation.keepSorted.label "Bronnen gesorteerd houden">
 <!ENTITY zotero.citation.line "Regel">
 <!ENTITY zotero.citation.page "Pagina">
@@ -32,8 +32,8 @@
 <!ENTITY zotero.downloadManager.label "Opslaan in Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Om deze functie te gebruiken moet u eerst de PDF-hulpprogramma's installen via de Zotero-voorkeuren.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Bijlages kunnen niet in de nu geselecteerde bibliotheek worden opgeslagen. Dit object zal daarom in plaats hiervan in uw bibliotheek worden opgeslagen.">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
-<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
 <!ENTITY zotero.errorReport.notReviewed "Foutenrapporten worden niet bekeken tenzij u ernaar verwijst in het forum.">
 <!ENTITY zotero.errorReport.postToForums "Plaats een bericht op het (Engelstalige) Zotero forum (forums.zotero.org) onder vermelding van het Rapport ID, een omschrijving van het probleem, en de stappen die nodig zijn om het probleem te reproduceren.">
 <!ENTITY zotero.errorReport.reportID "Rapport ID:">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.item.add "Toevoegen">
 <!ENTITY zotero.item.attachment.file.show "Bestand tonen">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 <!ENTITY zotero.item.textTransform "Hoofdlettergebruik wijzigen">
 <!ENTITY zotero.item.textTransform.sentencecase "Eerste woord (Sentence case)">
 <!ENTITY zotero.item.textTransform.titlecase "Alle woorden (Title Case)">
@@ -115,7 +115,7 @@
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Kopie maken van geselecteerd object">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
-<!ENTITY zotero.items.menu.mergeItems "Merge items">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Terugzetten in bibliotheek">

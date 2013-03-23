@@ -22,7 +22,7 @@
 <!ENTITY deleteCmd.key "D">
 <!ENTITY deleteCmd.label "Supprimer">
 <!ENTITY editMenu.accesskey "n">
-<!ENTITY editMenu.label "Edit">
+<!ENTITY editMenu.label "Édition">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY fileMenu.label "Fichier">
 <!ENTITY findAgainCmd.accesskey "g">
@@ -71,20 +71,20 @@
 <!ENTITY hideThisAppCmdMac.label "Cacher &brandShortName;">
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimiser">
-<!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.accesskey "M">
+<!ENTITY pageSetupCmd.label "Mise en page…">
 <!ENTITY pasteCmd.accesskey "o">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "Coller">
 <!ENTITY preferencesCmd.accesskey "i">
-<!ENTITY preferencesCmd.label "Options...">
+<!ENTITY preferencesCmd.label "Options…">
 <!ENTITY preferencesCmdMac.commandkey ",">
-<!ENTITY preferencesCmdMac.label "Préférences...">
+<!ENTITY preferencesCmdMac.label "Préférences…">
 <!ENTITY preferencesCmdUnix.accesskey "f">
 <!ENTITY preferencesCmdUnix.label "Préférences">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "P">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "Imprimer…">
 <!ENTITY productHelp.accesskey "A">
 <!ENTITY productHelp.label "Assistance et documentation">
 <!ENTITY quitApplicationCmd.accesskey "Q">
@@ -96,9 +96,9 @@
 <!ENTITY redoCmd.accesskey "R">
 <!ENTITY redoCmd.key "Y">
 <!ENTITY redoCmd.label "Rétablir">
-<!ENTITY saveCmd.accesskey "A">
+<!ENTITY saveCmd.accesskey "E">
 <!ENTITY saveCmd.key "S">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "Enregistrer…">
 <!ENTITY selectAllCmd.accesskey "T">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.label "Tout sélectionner">

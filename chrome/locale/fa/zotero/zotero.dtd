@@ -16,7 +16,7 @@
 <!ENTITY zotero.bibliography.style.label "شیوه‌نامه">
 <!ENTITY zotero.bibliography.title "ساخت کتابنامه">
 <!ENTITY zotero.charset.label "کدبندی نویسه‌ها">
-<!ENTITY zotero.citation.editorWarning.label "Editor warning">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 <!ENTITY zotero.citation.keepSorted.label "مرتب نگه داشتن منابع">
 <!ENTITY zotero.citation.line "خط">
 <!ENTITY zotero.citation.page "صفحه">
@@ -32,8 +32,8 @@
 <!ENTITY zotero.downloadManager.label "ذخیره در زوترو">
 <!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
-<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
 <!ENTITY zotero.errorReport.notReviewed "برای بررسی گزارش خطا، حتما باید آن را به انجمن گفتگو ارجاع دهید. در غیر این صورت گزارش بررسی نخواهد شد.">
 <!ENTITY zotero.errorReport.postToForums "لطفا یک پیام به انجمن گفتگوی زوترو به آدرس forums.zotero.org بفرستید که شامل شناسه گزارش، شرحی از مشکل و مراحل لازم برای تولید مجدد آن باشد.">
 <!ENTITY zotero.errorReport.reportID "شناسه گزارش:">
@@ -55,7 +55,7 @@
 <!ENTITY zotero.integration.classicView.label "Classic View">
 <!ENTITY zotero.integration.docPrefs.title "تنظیمات سند">
 <!ENTITY zotero.integration.editBibliography.title "ویرایش کتابنامه">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "نشانک‌‌ها در بین Microsoft Word و LibreOffice مشترک هستند، ولی ممکن است به شکل تصادفی، تغییر داده شوند. &#xA;در صورت انتخاب این گزینه، برای حفظ سازگاری، استفاده از یادکردها در پاورقی یا یادداشت‌های انتهایی امکان‌پذیر نخواهد بود.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "نشانک‌‌ها در بین Microsoft Word و OpenOffice مشترک هستند، ولی ممکن است به شکل تصادفی، تغییر داده شوند. &#xA;در صورت انتخاب این گزینه، برای حفظ سازگاری، استفاده از یادکردها در پاورقی یا یادداشت‌های انتهایی امکان‌پذیر نخواهد بود.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "نشانک">
 <!ENTITY zotero.integration.prefs.displayAs.label "نمایش یاکردها در:">
 <!ENTITY zotero.integration.prefs.endnotes.label "انتهای متن">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.item.add "افزودن">
 <!ENTITY zotero.item.attachment.file.show "نمایش محل ذخیره پرونده">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 <!ENTITY zotero.item.textTransform "تبدیل متن">
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.textTransform.titlecase "حروف اول بزرگ">
@@ -115,7 +115,7 @@
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "ساخت رونوشت از این آیتم">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
-<!ENTITY zotero.items.menu.mergeItems "Merge items">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">

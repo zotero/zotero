@@ -16,7 +16,7 @@
 <!ENTITY zotero.bibliography.style.label "Viite stiil:">
 <!ENTITY zotero.bibliography.title "Bibliograafia loomine">
 <!ENTITY zotero.charset.label "Märgikodeering">
-<!ENTITY zotero.citation.editorWarning.label "Editor warning">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 <!ENTITY zotero.citation.keepSorted.label "Hoida allikad sorteeritud">
 <!ENTITY zotero.citation.line "Rida">
 <!ENTITY zotero.citation.page "Lehekülg">
@@ -29,11 +29,11 @@
 <!ENTITY zotero.contextMenu.addTextToNewNote "Luua valikust Zotero kirje ja märkus">
 <!ENTITY zotero.contextMenu.saveImageAsItem "Salvestada pilt Zotero kirjena">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "Salvestada link Zotero kirjena">
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
-<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
+<!ENTITY zotero.downloadManager.label "Zoterosse salvestamine">
+<!ENTITY zotero.downloadManager.noPDFTools.description "Selle funktsiooni kasutamiseks on kõigepealt tarvis paigaldada PDF tööriistad Zotero seadetes.">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Valitud raamatukokku ei ole võimalik manuseid salvestada. See kirje salvestatakse teie isiklikku raamatukokku.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
 <!ENTITY zotero.errorReport.notReviewed "Veateadetega, millest ei ole foorumites teada antud, üldjuhul ei tegeleta.">
 <!ENTITY zotero.errorReport.postToForums "Palun postitage teade foorumisse (forums.zotero.org) koos veateate ID-ga ja kirjeldusega, millistel asjaoludel probleem esineb ning mis seda iseloomustab.">
 <!ENTITY zotero.errorReport.reportID "Veateate ID:">
@@ -52,10 +52,10 @@
 <!ENTITY zotero.general.optional "(Valikuline)">
 <!ENTITY zotero.general.selectAll "Valida kõik">
 <!ENTITY zotero.integration.addEditCitation.title "Lisa/toimeta viidet">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.classicView.label "Tavaline vaade">
 <!ENTITY zotero.integration.docPrefs.title "Dokumendi sätted">
 <!ENTITY zotero.integration.editBibliography.title "Toimeta bibliograafiat">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Järjehoidjad toimivad nii MS Wordi kui ka LibreOffice puhul, kuid võib juhtuda, et neid kogemata muudetakse. Ühilduvuse huvides ei ole võimalik lisada viiteid allmärkustele ja lõppmärkustele, kui see võimalus on aktiveeritud.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Järjehoidjad toimivad nii MS Wordi kui ka OpenOffice puhul, kuid võib juhtuda, et neid kogemata muudetakse. Ühilduvuse huvides ei ole võimalik lisada viiteid allmärkustele ja lõppmärkustele, kui see võimalus on aktiveeritud.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Järjehoidjaid">
 <!ENTITY zotero.integration.prefs.displayAs.label "Näidata viiteid:">
 <!ENTITY zotero.integration.prefs.endnotes.label "Lõppmärkustena">
@@ -74,17 +74,17 @@
 <!ENTITY zotero.integration.prefs.lang.titles "Titles:">
 <!ENTITY zotero.integration.prefs.lang.translation "Translation">
 <!ENTITY zotero.integration.prefs.lang.transliteration "Transliteration">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Viidete salvestamine dokumendi sisse suurendab veidi failisuurust, kuid võimaldab teil seda dokumenti teiste Zotero kasutajatega jagada ilma Zotero gruppi kasutamata. Et sellist dokumenti redigeerida on vajalik Zotero 3.0 või hilisem verisoon.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Säilita viited dokumendiga koos">
 <!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 <!ENTITY zotero.integration.references.label "Referentsid bibliograafias">
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.integration.showEditor.label "Redaktori näitamine">
 <!ENTITY zotero.item.add "Lisada">
 <!ENTITY zotero.item.attachment.file.show "Faili näitamine">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 <!ENTITY zotero.item.textTransform "Teksti muutmine">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.sentencecase "Lause tõst">
 <!ENTITY zotero.item.textTransform.titlecase "Suurteks Algustähtedeks">
 <!ENTITY zotero.items.accessDate_column "Vaadatud">
 <!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
@@ -109,16 +109,16 @@
 <!ENTITY zotero.items.menu.attach.file "Lisada fail kirje manusena">
 <!ENTITY zotero.items.menu.attach.fileLink "Lisada link failile">
 <!ENTITY zotero.items.menu.attach.link "Lisada link käesolevale leheküljele">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI...">
+<!ENTITY zotero.items.menu.attach.link.uri "Seonda link URI-ga…">
 <!ENTITY zotero.items.menu.attach.note "Märkuse lisamine">
 <!ENTITY zotero.items.menu.attach.snapshot "Lisada käesoleva lehekülje momentülesvõte">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Valitud kirje duplitseerimine">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
-<!ENTITY zotero.items.menu.mergeItems "Merge items">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.restoreToLibrary "Taasta raamatukokku">
 <!ENTITY zotero.items.menu.showInLibrary "Näidata raamatukogus">
 <!ENTITY zotero.items.moreColumns.label "More Columns">
 <!ENTITY zotero.items.numChildren_column "+">
@@ -138,7 +138,7 @@
 <!ENTITY zotero.items.year_column "Aasta">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Sisestada otsitava ISBN, DOI või PMID allolevasse lahtrisse.">
-<!ENTITY zotero.moreEncodings.label "More Encodings">
+<!ENTITY zotero.moreEncodings.label "Rohkem kodeeringud">
 <!ENTITY zotero.notes.separate "Salvestada eraldi aknas">
 <!ENTITY zotero.progress.title "Progress">
 <!ENTITY zotero.proxy.recognized.disable.label "Mitte suunata automaatselt eelevalt tuvastatud proksi kaudu">
@@ -234,10 +234,10 @@
 <!ENTITY zotero.toolbar.newGroup "Uus grupp...">
 <!ENTITY zotero.toolbar.newItem.label "Uus kirje">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Uue kirje loomine käesolevast leheküljest">
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newNote "Uus märkus">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Uus salvestatud otsing...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Uus alamteema...">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
+<!ENTITY zotero.toolbar.note.child "Lisada alammärkus">
 <!ENTITY zotero.toolbar.note.standalone "Uus sõltumatu märkus">
 <!ENTITY zotero.toolbar.openURL.label "Otsida">
 <!ENTITY zotero.toolbar.openURL.tooltip "Otsida kohalikus raamatukogus">

@@ -4,11 +4,11 @@
 <!ENTITY zotero.search.date.units.years "år">
 <!ENTITY zotero.search.includeParentsAndChildren "Inkluder under- og overordna element">
 <!ENTITY zotero.search.joinMode.all "alle">
-<!ENTITY zotero.search.joinMode.any "kva for ein som helst">
+<!ENTITY zotero.search.joinMode.any "minst ein">
 <!ENTITY zotero.search.joinMode.prefix "Finn">
 <!ENTITY zotero.search.joinMode.suffix "av følgjande:">
 <!ENTITY zotero.search.name "Namn:">
-<!ENTITY zotero.search.noChildren "Viser berre overordna element">
+<!ENTITY zotero.search.noChildren "Vis berre overordna element">
 <!ENTITY zotero.search.recursive.label "Søk i undermapper">
 <!ENTITY zotero.search.saveSearch "Lagra søk">
 <!ENTITY zotero.search.search "Søk">

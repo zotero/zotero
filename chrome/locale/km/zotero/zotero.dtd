@@ -16,7 +16,7 @@
 <!ENTITY zotero.bibliography.style.label "រចនាបថអាគតដ្ឋាន:">
 <!ENTITY zotero.bibliography.title "បង្កើតគន្ថនិទេ្ទស">
 <!ENTITY zotero.charset.label "បញ្ចូលកូដតួអក្សរ">
-<!ENTITY zotero.citation.editorWarning.label "Editor warning">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 <!ENTITY zotero.citation.keepSorted.label "បែងចែកប្រភពតាមប្រភេទ">
 <!ENTITY zotero.citation.line "បន្ទាត់">
 <!ENTITY zotero.citation.page "ទំព័រ">
@@ -32,10 +32,10 @@
 <!ENTITY zotero.downloadManager.label "ទាញរក្សាទុកក្នុងហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.downloadManager.noPDFTools.description "ដើម្បីប្រើលក្ខណៈពិសេស​នេះ ដំបូងអ្នកត្រូវដំឡើងឧបករណ៏ភីឌីអែហ្វនៅ​ក្នុង​​ជម្រើសអាទិភាពហ្ស៊ូតេរ៉ូជាមុនសិន។">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "កម្ជាប់មិនអាចទាញមករក្សាទុកនៅក្នុងបណ្ណល័យដែលកំពុងជ្រើសរើសនោះទេ។ ឯកសារនេះនឹងត្រូវទាញមករក្សាទុកនៅក្នុងបណ្ណល័យរបស់អ្នក។">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
-<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
 <!ENTITY zotero.errorReport.notReviewed "របាយការណ៍អំពីកំហុសមិនត្រូវបានពិនិត្យ លុះត្រាតែឆ្លងកាត់វេទិកានេះ។">
-<!ENTITY zotero.errorReport.postToForums "សូមផ្ញើសារទៅកាន់វេទិកាហ្ស៊ូតេរ៉ូ (forums.zotero.org) ជាមួយនិងអត្តលេខរបាយការណ៍នេះ ការពណ៌នាបញ្ហា និង ជំហានចាំបាច់នានា ដើម្បីផលិតឡើងវិញ។">
+<!ENTITY zotero.errorReport.postToForums "សូមផ្ញើសារទៅកាន់វេទិកាហ្ស៊ូតេរ៉ូ (forums.zotero.org) ជាមួយនិងអត្ត​លេខរ​បាយការណ៍នេះ ការពណ៌នាបញ្ហា និង ជំហានចាំបាច់នានា ដើម្បី​ផលិត​ឡើងវិញ។">
 <!ENTITY zotero.errorReport.reportID "អត្តលេខរបាយការណ៍:">
 <!ENTITY zotero.errorReport.submissionInProgress "សូមរង់ចាំ ខណៈពេលកំពុងធ្វើរបាយការណ៍អំពីកំហុស។">
 <!ENTITY zotero.errorReport.submitted "កំហុសបានធ្វើរបាយការណ៍រួចហើយ។">
@@ -55,7 +55,7 @@
 <!ENTITY zotero.integration.classicView.label "មើលតាមទម្រង់បុរាណ">
 <!ENTITY zotero.integration.docPrefs.title "ជម្រើសរចនាបថសម្រាប់យោងឯកសារ">
 <!ENTITY zotero.integration.editBibliography.title "កែតម្រូវគន្ថនិទេ្ទស">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "កំណត់ចំណាំគេហទំព័រអាចរក្សាទុកនៅក្នុងម៉ាយក្រូសូហ្វវើដ និង អូផិនអប់ហ្វីស ប៉ុន្តែអាចត្រូវបានកែប្រែដោយចៃដន្យ។ ដោយមូលហេតុសមិតភាព អាគតដ្ឋានមិនអាចដាក់ជាលេខយោងក្រោមអត្ថបទ​ ឬ លេខយោងចុងអត្ថបទនៅពេលត្រូវបានជ្រើសរើស។">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "កំណត់ចំណាំគេហទំព័រអាចរក្សាទុកនៅក្នុងម៉ាយក្រូសូហ្វវើដ និង អូផិនអប់ហ្វីស ប៉ុន្តែអាចត្រូវបានកែប្រែដោយចៃដន្យ។ ដោយមូលហេតុ​សមិតភាព អាគតដ្ឋានមិនអាចដាក់ជាលេខយោងក្រោមអត្ថបទ​ ឬ លេខ​យោង​ចុងអត្ថបទនៅពេលត្រូវបានជ្រើសរើស។">
 <!ENTITY zotero.integration.prefs.bookmarks.label "កំណត់ចំណាំគេហទំព័រទុក">
 <!ENTITY zotero.integration.prefs.displayAs.label "បង្ហាញអាគតដ្ឋានក្នុងទម្រង់ជា:">
 <!ENTITY zotero.integration.prefs.endnotes.label "លេខយោងចុងអត្ថបទ">
@@ -74,7 +74,7 @@
 <!ENTITY zotero.integration.prefs.lang.titles "Titles:">
 <!ENTITY zotero.integration.prefs.lang.translation "Translation">
 <!ENTITY zotero.integration.prefs.lang.transliteration "Transliteration">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "ការដាក់កំណត់យោងក្នុងឯកសាររបស់អ្នកនឹងបង្កើនទំហំឯកសារ ប៉ុន្តែវានឹងអនុញ្ញាតឲអ្នកអាចចែករំលែកឯកសារជាមួយអ្នកដទៃដោយមិនចាំបាច់ប្រើហ្ស៊ូតេរ៉ូជាក្រុម។​ ហ្ស៊ូតេរ៉ូកំណែថ្មីចាប់ពី ៣.០ ឡើងទៅ​ តម្រូវឲធ្វើទំនើបកម្មឯកសារដែលបានបង្កើតសម្រាប់ជម្រើសនេះ។">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "ការដាក់កំណត់យោងក្នុងឯកសាររបស់អ្នកនឹងបង្កើនទំហំឯកសារ ប៉ុន្តែ​វានឹងអនុញ្ញាតឲអ្នកអាចចែករំលែកឯកសារជាមួយអ្នកដទៃដោយមិនចាំបាច់ប្រើហ្ស៊ូតេរ៉ូជាក្រុម។​ ហ្ស៊ូតេរ៉ូកំណែថ្មីចាប់ពី ៣.០ ឡើងទៅ​ តម្រូវឲធ្វើ​ទំនើបកម្មឯកសារដែលបានបង្កើតសម្រាប់ជម្រើសនេះ។">
 <!ENTITY zotero.integration.prefs.storeReferences.label "ដាក់កំណត់យោងក្នុងឯកសារ">
 <!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 <!ENTITY zotero.integration.references.label "កំណត់យោងក្នុងគន្ថនិទេ្ទស">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.item.add "បន្ថែម">
 <!ENTITY zotero.item.attachment.file.show "បង្ហាញឯកសារ">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 <!ENTITY zotero.item.textTransform "បំលែងអត្ថបទ">
 <!ENTITY zotero.item.textTransform.sentencecase "ចំណងជើងអក្សរតូច">
 <!ENTITY zotero.item.textTransform.titlecase "ចំណងជើងអក្សរធំ">
@@ -115,7 +115,7 @@
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "ជ្រើសរើសឯកសារត្រួត">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
-<!ENTITY zotero.items.menu.mergeItems "Merge items">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "ស្តារទៅកាន់បណ្ណាល័យវិញ">
@@ -137,7 +137,7 @@
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "ឆ្នាំ">
 <!ENTITY zotero.lookup.button.search "Search">
-<!ENTITY zotero.lookup.description "សូមបញ្ចូលអាយអេសប៊ីអិន ឌីអូអាយ ឬ ភីអេមអាយឌី ដើម្បីរកមើលនៅក្នុងប្រអប់ខាងក្រោមៈ">
+<!ENTITY zotero.lookup.description "សូមបញ្ចូលអាយអេសប៊ីអិន ឌីអូអាយ ឬ ភីអេមអាយឌី ដើម្បីរកមើលនៅក្នុង​ប្រអប់ខាងក្រោមៈ">
 <!ENTITY zotero.moreEncodings.label "បញ្ចូលកូដបន្ថែម">
 <!ENTITY zotero.notes.separate "កែតម្រូវនៅក្នុងវីនដូយ៍ដោយឡែក">
 <!ENTITY zotero.progress.title "កំពុងដំណើរ">
@@ -163,7 +163,7 @@
 <!ENTITY zotero.rtfScan.citationsPage.label "សូមបញ្ជាក់ឯកសារដែលត្រូវបានដាក់អាគតដ្ឋាន">
 <!ENTITY zotero.rtfScan.completePage.description "ឥលូវឯកសាររបស់អ្នកត្រូវបានវិភាគ និង បញ្ចប់រួចហើយ។ សូមធ្វើឲប្រាកដ​ថា ឯកសាររបស់អ្នកត្រូវបានធ្វើទ្រង់ទ្រាយដោយត្រឹមត្រូវ។">
 <!ENTITY zotero.rtfScan.completePage.label "វិភាគអ៊ែរធីអែហ្វបានបញ្ចប់">
-<!ENTITY zotero.rtfScan.formatPage.description "សូមរង់ចាំ ខណៈពេលហ្ស៊ូតេរ៉ូកំពុងដំណើរការ និង ធ្វើទ្រង់ទ្រាយ​ឯកសារអ៊ែរធីអែហ្វរបស់អ្នក។">
+<!ENTITY zotero.rtfScan.formatPage.description "សូមរង់ចាំ ខណៈពេលហ្ស៊ូតេរ៉ូកំពុងដំណើរការ និង ធ្វើទ្រង់ទ្រាយ​ឯកសារ​អ៊ែរធីអែហ្វរបស់អ្នក។">
 <!ENTITY zotero.rtfScan.formatPage.label "កំពុងធ្វើទ្រង់ទ្រាយអាគតដ្ឋាន">
 <!ENTITY zotero.rtfScan.inputFile.label "ឯកសារព័ត៌មាន">
 <!ENTITY zotero.rtfScan.introPage.description "ហ្ស៊ូតេរ៉ូអាចដកស្រង់ និង​កំណត់ទ្រង់ទ្រាយអាគតដ្ឋានឡើងវិញដោយ​ស្វ័យប្រវត្តិ ហើយ ដាក់គន្ថនិទេ្ទសចូលទៅក្នុងឯកសារអ៊ែរធីអែហ្វ។ បច្ចុប្បន្ន លក្ខណៈពិសេសវិភាគអ៊ែរធីអែហ្វគាំទ្រអាគតដ្ឋាន​ទៅតាម​ទម្រង់ផ្សេងៗដូចខាងក្រោម:">
@@ -259,6 +259,6 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "ធ្វើឲប្រាកដថា អ្នកបានអាននូវ">
 <!ENTITY zotero.upgrade.majorUpgradeLink "ការណែនាំអំពីទំនើបកម្ម">
 <!ENTITY zotero.upgrade.newVersionInstalled "អ្នកបានដំឡើងហ្ស៊ូតេរ៉ូកំណែថ្មី។">
-<!ENTITY zotero.upgrade.upgradeInProgress "សូមរង់ចាំ ដើម្បីឲដំណើរការទំនើបកម្មបញ្ចប់។​ ដំណើរការនេះអាចចំណាយពេលមួយរយៈខ្លី។">
+<!ENTITY zotero.upgrade.upgradeInProgress "សូមរង់ចាំ ដើម្បីឲដំណើរការទំនើបកម្មបញ្ចប់។​ ដំណើរការនេះអាចចំណាយ​ពេលមួយរយៈខ្លី។">
 <!ENTITY zotero.upgrade.upgradeRequired "អ្នកត្រូវធ្វើទំនើបកម្មទិន្នន័យហ្ស៊ូតេរ៉ូរបស់អ្នកដើម្បីដំណើរការជាមួយកំណែថ្មីនេះ។">
 <!ENTITY zotero.upgrade.upgradeSucceeded "ទិន្នន័យហ្ស៊ូតេរ៉ូរបស់អ្នកបានធ្វើទំនើបកម្មដោយជោគជ័យ។">

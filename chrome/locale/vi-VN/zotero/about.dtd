@@ -1,11 +1,11 @@
 <!ENTITY zotero.about.additionalSoftware "Các Phần mềm và Tiêu chuẩn của bên thứ ba:">
-<!ENTITY zotero.about.close "Close">
+<!ENTITY zotero.about.close "Đóng">
 <!ENTITY zotero.about.localizations "Bản địa hóa:">
 <!ENTITY zotero.alumni "Cựu thành viên:">
 <!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Một sản phẩm của:">
 <!ENTITY zotero.developers "Phát triển phần mềm:">
-<!ENTITY zotero.director "Director:">
+<!ENTITY zotero.director "Giám đốc điều hành:">
 <!ENTITY zotero.directors "Giám đốc điều hành:">
 <!ENTITY zotero.executiveProducer "Chủ nhiệm:">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">

@@ -5,8 +5,8 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
 <!ENTITY zotero.preferences.autoUpdate "ស្វែងរកកូដចម្លងទំនើបទាន់សម័យដោយស្វ័យប្រវត្តិ">
-<!ENTITY zotero.preferences.automaticSnapshots "ថតយករូបភាពអត្ថបទចេញពីគេហទំព័រដោយស្វ័យប្រវត្តិ">
-<!ENTITY zotero.preferences.automaticTags "ដាក់ស្លាកឯកសារដោយប្រើពាក្យគន្លឹះ និង ចំណងជើងអត្ថបទដោយស្វ័យប្រវត្តិ">
+<!ENTITY zotero.preferences.automaticSnapshots "ថតយកអត្ថបទចេញពីគេហទំព័រដោយស្វ័យប្រវត្តិ">
+<!ENTITY zotero.preferences.automaticTags "ដាក់ស្លាកឯកសារដោយប្រើពាក្យគន្លឹះ និង ចំណងជើងអត្ថបទដោយស្វ័យ​ប្រវត្តិ">
 <!ENTITY zotero.preferences.charset "បញ្ចូលកូដអក្សរ">
 <!ENTITY zotero.preferences.charset.displayExportOption "បង្ហាញជម្រើសបញ្ចូលកូដអក្សរលើការទាញចេញ">
 <!ENTITY zotero.preferences.charset.importCharset "ទាញបញ្ចូលកូដអក្សរ">
@@ -40,9 +40,9 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "ដាក់ជូនម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "មើលទិន្នផល">
 <!ENTITY zotero.preferences.default "លំនាំដើម:">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "ភ្ជាប់មកជាមួយដោយស្វ័យប្រវត្តិនូវឯកសារភីឌីអែហ្វ និង ឯកសារដទៃទៀត ខណៈពេលទាញរក្សាឯកសារទុក។">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "ភ្ជាប់មកជាមួយដោយស្វ័យប្រវត្តិនូវឯកសារភីឌីអែហ្វ និង ឯកសារដទៃទៀត ខណៈពេលទាញរក្សាឯកសារទុក">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "បញ្ចូលគេហទំព័រនៃអត្ថបទស្រាវជ្រាវក្នុងឯកសារយោង">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "នៅពេលដែលជម្រើសនេះអស់លទ្ធភាព ហ្ស៊ូតេរ៉ូបញ្ចូលគេហទំព័រ នៅពេលយោងអត្ថបទទនានុប្បវត្តិ ទស្សនាវដ្តី និង កាសែត លើកលែងតែអត្ថបទដែលពុំមានទំព័រជាក់លាក់។">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "នៅពេលដែលជម្រើសនេះអស់លទ្ធភាព ហ្ស៊ូតេរ៉ូបញ្ចូលគេហទំព័រ នៅពេលយោងអត្ថបទទនានុប្បវត្តិ ទស្សនាវដ្តី និង កាសែត លើកលែង​តែអត្ថបទដែលពុំមានទំព័រជាក់លាក់។">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "បន្ថែមរចនាបថថ្មី...">
 <!ENTITY zotero.preferences.fontSize "ទំហំអក្សរៈ">
 <!ENTITY zotero.preferences.fontSize.large "ធំ">
@@ -57,12 +57,12 @@
 <!ENTITY zotero.preferences.groups.childLinks "កម្ជាប់រណប">
 <!ENTITY zotero.preferences.groups.childNotes "កំណត់ត្រាកម្ជាប់">
 <!ENTITY zotero.preferences.groups.tags "tags">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "នៅពេលចម្លងឯកសារពីបណ្ណាល័យមួយទៅបណ្ណាល័យមួយទៀត ត្រូវបញ្ចូលទាំង:">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "នៅពេលចម្លងឯកសារពីបណ្ណាល័យមួយទៅបណ្ណាល័យមួយទៀត ត្រូវបញ្ចូល​ទាំង:">
 <!ENTITY zotero.preferences.items "ឯកសារ">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "បំលាស់ប្តូរអាចមានសុពលភាពនៅលើវីនដូយ៍ថ្មីតែប៉ុណ្ណោះ">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "ចម្លងអាគតដ្ឋានឯកសារដែលបានជ្រើសរើសទៅកាន់កន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "ចម្លងឯកសារដែលបានជ្រើសរើសកន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "ទាញឯកសារចេញពីកន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
 <!ENTITY zotero.preferences.keys.library "បណ្ណាល័យ">
 <!ENTITY zotero.preferences.keys.newItem "បង្កើតឯកសារថ្មី">
@@ -194,9 +194,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "កំណត់រៀបចំប្រវត្តិឯកសារសមកាលកម្ម">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "ពិនិត្យដោយហ្មត់ចត់ចំពោះឯកសារភ្ជាប់មូលដ្ឋានទាំងអស់ដែលបានផ្ទុកនៅក្នុងម៉ាស៊ីនបម្រើ">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "ស្តារឡើងវិញពីម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "លុបចោលទិន្នន័យហ្ស៊ូតេរ៉ូមូលដ្ឋានទាំងអស់ និង ស្តារឡើងវិញពីម៉ាស៊ីនបម្រើសមកាលកម្ម">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "លុបចោលទិន្នន័យហ្ស៊ូតេរ៉ូមូលដ្ឋានទាំងអស់ និង ស្តារឡើងវិញពីម៉ាស៊ីន បម្រើសមកាលកម្ម">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "ស្តារទៅកាន់ម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "លុបចោលរាល់ទិន្នន័យម៉ាស៊ីនបម្រើទាំងអស់ និង សរសេរលុបពីលើទិន្នន័យហ្ស៊ូតេរ៉ូមូលដ្ឋាន">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "លុបចោលរាល់ទិន្នន័យម៉ាស៊ីនបម្រើទាំងអស់ និង សរសេរលុបពីលើទិន្នន័យ ហ្ស៊ូតេរ៉ូមូលដ្ឋាន">
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
@@ -205,7 +205,7 @@
 <!ENTITY zotero.preferences.sync.username "ឈ្មោះអ្នកប្រើ:">
 <!ENTITY zotero.preferences.title "ជម្រើសអាទិភាពហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ថ្ងៃកន្លងហើយ">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "លុបឯកសារចេញពីធុងសំរាមដោយស្វ័យប្រវត្តិ កាលណាត្រូវបានលុបយូរជាង">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "លុបឯកសារចេញពីធុងសំរាមដោយស្វ័យប្រវត្តិ កាលណាត្រូវបានលុបយូរ​ជាង">
 <!ENTITY zotero.preferences.updateNow "ធ្វើទំនើបកម្មឥលូវ">
 <!ENTITY zotero.preferences.userInterface "ចំណុចប្រទាក់ក្រឡាអ្នកប្រើប្រាស់">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "ទុកឲ zotero.org ផ្លាស់ប្តូរខ្លឹមសារដោយអនុលោមទៅតាមកំណែហ្ស៊ូតេរ៉ូថ្មី">

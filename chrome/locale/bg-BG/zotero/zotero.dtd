@@ -16,7 +16,7 @@
 <!ENTITY zotero.bibliography.style.label "Стил на цитиране:">
 <!ENTITY zotero.bibliography.title "Създава библиография">
 <!ENTITY zotero.charset.label "Код на символите">
-<!ENTITY zotero.citation.editorWarning.label "Editor warning">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 <!ENTITY zotero.citation.keepSorted.label "Запазва подредбата на източниците">
 <!ENTITY zotero.citation.line "Ред">
 <!ENTITY zotero.citation.page "Страница">
@@ -32,8 +32,8 @@
 <!ENTITY zotero.downloadManager.label "Save to Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
-<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
 <!ENTITY zotero.errorReport.notReviewed "В общият случай, отчетите с грешки няма да бъдат разглеждани, освен ако не са оповестени във форумите.">
 <!ENTITY zotero.errorReport.postToForums "Моля оставете съобщение във форумите на Zotero (forums.zotero.org) с идентификационият номер на отчета, описание на проблема и стъпките необходими, за да бъде възпроизведен.">
 <!ENTITY zotero.errorReport.reportID "Идентификационен номер на отчета:">
@@ -55,7 +55,7 @@
 <!ENTITY zotero.integration.classicView.label "Classic View">
 <!ENTITY zotero.integration.docPrefs.title "Настройки на докумета">
 <!ENTITY zotero.integration.editBibliography.title "Редактира на библиографията">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Отметките се запазват при прехвърляне между Microsoft Word и LibreOffice, но могат да бъдат променени по грешка.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Отметките се запазват при прехвърляне между Microsoft Word и OpenOffice, но могат да бъдат променени по грешка.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Отметки">
 <!ENTITY zotero.integration.prefs.displayAs.label "Показва цитатите като:">
 <!ENTITY zotero.integration.prefs.endnotes.label "Заключителни бележки">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.item.add "Добавя">
 <!ENTITY zotero.item.attachment.file.show "Показва Файл">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 <!ENTITY zotero.item.textTransform "Преобразува текст">
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.textTransform.titlecase "Заглавни букви">
@@ -109,13 +109,13 @@
 <!ENTITY zotero.items.menu.attach.file "Прилага съхранено копие на файл...">
 <!ENTITY zotero.items.menu.attach.fileLink "Прилага връзка към файл">
 <!ENTITY zotero.items.menu.attach.link "Прилага връзка към настоящата страница">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI...">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.note "Добавя Бележка">
 <!ENTITY zotero.items.menu.attach.snapshot "Прилага снимка на настоящата страница">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Дуплицира избраните записи">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
-<!ENTITY zotero.items.menu.mergeItems "Merge items">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">

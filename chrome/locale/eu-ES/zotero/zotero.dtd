@@ -16,7 +16,7 @@
 <!ENTITY zotero.bibliography.style.label "Erreferentzia estiloa:">
 <!ENTITY zotero.bibliography.title "Bibliografia sortu">
 <!ENTITY zotero.charset.label "karaktereen Kodea">
-<!ENTITY zotero.citation.editorWarning.label "Editor warning">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 <!ENTITY zotero.citation.keepSorted.label "Iturriak ordenaturik mantendu">
 <!ENTITY zotero.citation.line "Errenkada">
 <!ENTITY zotero.citation.page "orr.">
@@ -32,8 +32,8 @@
 <!ENTITY zotero.downloadManager.label "Save to Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
-<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
 <!ENTITY zotero.errorReport.notReviewed "Error reports are not reviewed unless referred to in the forums.">
 <!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
 <!ENTITY zotero.errorReport.reportID "Report ID:">
@@ -55,7 +55,7 @@
 <!ENTITY zotero.integration.classicView.label "Classic View">
 <!ENTITY zotero.integration.docPrefs.title "Dokumentu honetako ezaugarriak">
 <!ENTITY zotero.integration.editBibliography.title "Bibliografia editatu">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Lastermarkak Microsoft Word zein LibreOffice-n erabil daitezke, baina baliteke nahigabe aldaketak jasatea. Konpatibilitatea dela eta, Lastermarkak aukeratuz gero erreferentziak ezin dira oin- eta amaiera-oharretan sartu.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Lastermarkak Microsoft Word zein OpenOffice-n erabil daitezke, baina baliteke nahigabe aldaketak jasatea. Konpatibilitatea dela eta, Lastermarkak aukeratuz gero erreferentziak ezin dira oin- eta amaiera-oharretan sartu.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Lastermarkak">
 <!ENTITY zotero.integration.prefs.displayAs.label "Erreferentzien diseinua:">
 <!ENTITY zotero.integration.prefs.endnotes.label "Amaiera-oharrak">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.item.add "Gehitu">
 <!ENTITY zotero.item.attachment.file.show "Fitxategia erakutsi">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 <!ENTITY zotero.item.textTransform "Testua bihurtu">
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.textTransform.titlecase "letra larria">
@@ -109,13 +109,13 @@
 <!ENTITY zotero.items.menu.attach.file "Gordetako dokumentu baten kopia erantsi">
 <!ENTITY zotero.items.menu.attach.fileLink "Fitxategi baten helbidea erantsi">
 <!ENTITY zotero.items.menu.attach.link "Oraingo URLa erantsi">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI...">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.note "Oharra gehitu">
 <!ENTITY zotero.items.menu.attach.snapshot "Oraingo orrialdearen irudia erantsi">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Hautatutako itema bikoiztu">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
-<!ENTITY zotero.items.menu.mergeItems "Merge items">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">

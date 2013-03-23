@@ -72,7 +72,7 @@
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimieren">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "Seite einrichten">
 <!ENTITY pasteCmd.accesskey "P">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "Einfügen">
@@ -83,8 +83,8 @@
 <!ENTITY preferencesCmdUnix.accesskey "E">
 <!ENTITY preferencesCmdUnix.label "Einstellungen">
 <!ENTITY printCmd.accesskey "U">
-<!ENTITY printCmd.key "P">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.key "D">
+<!ENTITY printCmd.label "Drucken">
 <!ENTITY productHelp.accesskey "S">
 <!ENTITY productHelp.label "Support und Dokumentation">
 <!ENTITY quitApplicationCmd.accesskey "Q">
@@ -98,7 +98,7 @@
 <!ENTITY redoCmd.label "Wiederholen">
 <!ENTITY saveCmd.accesskey "A">
 <!ENTITY saveCmd.key "S">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "Speichern...">
 <!ENTITY selectAllCmd.accesskey "u">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.label "Alle auswählen">

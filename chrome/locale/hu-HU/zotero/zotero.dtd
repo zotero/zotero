@@ -16,7 +16,7 @@
 <!ENTITY zotero.bibliography.style.label "Hivatkozási stílus:">
 <!ENTITY zotero.bibliography.title "Bibliográfia létrehozása">
 <!ENTITY zotero.charset.label "Karakterkódolás">
-<!ENTITY zotero.citation.editorWarning.label "Editor warning">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 <!ENTITY zotero.citation.keepSorted.label "Források sorbarendezése">
 <!ENTITY zotero.citation.line "Sor">
 <!ENTITY zotero.citation.page "Oldal">
@@ -32,8 +32,8 @@
 <!ENTITY zotero.downloadManager.label "Save to Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
-<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
 <!ENTITY zotero.errorReport.notReviewed "A fórumba be nem küldött hibaüzenetek nem kerülnek kivizsgálásra.">
 <!ENTITY zotero.errorReport.postToForums "Küldje el a Zotero fórumba (forums.zotero.hu) a probléma leírását, hogy hogyan jutott idáig, ill. a hibaüzenet ID-jét .">
 <!ENTITY zotero.errorReport.reportID "Jelentés azonosítója:">
@@ -55,7 +55,7 @@
 <!ENTITY zotero.integration.classicView.label "Classic View">
 <!ENTITY zotero.integration.docPrefs.title "Dokumentum beállításai">
 <!ENTITY zotero.integration.editBibliography.title "Bibliográfia szerkesztése">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "A könyvjelzők mind a Microsoft Word, mind az LibreOffice programokkal kompatibilisak, de könnyű véletlenül módosítani.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "A könyvjelzők mind a Microsoft Word, mind az OpenOffice programokkal kompatibilisak, de könnyű véletlenül módosítani.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Könyvjelzők">
 <!ENTITY zotero.integration.prefs.displayAs.label "Hivatkozások megjelenítése:">
 <!ENTITY zotero.integration.prefs.endnotes.label "Végjegyzetek">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.item.add "Hozzáadás">
 <!ENTITY zotero.item.attachment.file.show "Fájl mutatása">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
 <!ENTITY zotero.item.textTransform "Szöveg átalakítása">
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.textTransform.titlecase "Szókezdő">
@@ -109,13 +109,13 @@
 <!ENTITY zotero.items.menu.attach.file "Helyben tárolt példány csatolása">
 <!ENTITY zotero.items.menu.attach.fileLink "Fájlra mutató hivatkozás csatolása">
 <!ENTITY zotero.items.menu.attach.link "Az aktuális oldal csatolása hivatkozásként">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI...">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.note "Jegyzet hozzáadása">
 <!ENTITY zotero.items.menu.attach.snapshot "Az aktuális oldal csatolása pillanatfelvételként">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Kiválasztott elem duplikálása">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
-<!ENTITY zotero.items.menu.mergeItems "Merge items">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
