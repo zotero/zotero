@@ -431,6 +431,10 @@
 }
 
 /* Sync error panel */
+#zotero-sync-error-panel {
+	margin-right: 0;
+}
+
 .zotero-sync-error-panel-library-name {
 	font-size: 12px;
 	font-weight: bold;

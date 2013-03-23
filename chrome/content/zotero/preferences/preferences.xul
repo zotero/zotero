@@ -40,7 +40,6 @@
 		onunload="Zotero_Preferences.onUnload()"
 		ondialoghelp="Zotero_Preferences.openHelpLink()"
 		windowtype="zotero:pref"
-		width="620"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<prefpane id="zotero-prefpane-general"

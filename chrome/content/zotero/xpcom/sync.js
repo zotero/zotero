@@ -978,13 +978,28 @@ Zotero.Sync.Runner = new function () {
 			box.appendChild(content);
 			box.appendChild(buttons);
 			
-			var desc = doc.createElement('description');
+			// Use of deck and textbox+description here is a hack from
+			// http://www.blackfishsoftware.com/node/47 to make the text
+			// selectable while maintaining the proper width and height
+			var deck = doc.createElement('deck');
+			
 			var msg = e.message;
 			/*if (e.fileName) {
 				msg += '\n\nFile: ' + e.fileName + '\nLine: ' + e.lineNumber;
 			}*/
+			
+			var textbox = doc.createElement('textbox');
+			textbox.className = 'plain';
+			textbox.setAttribute('multiline', true);
+			textbox.setAttribute('readonly', true);
+			textbox.setAttribute('value', msg);
+			deck.appendChild(textbox);
+			
+			var desc = doc.createElement('description');
 			desc.textContent = msg;
-			content.appendChild(desc);
+			deck.appendChild(desc);
+			
+			content.appendChild(deck);
 			
 			// If not an error and there's no explicit button text, don't show
 			// button to report errors

@@ -43,6 +43,7 @@ Zotero.Sync.Storage.Request = function (name, callbacks) {
 	
 	this._deferred = Q.defer();
 	this._running = false;
+	this._stopping = false;
 	this._percentage = 0;
 	this._remaining = null;
 	this._maxSize = null;
@@ -222,16 +223,16 @@ Zotero.Sync.Storage.Request.prototype.start = function () {
 		// This promise updates localChanges/remoteChanges on the queue
 		self._deferred.resolve(results);
 	})
-	.fail(function (e) {
+	.catch(function (e) {
+		if (self._stopping) {
+			Zotero.debug("Skipping error for stopping request " + self.name);
+			return;
+		}
 		Zotero.debug(self.queue.Type + " request " + self.name + " failed");
-		Zotero.debug(self._deferred);
-		Zotero.debug(self._deferred.promise.isFulfilled());
 		self._deferred.reject(e);
-		Zotero.debug(self._deferred.promise.isFulfilled());
-		Zotero.debug(self._deferred.promise.isRejected());
 	})
 	// Finish the request (and in turn the queue, if this is the last request)
-	.fin(function () {
+	.finally(function () {
 		if (!self._finished) {
 			self._finish();
 		}
@@ -309,6 +310,8 @@ Zotero.Sync.Storage.Request.prototype.onProgress = function (channel, progress, 
  */
 Zotero.Sync.Storage.Request.prototype.stop = function () {
 	if (this.channel) {
+		this._stopping = true;
+		
 		try {
 			Zotero.debug("Stopping request '" + this.name + "'");
 			this.channel.cancel(0x804b0002); // NS_BINDING_ABORTED
@@ -343,7 +346,7 @@ Zotero.Sync.Storage.Request.prototype._finish = function () {
 		this.queue.updateProgress();
 	}
 	catch (e) {
-		Zotero.debug(e);
+		Zotero.debug(e, 1);
 		Components.utils.reportError(e);
 		this._deferred.reject(e);
 		throw e;
