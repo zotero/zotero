@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "ID hlásenia:">
 <!ENTITY zotero.errorReport.submissionInProgress "Prosím počkajte, kým sa hlásenie o chybe neodošle.">
 <!ENTITY zotero.errorReport.submitted "Hlásenie o chybe bolo odoslané.">
+<!ENTITY zotero.errorReport.title "Výkaz chýb Zotera">
 <!ENTITY zotero.errorReport.unrelatedMessages "Hlásenie o chybe môže obsahovať informácie nesúvisiace so Zoterom.">
 <!ENTITY zotero.exportOptions.format.label "Formát:">
 <!ENTITY zotero.exportOptions.title "Export...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "Rok">
 <!ENTITY zotero.lookup.button.search "Hľadať">
 <!ENTITY zotero.lookup.description "Zadajte do poľa ISBN, DOI alebo PMID podľa ktorého chcete vyhľadávať.">
+<!ENTITY zotero.merge.deleted "Zmazané">
+<!ENTITY zotero.merge.of "z">
+<!ENTITY zotero.merge.title "Riešenie konfliktov">
 <!ENTITY zotero.moreEncodings.label "Viac">
 <!ENTITY zotero.notes.separate "Upraviť v samostatnom okne">
 <!ENTITY zotero.progress.title "Postup">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "Poznámky">
 <!ENTITY zotero.tabs.related.label "Súvisiace">
 <!ENTITY zotero.tabs.tags.label "Značky">
+<!ENTITY zotero.tagColorChooser.color "Farba:">
+<!ENTITY zotero.tagColorChooser.position "Pozícia:">
+<!ENTITY zotero.tagColorChooser.removeColor "Odstrániť farbu">
+<!ENTITY zotero.tagColorChooser.setColor "Nastaviť farbu">
+<!ENTITY zotero.tagColorChooser.title "Zvoliť farbu značky a pozíciu">
 <!ENTITY zotero.tagSelector.assignColor "Prideliť farbu...">
 <!ENTITY zotero.tagSelector.clearAll "Odznačiť všetky">
 <!ENTITY zotero.tagSelector.clearVisible "Odznačiť viditeľné">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Pred tým, než budete pokračovať si prečítajte">
 <!ENTITY zotero.upgrade.majorUpgradeLink "pokyny k aktualizácii">
 <!ENTITY zotero.upgrade.newVersionInstalled "Nainštalovali ste novú verziu Zotera.">
+<!ENTITY zotero.upgrade.title "Sprievodca aktualizáciou Zotera">
 <!ENTITY zotero.upgrade.upgradeInProgress "Prosím počkajte kým sa dokončí aktualizácia. Môže to trvať niekoľko minút.">
 <!ENTITY zotero.upgrade.upgradeRequired "Na to, aby ste mohli pracovať s novou verziou je potrebné aktualizovať vašu Zotero databázu.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Vaša Zotero databáza bola úspešne aktualizovaná.">

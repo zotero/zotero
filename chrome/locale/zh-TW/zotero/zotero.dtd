@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "報告識別號：">
 <!ENTITY zotero.errorReport.submissionInProgress "請等候錯誤報告送出。">
 <!ENTITY zotero.errorReport.submitted "錯誤報告已經送出。">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "錯誤記錄可能包括了一些和 Zotero 不相關的訊息。">
 <!ENTITY zotero.exportOptions.format.label "格式：">
 <!ENTITY zotero.exportOptions.title "匯出…">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "年">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "輸入 ISBN, DOI, 或 PMID 後在下面的方塊中尋找">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "更多編碼">
 <!ENTITY zotero.notes.separate "分出一個獨立視窗來編輯">
 <!ENTITY zotero.progress.title "進度">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "筆記">
 <!ENTITY zotero.tabs.related.label "相關的">
 <!ENTITY zotero.tabs.tags.label "標籤">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "取消全部的選取">
 <!ENTITY zotero.tagSelector.clearVisible "取消可見的選取">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "請確認你已檢閱過">
 <!ENTITY zotero.upgrade.majorUpgradeLink "升級指示">
 <!ENTITY zotero.upgrade.newVersionInstalled "你已安裝了新版的 Zotero。">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "請等候升級程序完成。這可能會花幾分鐘的時間。">
 <!ENTITY zotero.upgrade.upgradeRequired "你的 Zotero 資料庫必須升級才能在新版本中使用。">
 <!ENTITY zotero.upgrade.upgradeSucceeded "已經成功的升級你的 Zotero 資料庫。">

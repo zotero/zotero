@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "รหัสรายงาน:">
 <!ENTITY zotero.errorReport.submissionInProgress "โปรดรอในระหว่างที่รายงานข้อผิดพลาดกำลังส่งอยู่">
 <!ENTITY zotero.errorReport.submitted "รายงานข้อผิดพลาดได้รับการส่งเรียบร้อยแล้ว">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "บันทึกความผิดพลาดอาจรวมข้อความที่ไม่เกี่ยวกับ Zotero ไว้ด้วย">
 <!ENTITY zotero.exportOptions.format.label "รูปแบบ:">
 <!ENTITY zotero.exportOptions.title "ส่งออก...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "ปี">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "ป้อน ISBN, DOI หรือ PMID ในกล่องด้านล่างนี้เพื่อค้นหา">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "การเข้ารหัสอื่นๆ">
 <!ENTITY zotero.notes.separate "แก้ไขในหน้าต่างแยกต่างหาก">
 <!ENTITY zotero.progress.title "ความคืบหน้า">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "หมายเหตุ">
 <!ENTITY zotero.tabs.related.label "เชื่อมโยงกับ">
 <!ENTITY zotero.tabs.tags.label "แท็ก">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "ไม่เลือกทั้งหมด">
 <!ENTITY zotero.tagSelector.clearVisible "ไม่เลือกตามที่เห็น">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "ต้องมั่นใจว่าคุณได้ทบทวน">
 <!ENTITY zotero.upgrade.majorUpgradeLink "คำแนะนำการอัพเกรด">
 <!ENTITY zotero.upgrade.newVersionInstalled "ท่านได้ติดตั้ง Zotero รุ่นใหม่แล้ว">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "โปรดรอจนกว่าจะบวนการอัพเกรดจะเสร็จสิ้น ซึ่งอาจใช้เวลาหลายนาที">
 <!ENTITY zotero.upgrade.upgradeRequired "ฐานข้อมูล Zotero ของท่าน จำเป็นต้องปรับเป็นรุ่นปัจจุบันก่อนเพื่อให้ทำงานได้กับรุ่นใหม่">
 <!ENTITY zotero.upgrade.upgradeSucceeded "ฐานข้อมูล Zotero ของท่านได้รับการปรับให้เป็นรุ่นปัจจุบันแล้ว">

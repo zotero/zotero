@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "Raportin tunnus:">
 <!ENTITY zotero.errorReport.submissionInProgress "Odota">
 <!ENTITY zotero.errorReport.submitted "Virheraporttisi on toimitettu.">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Virhepäiväkirjassa saattaa olla mukana Zoteroon liittymättömiä viestejä.">
 <!ENTITY zotero.exportOptions.format.label "Muoto:">
 <!ENTITY zotero.exportOptions.title "Export...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "Vuosi">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Kirjoita ISBN-, DOI tai PMID-koodi allaolevaan laatikkoon.">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "Lisää koodauksia">
 <!ENTITY zotero.notes.separate "Muokkaa erillisessä ikkunassa">
 <!ENTITY zotero.progress.title "Eteneminen">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "Muistiinpanot">
 <!ENTITY zotero.tabs.related.label "Liittyvät">
 <!ENTITY zotero.tabs.tags.label "Merkit">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Deselect all">
 <!ENTITY zotero.tagSelector.clearVisible "Deselect visible">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Olethan tutustunut">
 <!ENTITY zotero.upgrade.majorUpgradeLink "päivitysohjeisiin">
 <!ENTITY zotero.upgrade.newVersionInstalled "Olet asentanut Zoteron uuden version.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "Odota päivitysprosessin päättymistä. Tämä saattaa kestää muutamia minuutteja.">
 <!ENTITY zotero.upgrade.upgradeRequired "Zotero-tietokantasi täytyy päivittää, jotta se toimisi uuden version kanssa.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Zotero-tietokantasi on onnistuneesti päivitetty.">

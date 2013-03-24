@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "ID raport:">
 <!ENTITY zotero.errorReport.submissionInProgress "Așteaptă, te rog, ca raportul de eroare să fie trimis.">
 <!ENTITY zotero.errorReport.submitted "Raportul de eroare a fost trimis.">
+<!ENTITY zotero.errorReport.title "Raportul de erori Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Jurnalul de erori poate include mesaje fără legătură cu Zotero.">
 <!ENTITY zotero.exportOptions.format.label "Formatare:">
 <!ENTITY zotero.exportOptions.title "Export...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "An">
 <!ENTITY zotero.lookup.button.search "Caută">
 <!ENTITY zotero.lookup.description "Introdu ISBN, DOI sau PMID pentru a căuta în caseta de mai jos.">
+<!ENTITY zotero.merge.deleted "Șters">
+<!ENTITY zotero.merge.of "din">
+<!ENTITY zotero.merge.title "Conflict rezoluție">
 <!ENTITY zotero.moreEncodings.label "Mai multe codificări">
 <!ENTITY zotero.notes.separate "Editează într-o fereastră separată">
 <!ENTITY zotero.progress.title "Progres">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "Note">
 <!ENTITY zotero.tabs.related.label "Relații">
 <!ENTITY zotero.tabs.tags.label "Etichete">
+<!ENTITY zotero.tagColorChooser.color "Culoare:">
+<!ENTITY zotero.tagColorChooser.position "Poziție:">
+<!ENTITY zotero.tagColorChooser.removeColor "Șterge culoare">
+<!ENTITY zotero.tagColorChooser.setColor "Setează culoare">
+<!ENTITY zotero.tagColorChooser.title "Alege o culoare și o poziție pentru etichetă">
 <!ENTITY zotero.tagSelector.assignColor "Stabilește culoare...">
 <!ENTITY zotero.tagSelector.clearAll "Deselectează totul">
 <!ENTITY zotero.tagSelector.clearVisible "Deselectează vedere">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Asigură-te că ai revăzut">
 <!ENTITY zotero.upgrade.majorUpgradeLink "instrucțiunile de actualizare">
 <!ENTITY zotero.upgrade.newVersionInstalled "Ai instalat o nouă versiune de Zotero.">
+<!ENTITY zotero.upgrade.title "Expertul de upgrade Zotero">
 <!ENTITY zotero.upgrade.upgradeInProgress "Așteaptă, te rog, ca procesul de actualizare să se încheie. Poate dura câteva minute.">
 <!ENTITY zotero.upgrade.upgradeRequired "Baza de date Zotero trebui actualizată în aşa fel încât să meargă cu noua versiune.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Baza de date Zotero a fost actualizată cu succes.">

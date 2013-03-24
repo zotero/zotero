@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "Jelentés azonosítója:">
 <!ENTITY zotero.errorReport.submissionInProgress "Várjon a hibajelentés elküldéséig.">
 <!ENTITY zotero.errorReport.submitted "A hibajelentés elküldve.">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "A hibanapló a Zoterohoz nem kapcsolódó bejegyzéseket is tartalmazhat">
 <!ENTITY zotero.exportOptions.format.label "Formátum:">
 <!ENTITY zotero.exportOptions.title "Exportálás...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "Év">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Adja meg az ISBN, DOI vagy PMID azonosítót az alábbi dobozban.">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "További karakterkódolások">
 <!ENTITY zotero.notes.separate "Szerkesztés külön ablakban">
 <!ENTITY zotero.progress.title "Folyamatban">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "Jegyzetek">
 <!ENTITY zotero.tabs.related.label "Kapcsolatok">
 <!ENTITY zotero.tabs.tags.label "Címkék">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Összes címke kiválasztásának megszüntetése">
 <!ENTITY zotero.tagSelector.clearVisible "Látható címkék kiválasztásának megszüntetése">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Mindenképpen olvassa el a">
 <!ENTITY zotero.upgrade.majorUpgradeLink "frissítési útmutatót">
 <!ENTITY zotero.upgrade.newVersionInstalled "A Zotero új verziójának telepítése sikerült.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "Várjon a frissítés befejezéséig. Ez akár percekig is eltarthat.">
 <!ENTITY zotero.upgrade.upgradeRequired "Frissíteni kell a Zotero adatbázist, hogy működjön az új verzióval.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "A Zotero adatbázis frissítése sikerült.">

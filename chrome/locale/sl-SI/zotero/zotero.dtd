@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "ID poročila:">
 <!ENTITY zotero.errorReport.submissionInProgress "Počakajte, da je poročilo o napaki oddano.">
 <!ENTITY zotero.errorReport.submitted "Poročilo o napaki je bilo oddano.">
+<!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Zapisnik napak lahko vključuje sporočila, ki se ne nanašajo na Zotero.">
 <!ENTITY zotero.exportOptions.format.label "Vrsta datoteke:">
 <!ENTITY zotero.exportOptions.title "Izvozi ...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "Leto">
 <!ENTITY zotero.lookup.button.search "Išči">
 <!ENTITY zotero.lookup.description "V spodnje polje vnesite ISBN, DOI ali PMID, potrebno za iskanje.">
+<!ENTITY zotero.merge.deleted "Izbrisano">
+<!ENTITY zotero.merge.of "od">
+<!ENTITY zotero.merge.title "Razrešitev sporov">
 <!ENTITY zotero.moreEncodings.label "Dodatna kodiranja">
 <!ENTITY zotero.notes.separate "Uredi v ločenem oknu">
 <!ENTITY zotero.progress.title "Napredek">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "Opombe">
 <!ENTITY zotero.tabs.related.label "Sorodno">
 <!ENTITY zotero.tabs.tags.label "Značke">
+<!ENTITY zotero.tagColorChooser.color "Barva:">
+<!ENTITY zotero.tagColorChooser.position "Položaj:">
+<!ENTITY zotero.tagColorChooser.removeColor "Odstrani barvo">
+<!ENTITY zotero.tagColorChooser.setColor "Določi barvo">
+<!ENTITY zotero.tagColorChooser.title "Izberite barvo oznake in položaj">
 <!ENTITY zotero.tagSelector.assignColor "Dodeli barvo ...">
 <!ENTITY zotero.tagSelector.clearAll "Ne izberi ničesar">
 <!ENTITY zotero.tagSelector.clearVisible "Ne izberi vidno">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Prepričajte se, da ste pregledali">
 <!ENTITY zotero.upgrade.majorUpgradeLink "navodila za posodabljanje">
 <!ENTITY zotero.upgrade.newVersionInstalled "Namestili ste novejšo različico razširitve Zotero.">
+<!ENTITY zotero.upgrade.title "Čarovnik za nadgradnjo Zotero">
 <!ENTITY zotero.upgrade.upgradeInProgress "Počakajte, da se postopek nadgradnje dokonča. To lahko znese nekaj minut.">
 <!ENTITY zotero.upgrade.upgradeRequired "Vašo zbirko podatkov Zotero je potrebno nadgraditi, da bo delovala z novejšo različico.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Vaša zbirka podatkov Zotero je bila uspešno nadgrajena.">

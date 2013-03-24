@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "Veateate ID:">
 <!ENTITY zotero.errorReport.submissionInProgress "Palun oodake kuni veateadet saadetakse.">
 <!ENTITY zotero.errorReport.submitted "Teie veateade on saadetud.">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Vealogi võib sisaldada teateid, mis ei puutu Zoterosse.">
 <!ENTITY zotero.exportOptions.format.label "Formaat:">
 <!ENTITY zotero.exportOptions.title "Eksport...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "Aasta">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Sisestada otsitava ISBN, DOI või PMID allolevasse lahtrisse.">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "Rohkem kodeeringud">
 <!ENTITY zotero.notes.separate "Salvestada eraldi aknas">
 <!ENTITY zotero.progress.title "Progress">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "Märkused">
 <!ENTITY zotero.tabs.related.label "Seotud">
 <!ENTITY zotero.tabs.tags.label "Märksõnad">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Ära vali midagi">
 <!ENTITY zotero.tagSelector.clearVisible "Nähtava valiku eemaldamine">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Enne jätkamist palun tutvuge kindlasti">
 <!ENTITY zotero.upgrade.majorUpgradeLink "uuenduste">
 <!ENTITY zotero.upgrade.newVersionInstalled "Paigaldasite uue Zotero versiooni.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "Palun oodake kuni uuendusi paigaldatakse. See võib võtta mõned minutid aega.">
 <!ENTITY zotero.upgrade.upgradeRequired "Et Zotero andmebaas töötaks uue versiooniga on seda tarvis uuendada.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Teie Zotero andmebaas on edukalt uuendatud.">

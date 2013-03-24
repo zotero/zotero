@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "ID hlášení:">
 <!ENTITY zotero.errorReport.submissionInProgress "Čekejte, prosím, dokud nebude zpráva o chybách odeslána.">
 <!ENTITY zotero.errorReport.submitted "Zpráva o chybách byla odeslána.">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Záznam o chybách může obsahovat informace nesouvisející se Zoterem.">
 <!ENTITY zotero.exportOptions.format.label "Formát:">
 <!ENTITY zotero.exportOptions.title "Export...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "Rok">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Do políčka níže vložte ISBN, DOI nebo PMID, podle kterého chcete vyhledávat.">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "Další kódování">
 <!ENTITY zotero.notes.separate "Upravit v samostatném okně">
 <!ENTITY zotero.progress.title "Postup">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "Poznámky">
 <!ENTITY zotero.tabs.related.label "Související">
 <!ENTITY zotero.tabs.tags.label "Štítky">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Zrušit výběr všech">
 <!ENTITY zotero.tagSelector.clearVisible "Zrušit výběr viditelných">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Než budete pokračovat, zkontrolujte">
 <!ENTITY zotero.upgrade.majorUpgradeLink "instrukce pro aktualizaci">
 <!ENTITY zotero.upgrade.newVersionInstalled "Nainstalovali jste novou verzi Zotera.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "Prosím počkejte, dokud neskončí proces aktualizace. Může zabrat až několik minut.">
 <!ENTITY zotero.upgrade.upgradeRequired "Databáze vašeho Zotera musí být aktualizována, aby mohla pracovat s novou verzí.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Vaše Zotero databáze byla úspěšně aktualizována.">

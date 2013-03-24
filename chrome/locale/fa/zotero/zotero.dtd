@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "شناسه گزارش:">
 <!ENTITY zotero.errorReport.submissionInProgress "لطفا تا پایان ارسال گزارش خطا، صبر کنید.">
 <!ENTITY zotero.errorReport.submitted "گزارش خطا ارسال شد.">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "گزارش خطا ممکن است شامل پیام‌های غیر مرتبط با زوترو باشد.">
 <!ENTITY zotero.exportOptions.format.label "قالب:">
 <!ENTITY zotero.exportOptions.title "صدور...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "سال">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "شابک،‏ DOI یا PMID را برای جستجو در کادر زیر وارد کنید.">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "کدبندی‌های بیشتر">
 <!ENTITY zotero.notes.separate "ویرایش در پنجره مستقل">
 <!ENTITY zotero.progress.title "پیشرفت">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "یادداشت‌ها">
 <!ENTITY zotero.tabs.related.label "مرتبط">
 <!ENTITY zotero.tabs.tags.label "برچسب‌ها">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "انتخاب هیچ‌کدام">
 <!ENTITY zotero.tagSelector.clearVisible "عدم انتخاب برچسب‌های پیدا">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "حتما پیش از ادامه کار">
 <!ENTITY zotero.upgrade.majorUpgradeLink "دستورالعمل ارتقا را">
 <!ENTITY zotero.upgrade.newVersionInstalled "شما نسخه جدیدی از زوترو را نصب کرده‌اید.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "لطفا تا اتمام فرآیند ارتقا صبر کنید. این فرآیند ممکن است چند دقیقه به طول انجامد.">
 <!ENTITY zotero.upgrade.upgradeRequired "برای کار کردن با نسخه جدید، بانک اطلاعات زوترو باید ارتقا یابد.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "بانک اطلاعات زوتروی شما با موفقیت ارتقا یافت.">

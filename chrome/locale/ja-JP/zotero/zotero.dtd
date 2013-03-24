@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "レポート ID:">
 <!ENTITY zotero.errorReport.submissionInProgress "エラーレポートが送信されるまでお待ちください。">
 <!ENTITY zotero.errorReport.submitted "エラーレポートが送信されました。">
+<!ENTITY zotero.errorReport.title "Zotero エラーレポート">
 <!ENTITY zotero.errorReport.unrelatedMessages "エラー・ログは Zotero とは無関係のメッセージを含んでいる可能性があります。">
 <!ENTITY zotero.exportOptions.format.label "フォーマット:">
 <!ENTITY zotero.exportOptions.title "エクスポート...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "年">
 <!ENTITY zotero.lookup.button.search "検索">
 <!ENTITY zotero.lookup.description "下のボックスから検索するには、 ISBN、DOI、または PMID （複数可）を入力してください。">
+<!ENTITY zotero.merge.deleted "削除済み">
+<!ENTITY zotero.merge.of "の">
+<!ENTITY zotero.merge.title "衝突の解決">
 <!ENTITY zotero.moreEncodings.label "その他の文字コード">
 <!ENTITY zotero.notes.separate "別画面で編集する">
 <!ENTITY zotero.progress.title "進捗">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "メモ">
 <!ENTITY zotero.tabs.related.label "関連アイテム">
 <!ENTITY zotero.tabs.tags.label "タグ">
+<!ENTITY zotero.tagColorChooser.color "色:">
+<!ENTITY zotero.tagColorChooser.position "位置:">
+<!ENTITY zotero.tagColorChooser.removeColor "色を取り除く">
+<!ENTITY zotero.tagColorChooser.setColor "色を指定">
+<!ENTITY zotero.tagColorChooser.title "タグの色と位置を選ぶ">
 <!ENTITY zotero.tagSelector.assignColor "色を指定...">
 <!ENTITY zotero.tagSelector.clearAll "選択をすべて解除">
 <!ENTITY zotero.tagSelector.clearVisible "可視タグの選択を解除">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "続ける前に">
 <!ENTITY zotero.upgrade.majorUpgradeLink "更新の手引きを">
 <!ENTITY zotero.upgrade.newVersionInstalled "Zotero の新しいバージョンがインストールされました。">
+<!ENTITY zotero.upgrade.title "Zotero 更新ガイド">
 <!ENTITY zotero.upgrade.upgradeInProgress "この更新が終了するまでお待ちください。数分間かかる場合もあります。">
 <!ENTITY zotero.upgrade.upgradeRequired "新しいバージョンを使用する前にあなたの Zotero データベースを更新する必要があります。">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Zotero データベースは問題なく更新されました。">

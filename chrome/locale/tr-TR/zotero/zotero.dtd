@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "Rapor ID:">
 <!ENTITY zotero.errorReport.submissionInProgress "Lütfen hata raporu gönderilene kadar bekleyiniz.">
 <!ENTITY zotero.errorReport.submitted "Hata raporu gönderilmiştir.">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Hata kaydı Zotero ile ilgili olmayan iletileri de içerebilir.">
 <!ENTITY zotero.exportOptions.format.label "Biçim">
 <!ENTITY zotero.exportOptions.title "Dışarı Aktar...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "Yıl">
 <!ENTITY zotero.lookup.button.search "Ara">
 <!ENTITY zotero.lookup.description "ISBN, DOI veya PMID'yi girerek aşağıdaki kutuda ara.">
+<!ENTITY zotero.merge.deleted "Silindi">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "Başka Kodlamalar">
 <!ENTITY zotero.notes.separate "Ayrı bir pencerede düzenle">
 <!ENTITY zotero.progress.title "İşlem">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "Notlar">
 <!ENTITY zotero.tabs.related.label "İligili">
 <!ENTITY zotero.tabs.tags.label "Etiketler">
+<!ENTITY zotero.tagColorChooser.color "Renk">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Hiçbirini Seçme">
 <!ENTITY zotero.tagSelector.clearVisible "Gürülebileni Seçme">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Gözden geçirdiğinize emin olunuz">
 <!ENTITY zotero.upgrade.majorUpgradeLink "yükseltme yönergeleri">
 <!ENTITY zotero.upgrade.newVersionInstalled "Zotero'nun yeni bir sürümünü kurdunuz.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "Lütfen yükseltme işleni bitene kadar bekleyiniz. Bu bir miktar zaman alabilir.">
 <!ENTITY zotero.upgrade.upgradeRequired "Zotero veri tabanınız yeni sürüm ile birlikte çalışabilmesi için yükseltilmesi gerekir.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Zotero veri tabanınız başarılı olarak yükseltilmiştir.">

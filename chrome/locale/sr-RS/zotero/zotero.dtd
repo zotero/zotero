@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "Број извештаја:">
 <!ENTITY zotero.errorReport.submissionInProgress "Сачекајте док се извештај о грешци шаље.">
 <!ENTITY zotero.errorReport.submitted "Извештај о грешци је послат.">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Дневник грешака може да садржи поруке невезане за Зотеро.">
 <!ENTITY zotero.exportOptions.format.label "Формат:">
 <!ENTITY zotero.exportOptions.title "Извоз...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "Година">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Enter one or more ISBNs, DOIs, or PMIDs to look up in the box below.">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 <!ENTITY zotero.notes.separate "Уреди у одвојеном прозору">
 <!ENTITY zotero.progress.title "Напредак">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "Белешке">
 <!ENTITY zotero.tabs.related.label "Сродно">
 <!ENTITY zotero.tabs.tags.label "Ознаке">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Избаци из избора све">
 <!ENTITY zotero.tagSelector.clearVisible "Избаци из избора видљиве">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Проверите">
 <!ENTITY zotero.upgrade.majorUpgradeLink "упутства за дограђивање">
 <!ENTITY zotero.upgrade.newVersionInstalled "Инсталирали сте нову верзију Зотера.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "Сачекајте док се процес надоградње извршава. Ово може потрајати неколико минута.">
 <!ENTITY zotero.upgrade.upgradeRequired "Ваша Зотеро база података мора бити надограђена да би радила са новом верзијом.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Зотеро база података је успешно надограђена.">

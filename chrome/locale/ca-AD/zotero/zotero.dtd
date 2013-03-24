@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "Número de referència de l&apos;informe:">
 <!ENTITY zotero.errorReport.submissionInProgress "Espereu mentre s&apos;envia l&apos;informe d&apos;error.">
 <!ENTITY zotero.errorReport.submitted "L&apos;informe d&apos;error ha estat enviat correctament.">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "El registre d&apos;error pot incloure missatges no relacionats amb el Zotero.">
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.title "Exporta...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "Any">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Introduïu l'ISBN, DOI, o PMID per cercar en el quadre inferior.">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "Més codificacions">
 <!ENTITY zotero.notes.separate "Edita en una finestra separada">
 <!ENTITY zotero.progress.title "Progrés">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "Notes">
 <!ENTITY zotero.tabs.related.label "Relacionats">
 <!ENTITY zotero.tabs.tags.label "Etiquetes">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Desselecciona-ho tot">
 <!ENTITY zotero.tagSelector.clearVisible "Desselecciona les visibles">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Assegureu-vos de revisar">
 <!ENTITY zotero.upgrade.majorUpgradeLink "instruccions d'actualització">
 <!ENTITY zotero.upgrade.newVersionInstalled "Has instal·lat una nova versió del Zotero.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "Espereu que s&apos;acabi el procés d&apos;actualització. Pot trigar uns minuts.">
 <!ENTITY zotero.upgrade.upgradeRequired "La vostra base de dades s&apos;ha d&apos;actualitzar per a funcionar amb la nova versió.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "La vostra base de dades del Zotero s&apos;ha actualitzat correctament">

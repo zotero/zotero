@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "رقم التقرير:">
 <!ENTITY zotero.errorReport.submissionInProgress "برجاء الانتظار لحين الانتهاء من ارسال التقرير عن الخطأ.">
 <!ENTITY zotero.errorReport.submitted "تم ارسال التقرير عن الخطأ.">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "قد يتضمن سجل الاخطاء على رسائل ليس لها علاقة بزوتيرو.">
 <!ENTITY zotero.exportOptions.format.label "الصياغة:">
 <!ENTITY zotero.exportOptions.title "تصدير...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "السنة">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "ادخل الترقيم الدولي الموحد للكتاب او معرف مقالات الميدلاين او معرف الوثيقة الرقمية.">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "المزيد من الترميزات">
 <!ENTITY zotero.notes.separate "التحرير في نافذة منفصلة">
 <!ENTITY zotero.progress.title "التقدم">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "ملاحظات">
 <!ENTITY zotero.tabs.related.label "عناصر ذات صلة">
 <!ENTITY zotero.tabs.tags.label "أوسمة">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "إلغاء تحديد الكل">
 <!ENTITY zotero.tagSelector.clearVisible "إلغاء تحديد العناصر الظاهرة">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "تأكد من أنك قمت بمراجعة">
 <!ENTITY zotero.upgrade.majorUpgradeLink "إرشادات الترقية">
 <!ENTITY zotero.upgrade.newVersionInstalled "لقد قمتَ بتنصيب نسخة جديدة من زوتيرو.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "فضلاً انتظر حتى تنتهي عملية الترقية. قد يستغرق ذلك عدة دقائق.">
 <!ENTITY zotero.upgrade.upgradeRequired "يجب ترقية قاعدة بيانات زوتيرو لكي تعمل مع النسخة الجديدة.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "تم ترقية قاعدة البيانات بنجاح.">

@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "Rapport-ID:">
 <!ENTITY zotero.errorReport.submissionInProgress "Vent venligst mens fejlrapporten registreres.">
 <!ENTITY zotero.errorReport.submitted "Din fejlrapport er registreret.">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Logfilen for fejl kan indeholde meddelelser der ikke har med Zotero at gøre.">
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.title "Eksport...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "År">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Indtast ISBN, DOI eller PMID for opslag nedenfor.">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "Flere tegnsæt">
 <!ENTITY zotero.notes.separate "Rediger i særskilt vindue">
 <!ENTITY zotero.progress.title "Fremgang">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "Noter">
 <!ENTITY zotero.tabs.related.label "Relationer">
 <!ENTITY zotero.tabs.tags.label "Mærkater">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Fravælg alle">
 <!ENTITY zotero.tagSelector.clearVisible "Fravælg de synlige">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Sørg for at gennemse">
 <!ENTITY zotero.upgrade.majorUpgradeLink "instruktioner for opgradering">
 <!ENTITY zotero.upgrade.newVersionInstalled "Du har installeret en ny version af Zotero.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "Vent venligst til opgraderingsprocessen er slut. Det kan tage nogle minutter.">
 <!ENTITY zotero.upgrade.upgradeRequired "Din Zotero-database skal opgraderes for at virke med den seneste version.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Din Zotero-database er blevet opgraderet korrekt.">

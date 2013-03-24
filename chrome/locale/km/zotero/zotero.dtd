@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "អត្តលេខរបាយការណ៍:">
 <!ENTITY zotero.errorReport.submissionInProgress "សូមរង់ចាំ ខណៈពេលកំពុងធ្វើរបាយការណ៍អំពីកំហុស។">
 <!ENTITY zotero.errorReport.submitted "កំហុសបានធ្វើរបាយការណ៍រួចហើយ។">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "កំណត់ហេតុកំហុសអាចបញ្ចូលសារដែលមិនពាក់ព័ន្ធទៅកាន់ហ្ស៊ូតេរ៉ូ។">
 <!ENTITY zotero.exportOptions.format.label "ទ្រង់ទ្រាយ:">
 <!ENTITY zotero.exportOptions.title "នាំចេញ...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "ឆ្នាំ">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "សូមបញ្ចូលអាយអេសប៊ីអិន ឌីអូអាយ ឬ ភីអេមអាយឌី ដើម្បីរកមើលនៅក្នុង​ប្រអប់ខាងក្រោមៈ">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "បញ្ចូលកូដបន្ថែម">
 <!ENTITY zotero.notes.separate "កែតម្រូវនៅក្នុងវីនដូយ៍ដោយឡែក">
 <!ENTITY zotero.progress.title "កំពុងដំណើរ">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "កំណត់ត្រា">
 <!ENTITY zotero.tabs.related.label "ពាក់ព័ន្ធ">
 <!ENTITY zotero.tabs.tags.label "ស្លាក">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "ដោះជម្រើសទាំងអស់">
 <!ENTITY zotero.tagSelector.clearVisible "ដោះជម្រើសមើលឃើញ">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "ធ្វើឲប្រាកដថា អ្នកបានអាននូវ">
 <!ENTITY zotero.upgrade.majorUpgradeLink "ការណែនាំអំពីទំនើបកម្ម">
 <!ENTITY zotero.upgrade.newVersionInstalled "អ្នកបានដំឡើងហ្ស៊ូតេរ៉ូកំណែថ្មី។">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "សូមរង់ចាំ ដើម្បីឲដំណើរការទំនើបកម្មបញ្ចប់។​ ដំណើរការនេះអាចចំណាយ​ពេលមួយរយៈខ្លី។">
 <!ENTITY zotero.upgrade.upgradeRequired "អ្នកត្រូវធ្វើទំនើបកម្មទិន្នន័យហ្ស៊ូតេរ៉ូរបស់អ្នកដើម្បីដំណើរការជាមួយកំណែថ្មីនេះ។">
 <!ENTITY zotero.upgrade.upgradeSucceeded "ទិន្នន័យហ្ស៊ូតេរ៉ូរបស់អ្នកបានធ្វើទំនើបកម្មដោយជោគជ័យ។">

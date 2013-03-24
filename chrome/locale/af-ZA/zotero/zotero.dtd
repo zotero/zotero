@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "Verslag-ID:">
 <!ENTITY zotero.errorReport.submissionInProgress "Wag asseblief terwyl die foutboodskap voorgelê word">
 <!ENTITY zotero.errorReport.submitted "Die foutboodskap is voorgelê">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
 <!ENTITY zotero.exportOptions.format.label "Formaat:">
 <!ENTITY zotero.exportOptions.title "Export...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "Jaar">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Enter one or more ISBNs, DOIs, or PMIDs to look up in the box below.">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "Meer enkoderings">
 <!ENTITY zotero.notes.separate "Redigeer in 'n apparte venster">
 <!ENTITY zotero.progress.title "Vordering">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "Notas">
 <!ENTITY zotero.tabs.related.label "Verwant">
 <!ENTITY zotero.tabs.tags.label "Etikette">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Deselect all">
 <!ENTITY zotero.tagSelector.clearVisible "Deselect visible">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Maak seker dat die">
 <!ENTITY zotero.upgrade.majorUpgradeLink "opgraderingsinstruksies hersien is">
 <!ENTITY zotero.upgrade.newVersionInstalled "'n Nuwe weergawe van Zotero in geïnstalleer">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "Wag asseblief vir die opgraderingsproses om klaar te maak. Dit kan 'n paar minute neem.">
 <!ENTITY zotero.upgrade.upgradeRequired "Die Zotero-databasis moet bygewerk word om by die nuwe weergawe aan te pas.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Die Zotero-databasis is suksesvol opgegradeer.">

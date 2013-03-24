@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "ID de Relatório:">
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor aguarde enquanto o relatório de erro é enviado.">
 <!ENTITY zotero.errorReport.submitted "O relatório de erro foi enviado.">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "O registo de erros pode incluir mensagens alheias ao Zotero.">
 <!ENTITY zotero.exportOptions.format.label "Formato:">
 <!ENTITY zotero.exportOptions.title "Exportar...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "Ano">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "Introduzir na caixa abaixo o ISBN, o DOI, ou o PMID a procurar.">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "Mais Codificações">
 <!ENTITY zotero.notes.separate "Editar numa janela à parte">
 <!ENTITY zotero.progress.title "Progresso">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "Notas">
 <!ENTITY zotero.tabs.related.label "Relações">
 <!ENTITY zotero.tabs.tags.label "Etiquetas">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "Desmarcar Todos">
 <!ENTITY zotero.tagSelector.clearVisible "Desmarcar Visíveis">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Assegure-se de que leu atentamente as">
 <!ENTITY zotero.upgrade.majorUpgradeLink "instruções de actualização">
 <!ENTITY zotero.upgrade.newVersionInstalled "Instalou uma nova versão do Zotero.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "Por favor espere que o processo de actualização termine. Pode demorar alguns minutos.">
 <!ENTITY zotero.upgrade.upgradeRequired "A sua base de dados do Zotero precisa de ser actualizada para poder funcionar com a nova versão.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "A sua base de dados do Zotero foi actualizada com sucesso.">

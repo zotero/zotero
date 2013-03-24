@@ -39,6 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "보고서 ID:">
 <!ENTITY zotero.errorReport.submissionInProgress "오류 보고가 제출되는 동안 기다려 주세요.">
 <!ENTITY zotero.errorReport.submitted "오류 보고가 제출되었습니다.">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "오류 로그에는 Zotero와 관련이 없는 메시지가 포함될 수 있습니다.">
 <!ENTITY zotero.exportOptions.format.label "형식:">
 <!ENTITY zotero.exportOptions.title "내보내기...">
@@ -138,6 +139,9 @@
 <!ENTITY zotero.items.year_column "년">
 <!ENTITY zotero.lookup.button.search "Search">
 <!ENTITY zotero.lookup.description "ISBN, DOI, 또는 PMID를 입력하세요.">
+<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "추가 인코딩">
 <!ENTITY zotero.notes.separate "분리 창에서 편집">
 <!ENTITY zotero.progress.title "진행">
@@ -200,6 +204,11 @@
 <!ENTITY zotero.tabs.notes.label "노트">
 <!ENTITY zotero.tabs.related.label "관련 페이지">
 <!ENTITY zotero.tabs.tags.label "태그">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "선택 모두 해제">
 <!ENTITY zotero.tagSelector.clearVisible "보이는 것들 선택 해제">
@@ -259,6 +268,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "업그레이드를 진행하기 전에">
 <!ENTITY zotero.upgrade.majorUpgradeLink "업그레이드 지침">
 <!ENTITY zotero.upgrade.newVersionInstalled "새 버전의 Zotero를 설치했습니다.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "업그레이드 과정이 끝나기까지 기다려 주십시오. 몇 분정도 걸릴 예정입니다.">
 <!ENTITY zotero.upgrade.upgradeRequired "Zotero 데이터베이스는 반드시 새 버전으로 작업하기 위해 업그레이드 해야 합니다.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Zotero 데이타베이스는 성공적으로 업그레이드 되었습니다.">
