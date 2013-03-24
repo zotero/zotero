@@ -29,7 +29,8 @@
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   
   <prefpane id="zotero-prefpane-lang"
-			onpaneload="Zotero_Preferences.Lang.init()">
+			onpaneload="Zotero_Preferences.Lang.init()"
+			helpTopic="lang">
     
     <menupopup id="extend-lang-menu" 
                position="after_start">
