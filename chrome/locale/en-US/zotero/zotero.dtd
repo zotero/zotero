@@ -105,7 +105,7 @@
 <!ENTITY zotero.items.language_column "Language">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
 <!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.menu.addTag "Add Tag">
+<!ENTITY zotero.items.menu.addTag "Add Subfield">
 <!ENTITY zotero.items.menu.attach "Add Attachment">
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File…">
 <!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File…">
