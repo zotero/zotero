@@ -1,0 +1,626 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2006–2013 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+
+<overlay id="zotero-prefpane-lang-overlay"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  
+  <prefpane id="zotero-prefpane-lang"
+			onpaneload="Zotero_Preferences.Lang.init()">
+    
+    <menupopup id="extend-lang-menu" 
+               position="after_start">
+      <menu label="&zotero.preferences.lang.script;" id="script-lang-menu">
+        <menupopup height="250"
+                   onpopupshowing="Zotero_Preferences.Lang.scriptLangMenuPrep(this.parentNode.parentNode)" id="script-lang-box"/>
+      </menu>
+      <menu label="&zotero.preferences.lang.region;" id="region-lang-menu">
+        <menupopup height="250" id="region-lang-box"/>
+      </menu>
+      <menu label="&zotero.preferences.lang.variant;" id="variant-lang-menu">
+        <menupopup maxheight="250"
+                   onpopupshowing="Zotero_Preferences.Lang.variantLangMenuPrep(this.parentNode.parentNode)" id="variant-lang-box"/>
+      </menu>
+    </menupopup>
+    <menupopup id="citation-primary-affix-menu" 
+               onpopupshowing="if (!document.popupNode.disabled &amp;&amp; !document.popupNode.checked) {Zotero_Preferences.Lang.citationPrimary(document.popupNode);return true;} else {Zotero_Preferences.Lang.citationPrimary(document.popupNode);return false;}" position="after_start">
+      
+      <menuitem label="&lt;i&gt;...&lt;/i&gt;" value="&lt;i&gt;|&lt;/i&gt;" oncommand="Zotero_Preferences.Lang.citationSetAffixes(null, this);"/>
+    </menupopup>
+    <menupopup id="citation-secondary-affix-menu" 
+               onpopupshowing="if (!document.popupNode.disabled &amp;&amp; !document.popupNode.checked) {Zotero_Preferences.Lang.citationSecondary();return true;} else {Zotero_Preferences.Lang.citationSecondary();return false;}" position="after_start">
+      <menuitem label=", ..." value=", |" oncommand="Zotero_Preferences.Lang.citationSetAffixes(null, this);"/>
+      <menuitem label="[...]" value=" [|]" oncommand="Zotero_Preferences.Lang.citationSetAffixes(null, this);"/>
+      <menuitem label="(...)" value=" (|)" oncommand="Zotero_Preferences.Lang.citationSetAffixes(null, this);"/>
+    </menupopup>
+    <groupbox>
+      <hbox>
+        <vbox>
+          <grid>
+            <columns>
+              <column/>
+              <column/>
+            </columns>
+            <rows>
+              <row>
+                <caption label="&zotero.preferences.lang.ui;"/>
+                <menulist id="ui-menulist" onselect="window.openDialog('chrome://zotero/content/languageSwitchConfirmation.xul', 'Switch Interface Language', 'chrome,centerscreen', document, Zotero);">
+                  <!-- generated list items go in here -->
+                </menulist>
+              </row>
+              <row>
+                <caption label="&zotero.preferences.lang.csl;"/>
+                <menulist id="locale-menulist" onselect="var lang = this.selectedItem.value;Zotero.Prefs.set('export.bibliographyLocale', lang)">
+                </menulist>
+              </row>
+            </rows>
+          </grid>
+          <hbox flex="1">
+            <vbox style="background:#99e199;border:1px black transparent;-moz-border-radius: 6px;margin-right:0.5em;margin-top:0.5em;" flex="1">
+              <label value="&zotero.preferences.lang.setLocales;"/>
+              <label value="&zotero.preferences.lang.languageRoles;"/>
+              <label value="&zotero.preferences.lang.configureCitations;"/>
+            </vbox>
+          </hbox>
+        </vbox>
+        <vbox>
+          <grid minwidth="500">
+            <columns>
+              <column/>
+              <column flex="1"/>
+              <column flex="1"/>
+            </columns>
+            <rows>
+              <row>
+                <label/>
+                <caption label="&zotero.preferences.lang.primary;" style="text-align:center;"/>
+                <caption label="&zotero.preferences.lang.secondary;" style="text-align:center;"/>
+              </row>
+              <row>
+                <label/>
+                <hbox style="background:#b7b7b7;margin:0px 0.5em 0px 0.5em;"/>
+                <hbox style="background:#b7b7b7;margin:0px 0.5em 0px 0.5em;"/>
+              </row>
+              <row>
+                <grid>
+                  <columns>
+                    <column/>
+                  </columns>
+                  <rows>
+                    <row style="max-height:1em;min-height:1em;">
+                      <label/>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <hbox flex="1" text-align="right">
+                        <caption label="&zotero.preferences.lang.persons;"/>
+                      </hbox>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <hbox flex="1" text-align="right">
+                        <caption label="&zotero.preferences.lang.institutions;"/>
+                      </hbox>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <hbox flex="1" text-align="right">
+                        <caption label="&zotero.preferences.lang.titles;"/>
+                      </hbox>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <hbox flex="1" text-align="right">
+                        <caption label="&zotero.preferences.lang.publishers;"/>
+                      </hbox>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <hbox flex="1" text-align="right">
+                        <caption label="&zotero.preferences.lang.places;"/>
+                      </hbox>
+                    </row>
+                  </rows>
+                </grid>
+                
+                <grid flex="1">
+                  <columns>
+                    <column flex="1"/>
+                  </columns>
+                  <rows>
+                    <row style="max-height:1em;min-height:1em;">
+                      <hbox flex="1">
+                        <hbox flex="2"/>
+                        <hbox  style="min-width:4.5em;" >
+                          <hbox flex="1"/>
+                          <label value="orig"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox  style="min-width:4.5em;">
+                          <hbox flex="1"/>
+                          <label value="translit"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox  style="min-width:4.5em;">
+                          <hbox flex="1"/>
+                          <label value="translate"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="2"/>
+                      </hbox>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <radiogroup orient="horizontal" flex="1" class="plain">
+                        <hbox flex="2"/>
+                        <hbox  style="min-width:4.5em;">
+                          <hbox flex="1"/>
+                          <radio group="persons-radio" id="persons-radio-orig" oncommand="Zotero_Preferences.Lang.citationPrimary(this);"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+                              style="min-width:4.5em;" class="compact translit-primary">
+                          <hbox flex="1"/>
+                          <label id="persons-radio-translit-prefix"/>
+                          <radio group="persons-radio" id="persons-radio-translit" popup="citation-primary-affix-menu"/>
+                          <label id="persons-radio-translit-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                              style="min-width:4.5em;" class="translat-primary">
+                          <hbox flex="1"/>
+                          <radio group="persons-radio" id="persons-radio-translat" oncommand="Zotero_Preferences.Lang.citationPrimary(this);"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="2"/>
+                      </radiogroup>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <radiogroup orient="horizontal" flex="1" class="plain">
+                        <hbox flex="2"/>
+                        <hbox  style="min-width:4.5em;">
+                          <hbox flex="1"/>
+                          <radio group="institutions-radio" id="institutions-radio-orig" oncommand="Zotero_Preferences.Lang.citationPrimary(this);"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+                              style="min-width:4.5em;" class="compact translit-primary">
+                          <hbox flex="1"/>
+                          <label id="institutions-radio-translit-prefix"/>
+                          <radio group="institutions-radio" id="institutions-radio-translit" popup="citation-primary-affix-menu"/>
+                          <label id="institutions-radio-translit-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                              style="min-width:4.5em;" class="compact translat-primary">
+                          <hbox flex="1"/>
+                          <radio group="institutions-radio" id="institutions-radio-translat" oncommand="Zotero_Preferences.Lang.citationPrimary(this);"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="2"/>
+                      </radiogroup>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <radiogroup orient="horizontal" flex="1" class="plain">
+                        <hbox flex="2"/>
+                        <hbox  style="min-width:4.5em;">
+                          <hbox flex="1"/>
+                          <radio group="titles-radio" id="titles-radio-orig" oncommand="Zotero_Preferences.Lang.citationPrimary(this);"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+                              style="min-width:4.5em;" class="compact translit-primary">
+                          <hbox flex="1"/>
+                          <label id="titles-radio-translit-prefix"/>
+                          <radio group="titles-radio" id="titles-radio-translit" popup="citation-primary-affix-menu"/>
+                          <label id="titles-radio-translit-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                              style="min-width:4.5em;" class="compact translat-primary">
+                          <hbox flex="1"/>
+                          <radio group="titles-radio" id="titles-radio-translat" oncommand="Zotero_Preferences.Lang.citationPrimary(this);"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="2"/>
+                      </radiogroup>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <radiogroup orient="horizontal" flex="1" class="plain">
+                        <hbox flex="2"/>
+                        <hbox  style="min-width:4.5em;">
+                          <hbox flex="1"/>
+                          <radio group="publishers-radio" id="publishers-radio-orig" oncommand="Zotero_Preferences.Lang.citationPrimary(this);"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+                              style="min-width:4.5em;" class="compact translit-primary">
+                          <hbox flex="1"/>
+                          <label id="publishers-radio-translit-prefix"/>
+                          <radio group="publishers-radio" id="publishers-radio-translit" popup="citation-primary-affix-menu"/>
+                          <label id="publishers-radio-translit-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                              style="min-width:4.5em;" class="compact translat-primary">
+                          <hbox flex="1"/>
+                          <radio group="publishers-radio" id="publishers-radio-translat" oncommand="Zotero_Preferences.Lang.citationPrimary(this);"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="2"/>
+                      </radiogroup>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <radiogroup orient="horizontal" flex="1" class="plain">
+                        <hbox flex="2"/>
+                        <hbox  style="min-width:4.5em;">
+                          <hbox flex="1"/>
+                          <radio group="places-radio" id="places-radio-orig" oncommand="Zotero_Preferences.Lang.citationPrimary(this);"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+                              style="min-width:4.5em;" class="compact translit-primary">
+                          <hbox flex="1"/>
+                          <label id="places-radio-translit-prefix"/>
+                          <radio group="places-radio" id="places-radio-translit" popup="citation-primary-affix-menu"/>
+                          <label id="places-radio-translit-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                              style="min-width:4.5em;" class="compact translat-primary">
+                          <hbox flex="1"/>
+                          <radio group="places-radio" id="places-radio-translat" oncommand="Zotero_Preferences.Lang.citationPrimary(this);"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="2"/>
+                      </radiogroup>
+                    </row>
+                  </rows>
+                </grid>
+                
+                <grid flex="1">
+                  <columns>
+                    <column flex="1"/>
+                    <column flex="1"/>
+                    <column flex="1"/>
+                  </columns>
+                  <rows>
+                    <row style="max-height:1em;min-height:1em;">
+                      <hbox flex="1">
+                        <hbox flex="2"/>
+                        <hbox  style="min-width:4.5em;">
+                          <hbox flex="1"/>
+                          <label value="orig"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox  style="min-width:4.5em;">
+                          <hbox flex="1"/>
+                          <label value="translit"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox  style="min-width:4.5em;">
+                          <hbox flex="1"/>
+                          <label value="translate"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="2"/>
+                      </hbox>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <hbox flex="1">
+                        <hbox flex="2"/>
+                        <hbox  style="min-width:4.5em;" class="plain compact">
+                          <hbox flex="1"/>
+                          <label id="persons-checkbox-orig-prefix"/>
+                          <checkbox popup="citation-secondary-affix-menu" id="persons-checkbox-orig"/>
+                          <label id="persons-checkbox-orig-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-secondary', 'translit'],false);" 
+                              style="min-width:4.5em;" class="plain compact translit-secondary">
+                          <hbox flex="1"/>
+                          <label id="persons-checkbox-translit-prefix"/>
+                          <checkbox id="persons-checkbox-translit" popup="citation-secondary-affix-menu"/>
+                          <label id="persons-checkbox-translit-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                              style="min-width:4.5em;" class="plain compact translat-secondary">
+                          <hbox flex="1"/>
+                          <label id="persons-checkbox-translat-prefix"/>
+                          <checkbox id="persons-checkbox-translat" popup="citation-secondary-affix-menu"/>
+                          <label id="persons-checkbox-translat-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="2"/>
+                      </hbox>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <hbox flex="1">
+                        <hbox flex="2"/>
+                        <hbox  style="min-width:4.5em;" class="plain compact">
+                          <hbox flex="1"/>
+                          <label id="institutions-checkbox-orig-prefix"/>
+                          <checkbox id="institutions-checkbox-orig" popup="citation-secondary-affix-menu"/>
+                          <label id="institutions-checkbox-orig-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-secondary', 'translit'],false);"
+                              style="min-width:4.5em;" class="plain compact translit-secondary">
+                          <hbox flex="1"/>
+                          <label id="institutions-checkbox-translit-prefix"/>
+                          <checkbox id="institutions-checkbox-translit" popup="citation-secondary-affix-menu"/>
+                          <label id="institutions-checkbox-translit-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                              style="min-width:4.5em;" class="plain compact translat-secondary">
+                          <hbox flex="1"/>
+                          <label id="institutions-checkbox-translat-prefix"/>
+                          <checkbox id="institutions-checkbox-translat" popup="citation-secondary-affix-menu"/>
+                          <label id="institutions-checkbox-translat-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="2"/>
+                      </hbox>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <hbox flex="1">
+                        <hbox flex="2"/>
+                        <hbox  style="min-width:4.5em;" class="plain compact">
+                          <hbox flex="1"/>
+                          <label id="titles-checkbox-orig-prefix"/>
+                          <checkbox id="titles-checkbox-orig" popup="citation-secondary-affix-menu"/>
+                          <label id="titles-checkbox-orig-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-secondary', 'translit'],false);"
+                              style="min-width:4.5em;" class="plain compact translit-secondary">
+                          <hbox flex="1"/>
+                          <label id="titles-checkbox-translit-prefix"/>
+                          <checkbox id="titles-checkbox-translit" popup="citation-secondary-affix-menu"/>
+                          <label id="titles-checkbox-translit-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                              style="min-width:4.5em;" class="plain compact translat-secondary">
+                          <hbox flex="1"/>
+                          <label id="titles-checkbox-translat-prefix"/>
+                          <checkbox id="titles-checkbox-translat" popup="citation-secondary-affix-menu"/>
+                          <label id="titles-checkbox-translat-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="2"/>
+                      </hbox>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <hbox flex="1">
+                        <hbox flex="2"/>
+                        <hbox  style="min-width:4.5em;" class="plain compact">
+                          <hbox flex="1"/>
+                          <label id="publishers-checkbox-orig-prefix"/>
+                          <checkbox id="publishers-checkbox-orig" popup="citation-secondary-affix-menu"/>
+                          <label id="publishers-checkbox-orig-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-secondary', 'translit'],false);"
+                              style="min-width:4.5em;" class="plain compact translit-secondary">
+                          <hbox flex="1"/>
+                          <label id="publishers-checkbox-translit-prefix"/>
+                          <checkbox id="publishers-checkbox-translit" popup="citation-secondary-affix-menu"/>
+                          <label id="publishers-checkbox-translit-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                              style="min-width:4.5em;" class="plain compact translat-secondary">
+                          <hbox flex="1"/>
+                          <label id="publishers-checkbox-translat-prefix"/>
+                          <checkbox id="publishers-checkbox-translat" popup="citation-secondary-affix-menu"/>
+                          <label id="publishers-checkbox-translat-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="2"/>
+                      </hbox>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <hbox flex="1">
+                        <hbox flex="2"/>
+                        <hbox style="min-width:4.5em;" class="plain compact">
+                          <hbox flex="1"/>
+                          <label id="places-checkbox-orig-prefix"/>
+                          <checkbox id="places-checkbox-orig" popup="citation-secondary-affix-menu"/>
+                          <label id="places-checkbox-orig-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translit-secondary', 'translit'],false);"
+                              style="min-width:4.5em;" class="plain compact translit-secondary">
+                          <hbox flex="1"/>
+                          <label id="places-checkbox-translit-prefix"/>
+                          <checkbox id="places-checkbox-translit" popup="citation-secondary-affix-menu"/>
+                          <label id="places-checkbox-translit-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="4"/>
+                        <hbox onmouseover="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+                              onmouseout="Zotero_Preferences.Lang.setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                              style="min-width:4.5em;" class="plain compact translat-secondary">
+                          <hbox flex="1"/>
+                          <label id="places-checkbox-translat-prefix"/>
+                          <checkbox id="places-checkbox-translat" popup="citation-secondary-affix-menu"/>
+                          <label id="places-checkbox-translat-suffix"/>
+                          <hbox flex="1"/>
+                        </hbox>
+                        <hbox flex="2"/>
+                      </hbox>
+                    </row>
+                  </rows>
+                </grid>
+                
+              </row>
+            </rows>
+          </grid>
+          <!--
+              This should come back at some point ...
+              
+              <checkbox id="original-name-format-checkbox"
+              oncommand="toggleOriginalCreatorNameFormatOption(event)" 
+              label="&zotero.preferences.lang.originalNameFormat;"/>
+          -->
+        </vbox>
+      </hbox>
+    </groupbox>
+    <groupbox>
+      <grid>
+        <columns>
+          <column minwidth="310" maxwidth="310"/>
+          <column minwidth="150" maxwidth="150"/>
+          <column minwidth="225" maxwidth="225"/>
+        </columns>
+        <rows>
+          <row>
+            <textbox emptytext="&zotero.preferences.lang.addLanguage;"
+                     type="autocomplete"
+                     autocompletesearch="zotero"
+                     autocompletesearchparam="zlsPrimary/"
+                     onkeypress="Zotero_Preferences.Lang.handleLangKeypress(event)"
+                     ontextentered="Zotero_Preferences.Lang.handleLangAutoCompleteSelect(this)"/>
+            <hbox style="border-bottom:2px solid #999999;margin:0 5px 0 5px;">
+              <hbox flex="1"/>
+              <label value="&zotero.preferences.lang.insideZotero;" style="font-weight:bold;font-size:larger;"/>
+              <hbox flex="1"/>
+            </hbox>
+            <hbox style="border-bottom:2px solid #999999;margin:0 5px 0 5px;">
+              <hbox flex="1"/>
+              <label value="&zotero.preferences.lang.inCitationsAndBibliographies;" style="font-weight:bold;font-size:larger;"/>
+              <hbox flex="1"/>
+            </hbox>
+          </row>
+        </rows>
+      </grid>
+      <grid>
+        <columns>
+          <column minwidth="120" maxwidth="120"/>
+          <column minwidth="120" maxwidth="120"/>
+          <column minwidth="70" maxwidth="70"/>
+          <column minwidth="70" maxwidth="70"/>
+          <column minwidth="80" maxwidth="80"/>
+          <column minwidth="100" maxwidth="100"/>
+          <column minwidth="75" maxwidth="75"/>
+          <column minwidth="50" maxwidth="50"/>
+        </columns>
+        <rows>
+          <row class="compact" style="margin:0px !important;">
+            <label flex="1" value="&zotero.preferences.lang.nickname;" style="font-weight:bold;"/>
+            <label flex="1" value="&zotero.preferences.lang.tag;" style="font-weight:bold;"/>
+            <hbox flex="1"/>
+            <hbox flex="1">
+              <hbox flex="1"/>
+              <label value="&zotero.preferences.lang.sorting;"/>
+              <hbox flex="1"/>
+            </hbox>
+            <hbox flex="1">
+              <hbox flex="1"/>
+              <label value="&zotero.preferences.lang.display;"/>
+              <hbox flex="1"/>
+            </hbox>
+            <hbox flex="1">
+              <hbox flex="1"/>
+              <label value="&zotero.preferences.lang.transliteration;"/>
+              <hbox flex="1"/>
+            </hbox>
+            <hbox flex="1">
+              <hbox flex="1"/>
+              <label value="&zotero.preferences.lang.translation;"/>
+              <hbox flex="1"/>
+            </hbox>
+            <hbox flex="1">
+              <hbox flex="1"/>
+              <label value="&zotero.preferences.lang.sorting;"/>
+              <hbox flex="1"/>
+            </hbox>
+          </row>
+        </rows>
+      </grid>
+    </groupbox>
+    <groupbox>
+      <hbox>
+        <vbox style="overflow:auto;height:250px;">
+          <grid>
+            <columns>
+              <column minwidth="120" maxwidth="120"/>
+              <column minwidth="120" maxwidth="120"/>
+              <column minwidth="70" maxwidth="70"/>
+              <column minwidth="70" maxwidth="70"/>
+              <column minwidth="80" maxwidth="80"/>
+              <column minwidth="95" maxwidth="95"/>
+              <column minwidth="75" maxwidth="75"/>
+              <column minwidth="55" maxwidth="55"/>
+            </columns>
+            <rows id="language-rows"/>
+          </grid>
+        </vbox>
+      </hbox>
+    </groupbox>
+  </prefpane>
+
+  <script src="preferences_lang.js" type="application/javascript;version=1.8"/>
+</overlay>
