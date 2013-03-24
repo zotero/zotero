@@ -43,6 +43,21 @@ Zotero.File = new function(){
 	this.getCharsetFromFile = getCharsetFromFile;
 	this.addCharsetListener = addCharsetListener;
 	
+	/**
+	 * Encode special characters in file paths that might cause problems,
+	 *  like # (but preserve slashes or colons)
+	 *
+	 * @param {String} path File path
+	 * @return {String} Encoded file path
+	 */
+	this.encodeFilePath = function(path) {
+		var parts = path.split(/([\\\/:]+)/);
+		// Every other item is the separator
+		for (var i=0, n=parts.length; i<n; i+=2) {
+			parts[i] = encodeURIComponent(parts[i]);
+		}
+		return parts.join('');
+	}
 	
 	function getExtension(file){
 		var pos = file.leafName.lastIndexOf('.');

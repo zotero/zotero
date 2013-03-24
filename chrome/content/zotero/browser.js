@@ -440,7 +440,7 @@ var Zotero_Browser = new function() {
 		}
 		
 		// set annotation bar status
-		if(tab.page.annotations) {
+		if(tab.page.annotations && tab.page.annotations.annotations.length) {
 			document.getElementById('zotero-annotate-tb').hidden = false;
 			toggleMode();
 		} else {

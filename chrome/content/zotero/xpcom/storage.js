@@ -260,7 +260,6 @@ Zotero.Sync.Storage = new function () {
 				}
 				
 				if (downloadAll || downloadForced) {
-					Zotero.debug(downloadAll);
 					for each(var itemID in _getFilesToDownload(libraryID, !downloadAll)) {
 						var item = Zotero.Items.get(itemID);
 						self.queueItem(item);
@@ -640,7 +639,7 @@ Zotero.Sync.Storage = new function () {
 		if (typeof libraryID != 'undefined') {
 			msg += " in library " + libraryID;
 			if (itemModTimes) {
-				throw new Error("libraryID is not allowed when itemIDs is set");
+				throw new Error("libraryID is not allowed when itemModTimes is set");
 			}
 		}
 		else {
@@ -755,7 +754,7 @@ Zotero.Sync.Storage = new function () {
 				}
 				
 				Zotero.debug("Marking attachment " + lk + " for download");
-				updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
+				updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD;
 			}
 			
 			var mtime = attachmentData[item.id].mtime;

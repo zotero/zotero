@@ -687,7 +687,8 @@ var ZoteroPane = new function()
 		if (from == 'zotero-collections-tree') {
 			if ((event.keyCode == event.DOM_VK_BACK_SPACE && Zotero.isMac) ||
 					event.keyCode == event.DOM_VK_DELETE) {
-				ZoteroPane_Local.deleteSelectedCollection();
+				var deleteItems = event.metaKey || (!Zotero.isMac && event.shiftKey);
+				ZoteroPane_Local.deleteSelectedCollection(deleteItems);
 				event.preventDefault();
 				return;
 			}
@@ -697,7 +698,7 @@ var ZoteroPane = new function()
 					event.keyCode == event.DOM_VK_DELETE) {
 				// If Cmd/Ctrl delete, use forced mode, which does different
 				// things depending on the context
-				var force = event.metaKey || (!Zotero.isMac && event.ctrlKey);
+				var force = event.metaKey || (!Zotero.isMac && event.shiftKey);
 				ZoteroPane_Local.deleteSelectedItems(force);
 				event.preventDefault();
 				return;
@@ -1116,12 +1117,11 @@ var ZoteroPane = new function()
 		
 		var itemgroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
 		
-		/*
-		if (itemgroup.isSeparator()) {
+		// Not necessary with seltype="cell", which calls nsITreeView::isSelectable()
+		/*if (itemgroup.isSeparator()) {
 			document.getElementById('zotero-items-tree').view = this.itemsView = null;
 			return;
-		}
-		*/
+		}*/
 		
 		itemgroup.setSearch('');
 		itemgroup.setTags(getTagSelection());
@@ -1616,7 +1616,7 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.deleteSelectedCollection = function () {
+	this.deleteSelectedCollection = function (deleteItems) {
 		var itemGroup = this.getItemGroup();
 		
 		// Remove virtual duplicates collection
@@ -1635,18 +1635,52 @@ var ZoteroPane = new function()
 			return;
 		}
 		
+		
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 		if (this.collectionsView.selection.count == 1) {
 			if (itemGroup.isCollection())
 			{
-				if (confirm(Zotero.getString('pane.collections.delete')))
-				{
-					this.collectionsView.deleteSelection();
+				if (deleteItems) {
+					var index = ps.confirmEx(
+						null,
+						Zotero.getString('pane.collections.deleteWithItems.title'),
+						Zotero.getString('pane.collections.deleteWithItems'),
+						buttonFlags,
+						Zotero.getString('pane.collections.deleteWithItems.title'),
+						"", "", "", {}
+					);
+				}
+				else {
+					var index = ps.confirmEx(
+						null,
+						Zotero.getString('pane.collections.delete.title'),
+						Zotero.getString('pane.collections.delete')
+							+ "\n\n"
+							+ Zotero.getString('pane.collections.delete.keepItems'),
+						buttonFlags,
+						Zotero.getString('pane.collections.delete.title'),
+						"", "", "", {}
+					);
+				}
+				if (index == 0) {
+					this.collectionsView.deleteSelection(deleteItems);
 				}
 			}
 			else if (itemGroup.isSearch())
 			{
-				if (confirm(Zotero.getString('pane.collections.deleteSearch')))
-				{
+				
+				var index = ps.confirmEx(
+					null,
+					Zotero.getString('pane.collections.deleteSearch.title'),
+					Zotero.getString('pane.collections.deleteSearch'),
+					buttonFlags,
+					Zotero.getString('pane.collections.deleteSearch.title'),
+					"", "", "", {}
+				);
+				if (index == 0) {
 					this.collectionsView.deleteSelection();
 				}
 			}
@@ -2039,7 +2073,8 @@ var ZoteroPane = new function()
 			"showDuplicates",
 			"showUnfiled",
 			"editSelectedCollection",
-			"removeCollection",
+			"deleteCollection",
+			"deleteCollectionAndItems",
 			"sep2",
 			"exportCollection",
 			"createBibCollection",
@@ -2069,7 +2104,8 @@ var ZoteroPane = new function()
 				m.newSubcollection,
 				m.sep1,
 				m.editSelectedCollection,
-				m.removeCollection,
+				m.deleteCollection,
+				m.deleteCollectionAndItems,
 				m.sep2,
 				m.exportCollection,
 				m.createBibCollection,
@@ -2087,7 +2123,8 @@ var ZoteroPane = new function()
 			
 			// Adjust labels
 			menu.childNodes[m.editSelectedCollection].setAttribute('label', Zotero.getString('pane.collections.menu.rename.collection'));
-			menu.childNodes[m.removeCollection].setAttribute('label', Zotero.getString('pane.collections.menu.remove.collection'));
+			menu.childNodes[m.deleteCollection].setAttribute('label', Zotero.getString('pane.collections.menu.delete.collection'));
+			menu.childNodes[m.deleteCollectionAndItems].setAttribute('label', Zotero.getString('pane.collections.menu.delete.collectionAndItems'));
 			menu.childNodes[m.exportCollection].setAttribute('label', Zotero.getString('pane.collections.menu.export.collection'));
 			menu.childNodes[m.createBibCollection].setAttribute('label', Zotero.getString('pane.collections.menu.createBib.collection'));
 			menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.collections.menu.generateReport.collection'));
@@ -2095,14 +2132,14 @@ var ZoteroPane = new function()
 		else if (itemGroup.isSearch()) {
 			show = [
 				m.editSelectedCollection,
-				m.removeCollection,
+				m.deleteCollection,
 				m.sep2,
 				m.exportCollection,
 				m.createBibCollection,
 				m.loadReport
 			];
 			
-			menu.childNodes[m.removeCollection].setAttribute('label', Zotero.getString('pane.collections.menu.remove.savedSearch'));
+			menu.childNodes[m.deleteCollection].setAttribute('label', Zotero.getString('pane.collections.menu.delete.savedSearch'));
 			
 			var s = [m.exportCollection, m.createBibCollection, m.loadReport];
 			if (!this.itemsView.rowCount) {
@@ -2123,10 +2160,10 @@ var ZoteroPane = new function()
 		}
 		else if (itemGroup.isDuplicates() || itemGroup.isUnfiled()) {
 			show = [
-				m.removeCollection
+				m.deleteCollection
 			];
 			
-			menu.childNodes[m.removeCollection].setAttribute('label', Zotero.getString('general.remove'));
+			menu.childNodes[m.deleteCollection].setAttribute('label', Zotero.getString('general.hide'));
 		}
 		else if (itemGroup.isHeader()) {
 			if (itemGroup.ref.id == 'commons-header') {
@@ -2145,7 +2182,7 @@ var ZoteroPane = new function()
 		// Disable some actions if user doesn't have write access
 		//
 		// Some actions are disabled via their commands in onCollectionSelected()
-		var s = [m.newSubcollection, m.editSelectedCollection, m.removeCollection];
+		var s = [m.newSubcollection, m.editSelectedCollection, m.deleteCollection, m.deleteCollectionAndItems];
 		if (itemGroup.isWithinGroup() && !itemGroup.editable && !itemGroup.isDuplicates() && !itemGroup.isUnfiled()) {
 			disable = disable.concat(s);
 		}
@@ -2414,7 +2451,7 @@ var ZoteroPane = new function()
 		}
 		
 		// Plural if necessary
-		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.erase' + multiple));
+		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
 		menu.childNodes[m.exportItems].setAttribute('label', Zotero.getString('pane.items.menu.export' + multiple));
 		menu.childNodes[m.createBib].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
 		menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));

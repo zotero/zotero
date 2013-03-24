@@ -19,7 +19,8 @@ var $rdf = {
 	},
 	log: {
 		debug: Zotero.debug,
-		warn: Zotero.debug
+		warn: Zotero.debug,
+		error: Zotero.debug
 	}
 };
 

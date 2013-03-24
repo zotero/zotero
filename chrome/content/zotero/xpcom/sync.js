@@ -947,51 +947,88 @@ Zotero.Sync.Runner = new function () {
 	
 	this.updateErrorPanel = function (doc, errors) {
 		var panel = doc.getElementById('zotero-sync-error-panel');
-		var panelContent = doc.getElementById('zotero-sync-error-panel-content');
-		var panelButtons = doc.getElementById('zotero-sync-error-panel-buttons');
 		
 		// Clear existing panel content
-		while (panelContent.hasChildNodes()) {
-			panelContent.removeChild(panelContent.firstChild);
-		}
-		while (panelButtons.hasChildNodes()) {
-			panelButtons.removeChild(panelButtons.firstChild);
+		while (panel.hasChildNodes()) {
+			panel.removeChild(panel.firstChild);
 		}
 		
-		// TEMP: for now, we only show one error
-		var e = errors.concat().shift();
-		e = this.parseSyncError(e);
+		var e = this
 		
-		var desc = doc.createElement('description');
-		var msg = e.message;
-		/*if (e.fileName) {
-			msg += '\n\nFile: ' + e.fileName + '\nLine: ' + e.lineNumber;
-		}*/
-		desc.textContent = msg;
-		panelContent.appendChild(desc);
-		
-		// If not an error and there's no explicit button text, don't show
-		// button to report errors
-		if (e.errorMode != 'error' && typeof e.buttonText == 'undefined') {
-			e.buttonText = null;
-		}
-		
-		if (e.buttonText !== null) {
-			if (typeof e.buttonText == 'undefined') {
-				var buttonText = Zotero.getString('errorReport.reportError');
-				var buttonCallback = function () {
-					doc.defaultView.ZoteroPane.reportErrors();
-				};
+		for each(var e in errors.concat()) {
+			e = this.parseSyncError(e);
+			
+			var box = doc.createElement('vbox');
+			var label = doc.createElement('label');
+			if (typeof e.libraryID != 'undefined') {
+				label.className = "zotero-sync-error-panel-library-name";
+				if (e.libraryID == 0) {
+					var libraryName = Zotero.getString('pane.collections.library');
+				}
+				else {
+					let group = Zotero.Groups.getByLibraryID(e.libraryID);
+					var libraryName = group.name;
+				}
+				label.setAttribute('value', libraryName);
 			}
-			else {
-				var buttonText = e.buttonText;
-				var buttonCallback = e.buttonCallback;
+			var content = doc.createElement('hbox');
+			var buttons = doc.createElement('hbox');
+			buttons.pack = 'end';
+			box.appendChild(label);
+			box.appendChild(content);
+			box.appendChild(buttons);
+			
+			// Use of deck and textbox+description here is a hack from
+			// http://www.blackfishsoftware.com/node/47 to make the text
+			// selectable while maintaining the proper width and height
+			var deck = doc.createElement('deck');
+			
+			var msg = e.message;
+			/*if (e.fileName) {
+				msg += '\n\nFile: ' + e.fileName + '\nLine: ' + e.lineNumber;
+			}*/
+			
+			var textbox = doc.createElement('textbox');
+			textbox.className = 'plain';
+			textbox.setAttribute('multiline', true);
+			textbox.setAttribute('readonly', true);
+			textbox.setAttribute('value', msg);
+			deck.appendChild(textbox);
+			
+			var desc = doc.createElement('description');
+			desc.textContent = msg;
+			deck.appendChild(desc);
+			
+			content.appendChild(deck);
+			
+			// If not an error and there's no explicit button text, don't show
+			// button to report errors
+			if (e.errorMode != 'error' && typeof e.buttonText == 'undefined') {
+				e.buttonText = null;
 			}
 			
-			var button = doc.createElement('button');
-			button.setAttribute('label', buttonText);
-			button.onclick = buttonCallback;
-			panelButtons.appendChild(button);
+			if (e.buttonText !== null) {
+				if (typeof e.buttonText == 'undefined') {
+					var buttonText = Zotero.getString('errorReport.reportError');
+					var buttonCallback = function () {
+						doc.defaultView.ZoteroPane.reportErrors();
+					};
+				}
+				else {
+					var buttonText = e.buttonText;
+					var buttonCallback = e.buttonCallback;
+				}
+				
+				var button = doc.createElement('button');
+				button.setAttribute('label', buttonText);
+				button.onclick = buttonCallback;
+				buttons.appendChild(button);
+			}
+			
+			panel.appendChild(box)
+			
+			// TEMP: Only show one error for now
+			break;
 		}
 		
 		return panel;

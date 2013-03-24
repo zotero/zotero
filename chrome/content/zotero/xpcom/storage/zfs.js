@@ -38,10 +38,17 @@ Zotero.Sync.Storage.ZFS = (function () {
 	 * @param	{Zotero.Item}	item
 	 * @param	{Function}		callback		Callback f(item, etag)
 	 */
-	function getStorageFileInfo(item) {
+	function getStorageFileInfo(item, request) {
 		var funcName = "Zotero.Sync.Storage.ZFS.getStorageFileInfo()";
 		
-		return Zotero.HTTP.promise("GET", getItemInfoURI(item), { successCodes: [200, 404], headers: _headers })
+		return Zotero.HTTP.promise("GET", getItemInfoURI(item),
+			{
+				successCodes: [200, 404],
+				headers: _headers,
+				requestObserver: function (xmlhttp) {
+					request.setChannel(xmlhttp.channel);
+				}
+			})
 			.then(function (req) {
 				if (req.status == 404) {
 					return false;
@@ -72,10 +79,15 @@ Zotero.Sync.Storage.ZFS = (function () {
 				
 				return info;
 			})
-			.fail(function (e) {
+			.catch(function (e) {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					var msg = "Unexpected status code " + e.xmlhttp.status
-						+ " getting storage file info";
+					if (e.xmlhttp.status == 0) {
+						var msg = "Request cancelled getting storage file info";
+					}
+					else {
+						var msg = "Unexpected status code " + e.xmlhttp.status
+							+ " getting storage file info";
+					}
 					Zotero.debug(msg, 1);
 					Zotero.debug(e.xmlhttp.responseText);
 					Components.utils.reportError(msg);
@@ -102,7 +114,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 		
 		var request = data.request;
 		var item = Zotero.Sync.Storage.getItemFromRequestName(request.name);
-		return getStorageFileInfo(item)
+		return getStorageFileInfo(item, request)
 			.then(function (info) {
 				if (request.isFinished()) {
 					Zotero.debug("Upload request '" + request.name
@@ -249,8 +261,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 				
 				// File was already available, so uploading isn't required
 				if (rootTag == 'exists') {
-					existsCallback();
-					return false;
+					return existsCallback();
 				}
 				
 				var url = req.responseXML.getElementsByTagName('url')[0].textContent;
@@ -695,7 +706,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 		}
 		
 		// Retrieve file info from server to store locally afterwards
-		return getStorageFileInfo(item)
+		return getStorageFileInfo(item, request)
 			.then(function (info) {
 				if (!request.isRunning()) {
 					Zotero.debug("Download request '" + request.name

@@ -24,7 +24,7 @@
     ***** END LICENSE BLOCK *****
 -->
 
-<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/merge.dtd">
+<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <bindings xmlns="http://www.mozilla.org/xbl"
 		  xmlns:xbl="http://www.mozilla.org/xbl"

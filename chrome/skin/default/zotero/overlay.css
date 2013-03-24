@@ -430,17 +430,20 @@
 	list-style-image: url(chrome://zotero/skin/bell_error.png);
 }
 
-#zotero-tb-sync-error {
-	/*border: 1px orange dashed;*/
-}
-
 /* Sync error panel */
 #zotero-sync-error-panel {
-	margin-right: 0px;
+	margin-right: 0;
+}
+
+.zotero-sync-error-panel-library-name {
+	font-size: 12px;
+	font-weight: bold;
+	margin-left: 0;
+	margin-bottom: 1.1em;
 }
 
 #zotero-sync-error-panel description {
-	width: 350px;
+	width: 370px;
 	white-space: pre-wrap;
 }
 

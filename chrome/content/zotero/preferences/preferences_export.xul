@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2006–2013 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<prefpane id="zotero-prefpane-export"
+			onpaneload="Zotero_Preferences.Export.init()"
+			helpTopic="export">
+		
+		<preferences>
+			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
+			<preference id="pref-quickCopy-dragLimit" name="extensions.zotero.export.quickCopy.dragLimit" type="int"/>
+		</preferences>
+		
+		<groupbox id="zotero-prefpane-export-groupbox">
+			<caption label="&zotero.preferences.quickCopy.caption;"/>
+			
+			<label id="quickCopy-instructions"/>
+			<separator class="thin"/>
+			<label id="quickCopy-citationInstructions"/>
+			
+			<separator/>
+			
+			<label value="&zotero.preferences.quickCopy.defaultOutputFormat;" control="quickCopy-menu"/>
+			<menulist id="zotero-quickCopy-menu"/>
+			
+			<separator class="thin"/>
+			
+			<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
+				oncommand="Zotero_Preferences.Export.buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : '');"/>
+			
+			<vbox id="zotero-prefpane-export-siteSettings"/>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.quickCopy.dragLimit;"/>
+				<textbox preference="pref-quickCopy-dragLimit" size="3"/>
+				<label value="&zotero.preferences.items;" flex="1"/>
+			</hbox>
+		</groupbox>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.charset;"/>
+			
+			<checkbox id="zotero-export-displayCharsetOption" label="&zotero.preferences.charset.displayExportOption;"
+				preference="pref-export-displayCharsetOption"/>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.charset.importCharset;:" control="zotero-import-charsetMenu"/>
+				<menulist id="zotero-import-charsetMenu" preference="pref-import-charset"/>
+			</hbox>
+		</groupbox>
+		
+		<!-- Unclear why this is necessary to prevent the menulist from getting cut off -->
+		<separator/>
+		<separator/>
+		<separator/>
+		
+		<script src="preferences_export.js" type="application/javascript;version=1.8"/>
+	</prefpane>
+</overlay>

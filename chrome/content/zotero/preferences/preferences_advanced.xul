@@ -1,0 +1,206 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2006–2013 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+
+<overlay id="zotero-prefpane-advanced-overlay"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<prefpane id="zotero-prefpane-advanced"
+			onpaneload="Zotero_Preferences.Advanced.init()"
+			helpTopic="advanced">
+		<preferences>
+			<preference id="pref-baseAttachmentPath" name="extensions.zotero.baseAttachmentPath" type="string"/>
+			<preference id="pref-useDataDir" name="extensions.zotero.useDataDir" type="bool"/>
+			<preference id="pref-dataDir" name="extensions.zotero.dataDir" type="string"/>
+			<preference id="pref-export-displayCharsetOption" name="extensions.zotero.export.displayCharsetOption" type="bool"/>
+			<preference id="pref-debug-output-enableAfterRestart" name="extensions.zotero.debug.store" type="bool"/>
+			<preference id="pref-import-charset" name="extensions.zotero.import.charset" type="string"/>
+			<preference id="pref-openURL-resolver" name="extensions.zotero.openURL.resolver" type="string"/>
+			<preference id="pref-openURL-version" name="extensions.zotero.openURL.version" type="string"/>
+		</preferences>
+		
+		<tabbox id="zotero-prefpane-advanced-tabs">
+			<tabs>
+				<tab label="&zotero.preferences.prefpane.general;"/>
+				<tab label="&zotero.preferences.advanced.filesAndFolders;"/>
+			</tabs>
+			
+			<tabpanels id="zotero-prefpane-advanced-tabpanels">
+				<tabpanel id="zotero-prefpane-advanced-general-tab" orient="vertical">
+					<groupbox>
+						<caption label="&zotero.preferences.debugOutputLogging;"/>
+						
+						<!-- This doesn't wrap without an explicit width -->
+						<vbox>
+							<description width="45em">&zotero.preferences.debugOutputLogging.message;</description>
+						</vbox>
+						
+						<hbox align="center">
+							<button id="debug-output-enable" oncommand="Zotero_Preferences.Debug_Output.toggleStore()"/>
+							<label id="debug-output-lines" style="margin-right: 0"/>
+							<label value="&zotero.preferences.debugOutputLogging.linesLogged;"/>
+							<checkbox preference="pref-debug-output-enableAfterRestart" label="&zotero.preferences.debugOutputLogging.enableAfterRestart;" style="margin-left: 1.5em"/>
+						</hbox>
+						
+						<hbox align="center">
+							<button id="debug-output-view" label="&zotero.preferences.debugOutputLogging.viewOutput;" oncommand="Zotero_Preferences.Debug_Output.view()"/>
+							<button id="debug-output-clear" label="&zotero.preferences.debugOutputLogging.clearOutput;" oncommand="Zotero_Preferences.Debug_Output.clear()"/>
+							<button id="debug-output-submit" label="&zotero.preferences.debugOutputLogging.submitToServer;" oncommand="Zotero_Preferences.Debug_Output.submit()"/>
+							<progressmeter id="debug-output-submit-progress" mode="undetermined" hidden="true"/>
+						</hbox>
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.openurl.caption;"/>
+						
+						<hbox align="center">
+							<!-- vbox prevents some weird vertical stretching of the menulist -->
+							<vbox flex="1">
+								<menulist id="openURLMenu" oncommand="Zotero_Preferences.Advanced.onOpenURLSelected();">
+									<menupopup>
+										<menuseparator/>
+										<menuitem label="&zotero.preferences.openurl.custom;" value="custom" selected="true"/>
+									</menupopup>
+								</menulist>
+							</vbox>
+							<button id="openURLSearchButton" label="&zotero.preferences.openurl.search;"
+									oncommand="Zotero_Preferences.Advanced.populateOpenURLResolvers()"/>
+						</hbox>
+						
+						<hbox align="center">
+							<label value="&zotero.preferences.openurl.server;"/>
+							<textbox id="openURLServerField" flex="1"
+									oninput="Zotero_Preferences.Advanced.onOpenURLCustomized();"
+									preference="pref-openURL-resolver"/>
+						</hbox>
+					
+						<hbox align="center">
+							<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
+							<menulist id="openURLVersionMenu"
+									oncommand="Zotero_Preferences.Advanced.onOpenURLCustomized();"
+									preference="pref-openURL-version">
+								<menupopup>
+									<menuitem label="0.1" value="0.1"/>
+									<menuitem label="1.0" value="1.0"/>
+								</menupopup>
+							</menulist>
+						</hbox>
+					</groupbox>
+					
+					<groupbox id="zotero-prefpane-advanced-miscellaneous">
+						<caption label="&zotero.preferences.miscellaneous;"/>
+						<hbox id="zotero-prefpane-advanced-openbuttons" align="center">
+							<button id="openAboutConfig"
+								label="&zotero.preferences.openAboutConfig;"
+								oncommand="Zotero_Preferences.openInViewer('about:config')"/>
+							<button id="openCSLEdit"
+								label="&zotero.preferences.openCSLEdit;"
+								oncommand="Zotero_Preferences.openInViewer('chrome://zotero/content/tools/csledit.xul', true)"/>
+							<button id="openCSLPreview"
+								label="&zotero.preferences.openCSLPreview;"
+								oncommand="Zotero_Preferences.openInViewer('chrome://zotero/content/tools/cslpreview.xul', true)"/>
+						</hbox>
+					</groupbox>
+				</tabpanel>
+				
+				<tabpanel orient="vertical">
+					<groupbox>
+						<caption label="&zotero.preferences.attachmentBaseDir.caption;"/>
+						
+						<!-- This doesn't wrap without an explicit width -->
+						<vbox>
+							<description width="45em">&zotero.preferences.attachmentBaseDir.message;</description>
+						</vbox>
+						
+						<hbox align="center">
+							<label value="&zotero.preferences.attachmentBaseDir.basePath;"/>
+							<filefield id="baseAttachmentPath"
+								preference="pref-baseAttachmentPath"
+								onsyncfrompreference="Zotero_Preferences.Attachment_Base_Directory.updateUI()"
+								preference-editable="true"
+								readonly="true"
+								flex="1"
+								tabindex="-1"/>
+							<button label="&zotero.preferences.attachmentBaseDir.selectBasePath;"
+								oncommand="Zotero_Preferences.Attachment_Base_Directory.choosePath()"/>
+						</hbox>
+						
+						<hbox>
+							<button id="resetBasePath"
+								label="&zotero.preferences.attachmentBaseDir.resetBasePath;"
+								oncommand="Zotero_Preferences.Attachment_Base_Directory.clearPath()"/>
+						</hbox>
+						
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.dataDir;"/>
+						
+						<radiogroup id="dataDir"
+								preference="pref-useDataDir"
+								onsyncfrompreference="Zotero_Preferences.Advanced.onDataDirLoad();"
+								onsynctopreference="return Zotero_Preferences.Advanced.onDataDirUpdate(event);">
+							<radio label="&zotero.preferences.dataDir.useProfile;" value="false"/>
+							<hbox>
+								<radio label="&zotero.preferences.dataDir.custom;" value="true"/>
+								<textbox id="dataDirPath" preference="pref-dataDir"
+									onsyncfrompreference="return Zotero_Preferences.Advanced.getDataDirPath();"
+									readonly="true" flex="1"/>
+								<button label="&zotero.preferences.dataDir.choose;"
+									oncommand="var file = Zotero.chooseZoteroDirectory(true);
+										if (!file) {
+											event.stopPropagation();
+										}"/>
+							</hbox>
+						</radiogroup>
+						
+						<hbox>
+							<button label="&zotero.preferences.dataDir.reveal;"
+								oncommand="Zotero_Preferences.Advanced.revealDataDirectory()"/>
+						</hbox>
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.dbMaintenance;"/>
+						
+						<hbox>
+							<button label="&zotero.preferences.dbMaintenance.integrityCheck;"
+								oncommand="Zotero_Preferences.Advanced.runIntegrityCheck()"/>
+							<button label="&zotero.preferences.dbMaintenance.resetTranslators;"
+								oncommand="Zotero_Preferences.Advanced.resetTranslators()"/>
+							<button label="&zotero.preferences.dbMaintenance.resetStyles;"
+								oncommand="Zotero_Preferences.Advanced.resetStyles()"/>
+						</hbox>
+					</groupbox>
+				</tabpanel>
+			</tabpanels>
+		</tabbox>
+		
+		<separator/>
+	</prefpane>
+	
+	<script src="preferences_advanced.js" type="application/javascript;version=1.8"/>
+</overlay>

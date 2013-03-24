@@ -403,9 +403,6 @@ Zotero.CollectionTreeView.prototype.getCellText = function(row, column)
 	if (column.id == 'zotero-collections-name-column') {
 		return obj.getName();
 	}
-	else if (column.id == 'zotero-collections-sync-status-column') {
-		return "";
-	}
 	else
 		return "";
 }
@@ -426,27 +423,6 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 	
 	switch (collectionType) {
 		case 'library':
-			if (col.id == 'zotero-collections-sync-status-column') {
-				if (itemGroup.isLibrary(true)) {
-					var libraryID = itemGroup.isLibrary() ? 0 : itemGroup.ref.libraryID;
-					var errors = Zotero.Sync.Runner.getErrors(libraryID);
-					if (errors) {
-						var e = Zotero.Sync.Runner.getPrimaryError(errors);
-						switch (e.errorMode) {
-						case 'warning':
-							var image = 'error';
-							break;
-							
-						default:
-							var image = 'exclamation';
-							break;
-						}
-						
-						return 'chrome://zotero/skin/' + image + '.png';
-					}
-				}
-				return '';
-			}
 			break;
 		
 		case 'trash':
@@ -814,7 +790,7 @@ Zotero.CollectionTreeView.prototype.getLastViewedRow = function () {
 /*
  *  Delete the selection
  */
-Zotero.CollectionTreeView.prototype.deleteSelection = function()
+Zotero.CollectionTreeView.prototype.deleteSelection = function(deleteItems)
 {
 	if(this.selection.count == 0)
 		return;
@@ -842,14 +818,12 @@ Zotero.CollectionTreeView.prototype.deleteSelection = function()
 	for (var i=0; i<rows.length; i++)
 	{
 		//erase collection from DB:
-		var group = this._getItemAtRow(rows[i]-i);
-		if(group.isCollection())
-		{
-			group.ref.erase();
+		var itemGroup = this._getItemAtRow(rows[i]-i);
+		if (itemGroup.isCollection()) {
+			itemGroup.ref.erase(deleteItems);
 		}
-		else if(group.isSearch())
-		{
-			Zotero.Searches.erase(group.ref['id']);
+		else if (itemGroup.isSearch()) {
+			Zotero.Searches.erase(itemGroup.ref.id);
 		}
 	}
 	this._treebox.endUpdateBatch();
@@ -1819,12 +1793,23 @@ Zotero.CollectionTreeView.prototype.isSorted = function() 							{ return false;
 Zotero.CollectionTreeView.prototype.isEditable = function(row, idx) 				{ return false; }
 
 /* Set 'highlighted' property on rows set by setHighlightedRows */
-Zotero.CollectionTreeView.prototype.getRowProperties = function(row, props) {
+Zotero.CollectionTreeView.prototype.getRowProperties = function(row, prop) {
+	var props = [];
+	
 	if (this._highlightedRows[row]) {
-		var aServ = Components.classes["@mozilla.org/atom-service;1"].
-			getService(Components.interfaces.nsIAtomService);
-		props.AppendElement(aServ.getAtom("highlighted"));
+		// <=Fx21
+		if (prop) {
+			var aServ = Components.classes["@mozilla.org/atom-service;1"].
+				getService(Components.interfaces.nsIAtomService);
+			prop.AppendElement(aServ.getAtom("highlighted"));
+		}
+		// Fx22+
+		else {
+			props.push("highlighted");
+		}
 	}
+	
+	return props.join(" ");
 }
 
 Zotero.CollectionTreeView.prototype.getColumnProperties = function(col, prop) 		{ }

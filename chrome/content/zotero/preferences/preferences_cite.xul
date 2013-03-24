@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2006–2013 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+
+<overlay id="zotero-prefpane-cite-overlay"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<prefpane id="zotero-prefpane-cite"
+			onpaneload="Zotero_Preferences.Cite.init()"
+			helpTopic="cite">
+		
+		<preferences id="zotero-preferences-cite">
+			<preference id="pref-cite-useClassicAddCitationDialog" name="extensions.zotero.integration.useClassicAddCitationDialog" type="bool"/>
+			<preference id="pref-cite-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
+			<preference id="pref-cite-automaticTitleAbbreviation" name="extensions.zotero.cite.automaticTitleAbbreviation" type="bool"/>
+		</preferences>
+		
+		<tabbox>
+			<tabs>
+				<tab label="&zotero.preferences.cite.wordProcessors;"/>
+				<tab label="&zotero.preferences.cite.styles;"/>
+			</tabs>
+			<tabpanels>
+				<tabpanel orient="vertical" id="wordProcessors">
+					<label id="wordProcessors-noWordProcessorPluginsInstalled" width="45em" hidden="true">
+							&zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled;
+					</label>
+					<checkbox label="&zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog;" preference="pref-cite-useClassicAddCitationDialog"/>
+					<label id="wordProcessors-getWordProcessorPlugins" class="zotero-text-link" href="&zotero.preferences.cite.wordProcessors.getPlugins.url;" value="&zotero.preferences.cite.wordProcessors.getPlugins;"/>
+				</tabpanel>
+				<tabpanel orient="vertical" id="styles">
+					<groupbox flex="1">
+						<caption label="&zotero.preferences.cite.styles.styleManager;"/>
+						
+						<tree flex="1" id="styleManager" hidecolumnpicker="true" rows="6"
+								onselect="document.getElementById('styleManager-delete').disabled = undefined"
+								onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { Zotero_Preferences.Cite.deleteSelectedStyle(); }">
+							<treecols>
+								<treecol id="styleManager-title" label="&zotero.preferences.cite.styles.styleManager.title;" flex="3"/>
+								<treecol id="styleManager-updated" label="&zotero.preferences.cite.styles.styleManager.updated;" flex="1"/>
+								<treecol id="styleManager-csl" label="&zotero.preferences.cite.styles.styleManager.csl;"/>
+							</treecols>
+							<treechildren id="styleManager-rows"/>
+						</tree>
+						<separator class="thin"/>
+						<hbox align="center" flex="1" height="40">
+							<label class="zotero-text-link" href="http://www.zotero.org/styles/" value="&zotero.preferences.export.getAdditionalStyles;" flex="1"/>
+							<button disabled="true" id="styleManager-delete" label="-" onclick="Zotero_Preferences.Cite.deleteStyle()"/>
+							<button label="+" onclick="Zotero_Preferences.Cite.addStyle()"/>
+						</hbox>
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.citationOptions.caption;"/>
+						
+						<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="pref-cite-citePaperJournalArticleURL"/>
+						<!-- This doesn't wrap without an explicit width, for some reason -->
+						<label id="export-citePaperJournalArticleURL" width="45em">
+							&zotero.preferences.export.citePaperJournalArticleURL.description;
+						</label>
+
+						<checkbox label="&zotero.preferences.cite.styles.automaticTitleAbbreviation;" preference="pref-cite-automaticTitleAbbreviation"/>
+					</groupbox>
+				</tabpanel>
+			</tabpanels>
+		</tabbox>
+	</prefpane>
+	
+	<script src="preferences_cite.js" type="application/javascript;version=1.8"/>
+</overlay>
