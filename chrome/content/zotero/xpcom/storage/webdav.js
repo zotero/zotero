@@ -220,15 +220,17 @@ Zotero.Sync.Storage.WebDAV = (function () {
 						
 						var smtime = Zotero.Sync.Storage.getSyncedModificationTime(item.id);
 						if (smtime != mtime) {
-							var localData = { modTime: fmtime };
-							var remoteData = { modTime: mtime };
-							Zotero.Sync.Storage.QueueManager.addConflict(
-								request.name, localData, remoteData
-							);
 							Zotero.debug("Conflict -- last synced file mod time "
 								+ "does not match time on storage server"
 								+ " (" + smtime + " != " + mtime + ")");
-							return false;
+							return {
+								localChanges: false,
+								remoteChanges: false,
+								conflict: {
+									local: { modTime: fmtime },
+									remote: { modTime: mtime }
+								}
+							};
 						}
 					}
 					else {
