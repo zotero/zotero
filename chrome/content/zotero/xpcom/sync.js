@@ -429,7 +429,7 @@ Zotero.Sync.EventListener = new function () {
 			var sql = "REPLACE INTO syncDeleteLog VALUES (?, ?, ?, ?)";
 			var syncStatement = Zotero.DB.getStatement(sql);
 			
-			if (isItem && Zotero.Sync.Storage.WebDAV.active) {
+			if (isItem && Zotero.Sync.Storage.WebDAV.includeUserFiles) {
 				var storageEnabled = true;
 				var sql = "INSERT INTO storageDeleteLog VALUES (?, ?, ?)";
 				var storageStatement = Zotero.DB.getStatement(sql);

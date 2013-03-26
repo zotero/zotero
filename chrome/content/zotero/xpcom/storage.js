@@ -326,6 +326,24 @@ Zotero.Sync.Storage = new function () {
 					Zotero.debug("File sync failed for library " + libraryID);
 					finalPromises.push([libraryID, libraryQueues]);
 				}
+				
+				// If WebDAV sync enabled, purge deleted and orphaned files
+				if (libraryID == 0 && Zotero.Sync.Storage.WebDAV.includeUserFiles) {
+					Zotero.Sync.Storage.WebDAV.purgeDeletedStorageFiles()
+					.then(function () {
+						return Zotero.Sync.Storage.WebDAV.purgeOrphanedStorageFiles();
+					})
+					.catch(function (e) {
+						Zotero.debug(e, 1);
+						Components.utils.reportError(e);
+					});
+				}
+			});
+			
+			Zotero.Sync.Storage.ZFS.purgeDeletedStorageFiles()
+			.catch(function (e) {
+				Zotero.debug(e, 1);
+				Components.utils.reportError(e);
 			});
 			
 			if (promises.length && !changedLibraries.length) {
@@ -1755,20 +1773,11 @@ Zotero.Sync.Storage = new function () {
 	
 	/**
 	 * @inner
-	 * @param	{Integer}	[days=pref:e.z.sync.storage.deleteDelayDays]
-	 *									Number of days old files have to be
 	 * @return	{String[]|FALSE}			Array of keys, or FALSE if none
 	 */
-	this.getDeletedFiles = function (days) {
-		if (!days) {
-			days = Zotero.Prefs.get("sync.storage.deleteDelayDays");
-		}
-		
-		var ts = Zotero.Date.getUnixTimestamp();
-		ts = ts - (86400 * days);
-		
-		var sql = "SELECT key FROM storageDeleteLog WHERE timestamp<?";
-		return Zotero.DB.columnQuery(sql, ts);
+	this.getDeletedFiles = function () {
+		var sql = "SELECT key FROM storageDeleteLog";
+		return Zotero.DB.columnQuery(sql);
 	}
 	
 	

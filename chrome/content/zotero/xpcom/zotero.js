@@ -1844,15 +1844,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		Zotero.Items.purge();
 		// DEBUG: this might not need to be permanent
 		Zotero.Relations.purge();
-		
-		if (!skipStoragePurge && Math.random() < 1/10) {
-			Zotero.Sync.Storage.ZFS.purgeDeletedStorageFiles();
-			Zotero.Sync.Storage.WebDAV.purgeDeletedStorageFiles();
-		}
-		
-		if (!skipStoragePurge) {
-			Zotero.Sync.Storage.WebDAV.purgeOrphanedStorageFiles();
-		}
 	}
 	
 	

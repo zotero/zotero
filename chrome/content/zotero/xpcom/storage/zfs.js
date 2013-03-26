@@ -1006,7 +1006,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 				Zotero.debug("Credentials are cached");
 				_cachedCredentials = true;
 			})
-			.fail(function (e) {
+			.catch(function (e) {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
 					if (e.status == 401) {
 						var msg = "File sync login failed\n\n"
@@ -1030,57 +1030,49 @@ Zotero.Sync.Storage.ZFS = (function () {
 	/**
 	 * Remove all synced files from the server
 	 */
-	obj._purgeDeletedStorageFiles = function (callback) {
-		// If we don't have a user id we've never synced and don't need to bother
-		if (!Zotero.userID) {
-			return false;
-		}
-		
-		var sql = "SELECT value FROM settings WHERE setting=? AND key=?";
-		var values = Zotero.DB.columnQuery(sql, ['storage', 'zfsPurge']);
-		if (!values) {
-			return false;
-		}
-		
-		// TODO: promisify
-		
-		Zotero.debug("Unlinking synced files on ZFS");
-		
-		var uri = this.userURI;
-		uri.spec += "removestoragefiles?";
-		// Unused
-		for each(var value in values) {
-			switch (value) {
-				case 'user':
-					uri.spec += "user=1&";
-					break;
-				
-				case 'group':
-					uri.spec += "group=1&";
-					break;
-				
-				default:
-					throw "Invalid zfsPurge value '" + value
-						+ "' in ZFS purgeDeletedStorageFiles()";
+	obj._purgeDeletedStorageFiles = function () {
+		return Q.fcall(function () {
+			// If we don't have a user id we've never synced and don't need to bother
+			if (!Zotero.userID) {
+				return false;
 			}
-		}
-		uri.spec = uri.spec.substr(0, uri.spec.length - 1);
-		
-		Zotero.HTTP.doPost(uri, "", function (xmlhttp) {
-			if (xmlhttp.status != 204) {
-				if (callback) {
-					callback(false);
+			
+			var sql = "SELECT value FROM settings WHERE setting=? AND key=?";
+			var values = Zotero.DB.columnQuery(sql, ['storage', 'zfsPurge']);
+			if (!values) {
+				return false;
+			}
+			
+			// TODO: promisify
+			
+			Zotero.debug("Unlinking synced files on ZFS");
+			
+			var uri = this.userURI;
+			uri.spec += "removestoragefiles?";
+			// Unused
+			for each(var value in values) {
+				switch (value) {
+					case 'user':
+						uri.spec += "user=1&";
+						break;
+					
+					case 'group':
+						uri.spec += "group=1&";
+						break;
+					
+					default:
+						throw "Invalid zfsPurge value '" + value
+							+ "' in ZFS purgeDeletedStorageFiles()";
 				}
-				throw "Unexpected status code " + xmlhttp.status + " purging ZFS files";
 			}
+			uri.spec = uri.spec.substr(0, uri.spec.length - 1);
 			
-			var sql = "DELETE FROM settings WHERE setting=? AND key=?";
-			Zotero.DB.query(sql, ['storage', 'zfsPurge']);
-			
-			if (callback) {
-				callback(true);
-			}
-		});
+			return Zotero.HTTP.promise("POST", uri, "")
+			.then(function (req) {
+				var sql = "DELETE FROM settings WHERE setting=? AND key=?";
+				Zotero.DB.query(sql, ['storage', 'zfsPurge']);
+			});
+		}.bind(this));
 	};
 	
 	return obj;
