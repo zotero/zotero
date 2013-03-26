@@ -112,14 +112,17 @@ Zotero.Proxies = new function() {
 		} else {
 			// otherwise, try to detect a proxy
 			var proxy = false;
-			for each(var detector in Zotero.Proxies.Detectors) {
+			for(var detectorName in Zotero.Proxies.Detectors) {
+				var detector = Zotero.Proxies.Detectors[detectorName];
 				try {
 					proxy = detector(channel);
 				} catch(e) {
-					Components.utils.reportError(e);
+					Zotero.logError(e);
 				}
 				
 				if(!proxy) continue;
+				Zotero.debug("Proxies: Detected "+detectorName+" proxy "+proxy.scheme+
+					(proxy.multiHost ? " (multi-host)" : " for "+proxy.hosts[0]));
 				
 				var bw = _getBrowserAndWindow(channel.notificationCallbacks);
 				if(!bw) return;
@@ -191,13 +194,13 @@ Zotero.Proxies = new function() {
 			// If the referrer is a proxiable host, we already have access (e.g., we're
 			// on-campus) and shouldn't redirect
 			if(Zotero.Proxies.properToProxy(channel.referrer.spec, true)) {
-				Zotero.debug("Zotero.Proxies: skipping redirect; referrer was proxiable");
+				Zotero.debug("Proxies: skipping redirect; referrer was proxiable");
 				return;
 			}
 			// If the referrer is the same host as we're about to redirect to, we shouldn't
 			// or we risk a loop
 			if(channel.referrer.host == proxiedURI.host) {
-				Zotero.debug("Zotero.Proxies: skipping redirect; redirect URI and referrer have same host");
+				Zotero.debug("Proxies: skipping redirect; redirect URI and referrer have same host");
 				return;
 			}
 		}
@@ -206,13 +209,13 @@ Zotero.Proxies = new function() {
 			// If the original URI was a proxied host, we also shouldn't redirect, since any
 			// links handed out by the proxy should already be proxied
 			if(Zotero.Proxies.proxyToProper(channel.originalURI.spec, true)) {
-				Zotero.debug("Zotero.Proxies: skipping redirect; original URI was proxied");
+				Zotero.debug("Proxies: skipping redirect; original URI was proxied");
 				return;
 			}
 			// Finally, if the original URI is the same as the host we're about to redirect
 			// to, then we also risk a loop
 			if(channel.originalURI.host == proxiedURI.host) {
-				Zotero.debug("Zotero.Proxies: skipping redirect; redirect URI and original URI have same host");
+				Zotero.debug("Proxies: skipping redirect; redirect URI and original URI have same host");
 				return;
 			}
 		}
@@ -223,7 +226,7 @@ Zotero.Proxies = new function() {
 		top21 = top2DomainsRe.exec(channel.URI.host);
 		top22 = top2DomainsRe.exec(proxiedURI.host);
 		if(!top21 || !top22 || top21[0] == top22[0]) {
-			Zotero.debug("Zotero.Proxies: skipping redirect; redirect URI and URI have same top 2 domains");
+			Zotero.debug("Proxies: skipping redirect; redirect URI and URI have same top 2 domains");
 			return;
 		}
 		
@@ -300,7 +303,7 @@ Zotero.Proxies = new function() {
 				var m = proxy.regexp.exec(url);
 				if(m) {
 					var toProper = proxy.toProper(m);
-					Zotero.debug("Zotero.Proxies.proxyToProper: "+url+" to "+toProper);
+					Zotero.debug("Proxies.proxyToProper: "+url+" to "+toProper);
 					return toProper;
 				}
 			}
@@ -320,7 +323,7 @@ Zotero.Proxies = new function() {
 		var uri = ioService.newURI(url, null, null);
 		if(Zotero.Proxies.hosts[uri.hostPort] && Zotero.Proxies.hosts[uri.hostPort].proxyID) {
 			var toProxy = Zotero.Proxies.hosts[uri.hostPort].toProxy(uri);
-			Zotero.debug("Zotero.Proxies.properToProxy: "+url+" to "+toProxy);
+			Zotero.debug("Proxies.properToProxy: "+url+" to "+toProxy);
 			return toProxy;
 		}
 		return (onlyReturnIfProxied ? false : url);
@@ -536,9 +539,9 @@ Zotero.Proxy.prototype.validate = function() {
 		return ["scheme.noHTTP"];
 	}
 	
-	if(!this.multiSite && (!this.hosts.length || !this.hosts[0])) {
+	if(!this.multiHost && (!this.hosts.length || !this.hosts[0])) {
 		return ["host.invalid"];
-	} else if(this.multiSite && !Zotero_Proxy_schemeParameterRegexps["%h"].test(this.scheme)) {
+	} else if(this.multiHost && !Zotero_Proxy_schemeParameterRegexps["%h"].test(this.scheme)) {
 		return ["scheme.noHost"];
 	}
 	
@@ -570,7 +573,7 @@ Zotero.Proxy.prototype.validate = function() {
 Zotero.Proxy.prototype.save = function(transparent) {
 	// ensure this proxy is valid
 	var hasErrors = this.validate();
-	if(hasErrors) throw "Zotero.Proxy: could not be saved because it is invalid: error "+hasErrors[0];
+	if(hasErrors) throw "Proxy: could not be saved because it is invalid: error "+hasErrors[0];
 	
 	// we never save any changes to non-persisting proxies, so this works
 	var newProxy = !this.proxyID;
@@ -610,7 +613,7 @@ Zotero.Proxy.prototype.save = function(transparent) {
 		Zotero.Proxies.save(this);
 	} else {
 		Zotero.Proxies.refreshHostMap(this);
-		if(!transparent) throw "Zotero.Proxy: cannot save transparent proxy without transparent param";
+		if(!transparent) throw "Proxy: cannot save transparent proxy without transparent param";
 	}
 }
 
@@ -719,8 +722,6 @@ Zotero.Proxies.Detectors = new Object();
  * @type Boolean|Zotero.Proxy
  */
 Zotero.Proxies.Detectors.EZProxy = function(channel) {
-	const ezProxyRe = /\?(?:.+&)?(url|qurl)=([^&]+)/i;
-	
 	// Try to catch links from one proxy-by-port site to another
 	if([80, 443, -1].indexOf(channel.URI.port) == -1) {
 		// Two options here: we could have a redirect from an EZProxy site to another, or a link
@@ -729,8 +730,7 @@ Zotero.Proxies.Detectors.EZProxy = function(channel) {
 		var fromProxy = false;
 		if([301, 302, 303].indexOf(channel.responseStatus) !== -1) {
 			try {
-				toProxy = Zotero.Proxies.Detectors.EZProxy.ios.newURI(
-					channel.getResponseHeader("Location"), null, null);
+				toProxy = Services.io.newURI(channel.getResponseHeader("Location"), null, null);
 				fromProxy = channel.URI;
 			} catch(e) {}
 		} else {
@@ -753,14 +753,12 @@ Zotero.Proxies.Detectors.EZProxy = function(channel) {
 				
 				// Create a new nsIObserver and nsIChannel to figure out real URL (by failing to 
 				// send cookies, so we get back to the login page)
-				var newChannel = Zotero.Proxies.Detectors.EZProxy.ios.newChannelFromURI(toProxy);
+				var newChannel = Services.io.newChannelFromURI(toProxy);
 				newChannel.originalURI = channel.originalURI ? channel.originalURI : channel.URI;
-				newChannel.QueryInterface(Components.interfaces.nsIRequest).loadFlags = newChannel.loadFlags |
-					Components.interfaces.nsIHttpChannel.LOAD_DOCUMENT_URI;
+				newChannel.QueryInterface(Components.interfaces.nsIRequest).loadFlags = newChannel.loadFlags;
+				Zotero.debug("Proxies: Identified putative port-by-port EZProxy link from "+fromProxy.hostPort+" to "+toProxy.hostPort);
 				
-				Zotero.Proxies.Detectors.EZProxy.obs.addObserver(
-					new Zotero.Proxies.Detectors.EZProxy.Observer(newChannel),
-					"http-on-modify-request", false);
+				new Zotero.Proxies.Detectors.EZProxy.Observer(newChannel);
 				newChannel.asyncOpen(new Zotero.Proxies.Detectors.EZProxy.DummyStreamListener(), null);
 				return false;
 			}
@@ -768,19 +766,25 @@ Zotero.Proxies.Detectors.EZProxy = function(channel) {
 	}
 	
 	// Now try to catch redirects
+	if(channel.responseStatus != 302) return false;
 	try {
 		if(channel.getResponseHeader("Server") != "EZproxy") return false;
+		var proxiedURI = Services.io.newURI(channel.getResponseHeader("Location"), null, null);
 	} catch(e) {
-		return false
+		return false;
 	}
-	
-	// Get the new URL
-	if(channel.responseStatus != 302) return false;
-	var proxiedURL = channel.getResponseHeader("Location");
-	if(!proxiedURL) return false;
-	var proxiedURI = Zotero.Proxies.Detectors.EZProxy.ios.newURI(proxiedURL, null, null);
+	return Zotero.Proxies.Detectors.EZProxy.learn(channel.URI, proxiedURI);
+}
+
+/**
+ * Learn about a mapping from an EZProxy to a normal proxy
+ * @param {nsIURI} loginURI The URL of the login page
+ * @param {nsIURI} proxiedURI The URI of the page
+ * @return {Zotero.Proxy | false}
+ */
+Zotero.Proxies.Detectors.EZProxy.learn = function(loginURI, proxiedURI) {
 	// look for query
-	var m = ezProxyRe.exec(channel.URI.spec);
+	var m =  /\?(?:.+&)?(url|qurl)=([^&]+)/i.exec(loginURI.path);
 	if(!m) return false;
 	
 	// Ignore if we already know about it
@@ -788,16 +792,16 @@ Zotero.Proxies.Detectors.EZProxy = function(channel) {
 	
 	// Found URL
 	var properURL = (m[1].toLowerCase() == "qurl" ? unescape(m[2]) : m[2]);
-	var properURI = Zotero.Proxies.Detectors.EZProxy.ios.newURI(properURL, null, null);
+	var properURI = Services.io.newURI(properURL, null, null);
 	
 	var proxy = false;
-	if(channel.URI.host == proxiedURI.host && [channel.URI.port, 80, 443, -1].indexOf(proxiedURI.port) == -1) {
+	if(loginURI.host == proxiedURI.host && [loginURI.port, 80, 443, -1].indexOf(proxiedURI.port) == -1) {
 		// Proxy by port
 		proxy = new Zotero.Proxy();
 		proxy.multiHost = false;
 		proxy.scheme = proxiedURI.scheme+"://"+proxiedURI.hostPort+"/%p";
 		proxy.hosts = [properURI.hostPort];
-	} else if(proxiedURI.host != channel.URI.host && proxiedURI.hostPort.indexOf(properURI.host) != -1) {
+	} else if(proxiedURI.host != loginURI.host && proxiedURI.hostPort.indexOf(properURI.host) != -1) {
 		// Proxy by host
 		proxy = new Zotero.Proxy();
 		proxy.multiHost = proxy.autoAssociate = true;
@@ -806,10 +810,6 @@ Zotero.Proxies.Detectors.EZProxy = function(channel) {
 	}
 	return proxy;
 }
-Zotero.Proxies.Detectors.EZProxy.ios = Components.classes["@mozilla.org/network/io-service;1"]
-												 .getService(Components.interfaces.nsIIOService);
-Zotero.Proxies.Detectors.EZProxy.obs = Components.classes["@mozilla.org/observer-service;1"]
-												 .getService(Components.interfaces.nsIObserverService);
 
 /**
  * @class Do-nothing stream listener
@@ -827,11 +827,42 @@ Zotero.Proxies.Detectors.EZProxy.DummyStreamListener.prototype.onStopRequest = f
  */
 Zotero.Proxies.Detectors.EZProxy.Observer = function(newChannel) {
 	this.channel = newChannel;
+	Services.obs.addObserver(this, "http-on-modify-request", false);
+	Services.obs.addObserver(this, "http-on-examine-response", false);
 }
 Zotero.Proxies.Detectors.EZProxy.Observer.prototype.observe = function(aSubject, aTopic, aData) {
 	if (aSubject == this.channel) {
-		aSubject.QueryInterface(Components.interfaces.nsIHttpChannel).setRequestHeader("Cookie", "", false);
-		Zotero.Proxies.Detectors.EZProxy.obs.removeObserver(this, "http-on-modify-request");
+		if(aTopic === "http-on-modify-request") {
+			try {
+				aSubject.QueryInterface(Components.interfaces.nsIHttpChannel).setRequestHeader("Cookie", "", false);
+			} catch(e) {
+				Zotero.logError(e);
+			} finally {
+				Services.obs.removeObserver(this, "http-on-modify-request");
+			}
+		} else if(aTopic === "http-on-examine-response") {
+			try {
+				// Make sure this is a redirect involving an EZProxy
+				if(aSubject.responseStatus !== 302) return;
+				try {
+					if(aSubject.getResponseHeader("Server") !== "EZproxy") return;
+					var loginURL = aSubject.getResponseHeader("Location");
+				} catch(e) {
+					return;
+				}
+
+				var proxy = Zotero.Proxies.Detectors.EZProxy.learn(Services.io.newURI(loginURL, null, null), aSubject.URI);
+				if(proxy) {
+					Zotero.debug("Proxies: Proxy-by-port EZProxy "+aSubject.URI.hostPort+" corresponds to "+proxy.hosts[0]);
+					proxy.save();
+				}
+			} catch(e) {
+				Zotero.logError(e);
+			} finally {
+				Services.obs.removeObserver(this, "http-on-examine-response");
+				aSubject.cancel(0x80004004 /*NS_ERROR_ABORT*/);
+			}
+		}
 	}
 }
 Zotero.Proxies.Detectors.EZProxy.Observer.prototype.QueryInterface = function(aIID) {
