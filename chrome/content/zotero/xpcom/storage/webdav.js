@@ -220,15 +220,17 @@ Zotero.Sync.Storage.WebDAV = (function () {
 						
 						var smtime = Zotero.Sync.Storage.getSyncedModificationTime(item.id);
 						if (smtime != mtime) {
-							var localData = { modTime: fmtime };
-							var remoteData = { modTime: mtime };
-							Zotero.Sync.Storage.QueueManager.addConflict(
-								request.name, localData, remoteData
-							);
 							Zotero.debug("Conflict -- last synced file mod time "
 								+ "does not match time on storage server"
 								+ " (" + smtime + " != " + mtime + ")");
-							return false;
+							return {
+								localChanges: false,
+								remoteChanges: false,
+								conflict: {
+									local: { modTime: fmtime },
+									remote: { modTime: mtime }
+								}
+							};
 						}
 					}
 					else {
@@ -473,21 +475,21 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		};
 		
 		if (files.length == 0) {
-			return Q.resolve(results);
+			return Q(results);
 		}
 		
 		let deleteURI = _rootURI.clone();
 		// This should never happen, but let's be safe
 		if (!deleteURI.spec.match(/\/$/)) {
-			throw new Error(
-				"Root URI does not end in slash in "
-				+ "Zotero.Sync.Storage.WebDAV.deleteStorageFiles()"
-			);
+			return Q.reject("Root URI does not end in slash in "
+				+ "Zotero.Sync.Storage.WebDAV.deleteStorageFiles()");
 		}
 		
-		results = Q.resolve(results);
-		files.forEach(function (fileName) {
-			results = results.then(function (results) {
+		var funcs = [];
+		for (let i=0; i<files.length; i++) {
+			let fileName = files[i];
+			let baseName = fileName.match(/^([^\.]+)/)[1];
+			funcs.push(function () {
 				let deleteURI = _rootURI.clone();
 				deleteURI.QueryInterface(Components.interfaces.nsIURL);
 				deleteURI.fileName = fileName;
@@ -502,30 +504,25 @@ Zotero.Sync.Storage.WebDAV = (function () {
 							break;
 						
 						case 404:
-							var fileDeleted = false;
+							var fileDeleted = true;
 							break;
 					}
 					
 					// If an item file URI, get the property URI
 					var deletePropURI = getPropertyURIFromItemURI(deleteURI);
-					if (!deletePropURI) {
+					
+					// If we already deleted the prop file, skip it
+					if (!deletePropURI || results.deleted.indexOf(deletePropURI.fileName) != -1) {
 						if (fileDeleted) {
-							results.deleted.push(fileName);
+							results.deleted.push(baseName);
 						}
 						else {
-							results.missing.push(fileName);
+							results.missing.push(baseName);
 						}
-						return results;
+						return;
 					}
 					
-					// If property file appears separately in delete queue,
-					// remove it, since we're taking care of it here
-					var propIndex = files.indexOf(deletePropURI.fileName);
-					if (propIndex > i) {
-						delete files[propIndex];
-						i--;
-						last = (i == files.length - 1);
-					}
+					let propFileName = deletePropURI.fileName;
 					
 					// Delete property file
 					return Zotero.HTTP.promise("DELETE", deletePropURI, { successCodes: [200, 204, 404] })
@@ -534,29 +531,40 @@ Zotero.Sync.Storage.WebDAV = (function () {
 							case 204:
 							// IIS 5.1 and Sakai return 200
 							case 200:
-								results.deleted.push(fileName);
+								results.deleted.push(baseName);
 								break;
 							
 							case 404:
 								if (fileDeleted) {
-									results.deleted.push(fileName);
+									results.deleted.push(baseName);
 								}
 								else {
-									results.missing.push(fileName);
+									results.missing.push(baseName);
 								}
 								break;
 						}
 					});
 				})
 				.catch(function (e) {
-					results.error.push(fileName);
-					var msg = "An error occurred attempting to delete "
-						+ "'" + fileName
-						+ "' (" + e.status + " " + e.xmlhttp.statusText + ").";
+					results.error.push(baseName);
+					throw e;
 				});
 			});
+		}
+		
+		Components.utils.import("resource://zotero/concurrent-caller.js");
+		var caller = new ConcurrentCaller(4);
+		caller.stopOnError = true;
+		caller.setLogger(function (msg) {
+			Zotero.debug("[ConcurrentCaller] " + msg);
 		});
-		return results;
+		caller.setErrorLogger(function (msg) {
+			Components.utils.reportError(msg);
+		});
+		return caller.fcall(funcs)
+		.then(function () {
+			return results;
+		});
 	}
 	
 	
@@ -881,7 +889,8 @@ Zotero.Sync.Storage.WebDAV = (function () {
 								deleteStorageFiles([item.key + ".prop"])
 								.finally(function (results) {
 									deferred.resolve(false);
-								});
+								})
+								.done();
 								return;
 							}
 							else if (status != 200) {
@@ -1457,182 +1466,199 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	
 	
 	/**
-	 * Remove files on storage server that were deleted locally more than
-	 * sync.storage.deleteDelayDays days ago
+	 * Remove files on storage server that were deleted locally
 	 *
 	 * @param	{Function}	callback		Passed number of files deleted
 	 */
 	obj._purgeDeletedStorageFiles = function () {
-		if (!this._active) {
-			return Q(false);
-		}
-		
-		Zotero.debug("Purging deleted storage files");
-		var files = Zotero.Sync.Storage.getDeletedFiles();
-		if (!files) {
-			Zotero.debug("No files to delete remotely");
-			return Q(false);
-		}
-		
-		// Add .zip extension
-		var files = files.map(function (file) file + ".zip");
-		
-		return deleteStorageFiles(files)
-		.then(function (results) {
-			// Remove deleted and nonexistent files from storage delete log
-			var toPurge = results.deleted.concat(results.missing);
-			if (toPurge.length > 0) {
-				var done = 0;
-				var maxFiles = 999;
-				var numFiles = toPurge.length;
-				
-				Zotero.DB.beginTransaction();
-				
-				do {
-					var chunk = toPurge.splice(0, maxFiles);
-					var sql = "DELETE FROM storageDeleteLog WHERE key IN ("
-						+ chunk.map(function () '?').join() + ")";
-					Zotero.DB.query(sql, chunk);
-					done += chunk.length;
-				}
-				while (done < numFiles);
-				
-				Zotero.DB.commitTransaction();
+		return Q.fcall(function () {
+			if (!this.includeUserFiles) {
+				return false;
 			}
 			
-			return results.deleted.length;
-		});
+			Zotero.debug("Purging deleted storage files");
+			var files = Zotero.Sync.Storage.getDeletedFiles();
+			if (!files) {
+				Zotero.debug("No files to delete remotely");
+				return false;
+			}
+			
+			// Add .zip extension
+			var files = files.map(function (file) file + ".zip");
+			
+			return deleteStorageFiles(files)
+			.then(function (results) {
+				// Remove deleted and nonexistent files from storage delete log
+				var toPurge = results.deleted.concat(results.missing);
+				if (toPurge.length > 0) {
+					var done = 0;
+					var maxFiles = 999;
+					var numFiles = toPurge.length;
+					
+					Zotero.DB.beginTransaction();
+					
+					do {
+						var chunk = toPurge.splice(0, maxFiles);
+						var sql = "DELETE FROM storageDeleteLog WHERE key IN ("
+							+ chunk.map(function () '?').join() + ")";
+						Zotero.DB.query(sql, chunk);
+						done += chunk.length;
+					}
+					while (done < numFiles);
+					
+					Zotero.DB.commitTransaction();
+				}
+				
+				Zotero.debug(results);
+				
+				return results.deleted.length;
+			});
+		}.bind(this));
 	};
 	
 	
 	/**
 	 * Delete orphaned storage files older than a day before last sync time
-	 *
-	 * @param	{Function}	callback
 	 */
-	obj._purgeOrphanedStorageFiles = function (callback) {
-		const daysBeforeSyncTime = 1;
-		
-		if (!this._active) {
-			return false;
-		}
-		
-		// If recently purged, skip
-		var lastpurge = Zotero.Prefs.get('lastWebDAVOrphanPurge');
-		var days = 10;
-		if (lastpurge && new Date(lastpurge * 1000) > (new Date() - (1000 * 60 * 60 * 24 * days))) {
-			return false;
-		}
-		
-		Zotero.debug("Purging orphaned storage files");
-		
-		var uri = this.rootURI;
-		var path = uri.path;
-		
-		var xmlstr = "<propfind xmlns='DAV:'><prop>"
-			+ "<getlastmodified/>"
-			+ "</prop></propfind>";
-		
-		var lastSyncDate = new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000);
-		
-		Zotero.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (req) {
-			Zotero.debug(req.responseText);
-				
-			var funcName = "Zotero.Sync.Storage.purgeOrphanedStorageFiles()";
+	obj._purgeOrphanedStorageFiles = function () {
+		return Q.fcall(function () {
+			const daysBeforeSyncTime = 1;
 			
-			var responseNode = req.responseXML.documentElement;
-			responseNode.xpath = function (path) {
-				return Zotero.Utilities.xpath(this, path, { D: 'DAV:' });
-			};
-			
-			var deleteFiles = [];
-			var trailingSlash = !!path.match(/\/$/);
-			for each(var response in responseNode.xpath("response")) {
-				var href = Zotero.Utilities.xpath(response, "href", { D: 'DAV:' });
-				href = href.length ? href[0] : ''
-				
-				// Strip trailing slash if there isn't one on the root path
-				if (!trailingSlash) {
-					href = href.replace(/\/$/, "")
-				}
-				
-				// Absolute
-				if (href.match(/^https?:\/\//)) {
-					var ios = Components.classes["@mozilla.org/network/io-service;1"].
-								getService(Components.interfaces.nsIIOService);
-					var href = ios.newURI(href, null, null);
-					href = href.path;
-				}
-				
-				// Skip root URI
-				if (href == path
-						// Some Apache servers respond with a "/zotero" href
-						// even for a "/zotero/" request
-						|| (trailingSlash && href + '/' == path)
-						// Try URL-encoded as well, as above
-						|| decodeURIComponent(href) == path) {
-					continue;
-				}
-				
-				if (href.indexOf(path) == -1
-						// Try URL-encoded as well, in case there's a '~' or similar
-						// character in the URL and the server (e.g., Sakai) is
-						// encoding the value
-						&& decodeURIComponent(href).indexOf(path) == -1) {
-					Zotero.Sync.Storage.EventManager.error(
-						"DAV:href '" + href + "' does not begin with path '"
-							+ path + "' in " + funcName
-					);
-				}
-				
-				var matches = href.match(/[^\/]+$/);
-				if (!matches) {
-					Zotero.Sync.Storage.EventManager.error(
-						"Unexpected href '" + href + "' in " + funcName
-					)
-				}
-				var file = matches[0];
-				
-				if (file.indexOf('.') == 0) {
-					Zotero.debug("Skipping hidden file " + file);
-					continue;
-				}
-				if (!file.match(/\.zip$/) && !file.match(/\.prop$/)) {
-					Zotero.debug("Skipping file " + file);
-					continue;
-				}
-				
-				var key = file.replace(/\.(zip|prop)$/, '');
-				var item = Zotero.Items.getByLibraryAndKey(null, key);
-				if (item) {
-					Zotero.debug("Skipping existing file " + file);
-					continue;
-				}
-				
-				Zotero.debug("Checking orphaned file " + file);
-				
-				// TODO: Parse HTTP date properly
-				var lastModified = Zotero.Utilities.xpath(
-					response, "//getlastmodified", { D: 'DAV:' }
-				);
-				lastModified = lastModified.length ? lastModified[0] : ''
-				lastModified = Zotero.Date.strToISO(lastModified);
-				lastModified = Zotero.Date.sqlToDate(lastModified);
-				
-				// Delete files older than a day before last sync time
-				var days = (lastSyncDate - lastModified) / 1000 / 60 / 60 / 24;
-				
-				if (days > daysBeforeSyncTime) {
-					deleteFiles.push(file);
-				}
+			if (!this.includeUserFiles) {
+				return false;
 			}
 			
-			deleteStorageFiles(deleteFiles)
-			.then(function (results) {
-				Zotero.Prefs.set("lastWebDAVOrphanPurge", Math.round(new Date().getTime() / 1000))
-				Zotero.debug(results);
-			});
-		}, { Depth: 1 });
+			// If recently purged, skip
+			var lastpurge = Zotero.Prefs.get('lastWebDAVOrphanPurge');
+			var days = 10;
+			if (lastpurge && new Date(lastpurge * 1000) > (new Date() - (1000 * 60 * 60 * 24 * days))) {
+				return false;
+			}
+			
+			Zotero.debug("Purging orphaned storage files");
+			
+			var uri = this.rootURI;
+			var path = uri.path;
+			
+			var xmlstr = "<propfind xmlns='DAV:'><prop>"
+				+ "<getlastmodified/>"
+				+ "</prop></propfind>";
+			
+			var lastSyncDate = new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000);
+			
+			var deferred = Q.defer();
+			
+			Zotero.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (xmlhttp) {
+				Q.fcall(function () {
+					Zotero.debug(xmlhttp.responseText);
+					
+					var funcName = "Zotero.Sync.Storage.purgeOrphanedStorageFiles()";
+					
+					var responseNode = xmlhttp.responseXML.documentElement;
+					responseNode.xpath = function (path) {
+						return Zotero.Utilities.xpath(this, path, { D: 'DAV:' });
+					};
+					
+					var deleteFiles = [];
+					var trailingSlash = !!path.match(/\/$/);
+					for each(var response in responseNode.xpath("D:response")) {
+						var href = Zotero.Utilities.xpathText(
+							response, "D:href", { D: 'DAV:' }
+						) || "";
+						Zotero.debug(href);
+						
+						// Strip trailing slash if there isn't one on the root path
+						if (!trailingSlash) {
+							href = href.replace(/\/$/, "");
+						}
+						
+						// Absolute
+						if (href.match(/^https?:\/\//)) {
+							var ios = Components.classes["@mozilla.org/network/io-service;1"].
+										getService(Components.interfaces.nsIIOService);
+							var href = ios.newURI(href, null, null);
+							href = href.path;
+						}
+						
+						// Skip root URI
+						if (href == path
+								// Some Apache servers respond with a "/zotero" href
+								// even for a "/zotero/" request
+								|| (trailingSlash && href + '/' == path)
+								// Try URL-encoded as well, as above
+								|| decodeURIComponent(href) == path) {
+							continue;
+						}
+						
+						if (href.indexOf(path) == -1
+								// Try URL-encoded as well, in case there's a '~' or similar
+								// character in the URL and the server (e.g., Sakai) is
+								// encoding the value
+								&& decodeURIComponent(href).indexOf(path) == -1) {
+							throw new Error(
+								"DAV:href '" + href + "' does not begin with path '"
+									+ path + "' in " + funcName
+							);
+						}
+						
+						var matches = href.match(/[^\/]+$/);
+						if (!matches) {
+							throw new Error(
+								"Unexpected href '" + href + "' in " + funcName
+							);
+						}
+						var file = matches[0];
+						
+						if (file.indexOf('.') == 0) {
+							Zotero.debug("Skipping hidden file " + file);
+							continue;
+						}
+						if (!file.match(/\.zip$/) && !file.match(/\.prop$/)) {
+							Zotero.debug("Skipping file " + file);
+							continue;
+						}
+						
+						var key = file.replace(/\.(zip|prop)$/, '');
+						var item = Zotero.Items.getByLibraryAndKey(null, key);
+						if (item) {
+							Zotero.debug("Skipping existing file " + file);
+							continue;
+						}
+						
+						Zotero.debug("Checking orphaned file " + file);
+						
+						// TODO: Parse HTTP date properly
+						Zotero.debug(response.innerHTML);
+						var lastModified = Zotero.Utilities.xpathText(
+							response, ".//D:getlastmodified", { D: 'DAV:' }
+						);
+						lastModified = Zotero.Date.strToISO(lastModified);
+						lastModified = Zotero.Date.sqlToDate(lastModified);
+						
+						// Delete files older than a day before last sync time
+						var days = (lastSyncDate - lastModified) / 1000 / 60 / 60 / 24;
+						
+						if (days > daysBeforeSyncTime) {
+							deleteFiles.push(file);
+						}
+					}
+					
+					return deleteStorageFiles(deleteFiles)
+					.then(function (results) {
+						Zotero.Prefs.set("lastWebDAVOrphanPurge", Math.round(new Date().getTime() / 1000))
+						Zotero.debug(results);
+					});
+				})
+				.catch(function (e) {
+					deferred.reject(e);
+				})
+				.then(function () {
+					deferred.resolve();
+				});
+			}, { Depth: 1 });
+			
+			return deferred.promise;
+		}.bind(this));
 	};
 	
 	return obj;
