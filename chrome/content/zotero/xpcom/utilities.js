@@ -1136,7 +1136,7 @@ Zotero.Utilities = {
 		}
 		
 		if (typeof(arr) == 'object') { // Array/Hashes/Objects
-			let isRequest = ((Zotero.isFx && !Zotero.isBookmarklet) || Zotero.isStandalone)
+			var isRequest = Zotero.isFx && !Zotero.isBookmarklet
 				&& arr instanceof Components.interfaces.nsIRequest;
 			
 			//array for checking recursion
