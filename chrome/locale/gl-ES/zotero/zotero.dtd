@@ -211,6 +211,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Marcador">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Os marcadores consérvanse a través de e OpenOffice e Microsoft Word pero poden ser modificados accidentalmente. Por motivos de compatibilidade, as citas non se insiren nas notas a final de páxina ou nos rodapés cando se activa esa opción.">
 
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+
 <!ENTITY zotero.integration.prefs.storeReferences.label "Almacenar as referencias no documento">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Almacenar as referencias no documento supón un aumento no peso do ficheiro máis permitelle compartir o documento sen ter que empregar o grupo de Zotero. Precísase ter un Zotero 3.0 ou as versións seguintes para actualizar os ficheiros que se crearon con esta opción.">
 

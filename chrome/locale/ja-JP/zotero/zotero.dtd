@@ -211,6 +211,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "ブックマーク">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "ブックマークは Microsoft Word、LibreOffice 双方で保存されますが、誤って変更されてしまう場合があります。 &#xA; 互換性上の理由により、この機能を選んだ場合、出典表記を脚注や巻末注に挿入することができません。">
 
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+
 <!ENTITY zotero.integration.prefs.storeReferences.label "文献情報を文書中に保存">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "文献情報をあなたの文書中に保存するとわずかにファイルサイズが大きくなりますが、あなたは Zotero グループを使わなくても他人とその文書を共有することが可能になります。このオプションで作成された文書を更新するには Zotero 3.0 以降が必要です。">
 

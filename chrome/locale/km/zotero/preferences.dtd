@@ -121,7 +121,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "ចំណងជើង">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "បានធ្វើទំនើបកម្ម">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "ស៊ីអេសអិល">
-<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "បន្ថែមរចនាបថថ្មី...">
 
 <!ENTITY zotero.preferences.prefpane.keys "ផ្លូវកាត់">

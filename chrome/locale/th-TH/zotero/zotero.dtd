@@ -211,6 +211,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "คั่นหน้า">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "คั่นหน้าถูกคงไว้ผ่านไมโครซอฟท์เวิร์ดและโอเพ่นออฟฟิศ แต่อาจมีการเปลี่ยนแปลงได้โดยบังเอิญ สำหรับ &#xA;เหตุผลการเข้ากันได้ การอ้างอิงไม่สามารถแทรกในเชิงอรรถหรืออ้างอิงท้ายเรื่องเมื่อตัวเลือกนี้ถูกเลือก">
 
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+
 <!ENTITY zotero.integration.prefs.storeReferences.label "จัดเก็บเอกสารอ้างอิงในแฟ้มเอกสาร">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "เก็บเอกสารอ้างอิงในแฟ้มเอกสารของคุณจะทำให้ขนาดแฟ้มใหญ่ขึ้นเล็กน้อย แต่ช่วยให้คุณใช้แฟ้มเอกสารของคุณร่วมกับผู้อื่นได้โดยไม่ต้องใช้กลุ่มของ Zotero ต้องใช้ Zotero รุ่น 3.0 ขึ้นไปเพื่อการปรับแฟ้มเอกสารที่สร้างด้วยตัวเลือกนี้">
 

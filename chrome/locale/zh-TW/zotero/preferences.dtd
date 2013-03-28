@@ -121,7 +121,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "標題">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "已更新">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "文獻樣式語言CSL">
-<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "獲取額外的樣式…">
 
 <!ENTITY zotero.preferences.prefpane.keys "快速鍵">

@@ -211,6 +211,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Yer imleri">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Yer imleri Microsoft Word ve OpenOffice arasında korunmuştur, ancak yanlışlıkla değiştirilebilirler. &#xA;Uyumluluk için, bu seçenek seçildiğinde, göndermeler dipnot ve sonnotlara eklenemez.">
 
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+
 <!ENTITY zotero.integration.prefs.storeReferences.label "Kaynakları belgede göster">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Kaynakları belgenizde kaydetmeniz dosya boyutunuzu büyütebilir, ancak belgenizi başkalarıyla bir Zotero grubu kullanmadan paylaşabilmenizi sağlayacaktır. Bu seçenekle yaratılmış belgelerin güncellenebilmesi, Zotero 3.0 veya sonraki sürümleri gerektirir.">
 
