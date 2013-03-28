@@ -213,7 +213,7 @@
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label 		"Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption	"MEDLINE journal abbreviations will be automatically generated using journal titles. The &quot;Journal Abbr&quot; field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption	"MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label		"Store references in document">
 <!ENTITY zotero.integration.prefs.storeReferences.caption	"Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
