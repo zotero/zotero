@@ -602,7 +602,9 @@ array_reduce(
         "dispatch",
         "when", "spread",
         "get", "put", "set", "del", "delete",
-        "post", "send", "invoke",
+        // .send() disabled by Zotero for Mozilla Task.jsm compatibility
+        //"post", "send", "invoke",
+        "post", "invoke",
         "keys",
         "fapply", "fcall", "fbind",
         "all", "allResolved",
@@ -1146,7 +1148,8 @@ var post = Q.post = dispatcher("post");
  * @param ...args   array of invocation arguments
  * @return promise for the return value
  */
-Q.send = send;
+// Disabled by Zotero for Mozilla Task.jsm compatibility
+//Q.send = send;
 Q.invoke = send; // synonyms
 function send(value, name) {
     var args = array_slice(arguments, 2);
