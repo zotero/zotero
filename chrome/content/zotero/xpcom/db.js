@@ -762,44 +762,44 @@ Zotero.DBConnection.prototype.getNextName = function (table, field, name)
 // Async methods
 //
 //
-//  Zotero.DB.executeTransaction(function (conn) {
-//  	var created = yield Zotero.DB.queryAsync("CREATE TEMPORARY TABLE tmpFoo (foo TEXT, bar INT)");
-//  	
-//  	// created == true
-//  	
-//  	var result = yield Zotero.DB.queryAsync("INSERT INTO tmpFoo VALUES ('a', ?)", 1);
-//  	
-//  	// result == 1
-//  	
-//  	yield Zotero.DB.queryAsync("INSERT INTO tmpFoo VALUES ('b', 2)");
-//  	yield Zotero.DB.queryAsync("INSERT INTO tmpFoo VALUES ('c', 3)");
-//  	yield Zotero.DB.queryAsync("INSERT INTO tmpFoo VALUES ('d', 4)");
-//  	
-//  	var value = yield Zotero.DB.valueQueryAsync("SELECT foo FROM tmpFoo WHERE bar=?", 2);
-//  	
-//  	// value == "b"
-//  	
-//  	var vals = yield Zotero.DB.columnQueryAsync("SELECT foo FROM tmpFoo");
-//  	
-//  	// '0' => "a"
-//  	// '1' => "b"
-//  	// '2' => "c"
-//  	// '3' => "d"
-//  	
-//  	let rows = yield Zotero.DB.queryAsync("SELECT * FROM tmpFoo");
-//  	for each(let row in rows) {
-//  		// row.foo == 'a', row.bar == 1
-//  		// row.foo == 'b', row.bar == 2
-//  		// row.foo == 'c', row.bar == 3
-//  		// row.foo == 'd', row.bar == 4
-//  	}
-//  	
-//  	// Optional, but necessary to pass 'rows' on to the next handler
-//  	Zotero.DB.asyncResult(rows);
-//  )
-//  then(function (rows) {
-//  	// rows == same as above
-//  )
+// Zotero.DB.executeTransaction(function (conn) {
+//     var created = yield Zotero.DB.queryAsync("CREATE TEMPORARY TABLE tmpFoo (foo TEXT, bar INT)");
+//     
+//     // created == true
+//     
+//     var result = yield Zotero.DB.queryAsync("INSERT INTO tmpFoo VALUES ('a', ?)", 1);
+//     
+//     // result == 1
+//     
+//     yield Zotero.DB.queryAsync("INSERT INTO tmpFoo VALUES ('b', 2)");
+//     yield Zotero.DB.queryAsync("INSERT INTO tmpFoo VALUES ('c', 3)");
+//     yield Zotero.DB.queryAsync("INSERT INTO tmpFoo VALUES ('d', 4)");
+//     
+//     var value = yield Zotero.DB.valueQueryAsync("SELECT foo FROM tmpFoo WHERE bar=?", 2);
+//     
+//     // value == "b"
+//     
+//     var vals = yield Zotero.DB.columnQueryAsync("SELECT foo FROM tmpFoo");
+//     
+//     // '0' => "a"
+//     // '1' => "b"
+//     // '2' => "c"
+//     // '3' => "d"
+//     
+//     let rows = yield Zotero.DB.queryAsync("SELECT * FROM tmpFoo");
+//     for each(let row in rows) {
+//         // row.foo == 'a', row.bar == 1
+//         // row.foo == 'b', row.bar == 2
+//         // row.foo == 'c', row.bar == 3
+//         // row.foo == 'd', row.bar == 4
+//     }
+//     
+//     // Optional, but necessary to pass 'rows' on to the next handler
+//     Zotero.DB.asyncResult(rows);
+// })
+// .then(function (rows) {
+//     // rows == same as above
+// })
 // .done();
 //
 /**
@@ -809,12 +809,10 @@ Zotero.DBConnection.prototype.getNextName = function (table, field, name)
  *                   pass a result by calling asyncResult(val) at the end
  */
 Zotero.DBConnection.prototype.executeTransaction = function (func) {
-	return Q(
-		this._getConnectionAsync()
-		.then(function (conn) {
-			return conn.executeTransaction(func);
-		})
-	);
+	return this._getConnectionAsync()
+	.then(function (conn) {
+		return conn.executeTransaction(func);
+	});
 };
 
 
@@ -952,7 +950,7 @@ Zotero.DBConnection.prototype.asyncResult = function (val) {
  */
 Zotero.DBConnection.prototype._getConnectionAsync = function () {
 	if (this._connectionAsync) {
-		return this.Promise.resolve(this._connectionAsync);
+		return Q(this._connectionAsync);
 	}
 	
 	var db = this._getDBConnection();
@@ -961,11 +959,11 @@ Zotero.DBConnection.prototype._getConnectionAsync = function () {
 	};
 	var self = this;
 	Zotero.debug("Asynchronously opening DB connection");
-	return this.Sqlite.openConnection(options)
+	return Q(this.Sqlite.openConnection(options)
 	.then(function(conn) {
 		self._connectionAsync = conn;
 		return conn;
-	});
+	}));
 };
 
 
