@@ -184,11 +184,11 @@ Zotero.Styles = new function() {
 	 *     displayed in dialogs referencing the style
 	 */
 	this.install = function(style, origin) {
-		var styleFile = null, styleInstalled;
+		var styleInstalled;
 		if(style instanceof Components.interfaces.nsIFile) {
 			// handle nsIFiles
 			origin = style.leafName;
-			styleInstalled = Zotero.File.getContentsAsync(styleFile).when(function(style) {
+			styleInstalled = Zotero.File.getContentsAsync(style).when(function(style) {
 				return _install(style, origin);
 			});
 		} else {
@@ -197,8 +197,8 @@ Zotero.Styles = new function() {
 		
 		styleInstalled.fail(function(error) {
 			// Unless user cancelled, show an alert with the error
-			if(error instanceof Zotero.Exception.UserCancelled) return;
-			if(error instanceof Zotero.Exception.Alert) {
+			if(typeof error === "object" && error instanceof Zotero.Exception.UserCancelled) return;
+			if(typeof error === "object" && error instanceof Zotero.Exception.Alert) {
 				error.present();
 				error.log();
 			} else {
@@ -220,14 +220,14 @@ Zotero.Styles = new function() {
 	function _install(style, origin, hidden) {
 		if(!_initialized || !_cacheTranslatorData) Zotero.Styles.init();
 		
-		var existingFile, destFile, source;
+		var existingFile, destFile, source, styleID
 		return Q.fcall(function() {
 			// First, parse style and make sure it's valid XML
 			var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 					.createInstance(Components.interfaces.nsIDOMParser),
 				doc = parser.parseFromString(style, "application/xml");
 			
-			var styleID = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:id[1]',
+			styleID = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:id[1]',
 					Zotero.Styles.ns),
 				// Get file name from URL
 				m = /[^\/]+$/.exec(styleID),
@@ -346,7 +346,7 @@ Zotero.Styles = new function() {
 					return Zotero.HTTP.promise("GET", source).then(function(xmlhttp) {
 						return _install(xmlhttp.responseText, origin, true);
 					}).fail(function(error) {
-						if(error instanceof Zotero.Exception) {
+						if(typeof error === "object" && error instanceof Zotero.Exception) {
 							throw new Zotero.Exception.Alert("styles.installSourceError", [origin, source],
 								"styles.install.title", error);
 						} else {
@@ -376,7 +376,7 @@ Zotero.Styles = new function() {
 			var enumerator = wm.getEnumerator("zotero:pref");
 			while(enumerator.hasMoreElements()) {
 				var win = enumerator.getNext();
-				win.refreshStylesList(styleID);
+				win.Zotero_Preferences.Cite.refreshStylesList(styleID);
 			}
 		});
 	}
