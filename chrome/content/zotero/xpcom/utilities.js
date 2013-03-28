@@ -625,6 +625,30 @@ Zotero.Utilities = {
 	},
 	
 	/**
+	 * Run a function on chunks of a given size of an array's elements.
+	 *
+	 * @param {Array} arr
+	 * @param {Integer} chunkSize
+	 * @param {Function} func
+	 * @return {Array} The return values from the successive runs
+	 */
+	"forEachChunk":function(arr, chunkSize, func) {
+		var retValues = [];
+		var tmpArray = arr.concat();
+		var num = arr.length;
+		var done = 0;
+		
+		do {
+			var chunk = tmpArray.splice(0, chunkSize);
+			done += chunk.length;
+			retValues.push(func(chunk));
+		}
+		while (done < num);
+		
+		return retValues;
+	},
+	
+	/**
 	 * Generate a random integer between min and max inclusive
 	 *
 	 * @param	{Integer}	min
