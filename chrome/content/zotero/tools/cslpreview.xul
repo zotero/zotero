@@ -117,7 +117,7 @@
 					Zotero.debug("CSL IGNORE this AD");
 					return '';
 				}
-				var styleEngine = style.csl;
+				var styleEngine = style.getCiteProc();
 				
 				// Generate multiple citations
 				var citations = styleEngine.previewCitationCluster(

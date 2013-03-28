@@ -430,6 +430,8 @@ Zotero.Style = function(arg) {
 			'/csl:style/csl:info[1]/csl:category', Zotero.Styles.ns))
 		if(category.hasAttribute("term"))];
 	this._class = doc.documentElement.getAttribute("class");
+	this._usesAbbreviation = !!Zotero.Utilities.xpath(doc, '//csl:text[@form="short"][@variable="container-title"][1]',
+		Zotero.Styles.ns).length;
 	this._hasBibliography = !!doc.getElementsByTagName("bibliography").length;
 	this._version = doc.documentElement.getAttribute("version");
 	if(!this._version) this._version = "0.8";
@@ -442,12 +444,11 @@ Zotero.Style = function(arg) {
 	}
 }
 
-Zotero.Style.prototype.__defineGetter__("csl",
 /**
- * Retrieves the Zotero.CSL object for this style
- * @type Zotero.CSL
+ * Get a citeproc-js CSL.Engine instance
+ * @param {Boolean} useAutomaticJournalAbbreviations Whether to automatically abbreviate titles
  */
-function() {
+Zotero.Style.prototype.getCiteProc = function(automaticJournalAbbreviations) {
 	var locale = Zotero.Prefs.get('export.bibliographyLocale');
 	if(!locale) {
 		var locale = Zotero.locale;
@@ -498,11 +499,16 @@ function() {
 	}
 	
 	try {
-		return new Zotero.CiteProc.CSL.Engine(Zotero.Cite.System, xml, locale);
+		return new Zotero.CiteProc.CSL.Engine(new Zotero.Cite.System(automaticJournalAbbreviations), xml, locale);
 	} catch(e) {
 		Zotero.logError(e);
 		throw e;
 	}
+};
+
+Zotero.Style.prototype.__defineGetter__("csl", function() {
+	Zotero.logError("Zotero.Style.csl is deprecated. Use Zotero.Style.getCiteProc()");
+	return this.getCiteProc();
 });
 
 Zotero.Style.prototype.__defineGetter__("class",
@@ -532,6 +538,20 @@ function() {
 		return parentStyle.hasBibliography;
 	}
 	return this._hasBibliography;
+});
+
+Zotero.Style.prototype.__defineGetter__("usesAbbreviation",
+/**
+ * Retrieves the style class, either from the metadata that's already loaded or by loading the file
+ * @type String
+ */
+function() {
+	if(this.source) {
+		var parentStyle = Zotero.Styles.get(this.source);
+		if(!parentStyle) return false;
+		return parentStyle.usesAbbreviation;
+	}
+	return this._usesAbbreviation;
 });
 
 Zotero.Style.prototype.__defineGetter__("independentFile",

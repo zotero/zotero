@@ -330,7 +330,7 @@ Zotero.QuickCopy = new function() {
 			
 			// Copy citations if shift key pressed
 			if (modified) {
-				var csl = Zotero.Styles.get(format).csl;
+				var csl = Zotero.Styles.get(format).getCiteProc();
 				csl.updateItems([item.id for each(item in items)]);
 				var citation = {citationItems:[{id:item.id} for each(item in items)], properties:{}};
 				var html = csl.previewCitationCluster(citation, [], [], "html"); 
