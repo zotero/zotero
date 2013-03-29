@@ -212,6 +212,10 @@ grid row hbox:first-child
 	height: 1em;
 }
 
+#quickCopy-instructions, #quickCopy-citationInstructions {
+	font-size: 12px;
+}
+
 #quickCopy-siteSettings-rows::-moz-tree-cell(quickCopy-copyAsHTML) {
 	/*
 	DEBUG: possible to center checkmark here instead of with spaces?
