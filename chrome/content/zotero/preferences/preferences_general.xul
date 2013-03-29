@@ -129,6 +129,9 @@
 				<checkbox label="&zotero.preferences.groups.tags;" preference="pref-groups-copyTags"/>
 			</vbox>
 		</groupbox>
+		
+		<separator/>
+		<separator/>
 	</prefpane>
 	
 	<script src="preferences_general.js" type="application/javascript;version=1.8"/>
