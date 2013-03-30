@@ -113,9 +113,8 @@
 <!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.note "Add Note">
 <!ENTITY zotero.items.menu.attach.snapshot "Attach Snapshot of Current Page">
-<!ENTITY zotero.items.menu.changeTag "Change Tag">
+<!ENTITY zotero.items.menu.changeTag "Reset Language">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicate Item">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

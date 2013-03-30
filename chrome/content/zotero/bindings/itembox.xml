@@ -3625,7 +3625,7 @@ if (oldCreator.id) {
 						<menu id="zotero-creator-lang-menu"
 							position="start_after"
 							onmouseover="document.getBindingParent(this)._multiSpawnPopup.openPopup(this,'start_after', null, null, true);"
-							label="&zotero.items.menu.languageTag;"/>
+							label="&zotero.items.menu.changeTag;"/>
 
 					</menupopup>
 					<menupopup id="zotero-field-transform-menu">
