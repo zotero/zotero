@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.442",
+    PROCESSOR_VERSION: "1.0.443",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     LOCATOR_LABELS_REGEXP: new RegExp("^((art|ch|Ch|subch|col|fig|l|n|no|op|p|pp|para|subpara|pt|r|sec|subsec|Sec|sv|sch|tit|vrs|vol)\\.)\\s+(.*)"),
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
@@ -12579,14 +12579,16 @@ CSL.Registry.prototype.init = function (myitems, uncited_flag) {
         }
     }
     myitems.reverse();
-    if (uncited_flag && this.mylist && this.mylist.length) {
-        this.uncited = myitems;
-        for (i = 0, ilen = myitems.length; i < ilen; i += 1) {
+    if (uncited_flag) {
+        for (var i = myitems.length - 1; i > -1; i += -1) {
             myitems[i] = "" + myitems[i];
             if (!this.myhash[myitems[i]] && this.mylist.indexOf(myitems[i]) === -1) {
                 this.mylist.push(myitems[i]);
+            } else {
+                myitems = myitems.slice(0,i).concat(myitems.slice(i + 1))
             }
         }
+        this.uncited = myitems;
     } else {
         this.mylist = myitems.concat(this.uncited);
     }
@@ -12694,10 +12696,11 @@ CSL.Registry.prototype.doinserts = function (mylist) {
 };
 CSL.Registry.prototype.douncited = function () {
     var pos, len;
-    for (pos = 0, len = this.mylist.length; pos < len; pos += 1) {
+    var cited_len = this.mylist.length - this.uncited.length;
+    for (pos = 0, len = cited_len; pos < len; pos += 1) {
         this.registry[this.mylist[pos]].uncited = false;
     }
-    for (pos = 0, len = this.uncited.length; pos < len; pos += 1) {
+    for (pos = cited_len, len = this.mylist.length; pos < len; pos += 1) {
         this.registry[this.mylist[pos]].uncited = true;
     }
 };
