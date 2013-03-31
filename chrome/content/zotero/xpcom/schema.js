@@ -545,9 +545,7 @@ Zotero.Schema = new function(){
 		var Modes = Mode + "s";
 		
         // MLZ: temporary
-        Zotero.debug("XXX Before (1)")
 		var repotime = Zotero.File.getContentsFromURL("resource://zotero/schema/repotime.txt");
-        Zotero.debug("  after")
 		var date = Zotero.Date.sqlToDate(repotime, true);
 		repotime = Zotero.Date.toUnixTimestamp(date);
 		
@@ -591,9 +589,7 @@ Zotero.Schema = new function(){
 			var deleted = xpiZipReader.getInputStream("deleted.txt");
 		}
 		
-        Zotero.debug("XXX Before (2)");
 		deleted = Zotero.File.getContents(deleted);
-        Zotero.debug("  done");
 		deleted = deleted.match(/^([^\s]+)/gm);
 		var version = deleted.shift();
 		
@@ -640,7 +636,6 @@ Zotero.Schema = new function(){
 					// Be a little more careful with this one, in case someone
 					// created a custom 'aaa' style
 					case 'aaa.csl':
-                        Zotero.debug("XXX Before (3)");
 						var str = Zotero.File.getContents(file, false, 300);
 						if (str.indexOf("<title>American Anthropological Association</title>") != -1) {
 							toDelete.push(file);
@@ -721,7 +716,6 @@ Zotero.Schema = new function(){
 					var indexFile = xpiZipReader.getInputStream("translators.index");
 				}
 				
-                Zotero.debug("XXX Before (4)");
 				indexFile = Zotero.File.getContents(indexFile);
 				indexFile = indexFile.split("\n");
 				var index = {};
@@ -1429,9 +1423,7 @@ Zotero.Schema = new function(){
 			throw ('Schema type not provided to _getSchemaSQL()');
 		}
 		
-        Zotero.debug("XXX Before (5)");
 		return Zotero.File.getContentsFromURL("resource://zotero/schema/"+schema+".sql");
-        Zotero.debug("  after")
 	}
 	
 	
