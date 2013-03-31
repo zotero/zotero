@@ -5666,7 +5666,7 @@ Zotero.Item.prototype._loadItemData = function() {
 	this._itemDataLoaded = true;
 
 	// This does need to run from this position, to avoid a fatal loop.
-	if (this._itemData[22] && this._itemData[22].slice(0, 9) === 'mlzsync1:') {
+	if (this._itemData[22] && ("" + this._itemData[22]).slice(0, 9) === 'mlzsync1:') {
 		var data = {itemTypeID:this._itemTypeID};
 		var obj = Zotero.Sync.Server.Data.decodeMlzFields(this,data,this._itemData[22],{});
 		if (obj) {
