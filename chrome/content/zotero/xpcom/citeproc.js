@@ -3555,7 +3555,6 @@ CSL.Engine.prototype.updateUncitedItems = function (idList, nosort) {
     var debug = false;
     this.registry.init(idList, true);
     this.registry.doinserts(this.registry.mylist);
-    this.registry.douncited();
     this.registry.rebuildlist();
     this.registry.setsortkeys();
     this.registry.setdisambigs();
@@ -12544,7 +12543,7 @@ CSL.Registry = function (state) {
     this.myhash = {};
     this.deletes = [];
     this.inserts = [];
-    this.uncited = [];
+    this.uncited = {};
     this.refreshes = {};
     this.akeys = {};
     this.oldseq = {};
@@ -12569,33 +12568,26 @@ CSL.Registry = function (state) {
 CSL.Registry.prototype.init = function (myitems, uncited_flag) {
     var i, ilen;
     this.oldseq = {};
-	var tmphash = {};
-	myitems.reverse();
-	for (i = myitems.length - 1; i > -1; i += -1) {
-		if (tmphash[myitems[i]]) {
-			myitems = myitems.slice(0, i).concat(myitems.slice(i + 1));
-		} else {
-			tmphash[myitems[i]] = true;
-		}
-	}
-	myitems.reverse();
     if (uncited_flag) {
-        for (var i = myitems.length - 1; i > -1; i += -1) {
-            myitems[i] = "" + myitems[i];
-            if (!this.myhash[myitems[i]] && this.mylist.indexOf(myitems[i]) === -1) {
-                this.mylist.push(myitems[i]);
-            } else {
-                myitems = myitems.slice(0,i).concat(myitems.slice(i + 1))
+        this.uncited = {};
+        for (var i=0,ilen=mylist.length;i<ilen; i += 1) {
+            if (!this.myhash[mylist[i]]) {
+                this.mylist.push(mylist[i]);
             }
+            this.uncited[mylist[i]] = true;
+            this.myhash[mylist[i]] = true;
         }
-        this.uncited = myitems;
     } else {
-        this.mylist = myitems.concat(this.uncited);
-    }
-    this.myhash = {};
-    for (i = 0, ilen = this.mylist.length; i < ilen; i += 1) {
-        this.mylist[i] = "" + this.mylist[i];
-        this.myhash[this.mylist[i]] = true;
+	    var myhash = {};
+	    for (i=myitems.length-1;i>-1; i += -1) {
+		    if (myhash[myitems[i]]) {
+			    myitems = myitems.slice(0, i).concat(myitems.slice(i + 1));
+		    } else {
+			    myhash[myitems[i]] = true;
+		    }
+	    }
+        this.mylist = myitems.slice();
+        this.myhash = myhash;
     }
     this.refreshes = {};
     this.touched = {};
@@ -12609,7 +12601,7 @@ CSL.Registry.prototype.dodeletes = function (myhash) {
     }
     for (key in this.registry) {
         if (!myhash[key]) {
-            if (this.registry[key].uncited) {
+            if (this.uncited[key]) {
                 continue;
             }
             otheritems = this.namereg.delitems(key);
@@ -12692,16 +12684,6 @@ CSL.Registry.prototype.doinserts = function (mylist) {
             this.touched[item] = true;
             this.return_data.bibchange = true;
         }
-    }
-};
-CSL.Registry.prototype.douncited = function () {
-    var pos, len;
-    var cited_len = this.mylist.length - this.uncited.length;
-    for (pos = 0, len = cited_len; pos < len; pos += 1) {
-        this.registry[this.mylist[pos]].uncited = false;
-    }
-    for (pos = cited_len, len = this.uncited.length; pos < len; pos += 1) {
-        this.registry[this.mylist[pos]].uncited = true;
     }
 };
 CSL.Registry.prototype.rebuildlist = function () {
