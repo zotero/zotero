@@ -42,15 +42,6 @@ html, body {
 		theme_advanced_resizing : true,
 
 		setup : function (ed) {
-			// Set text direction
-			var dir = window.location.href.match(/dir=(ltr|rtl)/)[1];
-			ed.settings.directionality = dir;
-			// Include button for opposite direction, to function as a toggle
-			ed.settings.theme_advanced_buttons1 = ed.settings.theme_advanced_buttons1.replace(
-				"%DIR%",
-				"," + dir.split("").reverse().join("")
-			);
-			
 			ed.onInit.add(function (ed) {
 				zoteroInit(ed);
 			});
