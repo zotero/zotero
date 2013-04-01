@@ -12760,7 +12760,7 @@ CSL.Registry.prototype.setsortkeys = function () {
     var key;
 	for (var i = 0, ilen = this.mylist.length; i < ilen; i += 1) {
 		var key = this.mylist[i];
-		if (this.touched[key] || this.state.tmp.taintedItemIDs[key]) {
+		if (this.touched[key] || this.state.tmp.taintedItemIDs[key] || !this.registry[key].sortkeys) {
 			this.registry[key].sortkeys = CSL.getSortKeys.call(this.state, this.state.retrieveItem(key), "bibliography_sort");
 		}
 	}
