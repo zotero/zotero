@@ -211,6 +211,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "書籤">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "書簽在Microsoft Word及OpenOffice之間應會被保留，但也可能意外的受到改變。為了相容性，在選用這個選項時文獻引用不能被插入到腳注或尾注中。">
 
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+
 <!ENTITY zotero.integration.prefs.storeReferences.label "將參考文獻存在文件中">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "將參考文獻存在文件中會讓檔案大一點，但可以讓你在不使用Zotero群組下和別人分享文件。更新用這個選項建立的文件需要Zotero 3.0以上的版本。">
 

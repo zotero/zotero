@@ -211,6 +211,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks worden behouden tussen Microsoft Word en OpenOffice, maar kunnen per ongeluk worden gewijzigd. Het is met bookmarks niet mogelijk verwijzingen op te nemen in voet- of eindnoten.">
 
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+
 <!ENTITY zotero.integration.prefs.storeReferences.label "Referenties in document bewaren">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Het bewaren van referenties in uw document maakt het bestand iets groter, maar maakt het mogelijk om uw document te delen met andere zonder gebruik te maken van een Zotero-groep. Zotero 3.0 of nieuwer is nodig om dit type documenten bij te werken.">
 

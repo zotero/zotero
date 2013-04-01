@@ -95,7 +95,7 @@ pref("extensions.zotero.export.bibliographySettings", 'save-as-rtf');
 pref("extensions.zotero.export.bibliographyLocale", '');
 pref("extensions.zotero.export.displayCharsetOption", false);
 pref("extensions.zotero.export.citePaperJournalArticleURL", false);
-pref("extensions.zotero.cite.automaticTitleAbbreviation", false);
+pref("extensions.zotero.cite.automaticJournalAbbreviations", true);
 pref("extensions.zotero.import.charset", "auto");
 pref("extensions.zotero.import.createNewCollection.fromFileOpenHandler", true);
 pref("extensions.zotero.rtfScan.lastInputFile", "");
@@ -138,8 +138,8 @@ pref("extensions.zotero.sync.storage.maxDownloads", 4);
 pref("extensions.zotero.sync.storage.maxUploads", 2);
 pref("extensions.zotero.sync.storage.deleteDelayDays", 30);
 pref("extensions.zotero.sync.storage.groups.enabled", true);
-pref("extensions.zotero.sync.storage.downloadMode.personal", "on-demand");
-pref("extensions.zotero.sync.storage.downloadMode.groups", "on-demand");
+pref("extensions.zotero.sync.storage.downloadMode.personal", "on-sync");
+pref("extensions.zotero.sync.storage.downloadMode.groups", "on-sync");
 
 // Proxy
 pref("extensions.zotero.proxies.autoRecognize", true);

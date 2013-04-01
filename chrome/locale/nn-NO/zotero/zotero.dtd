@@ -211,6 +211,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bokmerke">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmerke kan utvekslast mellom Microsoft Word og OpenOffice, men er utsette for utilsikta endringar.">
 
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+
 <!ENTITY zotero.integration.prefs.storeReferences.label "Lagra referansar i dokument">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Å lagra referansane i dokumentet gjer fila litt større, men gjer det mogleg å dela dokumentet med andre utan å laga ei Zotero-gruppe. Du treng Zotero 3.0 eller nyare for å oppdatera dokument laga med dette valet.">
 

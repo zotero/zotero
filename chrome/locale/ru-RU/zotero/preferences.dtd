@@ -121,7 +121,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Название">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Обновлён">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Загрузить дополнительные стили…">
 
 <!ENTITY zotero.preferences.prefpane.keys "Горячие клавиши">

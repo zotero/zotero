@@ -211,6 +211,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Signets">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Les signets sont conservés entre Microsoft Word et OpenOffice/LibreOffice, mais peuvent être modifiés accidentellement. Pour des raisons de compatibilité, les citations ne peuvent pas être insérées dans des notes de bas de page ou de fin lorsque cette option est sélectionnée.">
 
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abréger automatiquement les titres de revues">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Les abréviations MEDLINE des titres de revues seront automatiquement créés sur la base des titres de revues.  Le champ Zotero &quot;Abrév. de revue&quot; sera ignoré.">
+
 <!ENTITY zotero.integration.prefs.storeReferences.label "Stocker les références dans le document">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Stocker les références dans votre document augmentera la taille du fichier mais vous permettra de partager votre document avec d'autres sans utiliser un groupe Zotero. Zotero 3.0 ou suivant est nécessaire pour mettre à jour des documents créés avec cette option.">
 

@@ -34,6 +34,7 @@ var Zotero_Citation_Dialog = new function () {
 		"suppress-author":["checked", false]
 	};
 	
+	var _accepted = false;
 	var _itemData = new Object();
 	var _multipleSourcesOn = false;
 	var _lastSelected = null;
@@ -581,6 +582,8 @@ var Zotero_Citation_Dialog = new function () {
 	 * called when accept button is clicked
 	 */
 	function accept() {
+		if(_accepted) return true;
+
 		_getCitation();
 		var isCustom = _previewShown && io.citation.citationItems.length	// if a citation is selected
 				&& _originalHTML
@@ -600,6 +603,7 @@ var Zotero_Citation_Dialog = new function () {
 		}
 		
 		io.accept();
+		_accepted = true;
 		return true;
 	}
 	
@@ -607,8 +611,12 @@ var Zotero_Citation_Dialog = new function () {
 	 * called when cancel button is clicked
 	 */
 	function cancel() {
+		if(_accepted) return true;
 		io.citation.citationItems = new Array();
+
 		io.accept();
+		_accepted = true;
+		return true;
 	}
 	
 	/*

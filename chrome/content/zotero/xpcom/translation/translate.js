@@ -98,8 +98,9 @@ Zotero.Translate.Sandbox = {
 					delete item[i];
 					continue;
 				}
-
-				var isObject = typeof val === "object" || typeof val === "xml" || typeof val === "function",
+				
+				var type = typeof val;
+				var isObject = type === "object" || type === "xml" || type === "function",
 					shouldBeObject = allowedObjects.indexOf(i) !== -1;
 				if(isObject && !shouldBeObject) {
 					// Convert things that shouldn't be objects to objects
@@ -108,7 +109,7 @@ Zotero.Translate.Sandbox = {
 				} else if(shouldBeObject && !isObject) {
 					translate._debug("Translate: WARNING: typeof "+i+" is "+type+"; converting to array");
 					item[i] = [val];
-				} else if(typeof val === "string") {
+				} else if(type === "string") {
 					// trim strings
 					item[i] = val.trim();
 				}
@@ -1814,7 +1815,7 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 	if(oldState == "translate" && errorString && !this._parentTranslator && this.translator.length
 		&& this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
 		// Don't report failure if in private browsing mode
-		if(Zotero.isFx && !Zotero.isBookmarklet && !Zotero.isStandalone) {
+		if(Zotero.isFx && !Zotero.isBookmarklet && !Zotero.isStandalone && Components.classes["@mozilla.org/privatebrowsing;1"]) {
 			var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
 						.getService(Components.interfaces.nsIPrivateBrowsingService);
 			if (pbs.privateBrowsingEnabled) {

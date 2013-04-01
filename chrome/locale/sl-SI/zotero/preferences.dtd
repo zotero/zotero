@@ -121,7 +121,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Naslov">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Posodobljeno">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Samodejno okrajšaj naslove revij">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Dobi dodatne sloge ...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Tipke za bližnjice">

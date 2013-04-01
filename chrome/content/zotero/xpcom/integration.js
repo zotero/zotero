@@ -2016,16 +2016,19 @@ Zotero.Integration.Session.prototype.resetRequest = function(doc) {
 /**
  * Changes the Session style and data
  * @param data {Zotero.Integration.DocumentData}
+ * @param resetStyle {Boolean} Whether to force the style to be reset
+ *     regardless of whether it has changed. This is desirable if the
+ *     automaticJournalAbbreviations has changed.
  */
-Zotero.Integration.Session.prototype.setData = function(data) {
+Zotero.Integration.Session.prototype.setData = function(data, resetStyle) {
 	var oldStyle = (this.data && this.data.style ? this.data.style : false);
 	this.data = data;
-	if(data.style.styleID && (!oldStyle || oldStyle.styleID != data.style.styleID)) {
+	if(data.style.styleID && (!oldStyle || oldStyle.styleID != data.style.styleID || resetStyle)) {
 		this.styleID = data.style.styleID;
 		try {
 			var getStyle = Zotero.Styles.get(data.style.styleID);
 			data.style.hasBibliography = getStyle.hasBibliography;
-			this.style = getStyle.csl;
+			this.style = getStyle.getCiteProc(data.prefs.automaticJournalAbbreviations);
 			this.style.setOutputFormat("rtf");
 			this.styleClass = getStyle.class;
 			this.dateModified = new Object();
@@ -2060,6 +2063,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		io.primaryFieldType = primaryFieldType;
 		io.secondaryFieldType = secondaryFieldType;
 		io.storeReferences = this.data.prefs.storeReferences;
+		io.automaticJournalAbbreviations = this.data.prefs.automaticJournalAbbreviations;
 		io.requireStoreReferences = !Zotero.Utilities.isEmpty(this.embeddedItems);
 	}
 	
@@ -2078,13 +2082,19 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		data.style.styleID = io.style;
 		data.prefs.fieldType = io.fieldType;
 		data.prefs.storeReferences = io.storeReferences;
-		me.setData(data);
+		data.prefs.automaticJournalAbbreviations = io.automaticJournalAbbreviations;
+
+		me.setData(data, oldData && 
+		oldData.prefs.automaticJournalAbbreviations !=
+		data.prefs.automaticJournalAbbreviations);
+
 		// need to do this after setting the data so that we know if it's a note style
 		me.data.prefs.noteType = me.style && me.styleClass == "note" ? io.useEndnotes+1 : 0;
 		
 		if(!oldData || oldData.style.styleID != data.style.styleID
 				|| oldData.prefs.noteType != data.prefs.noteType
-				|| oldData.prefs.fieldType != data.prefs.fieldType) {
+				|| oldData.prefs.fieldType != data.prefs.fieldType
+				|| oldData.prefs.automaticJournalAbbreviations != data.prefs.automaticJournalAbbreviations) {
 			// This will cause us to regenerate all citations
 			me.oldCitationIDs = {};
 		}
@@ -2170,7 +2180,7 @@ Zotero.Integration.Session.prototype.getCitationField = function(citation) {
 		
 			// add itemData only if requested
 			if(this.data.prefs.storeReferences) {
-				serializeCitationItem.itemData = Zotero.Cite.System.retrieveItem(citationItem.id);
+				serializeCitationItem.itemData = this.style.sys.retrieveItem(citationItem.id);
 				addSchema = true;
 			}
 		}
@@ -3011,6 +3021,7 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 		this.prefs[name] = value;
 	}
 	if(this.prefs["storeReferences"] === undefined) this.prefs["storeReferences"] = false;
+	if(this.prefs["automaticJournalAbbreviations"] === undefined) this.prefs["automaticJournalAbbreviations"] = false;
 	this.zoteroVersion = doc.documentElement.getAttribute("zotero-version");
 	if(!this.zoteroVersion) this.zoteroVersion = "2.0";
 	this.dataVersion = doc.documentElement.getAttribute("data-version");

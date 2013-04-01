@@ -211,6 +211,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "záložiek">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Záložky sa môžu uchovať aj vo Worde a OpenOffice, ale môžu sa náhodne pozmeniť. Z dôvodu kompatibility sa citácie nemôžu vkladať do poznámok pod čiarou alebo do koncových poznámok pri výbere tejto možnosti.">
 
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automaticky skracovať názvy časopisov">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Skratky časopisov MEDLINE budú automaticky generované s použitím názvov časopisov. Pole &quot;Journal Abbr&quot; sa bude ignorovať.">
+
 <!ENTITY zotero.integration.prefs.storeReferences.label "Ukladať odkazy do dokumentu">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Ukladanie odkazov do vášho dokumentu nepatrne zväčší veľkosť súboru, ale vám umožní zdieľať váš dokument s ostatnými bez použitia skupín Zotera. Pre aktualizáciu dokumentov vytvorených s touto možnosťou sa vyžaduje Zotero 3.0 alebo novšie. ">
 

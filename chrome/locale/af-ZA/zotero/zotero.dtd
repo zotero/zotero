@@ -211,6 +211,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Boekmerke">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified.">
 
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+
 <!ENTITY zotero.integration.prefs.storeReferences.label "Stoor verwysings in dokument">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Om die verwysings in die dokument te stoor vergroot die lêergrootte effens, maar laat u toe om die dokument met ander te deel sonder om 'n Zotero-groep te gebruik. Zotero 3.0 of later word benodig om dokumente wat met hierdie keuse geskep is, op te gradeer.">
 

@@ -1136,6 +1136,9 @@ Zotero.Utilities = {
 		}
 		
 		if (typeof(arr) == 'object') { // Array/Hashes/Objects
+			var isRequest = Zotero.isFx && !Zotero.isBookmarklet
+				&& arr instanceof Components.interfaces.nsIRequest;
+			
 			//array for checking recursion
 			//initialise at first itteration
 			if(!parentObjects) {
@@ -1145,6 +1148,12 @@ Zotero.Utilities = {
 
 			for (var item in arr) {
 				try {
+					// Don't display nsIRequest.name, which can contain password
+					if (isRequest && item == 'name') {
+						dumped_text += level_padding + "'" + item + "' => <<Skipped>>\n";
+						continue;
+					}
+					
 					var value = arr[item];
 				} catch(e) {
 					dumped_text += level_padding + "'" + item + "' => <<Access Denied>>\n";

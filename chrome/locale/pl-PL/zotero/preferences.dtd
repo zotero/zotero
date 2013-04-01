@@ -121,7 +121,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Nazwa">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Aktualizacja">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatyczne skracanie tytułów czasopism">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Pobierz dodatkowe style...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Skróty klawiaturowe">

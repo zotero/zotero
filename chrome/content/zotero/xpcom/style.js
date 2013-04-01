@@ -184,11 +184,11 @@ Zotero.Styles = new function() {
 	 *     displayed in dialogs referencing the style
 	 */
 	this.install = function(style, origin) {
-		var styleFile = null, styleInstalled;
+		var styleInstalled;
 		if(style instanceof Components.interfaces.nsIFile) {
 			// handle nsIFiles
 			origin = style.leafName;
-			styleInstalled = Zotero.File.getContentsAsync(styleFile).when(function(style) {
+			styleInstalled = Zotero.File.getContentsAsync(style).when(function(style) {
 				return _install(style, origin);
 			});
 		} else {
@@ -197,8 +197,8 @@ Zotero.Styles = new function() {
 		
 		styleInstalled.fail(function(error) {
 			// Unless user cancelled, show an alert with the error
-			if(error instanceof Zotero.Exception.UserCancelled) return;
-			if(error instanceof Zotero.Exception.Alert) {
+			if(typeof error === "object" && error instanceof Zotero.Exception.UserCancelled) return;
+			if(typeof error === "object" && error instanceof Zotero.Exception.Alert) {
 				error.present();
 				error.log();
 			} else {
@@ -220,14 +220,14 @@ Zotero.Styles = new function() {
 	function _install(style, origin, hidden) {
 		if(!_initialized || !_cacheTranslatorData) Zotero.Styles.init();
 		
-		var existingFile, destFile, source;
+		var existingFile, destFile, source, styleID
 		return Q.fcall(function() {
 			// First, parse style and make sure it's valid XML
 			var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 					.createInstance(Components.interfaces.nsIDOMParser),
 				doc = parser.parseFromString(style, "application/xml");
 			
-			var styleID = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:id[1]',
+			styleID = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:id[1]',
 					Zotero.Styles.ns),
 				// Get file name from URL
 				m = /[^\/]+$/.exec(styleID),
@@ -346,7 +346,7 @@ Zotero.Styles = new function() {
 					return Zotero.HTTP.promise("GET", source).then(function(xmlhttp) {
 						return _install(xmlhttp.responseText, origin, true);
 					}).fail(function(error) {
-						if(error instanceof Zotero.Exception) {
+						if(typeof error === "object" && error instanceof Zotero.Exception) {
 							throw new Zotero.Exception.Alert("styles.installSourceError", [origin, source],
 								"styles.install.title", error);
 						} else {
@@ -376,7 +376,7 @@ Zotero.Styles = new function() {
 			var enumerator = wm.getEnumerator("zotero:pref");
 			while(enumerator.hasMoreElements()) {
 				var win = enumerator.getNext();
-				win.refreshStylesList(styleID);
+				win.Zotero_Preferences.Cite.refreshStylesList(styleID);
 			}
 		});
 	}
@@ -430,6 +430,8 @@ Zotero.Style = function(arg) {
 			'/csl:style/csl:info[1]/csl:category', Zotero.Styles.ns))
 		if(category.hasAttribute("term"))];
 	this._class = doc.documentElement.getAttribute("class");
+	this._usesAbbreviation = !!Zotero.Utilities.xpath(doc, '//csl:text[@form="short"][@variable="container-title"][1]',
+		Zotero.Styles.ns).length;
 	this._hasBibliography = !!doc.getElementsByTagName("bibliography").length;
 	this._version = doc.documentElement.getAttribute("version");
 	if(!this._version) this._version = "0.8";
@@ -442,12 +444,11 @@ Zotero.Style = function(arg) {
 	}
 }
 
-Zotero.Style.prototype.__defineGetter__("csl",
 /**
- * Retrieves the Zotero.CSL object for this style
- * @type Zotero.CSL
+ * Get a citeproc-js CSL.Engine instance
+ * @param {Boolean} useAutomaticJournalAbbreviations Whether to automatically abbreviate titles
  */
-function() {
+Zotero.Style.prototype.getCiteProc = function(automaticJournalAbbreviations) {
 	var locale = Zotero.Prefs.get('export.bibliographyLocale');
 	if(!locale) {
 		var locale = Zotero.locale;
@@ -498,11 +499,16 @@ function() {
 	}
 	
 	try {
-		return new Zotero.CiteProc.CSL.Engine(Zotero.Cite.System, xml, locale);
+		return new Zotero.CiteProc.CSL.Engine(new Zotero.Cite.System(automaticJournalAbbreviations), xml, locale);
 	} catch(e) {
 		Zotero.logError(e);
 		throw e;
 	}
+};
+
+Zotero.Style.prototype.__defineGetter__("csl", function() {
+	Zotero.logError("Zotero.Style.csl is deprecated. Use Zotero.Style.getCiteProc()");
+	return this.getCiteProc();
 });
 
 Zotero.Style.prototype.__defineGetter__("class",
@@ -532,6 +538,20 @@ function() {
 		return parentStyle.hasBibliography;
 	}
 	return this._hasBibliography;
+});
+
+Zotero.Style.prototype.__defineGetter__("usesAbbreviation",
+/**
+ * Retrieves the style class, either from the metadata that's already loaded or by loading the file
+ * @type String
+ */
+function() {
+	if(this.source) {
+		var parentStyle = Zotero.Styles.get(this.source);
+		if(!parentStyle) return false;
+		return parentStyle.usesAbbreviation;
+	}
+	return this._usesAbbreviation;
 });
 
 Zotero.Style.prototype.__defineGetter__("independentFile",

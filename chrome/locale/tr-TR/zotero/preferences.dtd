@@ -121,7 +121,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Başlık">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Güncelleştirilme">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Dergi başlıklarını otomatik kısalt">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Ek stiller indir...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Kısayol Tuşları">

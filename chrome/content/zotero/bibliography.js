@@ -124,10 +124,22 @@ var Zotero_File_Interface_Bibliography = new function() {
 		if(document.getElementById("formatUsing")) {
 			if(_io.fieldType == "Bookmark") document.getElementById("formatUsing").selectedIndex = 1;
 			var formatOption = (_io.primaryFieldType == "ReferenceMark" ? "referenceMarks" : "fields");
-			document.getElementById("fields").label = Zotero.getString("integration."+formatOption+".label");
-			document.getElementById("fields-caption").textContent = Zotero.getString("integration."+formatOption+".caption");
-			document.getElementById("fields-file-format-notice").textContent = Zotero.getString("integration."+formatOption+".fileFormatNotice");
-			document.getElementById("bookmarks-file-format-notice").textContent = Zotero.getString("integration.fields.fileFormatNotice");
+			document.getElementById("fields").label =
+				Zotero.getString("integration."+formatOption+".label");
+			document.getElementById("fields-caption").textContent =
+				Zotero.getString("integration."+formatOption+".caption");
+			document.getElementById("fields-file-format-notice").textContent =
+				Zotero.getString("integration."+formatOption+".fileFormatNotice");
+			document.getElementById("bookmarks-file-format-notice").textContent =
+				Zotero.getString("integration.fields.fileFormatNotice");
+		}
+		if(document.getElementById("automaticJournalAbbreviations-checkbox")) {
+			if(_io.automaticJournalAbbreviations === undefined) {
+				_io.automaticJournalAbbreviations = Zotero.Prefs.get("cite.automaticJournalAbbreviations");
+			}
+			if(_io.automaticJournalAbbreviations) {
+				document.getElementById("automaticJournalAbbreviations-checkbox").checked = true;
+			}
 		}
 		if(document.getElementById("storeReferences")) {
 			if(_io.storeReferences || _io.storeReferences === undefined) {
@@ -152,23 +164,30 @@ var Zotero_File_Interface_Bibliography = new function() {
 			var selectedItem = document.getElementById("style-listbox").selectedItem;
 		}
 		
-		var selectedStyle = selectedItem.getAttribute('value');
+		var selectedStyle = selectedItem.getAttribute('value'),
+			selectedStyleObj = Zotero.Styles.get(selectedStyle);
 		
 		//
 		// For integrationDocPrefs.xul
 		//
 		
 		// update status of displayAs box based on style class
-		if(document.getElementById("displayAs")) {
-			var isNote = Zotero.Styles.get(selectedStyle).class == "note";
-			document.getElementById("displayAs").disabled = !isNote;
+		if(document.getElementById("displayAs-groupbox")) {
+			var isNote = selectedStyleObj.class == "note";
+			document.getElementById("displayAs-groupbox").hidden = !isNote;
+			
+			// update status of formatUsing box based on style class
+			if(document.getElementById("formatUsing")) {
+				if(isNote) document.getElementById("formatUsing").selectedIndex = 0;
+				document.getElementById("bookmarks").disabled = isNote;
+				document.getElementById("bookmarks-caption").disabled = isNote;
+			}
 		}
-		
-		// update status of formatUsing box based on style class
-		if(document.getElementById("formatUsing")) {
-			if(isNote) document.getElementById("formatUsing").selectedIndex = 0;
-			document.getElementById("bookmarks").disabled = isNote;
-			document.getElementById("bookmarks-caption").disabled = isNote;
+
+		// update status of displayAs box based on style class
+		if(document.getElementById("automaticJournalAbbreviations-vbox")) {
+			document.getElementById("automaticJournalAbbreviations-vbox").hidden =
+				!selectedStyleObj.usesAbbreviation;
 		}
 		
 		//
@@ -184,6 +203,8 @@ var Zotero_File_Interface_Bibliography = new function() {
 			}
 			document.getElementById("citations").label = label;
 		}
+
+		window.sizeToContent();
 	}
 
 	function acceptSelection() {
@@ -198,8 +219,13 @@ var Zotero_File_Interface_Bibliography = new function() {
 				JSON.stringify({ mode: _io.mode, method: _io.method }));
 		}
 		
-		// ONLY FOR integrationDocPrefs.xul: collect displayAs
+		// ONLY FOR integrationDocPrefs.xul:
 		if(document.getElementById("displayAs")) {
+			var automaticJournalAbbreviationsEl = document.getElementById("automaticJournalAbbreviations-checkbox");
+			_io.automaticJournalAbbreviations = automaticJournalAbbreviationsEl.checked;
+			if(!automaticJournalAbbreviationsEl.hidden && _saveStyle) {
+				Zotero.Prefs.set("cite.automaticJournalAbbreviations", _io.automaticJournalAbbreviations);
+			}
 			_io.useEndnotes = document.getElementById("displayAs").selectedIndex;
 			_io.fieldType = (document.getElementById("formatUsing").selectedIndex == 0 ? _io.primaryFieldType : _io.secondaryFieldType);
 			_io.storeReferences = document.getElementById("storeReferences").checked;

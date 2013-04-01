@@ -235,15 +235,18 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * Called when OK button is pressed
 	 */
 	this.accept = function() {
-		_accepted = true;
+		if(_accepted) return;
 		_updatePreview(true);
+		_accepted = true;
 	}
 	
 	/**
 	 * Called when Cancel button is pressed
 	 */
 	this.close = function() {
-		if(!_accepted) bibEditInterface.cancel();
+		if(_accepted) return;
+		bibEditInterface.cancel();
+		_accepted = true;
 	}
 	
 	/**

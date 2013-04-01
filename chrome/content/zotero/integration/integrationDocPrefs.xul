@@ -48,7 +48,7 @@
 			<listbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
 		</groupbox>
 		
-		<groupbox>
+		<groupbox id="displayAs-groupbox">
 			<caption label="&zotero.integration.prefs.displayAs.label;"/>
 			<radiogroup id="displayAs" orient="horizontal">
 				<radio id="footnotes" label="&zotero.integration.prefs.footnotes.label;" selected="true"/>
@@ -67,9 +67,14 @@
 				<description class="radioDescription" id="bookmarks-caption">&zotero.integration.prefs.bookmarks.caption;</description>
 				<description class="radioDescription" id="bookmarks-file-format-notice"/>
 			</radiogroup>
-			
-			<checkbox id="storeReferences" label="&zotero.integration.prefs.storeReferences.label;"/>
-			<description class="radioDescription">&zotero.integration.prefs.storeReferences.caption;</description>
 		</groupbox>
+
+		<vbox id="automaticJournalAbbreviations-vbox">
+			<checkbox id="automaticJournalAbbreviations-checkbox" label="&zotero.integration.prefs.automaticJournalAbbeviations.label;"/>
+			<description class="radioDescription">&zotero.integration.prefs.automaticJournalAbbeviations.caption;</description>
+		</vbox>
+		
+		<checkbox id="storeReferences" label="&zotero.integration.prefs.storeReferences.label;"/>
+		<description class="radioDescription">&zotero.integration.prefs.storeReferences.caption;</description>
 	</vbox>
 </dialog>

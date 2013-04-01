@@ -211,6 +211,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bogmærker">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bogmærker bevares i både Microsoft Word og OpenOffice/LibreOffive, men kan blive ændret ved en fejl. Når denne mulighed er valgt, kan referencer ikke indsættes i fodnoter eller slutnoter.">
 
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+
 <!ENTITY zotero.integration.prefs.storeReferences.label "Gem referencer i dokument">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "At gemme referencer i dit dokument gør filen en anelse større, men det gør det også muligt at dele dokumentet med andre ved hjælp af en Zotero-gruppe. At opdatere dokumenter oprettet med denne funktion kræver Zotero 3.0 eller højere.">
 

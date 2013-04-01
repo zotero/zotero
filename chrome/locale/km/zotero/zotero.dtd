@@ -211,6 +211,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "កំណត់ចំណាំគេហទំព័រទុក">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "កំណត់ចំណាំគេហទំព័រអាចរក្សាទុកនៅក្នុងម៉ាយក្រូសូហ្វវើដ និង អូផិនអប់ហ្វីស ប៉ុន្តែអាចត្រូវបានកែប្រែដោយចៃដន្យ។ ដោយមូលហេតុ​សមិតភាព អាគតដ្ឋានមិនអាចដាក់ជាលេខយោងក្រោមអត្ថបទ​ ឬ លេខ​យោង​ចុងអត្ថបទនៅពេលត្រូវបានជ្រើសរើស។">
 
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+
 <!ENTITY zotero.integration.prefs.storeReferences.label "ដាក់កំណត់យោងក្នុងឯកសារ">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "ការដាក់កំណត់យោងក្នុងឯកសាររបស់អ្នកនឹងបង្កើនទំហំឯកសារ ប៉ុន្តែ​វានឹងអនុញ្ញាតឲអ្នកអាចចែករំលែកឯកសារជាមួយអ្នកដទៃដោយមិនចាំបាច់ប្រើហ្ស៊ូតេរ៉ូជាក្រុម។​ ហ្ស៊ូតេរ៉ូកំណែថ្មីចាប់ពី ៣.០ ឡើងទៅ​ តម្រូវឲធ្វើ​ទំនើបកម្មឯកសារដែលបានបង្កើតសម្រាប់ជម្រើសនេះ។">
 

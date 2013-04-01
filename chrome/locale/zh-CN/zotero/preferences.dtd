@@ -121,7 +121,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "标题">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "更新于">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "自动缩写标题">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "获取更多样式...">
 
 <!ENTITY zotero.preferences.prefpane.keys "快捷键">

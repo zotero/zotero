@@ -211,6 +211,10 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Marcadores">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Los marcadores se mantienen en Microsoft Word y OpenOffice, pero puede que se modifiquen accidentalmente.">
 
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+
 <!ENTITY zotero.integration.prefs.storeReferences.label "Guardar las referencias en el documento">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Guardar las referencias en el documento incrementa ligeramente el tamaño del archivo, pero te permitirá compartir tu documento con otros sin usar un grupo Zotero. Se necesita Zotero 3.0 o posterior para actualizar documentos creados con esta opción.">
 
