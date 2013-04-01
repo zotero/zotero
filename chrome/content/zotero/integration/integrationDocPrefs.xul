@@ -77,12 +77,12 @@
 				<description width="200" class="radioDescription" id="bookmarks-caption">&zotero.integration.prefs.bookmarks.caption;</description>
 				<description width="200" class="radioDescription" id="bookmarks-file-format-notice"/>
 			  </radiogroup>
-			
+			<!-- This option does not seem to play well with the Abbreviation Filter. Disabling in MLZ for the time being.
 			  <vbox id="automaticJournalAbbreviations-vbox">
 				  <checkbox id="automaticJournalAbbreviations-checkbox" label="&zotero.integration.prefs.automaticJournalAbbeviations.label;"/>
 				  <description class="radioDescription">&zotero.integration.prefs.automaticJournalAbbeviations.caption;</description>
 			  </vbox>
-
+            -->
 			  <checkbox id="storeReferences" label="&zotero.integration.prefs.storeReferences.label;"/>
 			  <description width="200" class="radioDescription">&zotero.integration.prefs.storeReferences.caption;</description>
 		    </groupbox>
