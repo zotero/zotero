@@ -45,6 +45,10 @@ prefwindow {
    min-width: 600px;
 }
 
+description, label, checkbox {
+	max-width: 630px;
+}
+
 radio[pane]
 {
 	min-width: 5.5em;
@@ -244,6 +248,10 @@ grid row hbox:first-child
 #zotero-prefpane-export separator:not(.thin)
 {
 	height: 1em;
+}
+
+#quickCopy-instructions, #quickCopy-citationInstructions {
+	font-size: 12px;
 }
 
 #quickCopy-siteSettings-rows::-moz-tree-cell(quickCopy-copyAsHTML) {

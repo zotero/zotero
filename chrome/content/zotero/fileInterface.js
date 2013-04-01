@@ -469,6 +469,7 @@ var Zotero_File_Interface = new function() {
 	function copyCitationToClipboard(items, style, asHTML, extras) {
 		// Recognize label, locator and affix data if requested.
 		// copy to clipboard
+        // Extras?
 		var transferable = Components.classes["@mozilla.org/widget/transferable;1"].
 						   createInstance(Components.interfaces.nsITransferable);
 		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].

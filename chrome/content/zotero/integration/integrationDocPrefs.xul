@@ -73,10 +73,16 @@
 				<label class="radioDescription" id="fields-caption"/>
 				<label class="radioDescription" id="fields-file-format-notice"/>
 				<radio id="bookmarks" label="&zotero.integration.prefs.bookmarks.label;"/>
+
 				<description width="200" class="radioDescription" id="bookmarks-caption">&zotero.integration.prefs.bookmarks.caption;</description>
 				<description width="200" class="radioDescription" id="bookmarks-file-format-notice"/>
 			  </radiogroup>
 			
+			  <vbox id="automaticJournalAbbreviations-vbox">
+				  <checkbox id="automaticJournalAbbreviations-checkbox" label="&zotero.integration.prefs.automaticJournalAbbeviations.label;"/>
+				  <description class="radioDescription">&zotero.integration.prefs.automaticJournalAbbeviations.caption;</description>
+			  </vbox>
+
 			  <checkbox id="storeReferences" label="&zotero.integration.prefs.storeReferences.label;"/>
 			  <description width="200" class="radioDescription">&zotero.integration.prefs.storeReferences.caption;</description>
 		    </groupbox>

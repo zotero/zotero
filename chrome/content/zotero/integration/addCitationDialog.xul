@@ -41,7 +41,7 @@
 	onunload="doUnload();"
 	ondialogaccept="return Zotero_Citation_Dialog.accept();"
 	ondialogcancel="Zotero_Citation_Dialog.cancel();"
-	onclose="Zotero_Citation_Dialog.cancel(); event.preventDefault(); event.stopPropagation();"
+	onclose="Zotero_Citation_Dialog.cancel();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY width height"
 	resizable="true"

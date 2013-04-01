@@ -93,21 +93,23 @@ Zotero_Preferences.Sync = {
 					var sql = "INSERT OR IGNORE INTO settings VALUES (?,?,?)";
 					Zotero.DB.query(sql, ['storage', 'zfsPurge', 'user']);
 					
-					Zotero.Sync.Storage.ZFS.purgeDeletedStorageFiles(function (success) {
-						if (success) {
-							ps.alert(
-								null,
-								Zotero.getString("general.success"),
-								"Attachment files from your personal library have been removed from the Zotero servers."
-							);
-						}
-						else {
-							ps.alert(
-								null,
-								Zotero.getString("general.error"),
-								"An error occurred. Please try again later."
-							);
-						}
+					Zotero.Sync.Storage.ZFS.purgeDeletedStorageFiles()
+					.then(function () {
+						ps.alert(
+							null,
+							Zotero.getString("general.success"),
+							"Attachment files from your personal library have been removed from the Zotero servers."
+						);
+					})
+					.catch(function (e) {
+						Zotero.debug(e, 1);
+						Components.utils.reportError(e);
+						
+						ps.alert(
+							null,
+							Zotero.getString("general.error"),
+							"An error occurred. Please try again later."
+						);
 					});
 				}
 			}

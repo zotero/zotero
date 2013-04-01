@@ -112,7 +112,7 @@
 				else {
 					try {
 						styleObject = new Zotero.Style(str);
-						styleEngine = styleObject.csl;
+						styleEngine = styleObject.getCiteProc();
 					} catch(e) {
 						iframe.contentDocument.documentElement.innerHTML = '<div>Error parsing '+
 							'style: </div><div>'+e+'</div>';

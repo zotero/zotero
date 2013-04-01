@@ -112,7 +112,7 @@
 					
 					<groupbox id="zotero-prefpane-advanced-miscellaneous">
 						<caption label="&zotero.preferences.miscellaneous;"/>
-						<hbox id="zotero-prefpane-advanced-openbuttons" align="center">
+						<hbox id="zotero-prefpane-advanced-openbuttons" align="center" style="display: block">
 							<button id="openAboutConfig"
 								label="&zotero.preferences.openAboutConfig;"
 								oncommand="Zotero_Preferences.openInViewer('about:config')"/>
@@ -186,7 +186,7 @@
 					<groupbox>
 						<caption label="&zotero.preferences.dbMaintenance;"/>
 						
-						<hbox>
+						<hbox style="display: block">
 							<button label="&zotero.preferences.dbMaintenance.integrityCheck;"
 								oncommand="Zotero_Preferences.Advanced.runIntegrityCheck()"/>
 							<button label="&zotero.preferences.dbMaintenance.resetTranslators;"
@@ -199,6 +199,8 @@
 			</tabpanels>
 		</tabbox>
 		
+		<separator/>
+		<separator/>
 		<separator/>
 	</prefpane>
 	

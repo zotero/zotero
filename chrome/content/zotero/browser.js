@@ -324,7 +324,7 @@ var Zotero_Browser = new function() {
 			var annotationID = Zotero.Annotate.getAnnotationIDFromURL(browser.currentURI.spec);
 			if(annotationID) {
 				if(Zotero.Annotate.isAnnotated(annotationID)) {
-					window.alert(Zotero.getString("annotations.oneWindowWarning"));
+					//window.alert(Zotero.getString("annotations.oneWindowWarning"));
 				} else if(!tab.page.annotations) {
 					// enable annotation
 					tab.page.annotations = new Zotero.Annotations(Zotero_Browser, browser, annotationID);

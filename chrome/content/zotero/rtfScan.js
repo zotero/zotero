@@ -496,7 +496,7 @@ var Zotero_RTFScan = new function() {
 	function _formatRTF() {
 		// load style and create ItemSet with all items
 		var zStyle = Zotero.Styles.get(document.getElementById("style-listbox").selectedItem.value)
-		var style = zStyle.csl;
+		var style = zStyle.getCiteProc();
 		style.setOutputFormat("rtf");
 		var isNote = style.class == "note";
 		

@@ -13,6 +13,19 @@ Zotero.HTTP = new function() {
 		this.xmlhttp = xmlhttp;
 		this.status = xmlhttp.status;
 		this.message = msg;
+		
+		// Hide password from debug output
+		//
+		// Password also shows up in channel.name (nsIRequest.name), but that's
+		// read-only and has to be handled in Zotero.varDump()
+		try {
+			if (xmlhttp.channel.URI.password) {
+				xmlhttp.channel.URI.password = "********";
+			}
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+		}
 	};
 	
 	this.UnexpectedStatusException.prototype.toString = function() {

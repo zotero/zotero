@@ -39,7 +39,7 @@ const ZOTERO_CONFIG = {
 	API_VERSION: 2,
 	PREF_BRANCH: 'extensions.zotero.',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "4.0b1.SOURCE"
+	VERSION: "4.0b2.SOURCE"
 };
 
 // Commonly used imports accessible anywhere
@@ -1909,15 +1909,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		Zotero.Items.purge();
 		// DEBUG: this might not need to be permanent
 		Zotero.Relations.purge();
-		
-		if (!skipStoragePurge && Math.random() < 1/10) {
-			Zotero.Sync.Storage.ZFS.purgeDeletedStorageFiles();
-			Zotero.Sync.Storage.WebDAV.purgeDeletedStorageFiles();
-		}
-		
-		if (!skipStoragePurge) {
-			Zotero.Sync.Storage.WebDAV.purgeOrphanedStorageFiles();
-		}
 	}
 	
 	
