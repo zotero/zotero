@@ -226,15 +226,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		this.mainThread = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
 		
 		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
-				getService(Components.interfaces.nsIXULAppInfo),
-			platformVersion = appInfo.platformVersion;
+				getService(Components.interfaces.nsIXULAppInfo);
 		this.isFx = true;
-		this.isFx3 = false;
-		this.isFx35 = false;
-		this.isFx31 = false;
-		this.isFx36 = false;
-		this.isFx4 = true;
-		this.isFx5 = true;
 		
 		this.isStandalone = appInfo.ID == ZOTERO_CONFIG['GUID'];
 		if(this.isStandalone) {
