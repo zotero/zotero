@@ -3571,8 +3571,9 @@ CSL.Engine.prototype.updateUncitedItems = function (idList, nosort) {
         }
     }
     this.registry.init(idList, true);
-    this.registry.doinserts(this.registry.mylist);
     this.registry.dopurge(idHash);
+    this.registry.doinserts(this.registry.mylist);
+    this.registry.dorefreshes();
     this.registry.rebuildlist();
     this.registry.setsortkeys();
     this.registry.setdisambigs();
@@ -12590,7 +12591,7 @@ CSL.Registry.prototype.init = function (itemIDs, uncited_flag) {
         this.uncited = {};
         for (var i=0,ilen=itemIDs.length;i<ilen; i += 1) {
             if (!this.myhash[itemIDs[i]]) {
-                this.mylist.push(itemIDs[i]);
+                this.mylist.push("" + itemIDs[i]);
             }
             this.uncited[itemIDs[i]] = true;
             this.myhash[itemIDs[i]] = true;
@@ -12604,7 +12605,10 @@ CSL.Registry.prototype.init = function (itemIDs, uncited_flag) {
 			    myhash[itemIDs[i]] = true;
 		    }
 	    }
-        this.mylist = itemIDs.slice();
+        this.mylist = [];
+        for (var i=0,ilen=itemIDs.length;i<ilen;i+=1) {
+            this.mylist.push("" + itemIDs[i]);
+        }
         this.myhash = myhash;
     }
     this.refreshes = {};
@@ -12613,11 +12617,14 @@ CSL.Registry.prototype.init = function (itemIDs, uncited_flag) {
 };
 CSL.Registry.prototype.dopurge = function (myhash) {
     for (var i=this.mylist.length-1;i>-1;i+=-1) {
-        if (!this.citationreg.citationsByItemId[this.mylist[i]] && !myhash[this.mylist[i]]) {
-            this.mylist = this.mylist.slice(0,i).concat(this.mylist.slice(i+1));
-            delete this.myhash[this.mylist[i]];
+        if (this.citationreg.citationsByItemId) {
+            if (!this.citationreg.citationsByItemId[this.mylist[i]] && !myhash[this.mylist[i]]) {
+                delete this.myhash[this.mylist[i]];
+                this.mylist = this.mylist.slice(0,i).concat(this.mylist[i+1]);
+            }
         }
     }
+    this.dodeletes(this.myhash);
 };
 CSL.Registry.prototype.dodeletes = function (myhash) {
     var otheritems, key, ambig, pos, len, items, kkey, mypos, id;
