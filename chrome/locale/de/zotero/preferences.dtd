@@ -3,7 +3,7 @@
 <!ENTITY zotero.preferences.default "Standardeinstellungen:">
 <!ENTITY zotero.preferences.items "Einträge">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Settings">
+<!ENTITY zotero.preferences.settings "Einstellungen">
 
 <!ENTITY zotero.preferences.prefpane.general "Allgemein">
 
@@ -60,9 +60,9 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Angehängte Dateien in Meine Bibliothek synchronisieren mit:">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Angehängte Dateien in Gruppen-Bibliotheken mit Zotero Storage synchronisieren">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Dateien herunterladen">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "beim Synchronisieren">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "bei Aufruf">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Wenn Sie Zotero Storage benutzen, erklären Sie sich einverstanden mit den">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "allgemeinen Geschäftsbedingungen">
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
@@ -76,7 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Alle Server-Daten löschen und mit lokalen Zotero-Daten überschreiben.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Zurücksetzen des Synchronisierungsverlaufs">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Überprüfung des Sicherungsservers für alle lokalen Datei-Anhänge erzwingen.">
-<!ENTITY zotero.preferences.sync.reset "Reset">
+<!ENTITY zotero.preferences.sync.reset "Zurücksetzen">
 <!ENTITY zotero.preferences.sync.reset.button "Zurücksetzen...">
 
 

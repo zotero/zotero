@@ -5,7 +5,7 @@
 <!ENTITY zotero.general.edit "Bearbeiten">
 <!ENTITY zotero.general.delete "Löschen">
 
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
+<!ENTITY zotero.errorReport.title "Zotero Fehlerbericht">
 <!ENTITY zotero.errorReport.unrelatedMessages "Dieses Fehlerprotokoll kann unter Umständen Nachrichten enthalten, die nicht mit Zotero in Verbindung stehen.">
 <!ENTITY zotero.errorReport.submissionInProgress "Bitte warten Sie, während der Fehlerbericht übermittelt wird.">
 <!ENTITY zotero.errorReport.submitted "Der Fehlerbericht wurde übermittelt.">
@@ -59,12 +59,12 @@
 <!ENTITY zotero.items.dateAdded_column "hinzugefügt am">
 <!ENTITY zotero.items.dateModified_column "geändert am">
 <!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archive">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.archive_column "Archiv">
+<!ENTITY zotero.items.archiveLocation_column "Standort im Archiv">
 <!ENTITY zotero.items.place_column "Place">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.edition_column "Edition">
-<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.pages_column "Seiten">
 <!ENTITY zotero.items.issue_column "Issue">
 <!ENTITY zotero.items.series_column "Series">
 <!ENTITY zotero.items.seriesTitle_column "Series Title">
@@ -147,10 +147,10 @@
 <!ENTITY zotero.tagColorChooser.color "Color:">
 <!ENTITY zotero.tagColorChooser.position "Position:">
 <!ENTITY zotero.tagColorChooser.setColor "Set Color">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Farbe entfernen">
 
 <!ENTITY zotero.lookup.description "Geben Sie die nachzuschlagende ISBN, DOI or PMID in das Eingabefeld unten ein.">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.button.search "Suche">
 
 <!ENTITY zotero.selectitems.title "Einträge auswählen">
 <!ENTITY zotero.selectitems.intro.label "Auswählen, welche Artikel zu Ihrer Bibliothek hinzugefügt werden sollen">
@@ -212,7 +212,7 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Lesezeichen werden zwischen Microsoft Word und OpenOffice.org erhalten, können sich aber versehentlich verändern. Aus &#xA;Kompatibilitätsgründen, werden Zitationen nicht in Fuß- oder Endnoten eingefügt, wenn diese Option ausgewählt ist.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Zeitschriftentitel automatisch kürzen">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Literaturangaben im Dokument speichen">
@@ -239,9 +239,9 @@
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Nicht-markierte Tags werden nicht gespeichert.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Das Tag wird aus allen Einträgen gelöscht.">
 
-<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.title "Konfliktlösung">
 <!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.deleted "Gelöscht">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy erkannt">
 <!ENTITY zotero.proxy.recognized.warning "Nur Proxys hinzufügen, die von Ihrer Bibliotheks-, Universitäts- oder Firmenwebsite verlinkt sind">

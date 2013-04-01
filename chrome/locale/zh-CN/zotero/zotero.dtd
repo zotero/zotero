@@ -17,7 +17,7 @@
 <!ENTITY zotero.upgrade.newVersionInstalled "您已经安装了一个新版本的Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "为了使用这个新版本您必须升级您的数据库.">
 <!ENTITY zotero.upgrade.autoBackup "在任何实质性的改动前, 您已有的数据库会被自动备份.">
-<!ENTITY zotero.upgrade.majorUpgrade "这是一次重要更新.">
+<!ENTITY zotero.upgrade.majorUpgrade "这是主版本更新.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "请确认您已查看了">
 <!ENTITY zotero.upgrade.majorUpgradeLink "更新说明">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "在继续之前.">
@@ -139,15 +139,15 @@
 <!ENTITY zotero.tagSelector.selectVisible "选择可见的">
 <!ENTITY zotero.tagSelector.clearVisible "取消可见的选择">
 <!ENTITY zotero.tagSelector.clearAll "取消全部选择">
-<!ENTITY zotero.tagSelector.assignColor "指派颜色">
+<!ENTITY zotero.tagSelector.assignColor "指派颜色…">
 <!ENTITY zotero.tagSelector.renameTag "重命名标签...">
 <!ENTITY zotero.tagSelector.deleteTag "删除标签...">
 
-<!ENTITY zotero.tagColorChooser.title "选择标签颜色和位置">
+<!ENTITY zotero.tagColorChooser.title "选择标签颜色及位置">
 <!ENTITY zotero.tagColorChooser.color "颜色:">
 <!ENTITY zotero.tagColorChooser.position "位置:">
 <!ENTITY zotero.tagColorChooser.setColor "设置颜色">
-<!ENTITY zotero.tagColorChooser.removeColor "删除颜色">
+<!ENTITY zotero.tagColorChooser.removeColor "移除颜色">
 
 <!ENTITY zotero.lookup.description "在下面方框中输入ISBN, DOI或PMID来检索文献">
 <!ENTITY zotero.lookup.button.search "检索">
@@ -212,8 +212,8 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "书签会在Microsoft Word和OpenOffice中保留, 但偶尔也会变动.由于 &#xA; 兼容性问题, 如果选中此项，引文将不能插入到脚注或尾注中.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "自动缩写期刊名">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE的期刊名缩写将根据期刊标题自动生成.&quot;期刊缩写&quot;域将被忽略.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "在文档中储存参考文献">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "在文档中储存参考文献会稍微增加文档的大小, 但这样可以和没有使用 Zotero v群组的其它用户共享您的文档. 要使用该功能, Zotero 必须升级到3.0或更高版本.">

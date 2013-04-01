@@ -212,8 +212,8 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Semnele de carte sunt protejate în Microsoft Word și OpenOffice, dar pot fi accidental modificate.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abreviere automată a titlurilor de revistă">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Abrevierile de reviste MEDLINE vor fi automat generate folosind titlurile revistelor. Câmpul „Abr. revistă” va fi ignorat.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Stochează referințele în document">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Stocarea referințelor în documentul va crește dimensiunea fișierului, dar îți va permite să-l partajezi cu alții fără a folosi un grup Zotero. Este nevoie de Zotero 3.0 sau mai recent pentru a actualiza documentele create cu această opțiune.">

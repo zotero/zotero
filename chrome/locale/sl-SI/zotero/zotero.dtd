@@ -212,8 +212,8 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Zaznamki se ohranijo v Microsoft Word in LibreOffice, se pa lahko ponesreči spremenijo. Iz razlogov združljivosti citatov ni mogoče vstavljati v sprotne ali končne opombe, če je izbrana ta možnost.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Samodejno okrajšaj naslove revij">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Okrajšave revij MEDLINE bodo samodejno ustvarjene iz naslovov revij. Polje &quot;Journal Abbr&quot; bo prezrto.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Sklice shrani v dokumentu">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Shranjevanje sklicev v dokumentu malce poveča velikost datoteke, vendar omogoča skupno rabo dokumenta z drugimi, četudi ne uporabljajo skupine Zotero. Zotero 3.0 ali kasnejši je potreben za posodabljanje dokumentov, ki jih ustvarite s to možnostjo.">
