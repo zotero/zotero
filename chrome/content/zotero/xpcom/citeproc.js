@@ -12565,28 +12565,28 @@ CSL.Registry = function (state) {
         return ret;
     };
 };
-CSL.Registry.prototype.init = function (myitems, uncited_flag) {
+CSL.Registry.prototype.init = function (itemIDs, uncited_flag) {
     var i, ilen;
     this.oldseq = {};
     if (uncited_flag) {
         this.uncited = {};
-        for (var i=0,ilen=mylist.length;i<ilen; i += 1) {
-            if (!this.myhash[mylist[i]]) {
-                this.mylist.push(mylist[i]);
+        for (var i=0,ilen=itemIDs.length;i<ilen; i += 1) {
+            if (!this.myhash[itemIDs[i]]) {
+                this.mylist.push(itemIDs[i]);
             }
-            this.uncited[mylist[i]] = true;
-            this.myhash[mylist[i]] = true;
+            this.uncited[itemIDs[i]] = true;
+            this.myhash[itemIDs[i]] = true;
         }
     } else {
 	    var myhash = {};
-	    for (i=myitems.length-1;i>-1; i += -1) {
-		    if (myhash[myitems[i]]) {
-			    myitems = myitems.slice(0, i).concat(myitems.slice(i + 1));
+	    for (i=itemIDs.length-1;i>-1; i += -1) {
+		    if (myhash[itemIDs[i]]) {
+			    itemIDs = itemIDs.slice(0, i).concat(itemIDs.slice(i + 1));
 		    } else {
-			    myhash[myitems[i]] = true;
+			    myhash[itemIDs[i]] = true;
 		    }
 	    }
-        this.mylist = myitems.slice();
+        this.mylist = itemIDs.slice();
         this.myhash = myhash;
     }
     this.refreshes = {};
