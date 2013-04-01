@@ -1815,7 +1815,7 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 	if(oldState == "translate" && errorString && !this._parentTranslator && this.translator.length
 		&& this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
 		// Don't report failure if in private browsing mode
-		if(Zotero.isFx && !Zotero.isBookmarklet && !Zotero.isStandalone) {
+		if(Zotero.isFx && !Zotero.isBookmarklet && !Zotero.isStandalone && Components.classes["@mozilla.org/privatebrowsing;1"]) {
 			var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
 						.getService(Components.interfaces.nsIPrivateBrowsingService);
 			if (pbs.privateBrowsingEnabled) {
