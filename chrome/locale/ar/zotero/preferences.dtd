@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "تصدير">
 <!ENTITY zotero.preferences.prefpane.general "عام">
 <!ENTITY zotero.preferences.prefpane.keys "اختصارات">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "تحديد موقع المقتنى">
 <!ENTITY zotero.preferences.prefpane.proxies "الوكيل">
 <!ENTITY zotero.preferences.prefpane.search "بحث">

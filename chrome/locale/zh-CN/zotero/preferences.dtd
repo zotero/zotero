@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "导出">
 <!ENTITY zotero.preferences.prefpane.general "常规">
 <!ENTITY zotero.preferences.prefpane.keys "快捷键">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "定位">
 <!ENTITY zotero.preferences.prefpane.proxies "代理">
 <!ENTITY zotero.preferences.prefpane.search "检索">

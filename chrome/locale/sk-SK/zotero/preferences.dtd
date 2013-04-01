@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Export">
 <!ENTITY zotero.preferences.prefpane.general "Všeobecné">
 <!ENTITY zotero.preferences.prefpane.keys "Klávesové skratky">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Lokalizovať">
 <!ENTITY zotero.preferences.prefpane.proxies "Proxy">
 <!ENTITY zotero.preferences.prefpane.search "Vyhľadávanie">

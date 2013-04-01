@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Экспорт">
 <!ENTITY zotero.preferences.prefpane.general "Общие">
 <!ENTITY zotero.preferences.prefpane.keys "Горячие клавиши">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Обнаружение">
 <!ENTITY zotero.preferences.prefpane.proxies "Прокси">
 <!ENTITY zotero.preferences.prefpane.search "Поиск">

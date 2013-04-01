@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Vizualizare clasică">
 <!ENTITY zotero.integration.docPrefs.title "Preferințe document">
 <!ENTITY zotero.integration.editBibliography.title "Editează bibliografia">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Abrevierile de reviste MEDLINE vor fi automat generate folosind titlurile revistelor. Câmpul „Abr. revistă” va fi ignorat.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abreviere automată a titlurilor de revistă">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Semnele de carte sunt protejate în Microsoft Word și OpenOffice, dar pot fi accidental modificate.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Semne de carte">
 <!ENTITY zotero.integration.prefs.displayAs.label "Afișează citatele ca:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Anexează un instantaneu al paginii curente">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Fă un duplicat înregistrării selectate">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Unește itemii...">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

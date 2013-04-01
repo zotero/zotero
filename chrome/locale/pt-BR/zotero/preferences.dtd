@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Exportar">
 <!ENTITY zotero.preferences.prefpane.general "Geral">
 <!ENTITY zotero.preferences.prefpane.keys "Teclas de atalho">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Localizar">
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 <!ENTITY zotero.preferences.prefpane.search "Procurar">

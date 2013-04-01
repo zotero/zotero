@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Klassisk visning">
 <!ENTITY zotero.integration.docPrefs.title "Dokumentindstillinger">
 <!ENTITY zotero.integration.editBibliography.title "Rediger referenceliste">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bogmærker bevares i både Microsoft Word og OpenOffice/LibreOffive, men kan blive ændret ved en fejl. Når denne mulighed er valgt, kan referencer ikke indsættes i fodnoter eller slutnoter.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bogmærker">
 <!ENTITY zotero.integration.prefs.displayAs.label "Vis referencer som:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Vedhæft aftryk af den aktuelle side">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Duplikér valgte element">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "エクスポート">
 <!ENTITY zotero.preferences.prefpane.general "一般">
 <!ENTITY zotero.preferences.prefpane.keys "ショートカットキー">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "所在確認">
 <!ENTITY zotero.preferences.prefpane.proxies "プロキシ">
 <!ENTITY zotero.preferences.prefpane.search "検索">

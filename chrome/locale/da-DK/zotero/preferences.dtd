@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Eksport">
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
 <!ENTITY zotero.preferences.prefpane.keys "Genvejs-taster">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Lokaliser">
 <!ENTITY zotero.preferences.prefpane.proxies "Proxyer">
 <!ENTITY zotero.preferences.prefpane.search "Søg">

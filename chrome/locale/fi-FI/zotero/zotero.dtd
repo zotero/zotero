@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Perinteinen näkymä">
 <!ENTITY zotero.integration.docPrefs.title "Asiakirjan asetukset">
 <!ENTITY zotero.integration.editBibliography.title "Muokkaa lähdeluetteloa">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Kirjanmerkit">
 <!ENTITY zotero.integration.prefs.displayAs.label "Näytä sitaatit muodossa:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Liitä tilannekuva nykyisestä sivusta">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Monista valittu nimike">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

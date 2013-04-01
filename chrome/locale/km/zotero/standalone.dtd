@@ -72,7 +72,7 @@
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "អប្បបរមានីយកម្ម">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "កំណត់ទម្រង់-ទ្រង់ទាយទំព័រ...">
 <!ENTITY pasteCmd.accesskey "P">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "បិទភ្ជាប់">
@@ -84,7 +84,7 @@
 <!ENTITY preferencesCmdUnix.label "ជម្រើសអាទិភាព">
 <!ENTITY printCmd.accesskey "P">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "បោះពុម្ព...">
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY productHelp.label "គាំទ្រ និង ឯកសារ">
 <!ENTITY quitApplicationCmd.accesskey "Q">
@@ -98,7 +98,7 @@
 <!ENTITY redoCmd.label "បកទៅមុខ">
 <!ENTITY saveCmd.accesskey "A">
 <!ENTITY saveCmd.key "S">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "រក្សាទុក...">
 <!ENTITY selectAllCmd.accesskey "A">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.label "ជ្រើសរើសទាំងអស់">

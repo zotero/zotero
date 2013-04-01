@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Exportera">
 <!ENTITY zotero.preferences.prefpane.general "Allmänt">
 <!ENTITY zotero.preferences.prefpane.keys "Snabbkommandon">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Hitta">
 <!ENTITY zotero.preferences.prefpane.proxies "Proxyservrar">
 <!ENTITY zotero.preferences.prefpane.search "Sök">

@@ -30,7 +30,7 @@
 <!ENTITY zotero.contextMenu.saveImageAsItem "Gorde irudia Zotero Item gisa">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "Gorde URLa Zotero Item gisa">
 <!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Search pane of the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
 <!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Classic View">
 <!ENTITY zotero.integration.docPrefs.title "Dokumentu honetako ezaugarriak">
 <!ENTITY zotero.integration.editBibliography.title "Bibliografia editatu">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Lastermarkak Microsoft Word zein OpenOffice-n erabil daitezke, baina baliteke nahigabe aldaketak jasatea. Konpatibilitatea dela eta, Lastermarkak aukeratuz gero erreferentziak ezin dira oin- eta amaiera-oharretan sartu.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Lastermarkak">
 <!ENTITY zotero.integration.prefs.displayAs.label "Erreferentzien diseinua:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Oraingo orrialdearen irudia erantsi">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Hautatutako itema bikoiztu">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

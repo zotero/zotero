@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Exporteren">
 <!ENTITY zotero.preferences.prefpane.general "Algemeen">
 <!ENTITY zotero.preferences.prefpane.keys "Sneltoetsen">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Opzoeken">
 <!ENTITY zotero.preferences.prefpane.proxies "Proxy's">
 <!ENTITY zotero.preferences.prefpane.search "Zoeken">

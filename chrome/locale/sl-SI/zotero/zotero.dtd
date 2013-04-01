@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Klasični pogled">
 <!ENTITY zotero.integration.docPrefs.title "Lastnosti dokumenta">
 <!ENTITY zotero.integration.editBibliography.title "Uredi bibliografijo">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Okrajšave revij MEDLINE bodo samodejno ustvarjene iz naslovov revij. Polje &quot;Journal Abbr&quot; bo prezrto.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Samodejno okrajšaj naslove revij">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Zaznamki se ohranijo v Microsoft Word in LibreOffice, se pa lahko ponesreči spremenijo. Iz razlogov združljivosti citatov ni mogoče vstavljati v sprotne ali končne opombe, če je izbrana ta možnost.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Zaznamki">
 <!ENTITY zotero.integration.prefs.displayAs.label "Prikaži citate kot:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Pripni posnetek trenutne strani">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Podvoji izbrani vnos">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Spoji vnose ...">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

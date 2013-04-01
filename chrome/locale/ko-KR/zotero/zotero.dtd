@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "클래식 뷰">
 <!ENTITY zotero.integration.docPrefs.title "문서 환경설정">
 <!ENTITY zotero.integration.editBibliography.title "참고문헌 목록 편집">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "책갈피는 Microsoft Word와 OpenOffice에서 보존되지만, 경우에 따라 변경될 수도 있습니다. 이 옵션이 선택되면, 호환성 때문에 인용이 각주나 미주에 삽입되지 않게 됩니다.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "북마크">
 <!ENTITY zotero.integration.prefs.displayAs.label "인용 표시:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "현재 페이지의 스냅샷 첨부">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "선택된 항목 복제">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Vie">
 <!ENTITY zotero.preferences.prefpane.general "Yleistä">
 <!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Paikanna">
 <!ENTITY zotero.preferences.prefpane.proxies "Välityspalvelimet">
 <!ENTITY zotero.preferences.prefpane.search "Etsi">

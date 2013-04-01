@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Standardní zobrazení">
 <!ENTITY zotero.integration.docPrefs.title "Vlastnosti dokumentu">
 <!ENTITY zotero.integration.editBibliography.title "Upravit bibliografii">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Záložky jsou zachovány u Microsoft Word i OpenOffice, ale mohou být náhodně modifikovány. Kvůli kompatibilitě nemohou být citace vkládány do poznámek pod čarou nebo koncových poznámek, pokud je tato možnost zvolena.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Záložky">
 <!ENTITY zotero.integration.prefs.displayAs.label "Zobrazit citaci jako:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Připojit snímek současné stránky">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Duplikovat vybranou položku">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Sloučit položky...">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

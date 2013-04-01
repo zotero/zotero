@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Eksport">
 <!ENTITY zotero.preferences.prefpane.general "Üldine">
 <!ENTITY zotero.preferences.prefpane.keys "Kiirvaliku klahvid">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Otsing">
 <!ENTITY zotero.preferences.prefpane.proxies "Proksid">
 <!ENTITY zotero.preferences.prefpane.search "Otsing">

@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Widok klasyczny">
 <!ENTITY zotero.integration.docPrefs.title "Ustawienia dokumentu">
 <!ENTITY zotero.integration.editBibliography.title "Edytuj bibliografię">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Zakładki są zabezpieczone zarówno przez program Microsoft Word jaki i OpenOffice, ale w wyjątkowych przypadkach mogą być modyfikowane.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Zakładki">
 <!ENTITY zotero.integration.prefs.displayAs.label "Wyświetl prośby jako:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Dołącz zrzut ekranu aktywnej strony">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Duplikuj zaznaczony element">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Złącz elementy...">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

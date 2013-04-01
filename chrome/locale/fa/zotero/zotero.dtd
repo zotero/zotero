@@ -30,7 +30,7 @@
 <!ENTITY zotero.contextMenu.saveImageAsItem "ذخیره تصویر به صورت یک آیتم‌ زوترو">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "ذخیره پیوند به صورت یک آیتم‌ زوترو">
 <!ENTITY zotero.downloadManager.label "ذخیره در زوترو">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Search pane of the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
 <!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Classic View">
 <!ENTITY zotero.integration.docPrefs.title "تنظیمات سند">
 <!ENTITY zotero.integration.editBibliography.title "ویرایش کتابنامه">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "نشانک‌‌ها در بین Microsoft Word و OpenOffice مشترک هستند، ولی ممکن است به شکل تصادفی، تغییر داده شوند. &#xA;در صورت انتخاب این گزینه، برای حفظ سازگاری، استفاده از یادکردها در پاورقی یا یادداشت‌های انتهایی امکان‌پذیر نخواهد بود.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "نشانک">
 <!ENTITY zotero.integration.prefs.displayAs.label "نمایش یاکردها در:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "پیوست کردن تصویر لحظه‌ای این صفحه">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "ساخت رونوشت از این آیتم">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

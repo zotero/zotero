@@ -30,7 +30,7 @@
 <!ENTITY zotero.contextMenu.saveImageAsItem "Enregistrer l'image en tant que document Zotero">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "Enregistrer le lien en tant que document Zotero">
 <!ENTITY zotero.downloadManager.label "Enregistrer dans Zotero">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Pour utiliser cette fonctionnalité, vous devez d'abord installer les outils PDF dans les préférences de Zotero.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "Pour utiliser cette fonctionnalité, vous devez d'abord installer les outils PDF depuis le panneau Recherche des préférences de Zotero.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Les pièces jointes ne peuvent pas être enregistrées dans la bibliothèque sélectionnée. Ce document sera enregistré dans votre bibliothèque à la place.">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Sélectionnez les champs à conserver depuis les autres versions du document :">
 <!ENTITY zotero.duplicatesMerge.versionSelect "Choisissez la version du document à utiliser comme document maître :">
@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Vue classique">
 <!ENTITY zotero.integration.docPrefs.title "Préférences du document">
 <!ENTITY zotero.integration.editBibliography.title "Modifier la bibliographie">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Les abréviations MEDLINE des titres de revues seront automatiquement créés sur la base des titres de revues.  Le champ Zotero &quot;Abrév. de revue&quot; sera ignoré.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abréger automatiquement les titres de revues">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Les signets sont conservés entre Microsoft Word et OpenOffice/LibreOffice, mais peuvent être modifiés accidentellement. Pour des raisons de compatibilité, les citations ne peuvent pas être insérées dans des notes de bas de page ou de fin lorsque cette option est sélectionnée.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Signets">
 <!ENTITY zotero.integration.prefs.displayAs.label "Afficher les citations en tant que :">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Joindre une capture de la page courante">
 <!ENTITY zotero.items.menu.changeTag "Changer l'étiquette">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliquer le document">
-<!ENTITY zotero.items.menu.languageTag "Étiquette de langue">
 <!ENTITY zotero.items.menu.mergeItems "Fusionner les documents…">
 <!ENTITY zotero.items.menu.moveDown "Descendre">
 <!ENTITY zotero.items.menu.moveUp "Monter">

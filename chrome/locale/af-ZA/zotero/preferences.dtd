@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Uitvoer">
 <!ENTITY zotero.preferences.prefpane.general "Algemeen">
 <!ENTITY zotero.preferences.prefpane.keys "Snelsleutels">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Locate">
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 <!ENTITY zotero.preferences.prefpane.search "Soektog">

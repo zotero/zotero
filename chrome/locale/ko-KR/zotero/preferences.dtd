@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "내보내기">
 <!ENTITY zotero.preferences.prefpane.general "일반">
 <!ENTITY zotero.preferences.prefpane.keys "단축키">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "위치">
 <!ENTITY zotero.preferences.prefpane.proxies "프록시">
 <!ENTITY zotero.preferences.prefpane.search "검색">

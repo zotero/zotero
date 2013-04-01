@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Dışarı Aktar">
 <!ENTITY zotero.preferences.prefpane.general "Genel">
 <!ENTITY zotero.preferences.prefpane.keys "Kısayol Tuşları">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Yerini Belirle">
 <!ENTITY zotero.preferences.prefpane.proxies "Vekil Sunucular">
 <!ENTITY zotero.preferences.prefpane.search "Arama">

@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "经典视图">
 <!ENTITY zotero.integration.docPrefs.title "文档首选项">
 <!ENTITY zotero.integration.editBibliography.title "编辑文献目录">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE的期刊名缩写将根据期刊标题自动生成.&quot;期刊缩写&quot;域将被忽略.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "自动缩写期刊名">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "书签会在Microsoft Word和OpenOffice中保留, 但偶尔也会变动.由于 &#xA; 兼容性问题, 如果选中此项，引文将不能插入到脚注或尾注中.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "书签">
 <!ENTITY zotero.integration.prefs.displayAs.label "显示引文为:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "附加当前页的快照">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "复制选中的条目">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "合并条目…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
@@ -206,10 +207,10 @@
 <!ENTITY zotero.tabs.tags.label "标签">
 <!ENTITY zotero.tagColorChooser.color "颜色:">
 <!ENTITY zotero.tagColorChooser.position "位置:">
-<!ENTITY zotero.tagColorChooser.removeColor "删除颜色">
+<!ENTITY zotero.tagColorChooser.removeColor "移除颜色">
 <!ENTITY zotero.tagColorChooser.setColor "设置颜色">
-<!ENTITY zotero.tagColorChooser.title "选择标签颜色和位置">
-<!ENTITY zotero.tagSelector.assignColor "指派颜色">
+<!ENTITY zotero.tagColorChooser.title "选择标签颜色及位置">
+<!ENTITY zotero.tagSelector.assignColor "指派颜色…">
 <!ENTITY zotero.tagSelector.clearAll "取消全部选择">
 <!ENTITY zotero.tagSelector.clearVisible "取消可见的选择">
 <!ENTITY zotero.tagSelector.deleteTag "删除标签...">
@@ -263,7 +264,7 @@
 <!ENTITY zotero.upgrade.changeLogAfterLink "以了解有哪些新的改动.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "请查看">
 <!ENTITY zotero.upgrade.changeLogLink "变更日志">
-<!ENTITY zotero.upgrade.majorUpgrade "这是一次重要更新.">
+<!ENTITY zotero.upgrade.majorUpgrade "这是主版本更新.">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "在继续之前.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "请确认您已查看了">
 <!ENTITY zotero.upgrade.majorUpgradeLink "更新说明">

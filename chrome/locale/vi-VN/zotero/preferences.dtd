@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Xuất khẩu">
 <!ENTITY zotero.preferences.prefpane.general "Các tùy chọn chung">
 <!ENTITY zotero.preferences.prefpane.keys "Phím gõ tắt">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Locate">
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 <!ENTITY zotero.preferences.prefpane.search "Tìm kiếm">

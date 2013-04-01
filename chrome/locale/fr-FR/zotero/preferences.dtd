@@ -122,7 +122,8 @@
 <!ENTITY zotero.preferences.prefpane.cite "Citer">
 <!ENTITY zotero.preferences.prefpane.export "Exportation">
 <!ENTITY zotero.preferences.prefpane.general "Générales">
-<!ENTITY zotero.preferences.prefpane.keys "Raccourcis clavier">
+<!ENTITY zotero.preferences.prefpane.keys "Raccourcis">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Localiser">
 <!ENTITY zotero.preferences.prefpane.proxies "Serveurs mandataires">
 <!ENTITY zotero.preferences.prefpane.search "Recherche">

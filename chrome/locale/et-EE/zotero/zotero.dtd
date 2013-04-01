@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Tavaline vaade">
 <!ENTITY zotero.integration.docPrefs.title "Dokumendi sätted">
 <!ENTITY zotero.integration.editBibliography.title "Toimeta bibliograafiat">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Järjehoidjad toimivad nii MS Wordi kui ka OpenOffice puhul, kuid võib juhtuda, et neid kogemata muudetakse. Ühilduvuse huvides ei ole võimalik lisada viiteid allmärkustele ja lõppmärkustele, kui see võimalus on aktiveeritud.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Järjehoidjaid">
 <!ENTITY zotero.integration.prefs.displayAs.label "Näidata viiteid:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Lisada käesoleva lehekülje momentülesvõte">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Valitud kirje duplitseerimine">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

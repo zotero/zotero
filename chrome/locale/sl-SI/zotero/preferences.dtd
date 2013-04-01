@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Izvozi">
 <!ENTITY zotero.preferences.prefpane.general "Splošno">
 <!ENTITY zotero.preferences.prefpane.keys "Tipke za bližnjice">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Lociraj">
 <!ENTITY zotero.preferences.prefpane.proxies "Posredovalni strežniki">
 <!ENTITY zotero.preferences.prefpane.search "Iskanje">

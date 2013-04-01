@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Klassisk vy">
 <!ENTITY zotero.integration.docPrefs.title "Dokumentinställningar">
 <!ENTITY zotero.integration.editBibliography.title "Redigera källförteckning">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmärken sparas i Microsoft Word och OpenOffice, men kan ändras av misstag.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bokmärken">
 <!ENTITY zotero.integration.prefs.displayAs.label "Visa källor som:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Bifoga sparad kopia av aktuell sida">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicera vald post">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Sammanfoga källor">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

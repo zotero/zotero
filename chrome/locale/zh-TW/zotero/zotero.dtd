@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "典型的外觀">
 <!ENTITY zotero.integration.docPrefs.title "文件的偏好設定">
 <!ENTITY zotero.integration.editBibliography.title "編輯參考書目">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "書簽在Microsoft Word及OpenOffice之間應會被保留，但也可能意外的受到改變。為了相容性，在選用這個選項時文獻引用不能被插入到腳注或尾注中。">
 <!ENTITY zotero.integration.prefs.bookmarks.label "書籤">
 <!ENTITY zotero.integration.prefs.displayAs.label "將引用文獻顯示成：">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "附上目前網頁的快照">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "為選取的項目建立副本">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

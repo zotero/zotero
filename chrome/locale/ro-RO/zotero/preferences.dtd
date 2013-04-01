@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Exportare">
 <!ENTITY zotero.preferences.prefpane.general "Generale">
 <!ENTITY zotero.preferences.prefpane.keys "Scurtături de la tastatură">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Localizează">
 <!ENTITY zotero.preferences.prefpane.proxies "Servere proxy">
 <!ENTITY zotero.preferences.prefpane.search "Căutare">

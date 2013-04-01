@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "ส่งออก">
 <!ENTITY zotero.preferences.prefpane.general "ทั่วไป">
 <!ENTITY zotero.preferences.prefpane.keys "คีย์ลัด">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "หาที่ตั้ง">
 <!ENTITY zotero.preferences.prefpane.proxies "พร็อกซี่">
 <!ENTITY zotero.preferences.prefpane.search "ค้นหา">

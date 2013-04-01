@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Vista classica">
 <!ENTITY zotero.integration.docPrefs.title "Impostazioni documento">
 <!ENTITY zotero.integration.editBibliography.title "Modifica bibliografia">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "I segnalibri vengono solitamente mantenuti passando da Microsoft Word a OpenOffice, ma potrebbero subire modifiche non previste.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Segnalibri">
 <!ENTITY zotero.integration.prefs.displayAs.label "Visualizza citazioni come:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Allega istantanea della pagina attuale">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Duplica elemento selezionato">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

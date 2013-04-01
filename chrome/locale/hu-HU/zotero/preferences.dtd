@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Exportálás">
 <!ENTITY zotero.preferences.prefpane.general "Általános">
 <!ENTITY zotero.preferences.prefpane.keys "Billentyűparancsok">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Locate">
 <!ENTITY zotero.preferences.prefpane.proxies "Proxyk">
 <!ENTITY zotero.preferences.prefpane.search "Keresés">

@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "មើលតាមទម្រង់បុរាណ">
 <!ENTITY zotero.integration.docPrefs.title "ជម្រើសរចនាបថសម្រាប់យោងឯកសារ">
 <!ENTITY zotero.integration.editBibliography.title "កែតម្រូវគន្ថនិទេ្ទស">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "កំណត់ចំណាំគេហទំព័រអាចរក្សាទុកនៅក្នុងម៉ាយក្រូសូហ្វវើដ និង អូផិនអប់ហ្វីស ប៉ុន្តែអាចត្រូវបានកែប្រែដោយចៃដន្យ។ ដោយមូលហេតុ​សមិតភាព អាគតដ្ឋានមិនអាចដាក់ជាលេខយោងក្រោមអត្ថបទ​ ឬ លេខ​យោង​ចុងអត្ថបទនៅពេលត្រូវបានជ្រើសរើស។">
 <!ENTITY zotero.integration.prefs.bookmarks.label "កំណត់ចំណាំគេហទំព័រទុក">
 <!ENTITY zotero.integration.prefs.displayAs.label "បង្ហាញអាគតដ្ឋានក្នុងទម្រង់ជា:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "ភ្ជាប់រូបភាពអត្ថបទនៃគេហទំព័រនេះ">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "ជ្រើសរើសឯកសារត្រួត">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

@@ -39,7 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "Bericht-ID:">
 <!ENTITY zotero.errorReport.submissionInProgress "Bitte warten Sie, während der Fehlerbericht übermittelt wird.">
 <!ENTITY zotero.errorReport.submitted "Der Fehlerbericht wurde übermittelt.">
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
+<!ENTITY zotero.errorReport.title "Zotero Fehlerbericht">
 <!ENTITY zotero.errorReport.unrelatedMessages "Dieses Fehlerprotokoll kann unter Umständen Nachrichten enthalten, die nicht mit Zotero in Verbindung stehen.">
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.title "Exportieren...">
@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Klassische Ansicht">
 <!ENTITY zotero.integration.docPrefs.title "Dokument-Eigenschaften">
 <!ENTITY zotero.integration.editBibliography.title "Literaturverzeichnis editieren">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Zeitschriftentitel automatisch kürzen">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Lesezeichen werden zwischen Microsoft Word und OpenOffice.org erhalten, können sich aber versehentlich verändern. Aus &#xA;Kompatibilitätsgründen, werden Zitationen nicht in Fuß- oder Endnoten eingefügt, wenn diese Option ausgewählt ist.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Lesezeichen">
 <!ENTITY zotero.integration.prefs.displayAs.label "Literaturangaben anzeigen als:">
@@ -88,8 +90,8 @@
 <!ENTITY zotero.item.textTransform.sentencecase "englische Satz-Großschreibung">
 <!ENTITY zotero.item.textTransform.titlecase "englische Titel-Großschreibung">
 <!ENTITY zotero.items.accessDate_column "Zugriffsdatum">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archiveLocation_column "Standort im Archiv">
+<!ENTITY zotero.items.archive_column "Archiv">
 <!ENTITY zotero.items.callNumber_column "Signatur">
 <!ENTITY zotero.items.court_column "Court">
 <!ENTITY zotero.items.creator_column "Ersteller">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Schnappschuss von aktueller Webseite anhängen">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Ausgewählten Eintrag duplizieren">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Einträge zusammenführen...">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
@@ -123,7 +124,7 @@
 <!ENTITY zotero.items.menu.showInLibrary "In Bibliothek anzeigen">
 <!ENTITY zotero.items.moreColumns.label "More Columns">
 <!ENTITY zotero.items.numChildren_column "+">
-<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.pages_column "Seiten">
 <!ENTITY zotero.items.place_column "Place">
 <!ENTITY zotero.items.publication_column "Zeitschriftentitel">
 <!ENTITY zotero.items.publisher_column "Verlag">
@@ -137,11 +138,11 @@
 <!ENTITY zotero.items.type_column "Typ">
 <!ENTITY zotero.items.volume_column "Volume">
 <!ENTITY zotero.items.year_column "Jahr">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.button.search "Suche">
 <!ENTITY zotero.lookup.description "Geben Sie die nachzuschlagende ISBN, DOI or PMID in das Eingabefeld unten ein.">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.deleted "Gelöscht">
 <!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.title "Konfliktlösung">
 <!ENTITY zotero.moreEncodings.label "Weitere Kodierungen">
 <!ENTITY zotero.notes.separate "In einem neuen Fenster bearbeiten">
 <!ENTITY zotero.progress.title "Fortschritt">
@@ -206,7 +207,7 @@
 <!ENTITY zotero.tabs.tags.label "Tags">
 <!ENTITY zotero.tagColorChooser.color "Color:">
 <!ENTITY zotero.tagColorChooser.position "Position:">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Farbe entfernen">
 <!ENTITY zotero.tagColorChooser.setColor "Set Color">
 <!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">

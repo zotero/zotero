@@ -30,7 +30,7 @@
 <!ENTITY zotero.contextMenu.saveImageAsItem "حفظ الصورة كعنصر زوتيرو">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "حفظ الرابط كعنصر زوتيرو">
 <!ENTITY zotero.downloadManager.label "احفظ في زوتيرو">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Search pane of the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
 <!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "عرض تقليدي">
 <!ENTITY zotero.integration.docPrefs.title "تفضيلات المستند">
 <!ENTITY zotero.integration.editBibliography.title "تحرير ببليوجرافية">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "الاشارات المرجعية هي خاصية متاحة عبر مايكروسوفت وورد و اوبن اوفيس ولكنها قد تكون عرضة للتغيير الغير مقصود. ولأسباب تتعلق &#xA;بالتوافق، فالاستشهادات المرجعية لا يمكن ادراجها في الحواشي السفلية او التعليقات الختامية عند تحديد هذا الخيار.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "الاشارات المرجعية">
 <!ENTITY zotero.integration.prefs.displayAs.label "عرض الاستشهادات المرجعية كـ:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "إرفاق لقطة للصفحة الحالية">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "تكرار العنصر المحدد">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

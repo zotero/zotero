@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "มุมมองแบบคลาสสิก">
 <!ENTITY zotero.integration.docPrefs.title "ค่าตั้งพึงใจเกี่ยวกับแฟ้มเอกสาร">
 <!ENTITY zotero.integration.editBibliography.title "แก้ไขบรรณานุกรม">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "คั่นหน้าถูกคงไว้ผ่านไมโครซอฟท์เวิร์ดและโอเพ่นออฟฟิศ แต่อาจมีการเปลี่ยนแปลงได้โดยบังเอิญ สำหรับ &#xA;เหตุผลการเข้ากันได้ การอ้างอิงไม่สามารถแทรกในเชิงอรรถหรืออ้างอิงท้ายเรื่องเมื่อตัวเลือกนี้ถูกเลือก">
 <!ENTITY zotero.integration.prefs.bookmarks.label "คั่นหน้า">
 <!ENTITY zotero.integration.prefs.displayAs.label "แสดงการอ้างอิงเป็น">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "แนบภาพหน้าจอของหน้าเว็บปัจจุบัน">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "ทำซ้ำรายการที่เลือก">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

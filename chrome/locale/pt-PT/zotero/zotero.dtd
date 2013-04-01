@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Visualização Clássica">
 <!ENTITY zotero.integration.docPrefs.title "Preferências do Documento">
 <!ENTITY zotero.integration.editBibliography.title "Editar Bibliografia">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Os marcadores são preservados entre o Microsoft Word e o OpenOffice, mas podem ser acidentalmente modificados. Por razões de compatibilidade, as citações não podem ser inseridas em notas de pé-de-página ou em notas finais quando esta opção é escolhida.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Marcadores">
 <!ENTITY zotero.integration.prefs.displayAs.label "Mostrar Citações Como:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Anexar Captura da Página Corrente">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicar o Item Seleccionado">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Fundir itens...">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

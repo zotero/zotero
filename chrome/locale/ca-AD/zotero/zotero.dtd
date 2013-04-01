@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Vista clàssica">
 <!ENTITY zotero.integration.docPrefs.title "Preferències del document">
 <!ENTITY zotero.integration.editBibliography.title "Edita la bibliografia">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Les adreces d&apos;interès es conserven entre el Microsoft Word i l'OpenOffice però es poden veure modificades accidentalment.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Adreces d&apos;interès">
 <!ENTITY zotero.integration.prefs.displayAs.label "Mostra les cites com a:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Adjunta la captura de la pàgina actual">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Duplica l&apos;element seleccionat">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Combina els elements...">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

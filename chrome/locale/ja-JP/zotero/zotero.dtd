@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "クラシック表示">
 <!ENTITY zotero.integration.docPrefs.title "ドキュメントの設定">
 <!ENTITY zotero.integration.editBibliography.title "参考文献目録を編集">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE の雑誌略誌名が雑誌名から自動的に生成されます。「雑誌略誌名」欄の内容は無視されます。">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "雑誌名を自動的に簡略化する">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "ブックマークは Microsoft Word、LibreOffice 双方で保存されますが、誤って変更されてしまう場合があります。 &#xA; 互換性上の理由により、この機能を選んだ場合、出典表記を脚注や巻末注に挿入することができません。">
 <!ENTITY zotero.integration.prefs.bookmarks.label "ブックマーク">
 <!ENTITY zotero.integration.prefs.displayAs.label "出典表記の出力形式:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "現在のページのスナップショットを添付">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "選択されたアイテムを複製">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "アイテムを統合する...">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

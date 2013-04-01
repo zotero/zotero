@@ -30,7 +30,7 @@
 <!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
 <!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Search pane of the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
 <!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Classic View">
 <!ENTITY zotero.integration.docPrefs.title "Dokumentegenskaper">
 <!ENTITY zotero.integration.editBibliography.title "Rediger bibliografi">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmerker kan utveksles mellom Microsoft Word og OpenOffice, men er utsatt for utilsiktede endringer.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bokmerker">
 <!ENTITY zotero.integration.prefs.displayAs.label "Vis henvisninger som:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Legg til snapshot av gjeldende side">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliser det valgte elementet">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Merge Items…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

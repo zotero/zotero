@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "صدور">
 <!ENTITY zotero.preferences.prefpane.general "عمومی">
 <!ENTITY zotero.preferences.prefpane.keys "کلیدهای میان‌بر">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "مکان‌یابی">
 <!ENTITY zotero.preferences.prefpane.proxies "پیشکارها">
 <!ENTITY zotero.preferences.prefpane.search "جستجو">

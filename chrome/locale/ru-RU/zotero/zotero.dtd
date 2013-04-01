@@ -56,6 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Классический вид">
 <!ENTITY zotero.integration.docPrefs.title "Параметры документа">
 <!ENTITY zotero.integration.editBibliography.title "Редактировать библиографию">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Закладки сохраняются при переходе между Microsoft Word и OpenOffice, но могут быть случайно изменены. Из соображений совместимости, когда эта опция выбрана, цитаты не могут быть вставлены в (концевые) сноски.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Закладки">
 <!ENTITY zotero.integration.prefs.displayAs.label "Отобразить цитаты как:">
@@ -115,7 +117,6 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Прикрепить снимок текущей страницы">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Сделать дубликат выбранного документа">
-<!ENTITY zotero.items.menu.languageTag "Language Tag">
 <!ENTITY zotero.items.menu.mergeItems "Объединить документы...">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">

@@ -123,6 +123,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Eksporter">
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
 <!ENTITY zotero.preferences.prefpane.keys "Hurtigtaster">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
 <!ENTITY zotero.preferences.prefpane.locate "Locate">
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 <!ENTITY zotero.preferences.prefpane.search "Søk">
