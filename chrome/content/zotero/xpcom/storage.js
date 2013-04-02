@@ -413,7 +413,14 @@ Zotero.Sync.Storage = new function () {
 			(item.libraryID ? item.libraryID : 0) + '/' + item.key, callbacks
 		);
 		if (queue.type == 'upload') {
-			request.setMaxSize(Zotero.Attachments.getTotalFileSize(item));
+			try {
+				request.setMaxSize(Zotero.Attachments.getTotalFileSize(item));
+			}
+			// If this fails, it's no big deal, though we might fail later
+			catch (e) {
+				Components.utils.reportError(e);
+				Zotero.debug(e, 1);
+			}
 		}
 		queue.addRequest(request, highPriority);
 	};
