@@ -13227,6 +13227,9 @@ CSL.Disambiguation.prototype.disExtraText = function () {
         this.base.disambiguate = true;
         this.betterbase.disambiguate = true;
         this.initGivens = true;
+        for (var i = 0, ilen = this.lists[this.listpos][1].length; i < ilen; i += 1) {
+            this.state.tmp.taintedItemIDs[this.lists[this.listpos][1][i].id] = true;
+        }
     } else if (this.lists[this.listpos][1].length > 1) {
         if (this.modeindex === this.modes.length - 1) {
             var base = this.lists[this.listpos][0];
