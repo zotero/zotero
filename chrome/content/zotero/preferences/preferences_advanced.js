@@ -410,7 +410,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		var chooseStrPrefix = 'attachmentBasePath.chooseNewPath.';
 		var clearStrPrefix = 'attachmentBasePath.clearBasePath.';
 		var title = Zotero.getString(chooseStrPrefix + 'title');
-		var msg1 = Zotero.getString(chooseStrPrefix + 'message') + "\n\n", msg2 = msg3 = "";
+		var msg1 = Zotero.getString(chooseStrPrefix + 'message') + "\n\n", msg2 = "", msg3 = "";
 		switch (numNewAttachments) {
 			case 0:
 				break;
