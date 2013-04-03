@@ -177,9 +177,10 @@ Zotero.Cite = {
 			var str;
 			var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 					.createInstance(Components.interfaces.nsIDOMParser),
-				doc = parser.parseFromString(html, "text/html");
-			
-			var leftMarginDivs = Zotero.Utilities.xpath(doc, '//div[@class="csl-left-margin"]'),
+				doc = parser.parseFromString("<!DOCTYPE html><html><body></body></html>", "text/html");
+			doc.body.insertAdjacentHTML("afterbegin", html);
+			var div = doc.body.firstChild,
+				leftMarginDivs = Zotero.Utilities.xpath(doc, '//div[@class="csl-left-margin"]'),
 				multiField = !!leftMarginDivs.length,
 				clearEntries = multiField;
 			
@@ -189,7 +190,7 @@ Zotero.Cite = {
 			// Force a minimum line height
 			if(lineSpacing <= 1.35) lineSpacing = 1.35;
 			
-			var style = doc.documentElement.getAttribute("style");
+			var style = div.getAttribute("style");
 			if(!style) style = "";
 			style += "line-height: " + lineSpacing + "; ";
 			
@@ -203,7 +204,7 @@ Zotero.Cite = {
 				}
 			}
 			
-			if(style) doc.documentElement.setAttribute("style", style);
+			if(style) div.setAttribute("style", style);
 			
 			// csl-entry
 			var divs = Zotero.Utilities.xpath(doc, '//div[@class="csl-entry"]');
@@ -263,7 +264,7 @@ Zotero.Cite = {
 				div.setAttribute("style", "margin: .5em 0 0 2em; padding: 0 0 .2em .5em; border-left: 5px solid #ccc;");
 			}
 			
-			return doc.documentElement.outerHTML;
+			return doc.body.innerHTML;
 		} else if(format == "text") {
 			return bib[0].bibstart+bib[1].join("")+bib[0].bibend;
 		} else if(format == "rtf") {
