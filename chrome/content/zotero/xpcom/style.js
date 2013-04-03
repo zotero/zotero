@@ -430,7 +430,8 @@ Zotero.Style = function(arg) {
 			'/csl:style/csl:info[1]/csl:category', Zotero.Styles.ns))
 		if(category.hasAttribute("term"))];
 	this._class = doc.documentElement.getAttribute("class");
-	this._usesAbbreviation = !!Zotero.Utilities.xpath(doc, '//csl:text[@form="short"][@variable="container-title"][1]',
+	this._usesAbbreviation = !!Zotero.Utilities.xpath(doc,
+		'//csl:text[(@variable="container-title" and @form="short") or (@variable="container-title-short")][1]',
 		Zotero.Styles.ns).length;
 	this._hasBibliography = !!doc.getElementsByTagName("bibliography").length;
 	this._version = doc.documentElement.getAttribute("version");
