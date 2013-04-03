@@ -1031,8 +1031,9 @@ Zotero.Utilities = {
 			
 			if(!Zotero.isIE || "evaluate" in rootDoc) {
 				try {
-					var xpathObject = rootDoc.evaluate(xpath, element, nsResolver, 5, // 5 = ORDERED_NODE_ITERATOR_TYPE
-						null);
+					// This may result in a deprecation warning in the console due to
+					// https://bugzilla.mozilla.org/show_bug.cgi?id=674437
+					var xpathObject = rootDoc.evaluate(xpath, element, nsResolver, 5 /*ORDERED_NODE_ITERATOR_TYPE*/, null);
 				} catch(e) {
 					// rethrow so that we get a stack
 					throw new Error(e.name+": "+e.message);
