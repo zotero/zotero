@@ -230,7 +230,12 @@ Zotero.Sync.Storage.Queue.prototype.start = function () {
 	// The queue manager needs to know what queues were running in the
 	// current session
 	Zotero.Sync.Storage.QueueManager.addCurrentQueue(this);
-	this.advance();
+	
+	var self = this;
+	setTimeout(function () {
+		self.advance();
+	}, 0);
+	
 	return this._deferred.promise;
 }
 
