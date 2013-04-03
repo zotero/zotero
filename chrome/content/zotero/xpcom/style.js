@@ -187,9 +187,9 @@ Zotero.Styles = new function() {
 		var styleInstalled;
 		if(style instanceof Components.interfaces.nsIFile) {
 			// handle nsIFiles
-			origin = style.leafName;
-			styleInstalled = Zotero.File.getContentsAsync(style).when(function(style) {
-				return _install(style, origin);
+			var url = Services.io.newFileURI(style);
+			styleInstalled = Zotero.HTTP.promise("GET", url.spec).when(function(xmlhttp) {
+				return _install(xmlhttp.responseText, style.leafName);
 			});
 		} else {
 			styleInstalled = _install(style, origin);
