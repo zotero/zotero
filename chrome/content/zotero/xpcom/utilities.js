@@ -1083,7 +1083,9 @@ Zotero.Utilities = {
 		var strings = new Array(elements.length);
 		for(var i=0, n=elements.length; i<n; i++) {
 			var el = elements[i];
-			strings[i] = "textContent" in el ? el.textContent
+			strings[i] =
+				(el.nodeType === 2 /*ATTRIBUTE_NODE*/ && "value" in el) ? el.value
+				: "textContent" in el ? el.textContent
 				: "innerText" in el ? el.innerText
 				: "text" in el ? el.text
 				: el.nodeValue;
