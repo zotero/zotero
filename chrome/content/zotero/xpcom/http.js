@@ -121,18 +121,20 @@ Zotero.HTTP = new function() {
 		}
 		
 		// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
-		var channel = xmlhttp.channel;
-		channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
-		channel.forceAllowThirdPartyCookie = true;
-		
-		// Set charset
-		if (options && options.responseCharset) {
-			channel.contentCharset = responseCharset;
-		}
-		
-		// Disable caching if requested
-		if(options && options.dontCache) {
-			channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
+		var channel = xmlhttp.channel,
+			isFile = channel instanceof Components.interfaces.nsIFileChannel;
+		if(channel instanceof Components.interfaces.nsIHttpChannelInternal) {
+			channel.forceAllowThirdPartyCookie = true;
+			
+			// Set charset
+			if (options && options.responseCharset) {
+				channel.contentCharset = responseCharset;
+			}
+			
+			// Disable caching if requested
+			if(options && options.dontCache) {
+				channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
+			}
 		}
 
 		// Set responseType
@@ -154,6 +156,9 @@ Zotero.HTTP = new function() {
 			
 			if (options && options.successCodes) {
 				var success = options.successCodes.indexOf(status) != -1;
+			}
+			else if(isFile) {
+				var success = status == 200 || status == 0;
 			}
 			else {
 				var success = status >= 200 && status < 300;
