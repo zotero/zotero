@@ -206,7 +206,7 @@ Zotero.Styles = new function() {
 				(new Zotero.Exception.Alert("styles.install.unexpectedError",
 					origin, "styles.install.title", error)).present();
 			}
-		});
+		}).end();
 	}
 	
 	/**
