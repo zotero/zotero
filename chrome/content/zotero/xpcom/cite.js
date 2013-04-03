@@ -377,8 +377,6 @@ Zotero.Cite.getAbbreviation = new function() {
 	 * Replace getAbbreviation on citeproc-js with our own handler.
 	 */
 	return function getAbbreviation(listname, obj, jurisdiction, category, key) {
-		if(!Zotero.Prefs.get("cite.automaticTitleAbbreviation")) return;
-
 		init();
 
 		// Short circuit if we know we don't handle this kind of abbreviation
