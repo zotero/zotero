@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.443",
+    PROCESSOR_VERSION: "1.0.446",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     LOCATOR_LABELS_REGEXP: new RegExp("^((art|ch|Ch|subch|col|fig|l|n|no|op|p|pp|para|subpara|pt|r|sec|subsec|Sec|sv|sch|tit|vrs|vol)\\.)\\s+(.*)"),
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
@@ -3429,30 +3429,25 @@ CSL.Engine.prototype.rebuildProcessorState = function (citations, mode, uncitedI
     if (!citations) {
         citations = [];
     }
-    if (!uncitedItemIDs) {
-        uncitedItemIDs = {};
+    if (!mode) {
+        mode = 'html';
     }
     var itemIDs = [];
-    var myUncitedItemIDs = [];
     for (var i=0,ilen=citations.length;i<ilen;i+=1) {
         for (var j=0,jlen=citations[i].citationItems.length;j<jlen;j+=1) {
             var itemID = "" + citations[i].citationItems[j].id;
             itemIDs.push(itemID);
-            if (uncitedItemIDs[itemID]) {
-                delete uncitedItemIDs[itemID];
-            }
         }
     }
     this.updateItems(itemIDs);
-    for (var key in uncitedItemIDs) {
-        myUncitedItemIDs.push(key);
-    }
-    this.updateUncitedItems(myUncitedItemIDs);
+    this.updateUncitedItems(uncitedItemIDs);
     var pre = [];
     var post = [];
     var ret = [];
+    var oldMode = this.opt.mode;
+    this.setOutputFormat(mode);
     for (var i=0,ilen=citations.length;i<ilen;i+=1) {
-        var res = this.processCitationCluster(citations[i],pre,post,mode);
+        var res = this.processCitationCluster(citations[i],pre,post,CSL.ASSUME_ALL_ITEMS_REGISTERED);
         pre.push([citations[i].citationID,citations[i].properties.noteIndex]);
         for (var j=0,jlen=res[1].length;j<jlen;j+=1) {
             var index = res[1][j][0];
@@ -3463,6 +3458,7 @@ CSL.Engine.prototype.rebuildProcessorState = function (citations, mode, uncitedI
             ];
         }
     }
+    this.setOutputFormat(oldMode);
     return ret;
 }
 CSL.Engine.prototype.restoreProcessorState = function (citations) {
@@ -4684,6 +4680,11 @@ CSL.getCite = function (Item, item, prevItemID) {
 };
 CSL.citeStart = function (Item, item) {
     this.tmp.same_author_as_previous_cite = false;
+    if (!this.tmp.suppress_decorations) {
+        this.tmp.subsequent_author_substitute_ok = true;
+    } else {
+        this.tmp.subsequent_author_substitute_ok = false;
+    }
     this.tmp.lastchr = "";
     if (this.tmp.area === "citation" && this.citation.opt.collapse && this.citation.opt.collapse.length) {
         this.tmp.have_collapsed = true;
@@ -6121,6 +6122,9 @@ CSL.NameOutput = function(state, Item, item, variables) {
     this._please_chop = false;
 };
 CSL.NameOutput.prototype.init = function (names) {
+    if (this.state.tmp.term_predecessor) {
+        this.state.tmp.subsequent_author_substitute_ok = false;
+    }
     if (this.nameset_offset) {
         this.nameset_base = this.nameset_base + this.nameset_offset;
     }
@@ -11316,7 +11320,7 @@ CSL.Util.substituteEnd = function (state, target) {
         func = function (state, Item) {
             var i, ilen;
             var printing = !state.tmp.suppress_decorations;
-            if (printing && state.tmp.area === "bibliography") {
+            if (printing && state.tmp.area === "bibliography" && state.tmp.subsequent_author_substitute_ok) {
                 if (state.tmp.rendered_name) {
                     if ("partial-each" === subrule || "partial-first" === subrule) {
                         var dosub = true;
@@ -12597,6 +12601,9 @@ CSL.Registry.prototype.init = function (itemIDs, uncited_flag) {
             this.myhash[itemIDs[i]] = true;
         }
     } else {
+        for (var key in this.uncited) {
+            itemIDs.push(key);
+        }
         var myhash = {};
         for (i=itemIDs.length-1;i>-1; i += -1) {
             if (myhash[itemIDs[i]]) {
@@ -13119,6 +13126,7 @@ CSL.Disambiguation.prototype.run = function(akey) {
     if (!this.modes.length) {
         return;
     }
+    this.akey = akey;
     if (this.initVars(akey)) {
         this.runDisambig();
     }
@@ -13212,15 +13220,16 @@ CSL.Disambiguation.prototype.disNames = function (ismax) {
 };
 CSL.Disambiguation.prototype.disExtraText = function () {
     var pos, len, mybase;
-    if (this.modes.length > 1 && !this.base.disambiguate) {
+    if (!this.base.disambiguate) {
+        this.initVars(this.akey)
         this.modeindex = 0;
-        this.base = CSL.cloneAmbigConfig(this.betterbase);
-    }
-    if (!this.betterbase.disambiguate) {
         this.base.disambiguate = true;
         this.betterbase.disambiguate = true;
         this.initGivens = true;
-    } else {
+        for (var i = 0, ilen = this.lists[this.listpos][1].length; i < ilen; i += 1) {
+            this.state.tmp.taintedItemIDs[this.lists[this.listpos][1][i].id] = true;
+        }
+    } else if (this.lists[this.listpos][1].length > 1) {
         if (this.modeindex === this.modes.length - 1) {
             var base = this.lists[this.listpos][0];
             for (var i = 0, ilen = this.lists[this.listpos][1].length; i < ilen; i += 1) {
