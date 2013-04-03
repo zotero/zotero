@@ -61,19 +61,19 @@
 <!ENTITY zotero.items.extra_column "Extra">
 <!ENTITY zotero.items.archive_column "Archiv">
 <!ENTITY zotero.items.archiveLocation_column "Standort im Archiv">
-<!ENTITY zotero.items.place_column "Place">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.place_column "Ort">
+<!ENTITY zotero.items.volume_column "Volumen">
+<!ENTITY zotero.items.edition_column "Ausgabe">
 <!ENTITY zotero.items.pages_column "Seiten">
-<!ENTITY zotero.items.issue_column "Issue">
-<!ENTITY zotero.items.series_column "Series">
-<!ENTITY zotero.items.seriesTitle_column "Series Title">
-<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.issue_column "Ausgabe">
+<!ENTITY zotero.items.series_column "Reihe">
+<!ENTITY zotero.items.seriesTitle_column "Titel der Reihe">
+<!ENTITY zotero.items.court_column "Gericht">
 <!ENTITY zotero.items.medium_column "Medium/Format">
 <!ENTITY zotero.items.genre_column "Genre">
 <!ENTITY zotero.items.system_column "System">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.moreColumns.label "Weitere Spalten">
+<!ENTITY zotero.items.restoreColumnOrder.label "Spaltenordnung wiederherstellen">
 
 <!ENTITY zotero.items.menu.showInLibrary "In Bibliothek anzeigen">
 <!ENTITY zotero.items.menu.attach.note "Notiz hinzufügen">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.item.textTransform "Text transformieren">
 <!ENTITY zotero.item.textTransform.titlecase "englische Titel-Großschreibung">
 <!ENTITY zotero.item.textTransform.sentencecase "englische Satz-Großschreibung">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Vorname/Nachname tauschen">
 
 <!ENTITY zotero.toolbar.newNote "Neue Notiz">
 <!ENTITY zotero.toolbar.note.standalone "Neue eigenständige Notiz">
@@ -139,14 +139,14 @@
 <!ENTITY zotero.tagSelector.selectVisible "Sichtbare auswählen">
 <!ENTITY zotero.tagSelector.clearVisible "Sichtbare abwählen">
 <!ENTITY zotero.tagSelector.clearAll "Alle abwählen">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
+<!ENTITY zotero.tagSelector.assignColor "Farbe zuweisen...">
 <!ENTITY zotero.tagSelector.renameTag "Tag umbenennen...">
 <!ENTITY zotero.tagSelector.deleteTag "Tag löschen...">
 
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
-<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.title "Tag Farbe und Position auswählen">
+<!ENTITY zotero.tagColorChooser.color "Farbe:">
 <!ENTITY zotero.tagColorChooser.position "Position:">
-<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.setColor "Farbe zuweisen">
 <!ENTITY zotero.tagColorChooser.removeColor "Farbe entfernen">
 
 <!ENTITY zotero.lookup.description "Geben Sie die nachzuschlagende ISBN, DOI or PMID in das Eingabefeld unten ein.">
@@ -213,7 +213,7 @@
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Zeitschriftentitel automatisch kürzen">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE Abkürzungen für Zeitschriften werden automatisch über die Zeitschriftentitel erstellt. Das &quot;Zeitschr. Abk.&quot; Feld wird ignoriert.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Literaturangaben im Dokument speichen">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Das Speichern der Literaturangaben im Dokument erhöht die Dateigröße geringfügig, aber erlaubt es Ihnen, Ihr Dokument mit anderen zu teilen, ohne dass sie Zotero Groups verwenden müssen. Zotero 3.0 oder neuer ist notwendig, um Dokumente, die mit dieser Option erstellt wurden, zu aktualisieren.">
@@ -240,7 +240,7 @@
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Das Tag wird aus allen Einträgen gelöscht.">
 
 <!ENTITY zotero.merge.title "Konfliktlösung">
-<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.of "von">
 <!ENTITY zotero.merge.deleted "Gelöscht">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy erkannt">

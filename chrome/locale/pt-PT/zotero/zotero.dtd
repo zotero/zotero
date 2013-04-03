@@ -5,7 +5,7 @@
 <!ENTITY zotero.general.edit "Editar">
 <!ENTITY zotero.general.delete "Remover">
 
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
+<!ENTITY zotero.errorReport.title "Relatório de Erros do Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "O registo de erros pode incluir mensagens alheias ao Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor aguarde enquanto o relatório de erro é enviado.">
 <!ENTITY zotero.errorReport.submitted "O relatório de erro foi enviado.">
@@ -13,7 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums "Por favor crie uma mensagem nos fóruns do Zotero (em forums.zotero.org) incluindo este ID de Relatório, uma descrição do problema e os passos necessários para o reproduzir.">
 <!ENTITY zotero.errorReport.notReviewed "Relatórios de erro não são geralmente revistos excepto quando mencionados nos fóruns.">
 
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.title "Assistente de Actualização do Zotero">
 <!ENTITY zotero.upgrade.newVersionInstalled "Instalou uma nova versão do Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "A sua base de dados do Zotero precisa de ser actualizada para poder funcionar com a nova versão.">
 <!ENTITY zotero.upgrade.autoBackup "A base de dados existente será salvaguardada automaticamente antes de se fazer qualquer alteração.">
@@ -59,21 +59,21 @@
 <!ENTITY zotero.items.dateAdded_column "Data de Adição">
 <!ENTITY zotero.items.dateModified_column "Data de Modificação">
 <!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archive">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.archive_column "Arquivo">
+<!ENTITY zotero.items.archiveLocation_column "Localização no Arquivo">
+<!ENTITY zotero.items.place_column "Lugar">
 <!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Edition">
-<!ENTITY zotero.items.pages_column "Pages">
-<!ENTITY zotero.items.issue_column "Issue">
-<!ENTITY zotero.items.series_column "Series">
-<!ENTITY zotero.items.seriesTitle_column "Series Title">
-<!ENTITY zotero.items.court_column "Court">
-<!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "System">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.edition_column "Edição">
+<!ENTITY zotero.items.pages_column "Páginas">
+<!ENTITY zotero.items.issue_column "Número">
+<!ENTITY zotero.items.series_column "Série">
+<!ENTITY zotero.items.seriesTitle_column "Título da Série">
+<!ENTITY zotero.items.court_column "Tribunal">
+<!ENTITY zotero.items.medium_column "Médio/Formato">
+<!ENTITY zotero.items.genre_column "Género">
+<!ENTITY zotero.items.system_column "Sistema">
+<!ENTITY zotero.items.moreColumns.label "Mais Colunas">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restabelecer Ordem das Colunas">
 
 <!ENTITY zotero.items.menu.showInLibrary "Mostrar na Biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Adicionar Nota">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.item.textTransform "Transformar Texto">
 <!ENTITY zotero.item.textTransform.titlecase "Maiúsculas Iniciais de Título">
 <!ENTITY zotero.item.textTransform.sentencecase "Caixa da frase">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Trocar primeiros/últimos nomes">
 
 <!ENTITY zotero.toolbar.newNote "Nova Nota">
 <!ENTITY zotero.toolbar.note.standalone "Nova Nota Isolada">
@@ -139,18 +139,18 @@
 <!ENTITY zotero.tagSelector.selectVisible "Marcar Visíveis">
 <!ENTITY zotero.tagSelector.clearVisible "Desmarcar Visíveis">
 <!ENTITY zotero.tagSelector.clearAll "Desmarcar Todos">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
+<!ENTITY zotero.tagSelector.assignColor "Atribuir Cor...">
 <!ENTITY zotero.tagSelector.renameTag "Alterar a Etiqueta...">
 <!ENTITY zotero.tagSelector.deleteTag "Remover a Etiqueta...">
 
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
-<!ENTITY zotero.tagColorChooser.color "Color:">
-<!ENTITY zotero.tagColorChooser.position "Position:">
-<!ENTITY zotero.tagColorChooser.setColor "Set Color">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.title "Escolha um Cor e uma Posição de Etiqueta">
+<!ENTITY zotero.tagColorChooser.color "Cor:">
+<!ENTITY zotero.tagColorChooser.position "Posição:">
+<!ENTITY zotero.tagColorChooser.setColor "Estabelecer Cor">
+<!ENTITY zotero.tagColorChooser.removeColor "Remover Cor">
 
 <!ENTITY zotero.lookup.description "Introduzir na caixa abaixo o ISBN, o DOI, ou o PMID a procurar.">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.button.search "Procurar">
 
 <!ENTITY zotero.selectitems.title "Seleccionar Itens">
 <!ENTITY zotero.selectitems.intro.label "Seleccione os itens que deseja adicionar à sua biblioteca">
@@ -212,8 +212,8 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Os marcadores são preservados entre o Microsoft Word e o OpenOffice, mas podem ser acidentalmente modificados. Por razões de compatibilidade, as citações não podem ser inseridas em notas de pé-de-página ou em notas finais quando esta opção é escolhida.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abreviar automaticamente títulos de publicações periódicas">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "As abreviações da publicação periódica MEDLINE serão geradas automaticamente usando os títulos das publicações periódicas. O campo «Journal Abbr» será ignorado.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Armazenar referências no documento">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Armazenar referências no seu documento aumenta ligeiramente o tamanho do ficheiro, mas permitir-lhe-á partilhar o documento com outros sem usar um grupo Zotero. É necessário usar o Zotero 3.0 ou uma versão posterior para actualizar documentos criados com esta opção.">
@@ -239,9 +239,9 @@
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "As etiquetas por marcar não serão guardadas.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "A etiqueta será removida de todos os itens.">
 
-<!ENTITY zotero.merge.title "Conflict Resolution">
-<!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.title "Resolução de Conflitos">
+<!ENTITY zotero.merge.of "de">
+<!ENTITY zotero.merge.deleted "Removido">
 
 <!ENTITY zotero.proxy.recognized.title "Cópia Local Reconhecida">
 <!ENTITY zotero.proxy.recognized.warning "Adicione apenas cópias locais com ligações a partir da sua biblioteca, escola ou sítio Web corporativo">

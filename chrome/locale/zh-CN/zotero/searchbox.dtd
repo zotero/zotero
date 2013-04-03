@@ -18,6 +18,6 @@
 <!ENTITY zotero.search.date.units.months "月">
 <!ENTITY zotero.search.date.units.years "年">
 
-<!ENTITY zotero.search.search "检索">
+<!ENTITY zotero.search.search "搜索">
 <!ENTITY zotero.search.clear "清除">
-<!ENTITY zotero.search.saveSearch "保存检索结果">
+<!ENTITY zotero.search.saveSearch "保存搜索结果">
