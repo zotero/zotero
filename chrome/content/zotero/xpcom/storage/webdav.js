@@ -960,6 +960,10 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		var created = Zotero.Sync.Storage.createUploadFile(
 			request,
 			function (data) {
+				if (!data) {
+					deferred.resolve(false);
+					return;
+				}
 				deferred.resolve(
 					Q.fcall(function () {
 						return processUploadFile(data);
