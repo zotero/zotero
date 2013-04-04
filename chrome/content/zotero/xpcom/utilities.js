@@ -1389,8 +1389,9 @@ Zotero.Utilities = {
 			
 			if(!Zotero.isIE || "evaluate" in rootDoc) {
 				try {
-					var xpathObject = rootDoc.evaluate(xpath, element, nsResolver, 5, // 5 = ORDERED_NODE_ITERATOR_TYPE
-						null);
+					// This may result in a deprecation warning in the console due to
+					// https://bugzilla.mozilla.org/show_bug.cgi?id=674437
+					var xpathObject = rootDoc.evaluate(xpath, element, nsResolver, 5 /*ORDERED_NODE_ITERATOR_TYPE*/, null);
 				} catch(e) {
 					// rethrow so that we get a stack
 					throw new Error(e.name+": "+e.message);
@@ -1441,7 +1442,9 @@ Zotero.Utilities = {
 		var strings = new Array(elements.length);
 		for(var i=0, n=elements.length; i<n; i++) {
 			var el = elements[i];
-			strings[i] = "textContent" in el ? el.textContent
+			strings[i] =
+				(el.nodeType === 2 /*ATTRIBUTE_NODE*/ && "value" in el) ? el.value
+				: "textContent" in el ? el.textContent
 				: "innerText" in el ? el.innerText
 				: "text" in el ? el.text
 				: el.nodeValue;

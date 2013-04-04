@@ -1875,7 +1875,7 @@ Zotero.Item.prototype.save = function(checkFields) {
 							let attachmentFile = Components.classes["@mozilla.org/file/local;1"]
 								.createInstance(Components.interfaces.nsILocalFile);
 							try {
-								attachmentFile.initWithPath(path);
+								attachmentFile.persistentDescriptor = path;
 							}
 							catch (e) {
 								Zotero.debug(e, 1);
@@ -2335,7 +2335,7 @@ Zotero.Item.prototype.save = function(checkFields) {
 							let attachmentFile = Components.classes["@mozilla.org/file/local;1"]
 								.createInstance(Components.interfaces.nsILocalFile);
 							try {
-								attachmentFile.initWithPath(path);
+								attachmentFile.persistentDescriptor = path;
 							}
 							catch (e) {
 								Zotero.debug(e, 1);

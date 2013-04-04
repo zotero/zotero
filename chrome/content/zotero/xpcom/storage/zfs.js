@@ -873,12 +873,19 @@ Zotero.Sync.Storage.ZFS = (function () {
 		var item = Zotero.Sync.Storage.getItemFromRequestName(request.name);
 		if (Zotero.Attachments.getNumFiles(item) > 1) {
 			var deferred = Q.defer();
-			Zotero.Sync.Storage.createUploadFile(
+			var created = Zotero.Sync.Storage.createUploadFile(
 				request,
 				function (data) {
+					if (!data) {
+						deferred.resolve(false);
+						return;
+					}
 					deferred.resolve(processUploadFile(data));
 				}
 			);
+			if (!created) {
+				return Q(false);
+			}
 			return deferred.promise;
 		}
 		else {
