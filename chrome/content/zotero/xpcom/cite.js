@@ -429,12 +429,14 @@ Zotero.Cite.getAbbreviation = new function() {
 					}
 
 					// Fall back to full word
-					if(newWord === undefined ) newWord = word;
+					if(newWord === undefined) newWord = word;
 
 					words[j] = newWord.substr(0, 1).toUpperCase() + newWord.substr(1);
 				}
+				abbreviation = words.join("").replace(/\s+/g, " ").trim();
+			} else {
+				abbreviation = key;
 			}
-			abbreviation = words.join("").replace(/\s+/g, " ").trim();
 		}
 
 		if(!abbreviation || abbreviation === key) {
