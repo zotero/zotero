@@ -6,8 +6,8 @@
 <!ENTITY zotero.search.joinMode.suffix "din următoarele:">
 
 <!ENTITY zotero.search.recursive.label "Caută în subdosare">
-<!ENTITY zotero.search.noChildren "Arată doar înregistrările de nivel înalt">
-<!ENTITY zotero.search.includeParentsAndChildren "Include înregistrările părinte și copil, dintre înregistrările care se potrivesc căutării">
+<!ENTITY zotero.search.noChildren "Arată doar itemii de nivel înalt">
+<!ENTITY zotero.search.includeParentsAndChildren "Include itemii părinte și copil, dintre intemii care se potrivesc căutării">
 
 <!ENTITY zotero.search.textModes.phrase "Expresie">
 <!ENTITY zotero.search.textModes.phraseBinary "Expresie (include fișierele binare)">

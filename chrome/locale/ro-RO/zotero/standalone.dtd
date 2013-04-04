@@ -19,7 +19,7 @@
 <!ENTITY pageSetupCmd.accesskey "U">
 <!ENTITY printCmd.label "Imprimă...">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "Închide">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
@@ -39,7 +39,7 @@
 <!ENTITY redoCmd.accesskey "R">
 <!ENTITY cutCmd.label "Decupare">
 <!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "d">
+<!ENTITY cutCmd.accesskey "t">
 <!ENTITY copyCmd.label "Copiere">
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.accesskey "C">
@@ -76,7 +76,7 @@
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimizare">
 <!ENTITY bringAllToFront.label "Adu totul în față">
-<!ENTITY zoomWindow.label "Mărire/Micșorare">
+<!ENTITY zoomWindow.label "Panoramare">
 <!ENTITY windowMenu.label "Fereastră">
 
 
@@ -90,7 +90,7 @@
 <!ENTITY aboutProduct.label "Despre &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Suport și documentație">
-<!ENTITY productHelp.accesskey "H">
+<!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Informații pentru probleme">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "Trimite feedback...">
