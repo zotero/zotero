@@ -30,9 +30,9 @@
 <!ENTITY zotero.preferences.parseRISRefer "Folosește Zotero pentru a descărca fișiere RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "Creează automat instantanee, atunci când sunt create înregistrări din paginile web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Anexează automat fișierele PDF asociate, precum și alte fișiere, atunci când sunt salvate înregistrările">
-<!ENTITY zotero.preferences.automaticTags "Creează automat etichetele pentru înregistrări, împreună cu cuvintele cheie și cu titlurile">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Șterge automat itemii din coșul de gunoi mai vechi de">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "zile">
+<!ENTITY zotero.preferences.automaticTags "Creează automat etichetele pentru itemi, împreună cu cuvintele cheie și cu titlurile">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Șterge automat din coșul de gunoi itemii mai vechi de">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "zile în urmă">
 
 <!ENTITY zotero.preferences.groups "Grupuri">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Când se copiază itemii între biblioteci se vor include:">
@@ -127,7 +127,7 @@
 
 <!ENTITY zotero.preferences.keys.openZotero "Deschide/Închide panoul Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Extinde pe tot ecranul">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focalizare Panou de biblioteci">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Panou de focalizare biblioteci">
 <!ENTITY zotero.preferences.keys.quicksearch "Căutare rapidă">
 <!ENTITY zotero.preferences.keys.newItem "Creează o înregistrare nouă">
 <!ENTITY zotero.preferences.keys.newNote "Creează o notă nouă">
@@ -168,22 +168,22 @@
 <!ENTITY zotero.preferences.locate.description "Descriere">
 <!ENTITY zotero.preferences.locate.name "Nume">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Un motor de căutare extinde capacitatea de localizare în lista derulantă din panoul Informații. Activând motoarele de căutare din lista de mai jos, ele vor fi adăugate în lista derulantă și vor putea fi folosite pentru localizarea resurselor din biblioteca ta de pe web.">
-<!ENTITY zotero.preferences.locate.addDescription "Pentru a adăuga un Motor de căutare care nu e pe listă, vizitează în browser motorul de căutare dorit și selectează 'Adaugă' din bara de căutare a Firefox. Când vei redeschide acest panou de preferințe, vei avea posibilitatea să activezi noul Motor de căutare.">
+<!ENTITY zotero.preferences.locate.addDescription "Pentru a adăuga un Motor de căutare care nu e pe listă, vizitează în browser motorul de căutare dorit și selectează 'Adaugă' din meniul Localizează din Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restaurează valorile implicite">
 
 <!ENTITY zotero.preferences.charset "Codificarea caracterelor">
 <!ENTITY zotero.preferences.charset.importCharset "Importă codificarea caracterelor">
 <!ENTITY zotero.preferences.charset.displayExportOption "Afișează la export opțiunea pentru codificarea caracterelor">
 
-<!ENTITY zotero.preferences.dataDir "Locație pentru stocare">
+<!ENTITY zotero.preferences.dataDir "Locația dosarului cu date">
 <!ENTITY zotero.preferences.dataDir.useProfile "Folosește dosarul de profil din Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Personalizare:">
 <!ENTITY zotero.preferences.dataDir.choose "Alege...">
-<!ENTITY zotero.preferences.dataDir.reveal "Afișează directorul de date">
+<!ENTITY zotero.preferences.dataDir.reveal "Afișează dosarul de date">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Directorul de bază pentru anexe atașate">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero va folosi căi relative pentru fișierele anexate în directorul de bază, permițând accesarea fișierelor pe diferite calculatoare atâta timp cât structura fișierelor în directorul de bază rămâne aceeași.">
-<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Director de bază:">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Dosarul de bază pentru anexe atașate">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero va folosi căi relative pentru fișierele anexate în directorul de bază, permițând accesarea fișierelor pe diferite calculatoare atâta timp cât structura fișierelor în dosarul de bază rămâne aceeași.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Dosar de bază:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Alege…">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revino la căi absolute...">
 
@@ -194,8 +194,8 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Resetează stiluri...">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Depanare jurnal de ieșire">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Depanarea ieșirii poate ajuta dezvoltatorii Zotero să diagnosticheze problemele din Zotero. Depanarea jurnalului va încetini Zotero, așa încât va trebui s-o păstrați dezactivată până când un dezvoltator Zotero cere depanarea ieșirii.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "linii încuiate">
+<!ENTITY zotero.preferences.debugOutputLogging.message "Datele de ieșire de la depanare pot ajuta dezvoltatorii Zotero să diagnosticheze problemele din Zotero. Jurnalul de depanare va încetini Zotero, așa încât va trebui să-l păstrați dezactivat până când un dezvoltator Zotero cere datele de ieșire de la depanare.">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "linii înregistrate">
 <!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Activare după restart">
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Vizualizare ieșire">
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Ștergere ieșire">
