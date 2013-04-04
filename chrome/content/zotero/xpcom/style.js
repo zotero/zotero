@@ -187,9 +187,9 @@ Zotero.Styles = new function() {
 		var styleInstalled;
 		if(style instanceof Components.interfaces.nsIFile) {
 			// handle nsIFiles
-			origin = style.leafName;
-			styleInstalled = Zotero.File.getContentsAsync(style).when(function(style) {
-				return _install(style, origin);
+			var url = Services.io.newFileURI(style);
+			styleInstalled = Zotero.HTTP.promise("GET", url.spec).when(function(xmlhttp) {
+				return _install(xmlhttp.responseText, style.leafName);
 			});
 		} else {
 			styleInstalled = _install(style, origin);
@@ -206,7 +206,7 @@ Zotero.Styles = new function() {
 				(new Zotero.Exception.Alert("styles.install.unexpectedError",
 					origin, "styles.install.title", error)).present();
 			}
-		});
+		}).done();
 	}
 	
 	/**
@@ -430,7 +430,8 @@ Zotero.Style = function(arg) {
 			'/csl:style/csl:info[1]/csl:category', Zotero.Styles.ns))
 		if(category.hasAttribute("term"))];
 	this._class = doc.documentElement.getAttribute("class");
-	this._usesAbbreviation = !!Zotero.Utilities.xpath(doc, '//csl:text[@form="short"][@variable="container-title"][1]',
+	this._usesAbbreviation = !!Zotero.Utilities.xpath(doc,
+		'//csl:text[(@variable="container-title" and @form="short") or (@variable="container-title-short")][1]',
 		Zotero.Styles.ns).length;
 	this._hasBibliography = !!doc.getElementsByTagName("bibliography").length;
 	this._version = doc.documentElement.getAttribute("version");

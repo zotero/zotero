@@ -413,7 +413,14 @@ Zotero.Sync.Storage = new function () {
 			(item.libraryID ? item.libraryID : 0) + '/' + item.key, callbacks
 		);
 		if (queue.type == 'upload') {
-			request.setMaxSize(Zotero.Attachments.getTotalFileSize(item));
+			try {
+				request.setMaxSize(Zotero.Attachments.getTotalFileSize(item));
+			}
+			// If this fails, it's no big deal, though we might fail later
+			catch (e) {
+				Components.utils.reportError(e);
+				Zotero.debug(e, 1);
+			}
 		}
 		queue.addRequest(request, highPriority);
 	};
@@ -1651,7 +1658,6 @@ Zotero.Sync.Storage = new function () {
 			if (fileList.length == 0) {
 				Zotero.debug('No files to add -- removing zip file');
 				tmpFile.remove(null);
-				request.stop();
 				return false;
 			}
 			
@@ -1663,9 +1669,10 @@ Zotero.Sync.Storage = new function () {
 			zw.processQueue(observer, null);
 			return true;
 		}
+		// DEBUG: Do we want to catch this?
 		catch (e) {
 			Zotero.debug(e, 1);
-			request.error(e);
+			Components.utils.reportError(e);
 			return false;
 		}
 	}
@@ -1844,9 +1851,10 @@ Zotero.Sync.Storage.ZipWriterObserver.prototype = {
 			var entry = this._zipWriter.getEntry(fileName);
 			if (!entry) {
 				var msg = "ZIP entry '" + fileName + "' not found for request '" + this._data.request.name + "'";
+				Components.utils.reportError(msg);
 				Zotero.debug(msg, 1);
 				this._zipWriter.close();
-				this._data.request.error(msg);
+				this._callback(false);
 				return;
 			}
 			originalSize += entry.realSize;

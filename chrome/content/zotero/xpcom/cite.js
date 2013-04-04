@@ -177,9 +177,10 @@ Zotero.Cite = {
 			var str;
 			var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 					.createInstance(Components.interfaces.nsIDOMParser),
-				doc = parser.parseFromString(html, "text/html");
-			
-			var leftMarginDivs = Zotero.Utilities.xpath(doc, '//div[@class="csl-left-margin"]'),
+				doc = parser.parseFromString("<!DOCTYPE html><html><body></body></html>", "text/html");
+			doc.body.insertAdjacentHTML("afterbegin", html);
+			var div = doc.body.firstChild,
+				leftMarginDivs = Zotero.Utilities.xpath(doc, '//div[@class="csl-left-margin"]'),
 				multiField = !!leftMarginDivs.length,
 				clearEntries = multiField;
 			
@@ -189,7 +190,7 @@ Zotero.Cite = {
 			// Force a minimum line height
 			if(lineSpacing <= 1.35) lineSpacing = 1.35;
 			
-			var style = doc.documentElement.getAttribute("style");
+			var style = div.getAttribute("style");
 			if(!style) style = "";
 			style += "line-height: " + lineSpacing + "; ";
 			
@@ -203,7 +204,7 @@ Zotero.Cite = {
 				}
 			}
 			
-			if(style) doc.documentElement.setAttribute("style", style);
+			if(style) div.setAttribute("style", style);
 			
 			// csl-entry
 			var divs = Zotero.Utilities.xpath(doc, '//div[@class="csl-entry"]');
@@ -263,7 +264,7 @@ Zotero.Cite = {
 				div.setAttribute("style", "margin: .5em 0 0 2em; padding: 0 0 .2em .5em; border-left: 5px solid #ccc;");
 			}
 			
-			return doc.documentElement.outerHTML;
+			return doc.body.innerHTML;
 		} else if(format == "text") {
 			return bib[0].bibstart+bib[1].join("")+bib[0].bibend;
 		} else if(format == "rtf") {
@@ -376,8 +377,6 @@ Zotero.Cite.getAbbreviation = new function() {
 	 * Replace getAbbreviation on citeproc-js with our own handler.
 	 */
 	return function getAbbreviation(listname, obj, jurisdiction, category, key) {
-		if(!Zotero.Prefs.get("cite.automaticTitleAbbreviation")) return;
-
 		init();
 
 		// Short circuit if we know we don't handle this kind of abbreviation
@@ -471,31 +470,30 @@ Zotero.Cite.System.prototype = {
 	 */
 	"retrieveItem":function retrieveItem(item) {
 		var zoteroItem, slashIndex;
-		if(item instanceof Zotero.Item) {
+		if(typeof item === "object" && item !== null &&  item instanceof Zotero.Item) {
 			//if(this._cache[item.id]) return this._cache[item.id];
 			zoteroItem = item;
-		} else {
-			var type = typeof item;
-			if(type === "string" && (slashIndex = item.indexOf("/")) !== -1) {
-				// is an embedded item
-				var sessionID = item.substr(0, slashIndex);
-				var session = Zotero.Integration.sessions[sessionID]
-				if(session) {
-					var embeddedCitation = session.embeddedItems[item.substr(slashIndex+1)];
-					if(embeddedCitation) {
-						embeddedCitation.id = item;
-						return embeddedCitation;
-					}
+		} else if(typeof item === "string" && (slashIndex = item.indexOf("/")) !== -1) {
+			// is an embedded item
+			var sessionID = item.substr(0, slashIndex);
+			var session = Zotero.Integration.sessions[sessionID]
+			if(session) {
+				var embeddedCitation = session.embeddedItems[item.substr(slashIndex+1)];
+				if(embeddedCitation) {
+					embeddedCitation.id = item;
+					return embeddedCitation;
 				}
-			} else {
-				// is an item ID
-				//if(this._cache[item]) return this._cache[item];
-				zoteroItem = Zotero.Items.get(item);
 			}
+		} else {
+			// is an item ID
+			//if(this._cache[item]) return this._cache[item];
+			try {
+				zoteroItem = Zotero.Items.get(item);
+			} catch(e) {}
 		}
-	
+
 		if(!zoteroItem) {
-			throw "Zotero.Cite.getCSLItem called to wrap a non-item "+item;
+			throw "Zotero.Cite.System.retrieveItem called on non-item "+item;
 		}
 		
 		// don't return URL or accessed information for journal articles if a

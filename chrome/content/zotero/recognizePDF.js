@@ -106,7 +106,7 @@ var Zotero_RecognizePDF = new function() {
 				Zotero.debug("RecognizePDF: "+error);
 				
 				// Use only first column from multi-column lines
-				const lineRe = /^\s*([^\s]+(?: [^\s]+)+)/;
+				const lineRe = /^[\s_]*([^\s]+(?: [^\s_]+)+)/;
 				var cleanedLines = [], cleanedLineLengths = [];
 				for(var i=0; i<lines.length && cleanedLines.length<100; i++) {
 					var m = lineRe.exec(lines[i]);

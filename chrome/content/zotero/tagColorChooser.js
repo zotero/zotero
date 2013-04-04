@@ -130,9 +130,15 @@ var Zotero_Tag_Color_Chooser = new function() {
 		num.id = 'number-key';
 		num.setAttribute('value', parseInt(tagPosition.value) + 1);
 		
-		instructions.appendChild(document.createTextNode(matches[1]));
-		instructions.appendChild(num);
-		instructions.appendChild(document.createTextNode(matches[2]));
+		if (matches) {
+			instructions.appendChild(document.createTextNode(matches[1]));
+			instructions.appendChild(num);
+			instructions.appendChild(document.createTextNode(matches[2]));
+		}
+		// If no $NUMBER variable in translated string, fail as gracefully as possible
+		else {
+			instructions.appendChild(document.createTextNode(msg));
+		}
 	};
 	
 	

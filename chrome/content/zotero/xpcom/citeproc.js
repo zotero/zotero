@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.443",
+    PROCESSOR_VERSION: "1.0.446",
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
     LOCATOR_LABELS_REGEXP: new RegExp("^((art|ch|Ch|subch|col|fig|l|n|no|op|p|pp|para|subpara|pt|r|sec|subsec|Sec|sv|sch|tit|vrs|vol)\\.)\\s+(.*)"),
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
@@ -253,7 +253,7 @@ var CSL = {
         "delimiter"
     ],
     PARALLEL_MATCH_VARS: ["container-title"],
-    PARALLEL_TYPES: ["bill","gazette","legislation","legal_case","treaty","article-magazine","article-journal"],
+    PARALLEL_TYPES: ["bill","gazette","regulation","legislation","legal_case","treaty","article-magazine","article-journal"],
     PARALLEL_COLLAPSING_MID_VARSET: ["volume", "issue", "container-title", "section", "collection-number"],
     LOOSE: 0,
     STRICT: 1,
@@ -3429,30 +3429,25 @@ CSL.Engine.prototype.rebuildProcessorState = function (citations, mode, uncitedI
     if (!citations) {
         citations = [];
     }
-    if (!uncitedItemIDs) {
-        uncitedItemIDs = {};
+    if (!mode) {
+        mode = 'html';
     }
     var itemIDs = [];
-    var myUncitedItemIDs = [];
     for (var i=0,ilen=citations.length;i<ilen;i+=1) {
         for (var j=0,jlen=citations[i].citationItems.length;j<jlen;j+=1) {
             var itemID = "" + citations[i].citationItems[j].id;
             itemIDs.push(itemID);
-            if (uncitedItemIDs[itemID]) {
-                delete uncitedItemIDs[itemID];
-            }
         }
     }
     this.updateItems(itemIDs);
-    for (var key in uncitedItemIDs) {
-        myUncitedItemIDs.push(key);
-    }
-    this.updateUncitedItems(myUncitedItemIDs);
+    this.updateUncitedItems(uncitedItemIDs);
     var pre = [];
     var post = [];
     var ret = [];
+    var oldMode = this.opt.mode;
+    this.setOutputFormat(mode);
     for (var i=0,ilen=citations.length;i<ilen;i+=1) {
-        var res = this.processCitationCluster(citations[i],pre,post,mode);
+        var res = this.processCitationCluster(citations[i],pre,post,CSL.ASSUME_ALL_ITEMS_REGISTERED);
         pre.push([citations[i].citationID,citations[i].properties.noteIndex]);
         for (var j=0,jlen=res[1].length;j<jlen;j+=1) {
             var index = res[1][j][0];
@@ -3463,6 +3458,7 @@ CSL.Engine.prototype.rebuildProcessorState = function (citations, mode, uncitedI
             ];
         }
     }
+    this.setOutputFormat(oldMode);
     return ret;
 }
 CSL.Engine.prototype.restoreProcessorState = function (citations) {
@@ -3553,9 +3549,27 @@ CSL.Engine.prototype.updateItems = function (idList, nosort, rerun_ambigs) {
 };
 CSL.Engine.prototype.updateUncitedItems = function (idList, nosort) {
     var debug = false;
+    if (!idList) {
+        idList = [];
+    }
+    if ("object" == typeof idList) {
+        if ("undefined" == typeof idList.length) {
+            var idHash = idList;
+            idList = [];
+            for (var key in idHash) {
+                idList.push(key);
+            }
+        } else if ("number" == typeof idList.length) {
+            var idHash = {};
+            for (var i=0,ilen=idList.length;i<ilen;i+=1) {
+                idHash[idList[i]] = true;
+            }
+        }
+    }
     this.registry.init(idList, true);
+    this.registry.dopurge(idHash);
     this.registry.doinserts(this.registry.mylist);
-    this.registry.douncited();
+    this.registry.dorefreshes();
     this.registry.rebuildlist();
     this.registry.setsortkeys();
     this.registry.setdisambigs();
@@ -4666,6 +4680,11 @@ CSL.getCite = function (Item, item, prevItemID) {
 };
 CSL.citeStart = function (Item, item) {
     this.tmp.same_author_as_previous_cite = false;
+    if (!this.tmp.suppress_decorations) {
+        this.tmp.subsequent_author_substitute_ok = true;
+    } else {
+        this.tmp.subsequent_author_substitute_ok = false;
+    }
     this.tmp.lastchr = "";
     if (this.tmp.area === "citation" && this.citation.opt.collapse && this.citation.opt.collapse.length) {
         this.tmp.have_collapsed = true;
@@ -6103,6 +6122,9 @@ CSL.NameOutput = function(state, Item, item, variables) {
     this._please_chop = false;
 };
 CSL.NameOutput.prototype.init = function (names) {
+    if (this.state.tmp.term_predecessor) {
+        this.state.tmp.subsequent_author_substitute_ok = false;
+    }
     if (this.nameset_offset) {
         this.nameset_base = this.nameset_base + this.nameset_offset;
     }
@@ -9864,7 +9886,7 @@ CSL.Transform = function (state) {
                 }
             }
         }
-        if (!value && altvar && Item[altvar] && use_field) {
+        if (!value && Item.type !== 'legal_case' && altvar && Item[altvar] && use_field) {
             value = Item[altvar];
         }
         if (!value) {
@@ -11298,7 +11320,7 @@ CSL.Util.substituteEnd = function (state, target) {
         func = function (state, Item) {
             var i, ilen;
             var printing = !state.tmp.suppress_decorations;
-            if (printing && state.tmp.area === "bibliography") {
+            if (printing && state.tmp.area === "bibliography" && state.tmp.subsequent_author_substitute_ok) {
                 if (state.tmp.rendered_name) {
                     if ("partial-each" === subrule || "partial-first" === subrule) {
                         var dosub = true;
@@ -12544,7 +12566,7 @@ CSL.Registry = function (state) {
     this.myhash = {};
     this.deletes = [];
     this.inserts = [];
-    this.uncited = [];
+    this.uncited = {};
     this.refreshes = {};
     this.akeys = {};
     this.oldseq = {};
@@ -12566,40 +12588,50 @@ CSL.Registry = function (state) {
         return ret;
     };
 };
-CSL.Registry.prototype.init = function (myitems, uncited_flag) {
+CSL.Registry.prototype.init = function (itemIDs, uncited_flag) {
     var i, ilen;
     this.oldseq = {};
-    var tmphash = {};
-    myitems.reverse();
-    for (i = myitems.length - 1; i > -1; i += -1) {
-        if (tmphash[myitems[i]]) {
-            myitems = myitems.slice(0, i).concat(myitems.slice(i + 1));
-        } else {
-            tmphash[myitems[i]] = true;
-        }
-    }
-    myitems.reverse();
     if (uncited_flag) {
-        for (var i = myitems.length - 1; i > -1; i += -1) {
-            myitems[i] = "" + myitems[i];
-            if (!this.myhash[myitems[i]] && this.mylist.indexOf(myitems[i]) === -1) {
-                this.mylist.push(myitems[i]);
+        this.uncited = {};
+        for (var i=0,ilen=itemIDs.length;i<ilen; i += 1) {
+            if (!this.myhash[itemIDs[i]]) {
+                this.mylist.push("" + itemIDs[i]);
+            }
+            this.uncited[itemIDs[i]] = true;
+            this.myhash[itemIDs[i]] = true;
+        }
+    } else {
+        for (var key in this.uncited) {
+            itemIDs.push(key);
+        }
+        var myhash = {};
+        for (i=itemIDs.length-1;i>-1; i += -1) {
+            if (myhash[itemIDs[i]]) {
+                itemIDs = itemIDs.slice(0, i).concat(itemIDs.slice(i + 1));
             } else {
-                myitems = myitems.slice(0,i).concat(myitems.slice(i + 1))
+                myhash[itemIDs[i]] = true;
             }
         }
-        this.uncited = myitems;
-    } else {
-        this.mylist = myitems.concat(this.uncited);
-    }
-    this.myhash = {};
-    for (i = 0, ilen = this.mylist.length; i < ilen; i += 1) {
-        this.mylist[i] = "" + this.mylist[i];
-        this.myhash[this.mylist[i]] = true;
+        this.mylist = [];
+        for (var i=0,ilen=itemIDs.length;i<ilen;i+=1) {
+            this.mylist.push("" + itemIDs[i]);
+        }
+        this.myhash = myhash;
     }
     this.refreshes = {};
     this.touched = {};
     this.ambigsTouched = {};
+};
+CSL.Registry.prototype.dopurge = function (myhash) {
+    for (var i=this.mylist.length-1;i>-1;i+=-1) {
+        if (this.citationreg.citationsByItemId) {
+            if (!this.citationreg.citationsByItemId[this.mylist[i]] && !myhash[this.mylist[i]]) {
+                delete this.myhash[this.mylist[i]];
+                this.mylist = this.mylist.slice(0,i).concat(this.mylist.slice(i+1));
+            }
+        }
+    }
+    this.dodeletes(this.myhash);
 };
 CSL.Registry.prototype.dodeletes = function (myhash) {
     var otheritems, key, ambig, pos, len, items, kkey, mypos, id;
@@ -12609,7 +12641,7 @@ CSL.Registry.prototype.dodeletes = function (myhash) {
     }
     for (key in this.registry) {
         if (!myhash[key]) {
-            if (this.registry[key].uncited) {
+            if (this.uncited[key]) {
                 continue;
             }
             otheritems = this.namereg.delitems(key);
@@ -12694,16 +12726,6 @@ CSL.Registry.prototype.doinserts = function (mylist) {
         }
     }
 };
-CSL.Registry.prototype.douncited = function () {
-    var pos, len;
-    var cited_len = this.mylist.length - this.uncited.length;
-    for (pos = 0, len = cited_len; pos < len; pos += 1) {
-        this.registry[this.mylist[pos]].uncited = false;
-    }
-    for (pos = cited_len, len = this.mylist.length; pos < len; pos += 1) {
-        this.registry[this.mylist[pos]].uncited = true;
-    }
-};
 CSL.Registry.prototype.rebuildlist = function () {
     var count, len, pos, item;
     this.reflist = [];
@@ -12778,7 +12800,7 @@ CSL.Registry.prototype.setsortkeys = function () {
     var key;
     for (var i = 0, ilen = this.mylist.length; i < ilen; i += 1) {
         var key = this.mylist[i];
-        if (this.touched[key] || this.state.tmp.taintedItemIDs[key]) {
+        if (this.touched[key] || this.state.tmp.taintedItemIDs[key] || !this.registry[key].sortkeys) {
             this.registry[key].sortkeys = CSL.getSortKeys.call(this.state, this.state.retrieveItem(key), "bibliography_sort");
         }
     }
@@ -13104,6 +13126,7 @@ CSL.Disambiguation.prototype.run = function(akey) {
     if (!this.modes.length) {
         return;
     }
+    this.akey = akey;
     if (this.initVars(akey)) {
         this.runDisambig();
     }
@@ -13197,18 +13220,20 @@ CSL.Disambiguation.prototype.disNames = function (ismax) {
 };
 CSL.Disambiguation.prototype.disExtraText = function () {
     var pos, len, mybase;
-    if (this.modes.length > 1 && !this.base.disambiguate) {
+    if (!this.base.disambiguate) {
+        this.initVars(this.akey)
         this.modeindex = 0;
-        this.base = CSL.cloneAmbigConfig(this.betterbase);
-    }
-    if (!this.betterbase.disambiguate) {
         this.base.disambiguate = true;
         this.betterbase.disambiguate = true;
         this.initGivens = true;
-    } else {
+        for (var i = 0, ilen = this.lists[this.listpos][1].length; i < ilen; i += 1) {
+            this.state.tmp.taintedItemIDs[this.lists[this.listpos][1][i].id] = true;
+        }
+    } else if (this.lists[this.listpos][1].length > 1) {
         if (this.modeindex === this.modes.length - 1) {
             var base = this.lists[this.listpos][0];
             for (var i = 0, ilen = this.lists[this.listpos][1].length; i < ilen; i += 1) {
+                this.state.tmp.taintedItemIDs[this.lists[this.listpos][1][i].id] = true;
                 this.state.registry.registerAmbigToken(this.akey, "" + this.lists[this.listpos][1][i].id, base);
             }
             this.lists[this.listpos] = [this.betterbase, []];

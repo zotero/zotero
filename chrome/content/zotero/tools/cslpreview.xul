@@ -37,8 +37,6 @@
 	
 	<script>
 	<![CDATA[
-		default xml namespace = "http://purl.org/net/xbiblio/csl";
-
 		var Zotero_CSL_Preview = new function() {
 			this.init = init;
 			this.refresh = refresh;
