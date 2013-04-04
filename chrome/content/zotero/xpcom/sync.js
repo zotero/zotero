@@ -1092,7 +1092,7 @@ Zotero.Sync.Runner.EventListener = {
 	
 	notify: function (event, type, ids, extraData) {
 		// TODO: skip others
-		if (type == 'refresh') {
+		if (event == 'refresh' || event == 'redraw') {
 			return;
 		}
 		
