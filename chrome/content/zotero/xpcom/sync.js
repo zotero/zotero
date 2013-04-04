@@ -2688,7 +2688,7 @@ Zotero.Sync.Server.Data = new function() {
 					var tagID = Zotero.DB.valueQuery(sql, [libraryID, key]);
 					
 					var sql = "SELECT COUNT(*) > 0 FROM itemTags WHERE tagID=?";
-					if (Zotero.DB.valueQuery(sql, [tagID])) {
+					if (tagID && Zotero.DB.valueQuery(sql, [tagID])) {
 						var sql = "UPDATE tags SET clientDateModified=CURRENT_TIMESTAMP "
 							+ "WHERE tagID=?";
 						Zotero.DB.query(sql, [tagID]);
