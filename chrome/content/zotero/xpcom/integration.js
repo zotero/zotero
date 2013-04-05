@@ -1327,7 +1327,7 @@ Zotero.Integration.Fields.prototype.get = function get() {
 	// If already getting fields, just return the promise
 	if(this._deferreds) {
 		this._deferreds.push(deferred);
-		return deferred;
+		return deferred.promise;
 	} else {
 		this._deferreds = [deferred];
 	}
