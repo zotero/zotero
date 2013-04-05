@@ -247,10 +247,6 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 		throw ("Cannot access database layer from a higher wait level if a transaction is open");
 	}
 	
-	// First, determine the type of query using first word
-	var matches = sql.match(/^[^\s\(]*/);
-	var queryMethod = matches[0].toLowerCase();
-	
 	[sql, params] = this.parseQueryAndParams(sql, params);
 	
 	try {
@@ -372,6 +368,10 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 
 Zotero.DBConnection.prototype.parseQueryAndParams = function (sql, params) {
 	if (params) {
+		// First, determine the type of query using first word
+		var matches = sql.match(/^[^\s\(]*/);
+		var queryMethod = matches[0].toLowerCase();
+		
 		// If single scalar value or single non-array object, wrap in an array
 		if (typeof params != 'object' || params === null ||
 				(typeof params == 'object' && !params.length)) {
