@@ -177,7 +177,7 @@ Zotero.DBConnection.prototype.query = function (sql,params) {
 		
 		var dberr = (db.lastErrorString!='not an error')
 			? ' [ERROR: ' + db.lastErrorString + ']' : '';
-		throw(e + ' [QUERY: ' + sql + ']' + dberr);
+		throw new Error(e + ' [QUERY: ' + sql + ']' + dberr);
 	}
 }
 
@@ -256,7 +256,7 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 	catch (e) {
 		var dberr = (db.lastErrorString!='not an error')
 			? ' [ERROR: ' + db.lastErrorString + ']' : '';
-		throw(e + ' [QUERY: ' + sql + ']' + dberr);
+		throw new Error(e + ' [QUERY: ' + sql + ']' + dberr);
 	}
 	
 	var numParams = statement.parameterCount;
