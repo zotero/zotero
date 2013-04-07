@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "隐藏其它">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "显示所有">
-<!ENTITY quitApplicationCmdMac.label "退出Zotero">
+<!ENTITY quitApplicationCmdMac.label "退出 Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 

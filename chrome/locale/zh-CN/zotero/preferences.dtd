@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "笔记字体大小:">
 
 <!ENTITY zotero.preferences.miscellaneous "杂项">
-<!ENTITY zotero.preferences.autoUpdate "自动检查转换器更新">
+<!ENTITY zotero.preferences.autoUpdate "自动更新转换器">
 <!ENTITY zotero.preferences.updateNow "立刻更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "报告失效的网站转换器">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "允许 zotero.org 根据当前 Zotero 版本定制内容">
@@ -189,8 +189,8 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "数据库维护">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "数据库完整性检查">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "重设转换器和样式...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重设转换器...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "转换器和样式重置...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "转换器重置...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "重设样式...">
 
 <!ENTITY zotero.preferences.debugOutputLogging "调试输出记录">

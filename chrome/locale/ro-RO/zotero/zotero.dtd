@@ -85,7 +85,7 @@
 <!ENTITY zotero.items.menu.attach.fileLink "Anexează o legătură la fișier...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaurează la bibliotecă">
-<!ENTITY zotero.items.menu.duplicateItem "Duplică item">
+<!ENTITY zotero.items.menu.duplicateItem "Creează un duplicat al înregistrării">
 <!ENTITY zotero.items.menu.mergeItems "Unește itemii...">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Alege versiunea itemului pe care-l folosești ca item master:">
