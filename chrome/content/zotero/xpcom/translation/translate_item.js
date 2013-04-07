@@ -411,12 +411,12 @@ Zotero.Translate.ItemSaver.prototype = {
 				// Save attachment if snapshot pref enabled or not HTML
 				// (in which case downloadAssociatedFiles applies)
 				} else {
-					if(!attachment.mimeType && attachment.mimeType !== '') {
+					if(!attachment.mimeType && attachment.mimeType !== '') {	//in case '' indicates unknwon mime type at some point
 						Zotero.debug("Translate: No mimeType specified for a possible snapshot. Trying to determine mimeType.", 4);
 						var me = this;
 						try {
 							Zotero.MIME.getMIMETypeFromURL(attachment.url, function (mimeType, hasNativeHandler) {
-								attachment.mimeType = mimeType || '';
+								attachment.mimeType = mimeType;
 								me._saveAttachmentDownload(attachment, parentID, attachmentCallback);
 							}, this._cookieSandbox);
 						} catch(e) {
