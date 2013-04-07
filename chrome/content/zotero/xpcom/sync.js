@@ -1228,9 +1228,18 @@ Zotero.Sync.Server = new function () {
 		}
 		catch (e) {
 			Zotero.debug(e);
-			var msg = Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"
-						+ Zotero.getString('sync.error.loginManagerCorrupted2', [Zotero.appName, Zotero.appName]);
-			alert(msg);
+			if (Zotero.isStandalone) {
+				var msg = Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"
+					+ Zotero.getString('sync.error.loginManagerCorrupted2', [Zotero.appName, Zotero.appName]);
+			}
+			else {
+				var msg = Zotero.getString('sync.error.loginManagerInaccessible') + "\n\n"
+					+ Zotero.getString('sync.error.checkMasterPassword', Zotero.appName) + "\n\n"
+					+ Zotero.getString('sync.error.corruptedLoginManager', Zotero.appName);
+			}
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+				.getService(Components.interfaces.nsIPromptService);
+			ps.alert(null, Zotero.getString('general.error'), msg);
 			return '';
 		}
 		
