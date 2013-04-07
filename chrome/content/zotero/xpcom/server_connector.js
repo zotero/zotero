@@ -624,8 +624,8 @@ Zotero.Server.Connector.IEHack.prototype = {
 	"init":function(postData, sendResponseCallback) {
 		sendResponseCallback(200, "text/html",
 			'<!DOCTYPE html><html><head>'+
-			'<script src="https://www.zotero.org/bookmarklet/common_ie.js"></script>'+
-			'<script src="https://www.zotero.org/bookmarklet/ie_hack.js"></script>'+
+			'<script src="'+ZOTERO_CONFIG.BOOKMARKLET_URL+'common_ie.js"></script>'+
+			'<script src="'+ZOTERO_CONFIG.BOOKMARKLET_URL+'ie_hack.js"></script>'+
 			'</head><body></body></html>');
 	}
 }
