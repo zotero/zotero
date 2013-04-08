@@ -195,17 +195,18 @@ Zotero.Utilities.Translate.prototype.loadDocument = function(url, succeeded, fai
  * @ignore
  */
 Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor, done, exception) {
+	var translate = this._translate;
+
 	if(typeof(urls) == "string") {
-		urls = [this._convertURL(urls)];
+		urls = [translate.resolveURL(urls)];
 	} else {
 		for(var i in urls) {
-			urls[i] = this._convertURL(urls[i]);
+			urls[i] = translate.resolveURL(urls[i]);
 		}
 	}
 	
 	// Unless the translator has proposed some way to handle an error, handle it
 	// by throwing a "scraping error" message
-	var translate = this._translate;
 	if(exception) {
 		var myException = function(e) {
 			var browserDeleted;
@@ -300,7 +301,9 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 * @return {Boolean} True if the request was sent, or false if the browser is offline
 */
 Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, responseCharset) {
-	var callAgain = false;
+	var callAgain = false,
+		me = this,
+		translate = this._translate;
 	
 	if(typeof(urls) == "string") {
 		var url = urls;
@@ -309,11 +312,9 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 		var url = urls.shift();
 	}
 	
-	url = this._convertURL(url);
+	url = translate.resolveURL(url);
 	
-	var me = this;
-	
-	this._translate.incrementAsyncProcesses("Zotero.Utilities.Translate#doGet");
+	translate.incrementAsyncProcesses("Zotero.Utilities.Translate#doGet");
 	var xmlhttp = Zotero.HTTP.doGet(url, function(xmlhttp) {
 		try {
 			if(processor) {
@@ -327,9 +328,9 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 					done();
 				}
 			}
-			me._translate.decrementAsyncProcesses("Zotero.Utilities.Translate#doGet");
+			translate.decrementAsyncProcesses("Zotero.Utilities.Translate#doGet");
 		} catch(e) {
-			me._translate.complete(false, e);
+			translate.complete(false, e);
 		}
 	}, responseCharset, this._translate.cookieSandbox);
 }
@@ -339,10 +340,10 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
  * @ignore
  */
 Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, headers, responseCharset) {
-	url = this._convertURL(url);
-	
 	var translate = this._translate;
-	this._translate.incrementAsyncProcesses("Zotero.Utilities.Translate#doPost");
+	url = translate.resolveURL(url);
+	
+	translate.incrementAsyncProcesses("Zotero.Utilities.Translate#doPost");
 	var xmlhttp = Zotero.HTTP.doPost(url, body, function(xmlhttp) {
 		try {
 			onDone(xmlhttp.responseText, xmlhttp);
@@ -351,55 +352,6 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
 			translate.complete(false, e);
 		}
 	}, headers, responseCharset, translate.cookieSandbox ? translate.cookieSandbox : undefined);
-}
-
-/**
- * Translate a URL to a form that goes through the appropriate proxy, or convert a relative URL to
- * an absolute one
- *
- * @param {String} url
- * @type String
- * @private
- */
-Zotero.Utilities.Translate.prototype._convertURL = function(url) {
-	const hostPortRe = /^((?:http|https|ftp):)\/\/([^\/]+)/i;
-	// resolve local URL
-	var resolved = "";
-	
-	// convert proxy to proper if applicable
-	if(hostPortRe.test(url)) {
-		if(this._translate.translator && this._translate.translator[0]
-				&& this._translate.translator[0].properToProxy) {
-			resolved = this._translate.translator[0].properToProxy(url);
-		} else {
-			resolved = url;
-		}
-	} else if(Zotero.isFx) {
-		resolved = Components.classes["@mozilla.org/network/io-service;1"].
-			getService(Components.interfaces.nsIIOService).
-			newURI(this._translate.location, "", null).resolve(url);
-	} else if(Zotero.isNode) {
-		resolved = require('url').resolve(this._translate.location, url);
-	} else {
-		var a = document.createElement('a');
-        a.href = url;
-        resolved = a.href;
-	}
-	
-	/*var m = hostPortRe.exec(resolved);
-	if(!m) {
-		throw new Error("Invalid URL supplied for HTTP request: "+url);
-	} else if(this._translate.document && this._translate.document.location) {
-		var loc = this._translate.document.location;
-		if(this._translate._currentState !== "translate" && loc
-				&& (m[1].toLowerCase() !== loc.protocol.toLowerCase()
-				|| m[2].toLowerCase() !== loc.host.toLowerCase())) {
-			throw new Error("Attempt to access "+m[1]+"//"+m[2]+" from "+loc.protocol+"//"+loc.host
-				+" blocked: Cross-site requests are only allowed during translation");
-		}
-	}*/
-	
-	return resolved;
 }
 
 Zotero.Utilities.Translate.prototype.__exposedProps__ = {"HTTP":"r"};
