@@ -282,15 +282,14 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	var sql = "SELECT itemID, CASE "
 				+ "WHEN maxID>6 THEN realvalue "
 				+ "ELSE NULL "
-			+ "END as checkvalue "
+			+ "END as value "
 			+ "FROM (SELECT itemID, max(fieldID) AS maxID, group_concat(value, '::') AS realvalue "
 				+ "FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
 				+ "WHERE libraryID=? AND fieldID in (5, 6, 110, 111, 112, 113) "
 				+ "AND itemTypeID NOT IN (1, 14, 16, 17, 20) "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
-				+ "GROUP BY itemID) "
-			+ "ORDER BY checkvalue COLLATE locale";
+			+ "GROUP BY itemID)";
 	var rows = Zotero.DB.query(sql, [this._libraryID]);
 	if(rows) {
 		//normalize all values ahead of time
