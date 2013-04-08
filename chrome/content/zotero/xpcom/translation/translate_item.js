@@ -336,7 +336,9 @@ Zotero.Translate.ItemSaver.prototype = {
 			// Determine whether to save an attachment
 			if(attachment.snapshot !== false) {
 				if(attachment.document
-						|| (attachment.mimeType && attachment.mimeType == "text/html")) {
+						|| (attachment.mimeType &&
+							(attachment.mimeType === "text/html"
+							 || attachment.mimeType == "application/xhtml+xml"))) {
 					if(!Zotero.Prefs.get("automaticSnapshots")) return;
 				} else {
 					if(!Zotero.Prefs.get("downloadAssociatedFiles")) return;
