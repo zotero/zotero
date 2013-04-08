@@ -336,10 +336,16 @@ Zotero.Translate.ItemSaver.prototype = {
 			// Determine whether to save an attachment
 			if(attachment.snapshot !== false) {
 				if(attachment.document
-						|| (attachment.mimeType && attachment.mimeType == "text/html")) {
-					if(!Zotero.Prefs.get("automaticSnapshots")) return;
+						|| (attachment.mimeType && Zotero.Attachments.SNAPSHOT_MIMETYPES.indexOf(attachment.mimeType) != -1)) {
+					if(!Zotero.Prefs.get("automaticSnapshots")) {
+						Zotero.debug("Translate: Automatic snapshots are disabled. Skipping.", 4);
+						return;
+					}
 				} else {
-					if(!Zotero.Prefs.get("downloadAssociatedFiles")) return;
+					if(!Zotero.Prefs.get("downloadAssociatedFiles")) {
+						Zotero.debug("Translate: File attachments are disabled. Skipping.", 4);
+						return;
+					}
 				}
 			}
 			
@@ -405,10 +411,24 @@ Zotero.Translate.ItemSaver.prototype = {
 				// Save attachment if snapshot pref enabled or not HTML
 				// (in which case downloadAssociatedFiles applies)
 				} else {
+					if(!attachment.mimeType && attachment.mimeType !== '') {
+						Zotero.debug("Translate: No mimeType specified for a possible snapshot. Trying to determine mimeType.", 4);
+						var me = this;
+						try {
+							Zotero.MIME.getMIMETypeFromURL(attachment.url, function (mimeType, hasNativeHandler) {
+								attachment.mimeType = mimeType || '';
+								me._saveAttachmentDownload(attachment, parentID, attachmentCallback);
+							}, this._cookieSandbox);
+						} catch(e) {
+							Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
+							attachmentCallback(attachment, false, e);
+						}
+						return;
+					}
 					var mimeType = (attachment.mimeType ? attachment.mimeType : null);
 					var fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentID);
 					try {
-						Zotero.debug('Importing attachment from URL');
+						Zotero.debug('Translate: Importing attachment from URL', 4);
 						attachment.linkMode = "imported_url";
 						Zotero.Attachments.importFromURL(attachment.url, parentID, title,
 							fileBaseName, null, mimeType, this._libraryID, function(status, err) {
