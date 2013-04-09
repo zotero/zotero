@@ -1,4 +1,4 @@
--- 37
+-- 38
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -995,17 +995,18 @@ INSERT INTO itemTypeFields VALUES (33, 22, NULL, 22);
 INSERT INTO itemTypeFields VALUES (34, 110, NULL, 1);  -- title
 INSERT INTO itemTypeFields VALUES (34, 90, NULL, 2);   -- abstract
 INSERT INTO itemTypeFields VALUES (34, 8, NULL, 3);    -- publisher
-INSERT INTO itemTypeFields VALUES (34, 14, NULL, 4);   -- date
-INSERT INTO itemTypeFields VALUES (34, 87, NULL, 5);   -- language
-INSERT INTO itemTypeFields VALUES (34, 116, NULL, 6);  -- shortTitle
-INSERT INTO itemTypeFields VALUES (34, 1, NULL, 7);    -- url
-INSERT INTO itemTypeFields VALUES (34, 27, NULL, 8);   -- accessed
-INSERT INTO itemTypeFields VALUES (34, 123, NULL, 9);  -- archive
-INSERT INTO itemTypeFields VALUES (34, 19, NULL, 10);  -- archiveLocation
-INSERT INTO itemTypeFields VALUES (34, 62, NULL, 11);  -- libraryCatalog
-INSERT INTO itemTypeFields VALUES (34, 18, NULL, 12);  -- callNumber
-INSERT INTO itemTypeFields VALUES (34, 2, NULL, 13);   -- rights
-INSERT INTO itemTypeFields VALUES (34, 22, NULL, 14);  -- extra
+INSERT INTO itemTypeFields VALUES (34, 81, NULL, 4);   -- version [ADDED]
+INSERT INTO itemTypeFields VALUES (34, 14, NULL, 5);   -- date
+INSERT INTO itemTypeFields VALUES (34, 87, NULL, 6);   -- language
+INSERT INTO itemTypeFields VALUES (34, 116, NULL, 7);  -- shortTitle
+INSERT INTO itemTypeFields VALUES (34, 1, NULL, 8);    -- url
+INSERT INTO itemTypeFields VALUES (34, 27, NULL, 9);   -- accessed
+INSERT INTO itemTypeFields VALUES (34, 123, NULL, 10);  -- archive
+INSERT INTO itemTypeFields VALUES (34, 19, NULL, 11);  -- archiveLocation
+INSERT INTO itemTypeFields VALUES (34, 62, NULL, 12);  -- libraryCatalog
+INSERT INTO itemTypeFields VALUES (34, 18, NULL, 13);  -- callNumber
+INSERT INTO itemTypeFields VALUES (34, 2, NULL, 14);   -- rights
+INSERT INTO itemTypeFields VALUES (34, 22, NULL, 15);  -- extra
 
 INSERT INTO itemTypeFields VALUES (35, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (35, 90, NULL, 2);
@@ -1160,7 +1161,6 @@ INSERT INTO baseFieldMappings VALUES (16, 4, 94); -- bill/volume/codeVolume
 INSERT INTO baseFieldMappings VALUES (17, 4, 97); -- case/volume/reporterVolume
 INSERT INTO baseFieldMappings VALUES (7, 8, 89); -- thesis/publisher/university
 INSERT INTO baseFieldMappings VALUES (11, 8, 21); -- film/publisher/distributor
-INSERT INTO baseFieldMappings VALUES (15, 8, 31); -- report/publisher/institution
 INSERT INTO baseFieldMappings VALUES (26, 8, 72); -- audioRecording/publisher/label
 INSERT INTO baseFieldMappings VALUES (28, 8, 76); -- videoRecording/publisher/studio
 INSERT INTO baseFieldMappings VALUES (29, 8, 78); -- tvBroadcast/publisher/network
