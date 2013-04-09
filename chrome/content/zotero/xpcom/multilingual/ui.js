@@ -99,6 +99,9 @@ Zotero.EXTENDED_FIELDS = {
 	},
 	"classic":{
 		"volume":"volume"
+	},
+	"document":{
+		"version":"version"
 	}
 }
 
