@@ -51,14 +51,19 @@ Zotero_TranslatorTesters = new function() {
 			Zotero.Translators.getAllForType(TEST_TYPES[i], new function() {
 				var type = TEST_TYPES[i];
 				return function(translators) {
-					for(var i=0; i<translators.length; i++) {
-						if(skipTranslators && !skipTranslators[translators[i].translatorID]) {
-							testers.push(new Zotero_TranslatorTester(translators[i], type));
+					try {
+						for(var i=0; i<translators.length; i++) {
+							if(skipTranslators && !skipTranslators[translators[i].translatorID]) {
+								testers.push(new Zotero_TranslatorTester(translators[i], type));
+							}
+						};
+						
+						if(!(--waitingForTranslators)) {
+							runTesters(testers, numConcurrentTests, doneCallback);
 						}
-					};
-					
-					if(!(--waitingForTranslators)) {
-						runTesters(testers, numConcurrentTests, doneCallback);
+					} catch(e) {
+						Zotero.debug(e);
+						Zotero.logError(e);
 					}
 				};
 			}, true);
@@ -70,46 +75,51 @@ Zotero_TranslatorTesters = new function() {
 	 */
 	function runTesters(testers, numConcurrentTests, doneCallback) {
 		var testersRunning = 0;
-		var results = [];
+		var results = []
 		
 		if("getLocaleCollation" in Zotero) {
 			var collation = Zotero.getLocaleCollation();
-			strcmp = function(a, b) {
+			var strcmp = function(a, b) {
 				return collation.compareString(1, a, b);
 			};
 		} else {
-			strcmp = function (a, b) {
+			var strcmp = function (a, b) {
 				return a.toLowerCase().localeCompare(b.toLowerCase());
 			};
 		}
 		
 		var testerDoneCallback = function(tester) {
-			if(tester.pending.length) return;
-			
-			Zotero.debug("Done testing "+tester.translator.label);
-			
-			// Done translating, so serialize test results
-			testersRunning--;
-			results.push(tester.serialize());
-			
-			if(testers.length) {
-				// Run next tester if one is available
-				runNextTester();
-			} else if(testersRunning === 0) {
-				// Testing is done, so sort results
-				results = results.sort(function(a, b) {
-					if(a.type !== b.type) {
-						return TEST_TYPES.indexOf(a.type) - TEST_TYPES.indexOf(b.type);
-					}
-					return strcmp(a.label, b.label);
-				});
+			try {
+				if(tester.pending.length) return;
 				
-				// Call done callback
-				doneCallback({
-					"browser":Zotero.browser,
-					"version":Zotero.version,
-					"results":results
-				});
+				Zotero.debug("Done testing "+tester.translator.label);
+				
+				// Done translating, so serialize test results
+				testersRunning--;
+				results.push(tester.serialize());
+				
+				if(testers.length) {
+					// Run next tester if one is available
+					runNextTester();
+				} else if(testersRunning === 0) {
+					// Testing is done, so sort results
+					results = results.sort(function(a, b) {
+						if(a.type !== b.type) {
+							return TEST_TYPES.indexOf(a.type) - TEST_TYPES.indexOf(b.type);
+						}
+						return strcmp(a.label, b.label);
+					});
+					
+					// Call done callback
+					doneCallback({
+						"browser":Zotero.browser,
+						"version":Zotero.version,
+						"results":results
+					});
+				}
+			} catch(e) {
+				Zotero.debug(e);
+				Zotero.logError(e);
 			}
 		};
 		
