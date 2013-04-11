@@ -48,6 +48,7 @@ Zotero.Sync.Storage.Request = function (name, callbacks) {
 	this._remaining = null;
 	this._maxSize = null;
 	this._finished = false;
+	this._forceFinish = false;
 	this._changesMade = false;
 	
 	for (var func in callbacks) {
@@ -308,7 +309,11 @@ Zotero.Sync.Storage.Request.prototype.onProgress = function (channel, progress, 
 /**
  * Stop the request's underlying network request, if there is one
  */
-Zotero.Sync.Storage.Request.prototype.stop = function () {
+Zotero.Sync.Storage.Request.prototype.stop = function (force) {
+	if (force) {
+		this._forceFinish = true;
+	}
+	
 	if (this.channel) {
 		this._stopping = true;
 		
@@ -330,6 +335,15 @@ Zotero.Sync.Storage.Request.prototype.stop = function () {
  * Mark request as finished and notify queue that it's done
  */
 Zotero.Sync.Storage.Request.prototype._finish = function () {
+	// If an error occurred, we wait to finish the request, since doing
+	// so might end the queue before the error flag has been set on the queue.
+	// When the queue's error handler stops the queue, it stops the request
+	// with stop(true) to force the finish to occur, allowing the queue's
+	// promise to be rejected with the error.
+	if (!this._forceFinish && this._deferred.promise.isRejected()) {
+		return;
+	}
+	
 	Zotero.debug("Finishing " + this.queue.name + " request '" + this.name + "'");
 	this._finished = true;
 	var active = this._running;

@@ -413,7 +413,7 @@ Zotero.Sync.Storage.Queue.prototype.stop = function () {
 	this._stopping = true;
 	for each(var request in this._requests) {
 		if (!request.isFinished()) {
-			request.stop();
+			request.stop(true);
 		}
 	}
 	

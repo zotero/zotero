@@ -271,6 +271,8 @@ Zotero.Sync.Storage.WebDAV = (function () {
 							request.onProgress(a, b, c);
 						},
 						onStop: function (httpRequest, status, response, data) {
+							data.request.setChannel(false);
+							
 							deferred.resolve(
 								Q.fcall(function () {
 									return onUploadComplete(httpRequest, status, response, data);
@@ -880,6 +882,8 @@ Zotero.Sync.Storage.WebDAV = (function () {
 							request.onProgress(a, b, c)
 						},
 						onStop: function (request, status, response, data) {
+							data.request.setChannel(false);
+							
 							if (status == 404) {
 								var msg = "Remote ZIP file not found for item " + item.key;
 								Zotero.debug(msg, 2);
