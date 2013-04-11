@@ -523,54 +523,34 @@ Zotero.File = new function(){
 		}
 		
 		if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED' || e.name == 'NS_ERROR_FILE_IS_LOCKED'
-				// Shows up on some Windows systems
-				|| e.name == 'NS_ERROR_FAILURE') {
+				// These show up on some Windows systems
+				|| e.name == 'NS_ERROR_FAILURE' || e.name == 'NS_ERROR_FILE_NOT_FOUND') {
 			Zotero.debug(e);
 			str = str + " " + Zotero.getString('file.accessError.cannotBe') + " " + opWord + ".";
 			var checkFileWindows = Zotero.getString('file.accessError.message.windows');
 			var checkFileOther = Zotero.getString('file.accessError.message.other');
-			var msg = str + " "
+			var msg = str + "\n\n"
 					+ (Zotero.isWin ? checkFileWindows : checkFileOther)
 					+ "\n\n"
 					+ Zotero.getString('file.accessError.restart');
 			
-			if (operation == 'create') {
-				var e = new Zotero.Error(
-					msg,
-					0,
-					{
-						dialogButtonText: Zotero.getString('file.accessError.showParentDir'),
-						dialogButtonCallback: function () {
-							try {
-								file.parent.QueryInterface(Components.interfaces.nsILocalFile).reveal();
-							}
-							// Unsupported on some platforms
-							catch (e2) {
-								Zotero.debug(e2);
-							}
+			var e = new Zotero.Error(
+				msg,
+				0,
+				{
+					dialogButtonText: Zotero.getString('file.accessError.showParentDir'),
+					dialogButtonCallback: function () {
+						try {
+							file.parent.QueryInterface(Components.interfaces.nsILocalFile);
+							file.parent.reveal();
+						}
+						// Unsupported on some platforms
+						catch (e2) {
+							Zotero.launchFile(file.parent);
 						}
 					}
-				);
-			}
-			else {
-				var e = new Zotero.Error(
-					msg,
-					0,
-					{
-						dialogButtonText: Zotero.getString('locate.showFile.label'),
-						dialogButtonCallback: function () {
-							try {
-								file.QueryInterface(Components.interfaces.nsILocalFile);
-								file.reveal();
-							}
-							// Unsupported on some platforms
-							catch (e2) {
-								Zotero.debug(e2);
-							}
-						}
-					}
-				);
-			}
+				}
+			);
 		}
 		
 		throw (e);
