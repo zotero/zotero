@@ -1334,7 +1334,7 @@
 						var elems = this._dynamicFields.getElementsByAttribute('value', '+');
 						var button = elems[elems.length-1];
 						var creatorFields = this.getCreatorFields(Zotero.getAncestorByTagName(button, 'row'));
-						this._enablePlusButton(button, creatorFields.typeID, creatorFields.fieldMode);
+						this._enablePlusButton(button, creatorFields.creatorTypeID, creatorFields.fieldMode);
 						
 						this._creatorCount--;
 						return;
