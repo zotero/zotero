@@ -2432,6 +2432,28 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	},
 	
 	/**
+	 * Adds __exposedProps__ to objects that need to be returned to translators
+	 * @param {Object} obj
+	 * @param {String} perm. Permissions to be assigned for each key ("r", "w", or "rw"). Defaults to "r"
+	 * @return  {Object}
+	 */
+	"_exposeObject": function(obj, perm) {
+		if(perm != "r" || perm != "w" || perm != "rw") perm = "r";
+
+		obj.__exposedProps__ = {		//not all of these are found in all objects returned
+			"uri": perm,
+			"value": perm,
+			"lang": perm,
+			"datatype": perm,
+			"termType": "r",
+			"id": "r",	//this is managed by RDF store
+			"toString": "r",
+			"toNT": "r"
+		};
+		return obj;
+	},
+	
+	/**
 	 * Runs a callback to initialize this RDF store
 	 */
 	"_init":function() {
@@ -2493,7 +2515,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	 * @return {Zotero.RDF.AJAW.Symbol}
 	 */
 	"newResource":function() {
-		return new Zotero.RDF.AJAW.BlankNode();
+		return this._exposeObject(new Zotero.RDF.AJAW.BlankNode(), "rw");
 	},
 	
 	/**
@@ -2515,7 +2537,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		this.addStatement(about, rdf+"type", rdf+containerTypes[type], false);
 		this._containerCounts[about.toNT()] = 1;
 		
-		return about;
+		return this._exposeObject(about, "rw");
 	},
 	
 	/**
@@ -2554,7 +2576,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 				var intNumber = parseInt(number);
 				if(number == intNumber.toString()) {
 					// add to element array
-					containerElements[intNumber-1] = (statement.object.termType == "literal" ? statement.object.toString() : statement.object);
+					containerElements[intNumber-1] = (statement.object.termType == "literal" ? statement.object.toString() : this._exposeObject(statement.object));
 				}
 			}
 		}
@@ -2590,7 +2612,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	"getAllResources":function() {
 		var returnArray = [];
 		for(var i in this._dataStore.subjectIndex) {
-			returnArray.push(this._dataStore.subjectIndex[i][0].subject);
+			returnArray.push(this._exposeObject(this._dataStore.subjectIndex[i][0].subject));
 		}
 		return returnArray;
 	},
@@ -2640,7 +2662,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		
 		var returnArray = [];
 		for(var i=0; i<statements.length; i++) {
-			returnArray.push(statements[i].subject);
+			returnArray.push(this._exposeObject(statements[i].subject));
 		}
 		return returnArray;
 	},
@@ -2658,7 +2680,11 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		
 		var returnArray = [];
 		for(var i=0; i<statements.length; i++) {
-			returnArray.push(statements[i].object.termType == "literal" ? statements[i].object.toString() : statements[i].object);
+			returnArray.push(
+				statements[i].object.termType == "literal" ?
+					statements[i].object.toString() :
+					this._exposeObject(statements[i].object)
+			);
 		}
 		return returnArray;
 	},
@@ -2685,7 +2711,13 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		
 		var returnArray = [];
 		for(var i=0; i<statements.length; i++) {
-			returnArray.push([statements[i].subject, statements[i].predicate, (statements[i].object.termType == "literal" ? statements[i].object.toString() : statements[i].object)]);
+			returnArray.push([
+				this._exposeObject(statements[i].subject),
+				statements[i].predicate.uri,
+				(statements[i].object.termType == "literal" ?
+					statements[i].object.toString() :
+					this._exposeObject(statements[i].object))
+				]);
 		}
 		return returnArray;
 	}
