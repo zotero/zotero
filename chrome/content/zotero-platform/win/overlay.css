@@ -22,7 +22,8 @@
 }
 
 #zotero-tb-sync-error {
-	margin-right: 2px;
+	margin-right: 4px;
+	padding-top: 4px;
 }
 
 #zotero-tb-sync {
