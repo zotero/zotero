@@ -369,12 +369,13 @@
 								delete self.selection[name];
 								var doCommand = true;
 							}
-
 							
-							// Always show colored tags at top
-							if (colorData) {
+							// Always show colored tags at top, unless they
+							// don't match an active tag search
+							if (colorData && (!self._search || inSearch)) {
 								labels[i].setAttribute('hidden', false);
 								labels[i].setAttribute('hasColor', true);
+								empty = false;
 							}
 							else {
 								labels[i].removeAttribute('hasColor');
