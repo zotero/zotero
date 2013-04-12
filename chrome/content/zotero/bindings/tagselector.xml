@@ -40,7 +40,8 @@
 			<field name="_notifierID">false</field>
 			<field name="_tags">null</field>
 			<field name="_dirty">null</field>
-			<field name="_empty">null</field>
+			<field name="_emptyColored">null</field>
+			<field name="_emptyRegular">null</field>
 			<field name="selection"/>
 			
 			<!-- Modes are predefined settings groups for particular tasks -->
@@ -206,7 +207,8 @@
 					}
 					
 					Zotero.debug('Refreshing tags selector');
-					var empty = true;
+					var emptyColored = true;
+					var emptyRegular = true;
 					var tagsToggleBox = this.id('tags-toggle');
 					
 					var self = this;
@@ -340,7 +342,7 @@
 									labels[i].className = 'zotero-clicky';
 									labels[i].setAttribute('inScope', true);
 									labels[i].setAttribute('hidden', false);
-									empty = false;
+									emptyRegular = false;
 								}
 								else {
 									labels[i].className = '';
@@ -360,14 +362,7 @@
 								}
 								
 								labels[i].setAttribute('hidden', false);
-								empty = false;
-							}
-							
-							// If tag isn't in scope and is still selected, deselect it
-							if (labels[i].getAttribute('hidden') == 'true' && self.selection[name]) {
-								labels[i].setAttribute('selected', false);
-								delete self.selection[name];
-								var doCommand = true;
+								emptyRegular = false;
 							}
 							
 							// Always show colored tags at top, unless they
@@ -375,7 +370,7 @@
 							if (colorData && (!self._search || inSearch)) {
 								labels[i].setAttribute('hidden', false);
 								labels[i].setAttribute('hasColor', true);
-								empty = false;
+								emptyColored = false;
 							}
 							else {
 								labels[i].removeAttribute('hasColor');
@@ -451,15 +446,16 @@
 						
 						//end tag cloud code
 						
-	
 						self.updateNumSelected();
-						self._empty = empty;
+						self._emptyColored = emptyColored;
+						self._emptyRegular = emptyRegular;
+						var empty = emptyColored && emptyRegular;
 						self.id('tags-toggle').setAttribute('collapsed', empty);
 						self.id('no-tags-box').setAttribute('collapsed', !empty);
 						
-						if (doCommand) {
-							Zotero.debug('A selected tag went out of scope -- deselecting');
-							self.doCommand();
+						if (self.onRefresh) {
+							self.onRefresh();
+							self.onRefresh = null;
 						}
 					})
 					.done();
@@ -564,14 +560,22 @@
 							me.setSearch(false, true);
 						}
 						me._dirty = true;
-						me.doCommand();
 						
-						// If no tags visible after a delete, deselect all
-						if ((event == 'remove' || event == 'delete') &&
-								me._empty && me.getNumSelected()) {
-							Zotero.debug('No tags visible after delete -- deselecting all');
-							me.clearAll();
-						}
+						// This is a hack, but set this to run after the refresh,
+						// since _emptyRegular isn't set until then
+						me.onRefresh = function () {
+							// If no regular tags visible after a delete, deselect all.
+							// This is necessary so that a selected tag that's removed
+							// from its last item doesn't cause all regular tags to
+							// disappear without anything being visibly selected.
+							if ((event == 'remove' || event == 'delete') &&
+									me._emptyRegular && me.getNumSelected()) {
+								Zotero.debug('No tags visible after delete -- deselecting all');
+								me.clearAll();
+							}
+						};
+						
+						me.doCommand();
 					}, 0);
 					this._notified = true;
 				]]>
