@@ -3755,7 +3755,8 @@ Zotero.Sync.Server.Data = new function() {
 		else {
 			msg += Zotero.getString('sync.conflict.recentVersionsKept');
 		}
-		msg += "\n\n" + Zotero.getString('sync.conflict.viewErrorConsole', (Zotero.isStandalone ? "" : " Firefox"));
+		msg += "\n\n" + Zotero.getString('sync.conflict.viewErrorConsole',
+				(Zotero.isStandalone ? "" : "Firefox")).replace(/\s+/, " ");
 		return msg;
 	}
 	
@@ -3795,8 +3796,9 @@ Zotero.Sync.Server.Data = new function() {
 	
 	
 	function _generateCollectionItemMergeAlertMessage() {
-		var msg = Zotero.getString('sync.conflict.collectionItemMerge.alert')
-			+ Zotero.getString('sync.conflict.viewErrorConsole', (Zotero.isStandalone ? "" : "Firefox "));
+		var msg = Zotero.getString('sync.conflict.collectionItemMerge.alert') + "\n\n"
+			+ Zotero.getString('sync.conflict.viewErrorConsole',
+				(Zotero.isStandalone ? "" : "Firefox")).replace(/\s+/, " ");
 		return msg;
 	}
 	
@@ -3830,8 +3832,9 @@ Zotero.Sync.Server.Data = new function() {
 	
 	
 	function _generateTagItemMergeAlertMessage() {
-		var msg = Zotero.getString('sync.conflict.tagItemMerge.alert')
-			+ Zotero.getString('sync.conflict.viewErrorConsole', (Zotero.isStandalone ? "" : "Firefox "));
+		var msg = Zotero.getString('sync.conflict.tagItemMerge.alert') + "\n\n"
+			+ Zotero.getString('sync.conflict.viewErrorConsole',
+				(Zotero.isStandalone ? "" : "Firefox")).replace(/\s+/, " ");
 		return msg;
 	}
 	
