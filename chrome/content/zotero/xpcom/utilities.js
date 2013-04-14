@@ -406,7 +406,7 @@ Zotero.Utilities = {
 			
 			if(Zotero.isFx && !Zotero.isBookmarklet) {
 				// Create a node and use the textContent property to do unescaping where
-				// possible, because this approach preserves <br/>
+				// possible, because this approach preserves line endings in the HTML
 				if(node === undefined) {
 					var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 						 .createInstance(Components.interfaces.nsIDOMParser);
