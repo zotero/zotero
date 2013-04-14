@@ -4003,10 +4003,11 @@ Zotero.Item.prototype.getImageSrc = function() {
 		
 		// Quick hack to use PDF icon for imported files and URLs --
 		// extend to support other document types later
+		var fileType;
 		if ((linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE ||
 				linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) &&
-				this.attachmentMIMEType == 'application/pdf') {
-			itemType += '-pdf';
+				(fileType = Zotero.FileTypes.getFileTypeFromMIMEType(this.attachmentMIMEType))) {
+			itemType += '-' + fileType;
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
 			itemType += "-file";

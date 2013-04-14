@@ -341,7 +341,16 @@ Zotero.ItemTypes = new function() {
 			case 'attachment-link':
 			case 'attachment-snapshot':
 			case 'attachment-web-link':
+			case 'attachment-webpage':
+			case 'attachment-image':
 			case 'attachment-pdf':
+			case 'attachment-audio':
+			case 'attachment-video':
+			case 'attachment-document':
+			case 'attachment-presentation':
+			case 'attachment-spreadsheet':
+			case 'attachment-archive':
+			case 'attachment-text':
 			case 'artwork':
 			case 'audioRecording':
 			case 'bill':
@@ -398,6 +407,14 @@ Zotero.FileTypes = new function() {
 	
 	function getIDFromMIMEType(mimeType) {
 		var sql = "SELECT fileTypeID FROM fileTypeMIMETypes "
+			+ "WHERE ? LIKE mimeType || '%'";
+			
+		return Zotero.DB.valueQuery(sql, [mimeType]);
+	}
+	
+	this.getFileTypeFromMIMEType = function(mimeType) {
+		var sql = "SELECT fileType FROM fileTypes "
+			+ "NATURAL JOIN fileTypeMimeTypes "
 			+ "WHERE ? LIKE mimeType || '%'";
 			
 		return Zotero.DB.valueQuery(sql, [mimeType]);

@@ -1146,44 +1146,62 @@ INSERT INTO "fileTypes" VALUES(4, 'audio');
 INSERT INTO "fileTypes" VALUES(5, 'video');
 INSERT INTO "fileTypes" VALUES(6, 'document');
 INSERT INTO "fileTypes" VALUES(7, 'presentation');
+INSERT INTO "fileTypes" VALUES(8, 'spreadsheet');
+INSERT INTO "fileTypes" VALUES(9, 'archive');
+INSERT INTO "fileTypes" VALUES(10, 'text');
+INSERT INTO "fileTypes" VALUES(11, 'other');
 
 -- webpage
 INSERT INTO "fileTypeMIMETypes" VALUES(1, 'text/html');
+INSERT INTO "fileTypeMIMETypes" VALUES(1, 'application/xhtml+xml');
 -- image
 INSERT INTO "fileTypeMIMETypes" VALUES(2, 'image/');
 INSERT INTO "fileTypeMIMETypes" VALUES(2, 'application/vnd.oasis.opendocument.graphics');
 INSERT INTO "fileTypeMIMETypes" VALUES(2, 'application/vnd.oasis.opendocument.image');
+INSERT INTO "fileTypeMIMETypes" VALUES(2, 'application/vnd.kde.killustrator'); -- NOT in IANA registry
 -- pdf
 INSERT INTO "fileTypeMIMETypes" VALUES(3, 'application/pdf');
+INSERT INTO "fileTypeMIMETypes" VALUES(3, 'application/postscript');
 -- audio
 INSERT INTO "fileTypeMIMETypes" VALUES(4, 'audio/');
-INSERT INTO "fileTypeMIMETypes" VALUES(4, 'x-pn-realaudio');
-INSERT INTO "fileTypeMIMETypes" VALUES(4, 'application/ogg');
-INSERT INTO "fileTypeMIMETypes" VALUES(4, 'application/x-killustrator');
+INSERT INTO "fileTypeMIMETypes" VALUES(4, 'x-pn-realaudio'); -- NOT in IANA registry
+INSERT INTO "fileTypeMIMETypes" VALUES(4, 'application/ogg'); -- in addition to audio/ogg
 -- video
 INSERT INTO "fileTypeMIMETypes" VALUES(5, 'video/');
 INSERT INTO "fileTypeMIMETypes" VALUES(5, 'application/x-shockwave-flash');
--- document
-INSERT INTO "fileTypeMIMETypes" VALUES(6, 'text/plain');
+-- document (rich text)
 INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/rtf');
 INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/msword');
-INSERT INTO "fileTypeMIMETypes" VALUES(6, 'text/xml');
-INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/postscript');
-INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/wordperfect5.1');
-INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/x-latex');
-INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/x-tex');
-INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/x-kword');
-INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/x-kspread');
-INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/x-kchart');
-INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.oasis.opendocument.chart');
-INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.oasis.opendocument.database');
-INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.oasis.opendocument.formula');
-INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.oasis.opendocument.spreadsheet');
+INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.wordperfect');
+INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.kde.kword');
 INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.oasis.opendocument.text');
+INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 -- presentation
-INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/powerpoint');
+INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/vnd.ms-powerpoint');
 INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/vnd.oasis.opendocument.presentation');
-INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/x-kpresenter');
+INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/vnd.kde.kpresenter');
+INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/vnd.openxmlformats-officedocument.presentationml.presentation');
+-- spreadsheet
+INSERT INTO "fileTypeMIMETypes" VALUES(8, 'application/vnd.oasis.opendocument.spreadsheet');
+INSERT INTO "fileTypeMIMETypes" VALUES(8, 'application/vnd.ms-excel');
+INSERT INTO "fileTypeMIMETypes" VALUES(8, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+INSERT INTO "fileTypeMIMETypes" VALUES(8, 'application/vnd.kde.kspread');
+-- archive
+INSERT INTO "fileTypeMIMETypes" VALUES(9, 'application/zip');
+INSERT INTO "fileTypeMIMETypes" VALUES(9, 'application/gzip');
+INSERT INTO "fileTypeMIMETypes" VALUES(9, 'application/x-rar-compressed');
+INSERT INTO "fileTypeMIMETypes" VALUES(9, 'application/x-tar');
+-- text
+INSERT INTO "fileTypeMIMETypes" VALUES(10, 'text/plain');
+INSERT INTO "fileTypeMIMETypes" VALUES(10, 'text/xml');
+INSERT INTO "fileTypeMIMETypes" VALUES(10, 'application/x-latex');
+INSERT INTO "fileTypeMIMETypes" VALUES(10, 'application/x-tex');
+-- other
+INSERT INTO "fileTypeMIMETypes" VALUES(11, 'application/vnd.kde.kchart');
+INSERT INTO "fileTypeMIMETypes" VALUES(11, 'application/vnd.oasis.opendocument.chart');
+INSERT INTO "fileTypeMIMETypes" VALUES(11, 'application/vnd.oasis.opendocument.database');
+INSERT INTO "fileTypeMIMETypes" VALUES(11, 'application/vnd.oasis.opendocument.formula');
+
 
 INSERT INTO "charsets" VALUES(1, 'utf-8');
 INSERT INTO "charsets" VALUES(2, 'ascii');
