@@ -36,8 +36,20 @@ Zotero.Notes = new function() {
 	* Return first line (or first MAX_LENGTH characters) of note content
 	**/
 	function noteToTitle(text) {
-		text = Zotero.Utilities.trim(text);
+		var origText = text;
+		text = text.trim();
 		text = Zotero.Utilities.unescapeHTML(text);
+		
+		// If first line is just an opening HTML tag, remove it
+		//
+		// Example:
+		//
+		// <blockquote>
+		// <p>Foo</p>
+		// </blockquote>
+		if (/^<[^>\n]+[^\/]>\n/.test(origText)) {
+			text = text.trim();
+		}
 		
 		var max = this.MAX_TITLE_LENGTH;
 		
