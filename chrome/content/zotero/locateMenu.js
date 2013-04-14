@@ -126,7 +126,7 @@ var Zotero_LocateMenu = new function() {
 			null, Zotero.getString("locate."+optionName+".tooltip"));
 		if(showIcons) {
 			menuitem.setAttribute("class", "menuitem-iconic");
-			menuitem.setAttribute("image", optionObject.icon);
+			menuitem.style.listStyleImage = "url('"+optionObject.icon+"')";
 		}
 		menuitem.setAttribute("zotero-locate", "true");
 		
