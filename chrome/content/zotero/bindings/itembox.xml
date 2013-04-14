@@ -2249,10 +2249,18 @@
 						
 						// Enable the "+" button on the previous row
 						var elems = this._dynamicFields.getElementsByAttribute('value', '+');
+	// Code below would replace this:
 						if (elems && elems.length) {
 							var button = elems[elems.length-1];
 							this._enablePlusButton(button);
 						}
+/*
+	// This has come in from 4.0.
+	// The UI code has diverged too much to adopt it here.
+						var button = elems[elems.length-1];
+						var creatorFields = this.getCreatorFields(Zotero.getAncestorByTagName(button, 'row'));
+						this._enablePlusButton(button, creatorFields.creatorTypeID, creatorFields.fieldMode);
+*/						
 						this._creatorCount--;
 						this._creatorTabCount--;
 					} else {

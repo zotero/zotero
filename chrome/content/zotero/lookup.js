@@ -76,9 +76,9 @@ const Zotero_Lookup = new function () {
 
 		//finally try for PMID
 		if(!items.length) {
-			// PMID; right now, PMIDs are 8 digits, so it doesn't seem like we will need to
-			// discriminate for a fairly long time
-			var PMID_RE = /(?:\D|^)(\d{8})(?!\d)/g;
+			// PMID; right now, the longest PMIDs are 8 digits, so it doesn't 
+			// seem like we will need to discriminate for a fairly long time
+			var PMID_RE = /(?:\D|^)(\d{1,9})(?!\d)/g;
 			var pmid;
 			while((pmid = PMID_RE.exec(identifier)) && foundIDs.indexOf(pmid) == -1) {
 				items.push({itemType:"journalArticle", contextObject:"rft_id=info:pmid/"+pmid[1]});

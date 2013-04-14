@@ -39,7 +39,7 @@ const ZOTERO_CONFIG = {
 	API_VERSION: 2,
 	PREF_BRANCH: 'extensions.zotero.',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "4.0.3.SOURCE"
+	VERSION: "4.0.4.SOURCE"
 };
 
 // Commonly used imports accessible anywhere
@@ -1211,6 +1211,58 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	}
 	
 	
+	/**
+	 * Launch a file, the best way we can
+	 */
+	this.launchFile = function (file) {
+		try {
+			file.launch();
+		}
+		catch (e) {
+			Zotero.debug("launch() not supported -- trying fallback executable");
+			
+			try {
+				if (Zotero.isWin) {
+					var pref = "fallbackLauncher.windows";
+				}
+				else {
+					var pref = "fallbackLauncher.unix";
+				}
+				var path = Zotero.Prefs.get(pref);
+				
+				var exec = Components.classes["@mozilla.org/file/local;1"]
+							.createInstance(Components.interfaces.nsILocalFile);
+				exec.initWithPath(path);
+				if (!exec.exists()) {
+					throw (path + " does not exist");
+				}
+				
+				var proc = Components.classes["@mozilla.org/process/util;1"]
+								.createInstance(Components.interfaces.nsIProcess);
+				proc.init(exec);
+				
+				var args = [file.path];
+				proc.runw(true, args, args.length);
+			}
+			catch (e) {
+				Zotero.debug(e);
+				Zotero.debug("Launching via executable failed -- passing to loadUrl()");
+				
+				// If nsILocalFile.launch() isn't available and the fallback
+				// executable doesn't exist, we just let the Firefox external
+				// helper app window handle it
+				var nsIFPH = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+								.getService(Components.interfaces.nsIFileProtocolHandler);
+				var uri = nsIFPH.newFileURI(file);
+				
+				var nsIEPS = Components.classes["@mozilla.org/uriloader/external-protocol-service;1"].
+								getService(Components.interfaces.nsIExternalProtocolService);
+				nsIEPS.loadUrl(uri);
+			}
+		}
+	}
+	
+	
 	/*
 	 * Debug logging function
 	 *
@@ -1918,6 +1970,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		Zotero.Creators.reloadAll();
 		Zotero.Items.reloadAll();
 	}
+	
 	
 	/**
 	 * Brings Zotero Standalone to the foreground
