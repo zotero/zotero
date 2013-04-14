@@ -2400,7 +2400,7 @@ var ZoteroPane = new function()
 		}
 		
 		// add locate menu options
-		Zotero_LocateMenu.buildContextMenu(menu);
+		Zotero_LocateMenu.buildContextMenu(menu, true);
 	}
 	
 	

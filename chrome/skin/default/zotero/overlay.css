@@ -352,6 +352,61 @@
 	list-style-image: url('chrome://zotero/skin/treeitem-note.png');
 }
 
+.zotero-menuitem-new-saved-search
+{
+	list-style-image: url('chrome://zotero/skin/treesource-search.png');
+}
+
+.zotero-menuitem-show-duplicates
+{
+	list-style-image: url('chrome://zotero/skin/treesource-duplicates.png');
+}
+
+.zotero-menuitem-show-unfiled
+{
+	list-style-image: url('chrome://zotero/skin/treesource-unfiled.png');
+}
+
+.zotero-menuitem-new-collection
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-collection-add.png');
+}
+
+.zotero-menuitem-edit-collection
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-collection-edit.png');
+}
+
+.zotero-menuitem-delete-collection
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-collection-delete.png');
+}
+
+.zotero-menuitem-show-in-library
+{
+	list-style-image: url('chrome://zotero/skin/treesource-library.png');
+}
+
+.zotero-menuitem-move-to-trash
+{
+	list-style-image: url('chrome://zotero/skin/treesource-trash-full.png');
+}
+
+.zotero-menuitem-delete-from-lib
+{
+	list-style-image: url('chrome://zotero/skin/cross-script.png');
+}
+
+.zotero-menuitem-attach-note
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-note-add.png');
+}
+
+.zotero-menuitem-attach
+{
+	list-style-image: url('chrome://zotero/skin/attach.png');
+}
+
 .zotero-menuitem-attachments-file
 {
 	list-style-image: url('chrome://zotero/skin/treeitem-attachment-file.png');
@@ -370,6 +425,56 @@
 .zotero-menuitem-attachments-web-link
 {
 	list-style-image: url('chrome://zotero/skin/treeitem-attachment-web-link.png');
+}
+
+.zotero-menuitem-duplicate-item
+{
+	list-style-image: url('chrome://zotero/skin/arrow-split-090.png');
+}
+
+.zotero-menuitem-merge-items
+{
+	list-style-image: url('chrome://zotero/skin/arrow-join-090.png');
+}
+
+.zotero-menuitem-export
+{
+	list-style-image: url('chrome://zotero/skin/arrow-curve-090-left.png');
+}
+
+.zotero-menuitem-restore-to-library
+{
+	list-style-image: url('chrome://zotero/skin/lifebuoy.png');
+}
+
+.zotero-menuitem-create-bibliography
+{
+	list-style-image: url('chrome://zotero/skin/edit-list-order.png');
+}
+
+.zotero-menuitem-create-report
+{
+	list-style-image: url('chrome://zotero/skin/treeitem-report.png');
+}
+
+.zotero-menuitem-retrieve-metadata
+{
+	list-style-image: url('chrome://zotero/skin/puzzle-arrow.png');
+}
+
+.zotero-menuitem-reindex
+{
+	list-style-image: url('chrome://zotero/skin/document-search-result.png');
+}
+
+.zotero-menuitem-create-parent
+{
+	list-style-image: url('chrome://zotero/skin/page_white_add.png');
+}
+
+.zotero-menuitem-rename-from-parent
+{
+	list-style-image: url('chrome://zotero/skin/bookmark-pencil.png');
 }
 
 #zotero-tb-advanced-search
