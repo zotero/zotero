@@ -1717,8 +1717,11 @@ Zotero.Utilities = {
 		if(attachment.linkMode === "linked_url") {
 			return Zotero.ItemTypes.getImageSrc("attachment-web-link");
 		}
-		return Zotero.ItemTypes.getImageSrc("attachment-" +
-			(Zotero.FileTypes.getFileTypeFromMIMEType(attachment.mimeType) || "snapshot"));
+		
+		var type = Zotero.FileTypes.getFileTypeFromMIMEType(attachment.mimeType);
+		if(!type || type == "webpage") type = "snapshot";
+		
+		return Zotero.ItemTypes.getImageSrc("attachment-" + type);
 	},
 
 	/**
