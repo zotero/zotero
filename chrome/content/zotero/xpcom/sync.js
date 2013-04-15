@@ -1228,9 +1228,18 @@ Zotero.Sync.Server = new function () {
 		}
 		catch (e) {
 			Zotero.debug(e);
-			var msg = Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"
-						+ Zotero.getString('sync.error.loginManagerCorrupted2', [Zotero.appName, Zotero.appName]);
-			alert(msg);
+			if (Zotero.isStandalone) {
+				var msg = Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"
+					+ Zotero.getString('sync.error.loginManagerCorrupted2', [Zotero.appName, Zotero.appName]);
+			}
+			else {
+				var msg = Zotero.getString('sync.error.loginManagerInaccessible') + "\n\n"
+					+ Zotero.getString('sync.error.checkMasterPassword', Zotero.appName) + "\n\n"
+					+ Zotero.getString('sync.error.corruptedLoginManager', Zotero.appName);
+			}
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+				.getService(Components.interfaces.nsIPromptService);
+			ps.alert(null, Zotero.getString('general.error'), msg);
 			return '';
 		}
 		
@@ -2688,7 +2697,7 @@ Zotero.Sync.Server.Data = new function() {
 					var tagID = Zotero.DB.valueQuery(sql, [libraryID, key]);
 					
 					var sql = "SELECT COUNT(*) > 0 FROM itemTags WHERE tagID=?";
-					if (Zotero.DB.valueQuery(sql, [tagID])) {
+					if (tagID && Zotero.DB.valueQuery(sql, [tagID])) {
 						var sql = "UPDATE tags SET clientDateModified=CURRENT_TIMESTAMP "
 							+ "WHERE tagID=?";
 						Zotero.DB.query(sql, [tagID]);
@@ -3746,7 +3755,8 @@ Zotero.Sync.Server.Data = new function() {
 		else {
 			msg += Zotero.getString('sync.conflict.recentVersionsKept');
 		}
-		msg += "\n\n" + Zotero.getString('sync.conflict.viewErrorConsole', (Zotero.isStandalone ? "" : " Firefox"));
+		msg += "\n\n" + Zotero.getString('sync.conflict.viewErrorConsole',
+				(Zotero.isStandalone ? "" : "Firefox")).replace(/\s+/, " ");
 		return msg;
 	}
 	
@@ -3786,8 +3796,9 @@ Zotero.Sync.Server.Data = new function() {
 	
 	
 	function _generateCollectionItemMergeAlertMessage() {
-		var msg = Zotero.getString('sync.conflict.collectionItemMerge.alert')
-			+ Zotero.getString('sync.conflict.viewErrorConsole', (Zotero.isStandalone ? "" : "Firefox "));
+		var msg = Zotero.getString('sync.conflict.collectionItemMerge.alert') + "\n\n"
+			+ Zotero.getString('sync.conflict.viewErrorConsole',
+				(Zotero.isStandalone ? "" : "Firefox")).replace(/\s+/, " ");
 		return msg;
 	}
 	
@@ -3821,8 +3832,9 @@ Zotero.Sync.Server.Data = new function() {
 	
 	
 	function _generateTagItemMergeAlertMessage() {
-		var msg = Zotero.getString('sync.conflict.tagItemMerge.alert')
-			+ Zotero.getString('sync.conflict.viewErrorConsole', (Zotero.isStandalone ? "" : "Firefox "));
+		var msg = Zotero.getString('sync.conflict.tagItemMerge.alert') + "\n\n"
+			+ Zotero.getString('sync.conflict.viewErrorConsole',
+				(Zotero.isStandalone ? "" : "Firefox")).replace(/\s+/, " ");
 		return msg;
 	}
 	

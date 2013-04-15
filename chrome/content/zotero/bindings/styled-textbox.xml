@@ -375,13 +375,17 @@
 						if (!SJOW.tinyMCE) {
 							var exts = Zotero.getInstalledExtensions(function(exts) {
 								for each(var ext in exts) {
-									if (ext.indexOf('NoScript') != -1) {
-										var warning = win.document.getElementById('noScriptWarning');
+									if (ext.indexOf('NoScript') != -1 && ext.indexOf('disabled') == -1) {
+										var doc = win.document;
+										var div = doc.getElementById('tinymce');
+										var warning = doc.createElement('div');
+										warning.id = 'noScriptWarning';
 										var str = "The NoScript extension is preventing Zotero "
 											+ "from displaying notes. To use NoScript and Zotero together, "
 											+ "whitelist the 'file:' scheme in the NoScript preferences "
 											+ "and restart " + Zotero.appName + ".";
 										warning.appendChild(document.createTextNode(str));
+										div.appendChild(warning);
 										break;
 									}
 								}

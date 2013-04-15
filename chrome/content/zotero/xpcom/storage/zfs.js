@@ -463,6 +463,8 @@ Zotero.Sync.Storage.ZFS = (function () {
 					request.onProgress(a, b, c);
 				},
 				onStop: function (httpRequest, status, response, data) {
+					data.request.setChannel(false);
+					
 					deferred.resolve(
 						onUploadComplete(httpRequest, status, response, data)
 					);
@@ -803,6 +805,8 @@ Zotero.Sync.Storage.ZFS = (function () {
 							request.onProgress(a, b, c)
 						},
 						onStop: function (request, status, response, data) {
+							data.request.setChannel(false);
+							
 							if (status != 200) {
 								var msg = "Unexpected status code " + status
 									+ " for request " + data.request.name

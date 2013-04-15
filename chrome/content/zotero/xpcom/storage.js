@@ -1607,18 +1607,18 @@ Zotero.Sync.Storage = new function () {
 		
 		// Do deletes outside of the enumerator to avoid an access error on Windows
 		for each(var file in filesToDelete) {
-			if (file.isFile()) {
-				Zotero.debug("Deleting existing file " + file.leafName);
-				try {
+			try {
+				if (file.isFile()) {
+					Zotero.debug("Deleting existing file " + file.leafName);
 					file.remove(false);
 				}
-				catch (e) {
-					Zotero.File.checkFileAccessError(e, file, 'delete');
+				else if (file.isDirectory()) {
+					Zotero.debug("Deleting existing directory " + file.leafName);
+					file.remove(true);
 				}
 			}
-			else if (file.isDirectory()) {
-				Zotero.debug("Deleting existing directory " + file.leafName);
-				file.remove(true);
+			catch (e) {
+				Zotero.File.checkFileAccessError(e, file, 'delete');
 			}
 		}
 	}

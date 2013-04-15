@@ -329,3 +329,13 @@ treechildren::-moz-tree-image {
 {
 	list-style-image: url('chrome://zotero/skin/mac/cog.png');
 }
+
+#zotero-collectionmenu > .menuitem-iconic, #zotero-itemmenu > .menuitem-iconic, #zotero-collectionmenu > .menu-iconic, #zotero-itemmenu > .menu-iconic {
+	padding-top: 0px !important;
+	padding-bottom: 2px !important;
+	list-style-image: none !important;
+}
+
+#zotero-collectionmenu > .menuitem-iconic > .menu-iconic-left, #zotero-itemmenu > .menuitem-iconic > .menu-iconic-left, #zotero-collectionmenu > .menu-iconic > .menu-iconic-left, #zotero-itemmenu > .menu-iconic > .menu-iconic-left {
+	display: none;
+}

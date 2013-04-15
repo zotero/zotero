@@ -2837,7 +2837,20 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 		if (self.isTopLevelItem()) {
 			return;
 		}
-		Zotero.Items.get(self.getSource()).updateBestAttachmentState();
+		
+		try {
+			var parentKey = self.getSource();
+		}
+		// This can happen during classic sync conflict resolution, if a
+		// standalone attachment was modified locally and remotely was changed
+		// into a child attachment
+		catch (e) {
+			Zotero.debug("Attachment parent doesn't exist for source key "
+				+ "in Zotero.Item.updateAttachmentStates()", 1);
+			return;
+		}
+		
+		Zotero.Items.get(parentKey).updateBestAttachmentState();
 	};
 	
 	// No associated files for linked URLs

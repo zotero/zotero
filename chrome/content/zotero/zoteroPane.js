@@ -2400,7 +2400,7 @@ var ZoteroPane = new function()
 		}
 		
 		// add locate menu options
-		Zotero_LocateMenu.buildContextMenu(menu);
+		Zotero_LocateMenu.buildContextMenu(menu, true);
 	}
 	
 	
@@ -3464,7 +3464,7 @@ var ZoteroPane = new function()
 					this.loadURI(url, event);
 				}
 				else {
-					this.launchFile(file);
+					Zotero.launchFile(file);
 				}
 			}
 			else {
@@ -3507,54 +3507,11 @@ var ZoteroPane = new function()
 	
 	
 	/**
-	 * Launch a file, the best way we can
+	 * @deprecated
 	 */
 	this.launchFile = function (file) {
-		try {
-			file.launch();
-		}
-		catch (e) {
-			Zotero.debug("launch() not supported -- trying fallback executable");
-			
-			try {
-				if (Zotero.isWin) {
-					var pref = "fallbackLauncher.windows";
-				}
-				else {
-					var pref = "fallbackLauncher.unix";
-				}
-				var path = Zotero.Prefs.get(pref);
-				
-				var exec = Components.classes["@mozilla.org/file/local;1"]
-							.createInstance(Components.interfaces.nsILocalFile);
-				exec.initWithPath(path);
-				if (!exec.exists()) {
-					throw (path + " does not exist");
-				}
-				
-				var proc = Components.classes["@mozilla.org/process/util;1"]
-								.createInstance(Components.interfaces.nsIProcess);
-				proc.init(exec);
-				
-				var args = [file.path];
-				proc.runw(true, args, args.length);
-			}
-			catch (e) {
-				Zotero.debug(e);
-				Zotero.debug("Launching via executable failed -- passing to loadUrl()");
-				
-				// If nsILocalFile.launch() isn't available and the fallback
-				// executable doesn't exist, we just let the Firefox external
-				// helper app window handle it
-				var nsIFPH = Components.classes["@mozilla.org/network/protocol;1?name=file"]
-								.getService(Components.interfaces.nsIFileProtocolHandler);
-				var uri = nsIFPH.newFileURI(file);
-				
-				var nsIEPS = Components.classes["@mozilla.org/uriloader/external-protocol-service;1"].
-								getService(Components.interfaces.nsIExternalProtocolService);
-				nsIEPS.loadUrl(uri);
-			}
-		}
+		Zotero.debug("ZoteroPane.launchFile() is deprecated -- use Zotero.launchFile()", 2);
+		Zotero.launchFile(file);
 	}
 	
 	
@@ -3626,7 +3583,7 @@ var ZoteroPane = new function()
 					// On platforms that don't support nsILocalFile.reveal() (e.g. Linux),
 					// launch the parent directory
 					var parent = file.parent.QueryInterface(Components.interfaces.nsILocalFile);
-					this.launchFile(parent);
+					Zotero.launchFile(parent);
 				}
 			}
 			else {

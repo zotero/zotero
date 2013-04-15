@@ -630,14 +630,11 @@ Zotero.Translate.Sandbox = {
 					}
 				}
 				
-				// Remap attachment (but not link) URLs
-				var properToProxy = translate.translator[0].properToProxy;
-				if(properToProxy && item.attachments) {
-					for(var i=0; i<item.attachments.length; i++) {
-						var attachment = item.attachments[i];
-						if(attachment.snapshot !== false && attachment.url) {
-							attachment.url = properToProxy(attachment.url);
-						}
+				for(var i=0; i<item.attachments.length; i++) {
+					var attachment = item.attachments[i];
+					if(attachment.url) {
+						// Remap attachment (but not link) URLs
+						attachment.url = translate.resolveURL(attachment.url, attachment.snapshot === false);
 					}
 				}
 			}
@@ -1185,6 +1182,57 @@ Zotero.Translate.Base.prototype = {
 	 * Return the progress of the import operation, or null if progress cannot be determined
 	 */
 	"getProgress":function() { return null },
+
+	/**
+	 * Translate a URL to a form that goes through the appropriate proxy, or
+	 * convert a relative URL to an absolute one
+	 *
+	 * @param {String} url
+	 * @param {Boolean} dontUseProxy If true, don't convert URLs to variants
+	 *     that use the proxy
+	 * @type String
+	 * @private
+	 */
+	"resolveURL":function(url, dontUseProxy) {
+		const hostPortRe = /^((?:http|https|ftp):)\/\/([^\/]+)/i;
+		// resolve local URL
+		var resolved = "";
+		
+		// convert proxy to proper if applicable
+		if(hostPortRe.test(url)) {
+			if(this.translator && this.translator[0]
+					&& this.translator[0].properToProxy && !dontUseProxy) {
+				resolved = this.translator[0].properToProxy(url);
+			} else {
+				resolved = url;
+			}
+		} else if(Zotero.isFx) {
+			resolved = Components.classes["@mozilla.org/network/io-service;1"].
+				getService(Components.interfaces.nsIIOService).
+				newURI(this.location, "", null).resolve(url);
+		} else if(Zotero.isNode) {
+			resolved = require('url').resolve(this.location, url);
+		} else {
+			var a = document.createElement('a');
+	        a.href = url;
+	        resolved = a.href;
+		}
+		
+		/*var m = hostPortRe.exec(resolved);
+		if(!m) {
+			throw new Error("Invalid URL supplied for HTTP request: "+url);
+		} else if(this._translate.document && this._translate.document.location) {
+			var loc = this._translate.document.location;
+			if(this._translate._currentState !== "translate" && loc
+					&& (m[1].toLowerCase() !== loc.protocol.toLowerCase()
+					|| m[2].toLowerCase() !== loc.host.toLowerCase())) {
+				throw new Error("Attempt to access "+m[1]+"//"+m[2]+" from "+loc.protocol+"//"+loc.host
+					+" blocked: Cross-site requests are only allowed during translation");
+			}
+		}*/
+		
+		return resolved;
+	},
 	
 	/**
 	 * Executed on translator completion, either automatically from a synchronous scraper or as
