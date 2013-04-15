@@ -74,7 +74,8 @@ Zotero.Connector = new function() {
 					
 					_ieConnectorCallbacks = [];
 					var listener = function(event) {
-						if(event.origin !== "http://127.0.0.1:23119") return;
+						if(event.origin !== "http://127.0.0.1:23119"
+								|| event.source !== iframe.contentWindow) return;
 						if(event.stopPropagation) {
 							event.stopPropagation();
 						} else {
