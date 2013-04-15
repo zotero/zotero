@@ -4006,7 +4006,10 @@ Zotero.Item.prototype.getImageSrc = function() {
 		var fileType;
 		if ((linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE ||
 				linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) &&
-				(fileType = Zotero.FileTypes.getFileTypeFromMIMEType(this.attachmentMIMEType))) {
+				(fileType = Zotero.FileTypes.getFileTypeFromMIMEType(this.attachmentMIMEType)) &&
+				//until there's a way to uniquely identify snapshots,
+				//treat all HTML attachments (from the web) as snapshots
+				(linkMode != Zotero.Attachments.LINK_MODE_IMPORTED_URL || fileType != 'webpage')) {
 			itemType += '-' + fileType;
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
