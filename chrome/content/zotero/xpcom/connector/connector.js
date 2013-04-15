@@ -54,10 +54,10 @@ Zotero.Connector = new function() {
 				callback(false);
 			};
 			
-			window.setTimeout(fail, 1200);
+			window.setTimeout(fail, 1000);
 			try {
 				var xdr = new XDomainRequest();
-				xdr.timeout = 1000;
+				xdr.timeout = 700;
 				xdr.open("POST", "http://127.0.0.1:23119/connector/ping", true);
 				xdr.onerror = function() {
 					Zotero.debug("Connector: XDomainRequest to Zotero Standalone experienced an error");
