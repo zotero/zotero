@@ -403,21 +403,42 @@ Zotero.FileTypes = new function() {
 	this._nameCol = 'fileType';
 	this._table = 'fileTypes';
 	
-	this.getIDFromMIMEType = getIDFromMIMEType;
+	this._mimeTypeCache = {};
+	this._mimeTypesLoaded = false;
 	
-	function getIDFromMIMEType(mimeType) {
-		var sql = "SELECT fileTypeID FROM fileTypeMIMETypes "
-			+ "WHERE ? LIKE mimeType || '%'";
-			
-		return Zotero.DB.valueQuery(sql, [mimeType]);
+	this.getType = function(mimeType) {
+		if(!this._mimeTypesLoaded) {
+			this._loadMimeTypes();
+		}
+		
+		var mimeTypeCategory = mimeType.split('/');
+		mimeTypeCategory = mimeTypeCategory[0] + (mimeTypeCategory.length > 1 ? '/' : '');
+		
+		return this._mimeTypeCache[mimeType] || this._mimeTypeCache[mimeTypeCategory];
+	}
+	
+	this.getIDFromMIMEType = function(mimeType) {
+		var type = this.getType(mimeType);
+		return type && type.id;
 	}
 	
 	this.getFileTypeFromMIMEType = function(mimeType) {
-		var sql = "SELECT fileType FROM fileTypes "
-			+ "NATURAL JOIN fileTypeMimeTypes "
-			+ "WHERE ? LIKE mimeType || '%'";
-			
-		return Zotero.DB.valueQuery(sql, [mimeType]);
+		var type = this.getType(mimeType);
+		return type && type.fileType;
+	}
+	
+	this._loadMimeTypes = function() {
+		var mimeTypes = Zotero.DB.query(
+			"SELECT ft.fileType AS fileType, ftmt.mimeType AS mimeType, ft.fileTypeID as id "
+			+ "FROM fileTypes ft, fileTypeMimeTypes ftmt ON ft.fileTypeID = ftmt.fileTypeID");
+		this._mimeTypeCache = {};
+		for(var i in mimeTypes) {
+			this._mimeTypeCache[mimeTypes[i].mimeType] = {
+				id: mimeTypes[i].id,
+				fileType: mimeTypes[i].fileType
+			}
+		}
+		this._mimeTypesLoaded = true;
 	}
 }
 
