@@ -61,9 +61,11 @@ Zotero.Connector = new function() {
 				xdr.open("POST", "http://127.0.0.1:23119/connector/ping", true);
 				xdr.onerror = function() {
 					Zotero.debug("Connector: XDomainRequest to Zotero Standalone experienced an error");
+					fail();
 				};
 				xdr.ontimeout = function() {
 					Zotero.debug("Connector: XDomainRequest to Zotero Standalone timed out");
+					fail();
 				};
 				xdr.onload = function() {
 					if(me.isOnline !== null) return;
