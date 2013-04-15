@@ -411,6 +411,8 @@ Zotero.FileTypes = new function() {
 			this._loadMimeTypes();
 		}
 		
+		if(!mimeType) return false;
+		
 		var mimeTypeCategory = mimeType.split('/');
 		mimeTypeCategory = mimeTypeCategory[0] + (mimeTypeCategory.length > 1 ? '/' : '');
 		
