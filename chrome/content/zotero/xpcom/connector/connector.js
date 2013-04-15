@@ -54,12 +54,17 @@ Zotero.Connector = new function() {
 				callback(false);
 			};
 			
-			window.setTimeout(fail, 1000);
+			window.setTimeout(fail, 1200);
 			try {
 				var xdr = new XDomainRequest();
-				xdr.timeout = 700;
+				xdr.timeout = 1000;
 				xdr.open("POST", "http://127.0.0.1:23119/connector/ping", true);
-				xdr.onerror = xdr.ontimeout = fail
+				xdr.onerror = function() {
+					Zotero.debug("Connector: XDomainRequest to Zotero Standalone experienced an error");
+				};
+				xdr.ontimeout = function() {
+					Zotero.debug("Connector: XDomainRequest to Zotero Standalone timed out");
+				};
 				xdr.onload = function() {
 					if(me.isOnline !== null) return;
 					me.isOnline = true;
