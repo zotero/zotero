@@ -32,6 +32,8 @@ Zotero.Styles = new function() {
 	var _initialized = false;
 	var _styles, _visibleStyles, _cacheTranslatorData;
 	
+	var _renamedStyles = null;
+	
 	Components.utils.import("resource://zotero/q.js");
 	Components.utils.import("resource://gre/modules/Services.jsm");
 	
@@ -116,22 +118,26 @@ Zotero.Styles = new function() {
 	/**
 	 * Gets a style with a given ID
 	 * @param {String} id
+	 * @param {Boolean} skipMappings Don't automatically return renamed style
 	 */
-	this.get = function(id) {
-		// Map some obsolete styles to current ones
-		const MAPPINGS = {
-			"http://www.zotero.org/styles/chicago-note": "http://www.zotero.org/styles/chicago-note-bibliography",
-			"http://www.zotero.org/styles/mhra_note_without_bibliography": "http://www.zotero.org/styles/mhra",
-			"http://www.zotero.org/styles/aaa": "http://www.zotero.org/styles/american-anthropological-association",
-			"http://www.zotero.org/styles/ama": "http://www.zotero.org/styles/american-medical-association",
-			"http://www.zotero.org/styles/nlm": "http://www.zotero.org/styles/national-library-of-medicine"
-		};
-
+	this.get = function(id, skipMappings) {
 		if(!_initialized) this.init();
-
-		if(MAPPINGS.hasOwnProperty(id) && _styles[MAPPINGS[id]]) {
-			Zotero.debug("Mapping " + id + " to " + MAPPINGS[id]);
-			return _styles[MAPPINGS[id]];
+		
+		// Map some obsolete styles to current ones
+		if(!_renamedStyles) {
+			_renamedStyles = JSON.parse(Zotero.File.getContentsFromURL(
+				"resource://zotero/schema/renamed-styles.json"
+			));
+		}
+		
+		if(!skipMappings) {
+			var prefix = "http://www.zotero.org/styles/";
+			var shortName = id.replace(prefix, "");
+			if(_renamedStyles.hasOwnProperty(shortName) && _styles[prefix + _renamedStyles[shortName]]) {
+				let newID = prefix + _renamedStyles[shortName];
+				Zotero.debug("Mapping " + id + " to " + newID);
+				return _styles[newID];
+			}
 		}
 		
 		return _styles[id] || false;

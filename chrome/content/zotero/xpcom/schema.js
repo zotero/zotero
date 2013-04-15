@@ -31,8 +31,8 @@ Zotero.Schema = new function(){
 	var _dbVersions = [];
 	var _schemaVersions = [];
 	var _repositoryTimer;
-	var _remoteUpdateInProgress = false,
-		_localUpdateInProgress = false;
+	var _remoteUpdateInProgress = false, _localUpdateInProgress = false;
+	var _renamedStylesByNew = null;
 	
 	var self = this;
 	
@@ -597,6 +597,8 @@ Zotero.Schema = new function(){
 					// Delete renamed/obsolete files
 					case 'chicago-note.csl':
 					case 'mhra_note_without_bibliography.csl':
+					case 'mhra.csl':
+					case 'mla.csl':
 						toDelete.push(file);
 						continue;
 					
@@ -1714,6 +1716,7 @@ Zotero.Schema = new function(){
 		xmlnode.normalize();
 		
 		var uri = xmlnode.getAttribute('id');
+		var shortName = uri.replace("http://www.zotero.org/styles/", "");
 		
 		// Delete local style if CSL code is empty
 		if (!xmlnode.firstChild) {
@@ -1724,18 +1727,10 @@ Zotero.Schema = new function(){
 			return;
 		}
 		
-		// Remove renamed styles
-		if (uri == 'http://www.zotero.org/styles/american-medical-association') {
-			var oldID = 'http://www.zotero.org/styles/ama';
-			var style = Zotero.Styles.get(oldID);
-			if (style && style.file.exists()) {
-				Zotero.debug("Deleting renamed style '" + oldID + "'");
-				style.file.remove(false);
-			}
-		}
-		else if (uri == 'http://www.zotero.org/styles/national-library-of-medicine') {
-			var oldID = 'http://www.zotero.org/styles/nlm';
-			var style = Zotero.Styles.get(oldID);
+		// Remove renamed styles, as instructed by the server
+		var oldID = xmlnode.getAttribute('oldID');
+		if (oldID) {
+			var style = Zotero.Styles.get(oldID, true);
 			if (style && style.file.exists()) {
 				Zotero.debug("Deleting renamed style '" + oldID + "'");
 				style.file.remove(false);
