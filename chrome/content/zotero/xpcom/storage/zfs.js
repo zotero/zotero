@@ -1044,7 +1044,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 	obj._purgeDeletedStorageFiles = function () {
 		return Q.fcall(function () {
 			// Cache the credentials at the root
-			return self._cacheCredentials();
+			return this._cacheCredentials();
 		}.bind(this))
 		then(function () {
 			// If we don't have a user id we've never synced and don't need to bother
