@@ -54,7 +54,8 @@ Zotero.File = new function(){
 		var parts = path.split(/([\\\/:]+)/);
 		// Every other item is the separator
 		for (var i=0, n=parts.length; i<n; i+=2) {
-			parts[i] = encodeURIComponent(parts[i]);
+			//decode before re-encoding so we don't double-encode
+			parts[i] = encodeURIComponent(decodeURIComponent(parts[i]));
 		}
 		return parts.join('');
 	}
