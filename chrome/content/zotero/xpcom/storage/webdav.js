@@ -1002,6 +1002,10 @@ Zotero.Sync.Storage.WebDAV = (function () {
 				
 				var lastModified = req.getResponseHeader("Last-Modified");
 				var date = new Date(lastModified);
+				// TEMP
+				if (date.getTime() == 0) {
+					Zotero.debug(lastModified);
+				}
 				Zotero.debug("Last successful WebDAV sync was " + date);
 				return Zotero.Date.toUnixTimestamp(date);
 			})
