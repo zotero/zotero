@@ -285,7 +285,6 @@ Zotero.Server.Connector.SavePage.prototype = {
 			Zotero.Server.Connector.AttachmentProgressManager.onProgress(attachment, progress, error);
 		});
 		translate.setHandler("itemsDone", function(obj, item) {
-			Zotero.Server.Connector.AttachmentProgressManager.add(item.attachments);
 			Zotero.Browser.deleteHiddenBrowser(me._browser);
 			if(jsonItems.length || me.selectedItems === false) {
 				me.sendResponse(201, "application/json", JSON.stringify({"items":jsonItems}));
