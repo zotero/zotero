@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.450",
+    PROCESSOR_VERSION: "1.0.451",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -4683,6 +4683,8 @@ CSL.getCite = function (Item, item, prevItemID) {
     return "" + Item.id;
 };
 CSL.citeStart = function (Item, item) {
+    this.tmp.disambiguate_count = 0;
+    this.tmp.disambiguate_maxMax = 0;
     this.tmp.same_author_as_previous_cite = false;
     if (!this.tmp.suppress_decorations) {
         this.tmp.subsequent_author_substitute_ok = true;
@@ -6804,7 +6806,7 @@ CSL.NameOutput.prototype._runDisambigNames = function (lst, pos) {
         if (this.state.tmp.disambig_request) {
             var val = this.state.tmp.disambig_settings.givens[pos][i];
             if (val === 1 && 
-                this.state.opt["givenname-disambiguation-rule"] === "by-cite" && 
+                this.state.citation.opt["givenname-disambiguation-rule"] === "by-cite" && 
                 ("undefined" === typeof this.name.strings["initialize-with"]
                  || "undefined" === typeof lst[i].given)) {
                 val = 2;
@@ -6955,6 +6957,7 @@ CSL.NameOutput.prototype._imposeNameConstraints = function (lst, count, key, pos
         }
     }
     this.state.tmp.disambig_settings.names[pos] = lst[key].length;
+    this.state.disambiguate.padBase(this.state.tmp.disambig_settings);
 };
 CSL.NameOutput.prototype.getEtAlConfig = function () {
     var item = this.item;
@@ -8819,7 +8822,10 @@ CSL.Attributes["@disambiguate"] = function (state, arg) {
         state.opt.has_disambiguate = true;
         var func = function (Item, item) {
             var ret;
-            if (state.tmp.disambig_settings.disambiguate) {
+            state.tmp.disambiguate_maxMax += 1;
+            if (state.tmp.disambig_settings.disambiguate
+               && state.tmp.disambiguate_count < state.tmp.disambig_settings.disambiguate) {
+                state.tmp.disambiguate_count += 1;
                 return true;
             }
             return false;
@@ -9581,7 +9587,7 @@ CSL.Attributes["@newdate"] = function (state, arg) {
 };
 CSL.Attributes["@givenname-disambiguation-rule"] = function (state, arg) {
     if (CSL.GIVENNAME_DISAMBIGUATION_RULES.indexOf(arg) > -1) {
-        state.opt["givenname-disambiguation-rule"] = arg;
+        state.citation.opt["givenname-disambiguation-rule"] = arg;
     }
 };
 CSL.Attributes["@collapse"] = function (state, arg) {
@@ -12719,7 +12725,7 @@ CSL.Registry.prototype.dodeletes = function (myhash) {
             mypos = this.ambigcites[ambig].indexOf(key);
             if (mypos > -1) {
                 items = this.ambigcites[ambig].slice();
-                this.ambigcites[ambig] = items.slice(0, mypos).concat(items.slice([(mypos + 1)], items.length));
+                this.ambigcites[ambig] = items.slice(0, mypos).concat(items.slice(mypos+1, items.length));
             }
             len = this.ambigcites[ambig].length;
             for (pos = 0; pos < len; pos += 1) {
@@ -12926,6 +12932,13 @@ CSL.Registry.prototype.registerAmbigToken = function (akey, id, ambig_config) {
             if (new_names_params !== old_names_params) {
                 this.state.tmp.taintedItemIDs[id] = true;
             }
+            for (var j=0,jlen=ambig_config.givens[i].length;j<jlen;j+=1) {
+                var new_gnames_params = ambig_config.givens[i][j];
+                var old_gnames_params = this.registry[id].disambig.givens[i][j];
+                if (new_gnames_params !== old_gnames_params) {
+                    this.state.tmp.taintedItemIDs[id] = true;
+                }
+            }
         }
     }
     if (!this.ambigcites[akey]) {
@@ -12983,7 +12996,7 @@ CSL.Registry.NameReg = function (state) {
             skey = skey.replace(/,\!* [^,]$/, "");
         }
         ikey = CSL.Util.Names.initializeWith(state, skey, "%s");
-        if (state.opt["givenname-disambiguation-rule"] === "by-cite") {
+        if (state.citation.opt["givenname-disambiguation-rule"] === "by-cite") {
             pkey = "" + itemid + pkey;
         }
     };
@@ -12997,7 +13010,7 @@ CSL.Registry.NameReg = function (state) {
         set_keys(this.state, "" + item_id, nameobj);
         param = 2;
         dagopt = state.opt["disambiguate-add-givenname"];
-        gdropt = state.opt["givenname-disambiguation-rule"];
+        gdropt = state.citation.opt["givenname-disambiguation-rule"];
         var gdropt_orig = gdropt;
         if (gdropt === "by-cite") {
             gdropt = "all-names";
@@ -13122,8 +13135,8 @@ CSL.Registry.NameReg = function (state) {
         var i, ilen;
         var res = state.nameOutput.getName(nameobj, "locale-translit", true);
         nameobj = res.name;
-        if (state.opt["givenname-disambiguation-rule"]
-            && state.opt["givenname-disambiguation-rule"].slice(0, 8) === "primary-"
+        if (state.citation.opt["givenname-disambiguation-rule"]
+            && state.citation.opt["givenname-disambiguation-rule"].slice(0, 8) === "primary-"
             && pos !== 0) {
                 return;
         }
@@ -13287,16 +13300,20 @@ CSL.Disambiguation.prototype.disNames = function (ismax) {
 };
 CSL.Disambiguation.prototype.disExtraText = function () {
     var pos, len, mybase;
-    if (!this.base.disambiguate) {
-        this.initVars(this.akey)
+    if (!this.base.disambiguate || this.state.tmp.disambiguate_count !== this.state.tmp.disambiguate_maxMax) {
         this.modeindex = 0;
-        this.base.disambiguate = true;
-        this.betterbase.disambiguate = true;
-        this.initGivens = true;
-        for (var i = 0, ilen = this.lists[this.listpos][1].length; i < ilen; i += 1) {
-            this.state.tmp.taintedItemIDs[this.lists[this.listpos][1][i].id] = true;
+        this.base.disambiguate = this.state.tmp.disambiguate_count;
+        this.betterbase.disambiguate = this.state.tmp.disambiguate_count;
+        if (!this.base.disambiguate) {
+            this.initGivens = true;
+            this.base.disambiguate = 1;
+            for (var i = 0, ilen = this.lists[this.listpos][1].length; i < ilen; i += 1) {
+                this.state.tmp.taintedItemIDs[this.lists[this.listpos][1][i].id] = true;
+            }
+        } else {
+            this.disNames();
         }
-    } else if (this.lists[this.listpos][1].length > 1) {
+    } else if (this.state.tmp.disambiguate_count === this.state.tmp.disambiguate_maxMax) {
         if (this.modeindex === this.modes.length - 1) {
             var base = this.lists[this.listpos][0];
             for (var i = 0, ilen = this.lists[this.listpos][1].length; i < ilen; i += 1) {
@@ -13361,17 +13378,22 @@ CSL.Disambiguation.prototype.incrementDisambig = function () {
             increment_namesets = true;
         }
         if ("number" === typeof this.givensMax) {
-            if (this.base.givens[this.gnameset][this.gname] < this.givensMax) {
+            if (this.base.givens.length && this.base.givens[this.gnameset][this.gname] < this.givensMax) {
                 this.base.givens[this.gnameset][this.gname] += 1;
             } else {
                 increment_names = true;
             }
         }
-        if ("number" === typeof this.namesMax && increment_names) {
-            increment_namesets = false;
-            if (this.base.names[this.gnameset] < this.namesMax) {
-                this.base.names[this.gnameset] += 1;
-                this.gname += 1;
+        if ("number" === typeof this.namesMax 
+            && increment_names) {
+            if (this.state.opt["disambiguate-add-names"]) {
+                increment_namesets = false;
+                if (this.base.names[this.gnameset] < this.namesMax) {
+                    this.base.names[this.gnameset] += 1;
+                    this.gname += 1;
+                } else {
+                    increment_namesets = true;
+                }
             } else {
                 increment_namesets = true;
             }
@@ -13386,10 +13408,13 @@ CSL.Disambiguation.prototype.incrementDisambig = function () {
             }
         }
         if (("number" !== typeof this.namesetsMax || this.namesetsMax === -1 || this.gnameset === this.namesetsMax)
-            && ("number" !== typeof this.namesMax || this.base.names[this.gnameset] === this.namesMax)
-            && ("number" != typeof this.givensMax || "undefined" === typeof this.base.givens[this.gnameset][this.gname] || this.base.givens[this.gnameset][this.gname] === this.givensMax)) {
+            && (!this.state.opt["disambiguate-add-names"] || "number" !== typeof this.namesMax || this.base.names[this.gnameset] === this.namesMax)
+            && ("number" != typeof this.givensMax || "undefined" === typeof this.base.givens[this.gnameset] || "undefined" === typeof this.base.givens[this.gnameset][this.gname] || this.base.givens[this.gnameset][this.gname] === this.givensMax)) {
             maxed = true;
         }
+    } else if ("disExtraText" === this.modes[this.modeindex]) {
+        this.base.disambiguate += 1;
+        this.betterbase.disambiguate += 1;
     }
     return maxed;
 };
@@ -13443,29 +13468,43 @@ CSL.Disambiguation.prototype.initVars = function (akey) {
         this.Item = this.state.retrieveItem("" + myIds[0]);
     }
     this.modeindex = 0;
-    this.namesMax = this.maxNamesByItemId[this.Item.id][0];
-    for (i = 0, ilen = this.base.givens.length; i < ilen; i += 1) {
-        for (var j = 0, jlen = this.namesMax; j < jlen; j += 1) {
-            if (!this.base.givens[i][j]) {
-                this.base.givens[i][j] = 0;
-                this.betterbase.givens[i][j] = 0;
-            }
+    if (this.state.citation.opt["disambiguate-add-names"] || true) {
+        this.namesMax = this.maxNamesByItemId[this.Item.id][0];
+    } else {
+        var namesMax = this.base.names[0];
+        for (var i=1,ilen=this.base.names.length;i<ilen;i+=1){
+            namesMax = Math.max(namesMax,this.base.names.names[i]);
         }
     }
+    this.padBase(this.base);
+    this.padBase(this.betterbase);
     this.base.year_suffix = false;
     this.base.disambiguate = false;
     this.betterbase.year_suffix = false;
     this.betterbase.disambiguate = false;
-    if (this.state.opt["givenname-disambiguation-rule"] === "by-cite") {
+    if (this.state.citation.opt["givenname-disambiguation-rule"] === "by-cite"
+       && this.state.opt["disambiguate-add-givenname"]) {
         this.givensMax = 2;
     }
     return true;
 };
+CSL.Disambiguation.prototype.padBase = function (base) {
+    for (i = 0, ilen = base.names.length; i < ilen; i += 1) {
+        if (!base.givens[i]) {
+            base.givens[i] = [];
+        }
+        for (var j=0,jlen=base.names[i];j<jlen;j+=1) {
+            if (!base.givens[i][j]) {
+                base.givens[i][j] = 0;
+            }
+        }
+    }
+}
 CSL.Disambiguation.prototype.configModes = function () {
     var dagopt, gdropt;
     this.modes = [];
     dagopt = this.state.opt["disambiguate-add-givenname"];
-    gdropt = this.state.opt["givenname-disambiguation-rule"];
+    gdropt = this.state.citation.opt["givenname-disambiguation-rule"];
     if (this.state.opt['disambiguate-add-names'] || (dagopt && gdropt === "by-cite")) {
         this.modes.push("disNames");
     }
@@ -13482,6 +13521,9 @@ CSL.Disambiguation.prototype.getCiteData = function(Item, base) {
         base = CSL.getAmbigConfig.call(this.state);
         this.maxNamesByItemId[Item.id] = CSL.getMaxVals.call(this.state);
         this.state.registry.registry[Item.id].disambig.givens = this.state.tmp.disambig_settings.givens.slice();
+        for (var i=0,ilen=this.state.registry.registry[Item.id].disambig.givens.length;i<ilen;i+=1) {
+            this.state.registry.registry[Item.id].disambig.givens[i] = this.state.tmp.disambig_settings.givens[i].slice();
+        }
         this.namesetsMax = this.state.registry.registry[Item.id].disambig.names.length - 1;
         if (!this.base) {
             this.base = base;
@@ -13493,9 +13535,12 @@ CSL.Disambiguation.prototype.getCiteData = function(Item, base) {
         var update = false;
         for (var i = 0, ilen = base.names.length; i < ilen; i += 1) {
             if (base.names[i] > this.base.names[i]) {
-                this.base.givens[i] = this.base.givens[i].concat(this.base.givens[i].slice(this.base.names[i]));
+                this.base.givens[i] = base.givens[i].slice();
                 this.base.names[i] = base.names[i];
                 this.betterbase.names = this.base.names.slice();
+                this.betterbase.givens = this.base.givens.slice();
+                this.padBase(this.base);
+                this.padBase(this.betterbase);
             }
         }
         this.betterbase.givens = this.base.givens.slice();
@@ -13505,7 +13550,7 @@ CSL.Disambiguation.prototype.getCiteData = function(Item, base) {
     }
 };
 CSL.Disambiguation.prototype.captureStepToBase = function() {
-    if (this.state.opt["givenname-disambiguation-rule"] === "by-cite") {
+    if (this.state.citation.opt["givenname-disambiguation-rule"] === "by-cite") {
         this.betterbase.givens[this.gnameset][this.gname] = this.base.givens[this.gnameset][this.gname];
     }
     this.betterbase.names[this.gnameset] = this.base.names[this.gnameset];
