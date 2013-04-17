@@ -804,16 +804,23 @@ Zotero_Browser.Tab.prototype._selectItems = function(obj, itemList, callback) {
  */
 Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, translators) {
 	if(translators && translators.length) {
-		// if there's already a scrapable page in the browser window, and it's
-		// still there, ensure it is actually part of the page, then return
-		if(this.page.translators && this.page.translators.length && this.page.document.location) {
-			if(this.page.document.defaultView && !this.page.document.defaultView.closed
-				&& this.page.document.location.href != translate.document.location.href) {
-				// if it is still there, switch translation to take place on 
-				if(!translators.length || this.page.translators[0].priority <= translators[0].priority) return;
-			} else {
-				this.clear();
-			}
+		//see if we should keep the previous set of translators
+		if(//we already have a translator for part of this page
+			this.page.translators && this.page.translators.length && this.page.document.location
+			//and the page is still there
+			&& this.page.document.defaultView && !this.page.document.defaultView.closed
+			//this set of translators is not targeting the same URL as a previous set of translators,
+			// because otherwise we want to use the newer set
+			&& this.page.document.location.href != translate.document.location.href
+			//the previous set of translators targets the top frame or the current one does not either
+			&& (this.page.document.defaultView == this.page.document.defaultView.top
+				|| translate.document.defaultView !== this.page.document.defaultView.top)
+			//the best translator we had was of higher priority than the new set
+			&& this.page.translators[0].priority <= translators[0].priority
+		) {
+			return; //keep what we had
+		} else {
+			this.clear(); //clear URL bar icon
 		}
 		
 		this.page.translate = translate;
