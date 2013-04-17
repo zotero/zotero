@@ -334,7 +334,9 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
 	if(this.type === "web") {
 		this.fetchPageAndRunTest(test, callback);
 	} else {
-		this.runTest(test, null, callback);
+		(Zotero.setTimeout ? Zotero : window).setTimeout(function() {
+			this.runTest(test, null, callback);
+		}, 0);
 	}
 	
 	(Zotero.setTimeout ? Zotero : window).setTimeout(function() {
