@@ -82,14 +82,15 @@ Zotero.Attachments = new function(){
 			
 			// Create directory for attachment files within storage directory
 			var destDir = this.createDirectoryForItem(itemID);
-			file.copyTo(destDir, newName);
 			
 			// Point to copied file
 			var newFile = destDir.clone();
 			newFile.append(newName);
 			
-			var mimeType = Zotero.MIME.getMIMETypeFromFile(newFile);
+			// Copy file to unique filename, which automatically shortens long filenames
+			newFile = Zotero.File.copyToUnique(file, newFile);
 			
+			var mimeType = Zotero.MIME.getMIMETypeFromFile(newFile);
 			
 			attachmentItem.attachmentMIMEType = mimeType;
 			attachmentItem.attachmentPath = this.getPath(newFile, this.LINK_MODE_IMPORTED_FILE);

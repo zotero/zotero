@@ -39,7 +39,6 @@ Zotero.File = new function(){
 	this.putContents = putContents;
 	this.getValidFileName = getValidFileName;
 	this.truncateFileName = truncateFileName;
-	this.copyToUnique = this.copyToUnique;
 	this.getCharsetFromFile = getCharsetFromFile;
 	this.addCharsetListener = addCharsetListener;
 	
@@ -287,14 +286,14 @@ Zotero.File = new function(){
 	}
 	
 	
-	function copyToUnique(file, newFile) {
+	this.copyToUnique = function (file, newFile) {
 		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
 		var newName = newFile.leafName;
 		newFile.remove(null);
 		
 		// Copy file to unique name
 		file.copyTo(newFile.parent, newName);
-		return file;
+		return newFile;
 	}
 	
 	
