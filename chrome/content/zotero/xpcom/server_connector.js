@@ -55,6 +55,14 @@ Zotero.Server.Connector.AttachmentProgressManager = new function() {
 	this.getProgressForID = function(progressID) {
 		return progressID in attachmentProgress ? attachmentProgress[progressID] : 0;
 	};
+
+	/**
+	 * Check if we have received progress for a given attachment
+	 */
+	this.has = function(attachment) {
+		return attachmentsInProgress.has(attachment)
+			&& attachmentsInProgress.get(attachment) in attachmentProgress;
+	}
 };
 
 /**
@@ -339,11 +347,21 @@ Zotero.Server.Connector.SaveItem.prototype = {
 		// save items
 		var itemSaver = new Zotero.Translate.ItemSaver(libraryID,
 			Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD, 1, undefined, cookieSandbox);
-		itemSaver.saveItems(data.items, function(returnValue, newItems) {
+		itemSaver.saveItems(data.items, function(returnValue, items) {
 			if(returnValue) {
 				try {
-					for each(var item in newItems) {
-						if(collection) collection.addItem(item.id);
+					// Remove attachments not being saved from item.attachments
+					for(var i=0; i<data.items.length; i++) {
+						var item = data.items[i];
+						for(var j=0; j<item.attachments.length; j++) {
+							if(!Zotero.Server.Connector.AttachmentProgressManager.has(item.attachments[j])) {
+								item.attachments.splice(j--, 1);
+							}
+						}
+					}
+					
+					for(var i=0; i<items.length; i++) {
+						if(collection) collection.addItem(items[i].id);
 					}
 					
 					sendResponseCallback(201, "application/json", JSON.stringify({"items":data.items}));
