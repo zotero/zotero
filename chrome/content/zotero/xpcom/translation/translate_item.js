@@ -314,11 +314,10 @@ Zotero.Translate.ItemSaver.prototype = {
 	"_parseRelativePath":function(path) {
 		try {
 			var file = this._baseURI.QueryInterface(Components.interfaces.nsIFileURL).file.parent;
-			var splitPath = path.split(/[\/\\]/g);
+			var splitPath = path.split(/\//g);
 			for(var i=0; i<splitPath.length; i++) {
 				if(splitPath[i] !== "") file.append(splitPath[i]);
 			}
-			Zotero.debug("Testing "+file.path);
 			if(file.exists()) return file;
 		} catch(e) {
 			Zotero.logError(e);
@@ -343,7 +342,13 @@ Zotero.Translate.ItemSaver.prototype = {
 		} else if(path.substr(0, 7) !== "file://") {
 			// If it was a fully qualified file URI, we can give up now
 
-			// Next, try to parse as relative path
+			// Next, try to parse as relative path, replacing backslashes with slashes
+			if((file = this._parseRelativePath(path.replace(/\\/g, "/")))) {
+				Zotero.debug("Translate: Got file "+path+" as relative path");
+				return file;
+			}
+
+			// Next, try to parse as relative path, without replacing backslashes with slashes
 			if((file = this._parseRelativePath(path))) {
 				Zotero.debug("Translate: Got file "+path+" as relative path");
 				return file;
