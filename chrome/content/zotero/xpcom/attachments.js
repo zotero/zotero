@@ -51,12 +51,7 @@ Zotero.Attachments = new function(){
 		Zotero.debug('Importing attachment from file');
 		
 		// Try decoding URI entities, since we're going to strip '%'
-		var newName = file.leafName;
-		try {
-			newName = decodeURIComponent(file.leafName);
-		}
-		catch (e) {}
-		newName = Zotero.File.getValidFileName(newName);
+		var newName = Zotero.File.getValidFileName(file.leafName);
 		
 		if (!file.isFile()) {
 			throw ("'" + file.leafName + "' must be a file in Zotero.Attachments.importFromFile()");
