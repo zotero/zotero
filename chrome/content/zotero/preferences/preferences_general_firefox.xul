@@ -63,7 +63,7 @@
 						</rows>
 					</grid>
 				</tabpanel>
-				<tabpanel orient="vertical" id="zotero-prefpane-misc-tabpanel">
+				<tabpanel id="zotero-prefpane-misc-tabpanel">
 					<checkbox id="launchNonNativeFiles-checkbox"
 						preference="pref-launchNonNativeFiles"
 						onsyncfrompreference="return !document.getElementById(this.getAttribute('preference')).value"

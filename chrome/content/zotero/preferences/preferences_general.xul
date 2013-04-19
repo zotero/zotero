@@ -101,7 +101,7 @@
 					
 					<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
 				</tabpanel>
-				<tabpanel orient="vertical" id="zotero-prefpane-misc-tabpanel">
+				<tabpanel orient="vertical">
 					<label value="&zotero.preferences.groups.whenCopyingInclude;"/>
 					<vbox style="margin-left: 2em">
 						<checkbox label="&zotero.preferences.groups.childNotes;" preference="pref-groups-copyChildNotes"/>
@@ -110,7 +110,7 @@
 						<checkbox label="&zotero.preferences.groups.tags;" preference="pref-groups-copyTags"/>
 					</vbox>
 				</tabpanel>
-				<tabpanel orient="vertical">
+				<tabpanel orient="vertical" id="zotero-prefpane-misc-tabpanel">
 					<hbox align="center">
 						<checkbox label="&zotero.preferences.autoUpdate;" preference="pref-automaticScraperUpdates"/>
 						<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;"
