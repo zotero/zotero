@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.451",
+    PROCESSOR_VERSION: "1.0.453",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -930,6 +930,20 @@ CSL_CHROME.prototype.flagDateMacros = function(myxml) {
         }
     }
 };
+var XML_PARSING;
+if ("undefined" !== typeof CSL_IS_NODEJS) {
+    XML_PARSING = CSL_NODEJS;
+} else if ("undefined" !== typeof CSL_E4X) {
+    XML_PARSING = CSL_E4X;
+} else if ("undefined" !== typeof CSL_JSON) {
+    XML_PARSING = CSL_JSON;
+} else {
+    XML_PARSING = CSL_CHROME;
+}
+CSL.System = {};
+CSL.System.Xml = {
+    "Parsing": XML_PARSING
+};
 CSL.getSortCompare = function () {
     if (CSL.stringCompare) {
         return CSL.stringCompare;
@@ -985,780 +999,6 @@ CSL.getSortCompare = function () {
         sortCompare = strcmp;
     }
     return sortCompare;
-};
-CSL.Output = {};
-CSL.Output.Queue = function (state) {
-    this.levelname = ["top"];
-    this.state = state;
-    this.queue = [];
-    this.empty = new CSL.Token("empty");
-    var tokenstore = {};
-    tokenstore.empty = this.empty;
-    this.formats = new CSL.Stack(tokenstore);
-    this.current = new CSL.Stack(this.queue);
-};
-CSL.Output.Queue.prototype.pop = function () {
-    var drip = this.current.value();
-    if (drip.length) {
-        return drip.pop();
-    } else {
-        return drip.blobs.pop();
-    }
-};
-CSL.Output.Queue.prototype.getToken = function (name) {
-    var ret = this.formats.value()[name];
-    return ret;
-};
-CSL.Output.Queue.prototype.mergeTokenStrings = function (base, modifier) {
-    var base_token, modifier_token, ret, key;
-    base_token = this.formats.value()[base];
-    modifier_token = this.formats.value()[modifier];
-    ret = base_token;
-    if (modifier_token) {
-        if (!base_token) {
-            base_token = new CSL.Token(base, CSL.SINGLETON);
-            base_token.decorations = [];
-        }
-        ret = new CSL.Token(base, CSL.SINGLETON);
-        key = "";
-        for (key in base_token.strings) {
-            if (base_token.strings.hasOwnProperty(key)) {
-                ret.strings[key] = base_token.strings[key];
-            }
-        }
-        for (key in modifier_token.strings) {
-            if (modifier_token.strings.hasOwnProperty(key)) {
-                ret.strings[key] = modifier_token.strings[key];
-            }
-        }
-        ret.decorations = base_token.decorations.concat(modifier_token.decorations);
-    }
-    return ret;
-};
-CSL.Output.Queue.prototype.addToken = function (name, modifier, token) {
-    var newtok, attr;
-    newtok = new CSL.Token("output");
-    if ("string" === typeof token) {
-        token = this.formats.value()[token];
-    }
-    if (token && token.strings) {
-        for (attr in token.strings) {
-            if (token.strings.hasOwnProperty(attr)) {
-                newtok.strings[attr] = token.strings[attr];
-            }
-        }
-        newtok.decorations = token.decorations;
-    }
-    if ("string" === typeof modifier) {
-        newtok.strings.delimiter = modifier;
-    }
-    this.formats.value()[name] = newtok;
-};
-CSL.Output.Queue.prototype.pushFormats = function (tokenstore) {
-    if (!tokenstore) {
-        tokenstore = {};
-    }
-    tokenstore.empty = this.empty;
-    this.formats.push(tokenstore);
-};
-CSL.Output.Queue.prototype.popFormats = function (tokenstore) {
-    this.formats.pop();
-};
-CSL.Output.Queue.prototype.startTag = function (name, token) {
-    var tokenstore = {};
-    if (this.state.tmp["doing-macro-with-date"] && this.state.tmp.extension) {
-        token = this.empty;
-        name = "empty";
-    }
-    tokenstore[name] = token;
-    this.pushFormats(tokenstore);
-    this.openLevel(name);
-};
-CSL.Output.Queue.prototype.endTag = function (name) {
-    this.closeLevel();
-    this.popFormats();
-};
-CSL.Output.Queue.prototype.openLevel = function (token, ephemeral) {
-    var blob, curr, x, has_ephemeral;
-    if ("object" === typeof token) {
-        blob = new CSL.Blob(undefined, token);
-    } else if ("undefined" === typeof token) {
-        blob = new CSL.Blob(undefined, this.formats.value().empty, "empty");
-    } else {
-        if (!this.formats.value() || !this.formats.value()[token]) {
-            throw "CSL processor error: call to nonexistent format token \"" + token + "\"";
-        }
-        blob = new CSL.Blob(undefined, this.formats.value()[token], token);
-    }
-    if (this.nestedBraces) {
-        blob.strings.prefix = blob.strings.prefix.replace(this.nestedBraces[0][0], this.nestedBraces[0][1]);
-        blob.strings.prefix = blob.strings.prefix.replace(this.nestedBraces[1][0], this.nestedBraces[1][1]);
-        blob.strings.suffix = blob.strings.suffix.replace(this.nestedBraces[0][0], this.nestedBraces[0][1]);
-        blob.strings.suffix = blob.strings.suffix.replace(this.nestedBraces[1][0], this.nestedBraces[1][1]);
-    }
-    curr = this.current.value();
-    curr.push(blob);
-    this.current.push(blob);
-};
-CSL.Output.Queue.prototype.closeLevel = function (name) {
-    if (name && name !== this.current.value().levelname) {
-        CSL.error("Level mismatch error:  wanted " + name + " but found " + this.current.value().levelname);
-    }
-    this.current.pop();
-};
-CSL.Output.Queue.prototype.append = function (str, tokname, notSerious, ignorePredecessor, noStripPeriods) {
-    var token, blob, curr;
-    var useblob = true;
-    if (notSerious) {
-        ignorePredecessor = true;
-    }
-    if (this.state.tmp["doing-macro-with-date"]) {
-        if (tokname !== "macro-with-date") {
-            return false;
-        }
-        if (tokname === "macro-with-date") {
-            tokname = "empty";
-        }
-    }
-    if ("undefined" === typeof str) {
-        return false;
-    }
-    if ("number" === typeof str) {
-        str = "" + str;
-    }
-    if (!notSerious 
-        && this.state.tmp.element_trace 
-        && this.state.tmp.element_trace.value() === "suppress-me") {
-        return false;
-    }
-    blob = false;
-    if (!tokname) {
-        token = this.formats.value().empty;
-    } else if (tokname === "literal") {
-        token = true;
-        useblob = false;
-    } else if ("string" === typeof tokname) {
-        token = this.formats.value()[tokname];
-    } else {
-        token = tokname;
-    }
-    if (!token) {
-        throw "CSL processor error: unknown format token name: " + tokname;
-    }
-    if (token.strings && "undefined" === typeof token.strings.delimiter) {
-        token.strings.delimiter = "";
-    }
-    if ("string" === typeof str && str.length) {
-        str = str.replace(/ ([:;?!\u00bb])/g, "\u202f$1").replace(/\u00ab /g, "\u00ab\u202f");
-        this.last_char_rendered = str.slice(-1);
-        str = str.replace(/\s+'/g, "  \'").replace(/^'/g, " \'");
-        if (!ignorePredecessor) {
-            this.state.tmp.term_predecessor = true;
-        } else if (notSerious) {
-            this.state.tmp.term_predecessor_name = true;
-        }
-    }
-    blob = new CSL.Blob(str, token);
-    if (this.nestedBraces) {
-        blob.strings.prefix = blob.strings.prefix.replace(this.nestedBraces[0][0], this.nestedBraces[0][1]);
-        blob.strings.prefix = blob.strings.prefix.replace(this.nestedBraces[1][0], this.nestedBraces[1][1]);
-        blob.strings.suffix = blob.strings.suffix.replace(this.nestedBraces[0][0], this.nestedBraces[0][1]);
-        blob.strings.suffix = blob.strings.suffix.replace(this.nestedBraces[1][0], this.nestedBraces[1][1]);
-    }
-    curr = this.current.value();
-    if ("undefined" === typeof curr && this.current.mystack.length === 0) {
-        this.current.mystack.push([]);
-        curr = this.current.value();
-    }
-    if ("string" === typeof blob.blobs) {
-        if (!ignorePredecessor) {
-            this.state.tmp.term_predecessor = true;
-        } else if (notSerious) {
-            this.state.tmp.term_predecessor_name = true;
-        }
-    }
-    if (!notSerious) {
-        this.state.parallel.AppendBlobPointer(curr);
-    }
-    if ("string" === typeof str) {
-        curr.push(blob);
-        if (blob.strings["text-case"]) {
-            blob.blobs = CSL.Output.Formatters[blob.strings["text-case"]](this.state, str);
-        }
-        if (this.state.tmp.strip_periods && !noStripPeriods) {
-            blob.blobs = blob.blobs.replace(/\.([^a-z]|$)/g, "$1");
-        }
-        for (var i = blob.decorations.length - 1; i > -1; i += -1) {
-            if (blob.decorations[i][0] === "@quotes" && blob.decorations[i][1] === "true") {
-                blob.punctuation_in_quote = this.state.getOpt("punctuation-in-quote")
-            }
-            if (!blob.blobs.match(CSL.ROMANESQUE_REGEXP)) {
-                if (blob.decorations[i][0] === "@font-style") {
-                    blob.decorations = blob.decorations.slice(0, i).concat(blob.decorations.slice(i + 1));
-                }
-            }
-        }
-        this.state.fun.flipflopper.init(str, blob);
-        this.state.fun.flipflopper.processTags();
-    } else if (useblob) {
-        curr.push(blob);
-    } else {
-        curr.push(str);
-    }
-    return true;
-};
-CSL.Output.Queue.prototype.string = function (state, myblobs, blob) {
-    var i, ilen, j, jlen, b;
-    var txt_esc = CSL.getSafeEscape(this.state);
-    var blobs = myblobs.slice();
-    var ret = [];
-    if (blobs.length === 0) {
-        return ret;
-    }
-    var blob_delimiter = "";
-    if (blob) {
-        blob_delimiter = blob.strings.delimiter;
-    } else {
-        state.tmp.count_offset_characters = false;
-        state.tmp.offset_characters = 0;
-    }
-    if (blob && blob.new_locale) {
-        blob.old_locale = state.opt.lang;
-        state.opt.lang = blob.new_locale;
-    }
-    var blobjr, use_suffix, use_prefix, params;
-    for (i = 0, ilen = blobs.length; i < ilen; i += 1) {
-        blobjr = blobs[i];
-        if (blobjr.strings.first_blob) {
-            state.tmp.count_offset_characters = blobjr.strings.first_blob;
-        }
-        if ("string" === typeof blobjr.blobs) {
-            if ("number" === typeof blobjr.num) {
-                ret.push(blobjr);
-            } else if (blobjr.blobs) {
-                b = txt_esc(blobjr.blobs);
-                var blen = b.length;
-                if (!state.tmp.suppress_decorations) {
-                    for (j = 0, jlen = blobjr.decorations.length; j < jlen; j += 1) {
-                        params = blobjr.decorations[j];
-                        if (params[0] === "@showid") {
-                            continue;
-                        }
-                        if (state.normalDecorIsOrphan(blobjr, params)) {
-                            continue;
-                        }
-                        b = state.fun.decorate[params[0]][params[1]](state, b, params[2]);
-                    }
-                }
-                if (b && b.length) {
-                    b = txt_esc(blobjr.strings.prefix, state.tmp.nestedBraces) + b + txt_esc(blobjr.strings.suffix, state.tmp.nestedBraces);
-                    if (state.opt.development_extensions.csl_reverse_lookup_support && !state.tmp.suppress_decorations) {
-                        for (j = 0, jlen = blobjr.decorations.length; j < jlen; j += 1) {
-                            params = blobjr.decorations[j];
-                            if (params[0] === "@showid") {
-                                b = state.fun.decorate[params[0]][params[1]](state, b, params[2]);
-                            }
-                        }
-                    }
-                    ret.push(b);
-                    if (state.tmp.count_offset_characters) {
-                        state.tmp.offset_characters += (blen + blobjr.strings.suffix.length + blobjr.strings.prefix.length);
-                    }
-                }
-            }
-        } else if (blobjr.blobs.length) {
-            var addtoret = state.output.string(state, blobjr.blobs, blobjr);
-            ret = ret.concat(addtoret);
-        }
-        if (blobjr.strings.first_blob) {
-            state.registry.registry[blobjr.strings.first_blob].offset = state.tmp.offset_characters;
-            state.tmp.count_offset_characters = false;
-        }
-    }
-    for (i=0,ilen=ret.length - 1;i<ilen;i+=1) {
-        if ("number" === typeof ret[i].num && "number" === typeof ret[i+1].num && !ret[i+1].UGLY_DELIMITER_SUPPRESS_HACK) {
-            ret[i].strings.suffix = txt_esc(blob_delimiter);
-            ret[i+1].successor_prefix = "";
-            ret[i+1].UGLY_DELIMITER_SUPPRESS_HACK = true;
-        }
-    }
-    var span_split = 0;
-    for (i = 0, ilen = ret.length; i < ilen; i += 1) {
-        if ("string" === typeof ret[i]) {
-            span_split = (parseInt(i, 10) + 1);
-            if (i < ret.length - 1  && "object" === typeof ret[i + 1]) {
-                if (blob_delimiter && !ret[i + 1].UGLY_DELIMITER_SUPPRESS_HACK) {
-                    ret[i] += txt_esc(blob_delimiter);
-                }
-                ret[i + 1].UGLY_DELIMITER_SUPPRESS_HACK = true;
-            }
-        }
-    }
-    if (blob && (blob.decorations.length || blob.strings.suffix || blob.strings.prefix)) {
-        span_split = ret.length;
-    }
-    var blobs_start = state.output.renderBlobs(ret.slice(0, span_split), blob_delimiter, true);
-    if (blobs_start && blob && (blob.decorations.length || blob.strings.suffix || blob.strings.prefix)) {
-        if (!state.tmp.suppress_decorations) {
-            for (i = 0, ilen = blob.decorations.length; i < ilen; i += 1) {
-                params = blob.decorations[i];
-                if (["@cite","@bibliography", "@display", "@showid"].indexOf(params[0]) > -1) {
-                    continue;
-                }
-                if (state.normalDecorIsOrphan(blobjr, params)) {
-                    continue;
-                }
-                blobs_start = state.fun.decorate[params[0]][params[1]](state, blobs_start, params[2]);
-            }
-        }
-        b = blobs_start;
-        use_suffix = blob.strings.suffix;
-        if (b && b.length) {
-            use_prefix = blob.strings.prefix;
-            b = txt_esc(use_prefix, state.tmp.nestedBraces) + b + txt_esc(use_suffix, state.tmp.nestedBraces);
-            if (state.tmp.count_offset_characters) {
-                state.tmp.offset_characters += (use_prefix.length + use_suffix.length);
-            }
-        }
-        blobs_start = b;
-        if (!state.tmp.suppress_decorations) {
-            for (i = 0, ilen = blob.decorations.length; i < ilen; i += 1) {
-                params = blob.decorations[i];
-                if (["@cite","@bibliography", "@display", "@showid"].indexOf(params[0]) === -1) {
-                    continue;
-                }
-                blobs_start = state.fun.decorate[params[0]][params[1]].call(blob, state, blobs_start, params[2]);
-            }
-        }
-    }
-    var blobs_end = ret.slice(span_split, ret.length);
-    if (!blobs_end.length && blobs_start) {
-        ret = [blobs_start];
-    } else if (blobs_end.length && !blobs_start) {
-        ret = blobs_end;
-    } else if (blobs_start && blobs_end.length) {
-        ret = [blobs_start].concat(blobs_end);
-    }
-    if ("undefined" === typeof blob) {
-        this.queue = [];
-        this.current.mystack = [];
-        this.current.mystack.push(this.queue);
-        if (state.tmp.suppress_decorations) {
-            ret = state.output.renderBlobs(ret, undefined, true);
-        }
-    } else if ("boolean" === typeof blob) {
-        ret = state.output.renderBlobs(ret, undefined, true);
-    }
-    if (blob && blob.new_locale) {
-        state.opt.lang = blob.old_locale;
-    }
-    return ret;
-};
-CSL.Output.Queue.prototype.clearlevel = function () {
-    var blob, pos, len;
-    blob = this.current.value();
-    len = blob.blobs.length;
-    for (pos = 0; pos < len; pos += 1) {
-        blob.blobs.pop();
-    }
-};
-CSL.Output.Queue.prototype.renderBlobs = function (blobs, delim, in_cite) {
-    var state, ret, ret_last_char, use_delim, i, blob, pos, len, ppos, llen, pppos, lllen, res, str, params, txt_esc;
-    txt_esc = CSL.getSafeEscape(this.state);
-    if (!delim) {
-        delim = "";
-    }
-    state = this.state;
-    ret = "";
-    ret_last_char = [];
-    use_delim = "";
-    len = blobs.length;
-    var start = true;
-    for (pos = 0; pos < len; pos += 1) {
-        if (blobs[pos].checkNext) {
-            blobs[pos].checkNext(blobs[(pos + 1)],start);
-            start = false;
-        } else {
-            start = true;
-        }
-    }
-    var doit = true;
-    for (pos = blobs.length - 1; pos > 0; pos += -1) {
-        if (blobs[pos].checkLast) {
-        if (doit && blobs[pos].checkLast(blobs[pos - 1])) {
-            doit = false;
-        }
-        } else {
-        doit = true;
-        }
-    }
-    len = blobs.length;
-    for (pos = 0; pos < len; pos += 1) {
-        blob = blobs[pos];
-        if (ret) {
-            use_delim = delim;
-        }
-        if (blob && "string" === typeof blob) {
-            ret += txt_esc(use_delim);
-            ret += blob;
-            if (state.tmp.count_offset_characters) {
-                state.tmp.offset_characters += (use_delim.length);
-            }
-        } else if (blob.status !== CSL.SUPPRESS) {
-            str = blob.formatter.format(blob.num, blob.gender);
-            var strlen = str.replace(/<[^>]*>/g, "").length;
-            this.append(str, "empty", true);
-            var str_blob = this.pop();
-            var count_offset_characters = state.tmp.count_offset_characters;
-            str = this.string(state, [str_blob], false);
-            state.tmp.count_offset_characters = count_offset_characters;
-            if (blob.strings["text-case"]) {
-                str = CSL.Output.Formatters[blob.strings["text-case"]](this.state, str);
-            }
-            if (str && this.state.tmp.strip_periods) {
-                str = str.replace(/\.([^a-z]|$)/g, "$1");
-            }
-            if (!state.tmp.suppress_decorations) {
-                llen = blob.decorations.length;
-                for (ppos = 0; ppos < llen; ppos += 1) {
-                    params = blob.decorations[ppos];
-                    if (state.normalDecorIsOrphan(blob, params)) {
-                        continue;
-                    }
-                    str = state.fun.decorate[params[0]][params[1]](state, str, params[2]);
-                }
-            }
-            str = txt_esc(blob.strings.prefix) + str + txt_esc(blob.strings.suffix);
-            var addme = "";
-            if (blob.status === CSL.END) {
-                addme = txt_esc(blob.range_prefix);
-            } else if (blob.status === CSL.SUCCESSOR) {
-                addme = txt_esc(blob.successor_prefix);
-            } else if (blob.status === CSL.START) {
-                addme = "";
-            } else if (blob.status === CSL.SEEN) {
-                addme = txt_esc(blob.splice_prefix);
-            }
-            ret += addme;
-            ret += str;
-            if (state.tmp.count_offset_characters) {
-                state.tmp.offset_characters += (addme.length + blob.strings.prefix.length + strlen + blob.strings.suffix.length);
-            }
-        }
-    }
-    return ret;
-};
-CSL.Output.Queue.purgeEmptyBlobs = function (myblobs, endOnly) {
-    var res, i, ilen, j, jlen, tmpblobs;
-    if ("string" === typeof myblobs || !myblobs.length) {
-        return;
-    }
-    for (i = myblobs.length - 1; i > -1; i += -1) {
-        CSL.Output.Queue.purgeEmptyBlobs(myblobs[i].blobs, endOnly);
-    }
-    for (i = myblobs.length - 1; i > -1; i += -1) {
-        if (!myblobs[i].blobs.length) {
-            tmpblobs = myblobs.slice(i + 1);
-            for (j = i, jlen = myblobs.length; j < jlen; j += 1) {
-                myblobs.pop();
-            }
-            for (j = 0, jlen = tmpblobs.length; j < jlen; j += 1) {
-                myblobs.push(tmpblobs[j]);
-            }
-        }
-        if (endOnly) {
-            break;
-        }
-    }
-};
-CSL.Output.Queue.purgeNearsidePrefixChars = function(myblob, chr) {
-    if (!chr) {
-        return;
-    }
-    if ("object" === typeof myblob) {
-        if ((CSL.TERMINAL_PUNCTUATION.indexOf(chr) > -1
-             && CSL.TERMINAL_PUNCTUATION.slice(0, -1).indexOf(myblob.strings.prefix.slice(0, 1)) > -1)
-            && !(myblob.strings.prefix.slice(0,1) === ";" && chr === ".")) {
-            myblob.strings.prefix = myblob.strings.prefix.slice(1);
-        } else if ("object" === typeof myblob.blobs) {
-            CSL.Output.Queue.purgeNearsidePrefixChars(myblob.blobs[0], chr);
-        }
-    }
-};
-CSL.Output.Queue.purgeNearsidePrefixSpaces = function(myblob, chr) {
-    if ("object" === typeof myblob) {
-        if (" " === chr && " " === myblob.strings.prefix.slice(0, 1)) {
-            myblob.strings.prefix = myblob.strings.prefix.slice(1);
-        } else if ("object" === typeof myblob.blobs) {
-            CSL.Output.Queue.purgeNearsidePrefixSpaces(myblob.blobs[0], chr);
-        }
-    }
-};
-CSL.Output.Queue.purgeNearsideSuffixSpaces = function(myblob, chr) {
-    if ("object" === typeof myblob) {
-        if (" " === chr && " " === myblob.strings.suffix.slice(-1)) {
-            myblob.strings.suffix = myblob.strings.suffix.slice(0, -1);
-        } else if ("object" === typeof myblob.blobs) {
-            if (!chr) {
-                chr = myblob.strings.suffix.slice(-1);
-            }
-            chr = CSL.Output.Queue.purgeNearsideSuffixSpaces(myblob.blobs[myblob.blobs.length - 1], chr);
-        } else {
-            chr = myblob.strings.suffix.slice(-1);
-        }
-    }
-    return chr;
-};
-CSL.Output.Queue.adjustPunctuation = function (state, myblobs, stk) {
-    var chr, suffix, dpref, blob, delimiter, suffixX, dprefX, blobX, delimiterX, prefix, prefixX, dsuffX, dsuff, slast, dsufff, dsufffX, lastchr, firstchr, exposed_suffixes, exposed, j, jlen, i, ilen;
-    var TERMS = CSL.TERMINAL_PUNCTUATION.slice(0, -1);
-    var TERM_OR_SPACE = CSL.TERMINAL_PUNCTUATION;
-    var SWAPS = CSL.SWAPPING_PUNCTUATION;
-    if (!stk) {
-        stk = [{suffix: "", delimiter: "", lastNode:true}];        
-    }
-    slast = stk.length - 1;
-    delimiter = stk[slast].delimiter;
-    dpref = stk[slast].dpref;
-    dsuff = stk[slast].dsuff;
-    dsufff = stk[slast].dsufff;
-    prefix = stk[slast].prefix;
-    suffix = stk[slast].suffix;
-    blob = stk[slast].blob;
-    if ("string" === typeof myblobs) {
-        if (suffix) {
-            if (blob && 
-                TERMS.indexOf(myblobs.slice(-1)) > -1 &&
-                TERMS.slice(1).indexOf(suffix) > -1 &&
-                blob.strings.suffix !== " ") {
-                    blob.strings.suffix = blob.strings.suffix.slice(1);
-            }
-        }
-        lastchr = myblobs.slice(-1);
-        firstchr = myblobs.slice(0,1);
-    } else {
-        if (dpref) {
-            for (j = 0, jlen = myblobs.length - 1; j < jlen; j += 1) {
-                var t = myblobs[j].strings.suffix.slice(-1);
-                if (TERMS.indexOf(t) === -1 ||
-                    TERMS.indexOf(dpref) === -1) {
-                    if (dpref !== " " || dpref !== myblobs[j].strings.suffix.slice(-1)) {
-                        myblobs[j].strings.suffix += dpref;                        
-                    }
-                }
-            }
-        }
-        if (suffix === " ") {
-            CSL.Output.Queue.purgeNearsideSuffixSpaces(myblobs[myblobs.length - 1], " ");
-        }
-        var lst = [];
-        var doblob;
-        for (i = 0, ilen = myblobs.length - 1; i < ilen; i += 1) {
-            doblob = myblobs[i];
-            var following_prefix = myblobs[i + 1].strings.prefix;
-            chr = false;
-            var ret = CSL.Output.Queue.purgeNearsideSuffixSpaces(doblob, chr);
-            if (!dsuff) {
-                lst.push(ret);
-            } else {
-                lst.push(false);
-            }
-        }
-        chr = false;
-        for (i = 1, ilen = myblobs.length; i < ilen; i += 1) {
-            doblob = myblobs[i];
-            chr = "";
-            var preceding_suffix = myblobs[i - 1].strings.suffix;
-            if (dsuff === " ") {
-                chr = dsuff;
-            } else if (preceding_suffix) {
-                chr = preceding_suffix.slice(-1);
-            } else if (lst[i - 1]) {
-                chr = lst[i - 1];
-            }
-            CSL.Output.Queue.purgeNearsidePrefixSpaces(doblob, chr);
-        }
-        if (dsufff) {
-            CSL.Output.Queue.purgeNearsidePrefixSpaces(myblobs[0], " ");
-        } else if (prefix === " ") {
-            CSL.Output.Queue.purgeNearsidePrefixSpaces(myblobs[0], " ");
-        }
-        for (i = 0, ilen = myblobs.length; i < ilen; i += 1) {
-            doblob = myblobs[i];
-            CSL.Output.Queue.purgeNearsidePrefixChars(doblob, lastchr);
-            if (i === 0) {
-                if (prefix) {
-                    if (doblob.strings.prefix.slice(0, 1) === " ") {
-                    }
-                }
-            }
-            if (dsufff) {
-                if (doblob.strings.prefix) {
-                    if (i === 0) {
-                        if (doblob.strings.prefix.slice(0, 1) === " ") {
-                        }
-                    }
-                }
-            }
-            if (dsuff) {
-                if (i > 0) {
-                    if (doblob.strings.prefix.slice(0, 1) === " ") {
-                    }
-                }
-            }
-            if (i < (myblobs.length - 1)) {
-                var nextprefix = myblobs[i + 1].strings.prefix;
-                if (!delimiter) {
-                    if (nextprefix) {
-                        var nxtchr = nextprefix.slice(0, 1);
-                        if (SWAPS.indexOf(nxtchr) > -1) {
-                            myblobs[i + 1].strings.prefix = nextprefix.slice(1);
-                            if (TERMS.indexOf(nxtchr) === -1 ||
-                                (TERMS.indexOf(nxtchr) > -1 &&
-                                 TERMS.indexOf(doblob.strings.suffix.slice(-1)) === -1)) {
-                                     doblob.strings.suffix += nxtchr;
-                            }
-                        } else if (nxtchr === " " &&
-                                    doblob.strings.suffix.slice(-1) === " ") {
-                            doblob.strings.suffix = doblob.strings.suffix.slice(0, -1);
-                        }
-                    }
-                }
-            }
-            if (i === (myblobs.length - 1)) {
-                if (suffix) {
-                    if (doblob.strings.suffix && 
-                        (TERMS.slice(1).indexOf(suffix) > -1 &&
-                          TERMS.indexOf(doblob.strings.suffix.slice(-1)) > -1)) {
-                            blob.strings.suffix = blob.strings.suffix.slice(1);
-                    }
-                }
-            }
-            if (state.getOpt('punctuation-in-quote')) {
-                var decorations = doblob.decorations;
-                for (j = 0, jlen = decorations.length; j < jlen; j += 1) {
-                    if (decorations[j][0] === '@quotes' && decorations[j][1] === 'true') {
-                        doblob.punctuation_in_quote = true;
-                        stk[slast].lastNode = true;
-                    }
-                }
-            }
-            if (doblob.punctuation_in_quote && stk[slast].lastNode) {
-                var swapchar = doblob.strings.suffix.slice(0, 1);
-                var swapblob = false;
-                if (SWAPS.indexOf(swapchar) > -1) {
-                    swapblob = doblob;
-                } else if (SWAPS.indexOf(suffix) > -1 && i === (myblobs.length - 1)) {
-                    swapchar = suffix;
-                    swapblob = blob;
-                } else {
-                    swapchar = false;
-                }
-                if (swapchar) {
-                    if ("string" === typeof doblob.blobs) {
-                        if (SWAPS.indexOf(doblob.blobs.slice(-1)) === -1 ||
-                            (TERMS.indexOf(doblob.blobs.slice(-1)) > -1 &&
-                             SWAPS.indexOf(swapchar) > -1 &&
-                             TERMS.indexOf(swapchar) === -1)) {
-                            doblob.blobs += swapchar;
-                        }
-                    } else {
-                        if (SWAPS.indexOf(doblob.blobs.slice(-1)[0].strings.suffix.slice(-1)) === -1 ||
-                            (TERMS.indexOf(doblob.blobs.slice(-1)[0].strings.suffix.slice(-1)) > -1 &&
-                             SWAPS.indexOf(swapchar) > -1 &&
-                             TERMS.indexOf(swapchar) === -1)) {
-                            doblob.blobs.slice(-1)[0].strings.suffix += swapchar;
-                        }
-                    }
-                    swapblob.strings.suffix = swapblob.strings.suffix.slice(1);
-                }
-            }
-            if (i === (myblobs.length - 1)) {
-                if (doblob.strings.suffix) {
-                    suffixX = doblob.strings.suffix.slice(0, 1);
-                    blobX = doblob;
-                } else {
-                    suffixX = stk[stk.length - 1].suffix;
-                    blobX = stk[stk.length - 1].blob;
-                }
-            } else {
-                if (doblob.strings.suffix) {
-                    suffixX = doblob.strings.suffix.slice(0, 1);
-                    blobX = doblob;
-                } else {
-                    suffixX = "";
-                    blobX = false;
-                }
-            }
-            if (SWAPS.concat([" "]).indexOf(suffixX) === -1) {
-                suffixX = "";
-                blobX = false;
-            }
-            if (doblob.strings.delimiter && 
-                doblob.blobs.length > 1) {
-                dprefX = doblob.strings.delimiter.slice(0, 1);
-                if (SWAPS.concat([" "]).indexOf(dprefX) > -1) {
-                    doblob.strings.delimiter = doblob.strings.delimiter.slice(1);
-                } else {
-                    dprefX = "";
-                }
-            } else {
-                dprefX = "";
-            }
-            if (doblob.strings.prefix) {
-                if (doblob.strings.prefix.slice(-1) === " ") {
-                    prefixX = " ";
-                } else {
-                    prefixX = "";
-                }
-            } else {
-                if (i === 0) {
-                    prefixX = prefix;                    
-                } else {
-                    prefixX = "";
-                }
-            }
-            if (dsuff) {
-                dsufffX = dsuff;
-            } else {
-                if (i === 0) {
-                    dsufffX = dsufff;                    
-                } else {
-                    dsufffX = "";
-                }
-            }
-            if (doblob.strings.delimiter) {
-                if (doblob.strings.delimiter.slice(-1) === " " &&
-                    "object" === typeof doblob.blobs && doblob.blobs.length > 1) {
-                       dsuffX = doblob.strings.delimiter.slice(-1);
-                } else {
-                    dsuffX = "";                        
-                }
-            } else {
-                dsuffX = "";                    
-            }
-            delimiterX = doblob.strings.delimiter;
-            var lastNode
-            if (i === (myblobs.length - 1) && stk[slast].lastNode) {
-                lastNode = true;
-            } else {
-                lastNode = false;
-            }
-            stk.push({suffix: suffixX, dsuff:dsuffX, blob:blobX, delimiter:delimiterX, prefix:prefixX, dpref: dprefX, dsufff: dsufffX, lastNode: lastNode});
-            lastchr = CSL.Output.Queue.adjustPunctuation(state, doblob.blobs, stk);
-        }
-        if (myblobs && myblobs.length) {
-            var last_suffix = myblobs[myblobs.length - 1].strings.suffix;
-            if (last_suffix) {
-                lastchr = last_suffix.slice(-1);
-            }
-        }
-    }
-    if (stk.length > 1) {
-        stk.pop();
-    }
-    state.tmp.last_chr = lastchr;
-    return lastchr;
 };
 CSL.ambigConfigDiff = function(a, b) {
     var ret, pos, len, ppos, llen;
@@ -2791,11 +2031,7 @@ CSL.Engine.prototype.retrieveItem = function (id) {
         Item["title-short"] = Item.shortTitle;
     }
     var isLegalType = ["legal_case","legislation","gazette","regulation"].indexOf(Item.type) > -1;
-    if (isLegalType) {
-        if (!Item["title-short"]) {
-            Item["title-short"] = Item.title;
-        }
-    } else if (Item.title && this.sys.getAbbreviation) {
+    if (!isLegalType && Item.title && this.sys.getAbbreviation) {
         var jurisdiction = this.transform.loadAbbreviation(Item.jurisdiction, "title", Item.title);
         if (this.transform.abbrevs[jurisdiction].title) {
             if (this.transform.abbrevs[jurisdiction].title[Item.title]) {
@@ -3053,6 +2289,94 @@ CSL.Engine.prototype.normalDecorIsOrphan = function (blob, params) {
     }
     return false;
 };
+CSL.Engine.prototype.getCitationLabel = function (Item) {
+    var label = "";
+    var params = this.getTrigraphParams();
+    var config = params[0];
+    var myname = this.getTerm("reference", "short", 0);
+    if ("undefined" === typeof myname) {
+        myname = "reference";
+    }
+    myname = myname.replace(".", "");
+    myname = myname.slice(0, 1).toUpperCase() + myname.slice(1);
+    for (var i = 0, ilen = CSL.CREATORS.length; i < ilen; i += 1) {
+        var n = CSL.CREATORS[i];
+        if (Item[n]) {
+            var names = Item[n];
+            if (names.length > params.length) {
+                config = params[params.length - 1];
+            } else {
+                config = params[names.length - 1];
+            }
+            for (var j = 0, jlen = names.length; j < jlen; j += 1) {
+                if (j === config.authors.length) {
+                    break;
+                }
+                var res = this.nameOutput.getName(names[j], "locale-translit", true);
+                var name = res.name;
+                if (name && name.family) {
+                    myname = name.family;
+                    myname = myname.replace(/^([ \'\u2019a-z]+\s+)/, "");
+                } else if (name && name.literal) {
+                    myname = name.literal;
+                }
+                var m = myname.toLowerCase().match(/^(a\s+|the\s+|an\s+)/);
+                if (m) {
+                    myname = myname.slice(m[1].length);
+                }
+                myname = myname.replace(CSL.ROMANESQUE_NOT_REGEXP, "", "g");
+                if (!myname) {
+                    break;
+                }
+                myname = myname.slice(0, config.authors[j]);
+                if (myname.length > 1) {
+                    myname = myname.slice(0, 1).toUpperCase() + myname.slice(1).toLowerCase();
+                } else if (myname.length === 1) {
+                    myname = myname.toUpperCase();
+                }
+                label += myname;
+            }
+            break;
+        }
+    }
+    var year = "0000";
+    if (Item.issued) {
+        if (Item.issued.year) {
+            year = "" + Item.issued.year;
+        }
+    }
+    year = year.slice((config.year * -1));
+    label = label + year;
+    return label;
+};
+CSL.Engine.prototype.getTrigraphParams = function () {
+    var params = [];
+    var ilst = this.opt.trigraph.split(":");
+    if (!this.opt.trigraph || this.opt.trigraph.slice(0,1) !== "A") {
+        throw "Bad trigraph definition: "+this.opt.trigraph;
+    }
+    for (var i = 0, ilen = ilst.length; i < ilen; i += 1) {
+        var str = ilst[i];
+        var config = {authors:[], year:0};
+        for (var j = 0, jlen = str.length; j < jlen; j += 1) {
+            switch (str.slice(j,j+1)) {
+            case "A":
+                config.authors.push(1);
+                break;
+            case "a":
+                config.authors[config.authors.length - 1] += 1;
+                break;
+            case "0":
+                config.year += 1;
+                break;
+            default:
+                throw "Invalid character in trigraph definition: "+this.opt.trigraph;
+            }
+        }
+        params.push(config);
+    }
+    return params;
+};
 CSL.Engine.prototype.setOutputFormat = function (mode) {
     this.opt.mode = mode;
     this.fun.decorate = CSL.Mode(mode);
@@ -3163,6 +2487,780 @@ CSL.Engine.prototype.setAbbreviations = function (arg) {
     if (this.sys.setAbbreviations) {
         this.sys.setAbbreviations(arg);
     }
+};
+CSL.Output = {};
+CSL.Output.Queue = function (state) {
+    this.levelname = ["top"];
+    this.state = state;
+    this.queue = [];
+    this.empty = new CSL.Token("empty");
+    var tokenstore = {};
+    tokenstore.empty = this.empty;
+    this.formats = new CSL.Stack(tokenstore);
+    this.current = new CSL.Stack(this.queue);
+};
+CSL.Output.Queue.prototype.pop = function () {
+    var drip = this.current.value();
+    if (drip.length) {
+        return drip.pop();
+    } else {
+        return drip.blobs.pop();
+    }
+};
+CSL.Output.Queue.prototype.getToken = function (name) {
+    var ret = this.formats.value()[name];
+    return ret;
+};
+CSL.Output.Queue.prototype.mergeTokenStrings = function (base, modifier) {
+    var base_token, modifier_token, ret, key;
+    base_token = this.formats.value()[base];
+    modifier_token = this.formats.value()[modifier];
+    ret = base_token;
+    if (modifier_token) {
+        if (!base_token) {
+            base_token = new CSL.Token(base, CSL.SINGLETON);
+            base_token.decorations = [];
+        }
+        ret = new CSL.Token(base, CSL.SINGLETON);
+        key = "";
+        for (key in base_token.strings) {
+            if (base_token.strings.hasOwnProperty(key)) {
+                ret.strings[key] = base_token.strings[key];
+            }
+        }
+        for (key in modifier_token.strings) {
+            if (modifier_token.strings.hasOwnProperty(key)) {
+                ret.strings[key] = modifier_token.strings[key];
+            }
+        }
+        ret.decorations = base_token.decorations.concat(modifier_token.decorations);
+    }
+    return ret;
+};
+CSL.Output.Queue.prototype.addToken = function (name, modifier, token) {
+    var newtok, attr;
+    newtok = new CSL.Token("output");
+    if ("string" === typeof token) {
+        token = this.formats.value()[token];
+    }
+    if (token && token.strings) {
+        for (attr in token.strings) {
+            if (token.strings.hasOwnProperty(attr)) {
+                newtok.strings[attr] = token.strings[attr];
+            }
+        }
+        newtok.decorations = token.decorations;
+    }
+    if ("string" === typeof modifier) {
+        newtok.strings.delimiter = modifier;
+    }
+    this.formats.value()[name] = newtok;
+};
+CSL.Output.Queue.prototype.pushFormats = function (tokenstore) {
+    if (!tokenstore) {
+        tokenstore = {};
+    }
+    tokenstore.empty = this.empty;
+    this.formats.push(tokenstore);
+};
+CSL.Output.Queue.prototype.popFormats = function (tokenstore) {
+    this.formats.pop();
+};
+CSL.Output.Queue.prototype.startTag = function (name, token) {
+    var tokenstore = {};
+    if (this.state.tmp["doing-macro-with-date"] && this.state.tmp.extension) {
+        token = this.empty;
+        name = "empty";
+    }
+    tokenstore[name] = token;
+    this.pushFormats(tokenstore);
+    this.openLevel(name);
+};
+CSL.Output.Queue.prototype.endTag = function (name) {
+    this.closeLevel();
+    this.popFormats();
+};
+CSL.Output.Queue.prototype.openLevel = function (token, ephemeral) {
+    var blob, curr, x, has_ephemeral;
+    if ("object" === typeof token) {
+        blob = new CSL.Blob(undefined, token);
+    } else if ("undefined" === typeof token) {
+        blob = new CSL.Blob(undefined, this.formats.value().empty, "empty");
+    } else {
+        if (!this.formats.value() || !this.formats.value()[token]) {
+            throw "CSL processor error: call to nonexistent format token \"" + token + "\"";
+        }
+        blob = new CSL.Blob(undefined, this.formats.value()[token], token);
+    }
+    if (this.nestedBraces) {
+        blob.strings.prefix = blob.strings.prefix.replace(this.nestedBraces[0][0], this.nestedBraces[0][1]);
+        blob.strings.prefix = blob.strings.prefix.replace(this.nestedBraces[1][0], this.nestedBraces[1][1]);
+        blob.strings.suffix = blob.strings.suffix.replace(this.nestedBraces[0][0], this.nestedBraces[0][1]);
+        blob.strings.suffix = blob.strings.suffix.replace(this.nestedBraces[1][0], this.nestedBraces[1][1]);
+    }
+    curr = this.current.value();
+    curr.push(blob);
+    this.current.push(blob);
+};
+CSL.Output.Queue.prototype.closeLevel = function (name) {
+    if (name && name !== this.current.value().levelname) {
+        CSL.error("Level mismatch error:  wanted " + name + " but found " + this.current.value().levelname);
+    }
+    this.current.pop();
+};
+CSL.Output.Queue.prototype.append = function (str, tokname, notSerious, ignorePredecessor, noStripPeriods) {
+    var token, blob, curr;
+    var useblob = true;
+    if (notSerious) {
+        ignorePredecessor = true;
+    }
+    if (this.state.tmp["doing-macro-with-date"]) {
+        if (tokname !== "macro-with-date") {
+            return false;
+        }
+        if (tokname === "macro-with-date") {
+            tokname = "empty";
+        }
+    }
+    if ("undefined" === typeof str) {
+        return false;
+    }
+    if ("number" === typeof str) {
+        str = "" + str;
+    }
+    if (!notSerious 
+        && this.state.tmp.element_trace 
+        && this.state.tmp.element_trace.value() === "suppress-me") {
+        return false;
+    }
+    blob = false;
+    if (!tokname) {
+        token = this.formats.value().empty;
+    } else if (tokname === "literal") {
+        token = true;
+        useblob = false;
+    } else if ("string" === typeof tokname) {
+        token = this.formats.value()[tokname];
+    } else {
+        token = tokname;
+    }
+    if (!token) {
+        throw "CSL processor error: unknown format token name: " + tokname;
+    }
+    if (token.strings && "undefined" === typeof token.strings.delimiter) {
+        token.strings.delimiter = "";
+    }
+    if ("string" === typeof str && str.length) {
+        str = str.replace(/ ([:;?!\u00bb])/g, "\u202f$1").replace(/\u00ab /g, "\u00ab\u202f");
+        this.last_char_rendered = str.slice(-1);
+        str = str.replace(/\s+'/g, "  \'").replace(/^'/g, " \'");
+        if (!ignorePredecessor) {
+            this.state.tmp.term_predecessor = true;
+        } else if (notSerious) {
+            this.state.tmp.term_predecessor_name = true;
+        }
+    }
+    blob = new CSL.Blob(str, token);
+    if (this.nestedBraces) {
+        blob.strings.prefix = blob.strings.prefix.replace(this.nestedBraces[0][0], this.nestedBraces[0][1]);
+        blob.strings.prefix = blob.strings.prefix.replace(this.nestedBraces[1][0], this.nestedBraces[1][1]);
+        blob.strings.suffix = blob.strings.suffix.replace(this.nestedBraces[0][0], this.nestedBraces[0][1]);
+        blob.strings.suffix = blob.strings.suffix.replace(this.nestedBraces[1][0], this.nestedBraces[1][1]);
+    }
+    curr = this.current.value();
+    if ("undefined" === typeof curr && this.current.mystack.length === 0) {
+        this.current.mystack.push([]);
+        curr = this.current.value();
+    }
+    if ("string" === typeof blob.blobs) {
+        if (!ignorePredecessor) {
+            this.state.tmp.term_predecessor = true;
+        } else if (notSerious) {
+            this.state.tmp.term_predecessor_name = true;
+        }
+    }
+    if (!notSerious) {
+        this.state.parallel.AppendBlobPointer(curr);
+    }
+    if ("string" === typeof str) {
+        curr.push(blob);
+        if (blob.strings["text-case"]) {
+            blob.blobs = CSL.Output.Formatters[blob.strings["text-case"]](this.state, str);
+        }
+        if (this.state.tmp.strip_periods && !noStripPeriods) {
+            blob.blobs = blob.blobs.replace(/\.([^a-z]|$)/g, "$1");
+        }
+        for (var i = blob.decorations.length - 1; i > -1; i += -1) {
+            if (blob.decorations[i][0] === "@quotes" && blob.decorations[i][1] === "true") {
+                blob.punctuation_in_quote = this.state.getOpt("punctuation-in-quote")
+            }
+            if (!blob.blobs.match(CSL.ROMANESQUE_REGEXP)) {
+                if (blob.decorations[i][0] === "@font-style") {
+                    blob.decorations = blob.decorations.slice(0, i).concat(blob.decorations.slice(i + 1));
+                }
+            }
+        }
+        this.state.fun.flipflopper.init(str, blob);
+        this.state.fun.flipflopper.processTags();
+    } else if (useblob) {
+        curr.push(blob);
+    } else {
+        curr.push(str);
+    }
+    return true;
+};
+CSL.Output.Queue.prototype.string = function (state, myblobs, blob) {
+    var i, ilen, j, jlen, b;
+    var txt_esc = CSL.getSafeEscape(this.state);
+    var blobs = myblobs.slice();
+    var ret = [];
+    if (blobs.length === 0) {
+        return ret;
+    }
+    var blob_delimiter = "";
+    if (blob) {
+        blob_delimiter = blob.strings.delimiter;
+    } else {
+        state.tmp.count_offset_characters = false;
+        state.tmp.offset_characters = 0;
+    }
+    if (blob && blob.new_locale) {
+        blob.old_locale = state.opt.lang;
+        state.opt.lang = blob.new_locale;
+    }
+    var blobjr, use_suffix, use_prefix, params;
+    for (i = 0, ilen = blobs.length; i < ilen; i += 1) {
+        blobjr = blobs[i];
+        if (blobjr.strings.first_blob) {
+            state.tmp.count_offset_characters = blobjr.strings.first_blob;
+        }
+        if ("string" === typeof blobjr.blobs) {
+            if ("number" === typeof blobjr.num) {
+                ret.push(blobjr);
+            } else if (blobjr.blobs) {
+                b = txt_esc(blobjr.blobs);
+                var blen = b.length;
+                if (!state.tmp.suppress_decorations) {
+                    for (j = 0, jlen = blobjr.decorations.length; j < jlen; j += 1) {
+                        params = blobjr.decorations[j];
+                        if (params[0] === "@showid") {
+                            continue;
+                        }
+                        if (state.normalDecorIsOrphan(blobjr, params)) {
+                            continue;
+                        }
+                        b = state.fun.decorate[params[0]][params[1]](state, b, params[2]);
+                    }
+                }
+                if (b && b.length) {
+                    b = txt_esc(blobjr.strings.prefix, state.tmp.nestedBraces) + b + txt_esc(blobjr.strings.suffix, state.tmp.nestedBraces);
+                    if (state.opt.development_extensions.csl_reverse_lookup_support && !state.tmp.suppress_decorations) {
+                        for (j = 0, jlen = blobjr.decorations.length; j < jlen; j += 1) {
+                            params = blobjr.decorations[j];
+                            if (params[0] === "@showid") {
+                                b = state.fun.decorate[params[0]][params[1]](state, b, params[2]);
+                            }
+                        }
+                    }
+                    ret.push(b);
+                    if (state.tmp.count_offset_characters) {
+                        state.tmp.offset_characters += (blen + blobjr.strings.suffix.length + blobjr.strings.prefix.length);
+                    }
+                }
+            }
+        } else if (blobjr.blobs.length) {
+            var addtoret = state.output.string(state, blobjr.blobs, blobjr);
+            ret = ret.concat(addtoret);
+        }
+        if (blobjr.strings.first_blob) {
+            state.registry.registry[blobjr.strings.first_blob].offset = state.tmp.offset_characters;
+            state.tmp.count_offset_characters = false;
+        }
+    }
+    for (i=0,ilen=ret.length - 1;i<ilen;i+=1) {
+        if ("number" === typeof ret[i].num && "number" === typeof ret[i+1].num && !ret[i+1].UGLY_DELIMITER_SUPPRESS_HACK) {
+            ret[i].strings.suffix = txt_esc(blob_delimiter);
+            ret[i+1].successor_prefix = "";
+            ret[i+1].UGLY_DELIMITER_SUPPRESS_HACK = true;
+        }
+    }
+    var span_split = 0;
+    for (i = 0, ilen = ret.length; i < ilen; i += 1) {
+        if ("string" === typeof ret[i]) {
+            span_split = (parseInt(i, 10) + 1);
+            if (i < ret.length - 1  && "object" === typeof ret[i + 1]) {
+                if (blob_delimiter && !ret[i + 1].UGLY_DELIMITER_SUPPRESS_HACK) {
+                    ret[i] += txt_esc(blob_delimiter);
+                }
+                ret[i + 1].UGLY_DELIMITER_SUPPRESS_HACK = true;
+            }
+        }
+    }
+    if (blob && (blob.decorations.length || blob.strings.suffix || blob.strings.prefix)) {
+        span_split = ret.length;
+    }
+    var blobs_start = state.output.renderBlobs(ret.slice(0, span_split), blob_delimiter, true);
+    if (blobs_start && blob && (blob.decorations.length || blob.strings.suffix || blob.strings.prefix)) {
+        if (!state.tmp.suppress_decorations) {
+            for (i = 0, ilen = blob.decorations.length; i < ilen; i += 1) {
+                params = blob.decorations[i];
+                if (["@cite","@bibliography", "@display", "@showid"].indexOf(params[0]) > -1) {
+                    continue;
+                }
+                if (state.normalDecorIsOrphan(blobjr, params)) {
+                    continue;
+                }
+                blobs_start = state.fun.decorate[params[0]][params[1]](state, blobs_start, params[2]);
+            }
+        }
+        b = blobs_start;
+        use_suffix = blob.strings.suffix;
+        if (b && b.length) {
+            use_prefix = blob.strings.prefix;
+            b = txt_esc(use_prefix, state.tmp.nestedBraces) + b + txt_esc(use_suffix, state.tmp.nestedBraces);
+            if (state.tmp.count_offset_characters) {
+                state.tmp.offset_characters += (use_prefix.length + use_suffix.length);
+            }
+        }
+        blobs_start = b;
+        if (!state.tmp.suppress_decorations) {
+            for (i = 0, ilen = blob.decorations.length; i < ilen; i += 1) {
+                params = blob.decorations[i];
+                if (["@cite","@bibliography", "@display", "@showid"].indexOf(params[0]) === -1) {
+                    continue;
+                }
+                blobs_start = state.fun.decorate[params[0]][params[1]].call(blob, state, blobs_start, params[2]);
+            }
+        }
+    }
+    var blobs_end = ret.slice(span_split, ret.length);
+    if (!blobs_end.length && blobs_start) {
+        ret = [blobs_start];
+    } else if (blobs_end.length && !blobs_start) {
+        ret = blobs_end;
+    } else if (blobs_start && blobs_end.length) {
+        ret = [blobs_start].concat(blobs_end);
+    }
+    if ("undefined" === typeof blob) {
+        this.queue = [];
+        this.current.mystack = [];
+        this.current.mystack.push(this.queue);
+        if (state.tmp.suppress_decorations) {
+            ret = state.output.renderBlobs(ret, undefined, true);
+        }
+    } else if ("boolean" === typeof blob) {
+        ret = state.output.renderBlobs(ret, undefined, true);
+    }
+    if (blob && blob.new_locale) {
+        state.opt.lang = blob.old_locale;
+    }
+    return ret;
+};
+CSL.Output.Queue.prototype.clearlevel = function () {
+    var blob, pos, len;
+    blob = this.current.value();
+    len = blob.blobs.length;
+    for (pos = 0; pos < len; pos += 1) {
+        blob.blobs.pop();
+    }
+};
+CSL.Output.Queue.prototype.renderBlobs = function (blobs, delim, in_cite) {
+    var state, ret, ret_last_char, use_delim, i, blob, pos, len, ppos, llen, pppos, lllen, res, str, params, txt_esc;
+    txt_esc = CSL.getSafeEscape(this.state);
+    if (!delim) {
+        delim = "";
+    }
+    state = this.state;
+    ret = "";
+    ret_last_char = [];
+    use_delim = "";
+    len = blobs.length;
+    var start = true;
+    for (pos = 0; pos < len; pos += 1) {
+        if (blobs[pos].checkNext) {
+            blobs[pos].checkNext(blobs[(pos + 1)],start);
+            start = false;
+        } else {
+            start = true;
+        }
+    }
+    var doit = true;
+    for (pos = blobs.length - 1; pos > 0; pos += -1) {
+        if (blobs[pos].checkLast) {
+        if (doit && blobs[pos].checkLast(blobs[pos - 1])) {
+            doit = false;
+        }
+        } else {
+        doit = true;
+        }
+    }
+    len = blobs.length;
+    for (pos = 0; pos < len; pos += 1) {
+        blob = blobs[pos];
+        if (ret) {
+            use_delim = delim;
+        }
+        if (blob && "string" === typeof blob) {
+            ret += txt_esc(use_delim);
+            ret += blob;
+            if (state.tmp.count_offset_characters) {
+                state.tmp.offset_characters += (use_delim.length);
+            }
+        } else if (blob.status !== CSL.SUPPRESS) {
+            str = blob.formatter.format(blob.num, blob.gender);
+            var strlen = str.replace(/<[^>]*>/g, "").length;
+            this.append(str, "empty", true);
+            var str_blob = this.pop();
+            var count_offset_characters = state.tmp.count_offset_characters;
+            str = this.string(state, [str_blob], false);
+            state.tmp.count_offset_characters = count_offset_characters;
+            if (blob.strings["text-case"]) {
+                str = CSL.Output.Formatters[blob.strings["text-case"]](this.state, str);
+            }
+            if (str && this.state.tmp.strip_periods) {
+                str = str.replace(/\.([^a-z]|$)/g, "$1");
+            }
+            if (!state.tmp.suppress_decorations) {
+                llen = blob.decorations.length;
+                for (ppos = 0; ppos < llen; ppos += 1) {
+                    params = blob.decorations[ppos];
+                    if (state.normalDecorIsOrphan(blob, params)) {
+                        continue;
+                    }
+                    str = state.fun.decorate[params[0]][params[1]](state, str, params[2]);
+                }
+            }
+            str = txt_esc(blob.strings.prefix) + str + txt_esc(blob.strings.suffix);
+            var addme = "";
+            if (blob.status === CSL.END) {
+                addme = txt_esc(blob.range_prefix);
+            } else if (blob.status === CSL.SUCCESSOR) {
+                addme = txt_esc(blob.successor_prefix);
+            } else if (blob.status === CSL.START) {
+                addme = "";
+            } else if (blob.status === CSL.SEEN) {
+                addme = txt_esc(blob.splice_prefix);
+            }
+            ret += addme;
+            ret += str;
+            if (state.tmp.count_offset_characters) {
+                state.tmp.offset_characters += (addme.length + blob.strings.prefix.length + strlen + blob.strings.suffix.length);
+            }
+        }
+    }
+    return ret;
+};
+CSL.Output.Queue.purgeEmptyBlobs = function (myblobs, endOnly) {
+    var res, i, ilen, j, jlen, tmpblobs;
+    if ("string" === typeof myblobs || !myblobs.length) {
+        return;
+    }
+    for (i = myblobs.length - 1; i > -1; i += -1) {
+        CSL.Output.Queue.purgeEmptyBlobs(myblobs[i].blobs, endOnly);
+    }
+    for (i = myblobs.length - 1; i > -1; i += -1) {
+        if (!myblobs[i].blobs.length) {
+            tmpblobs = myblobs.slice(i + 1);
+            for (j = i, jlen = myblobs.length; j < jlen; j += 1) {
+                myblobs.pop();
+            }
+            for (j = 0, jlen = tmpblobs.length; j < jlen; j += 1) {
+                myblobs.push(tmpblobs[j]);
+            }
+        }
+        if (endOnly) {
+            break;
+        }
+    }
+};
+CSL.Output.Queue.purgeNearsidePrefixChars = function(myblob, chr) {
+    if (!chr) {
+        return;
+    }
+    if ("object" === typeof myblob) {
+        if ((CSL.TERMINAL_PUNCTUATION.indexOf(chr) > -1
+             && CSL.TERMINAL_PUNCTUATION.slice(0, -1).indexOf(myblob.strings.prefix.slice(0, 1)) > -1)
+            && !(myblob.strings.prefix.slice(0,1) === ";" && chr === ".")) {
+            myblob.strings.prefix = myblob.strings.prefix.slice(1);
+        } else if ("object" === typeof myblob.blobs) {
+            CSL.Output.Queue.purgeNearsidePrefixChars(myblob.blobs[0], chr);
+        }
+    }
+};
+CSL.Output.Queue.purgeNearsidePrefixSpaces = function(myblob, chr) {
+    if ("object" === typeof myblob) {
+        if (" " === chr && " " === myblob.strings.prefix.slice(0, 1)) {
+            myblob.strings.prefix = myblob.strings.prefix.slice(1);
+        } else if ("object" === typeof myblob.blobs) {
+            CSL.Output.Queue.purgeNearsidePrefixSpaces(myblob.blobs[0], chr);
+        }
+    }
+};
+CSL.Output.Queue.purgeNearsideSuffixSpaces = function(myblob, chr) {
+    if ("object" === typeof myblob) {
+        if (" " === chr && " " === myblob.strings.suffix.slice(-1)) {
+            myblob.strings.suffix = myblob.strings.suffix.slice(0, -1);
+        } else if ("object" === typeof myblob.blobs) {
+            if (!chr) {
+                chr = myblob.strings.suffix.slice(-1);
+            }
+            chr = CSL.Output.Queue.purgeNearsideSuffixSpaces(myblob.blobs[myblob.blobs.length - 1], chr);
+        } else {
+            chr = myblob.strings.suffix.slice(-1);
+        }
+    }
+    return chr;
+};
+CSL.Output.Queue.adjustPunctuation = function (state, myblobs, stk) {
+    var chr, suffix, dpref, blob, delimiter, suffixX, dprefX, blobX, delimiterX, prefix, prefixX, dsuffX, dsuff, slast, dsufff, dsufffX, lastchr, firstchr, exposed_suffixes, exposed, j, jlen, i, ilen;
+    var TERMS = CSL.TERMINAL_PUNCTUATION.slice(0, -1);
+    var TERM_OR_SPACE = CSL.TERMINAL_PUNCTUATION;
+    var SWAPS = CSL.SWAPPING_PUNCTUATION;
+    if (!stk) {
+        stk = [{suffix: "", delimiter: "", lastNode:true}];        
+    }
+    slast = stk.length - 1;
+    delimiter = stk[slast].delimiter;
+    dpref = stk[slast].dpref;
+    dsuff = stk[slast].dsuff;
+    dsufff = stk[slast].dsufff;
+    prefix = stk[slast].prefix;
+    suffix = stk[slast].suffix;
+    blob = stk[slast].blob;
+    if ("string" === typeof myblobs) {
+        if (suffix) {
+            if (blob && 
+                TERMS.indexOf(myblobs.slice(-1)) > -1 &&
+                TERMS.slice(1).indexOf(suffix) > -1 &&
+                blob.strings.suffix !== " ") {
+                    blob.strings.suffix = blob.strings.suffix.slice(1);
+            }
+        }
+        lastchr = myblobs.slice(-1);
+        firstchr = myblobs.slice(0,1);
+    } else {
+        if (dpref) {
+            for (j = 0, jlen = myblobs.length - 1; j < jlen; j += 1) {
+                var t = myblobs[j].strings.suffix.slice(-1);
+                if (TERMS.indexOf(t) === -1 ||
+                    TERMS.indexOf(dpref) === -1) {
+                    if (dpref !== " " || dpref !== myblobs[j].strings.suffix.slice(-1)) {
+                        myblobs[j].strings.suffix += dpref;                        
+                    }
+                }
+            }
+        }
+        if (suffix === " ") {
+            CSL.Output.Queue.purgeNearsideSuffixSpaces(myblobs[myblobs.length - 1], " ");
+        }
+        var lst = [];
+        var doblob;
+        for (i = 0, ilen = myblobs.length - 1; i < ilen; i += 1) {
+            doblob = myblobs[i];
+            var following_prefix = myblobs[i + 1].strings.prefix;
+            chr = false;
+            var ret = CSL.Output.Queue.purgeNearsideSuffixSpaces(doblob, chr);
+            if (!dsuff) {
+                lst.push(ret);
+            } else {
+                lst.push(false);
+            }
+        }
+        chr = false;
+        for (i = 1, ilen = myblobs.length; i < ilen; i += 1) {
+            doblob = myblobs[i];
+            chr = "";
+            var preceding_suffix = myblobs[i - 1].strings.suffix;
+            if (dsuff === " ") {
+                chr = dsuff;
+            } else if (preceding_suffix) {
+                chr = preceding_suffix.slice(-1);
+            } else if (lst[i - 1]) {
+                chr = lst[i - 1];
+            }
+            CSL.Output.Queue.purgeNearsidePrefixSpaces(doblob, chr);
+        }
+        if (dsufff) {
+            CSL.Output.Queue.purgeNearsidePrefixSpaces(myblobs[0], " ");
+        } else if (prefix === " ") {
+            CSL.Output.Queue.purgeNearsidePrefixSpaces(myblobs[0], " ");
+        }
+        for (i = 0, ilen = myblobs.length; i < ilen; i += 1) {
+            doblob = myblobs[i];
+            CSL.Output.Queue.purgeNearsidePrefixChars(doblob, lastchr);
+            if (i === 0) {
+                if (prefix) {
+                    if (doblob.strings.prefix.slice(0, 1) === " ") {
+                    }
+                }
+            }
+            if (dsufff) {
+                if (doblob.strings.prefix) {
+                    if (i === 0) {
+                        if (doblob.strings.prefix.slice(0, 1) === " ") {
+                        }
+                    }
+                }
+            }
+            if (dsuff) {
+                if (i > 0) {
+                    if (doblob.strings.prefix.slice(0, 1) === " ") {
+                    }
+                }
+            }
+            if (i < (myblobs.length - 1)) {
+                var nextprefix = myblobs[i + 1].strings.prefix;
+                if (!delimiter) {
+                    if (nextprefix) {
+                        var nxtchr = nextprefix.slice(0, 1);
+                        if (SWAPS.indexOf(nxtchr) > -1) {
+                            myblobs[i + 1].strings.prefix = nextprefix.slice(1);
+                            if (TERMS.indexOf(nxtchr) === -1 ||
+                                (TERMS.indexOf(nxtchr) > -1 &&
+                                 TERMS.indexOf(doblob.strings.suffix.slice(-1)) === -1)) {
+                                     doblob.strings.suffix += nxtchr;
+                            }
+                        } else if (nxtchr === " " &&
+                                    doblob.strings.suffix.slice(-1) === " ") {
+                            doblob.strings.suffix = doblob.strings.suffix.slice(0, -1);
+                        }
+                    }
+                }
+            }
+            if (i === (myblobs.length - 1)) {
+                if (suffix) {
+                    if (doblob.strings.suffix && 
+                        (TERMS.slice(1).indexOf(suffix) > -1 &&
+                          TERMS.indexOf(doblob.strings.suffix.slice(-1)) > -1)) {
+                            blob.strings.suffix = blob.strings.suffix.slice(1);
+                    }
+                }
+            }
+            if (state.getOpt('punctuation-in-quote')) {
+                var decorations = doblob.decorations;
+                for (j = 0, jlen = decorations.length; j < jlen; j += 1) {
+                    if (decorations[j][0] === '@quotes' && decorations[j][1] === 'true') {
+                        doblob.punctuation_in_quote = true;
+                        stk[slast].lastNode = true;
+                    }
+                }
+            }
+            if (doblob.punctuation_in_quote && stk[slast].lastNode) {
+                var swapchar = doblob.strings.suffix.slice(0, 1);
+                var swapblob = false;
+                if (SWAPS.indexOf(swapchar) > -1) {
+                    swapblob = doblob;
+                } else if (SWAPS.indexOf(suffix) > -1 && i === (myblobs.length - 1)) {
+                    swapchar = suffix;
+                    swapblob = blob;
+                } else {
+                    swapchar = false;
+                }
+                if (swapchar) {
+                    if ("string" === typeof doblob.blobs) {
+                        if (SWAPS.indexOf(doblob.blobs.slice(-1)) === -1 ||
+                            (TERMS.indexOf(doblob.blobs.slice(-1)) > -1 &&
+                             SWAPS.indexOf(swapchar) > -1 &&
+                             TERMS.indexOf(swapchar) === -1)) {
+                            doblob.blobs += swapchar;
+                        }
+                    } else {
+                        if (SWAPS.indexOf(doblob.blobs.slice(-1)[0].strings.suffix.slice(-1)) === -1 ||
+                            (TERMS.indexOf(doblob.blobs.slice(-1)[0].strings.suffix.slice(-1)) > -1 &&
+                             SWAPS.indexOf(swapchar) > -1 &&
+                             TERMS.indexOf(swapchar) === -1)) {
+                            doblob.blobs.slice(-1)[0].strings.suffix += swapchar;
+                        }
+                    }
+                    swapblob.strings.suffix = swapblob.strings.suffix.slice(1);
+                }
+            }
+            if (i === (myblobs.length - 1)) {
+                if (doblob.strings.suffix) {
+                    suffixX = doblob.strings.suffix.slice(0, 1);
+                    blobX = doblob;
+                } else {
+                    suffixX = stk[stk.length - 1].suffix;
+                    blobX = stk[stk.length - 1].blob;
+                }
+            } else {
+                if (doblob.strings.suffix) {
+                    suffixX = doblob.strings.suffix.slice(0, 1);
+                    blobX = doblob;
+                } else {
+                    suffixX = "";
+                    blobX = false;
+                }
+            }
+            if (SWAPS.concat([" "]).indexOf(suffixX) === -1) {
+                suffixX = "";
+                blobX = false;
+            }
+            if (doblob.strings.delimiter && 
+                doblob.blobs.length > 1) {
+                dprefX = doblob.strings.delimiter.slice(0, 1);
+                if (SWAPS.concat([" "]).indexOf(dprefX) > -1) {
+                    doblob.strings.delimiter = doblob.strings.delimiter.slice(1);
+                } else {
+                    dprefX = "";
+                }
+            } else {
+                dprefX = "";
+            }
+            if (doblob.strings.prefix) {
+                if (doblob.strings.prefix.slice(-1) === " ") {
+                    prefixX = " ";
+                } else {
+                    prefixX = "";
+                }
+            } else {
+                if (i === 0) {
+                    prefixX = prefix;                    
+                } else {
+                    prefixX = "";
+                }
+            }
+            if (dsuff) {
+                dsufffX = dsuff;
+            } else {
+                if (i === 0) {
+                    dsufffX = dsufff;                    
+                } else {
+                    dsufffX = "";
+                }
+            }
+            if (doblob.strings.delimiter) {
+                if (doblob.strings.delimiter.slice(-1) === " " &&
+                    "object" === typeof doblob.blobs && doblob.blobs.length > 1) {
+                       dsuffX = doblob.strings.delimiter.slice(-1);
+                } else {
+                    dsuffX = "";                        
+                }
+            } else {
+                dsuffX = "";                    
+            }
+            delimiterX = doblob.strings.delimiter;
+            var lastNode
+            if (i === (myblobs.length - 1) && stk[slast].lastNode) {
+                lastNode = true;
+            } else {
+                lastNode = false;
+            }
+            stk.push({suffix: suffixX, dsuff:dsuffX, blob:blobX, delimiter:delimiterX, prefix:prefixX, dpref: dprefX, dsufff: dsufffX, lastNode: lastNode});
+            lastchr = CSL.Output.Queue.adjustPunctuation(state, doblob.blobs, stk);
+        }
+        if (myblobs && myblobs.length) {
+            var last_suffix = myblobs[myblobs.length - 1].strings.suffix;
+            if (last_suffix) {
+                lastchr = last_suffix.slice(-1);
+            }
+        }
+    }
+    if (stk.length > 1) {
+        stk.pop();
+    }
+    state.tmp.last_chr = lastchr;
+    return lastchr;
 };
 CSL.Engine.Opt = function () {
     this.has_disambiguate = false;
@@ -3402,515 +3500,6 @@ CSL.Engine.CitationSort = function () {
     this.opt.sort_directions = [];
     this.keys = [];
     this.opt.topdecor = [];
-};
-CSL.Engine.prototype.setCitationId = function (citation, force) {
-    var ret, id, direction;
-    ret = false;
-    if (!citation.citationID || force) {
-        id = Math.floor(Math.random() * 100000000000000);
-        while (true) {
-            direction = 0;
-            if (!this.registry.citationreg.citationById[id]) {
-                citation.citationID = id.toString(32);
-                break;
-            } else if (!direction && id < 50000000000000) {
-                direction = 1;
-            } else {
-                direction = -1;
-            }
-            if (direction === 1) {
-                id += 1;
-            } else {
-                id += -1;
-            }
-        }
-        ret = "" + id;
-    }
-    this.registry.citationreg.citationById[citation.citationID] = citation;
-    return ret;
-};
-CSL.Engine.prototype.rebuildProcessorState = function (citations, mode, uncitedItemIDs) {
-    if (!citations) {
-        citations = [];
-    }
-    if (!mode) {
-        mode = 'html';
-    }
-    var itemIDs = [];
-    for (var i=0,ilen=citations.length;i<ilen;i+=1) {
-        for (var j=0,jlen=citations[i].citationItems.length;j<jlen;j+=1) {
-            var itemID = "" + citations[i].citationItems[j].id;
-            itemIDs.push(itemID);
-        }
-    }
-    this.updateItems(itemIDs);
-    var pre = [];
-    var post = [];
-    var ret = [];
-    var oldMode = this.opt.mode;
-    this.setOutputFormat(mode);
-    for (var i=0,ilen=citations.length;i<ilen;i+=1) {
-        var res = this.processCitationCluster(citations[i],pre,post,CSL.ASSUME_ALL_ITEMS_REGISTERED);
-        pre.push([citations[i].citationID,citations[i].properties.noteIndex]);
-        for (var j=0,jlen=res[1].length;j<jlen;j+=1) {
-            var index = res[1][j][0];
-            ret[index] = [
-                pre[index][0],
-                pre[index][1],
-                res[1][j][1]
-            ];
-        }
-    }
-    this.updateUncitedItems(uncitedItemIDs);
-    this.setOutputFormat(oldMode);
-    return ret;
-}
-CSL.Engine.prototype.restoreProcessorState = function (citations) {
-    var i, ilen, j, jlen, item, Item, newitem, citationList, itemList, sortedItems;
-    citationList = [];
-    itemList = [];
-    if (!citations) {
-        citations = [];
-    }
-    var indexNumbers = [];
-    var citationIds = {};
-    for (i = 0, ilen = citations.length; i < ilen; i += 1) {
-        if (citationIds[citations[i].citationID]) {
-            this.setCitationId(citations[i], true);
-        }
-        citationIds[citations[i].citationID] = true;
-        indexNumbers.push(citations[i].properties.index);
-    }
-    var oldCitations = citations.slice();
-    oldCitations.sort(
-        function (a,b) {
-            if (a.properties.index < b.properties.index) {
-                return -1;
-            } else if (a.properties.index > b.properties.index) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
-    );
-    for (i = 0, ilen = oldCitations.length; i < ilen; i += 1) {
-        oldCitations[i].properties.index = i;
-    }
-    for (i = 0, ilen = oldCitations.length; i < ilen; i += 1) {
-        sortedItems = [];
-        for (j = 0, jlen = oldCitations[i].citationItems.length; j < jlen; j += 1) {
-            item = oldCitations[i].citationItems[j];
-            if ("undefined" === typeof item.sortkeys) {
-                item.sortkeys = [];
-            }
-            Item = this.retrieveItem("" + item.id);
-            newitem = [Item, item];
-            sortedItems.push(newitem);
-            oldCitations[i].citationItems[j].item = Item;
-            itemList.push("" + item.id);
-        }
-        if (!oldCitations[i].properties.unsorted) {
-            sortedItems.sort(this.citation.srt.compareCompositeKeys);
-        }
-        oldCitations[i].sortedItems = sortedItems;
-        this.registry.citationreg.citationById[oldCitations[i].citationID] = oldCitations[i];
-    }
-    this.updateItems(itemList);
-    for (i = 0, ilen = citations.length; i < ilen; i += 1) {
-        citationList.push(["" + citations[i].citationID, citations[i].properties.noteIndex]);
-    }
-    var ret = [];
-    if (citations && citations.length) {
-        ret = this.processCitationCluster(citations[0], [], citationList.slice(1));
-    } else {
-        this.registry = new CSL.Registry(this);
-        this.tmp = new CSL.Engine.Tmp();
-        this.disambiguate = new CSL.Disambiguation(this);
-    }
-    return ret;
-};
-CSL.Engine.prototype.updateItems = function (idList, nosort, rerun_ambigs) {
-    var debug = false;
-    var oldArea = this.tmp.area;
-    this.registry.init(idList);
-	if (rerun_ambigs) {
-		for (var ambig in this.registry.ambigcites) {
-			this.registry.ambigsTouched[ambig] = true;
-		}
-	}
-    this.registry.dodeletes(this.registry.myhash);
-    this.registry.doinserts(this.registry.mylist);
-    this.registry.dorefreshes();
-    this.registry.rebuildlist();
-    this.registry.setsortkeys();
-    this.registry.setdisambigs();
-    if (!nosort) {
-        this.registry.sorttokens();
-    }
-    this.registry.renumber();
-    this.tmp.area = oldArea;
-    return this.registry.getSortedIds();
-};
-CSL.Engine.prototype.updateUncitedItems = function (idList, nosort) {
-    var debug = false;
-    if (!idList) {
-        idList = [];
-    }
-    if ("object" == typeof idList) {
-        if ("undefined" == typeof idList.length) {
-            var idHash = idList;
-            idList = [];
-            for (var key in idHash) {
-                idList.push(key);
-            }
-        } else if ("number" == typeof idList.length) {
-            var idHash = {};
-            for (var i=0,ilen=idList.length;i<ilen;i+=1) {
-                idHash[idList[i]] = true;
-            }
-        }
-    }
-    this.registry.init(idList, true);
-    this.registry.dopurge(idHash);
-    this.registry.doinserts(this.registry.mylist);
-    this.registry.dorefreshes();
-    this.registry.rebuildlist();
-    this.registry.setsortkeys();
-    this.registry.setdisambigs();
-    if (!nosort) {
-        this.registry.sorttokens();
-    }
-    this.registry.renumber();
-    return this.registry.getSortedIds();
-};
-CSL.Engine.prototype.getCitationLabel = function (Item) {
-    var label = "";
-    var params = this.getTrigraphParams();
-    var config = params[0];
-    var myname = this.getTerm("reference", "short", 0);
-    if ("undefined" === typeof myname) {
-        myname = "reference";
-    }
-    myname = myname.replace(".", "");
-    myname = myname.slice(0, 1).toUpperCase() + myname.slice(1);
-    for (var i = 0, ilen = CSL.CREATORS.length; i < ilen; i += 1) {
-        var n = CSL.CREATORS[i];
-        if (Item[n]) {
-            var names = Item[n];
-            if (names.length > params.length) {
-                config = params[params.length - 1];
-            } else {
-                config = params[names.length - 1];
-            }
-            for (var j = 0, jlen = names.length; j < jlen; j += 1) {
-                if (j === config.authors.length) {
-                    break;
-                }
-                var res = this.nameOutput.getName(names[j], "locale-translit", true);
-                var name = res.name;
-                if (name && name.family) {
-                    myname = name.family;
-                    myname = myname.replace(/^([ \'\u2019a-z]+\s+)/, "");
-                } else if (name && name.literal) {
-                    myname = name.literal;
-                }
-                var m = myname.toLowerCase().match(/^(a\s+|the\s+|an\s+)/);
-                if (m) {
-                    myname = myname.slice(m[1].length);
-                }
-                myname = myname.replace(CSL.ROMANESQUE_NOT_REGEXP, "", "g");
-                if (!myname) {
-                    break;
-                }
-                myname = myname.slice(0, config.authors[j]);
-                if (myname.length > 1) {
-                    myname = myname.slice(0, 1).toUpperCase() + myname.slice(1).toLowerCase();
-                } else if (myname.length === 1) {
-                    myname = myname.toUpperCase();
-                }
-                label += myname;
-            }
-            break;
-        }
-    }
-    var year = "0000";
-    if (Item.issued) {
-        if (Item.issued.year) {
-            year = "" + Item.issued.year;
-        }
-    }
-    year = year.slice((config.year * -1));
-    label = label + year;
-    return label;
-};
-CSL.Engine.prototype.getTrigraphParams = function () {
-    var params = [];
-    var ilst = this.opt.trigraph.split(":");
-    if (!this.opt.trigraph || this.opt.trigraph.slice(0,1) !== "A") {
-        throw "Bad trigraph definition: "+this.opt.trigraph;
-    }
-    for (var i = 0, ilen = ilst.length; i < ilen; i += 1) {
-        var str = ilst[i];
-        var config = {authors:[], year:0};
-        for (var j = 0, jlen = str.length; j < jlen; j += 1) {
-            switch (str.slice(j,j+1)) {
-            case "A":
-                config.authors.push(1);
-                break;
-            case "a":
-                config.authors[config.authors.length - 1] += 1;
-                break;
-            case "0":
-                config.year += 1;
-                break;
-            default:
-                throw "Invalid character in trigraph definition: "+this.opt.trigraph;
-            }
-        }
-        params.push(config);
-    }
-    return params;
-};
-CSL.Engine.prototype.makeBibliography = function (bibsection) {
-    var debug, ret, params, maxoffset, item, len, pos, tok, tokk, tokkk, entry_ids, entry_strings, bibliography_errors;
-    debug = false;
-    if (!this.bibliography.tokens.length) {
-        return false;
-    }
-    if ("string" === typeof bibsection) {
-        this.opt.citation_number_slug = bibsection;
-        bibsection = false;
-    }
-    ret = CSL.getBibliographyEntries.call(this, bibsection);
-    entry_ids = ret[0];
-    entry_strings = ret[1];
-    var done = ret[2];
-    params = {
-        "maxoffset": 0,
-        "entryspacing": this.bibliography.opt["entry-spacing"],
-        "linespacing": this.bibliography.opt["line-spacing"],
-        "second-field-align": false,
-        "entry_ids": entry_ids,
-        "bibliography_errors": this.tmp.bibliography_errors.slice(),
-        "done": done
-    };
-    if (this.bibliography.opt["second-field-align"]) {
-        params["second-field-align"] = this.bibliography.opt["second-field-align"];
-    }
-    maxoffset = 0;
-    len = this.registry.reflist.length;
-    for (pos = 0; pos < len; pos += 1) {
-        item = this.registry.reflist[pos];
-        if (item.offset > params.maxoffset) {
-            params.maxoffset = item.offset;
-        }
-    }
-    if (this.bibliography.opt.hangingindent) {
-        params.hangingindent = this.bibliography.opt.hangingindent;
-    }
-    params.bibstart = this.fun.decorate.bibstart;
-    params.bibend = this.fun.decorate.bibend;
-    this.opt.citation_number_slug = false;
-    return [params, entry_strings];
-};
-CSL.getBibliographyEntries = function (bibsection) {
-    var ret, input, include, anymatch, allmatch, bib_entry, res, len, pos, item, llen, ppos, spec, lllen, pppos, bib_layout, topblobs, all_item_ids, entry_item_ids, debug, collapse_parallel, i, ilen, siblings, skips, sortedItems, eyetem, chr, entry_item_data, j, jlen, newIDs, originalIDs;
-    ret = [];
-    entry_item_data = [];
-    this.tmp.area = "bibliography";
-    this.tmp.last_rendered_name = false;
-    this.tmp.bibliography_errors = [];
-    this.tmp.bibliography_pos = 0;
-    if (bibsection && bibsection.page_start && bibsection.page_length) {
-        input = this.registry.getSortedIds();        
-    } else {
-        input = this.retrieveItems(this.registry.getSortedIds());
-    }
-    this.tmp.disambig_override = true;
-    function eval_string(a, b) {
-        if (a === b) {
-            return true;
-        }
-        return false;
-    }
-    function eval_list(a, lst) {
-        lllen = lst.length;
-        for (pppos = 0; pppos < lllen; pppos += 1) {
-            if (eval_string(a, lst[pppos])) {
-                return true;
-            }
-        }
-        return false;
-    }
-    function eval_spec(a, b) {
-        if ((a === "none" || !a) && !b) {
-            return true;
-        }
-        if ("string" === typeof b) {
-            return eval_string(a, b);
-        } else if (!b) {
-            return false;
-        } else {
-            return eval_list(a, b);
-        }
-    }
-    skips = {};
-    var page_item_count;
-    if (bibsection && bibsection.page_start && bibsection.page_length) {
-        page_item_count = 0;
-        if (bibsection.page_start !== true) {
-            for (i = 0, ilen = input.length; i < ilen; i += 1) {
-                skips[input[i]] = true;
-                if (bibsection.page_start == input[i]) {
-                    break;
-                }
-            }
-        }
-    }
-    var processed_item_ids = [];
-    for (i = 0, ilen = input.length; i < ilen; i += 1) {
-        if (bibsection && bibsection.page_start && bibsection.page_length) {
-            if (skips[input[i]]) {
-                continue;
-            }
-            item = this.retrieveItem(input[i]);
-            if (page_item_count === bibsection.page_length) {
-                break;
-            }
-        } else {
-            item = input[i];
-            if (skips[item.id]) {
-                continue;
-            }
-        }
-        if (bibsection) {
-            include = true;
-            if (bibsection.include) {
-                include = false;
-                for (j = 0, jlen = bibsection.include.length; j < jlen; j += 1) {
-                    spec = bibsection.include[j];
-                    if (eval_spec(spec.value, item[spec.field])) {
-                        include = true;
-                        break;
-                    }
-                }
-            } else if (bibsection.exclude) {
-                anymatch = false;
-                for (j = 0, jlen = bibsection.exclude.length; j < jlen; j += 1) {
-                    spec = bibsection.exclude[j];
-                    if (eval_spec(spec.value, item[spec.field])) {
-                        anymatch = true;
-                        break;
-                    }
-                }
-                if (anymatch) {
-                    include = false;
-                }
-            } else if (bibsection.select) {
-                include = false;
-                allmatch = true;
-                for (j = 0, jlen = bibsection.select.length; j < jlen; j += 1) {
-                    spec = bibsection.select[j];
-                    if (!eval_spec(spec.value, item[spec.field])) {
-                        allmatch = false;
-                    }
-                }
-                if (allmatch) {
-                    include = true;
-                }
-            }
-            if (bibsection.quash) {
-                allmatch = true;
-                for (j = 0, jlen = bibsection.quash.length; j < jlen; j += 1) {
-                    spec = bibsection.quash[j];
-                    if (!eval_spec(spec.value, item[spec.field])) {
-                        allmatch = false;
-                    }
-                }
-                if (allmatch) {
-                    include = false;
-                }
-            }
-            if (!include) {
-                continue;
-            }
-        }
-        bib_entry = new CSL.Token("group", CSL.START);
-        bib_entry.decorations = [["@bibliography", "entry"]].concat(this.bibliography.opt.layout_decorations);
-        this.output.startTag("bib_entry", bib_entry);
-        if (item.system_id && this.sys.embedBibliographyEntry) {
-            this.output.current.value().item_id = item.system_id;
-        } else {
-            this.output.current.value().system_id = item.id;
-        }
-        sortedItems = [[{id: "" + item.id}, item]];
-        entry_item_ids = [];
-        if (this.registry.registry[item.id].master 
-            && !(bibsection && bibsection.page_start && bibsection.page_length)) {
-            collapse_parallel = true;
-            this.parallel.StartCitation(sortedItems);
-            this.output.queue[0].strings.delimiter = ", ";
-            this.tmp.term_predecessor = false;
-            entry_item_ids.push("" + CSL.getCite.call(this, item));
-            skips[item.id] = true;
-            siblings = this.registry.registry[item.id].siblings;
-            for (j = 0, jlen = siblings.length; j < jlen; j += 1) {
-                var k = this.registry.registry[item.id].siblings[j];
-                eyetem = this.retrieveItem(k);
-                entry_item_ids.push("" + CSL.getCite.call(this, eyetem));
-                skips[eyetem.id] = true;
-            }
-            this.parallel.ComposeSet();
-            this.parallel.PruneOutputQueue();
-        } else if (!this.registry.registry[item.id].siblings) {
-            this.parallel.StartCitation(sortedItems);
-            this.tmp.term_predecessor = false;
-            entry_item_ids.push("" + CSL.getCite.call(this, item));
-            if (bibsection && bibsection.page_start && bibsection.page_length) {
-                page_item_count += 1;
-            }
-        }
-        entry_item_data.push("");
-        this.tmp.bibliography_pos += 1;
-        processed_item_ids.push(entry_item_ids);
-        this.output.endTag("bib_entry");
-        if (this.output.queue[0].blobs.length && this.output.queue[0].blobs[0].blobs.length) {
-            if (collapse_parallel || !this.output.queue[0].blobs[0].blobs[0].strings) {
-                topblobs = this.output.queue[0].blobs;
-                collapse_parallel = false;
-            } else {
-                topblobs = this.output.queue[0].blobs[0].blobs;
-            }
-            for (j  = topblobs.length - 1; j > -1; j += -1) {
-                if (topblobs[j].blobs && topblobs[j].blobs.length !== 0) {
-                    chr = this.bibliography.opt.layout_suffix.slice(0, 1);
-                    if (chr && topblobs[j].strings.suffix.slice(-1) === chr) {
-                        topblobs[j].strings.suffix = topblobs[j].strings.suffix.slice(0, -1);
-                    }
-                    topblobs[j].strings.suffix += this.bibliography.opt.layout_suffix;
-                    break;
-                }
-            }
-            topblobs[0].strings.prefix = this.bibliography.opt.layout_prefix + topblobs[0].strings.prefix;
-        }
-        CSL.Output.Queue.purgeEmptyBlobs(this.output.queue);
-        CSL.Output.Queue.adjustPunctuation(this, this.output.queue);
-        res = this.output.string(this, this.output.queue)[0];
-        if (!res) {
-            res = "\n[CSL STYLE ERROR: reference with no printed form.]\n";
-        }
-        ret.push(res);
-    }
-    var done = false;
-    if (bibsection && bibsection.page_start && bibsection.page_length) {
-        var last_expected_id = input.slice(-1)[0];
-        var last_seen_id = processed_item_ids.slice(-1)[0];
-        if (!last_expected_id || !last_seen_id || last_expected_id == last_seen_id) {
-            done = true;
-        }
-    }
-    this.tmp.disambig_override = false;
-    return [processed_item_ids, ret, done];
 };
 CSL.Engine.prototype.previewCitationCluster = function (citation, citationsPre, citationsPost, newMode) {
     var oldMode = this.opt.mode;
@@ -4785,57 +4374,426 @@ CSL.citeEnd = function (Item, item) {
         }
     }
 };
-CSL.Node = {};
-CSL.Node.bibliography = {
-    build: function (state, target) {
-        if (this.tokentype === CSL.START) {
-            state.build.area = "bibliography";
-            state.build.root = "bibliography";
-            state.fixOpt(this, "names-delimiter", "delimiter");
-            state.fixOpt(this, "name-delimiter", "delimiter");
-            state.fixOpt(this, "name-form", "form");
-            state.fixOpt(this, "and", "and");
-            state.fixOpt(this, "delimiter-precedes-last", "delimiter-precedes-last");
-            state.fixOpt(this, "delimiter-precedes-et-al", "delimiter-precedes-et-al");
-            state.fixOpt(this, "initialize-with", "initialize-with");
-            state.fixOpt(this, "initialize", "initialize");
-            state.fixOpt(this, "name-as-sort-order", "name-as-sort-order");
-            state.fixOpt(this, "sort-separator", "sort-separator");
-            state.fixOpt(this, "and", "and");
-            state.fixOpt(this, "et-al-min", "et-al-min");
-            state.fixOpt(this, "et-al-use-first", "et-al-use-first");
-            state.fixOpt(this, "et-al-use-last", "et-al-use-last");
-            state.fixOpt(this, "et-al-subsequent-min", "et-al-subsequent-min");
-            state.fixOpt(this, "et-al-subsequent-use-first", "et-al-subsequent-use-first");
-        }
-        target.push(this);
+CSL.Engine.prototype.makeBibliography = function (bibsection) {
+    var debug, ret, params, maxoffset, item, len, pos, tok, tokk, tokkk, entry_ids, entry_strings, bibliography_errors;
+    debug = false;
+    if (!this.bibliography.tokens.length) {
+        return false;
     }
+    if ("string" === typeof bibsection) {
+        this.opt.citation_number_slug = bibsection;
+        bibsection = false;
+    }
+    ret = CSL.getBibliographyEntries.call(this, bibsection);
+    entry_ids = ret[0];
+    entry_strings = ret[1];
+    var done = ret[2];
+    params = {
+        "maxoffset": 0,
+        "entryspacing": this.bibliography.opt["entry-spacing"],
+        "linespacing": this.bibliography.opt["line-spacing"],
+        "second-field-align": false,
+        "entry_ids": entry_ids,
+        "bibliography_errors": this.tmp.bibliography_errors.slice(),
+        "done": done
+    };
+    if (this.bibliography.opt["second-field-align"]) {
+        params["second-field-align"] = this.bibliography.opt["second-field-align"];
+    }
+    maxoffset = 0;
+    len = this.registry.reflist.length;
+    for (pos = 0; pos < len; pos += 1) {
+        item = this.registry.reflist[pos];
+        if (item.offset > params.maxoffset) {
+            params.maxoffset = item.offset;
+        }
+    }
+    if (this.bibliography.opt.hangingindent) {
+        params.hangingindent = this.bibliography.opt.hangingindent;
+    }
+    params.bibstart = this.fun.decorate.bibstart;
+    params.bibend = this.fun.decorate.bibend;
+    this.opt.citation_number_slug = false;
+    return [params, entry_strings];
 };
-CSL.Node.choose = {
-    build: function (state, target) {
-        var func;
-        if (this.tokentype === CSL.START) {
-            func = function (state, Item) {
-                state.tmp.jump.push(undefined, CSL.LITERAL);
-            };
+CSL.getBibliographyEntries = function (bibsection) {
+    var ret, input, include, anymatch, allmatch, bib_entry, res, len, pos, item, llen, ppos, spec, lllen, pppos, bib_layout, topblobs, all_item_ids, entry_item_ids, debug, collapse_parallel, i, ilen, siblings, skips, sortedItems, eyetem, chr, entry_item_data, j, jlen, newIDs, originalIDs;
+    ret = [];
+    entry_item_data = [];
+    this.tmp.area = "bibliography";
+    this.tmp.last_rendered_name = false;
+    this.tmp.bibliography_errors = [];
+    this.tmp.bibliography_pos = 0;
+    if (bibsection && bibsection.page_start && bibsection.page_length) {
+        input = this.registry.getSortedIds();        
+    } else {
+        input = this.retrieveItems(this.registry.getSortedIds());
+    }
+    this.tmp.disambig_override = true;
+    function eval_string(a, b) {
+        if (a === b) {
+            return true;
         }
-        if (this.tokentype === CSL.END) {
-            func = function (state, Item) {
-                state.tmp.jump.pop();
-            };
+        return false;
+    }
+    function eval_list(a, lst) {
+        lllen = lst.length;
+        for (pppos = 0; pppos < lllen; pppos += 1) {
+            if (eval_string(a, lst[pppos])) {
+                return true;
+            }
         }
-        this.execs.push(func);
-        target.push(this);
-    },
-    configure: function (state, pos) {
-        if (this.tokentype === CSL.END) {
-            state.configure.fail.push((pos));
-            state.configure.succeed.push((pos));
+        return false;
+    }
+    function eval_spec(a, b) {
+        if ((a === "none" || !a) && !b) {
+            return true;
+        }
+        if ("string" === typeof b) {
+            return eval_string(a, b);
+        } else if (!b) {
+            return false;
         } else {
-            state.configure.fail.pop();
-            state.configure.succeed.pop();
+            return eval_list(a, b);
         }
     }
+    skips = {};
+    var page_item_count;
+    if (bibsection && bibsection.page_start && bibsection.page_length) {
+        page_item_count = 0;
+        if (bibsection.page_start !== true) {
+            for (i = 0, ilen = input.length; i < ilen; i += 1) {
+                skips[input[i]] = true;
+                if (bibsection.page_start == input[i]) {
+                    break;
+                }
+            }
+        }
+    }
+    var processed_item_ids = [];
+    for (i = 0, ilen = input.length; i < ilen; i += 1) {
+        if (bibsection && bibsection.page_start && bibsection.page_length) {
+            if (skips[input[i]]) {
+                continue;
+            }
+            item = this.retrieveItem(input[i]);
+            if (page_item_count === bibsection.page_length) {
+                break;
+            }
+        } else {
+            item = input[i];
+            if (skips[item.id]) {
+                continue;
+            }
+        }
+        if (bibsection) {
+            include = true;
+            if (bibsection.include) {
+                include = false;
+                for (j = 0, jlen = bibsection.include.length; j < jlen; j += 1) {
+                    spec = bibsection.include[j];
+                    if (eval_spec(spec.value, item[spec.field])) {
+                        include = true;
+                        break;
+                    }
+                }
+            } else if (bibsection.exclude) {
+                anymatch = false;
+                for (j = 0, jlen = bibsection.exclude.length; j < jlen; j += 1) {
+                    spec = bibsection.exclude[j];
+                    if (eval_spec(spec.value, item[spec.field])) {
+                        anymatch = true;
+                        break;
+                    }
+                }
+                if (anymatch) {
+                    include = false;
+                }
+            } else if (bibsection.select) {
+                include = false;
+                allmatch = true;
+                for (j = 0, jlen = bibsection.select.length; j < jlen; j += 1) {
+                    spec = bibsection.select[j];
+                    if (!eval_spec(spec.value, item[spec.field])) {
+                        allmatch = false;
+                    }
+                }
+                if (allmatch) {
+                    include = true;
+                }
+            }
+            if (bibsection.quash) {
+                allmatch = true;
+                for (j = 0, jlen = bibsection.quash.length; j < jlen; j += 1) {
+                    spec = bibsection.quash[j];
+                    if (!eval_spec(spec.value, item[spec.field])) {
+                        allmatch = false;
+                    }
+                }
+                if (allmatch) {
+                    include = false;
+                }
+            }
+            if (!include) {
+                continue;
+            }
+        }
+        bib_entry = new CSL.Token("group", CSL.START);
+        bib_entry.decorations = [["@bibliography", "entry"]].concat(this.bibliography.opt.layout_decorations);
+        this.output.startTag("bib_entry", bib_entry);
+        if (item.system_id && this.sys.embedBibliographyEntry) {
+            this.output.current.value().item_id = item.system_id;
+        } else {
+            this.output.current.value().system_id = item.id;
+        }
+        sortedItems = [[{id: "" + item.id}, item]];
+        entry_item_ids = [];
+        if (this.registry.registry[item.id].master 
+            && !(bibsection && bibsection.page_start && bibsection.page_length)) {
+            collapse_parallel = true;
+            this.parallel.StartCitation(sortedItems);
+            this.output.queue[0].strings.delimiter = ", ";
+            this.tmp.term_predecessor = false;
+            entry_item_ids.push("" + CSL.getCite.call(this, item));
+            skips[item.id] = true;
+            siblings = this.registry.registry[item.id].siblings;
+            for (j = 0, jlen = siblings.length; j < jlen; j += 1) {
+                var k = this.registry.registry[item.id].siblings[j];
+                eyetem = this.retrieveItem(k);
+                entry_item_ids.push("" + CSL.getCite.call(this, eyetem));
+                skips[eyetem.id] = true;
+            }
+            this.parallel.ComposeSet();
+            this.parallel.PruneOutputQueue();
+        } else if (!this.registry.registry[item.id].siblings) {
+            this.parallel.StartCitation(sortedItems);
+            this.tmp.term_predecessor = false;
+            entry_item_ids.push("" + CSL.getCite.call(this, item));
+            if (bibsection && bibsection.page_start && bibsection.page_length) {
+                page_item_count += 1;
+            }
+        }
+        entry_item_data.push("");
+        this.tmp.bibliography_pos += 1;
+        processed_item_ids.push(entry_item_ids);
+        this.output.endTag("bib_entry");
+        if (this.output.queue[0].blobs.length && this.output.queue[0].blobs[0].blobs.length) {
+            if (collapse_parallel || !this.output.queue[0].blobs[0].blobs[0].strings) {
+                topblobs = this.output.queue[0].blobs;
+                collapse_parallel = false;
+            } else {
+                topblobs = this.output.queue[0].blobs[0].blobs;
+            }
+            for (j  = topblobs.length - 1; j > -1; j += -1) {
+                if (topblobs[j].blobs && topblobs[j].blobs.length !== 0) {
+                    chr = this.bibliography.opt.layout_suffix.slice(0, 1);
+                    if (chr && topblobs[j].strings.suffix.slice(-1) === chr) {
+                        topblobs[j].strings.suffix = topblobs[j].strings.suffix.slice(0, -1);
+                    }
+                    topblobs[j].strings.suffix += this.bibliography.opt.layout_suffix;
+                    break;
+                }
+            }
+            topblobs[0].strings.prefix = this.bibliography.opt.layout_prefix + topblobs[0].strings.prefix;
+        }
+        CSL.Output.Queue.purgeEmptyBlobs(this.output.queue);
+        CSL.Output.Queue.adjustPunctuation(this, this.output.queue);
+        res = this.output.string(this, this.output.queue)[0];
+        if (!res) {
+            res = "\n[CSL STYLE ERROR: reference with no printed form.]\n";
+        }
+        ret.push(res);
+    }
+    var done = false;
+    if (bibsection && bibsection.page_start && bibsection.page_length) {
+        var last_expected_id = input.slice(-1)[0];
+        var last_seen_id = processed_item_ids.slice(-1)[0];
+        if (!last_expected_id || !last_seen_id || last_expected_id == last_seen_id) {
+            done = true;
+        }
+    }
+    this.tmp.disambig_override = false;
+    return [processed_item_ids, ret, done];
+};
+CSL.Engine.prototype.setCitationId = function (citation, force) {
+    var ret, id, direction;
+    ret = false;
+    if (!citation.citationID || force) {
+        id = Math.floor(Math.random() * 100000000000000);
+        while (true) {
+            direction = 0;
+            if (!this.registry.citationreg.citationById[id]) {
+                citation.citationID = id.toString(32);
+                break;
+            } else if (!direction && id < 50000000000000) {
+                direction = 1;
+            } else {
+                direction = -1;
+            }
+            if (direction === 1) {
+                id += 1;
+            } else {
+                id += -1;
+            }
+        }
+        ret = "" + id;
+    }
+    this.registry.citationreg.citationById[citation.citationID] = citation;
+    return ret;
+};
+CSL.Engine.prototype.rebuildProcessorState = function (citations, mode, uncitedItemIDs) {
+    if (!citations) {
+        citations = [];
+    }
+    if (!mode) {
+        mode = 'html';
+    }
+    var itemIDs = [];
+    for (var i=0,ilen=citations.length;i<ilen;i+=1) {
+        for (var j=0,jlen=citations[i].citationItems.length;j<jlen;j+=1) {
+            var itemID = "" + citations[i].citationItems[j].id;
+            itemIDs.push(itemID);
+        }
+    }
+    this.updateItems(itemIDs);
+    var pre = [];
+    var post = [];
+    var ret = [];
+    var oldMode = this.opt.mode;
+    this.setOutputFormat(mode);
+    for (var i=0,ilen=citations.length;i<ilen;i+=1) {
+        var res = this.processCitationCluster(citations[i],pre,post,CSL.ASSUME_ALL_ITEMS_REGISTERED);
+        pre.push([citations[i].citationID,citations[i].properties.noteIndex]);
+        for (var j=0,jlen=res[1].length;j<jlen;j+=1) {
+            var index = res[1][j][0];
+            ret[index] = [
+                pre[index][0],
+                pre[index][1],
+                res[1][j][1]
+            ];
+        }
+    }
+    this.updateUncitedItems(uncitedItemIDs);
+    this.setOutputFormat(oldMode);
+    return ret;
+}
+CSL.Engine.prototype.restoreProcessorState = function (citations) {
+    var i, ilen, j, jlen, item, Item, newitem, citationList, itemList, sortedItems;
+    citationList = [];
+    itemList = [];
+    if (!citations) {
+        citations = [];
+    }
+    var indexNumbers = [];
+    var citationIds = {};
+    for (i = 0, ilen = citations.length; i < ilen; i += 1) {
+        if (citationIds[citations[i].citationID]) {
+            this.setCitationId(citations[i], true);
+        }
+        citationIds[citations[i].citationID] = true;
+        indexNumbers.push(citations[i].properties.index);
+    }
+    var oldCitations = citations.slice();
+    oldCitations.sort(
+        function (a,b) {
+            if (a.properties.index < b.properties.index) {
+                return -1;
+            } else if (a.properties.index > b.properties.index) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    );
+    for (i = 0, ilen = oldCitations.length; i < ilen; i += 1) {
+        oldCitations[i].properties.index = i;
+    }
+    for (i = 0, ilen = oldCitations.length; i < ilen; i += 1) {
+        sortedItems = [];
+        for (j = 0, jlen = oldCitations[i].citationItems.length; j < jlen; j += 1) {
+            item = oldCitations[i].citationItems[j];
+            if ("undefined" === typeof item.sortkeys) {
+                item.sortkeys = [];
+            }
+            Item = this.retrieveItem("" + item.id);
+            newitem = [Item, item];
+            sortedItems.push(newitem);
+            oldCitations[i].citationItems[j].item = Item;
+            itemList.push("" + item.id);
+        }
+        if (!oldCitations[i].properties.unsorted) {
+            sortedItems.sort(this.citation.srt.compareCompositeKeys);
+        }
+        oldCitations[i].sortedItems = sortedItems;
+        this.registry.citationreg.citationById[oldCitations[i].citationID] = oldCitations[i];
+    }
+    this.updateItems(itemList);
+    for (i = 0, ilen = citations.length; i < ilen; i += 1) {
+        citationList.push(["" + citations[i].citationID, citations[i].properties.noteIndex]);
+    }
+    var ret = [];
+    if (citations && citations.length) {
+        ret = this.processCitationCluster(citations[0], [], citationList.slice(1));
+    } else {
+        this.registry = new CSL.Registry(this);
+        this.tmp = new CSL.Engine.Tmp();
+        this.disambiguate = new CSL.Disambiguation(this);
+    }
+    return ret;
+};
+CSL.Engine.prototype.updateItems = function (idList, nosort, rerun_ambigs) {
+    var debug = false;
+    var oldArea = this.tmp.area;
+    this.registry.init(idList);
+	if (rerun_ambigs) {
+		for (var ambig in this.registry.ambigcites) {
+			this.registry.ambigsTouched[ambig] = true;
+		}
+	}
+    this.registry.dodeletes(this.registry.myhash);
+    this.registry.doinserts(this.registry.mylist);
+    this.registry.dorefreshes();
+    this.registry.rebuildlist();
+    this.registry.setsortkeys();
+    this.registry.setdisambigs();
+    if (!nosort) {
+        this.registry.sorttokens();
+    }
+    this.registry.renumber();
+    this.tmp.area = oldArea;
+    return this.registry.getSortedIds();
+};
+CSL.Engine.prototype.updateUncitedItems = function (idList, nosort) {
+    var debug = false;
+    if (!idList) {
+        idList = [];
+    }
+    if ("object" == typeof idList) {
+        if ("undefined" == typeof idList.length) {
+            var idHash = idList;
+            idList = [];
+            for (var key in idHash) {
+                idList.push(key);
+            }
+        } else if ("number" == typeof idList.length) {
+            var idHash = {};
+            for (var i=0,ilen=idList.length;i<ilen;i+=1) {
+                idHash[idList[i]] = true;
+            }
+        }
+    }
+    this.registry.init(idList, true);
+    this.registry.dopurge(idHash);
+    this.registry.doinserts(this.registry.mylist);
+    this.registry.dorefreshes();
+    this.registry.rebuildlist();
+    this.registry.setsortkeys();
+    this.registry.setdisambigs();
+    if (!nosort) {
+        this.registry.sorttokens();
+    }
+    this.registry.renumber();
+    return this.registry.getSortedIds();
 };
 CSL.localeResolve = function (langstr) {
     var ret, langlst;
@@ -5078,6 +5036,58 @@ CSL.Engine.prototype.localeSet = function (myxml, lang_in, lang_out) {
         }
     }
 };
+CSL.Node = {};
+CSL.Node.bibliography = {
+    build: function (state, target) {
+        if (this.tokentype === CSL.START) {
+            state.build.area = "bibliography";
+            state.build.root = "bibliography";
+            state.fixOpt(this, "names-delimiter", "delimiter");
+            state.fixOpt(this, "name-delimiter", "delimiter");
+            state.fixOpt(this, "name-form", "form");
+            state.fixOpt(this, "and", "and");
+            state.fixOpt(this, "delimiter-precedes-last", "delimiter-precedes-last");
+            state.fixOpt(this, "delimiter-precedes-et-al", "delimiter-precedes-et-al");
+            state.fixOpt(this, "initialize-with", "initialize-with");
+            state.fixOpt(this, "initialize", "initialize");
+            state.fixOpt(this, "name-as-sort-order", "name-as-sort-order");
+            state.fixOpt(this, "sort-separator", "sort-separator");
+            state.fixOpt(this, "and", "and");
+            state.fixOpt(this, "et-al-min", "et-al-min");
+            state.fixOpt(this, "et-al-use-first", "et-al-use-first");
+            state.fixOpt(this, "et-al-use-last", "et-al-use-last");
+            state.fixOpt(this, "et-al-subsequent-min", "et-al-subsequent-min");
+            state.fixOpt(this, "et-al-subsequent-use-first", "et-al-subsequent-use-first");
+        }
+        target.push(this);
+    }
+};
+CSL.Node.choose = {
+    build: function (state, target) {
+        var func;
+        if (this.tokentype === CSL.START) {
+            func = function (state, Item) {
+                state.tmp.jump.push(undefined, CSL.LITERAL);
+            };
+        }
+        if (this.tokentype === CSL.END) {
+            func = function (state, Item) {
+                state.tmp.jump.pop();
+            };
+        }
+        this.execs.push(func);
+        target.push(this);
+    },
+    configure: function (state, pos) {
+        if (this.tokentype === CSL.END) {
+            state.configure.fail.push((pos));
+            state.configure.succeed.push((pos));
+        } else {
+            state.configure.fail.pop();
+            state.configure.succeed.pop();
+        }
+    }
+};
 CSL.Node.citation = {
     build: function (state, target) {
         if (this.tokentype === CSL.START) {
@@ -5115,6 +5125,10 @@ CSL.Node.citation = {
             state.citation.srt = new CSL.Registry.Comparifier(state, "citation_sort");
         }
     }
+};
+CSL.Node["#comment"] = {
+       build: function (state, target) {
+       }
 };
 CSL.Node.date = {
     build: function (state, target) {
@@ -5444,6 +5458,8 @@ CSL.Node["else-if"] = {
             if (this.locale) {
                 state.opt.lang = this.locale;
             }
+            var func = state.fun.match[this.match](this, state, this.rawtests, CSL.CONDITION_LEVEL_BOTTOM);
+            this.tests.push(func);
             if (!this.evaluator) {
                 this.evaluator = function (token, state, Item, item) {
                     var record = function (result) {
@@ -5500,10 +5516,6 @@ CSL.Node["else"] = {
             state.configure.fail[(state.configure.fail.length - 1)] = pos;
         }
     }
-};
-CSL.Node["#comment"] = {
-       build: function (state, target) {
-       }
 };
 CSL.Node["et-al"] = {
     build: function (state, target) {
@@ -5617,6 +5629,8 @@ CSL.Node["if"] = {
             if (this.locale) {
                 state.opt.lang = this.locale;
             }
+            var func = state.fun.match[this.match](this, state, this.rawtests, CSL.CONDITION_LEVEL_BOTTOM);
+            this.tests.push(func);
             if (!this.evaluator) {
                 this.evaluator = function (token, state, Item, item) {
                     var record = function (result) {
@@ -6759,78 +6773,6 @@ CSL.NameOutput.prototype._getToken = function (tokenname) {
     }
     return token;
 };
-CSL.NameOutput.prototype.disambigNames = function () {
-    var pos = this.nameset_base;
-    for (var i = 0, ilen = this.variables.length; i < ilen; i += 1) {
-        var v = this.variables[i];
-        if (this.freeters[v].length) {
-            this._runDisambigNames(this.freeters[v], pos);
-            pos += 1;
-        }
-        if (this.institutions[v].length) {
-            pos += 1;
-        }
-        for (var j = 0, jlen = this.persons[v].length; j < jlen; j += 1) {
-            if (this.persons[v][j].length) {
-                this._runDisambigNames(this.persons[v][j], pos);
-                this.state.tmp.disambig_settings.givens.push([]);
-                pos += 1;
-            }
-        }
-    }
-};
-CSL.NameOutput.prototype._runDisambigNames = function (lst, pos) {
-    var chk, myform, myinitials, param, i, ilen, paramx;
-    for (i = 0, ilen = lst.length; i < ilen; i += 1) {
-        if (!lst[i].given && !lst[i].family) {
-            continue;
-        }
-        myinitials = this.name.strings["initialize-with"];
-        this.state.registry.namereg.addname("" + this.Item.id, lst[i], i);
-        chk = this.state.tmp.disambig_settings.givens[pos];
-        if ("undefined" === typeof chk) {
-            for (var j = 0, jlen = pos + 1; j < jlen; j += 1) {
-                if (!this.state.tmp.disambig_settings.givens[j]) {
-                    this.state.tmp.disambig_settings.givens[j] = [];
-                }
-            }
-        }
-        chk = this.state.tmp.disambig_settings.givens[pos][i];
-        if ("undefined" === typeof chk) {
-            myform = this.name.strings.form;
-            param = this.state.registry.namereg.evalname("" + this.Item.id, lst[i], i, 0, myform, myinitials);
-            this.state.tmp.disambig_settings.givens[pos].push(param);
-        }
-        myform = this.name.strings.form;
-        paramx = this.state.registry.namereg.evalname("" + this.Item.id, lst[i], i, 0, myform, myinitials);
-        if (this.state.tmp.disambig_request) {
-            var val = this.state.tmp.disambig_settings.givens[pos][i];
-            if (val === 1 && 
-                this.state.citation.opt["givenname-disambiguation-rule"] === "by-cite" && 
-                ("undefined" === typeof this.name.strings["initialize-with"]
-                 || "undefined" === typeof lst[i].given)) {
-                val = 2;
-            }
-            param = val;
-            if (this.state.opt["disambiguate-add-givenname"] && lst[i].given) {
-                param = this.state.registry.namereg.evalname("" + this.Item.id, lst[i], i, param, this.name.strings.form, this.name.strings["initialize-with"]);
-            }
-        } else {
-            param = paramx;
-        }
-        if (!this.state.tmp.just_looking && this.item && this.item.position === CSL.POSITION_FIRST) {
-            param = paramx;
-        }
-        if (!this.state.tmp.sort_key_flag) {
-            this.state.tmp.disambig_settings.givens[pos][i] = param;
-            if ("string" === typeof myinitials
-                && ("undefined" === typeof this.name.strings["initialize"]
-                    || true === this.name.strings["initialize"])) {
-                this.state.tmp.disambig_settings.use_initials = true;
-            }
-        }
-    }
-};
 CSL.NameOutput.prototype.setCommonTerm = function () {
     var variables = this.variables;
     var varnames = variables.slice();
@@ -6959,6 +6901,78 @@ CSL.NameOutput.prototype._imposeNameConstraints = function (lst, count, key, pos
     this.state.tmp.disambig_settings.names[pos] = lst[key].length;
     this.state.disambiguate.padBase(this.state.tmp.disambig_settings);
 };
+CSL.NameOutput.prototype.disambigNames = function () {
+    var pos = this.nameset_base;
+    for (var i = 0, ilen = this.variables.length; i < ilen; i += 1) {
+        var v = this.variables[i];
+        if (this.freeters[v].length) {
+            this._runDisambigNames(this.freeters[v], pos);
+            pos += 1;
+        }
+        if (this.institutions[v].length) {
+            pos += 1;
+        }
+        for (var j = 0, jlen = this.persons[v].length; j < jlen; j += 1) {
+            if (this.persons[v][j].length) {
+                this._runDisambigNames(this.persons[v][j], pos);
+                this.state.tmp.disambig_settings.givens.push([]);
+                pos += 1;
+            }
+        }
+    }
+};
+CSL.NameOutput.prototype._runDisambigNames = function (lst, pos) {
+    var chk, myform, myinitials, param, i, ilen, paramx;
+    for (i = 0, ilen = lst.length; i < ilen; i += 1) {
+        if (!lst[i].given && !lst[i].family) {
+            continue;
+        }
+        myinitials = this.name.strings["initialize-with"];
+        this.state.registry.namereg.addname("" + this.Item.id, lst[i], i);
+        chk = this.state.tmp.disambig_settings.givens[pos];
+        if ("undefined" === typeof chk) {
+            for (var j = 0, jlen = pos + 1; j < jlen; j += 1) {
+                if (!this.state.tmp.disambig_settings.givens[j]) {
+                    this.state.tmp.disambig_settings.givens[j] = [];
+                }
+            }
+        }
+        chk = this.state.tmp.disambig_settings.givens[pos][i];
+        if ("undefined" === typeof chk) {
+            myform = this.name.strings.form;
+            param = this.state.registry.namereg.evalname("" + this.Item.id, lst[i], i, 0, myform, myinitials);
+            this.state.tmp.disambig_settings.givens[pos].push(param);
+        }
+        myform = this.name.strings.form;
+        paramx = this.state.registry.namereg.evalname("" + this.Item.id, lst[i], i, 0, myform, myinitials);
+        if (this.state.tmp.disambig_request) {
+            var val = this.state.tmp.disambig_settings.givens[pos][i];
+            if (val === 1 && 
+                this.state.citation.opt["givenname-disambiguation-rule"] === "by-cite" && 
+                ("undefined" === typeof this.name.strings["initialize-with"]
+                 || "undefined" === typeof lst[i].given)) {
+                val = 2;
+            }
+            param = val;
+            if (this.state.opt["disambiguate-add-givenname"] && lst[i].given) {
+                param = this.state.registry.namereg.evalname("" + this.Item.id, lst[i], i, param, this.name.strings.form, this.name.strings["initialize-with"]);
+            }
+        } else {
+            param = paramx;
+        }
+        if (!this.state.tmp.just_looking && this.item && this.item.position === CSL.POSITION_FIRST) {
+            param = paramx;
+        }
+        if (!this.state.tmp.sort_key_flag) {
+            this.state.tmp.disambig_settings.givens[pos][i] = param;
+            if ("string" === typeof myinitials
+                && ("undefined" === typeof this.name.strings["initialize"]
+                    || true === this.name.strings["initialize"])) {
+                this.state.tmp.disambig_settings.use_initials = true;
+            }
+        }
+    }
+};
 CSL.NameOutput.prototype.getEtAlConfig = function () {
     var item = this.item;
     this["et-al"] = {};
@@ -7003,6 +7017,40 @@ CSL.NameOutput.prototype.getEtAlConfig = function () {
     }
     if (!this.state.tmp["et-al-min"]) {
         this.state.tmp["et-al-min"] = this.etal_min;
+    }
+};
+CSL.NameOutput.prototype.setEtAlParameters = function () {
+    var i, ilen, j, jlen;
+    for (i = 0, ilen = this.variables.length; i < ilen; i += 1) {
+        var v = this.variables[i];
+        if (this.freeters[v].length) {
+            this._setEtAlParameter("freeters", v);
+        }
+        if (this.institutions[v].length) {
+            this._setEtAlParameter("institutions", v);
+        }
+        for (j = 0, jlen = this.persons[v].length; j < jlen; j += 1) {
+            this._setEtAlParameter("persons", v, j);
+        }
+    }
+};
+CSL.NameOutput.prototype._setEtAlParameter = function (type, v, j) {
+    var lst, count;
+    if ("undefined" === typeof j) {
+        lst = this[type][v];
+        count = this[type + "_count"][v];
+    } else {
+        lst = this[type][v][j];
+        count = this[type + "_count"][v][j];
+    }
+    if (lst.length < count && !this.state.tmp.sort_key_flag) {
+        if (this.etal_use_last) {
+            this.etal_spec.push(2);
+        } else {
+            this.etal_spec.push(1);
+        }
+    } else {
+        this.etal_spec.push(0);
     }
 };
 CSL.NameOutput.prototype.renderAllNames = function () {
@@ -7803,116 +7851,6 @@ CSL.NameOutput.prototype._trimInstitution = function (subunits, v, i) {
     }
     return subunits;
 };
-CSL.NameOutput.prototype.setEtAlParameters = function () {
-    var i, ilen, j, jlen;
-    for (i = 0, ilen = this.variables.length; i < ilen; i += 1) {
-        var v = this.variables[i];
-        if (this.freeters[v].length) {
-            this._setEtAlParameter("freeters", v);
-        }
-        if (this.institutions[v].length) {
-            this._setEtAlParameter("institutions", v);
-        }
-        for (j = 0, jlen = this.persons[v].length; j < jlen; j += 1) {
-            this._setEtAlParameter("persons", v, j);
-        }
-    }
-};
-CSL.NameOutput.prototype._setEtAlParameter = function (type, v, j) {
-    var lst, count;
-    if ("undefined" === typeof j) {
-        lst = this[type][v];
-        count = this[type + "_count"][v];
-    } else {
-        lst = this[type][v][j];
-        count = this[type + "_count"][v][j];
-    }
-    if (lst.length < count && !this.state.tmp.sort_key_flag) {
-        if (this.etal_use_last) {
-            this.etal_spec.push(2);
-        } else {
-            this.etal_spec.push(1);
-        }
-    } else {
-        this.etal_spec.push(0);
-    }
-};
-CSL.evaluateLabel = function (node, state, Item, item) {
-    var myterm;
-    if ("locator" === node.strings.term) {
-        if (item && item.label) {
-            if (item.label === "sub verbo") {
-                myterm = "sub-verbo";
-            } else {
-                myterm = item.label;
-            }
-        }
-        if (!myterm) {
-            myterm = "page";
-        }
-    } else {
-        myterm = node.strings.term;
-    }
-    var plural = node.strings.plural;
-    if (item && "number" === typeof item.force_pluralism) {
-        plural = item.force_pluralism;
-    } else if ("number" !== typeof plural) {
-        if ("locator" === node.strings.term) {
-            if (item && item.locator) {
-                if (state.opt.development_extensions.locator_parsing_for_plurals) {
-                    if (!state.tmp.shadow_numbers.locator) {
-                        state.processNumber(false, item, "locator", Item.type);
-                    }
-                    plural = state.tmp.shadow_numbers.locator.plural;
-                } else {
-                    plural = CSL.evaluateStringPluralism(item.locator);
-                }
-            }
-        } else if (["page", "page-first"].indexOf(node.variables[0]) > -1) {
-            state.processNumber(false, Item, myterm, Item.type);
-            plural = state.tmp.shadow_numbers[myterm].plural;
-            myterm = state.tmp.shadow_numbers[myterm].label;
-        } else {
-            if (!state.tmp.shadow_numbers[myterm]) {
-                state.processNumber(false, Item, myterm, Item.type);
-            }
-            plural = state.tmp.shadow_numbers[myterm].plural;
-        }
-        if (node.decorations && state.opt.development_extensions.csl_reverse_lookup_support) {
-            node.decorations.reverse();
-            node.decorations.push(["@showid","true", node.cslid]);
-            node.decorations.reverse();
-        }
-    }
-    return CSL.castLabel(state, node, myterm, plural, CSL.TOLERANT);
-};
-CSL.evaluateStringPluralism = function (str) {
-    if (str) {
-        var m = str.match(/(?:[0-9],\s*[0-9]|\s+and\s+|&|([0-9]+)\s*[\-\u2013]\s*([0-9]+))/);
-        if (m && (!m[1] || parseInt(m[1], 10) < parseInt(m[2], 10))) {
-            return 1;
-        }
-    }
-    return 0;
-};
-CSL.castLabel = function (state, node, term, plural, mode) {
-    var label_form = node.strings.form;
-    if (state.tmp.group_context.value()[5]) {
-        label_form = state.tmp.group_context.value()[5];
-    }
-    var ret = state.getTerm(term, label_form, plural, false, mode);
-    if (state.tmp.strip_periods) {
-        ret = ret.replace(/\./g, "");
-    } else {
-        for (var i = 0, ilen = node.decorations.length; i < ilen; i += 1) {
-            if ("@strip-periods" === node.decorations[i][0] && "true" === node.decorations[i][1]) {
-                ret = ret.replace(/\./g, "");
-                break;
-            }
-        }
-    }
-    return ret;
-};
 CSL.PublisherOutput = function (state, group_tok) {
     this.state = state;
     this.group_tok = group_tok;
@@ -7989,89 +7927,77 @@ CSL.PublisherOutput.prototype.clearVars = function () {
     this.state.tmp["publisher-token"] = false;
     this.state.tmp["publisher-place-token"] = false;
 };
-CSL.dateMacroAsSortKey = function (state, Item) {
-    CSL.dateAsSortKey.call(this, state, Item, true);
-};
-CSL.dateAsSortKey = function (state, Item, isMacro) {
-    var dp, elem, value, e, yr, prefix, i, ilen, num;
-    var variable = this.variables[0];
-    var macroFlag = "empty";
-    if (isMacro) {
-        macroFlag = "macro-with-date";
-    }
-    dp = Item[variable];
-    if ("undefined" === typeof dp) {
-        dp = {"date-parts": [[0]] };
-        if (!dp.year) {
-            state.tmp.empty_date = true;
-        }
-    }
-    if ("undefined" === typeof this.dateparts) {
-        this.dateparts = ["year", "month", "day"];
-    }
-    if (dp.raw) {
-        dp = state.fun.dateparser.parse(dp.raw);
-    } else if (dp["date-parts"]) {
-        dp = state.dateParseArray(dp);
-    }
-    if ("undefined" === typeof dp) {
-        dp = {};
-    }
-    for (i = 0, ilen = CSL.DATE_PARTS_INTERNAL.length; i < ilen; i += 1) {
-        elem = CSL.DATE_PARTS_INTERNAL[i];
-        value = 0;
-        e = elem;
-        if (e.slice(-4) === "_end") {
-            e = e.slice(0, -4);
-        }
-        if (dp[elem] && this.dateparts.indexOf(e) > -1) {
-            value = dp[elem];
-        }
-        if (elem.slice(0, 4) === "year") {
-            yr = CSL.Util.Dates[e].numeric(state, value);
-            prefix = "Y";
-            if (yr[0] === "-") {
-                prefix = "X";
-                yr = yr.slice(1);
-                yr = 9999 - parseInt(yr, 10);
-            }
-            state.output.append(CSL.Util.Dates[elem.slice(0, 4)].numeric(state, (prefix + yr)), macroFlag);
-        } else {
-            value = CSL.Util.Dates[e]["numeric-leading-zeros"](state, value);
-            if (!value) {
-                value = "00";
-            }
-            state.output.append(value, macroFlag);
-        }
-    }
-};
-CSL.Engine.prototype.dateParseArray = function (date_obj) {
-    var ret, field, dpos, ppos, dp, exts, llen, pos, len, pppos, lllen;
-    ret = {};
-    for (field in date_obj) {
-        if (field === "date-parts") {
-            dp = date_obj["date-parts"];
-            if (dp.length > 1) {
-                if (dp[0].length !== dp[1].length) {
-                    CSL.error("CSL data error: element mismatch in date range input.");
-                }
-            }
-            exts = ["", "_end"];
-            for (var i = 0, ilen = dp.length; i < ilen; i += 1) {
-                for (var j = 0, jlen = CSL.DATE_PARTS.length; j < jlen; j += 1) {
-                    if ("undefined" === typeof dp[i][j]) {
-                        ret[(CSL.DATE_PARTS[j] + exts[i])] = dp[i][j];
-                    } else {
-                        ret[(CSL.DATE_PARTS[j] + exts[i])] = parseInt(dp[i][j], 10);
-                    }
-                }
-            }
-        } else if (date_obj.hasOwnProperty(field)) {
-            if (field === "literal" && "object" === typeof date_obj.literal && "string" === typeof date_obj.literal.part) {
-                CSL.debug("Warning: fixing up weird literal date value");
-                ret.literal = date_obj.literal.part;
+CSL.evaluateLabel = function (node, state, Item, item) {
+    var myterm;
+    if ("locator" === node.strings.term) {
+        if (item && item.label) {
+            if (item.label === "sub verbo") {
+                myterm = "sub-verbo";
             } else {
-                ret[field] = date_obj[field];
+                myterm = item.label;
+            }
+        }
+        if (!myterm) {
+            myterm = "page";
+        }
+    } else {
+        myterm = node.strings.term;
+    }
+    var plural = node.strings.plural;
+    if (item && "number" === typeof item.force_pluralism) {
+        plural = item.force_pluralism;
+    } else if ("number" !== typeof plural) {
+        if ("locator" === node.strings.term) {
+            if (item && item.locator) {
+                if (state.opt.development_extensions.locator_parsing_for_plurals) {
+                    if (!state.tmp.shadow_numbers.locator) {
+                        state.processNumber(false, item, "locator", Item.type);
+                    }
+                    plural = state.tmp.shadow_numbers.locator.plural;
+                } else {
+                    plural = CSL.evaluateStringPluralism(item.locator);
+                }
+            }
+        } else if (["page", "page-first"].indexOf(node.variables[0]) > -1) {
+            state.processNumber(false, Item, myterm, Item.type);
+            plural = state.tmp.shadow_numbers[myterm].plural;
+            myterm = state.tmp.shadow_numbers[myterm].label;
+        } else {
+            if (!state.tmp.shadow_numbers[myterm]) {
+                state.processNumber(false, Item, myterm, Item.type);
+            }
+            plural = state.tmp.shadow_numbers[myterm].plural;
+        }
+        if (node.decorations && state.opt.development_extensions.csl_reverse_lookup_support) {
+            node.decorations.reverse();
+            node.decorations.push(["@showid","true", node.cslid]);
+            node.decorations.reverse();
+        }
+    }
+    return CSL.castLabel(state, node, myterm, plural, CSL.TOLERANT);
+};
+CSL.evaluateStringPluralism = function (str) {
+    if (str) {
+        var m = str.match(/(?:[0-9],\s*[0-9]|\s+and\s+|&|([0-9]+)\s*[\-\u2013]\s*([0-9]+))/);
+        if (m && (!m[1] || parseInt(m[1], 10) < parseInt(m[2], 10))) {
+            return 1;
+        }
+    }
+    return 0;
+};
+CSL.castLabel = function (state, node, term, plural, mode) {
+    var label_form = node.strings.form;
+    if (state.tmp.group_context.value()[5]) {
+        label_form = state.tmp.group_context.value()[5];
+    }
+    var ret = state.getTerm(term, label_form, plural, false, mode);
+    if (state.tmp.strip_periods) {
+        ret = ret.replace(/\./g, "");
+    } else {
+        for (var i = 0, ilen = node.decorations.length; i < ilen; i += 1) {
+            if ("@strip-periods" === node.decorations[i][0] && "true" === node.decorations[i][1]) {
+                ret = ret.replace(/\./g, "");
+                break;
             }
         }
     }
@@ -8833,13 +8759,12 @@ CSL.Attributes["@disambiguate"] = function (state, arg) {
         this.tests.push(func);
     }
 };
-CSL.Attributes["@is-numeric"] = function (state, arg) {
+CSL.Attributes["@is-numeric"] = function (state, arg, joiner) {
     var variables = arg.split(/\s+/);
     var reverses = CSL.Util.setReverseConditions.call(this, variables);
     var maketest = function(variable, reverse) {
         return function (Item, item) {
             var myitem = Item;
-            var mytests = [];
             if (["locator","locator-revision"].indexOf(variable) > -1) {
                 myitem = item;
             }
@@ -8860,18 +8785,9 @@ CSL.Attributes["@is-numeric"] = function (state, arg) {
             return reverse ? true : false;
         }
     }
-    var mytests = [];
     for (var i=0; i<variables.length; i+=1) {
-        mytests.push(maketest(variables[i], reverses[i]));
+        this.rawtests.push(maketest(variables[i], reverses[i]));
     }
-    var func = state.fun.match[this.match](this, state, mytests, CSL.CONDITION_LEVEL_BOTTOM);
-    this.tests.push(func);
-};
-CSL.Attributes["@is-numeric-any"] = function (state, arg) {
-    CSL.Attributes["@is-numeric"].call(this, state, arg, "any");
-};
-CSL.Attributes["@is-numeric-all"] = function (state, arg) {
-    CSL.Attributes["@is-numeric"].call(this, state, arg, "all");
 };
 CSL.Attributes["@is-uncertain-date"] = function (state, arg) {
     var variables = arg.split(/\s+/);
@@ -8885,18 +8801,9 @@ CSL.Attributes["@is-uncertain-date"] = function (state, arg) {
             }
         }
     }
-    var mytests = [];
     for (var i=0,ilen=variables.length;i<ilen;i+=1) {
-        mytests.push(maketest(variables[i], reverses[i]));
+        this.rawtests.push(maketest(variables[i], reverses[i]));
     };
-    var func = state.fun.match[this.match](this, state, mytests, CSL.CONDITION_LEVEL_BOTTOM);
-    this.tests.push(func);
-};
-CSL.Attributes["@is-uncertain-date-any"] = function (state, arg) {
-    CSL.Attributes["@is-uncertain-date"].call(this, state, arg, "any");
-};
-CSL.Attributes["@is-uncertain-date-all"] = function (state, arg) {
-    CSL.Attributes["@is-uncertain-date"].call(this, state, arg, "all");
 };
 CSL.Attributes["@locator"] = function (state, arg) {
     var trylabels = arg.replace("sub verbo", "sub-verbo");
@@ -8919,18 +8826,9 @@ CSL.Attributes["@locator"] = function (state, arg) {
             }
         }
     }
-    var mytests = [];
     for (var i=0,ilen=trylabels.length;i<ilen;i+=1) {
-        mytests.push(maketest(trylabels[i], reverses[i]));
+        this.rawtests.push(maketest(trylabels[i], reverses[i]));
     }
-    var func = state.fun.match[this.match](this, state, mytests, CSL.CONDITION_LEVEL_BOTTOM);
-    this.tests.push(func);
-};
-CSL.Attributes["@locator-any"] = function (state, arg) {
-    CSL.Attributes["@locator"].call(this, state, arg, "any");
-};
-CSL.Attributes["@locator-all"] = function (state, arg) {
-    CSL.Attributes["@locator"].call(this, state, arg, "all");
 };
 CSL.Attributes["@position"] = function (state, arg) {
     var tryposition;
@@ -8957,7 +8855,6 @@ CSL.Attributes["@position"] = function (state, arg) {
             return false;
         }
     }
-    var mytests = [];
     for (var i=0,ilen=trypositions.length;i<ilen;i+=1) {
         var tryposition = trypositions[i];
         if (tryposition === "first") {
@@ -8970,18 +8867,16 @@ CSL.Attributes["@position"] = function (state, arg) {
             tryposition = CSL.POSITION_IBID_WITH_LOCATOR;
         }
         if ("near-note" === tryposition) {
-            mytests.push(function (Item, item) {
+            this.rawtests.push(function (Item, item) {
                 if (item && item.position === CSL.POSITION_SUBSEQUENT && item["near-note"]) {
                     return true;
                 }
                 return false;
             });
         } else {
-            mytests.push(maketest(tryposition));
+            this.rawtests.push(maketest(tryposition));
         }
     }
-    var func = state.fun.match[this.match](this, state, mytests, CSL.CONDITION_LEVEL_BOTTOM);
-    this.tests.push(func);
 };
 CSL.Attributes["@type"] = function (state, arg) {
     var types = arg.split(/\s+/);
@@ -8996,20 +8891,12 @@ CSL.Attributes["@type"] = function (state, arg) {
             }
         }
     }
-    var mytests = [];
     for (var i=0,ilen=types.length;i<ilen;i+=1) {
-        mytests.push(maketest(types[i], reverses[i]));
+        this.rawtests.push(maketest(types[i], reverses[i]));
     }
-    var func = state.fun.match[this.match](this, state, mytests, CSL.CONDITION_LEVEL_BOTTOM);
-    this.tests.push(func);
-};
-CSL.Attributes["@type-any"] = function (state, arg) {
-    CSL.Attributes["@type"].call(this, state, arg, "any");
-};
-CSL.Attributes["@type-all"] = function (state, arg) {
-    CSL.Attributes["@type"].call(this, state, arg, "all");
 };
 CSL.Attributes["@variable"] = function (state, arg) {
+    var func;
     this.variables = arg.split(/\s+/);
     this.variables_real = this.variables.slice();
     if ("label" === this.name && this.variables[0]) {
@@ -9155,19 +9042,10 @@ CSL.Attributes["@variable"] = function (state, arg) {
                 return reverse ? true : false;
             }
         }
-        var mytests = [];
         for (var i=0,ilen=this.variables.length;i<ilen;i+=1) {
-            mytests.push(maketest(this.variables[i], reverses[i]));
+            this.rawtests.push(maketest(this.variables[i], reverses[i]));
         }
-        var func = state.fun.match[this.match](this, state, mytests, CSL.CONDITION_LEVEL_BOTTOM);
-        this.tests.push(func);
     }
-};
-CSL.Attributes["@variable-any"] = function (state, arg) {
-    CSL.Attributes["@variable"].call(this, state, arg, "any");
-};
-CSL.Attributes["@variable-all"] = function (state, arg) {
-    CSL.Attributes["@variable"].call(this, state, arg, "all");
 };
 CSL.Attributes["@page"] = function (state, arg) {
     var trylabels = arg.replace("sub verbo", "sub-verbo");
@@ -9191,18 +9069,9 @@ CSL.Attributes["@page"] = function (state, arg) {
             }
         }
     }
-    var mytests = [];
     for (var i=0,ilen=trylabels.length;i<ilen;i+=1) {
-        mytests.push(maketest(trylabels[i], reverses[i]));
+        this.rawtests.push(maketest(trylabels[i], reverses[i]));
     }
-    var func = state.fun.match[this.match](this, state, mytests, CSL.CONDITION_LEVEL_BOTTOM);
-    this.tests.push(func);
-};
-CSL.Attributes["@page-any"] = function (state, arg) {
-    CSL.Attributes["@page"].call(this, state, arg, "any");
-};
-CSL.Attributes["@page-all"] = function (state, arg) {
-    CSL.Attributes["@page"].call(this, state, arg, "all");
 };
 CSL.Attributes["@jurisdiction"] = function (state, arg) {
     var tryjurisdictions = arg.split(/\s+/);
@@ -9229,19 +9098,10 @@ CSL.Attributes["@jurisdiction"] = function (state, arg) {
             return reverse ? true : false;
         }
     }
-    var mytests = [];
     for (var i=0,ilen=tryjurisdictions.length;i<ilen;i+=1) {
         var tryjurisdictionSlice = tryjurisdictions[i].slice();
-        mytests.push(maketests(tryjurisdictionSlice, reverses[i]));
+        this.rawtests.push(maketests(tryjurisdictionSlice, reverses[i]));
     }
-    var func = state.fun.match[this.match](this, state, mytests, CSL.CONDITION_LEVEL_BOTTOM);
-    this.tests.push(func);
-};
-CSL.Attributes["@jurisdiction-any"] = function (state, arg) {
-    CSL.Attributes["@jurisdiction"].call(this, state, arg, "any");
-};
-CSL.Attributes["@jurisdiction-all"] = function (state, arg) {
-    CSL.Attributes["@jurisdiction"].call(this, state, arg, "all");
 };
 CSL.Attributes["@context"] = function (state, arg) {
     var func = function (Item, item) {
@@ -9265,12 +9125,9 @@ CSL.Attributes["@has-year-only"] = function (state, arg) {
             }
         }
     }
-    var mytests = [];
     for (var i=0,ilen=trydates.length;i<ilen;i+=1) {
-        mytests.push(maketest(trydates[i]));
+        this.rawtests.push(maketest(trydates[i]));
     }
-    var func = state.fun.match[this.match](this, state, mytests);
-    this.tests.push(func);
 };
 CSL.Attributes["@has-month-or-season-only"] = function (state, arg) {
     var trydates = arg.split(/\s+/);
@@ -9284,12 +9141,9 @@ CSL.Attributes["@has-month-or-season-only"] = function (state, arg) {
             }
         }
     }
-    var mytests = [];
     for (var i=0,ilen=trydates.length;i<ilen;i+=1) {
-        mytests.push(maketest(trydates[i]));
+        this.rawtests.push(maketest(trydates[i]));
     }
-    var func = state.fun.match[this.match](this, state, mytests);
-    this.tests.push(func);
 };
 CSL.Attributes["@has-day-only"] = function (state, arg) {
     var trydates = arg.split(/\s+/);
@@ -9303,12 +9157,9 @@ CSL.Attributes["@has-day-only"] = function (state, arg) {
             }
         }
     }
-    var mytests = [];
     for (var i=0,ilen=trydates.length;i<ilen;i+=1) {
-        mytests.push(maketest(trydates[i]));
+        this.rawtests.push(maketest(trydates[i]));
     };
-    var func = state.fun.match[this.match](this, state, mytests);
-    this.tests.push(func);
 };
 CSL.Attributes["@subjurisdictions"] = function (state, arg) {
     var trysubjurisdictions = parseInt(arg, 10);
@@ -9808,20 +9659,6 @@ CSL.Attributes["@reverse-order"] = function (state, arg) {
 CSL.Attributes["@display"] = function (state, arg) {
     this.strings.cls = arg;
 };
-var XML_PARSING;
-if ("undefined" !== typeof CSL_IS_NODEJS) {
-    XML_PARSING = CSL_NODEJS;
-} else if ("undefined" !== typeof CSL_E4X) {
-    XML_PARSING = CSL_E4X;
-} else if ("undefined" !== typeof CSL_JSON) {
-    XML_PARSING = CSL_JSON;
-} else {
-    XML_PARSING = CSL_CHROME;
-}
-CSL.System = {};
-CSL.System.Xml = {
-    "Parsing": XML_PARSING
-};
 CSL.Stack = function (val, literal) {
     this.mystack = [];
     if (literal || val) {
@@ -9856,400 +9693,6 @@ CSL.Stack.prototype.value = function () {
 };
 CSL.Stack.prototype.length = function () {
     return this.mystack.length;
-};
-CSL.Util = {
-    setReverseConditions: function (lst) {
-        reverses = [];
-        for (var i=0,ilen=lst.length;i<ilen;i+=1) {
-            if (lst[i].slice(0,4) === "not:") {
-                lst[i] = lst[i].slice(4);
-                reverses.push(true);
-            } else {
-                reverses.push(false);
-            }
-        }
-        return reverses;
-    }
-};
-CSL.Util.Match = function () {
-    this.any = function (token, state, tests, level) {
-        return function (Item, item) {
-            for (var i=0, ilen=tests.length; i < ilen; i += 1) {
-                result = tests[i](Item, item);
-                if (result) {
-                    return true;
-                }
-            }
-            return false;
-        };
-    };
-    this[undefined] = this.any;
-    this.none = function (token, state, tests, level) {
-        if (CSL.CONDITION_LEVEL_TOP !== level) {
-            return this.any(token, state, tests, level);
-        }
-        return function (Item, item) {
-            for (var i=0,ilen=tests.length;i<ilen;i+=1) {
-                result = tests[i](Item,item);
-                if (result) {
-                    return false;
-                }
-            }
-            return true;
-        };
-    };
-    this.all = function (token, state, tests, level) {
-        return function (Item, item) {
-            for (var i=0,ilen=tests.length;i<ilen;i+=1) {
-                result = tests[i](Item,item);
-                if (!result) {
-                    return false;
-                }
-            }
-            return true;
-        };
-    };
-};
-CSL.Transform = function (state) {
-    var debug = false, abbreviations, token, fieldname, abbrev_family, opt;
-    this.abbrevs = {};
-    this.abbrevs["default"] = new state.sys.AbbreviationSegments();
-    this.getTextSubField = getTextSubField;
-    function abbreviate(state, Item, altvar, basevalue, myabbrev_family, use_field) {
-        var value;
-        if (!myabbrev_family) {
-            return basevalue;
-        }
-        var variable = myabbrev_family;
-        if (CSL.NUMERIC_VARIABLES.indexOf(myabbrev_family) > -1) {
-            myabbrev_family = "number";
-        }
-        if (["publisher-place", "event-place", "jurisdiction", "archive-place"].indexOf(myabbrev_family) > -1) {
-            myabbrev_family = "place";
-        }
-        if (["publisher", "authority"].indexOf(myabbrev_family) > -1) {
-            myabbrev_family = "institution-part";
-        }
-        if (["genre", "event", "medium", "title-short"].indexOf(myabbrev_family) > -1) {
-            myabbrev_family = "title";
-        }
-        if (["archive"].indexOf(myabbrev_family) > -1) {
-            myabbrev_family = "collection-title";
-        }
-        value = "";
-        if (state.sys.getAbbreviation) {
-            var jurisdiction = state.transform.loadAbbreviation(Item.jurisdiction, myabbrev_family, basevalue);
-            if (state.transform.abbrevs[jurisdiction][myabbrev_family] && basevalue && state.sys.getAbbreviation) {
-                if (state.transform.abbrevs[jurisdiction][myabbrev_family][basevalue]) {
-                    value = state.transform.abbrevs[jurisdiction][myabbrev_family][basevalue];
-                }
-            }
-        }
-        if (!value && Item.type !== 'legal_case' && altvar && Item[altvar] && use_field) {
-            value = Item[altvar];
-        }
-        if (!value) {
-            value = basevalue;
-        }
-        if (value && value.slice(0, 10) === "!here>>>") {
-            if (variable === "jurisdiction" && ["treaty", "patent"].indexOf(variable) > -1) {
-                value = value.slice(10);
-            } else {
-                value = false;
-            }
-        } 
-        return value;
-    }
-    function getFieldLocale(Item,field) {
-        var ret = state.opt["default-locale"][0].slice(0, 2)
-        var localeRex;
-        if (state.opt.development_extensions.strict_text_case_locales) {
-            localeRex = new RegExp("^([a-zA-Z]{2})(?:$|-.*| .*)");
-        } else {
-            localeRex = new RegExp("^([a-zA-Z]{2})(?:$|-.*|.*)");
-        }
-        if (Item.language) {
-            m = ("" + Item.language).match(localeRex);
-            if (m) {
-                ret = m[1];
-            } else {
-                ret = "tlh";
-            }
-        }
-        if (Item.multi && Item.multi && Item.multi.main && Item.multi.main[field]) {
-            ret = Item.multi.main[field];
-        }
-        if (!state.opt.development_extensions.strict_text_case_locales
-           || state.opt.development_extensions.normalize_lang_keys_to_lowercase) {
-            ret = ret.toLowerCase();
-        }
-        return ret;
-    };
-    function getTextSubField(Item, field, locale_type, use_default, stopOrig) {
-        var m, lst, opt, o, oo, pos, key, ret, len, myret, opts;
-        var usedOrig = stopOrig;
-        if (!Item[field]) {
-            return {name:"", usedOrig:stopOrig};
-        }
-        ret = {name:"", usedOrig:stopOrig,locale:getFieldLocale(Item,field)};
-        opts = state.opt[locale_type];
-        if (locale_type === 'locale-orig') {
-            if (stopOrig) {
-                ret = {name:"", usedOrig:stopOrig};
-            } else {
-                ret = {name:Item[field], usedOrig:false, locale:getFieldLocale(Item,field)};
-            }
-            return ret;
-        } else if (use_default && ("undefined" === typeof opts || opts.length === 0)) {
-            return {name:Item[field], usedOrig:true, locale:getFieldLocale(Item,field)};
-        }
-        for (var i = 0, ilen = opts.length; i < ilen; i += 1) {
-            opt = opts[i];
-            o = opt.split(/[\-_]/)[0];
-            if (opt && Item.multi && Item.multi._keys[field] && Item.multi._keys[field][opt]) {
-                ret.name = Item.multi._keys[field][opt];
-                ret.locale = o;
-                break;
-            } else if (o && Item.multi && Item.multi._keys[field] && Item.multi._keys[field][o]) {
-                ret.name = Item.multi._keys[field][o];
-                ret.locale = o;
-                break;
-            }
-        }
-        if (!ret.name && use_default) {
-            ret = {name:Item[field], usedOrig:true, locale:getFieldLocale(Item,field)};
-        }
-        return ret;
-    }
-    function loadAbbreviation(jurisdiction, category, orig) {
-        var pos, len;
-        if (!jurisdiction) {
-            jurisdiction = "default";
-        }
-        if (!orig) {
-            if (!this.abbrevs[jurisdiction]) {
-                this.abbrevs[jurisdiction] = new state.sys.AbbreviationSegments();
-            }
-            return jurisdiction;
-        }
-        if (state.sys.getAbbreviation) {
-            var tryList = ['default'];
-            if (jurisdiction !== 'default') {
-                var workLst = jurisdiction.split(/\s*;\s*/);
-                for (var i=0, ilen=workLst.length; i < ilen; i += 1) {
-                    tryList.push(workLst.slice(0,i+1).join(';'));
-                }
-            }
-            for (var i=tryList.length - 1; i > -1; i += -1) {
-                if (!this.abbrevs[tryList[i]]) {
-                    this.abbrevs[tryList[i]] = new state.sys.AbbreviationSegments();
-                }
-                if (!this.abbrevs[tryList[i]][category][orig]) {
-                    state.sys.getAbbreviation(state.opt.styleID, this.abbrevs, tryList[i], category, orig);
-                }
-                if (this.abbrevs[tryList[i]][category][orig]) {
-                    if (i < tryList.length) {
-                        this.abbrevs[jurisdiction][category][orig] = this.abbrevs[tryList[i]][category][orig];
-                    }
-                    break;
-                }
-            }
-        }
-        return jurisdiction;
-    }
-    this.loadAbbreviation = loadAbbreviation;
-    function publisherCheck (tok, Item, primary, myabbrev_family) {
-        var varname = tok.variables[0];
-        if (state.publisherOutput && primary) {
-            if (["publisher","publisher-place"].indexOf(varname) === -1) {
-                return false;
-            } else {
-                state.publisherOutput[varname + "-token"] = tok;
-                state.publisherOutput.varlist.push(varname);
-                var lst = primary.split(/;\s*/);
-                if (lst.length === state.publisherOutput[varname + "-list"].length) {
-                    state.publisherOutput[varname + "-list"] = lst;
-                }
-                for (var i = 0, ilen = lst.length; i < ilen; i += 1) {
-                    lst[i] = abbreviate(state, Item, false, lst[i], myabbrev_family, true);
-                }
-                state.tmp[varname + "-token"] = tok;
-                return true;
-            }
-        }
-        return false;
-    }
-    function getOutputFunction(variables, myabbrev_family, abbreviation_fallback, alternative_varname, transform_fallback) {
-        var localesets;
-        var langPrefs = CSL.LangPrefsMap[variables[0]];
-        if (!langPrefs) {
-            localesets = false;
-        } else {
-            localesets = state.opt['cite-lang-prefs'][langPrefs];
-        }
-        return function (state, Item, item, usedOrig) {
-            var primary, primary_locale, secondary, secondary_locale, tertiary, tertiary_locale, primary_tok, group_tok, key;
-            if (!variables[0] || (!Item[variables[0]] && !Item[alternative_varname])) {
-                return null;
-            }
-            var slot = {primary:false, secondary:false, tertiary:false};
-            if (state.tmp.area.slice(-5) === "_sort") {
-                slot.primary = 'locale-sort';
-            } else {
-                if (localesets) {
-                    var slotnames = ["primary", "secondary", "tertiary"];
-                    for (var i = 0, ilen = slotnames.length; i < ilen; i += 1) {
-                        if (localesets.length - 1 <  i) {
-                            break;
-                        }
-                        if (localesets[i]) {
-                            slot[slotnames[i]] = 'locale-' + localesets[i];
-                        }
-                    }
-                } else {
-                    slot.primary = 'locale-orig';
-                }
-            }
-            if ((state.tmp.area !== "bibliography"
-                 && !(state.tmp.area === "citation"
-                      && state.opt.xclass === "note"
-                      && item && !item.position))) {
-                slot.secondary = false;
-                slot.tertiary = false;
-            }
-            if (state.tmp["publisher-list"]) {
-                if (variables[0] === "publisher") {
-                    state.tmp["publisher-token"] = this;
-                } else if (variables[0] === "publisher-place") {
-                    state.tmp["publisher-place-token"] = this;
-                }
-                return null;
-            }
-            var res = getTextSubField(Item, variables[0], slot.primary, true);
-            primary = res.name;
-            primary_locale = res.locale;
-            var primaryUsedOrig = res.usedOrig;
-            if (publisherCheck(this, Item, primary, myabbrev_family)) {
-                return null;
-            }
-            secondary = false;
-            tertiary = false;
-            if (slot.secondary) {
-                res = getTextSubField(Item, variables[0], slot.secondary, false, res.usedOrig);
-                secondary = res.name;
-                secondary_locale = res.locale;
-            }
-            if (slot.tertiary) {
-                res = getTextSubField(Item, variables[0], slot.tertiary, false, res.usedOrig);
-                tertiary = res.name;
-                tertiary_locale = res.locale;
-            }
-            if (myabbrev_family) {
-                primary = abbreviate(state, Item, alternative_varname, primary, myabbrev_family, true);
-                if (primary) {
-                    primary = quashCheck(primary);
-                }
-                secondary = abbreviate(state, Item, false, secondary, myabbrev_family, true);
-                tertiary = abbreviate(state, Item, false, tertiary, myabbrev_family, true);
-            }
-            if ("demote" === this["leading-noise-words"]) {
-                primary = CSL.demoteNoiseWords(state, primary);
-                secondary = CSL.demoteNoiseWords(state, secondary);
-                tertiary = CSL.demoteNoiseWords(state, tertiary);
-            }
-            var template_tok = CSL.Util.cloneToken(this);
-            var primary_tok = CSL.Util.cloneToken(this);
-            var primaryPrefix;
-            if (slot.primary === "locale-translit") {
-                primaryPrefix = state.opt.citeAffixes[langPrefs][slot.primary].prefix;
-            }                
-            if (primaryPrefix === "<i>" && variables[0] === 'title' && !primaryUsedOrig) {
-                var hasItalic = false;
-                for (var i = 0, ilen = primary_tok.decorations.length; i < ilen; i += 1) {
-                    if (primary_tok.decorations[i][0] === "@font-style"
-                        && primary_tok.decorations[i][1] === "italic") {
-                        hasItalic = true;
-                    }
-                }
-                if (!hasItalic) {
-                    primary_tok.decorations.push(["@font-style", "italic"])
-                }
-            }
-            if (primary_locale !== "en" && primary_tok.strings["text-case"] === "title") {
-                primary_tok.strings["text-case"] = "passthrough";
-            }
-            if (secondary || tertiary) {
-                state.output.openLevel("empty");
-                primary_tok.strings.suffix = "";
-                state.output.append(primary, primary_tok);
-                if (secondary) {
-                    secondary_tok = CSL.Util.cloneToken(template_tok);
-                    secondary_tok.strings.prefix = state.opt.citeAffixes[langPrefs][slot.secondary].prefix;
-                    secondary_tok.strings.suffix = state.opt.citeAffixes[langPrefs][slot.secondary].suffix;
-                    if (!secondary_tok.strings.prefix) {
-                        secondary_tok.strings.prefix = " ";
-                    }
-                    for (var i = secondary_tok.decorations.length - 1; i > -1; i += -1) {
-                        if (['@quotes/true','@font-style/italic','@font-style/oblique','@font-weight/bold'].indexOf(secondary_tok.decorations[i].join('/')) > -1) {
-                            secondary_tok.decorations = secondary_tok.decorations.slice(0, i).concat(secondary_tok.decorations.slice(i + 1))
-                        }
-                    }
-                    if (secondary_locale !== "en" && secondary_tok.strings["text-case"] === "title") {
-                        secondary_tok.strings["text-case"] = "passthrough";
-                    }
-                    state.output.append(secondary, secondary_tok);
-                    var blob_obj = state.output.current.value();
-                    var blobs_pos = state.output.current.value().blobs.length - 1;
-                    if (state.parallel.use_parallels) {
-                        state.parallel.cite.front.push(variables[0] + ":secondary");
-                        state.parallel.cite[variables[0] + ":secondary"] = {blobs:[[blob_obj, blobs_pos]]};
-                    }
-                }
-                if (tertiary) {
-                    tertiary_tok = CSL.Util.cloneToken(template_tok);
-                    tertiary_tok.strings.prefix = state.opt.citeAffixes[langPrefs][slot.tertiary].prefix;
-                    tertiary_tok.strings.suffix = state.opt.citeAffixes[langPrefs][slot.tertiary].suffix;
-                    if (!tertiary_tok.strings.prefix) {
-                        tertiary_tok.strings.prefix = " ";
-                    }
-                    for (var i = tertiary_tok.decorations.length - 1; i > -1; i += -1) {
-                        if (['@quotes/true','@font-style/italic','@font-style/oblique','@font-weight/bold'].indexOf(tertiary_tok.decorations[i].join('/')) > -1) {
-                            tertiary_tok.decorations = tertiary_tok.decorations.slice(0, i).concat(tertiary_tok.decorations.slice(i + 1))
-                        }
-                    }
-                    if (tertiary_locale !== "en" && tertiary_tok.strings["text-case"] === "title") {
-                        tertiary_tok.strings["text-case"] = "passthrough";
-                    }
-                    state.output.append(tertiary, tertiary_tok);
-                    var blob_obj = state.output.current.value();
-                    var blobs_pos = state.output.current.value().blobs.length - 1;
-                    if (state.parallel.use_parallels) {
-                        state.parallel.cite.front.push(variables[0] + ":tertiary");
-                        state.parallel.cite[variables[0] + ":tertiary"] = {blobs:[[blob_obj, blobs_pos]]};
-                    }
-                }
-                state.output.closeLevel();
-            } else {
-                state.output.append(primary, primary_tok);
-            }
-            return null;
-        };
-    }
-    this.getOutputFunction = getOutputFunction;
-    function quashCheck(value) {
-        var m = value.match(/^!([-,_a-z]+)>>>/);
-        if (m) {
-            var fields = m[1].split(",");
-            value = value.slice(m[0].length);
-            for (var i = 0, ilen = fields.length; i < ilen; i += 1) {
-                if (state.tmp.done_vars.indexOf(fields[i]) === -1) {
-                    state.tmp.done_vars.push(fields[i]);
-                }
-            }
-        }
-        return value;
-    }
-    this.quashCheck = quashCheck;
 };
 CSL.Parallel = function (state) {
     this.state = state;
@@ -10699,6 +10142,400 @@ CSL.Parallel.prototype.purgeGroupsIfParallel = function (original_condition) {
         this.parallel_conditional_blobs_list.pop();
     }
 }
+CSL.Util = {
+    setReverseConditions: function (lst) {
+        reverses = [];
+        for (var i=0,ilen=lst.length;i<ilen;i+=1) {
+            if (lst[i].slice(0,4) === "not:") {
+                lst[i] = lst[i].slice(4);
+                reverses.push(true);
+            } else {
+                reverses.push(false);
+            }
+        }
+        return reverses;
+    }
+};
+CSL.Util.Match = function () {
+    this.any = function (token, state, tests, level) {
+        return function (Item, item) {
+            for (var i=0, ilen=tests.length; i < ilen; i += 1) {
+                result = tests[i](Item, item);
+                if (result) {
+                    return true;
+                }
+            }
+            return false;
+        };
+    };
+    this[undefined] = this.any;
+    this.none = function (token, state, tests, level) {
+        if (CSL.CONDITION_LEVEL_TOP !== level) {
+            return this.any(token, state, tests, level);
+        }
+        return function (Item, item) {
+            for (var i=0,ilen=tests.length;i<ilen;i+=1) {
+                result = tests[i](Item,item);
+                if (result) {
+                    return false;
+                }
+            }
+            return true;
+        };
+    };
+    this.all = function (token, state, tests, level) {
+        return function (Item, item) {
+            for (var i=0,ilen=tests.length;i<ilen;i+=1) {
+                result = tests[i](Item,item);
+                if (!result) {
+                    return false;
+                }
+            }
+            return true;
+        };
+    };
+};
+CSL.Transform = function (state) {
+    var debug = false, abbreviations, token, fieldname, abbrev_family, opt;
+    this.abbrevs = {};
+    this.abbrevs["default"] = new state.sys.AbbreviationSegments();
+    this.getTextSubField = getTextSubField;
+    function abbreviate(state, Item, altvar, basevalue, myabbrev_family, use_field) {
+        var value;
+        if (!myabbrev_family) {
+            return basevalue;
+        }
+        var variable = myabbrev_family;
+        if (CSL.NUMERIC_VARIABLES.indexOf(myabbrev_family) > -1) {
+            myabbrev_family = "number";
+        }
+        if (["publisher-place", "event-place", "jurisdiction", "archive-place"].indexOf(myabbrev_family) > -1) {
+            myabbrev_family = "place";
+        }
+        if (["publisher", "authority"].indexOf(myabbrev_family) > -1) {
+            myabbrev_family = "institution-part";
+        }
+        if (["genre", "event", "medium", "title-short"].indexOf(myabbrev_family) > -1) {
+            myabbrev_family = "title";
+        }
+        if (["archive"].indexOf(myabbrev_family) > -1) {
+            myabbrev_family = "collection-title";
+        }
+        value = "";
+        if (state.sys.getAbbreviation) {
+            var jurisdiction = state.transform.loadAbbreviation(Item.jurisdiction, myabbrev_family, basevalue);
+            if (state.transform.abbrevs[jurisdiction][myabbrev_family] && basevalue && state.sys.getAbbreviation) {
+                if (state.transform.abbrevs[jurisdiction][myabbrev_family][basevalue]) {
+                    value = state.transform.abbrevs[jurisdiction][myabbrev_family][basevalue];
+                }
+            }
+        }
+        if (!value && Item.type !== 'legal_case' && altvar && Item[altvar] && use_field) {
+            value = Item[altvar];
+        }
+        if (!value) {
+            value = basevalue;
+        }
+        if (value && value.slice(0, 10) === "!here>>>") {
+            if (variable === "jurisdiction" && ["treaty", "patent"].indexOf(variable) > -1) {
+                value = value.slice(10);
+            } else {
+                value = false;
+            }
+        } 
+        return value;
+    }
+    function getFieldLocale(Item,field) {
+        var ret = state.opt["default-locale"][0].slice(0, 2)
+        var localeRex;
+        if (state.opt.development_extensions.strict_text_case_locales) {
+            localeRex = new RegExp("^([a-zA-Z]{2})(?:$|-.*| .*)");
+        } else {
+            localeRex = new RegExp("^([a-zA-Z]{2})(?:$|-.*|.*)");
+        }
+        if (Item.language) {
+            m = ("" + Item.language).match(localeRex);
+            if (m) {
+                ret = m[1];
+            } else {
+                ret = "tlh";
+            }
+        }
+        if (Item.multi && Item.multi && Item.multi.main && Item.multi.main[field]) {
+            ret = Item.multi.main[field];
+        }
+        if (!state.opt.development_extensions.strict_text_case_locales
+           || state.opt.development_extensions.normalize_lang_keys_to_lowercase) {
+            ret = ret.toLowerCase();
+        }
+        return ret;
+    };
+    function getTextSubField(Item, field, locale_type, use_default, stopOrig) {
+        var m, lst, opt, o, oo, pos, key, ret, len, myret, opts;
+        var usedOrig = stopOrig;
+        if (!Item[field]) {
+            return {name:"", usedOrig:stopOrig};
+        }
+        ret = {name:"", usedOrig:stopOrig,locale:getFieldLocale(Item,field)};
+        opts = state.opt[locale_type];
+        if (locale_type === 'locale-orig') {
+            if (stopOrig) {
+                ret = {name:"", usedOrig:stopOrig};
+            } else {
+                ret = {name:Item[field], usedOrig:false, locale:getFieldLocale(Item,field)};
+            }
+            return ret;
+        } else if (use_default && ("undefined" === typeof opts || opts.length === 0)) {
+            return {name:Item[field], usedOrig:true, locale:getFieldLocale(Item,field)};
+        }
+        for (var i = 0, ilen = opts.length; i < ilen; i += 1) {
+            opt = opts[i];
+            o = opt.split(/[\-_]/)[0];
+            if (opt && Item.multi && Item.multi._keys[field] && Item.multi._keys[field][opt]) {
+                ret.name = Item.multi._keys[field][opt];
+                ret.locale = o;
+                break;
+            } else if (o && Item.multi && Item.multi._keys[field] && Item.multi._keys[field][o]) {
+                ret.name = Item.multi._keys[field][o];
+                ret.locale = o;
+                break;
+            }
+        }
+        if (!ret.name && use_default) {
+            ret = {name:Item[field], usedOrig:true, locale:getFieldLocale(Item,field)};
+        }
+        return ret;
+    }
+    function loadAbbreviation(jurisdiction, category, orig) {
+        var pos, len;
+        if (!jurisdiction) {
+            jurisdiction = "default";
+        }
+        if (!orig) {
+            if (!this.abbrevs[jurisdiction]) {
+                this.abbrevs[jurisdiction] = new state.sys.AbbreviationSegments();
+            }
+            return jurisdiction;
+        }
+        if (state.sys.getAbbreviation) {
+            var tryList = ['default'];
+            if (jurisdiction !== 'default') {
+                var workLst = jurisdiction.split(/\s*;\s*/);
+                for (var i=0, ilen=workLst.length; i < ilen; i += 1) {
+                    tryList.push(workLst.slice(0,i+1).join(';'));
+                }
+            }
+            for (var i=tryList.length - 1; i > -1; i += -1) {
+                if (!this.abbrevs[tryList[i]]) {
+                    this.abbrevs[tryList[i]] = new state.sys.AbbreviationSegments();
+                }
+                if (!this.abbrevs[tryList[i]][category][orig]) {
+                    state.sys.getAbbreviation(state.opt.styleID, this.abbrevs, tryList[i], category, orig);
+                }
+                if (this.abbrevs[tryList[i]][category][orig]) {
+                    if (i < tryList.length) {
+                        this.abbrevs[jurisdiction][category][orig] = this.abbrevs[tryList[i]][category][orig];
+                    }
+                    break;
+                }
+            }
+        }
+        return jurisdiction;
+    }
+    this.loadAbbreviation = loadAbbreviation;
+    function publisherCheck (tok, Item, primary, myabbrev_family) {
+        var varname = tok.variables[0];
+        if (state.publisherOutput && primary) {
+            if (["publisher","publisher-place"].indexOf(varname) === -1) {
+                return false;
+            } else {
+                state.publisherOutput[varname + "-token"] = tok;
+                state.publisherOutput.varlist.push(varname);
+                var lst = primary.split(/;\s*/);
+                if (lst.length === state.publisherOutput[varname + "-list"].length) {
+                    state.publisherOutput[varname + "-list"] = lst;
+                }
+                for (var i = 0, ilen = lst.length; i < ilen; i += 1) {
+                    lst[i] = abbreviate(state, Item, false, lst[i], myabbrev_family, true);
+                }
+                state.tmp[varname + "-token"] = tok;
+                return true;
+            }
+        }
+        return false;
+    }
+    function getOutputFunction(variables, myabbrev_family, abbreviation_fallback, alternative_varname, transform_fallback) {
+        var localesets;
+        var langPrefs = CSL.LangPrefsMap[variables[0]];
+        if (!langPrefs) {
+            localesets = false;
+        } else {
+            localesets = state.opt['cite-lang-prefs'][langPrefs];
+        }
+        return function (state, Item, item, usedOrig) {
+            var primary, primary_locale, secondary, secondary_locale, tertiary, tertiary_locale, primary_tok, group_tok, key;
+            if (!variables[0] || (!Item[variables[0]] && !Item[alternative_varname])) {
+                return null;
+            }
+            var slot = {primary:false, secondary:false, tertiary:false};
+            if (state.tmp.area.slice(-5) === "_sort") {
+                slot.primary = 'locale-sort';
+            } else {
+                if (localesets) {
+                    var slotnames = ["primary", "secondary", "tertiary"];
+                    for (var i = 0, ilen = slotnames.length; i < ilen; i += 1) {
+                        if (localesets.length - 1 <  i) {
+                            break;
+                        }
+                        if (localesets[i]) {
+                            slot[slotnames[i]] = 'locale-' + localesets[i];
+                        }
+                    }
+                } else {
+                    slot.primary = 'locale-orig';
+                }
+            }
+            if ((state.tmp.area !== "bibliography"
+                 && !(state.tmp.area === "citation"
+                      && state.opt.xclass === "note"
+                      && item && !item.position))) {
+                slot.secondary = false;
+                slot.tertiary = false;
+            }
+            if (state.tmp["publisher-list"]) {
+                if (variables[0] === "publisher") {
+                    state.tmp["publisher-token"] = this;
+                } else if (variables[0] === "publisher-place") {
+                    state.tmp["publisher-place-token"] = this;
+                }
+                return null;
+            }
+            var res = getTextSubField(Item, variables[0], slot.primary, true);
+            primary = res.name;
+            primary_locale = res.locale;
+            var primaryUsedOrig = res.usedOrig;
+            if (publisherCheck(this, Item, primary, myabbrev_family)) {
+                return null;
+            }
+            secondary = false;
+            tertiary = false;
+            if (slot.secondary) {
+                res = getTextSubField(Item, variables[0], slot.secondary, false, res.usedOrig);
+                secondary = res.name;
+                secondary_locale = res.locale;
+            }
+            if (slot.tertiary) {
+                res = getTextSubField(Item, variables[0], slot.tertiary, false, res.usedOrig);
+                tertiary = res.name;
+                tertiary_locale = res.locale;
+            }
+            if (myabbrev_family) {
+                primary = abbreviate(state, Item, alternative_varname, primary, myabbrev_family, true);
+                if (primary) {
+                    primary = quashCheck(primary);
+                }
+                secondary = abbreviate(state, Item, false, secondary, myabbrev_family, true);
+                tertiary = abbreviate(state, Item, false, tertiary, myabbrev_family, true);
+            }
+            if ("demote" === this["leading-noise-words"]) {
+                primary = CSL.demoteNoiseWords(state, primary);
+                secondary = CSL.demoteNoiseWords(state, secondary);
+                tertiary = CSL.demoteNoiseWords(state, tertiary);
+            }
+            var template_tok = CSL.Util.cloneToken(this);
+            var primary_tok = CSL.Util.cloneToken(this);
+            var primaryPrefix;
+            if (slot.primary === "locale-translit") {
+                primaryPrefix = state.opt.citeAffixes[langPrefs][slot.primary].prefix;
+            }                
+            if (primaryPrefix === "<i>" && variables[0] === 'title' && !primaryUsedOrig) {
+                var hasItalic = false;
+                for (var i = 0, ilen = primary_tok.decorations.length; i < ilen; i += 1) {
+                    if (primary_tok.decorations[i][0] === "@font-style"
+                        && primary_tok.decorations[i][1] === "italic") {
+                        hasItalic = true;
+                    }
+                }
+                if (!hasItalic) {
+                    primary_tok.decorations.push(["@font-style", "italic"])
+                }
+            }
+            if (primary_locale !== "en" && primary_tok.strings["text-case"] === "title") {
+                primary_tok.strings["text-case"] = "passthrough";
+            }
+            if (secondary || tertiary) {
+                state.output.openLevel("empty");
+                primary_tok.strings.suffix = "";
+                state.output.append(primary, primary_tok);
+                if (secondary) {
+                    secondary_tok = CSL.Util.cloneToken(template_tok);
+                    secondary_tok.strings.prefix = state.opt.citeAffixes[langPrefs][slot.secondary].prefix;
+                    secondary_tok.strings.suffix = state.opt.citeAffixes[langPrefs][slot.secondary].suffix;
+                    if (!secondary_tok.strings.prefix) {
+                        secondary_tok.strings.prefix = " ";
+                    }
+                    for (var i = secondary_tok.decorations.length - 1; i > -1; i += -1) {
+                        if (['@quotes/true','@font-style/italic','@font-style/oblique','@font-weight/bold'].indexOf(secondary_tok.decorations[i].join('/')) > -1) {
+                            secondary_tok.decorations = secondary_tok.decorations.slice(0, i).concat(secondary_tok.decorations.slice(i + 1))
+                        }
+                    }
+                    if (secondary_locale !== "en" && secondary_tok.strings["text-case"] === "title") {
+                        secondary_tok.strings["text-case"] = "passthrough";
+                    }
+                    state.output.append(secondary, secondary_tok);
+                    var blob_obj = state.output.current.value();
+                    var blobs_pos = state.output.current.value().blobs.length - 1;
+                    if (state.parallel.use_parallels) {
+                        state.parallel.cite.front.push(variables[0] + ":secondary");
+                        state.parallel.cite[variables[0] + ":secondary"] = {blobs:[[blob_obj, blobs_pos]]};
+                    }
+                }
+                if (tertiary) {
+                    tertiary_tok = CSL.Util.cloneToken(template_tok);
+                    tertiary_tok.strings.prefix = state.opt.citeAffixes[langPrefs][slot.tertiary].prefix;
+                    tertiary_tok.strings.suffix = state.opt.citeAffixes[langPrefs][slot.tertiary].suffix;
+                    if (!tertiary_tok.strings.prefix) {
+                        tertiary_tok.strings.prefix = " ";
+                    }
+                    for (var i = tertiary_tok.decorations.length - 1; i > -1; i += -1) {
+                        if (['@quotes/true','@font-style/italic','@font-style/oblique','@font-weight/bold'].indexOf(tertiary_tok.decorations[i].join('/')) > -1) {
+                            tertiary_tok.decorations = tertiary_tok.decorations.slice(0, i).concat(tertiary_tok.decorations.slice(i + 1))
+                        }
+                    }
+                    if (tertiary_locale !== "en" && tertiary_tok.strings["text-case"] === "title") {
+                        tertiary_tok.strings["text-case"] = "passthrough";
+                    }
+                    state.output.append(tertiary, tertiary_tok);
+                    var blob_obj = state.output.current.value();
+                    var blobs_pos = state.output.current.value().blobs.length - 1;
+                    if (state.parallel.use_parallels) {
+                        state.parallel.cite.front.push(variables[0] + ":tertiary");
+                        state.parallel.cite[variables[0] + ":tertiary"] = {blobs:[[blob_obj, blobs_pos]]};
+                    }
+                }
+                state.output.closeLevel();
+            } else {
+                state.output.append(primary, primary_tok);
+            }
+            return null;
+        };
+    }
+    this.getOutputFunction = getOutputFunction;
+    function quashCheck(value) {
+        var m = value.match(/^!([-,_a-z]+)>>>/);
+        if (m) {
+            var fields = m[1].split(",");
+            value = value.slice(m[0].length);
+            for (var i = 0, ilen = fields.length; i < ilen; i += 1) {
+                if (state.tmp.done_vars.indexOf(fields[i]) === -1) {
+                    state.tmp.done_vars.push(fields[i]);
+                }
+            }
+        }
+        return value;
+    }
+    this.quashCheck = quashCheck;
+};
 CSL.Token = function (name, tokentype) {
     this.name = name;
     this.strings = {};
@@ -10711,6 +10548,7 @@ CSL.Token = function (name, tokentype) {
     this.tokentype = tokentype;
     this.evaluator = false;
     this.tests = [];
+    this.rawtests = [];
     this.succeed = false;
     this.fail = false;
     this.next = false;
@@ -10738,6 +10576,7 @@ CSL.Util.cloneToken = function (token) {
     if (token.execs) {
         newtok.execs = token.execs.slice();
         newtok.tests = token.tests.slice();
+        newtok.rawtests = token.tests.slice();
     }
     return newtok;
 };
@@ -10934,6 +10773,94 @@ CSL.Util.fixDateNode = function (parent, pos, node) {
         this.sys.xml.deleteNodeByNameAttribute(datexml, 'day');
     }
     return this.sys.xml.insertChildNodeAfter(parent, node, pos, datexml);
+};
+CSL.dateMacroAsSortKey = function (state, Item) {
+    CSL.dateAsSortKey.call(this, state, Item, true);
+};
+CSL.dateAsSortKey = function (state, Item, isMacro) {
+    var dp, elem, value, e, yr, prefix, i, ilen, num;
+    var variable = this.variables[0];
+    var macroFlag = "empty";
+    if (isMacro) {
+        macroFlag = "macro-with-date";
+    }
+    dp = Item[variable];
+    if ("undefined" === typeof dp) {
+        dp = {"date-parts": [[0]] };
+        if (!dp.year) {
+            state.tmp.empty_date = true;
+        }
+    }
+    if ("undefined" === typeof this.dateparts) {
+        this.dateparts = ["year", "month", "day"];
+    }
+    if (dp.raw) {
+        dp = state.fun.dateparser.parse(dp.raw);
+    } else if (dp["date-parts"]) {
+        dp = state.dateParseArray(dp);
+    }
+    if ("undefined" === typeof dp) {
+        dp = {};
+    }
+    for (i = 0, ilen = CSL.DATE_PARTS_INTERNAL.length; i < ilen; i += 1) {
+        elem = CSL.DATE_PARTS_INTERNAL[i];
+        value = 0;
+        e = elem;
+        if (e.slice(-4) === "_end") {
+            e = e.slice(0, -4);
+        }
+        if (dp[elem] && this.dateparts.indexOf(e) > -1) {
+            value = dp[elem];
+        }
+        if (elem.slice(0, 4) === "year") {
+            yr = CSL.Util.Dates[e].numeric(state, value);
+            prefix = "Y";
+            if (yr[0] === "-") {
+                prefix = "X";
+                yr = yr.slice(1);
+                yr = 9999 - parseInt(yr, 10);
+            }
+            state.output.append(CSL.Util.Dates[elem.slice(0, 4)].numeric(state, (prefix + yr)), macroFlag);
+        } else {
+            value = CSL.Util.Dates[e]["numeric-leading-zeros"](state, value);
+            if (!value) {
+                value = "00";
+            }
+            state.output.append(value, macroFlag);
+        }
+    }
+};
+CSL.Engine.prototype.dateParseArray = function (date_obj) {
+    var ret, field, dpos, ppos, dp, exts, llen, pos, len, pppos, lllen;
+    ret = {};
+    for (field in date_obj) {
+        if (field === "date-parts") {
+            dp = date_obj["date-parts"];
+            if (dp.length > 1) {
+                if (dp[0].length !== dp[1].length) {
+                    CSL.error("CSL data error: element mismatch in date range input.");
+                }
+            }
+            exts = ["", "_end"];
+            for (var i = 0, ilen = dp.length; i < ilen; i += 1) {
+                for (var j = 0, jlen = CSL.DATE_PARTS.length; j < jlen; j += 1) {
+                    if ("undefined" === typeof dp[i][j]) {
+                        ret[(CSL.DATE_PARTS[j] + exts[i])] = dp[i][j];
+                    } else {
+                        ret[(CSL.DATE_PARTS[j] + exts[i])] = parseInt(dp[i][j], 10);
+                    }
+                }
+            }
+        } else if (date_obj.hasOwnProperty(field)) {
+            if (field === "literal" && "object" === typeof date_obj.literal && "string" === typeof date_obj.literal.part) {
+                CSL.debug("Warning: fixing up weird literal date value");
+                ret.literal = date_obj.literal.part;
+            } else {
+                ret[field] = date_obj[field];
+            }
+        }
+    }
+    return ret;
 };
 CSL.Util.Names = {};
 CSL.Util.Names.compareNamesets = CSL.NameOutput.prototype._compareNamesets;
@@ -13194,6 +13121,10 @@ CSL.Registry.NameReg = function (state) {
     this.delitems = delitems;
     this.evalname = evalname;
 };
+CSL.Registry.CitationReg = function (state) {
+    this.citationById = {};
+    this.citationByIndex = [];
+};
 CSL.Disambiguation = function (state) {
     this.state = state;
     this.sys = this.state.sys;
@@ -13554,8 +13485,4 @@ CSL.Disambiguation.prototype.captureStepToBase = function() {
         this.betterbase.givens[this.gnameset][this.gname] = this.base.givens[this.gnameset][this.gname];
     }
     this.betterbase.names[this.gnameset] = this.base.names[this.gnameset];
-};
-CSL.Registry.CitationReg = function (state) {
-    this.citationById = {};
-    this.citationByIndex = [];
 };
