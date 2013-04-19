@@ -1014,6 +1014,104 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
+	 * If file is within the attachment base directory, return a relative
+	 * path prefixed by BASE_PATH_PLACEHOLDER. Otherwise, return unchanged.
+	 */
+	this.getBaseDirectoryRelativePath = function (path) {
+		if (!path || path.indexOf(this.BASE_PATH_PLACEHOLDER) == 0) {
+			return path;
+		}
+		
+		var basePath = Zotero.Prefs.get('baseAttachmentPath');
+		if (!basePath) {
+			return path;
+		}
+		
+		// Get nsIFile for base directory
+		var baseDir = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		try {
+			baseDir.persistentDescriptor = basePath;
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+			return path;
+		}
+		
+		// Get nsIFile for file
+		var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		try {
+			attachmentFile.persistentDescriptor = path;
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+			return path;
+		}
+		
+		if (Zotero.File.directoryContains(baseDir, attachmentFile)) {
+			path = this.BASE_PATH_PLACEHOLDER
+				+ attachmentFile.getRelativeDescriptor(baseDir);
+		}
+		
+		return path;
+	}
+	
+	
+	/**
+	 * Get a file from this path, if we can
+	 *
+	 * @param {String} path  Absolute path or relative path prefixed
+	 *                       by BASE_PATH_PLACEHOLDER
+	 * @param {Boolean} asFile Return nsIFile instead of path
+	 * @return {String|nsIFile|FALSE} Persistent descriptor string, file,
+	 *                                of FALSE if no path
+	 */
+	this.resolveRelativePath = function (path) {
+		if (path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) != 0) {
+			return false;
+		}
+		
+		var basePath = Zotero.Prefs.get('baseAttachmentPath');
+		if (!basePath) {
+			Zotero.debug("No base attachment path set -- can't resolve '" + path + "'", 2);
+			return false;
+		}
+		
+		// Get file from base directory
+		var baseDir = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		try {
+			baseDir.persistentDescriptor = basePath;
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+			Zotero.debug("Invalid base attachment path -- can't resolve'" + row.path + "'", 2);
+			return false;
+		}
+		
+		// Get file from relative path
+		var relativePath = path.substr(
+			Zotero.Attachments.BASE_PATH_PLACEHOLDER.length
+		);
+		var file = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		try {
+			file.setRelativeDescriptor(baseDir, relativePath);
+		}
+		catch (e) {
+			Zotero.debug("Invalid relative descriptor '" + relativePath + "'", 2);
+			return false;
+		}
+		
+		return file;
+	}
+	
+	
+	/**
 	 * Returns the number of files in the attachment directory
 	 *
 	 * Only counts if MIME type is text/html

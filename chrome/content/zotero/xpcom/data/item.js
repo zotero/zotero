@@ -76,7 +76,6 @@ Zotero.Item.prototype._init = function () {
 	this._changedSource = false;
 	this._changedAttachmentData = false;
 	
-	this._skipModTimeUpdate = false;
 	this._previousData = {};
 	
 	this._bestAttachmentState = null;
@@ -1251,7 +1250,11 @@ Zotero.Item.prototype.removeRelatedItem = function (itemID) {
  *
  * Returns true on item update or itemID of new item
  */
-Zotero.Item.prototype.save = function() {
+Zotero.Item.prototype.save = function(options) {
+	if (!options) {
+		options = {};
+	}
+	
 	Zotero.Items.editCheck(this);
 	
 	if (!this.hasChanged()) {
@@ -1527,37 +1530,16 @@ Zotero.Item.prototype.save = function() {
 				var path = this.attachmentPath;
 				var syncState = this.attachmentSyncState;
 				
-				// Save attachment within attachment base directory as relative path
-				if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE && path) {
-					let basePath = Zotero.Prefs.get('baseAttachmentPath');
-					if (basePath != '' && Zotero.Prefs.get('saveRelativeAttachmentPath')) {
-						let baseDir = Components.classes["@mozilla.org/file/local;1"]
-							.createInstance(Components.interfaces.nsILocalFile);
-						try {
-							baseDir.persistentDescriptor = basePath;
-						}
-						catch (e) {
-							Zotero.debug(e, 1);
-							Components.utils.reportError(e);
-							baseDir = null;
-						}
-						
-						if (baseDir) {
-							let attachmentFile = Components.classes["@mozilla.org/file/local;1"]
-								.createInstance(Components.interfaces.nsILocalFile);
-							try {
-								attachmentFile.persistentDescriptor = path;
-							}
-							catch (e) {
-								Zotero.debug(e, 1);
-								Components.utils.reportError(e);
-								attachmentFile = null;
-							}
-							
-							if (attachmentFile && Zotero.File.directoryContains(baseDir, attachmentFile)) {
-								path = Zotero.Attachments.BASE_PATH_PLACEHOLDER
-									+ attachmentFile.getRelativeDescriptor(baseDir);
-							}
+				if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+					// Save attachment within attachment base directory as relative path
+					if (Zotero.Prefs.get('saveRelativeAttachmentPath')) {
+						path = Zotero.Attachments.getBaseDirectoryRelativePath(path);
+					}
+					// If possible, convert relative path to absolute
+					else {
+						let file = Zotero.Attachments.resolveRelativePath(path);
+						if (file) {
+							path = file.persistentDescriptor;
 						}
 					}
 				}
@@ -1669,8 +1651,11 @@ Zotero.Item.prototype.save = function() {
 					sql += field + '=?, ';
 					sqlValues.push(this.getField(field));
 				}
-				else if ((field == 'dateModified' || field == 'clientDateModified')
-							&& !this._skipModTimeUpdate) {
+				else if (field == 'dateModified' && !options.skipDateModifiedUpdate) {
+					sql += field + '=?, ';
+					sqlValues.push(Zotero.DB.transactionDateTime);
+				}
+				else if (field == 'clientDateModified' && !options.skipClientDateModifiedUpdate) {
 					sql += field + '=?, ';
 					sqlValues.push(Zotero.DB.transactionDateTime);
 				}
@@ -1962,37 +1947,16 @@ Zotero.Item.prototype.save = function() {
 				var path = this.attachmentPath;
 				var syncState = this.attachmentSyncState;
 				
-				// Save attachment within attachment base directory as relative path
-				if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE && path) {
-					let basePath = Zotero.Prefs.get('baseAttachmentPath');
-					if (basePath != '' && Zotero.Prefs.get('saveRelativeAttachmentPath')) {
-						let baseDir = Components.classes["@mozilla.org/file/local;1"]
-							.createInstance(Components.interfaces.nsILocalFile);
-						try {
-							baseDir.persistentDescriptor = basePath;
-						}
-						catch (e) {
-							Zotero.debug(e, 1);
-							Components.utils.reportError(e);
-							baseDir = null;
-						}
-						
-						if (baseDir) {
-							let attachmentFile = Components.classes["@mozilla.org/file/local;1"]
-								.createInstance(Components.interfaces.nsILocalFile);
-							try {
-								attachmentFile.persistentDescriptor = path;
-							}
-							catch (e) {
-								Zotero.debug(e, 1);
-								Components.utils.reportError(e);
-								attachmentFile = null;
-							}
-							
-							if (attachmentFile && Zotero.File.directoryContains(baseDir, attachmentFile)) {
-								path = Zotero.Attachments.BASE_PATH_PLACEHOLDER
-									+ attachmentFile.getRelativeDescriptor(baseDir);
-							}
+				if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+					// Save attachment within attachment base directory as relative path
+					if (Zotero.Prefs.get('saveRelativeAttachmentPath')) {
+						path = Zotero.Attachments.getBaseDirectoryRelativePath(path);
+					}
+					// If possible, convert relative path to absolute
+					else {
+						let file = Zotero.Attachments.resolveRelativePath(path);
+						if (file) {
+							path = file.persistentDescriptor;
 						}
 					}
 				}
@@ -2864,6 +2828,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 		return false;
 	}
 	
+	// Imported file with relative path
 	if (row.linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
 			row.linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
 		try {
@@ -2911,6 +2876,15 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 				updateAttachmentStates(false);
 				return false;
 			}
+		}
+	}
+	// Linked file with relative path
+	else if (row.linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE &&
+			row.path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0) {
+		var file = Zotero.Attachments.resolveRelativePath(row.path);
+		if (!file) {
+			updateAttachmentStates(false);
+			return false;
 		}
 	}
 	else {
@@ -3073,11 +3047,10 @@ Zotero.Item.prototype.relinkAttachmentFile = function(file, skipItemUpdate) {
 	var path = Zotero.Attachments.getPath(file, linkMode);
 	this.attachmentPath = path;
 	
-	if (skipItemUpdate) {
-		this._skipModTimeUpdate = true;
-	}
-	this.save();
-	this._skipModTimeUpdate = false;
+	this.save({
+		skipDateModifiedUpdate: true,
+		skipClientDateModifiedUpdate: skipItemUpdate
+	});
 	
 	return false;
 }
@@ -3274,58 +3247,20 @@ Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
 		return undefined;
 	}
 	
-	var pathIsRelative = false;
-	
 	if (this._attachmentPath !== null)  {
-		pathIsRelative = this._attachmentPath.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0
-			&& this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE;
-		if (!pathIsRelative) {
-			return this._attachmentPath;
-		}
-	} 
-	else if (!this.id) {
+		return this._attachmentPath;
+	}
+	
+	if (!this.id) {
 		return '';
 	}
-	else {
-		var sql = "SELECT path FROM itemAttachments WHERE itemID=?";
-		var path = Zotero.DB.valueQuery(sql, this.id);
-		if (!path) {
-			this._attachmentPath = '';
-			return this._attachmentPath;
-		}
-		
-		this._attachmentPath = path;
-		
-		pathIsRelative = path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0
-			&& this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE;
-	}
 	
-	if (pathIsRelative) {
-		var basePath = Zotero.Prefs.get('baseAttachmentPath');
-		// If the base path has been cleared, don't try to recreate the full attachment path
-		if (basePath == '') {
-			return '';
-		}
-		var baseDir = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
-		try {
-			baseDir.persistentDescriptor = basePath;
-		}
-		catch (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
-			return '';
-		}
-		
-		var relativePath = this._attachmentPath.substr(
-			Zotero.Attachments.BASE_PATH_PLACEHOLDER.length
-		);
-		var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
-		attachmentFile.setRelativeDescriptor(baseDir,relativePath);
-		return attachmentFile.persistentDescriptor;
+	var sql = "SELECT path FROM itemAttachments WHERE itemID=?";
+	var path = Zotero.DB.valueQuery(sql, this.id);
+	if (!path) {
+		path = '';
 	}
-	
+	this._attachmentPath = path;
 	return path;
 });
 
@@ -3366,7 +3301,9 @@ Zotero.Item.prototype.updateAttachmentPath = function () {
 		this._changedAttachmentData = {};
 	}
 	this._changedAttachmentData.path = true;
-	this.save();
+	this.save({
+		skipDateModifiedUpdate: true
+	});
 };
 
 
