@@ -437,8 +437,14 @@
 					else {
 						t.setAttribute('type', 'autocomplete');
 						t.setAttribute('autocompletesearch', 'zotero');
-						var suffix = itemID ? itemID : '';
-						t.setAttribute('autocompletesearchparam', fieldName + '/' + suffix);
+						let params = {
+							fieldName: fieldName,
+							libraryID: this.item.libraryID
+						};
+						params.itemID = itemID ? itemID : '';
+						t.setAttribute(
+							'autocompletesearchparam', JSON.stringify(params)
+						);
 					}
 					
 					var box = elem.parentNode;

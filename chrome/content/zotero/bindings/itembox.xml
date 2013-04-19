@@ -1416,11 +1416,17 @@
 								|| fieldName == 'creator') {
 							t.setAttribute('type', 'autocomplete');
 							t.setAttribute('autocompletesearch', 'zotero');
-							var suffix = itemID ? itemID : '';
-							if (field=='creator') {
-								suffix = elem.getAttribute('fieldMode') + '-' + suffix;
-							}
-							t.setAttribute('autocompletesearchparam', fieldName + '/' + suffix);
+							let params = {
+								fieldName: fieldName,
+								libraryID: this.item.libraryID
+							};
+							if (field == 'creator') {
+								params.fieldMode = parseInt(elem.getAttribute('fieldMode'));
+								params.itemID = itemID ? itemID : '';
+							};
+							t.setAttribute(
+								'autocompletesearchparam', JSON.stringify(params)
+							);
 							t.setAttribute('ontextentered',
 								'document.getBindingParent(this).handleCreatorAutoCompleteSelect(this)');
 						}
