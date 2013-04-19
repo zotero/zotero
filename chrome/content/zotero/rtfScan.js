@@ -529,7 +529,6 @@ var Zotero_RTFScan = new function() {
 		
 		itemIDs = [itemID for(itemID in itemIDs)];
 		Zotero.debug(itemIDs);
-		style.updateItems(itemIDs);
 		
 		// prepare the list of rendered citations
 		var citationResults = style.rebuildProcessorState(cslCitations, "rtf");
