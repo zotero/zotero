@@ -531,11 +531,14 @@ var Zotero_RTFScan = new function() {
 		Zotero.debug(itemIDs);
 		style.updateItems(itemIDs);
 		
+		// prepare the list of rendered citations
+		var citationResults = style.rebuildProcessorState(cslCitations, "rtf");
+		
 		// format citations
 		var contentArray = [];
 		var lastEnd = 0;
 		for(var i=0; i<citations.length; i++) {
-			var citation = style.appendCitationCluster(cslCitations[i], true)[0][1];
+			var citation = citationResults[i][2];
 			Zotero.debug("Formatted "+citation);
 			
 			// if using notes, we might have to move the note after the punctuation
