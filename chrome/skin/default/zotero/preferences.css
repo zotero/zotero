@@ -19,6 +19,13 @@ radio[pane]
 	-moz-box-pack: end;
 }
 
+tabpanel
+{
+	height: 400px;
+	max-height: 400px;
+	overflow-y: auto
+}
+
 #export-citePaperJournalArticleURL
 {
 	font-size: .85em;
@@ -26,7 +33,7 @@ radio[pane]
 
 .statusLine
 {
-	margin: .75em 0;
+	margin: 0 0 .75em 0;
 	font-size: .85em;
 }
 

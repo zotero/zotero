@@ -49,7 +49,7 @@
 				<tab label="&zotero.preferences.sync.reset;"/>
 			</tabs>
 			
-			<tabpanels>
+			<tabpanels class="preference-panels">
 				<tabpanel orient="vertical">
 					<groupbox>
 						<caption label="&zotero.preferences.sync.syncServer;"/>
@@ -311,9 +311,6 @@
 				</tabpanel>
 			</tabpanels>
 		</tabbox>
-		
-		<separator/>
-		<separator/>
 	</prefpane>
 	
 	<script src="preferences_sync.js" type="application/javascript;version=1.8"/>
