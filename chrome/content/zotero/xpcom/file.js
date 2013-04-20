@@ -124,8 +124,6 @@ Zotero.File = new function(){
 				createInstance(Components.interfaces.nsIFileInputStream);
 			fis.init(file, 0x01, 0664, 0);
 		} else {
-            Zotero.debug("WELL, FUCK(1)! "+file);
-            Zotero.debug("WELL, FUCK(2)! "+file.path);
 			throw new Error("File is not an nsIInputStream or nsIFile");
 		}
 		
