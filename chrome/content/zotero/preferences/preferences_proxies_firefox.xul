@@ -63,7 +63,7 @@
 							</hbox>
 						</vbox>
 						
-						<groupbox flex="1" id="proxyGroup">
+						<groupbox id="proxyGroup">
 							<caption label="&zotero.preferences.proxies.configured;"/>
 							
 							<tree id="proxyTree" hidecolumnpicker="true" rows="6" seltype="single"

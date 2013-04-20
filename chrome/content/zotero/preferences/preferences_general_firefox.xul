@@ -37,41 +37,51 @@
 		</preferences>
 		<tabbox id="zotero-prefpane-general-tabbox">
 			<tabpanels id="zotero-prefpane-general-tabpanels">
-				<tabpanel id="zotero-prefpane-ui-tabpanel">
-					<grid id="zotero-prefpane-general-grid">
-						<rows id="zotero-prefpane-general-rows">
-							<row position="1">
-								<hbox align="center">
-									<label value="&zotero.preferences.showIn;" control="showAs"/>
-								</hbox>
-								<radiogroup id="showIn" orient="horizontal" preference="pref-showIn" oncommand="Zotero_Preferences.General.handleShowInPreferenceChange()">
-									<radio id="zotero-prefpane-general-showIn-browserPane" label="&zotero.preferences.showIn.browserPane;" value="1"/>
-									<radio id="zotero-prefpane-general-showIn-separateTab" label="&zotero.preferences.showIn.separateTab;" value="2"/>
-									<radio id="zotero-prefpane-general-showIn-appTab" label="&zotero.preferences.showIn.appTab;" value="3"/>
-								</radiogroup>
-							</row>
-							<row position="2" id="zotero-prefpane-general-statusBarIcon-row">
-								<hbox align="center">
-									<label id="statusBarIcon-label" value="&zotero.preferences.statusBarIcon;" control="statusBarIcon"/>
-								</hbox>
-								<radiogroup id="statusBarIcon" orient="horizontal" preference="pref-statusBarIcon">
-									<radio id="statusBarIcon-full" src="chrome://zotero/skin/zotero_status_bar.png" value="2"/>
-									<radio id="statusBarIcon-compact" src="chrome://zotero/skin/zotero_status_bar_compact.png" value="1"/>
-									<radio id="statusBarIcon-none" label="&zotero.preferences.statusBarIcon.none;" value="0"/>
-								</radiogroup>
-							</row>
-						</rows>
-					</grid>
-				</tabpanel>
-				<tabpanel id="zotero-prefpane-misc-tabpanel">
-					<checkbox id="launchNonNativeFiles-checkbox"
-						preference="pref-launchNonNativeFiles"
-						onsyncfrompreference="return !document.getElementById(this.getAttribute('preference')).value"
-						onsynctopreference="return !this.checked"
-						insertbefore="automaticSnapshots-checkbox"/>
-					<checkbox label="&zotero.preferences.parseRISRefer;"
-						preference="pref-parseEndNoteMIMETypes"
-						insertbefore="automaticSnapshots-checkbox"/>
+				<tabpanel id="zotero-prefpane-general-tabpanel">
+					<groupbox id="zotero-prefpane-general-ui-groupbox">
+						<grid id="zotero-prefpane-general-ui-grid">
+							<rows id="zotero-prefpane-general-ui-rows">
+								<row position="1">
+									<hbox align="center">
+										<label value="&zotero.preferences.showIn;" control="showAs"/>
+									</hbox>
+									<menulist preference="pref-showIn" id="zotero-prefpane-general-showIn" oncommand="Zotero_Preferences.General.handleShowInPreferenceChange()">
+										<menupopup>
+											<menuitem id="zotero-prefpane-general-showIn-browserPane" label="&zotero.preferences.showIn.browserPane;" value="1"/>
+											<menuitem id="zotero-prefpane-general-showIn-separateTab" label="&zotero.preferences.showIn.separateTab;" value="2"/>
+											<menuitem id="zotero-prefpane-general-showIn-appTab" label="&zotero.preferences.showIn.appTab;" value="3"/>
+										</menupopup>
+									</menulist>
+									<hbox align="center" class="column-label">
+										<label id="statusBarIcon-label" value="&zotero.preferences.statusBarIcon;" control="statusBarIcon"/>
+									</hbox>
+									<menulist preference="pref-statusBarIcon"
+										id="zotero-prefpane-general-statusBarIcon"
+										onload="this._lastValue = this.value"
+										oncommand="this._lastValue = this.value">
+										<menupopup>
+											<menuitem image="chrome://zotero/skin/zotero_status_bar.png" value="2">
+												<hbox><image src="chrome://zotero/skin/zotero_status_bar.png"/></hbox>
+											</menuitem>
+											<menuitem image="chrome://zotero/skin/zotero_status_bar_compact.png" value="1">
+												<hbox><image src="chrome://zotero/skin/zotero_status_bar_compact.png"/></hbox>
+											</menuitem>
+											<menuitem label="&zotero.preferences.statusBarIcon.none;" value="0"/>
+										</menupopup>
+									</menulist>
+								</row>
+							</rows>
+						</grid>
+					</groupbox>
+					
+					
+					<groupbox id="zotero-prefpane-general-miscellaneous-groupbox">
+						<checkbox id="launchNonNativeFiles-checkbox"
+							preference="pref-launchNonNativeFiles"
+							onsyncfrompreference="return !document.getElementById(this.getAttribute('preference')).value"
+							onsynctopreference="return !this.checked"
+							insertbefore="automaticSnapshots-checkbox"/>
+					</groupbox>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>

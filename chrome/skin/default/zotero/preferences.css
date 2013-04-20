@@ -7,7 +7,7 @@ prefwindow {
    min-width: 600px;
 }
 
-description, label, checkbox {
+description, label, checkbox, menulist {
 	max-width: 630px;
 }
 
@@ -22,8 +22,6 @@ radio[pane]
 tabpanel
 {
 	height: 400px;
-	max-height: 400px;
-	overflow-y: auto
 }
 
 #export-citePaperJournalArticleURL
@@ -49,36 +47,15 @@ grid row:not(:first-child)
 	margin-top: .3em;
 }
 
-grid row hbox:first-child
+grid row hbox:first-child, .column-label
 {
 	-moz-box-pack: end; /* Right-justify left column */
 }
 
-#fontSize
+menuitem > hbox
 {
-	font-size: 3mm; /* Firefox default */
+	margin: 0.2em 0em 0.2em 0em;
 }
-
-#fontSize1
-{
-	font-size: 1.0em;
-}
-
-#fontSize2
-{
-	font-size: 1.15em;
-}
-
-#fontSize3
-{
-	font-size: 1.3em;
-}
-
-#fontSize4
-{
-	font-size: 1.5em;
-}
-
 
 #showIn radio, #statusBarIcon radio
 {
@@ -94,7 +71,6 @@ grid row hbox:first-child
 {
 	margin-left: 6px;
 }
-
 
 /*
  * Sync pane

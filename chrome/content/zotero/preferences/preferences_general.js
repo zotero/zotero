@@ -40,14 +40,26 @@ Zotero_Preferences.General = {
 	 * Sets "Status bar icon" to "None" if Zotero is set to load in separate tab
 	 */
 	handleShowInPreferenceChange: function () {
-		var showInSeparateTab = document.getElementById("zotero-prefpane-general-showIn-separateTab");
-		var showInAppTab = document.getElementById("zotero-prefpane-general-showIn-appTab");
-		if(showInAppTab.selected) {
-			document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-none');
+		var statusBarIcon = document.getElementById('zotero-prefpane-general-statusBarIcon');
+		
+		if(document.getElementById("zotero-prefpane-general-showIn").value == 3) {
+			statusBarIcon.value = 0;
 			Zotero.Prefs.set("statusBarIcon", 0);
+			//disable other options
+			var options = statusBarIcon.getElementsByTagName("menuitem");
+			for each(var menuitem in options) {
+				if(menuitem.value != 0) {
+					menuitem.hidden = true;
+				}
+			}
 		} else {
-			document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-full');
-			Zotero.Prefs.set("statusBarIcon", 2);
+			statusBarIcon.value = statusBarIcon._lastValue;
+			Zotero.Prefs.set("statusBarIcon", statusBarIcon._lastValue);
+			//make sure all options are enabled
+			var options = statusBarIcon.getElementsByTagName("menuitem");
+			for each(var menuitem in options) {
+				menuitem.hidden = false;
+			}
 		}
 	},
 	

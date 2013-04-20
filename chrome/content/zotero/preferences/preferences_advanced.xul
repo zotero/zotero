@@ -95,9 +95,6 @@
 							<textbox id="openURLServerField" flex="1"
 									oninput="Zotero_Preferences.Advanced.onOpenURLCustomized();"
 									preference="pref-openURL-resolver"/>
-						</hbox>
-					
-						<hbox align="center">
 							<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
 							<menulist id="openURLVersionMenu"
 									oncommand="Zotero_Preferences.Advanced.onOpenURLCustomized();"

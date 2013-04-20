@@ -36,12 +36,12 @@
 		</preferences>
 		
 		<tabbox id="zotero-prefpane-export-tabbox">
-			<tabs id="zotero-prefpane-export-tabs">
+			<tabs>
 				<tab label="&zotero.preferences.quickCopy.caption;"/>
 				<tab label="&zotero.preferences.charset;"/>
 			</tabs>
 			<tabpanels id="zotero-prefpane-export-tabpanels">
-				<tabpanel orient="vertical">
+				<tabpanel orient="vertical" id="zotero-prefpane-export-quickCopy">
 					<label id="quickCopy-instructions"/>
 					<separator class="thin"/>
 					<label id="quickCopy-citationInstructions"/>

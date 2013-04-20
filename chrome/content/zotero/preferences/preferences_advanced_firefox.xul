@@ -37,6 +37,9 @@
 			<tabpanels id="zotero-prefpane-advanced-tabpanels">
 				<tabpanel id="zotero-prefpane-advanced-general-tab">
 					<groupbox id="zotero-prefpane-advanced-miscellaneous">
+						<checkbox label="&zotero.preferences.parseRISRefer;"
+							preference="pref-parseEndNoteMIMETypes"
+							insertbefore="zotero-prefpane-advanced-openbuttons"/>
 						<checkbox label="&zotero.preferences.zoteroDotOrgVersionHeader;"
 							tooltiptext="&zotero.preferences.zoteroDotOrgVersionHeader.tooltip;"
 							preference="pref-zoteroDotOrgVersionHeader"

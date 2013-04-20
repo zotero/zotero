@@ -48,86 +48,101 @@
 		
 		<tabbox id="zotero-prefpane-general-tabbox">
 			<tabs>
-				<tab label="&zotero.preferences.userInterface;"/>
+				<tab label="&zotero.preferences.prefpane.general;"/>
 				<tab label="&zotero.preferences.groups;"/>
-				<tab label="&zotero.preferences.miscellaneous;"/>
 			</tabs>
-			
 			<tabpanels id="zotero-prefpane-general-tabpanels">
-				<tabpanel orient="vertical" id="zotero-prefpane-ui-tabpanel">
-					<grid id="zotero-prefpane-general-grid">
-						<columns>
-							<column/>
-							<column flex="1"/>
-						</columns>
-					
-						<rows id="zotero-prefpane-general-rows">
-							<row>
-								<hbox align="center">
-									<label value="&zotero.preferences.fontSize;" control="fontSize"/>
-								</hbox>
-								<radiogroup id="fontSize" orient="horizontal" align="center" preference="pref-fontSize">
-									<radio id="fontSize1" label="&zotero.preferences.fontSize.small;" value="1.0"/>
-									<radio id="fontSize2" label="&zotero.preferences.fontSize.medium;" value="1.15"/>
-									<radio id="fontSize3" label="&zotero.preferences.fontSize.large;" value="1.3"/>
-									<radio id="fontSize4" label="&zotero.preferences.fontSize.xlarge;" value="1.5"/>
-								</radiogroup>
-							</row>
-							
-							<row>
-								<hbox align="center">
-									<label value="&zotero.preferences.fontSize.notes;" control="noteFontSize"/>
-								</hbox>
-								<hbox>
-									<menulist id="noteFontSize" preference="pref-noteFontSize" editable="true">
+				<tabpanel id="zotero-prefpane-general-tabpanel" orient="vertical">
+					<groupbox id="zotero-prefpane-general-ui-groupbox">
+						<caption label="&zotero.preferences.userInterface;"/>
+						
+						<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
+						
+						<grid id="zotero-prefpane-general-ui-grid">
+							<columns>
+								<column />
+								<column />
+								<column style="margin-left: 3em;"/>
+								<column />
+							</columns>
+							<rows id="zotero-prefpane-general-ui-rows">
+								<row>
+									<hbox align="center">
+										<label value="&zotero.preferences.fontSize;" control="fontSize"/>
+									</hbox>
+									<menulist preference="pref-fontSize">
 										<menupopup>
-											<menuitem label="11"/>
-											<menuitem label="12"/>
-											<menuitem label="13"/>
-											<menuitem label="14"/>
-											<menuitem label="18"/>
-											<menuitem label="24"/>
-											<menuitem label="36"/>
-											<menuitem label="48"/>
-											<menuitem label="64"/>
-											<menuitem label="72"/>
-											<menuitem label="96"/>
+											<menuitem label="&zotero.preferences.fontSize.small;" value="1.0">
+												<label value="&zotero.preferences.fontSize.small;" style="font-size: 1.0em"/>
+											</menuitem>
+											<menuitem label="&zotero.preferences.fontSize.medium;" value="1.15">
+												<label value="&zotero.preferences.fontSize.medium;" style="font-size: 1.15em"/>
+											</menuitem>
+											<menuitem label="&zotero.preferences.fontSize.large;" value="1.3">
+												<label value="&zotero.preferences.fontSize.large;" style="font-size: 1.3em"/>
+											</menuitem>
+											<menuitem label="&zotero.preferences.fontSize.xlarge;" value="1.5">
+												<label value="&zotero.preferences.fontSize.xlarge;" style="font-size: 1.5em"/>
+											</menuitem>
 										</menupopup>
 									</menulist>
-								</hbox>
-							</row>
-						</rows>
-					</grid>
+									<hbox align="center" class="column-label">
+										<label value="&zotero.preferences.fontSize.notes;" control="noteFontSize"/>
+									</hbox>
+									<hbox>
+										<menulist id="noteFontSize" preference="pref-noteFontSize" editable="true">
+											<menupopup>
+												<menuitem label="11"/>
+												<menuitem label="12"/>
+												<menuitem label="13"/>
+												<menuitem label="14"/>
+												<menuitem label="18"/>
+												<menuitem label="24"/>
+												<menuitem label="36"/>
+												<menuitem label="48"/>
+												<menuitem label="64"/>
+												<menuitem label="72"/>
+												<menuitem label="96"/>
+											</menupopup>
+										</menulist>
+									</hbox>
+								</row>
+							</rows>
+						</grid>
+					</groupbox>
 					
-					<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
+					
+					<groupbox id="zotero-prefpane-general-miscellaneous-groupbox">
+						<caption label="&zotero.preferences.miscellaneous;"/>
+						<hbox align="center">
+							<checkbox label="&zotero.preferences.autoUpdate;" preference="pref-automaticScraperUpdates"/>
+							<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;"
+								oncommand="Zotero_Preferences.General.updateTranslators()"/>
+						</hbox>
+						<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="pref-reportTranslationFailure"/>
+						<checkbox id="automaticSnapshots-checkbox"
+							label="&zotero.preferences.automaticSnapshots;"
+							preference="pref-automaticSnapshots"/>
+						<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
+						<checkbox label="&zotero.preferences.automaticTags;" preference="pref-automaticTags"/>
+						<hbox align="center">
+							<label value="&zotero.preferences.trashAutoEmptyDaysPre;"/>
+							<textbox size="2" preference="pref-trashAutoEmptyDays"/>
+							<label value="&zotero.preferences.trashAutoEmptyDaysPost;"/>
+						</hbox>
+					</groupbox>
+					
 				</tabpanel>
 				<tabpanel orient="vertical">
-					<label value="&zotero.preferences.groups.whenCopyingInclude;"/>
-					<vbox style="margin-left: 2em">
-						<checkbox label="&zotero.preferences.groups.childNotes;" preference="pref-groups-copyChildNotes"/>
-						<checkbox label="&zotero.preferences.groups.childFiles;" preference="pref-groups-copyChildFileAttachments"/>
-						<checkbox label="&zotero.preferences.groups.childLinks;" preference="pref-groups-copyChildLinks"/>
-						<checkbox label="&zotero.preferences.groups.tags;" preference="pref-groups-copyTags"/>
-					</vbox>
-				</tabpanel>
-				<tabpanel orient="vertical" id="zotero-prefpane-misc-tabpanel">
-					<hbox align="center">
-						<checkbox label="&zotero.preferences.autoUpdate;" preference="pref-automaticScraperUpdates"/>
-						<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;"
-							oncommand="Zotero_Preferences.General.updateTranslators()"/>
-					</hbox>
-					
-					<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="pref-reportTranslationFailure"/>
-					<checkbox id="automaticSnapshots-checkbox"
-						label="&zotero.preferences.automaticSnapshots;"
-						preference="pref-automaticSnapshots"/>
-					<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
-					<checkbox label="&zotero.preferences.automaticTags;" preference="pref-automaticTags"/>
-					<hbox align="center">
-						<label value="&zotero.preferences.trashAutoEmptyDaysPre;"/>
-						<textbox size="2" preference="pref-trashAutoEmptyDays"/>
-						<label value="&zotero.preferences.trashAutoEmptyDaysPost;"/>
-					</hbox>
+					<groupbox>
+						<label value="&zotero.preferences.groups.whenCopyingInclude;"/>
+						<vbox style="margin-left: 2em">
+							<checkbox label="&zotero.preferences.groups.childNotes;" preference="pref-groups-copyChildNotes"/>
+							<checkbox label="&zotero.preferences.groups.childFiles;" preference="pref-groups-copyChildFileAttachments"/>
+							<checkbox label="&zotero.preferences.groups.childLinks;" preference="pref-groups-copyChildLinks"/>
+							<checkbox label="&zotero.preferences.groups.tags;" preference="pref-groups-copyTags"/>
+						</vbox>
+					</groupbox>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>
