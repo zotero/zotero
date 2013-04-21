@@ -1487,6 +1487,7 @@ Zotero.Attachments = new function(){
 	 */
 	this.isPDFJS = function(doc) {
 		// pdf.js HACK
+		// This may no longer be necessary (as of Fx 23)
 		if(doc.contentType === "text/html") {
 			var win = doc.defaultView;
 			if(win) {

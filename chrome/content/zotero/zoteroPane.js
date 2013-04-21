@@ -3087,7 +3087,8 @@ var ZoteroPane = new function()
 		if (itemType == 'temporaryPDFHack') {
 			itemType = null;
 			var isPDF = false;
-			if (doc.title.indexOf('application/pdf') != -1 || Zotero.Attachments.isPDFJS(doc)) {
+			if (doc.title.indexOf('application/pdf') != -1 || Zotero.Attachments.isPDFJS(doc)
+					|| doc.contentType == 'application/pdf') {
 				isPDF = true;
 			}
 			else {
