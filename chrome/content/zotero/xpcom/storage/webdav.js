@@ -995,10 +995,12 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		})
 		.then(function () {
 			return Zotero.HTTP.promise("GET", lastSyncURI,
-				{ debug: true, successCodes: [200, 404] });
+				{ debug: true, successCodes: [200, 300, 404] });
 		})
 		.then(function (req) {
-			if (req.status == 404) {
+			// If lastsync exists but not lastsync.txt, some servers try to
+			// be helpful and return 300.
+			if (req.status == 300 || req.status == 404) {
 				Zotero.debug("No last WebDAV sync file");
 				
 				// If no lastsync.txt, check previously used 'lastsync',
