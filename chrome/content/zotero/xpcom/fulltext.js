@@ -575,8 +575,14 @@ Zotero.Fulltext = new function(){
 					flags += 'i';
 				}
 				
-				var re = new RegExp(searchText, flags);
-				var matches = re(str);
+				try {
+					var re = new RegExp(searchText, flags);
+					var matches = re.exec(str);
+				}
+				catch (e) {
+					Zotero.debug(e, 1);
+					Components.utils.reportError(e);
+				}
 				if (matches){
 					Zotero.debug("Text found");
 					return str.substr(matches.index, 50);

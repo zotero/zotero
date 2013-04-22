@@ -57,8 +57,11 @@ Zotero.MIMETypeHandler = new function () {
 		if(Zotero.Prefs.get("parseEndNoteMIMETypes")) {
 			this.addHandler("application/x-endnote-refer", _importHandler, true);
 			this.addHandler("application/x-research-info-systems", _importHandler, true);
-			// Add ISI
 			this.addHandler("application/x-inst-for-scientific-info", _importHandler, true);
+
+			this.addHandler("text/x-bibtex", _importHandler, true);
+			this.addHandler("application/x-bibtex", _importHandler, true);
+
 			//
 			// And some non-standard ones
 			//

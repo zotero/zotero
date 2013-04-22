@@ -72,7 +72,7 @@ Zotero_Preferences.Sync = {
 		}
 		
 		if (oldProtocol == 'zotero' && protocol == 'webdav') {
-			var sql = "SELECT COUNT(*) FROM version WHERE schema='storage_zfs'";
+			var sql = "SELECT COUNT(*) FROM version WHERE schema LIKE 'storage_zfs%'";
 			if (Zotero.DB.valueQuery(sql)) {
 				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 										.getService(Components.interfaces.nsIPromptService);

@@ -813,22 +813,20 @@
 										textbox.setAttribute('autocompletesearch', 'zotero');
 										textbox.setAttribute('timeout', '250');
 										
-										if (condition=='creator')
-										{
-											// 2 searches both single- and double-field creators
-											var autocompleteCondition = condition + '/2'
+										var autocompleteParams = {
+											fieldName: condition
+										};
+										if (condition == 'creator') {
+											autocompleteParams.fieldMode = 2;
 										}
-										else
-										{
-											var autocompleteCondition = condition;
-										}
-										
-										textbox.setAttribute('autocompletesearchparam', autocompleteCondition);
+										textbox.setAttribute(
+											'autocompletesearchparam',
+											JSON.stringify(autocompleteParams)
+										);
 								}
 						}
 						
-						if (!autocompleteCondition)
-						{
+						if (!autocompleteParams) {
 							var textbox = document.getAnonymousNodes(this)[0];
 							textbox.removeAttribute('type');
 						}

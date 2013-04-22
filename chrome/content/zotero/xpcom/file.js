@@ -39,7 +39,6 @@ Zotero.File = new function(){
 	this.putContents = putContents;
 	this.getValidFileName = getValidFileName;
 	this.truncateFileName = truncateFileName;
-	this.copyToUnique = this.copyToUnique;
 	this.getCharsetFromFile = getCharsetFromFile;
 	this.addCharsetListener = addCharsetListener;
 	
@@ -287,14 +286,14 @@ Zotero.File = new function(){
 	}
 	
 	
-	function copyToUnique(file, newFile) {
+	this.copyToUnique = function (file, newFile) {
 		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
 		var newName = newFile.leafName;
 		newFile.remove(null);
 		
 		// Copy file to unique name
 		file.copyTo(newFile.parent, newName);
-		return file;
+		return newFile;
 	}
 	
 	
@@ -361,7 +360,7 @@ Zotero.File = new function(){
 	function getValidFileName(fileName, skipXML) {
 		// TODO: use space instead, and figure out what's doing extra
 		// URL encode when saving attachments that trigger this
-		fileName = fileName.replace(/[\/\\\?%\*:|"<>]/g, '');
+		fileName = fileName.replace(/[\/\\\?\*:|"<>]/g, '');
 		// Replace newlines and tabs (which shouldn't be in the string in the first place) with spaces
 		fileName = fileName.replace(/[\r\n\t]+/g, ' ');
 		// Replace various thin spaces

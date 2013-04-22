@@ -285,45 +285,93 @@ Zotero.Translate.ItemSaver.prototype = {
 		
 		return newItem;
 	},
-	
-	"_parsePath":function(path) {
-		// generate nsIFile
-		var IOService = Components.classes["@mozilla.org/network/io-service;1"].
-						getService(Components.interfaces.nsIIOService);
+
+	"_parsePathURI":function(path) {
 		try {
-			var uri = IOService.newURI(Zotero.File.encodeFilePath(path), "", this._baseURI);
+			var uri = Services.io.newURI(path, "", this._baseURI);
+			var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
+			if(file.path != '/' && file.exists()) return file;
 		}
 		catch (e) {
-			var msg = "Error parsing attachment path: " + path + "\n" + e.message;
-			Zotero.logError(msg);
-			Zotero.debug("Translate: " + msg, 2);
-			return false;
+			Zotero.logError(e);
 		}
-		
+		return false;
+	},
+
+	"_parseAbsolutePath":function(path) {
 		try {
-			var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
-			if (file.path == '/') {
-				var msg = "Error parsing attachment path: " + path + "\nRoot path returned.";
-				Zotero.logError(msg);
-				Zotero.debug("Translate: " + msg, 2);
-				return false;
+			// First, try to parse absolute paths using initWithPath
+			var file = Components.classes["@mozilla.org/file/local;1"].
+				createInstance(Components.interfaces.nsILocalFile);
+			file.initWithPath(path);
+			if(file.exists()) return file;
+		} catch(e) {
+			Zotero.logError(e);
+		}
+		return false;
+	},
+
+	"_parseRelativePath":function(path) {
+		try {
+			var file = this._baseURI.QueryInterface(Components.interfaces.nsIFileURL).file.parent;
+			var splitPath = path.split(/\//g);
+			for(var i=0; i<splitPath.length; i++) {
+				if(splitPath[i] !== "") file.append(splitPath[i]);
+			}
+			if(file.exists()) return file;
+		} catch(e) {
+			Zotero.logError(e);
+		}
+		return false;
+	},
+
+	"_parsePath":function(path) {
+		var file;
+
+		// First, try to parse as absolute path
+		if(((/[a-zA-Z]:\\/.test(path) && Zotero.isWin) || (path[0] === "/" && !Zotero.isWin))
+				&& (file = this._parseAbsolutePath(path))) {
+			Zotero.debug("Translate: Got file "+path+" as absolute path");
+			return file;
+		}
+
+		// Next, try to parse as URI
+		if((file = this._parsePathURI(path))) {
+			Zotero.debug("Translate: Got "+path+" as URI")
+			return file;
+		} else if(path.substr(0, 7) !== "file://") {
+			// If it was a fully qualified file URI, we can give up now
+
+			// Next, try to parse as relative path, replacing backslashes with slashes
+			if((file = this._parseRelativePath(path.replace(/\\/g, "/")))) {
+				Zotero.debug("Translate: Got file "+path+" as relative path");
+				return file;
+			}
+
+			// Next, try to parse as relative path, without replacing backslashes with slashes
+			if((file = this._parseRelativePath(path))) {
+				Zotero.debug("Translate: Got file "+path+" as relative path");
+				return file;
+			}
+
+			if(path[0] !== "/") {
+				// Next, try to parse a path with no / as an absolute URI or path
+				if((file = this._parsePathURI("/"+path))) {
+					Zotero.debug("Translate: Got file "+path+" as broken URI");
+					return file;
+				}
+
+				if((file = this._parseAbsolutePath("/"+path))) {
+					Zotero.debug("Translate: Got file "+path+" as broken absolute path");
+					return file;
+				}
+
 			}
 		}
-		catch (e) {
-			var msg = "Error getting file from attachment path: " + path + "\n" + e.message;
-			Zotero.logError(msg);
-			Zotero.debug("Translate: " + msg, 2);
-			return false;
-		}
-		
-		if(file.exists()) {
-			return file;
-		} else if(path[0] !== "/" && path.substr(0, 5).toLowerCase() !== "file:") {
-			// This looks like a relative path, but it might actually be an absolute path, because
-			// some people are not quite there.
-			var newFile = this._parsePath("/"+path);
-			if(newFile && newFile.exists()) return newFile;
-		}
+
+		// Give up
+		Zotero.debug("Translate: Could not find file "+path)
+
 		return false;
 	},
 	

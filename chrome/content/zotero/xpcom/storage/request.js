@@ -314,7 +314,7 @@ Zotero.Sync.Storage.Request.prototype.stop = function (force) {
 		this._forceFinish = true;
 	}
 	
-	if (this.channel) {
+	if (this.channel && this.channel.isPending()) {
 		this._stopping = true;
 		
 		try {

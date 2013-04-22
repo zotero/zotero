@@ -552,7 +552,7 @@
 							this._displayAllCreators = true;
 							
 							if (this._addCreatorRow) {
-								this.addCreatorRow(false, false, true);
+								this.addCreatorRow(false, this.item.getCreator(max-1).creatorTypeID, true); 
 								this._addCreatorRow = false;
 								this.disableCreatorAddButtons();
 							}
@@ -1416,11 +1416,17 @@
 								|| fieldName == 'creator') {
 							t.setAttribute('type', 'autocomplete');
 							t.setAttribute('autocompletesearch', 'zotero');
-							var suffix = itemID ? itemID : '';
-							if (field=='creator') {
-								suffix = elem.getAttribute('fieldMode') + '-' + suffix;
-							}
-							t.setAttribute('autocompletesearchparam', fieldName + '/' + suffix);
+							let params = {
+								fieldName: fieldName,
+								libraryID: this.item.libraryID
+							};
+							if (field == 'creator') {
+								params.fieldMode = parseInt(elem.getAttribute('fieldMode'));
+								params.itemID = itemID ? itemID : '';
+							};
+							t.setAttribute(
+								'autocompletesearchparam', JSON.stringify(params)
+							);
 							t.setAttribute('ontextentered',
 								'document.getBindingParent(this).handleCreatorAutoCompleteSelect(this)');
 						}
@@ -1555,8 +1561,8 @@
 										this._focusNextField(this._dynamicFields, this._lastTabIndex, false);
 									}
 									else {
-										// TODO: should use current creator type
-										this.addCreatorRow(false, false, true);
+										var creatorFields = this.getCreatorFields(Zotero.getAncestorByTagName(target, 'row'));
+										this.addCreatorRow(false, creatorFields.creatorTypeID, true);
 									}
 								}
 								// Value has changed

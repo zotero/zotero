@@ -50,13 +50,7 @@ Zotero.Attachments = new function(){
 	function importFromFile(file, sourceItemID, libraryID) {
 		Zotero.debug('Importing attachment from file');
 		
-		// Try decoding URI entities, since we're going to strip '%'
-		var newName = file.leafName;
-		try {
-			newName = decodeURIComponent(file.leafName);
-		}
-		catch (e) {}
-		newName = Zotero.File.getValidFileName(newName);
+		var newName = Zotero.File.getValidFileName(file.leafName);
 		
 		if (!file.isFile()) {
 			throw ("'" + file.leafName + "' must be a file in Zotero.Attachments.importFromFile()");
@@ -82,14 +76,15 @@ Zotero.Attachments = new function(){
 			
 			// Create directory for attachment files within storage directory
 			var destDir = this.createDirectoryForItem(itemID);
-			file.copyTo(destDir, newName);
 			
 			// Point to copied file
 			var newFile = destDir.clone();
 			newFile.append(newName);
 			
-			var mimeType = Zotero.MIME.getMIMETypeFromFile(newFile);
+			// Copy file to unique filename, which automatically shortens long filenames
+			newFile = Zotero.File.copyToUnique(file, newFile);
 			
+			var mimeType = Zotero.MIME.getMIMETypeFromFile(newFile);
 			
 			attachmentItem.attachmentMIMEType = mimeType;
 			attachmentItem.attachmentPath = this.getPath(newFile, this.LINK_MODE_IMPORTED_FILE);
@@ -1019,6 +1014,104 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
+	 * If file is within the attachment base directory, return a relative
+	 * path prefixed by BASE_PATH_PLACEHOLDER. Otherwise, return unchanged.
+	 */
+	this.getBaseDirectoryRelativePath = function (path) {
+		if (!path || path.indexOf(this.BASE_PATH_PLACEHOLDER) == 0) {
+			return path;
+		}
+		
+		var basePath = Zotero.Prefs.get('baseAttachmentPath');
+		if (!basePath) {
+			return path;
+		}
+		
+		// Get nsIFile for base directory
+		var baseDir = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		try {
+			baseDir.persistentDescriptor = basePath;
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+			return path;
+		}
+		
+		// Get nsIFile for file
+		var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		try {
+			attachmentFile.persistentDescriptor = path;
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+			return path;
+		}
+		
+		if (Zotero.File.directoryContains(baseDir, attachmentFile)) {
+			path = this.BASE_PATH_PLACEHOLDER
+				+ attachmentFile.getRelativeDescriptor(baseDir);
+		}
+		
+		return path;
+	}
+	
+	
+	/**
+	 * Get a file from this path, if we can
+	 *
+	 * @param {String} path  Absolute path or relative path prefixed
+	 *                       by BASE_PATH_PLACEHOLDER
+	 * @param {Boolean} asFile Return nsIFile instead of path
+	 * @return {String|nsIFile|FALSE} Persistent descriptor string, file,
+	 *                                of FALSE if no path
+	 */
+	this.resolveRelativePath = function (path) {
+		if (path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) != 0) {
+			return false;
+		}
+		
+		var basePath = Zotero.Prefs.get('baseAttachmentPath');
+		if (!basePath) {
+			Zotero.debug("No base attachment path set -- can't resolve '" + path + "'", 2);
+			return false;
+		}
+		
+		// Get file from base directory
+		var baseDir = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		try {
+			baseDir.persistentDescriptor = basePath;
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+			Zotero.debug("Invalid base attachment path -- can't resolve'" + row.path + "'", 2);
+			return false;
+		}
+		
+		// Get file from relative path
+		var relativePath = path.substr(
+			Zotero.Attachments.BASE_PATH_PLACEHOLDER.length
+		);
+		var file = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		try {
+			file.setRelativeDescriptor(baseDir, relativePath);
+		}
+		catch (e) {
+			Zotero.debug("Invalid relative descriptor '" + relativePath + "'", 2);
+			return false;
+		}
+		
+		return file;
+	}
+	
+	
+	/**
 	 * Returns the number of files in the attachment directory
 	 *
 	 * Only counts if MIME type is text/html
@@ -1394,6 +1487,7 @@ Zotero.Attachments = new function(){
 	 */
 	this.isPDFJS = function(doc) {
 		// pdf.js HACK
+		// This may no longer be necessary (as of Fx 23)
 		if(doc.contentType === "text/html") {
 			var win = doc.defaultView;
 			if(win) {
