@@ -4136,7 +4136,9 @@ Zotero.Sync.Server.Data = new function() {
 					var msg = Zotero.getString('sync.error.invalidCharsFilename', filename);
 					var e = new Zotero.Error(msg, 0, { dialogButtonText: null });
 					throw (e);
-
+				}
+				if (item.attachment.linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+					path = Zotero.Attachments.getBaseDirectoryRelativePath(path);
 				}
 				var pathElem = doc.createElement('path');
 				pathElem.appendChild(doc.createTextNode(path));

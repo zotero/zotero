@@ -242,7 +242,7 @@ Zotero.Sync.Storage = new function () {
 						);
 						if (version == lastSyncTime) {
 							Zotero.debug("Last " + libraryModes[libraryID].name
-								+ " sync time hasn't changed for library "
+								+ " sync id hasn't changed for library "
 								+ libraryID + " -- skipping file downloads");
 							downloadAll = false;
 						}

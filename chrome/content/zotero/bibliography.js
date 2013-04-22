@@ -98,10 +98,10 @@ var Zotero_File_Interface_Bibliography = new function() {
 		}
 		
 		// Has to be async to work properly
-		setTimeout(function () {
+		window.setTimeout(function () {
 			listbox.ensureIndexIsVisible(selectIndex);
 			listbox.selectedIndex = selectIndex;
-		});
+		}, 0);
 		
 		// ONLY FOR bibliography.xul: export options
 		if(document.getElementById("save-as-rtf")) {
@@ -129,8 +129,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		// bookmarks text
 		if(document.getElementById("displayAs")) {
 			if(_io.useEndnotes && _io.useEndnotes == 1) document.getElementById("displayAs").selectedIndex = 1;
-			styleChanged(selectIndex);
-		}		
+		}
 		if(document.getElementById("formatUsing")) {
 			if(_io.fieldType == "Bookmark") document.getElementById("formatUsing").selectedIndex = 1;
 			var formatOption = (_io.primaryFieldType == "ReferenceMark" ? "referenceMarks" : "fields");

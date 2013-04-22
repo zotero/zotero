@@ -2477,7 +2477,7 @@ var ZoteroPane = new function()
 		}
 		
 		// add locate menu options
-		Zotero_LocateMenu.buildContextMenu(menu);
+		Zotero_LocateMenu.buildContextMenu(menu, true);
 	}
 	
 	
@@ -3164,7 +3164,8 @@ var ZoteroPane = new function()
 		if (itemType == 'temporaryPDFHack') {
 			itemType = null;
 			var isPDF = false;
-			if (doc.title.indexOf('application/pdf') != -1 || Zotero.Attachments.isPDFJS(doc)) {
+			if (doc.title.indexOf('application/pdf') != -1 || Zotero.Attachments.isPDFJS(doc)
+					|| doc.contentType == 'application/pdf') {
 				isPDF = true;
 			}
 			else {
@@ -3521,8 +3522,9 @@ var ZoteroPane = new function()
 			}
 			
 			var file = item.getFile();
-			Zotero.debug("Opening " + file.path);
 			if (file) {
+				Zotero.debug("Opening " + file.path);
+				
 				if(forceExternalViewer !== undefined) {
 					var externalViewer = forceExternalViewer;
 				} else {

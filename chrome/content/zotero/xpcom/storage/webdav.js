@@ -33,6 +33,8 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	var _loginManagerHost = 'chrome://zotero';
 	var _loginManagerURL = 'Zotero Storage Server';
 	
+	var _lastSyncIDLength = 30;
+	
 	//
 	// Private methods
 	//
@@ -983,89 +985,118 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	
 	
 	obj._getLastSyncTime = function () {
+		var lastSyncURI = this.rootURI;
+		lastSyncURI.spec += "lastsync.txt";
+		
 		// Cache the credentials at the root URI
 		var self = this;
 		return Q.fcall(function () {
 			return self._cacheCredentials();
 		})
-			.then(function () {
-				var lastSyncURI = self.rootURI;
+		.then(function () {
+			return Zotero.HTTP.promise("GET", lastSyncURI,
+				{ debug: true, successCodes: [200, 300, 404] });
+		})
+		.then(function (req) {
+			// If lastsync exists but not lastsync.txt, some servers try to
+			// be helpful and return 300.
+			if (req.status == 300 || req.status == 404) {
+				Zotero.debug("No last WebDAV sync file");
+				
+				// If no lastsync.txt, check previously used 'lastsync',
+				// and then delete it
+				let lastSyncURI = self.rootURI;
 				lastSyncURI.spec += "lastsync";
 				return Zotero.HTTP.promise("GET", lastSyncURI,
-					{ debug: true, successCodes: [200, 404] });
-			})
-			.then(function (req) {
-				if (req.status == 404) {
-					Zotero.debug("No last WebDAV sync time");
-					return null;
-				}
-				
-				var lastModified = req.getResponseHeader("Last-Modified");
-				var date = new Date(lastModified);
-				Zotero.debug("Last successful WebDAV sync was " + date);
-				return Zotero.Date.toUnixTimestamp(date);
-			})
-			.fail(function (e) {
-				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					if (e.status == 403) {
-						Zotero.debug("Clearing WebDAV authentication credentials", 2);
-						_cachedCredentials = false;
-					}
-					else {
-						throw("HTTP " + e.status + " error from WebDAV server "
-							+ "for GET request");
+					{ debug: true, successCodes: [200, 404] })
+				.then(function (req) {
+					if (req.status == 404) {
+						return null;
 					}
 					
-					return Q.reject(e);
+					Zotero.HTTP.promise("DELETE", lastSyncURI,
+						{ debug: true, successCodes: [200, 204, 404] })
+					.done();
+					
+					var lastModified = req.getResponseHeader("Last-Modified");
+					var date = new Date(lastModified);
+					Zotero.debug("Last successful WebDAV sync was " + date);
+					return Zotero.Date.toUnixTimestamp(date);
+				});
+			}
+			
+			var lastModified = req.getResponseHeader("Last-Modified");
+			var date = new Date(lastModified);
+			Zotero.debug("Last successful WebDAV sync was " + date);
+			
+			var re = new RegExp("^[a-zA-Z0-9]{" + _lastSyncIDLength + "}$");
+			if (!re.test(req.responseText)) {
+				Zotero.HTTP.promise("DELETE", lastSyncURI,
+					{ debug: true, successCodes: [200, 204, 404] })
+				.done();
+				
+				throw new Error("Invalid last sync id '" + req.responseText+ "'")
+			}
+			
+			return req.responseText;
+		})
+		.catch(function (e) {
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+				if (e.status == 403) {
+					Zotero.debug("Clearing WebDAV authentication credentials", 2);
+					_cachedCredentials = false;
 				}
-				// TODO: handle browser offline exception
 				else {
-					throw (e);
+					throw("HTTP " + e.status + " error from WebDAV server "
+						+ "for GET request");
 				}
-			});
+				
+				return Q.reject(e);
+			}
+			// TODO: handle browser offline exception
+			else {
+				throw (e);
+			}
+		});
 	};
 	
 	
-	obj._setLastSyncTime = function (libraryID, localLastSyncTime) {
+	obj._setLastSyncTime = function (libraryID, localLastSyncID) {
 		if (libraryID) {
 			throw new Error("libraryID must be 0");
 		}
 		
 		// DEBUG: is this necessary for WebDAV?
-		if (localLastSyncTime) {
+		if (localLastSyncID) {
 			var sql = "REPLACE INTO version VALUES (?, ?)";
 			Zotero.DB.query(
-				sql, ['storage_webdav_' + libraryID, { int: localLastSyncTime }]
+				sql, ['storage_webdav_' + libraryID, localLastSyncID]
 			);
 			return;
 		}
 		
 		var uri = this.rootURI;
 		var successFileURI = uri.clone();
-		successFileURI.spec += "lastsync";
+		successFileURI.spec += "lastsync.txt";
 		
-		var self = this;
+		// Generate a random id for the last-sync id
+		var id = Zotero.Utilities.randomString(_lastSyncIDLength);
 		
-		return Zotero.HTTP.promise("PUT", successFileURI, " ",
-				{ debug: true, successCodes: [200, 201, 204] })
-			.then(function () {
-				return self._getLastSyncTime()
-					.then(function (ts) {
-						if (ts) {
-							var sql = "REPLACE INTO version VALUES (?, ?)";
-							Zotero.DB.query(
-								sql, ['storage_webdav_' + libraryID, { int: ts }]
-							);
-						}
-					});
-			})
-			.catch(function (e) {
-				var msg = "HTTP " + req.status + " error from WebDAV server "
-					+ "for PUT request";
-				Zotero.debug(msg, 2);
-				Components.utils.reportError(msg);
-				throw Zotero.Sync.Storage.WebDAV.defaultError;
-			});
+		return Zotero.HTTP.promise("PUT", successFileURI,
+				{ body: id, debug: true, successCodes: [200, 201, 204] })
+		.then(function () {
+			var sql = "REPLACE INTO version VALUES (?, ?)";
+			Zotero.DB.query(
+				sql, ['storage_webdav_' + libraryID, id]
+			);
+		})
+		.catch(function (e) {
+			var msg = "HTTP " + req.status + " error from WebDAV server "
+				+ "for PUT request";
+			Zotero.debug(msg, 2);
+			Components.utils.reportError(msg);
+			throw Zotero.Sync.Storage.WebDAV.defaultError;
+		});
 	};
 	
 	
@@ -1182,7 +1213,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 					case 207:
 						// Test if Zotero directory is writable
 						var testFileURI = uri.clone();
-						testFileURI.spec += "zotero-test-file";
+						testFileURI.spec += "zotero-test-file.prop";
 						Zotero.HTTP.WebDAV.doPut(testFileURI, " ", function (req) {
 							Zotero.debug(req.responseText);
 							Zotero.debug(req.status);
@@ -1235,7 +1266,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 												// data stores.
 												//
 												// This can also be from IIS 6+, which is configured
-												// not to serve extensionless files or .prop files
+												// not to serve .prop files.
 												// http://support.microsoft.com/kb/326965
 												case 404:
 													return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FILE_MISSING_AFTER_UPLOAD]);

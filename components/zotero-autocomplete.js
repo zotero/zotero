@@ -44,7 +44,7 @@ function ZoteroAutoComplete() {
 }
 
 
-ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, previousResult, listener) {
+ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, previousResult, listener) {
 	var result = Cc["@mozilla.org/autocomplete/simple-result;1"]
 					.createInstance(Ci.nsIAutoCompleteSimpleResult);
 	result.setSearchString(searchString);
@@ -54,25 +54,21 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 	this._listener = listener;
 	this._cancelled = false;
 	
-	this._zotero.debug("Starting autocomplete search of type '"
-		+ searchParam + "'" + " with string '" + searchString + "'");
+	this._zotero.debug("Starting autocomplete search with data '"
+		+ searchParams + "'" + " and string '" + searchString + "'");
+	
+	searchParams = JSON.parse(searchParams);
+	if (!searchParams) {
+		throw new Error("Invalid JSON passed to autocomplete");
+	}
+	var [fieldName, , subField] = searchParams.fieldName.split("-");
 	
 	this.stopSearch();
 	
 	var self = this;
 	var statement;
 	
-	// Allow extra parameters to be passed in
-	var pos = searchParam.indexOf('/');
-	if (pos!=-1){
-		var extra = searchParam.substr(pos + 1);
-		var searchParam = searchParam.substr(0, pos);
-	}
-	
-	var searchParts = searchParam.split('-');
-	searchParam = searchParts[0];
-	
-	switch (searchParam) {
+	switch (fieldName) {
 		case '':
 			break;
 		
@@ -115,10 +111,14 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 		case 'tag':
 			var sql = "SELECT DISTINCT name AS val, NULL AS comment FROM tags WHERE name LIKE ?";
 			var sqlParams = [searchString + '%'];
-			if (extra){
+			if (typeof searchParams.libraryID != 'undefined') {
+				sql += " AND libraryID=?";
+				sqlParams.push(searchParams.libraryID);
+			}
+			if (searchParams.itemID) {
 				sql += " AND name NOT IN (SELECT name FROM tags WHERE tagID IN ("
 					+ "SELECT tagID FROM itemTags WHERE itemID = ?))";
-				sqlParams.push(extra);
+				sqlParams.push(searchParams.itemID);
 			}
 			
 			statement = this._zotero.DB.getStatement(sql, sqlParams);
@@ -139,22 +139,24 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 			// 		0 == search two-field creators
 			// 		1 == search single-field creators
 			// 		2 == search both
-			var [fieldMode, itemID] = extra.split('-');
-			
-			if (fieldMode==2)
-			{
+			if (searchParams.fieldMode == 2) {
 				var sql = "SELECT DISTINCT CASE fieldMode WHEN 1 THEN lastName "
 					+ "WHEN 0 THEN firstName || ' ' || lastName END AS val, NULL AS comment "
 					+ "FROM creators NATURAL JOIN creatorData WHERE CASE fieldMode "
 					+ "WHEN 1 THEN lastName "
 					+ "WHEN 0 THEN firstName || ' ' || lastName END "
-					+ "LIKE ? ORDER BY val";
-				var sqlParams = searchString + '%';
+					+ "LIKE ? ";
+				var sqlParams = [searchString + '%'];
+				if (typeof searchParams.libraryID != 'undefined') {
+					sql += " AND libraryID=?";
+					sqlParams.push(searchParams.libraryID);
+				}
+				sql += "ORDER BY val";
 			}
 			else
 			{
 				var sql = "SELECT DISTINCT ";
-				if (fieldMode==1){
+				if (searchParams.fieldMode == 1) {
 					sql += "lastName AS val, creatorID || '-1' AS comment";
 				}
 				// Retrieve the matches in the specified field
@@ -174,22 +176,35 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 				}
 				
 				var fromSQL = " FROM creators NATURAL JOIN creatorData "
-					+ "WHERE " + searchParts[2] + " LIKE ?1 " + "AND fieldMode=?2";
-				var sqlParams = [searchString + '%',
-					fieldMode ? parseInt(fieldMode) : 0];
-				if (itemID){
+					+ "WHERE " + subField + " LIKE ?1 " + "AND fieldMode=?2";
+				var sqlParams = [
+					searchString + '%',
+					searchParams.fieldMode ? searchParams.fieldMode : 0
+				];
+				if (searchParams.itemID) {
 					fromSQL += " AND creatorID NOT IN (SELECT creatorID FROM "
 						+ "itemCreators WHERE itemID=?3)";
-					sqlParams.push(itemID);
+					sqlParams.push(searchParams.itemID);
+				}
+				if (typeof searchParams.libraryID != 'undefined') {
+					if (searchParams.libraryID) {
+						fromSQL += " AND libraryID=?4";
+						sqlParams.push(searchParams.libraryID);
+					}
+					// The db query code doesn't properly replace numbered
+					// parameters with "IS NULL"
+					else {
+						fromSQL += " AND libraryID IS NULL";
+					}
 				}
 				
 				sql += fromSQL;
 				
 				// If double-field mode, include matches for just this field
 				// as well (i.e. "Shakespeare"), and group to collapse repeats
-				if (fieldMode!=1){
+				if (searchParams.fieldMode != 1) {
 					sql = "SELECT * FROM (" + sql + " UNION SELECT DISTINCT "
-						+ searchParts[2] + " AS val, creatorID || '-1' AS comment"
+						+ subField + " AS val, creatorID || '-1' AS comment"
 						+ fromSQL + ") GROUP BY val";
 				}
 				
@@ -201,8 +216,8 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 		
 		case 'dateModified':
 		case 'dateAdded':
-			var sql = "SELECT DISTINCT DATE(" + searchParam + ", 'localtime') AS val, NULL AS comment FROM items "
-				+ "WHERE " + searchParam + " LIKE ? ORDER BY " + searchParam;
+			var sql = "SELECT DISTINCT DATE(" + fieldName + ", 'localtime') AS val, NULL AS comment FROM items "
+				+ "WHERE " + fieldName + " LIKE ? ORDER BY " + fieldName;
 			var sqlParams = [searchString + '%'];
 			statement = this._zotero.DB.getStatement(sql, sqlParams);
 			break;
@@ -217,9 +232,9 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 			break;
 		
 		default:
-			var fieldID = this._zotero.ItemFields.getID(searchParam);
+			var fieldID = this._zotero.ItemFields.getID(fieldName);
 			if (!fieldID) {
-				this._zotero.debug("'" + searchParam + "' is not a valid autocomplete scope", 1);
+				this._zotero.debug("'" + fieldName + "' is not a valid autocomplete scope", 1);
 				this.updateResults([], false, Ci.nsIAutoCompleteResult.RESULT_IGNORED);
 				return;
 			}
@@ -227,7 +242,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 			// We don't use date autocomplete anywhere, but if we're not
 			// disallowing it altogether, we should at least do it right and
 			// use the user part of the multipart field
-			var valueField = searchParam=='date' ? 'SUBSTR(value, 12, 100)' : 'value';
+			var valueField = fieldName == 'date' ? 'SUBSTR(value, 12, 100)' : 'value';
 			
 			var sql = "SELECT DISTINCT " + valueField + " AS val, NULL AS comment "
 				+ "FROM itemData NATURAL JOIN itemDataValues "
@@ -235,10 +250,10 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 				+ " LIKE ?2 "
 			
 			var sqlParams = [fieldID, searchString + '%'];
-			if (extra){
+			if (searchParams.itemID) {
 				sql += "AND value NOT IN (SELECT value FROM itemData "
 					+ "NATURAL JOIN itemDataValues WHERE fieldID=?1 AND itemID=?3) ";
-				sqlParams.push(extra);
+				sqlParams.push(searchParams.itemID);
 			}
 			sql += "ORDER BY value";
 			statement = this._zotero.DB.getStatement(sql, sqlParams);

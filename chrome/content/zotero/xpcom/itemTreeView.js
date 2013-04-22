@@ -54,7 +54,9 @@ Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 	this._dataItems = [];
 	this._itemImages = {};
 	
-	this._unregisterID = Zotero.Notifier.registerObserver(this, ['item', 'collection-item', 'share-items', 'bucket']);
+	this._unregisterID = Zotero.Notifier.registerObserver(
+		this, ['item', 'collection-item', 'item-tag', 'share-items', 'bucket']
+	);
 }
 
 
@@ -434,6 +436,14 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		return;
 	}
 	
+	// Clear item type icon and tag colors
+	if (type == 'item-tag') {
+		ids.map(function (val) val.split("-")[0]).forEach(function (val) {
+			delete this._itemImages[val];
+		}.bind(this));
+		return;
+	}
+	
 	var itemGroup = this._itemGroup;
 	
 	var madeChanges = false;
@@ -599,8 +609,6 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 					this._refreshHashMap();
 				}
 				var row = this._itemRowMap[id];
-				// Clear item type icon and tag colors
-				delete this._itemImages[id];
 				
 				// Deleted items get a modify that we have to ignore when
 				// not viewing the trash

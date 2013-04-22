@@ -27,7 +27,7 @@
 Zotero.Notes = new function() {
 	this.noteToTitle = noteToTitle;
 	
-	this.__defineGetter__("MAX_TITLE_LENGTH", function() { return 80; });
+	this.__defineGetter__("MAX_TITLE_LENGTH", function() { return 120; });
 	this.__defineGetter__("defaultNote", function () '<div class="zotero-note znv1"></div>');
 	this.__defineGetter__("notePrefix", function () '<div class="zotero-note znv1">');
 	this.__defineGetter__("noteSuffix", function () '</div>');
@@ -36,8 +36,20 @@ Zotero.Notes = new function() {
 	* Return first line (or first MAX_LENGTH characters) of note content
 	**/
 	function noteToTitle(text) {
-		text = Zotero.Utilities.trim(text);
+		var origText = text;
+		text = text.trim();
 		text = Zotero.Utilities.unescapeHTML(text);
+		
+		// If first line is just an opening HTML tag, remove it
+		//
+		// Example:
+		//
+		// <blockquote>
+		// <p>Foo</p>
+		// </blockquote>
+		if (/^<[^>\n]+[^\/]>\n/.test(origText)) {
+			text = text.trim();
+		}
 		
 		var max = this.MAX_TITLE_LENGTH;
 		

@@ -821,6 +821,7 @@
 							this._displayAllCreators = true;
 							
 							if (this._addCreatorRow) {
+<<<<<<< HEAD
 								this._creatorCount++;
 								this._creatorTabCount++;
 								// Add default row
@@ -838,6 +839,8 @@
 											lastCreator,
 											notYetSaved,
 											hasMulti);
+                                // XXX This from 4.0 will note work, unfortunately. The code in this file has diverged too far.
+								// this.addCreatorRow(false, this.item.getCreator(max-1).creatorTypeID, true); 
 								this._addCreatorRow = false;
 								this.disableCreatorAddButtons();
 							}
@@ -2406,11 +2409,17 @@
 								|| fieldName == 'tag') {
 							t.setAttribute('type', 'autocomplete');
 							t.setAttribute('autocompletesearch', 'zotero');
-							var suffix = itemID ? itemID : '';
-							if (field=='creator') {
-								suffix = elem.getAttribute('fieldMode') + '-' + suffix;
-							}
-							t.setAttribute('autocompletesearchparam', fieldName + '/' + suffix);
+							let params = {
+								fieldName: fieldName,
+								libraryID: this.item.libraryID
+							};
+							if (field == 'creator') {
+								params.fieldMode = parseInt(elem.getAttribute('fieldMode'));
+								params.itemID = itemID ? itemID : '';
+							};
+							t.setAttribute(
+								'autocompletesearchparam', JSON.stringify(params)
+							);
 							t.setAttribute('ontextentered',
 								'document.getBindingParent(this).handleCreatorAutoCompleteSelect(this)');
 						}
@@ -2561,6 +2570,9 @@
 									else {
 										// TODO: should use current creator type
 										this.addCreatorRow(row);
+                                        // XXX This from 4.0 will not work, unfortunately. The code in this file has diverged too far.
+										// var creatorFields = this.getCreatorFields(Zotero.getAncestorByTagName(target, 'row'));
+										// this.addCreatorRow(false, creatorFields.creatorTypeID, true);
 									}
 								}
 								// Value has changed
