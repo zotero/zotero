@@ -212,9 +212,8 @@ Zotero.Attachments = new function(){
 		}
 		
 		// Throw error on invalid URLs
-		//
-		// TODO: allow other schemes
-		var urlRe = /^https?:\/\/[^\s]*$/;
+		var urlRe = /^((https?|evernote|onenote|brain|nv|mlo|kindle|x-devonthink-item|ftp):\/\/|logosres:)[^\s]*$/;
+
 		var matches = urlRe.exec(url);
 		if (!matches) {
 			if(callback) callback(false);
