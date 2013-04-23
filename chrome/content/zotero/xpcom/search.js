@@ -733,7 +733,7 @@ Zotero.Search.prototype.search = function(asTempTable){
 					
 					var sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE "
 						+ "itemID NOT IN (SELECT itemID FROM " + tmpTable + ")";
-					var res = Zotero.DB.valueQuery(sql).split(",");
+					var res = Zotero.DB.valueQuery(sql);
 					var scopeIDs = res ? res.split(",") : [];
 				}
 				// If an ALL search, scan only items from the main search

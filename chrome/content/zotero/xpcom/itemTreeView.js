@@ -590,6 +590,13 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		if (itemGroup.isTrash() || itemGroup.isSearch())
 		{
 			Zotero.ItemGroupCache.clear();
+			
+			// Clear item type icons
+			var items = Zotero.Items.get(ids);
+			for (let i=0; i<items.length; i++) {
+				delete this._itemImages[items[i].id];
+			}
+			
 			this.refresh();
 			madeChanges = true;
 			sort = true;
@@ -609,6 +616,8 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 					this._refreshHashMap();
 				}
 				var row = this._itemRowMap[id];
+				// Clear item type icon
+				delete this._itemImages[id];
 				
 				// Deleted items get a modify that we have to ignore when
 				// not viewing the trash
@@ -681,17 +690,19 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		// If quicksearch, re-run it, since the results may have changed
 		else
 		{
-			// If not viewing trash and all items were deleted, ignore modify
 			var allDeleted = true;
-			if (!itemGroup.isTrash()) {
-				var items = Zotero.Items.get(ids);
-				for each(var item in items) {
-					if (!item.deleted) {
-						allDeleted = false;
-						break;
-					}
+			var isTrash = itemGroup.isTrash();
+			var items = Zotero.Items.get(ids);
+			for each(var item in items) {
+				// Clear item type icon
+				delete this._itemImages[item.id];
+				
+				// If not viewing trash and all items were deleted, ignore modify
+				if (allDeleted && !isTrash && !item.deleted) {
+					allDeleted = false;
 				}
 			}
+			
 			if (!allDeleted) {
 				quicksearch.doCommand();
 				madeChanges = true;
