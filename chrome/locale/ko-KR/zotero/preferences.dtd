@@ -109,6 +109,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "기본값 복원">
 <!ENTITY zotero.preferences.miscellaneous "기타">
 <!ENTITY zotero.preferences.openAboutConfig "config 열기">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "CSL 에디터 열기">
 <!ENTITY zotero.preferences.openCSLPreview "CSL 미리보기 열기">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">

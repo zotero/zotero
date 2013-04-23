@@ -109,6 +109,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Востановить список по умолчанию">
 <!ENTITY zotero.preferences.miscellaneous "Разное">
 <!ENTITY zotero.preferences.openAboutConfig "Открыть about:config">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "Открыть редактор CSL">
 <!ENTITY zotero.preferences.openCSLPreview "Открыть предварительный просмотр CSL">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">

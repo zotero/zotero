@@ -109,6 +109,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "初期設定に戻す">
 <!ENTITY zotero.preferences.miscellaneous "各種設定">
 <!ENTITY zotero.preferences.openAboutConfig "about:config を開く">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "CSL エディタを開く">
 <!ENTITY zotero.preferences.openCSLPreview "CSL プレビューを開く">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">

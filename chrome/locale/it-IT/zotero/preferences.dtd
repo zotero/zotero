@@ -109,6 +109,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Ripristina le impostazioni predefinite">
 <!ENTITY zotero.preferences.miscellaneous "Varie">
 <!ENTITY zotero.preferences.openAboutConfig "Apri about:config">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "Apri l'editor CSL">
 <!ENTITY zotero.preferences.openCSLPreview "Apri l'anteprima CSL">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">

@@ -109,6 +109,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restaura els valors predeterminats">
 <!ENTITY zotero.preferences.miscellaneous "Miscel·lània">
 <!ENTITY zotero.preferences.openAboutConfig "Obri about:config">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "Obri l'editor CSL">
 <!ENTITY zotero.preferences.openCSLPreview "Obri la previsualització CSL">
 <!ENTITY zotero.preferences.openurl.caption "Obre la URL">

@@ -109,6 +109,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Obnovit původní nastavení">
 <!ENTITY zotero.preferences.miscellaneous "Různé">
 <!ENTITY zotero.preferences.openAboutConfig "Otevřít about:config">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "Otevřít editor CSL">
 <!ENTITY zotero.preferences.openCSLPreview "Otevřít náhled CSL">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">

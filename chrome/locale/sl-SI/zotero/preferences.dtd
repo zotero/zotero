@@ -109,6 +109,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Obnovi privzeto">
 <!ENTITY zotero.preferences.miscellaneous "Razno">
 <!ENTITY zotero.preferences.openAboutConfig "Odpri about:config">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "Odpri urejevalnik CSL">
 <!ENTITY zotero.preferences.openCSLPreview "Odpri predloge CSL">
 <!ENTITY zotero.preferences.openurl.caption "Odpri URL">

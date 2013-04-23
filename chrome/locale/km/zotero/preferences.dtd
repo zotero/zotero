@@ -109,6 +109,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "ស្តារលំនាំដើម">
 <!ENTITY zotero.preferences.miscellaneous "ជម្រើសនានា">
 <!ENTITY zotero.preferences.openAboutConfig "បើកអំពី:config">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "បើកកំណែតម្រូវស៊ីអេសអិល">
 <!ENTITY zotero.preferences.openCSLPreview "បើកពិនិត្យមើលស៊ីអេសអិល">
 <!ENTITY zotero.preferences.openurl.caption "បើកគេហទំព័រ">

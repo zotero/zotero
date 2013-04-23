@@ -109,6 +109,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Gendan Defaults">
 <!ENTITY zotero.preferences.miscellaneous "Forskelligt">
 <!ENTITY zotero.preferences.openAboutConfig "Åbn about:config">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "Åbn CSL-Editor">
 <!ENTITY zotero.preferences.openCSLPreview "Åbn CSL-Preview">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">

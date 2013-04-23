@@ -109,6 +109,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "恢復預設值">
 <!ENTITY zotero.preferences.miscellaneous "雜項">
 <!ENTITY zotero.preferences.openAboutConfig "開啟 about:config">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "開啟 CSL 編輯器">
 <!ENTITY zotero.preferences.openCSLPreview "開啟 CSL 預覽">
 <!ENTITY zotero.preferences.openurl.caption "開啟網址">

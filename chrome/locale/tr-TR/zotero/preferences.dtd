@@ -109,6 +109,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Varsayılanları Geri Yükle">
 <!ENTITY zotero.preferences.miscellaneous "Çeşitli">
 <!ENTITY zotero.preferences.openAboutConfig "about:config'i Aç">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "CSL Düzenleyicisini Aç">
 <!ENTITY zotero.preferences.openCSLPreview "CSL Ön İzlemesini Aç">
 <!ENTITY zotero.preferences.openurl.caption "URLAç">

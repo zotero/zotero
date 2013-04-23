@@ -109,6 +109,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Algseaded taastada">
 <!ENTITY zotero.preferences.miscellaneous "Mitmesugust">
 <!ENTITY zotero.preferences.openAboutConfig "Avada about:config">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "Avada CSL redaktor">
 <!ENTITY zotero.preferences.openCSLPreview "Avada CSL eelvaade">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">

@@ -109,6 +109,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Rétablir les moteurs par défaut">
 <!ENTITY zotero.preferences.miscellaneous "Divers">
 <!ENTITY zotero.preferences.openAboutConfig "Ouvrir about:config">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "Ouvrir CSL Editor (test des styles installés)">
 <!ENTITY zotero.preferences.openCSLPreview "Ouvrir CSL Preview (aperçu des styles installés)">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">

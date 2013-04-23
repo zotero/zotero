@@ -109,6 +109,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Standaarden herstellen">
 <!ENTITY zotero.preferences.miscellaneous "Diversen">
 <!ENTITY zotero.preferences.openAboutConfig "about:config openen">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "CSL-editor openen">
 <!ENTITY zotero.preferences.openCSLPreview "CSL-voorbeeldweergave openen">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
