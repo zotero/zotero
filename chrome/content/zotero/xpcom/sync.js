@@ -3241,8 +3241,8 @@ Zotero.Sync.Server.Data = new function() {
 							continue;
 							
 						default:
-							alert('Delete reconciliation unimplemented for ' + types);
-							throw ('Delete reconciliation unimplemented for ' + types);
+							Components.utils.reportError('Delete reconciliation unimplemented for ' + types + ' -- ignoring');
+							continue;
 					}
 				}
 				
