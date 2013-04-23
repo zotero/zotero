@@ -4740,6 +4740,7 @@ Zotero.Item.prototype.multiDiff = function (otherItems, ignoreFields) {
  * @param  {Boolean}       [skipTags=false]       Skip tags (implied by 'unsaved')
  */
 Zotero.Item.prototype.clone = function(includePrimary, newItem, unsaved, skipTags) {
+    var newItem;
 	Zotero.debug('Cloning item ' + this.id);
 	
 	if (includePrimary && newItem) {

@@ -42,10 +42,8 @@ Zotero.LocateManager = new function() {
 		_jsonFile = _getLocateFile();
 		
 		if(_jsonFile.exists()) {
-            Zotero.debug("FUCKME BEFORE");
 			_locateEngines = [new LocateEngine(engine)
 				for each(engine in JSON.parse(Zotero.File.getContents(_jsonFile)))];
-            Zotero.debug("  FUCKME AFTER");
 		} else {
 			this.restoreDefaultEngines();
 		}

@@ -821,7 +821,6 @@
 							this._displayAllCreators = true;
 							
 							if (this._addCreatorRow) {
-<<<<<<< HEAD
 								this._creatorCount++;
 								this._creatorTabCount++;
 								// Add default row
