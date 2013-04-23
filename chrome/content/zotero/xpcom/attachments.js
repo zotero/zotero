@@ -211,7 +211,17 @@ Zotero.Attachments = new function(){
 			parentCollectionIDs = undefined;
 		}
 		
-		// Throw error on invalid URLs
+		/* Throw error on invalid URLs
+		   We currently accept the following protocols:
+		   PersonalBrain (brain://)
+		   DevonThink (x-devonthink-item://)
+		   Notational Velocity (nv://)
+		   MyLife Organized (mlo://)
+		   Evernote (evernote://)
+		   OneNote (onenote://)
+		   Kindle (kindle://) 
+		   Logos (logosres:) */
+
 		var urlRe = /^((https?|evernote|onenote|brain|nv|mlo|kindle|x-devonthink-item|ftp):\/\/|logosres:)[^\s]*$/;
 
 		var matches = urlRe.exec(url);
