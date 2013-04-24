@@ -220,9 +220,10 @@ Zotero.Attachments = new function(){
 		   Evernote (evernote://)
 		   OneNote (onenote://)
 		   Kindle (kindle://) 
-		   Logos (logosres:) */
+		   Logos (logosres:) 
+		   Zotero (zotero://) */
 
-		var urlRe = /^((https?|evernote|onenote|brain|nv|mlo|kindle|x-devonthink-item|ftp):\/\/|logosres:)[^\s]*$/;
+		var urlRe = /^((https?|zotero|evernote|onenote|brain|nv|mlo|kindle|x-devonthink-item|ftp):\/\/|logosres:)[^\s]*$/;
 
 		var matches = urlRe.exec(url);
 		if (!matches) {
