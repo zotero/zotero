@@ -2664,9 +2664,9 @@ Zotero.Sync.Server.Data = new function() {
 		
 		// Remotely deleted groups
 		var deletedGroups = updatedNode.xpath("deleted/groups");
-		if (deletedGroups.length && deletedGroups.textContent) {
+		if (deletedGroups.length && deletedGroups[0].textContent) {
 			Zotero.debug("Processing remotely deleted groups");
-			var groupIDs = deletedGroups.textContent.split(' ');
+			var groupIDs = deletedGroups[0].textContent.split(' ');
 			Zotero.debug(groupIDs);
 			
 			for each(var groupID in groupIDs) {
