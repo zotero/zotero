@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.458",
+    PROCESSOR_VERSION: "1.0.459",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -10274,7 +10274,7 @@ CSL.Transform = function (state) {
         }
         value = "";
         if (state.sys.getAbbreviation) {
-            var jurisdiction = state.transform.loadAbbreviation(Item.jurisdiction, myabbrev_family, basevalue);
+            var jurisdiction = state.transform.loadAbbreviation(Item.jurisdiction, myabbrev_family, basevalue, Item.type);
             if (state.transform.abbrevs[jurisdiction][myabbrev_family] && basevalue && state.sys.getAbbreviation) {
                 if (state.transform.abbrevs[jurisdiction][myabbrev_family][basevalue]) {
                     value = state.transform.abbrevs[jurisdiction][myabbrev_family][basevalue];
@@ -10357,7 +10357,7 @@ CSL.Transform = function (state) {
         }
         return ret;
     }
-    function loadAbbreviation(jurisdiction, category, orig) {
+    function loadAbbreviation(jurisdiction, category, orig, itemType) {
         var pos, len;
         if (!jurisdiction) {
             jurisdiction = "default";
@@ -10381,7 +10381,7 @@ CSL.Transform = function (state) {
                     this.abbrevs[tryList[i]] = new state.sys.AbbreviationSegments();
                 }
                 if (!this.abbrevs[tryList[i]][category][orig]) {
-                    state.sys.getAbbreviation(state.opt.styleID, this.abbrevs, tryList[i], category, orig);
+                    state.sys.getAbbreviation(state.opt.styleID, this.abbrevs, tryList[i], category, orig, itemType);
                 }
                 if (this.abbrevs[tryList[i]][category][orig]) {
                     if (i < tryList.length) {
