@@ -136,6 +136,7 @@ Zotero.LANGUAGE_NAMES = {
 	"km": "Khmer",
 	"ko-KR": "Korean",
 	"lt": "Lithuanian",
+	"lv": "Latvian",
 	"mn-MN": "Mongolian",
 	"nb-NO": "Norwegian Bokmål",
 	"nl-NL": "Dutch",
@@ -225,20 +226,13 @@ Zotero.setupLocale = function(document) {
 			menupopup.appendChild(menuitem);
 		}
 
-/////
-
-		// XXXX This is wrong. This should be a list of actually available CSL
-		// locales derived from files under chrome/content/zotero/locale/csl,
-        // but I have no idea how to obtain that list from Firefox.
-
-		//var availableLocales = toolkitChromeReg.getLocalesForPackage("zotero");
 		var availableLocales = [];
-        for (var key in Zotero.CiteProc.CSL.LANG_BASES) {
+        for (var key in Zotero.CiteProc.CSL.LANGS) {
             availableLocales.push(key);
         }
 		var selectedLocale = Zotero.Prefs.get('export.bibliographyLocale');
 		if (!selectedLocale || !availableLocales[selectedLocale]) {
-			Zotero.Prefs.set('export.bibliographyLocale', 'en');
+			Zotero.Prefs.set('export.bibliographyLocale', 'en-US');
 		}
 
 		var localeMenulist = document.getElementById("locale-menulist");
@@ -257,10 +251,10 @@ Zotero.setupLocale = function(document) {
         var locales = [];
         for (var i=0, ilen=availableLocales.length; i<ilen; i += 1) {
             locale = availableLocales[i];
-			locales.push({value: locale, label: locale});
+			locales.push({value: locale, label: Zotero.CiteProc.CSL.LANGS[locale]});
 			if (locale == selectedLocale) {
 				// Is this the current locale?
-				localeMenulist.setAttribute('label', locale);
+				localeMenulist.setAttribute('label', Zotero.CiteProc.CSL.LANGS[locale]);
 				localeMenulist.setAttribute('value', locale);
 			}
         }
