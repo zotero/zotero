@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.453",
+    PROCESSOR_VERSION: "1.0.457",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -292,6 +292,7 @@ var CSL = {
         "chapter-number",
         "collection-number",
         "edition",
+        "page",
         "issue",
         "locator",
         "number",
@@ -350,7 +351,7 @@ var CSL = {
         ret[ret.length - 1] += str;
         return ret;
     },
-    SKIP_WORDS: ["but", "or", "yet", "so", "for", "and", "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up", "down", "as", "via", "onto", "over", "till", "de", "d'", "von", "van"],
+    SKIP_WORDS: ["but", "or", "yet", "so", "for", "and", "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up", "down", "as", "via", "onto", "over", "till", "de", "d'", "von", "van", "before", "after", "c", "et", "through","ca"],
     FORMAT_KEY_SEQUENCE: [
         "@strip-periods",
         "@font-style",
@@ -12858,12 +12859,13 @@ CSL.Registry.prototype.registerAmbigToken = function (akey, id, ambig_config) {
             var old_names_params = this.registry[id].disambig.names[i];
             if (new_names_params !== old_names_params) {
                 this.state.tmp.taintedItemIDs[id] = true;
-            }
-            for (var j=0,jlen=ambig_config.givens[i].length;j<jlen;j+=1) {
-                var new_gnames_params = ambig_config.givens[i][j];
-                var old_gnames_params = this.registry[id].disambig.givens[i][j];
-                if (new_gnames_params !== old_gnames_params) {
-                    this.state.tmp.taintedItemIDs[id] = true;
+            } else {
+                for (var j=0,jlen=ambig_config.givens[i].length;j<jlen;j+=1) {
+                    var new_gnames_params = ambig_config.givens[i][j];
+                    var old_gnames_params = this.registry[id].disambig.givens[i][j];
+                    if (new_gnames_params !== old_gnames_params) {
+                        this.state.tmp.taintedItemIDs[id] = true;
+                    }
                 }
             }
         }
