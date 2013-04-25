@@ -58,9 +58,9 @@ Zotero.MultiCreator.prototype.get = function (field, langs) {
 		&& lang !== this.main 
 		&& this._key[lang]
 		&& (field === 'firstName' || field === 'lastName' || field === 'shortName')) {
-		return this._key[lang][field];
+		return this._key[lang][field] ? this._key[lang][field] : '';
 	} else {
-		return this.parent[field];
+		return this.parent[field] ? this.parent[field] : '';
 	}
 };
 
