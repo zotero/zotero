@@ -541,7 +541,7 @@
             <textbox emptytext="&zotero.preferences.lang.addLanguage;"
                      type="autocomplete"
                      autocompletesearch="zotero"
-                     autocompletesearchparam="zlsPrimary/"
+                     autocompletesearchparam='{"fieldName":"zlsPrimary"}'
                      onkeypress="Zotero_Preferences.Lang.handleLangKeypress(event)"
                      ontextentered="Zotero_Preferences.Lang.handleLangAutoCompleteSelect(this)"/>
             <hbox style="border-bottom:2px solid #999999;margin:0 5px 0 5px;">

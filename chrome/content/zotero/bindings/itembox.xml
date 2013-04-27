@@ -1972,7 +1972,7 @@
 					textbox.setAttribute('emptytext','Enter a jurisdiction');
 					textbox.setAttribute('type','autocomplete');
 					textbox.setAttribute('autocompletesearch','zotero');
-					textbox.setAttribute('autocompletesearchparam','jurisdictions');
+					textbox.setAttribute('autocompletesearchparam','{"fieldName":"jurisdictions"}');
 					textbox.setAttribute('onkeypress','document.getBindingParent(this).handleJurisdictionKeypress(event);');
 					textbox.setAttribute('ontextentered','document.getBindingParent(this).handleJurisdictionAutoCompleteSelect(this)');
 					node.parentNode.replaceChild(textbox, node)
