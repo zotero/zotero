@@ -493,7 +493,7 @@ Zotero_Preferences.Lang = {
     },
     
     hideNicknameEditor: function (textbox) {
- 	    if (textbox.value !== textbox.getAttribute('value') && nicknameExists(textbox.value)) {
+ 	    if (textbox.value !== textbox.getAttribute('value') && Zotero_Preferences.Lang.nicknameExists(textbox.value)) {
  		    return;
  	    }
  	    var oldval = textbox.getAttribute('value');
