@@ -204,3 +204,4 @@
 <!ENTITY zotero.preferences.openAboutConfig "Avada about:config">
 <!ENTITY zotero.preferences.openCSLEdit "Avada CSL redaktor">
 <!ENTITY zotero.preferences.openCSLPreview "Avada CSL eelvaade">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">

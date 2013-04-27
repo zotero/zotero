@@ -204,3 +204,4 @@
 <!ENTITY zotero.preferences.openAboutConfig "เปิด about:config">
 <!ENTITY zotero.preferences.openCSLEdit "เปิดตัวจัดการ CSL">
 <!ENTITY zotero.preferences.openCSLPreview "เปิดดูตัวอย่าง CSL">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">

@@ -204,3 +204,4 @@
 <!ENTITY zotero.preferences.openAboutConfig "បើកអំពី:config">
 <!ENTITY zotero.preferences.openCSLEdit "បើកកំណែតម្រូវស៊ីអេសអិល">
 <!ENTITY zotero.preferences.openCSLPreview "បើកពិនិត្យមើលស៊ីអេសអិល">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">

@@ -147,7 +147,7 @@
 <!ENTITY zotero.tagColorChooser.color "Color:">
 <!ENTITY zotero.tagColorChooser.position "Posición:">
 <!ENTITY zotero.tagColorChooser.setColor "Establecer color">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Borrar color">
 
 <!ENTITY zotero.lookup.description "Introduce el ISBN, DOI o PMID para buscar en la caja de abajo.">
 <!ENTITY zotero.lookup.button.search "Buscar">

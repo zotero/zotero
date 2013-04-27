@@ -204,3 +204,4 @@
 <!ENTITY zotero.preferences.openAboutConfig "Avaa about:config">
 <!ENTITY zotero.preferences.openCSLEdit "Avaa CSL-muokkain">
 <!ENTITY zotero.preferences.openCSLPreview "Avaa CSL-esikatselu">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
