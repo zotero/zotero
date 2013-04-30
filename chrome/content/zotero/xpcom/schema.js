@@ -215,22 +215,12 @@ Zotero.Schema = new function(){
 		
 		// After a delay, start update of bundled files and repo updates
 		setTimeout(function () {
-			try {
-				Zotero.UnresponsiveScriptIndicator.disable();
-				var up = Zotero.Schema.updateBundledFiles();
-			}
-			finally {
+			Zotero.UnresponsiveScriptIndicator.disable();
+			Zotero.Schema.updateBundledFiles(null, false, true)
+			.finally(function () {
 				Zotero.UnresponsiveScriptIndicator.enable();
-			}
-			if (up) {
-				// Run a manual scraper update if upgraded and pref set
-				if (Zotero.Prefs.get('automaticScraperUpdates')) {
-					Zotero.Schema.updateFromRepository(2);
-				}
-			}
-			else {
-				Zotero.Schema.updateFromRepository();
-			}
+			})
+			.done();
 		}, 5000);
 	}
 	
@@ -448,39 +438,63 @@ Zotero.Schema = new function(){
 	 * 												it should only be updated the last time through
 	 */
 	this.updateBundledFiles = function(mode, skipDeleteUpdate, runRemoteUpdateWhenComplete) {
-		if(_localUpdateInProgress) return;
-		_localUpdateInProgress = true;
+		if (_localUpdateInProgress) return Q();
 		
-		// Get path to addon and then call updateBundledFilesCallback, potentially asynchronously
-		if(Zotero.isStandalone) {
-			var appChrome = Components.classes["@mozilla.org/file/directory_service;1"]
-				.getService(Components.interfaces.nsIProperties)
-				.get("AChrom", Components.interfaces.nsIFile);
-			_updateBundledFilesCallback(appChrome.parent, mode, skipDeleteUpdate,
-				runRemoteUpdateWhenComplete);
-		} else {
+		return Q.fcall(function () {
+			_localUpdateInProgress = true;
+			
+			// Get path to addon and then call updateBundledFilesCallback
+			
+			// Synchronous in Standalone
+			if (Zotero.isStandalone) {
+				var appChrome = Components.classes["@mozilla.org/file/directory_service;1"]
+					.getService(Components.interfaces.nsIProperties)
+					.get("AChrom", Components.interfaces.nsIFile);
+				return _updateBundledFilesCallback(appChrome.parent, mode, skipDeleteUpdate);
+			}
+			
+			// Asynchronous in Firefox
+			var deferred = Q.defer();
 			Components.utils.import("resource://gre/modules/AddonManager.jsm");
-			AddonManager.getAddonByID(ZOTERO_CONFIG['GUID'],
+			AddonManager.getAddonByID(
+				ZOTERO_CONFIG['GUID'],
 				function(addon) {
-					_updateBundledFilesCallback(
+					var up = _updateBundledFilesCallback(
 						addon.getResourceURI().QueryInterface(Components.interfaces.nsIFileURL).file,
-						mode, skipDeleteUpdate, runRemoteUpdateWhenComplete);
-				});
-		}
+						mode,
+						skipDeleteUpdate
+					);
+					deferred.resolve(up);
+				}
+			);
+			return deferred.promise;
+		})
+		.then(function (updated) {
+			if (runRemoteUpdateWhenComplete) {
+				var deferred = Q.defer();
+				if (updated) {
+					if (Zotero.Prefs.get('automaticScraperUpdates')) {
+						Zotero.Schema.updateFromRepository(2, function () deferred.resolve());
+					}
+				}
+				else {
+					Zotero.Schema.updateFromRepository(false, function () deferred.resolve());
+				}
+				return deferred.promise;
+			}
+		});
 	}
 	
 	/**
 	 * Callback to update bundled files, after finding the path to the Zotero install location
 	 */
-	function _updateBundledFilesCallback(installLocation, mode, skipDeleteUpdate,
-			runRemoteUpdateWhenComplete) {
+	function _updateBundledFilesCallback(installLocation, mode, skipDeleteUpdate) {
 		_localUpdateInProgress = false;
 		
 		if (!mode) {
-			var up1 = _updateBundledFilesCallback(installLocation, 'translators', true, false);
-			var up2 = _updateBundledFilesCallback(installLocation, 'styles', false,
-				runRemoteUpdateWhenComplete);
-			return up1 && up2;
+			var up1 = _updateBundledFilesCallback(installLocation, 'translators', true);
+			var up2 = _updateBundledFilesCallback(installLocation, 'styles', false);
+			return up1 || up2;
 		}
 		
 		var xpiZipReader, isUnpacked = installLocation.isDirectory();
@@ -928,12 +942,6 @@ Zotero.Schema = new function(){
 		
 		Zotero[Modes].init();
 		
-		if (runRemoteUpdateWhenComplete) {
-			// Run a manual scraper update if upgraded and pref set
-			if (Zotero.Prefs.get('automaticScraperUpdates')){
-				Zotero.Schema.updateFromRepository(2);
-			}
-		}
 		return true;
 	}
 	
@@ -1072,11 +1080,13 @@ Zotero.Schema = new function(){
 		stylesDir.remove(true);
 		Zotero.getStylesDirectory(); // recreate directory
 		Zotero.Styles.init();
-		this.updateBundledFiles('styles', null, true);
-		
-		if (callback) {
-			callback();
-		}
+		this.updateBundledFiles('styles', null, true)
+		.then(function () {
+			if (callback) {
+				callback();
+			}
+		})
+		.done();
 	}
 	
 	
@@ -1093,20 +1103,13 @@ Zotero.Schema = new function(){
 		translatorsDir.remove(true);
 		Zotero.getTranslatorsDirectory(); // recreate directory
 		Zotero.Translators.init();
-		this.updateBundledFiles('translators');
-		
-		// Run a manual update from repository if pref set
-		if (Zotero.Prefs.get('automaticScraperUpdates')) {
-			this.updateFromRepository(2, function () {
-				if (callback) {
-					callback();
-				}
-			});
-		}
-		
-		if (callback) {
-			callback();
-		}
+		this.updateBundledFiles('translators', null, true)
+		.then(function () {
+			if (callback) {
+				callback();
+			}
+		})
+		.done();
 	}
 	
 	
@@ -1123,20 +1126,13 @@ Zotero.Schema = new function(){
 		stylesDir.remove(true);
 		Zotero.getStylesDirectory(); // recreate directory
 		Zotero.Styles.init();
-		this.updateBundledFiles('styles');
-		
-		// Run a manual update from repository if pref set
-		if (Zotero.Prefs.get('automaticScraperUpdates')) {
-			this.updateFromRepository(2, function () {
-				if (callback) {
-					callback();
-				}
-			});
-		}
-		
-		if (callback) {
-			callback();
-		}
+		this.updateBundledFiles('styles', null, true)
+		.then(function () {
+			if (callback) {
+				callback();
+			}
+		})
+		.done();
 	}
 	
 	
@@ -1477,14 +1473,12 @@ Zotero.Schema = new function(){
 			throw(e);
 		}
 		
-		try {
-			Zotero.Schema.updateBundledFiles(null, null, true);
-		}
-		catch (e) {
+		Zotero.Schema.updateBundledFiles(null, null, true)
+		.catch(function (e) {
 			Zotero.debug(e);
 			Zotero.logError(e);
 			alert('Error updating Zotero translators and styles');
-		}
+		});
 	}
 	
 	
