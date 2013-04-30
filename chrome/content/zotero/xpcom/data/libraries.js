@@ -93,10 +93,6 @@ Zotero.Libraries = new function () {
 	
 	
 	this.isFilesEditable = function (libraryID) {
-		if (!this.isEditable(libraryID)) {
-			return false;
-		}
-		
 		var type = this.getType(libraryID);
 		switch (type) {
 			case 'user':

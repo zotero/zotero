@@ -59,7 +59,7 @@ Zotero.Group.prototype.__defineGetter__('description', function () { return this
 Zotero.Group.prototype.__defineSetter__('description', function (val) { this._set('description', val); });
 Zotero.Group.prototype.__defineGetter__('editable', function () { return this._get('editable'); });
 Zotero.Group.prototype.__defineSetter__('editable', function (val) { this._set('editable', val); });
-Zotero.Group.prototype.__defineGetter__('filesEditable', function () { return this._get('filesEditable'); });
+Zotero.Group.prototype.__defineGetter__('filesEditable', function () { if (!this.editable) { return false; } return this._get('filesEditable'); });
 Zotero.Group.prototype.__defineSetter__('filesEditable', function (val) { this._set('filesEditable', val); });
 
 
@@ -146,8 +146,8 @@ Zotero.Group.prototype.loadFromRow = function(row) {
 	this._libraryID = row.libraryID;
 	this._name = row.name;
 	this._description = row.description;
-	this._editable = row.editable;
-	this._filesEditable = row.filesEditable;
+	this._editable = !!row.editable;
+	this._filesEditable = !!row.filesEditable;
 }
 
 
