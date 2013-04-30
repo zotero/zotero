@@ -78,10 +78,34 @@ Zotero.Libraries = new function () {
 	this.isEditable = function (libraryID) {
 		var type = this.getType(libraryID);
 		switch (type) {
+			case 'user':
+				return true;
+			
 			case 'group':
 				var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
 				var group = Zotero.Groups.get(groupID);
 				return group.editable;
+			
+			default:
+				throw ("Unsupported library type '" + type + "' in Zotero.Libraries.getName()");
+		}
+	}
+	
+	
+	this.isFilesEditable = function (libraryID) {
+		if (!this.isEditable(libraryID)) {
+			return false;
+		}
+		
+		var type = this.getType(libraryID);
+		switch (type) {
+			case 'user':
+				return true;
+			
+			case 'group':
+				var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
+				var group = Zotero.Groups.get(groupID);
+				return group.filesEditable;
 			
 			default:
 				throw ("Unsupported library type '" + type + "' in Zotero.Libraries.getName()");

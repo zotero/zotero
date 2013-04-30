@@ -263,9 +263,14 @@ Zotero.Sync.Storage = new function () {
 				}
 				
 				// Get files to upload
-				for each(var itemID in _getFilesToUpload(libraryID)) {
-					var item = Zotero.Items.get(itemID);
-					self.queueItem(item);
+				if (Zotero.Libraries.isFilesEditable(libraryID)) {
+					for each(var itemID in _getFilesToUpload(libraryID)) {
+						var item = Zotero.Items.get(itemID);
+						self.queueItem(item);
+					}
+				}
+				else {
+					Zotero.debug("No file editing access -- skipping file uploads for library " + libraryID);
 				}
 			}
 			
