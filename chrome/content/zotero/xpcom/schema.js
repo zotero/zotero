@@ -3740,7 +3740,7 @@ Zotero.Schema = new function(){
 						creatorInsert: {}
 					};
 					// Do not touch records that have already been converted
-					var extras = Zotero.DB.query("SELECT itemID,libraryID,key,itemTypeID,value FROM items NATURAL JOIN itemData NATURAL JOIN itemDataValues WHERE fieldID=22 AND NOT value LIKE 'mlzsync1:%' AND value LIKE '%{:%'");
+					var extras = Zotero.DB.query("SELECT itemID,libraryID,key,itemTypeID,value FROM items NATURAL JOIN itemData NATURAL JOIN itemDataValues WHERE fieldID=22 AND value LIKE '%{:%' AND NOT value LIKE 'mlzsync1:%'");
 					var t;
 					for each(row in extras) {
 						var itemTypeID = row.itemTypeID;
@@ -3921,21 +3921,24 @@ Zotero.Schema = new function(){
 							} else {
 								Zotero.DB.query("DELETE from itemData WHERE itemID=? AND fieldID=?",[row.itemID,22]);
 							}
-							// Mark actioned items with current timestamp to force sync-up
-							Zotero.DB.query("UPDATE items SET dateModified=? WHERE itemID=?",[Zotero.DB.transactionDateTime,row.itemID]);
-							Zotero.DB.query("UPDATE items SET clientDateModified=? WHERE itemID=?",[Zotero.DB.transactionDateTime,row.itemID]);
+							// Mark actioned items with current timestamp to force sync-up (if editable)
+							Zotero.DB.query("UPDATE items SET dateModified=CURRENT_TIMESTAMP WHERE itemID=? AND libraryID IN (SELECT libraryID FROM groups WHERE editable=1)",[row.itemID]);
+							Zotero.DB.query("UPDATE items SET clientDateModified=CURRENT_TIMESTAMP WHERE itemID=? AND libraryID IN (SELECT libraryID FROM groups WHERE editable=1)",[Zotero.DB.transactionDateTime,row.itemID]);
 						}
 					}
-					// Force update of any entries with multilingual content
+					// Force update of any entries with multilingual content (if editable)
+                    // AHA. This is way way too aggressive.
+/*
 					var sql = "SELECT itemID FROM items"
 						+ " WHERE"
 						+ " itemID in (SELECT DISTINCT itemID FROM itemDataAlt) OR"
 						+ " itemID in (SELECT DISTINCT itemID FROM itemCreatorsAlt)";
 					var localMulti = Zotero.DB.query(sql);
 					for each(row in localMulti) {
-						Zotero.DB.query("UPDATE items SET dateModified=? WHERE itemID=?",[Zotero.DB.transactionDateTime,row.itemID]);
-						Zotero.DB.query("UPDATE items SET clientDateModified=? WHERE itemID=?",[Zotero.DB.transactionDateTime,row.itemID]);
+						Zotero.DB.query("UPDATE items SET dateModified=CURRENT_TIMESTAMP WHERE itemID=? AND libraryID IN (SELECT libraryID FROM groups WHERE editable=1)",[row.itemID]);
+						Zotero.DB.query("UPDATE items SET clientDateModified=CURRENT_TIMESTAMP WHERE itemID=? AND libraryID IN (SELECT libraryID FROM groups WHERE editable=1)",[row.itemID]);
 					}
+*/
 				}
 				Zotero.wait();
 			}
