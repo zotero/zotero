@@ -56,9 +56,7 @@
 					var url = 'https://repo.zotero.org/repo/report';
 					Zotero.HTTP.promise('POST', url,
 						{ body: body, successCodes: false, foreground: true })
-					.then(function (xmlhttp) {
-						_sendErrorReportCallback(xmlhttp);
-					})
+					.then(_sendErrorReportCallback)
 					.done();
 				});
 			}
