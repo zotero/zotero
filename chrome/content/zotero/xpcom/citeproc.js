@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.455",
+    PROCESSOR_VERSION: "1.0.460",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -351,7 +351,7 @@ var CSL = {
         ret[ret.length - 1] += str;
         return ret;
     },
-    SKIP_WORDS: ["but", "or", "yet", "so", "for", "and", "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up", "down", "as", "via", "onto", "over", "till", "de", "d'", "von", "van"],
+    SKIP_WORDS: ["but", "or", "yet", "so", "for", "and", "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up", "down", "as", "via", "onto", "over", "till", "de", "d'", "von", "van", "before", "after", "c", "et", "through","ca"],
     FORMAT_KEY_SEQUENCE: [
         "@strip-periods",
         "@font-style",
@@ -387,6 +387,56 @@ var CSL = {
         "container-author",
         "collection-editor"
     ],
+    LANGS: {
+        "af-ZA":"Afrikaans",
+        "ar-AR":"Arabic",
+        "bg-BG":"Bulgarian",
+        "ca-AD":"Catalan",
+        "cs-CZ":"Czech",
+        "da-DK":"Danish",
+        "de-AT":"Austrian",
+        "de-CH":"German (CH)",
+        "de-DE":"German (DE)",
+        "el-GR":"Greek",
+        "en-GB":"English (GB)",
+        "en-US":"English (US)",
+        "es-ES":"Spanish",
+        "et-EE":"Estonian",
+        "eu":"European",
+        "fa-IR":"Persian",
+        "fi-FI":"Finnish",
+        "fr-CA":"French (CA)",
+        "fr-FR":"French (FR)",
+        "he-IL":"Hebrew",
+        "hr-HR":"Croatian",
+        "hu-HU":"Hungarian",
+        "is-IS":"Icelandic",
+        "it-IT":"Italian",
+        "ja-JP":"Japanese",
+        "km-KH":"Khmer",
+        "ko-KR":"Korean",
+        "lt-LT":"Lithuanian",
+        "lv-LV":"Latvian",
+        "mn-MN":"Mongolian",
+        "nb-NO":"Norwegian (Bokmål)",
+        "nl-NL":"Dutch",
+        "nn-NO":"Norwegian (Nynorsk)",
+        "pl-PL":"Polish",
+        "pt-BR":"Portuguese (BR)",
+        "pt-PT":"Portuguese (PT)",
+        "ro-RO":"Romanian",
+        "ru-RU":"Russian",
+        "sk-SK":"Slovak",
+        "sl-SI":"Slovenian",
+        "sr-RS":"Serbian",
+        "sv-SE":"Swedish",
+        "th-TH":"Thai",
+        "tr-TR":"Turkish",
+        "uk-UA":"Ukranian",
+        "vi-VN":"Vietnamese",
+        "zh-CN":"Chinese (CN)",
+        "zh-TW":"Chinese (TW)"
+    },
     LANG_BASES: {
         af: "af_ZA",
         ar: "ar_AR",
@@ -8607,7 +8657,7 @@ CSL.Node.text = {
                             parallel_variable = "shortTitle";
                         }
                         state.parallel.StartVariable(parallel_variable);
-                        state.parallel.AppendToVariable(Item[parallel_variable]);
+                        state.parallel.AppendToVariable(Item[parallel_variable],parallel_variable);
                     };
                     this.execs.push(func);
                     if (CSL.MULTI_FIELDS.indexOf(this.variables_real[0]) > -1) {
@@ -9702,6 +9752,7 @@ CSL.Parallel = function (state) {
     this.use_parallels = false;
     this.midVars = ["section", "volume", "container-title", "collection-number", "issue", "page-first", "page", "number"];
     this.ignoreVarsLawGeneral = ["first-reference-note-number", "locator", "label","page-first","page","genre"];
+    this.ignoreVarsLawProceduralHistory = ["issued", "first-reference-note-number", "locator", "label","page-first","page","genre","jurisdiction"];
     this.ignoreVarsOrders = ["first-reference-note-number"];
     this.ignoreVarsOther = ["first-reference-note-number", "locator", "label","section","page-first","page"];
 };
@@ -9728,13 +9779,6 @@ CSL.Parallel.prototype.StartCitation = function (sortedItems, out) {
 };
 CSL.Parallel.prototype.StartCite = function (Item, item, prevItemID) {
     var position, len, pos, x, curr, master, last_id, prev_locator, curr_locator, is_master, parallel;
-    if (["treaty"].indexOf(Item.type) > -1) {
-        this.ignoreVars = this.ignoreVarsOrders;
-    } else if (["article-journal","article-magazine"].indexOf(Item.type) > -1) {
-        this.ignoreVars = this.ignoreVarsOther;
-    } else {
-        this.ignoreVars = this.ignoreVarsLawGeneral;
-    }
     if (this.use_parallels) {
         if (this.sets.value().length && this.sets.value()[0].itemId == Item.id) {
             this.ComposeSet();
@@ -9782,6 +9826,24 @@ CSL.Parallel.prototype.StartCite = function (Item, item, prevItemID) {
         this.cite.itemId = "" + Item.id;
         this.cite.prevItemID = "" + prevItemID;
         this.target = "front";
+        if (["treaty"].indexOf(Item.type) > -1) {
+            this.ignoreVars = this.ignoreVarsOrders;
+        } else if (["article-journal","article-magazine"].indexOf(Item.type) > -1) {
+            this.ignoreVars = this.ignoreVarsOther;
+        } else if (item && item.prefix) {
+            this.ignoreVars = this.ignoreVarsLawProceduralHistory;
+            this.cite.useProceduralHistory = true;
+            var prev = this.sets.value()[(this.sets.value().length - 1)];
+            if (prev && prev.back) {
+                for (var i=prev.back.length-1;i>-1;i+=-1) {
+                    if (prev.back[i] && prev[prev.back[i]]) {
+                        delete prev[prev.back[i]];
+                    }
+                }
+            }
+        } else {
+            this.ignoreVars = this.ignoreVarsLawGeneral;
+        }
         if (this.sortedItems && this.sortedItemsPos > 0 && this.sortedItemsPos < this.sortedItems.length) {
             curr = this.sortedItems[this.sortedItemsPos][1];
             last_id = "" + this.sortedItems[(this.sortedItemsPos - 1)][1].id;
@@ -9859,36 +9921,45 @@ CSL.Parallel.prototype.StartVariable = function (variable, real_variable) {
    }
 };
 CSL.Parallel.prototype.AppendBlobPointer = function (blob) {
-    if (this.ignoreVars.indexOf(this.variable) > -1) {
-        return;
-    }
-    if (this.use_parallels && (this.force_collapse || this.try_cite)) {
-        if (["article-journal", "article-magazine"].indexOf(this.cite.Item.type) > -1) {
-            if (["volume","page","page-first","issue"].indexOf(this.variable) > -1) {
-                return;
-            }
-            if ("container-title" === this.variable && this.cite.mid.length > 1) {
-                return;
-            }
+    if (this.use_parallels) {
+        if (this.ignoreVars.indexOf(this.variable) > -1) {
+            return;
         }
-        if (this.variable && (this.try_cite || this.force_collapse) && blob && blob.blobs) {
-            this.data.blobs.push([blob, blob.blobs.length]);
+        if (this.use_parallels && (this.force_collapse || this.try_cite)) {
+            if (["article-journal", "article-magazine"].indexOf(this.cite.Item.type) > -1) {
+                if (["volume","page","page-first","issue"].indexOf(this.variable) > -1) {
+                    return;
+                }
+                if ("container-title" === this.variable && this.cite.mid.length > 1) {
+                    return;
+                }
+            }
+            if (this.variable && (this.try_cite || this.force_collapse) && blob && blob.blobs) {
+                if (!(this.cite.useProceduralHistory && this.target === "back")) {
+                    this.data.blobs.push([blob, blob.blobs.length]);
+                }
+            }
         }
     }
 };
 CSL.Parallel.prototype.AppendToVariable = function (str, varname) {
-    if (this.ignoreVars.indexOf(this.variable) > -1) {
-        return;
-    }
-    if (this.use_parallels && (this.try_cite || this.force_collapse)) {
-        if (this.target !== "back" || true) {
-            this.data.value += "::" + str;
-        } else {
-            var prev = this.sets.value()[(this.sets.value().length - 1)];
-            if (prev) {
-                if (prev[this.variable]) {
-                    if (prev[this.variable].value) {
-                        this.data.value += "::" + str;
+    if (this.use_parallels) {
+        if (this.ignoreVars.indexOf(this.variable) > -1) {
+            return;
+        }
+        if (str && varname === "jurisdiction") {
+            str = str.split(';')[0];
+        }
+        if (this.try_cite || this.force_collapse) {
+            if (this.target !== "back" || true) {
+                this.data.value += "::" + str;
+            } else {
+                var prev = this.sets.value()[(this.sets.value().length - 1)];
+                if (prev) {
+                    if (prev[this.variable]) {
+                        if (prev[this.variable].value) {
+                            this.data.value += "::" + str;
+                        }
                     }
                 }
             }
@@ -9896,47 +9967,49 @@ CSL.Parallel.prototype.AppendToVariable = function (str, varname) {
     }
 };
 CSL.Parallel.prototype.CloseVariable = function () {
-    if (this.ignoreVars.indexOf(this.variable) > -1) {
-        return;
-    }
-    if (this.use_parallels && (this.try_cite || this.force_collapse)) {
-        this.cite[this.variable] = this.data;
-        if (this.sets.value().length > 0) {
-            var prev = this.sets.value()[(this.sets.value().length - 1)];
-            if (this.target === "front" && this.variable === "issued") {
-                if (this.data.value && this.master_was_neutral_cite) {
-                    this.target = "mid";
-                }
-            }
-            if (this.target === "front") {
-                if ((prev[this.variable] || this.data.value) && (!prev[this.variable] || this.data.value !== prev[this.variable].value)) {
-                    if ("issued" !== this.variable) {
-                        this.in_series = false;
+    if (this.use_parallels) {
+        if (this.ignoreVars.indexOf(this.variable) > -1) {
+            return;
+        }
+        if (this.try_cite || this.force_collapse) {
+            this.cite[this.variable] = this.data;
+            if (this.sets.value().length > 0) {
+                var prev = this.sets.value()[(this.sets.value().length - 1)];
+                if (this.target === "front" && this.variable === "issued") {
+                    if (this.data.value && this.master_was_neutral_cite) {
+                        this.target = "mid";
                     }
                 }
-            } else if (this.target === "mid") {
-                if (CSL.PARALLEL_COLLAPSING_MID_VARSET.indexOf(this.variable) > -1) {
-                    if (prev[this.variable]) {
-                        if (prev[this.variable].value === this.data.value) {
-                            this.cite.front_collapse[this.variable] = true;
+                if (this.target === "front") {
+                    if ((prev[this.variable] || this.data.value) && (!prev[this.variable] || this.data.value !== prev[this.variable].value)) {
+                        if ("issued" !== this.variable) {
+                            this.in_series = false;
+                        }
+                    }
+                } else if (this.target === "mid") {
+                    if (CSL.PARALLEL_COLLAPSING_MID_VARSET.indexOf(this.variable) > -1) {
+                        if (prev[this.variable]) {
+                            if (prev[this.variable].value === this.data.value) {
+                                this.cite.front_collapse[this.variable] = true;
+                            } else {
+                                this.cite.front_collapse[this.variable] = false;
+                            }
                         } else {
                             this.cite.front_collapse[this.variable] = false;
                         }
-                    } else {
-                        this.cite.front_collapse[this.variable] = false;
                     }
-                }
-            } else if (this.target === "back") {
-                if (prev[this.variable]) {
-                    if (this.data.value !== prev[this.variable].value 
-                        && this.sets.value().slice(-1)[0].back_forceme.indexOf(this.variable) === -1) {
-                        this.in_series = false;
+                } else if (this.target === "back") {
+                    if (prev[this.variable]) {
+                        if (this.data.value !== prev[this.variable].value 
+                            && this.sets.value().slice(-1)[0].back_forceme.indexOf(this.variable) === -1) {
+                            this.in_series = false;
+                        }
                     }
                 }
             }
         }
+        this.variable = false;
     }
-    this.variable = false;
 };
 CSL.Parallel.prototype.CloseCite = function () {
     var x, pos, len, has_issued, use_journal_info, volume_pos, container_title_pos, section_pos;
@@ -10224,7 +10297,7 @@ CSL.Transform = function (state) {
         }
         value = "";
         if (state.sys.getAbbreviation) {
-            var jurisdiction = state.transform.loadAbbreviation(Item.jurisdiction, myabbrev_family, basevalue);
+            var jurisdiction = state.transform.loadAbbreviation(Item.jurisdiction, myabbrev_family, basevalue, Item.type);
             if (state.transform.abbrevs[jurisdiction][myabbrev_family] && basevalue && state.sys.getAbbreviation) {
                 if (state.transform.abbrevs[jurisdiction][myabbrev_family][basevalue]) {
                     value = state.transform.abbrevs[jurisdiction][myabbrev_family][basevalue];
@@ -10307,7 +10380,7 @@ CSL.Transform = function (state) {
         }
         return ret;
     }
-    function loadAbbreviation(jurisdiction, category, orig) {
+    function loadAbbreviation(jurisdiction, category, orig, itemType) {
         var pos, len;
         if (!jurisdiction) {
             jurisdiction = "default";
@@ -10331,7 +10404,7 @@ CSL.Transform = function (state) {
                     this.abbrevs[tryList[i]] = new state.sys.AbbreviationSegments();
                 }
                 if (!this.abbrevs[tryList[i]][category][orig]) {
-                    state.sys.getAbbreviation(state.opt.styleID, this.abbrevs, tryList[i], category, orig);
+                    state.sys.getAbbreviation(state.opt.styleID, this.abbrevs, tryList[i], category, orig, itemType);
                 }
                 if (this.abbrevs[tryList[i]][category][orig]) {
                     if (i < tryList.length) {
@@ -12859,7 +12932,7 @@ CSL.Registry.prototype.registerAmbigToken = function (akey, id, ambig_config) {
             var old_names_params = this.registry[id].disambig.names[i];
             if (new_names_params !== old_names_params) {
                 this.state.tmp.taintedItemIDs[id] = true;
-            } else {
+            } else if (ambig_config.givens[i]) {
                 for (var j=0,jlen=ambig_config.givens[i].length;j<jlen;j+=1) {
                     var new_gnames_params = ambig_config.givens[i][j];
                     var old_gnames_params = this.registry[id].disambig.givens[i][j];
@@ -13483,7 +13556,8 @@ CSL.Disambiguation.prototype.getCiteData = function(Item, base) {
     }
 };
 CSL.Disambiguation.prototype.captureStepToBase = function() {
-    if (this.state.citation.opt["givenname-disambiguation-rule"] === "by-cite") {
+    if (this.state.citation.opt["givenname-disambiguation-rule"] === "by-cite"
+        && this.base.givens && this.base.givens.length) {
         this.betterbase.givens[this.gnameset][this.gname] = this.base.givens[this.gnameset][this.gname];
     }
     this.betterbase.names[this.gnameset] = this.base.names[this.gnameset];
