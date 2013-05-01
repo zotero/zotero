@@ -440,6 +440,53 @@ Zotero.HTTP = new function() {
 		return xmlhttp;
 	}
 	
+	
+	/**
+	 * Make a foreground HTTP request in order to trigger a proxy authentication
+	 * dialog in Standalone
+	 *
+	 * Other Zotero.HTTP requests are background requests by default, and
+	 * background requests don't trigger a proxy auth prompt, so we make a
+	 * foreground request on startup and resolve the promise
+	 * Zotero.proxyAuthComplete when we're done. Any network requests that want
+	 * to wait for proxy authentication can wait for that promise.
+	 */
+	this.triggerProxyAuth = function () {
+		if (!Zotero.isStandalone
+				|| !Zotero.Prefs.get("triggerProxyAuthentication")
+				|| Zotero.HTTP.browserIsOffline()) {
+			Zotero.proxyAuthComplete = Q();
+			return false;
+		}
+		
+		var deferred = Q.defer();
+		Zotero.proxyAuthComplete = deferred.promise;
+		
+		var uri = ZOTERO_CONFIG.PROXY_AUTH_URL;
+		
+		Zotero.debug("HTTP GET " + uri);
+		
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+					.createInstance();
+		xmlhttp.open("GET", uri, true);
+		
+		xmlhttp.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
+		
+		var useMethodjit = Components.utils.methodjit;
+		/** @ignore */
+		xmlhttp.onreadystatechange = function() {
+			Components.utils.methodjit = useMethodjit;
+			_stateChange(xmlhttp, function (xmlhttp) {
+				Zotero.debug("Proxy auth request completed with status "
+					+ xmlhttp.status + ": " + xmlhttp.responseText);
+				deferred.resolve();
+			});
+		};
+		xmlhttp.send(null);
+		return xmlhttp;
+	}
+	
+	
 	//
 	// WebDAV methods
 	//

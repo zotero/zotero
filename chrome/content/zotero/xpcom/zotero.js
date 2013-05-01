@@ -31,6 +31,7 @@ const ZOTERO_CONFIG = {
 	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
 	BASE_URI: 'http://zotero.org/',
 	WWW_BASE_URL: 'http://www.zotero.org/',
+	PROXY_AUTH_URL: 'http://zotero.org.s3.amazonaws.com/proxy-auth',
 	SYNC_URL: 'https://sync.zotero.org/',
 	API_URL: 'https://api.zotero.org/',
 	API_VERSION: 2,
@@ -543,6 +544,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		}
 		
 		if(!_initDB()) return false;
+		
+		Zotero.HTTP.triggerProxyAuth();
 		
 		// Add notifier queue callbacks to the DB layer
 		Zotero.DB.addCallback('begin', Zotero.Notifier.begin);

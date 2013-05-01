@@ -474,11 +474,18 @@ Zotero.Schema = new function(){
 				var deferred = Q.defer();
 				if (updated) {
 					if (Zotero.Prefs.get('automaticScraperUpdates')) {
-						Zotero.Schema.updateFromRepository(2, function () deferred.resolve());
+						Zotero.proxyAuthComplete
+						.then(function () {
+							Zotero.Schema.updateFromRepository(2, function () deferred.resolve());
+						})
 					}
 				}
 				else {
-					Zotero.Schema.updateFromRepository(false, function () deferred.resolve());
+					Zotero.proxyAuthComplete
+					.then(function () {
+						Zotero.Schema.updateFromRepository(false, function () deferred.resolve());
+					})
+					.done();
 				}
 				return deferred.promise;
 			}
