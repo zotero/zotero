@@ -53,11 +53,12 @@ Zotero.HTTP = new function() {
 	 *         <li>cookieSandbox - The sandbox from which cookies should be taken</li>
 	 *         <li>debug - Log response text and status code</li>
 	 *         <li>dontCache - If set, specifies that the request should not be fulfilled from the cache</li>
+	 *         <li>foreground - Make a foreground request, showing certificate/authentication dialogs if necessary</li>
 	 *         <li>headers - HTTP headers to include in the request</li>
 	 *         <li>requestObserver - Callback to receive XMLHttpRequest after open()</li>
 	 *         <li>responseType - The type of the response. See XHR 2 documentation for legal values</li>
 	 *         <li>responseCharset - The charset the response should be interpreted as</li>
-	 *         <li>successCodes - HTTP status codes that are considered successful</li>
+	 *         <li>successCodes - HTTP status codes that are considered successful, or FALSE to allow all</li>
 	 *     </ul>
 	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
 	 * @return {Promise} A promise resolved with the XMLHttpRequest object if the request
@@ -105,7 +106,9 @@ Zotero.HTTP = new function() {
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 					.createInstance();
 		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
+		if (!options || !options.foreground) {
+			xmlhttp.mozBackgroundRequest = true;
+		}
 		xmlhttp.open(method, url, true);
 		
 		// Pass the request to a callback
@@ -156,6 +159,10 @@ Zotero.HTTP = new function() {
 			
 			if (options && options.successCodes) {
 				var success = options.successCodes.indexOf(status) != -1;
+			}
+			// Explicit FALSE means allow any status code
+			else if (options && options.successCodes === false) {
+				var success = true;
 			}
 			else if(isFile) {
 				var success = status == 200 || status == 0;

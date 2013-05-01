@@ -53,8 +53,13 @@
 						body += key + '=' + encodeURIComponent(parts[key]) + '&';
 					}
 					body = body.substr(0, body.length - 1);
-					Zotero.HTTP.doPost("https://repo.zotero.org/repo/report", body,
-						_sendErrorReportCallback);
+					var url = 'https://repo.zotero.org/repo/report';
+					Zotero.HTTP.promise('POST', url,
+						{ body: body, successCodes: false, foreground: true })
+					.then(function (xmlhttp) {
+						_sendErrorReportCallback(xmlhttp);
+					})
+					.done();
 				});
 			}
 			
