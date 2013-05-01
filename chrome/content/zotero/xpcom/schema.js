@@ -3329,6 +3329,10 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("CREATE TABLE syncedSettings (\n    setting TEXT NOT NULL,\n    libraryID INT NOT NULL,\n    value NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    synced INT NOT NULL DEFAULT 0,\n    PRIMARY KEY (setting, libraryID)\n)");
 					Zotero.DB.query("INSERT OR IGNORE INTO syncObjectTypes VALUES (7, 'setting')");
 				}
+				
+				if (i == 78) {
+					Zotero.DB.query("CREATE INDEX creatorData_name ON creatorData(lastName, firstName)");
+				}
 			}
 			
 			_updateDBVersion('userdata2', toVersion);
