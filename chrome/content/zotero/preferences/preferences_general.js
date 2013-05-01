@@ -44,7 +44,6 @@ Zotero_Preferences.General = {
 		
 		if(document.getElementById("zotero-prefpane-general-showIn").value == 3) {
 			statusBarIcon.value = 0;
-			Zotero.Prefs.set("statusBarIcon", 0);
 			//disable other options
 			var options = statusBarIcon.getElementsByTagName("menuitem");
 			for each(var menuitem in options) {
@@ -54,7 +53,6 @@ Zotero_Preferences.General = {
 			}
 		} else {
 			statusBarIcon.value = statusBarIcon._lastValue;
-			Zotero.Prefs.set("statusBarIcon", statusBarIcon._lastValue);
 			//make sure all options are enabled
 			var options = statusBarIcon.getElementsByTagName("menuitem");
 			for each(var menuitem in options) {

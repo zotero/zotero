@@ -45,7 +45,9 @@
 									<hbox align="center">
 										<label value="&zotero.preferences.showIn;" control="showAs"/>
 									</hbox>
-									<menulist preference="pref-showIn" id="zotero-prefpane-general-showIn" oncommand="Zotero_Preferences.General.handleShowInPreferenceChange()">
+									<menulist preference="pref-showIn"
+										id="zotero-prefpane-general-showIn"
+										oncommand="Zotero_Preferences.General.handleShowInPreferenceChange()">
 										<menupopup>
 											<menuitem id="zotero-prefpane-general-showIn-browserPane" label="&zotero.preferences.showIn.browserPane;" value="1"/>
 											<menuitem id="zotero-prefpane-general-showIn-separateTab" label="&zotero.preferences.showIn.separateTab;" value="2"/>
