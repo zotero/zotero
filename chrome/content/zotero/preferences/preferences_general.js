@@ -59,6 +59,10 @@ Zotero_Preferences.General = {
 				menuitem.hidden = false;
 			}
 		}
+		
+		//trigger value change for instantApply
+		document.getElementById('zotero-prefpane-general')
+			.userChangedValue(statusBarIcon);
 	},
 	
 	
