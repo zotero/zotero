@@ -70,17 +70,32 @@
 					return;
 				}
 				
+				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+					.getService(Components.interfaces.nsIPromptService);
+				
 				if (!xmlhttp.responseXML){
 					try {
 						if (xmlhttp.status>1000){
-							alert(Zotero.getString('errorReport.noNetworkConnection'));
+							ps.alert(
+								null,
+								Zotero.getString('general.error'),
+								Zotero.getString('errorReport.noNetworkConnection')
+							);
 						}
 						else {
-							alert(Zotero.getString('errorReport.invalidResponseRepository'));
+							ps.alert(
+								null,
+								Zotero.getString('general.error'),
+								Zotero.getString('errorReport.invalidResponseRepository')
+							);
 						}
 					}
 					catch (e){
-						alert(Zotero.getString('errorReport.repoCannotBeContacted'));
+						ps.alert(
+							null,
+							Zotero.getString('general.error'),
+							Zotero.getString('errorReport.repoCannotBeContacted')
+						);
 					}
 					
 					wizard.rewind();
@@ -90,7 +105,11 @@
 				
 				var reported = xmlhttp.responseXML.getElementsByTagName('reported');
 				if (reported.length != 1) {
-					alert(Zotero.getString('errorReport.invalidResponseRepository'));
+					ps.alert(
+						null,
+						Zotero.getString('general.error'),
+						Zotero.getString('errorReport.invalidResponseRepository')
+					);
 					wizard.rewind();
 					return;
 				}
