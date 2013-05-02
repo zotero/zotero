@@ -382,7 +382,9 @@ Zotero.Styles = new function() {
 			var enumerator = wm.getEnumerator("zotero:pref");
 			while(enumerator.hasMoreElements()) {
 				var win = enumerator.getNext();
-				win.Zotero_Preferences.Cite.refreshStylesList(styleID);
+				if(win.Zotero_Preferences.Cite) {
+					win.Zotero_Preferences.Cite.refreshStylesList(styleID);
+				}
 			}
 		});
 	}
