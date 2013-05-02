@@ -3786,7 +3786,7 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		var msg = Zotero.getString('sync.conflict.autoChange.log', itemType) + "\n\n";
-		msg += Zotero.getString('sync.conflict.localVersion', localName);
+		msg += Zotero.getString('sync.conflict.localVersion', localName) + "\n";
 		msg += Zotero.getString('sync.conflict.remoteVersion', remoteName);
 		msg += "\n\n";
 		if (localDelete) {
