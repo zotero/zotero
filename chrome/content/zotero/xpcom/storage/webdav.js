@@ -1211,89 +1211,120 @@ Zotero.Sync.Storage.WebDAV = (function () {
 				
 				switch (req.status) {
 					case 207:
-						// Test if Zotero directory is writable
-						var testFileURI = uri.clone();
-						testFileURI.spec += "zotero-test-file.prop";
-						Zotero.HTTP.WebDAV.doPut(testFileURI, " ", function (req) {
-							Zotero.debug(req.responseText);
-							Zotero.debug(req.status);
-							
-							switch (req.status) {
-								case 200:
-								case 201:
-								case 204:
-									Zotero.HTTP.doGet(
-										testFileURI,
-										function (req) {
-											Zotero.debug(req.responseText);
-											Zotero.debug(req.status);
-											
-											switch (req.status) {
-												case 200:
-													// Delete test file
-													Zotero.HTTP.WebDAV.doDelete(
-														testFileURI,
-														function (req) {
-															Zotero.debug(req.responseText);
-															Zotero.debug(req.status);
-															
-															switch (req.status) {
-																case 200: // IIS 5.1 and Sakai return 200
-																case 204:
-																	return deferred.resolve([uri, Zotero.Sync.Storage.SUCCESS]);
+						// Test if missing files return 404s
+						var missingFileURI = uri.clone();
+						missingFileURI.spec += "nonexistent.prop";
+						Zotero.HTTP.promise("GET", missingFileURI, { successCodes: [404], debug: true })
+						.then(function () {
+							// Test if Zotero directory is writable
+							var testFileURI = uri.clone();
+							testFileURI.spec += "zotero-test-file.prop";
+							Zotero.HTTP.WebDAV.doPut(testFileURI, " ", function (req) {
+								Zotero.debug(req.responseText);
+								Zotero.debug(req.status);
+								
+								switch (req.status) {
+									case 200:
+									case 201:
+									case 204:
+										Zotero.HTTP.doGet(
+											testFileURI,
+											function (req) {
+												Zotero.debug(req.responseText);
+												Zotero.debug(req.status);
+												
+												switch (req.status) {
+													case 200:
+														// Delete test file
+														Zotero.HTTP.WebDAV.doDelete(
+															testFileURI,
+															function (req) {
+																Zotero.debug(req.responseText);
+																Zotero.debug(req.status);
 																
-																case 401:
-																	return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED]);
-																
-																case 403:
-																	return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FORBIDDEN]);
-																
-																default:
-																	return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_UNKNOWN]);
+																switch (req.status) {
+																	case 200: // IIS 5.1 and Sakai return 200
+																	case 204:
+																		return deferred.resolve([uri, Zotero.Sync.Storage.SUCCESS]);
+																	
+																	case 401:
+																		return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED]);
+																	
+																	case 403:
+																		return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FORBIDDEN]);
+																	
+																	default:
+																		return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_UNKNOWN]);
+																}
 															}
-														}
-													);
-													return;
-												
-												case 401:
-													return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED]);
-												
-												case 403:
-													return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FORBIDDEN]);
-												
-												// This can happen with cloud storage services
-												// backed by S3 or other eventually consistent
-												// data stores.
-												//
-												// This can also be from IIS 6+, which is configured
-												// not to serve .prop files.
-												// http://support.microsoft.com/kb/326965
-												case 404:
-													return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FILE_MISSING_AFTER_UPLOAD]);
-												
-												case 500:
-													return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR]);
-												
-												default:
-													return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_UNKNOWN]);
+														);
+														return;
+													
+													case 401:
+														return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED]);
+													
+													case 403:
+														return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FORBIDDEN]);
+													
+													// This can happen with cloud storage services
+													// backed by S3 or other eventually consistent
+													// data stores.
+													//
+													// This can also be from IIS 6+, which is configured
+													// not to serve .prop files.
+													// http://support.microsoft.com/kb/326965
+													case 404:
+														return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FILE_MISSING_AFTER_UPLOAD]);
+													
+													case 500:
+														return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR]);
+													
+													default:
+														return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_UNKNOWN]);
+												}
 											}
-										}
-									);
-									return;
-								
-								case 401:
-									return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED]);
-								
-								case 403:
-									return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FORBIDDEN]);
-								
-								case 500:
-									return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR]);
-								
-								default:
-									return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_UNKNOWN]);
+										);
+										return;
+									
+									case 401:
+										return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED]);
+									
+									case 403:
+										return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FORBIDDEN]);
+									
+									case 500:
+										return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR]);
+									
+									default:
+										return deferred.resolve([uri, Zotero.Sync.Storage.ERROR_UNKNOWN]);
+								}
+							});
+						})
+						.catch(function (e) {
+							if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+								if (e.status >= 200 && e.status < 300) {
+									deferred.resolve([uri, Zotero.Sync.Storage.ERROR_NONEXISTENT_FILE_NOT_MISSING]);
+								}
+								else if (e.status == 401) {
+									deferred.resolve([uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED]);
+								}
+								else if (e.status == 403) {
+									deferred.resolve([uri, Zotero.Sync.Storage.ERROR_FORBIDDEN]);
+								}
+								else if (e.status == 500) {
+									deferred.resolve([uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR]);
+								}
+								else {
+									deferred.resolve([uri, Zotero.Sync.Storage.ERROR_UNKNOWN]);
+								}
 							}
-						});
+							else {
+								Zotero.debug(e, 1);
+								Components.utils.reportError(e);
+								deferred.resolve([uri, Zotero.Sync.Storage.ERROR_UNKNOWN]);
+							}
+						})
+						.done();
 						return;
 					
 					case 400:
@@ -1490,6 +1521,11 @@ Zotero.Sync.Storage.WebDAV = (function () {
 					Zotero.getString('general.unknownErrorOccurred'),
 					Zotero.getString('sync.storage.error.checkFileSyncSettings')
 				]);
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_NONEXISTENT_FILE_NOT_MISSING:
+				var errorTitle = Zotero.getString('sync.storage.error.webdav.serverConfig.title');
+				var errorMessage = Zotero.getString('sync.storage.error.webdav.nonexistentFileNotMissing');
 				break;
 		}
 		
