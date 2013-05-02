@@ -167,3 +167,9 @@ pref("extensions.zotero.connector.repo.lastCheck.repoTime", 0);
 // File/URL opening executable if launch() fails
 pref("extensions.zotero.fallbackLauncher.unix", "/usr/bin/xdg-open");
 pref("extensions.zotero.fallbackLauncher.windows", "");
+
+//Translators
+pref("extensions.zotero.translators.attachSupplementary", false);
+pref("extensions.zotero.translators.supplementaryAsLink", false);
+pref("extensions.zotero.translators.RIS.import.ignoreUnknown", false);
+pref("extensions.zotero.translators.RIS.import.keepID", false);
