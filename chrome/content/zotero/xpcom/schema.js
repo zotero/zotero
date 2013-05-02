@@ -3311,7 +3311,7 @@ Zotero.Schema = new function(){
 			fromVersion = 76;
 		}
 		
-		if (fromVersion == toVersion) {
+		if (fromVersion >= toVersion) {
 			return false;
 		}
 		
@@ -3326,12 +3326,12 @@ Zotero.Schema = new function(){
 			// previous revision to that one.
 			for (var i=fromVersion + 1; i<=toVersion; i++) {
 				if (i == 77) {
-					Zotero.DB.query("CREATE TABLE syncedSettings (\n    setting TEXT NOT NULL,\n    libraryID INT NOT NULL,\n    value NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    synced INT NOT NULL DEFAULT 0,\n    PRIMARY KEY (setting, libraryID)\n)");
+					Zotero.DB.query("CREATE TABLE IF NOT EXISTS syncedSettings (\n    setting TEXT NOT NULL,\n    libraryID INT NOT NULL,\n    value NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    synced INT NOT NULL DEFAULT 0,\n    PRIMARY KEY (setting, libraryID)\n)");
 					Zotero.DB.query("INSERT OR IGNORE INTO syncObjectTypes VALUES (7, 'setting')");
 				}
 				
 				if (i == 78) {
-					Zotero.DB.query("CREATE INDEX creatorData_name ON creatorData(lastName, firstName)");
+					Zotero.DB.query("CREATE INDEX IF NOT EXISTS creatorData_name ON creatorData(lastName, firstName)");
 				}
 			}
 			
