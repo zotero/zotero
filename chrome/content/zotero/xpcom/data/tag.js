@@ -502,14 +502,15 @@ Zotero.Tag.prototype.save = function (full) {
 		this._key = key;
 	}
 	
-	Zotero.Tags.reload(this.id);
-	
 	if (isNew) {
 		Zotero.Notifier.trigger('add', 'tag', this.id);
 	}
 	else {
 		Zotero.Notifier.trigger('modify', 'tag', this.id, this._previousData);
 	}
+	
+	this._reset();
+	Zotero.Tags.reload(this.id);
 	
 	return this.id;
 }
@@ -644,7 +645,20 @@ Zotero.Tag.prototype.erase = function () {
 	
 	Zotero.DB.commitTransaction();
 	
+	this._reset();
+	
 	Zotero.Prefs.set('purge.tags', true);
+}
+
+
+Zotero.Tag.prototype._reset = function () {
+	var id = this._id;
+	var libraryID = this._libraryID;
+	var key = this._key;
+	this._init();
+	this._id = id;
+	this._libraryID = libraryID;
+	this._key = key;
 }
 
 
@@ -709,7 +723,7 @@ Zotero.Tag.prototype._setLinkedItems = function (itemIDs) {
 			throw new Error("Invalid itemID '" + itemIDs[i] + "'");
 		}
 		
-		if (this._linkedItemIDs[id]) {
+		if (this._linkedItems[id]) {
 			Zotero.debug("Item " + id + " is already linked to tag " + this.id);
 		}
 		else {
@@ -728,13 +742,14 @@ Zotero.Tag.prototype._setLinkedItems = function (itemIDs) {
 	// Rebuild linked items with items that exist
 	var items = Zotero.Items.get(itemIDs) || [];
 	this._linkedItems = {};
-	for (let i=0; i<items; i++) {
+	for (let i=0; i<items.length; i++) {
 		this._linkedItems[items[i].id] = items[i];
 	}
 	
 	// Mark items not found for removal
 	for (let i=0; i<itemIDs.length; i++) {
-		if (!this._linkedItemIDs[id]) {
+		let id = itemIDs[i];
+		if (!this._linkedItems[id]) {
 			this._linkedItemIDsToRemove.push(id);
 		}
 	}
