@@ -53,8 +53,11 @@
 						body += key + '=' + encodeURIComponent(parts[key]) + '&';
 					}
 					body = body.substr(0, body.length - 1);
-					Zotero.HTTP.doPost("https://repo.zotero.org/repo/report", body,
-						_sendErrorReportCallback);
+					var url = 'https://repo.zotero.org/repo/report';
+					Zotero.HTTP.promise('POST', url,
+						{ body: body, successCodes: false, foreground: true })
+					.then(_sendErrorReportCallback)
+					.done();
 				});
 			}
 			
@@ -65,17 +68,32 @@
 					return;
 				}
 				
+				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+					.getService(Components.interfaces.nsIPromptService);
+				
 				if (!xmlhttp.responseXML){
 					try {
 						if (xmlhttp.status>1000){
-							alert(Zotero.getString('errorReport.noNetworkConnection'));
+							ps.alert(
+								null,
+								Zotero.getString('general.error'),
+								Zotero.getString('errorReport.noNetworkConnection')
+							);
 						}
 						else {
-							alert(Zotero.getString('errorReport.invalidResponseRepository'));
+							ps.alert(
+								null,
+								Zotero.getString('general.error'),
+								Zotero.getString('errorReport.invalidResponseRepository')
+							);
 						}
 					}
 					catch (e){
-						alert(Zotero.getString('errorReport.repoCannotBeContacted'));
+						ps.alert(
+							null,
+							Zotero.getString('general.error'),
+							Zotero.getString('errorReport.repoCannotBeContacted')
+						);
 					}
 					
 					wizard.rewind();
@@ -85,7 +103,11 @@
 				
 				var reported = xmlhttp.responseXML.getElementsByTagName('reported');
 				if (reported.length != 1) {
-					alert(Zotero.getString('errorReport.invalidResponseRepository'));
+					ps.alert(
+						null,
+						Zotero.getString('general.error'),
+						Zotero.getString('errorReport.invalidResponseRepository')
+					);
 					wizard.rewind();
 					return;
 				}

@@ -437,7 +437,9 @@ var ZoteroPane = new function()
 		
 		// Auto-sync on pane open
 		if (Zotero.Prefs.get('sync.autoSync')) {
-			setTimeout(function () {
+			Zotero.proxyAuthComplete
+			.delay(1000)
+			.then(function () {
 				if (!Zotero.Sync.Server.enabled) {
 					Zotero.debug('Sync not enabled -- skipping auto-sync', 4);
 					return;
@@ -454,7 +456,8 @@ var ZoteroPane = new function()
 				}
 				
 				Zotero.Sync.Runner.sync(true);
-			}, 1000);
+			})
+			.done();
 		}
 		
 		// Set sync icon to spinning or not

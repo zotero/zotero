@@ -1345,7 +1345,7 @@ Zotero.Sync.Server = new function () {
 		}
 	};
 	
-	function login(callback) {
+	function login() {
 		var url = _serverURL + "login";
 		
 		var username = Zotero.Sync.Server.username;
@@ -1368,7 +1368,9 @@ Zotero.Sync.Server = new function () {
 		
 		Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.loggingIn'));
 		
-		Zotero.HTTP.doPost(url, body, function (xmlhttp) {
+		return Zotero.HTTP.promise("POST", url,
+			{ body: body, successCodes: false, foreground: !Zotero.Sync.Runner.background })
+		.then(function (xmlhttp) {
 			_checkResponse(xmlhttp, true);
 			
 			var response = xmlhttp.responseXML.childNodes[0];
@@ -1396,10 +1398,6 @@ Zotero.Sync.Server = new function () {
 			
 			
 			//Zotero.debug('Got session ID ' + _sessionID + ' from server');
-			
-			if (callback) {
-				callback();
-			}
 		});
 	}
 	
@@ -1416,9 +1414,11 @@ Zotero.Sync.Server = new function () {
 		
 		if (!_sessionID) {
 			Zotero.debug("Session ID not available -- logging in");
-			Zotero.Sync.Server.login(function () {
+			Zotero.Sync.Server.login()
+			.then(function () {
 				Zotero.Sync.Server.sync(_callbacks);
-			});
+			})
+			.done();
 			return;
 		}
 		
@@ -1472,9 +1472,11 @@ Zotero.Sync.Server = new function () {
 				Zotero.debug("Invalid session ID -- logging in");
 				_sessionID = false;
 				_syncInProgress = false;
-				Zotero.Sync.Server.login(function () {
+				Zotero.Sync.Server.login()
+				.then(function () {
 					Zotero.Sync.Server.sync(_callbacks);
-				});
+				})
+				.done();
 				return;
 			}
 			
@@ -1799,9 +1801,11 @@ Zotero.Sync.Server = new function () {
 	function clear(callback) {
 		if (!_sessionID) {
 			Zotero.debug("Session ID not available -- logging in");
-			Zotero.Sync.Server.login(function () {
+			Zotero.Sync.Server.login()
+			.then(function () {
 				Zotero.Sync.Server.clear(callback);
-			});
+			})
+			.done();
 			return;
 		}
 		
@@ -1813,9 +1817,11 @@ Zotero.Sync.Server = new function () {
 			if (_invalidSession(xmlhttp)) {
 				Zotero.debug("Invalid session ID -- logging in");
 				_sessionID = false;
-				Zotero.Sync.Server.login(function () {
+				Zotero.Sync.Server.login()
+				.then(function () {
 					Zotero.Sync.Server.clear(callback);
-				});
+				})
+				.done();
 				return;
 			}
 			
@@ -1895,27 +1901,29 @@ Zotero.Sync.Server = new function () {
 		if (!xmlhttp.responseText) {
 			var channel = xmlhttp.channel;
 			// Check SSL cert
-			var secInfo = channel.securityInfo;
-			if (secInfo instanceof Ci.nsITransportSecurityInfo) {
-				secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
-				if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE) == Ci.nsIWebProgressListener.STATE_IS_INSECURE) {
-					var url = channel.name;
-					var ios = Components.classes["@mozilla.org/network/io-service;1"].
-								getService(Components.interfaces.nsIIOService);
-					try {
-						var uri = ios.newURI(url, null, null);
-						var host = uri.host;
+			if (channel) {
+				var secInfo = channel.securityInfo;
+				if (secInfo instanceof Ci.nsITransportSecurityInfo) {
+					secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
+					if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE) == Ci.nsIWebProgressListener.STATE_IS_INSECURE) {
+						var url = channel.name;
+						var ios = Components.classes["@mozilla.org/network/io-service;1"].
+									getService(Components.interfaces.nsIIOService);
+						try {
+							var uri = ios.newURI(url, null, null);
+							var host = uri.host;
+						}
+						catch (e) {
+							Zotero.debug(e);
+						}
+						var kbURL = 'http://zotero.org/support/kb/ssl_certificate_error';
+						_error(Zotero.getString('sync.storage.error.webdav.sslCertificateError', host) + "\n\n"
+							+ Zotero.getString('general.seeForMoreInformation', kbURL),
+							false, noReloadOnFailure);
 					}
-					catch (e) {
-						Zotero.debug(e);
+					else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN) == Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
+						_error(Zotero.getString('sync.error.sslConnectionError'), false, noReloadOnFailure);
 					}
-					var kbURL = 'http://zotero.org/support/kb/ssl_certificate_error';
-					_error(Zotero.getString('sync.storage.error.webdav.sslCertificateError', host) + "\n\n"
-						+ Zotero.getString('general.seeForMoreInformation', kbURL),
-						false, noReloadOnFailure);
-				}
-				else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN) == Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
-					_error(Zotero.getString('sync.error.sslConnectionError'), false, noReloadOnFailure);
 				}
 			}
 			if (xmlhttp.status === 0) {
@@ -3771,7 +3779,7 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		var msg = Zotero.getString('sync.conflict.autoChange.log', itemType) + "\n\n";
-		msg += Zotero.getString('sync.conflict.localVersion', localName);
+		msg += Zotero.getString('sync.conflict.localVersion', localName) + "\n";
 		msg += Zotero.getString('sync.conflict.remoteVersion', remoteName);
 		msg += "\n\n";
 		if (localDelete) {
