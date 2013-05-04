@@ -24,6 +24,7 @@ Zotero.MultiCreator.prototype.setFields = function (fields, lang) {
 	} else {
 		if (!this._key[lang]) {
 			this._key[lang] = new Zotero.Creator;
+            this._key[lang].libraryID = this.parent.libraryID;
 			this._lst.push(lang);
 		}
 		this._key[lang].firstName = Zotero.MultiCreator.tidy(fields.firstName);
