@@ -1406,10 +1406,14 @@ Zotero.Schema = new function(){
 		// TEMP: For 'userdata', cap the version at 76
 		// For 'userdata2', versions > 76 are allowed.
 		if (schema == 'userdata' && !newUserdata) {
+
             // MLZ: bump from 76 in Zotero to 77. 
             // Bump again for further upgrades.
             // Silent table install for official Zotero 77 is disabled if
             // table already exists.
+
+            // XXX Need to do better here.
+
 			schemaVersion = Math.min(77, schemaVersion);
 		}
 		
@@ -3407,144 +3411,12 @@ Zotero.Schema = new function(){
 				}
 				
                 // MLZ: multilingual updates
-				/*
-				if (i==77 && _okMultilingual(77)) {
-				}
-				*/
 
-				if (i==78 && _okMultilingual(78)) {
-					Zotero.debug("Multilingual upgrade ok: 78");
-					// Bundled forward from 77.
-					Zotero.DB.query("DROP TABLE IF EXISTS zlsTags");
-					Zotero.DB.query("CREATE TABLE zlsTags (tag TEXT PRIMARY KEY,nickname TEXT,parent TEXT)");
-					Zotero.DB.query("CREATE INDEX zlsTags_nickname ON zlsTags(nickname)");
-					Zotero.DB.query("CREATE INDEX zlsTags_parent ON zlsTags(parent)");
+                // [transitional code covering migration from very early MLZ version removed]
 
-					Zotero.DB.query("DROP TABLE IF EXISTS zlsPreferences");
-					Zotero.DB.query("CREATE TABLE zlsPreferences (profile TEXT NOT NULL,param TEXT NOT NULL,tag TEXT NOT NULL,PRIMARY KEY (profile, param, tag))");
-					Zotero.DB.query("CREATE INDEX zlsPreferences_param ON zlsPreferences(param, profile)");
-
-					Zotero.DB.query("DROP TABLE IF EXISTS creatorsMulti");
-					Zotero.DB.query("CREATE TABLE creatorsMulti (creatorID INTEGER,languageTagID INTEGER,creatorDataID INTEGER,PRIMARY KEY (creatorID, languageTagID),FOREIGN KEY (creatorDataID) REFERENCES creatorData(creatorDataID),FOREIGN KEY (creatorID) REFERENCES creators(creatorID))");
-
-					Zotero.DB.query("DROP TABLE IF EXISTS fieldsMulti");
-					Zotero.DB.query("CREATE TABLE fieldsMulti (itemID INTEGER,fieldID INTEGER,languageTagID INTEGER,valueID INTEGER,PRIMARY KEY (itemID, fieldID, languageTagID))");
-									
-					Zotero.DB.query("DROP TABLE IF EXISTS languageTagData");
-					Zotero.DB.query("CREATE TABLE languageTagData (languageTagID INTEGER PRIMARY KEY,languageTag TEXT NOT NULL,UNIQUE (languageTag))");
-				}
-
-				if (i==79 && _okMultilingual(79)) {
-					Zotero.debug("Multilingual upgrade ok: 79");
-					// XXX: Short-lived tables cast about during development.
-					Zotero.DB.query("DROP TABLE IF EXISTS creatorsMulti");
-					Zotero.DB.query("DROP TABLE IF EXISTS fieldsMulti");
-					Zotero.DB.query("DROP TABLE IF EXISTS creatorsMain");
-					Zotero.DB.query("DROP TABLE IF EXISTS creatorsAlt");
-					Zotero.DB.query("DROP TABLE IF EXISTS itemCreatorsMain");
-					Zotero.DB.query("DROP TABLE IF EXISTS itemCreatorsAlt");
-					// XXX: Don't delete the final-version alt data tables 
-					// XXX: unless very sure they have no useful content.
-					// Zotero.DB.query("DROP TABLE IF EXISTS creatorsAlt");
-					// Zotero.DB.query("DROP TABLE IF EXISTS creatorDataAlt");
-
-					Zotero.DB.query("CREATE TABLE itemDataMain (itemID INTEGER,fieldID INTEGER,languageTag TEXT,PRIMARY KEY (itemID, fieldID, languageTag))");
-
-					Zotero.DB.query("CREATE TABLE itemDataAlt (itemID INTEGER,fieldID INTEGER,languageTag TEXT,valueID INTEGER,PRIMARY KEY (itemID, fieldID, languageTag))");
-
-					Zotero.DB.query("CREATE TABLE creatorsMain (creatorID INT,languageTag TEXT,PRIMARY KEY (creatorID, languageTag))");
-
-					Zotero.DB.query("CREATE TABLE creatorsAlt (creatorID INTEGER,creatorDataAltID INT NOT NULL,dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,libraryID INT,key TEXT NOT NULL,languageTag TEXT,UNIQUE (libraryID, key, languageTag),PRIMARY KEY (creatorID, languageTag))");
-					Zotero.DB.query("CREATE TABLE creatorDataAlt (creatorDataAltID INTEGER PRIMARY KEY,firstName TEXT,lastName TEXT,shortName TEXT)");
-				}
-
-				if (i==80 && _okMultilingual(80)) {
-					Zotero.debug("Multilingual upgrade ok: 80");
-					Zotero.DB.query("DROP TABLE IF EXISTS duplicateCheckList");
-					Zotero.DB.query("CREATE TABLE duplicateCheckList (itemID INTEGER PRIMARY KEY,checkFields TEXT)");
-				}
-
-				if (i==81 && _okMultilingual(81)) {
-					Zotero.debug("Multilingual upgrade ok: 81");
-					Zotero.DB.query("DROP TABLE IF EXISTS itemDataMain");
-					Zotero.DB.query("CREATE TABLE itemDataMain (itemID INTEGER, fieldID INTEGER, languageTag TEXT, PRIMARY KEY (itemID, fieldID))");
-					Zotero.DB.query("DROP TABLE IF EXISTS creatorsMain");
-					Zotero.DB.query("CREATE TABLE creatorsMain (creatorID INTEGER, languageTag TEXT, PRIMARY KEY (creatorID))");
-				}
-
-				if (i==82 && _okMultilingual(82)) {
-					Zotero.debug("Multilingual upgrade ok: 82");
-					// Add key field as primary key on creatorsAlt
-					Zotero.DB.query("CREATE TEMPORARY TABLE tmpCreatorsAlt AS SELECT creatorID,creatorDataAltID,dateAdded,dateModified,clientDateModified,libraryID,key,languageTag FROM creatorsAlt");
-					Zotero.DB.query("DROP TABLE IF EXISTS creatorsAlt");
-					Zotero.DB.query("CREATE TABLE creatorsAlt (creatorID INTEGER,creatorDataAltID INT NOT NULL,dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,libraryID INT,key TEXT NOT NULL,languageTag TEXT,UNIQUE (libraryID, key, languageTag),PRIMARY KEY (creatorID, key, languageTag))");
-					Zotero.DB.query("INSERT INTO creatorsAlt SELECT creatorID,creatorDataAltID,dateAdded,dateModified,clientDateModified,libraryID,key,languageTag FROM tmpCreatorsAlt");
-
-					// Index for the value stored in itemDataValues
-					Zotero.DB.query("CREATE INDEX IF NOT EXISTS itemDataValues_value ON itemDataValues(value)");
-
-					var convie = new Zotero.MultiConvert;
-					convie.fixItems();
-				}
-
-				if (i==83 && _okMultilingual(83)) {
-					Zotero.debug("Multilingual upgrade ok: 83");
-					// Fix creatorsMain -> itemCreatorsMain
-					Zotero.DB.query("DROP TABLE IF EXISTS itemCreatorsMain");
-					Zotero.DB.query("CREATE TABLE itemCreatorsMain (itemID INT,creatorID INT,creatorTypeID INT DEFAULT 1,orderIndex INT DEFAULT 0,languageTag TEXT,PRIMARY KEY (itemID, creatorID, creatorTypeID, orderIndex, languageTag))");
-					Zotero.DB.query("INSERT INTO itemCreatorsMain SELECT itemID, IC.creatorID, IC.creatorTypeID, IC.orderIndex, languageTag FROM itemCreators IC JOIN creatorsMain CM ON IC.creatorID=CM.creatorID");
-					Zotero.DB.query("DROP TABLE IF EXISTS creatorsMain");
-
-					// Fix creatorsAlt -> itemCreatorsAlt
-
-					// Create new table to hold per-item multilingual
-					// creator pointers.
-					Zotero.DB.query("DROP TABLE IF EXISTS itemCreatorsAlt");
-					Zotero.DB.query("CREATE TABLE itemCreatorsAlt (itemID INT,creatorID INT,creatorTypeID INT DEFAULT 1,orderIndex INT DEFAULT 0,languageTag TEXT,PRIMARY KEY (itemID, creatorID, creatorTypeID, orderIndex, languageTag),FOREIGN KEY (itemID) REFERENCES items(itemID),FOREIGN KEY (creatorID) REFERENCES itemCreatorsAlt(creatorID),FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID))");
-
-					// Divide row content up among itemCreatorsAlt,
-					// creators, and creatorData, to produce properly linked
-					// and normalized tables.
-					// Get consolidated rows for creator & each multilingual variant
-					var rows = Zotero.DB.query("SELECT DISTINCT itemID,IC.creatorTypeID,IC.orderIndex,CA.languageTag,CDA.lastName,CDA.firstName,IC.orderIndex FROM itemCreators IC JOIN creators C ON IC.creatorID=C.creatorID JOIN creatorsAlt CA ON C.creatorID=CA.creatorID JOIN creatorDataAlt CDA ON CA.creatorDataAltID=CDA.creatorDataAltID ORDER BY IC.itemID, IC.orderIndex, CA.languageTag");
-					var idgen = new Zotero.ID_Tracker;
-					for (var j in rows) {
-						// Check for existence of entry in creatorData, and either
-						// use it, or create a new one and remember the ID
-						if (rows[j].firstName) {
-							var fieldMode = 0;
-						} else {
-							var fieldMode = 1;
-						}
-
-						if (rows[j].lastName && rows[j].lastName.slice(0, 8) == 'Bazhanov') {
-							Zotero.debug("Processing for conversion: "+rows[j].lastName+" @ "+rows[j].orderIndex);
-						}
-
-						sql = "SELECT creatorDataID FROM creatorData WHERE lastName=? AND firstName=? AND fieldMode=?";
-						var creatorDataID = Zotero.DB.valueQuery(sql, [rows[j].lastName, rows[j].firstName, fieldMode]);
-						if (!creatorDataID) {
-							creatorDataID = idgen.get("creatorData");
-							sql = "INSERT INTO creatorData VALUES (?, ?, ?, '', ?, '')";
-							Zotero.DB.query(sql, [creatorDataID, rows[j].firstName, rows[j].lastName, fieldMode]);
-						}
-
-						// Check for existence of entry in creators, and either
-						// use it, or create a new one and remember the ID
-						sql = "SELECT creatorID FROM creators WHERE creatorDataID=? AND libraryID IS NULL";
-						var creatorID = Zotero.DB.valueQuery(sql, creatorDataID);
-						if (!creatorID) {
-							creatorID = idgen.get("creators");
-							var key = Zotero.ID.getKey();
-							sql = "INSERT INTO creators VALUES (?, ?, ?, ?, ?, NULL, ?)";
-							Zotero.DB.query(sql, [creatorID, creatorDataID, Zotero.DB.transactionDateTime, Zotero.DB.transactionDateTime, Zotero.DB.transactionDateTime, key]);
-						}
-						// Insert appropriate IDs into itemCreatorsAlt
-						Zotero.DB.query("INSERT INTO itemCreatorsAlt VALUES (?, ?, ?, ?, ?)", [rows[j].itemID, creatorID, rows[j].creatorTypeID, rows[j].orderIndex, rows[j].languageTag]);
-					}
-					Zotero.DB.query("DROP TABLE IF EXISTS creatorsAlt");
-					Zotero.DB.query("DROP TABLE IF EXISTS creatorDataAlt");
-				}
+                // Problem to be solved: userdata schema can be 77/mlz or 77/main, or 78/mlz or 78/main.
+                // Need to work out a readable structure for doing the right things in the right
+                // sequence.
 
 				if (i==77 && dbMultilingualVersion==1) {
 
