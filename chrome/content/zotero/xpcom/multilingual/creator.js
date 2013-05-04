@@ -24,7 +24,7 @@ Zotero.MultiCreator.prototype.setFields = function (fields, lang) {
 	} else {
 		if (!this._key[lang]) {
 			this._key[lang] = new Zotero.Creator;
-            this._key[lang].libraryID = this.parent.libraryID;
+			this._key[lang].libraryID = this.parent.libraryID;
 			this._lst.push(lang);
 		}
 		this._key[lang].firstName = Zotero.MultiCreator.tidy(fields.firstName);
@@ -39,7 +39,7 @@ Zotero.MultiCreator.prototype.setFields = function (fields, lang) {
 
 		this._key[lang]._changed = true;
 	}
-    this.parent._changed = true;
+	this.parent._changed = true;
 }
 
 Zotero.MultiCreator.prototype.get = function (field, langs) {
@@ -125,6 +125,7 @@ Zotero.MultiCreator.prototype.merge = function (item, orderIndex, otherCreator, 
 		if (otherCreator.multi._key[langTag].fieldMode == this.parent.fieldMode) {
 			if (!shy || (shy && !this._key[langTag])) {
 				var newCreator = new Zotero.Creator;
+				newCreator.libraryID = this.parent.libraryID;
 				if (this._key[langTag]) {
 					var fields = {};
 					fields.lastName = this._key[langTag].lastName;
@@ -153,6 +154,7 @@ Zotero.MultiCreator.prototype.clone = function (parent, parentLang, item, orderI
 	clone._lst = this._lst.slice();
 	for (var langTag in this._key) {
 		clone._key[langTag] = new Zotero.Creator;
+		clone._key[langTag].libraryID = parent.libraryID;
 		clone._key[langTag].lastName = this._key[langTag].lastName;
 		clone._key[langTag].firstName = this._key[langTag].firstName;
 		clone._key[langTag].shortName = this._key[langTag].shortName;

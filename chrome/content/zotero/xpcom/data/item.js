@@ -1765,25 +1765,21 @@ Zotero.Item.prototype.save = function(options) {
 								}
 								// OOOOO: This makes no sense here? Or does it?
 								if (creator.multi._key[langTag].hasChanged()) {
-									Zotero.debug("Auto-saving changed multilingual creator " + creator.multi._key[langTag].id);
-									creator.multi._key[langTag].save();
-								}
-								
-								sql = "INSERT INTO itemCreatorsAlt VALUES (?,?,?,?,?)";
-								
-								sqlValues = [
-											 { int: itemID },
-											 { int: creator.multi._key[langTag].id },
-											 { int: creator.creatorTypeID },
-											 { int: orderIndex },
-											 langTag
-											 ];
-								
-								Zotero.DB.query(sql, sqlValues);
+									// Zotero.debug("Auto-saving changed multilingual creator " + creator.multi._key[langTag].id + " with libraryID " +creator.multi._key[langTag].libraryID);
+									var creatorID = creator.multi._key[langTag].save();
+                                    
+								    sql = "INSERT INTO itemCreatorsAlt VALUES (?,?,?,?,?)";
+								    sqlValues = [
+										{ int: itemID },
+										{ int: creatorID },
+										{ int: creator.creatorTypeID },
+										{ int: orderIndex },
+										langTag
+									];
+								    Zotero.DB.query(sql, sqlValues);
+							    }
 							}
-							
 						}
-						
 					}
 					
 					/*
@@ -2160,23 +2156,20 @@ Zotero.Item.prototype.save = function(options) {
 							continue;
 						}
 						if (creator.multi._key[langTag].hasChanged()) {
-							Zotero.debug("Auto-saving changed multilingual creator " + creator.multi._key[langTag].id);
-							creator.multi._key[langTag].save();
+							// Zotero.debug("Auto-saving changed multilingual creator " + creator.multi._key[langTag].id + " for library "+creator.multi._key[langTag].libraryID);
+							var creatorID = creator.multi._key[langTag].save();
+
+						    sql = "INSERT INTO itemCreatorsAlt VALUES (?,?,?,?,?)";
+						    sqlValues = [
+							    { int: this.id },
+							    { int: creatorID },
+							    { int: creator.creatorTypeID },
+							    { int: orderIndex },
+							    langTag
+						    ];
+						    Zotero.DB.query(sql, sqlValues);
 						}
-						
-						sql = "INSERT INTO itemCreatorsAlt VALUES (?,?,?,?,?)";
-						
-						sqlValues = [
-							{ int: this.id },
-							{ int: creator.multi._key[langTag].id },
-							{ int: creator.creatorTypeID },
-							{ int: orderIndex },
-							langTag
-						];
-
-						Zotero.DB.query(sql, sqlValues);
 					}
-
 				}
 			}
 			
@@ -5484,8 +5477,8 @@ Zotero.Item.prototype._loadCreators = function() {
 		throw ('ItemID not set for item before attempting to load creators');
 	}
 	// XXXX As below.
-	var sql = 'SELECT creatorID, creatorTypeID, orderIndex FROM itemCreators '
-		+ 'WHERE itemID=? ORDER BY orderIndex';
+	var sql = 'SELECT creatorID, creatorTypeID, orderIndex, libraryID FROM itemCreators IC JOIN items I ON I.itemID=IC.itemID '
+		+ 'WHERE I.itemID=? ORDER BY orderIndex';
 	var creators = Zotero.DB.query(sql, this.id);
 	
 	this._creators = [];
@@ -5499,6 +5492,7 @@ Zotero.Item.prototype._loadCreators = function() {
 		var creatorObj = Zotero.Creators.get(creators[i].creatorID);
 		if (!creatorObj) {
 			creatorObj = new Zotero.Creator();
+            creatorObj.libraryID = creators[i].libraryID;
 			creatorObj.id = creators[i].creatorID;
 		}
 		
@@ -5506,7 +5500,7 @@ Zotero.Item.prototype._loadCreators = function() {
 		sql = "SELECT languageTag FROM itemCreatorsMain WHERE itemID=? AND creatorID=? AND creatorTypeID=? AND orderIndex=?";
 		var langTag = Zotero.DB.valueQuery(sql, [this.id, creators[i].creatorID, creators[i].creatorTypeID, creators[i].orderIndex]);
 		
-		sql = 'SELECT creatorID, creatorTypeID, orderIndex, languageTag FROM itemCreatorsAlt '
+		sql = 'SELECT ICA.creatorID, creatorTypeID, orderIndex, languageTag, libraryID FROM itemCreatorsAlt ICA JOIN creators C ON ICA.creatorID=C.creatorID '
 		+ 'WHERE itemID=? AND orderIndex=? ORDER BY languageTag';
 		var multiRows = Zotero.DB.query(sql, [this.id, i]);
 		
@@ -5518,10 +5512,12 @@ Zotero.Item.prototype._loadCreators = function() {
 			var creatorAltObj = Zotero.Creators.get(multiRows[j].creatorID);
 			if (!creatorAltObj) {
 				creatorAltObj = new Zotero.Creator();
+                creatorAltObj.libraryID = multiRows[j].libraryID;
 				Zotero.debug("XXX Odd: empty creator alternate");
 			}
 			creatorAltObj.id = multiRows[j].creatorID;
 			multi._key[multiRows[j].languageTag] = creatorAltObj;
+            
 			multi._lst.push(multiRows[j].languageTag);
 		}
 

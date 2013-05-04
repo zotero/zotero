@@ -587,7 +587,7 @@ Zotero.Items = new function() {
 	 * @param	{Integer|Integer[]}	ids					Item ids
 	 */
 	function erase(ids) {
-		Zotero.debug("XXX  erase: "+ids);
+		Zotero.debug("erase: "+ids);
 		ids = Zotero.flattenArguments(ids);
 		
 		var usiDisabled = Zotero.UnresponsiveScriptIndicator.disable();

@@ -146,7 +146,6 @@ Zotero.Creator.prototype._set = function (field, val) {
 
 
 Zotero.Creator.prototype.setFields = function (fields) {
-    Zotero.debug("PPPXXX setFields(): "+fields.fieldMode);
 	this.firstName = fields.firstName;
 	this.lastName = fields.lastName;
 	this.fieldMode = fields.fieldMode;
