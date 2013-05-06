@@ -3713,9 +3713,7 @@ Zotero.Schema = new function(){
 								Zotero.DB.query("DELETE from itemData WHERE itemID=? AND fieldID=?",[row.itemID,22]);
 							}
 							// Mark actioned items with current timestamp to force sync-up (if editable)
-							// dateModified should not be necessary here
-							//Zotero.DB.query("UPDATE items SET dateModified=CURRENT_TIMESTAMP WHERE itemID=? AND libraryID IN (SELECT libraryID FROM groups WHERE editable=1)",[row.itemID]);
-							Zotero.DB.query("UPDATE items SET clientDateModified=CURRENT_TIMESTAMP WHERE itemID=? AND libraryID IN (SELECT libraryID FROM groups WHERE editable=1)",[Zotero.DB.transactionDateTime,row.itemID]);
+							Zotero.DB.query("UPDATE items SET clientDateModified=? WHERE itemID=? AND (libraryID IS NULL OR libraryID IN (SELECT libraryID FROM groups WHERE editable=1))",[Zotero.DB.transactionDateTime,row.itemID]);
 						}
 					}
 					Zotero.wait();
@@ -3727,9 +3725,7 @@ Zotero.Schema = new function(){
 						+ " itemID in (SELECT DISTINCT itemID FROM itemCreatorsAlt)";
 					var localMulti = Zotero.DB.query(sql);
 					for each(row in localMulti) {
-						// dateModified should not be necessary here
-						//Zotero.DB.query("UPDATE items SET dateModified=CURRENT_TIMESTAMP WHERE itemID=? AND libraryID IN (SELECT libraryID FROM groups WHERE editable=1)",[row.itemID]);
-						Zotero.DB.query("UPDATE items SET clientDateModified=CURRENT_TIMESTAMP WHERE itemID=? AND libraryID IN (SELECT libraryID FROM groups WHERE editable=1)",[row.itemID]);
+						Zotero.DB.query("UPDATE items SET clientDateModified=? WHERE itemID=? AND (libraryID IS NULL OR libraryID IN (SELECT libraryID FROM groups WHERE editable=1))",[Zotero.DB.transactionDateTime,row.itemID]);
 					}
 					Zotero.wait();
 					_updateDBVersion('multilingual', 2);
@@ -3747,6 +3743,74 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("CREATE INDEX IF NOT EXISTS creatorData_name ON creatorData(lastName, firstName)");
 				}
 
+				if (i==10001) {
+					
+					var sql = "SELECT IG.name AS itemgroup,CG.name AS creatorgroup,IDV.value AS title,CD.lastName AS name," +
+						"ICA.itemID AS itemID,ICA.creatorID AS creatorID,ICA.creatorTypeID AS creatorTypeID,ICA.orderIndex AS orderIndex," +
+						"C.creatorDataID AS creatorDataID,I.libraryID AS libraryID,ICA.languageTag AS languageTag " +
+						"FROM " +
+						"itemCreatorsAlt ICA " +
+						"JOIN items I ON I.itemID=ICA.itemID " +
+						"JOIN creators C ON ICA.creatorID=C.creatorID " +
+						"JOIN creatorData CD ON C.creatorDataID=CD.creatorDataID " +
+						"JOIN itemData ID ON I.itemID=ID.itemID " +
+						"JOIN itemDataValues IDV ON ID.valueID=IDV.valueID " +
+						"LEFT JOIN groups IG ON I.libraryID=IG.libraryID " +
+						"LEFT JOIN groups CG ON C.libraryID=CG.libraryID " +
+						"WHERE ((I.libraryID IS NULL AND C.libraryID IS NOT NULL) " +
+						"OR (I.libraryID IS NOT NULL AND C.libraryID IS NULL) " +
+						"OR (I.libraryID IS NOT NULL AND C.libraryID IS NOT NULL AND I.libraryID!=C.libraryID)) " +
+						"AND ID.fieldID IN (110,112,113) ORDER BY IG.name,CG.name";
+					var res = Zotero.DB.query(sql);
+
+					for (var j=0,jlen=res.length;j<jlen;j+=1) {
+						// Try to find an existing creator with the correct data
+						var sql = "SELECT creatorID FROM creators " +
+							"WHERE creatorDataID=? AND libraryID=?";
+						var sqlParams = [
+							res[j].creatorDataID,
+							res[j].libraryID
+						]
+						var newCreatorID = Zotero.DB.valueQuery(sql, sqlParams);
+						// If none is found, create one
+						if (!newCreatorID) {
+							var key = Zotero.ID.getKey();
+							sql = "INSERT INTO creators VALUES (NULL,?,?,?,?,?,?)";
+							sqlParams = [
+								res[j].creatorDataID,
+								Zotero.DB.transactionDateTime,
+								Zotero.DB.transactionDateTime,
+								Zotero.DB.transactionDateTime,
+								res[j].libraryID,
+								key
+							]
+							Zotero.DB.query(sql, sqlParams);
+							sql = "SELECT creatorID FROM creators WHERE key=? AND libraryID=?";
+							sqlParams = [
+								key,
+								res[j].libraryID
+							]
+							newCreatorID = Zotero.DB.valueQuery(sql, sqlParams);
+						}
+						// Point to the correct creator object
+						sql = "UPDATE itemCreatorsAlt SET creatorID=? WHERE itemID=? AND orderIndex=? AND languageTag=?";
+						sqlParams = [
+							newCreatorID,
+							res[j].itemID,
+							res[j].orderIndex,
+							res[j].languageTag
+						];
+						Zotero.DB.query(sql, sqlParams);
+
+						// Flag the item as updated so it will sync (?)
+						sql = "UPDATE items SET clientDateModified=? WHERE itemID=?";
+						sqlParams = [
+							Zotero.DB.transactionDateTime,
+							res[j].itemID
+						];
+						Zotero.DB.query(sql, sqlParams);
+					}
+				}
 				Zotero.wait();
 			}
 			
