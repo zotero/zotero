@@ -36,6 +36,45 @@ Zotero.Schema = new function(){
 	
 	var self = this;
 	
+    /*
+     * Multilingual Zotero schema upgrade notes
+     *
+     * With MLZ easing its way into wider use, we need more orderly
+     * code for the upgrade process. The challenge is that upgrades
+     * may appear in the Zotero source on which the project is based
+     * (Z-upgrades). Going forward, these may require special handling
+     * to apply correctly against an MLZ database, and may impact
+     * Multilingual Zotero upgrades (M-upgrades).
+     * 
+     * The previous M-upgrade code assumed no Z-upgrade activity.
+     * This worked as a short-term assumption, but we are now starting
+     * to see activity, and a major refactoring of the Zotero schema
+     * is likely to arrive this year or next. When that emerges, it is
+     * important that we be able to follow the changes smoothly in MLZ.
+     *
+     * The current release MLZ client as of this writing brings the
+     * schema safely to version userdata:77. Our difficulties involve
+     * version levels beyond this point, where sequential increments
+     * of userdata.sql in Zotero and MLZ will become ambiguous.
+     *
+     * To avoid ambiguity, the schema version baseline for MLZ clients
+     * will be bumped to 10000. To permit Z-updates to be applied in a
+     * controlled way, the Z version level at which the DB was
+     * migrated to MLZ will be recorded as "mlzSchemaEntryLevel" in
+     * the version table.
+     *
+     * Happily, the existing multilingual.sql schema version record
+     * provides a means of identifying MLZ clients that may require
+     * record conversion: 1 is for old-style client; 2 is for
+     * new-style clients. Old-style MLZ clients can be assumed to be
+     * at schema version 76, and so receive that value as
+     * mlzSchemaEntryLevel.
+     * 
+     * 
+     * 
+     * 
+     */
+
 	/*
 	 * Retrieve the DB schema version
 	 */
@@ -57,13 +96,11 @@ Zotero.Schema = new function(){
 	this.userDataUpgradeRequired = function () {
 		var dbVersion = this.getDBVersion('userdata');
 		var schemaVersion = _getSchemaSQLVersion('userdata');
-
 		// MLZ: upgrade if proposed userdata.sql version is greater than
-        // database record, or if multilingual tables do not yet exist.
+        // database record, or if existing DB is not MLZ
 		var multilingualVersion = this.getDBVersion('multilingual');
 		return dbVersion && (!multilingualVersion || (dbVersion < schemaVersion));
 	}
-	
 	
 	this.showUpgradeWizard = function () {
 		var dbVersion = this.getDBVersion('userdata');
@@ -118,33 +155,17 @@ Zotero.Schema = new function(){
 	 */
 	this.updateSchema = function () {
 		var dbVersion = this.getDBVersion('userdata');
-		var dbVersion2 = this.getDBVersion('userdata2');
-        // MLZ: get multilingual table version record.
-		var dbMultilingualVersion = this.getDBVersion('multilingual');
-		
+ 		
 		// 'schema' check is for old (<= 1.0b1) schema system,
 		// 'user' is for pre-1.0b2 'user' table
-        // MLZ: doNeedSchema is the original Zotero condition.
-        // doNeedMultilingual checks if multilingual tables must be created.
-		var doNeedSchema = !dbVersion && !this.getDBVersion('schema') && !this.getDBVersion('user');
-		var doNeedMultilingual = !dbMultilingualVersion && !_hasMultilingualTables();
-		if (doNeedSchema || doNeedMultilingual) {
-			if (doNeedSchema){
-			Zotero.debug('Database does not exist -- creating\n');
+		if (!dbVersion && !this.getDBVersion('schema') && !this.getDBVersion('user')) {
+			Zotero.debug('Database does not exist -- creating MLZ database\n');
 			_initializeSchema();
-			}
-			if (doNeedMultilingual) {
-			    Zotero.debug('Initializing multilingual database tables\n');
-				_initializeMultilingualSchema();
-				_updateSchema('zls')
-			}
 			return true;
-		}
-		
+        }
+
 		var schemaVersion = _getSchemaSQLVersion('userdata');
-        // MLZ: make a note of the now-installed multilingual schema version.
-		var schemaMultilingualVersion = _getSchemaSQLVersion('multilingual');
-		
+
 		try {
 			Zotero.UnresponsiveScriptIndicator.disable();
 			
@@ -180,13 +201,27 @@ Zotero.Schema = new function(){
 				}
 				if(up1) Zotero.wait();
 
-                // MLZ: install multilingual tables if required.
-				if (!Zotero.Schema.getDBVersion('multilingual') && !_hasMultilingualTables()) {
-					_initializeMultilingualSchema();
-				}
+                // If first-time install of multilingual against an existing DB,
+                // make a permanent note of its version number, and bump the
+                // "multilingual" version flag down to 1 to request extra-field-hack
+                // record conversion.
+                // Earlier (Z-compatible) MLZ clients have schema version 76
+                var mlzVersion = this.getDBVersion('multilingual');
+                if (!mlzVersion) {
+                    _updateSchema('multilingual');
+                    Zotero.wait();
+   			        _updateDBVersion('mlzSchemaEntryLevel', dbVersion);
+                    // Set entry level to userdata2 level, if available
+		            var dbVersion2 = this.getDBVersion('userdata2');
+                    if (dbVersion2) {
+   			            _updateDBVersion('mlzSchemaEntryLevel', dbVersion2);
+                    }
+                    _updateDBVersion('multilingual', 1);
+                } else if (mlzVersion === 1) {
+                    _updateDBVersion('mlzSchemaEntryLevel', 76);
+                }
 
 				var up2 = _migrateUserDataSchema(dbVersion);
-				var up3 = _migrateUserDataSchemaSilent(dbVersion2);
 
 				var up4 = _updateSchema('triggers');
 				if (up2) {
@@ -251,9 +286,6 @@ Zotero.Schema = new function(){
 			})
 			.done();
 		}, 5000);
-
-        // MLZ: this return value is now apparently redundant from 4.0
-		//return up1 || up2 || up3 || up4 || up5;
 	}
 	
 	
@@ -1393,29 +1425,10 @@ Zotero.Schema = new function(){
 	 * Retrieve the version from the top line of the schema SQL file
 	 */
 	function _getSchemaSQLVersion(schema){
-		// TEMP
-		if (schema == 'userdata2') {
-			schema = 'userdata';
-			var newUserdata = true;
-		}
 		var sql = _getSchemaSQL(schema);
 		
 		// Fetch the schema version from the first line of the file
 		var schemaVersion = parseInt(sql.match(/^-- ([0-9]+)/)[1]);
-		
-		// TEMP: For 'userdata', cap the version at 76
-		// For 'userdata2', versions > 76 are allowed.
-		if (schema == 'userdata' && !newUserdata) {
-
-            // MLZ: bump from 76 in Zotero to 77. 
-            // Bump again for further upgrades.
-            // Silent table install for official Zotero 77 is disabled if
-            // table already exists.
-
-            // XXX Need to do better here.
-
-			schemaVersion = Math.min(77, schemaVersion);
-		}
 		
 		_schemaVersions[schema] = schemaVersion;
 		return schemaVersion;
@@ -1456,22 +1469,6 @@ Zotero.Schema = new function(){
 		return str;
 	}
 	
-	
-	function _initializeMultilingualSchema(){
-		Zotero.DB.beginTransaction();
-		try {
-			Zotero.DB.query(_getSchemaSQL('multilingual'));
-			_updateDBVersion('multilingual', _getSchemaSQLVersion('multilingual'));
-			Zotero.DB.commitTransaction();
-		} catch (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
-			Zotero.DB.rollbackTransaction();
-			alert('Error initializing Zotero multilingual tables');
-			throw(e);
-		}
-	}
- 	
 	/*
 	 * Create new DB schema
 	 */
@@ -1486,12 +1483,15 @@ Zotero.Schema = new function(){
 			Zotero.DB.query(_getSchemaSQL('system'));
 			Zotero.DB.query(_getSchemaSQL('userdata'));
 			Zotero.DB.query(_getSchemaSQL('triggers'));
+			Zotero.DB.query(_getSchemaSQL('multilingual'));
+			Zotero.DB.query(_getSchemaSQL('zls'));
 			Zotero.Schema.updateCustomTables(true);
 			
 			_updateDBVersion('system', _getSchemaSQLVersion('system'));
 			_updateDBVersion('userdata', _getSchemaSQLVersion('userdata'));
-			_updateDBVersion('userdata2', _getSchemaSQLVersion('userdata2'));
 			_updateDBVersion('triggers', _getSchemaSQLVersion('triggers'));
+			_updateDBVersion('multilingual', _getSchemaSQLVersion('multilingual'));
+			_updateDBVersion('zls', _getSchemaSQLVersion('zls'));
 			
 			if (!Zotero.Schema.skipDefaultData) {
 				// Quick Start Guide web page item
@@ -1558,7 +1558,7 @@ Zotero.Schema = new function(){
 	function _updateSchema(schema){
 		var dbVersion = Zotero.Schema.getDBVersion(schema);
 		var schemaVersion = _getSchemaSQLVersion(schema);
-		
+
 		if (dbVersion == schemaVersion){
 			return false;
 		}
@@ -1576,8 +1576,10 @@ Zotero.Schema = new function(){
 			}
 			return true;
 		}
+
         // MLZ: decommissioning this code use for very early MLZ migrations.
         // It is not conceivable that instances of the early client schema are still in service.
+        //
         //else if (dbVersion == 32 && schemaVersion == 31 && !Zotero.Schema.getDBVersion('multilingual')) {
 		//	_updateDBVersion(schema, schemaVersion);
 		//	return false;
@@ -1596,74 +1598,6 @@ Zotero.Schema = new function(){
 			return false;
 		}
 	};
-
-	function _hasMultilingualTables () {
-	    var _multilingualTables = [
-		    "creatorsMulti",
-		    "fieldsMulti",
-		    "zlsPreferences",
-		    "languageTagData"
-	    ]
-		for (i = 0, ilen = _multilingualTables.length; i < ilen; i += 1) {
-			if (_tableExists(_multilingualTables[i])) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	function _hasAllTables (tables) {
-		var result = true;
-		for (i = 0, ilen = tables.length; i < ilen; i += 1) {
-			if (!_tableExists(tables[i])) {
-				result = false;
-			}
-		}
-		return result;
-	}
-
-    // MLZ: protect against repeat upgrades by Zotero update2 functions.
-	function _migrateUserDataSchemaSilentOk (num) {
-        var result = true;
-        if (_tableExists("syncedSettings")) {
-            result = false;
-        }
-        return result;
-    }
-
-    // MLZ: early migration support code. Avoids clash with official Zotero upgrade
-    // functions.
-	function _okMultilingual (num) {
-			switch (num) {
-			case 78:
-				if (_tableExists("zlsTags")) {
-					return true;
-				}
-				break;
-			case 79:
-				var tables = ["creatorsMulti","fieldsMulti","zlsPreferences","languageTagData"];
-				if (_hasAllTables(tables)) {
-					return true;
-				}
-				break;
-			case 80:
-				var tables = ["itemDataMain","itemDataAlt","creatorsMain","creatorsAlt","creatorDataAlt"];
-				if (_hasAllTables(tables)) {
-					return true;
-				}
-				break;
-			case 81:
-			case 82:
-			case 83:
-				var tables = ["itemDataMain","itemDataAlt","creatorsMain","creatorsAlt","creatorDataAlt","duplicateCheckList"];
-				if (_hasAllTables(tables)) {
-					return true;
-				}
-				break;
-			}
-			return false;
-	}
-
 
 	/**
 	* Process the response from the repository
@@ -1904,43 +1838,26 @@ Zotero.Schema = new function(){
 		return;
 	}
 	
-	
+
 	/*
 	 * Migrate user data schema from an older version, preserving data
 	 */
 	function _migrateUserDataSchema(fromVersion){
         // MLZ: get multilingual database version record (i.e. multilingual fromVersion)
 		var dbMultilingualVersion = Zotero.Schema.getDBVersion('multilingual');
+        var mlzSchemaEntryLevel = Zotero.Schema.getDBVersion('mlzSchemaEntryLevel');
 		var toVersion = _getSchemaSQLVersion('userdata');
-
-		// MLZ: get multilingual toVersion
-		var toMultilingualVersion = _getSchemaSQLVersion('multilingual');
-
-		// Only upgrades through version 76 are handled here
-        // MLZ: allow higher versions, but disable elements of update2 block
-        // as needed to avoid crash.
-		//toVersion = Math.min(76, toVersion);
 
 		if (fromVersion==toVersion){
 			return false;
 		}
 		
 		if (fromVersion > toVersion){
-        // MLZ: decommissioning this early transitional migration hack.
-		//if (!dbMultilingualVersion) {
-		//	var toVersion = 83;
-		//}
-        //
-		//if (fromVersion > toVersion && Zotero.Schema.getDBVersion('multilingual')){
 			throw("Zotero user data DB version is newer than SQL file");
 		}
 		
 		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
 
-        // MLZ: debugging note
-		if (!Zotero.Schema.getDBVersion('multilingual')) {
-			Zotero.debug('Applying multilingual update');
-		}
 		
 		Zotero.DB.beginTransaction();
 		
@@ -2190,7 +2107,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DELETE FROM itemTags WHERE tagID=0");
 					Zotero.DB.query("DELETE FROM savedSearches WHERE savedSearchID=0");
 				}
-				
+                
 				if (i==23) {
 					Zotero.DB.query("CREATE TABLE IF NOT EXISTS itemNoteTitles (\n    itemID INT,\n    title TEXT,\n    PRIMARY KEY (itemID),\n    FOREIGN KEY (itemID) REFERENCES itemNotes(itemID)\n);");
 					var notes = Zotero.DB.query("SELECT itemID, note FROM itemNotes WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=1)");
@@ -2376,7 +2293,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("ALTER TABLE fulltextItems ADD totalChars INT");
 					Zotero.DB.query("DELETE FROM version WHERE schema='fulltext'");
 				}
-				
+                
 				// 1.5 Sync Preview 1
 				if (i==37) {
 					// Some data cleanup from the pre-FK-trigger days
@@ -2675,7 +2592,7 @@ Zotero.Schema = new function(){
 							}
 						}
 					}
-					
+                    
 					Zotero.wait();
 					
 					Zotero.DB.query("DROP TABLE tags");
@@ -2701,7 +2618,7 @@ Zotero.Schema = new function(){
 					
 					// Migrate attachment folders to secondary keys
 					Zotero.DB.query("UPDATE itemAttachments SET path=REPLACE(path, itemID || '/', 'storage:') WHERE path REGEXP '^[0-9]+/'");
-					
+                    
 					if (Zotero.Prefs.get('useDataDir')) {
 						var dataDir = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
 						dataDir.persistentDescriptor = Zotero.Prefs.get('dataDir');
@@ -2727,6 +2644,7 @@ Zotero.Schema = new function(){
 					for each(var row in rows) {
 						keys[row.itemID] = row.key;
 					}
+
 					if (storage37.exists()) {
 						var entries = storage37.directoryEntries;
 						entries.QueryInterface(Components.interfaces.nsIDirectoryEnumerator);
@@ -2752,8 +2670,7 @@ Zotero.Schema = new function(){
 									file: file,
 									key: keys[id]
 								});
-							}
-							else {
+							} else {
 								orphanQueue.push({
 									id: id,
 									file: file
@@ -2761,9 +2678,9 @@ Zotero.Schema = new function(){
 							}
 						}
 						entries.close();
-						
+                        
 						Zotero.wait();
-						
+                        
 						if (orphanQueue.length) {
 							if (!orphaned.exists()) {
 								orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
@@ -2808,7 +2725,7 @@ Zotero.Schema = new function(){
 								movedFiles37[orphan.id] = orphan.file;
 							}
 						}
-						
+                        
 						Zotero.wait();
 						
 						for each(var dir in renameQueue) {
@@ -2825,7 +2742,7 @@ Zotero.Schema = new function(){
 							Zotero.File.putContents(moveReportFile, moveReport);
 						}
 					}
-					
+                    
 					Zotero.wait();
 					
 					// Migrate big integers
@@ -2856,7 +2773,7 @@ Zotero.Schema = new function(){
 						Zotero.DB.query("UPDATE fulltextItems SET itemID=? WHERE itemID=?", params);
 					}
 				}
-				
+                
 				// 1.5 Sync Preview 2
 				if (i==38) {
 					var ids = Zotero.DB.columnQuery("SELECT itemID FROM items WHERE itemTypeID=14 AND itemID NOT IN (SELECT itemID FROM itemAttachments)");
@@ -2933,7 +2850,7 @@ Zotero.Schema = new function(){
 				if (i==42) {
 					Zotero.DB.query("UPDATE itemAttachments SET syncState=0");
 				}
-				
+                
 				// 1.5 Sync Preview 2.3
 				if (i==43) {
 					Zotero.DB.query("UPDATE itemNotes SET note='<div class=\"zotero-note znv1\">' || TEXT2HTML(note) || '</div>' WHERE note NOT LIKE '<div class=\"zotero-note %'");
@@ -3135,7 +3052,7 @@ Zotero.Schema = new function(){
 				if (i==48) {
 					Zotero.DB.query("CREATE TABLE deletedItems (\n    itemID INTEGER PRIMARY KEY,\n    dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL\n);");
 				}
-				
+                
 				if (i==49) {
 					Zotero.DB.query("ALTER TABLE collections RENAME TO collectionsOld");
 					Zotero.DB.query("DROP INDEX creators_creatorDataID");
@@ -3257,7 +3174,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE tmpEmptyCreators");
 					Zotero.DB.query("DELETE FROM creatorData WHERE firstName='' AND lastName=''");
 				}
-				
+                
 				if (i==56) {
 					Zotero.DB.query("UPDATE itemAttachments SET mimeType=charsetID, charsetID=NULL WHERE charsetID REGEXP '[a-zA-Z0-9\-]+/[a-zA-Z0-9\-]'");
 				}
@@ -3331,7 +3248,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("INSERT INTO syncDeleteLog SELECT syncObjectTypeID, IFNULL(libraryID, 0) AS libraryID, key, timestamp FROM syncDeleteLogOld");
 					Zotero.DB.query("DROP TABLE syncDeleteLogOld");
 				}
-				
+                
 				if (i==65) {
 					Zotero.DB.query("UPDATE itemAttachments SET sourceItemID=NULL WHERE sourceItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (1,14))");
 					Zotero.DB.query("UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (1,14))");
@@ -3394,7 +3311,7 @@ Zotero.Schema = new function(){
 				if (i==73) {
 					Zotero.DB.query("UPDATE savedSearchConditions SET condition='libraryCatalog' WHERE condition='repository'");
 				}
-				
+
 				// 2.1b1
 				if (i==74) {
 					Zotero.DB.query("CREATE INDEX deletedItems_dateDeleted ON deletedItems(dateDeleted)");
@@ -3409,16 +3326,12 @@ Zotero.Schema = new function(){
 				if (i==76) {
 					Zotero.DB.query("DELETE FROM itemTags WHERE tagID IS NULL");
 				}
-				
-                // MLZ: multilingual updates
+                
+                // MLZ: multilingual controls updates from here
 
-                // [transitional code covering migration from very early MLZ version removed]
-
-                // Problem to be solved: userdata schema can be 77/mlz or 77/main, or 78/mlz or 78/main.
-                // Need to work out a readable structure for doing the right things in the right
-                // sequence.
-
-				if (i==77 && dbMultilingualVersion==1) {
+                // Do this one only if DB may contain extra-field-hack entries
+                // Otherwise, skip it
+				if (i==10000 && dbMultilingualVersion==1) {
 
 					// Date field IDs
 					var dateFieldIDs = [14, 27, 52, 96, 100, 121, 1265, 1266, 1268, 1272, 1277, 1278, 1279];
@@ -3737,26 +3650,27 @@ Zotero.Schema = new function(){
 									} else {
 										creatorDataID = Zotero.DB.valueQuery("SELECT creatorDataID FROM creatorData WHERE firstName=? AND lastName=? AND fieldMode=?",[firstName,lastName,fieldMode]);
 									}
-									// Look in creators IN THIS LIBRARY for creatorDataID
-									var hasCreatorID;
+									// Look in creators IN THIS LIBRARY for one carrying this creatorDataID
+									var creatorID;
 									if (!row.libraryID) {
-										hasCreatorID = Zotero.DB.valueQuery("SELECT COUNT(*) FROM creators WHERE key=? AND libraryID IS NULL AND creatorDataID=?",[row.key,creatorDataID])
+										creatorID = Zotero.DB.valueQuery("SELECT creatorID FROM creators WHERE libraryID IS NULL AND creatorDataID=?",[creatorDataID])
 									} else {
-										hasCreatorID = Zotero.DB.valueQuery("SELECT COUNT(*) FROM creators WHERE key=? AND libraryID=? AND creatorDataID=?",[row.key,row.libraryID,creatorDataID])
+										creatorID = Zotero.DB.valueQuery("SELECT creatorID FROM creators WHERE libraryID=? AND creatorDataID=?",[row.libraryID,creatorDataID])
 									}
 									// Insert value if necessary and get creatorID
-									if (!hasCreatorID) {
+									if (!creatorID) {
+                                        var creatorKey = Zotero.ID.getKey();
 										if (!row.libraryID) {
-											Zotero.DB.query("INSERT INTO creators VALUES (NULL, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, ?)",[creatorDataID,row.key]);
+											Zotero.DB.query("INSERT INTO creators VALUES (NULL, ?, ?, ?, ?, NULL, ?)",[creatorDataID,Zotero.DB.transactionDateTime,Zotero.DB.transactionDateTime,Zotero.DB.transactionDateTime,creatorKey]);
 										} else {
-											Zotero.DB.query("INSERT INTO creators VALUES (NULL, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?)",[creatorDataID,row.libraryID,row.key]);
+											Zotero.DB.query("INSERT INTO creators VALUES (NULL, ?, ?, ?, ?, ?, ?)",[creatorDataID,Zotero.DB.transactionDateTime,Zotero.DB.transactionDateTime,Zotero.DB.transactionDateTime,row.libraryID,creatorKey]);
 										}
 									}
 									var creatorID;
 									if (!row.libraryID) {
-										creatorID = Zotero.DB.valueQuery("SELECT creatorID FROM creators WHERE creatorDataID=? AND libraryID IS NULL AND key=?",[creatorDataID,row.key]);
+										creatorID = Zotero.DB.valueQuery("SELECT creatorID FROM creators WHERE creatorDataID=? AND libraryID IS NULL",[creatorDataID]);
 									} else {
-										creatorID = Zotero.DB.valueQuery("SELECT creatorID FROM creators WHERE creatorDataID=? AND libraryID=? AND key=?",[creatorDataID,row.libraryID,row.key]);
+										creatorID = Zotero.DB.valueQuery("SELECT creatorID FROM creators WHERE creatorDataID=? AND libraryID=?",[creatorDataID,row.libraryID]);
 									}
 									
 									// Look in itemCreators on this itemID for creatorID with the same creatorTypeID
@@ -3764,8 +3678,12 @@ Zotero.Schema = new function(){
 									// If it's not already in there, insert it, incrementing the orderIndex
 									if (!hasItemCreator) {
 										var maxIndex = Zotero.DB.valueQuery("SELECT MAX(orderIndex) FROM itemCreators WHERE itemID=?",[row.itemID]);
-										maxIndex += 1;
-										Zotero.DB.query("INSERT INTO itemCreators VALUES (?, ?, ?, ?)",[row.itemID,creatorID,t.creatorInsert[cslKey],maxIndex]);
+                                        if ("number" === typeof maxIndex) {
+										    maxIndex += 1;
+										    Zotero.DB.query("INSERT INTO itemCreators VALUES (?, ?, ?, ?)",[row.itemID,creatorID,t.creatorInsert[cslKey],maxIndex]);
+                                        } else {
+										    Zotero.DB.query("INSERT INTO itemCreators VALUES (?, ?, ?, ?)",[row.itemID,creatorID,t.creatorInsert[cslKey],0]);
+                                        }
 									}
 									// Remove variable hack code from Extra
 									// XXX Build a compiled regexp with the variable name
@@ -3795,24 +3713,40 @@ Zotero.Schema = new function(){
 								Zotero.DB.query("DELETE from itemData WHERE itemID=? AND fieldID=?",[row.itemID,22]);
 							}
 							// Mark actioned items with current timestamp to force sync-up (if editable)
-							Zotero.DB.query("UPDATE items SET dateModified=CURRENT_TIMESTAMP WHERE itemID=? AND libraryID IN (SELECT libraryID FROM groups WHERE editable=1)",[row.itemID]);
+                            // dateModified should not be necessary here
+							//Zotero.DB.query("UPDATE items SET dateModified=CURRENT_TIMESTAMP WHERE itemID=? AND libraryID IN (SELECT libraryID FROM groups WHERE editable=1)",[row.itemID]);
 							Zotero.DB.query("UPDATE items SET clientDateModified=CURRENT_TIMESTAMP WHERE itemID=? AND libraryID IN (SELECT libraryID FROM groups WHERE editable=1)",[Zotero.DB.transactionDateTime,row.itemID]);
 						}
 					}
+                    Zotero.wait();
+
 					// Force update of any entries with multilingual content (if editable)
-                    // AHA. This is way way too aggressive.
-/*
 					var sql = "SELECT itemID FROM items"
 						+ " WHERE"
 						+ " itemID in (SELECT DISTINCT itemID FROM itemDataAlt) OR"
 						+ " itemID in (SELECT DISTINCT itemID FROM itemCreatorsAlt)";
 					var localMulti = Zotero.DB.query(sql);
 					for each(row in localMulti) {
-						Zotero.DB.query("UPDATE items SET dateModified=CURRENT_TIMESTAMP WHERE itemID=? AND libraryID IN (SELECT libraryID FROM groups WHERE editable=1)",[row.itemID]);
+                        // dateModified should not be necessary here
+						//Zotero.DB.query("UPDATE items SET dateModified=CURRENT_TIMESTAMP WHERE itemID=? AND libraryID IN (SELECT libraryID FROM groups WHERE editable=1)",[row.itemID]);
 						Zotero.DB.query("UPDATE items SET clientDateModified=CURRENT_TIMESTAMP WHERE itemID=? AND libraryID IN (SELECT libraryID FROM groups WHERE editable=1)",[row.itemID]);
 					}
-*/
+                    Zotero.wait();
+                    _updateDBVersion('multilingual', 2);
+                    Zotero.wait();
+
 				}
+
+				if (i==10000 && mlzSchemaEntryLevel && mlzSchemaEntryLevel < 77) {
+					Zotero.DB.query("CREATE TABLE IF NOT EXISTS syncedSettings (\n    setting TEXT NOT NULL,\n    libraryID INT NOT NULL,\n    value NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    synced INT NOT NULL DEFAULT 0,\n    PRIMARY KEY (setting, libraryID)\n)");
+					Zotero.DB.query("INSERT OR IGNORE INTO syncObjectTypes VALUES (7, 'setting')");
+                    Zotero.wait();
+                }
+
+				if (i==10000 && mlzSchemaEntryLevel && mlzSchemaEntryLevel < 78) {
+					Zotero.DB.query("CREATE INDEX IF NOT EXISTS creatorData_name ON creatorData(lastName, firstName)");
+                }
+
 				Zotero.wait();
 			}
 			
@@ -3854,53 +3788,6 @@ Zotero.Schema = new function(){
 				ps.alert(null, title, Zotero.getString('upgrade.couldNotMigrate', Zotero.appName) + "\n\n" + Zotero.getString('upgrade.couldNotMigrate.restart'));
 			}
 			
-			throw(e);
-		}
-		
-		return true;
-	}
-	
-	
-	// TEMP
-	//
-	// TODO: Make this asynchronous, and make it block other SQLite
-	function _migrateUserDataSchemaSilent(fromVersion) {
-		var toVersion = _getSchemaSQLVersion('userdata2');
-		
-		if (!fromVersion) {
-			fromVersion = 76;
-		}
-		
-		if (fromVersion >= toVersion) {
-			return false;
-		}
-		
-		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
-		
-		Zotero.DB.beginTransaction();
-		
-		try {
-			// Step through version changes until we reach the current version
-			//
-			// Each block performs the changes necessary to move from the
-			// previous revision to that one.
-			for (var i=fromVersion + 1; i<=toVersion; i++) {
-				if (i == 77 && _migrateUserDataSchemaSilentOk(i)) {
-					Zotero.DB.query("CREATE TABLE IF NOT EXISTS syncedSettings (\n    setting TEXT NOT NULL,\n    libraryID INT NOT NULL,\n    value NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    synced INT NOT NULL DEFAULT 0,\n    PRIMARY KEY (setting, libraryID)\n)");
-					Zotero.DB.query("INSERT OR IGNORE INTO syncObjectTypes VALUES (7, 'setting')");
-				}
-				
-				if (i == 78) {
-					Zotero.DB.query("CREATE INDEX IF NOT EXISTS creatorData_name ON creatorData(lastName, firstName)");
-				}
-			}
-			
-			_updateDBVersion('userdata2', toVersion);
-			
-			Zotero.DB.commitTransaction();
-		}
-		catch (e) {
-			Zotero.DB.rollbackTransaction();
 			throw(e);
 		}
 		
