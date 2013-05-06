@@ -1,27 +1,9 @@
 -- 2
 
--- Copyright (c) 2009 Center for History and New Media
---                    George Mason University, Fairfax, Virginia, USA
---                    http://zotero.org
---
--- This file is part of Zotero.
--- 
--- Zotero is free software: you can redistribute it and/or modify
--- it under the terms of the GNU Affero General Public License as published by
--- the Free Software Foundation, either version 3 of the License, or
--- (at your option) any later version.
--- 
--- Zotero is distributed in the hope that it will be useful,
--- but WITHOUT ANY WARRANTY; without even the implied warranty of
--- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
--- GNU Affero General Public License for more details.
--- 
--- You should have received a copy of the GNU Affero General Public License
--- along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-
-
--- This file creates tables containing user-specific data for new users --
--- any changes made here must be mirrored in transition steps in schema.js::_migrateSchema()
+-- This code is used only when migrating to MLZ from an existing
+-- Zotero DB, or when creating an MLZ DB from scratch. In the former
+-- case the version number ("multilingual") will be bumped down to "1"
+-- during install to indicate that hack-field records should be handled.
 
 CREATE TABLE zlsTags (
 	tag TEXT PRIMARY KEY,
@@ -73,10 +55,5 @@ CREATE TABLE itemDataAlt (
     languageTag TEXT,
     valueID INTEGER,
 	PRIMARY KEY (itemID, fieldID, languageTag)
-);
-
-CREATE TABLE duplicateCheckList (
-    itemID INTEGER PRIMARY KEY,
-    checkFields TEXT
 );
 
