@@ -680,10 +680,10 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 				for (var langTag in copiedMultilingualFieldData[f[0]]) {
 					this.setField(f[0], copiedMultilingualFieldData[f[0]][langTag], true, langTag);
 				}
-            }
+			}
 		}
 	}
-    
+	
 	if (loadIn) {
 		this._itemDataLoaded = false;
 	}
@@ -980,7 +980,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn, lang, force_top)
 				value = "\u202b" + value + "\u202c";
 			}
 		}
-        // Official 3.0 branch uses this for the condition below
+		// Official 3.0 branch uses this for the condition below
 		//if ((typeof this._itemData[fieldID] == 'undefined' && value === false)
 		//		|| (typeof this._itemData[fieldID] != 'undefined'
 		//			&& this._itemData[fieldID] === value)) {
@@ -1004,7 +1004,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn, lang, force_top)
 		}
 		
 		// Save a copy of the field before modifying
-        // (This should probably be extended to catch multilingual field values)
+		// (This should probably be extended to catch multilingual field values)
 		this._markFieldChange(
 			Zotero.ItemFields.getName(field), this._itemData[fieldID]
 		);
@@ -1341,11 +1341,11 @@ Zotero.Item.prototype.setCreator = function(orderIndex,
 	var multiChange = false;
 	if (!this._creators[orderIndex]) {
 		// If no creator at all at this position, add one
-	    this._creators[orderIndex] = {
-		    ref: creator,
+		this._creators[orderIndex] = {
+			ref: creator,
 			creatorTypeID: creatorTypeID,
 			multi: new Zotero.MultiCreator(creator, langTag)
-	    };
+		};
 		// OOOOO: Aha. Overwrites.  Bad.
 		headlineChange = orderIndex;
 	} else if (!mytarget) {
@@ -1767,8 +1767,8 @@ Zotero.Item.prototype.save = function(options) {
 								if (creator.multi._key[langTag].hasChanged()) {
 									// Zotero.debug("Auto-saving changed multilingual creator " + creator.multi._key[langTag].id + " with libraryID " +creator.multi._key[langTag].libraryID);
 									creator.multi._key[langTag].save();
-                                }
-                                var creatorID = creator.multi._key[langTag].id;
+								}
+								var creatorID = creator.multi._key[langTag].id;
 
 								sql = "INSERT INTO itemCreatorsAlt VALUES (?,?,?,?,?)";
 								sqlValues = [
@@ -2156,13 +2156,13 @@ Zotero.Item.prototype.save = function(options) {
 						if (!creator || !creator.multi._key[langTag]) {
 							continue;
 						}
-                        
+						
 						if (creator.multi._key[langTag].hasChanged()) {
 							// Zotero.debug("Auto-saving changed multilingual creator " + creator.multi._key[langTag].id + " for library "+creator.multi._key[langTag].libraryID);
 							creator.multi._key[langTag].save();
-                        }
-                        var creatorID = creator.multi._key[langTag].id;
-                        
+						}
+						var creatorID = creator.multi._key[langTag].id;
+						
 						sql = "INSERT INTO itemCreatorsAlt VALUES (?,?,?,?,?)";
 						sqlValues = [
 							{ int: this.id },
@@ -4736,7 +4736,7 @@ Zotero.Item.prototype.multiDiff = function (otherItems, ignoreFields) {
  * @param  {Boolean}       [skipTags=false]       Skip tags (implied by 'unsaved')
  */
 Zotero.Item.prototype.clone = function(includePrimary, newItem, unsaved, skipTags) {
-    var newItem;
+	var newItem;
 	Zotero.debug('Cloning item ' + this.id);
 	
 	if (includePrimary && newItem) {
@@ -5491,7 +5491,7 @@ Zotero.Item.prototype._loadCreators = function() {
 		var creatorObj = Zotero.Creators.get(creators[i].creatorID);
 		if (!creatorObj) {
 			creatorObj = new Zotero.Creator();
-            creatorObj.libraryID = creators[i].libraryID;
+			creatorObj.libraryID = creators[i].libraryID;
 			creatorObj.id = creators[i].creatorID;
 		}
 		
@@ -5511,12 +5511,12 @@ Zotero.Item.prototype._loadCreators = function() {
 			var creatorAltObj = Zotero.Creators.get(multiRows[j].creatorID);
 			if (!creatorAltObj) {
 				creatorAltObj = new Zotero.Creator();
-                creatorAltObj.libraryID = multiRows[j].libraryID;
+				creatorAltObj.libraryID = multiRows[j].libraryID;
 				Zotero.debug("XXX Odd: empty creator alternate");
 			}
 			creatorAltObj.id = multiRows[j].creatorID;
 			multi._key[multiRows[j].languageTag] = creatorAltObj;
-            
+			
 			multi._lst.push(multiRows[j].languageTag);
 		}
 
@@ -5593,7 +5593,7 @@ Zotero.Item.prototype._loadItemData = function() {
 	this._itemDataLoaded = true;
 
 	// This does need to run from this position, to avoid a fatal loop ... but it won't work here
-    // because the libraryID cannot be adjusted after loading the creator. Hmmm.
+	// because the libraryID cannot be adjusted after loading the creator. Hmmm.
 	if (this._itemData[22] && ("" + this._itemData[22]).slice(0, 9) === 'mlzsync1:') {
 		var data = {itemTypeID:this._itemTypeID};
 		var obj = Zotero.Sync.Server.Data.decodeMlzFields(this,data,this._itemData[22],{});
