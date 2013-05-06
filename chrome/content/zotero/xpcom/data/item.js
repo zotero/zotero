@@ -1766,18 +1766,19 @@ Zotero.Item.prototype.save = function(options) {
 								// OOOOO: This makes no sense here? Or does it?
 								if (creator.multi._key[langTag].hasChanged()) {
 									// Zotero.debug("Auto-saving changed multilingual creator " + creator.multi._key[langTag].id + " with libraryID " +creator.multi._key[langTag].libraryID);
-									var creatorID = creator.multi._key[langTag].save();
-                                    
-								    sql = "INSERT INTO itemCreatorsAlt VALUES (?,?,?,?,?)";
-								    sqlValues = [
-										{ int: itemID },
-										{ int: creatorID },
-										{ int: creator.creatorTypeID },
-										{ int: orderIndex },
-										langTag
-									];
-								    Zotero.DB.query(sql, sqlValues);
-							    }
+									creator.multi._key[langTag].save();
+                                }
+                                var creatorID = creator.multi._key[langTag].id;
+
+								sql = "INSERT INTO itemCreatorsAlt VALUES (?,?,?,?,?)";
+								sqlValues = [
+									{ int: itemID },
+									{ int: creatorID },
+									{ int: creator.creatorTypeID },
+									{ int: orderIndex },
+									langTag
+								];
+								Zotero.DB.query(sql, sqlValues);
 							}
 						}
 					}
@@ -2155,20 +2156,22 @@ Zotero.Item.prototype.save = function(options) {
 						if (!creator || !creator.multi._key[langTag]) {
 							continue;
 						}
+                        
 						if (creator.multi._key[langTag].hasChanged()) {
 							// Zotero.debug("Auto-saving changed multilingual creator " + creator.multi._key[langTag].id + " for library "+creator.multi._key[langTag].libraryID);
-							var creatorID = creator.multi._key[langTag].save();
-
-						    sql = "INSERT INTO itemCreatorsAlt VALUES (?,?,?,?,?)";
-						    sqlValues = [
-							    { int: this.id },
-							    { int: creatorID },
-							    { int: creator.creatorTypeID },
-							    { int: orderIndex },
-							    langTag
-						    ];
-						    Zotero.DB.query(sql, sqlValues);
-						}
+							creator.multi._key[langTag].save();
+                        }
+                        var creatorID = creator.multi._key[langTag].id;
+                        
+						sql = "INSERT INTO itemCreatorsAlt VALUES (?,?,?,?,?)";
+						sqlValues = [
+							{ int: this.id },
+							{ int: creatorID },
+							{ int: creator.creatorTypeID },
+							{ int: orderIndex },
+							langTag
+						];
+						Zotero.DB.query(sql, sqlValues);
 					}
 				}
 			}
@@ -4948,10 +4951,6 @@ Zotero.Item.prototype.erase = function() {
 		}
 	}
 	
-	// Remove from duplicates registry
-	Zotero.DB.query("DELETE FROM duplicateCheckList WHERE itemID=?", [this.id]);
-	
-
 	// Note
 	if (this.isNote()) {
 		// Decrement note count of source items
@@ -5593,7 +5592,8 @@ Zotero.Item.prototype._loadItemData = function() {
 
 	this._itemDataLoaded = true;
 
-	// This does need to run from this position, to avoid a fatal loop.
+	// This does need to run from this position, to avoid a fatal loop ... but it won't work here
+    // because the libraryID cannot be adjusted after loading the creator. Hmmm.
 	if (this._itemData[22] && ("" + this._itemData[22]).slice(0, 9) === 'mlzsync1:') {
 		var data = {itemTypeID:this._itemTypeID};
 		var obj = Zotero.Sync.Server.Data.decodeMlzFields(this,data,this._itemData[22],{});

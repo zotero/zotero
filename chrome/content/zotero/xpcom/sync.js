@@ -4003,7 +4003,7 @@ Zotero.Sync.Server.Data = new function() {
 			var deletecreatoridx = item.creators.length;
 			if (Zotero.EXTENDED_CREATORS[localItemType]) {
 				for (var i=item.creators.length-1; i>-1; i += -1) {
-					creator = item.creators[i];
+					var creator = item.creators[i];
 					if (Zotero.EXTENDED_CREATORS[localItemType][creator.creatorType]) {
 						if (!extracreators) {
 							extracreators = [];
@@ -4471,7 +4471,7 @@ Zotero.Sync.Server.Data = new function() {
             for (var i=0,ilen=obj.extracreators.length; i<ilen; i+=1) {
                 extracreator = obj.extracreators[i];
                 creator = new Zotero.Creator;
-                creator.libraryID = extracreator.libraryID;
+                creator.libraryID = item.libraryID;
 			    creator.key = extracreator.key;
 			    //creator.dateAdded = extracreator.dateAdded;
                 //creator.dateModified = extracreator.dateModified;
@@ -4499,7 +4499,10 @@ Zotero.Sync.Server.Data = new function() {
                 multicreatorset = obj.multicreators[pos];
                 for (var lang in multicreatorset._key) {
                     multicreator = multicreatorset._key[lang];
-                    creator = new Zotero.Creator;
+                    var creator = new Zotero.Creator;
+                    if (item.libraryID) {
+                        creator.libraryID = item.libraryID;
+                    }
                     creator.firstName = multicreator.firstName;
                     creator.lastName = multicreator.lastName;
 		            creator.birthYear = multicreator.birthYear;
