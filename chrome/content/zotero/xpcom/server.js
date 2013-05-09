@@ -254,7 +254,7 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 	if(method[1] == "HEAD" || method[1] == "OPTIONS") {
 		this._requestFinished(this._generateResponse(200));
 	} else if(method[1] == "GET") {
-		this._processEndpoint("GET", null);
+		this._processEndpoint("GET", this.query.substring(1))
 	} else if(method[1] == "POST") {
 		const contentLengthRe = /[\r\n]Content-Length: +([0-9]+)/i;
 		
@@ -353,26 +353,30 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 		}
 		
 		var decodedData = null;
-		if(postData && this.contentType) {
-			// check that endpoint supports contentType
-			var supportedDataTypes = endpoint.supportedDataTypes;
-			if(supportedDataTypes && supportedDataTypes.indexOf(this.contentType) === -1) {
-				this._requestFinished(this._generateResponse(400, "text/plain", "Endpoint does not support content-type\n"));
-				return;
-			}
-			
-			// decode JSON or urlencoded post data, and pass through anything else
-			if(supportedDataTypes && this.contentType === "application/json") {
-				try {
-					decodedData = JSON.parse(postData);
-				} catch(e) {
-					this._requestFinished(this._generateResponse(400, "text/plain", "Invalid JSON provided\n"));
+		if(postData) {
+			if(method === "GET") {
+				decodedData = Zotero.Server.decodeQueryString(postData);
+			} else if(method === "POST" && this.contentType) {
+				// check that endpoint supports contentType
+				var supportedDataTypes = endpoint.supportedDataTypes;
+				if(supportedDataTypes && supportedDataTypes.indexOf(this.contentType) === -1) {
+					this._requestFinished(this._generateResponse(400, "text/plain", "Endpoint does not support content-type\n"));
 					return;
 				}
-			} else if(supportedDataTypes && this.contentType === "application/x-www-urlencoded") {				
-				decodedData = Zotero.Server.decodeQueryString(postData);
-			} else {
-				decodedData = postData;
+				
+				// decode JSON or urlencoded post data, and pass through anything else
+				if(supportedDataTypes && this.contentType === "application/json") {
+					try {
+						decodedData = JSON.parse(postData);
+					} catch(e) {
+						this._requestFinished(this._generateResponse(400, "text/plain", "Invalid JSON provided\n"));
+						return;
+					}
+				} else if(supportedDataTypes && this.contentType === "application/x-www-urlencoded") {				
+					decodedData = Zotero.Server.decodeQueryString(postData);
+				} else {
+					decodedData = postData;
+				}
 			}
 		}
 		
