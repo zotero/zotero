@@ -44,7 +44,7 @@
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "复制引文">
-<!ENTITY copyBibliographyCmd.label "复制文献目录">
+<!ENTITY copyBibliographyCmd.label "复制引文目录">
 <!ENTITY pasteCmd.label "粘贴">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.accesskey "P">
@@ -90,7 +90,7 @@
 <!ENTITY aboutProduct.label "关于&brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "支持与文档">
-<!ENTITY productHelp.accesskey "H">
+<!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "故障排除信息">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "提交反馈…">

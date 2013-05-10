@@ -12,7 +12,7 @@
 <!ENTITY zotero.search.textModes.phrase "Sözcük öbeği">
 <!ENTITY zotero.search.textModes.phraseBinary "Sözcük öbeği (ikili dosyalar içerir)">
 <!ENTITY zotero.search.textModes.regexp "AraBul">
-<!ENTITY zotero.search.textModes.regexpCS "AraBul (harf duyarlı)">
+<!ENTITY zotero.search.textModes.regexpCS "AraBul (büyük/küçük harf duyarlı)">
 
 <!ENTITY zotero.search.date.units.days "gün">
 <!ENTITY zotero.search.date.units.months "ay">

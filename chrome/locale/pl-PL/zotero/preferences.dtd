@@ -185,7 +185,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Katalog podstawowy:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Wybierz...">
-<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Przywróć absolutne ścieżki...">
 
 <!ENTITY zotero.preferences.dbMaintenance "Konserwacja bazy danych">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Sprawdź spójność bazy danych">
@@ -204,3 +204,4 @@
 <!ENTITY zotero.preferences.openAboutConfig "Otwórz about:config">
 <!ENTITY zotero.preferences.openCSLEdit "Otwórz edytor CSL">
 <!ENTITY zotero.preferences.openCSLPreview "Otwórz podgląd CSL">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">

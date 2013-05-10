@@ -65,8 +65,8 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "podľa potreby">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Používaním Úložiska Zotero súhlasíte s uvedenými">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "pravidlami a podmienkami">
-<!ENTITY zotero.preferences.sync.reset.warning1 "Nasledujúce operácie treba použiť iba v zriedkavých, špecifických situáciách a nie pre všeobecné odstraňovanie chýb. V mnohých prípadoch resetovanie zapríčiní dodatočné problémy. Pozri">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Možnosti resetovania synchronizácie">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Nasledujúce operácie treba použiť iba v zriedkavých, špecifických situáciách a nie pre všeobecné odstraňovanie chýb. V mnohých prípadoch obnova zapríčiní dodatočné problémy. Pozri ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Možnosti obnovy synchronizácie">
 <!ENTITY zotero.preferences.sync.reset.warning3 "pre viac informácií.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Úplná synchronizácia so serverom Zotero">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Zlúčiť lokálne dáta s dátami na serveri bez ohľadu predchádzajúce synchronizácie.">
@@ -74,9 +74,9 @@
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Vymazať všetky lokálne dáta a nahradiť ich dátami servera.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Nahradiť dáta na serveri Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Vymazať všetky dáta na serveri a nahradiť ich lokálnymi.">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Vymazať históriu synchronizácie súborov">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Obnoviť históriu synchronizácie súborov">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Nechať server znovu preveriť, či obsahuje všetky lokálne prílohy.">
-<!ENTITY zotero.preferences.sync.reset "Vynulovať">
+<!ENTITY zotero.preferences.sync.reset "Obnova">
 <!ENTITY zotero.preferences.sync.reset.button "Obnoviť...">
 
 
@@ -189,9 +189,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Údržba databázy">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Skontrolovať integritu databázy">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Obnoviť konvertory a citačné štýly...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Obnoviť konvertory a štýly...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Obnoviť konvertory...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Obnoviť citačné štýly...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Obnoviť štýly...">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Záznam protokolu ladenia chýb">
 <!ENTITY zotero.preferences.debugOutputLogging.message "Protokol ladenia môže pomôcť vývojárom rozpoznať problémy v Zotere. Zaznamenávanie protokolu spomalí Zotero, takže túto možnosť by ste mali povoliť iba vtedy, keď si od vás protokol ladenia vyžiada niekto z vývojárskeho tímu Zotera.">
@@ -204,3 +204,4 @@
 <!ENTITY zotero.preferences.openAboutConfig "Otvoriť about:config">
 <!ENTITY zotero.preferences.openCSLEdit "Otvoriť CSL Editor">
 <!ENTITY zotero.preferences.openCSLPreview "Otvoriť ukážku CSL ">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">

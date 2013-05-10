@@ -7,10 +7,10 @@
 
 <!ENTITY zotero.search.recursive.label "Szukaj w podkolekcjach">
 <!ENTITY zotero.search.noChildren "Wyświetl tylko elementy główne">
-<!ENTITY zotero.search.includeParentsAndChildren "Zawiera pasujące elementy główne i potomne">
+<!ENTITY zotero.search.includeParentsAndChildren "Zawiera elementy główne i potomne pasujących elementów">
 
 <!ENTITY zotero.search.textModes.phrase "Fraza">
-<!ENTITY zotero.search.textModes.phraseBinary "Fraza (włącznie z plikami binarnymi)">
+<!ENTITY zotero.search.textModes.phraseBinary "Fraza (łącznie z plikami binarnymi)">
 <!ENTITY zotero.search.textModes.regexp "Wyrażenie regularne">
 <!ENTITY zotero.search.textModes.regexpCS "Wyrażenie regularne (rozróżnia wielkość liter)">
 
@@ -20,4 +20,4 @@
 
 <!ENTITY zotero.search.search "Szukaj">
 <!ENTITY zotero.search.clear "Wyczyść">
-<!ENTITY zotero.search.saveSearch "Zapisz wyniki wyszukiwania">
+<!ENTITY zotero.search.saveSearch "Zapisz wyszukiwanie">

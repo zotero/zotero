@@ -333,7 +333,9 @@ Zotero_Preferences.Sync = {
 						
 						// TODO: better way of checking for an active session?
 						if (Zotero.Sync.Server.sessionIDComponent == 'sessionid=') {
-							Zotero.Sync.Server.login(callback);
+							Zotero.Sync.Server.login()
+							.then(callback)
+							.done();
 						}
 						else {
 							callback();

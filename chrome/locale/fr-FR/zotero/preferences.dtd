@@ -62,7 +62,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Synchroniser les fichiers joints dans les bibliothèques de groupe en utilisant le stockage de Zotero">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Télécharger les fichiers">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "lors de la synchronisation">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "si nécessaire">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "à la demande">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "En utilisant le stockage de Zotero, vous acceptez d'être lié par ses">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "modalités et conditions">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Les opérations suivantes ne sont à utiliser que dans de rares et spécifiques situations et ne doivent pas être utilisées pour un dépannage général. Dans la plupart des cas, la réinitialisation ne fera que causer des problèmes supplémentaires. Consultez ">
@@ -204,3 +204,4 @@
 <!ENTITY zotero.preferences.openAboutConfig "Ouvrir about:config">
 <!ENTITY zotero.preferences.openCSLEdit "Ouvrir CSL Editor (test des styles installés)">
 <!ENTITY zotero.preferences.openCSLPreview "Ouvrir CSL Preview (aperçu des styles installés)">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">

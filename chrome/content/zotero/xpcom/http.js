@@ -53,11 +53,12 @@ Zotero.HTTP = new function() {
 	 *         <li>cookieSandbox - The sandbox from which cookies should be taken</li>
 	 *         <li>debug - Log response text and status code</li>
 	 *         <li>dontCache - If set, specifies that the request should not be fulfilled from the cache</li>
+	 *         <li>foreground - Make a foreground request, showing certificate/authentication dialogs if necessary</li>
 	 *         <li>headers - HTTP headers to include in the request</li>
 	 *         <li>requestObserver - Callback to receive XMLHttpRequest after open()</li>
 	 *         <li>responseType - The type of the response. See XHR 2 documentation for legal values</li>
 	 *         <li>responseCharset - The charset the response should be interpreted as</li>
-	 *         <li>successCodes - HTTP status codes that are considered successful</li>
+	 *         <li>successCodes - HTTP status codes that are considered successful, or FALSE to allow all</li>
 	 *     </ul>
 	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
 	 * @return {Promise} A promise resolved with the XMLHttpRequest object if the request
@@ -105,7 +106,9 @@ Zotero.HTTP = new function() {
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 					.createInstance();
 		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
+		if (!options || !options.foreground) {
+			xmlhttp.mozBackgroundRequest = true;
+		}
 		xmlhttp.open(method, url, true);
 		
 		// Pass the request to a callback
@@ -156,6 +159,10 @@ Zotero.HTTP = new function() {
 			
 			if (options && options.successCodes) {
 				var success = options.successCodes.indexOf(status) != -1;
+			}
+			// Explicit FALSE means allow any status code
+			else if (options && options.successCodes === false) {
+				var success = true;
 			}
 			else if(isFile) {
 				var success = status == 200 || status == 0;
@@ -439,6 +446,53 @@ Zotero.HTTP = new function() {
 		xmlhttp.send(null);
 		return xmlhttp;
 	}
+	
+	
+	/**
+	 * Make a foreground HTTP request in order to trigger a proxy authentication
+	 * dialog in Standalone
+	 *
+	 * Other Zotero.HTTP requests are background requests by default, and
+	 * background requests don't trigger a proxy auth prompt, so we make a
+	 * foreground request on startup and resolve the promise
+	 * Zotero.proxyAuthComplete when we're done. Any network requests that want
+	 * to wait for proxy authentication can wait for that promise.
+	 */
+	this.triggerProxyAuth = function () {
+		if (!Zotero.isStandalone
+				|| !Zotero.Prefs.get("triggerProxyAuthentication")
+				|| Zotero.HTTP.browserIsOffline()) {
+			Zotero.proxyAuthComplete = Q();
+			return false;
+		}
+		
+		var deferred = Q.defer();
+		Zotero.proxyAuthComplete = deferred.promise;
+		
+		var uri = ZOTERO_CONFIG.PROXY_AUTH_URL;
+		
+		Zotero.debug("HTTP GET " + uri);
+		
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+					.createInstance();
+		xmlhttp.open("GET", uri, true);
+		
+		xmlhttp.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
+		
+		var useMethodjit = Components.utils.methodjit;
+		/** @ignore */
+		xmlhttp.onreadystatechange = function() {
+			Components.utils.methodjit = useMethodjit;
+			_stateChange(xmlhttp, function (xmlhttp) {
+				Zotero.debug("Proxy auth request completed with status "
+					+ xmlhttp.status + ": " + xmlhttp.responseText);
+				deferred.resolve();
+			});
+		};
+		xmlhttp.send(null);
+		return xmlhttp;
+	}
+	
 	
 	//
 	// WebDAV methods

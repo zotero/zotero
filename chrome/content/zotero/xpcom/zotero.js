@@ -31,6 +31,7 @@ const ZOTERO_CONFIG = {
 	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
 	BASE_URI: 'http://zotero.org/',
 	WWW_BASE_URL: 'http://www.zotero.org/',
+	PROXY_AUTH_URL: 'http://zotero.org.s3.amazonaws.com/proxy-auth',
 	SYNC_URL: 'https://sync.zotero.org/',
 	API_URL: 'https://api.zotero.org/',
 	API_VERSION: 2,
@@ -536,6 +537,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		}
 		
 		if(!_initDB()) return false;
+		
+		Zotero.HTTP.triggerProxyAuth();
 		
 		// Add notifier queue callbacks to the DB layer
 		Zotero.DB.addCallback('begin', Zotero.Notifier.begin);
@@ -1423,28 +1426,26 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 * values and/or an arbitrary number of individual values
 	 */
 	function flattenArguments(args){
-		var isArguments = args.callee && args.length;
-		
 		// Put passed scalar values into an array
-		if (args === null || (args.constructor.name != 'Array' && !isArguments)) {
+		if (args === null || typeof args == 'string' || typeof args.length == 'undefined') {
 			args = [args];
 		}
 		
 		var returns = [];
 		for (var i=0; i<args.length; i++){
-			if (!args[i] && args[i] !== 0) {
+			var arg = args[i];
+			if (!arg && arg !== 0) {
 				continue;
 			}
-			if (args[i].constructor.name == 'Array') {
-				for (var j=0; j<args[i].length; j++){
-					returns.push(args[i][j]);
+			if (Array.isArray(arg)) {
+				for (var j=0; j<arg.length; j++){
+					returns.push(arg[j]);
 				}
 			}
 			else {
-				returns.push(args[i]);
+				returns.push(arg);
 			}
 		}
-		
 		return returns;
 	}
 	

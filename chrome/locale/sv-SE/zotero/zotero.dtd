@@ -212,8 +212,8 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmärken sparas i Microsoft Word och OpenOffice, men kan ändras av misstag.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Förkorta tidskriftstitlar automatiskt">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE-tidskriftsförkortningar genereras automatiskt från tidskriftstitlarna. Tidskriftsförkortningsfältet ignoreras.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Lagra referenserna i dokumentet">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "När du lagerar referenserna i dokument ökar filstorleken något, men det ger dig möjligheten att dela dokumentet till andra utan att använda en Zotero-grupp. Zotero 3.0 eller senare krävs för att redigera dokument som skapats med detta tillval.">

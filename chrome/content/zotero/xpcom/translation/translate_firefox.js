@@ -360,9 +360,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	 * Unwraps an object
 	 */
 	this.unwrap = function(obj) {
-		if("__wrappedDOMObject" in obj) {
-			return obj.__wrappedDOMObject;
-		} else if(isWrapper(obj)) {
+		if(isWrapper(obj)) {
 			return unwrapPrivileged(obj);
 		} else {
 			return obj;
@@ -374,9 +372,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	 * @param {XPCCrossOriginWrapper} obj
 	 * @return {Boolean} Whether or not the object is wrapped
 	 */
-	this.isWrapped = function(obj) {
-		return "__wrappedDOMObject" in obj || isWrapper(obj);
-	}
+	this.isWrapped = isWrapper;
 }
 
 /**
@@ -390,12 +386,8 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	
 	// import functions missing from global scope into Fx sandbox
 	this.sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
-	if(typeof sandboxLocation === "object" &&
-			("wrappedJSObject" in sandboxLocation
-			? "DOMParser" in sandboxLocation.wrappedJSObject
-			: "DOMParser" in sandboxLocation)) {
-		this.sandbox.DOMParser = "wrappedJSObject" in sandboxLocation
-			? sandboxLocation.wrappedJSObject.DOMParser : sandboxLocation.DOMParser;
+	if(typeof sandboxLocation === "object" && "DOMParser" in sandboxLocation) {
+		this.sandbox.DOMParser = sandboxLocation.DOMParser;
 	} else {
 		var sandbox = this.sandbox;
 		this.sandbox.DOMParser = function() {
@@ -500,7 +492,7 @@ Zotero.Translate.SandboxManager.prototype = {
 	"_copyObject":function(obj, wm) {
 		if(typeof obj !== "object" || obj === null
 				|| (obj.__proto__ !== Object.prototype && obj.__proto__ !== Array.prototype)
-				|| "__exposedProps__" in obj || "__wrappedDOMObject" in obj) {
+				|| "__exposedProps__" in obj) {
 			return obj;
 		}
 		if(!wm) wm = new WeakMap();

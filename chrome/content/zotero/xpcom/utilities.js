@@ -557,11 +557,11 @@ Zotero.Utilities = {
 	 *										otherwise return the values
 	 */
 	"arrayDiff":function(array1, array2, useIndex) {
-		if (array1.constructor.name != 'Array') {
-			throw ("array1 is not an array in Zotero.Utilities.arrayDiff() (" + array1 + ")");
+		if (!Array.isArray(array1)) {
+			throw ("array1 is not an array (" + array1 + ")");
 		}
-		if (array2.constructor.name != 'Array') {
-			throw ("array2 is not an array in Zotero.Utilities.arrayDiff() (" + array2 + ")");
+		if (!Array.isArray(array2)) {
+			throw ("array2 is not an array (" + array2 + ")");
 		}
 		
 		var val, pos, vals = [];
@@ -574,6 +574,7 @@ Zotero.Utilities = {
 		}
 		return vals;
 	},
+	
 	
 	/**
 	 * Return new array with duplicate values removed

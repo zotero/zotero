@@ -1,4 +1,4 @@
--- 77
+-- 78
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -162,6 +162,7 @@ CREATE TABLE creatorData (
     fieldMode INT,
     birthYear INT
 );
+CREATE INDEX creatorData_name ON creatorData(lastName, firstName);
 
 CREATE TABLE itemCreators (
     itemID INT,

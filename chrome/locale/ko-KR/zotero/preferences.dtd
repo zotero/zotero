@@ -204,3 +204,4 @@
 <!ENTITY zotero.preferences.openAboutConfig "config 열기">
 <!ENTITY zotero.preferences.openCSLEdit "CSL 에디터 열기">
 <!ENTITY zotero.preferences.openCSLPreview "CSL 미리보기 열기">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">

@@ -35,7 +35,6 @@
 			<preference id="pref-baseAttachmentPath" name="extensions.zotero.baseAttachmentPath" type="string"/>
 			<preference id="pref-useDataDir" name="extensions.zotero.useDataDir" type="bool"/>
 			<preference id="pref-dataDir" name="extensions.zotero.dataDir" type="string"/>
-			<preference id="pref-export-displayCharsetOption" name="extensions.zotero.export.displayCharsetOption" type="bool"/>
 			<preference id="pref-debug-output-enableAfterRestart" name="extensions.zotero.debug.store" type="bool"/>
 			<preference id="pref-import-charset" name="extensions.zotero.import.charset" type="string"/>
 			<preference id="pref-openURL-resolver" name="extensions.zotero.openURL.resolver" type="string"/>

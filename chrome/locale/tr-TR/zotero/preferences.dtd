@@ -204,3 +204,4 @@
 <!ENTITY zotero.preferences.openAboutConfig "about:config'i Aç">
 <!ENTITY zotero.preferences.openCSLEdit "CSL Düzenleyicisini Aç">
 <!ENTITY zotero.preferences.openCSLPreview "CSL Ön İzlemesini Aç">
+<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">

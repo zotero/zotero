@@ -13,7 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums "Proszę wysłać informację na forum Zotero (forums.zotero.org) z podaniem tego ID raportu, opisem problemu oraz wszystkmi krokami niezbędnymi do powtórzenia błędu.">
 <!ENTITY zotero.errorReport.notReviewed "Raporty błędów nie są zwykle przeglądane, jeśli nie zostaną zamieszczone na forum.">
 
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.title "Kreator aktualizacji Zotero">
 <!ENTITY zotero.upgrade.newVersionInstalled "Nowa wersja Zotero została zainstalowana.">
 <!ENTITY zotero.upgrade.upgradeRequired "Baza danych Zotero musi zostać zaktualizowana, aby współpracowała z nową wersją programu.">
 <!ENTITY zotero.upgrade.autoBackup "Przed wprowadzeniem zmian automatycznie zostanie utworzona kopia zapasowa istniejącej bazy danych.">
@@ -68,11 +68,11 @@
 <!ENTITY zotero.items.issue_column "Numer">
 <!ENTITY zotero.items.series_column "Seria">
 <!ENTITY zotero.items.seriesTitle_column "Tytuł serii">
-<!ENTITY zotero.items.court_column "Court">
-<!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.court_column "Sąd">
+<!ENTITY zotero.items.medium_column "Nośnik/Format">
+<!ENTITY zotero.items.genre_column "Rodzaj">
 <!ENTITY zotero.items.system_column "System">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.moreColumns.label "Więcej kolumn">
 <!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 
 <!ENTITY zotero.items.menu.showInLibrary "Wyświetl w bibliotece">
@@ -212,7 +212,7 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Zakładki są zabezpieczone zarówno przez program Microsoft Word jaki i OpenOffice, ale w wyjątkowych przypadkach mogą być modyfikowane.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatycznie skróć tytuły czasopism">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Zapisz cytowania w dokumencie">

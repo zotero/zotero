@@ -33,6 +33,7 @@
 		<preferences>
 			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
 			<preference id="pref-quickCopy-dragLimit" name="extensions.zotero.export.quickCopy.dragLimit" type="int"/>
+			<preference id="pref-export-displayCharsetOption" name="extensions.zotero.export.displayCharsetOption" type="bool"/>
 		</preferences>
 		
 		<groupbox id="zotero-prefpane-export-groupbox">

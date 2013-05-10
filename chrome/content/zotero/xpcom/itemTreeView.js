@@ -54,7 +54,9 @@ Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 	this._dataItems = [];
 	this._itemImages = {};
 	
-	this._unregisterID = Zotero.Notifier.registerObserver(this, ['item', 'collection-item', 'share-items', 'bucket']);
+	this._unregisterID = Zotero.Notifier.registerObserver(
+		this, ['item', 'collection-item', 'item-tag', 'share-items', 'bucket']
+	);
 }
 
 
@@ -434,6 +436,14 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		return;
 	}
 	
+	// Clear item type icon and tag colors
+	if (type == 'item-tag') {
+		ids.map(function (val) val.split("-")[0]).forEach(function (val) {
+			delete this._itemImages[val];
+		}.bind(this));
+		return;
+	}
+	
 	var itemGroup = this._itemGroup;
 	
 	var madeChanges = false;
@@ -580,6 +590,13 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		if (itemGroup.isTrash() || itemGroup.isSearch())
 		{
 			Zotero.ItemGroupCache.clear();
+			
+			// Clear item type icons
+			var items = Zotero.Items.get(ids);
+			for (let i=0; i<items.length; i++) {
+				delete this._itemImages[items[i].id];
+			}
+			
 			this.refresh();
 			madeChanges = true;
 			sort = true;
@@ -599,7 +616,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 					this._refreshHashMap();
 				}
 				var row = this._itemRowMap[id];
-				// Clear item type icon and tag colors
+				// Clear item type icon
 				delete this._itemImages[id];
 				
 				// Deleted items get a modify that we have to ignore when
@@ -666,17 +683,19 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		// If quicksearch, re-run it, since the results may have changed
 		else
 		{
-			// If not viewing trash and all items were deleted, ignore modify
 			var allDeleted = true;
-			if (!itemGroup.isTrash()) {
-				var items = Zotero.Items.get(ids);
-				for each(var item in items) {
-					if (!item.deleted) {
-						allDeleted = false;
-						break;
-					}
+			var isTrash = itemGroup.isTrash();
+			var items = Zotero.Items.get(ids);
+			for each(var item in items) {
+				// Clear item type icon
+				delete this._itemImages[item.id];
+				
+				// If not viewing trash and all items were deleted, ignore modify
+				if (allDeleted && !isTrash && !item.deleted) {
+					allDeleted = false;
 				}
 			}
+			
 			if (!allDeleted) {
 				quicksearch.doCommand();
 				madeChanges = true;
