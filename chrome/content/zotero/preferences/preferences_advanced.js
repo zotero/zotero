@@ -129,7 +129,9 @@ Zotero_Preferences.Advanced = {
 		
 		if (index == 0) {
 			Zotero.Schema.resetTranslatorsAndStyles(function (xmlhttp, updated) {
-				this.populateQuickCopyList();
+				if (Zotero_Preferences.Export) {
+					Zotero_Preferences.Export.populateQuickCopyList();
+				}
 			});
 		}
 	},
@@ -170,9 +172,10 @@ Zotero_Preferences.Advanced = {
 			null, null, null, {});
 		
 		if (index == 0) {
-			var self = this;
 			Zotero.Schema.resetStyles(function (xmlhttp, updated) {
-				self.populateQuickCopyList();
+				if (Zotero_Preferences.Export) {
+					Zotero_Preferences.Export.populateQuickCopyList();
+				}
 			});
 		}
 	},
