@@ -369,7 +369,7 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 					this._requestFinished(this._generateResponse(400, "text/plain", "Invalid JSON provided\n"));
 					return;
 				}
-			} else if(supportedDataTypes && this.contentType === "application/x-www-urlencoded") {				
+			} else if(supportedDataTypes && this.contentType === "application/x-www-form-urlencoded") {				
 				decodedData = Zotero.Server.decodeQueryString(postData);
 			} else {
 				decodedData = postData;
