@@ -152,7 +152,11 @@ Zotero_Preferences.Advanced = {
 			null, null, null, {});
 		
 		if (index == 0) {
-			Zotero.Schema.resetTranslators();
+			Zotero.Schema.resetTranslators(function () {
+				if (Zotero_Preferences.Export) {
+					Zotero_Preferences.Export.populateQuickCopyList();
+				}
+			});
 		}
 	},
 	
