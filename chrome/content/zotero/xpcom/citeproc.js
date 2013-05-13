@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.462",
+    PROCESSOR_VERSION: "1.0.463",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -7665,7 +7665,7 @@ CSL.NameOutput.prototype._parseName = function (name) {
     } else {
         noparse = false;
     }
-    if (!name["non-dropping-particle"] && name.family && !noparse) {
+    if (!name["non-dropping-particle"] && name.family && !noparse && name.given) {
         m = name.family.match(/^((?:[a-z][ \'\u2019a-z]*[-|\s+|\'\u2019]|[ABDVL][^ ][-|\s+][a-z]*\s*|[ABDVL][^ ][^ ][-|\s+][a-z]*\s*))/);
         if (m) {
             name.family = name.family.slice(m[1].length);
@@ -11617,7 +11617,9 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
         if (["page", "page-first"].indexOf(variable) > -1) {
             var m = num.split(" ")[0].match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
             if (m){
-                this.tmp.shadow_numbers[variable].label = CSL.STATUTE_SUBDIV_STRINGS[m[0]];
+                if (this.opt.development_extensions.static_statute_locator) {
+                    this.tmp.shadow_numbers[variable].label = CSL.STATUTE_SUBDIV_STRINGS[m[0]];
+                }
                 var mm = num.match(/[^ ]+\s+(.*)/);
                 if (mm) {
                     num = mm[1];
