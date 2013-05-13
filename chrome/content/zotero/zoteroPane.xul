@@ -249,7 +249,7 @@
 					<menuseparator/>
 					<menuitem class="menuitem-iconic zotero-menuitem-export" oncommand="Zotero_File_Interface.exportCollection();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-create-bibliography" oncommand="Zotero_File_Interface.bibliographyFromCollection();"/>
-					<menuitem class="menuitem-iconic zotero-menuitem-export" label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile()"/>
+					<menuitem class="menuitem-iconic zotero-menuitem-export" label="&zotero.toolbar.export.label;" command="cmd_zotero_exportLibrary"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-create-report" oncommand="Zotero_Report_Interface.loadCollectionReport(event)"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-delete-from-lib" label="&zotero.toolbar.emptyTrash.label;" oncommand="ZoteroPane_Local.emptyTrash();"/>
 					<menuitem label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.createCommonsBucket();"/><!--TODO localize -->

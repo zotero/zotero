@@ -108,7 +108,7 @@ Zotero.Items = new function() {
 		}
 		
 		// Otherwise, build return array
-		for (i=0; i<ids.length; i++) {
+		for (var i=0; i<ids.length; i++) {
 			if (!this._objectCache[ids[i]]) {
 				Zotero.debug("Item " + ids[i] + " doesn't exist", 2);
 				continue;
