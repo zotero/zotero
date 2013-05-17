@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Nama:">
+
+<!ENTITY zotero.search.joinMode.prefix "Cocok">
+<!ENTITY zotero.search.joinMode.any "apapun">
+<!ENTITY zotero.search.joinMode.all "semua">
+<!ENTITY zotero.search.joinMode.suffix "salah satu dari berikut ini:">
+
+<!ENTITY zotero.search.recursive.label "cari subfolder">
+<!ENTITY zotero.search.noChildren "Tampilkan hanya item level teratas">
+<!ENTITY zotero.search.includeParentsAndChildren "Sertakan item induk dan anak dari item-item yang cocok">
+
+<!ENTITY zotero.search.textModes.phrase "rase">
+<!ENTITY zotero.search.textModes.phraseBinary "Frase (termasuk berkas binari)">
+<!ENTITY zotero.search.textModes.regexp "Regexp">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (case-sensitive)">
+
+<!ENTITY zotero.search.date.units.days "hari">
+<!ENTITY zotero.search.date.units.months "bulan">
+<!ENTITY zotero.search.date.units.years "tahun">
+
+<!ENTITY zotero.search.search "Cari">
+<!ENTITY zotero.search.clear "Bersihkan">
+<!ENTITY zotero.search.saveSearch "Simpan pencarian">
