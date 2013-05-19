@@ -1,5 +1,4 @@
-#zotero-tb-item-from-page, #zotero-tb-snapshot-from-page, #zotero-tb-link-from-page,
-#zotero-tb-fullscreen, #zotero-fullscreen-close-separator, #zotero-close-button {
+.standalone-no-display {
 	display: none;
 }
 

@@ -66,7 +66,7 @@
 	<popup id="contentAreaContextMenu">
 		<menu id="zotero-content-area-context-menu" label="Zotero">
 			<menupopup>
-				<menuitem id="zotero-context-item-from-page" class="menu-iconic"
+				<menuitem id="zotero-context-item-from-page" class="menu-iconic standalone-no-display"
 					label="&zotero.toolbar.newItemFromPage.label;"
 					command="cmd_zotero_newItemFromCurrentPage"/>
 				<menuitem id="zotero-context-add-to-current-note" class="menu-iconic"
@@ -169,8 +169,8 @@
 					</toolbarbutton>
 					<toolbarbutton id="zotero-tb-attachment-add" class="zotero-tb-button" tooltiptext="&zotero.items.menu.attach;" type="menu">
 						<menupopup onpopupshowing="ZoteroPane_Local.updateAttachmentButtonMenu(this)">
-							<menuitem id="zotero-tb-snapshot-from-page" class="menuitem-iconic zotero-menuitem-attachments-snapshot" label="&zotero.items.menu.attach.snapshot;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(false, itemID)"/>
-							<menuitem id="zotero-tb-link-from-page" class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(true, itemID)"/>
+							<menuitem id="zotero-tb-snapshot-from-page" class="menuitem-iconic zotero-menuitem-attachments-snapshot standalone-no-display" label="&zotero.items.menu.attach.snapshot;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(false, itemID)"/>
+							<menuitem id="zotero-tb-link-from-page" class="menuitem-iconic zotero-menuitem-attachments-web-link standalone-no-display" label="&zotero.items.menu.attach.link;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(true, itemID)"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="&zotero.items.menu.attach.file;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(true, itemID);"/>
@@ -228,9 +228,9 @@
 							<label id="zotero-tb-sync-last-sync"/>
 						</tooltip>
 					</toolbarbutton>
-					<toolbarseparator id="zotero-fullscreen-close-separator"/>
-					<toolbarbutton id="zotero-tb-fullscreen" tooltiptext="&zotero.toolbar.tab.tooltip;" oncommand="ZoteroPane_Local.toggleTab();" class="zotero-tb-button"/>
-					<toolbarbutton id="zotero-close-button" class="tabs-closebutton" oncommand="ZoteroOverlay.toggleDisplay()"/>
+					<toolbarseparator id="zotero-fullscreen-close-separator" class="standalone-no-display"/>
+					<toolbarbutton id="zotero-tb-fullscreen" tooltiptext="&zotero.toolbar.tab.tooltip;" oncommand="ZoteroPane_Local.toggleTab();" class="zotero-tb-button standalone-no-display"/>
+					<toolbarbutton id="zotero-close-button" class="tabs-closebutton standalone-no-display" oncommand="ZoteroOverlay.toggleDisplay()"/>
 				</hbox>
 			</toolbar>
 			
@@ -263,8 +263,8 @@
 					<menuitem class="menuitem-iconic zotero-menuitem-attach-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemID'))"/>
 					<menu class="menu-iconic zotero-menuitem-attach" label="&zotero.items.menu.attach;">
 						<menupopup id="zotero-add-attachment-popup">
-							<menuitem class="menuitem-iconic zotero-menuitem-attachments-snapshot" label="&zotero.items.menu.attach.snapshot;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromPage(false, itemID)"/>
-							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromPage(true, itemID)"/>
+							<menuitem class="menuitem-iconic zotero-menuitem-attachments-snapshot standalone-no-display" label="&zotero.items.menu.attach.snapshot;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromPage(false, itemID)"/>
+							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link standalone-no-display" label="&zotero.items.menu.attach.link;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromPage(true, itemID)"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="&zotero.items.menu.attach.file;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromDialog(true, itemID);"/>
