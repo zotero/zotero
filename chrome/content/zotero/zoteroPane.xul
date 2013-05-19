@@ -169,8 +169,8 @@
 					</toolbarbutton>
 					<toolbarbutton id="zotero-tb-attachment-add" class="zotero-tb-button" tooltiptext="&zotero.items.menu.attach;" type="menu">
 						<menupopup onpopupshowing="ZoteroPane_Local.updateAttachmentButtonMenu(this)">
-							<menuitem id="zotero-tb-snapshot-from-page" class="menuitem-iconic zotero-menuitem-attachments-snapshot standalone-no-display" label="&zotero.items.menu.attach.snapshot;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(false, itemID)"/>
-							<menuitem id="zotero-tb-link-from-page" class="menuitem-iconic zotero-menuitem-attachments-web-link standalone-no-display" label="&zotero.items.menu.attach.link;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(true, itemID)"/>
+							<menuitem class="menuitem-iconic zotero-menuitem-attachments-snapshot standalone-no-display" label="&zotero.items.menu.attach.snapshot;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(false, itemID)"/>
+							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link standalone-no-display" label="&zotero.items.menu.attach.link;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(true, itemID)"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="&zotero.items.menu.attach.file;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(true, itemID);"/>
