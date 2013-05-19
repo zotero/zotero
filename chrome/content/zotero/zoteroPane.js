@@ -1384,8 +1384,9 @@ var ZoteroPane = new function()
 		
 		for (var i=0; i<popup.childNodes.length; i++) {
 			var node = popup.childNodes[i];
+			var className = node.className.replace('standalone-no-display', '').trim();
 			
-			switch (node.className) {
+			switch (className) {
 				case prefix + 'link':
 					node.disabled = itemgroup.isWithinGroup();
 					break;
@@ -1400,7 +1401,7 @@ var ZoteroPane = new function()
 					break;
 				
 				default:
-					throw ("Invalid class name '" + node.className + "' in ZoteroPane_Local.updateAttachmentButtonMenu()");
+					throw ("Invalid class name '" + className + "' in ZoteroPane_Local.updateAttachmentButtonMenu()");
 			}
 		}
 	}
