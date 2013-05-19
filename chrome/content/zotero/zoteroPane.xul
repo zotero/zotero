@@ -66,7 +66,7 @@
 	<popup id="contentAreaContextMenu">
 		<menu id="zotero-content-area-context-menu" label="Zotero">
 			<menupopup>
-				<menuitem id="zotero-context-item-from-page" class="menu-iconic standalone-no-display"
+				<menuitem id="zotero-context-item-from-page" class="menu-iconic"
 					label="&zotero.toolbar.newItemFromPage.label;"
 					command="cmd_zotero_newItemFromCurrentPage"/>
 				<menuitem id="zotero-context-add-to-current-note" class="menu-iconic"
@@ -138,7 +138,7 @@
 							</menu>
 						</menupopup>
 					</toolbarbutton>
-					<toolbarbutton id="zotero-tb-item-from-page" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItemFromPage.label;" command="cmd_zotero_newItemFromCurrentPage"/>
+					<toolbarbutton id="zotero-tb-item-from-page" class="zotero-tb-button standalone-no-display" tooltiptext="&zotero.toolbar.newItemFromPage.label;" command="cmd_zotero_newItemFromCurrentPage"/>
 					<toolbarbutton id="zotero-tb-lookup" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" type="panel">
 						<panel id="zotero-lookup-panel" type="arrow" onpopupshown="Zotero_Lookup.onShowing()"
 								onpopuphidden="Zotero_Lookup.onHidden(event)">
