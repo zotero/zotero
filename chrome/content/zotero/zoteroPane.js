@@ -2538,14 +2538,8 @@ var ZoteroPane = new function()
 			else if (tree.id == 'zotero-items-tree') {
 				let itemGroup = ZoteroPane_Local.getItemGroup();
 				if (itemGroup.isDuplicates()) {
-					if (event.button == 0 && (event.metaKey || event.shiftKey
-						|| event.altKey || event.ctrlKey)) {
-						return;
-					}
-					
-					// Allow right-click on single items/attachments
-					var items = ZoteroPane_Local.getSelectedItems();
-					if (event.button != 0 && items.length == 1) {
+					if (event.button != 0 || event.metaKey || event.shiftKey
+						|| event.altKey || event.ctrlKey) {
 						return;
 					}
 					
