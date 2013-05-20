@@ -2446,9 +2446,10 @@ var ZoteroPane = new function()
 			let itemGroup = ZoteroPane_Local.getItemGroup();
 			
 			if (itemGroup.isDuplicates()) {
-				// Trigger only on primary-button single clicks with modifiers
+				// Trigger only on primary-button single clicks without modifiers
 				// (so that items can still be selected and deselected manually)
-				if (!event || event.detail != 1 || event.button != 0 || event.metaKey || event.shiftKey) {
+				if (!event || event.detail != 1 || event.button != 0 || event.metaKey
+					|| event.shiftKey || event.altKey || event.ctrlKey) {
 					return;
 				}
 				
@@ -2537,7 +2538,14 @@ var ZoteroPane = new function()
 			else if (tree.id == 'zotero-items-tree') {
 				let itemGroup = ZoteroPane_Local.getItemGroup();
 				if (itemGroup.isDuplicates()) {
-					if (event.metaKey || event.shiftKey) {
+					if (event.button == 0 && (event.metaKey || event.shiftKey
+						|| event.altKey || event.ctrlKey)) {
+						return;
+					}
+					
+					// Allow right-click on single items/attachments
+					var items = ZoteroPane_Local.getSelectedItems();
+					if (event.button != 0 && items.length == 1) {
 						return;
 					}
 					
