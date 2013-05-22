@@ -3283,16 +3283,12 @@ var ZoteroPane = new function()
 							var collectionID = false;
 						}
 						
-						var attachmentItem = Zotero.Attachments.importFromURL(url, false, false, false, collectionID, mimeType, libraryID);
-						
-						// importFromURL() doesn't trigger the notifier until
-						// after download is complete
-						//
-						// TODO: add a callback to importFromURL()
-						setTimeout(function () {
-							self.selectItem(attachmentItem.id);
-						}, 1001);
-						
+						var attachmentItem = Zotero.Attachments.importFromURL(url, false,
+							false, false, collectionID, mimeType, libraryID,
+							function(attachmentItem) {
+								self.selectItem(attachmentItem.id);
+							});
+							
 						return;
 					}
 				}
