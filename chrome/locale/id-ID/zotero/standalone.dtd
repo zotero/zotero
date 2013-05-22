@@ -1,0 +1,101 @@
+<!ENTITY preferencesCmdMac.label "Preferensi...">
+<!ENTITY preferencesCmdMac.commandkey ",">
+<!ENTITY servicesMenuMac.label "Layanan">
+<!ENTITY hideThisAppCmdMac.label "Sembunyikan &brandShortName;">
+<!ENTITY hideThisAppCmdMac.commandkey "H">
+<!ENTITY hideOtherAppsCmdMac.label "Sembunyikan yang Lain">
+<!ENTITY hideOtherAppsCmdMac.commandkey "H">
+<!ENTITY showAllAppsCmdMac.label "Tunjukkan Semua">
+<!ENTITY quitApplicationCmdMac.label "Berhentikan Zotero">
+<!ENTITY quitApplicationCmdMac.key "Q">
+
+
+<!ENTITY fileMenu.label "Berkas">
+<!ENTITY fileMenu.accesskey "F">
+<!ENTITY saveCmd.label "Simpan...">
+<!ENTITY saveCmd.key "S">
+<!ENTITY saveCmd.accesskey "A">
+<!ENTITY pageSetupCmd.label "Setup Halaman...">
+<!ENTITY pageSetupCmd.accesskey "U">
+<!ENTITY printCmd.label "Cetak...">
+<!ENTITY printCmd.key "P">
+<!ENTITY printCmd.accesskey "U">
+<!ENTITY closeCmd.label "Tutup">
+<!ENTITY closeCmd.key "W">
+<!ENTITY closeCmd.accesskey "C">
+<!ENTITY quitApplicationCmdWin.label "Keluar">
+<!ENTITY quitApplicationCmdWin.accesskey "x">
+<!ENTITY quitApplicationCmd.label "Berhenti">
+<!ENTITY quitApplicationCmd.accesskey "Q">
+
+
+<!ENTITY editMenu.label "Edit">
+<!ENTITY editMenu.accesskey "E">
+<!ENTITY undoCmd.label "Undo">
+<!ENTITY undoCmd.key "Z">
+<!ENTITY undoCmd.accesskey "U">
+<!ENTITY redoCmd.label "Redo">
+<!ENTITY redoCmd.key "Y">
+<!ENTITY redoCmd.accesskey "R">
+<!ENTITY cutCmd.label "Potong">
+<!ENTITY cutCmd.key "X">
+<!ENTITY cutCmd.accesskey "t">
+<!ENTITY copyCmd.label "Kopi">
+<!ENTITY copyCmd.key "C">
+<!ENTITY copyCmd.accesskey "C">
+<!ENTITY copyCitationCmd.label "Kopi Sitasi">
+<!ENTITY copyBibliographyCmd.label "Kopi Bibliografi">
+<!ENTITY pasteCmd.label "Paste">
+<!ENTITY pasteCmd.key "V">
+<!ENTITY pasteCmd.accesskey "P">
+<!ENTITY deleteCmd.label "Hapus">
+<!ENTITY deleteCmd.key "D">
+<!ENTITY deleteCmd.accesskey "D">
+<!ENTITY selectAllCmd.label "Pilih Semua">
+<!ENTITY selectAllCmd.key "A">
+<!ENTITY selectAllCmd.accesskey "A">
+<!ENTITY preferencesCmd.label "Pilihan...">
+<!ENTITY preferencesCmd.accesskey "O">
+<!ENTITY preferencesCmdUnix.label "Preferensi">
+<!ENTITY preferencesCmdUnix.accesskey "n">
+<!ENTITY findCmd.label "Temukan">
+<!ENTITY findCmd.accesskey "F">
+<!ENTITY findCmd.commandkey "f">
+<!ENTITY bidiSwitchPageDirectionItem.label "Ubah Arah Halaman">
+<!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
+<!ENTITY bidiSwitchTextDirectionItem.label "Ubah Arah Teks">
+<!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
+<!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
+
+
+<!ENTITY toolsMenu.label "Perkakas">
+<!ENTITY toolsMenu.accesskey "T">
+<!ENTITY addons.label "Pengaya">
+
+
+<!ENTITY minimizeWindow.key "m">
+<!ENTITY minimizeWindow.label "Kecilkan">
+<!ENTITY bringAllToFront.label "Bawa Semuanya ke Depan">
+<!ENTITY zoomWindow.label "Arahkan">
+<!ENTITY windowMenu.label "Jendela">
+
+
+<!ENTITY helpMenu.label "Bantuan">
+<!ENTITY helpMenu.accesskey "H">
+
+
+<!ENTITY helpMenuWin.label "Bantuan">
+<!ENTITY helpMenuWin.accesskey "H">
+<!ENTITY helpMac.commandkey "?">
+<!ENTITY aboutProduct.label "Tentang &brandShortName;">
+<!ENTITY aboutProduct.accesskey "A">
+<!ENTITY productHelp.label "Dukungan dan Dokumentasi">
+<!ENTITY productHelp.accesskey "H">
+<!ENTITY helpTroubleshootingInfo.label "Informasi Penyelasaian Masalah">
+<!ENTITY helpTroubleshootingInfo.accesskey "T">
+<!ENTITY helpFeedbackPage.label "Sampaikan Umpan Balik">
+<!ENTITY helpFeedbackPage.accesskey "S">
+<!ENTITY helpReportErrors.label "Laporkan Kesalahan pada Zotero">
+<!ENTITY helpReportErrors.accesskey "R">
+<!ENTITY helpCheckForUpdates.label "Periksa Pemutakhiran">
+<!ENTITY helpCheckForUpdates.accesskey "U">

@@ -1408,8 +1408,9 @@ var ZoteroPane = new function()
 		
 		for (var i=0; i<popup.childNodes.length; i++) {
 			var node = popup.childNodes[i];
+			var className = node.className.replace('standalone-no-display', '').trim();
 			
-			switch (node.className) {
+			switch (className) {
 				case prefix + 'link':
 					node.disabled = itemgroup.isWithinGroup();
 					break;
@@ -1424,7 +1425,7 @@ var ZoteroPane = new function()
 					break;
 				
 				default:
-					throw ("Invalid class name '" + node.className + "' in ZoteroPane_Local.updateAttachmentButtonMenu()");
+					throw ("Invalid class name '" + className + "' in ZoteroPane_Local.updateAttachmentButtonMenu()");
 			}
 		}
 	}
@@ -2522,9 +2523,10 @@ var ZoteroPane = new function()
 			let itemGroup = ZoteroPane_Local.getItemGroup();
 			
 			if (itemGroup.isDuplicates()) {
-				// Trigger only on primary-button single clicks with modifiers
+				// Trigger only on primary-button single clicks without modifiers
 				// (so that items can still be selected and deselected manually)
-				if (!event || event.detail != 1 || event.button != 0 || event.metaKey || event.shiftKey) {
+				if (!event || event.detail != 1 || event.button != 0 || event.metaKey
+					|| event.shiftKey || event.altKey || event.ctrlKey) {
 					return;
 				}
 				
@@ -2613,7 +2615,14 @@ var ZoteroPane = new function()
 			else if (tree.id == 'zotero-items-tree') {
 				let itemGroup = ZoteroPane_Local.getItemGroup();
 				if (itemGroup.isDuplicates()) {
-					if (event.metaKey || event.shiftKey) {
+					if (event.button == 0 && (event.metaKey || event.shiftKey
+						|| event.altKey || event.ctrlKey)) {
+						return;
+					}
+					
+					// Allow right-click on single items/attachments
+					var items = ZoteroPane_Local.getSelectedItems();
+					if (event.button != 0 && items.length == 1) {
 						return;
 					}
 					

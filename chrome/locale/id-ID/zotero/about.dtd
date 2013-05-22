@@ -1,0 +1,13 @@
+<!ENTITY zotero.version "versi">
+<!ENTITY zotero.createdby "Dibuat oleh:">
+<!ENTITY zotero.director "Direktur:">
+<!ENTITY zotero.directors "Direktur-direktur:">
+<!ENTITY zotero.developers "Pengembang:">
+<!ENTITY zotero.alumni "Alumni:">
+<!ENTITY zotero.about.localizations "Lokalisasi:">
+<!ENTITY zotero.about.additionalSoftware "Piranti Lunak dan Standard Pihak Ketiga:">
+<!ENTITY zotero.executiveProducer "Produser Eksekutif:">
+<!ENTITY zotero.thanks "Ucapan Terima kasih khusus:">
+<!ENTITY zotero.about.close "Tutup">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Pengakuan &amp; Penghargaan lain">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">

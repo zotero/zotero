@@ -212,7 +212,7 @@ Zotero.Attachments = new function(){
 		}
 		
 		// Throw error on invalid URLs
-		//
+	        //
 		// TODO: allow other schemes
 		var urlRe = /^https?:\/\/[^\s]*$/;
 		var matches = urlRe.exec(url);
@@ -409,9 +409,20 @@ Zotero.Attachments = new function(){
 	 */
 	function linkFromURL(url, sourceItemID, mimeType, title){
 		Zotero.debug('Linking attachment from URL');
-		
-		// Throw error on invalid URLs
-		var urlRe = /^https?:\/\/[^\s]*$/;
+	    
+		/* Throw error on invalid URLs
+		   We currently accept the following protocols:
+		   PersonalBrain (brain://)
+		   DevonThink (x-devonthink-item://)
+		   Notational Velocity (nv://)
+		   MyLife Organized (mlo://)
+		   Evernote (evernote://)
+		   OneNote (onenote://)
+		   Kindle (kindle://) 
+		   Logos (logosres:) 
+		   Zotero (zotero://) */
+
+		var urlRe = /^((https?|zotero|evernote|onenote|brain|nv|mlo|kindle|x-devonthink-item|ftp):\/\/|logosres:)[^\s]*$/;
 		var matches = urlRe.exec(url);
 		if (!matches) {
 			throw ("Invalid URL '" + url + "' in Zotero.Attachments.linkFromURL()");

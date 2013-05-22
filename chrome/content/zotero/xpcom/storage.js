@@ -1663,6 +1663,7 @@ Zotero.Sync.Storage = new function () {
 			var fileList = _zipDirectory(dir, dir, zw);
 			if (fileList.length == 0) {
 				Zotero.debug('No files to add -- removing zip file');
+				zw.close();
 				tmpFile.remove(null);
 				return false;
 			}
