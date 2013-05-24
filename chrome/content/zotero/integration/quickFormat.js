@@ -1162,7 +1162,8 @@ var Zotero_QuickFormat = new function () {
 	 * Handle a click on a bubble
 	 */
 	function _onBubbleClick(event) {
-		_showCitationProperties(event.target);
+		_moveCursorToEnd();
+		_showCitationProperties(event.currentTarget);
 	}
 	
 	/**
@@ -1203,7 +1204,6 @@ var Zotero_QuickFormat = new function () {
 	this.onCitationPropertiesClosed = function(event) {
 		panelRefersToBubble.removeAttribute("selected");
 		Zotero_QuickFormat.onCitationPropertiesChanged();
-		_moveCursorToEnd();
 	}
 	
 	/**
