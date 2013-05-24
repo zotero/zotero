@@ -22,6 +22,7 @@
     
     ***** END LICENSE BLOCK *****
 */
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 var Zotero_QuickFormat = new function () {
 	const pixelRe = /^([0-9]+)px$/
@@ -36,10 +37,8 @@ var Zotero_QuickFormat = new function () {
 		keepSorted,  showEditor, referencePanel, referenceBox, referenceHeight = 0,
 		separatorHeight = 0, currentLocator, currentLocatorLabel, currentSearchTime, dragging,
 		panel, panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator,
-		panelLibraryLink, panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false;
-	
-	// A variable that contains the timeout object for the latest onKeyPress event
-	var eventTimeout = null;
+		panelLibraryLink, panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false,
+		searchTimeout;
 	
 	const SHOWN_REFERENCES = 7;
 	
@@ -120,6 +119,7 @@ var Zotero_QuickFormat = new function () {
 			qfb.addEventListener("keypress", _onQuickSearchKeyPress, false);
 			qfe = qfiDocument.getElementById("quick-format-editor");
 			qfe.addEventListener("drop", _onBubbleDrop, false);
+			qfe.addEventListener("paste", _onPaste, false);
 		}
 	}
 	
@@ -180,11 +180,17 @@ var Zotero_QuickFormat = new function () {
 		var range = selection.getRangeAt(0);
 		
 		var node = range.startContainer;
-		if(node !== range.endContainer || node.nodeType !== Node.TEXT_NODE ) {
-			return false;
+		if(node !== range.endContainer) return false;
+		if(node.nodeType === Node.TEXT_NODE) return node;
+
+		// Range could be referenced to the body element
+		if(node === qfe) {
+			var offset = range.startOffset;
+			if(offset !== range.endOffset) return false;
+			node = qfe.childNodes[Math.min(qfe.childNodes.length-1, offset)];
+			if(node.nodeType === Node.TEXT_NODE) return node;
 		}
-		
-		return node;
+		return false;
 	}
 	
 	/**
@@ -193,7 +199,7 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _getEditorContent(clear) {
 		var node = _getCurrentEditorTextNode();
-		return node ? node.textContent : false;
+		return node ? node.wholeText : false;
 	}
 	
 	/**
@@ -1011,8 +1017,13 @@ var Zotero_QuickFormat = new function () {
 	}
 
 	/**
-	 * 
+	 * Reset timer that controls when search takes place. We use this to avoid searching after each
+	 * keypress, since searches can be slow.
 	 */
+	function _resetSearchTimer() {
+		if(searchTimeout) clearTimeout(searchTimeout);
+		searchTimeout = setTimeout(_quickFormat, 250);
+	}
 	
 	/**
 	 * Handle return or escape
@@ -1038,9 +1049,7 @@ var Zotero_QuickFormat = new function () {
 			}
 
 			_resize();
-			
-			if(Zotero_QuickFormat.eventTimeout) clearTimeout(Zotero_QuickFormat.eventTimeout);
-			Zotero_QuickFormat.eventTimeout = setTimeout(_quickFormat, 250);
+			_resetSearchTimer();
 		} else if(keyCode === event.DOM_VK_LEFT || keyCode === event.DOM_VK_RIGHT) {
 			var right = keyCode === event.DOM_VK_RIGHT,
 				bubble = _getSelectedBubble(right);
@@ -1102,9 +1111,7 @@ var Zotero_QuickFormat = new function () {
 				};
 			}
 		} else {
-			// Use a timeout so that _quickFormat gets called after update
-			if(Zotero_QuickFormat.eventTimeout) clearTimeout(Zotero_QuickFormat.eventTimeout);
-			Zotero_QuickFormat.eventTimeout = setTimeout(_quickFormat, 250);
+			_resetSearchTimer();
 		}
 	}
 	
@@ -1162,6 +1169,24 @@ var Zotero_QuickFormat = new function () {
 	function _onBubbleClick(event) {
 		_moveCursorToEnd();
 		_showCitationProperties(event.currentTarget);
+	}
+
+	/**
+	 * Called when the user attempts to paste
+	 */
+	function _onPaste(event) {
+		event.stopPropagation();
+		event.preventDefault();
+
+		var str = Zotero.Utilities.Internal.getClipboard("text/unicode");
+		if(str) {
+			var selection = qfiWindow.getSelection();
+			var range = selection.getRangeAt(0);
+			range.deleteContents();
+			range.insertNode(document.createTextNode(str.replace(/[\r\n]/g, " ").trim()));
+			range.collapse(false);
+			_resetSearchTimer();
+		}
 	}
 	
 	/**
