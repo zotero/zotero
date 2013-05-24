@@ -976,6 +976,45 @@ var Zotero_QuickFormat = new function () {
 			io.accept();
 		}
 	}
+
+	/**
+	 * Get bubbles within the current selection
+	 */
+	function _getSelectedBubble(right) {
+		var selection = qfiWindow.getSelection(),
+			range = selection.getRangeAt(0);
+		qfe.normalize();
+		
+		// Check whether the bubble is selected
+		// Not sure whether this ever happens anymore
+		var container = range.startContainer;
+		if(container !== qfe) {
+			if(container.citationItem) {
+				return container;
+			} else if(container.nodeType === Node.TEXT_NODE && container.wholeText == "") {
+				if(container.parentNode === qfe) {
+					var node = container;
+					while((node = container.previousSibling)) {
+						if(node.citationItem) {
+							return node;
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		// Check whether there is a bubble anywhere to the left of this one
+		var offset = range.startOffset,
+			childNodes = qfe.childNodes,
+			node = childNodes[offset-(right ? 0 : 1)];
+		if(node && node.citationItem) return node;
+		return null;
+	}
+
+	/**
+	 * 
+	 */
 	
 	/**
 	 * Handle return or escape
@@ -992,29 +1031,50 @@ var Zotero_QuickFormat = new function () {
 		} else if(keyCode === event.DOM_VK_TAB || event.charCode === 59 /* ; */) {
 			event.preventDefault();
 			_bubbleizeSelected();
-		} else if(keyCode === event.DOM_VK_BACK_SPACE) {
+		} else if(keyCode === event.DOM_VK_BACK_SPACE || keyCode === event.DOM_VK_DELETE) {
+			var bubble = _getSelectedBubble(keyCode === event.DOM_VK_DELETE);
+
+			if(bubble) {
+				event.preventDefault();
+				bubble.parentNode.removeChild(bubble);
+			}
+
 			_resize();
 			
 			if(Zotero_QuickFormat.eventTimeout) clearTimeout(Zotero_QuickFormat.eventTimeout);
 			Zotero_QuickFormat.eventTimeout = setTimeout(_quickFormat, 250);
-			
+		} else if(keyCode === event.DOM_VK_LEFT || keyCode === event.DOM_VK_RIGHT) {
+			var right = keyCode === event.DOM_VK_RIGHT,
+				bubble = _getSelectedBubble(right);
+			if(bubble) {
+				event.preventDefault();
+
+				var nodeRange = qfiDocument.createRange();
+				nodeRange.selectNode(bubble);
+				nodeRange.collapse(!right);
+
+				var selection = qfiWindow.getSelection();
+				selection.removeAllRanges();
+				selection.addRange(nodeRange);
+			}
+
 		} else if(keyCode === event.DOM_VK_UP) {
 			var selectedItem = referenceBox.selectedItem;
 
 			var previousSibling;
 			
-			//Seek the closet previous sibling that is not disabled
-			while((previousSibling = selectedItem.previousSibling) && previousSibling.getAttribute("disabled")){
+			// Seek the closet previous sibling that is not disabled
+			while((previousSibling = selectedItem.previousSibling) && previousSibling.hasAttribute("disabled")) {
 				selectedItem = previousSibling;
 			}
-			//If found, change to that
+			// If found, change to that
 			if(previousSibling) {
 				referenceBox.selectedItem = previousSibling;
 				
-				//If there are separators before this item, ensure that they are visible
+				// If there are separators before this item, ensure that they are visible
 				var visibleItem = previousSibling;
 
-				while(visibleItem.previousSibling && visibleItem.previousSibling.getAttribute("disabled")){
+				while(visibleItem.previousSibling && visibleItem.previousSibling.hasAttribute("disabled")) {
 					visibleItem = visibleItem.previousSibling;
 				}
 				referenceBox.ensureElementIsVisible(visibleItem);
@@ -1023,54 +1083,20 @@ var Zotero_QuickFormat = new function () {
 		} else if(keyCode === event.DOM_VK_DOWN) {
 			if((Zotero.isMac ? event.metaKey : event.ctrlKey)) {
 				// If meta key is held down, show the citation properties panel
-				var selection = qfiWindow.getSelection();
-				var range = selection.getRangeAt(0);
-				
-				// Check whether the bubble is selected
-				var endContainer = range.endContainer;
-				if(endContainer !== qfe) {
-					if(range.endContainer.citationItem) {
-						_showCitationProperties(range.endContainer);
-					} else if(endContainer.nodeType === Node.TEXT_NODE) {
-						if(endContainer.parentNode === qfe) {
-							var node = endContainer;
-							while((node = endContainer.previousSibling)) {
-								if(node.citationItem) {
-									_showCitationProperties(node);
-									event.preventDefault();
-									return;
-								}
-							}
-						}
-					}
-					event.preventDefault();
-					return;
-				}
-				
-				// Check whether there is a bubble in the range
-				var endOffset = range.endOffset;
-				var childNodes = qfe.childNodes;
-				for(var i=Math.min(endOffset, childNodes.length-1); i>=0; i--) {
-					var node = childNodes[i];
-					if(node.citationItem) {
-						_showCitationProperties(node);
-						event.preventDefault();
-						return;
-					}
-				}
-				
+				var bubble = _getSelectedBubble();
+
+				if(bubble) _showCitationProperties(bubble);
 				event.preventDefault();
 			} else {
 				var selectedItem = referenceBox.selectedItem;
 				var nextSibling;
 				
-				//Seek the closet next sibling that is not disabled
-				while((nextSibling = selectedItem.nextSibling) && nextSibling.getAttribute("disabled")){
+				// Seek the closet next sibling that is not disabled
+				while((nextSibling = selectedItem.nextSibling) && nextSibling.hasAttribute("disabled")) {
 					selectedItem = nextSibling;
 				}
 				
-				//If found, change to that
-
+				// If found, change to that
 				if(nextSibling){
 					referenceBox.selectedItem = nextSibling;
 					referenceBox.ensureElementIsVisible(nextSibling);
