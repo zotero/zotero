@@ -119,6 +119,7 @@ var Zotero_QuickFormat = new function () {
 			qfiDocument = qfi.contentDocument;
 			qfb.addEventListener("keypress", _onQuickSearchKeyPress, false);
 			qfe = qfiDocument.getElementById("quick-format-editor");
+			qfe.addEventListener("drop", _onBubbleDrop, false);
 		}
 	}
 	
@@ -641,14 +642,18 @@ var Zotero_QuickFormat = new function () {
 		// It's entirely unintuitive why, but after trying a bunch of things, it looks like using
 		// a XUL label for these things works best. A regular span causes issues with moving the
 		// cursor.
-		var bubble = qfiDocument.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "label");
+		var bubble = qfiDocument.createElement("span");
 		bubble.setAttribute("class", "quick-format-bubble");
-		bubble.setAttribute("value", str);
+		bubble.setAttribute("draggable", "true");
+		bubble.textContent = str;
 		bubble.addEventListener("click", _onBubbleClick, false);
 		bubble.addEventListener("dragstart", _onBubbleDrag, false);
-		bubble.addEventListener("dragend", _onBubbleDrop, false);
 		bubble.citationItem = citationItem;
-		qfe.insertBefore(bubble, (nextNode ? nextNode : null));
+		if(nextNode && nextNode instanceof Range) {
+			nextNode.insertNode(bubble);
+		} else {
+			qfe.insertBefore(bubble, (nextNode ? nextNode : null));
+		}
 		
 		// make sure that there are no rogue <br>s
 		var elements = qfe.getElementsByTagName("br");
@@ -1083,27 +1088,48 @@ var Zotero_QuickFormat = new function () {
 	 * Adds a dummy element to make dragging work
 	 */
 	function _onBubbleDrag(event) {
-		// just in case
-		var el = qfiDocument.getElementById("zotero-drag");
-		if(el) el.parentNode.removeChild(el);
-		
-		var dt = event.dataTransfer;
-		dragging = event.target.citationItem;
-		dt.setData("text/html", '<span id="zotero-drag"/>');
+		dragging = event.currentTarget;
+		event.dataTransfer.setData("text/plain", '<span id="zotero-drag"/>');
 		event.stopPropagation();
+	}
+
+	/**
+	 * Get index of bubble in citations
+	 */
+	function _getBubbleIndex(bubble) {
+		var nodes = qfe.childNodes, oldPosition = -1, index = 0;
+		for(var i=0, n=nodes.length; i<n; i++) {
+			if(nodes[i].citationItem) {
+				if(nodes[i] == bubble) return index;
+				index++;
+			}
+		}
+		return -1;
 	}
 	
 	/**
 	 * Replaces the dummy element with a node to make dropping work
 	 */
 	function _onBubbleDrop(event) {
-		window.setTimeout(function() {
-			var el = qfiDocument.getElementById("zotero-drag");
-			if(el) {
-				_insertBubble(dragging, el);
-				el.parentNode.removeChild(el);
-			}
-		}, 0);
+		event.preventDefault();
+		event.stopPropagation();
+
+		var range = document.createRange();
+
+		// Find old position in list
+		var oldPosition = _getBubbleIndex(dragging);
+		range.setStart(event.rangeParent, event.rangeOffset);
+		dragging.parentNode.removeChild(dragging);
+		var bubble = _insertBubble(dragging.citationItem, range);
+
+		// If moved out of order, turn off "Keep Sources Sorted"
+		if(io.sortable && keepSorted.hasAttribute("checked") && oldPosition !== -1 &&
+				oldPosition != _getBubbleIndex(bubble)) {
+			keepSorted.removeAttribute("checked");
+		}
+
+		_previewAndSort();
+		_moveCursorToEnd();
 	}
 	
 	/**
