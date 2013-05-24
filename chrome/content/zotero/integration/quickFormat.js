@@ -730,12 +730,10 @@ var Zotero_QuickFormat = new function () {
 			}
 		}
 		
-		var qfeHeight = qfe.scrollHeight;
-		
-		if(qfeHeight > 30) {
+		if(qfe.scrollHeight > 30) {
 			qfe.setAttribute("multiline", true);
 			qfs.setAttribute("multiline", true);
-			qfs.style.height = (4+qfeHeight)+"px";
+			qfs.style.height = (4+qfe.scrollHeight)+"px";
 			window.sizeToContent();
 		} else {
 			delete qfs.style.height;

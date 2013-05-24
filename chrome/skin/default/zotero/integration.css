@@ -114,6 +114,9 @@
 	border-color: #a8c0ec;
 	padding: 0 6px 0 6px;
 	margin: -1px 2px 0 2px;
+	display: inline-block;
+	white-space: nowrap;
+	line-height: normal;
 	-moz-user-select: all;
 }
 
