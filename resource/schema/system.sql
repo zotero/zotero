@@ -1159,6 +1159,7 @@ INSERT INTO "fileTypeMIMETypes" VALUES(2, 'image/');
 INSERT INTO "fileTypeMIMETypes" VALUES(2, 'application/vnd.oasis.opendocument.graphics');
 INSERT INTO "fileTypeMIMETypes" VALUES(2, 'application/vnd.oasis.opendocument.image');
 INSERT INTO "fileTypeMIMETypes" VALUES(2, 'application/vnd.kde.killustrator'); -- NOT in IANA registry
+INSERT INTO "fileTypeMIMETypes" VALUES(2, 'application/vnd.djvu');
 -- pdf
 INSERT INTO "fileTypeMIMETypes" VALUES(3, 'application/pdf');
 INSERT INTO "fileTypeMIMETypes" VALUES(3, 'application/postscript');
@@ -1176,6 +1177,10 @@ INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.wordperfect');
 INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.kde.kword');
 INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.oasis.opendocument.text');
 INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/epub+zip'); -- NOT in IANA registry
+INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.ms-htmlhelp');
+INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/vnd.palm');
+INSERT INTO "fileTypeMIMETypes" VALUES(6, 'application/x-mobipocket-ebook'); -- NOT in IANA registry
 -- presentation
 INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/vnd.ms-powerpoint');
 INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/vnd.oasis.opendocument.presentation');
