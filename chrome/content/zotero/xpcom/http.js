@@ -246,10 +246,8 @@ Zotero.HTTP = new function() {
 		// Don't cache GET requests
 		xmlhttp.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 		
-		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
@@ -334,10 +332,8 @@ Zotero.HTTP = new function() {
 			xmlhttp.setRequestHeader(header, headers[header]);
 		}
 		
-		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
@@ -398,10 +394,8 @@ Zotero.HTTP = new function() {
 		// Don't cache HEAD requests
 		xmlhttp.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 		
-		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, onDone);
 		};
 		
@@ -437,10 +431,8 @@ Zotero.HTTP = new function() {
 		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open('OPTIONS', uri.spec, true);
 		
-		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(null);
@@ -479,10 +471,8 @@ Zotero.HTTP = new function() {
 		
 		xmlhttp.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 		
-		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, function (xmlhttp) {
 				Zotero.debug("Proxy auth request completed with status "
 					+ xmlhttp.status + ": " + xmlhttp.responseText);
@@ -558,10 +548,8 @@ Zotero.HTTP = new function() {
 		
 		xmlhttp.setRequestHeader("Content-Type", 'text/xml; charset="utf-8"');
 		
-		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		
@@ -594,10 +582,8 @@ Zotero.HTTP = new function() {
 		// Prevent certificate/authentication dialogs from popping up
 		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open('MKCOL', uri.spec, true);
-		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(null);
@@ -639,10 +625,8 @@ Zotero.HTTP = new function() {
 		// with Content-Length: 0, which triggers a "no element found" error
 		// in Firefox, so we override to text
 		xmlhttp.overrideMimeType("text/plain");
-		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(body);
@@ -678,10 +662,8 @@ Zotero.HTTP = new function() {
 		// Firefox 3 throws a "no element found" error even with a
 		// 204 ("No Content") response, so we override to text
 		xmlhttp.overrideMimeType("text/plain");
-		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(null);

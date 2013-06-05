@@ -199,6 +199,31 @@ Zotero.Utilities.Internal = {
 		}});
 		
 		return deferred.promise;
+	},
+
+	/**
+	 * Get string data from the clipboard
+	 * @param {String[]} mimeType MIME type of data to get
+	 * @return {String|null} Clipboard data, or null if none was available
+	 */
+	"getClipboard":function(mimeType) {
+		var clip = Services.clipboard;
+		if (!clip.hasDataMatchingFlavors([mimeType], 1, clip.kGlobalClipboard)) {
+			return null;
+		}
+		var trans = Components.classes["@mozilla.org/widget/transferable;1"]
+						.createInstance(Components.interfaces.nsITransferable);
+		trans.addDataFlavor(mimeType);
+		clip.getData(trans, clip.kGlobalClipboard);
+		var str = {};
+		try {
+			trans.getTransferData(mimeType, str, {});
+			str = str.value.QueryInterface(Components.interfaces.nsISupportsString).data;
+		}
+		catch (e) {
+			return null;
+		}
+		return str;
 	}
 }
 

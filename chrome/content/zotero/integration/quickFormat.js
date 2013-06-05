@@ -22,6 +22,7 @@
     
     ***** END LICENSE BLOCK *****
 */
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 var Zotero_QuickFormat = new function () {
 	const pixelRe = /^([0-9]+)px$/
@@ -36,10 +37,8 @@ var Zotero_QuickFormat = new function () {
 		keepSorted,  showEditor, referencePanel, referenceBox, referenceHeight = 0,
 		separatorHeight = 0, currentLocator, currentLocatorLabel, currentSearchTime, dragging,
 		panel, panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator,
-		panelLibraryLink, panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false;
-	
-	// A variable that contains the timeout object for the latest onKeyPress event
-	var eventTimeout = null;
+		panelLibraryLink, panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false,
+		searchTimeout;
 	
 	const SHOWN_REFERENCES = 7;
 	
@@ -119,6 +118,8 @@ var Zotero_QuickFormat = new function () {
 			qfiDocument = qfi.contentDocument;
 			qfb.addEventListener("keypress", _onQuickSearchKeyPress, false);
 			qfe = qfiDocument.getElementById("quick-format-editor");
+			qfe.addEventListener("drop", _onBubbleDrop, false);
+			qfe.addEventListener("paste", _onPaste, false);
 		}
 	}
 	
@@ -179,11 +180,17 @@ var Zotero_QuickFormat = new function () {
 		var range = selection.getRangeAt(0);
 		
 		var node = range.startContainer;
-		if(node !== range.endContainer || node.nodeType !== Node.TEXT_NODE ) {
-			return false;
+		if(node !== range.endContainer) return false;
+		if(node.nodeType === Node.TEXT_NODE) return node;
+
+		// Range could be referenced to the body element
+		if(node === qfe) {
+			var offset = range.startOffset;
+			if(offset !== range.endOffset) return false;
+			node = qfe.childNodes[Math.min(qfe.childNodes.length-1, offset)];
+			if(node.nodeType === Node.TEXT_NODE) return node;
 		}
-		
-		return node;
+		return false;
 	}
 	
 	/**
@@ -192,7 +199,7 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _getEditorContent(clear) {
 		var node = _getCurrentEditorTextNode();
-		return node ? node.textContent : false;
+		return node ? node.wholeText : false;
 	}
 	
 	/**
@@ -641,14 +648,18 @@ var Zotero_QuickFormat = new function () {
 		// It's entirely unintuitive why, but after trying a bunch of things, it looks like using
 		// a XUL label for these things works best. A regular span causes issues with moving the
 		// cursor.
-		var bubble = qfiDocument.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "label");
+		var bubble = qfiDocument.createElement("span");
 		bubble.setAttribute("class", "quick-format-bubble");
-		bubble.setAttribute("value", str);
+		bubble.setAttribute("draggable", "true");
+		bubble.textContent = str;
 		bubble.addEventListener("click", _onBubbleClick, false);
 		bubble.addEventListener("dragstart", _onBubbleDrag, false);
-		bubble.addEventListener("dragend", _onBubbleDrop, false);
 		bubble.citationItem = citationItem;
-		qfe.insertBefore(bubble, (nextNode ? nextNode : null));
+		if(nextNode && nextNode instanceof Range) {
+			nextNode.insertNode(bubble);
+		} else {
+			qfe.insertBefore(bubble, (nextNode ? nextNode : null));
+		}
 		
 		// make sure that there are no rogue <br>s
 		var elements = qfe.getElementsByTagName("br");
@@ -725,12 +736,10 @@ var Zotero_QuickFormat = new function () {
 			}
 		}
 		
-		var qfeHeight = qfe.scrollHeight;
-		
-		if(qfeHeight > 30) {
+		if(qfe.scrollHeight > 30) {
 			qfe.setAttribute("multiline", true);
 			qfs.setAttribute("multiline", true);
-			qfs.style.height = (4+qfeHeight)+"px";
+			qfs.style.height = (4+qfe.scrollHeight)+"px";
 			window.sizeToContent();
 		} else {
 			delete qfs.style.height;
@@ -971,6 +980,50 @@ var Zotero_QuickFormat = new function () {
 			io.accept();
 		}
 	}
+
+	/**
+	 * Get bubbles within the current selection
+	 */
+	function _getSelectedBubble(right) {
+		var selection = qfiWindow.getSelection(),
+			range = selection.getRangeAt(0);
+		qfe.normalize();
+		
+		// Check whether the bubble is selected
+		// Not sure whether this ever happens anymore
+		var container = range.startContainer;
+		if(container !== qfe) {
+			if(container.citationItem) {
+				return container;
+			} else if(container.nodeType === Node.TEXT_NODE && container.wholeText == "") {
+				if(container.parentNode === qfe) {
+					var node = container;
+					while((node = container.previousSibling)) {
+						if(node.citationItem) {
+							return node;
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		// Check whether there is a bubble anywhere to the left of this one
+		var offset = range.startOffset,
+			childNodes = qfe.childNodes,
+			node = childNodes[offset-(right ? 0 : 1)];
+		if(node && node.citationItem) return node;
+		return null;
+	}
+
+	/**
+	 * Reset timer that controls when search takes place. We use this to avoid searching after each
+	 * keypress, since searches can be slow.
+	 */
+	function _resetSearchTimer() {
+		if(searchTimeout) clearTimeout(searchTimeout);
+		searchTimeout = setTimeout(_quickFormat, 250);
+	}
 	
 	/**
 	 * Handle return or escape
@@ -987,29 +1040,48 @@ var Zotero_QuickFormat = new function () {
 		} else if(keyCode === event.DOM_VK_TAB || event.charCode === 59 /* ; */) {
 			event.preventDefault();
 			_bubbleizeSelected();
-		} else if(keyCode === event.DOM_VK_BACK_SPACE) {
+		} else if(keyCode === event.DOM_VK_BACK_SPACE || keyCode === event.DOM_VK_DELETE) {
+			var bubble = _getSelectedBubble(keyCode === event.DOM_VK_DELETE);
+
+			if(bubble) {
+				event.preventDefault();
+				bubble.parentNode.removeChild(bubble);
+			}
+
 			_resize();
-			
-			if(Zotero_QuickFormat.eventTimeout) clearTimeout(Zotero_QuickFormat.eventTimeout);
-			Zotero_QuickFormat.eventTimeout = setTimeout(_quickFormat, 250);
-			
+			_resetSearchTimer();
+		} else if(keyCode === event.DOM_VK_LEFT || keyCode === event.DOM_VK_RIGHT) {
+			var right = keyCode === event.DOM_VK_RIGHT,
+				bubble = _getSelectedBubble(right);
+			if(bubble) {
+				event.preventDefault();
+
+				var nodeRange = qfiDocument.createRange();
+				nodeRange.selectNode(bubble);
+				nodeRange.collapse(!right);
+
+				var selection = qfiWindow.getSelection();
+				selection.removeAllRanges();
+				selection.addRange(nodeRange);
+			}
+
 		} else if(keyCode === event.DOM_VK_UP) {
 			var selectedItem = referenceBox.selectedItem;
 
 			var previousSibling;
 			
-			//Seek the closet previous sibling that is not disabled
-			while((previousSibling = selectedItem.previousSibling) && previousSibling.getAttribute("disabled")){
+			// Seek the closet previous sibling that is not disabled
+			while((previousSibling = selectedItem.previousSibling) && previousSibling.hasAttribute("disabled")) {
 				selectedItem = previousSibling;
 			}
-			//If found, change to that
+			// If found, change to that
 			if(previousSibling) {
 				referenceBox.selectedItem = previousSibling;
 				
-				//If there are separators before this item, ensure that they are visible
+				// If there are separators before this item, ensure that they are visible
 				var visibleItem = previousSibling;
 
-				while(visibleItem.previousSibling && visibleItem.previousSibling.getAttribute("disabled")){
+				while(visibleItem.previousSibling && visibleItem.previousSibling.hasAttribute("disabled")) {
 					visibleItem = visibleItem.previousSibling;
 				}
 				referenceBox.ensureElementIsVisible(visibleItem);
@@ -1018,54 +1090,20 @@ var Zotero_QuickFormat = new function () {
 		} else if(keyCode === event.DOM_VK_DOWN) {
 			if((Zotero.isMac ? event.metaKey : event.ctrlKey)) {
 				// If meta key is held down, show the citation properties panel
-				var selection = qfiWindow.getSelection();
-				var range = selection.getRangeAt(0);
-				
-				// Check whether the bubble is selected
-				var endContainer = range.endContainer;
-				if(endContainer !== qfe) {
-					if(range.endContainer.citationItem) {
-						_showCitationProperties(range.endContainer);
-					} else if(endContainer.nodeType === Node.TEXT_NODE) {
-						if(endContainer.parentNode === qfe) {
-							var node = endContainer;
-							while((node = endContainer.previousSibling)) {
-								if(node.citationItem) {
-									_showCitationProperties(node);
-									event.preventDefault();
-									return;
-								}
-							}
-						}
-					}
-					event.preventDefault();
-					return;
-				}
-				
-				// Check whether there is a bubble in the range
-				var endOffset = range.endOffset;
-				var childNodes = qfe.childNodes;
-				for(var i=Math.min(endOffset, childNodes.length-1); i>=0; i--) {
-					var node = childNodes[i];
-					if(node.citationItem) {
-						_showCitationProperties(node);
-						event.preventDefault();
-						return;
-					}
-				}
-				
+				var bubble = _getSelectedBubble();
+
+				if(bubble) _showCitationProperties(bubble);
 				event.preventDefault();
 			} else {
 				var selectedItem = referenceBox.selectedItem;
 				var nextSibling;
 				
-				//Seek the closet next sibling that is not disabled
-				while((nextSibling = selectedItem.nextSibling) && nextSibling.getAttribute("disabled")){
+				// Seek the closet next sibling that is not disabled
+				while((nextSibling = selectedItem.nextSibling) && nextSibling.hasAttribute("disabled")) {
 					selectedItem = nextSibling;
 				}
 				
-				//If found, change to that
-
+				// If found, change to that
 				if(nextSibling){
 					referenceBox.selectedItem = nextSibling;
 					referenceBox.ensureElementIsVisible(nextSibling);
@@ -1073,9 +1111,7 @@ var Zotero_QuickFormat = new function () {
 				};
 			}
 		} else {
-			// Use a timeout so that _quickFormat gets called after update
-			if(Zotero_QuickFormat.eventTimeout) clearTimeout(Zotero_QuickFormat.eventTimeout);
-			Zotero_QuickFormat.eventTimeout = setTimeout(_quickFormat, 250);
+			_resetSearchTimer();
 		}
 	}
 	
@@ -1083,34 +1119,74 @@ var Zotero_QuickFormat = new function () {
 	 * Adds a dummy element to make dragging work
 	 */
 	function _onBubbleDrag(event) {
-		// just in case
-		var el = qfiDocument.getElementById("zotero-drag");
-		if(el) el.parentNode.removeChild(el);
-		
-		var dt = event.dataTransfer;
-		dragging = event.target.citationItem;
-		dt.setData("text/html", '<span id="zotero-drag"/>');
+		dragging = event.currentTarget;
+		event.dataTransfer.setData("text/plain", '<span id="zotero-drag"/>');
 		event.stopPropagation();
+	}
+
+	/**
+	 * Get index of bubble in citations
+	 */
+	function _getBubbleIndex(bubble) {
+		var nodes = qfe.childNodes, oldPosition = -1, index = 0;
+		for(var i=0, n=nodes.length; i<n; i++) {
+			if(nodes[i].citationItem) {
+				if(nodes[i] == bubble) return index;
+				index++;
+			}
+		}
+		return -1;
 	}
 	
 	/**
 	 * Replaces the dummy element with a node to make dropping work
 	 */
 	function _onBubbleDrop(event) {
-		window.setTimeout(function() {
-			var el = qfiDocument.getElementById("zotero-drag");
-			if(el) {
-				_insertBubble(dragging, el);
-				el.parentNode.removeChild(el);
-			}
-		}, 0);
+		event.preventDefault();
+		event.stopPropagation();
+
+		var range = document.createRange();
+
+		// Find old position in list
+		var oldPosition = _getBubbleIndex(dragging);
+		range.setStart(event.rangeParent, event.rangeOffset);
+		dragging.parentNode.removeChild(dragging);
+		var bubble = _insertBubble(dragging.citationItem, range);
+
+		// If moved out of order, turn off "Keep Sources Sorted"
+		if(io.sortable && keepSorted.hasAttribute("checked") && oldPosition !== -1 &&
+				oldPosition != _getBubbleIndex(bubble)) {
+			keepSorted.removeAttribute("checked");
+		}
+
+		_previewAndSort();
+		_moveCursorToEnd();
 	}
 	
 	/**
 	 * Handle a click on a bubble
 	 */
 	function _onBubbleClick(event) {
-		_showCitationProperties(event.target);
+		_moveCursorToEnd();
+		_showCitationProperties(event.currentTarget);
+	}
+
+	/**
+	 * Called when the user attempts to paste
+	 */
+	function _onPaste(event) {
+		event.stopPropagation();
+		event.preventDefault();
+
+		var str = Zotero.Utilities.Internal.getClipboard("text/unicode");
+		if(str) {
+			var selection = qfiWindow.getSelection();
+			var range = selection.getRangeAt(0);
+			range.deleteContents();
+			range.insertNode(document.createTextNode(str.replace(/[\r\n]/g, " ").trim()));
+			range.collapse(false);
+			_resetSearchTimer();
+		}
 	}
 	
 	/**
@@ -1151,7 +1227,6 @@ var Zotero_QuickFormat = new function () {
 	this.onCitationPropertiesClosed = function(event) {
 		panelRefersToBubble.removeAttribute("selected");
 		Zotero_QuickFormat.onCitationPropertiesChanged();
-		_moveCursorToEnd();
 	}
 	
 	/**

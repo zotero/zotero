@@ -187,20 +187,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	var _waitingForDBLock = false;
 	
 	/**
-	 * Maintains nsITimers to be used when Zotero.wait() completes (to reduce performance penalty
-	 * of initializing new objects)
-	 */
-	var _waitTimers = [];
-	
-	/**
 	 * Maintains nsITimerCallbacks to be used when Zotero.wait() completes
 	 */
 	var _waitTimerCallbacks = [];
-	
-	/**
-	 * Maintains running nsITimers in global scope, so that they don't disappear randomly
-	 */
-	var _runningTimers = [];
 	
 	// Errors that were in the console at startup
 	var _startupErrors = [];
@@ -208,6 +197,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	const ERROR_BUFFER_SIZE = 25;
 	// A rolling buffer of the last ERROR_BUFFER_SIZE errors
 	var _recentErrors = [];
+
+	// The hidden DOM window
+	var _hiddenDOMWindow;
 	
 	/**
 	 * Initialize the extension
@@ -216,11 +208,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		if (this.initialized || this.skipLoading) {
 			return false;
 		}
-		
-		var observerService = Components.classes["@mozilla.org/observer-service;1"]
-			.getService(Components.interfaces.nsIObserverService);
-		var versionComparator = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
-			.getService(Components.interfaces.nsIVersionComparator);
 		
 		// Load in the preferences branch for the extension
 		Zotero.Prefs.init();
@@ -245,14 +232,12 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		}
 		
 		// OS platform
-		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
-			   .getService(Components.interfaces.nsIAppShellService)
-			   .hiddenDOMWindow;
-		this.platform = win.navigator.platform;
+		_hiddenDOMWindow = Services.appShell.hiddenDOMWindow;
+		this.platform = _hiddenDOMWindow.navigator.platform;
 		this.isMac = (this.platform.substr(0, 3) == "Mac");
 		this.isWin = (this.platform.substr(0, 3) == "Win");
 		this.isLinux = (this.platform.substr(0, 5) == "Linux");
-		this.oscpu = win.navigator.oscpu;
+		this.oscpu = _hiddenDOMWindow.navigator.oscpu;
 		
 		// Browser
 		Zotero.browser = "g";
@@ -418,7 +403,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		// Register shutdown handler to call Zotero.shutdown()
 		var _shutdownObserver = {observe:Zotero.shutdown};
-		observerService.addObserver(_shutdownObserver, "quit-application", false);
+		Services.obs.addObserver(_shutdownObserver, "quit-application", false);
 		
 		try {
 			Zotero.IPC.init();
@@ -452,7 +437,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		// Add shutdown listener to remove quit-application observer and console listener
 		this.addShutdownListener(function() {
-			observerService.removeObserver(_shutdownObserver, "quit-application", false);
+			Services.obs.removeObserver(_shutdownObserver, "quit-application", false);
 			cs.unregisterListener(ConsoleListener);
 		});
 		
@@ -489,17 +474,14 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			Zotero.Repo.init();
 		}
 		
-		var observerService = Components.classes["@mozilla.org/observer-service;1"]
-			.getService(Components.interfaces.nsIObserverService);
-		
 		if(!Zotero.isFirstLoadThisSession) {
 			// trigger zotero-reloaded event
 			Zotero.debug('Triggering "zotero-reloaded" event');
-			observerService.notifyObservers(Zotero, "zotero-reloaded", null);
+			Services.obs.notifyObservers(Zotero, "zotero-reloaded", null);
 		}
 		
 		Zotero.debug('Triggering "zotero-loaded" event');
-		observerService.notifyObservers(Zotero, "zotero-loaded", null);
+		Services.obs.notifyObservers(Zotero, "zotero-loaded", null);
 	}
 	
 	/**
@@ -1520,10 +1502,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		_waiting--;
 		
 		// requeue nsITimerCallbacks that came up during Zotero.wait() but couldn't execute
-		for(var i in _waitTimers) {
-			_waitTimers[i].initWithCallback(_waitTimerCallbacks[i], 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+		for(var i=0; i<_waitTimerCallbacks.length; i++) {
+			Zotero.setTimeout(_waitTimerCallbacks[i], 0);
 		}
-		_waitTimers = [];
 		_waitTimerCallbacks = [];
 		
 		//Zotero.debug("Waited " + cycles + " cycles");
@@ -1539,13 +1520,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	this.pumpGenerator = function(generator, ms, errorHandler, doneHandler) {
 		_waiting++;
 		
-		var timer = Components.classes["@mozilla.org/timer;1"].
-			createInstance(Components.interfaces.nsITimer),
-			yielded,
-			useJIT = Components.utils.methodjit;
-		var timerCallback = {"notify":function() {
-			Components.utils.methodjit = useJIT;
-			
+		var yielded;
+		var interval = _hiddenDOMWindow.setInterval(function() {
 			var err = false;
 			_waiting--;
 			try {
@@ -1559,14 +1535,12 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				err = e;
 			}
 			
-			timer.cancel();
-			_runningTimers.splice(_runningTimers.indexOf(timer), 1);
+			_hiddenDOMWindow.clearInterval(interval);
 			
 			// requeue nsITimerCallbacks that came up during generator pumping but couldn't execute
-			for(var i in _waitTimers) {
-				_waitTimers[i].initWithCallback(_waitTimerCallbacks[i], 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+			for(var i=0; i<_waitTimerCallbacks.length; i++) {
+				Zotero.setTimeout(_waitTimerCallbacks[i], 0);
 			}
-			_waitTimers = [];
 			_waitTimerCallbacks = [];
 			
 			if(err) {
@@ -1578,10 +1552,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			} else if(doneHandler) {
 				doneHandler(yielded);
 			}
-		}}
-		timer.initWithCallback(timerCallback, ms ? ms : 0, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
-		// add timer to global scope so that it doesn't get garbage collected before it completes
-		_runningTimers.push(timer);
+		}, 0);
 	};
 	
 	/**
@@ -1605,27 +1576,17 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 *                                  is executing
 	 */
 	this.setTimeout = function(func, ms, runWhenWaiting) {
-		var timer = Components.classes["@mozilla.org/timer;1"].
-			createInstance(Components.interfaces.nsITimer),
-			useJIT = Components.utils.methodjit;
-		var timerCallback = {"notify":function() {
-			Components.utils.methodjit = useJIT;
-			
+		var timerCallback = function() {
 			if(_waiting && !runWhenWaiting) {
 				// if our callback gets called during Zotero.wait(), queue it to be set again
 				// when Zotero.wait() completes
-				_waitTimers.push(timer);
 				_waitTimerCallbacks.push(timerCallback);
 			} else {
 				// execute callback function
 				func();
-				// remove timer from global scope, so it can be garbage collected
-				_runningTimers.splice(_runningTimers.indexOf(timer), 1);
 			}
-		}}
-		timer.initWithCallback(timerCallback, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-		// add timer to global scope so that it doesn't get garbage collected before it completes
-		_runningTimers.push(timer);
+		};
+		_hiddenDOMWindow.setTimeout(timerCallback, ms);
 	}
 	
 	/**
@@ -2343,9 +2304,7 @@ Zotero.VersionHeader = {
 	
 	// Called from this.init() and Zotero.Prefs.observe()
 	register: function () {
-		var observerService = Components.classes["@mozilla.org/observer-service;1"]
-								.getService(Components.interfaces.nsIObserverService);
-		observerService.addObserver(this, "http-on-modify-request", false);
+		Services.obs.addObserver(this, "http-on-modify-request", false);
 	},
 	
 	observe: function (subject, topic, data) {
@@ -2361,9 +2320,7 @@ Zotero.VersionHeader = {
 	},
 	
 	unregister: function () {
-		var observerService = Components.classes["@mozilla.org/observer-service;1"]
-								.getService(Components.interfaces.nsIObserverService);
-		observerService.removeObserver(Zotero.VersionHeader, "http-on-modify-request");
+		Services.obs.removeObserver(Zotero.VersionHeader, "http-on-modify-request");
 	}
 }
 
