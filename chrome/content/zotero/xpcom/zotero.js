@@ -217,9 +217,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			return false;
 		}
 		
-		var versionComparator = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
-			.getService(Components.interfaces.nsIVersionComparator);
-		
 		// Load in the preferences branch for the extension
 		Zotero.Prefs.init();
 		Zotero.Debug.init();
