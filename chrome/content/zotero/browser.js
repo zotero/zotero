@@ -812,11 +812,14 @@ Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, transla
 			//this set of translators is not targeting the same URL as a previous set of translators,
 			// because otherwise we want to use the newer set
 			&& this.page.document.location.href != translate.document.location.href
-			//the previous set of translators targets the top frame or the current one does not either
-			&& (this.page.document.defaultView == this.page.document.defaultView.top
-				|| translate.document.defaultView !== this.page.document.defaultView.top)
-			//the best translator we had was of higher priority than the new set
-			&& this.page.translators[0].priority <= translators[0].priority
+				//the best translator we had was of higher priority than the new set
+			&& (this.page.translators[0].priority < translators[0].priority
+				//or the priority was the same, but...
+				|| (this.page.translators[0].priority == translators[0].priority
+					//the previous set of translators targets the top frame or the current one does not either
+					&& (this.page.document.defaultView == this.page.document.defaultView.top
+						|| translate.document.defaultView !== this.page.document.defaultView.top)
+			))
 		) {
 			return; //keep what we had
 		} else {
