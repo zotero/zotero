@@ -123,10 +123,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	});
 	
 	this.getActiveZoteroPane = function() {
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			.getService(Components.interfaces.nsIWindowMediator);
-		var win = wm.getMostRecentWindow("navigator:browser");
-		return win.ZoteroPane;
+		return Services.wm.getMostRecentWindow("navigator:browser").ZoteroPane;
 	};
 	
 	this.getLocalUserKey = function (generate) {
@@ -213,15 +210,12 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		Zotero.Prefs.init();
 		Zotero.Debug.init();
 		
-		this.mainThread = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
-		
-		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
-				getService(Components.interfaces.nsIXULAppInfo);
+		this.mainThread = Services.tm.mainThread;
 		this.isFx = true;
 		
-		this.isStandalone = appInfo.ID == ZOTERO_CONFIG['GUID'];
+		this.isStandalone = Services.appinfo.ID == ZOTERO_CONFIG['GUID'];
 		if(this.isStandalone) {
-			this.version = appInfo.version;
+			this.version = Services.appinfo.version;
 		} else {
 			// Use until we collect version from extension manager
 			this.version = ZOTERO_CONFIG['VERSION'];
@@ -243,9 +237,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		Zotero.browser = "g";
 		
 		// Locale
-		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-						.getService(Components.interfaces.nsIPrefService),
-			uaPrefs = prefs.getBranch("general.useragent.");
+		var uaPrefs = Services.prefs.getBranch("general.useragent.");
 		try {
 			this.locale = uaPrefs.getComplexValue("locale", Components.interfaces.nsIPrefLocalizedString);
 		} catch (e) {}
@@ -261,18 +253,13 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		}
 		
 		// Load in the localization stringbundle for use by getString(name)
-		var stringBundleService =
-			Components.classes["@mozilla.org/intl/stringbundle;1"]
-			.getService(Components.interfaces.nsIStringBundleService);
-		var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
-							getService(Components.interfaces.nsILocaleService);
-		var appLocale = localeService.getApplicationLocale();
+		var appLocale = Services.locale.getApplicationLocale();
 		
-		_localizedStringBundle = stringBundleService.createBundle(
+		_localizedStringBundle = Services.strings.createBundle(
 			"chrome://zotero/locale/zotero.properties", appLocale);
 		
 		// Also load the brand as appName
-		var brandBundle = stringBundleService.createBundle(
+		var brandBundle = Services.strings.createBundle(
 			"chrome://branding/locale/brand.properties", appLocale);
 		this.appName = brandBundle.GetStringFromName("brandShortName");
 		
@@ -299,9 +286,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			if (e.name == 'NS_ERROR_FILE_NOT_FOUND') {
 				Zotero.startupError = Zotero.getString('dataDir.notFound');
 				_startupErrorHandler = function() {
-					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						.getService(Components.interfaces.nsIWindowMediator);
-					var win = wm.getMostRecentWindow('navigator:browser');
+					var win = Services.wm.getMostRecentWindow('navigator:browser');
 					
 					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 							createInstance(Components.interfaces.nsIPromptService);
@@ -422,23 +407,21 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			throw (e);
 		}
 		
-		var cs = Components.classes["@mozilla.org/consoleservice;1"].
-			getService(Components.interfaces.nsIConsoleService);
 		// Get startup errors
 		try {
 			var messages = {};
-			cs.getMessageArray(messages, {});
+			Services.console.getMessageArray(messages, {});
 			_startupErrors = [msg for each(msg in messages.value) if(_shouldKeepError(msg))];
 		} catch(e) {
 			Zotero.logError(e);
 		}
 		// Register error observer
-		cs.registerListener(ConsoleListener);
+		Services.console.registerListener(ConsoleListener);
 		
 		// Add shutdown listener to remove quit-application observer and console listener
 		this.addShutdownListener(function() {
 			Services.obs.removeObserver(_shutdownObserver, "quit-application", false);
-			cs.unregisterListener(ConsoleListener);
+			Services.console.unregisterListener(ConsoleListener);
 		});
 		
 		// Load additional info for connector or not
@@ -531,9 +514,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		// Require >=2.1b3 database to ensure proper locking
 		if (Zotero.isStandalone && Zotero.Schema.getDBVersion('system') > 0 && Zotero.Schema.getDBVersion('system') < 31) {
-			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
-					.getService(Components.interfaces.nsIAppStartup);
-			
 			var dir = Zotero.getProfileDirectory();
 			dir.append('zotero');
 
@@ -563,7 +543,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				
 				Zotero.Prefs.set("useDataDir", false)
 				
-				appStartup.quit(
+				Services.startup.quit(
 					Components.interfaces.nsIAppStartup.eAttemptQuit
 						| Components.interfaces.nsIAppStartup.eRestart
 				);
@@ -580,7 +560,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			}
 			
 			if (quit) {
-				appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
+				Services.startup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
 			}
 			
 			Zotero.skipLoading = true;
@@ -803,9 +783,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	
 	
 	function getProfileDirectory(){
-		return Components.classes["@mozilla.org/file/directory_service;1"]
-			 .getService(Components.interfaces.nsIProperties)
-			 .get("ProfD", Components.interfaces.nsIFile);
+		return Services.dirsvc.get("ProfD", Components.interfaces.nsIFile);
 	}
 	
 	function getDefaultProfile(prefDir) {
@@ -887,8 +865,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			// if standalone and no directory yet, check Firefox directory
 			// or if in Firefox and no directory yet, check standalone Zotero directory
 			if(!file.exists()) {
-				var prefDir = Components.classes["@mozilla.org/file/directory_service;1"]
-					.getService(Components.interfaces.nsIProperties)
+				var prefDir = Services.dirsvc
 					.get("DefProfRt", Components.interfaces.nsILocalFile).parent.parent;
 				
 				if(Zotero.isStandalone) {
@@ -1008,12 +985,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	
 	
 	function chooseZoteroDirectory(forceQuitNow, useProfileDir, moreInfoCallback) {
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			.getService(Components.interfaces.nsIWindowMediator);
-		var win = wm.getMostRecentWindow('navigator:browser');
-		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
+		var win = Services.wm.getMostRecentWindow('navigator:browser');
+		var ps = Services.prompt;
 		
 		if (useProfileDir) {
 			Zotero.Prefs.set('useDataDir', false);
@@ -1115,9 +1088,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			null, null, {});
 		
 		if (index == 0) {
-			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
-					.getService(Components.interfaces.nsIAppStartup);
-			appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
+			Services.startup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
 		}
 		
 		return useProfileDir ? true : file;
@@ -1195,8 +1166,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 *    'error', 'warning', 'exception', 'strict'
 	 */
 	function log(message, type, sourceName, sourceLine, lineNumber, columnNumber) {
-		var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
-			.getService(Components.interfaces.nsIConsoleService);
 		var scriptError = Components.classes["@mozilla.org/scripterror;1"]
 			.createInstance(Components.interfaces.nsIScriptError);
 		
@@ -1214,7 +1183,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			flags,
 			'component javascript'
 		);
-		consoleService.logMessage(scriptError);
+		Services.console.logMessage(scriptError);
 	}
 	
 	/**
@@ -1258,16 +1227,13 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 * is available only in async mode
 	 */
 	function getSystemInfo(callback) {
-		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
-			getService(Components.interfaces.nsIXULAppInfo);
-		
 		var info = {
 			version: Zotero.version,
 			platform: Zotero.platform,
 			oscpu: Zotero.oscpu,
 			locale: Zotero.locale,
-			appName: appInfo.name,
-			appVersion: appInfo.version
+			appName: Services.appinfo.name,
+			appVersion: Services.appinfo.version
 		};
 		
 		if (callback) {
@@ -1373,11 +1339,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	
 	
 	function getLocaleCollation() {
-		var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
-			.getService(Components.interfaces.nsILocaleService);
 		var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
 			.getService(Components.interfaces.nsICollationFactory);
-		return collationFactory.CreateCollation(localeService.getApplicationLocale());
+		return collationFactory.CreateCollation(Services.locale.getApplicationLocale());
 	}
 	
 	
@@ -1597,10 +1561,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 * @return	void
 	 */
 	this.showZoteroPaneProgressMeter = function (msg, determinate, icon) {
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-					.getService(Components.interfaces.nsIWindowMediator);
-		var currentWindow = wm.getMostRecentWindow("navigator:browser");
-		var enumerator = wm.getEnumerator("navigator:browser");
+		var currentWindow = Services.wm.getMostRecentWindow("navigator:browser");
+		var enumerator = Services.wm.getEnumerator("navigator:browser");
 		var progressMeters = [];
 		while (enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
@@ -1685,9 +1647,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			}
 		}
 		
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-					.getService(Components.interfaces.nsIWindowMediator);
-		var enumerator = wm.getEnumerator("navigator:browser");
+		var enumerator = Services.wm.getEnumerator("navigator:browser");
 		while (enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
 			if(win.ZoteroPane && win.ZoteroPane.document) {
@@ -1866,9 +1826,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 * Brings Zotero Standalone to the foreground
 	 */
 	this.activateStandalone = function() {
-		var io = Components.classes['@mozilla.org/network/io-service;1']
-					.getService(Components.interfaces.nsIIOService);
-		var uri = io.newURI('zotero://select', null, null);
+		var uri = Services.io.newURI('zotero://select', null, null);
 		var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
 					.getService(Components.interfaces.nsIExternalProtocolService)
 					.getProtocolHandlerInfo('zotero');
@@ -1949,9 +1907,7 @@ Zotero.Prefs = new function(){
 	this.prefBranch;
 	
 	function init(){
-		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-						.getService(Components.interfaces.nsIPrefService);
-		this.prefBranch = prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
+		this.prefBranch = Services.prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
 		
 		// Register observer to handle pref changes
 		this.register();
@@ -1990,9 +1946,7 @@ Zotero.Prefs = new function(){
 	function get(pref, global){
 		try {
 			if (global) {
-				var service = Components.classes["@mozilla.org/preferences-service;1"]
-								.getService(Components.interfaces.nsIPrefService);
-				var branch = service.getBranch("");
+				var branch = Services.prefs.getBranch("");
 			}
 			else {
 				var branch = this.prefBranch;
@@ -2061,8 +2015,7 @@ Zotero.Prefs = new function(){
 	
 	// Import settings bundles
 	this.importSettings = function (str, uri) {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService);
+		var ps = Services.prompt;
 		
 		if (!uri.match(/https:\/\/([^\.]+\.)?zotero.org\//)) {
 			Zotero.debug("Ignoring settings file not from https://zotero.org");
@@ -2112,9 +2065,7 @@ Zotero.Prefs = new function(){
 		// data is the name of the pref that's been changed (relative to subject)
 		switch (data) {
 			case "statusBarIcon":
-				var doc = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-							.getService(Components.interfaces.nsIWindowMediator)
-							.getMostRecentWindow("navigator:browser").document;
+				var doc = Services.wm.getMostRecentWindow("navigator:browser").document;
 				
 				var addonBar = doc.getElementById("addon-bar");
 				var icon = doc.getElementById("zotero-toolbar-button");
@@ -2201,9 +2152,7 @@ Zotero.Prefs = new function(){
 				break;
 			
 			case "search.quicksearch-mode":
-				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-							.getService(Components.interfaces.nsIWindowMediator);
-				var enumerator = wm.getEnumerator("navigator:browser");
+				var enumerator = Services.wm.getEnumerator("navigator:browser");
 				while (enumerator.hasMoreElements()) {
 					var win = enumerator.getNext();
 					if (!win.ZoteroPane) continue;
@@ -2391,13 +2340,9 @@ Zotero.Browser = new function() {
 	
 	function createHiddenBrowser(win) {
 	 	if (!win) {
-			var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-							.getService(Components.interfaces.nsIWindowMediator)
-							.getMostRecentWindow("navigator:browser");
+			var win = Services.wm.getMostRecentWindow("navigator:browser");
 			if(!win) {
-				var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								.getService(Components.interfaces.nsIWindowWatcher)
-								.activeWindow;
+				var win = Services.ww.activeWindow;
 			}
 		}
 		
@@ -2450,10 +2395,8 @@ Zotero.UnresponsiveScriptIndicator = new function() {
 			return false;
 		}
 		
-		var prefService = Components.classes["@mozilla.org/preferences-service;1"].
-		                  getService(Components.interfaces.nsIPrefBranch);
-		_unresponsiveScriptPreference = prefService.getIntPref("dom.max_chrome_script_run_time");
-		prefService.setIntPref("dom.max_chrome_script_run_time", 0);
+		_unresponsiveScriptPreference = Services.prefs.getIntPref("dom.max_chrome_script_run_time");
+		Services.prefs.setIntPref("dom.max_chrome_script_run_time", 0);
 		
 		_isDisabled = true;
 		return true;
@@ -2463,9 +2406,7 @@ Zotero.UnresponsiveScriptIndicator = new function() {
 	 * restores the "unresponsive script" warning
 	 **/
 	function enable() {
-		var prefService = Components.classes["@mozilla.org/preferences-service;1"].
-		                  getService(Components.interfaces.nsIPrefBranch);
-		prefService.setIntPref("dom.max_chrome_script_run_time", _unresponsiveScriptPreference);
+		Services.prefs.setIntPref("dom.max_chrome_script_run_time", _unresponsiveScriptPreference);
 		
 		_isDisabled = false;
 	}
