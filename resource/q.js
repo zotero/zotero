@@ -70,7 +70,8 @@
 					timer = Components.classes["@mozilla.org/timer;1"].
 						createInstance(Components.interfaces.nsITimer);
 				timer.initWithCallback({"notify":function() {
-					Components.utils.methodjit = useMethodjit;
+                    // XXX Remove when we drop support for Fx <24
+					if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 					
 					// Remove timer from array so it can be garbage collected
 					_runningTimers.splice(_runningTimers.indexOf(timer), 1);

@@ -1545,7 +1545,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			yielded,
 			useJIT = Components.utils.methodjit;
 		var timerCallback = {"notify":function() {
-			Components.utils.methodjit = useJIT;
+			// XXX Remove when we drop support for Fx <24
+			if(useJIT !== undefined) Components.utils.methodjit = useJIT;
 			
 			var err = false;
 			_waiting--;
@@ -1610,7 +1611,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			createInstance(Components.interfaces.nsITimer),
 			useJIT = Components.utils.methodjit;
 		var timerCallback = {"notify":function() {
-			Components.utils.methodjit = useJIT;
+			// XXX Remove when we drop support for Fx <24
+			if(useJIT !== undefined) Components.utils.methodjit = useJIT;
 			
 			if(_waiting && !runWhenWaiting) {
 				// if our callback gets called during Zotero.wait(), queue it to be set again

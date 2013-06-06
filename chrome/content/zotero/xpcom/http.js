@@ -249,7 +249,8 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
+			// XXX Remove when we drop support for Fx <24
+			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
@@ -337,7 +338,8 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
+			// XXX Remove when we drop support for Fx <24
+			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
@@ -401,7 +403,8 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
+			// XXX Remove when we drop support for Fx <24
+			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, onDone);
 		};
 		
@@ -440,7 +443,8 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
+			// XXX Remove when we drop support for Fx <24
+			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(null);
@@ -482,7 +486,8 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
+			// XXX Remove when we drop support for Fx <24
+			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, function (xmlhttp) {
 				Zotero.debug("Proxy auth request completed with status "
 					+ xmlhttp.status + ": " + xmlhttp.responseText);
@@ -561,7 +566,8 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
+			// XXX Remove when we drop support for Fx <24
+			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		
@@ -597,7 +603,8 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
+			// XXX Remove when we drop support for Fx <24
+			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(null);
@@ -642,7 +649,8 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
+			// XXX Remove when we drop support for Fx <24
+			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(body);
@@ -681,7 +689,8 @@ Zotero.HTTP = new function() {
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
-			Components.utils.methodjit = useMethodjit;
+			// XXX Remove when we drop support for Fx <24
+			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(null);
