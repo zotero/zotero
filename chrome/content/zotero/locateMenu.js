@@ -77,6 +77,7 @@ var Zotero_LocateMenu = new function() {
 				menuitem.setAttribute("label", locateEngine.label);
 				menuitem.setAttribute("class", "menuitem-iconic");
 				menuitem.setAttribute("image", locateEngine.image);
+				menuitem.sourceURL = locateEngine.sourceURL;
 				menuitem.zoteroLocateInfo = locateEngine;
 				menuitem.addEventListener("command", _addLocateEngine, false);
 				
@@ -221,6 +222,7 @@ var Zotero_LocateMenu = new function() {
 			var menuitem = _createMenuItem(engine.name, null, engine.description);
 			menuitem.setAttribute("class", "menuitem-iconic");
 			menuitem.setAttribute("image", engine.icon);
+			menuitem.sourceURL = engine.sourceURL;
 			menu.appendChild(menuitem);
 			menuitem.addEventListener("command", locateFn, false);
 		}
@@ -245,27 +247,38 @@ var Zotero_LocateMenu = new function() {
 		var locateEngines = [];
 		if(!window.Zotero_Browser || !window.Zotero_Browser.tabbrowser) return locateEngines;
 		
-		var links = Zotero_Browser.tabbrowser.selectedBrowser.contentDocument.getElementsByTagName("link");
+		var doc = Zotero_Browser.tabbrowser.selectedBrowser.contentDocument;
+		var links = doc.getElementsByTagName("link");
 		for each(var link in links) {
 			if(!link.getAttribute) continue;
 			var rel = link.getAttribute("rel");
 			if(rel && rel === "search") {
 				var type = link.getAttribute("type");
-				if(type && type === "application/x-openurl-opensearchdescription+xml") {
+				if(type
+					&& (type === "application/x-openurl-opensearchdescription+xml"
+						|| type === "application/opensearchdescription+xml") ) {
 					var label = link.getAttribute("title");
-					if(label) {
-						if(Zotero.LocateManager.getEngineByName(label)) {
-							label = 'Update "'+label+'"';
-						} else {
-							label = 'Add "'+label+'"';
-						}
+					var sourceURL = link.href;
+					var oldEngine;
+					if(oldEngine = Zotero.LocateManager.getEngineBySourceURL(sourceURL)) {
+						label = 'Update "' + oldEngine.name + '"';
+					} else if(label) {
+						label = 'Add "'+label+'"';
 					} else {
 						label = 'Add Locate Engine';
 					}
 					
+					// Use the page icon in the locate menu,
+					// but only if the OpenSearch link is to the same hostname
+					var imageURI = Zotero_Browser.tabbrowser.selectedTab.image;
+					var sourceHostname = sourceURL.match(/^https?:\/\/([^:\/?#]+)/);
+					if(!sourceHostname || doc.location.hostname != sourceHostname[1]) {
+						imageURI = '';
+					}
+					
 					locateEngines.push({'label':label,
-						'href':link.getAttribute("href"),
-						'image':Zotero_Browser.tabbrowser.selectedTab.image});
+						'href':sourceURL,
+						'image': imageURI});
 				}
 			}
 		}
@@ -282,7 +295,7 @@ var Zotero_LocateMenu = new function() {
 		}
 		
 		// find selected engine
-		var selectedEngine = Zotero.LocateManager.getEngineByName(event.target.label);
+		var selectedEngine = Zotero.LocateManager.getEngineBySourceURL(event.target.sourceURL);
 		if(!selectedEngine) throw "Selected locate engine not found";
 		
 		var urls = [];

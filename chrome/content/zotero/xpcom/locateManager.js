@@ -60,7 +60,7 @@ Zotero.LocateManager = new function() {
 		
 		Zotero.HTTP.doGet(engineURL, function(xmlhttp) {
 			var engine = new LocateEngine();
-			engine.initWithXML(xmlhttp.responseText, iconURL);
+			engine.initWithXML(xmlhttp.responseText, engineURL, iconURL);
 		});
 	}
 	
@@ -95,6 +95,14 @@ Zotero.LocateManager = new function() {
 	this.getEngineByAlias = function(engineAlias) {
 		engineAlias = engineAlias.toLowerCase();
 		for each(var engine in _locateEngines) if(engine.alias.toLowerCase() == engineAlias) return engine;
+		return null;
+	}
+	
+	/**
+	 * Returns an engine with a specific source URL
+	 */
+	this.getEngineBySourceURL = function(sourceURL) {
+		for each(var engine in _locateEngines) if(engine.sourceURL == sourceURL) return engine;
 		return null;
 	}
 	
@@ -321,14 +329,14 @@ Zotero.LocateManager = new function() {
 	 */
 	var LocateEngine = function(obj) {
 		this.alias = this.name = "Untitled";
-		this.description = this._urlTemplate = this.icon = null;
+		this.description = this._urlTemplate = this.icon = this.sourceURL = null;
 		this.hidden = false;
 		this._urlParams = [];
 		
 		if(obj) for(var prop in obj) this[prop] = obj[prop];
 		
 		// Queue deferred serialization whenever a property is modified
-		for each(var prop in ["alias", "name", "description", "icon", "hidden"]) {
+		for each(var prop in ["alias", "name", "description", "icon", "hidden", "sourceURL"]) {
 			this.watch(prop, _watchLocateEngineProperties);
 		}
 	}
@@ -337,7 +345,7 @@ Zotero.LocateManager = new function() {
 		/**
 		 * Initializes an engine with a string and an iconURL to use if none is defined in the file
 		 */
-		"initWithXML":function(xmlStr, iconURL) {
+		"initWithXML":function(xmlStr, sourceURL, iconURL) {
 			const OPENSEARCH_NAMESPACES = [
 			  // These are the official namespaces
 			  "http://a9.com/-/spec/opensearch/1.1/",
@@ -364,6 +372,8 @@ Zotero.LocateManager = new function() {
 			if(!this.name) this.name = this.alias;
 			this.description = Zotero.Utilities.xpathText(docEl, 's:Description', xns);
 			
+			this.sourceURL = sourceURL;
+			
 			// get the URL template
 			this._urlTemplate = undefined;
 			var urlTags = Zotero.Utilities.xpath(docEl, 's:Url[@type="text/html"]', xns),
@@ -376,7 +386,8 @@ Zotero.LocateManager = new function() {
 			// TODO: better error handling
 			var urlTag = urlTags[i];
 			this._urlTemplate = urlTag.getAttribute("template")
-			this._method = urlTag.getAttribute("method").toString().toUpperCase() === "POST" ? "POST" : "GET";
+			var method = urlTag.getAttribute("method") || "GET";
+			this._method = method.toString().toUpperCase() === "POST" ? "POST" : "GET";
 			
 			// get namespaces
 			this._urlNamespaces = {};
@@ -397,6 +408,21 @@ Zotero.LocateManager = new function() {
 				this._urlParams[param.getAttribute("name")] = param.getAttribute("value");
 			}
 			
+			// Delete any old engine from the same source
+			var engine = Zotero.LocateManager.getEngineBySourceURL(sourceURL);
+			if(engine) Zotero.LocateManager.removeEngine(engine);
+			
+			// Prevent duplicate names for lookup engines
+			var name = this.name;
+			engine = Zotero.LocateManager.getEngineByName(name);
+			if(engine) {
+				var j = 1;
+				while(Zotero.LocateManager.getEngineByName(name + ' (' + j + ')')) {
+					j++;
+				}
+				this.name = name + ' (' + j + ')';
+			}
+			
 			// find the icon
 			this._iconSourceURI = iconURL;
 			for(var img of Zotero.Utilities.xpath(docEl, 's:Image', xns)) {
@@ -410,10 +436,6 @@ Zotero.LocateManager = new function() {
 				// begin fetching the icon if necesssary
 				this._updateIcon();
 			}
-			
-			// delete any old engine with the same name
-			var engine = Zotero.LocateManager.getEngineByName(this.name);
-			if(engine) Zotero.LocateManager.removeEngine(engine);
 			
 			// add and serialize the new engine
 			_locateEngines.push(this);
