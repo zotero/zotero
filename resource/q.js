@@ -58,11 +58,50 @@
     // Mozilla JSM
     } else if (~String(this).indexOf('BackstagePass')) {
 		EXPORTED_SYMBOLS = ["Q"];
-        Components.utils.import("resource://gre/modules/Services.jsm");
-        var hiddenDOMWindow = Services.appShell.hiddenDOMWindow;
 		
 		// Q expects an implementation of setTimeout
-		setTimeout = hiddenDOMWindow.setTimeout;
+		setTimeout = new function() {
+			// We need to maintain references to running nsITimers. Otherwise, they can
+			// get garbage collected before they fire.
+			var _runningTimers = [];
+			
+			return function setTimeout(func, ms) {
+				var useMethodjit = Components.utils.methodjit,
+					timer = Components.classes["@mozilla.org/timer;1"].
+						createInstance(Components.interfaces.nsITimer);
+				timer.initWithCallback({"notify":function() {
+                    // XXX Remove when we drop support for Fx <24
+					if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
+					
+					// Remove timer from array so it can be garbage collected
+					_runningTimers.splice(_runningTimers.indexOf(timer), 1);
+					
+					// Execute callback function
+					try {
+						func();
+					} catch(err) {
+						// Rethrow errors that occur so that they appear in the error
+						// console with the appropriate name and line numbers. While the
+						// the errors appear without this, the line numbers get eaten.
+						var scriptError = Components.classes["@mozilla.org/scripterror;1"]
+							.createInstance(Components.interfaces.nsIScriptError);
+						scriptError.init(
+							err.message || err.toString(),
+							err.fileName || err.filename || null,
+							null,
+							err.lineNumber || null, 
+							null,
+							scriptError.errorFlag,
+							'component javascript'
+						);
+						Components.classes["@mozilla.org/consoleservice;1"]
+							.getService(Components.interfaces.nsIConsoleService)
+							.logMessage(scriptError);
+					}
+				}}, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+				_runningTimers.push(timer);
+			}
+		};
         Q = definition();
 
     // <script>
