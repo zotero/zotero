@@ -63,7 +63,7 @@ Zotero.Translators = new function() {
 			while(contents.hasMoreElements()) {
 				var file = contents.getNext().QueryInterface(Components.interfaces.nsIFile);
 				var leafName = file.leafName;
-				if(!leafName || leafName[0] == ".") continue;
+				if(!(/[^.].*\.js/.test(leafName))) continue;
 				var lastModifiedTime = file.lastModifiedTime;
 				
 				var dbCacheEntry = false;
