@@ -836,7 +836,7 @@
         "name": "United States Minor Outlying Islands"
     }, 
     "un.org": {
-        "name": "United Nations"
+        "name": "United Nations",
         "nickname": "UN",
         "subunit": {
            "children": {
