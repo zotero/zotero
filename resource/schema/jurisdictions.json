@@ -38,6 +38,9 @@
     "au": {
         "name": "Australia"
     }, 
+    "au.int": {
+        "name": "African Union"
+    }, 
     "aw": {
         "name": "Aruba"
     }, 
@@ -424,6 +427,9 @@
     "hu": {
         "name": "Hungary"
     }, 
+    "icc-cpi.int": {
+       "name": "International Criminal Court"
+    },
     "id": {
         "name": "Indonesia"
     }, 
@@ -831,6 +837,14 @@
     }, 
     "un.org": {
         "name": "United Nations"
+        "nickname": "UN",
+        "subunit": {
+           "children": {
+              "icj": {
+                  "name": "International Court of Justice"
+              }
+           }
+        }
     }, 
     "us": {
         "name": "United States",
