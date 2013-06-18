@@ -2,7 +2,7 @@
 
 import sys,os,json
 
-ifh = open("mlz-jurisdictions/jurisdictions.js")
+ifh = open("/home/bennett/src/mlz-jurisdictions/jurisdictions.json")
 json = json.load(ifh)
 ifh.close()
 
@@ -19,7 +19,7 @@ class JurisdictionEngine:
                 uistr = "%s, %s" % (obj[key]["name"],suffix)
             else:
                 uistr = obj[key]["name"]
-            strs.append("INSERT INTO jurisdictions VALUES(\"%s\",\"%s\")" % (key,uistr))
+            strs.append("INSERT INTO jurisdictions VALUES(\"%s\",\"%s\");" % (key,uistr.replace("'","")))
             if obj[key].has_key("subunit"):
                 if obj[key]["subunit"]["name"]:
                     mysuffix = "%s (%s)" % (obj[key]["nickname"],obj[key]["subunit"]["name"])
