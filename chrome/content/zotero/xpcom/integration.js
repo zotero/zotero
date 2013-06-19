@@ -1490,7 +1490,7 @@ Zotero.Integration.Fields.prototype._processFields = function(i) {
 					throw e;
 				}
 			}
-		} else if(type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
+		} else if(type === INTEGRATION_TYPE_BIBLIOGRAPHY && field.getText().trim() !== "") {
 			this._bibliographyFields.push(field);
 			if(!this._session.bibliographyData && !this._bibliographyData) {
 				this._bibliographyData = content;
