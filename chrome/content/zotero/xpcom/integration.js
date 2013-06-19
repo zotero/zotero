@@ -1235,6 +1235,7 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 		
 		// Refresh contents
 		fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		fieldGetter.ignoreEmptyBibliography = false;
 		return fieldGetter.updateSession().fail(Zotero.Integration.onFieldError)
 		.then(fieldGetter.updateDocument.bind(
 			fieldGetter, FORCE_CITATIONS_RESET_TEXT, true, true));
@@ -1261,6 +1262,7 @@ Zotero.Integration.Document.JSEnumerator.prototype.getNext = function() {
 Zotero.Integration.Fields = function(session, doc) {
 	this._session = session;
 	this._doc = doc;
+	this.ignoreEmptyBibliography = true;
 }
 
 /**
@@ -1490,10 +1492,14 @@ Zotero.Integration.Fields.prototype._processFields = function(i) {
 					throw e;
 				}
 			}
-		} else if(type === INTEGRATION_TYPE_BIBLIOGRAPHY && field.getText().trim() !== "") {
-			this._bibliographyFields.push(field);
-			if(!this._session.bibliographyData && !this._bibliographyData) {
-				this._bibliographyData = content;
+		} else if(type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
+			if(this.ignoreEmptyBibliography && field.getText().trim() === "") {
+				this._removeCodeFields[i] = true;
+			} else {
+				this._bibliographyFields.push(field);
+				if(!this._session.bibliographyData && !this._bibliographyData) {
+					this._bibliographyData = content;
+				}
 			}
 		}
 	}
@@ -2491,33 +2497,6 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) 
 }
 
 /**
- * Marks a citation for removal
- */
-Zotero.Integration.Session.prototype.deleteCitation = function(index) {
-	var oldCitation = (this.citationsByIndex[index] ? this.citationsByIndex[index] : false);
-	this.citationsByIndex[index] = {properties:{"delete":true}};
-	
-	if(oldCitation && oldCitation.citationItems & oldCitation.properties.added) {
-		// clear out old citations if necessary
-		for each(var citationItem in oldCitation.citationItems) {
-			if(this.citationsByItemID[citationItem.id]) {
-				var indexInItemID = this.citationsByItemID[citationItem.id].indexOf(oldCitation);
-				if(indexInItemID !== -1) {
-					this.citationsByItemID[citationItem.id] = this.citationsByItemID[citationItem.id].splice(indexInItemID, 1);
-					if(this.citationsByItemID[citationItem.id].length == 0) {
-						delete this.citationsByItemID[citationItem.id];
-					}
-				}
-			}
-		}
-	}
-	Zotero.debug("Integration: Deleting old citationID "+oldCitation.citationID);
-	if(oldCitation.citationID) delete this.citeprocCitationIDs[oldCitation.citationID];
-	
-	this.updateIndices[index] = true;
-}
-
-/**
  * Gets integration bibliography
  */
 Zotero.Integration.Session.prototype.getBibliography = function() {
@@ -2657,7 +2636,7 @@ Zotero.Integration.Session.prototype._updateCitations = function() {
 			index = parseInt(index);
 			
 			var citation = this.citationsByIndex[index];
-			if(!citation) continue;
+			if(!citation || citation.properties.delete) continue;
 			if(this.formatCitation(index, citation)) {
 				this.bibliographyHasChanged = true;
 			}
