@@ -1,4 +1,4 @@
--- 20130614
+-- 20130622
 
 -- This file is derived from the IANA Language Subtag Registry
 -- and the jurisdictions object at https://github.com/fbennett/mlz-jurisdictions
@@ -17,7 +17,7 @@ CREATE INDEX jurisdictions_param ON jurisdictions(jurisdictionName);
 INSERT INTO jurisdictions VALUES("gb;england.and.wales","England and Wales, UK");
 INSERT INTO jurisdictions VALUES("gb;northern.ireland","Northern Ireland, UK");
 INSERT INTO jurisdictions VALUES("gb;scotland","Scotland, UK");
-INSERT INTO jurisdictions VALUES("un;icj","International Court of Justice, UN");
+INSERT INTO jurisdictions VALUES("un.org;icj","International Court of Justice, UN");
 INSERT INTO jurisdictions VALUES("coe.int;commission.on.human.rights","Commission on Human Rights, COE");
 INSERT INTO jurisdictions VALUES("us;ak","Alaska, US");
 INSERT INTO jurisdictions VALUES("us;al","Alabama, US");

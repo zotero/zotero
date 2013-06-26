@@ -524,16 +524,15 @@ Zotero.Cite.System.prototype = {
 	    }
 
 
-
-
-
-
 		// get all text variables (there must be a better way)
 		// TODO: does citeproc-js permit short forms?
-		for(var variable in CSL_TEXT_MAPPINGS) {
+		for(var variable in CSL_TEXT_MAPPINGS) {zzz
 			var fields = CSL_TEXT_MAPPINGS[variable];
 			if(variable == "URL" && ignoreURL) continue;
 			for each(var field in fields) {
+                //
+                // Treat "authority" as name variable
+                //
 				var value = zoteroItem.getField(field, false, true).toString();
 			    var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(zoteroItem.itemTypeID, field);
 			    if (!fieldID) {
@@ -618,6 +617,8 @@ Zotero.Cite.System.prototype = {
 			}
 		}
 		
+        
+
 		// get date variables
 		for(var variable in CSL_DATE_MAPPINGS) {
 		    var date;
