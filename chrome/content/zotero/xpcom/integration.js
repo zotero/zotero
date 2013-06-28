@@ -1075,13 +1075,14 @@ Zotero.Integration.Document.prototype.addBibliography = function() {
 				"integration.error.title");
 		}
 		
-		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc),
-			field = fieldGetter.addField();
-		field.setCode("BIBL");
-		return fieldGetter.updateSession().fail(Zotero.Integration.onFieldError)
-		.then(function() {
-			return fieldGetter.updateDocument(FORCE_CITATIONS_FALSE, true, false);
-		})
+		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		return fieldGetter.addField().then(function(field) {
+			field.setCode("BIBL");
+			return fieldGetter.updateSession().fail(Zotero.Integration.onFieldError)
+			.then(function() {
+				return fieldGetter.updateDocument(FORCE_CITATIONS_FALSE, true, false);
+			});
+		});
 	});
 }
 
@@ -1287,7 +1288,7 @@ Zotero.Integration.Fields.prototype.addField = function(note) {
 			(note ? this._session.data.prefs["noteType"] : 0));
 	}
 	
-	return field;
+	return Q.resolve(field);
 }
 
 /**
@@ -1725,39 +1726,41 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field) {
 		}
 	} else {
 		newField = true;
-		var field = this.addField(true);
+		field = this.addField(true);
 	}
 	
-	if(!citation) {
-		field.setCode("TEMP");
-		citation = {"citationItems":[], "properties":{}};
-	}
-	
-	var io = new Zotero.Integration.CitationEditInterface(citation, field, this, session);
-	
-	if(Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
-		Zotero.Integration.displayDialog(this._doc,
-		'chrome://zotero/content/integration/addCitationDialog.xul', 'alwaysRaised,resizable',
-		io);
-	} else {
-		var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
-			? 'popup' : 'alwaysRaised')
-		Zotero.Integration.displayDialog(this._doc,
-		'chrome://zotero/content/integration/quickFormat.xul', mode, io);
-	}
-	
-	if(newField) {
-		var me = this;
-		return io.promise.fail(function(e) {
-			// Try to delete new field on failure
-			try {
-				field.delete();
-			} catch(e) {}
-			throw e;
-		});
-	} else {
-		return io.promise;
-	}
+	var me = this;
+	return Q(field).then(function(field) {
+		if(!citation) {
+			field.setCode("TEMP");
+			citation = {"citationItems":[], "properties":{}};
+		}
+		
+		var io = new Zotero.Integration.CitationEditInterface(citation, field, me, session);
+		
+		if(Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
+			Zotero.Integration.displayDialog(me._doc,
+			'chrome://zotero/content/integration/addCitationDialog.xul', 'alwaysRaised,resizable',
+			io);
+		} else {
+			var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
+				? 'popup' : 'alwaysRaised')
+			Zotero.Integration.displayDialog(me._doc,
+			'chrome://zotero/content/integration/quickFormat.xul', mode, io);
+		}
+		
+		if(newField) {
+			return io.promise.fail(function(e) {
+				// Try to delete new field on failure
+				try {
+					field.delete();
+				} catch(e) {}
+				throw e;
+			});
+		} else {
+			return io.promise;
+		}
+	});
 }
 
 /**
