@@ -508,181 +508,7 @@ Zotero.Cite.System.prototype = {
 				&& zoteroItem.getField("pages")
 				&& !Zotero.Prefs.get("export.citePaperJournalArticleURL"));
 		
-		var cslItem = {
-			'id':zoteroItem.id,
-			'type':cslType,
-		    'multi':{
-			    'main':{},
-			    '_keys':{}
-		    }
-		};
-		
-	    if (!zoteroItem.libraryID) {
-		    cslItem.system_id = "0_" + zoteroItem.key;
-	    } else {
-		    cslItem.system_id = zoteroItem.libraryID + "_" + zoteroItem.key;
-	    }
-
-
-		// get all text variables (there must be a better way)
-		// TODO: does citeproc-js permit short forms?
-		for(var variable in CSL_TEXT_MAPPINGS) {zzz
-			var fields = CSL_TEXT_MAPPINGS[variable];
-			if(variable == "URL" && ignoreURL) continue;
-			for each(var field in fields) {
-                //
-                // Treat "authority" as name variable
-                //
-				var value = zoteroItem.getField(field, false, true).toString();
-			    var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(zoteroItem.itemTypeID, field);
-			    if (!fieldID) {
-				    var fieldID = Zotero.ItemFields.getID(field);
-			    }
-				if(value != "") {
-					// Strip enclosing quotes
-					if(value.match(/^".+"$/)) {
-						value = value.substr(1, value.length-2);
-					}
-					cslItem[variable] = value;
-				    if (zoteroItem.multi.main[fieldID]) {
-					    cslItem.multi.main[variable] = zoteroItem.multi.main[fieldID]
-				    }
-				    if (zoteroItem.multi._keys[fieldID]) {
-					    cslItem.multi._keys[variable] = {};
-					    for (var langTag in zoteroItem.multi._keys[fieldID]) {
-						    cslItem.multi._keys[variable][langTag] = zoteroItem.multi._keys[fieldID][langTag];
-					    }
-				    }
-					break;
-				}
-			}
-		}
-		
-	    // Clean up committee/legislativeBody
-	    if (cslItem.committee && cslItem.authority) {
-		    cslItem.authority = [cslItem.authority,cslItem.committee].join("|");
-		    delete cslItem.committee;
-	    }
-
-		// separate name variables
-		var authorID = Zotero.CreatorTypes.getPrimaryIDForType(zoteroItem.itemTypeID);
-		var creators = zoteroItem.getCreators();
-		for each(var creator in creators) {
-			if(creator.creatorTypeID == authorID) {
-				var creatorType = "author";
-			} else {
-				var creatorType = Zotero.CreatorTypes.getName(creator.creatorTypeID);
-			}
-			
-			var creatorType = CSL_NAMES_MAPPINGS[creatorType];
-			if(!creatorType) continue;
-			
-		    if (Zotero.Prefs.get('csl.enableInstitutionFormatting')) {
-			    var nameObj = {
-				    'family':creator.ref.lastName, 
-				    'given':creator.ref.firstName,
-				    'isInstitution': creator.ref.fieldMode
-			    }
-		    } else {
-			    var nameObj = {
-				    'family':creator.ref.lastName, 
-				    'given':creator.ref.firstName
-			    }
-		    }
-		
-		    if (!nameObj.multi) {
-			    nameObj.multi = {};
-			    nameObj.multi._key = {};
-			    nameObj.multi.main = creator.multi.main;
-		    }
-		    for (var langTag in creator.multi._key) {
-			    if (Zotero.Prefs.get('csl.enableInstitutionFormatting')) {
-				    nameObj.multi._key[langTag] = {
-					    'family':creator.multi.get('lastName', langTag),
-					    'given':creator.multi.get('firstName', langTag),
-					    'isInstitution': creator.ref.fieldMode
-				    };
-			    } else {
-				    nameObj.multi._key[langTag] = {
-					    'family':creator.multi.get('lastName', langTag),
-					    'given':creator.multi.get('firstName', langTag)
-				    };
-			    }
-		    }
-
-			if(cslItem[creatorType]) {
-				cslItem[creatorType].push(nameObj);
-			} else {
-				cslItem[creatorType] = [nameObj];
-			}
-		}
-		
-        
-
-		// get date variables
-		for(var variable in CSL_DATE_MAPPINGS) {
-		    var date;
-		    for each(var zVar in CSL_DATE_MAPPINGS[variable]) {
-			    date = zoteroItem.getField(zVar, false, true);
-			    break;
-		    }
-			if(date) {
-			    if (Zotero.Prefs.get('hackUseCiteprocJsDateParser')) {
-				    var raw = Zotero.Date.multipartToStr(date);
-				    cslItem[variable] = {raw: raw, "date-parts":[dateParts]};
-			    } else {
-				    var dateObj = Zotero.Date.strToDate(date);
-				    // otherwise, use date-parts
-				    var dateParts = [];
-				    if(dateObj.year) {
-					    // add year, month, and day, if they exist
-					    dateParts.push(dateObj.year);
-					    if("number" === typeof dateObj.month) {
-						    dateParts.push(dateObj.month+1);
-						    if(dateObj.day) {
-							    dateParts.push(dateObj.day);
-						    }
-					    }
-					    cslItem[variable] = {"date-parts":[dateParts]};
-					
-					    // if no month, use season as month
-					    if(dateObj.part && !dateObj.month) {
-						    cslItem[variable].season = dateObj.part;
-					    }
-				    } else {
-					    // if no year, pass date literally
-					    cslItem[variable] = {"literal":date};
-				    }
-			    }
-		    }
-        }
-
-	    // Force Fields
-	    if (CSL_FORCE_FIELD_CONTENT[itemType]) {
-		    for (var variable in CSL_FORCE_FIELD_CONTENT[itemType]) {
-			    cslItem[variable] = CSL_FORCE_FIELD_CONTENT[itemType][variable];
-		    }
-	    }
-        
-	    // Force remap
-	    if (CSL_FORCE_REMAP[itemType]) {
-		    for (var variable in CSL_FORCE_REMAP[itemType]) {
-			    cslItem[CSL_FORCE_REMAP[itemType][variable]] = cslItem[variable];
-			    delete cslItem[variable];
-		    }
-	    }
-
-		// extract PMID
-		var extra = zoteroItem.getField("extra", false, true);
-		if(typeof extra === "string") {
-			var m = /(?:^|\n)PMID:\s*([0-9]+)/.exec(extra);
-			if(m) cslItem.PMID = m[1];
-			m = /(?:^|\n)PMCID:\s*([0-9]+)/.exec(extra);
-			if(m) cslItem.PMCID = m[1];
-		}
-		
-		//this._cache[zoteroItem.id] = cslItem;
-		return cslItem;
+		return Zotero.Utilities.itemToCSLJSON(zoteroItem, ignoreURL);
 	},
 
 	/**
@@ -710,33 +536,33 @@ Zotero.Cite.System.prototype = {
 		return str.value;
 	},
 
-    "wrapCitationEntryHtml":function (str, item_id, locator_txt, suffix_txt) {
-	    if (!locator_txt) {
-		    locator_txt = "";
-	    }
-	    if (!suffix_txt) {
-		    suffix_txt = "";
-	    }
-	    return Zotero.Prefs.get("export.quickCopy.citationWrapperHtml")
-		    .replace("%%STRING%%", str)
-		    .replace("%%LOCATOR%%", locator_txt)
-		    .replace("%%SUFFIX%%", suffix_txt)
-		    .replace("%%ITEM_ID%%", item_id);
-    },
+	"wrapCitationEntryHtml":function (str, item_id, locator_txt, suffix_txt) {
+		if (!locator_txt) {
+			locator_txt = "";
+		}
+		if (!suffix_txt) {
+			suffix_txt = "";
+		}
+		return Zotero.Prefs.get("export.quickCopy.citationWrapperHtml")
+			.replace("%%STRING%%", str)
+			.replace("%%LOCATOR%%", locator_txt)
+			.replace("%%SUFFIX%%", suffix_txt)
+			.replace("%%ITEM_ID%%", item_id);
+	},
 
-    "wrapCitationEntryText":function (str, item_id, locator_txt, suffix_txt) {
-	    if (!locator_txt) {
-		    locator_txt = "";
-	    }
-	    if (!suffix_txt) {
-		    suffix_txt = "";
-	    }
-	    return Zotero.Prefs.get("export.quickCopy.citationWrapperText")
-		    .replace("%%STRING%%", str)
-		    .replace("%%LOCATOR%%", locator_txt)
-		    .replace("%%SUFFIX%%", suffix_txt)
-		    .replace("%%ITEM_ID%%", item_id);
-    },
+	"wrapCitationEntryText":function (str, item_id, locator_txt, suffix_txt) {
+		if (!locator_txt) {
+			locator_txt = "";
+		}
+		if (!suffix_txt) {
+			suffix_txt = "";
+		}
+		return Zotero.Prefs.get("export.quickCopy.citationWrapperText")
+			.replace("%%STRING%%", str)
+			.replace("%%LOCATOR%%", locator_txt)
+			.replace("%%SUFFIX%%", suffix_txt)
+			.replace("%%ITEM_ID%%", item_id);
+	},
 
 	/**
 	 * citeproc-js system function for getting abbreviations
@@ -764,7 +590,7 @@ Zotero.Cite.getMonthStrings = function(form, locale) {
 			if(!localexml) {
 				if(localexml == "en-US") {
 					throw "No locales.xml file could be found for the preferred locale or for en-US. "+
-					      "Please ensure that the locales directory exists and is properly populated";
+						  "Please ensure that the locales directory exists and is properly populated";
 				} else {
 					let localexml = sys.xml.makeXml(Zotero.Cite.System.retrieveLocale(cslLocale.bare));
 					if(!localexml) {
