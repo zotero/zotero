@@ -173,7 +173,11 @@ const Zotero_Lookup = new function () {
 	 */
 	this.onShowing = function() {
 		document.getElementById("zotero-lookup-panel").style.padding = "10px";
-
+		
+		// Workaround for field being truncated in middle
+		// https://github.com/zotero/zotero/issues/343
+		this.toggleMultiline(true);
+		
 		var identifierElement = Zotero_Lookup.toggleMultiline(false);
 		Zotero_Lookup.toggleProgress(false);
 		identifierElement.focus();
