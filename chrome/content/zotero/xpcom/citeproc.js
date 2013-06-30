@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.465",
+    PROCESSOR_VERSION: "1.0.469",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -264,11 +264,11 @@ var CSL = {
     SUFFIX_PUNCTUATION: /^\s*[.;:,\(\)]/,
     NUMBER_REGEXP: /(?:^\d+|\d+$)/,
     NAME_INITIAL_REGEXP: /^([A-Z\u0590-\u05ff\u0080-\u017f\u0400-\u042f\u0600-\u06ff])([a-zA-Z\u0080-\u017f\u0400-\u052f\u0600-\u06ff]*|)/,
-    ROMANESQUE_REGEXP: /[-0-9a-zA-Z\u0590-\u05ff\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe\u0600-\u06ff\u200c\u200d\u200e\u202a-\u202e]/,
-    ROMANESQUE_NOT_REGEXP: /[^a-zA-Z\u0590-\u05ff\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe\u0600-\u06ff\u200c\u200d\u200e\u202a-\u202e]/g,
-    STARTSWITH_ROMANESQUE_REGEXP: /^[&a-zA-Z\u0590-\u05ff\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe\u0600-\u06ff\u200c\u200d\u200e\u202a-\u202e]/,
-    ENDSWITH_ROMANESQUE_REGEXP: /[.;:&a-zA-Z\u0590-\u05ff\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe\u0600-\u06ff\u200c\u200d\u200e\u202a-\u202e]$/,
-    ALL_ROMANESQUE_REGEXP: /^[a-zA-Z\u0590-\u05ff\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe\u0600-\u06ff\u200c\u200d\u200e\u202a-\u202e]+$/,
+    ROMANESQUE_REGEXP: /[-0-9a-zA-Z\u0590-\u05ff\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]/,
+    ROMANESQUE_NOT_REGEXP: /[^a-zA-Z\u0590-\u05ff\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]/g,
+    STARTSWITH_ROMANESQUE_REGEXP: /^[&a-zA-Z\u0590-\u05ff\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]/,
+    ENDSWITH_ROMANESQUE_REGEXP: /[.;:&a-zA-Z\u0590-\u05ff\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]$/,
+    ALL_ROMANESQUE_REGEXP: /^[a-zA-Z\u0590-\u05ff\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]+$/,
     VIETNAMESE_SPECIALS: /[\u00c0-\u00c3\u00c8-\u00ca\u00cc\u00cd\u00d2-\u00d5\u00d9\u00da\u00dd\u00e0-\u00e3\u00e8-\u00ea\u00ec\u00ed\u00f2-\u00f5\u00f9\u00fa\u00fd\u0101\u0103\u0110\u0111\u0128\u0129\u0168\u0169\u01a0\u01a1\u01af\u01b0\u1ea0-\u1ef9]/,
     VIETNAMESE_NAMES: /^(?:(?:[.AaBbCcDdEeGgHhIiKkLlMmNnOoPpQqRrSsTtUuVvXxYy \u00c0-\u00c3\u00c8-\u00ca\u00cc\u00cd\u00d2-\u00d5\u00d9\u00da\u00dd\u00e0-\u00e3\u00e8-\u00ea\u00ec\u00ed\u00f2-\u00f5\u00f9\u00fa\u00fd\u0101\u0103\u0110\u0111\u0128\u0129\u0168\u0169\u01a0\u01a1\u01af\u01b0\u1ea0-\u1ef9]{2,6})(\s+|$))+$/,
     NOTE_FIELDS_REGEXP: /\{:(?:[\-_a-z]+|[A-Z]+):[^\}]+\}/g,
@@ -289,6 +289,7 @@ var CSL = {
         "recipient"
     ],
     NUMERIC_VARIABLES: [
+        "call-number",
         "chapter-number",
         "collection-number",
         "edition",
@@ -3435,6 +3436,7 @@ CSL.Engine.Opt = function () {
     this.development_extensions.main_title_from_short_title = false;
     this.development_extensions.normalize_lang_keys_to_lowercase = false;
     this.development_extensions.strict_text_case_locales = false;
+    this.development_extensions.rtl_support = true;
     this.nodenames = [];
     this.gender = {};
     this['cite-lang-prefs'] = {
@@ -6075,10 +6077,22 @@ CSL.Node.layout = {
             };
             this.execs.push(func);
             func = function (state, Item) {
-                state.output.openLevel("empty");
-            };
+                var tok = "empty";
+                if (state.opt.development_extensions.rtl_support) {
+                    if (["ar", "he", "fa", "ur", "yi", "ps", "syr"].indexOf(Item.language) > -1) {
+                        tok = new CSL.Token();
+                        tok.strings.prefix = "\u202b";
+                        tok.strings.suffix = "\u202c";
+                    }
+                }
+                state.output.openLevel(tok);
+            }
             this.execs.push(func);
             target.push(this);
+            if (state.opt.development_extensions.rtl_support && false) {
+                this.strings.prefix = this.strings.prefix.replace(/\((.|$)/g,"(\u200e$1");
+                this.strings.suffix = this.strings.suffix.replace(/\)(.|$)/g,")\u200e$1");
+            }
             if (state.build.area === "citation") {
                 prefix_token = new CSL.Token("text", CSL.SINGLETON);
                 func = function (state, Item, item) {
@@ -8947,9 +8961,11 @@ CSL.Attributes["@type"] = function (state, arg) {
             }
         }
     }
+    var tests = [];
     for (var i=0,ilen=types.length;i<ilen;i+=1) {
-        this.tests.push(maketest(types[i]));
+        tests.push(maketest(types[i]));
     }
+    this.tests.push(state.fun.match.any(this, state, tests));
 };
 CSL.Attributes["@variable"] = function (state, arg) {
     var func;
@@ -12203,12 +12219,6 @@ CSL.getSafeEscape = function(state) {
                 return txt.replace(/\u202f/g, '<span style="white-space:nowrap">&thinsp;</span>');
             });
         }
-        if (state.opt.force_parens_char) {
-            callbacks.push(function (txt) {
-                return txt.replace(/([\(\<\[])/g, state.opt.force_parens_char + "$1")
-                    .replace(/([\)\>\]])/g, "$1" + state.opt.force_parens_char);
-            });
-        }
         if (callbacks.length) {
             return function (txt) {
                 for (var i = 0, ilen = callbacks.length; i < ilen; i += 1) {
@@ -13382,7 +13392,7 @@ CSL.Disambiguation.prototype.incrementDisambig = function () {
             && increment_names) {
             if (this.state.opt["disambiguate-add-names"]) {
                 increment_namesets = false;
-                if (this.base.names[this.gnameset] < this.namesMax) {
+                if (this.gname < this.namesMax) {
                     this.base.names[this.gnameset] += 1;
                     this.gname += 1;
                 } else {
@@ -13402,7 +13412,7 @@ CSL.Disambiguation.prototype.incrementDisambig = function () {
             }
         }
         if (("number" !== typeof this.namesetsMax || this.namesetsMax === -1 || this.gnameset === this.namesetsMax)
-            && (!this.state.opt["disambiguate-add-names"] || "number" !== typeof this.namesMax || this.base.names[this.gnameset] === this.namesMax)
+            && (!this.state.opt["disambiguate-add-names"] || "number" !== typeof this.namesMax || this.gname === this.namesMax)
             && ("number" != typeof this.givensMax || "undefined" === typeof this.base.givens[this.gnameset] || "undefined" === typeof this.base.givens[this.gnameset][this.gname] || this.base.givens[this.gnameset][this.gname] === this.givensMax)) {
             maxed = true;
         }
