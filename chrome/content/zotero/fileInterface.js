@@ -241,30 +241,11 @@ var Zotero_File_Interface = new function() {
 	 * Imports from clipboard
 	 */
 	this.importFromClipboard = function () {
-		var clip = Components.classes["@mozilla.org/widget/clipboard;1"]
-					.getService(Components.interfaces.nsIClipboard);
-		if (!clip.hasDataMatchingFlavors(["text/unicode"], 1, clip.kGlobalClipboard)) {
+		var str = Zotero.Utilities.Internal.getClipboard("text/unicode");
+		if(!str) {
 			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 									.getService(Components.interfaces.nsIPromptService);
 			ps.alert(null, "", Zotero.getString('fileInterface.importClipboardNoDataError'));
-			return;
-		}
-		var trans = Components.classes["@mozilla.org/widget/transferable;1"]
-						.createInstance(Components.interfaces.nsITransferable);
-		trans.addDataFlavor("text/unicode");
-		clip.getData(trans, clip.kGlobalClipboard);
-		var str = {};
-		try {
-			trans.getTransferData("text/unicode", str, {});
-			str = str.value.QueryInterface(Components.interfaces.nsISupportsString).data;
-		}
-		catch (e) {
-			Zotero.debug(e);
-			return;
-		}
-		if (!str) {
-			Zotero.debug("No clipboard text to import");
-			return;
 		}
 		
 		var translate = new Zotero.Translate.Import();

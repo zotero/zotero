@@ -1075,13 +1075,14 @@ Zotero.Integration.Document.prototype.addBibliography = function() {
 				"integration.error.title");
 		}
 		
-		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc),
-			field = fieldGetter.addField();
-		field.setCode("BIBL");
-		return fieldGetter.updateSession().fail(Zotero.Integration.onFieldError)
-		.then(function() {
-			return fieldGetter.updateDocument(FORCE_CITATIONS_FALSE, true, false);
-		})
+		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		return fieldGetter.addField().then(function(field) {
+			field.setCode("BIBL");
+			return fieldGetter.updateSession().fail(Zotero.Integration.onFieldError)
+			.then(function() {
+				return fieldGetter.updateDocument(FORCE_CITATIONS_FALSE, true, false);
+			});
+		});
 	});
 }
 
@@ -1234,6 +1235,7 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 		
 		// Refresh contents
 		fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		fieldGetter.ignoreEmptyBibliography = false;
 		return fieldGetter.updateSession().fail(Zotero.Integration.onFieldError)
 		.then(fieldGetter.updateDocument.bind(
 			fieldGetter, FORCE_CITATIONS_RESET_TEXT, true, true));
@@ -1260,6 +1262,7 @@ Zotero.Integration.Document.JSEnumerator.prototype.getNext = function() {
 Zotero.Integration.Fields = function(session, doc) {
 	this._session = session;
 	this._doc = doc;
+	this.ignoreEmptyBibliography = true;
 }
 
 /**
@@ -1287,7 +1290,7 @@ Zotero.Integration.Fields.prototype.addField = function(note) {
 			(note ? this._session.data.prefs["noteType"] : 0));
 	}
 	
-	return field;
+	return Q.resolve(field);
 }
 
 /**
@@ -1490,9 +1493,13 @@ Zotero.Integration.Fields.prototype._processFields = function(i) {
 				}
 			}
 		} else if(type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
-			this._bibliographyFields.push(field);
-			if(!this._session.bibliographyData && !this._bibliographyData) {
-				this._bibliographyData = content;
+			if(this.ignoreEmptyBibliography && field.getText().trim() === "") {
+				this._removeCodeFields[i] = true;
+			} else {
+				this._bibliographyFields.push(field);
+				if(!this._session.bibliographyData && !this._bibliographyData) {
+					this._bibliographyData = content;
+				}
 			}
 		}
 	}
@@ -1725,39 +1732,41 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field) {
 		}
 	} else {
 		newField = true;
-		var field = this.addField(true);
+		field = this.addField(true);
 	}
 	
-	if(!citation) {
-		field.setCode("TEMP");
-		citation = {"citationItems":[], "properties":{}};
-	}
-	
-	var io = new Zotero.Integration.CitationEditInterface(citation, field, this, session);
-	
-	if(Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
-		Zotero.Integration.displayDialog(this._doc,
-		'chrome://zotero/content/integration/addCitationDialog.xul', 'alwaysRaised,resizable',
-		io);
-	} else {
-		var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
-			? 'popup' : 'alwaysRaised')
-		Zotero.Integration.displayDialog(this._doc,
-		'chrome://zotero/content/integration/quickFormat.xul', mode, io);
-	}
-	
-	if(newField) {
-		var me = this;
-		return io.promise.fail(function(e) {
-			// Try to delete new field on failure
-			try {
-				field.delete();
-			} catch(e) {}
-			throw e;
-		});
-	} else {
-		return io.promise;
-	}
+	var me = this;
+	return Q(field).then(function(field) {
+		if(!citation) {
+			field.setCode("TEMP");
+			citation = {"citationItems":[], "properties":{}};
+		}
+		
+		var io = new Zotero.Integration.CitationEditInterface(citation, field, me, session);
+		
+		if(Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
+			Zotero.Integration.displayDialog(me._doc,
+			'chrome://zotero/content/integration/addCitationDialog.xul', 'alwaysRaised,resizable',
+			io);
+		} else {
+			var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
+				? 'popup' : 'alwaysRaised')
+			Zotero.Integration.displayDialog(me._doc,
+			'chrome://zotero/content/integration/quickFormat.xul', mode, io);
+		}
+		
+		if(newField) {
+			return io.promise.fail(function(e) {
+				// Try to delete new field on failure
+				try {
+					field.delete();
+				} catch(e) {}
+				throw e;
+			});
+		} else {
+			return io.promise;
+		}
+	});
 }
 
 /**
@@ -2524,33 +2533,6 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) 
 }
 
 /**
- * Marks a citation for removal
- */
-Zotero.Integration.Session.prototype.deleteCitation = function(index) {
-	var oldCitation = (this.citationsByIndex[index] ? this.citationsByIndex[index] : false);
-	this.citationsByIndex[index] = {properties:{"delete":true}};
-	
-	if(oldCitation && oldCitation.citationItems & oldCitation.properties.added) {
-		// clear out old citations if necessary
-		for each(var citationItem in oldCitation.citationItems) {
-			if(this.citationsByItemID[citationItem.id]) {
-				var indexInItemID = this.citationsByItemID[citationItem.id].indexOf(oldCitation);
-				if(indexInItemID !== -1) {
-					this.citationsByItemID[citationItem.id] = this.citationsByItemID[citationItem.id].splice(indexInItemID, 1);
-					if(this.citationsByItemID[citationItem.id].length == 0) {
-						delete this.citationsByItemID[citationItem.id];
-					}
-				}
-			}
-		}
-	}
-	Zotero.debug("Integration: Deleting old citationID "+oldCitation.citationID);
-	if(oldCitation.citationID) delete this.citeprocCitationIDs[oldCitation.citationID];
-	
-	this.updateIndices[index] = true;
-}
-
-/**
  * Gets integration bibliography
  */
 Zotero.Integration.Session.prototype.getBibliography = function() {
@@ -2690,7 +2672,7 @@ Zotero.Integration.Session.prototype._updateCitations = function() {
 			index = parseInt(index);
 			
 			var citation = this.citationsByIndex[index];
-			if(!citation) continue;
+			if(!citation || citation.properties.delete) continue;
 			if(this.formatCitation(index, citation)) {
 				this.bibliographyHasChanged = true;
 			}

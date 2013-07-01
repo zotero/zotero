@@ -223,11 +223,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			return false;
 		}
 		
-		var observerService = Components.classes["@mozilla.org/observer-service;1"]
-			.getService(Components.interfaces.nsIObserverService);
-		var versionComparator = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
-			.getService(Components.interfaces.nsIVersionComparator);
-		
 		// Load in the preferences branch for the extension
 		Zotero.Prefs.init();
 		Zotero.Debug.init();
@@ -431,7 +426,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		// Register shutdown handler to call Zotero.shutdown()
 		var _shutdownObserver = {observe:Zotero.shutdown};
-		observerService.addObserver(_shutdownObserver, "quit-application", false);
+		Services.obs.addObserver(_shutdownObserver, "quit-application", false);
 		
 		try {
 			Zotero.IPC.init();
@@ -465,7 +460,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		// Add shutdown listener to remove quit-application observer and console listener
 		this.addShutdownListener(function() {
-			observerService.removeObserver(_shutdownObserver, "quit-application", false);
+			Services.obs.removeObserver(_shutdownObserver, "quit-application", false);
 			cs.unregisterListener(ConsoleListener);
 		});
 		
@@ -502,17 +497,14 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			Zotero.Repo.init();
 		}
 		
-		var observerService = Components.classes["@mozilla.org/observer-service;1"]
-			.getService(Components.interfaces.nsIObserverService);
-		
 		if(!Zotero.isFirstLoadThisSession) {
 			// trigger zotero-reloaded event
 			Zotero.debug('Triggering "zotero-reloaded" event');
-			observerService.notifyObservers(Zotero, "zotero-reloaded", null);
+			Services.obs.notifyObservers(Zotero, "zotero-reloaded", null);
 		}
 		
 		Zotero.debug('Triggering "zotero-loaded" event');
-		observerService.notifyObservers(Zotero, "zotero-loaded", null);
+		Services.obs.notifyObservers(Zotero, "zotero-loaded", null);
 	}
 	
 	/**
@@ -1618,7 +1610,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			yielded,
 			useJIT = Components.utils.methodjit;
 		var timerCallback = {"notify":function() {
-			Components.utils.methodjit = useJIT;
+			// XXX Remove when we drop support for Fx <24
+			if(useJIT !== undefined) Components.utils.methodjit = useJIT;
 			
 			var err = false;
 			_waiting--;
@@ -1683,7 +1676,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			createInstance(Components.interfaces.nsITimer),
 			useJIT = Components.utils.methodjit;
 		var timerCallback = {"notify":function() {
-			Components.utils.methodjit = useJIT;
+			// XXX Remove when we drop support for Fx <24
+			if(useJIT !== undefined) Components.utils.methodjit = useJIT;
 			
 			if(_waiting && !runWhenWaiting) {
 				// if our callback gets called during Zotero.wait(), queue it to be set again
@@ -2417,9 +2411,7 @@ Zotero.VersionHeader = {
 	
 	// Called from this.init() and Zotero.Prefs.observe()
 	register: function () {
-		var observerService = Components.classes["@mozilla.org/observer-service;1"]
-								.getService(Components.interfaces.nsIObserverService);
-		observerService.addObserver(this, "http-on-modify-request", false);
+		Services.obs.addObserver(this, "http-on-modify-request", false);
 	},
 	
 	observe: function (subject, topic, data) {
@@ -2435,9 +2427,7 @@ Zotero.VersionHeader = {
 	},
 	
 	unregister: function () {
-		var observerService = Components.classes["@mozilla.org/observer-service;1"]
-								.getService(Components.interfaces.nsIObserverService);
-		observerService.removeObserver(Zotero.VersionHeader, "http-on-modify-request");
+		Services.obs.removeObserver(Zotero.VersionHeader, "http-on-modify-request");
 	}
 }
 
