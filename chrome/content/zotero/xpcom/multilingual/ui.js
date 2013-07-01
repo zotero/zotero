@@ -79,7 +79,9 @@ Zotero.EXTENDED_FIELDS = {
 		"jurisdiction":"jurisdiction"
 	},
 	"gazette": {
-		"jurisdiction":"jurisdiction"
+		"jurisdiction":"jurisdiction",
+		"publisher":"publisher",
+		"publicationDate":"publication-date"
 	},
 	"regulation": {
 		"jurisdiction":"jurisdiction",
