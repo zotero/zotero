@@ -1,4 +1,4 @@
--- 39
+-- 40
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -1067,15 +1067,17 @@ INSERT INTO itemTypeFields VALUES (1261, 55, NULL, 7);    -- codeNumber (volume)
 INSERT INTO itemTypeFields VALUES (1261, 10, NULL, 8);    -- pages
 INSERT INTO itemTypeFields VALUES (1261, 100, NULL, 9);   -- dateEnacted
 INSERT INTO itemTypeFields VALUES (1261, 15, NULL, 10);   -- section
-INSERT INTO itemTypeFields VALUES (1261, 8, NULL, 11);    -- publisher       [ADDED]
-INSERT INTO itemTypeFields VALUES (1261, 1268, NULL, 12); -- publicationDate [ADDED]
-INSERT INTO itemTypeFields VALUES (1261, 87, NULL, 13);   -- language
-INSERT INTO itemTypeFields VALUES (1261, 1, NULL, 14);    -- url
-INSERT INTO itemTypeFields VALUES (1261, 27, NULL, 15);   -- accessed
-INSERT INTO itemTypeFields VALUES (1261, 40, NULL, 16);   -- session        Deprecated
-INSERT INTO itemTypeFields VALUES (1261, 42, NULL, 17);   -- history        Deprecated
-INSERT INTO itemTypeFields VALUES (1261, 2, NULL, 18);    -- rights
-INSERT INTO itemTypeFields VALUES (1261, 22, NULL, 19);   -- extra
+INSERT INTO itemTypeFields VALUES (1261, 1269, NULL, 11); -- reign            [ADDED]
+INSERT INTO itemTypeFields VALUES (1261, 1270, NULL, 12); -- regnalYear       [ADDED]
+INSERT INTO itemTypeFields VALUES (1261, 8, NULL, 13);    -- publisher       [ADDED]
+INSERT INTO itemTypeFields VALUES (1261, 1268, NULL, 14); -- publicationDate [ADDED]
+INSERT INTO itemTypeFields VALUES (1261, 87, NULL, 15);   -- language
+INSERT INTO itemTypeFields VALUES (1261, 1, NULL, 16);    -- url
+INSERT INTO itemTypeFields VALUES (1261, 27, NULL, 17);   -- accessed
+INSERT INTO itemTypeFields VALUES (1261, 40, NULL, 18);   -- session        Deprecated
+INSERT INTO itemTypeFields VALUES (1261, 42, NULL, 19);   -- history        Deprecated
+INSERT INTO itemTypeFields VALUES (1261, 2, NULL, 20);    -- rights
+INSERT INTO itemTypeFields VALUES (1261, 22, NULL, 21);   -- extra
 
 -- [NEW] treaty (derived from document)
 INSERT INTO itemTypeFields VALUES (1262, 110, NULL, 1);   -- title
