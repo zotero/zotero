@@ -647,8 +647,28 @@ var ZoteroPane = new function()
 					document.getElementById('zotero-tb-search').select();
 					break;
 				case 'newItem':
-					ZoteroPane_Local.newItem(2); // book
-					var menu = document.getElementById('zotero-editpane-item-box').itemTypeMenu;
+					// Default to most recent item type from here or the
+					// New Type menu
+					var mru = Zotero.Prefs.get('newItemTypeMRU');
+					// Or fall back to 'book'
+					var typeID = mru ? mru.split(',')[0] : 2;
+					ZoteroPane_Local.newItem(typeID);
+					let itemBox = document.getElementById('zotero-editpane-item-box');
+					var menu = itemBox.itemTypeMenu;
+					var self = this;
+					var handleTypeChange = function () {
+						self.addItemTypeToNewItemTypeMRU(this.itemTypeMenu.value);
+						itemBox.removeHandler('itemtypechange', handleTypeChange);
+					};
+					// Only update the MRU when the menu is opened for the
+					// keyboard shortcut, not on subsequent opens
+					var removeTypeChangeHandler = function () {
+						itemBox.removeHandler('itemtypechange', handleTypeChange);
+						itemBox.itemTypeMenu.firstChild.removeEventListener('popuphiding', removeTypeChangeHandler);
+					};
+					itemBox.addHandler('itemtypechange', handleTypeChange);
+					itemBox.itemTypeMenu.firstChild.addEventListener('popuphiding', removeTypeChangeHandler);
+					
 					menu.focus();
 					document.getElementById('zotero-editpane-item-box').itemTypeMenu.menupopup.openPopup(menu, "before_start", 0, 0);
 					break;
@@ -750,22 +770,27 @@ var ZoteroPane = new function()
 		
 		// Update most-recently-used list for New Item menu
 		if (manual) {
-			var mru = Zotero.Prefs.get('newItemTypeMRU');
-			if (mru) {
-				var mru = mru.split(',');
-				var pos = mru.indexOf(typeID + '');
-				if (pos != -1) {
-					mru.splice(pos, 1);
-				}
-				mru.unshift(typeID);
-			}
-			else {
-				var mru = [typeID + ''];
-			}
-			Zotero.Prefs.set('newItemTypeMRU', mru.slice(0, 5).join(','));
+			this.addItemTypeToNewItemTypeMRU(typeID);
 		}
 		
 		return Zotero.Items.get(itemID);
+	}
+	
+	
+	this.addItemTypeToNewItemTypeMRU = function (itemTypeID) {
+		var mru = Zotero.Prefs.get('newItemTypeMRU');
+		if (mru) {
+			var mru = mru.split(',');
+			var pos = mru.indexOf(itemTypeID + '');
+			if (pos != -1) {
+				mru.splice(pos, 1);
+			}
+			mru.unshift(itemTypeID);
+		}
+		else {
+			var mru = [itemTypeID + ''];
+		}
+		Zotero.Prefs.set('newItemTypeMRU', mru.slice(0, 5).join(','));
 	}
 	
 	

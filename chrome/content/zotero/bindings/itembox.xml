@@ -51,6 +51,7 @@
 			
 			<field name="clickHandler"/>
 			<field name="blurHandler"/>
+			<field name="eventHandlers">[]</field>
 			
 			<field name="_initialVisibleCreators">10</field>
 			<field name="_displayAllCreators"/>
@@ -1101,6 +1102,11 @@
 						}
 						else {
 							this.refresh();
+						}
+						
+						if (this.eventHandlers['itemtypechange'] && this.eventHandlers['itemtypechange'].length) {
+							var self = this;
+							this.eventHandlers['itemtypechange'].forEach(function (f) f.bind(self)());
 						}
 						
 						return true;
@@ -2284,6 +2290,43 @@
 					var textboxes = document.getAnonymousNodes(this)[0].getElementsByTagName('textbox');
 					if (textboxes && textboxes.length) {
 						textboxes[0].inputField.blur();
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<!--
+				Available handlers:
+				
+				  - 'itemtypechange'
+				
+				Note: 'this' in the function will be bound to the item box.
+			-->
+			<method name="addHandler">
+				<parameter name="eventName"/>
+				<parameter name="func"/>
+				<body>
+				<![CDATA[
+					if (!this.eventHandlers[eventName]) {
+						this.eventHandlers[eventName] = [];
+					}
+					this.eventHandlers[eventName].push(func);
+				]]>
+				</body>
+			</method>
+			
+			<method name="removeHandler">
+				<parameter name="eventName"/>
+				<parameter name="func"/>
+				<body>
+				<![CDATA[
+					if (!this.eventHandlers[eventName]) {
+						return;
+					}
+					var pos = this.eventHandlers[eventName].indexOf(func);
+					if (pos != -1) {
+						this.eventHandlers[eventName].splice(pos, 1);
 					}
 				]]>
 				</body>
