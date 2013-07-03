@@ -1813,6 +1813,9 @@ Zotero.Utilities = {
 		// separate name variables
 		var authorID = Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID);
 		var authorFieldName = Zotero.CreatorTypes.getName(authorID);
+		if ("undefined" === typeof arrayItem.creators) {
+			arrayItem.creators = [];
+		}
 		var creators = arrayItem.creators.slice();
 
 		// Stir in authority variable
