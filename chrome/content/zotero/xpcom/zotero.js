@@ -26,7 +26,7 @@
 const ZOTERO_CONFIG = {
 	GUID: 'zotero@chnm.gmu.edu',
 	DB_REBUILD: false, // erase DB and recreate from schema
-	REPOSITORY_URL: 'https://gator1603.hostgator.com/~fbennett/cgi-bin',
+	REPOSITORY_URL: 'https://gator3143.hostgator.com/~fbennett/cgi-bin',
 	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
 	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
 	// XXX values used for iterative testing
