@@ -3345,7 +3345,9 @@ Zotero.Sync.Server.Data = new function() {
 						}
 						item.addRelatedItem(relItem.id);
 					}
-					item.save();
+					item.save({
+						skipDateModifiedUpdate: true
+					});
 				}
 			}
 			else if (type == 'tag') {
