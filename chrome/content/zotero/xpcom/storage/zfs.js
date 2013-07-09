@@ -321,12 +321,10 @@ Zotero.Sync.Storage.ZFS = (function () {
 								dialogButtonCallback: buttonCallback
 							}
 						);
+						e.errorMode = 'warning';
 						Zotero.debug(e, 2);
 						Components.utils.reportError(e);
-						// Stop uploads from this library, log warning, and continue
-						Zotero.Sync.Storage.QueueManager.get('upload', item.libraryID).stop();
-						Zotero.Sync.Storage.EventLog.warning(e, item.libraryID);
-						return false;
+						throw e;
 					}
 					else if (e.status == 403) {
 						var groupID = Zotero.Groups.getGroupIDFromLibraryID(item.libraryID);
