@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.469",
+    PROCESSOR_VERSION: "1.0.470",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -3017,6 +3017,9 @@ CSL.Output.Queue.purgeEmptyBlobs = function (myblobs, endOnly) {
         return;
     }
     for (i = myblobs.length - 1; i > -1; i += -1) {
+        if ("undefined" === typeof myblobs[i].blobs) {
+            myblobs[i].blobs = [];
+        }
         CSL.Output.Queue.purgeEmptyBlobs(myblobs[i].blobs, endOnly);
     }
     for (i = myblobs.length - 1; i > -1; i += -1) {
