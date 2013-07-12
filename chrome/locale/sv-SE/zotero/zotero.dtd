@@ -28,12 +28,12 @@
 <!ENTITY zotero.upgrade.changeLogAfterLink "för att se vad som är nytt eller ändrat.">
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Lägg markeringen till Zotero-anteckning">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Skapa en Zotero-anteckning av det valda">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Skapa en Zotero-källa och anteckning av markeringen">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "Spara länk som en Zotero-källa">
 <!ENTITY zotero.contextMenu.saveImageAsItem "Spara bild som en Zotero-källa">
 
 <!ENTITY zotero.tabs.info.label "Information">
-<!ENTITY zotero.tabs.notes.label "Fotnot">
+<!ENTITY zotero.tabs.notes.label "Fotnoter">
 <!ENTITY zotero.tabs.attachments.label "Bilagor">
 <!ENTITY zotero.tabs.tags.label "Etiketter">
 <!ENTITY zotero.tabs.related.label "Liknande källor">
@@ -67,7 +67,7 @@
 <!ENTITY zotero.items.pages_column "Sidor">
 <!ENTITY zotero.items.issue_column "Nummer">
 <!ENTITY zotero.items.series_column "Bokserie">
-<!ENTITY zotero.items.seriesTitle_column "Titel på bokserie">
+<!ENTITY zotero.items.seriesTitle_column "Bokseriens titel">
 <!ENTITY zotero.items.court_column "Domstol">
 <!ENTITY zotero.items.medium_column "Media/format">
 <!ENTITY zotero.items.genre_column "Genre">
@@ -86,7 +86,7 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Återställ till bibliotek">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicera vald post">
-<!ENTITY zotero.items.menu.mergeItems "Sammanfoga källor">
+<!ENTITY zotero.items.menu.mergeItems "Sammanfoga källor…">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Välj vilken version av källan som ska vara utgångspunkt:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Välj fält att behålla från andra versioner av källan:">
@@ -119,9 +119,9 @@
 <!ENTITY zotero.item.add "Lägg till">
 <!ENTITY zotero.item.attachment.file.show "Visa fil">
 <!ENTITY zotero.item.textTransform "Omvandla text">
-<!ENTITY zotero.item.textTransform.titlecase "engelsk titelskrivning">
+<!ENTITY zotero.item.textTransform.titlecase "Engelsk Titelskrivning">
 <!ENTITY zotero.item.textTransform.sentencecase "Vanlig versalisering">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Skifta för-/efternman">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Skifta för-/efternamn">
 
 <!ENTITY zotero.toolbar.newNote "Ny anteckning">
 <!ENTITY zotero.toolbar.note.standalone "Ny fristående anteckning">
@@ -234,8 +234,8 @@
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Du kan antingen dela upp etiketten i flera etiketter, förkorta den, eller radera den.">
 <!ENTITY zotero.sync.longTagFixer.split "Dela">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Dela vid det">
-<!ENTITY zotero.sync.longTagFixer.character "tecknet">
-<!ENTITY zotero.sync.longTagFixer.characters "tecknen">
+<!ENTITY zotero.sync.longTagFixer.character "tecken">
+<!ENTITY zotero.sync.longTagFixer.characters "tecken">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Omarkerade etiketter kommer inte att sparas.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etiketten kommer att raderas från alla källor.">
 

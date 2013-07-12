@@ -50,7 +50,7 @@
 <!ENTITY zotero.items.year_column "年">
 <!ENTITY zotero.items.publisher_column "出版社">
 <!ENTITY zotero.items.publication_column "期刊">
-<!ENTITY zotero.items.journalAbbr_column "期刊缩写">
+<!ENTITY zotero.items.journalAbbr_column "刊名缩写">
 <!ENTITY zotero.items.language_column "语言">
 <!ENTITY zotero.items.accessDate_column "访问时间">
 <!ENTITY zotero.items.libraryCatalog_column "馆藏目录">
@@ -96,14 +96,14 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label "从当前页创建网页条目">
 <!ENTITY zotero.toolbar.lookup.label "通过标识符添加条目">
 <!ENTITY zotero.toolbar.removeItem.label "移除条目...">
-<!ENTITY zotero.toolbar.newCollection.label "新建分类...">
+<!ENTITY zotero.toolbar.newCollection.label "新建分类…">
 <!ENTITY zotero.toolbar.newGroup "新建群组...">
-<!ENTITY zotero.toolbar.newSubcollection.label "新建子分类...">
+<!ENTITY zotero.toolbar.newSubcollection.label "新建子分类…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "新建搜索...">
 <!ENTITY zotero.toolbar.emptyTrash.label "清空回收站">
 <!ENTITY zotero.toolbar.tagSelector.label "显示/隐藏标签选择器">
 <!ENTITY zotero.toolbar.actions.label "操作">
-<!ENTITY zotero.toolbar.import.label "导入...">
+<!ENTITY zotero.toolbar.import.label "导入…">
 <!ENTITY zotero.toolbar.importFromClipboard "从剪贴板导入">
 <!ENTITY zotero.toolbar.export.label "导出文献库...">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF 扫描...">
@@ -213,7 +213,7 @@
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "自动缩写期刊名">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE的期刊名缩写将根据期刊标题自动生成.&quot;期刊缩写&quot;域将被忽略.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE的期刊的刊名缩写将根据期刊标题自动生成.&quot;刊名缩写&quot;域将被忽略.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "在文档中保存参考文献">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "在文档中储存参考文献会稍微增加文档的大小, 但这样可以和没有使用 Zotero v群组的其它用户共享您的文档. 要使用该功能, Zotero 必须升级到3.0或更高版本.">

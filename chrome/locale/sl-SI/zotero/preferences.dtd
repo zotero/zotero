@@ -36,12 +36,12 @@
 
 <!ENTITY zotero.preferences.groups "Skupine">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Pri kopiranju med knjižnicami vključi:">
-<!ENTITY zotero.preferences.groups.childNotes "otroške opombe">
-<!ENTITY zotero.preferences.groups.childFiles "otroške slike stanj in uvožene datoteke">
+<!ENTITY zotero.preferences.groups.childNotes "podrejene opombe">
+<!ENTITY zotero.preferences.groups.childFiles "podrejene slike stanj in uvožene datoteke">
 <!ENTITY zotero.preferences.groups.childLinks "otroške povezave">
 <!ENTITY zotero.preferences.groups.tags "značke">
 
-<!ENTITY zotero.preferences.openurl.caption "Odpri URL">
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Išči razločitelje">
 <!ENTITY zotero.preferences.openurl.custom "Po meri ...">
@@ -72,7 +72,7 @@
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Spoji krajevne podatke Zotero s podatki s strežnika Zotero, pri čemer prezri zgodovino usklajevanja.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Obnovi s strežnika Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Pobriši vse krajevne podatke Zotero in obnovi z uskladitvenega strežnika.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Obnovi na strežniku Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Obnovi na stanje na strežniku Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Pobriši vse strežniške podatke in prepiši s krajevnimi podatki Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Ponastavi zgodovino usklajevanja datotek">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Vsili preverjanje strežnika hrambe za vse krajevne datoteke priponk.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Neindeksirano:">
 <!ENTITY zotero.preferences.search.indexStats.words "Besed:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Največ znakov na kazalo na datoteko:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Največ znakov na indeks na datoteko:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Največ strani na kazalo na datoteko:">
 
 <!ENTITY zotero.preferences.prefpane.export "Izvozi">
@@ -112,8 +112,8 @@
 <!ENTITY zotero.preferences.prefpane.cite "Citiraj">
 <!ENTITY zotero.preferences.cite.styles "Slogi">
 <!ENTITY zotero.preferences.cite.wordProcessors "Urejevalniki besedil">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Trenutno ni nameščen noben vtičnik za urejevalnike besedil.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Pridobi vtičnike za urejevalnike besedil ...">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Trenutno ni nameščen noben vstavek za urejevalnike besedil.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Pridobi vstavke za urejevalnike besedil ...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Uporabi klasično pogovorno okno Dodaj citat">
 
@@ -132,9 +132,9 @@
 <!ENTITY zotero.preferences.keys.newItem "Ustvari nov vnos">
 <!ENTITY zotero.preferences.keys.newNote "Ustvari novo opombo">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Vključi/izključi izbirnik značk">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiraj citate izbranega na odložišče">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiraj izbrano na odložišče">
-<!ENTITY zotero.preferences.keys.importFromClipboard "Uvozi iz odložišča">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiraj citate izbranega elementa na odložišče">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiraj izbrane elemente na odložišče">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Uvozi z odložišča">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Poskusi preglasiti sporne tipke za bližnjice">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Spremembe veljajo le v novih oknih">
 
@@ -203,5 +203,5 @@
 
 <!ENTITY zotero.preferences.openAboutConfig "Odpri about:config">
 <!ENTITY zotero.preferences.openCSLEdit "Odpri urejevalnik CSL">
-<!ENTITY zotero.preferences.openCSLPreview "Odpri predloge CSL">
-<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
+<!ENTITY zotero.preferences.openCSLPreview "Odpri predogled CSL">
+<!ENTITY zotero.preferences.openAboutMemory "Odprite about:memory">
