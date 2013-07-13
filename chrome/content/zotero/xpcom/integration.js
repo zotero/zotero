@@ -782,13 +782,8 @@ Zotero.Integration.MissingItemException.prototype = {
 				// Now try again
 				Zotero.Integration.currentWindow = oldCurrentWindow;
 				fieldGetter._doc.activate();
-				try {
-					fieldGetter._processFields(fieldIndex);
-				} catch(e) {
-					return Zotero.Integration.onFieldError(e);
-				}
+				fieldGetter._processFields(fieldIndex);
 			});
-			return false;
 		}
 	}
 }
@@ -842,7 +837,7 @@ Zotero.Integration.CorruptFieldException.prototype = {
 				}
 				Zotero.Integration.currentWindow = oldWindow;
 				fieldGetter.progressCallback = oldProgressCallback;
-				return fieldGetter.updateSession().fail(Zotero.Integration.onFieldError);
+				return fieldGetter.updateSession();
 			});
 		}
 	}
@@ -1075,11 +1070,10 @@ Zotero.Integration.Document.prototype.addBibliography = function() {
 				"integration.error.title");
 		}
 		
-		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc, Zotero.Integration.onFieldError);
 		return fieldGetter.addField().then(function(field) {
 			field.setCode("BIBL");
-			return fieldGetter.updateSession().fail(Zotero.Integration.onFieldError)
-			.then(function() {
+			return fieldGetter.updateSession().then(function() {
 				return fieldGetter.updateDocument(FORCE_CITATIONS_FALSE, true, false);
 			});
 		});
@@ -1094,7 +1088,7 @@ Zotero.Integration.Document.prototype.editBibliography = function() {
 	// Make sure we have a bibliography
 	var me = this, fieldGetter;
 	return this._getSession(true, false).then(function() {
-		fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		fieldGetter = new Zotero.Integration.Fields(me._session, me._doc, Zotero.Integration.onFieldError);
 		return fieldGetter.get();
 	}).then(function(fields) {
 		var haveBibliography = false;
@@ -1111,8 +1105,7 @@ Zotero.Integration.Document.prototype.editBibliography = function() {
 			throw new Zotero.Exception.Alert("integration.error.mustInsertBibliography",
 				[], "integration.error.title");
 		}
-		
-		return fieldGetter.updateSession().fail(Zotero.Integration.onFieldError);
+		return fieldGetter.updateSession();
 	}).then(function() {
 		return me._session.editBibliography(me._doc);
 	}).then(function() {
@@ -1128,9 +1121,8 @@ Zotero.Integration.Document.prototype.refresh = function() {
 	var me = this;
 	return this._getSession(true, false).then(function() {
 		// Send request, forcing update of citations and bibliography
-		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
-		return fieldGetter.updateSession().fail(Zotero.Integration.onFieldError)
-		.then(function() {
+		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc, Zotero.Integration.onFieldError);
+		return fieldGetter.updateSession().then(function() {
 			return fieldGetter.updateDocument(FORCE_CITATIONS_REGENERATE, true, false);
 		});
 	});
@@ -1166,7 +1158,7 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 		fieldGetter,
 		oldData;
 	return this._getSession(false, true).then(function(haveSession) {
-		fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		fieldGetter = new Zotero.Integration.Fields(me._session, me._doc, Zotero.Integration.onFieldError);
 		var setDocPrefs = me._session.setDocPrefs.bind(me._session, me._doc,
 				me._app.primaryFieldType, me._app.secondaryFieldType);
 		if(!haveSession) {
@@ -1175,8 +1167,7 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 		} else if(me._session.reload) {
 			// Always reload before setDocPrefs so we can permit/deny unchecking storeReferences as
 			// appropriate
-			return fieldGetter.updateSession().fail(Zotero.Integration.onFieldError)
-			.then(setDocPrefs);
+			return fieldGetter.updateSession().then(setDocPrefs);
 		} else {
 			// Can get fields while dialog is open
 			return Q.all([
@@ -1234,10 +1225,9 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 		}
 		
 		// Refresh contents
-		fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		fieldGetter = new Zotero.Integration.Fields(me._session, me._doc, Zotero.Integration.onFieldError);
 		fieldGetter.ignoreEmptyBibliography = false;
-		return fieldGetter.updateSession().fail(Zotero.Integration.onFieldError)
-		.then(fieldGetter.updateDocument.bind(
+		return fieldGetter.updateSession().then(fieldGetter.updateDocument.bind(
 			fieldGetter, FORCE_CITATIONS_RESET_TEXT, true, true));
 	});
 }
@@ -1259,10 +1249,25 @@ Zotero.Integration.Document.JSEnumerator.prototype.getNext = function() {
  * Methods for retrieving fields from a document
  * @constructor
  */
-Zotero.Integration.Fields = function(session, doc) {
+Zotero.Integration.Fields = function(session, doc, fieldErrorHandler) {
+	this.ignoreEmptyBibliography = true;
+
+	// Callback called while retrieving fields with the percentage complete.
+	this.progressCallback = null;
+
+	// Promise injected into the middle of the promise chain while retrieving fields, to check for
+	// recoverable errors. If the fieldErrorHandler is fulfilled, then the rest of the promise
+	// chain continues. If the fieldErrorHandler is rejected, then the promise chain is rejected.
+	this.fieldErrorHandler = fieldErrorHandler;
+
 	this._session = session;
 	this._doc = doc;
-	this.ignoreEmptyBibliography = true;
+
+	this._deferreds = null;
+	this._removeCodeKeys = {};
+	this._removeCodeFields = {};
+	this._bibliographyFields = [];
+	this._bibliographyData = "";
 }
 
 /**
@@ -1454,7 +1459,6 @@ Zotero.Integration.Fields.prototype.updateSession = function() {
 Zotero.Integration.Fields.prototype._processFields = function(i) {
 	if(!i) i = 0;
 	
-	var me = this;
 	for(var n = this._fields.length; i<n; i++) {
 		var field = this._fields[i];
 		
@@ -1483,12 +1487,14 @@ Zotero.Integration.Fields.prototype._processFields = function(i) {
 						if(this._removeCodeKeys[reselectKey]) {
 							this._removeCodeFields[i] = true;
 							removeCode = true;
+							break;
 						}
 					}
 					if(!removeCode) e.setContext(this, i);
 				}
 				
 				if(!removeCode) {
+					if(this.fieldErrorHandler) return this.fieldErrorHandler(e);
 					throw e;
 				}
 			}
@@ -1866,7 +1872,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 				// Add deferred to queue
 				
 				var me = this;
-				this._sessionUpdatePromise = this._fieldGetter.updateSession().fail(function(err) {
+				this._fieldGetter.fieldErrorHandler = function(err) {
 					// If an error occurred, either try to resolve it or reject it
 					// depending on whether anyone has called _updateSession with
 					// resolveErrors set to true. This is necessary to prevent field code
@@ -1877,7 +1883,8 @@ Zotero.Integration.CitationEditInterface.prototype = {
 					} else {
 						throw err;
 					}
-				}).then(function() {
+				};
+				this._sessionUpdatePromise = this._fieldGetter.updateSession().then(function() {
 					// If no errors occurred, or errors were resolved, resolve promises
 					for(var i=0; i<me._sessionUpdateDeferreds.length; i++) {
 						me._sessionUpdateDeferreds[i].resolve(true);
