@@ -24,14 +24,6 @@
 	list-style-image: url(chrome://zotero/skin/arrow_refresh.png);
 }
 
-#reindex .toolbarbutton-icon
-{
-	margin: 0 0 0 2px;
-	padding: 0;
-	width: 14px;
-	height: 14px;
-}
-
 #index-box > button
 {
 	font-size: .95em;
