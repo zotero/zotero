@@ -20,8 +20,7 @@
 
 #reindex
 {
-	margin: 0;
-	padding: 0;
+	padding-left: 5px;
 	list-style-image: url(chrome://zotero/skin/arrow_refresh.png);
 }
 
