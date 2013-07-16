@@ -447,10 +447,11 @@ Zotero.Schema = new function(){
 			
 			// Synchronous in Standalone
 			if (Zotero.isStandalone) {
-				var appChrome = Components.classes["@mozilla.org/file/directory_service;1"]
+				var jar = Components.classes["@mozilla.org/file/directory_service;1"]
 					.getService(Components.interfaces.nsIProperties)
-					.get("AChrom", Components.interfaces.nsIFile);
-				return _updateBundledFilesCallback(appChrome.parent, mode, skipDeleteUpdate);
+					.get("AChrom", Components.interfaces.nsIFile).parent;
+				jar.append("zotero.jar");
+				return _updateBundledFilesCallback(jar, mode, skipDeleteUpdate);
 			}
 			
 			// Asynchronous in Firefox

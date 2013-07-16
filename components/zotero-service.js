@@ -94,7 +94,6 @@ const xpcomFilesLocal = [
 	'sync',
 	'storage',
 	'storage/streamListener',
-	'storage/eventLog',
 	'storage/queueManager',
 	'storage/queue',
 	'storage/request',

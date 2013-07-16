@@ -3,11 +3,11 @@
 <!ENTITY zotero.director "ผู้ควบคุม:">
 <!ENTITY zotero.directors "ผู้ควบคุม:">
 <!ENTITY zotero.developers "ผู้พัฒนา:">
-<!ENTITY zotero.alumni "ศิษย์เก่า:">
+<!ENTITY zotero.alumni "ผู้ที่เคยช่วยเหลือ:">
 <!ENTITY zotero.about.localizations "การแปลเป็นภาษาถิ่น:">
 <!ENTITY zotero.about.additionalSoftware "ซอฟต์แวร์จากบุคคลภายนอกและมาตรฐาน:">
 <!ENTITY zotero.executiveProducer "ผู้อำนวยการสร้างฝ่ายบริหาร:">
 <!ENTITY zotero.thanks "ขอบคุณเป็นพิเศษ:">
 <!ENTITY zotero.about.close "ปิด">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "เกียรติยศและกิตติกรรมประกาศ">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.citationProcessing "กำลังดำเนินการการอ้างอิง &amp; บรรณานุกรม">

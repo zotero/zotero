@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "Fermer">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "r">
-<!ENTITY quitApplicationCmdWin.label "Sortir">
-<!ENTITY quitApplicationCmdWin.accesskey "S">
+<!ENTITY quitApplicationCmdWin.label "Quitter">
+<!ENTITY quitApplicationCmdWin.accesskey "Q">
 <!ENTITY quitApplicationCmd.label "Quitter">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 

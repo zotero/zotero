@@ -49,7 +49,7 @@
 <!ENTITY zotero.items.date_column "Datum">
 <!ENTITY zotero.items.year_column "Jahr">
 <!ENTITY zotero.items.publisher_column "Verlag">
-<!ENTITY zotero.items.publication_column "Zeitschriftentitel">
+<!ENTITY zotero.items.publication_column "Publikation">
 <!ENTITY zotero.items.journalAbbr_column "Abkürzung der Zeitschrift">
 <!ENTITY zotero.items.language_column "Sprache">
 <!ENTITY zotero.items.accessDate_column "Zugriffsdatum">

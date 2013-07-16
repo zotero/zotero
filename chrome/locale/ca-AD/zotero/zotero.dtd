@@ -1,4 +1,4 @@
-<!ENTITY zotero.general.optional "(Opciona1)">
+<!ENTITY zotero.general.optional "(Opcional)">
 <!ENTITY zotero.general.note "Nota:">
 <!ENTITY zotero.general.selectAll "Selecciona tot">
 <!ENTITY zotero.general.deselectAll "Desselecciona tot">
@@ -63,17 +63,17 @@
 <!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
 <!ENTITY zotero.items.place_column "Place">
 <!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Edition">
-<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.edition_column "Edició">
+<!ENTITY zotero.items.pages_column "Nre. de pàgines">
 <!ENTITY zotero.items.issue_column "Issue">
 <!ENTITY zotero.items.series_column "Series">
 <!ENTITY zotero.items.seriesTitle_column "Series Title">
 <!ENTITY zotero.items.court_column "Court">
 <!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "System">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.genre_column "Gènere">
+<!ENTITY zotero.items.system_column "Sistema">
+<!ENTITY zotero.items.moreColumns.label "Més columnes">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restableix l'ordre de les columnes">
 
 <!ENTITY zotero.items.menu.showInLibrary "Mostra a la biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Afegeix una nota">
@@ -139,18 +139,18 @@
 <!ENTITY zotero.tagSelector.selectVisible "Selecciona les visibles">
 <!ENTITY zotero.tagSelector.clearVisible "Desselecciona les visibles">
 <!ENTITY zotero.tagSelector.clearAll "Desselecciona-ho tot">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
+<!ENTITY zotero.tagSelector.assignColor "Assigna color...">
 <!ENTITY zotero.tagSelector.renameTag "Reanomena l'etiqueta...">
 <!ENTITY zotero.tagSelector.deleteTag "Esborra l'etiqueta...">
 
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.title "Tria un color i una posició per a l'etiqueta">
 <!ENTITY zotero.tagColorChooser.color "Color:">
-<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.position "Posició:">
 <!ENTITY zotero.tagColorChooser.setColor "Set Color">
 <!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
 
 <!ENTITY zotero.lookup.description "Introduïu l'ISBN, DOI, o PMID per cercar en el quadre inferior.">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.button.search "Cerca">
 
 <!ENTITY zotero.selectitems.title "Selecciona elements">
 <!ENTITY zotero.selectitems.intro.label "Seleccioneu els elements que voleu afegir a la biblioteca">
@@ -212,7 +212,7 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Les adreces d&apos;interès es conserven entre el Microsoft Word i l'OpenOffice però es poden veure modificades accidentalment.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abrevia automàticament els títols de les publicacions">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Emmagatzema les referències al document">
@@ -239,9 +239,9 @@
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Les etiquetes desactivades no es desaran.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "L'etiqueta se suprimirà de tots els elements.">
 
-<!ENTITY zotero.merge.title "Conflict Resolution">
-<!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.title "Resolució de conflictes">
+<!ENTITY zotero.merge.of "de">
+<!ENTITY zotero.merge.deleted "Esborrat">
 
 <!ENTITY zotero.proxy.recognized.title "Servidor intermediari reconegut">
 <!ENTITY zotero.proxy.recognized.warning "Afegiu tan sols servidors intermediaris enllaçats des del lloc web de la vostra biblioteca, escola o corporació">

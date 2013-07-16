@@ -30,12 +30,12 @@
 <!ENTITY zotero.preferences.parseRISRefer "Folosește Zotero pentru a descărca fișiere RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "Creează automat instantanee, atunci când sunt create înregistrări din paginile web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Anexează automat fișierele PDF asociate, precum și alte fișiere, atunci când sunt salvate înregistrările">
-<!ENTITY zotero.preferences.automaticTags "Creează automat etichetele pentru itemi, împreună cu cuvintele cheie și cu titlurile">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Șterge automat din coșul de gunoi itemii mai vechi de">
+<!ENTITY zotero.preferences.automaticTags "Creează automat etichetele pentru înregistrări, împreună cu cuvintele cheie și cu titlurile">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Șterge automat din coșul de gunoi înregistrările mai vechi de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "zile în urmă">
 
 <!ENTITY zotero.preferences.groups "Grupuri">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "Când se copiază itemii între biblioteci se vor include:">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "Când se copiază înregistrările între biblioteci se vor include:">
 <!ENTITY zotero.preferences.groups.childNotes "note copil">
 <!ENTITY zotero.preferences.groups.childFiles "instantanee copil și fișiere importate">
 <!ENTITY zotero.preferences.groups.childLinks "legături copil">
@@ -204,4 +204,4 @@
 <!ENTITY zotero.preferences.openAboutConfig "Deschide about:config">
 <!ENTITY zotero.preferences.openCSLEdit "Deschide editorul CSL">
 <!ENTITY zotero.preferences.openCSLPreview "Deschide Previzualizare CSL">
-<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
+<!ENTITY zotero.preferences.openAboutMemory "Deschide about:memory">

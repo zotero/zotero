@@ -40,7 +40,7 @@
 <!ENTITY zotero.notes.separate "Editează într-o fereastră separată">
 
 <!ENTITY zotero.toolbar.duplicate.label "Afișează duplicatele">
-<!ENTITY zotero.collections.showUnfiledItems "Arată itemii neîndosariați">
+<!ENTITY zotero.collections.showUnfiledItems "Arată înregistrările neîndosariate">
 
 <!ENTITY zotero.items.itemType "Tip înregistrare">
 <!ENTITY zotero.items.type_column "Tip">
@@ -86,16 +86,16 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaurează la bibliotecă">
 <!ENTITY zotero.items.menu.duplicateItem "Creează un duplicat al înregistrării">
-<!ENTITY zotero.items.menu.mergeItems "Unește itemii...">
+<!ENTITY zotero.items.menu.mergeItems "Unește înregistrările...">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Alege versiunea itemului pe care-l folosești ca item master:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Selectează câmpurile pentru a le păstra față de alte versiuni ale itemului:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Alege versiunea înregistrării pe care o folosești ca înregistrare master:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Selectează câmpurile pentru a le păstra față de alte versiuni ale înregistrării:">
 
-<!ENTITY zotero.toolbar.newItem.label "Item nou">
+<!ENTITY zotero.toolbar.newItem.label "Înregistrare nouă">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mai mult">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Creează o înregistrare nouă din pagina curentă">
-<!ENTITY zotero.toolbar.lookup.label "Adaugă item(i) după identificator">
-<!ENTITY zotero.toolbar.removeItem.label "Șterge item...">
+<!ENTITY zotero.toolbar.lookup.label "Adaugă înregistrare (înregistrări) după identificator">
+<!ENTITY zotero.toolbar.removeItem.label "Șterge înregistrare...">
 <!ENTITY zotero.toolbar.newCollection.label "Colecție nouă...">
 <!ENTITY zotero.toolbar.newGroup "Grup nou...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Subcolecție nouă...">
@@ -152,8 +152,8 @@
 <!ENTITY zotero.lookup.description "Introdu ISBN, DOI sau PMID pentru a căuta în caseta de mai jos.">
 <!ENTITY zotero.lookup.button.search "Caută">
 
-<!ENTITY zotero.selectitems.title "Selectează itemi">
-<!ENTITY zotero.selectitems.intro.label "Selectează itemii pe care ai vrea să-i adaugi în biblioteca ta">
+<!ENTITY zotero.selectitems.title "Selectează înregistrări">
+<!ENTITY zotero.selectitems.intro.label "Selectează înregistrările pe care ai vrea să le adaugi în biblioteca ta">
 <!ENTITY zotero.selectitems.cancel.label "Anulare">
 <!ENTITY zotero.selectitems.select.label "OK">
 
@@ -237,7 +237,7 @@
 <!ENTITY zotero.sync.longTagFixer.character "caracter">
 <!ENTITY zotero.sync.longTagFixer.characters "caractere">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Etichetele demarcate nu vor fi salvate.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Eticheta va fi ștearsă din toți itemii.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Eticheta va fi ștearsă din toate înregistrările.">
 
 <!ENTITY zotero.merge.title "Conflict rezoluție">
 <!ENTITY zotero.merge.of "din">
@@ -252,13 +252,13 @@
 <!ENTITY zotero.recognizePDF.recognizing.label "Extrage metadatele...">
 <!ENTITY zotero.recognizePDF.cancel.label "Anulare">
 <!ENTITY zotero.recognizePDF.pdfName.label "Nume PDF">
-<!ENTITY zotero.recognizePDF.itemName.label "Nume item">
+<!ENTITY zotero.recognizePDF.itemName.label "Nume înregistrare">
 <!ENTITY zotero.recognizePDF.captcha.label "Tastează textul de mai jos pentru a continua extragerea metadatelor">
 
 <!ENTITY zotero.rtfScan.title "Scanare RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Anulare">
 <!ENTITY zotero.rtfScan.citation.label "Citare">
-<!ENTITY zotero.rtfScan.itemName.label "Nume item">
+<!ENTITY zotero.rtfScan.itemName.label "Nume înregistrare">
 <!ENTITY zotero.rtfScan.unmappedCitations.label "Citări nerezolvate">
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Citări ambigue">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Citări rezolvate">
@@ -268,7 +268,7 @@
 <!ENTITY zotero.rtfScan.scanPage.label "Scanează după citări">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero scanează documentul pentru a găsi citări. Te rog să aștepți.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Verifică înregistrările citate">
-<!ENTITY zotero.rtfScan.citationsPage.description "Te rog să controlezi lista de mai jos a citărilor recunoscute pentru a te asigura că Zotero a selectat itemii corespunzători în mod corect. Eventualele citări nepotrivite sau ambigue trebuie rezolvate înainte de a proceda la următorul pas.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Te rog să controlezi lista de mai jos a citărilor recunoscute pentru a te asigura că Zotero a selectat înregistrările corespunzătoare în mod corect. Eventualele citări nepotrivite sau ambigue trebuie rezolvate înainte de a proceda la următorul pas.">
 <!ENTITY zotero.rtfScan.stylePage.label "Formatare document">
 <!ENTITY zotero.rtfScan.formatPage.label "Formatare citări">
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero procesează și formatează fișierul tău RTF. Te rog să aștepți.">
@@ -281,5 +281,5 @@
 <!ENTITY zotero.file.noneSelected.label "Niciun fișier selectat">
 
 <!ENTITY zotero.downloadManager.label "Salvează în Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Anexele nu pot fi salvate în biblioteca selectată. Acest item va fi salvat în schimb în biblioteca ta.">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Anexele nu pot fi salvate în biblioteca selectată. Această înregistrare va fi salvată în schimb în biblioteca ta.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Pentru a folosi această facilitate, trebuie să instalezi mai întâi uneletele PDF în preferințele Zotero.">

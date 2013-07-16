@@ -1,4 +1,4 @@
-<!ENTITY preferencesCmdMac.label "ค่าตั้งพึงใจ...">
+<!ENTITY preferencesCmdMac.label "การตั้งค่าพึงใจ...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "บริการ">
 <!ENTITY hideThisAppCmdMac.label "ซ่อน &brandShortName;">
@@ -19,7 +19,7 @@
 <!ENTITY pageSetupCmd.accesskey "U">
 <!ENTITY printCmd.label "พิมพ์...">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "ปิด">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
@@ -56,7 +56,7 @@
 <!ENTITY selectAllCmd.accesskey "A">
 <!ENTITY preferencesCmd.label "ตัวเลือก...">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "ค่าตั้งพึงใจ">
+<!ENTITY preferencesCmdUnix.label "ตั้งค่าพึงใจ">
 <!ENTITY preferencesCmdUnix.accesskey "n">
 <!ENTITY findCmd.label "ค้นหา">
 <!ENTITY findCmd.accesskey "F">
@@ -90,7 +90,7 @@
 <!ENTITY aboutProduct.label "เกี่ยวกับ &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "การช่วยเหลือและเอกสาร">
-<!ENTITY productHelp.accesskey "H">
+<!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "ข้อมูลการแก้ปัญหา">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "ส่งกลับคำแนะนำ...">

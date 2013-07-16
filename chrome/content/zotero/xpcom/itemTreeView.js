@@ -167,24 +167,28 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 				return;
 			}
 			
+			var key = String.fromCharCode(event.which);
+			if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
+				self.expandAllRows();
+				event.preventDefault();
+				return;
+			}
+			else if (key == '-' && !(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)) {
+				self.collapseAllRows();
+				event.preventDefault();
+				return;
+			}
+			
 			// Ignore other non-character keypresses
-			if (!event.charCode) {
+			if (!event.charCode || event.shiftKey || event.ctrlKey ||
+					event.altKey || event.metaKey) {
 				return;
 			}
 			
 			event.preventDefault();
 			
 			Q.fcall(function () {
-				var key = String.fromCharCode(event.which);
-				if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
-					self.expandAllRows();
-					return false;
-				}
-				else if (key == '-' && !(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)) {
-					self.collapseAllRows();
-					return false;
-				}
-				else if (coloredTagsRE.test(key)) {
+				if (coloredTagsRE.test(key)) {
 					let libraryID = self._itemGroup.libraryID;
 					libraryID = libraryID ? parseInt(libraryID) : 0;
 					let position = parseInt(key) - 1;
