@@ -44,11 +44,6 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	
 	// nsIProgressEventSink
 	onProgress: function (request, context, progress, progressMax) {
-		// Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=451991
-		// (fixed in Fx3.1)
-		if (progress > progressMax) {
-			progress = progressMax;
-		}
 		Zotero.debug("onProgress with " + progress + "/" + progressMax);
 		this._onProgress(request, progress, progressMax);
 	},
