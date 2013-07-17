@@ -656,6 +656,11 @@ Zotero.Sync.Storage = new function () {
 	this.checkForUpdatedFiles = function (itemModTimes, libraryID) {
 		var msg = "Checking for locally changed attachment files";
 		
+		var memmgr = Components.classes["@mozilla.org/memory-reporter-manager;1"]
+			.getService(Components.interfaces.nsIMemoryReporterManager);
+		memmgr.init();
+		Zotero.debug("Memory usage: " + memmgr.resident);
+		
 		if (typeof libraryID != 'undefined') {
 			msg += " in library " + libraryID;
 			if (itemModTimes) {
@@ -740,8 +745,10 @@ Zotero.Sync.Storage = new function () {
 		var updatedStates = {};
 		var items = Zotero.Items.get(itemIDs);
 		for each(var item in items) {
+			Zotero.debug("Memory usage: " + memmgr.resident);
+			
 			var lk = libraryID + "/" + item.key;
-			//Zotero.debug("Checking attachment file for item " + lk);
+			Zotero.debug("Checking attachment file for item " + lk);
 			var file = item.getFile(attachmentData[item.id]);
 			if (!file) {
 				Zotero.debug("Marking attachment " + lk + " as missing");
