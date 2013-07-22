@@ -748,7 +748,7 @@ Zotero.Sync.Storage = new function () {
 			Zotero.debug("Memory usage: " + memmgr.resident);
 			
 			var lk = libraryID + "/" + item.key;
-			//Zotero.debug("Checking attachment file for item " + lk);
+			Zotero.debug("Checking attachment file for item " + lk);
 			var file = item.getFile(attachmentData[item.id]);
 			if (!file) {
 				Zotero.debug("Marking attachment " + lk + " as missing");
