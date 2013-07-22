@@ -453,6 +453,46 @@ Zotero.Utilities = {
 		// Create an empty HTML document
 		var newDoc = doc.implementation.createDocument('http://www.w3.org/1999/xhtml', 'html', newDocType);
 
+		var getHeaderFooter = function (title, footer) {
+			// Cast a headerfooter div for use in the document,
+			// with a horizontal rule at the top
+			var ret = newDoc.createElementNS(myns, "div");
+			var hr = newDoc.createElementNS(myns, "hr");
+			
+			// Cast a div for the title, populate it with the title
+			// text, and insert the unit into the headerfooter object
+			var text = newDoc.createElementNS(myns, "div");
+			text.appendChild(newDoc.createTextNode(title));
+			
+			// Cast a source div, populate it with a simple
+			// label and the URL of the document from which
+			// the text is extracted, bundle the unit up
+			// and insert it into the document HTML node.
+			var source = newDoc.createElementNS(myns, "div");
+			if (!suppressURL) {
+				var source_label = newDoc.createTextNode("Source: ");
+				var source_anchor = newDoc.createElementNS(myns, "a");
+				source_anchor.setAttribute("href", doc.location.href);
+				var source_anchor_text = newDoc.createTextNode(doc.location.href);
+				source_anchor.appendChild(source_anchor_text);
+				source.appendChild(source_anchor);
+			}
+			
+
+
+			if (footer) {
+				ret.appendChild(hr);
+				ret.appendChild(text);
+				ret.appendChild(source);
+			} else {
+				ret.appendChild(text);
+				ret.appendChild(source);
+				ret.appendChild(hr);
+			}
+			return ret;
+		}
+
+
 		// Get the HTML section of the document, into which we will insert things.
 		var html = newDoc.getElementsByTagName("html")[0];
 
@@ -483,6 +523,8 @@ Zotero.Utilities = {
 		// into it, and insert the body into the document.
 		var body = newDoc.createElementNS(myns, "body");
 
+		body.appendChild(getHeaderFooter(title));
+
 		// Cast a content node and populate it.
 		contentNode = newDoc.createElementNS(myns, "div");
 		if (object.tagName) {
@@ -508,34 +550,7 @@ Zotero.Utilities = {
 		}
 		body.appendChild(contentNode);
 
-		// Cast a footer div for use in the document,
-		// with a horizontal rule at the top
-		var footer = newDoc.createElementNS(myns, "div");
-		var hr = newDoc.createElementNS(myns, "hr");
-		footer.appendChild(hr);
-
-		// Cast a div for the title, populate it with the title
-		// text, and insert the unit into the footer object
-		var footer_title_div = newDoc.createElementNS(myns, "div");
-		var footer_title = newDoc.createTextNode(title);
-		footer_title_div.appendChild(footer_title);
-		footer.appendChild(footer_title);
-
-		// Cast a source div, populate it with a simple
-		// label and the URL of the document from which
-		// the text is extracted, bundle the unit up
-		// and insert it into the document HTML node.
-		var source_div = newDoc.createElementNS(myns, "div");
-		if (!suppressURL) {
-			var source_label = newDoc.createTextNode("Source: ");
-			var source_anchor = newDoc.createElementNS(myns, "a");
-			source_anchor.setAttribute("href", doc.location.href);
-			var source_anchor_text = newDoc.createTextNode(doc.location.href);
-			source_anchor.appendChild(source_anchor_text);
-			source_div.appendChild(source_anchor);
-		}
-		footer.appendChild(source_div);
-		body.appendChild(footer);
+		body.appendChild(getHeaderFooter(title, true));
 
 		// Insert the body into the document HTML node
 		html.appendChild(body);
