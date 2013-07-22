@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.470",
+    PROCESSOR_VERSION: "1.0.471",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -2860,7 +2860,7 @@ CSL.Output.Queue.prototype.string = function (state, myblobs, blob) {
     if (blob && (blob.decorations.length || blob.strings.suffix || blob.strings.prefix)) {
         span_split = ret.length;
     }
-    var blobs_start = state.output.renderBlobs(ret.slice(0, span_split), blob_delimiter, true);
+    var blobs_start = state.output.renderBlobs(ret.slice(0, span_split), blob_delimiter, true, blob);
     if (blobs_start && blob && (blob.decorations.length || blob.strings.suffix || blob.strings.prefix)) {
         if (!state.tmp.suppress_decorations) {
             for (i = 0, ilen = blob.decorations.length; i < ilen; i += 1) {
@@ -2925,7 +2925,7 @@ CSL.Output.Queue.prototype.clearlevel = function () {
         blob.blobs.pop();
     }
 };
-CSL.Output.Queue.prototype.renderBlobs = function (blobs, delim, in_cite) {
+CSL.Output.Queue.prototype.renderBlobs = function (blobs, delim, in_cite, parent) {
     var state, ret, ret_last_char, use_delim, i, blob, pos, len, ppos, llen, pppos, lllen, res, str, params, txt_esc;
     txt_esc = CSL.getSafeEscape(this.state);
     if (!delim) {
@@ -2936,6 +2936,11 @@ CSL.Output.Queue.prototype.renderBlobs = function (blobs, delim, in_cite) {
     ret_last_char = [];
     use_delim = "";
     len = blobs.length;
+    if (this.state.tmp.area === "citation" && !this.state.tmp.just_looking && len === 1 && typeof blobs[0] === "object" && parent) {
+        blobs[0].strings.prefix = parent.strings.prefix + blobs[0].strings.prefix;
+        blobs[0].strings.suffix = blobs[0].strings.suffix + parent.strings.suffix;
+        return blobs[0];
+    }
     var start = true;
     for (pos = 0; pos < len; pos += 1) {
         if (blobs[pos].checkNext) {
