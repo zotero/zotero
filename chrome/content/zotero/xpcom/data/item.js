@@ -132,6 +132,7 @@ Zotero.Item.prototype.__defineSetter__('relatedItems', function (arr) { this._se
 Zotero.Item.prototype.__defineGetter__('relatedItemsReverse', function () { var ids = this._getRelatedItemsReverse(); return ids; });
 Zotero.Item.prototype.__defineGetter__('relatedItemsBidirectional', function () { var ids = this._getRelatedItemsBidirectional(); return ids; });
 
+Zotero.Item.prototype.__defineGetter__('libraryKey', function () this.libraryIDInt + "/" + this.key);
 
 Zotero.Item.prototype.getID = function() {
 	Zotero.debug('Item.getID() is deprecated -- use Item.id');
