@@ -223,9 +223,10 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		this.mainThread = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
 		
-		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
-				getService(Components.interfaces.nsIXULAppInfo),
-			platformVersion = appInfo.platformVersion;
+		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
+			.getService(Components.interfaces.nsIXULAppInfo);
+		this.platformVersion = appInfo.platformVersion;
+		this.platformMajorVersion = parseInt(appInfo.platformVersion.match(/^[0-9]+/)[0]);
 		this.isFx = true;
 		this.isFx3 = false;
 		this.isFx35 = false;
