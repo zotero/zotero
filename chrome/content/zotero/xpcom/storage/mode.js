@@ -74,8 +74,8 @@ Zotero.Sync.Storage.Mode.prototype.checkServerCallback = function (uri, status, 
 	return this._checkServerCallback(uri, status, window, skipSuccessMessage);
 }
 
-Zotero.Sync.Storage.Mode.prototype.cacheCredentials = function (callback) {
-	return this._cacheCredentials(callback);
+Zotero.Sync.Storage.Mode.prototype.cacheCredentials = function () {
+	return this._cacheCredentials();
 }
 
 Zotero.Sync.Storage.Mode.prototype.purgeDeletedStorageFiles = function (callback) {
