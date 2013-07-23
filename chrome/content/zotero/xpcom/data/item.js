@@ -2793,31 +2793,6 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 		};
 	}
 	
-	// Update file existence state of this item
-	// and best attachment state of parent item
-	var self = this;
-	var updateAttachmentStates = function (exists) {
-		self._fileExists = exists;
-		
-		if (self.isTopLevelItem()) {
-			return;
-		}
-		
-		try {
-			var parentKey = self.getSource();
-		}
-		// This can happen during classic sync conflict resolution, if a
-		// standalone attachment was modified locally and remotely was changed
-		// into a child attachment
-		catch (e) {
-			Zotero.debug("Attachment parent doesn't exist for source key "
-				+ "in Zotero.Item.updateAttachmentStates()", 1);
-			return;
-		}
-		
-		Zotero.Items.get(parentKey).updateBestAttachmentState();
-	};
-	
 	// No associated files for linked URLs
 	if (row.linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 		return false;
@@ -2825,7 +2800,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 	
 	if (!row.path) {
 		Zotero.debug("Attachment path is empty", 2);
-		updateAttachmentStates(false);
+		this._updateAttachmentStates(false);
 		return false;
 	}
 	
@@ -2874,7 +2849,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			}
 			catch (e) {
 				Zotero.debug('Invalid persistent descriptor', 2);
-				updateAttachmentStates(false);
+				this._updateAttachmentStates(false);
 				return false;
 			}
 		}
@@ -2884,7 +2859,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			row.path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0) {
 		var file = Zotero.Attachments.resolveRelativePath(row.path);
 		if (!file) {
-			updateAttachmentStates(false);
+			this._updateAttachmentStates(false);
 			return false;
 		}
 	}
@@ -2910,7 +2885,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			}
 			catch (e) {
 				Zotero.debug('Invalid relative descriptor', 2);
-				updateAttachmentStates(false);
+				this._updateAttachmentStates(false);
 				return false;
 			}
 		}
@@ -2918,12 +2893,38 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 	
 	if (!skipExistsCheck && !file.exists()) {
 		Zotero.debug("Attachment file '" + file.path + "' not found", 2);
-		updateAttachmentStates(false);
+		this._updateAttachmentStates(false);
 		return false;
 	}
 	
-	updateAttachmentStates(true);
+	this._updateAttachmentStates(true);
 	return file;
+}
+
+
+/**
+ * Update file existence state of this item and best attachment state of parent item
+ */
+Zotero.Item.prototype._updateAttachmentStates = function (exists) {
+	this._fileExists = exists;
+	
+	if (this.isTopLevelItem()) {
+		return;
+	}
+	
+	try {
+		var parentKey = this.getSource();
+	}
+	// This can happen during classic sync conflict resolution, if a
+	// standalone attachment was modified locally and remotely was changed
+	// into a child attachment
+	catch (e) {
+		Zotero.debug("Attachment parent doesn't exist for source key "
+			+ "in Zotero.Item.updateAttachmentStates()", 1);
+		return;
+	}
+	
+	Zotero.Items.get(parentKey).updateBestAttachmentState();
 }
 
 
