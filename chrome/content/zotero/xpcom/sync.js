@@ -1561,219 +1561,216 @@ Zotero.Sync.Server = new function () {
 					_error(e);
 				}
 				
-				try {
-					var gen = Zotero.Sync.Server.Data.processUpdatedXML(
-						responseNode.getElementsByTagName('updated')[0],
-						lastLocalSyncDate,
-						syncSession,
-						libraryID,
-						function (xmlstr) {
-							Zotero.UnresponsiveScriptIndicator.enable();
-							
-							if (Zotero.locked) {
-								Zotero.hideZoteroPaneOverlay();
-							}
-							Zotero.suppressUIUpdates = false;
-							_updatesInProgress = false;
-							
-							if (xmlstr === false) {
-								Zotero.debug("Sync cancelled");
-								Zotero.DB.rollbackTransaction();
-								Zotero.reloadDataObjects();
-								Zotero.Sync.EventListener.resetIgnored();
-								_syncInProgress = false;
-								_callbacks.onStop();
+				Components.utils.import("resource://gre/modules/Task.jsm");
+				
+				Task.spawn(Zotero.Sync.Server.Data.processUpdatedXML(
+					responseNode.getElementsByTagName('updated')[0],
+					lastLocalSyncDate,
+					syncSession,
+					libraryID,
+					function (xmlstr) {
+						Zotero.UnresponsiveScriptIndicator.enable();
+						
+						if (Zotero.locked) {
+							Zotero.hideZoteroPaneOverlay();
+						}
+						Zotero.suppressUIUpdates = false;
+						_updatesInProgress = false;
+						
+						if (xmlstr === false) {
+							Zotero.debug("Sync cancelled");
+							Zotero.DB.rollbackTransaction();
+							Zotero.reloadDataObjects();
+							Zotero.Sync.EventListener.resetIgnored();
+							_syncInProgress = false;
+							_callbacks.onStop();
+							return;
+						}
+						
+						if (xmlstr) {
+							Zotero.debug(xmlstr);
+						}
+						
+						if (Zotero.Prefs.get('sync.debugBreak')) {
+							Zotero.debug('===============');
+							throw ("break");
+						}
+						
+						if (!xmlstr) {
+							Zotero.debug("Nothing to upload to server");
+							Zotero.Sync.Server.lastRemoteSyncTime = response.getAttribute('timestamp');
+							Zotero.Sync.Server.lastLocalSyncTime = nextLocalSyncTime;
+							Zotero.Sync.Server.nextLocalSyncDate = false;
+							Zotero.DB.commitTransaction();
+							_syncInProgress = false;
+							_callbacks.onSuccess();
+							return;
+						}
+						
+						Zotero.DB.commitTransaction();
+						
+						Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.uploadingData'));
+						
+						var url = _serverURL + 'upload';
+						var body = _apiVersionComponent
+									+ '&' + Zotero.Sync.Server.sessionIDComponent
+									+ '&updateKey=' + updateKey
+									+ '&data=' + encodeURIComponent(xmlstr);
+						
+						//var file = Zotero.getZoteroDirectory();
+						//file.append('lastupload.txt');
+						//Zotero.File.putContents(file, body);
+						
+						var uploadCallback = function (xmlhttp) {
+							if (xmlhttp.status == 409) {
+								Zotero.debug("Upload key is no longer valid -- restarting sync");
+								setTimeout(function () {
+									Zotero.Sync.Server.sync(_callbacks, true, true);
+								}, 1);
 								return;
 							}
 							
-							if (xmlstr) {
-								Zotero.debug(xmlstr);
+							_checkResponse(xmlhttp);
+							
+							Zotero.debug(xmlhttp.responseText);
+							var response = xmlhttp.responseXML.childNodes[0];
+							
+							if (_checkServerLock(response, function (mode) {
+								switch (mode) {
+									// If the upload was queued, keep checking back
+									case 'queued':
+										Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.uploadAccepted'));
+										
+										var url = _serverURL + 'uploadstatus';
+										var body = _apiVersionComponent
+													+ '&' + Zotero.Sync.Server.sessionIDComponent;
+										Zotero.HTTP.doPost(url, body, function (xmlhttp) {
+											uploadCallback(xmlhttp);
+										});
+										break;
+									
+									// If affected libraries were locked, restart sync,
+									// since the upload key would be out of date anyway
+									case 'locked':
+										setTimeout(function () {
+											Zotero.Sync.Server.sync(_callbacks, true, true);
+										}, 1);
+										break;
+										
+									default:
+										throw ("Unexpected server lock mode '" + mode + "' in Zotero.Sync.Server.upload()");
+								}
+							})) { return; }
+							
+							if (response.firstChild.tagName == 'error') {
+								// handle error
+								_error(response.firstChild.firstChild.nodeValue);
 							}
 							
-							if (Zotero.Prefs.get('sync.debugBreak')) {
-								Zotero.debug('===============');
-								throw ("break");
+							if (response.firstChild.localName != 'uploaded') {
+								_error("Unexpected upload response '" + response.firstChild.localName
+										+ "' in Zotero.Sync.Server.sync()");
 							}
 							
-							if (!xmlstr) {
-								Zotero.debug("Nothing to upload to server");
-								Zotero.Sync.Server.lastRemoteSyncTime = response.getAttribute('timestamp');
-								Zotero.Sync.Server.lastLocalSyncTime = nextLocalSyncTime;
-								Zotero.Sync.Server.nextLocalSyncDate = false;
-								Zotero.DB.commitTransaction();
-								_syncInProgress = false;
-								_callbacks.onSuccess();
-								return;
-							}
+							Zotero.DB.beginTransaction();
+							Zotero.Sync.purgeDeletedObjects(nextLocalSyncTime);
+							Zotero.Sync.Server.lastLocalSyncTime = nextLocalSyncTime;
+							Zotero.Sync.Server.nextLocalSyncDate = false;
+							Zotero.Sync.Server.lastRemoteSyncTime = response.getAttribute('timestamp');
+							
+							var sql = "UPDATE syncedSettings SET synced=1";
+							Zotero.DB.query(sql);
+							
+							//throw('break2');
 							
 							Zotero.DB.commitTransaction();
 							
-							Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.uploadingData'));
-							
-							var url = _serverURL + 'upload';
-							var body = _apiVersionComponent
-										+ '&' + Zotero.Sync.Server.sessionIDComponent
-										+ '&updateKey=' + updateKey
-										+ '&data=' + encodeURIComponent(xmlstr);
-							
-							//var file = Zotero.getZoteroDirectory();
-							//file.append('lastupload.txt');
-							//Zotero.File.putContents(file, body);
-							
-							var uploadCallback = function (xmlhttp) {
-								if (xmlhttp.status == 409) {
-									Zotero.debug("Upload key is no longer valid -- restarting sync");
-									setTimeout(function () {
-										Zotero.Sync.Server.sync(_callbacks, true, true);
-									}, 1);
-									return;
-								}
-								
-								_checkResponse(xmlhttp);
-								
-								Zotero.debug(xmlhttp.responseText);
-								var response = xmlhttp.responseXML.childNodes[0];
-								
-								if (_checkServerLock(response, function (mode) {
-									switch (mode) {
-										// If the upload was queued, keep checking back
-										case 'queued':
-											Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.uploadAccepted'));
-											
-											var url = _serverURL + 'uploadstatus';
-											var body = _apiVersionComponent
-														+ '&' + Zotero.Sync.Server.sessionIDComponent;
-											Zotero.HTTP.doPost(url, body, function (xmlhttp) {
-												uploadCallback(xmlhttp);
-											});
-											break;
-										
-										// If affected libraries were locked, restart sync,
-										// since the upload key would be out of date anyway
-										case 'locked':
-											setTimeout(function () {
-												Zotero.Sync.Server.sync(_callbacks, true, true);
-											}, 1);
-											break;
-											
-										default:
-											throw ("Unexpected server lock mode '" + mode + "' in Zotero.Sync.Server.upload()");
-									}
-								})) { return; }
-								
-								if (response.firstChild.tagName == 'error') {
-									// handle error
-									_error(response.firstChild.firstChild.nodeValue);
-								}
-								
-								if (response.firstChild.localName != 'uploaded') {
-									_error("Unexpected upload response '" + response.firstChild.localName
-											+ "' in Zotero.Sync.Server.sync()");
-								}
-								
-								Zotero.DB.beginTransaction();
-								Zotero.Sync.purgeDeletedObjects(nextLocalSyncTime);
-								Zotero.Sync.Server.lastLocalSyncTime = nextLocalSyncTime;
-								Zotero.Sync.Server.nextLocalSyncDate = false;
-								Zotero.Sync.Server.lastRemoteSyncTime = response.getAttribute('timestamp');
-								
-								var sql = "UPDATE syncedSettings SET synced=1";
-								Zotero.DB.query(sql);
-								
-								//throw('break2');
-								
-								Zotero.DB.commitTransaction();
-								
-								// Check if any items were modified during /upload,
-								// and restart the sync if so
-								if (Zotero.Items.getNewer(nextLocalSyncDate, true)) {
-									Zotero.debug("Items were modified during upload -- restarting sync");
-									Zotero.Sync.Server.sync(_callbacks, true, true);
-									return;
-								}
-								
-								_syncInProgress = false;
-								_callbacks.onSuccess();
+							// Check if any items were modified during /upload,
+							// and restart the sync if so
+							if (Zotero.Items.getNewer(nextLocalSyncDate, true)) {
+								Zotero.debug("Items were modified during upload -- restarting sync");
+								Zotero.Sync.Server.sync(_callbacks, true, true);
+								return;
 							}
 							
-							var compress = Zotero.Prefs.get('sync.server.compressData');
-							// Compress upload data
-							if (compress) {
-								// Callback when compressed data is available
-								var bufferUploader = function (data) {
-									var gzurl = url + '?gzip=1';
-									
-									var oldLen = body.length;
-									var newLen = data.length;
-									var savings = Math.round(((oldLen - newLen) / oldLen) * 100)
-									Zotero.debug("HTTP POST " + newLen + " bytes to " + gzurl
-										+ " (gzipped from " + oldLen + " bytes; "
-										+ savings + "% savings)");
-									
-									if (Zotero.HTTP.browserIsOffline()) {
-										Zotero.debug('Browser is offline');
-										return false;
-									}
-									
-									var req =
-										Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
-											createInstance();
-									req.open('POST', gzurl, true);
-									req.setRequestHeader('Content-Type', "application/octet-stream");
-									req.setRequestHeader('Content-Encoding', 'gzip');
-									
-									req.onreadystatechange = function () {
-										if (req.readyState == 4) {
-											uploadCallback(req);
-										}
-									};
-									try {
-										req.sendAsBinary(data);
-									}
-									catch (e) {
-										_error(e);
-									}
-								}
-								
-								// Get input stream from POST data
-								var unicodeConverter =
-									Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-										.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-								unicodeConverter.charset = "UTF-8";
-								var bodyStream = unicodeConverter.convertToInputStream(body);
-								
-								// Get listener for when compression is done
-								var listener = new Zotero.BufferedInputListener(bufferUploader);
-								
-								// Initialize stream converter
-								var converter =
-									Components.classes["@mozilla.org/streamconv;1?from=uncompressed&to=gzip"]
-										.createInstance(Components.interfaces.nsIStreamConverter);
-								converter.asyncConvertData("uncompressed", "gzip", listener, null);
-								
-								// Send input stream to stream converter
-								var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"].
-										createInstance(Components.interfaces.nsIInputStreamPump);
-								pump.init(bodyStream, -1, -1, 0, 0, true);
-								pump.asyncRead(converter, null);
-							}
-							
-							// Don't compress upload data
-							else {
-								Zotero.HTTP.doPost(url, body, uploadCallback);
-							}
+							_syncInProgress = false;
+							_callbacks.onSuccess();
 						}
-					);
-					
-					try {
-						gen.next();
+						
+						var compress = Zotero.Prefs.get('sync.server.compressData');
+						// Compress upload data
+						if (compress) {
+							// Callback when compressed data is available
+							var bufferUploader = function (data) {
+								var gzurl = url + '?gzip=1';
+								
+								var oldLen = body.length;
+								var newLen = data.length;
+								var savings = Math.round(((oldLen - newLen) / oldLen) * 100)
+								Zotero.debug("HTTP POST " + newLen + " bytes to " + gzurl
+									+ " (gzipped from " + oldLen + " bytes; "
+									+ savings + "% savings)");
+								
+								if (Zotero.HTTP.browserIsOffline()) {
+									Zotero.debug('Browser is offline');
+									return false;
+								}
+								
+								var req =
+									Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
+										createInstance();
+								req.open('POST', gzurl, true);
+								req.setRequestHeader('Content-Type', "application/octet-stream");
+								req.setRequestHeader('Content-Encoding', 'gzip');
+								
+								req.onreadystatechange = function () {
+									if (req.readyState == 4) {
+										uploadCallback(req);
+									}
+								};
+								try {
+									req.sendAsBinary(data);
+								}
+								catch (e) {
+									_error(e);
+								}
+							}
+							
+							// Get input stream from POST data
+							var unicodeConverter =
+								Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+									.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+							unicodeConverter.charset = "UTF-8";
+							var bodyStream = unicodeConverter.convertToInputStream(body);
+							
+							// Get listener for when compression is done
+							var listener = new Zotero.BufferedInputListener(bufferUploader);
+							
+							// Initialize stream converter
+							var converter =
+								Components.classes["@mozilla.org/streamconv;1?from=uncompressed&to=gzip"]
+									.createInstance(Components.interfaces.nsIStreamConverter);
+							converter.asyncConvertData("uncompressed", "gzip", listener, null);
+							
+							// Send input stream to stream converter
+							var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"].
+									createInstance(Components.interfaces.nsIInputStreamPump);
+							pump.init(bodyStream, -1, -1, 0, 0, true);
+							pump.asyncRead(converter, null);
+						}
+						
+						// Don't compress upload data
+						else {
+							Zotero.HTTP.doPost(url, body, uploadCallback);
+						}
 					}
-					catch (e if e.toString() === "[object StopIteration]") {}
-					Zotero.pumpGenerator(gen, false, errorHandler);
-				}
-				catch (e) {
-					errorHandler(e, true);
-				}
+				))
+				.then(
+					null,
+					function (e) {
+						errorHandler(e);
+					}
+				);
 			}
 			catch (e) {
 				_error(e);
@@ -3433,14 +3430,14 @@ Zotero.Sync.Server.Data = new function() {
 			// Check mod times and hashes of updated items against stored values to see
 			// if they've been updated elsewhere and mark for download if so
 			if (type == 'item' && Object.keys(itemStorageModTimes).length) {
-				Zotero.Sync.Storage.checkForUpdatedFiles(itemStorageModTimes);
+				yield Zotero.Sync.Storage.checkForUpdatedFiles(itemStorageModTimes);
 			}
 		}
 		
 		if (_timeToYield()) yield true;
 		
 		callback(Zotero.Sync.Server.Data.buildUploadXML(syncSession));
-	}
+	};
 	
 	
 	/**
