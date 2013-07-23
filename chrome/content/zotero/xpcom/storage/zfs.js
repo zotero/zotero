@@ -1002,7 +1002,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 	
 	obj._cacheCredentials = function () {
 		if (_cachedCredentials) {
-			Zotero.debug("Credentials are already cached");
+			Zotero.debug("ZFS credentials are already cached");
 			return;
 		}
 		
