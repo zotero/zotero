@@ -38,6 +38,7 @@ const ZoteroStandalone = new function() {
 			window.close();
 			return;
 		}
+		_checkRoot();
 		ZoteroPane.init();
 		ZoteroPane.makeVisible();
 		
@@ -145,6 +146,32 @@ const ZoteroStandalone = new function() {
 	 */
 	this.onUnload = function() {
 		ZoteroPane.destroy();
+	}
+
+	/**
+	 * Warn if Zotero Standalone is running as root and clobber the cache directory
+	 */
+	function _checkRoot() {
+		if(!Zotero.isWin) {
+			var env = Components.classes["@mozilla.org/process/environment;1"].
+				getService(Components.interfaces.nsIEnvironment);
+			var user = env.get("USER") || env.get("USERNAME");
+			if(user === "root") {
+				// Zap cache files
+				try {
+					Services.dirsvc.get("ProfLD", Components.interfaces.nsIFile).remove(true);
+				} catch(e) {}
+				// Warn user never to do this again
+				if(Services.prompt.confirmEx(null, "", Zotero.getString("standalone.rootWarning"),
+						Services.prompt.BUTTON_POS_0*Services.prompt.BUTTON_TITLE_IS_STRING |
+						Services.prompt.BUTTON_POS_1*Services.prompt.BUTTON_TITLE_IS_STRING,
+						Zotero.getString("standalone.rootWarning.exit"),
+						Zotero.getString("standalone.rootWarning.continue"),
+						null, null, {}) == 0) {
+					goQuitApplication();
+				}
+			}
+		}
 	}
 }
 
