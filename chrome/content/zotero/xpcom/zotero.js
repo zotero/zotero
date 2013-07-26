@@ -2327,6 +2327,7 @@ Zotero.Keys = new function() {
 	
 	
 	function getCommand(key) {
+		key = key.toUpperCase();
 		return _keys[key] ? _keys[key] : false;
 	}
 }
