@@ -316,7 +316,16 @@ var Zotero_File_Interface = new function() {
 			translation.setHandler("done", function(obj, worked) {
 				// add items to import collection
 				if(importCollection) {
-					importCollection.addItems([item.id for each(item in obj.newItems)]);
+					//only add items to the base collection that would otherwise go unfiled
+					var itemsWihtoutCollections = [];
+					for(var i=0, n=obj.newItems.length; i<n; i++) {
+						if(!obj.newItems[i].getCollections().length) {
+							itemsWihtoutCollections.push(obj.newItems[i].id);
+						}
+					}
+					
+					if(itemsWihtoutCollections.length)
+						importCollection.addItems(itemsWihtoutCollections);
 				}
 				
 				Zotero.DB.commitTransaction();
