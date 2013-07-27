@@ -199,8 +199,9 @@ Zotero.Translate.ItemSaver.prototype = {
 					parentIDs.push(newCollection.id);
 				} else {
 					// add mapped items to collection
-					if(this._IDMap[child.id]) {
-						toAdd.push(this._IDMap[child.id]);
+					var id = this._IDMap[child.id] || this._IDMap[child.itemID];
+					if(id) {
+						toAdd.push(id);
 					} else {
 						Zotero.debug("Translate: Could not map "+child.id+" to an imported item", 2);
 					}
