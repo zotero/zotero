@@ -2,6 +2,9 @@
 
 import sys,os,json
 
+reload(sys)
+sys.setdefaultencoding("utf-8") # Needs Python Unicode build !
+
 ifh = open("/home/bennett/src/mlz-jurisdictions/jurisdictions.json")
 json = json.load(ifh)
 ifh.close()
