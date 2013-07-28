@@ -1172,7 +1172,12 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 		//if (itemTypeID == 20) {
 		//	title = this.getField('nameOfAct');
 		//}
-		var volume = this.getField('volume');
+
+		// XXX Ouch. Only one of these need exist surely?
+		var volume = this.getField('codeNumber');
+		if (!volume) {
+			volume = this.getField('codeVolume');
+		}
 		var code;
 		if (itemTypeID == 18) {
 			code = this.getField('reporter', false, true, language);
