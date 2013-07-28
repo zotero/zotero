@@ -470,10 +470,10 @@ Zotero.Utilities = {
 			// and insert it into the document HTML node.
 			var source = newDoc.createElementNS(myns, "div");
 			if (!suppressURL) {
-				var source_label = newDoc.createTextNode("Source: ");
+				source.setAttribute("class","mlz-link-button");
 				var source_anchor = newDoc.createElementNS(myns, "a");
 				source_anchor.setAttribute("href", doc.location.href);
-				var source_anchor_text = newDoc.createTextNode(doc.location.href);
+				var source_anchor_text = newDoc.createTextNode("View text online");
 				source_anchor.appendChild(source_anchor_text);
 				source.appendChild(source_anchor);
 			}
@@ -519,14 +519,17 @@ Zotero.Utilities = {
 		head.appendChild(base);
 		html.appendChild(head);
 
-		// Cast a body element, insert the content node
-		// into it, and insert the body into the document.
+		// Cast a body element, insert an overall wrapper
+		// div into it, insert the content node
+		// into that, and insert the body into the document.
 		var body = newDoc.createElementNS(myns, "body");
 
-		body.appendChild(getHeaderFooter(title));
-
-		// Cast a content node and populate it.
 		contentNode = newDoc.createElementNS(myns, "div");
+		contentNode.setAttribute("class","mlz-outer");
+		body.appendChild(contentNode);
+
+		contentNode.appendChild(getHeaderFooter(title));
+
 		if (object.tagName) {
 			// Object is a DOM node. Clone and wrap.
 			content = object.cloneNode(true);
@@ -548,9 +551,8 @@ Zotero.Utilities = {
 				}
 			}
 		}
-		body.appendChild(contentNode);
 
-		body.appendChild(getHeaderFooter(title, true));
+		contentNode.appendChild(getHeaderFooter(title, true));
 
 		// Insert the body into the document HTML node
 		html.appendChild(body);
