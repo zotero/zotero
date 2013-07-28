@@ -1,4 +1,4 @@
--- 20130622
+-- 20130727
 
 -- This file is derived from the IANA Language Subtag Registry
 -- and the jurisdictions object at https://github.com/fbennett/mlz-jurisdictions
@@ -18,6 +18,7 @@ INSERT INTO jurisdictions VALUES("gb;england.and.wales","England and Wales, UK")
 INSERT INTO jurisdictions VALUES("gb;northern.ireland","Northern Ireland, UK");
 INSERT INTO jurisdictions VALUES("gb;scotland","Scotland, UK");
 INSERT INTO jurisdictions VALUES("un.org;icj","International Court of Justice, UN");
+INSERT INTO jurisdictions VALUES("un;icj","International Court of Justice (X AVOID), UN");
 INSERT INTO jurisdictions VALUES("coe.int;commission.on.human.rights","Commission on Human Rights, COE");
 INSERT INTO jurisdictions VALUES("us;ak","Alaska, US");
 INSERT INTO jurisdictions VALUES("us;al","Alabama, US");
@@ -71,6 +72,17 @@ INSERT INTO jurisdictions VALUES("us;wa","Washington, US");
 INSERT INTO jurisdictions VALUES("us;wi","Wisconsin, US");
 INSERT INTO jurisdictions VALUES("us;wv","West Virginia, US");
 INSERT INTO jurisdictions VALUES("us;wy","Wyoming, US");
+INSERT INTO jurisdictions VALUES("us;federal;1-cir","1st Circuit Court of Appeals, US (federal)");
+INSERT INTO jurisdictions VALUES("us;federal;10-cir","10th Circuit Court of Appeals, US (federal)");
+INSERT INTO jurisdictions VALUES("us;federal;11-cir","11th Circuit Court of Appeals, US (federal)");
+INSERT INTO jurisdictions VALUES("us;federal;2-cir","2nd Circuit Court of Appeals, US (federal)");
+INSERT INTO jurisdictions VALUES("us;federal;3-cir","3rd Circuit Court of Appeals, US (federal)");
+INSERT INTO jurisdictions VALUES("us;federal;4-cir","4th Circuit Court of Appeals, US (federal)");
+INSERT INTO jurisdictions VALUES("us;federal;5-cir","5th Circuit Court of Appeals, US (federal)");
+INSERT INTO jurisdictions VALUES("us;federal;6-cir","6th Circuit Court of Appeals, US (federal)");
+INSERT INTO jurisdictions VALUES("us;federal;7-cir","7th Circuit Court of Appeals, US (federal)");
+INSERT INTO jurisdictions VALUES("us;federal;8-cir","8th Circuit Court of Appeals, US (federal)");
+INSERT INTO jurisdictions VALUES("us;federal;9-cir","9th Circuit Court of Appeals, US (federal)");
 INSERT INTO jurisdictions VALUES("us;federal;ak","D. Alaska, US (federal)");
 INSERT INTO jurisdictions VALUES("us;federal;al.middle","M.D. Alabama, US (federal)");
 INSERT INTO jurisdictions VALUES("us;federal;al.northern","N.D. Alabama, US (federal)");
@@ -188,6 +200,28 @@ INSERT INTO jurisdictions VALUES("ca;federal;pe","Prince Edward Island, Canada (
 INSERT INTO jurisdictions VALUES("ca;federal;qc","Quebec, Canada (federal)");
 INSERT INTO jurisdictions VALUES("ca;federal;sk","Saskatchewan, Canada (federal)");
 INSERT INTO jurisdictions VALUES("ca;federal;yt","Yukon, Canada (federal)");
+INSERT INTO jurisdictions VALUES("mn;arkhangai","Arkhangai, MN");
+INSERT INTO jurisdictions VALUES("mn;bayan-ulgii","Bayan-Ulgii, MN");
+INSERT INTO jurisdictions VALUES("mn;bayankhongor","Bayankhongor, MN");
+INSERT INTO jurisdictions VALUES("mn;bulgan","Blugan, MN");
+INSERT INTO jurisdictions VALUES("mn;darkhan-uul","Darkhan-Uul, MN");
+INSERT INTO jurisdictions VALUES("mn;dornod","Dornod, MN");
+INSERT INTO jurisdictions VALUES("mn;dornogovi","Dornogovi, MN");
+INSERT INTO jurisdictions VALUES("mn;dundgovi","Dundgovi, MN");
+INSERT INTO jurisdictions VALUES("mn;govi-altai","Govi-Altai, MN");
+INSERT INTO jurisdictions VALUES("mn;govisumber","Govisumber, MN");
+INSERT INTO jurisdictions VALUES("mn;khentii","Khetii, MN");
+INSERT INTO jurisdictions VALUES("mn;khovd","Khovd, MN");
+INSERT INTO jurisdictions VALUES("mn;khuvsgul","Khuvsgul, MN");
+INSERT INTO jurisdictions VALUES("mn;orkhon","Orkhon, MN");
+INSERT INTO jurisdictions VALUES("mn;selenge","Selenge, MN");
+INSERT INTO jurisdictions VALUES("mn;sukhbaatar","Sukhbaatar, MN");
+INSERT INTO jurisdictions VALUES("mn;tuv","Tuv, MN");
+INSERT INTO jurisdictions VALUES("mn;ulaanbaatar","Ulaanbaatar, MN");
+INSERT INTO jurisdictions VALUES("mn;umnugovi","Umnugovi, MN");
+INSERT INTO jurisdictions VALUES("mn;uvs","Uvs, MN");
+INSERT INTO jurisdictions VALUES("mn;uvurkhangai","Uvurkhangai, MN");
+INSERT INTO jurisdictions VALUES("mn;zavkhan","Zavkhan, MN");
 INSERT INTO jurisdictions VALUES("nz;maori","Maori Jurisdiction, NZ");
 INSERT INTO jurisdictions VALUES("ad","Andorra");
 INSERT INTO jurisdictions VALUES("ae","United Arab Emirates");
@@ -447,6 +481,7 @@ INSERT INTO jurisdictions VALUES("yt","Mayotte");
 INSERT INTO jurisdictions VALUES("za","South Africa");
 INSERT INTO jurisdictions VALUES("zm","Zambia");
 INSERT INTO jurisdictions VALUES("zw","Zimbabwe");
+
 
 CREATE TABLE zlsSubtagData (
 	id INTEGER PRIMARY KEY,
