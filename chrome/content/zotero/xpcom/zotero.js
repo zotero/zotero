@@ -2307,20 +2307,16 @@ Zotero.Keys = new function() {
 	 * Called by ZoteroPane.onLoad()
 	 */
 	function windowInit(document) {
-		var useShift = Zotero.isMac;
-		
 		// Zotero pane shortcut
 		var keyElem = document.getElementById('key_openZotero');
 		if(keyElem) {
 			var zKey = Zotero.Prefs.get('keys.openZotero');
-			// Only override the default with the pref if the <key> hasn't been manually changed
-			// and the pref has been
-			if (keyElem.getAttribute('key') == 'Z' && keyElem.getAttribute('modifiers') == 'accel alt'
-					&& (zKey != 'Z' || useShift)) {
+			// Only override the default with the pref if the <key> hasn't
+			// been manually changed and the pref has been
+			if (keyElem.getAttribute('key') == 'Z'
+					&& keyElem.getAttribute('modifiers') == 'accel shift'
+					&& zKey != 'Z') {
 				keyElem.setAttribute('key', zKey);
-				if (useShift) {
-					keyElem.setAttribute('modifiers', 'accel shift');
-				}
 			}
 		}
 	}

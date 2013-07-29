@@ -602,17 +602,14 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		var useShift = Zotero.isMac;
-		
 		var key = String.fromCharCode(event.which);
 		if (!key) {
 			Zotero.debug('No key');
 			return;
 		}
 		
-		// Ignore modifiers other than Ctrl-Alt or Cmd-Shift
-		if (!((Zotero.isMac ? event.metaKey : event.ctrlKey) &&
-				(useShift ? event.shiftKey : event.altKey))) {
+		// Ignore modifiers other than Ctrl-Shift/Cmd-Shift
+		if (!((Zotero.isMac ? event.metaKey : event.ctrlKey) && event.shiftKey)) {
 			return;
 		}
 		
@@ -687,9 +684,7 @@ var ZoteroPane = new function()
 						}
 					}
 					// Use key that's not the modifier as the popup toggle
-					ZoteroPane_Local.newNote(
-						useShift ? event.altKey : event.shiftKey, parent
-					);
+					ZoteroPane_Local.newNote(event.altKey, parent);
 					break;
 				case 'toggleTagSelector':
 					ZoteroPane_Local.toggleTagSelector();

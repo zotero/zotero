@@ -30,7 +30,7 @@ Zotero_Preferences.Keys = {
 		// Display the appropriate modifier keys for the platform
 		var rows = document.getElementById('zotero-prefpane-keys').getElementsByTagName('row');
 		for (var i=0; i<rows.length; i++) {
-			rows[i].firstChild.nextSibling.value = Zotero.isMac ? 'Cmd+Shift+' : 'Ctrl+Alt+';
+			rows[i].firstChild.nextSibling.value = Zotero.isMac ? 'Cmd+Shift+' : 'Ctrl+Shift+';
 		}
 	}
 };

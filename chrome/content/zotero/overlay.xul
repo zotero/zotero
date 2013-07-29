@@ -94,6 +94,6 @@
 		<key id="key_openZotero"
 			 key="Z" 
 			 oncommand="ZoteroOverlay.toggleDisplay();"
-			 modifiers="accel alt" />
+			 modifiers="accel shift" />
 	</keyset>
 </overlay>
