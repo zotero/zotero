@@ -1553,7 +1553,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 			} catch(e) {
 				Zotero.logError(e);
 			}
-			yield;
+			yield undefined;
 		}
 		
 		var citation = this._session.citationsByIndex[i];
@@ -1661,7 +1661,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 				} catch(e) {
 					Zotero.logError(e);
 				}
-				yield;
+				yield undefined;
 			}
 			
 			if(bibliographyText) {
@@ -2649,7 +2649,7 @@ Zotero.Integration.Session.prototype._updateCitations = function() {
 			}
 			this.citeprocCitationIDs[citation.citationID] = true;
 			delete this.newIndices[index];
-			yield;
+			yield undefined;
 		}
 	}
 	
