@@ -1944,13 +1944,13 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			'[JavaScript Error: "this._uiElement is null',
 			'Error: a._updateVisibleText is not a function',
 			'[JavaScript Error: "Warning: unrecognized command line flag ',
-			'[JavaScript Error: "Warning: unrecognized command line flag -foreground',
 			'LibX:',
 			'function skype_',
 			'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
 			'CVE-2009-3555',
 			'OpenGL LayerManager',
-			'trying to re-register CID'
+			'trying to re-register CID',
+			'Services.HealthReport'
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
