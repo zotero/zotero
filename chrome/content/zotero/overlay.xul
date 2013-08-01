@@ -95,5 +95,9 @@
 			 key="Z" 
 			 oncommand="ZoteroOverlay.toggleDisplay();"
 			 modifiers="accel shift" />
+		 <key id="key_saveToZotero"
+			 key="S"
+			 oncommand="Zotero_Browser.scrapeThisPage();"
+			 modifiers="accel shift" />
 	</keyset>
 </overlay>

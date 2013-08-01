@@ -2294,6 +2294,7 @@ Zotero.Keys = new function() {
 		// Get the key=>command mappings from the prefs
 		for each(var action in actions) {
 			var action = action.substr(5); // strips 'keys.'
+			// Remove old pref
 			if (action == 'overrideGlobal') {
 				Zotero.Prefs.clear('keys.overrideGlobal');
 				continue;
@@ -2307,18 +2308,30 @@ Zotero.Keys = new function() {
 	 * Called by ZoteroPane.onLoad()
 	 */
 	function windowInit(document) {
-		// Zotero pane shortcut
-		var keyElem = document.getElementById('key_openZotero');
-		if(keyElem) {
-			var zKey = Zotero.Prefs.get('keys.openZotero');
-			// Only override the default with the pref if the <key> hasn't
-			// been manually changed and the pref has been
-			if (keyElem.getAttribute('key') == 'Z'
-					&& keyElem.getAttribute('modifiers') == 'accel shift'
-					&& zKey != 'Z') {
-				keyElem.setAttribute('key', zKey);
+		var globalKeys = [
+			{
+				name: 'openZotero',
+				defaultKey: 'Z'
+			},
+			{
+				name: 'saveToZotero',
+				defaultKey: 'S'
 			}
-		}
+		];
+		
+		globalKeys.forEach(function (x) {
+			let keyElem = document.getElementById('key_' + x.name);
+			if (keyElem) {
+				let prefKey = Zotero.Prefs.get('keys.'  + x.name);
+				// Only override the default with the pref if the <key> hasn't
+				// been manually changed and the pref has been
+				if (keyElem.getAttribute('key') == x.defaultKey
+						&& keyElem.getAttribute('modifiers') == 'accel shift'
+						&& prefKey != x.defaultKey) {
+					keyElem.setAttribute('key', prefKey);
+				}
+			}
+		});
 	}
 	
 	
