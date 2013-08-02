@@ -75,17 +75,23 @@ Zotero.Sync.Storage = new function () {
 		}
 	}
 	
+	Zotero.Notifier.registerObserver(this, ['file']);
+	
+	
 	//
 	// Private properties
 	//
+	var _maxCheckAgeInSeconds = 10800; // maximum age for upload modification check (3 hours)
 	var _syncInProgress;
 	var _updatesInProgress;
 	var _itemDownloadPercentages = {};
+	var _uploadCheckFiles = [];
+	var _lastFullFileCheck = {};
 	
 	
-	this.sync = function (libraries) {
-		if (libraries) {
-			Zotero.debug("Starting file sync for libraries " + libraries);
+	this.sync = function (options) {
+		if (options.libraries) {
+			Zotero.debug("Starting file sync for libraries " + options.libraries);
 		}
 		else {
 			Zotero.debug("Starting file sync");
@@ -100,7 +106,7 @@ Zotero.Sync.Storage = new function () {
 		return Q.fcall(function () {
 			// TODO: Make sure modes are active
 			
-			if (libraries && libraries.indexOf(0) == -1) {
+			if (options.libraries && options.libraries.indexOf(0) == -1) {
 				return;
 			}
 			
@@ -116,7 +122,7 @@ Zotero.Sync.Storage = new function () {
 			if (Zotero.Sync.Storage.ZFS.includeGroupFiles) {
 				var groups = Zotero.Groups.getAll();
 				for each(var group in groups) {
-					if (libraries && libraries.indexOf(group.libraryID) == -1) {
+					if (options.libraries && options.libraries.indexOf(group.libraryID) == -1) {
 						continue;
 					}
 					// TODO: if library file syncing enabled
@@ -214,8 +220,37 @@ Zotero.Sync.Storage = new function () {
 			});
 			
 			// Check for updated files to upload in each library
-			return Q.all([self.checkForUpdatedFiles(null, parseInt(libraryID))
-				for (libraryID in librarySyncTimes)])
+			var promises = [];
+			for (let libraryID in librarySyncTimes) {
+				let promise;
+				libraryID = parseInt(libraryID);
+				
+				if (!Zotero.Libraries.isFilesEditable(libraryID)) {
+					Zotero.debug("No file editing access -- skipping file "
+						+ "modification check for library " + libraryID);
+					continue;
+				}
+				// If this is a background sync, it's not the first sync of
+				// the session, the library has had at least one full check
+				// this session, and it's been less than _maxCheckAgeInSeconds
+				// since the last full check of this library, check only files
+				// that were previously modified or opened recently
+				else if (options.background
+						&& !options.firstInSession
+						&& _lastFullFileCheck[libraryID]
+						&& (_lastFullFileCheck[libraryID] + (_maxCheckAgeInSeconds * 1000))
+							> new Date().getTime()) {
+					let itemIDs = _getFilesToCheck(libraryID);
+					promise = self.checkForUpdatedFiles(libraryID, itemIDs);
+				}
+				// Otherwise check all files in the library
+				else {
+					_lastFullFileCheck[libraryID] = new Date().getTime();
+					promise = self.checkForUpdatedFiles(libraryID);
+				}
+				promises.push(promise);
+			}
+			return Q.all(promises)
 			.then(function () {
 				// Queue files to download and upload from each library
 				for (let libraryID in librarySyncTimes) {
@@ -646,251 +681,155 @@ Zotero.Sync.Storage = new function () {
 	 * Scans local files and marks any that have changed for uploading
 	 * and any that are missing for downloading
 	 *
-	 * @param	{Object}	[itemModTimes]	Item mod times indexed by item ids;
-	 *											items with stored mod times
-	 *											that differ from the provided
-	 *											time but file mod times
-	 *											matching the stored time will
-	 *											be marked for download
-	 * @param	{Boolean}	[includePersonalItems=false]
-	 * @param	{Boolean}	[includeGroupItems=false]
+	 * @param {Integer} [libraryID]
+	 * @param {Integer[]} [itemIDs]
+	 * @param {Object} [itemModTimes]  Item mod times indexed by item ids;
+	 *                                 items with stored mod times
+	 *                                 that differ from the provided
+	 *                                 time but file mod times
+	 *                                 matching the stored time will
+	 *                                 be marked for download
 	 * @return {Promise} Promise resolving to TRUE if any items changed state,
 	 *                   FALSE otherwise
 	 */
-	this.checkForUpdatedFiles = function (itemModTimes, libraryID) {
-		var msg = "Checking for locally changed attachment files";
-		
-		var memmgr = Components.classes["@mozilla.org/memory-reporter-manager;1"]
-			.getService(Components.interfaces.nsIMemoryReporterManager);
-		memmgr.init();
-		Zotero.debug("Memory usage: " + memmgr.resident);
-		
-		if (typeof libraryID != 'undefined') {
-			msg += " in library " + libraryID;
-			if (itemModTimes) {
-				throw new Error("libraryID is not allowed when itemModTimes is set");
-			}
-		}
-		else {
-			if (!itemModTimes) {
-				return Q(false);
-			}
-		}
-		Zotero.debug(msg);
-		
-		var changed = false;
-		
-		var itemIDs = Object.keys(itemModTimes ? itemModTimes : {});
-		
-		// Can only handle 999 bound parameters at a time
-		var numIDs = itemIDs.length;
-		var maxIDs = 990;
-		var done = 0;
-		var rows = [];
-		
-		Zotero.DB.beginTransaction();
-		
-		do {
-			var chunk = itemIDs.splice(0, maxIDs);
-			var sql = "SELECT itemID, linkMode, path, storageModTime, storageHash, syncState "
-						+ "FROM itemAttachments JOIN items USING (itemID) "
-						+ "WHERE linkMode IN (?,?) AND syncState IN (?,?)";
-			var params = [];
-			params.push(
-				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
-				Zotero.Attachments.LINK_MODE_IMPORTED_URL,
-				Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD,
-				Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
-			);
-			if (typeof libraryID != 'undefined') {
-				sql += " AND libraryID=?";
-				params.push(libraryID == 0 ? null : libraryID);
-			}
-			if (chunk.length) {
-				sql += " AND itemID IN (" + chunk.map(function () '?').join() + ")";
-				params = params.concat(chunk);
-			}
-			var chunkRows = Zotero.DB.query(sql, params);
-			if (chunkRows) {
-				rows = rows.concat(chunkRows);
-			}
-			done += chunk.length;
-		}
-		while (done < numIDs);
-		
-		Zotero.DB.commitTransaction();
-		
-		// If no files, or everything is already marked for download,
-		// we don't need to do anything
-		if (!rows.length) {
-			var msg = "No in-sync or to-upload files found";
-			if (typeof libraryID != 'undefined') {
-				msg += " in library " + libraryID;
-			}
-			Zotero.debug(msg);
-			return Q(changed);
+	this.checkForUpdatedFiles = function (libraryID, itemIDs, itemModTimes) {
+		libraryID = parseInt(libraryID);
+		if (isNaN(libraryID)) {
+			libraryID = false;
 		}
 		
-		// Index attachment data by item id
-		var itemIDs = [];
-		var attachmentData = {};
-		for each(let row in rows) {
-			var id = row.itemID;
-			itemIDs.push(id);
-			attachmentData[id] = {
-				linkMode: row.linkMode,
-				path: row.path,
-				mtime: row.storageModTime,
-				hash: row.storageHash,
-				state: row.syncState
-			};
-		}
-		rows = null;
-		
-		// OS.File didn't work reliably before Firefox 23, so use the old code
-		if (Zotero.platformMajorVersion < 23) {
-			var updatedStates = {};
-			var items = Zotero.Items.get(itemIDs);
-			for each(var item in items) {
-				Zotero.debug("Memory usage: " + memmgr.resident);
-				
-				let row = attachmentData[item.id];
-				let lk = item.libraryID + "/" + item.key;
-				Zotero.debug("Checking attachment file for item " + lk);
-				
-				var file = item.getFile(row);
-				if (!file) {
-					Zotero.debug("Marking attachment " + lk + " as missing");
-					updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
-					continue;
-				}
-				
-				// If file is already marked for upload, skip check. Even if this
-				// is download-marking mode (itemModTimes) and the file was
-				// changed remotely, conflicts are checked at upload time, so we
-				// don't need to worry about it here.
-				if (row.state == Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD) {
-					continue;
-				}
-				
-				var fmtime = item.attachmentModificationTime;
-				
-				//Zotero.debug("Stored mtime is " + row.mtime);
-				//Zotero.debug("File mtime is " + fmtime);
-				
-				// Download-marking mode
-				if (itemModTimes) {
-					Zotero.debug("Remote mod time for item " + lk + " is " + itemModTimes[item.id]);
-					
-					// Ignore attachments whose stored mod times haven't changed
-					if (row.storageModTime == itemModTimes[id]) {
-						Zotero.debug("Storage mod time (" + row.storageModTime + ") "
-							+ "hasn't changed for item " + lk);
-						continue;
-					}
-					
-					Zotero.debug("Marking attachment " + lk + " for download");
-					updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD;
-				}
-				
-				var mtime = row.mtime;
-				
-				// If stored time matches file, it hasn't changed locally
-				if (mtime == fmtime) {
-					continue;
-				}
-				
-				// Allow floored timestamps for filesystems that don't support
-				// millisecond precision (e.g., HFS+)
-				if (Math.floor(mtime / 1000) * 1000 == fmtime || Math.floor(fmtime / 1000) * 1000 == mtime) {
-					Zotero.debug("File mod times are within one-second precision "
-						+ "(" + fmtime + " ≅ " + mtime + ") for " + file.leafName
-						+ " for item " + lk + " -- ignoring");
-					continue;
-				}
-				
-				// Allow timestamp to be exactly one hour off to get around
-				// time zone issues -- there may be a proper way to fix this
-				if (Math.abs(fmtime - mtime) == 3600000
-						// And check with one-second precision as well
-						|| Math.abs(fmtime - Math.floor(mtime / 1000) * 1000) == 3600000
-						|| Math.abs(Math.floor(fmtime / 1000) * 1000 - mtime) == 3600000) {
-					Zotero.debug("File mod time (" + fmtime + ") is exactly one "
-						+ "hour off remote file (" + mtime + ") for item " + lk
-						+ "-- assuming time zone issue and skipping upload");
-					continue;
-				}
-				
-				// If file hash matches stored hash, only the mod time changed, so skip
-				var f = item.getFile();
-				if (f) {
-					Zotero.debug(f.path);
-				}
-				else {
-					Zotero.debug("File for item " + lk + " missing before getting hash");
-				}
-				var fileHash = item.attachmentHash;
-				if (row.hash && row.hash == fileHash) {
-					Zotero.debug("Mod time didn't match (" + fmtime + "!=" + mtime + ") "
-						+ "but hash did for " + file.leafName + " for item " + lk
-						+ " -- updating file mod time");
-					try {
-						file.lastModifiedTime = row.mtime;
-					}
-					catch (e) {
-						Zotero.File.checkFileAccessError(e, file, 'update');
-					}
-					continue;
-				}
-				
-				// Mark file for upload
-				Zotero.debug("Marking attachment " + lk + " as changed "
-					+ "(" + mtime + " != " + fmtime + ")");
-				updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD;
-			}
+		Components.utils.import("resource://gre/modules/Task.jsm");
+		return Q(Task.spawn(function () {
+			var msg = "Checking for locally changed attachment files";
 			
-			for (var itemID in updatedStates) {
-				Zotero.Sync.Storage.setSyncState(itemID, updatedStates[itemID]);
-				changed = true;
-			}
-			
-			if (!changed) {
-				Zotero.debug("No synced files have changed locally");
-			}
-			
-			return Q(changed);
-		}
-		
-		Components.utils.import("resource://gre/modules/osfile.jsm")
-		
-		var updatedStates = {};
-		var items = Zotero.Items.get(itemIDs);
-		
-		let checkItems = function () {
-			if (!items.length) return;
-			
+			var memmgr = Components.classes["@mozilla.org/memory-reporter-manager;1"]
+				.getService(Components.interfaces.nsIMemoryReporterManager);
+			memmgr.init();
 			Zotero.debug("Memory usage: " + memmgr.resident);
 			
-			let item = items.shift();
-			let row = attachmentData[item.id];
-			let lk = item.libraryKey;
-			Zotero.debug("Checking attachment file for item " + lk);
+			if (libraryID !== false) {
+				if (itemIDs) {
+					if (!itemIDs.length) {
+						var msg = "No files to check for local changes in library " + libraryID;
+						Zotero.debug(msg);
+						throw new Task.Result(false);
+					}
+				}
+				if (itemModTimes) {
+					throw new Error("itemModTimes is not allowed when libraryID is set");
+				}
+				
+				msg += " in library " + libraryID;
+			}
+			else if (itemIDs) {
+				throw new Error("libraryID not provided");
+			}
+			else if (itemModTimes) {
+				if (!Object.keys(itemModTimes).length) {
+					throw new Task.Result(false);
+				}
+				msg += " in download-marking mode";
+			}
+			else {
+				throw new Error("libraryID, itemIDs, or itemModTimes must be provided");
+			}
+			Zotero.debug(msg);
 			
-			let nsIFile = item.getFile(row, true);
-			let file = null;
-			return Q(OS.File.open(nsIFile.path))
-			.then(function (promisedFile) {
-				file = promisedFile;
-				return file.stat()
-				.then(function (info) {
+			var changed = false;
+			
+			if (!itemIDs) {
+				itemIDs = Object.keys(itemModTimes ? itemModTimes : {});
+			}
+			
+			// Can only handle 999 bound parameters at a time
+			var numIDs = itemIDs.length;
+			var maxIDs = 990;
+			var done = 0;
+			var rows = [];
+			
+			Zotero.DB.beginTransaction();
+			
+			do {
+				var chunk = itemIDs.splice(0, maxIDs);
+				var sql = "SELECT itemID, linkMode, path, storageModTime, storageHash, syncState "
+							+ "FROM itemAttachments JOIN items USING (itemID) "
+							+ "WHERE linkMode IN (?,?) AND syncState IN (?,?)";
+				var params = [];
+				params.push(
+					Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+					Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+					Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD,
+					Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
+				);
+				if (libraryID !== false) {
+					sql += " AND libraryID=?";
+					params.push(libraryID == 0 ? null : libraryID);
+				}
+				if (chunk.length) {
+					sql += " AND itemID IN (" + chunk.map(function () '?').join() + ")";
+					params = params.concat(chunk);
+				}
+				var chunkRows = Zotero.DB.query(sql, params);
+				if (chunkRows) {
+					rows = rows.concat(chunkRows);
+				}
+				done += chunk.length;
+			}
+			while (done < numIDs);
+			
+			Zotero.DB.commitTransaction();
+			
+			// If no files, or everything is already marked for download,
+			// we don't need to do anything
+			if (!rows.length) {
+				var msg = "No in-sync or to-upload files found";
+				if (libraryID !== false) {
+					msg += " in library " + libraryID;
+				}
+				Zotero.debug(msg);
+				throw new Task.Result(changed);
+			}
+			
+			// Index attachment data by item id
+			itemIDs = [];
+			var attachmentData = {};
+			for each(let row in rows) {
+				var id = row.itemID;
+				itemIDs.push(id);
+				attachmentData[id] = {
+					linkMode: row.linkMode,
+					path: row.path,
+					mtime: row.storageModTime,
+					hash: row.storageHash,
+					state: row.syncState
+				};
+			}
+			rows = null;
+			
+			var t = new Date();
+			var items = Zotero.Items.get(itemIDs);
+			var numItems = items.length;
+			var updatedStates = {};
+			
+			// OS.File didn't work reliably before Firefox 23, so use the old code
+			if (Zotero.platformMajorVersion < 23) {
+				Zotero.debug("Performing synchronous file update check");
+				
+				for each(var item in items) {
+					// Spin the event loop during synchronous file access
+					yield Q.delay(1);
+					
 					Zotero.debug("Memory usage: " + memmgr.resident);
 					
-					var fmtime = info.lastModificationDate.getTime();
-					Zotero.debug("File modification time for item " + lk + " is " + fmtime);
+					let row = attachmentData[item.id];
+					let lk = item.libraryID + "/" + item.key;
+					Zotero.debug("Checking attachment file for item " + lk);
 					
-					if (fmtime < 1) {
-						Zotero.debug("File mod time " + fmtime + " is less than 1 -- interpreting as 1", 2);
-						fmtime = 1;
+					var file = item.getFile(row);
+					if (!file) {
+						Zotero.debug("Marking attachment " + lk + " as missing");
+						updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
+						continue;
 					}
 					
 					// If file is already marked for upload, skip check. Even if this
@@ -898,8 +837,10 @@ Zotero.Sync.Storage = new function () {
 					// changed remotely, conflicts are checked at upload time, so we
 					// don't need to worry about it here.
 					if (row.state == Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD) {
-						return;
+						continue;
 					}
+					
+					var fmtime = item.attachmentModificationTime;
 					
 					//Zotero.debug("Stored mtime is " + row.mtime);
 					//Zotero.debug("File mtime is " + fmtime);
@@ -912,7 +853,7 @@ Zotero.Sync.Storage = new function () {
 						if (row.storageModTime == itemModTimes[id]) {
 							Zotero.debug("Storage mod time (" + row.storageModTime + ") "
 								+ "hasn't changed for item " + lk);
-							return;
+							continue;
 						}
 						
 						Zotero.debug("Marking attachment " + lk + " for download");
@@ -923,7 +864,7 @@ Zotero.Sync.Storage = new function () {
 					
 					// If stored time matches file, it hasn't changed locally
 					if (mtime == fmtime) {
-						return;
+						continue;
 					}
 					
 					// Allow floored timestamps for filesystems that don't support
@@ -932,7 +873,7 @@ Zotero.Sync.Storage = new function () {
 						Zotero.debug("File mod times are within one-second precision "
 							+ "(" + fmtime + " ≅ " + mtime + ") for " + file.leafName
 							+ " for item " + lk + " -- ignoring");
-						return;
+						continue;
 					}
 					
 					// Allow timestamp to be exactly one hour off to get around
@@ -944,73 +885,201 @@ Zotero.Sync.Storage = new function () {
 						Zotero.debug("File mod time (" + fmtime + ") is exactly one "
 							+ "hour off remote file (" + mtime + ") for item " + lk
 							+ "-- assuming time zone issue and skipping upload");
-						return;
+						continue;
 					}
 					
 					// If file hash matches stored hash, only the mod time changed, so skip
-					return Zotero.Utilities.Internal.md5Async(file)
-					.then(function (fileHash) {
-						if (row.hash && row.hash == fileHash) {
-							Zotero.debug("Mod time didn't match (" + fmtime + "!=" + mtime + ") "
-								+ "but hash did for " + file.leafName + " for item " + lk
-								+ " -- updating file mod time");
-							try {
-								nsIFile.lastModifiedTime = row.mtime;
-							}
-							catch (e) {
-								Zotero.File.checkFileAccessError(e, nsIFile, 'update');
-							}
+					var f = item.getFile();
+					if (f) {
+						Zotero.debug(f.path);
+					}
+					else {
+						Zotero.debug("File for item " + lk + " missing before getting hash");
+					}
+					var fileHash = item.attachmentHash;
+					if (row.hash && row.hash == fileHash) {
+						Zotero.debug("Mod time didn't match (" + fmtime + "!=" + mtime + ") "
+							+ "but hash did for " + file.leafName + " for item " + lk
+							+ " -- updating file mod time");
+						try {
+							file.lastModifiedTime = row.mtime;
+						}
+						catch (e) {
+							Zotero.File.checkFileAccessError(e, file, 'update');
+						}
+						continue;
+					}
+					
+					// Mark file for upload
+					Zotero.debug("Marking attachment " + lk + " as changed "
+						+ "(" + mtime + " != " + fmtime + ")");
+					updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD;
+				}
+				
+				for (var itemID in updatedStates) {
+					Zotero.Sync.Storage.setSyncState(itemID, updatedStates[itemID]);
+					changed = true;
+				}
+				
+				if (!changed) {
+					Zotero.debug("No synced files have changed locally");
+				}
+				
+				Zotero.debug("Checked " + numItems + " files in " + (new Date() - t) + "ms");
+				
+				throw new Task.Result(changed);
+			}
+			
+			Components.utils.import("resource://gre/modules/osfile.jsm")
+			
+			let checkItems = function () {
+				if (!items.length) return;
+				
+				Zotero.debug("Memory usage: " + memmgr.resident);
+				
+				let item = items.shift();
+				let row = attachmentData[item.id];
+				let lk = item.libraryKey;
+				Zotero.debug("Checking attachment file for item " + lk);
+				
+				let nsIFile = item.getFile(row, true);
+				let file = null;
+				return Q(OS.File.open(nsIFile.path))
+				.then(function (promisedFile) {
+					file = promisedFile;
+					return file.stat()
+					.then(function (info) {
+						Zotero.debug("Memory usage: " + memmgr.resident);
+						
+						var fmtime = info.lastModificationDate.getTime();
+						Zotero.debug("File modification time for item " + lk + " is " + fmtime);
+						
+						if (fmtime < 1) {
+							Zotero.debug("File mod time " + fmtime + " is less than 1 -- interpreting as 1", 2);
+							fmtime = 1;
+						}
+						
+						// If file is already marked for upload, skip check. Even if this
+						// is download-marking mode (itemModTimes) and the file was
+						// changed remotely, conflicts are checked at upload time, so we
+						// don't need to worry about it here.
+						if (row.state == Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD) {
 							return;
 						}
 						
-						// Mark file for upload
-						Zotero.debug("Marking attachment " + lk + " as changed "
-							+ "(" + mtime + " != " + fmtime + ")");
-						updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD;
+						//Zotero.debug("Stored mtime is " + row.mtime);
+						//Zotero.debug("File mtime is " + fmtime);
+						
+						// Download-marking mode
+						if (itemModTimes) {
+							Zotero.debug("Remote mod time for item " + lk + " is " + itemModTimes[item.id]);
+							
+							// Ignore attachments whose stored mod times haven't changed
+							if (row.storageModTime == itemModTimes[id]) {
+								Zotero.debug("Storage mod time (" + row.storageModTime + ") "
+									+ "hasn't changed for item " + lk);
+								return;
+							}
+							
+							Zotero.debug("Marking attachment " + lk + " for download");
+							updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD;
+						}
+						
+						var mtime = row.mtime;
+						
+						// If stored time matches file, it hasn't changed locally
+						if (mtime == fmtime) {
+							return;
+						}
+						
+						// Allow floored timestamps for filesystems that don't support
+						// millisecond precision (e.g., HFS+)
+						if (Math.floor(mtime / 1000) * 1000 == fmtime || Math.floor(fmtime / 1000) * 1000 == mtime) {
+							Zotero.debug("File mod times are within one-second precision "
+								+ "(" + fmtime + " ≅ " + mtime + ") for " + file.leafName
+								+ " for item " + lk + " -- ignoring");
+							return;
+						}
+						
+						// Allow timestamp to be exactly one hour off to get around
+						// time zone issues -- there may be a proper way to fix this
+						if (Math.abs(fmtime - mtime) == 3600000
+								// And check with one-second precision as well
+								|| Math.abs(fmtime - Math.floor(mtime / 1000) * 1000) == 3600000
+								|| Math.abs(Math.floor(fmtime / 1000) * 1000 - mtime) == 3600000) {
+							Zotero.debug("File mod time (" + fmtime + ") is exactly one "
+								+ "hour off remote file (" + mtime + ") for item " + lk
+								+ "-- assuming time zone issue and skipping upload");
+							return;
+						}
+						
+						// If file hash matches stored hash, only the mod time changed, so skip
+						return Zotero.Utilities.Internal.md5Async(file)
+						.then(function (fileHash) {
+							if (row.hash && row.hash == fileHash) {
+								Zotero.debug("Mod time didn't match (" + fmtime + "!=" + mtime + ") "
+									+ "but hash did for " + file.leafName + " for item " + lk
+									+ " -- updating file mod time");
+								try {
+									nsIFile.lastModifiedTime = row.mtime;
+								}
+								catch (e) {
+									Zotero.File.checkFileAccessError(e, nsIFile, 'update');
+								}
+								return;
+							}
+							
+							// Mark file for upload
+							Zotero.debug("Marking attachment " + lk + " as changed "
+								+ "(" + mtime + " != " + fmtime + ")");
+							updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD;
+						});
 					});
+				})
+				.finally(function () {
+					if (file) {
+						Zotero.debug("Closing file for item " + lk);
+						file.close();
+					}
+				})
+				.catch(function (e) {
+					if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+						Zotero.debug("Marking attachment " + lk + " as missing");
+						updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
+						return;
+					}
+					
+					if (e instanceof OS.File.Error && e.becauseClosed) {
+						Zotero.debug("File was closed", 2);
+					}
+					else {
+						Zotero.debug(e);
+						Zotero.debug(e.toString());
+					}
+					throw new Error("Error " + e.operation + " " + nsIFile.path);
+				})
+				.then(function () {
+					return checkItems();
 				});
-			})
-			.finally(function () {
-				if (file) {
-					Zotero.debug("Closing file for item " + lk);
-					file.close();
-				}
-			})
-			.catch(function (e) {
-				if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
-					Zotero.debug("Marking attachment " + lk + " as missing");
-					updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
-					return;
+			};
+			
+			throw new Task.Result(checkItems()
+			.then(function () {
+				for (let itemID in updatedStates) {
+					Zotero.Sync.Storage.setSyncState(itemID, updatedStates[itemID]);
+					changed = true;
 				}
 				
-				if (e instanceof OS.File.Error && e.becauseClosed) {
-					Zotero.debug("File was closed", 2);
+				if (!changed) {
+					Zotero.debug("No synced files have changed locally");
 				}
-				else {
-					Zotero.debug(e);
-					Zotero.debug(e.toString());
-				}
-				throw new Error("Error " + e.operation + " " + nsIFile.path);
-			})
-			.then(function () {
-				return checkItems();
-			});
-		};
-		
-		return checkItems()
-		.then(function () {
-			for (let itemID in updatedStates) {
-				Zotero.Sync.Storage.setSyncState(itemID, updatedStates[itemID]);
-				changed = true;
-			}
-			
-			if (!changed) {
-				Zotero.debug("No synced files have changed locally");
-			}
-			
-			return changed;
-		});
-	}
+				
+				Zotero.debug("Checked " + numItems + " files in " + (new Date() - t) + "ms");
+				
+				return changed;
+			}));
+		}));
+	};
 	
 	
 	/**
@@ -1307,6 +1376,20 @@ Zotero.Sync.Storage = new function () {
 	this.getItemFromRequestName = function (name) {
 		var [libraryID, key] = name.split('/');
 		return Zotero.Items.getByLibraryAndKey(libraryID, key);
+	}
+	
+	
+	this.notify = function(event, type, ids, extraData) {
+		if (event == 'open' && type == 'file') {
+			let timestamp = new Date().getTime();
+			
+			for each(let id in ids) {
+				_uploadCheckFiles.push({
+					itemID: id,
+					timestamp: timestamp
+				});
+			}
+		}
 	}
 	
 	
@@ -1937,6 +2020,36 @@ Zotero.Sync.Storage = new function () {
 			return [];
 		}
 		return itemIDs;
+	}
+	
+	
+	/**
+	 * Get files to check for local modifications for uploading
+	 *
+	 * This includes files previously modified and files opened externally
+	 * via Zotero within _maxCheckAgeInSeconds.
+	 */
+	function _getFilesToCheck(libraryID) {
+		var minTime = new Date().getTime() - (_maxCheckAgeInSeconds * 1000);
+		
+		// Get files by modification time
+		var sql = "SELECT itemID FROM itemAttachments JOIN items USING (itemID) "
+			+ "WHERE libraryID=? AND linkMode IN (?,?) AND syncState IN (?) AND "
+			+ "storageModTime>=?";
+		var params = [
+			libraryID == 0 ? null : libraryID,
+			Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+			Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+			Zotero.Sync.Storage.SYNC_STATE_IN_SYNC,
+			minTime
+		];
+		var itemIDs = Zotero.DB.columnQuery(sql, params) || [];
+		
+		// Get files by open time
+		_uploadCheckFiles.filter(function (x) x.timestamp >= minTime);
+		itemIDs = itemIDs.concat([x.itemID for each(x in _uploadCheckFiles)])
+		
+		return Zotero.Utilities.arrayUnique(itemIDs);
 	}
 	
 	

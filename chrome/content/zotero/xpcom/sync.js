@@ -520,6 +520,7 @@ Zotero.Sync.Runner = new function () {
 	var _autoSyncTimer;
 	var _queue;
 	var _background;
+	var _firstInSession = true;
 	
 	var _lastSyncStatus;
 	var _currentSyncStatusLabel;
@@ -533,7 +534,13 @@ Zotero.Sync.Runner = new function () {
 		this.IdleListener.init();
 	}
 	
-	this.sync = function (background) {
+	this.sync = function (options) {
+		if (!options) options = {};
+		if (_firstInSession) {
+			options.firstInSession = true;
+			_firstInSession = false;
+		}
+		
 		_warning = null;
 		
 		if (Zotero.HTTP.browserIsOffline()){
@@ -549,7 +556,7 @@ Zotero.Sync.Runner = new function () {
 		// Purge deleted objects so they don't cause sync errors (e.g., long tags)
 		Zotero.purgeDataObjects(true);
 		
-		_background = !!background;
+		_background = !!options.background;
 		this.setSyncIcon('animate');
 		
 		var finalCallbacks = {
@@ -562,7 +569,7 @@ Zotero.Sync.Runner = new function () {
 		var storageSync = function () {
 			Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.syncingFiles'));
 			
-			Zotero.Sync.Storage.sync()
+			Zotero.Sync.Storage.sync(options)
 			.then(function (results) {
 				Zotero.debug("File sync is finished");
 				
@@ -692,7 +699,9 @@ Zotero.Sync.Runner = new function () {
 					return;
 				}
 				
-				Zotero.Sync.Runner.sync(background);
+				Zotero.Sync.Runner.sync({
+					background: background
+				});
 			}
 		}
 		
@@ -1143,8 +1152,10 @@ Zotero.Sync.Runner.IdleListener = {
 		
 		Zotero.debug("Beginning idle sync");
 		
-		Zotero.Sync.Runner.sync(true);
-		Zotero.Sync.Runner.setSyncTimeout(this._idleTimeout, true);
+		Zotero.Sync.Runner.sync({
+			background: true
+		});
+		Zotero.Sync.Runner.setSyncTimeout(this._idleTimeout, true, true);
 	},
 	
 	_backObserver: {
@@ -1160,7 +1171,9 @@ Zotero.Sync.Runner.IdleListener = {
 				return;
 			}
 			Zotero.debug("Beginning return-from-idle sync");
-			Zotero.Sync.Runner.sync(true);
+			Zotero.Sync.Runner.sync({
+				background: true
+			});
 		}
 	},
 	
@@ -2021,7 +2034,9 @@ Zotero.Sync.Server = new function () {
 						
 						Zotero.Sync.Server.resetClient();
 						Zotero.Sync.Server.canAutoResetClient = false;
-						Zotero.Sync.Runner.sync(background);
+						Zotero.Sync.Runner.sync({
+							background: background
+						});
 					}, 1);
 					break;
 				
@@ -2124,7 +2139,9 @@ Zotero.Sync.Server = new function () {
 							Zotero.Sync.Server.canAutoResetClient = false;
 						}
 						
-						Zotero.Sync.Runner.sync(background);
+						Zotero.Sync.Runner.sync({
+							background: background
+						});
 					}, 1);
 					break;
 				
@@ -2359,7 +2376,9 @@ Zotero.Sync.Server = new function () {
 						}
 						Zotero.Sync.Server.resetClient();
 						Zotero.Sync.Server.canAutoResetClient = false;
-						Zotero.Sync.Runner.sync(background);
+						Zotero.Sync.Runner.sync({
+							background: background
+						});
 					}, 1);
 					break;
 				
@@ -3430,7 +3449,7 @@ Zotero.Sync.Server.Data = new function() {
 			// Check mod times and hashes of updated items against stored values to see
 			// if they've been updated elsewhere and mark for download if so
 			if (type == 'item' && Object.keys(itemStorageModTimes).length) {
-				yield Zotero.Sync.Storage.checkForUpdatedFiles(itemStorageModTimes);
+				yield Zotero.Sync.Storage.checkForUpdatedFiles(null, null, itemStorageModTimes);
 			}
 		}
 		
