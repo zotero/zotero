@@ -433,7 +433,9 @@ var ZoteroPane = new function()
 					return;
 				}
 				
-				Zotero.Sync.Runner.sync(true);
+				Zotero.Sync.Runner.sync({
+					background: true
+				});
 			})
 			.done();
 		}
@@ -3492,6 +3494,7 @@ var ZoteroPane = new function()
 					this.loadURI(url, event);
 				}
 				else {
+					Zotero.Notifier.trigger('open', 'file', itemID);
 					Zotero.launchFile(file);
 				}
 			}
@@ -3613,6 +3616,7 @@ var ZoteroPane = new function()
 					var parent = file.parent.QueryInterface(Components.interfaces.nsILocalFile);
 					Zotero.launchFile(parent);
 				}
+				Zotero.Notifier.trigger('open', 'file', attachment.id);
 			}
 			else {
 				this.showAttachmentNotFoundDialog(attachment.id, noLocateOnMissing)
