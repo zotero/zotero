@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<overlay id="zotero-update"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<wizard id="updates">
+		<script type="application/javascript" src="chrome://zotero/content/include.js"/>
+		<script type="application/javascript">
+			document.getElementById("manualUpdateDesc").textContent = Zotero.getString("standalone.updateMessage");
+		</script>
+	</wizard>
+</overlay>

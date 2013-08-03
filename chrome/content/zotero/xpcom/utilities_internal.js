@@ -80,9 +80,6 @@ Zotero.Utilities.Internal = {
 			return hash;
 		}
 		
-		/*
-		// This created 36-character hashes
-		
 		// return the two-digit hexadecimal code for a byte
 		function toHexString(charCode) {
 			return ("0" + charCode.toString(16)).slice(-2);
@@ -90,18 +87,98 @@ Zotero.Utilities.Internal = {
 		
 		// convert the binary hash data to a hex string.
 		return [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
-		*/
+	},
+	
+	
+	/**
+	 * @param {OS.File|nsIFile|String} file  File or file path
+	 * @param {Boolean} [base64=FALSE]  Return as base-64-encoded string
+	 *                                  rather than hex string
+	 */
+	"md5Async": function (file, base64) {
+		Components.utils.import("resource://gre/modules/osfile.jsm");
+		const CHUNK_SIZE = 16384;
 		
-		// From http://rcrowley.org/2007/11/15/md5-in-xulrunner-or-firefox-extensions/
-		var ascii = [];
-		var ii = hash.length;
-		for (var i = 0; i < ii; ++i) {
-			var c = hash.charCodeAt(i);
-			var ones = c % 16;
-			var tens = c >> 4;
-			ascii.push(String.fromCharCode(tens + (tens > 9 ? 87 : 48)) + String.fromCharCode(ones + (ones > 9 ? 87 : 48)));
+		var deferred = Q.defer();
+		
+		function toHexString(charCode) {
+			return ("0" + charCode.toString(16)).slice(-2);
 		}
-		return ascii.join('');
+		
+		var ch = Components.classes["@mozilla.org/security/hash;1"]
+				   .createInstance(Components.interfaces.nsICryptoHash);
+		ch.init(ch.MD5);
+		
+		// Recursively read chunks of the file, and resolve the promise
+		// with the hash when done
+		let readChunk = function readChunk(file) {
+			file.read(CHUNK_SIZE)
+			.then(
+				function readSuccess(data) {
+					ch.update(data, data.length);
+					if (data.length == CHUNK_SIZE) {
+						readChunk(file);
+					}
+					else {
+						let hash = ch.finish(base64);
+						
+						// Base64
+						if (base64) {
+							deferred.resolve(hash);
+						}
+						// Hex string
+						else {
+							deferred.resolve(
+								[toHexString(hash.charCodeAt(i))
+									for (i in hash)].join("")
+							);
+						}
+					}
+				},
+				function (e) {
+					try {
+						ch.finish(false);
+					}
+					catch (e) {}
+					
+					deferred.reject(e);
+				}
+			)
+			.then(
+				null,
+				function (e) {
+					try {
+						ch.finish(false);
+					}
+					catch (e) {}
+					
+					deferred.reject(e);
+				}
+			);
+		}
+		
+		if (file instanceof OS.File) {
+			readChunk(file);
+		}
+		else {
+			if (file instanceof Components.interfaces.nsIFile) {
+				var path = file.path;
+			}
+			else {
+				var path = file;
+			}
+			OS.File.open(path)
+			.then(
+				function opened(file) {
+					readChunk(file);
+				},
+				function (e) {
+					deferred.reject(e);
+				}
+			);
+		}
+		
+		return deferred.promise;
 	},
 	
 	

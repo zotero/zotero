@@ -433,7 +433,9 @@ var ZoteroPane = new function()
 					return;
 				}
 				
-				Zotero.Sync.Runner.sync(true);
+				Zotero.Sync.Runner.sync({
+					background: true
+				});
 			})
 			.done();
 		}
@@ -602,17 +604,14 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		var useShift = Zotero.isMac;
-		
 		var key = String.fromCharCode(event.which);
 		if (!key) {
 			Zotero.debug('No key');
 			return;
 		}
 		
-		// Ignore modifiers other than Ctrl-Alt or Cmd-Shift
-		if (!((Zotero.isMac ? event.metaKey : event.ctrlKey) &&
-				(useShift ? event.shiftKey : event.altKey))) {
+		// Ignore modifiers other than Ctrl-Shift/Cmd-Shift
+		if (!((Zotero.isMac ? event.metaKey : event.ctrlKey) && event.shiftKey)) {
 			return;
 		}
 		
@@ -687,9 +686,7 @@ var ZoteroPane = new function()
 						}
 					}
 					// Use key that's not the modifier as the popup toggle
-					ZoteroPane_Local.newNote(
-						useShift ? event.altKey : event.shiftKey, parent
-					);
+					ZoteroPane_Local.newNote(event.altKey, parent);
 					break;
 				case 'toggleTagSelector':
 					ZoteroPane_Local.toggleTagSelector();
@@ -2563,14 +2560,8 @@ var ZoteroPane = new function()
 			else if (tree.id == 'zotero-items-tree') {
 				let itemGroup = ZoteroPane_Local.getItemGroup();
 				if (itemGroup.isDuplicates()) {
-					if (event.button == 0 && (event.metaKey || event.shiftKey
-						|| event.altKey || event.ctrlKey)) {
-						return;
-					}
-					
-					// Allow right-click on single items/attachments
-					var items = ZoteroPane_Local.getSelectedItems();
-					if (event.button != 0 && items.length == 1) {
+					if (event.button != 0 || event.metaKey || event.shiftKey
+						|| event.altKey || event.ctrlKey) {
 						return;
 					}
 					
@@ -3503,6 +3494,7 @@ var ZoteroPane = new function()
 					this.loadURI(url, event);
 				}
 				else {
+					Zotero.Notifier.trigger('open', 'file', itemID);
 					Zotero.launchFile(file);
 				}
 			}
@@ -3624,6 +3616,7 @@ var ZoteroPane = new function()
 					var parent = file.parent.QueryInterface(Components.interfaces.nsILocalFile);
 					Zotero.launchFile(parent);
 				}
+				Zotero.Notifier.trigger('open', 'file', attachment.id);
 			}
 			else {
 				this.showAttachmentNotFoundDialog(attachment.id, noLocateOnMissing)

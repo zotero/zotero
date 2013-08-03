@@ -1102,7 +1102,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	
 	obj._cacheCredentials = function () {
 		if (_cachedCredentials) {
-			Zotero.debug("Credentials are already cached");
+			Zotero.debug("WebDAV credentials are already cached");
 			return;
 		}
 		

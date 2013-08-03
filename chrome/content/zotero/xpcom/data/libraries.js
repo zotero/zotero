@@ -36,7 +36,7 @@ Zotero.Libraries = new function () {
 				break;
 			
 			default:
-				throw ("Invalid library type '" + type + "' in Zotero.Libraries.add()");
+				throw new Error("Invalid library type '" + type + "' in Zotero.Libraries.add()");
 		}
 		
 		var sql = "INSERT INTO libraries (libraryID, libraryType) VALUES (?, ?)";
@@ -57,7 +57,7 @@ Zotero.Libraries = new function () {
 				return group.name;
 			
 			default:
-				throw ("Unsupported library type '" + type + "' in Zotero.Libraries.getName()");
+				throw new Error("Unsupported library type '" + type + "' in Zotero.Libraries.getName()");
 		}
 	}
 	
@@ -69,7 +69,7 @@ Zotero.Libraries = new function () {
 		var sql = "SELECT libraryType FROM libraries WHERE libraryID=?";
 		var libraryType = Zotero.DB.valueQuery(sql, libraryID);
 		if (!libraryType) {
-			throw ("Library " + libraryID + " does not exist in Zotero.Libraries.getType()");
+			throw new Error("Library " + libraryID + " does not exist in Zotero.Libraries.getType()");
 		}
 		return libraryType;
 	}
@@ -87,7 +87,7 @@ Zotero.Libraries = new function () {
 				return group.editable;
 			
 			default:
-				throw ("Unsupported library type '" + type + "' in Zotero.Libraries.getName()");
+				throw new Error("Unsupported library type '" + type + "' in Zotero.Libraries.getName()");
 		}
 	}
 	
@@ -104,7 +104,7 @@ Zotero.Libraries = new function () {
 				return group.filesEditable;
 			
 			default:
-				throw ("Unsupported library type '" + type + "' in Zotero.Libraries.getName()");
+				throw new Error("Unsupported library type '" + type + "' in Zotero.Libraries.getName()");
 		}
 	}
 }

@@ -86,7 +86,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 					}
 					else {
 						var msg = "Unexpected status code " + e.xmlhttp.status
-							+ " getting storage file info";
+							+ " getting storage file info for item " + item.libraryKey;
 					}
 					Zotero.debug(msg, 1);
 					Zotero.debug(e.xmlhttp.responseText);
@@ -1002,8 +1002,8 @@ Zotero.Sync.Storage.ZFS = (function () {
 	
 	obj._cacheCredentials = function () {
 		if (_cachedCredentials) {
-			Zotero.debug("Credentials are already cached");
-			return;
+			Zotero.debug("ZFS credentials are already cached");
+			return Q();
 		}
 		
 		var uri = this.rootURI;

@@ -219,6 +219,11 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		Zotero.Debug.init();
 		
 		this.mainThread = Services.tm.mainThread;
+		
+		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
+			.getService(Components.interfaces.nsIXULAppInfo);
+		this.platformVersion = appInfo.platformVersion;
+		this.platformMajorVersion = parseInt(appInfo.platformVersion.match(/^[0-9]+/)[0]);
 		this.isFx = true;
 		
 		this.isStandalone = Services.appinfo.ID == ZOTERO_CONFIG['GUID'];
@@ -1892,13 +1897,13 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			'[JavaScript Error: "this._uiElement is null',
 			'Error: a._updateVisibleText is not a function',
 			'[JavaScript Error: "Warning: unrecognized command line flag ',
-			'[JavaScript Error: "Warning: unrecognized command line flag -foreground',
 			'LibX:',
 			'function skype_',
 			'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
 			'CVE-2009-3555',
 			'OpenGL LayerManager',
-			'trying to re-register CID'
+			'trying to re-register CID',
+			'Services.HealthReport'
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
@@ -2233,6 +2238,7 @@ Zotero.Keys = new function() {
 		// Get the key=>command mappings from the prefs
 		for each(var action in actions) {
 			var action = action.substr(5); // strips 'keys.'
+			// Remove old pref
 			if (action == 'overrideGlobal') {
 				Zotero.Prefs.clear('keys.overrideGlobal');
 				continue;
@@ -2246,26 +2252,35 @@ Zotero.Keys = new function() {
 	 * Called by ZoteroPane.onLoad()
 	 */
 	function windowInit(document) {
-		var useShift = Zotero.isMac;
+		var globalKeys = [
+			{
+				name: 'openZotero',
+				defaultKey: 'Z'
+			},
+			{
+				name: 'saveToZotero',
+				defaultKey: 'S'
+			}
+		];
 		
-		// Zotero pane shortcut
-		var keyElem = document.getElementById('key_openZotero');
-		if(keyElem) {
-			var zKey = Zotero.Prefs.get('keys.openZotero');
-			// Only override the default with the pref if the <key> hasn't been manually changed
-			// and the pref has been
-			if (keyElem.getAttribute('key') == 'Z' && keyElem.getAttribute('modifiers') == 'accel alt'
-					&& (zKey != 'Z' || useShift)) {
-				keyElem.setAttribute('key', zKey);
-				if (useShift) {
-					keyElem.setAttribute('modifiers', 'accel shift');
+		globalKeys.forEach(function (x) {
+			let keyElem = document.getElementById('key_' + x.name);
+			if (keyElem) {
+				let prefKey = Zotero.Prefs.get('keys.'  + x.name);
+				// Only override the default with the pref if the <key> hasn't
+				// been manually changed and the pref has been
+				if (keyElem.getAttribute('key') == x.defaultKey
+						&& keyElem.getAttribute('modifiers') == 'accel shift'
+						&& prefKey != x.defaultKey) {
+					keyElem.setAttribute('key', prefKey);
 				}
 			}
-		}
+		});
 	}
 	
 	
 	function getCommand(key) {
+		key = key.toUpperCase();
 		return _keys[key] ? _keys[key] : false;
 	}
 }
@@ -2310,16 +2325,18 @@ Zotero.DragDrop = {
 	currentDataTransfer: null,
 	
 	getDragData: function (element, firstOnly) {
-		var dragData = {
-			dataType: '',
-			data: []
-		};
-		
 		var dt = this.currentDataTransfer;
 		if (!dt) {
 			Zotero.debug("Drag data not available");
 			return false;
 		}
+		
+		var dragData = {
+			dataType: '',
+			data: [],
+			dropEffect: dt.dropEffect
+		};
+		
 		
 		var len = firstOnly ? 1 : dt.mozItemCount;
 		

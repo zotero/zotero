@@ -44,17 +44,12 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	
 	// nsIProgressEventSink
 	onProgress: function (request, context, progress, progressMax) {
-		// Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=451991
-		// (fixed in Fx3.1)
-		if (progress > progressMax) {
-			progress = progressMax;
-		}
-		//Zotero.debug("onProgress with " + progress + "/" + progressMax);
+		Zotero.debug("onProgress with " + progress + "/" + progressMax);
 		this._onProgress(request, progress, progressMax);
 	},
 	
 	onStatus: function (request, context, status, statusArg) {
-		//Zotero.debug('onStatus');
+		Zotero.debug('onStatus with ' + status);
 	},
 	
 	// nsIRequestObserver
@@ -67,7 +62,7 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	},
 	
 	onStopRequest: function (request, context, status) {
-		Zotero.debug('onStopRequest');
+		Zotero.debug('onStopRequest with ' + status);
 		
 		switch (status) {
 			case 0:
@@ -84,7 +79,7 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	// nsIWebProgressListener
 	onProgressChange: function (wp, request, curSelfProgress,
 			maxSelfProgress, curTotalProgress, maxTotalProgress) {
-		//Zotero.debug("onProgressChange with " + curTotalProgress + "/" + maxTotalProgress);
+		Zotero.debug("onProgressChange with " + curTotalProgress + "/" + maxTotalProgress);
 		
 		// onProgress gets called too, so this isn't necessary
 		//this._onProgress(request, curTotalProgress, maxTotalProgress);
@@ -108,8 +103,12 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	onStatusChange: function (progress, request, status, message) {
 		Zotero.debug("onStatusChange with '" + message + "'");
 	},
-	onLocationChange: function () {},
-	onSecurityChange: function () {},
+	onLocationChange: function () {
+		Zotero.debug('onLocationChange');
+	},
+	onSecurityChange: function () {
+		Zotero.debug('onSecurityChange');
+	},
 	
 	// nsIStreamListener
 	onDataAvailable: function (request, context, stream, sourceOffset, length) {
@@ -119,7 +118,9 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 				.createInstance(Components.interfaces.nsIScriptableInputStream);
 		scriptableInputStream.init(stream);
 		
-		this._response += scriptableInputStream.read(length);
+		var data = scriptableInputStream.read(length);
+		Zotero.debug(data);
+		this._response += data;
 	},
 	
 	// nsIChannelEventSink
