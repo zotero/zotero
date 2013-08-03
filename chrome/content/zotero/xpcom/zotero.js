@@ -2381,16 +2381,18 @@ Zotero.DragDrop = {
 	currentDataTransfer: null,
 	
 	getDragData: function (element, firstOnly) {
-		var dragData = {
-			dataType: '',
-			data: []
-		};
-		
 		var dt = this.currentDataTransfer;
 		if (!dt) {
 			Zotero.debug("Drag data not available");
 			return false;
 		}
+		
+		var dragData = {
+			dataType: '',
+			data: [],
+			dropEffect: dt.dropEffect
+		};
+		
 		
 		var len = firstOnly ? 1 : dt.mozItemCount;
 		

@@ -2990,7 +2990,15 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 				
 				try {
 					Zotero.DB.beginTransaction();
-					var itemID = Zotero.Attachments.importFromFile(file, sourceItemID, targetLibraryID);
+					if (dragData.dropEffect == 'link') {
+						var itemID = Zotero.Attachments.linkFromFile(file, sourceItemID);
+					}
+					else {
+						if (dragData.dropEffect != 'copy') {
+							Components.utils.reportError("Invalid dropEffect '" + dragData.dropEffect + "' dropping file");
+						}
+						var itemID = Zotero.Attachments.importFromFile(file, sourceItemID, targetLibraryID);
+					}
 					if (parentCollectionID) {
 						var col = Zotero.Collections.get(parentCollectionID);
 						if (col) {
@@ -3012,21 +3020,46 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 }
 
 Zotero.ItemTreeView.prototype.onDragEnter = function (event) {
-	//Zotero.debug("Storing current drag data");
 	Zotero.DragDrop.currentDataTransfer = event.dataTransfer;
+	return false;
 }
 
 /*
  * Called by HTML 5 Drag and Drop when dragging over the tree
  */
-Zotero.ItemTreeView.prototype.onDragOver = function (event, dropdata, session) {
+Zotero.ItemTreeView.prototype.onDragOver = function (event) {
+	Zotero.DragDrop.currentDataTransfer = event.dataTransfer;
+	if (event.dataTransfer.types.contains("application/x-moz-file")) {
+		// As of Aug. 2013 nightlies:
+		//
+		// - Setting the dropEffect only works on Linux and OS X.
+		//
+		// - Modifier keys don't show up in the drag event on OS X until the
+		//   drop, so since we can't show a correct effect, we leave it at
+		//   the default 'move', the least misleading option.
+		//
+		// - The cursor effect gets set by the system on Windows 7 and can't
+		//   be overridden.
+		if (!Zotero.isMac) {
+			if (event.ctrlKey && event.shiftKey) {
+				event.dataTransfer.dropEffect = "link";
+			}
+			else {
+				event.dataTransfer.dropEffect = "copy";
+			}
+		}
+	}
+	// Show copy symbol when dragging an item over a collection
+	else if (event.dataTransfer.getData("zotero/item")) {
+		event.dataTransfer.dropEffect = "copy";
+	}
 	return false;
 }
 
 /*
  * Called by HTML 5 Drag and Drop when dropping onto the tree
  */
-Zotero.ItemTreeView.prototype.onDrop = function (event, dropdata, session) {
+Zotero.ItemTreeView.prototype.onDrop = function (event) {
 	return false;
 }
 
