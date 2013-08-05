@@ -592,7 +592,7 @@ Zotero.Translate.Sandbox = {
 				var altTitle = Zotero.ItemFields.getName(Zotero.ItemFields.getFieldIDFromTypeAndBase(item.itemType, 'title'));
 				if(altTitle && item[altTitle]) item.title = item[altTitle];
 				
-				if(!item.title && ["case", "statute", "bill", "order", "gazette"].indexOf(item.itemType) === -1) {
+				if(!item.title && ["case", "statute", "regulation", "bill", "gazette", "hearing"].indexOf(item.itemType) === -1) {
 					translate.complete(false, new Error("Item is not case, statute, bill, order or gazette, and has no title"));
 					return;
 				}
