@@ -1180,11 +1180,13 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 		}
 		var code;
 		if (itemTypeID == 18) {
-			code = this.getField('reporter', false, true, language);
+			code = this.getField('committee', false, true, language);
+			if (!code) {
+				code = this.getField('reporter', false, true, language);
+			}
 		} else {
 			code = this.getField('code', false, true, language);
 		}
-		var section = this.getField('section');
 
 		if (title) {
 			strParts.push(title); 
@@ -1194,10 +1196,20 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 			}
 			strParts.push(code);
 		}
+
+		var section;
+		var label;
+		if (18 === itemTypeID) {
+			section = this.getField('meetingNumber');
+			label = "sess. "
+		} else {
+			section = this.getField('section');
+			label = "sec. ";
+		}
 		if (section) {
 			section = "" + section;
 			if (section.match(/^[0-9].*/)) {
-				strParts.push("sec. "+ section);
+				strParts.push(label + section);
 			} else {
 				strParts.push(section);
 			}
