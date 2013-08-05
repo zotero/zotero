@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes				"Note font size:">
 
 <!ENTITY zotero.preferences.miscellaneous				"Miscellaneous">
-<!ENTITY zotero.preferences.autoUpdate					"Automatically check for updated translators">
+<!ENTITY zotero.preferences.autoUpdate					"Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow					"Update now">
 <!ENTITY zotero.preferences.reportTranslationFailure		"Report broken site translators">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader			"Allow zotero.org to customize content based on current Zotero version">
