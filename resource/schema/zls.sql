@@ -1,4 +1,4 @@
--- 20130727
+-- 20130730
 
 -- This file is derived from the IANA Language Subtag Registry
 -- and the jurisdictions object at https://github.com/fbennett/mlz-jurisdictions
@@ -203,7 +203,7 @@ INSERT INTO jurisdictions VALUES("ca;federal;yt","Yukon, Canada (federal)");
 INSERT INTO jurisdictions VALUES("mn;arkhangai","Arkhangai, MN");
 INSERT INTO jurisdictions VALUES("mn;bayan-ulgii","Bayan-Ulgii, MN");
 INSERT INTO jurisdictions VALUES("mn;bayankhongor","Bayankhongor, MN");
-INSERT INTO jurisdictions VALUES("mn;bulgan","Blugan, MN");
+INSERT INTO jurisdictions VALUES("mn;bulgan","Bulgan, MN");
 INSERT INTO jurisdictions VALUES("mn;darkhan-uul","Darkhan-Uul, MN");
 INSERT INTO jurisdictions VALUES("mn;dornod","Dornod, MN");
 INSERT INTO jurisdictions VALUES("mn;dornogovi","Dornogovi, MN");
