@@ -925,7 +925,12 @@ Zotero.Sync.Storage = new function () {
 					Zotero.debug("No synced files have changed locally");
 				}
 				
-				Zotero.debug("Checked " + numItems + " files in " + (new Date() - t) + "ms");
+				let msg = "Checked " + numItems + " files in ";
+				if (libraryID !== false) {
+					msg += "library " + libraryID + " in ";
+				}
+				msg += (new Date() - t) + "ms";
+				Zotero.debug(msg);
 				
 				throw new Task.Result(changed);
 			}
@@ -1074,7 +1079,12 @@ Zotero.Sync.Storage = new function () {
 					Zotero.debug("No synced files have changed locally");
 				}
 				
-				Zotero.debug("Checked " + numItems + " files in " + (new Date() - t) + "ms");
+				let msg = "Checked " + numItems + " files in ";
+				if (libraryID !== false) {
+					msg += "library " + libraryID + " in ";
+				}
+				msg += (new Date() - t) + "ms";
+				Zotero.debug(msg);
 				
 				return changed;
 			}));
