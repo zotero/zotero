@@ -54,7 +54,7 @@
 <!ENTITY selectAllCmd.label "Выбрать все">
 <!ENTITY selectAllCmd.key "А">
 <!ENTITY selectAllCmd.accesskey "А">
-<!ENTITY preferencesCmd.label "Параметры...">
+<!ENTITY preferencesCmd.label "Preferences">
 <!ENTITY preferencesCmd.accesskey "O">
 <!ENTITY preferencesCmdUnix.label "Настройки">
 <!ENTITY preferencesCmdUnix.accesskey "n">

@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "font neurria oharretan:">
 
 <!ENTITY zotero.preferences.miscellaneous "Bestelakoak">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Update now">
 <!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Teklatu-komandoak">
 
 <!ENTITY zotero.preferences.keys.openZotero "Ireki/Itxi Zotero panela">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Pantaila osoa bai/ez">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Bilatu:">
-<!ENTITY zotero.preferences.keys.newItem "Item berria sortu">
-<!ENTITY zotero.preferences.keys.newNote "Ohar berria sortu">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Esteka-hautatzailea ikusi bai/ez">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Hautatutako item aipamenak arbelera kopiatu">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Hautatutako itemak arbelera kopiatu">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Arbeletik inportatu">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Aldaketak burutzeko, leiho berri bat ireki.">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">

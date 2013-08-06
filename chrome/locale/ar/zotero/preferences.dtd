@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "حجم خط الملاحظات:">
 
 <!ENTITY zotero.preferences.miscellaneous "أخرى">
-<!ENTITY zotero.preferences.autoUpdate "التأكد التلقائي من وجود مترجمات مواقع محدثة">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "التحديث الآن">
 <!ENTITY zotero.preferences.reportTranslationFailure "الإبلاغ عن مترجمات مواقع معطلة">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "السماح لموقع زوتيرو بتخصيص المحتوى بناء على الاصدار الحالي لزوتيرو">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "اختصارات">
 
 <!ENTITY zotero.preferences.keys.openZotero "فتح/إغلاق نافذة زوتيرو">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "التنشيط لوضع ملء الشاشة">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "البحث السريع">
-<!ENTITY zotero.preferences.keys.newItem "انشئ عنصر جديد">
-<!ENTITY zotero.preferences.keys.newNote "انشئ ملاحظة جديدة">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "تنشيط محدد الأوسمة">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "نسخ استشهادات العنصر المختار للحافظة">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "انسخ العناصر المحددة للحافظة">
 <!ENTITY zotero.preferences.keys.importFromClipboard "الاستيراد من الحافظة">
-<!ENTITY zotero.preferences.keys.overrideGlobal "حاول تجنب الإختصارات المتعارضة">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "يتم تفعيل التغييرات في النوافذ الجديدة فقط">
 
 <!ENTITY zotero.preferences.prefpane.proxies "الوكيل">

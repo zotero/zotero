@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Taille des caractères des notes :">
 
 <!ENTITY zotero.preferences.miscellaneous "Divers">
-<!ENTITY zotero.preferences.autoUpdate "Vérifier automatiquement les mises à jour des convertisseurs">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Mettre à jour maintenant">
 <!ENTITY zotero.preferences.reportTranslationFailure "Signaler les convertisseurs défectueux">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Autoriser zotero.org à personnaliser le contenu en se basant sur la version actuelle de Zotero">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Raccourcis">
 
 <!ENTITY zotero.preferences.keys.openZotero "Ouvrir/fermer le panneau Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Bascule du mode plein écran">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Bascule vers le panneau Ma Bibliothèque">
 <!ENTITY zotero.preferences.keys.quicksearch "Recherche rapide">
-<!ENTITY zotero.preferences.keys.newItem "Créer un nouveau document">
-<!ENTITY zotero.preferences.keys.newNote "Créer une nouvelle note">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Bascule du sélecteur de marqueurs">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copier les citations du document sélectionné dans le presse-papiers">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copier les documents sélectionnés dans le presse-papiers">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importer du presse-papiers">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Essayer de gérer les conflits de raccourcis">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Les modifications ne prennent effet que dans les nouvelles fenêtres.">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Serveurs mandataires">

@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Tamaño de letra en las notas:">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscelánea">
-<!ENTITY zotero.preferences.autoUpdate "Comprobar automáticamente si hay traductores actualizados">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Hacerlo ahora">
 <!ENTITY zotero.preferences.reportTranslationFailure "Informar de fallos en los traductores de página">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Permitir que zotero.org personalice contenido basándose en la versión actual de Zotero">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Atajos de teclado">
 
 <!ENTITY zotero.preferences.keys.openZotero "Abrir/cerrar el panel de Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Conmutar el modo de pantalla completa">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Enfocar el panel de bibliotecas">
 <!ENTITY zotero.preferences.keys.quicksearch "Búsqueda rápida">
-<!ENTITY zotero.preferences.keys.newItem "Crear un nuevo ítem">
-<!ENTITY zotero.preferences.keys.newNote "Crear una nueva nota">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Conmutar el selector de marcas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar las citas para los ítems seleccionados al portapapeles">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar los ítems seleccionados al portapapeles">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importar desde el portapapeles">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Intentar suprimir los atajos de otras aplicaciones que coincidan">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Los cambios tendrán efecto sólo en las ventanas nuevas">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Servidores Proxies">

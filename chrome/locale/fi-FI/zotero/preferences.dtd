@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Muistiinpanojen kirjasinkoko:">
 
 <!ENTITY zotero.preferences.miscellaneous "Sekalaista">
-<!ENTITY zotero.preferences.autoUpdate "Tarkista automaattisesti sivutulkkien päivitykset">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Päivitä nyt">
 <!ENTITY zotero.preferences.reportTranslationFailure "Ilmoita toimimattomista sivutulkeista">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Anna zotero.orgin muunnella sisältöään nykyisen Zotero-version perusteella">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
 
 <!ENTITY zotero.preferences.keys.openZotero "Avaa/sulje Zotero-ikkuna">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Koko ruudun tila">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Pikahaku">
-<!ENTITY zotero.preferences.keys.newItem "Luo uusi nimike">
-<!ENTITY zotero.preferences.keys.newNote "Luo uusi muistiinpano">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Aiheenvalitsin päälle/pois">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopioi valittujen nimikkeiden sitaatit leikepöydälle">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopioi valitut nimikkeet leikepöydälle">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Tuo leikepöydältä">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Yritä ohittaa keskenään ristiriitaiset pikanäppäimet">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Muutokset tulevat voimaan vasta uusissa ikkunoissa">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Välityspalvelimet">

@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "ទំហំអក្សរកំណត់ចំណាំៈ">
 
 <!ENTITY zotero.preferences.miscellaneous "ជម្រើសនានា">
-<!ENTITY zotero.preferences.autoUpdate "ស្វែងរកកូដចម្លងទំនើបទាន់សម័យដោយស្វ័យប្រវត្តិ">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "ធ្វើទំនើបកម្មឥលូវ">
 <!ENTITY zotero.preferences.reportTranslationFailure "រាយការណ៍កូដចម្លងគេហទំព័រខូច">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "ទុកឲ zotero.org ផ្លាស់ប្តូរខ្លឹមសារដោយអនុលោមទៅតាមកំណែហ្ស៊ូតេរ៉ូថ្មី">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "ផ្លូវកាត់">
 
 <!ENTITY zotero.preferences.keys.openZotero "បើក/បិទផ្ទាំងហ្ស៊ូតេរ៉ូ">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "បើកពេញអេក្រង់">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "ស្វែងរកលឿន">
-<!ENTITY zotero.preferences.keys.newItem "បង្កើតឯកសារថ្មី">
-<!ENTITY zotero.preferences.keys.newNote "បង្កើតកំណត់ត្រាថ្មី">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "បើកជម្រើសស្លាក">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "ចម្លងអាគតដ្ឋានឯកសារដែលបានជ្រើសរើសទៅកាន់កន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "ចម្លងឯកសារដែលបានជ្រើសរើសកន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
 <!ENTITY zotero.preferences.keys.importFromClipboard "ទាញឯកសារចេញពីកន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
-<!ENTITY zotero.preferences.keys.overrideGlobal "ព្យាយាមជំនះផ្លូវកាត់ដែលមានការទង្គិច">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "បំលាស់ប្តូរអាចមានសុពលភាពនៅលើវីនដូយ៍ថ្មីតែប៉ុណ្ណោះ">
 
 <!ENTITY zotero.preferences.prefpane.proxies "សិទ្ធិប្រទាន">

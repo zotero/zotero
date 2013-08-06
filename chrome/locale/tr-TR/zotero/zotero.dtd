@@ -5,7 +5,7 @@
 <!ENTITY zotero.general.edit "Düzenle">
 <!ENTITY zotero.general.delete "Sil">
 
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
+<!ENTITY zotero.errorReport.title "Zotero Hata Raporu">
 <!ENTITY zotero.errorReport.unrelatedMessages "Hata kaydı Zotero ile ilgili olmayan iletileri de içerebilir.">
 <!ENTITY zotero.errorReport.submissionInProgress "Lütfen hata raporu gönderilene kadar bekleyiniz.">
 <!ENTITY zotero.errorReport.submitted "Hata raporu gönderilmiştir.">
@@ -58,17 +58,17 @@
 <!ENTITY zotero.items.rights_column "Telif">
 <!ENTITY zotero.items.dateAdded_column "Eklendiği Tarih">
 <!ENTITY zotero.items.dateModified_column "Değiştirildiği Tarih">
-<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.extra_column "İlave">
 <!ENTITY zotero.items.archive_column "Arşiv">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.archiveLocation_column "Arşivdeki Yeri">
+<!ENTITY zotero.items.place_column "Yayın Yeri">
 <!ENTITY zotero.items.volume_column "Cilt">
 <!ENTITY zotero.items.edition_column "Baskı">
 <!ENTITY zotero.items.pages_column "Sayfalar">
 <!ENTITY zotero.items.issue_column "Sayı">
 <!ENTITY zotero.items.series_column "Seriler">
 <!ENTITY zotero.items.seriesTitle_column "Seri Başlığı">
-<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.court_column "Mahkeme">
 <!ENTITY zotero.items.medium_column "Medium/Format">
 <!ENTITY zotero.items.genre_column "Tür">
 <!ENTITY zotero.items.system_column "Sistem">
@@ -139,7 +139,7 @@
 <!ENTITY zotero.tagSelector.selectVisible "Görülebileni Seç">
 <!ENTITY zotero.tagSelector.clearVisible "Gürülebileni Seçme">
 <!ENTITY zotero.tagSelector.clearAll "Hiçbirini Seçme">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
+<!ENTITY zotero.tagSelector.assignColor "Renk Belirle...">
 <!ENTITY zotero.tagSelector.renameTag "Etiketi Yeniden Adlandır...">
 <!ENTITY zotero.tagSelector.deleteTag "Etiketi Sil...">
 
@@ -147,7 +147,7 @@
 <!ENTITY zotero.tagColorChooser.color "Renk">
 <!ENTITY zotero.tagColorChooser.position "Position:">
 <!ENTITY zotero.tagColorChooser.setColor "Set Color">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Rengi Kaldır">
 
 <!ENTITY zotero.lookup.description "ISBN, DOI veya PMID numarasını girerek aşağıdaki kutuda ara.">
 <!ENTITY zotero.lookup.button.search "Ara">
@@ -212,7 +212,7 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Yer imleri Microsoft Word ve OpenOffice arasında korunmuştur, ancak yanlışlıkla değiştirilebilirler. &#xA;Uyumluluk için, bu seçenek seçildiğinde, göndermeler dipnot ve sonnotlara eklenemez.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Dergi başlıklarını otomatik kısalt">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Kaynakları belgede göster">

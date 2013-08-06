@@ -5,7 +5,7 @@
 <!ENTITY zotero.general.edit "Rediger">
 <!ENTITY zotero.general.delete "Slet">
 
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
+<!ENTITY zotero.errorReport.title "Zotero fejlrapport">
 <!ENTITY zotero.errorReport.unrelatedMessages "Logfilen for fejl kan indeholde meddelelser der ikke har med Zotero at gøre.">
 <!ENTITY zotero.errorReport.submissionInProgress "Vent venligst mens fejlrapporten registreres.">
 <!ENTITY zotero.errorReport.submitted "Din fejlrapport er registreret.">
@@ -13,7 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums "Læg venligst en besked på Zoteros fora (forums.zotero.org) med dette Rapport-ID, en beskrivelse af problemet og det der får problemet til at opstå.">
 <!ENTITY zotero.errorReport.notReviewed "Fejlrapporter bliver ikke læst medmindre der henvises til dem i Zoteros fora.">
 
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.title "Zotero opgraderingsguide">
 <!ENTITY zotero.upgrade.newVersionInstalled "Du har installeret en ny version af Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Din Zotero-database skal opgraderes for at virke med den seneste version.">
 <!ENTITY zotero.upgrade.autoBackup "Din nuværende database vil blive sikkerhedskopieret, inden der foretages ændringer.">
@@ -58,22 +58,22 @@
 <!ENTITY zotero.items.rights_column "Rettigheder">
 <!ENTITY zotero.items.dateAdded_column "Tilføjet den">
 <!ENTITY zotero.items.dateModified_column "Ændret den">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archive">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.place_column "Place">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Edition">
-<!ENTITY zotero.items.pages_column "Pages">
-<!ENTITY zotero.items.issue_column "Issue">
-<!ENTITY zotero.items.series_column "Series">
-<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.extra_column "Ekstra">
+<!ENTITY zotero.items.archive_column "Arkiv">
+<!ENTITY zotero.items.archiveLocation_column "Loc. i arkiv">
+<!ENTITY zotero.items.place_column "Sted">
+<!ENTITY zotero.items.volume_column "Omfang">
+<!ENTITY zotero.items.edition_column "Udgave">
+<!ENTITY zotero.items.pages_column "Sider">
+<!ENTITY zotero.items.issue_column "Udgivelse">
+<!ENTITY zotero.items.series_column "Serier">
+<!ENTITY zotero.items.seriesTitle_column "Serie titel">
 <!ENTITY zotero.items.court_column "Court">
 <!ENTITY zotero.items.medium_column "Medium/Format">
 <!ENTITY zotero.items.genre_column "Genre">
 <!ENTITY zotero.items.system_column "System">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.moreColumns.label "Flere kolonner">
+<!ENTITY zotero.items.restoreColumnOrder.label "Genskab kolonneorden">
 
 <!ENTITY zotero.items.menu.showInLibrary "Vis i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Tilføj note">
@@ -86,10 +86,10 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Genindlæs i bibliotek">
 <!ENTITY zotero.items.menu.duplicateItem "Duplikér valgte element">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.mergeItems "Flet elementer...">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Vælg den version af elementet som du vil bruge som hovedelement:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Vælg felter som skal afskæres fra andre versioner af elementet:">
 
 <!ENTITY zotero.toolbar.newItem.label "Nyt element">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mere">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.item.textTransform "Transformer tekst">
 <!ENTITY zotero.item.textTransform.titlecase "Betydende ord med stort ">
 <!ENTITY zotero.item.textTransform.sentencecase "Første bogstav med stort">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Byt rundt på fornavn og efternavn">
 
 <!ENTITY zotero.toolbar.newNote "Ny note">
 <!ENTITY zotero.toolbar.note.standalone "Ny selvstændig note">
@@ -139,18 +139,18 @@
 <!ENTITY zotero.tagSelector.selectVisible "Vælg de synlige">
 <!ENTITY zotero.tagSelector.clearVisible "Fravælg de synlige">
 <!ENTITY zotero.tagSelector.clearAll "Fravælg alle">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
+<!ENTITY zotero.tagSelector.assignColor "Tilknyt farve...">
 <!ENTITY zotero.tagSelector.renameTag "Omdøb mærkaten...">
 <!ENTITY zotero.tagSelector.deleteTag "Slet mærkaten...">
 
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
-<!ENTITY zotero.tagColorChooser.color "Color:">
-<!ENTITY zotero.tagColorChooser.position "Position:">
-<!ENTITY zotero.tagColorChooser.setColor "Set Color">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.title "Vælg en farve og placering">
+<!ENTITY zotero.tagColorChooser.color "Farve:">
+<!ENTITY zotero.tagColorChooser.position "Placering:">
+<!ENTITY zotero.tagColorChooser.setColor "Sæt farve:">
+<!ENTITY zotero.tagColorChooser.removeColor "Fjern farve">
 
 <!ENTITY zotero.lookup.description "Indtast ISBN, DOI eller PMID for opslag nedenfor.">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.button.search "Søg">
 
 <!ENTITY zotero.selectitems.title "Vælg elementer">
 <!ENTITY zotero.selectitems.intro.label "Vælg de elementer, du ønsker at tilføje til dit bibliotek">
@@ -159,9 +159,9 @@
 
 <!ENTITY zotero.bibliography.title "Opret bibliografien">
 <!ENTITY zotero.bibliography.style.label "Reference-stil:">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Outputtilstand:">
+<!ENTITY zotero.bibliography.bibliography "Litteraturliste">
+<!ENTITY zotero.bibliography.outputMethod "Outputmetode:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Gem som RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Gem som HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Kopier til udklipsholder">
@@ -170,7 +170,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Dokumentindstillinger">
 <!ENTITY zotero.integration.addEditCitation.title "Tilføj/rediger reference">
 <!ENTITY zotero.integration.editBibliography.title "Rediger referenceliste">
-<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "Hurtigformater referencer">
 
 <!ENTITY zotero.progress.title "Fremgang">
 
@@ -189,7 +189,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Undertryk forfatter/ophav">
 <!ENTITY zotero.citation.prefix.label "Præfiks:">
 <!ENTITY zotero.citation.suffix.label "Suffiks:">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.editorWarning.label "Advarsel: hvis du redigerer referencer i editoren vil det ikke længere opdatere for at reflektere ændringer i din database eller reference-typografi.">
 
 <!ENTITY zotero.richText.italic.label "Kursiv">
 <!ENTITY zotero.richText.bold.label "Fed">
@@ -212,8 +212,8 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bogmærker bevares i både Microsoft Word og OpenOffice/LibreOffive, men kan blive ændret ved en fejl. Når denne mulighed er valgt, kan referencer ikke indsættes i fodnoter eller slutnoter.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Afkort automatisk journaltitler">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal-forkortelser vil automatisk blive genereret ved hjælp af journaltitler. Feltet &quot;Journal Abbr&quot; vil blive ignoreret.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Gem referencer i dokument">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "At gemme referencer i dit dokument gør filen en anelse større, men det gør det også muligt at dele dokumentet med andre ved hjælp af en Zotero-gruppe. At opdatere dokumenter oprettet med denne funktion kræver Zotero 3.0 eller højere.">
@@ -239,9 +239,9 @@
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Mærkater, der ikke er markeret, vil ikke blive gemt.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Mærkatet vil blive fjernet fra alle elementer.">
 
-<!ENTITY zotero.merge.title "Conflict Resolution">
-<!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.title "Reparer konflikter">
+<!ENTITY zotero.merge.of "af">
+<!ENTITY zotero.merge.deleted "Slettede">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy registreret">
 <!ENTITY zotero.proxy.recognized.warning "Tilføj kun proxyer, der er knyttet til dit biblioteks, din institutions eller din virksomheds web-sted">

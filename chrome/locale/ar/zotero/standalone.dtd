@@ -54,7 +54,7 @@
 <!ENTITY selectAllCmd.label "تحديد الكل">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "ح">
-<!ENTITY preferencesCmd.label "خيارات…">
+<!ENTITY preferencesCmd.label "Preferences">
 <!ENTITY preferencesCmd.accesskey "ي">
 <!ENTITY preferencesCmdUnix.label "تفضيلات">
 <!ENTITY preferencesCmdUnix.accesskey "ف">

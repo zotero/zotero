@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Размер шрифта заметок:">
 
 <!ENTITY zotero.preferences.miscellaneous "Разное">
-<!ENTITY zotero.preferences.autoUpdate "Автоматически проверять на наличие обновленных трансляторов">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Обновить сейчас">
 <!ENTITY zotero.preferences.reportTranslationFailure "Сообщить о неработающих трансляторах сайта">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Разрешить zotero.org модифицировать содержание на основе текущей версии Zotero">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Горячие клавиши">
 
 <!ENTITY zotero.preferences.keys.openZotero "Открыть/закрыть панель Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Переключение полноэкранного режима">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Фокус на панели библиотек">
 <!ENTITY zotero.preferences.keys.quicksearch "Быстрый поиск">
-<!ENTITY zotero.preferences.keys.newItem "Создать новый документ">
-<!ENTITY zotero.preferences.keys.newNote "Создать новую заметку">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Переключить панель выбора тэгов">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Скопировать цитаты из выбранного документа в буфер обмена">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копировать выбранные документы в буфер обмена">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Импортировать из буфера обмена">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Попытаться переопределить конфликтующие комбинации клавиш">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Изменения вступят в силу только в новых окнах">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Прокси">

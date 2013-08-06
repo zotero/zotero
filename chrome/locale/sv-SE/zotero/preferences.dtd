@@ -22,14 +22,14 @@
 <!ENTITY zotero.preferences.fontSize.notes "Teckenstorlek på anteckningar">
 
 <!ENTITY zotero.preferences.miscellaneous "Övrigt">
-<!ENTITY zotero.preferences.autoUpdate "Kolla automatiskt efter nya källfångare">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Uppdatera nu">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapportera felaktiga källfångare">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillåt zotero.org att justera innehåll beroende på installerad Zoteroversion">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Visa för zotero.org vilken version av programmet jag använder">
 <!ENTITY zotero.preferences.parseRISRefer "Använd Zotero för att ladda ner RIS/Refer-filer">
 <!ENTITY zotero.preferences.automaticSnapshots "Ta automatiskt lokala kopior när källor skapas av hemsidor">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Bifoga automatiskt associerade PDF- och andra filer när källor sparas">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Bifoga automatiskt associerade PDF:er och andra filer när källor sparas">
 <!ENTITY zotero.preferences.automaticTags "Lägg automatiskt till etiketter med nyckelord och ämnesord">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Radera automatiskt källor i papperskorgen som raderats för mer än">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dagar sen">
@@ -63,7 +63,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Ladda ner filer">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "vid synkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "efter behov">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Genom att använda Zotero Storage går du med på deras">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Genom att använda Zotero Storage går du med på tjänstens">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "avtalsvillkor">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Följande åtgärder är endast till för sällsynta, särskilda situationer och ska inte användas för vanlig felsökning. I många fall kan återställning istället ge upphov till nya problem. Se">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Återställningsalternativ för synkronisering">
@@ -75,7 +75,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Återställ till Zotero Server">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Byt ut allt innehåll på Zotero Server mot lokala Zoterodata.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Återställ filsynkroniseringshistorik">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tvinga Zotero Server att säkerhetskontrollera alla lokala bifogade filer.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tvinga kontroll mot lagringsservern för alla lokala bifogade filer.">
 <!ENTITY zotero.preferences.sync.reset "Återställ">
 <!ENTITY zotero.preferences.sync.reset.button "Återställ...">
 
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Snabbkommandon">
 
 <!ENTITY zotero.preferences.keys.openZotero "Öppna/Stäng Zotero-panelen">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Växla fullskärmsläge">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Ruta för fokusbibliotek">
 <!ENTITY zotero.preferences.keys.quicksearch "Snabbsökning">
-<!ENTITY zotero.preferences.keys.newItem "Lagra en ny källa">
-<!ENTITY zotero.preferences.keys.newNote "Skapa en ny anteckning">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Växla etikettväljare">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiera valda källanteckningar till urklipp">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiera valda källor till urklipp">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Klistra in från urklipp">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Försök kringgå motsägelsefulla snabbkommandon">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Ändringarna gäller bara i nya fönster">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxyservrar">

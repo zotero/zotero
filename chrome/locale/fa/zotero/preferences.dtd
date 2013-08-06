@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "اندازه قلم یادداشت:">
 
 <!ENTITY zotero.preferences.miscellaneous "متفرقه">
-<!ENTITY zotero.preferences.autoUpdate "جستجوی خودکار برای روزآمدسازی مترجم‌ها">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "روزآمدسازی هم‌اکنون انجام شود">
 <!ENTITY zotero.preferences.reportTranslationFailure "گزارش مترجم‌های مشکل‌دار">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "اجازه به zotero.org برای تنظیم محتوا با توجه به نگارش زوترو">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "کلیدهای میان‌بر">
 
 <!ENTITY zotero.preferences.keys.openZotero "باز کردن/بستن قاب زوترو">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "فعال/غیرفعال کردن حالت تمام‌صفحه">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "جستجوی سریع">
-<!ENTITY zotero.preferences.keys.newItem "ساخت آیتم‌ جدید">
-<!ENTITY zotero.preferences.keys.newNote "ساخت یادداشت جدید">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "روشن/خاموش کردن انتخاب برچسب">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "رونوشت یادکرد آیتم‌های انتخاب شده به حافظه موقت">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "رونوشت آیتم‌های انتخاب شده به حافظه موقت">
 <!ENTITY zotero.preferences.keys.importFromClipboard "درون‌برد از حافظه موقت">
-<!ENTITY zotero.preferences.keys.overrideGlobal "تلاش برای لغو کلیدهای میان‌بر ناسازگار">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "تغییرات فقط در پنجره‌های جدید اعمال می‌شوند">
 
 <!ENTITY zotero.preferences.prefpane.proxies "پیشکارها">
