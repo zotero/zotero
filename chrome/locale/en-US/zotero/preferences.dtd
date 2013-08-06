@@ -27,7 +27,7 @@
 <!ENTITY zotero.preferences.reportTranslationFailure		"Report broken site translators">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader			"Allow zotero.org to customize content based on current Zotero version">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip	"If enabled, the current Zotero version will be included in HTTP requests to zotero.org.">
-<!ENTITY zotero.preferences.parseRISRefer				"Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer				"Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots			"Automatically take snapshots when creating items from web pages">
 <!ENTITY zotero.preferences.downloadAssociatedFiles		"Automatically attach associated PDFs and other files when saving items">
 <!ENTITY zotero.preferences.automaticTags				"Automatically tag items with keywords and subject headings">
