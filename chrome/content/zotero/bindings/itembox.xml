@@ -1422,13 +1422,25 @@
 								|| fieldName == 'creator') {
 							t.setAttribute('type', 'autocomplete');
 							t.setAttribute('autocompletesearch', 'zotero');
-							let params = {
+							
+							var params = {
 								fieldName: fieldName,
 								libraryID: this.item.libraryID
 							};
 							if (field == 'creator') {
 								params.fieldMode = parseInt(elem.getAttribute('fieldMode'));
-								params.itemID = itemID ? itemID : '';
+								
+								// Include itemID and creatorTypeID so the autocomplete can
+								// avoid showing results for creators already set on the item
+								var row = Zotero.getAncestorByTagName(elem, 'row');
+								var creatorTypeID = parseInt(
+									row.getElementsByClassName('creator-type-label')[0]
+									.getAttribute('typeid')
+								);
+								if (itemID) {
+									params.itemID = itemID;
+									params.creatorTypeID = creatorTypeID;
+								}
 							};
 							t.setAttribute(
 								'autocompletesearchparam', JSON.stringify(params)
@@ -2163,6 +2175,25 @@
 				</body>
 			</method>
 			
+			
+			<method name="_updateAutoCompleteParams">
+				<parameter name="row"/>
+				<parameter name="changedParams"/>
+				<body>
+				<![CDATA[
+					var textboxes = row.getElementsByTagName('textbox');
+					if (textboxes.length) {
+						var t = textboxes[0];
+						var params = JSON.parse(t.getAttribute('autocompletesearchparam'));
+						for (var param in changedParams) {
+							params[param] = changedParams[param];
+						}
+						t.setAttribute('autocompletesearchparam', JSON.stringify(params));
+					}
+				]]>
+				</body>
+			</method>
+			
 			<!--
 			/*
 			function modifyCreatorByID(index, creatorID, creatorTypeID) {
@@ -2365,15 +2396,17 @@
 						oncommand="var typeBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
 							var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 							
+							var itemBox = document.getBindingParent(this);
+							
 							if (event.explicitOriginalTarget.className == 'zotero-creator-move') {
 								var up = event.explicitOriginalTarget.id == 'zotero-creator-move-up';
-								document.getBindingParent(this).moveCreator(index, up);
+								itemBox.moveCreator(index, up);
 								return;
 							}
 							
 							var typeID = event.explicitOriginalTarget.getAttribute('typeid');
 							var row = typeBox.parentNode;
-							var fields = document.getBindingParent(this).getCreatorFields(row);
+							var fields = itemBox.getCreatorFields(row);
 							fields.creatorTypeID = typeID;
 							typeBox.getElementsByTagName('label')[0].setAttribute(
 								'value',
@@ -2382,7 +2415,16 @@
 								) + ':'
 							);
 							typeBox.setAttribute('typeid', typeID);
-							document.getBindingParent(this).modifyCreator(index, fields);"/>
+							
+							// If a creator textbox is already open, we need to
+							// change its autocomplete parameters so that it
+							// completes on a creator with a different creator type
+							var changedParams = {
+								creatorTypeID: typeID
+							};
+							itemBox._updateAutoCompleteParams(row, changedParams);
+							
+							itemBox.modifyCreator(index, fields);"/>
 					<menupopup id="zotero-field-transform-menu">
 						<menu label="&zotero.item.textTransform;">
 							<menupopup>

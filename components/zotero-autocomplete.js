@@ -140,23 +140,26 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 				}
 				
 				var fromSQL = " FROM creators NATURAL JOIN creatorData "
-					+ "WHERE " + subField + " LIKE ?1 " + "AND fieldMode=?2";
+					+ "WHERE " + subField + " LIKE ? " + "AND fieldMode=?";
 				var sqlParams = [
 					searchString + '%',
 					searchParams.fieldMode ? searchParams.fieldMode : 0
 				];
 				if (searchParams.itemID) {
 					fromSQL += " AND creatorID NOT IN (SELECT creatorID FROM "
-						+ "itemCreators WHERE itemID=?3)";
+						+ "itemCreators WHERE itemID=?";
 					sqlParams.push(searchParams.itemID);
+					if (searchParams.creatorTypeID) {
+						fromSQL += " AND creatorTypeID=?";
+						sqlParams.push(searchParams.creatorTypeID);
+					}
+					fromSQL += ")";
 				}
 				if (typeof searchParams.libraryID != 'undefined') {
 					if (searchParams.libraryID) {
-						fromSQL += " AND libraryID=?4";
+						fromSQL += " AND libraryID=?";
 						sqlParams.push(searchParams.libraryID);
 					}
-					// The db query code doesn't properly replace numbered
-					// parameters with "IS NULL"
 					else {
 						fromSQL += " AND libraryID IS NULL";
 					}
@@ -170,6 +173,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 					sql = "SELECT * FROM (" + sql + " UNION SELECT DISTINCT "
 						+ subField + " AS val, creatorID || '-1' AS comment"
 						+ fromSQL + ") GROUP BY val";
+					sqlParams = sqlParams.concat(sqlParams);
 				}
 				
 				sql += " ORDER BY val";
