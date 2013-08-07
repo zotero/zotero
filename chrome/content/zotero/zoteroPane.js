@@ -658,6 +658,8 @@ var ZoteroPane = new function()
 					var handleTypeChange = function () {
 						self.addItemTypeToNewItemTypeMRU(this.itemTypeMenu.value);
 						itemBox.removeHandler('itemtypechange', handleTypeChange);
+						// Focus the title field after menu closes
+						itemBox.focusFirstField();
 					};
 					// Only update the MRU when the menu is opened for the
 					// keyboard shortcut, not on subsequent opens
@@ -765,8 +767,11 @@ var ZoteroPane = new function()
 		//set to Info tab
 		document.getElementById('zotero-view-item').selectedIndex = 0;
 		
-		// Update most-recently-used list for New Item menu
 		if (manual) {
+			// Focus the title field
+			document.getElementById('zotero-editpane-item-box').focusFirstField();
+			
+			// Update most-recently-used list for New Item menu
 			this.addItemTypeToNewItemTypeMRU(typeID);
 		}
 		
