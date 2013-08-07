@@ -308,6 +308,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		else {
 			Zotero.dir = 'ltr';
 		}
+
+		// Make sure that Zotero Standalone is not running as root
+		if(Zotero.isStandalone && !Zotero.isWin) _checkRoot();
 		
 		try {
 			var dataDir = Zotero.getZoteroDirectory();
@@ -1961,6 +1964,35 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		}
 		
 		return true;
+	}
+
+	/**
+	 * Warn if Zotero Standalone is running as root and clobber the cache directory if it is
+	 */
+	function _checkRoot() {
+		var env = Components.classes["@mozilla.org/process/environment;1"].
+			getService(Components.interfaces.nsIEnvironment);
+		var user = env.get("USER") || env.get("USERNAME");
+		if(user === "root") {
+			// Show warning
+			if(Services.prompt.confirmEx(null, "", Zotero.getString("standalone.rootWarning"),
+					Services.prompt.BUTTON_POS_0*Services.prompt.BUTTON_TITLE_IS_STRING |
+					Services.prompt.BUTTON_POS_1*Services.prompt.BUTTON_TITLE_IS_STRING,
+					Zotero.getString("standalone.rootWarning.exit"),
+					Zotero.getString("standalone.rootWarning.continue"),
+					null, null, {}) == 0) {
+				Components.utils.import("resource://gre/modules/ctypes.jsm");
+				var exit = Zotero.IPC.getLibc().declare("exit", ctypes.default_abi,
+					                                    ctypes.void_t, ctypes.int);
+				// Zap cache files
+				try {
+					Services.dirsvc.get("ProfLD", Components.interfaces.nsIFile).remove(true);
+				} catch(e) {}
+				// Exit Zotero without giving XULRunner the opportunity to figure out the
+				// cache is missing. Otherwise XULRunner will zap the prefs
+				exit(0);
+			}
+		}
 	}
 	
 	/**
