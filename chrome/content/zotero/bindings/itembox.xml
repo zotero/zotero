@@ -2416,9 +2416,9 @@
 							);
 							typeBox.setAttribute('typeid', typeID);
 							
-							// If a creator textbox is already open, we need to
-							// change its autocomplete parameters so that it
-							// completes on a creator with a different creator type
+							/* If a creator textbox is already open, we need to
+							change its autocomplete parameters so that it
+							completes on a creator with a different creator type */
 							var changedParams = {
 								creatorTypeID: typeID
 							};
