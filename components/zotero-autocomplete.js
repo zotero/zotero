@@ -223,36 +223,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 			statement = this._zotero.DB.getStatement(sql, sqlParams);
 	}
 	
-	// Disable asynchronous until we figure out the hangs
-	if (true) {
-		var rows = this._zotero.DB.query(sql, sqlParams);
-		
-		if (resultsCallback) {
-			resultsCallback(rows);
-		}
-		
-		var results = [];
-		var comments = [];
-		for each(var row in rows) {
-			results.push(row.val);
-			let comment = row.comment;
-			if (comment) {
-				comments.push(comment);
-			}
-		}
-		this.updateResults(results, comments);
-		return;
-	}
-	
 	var self = this;
-	
-	this._zotero.DB._connection.setProgressHandler(5000, {
-		onProgress: function (connection) {
-			if (self._cancelled) {
-				return true;
-			}
-		}
-	});
 	
 	this.pendingStatement = statement.executeAsync({
 		handleResult: function (storageResultSet) {
@@ -282,7 +253,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 		},
 		
 		handleError: function (e) {
-			//Components.utils.reportError(e.message);
+			Components.utils.reportError(e.message);
 		},
 		
 		handleCompletion: function (reason) {
@@ -352,10 +323,7 @@ ZoteroAutoComplete.prototype.updateResults = function (results, comments, ongoin
 ZoteroAutoComplete.prototype.stopSearch = function(){
 	if (this.pendingStatement) {
 		this._zotero.debug('Stopping autocomplete search');
-		// This appears to take as long as letting the query complete,
-		// so we flag instead and abort from the progress handler
-		//this.pendingStatement.cancel();
-		this._cancelled = true;
+		this.pendingStatement.cancel();
 	}
 }
 
