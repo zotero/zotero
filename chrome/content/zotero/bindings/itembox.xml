@@ -1423,7 +1423,7 @@
 							t.setAttribute('type', 'autocomplete');
 							t.setAttribute('autocompletesearch', 'zotero');
 							
-							var params = {
+							let params = {
 								fieldName: fieldName,
 								libraryID: this.item.libraryID
 							};
@@ -1432,8 +1432,8 @@
 								
 								// Include itemID and creatorTypeID so the autocomplete can
 								// avoid showing results for creators already set on the item
-								var row = Zotero.getAncestorByTagName(elem, 'row');
-								var creatorTypeID = parseInt(
+								let row = Zotero.getAncestorByTagName(elem, 'row');
+								let creatorTypeID = parseInt(
 									row.getElementsByClassName('creator-type-label')[0]
 									.getAttribute('typeid')
 								);
