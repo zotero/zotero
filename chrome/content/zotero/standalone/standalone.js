@@ -157,18 +157,23 @@ const ZoteroStandalone = new function() {
 				getService(Components.interfaces.nsIEnvironment);
 			var user = env.get("USER") || env.get("USERNAME");
 			if(user === "root") {
-				// Zap cache files
-				try {
-					Services.dirsvc.get("ProfLD", Components.interfaces.nsIFile).remove(true);
-				} catch(e) {}
-				// Warn user never to do this again
+				// Show warning
 				if(Services.prompt.confirmEx(null, "", Zotero.getString("standalone.rootWarning"),
 						Services.prompt.BUTTON_POS_0*Services.prompt.BUTTON_TITLE_IS_STRING |
 						Services.prompt.BUTTON_POS_1*Services.prompt.BUTTON_TITLE_IS_STRING,
 						Zotero.getString("standalone.rootWarning.exit"),
 						Zotero.getString("standalone.rootWarning.continue"),
 						null, null, {}) == 0) {
-					goQuitApplication();
+					Components.utils.import("resource://gre/modules/ctypes.jsm");
+					var exit = Zotero.IPC.getLibc().declare("exit", ctypes.default_abi,
+						                                    ctypes.void_t, ctypes.int);
+					// Zap cache files
+					try {
+						Services.dirsvc.get("ProfLD", Components.interfaces.nsIFile).remove(true);
+					} catch(e) {}
+					// Exit Zotero without giving XULRunner the opportunity to figure out the
+					// cache is missing. Otherwise XULRunner will zap the prefs
+					exit(0);
 				}
 			}
 		}
