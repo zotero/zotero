@@ -658,14 +658,14 @@ var ZoteroPane = new function()
 					var handleTypeChange = function () {
 						self.addItemTypeToNewItemTypeMRU(this.itemTypeMenu.value);
 						itemBox.removeHandler('itemtypechange', handleTypeChange);
-						// Focus the title field after menu closes
-						itemBox.focusFirstField();
 					};
 					// Only update the MRU when the menu is opened for the
 					// keyboard shortcut, not on subsequent opens
 					var removeTypeChangeHandler = function () {
 						itemBox.removeHandler('itemtypechange', handleTypeChange);
 						itemBox.itemTypeMenu.firstChild.removeEventListener('popuphiding', removeTypeChangeHandler);
+						// Focus the title field after menu closes
+						itemBox.focusFirstField();
 					};
 					itemBox.addHandler('itemtypechange', handleTypeChange);
 					itemBox.itemTypeMenu.firstChild.addEventListener('popuphiding', removeTypeChangeHandler);
