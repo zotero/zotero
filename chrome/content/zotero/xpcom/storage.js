@@ -1058,7 +1058,12 @@ Zotero.Sync.Storage = new function () {
 					}
 				})
 				.catch(function (e) {
-					if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+					if (e instanceof OS.File.Error &&
+							(e.becauseNoSuchFile
+							// This can happen if a path is too long on Windows,
+							// e.g. a file is being accessed on a VM through a share
+							// (and probably in other cases).
+							|| (e.winLastError && e.winLastError == 3))) {
 						Zotero.debug("Marking attachment " + lk + " as missing");
 						updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
 						return;
