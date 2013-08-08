@@ -939,7 +939,7 @@ Zotero.Sync.Storage = new function () {
 				throw new Task.Result(changed);
 			}
 			
-			Components.utils.import("resource://gre/modules/osfile.jsm")
+			Components.utils.import("resource://gre/modules/osfile.jsm");
 			
 			let checkItems = function () {
 				if (!items.length) return Q();
