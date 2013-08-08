@@ -938,7 +938,7 @@ Zotero.Sync.Storage = new function () {
 			Components.utils.import("resource://gre/modules/osfile.jsm")
 			
 			let checkItems = function () {
-				if (!items.length) return;
+				if (!items.length) return Q();
 				
 				//Zotero.debug("Memory usage: " + memmgr.resident);
 				
@@ -948,6 +948,11 @@ Zotero.Sync.Storage = new function () {
 				//Zotero.debug("Checking attachment file for item " + lk);
 				
 				let nsIFile = item.getFile(row, true);
+				if (!nsIFile) {
+					Zotero.debug("Marking pathless attachment " + lk + " as in-sync");
+					updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_IN_SYNC;
+					return checkItems();
+				}
 				let file = null;
 				return Q(OS.File.open(nsIFile.path))
 				.then(function (promisedFile) {
@@ -1023,7 +1028,7 @@ Zotero.Sync.Storage = new function () {
 						.then(function (fileHash) {
 							if (row.hash && row.hash == fileHash) {
 								Zotero.debug("Mod time didn't match (" + fmtime + "!=" + mtime + ") "
-									+ "but hash did for " + file.leafName + " for item " + lk
+									+ "but hash did for " + nsIFile.leafName + " for item " + lk
 									+ " -- updating file mod time");
 								try {
 									nsIFile.lastModifiedTime = row.mtime;
@@ -1054,14 +1059,16 @@ Zotero.Sync.Storage = new function () {
 						return;
 					}
 					
-					if (e instanceof OS.File.Error && e.becauseClosed) {
-						Zotero.debug("File was closed", 2);
-					}
-					else {
+					if (e instanceof OS.File.Error) {
+						if (e.becauseClosed) {
+							Zotero.debug("File was closed", 2);
+						}
 						Zotero.debug(e);
 						Zotero.debug(e.toString());
+						throw new Error("Error " + e.operation + " " + nsIFile.path);
 					}
-					throw new Error("Error " + e.operation + " " + nsIFile.path);
+					
+					throw e;
 				})
 				.then(function () {
 					return checkItems();
