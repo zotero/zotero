@@ -10,7 +10,7 @@
 	orient="vertical"
 	buttons="accept"
 	buttonlabelaccept="&zotero.about.close;"
-	onload="moveToAlertPosition(); sizeToContent();"
+	onload="moveToAlertPosition(); sizeToContent(); document.documentElement.getButton('accept').focus();"
 	ondialogaccept="return true;">
 	
 	<script src="include.js"/>
@@ -60,7 +60,7 @@
 				<vbox class="subcontent">
 					<label class="zotero-text-link" href="http://p.yusukekamiyamane.com/" value="Fugue icons (by Yusuke Kamiyamane)"/>
 					<label class="zotero-text-link" href="http://www.davidashen.net/rnv.html" value="RNV (CSL validation)"/>
-					<label class="zotero-text-link" href="http://documentup.com/kriskowal/q/" value="q (by Kristopher Michael Kowal)"/>
+					<label class="zotero-text-link" href="http://documentup.com/kriskowal/q/" value="Q (by Kristopher Michael Kowal)"/>
 					<label class="zotero-text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="Silk icons (by Mark James)"/>
 					<label class="zotero-text-link" href="http://simile.mit.edu/timeline/" value="SIMILE Project (Timeline)"/>
 					<label class="zotero-text-link" href="http://www.w3.org/2005/ajar/tab" value="Tabulator (RDF parser)"/>

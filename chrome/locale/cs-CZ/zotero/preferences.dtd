@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Velikost písma poznámek:">
 
 <!ENTITY zotero.preferences.miscellaneous "Různé">
-<!ENTITY zotero.preferences.autoUpdate "Automaticky kontrolovat aktualizace překladačů">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Aktualizovat nyní">
 <!ENTITY zotero.preferences.reportTranslationFailure "Oznamovat poškozené překladače">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Umožnit, aby zotero.org upravovalo obsah na základě aktuální verze Zotera.">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Klávesové zkratky">
 
 <!ENTITY zotero.preferences.keys.openZotero "Otevřít/Zavřít Zotero panel">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Zapnutí celoobrazového módu">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Přejít do panelu Knihovny">
 <!ENTITY zotero.preferences.keys.quicksearch "Rychlé hledání">
-<!ENTITY zotero.preferences.keys.newItem "Vytvořit novou položku">
-<!ENTITY zotero.preferences.keys.newNote "Vytvořit novou poznámku">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Zapnout Výběr štítků">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopírovat citaci vybrané položky do schránky">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopírovat vybrané položky do schránky">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importovat ze schránky">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Pokusit se přepsat zabrané (např. jinými doplňky) klávesové zkratky">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Změny se projeví jen v nových oknech">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxy servery">

@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "노트 글꼴 크기:">
 
 <!ENTITY zotero.preferences.miscellaneous "기타">
-<!ENTITY zotero.preferences.autoUpdate "중계기 업데이트 자동 확인">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "지금 업데이트">
 <!ENTITY zotero.preferences.reportTranslationFailure "고장난 사이트 중계기 신고">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "zotero.org가 현재 Zotero 버전의 정보를 사용하여 기능을 개선하도록 허락">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "단축키">
 
 <!ENTITY zotero.preferences.keys.openZotero "Zotero 패널 열기/닫기">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "전체화면 끄기/켜기">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "빠른 검색">
-<!ENTITY zotero.preferences.keys.newItem "새 항목 작성">
-<!ENTITY zotero.preferences.keys.newNote "새 노트 작성">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "태그 선택기 끄기/켜기">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "선택된 항목 인용을 클립보드에 복사">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "선택된 항목을 클립보드에 복사">
 <!ENTITY zotero.preferences.keys.importFromClipboard "클립보드에서 불러오기">
-<!ENTITY zotero.preferences.keys.overrideGlobal "충돌하는 단축키는 무시합니다.">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "새 창에서만 변경한 효과가 나타납니다">
 
 <!ENTITY zotero.preferences.prefpane.proxies "프록시">

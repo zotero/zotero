@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Note font size:">
 
 <!ENTITY zotero.preferences.miscellaneous "Diverse">
-<!ENTITY zotero.preferences.autoUpdate "Sjekk automatisk for oppdaterte oversettere">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Oppdater nå">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapporter ødelagte nettstedoversettere">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Hurtigtaster">
 
 <!ENTITY zotero.preferences.keys.openZotero "Åpne/lukk Zotero-panelet">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Fullskjerm av/på">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøk">
-<!ENTITY zotero.preferences.keys.newItem "Lag et nytt element">
-<!ENTITY zotero.preferences.keys.newNote "Lag et nytt notat">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Slå taggvelgeren av/på">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier de valgte element-henvisningene til utklippstavla.">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopier de valgte elementene til utklippstavla.">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Forsøk å overstyre snarveier i konflikt">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Endringer gjelder kun for nye vinduer">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">

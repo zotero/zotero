@@ -54,7 +54,7 @@
 <!ENTITY selectAllCmd.label "Valida kõik">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Seaded…">
+<!ENTITY preferencesCmd.label "Preferences">
 <!ENTITY preferencesCmd.accesskey "O">
 <!ENTITY preferencesCmdUnix.label "Eelistused">
 <!ENTITY preferencesCmdUnix.accesskey "n">

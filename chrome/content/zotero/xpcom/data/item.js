@@ -2951,12 +2951,48 @@ Zotero.Item.prototype.getFilename = function () {
  *
  * This is updated only initially and on subsequent getFile() calls.
  */
-Zotero.Item.prototype.__defineGetter__('fileExists', function () {
-	if (this._fileExists === null) {
+Zotero.Item.prototype.fileExists = function (cachedOnly) {
+	if (!cachedOnly && this._fileExists === null) {
 		this.getFile();
 	}
 	return this._fileExists;
-});
+};
+
+
+/**
+ * Asynchronous cached check for file existence, used for items view
+ *
+ * This is updated only initially and on subsequent getFile() calls.
+ */
+Zotero.Item.prototype.fileExistsAsync = function () {
+	var self = this;
+	return Q.fcall(function () {
+		if (self._fileExists !== null) {
+			return self._fileExists;
+		}
+		
+		if (Zotero.platformMajorVersion < 23) {
+			return self.fileExists();
+		}
+		
+		if (!self.isAttachment()) {
+			throw new Error("Zotero.Item.fileExistsAsync() can only be called on attachment items");
+		}
+		
+		if (self.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+			throw new Error("Zotero.Item.fileExistsAsync() cannot be called on link attachments");
+		}
+		
+		var nsIFile = self.getFile(null, true);
+		Components.utils.import("resource://gre/modules/osfile.jsm");
+		return Q(OS.File.exists(nsIFile.path))
+		.then(function(exists) {
+			self._updateAttachmentStates(exists);
+			return exists;
+		});
+	});
+};
+
 
 
 /*
@@ -3611,13 +3647,43 @@ Zotero.Item.prototype.getBestAttachment = function() {
  *
  * @return {Integer}  0 (none), 1 (present), -1 (missing)
  */
-Zotero.Item.prototype.getBestAttachmentState = function () {
-	if (this._bestAttachmentState !== null) {
+Zotero.Item.prototype.getBestAttachmentState = function (cachedOnly) {
+	if (cachedOnly || this._bestAttachmentState !== null) {
 		return this._bestAttachmentState;
 	}
 	var itemID = this.getBestAttachment();
-	this._bestAttachmentState = itemID ? (Zotero.Items.get(itemID).fileExists ? 1 : -1) : 0;
+	this._bestAttachmentState = itemID
+		? (Zotero.Items.get(itemID).fileExists() ? 1 : -1)
+		: 0;
 	return this._bestAttachmentState;
+}
+
+
+/**
+ * Return cached state of best attachment for use in items view
+ *
+ * @return {Promise:Integer}  Promise with 0 (none), 1 (present), -1 (missing)
+ */
+Zotero.Item.prototype.getBestAttachmentStateAsync = function () {
+	var self = this;
+	return Q.fcall(function() {
+		if (self._bestAttachmentState !== null) {
+			return self._bestAttachmentState;
+		}
+		var itemID = self.getBestAttachment();
+		if (itemID) {
+			return Zotero.Items.get(itemID).fileExistsAsync()
+			.then(function (exists) {
+				self._bestAttachmentState = exists ? 1 : -1;
+			});
+		}
+		else {
+			self._bestAttachmentState = 0;
+		}
+	})
+	.then(function () {
+		return self._bestAttachmentState;
+	});
 }
 
 

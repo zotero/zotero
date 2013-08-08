@@ -93,7 +93,7 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Ny post">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mer">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Skapa ny post från aktuell sida">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Skapa ny webbsidekälla från aktuell sida">
 <!ENTITY zotero.toolbar.lookup.label "Lägg till källa via referensnummer">
 <!ENTITY zotero.toolbar.removeItem.label "Radera källa...">
 <!ENTITY zotero.toolbar.newCollection.label "Ny samling...">
@@ -209,7 +209,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Formatera med:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bokmärken">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmärken sparas i Microsoft Word och OpenOffice, men kan ändras av misstag.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmärken sparas i Microsoft Word och LibreOffice, men kan ändras av misstag. Av kompatibilitetsskäl kan inte källhänvisningar läggas till fotnoter eller slutkommentarer när detta alternativ är valt.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Förkorta tidskriftstitlar automatiskt">

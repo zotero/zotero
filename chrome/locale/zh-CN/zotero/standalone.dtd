@@ -54,7 +54,7 @@
 <!ENTITY selectAllCmd.label "全选">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "选项…">
+<!ENTITY preferencesCmd.label "Preferences">
 <!ENTITY preferencesCmd.accesskey "O">
 <!ENTITY preferencesCmdUnix.label "首选项">
 <!ENTITY preferencesCmdUnix.accesskey "n">

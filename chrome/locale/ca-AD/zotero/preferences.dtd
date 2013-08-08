@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Mida de lletra de la nota:">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscel·lània">
-<!ENTITY zotero.preferences.autoUpdate "Cerca automàticament actualitzacions dels transcriptors">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Actualitza ara">
 <!ENTITY zotero.preferences.reportTranslationFailure "Envia un informe dels transcriptors trencats">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Permeteu que zotero.org personalitzi el contingut en base a la versió actual del Zotero">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Dreceres de teclat">
 
 <!ENTITY zotero.preferences.keys.openZotero "Obre/Tanca el Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Canvia a pantalla completa">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Enfoca la subfinestra de les biblioteques">
 <!ENTITY zotero.preferences.keys.quicksearch "Cerca ràpida">
-<!ENTITY zotero.preferences.keys.newItem "Crea un element nou">
-<!ENTITY zotero.preferences.keys.newNote "Crea una nova nota">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Canvia el selector d&apos;etiquetes">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copia les cites dels elements seleccionats al porta-retalls">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copia els elements seleccionats al porta-retalls">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importa des del porta-retalls">
-<!ENTITY zotero.preferences.keys.overrideGlobal "intenta corregir els conflictes en les dreceres de teclat">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Els canvis tenen efecte només en les finestres noves">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Servidors intermediaris">

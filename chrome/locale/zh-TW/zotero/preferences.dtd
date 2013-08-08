@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "筆記字型大小：">
 
 <!ENTITY zotero.preferences.miscellaneous "雜項">
-<!ENTITY zotero.preferences.autoUpdate "自動檢查更新的轉譯器">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "立刻更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "回報故障的網站轉譯器">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "允許 zotero.org 依目前的 Zotero 版本來調整內容。">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "快速鍵">
 
 <!ENTITY zotero.preferences.keys.openZotero "開／關 Zotero 窗格">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "切換全螢幕模式">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "聚焦到書庫窗格">
 <!ENTITY zotero.preferences.keys.quicksearch "快速搜尋">
-<!ENTITY zotero.preferences.keys.newItem "建立一個新的項目">
-<!ENTITY zotero.preferences.keys.newNote "建立一則新的筆記">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "切換標籤選擇器">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "複製選取項目的引用文獻到剪貼簿">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "複製選取項目到剪貼簿">
 <!ENTITY zotero.preferences.keys.importFromClipboard "從剪貼簿匯入">
-<!ENTITY zotero.preferences.keys.overrideGlobal "嘗試蓋過相衝突的快速鍵">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "改變只會在新開的視窗中生效">
 
 <!ENTITY zotero.preferences.prefpane.proxies "代理伺服器">

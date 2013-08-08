@@ -54,7 +54,7 @@
 <!ENTITY selectAllCmd.label "Selecionar tudo">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Opções...">
+<!ENTITY preferencesCmd.label "Preferences">
 <!ENTITY preferencesCmd.accesskey "O">
 <!ENTITY preferencesCmdUnix.label "Preferências">
 <!ENTITY preferencesCmdUnix.accesskey "n">

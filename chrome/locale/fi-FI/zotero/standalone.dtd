@@ -54,7 +54,7 @@
 <!ENTITY selectAllCmd.label "Valitse kaikki">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Lisävalinnat...">
+<!ENTITY preferencesCmd.label "Preferences">
 <!ENTITY preferencesCmd.accesskey "O">
 <!ENTITY preferencesCmdUnix.label "Asetukset">
 <!ENTITY preferencesCmdUnix.accesskey "n">

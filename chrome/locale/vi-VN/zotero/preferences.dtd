@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Note font size:">
 
 <!ENTITY zotero.preferences.miscellaneous "Các tùy chọn khác">
-<!ENTITY zotero.preferences.autoUpdate "Tự động tìm kiếm các bản cập nhật cho các bộ biến đổi">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Cập nhật ngay bây giờ">
 <!ENTITY zotero.preferences.reportTranslationFailure "Báo cáo các bộ biến đổi bị hỏng">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Phím gõ tắt">
 
 <!ENTITY zotero.preferences.keys.openZotero "Mở/Đóng cửa sổ Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Bật/Tắt chế độ Toàn-màn-hình">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Tìm kiếm nhanh">
-<!ENTITY zotero.preferences.keys.newItem "Tạo một biểu ghi mới">
-<!ENTITY zotero.preferences.keys.newNote "Tạo một ghi chép mới">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Bật/Tắt Bộ-chọn-thẻ">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Sao chép các trích dẫn vừa chọn vào clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Sao chép các biểu ghi vừa chọn vào clipboard">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Thử ghi đè các phím gõ tắt có xung đột">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Các thay đổi chỉ có hiệu lực trong các cửa sổ mới">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">

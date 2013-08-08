@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Tamaño da tipografía das notas:">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscelánea">
-<!ENTITY zotero.preferences.autoUpdate "Comprobar a actualización de tradutores automaticamente">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Actualizar agora">
 <!ENTITY zotero.preferences.reportTranslationFailure "Informar de tradutores de sitio rotos">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Permitir que zotero.org personalice o contido baseandose na versión actual">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Atallos de teclado">
 
 <!ENTITY zotero.preferences.keys.openZotero "Abrir/Pechar o panel de Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Cambiar ao modo de pantalla completa">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Foco no panel de bibliotecas">
 <!ENTITY zotero.preferences.keys.quicksearch "Busca rápida">
-<!ENTITY zotero.preferences.keys.newItem "Crear un novo elemento">
-<!ENTITY zotero.preferences.keys.newNote "Crear unha nova nota">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Alternar o selector de etiquetas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar as citas do elemento seleccionado ao portaretallos">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar os elementos seleccionados ao portaretallos">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importar do portaretallos">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Tratar de anular os accesos directos en conflito">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Os cambios só terán efecto nas novas xanelas">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">

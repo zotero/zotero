@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Размер на шрифта в бележките:">
 
 <!ENTITY zotero.preferences.miscellaneous "Разни">
-<!ENTITY zotero.preferences.autoUpdate "Автоматична проверка за усъвременени преводачи">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Oсъвременява веднага">
 <!ENTITY zotero.preferences.reportTranslationFailure "Осведомява за неработещи преводачи на страници">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Разрешава на zotero.org да персонализира съдържанието според настоящата версия на Зотеро">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Клавишни Комбинации">
 
 <!ENTITY zotero.preferences.keys.openZotero "Отваря/Затваря на Панела на Зотеро">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Превключва в Режим на Цял Екран">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Бързо Търсене">
-<!ENTITY zotero.preferences.keys.newItem "Създаване на нов запис">
-<!ENTITY zotero.preferences.keys.newNote "Създаване на нова бележка">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Превключване на Избора на Отметки">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Копирани на цитати за избраните записите в клипборда">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копиране на избраните записи в клипборда">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Внос от Клипборда">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Приоритет в случай на конфликт в клавишните комбинации.">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Промените ще се отразят само в новите прозорци">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Проксита">

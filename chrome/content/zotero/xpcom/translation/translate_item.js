@@ -822,9 +822,10 @@ Zotero.Translate.ItemGetter.prototype = {
 						
 						var directory = targetFile.parent;
 						
-						// The only attachments that can have multiple supporting files are of mime type
-						// text/html (specified in Attachments.getNumFiles())
-						if(attachment.attachmentMIMEType == "text/html" 
+						// The only attachments that can have multiple supporting files are imported
+						// attachments of mime type text/html (specified in Attachments.getNumFiles())
+						if(attachment.attachmentMIMEType == "text/html"
+								&& linkMode != Zotero.Attachments.LINK_MODE_LINKED_FILE
 								&& Zotero.Attachments.getNumFiles(attachment) > 1) {
 							// Attachment is a snapshot with supporting files. Check if any of the
 							// supporting files would cause a name conflict, and build a list of transfers

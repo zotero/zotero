@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Note font size:">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Update now">
 <!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
 
 <!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Хурдан хайх">
-<!ENTITY zotero.preferences.keys.newItem "Create a new item">
-<!ENTITY zotero.preferences.keys.newNote "Create a new note">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">

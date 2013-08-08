@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Tamanho da fonte das notas:">
 
 <!ENTITY zotero.preferences.miscellaneous "Outras preferências">
-<!ENTITY zotero.preferences.autoUpdate "Verificar atualização de tradutores automaticamente">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Atualizar agora">
 <!ENTITY zotero.preferences.reportTranslationFailure "Informar problemas com sites de tradutores">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Permitir que zotero.org personalize o conteúdo baseado em sua versão atual do Zotero">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Teclas de atalho">
 
 <!ENTITY zotero.preferences.keys.openZotero "Abrir/Fechar painel Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Modo Tela Cheia">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Concentrar o painel Bibliotecas">
 <!ENTITY zotero.preferences.keys.quicksearch "Pesquisa rápida">
-<!ENTITY zotero.preferences.keys.newItem "Criar um novo item">
-<!ENTITY zotero.preferences.keys.newNote "Criar uma nova nota">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Alternar seletor de marcadores">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar citações de item selecionado para a área de transferência">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar itens selecionados para a área de transferência">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importar da área de transferência">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Tentar sobrescrefer conflitos de teclas de atalho">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Mudanças tem efeito apenas em novas janelas">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">

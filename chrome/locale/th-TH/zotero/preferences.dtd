@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "ขนาดตัวอักษรในหมายเหตุ:">
 
 <!ENTITY zotero.preferences.miscellaneous "อื่น ๆ">
-<!ENTITY zotero.preferences.autoUpdate "ตรวจสอบการอัพเดตตัวช่วยแปลเว็บไซต์โดยอัตโนมัติ">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "อัพเดตเดี๋ยวนี้">
 <!ENTITY zotero.preferences.reportTranslationFailure "รายงานตัวช่วยแปลเว็บไซต์ใช้งานไม่ได้">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "ยินยอมให้ zotero.org ปรับปรุงข้อมูลตามรุ่นปัจจุบันของ Zotero">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "คีย์ลัด">
 
 <!ENTITY zotero.preferences.keys.openZotero "เปิด/ปิดแผง Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "เปลี่ยนสู่แบบเต็มจอ">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "โฟกัสที่ช่องไลบรารี">
 <!ENTITY zotero.preferences.keys.quicksearch "ค้นหาแบบเร็ว">
-<!ENTITY zotero.preferences.keys.newItem "สร้างรายการใหม่">
-<!ENTITY zotero.preferences.keys.newNote "สร้างหมายเหตุใหม่">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "เปลี่ยนตัวเลือกแท็ก">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "ทำสำเนารายการอ้างอิงที่เลือกไว้ไปยังคลิปบอร์ด">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "ทำสำเนารายการที่เลือกไปยังคลิปบอร์ด">
 <!ENTITY zotero.preferences.keys.importFromClipboard "นำเข้าจากคลิปบอร์ด">
-<!ENTITY zotero.preferences.keys.overrideGlobal "พยายามครอบงำคีย์ลัดที่ขัดแย้งกัน">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "การเปลี่ยนแปลงจะมีผลกับหน้าต่างใหม่เท่านั้น">
 
 <!ENTITY zotero.preferences.prefpane.proxies "พร็อกซี่">

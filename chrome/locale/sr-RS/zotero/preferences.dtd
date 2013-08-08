@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Величина фонта:">
 
 <!ENTITY zotero.preferences.miscellaneous "Разне поставке">
-<!ENTITY zotero.preferences.autoUpdate "Самостално провери ажуриране преводиоце">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Ажурирај сада">
 <!ENTITY zotero.preferences.reportTranslationFailure "Извести о грешкама у „преводиоцу странице“">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Пречице на тастатури">
 
 <!ENTITY zotero.preferences.keys.openZotero "Отвори/затвори Зотеро површ">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Укључи/искључи приказ преко целог екрана">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Брза претрага">
-<!ENTITY zotero.preferences.keys.newItem "Направи нову ставку">
-<!ENTITY zotero.preferences.keys.newNote "Направи нову белешку">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Искључи/укључи избирача ознаке">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Умножи изабрани предмет цитата у списак исечака">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Умножи изабране ставке у списак исечака">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Покушај да премостиш сукобљене пречице">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Промене су постављене само у новом прозору">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">

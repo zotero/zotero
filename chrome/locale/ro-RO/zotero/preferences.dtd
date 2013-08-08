@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Mărimea fontului pentru notă:">
 
 <!ENTITY zotero.preferences.miscellaneous "Diverse">
-<!ENTITY zotero.preferences.autoUpdate "Controlează automat dacă există traduceri actualizate">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Actualizează acum">
 <!ENTITY zotero.preferences.reportTranslationFailure "Raportează site-uri cu legături rupte (la translatare)">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Permite zotero.org să modifice conținutul pe bază versiunii curente de Zotero">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Scurtături de la tastatură">
 
 <!ENTITY zotero.preferences.keys.openZotero "Deschide/Închide panoul Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Extinde pe tot ecranul">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Panou de focalizare biblioteci">
 <!ENTITY zotero.preferences.keys.quicksearch "Căutare rapidă">
-<!ENTITY zotero.preferences.keys.newItem "Creează o înregistrare nouă">
-<!ENTITY zotero.preferences.keys.newNote "Creează o notă nouă">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Afișează/ascunde selectorul de etichete">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiază citările înregistrărilor selectate în memoria Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiază înregistrările selectate în memoria Clipboard">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importă din memoria Clipboard">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Încearcă să suprascrii scurtăturile care sunt în conflict">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Schimbările vor putea fi vizualizate doar într-o fereastră nouă">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Servere proxy">

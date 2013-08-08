@@ -3,7 +3,7 @@
 <!ENTITY zotero.preferences.default "Default:">
 <!ENTITY zotero.preferences.items "Elementer">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Settings">
+<!ENTITY zotero.preferences.settings "Indstillinger">
 
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
 
@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Skriftstørrelse i noter:">
 
 <!ENTITY zotero.preferences.miscellaneous "Forskelligt">
-<!ENTITY zotero.preferences.autoUpdate "Se automatisk efter opdatering af &quot;oversættere&quot;">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Opdater nu">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapporter om &quot;oversættere&quot; uden forbindelse">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillad Zoter.org at tilpasse indhold baseret på den aktuelle Zotero-version">
@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "underliggende Noter">
 <!ENTITY zotero.preferences.groups.childFiles "underliggende &quot;Snapshots&quot; og importerede filer">
 <!ENTITY zotero.preferences.groups.childLinks "underliggende links">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "etiketter">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -60,14 +60,14 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synkroniser Vedhæftninger i Mit Bibliotek ved hjælp af">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Synkroniser Vedhæftninger i gruppe-biblioteker ved hjælp af Zoteros online-lager">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Hent filer">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "under synkronisering">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "efter behov">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Når du anvender Zoteros online-lager, er du forpligtet på dets">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "betingelser">
-<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
-<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Følgende operationer er bruges normalt kun i sjældne og meget specielle situationer og bør ikke bruges ved normal problemløsning. I mange tilfælde vil nulstilling føre til yderligere problemer. Se">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Synkroniser nulstillingsindstillinger">
+<!ENTITY zotero.preferences.sync.reset.warning3 "for mere information">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Fuld synkronisering med Zotero Server">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Flet de lokale Zotero-data med data fra synkroniserings-serveren uanset deres synkroniserings-historik.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Gendan fra Zotero Server">
@@ -76,7 +76,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Slet alle server-data og overskriv med lokale data fra Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Nulstil historik for fil-synkronisering">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Gennemtving et tjek af lager-serveren for alle lokale Vedhæftninger">
-<!ENTITY zotero.preferences.sync.reset "Reset">
+<!ENTITY zotero.preferences.sync.reset "Nulstil">
 <!ENTITY zotero.preferences.sync.reset.button "Nulstil...">
 
 
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Genvejs-taster">
 
 <!ENTITY zotero.preferences.keys.openZotero "Åbn/Luk Zotero-vinduet">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Slå fuldskærmsvisning til/fra">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Panel med fokusbiblioteker">
 <!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøgning">
-<!ENTITY zotero.preferences.keys.newItem "Opret nyt Element">
-<!ENTITY zotero.preferences.keys.newNote "Opret ny Note">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Slå Tag selector til/fra">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier valgte henvisninger til udklipsholder">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopier valgte Elementer til udklipsholder">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importer fra udklipsholder">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Forsøg at løse overlappende genveje">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Ændringer vil kun træde i kraft i nyåbnede vinduer">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxyer">
@@ -161,7 +161,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Enhver tegnstreng">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avanceret">
-<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Filer og mapper">
 
 <!ENTITY zotero.preferences.prefpane.locate "Lokaliser">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Håndtering af søgemaskiner for artikler">
@@ -181,11 +181,11 @@
 <!ENTITY zotero.preferences.dataDir.choose "Vælg...">
 <!ENTITY zotero.preferences.dataDir.reveal "Vis data-mappen">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
-<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
-<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Tilknyttet databasefolder for vedhæftninger">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero vil benytte relative stier for tilknyttede vedhæftede filer i databasefolderen, hvilket giver dig mulighed for at tilgå filerne med forskellige computere så længe filstrukturen i databasefolderen forbliver den samme">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Databasefolder:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Vælg...">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Gendan til absolutte stier...">
 
 <!ENTITY zotero.preferences.dbMaintenance "Vedligeholdelse af databasen">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Tjek databasens gyldighed">
@@ -204,4 +204,4 @@
 <!ENTITY zotero.preferences.openAboutConfig "Åbn about:config">
 <!ENTITY zotero.preferences.openCSLEdit "Åbn CSL-Editor">
 <!ENTITY zotero.preferences.openCSLPreview "Åbn CSL-Preview">
-<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
+<!ENTITY zotero.preferences.openAboutMemory "Åben about:memory">

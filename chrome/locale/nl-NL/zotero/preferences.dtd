@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.fontSize.notes "Tekengrootte aantekeningen:">
 
 <!ENTITY zotero.preferences.miscellaneous "Diversen">
-<!ENTITY zotero.preferences.autoUpdate "Automatisch zoeken naar bijgewerkte vertalers">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "Nu bijwerken">
 <!ENTITY zotero.preferences.reportTranslationFailure "Defecte webpagina-vertalers rapporteren">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "zotero.org toestaan om inhoud aan te passen aan de gebruikte Zotero-versie">
@@ -126,16 +126,16 @@
 <!ENTITY zotero.preferences.prefpane.keys "Sneltoetsen">
 
 <!ENTITY zotero.preferences.keys.openZotero "Openen/Sluiten van Zotero-paneel">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Volledige schermweergave">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Snelzoeken">
-<!ENTITY zotero.preferences.keys.newItem "Nieuw object aanmaken">
-<!ENTITY zotero.preferences.keys.newNote "Nieuwe aantekening aanmaken">
+<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
+<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Label-kiezer tonen">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Verwijzingen van geselecteerde objecten naar klembord kopiëren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Geselecteerde objecten naar klembord kopiëren">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importeren vanaf klembord">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Probeer voorrang te krijgen bij conflicterende sneltoetsen">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Aanpassingen worden pas zichtbaar in nieuwe vensters">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxy's">

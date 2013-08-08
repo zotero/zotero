@@ -705,7 +705,7 @@ Zotero.Sync.Storage = new function () {
 			var memmgr = Components.classes["@mozilla.org/memory-reporter-manager;1"]
 				.getService(Components.interfaces.nsIMemoryReporterManager);
 			memmgr.init();
-			Zotero.debug("Memory usage: " + memmgr.resident);
+			//Zotero.debug("Memory usage: " + memmgr.resident);
 			
 			if (libraryID !== false) {
 				if (itemIDs) {
@@ -819,11 +819,11 @@ Zotero.Sync.Storage = new function () {
 					// Spin the event loop during synchronous file access
 					yield Q.delay(1);
 					
-					Zotero.debug("Memory usage: " + memmgr.resident);
+					//Zotero.debug("Memory usage: " + memmgr.resident);
 					
 					let row = attachmentData[item.id];
 					let lk = item.libraryID + "/" + item.key;
-					Zotero.debug("Checking attachment file for item " + lk);
+					//Zotero.debug("Checking attachment file for item " + lk);
 					
 					var file = item.getFile(row);
 					if (!file) {
@@ -925,7 +925,12 @@ Zotero.Sync.Storage = new function () {
 					Zotero.debug("No synced files have changed locally");
 				}
 				
-				Zotero.debug("Checked " + numItems + " files in " + (new Date() - t) + "ms");
+				let msg = "Checked " + numItems + " files in ";
+				if (libraryID !== false) {
+					msg += "library " + libraryID + " in ";
+				}
+				msg += (new Date() - t) + "ms";
+				Zotero.debug(msg);
 				
 				throw new Task.Result(changed);
 			}
@@ -935,12 +940,12 @@ Zotero.Sync.Storage = new function () {
 			let checkItems = function () {
 				if (!items.length) return;
 				
-				Zotero.debug("Memory usage: " + memmgr.resident);
+				//Zotero.debug("Memory usage: " + memmgr.resident);
 				
 				let item = items.shift();
 				let row = attachmentData[item.id];
 				let lk = item.libraryKey;
-				Zotero.debug("Checking attachment file for item " + lk);
+				//Zotero.debug("Checking attachment file for item " + lk);
 				
 				let nsIFile = item.getFile(row, true);
 				let file = null;
@@ -949,10 +954,10 @@ Zotero.Sync.Storage = new function () {
 					file = promisedFile;
 					return file.stat()
 					.then(function (info) {
-						Zotero.debug("Memory usage: " + memmgr.resident);
+						//Zotero.debug("Memory usage: " + memmgr.resident);
 						
 						var fmtime = info.lastModificationDate.getTime();
-						Zotero.debug("File modification time for item " + lk + " is " + fmtime);
+						//Zotero.debug("File modification time for item " + lk + " is " + fmtime);
 						
 						if (fmtime < 1) {
 							Zotero.debug("File mod time " + fmtime + " is less than 1 -- interpreting as 1", 2);
@@ -1038,7 +1043,7 @@ Zotero.Sync.Storage = new function () {
 				})
 				.finally(function () {
 					if (file) {
-						Zotero.debug("Closing file for item " + lk);
+						//Zotero.debug("Closing file for item " + lk);
 						file.close();
 					}
 				})
@@ -1074,7 +1079,12 @@ Zotero.Sync.Storage = new function () {
 					Zotero.debug("No synced files have changed locally");
 				}
 				
-				Zotero.debug("Checked " + numItems + " files in " + (new Date() - t) + "ms");
+				let msg = "Checked " + numItems + " files in ";
+				if (libraryID !== false) {
+					msg += "library " + libraryID + " in ";
+				}
+				msg += (new Date() - t) + "ms";
+				Zotero.debug(msg);
 				
 				return changed;
 			}));
