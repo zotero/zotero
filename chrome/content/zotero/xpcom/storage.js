@@ -1027,16 +1027,21 @@ Zotero.Sync.Storage = new function () {
 						return Zotero.Utilities.Internal.md5Async(file)
 						.then(function (fileHash) {
 							if (row.hash && row.hash == fileHash) {
-								Zotero.debug("Mod time didn't match (" + fmtime + "!=" + mtime + ") "
-									+ "but hash did for " + nsIFile.leafName + " for item " + lk
-									+ " -- updating file mod time");
-								try {
-									nsIFile.lastModifiedTime = row.mtime;
-								}
-								catch (e) {
-									Zotero.File.checkFileAccessError(e, nsIFile, 'update');
-								}
-								return;
+								// We have to close the file before modifying it from the main
+								// thread (at least on Windows, where assigning lastModifiedTime
+								// throws an NS_ERROR_FILE_IS_LOCKED otherwise)
+								return Q(file.close())
+								.then(function () {
+									Zotero.debug("Mod time didn't match (" + fmtime + "!=" + mtime + ") "
+										+ "but hash did for " + nsIFile.leafName + " for item " + lk
+										+ " -- updating file mod time");
+									try {
+										nsIFile.lastModifiedTime = row.mtime;
+									}
+									catch (e) {
+										Zotero.File.checkFileAccessError(e, nsIFile, 'update');
+									}
+								});
 							}
 							
 							// Mark file for upload
