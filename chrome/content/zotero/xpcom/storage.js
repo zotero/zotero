@@ -1075,7 +1075,7 @@ Zotero.Sync.Storage = new function () {
 						}
 						Zotero.debug(e);
 						Zotero.debug(e.toString());
-						throw new Error("Error " + e.operation + " " + nsIFile.path);
+						throw new Error("Error for operation '" + e.operation + "' for " + nsIFile.path);
 					}
 					
 					throw e;
