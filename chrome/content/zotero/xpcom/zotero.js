@@ -405,7 +405,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		}
 		
 		// Register shutdown handler to call Zotero.shutdown()
-		var _shutdownObserver = {observe:Zotero.shutdown};
+		var _shutdownObserver = {observe:function() { Zotero.shutdown().done() }};
 		Services.obs.addObserver(_shutdownObserver, "quit-application", false);
 		
 		try {
@@ -758,7 +758,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	}
 	
 	
-	this.shutdown = function (subject, topic, data) {
+	this.shutdown = function() {
 		Zotero.debug("Shutting down Zotero");
 		
 		try {
@@ -786,17 +786,17 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				Components.utils.forceGC();
 				
 				// unlock DB
-				Zotero.DB.closeDatabase();
-				
-				// broadcast that DB lock has been released
-				Zotero.IPC.broadcast("lockReleased");
+				return Zotero.DB.closeDatabase().then(function() {				
+					// broadcast that DB lock has been released
+					Zotero.IPC.broadcast("lockReleased");
+				});
 			}
+			
+			return Q();
 		} catch(e) {
 			Zotero.debug(e);
-			throw e;
+			return Q.reject(e);
 		}
-		
-		return true;
 	}
 	
 	

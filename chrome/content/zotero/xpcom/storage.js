@@ -811,8 +811,12 @@ Zotero.Sync.Storage = new function () {
 			var numItems = items.length;
 			var updatedStates = {};
 			
-			// OS.File didn't work reliably before Firefox 23, so use the old code
-			if (Zotero.platformMajorVersion < 23) {
+			// OS.File didn't work reliably before Firefox 23, and on Windows it returns
+			// the access time instead of the modification time until Firefox 25
+			// (https://bugzilla.mozilla.org/show_bug.cgi?id=899436),
+			// so use the old code
+			if (Zotero.platformMajorVersion < 23
+					|| (Zotero.isWin && Zotero.platformMajorVersion < 25)) {
 				Zotero.debug("Performing synchronous file update check");
 				
 				for each(var item in items) {
@@ -935,10 +939,10 @@ Zotero.Sync.Storage = new function () {
 				throw new Task.Result(changed);
 			}
 			
-			Components.utils.import("resource://gre/modules/osfile.jsm")
+			Components.utils.import("resource://gre/modules/osfile.jsm");
 			
 			let checkItems = function () {
-				if (!items.length) return;
+				if (!items.length) return Q();
 				
 				//Zotero.debug("Memory usage: " + memmgr.resident);
 				
@@ -948,6 +952,11 @@ Zotero.Sync.Storage = new function () {
 				//Zotero.debug("Checking attachment file for item " + lk);
 				
 				let nsIFile = item.getFile(row, true);
+				if (!nsIFile) {
+					Zotero.debug("Marking pathless attachment " + lk + " as in-sync");
+					updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_IN_SYNC;
+					return checkItems();
+				}
 				let file = null;
 				return Q(OS.File.open(nsIFile.path))
 				.then(function (promisedFile) {
@@ -1022,16 +1031,21 @@ Zotero.Sync.Storage = new function () {
 						return Zotero.Utilities.Internal.md5Async(file)
 						.then(function (fileHash) {
 							if (row.hash && row.hash == fileHash) {
-								Zotero.debug("Mod time didn't match (" + fmtime + "!=" + mtime + ") "
-									+ "but hash did for " + file.leafName + " for item " + lk
-									+ " -- updating file mod time");
-								try {
-									nsIFile.lastModifiedTime = row.mtime;
-								}
-								catch (e) {
-									Zotero.File.checkFileAccessError(e, nsIFile, 'update');
-								}
-								return;
+								// We have to close the file before modifying it from the main
+								// thread (at least on Windows, where assigning lastModifiedTime
+								// throws an NS_ERROR_FILE_IS_LOCKED otherwise)
+								return Q(file.close())
+								.then(function () {
+									Zotero.debug("Mod time didn't match (" + fmtime + "!=" + mtime + ") "
+										+ "but hash did for " + nsIFile.leafName + " for item " + lk
+										+ " -- updating file mod time");
+									try {
+										nsIFile.lastModifiedTime = row.mtime;
+									}
+									catch (e) {
+										Zotero.File.checkFileAccessError(e, nsIFile, 'update');
+									}
+								});
 							}
 							
 							// Mark file for upload
@@ -1048,20 +1062,27 @@ Zotero.Sync.Storage = new function () {
 					}
 				})
 				.catch(function (e) {
-					if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+					if (e instanceof OS.File.Error &&
+							(e.becauseNoSuchFile
+							// This can happen if a path is too long on Windows,
+							// e.g. a file is being accessed on a VM through a share
+							// (and probably in other cases).
+							|| (e.winLastError && e.winLastError == 3))) {
 						Zotero.debug("Marking attachment " + lk + " as missing");
 						updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
 						return;
 					}
 					
-					if (e instanceof OS.File.Error && e.becauseClosed) {
-						Zotero.debug("File was closed", 2);
-					}
-					else {
+					if (e instanceof OS.File.Error) {
+						if (e.becauseClosed) {
+							Zotero.debug("File was closed", 2);
+						}
 						Zotero.debug(e);
 						Zotero.debug(e.toString());
+						throw new Error("Error for operation '" + e.operation + "' for " + nsIFile.path);
 					}
-					throw new Error("Error " + e.operation + " " + nsIFile.path);
+					
+					throw e;
 				})
 				.then(function () {
 					return checkItems();
