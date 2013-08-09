@@ -814,10 +814,10 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				Zotero.DB.closeDatabase().then(function() {				
 					// broadcast that DB lock has been released
 					Zotero.IPC.broadcast("lockReleased");
-					callback();
+					if(callback) callback();
 				});
 			} else {
-				callback();
+				if(callback) callback();
 			}
 		} catch(e) {
 			Zotero.debug(e);
