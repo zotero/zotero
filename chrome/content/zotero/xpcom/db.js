@@ -794,8 +794,11 @@ Zotero.DBConnection.prototype.checkException = function (e) {
 Zotero.DBConnection.prototype.closeDatabase = function () {
 	if(this._connection) {
 		this.stopDummyStatement();
-		this._connection.asyncClose();
-		return true;
+		var deferred = Q.defer();
+		this._connection.asyncClose(deferred.resolve);
+		return deferred.promise;
+	} else {
+		return Q();
 	}
 }
 

@@ -164,11 +164,16 @@ ZoteroContext.prototype = {
 	 */
 	"switchConnectorMode":function(isConnector) {
 		if(isConnector !== this.isConnector) {
-			zContext.Zotero.shutdown();
-			
-			// create a new zContext
-			makeZoteroContext(isConnector);
-			zContext.Zotero.init();
+			zContext.Zotero.shutdown(function() {
+				try {
+					// create a new zContext
+					makeZoteroContext(isConnector);
+					zContext.Zotero.init();
+				} catch(e) {
+					dump(e.toSource());
+					throw e;
+				}
+			});
 		}
 		
 		return zContext;
@@ -294,9 +299,16 @@ function ZoteroService() {
 			} catch(e) {
 				if(e === "ZOTERO_SHOULD_START_AS_CONNECTOR") {
 					// if Zotero should start as a connector, reload it
-					zContext.Zotero.shutdown();
-					makeZoteroContext(true);
-					zContext.Zotero.init();
+					zContext.Zotero.shutdown(function() {
+						try {
+							makeZoteroContext(true);
+							zContext.Zotero.init();
+						} catch(e) {
+							dump(e.toSource());
+							Components.utils.reportError(e);
+							throw e;
+						}
+					});
 				} else {
 					dump(e.toSource());
 					Components.utils.reportError(e);
