@@ -11,8 +11,8 @@
           <targetApplication>
             <RDF:Description>
               <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
-              <minVersion>20.0</minVersion>
-              <maxVersion>23.*</maxVersion>
+              <minVersion>24.0</minVersion>
+              <maxVersion>25.*</maxVersion>
               <updateLink>http://download.zotero.org/extension/zotero.xpi</updateLink>
               <updateHash>sha1:</updateHash>
             </RDF:Description>
