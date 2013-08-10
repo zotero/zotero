@@ -65,6 +65,7 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "脚注">
 <!ENTITY zotero.integration.prefs.formatUsing.label "スタイル:">
 <!ENTITY zotero.integration.prefs.lang.institutions "Institutions:">
+<!ENTITY zotero.integration.prefs.lang.journals "Journals:">
 <!ENTITY zotero.integration.prefs.lang.languages "言語">
 <!ENTITY zotero.integration.prefs.lang.languagesInCitations "引用に使用する言語">
 <!ENTITY zotero.integration.prefs.lang.persons "Persons:">

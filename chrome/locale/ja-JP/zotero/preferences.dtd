@@ -79,6 +79,7 @@
 <!ENTITY zotero.preferences.lang.inCitationsAndBibliographies "引用と参考文献">
 <!ENTITY zotero.preferences.lang.insideZotero "Zotero内部">
 <!ENTITY zotero.preferences.lang.institutions "Institutions:">
+<!ENTITY zotero.preferences.lang.journals "Journals:">
 <!ENTITY zotero.preferences.lang.languageList "メタデータに使用する言語">
 <!ENTITY zotero.preferences.lang.languageRoles "(2) Define language roles &#8681;">
 <!ENTITY zotero.preferences.lang.languages "言語">

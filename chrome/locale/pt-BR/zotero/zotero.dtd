@@ -65,6 +65,7 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Notas de pé de página">
 <!ENTITY zotero.integration.prefs.formatUsing.label "Formatar utilizando:">
 <!ENTITY zotero.integration.prefs.lang.institutions "Institutions:">
+<!ENTITY zotero.integration.prefs.lang.journals "Journals:">
 <!ENTITY zotero.integration.prefs.lang.languages "Languages">
 <!ENTITY zotero.integration.prefs.lang.languagesInCitations "Languages for use in citations">
 <!ENTITY zotero.integration.prefs.lang.persons "Persons:">

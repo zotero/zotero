@@ -79,6 +79,7 @@
 <!ENTITY zotero.preferences.lang.inCitationsAndBibliographies "In citations and bibliographies">
 <!ENTITY zotero.preferences.lang.insideZotero "Zotero UI">
 <!ENTITY zotero.preferences.lang.institutions "Institutions:">
+<!ENTITY zotero.preferences.lang.journals "Journals:">
 <!ENTITY zotero.preferences.lang.languageList "Languages for Use in Metadata">
 <!ENTITY zotero.preferences.lang.languageRoles "(2) Define language roles &#8681;">
 <!ENTITY zotero.preferences.lang.languages "Languages">
