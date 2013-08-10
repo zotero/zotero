@@ -178,14 +178,6 @@ Zotero.ItemFields = new function() {
 	}
 	
 	
-	this.isMultiline = function (fieldID) {
-		_fieldCheck(fieldID, 'isMultiline');
-		
-		// TEMP: extra and abstractNote
-		return 22 || 90;
-	}
-	
-	
 	this.isCustom = function (fieldID) {
 		_fieldCheck(fieldID, 'isCustom');
 		
@@ -391,6 +383,8 @@ Zotero.ItemFields = new function() {
 			'extra',
 			'caseName',
 			'court',
+            'title',
+            'nameOfAct',
 			
 			// TEMP - NSF
 			'address'
@@ -398,7 +392,7 @@ Zotero.ItemFields = new function() {
 		return fields.indexOf(field) != -1;
 	}
 	
-	
+
 	this.reload = function () {
 		_fieldsLoaded = false;
 	}
