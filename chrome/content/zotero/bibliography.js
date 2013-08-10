@@ -161,7 +161,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		
 		// initialize options display from provided params
 
-		var citationPrefNames = ['Persons', 'Institutions', 'Titles', 'Publishers', 'Places'];
+		var citationPrefNames = ['Persons', 'Institutions', 'Titles', 'Journals', 'Publishers', 'Places'];
 		for (var i = 0, ilen = citationPrefNames.length; i < ilen; i += 1) {
 			var prefname = citationPrefNames[i].toLowerCase();
             var citationRoleNames = ["orig","translit","translat"];
@@ -518,7 +518,7 @@ var Zotero_File_Interface_Bibliography = new function() {
             suffixNode.value = suffix;
         }
         // Do something to store this data in Prefs
-        var types = ['persons', 'institutions', 'titles', 'publishers', 'places'];
+        var types = ['persons', 'institutions', 'titles', 'journals', 'publishers', 'places'];
 	    var forms = ['orig', 'translit', 'translat'];
         var affixList = [];
         for (var i = 0, ilen = types.length; i < ilen; i += 1) {
@@ -543,14 +543,14 @@ var Zotero_File_Interface_Bibliography = new function() {
     function citationGetAffixes () {
 		var affixList = null;
 		if (_io['citationAffixes']) {
-			if (_io['citationAffixes'].length === 40) {
+			if (_io['citationAffixes'].length === 48) {
 				affixList = _io['citationAffixes'];
 			}
 		}
 		if (!affixList) {
-			affixList = [,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,];
+			affixList = [,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,];
 		}
-        var types = ['persons', 'institutions', 'titles', 'publishers', 'places'];
+        var types = ['persons', 'institutions', 'titles', 'journals', 'publishers', 'places'];
 	    var forms = ['orig', 'translit', 'translat'];
         var count = 0;
         for (var i = 0, ilen = types.length; i < ilen; i += 1) {

@@ -147,6 +147,11 @@
                       </row>
                       <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1" text-align="right">
+                          <caption label="&zotero.integration.prefs.lang.journals;"/>
+                        </hbox>
+                      </row>
+                      <row style="max-height:1em;min-height:1em;">
+                        <hbox flex="1" text-align="right">
                           <caption label="&zotero.integration.prefs.lang.publishers;"/>
                         </hbox>
                       </row>
@@ -268,6 +273,35 @@
                                 style="min-width:4.5em;" class="compact translat-primary">
                             <hbox flex="1"/>
                             <radio group="titles-radio" id="titles-radio-translat" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </radiogroup>
+                      </row>
+                      <row style="max-height:1em;min-height:1em;">
+                        <radiogroup orient="horizontal" flex="1" class="plain">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio group="journals-radio" id="journals-radio-orig" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+                                style="min-width:4.5em;" class="compact translit-primary">
+                            <hbox flex="1"/>
+                            <label id="journals-radio-translit-prefix"/>
+							<radio group="journals-radio" id="journals-radio-translit" popup="citation-primary-affix-menu"/>
+							<label id="journals-radio-translit-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                                style="min-width:4.5em;" class="compact translat-primary">
+                            <hbox flex="1"/>
+                            <radio group="journals-radio" id="journals-radio-translat" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="2"/>
@@ -459,6 +493,39 @@
                             <label id="titles-checkbox-translat-prefix"/>
                             <checkbox id="titles-checkbox-translat" popup="citation-secondary-affix-menu"/>
                             <label id="titles-checkbox-translat-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </hbox>
+                      </row>
+                      <row style="max-height:1em;min-height:1em;">
+                        <hbox flex="1">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;" class="plain compact">
+                            <hbox flex="1"/>
+                            <label id="journals-checkbox-orig-prefix"/>
+                            <checkbox id="journals-checkbox-orig" popup="citation-secondary-affix-menu"/>
+                            <label id="journals-checkbox-orig-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-secondary', 'translit'],false);"
+                                style="min-width:4.5em;" class="plain compact translit-secondary">
+                            <hbox flex="1"/>
+                            <label id="journals-checkbox-translit-prefix"/>
+                            <checkbox id="journals-checkbox-translit" popup="citation-secondary-affix-menu"/>
+                            <label id="journals-checkbox-translit-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                                style="min-width:4.5em;" class="plain compact translat-secondary">
+                            <hbox flex="1"/>
+                            <label id="journals-checkbox-translat-prefix"/>
+                            <checkbox id="journals-checkbox-translat" popup="citation-secondary-affix-menu"/>
+                            <label id="journals-checkbox-translat-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="2"/>

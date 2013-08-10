@@ -131,6 +131,11 @@
                     </row>
                     <row style="max-height:1em;min-height:1em;">
                       <hbox flex="1" text-align="right">
+                        <caption label="&zotero.preferences.lang.journals;"/>
+                      </hbox>
+                    </row>
+                    <row style="max-height:1em;min-height:1em;">
+                      <hbox flex="1" text-align="right">
                         <caption label="&zotero.preferences.lang.publishers;"/>
                       </hbox>
                     </row>

@@ -2085,6 +2085,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		io.citationLangPrefsPersons = this.data.prefs.citationLangPrefsPersons;
 		io.citationLangPrefsInstitutions = this.data.prefs.citationLangPrefsInstitutions;
 		io.citationLangPrefsTitles = this.data.prefs.citationLangPrefsTitles;
+		io.citationLangPrefsJournals = this.data.prefs.citationLangPrefsJournals;
 		io.citationLangPrefsPublishers = this.data.prefs.citationLangPrefsPublishers;
 		io.citationLangPrefsPlaces = this.data.prefs.citationLangPrefsPlaces;
 		io.citationAffixes = this.data.prefs.citationAffixes;
@@ -2120,6 +2121,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		me.data.prefs.citationLangPrefsPersons = io.citationLangPrefsPersons;
 		me.data.prefs.citationLangPrefsInstitutions = io.citationLangPrefsInstitutions;
 		me.data.prefs.citationLangPrefsTitles = io.citationLangPrefsTitles;
+		me.data.prefs.citationLangPrefsJournals = io.citationLangPrefsJournals;
 		me.data.prefs.citationLangPrefsPublishers = io.citationLangPrefsPublishers;
 		me.data.prefs.citationLangPrefsPlaces = io.citationLangPrefsPlaces;
 		me.data.prefs.citationAffixes = io.citationAffixes;
@@ -2999,9 +3001,10 @@ Zotero.Integration.DocumentData = function(string) {
 	this.prefs.citationLangPrefsPersons = [];
 	this.prefs.citationLangPrefsInstitutions = [];
 	this.prefs.citationLangPrefsTitles = [];
+	this.prefs.citationLangPrefsJournals = [];
 	this.prefs.citationLangPrefsPublishers = [];
 	this.prefs.citationLangPrefsPlaces = [];
-	this.prefs.citationAffixes = [,,,,,,,,,,,,,,];
+	this.prefs.citationAffixes = [,,,,,,,,,,,,,,,,,,];
 	this.sessionID = null;
 	if(string) {
 		this.unserialize(string);
@@ -3015,8 +3018,8 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
 	var prefs = "";
 	for(var pref in this.prefs) {
 		if (pref === 'citationAffixes') {
-			var citeaffixes = "|||||||||||||||||||||||||||||||||||||||";
-			if (this.prefs.citationAffixes && this.prefs.citationAffixes.length === 40) {
+			var citeaffixes = "|||||||||||||||||||||||||||||||||||||||||||||||";
+			if (this.prefs.citationAffixes && this.prefs.citationAffixes.length === 48) {
 				citeaffixes = this.prefs.citationAffixes.join('|');
 			}
 			prefs += '<pref name="citationAffixes" '+

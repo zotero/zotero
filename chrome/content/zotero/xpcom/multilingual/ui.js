@@ -167,6 +167,7 @@ Zotero.DOCUMENT_MULTI_PREFERENCES = [
 	"citationLangPrefsPersons",
 	"citationLangPrefsInstitutions",
 	"citationLangPrefsTitles",
+	"citationLangPrefsJournals",
 	"citationLangPrefsPublishers",
 	"citationLangPrefsPlaces"
 ];
@@ -306,7 +307,7 @@ Zotero.switchLocale = function(document) {
 
 
 Zotero.setCitationLanguages = function (obj, citeproc) {
-	var segments = ['Persons', 'Institutions', 'Titles', 'Publishers', 'Places'];
+	var segments = ['Persons', 'Institutions', 'Titles', 'Journals', 'Publishers', 'Places'];
 	for (var i = 0, ilen = segments.length; i < ilen; i += 1) {
 		var settings = Zotero.Prefs.get("csl.citation" + segments[i]);
 		if (settings) {
@@ -325,7 +326,7 @@ Zotero.setCitationLanguages = function (obj, citeproc) {
 		}
 	}
 	if (!obj.citationAffixes) {
-		obj.citationAffixes = [,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,];
+		obj.citationAffixes = [,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,];
 	}
 	obj.citationTransliteration = [];
 	obj.citationTranslation = [];

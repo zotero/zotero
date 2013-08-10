@@ -31,7 +31,7 @@ Zotero_Preferences.Lang = {
         var startTime = Date.now();
  	    Zotero_Preferences.Lang.refreshMenus();
  	    Zotero_Preferences.Lang.refreshLanguages();
- 	    var radios = ['Persons', 'Institutions', 'Titles', 'Publishers', 'Places']
+ 	    var radios = ['Persons', 'Institutions', 'Titles', 'Journals', 'Publishers', 'Places']
  	    var forms = ['orig', 'translit', 'translat'];
  	    // Check for a settings in Prefs. For those not found, set to orig.
  	    // Then set language in node.
