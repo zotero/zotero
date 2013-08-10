@@ -811,12 +811,11 @@ Zotero.Sync.Storage = new function () {
 			var numItems = items.length;
 			var updatedStates = {};
 			
-			// OS.File didn't work reliably before Firefox 23, and on Windows it returns
-			// the access time instead of the modification time until Firefox 25
+			// On Windows, OS.File returns the access time instead of the
+			// modification time until Firefox 25
 			// (https://bugzilla.mozilla.org/show_bug.cgi?id=899436),
 			// so use the old code
-			if (Zotero.platformMajorVersion < 23
-					|| (Zotero.isWin && Zotero.platformMajorVersion < 25)) {
+			if (Zotero.isWin && Zotero.platformMajorVersion < 25) {
 				Zotero.debug("Performing synchronous file update check");
 				
 				for each(var item in items) {
