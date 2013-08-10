@@ -2971,10 +2971,6 @@ Zotero.Item.prototype.fileExistsAsync = function () {
 			return self._fileExists;
 		}
 		
-		if (Zotero.platformMajorVersion < 23) {
-			return self.fileExists();
-		}
-		
 		if (!self.isAttachment()) {
 			throw new Error("Zotero.Item.fileExistsAsync() can only be called on attachment items");
 		}
