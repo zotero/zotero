@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.476",
+    PROCESSOR_VERSION: "1.0.478",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -316,8 +316,8 @@ var CSL = {
     ],
     TAG_ESCAPE: function (str) {
         var mx, lst, len, pos, m, buf1, buf2, idx, ret, myret;
-        mx = str.match(/(\"|\'|<span\s+class=\"no(?:case|decor)\">.*?<\/span>|<\/?(?:i|sc|b)>|<\/span>)/g);
-        lst = str.split(/(?:\"|\'|<span\s+class=\"no(?:case|decor)\">.*?<\/span>|<\/?(?:i|sc|b)>|<\/span>)/g);
+        mx = str.match(/(\"|\'|-|<span\s+class=\"no(?:case|decor)\">.*?<\/span>|<\/?(?:i|sc|b)>|<\/span>)/g);
+        lst = str.split(/(?:\"|\'|-|<span\s+class=\"no(?:case|decor)\">.*?<\/span>|<\/?(?:i|sc|b)>|<\/span>)/g);
         myret = [lst[0]];
         for (pos = 1, len = lst.length; pos < len; pos += 1) {
             myret.push(mx[pos - 1]);
@@ -11672,6 +11672,15 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
         if (num.slice(0, 1) === '"' && num.slice(-1) === '"') {
             num = num.slice(1, -1);
         }
+        if (num && ["number-of-volumes","number-of-pages"].indexOf(variable) > -1) {
+            var m = num.match(/[^0-9]*([0-9]+).*/);
+            if (m) {
+                this.tmp.shadow_numbers[variable].numeric = true;
+                if (m[1] !== "1") {
+                    this.tmp.shadow_numbers[variable].plural = 1;
+                }
+            }
+        }
         if ("locator" === variable
             && ["bill","gazette","legislation","treaty"].indexOf(type) > -1) {
             num = num.split(CSL.STATUTE_SUBDIV_PLAIN_REGEX)[0];
@@ -12401,22 +12410,29 @@ CSL.Output.Formatters.doppelString = function (string, rex) {
     ret = {};
     ret.array = rex(string);
     ret.string = "";
-    len = ret.array.length;
-    for (pos = 0; pos < len; pos += 2) {
-        ret.string += ret.array[pos];
+    for (var i=0,ilen=ret.array.length; i<ilen; i += 2) {
+        if (ret.array[i-1] === "-") {
+            ret.string += " " + ret.array[i];
+        } else {
+            ret.string += ret.array[i];
+        }
     }
     return ret;
 };
 CSL.Output.Formatters.undoppelString = function (str) {
     var ret, len, pos;
     ret = "";
-    len = str.array.length;
-    for (pos = 0; pos < len; pos += 1) {
-        if ((pos % 2)) {
-            ret += str.array[pos];
+    for (var i=0,ilen=str.array.length; i<ilen; i+=1) {
+        if ((i % 2)) {
+            ret += str.array[i];
         } else {
-            ret += str.string.slice(0, str.array[pos].length);
-            str.string = str.string.slice(str.array[pos].length);
+            if (str.array[i-1] === "-") {
+                ret += str.string.slice(0, str.array[i].length+1).slice(1);
+                str.string = str.string.slice(str.array[i].length+1);
+            } else {
+                ret += str.string.slice(0, str.array[i].length);
+                str.string = str.string.slice(str.array[i].length);
+            }
         }
     }
     return ret;
