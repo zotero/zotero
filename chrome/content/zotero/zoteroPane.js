@@ -536,10 +536,13 @@ var ZoteroPane = new function()
 	function setHighlightedRowsCallback() {
 		var itemIDs = ZoteroPane_Local.getSelectedItems(true);
 		if (itemIDs && itemIDs.length) {
-			var collectionIDs = Zotero.Collections.getCollectionsContainingItems(itemIDs, true);
-			if (collectionIDs) {
-				ZoteroPane_Local.collectionsView.setHighlightedRows(collectionIDs);
-			}
+			Zotero.Collections.getCollectionsContainingItems(itemIDs, true)
+			.then(function (collectionIDs) {
+				if (collectionIDs) {
+					ZoteroPane_Local.collectionsView.setHighlightedRows(collectionIDs);
+				}
+			})
+			.done();
 		}
 	}
 	

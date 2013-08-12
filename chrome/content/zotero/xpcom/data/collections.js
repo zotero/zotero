@@ -33,7 +33,6 @@ Zotero.Collections = new function() {
 	
 	this.get = get;
 	this.add = add;
-	this.getCollectionsContainingItems = getCollectionsContainingItems;
 	this.erase = erase;
 	
 	/*
@@ -64,7 +63,12 @@ Zotero.Collections = new function() {
 	}
 	
 	
-	function getCollectionsContainingItems(itemIDs, asIDs) {
+	this.getCollectionsContainingItems = function (itemIDs, asIDs) {
+		// If an unreasonable number of items, don't try
+		if (itemIDs.length > 100) {
+			return Q([]);
+		}
+		
 		var sql = "SELECT collectionID FROM collections WHERE ";
 		var sqlParams = [];
 		for each(var id in itemIDs) {
@@ -73,13 +77,11 @@ Zotero.Collections = new function() {
 			sqlParams.push(id);
 		}
 		sql = sql.substring(0, sql.length - 5);
-		var collectionIDs = Zotero.DB.columnQuery(sql, sqlParams);
+		return Zotero.DB.columnQueryAsync(sql, sqlParams)
+		.then(function (collectionIDs) {
+			return asIDs ? collectionIDs : Zotero.Collections.get(collectionIDs);
+		});
 		
-		if (asIDs) {
-			return collectionIDs;
-		}
-		
-		return Zotero.Collections.get(collectionIDs);
 	}
 	
 	
