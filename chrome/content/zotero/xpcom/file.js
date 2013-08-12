@@ -217,6 +217,17 @@ Zotero.File = new function(){
 	
 	
 	/*
+	 * Return a promise for the contents of a URL as a string
+	 */
+	this.getContentsFromURLAsync = function (url) {
+		return Zotero.HTTP.promise("GET", url, { responseType: "text" })
+		.then(function (xmlhttp) {
+			return xmlhttp.response;
+		});
+	}
+	
+	
+	/*
 	 * Write string to a file, overwriting existing file if necessary
 	 */
 	function putContents(file, str) {
