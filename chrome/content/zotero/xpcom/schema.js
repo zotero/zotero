@@ -1462,7 +1462,7 @@ Zotero.Schema = new function(){
 	function _updateDBVersion(schema, version) {
 		_dbVersions[schema] = version;
 		var sql = "REPLACE INTO version (schema,version) VALUES (?,?)";
-		return Zotero.DB.queryAsync(sql, [schema, version]);
+		return Zotero.DB.queryAsync(sql, [schema, parseInt(version)]);
 	}
 	
 	
