@@ -1563,7 +1563,7 @@ Zotero.Sync.Server = new function () {
 					Zotero.UnresponsiveScriptIndicator.enable();
 					
 					if (Zotero.locked) {
-						Zotero.hideZoteroPaneOverlay();
+						Zotero.hideZoteroPaneOverlays();
 					}
 					Zotero.suppressUIUpdates = false;
 					_updatesInProgress = false;
@@ -1585,7 +1585,7 @@ Zotero.Sync.Server = new function () {
 						Zotero.UnresponsiveScriptIndicator.enable();
 						
 						if (Zotero.locked) {
-							Zotero.hideZoteroPaneOverlay();
+							Zotero.hideZoteroPaneOverlays();
 						}
 						Zotero.suppressUIUpdates = false;
 						_updatesInProgress = false;

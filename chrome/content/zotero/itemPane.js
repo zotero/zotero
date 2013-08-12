@@ -24,17 +24,16 @@
 */
 
 var ZoteroItemPane = new function() {
-	this.onLoad = onLoad;
-	
 	var _lastItem, _itemBox, _notesLabel, _notesButton, _notesList, _tagsBox, _relatedBox;
 	
-	function onLoad()
-	{
-		if (!Zotero || !Zotero.initialized) {
+	this.onLoad = function () {
+		if (!Zotero) {
 			return;
 		}
 		
 		// Not in item pane, so skip the introductions
+		//
+		// DEBUG: remove?
 		if (!document.getElementById('zotero-view-tabbox')) {
 			return;
 		}

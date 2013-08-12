@@ -167,7 +167,7 @@ ZoteroContext.prototype = {
 			zContext.Zotero.shutdown().then(function() {
 				// create a new zContext
 				makeZoteroContext(isConnector);
-				zContext.Zotero.init();
+				return zContext.Zotero.init();
 			}).done();
 		}
 		
@@ -289,20 +289,30 @@ function ZoteroService() {
 		
 		if(isFirstLoadThisSession) {
 			makeZoteroContext(false);
-			try {
-				zContext.Zotero.init();
-			} catch(e) {
+			Q.fcall(function () {
+				return zContext.Zotero.init();
+			})
+			.catch(function (e) {
+				dump(e + "\n\n");
+				Components.utils.reportError(e);
+				
 				// if Zotero should start as a connector, reload it
-				zContext.Zotero.shutdown().then(function() {
+				return zContext.Zotero.shutdown()
+				.then(function() {
 					makeZoteroContext(true);
-					zContext.Zotero.init();
-				}).done();
-			}
+					return zContext.Zotero.init();
+				})
+			})
+			.then(function () {
+				zContext.Zotero.debug("Initialized in "+(Date.now() - start)+" ms");
+			})
+			.done();
 		}
-		isFirstLoadThisSession = false;	// no longer first load
+		else {
+			zContext.Zotero.debug("Already initialized");
+		}
+		isFirstLoadThisSession = false;
 		this.wrappedJSObject = zContext.Zotero;
-		
-		zContext.Zotero.debug("Initialized in "+(Date.now() - start)+" ms");
 	} catch(e) {
 		var msg = typeof e == 'string' ? e : e.name;
 		dump(e + "\n\n");

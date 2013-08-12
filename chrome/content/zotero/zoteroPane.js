@@ -97,6 +97,8 @@ var ZoteroPane = new function()
 	 * Called when the window containing Zotero pane is open
 	 */
 	function init() {
+		Zotero.debug("Initializing Zotero pane");
+		
 		// Set "Report Errors..." label via property rather than DTD entity,
 		// since we need to reference it in script elsewhere
 		document.getElementById('zotero-tb-actions-reportErrors').setAttribute('label',
@@ -104,9 +106,6 @@ var ZoteroPane = new function()
 		// Set key down handler
 		document.getElementById('appcontent').addEventListener('keydown', ZoteroPane_Local.handleKeyDown, true);
 		
-		if (Zotero.locked) {
-			return;
-		}
 		_loaded = true;
 		
 		var zp = document.getElementById('zotero-pane');
@@ -139,8 +138,6 @@ var ZoteroPane = new function()
 	 * mode
 	 */
 	function _loadPane() {
-		if(!Zotero || !Zotero.initialized) return;
-		
 		if(Zotero.isConnector) {
 			ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('connector.standaloneOpen'));
 			return;
@@ -356,98 +353,100 @@ var ZoteroPane = new function()
 	 */
 	function makeVisible()
 	{
-		// If pane not loaded, load it or display an error message
-		if (!ZoteroPane_Local.loaded) {
-			if (Zotero.locked) {
-				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
-				var msg = Zotero.getString('general.operationInProgress') + '\n\n' + Zotero.getString('general.operationInProgress.waitUntilFinished');
-				ps.alert(null, "", msg);
+		if (Zotero.locked) {
+			Zotero.showZoteroPaneProgressMeter();
+		}
+		Zotero.unlockPromise
+		.then(function () {
+			Zotero.hideZoteroPaneOverlays();
+			
+			// If pane not loaded, load it or display an error message
+			if (!ZoteroPane_Local.loaded) {
+				ZoteroPane_Local.init();
+			}
+			
+			// If Zotero could not be initialized, display an error message and return
+			if (!Zotero || Zotero.skipLoading) {
+				this.displayStartupError();
 				return false;
 			}
-			ZoteroPane_Local.init();
-		}
-		
-		// If Zotero could not be initialized, display an error message and return
-		if(!Zotero || !Zotero.initialized) {
-			this.displayStartupError();
-			return false;
-		}
-		
-		if(!_madeVisible) {
-			this.buildItemTypeSubMenu();
-		}
-		_madeVisible = true;
-		
-		this.unserializePersist();
-		this.updateToolbarPosition();
-		this.updateTagSelectorSize();
-		
-		// restore saved row selection (for tab switching)
-		var containerWindow = (window.ZoteroTab ? window.ZoteroTab.containerWindow : window);
-		if(containerWindow.zoteroSavedCollectionSelection) {
-			this.collectionsView.rememberSelection(containerWindow.zoteroSavedCollectionSelection);
-			delete containerWindow.zoteroSavedCollectionSelection;
-		}
-		
-		// restore saved item selection (for tab switching)
-		if(containerWindow.zoteroSavedItemSelection) {
-			var me = this;
-			// hack to restore saved selection after itemTreeView finishes loading
-			window.setTimeout(function() {
-				if(containerWindow.zoteroSavedItemSelection) {
-					me.itemsView.rememberSelection(containerWindow.zoteroSavedItemSelection);
-					delete containerWindow.zoteroSavedItemSelection;
-				}
-			}, 51);
-		}
-		
-		// Focus the quicksearch on pane open
-		var searchBar = document.getElementById('zotero-tb-search');
-		setTimeout(function () {
-			searchBar.inputField.select();
-		}, 1);
-		
-		var d = new Date();
-		Zotero.purgeDataObjects();
-		var d2 = new Date();
-		Zotero.debug("Purged data tables in " + (d2 - d) + " ms");
-		
-		// Auto-sync on pane open
-		if (Zotero.Prefs.get('sync.autoSync')) {
-			Zotero.proxyAuthComplete
-			.delay(1000)
-			.then(function () {
-				if (!Zotero.Sync.Server.enabled) {
-					Zotero.debug('Sync not enabled -- skipping auto-sync', 4);
-					return;
-				}
-				
-				if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
-					Zotero.debug('Sync already running -- skipping auto-sync', 4);
-					return;
-				}
-				
-				if (Zotero.Sync.Server.manualSyncRequired) {
-					Zotero.debug('Manual sync required -- skipping auto-sync', 4);
-					return;
-				}
-				
-				Zotero.Sync.Runner.sync({
-					background: true
-				});
-			})
-			.done();
-		}
-		
-		// Set sync icon to spinning or not
-		//
-		// We don't bother setting an error state at open
-		if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
-			Zotero.Sync.Runner.setSyncIcon('animate');
-		}
-		
-		return true;
+			
+			if(!_madeVisible) {
+				this.buildItemTypeSubMenu();
+			}
+			_madeVisible = true;
+			
+			this.unserializePersist();
+			this.updateToolbarPosition();
+			this.updateTagSelectorSize();
+			
+			// restore saved row selection (for tab switching)
+			var containerWindow = (window.ZoteroTab ? window.ZoteroTab.containerWindow : window);
+			if(containerWindow.zoteroSavedCollectionSelection) {
+				this.collectionsView.rememberSelection(containerWindow.zoteroSavedCollectionSelection);
+				delete containerWindow.zoteroSavedCollectionSelection;
+			}
+			
+			// restore saved item selection (for tab switching)
+			if(containerWindow.zoteroSavedItemSelection) {
+				var me = this;
+				// hack to restore saved selection after itemTreeView finishes loading
+				window.setTimeout(function() {
+					if(containerWindow.zoteroSavedItemSelection) {
+						me.itemsView.rememberSelection(containerWindow.zoteroSavedItemSelection);
+						delete containerWindow.zoteroSavedItemSelection;
+					}
+				}, 51);
+			}
+			
+			// Focus the quicksearch on pane open
+			var searchBar = document.getElementById('zotero-tb-search');
+			setTimeout(function () {
+				searchBar.inputField.select();
+			}, 1);
+			
+			var d = new Date();
+			Zotero.purgeDataObjects();
+			var d2 = new Date();
+			Zotero.debug("Purged data tables in " + (d2 - d) + " ms");
+			
+			// Auto-sync on pane open
+			if (Zotero.Prefs.get('sync.autoSync')) {
+				Zotero.proxyAuthComplete
+				.delay(1000)
+				.then(function () {
+					if (!Zotero.Sync.Server.enabled) {
+						Zotero.debug('Sync not enabled -- skipping auto-sync', 4);
+						return;
+					}
+					
+					if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
+						Zotero.debug('Sync already running -- skipping auto-sync', 4);
+						return;
+					}
+					
+					if (Zotero.Sync.Server.manualSyncRequired) {
+						Zotero.debug('Manual sync required -- skipping auto-sync', 4);
+						return;
+					}
+					
+					Zotero.Sync.Runner.sync({
+						background: true
+					});
+				})
+				.done();
+			}
+			
+			// Set sync icon to spinning or not
+			//
+			// We don't bother setting an error state at open
+			if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
+				Zotero.Sync.Runner.setSyncIcon('animate');
+			}
+			
+			return true;
+		}.bind(this))
+		.done();
 	}
 	
 	/**
@@ -3965,40 +3964,38 @@ var ZoteroPane = new function()
 	}
 	
 	this.displayStartupError = function(asPaneMessage) {
-		if(!Zotero || !Zotero.initialized) {
-			if (Zotero) {
-				var errMsg = Zotero.startupError;
-				var errFunc = Zotero.startupErrorHandler;
-			}
+		if (Zotero) {
+			var errMsg = Zotero.startupError;
+			var errFunc = Zotero.startupErrorHandler;
+		}
+		
+		if (!errMsg) {
+			// Get the stringbundle manually
+			var src = 'chrome://zotero/locale/zotero.properties';
+			var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
+					getService(Components.interfaces.nsILocaleService);
+			var appLocale = localeService.getApplicationLocale();
+			var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
+				.getService(Components.interfaces.nsIStringBundleService);
+			var stringBundle = stringBundleService.createBundle(src, appLocale);
 			
-			if (!errMsg) {
-				// Get the stringbundle manually
-				var src = 'chrome://zotero/locale/zotero.properties';
-				var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
-						getService(Components.interfaces.nsILocaleService);
-				var appLocale = localeService.getApplicationLocale();
-				var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
-					.getService(Components.interfaces.nsIStringBundleService);
-				var stringBundle = stringBundleService.createBundle(src, appLocale);
-				
-				var errMsg = stringBundle.GetStringFromName('startupError');
-			}
-			
-			if (errFunc) {
-				errFunc();
-			}
-			else {
-				// TODO: Add a better error page/window here with reporting
-				// instructions
-				// window.loadURI('chrome://zotero/content/error.xul');
-				//if(asPaneMessage) {
-				//	ZoteroPane_Local.setItemsPaneMessage(errMsg, true);
-				//} else {
-					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-											.getService(Components.interfaces.nsIPromptService);
-					ps.alert(null, "", errMsg);
-				//}
-			}
+			var errMsg = stringBundle.GetStringFromName('startupError');
+		}
+		
+		if (errFunc) {
+			errFunc();
+		}
+		else {
+			// TODO: Add a better error page/window here with reporting
+			// instructions
+			// window.loadURI('chrome://zotero/content/error.xul');
+			//if(asPaneMessage) {
+			//	ZoteroPane_Local.setItemsPaneMessage(errMsg, true);
+			//} else {
+				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+										.getService(Components.interfaces.nsIPromptService);
+				ps.alert(null, "", errMsg);
+			//}
 		}
 	}
 	

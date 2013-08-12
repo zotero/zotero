@@ -101,7 +101,7 @@ var Zotero_Browser = new function() {
 	 * Initialize some variables and prepare event listeners for when chrome is done loading
 	 */
 	function init() {
-		if (!Zotero || !Zotero.initialized || !window.hasOwnProperty("gBrowser")) {
+		if (!Zotero || Zotero.skipLoading || !window.hasOwnProperty("gBrowser")) {
 			return;
 		}
 		

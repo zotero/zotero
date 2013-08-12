@@ -669,6 +669,6 @@ Zotero_File_Interface.Progress = new function() {
 	}
 	
 	function close() {
-		Zotero.hideZoteroPaneOverlay();
+		Zotero.hideZoteroPaneOverlays();
 	}
 }

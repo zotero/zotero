@@ -38,7 +38,6 @@
 <overlay id="zotero"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
-    <!-- Include the global XPCOM object -->
 	<script src="overlay.js"/>
 	
 	<popup id="contentAreaContextMenu"/>

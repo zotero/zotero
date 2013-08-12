@@ -1476,12 +1476,11 @@ Zotero.Attachments = new function(){
 			}
 			
 			// Since the callback can be called during an import process that uses
-			// Zotero.wait(), try to queue the callback to run at the end,
-			// or run now if not queued
-			var queued = Zotero.addUnlockCallback(writeCallback);
-			if (!queued) {
+			// Zotero.wait(), wait until we're unlocked
+			Zotero.unlockPromise
+			.then(function () {
 				writeCallback();
-			}
+			});
 		};
 		
 		Zotero.File.addCharsetListener(browser, callback, itemID);
