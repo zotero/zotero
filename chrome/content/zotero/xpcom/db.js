@@ -854,7 +854,15 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params) {
 	then(function (c) {
 		conn = c;
 		[sql, params] = self.parseQueryAndParams(sql, params);
-		Zotero.debug(sql, 5);
+		if (Zotero.Debug.enabled) {
+			Zotero.debug(sql, 5);
+			for each(let param in params) {
+				let paramType = typeof param;
+				let msg = "Binding parameter of type " + paramType + ": ";
+				msg += paramType == 'string' ? "'" + param + "'" : param;
+				Zotero.debug(msg, 5);
+			}
+		}
 		return conn.executeCached(sql, params);
 	})
 	.then(function (rows) {
@@ -912,7 +920,15 @@ Zotero.DBConnection.prototype.valueQueryAsync = function (sql, params) {
 	return this._getConnectionAsync().
 	then(function (conn) {
 		[sql, params] = self.parseQueryAndParams(sql, params);
-		Zotero.debug(sql, 5);
+		if (Zotero.Debug.enabled) {
+			Zotero.debug(sql, 5);
+			for each(let param in params) {
+				let paramType = typeof param;
+				let msg = "Binding parameter of type " + paramType + ": ";
+				msg += paramType == 'string' ? "'" + param + "'" : param;
+				Zotero.debug(msg, 5);
+			}
+		}
 		return conn.executeCached(sql, params);
 	})
 	.then(function (rows) {
@@ -960,7 +976,15 @@ Zotero.DBConnection.prototype.columnQueryAsync = function (sql, params) {
 	then(function (c) {
 		conn = c;
 		[sql, params] = self.parseQueryAndParams(sql, params);
-		Zotero.debug(sql, 5);
+		if (Zotero.Debug.enabled) {
+			Zotero.debug(sql, 5);
+			for each(let param in params) {
+				let paramType = typeof param;
+				let msg = "Binding parameter of type " + paramType + ": ";
+				msg += paramType == 'string' ? "'" + param + "'" : param;
+				Zotero.debug(msg, 5);
+			}
+		}
 		return conn.executeCached(sql, params);
 	})
 	.then(function (rows) {
