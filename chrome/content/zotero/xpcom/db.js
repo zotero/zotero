@@ -34,15 +34,6 @@ Zotero.DBConnection = function(dbName) {
 		throw ('DB name not provided in Zotero.DBConnection()');
 	}
 	
-	// Code modules for async methods
-	// Fx21+
-	try {
-		Components.utils.import("resource://gre/modules/commonjs/sdk/core/promise.js", this);
-	}
-	// Fx20
-	catch (e) {
-		Components.utils.import("resource://gre/modules/commonjs/promise/core.js", this);
-	}
 	Components.utils.import("resource://gre/modules/Task.jsm", this);
 	Components.utils.import("resource://gre/modules/Sqlite.jsm", this);
 	
