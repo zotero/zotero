@@ -944,16 +944,6 @@ Zotero.DBConnection.prototype.rowQueryAsync = function (sql, params) {
 	return this.queryAsync(sql, params)
 	.then(function (rows) {
 		return rows.length ? rows[0] : false;
-	})
-	.catch(function (e) {
-		if (e.errors && e.errors[0]) {
-			var eStr = e + "";
-			eStr = eStr.indexOf("Error: ") == 0 ? eStr.substr(7): e;
-			throw new Error(eStr + ' [QUERY: ' + sql + '] [ERROR: ' + e.errors[0].message + ']');
-		}
-		else {
-			throw e;
-		}
 	});
 };
 
