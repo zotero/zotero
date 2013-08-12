@@ -568,8 +568,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		Zotero.DB.addCallback('commit', Zotero.Notifier.commit);
 		Zotero.DB.addCallback('rollback', Zotero.Notifier.reset);
 		
-		Zotero.Fulltext.init();
-		
 		return Q.fcall(function () {
 			// Require >=2.1b3 database to ensure proper locking
 			if (!Zotero.isStandalone) {
@@ -642,6 +640,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				if(Zotero.Prefs.get("httpServer.enabled")) {
 					Zotero.Server.init();
 				}
+				
+				Zotero.Fulltext.init();
 				
 				Zotero.Notifier.registerObserver(Zotero.Tags, 'setting');
 				
