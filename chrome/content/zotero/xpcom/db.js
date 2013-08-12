@@ -842,10 +842,9 @@ Zotero.DBConnection.prototype.executeTransaction = function (func) {
 /**
  * @param {String} sql SQL statement to run
  * @param {Array|String|Integer} [params] SQL parameters to bind
- * @return {Promise} A Q promise for either an array of rows or FALSE if none.
- *                   The individual rows are Proxy objects that return
- *                   values from the underlying mozIStorageRows based
- *                   on column names.
+ * @return {Promise|Array} A Q promise for an array of rows. The individual
+ *                         rows are Proxy objects that return values from the
+ *                         underlying mozIStorageRows based on column names.
  */
 Zotero.DBConnection.prototype.queryAsync = function (sql, params) {
 	let conn;
@@ -913,7 +912,7 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params) {
 /**
  * @param {String} sql SQL statement to run
  * @param {Array|String|Integer} [params] SQL parameters to bind
- * @return {Promise} A Q promise for either the value or FALSE if no rows
+ * @return {Promise:Array|Boolean} A Q promise for either the value or FALSE if no result
  */
 Zotero.DBConnection.prototype.valueQueryAsync = function (sql, params) {
 	let self = this;
@@ -953,13 +952,13 @@ Zotero.DBConnection.prototype.valueQueryAsync = function (sql, params) {
  *
  * @param {String} sql SQL statement to run
  * @param {Array|String|Integer} [params] SQL parameters to bind
- * @return {Promise} A Q promise for either the row or FALSE if no rows
+ * @return {Promise:Array} A Q promise for an array of row values
  */
 Zotero.DBConnection.prototype.rowQueryAsync = function (sql, params) {
 	let self = this;
 	return this.queryAsync(sql, params)
 	.then(function (rows) {
-		return rows.length ? rows[0] : false;
+		return rows.length ? rows[0] : [];
 	});
 };
 
@@ -967,7 +966,7 @@ Zotero.DBConnection.prototype.rowQueryAsync = function (sql, params) {
 /**
  * @param {String} sql SQL statement to run
  * @param {Array|String|Integer} [params] SQL parameters to bind
- * @return {Promise} A Q promise for either the column or FALSE if no rows
+ * @return {Promise:Array} A Q promise for an array of values in the column
  */
 Zotero.DBConnection.prototype.columnQueryAsync = function (sql, params) {
 	let conn;
@@ -988,9 +987,6 @@ Zotero.DBConnection.prototype.columnQueryAsync = function (sql, params) {
 		return conn.executeCached(sql, params);
 	})
 	.then(function (rows) {
-		if (!rows.length) {
-			return false;
-		}
 		var column = [];
 		for (let i=0, len=rows.length; i<len; i++) {
 			column.push(self._getTypedValue(rows[i], 0));
