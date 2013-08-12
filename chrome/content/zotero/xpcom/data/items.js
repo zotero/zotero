@@ -628,6 +628,8 @@ Zotero.Items = new function() {
 		
 		/* This whole block is to get the firstCreator */
 		var localizedAnd = Zotero.getString('general.and');
+		var localizedEtAl = Zotero.getString('general.etAl');
+		
 		var sql = "COALESCE(" +
 			// First try for primary creator types
 			"CASE (" +
@@ -665,7 +667,7 @@ Zotero.Items = new function() {
 				"LEFT JOIN itemTypeCreatorTypes ITCT " +
 				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=I.itemTypeID) " +
 				"WHERE itemID=I.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
-				" || ' et al.' " +
+				" || ' " + localizedEtAl + "' " +
 			") " +
 			"END, " +
 			
@@ -691,7 +693,7 @@ Zotero.Items = new function() {
 				"SELECT " +
 				"(SELECT lastName FROM itemCreators NATURAL JOIN creators NATURAL JOIN creatorData " +
 				"WHERE itemID=I.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1)" +
-				" || ' et al.' " +
+				" || ' " + localizedEtAl + "' " +
 			") " +
 			"END, " +
 			
@@ -717,7 +719,7 @@ Zotero.Items = new function() {
 				"SELECT " +
 				"(SELECT lastName FROM itemCreators NATURAL JOIN creators NATURAL JOIN creatorData " +
 				"WHERE itemID=I.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
-				" || ' et al.' " +
+				" || ' " + localizedEtAl + "' " +
 			") " +
 			"END" +
 		") AS firstCreator";
