@@ -448,7 +448,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 						Zotero.getString('startupError.checkPermissions')
 					]);
 					Zotero.startupError = msg;
-					Zotero.debug(e);
+					Zotero.debug(e, 1);
 					Components.utils.reportError(e);
 					return false;
 				}
@@ -701,9 +701,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				var e = {
 					name: 'NS_ERROR_FILE_ACCESS_DENIED',
 					message: msg,
-					toString: function () {
-						return Zotero.name + ': ' + Zotero.message; 
-					}
+					toString: function () this.message
 				};
 				throw (e);
 			}
@@ -747,7 +745,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				Zotero.startupError = msg;
 			}
 			
-			Components.utils.reportError(e);
+			Zotero.debug(e.toString(), 1);
+			Components.utils.reportError(e); // DEBUG: doesn't always work
 			Zotero.skipLoading = true;
 			return false;
 		}
