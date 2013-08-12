@@ -82,9 +82,10 @@ Zotero.DBConnection = function(dbName) {
 	this._connectionAsync = null;
 	this._transactionDate = null;
 	this._lastTransactionDate = null;
-	this._transactionRollback = null;
+	this._transactionRollback = false;
 	this._transactionNestingLevel = 0;
 	this._transactionWaitLevel = 0;
+	this._asyncTransactionNestingLevel = 0;
 	this._callbacks = { begin: [], commit: [], rollback: [] };
 	this._dbIsCorrupt = null
 	this._self = this;
@@ -809,9 +810,40 @@ Zotero.DBConnection.prototype.getNextName = function (table, field, name)
  *                   pass a result by calling asyncResult(val) at the end
  */
 Zotero.DBConnection.prototype.executeTransaction = function (func) {
+	var self = this;
 	return this._getConnectionAsync()
 	.then(function (conn) {
-		return conn.executeTransaction(func);
+		if (conn.transactionInProgress) {
+			Zotero.debug("Async DB transaction in progress -- increasing level to "
+				+ ++self._asyncTransactionNestingLevel, 5);
+			return self.Task.spawn(func)
+			.then(
+				function (result) {
+					Zotero.debug("Decreasing async DB transaction level to "
+						+ --self._asyncTransactionNestingLevel, 5);
+					return result;
+				},
+				function (e) {
+					Zotero.debug("Rolled back nested async DB transaction", 5);
+					self._asyncTransactionNestingLevel = 0;
+					throw e;
+				}
+			);
+		}
+		else {
+			Zotero.debug("Beginning async DB transaction", 5);
+			return conn.executeTransaction(func)
+			.then(
+				function (result) {
+					Zotero.debug("Committed async DB transaction", 5);
+					return result;
+				},
+				function (e) {
+					Zotero.debug("Rolled back async DB transaction", 5);
+					throw e;
+				}
+			);
+		}
 	});
 };
 
