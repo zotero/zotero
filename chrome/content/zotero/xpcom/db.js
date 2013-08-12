@@ -851,10 +851,10 @@ Zotero.DBConnection.prototype.executeTransaction = function (func) {
 /**
  * @param {String} sql SQL statement to run
  * @param {Array|String|Integer} [params] SQL parameters to bind
- * @return {Promise|FALSE} A Q promise for an array of rows, or FALSE if none.
- *                         The individual rows are Proxy objects that return
- *                         values from the underlying mozIStorageRows based
- *                         on column names.
+ * @return {Promise} A Q promise for either an array of rows or FALSE if none.
+ *                   The individual rows are Proxy objects that return
+ *                   values from the underlying mozIStorageRows based
+ *                   on column names.
  */
 Zotero.DBConnection.prototype.queryAsync = function (sql, params) {
 	let conn;
@@ -897,6 +897,16 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params) {
 				return conn.affectedRows;
 			}
 		}
+	})
+	.catch(function (e) {
+		if (e.errors && e.errors[0]) {
+			var eStr = e + "";
+			eStr = eStr.indexOf("Error: ") == 0 ? eStr.substr(7): e;
+			throw new Error(eStr + ' [QUERY: ' + sql + '] [ERROR: ' + e.errors[0].message + ']');
+		}
+		else {
+			throw e;
+		}
 	});
 };
 
@@ -904,7 +914,7 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params) {
 /**
  * @param {String} sql SQL statement to run
  * @param {Array|String|Integer} [params] SQL parameters to bind
- * @return {Promise|FALSE} A Q promise for the value, or FALSE if no rows
+ * @return {Promise} A Q promise for either the value or FALSE if no rows
  */
 Zotero.DBConnection.prototype.valueQueryAsync = function (sql, params) {
 	let self = this;
@@ -916,6 +926,16 @@ Zotero.DBConnection.prototype.valueQueryAsync = function (sql, params) {
 	})
 	.then(function (rows) {
 		return rows.length ? self._getTypedValue(rows[0], 0) : false;
+	})
+	.catch(function (e) {
+		if (e.errors && e.errors[0]) {
+			var eStr = e + "";
+			eStr = eStr.indexOf("Error: ") == 0 ? eStr.substr(7): e;
+			throw new Error(eStr + ' [QUERY: ' + sql + '] [ERROR: ' + e.errors[0].message + ']');
+		}
+		else {
+			throw e;
+		}
 	});
 };
 
@@ -926,13 +946,23 @@ Zotero.DBConnection.prototype.valueQueryAsync = function (sql, params) {
  *
  * @param {String} sql SQL statement to run
  * @param {Array|String|Integer} [params] SQL parameters to bind
- * @return {Promise|FALSE} A Q promise for the row, or FALSE if no rows
+ * @return {Promise} A Q promise for either the row or FALSE if no rows
  */
 Zotero.DBConnection.prototype.rowQueryAsync = function (sql, params) {
 	let self = this;
 	return this.queryAsync(sql, params)
 	.then(function (rows) {
 		return rows.length ? rows[0] : false;
+	})
+	.catch(function (e) {
+		if (e.errors && e.errors[0]) {
+			var eStr = e + "";
+			eStr = eStr.indexOf("Error: ") == 0 ? eStr.substr(7): e;
+			throw new Error(eStr + ' [QUERY: ' + sql + '] [ERROR: ' + e.errors[0].message + ']');
+		}
+		else {
+			throw e;
+		}
 	});
 };
 
@@ -940,7 +970,7 @@ Zotero.DBConnection.prototype.rowQueryAsync = function (sql, params) {
 /**
  * @param {String} sql SQL statement to run
  * @param {Array|String|Integer} [params] SQL parameters to bind
- * @return {Promise|FALSE} A Q promise for the column, or FALSE if no rows
+ * @return {Promise} A Q promise for either the column or FALSE if no rows
  */
 Zotero.DBConnection.prototype.columnQueryAsync = function (sql, params) {
 	let conn;
@@ -961,6 +991,16 @@ Zotero.DBConnection.prototype.columnQueryAsync = function (sql, params) {
 			column.push(self._getTypedValue(rows[i], 0));
 		}
 		return column;
+	})
+	.catch(function (e) {
+		if (e.errors && e.errors[0]) {
+			var eStr = e + "";
+			eStr = eStr.indexOf("Error: ") == 0 ? eStr.substr(7): e;
+			throw new Error(eStr + ' [QUERY: ' + sql + '] [ERROR: ' + e.errors[0].message + ']');
+		}
+		else {
+			throw e;
+		}
 	});
 };
 
