@@ -138,14 +138,16 @@ Zotero.Schema = new function(){
 						}
 						
 						// After a delay, start update of bundled files and repo updates
-						setTimeout(function () {
+						Zotero.initializationPromise
+						.delay(5000)
+						.then(function () {
 							Zotero.UnresponsiveScriptIndicator.disable();
-							Zotero.Schema.updateBundledFiles(null, false, true)
+							return Zotero.Schema.updateBundledFiles(null, false, true)
 							.finally(function () {
-									Zotero.UnresponsiveScriptIndicator.enable();
-							})
-							.done();
-						}, 5000);
+								Zotero.UnresponsiveScriptIndicator.enable();
+							});
+						})
+						.done();
 						
 						return updated;
 					});
