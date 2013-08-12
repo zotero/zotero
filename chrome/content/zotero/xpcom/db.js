@@ -1314,21 +1314,6 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 	
 	var fileName = this._dbName + '.sqlite';
 	
-	if (this._dbName == 'zotero' && ZOTERO_CONFIG['DB_REBUILD']) {
-		if (confirm('Erase all user data and recreate database from schema?')) {
-			// Delete existing Zotero database
-			if (file.exists()) {
-				file.remove(null);
-			}
-			
-			// Delete existing storage folder
-			var dir = Zotero.getStorageDirectory();
-			if (dir.exists()) {
-				dir.remove(true);
-			}
-		}
-	}
-	
 	catchBlock: try {
 		var corruptMarker = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt');
 		if (corruptMarker.exists()) {
