@@ -167,24 +167,28 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 				return;
 			}
 			
+			var key = String.fromCharCode(event.which);
+			if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
+				self.expandAllRows();
+				event.preventDefault();
+				return;
+			}
+			else if (key == '-' && !(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)) {
+				self.collapseAllRows();
+				event.preventDefault();
+				return;
+			}
+			
 			// Ignore other non-character keypresses
-			if (!event.charCode) {
+			if (!event.charCode || event.shiftKey || event.ctrlKey ||
+					event.altKey || event.metaKey) {
 				return;
 			}
 			
 			event.preventDefault();
 			
 			Q.fcall(function () {
-				var key = String.fromCharCode(event.which);
-				if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
-					self.expandAllRows();
-					return false;
-				}
-				else if (key == '-' && !(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)) {
-					self.collapseAllRows();
-					return false;
-				}
-				else if (coloredTagsRE.test(key)) {
+				if (coloredTagsRE.test(key)) {
 					let libraryID = self._itemGroup.libraryID;
 					libraryID = libraryID ? parseInt(libraryID) : 0;
 					let position = parseInt(key) - 1;
@@ -594,7 +598,8 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 			// Clear item type icons
 			var items = Zotero.Items.get(ids);
 			for (let i=0; i<items.length; i++) {
-				delete this._itemImages[items[i].id];
+				let id = items[i].id;
+				delete this._itemImages[id];
 			}
 			
 			this.refresh();
@@ -608,7 +613,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 			var items = Zotero.Items.get(ids);
 			
 			for each(var item in items) {
-				var id = item.id;
+				let id = item.id;
 				
 				// Make sure row map is up to date
 				// if we made changes in a previous loop
@@ -694,8 +699,9 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 			var isTrash = itemGroup.isTrash();
 			var items = Zotero.Items.get(ids);
 			for each(var item in items) {
+				let id = item.id;
 				// Clear item type icon
-				delete this._itemImages[item.id];
+				delete this._itemImages[id];
 				
 				// If not viewing trash and all items were deleted, ignore modify
 				if (allDeleted && !isTrash && !item.deleted) {
@@ -1065,34 +1071,53 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 		if (this._itemGroup.isTrash()) return false;
 		
 		var treerow = this._getItemAtRow(row);
+		var item = treerow.ref;
 		
 		if ((!this.isContainer(row) || !this.isContainerOpen(row))
-				&& Zotero.Sync.Storage.getItemDownloadImageNumber(treerow.ref)) {
+				&& Zotero.Sync.Storage.getItemDownloadImageNumber(item)) {
 			return '';
 		}
 		
+		var itemID = item.id;
+		
 		if (treerow.level === 0) {
-			if (treerow.ref.isRegularItem()) {
-				switch (treerow.ref.getBestAttachmentState()) {
-					case 1:
-						return "chrome://zotero/skin/bullet_blue.png";
-					
-					case -1:
-						return "chrome://zotero/skin/bullet_blue_empty.png";
-					
-					default:
-						return "";
+			if (item.isRegularItem()) {
+				let state = item.getBestAttachmentState(true);
+				if (state !== null) {
+					switch (state) {
+						case 1:
+							return "chrome://zotero/skin/bullet_blue.png";
+						
+						case -1:
+							return "chrome://zotero/skin/bullet_blue_empty.png";
+						
+						default:
+							return "";
+					}
 				}
+				
+				item.getBestAttachmentStateAsync()
+				// Refresh cell when promise is fulfilled
+				.then(function (state) {
+					this._treebox.invalidateCell(row, col);
+				}.bind(this))
+				.done();
 			}
 		}
 		
-		if (treerow.ref.isFileAttachment()) {
-			if (treerow.ref.fileExists) {
-				return "chrome://zotero/skin/bullet_blue.png";
+		if (item.isFileAttachment()) {
+			let exists = item.fileExists(true);
+			if (exists !== null) {
+				return exists
+					? "chrome://zotero/skin/bullet_blue.png"
+					: "chrome://zotero/skin/bullet_blue_empty.png";
 			}
-			else {
-				return "chrome://zotero/skin/bullet_blue_empty.png";
-			}
+			
+			item.fileExistsAsync()
+			// Refresh cell when promise is fulfilled
+			.then(function (exists) {
+				this._treebox.invalidateCell(row, col);
+			}.bind(this));
 		}
 	}
 }
@@ -1357,7 +1382,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		case 'hasAttachment':
 			getField = function (row) {
 				if (row.ref.isAttachment()) {
-					var state = row.ref.fileExists ? 1 : -1;
+					var state = row.ref.fileExists() ? 1 : -1;
 				}
 				else if (row.ref.isRegularItem()) {
 					var state = row.ref.getBestAttachmentState();
@@ -2993,7 +3018,15 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 				
 				try {
 					Zotero.DB.beginTransaction();
-					var itemID = Zotero.Attachments.importFromFile(file, sourceItemID, targetLibraryID);
+					if (dragData.dropEffect == 'link') {
+						var itemID = Zotero.Attachments.linkFromFile(file, sourceItemID);
+					}
+					else {
+						if (dragData.dropEffect != 'copy') {
+							Components.utils.reportError("Invalid dropEffect '" + dragData.dropEffect + "' dropping file");
+						}
+						var itemID = Zotero.Attachments.importFromFile(file, sourceItemID, targetLibraryID);
+					}
 					if (parentCollectionID) {
 						var col = Zotero.Collections.get(parentCollectionID);
 						if (col) {
@@ -3015,21 +3048,46 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 }
 
 Zotero.ItemTreeView.prototype.onDragEnter = function (event) {
-	//Zotero.debug("Storing current drag data");
 	Zotero.DragDrop.currentDataTransfer = event.dataTransfer;
+	return false;
 }
 
 /*
  * Called by HTML 5 Drag and Drop when dragging over the tree
  */
-Zotero.ItemTreeView.prototype.onDragOver = function (event, dropdata, session) {
+Zotero.ItemTreeView.prototype.onDragOver = function (event) {
+	Zotero.DragDrop.currentDataTransfer = event.dataTransfer;
+	if (event.dataTransfer.types.contains("application/x-moz-file")) {
+		// As of Aug. 2013 nightlies:
+		//
+		// - Setting the dropEffect only works on Linux and OS X.
+		//
+		// - Modifier keys don't show up in the drag event on OS X until the
+		//   drop, so since we can't show a correct effect, we leave it at
+		//   the default 'move', the least misleading option.
+		//
+		// - The cursor effect gets set by the system on Windows 7 and can't
+		//   be overridden.
+		if (!Zotero.isMac) {
+			if (event.ctrlKey && event.shiftKey) {
+				event.dataTransfer.dropEffect = "link";
+			}
+			else {
+				event.dataTransfer.dropEffect = "copy";
+			}
+		}
+	}
+	// Show copy symbol when dragging an item over a collection
+	else if (event.dataTransfer.getData("zotero/item")) {
+		event.dataTransfer.dropEffect = "copy";
+	}
 	return false;
 }
 
 /*
  * Called by HTML 5 Drag and Drop when dropping onto the tree
  */
-Zotero.ItemTreeView.prototype.onDrop = function (event, dropdata, session) {
+Zotero.ItemTreeView.prototype.onDrop = function (event) {
 	return false;
 }
 

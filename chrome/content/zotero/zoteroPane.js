@@ -280,17 +280,8 @@ var ZoteroPane = new function()
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", itemTypes[i].localized);
 			menuitem.setAttribute("tooltiptext", "");
-			var mydata = {};
-			var mytype;
-			if (itemTypes[i].realID) {
-				mytype = itemTypes[i].realID;
-				mydata.extra = '{:type:' + itemTypes[i].id + '} ';
-			} else {
-				mytype = itemTypes[i].id;
-			}
-			let type = mytype;
-			let data = mydata;
-			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, data, null, true); }, false);
+			let type = itemTypes[i].id;
+			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, {}, null, true); }, false);
 			moreMenu.appendChild(menuitem);
 		}
 	}
@@ -327,17 +318,8 @@ var ZoteroPane = new function()
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", itemTypes[i].localized);
 			menuitem.setAttribute("tooltiptext", "");
-			var mydata = {};
-			var mytype;
-			if (itemTypes[i].realID) {
-				mytype = itemTypes[i].realID;
-				mydata.extra = '{:type:' + itemTypes[i].id + '} ';
-			} else {
-				mytype = itemTypes[i].id;
-			}
-			let type = mytype;
-			let data = mydata;
-			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, data, null, true); }, false);
+			let type = itemTypes[i].id;
+			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, {}, null, true); }, false);
 			menuitem.className = "zotero-tb-add";
 			addMenu.insertBefore(menuitem, separator);
 		}
@@ -364,11 +346,7 @@ var ZoteroPane = new function()
 		if(this.collectionsView) this.collectionsView.unregister();
 		if(this.itemsView) this.itemsView.unregister();
 		
-		try {
-			observerService.removeObserver(_reloadObserver, "zotero-reloaded");
-		} catch (e) {
-			Zotero.debug("Warning: failure removing observer on window close.");
-		}
+		observerService.removeObserver(_reloadObserver, "zotero-reloaded");
 	}
 	
 	/**
@@ -455,7 +433,9 @@ var ZoteroPane = new function()
 					return;
 				}
 				
-				Zotero.Sync.Runner.sync(true);
+				Zotero.Sync.Runner.sync({
+					background: true
+				});
 			})
 			.done();
 		}
@@ -532,128 +512,7 @@ var ZoteroPane = new function()
 				}
 				ZoteroPane_Local.collectionsView.setHighlightedRows();
 			}
-			
-			return;
 		}
-		else if (from == 'zotero-items-tree') {
-			// Focus TinyMCE explicitly on tab key, since the normal focusing
-			// doesn't work right
-			if (!event.shiftKey && event.keyCode == event.DOM_VK_TAB) {
-				var deck = document.getElementById('zotero-item-pane-content');
-				if (deck.selectedPanel.id == 'zotero-view-note') {
-					setTimeout(function () {
-						document.getElementById('zotero-note-editor').focus();
-					}, 0);
-				}
-			}
-			return;
-		}
-		
-		// Ignore keystrokes if Zotero pane is closed
-		var zoteroPane = document.getElementById('zotero-pane-stack');
-		if (zoteroPane.getAttribute('hidden') == 'true' ||
-				zoteroPane.getAttribute('collapsed') == 'true') {
-			return;
-		}
-		
-		var useShift = Zotero.isMac;
-		
-		var key = String.fromCharCode(event.which);
-		if (!key) {
-			Zotero.debug('No key');
-			return;
-		}
-		
-		// Ignore modifiers other than Ctrl-Alt or Cmd-Shift
-		if (!((Zotero.isMac ? event.metaKey : event.ctrlKey) &&
-				(useShift ? event.shiftKey : event.altKey))) {
-			return;
-		}
-		
-		var command = Zotero.Keys.getCommand(key);
-		if (!command) {
-			return;
-		}
-		
-		Zotero.debug(command);
-		
-		// Errors don't seem to make it out otherwise
-		try {
-		
-		switch (command) {
-			case 'openZotero':
-				try {
-					// Ignore Cmd-Shift-Z keystroke in text areas
-					if (Zotero.isMac && key == 'Z' &&
-							event.originalTarget.localName == 'textarea') {
-						Zotero.debug('Ignoring keystroke in text area');
-						return;
-					}
-				}
-				catch (e) {
-					Zotero.debug(e);
-				}
-				if(window.ZoteroOverlay) window.ZoteroOverlay.toggleDisplay()
-				break;
-			case 'library':
-				document.getElementById('zotero-collections-tree').focus();
-				//var selection = ZoteroPane_Local.collectionsView.getLastViewedRow();
-				//ZoteroPane_Local.collectionsView.selection.select(selection);
-				break;
-			case 'quicksearch':
-				document.getElementById('zotero-tb-search').select();
-				break;
-			case 'newItem':
-				ZoteroPane_Local.newItem(2); // book
-				var menu = document.getElementById('zotero-editpane-item-box').itemTypeMenu;
-				menu.focus();
-				document.getElementById('zotero-editpane-item-box').itemTypeMenu.menupopup.openPopup(menu, "before_start", 0, 0);
-				break;
-			case 'newNote':
-				// If a regular item is selected, use that as the parent.
-				// If a child item is selected, use its parent as the parent.
-				// Otherwise create a standalone note.
-				var parent = false;
-				var items = ZoteroPane_Local.getSelectedItems();
-				if (items.length == 1) {
-					if (items[0].isRegularItem()) {
-						parent = items[0].id;
-					}
-					else {
-						parent = items[0].getSource();
-					}
-				}
-				// Use key that's not the modifier as the popup toggle
-				ZoteroPane_Local.newNote(
-					useShift ? event.altKey : event.shiftKey, parent
-				);
-				break;
-			case 'toggleTagSelector':
-				ZoteroPane_Local.toggleTagSelector();
-				break;
-			case 'toggleFullscreen':
-				ZoteroPane_Local.toggleTab();
-				break;
-			case 'copySelectedItemCitationsToClipboard':
-				ZoteroPane_Local.copySelectedItemsToClipboard(true)
-				break;
-			case 'copySelectedItemsToClipboard':
-				ZoteroPane_Local.copySelectedItemsToClipboard();
-				break;
-			case 'importFromClipboard':
-				Zotero_File_Interface.importFromClipboard();
-				break;
-			default:
-				throw ('Command "' + command + '" not found in ZoteroPane_Local.handleKeyDown()');
-		}
-		
-		}
-		catch (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
-		}
-		
-		event.preventDefault();
 	}
 	
 	
@@ -686,7 +545,21 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function handleKeyPress(event, from) {
+	function handleKeyPress(event) {
+		var from = event.originalTarget.id;
+		
+		// Ignore keystrokes if Zotero pane is closed
+		var zoteroPane = document.getElementById('zotero-pane-stack');
+		if (zoteroPane.getAttribute('hidden') == 'true' ||
+				zoteroPane.getAttribute('collapsed') == 'true') {
+			return;
+		}
+		
+		if (Zotero.locked) {
+			event.preventDefault();
+			return;
+		}
+		
 		if (from == 'zotero-collections-tree') {
 			if ((event.keyCode == event.DOM_VK_BACK_SPACE && Zotero.isMac) ||
 					event.keyCode == event.DOM_VK_DELETE) {
@@ -697,7 +570,17 @@ var ZoteroPane = new function()
 			}
 		}
 		else if (from == 'zotero-items-tree') {
-			if ((event.keyCode == event.DOM_VK_BACK_SPACE && Zotero.isMac) ||
+			// Focus TinyMCE explicitly on tab key, since the normal focusing
+			// doesn't work right
+			if (!event.shiftKey && event.keyCode == event.DOM_VK_TAB) {
+				var deck = document.getElementById('zotero-item-pane-content');
+				if (deck.selectedPanel.id == 'zotero-view-note') {
+					setTimeout(function () {
+						document.getElementById('zotero-note-editor').focus();
+					}, 0);
+				}
+			}
+			else if ((event.keyCode == event.DOM_VK_BACK_SPACE && Zotero.isMac) ||
 					event.keyCode == event.DOM_VK_DELETE) {
 				// If Cmd/Ctrl delete, use forced mode, which does different
 				// things depending on the context
@@ -720,6 +603,118 @@ var ZoteroPane = new function()
 				return;
 			}
 		}
+		
+		var key = String.fromCharCode(event.which);
+		if (!key) {
+			Zotero.debug('No key');
+			return;
+		}
+		
+		// Ignore modifiers other than Ctrl-Shift/Cmd-Shift
+		if (!((Zotero.isMac ? event.metaKey : event.ctrlKey) && event.shiftKey)) {
+			return;
+		}
+		
+		var command = Zotero.Keys.getCommand(key);
+		if (!command) {
+			return;
+		}
+		
+		Zotero.debug(command);
+		
+		// Errors don't seem to make it out otherwise
+		try {
+			switch (command) {
+				case 'openZotero':
+					try {
+						// Ignore Cmd-Shift-Z keystroke in text areas
+						if (Zotero.isMac && key == 'Z' &&
+								event.originalTarget.localName == 'textarea') {
+							Zotero.debug('Ignoring keystroke in text area');
+							return;
+						}
+					}
+					catch (e) {
+						Zotero.debug(e);
+					}
+					if (window.ZoteroOverlay) window.ZoteroOverlay.toggleDisplay()
+					break;
+				case 'library':
+					document.getElementById('zotero-collections-tree').focus();
+					break;
+				case 'quicksearch':
+					document.getElementById('zotero-tb-search').select();
+					break;
+				case 'newItem':
+					// Default to most recent item type from here or the
+					// New Type menu
+					var mru = Zotero.Prefs.get('newItemTypeMRU');
+					// Or fall back to 'book'
+					var typeID = mru ? mru.split(',')[0] : 2;
+					ZoteroPane_Local.newItem(typeID);
+					let itemBox = document.getElementById('zotero-editpane-item-box');
+					var menu = itemBox.itemTypeMenu;
+					var self = this;
+					var handleTypeChange = function () {
+						self.addItemTypeToNewItemTypeMRU(this.itemTypeMenu.value);
+						itemBox.removeHandler('itemtypechange', handleTypeChange);
+					};
+					// Only update the MRU when the menu is opened for the
+					// keyboard shortcut, not on subsequent opens
+					var removeTypeChangeHandler = function () {
+						itemBox.removeHandler('itemtypechange', handleTypeChange);
+						itemBox.itemTypeMenu.firstChild.removeEventListener('popuphiding', removeTypeChangeHandler);
+						// Focus the title field after menu closes
+						itemBox.focusFirstField();
+					};
+					itemBox.addHandler('itemtypechange', handleTypeChange);
+					itemBox.itemTypeMenu.firstChild.addEventListener('popuphiding', removeTypeChangeHandler);
+					
+					menu.focus();
+					document.getElementById('zotero-editpane-item-box').itemTypeMenu.menupopup.openPopup(menu, "before_start", 0, 0);
+					break;
+				case 'newNote':
+					// If a regular item is selected, use that as the parent.
+					// If a child item is selected, use its parent as the parent.
+					// Otherwise create a standalone note.
+					var parent = false;
+					var items = ZoteroPane_Local.getSelectedItems();
+					if (items.length == 1) {
+						if (items[0].isRegularItem()) {
+							parent = items[0].id;
+						}
+						else {
+							parent = items[0].getSource();
+						}
+					}
+					// Use key that's not the modifier as the popup toggle
+					ZoteroPane_Local.newNote(event.altKey, parent);
+					break;
+				case 'toggleTagSelector':
+					ZoteroPane_Local.toggleTagSelector();
+					break;
+				case 'toggleFullscreen':
+					ZoteroPane_Local.toggleTab();
+					break;
+				case 'copySelectedItemCitationsToClipboard':
+					ZoteroPane_Local.copySelectedItemsToClipboard(true)
+					break;
+				case 'copySelectedItemsToClipboard':
+					ZoteroPane_Local.copySelectedItemsToClipboard();
+					break;
+				case 'importFromClipboard':
+					Zotero_File_Interface.importFromClipboard();
+					break;
+				default:
+					throw ('Command "' + command + '" not found in ZoteroPane_Local.handleKeyDown()');
+			}
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+		}
+		
+		event.preventDefault();
 	}
 	
 	
@@ -772,24 +767,32 @@ var ZoteroPane = new function()
 		//set to Info tab
 		document.getElementById('zotero-view-item').selectedIndex = 0;
 		
-		// Update most-recently-used list for New Item menu
 		if (manual) {
-			var mru = Zotero.Prefs.get('newItemTypeMRU');
-			if (mru) {
-				var mru = mru.split(',');
-				var pos = mru.indexOf(typeID + '');
-				if (pos != -1) {
-					mru.splice(pos, 1);
-				}
-				mru.unshift(typeID);
-			}
-			else {
-				var mru = [typeID + ''];
-			}
-			Zotero.Prefs.set('newItemTypeMRU', mru.slice(0, 5).join(','));
+			// Focus the title field
+			document.getElementById('zotero-editpane-item-box').focusFirstField();
+			
+			// Update most-recently-used list for New Item menu
+			this.addItemTypeToNewItemTypeMRU(typeID);
 		}
 		
 		return Zotero.Items.get(itemID);
+	}
+	
+	
+	this.addItemTypeToNewItemTypeMRU = function (itemTypeID) {
+		var mru = Zotero.Prefs.get('newItemTypeMRU');
+		if (mru) {
+			var mru = mru.split(',');
+			var pos = mru.indexOf(itemTypeID + '');
+			if (pos != -1) {
+				mru.splice(pos, 1);
+			}
+			mru.unshift(itemTypeID);
+		}
+		else {
+			var mru = [itemTypeID + ''];
+		}
+		Zotero.Prefs.set('newItemTypeMRU', mru.slice(0, 5).join(','));
 	}
 	
 	
@@ -1505,11 +1508,6 @@ var ZoteroPane = new function()
 		item.clone(false, newItem, false, !Zotero.Prefs.get('groups.copyTags'));
 		newItem.save();
 		
-		var title = "title";
-		if (newItem.itemTypeID == 17) {
-			title = "caseName";
-		}
-
 		if (this.itemsView._itemGroup.isCollection() && !newItem.getSource()) {
 			this.itemsView._itemGroup.ref.addItem(newItem.id);
 		}
@@ -1795,65 +1793,13 @@ var ZoteroPane = new function()
 		// tried it the OS X clipboard seemed to be getting text vs. HTML wrong,
 		// automatically converting text/html to plaintext rather than using
 		// text/unicode. (That may be fixable, however.)
-
-		var url = (window.content && window.content.location ? window.content.location.href : null);
-		var [mode, format] = Zotero.QuickCopy.getFormatFromURL(url).split('=');
-		var [mode, contentType] = mode.split('/');
-		
-		var extras = undefined;
 		var canCopy = false;
-		if (mode === 'bibliography' && asCitations && Zotero.Prefs.get("export.quickCopy.linkOption")) {
-			// When copying citations against a note, use the parent item
-			// Save locator and cite suffix info on extras
-			extras = [];
-			for (var i = 0, ilen = items.length; i < ilen; i += 1) {
-				var item = items[i];
-				var extra = {};
-				if (item.isNote()) {
-					var parentID = item.getSource();
-					if (parentID) {
-						items[i] = Zotero.Items.get(parentID);
-					}
-					var note = item.getNote();
-					if (note) {
-						note = note.replace(/<[^>]+>/g, "");
-						note = note.replace(/&nbsp;/g, " ");
-						note = note.split("\n");
-						var summary = "";
-						var quote = "";
-						for (var j = 0, jlen = note.length; j < jlen; j += 1) {
-							if (["p."].indexOf(note[j].split(/\s+/)[0]) > -1) {
-								extra.locator_txt = note[j];
-							} else if (note[j].slice(0, 1) === "=") {
-								quote += note[j].slice(1).replace(/^\s+/, "").replace(/\s+$/, "") + " ";
-							} else if (note[j].slice(0, 1) === "~") {
-								summary += note[j].slice(1).replace(/^\s+/, "").replace(/\s+$/, "") + " ";
-							} else if (note[j].replace(/\s+/, "")) {
-								break;
-							}
-						}
-						if (quote) {
-							extra.suffix_txt = '("' + quote.replace(/\s+$/, "") + '")';
-						} else if (summary) {
-							extra.suffix_txt = '(' + summary.replace(/\s+$/, "") + ')';
-						}
-					}
-				}
-				if (items[i].isRegularItem()) {
-					extra.id = items[i].id;
-					extras.push(extra);
-					canCopy = true;
-				}
-			}
-		} else {
-			for each(var item in items) {
-				if (item.isRegularItem()) {
-					canCopy = true;
-					break;
-				}
+		for each(var item in items) {
+			if (item.isRegularItem()) {
+				canCopy = true;
+				break;
 			}
 		}
-
 		if (!canCopy) {
 			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 									.getService(Components.interfaces.nsIPromptService);
@@ -1861,9 +1807,13 @@ var ZoteroPane = new function()
 			return;
 		}
 		
+		var url = (window.content && window.content.location ? window.content.location.href : null);
+		var [mode, format] = Zotero.QuickCopy.getFormatFromURL(url).split('=');
+		var [mode, contentType] = mode.split('/');
+		
 		if (mode == 'bibliography') {
 			if (asCitations) {
-				Zotero_File_Interface.copyCitationToClipboard(items, format, contentType == 'html', extras);
+				Zotero_File_Interface.copyCitationToClipboard(items, format, contentType == 'html');
 			}
 			else {
 				Zotero_File_Interface.copyItemsToClipboard(items, format, contentType == 'html');
@@ -2615,14 +2565,8 @@ var ZoteroPane = new function()
 			else if (tree.id == 'zotero-items-tree') {
 				let itemGroup = ZoteroPane_Local.getItemGroup();
 				if (itemGroup.isDuplicates()) {
-					if (event.button == 0 && (event.metaKey || event.shiftKey
-						|| event.altKey || event.ctrlKey)) {
-						return;
-					}
-					
-					// Allow right-click on single items/attachments
-					var items = ZoteroPane_Local.getSelectedItems();
-					if (event.button != 0 && items.length == 1) {
+					if (event.button != 0 || event.metaKey || event.shiftKey
+						|| event.altKey || event.ctrlKey) {
 						return;
 					}
 					
@@ -2655,7 +2599,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		if (tree.id == 'zotero-collections-tree') {
+		if (tree.id == 'zotero-collections-tree') {                                                    
 			// Ignore triple clicks for collections
 			if (event.detail != 2) {
 				return;
@@ -3555,6 +3499,7 @@ var ZoteroPane = new function()
 					this.loadURI(url, event);
 				}
 				else {
+					Zotero.Notifier.trigger('open', 'file', itemID);
 					Zotero.launchFile(file);
 				}
 			}
@@ -3676,6 +3621,7 @@ var ZoteroPane = new function()
 					var parent = file.parent.QueryInterface(Components.interfaces.nsILocalFile);
 					Zotero.launchFile(parent);
 				}
+				Zotero.Notifier.trigger('open', 'file', attachment.id);
 			}
 			else {
 				this.showAttachmentNotFoundDialog(attachment.id, noLocateOnMissing)
@@ -4150,13 +4096,6 @@ var ZoteroPane = new function()
 	 */
 	this.openAboutDialog = function() {
 		window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome');
-	}
-	
-	/**
-	 * Opens the MLZ Welcome dialog
-	 */
-	this.openMlzWelcomeDialog = function() {
-		window.openDialog('chrome://zotero/content/mlzwelcome.xul', 'mlzwelcome', 'chrome');
 	}
 	
 	/**

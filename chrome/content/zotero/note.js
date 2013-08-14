@@ -88,8 +88,7 @@ function onUnload()
 
 var NotifyCallback = {
 	notify: function(action, type, ids){
-		// DEBUG: why does this reset without checking the modified ids?
-		if (noteEditor.item) {
+		if (noteEditor.item && ids.indexOf(noteEditor.item.id) != -1) {
 			noteEditor.item = noteEditor.item;
 			
 			// If the document title hasn't yet been set, reset undo so

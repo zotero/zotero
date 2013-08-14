@@ -42,7 +42,7 @@ const ZOTERO_CONFIG = {
 	BOOKMARKLET_ORIGIN : 'https://www.zotero.org',
 	HTTP_BOOKMARKLET_ORIGIN : 'http://www.zotero.org',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "4.0.8.SOURCE"
+	VERSION: "4.0.12.SOURCE"
 };
 
 // Commonly used imports accessible anywhere
@@ -229,9 +229,10 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		this.mainThread = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
 		
-		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
-				getService(Components.interfaces.nsIXULAppInfo),
-			platformVersion = appInfo.platformVersion;
+		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
+			.getService(Components.interfaces.nsIXULAppInfo);
+		this.platformVersion = appInfo.platformVersion;
+		this.platformMajorVersion = parseInt(appInfo.platformVersion.match(/^[0-9]+/)[0]);
 		this.isFx = true;
 		this.isFx3 = false;
 		this.isFx35 = false;
@@ -313,6 +314,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		else {
 			Zotero.dir = 'ltr';
 		}
+
+		// Make sure that Zotero Standalone is not running as root
+		if(Zotero.isStandalone && !Zotero.isWin) _checkRoot();
 		
 		try {
 			var dataDir = Zotero.getZoteroDirectory();
@@ -425,7 +429,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		}
 		
 		// Register shutdown handler to call Zotero.shutdown()
-		var _shutdownObserver = {observe:Zotero.shutdown};
+		var _shutdownObserver = {observe:function() { Zotero.shutdown().done() }};
 		Services.obs.addObserver(_shutdownObserver, "quit-application", false);
 		
 		try {
@@ -844,7 +848,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	}
 	
 	
-	this.shutdown = function (subject, topic, data) {
+	this.shutdown = function() {
 		Zotero.debug("Shutting down Zotero");
 		
 		try {
@@ -872,17 +876,17 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				Components.utils.forceGC();
 				
 				// unlock DB
-				Zotero.DB.closeDatabase();
-				
-				// broadcast that DB lock has been released
-				Zotero.IPC.broadcast("lockReleased");
+				return Zotero.DB.closeDatabase().then(function() {				
+					// broadcast that DB lock has been released
+					Zotero.IPC.broadcast("lockReleased");
+				});
 			}
+			
+			return Q();
 		} catch(e) {
 			Zotero.debug(e);
-			throw e;
+			return Q.reject(e);
 		}
-		
-		return true;
 	}
 	
 	
@@ -2008,13 +2012,13 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			'[JavaScript Error: "this._uiElement is null',
 			'Error: a._updateVisibleText is not a function',
 			'[JavaScript Error: "Warning: unrecognized command line flag ',
-			'[JavaScript Error: "Warning: unrecognized command line flag -foreground',
 			'LibX:',
 			'function skype_',
 			'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
 			'CVE-2009-3555',
 			'OpenGL LayerManager',
-			'trying to re-register CID'
+			'trying to re-register CID',
+			'Services.HealthReport'
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
@@ -2025,6 +2029,35 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		}
 		
 		return true;
+	}
+
+	/**
+	 * Warn if Zotero Standalone is running as root and clobber the cache directory if it is
+	 */
+	function _checkRoot() {
+		var env = Components.classes["@mozilla.org/process/environment;1"].
+			getService(Components.interfaces.nsIEnvironment);
+		var user = env.get("USER") || env.get("USERNAME");
+		if(user === "root") {
+			// Show warning
+			if(Services.prompt.confirmEx(null, "", Zotero.getString("standalone.rootWarning"),
+					Services.prompt.BUTTON_POS_0*Services.prompt.BUTTON_TITLE_IS_STRING |
+					Services.prompt.BUTTON_POS_1*Services.prompt.BUTTON_TITLE_IS_STRING,
+					Zotero.getString("standalone.rootWarning.exit"),
+					Zotero.getString("standalone.rootWarning.continue"),
+					null, null, {}) == 0) {
+				Components.utils.import("resource://gre/modules/ctypes.jsm");
+				var exit = Zotero.IPC.getLibc().declare("exit", ctypes.default_abi,
+					                                    ctypes.void_t, ctypes.int);
+				// Zap cache files
+				try {
+					Services.dirsvc.get("ProfLD", Components.interfaces.nsIFile).remove(true);
+				} catch(e) {}
+				// Exit Zotero without giving XULRunner the opportunity to figure out the
+				// cache is missing. Otherwise XULRunner will zap the prefs
+				exit(0);
+			}
+		}
 	}
 	
 	/**
@@ -2358,6 +2391,7 @@ Zotero.Keys = new function() {
 		// Get the key=>command mappings from the prefs
 		for each(var action in actions) {
 			var action = action.substr(5); // strips 'keys.'
+			// Remove old pref
 			if (action == 'overrideGlobal') {
 				Zotero.Prefs.clear('keys.overrideGlobal');
 				continue;
@@ -2371,26 +2405,35 @@ Zotero.Keys = new function() {
 	 * Called by ZoteroPane.onLoad()
 	 */
 	function windowInit(document) {
-		var useShift = Zotero.isMac;
+		var globalKeys = [
+			{
+				name: 'openZotero',
+				defaultKey: 'Z'
+			},
+			{
+				name: 'saveToZotero',
+				defaultKey: 'S'
+			}
+		];
 		
-		// Zotero pane shortcut
-		var keyElem = document.getElementById('key_openZotero');
-		if(keyElem) {
-			var zKey = Zotero.Prefs.get('keys.openZotero');
-			// Only override the default with the pref if the <key> hasn't been manually changed
-			// and the pref has been
-			if (keyElem.getAttribute('key') == 'Z' && keyElem.getAttribute('modifiers') == 'accel alt'
-					&& (zKey != 'Z' || useShift)) {
-				keyElem.setAttribute('key', zKey);
-				if (useShift) {
-					keyElem.setAttribute('modifiers', 'accel shift');
+		globalKeys.forEach(function (x) {
+			let keyElem = document.getElementById('key_' + x.name);
+			if (keyElem) {
+				let prefKey = Zotero.Prefs.get('keys.'  + x.name);
+				// Only override the default with the pref if the <key> hasn't
+				// been manually changed and the pref has been
+				if (keyElem.getAttribute('key') == x.defaultKey
+						&& keyElem.getAttribute('modifiers') == 'accel shift'
+						&& prefKey != x.defaultKey) {
+					keyElem.setAttribute('key', prefKey);
 				}
 			}
-		}
+		});
 	}
 	
 	
 	function getCommand(key) {
+		key = key.toUpperCase();
 		return _keys[key] ? _keys[key] : false;
 	}
 }
@@ -2435,16 +2478,18 @@ Zotero.DragDrop = {
 	currentDataTransfer: null,
 	
 	getDragData: function (element, firstOnly) {
-		var dragData = {
-			dataType: '',
-			data: []
-		};
-		
 		var dt = this.currentDataTransfer;
 		if (!dt) {
 			Zotero.debug("Drag data not available");
 			return false;
 		}
+		
+		var dragData = {
+			dataType: '',
+			data: [],
+			dropEffect: dt.dropEffect
+		};
+		
 		
 		var len = firstOnly ? 1 : dt.mozItemCount;
 		

@@ -102,7 +102,6 @@ const xpcomFilesLocal = [
 	'sync',
 	'storage',
 	'storage/streamListener',
-	'storage/eventLog',
 	'storage/queueManager',
 	'storage/queue',
 	'storage/request',
@@ -173,11 +172,11 @@ ZoteroContext.prototype = {
 	 */
 	"switchConnectorMode":function(isConnector) {
 		if(isConnector !== this.isConnector) {
-			zContext.Zotero.shutdown();
-			
-			// create a new zContext
-			makeZoteroContext(isConnector);
-			zContext.Zotero.init();
+			zContext.Zotero.shutdown().then(function() {
+				// create a new zContext
+				makeZoteroContext(isConnector);
+				zContext.Zotero.init();
+			}).done();
 		}
 		
 		return zContext;
@@ -301,16 +300,11 @@ function ZoteroService() {
 			try {
 				zContext.Zotero.init();
 			} catch(e) {
-				if(e === "ZOTERO_SHOULD_START_AS_CONNECTOR") {
-					// if Zotero should start as a connector, reload it
-					zContext.Zotero.shutdown();
+				// if Zotero should start as a connector, reload it
+				zContext.Zotero.shutdown().then(function() {
 					makeZoteroContext(true);
 					zContext.Zotero.init();
-				} else {
-					dump(e.toSource());
-					Components.utils.reportError(e);
-					throw e;
-				}
+				}).done();
 			}
 		}
 		isFirstLoadThisSession = false;	// no longer first load

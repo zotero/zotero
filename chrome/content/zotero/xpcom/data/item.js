@@ -138,6 +138,7 @@ Zotero.Item.prototype.__defineSetter__('relatedItems', function (arr) { this._se
 Zotero.Item.prototype.__defineGetter__('relatedItemsReverse', function () { var ids = this._getRelatedItemsReverse(); return ids; });
 Zotero.Item.prototype.__defineGetter__('relatedItemsBidirectional', function () { var ids = this._getRelatedItemsBidirectional(); return ids; });
 
+Zotero.Item.prototype.__defineGetter__('libraryKey', function () this.libraryIDInt + "/" + this.key);
 
 Zotero.Item.prototype.getID = function() {
 	Zotero.debug('Item.getID() is deprecated -- use Item.id');
@@ -3377,31 +3378,6 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 		};
 	}
 	
-	// Update file existence state of this item
-	// and best attachment state of parent item
-	var self = this;
-	var updateAttachmentStates = function (exists) {
-		self._fileExists = exists;
-		
-		if (self.isTopLevelItem()) {
-			return;
-		}
-		
-		try {
-			var parentKey = self.getSource();
-		}
-		// This can happen during classic sync conflict resolution, if a
-		// standalone attachment was modified locally and remotely was changed
-		// into a child attachment
-		catch (e) {
-			Zotero.debug("Attachment parent doesn't exist for source key "
-				+ "in Zotero.Item.updateAttachmentStates()", 1);
-			return;
-		}
-		
-		Zotero.Items.get(parentKey).updateBestAttachmentState();
-	};
-	
 	// No associated files for linked URLs
 	if (row.linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 		return false;
@@ -3409,7 +3385,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 	
 	if (!row.path) {
 		Zotero.debug("Attachment path is empty", 2);
-		updateAttachmentStates(false);
+		this._updateAttachmentStates(false);
 		return false;
 	}
 	
@@ -3458,7 +3434,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			}
 			catch (e) {
 				Zotero.debug('Invalid persistent descriptor', 2);
-				updateAttachmentStates(false);
+				this._updateAttachmentStates(false);
 				return false;
 			}
 		}
@@ -3468,7 +3444,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			row.path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0) {
 		var file = Zotero.Attachments.resolveRelativePath(row.path);
 		if (!file) {
-			updateAttachmentStates(false);
+			this._updateAttachmentStates(false);
 			return false;
 		}
 	}
@@ -3494,7 +3470,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			}
 			catch (e) {
 				Zotero.debug('Invalid relative descriptor', 2);
-				updateAttachmentStates(false);
+				this._updateAttachmentStates(false);
 				return false;
 			}
 		}
@@ -3502,12 +3478,38 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 	
 	if (!skipExistsCheck && !file.exists()) {
 		Zotero.debug("Attachment file '" + file.path + "' not found", 2);
-		updateAttachmentStates(false);
+		this._updateAttachmentStates(false);
 		return false;
 	}
 	
-	updateAttachmentStates(true);
+	this._updateAttachmentStates(true);
 	return file;
+}
+
+
+/**
+ * Update file existence state of this item and best attachment state of parent item
+ */
+Zotero.Item.prototype._updateAttachmentStates = function (exists) {
+	this._fileExists = exists;
+	
+	if (this.isTopLevelItem()) {
+		return;
+	}
+	
+	try {
+		var parentKey = this.getSource();
+	}
+	// This can happen during classic sync conflict resolution, if a
+	// standalone attachment was modified locally and remotely was changed
+	// into a child attachment
+	catch (e) {
+		Zotero.debug("Attachment parent doesn't exist for source key "
+			+ "in Zotero.Item.updateAttachmentStates()", 1);
+		return;
+	}
+	
+	Zotero.Items.get(parentKey).updateBestAttachmentState();
 }
 
 
@@ -3534,12 +3536,48 @@ Zotero.Item.prototype.getFilename = function () {
  *
  * This is updated only initially and on subsequent getFile() calls.
  */
-Zotero.Item.prototype.__defineGetter__('fileExists', function () {
-	if (this._fileExists === null) {
+Zotero.Item.prototype.fileExists = function (cachedOnly) {
+	if (!cachedOnly && this._fileExists === null) {
 		this.getFile();
 	}
 	return this._fileExists;
-});
+};
+
+
+/**
+ * Asynchronous cached check for file existence, used for items view
+ *
+ * This is updated only initially and on subsequent getFile() calls.
+ */
+Zotero.Item.prototype.fileExistsAsync = function () {
+	var self = this;
+	return Q.fcall(function () {
+		if (self._fileExists !== null) {
+			return self._fileExists;
+		}
+		
+		if (Zotero.platformMajorVersion < 23) {
+			return self.fileExists();
+		}
+		
+		if (!self.isAttachment()) {
+			throw new Error("Zotero.Item.fileExistsAsync() can only be called on attachment items");
+		}
+		
+		if (self.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+			throw new Error("Zotero.Item.fileExistsAsync() cannot be called on link attachments");
+		}
+		
+		var nsIFile = self.getFile(null, true);
+		Components.utils.import("resource://gre/modules/osfile.jsm");
+		return Q(OS.File.exists(nsIFile.path))
+		.then(function(exists) {
+			self._updateAttachmentStates(exists);
+			return exists;
+		});
+	});
+};
+
 
 
 /*
@@ -4194,13 +4232,43 @@ Zotero.Item.prototype.getBestAttachment = function() {
  *
  * @return {Integer}  0 (none), 1 (present), -1 (missing)
  */
-Zotero.Item.prototype.getBestAttachmentState = function () {
-	if (this._bestAttachmentState !== null) {
+Zotero.Item.prototype.getBestAttachmentState = function (cachedOnly) {
+	if (cachedOnly || this._bestAttachmentState !== null) {
 		return this._bestAttachmentState;
 	}
 	var itemID = this.getBestAttachment();
-	this._bestAttachmentState = itemID ? (Zotero.Items.get(itemID).fileExists ? 1 : -1) : 0;
+	this._bestAttachmentState = itemID
+		? (Zotero.Items.get(itemID).fileExists() ? 1 : -1)
+		: 0;
 	return this._bestAttachmentState;
+}
+
+
+/**
+ * Return cached state of best attachment for use in items view
+ *
+ * @return {Promise:Integer}  Promise with 0 (none), 1 (present), -1 (missing)
+ */
+Zotero.Item.prototype.getBestAttachmentStateAsync = function () {
+	var self = this;
+	return Q.fcall(function() {
+		if (self._bestAttachmentState !== null) {
+			return self._bestAttachmentState;
+		}
+		var itemID = self.getBestAttachment();
+		if (itemID) {
+			return Zotero.Items.get(itemID).fileExistsAsync()
+			.then(function (exists) {
+				self._bestAttachmentState = exists ? 1 : -1;
+			});
+		}
+		else {
+			self._bestAttachmentState = 0;
+		}
+	})
+	.then(function () {
+		return self._bestAttachmentState;
+	});
 }
 
 

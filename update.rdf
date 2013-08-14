@@ -1,23 +1,25 @@
 <?xml version="1.0"?>
-<RDF:RDF xmlns:NS1="http://www.mozilla.org/2004/em-rdf#"
-         xmlns:NC="http://home.netscape.com/NC-rdf#"
-         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-  <RDF:Seq RDF:about="rdf:#$HINiy">
-    <RDF:li RDF:resource="rdf:#$IINiy"/>
-  </RDF:Seq>
-  <RDF:Description RDF:about="urn:mozilla:extension:zotero@chnm.gmu.edu"
-                   NS1:signature="MIGTMA0GCSqGSIb3DQEBDQUAA4GBAGXIabsD4ki4jEGQ9847xkO78vO7Lj1yLjtUQh6lIARV5h/fxDKyeyKpl6/SSpNn/QcoA719Xs27NioraSYTOPUCnRuQwmnXVi/rDLu7DBtNqh+Ps4TsVzA+I+f1qHCE9tdd2bNrlPNQIHsCPH4+aanTFMK9+nvEkV4leVXVv8tk">
-    <NS1:updates RDF:resource="rdf:#$HINiy"/>
-  </RDF:Description>
-  <RDF:Description RDF:about="rdf:#$IINiy"
-                   NS1:version="4.0m361">
-    <NS1:targetApplication RDF:resource="rdf:#$LINiy"/>
-  </RDF:Description>
-  <RDF:Description RDF:about="rdf:#$LINiy"
-                   NS1:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
-                   NS1:minVersion="3.6"
-                   NS1:maxVersion="21.*"
-                   NS1:updateLink="http://gsl-nagoya-u.net/http/pub/zotero-multi-3.xpi"
-                   NS1:updateInfoURL="http://gsl-nagoya-u.net/http/pub/zotero-multi-3.xhtml"
-                   NS1:updateHash="sha1:bdb7255fe8fb0f4480a0c0ad7375b0956842c6d9" />
+<RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns="http://www.mozilla.org/2004/em-rdf#">
+<!-- Zotero Extension -->
+<RDF:Description about="urn:mozilla:extension:zotero@chnm.gmu.edu">
+  <updates>
+    <RDF:Seq>
+      <RDF:li>
+        <RDF:Description>
+          <version>4.0.12.SOURCE</version>
+          <targetApplication>
+            <RDF:Description>
+              <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
+              <minVersion>17.0</minVersion>
+              <maxVersion>23.*</maxVersion>
+              <updateLink>http://download.zotero.org/extension/zotero.xpi</updateLink>
+              <updateHash>sha1:</updateHash>
+            </RDF:Description>
+          </targetApplication>
+        </RDF:Description>
+      </RDF:li>
+    </RDF:Seq>
+  </updates>
+</RDF:Description>
 </RDF:RDF>

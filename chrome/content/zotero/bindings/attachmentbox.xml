@@ -538,7 +538,7 @@
 							<label id="index-status-label"/>
 							<hbox>
 								<label id="index-status"/>
-								<toolbarbutton id="reindex" oncommand="this.hidden = true; setTimeout(function () { ZoteroPane_Local.reindexItem(); }, 50)"/>
+								<image id="reindex" onclick="this.hidden = true; setTimeout(function () { ZoteroPane_Local.reindexItem(); }, 50)"/>
 							</hbox>
 						</row>
 					</rows>

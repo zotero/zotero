@@ -176,23 +176,26 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 				}
 				
 				var fromSQL = " FROM creators NATURAL JOIN creatorData "
-					+ "WHERE " + subField + " LIKE ?1 " + "AND fieldMode=?2";
+					+ "WHERE " + subField + " LIKE ? " + "AND fieldMode=?";
 				var sqlParams = [
 					searchString + '%',
 					searchParams.fieldMode ? searchParams.fieldMode : 0
 				];
 				if (searchParams.itemID) {
 					fromSQL += " AND creatorID NOT IN (SELECT creatorID FROM "
-						+ "itemCreators WHERE itemID=?3)";
+						+ "itemCreators WHERE itemID=?";
 					sqlParams.push(searchParams.itemID);
+					if (searchParams.creatorTypeID) {
+						fromSQL += " AND creatorTypeID=?";
+						sqlParams.push(searchParams.creatorTypeID);
+					}
+					fromSQL += ")";
 				}
 				if (typeof searchParams.libraryID != 'undefined') {
 					if (searchParams.libraryID) {
-						fromSQL += " AND libraryID=?4";
+						fromSQL += " AND libraryID=?";
 						sqlParams.push(searchParams.libraryID);
 					}
-					// The db query code doesn't properly replace numbered
-					// parameters with "IS NULL"
 					else {
 						fromSQL += " AND libraryID IS NULL";
 					}
@@ -206,6 +209,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 					sql = "SELECT * FROM (" + sql + " UNION SELECT DISTINCT "
 						+ subField + " AS val, creatorID || '-1' AS comment"
 						+ fromSQL + ") GROUP BY val";
+					sqlParams = sqlParams.concat(sqlParams);
 				}
 				
 				sql += " ORDER BY val";
@@ -259,36 +263,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 			statement = this._zotero.DB.getStatement(sql, sqlParams);
 	}
 	
-	// Disable asynchronous until we figure out the hangs
-	if (true) {
-		var rows = this._zotero.DB.query(sql, sqlParams);
-		
-		if (resultsCallback) {
-			resultsCallback(rows);
-		}
-		
-		var results = [];
-		var comments = [];
-		for each(var row in rows) {
-			results.push(row.val);
-			let comment = row.comment;
-			if (comment) {
-				comments.push(comment);
-			}
-		}
-		this.updateResults(results, comments);
-		return;
-	}
-	
 	var self = this;
-	
-	this._zotero.DB._connection.setProgressHandler(5000, {
-		onProgress: function (connection) {
-			if (self._cancelled) {
-				return true;
-			}
-		}
-	});
 	
 	this.pendingStatement = statement.executeAsync({
 		handleResult: function (storageResultSet) {
@@ -318,7 +293,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 		},
 		
 		handleError: function (e) {
-			//Components.utils.reportError(e.message);
+			Components.utils.reportError(e.message);
 		},
 		
 		handleCompletion: function (reason) {
@@ -388,10 +363,7 @@ ZoteroAutoComplete.prototype.updateResults = function (results, comments, ongoin
 ZoteroAutoComplete.prototype.stopSearch = function(){
 	if (this.pendingStatement) {
 		this._zotero.debug('Stopping autocomplete search');
-		// This appears to take as long as letting the query complete,
-		// so we flag instead and abort from the progress handler
-		//this.pendingStatement.cancel();
-		this._cancelled = true;
+		this.pendingStatement.cancel();
 	}
 }
 

@@ -101,6 +101,7 @@
 			
 			<field name="clickHandler"/>
 			<field name="blurHandler"/>
+			<field name="eventHandlers">[]</field>
 			
 			<field name="_initialVisibleCreators">10</field>
 			<field name="_displayAllCreators"/>
@@ -1848,6 +1849,12 @@
 						else {
 							this.refresh();
 						}
+						
+						if (this.eventHandlers['itemtypechange'] && this.eventHandlers['itemtypechange'].length) {
+							var self = this;
+							this.eventHandlers['itemtypechange'].forEach(function (f) f.bind(self)());
+						}
+						
 						return true;
 					}
 					return false;
@@ -2408,13 +2415,25 @@
 								|| fieldName == 'tag') {
 							t.setAttribute('type', 'autocomplete');
 							t.setAttribute('autocompletesearch', 'zotero');
+							
 							let params = {
 								fieldName: fieldName,
 								libraryID: this.item.libraryID
 							};
 							if (field == 'creator') {
 								params.fieldMode = parseInt(elem.getAttribute('fieldMode'));
-								params.itemID = itemID ? itemID : '';
+								
+								// Include itemID and creatorTypeID so the autocomplete can
+								// avoid showing results for creators already set on the item
+								let row = Zotero.getAncestorByTagName(elem, 'row');
+								let creatorTypeID = parseInt(
+									row.getElementsByClassName('creator-type-label')[0]
+									.getAttribute('typeid')
+								);
+								if (itemID) {
+									params.itemID = itemID;
+									params.creatorTypeID = creatorTypeID;
+								}
 							};
 							t.setAttribute(
 								'autocompletesearchparam', JSON.stringify(params)
@@ -3178,6 +3197,16 @@
 					if (fieldStringSuffix === 'typeID') {
 						forceTop = true;
 					}
+
+                    /* If a creator textbox is already open, we need to
+                     * change its autocomplete parameters so that it
+                     * completes on a creator with a different creator type
+                     */
+                    var changedParams = {
+                    	creatorTypeID: creatorTypeID
+                    };
+                    itemBox._updateAutoCompleteParams(row, changedParams);
+							
 					var creator = this.item.getCreator(index);
 					this.item.setCreator(index, creator.ref, creatorTypeID, creator.multi.main, forceTop);
 					this.item.save();
@@ -3426,6 +3455,43 @@ if (oldCreator.id) {
 			</method>
 			
 			
+			<method name="_updateAutoCompleteParams">
+				<parameter name="row"/>
+				<parameter name="changedParams"/>
+				<body>
+				<![CDATA[
+					var textboxes = row.getElementsByTagName('textbox');
+					if (textboxes.length) {
+						var t = textboxes[0];
+						var params = JSON.parse(t.getAttribute('autocompletesearchparam'));
+						for (var param in changedParams) {
+							params[param] = changedParams[param];
+						}
+						t.setAttribute('autocompletesearchparam', JSON.stringify(params));
+					}
+				]]>
+				</body>
+			</method>
+			
+			<!--
+			/*
+			function modifyCreatorByID(index, creatorID, creatorTypeID) {
+				throw ('Unimplemented');
+				var oldCreator = _itemBeingEdited.getCreator(index);
+				if (creator) {
+					oldCreator = creator.ref;
+					var oldCreatorID = oldCreator.creatorID;
+				}
+				
+				Zotero.debug("Old creatorID is " + oldCreatorID);
+				
+				_itemBeingEdited.setCreator(index, firstName, lastName, typeID, fieldMode);
+				_itemBeingEdited.save();
+			}
+			*/
+			-->
+			
+			
 			<method name="focusFirstField">
 				<parameter name="mode"/>
 				<body>
@@ -3541,6 +3607,43 @@ if (oldCreator.id) {
 					var textboxes = document.getAnonymousNodes(this)[0].getElementsByTagName('textbox');
 					if (textboxes && textboxes.length) {
 						textboxes[0].inputField.blur();
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<!--
+				Available handlers:
+				
+				  - 'itemtypechange'
+				
+				Note: 'this' in the function will be bound to the item box.
+			-->
+			<method name="addHandler">
+				<parameter name="eventName"/>
+				<parameter name="func"/>
+				<body>
+				<![CDATA[
+					if (!this.eventHandlers[eventName]) {
+						this.eventHandlers[eventName] = [];
+					}
+					this.eventHandlers[eventName].push(func);
+				]]>
+				</body>
+			</method>
+			
+			<method name="removeHandler">
+				<parameter name="eventName"/>
+				<parameter name="func"/>
+				<body>
+				<![CDATA[
+					if (!this.eventHandlers[eventName]) {
+						return;
+					}
+					var pos = this.eventHandlers[eventName].indexOf(func);
+					if (pos != -1) {
+						this.eventHandlers[eventName].splice(pos, 1);
 					}
 				]]>
 				</body>

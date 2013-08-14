@@ -349,11 +349,7 @@
 					
 					var ios = Components.classes["@mozilla.org/network/io-service;1"].
 						getService(Components.interfaces.nsIIOService);
-					var uri = ios.newURI("chrome://zotero/content/tinymce/" + htmlFile + ".html", null, null);
-					
-					var cr = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
-							.getService(Components.interfaces.nsIChromeRegistry);
-					uri = cr.convertChromeURL(uri);
+					var uri = ios.newURI("resource://zotero/tinymce/" + htmlFile + ".html", null, null);
 					
 					// Pass directionality (LTR/RTL) in URL
 					uri.spec += "?dir=" + Zotero.dir;

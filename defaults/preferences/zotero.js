@@ -73,14 +73,15 @@ pref("extensions.zotero.tagCloud", false);
 // Keyboard shortcuts
 pref("extensions.zotero.keys.openZotero", 'Z');
 pref("extensions.zotero.keys.toggleFullscreen", 'F');
-pref("extensions.zotero.keys.library", 'L');
-pref("extensions.zotero.keys.quicksearch", 'K');
+pref("extensions.zotero.keys.saveToZotero", 'S');
 pref("extensions.zotero.keys.newItem", 'N');
 pref("extensions.zotero.keys.newNote", 'O');
-pref("extensions.zotero.keys.toggleTagSelector", 'T');
+pref("extensions.zotero.keys.importFromClipboard", 'V');
+pref("extensions.zotero.keys.library", 'L');
+pref("extensions.zotero.keys.quicksearch", 'K');
 pref("extensions.zotero.keys.copySelectedItemCitationsToClipboard", 'A');
 pref("extensions.zotero.keys.copySelectedItemsToClipboard", 'C');
-pref("extensions.zotero.keys.importFromClipboard", 'V');
+pref("extensions.zotero.keys.toggleTagSelector", 'T');
 
 // Fulltext indexing
 pref("extensions.zotero.fulltext.textMaxLength", 500000);

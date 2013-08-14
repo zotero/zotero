@@ -94,6 +94,7 @@
 		<vbox id="zotero-pane"
 			onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
 			onkeyup="ZoteroPane_Local.handleKeyUp(event, this.id)"
+			onkeypress="ZoteroPane_Local.handleKeyPress(event)"
 			chromedir="&locale.dir;">
 			
 			<toolbar id="zotero-toolbar" class="toolbar toolbar-primary">
@@ -305,7 +306,6 @@
 							the tag selector to max height -->
 					<tree id="zotero-collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
 						onmouseover="ZoteroPane_Local.collectionsView.setHighlightedRows();"
-						onkeypress="ZoteroPane_Local.handleKeyPress(event, this.id)"
 						onselect="ZoteroPane_Local.onCollectionSelected();"
 						ondragstart="if (event.target.localName == 'treechildren') { ZoteroPane_Local.collectionsView.onDragStart(event); }"
 						ondragenter="return ZoteroPane_Local.collectionsView.onDragEnter(event)"
@@ -343,7 +343,6 @@
 							disableKeyNavigation="true"
 							onfocus="if (ZoteroPane_Local.itemsView.rowCount &amp;&amp; !ZoteroPane_Local.itemsView.selection.count) { ZoteroPane_Local.itemsView.selection.select(0); }"
 							onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
-							onkeypress="ZoteroPane_Local.handleKeyPress(event, this.id)"
 							onselect="ZoteroPane_Local.itemSelected(event)"
 							ondragstart="if (event.target.localName == 'treechildren') { ZoteroPane_Local.itemsView.onDragStart(event); }"
 							ondragenter="return ZoteroPane_Local.itemsView.onDragEnter(event)"

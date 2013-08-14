@@ -418,6 +418,7 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 			
 			if (condition == 'quicksearch-titleCreatorYear') {
 				this.addCondition('title', operator, part.text, false);
+				this.addCondition('publicationTitle', operator, part.text, false);
 				this.addCondition('year', operator, part.text, false);
 			}
 			else {
