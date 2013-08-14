@@ -68,7 +68,7 @@ Zotero.Schema = new function(){
 				return _initializeSchema().thenResolve(true);
 			}
 			
-			if (dbVersion < 76) {
+			if (oldDBVersion < 76) {
 				// TODO: localize
 				let msg = "Zotero found a pre–Zotero 2.1 database that cannot be upgraded to "
 					+ "work with this version of Zotero. To continue, either upgrade your "
