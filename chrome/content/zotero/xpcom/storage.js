@@ -949,7 +949,7 @@ Zotero.Sync.Storage = new function () {
 				let item = items.shift();
 				let row = attachmentData[item.id];
 				let lk = item.libraryKey;
-				//Zotero.debug("Checking attachment file for item " + lk);
+				Zotero.debug("Checking attachment file for item " + lk);
 				
 				let nsIFile = item.getFile(row, true);
 				if (!nsIFile) {
