@@ -1259,7 +1259,11 @@ Zotero.Utilities = {
 	 * the content=json format used by the server
 	 */
 	"itemToServerJSON":function(item) {
-		var newItem = {}, newItems = [newItem];
+		var newItem = {
+				"itemKey":Zotero.Utilities.generateObjectKey(),
+				"itemVersion":0
+			},
+			newItems = [newItem];
 		
 		var typeID = Zotero.ItemTypes.getID(item.itemType);
 		if(!typeID) {
@@ -1347,7 +1351,8 @@ Zotero.Utilities = {
 						}
 						note = note.note;
 					}
-					newItems.push({"itemType":"note", "note":note.toString()});
+					newItems.push({"itemType":"note", "parentItem":newItem.itemKey,
+						"note":note.toString()});
 				}
 			} else if((fieldID = Zotero.ItemFields.getID(field))) {
 				// if content is not a string, either stringify it or delete it
@@ -1728,7 +1733,7 @@ Zotero.Utilities = {
 	"generateObjectKey":function getKey() {
 		// TODO: add 'L' and 'Y' after 3.0.11 cut-off
 		var baseString = "23456789ABCDEFGHIJKMNPQRSTUVWXZ";
-		return Zotero.randomString(8, baseString);
+		return Zotero.Utilities.randomString(8, baseString);
 	},
 
 	/**

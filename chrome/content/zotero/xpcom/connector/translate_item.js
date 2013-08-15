@@ -106,8 +106,6 @@ Zotero.Translate.ItemSaver.prototype = {
 		});
 	},
 	
-	// ALL CODE BELOW THIS POINT IS EXECUTED ONLY IN NON-FIREFOX ENVIRONMENTS
-	
 	/**
 	 * Polls for updates to attachment progress
 	 * @param items Items in Zotero.Item.toArray() format
@@ -162,6 +160,8 @@ Zotero.Translate.ItemSaver.prototype = {
 		poll();
 	},
 	
+	// ALL CODE BELOW THIS POINT IS EXECUTED ONLY IN NON-FIREFOX ENVIRONMENTS
+	
 	/**
 	 * Saves items to server
 	 * @param items Items in Zotero.Item.toArray() format
@@ -182,7 +182,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		
 		for(var i=0, n=items.length; i<n; i++) {
 			var item = items[i];
-			newItems.push(Zotero.Utilities.itemToServerJSON(item));
+			newItems = newItems.concat(Zotero.Utilities.itemToServerJSON(item));
 			if(typedArraysSupported) {
 				for(var j=0; j<item.attachments.length; j++) {
 					item.attachments[j].id = Zotero.Utilities.randomString();
@@ -193,34 +193,40 @@ Zotero.Translate.ItemSaver.prototype = {
 		}
 		
 		var me = this;
-		Zotero.API.createItem({"items":newItems}, null, function(statusCode, response) {
-			if(statusCode !== 201) {
-				callback(false, new Error("Save to server failed"));
-			} else {
-				Zotero.debug("Translate: Save to server complete");
-				
-				Zotero.Prefs.getCallback(["downloadAssociatedFiles", "automaticSnapshots"],
-				function(prefs) {
-					if(typedArraysSupported) {
-						try {
-							var newKeys = me._getItemKeysFromServerResponse(response);
-						} catch(e) {
-							callback(false, e);
-							return;
-						}
-						
-						for(var i=0; i<items.length; i++) {
-							var item = items[i], key = newKeys[i];
-							if(item.attachments && item.attachments.length) {
-								me._saveAttachmentsToServer(key, me._getFileBaseNameFromItem(item),
-									item.attachments, prefs, attachmentCallback);
-							}
+		Zotero.API.createItem({"items":newItems}, function(statusCode, response) {
+			if(statusCode !== 200) {
+				callback(false, new Error("Save to server failed with "+statusCode+" "+response));
+				retrun;
+			}
+
+			try {
+				var resp = JSON.parse(response);
+			} catch(e) {
+				callback(false, new Error("Unexpected response received from server"));
+				return;
+			}
+			for(var i in resp.failed) {
+				callback(false, new Error("Save to server failed with "+statusCode+" "+response));
+				return;
+			}
+			
+			Zotero.debug("Translate: Save to server complete");
+			Zotero.Prefs.getCallback(["downloadAssociatedFiles", "automaticSnapshots"],
+			function(prefs) {
+
+				if(typedArraysSupported) {
+					Zotero.debug(response);
+					for(var i in resp.success) {
+						var item = items[i], key = resp.success[i];
+						if(item.attachments && item.attachments.length) {
+							me._saveAttachmentsToServer(key, me._getFileBaseNameFromItem(item),
+								item.attachments, prefs, attachmentCallback);
 						}
 					}
-					
-					callback(true, items);
-				});
-			}
+				}
+				
+				callback(true, items);
+			});
 		});
 	},
 	
@@ -235,6 +241,7 @@ Zotero.Translate.ItemSaver.prototype = {
 	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
 	 */
 	"_saveAttachmentsToServer":function(itemKey, baseName, attachments, prefs, attachmentCallback) {
+						Zotero.debug("saveattachmentstoserver");
 		var me = this,
 			uploadAttachments = [],
 			retrieveHeadersForAttachments = attachments.length;
@@ -252,6 +259,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				var attachment = uploadAttachments[i];
 				attachmentPayload.push({
 					"itemType":"attachment",
+					"parentItem":itemKey,
 					"linkMode":attachment.linkMode,
 					"title":(attachment.title ? attachment.title.toString() : "Untitled Attachment"),
 					"accessDate":"CURRENT_TIMESTAMP",
@@ -261,25 +269,23 @@ Zotero.Translate.ItemSaver.prototype = {
 				});
 			}
 			
-			Zotero.API.createItem({"items":attachmentPayload}, itemKey, function(statusCode, response) {
-				var err;
-				if(statusCode === 201) {
+			Zotero.API.createItem({"items":attachmentPayload}, function(statusCode, response) {
+				var resp;
+				if(statusCode === 200) {
 					try {
-						var newKeys = me._getItemKeysFromServerResponse(response);
-					} catch(e) {
-						err = new Error("Unexpected response received from server");
-					}
-				} else {
-					err = new Error("Unexpected status "+statusCode+" received from server");
+						resp = JSON.parse(response);
+						if(!resp.success) resp = undefined;
+					} catch(e) {};
 				}
 				
 				Zotero.debug("Finished creating items");
 				for(var i=0; i<uploadAttachments.length; i++) {
 					var attachment = uploadAttachments[i];
-					if(err) {
-						attachmentProgress(attachment, false, err);
+					if(!resp || !resp.success[i]) {
+						attachmentCallback(attachment, false,
+							new Error("Unexpected response received from server "+statusCode+" "+response));
 					} else {
-						attachment.key = newKeys[i];
+						attachment.key = resp.success[i];
 						
 						if(attachment.linkMode === "linked_url") {
 							attachmentCallback(attachment, 100);
@@ -288,8 +294,6 @@ Zotero.Translate.ItemSaver.prototype = {
 						}
 					}
 				}
-				
-				if(err) Zotero.logError(err);
 			});
 		};
 		
@@ -549,25 +553,6 @@ Zotero.Translate.ItemSaver.prototype = {
 			};
 			Zotero.API.uploadAttachment(attachment);
 		}
-	},
-	
-	/**
-	 * Gets item keys from a server response
-	 * @param {String} response ATOM response
-	 */
-	"_getItemKeysFromServerResponse":function(response) {
-		try {
-			response = (new DOMParser()).parseFromString(response, "text/xml");
-		} catch(e) {
-			throw new Error("Save to server returned invalid output");
-		}
-		var keyNodes = response.getElementsByTagNameNS("http://zotero.org/ns/api", "key");
-		var newKeys = [];
-		for(var i=0, n=keyNodes.length; i<n; i++) {
-			newKeys.push("textContent" in keyNodes[i] ? keyNodes[i].textContent
-				: keyNodes[i].innerText);
-		}
-		return newKeys;
 	},
 	
 	/**
