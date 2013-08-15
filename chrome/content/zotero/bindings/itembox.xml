@@ -3198,14 +3198,14 @@
 						forceTop = true;
 					}
 
-                    /* If a creator textbox is already open, we need to
-                     * change its autocomplete parameters so that it
-                     * completes on a creator with a different creator type
-                     */
-                    var changedParams = {
-                    	creatorTypeID: creatorTypeID
-                    };
-                    itemBox._updateAutoCompleteParams(row, changedParams);
+					/* If a creator textbox is already open, we need to
+					 * change its autocomplete parameters so that it
+					 * completes on a creator with a different creator type
+					 */
+					var changedParams = {
+						creatorTypeID: creatorTypeID
+					};
+					this._updateAutoCompleteParams(row, changedParams);
 							
 					var creator = this.item.getCreator(index);
 					this.item.setCreator(index, creator.ref, creatorTypeID, creator.multi.main, forceTop);
