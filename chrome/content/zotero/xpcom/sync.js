@@ -4283,7 +4283,7 @@ Zotero.Sync.Server.Data = new function() {
 			var fieldName = field.getAttribute('name');
 			item.setField(fieldName, field.textContent, false);
 			if (fieldName === "extra") {
-				extra = field.toString();
+				extra = field.textContent;
 			}
 			changedFields[fieldName] = true;
 		}
