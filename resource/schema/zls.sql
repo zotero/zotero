@@ -1,4 +1,4 @@
--- 20130730
+-- 20130815
 
 -- This file is derived from the IANA Language Subtag Registry
 -- and the jurisdictions object at https://github.com/fbennett/mlz-jurisdictions
@@ -282,6 +282,7 @@ INSERT INTO jurisdictions VALUES("cw","Curaçao");
 INSERT INTO jurisdictions VALUES("cx","Christmas Island");
 INSERT INTO jurisdictions VALUES("cy","Cyprus");
 INSERT INTO jurisdictions VALUES("cz","Czech Republic");
+INSERT INTO jurisdictions VALUES("czechoslovakia","Czechoslovakia");
 INSERT INTO jurisdictions VALUES("de","Germany");
 INSERT INTO jurisdictions VALUES("dj","Djibouti");
 INSERT INTO jurisdictions VALUES("dk","Denmark");
@@ -307,6 +308,7 @@ INSERT INTO jurisdictions VALUES("fr","France");
 INSERT INTO jurisdictions VALUES("ga","Gabon");
 INSERT INTO jurisdictions VALUES("gb","United Kingdom");
 INSERT INTO jurisdictions VALUES("gd","Grenada");
+INSERT INTO jurisdictions VALUES("gdr","German Democratic Republic");
 INSERT INTO jurisdictions VALUES("ge","Georgia");
 INSERT INTO jurisdictions VALUES("gf","French Guiana");
 INSERT INTO jurisdictions VALUES("gg","Guernsey");
@@ -464,6 +466,7 @@ INSERT INTO jurisdictions VALUES("ug","Uganda");
 INSERT INTO jurisdictions VALUES("um","United States Minor Outlying Islands");
 INSERT INTO jurisdictions VALUES("un.org","United Nations");
 INSERT INTO jurisdictions VALUES("us","United States");
+INSERT INTO jurisdictions VALUES("ussr","Union of Soviet Socialist Republics");
 INSERT INTO jurisdictions VALUES("uy","Uruguay");
 INSERT INTO jurisdictions VALUES("uz","Uzbekistan");
 INSERT INTO jurisdictions VALUES("va","Holy See (Vatican City State)");
@@ -478,10 +481,10 @@ INSERT INTO jurisdictions VALUES("ws","Samoa");
 INSERT INTO jurisdictions VALUES("wto.org","World Trade Organization");
 INSERT INTO jurisdictions VALUES("ye","Yemen");
 INSERT INTO jurisdictions VALUES("yt","Mayotte");
+INSERT INTO jurisdictions VALUES("yugoslavia","Yugoslavia");
 INSERT INTO jurisdictions VALUES("za","South Africa");
 INSERT INTO jurisdictions VALUES("zm","Zambia");
 INSERT INTO jurisdictions VALUES("zw","Zimbabwe");
-
 
 CREATE TABLE zlsSubtagData (
 	id INTEGER PRIMARY KEY,
