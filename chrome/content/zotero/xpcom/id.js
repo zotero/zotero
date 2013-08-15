@@ -25,7 +25,6 @@
 
 Zotero.ID_Tracker = function () {
 	this.get = get;
-	this.getKey = getKey;
 	this.getBigInt = getBigInt;
 	this.skip = skip;
 	this.getTableName = getTableName;
