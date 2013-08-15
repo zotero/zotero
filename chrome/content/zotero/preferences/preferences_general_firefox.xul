@@ -53,8 +53,8 @@
 							<label id="statusBarIcon-label" value="&zotero.preferences.statusBarIcon;" control="statusBarIcon"/>
 						</hbox>
 						<radiogroup id="statusBarIcon" orient="horizontal" preference="pref-statusBarIcon">
-							<radio id="statusBarIcon-full" src="chrome://zotero/skin/zotero_status_bar.png" value="2"/>
-							<radio id="statusBarIcon-compact" src="chrome://zotero/skin/zotero_status_bar_compact.png" value="1"/>
+							<radio id="statusBarIcon-full" src="chrome://zotero/skin/mlz_status_bar.png" value="2"/>
+							<radio id="statusBarIcon-compact" src="chrome://zotero/skin/mlz_status_bar_compact.png" value="1"/>
 							<radio id="statusBarIcon-none" label="&zotero.preferences.statusBarIcon.none;" value="0"/>
 						</radiogroup>
 					</row>

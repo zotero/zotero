@@ -25,33 +25,38 @@
   Add-on bar and toolbar icon
 */
 #zotero-toolbar-button {
-	list-style-image: url(chrome://zotero/skin/zotero-z-24px.png);
+	list-style-image: url(chrome://zotero/skin/mlz-mlz-24px.png);
 }
 
 #zotero-toolbar-button:active {
-	list-style-image: url(chrome://zotero/skin/zotero-z-24px-active.png);
+	list-style-image: url(chrome://zotero/skin/mlz-mlz-24px-active.png);
 }
 
 toolbar[iconsize="small"] #zotero-toolbar-button {
-	list-style-image: url(chrome://zotero/skin/zotero-z-16px.png);
+	list-style-image: url(chrome://zotero/skin/mlz-mlz-16px.png);
+    width: 29px;
+    height: 16px;
 }
 
 toolbar[iconsize="small"] #zotero-toolbar-button:active {
-	list-style-image: url(chrome://zotero/skin/zotero-z-16px-active.png);
+	list-style-image: url(chrome://zotero/skin/mlz-mlz-16px-active.png);
+    width: 29px;
+    height: 16px;
 }
 
 #addon-bar #zotero-toolbar-button {
-	list-style-image: url(chrome://zotero/skin/zotero_status_bar.png);
+	list-style-image: url(chrome://zotero/skin/mlz_status_bar.png);
+	width: 151px;
 	height: 18px;
 }
 
 #addon-bar #zotero-toolbar-button[compact="true"] {
-	width: 20px;
-	list-style-image: url(chrome://zotero/skin/zotero_status_bar_compact.png);
+	width: 47px;
+	list-style-image: url(chrome://zotero/skin/mlz_status_bar_compact.png);
 }
 
 #addon-bar #zotero-toolbar-button[error="true"] {
-	list-style-image: url(chrome://zotero/skin/zotero_status_bar_error.png);
+	list-style-image: url(chrome://zotero/skin/mlz_status_bar_error.png);
 }
 
 
