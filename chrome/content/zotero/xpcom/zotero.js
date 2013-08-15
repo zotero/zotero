@@ -1519,6 +1519,25 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	};
 	
 	/**
+	 * Generate a function that produces a static output
+	 *
+	 * Zotero.lazy(fn) returns a function. The first time this function
+	 * is called, it calls fn() and returns its output. Subsequent
+	 * calls return the same output as the first without calling fn()
+	 * again.
+	 */
+	this.lazy = function(fn) {
+		var x, called = false;
+		return function() {
+			if(!called) {
+				x = fn.apply(this);
+				called = true;
+			}
+			return x;
+		};
+	};
+	
+	/**
 	 * Pumps a generator until it yields false. See itemTreeView.js for an example.
 	 *
 	 * If errorHandler is specified, exceptions in the generator will be caught
