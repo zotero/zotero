@@ -1304,8 +1304,6 @@ Zotero.Translate.Base.prototype = {
 				if(!this._waitingForRPC) this._detectTranslatorsCollected();
 			}
 		} else {
-			this._currentState = null;
-			
 			// unset return value is equivalent to true
 			if(returnValue === undefined) returnValue = true;
 			
@@ -1327,6 +1325,8 @@ Zotero.Translate.Base.prototype = {
 				
 				this._runHandler("error", error);
 			}
+			
+			this._currentState = null;
 			
 			// call handlers
 			this._runHandler("itemsDone", returnValue);
