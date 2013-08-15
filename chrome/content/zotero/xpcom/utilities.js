@@ -1255,10 +1255,11 @@ Zotero.Utilities = {
 	},
 	
 	/**
-	 * Converts an item from toArray() format to content=json format used by the server
+	 * Converts an item from toArray() format to an array of items in
+	 * the content=json format used by the server
 	 */
 	"itemToServerJSON":function(item) {
-		var newItem = {};
+		var newItem = {}, newItems = [newItem];
 		
 		var typeID = Zotero.ItemTypes.getID(item.itemType);
 		if(!typeID) {
@@ -1337,7 +1338,6 @@ Zotero.Utilities = {
 			} else if(field === "notes") {
 				// normalize notes
 				var n = val.length;
-				var newNotes = newItem.notes = new Array(n);
 				for(var j=0; j<n; j++) {
 					var note = val[j];
 					if(typeof note === "object") {
@@ -1347,7 +1347,7 @@ Zotero.Utilities = {
 						}
 						note = note.note;
 					}
-					newNotes[j] = {"itemType":"note", "note":note.toString()};
+					newItems.push({"itemType":"note", "note":note.toString()});
 				}
 			} else if((fieldID = Zotero.ItemFields.getID(field))) {
 				// if content is not a string, either stringify it or delete it
@@ -1378,7 +1378,7 @@ Zotero.Utilities = {
 			}
 		}
 		
-		return newItem;
+		return newItems;
 	},
 	
 	/**
