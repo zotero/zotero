@@ -1723,6 +1723,15 @@ Zotero.Utilities = {
 	},
 
 	/**
+	 * Generates a valid object key for the server API
+	 */
+	"generateObjectKey":function getKey() {
+		// TODO: add 'L' and 'Y' after 3.0.11 cut-off
+		var baseString = "23456789ABCDEFGHIJKMNPQRSTUVWXZ";
+		return Zotero.randomString(8, baseString);
+	},
+
+	/**
 	 * Provides unicode support and other additional features for regular expressions
 	 * See https://github.com/slevithan/xregexp for usage
 	 */

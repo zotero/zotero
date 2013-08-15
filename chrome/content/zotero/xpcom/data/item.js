@@ -5193,7 +5193,7 @@ Zotero.Item.prototype._clearFieldChange = function (field) {
 
 
 Zotero.Item.prototype._generateKey = function () {
-	return Zotero.ID.getKey();
+	return Zotero.Utilites.generateObjectKey();
 }
 
 
