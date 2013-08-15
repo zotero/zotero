@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Abrir/Fechar Painel do Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Tentar sobrepor atalhos em conflito">
 <!ENTITY zotero.preferences.keys.quicksearch "Procura Rápida">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Alternar Modo de Ecrã Inteiro">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Alternar Selector de Etiquetas">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

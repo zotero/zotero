@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Zotero Bölmesini Aç/Kapa">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Çelişen kısayolların üzerine yazdırmayı dene">
 <!ENTITY zotero.preferences.keys.quicksearch "Çabuk Arama">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Tam Ekran Moduna Geç">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Konu Seçiciyi Aç">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

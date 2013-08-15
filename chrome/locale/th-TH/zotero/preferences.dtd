@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "เปิด/ปิดแผง Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "พยายามครอบงำทางลัดที่ขัดแย้งกัน">
 <!ENTITY zotero.preferences.keys.quicksearch "ค้นหาด่วน">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "เปลี่ยนสู่แบบเต็มจอ">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "เปลี่ยนตัวเลือกแท็ก">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

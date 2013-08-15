@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Avada/Sulgeda Zotero aken">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Võistlevate kiirvaliku klahvide korraldamine">
 <!ENTITY zotero.preferences.keys.quicksearch "Kiirotsing">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Täisekraan režiim">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Lipikuvalija olek">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Mở/Đóng cửa sổ Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Thử ghi đè các phím gõ tắt có xung đột">
 <!ENTITY zotero.preferences.keys.quicksearch "Tìm kiếm nhanh">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Bật/Tắt chế độ Toàn-màn-hình">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Bật/Tắt Bộ-chọn-thẻ">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

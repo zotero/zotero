@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "فتح/إغلاق نافذة زوتيرو">
 <!ENTITY zotero.preferences.keys.overrideGlobal "حاول تجنب الإختصارات المتعارضة">
 <!ENTITY zotero.preferences.keys.quicksearch "البحث السريع">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "التنشيط لوضع ملء الشاشة">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "تنشيط محدد الأوسمة">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

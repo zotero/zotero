@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Avaa/sulje Zotero-ikkuna">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Yritä ohittaa keskenään ristiriitaiset pikanäppäimet">
 <!ENTITY zotero.preferences.keys.quicksearch "Pikahaku">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Koko ruudun tila">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Aiheenvalitsin päälle/pois">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

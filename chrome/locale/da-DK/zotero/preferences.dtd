@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Åbn/Luk Zotero-vinduet">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Forsøg at løse overlappende genveje">
 <!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøgning">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Slå fuldskærmsvisning til/fra">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Slå Tag selector til/fra">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

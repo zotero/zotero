@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Öppna/Stäng Zotero-panelen">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Försök kringgå motsägelsefulla snabbkommandon">
 <!ENTITY zotero.preferences.keys.quicksearch "Snabbsökning">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Växla fullskärmsläge">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Växla etikettväljare">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

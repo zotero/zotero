@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Abrir/cerrar el panel de Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Intentar suprimir los atajos de otras aplicaciones que coincidan">
 <!ENTITY zotero.preferences.keys.quicksearch "Búsqueda rápida">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Conmutar el modo de pantalla completa">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Conmutar el selector de marcas">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

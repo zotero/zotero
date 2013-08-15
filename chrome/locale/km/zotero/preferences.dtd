@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "បើក/បិទផ្ទាំងហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.preferences.keys.overrideGlobal "ព្យាយាមជំនះផ្លូវកាត់ដែលមានការទង្គិច">
 <!ENTITY zotero.preferences.keys.quicksearch "ស្វែងរកលឿន">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "បើកពេញអេក្រង់">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "បើកជម្រើសស្លាក">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

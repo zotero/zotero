@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Отвори/затвори Зотеро површ">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Покушај да премостиш сукобљене пречице">
 <!ENTITY zotero.preferences.keys.quicksearch "Брза претрага">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Укључи/искључи приказ преко целог екрана">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Искључи/укључи избирача ознаке">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

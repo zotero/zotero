@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Buka/Tutup  Jendela Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Usahakan kendalikan shortcut yang berkontradiksi">
 <!ENTITY zotero.preferences.keys.quicksearch "Pencarian Cepat">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Hidupkan/Matikan Mode Layar Penuh">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Munculkan/Sembunyikan Selektor Tag">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

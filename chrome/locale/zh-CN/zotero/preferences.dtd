@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "开/关 Zotero 面板">
 <!ENTITY zotero.preferences.keys.overrideGlobal "尝试覆盖有冲突的快捷键">
 <!ENTITY zotero.preferences.keys.quicksearch "快速搜索">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "切换全屏模式">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "切换标签选择器">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

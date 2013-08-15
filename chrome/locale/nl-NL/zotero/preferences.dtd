@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Openen/Sluiten van Zotero-paneel">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Probeer voorrang te krijgen bij conflicterende sneltoetsen">
 <!ENTITY zotero.preferences.keys.quicksearch "Snelzoeken">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Volledige schermweergave">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Label-kiezer tonen">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Odpri/zapri podokno Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Poskusi preglasiti sporne tipke za bližnjice">
 <!ENTITY zotero.preferences.keys.quicksearch "Hitro iskanje">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Vključi/izključi celozaslonski način">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Vključi/izključi izbirnik značk">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

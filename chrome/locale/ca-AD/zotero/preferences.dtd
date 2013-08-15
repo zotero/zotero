@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Obre/Tanca el Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "intenta corregir els conflictes en les dreceres de teclat">
 <!ENTITY zotero.preferences.keys.quicksearch "Cerca ràpida">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Canvia a pantalla completa">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Canvia el selector d&apos;etiquetes">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

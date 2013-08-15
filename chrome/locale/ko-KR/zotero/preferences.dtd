@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Zotero 패널 열기/닫기">
 <!ENTITY zotero.preferences.keys.overrideGlobal "충돌하는 단축키는 무시합니다.">
 <!ENTITY zotero.preferences.keys.quicksearch "빠른 검색">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "전체화면 끄기/켜기">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "태그 선택기 끄기/켜기">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

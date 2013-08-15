@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Deschide/Închide panoul Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Încearcă să suprascrii scurtăturile care sunt în conflict">
 <!ENTITY zotero.preferences.keys.quicksearch "Căutare rapidă">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Extinde pe tot ecranul">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Afișează/ascunde selectorul de etichete">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

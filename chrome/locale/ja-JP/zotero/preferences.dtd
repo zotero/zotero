@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Zotero 画面を開く／閉じる">
 <!ENTITY zotero.preferences.keys.overrideGlobal "衝突するショートカットを上書きする">
 <!ENTITY zotero.preferences.keys.quicksearch "簡易検索">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "全画面表示の切り替え">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "タグ選択ボックスを表示する／隠す">
 <!ENTITY zotero.preferences.lang.addLanguage "言語を追加">

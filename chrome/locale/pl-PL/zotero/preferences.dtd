@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Otwórz/Zamknij okno Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Spróbuj pominąć powtarzające się skróty">
 <!ENTITY zotero.preferences.keys.quicksearch "Szybkie wyszukiwanie">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Przełącz w tryb pełnoekranowy">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Wyświetl/Ukryj wybór etykiet">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

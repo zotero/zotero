@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Otvoriť/zatvoriť Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Pokúsiť sa získať kontrolu v prípade konfliktu skratiek s inými rozšíreniami.">
 <!ENTITY zotero.preferences.keys.quicksearch "Rýchle vyhľadávanie">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Prepnúť Zotero do celého okna">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Zobraziť/skryť značky">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

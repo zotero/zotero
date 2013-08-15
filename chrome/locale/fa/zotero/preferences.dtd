@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "باز کردن/بستن قاب زوترو">
 <!ENTITY zotero.preferences.keys.overrideGlobal "تلاش برای لغو کلیدهای میان‌بر ناسازگار">
 <!ENTITY zotero.preferences.keys.quicksearch "جستجوی سریع">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "فعال/غیرفعال کردن حالت تمام‌صفحه">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "روشن/خاموش کردن انتخاب برچسب">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

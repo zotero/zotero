@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Zotero megnyitása/bezárása">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Ellentmondó billentyűparancsok felülírása">
 <!ENTITY zotero.preferences.keys.quicksearch "Gyorskeresés">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Teljesképernyős üzemmód">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Címkeválasztó mutatása/elrejtése">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

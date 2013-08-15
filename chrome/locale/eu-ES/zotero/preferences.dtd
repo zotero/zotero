@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Ireki/Itxi Zotero panela">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
 <!ENTITY zotero.preferences.keys.quicksearch "Bilatu:">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Pantaila osoa bai/ez">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Esteka-hautatzailea ikusi bai/ez">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">

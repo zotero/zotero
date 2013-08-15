@@ -70,6 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Открыть/закрыть панель Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Попытаться переопределить конфликтующие комбинации клавиш">
 <!ENTITY zotero.preferences.keys.quicksearch "Быстрый поиск">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Переключение полноэкранного режима">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Переключить панель выбора тэгов">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
