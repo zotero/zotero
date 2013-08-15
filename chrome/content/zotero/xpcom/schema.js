@@ -50,8 +50,10 @@ Zotero.Schema = new function(){
 		var sql = "SELECT version FROM version WHERE schema='" + schema + "'";
 		return Zotero.DB.valueQueryAsync(sql)
 		.then(function (dbVersion) {
-			dbVersion = parseInt(dbVersion);
-			_dbVersions[schema] = dbVersion;
+			if (dbVersion) {
+				dbVersion = parseInt(dbVersion);
+				_dbVersions[schema] = dbVersion;
+			}
 			return dbVersion;
 		});
 	}
@@ -409,23 +411,22 @@ Zotero.Schema = new function(){
 		})
 		.then(function (updated) {
 			if (runRemoteUpdateWhenComplete) {
-				var deferred = Q.defer();
 				if (updated) {
 					if (Zotero.Prefs.get('automaticScraperUpdates')) {
-						Zotero.proxyAuthComplete
-						.then(function () {
-							Zotero.Schema.updateFromRepository(2, function () deferred.resolve());
-						})
+						Zotero.unlockPromise
+						.then(Zotero.proxyAuthComplete)
+						.delay(1000)
+						.then(function () Zotero.Schema.updateFromRepository(2))
+						.done();
 					}
 				}
 				else {
-					Zotero.proxyAuthComplete
-					.then(function () {
-						Zotero.Schema.updateFromRepository(false, function () deferred.resolve());
-					})
+					Zotero.unlockPromise
+					.then(Zotero.proxyAuthComplete)
+					.delay(1000)
+					.then(function () Zotero.Schema.updateFromRepository(false))
 					.done();
 				}
-				return deferred.promise;
 			}
 		});
 	}
@@ -896,10 +897,9 @@ Zotero.Schema = new function(){
 	 *
 	 * @param	{Boolean}	force	Force a repository query regardless of how
 	 *									long it's been since the last check
-	 * @param	{Function}	callback
 	 */
-	this.updateFromRepository = function (force, callback) {
-		Q.fcall(function () {
+	this.updateFromRepository = function (force) {
+		return Q.fcall(function () {
 			if (force) return true;
 			
 			if (_remoteUpdateInProgress) {
@@ -992,23 +992,21 @@ Zotero.Schema = new function(){
 				}
 				var body = 'styles=' + encodeURIComponent(JSON.stringify(styleTimestamps));
 				
-				var get = Zotero.HTTP.doPost(url, body, function (xmlhttp) {
-					_updateFromRepositoryCallback(xmlhttp, !!force)
-					.then(function (updated) {
-						if (callback) {
-							callback(xmlhttp, updated);
-						}
-					});
+				Zotero.HTTP.promise("POST", url, { body: body })
+				.then(function (xmlhttp) {
+					return _updateFromRepositoryCallback(xmlhttp, !!force);
+				})
+				.catch(function (e) {
+					if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+						Zotero.debug('Browser is offline -- skipping check');
+						// TODO: instead, add an observer to start and stop timer on online state change
+						_setRepositoryTimer(ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL);
+						return;
+					}
+					throw e;
 				});
-				
-				// TODO: instead, add an observer to start and stop timer on online state change
-				if (!get) {
-					Zotero.debug('Browser is offline -- skipping check');
-					_setRepositoryTimer(ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL);
-				}
 			});
-		})
-		.done();
+		});
 	}
 	
 	
@@ -1382,13 +1380,13 @@ Zotero.Schema = new function(){
 			yield Zotero.DB.queryAsync("PRAGMA auto_vacuum = 1");
 			
 			yield _getSchemaSQL('system').then(function (sql) {
-				return Zotero.DB.queryAsync(sql);
+				return Zotero.DB.executeSQLFile(sql);
 			});
 			yield _getSchemaSQL('userdata').then(function (sql) {
-				return Zotero.DB.queryAsync(sql);
+				return Zotero.DB.executeSQLFile(sql);
 			});
 			yield _getSchemaSQL('triggers').then(function (sql) {
-				return Zotero.DB.queryAsync(sql);
+				return Zotero.DB.executeSQLFile(sql);
 			});
 			yield Zotero.Schema.updateCustomTables(true);
 			
@@ -1526,10 +1524,8 @@ Zotero.Schema = new function(){
 				// Store the timestamp provided by the server
 				yield _updateDBVersion('repository', currentTime);
 				
-				if (!manual) {
-					// And the local timestamp of the update time
-					yield _updateDBVersion('lastcheck', lastCheckTime);
-				}
+				// And the local timestamp of the update time
+				yield _updateDBVersion('lastcheck', lastCheckTime);
 			})
 			.then(function () {
 				Zotero.debug('All translators and styles are up-to-date');
@@ -1567,10 +1563,8 @@ Zotero.Schema = new function(){
 			// Store the timestamp provided by the server
 			yield _updateDBVersion('repository', currentTime);
 			
-			if (!manual) {
-				// And the local timestamp of the update time
-				yield _updateDBVersion('lastcheck', lastCheckTime);
-			}
+			// And the local timestamp of the update time
+			yield _updateDBVersion('lastcheck', lastCheckTime);
 		})
 		.then(function () {
 			if (!manual) {

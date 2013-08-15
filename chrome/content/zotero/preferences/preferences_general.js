@@ -53,7 +53,8 @@ Zotero_Preferences.General = {
 	
 	
 	updateTranslators: function () {
-		Zotero.Schema.updateFromRepository(true, function (xmlhttp, updated) {
+		Zotero.Schema.updateFromRepository(true)
+		.then(function (updated) {
 			var button = document.getElementById('updateButton');
 			if (button) {
 				if (updated===-1) {
@@ -71,6 +72,7 @@ Zotero_Preferences.General = {
 					Zotero_Preferences.Cite.refreshStylesList();
 				}
 			}
-		});
+		})
+		.done();
 	}
 }

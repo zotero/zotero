@@ -1005,6 +1005,51 @@ Zotero.DBConnection.prototype.columnQueryAsync = function (sql, params) {
 };
 
 
+Zotero.DBConnection.prototype.tableExistsAsync = function (table) {
+	return this._getConnectionAsync()
+	.then(function () {
+		var sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND tbl_name=?";
+		return Zotero.DB.valueQueryAsync(sql, [table]);
+	})
+	.then(function (count) {
+		return !!count;
+	});
+}
+
+
+/**
+ * Parse SQL string and execute transaction with all statements
+ *
+ * @return {Promise}
+ */
+Zotero.DBConnection.prototype.executeSQLFile = function (sql) {
+	var nonCommentRE = /^[^-]/;
+	var trailingCommentRE = /^(.*?)(?:--.+)?$/;
+	
+	sql = sql.trim()
+		// Ugly hack to parse triggers with embedded semicolons
+		.replace(/;---/g, "TEMPSEMI")
+		.split("\n")
+		.filter(function (x) nonCommentRE.test(x))
+		.map(function (x) x.match(trailingCommentRE)[1])
+		.join("");
+	if (sql.substr(-1) == ";") {
+		sql = sql.substr(0, sql.length - 1);
+	}
+	
+	var statements = sql.split(";")
+		.map(function (x) x.replace(/TEMPSEMI/g, ";"));
+	
+	return this.executeTransaction(function () {
+		var statement;
+		while (statement = statements.shift()) {
+			yield Zotero.DB.queryAsync(statement);
+		}
+	});
+}
+
+
+
 /**
  * Generator functions can't return values, but Task.js-style generators,
  * as used by executeTransaction(), can throw a special exception in order
