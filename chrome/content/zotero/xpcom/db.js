@@ -70,7 +70,6 @@ Zotero.DBConnection = function(dbName) {
 	this._dbName = dbName;
 	this._shutdown = false;
 	this._connection = null;
-	this._connectionAsync = null;
 	this._transactionDate = null;
 	this._lastTransactionDate = null;
 	this._transactionRollback = false;
@@ -1021,23 +1020,15 @@ Zotero.DBConnection.prototype.asyncResult = function (val) {
 /**
  * Asynchronously return a connection object for the current DB
  */
-Zotero.DBConnection.prototype._getConnectionAsync = function () {
-	if (this._connectionAsync) {
-		return Q(this._connectionAsync);
-	}
-	
+Zotero.DBConnection.prototype._getConnectionAsync = Zotero.lazy(function() {
 	var db = this._getDBConnection();
 	var options = {
 		path: db.databaseFile.path
 	};
 	var self = this;
 	Zotero.debug("Asynchronously opening DB connection");
-	return Q(this.Sqlite.openConnection(options)
-	.then(function(conn) {
-		self._connectionAsync = conn;
-		return conn;
-	}));
-};
+	return Q(this.Sqlite.openConnection(options));
+});
 
 
 /*
