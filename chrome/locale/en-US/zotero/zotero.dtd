@@ -265,6 +265,9 @@
 <!ENTITY zotero.upgrade.changeLogAfterLink "to find out what's new.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Please see">
 <!ENTITY zotero.upgrade.changeLogLink "the changelog">
+<!ENTITY zotero.upgrade.ifZoteroChoice "If this is not desired, cancel the upgrade process now, and reinstall the official Zotero client.">
+<!ENTITY zotero.upgrade.ifZoteroInfo "If you are migrating from official Zotero to MLZ, the next step of the upgrade process will convert your database for use with MLZ.">
+<!ENTITY zotero.upgrade.ifZoteroWarning "After conversion, the database will be accessible only to MLZ clients.">
 <!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
@@ -273,7 +276,4 @@
 <!ENTITY zotero.upgrade.title "MLZ Upgrade Wizard">
 <!ENTITY zotero.upgrade.upgradeInProgress "Please wait for the upgrade process to finish. This may take a few minutes.">
 <!ENTITY zotero.upgrade.upgradeRequired "Your database must be upgraded to work with this version of MLZ.">
-<!ENTITY zotero.upgrade.ifZoteroInfo "If you are migrating from official Zotero to MLZ, the next step of the upgrade process will convert your database for use with MLZ.">
-<!ENTITY zotero.upgrade.ifZoteroWarning "After conversion, the database will be accessible only to MLZ clients.">
-<!ENTITY zotero.upgrade.ifZoteroChoice "If this is not desired, cancel the upgrade process now, and reinstall the official Zotero client.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Your MLZ database has been successfully upgraded.">

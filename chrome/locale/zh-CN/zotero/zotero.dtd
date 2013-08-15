@@ -265,6 +265,9 @@
 <!ENTITY zotero.upgrade.changeLogAfterLink "以了解有哪些新的改动.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "请查看">
 <!ENTITY zotero.upgrade.changeLogLink "变更日志">
+<!ENTITY zotero.upgrade.ifZoteroChoice "If this is not desired, cancel the upgrade process now, and reinstall the official Zotero client.">
+<!ENTITY zotero.upgrade.ifZoteroInfo "If you are migrating from official Zotero to MLZ, the next step of the upgrade process will convert your database for use with MLZ.">
+<!ENTITY zotero.upgrade.ifZoteroWarning "After conversion, the database will be accessible only to MLZ clients.">
 <!ENTITY zotero.upgrade.majorUpgrade "这是主版本更新.">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "在继续之前.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "请确认您已查看了">

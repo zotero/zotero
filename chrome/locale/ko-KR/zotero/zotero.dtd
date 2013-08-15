@@ -265,6 +265,9 @@
 <!ENTITY zotero.upgrade.changeLogAfterLink "changelog를 참고하십시오.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "새롭게 달라진 것을">
 <!ENTITY zotero.upgrade.changeLogLink "알기 원한다면">
+<!ENTITY zotero.upgrade.ifZoteroChoice "If this is not desired, cancel the upgrade process now, and reinstall the official Zotero client.">
+<!ENTITY zotero.upgrade.ifZoteroInfo "If you are migrating from official Zotero to MLZ, the next step of the upgrade process will convert your database for use with MLZ.">
+<!ENTITY zotero.upgrade.ifZoteroWarning "After conversion, the database will be accessible only to MLZ clients.">
 <!ENTITY zotero.upgrade.majorUpgrade "이것은 중요 업그레이드입니다.">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "을 참조하시기 바랍니다.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "업그레이드를 진행하기 전에">

@@ -265,6 +265,9 @@
 <!ENTITY zotero.upgrade.changeLogAfterLink "om te zien wat er in de nieuwe versie veranderd is.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Bekijk het">
 <!ENTITY zotero.upgrade.changeLogLink "changelog">
+<!ENTITY zotero.upgrade.ifZoteroChoice "If this is not desired, cancel the upgrade process now, and reinstall the official Zotero client.">
+<!ENTITY zotero.upgrade.ifZoteroInfo "If you are migrating from official Zotero to MLZ, the next step of the upgrade process will convert your database for use with MLZ.">
+<!ENTITY zotero.upgrade.ifZoteroWarning "After conversion, the database will be accessible only to MLZ clients.">
 <!ENTITY zotero.upgrade.majorUpgrade "Dit is een omvangrijke bijwerking.">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink ".">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Lees daarom eerst de">
