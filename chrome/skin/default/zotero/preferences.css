@@ -3,10 +3,12 @@
     -moz-transition: background-color 0s linear 0.25s;
 };
 
-.translit-primary {
-}
-.translit-secondary {
-}
+/*
+ * .translit-primary {
+ * }
+ * .translit-secondary {
+ * }
+ */
 
 .compact label {
     margin: 0;
@@ -25,10 +27,12 @@
 	margin: 0 0 0 0;
 }
 
-.translit {
-}
-.translat {
-}
+/* 
+ * .translit {
+ * }
+ * .translat {
+ * }
+ */
 
 row.compact {
 	margin: 0 0 0 0 !important;
