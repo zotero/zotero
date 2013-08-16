@@ -552,7 +552,7 @@ Zotero.Creator.prototype._checkValue = function (field, value) {
 
 
 Zotero.Creator.prototype._generateKey = function () {
-	return Zotero.Utilites.generateObjectKey();
+	return Zotero.Utilities.generateObjectKey();
 }
 
 

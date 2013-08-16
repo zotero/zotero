@@ -773,6 +773,6 @@ Zotero.Tag.prototype._prepFieldChange = function (field) {
 
 
 Zotero.Tag.prototype._generateKey = function () {
-	return Zotero.Utilites.generateObjectKey();
+	return Zotero.Utilities.generateObjectKey();
 }
 
