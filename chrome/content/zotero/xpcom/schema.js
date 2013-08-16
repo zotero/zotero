@@ -142,13 +142,7 @@ Zotero.Schema = new function(){
 						// After a delay, start update of bundled files and repo updates
 						Zotero.initializationPromise
 						.delay(5000)
-						.then(function () {
-							Zotero.UnresponsiveScriptIndicator.disable();
-							return Zotero.Schema.updateBundledFiles(null, false, true)
-							.finally(function () {
-								Zotero.UnresponsiveScriptIndicator.enable();
-							});
-						})
+						.then(function () Zotero.Schema.updateBundledFiles(null, false, true))
 						.done();
 						
 						return updated;
@@ -375,6 +369,7 @@ Zotero.Schema = new function(){
 	 * @param	{Boolean}	[skipDeleteUpdated]		Skip updating of the file deleting version --
 	 *												since deleting uses a single version table key,
 	 * 												it should only be updated the last time through
+	 * @return {Promise}
 	 */
 	this.updateBundledFiles = function(mode, skipDeleteUpdate, runRemoteUpdateWhenComplete) {
 		if (_localUpdateInProgress) return Q();
@@ -1038,20 +1033,16 @@ Zotero.Schema = new function(){
 		var translatorsDir = Zotero.getTranslatorsDirectory();
 		translatorsDir.remove(true);
 		Zotero.getTranslatorsDirectory(); // recreate directory
-		Zotero.Translators.init();
-		this.updateBundledFiles('translators', null, false);
-		
-		var stylesDir = Zotero.getStylesDirectory();
-		stylesDir.remove(true);
-		Zotero.getStylesDirectory(); // recreate directory
-		Zotero.Styles.init();
-		this.updateBundledFiles('styles', null, true)
+		return Zotero.Translators.init()
+		.then(function () self.updateBundledFiles('translators', null, false))
 		.then(function () {
-			if (callback) {
-				callback();
-			}
+			var stylesDir = Zotero.getStylesDirectory();
+			stylesDir.remove(true);
+			Zotero.getStylesDirectory(); // recreate directory
+			Zotero.Styles.init();
+			return self.updateBundledFiles('styles', null, true);
 		})
-		.done();
+		.then(callback);
 	}
 	
 	
@@ -1067,14 +1058,9 @@ Zotero.Schema = new function(){
 		var translatorsDir = Zotero.getTranslatorsDirectory();
 		translatorsDir.remove(true);
 		Zotero.getTranslatorsDirectory(); // recreate directory
-		Zotero.Translators.init();
-		this.updateBundledFiles('translators', null, true)
-		.then(function () {
-			if (callback) {
-				callback();
-			}
-		})
-		.done();
+		return Zotero.Translators.init()
+		.then(function () self.updateBundledFiles('translators', null, true))
+		.then(callback);
 	}
 	
 	
@@ -1090,14 +1076,9 @@ Zotero.Schema = new function(){
 		var stylesDir = Zotero.getStylesDirectory();
 		stylesDir.remove(true);
 		Zotero.getStylesDirectory(); // recreate directory
-		Zotero.Styles.init();
-		this.updateBundledFiles('styles', null, true)
-		.then(function () {
-			if (callback) {
-				callback();
-			}
-		})
-		.done();
+		return Zotero.Styles.init()
+		.then(function () self.updateBundledFiles('styles', null, true))
+		.then(callback);
 	}
 	
 	
@@ -1554,7 +1535,7 @@ Zotero.Schema = new function(){
 				}
 				
 				// Rebuild caches
-				Zotero.Translators.init();
+				yield Zotero.Translators.init();
 				Zotero.Styles.init();
 			}
 			catch (e) {

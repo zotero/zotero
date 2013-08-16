@@ -128,11 +128,13 @@ Zotero_Preferences.Advanced = {
 			null, null, null, {});
 		
 		if (index == 0) {
-			Zotero.Schema.resetTranslatorsAndStyles(function (xmlhttp, updated) {
+			Zotero.Schema.resetTranslatorsAndStyles()
+			.then(function () {
 				if (Zotero_Preferences.Export) {
 					Zotero_Preferences.Export.populateQuickCopyList();
 				}
-			});
+			})
+			.done();
 		}
 	},
 	
@@ -152,11 +154,13 @@ Zotero_Preferences.Advanced = {
 			null, null, null, {});
 		
 		if (index == 0) {
-			Zotero.Schema.resetTranslators(function () {
+			Zotero.Schema.resetTranslators()
+			.then(function () {
 				if (Zotero_Preferences.Export) {
 					Zotero_Preferences.Export.populateQuickCopyList();
 				}
-			});
+			})
+			.done();
 		}
 	},
 	
@@ -176,11 +180,13 @@ Zotero_Preferences.Advanced = {
 			null, null, null, {});
 		
 		if (index == 0) {
-			Zotero.Schema.resetStyles(function (xmlhttp, updated) {
+			Zotero.Schema.resetStyles()
+			.then(function () {
 				if (Zotero_Preferences.Export) {
 					Zotero_Preferences.Export.populateQuickCopyList();
 				}
-			});
+			})
+			.done();
 		}
 	},
 	

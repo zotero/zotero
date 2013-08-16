@@ -37,115 +37,105 @@ Zotero.Translators = new function() {
 	/**
 	 * Initializes translator cache, loading all relevant translators into memory
 	 */
-	this.init = function() {
+	this.init = Q.async(function() {
 		_initialized = true;
 		
 		var start = (new Date()).getTime();
 		var transactionStarted = false;
 		
-		Zotero.UnresponsiveScriptIndicator.disable();
+		_cache = {"import":[], "export":[], "web":[], "search":[]};
+		_translators = {};
 		
-		// Use try/finally so that we always reset the unresponsive script warning
-		try {
-			_cache = {"import":[], "export":[], "web":[], "search":[]};
-			_translators = {};
+		var dbCacheResults = yield Zotero.DB.queryAsync("SELECT leafName, translatorJSON, "+
+			"code, lastModifiedTime FROM translatorCache");
+		var dbCache = {};
+		for each(var cacheEntry in dbCacheResults) {
+			dbCache[cacheEntry.leafName] = cacheEntry;
+		}
+		
+		var i = 0;
+		var filesInCache = {};
+		var contents = Zotero.getTranslatorsDirectory().directoryEntries;
+		while(contents.hasMoreElements()) {
+			var file = contents.getNext().QueryInterface(Components.interfaces.nsIFile);
+			var leafName = file.leafName;
+			if(!(/^[^.].*\.js$/.test(leafName))) continue;
+			var lastModifiedTime = file.lastModifiedTime;
 			
-			var dbCacheResults = Zotero.DB.query("SELECT leafName, translatorJSON, "+
-				"code, lastModifiedTime FROM translatorCache");
-			var dbCache = {};
-			for each(var cacheEntry in dbCacheResults) {
-				dbCache[cacheEntry.leafName] = cacheEntry;
+			var dbCacheEntry = false;
+			if(dbCache[leafName]) {
+				filesInCache[leafName] = true;
+				if(dbCache[leafName].lastModifiedTime == lastModifiedTime) {
+					dbCacheEntry = dbCache[file.leafName];
+				}
 			}
 			
-			var i = 0;
-			var filesInCache = {};
-			var contents = Zotero.getTranslatorsDirectory().directoryEntries;
-			while(contents.hasMoreElements()) {
-				var file = contents.getNext().QueryInterface(Components.interfaces.nsIFile);
-				var leafName = file.leafName;
-				if(!(/^[^.].*\.js$/.test(leafName))) continue;
-				var lastModifiedTime = file.lastModifiedTime;
-				
-				var dbCacheEntry = false;
-				if(dbCache[leafName]) {
-					filesInCache[leafName] = true;
-					if(dbCache[leafName].lastModifiedTime == lastModifiedTime) {
-						dbCacheEntry = dbCache[file.leafName];
-					}
-				}
-				
-				if(dbCacheEntry) {
-					// get JSON from cache if possible
-					var translator = new Zotero.Translator(file, dbCacheEntry.translatorJSON, dbCacheEntry.code);
-					filesInCache[leafName] = true;
+			// TODO: use async load method instead of constructor
+			if(dbCacheEntry) {
+				// get JSON from cache if possible
+				var translator = new Zotero.Translator(file, dbCacheEntry.translatorJSON, dbCacheEntry.code);
+				filesInCache[leafName] = true;
+			} else {
+				// otherwise, load from file
+				var translator = new Zotero.Translator(file);
+			}
+			
+			if(translator.translatorID) {
+				if(_translators[translator.translatorID]) {
+					// same translator is already cached
+					translator.logError('Translator with ID '+
+						translator.translatorID+' already loaded from "'+
+						_translators[translator.translatorID].file.leafName+'"');
 				} else {
-					// otherwise, load from file
-					var translator = new Zotero.Translator(file);
-				}
-				
-				if(translator.translatorID) {
-					if(_translators[translator.translatorID]) {
-						// same translator is already cached
-						translator.logError('Translator with ID '+
-							translator.translatorID+' already loaded from "'+
-							_translators[translator.translatorID].file.leafName+'"');
-					} else {
-						// add to cache
-						_translators[translator.translatorID] = translator;
-						for(var type in TRANSLATOR_TYPES) {
-							if(translator.translatorType & TRANSLATOR_TYPES[type]) {
-								_cache[type].push(translator);
-							}
-						}
-						
-						if(!dbCacheEntry) {
-							// Add cache misses to DB
-							if(!transactionStarted) {
-								transactionStarted = true;
-								Zotero.DB.beginTransaction();
-							}
-							Zotero.Translators.cacheInDB(leafName, translator.metadataString, translator.cacheCode ? translator.code : null, lastModifiedTime);
-							delete translator.metadataString;
+					// add to cache
+					_translators[translator.translatorID] = translator;
+					for(var type in TRANSLATOR_TYPES) {
+						if(translator.translatorType & TRANSLATOR_TYPES[type]) {
+							_cache[type].push(translator);
 						}
 					}
+					
+					if(!dbCacheEntry) {
+						yield Zotero.Translators.cacheInDB(
+							leafName,
+							translator.metadataString,
+							translator.cacheCode ? translator.code : null,
+							lastModifiedTime
+						);
+						delete translator.metadataString;
+					}
 				}
-				
-				i++;
 			}
 			
-			// Remove translators from DB as necessary
-			for(var leafName in dbCache) {
-				if(!filesInCache[leafName]) {
-					Zotero.DB.query("DELETE FROM translatorCache WHERE leafName = ?", [leafName]);
-				}
-			}
-			
-			// Close transaction
-			if(transactionStarted) {
-				Zotero.DB.commitTransaction();
-			}
-			
-			// Sort by priority
-			var collation = Zotero.getLocaleCollation();
-			var cmp = function (a, b) {
-				if (a.priority > b.priority) {
-					return 1;
-				}
-				else if (a.priority < b.priority) {
-					return -1;
-				}
-				return collation.compareString(1, a.label, b.label);
-			}
-			for(var type in _cache) {
-				_cache[type].sort(cmp);
+			i++;
+		}
+		
+		// Remove translators from DB as necessary
+		for(var leafName in dbCache) {
+			if(!filesInCache[leafName]) {
+				yield Zotero.DB.queryAsync(
+					"DELETE FROM translatorCache WHERE leafName = ?", [leafName]
+				);
 			}
 		}
-		finally {
-			Zotero.UnresponsiveScriptIndicator.enable();
+		
+		// Sort by priority
+		var collation = Zotero.getLocaleCollation();
+		var cmp = function (a, b) {
+			if (a.priority > b.priority) {
+				return 1;
+			}
+			else if (a.priority < b.priority) {
+				return -1;
+			}
+			return collation.compareString(1, a.label, b.label);
+		}
+		for(var type in _cache) {
+			_cache[type].sort(cmp);
 		}
 		
 		Zotero.debug("Cached "+i+" translators in "+((new Date()).getTime() - start)+" ms");
-	}
+	});
 	
 	/**
 	 * Gets the translator that corresponds to a given ID
@@ -414,8 +404,10 @@ Zotero.Translators = new function() {
 	}
 	
 	this.cacheInDB = function(fileName, metadataJSON, code, lastModifiedTime) {
-		Zotero.DB.query("REPLACE INTO translatorCache VALUES (?, ?, ?, ?)",
-			[fileName, metadataJSON, code, lastModifiedTime]);
+		return Zotero.DB.queryAsync(
+			"REPLACE INTO translatorCache VALUES (?, ?, ?, ?)",
+			[fileName, metadataJSON, code, lastModifiedTime]
+		);
 	}
 }
 
