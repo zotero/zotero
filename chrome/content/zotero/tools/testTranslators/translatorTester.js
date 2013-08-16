@@ -48,7 +48,8 @@ Zotero_TranslatorTesters = new function() {
 		var testers = [];
 		var waitingForTranslators = TEST_TYPES.length;
 		for(var i=0; i<TEST_TYPES.length; i++) {
-			Zotero.Translators.getAllForType(TEST_TYPES[i], new function() {
+			Zotero.Translators.getAllForType(TEST_TYPES[i], true).
+			then(new function() {
 				var type = TEST_TYPES[i];
 				return function(translators) {
 					try {
@@ -66,7 +67,7 @@ Zotero_TranslatorTesters = new function() {
 						Zotero.logError(e);
 					}
 				};
-			}, true);
+			});
 		};
 	};
 	

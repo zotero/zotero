@@ -37,9 +37,7 @@ Zotero.Translators = new function() {
 	/**
 	 * Initializes translator cache, loading all relevant translators into memory
 	 */
-	this.init = Q.async(function() {
-		_initialized = true;
-		
+	this.reinit = Q.async(function() {
 		var start = (new Date()).getTime();
 		var transactionStarted = false;
 		
@@ -136,6 +134,7 @@ Zotero.Translators = new function() {
 		
 		Zotero.debug("Cached "+i+" translators in "+((new Date()).getTime() - start)+" ms");
 	});
+	this.init = Zotero.lazy(this.reinit);
 	
 	/**
 	 * Gets the translator that corresponds to a given ID
@@ -144,15 +143,10 @@ Zotero.Translators = new function() {
 	 *                              retrieved. If no callback is specified, translators are
 	 *                              returned.
 	 */
-	this.get = function(id, callback) {
-		if(!_initialized) this.init();
-		var translator = _translators[id] ? _translators[id] : false;
-		
-		if(callback) {
-			callback(translator);
-			return true;
-		}
-		return translator;
+	this.get = function(id) {
+		return this.init().then(function() {
+			return  _translators[id] ? _translators[id] : false
+		});
 	}
 	
 	/**
@@ -162,23 +156,19 @@ Zotero.Translators = new function() {
 	 *                              retrieved. If no callback is specified, translators are
 	 *                              returned.
 	 */
-	this.getAllForType = function(type, callback) {
-		if(!_initialized) this.init()
-		
-		var translators = _cache[type].slice(0);
-		if(callback) {
-			callback(translators);
-			return true;
-		}
-		return translators;
+	this.getAllForType = function(type) {
+		return this.init().then(function() {
+			return _cache[type].slice();
+		});
 	}
 	
 	/**
 	 * Gets all translators for a specific type of translation
 	 */
 	this.getAll = function() {
-		if(!_initialized) this.init();
-		return [translator for each(translator in _translators)];
+		return this.init().then(function() {
+			return [translator for each(translator in _translators)];
+		});
 	}
 	
 	/**
@@ -191,76 +181,73 @@ Zotero.Translators = new function() {
 	 *                              argument.
 	 */
 	this.getWebTranslatorsForLocation = function(uri, callback) {
-		var allTranslators = this.getAllForType("web");
-		var potentialTranslators = [];
-		
-		var properHosts = [];
-		var proxyHosts = [];
-		
-		var properURI = Zotero.Proxies.proxyToProper(uri);
-		var knownProxy = properURI !== uri;
-		if(knownProxy) {
-			// if we know this proxy, just use the proper URI for detection
-			var searchURIs = [properURI];
-		} else {
-			var searchURIs = [uri];
+		return this.getAllForType("web").then(function(allTranslators) {
+			var potentialTranslators = [];
 			
-			// if there is a subdomain that is also a TLD, also test against URI with the domain
-			// dropped after the TLD
-			// (i.e., www.nature.com.mutex.gmu.edu => www.nature.com)
-			var m = /^(https?:\/\/)([^\/]+)/i.exec(uri);
-			if(m) {
-				// First, drop the 0- if it exists (this is an III invention)
-				var host = m[2];
-				if(host.substr(0, 2) === "0-") host = host.substr(2);
-				var hostnames = host.split(".");
-				for(var i=1; i<hostnames.length-2; i++) {
-					if(TLDS[hostnames[i].toLowerCase()]) {
-						var properHost = hostnames.slice(0, i+1).join(".");
-						searchURIs.push(m[1]+properHost+uri.substr(m[0].length));
-						properHosts.push(properHost);
-						proxyHosts.push(hostnames.slice(i+1).join("."));
-					}
-				}
-			}
-		}
-		
-		Zotero.debug("Translators: Looking for translators for "+searchURIs.join(", "));
-		
-		var converterFunctions = [];
-		for(var i=0; i<allTranslators.length; i++) {
-			for(var j=0; j<searchURIs.length; j++) {
-				if((!allTranslators[i].webRegexp
-						&& allTranslators[i].runMode === Zotero.Translator.RUN_MODE_IN_BROWSER)
-						|| (uri.length < 8192 && allTranslators[i].webRegexp.test(searchURIs[j]))) {
-					// add translator to list
-					potentialTranslators.push(allTranslators[i]);
-					
-					if(j === 0) {
-						if(knownProxy) {
-							converterFunctions.push(Zotero.Proxies.properToProxy);
-						} else {
-							converterFunctions.push(null);
+			var properHosts = [];
+			var proxyHosts = [];
+			
+			var properURI = Zotero.Proxies.proxyToProper(uri);
+			var knownProxy = properURI !== uri;
+			if(knownProxy) {
+				// if we know this proxy, just use the proper URI for detection
+				var searchURIs = [properURI];
+			} else {
+				var searchURIs = [uri];
+				
+				// if there is a subdomain that is also a TLD, also test against URI with the domain
+				// dropped after the TLD
+				// (i.e., www.nature.com.mutex.gmu.edu => www.nature.com)
+				var m = /^(https?:\/\/)([^\/]+)/i.exec(uri);
+				if(m) {
+					// First, drop the 0- if it exists (this is an III invention)
+					var host = m[2];
+					if(host.substr(0, 2) === "0-") host = host.substr(2);
+					var hostnames = host.split(".");
+					for(var i=1; i<hostnames.length-2; i++) {
+						if(TLDS[hostnames[i].toLowerCase()]) {
+							var properHost = hostnames.slice(0, i+1).join(".");
+							searchURIs.push(m[1]+properHost+uri.substr(m[0].length));
+							properHosts.push(properHost);
+							proxyHosts.push(hostnames.slice(i+1).join("."));
 						}
-					} else {
-						converterFunctions.push(new function() {
-							var re = new RegExp('^https?://(?:[^/]\\.)?'+Zotero.Utilities.quotemeta(properHosts[j-1]), "gi");
-							var proxyHost = proxyHosts[j-1].replace(/\$/g, "$$$$");
-							return function(uri) { return uri.replace(re, "$&."+proxyHost) };
-						});
 					}
-					
-					// don't add translator more than once
-					break;
 				}
 			}
-		}
-		
-		if(callback) {
-			callback([potentialTranslators, converterFunctions]);
-			return true;
-		}
-		return potentialTranslators;
+			
+			Zotero.debug("Translators: Looking for translators for "+searchURIs.join(", "));
+			
+			var converterFunctions = [];
+			for(var i=0; i<allTranslators.length; i++) {
+				for(var j=0; j<searchURIs.length; j++) {
+					if((!allTranslators[i].webRegexp
+							&& allTranslators[i].runMode === Zotero.Translator.RUN_MODE_IN_BROWSER)
+							|| (uri.length < 8192 && allTranslators[i].webRegexp.test(searchURIs[j]))) {
+						// add translator to list
+						potentialTranslators.push(allTranslators[i]);
+						
+						if(j === 0) {
+							if(knownProxy) {
+								converterFunctions.push(Zotero.Proxies.properToProxy);
+							} else {
+								converterFunctions.push(null);
+							}
+						} else {
+							converterFunctions.push(new function() {
+								var re = new RegExp('^https?://(?:[^/]\\.)?'+Zotero.Utilities.quotemeta(properHosts[j-1]), "gi");
+								var proxyHost = proxyHosts[j-1].replace(/\$/g, "$$$$");
+								return function(uri) { return uri.replace(re, "$&."+proxyHost) };
+							});
+						}
+						
+						// don't add translator more than once
+						break;
+					}
+				}
+			}
+			
+			return [potentialTranslators, converterFunctions];
+		});
 	}
 	
 	/**
@@ -271,24 +258,25 @@ Zotero.Translators = new function() {
 	 *                              returned.
 	 */
 	this.getImportTranslatorsForLocation = function(location, callback) {	
-		var allTranslators = Zotero.Translators.getAllForType("import");
-		var tier1Translators = [];
-		var tier2Translators = [];
-		
-		for(var i=0; i<allTranslators.length; i++) {
-			if(allTranslators[i].importRegexp && allTranslators[i].importRegexp.test(location)) {
-				tier1Translators.push(allTranslators[i]);
-			} else {
-				tier2Translators.push(allTranslators[i]);
+		return Zotero.Translators.getAllForType("import").then(function(allTranslators) {
+			var tier1Translators = [];
+			var tier2Translators = [];
+			
+			for(var i=0; i<allTranslators.length; i++) {
+				if(allTranslators[i].importRegexp && allTranslators[i].importRegexp.test(location)) {
+					tier1Translators.push(allTranslators[i]);
+				} else {
+					tier2Translators.push(allTranslators[i]);
+				}
 			}
-		}
-		
-		var translators = tier1Translators.concat(tier2Translators);
-		if(callback) {
-			callback(translators);
-			return true;
-		}
-		return translators;
+			
+			var translators = tier1Translators.concat(tier2Translators);
+			if(callback) {
+				callback(translators);
+				return true;
+			}
+			return translators;
+		});
 	}
 	
 	/**

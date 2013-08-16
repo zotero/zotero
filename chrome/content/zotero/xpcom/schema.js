@@ -1033,7 +1033,7 @@ Zotero.Schema = new function(){
 		var translatorsDir = Zotero.getTranslatorsDirectory();
 		translatorsDir.remove(true);
 		Zotero.getTranslatorsDirectory(); // recreate directory
-		return Zotero.Translators.init()
+		return Zotero.Translators.reinit()
 		.then(function () self.updateBundledFiles('translators', null, false))
 		.then(function () {
 			var stylesDir = Zotero.getStylesDirectory();
@@ -1058,7 +1058,7 @@ Zotero.Schema = new function(){
 		var translatorsDir = Zotero.getTranslatorsDirectory();
 		translatorsDir.remove(true);
 		Zotero.getTranslatorsDirectory(); // recreate directory
-		return Zotero.Translators.init()
+		return Zotero.Translators.reinit()
 		.then(function () self.updateBundledFiles('translators', null, true))
 		.then(callback);
 	}
@@ -1535,7 +1535,7 @@ Zotero.Schema = new function(){
 				}
 				
 				// Rebuild caches
-				yield Zotero.Translators.init();
+				yield Zotero.Translators.reinit();
 				Zotero.Styles.init();
 			}
 			catch (e) {

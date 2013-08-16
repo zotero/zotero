@@ -89,13 +89,18 @@ Zotero.Server.Connector.GetTranslators.prototype = {
 		// Translator data
 		if(data.url) {
 			var me = this;
-			Zotero.Translators.getWebTranslatorsForLocation(data.url, function(data) {				
+			Zotero.Translators.getWebTranslatorsForLocation(data.url).then(function(data) {				
 				sendResponseCallback(200, "application/json",
 						JSON.stringify(me._serializeTranslators(data[0])));
 			});
 		} else {
-			var responseData = this._serializeTranslators(Zotero.Translators.getAll());
-			sendResponseCallback(200, "application/json", JSON.stringify(responseData));
+			Zotero.Translators.getAll().then(function(translators) {
+				var responseData = this._serializeTranslators(translators);
+				sendResponseCallback(200, "application/json", JSON.stringify(responseData));
+			}).fail(function() {
+				sendResponseCallback(500);
+				throw e;
+			}).done();
 		}
 	},
 	
