@@ -331,7 +331,7 @@ Zotero.Translators = new function() {
 	 * @param	{Boolean}		metadata.inRepository
 	 * @param	{String}		metadata.lastUpdated		SQL date
 	 * @param	{String}		code
-	 * @return	{nsIFile}
+	 * @return	{Promise<nsIFile>}
 	 */
 	this.save = function(metadata, code) {
 		if (!metadata.translatorID) {
@@ -373,7 +373,7 @@ Zotero.Translators = new function() {
 		var destFile = Zotero.getTranslatorsDirectory();
 		destFile.append(fileName);
 		
-		// JSON.stringify (FF 3.5.4 and up) has the benefit of indenting JSON
+		// JSON.stringify has the benefit of indenting JSON
 		var metadataJSON = JSON.stringify(metadata, null, "\t");
 		
 		var str = metadataJSON + "\n\n" + code;
@@ -383,23 +383,34 @@ Zotero.Translators = new function() {
 			var sameFile = true;
 		}
 		
-		if (!sameFile && destFile.exists()) {
-			var msg = "Overwriting translator with same filename '"
-				+ fileName + "'";
-			Zotero.debug(msg, 1);
-			Zotero.debug(metadata, 1);
-			Components.utils.reportError(msg + " in Zotero.Translators.save()");
-		}
-		
-		if (translator && translator.file.exists()) {
-			translator.file.remove(false);
-		}
-		
-		Zotero.debug("Saving translator '" + metadata.label + "'");
-		Zotero.debug(str);
-		Zotero.File.putContents(destFile, str);
-		
-		return destFile;
+		return Q.fcall(function () {
+			if (sameFile) return;
+			
+			return Q(OS.File.exists(destFile.path))
+			.then(function (exists) {
+				if (exists) {
+					var msg = "Overwriting translator with same filename '"
+						+ fileName + "'";
+					Zotero.debug(msg, 1);
+					Zotero.debug(metadata, 1);
+					Components.utils.reportError(msg);
+				}
+			});
+		})
+		.then(function () {
+			if (!translator) return;
+			
+			return Q(OS.File.exists(translator.file.path))
+			.then(function (exists) {
+				translator.file.remove(false);
+			});
+		})
+		.then(function () {
+			Zotero.debug("Saving translator '" + metadata.label + "'");
+			Zotero.debug(str);
+			return Zotero.File.putContentsAsync(destFile, str)
+			.thenResolve(destFile);
+		});
 	}
 	
 	this.cacheInDB = function(fileName, metadataJSON, code, lastModifiedTime) {

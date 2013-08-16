@@ -992,20 +992,28 @@ Zotero.Schema = new function(){
 				}
 				var body = 'styles=' + encodeURIComponent(JSON.stringify(styleTimestamps));
 				
-				Zotero.HTTP.promise("POST", url, { body: body })
+				return Zotero.HTTP.promise("POST", url, { body: body })
 				.then(function (xmlhttp) {
 					return _updateFromRepositoryCallback(xmlhttp, !!force);
 				})
 				.catch(function (e) {
-					if (e instanceof Zotero.HTTP.BrowserOfflineException) {
-						Zotero.debug('Browser is offline -- skipping check');
+					if (e instanceof Zotero.HTTP.BrowserOfflineException || e.xmlhttp) {
+						var msg = " -- retrying in " + ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL
+						if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+							Zotero.debug("Browser is offline" + msg);
+						}
+						else {
+							Components.utils.reportError(e);
+							Zotero.debug("Error updating from repository " + msg);
+						}
 						// TODO: instead, add an observer to start and stop timer on online state change
 						_setRepositoryTimer(ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL);
 						return;
 					}
 					throw e;
 				});
-			});
+			})
+			.finally(function () _remoteUpdateInProgress = false);
 		});
 	}
 	
@@ -1509,7 +1517,6 @@ Zotero.Schema = new function(){
 				_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
 			}
 			
-			_remoteUpdateInProgress = false;
 			return Q(false);
 		}
 		
@@ -1532,47 +1539,51 @@ Zotero.Schema = new function(){
 				if (!manual) {
 					_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
 				}
-				_remoteUpdateInProgress = false;
-				return -1;
+				return Q(true);
 			});
 		}
 		
-		try {
-			for (var i=0, len=translatorUpdates.length; i<len; i++){
-				_translatorXMLToFile(translatorUpdates[i]);
+		return Q.async(function () {
+			try {
+				for (var i=0, len=translatorUpdates.length; i<len; i++){
+					yield _translatorXMLToFile(translatorUpdates[i]);
+				}
+				
+				for (var i=0, len=styleUpdates.length; i<len; i++){
+					yield _styleXMLToFile(styleUpdates[i]);
+				}
+				
+				// Rebuild caches
+				Zotero.Translators.init();
+				Zotero.Styles.init();
+			}
+			catch (e) {
+				Zotero.debug(e, 1);
+				if (!manual){
+					_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
+				}
+				Q.return(false);
 			}
 			
-			for (var i=0, len=styleUpdates.length; i<len; i++){
-				_styleXMLToFile(styleUpdates[i]);
-			}
+			Q.return(true);
+		})()
+		.then(function (update) {
+			if (!update) return false;
 			
-			// Rebuild caches
-			Zotero.Translators.init();
-			Zotero.Styles.init();
-		}
-		catch (e) {
-			Zotero.debug(e, 1);
-			if (!manual){
-				_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_RETRY_INTERVAL']);
-			}
-			_remoteUpdateInProgress = false;
-			return Q(false);
-		}
-		
-		return Zotero.DB.executeTransaction(function (conn) {
-			// Store the timestamp provided by the server
-			yield _updateDBVersion('repository', currentTime);
-			
-			// And the local timestamp of the update time
-			yield _updateDBVersion('lastcheck', lastCheckTime);
-		})
-		.then(function () {
-			if (!manual) {
-				_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
-			}
-			_remoteUpdateInProgress = false;
-			
-			return true;
+			return Zotero.DB.executeTransaction(function (conn) {
+				// Store the timestamp provided by the server
+				yield _updateDBVersion('repository', currentTime);
+				
+				// And the local timestamp of the update time
+				yield _updateDBVersion('lastcheck', lastCheckTime);
+			})
+			.then(function () {
+				if (!manual) {
+					_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
+				}
+				
+				return true;
+			});
 		});
 	}
 	
@@ -1606,9 +1617,11 @@ Zotero.Schema = new function(){
 	
 	
 	/**
-	* Traverse an XML translator node from the repository and
-	* update the local translators folder with the translator data
-	**/
+	 * Traverse an XML translator node from the repository and
+	 * update the local translators folder with the translator data
+	 *
+	 * @return {Promise}
+	 */
 	function _translatorXMLToFile(xmlnode) {
 		// Don't split >4K chunks into multiple nodes
 		// https://bugzilla.mozilla.org/show_bug.cgi?id=194231
@@ -1727,8 +1740,7 @@ Zotero.Schema = new function(){
 		}
 		
 		Zotero.debug("Saving style '" + uri + "'");
-		Zotero.File.putContents(destFile, str);
-		return;
+		return Zotero.File.putContentsAsync(destFile, str);
 	}
 	
 	
