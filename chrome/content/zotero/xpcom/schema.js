@@ -2335,7 +2335,7 @@ Zotero.Schema = new function(){
 						for (var j=0, len=data.length; j<len; j++) {
 							insertStatement.bindInt32Parameter(0, data[j].creatorDataID);
 							insertStatement.bindInt32Parameter(1, data[j].creatorDataID);
-							var key = Zotero.Utilites.generateObjectKey();
+							var key = Zotero.Utilities.generateObjectKey();
 							insertStatement.bindStringParameter(2, key);
 							try {
 								insertStatement.execute();
@@ -2360,7 +2360,7 @@ Zotero.Schema = new function(){
 					var titles = Zotero.DB.query("SELECT itemID, value FROM itemData NATURAL JOIN itemDataValues WHERE fieldID BETWEEN 110 AND 112");
 					var statement = Zotero.DB.getStatement("UPDATE items SET key=? WHERE itemID=?");
 					for (var j=0, len=items.length; j<len; j++) {
-						var key = Zotero.Utilites.generateObjectKey();
+						var key = Zotero.Utilities.generateObjectKey();
 						if (key == 'AJ4PT6IT') {
 							j--;
 							continue;
@@ -2423,7 +2423,7 @@ Zotero.Schema = new function(){
 						else {
 							statement.bindNullParameter(2);
 						}
-						var key = Zotero.Utilites.generateObjectKey();
+						var key = Zotero.Utilities.generateObjectKey();
 						statement.bindStringParameter(3, key);
 						
 						try {
@@ -2445,7 +2445,7 @@ Zotero.Schema = new function(){
 					for (var j=0, len=searches.length; j<len; j++) {
 						statement.bindInt32Parameter(0, searches[j].savedSearchID);
 						statement.bindUTF8StringParameter(1, searches[j].savedSearchName);
-						var key = Zotero.Utilites.generateObjectKey();
+						var key = Zotero.Utilities.generateObjectKey();
 						statement.bindStringParameter(2, key);
 
 						try {
@@ -2529,7 +2529,7 @@ Zotero.Schema = new function(){
 						statement.bindInt32Parameter(0, newTags[j].tagID);
 						statement.bindUTF8StringParameter(1, newTags[j].tag);
 						statement.bindInt32Parameter(2, newTags[j].tagType);
-						var key = Zotero.Utilites.generateObjectKey();
+						var key = Zotero.Utilities.generateObjectKey();
 						statement.bindStringParameter(3, key);
 
 						try {
@@ -3124,7 +3124,7 @@ Zotero.Schema = new function(){
 					}
 					var creatorID = Zotero.DB.valueQuery("SELECT creatorID FROM creators WHERE creatorDataID=?", id);
 					if (!creatorID) {
-						var key = Zotero.Utilites.generateObjectKey();
+						var key = Zotero.Utilities.generateObjectKey();
 						creatorID = Zotero.DB.query("INSERT INTO creators (creatorDataID, key) VALUES (?, ?)", [id, key]);
 					}
 					Zotero.DB.query("UPDATE itemCreators SET creatorID=? WHERE creatorID NOT IN (SELECT creatorID FROM creators)", creatorID);
