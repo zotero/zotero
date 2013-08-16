@@ -149,7 +149,7 @@ Zotero.Sync.Storage = new function () {
 					else {
 						var promise = mode.cacheCredentials();
 					}
-					promises.push(Q.allResolved([mode, promise]));
+					promises.push(Q.allSettled([mode, promise]));
 				}
 			}
 			
@@ -161,12 +161,12 @@ Zotero.Sync.Storage = new function () {
 				// Mark WebDAV verification failure as user library error.
 				// We ignore credentials-caching errors for ZFS and let the
 				// later requests fail.
-				cacheCredentialsPromises.forEach(function (promise) {
-					let mode = promise[0].valueOf();
+				cacheCredentialsPromises.forEach(function (results) {
+					let mode = results[0].value;
 					if (mode == Zotero.Sync.Storage.WebDAV) {
-						if (promise[1].isRejected()) {
-							promises.push(Q.allResolved(
-								[0, promise[1]]
+						if (results[1].state == "rejected") {
+							promises.push(Q.allSettled(
+								[0, Q.reject(results[1].reason)]
 							));
 							// Skip further syncing of user library
 							delete libraryModes[0];
@@ -179,15 +179,13 @@ Zotero.Sync.Storage = new function () {
 					
 					// Get the last sync time for each library
 					if (self.downloadOnSync(libraryID)) {
-						promises.push(Q.allResolved(
+						promises.push(Q.allSettled(
 							[libraryID, libraryModes[libraryID].getLastSyncTime(libraryID)]
 						));
 					}
 					// If download-as-needed, we don't need the last sync time
 					else {
-						promises.push(Q.allResolved(
-							[libraryID, null]
-						));
+						promises.push(Q.allSettled([libraryID, null]));
 					}
 				}
 				return Q.all(promises);
@@ -202,20 +200,17 @@ Zotero.Sync.Storage = new function () {
 			var libraryQueues = [];
 			
 			// Get the libraries we have sync times for
-			promises.forEach(function (promise) {
-				let libraryID = promise[0].valueOf();
-				let lastSyncTime = promise[1].valueOf();
-				if (promise[1].isFulfilled()) {
+			promises.forEach(function (results) {
+				let libraryID = results[0].value;
+				let lastSyncTime = results[1].value;
+				if (results[1].state == "fulfilled") {
 					librarySyncTimes[libraryID] = lastSyncTime;
 				}
 				else {
-					let e = lastSyncTime.exception;
-					Zotero.debug(e);
-					Components.utils.reportError(e);
+					Zotero.debug(lastSyncTime.reason);
+					Components.utils.reportError(lastSyncTime.reason);
 					// Pass rejected promise through
-					libraryQueues.push(Q.allResolved(
-						[libraryID, lastSyncTime]
-					));
+					libraryQueues.push(results);
 				}
 			});
 			
@@ -316,7 +311,7 @@ Zotero.Sync.Storage = new function () {
 				// Start queues for each library
 				for (let libraryID in librarySyncTimes) {
 					libraryID = parseInt(libraryID);
-					libraryQueues.push(Q.allResolved(
+					libraryQueues.push(Q.allSettled(
 						[libraryID, Zotero.Sync.Storage.QueueManager.start(libraryID)]
 					));
 				}
@@ -331,20 +326,20 @@ Zotero.Sync.Storage = new function () {
 			var changedLibraries = [];
 			var finalPromises = [];
 			
-			promises.forEach(function (promise) {
-				var libraryID = promise[0].valueOf();
-				var libraryQueues = promise[1].valueOf();
+			promises.forEach(function (results) {
+				var libraryID = results[0].value;
+				var libraryQueues = results[1].value;
 				
-				if (promise[1].isFulfilled()) {
+				if (results[1].state == "fulfilled") {
 					libraryQueues.forEach(function (queuePromise) {
-						let result = queuePromise.valueOf();
 						if (queuePromise.isFulfilled()) {
+							let result = queuePromise.inspect().value;
 							Zotero.debug("File " + result.type + " sync finished "
 								+ "for library " + libraryID);
 							if (result.localChanges) {
 								changedLibraries.push(libraryID);
 							}
-							finalPromises.push(Q.allResolved([
+							finalPromises.push(Q.allSettled([
 								libraryID,
 								libraryModes[libraryID].setLastSyncTime(
 									libraryID,
@@ -353,10 +348,12 @@ Zotero.Sync.Storage = new function () {
 							]));
 						}
 						else {
-							result = result.exception;
-							Zotero.debug("File " + result.type + " sync failed "
+							let e = queuePromise.inspect().reason;
+							Zotero.debug("File " + e.type + " sync failed "
 								+ "for library " + libraryID);
-							finalPromises.push([libraryID, queuePromise]);
+							finalPromises.push(Q.allSettled(
+								[libraryID, Q.reject(e)]
+							));
 						}
 					});
 				}
@@ -389,27 +386,26 @@ Zotero.Sync.Storage = new function () {
 			}
 			
 			return Q.all(finalPromises)
-				.then(function (promises) {
-					var results = {
-						changesMade: !!changedLibraries.length,
-						errors: []
-					};
-					
-					promises.forEach(function (promise) {
-						var libraryID = promise[0].valueOf();
-						if (promise[1].isRejected()) {
-							var result = promise[1].valueOf();
-							result = result.exception;
-							if (typeof result == 'string') {
-								result = new Error(result);
-							}
-							result.libraryID = libraryID;
-							results.errors.push(result);
+			.then(function (promises) {
+				var results = {
+					changesMade: !!changedLibraries.length,
+					errors: []
+				};
+				
+				promises.forEach(function (promiseResults) {
+					var libraryID = promiseResults[0].value;
+					if (promiseResults[1].state == "rejected") {
+						let e = promiseResults[1].reason;
+						if (typeof e == 'string') {
+							e = new Error(e);
 						}
-					});
-					
-					return results;
+						e.libraryID = libraryID;
+						results.errors.push(e);
+					}
 				});
+				
+				return results;
+			});
 		});
 	}
 	

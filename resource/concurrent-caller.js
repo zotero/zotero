@@ -26,7 +26,7 @@
 EXPORTED_SYMBOLS = ["ConcurrentCaller"];
 Components.utils.import("resource://zotero/q.js");
 
-/**
+f/**
  * Call a fixed number of functions at once, queueing the rest until slots
  * open and returning a promise for the final completion. The functions do
  * not need to return promises, but they should if they have asynchronous
@@ -79,7 +79,7 @@ ConcurrentCaller.prototype.fcall = function (func) {
 			//this._log("Running fcall on function");
 			promises.push(this.fcall(func[i]));
 		}
-		return this.stopOnError ? Q.all(promises) : Q.allResolved(promises);
+		return this.stopOnError ? Q.all(promises) : Q.allSettled(promises);
 	}
 	
 	// If we're at the maximum number of concurrent functions,

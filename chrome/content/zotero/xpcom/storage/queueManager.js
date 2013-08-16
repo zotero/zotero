@@ -53,26 +53,26 @@ Zotero.Sync.Storage.QueueManager = new function () {
 			Zotero.debug("No files to sync" + suffix);
 		}
 		
-		return Q.allResolved(promises)
-			.then(function (promises) {
-				Zotero.debug("All storage queues are finished" + suffix);
-				
-				promises.forEach(function (promise) {
-					// Check for conflicts to resolve
-					if (promise.isFulfilled()) {
-						var result = promise.valueOf();
-						if (result.conflicts.length) {
-							Zotero.debug("Reconciling conflicts for library " + result.libraryID);
-							Zotero.debug(result.conflicts);
-							var data = _reconcileConflicts(result.conflicts);
-							if (data) {
-								_processMergeData(data);
-							}
+		return Q.allSettled(promises)
+		.then(function (results) {
+			Zotero.debug("All storage queues are finished" + suffix);
+			
+			results.forEach(function (result) {
+				// Check for conflicts to resolve
+				if (result.state == "fulfilled") {
+					result = result.value;
+					if (result.conflicts.length) {
+						Zotero.debug("Reconciling conflicts for library " + result.libraryID);
+						Zotero.debug(result.conflicts);
+						var data = _reconcileConflicts(result.conflicts);
+						if (data) {
+							_processMergeData(data);
 						}
 					}
-				});
-				return promises;
+				}
 			});
+			return promises;
+		});
 	};
 	
 	this.stop = function (libraryID) {
