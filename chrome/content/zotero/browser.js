@@ -58,6 +58,7 @@ var Zotero_Browser = new function() {
 	this.isScraping = false;
 	
 	var _browserData = new Object();
+	var _attachmentsMap = new WeakMap();
 	
 	var _blacklist = [
 		"googlesyndication.com",
@@ -533,6 +534,7 @@ var Zotero_Browser = new function() {
 		
 		translate.clearHandlers("done");
 		translate.clearHandlers("itemDone");
+		translate.clearHandlers("attachmentProgress");
 		
 		translate.setHandler("done", function(obj, returnValue) {		
 			if(!returnValue) {
@@ -550,8 +552,6 @@ var Zotero_Browser = new function() {
 			Zotero_Browser.isScraping = false;
 		});
 		
-		var attachmentsMap = new WeakMap();
-		
 		translate.setHandler("itemDone", function(obj, dbItem, item) {
 			Zotero_Browser.progress.show();
 			var itemProgress = new Zotero_Browser.progress.ItemProgress(Zotero.ItemTypes.getImageSrc(item.itemType),
@@ -559,7 +559,7 @@ var Zotero_Browser = new function() {
 			itemProgress.setProgress(100);
 			for(var i=0; i<item.attachments.length; i++) {
 				var attachment = item.attachments[i];
-				attachmentsMap.set(attachment,
+				_attachmentsMap.set(attachment,
 					new Zotero_Browser.progress.ItemProgress(
 						Zotero.Utilities.determineAttachmentIcon(attachment),
 						attachment.title, itemProgress));
@@ -572,7 +572,7 @@ var Zotero_Browser = new function() {
 		});
 		
 		translate.setHandler("attachmentProgress", function(obj, attachment, progress, error) {
-			var itemProgress = attachmentsMap.get(attachment);
+			var itemProgress = _attachmentsMap.get(attachment);
 			if(progress === false) {
 				itemProgress.setError();
 			} else {
