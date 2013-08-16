@@ -45,8 +45,8 @@ Zotero_Preferences.Export = {
 		// Initialize default format drop-down
 		var format = Zotero.Prefs.get("export.quickCopy.setting");
 		var menulist = document.getElementById("zotero-quickCopy-menu");
-		this.buildQuickCopyFormatDropDown(menulist, Zotero.QuickCopy.getContentType(format), format);
 		menulist.setAttribute('preference', "pref-quickCopy-setting");
+		this.buildQuickCopyFormatDropDown(menulist, Zotero.QuickCopy.getContentType(format), format);
 		this.updateQuickCopyHTMLCheckbox();
 		
 		if (!Zotero.isStandalone) {
@@ -106,30 +106,30 @@ Zotero_Preferences.Export = {
 		
 		// add export formats to list
 		var translation = new Zotero.Translate("export");
-		var translators = translation.getTranslators();
-		
-		for (var i=0; i<translators.length; i++) {
-			// Skip RDF formats
-			switch (translators[i].translatorID) {
-				case '6e372642-ed9d-4934-b5d1-c11ac758ebb7':
-				case '14763d24-8ba0-45df-8f52-b8d1108e7ac9':
-					continue;
+		translation.getTranslators()
+		.then(function (translators) {
+			for (var i=0; i<translators.length; i++) {
+				// Skip RDF formats
+				switch (translators[i].translatorID) {
+					case '6e372642-ed9d-4934-b5d1-c11ac758ebb7':
+					case '14763d24-8ba0-45df-8f52-b8d1108e7ac9':
+						continue;
+				}
+				var val  = 'export=' + translators[i].translatorID;
+				var itemNode = document.createElement("menuitem");
+				itemNode.setAttribute("value", val);
+				itemNode.setAttribute("label", translators[i].label);
+				itemNode.setAttribute("oncommand", 'Zotero_Preferences.Export.updateQuickCopyHTMLCheckbox()');
+				popup.appendChild(itemNode);
+				
+				if (val == currentFormat) {
+					menulist.selectedItem = itemNode;
+				}
 			}
-			var val  = 'export=' + translators[i].translatorID;
-			var itemNode = document.createElement("menuitem");
-			itemNode.setAttribute("value", val);
-			itemNode.setAttribute("label", translators[i].label);
-			itemNode.setAttribute("oncommand", 'Zotero_Preferences.Export.updateQuickCopyHTMLCheckbox()');
-			popup.appendChild(itemNode);
 			
-			if (val == currentFormat) {
-				menulist.selectedItem = itemNode;
-			}
-		}
-		
-		menulist.click();
-		
-		return popup;
+			menulist.click();
+		})
+		.done();
 	},
 	
 	
@@ -156,25 +156,28 @@ Zotero_Preferences.Export = {
 			var asHTML = treerow.childNodes[2].getAttribute('label') != '';
 		}
 		
-		var format = Zotero.QuickCopy.getSettingFromFormattedName(format);
-		if (asHTML) {
-			format = format.replace('bibliography=', 'bibliography/html=');
-		}
-		
-		var io = {domain: domain, format: format, ok: false};
-		window.openDialog('chrome://zotero/content/preferences/quickCopySiteEditor.xul', "zotero-preferences-quickCopySiteEditor", "chrome, modal", io);
-		
-		if (!io.ok) {
-			return;
-		}
-		
-		if (domain && domain != io.domain) {
-			Zotero.DB.query("DELETE FROM settings WHERE setting='quickCopySite' AND key=?", [domain]);
-		}
-		
-		Zotero.DB.query("REPLACE INTO settings VALUES ('quickCopySite', ?, ?)", [io.domain, io.format]);
-		
-		this.refreshQuickCopySiteList();
+		Zotero.QuickCopy.getSettingFromFormattedName(format)
+		.then(function (format) {
+			if (asHTML) {
+				format = format.replace('bibliography=', 'bibliography/html=');
+			}
+			
+			var io = {domain: domain, format: format, ok: false};
+			window.openDialog('chrome://zotero/content/preferences/quickCopySiteEditor.xul', "zotero-preferences-quickCopySiteEditor", "chrome, modal", io);
+			
+			if (!io.ok) {
+				return;
+			}
+			
+			if (domain && domain != io.domain) {
+				Zotero.DB.query("DELETE FROM settings WHERE setting='quickCopySite' AND key=?", [domain]);
+			}
+			
+			Zotero.DB.query("REPLACE INTO settings VALUES ('quickCopySite', ?, ?)", [io.domain, io.format]);
+			
+			this.refreshQuickCopySiteList();
+		}.bind(this))
+		.done();
 	},
 	
 	
@@ -192,26 +195,30 @@ Zotero_Preferences.Export = {
 			return;
 		}
 		
-		for (var i=0; i<siteData.length; i++) {
-			var treeitem = document.createElement('treeitem');
-			var treerow = document.createElement('treerow');
-			var domainCell = document.createElement('treecell');
-			var formatCell = document.createElement('treecell');
-			var HTMLCell = document.createElement('treecell');
-			
-			domainCell.setAttribute('label', siteData[i].domainPath);
-			
-			var formatted = Zotero.QuickCopy.getFormattedNameFromSetting(siteData[i].format);
-			formatCell.setAttribute('label', formatted);
-			var copyAsHTML = Zotero.QuickCopy.getContentType(siteData[i].format) == 'html';
-			HTMLCell.setAttribute('label', copyAsHTML ? '   ✓   ' : '');
-			
-			treerow.appendChild(domainCell);
-			treerow.appendChild(formatCell);
-			treerow.appendChild(HTMLCell);
-			treeitem.appendChild(treerow);
-			treechildren.appendChild(treeitem);
-		}
+		Q.async(function () {
+			for (var i=0; i<siteData.length; i++) {
+				let treeitem = document.createElement('treeitem');
+				let treerow = document.createElement('treerow');
+				let domainCell = document.createElement('treecell');
+				let formatCell = document.createElement('treecell');
+				let HTMLCell = document.createElement('treecell');
+				
+				domainCell.setAttribute('label', siteData[i].domainPath);
+				
+				yield Zotero.QuickCopy.getFormattedNameFromSetting(siteData[i].format)
+				.then(function (formatted) {
+					formatCell.setAttribute('label', formatted);
+					var copyAsHTML = Zotero.QuickCopy.getContentType(siteData[i].format) == 'html';
+					HTMLCell.setAttribute('label', copyAsHTML ? '   ✓   ' : '');
+					
+					treerow.appendChild(domainCell);
+					treerow.appendChild(formatCell);
+					treerow.appendChild(HTMLCell);
+					treeitem.appendChild(treerow);
+					treechildren.appendChild(treeitem);
+				});
+			}
+		})().done();
 	},
 	
 	

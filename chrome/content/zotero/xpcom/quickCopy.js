@@ -25,38 +25,57 @@
 
 
 Zotero.QuickCopy = new function() {
-	this.getFormattedNameFromSetting = getFormattedNameFromSetting;
-	this.getSettingFromFormattedName = getSettingFromFormattedName;
 	this.getContentType = getContentType;
 	this.stripContentType = stripContentType;
 	this.getFormatFromURL = getFormatFromURL;
 	this.getContentFromItems = getContentFromItems;
 	
-	var _initialized = false;
 	var _formattedNames = {};
 	
 	
-	function getFormattedNameFromSetting(setting) {
-		if (!_initialized) {
-			_init();
-		}
+	var _init = Zotero.lazy(function () {
+		Zotero.debug("Initializing Quick Copy");
 		
-		var name = _formattedNames[this.stripContentType(setting)];
-		return name ? name : '';
+		var translation = new Zotero.Translate.Export;
+		return translation.getTranslators()
+		.then(function (translators) {
+			// add styles to list
+			var styles = Zotero.Styles.getVisible();
+			for each(var style in styles) {
+				_formattedNames['bibliography=' + style.styleID] = style.title;
+			}
+			
+			for (var i=0; i<translators.length; i++) {
+				// Skip RDF formats
+				switch (translators[i].translatorID) {
+					case '6e372642-ed9d-4934-b5d1-c11ac758ebb7':
+					case '14763d24-8ba0-45df-8f52-b8d1108e7ac9':
+						continue;
+				}
+				_formattedNames['export=' + translators[i].translatorID] = translators[i].label;
+			}
+		});
+	});
+	
+	
+	this.getFormattedNameFromSetting = function (setting) {
+		return _init()
+		.then(function () {
+			var name = _formattedNames[this.stripContentType(setting)];
+			return name ? name : '';
+		}.bind(this));
 	}
 	
-	function getSettingFromFormattedName(name) {
-		if (!_initialized) {
-			_init();
-		}
-		
-		for (var setting in _formattedNames) {
-			if (_formattedNames[setting] == name) {
-				return setting;
+	this.getSettingFromFormattedName = function (name) {
+		return _init()
+		.then(function () {
+			for (var setting in _formattedNames) {
+				if (_formattedNames[setting] == name) {
+					return setting;
+				}
 			}
-		}
-		
-		return '';
+			return '';
+		});
 	}
 	
 	
@@ -345,27 +364,5 @@ Zotero.QuickCopy = new function() {
 		}
 		
 		throw ("Invalid mode '" + mode + "' in Zotero.QuickCopy.getContentFromItems()");
-	}
-	
-	
-	function _init() {
-		var translation = new Zotero.Translate.Export;
-		var translators = translation.getTranslators();
-		
-		// add styles to list
-		var styles = Zotero.Styles.getVisible();
-		for each(var style in styles) {
-			_formattedNames['bibliography=' + style.styleID] = style.title;
-		}
-		
-		for (var i=0; i<translators.length; i++) {
-			// Skip RDF formats
-			switch (translators[i].translatorID) {
-				case '6e372642-ed9d-4934-b5d1-c11ac758ebb7':
-				case '14763d24-8ba0-45df-8f52-b8d1108e7ac9':
-					continue;
-			}
-			_formattedNames['export=' + translators[i].translatorID] = translators[i].label;
-		}
 	}
 }
