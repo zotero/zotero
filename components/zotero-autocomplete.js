@@ -73,7 +73,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 			break;
 		
 		case 'zlsPrimary':
-			var sql = 'SELECT TA.value AS comment,D.value AS val FROM zlsSubtags S '
+			var sql = 'SELECT D.value AS val,TA.value AS comment FROM zlsSubtags S '
 				+ 'LEFT JOIN zlsSubtagData TA ON S.subtag=TA.id '
 				+ 'LEFT JOIN zlsSubtagData D ON S.description=D.id '
 				+ 'LEFT JOIN zlsSubtagData TY ON S.type=TY.id '
@@ -84,28 +84,16 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 				+ 'AND ('
 					+ 'S.scope IS NULL '
 					+ 'OR NOT SC.value=?'
-				+ ')';
+				+ ') ORDER BY D.value';
 			var sqlParams = ['%' + searchString + '%', 'language', 'collection'];
 			statement = this._zotero.DB.getStatement(sql, sqlParams);
-			var resultsCallback = function (results) {
-				var collation = self._zotero.getLocaleCollation();
-				results.sort(function(a, b) {
-					return collation.compareString(1, a, b);
-				});
-			};
 			break;
 		
 		case 'jurisdictions':
-			var sql = 'SELECT jurisdictionID as comment,jurisdictionName as val FROM jurisdictions '
-				+ 'WHERE jurisdictionName LIKE ?'
+			var sql = 'SELECT jurisdictionName as val,jurisdictionID as comment FROM jurisdictions '
+				+ 'WHERE jurisdictionName LIKE ? ORDER BY jurisdictionName'
 			var sqlParams = ['%' + searchString + '%'];
 			statement = this._zotero.DB.getStatement(sql, sqlParams);
-			var resultsCallback = function (results) {
-				var collation = self._zotero.getLocaleCollation();
-				results.sort(function(a, b) {
-					return collation.compareString(1, a, b);
-				});
-			};
 			break;
 		
 		case 'tag':
