@@ -41,55 +41,56 @@ var Zotero_File_Exporter = function() {
  * Performs the actual export operation
  **/
 Zotero_File_Exporter.prototype.save = function() {
-	var translation = new Zotero.Translate.Export();
-	var translators = translation.getTranslators();
-	
-	// present options dialog
-	var io = {translators:translators}
-	window.openDialog("chrome://zotero/content/exportOptions.xul",
-		"_blank", "chrome,modal,centerscreen,resizable=no", io);
-	if(!io.selectedTranslator) {
-		return false;
-	}
-	
-	const nsIFilePicker = Components.interfaces.nsIFilePicker;
-	var fp = Components.classes["@mozilla.org/filepicker;1"]
-			.createInstance(nsIFilePicker);
-	fp.init(window, Zotero.getString("fileInterface.export"), nsIFilePicker.modeSave);
-	
-	// set file name and extension
-	if(io.displayOptions.exportFileData) {
-		// if the result will be a folder, don't append any extension or use
-		// filters
-		fp.defaultString = this.name;
-		fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
-	} else {
-		// if the result will be a file, append an extension and use filters
-		fp.defaultString = this.name+(io.selectedTranslator.target ? "."+io.selectedTranslator.target : "");
-		fp.defaultExtension = io.selectedTranslator.target;
-		fp.appendFilter(io.selectedTranslator.label, "*."+(io.selectedTranslator.target ? io.selectedTranslator.target : "*"));
-	}
-	
-	var rv = fp.show();
-	if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
-		if(this.collection) {
-			translation.setCollection(this.collection);
-		} else if(this.items) {
-			translation.setItems(this.items);
+	var translation = new Zotero.Translate.Export(),
+		me = this;
+	translation.getTranslators().then(function(translators) {
+		// present options dialog
+		var io = {translators:translators}
+		window.openDialog("chrome://zotero/content/exportOptions.xul",
+			"_blank", "chrome,modal,centerscreen,resizable=no", io);
+		if(!io.selectedTranslator) {
+			return false;
 		}
 		
-		translation.setLocation(fp.file);
-		translation.setTranslator(io.selectedTranslator);
-		translation.setDisplayOptions(io.displayOptions);
-		translation.setHandler("itemDone", Zotero_File_Interface.updateProgress);
-		translation.setHandler("done", this._exportDone);
-		Zotero.UnresponsiveScriptIndicator.disable();
-		Zotero_File_Interface.Progress.show(
-			Zotero.getString("fileInterface.itemsExported")
-		);
-		translation.translate()
-	}
-	return false;
+		const nsIFilePicker = Components.interfaces.nsIFilePicker;
+		var fp = Components.classes["@mozilla.org/filepicker;1"]
+				.createInstance(nsIFilePicker);
+		fp.init(window, Zotero.getString("fileInterface.export"), nsIFilePicker.modeSave);
+		
+		// set file name and extension
+		if(io.displayOptions.exportFileData) {
+			// if the result will be a folder, don't append any extension or use
+			// filters
+			fp.defaultString = me.name;
+			fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
+		} else {
+			// if the result will be a file, append an extension and use filters
+			fp.defaultString = me.name+(io.selectedTranslator.target ? "."+io.selectedTranslator.target : "");
+			fp.defaultExtension = io.selectedTranslator.target;
+			fp.appendFilter(io.selectedTranslator.label, "*."+(io.selectedTranslator.target ? io.selectedTranslator.target : "*"));
+		}
+		
+		var rv = fp.show();
+		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
+			if(me.collection) {
+				translation.setCollection(me.collection);
+			} else if(me.items) {
+				translation.setItems(me.items);
+			}
+			
+			translation.setLocation(fp.file);
+			translation.setTranslator(io.selectedTranslator);
+			translation.setDisplayOptions(io.displayOptions);
+			translation.setHandler("itemDone", Zotero_File_Interface.updateProgress);
+			translation.setHandler("done", me._exportDone);
+			Zotero.UnresponsiveScriptIndicator.disable();
+			Zotero_File_Interface.Progress.show(
+				Zotero.getString("fileInterface.itemsExported")
+			);
+			translation.translate()
+		}
+		return false;
+	}).done();
 }
 	
 /*
@@ -207,9 +208,7 @@ var Zotero_File_Interface = new function() {
 		}
 		
 		var translation = new Zotero.Translate.Import();
-		if(!file) {
-			var translators = translation.getTranslators();
-			
+		(file ? Q(file) : translation.getTranslators().then(function(translators) {
 			const nsIFilePicker = Components.interfaces.nsIFilePicker;
 			var fp = Components.classes["@mozilla.org/filepicker;1"]
 					.createInstance(nsIFilePicker);
@@ -225,15 +224,17 @@ var Zotero_File_Interface = new function() {
 				return false;
 			}
 			
-			file = fp.file;
-		}
-		
-		translation.setLocation(file);
-		// get translators again, bc now we can check against the file
-		translation.setHandler("translators", function(obj, item) {
-			_importTranslatorsAvailable(obj, item, createNewCollection);
-		});
-		translators = translation.getTranslators();
+			return fp.file;
+		})).then(function(file) {
+			if(!file) return; // no file if user cancelled
+
+			translation.setLocation(file);
+			// get translators again, bc now we can check against the file
+			translation.setHandler("translators", function(obj, item) {
+				_importTranslatorsAvailable(obj, item, createNewCollection);
+			});
+			translators = translation.getTranslators();
+		}).done();
 	}
 	
 	

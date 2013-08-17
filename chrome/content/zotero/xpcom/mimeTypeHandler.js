@@ -145,15 +145,16 @@ Zotero.MIMETypeHandler = new function () {
 		translation.setString(string);
 		
 		// attempt to retrieve translators
-		var translators = translation.getTranslators();
-		if(!translators.length) {
-			// we lied. we can't really translate this file.
-			throw "No translator found for handled RIS, Refer or ISI file"
-		}
-		
-		// translate using first available
-		translation.setTranslator(translators[0]);
-		frontWindow.Zotero_Browser.performTranslation(translation);
+		return translation.getTranslators().then(function(translators) {
+			if(!translators.length) {
+				// we lied. we can't really translate this file.
+				throw "No translator found for handled RIS, Refer or ISI file"
+			}
+			
+			// translate using first available
+			translation.setTranslator(translators[0]);
+			frontWindow.Zotero_Browser.performTranslation(translation);
+		});
 	}
 	
 	/**
@@ -268,7 +269,7 @@ Zotero.MIMETypeHandler = new function () {
 		if (!this._storageStream) {
 			this._storageStream = Components.classes["@mozilla.org/storagestream;1"].
 					createInstance(Components.interfaces.nsIStorageStream);
-			this._storageStream.init(4096, 4294967295, null); // PR_UINT32_MAX
+			this._storageStream.init(16384, 4294967295, null); // PR_UINT32_MAX
 			this._outputStream = this._storageStream.getOutputStream(0);
 			
 			this._binaryInputStream = Components.classes["@mozilla.org/binaryinputstream;1"].
@@ -291,38 +292,36 @@ Zotero.MIMETypeHandler = new function () {
 		const replacementChar = Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
 		var convStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 					.createInstance(Components.interfaces.nsIConverterInputStream);
-		convStream.init(inputStream, charset, 1024, replacementChar);
+		convStream.init(inputStream, charset, 16384, replacementChar);
 		var readString = "";
 		var str = {};
-		while (convStream.readString(4096, str) != 0) {
+		while (convStream.readString(16384, str) != 0) {
 			readString += str.value;
 		}
 		convStream.close();
 		inputStream.close();
 		
-		try {
-			_typeHandlers[this._contentType](readString, (this._request.name ? this._request.name : null),
-				this._contentType, channel);
-		} catch(e) {
-			// if there was an error, handle using nsIExternalHelperAppService
-			var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"].
-				getService(Components.interfaces.nsIExternalHelperAppService);
-			var frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
-				getService(Components.interfaces.nsIWindowWatcher).activeWindow;
-			
-			var inputStream = this._storageStream.newInputStream(0);
-			var streamListener = externalHelperAppService.doContent(this._contentType, this._request, frontWindow, null);
-			if (streamListener) {
-				streamListener.onStartRequest(channel, context);
-				streamListener.onDataAvailable(this._request, context, inputStream, 0, this._storageStream.length);
-				streamListener.onStopRequest(channel, context, status);
-			}
-			this._storageStream.close();
-			
-			// then throw our error
-			throw e;
-		}
-		
-		this._storageStream.close();
+		var me = this;
+		Q(_typeHandlers[this._contentType](readString, (this._request.name ? this._request.name : null),
+			this._contentType, channel)).fail(function(e) {
+				// if there was an error, handle using nsIExternalHelperAppService
+				var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"].
+					getService(Components.interfaces.nsIExternalHelperAppService);
+				var frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
+					getService(Components.interfaces.nsIWindowWatcher).activeWindow;
+				
+				var inputStream = me._storageStream.newInputStream(0);
+				var streamListener = externalHelperAppService.doContent(me._contentType, me._request, frontWindow, null);
+				if (streamListener) {
+					streamListener.onStartRequest(channel, context);
+					streamListener.onDataAvailable(me._request, context, inputStream, 0, me._storageStream.length);
+					streamListener.onStopRequest(channel, context, status);
+				}
+				
+				// then throw our error
+				throw e;
+			}).fin(function() {
+				me._storageStream.close();
+			}).done();
 	}
 }

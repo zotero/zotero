@@ -115,31 +115,32 @@ const Zotero_Lookup = new function () {
 				translate.setSearch(item);
 
 				// be lenient about translators
-				var translators = translate.getTranslators();
-				translate.setTranslator(translators);
+				translate.getTranslators().then(function(translators) {
+					translate.setTranslator(translators);
 
-				translate.setHandler("done", function(translate, success) {
-					notDone--;
-					successful += success;
+					translate.setHandler("done", function(translate, success) {
+						notDone--;
+						successful += success;
 
-					if(!notDone) {	//i.e. done
-						Zotero_Lookup.toggleProgress(false);
-						if(successful) {
-							document.getElementById("zotero-lookup-panel").hidePopup();
-						} else {
-							var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-																			.getService(Components.interfaces.nsIPromptService);
-							prompts.alert(window, Zotero.getString("lookup.failure.title"),
-								Zotero.getString("lookup.failure.description"));
+						if(!notDone) {	//i.e. done
+							Zotero_Lookup.toggleProgress(false);
+							if(successful) {
+								document.getElementById("zotero-lookup-panel").hidePopup();
+							} else {
+								var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+																				.getService(Components.interfaces.nsIPromptService);
+								prompts.alert(window, Zotero.getString("lookup.failure.title"),
+									Zotero.getString("lookup.failure.description"));
+							}
 						}
-					}
-				});
+					});
 
-				translate.setHandler("itemDone", function(obj, item) {
-					if(collection) collection.addItem(item.id);
+					translate.setHandler("itemDone", function(obj, item) {
+						if(collection) collection.addItem(item.id);
+					});
+					
+					translate.translate(libraryID);
 				});
-				
-				translate.translate(libraryID);
 			})(item);
 		}
 

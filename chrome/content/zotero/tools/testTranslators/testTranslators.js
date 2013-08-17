@@ -466,12 +466,13 @@ function init() {
 		
 		// get translators, with code for unsupported translators
 		if(!viewerMode) {
-			Zotero.Translators.getAllForType(translatorType, new function() {
+			Zotero.Translators.getAllForType(translatorType, true).
+			then(new function() {
 				var type = translatorType;
 				return function(translators) {
 					haveTranslators(translators, type);
 				}
-			}, true);
+			});
 		}
 	}
 	
