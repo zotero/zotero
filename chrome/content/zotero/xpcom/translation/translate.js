@@ -1017,7 +1017,7 @@ Zotero.Translate.Base.prototype = {
 		}
 
 		// if detection returns immediately, return found translators
-		var me = this, deferred = Q.defer();
+		var me = this;
 		return potentialTranslators.spread(function(allPotentialTranslators, properToProxyFunctions) {
 			me._potentialTranslators = [];
 			me._foundTranslators = [];
@@ -1040,10 +1040,12 @@ Zotero.Translate.Base.prototype = {
 			// Attach handler for translators, so that we can return a
 			// promise that provides them.
 			// TODO make me._detect() return a promise
-			var translatorsHandler = function(obj, translators) {
-				me.removeHandler("translators", translatorsHandler);
-				deferred.resolve(translators);
-			}
+			var deferred = Q.defer(),
+				translatorsHandler = function(obj, translators) {
+					Zotero.debug("TRANSLATORS HANDLER")
+					me.removeHandler("translators", translatorsHandler);
+					deferred.resolve(translators);
+				}
 			me.setHandler("translators", translatorsHandler);
 			me._detect();
 
@@ -1069,10 +1071,12 @@ Zotero.Translate.Base.prototype = {
 						}
 					});
 			}
+
+			return deferred.promise;
 		}).fail(function(e) {
 			Zotero.logError(e);
 			me.complete(false, e);
-		}).then(deferred.promise);
+		});
 	},
 
 	/**
