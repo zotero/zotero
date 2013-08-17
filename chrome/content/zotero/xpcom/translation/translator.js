@@ -354,14 +354,13 @@ Zotero.Translators = new function() {
 		// JSON.stringify has the benefit of indenting JSON
 		var metadataJSON = JSON.stringify(metadata, null, "\t");
 		
-		var str = metadataJSON + "\n\n" + code;
+		var str = metadataJSON + "\n\n" + code,
+			translator;
 		
-		var translator = Zotero.Translators.get(metadata.translatorID);
-		if (translator && destFile.equals(translator.file)) {
-			var sameFile = true;
-		}
-		
-		return Q.fcall(function () {
+		return Zotero.Translators.get(metadata.translatorID)
+		.then(function(gTranslator) {
+			translator = gTranslator;
+			var sameFile = translator && destFile.equals(translator.file);
 			if (sameFile) return;
 			
 			return Q(OS.File.exists(destFile.path))
