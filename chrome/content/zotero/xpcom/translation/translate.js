@@ -331,52 +331,51 @@ Zotero.Translate.Sandbox = {
 				}
 				
 				var translator = translation.translator[0];
-				translation._loadTranslator(translator, function() {
-					if(Zotero.isFx && !Zotero.isBookmarklet) {
-						// do same origin check
-						var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
-							.getService(Components.interfaces.nsIScriptSecurityManager);
-						var ioService = Components.classes["@mozilla.org/network/io-service;1"] 
-							.getService(Components.interfaces.nsIIOService);
-						
-						var outerSandboxURI = ioService.newURI(typeof translate._sandboxLocation === "object" ?
-							translate._sandboxLocation.location : translate._sandboxLocation, null, null);
-						var innerSandboxURI = ioService.newURI(typeof translation._sandboxLocation === "object" ?
-							translation._sandboxLocation.location : translation._sandboxLocation, null, null);
-						
-						try {
-							secMan.checkSameOriginURI(outerSandboxURI, innerSandboxURI, false);
-						} catch(e) {
-							throw new Error("getTranslatorObject() may not be called from web or search "+
-								"translators to web or search translators from different origins.");
+				(typeof translator === "object" ? Q(translator) : Zotero.Translators.get(translator)).
+				then(function(translator) {
+					translation._loadTranslator(translator, function() {
+						if(Zotero.isFx && !Zotero.isBookmarklet) {
+							// do same origin check
+							var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
+								.getService(Components.interfaces.nsIScriptSecurityManager);
+							var ioService = Components.classes["@mozilla.org/network/io-service;1"] 
+								.getService(Components.interfaces.nsIIOService);
+							
+							var outerSandboxURI = ioService.newURI(typeof translate._sandboxLocation === "object" ?
+								translate._sandboxLocation.location : translate._sandboxLocation, null, null);
+							var innerSandboxURI = ioService.newURI(typeof translation._sandboxLocation === "object" ?
+								translation._sandboxLocation.location : translation._sandboxLocation, null, null);
+							
+							try {
+								secMan.checkSameOriginURI(outerSandboxURI, innerSandboxURI, false);
+							} catch(e) {
+								throw new Error("getTranslatorObject() may not be called from web or search "+
+									"translators to web or search translators from different origins.");
+								return;
+							}
 						}
-					}
-					
-					translation._prepareTranslation();
-					setDefaultHandlers(translate, translation);
-					sandbox = translation._sandboxManager.sandbox;
-					if(!Zotero.Utilities.isEmpty(sandbox.exports)) {
-						sandbox.exports.Zotero = sandbox.Zotero;
-						sandbox = sandbox.exports;
-					} else {
-						translate._debug("COMPAT WARNING: "+translation.translator[0].label+" does "+
-							"not export any properties. Only detect"+translation._entryFunctionSuffix+
-							" and do"+translation._entryFunctionSuffix+" will be available in "+
-							"connectors.");
-					}
-					
-					try {
+						
+						translation._prepareTranslation();
+						setDefaultHandlers(translate, translation);
+						sandbox = translation._sandboxManager.sandbox;
+						if(!Zotero.Utilities.isEmpty(sandbox.exports)) {
+							sandbox.exports.Zotero = sandbox.Zotero;
+							sandbox = sandbox.exports;
+						} else {
+							translate._debug("COMPAT WARNING: "+translation.translator[0].label+" does "+
+								"not export any properties. Only detect"+translation._entryFunctionSuffix+
+								" and do"+translation._entryFunctionSuffix+" will be available in "+
+								"connectors.");
+						}
+						
 						callback(sandbox);
-					} catch(e) {
-						translate.complete(false, e);
-						return;
-					}
-					translate.decrementAsyncProcesses("safeTranslator#getTranslatorObject()");
+						translate.decrementAsyncProcesses("safeTranslator#getTranslatorObject()");
+					});
+				}).fail(function(e) {
+					translate.complete(false, e);
+					return;
 				});
 			};
-			
-			// TODO security is not super-tight here, as someone could pass something into arg
-			// that gets evaluated in the wrong scope in Fx < 4. We should wrap this.
 			
 			return safeTranslator;
 		},
@@ -1042,7 +1041,6 @@ Zotero.Translate.Base.prototype = {
 			// TODO make me._detect() return a promise
 			var deferred = Q.defer(),
 				translatorsHandler = function(obj, translators) {
-					Zotero.debug("TRANSLATORS HANDLER")
 					me.removeHandler("translators", translatorsHandler);
 					deferred.resolve(translators);
 				}
