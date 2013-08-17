@@ -44,6 +44,7 @@ const xpcomFilesAll = [
 	'progressWindow',
 	'translation/translate',
 	'translation/translate_firefox',
+	'translation/translator',
 	'translation/tlds',
 	'utilities',
 	'utilities_internal',
@@ -104,7 +105,7 @@ const xpcomFilesLocal = [
 	'timeline',
 	'uri',
 	'translation/translate_item',
-	'translation/translator',
+	'translation/translators',
 	'server_connector'
 ];
 
