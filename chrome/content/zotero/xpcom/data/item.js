@@ -2980,7 +2980,6 @@ Zotero.Item.prototype.fileExistsAsync = function () {
 		}
 		
 		var nsIFile = self.getFile(null, true);
-		Components.utils.import("resource://gre/modules/osfile.jsm");
 		return Q(OS.File.exists(nsIFile.path))
 		.then(function(exists) {
 			self._updateAttachmentStates(exists);

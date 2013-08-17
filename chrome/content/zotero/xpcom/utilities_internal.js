@@ -96,7 +96,6 @@ Zotero.Utilities.Internal = {
 	 *                                  rather than hex string
 	 */
 	"md5Async": function (file, base64) {
-		Components.utils.import("resource://gre/modules/osfile.jsm");
 		const CHUNK_SIZE = 16384;
 		
 		var deferred = Q.defer();

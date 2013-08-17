@@ -44,6 +44,7 @@ const ZOTERO_CONFIG = {
 Components.utils.import("resource://zotero/q.js");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
+Components.utils.import("resource://gre/modules/osfile.jsm");
 
 /*
  * Core functions
