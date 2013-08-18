@@ -204,7 +204,7 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 		} else if(creators.length === 2) {
 			return creators[0].ref.lastName+" "+Zotero.getString('general.and')+" "+creators[1].ref.lastName;
 		} else if(creators.length > 3) {
-			return creators[0].ref.lastName+" et al."
+			return creators[0].ref.lastName+" "+Zotero.getString('general.etAl');
 		}
 	} else if (field === 'id' || Zotero.Items.isPrimaryField(field)) {
 		var privField = '_' + field;
