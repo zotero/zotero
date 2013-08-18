@@ -225,7 +225,7 @@ Zotero_Preferences.Export = {
 	
 	
 	updateQuickCopyInstructions: function () {
-		var prefix = Zotero.isMac ? 'Cmd+Shift+' : 'Ctrl+Alt+';
+		var prefix = Zotero.isMac ? Zotero.getString('general.keys.cmdShift') : Zotero.getString('general.keys.ctrlShift');
 		
 		var key = Zotero.Prefs.get('keys.copySelectedItemsToClipboard');
 		var str = Zotero.getString('zotero.preferences.export.quickCopy.instructions', prefix + key);
