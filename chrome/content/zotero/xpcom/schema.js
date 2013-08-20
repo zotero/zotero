@@ -1379,17 +1379,17 @@ Zotero.Schema = new function(){
 			});
 			yield Zotero.Schema.updateCustomTables(true);
 			
-			yield _getSchemaSQLVersion('system').then(function (sql) {
-				return _updateDBVersion('system', sql);
+			yield _getSchemaSQLVersion('system').then(function (version) {
+				return _updateDBVersion('system', version);
 			});
-			yield _getSchemaSQLVersion('userdata').then(function (sql) {
-				return _updateDBVersion('userdata', sql);
+			yield _getSchemaSQLVersion('userdata').then(function (version) {
+				return _updateDBVersion('userdata', version);
 			});
-			yield _getSchemaSQLVersion('userdata3').then(function (sql) {
-				return _updateDBVersion('userdata3', sql);
+			yield _getSchemaSQLVersion('userdata3').then(function (version) {
+				return _updateDBVersion('userdata3', version);
 			});
-			yield _getSchemaSQLVersion('triggers').then(function (sql) {
-				return _updateDBVersion('triggers', sql);
+			yield _getSchemaSQLVersion('triggers').then(function (version) {
+				return _updateDBVersion('triggers', version);
 			});
 			
 			if (!Zotero.Schema.skipDefaultData) {
