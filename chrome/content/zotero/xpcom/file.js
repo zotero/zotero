@@ -159,23 +159,24 @@ Zotero.File = new function(){
 	
 	
 	/**
-	 * Get the contents of a file or input stream asynchronously
-	 * @param {nsIFile|nsIInputStream} file The file to read
+	 * Get the contents of a text source asynchronously
+	 *
+	 * @param {nsIURI|nsIFile|string spec|nsIChannel|nsIInputStream} source The source to read
 	 * @param {String} [charset] The character set; defaults to UTF-8
-	 * @param {Integer} [maxLength] The maximum number of characters to read
 	 * @return {Promise} A Q promise that is resolved with the contents of the file
 	 */
-	this.getContentsAsync = function getContentsAsync(file, charset, maxLength) {
-		charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
-		var deferred = Q.defer(),
-			channel = NetUtil.newChannel(file, charset);
-		NetUtil.asyncFetch(channel, function(inputStream, status) {  
+	this.getContentsAsync = function getContentsAsync(source, charset) {
+		var options = {
+			charset: charset ? Zotero.CharacterSets.getName(charset) : "UTF-8"
+		};
+		var deferred = Q.defer();
+		NetUtil.asyncFetch(source, function(inputStream, status) {
 			if (!Components.isSuccessCode(status)) {
 				deferred.reject(new Components.Exception("File read operation failed", status));
 				return;
 			}
 			
-			deferred.resolve(NetUtil.readInputStreamToString(inputStream, inputStream.available()));
+			deferred.resolve(NetUtil.readInputStreamToString(inputStream, inputStream.available(), options));
 		});
 		return deferred.promise;
 	};
