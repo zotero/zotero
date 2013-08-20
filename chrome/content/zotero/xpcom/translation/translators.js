@@ -152,9 +152,11 @@ Zotero.Translators = new function() {
 	 */
 	this.loadFromDisk = function(file) {
 		const infoRe = /^\s*{[\S\s]*?}\s*?[\r\n]/;
-		return Zotero.File.getContentsAsync(file).then(function(source) {
+		return Zotero.File.getContentsAsync(file)
+		.then(function(source) {
 			return Zotero.Translators.load(file, infoRe.exec(source)[0], source);
-		}).fail(function() {
+		})
+		.fail(function() {
 			throw "Invalid or missing translator metadata JSON object in " + file.leafName;
 		});
 	}
