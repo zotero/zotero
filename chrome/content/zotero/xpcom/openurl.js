@@ -179,6 +179,14 @@ Zotero.OpenURL = new function() {
 			if(item.issueDate) {
 				_mapTag(Zotero.Date.strToISO(item.issueDate), "date");
 			}
+		} else if (item.itemType == "case" && version == "1.0") {
+			_mapTag("info:ofi/fmt:kev:mtx:journal", "rft_val_fmt", true);
+
+			if(item.caseName) _mapTag(item.caseName, "caseName");
+			
+			if(item.dateDecided) {
+				_mapTag(Zotero.Date.strToISO(item.dateDecided), "date");
+			}
 		} else {
 			return false;
 		}
