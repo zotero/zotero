@@ -163,9 +163,10 @@ Zotero.File = new function(){
 	 *
 	 * @param {nsIURI|nsIFile|string spec|nsIChannel|nsIInputStream} source The source to read
 	 * @param {String} [charset] The character set; defaults to UTF-8
+	 * @param {Integer} [maxLength] Maximum length to fetch, in bytes (unimplemented)
 	 * @return {Promise} A Q promise that is resolved with the contents of the file
 	 */
-	this.getContentsAsync = function getContentsAsync(source, charset) {
+	this.getContentsAsync = function getContentsAsync(source, charset, maxLength) {
 		var options = {
 			charset: charset ? Zotero.CharacterSets.getName(charset) : "UTF-8"
 		};
@@ -276,6 +277,54 @@ Zotero.File = new function(){
 		});
 		return deferred.promise; 
 	};
+	
+	
+	/**
+	 * Delete a file if it exists, asynchronously
+	 *
+	 * @return {Promise<Boolean>} A Q promise for TRUE if file was deleted,
+	 *                            FALSE if missing
+	 */
+	this.deleteIfExists = function deleteIfExists(path) {
+		return Q(OS.File.remove(path))
+		.thenResolve(true)
+		.catch(function (e) {
+			if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+				return false;
+			}
+			throw e;
+		});
+	}
+	
+	
+	/**
+	 * Run a generator with an OS.File.DirectoryIterator, closing the
+	 * iterator when done
+	 *
+	 * The DirectoryInterator is passed as the first parameter to the generator.
+	 * A StopIteration error will be caught automatically.
+	 *
+	 * Zotero.File.iterateDirectory(path, function (iterator) {
+	 *    while (true) {
+	 *        var entry = yield iterator.next();
+	 *        [...]
+	 *    }
+	 * }).done()
+	 *
+	 * @return {Promise}
+	 */
+	this.iterateDirectory = function iterateDirectory(path, generator) {
+		var iterator = new OS.File.DirectoryIterator(path);
+		return Q.async(generator)(iterator)
+		.catch(function (e) {
+			if (e != StopIteration) {
+				throw e;
+			}
+		})
+		.finally(function () {
+			iterator.close();
+		});
+	}
 	
 	
 	/**
