@@ -1862,7 +1862,7 @@ Zotero.Utilities = {
 			} else if (creator.creatorType === 'authority') {
 				var creatorType = 'authority';
 			} else {
-				var creatorType = Zotero.CreatorTypes.getName(creator.creatorTypeID);
+				var creatorType = creator.creatorType;
 			}
 			
 			var creatorType = CSL_NAMES_MAPPINGS[creatorType];
