@@ -35,7 +35,11 @@ Zotero.DBConnection = function(dbName) {
 	}
 	
 	Components.utils.import("resource://gre/modules/Task.jsm", this);
-	Components.utils.import("resource://gre/modules/Sqlite.jsm", this);
+	// Use the Fx24 Sqlite.jsm, because the Sqlite.jsm in Firefox 25 breaks
+	// locking_mode=EXCLUSIVE with async DB access. In the Fx24 version,
+	// the main-thread DB connection is still used for async access.
+	//Components.utils.import("resource://gre/modules/Sqlite.jsm", this);
+	Components.utils.import("resource://zotero/Sqlite.jsm", this);
 	
 	this.skipBackup = false;
 	this.transactionVacuum = false;
