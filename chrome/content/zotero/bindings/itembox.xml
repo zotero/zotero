@@ -1603,7 +1603,7 @@
 						firstName.setAttribute('hidden', true);
 						comma.setAttribute('hidden', true);
 						
-						if (!initial) {
+						if (!initial && (this._getFieldValue(firstName) || this._getFieldValue(lastName))) {
 							var first = this._getFieldValue(firstName);
 							if (first && first != this._defaultFirstName) {
 								var last = this._getFieldValue(lastName);
@@ -1705,7 +1705,7 @@
 							this._tabIndexMaxCreators++;
 						}
 						
-						if (!initial) {
+						if (!initial && (this._getFieldValue(lastName) || this._getFieldValue(firstName))) {
 							// Move all but last word to first name field and show it
 							var last = this._getFieldValue(lastName);
 							if (last && last != this._defaultFullName) {
@@ -1731,7 +1731,7 @@
 						comma.setAttribute('hidden', false);
 					}
 					
-					if (!initial)
+					if (!initial && (this._getFieldValue(firstName) || this._getFieldValue(lastName)))
 					{
 						var fields = this.getCreatorFields(row);
 						fields.fieldMode = fieldMode;
@@ -1740,7 +1740,7 @@
 						// (this insurance is probably not required, actually)
 						//fields.forceTop = true;
 
-						// Defer item save
+						// Defer item save?
 						var fieldstring = row.firstChild.getAttribute('fieldname');
 						var creatorIndex = fieldstring.split('-')[1];
 						this.modifyCreator(creatorIndex, fields, false, deferSave);
