@@ -1730,7 +1730,7 @@ Zotero.Utilities = {
 	/**
 	 * Generates a valid object key for the server API
 	 */
-	"generateObjectKey":function getKey() {
+	"generateObjectKey":function generateObjectKey() {
 		// TODO: add 'L' and 'Y' after 3.0.11 cut-off
 		var baseString = "23456789ABCDEFGHIJKMNPQRSTUVWXZ";
 		return Zotero.Utilities.randomString(8, baseString);
