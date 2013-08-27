@@ -1132,6 +1132,7 @@ Zotero.Translate.Base.prototype = {
 		this._saveAttachments = saveAttachments === undefined || saveAttachments;
 		this._savingAttachments = [];
 		this._savingItems = 0;
+		this._waitingForSave = false;
 		
 		var me = this;
 		if(typeof this.translator[0] === "object") {
@@ -1258,7 +1259,6 @@ Zotero.Translate.Base.prototype = {
 			}
 			return;
 		}
-		var oldState = this._currentState;
 		
 		// reset async processes and propagate them to parent
 		if(this._parentTranslator && this._runningAsyncProcesses) {
@@ -1271,7 +1271,7 @@ Zotero.Translate.Base.prototype = {
 		var errorString = null;
 		if(!returnValue && error) errorString = this._generateErrorString(error);
 		
-		if(oldState === "detect") {
+		if(this._currentState === "detect") {
 			if(this._potentialTranslators.length) {
 				var lastTranslator = this._potentialTranslators.shift();
 				var lastProperToProxyFunction = this._properToProxyFunctions ? this._properToProxyFunctions.shift() : null;
@@ -1309,6 +1309,7 @@ Zotero.Translate.Base.prototype = {
 			
 			if(returnValue) {
 				if(this.saveQueue.length) {
+					this._waitingForSave = true;
 					this._saveItems(this.saveQueue);
 					this.saveQueue = [];
 					return;
@@ -1413,7 +1414,7 @@ Zotero.Translate.Base.prototype = {
 	 * Checks if saving done, and if so, fires done event
 	 */
 	"_checkIfDone":function() {
-		if(!this._savingItems && !this._savingAttachments.length) {
+		if(!this._savingItems && !this._savingAttachments.length && (!this._currentState || this._waitingForSave)) {
 			this._runHandler("done", true);
 		}
 	},
