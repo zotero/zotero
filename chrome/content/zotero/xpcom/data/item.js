@@ -3384,6 +3384,8 @@ Zotero.Item.prototype.__defineSetter__('attachmentSyncState', function (val) {
 		case Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD:
 		case Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD:
 		case Zotero.Sync.Storage.SYNC_STATE_IN_SYNC:
+		case Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD:
+		case Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD:
 			break;
 			
 		default:
