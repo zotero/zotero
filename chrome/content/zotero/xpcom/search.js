@@ -2138,7 +2138,7 @@ Zotero.SearchConditions = new function(){
 				table: '(SELECT * FROM itemData UNION SELECT itemID,fieldID,valueID FROM itemDataAlt)',
 				field: 'value',
 				aliases: Zotero.DB.columnQuery("SELECT fieldName FROM fieldsCombined " +
-					"WHERE fieldName NOT IN ('accessDate', 'date', 'pages', " +
+					"WHERE fieldName NOT IN ('accessDate', 'date', 'pages','firstPage', " +
 					"'section','seriesNumber','issue')"),
 				template: true // mark for special handling
 			},
@@ -2183,7 +2183,7 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'itemData',
 				field: 'value',
-				aliases: ['pages', 'section', 'seriesNumber','issue'],
+				aliases: ['pages', 'firstPage', 'section', 'seriesNumber','issue'],
 				template: true // mark for special handling
 			},
 			
