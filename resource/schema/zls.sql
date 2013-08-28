@@ -1,4 +1,4 @@
--- 20130815
+-- 20130927
 
 -- This file is derived from the IANA Language Subtag Registry
 -- and the jurisdictions object at https://github.com/fbennett/mlz-jurisdictions
@@ -44,7 +44,7 @@ INSERT INTO jurisdictions VALUES("us;md","Maryland, US");
 INSERT INTO jurisdictions VALUES("us;me","Maine, US");
 INSERT INTO jurisdictions VALUES("us;mi","Michigan, US");
 INSERT INTO jurisdictions VALUES("us;mn","Minnisota, US");
-INSERT INTO jurisdictions VALUES("us;mo","Montana, US");
+INSERT INTO jurisdictions VALUES("us;mo","Missouri, US");
 INSERT INTO jurisdictions VALUES("us;ms","Mississippi, US");
 INSERT INTO jurisdictions VALUES("us;mt","Montana, US");
 INSERT INTO jurisdictions VALUES("us;nc","North Carolina, US");
@@ -156,6 +156,7 @@ INSERT INTO jurisdictions VALUES("us;federal;pr","D. Puerto Rico, US (federal)")
 INSERT INTO jurisdictions VALUES("us;federal;ri","D. Rhode Island, US (federal)");
 INSERT INTO jurisdictions VALUES("us;federal;sc","D. South Carolina, US (federal)");
 INSERT INTO jurisdictions VALUES("us;federal;sd","D. South Dakota, US (federal)");
+INSERT INTO jurisdictions VALUES("us;federal;supreme.court","Supreme Court, US (federal)");
 INSERT INTO jurisdictions VALUES("us;federal;tn.eastern","E.D. Tennessee, US (federal)");
 INSERT INTO jurisdictions VALUES("us;federal;tn.middle","M.D. Tennessee, US (federal)");
 INSERT INTO jurisdictions VALUES("us;federal;tn.western","W.D. Tennessee, US (federal)");
