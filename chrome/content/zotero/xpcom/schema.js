@@ -512,10 +512,11 @@ Zotero.Schema = new function(){
 			xpiZipReader.open(installLocation);
 
 			if(Zotero.isStandalone && !xpiZipReader.hasEntry("translators.index")) {
-				// Symlinked Standalone build
-				var installLocation2 = installLocation.parent;
-				installLocation2.append("translators");
-				if(installLocation2.exists()) {
+				// Symlinked dev Standalone build
+				var installLocation2 = installLocation.parent,
+					translatorsDir = installLocation2.clone();
+				translatorsDir.append("translators");
+				if(translatorsDir.exists()) {
 					installLocation = installLocation2;
 					isUnpacked = true;
 					xpiZipReader.close();
