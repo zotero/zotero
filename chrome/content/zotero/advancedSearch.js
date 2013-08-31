@@ -118,7 +118,7 @@ var ZoteroAdvancedSearch = new function() {
 		
 		if (!name.value)
 		{
-			newName.value = untitled;
+			name.value = untitled;
 		}
 		
 		var s = _searchBox.search.clone();
