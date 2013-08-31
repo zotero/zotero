@@ -118,13 +118,13 @@ var ZoteroAdvancedSearch = new function() {
 		
 		if (!name.value)
 		{
-			newName.value = untitled;
+			name.value = untitled;
 		}
 		
 		var s = _searchBox.search.clone();
 		s.name = name.value;
 		s.save();
-	}
+		}
 	
 	
 	// Adapted from: http://www.xulplanet.com/references/elemref/ref_tree.html#cmnote-9
