@@ -141,7 +141,7 @@ Zotero.OpenURL = new function() {
 			if(item.journalAbbreviation) _mapTag(item.journalAbbreviation, "stitle");
 			if(item.volume) _mapTag(item.volume, "volume");
 			if(item.issue) _mapTag(item.issue, "issue");
-		} else if(item.itemType == "book" || item.itemType == "bookSection" || item.itemType == "conferencePaper") {
+		} else if(item.itemType == "book" || item.itemType == "bookSection" || item.itemType == "conferencePaper" || item.itemType == "report") {
 			if(version === "1.0") {
 				_mapTag("info:ofi/fmt:kev:mtx:book", "rft_val_fmt", true);
 			}
@@ -153,6 +153,11 @@ Zotero.OpenURL = new function() {
 				_mapTag("proceeding", "genre");
 				if(item.title) _mapTag(item.title, "atitle")		
 				if(item.proceedingsTitle) _mapTag(item.proceedingsTitle, (version == "0.1" ? "title" : "btitle"));
+			} else if (item.itemType == "report") {
+			    _mapTag("report", "genre");
+			    if(item.seriesTitle) _mapTag(item.seriesTitle, "series");
+			    if(item.institution) _mapTag(item.institution, "publisher");
+			    if(item.title) _mapTag(item.title, "title")
 			} else {
 				_mapTag("bookitem", "genre");
 				if(item.title) _mapTag(item.title, "atitle")		
@@ -396,7 +401,9 @@ Zotero.OpenURL = new function() {
 			} else if(key == "rft.edition") {
 				item.edition = value;
 			} else if(key == "rft.series") {
-				item.series = value;
+			    if(item.itemType == "report"){
+				item.seriesTitle = value;
+			    } else item.series = value;
 			} else if(item.itemType == "thesis") {
 				if(key == "rft.inst") {
 					item.publisher = value;
