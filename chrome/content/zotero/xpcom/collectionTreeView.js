@@ -1729,10 +1729,16 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 						var itemID = Zotero.Attachments.linkFromFile(file);
 					}
 					else {
-						if (dragData.dropEffect != 'copy') {
-							Components.utils.reportError("Invalid dropEffect '" + dragData.dropEffect + "' dropping file");
-						}
 						var itemID = Zotero.Attachments.importFromFile(file, false, targetLibraryID);
+						// If moving, delete original file
+						if (dragData.dropEffect == 'move') {
+							try {
+								file.remove(false);
+							}
+							catch (e) {
+								Components.utils.reportError("Error deleting original file " + file.path + " after drag");
+							}
+						}
 					}
 					
 					if (parentCollectionID) {
@@ -1802,7 +1808,36 @@ Zotero.CollectionTreeView.prototype.onDragOver = function (event) {
  * Called by HTML 5 Drag and Drop when dropping onto the tree
  */
 Zotero.CollectionTreeView.prototype.onDrop = function (event) {
-	Zotero.DragDrop.currentDataTransfer = event.dataTransfer;
+	if (event.dataTransfer.types.contains("application/x-moz-file")) {
+		Zotero.DragDrop.currentDataTransfer = event.dataTransfer;
+		Zotero.safeDebug(event);
+		if (Zotero.isMac) {
+			if (event.metaKey) {
+				if (event.altKey) {
+					event.dataTransfer.dropEffect = 'link';
+				}
+				else {
+					event.dataTransfer.dropEffect = 'move';
+				}
+			}
+			else {
+				event.dataTransfer.dropEffect = 'copy';
+			}
+		}
+		else {
+			if (event.shiftKey) {
+				if (event.ctrlKey) {
+					event.dataTransfer.dropEffect = "link";
+				}
+				else {
+					event.dataTransfer.dropEffect = "move";
+				}
+			}
+			else {
+				event.dataTransfer.dropEffect = "copy";
+			}
+		}
+	}
 	return false;
 }
 
