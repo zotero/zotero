@@ -1815,7 +1815,7 @@ CSL.Engine.prototype.getTerm = function (term, form, plural, gender, mode, force
         term = term.toLowerCase();
     }
     var lang;
-    if (forceDefaultLocale) {
+    if (forceDefaultLocale || this.opt["force-locale-terms-to-default"]) {
         lang = this.opt["default-locale"][0];
     } else {
         lang = this.opt.lang;
@@ -1838,7 +1838,7 @@ CSL.Engine.prototype.getTerm = function (term, form, plural, gender, mode, force
 };
 CSL.Engine.prototype.getDate = function (form, forceDefaultLocale) {
     var lang;
-    if (forceDefaultLocale) {
+    if (forceDefaultLocale || this.opt["force-locale-terms-to-default"]) {
         lang = this.opt["default-locale"];
     } else {
         lang = this.opt.lang;
@@ -3449,6 +3449,7 @@ CSL.Engine.Opt = function () {
         }
     };
     this["default-locale"] = [];
+    this["force-locale-terms-to-default"] = false;    
     this.update_mode = CSL.NONE;
     this.bib_mode = CSL.NONE;
     this.sort_citations = false;
@@ -9395,6 +9396,9 @@ CSL.Attributes["@is-parallel"] = function (state, arg) {
     }
     this.strings.set_parallel_condition = values;
 };
+CSL.Attributes["@force-locale-terms-to-default"] = function (state, arg) {
+    state.opt["force-locale-terms-to-default"] = arg;
+};
 CSL.Attributes["@gender"] = function (state, arg) {
     this.gender = arg;
 }
@@ -10323,6 +10327,7 @@ CSL.Transform = function (state) {
     this.abbrevs = {};
     this.abbrevs["default"] = new state.sys.AbbreviationSegments();
     this.getTextSubField = getTextSubField;
+    this.getFieldLocale = getFieldLocale;
     function abbreviate(state, Item, altvar, basevalue, myabbrev_family, use_field) {
         var value;
         if (!myabbrev_family) {
