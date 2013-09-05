@@ -2386,21 +2386,18 @@ Zotero.VersionHeader = {
 }
 
 Zotero.DragDrop = {
-	currentDataTransfer: null,
+	currentDragEvent: null,
+	currentTarget: null,
+	currentOrientation: 0,
 	
-	getDragData: function (element, firstOnly) {
-		var dt = this.currentDataTransfer;
-		if (!dt) {
-			Zotero.debug("Drag data not available");
-			return false;
-		}
+	getDataFromDataTransfer: function (dataTransfer, firstOnly) {
+		var dt = dataTransfer;
 		
 		var dragData = {
 			dataType: '',
 			data: [],
 			dropEffect: dt.dropEffect
 		};
-		
 		
 		var len = firstOnly ? 1 : dt.mozItemCount;
 		
@@ -2439,6 +2436,46 @@ Zotero.DragDrop = {
 		}
 		
 		return dragData;
+	},
+	
+	
+	getDragSource: function () {
+		var dt = this.currentDragEvent.dataTransfer;
+		if (!dt) {
+			Zotero.debug("Drag data not available", 2);
+			return false;
+		}
+		
+		// For items, the drag source is the ItemGroup of the parent window
+		// of the source tree
+		if (dt.types.contains("zotero/item")) {
+			var sourceNode = dt.mozSourceNode;
+			if (!sourceNode || sourceNode.tagName != 'treechildren'
+					|| sourceNode.parentElement.id != 'zotero-items-tree') {
+				return false;
+			}
+			var win = sourceNode.ownerDocument.defaultView;
+			return win.ZoteroPane.collectionsView.itemGroup;
+		}
+		else {
+			return false;
+		}
+	},
+	
+	
+	getDragTarget: function () {
+		var event = this.currentDragEvent;
+		var target = event.target;
+		if (target.tagName == 'treechildren') {
+			var tree = target.parentNode;
+			if (tree.id == 'zotero-collections-tree') {
+				let row = {}, col = {}, obj = {};
+				tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
+				let win = tree.ownerDocument.defaultView;
+				return win.ZoteroPane.collectionsView.getItemGroupAtRow(row.value);
+			}
+		}
+		return false;
 	}
 }
 
