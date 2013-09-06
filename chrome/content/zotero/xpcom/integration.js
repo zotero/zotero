@@ -1896,8 +1896,8 @@ Zotero.Integration.CitationEditInterface.prototype = {
 					for(var i=0; i<me._sessionUpdateDeferreds.length; i++) {
 						me._sessionUpdateDeferreds[i].reject(err);
 					}
-					throw err;
-				}).done();
+					Zotero.logError(err);
+				});
 			}
 			
 			return deferred.promise;

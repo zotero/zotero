@@ -535,10 +535,10 @@ Zotero.Tag.prototype.diff = function (tag, includeMatches, ignoreOnlyDateModifie
 	
 	// For the moment, just compare linked items and increase numDiffs if any differences
 	var d1 = Zotero.Utilities.arrayDiff(
-		otherData.linkedItems, thisData.linkedItems
+		thisData.linkedItems, otherData.linkedItems
 	);
 	var d2 = Zotero.Utilities.arrayDiff(
-		thisData.linkedItems, otherData.linkedItems
+		otherData.linkedItems, thisData.linkedItems
 	);
 	numDiffs += d1.length + d2.length;
 	

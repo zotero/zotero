@@ -3015,10 +3015,16 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 						var itemID = Zotero.Attachments.linkFromFile(file, sourceItemID);
 					}
 					else {
-						if (dragData.dropEffect != 'copy') {
-							Components.utils.reportError("Invalid dropEffect '" + dragData.dropEffect + "' dropping file");
-						}
 						var itemID = Zotero.Attachments.importFromFile(file, sourceItemID, targetLibraryID);
+						// If moving, delete original file
+						if (dragData.dropEffect == 'move') {
+							try {
+								file.remove(false);
+							}
+							catch (e) {
+								Components.utils.reportError("Error deleting original file " + file.path + " after drag");
+							}
+						}
 					}
 					if (parentCollectionID) {
 						var col = Zotero.Collections.get(parentCollectionID);
@@ -3056,14 +3062,21 @@ Zotero.ItemTreeView.prototype.onDragOver = function (event) {
 		// - Setting the dropEffect only works on Linux and OS X.
 		//
 		// - Modifier keys don't show up in the drag event on OS X until the
-		//   drop, so since we can't show a correct effect, we leave it at
-		//   the default 'move', the least misleading option.
+		//   drop (https://bugzilla.mozilla.org/show_bug.cgi?id=911918),
+		//   so since we can't show a correct effect, we leave it at
+		//   the default 'move', the least misleading option, and set it
+		//   below in onDrop().
 		//
 		// - The cursor effect gets set by the system on Windows 7 and can't
 		//   be overridden.
 		if (!Zotero.isMac) {
-			if (event.ctrlKey && event.shiftKey) {
-				event.dataTransfer.dropEffect = "link";
+			if (event.shiftKey) {
+				if (event.ctrlKey) {
+					event.dataTransfer.dropEffect = "link";
+				}
+				else {
+					event.dataTransfer.dropEffect = "move";
+				}
 			}
 			else {
 				event.dataTransfer.dropEffect = "copy";
@@ -3077,10 +3090,27 @@ Zotero.ItemTreeView.prototype.onDragOver = function (event) {
 	return false;
 }
 
+
 /*
  * Called by HTML 5 Drag and Drop when dropping onto the tree
  */
 Zotero.ItemTreeView.prototype.onDrop = function (event) {
+	if (event.dataTransfer.types.contains("application/x-moz-file")) {
+		if (Zotero.isMac) {
+			Zotero.DragDrop.currentDataTransfer = event.dataTransfer;
+			if (event.metaKey) {
+				if (event.altKey) {
+					event.dataTransfer.dropEffect = 'link';
+				}
+				else {
+					event.dataTransfer.dropEffect = 'move';
+				}
+			}
+			else {
+				event.dataTransfer.dropEffect = 'copy';
+			}
+		}
+	}
 	return false;
 }
 
