@@ -83,7 +83,10 @@ Zotero.LibraryTreeView.prototype = {
 			return;
 		}
 		
-		if (event.dataTransfer.getData("zotero/item")) {
+		if (event.dataTransfer.getData("zotero/collection")) {
+			this._setDropEffect(event, "move");
+		}
+		else if (event.dataTransfer.getData("zotero/item")) {
 			var sourceItemGroup = Zotero.DragDrop.getDragSource();
 			if (sourceItemGroup) {
 				if (this.type == 'collection') {
