@@ -14,6 +14,14 @@ Zotero.EXTENDED_TYPES = {
 }
 
 Zotero.EXTENDED_FIELDS = {
+	"book": {
+        "medium":"medium"
+	},
+	"conferencePaper": {
+        "conferenceDate":"event-date",
+        "issue":"issue",
+        "institution":"authority"
+	},
 	"newspaperArticle": {
 		"jurisdiction":"jurisdiction",
 		"newsCaseDate":"original-date",
@@ -77,6 +85,7 @@ Zotero.EXTENDED_FIELDS = {
 		"publisher":"publisher"
 	},
 	"report": {
+		"bookTitle":"container-title",
 		"jurisdiction":"jurisdiction"
 	},
 	"gazette": {

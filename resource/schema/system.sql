@@ -1,4 +1,4 @@
--- 40
+-- 10045
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -371,6 +371,7 @@ INSERT INTO fields VALUES (1279,'adoptionDate',NULL);         -- [ADDED]
 INSERT INTO fields VALUES (1280,'release',NULL);              -- [ADDED]
 INSERT INTO fields VALUES (1281,'regulationType',NULL);              -- [ADDED]
 INSERT INTO fields VALUES (1282,'regulatoryBody',NULL);              -- [ADDED]
+INSERT INTO fields VALUES (1283,'conferenceDate',NULL);              -- [ADDED]
 
 -- book
 INSERT INTO itemTypeFields VALUES (2, 110, NULL, 1);
@@ -384,17 +385,18 @@ INSERT INTO itemTypeFields VALUES (2, 7, NULL, 8);
 INSERT INTO itemTypeFields VALUES (2, 8, NULL, 9);
 INSERT INTO itemTypeFields VALUES (2, 14, NULL, 10);
 INSERT INTO itemTypeFields VALUES (2, 118, NULL, 11);
-INSERT INTO itemTypeFields VALUES (2, 87, NULL, 12);
-INSERT INTO itemTypeFields VALUES (2, 11, NULL, 13);
-INSERT INTO itemTypeFields VALUES (2, 116, NULL, 14);
-INSERT INTO itemTypeFields VALUES (2, 1, NULL, 15);
-INSERT INTO itemTypeFields VALUES (2, 27, NULL, 16);
-INSERT INTO itemTypeFields VALUES (2, 123, NULL, 17);
-INSERT INTO itemTypeFields VALUES (2, 19, NULL, 18);
-INSERT INTO itemTypeFields VALUES (2, 62, NULL, 19);
-INSERT INTO itemTypeFields VALUES (2, 18, NULL, 20);
-INSERT INTO itemTypeFields VALUES (2, 2, NULL, 21);
-INSERT INTO itemTypeFields VALUES (2, 22, NULL, 22);
+INSERT INTO itemTypeFields VALUES (2, 109, NULL, 12);
+INSERT INTO itemTypeFields VALUES (2, 87, NULL, 13);
+INSERT INTO itemTypeFields VALUES (2, 11, NULL, 14);
+INSERT INTO itemTypeFields VALUES (2, 116, NULL, 15);
+INSERT INTO itemTypeFields VALUES (2, 1, NULL, 16);
+INSERT INTO itemTypeFields VALUES (2, 27, NULL, 17);
+INSERT INTO itemTypeFields VALUES (2, 123, NULL, 18);
+INSERT INTO itemTypeFields VALUES (2, 19, NULL, 19);
+INSERT INTO itemTypeFields VALUES (2, 62, NULL, 20);
+INSERT INTO itemTypeFields VALUES (2, 18, NULL, 21);
+INSERT INTO itemTypeFields VALUES (2, 2, NULL, 22);
+INSERT INTO itemTypeFields VALUES (2, 22, NULL, 23);
 
 INSERT INTO itemTypeFields VALUES (3, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (3, 90, NULL, 2);
@@ -612,22 +614,23 @@ INSERT INTO itemTypeFields VALUES (15, 110, NULL, 1);   -- title
 INSERT INTO itemTypeFields VALUES (15, 90, NULL, 2);    -- abstract
 INSERT INTO itemTypeFields VALUES (15, 92, NULL, 3);    -- reportNumber
 INSERT INTO itemTypeFields VALUES (15, 32, NULL, 4);    -- reportType
-INSERT INTO itemTypeFields VALUES (15, 28, NULL, 5);    -- seriesTitle
-INSERT INTO itemTypeFields VALUES (15, 7, NULL, 6);     -- edition
-INSERT INTO itemTypeFields VALUES (15, 31, NULL, 7);    -- place
-INSERT INTO itemTypeFields VALUES (15, 14, NULL, 8);    -- date
-INSERT INTO itemTypeFields VALUES (15, 10, NULL, 9);    -- pages
-INSERT INTO itemTypeFields VALUES (15, 87, NULL, 10);   -- language
-INSERT INTO itemTypeFields VALUES (15, 116, NULL, 11);  -- shortTitle
-INSERT INTO itemTypeFields VALUES (15, 1261, NULL, 12); -- jurisdiction     [ADDED]
-INSERT INTO itemTypeFields VALUES (15, 1, NULL, 13);    -- url
-INSERT INTO itemTypeFields VALUES (15, 27, NULL, 14);   -- accessed
-INSERT INTO itemTypeFields VALUES (15, 123, NULL, 15);  -- archive
-INSERT INTO itemTypeFields VALUES (15, 19, NULL, 16);   -- archiveLocation
-INSERT INTO itemTypeFields VALUES (15, 62, NULL, 17);   -- libraryCatalog
-INSERT INTO itemTypeFields VALUES (15, 18, NULL, 18);   -- callNumber
-INSERT INTO itemTypeFields VALUES (15, 2, NULL, 19);    -- rights
-INSERT INTO itemTypeFields VALUES (15, 22, NULL, 20);   -- extra
+INSERT INTO itemTypeFields VALUES (15, 115, NULL, 5);    -- bookTitle
+INSERT INTO itemTypeFields VALUES (15, 28, NULL, 6);    -- seriesTitle
+INSERT INTO itemTypeFields VALUES (15, 7, NULL, 7);     -- edition
+INSERT INTO itemTypeFields VALUES (15, 31, NULL, 8);    -- place
+INSERT INTO itemTypeFields VALUES (15, 14, NULL, 9);    -- date
+INSERT INTO itemTypeFields VALUES (15, 10, NULL, 10);    -- pages
+INSERT INTO itemTypeFields VALUES (15, 87, NULL, 11);   -- language
+INSERT INTO itemTypeFields VALUES (15, 116, NULL, 12);  -- shortTitle
+INSERT INTO itemTypeFields VALUES (15, 1261, NULL, 13); -- jurisdiction     [ADDED]
+INSERT INTO itemTypeFields VALUES (15, 1, NULL, 14);    -- url
+INSERT INTO itemTypeFields VALUES (15, 27, NULL, 15);   -- accessed
+INSERT INTO itemTypeFields VALUES (15, 123, NULL, 16);  -- archive
+INSERT INTO itemTypeFields VALUES (15, 19, NULL, 17);   -- archiveLocation
+INSERT INTO itemTypeFields VALUES (15, 62, NULL, 18);   -- libraryCatalog
+INSERT INTO itemTypeFields VALUES (15, 18, NULL, 19);   -- callNumber
+INSERT INTO itemTypeFields VALUES (15, 2, NULL, 20);    -- rights
+INSERT INTO itemTypeFields VALUES (15, 22, NULL, 21);   -- extra
 
 -- bill
 INSERT INTO itemTypeFields VALUES (16, 110, NULL, 1);  -- title
@@ -968,28 +971,32 @@ INSERT INTO itemTypeFields VALUES (32, 18, NULL, 17);
 INSERT INTO itemTypeFields VALUES (32, 27, NULL, 18);
 INSERT INTO itemTypeFields VALUES (32, 22, NULL, 19);
 
+-- conferencePaper
 INSERT INTO itemTypeFields VALUES (33, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (33, 90, NULL, 2);
-INSERT INTO itemTypeFields VALUES (33, 14, NULL, 3);
+INSERT INTO itemTypeFields VALUES (33, 1283, NULL, 3);
 INSERT INTO itemTypeFields VALUES (33, 114, NULL, 4);
 INSERT INTO itemTypeFields VALUES (33, 84, NULL, 5);
 INSERT INTO itemTypeFields VALUES (33, 7, NULL, 6);
-INSERT INTO itemTypeFields VALUES (33, 8, NULL, 7);
-INSERT INTO itemTypeFields VALUES (33, 4, NULL, 8);
-INSERT INTO itemTypeFields VALUES (33, 10, NULL, 9);
-INSERT INTO itemTypeFields VALUES (33, 3, NULL, 10);
-INSERT INTO itemTypeFields VALUES (33, 87, NULL, 11);
-INSERT INTO itemTypeFields VALUES (33, 26, NULL, 12);
-INSERT INTO itemTypeFields VALUES (33, 11, NULL, 13);
-INSERT INTO itemTypeFields VALUES (33, 116, NULL, 14);
-INSERT INTO itemTypeFields VALUES (33, 1, NULL, 15);
-INSERT INTO itemTypeFields VALUES (33, 27, NULL, 16);
-INSERT INTO itemTypeFields VALUES (33, 123, NULL, 17);
-INSERT INTO itemTypeFields VALUES (33, 19, NULL, 18);
-INSERT INTO itemTypeFields VALUES (33, 62, NULL, 19);
-INSERT INTO itemTypeFields VALUES (33, 18, NULL, 20);
-INSERT INTO itemTypeFields VALUES (33, 2, NULL, 21);
-INSERT INTO itemTypeFields VALUES (33, 22, NULL, 22);
+INSERT INTO itemTypeFields VALUES (33, 31, NULL, 7);
+INSERT INTO itemTypeFields VALUES (33, 8, NULL, 8);
+INSERT INTO itemTypeFields VALUES (33, 14, NULL, 9);
+INSERT INTO itemTypeFields VALUES (33, 4, NULL, 10);
+INSERT INTO itemTypeFields VALUES (33, 5, NULL, 11);
+INSERT INTO itemTypeFields VALUES (33, 10, NULL, 12);
+INSERT INTO itemTypeFields VALUES (33, 3, NULL, 13);
+INSERT INTO itemTypeFields VALUES (33, 87, NULL, 14);
+INSERT INTO itemTypeFields VALUES (33, 26, NULL, 15);
+INSERT INTO itemTypeFields VALUES (33, 11, NULL, 16);
+INSERT INTO itemTypeFields VALUES (33, 116, NULL, 17);
+INSERT INTO itemTypeFields VALUES (33, 1, NULL, 18);
+INSERT INTO itemTypeFields VALUES (33, 27, NULL, 19);
+INSERT INTO itemTypeFields VALUES (33, 123, NULL, 20);
+INSERT INTO itemTypeFields VALUES (33, 19, NULL, 21);
+INSERT INTO itemTypeFields VALUES (33, 62, NULL, 22);
+INSERT INTO itemTypeFields VALUES (33, 18, NULL, 23);
+INSERT INTO itemTypeFields VALUES (33, 2, NULL, 24);
+INSERT INTO itemTypeFields VALUES (33, 22, NULL, 25);
 
 -- document
 INSERT INTO itemTypeFields VALUES (34, 110, NULL, 1);  -- title
@@ -1175,6 +1182,7 @@ INSERT INTO baseFieldMappings VALUES (17, 10, 98); -- case/pages/firstPage
 INSERT INTO baseFieldMappings VALUES (3, 12, 115); -- bookSection/publicationTitle/bookTitle
 INSERT INTO baseFieldMappings VALUES (33, 12, 114); -- conferencePaper/publicationTitle/proceedingsTitle
 INSERT INTO baseFieldMappings VALUES (13, 12, 91); -- webpage/publicationTitle/websiteTitle
+INSERT INTO baseFieldMappings VALUES (15, 12, 115); -- report/publicationTitle/bookTitle
 INSERT INTO baseFieldMappings VALUES (23, 12, 107); -- blogPost/publicationTitle/blogTitle
 INSERT INTO baseFieldMappings VALUES (25, 12, 104); -- forumPost/publicationTitle/forumTitle
 INSERT INTO baseFieldMappings VALUES (26, 6, 1280); -- audioRecording/edition/release
