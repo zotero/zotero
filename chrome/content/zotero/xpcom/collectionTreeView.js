@@ -1173,6 +1173,11 @@ Zotero.CollectionTreeCommandController.prototype.onEvent = function(evt)
  * Start a drag using HTML 5 Drag and Drop
  */
 Zotero.CollectionTreeView.prototype.onDragStart = function(event) {
+	// See note in LibraryTreeView::_setDropEffect()
+	if (Zotero.isWin) {
+		event.dataTransfer.effectAllowed = 'move';
+	}
+	
 	var itemGroup = this.itemGroup;
 	if (!itemGroup.isCollection()) {
 		return;
