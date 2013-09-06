@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.478",
+    PROCESSOR_VERSION: "1.0.483",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -1815,7 +1815,7 @@ CSL.Engine.prototype.getTerm = function (term, form, plural, gender, mode, force
         term = term.toLowerCase();
     }
     var lang;
-    if (forceDefaultLocale || this.opt["force-locale-terms-to-default"]) {
+    if (forceDefaultLocale) {
         lang = this.opt["default-locale"][0];
     } else {
         lang = this.opt.lang;
@@ -1838,7 +1838,7 @@ CSL.Engine.prototype.getTerm = function (term, form, plural, gender, mode, force
 };
 CSL.Engine.prototype.getDate = function (form, forceDefaultLocale) {
     var lang;
-    if (forceDefaultLocale || this.opt["force-locale-terms-to-default"]) {
+    if (forceDefaultLocale) {
         lang = this.opt["default-locale"];
     } else {
         lang = this.opt.lang;
@@ -3449,7 +3449,6 @@ CSL.Engine.Opt = function () {
         }
     };
     this["default-locale"] = [];
-    this["force-locale-terms-to-default"] = false;    
     this.update_mode = CSL.NONE;
     this.bib_mode = CSL.NONE;
     this.sort_citations = false;
@@ -3484,6 +3483,7 @@ CSL.Engine.Opt = function () {
     this.development_extensions.normalize_lang_keys_to_lowercase = false;
     this.development_extensions.strict_text_case_locales = false;
     this.development_extensions.rtl_support = true;
+    this.development_extensions.strict_page_numbers = false;
     this.nodenames = [];
     this.gender = {};
     this['cite-lang-prefs'] = {
@@ -4945,8 +4945,11 @@ CSL.localeResolve = function (langstr) {
     ret.bare = langlst[0];
     return ret;
 };
-CSL.Engine.prototype.localeConfigure = function (langspec) {
+CSL.Engine.prototype.localeConfigure = function (langspec, beShy) {
     var localexml;
+    if (beShy && this.locale[langspec.best]) {
+        return;
+    }
     localexml = this.sys.xml.makeXml(this.sys.retrieveLocale("en-US"));
     this.localeSet(localexml, "en-US", langspec.best);
     if (langspec.best !== "en-US") {
@@ -5605,11 +5608,15 @@ CSL.Node["else"] = {
 CSL.Node["et-al"] = {
     build: function (state, target) {
         if (state.build.area === "citation" || state.build.area === "bibliography") {
-            state.build.etal_node = this;
-            if ("string" === typeof this.strings.term) {
-                state.build.etal_term = this.strings.term;
+            var func = function (state, Item, item) {
+                state.tmp.etal_node = this;
+                if ("string" === typeof this.strings.term) {
+                    state.tmp.etal_term = this.strings.term;
+                }
             }
+            this.execs.push(func);
         }
+        target.push(this);
     }
 };
 CSL.Node.group = {
@@ -5802,40 +5809,40 @@ CSL.Node.info = {
 CSL.Node.institution = {
     build: function (state, target) {
         if ([CSL.SINGLETON, CSL.START].indexOf(this.tokentype) > -1) {
-            if ("string" === typeof state.build.name_delimiter && !this.strings.delimiter) {
-                this.strings.delimiter = state.build.name_delimiter;
-            }
-            var myand, and_default_prefix, and_suffix;
-            if ("text" === this.strings.and) {
-                this.and_term = state.getTerm("and", "long", 0);
-            } else if ("symbol" === this.strings.and) {
-                this.and_term = "&";
-            } else if ("none" === this.strings.and) {
-                this.and_term = this.strings.delimiter;
-            }
-            if ("undefined" === typeof this.and_term && state.build.and_term) {
-                this.and_term = state.getTerm("and", "long", 0);
-            }
-            if (CSL.STARTSWITH_ROMANESQUE_REGEXP.test(this.and_term)) {
-                this.and_prefix_single = " ";
-                this.and_prefix_multiple = ", ";
-                if ("string" === typeof this.strings.delimiter) {
-                    this.and_prefix_multiple = this.strings.delimiter;
-                }
-                this.and_suffix = " ";
-            } else {
-                this.and_prefix_single = "";
-                this.and_prefix_multiple = "";
-                this.and_suffix = "";
-            }
-            if (this.strings["delimiter-precedes-last"] === "always") {
-                this.and_prefix_single = this.strings.delimiter;
-            } else if (this.strings["delimiter-precedes-last"] === "never") {
-                if (this.and_prefix_multiple) {
-                    this.and_prefix_multiple = " ";
-                }
-            }
             var func = function (state, Item) {
+                if ("string" === typeof state.build.name_delimiter && !this.strings.delimiter) {
+                    this.strings.delimiter = state.tmp.name_delimiter;
+                }
+                var myand, and_default_prefix, and_suffix;
+                if ("text" === this.strings.and) {
+                    this.and_term = state.getTerm("and", "long", 0);
+                } else if ("symbol" === this.strings.and) {
+                    this.and_term = "&";
+                } else if ("none" === this.strings.and) {
+                    this.and_term = this.strings.delimiter;
+                }
+                if ("undefined" === typeof this.and_term && state.tmp.and_term) {
+                    this.and_term = state.getTerm("and", "long", 0);
+                }
+                if (CSL.STARTSWITH_ROMANESQUE_REGEXP.test(this.and_term)) {
+                    this.and_prefix_single = " ";
+                    this.and_prefix_multiple = ", ";
+                    if ("string" === typeof this.strings.delimiter) {
+                        this.and_prefix_multiple = this.strings.delimiter;
+                    }
+                    this.and_suffix = " ";
+                } else {
+                    this.and_prefix_single = "";
+                    this.and_prefix_multiple = "";
+                    this.and_suffix = "";
+                }
+                if (this.strings["delimiter-precedes-last"] === "always") {
+                    this.and_prefix_single = this.strings.delimiter;
+                } else if (this.strings["delimiter-precedes-last"] === "never") {
+                    if (this.and_prefix_multiple) {
+                        this.and_prefix_multiple = " ";
+                    }
+                }
                 this.and = {};
                 if ("undefined" !== typeof this.and_term) {
                     state.output.append(this.and_term, "empty", true);
@@ -6198,11 +6205,11 @@ CSL.Node.layout = {
                     var choose_tok = new CSL.Token("choose", CSL.START);
                     CSL.Node.choose.build.call(choose_tok, state, target);
                     my_tok.name = "if";
-                    CSL.Attributes["@locale"].call(my_tok, state, this.locale_raw);
+                    CSL.Attributes["@locale-internal"].call(my_tok, state, this.locale_raw);
                     CSL.Node["if"].build.call(my_tok, state, target);
                 } else {
                     my_tok.name = "else-if";
-                    CSL.Attributes["@locale"].call(my_tok, state, this.locale_raw);
+                    CSL.Attributes["@locale-internal"].call(my_tok, state, this.locale_raw);
                     CSL.Node["else-if"].build.call(my_tok, state, target);
                 }
                 state.tmp.cite_affixes[my_tok.locale] = {};
@@ -6215,13 +6222,13 @@ CSL.Node.layout = {
                 if (!state.build.layout_locale_flag) {
                     my_tok.name = "if";
                     my_tok.tokentype = CSL.END;
-                    CSL.Attributes["@locale"].call(my_tok, state, this.locale_raw);
+                    CSL.Attributes["@locale-internal"].call(my_tok, state, this.locale_raw);
                     CSL.Node["if"].build.call(my_tok, state, target);
                     state.build.layout_locale_flag = true;
                 } else {
                     my_tok.name = "else-if";
                     my_tok.tokentype = CSL.END;
-                    CSL.Attributes["@locale"].call(my_tok, state, this.locale_raw);
+                    CSL.Attributes["@locale-internal"].call(my_tok, state, this.locale_raw);
                     CSL.Node["else-if"].build.call(my_tok, state, target);
                 }
             }
@@ -8156,46 +8163,10 @@ CSL.Node.name = {
                 && (this.strings["et-al-subsequent-use-first"] !== this.strings["et-al-use-first"])) {
                 state.opt.update_mode = CSL.POSITION;
             }
-            state.build.etal_term = "et-al";
-            state.build.name_delimiter = this.strings.delimiter;
-            state.build["delimiter-precedes-et-al"] = this.strings["delimiter-precedes-et-al"];
             if ("undefined" == typeof this.strings.name_delimiter) {
                 this.strings.delimiter = ", ";
             } else {
                 this.strings.delimiter = this.strings.name_delimiter;
-            }
-            if ("text" === this.strings.and) {
-                this.and_term = state.getTerm("and", "long", 0);
-            } else if ("symbol" === this.strings.and) {
-                this.and_term = "&";
-            }
-            state.build.and_term = this.and_term;
-            if (CSL.STARTSWITH_ROMANESQUE_REGEXP.test(this.and_term)) {
-                this.and_prefix_single = " ";
-                this.and_prefix_multiple = ", ";
-                if ("string" === typeof this.strings.delimiter) {
-                    this.and_prefix_multiple = this.strings.delimiter;
-                }
-                this.and_suffix = " ";
-                state.build.name_delimiter = this.strings.delimiter;
-            } else {
-                this.and_prefix_single = "";
-                this.and_prefix_multiple = "";
-                this.and_suffix = "";
-            }
-            if (this.strings["delimiter-precedes-last"] === "always") {
-                this.and_prefix_single = this.strings.delimiter;
-            } else if (this.strings["delimiter-precedes-last"] === "never") {
-                if (this.and_prefix_multiple) {
-                    this.and_prefix_multiple = " ";
-                }
-            } else if (this.strings["delimiter-precedes-last"] === "after-inverted-name") {
-                if (this.and_prefix_single) {
-                    this.and_prefix_single = this.strings.delimiter;;
-                }
-                if (this.and_prefix_multiple) {
-                    this.and_prefix_multiple = " ";
-                }
             }
             if (this.strings["et-al-use-last"]) {
                 this.ellipsis_term = "\u2026";
@@ -8204,6 +8175,42 @@ CSL.Node.name = {
                 this.ellipsis_suffix = " ";
             }
             func = function (state, Item) {
+                state.tmp.etal_term = "et-al";
+                state.tmp.name_delimiter = this.strings.delimiter;
+                state.tmp["delimiter-precedes-et-al"] = this.strings["delimiter-precedes-et-al"];
+                if ("text" === this.strings.and) {
+                    this.and_term = state.getTerm("and", "long", 0);
+                } else if ("symbol" === this.strings.and) {
+                    this.and_term = "&";
+                }
+                state.tmp.and_term = this.and_term;
+                if (CSL.STARTSWITH_ROMANESQUE_REGEXP.test(this.and_term)) {
+                    this.and_prefix_single = " ";
+                    this.and_prefix_multiple = ", ";
+                    if ("string" === typeof this.strings.delimiter) {
+                        this.and_prefix_multiple = this.strings.delimiter;
+                    }
+                    this.and_suffix = " ";
+                    state.build.name_delimiter = this.strings.delimiter;
+                } else {
+                    this.and_prefix_single = "";
+                    this.and_prefix_multiple = "";
+                    this.and_suffix = "";
+                }
+                if (this.strings["delimiter-precedes-last"] === "always") {
+                    this.and_prefix_single = this.strings.delimiter;
+                } else if (this.strings["delimiter-precedes-last"] === "never") {
+                    if (this.and_prefix_multiple) {
+                        this.and_prefix_multiple = " ";
+                    }
+                } else if (this.strings["delimiter-precedes-last"] === "after-inverted-name") {
+                    if (this.and_prefix_single) {
+                        this.and_prefix_single = this.strings.delimiter;;
+                    }
+                    if (this.and_prefix_multiple) {
+                        this.and_prefix_multiple = " ";
+                    }
+                }
                 this.and = {};
                 if (this.strings.and) {
                     state.output.append(this.and_term, "empty", true);
@@ -8324,30 +8331,30 @@ CSL.Node.names = {
                 this["with"].single.strings.prefix = with_default_prefix;
                 this["with"].multiple.strings.prefix = with_default_prefix;
             }
-            if (state.build.etal_node) {
-                this.etal_style = state.build.etal_node;
-            } else {
-                this.etal_style = "empty";
-            }
-            this.etal_term = state.getTerm(state.build.etal_term, "long", 0);
-            if (CSL.STARTSWITH_ROMANESQUE_REGEXP.test(this.etal_term)) {
-                this.etal_prefix_single = " ";
-                this.etal_prefix_multiple = state.build.name_delimiter;
-                if (state.build["delimiter-precedes-et-al"] === "always") {
-                    this.etal_prefix_single = state.build.name_delimiter;
-                } else if (state.build["delimiter-precedes-et-al"] === "never") {
-                    this.etal_prefix_multiple = " ";
-                } else if (state.build["delimiter-precedes-et-al"] === "after-inverted-name") {
-                    this.etal_prefix_single = state.build.name_delimiter;
-                    this.etal_prefix_multiple = " ";
-                }
-                this.etal_suffix = "";
-            } else {
-                this.etal_prefix_single = "";
-                this.etal_prefix_multiple = "";
-                this.etal_suffix = "";
-            }
             func = function (state, Item, item) {
+                if (state.tmp.etal_node) {
+                    this.etal_style = state.tmp.etal_node;
+                } else {
+                    this.etal_style = "empty";
+                }
+                this.etal_term = state.getTerm(state.tmp.etal_term, "long", 0);
+                if (CSL.STARTSWITH_ROMANESQUE_REGEXP.test(this.etal_term)) {
+                    this.etal_prefix_single = " ";
+                    this.etal_prefix_multiple = state.tmp.name_delimiter;
+                    if (state.tmp["delimiter-precedes-et-al"] === "always") {
+                        this.etal_prefix_single = state.tmp.name_delimiter;
+                    } else if (state.tmp["delimiter-precedes-et-al"] === "never") {
+                        this.etal_prefix_multiple = " ";
+                    } else if (state.tmp["delimiter-precedes-et-al"] === "after-inverted-name") {
+                        this.etal_prefix_single = state.tmp.name_delimiter;
+                        this.etal_prefix_multiple = " ";
+                    }
+                    this.etal_suffix = "";
+                } else {
+                    this.etal_prefix_single = "";
+                    this.etal_prefix_multiple = "";
+                    this.etal_suffix = "";
+                }
                 for (var i = 0, ilen = 3; i < ilen; i += 1) {
                     var key = ["family", "given"][i];
                     state.nameOutput[key] = this[key];
@@ -9333,6 +9340,49 @@ CSL.Attributes["@locale"] = function (state, arg) {
         this.locale_raw = arg;
     } else {
         lst = arg.split(/\s+/);
+        var locale_bares = [];
+        for (i = 0, ilen = lst.length; i < ilen; i += 1) {
+            lang = lst[i];
+            langspec = CSL.localeResolve(lang);
+            if (lst[i].length === 2) {
+                locale_bares.push(langspec.bare);
+            }
+            state.localeConfigure(langspec, true);
+            lst[i] = langspec;
+        }
+        var locale_list = lst.slice();
+        var locale_default = state.opt["default-locale"][0];
+        var maketest = function (locale_list, locale_default,locale_bares) {
+            return function (Item, item) {
+                var key, res;
+                ret = [];
+                res = false;
+                var langspec = false;
+                var lang;
+                if (!Item.language) {
+                    lang = locale_default;
+                } else {
+                    lang = Item.language;
+                }
+                langspec = CSL.localeResolve(lang);
+                for (i = 0, ilen = locale_list.length; i < ilen; i += 1) {
+                    if (langspec.best === locale_list[i].best) {
+                        res = true;
+                        break;
+                    }
+                }
+                if (!res && locale_bares.indexOf(langspec.bare) > -1) {
+                    res = true;
+                }
+                return res;
+            }
+        }
+        this.tests.push(maketest(locale_list,locale_default,locale_bares));
+    }
+};
+CSL.Attributes["@locale-internal"] = function (state, arg) {
+    var func, ret, len, pos, variable, myitem, langspec, lang, lst, i, ilen, fallback;
+        lst = arg.split(/\s+/);
         this.locale_bares = [];
         for (i = 0, ilen = lst.length; i < ilen; i += 1) {
             lang = lst[i];
@@ -9383,8 +9433,7 @@ CSL.Attributes["@locale"] = function (state, arg) {
         }
         var me = this;
         this.tests.push(maketest(me));
-    }
-};
+}
 CSL.Attributes["@is-parallel"] = function (state, arg) {
     var values = arg.split(" ");
     for (var i = 0, ilen = values.length; i < ilen; i += 1) {
@@ -9395,9 +9444,6 @@ CSL.Attributes["@is-parallel"] = function (state, arg) {
         }
     }
     this.strings.set_parallel_condition = values;
-};
-CSL.Attributes["@force-locale-terms-to-default"] = function (state, arg) {
-    state.opt["force-locale-terms-to-default"] = arg;
 };
 CSL.Attributes["@gender"] = function (state, arg) {
     this.gender = arg;
@@ -10327,7 +10373,6 @@ CSL.Transform = function (state) {
     this.abbrevs = {};
     this.abbrevs["default"] = new state.sys.AbbreviationSegments();
     this.getTextSubField = getTextSubField;
-    this.getFieldLocale = getFieldLocale;
     function abbreviate(state, Item, altvar, basevalue, myabbrev_family, use_field) {
         var value;
         if (!myabbrev_family) {
@@ -11748,7 +11793,11 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
                     }
                     var subelements = elements[i].split(/\s+/);
                     for (var j = 0, jlen = subelements.length; j < jlen; j += 1) {
-                        if (!subelements[j].match(/[0-9]/)) {
+                        if (this.opt.development_extensions.strict_page_numbers
+                            && variable === "page"
+                            && !subelements[j].match(/^-*[0-9]/)) {
+                            numeric = false;
+                        } else if (!subelements[j].match(/[-0-9]/)) {
                             numeric = false;
                         }
                     }
@@ -11771,11 +11820,19 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
                     this.tmp.shadow_numbers[variable].values.push(["Blob", elements[i], undefined]);
                 }
             }
-                    };
-        if (num.indexOf(" ") === -1 && num.match(/[0-9]/)) {
-            this.tmp.shadow_numbers[variable].numeric = true;
+        };
+        if (this.opt.development_extensions.strict_page_numbers && variable === "page") {
+            if (num.indexOf(" ") === -1 && num.match(/^-*[0-9]/)) {
+                this.tmp.shadow_numbers[variable].numeric = true;
+            } else {
+                this.tmp.shadow_numbers[variable].numeric = numeric;
+            }
         } else {
-             this.tmp.shadow_numbers[variable].numeric = numeric;
+            if (num.indexOf(" ") === -1 && num.match(/[0-9]/)) {
+                this.tmp.shadow_numbers[variable].numeric = true;
+            } else {
+                this.tmp.shadow_numbers[variable].numeric = numeric;
+            }
         }
         if (!this.tmp.shadow_numbers[variable].numeric) {
             this.transform.loadAbbreviation(ItemObject.jurisdiction, "number", num);
