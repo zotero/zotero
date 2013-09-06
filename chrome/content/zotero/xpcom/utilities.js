@@ -105,7 +105,7 @@ const CSL_DATE_MAPPINGS = {
 	"submitted":["filingDate"],
 	"accessed":["accessDate"],
 	"available-date":["openingDate"],
-	"event-date":["signingDate"],
+	"event-date":["signingDate","conferenceDate"],
 	"publication-date":["publicationDate"]
 }
 
