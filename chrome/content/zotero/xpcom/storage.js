@@ -689,13 +689,12 @@ Zotero.Sync.Storage = new function () {
 	 *                   FALSE otherwise
 	 */
 	this.checkForUpdatedFiles = function (libraryID, itemIDs, itemModTimes) {
-		libraryID = parseInt(libraryID);
-		if (isNaN(libraryID)) {
-			libraryID = false;
-		}
-		
-		Components.utils.import("resource://gre/modules/Task.jsm");
-		return Q(Task.spawn(function () {
+		return Q.fcall(function () {
+			libraryID = parseInt(libraryID);
+			if (isNaN(libraryID)) {
+				libraryID = false;
+			}
+			
 			var msg = "Checking for locally changed attachment files";
 			
 			var memmgr = Components.classes["@mozilla.org/memory-reporter-manager;1"]
@@ -708,7 +707,7 @@ Zotero.Sync.Storage = new function () {
 					if (!itemIDs.length) {
 						var msg = "No files to check for local changes in library " + libraryID;
 						Zotero.debug(msg);
-						throw new Task.Result(false);
+						return false;
 					}
 				}
 				if (itemModTimes) {
@@ -722,7 +721,7 @@ Zotero.Sync.Storage = new function () {
 			}
 			else if (itemModTimes) {
 				if (!Object.keys(itemModTimes).length) {
-					throw new Task.Result(false);
+					return false;
 				}
 				msg += " in download-marking mode";
 			}
@@ -783,7 +782,7 @@ Zotero.Sync.Storage = new function () {
 					msg += " in library " + libraryID;
 				}
 				Zotero.debug(msg);
-				throw new Task.Result(changed);
+				return false;
 			}
 			
 			// Index attachment data by item id
@@ -955,7 +954,7 @@ Zotero.Sync.Storage = new function () {
 				});
 			};
 			
-			throw new Task.Result(checkItems()
+			return checkItems()
 			.then(function () {
 				for (let itemID in updatedStates) {
 					Zotero.Sync.Storage.setSyncState(itemID, updatedStates[itemID]);
@@ -974,8 +973,8 @@ Zotero.Sync.Storage = new function () {
 				Zotero.debug(msg);
 				
 				return changed;
-			}));
-		}));
+			});
+		});
 	};
 	
 	
