@@ -96,7 +96,9 @@ Zotero.EXTENDED_FIELDS = {
 	},
 	"report": {
 		"bookTitle":"container-title",
-		"jurisdiction":"jurisdiction"
+		"jurisdiction":"jurisdiction",
+		"status":"status",
+		"medium":"medium"
 	},
 	"gazette": {
 		"jurisdiction":"jurisdiction",

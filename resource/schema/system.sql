@@ -1,4 +1,4 @@
--- 10050
+-- 10052
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -615,25 +615,27 @@ INSERT INTO itemTypeFields VALUES (14, 1, NULL, 3);
 -- report
 INSERT INTO itemTypeFields VALUES (15, 110, NULL, 1);   -- title
 INSERT INTO itemTypeFields VALUES (15, 90, NULL, 2);    -- abstract
-INSERT INTO itemTypeFields VALUES (15, 92, NULL, 3);    -- reportNumber
-INSERT INTO itemTypeFields VALUES (15, 32, NULL, 4);    -- reportType
-INSERT INTO itemTypeFields VALUES (15, 115, NULL, 5);    -- bookTitle
-INSERT INTO itemTypeFields VALUES (15, 28, NULL, 6);    -- seriesTitle
-INSERT INTO itemTypeFields VALUES (15, 7, NULL, 7);     -- edition
-INSERT INTO itemTypeFields VALUES (15, 31, NULL, 8);    -- place
-INSERT INTO itemTypeFields VALUES (15, 14, NULL, 9);    -- date
-INSERT INTO itemTypeFields VALUES (15, 10, NULL, 10);    -- pages
-INSERT INTO itemTypeFields VALUES (15, 87, NULL, 11);   -- language
-INSERT INTO itemTypeFields VALUES (15, 116, NULL, 12);  -- shortTitle
-INSERT INTO itemTypeFields VALUES (15, 1261, NULL, 13); -- jurisdiction     [ADDED]
-INSERT INTO itemTypeFields VALUES (15, 1, NULL, 14);    -- url
-INSERT INTO itemTypeFields VALUES (15, 27, NULL, 15);   -- accessed
-INSERT INTO itemTypeFields VALUES (15, 123, NULL, 16);  -- archive
-INSERT INTO itemTypeFields VALUES (15, 19, NULL, 17);   -- archiveLocation
-INSERT INTO itemTypeFields VALUES (15, 62, NULL, 18);   -- libraryCatalog
-INSERT INTO itemTypeFields VALUES (15, 18, NULL, 19);   -- callNumber
-INSERT INTO itemTypeFields VALUES (15, 2, NULL, 20);    -- rights
-INSERT INTO itemTypeFields VALUES (15, 22, NULL, 21);   -- extra
+INSERT INTO itemTypeFields VALUES (15, 1284, NULL, 3);    -- status [ADDED]
+INSERT INTO itemTypeFields VALUES (15, 92, NULL, 4);    -- reportNumber
+INSERT INTO itemTypeFields VALUES (15, 32, NULL, 5);    -- reportType
+INSERT INTO itemTypeFields VALUES (15, 115, NULL, 6);    -- bookTitle
+INSERT INTO itemTypeFields VALUES (15, 28, NULL, 7);    -- seriesTitle
+INSERT INTO itemTypeFields VALUES (15, 109, NULL, 8);     -- medium [ADDED]
+INSERT INTO itemTypeFields VALUES (15, 7, NULL, 9);     -- place
+INSERT INTO itemTypeFields VALUES (15, 31, NULL, 10);    -- institution
+INSERT INTO itemTypeFields VALUES (15, 14, NULL, 11);    -- date
+INSERT INTO itemTypeFields VALUES (15, 10, NULL, 12);    -- pages
+INSERT INTO itemTypeFields VALUES (15, 87, NULL, 13);   -- language
+INSERT INTO itemTypeFields VALUES (15, 116, NULL, 14);  -- shortTitle
+INSERT INTO itemTypeFields VALUES (15, 1261, NULL, 15); -- jurisdiction     [ADDED]
+INSERT INTO itemTypeFields VALUES (15, 1, NULL, 16);    -- url
+INSERT INTO itemTypeFields VALUES (15, 27, NULL, 17);   -- accessed
+INSERT INTO itemTypeFields VALUES (15, 123, NULL, 18);  -- archive
+INSERT INTO itemTypeFields VALUES (15, 19, NULL, 19);   -- archiveLocation
+INSERT INTO itemTypeFields VALUES (15, 62, NULL, 20);   -- libraryCatalog
+INSERT INTO itemTypeFields VALUES (15, 18, NULL, 21);   -- callNumber
+INSERT INTO itemTypeFields VALUES (15, 2, NULL, 22);    -- rights
+INSERT INTO itemTypeFields VALUES (15, 22, NULL, 23);   -- extra
 
 -- bill
 INSERT INTO itemTypeFields VALUES (16, 110, NULL, 1);  -- title
