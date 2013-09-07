@@ -2557,7 +2557,10 @@
 						case event.DOM_VK_RETURN:
 							var fieldname = target.getAttribute('fieldname');
 							// Use shift-enter as the save action for the larger fields
-							if (Zotero.ItemFields.isMultiline(fieldname) && !event.shiftKey) {
+							if (Zotero.ItemFields.isMultiline(fieldname) 
+								&& !event.shiftKey 
+								&& !Zotero.ItemFields.isFieldOfBase(fieldname, 'title')) {
+
 								break;
 							}
 							
