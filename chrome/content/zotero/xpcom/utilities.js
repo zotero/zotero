@@ -93,7 +93,9 @@ const CSL_TEXT_MAPPINGS = {
 	"shortTitle":["shortTitle"],
 	"journalAbbreviation":["journalAbbreviation"],
 	"language":["language"],
-	"jurisdiction":["jurisdiction"]
+	"jurisdiction":["jurisdiction"],
+	"status":["status"],
+    "publication-number": ["publicationNumber"]
 }
 
 /*
@@ -150,7 +152,8 @@ const CSL_TYPE_MAPPINGS = {
 	'gazette':'gazette',
 	'regulation':'regulation',
 	'classic':'classic',
-	'treaty':'treaty'
+	'treaty':'treaty',
+	'standard':'standard'
 };
 
 /**

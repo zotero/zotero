@@ -10,12 +10,17 @@ Zotero.EXTENDED_TYPES = {
 	"gazette":"statute",
 	"regulation":"statute",
 	"classic":"manuscript",
-	"treaty":"document"
+	"treaty":"document",
+	"standard":"document"
 }
 
 Zotero.EXTENDED_FIELDS = {
 	"book": {
         "medium":"medium"
+	},
+	"standard": {
+        "version":"version",
+        "number":"number"
 	},
 	"conferencePaper": {
         "conferenceDate":"event-date",
@@ -26,6 +31,9 @@ Zotero.EXTENDED_FIELDS = {
 		"jurisdiction":"jurisdiction",
 		"newsCaseDate":"original-date",
         "court":"authority"
+	},
+	"journalArticle": {
+		"status":"status"
 	},
 	"bill": {
 		"jurisdiction":"jurisdiction",
@@ -50,7 +58,9 @@ Zotero.EXTENDED_FIELDS = {
 	}, 
 	"patent": {
 		"jurisdiction":"jurisdiction",
-		"priorityDate":"original-date"
+		"priorityDate":"original-date",
+		"publicationDate":"publication-date",
+		"publicationNumber":"publication-number"
 	}, 
 	"case": {
 		"jurisdiction":"jurisdiction",
@@ -107,7 +117,8 @@ Zotero.EXTENDED_FIELDS = {
 		"section":"section",
 		"openingDate":"available-date",
 		"adoptionDate":"original-date",
-		"signingDate":"event-date"
+		"signingDate":"event-date",
+		"version":"version"
 	},
 	"classic":{
 		"volume":"volume"
