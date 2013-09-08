@@ -705,7 +705,7 @@ Zotero.Items = new function() {
 				"WHERE IC.itemID=I.itemID AND primaryField=1 ORDER BY IC.orderIndex LIMIT 1,1)" +
 			") " +
 			"ELSE (" +
-				"SELECT COALESCE(lastNameAlt,lastName) AS lastName FROM itemCreators IC " +
+				"(SELECT COALESCE(lastNameAlt,lastName) AS lastName FROM itemCreators IC " +
 					"NATURAL JOIN (SELECT itemID,orderIndex,lastName " +
 						"FROM itemCreators " +
 							"NATURAL JOIN creators " +
@@ -719,7 +719,7 @@ Zotero.Items = new function() {
 							"ON A.itemID=C.itemID AND A.orderIndex=C.orderIndex " +
 				"LEFT JOIN itemTypeCreatorTypes ITCT " +
 				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=I.itemTypeID) " +
-				"WHERE IC.itemID=I.itemID AND primaryField=1 ORDER BY IC.orderIndex LIMIT 1 " +
+				"WHERE IC.itemID=I.itemID AND primaryField=1 ORDER BY IC.orderIndex LIMIT 1) " +
 				" || ' " + localizedEtAl + "' " +
 			") " +
 			"END, " +
@@ -787,7 +787,7 @@ Zotero.Items = new function() {
 								"WHERE languageTag in (SELECT tag FROM zlsPreferences WHERE param='zoteroDisplay')) A " +
 				   		"ON A.itemID=C.itemID AND A.orderIndex=C.orderIndex " +
 				"WHERE IC.itemID=I.itemID AND creatorTypeID IN (3) ORDER BY IC.orderIndex LIMIT 1)" +
-				" || '" + localizedEtAl + "' " +
+				" || ' " + localizedEtAl + "' " +
 			") " +
 			"END, " +
 			
@@ -854,7 +854,7 @@ Zotero.Items = new function() {
 								"WHERE languageTag in (SELECT tag FROM zlsPreferences WHERE param='zoteroDisplay')) A " +
 				   		"ON A.itemID=C.itemID AND A.orderIndex=C.orderIndex " +
 				"WHERE IC.itemID=I.itemID AND creatorTypeID IN (2) ORDER BY IC.orderIndex LIMIT 1)" +
-				" || '" + localizedEtAl + "' " +
+				" || ' " + localizedEtAl + "' " +
 			") " +
 			"END" +
 		") AS firstCreator";
