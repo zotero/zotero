@@ -25,7 +25,6 @@
 
 Zotero.ID_Tracker = function () {
 	this.get = get;
-	this.getKey = getKey;
 	this.getBigInt = getBigInt;
 	this.skip = skip;
 	this.getTableName = getTableName;
@@ -84,13 +83,6 @@ Zotero.ID_Tracker = function () {
 			default:
 				throw ("Unsupported table '" + table + "' in Zotero.ID.get()");
 		}
-	}
-	
-	
-	function getKey() {
-		// TODO: add 'L' and 'Y' after 3.0.11 cut-off
-		var baseString = "23456789ABCDEFGHIJKMNPQRSTUVWXZ";
-		return Zotero.randomString(8, baseString);
 	}
 	
 	

@@ -347,7 +347,7 @@
 							ondragstart="if (event.target.localName == 'treechildren') { ZoteroPane_Local.itemsView.onDragStart(event); }"
 							ondragenter="return ZoteroPane_Local.itemsView.onDragEnter(event)"
 							ondragover="return ZoteroPane_Local.itemsView.onDragOver(event)"
-							ondragdrop="return ZoteroPane_Local.itemsView.onDrop(event)"
+							ondrop="return ZoteroPane_Local.itemsView.onDrop(event)"
 							oncommand="ZoteroPane_Local.serializePersist()"
 							flex="1">
 							<treecols id="zotero-items-columns-header">

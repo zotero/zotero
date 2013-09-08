@@ -644,6 +644,7 @@ Zotero.Items = new function() {
 		
 		/* This whole block is to get the firstCreator */
 		var localizedAnd = Zotero.getString('general.and');
+		var localizedEtAl = Zotero.getString('general.etAl'); 
 		var sql = "COALESCE(" +
 			// First try for primary creator types
 			"CASE (" +
@@ -719,7 +720,7 @@ Zotero.Items = new function() {
 				"LEFT JOIN itemTypeCreatorTypes ITCT " +
 				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=I.itemTypeID) " +
 				"WHERE IC.itemID=I.itemID AND primaryField=1 ORDER BY IC.orderIndex LIMIT 1 " +
-				" || ' et al.' " +
+				" || ' " + localizedEtAl + "' " +
 			") " +
 			"END, " +
 			
@@ -786,7 +787,7 @@ Zotero.Items = new function() {
 								"WHERE languageTag in (SELECT tag FROM zlsPreferences WHERE param='zoteroDisplay')) A " +
 				   		"ON A.itemID=C.itemID AND A.orderIndex=C.orderIndex " +
 				"WHERE IC.itemID=I.itemID AND creatorTypeID IN (3) ORDER BY IC.orderIndex LIMIT 1)" +
-				" || ' et al.' " +
+				" || '" + localizedEtAl + "' " +
 			") " +
 			"END, " +
 			
@@ -840,6 +841,7 @@ Zotero.Items = new function() {
 				"WHERE IC.itemID=I.itemID AND creatorTypeID IN (2) ORDER BY IC.orderIndex LIMIT 1,1)" +
 			") " +
 			"ELSE (" +
+<<<<<<< HEAD
 				"(SELECT COALESCE(lastNameAlt,lastName) AS lastName FROM itemCreators IC " +
 					"NATURAL JOIN (SELECT itemID,orderIndex,lastName " +
 						"FROM itemCreators " +
@@ -854,6 +856,12 @@ Zotero.Items = new function() {
 				   		"ON A.itemID=C.itemID AND A.orderIndex=C.orderIndex " +
 				"WHERE IC.itemID=I.itemID AND creatorTypeID IN (2) ORDER BY IC.orderIndex LIMIT 1)" +
 				" || ' et al.' " +
+=======
+				"SELECT " +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators NATURAL JOIN creatorData " +
+				"WHERE itemID=I.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
+				" || ' " + localizedEtAl + "' " + 
+>>>>>>> 6c0be3426bc5942ee04a0a27af97ce94d0a10ed5
 			") " +
 			"END" +
 		") AS firstCreator";

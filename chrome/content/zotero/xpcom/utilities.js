@@ -1634,10 +1634,15 @@ Zotero.Utilities = {
 	},
 	
 	/**
-	 * Converts an item from toArray() format to content=json format used by the server
+	 * Converts an item from toArray() format to an array of items in
+	 * the content=json format used by the server
 	 */
 	"itemToServerJSON":function(item) {
-		var newItem = {};
+		var newItem = {
+				"itemKey":Zotero.Utilities.generateObjectKey(),
+				"itemVersion":0
+			},
+			newItems = [newItem];
 		
 		var typeID = Zotero.ItemTypes.getID(item.itemType);
 		if(!typeID) {
@@ -1715,7 +1720,6 @@ Zotero.Utilities = {
 			} else if(field === "notes") {
 				// normalize notes
 				var n = val.length;
-				var newNotes = newItem.notes = new Array(n);
 				for(var j=0; j<n; j++) {
 					var note = val[j];
 					if(typeof note === "object") {
@@ -1725,7 +1729,8 @@ Zotero.Utilities = {
 						}
 						note = note.note;
 					}
-					newNotes[j] = {"itemType":"note", "note":note.toString()};
+					newItems.push({"itemType":"note", "parentItem":newItem.itemKey,
+						"note":note.toString()});
 				}
 			} else if((fieldID = Zotero.ItemFields.getID(field))) {
 				// if content is not a string, either stringify it or delete it
@@ -1756,7 +1761,7 @@ Zotero.Utilities = {
 			}
 		}
 		
-		return newItem;
+		return newItems;
 	},
 	
 	/**
@@ -2210,6 +2215,15 @@ Zotero.Utilities = {
 		}
 		return Zotero.ItemTypes.getImageSrc(attachment.mimeType === "application/pdf"
 							? "attachment-pdf" : "attachment-snapshot");
+	},
+
+	/**
+	 * Generates a valid object key for the server API
+	 */
+	"generateObjectKey":function generateObjectKey() {
+		// TODO: add 'L' and 'Y' after 3.0.11 cut-off
+		var baseString = "23456789ABCDEFGHIJKMNPQRSTUVWXZ";
+		return Zotero.Utilities.randomString(8, baseString);
 	},
 
 	/**

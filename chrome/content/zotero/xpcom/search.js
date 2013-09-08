@@ -1684,7 +1684,7 @@ Zotero.Search.prototype._buildQuery = function(){
 
 
 Zotero.Search.prototype._generateKey = function () {
-	return Zotero.ID.getKey();
+	return Zotero.Utilities.generateObjectKey();
 }
 
 

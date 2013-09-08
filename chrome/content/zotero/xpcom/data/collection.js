@@ -1497,5 +1497,5 @@ Zotero.Collection.prototype._refreshChildCollections = function () {
 
 
 Zotero.Collection.prototype._generateKey = function () {
-	return Zotero.ID.getKey();
+	return Zotero.Utilities.generateObjectKey();
 }

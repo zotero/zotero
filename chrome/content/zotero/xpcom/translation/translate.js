@@ -1137,6 +1137,7 @@ Zotero.Translate.Base.prototype = {
 		this._saveAttachments = saveAttachments === undefined || saveAttachments;
 		this._savingAttachments = [];
 		this._savingItems = 0;
+		this._waitingForSave = false;
 		
 		var me = this;
 		if(typeof this.translator[0] === "object") {
@@ -1263,7 +1264,6 @@ Zotero.Translate.Base.prototype = {
 			}
 			return;
 		}
-		var oldState = this._currentState;
 		
 		// reset async processes and propagate them to parent
 		if(this._parentTranslator && this._runningAsyncProcesses) {
@@ -1276,7 +1276,7 @@ Zotero.Translate.Base.prototype = {
 		var errorString = null;
 		if(!returnValue && error) errorString = this._generateErrorString(error);
 		
-		if(oldState === "detect") {
+		if(this._currentState === "detect") {
 			if(this._potentialTranslators.length) {
 				var lastTranslator = this._potentialTranslators.shift();
 				var lastProperToProxyFunction = this._properToProxyFunctions ? this._properToProxyFunctions.shift() : null;
@@ -1309,13 +1309,12 @@ Zotero.Translate.Base.prototype = {
 				if(!this._waitingForRPC) this._detectTranslatorsCollected();
 			}
 		} else {
-			this._currentState = null;
-			
 			// unset return value is equivalent to true
 			if(returnValue === undefined) returnValue = true;
 			
 			if(returnValue) {
 				if(this.saveQueue.length) {
+					this._waitingForSave = true;
 					this._saveItems(this.saveQueue);
 					this.saveQueue = [];
 					return;
@@ -1332,6 +1331,8 @@ Zotero.Translate.Base.prototype = {
 				
 				this._runHandler("error", error);
 			}
+			
+			this._currentState = null;
 			
 			// call handlers
 			this._runHandler("itemsDone", returnValue);
@@ -1418,7 +1419,7 @@ Zotero.Translate.Base.prototype = {
 	 * Checks if saving done, and if so, fires done event
 	 */
 	"_checkIfDone":function() {
-		if(!this._savingItems && !this._savingAttachments.length && !this._currentState) {
+		if(!this._savingItems && !this._savingAttachments.length && (!this._currentState || this._waitingForSave)) {
 			this._runHandler("done", true);
 		}
 	},
@@ -1754,7 +1755,7 @@ Zotero.Translate.Web.prototype._translateTranslatorLoaded = function() {
 			}, function(obj) { me._translateRPCComplete(obj) });
 	} else if(runMode === Zotero.Translator.RUN_MODE_ZOTERO_SERVER) {
 		var me = this;
-		Zotero.API.createItem({"url":this.document.location.href.toString()}, null,
+		Zotero.API.createItem({"url":this.document.location.href.toString()},
 			function(statusCode, response) {
 				me._translateServerComplete(statusCode, response);
 			});
@@ -1806,7 +1807,7 @@ Zotero.Translate.Web.prototype._translateServerComplete = function(statusCode, r
 				Zotero.API.createItem({
 						"url":me.document.location.href.toString(),
 						"items":selectedItems
-					}, null,
+					},
 					function(statusCode, response) {
 							me._translateServerComplete(statusCode, response);
 					});

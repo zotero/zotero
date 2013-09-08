@@ -60,6 +60,7 @@ var Zotero_Browser = new function() {
 	this.isScraping = false;
 	
 	var _browserData = new Object();
+	var _attachmentsMap = new WeakMap();
 	
 	var _blacklist = [
 		"googlesyndication.com",
@@ -542,6 +543,133 @@ var Zotero_Browser = new function() {
 			_constructLookupFunction(tab, function(e, obj) {
 				Zotero_LocateMenu.locateItem(e, obj.newItems);
 			}), true);
+	}
+	
+	/**
+	 * Translates using the specified translation instance. setTranslator() must already
+	 * have been called
+	 * @param {Zotero.Translate} translate
+	 */
+	this.performTranslation = function(translate, libraryID, collection) {
+		if (Zotero.locked) {
+			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+			var desc = Zotero.localeJoin([
+				Zotero.getString('general.operationInProgress'),
+				Zotero.getString('general.operationInProgress.waitUntilFinishedAndTryAgain')
+			]);
+			Zotero_Browser.progress.addDescription(desc);
+			Zotero_Browser.progress.show();
+			Zotero_Browser.progress.startCloseTimer(8000);
+			return;
+		}
+		
+		if (!Zotero.stateCheck()) {
+			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+			var desc = Zotero.getString("ingester.scrapeErrorDescription.previousError")
+				+ ' ' + Zotero.getString("general.restartFirefoxAndTryAgain", Zotero.appName);
+			Zotero_Browser.progress.addDescription(desc);
+			Zotero_Browser.progress.show();
+			Zotero_Browser.progress.startCloseTimer(8000);
+			return;
+		}
+		
+		Zotero_Browser.progress.show();
+		Zotero_Browser.isScraping = true;
+		
+		// Get libraryID and collectionID
+		if(libraryID === undefined && ZoteroPane && !Zotero.isConnector) {
+			try {
+				if (!ZoteroPane.collectionsView.editable) {
+					Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+					var desc = Zotero.getString('save.error.cannotMakeChangesToCollection');
+					Zotero_Browser.progress.addDescription(desc);
+					Zotero_Browser.progress.show();
+					Zotero_Browser.progress.startCloseTimer(8000);
+					return;
+				}
+				
+				libraryID = ZoteroPane.getSelectedLibraryID();
+				collection = ZoteroPane.getSelectedCollection();
+			} catch(e) {}
+		}
+		
+		if(Zotero.isConnector) {
+			Zotero.Connector.callMethod("getSelectedCollection", {}, function(response, status) {
+				if(status !== 200) {
+					Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scraping"));
+				} else {
+					Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapingTo"),
+						"chrome://zotero/skin/treesource-"+(response.id ? "collection" : "library")+".png",
+						response.name+"\u2026");
+				}
+			});
+		} else {
+			var name;
+			if(collection) {
+				name = collection.name;
+			} else if(libraryID) {
+				name = Zotero.Libraries.getName(libraryID);
+			} else {
+				name = Zotero.getString("pane.collections.library");
+			}
+			
+			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapingTo"),
+				"chrome://zotero/skin/treesource-"+(collection ? "collection" : "library")+".png",
+				name+"\u2026");
+		}
+		
+		translate.clearHandlers("done");
+		translate.clearHandlers("itemDone");
+		translate.clearHandlers("attachmentProgress");
+		
+		translate.setHandler("done", function(obj, returnValue) {		
+			if(!returnValue) {
+				Zotero_Browser.progress.show();
+				Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+				// Include link to Known Translator Issues page
+				var url = "http://www.zotero.org/documentation/known_translator_issues";
+				var linkText = '<a href="' + url + '" tooltiptext="' + url + '">'
+					+ Zotero.getString('ingester.scrapeErrorDescription.linkText') + '</a>';
+				Zotero_Browser.progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription", linkText));
+				Zotero_Browser.progress.startCloseTimer(8000);
+			} else {
+				Zotero_Browser.progress.startCloseTimer();
+			}
+			Zotero_Browser.isScraping = false;
+		});
+		
+		translate.setHandler("itemDone", function(obj, dbItem, item) {
+			Zotero_Browser.progress.show();
+			var itemProgress = new Zotero_Browser.progress.ItemProgress(Zotero.ItemTypes.getImageSrc(item.itemType),
+				item.title);
+			itemProgress.setProgress(100);
+			for(var i=0; i<item.attachments.length; i++) {
+				var attachment = item.attachments[i];
+				_attachmentsMap.set(attachment,
+					new Zotero_Browser.progress.ItemProgress(
+						Zotero.Utilities.determineAttachmentIcon(attachment),
+						attachment.title, itemProgress));
+			}
+			
+			// add item to collection, if one was specified
+			if(collection) {
+				collection.addItem(dbItem.id);
+			}
+		});
+		
+		translate.setHandler("attachmentProgress", function(obj, attachment, progress, error) {
+			var itemProgress = _attachmentsMap.get(attachment);
+			if(progress === false) {
+				itemProgress.setError();
+			} else {
+				itemProgress.setProgress(progress);
+				if(progress === 100) {
+					itemProgress.setIcon(Zotero.Utilities.determineAttachmentIcon(attachment));
+				}
+			}
+		});
+		
+		translate.translate(libraryID);
 	}
 	
 	

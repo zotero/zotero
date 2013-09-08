@@ -812,11 +812,11 @@ Zotero.Sync.Storage = new function () {
 			var updatedStates = {};
 			
 			// OS.File didn't work reliably before Firefox 23, and on Windows it returns
-			// the access time instead of the modification time until Firefox 25
+			// the access time instead of the modification time until Firefox 24
 			// (https://bugzilla.mozilla.org/show_bug.cgi?id=899436),
 			// so use the old code
 			if (Zotero.platformMajorVersion < 23
-					|| (Zotero.isWin && Zotero.platformMajorVersion < 25)) {
+					|| (Zotero.isWin && Zotero.platformMajorVersion < 24)) {
 				Zotero.debug("Performing synchronous file update check");
 				
 				for each(var item in items) {
@@ -949,7 +949,7 @@ Zotero.Sync.Storage = new function () {
 				let item = items.shift();
 				let row = attachmentData[item.id];
 				let lk = item.libraryKey;
-				//Zotero.debug("Checking attachment file for item " + lk);
+				Zotero.debug("Checking attachment file for item " + lk);
 				
 				let nsIFile = item.getFile(row, true);
 				if (!nsIFile) {
