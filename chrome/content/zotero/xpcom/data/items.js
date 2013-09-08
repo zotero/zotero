@@ -841,7 +841,6 @@ Zotero.Items = new function() {
 				"WHERE IC.itemID=I.itemID AND creatorTypeID IN (2) ORDER BY IC.orderIndex LIMIT 1,1)" +
 			") " +
 			"ELSE (" +
-<<<<<<< HEAD
 				"(SELECT COALESCE(lastNameAlt,lastName) AS lastName FROM itemCreators IC " +
 					"NATURAL JOIN (SELECT itemID,orderIndex,lastName " +
 						"FROM itemCreators " +
