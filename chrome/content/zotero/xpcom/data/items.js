@@ -855,13 +855,7 @@ Zotero.Items = new function() {
 								"WHERE languageTag in (SELECT tag FROM zlsPreferences WHERE param='zoteroDisplay')) A " +
 				   		"ON A.itemID=C.itemID AND A.orderIndex=C.orderIndex " +
 				"WHERE IC.itemID=I.itemID AND creatorTypeID IN (2) ORDER BY IC.orderIndex LIMIT 1)" +
-				" || ' et al.' " +
-=======
-				"SELECT " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators NATURAL JOIN creatorData " +
-				"WHERE itemID=I.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
-				" || ' " + localizedEtAl + "' " + 
->>>>>>> 6c0be3426bc5942ee04a0a27af97ce94d0a10ed5
+				" || '" + localizedEtAl + "' " +
 			") " +
 			"END" +
 		") AS firstCreator";
