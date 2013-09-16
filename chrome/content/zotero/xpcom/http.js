@@ -50,6 +50,7 @@ Zotero.HTTP = new function() {
 	 * @param {nsIURI|String}	url				URL to request
 	 * @param {Object} [options] Options for HTTP request:<ul>
 	 *         <li>body - The body of a POST request</li>
+	 *         <li>headers - Object of HTTP headers to send with the request</li>
 	 *         <li>cookieSandbox - The sandbox from which cookies should be taken</li>
 	 *         <li>debug - Log response text and status code</li>
 	 *         <li>dontCache - If set, specifies that the request should not be fulfilled from the cache</li>
