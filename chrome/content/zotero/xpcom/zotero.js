@@ -69,7 +69,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	this.setFontSize = setFontSize;
 	this.flattenArguments = flattenArguments;
 	this.getAncestorByTagName = getAncestorByTagName;
-	this.join = join;
 	this.randomString = randomString;
 	this.moveToUnique = moveToUnique;
 	
@@ -1611,21 +1610,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			}
 		}
 		return false;
-	}
-	
-	
-	/*
-	 * A version of join() that operates externally for use on objects other
-	 * than arrays (e.g. _arguments_)
-	 *
-	 * Note that this is safer than extending Object()
-	 */
-	function join(obj, delim){
-		var a = [];
-		for (var i=0, len=obj.length; i<len; i++){
-			a.push(obj[i]);
-		}
-		return a.join(delim);
 	}
 	
 	
