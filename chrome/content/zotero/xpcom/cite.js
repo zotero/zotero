@@ -408,8 +408,9 @@ Zotero.Cite.getAbbreviation = new function() {
 				for(var j=0; j<words.length; j+=2) {
 					var word = words[j],
 						lcWord = lookupKey(word),
-						newWord = undefined;
-
+						newWord = undefined,
+						exactMatch = false;
+					
 					for(var i=0; i<jurisdictions.length && newWord === undefined; i++) {
 						if(!(jur = abbreviations[jurisdictions[i]])) continue;
 						if(!(cat = jur[category+"-word"])) continue;
@@ -417,6 +418,11 @@ Zotero.Cite.getAbbreviation = new function() {
 						// Complete match
 						if(cat.hasOwnProperty(lcWord)) {
 							newWord = cat[lcWord];
+							exactMatch = true;
+						} else if(lcWord.charAt(lcWord.length-1) == 's' && cat.hasOwnProperty(lcWord.substr(0, lcWord.length-1))) {
+							// Try dropping 's'
+							newWord = cat[lcWord.substr(0, lcWord.length-1)];
+							exactMatch = true;
 						} else {
 							// Partial match
 							for(var k=word.length; k>0 && newWord === undefined; k--) {
@@ -426,7 +432,7 @@ Zotero.Cite.getAbbreviation = new function() {
 					}
 					
 					// Don't substitute with a longer word
-					if(newWord && word.length - newWord.length < 1) {
+					if(newWord && !exactMatch && word.length - newWord.length < 1) {
 						newWord = word;
 					}
 					
