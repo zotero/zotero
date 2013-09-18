@@ -421,13 +421,15 @@ Zotero.Cite.getAbbreviation = new function() {
 							// Partial match
 							for(var k=word.length; k>0 && newWord === undefined; k--) {
 								newWord = cat[lcWord.substr(0, k)+"-"];
-								if(newWord && word.length - newWord.length < 1) {
-									newWord = undefined;
-								}
 							}
 						}
 					}
-
+					
+					// Don't substitute with a longer word
+					if(newWord && word.length - newWord.length < 1) {
+						newWord = word;
+					}
+					
 					// Fall back to full word
 					if(newWord === undefined) newWord = word;
 					
