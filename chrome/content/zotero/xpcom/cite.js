@@ -430,7 +430,10 @@ Zotero.Cite.getAbbreviation = new function() {
 
 					// Fall back to full word
 					if(newWord === undefined) newWord = word;
-
+					
+					// Don't discard last word (e.g. Climate of the Past => Clim. Past)
+					if(!newWord && words.length<=j+2) newWord = word;
+					
 					words[j] = newWord.substr(0, 1).toUpperCase() + newWord.substr(1);
 				}
 				abbreviation = words.join("").replace(/\s+/g, " ").trim();
