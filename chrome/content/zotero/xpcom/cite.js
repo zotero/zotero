@@ -450,10 +450,8 @@ Zotero.Cite.getAbbreviation = new function() {
 			}
 		}
 
-		if(!abbreviation || abbreviation === key) {
-			Zotero.debug("No abbreviation found for "+key);
-			return;
-		}
+		if(!abbreviation) abbreviation = key; //this should never happen, but just in case
+		
 		Zotero.debug("Abbreviated "+key+" as "+abbreviation);
 		
 		// Add to jurisdiction object
