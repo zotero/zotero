@@ -405,9 +405,13 @@ Zotero.Cite.getAbbreviation = new function() {
 			var words = normalizedKey.split(/([ \-])/);
 
 			if(words.length > 1) {
+				var lcWords = [];
+				for(var j=0; j<words.length; j+=2) {
+					lcWords[j] = lookupKey(words[j]);
+				}
 				for(var j=0; j<words.length; j+=2) {
 					var word = words[j],
-						lcWord = lookupKey(word),
+						lcWord = lcWords[j],
 						newWord = undefined,
 						exactMatch = false;
 					
@@ -415,8 +419,8 @@ Zotero.Cite.getAbbreviation = new function() {
 						if(!(jur = abbreviations[jurisdictions[i]])) continue;
 						if(!(cat = jur[category+"-word"])) continue;
 						
-						// Complete match
 						if(cat.hasOwnProperty(lcWord)) {
+							// Complete match
 							newWord = cat[lcWord];
 							exactMatch = true;
 						} else if(lcWord.charAt(lcWord.length-1) == 's' && cat.hasOwnProperty(lcWord.substr(0, lcWord.length-1))) {
@@ -424,9 +428,21 @@ Zotero.Cite.getAbbreviation = new function() {
 							newWord = cat[lcWord.substr(0, lcWord.length-1)];
 							exactMatch = true;
 						} else {
-							// Partial match
-							for(var k=word.length; k>0 && newWord === undefined; k--) {
-								newWord = cat[lcWord.substr(0, k)+"-"];
+							if(j < words.length-2) {
+								// Two-word match
+								newWord = cat[lcWord+words[j+1]+lcWords[j+2]];
+								if(newWord !== undefined) {
+									words.splice(j+1, 2);
+									lcWords.splice(j+1, 2);
+									exactMatch = true;
+								}
+							}
+
+							if(newWord === undefined) {
+								// Partial match
+								for(var k=lcWord.length; k>0 && newWord === undefined; k--) {
+									newWord = cat[lcWord.substr(0, k)+"-"];
+								}
 							}
 						}
 					}
@@ -440,7 +456,7 @@ Zotero.Cite.getAbbreviation = new function() {
 					if(newWord === undefined) newWord = word;
 					
 					// Don't discard last word (e.g. Climate of the Past => Clim. Past)
-					if(!newWord && words.length<=j+2) newWord = word;
+					if(!newWord && j == words.length-1) newWord = word;
 					
 					words[j] = newWord.substr(0, 1).toUpperCase() + newWord.substr(1);
 				}
