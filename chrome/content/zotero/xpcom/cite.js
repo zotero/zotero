@@ -408,8 +408,9 @@ Zotero.Cite.getAbbreviation = new function() {
 				for(var j=0; j<words.length; j+=2) {
 					var word = words[j],
 						lcWord = lookupKey(word),
-						newWord = undefined;
-
+						newWord = undefined,
+						exactMatch = false;
+					
 					for(var i=0; i<jurisdictions.length && newWord === undefined; i++) {
 						if(!(jur = abbreviations[jurisdictions[i]])) continue;
 						if(!(cat = jur[category+"-word"])) continue;
@@ -417,20 +418,30 @@ Zotero.Cite.getAbbreviation = new function() {
 						// Complete match
 						if(cat.hasOwnProperty(lcWord)) {
 							newWord = cat[lcWord];
+							exactMatch = true;
+						} else if(lcWord.charAt(lcWord.length-1) == 's' && cat.hasOwnProperty(lcWord.substr(0, lcWord.length-1))) {
+							// Try dropping 's'
+							newWord = cat[lcWord.substr(0, lcWord.length-1)];
+							exactMatch = true;
 						} else {
 							// Partial match
-							for(var k=1; k<=word.length && newWord === undefined; k++) {
+							for(var k=word.length; k>0 && newWord === undefined; k--) {
 								newWord = cat[lcWord.substr(0, k)+"-"];
-								if(newWord && word.length - newWord.length < 1) {
-									newWord = undefined;
-								}
 							}
 						}
 					}
-
+					
+					// Don't substitute with a longer word
+					if(newWord && !exactMatch && word.length - newWord.length < 1) {
+						newWord = word;
+					}
+					
 					// Fall back to full word
 					if(newWord === undefined) newWord = word;
-
+					
+					// Don't discard last word (e.g. Climate of the Past => Clim. Past)
+					if(!newWord && words.length<=j+2) newWord = word;
+					
 					words[j] = newWord.substr(0, 1).toUpperCase() + newWord.substr(1);
 				}
 				abbreviation = words.join("").replace(/\s+/g, " ").trim();
@@ -439,10 +450,8 @@ Zotero.Cite.getAbbreviation = new function() {
 			}
 		}
 
-		if(!abbreviation || abbreviation === key) {
-			Zotero.debug("No abbreviation found for "+key);
-			return;
-		}
+		if(!abbreviation) abbreviation = key; //this should never happen, but just in case
+		
 		Zotero.debug("Abbreviated "+key+" as "+abbreviation);
 		
 		// Add to jurisdiction object
