@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.483",
+    PROCESSOR_VERSION: "1.0.484",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -6292,7 +6292,7 @@ CSL.NameOutput = function(state, Item, item, variables) {
     this.Item = Item;
     this.item = item;
     this.nameset_base = 0;
-    this.etal_spec = [];
+    this.etal_spec = {};
     this._first_creator_variable = false;
     this._please_chop = false;
 };
@@ -6804,24 +6804,36 @@ CSL.NameOutput.prototype._checkNickname = function (name) {
     }
     return name;
 };
-CSL.NameOutput.prototype.joinPersons = function (blobs, pos) {
+CSL.NameOutput.prototype.joinPersons = function (blobs, pos, j) {
     var ret;
-    if (this.etal_spec[pos] === 1) {
-        ret = this._joinEtAl(blobs, "name");
-    } else if (this.etal_spec[pos] === 2) {
-        ret = this._joinEllipsis(blobs, "name");
-    } else if (!this.state.tmp.sort_key_flag) {
-        ret = this._joinAnd(blobs, "name");
+    if ("undefined" === typeof j) {
+        if (this.etal_spec[pos].freeters === 1) {
+            ret = this._joinEtAl(blobs, "name");
+        } else if (this.etal_spec[pos].freeters === 2) {
+            ret = this._joinEllipsis(blobs, "name");
+        } else if (!this.state.tmp.sort_key_flag) {
+            ret = this._joinAnd(blobs, "name");
+        } else {
+            ret = this._join(blobs, " ");
+        }
     } else {
-        ret = this._join(blobs, " ");
+        if (this.etal_spec[pos].persons[j] === 1) {
+            ret = this._joinEtAl(blobs, "name");
+        } else if (this.etal_spec[pos].persons[j] === 2) {
+            ret = this._joinEllipsis(blobs, "name");
+        } else if (!this.state.tmp.sort_key_flag) {
+            ret = this._joinAnd(blobs, "name");
+        } else {
+            ret = this._join(blobs, " ");
+        }
     }
     return ret;
 };
 CSL.NameOutput.prototype.joinInstitutionSets = function (blobs, pos) {
     var ret;
-    if (this.etal_spec[pos] === 1) {
+    if (this.etal_spec[pos].institutions === 1) {
         ret = this._joinEtAl(blobs, "institution");
-    } else if (this.etal_spec[pos] === 2) {
+    } else if (this.etal_spec[pos].institutions === 2) {
         ret = this._joinEllipsis(blobs, "institution");
     } else {
         ret = this._joinAnd(blobs, "institution");
@@ -6933,7 +6945,7 @@ CSL.NameOutput.prototype.setCommonTerm = function () {
         var v = this.variables[i];
         var vv = this.variables[i + 1];
         if (this.freeters[v].length || this.freeters[vv].length) {
-            if (this.etal_spec[this.nameset_base + this.variable_offset[v]] !== this.etal_spec[this.nameset_base + this.variable_offset[vv]]
+            if (this.etal_spec[v].freeters !== this.etal_spec[vv].freeters
                 || !this._compareNamesets(this.freeters[v], this.freeters[vv])) {
                 this.common_term = false;
                 return;
@@ -6941,7 +6953,7 @@ CSL.NameOutput.prototype.setCommonTerm = function () {
             freeters_offset += 1;
         }
         for (var j = 0, jlen = this.persons[v].length; j < jlen; j += 1) {
-            if (this.etal_spec[this.nameset_base + this.variable_offset[v] + freeters_offset + j + 1] !== this.etal_spec[this.nameset_base + this.variable_offset + freeters_offset + j + 1]
+            if (this.etal_spec[v].persons[j] !== this.etal_spec[vv].persons[j]
                 || !this._compareNamesets(this.persons[v][j], this.persons[vv][j])) {
                 this.common_term = false;
                 return;
@@ -6966,28 +6978,26 @@ CSL.NameOutput.prototype._compareNamesets = function (base_nameset, nameset) {
 };
 CSL.NameOutput.prototype.constrainNames = function () {
     this.names_count = 0;
-    var pos = this.nameset_base;
+    var pos;
     for (var i = 0, ilen = this.variables.length; i < ilen; i += 1) {
         var v = this.variables[i];
+        pos = this.nameset_base + i;
         if (this.freeters[v].length) {
             this.state.tmp.names_max.push(this.freeters[v].length, "literal");
             this._imposeNameConstraints(this.freeters, this.freeters_count, v, pos);
             this.names_count += this.freeters[v].length;
-            pos += 1;
         }
         if (this.institutions[v].length) {
             this.state.tmp.names_max.push(this.institutions[v].length, "literal");
             this._imposeNameConstraints(this.institutions, this.institutions_count, v, pos);
             this.persons[v] = this.persons[v].slice(0, this.institutions[v].length);
             this.names_count += this.institutions[v].length;
-            pos += 1;
         }
         for (var j = 0, jlen = this.persons[v].length; j < jlen; j += 1) {
             if (this.persons[v][j].length) {
                 this.state.tmp.names_max.push(this.persons[v][j].length, "literal");
                 this._imposeNameConstraints(this.persons[v], this.persons_count[v], j, pos);
                 this.names_count += this.persons[v][j].length;
-                pos += 1;
             }
         }
     }
@@ -7027,29 +7037,31 @@ CSL.NameOutput.prototype._imposeNameConstraints = function (lst, count, key, pos
         } else {
             lst[key] = display_names.slice(0, discretionary_names_length);
         }
-        if (!lst[key].length) {
-            this.etal_spec.push(0);
-        }
     }
     this.state.tmp.disambig_settings.names[pos] = lst[key].length;
     this.state.disambiguate.padBase(this.state.tmp.disambig_settings);
 };
 CSL.NameOutput.prototype.disambigNames = function () {
-    var pos = this.nameset_base;
+    var pos;
     for (var i = 0, ilen = this.variables.length; i < ilen; i += 1) {
         var v = this.variables[i];
+        pos = this.nameset_base + i;
         if (this.freeters[v].length) {
             this._runDisambigNames(this.freeters[v], pos);
-            pos += 1;
         }
         if (this.institutions[v].length) {
-            pos += 1;
+            if ("undefined" === typeof this.state.tmp.disambig_settings.givens[pos]) {
+                this.state.tmp.disambig_settings.givens[pos] = [];
+            }
+            for (var j=0,jlen=this.institutions[v].length;j<jlen;j+=1) {
+                if ("undefined" === typeof this.state.tmp.disambig_settings.givens[pos][j]) {
+                    this.state.tmp.disambig_settings.givens[pos].push(2);
+                }
+            }
         }
         for (var j = 0, jlen = this.persons[v].length; j < jlen; j += 1) {
             if (this.persons[v][j].length) {
                 this._runDisambigNames(this.persons[v][j], pos);
-                this.state.tmp.disambig_settings.givens.push([]);
-                pos += 1;
             }
         }
     }
@@ -7156,50 +7168,65 @@ CSL.NameOutput.prototype.setEtAlParameters = function () {
     var i, ilen, j, jlen;
     for (i = 0, ilen = this.variables.length; i < ilen; i += 1) {
         var v = this.variables[i];
+        if ("undefined" === typeof this.etal_spec[v]) {
+            this.etal_spec[v] = {freeters:0,institutions:0,persons:[]};
+        }
+        this.etal_spec[this.nameset_base + i] = this.etal_spec[v];
         if (this.freeters[v].length) {
             this._setEtAlParameter("freeters", v);
         }
+        for (j = 0, jlen = this.persons[v].length; j < jlen; j += 1) {
+            if ("undefined" === typeof this.etal_spec[v][j]) {
+                this.etal_spec[v].persons[j] = 0;
+            }
+            this._setEtAlParameter("persons", v, j);
+        }
         if (this.institutions[v].length) {
             this._setEtAlParameter("institutions", v);
-        }
-        for (j = 0, jlen = this.persons[v].length; j < jlen; j += 1) {
-            this._setEtAlParameter("persons", v, j);
         }
     }
 };
 CSL.NameOutput.prototype._setEtAlParameter = function (type, v, j) {
     var lst, count;
-    if ("undefined" === typeof j) {
+    if (type === "persons") {
+        lst = this.persons[v][j];
+        count = this.persons_count[v][j];
+    } else {
         lst = this[type][v];
         count = this[type + "_count"][v];
-    } else {
-        lst = this[type][v][j];
-        count = this[type + "_count"][v][j];
     }
     if (lst.length < count && !this.state.tmp.sort_key_flag) {
         if (this.etal_use_last) {
-            this.etal_spec.push(2);
+            if (type === "persons") {
+                this.etal_spec[v].persons[j] = 2
+            } else {
+                this.etal_spec[v][type] = 2;
+            }
         } else {
-            this.etal_spec.push(1);
+            if (type === "persons") {
+                this.etal_spec[v].persons[j] = 1;
+            } else {
+                this.etal_spec[v][type] = 1;
+            }
         }
     } else {
-        this.etal_spec.push(0);
+        if (type === "persons") {
+            this.etal_spec[v].persons[j] = 0;
+        } else {
+            this.etal_spec[v][type] = 0;
+        }
     }
 };
 CSL.NameOutput.prototype.renderAllNames = function () {
-    var pos = this.nameset_base;
+    var pos;
     for (var i = 0, ilen = this.variables.length; i < ilen; i += 1) {
         var v = this.variables[i];
+        pos = this.nameset_base + i;
         if (this.freeters[v].length) {
             this.freeters[v] = this._renderPersonalNames(this.freeters[v], pos);
-            pos += 1;
-        }
-        if (this.institutions[v].length) {
-            pos += 1;
         }
         for (var j = 0, jlen = this.institutions[v].length; j < jlen; j += 1) {
-            this.persons[v][j] = this._renderPersonalNames(this.persons[v][j], pos);
-            pos += 1;
+            this.persons[v][j] = this._renderPersonalNames(this.persons[v][j], pos, j);
         }
     }
     this.renderInstitutionNames();
@@ -7366,7 +7393,7 @@ CSL.NameOutput.prototype._renderOneInstitutionPart = function (blobs, style) {
     }
     return this._join(blobs, this.institution.strings["part-separator"]);
 };
-CSL.NameOutput.prototype._renderPersonalNames = function (values, pos) {
+CSL.NameOutput.prototype._renderPersonalNames = function (values, pos, j) {
     var ret = false;
     if (values.length) {
         var names = [];
@@ -7383,11 +7410,11 @@ CSL.NameOutput.prototype._renderPersonalNames = function (values, pos) {
             slot = {primary:'locale-orig',secondary:false,tertiary:false};
 	        if (localesets) {
 		        var slotnames = ["primary", "secondary", "tertiary"];
-		        for (var j = 0, jlen = slotnames.length; j < jlen; j += 1) {
-			        if (localesets.length - 1 <  j) {
+		        for (var k = 0, klen = slotnames.length; k < klen; k += 1) {
+			        if (localesets.length - 1 <  k) {
 				        break;
 			        }
-			        slot[slotnames[j]] = 'locale-' + localesets[j];
+			        slot[slotnames[k]] = 'locale-' + localesets[k];
 		        }
 	        } else {
 		        slot.primary = 'locale-translat';
@@ -7401,19 +7428,19 @@ CSL.NameOutput.prototype._renderPersonalNames = function (values, pos) {
 	        }
             this.setRenderedName(name);
             var res = this.getName(name, slot.primary, true);
-            var primary = this._renderOnePersonalName(res.name, pos, i);
+            var primary = this._renderOnePersonalName(res.name, pos, i, j);
 			secondary = false;
 			if (slot.secondary) {
                 res = this.getName(name, slot.secondary, false, res.usedOrig);
                 if (res.name) {
-				    secondary = this._renderOnePersonalName(res.name, pos, i);
+				    secondary = this._renderOnePersonalName(res.name, pos, i, j);
                 }
 			}
 			tertiary = false;
 			if (slot.tertiary) {
                 res = this.getName(name, slot.tertiary, false, res.usedOrig);
                 if (res.name) {
-				    tertiary = this._renderOnePersonalName(res.name, pos, i);
+				    tertiary = this._renderOnePersonalName(res.name, pos, i, j);
                 }
 			}
             var personblob;
@@ -7445,7 +7472,7 @@ CSL.NameOutput.prototype._renderPersonalNames = function (values, pos) {
             }
             names.push(personblob);
         }
-        ret = this.joinPersons(names, pos);
+        ret = this.joinPersons(names, pos, j);
     }
     return ret;
 };
@@ -7469,9 +7496,9 @@ CSL.NameOutput.prototype._isRomanesque = function (name) {
     }
     return ret;
 };
-CSL.NameOutput.prototype._renderOnePersonalName = function (value, pos, i) {
+CSL.NameOutput.prototype._renderOnePersonalName = function (value, pos, i, j) {
     var name = value;
-    var dropping_particle = this._droppingParticle(name, pos);
+    var dropping_particle = this._droppingParticle(name, pos, j);
     var family = this._familyName(name);
     var non_dropping_particle = this._nonDroppingParticle(name);
     var given = this._givenName(name, pos, i);
@@ -7641,13 +7668,21 @@ CSL.NameOutput.prototype._nonDroppingParticle = function (name) {
     }
     return false;
 };
-CSL.NameOutput.prototype._droppingParticle = function (name, pos) {
+CSL.NameOutput.prototype._droppingParticle = function (name, pos, j) {
     var str = this._stripPeriods("given", name["dropping-particle"]);
     if (name["dropping-particle"] && name["dropping-particle"].match(/^et.?al[^a-z]$/)) {
         if (this.name.strings["et-al-use-last"]) {
-            this.etal_spec[pos] = 2;
+            if ("undefined" === typeof j) { 
+                this.etal_spec[pos].freeters = 2;
+            } else {
+                this.etal_spec[pos].persons = 2;
+            }
         } else {
-            this.etal_spec[pos] = 1;
+            if ("undefined" === typeof j) { 
+                this.etal_spec[pos].freeters = 1;
+            } else {
+                this.etal_spec[pos].persons = 1;
+            }
         }
         name["comma-dropping-particle"] = "";
     } else if (this.state.output.append(str, this.given_decor, true)) {
@@ -13622,7 +13657,7 @@ CSL.Disambiguation.prototype.initVars = function (akey) {
     return true;
 };
 CSL.Disambiguation.prototype.padBase = function (base) {
-    for (i = 0, ilen = base.names.length; i < ilen; i += 1) {
+    for (var i = 0, ilen = base.names.length; i < ilen; i += 1) {
         if (!base.givens[i]) {
             base.givens[i] = [];
         }
