@@ -811,6 +811,12 @@ Zotero.Sync.Storage.ZFS = (function () {
 									+ " in Zotero.Sync.Storage.ZFS.downloadFile()";
 								Zotero.debug(msg, 1);
 								Components.utils.reportError(msg);
+								try {
+									Zotero.debug(Zotero.File.getContents(destFile, null, 4096), 1);
+								}
+								catch (e) {
+									Zotero.debug(e, 1);
+								}
 								deferred.reject(Zotero.Sync.Storage.defaultError);
 								return;
 							}
