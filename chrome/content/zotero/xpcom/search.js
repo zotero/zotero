@@ -747,6 +747,9 @@ Zotero.Search.prototype.search = function(asTempTable){
 			else {
 				Zotero.debug('Running subsearch against fulltext word index');
 				var s = new Zotero.Search();
+				if (this._scope) {
+					s.addCondition("libraryID", "is", this._scope.libraryID);
+				}
 				
 				// Add any necessary conditions to the fulltext word search --
 				// those that are required in an ANY search and any outside the
@@ -761,7 +764,6 @@ Zotero.Search.prototype.search = function(asTempTable){
 						continue;
 					}
 					else if (c.condition == 'fulltextContent' ||
-							c.condition == 'fulltextContent' ||
 								inQS) {
 						continue;
 					}
