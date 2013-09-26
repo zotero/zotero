@@ -2515,10 +2515,6 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 	catch (e) {
 		Components.utils.reportError(e + " with format '" + format + "'");
 	}
-    // Drag-and-drop could be broken by intervening UI clicks on
-    // slow operations. This seems to prevent that breakage, and cause
-    // a quicker return to boot.
-    Zotero.notifier.reset();
 }
 
 
