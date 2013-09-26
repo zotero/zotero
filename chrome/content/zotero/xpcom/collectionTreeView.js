@@ -2172,6 +2172,7 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 			includeScopeChildren = true;
 		}
 		else if (this.isGroup()) {
+			s.libraryID = this.ref.libraryID;
 			s.addCondition('libraryID', 'is', this.ref.libraryID);
 			s.addCondition('noChildren', 'true');
 			includeScopeChildren = true;
