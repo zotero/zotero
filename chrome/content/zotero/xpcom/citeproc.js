@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.484",
+    PROCESSOR_VERSION: "1.0.485",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -3232,7 +3232,7 @@ CSL.Output.Queue.adjustPunctuation = function (state, myblobs, stk) {
             if (state.getOpt('punctuation-in-quote')) {
                 var decorations = doblob.decorations;
                 for (j = 0, jlen = decorations.length; j < jlen; j += 1) {
-                    if (decorations[j][0] === '@quotes' && decorations[j][1] === 'true') {
+                    if (decorations[j][0] === '@quotes' && (decorations[j][1] === 'true' || decorations[j][1] === 'inner')) {
                         doblob.punctuation_in_quote = true;
                         stk[slast].lastNode = true;
                     }
@@ -8935,6 +8935,9 @@ CSL.Attributes["@is-numeric"] = function (state, arg, joiner) {
             if (["locator","locator-revision"].indexOf(variable) > -1) {
                 myitem = item;
             }
+            if ("undefined" === typeof myitem) {
+                return false;
+            }
             if (CSL.NUMERIC_VARIABLES.indexOf(variable) > -1) {
                 if (!state.tmp.shadow_numbers[variable]) {
                     state.processNumber(false, myitem, variable, Item.type);
@@ -9292,7 +9295,7 @@ CSL.Attributes["@has-year-only"] = function (state, arg) {
         this.tests.push(maketest(trydates[i]));
     }
 };
-CSL.Attributes["@has-month-or-season-only"] = function (state, arg) {
+CSL.Attributes["@has-to-month-or-season"] = function (state, arg) {
     var trydates = arg.split(/\s+/);
     var maketest = function (trydate) {
         return function(Item,item){
@@ -9308,7 +9311,7 @@ CSL.Attributes["@has-month-or-season-only"] = function (state, arg) {
         this.tests.push(maketest(trydates[i]));
     }
 };
-CSL.Attributes["@has-day-only"] = function (state, arg) {
+CSL.Attributes["@has-day"] = function (state, arg) {
     var trydates = arg.split(/\s+/);
     var maketest = function (trydate) {
         return function(Item,item){
