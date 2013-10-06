@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.485",
+    PROCESSOR_VERSION: "1.0.487",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -3532,7 +3532,12 @@ CSL.Engine.Tmp = function () {
     this.suffix = new CSL.Stack("", CSL.LITERAL);
     this.delimiter = new CSL.Stack("", CSL.LITERAL);
     this.cite_locales = [];
-    this.cite_affixes = false;
+    this.cite_affixes = {
+        citation: false, 
+        bibliography: false,
+        citation_sort: false, 
+        bibliography_sort: false
+    };
     this.strip_periods = 0;
     this.shadow_numbers = {};
 };
@@ -4112,7 +4117,7 @@ CSL.getSpliceDelimiter = function (last_collapsed, pos) {
     } else if (this.tmp.use_cite_group_delimiter) {
         this.tmp.splice_delimiter = this.citation.opt.cite_group_delimiter;
     } else if (this.tmp.cite_locales[pos - 1]) {
-        var alt_affixes = this.tmp.cite_affixes[this.tmp.cite_locales[pos - 1]];
+        var alt_affixes = this.tmp.cite_affixes[this.tmp.area][this.tmp.cite_locales[pos - 1]];
         if (alt_affixes && alt_affixes.delimiter) {
             this.tmp.splice_delimiter = alt_affixes.delimiter;
         }
@@ -4242,8 +4247,9 @@ CSL.getCitationCluster = function (inputList, citationID) {
     };
     var suffix = this.citation.opt.layout_suffix;
     var last_locale = this.tmp.cite_locales[this.tmp.cite_locales.length - 1];
-    if (last_locale && this.tmp.cite_affixes[last_locale] && this.tmp.cite_affixes[last_locale].suffix) {
-        suffix = this.tmp.cite_affixes[last_locale].suffix;
+    if (last_locale && this.tmp.cite_affixes[this.tmp.area][last_locale] && this.tmp.cite_affixes[this.tmp.area][last_locale].suffix) {
+        suffix = this.tmp.cite_affixes[this.tmp.area][last_locale].suffix;
+        print("XXX use: "+suffix);
     }
     if (CSL.TERMINAL_PUNCTUATION.slice(0, -1).indexOf(suffix.slice(0, 1)) > -1) {
         suffix = suffix.slice(0, 1);
@@ -4714,11 +4720,18 @@ CSL.getBibliographyEntries = function (bibsection) {
             }
             for (j  = topblobs.length - 1; j > -1; j += -1) {
                 if (topblobs[j].blobs && topblobs[j].blobs.length !== 0) {
-                    chr = this.bibliography.opt.layout_suffix.slice(0, 1);
+                    var last_locale = this.tmp.cite_locales[this.tmp.cite_locales.length - 1];
+                    var suffix;
+                    if (this.tmp.cite_affixes[this.tmp.area][last_locale]) {
+                        suffix = this.tmp.cite_affixes[this.tmp.area][last_locale].suffix;
+                    } else {
+                        suffix = this.bibliography.opt.layout_suffix;
+                    }
+                    chr = suffix.slice(0, 1);
                     if (chr && topblobs[j].strings.suffix.slice(-1) === chr) {
                         topblobs[j].strings.suffix = topblobs[j].strings.suffix.slice(0, -1);
                     }
-                    topblobs[j].strings.suffix += this.bibliography.opt.layout_suffix;
+                    topblobs[j].strings.suffix += suffix;
                     break;
                 }
             }
@@ -6117,7 +6130,7 @@ CSL.Node.layout = {
             }
             this.execs.push(func);
         }
-        if (this.tokentype === CSL.START && !state.tmp.cite_affixes) {
+        if (this.tokentype === CSL.START && !state.tmp.cite_affixes[state.build.area]) {
             func = function (state, Item) {
                 state.tmp.done_vars = [];
                 if (!state.tmp.just_looking && state.registry.registry[Item.id].parallel) {
@@ -6182,8 +6195,8 @@ CSL.Node.layout = {
             my_tok.locale = this.locale_raw;
             my_tok.strings.delimiter = this.strings.delimiter;
             my_tok.strings.suffix = this.strings.suffix;
-            if (!state.tmp.cite_affixes) {
-                state.tmp.cite_affixes = {};
+            if (!state.tmp.cite_affixes[state.build.area]) {
+                state.tmp.cite_affixes[state.build.area] = {};
             }
         }
         if (this.tokentype === CSL.START) {
@@ -6195,7 +6208,7 @@ CSL.Node.layout = {
                 state[state.build.area].opt.layout_suffix = this.strings.suffix;
                 state[state.build.area].opt.layout_delimiter = this.strings.delimiter;
                 state[state.build.area].opt.layout_decorations = this.decorations;
-                if (state.tmp.cite_affixes) {
+                if (state.tmp.cite_affixes[state.build.area]) {
                     tok = new CSL.Token("else", CSL.START);
                     CSL.Node["else"].build.call(tok, state, target);
                 }
@@ -6212,9 +6225,9 @@ CSL.Node.layout = {
                     CSL.Attributes["@locale-internal"].call(my_tok, state, this.locale_raw);
                     CSL.Node["else-if"].build.call(my_tok, state, target);
                 }
-                state.tmp.cite_affixes[my_tok.locale] = {};
-                state.tmp.cite_affixes[my_tok.locale].delimiter = this.strings.delimiter;
-                state.tmp.cite_affixes[my_tok.locale].suffix = this.strings.suffix;
+                state.tmp.cite_affixes[state.build.area][my_tok.locale] = {};
+                state.tmp.cite_affixes[state.build.area][my_tok.locale].delimiter = this.strings.delimiter;
+                state.tmp.cite_affixes[state.build.area][my_tok.locale].suffix = this.strings.suffix;
             }
         }
         if (this.tokentype === CSL.END) {
@@ -6233,7 +6246,7 @@ CSL.Node.layout = {
                 }
             }
             if (!this.locale_raw) {
-                if (state.tmp.cite_affixes) {
+                if (state.tmp.cite_affixes[state.build.area]) {
                     if (state.build.layout_locale_flag) {
                         tok = new CSL.Token("else", CSL.END);
                         CSL.Node["else"].build.call(tok, state, target);
@@ -13723,7 +13736,9 @@ CSL.Disambiguation.prototype.getCiteData = function(Item, base) {
 CSL.Disambiguation.prototype.captureStepToBase = function() {
     if (this.state.citation.opt["givenname-disambiguation-rule"] === "by-cite"
         && this.base.givens && this.base.givens.length) {
-        this.betterbase.givens[this.gnameset][this.gname] = this.base.givens[this.gnameset][this.gname];
+        if ("undefined" !== typeof this.base.givens[this.gnameset][this.gname]) {
+            this.betterbase.givens[this.gnameset][this.gname] = this.base.givens[this.gnameset][this.gname];
+        }
     }
     this.betterbase.names[this.gnameset] = this.base.names[this.gnameset];
 };
