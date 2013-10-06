@@ -4249,7 +4249,6 @@ CSL.getCitationCluster = function (inputList, citationID) {
     var last_locale = this.tmp.cite_locales[this.tmp.cite_locales.length - 1];
     if (last_locale && this.tmp.cite_affixes[this.tmp.area][last_locale] && this.tmp.cite_affixes[this.tmp.area][last_locale].suffix) {
         suffix = this.tmp.cite_affixes[this.tmp.area][last_locale].suffix;
-        print("XXX use: "+suffix);
     }
     if (CSL.TERMINAL_PUNCTUATION.slice(0, -1).indexOf(suffix.slice(0, 1)) > -1) {
         suffix = suffix.slice(0, 1);
