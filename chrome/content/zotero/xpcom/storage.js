@@ -461,8 +461,18 @@ Zotero.Sync.Storage = new function () {
 			try {
 				request.setMaxSize(Zotero.Attachments.getTotalFileSize(item));
 			}
-			// If this fails, it's no big deal, though we might fail later
+			// If this fails, ignore it, though we might fail later
 			catch (e) {
+				// But if the file doesn't exist yet, don't try to upload it
+				//
+				// This isn't a perfect test, because the file could still be
+				// in the process of being downloaded. It'd be better to
+				// download files to a temp directory and move them into place.
+				if (!item.getFile()) {
+					Zotero.debug("File " + item.libraryKey + " not yet available to upload -- skipping");
+					return;
+				}
+				
 				Components.utils.reportError(e);
 				Zotero.debug(e, 1);
 			}
