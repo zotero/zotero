@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.487",
+    PROCESSOR_VERSION: "1.0.488",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -10552,8 +10552,12 @@ CSL.Transform = function (state) {
                 if (!this.abbrevs[tryList[i]]) {
                     this.abbrevs[tryList[i]] = new state.sys.AbbreviationSegments();
                 }
+                var noHints = false;
+                if (tryList[i] === "default" && variable === "title") {
+                    noHints = true;
+                }
                 if (!this.abbrevs[tryList[i]][category][orig]) {
-                    state.sys.getAbbreviation(state.opt.styleID, this.abbrevs, tryList[i], category, orig, itemType);
+                    state.sys.getAbbreviation(state.opt.styleID, this.abbrevs, tryList[i], category, orig, itemType, noHints);
                 }
                 if (this.abbrevs[tryList[i]][category][orig]) {
                     if (i < tryList.length) {
