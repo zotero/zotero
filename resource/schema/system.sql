@@ -511,20 +511,20 @@ INSERT INTO itemTypeFields VALUES (7, 2, NULL, 16);
 INSERT INTO itemTypeFields VALUES (7, 22, NULL, 17);
 
 -- letter
-INSERT INTO itemTypeFields VALUES (8, 110, NULL, 1);
-INSERT INTO itemTypeFields VALUES (8, 90, NULL, 2);
-INSERT INTO itemTypeFields VALUES (8, 65, NULL, 3);
-INSERT INTO itemTypeFields VALUES (8, 14, NULL, 4);
-INSERT INTO itemTypeFields VALUES (8, 87, NULL, 5);
-INSERT INTO itemTypeFields VALUES (8, 116, NULL, 6);
-INSERT INTO itemTypeFields VALUES (8, 1, NULL, 7);
-INSERT INTO itemTypeFields VALUES (8, 27, NULL, 8);
-INSERT INTO itemTypeFields VALUES (8, 123, NULL, 9);
-INSERT INTO itemTypeFields VALUES (8, 19, NULL, 10);
-INSERT INTO itemTypeFields VALUES (8, 62, NULL, 11);
-INSERT INTO itemTypeFields VALUES (8, 18, NULL, 12);
-INSERT INTO itemTypeFields VALUES (8, 2, NULL, 13);
-INSERT INTO itemTypeFields VALUES (8, 22, NULL, 14);
+INSERT INTO itemTypeFields VALUES (8, 110, NULL, 1); -- title
+INSERT INTO itemTypeFields VALUES (8, 90, NULL, 2);  -- abstractNote
+INSERT INTO itemTypeFields VALUES (8, 65, NULL, 3);  -- letterType
+INSERT INTO itemTypeFields VALUES (8, 14, NULL, 4);  -- date
+INSERT INTO itemTypeFields VALUES (8, 87, NULL, 5);  -- issue
+INSERT INTO itemTypeFields VALUES (8, 116, NULL, 6); -- shortTitle
+INSERT INTO itemTypeFields VALUES (8, 1, NULL, 7);   -- url
+INSERT INTO itemTypeFields VALUES (8, 27, NULL, 8);  -- accessDate
+INSERT INTO itemTypeFields VALUES (8, 123, NULL, 9); -- archive
+INSERT INTO itemTypeFields VALUES (8, 19, NULL, 10); -- archiveLocation
+INSERT INTO itemTypeFields VALUES (8, 62, NULL, 11); -- libraryCatalog
+INSERT INTO itemTypeFields VALUES (8, 18, NULL, 12); -- callNumber
+INSERT INTO itemTypeFields VALUES (8, 2, NULL, 13);  -- rights
+INSERT INTO itemTypeFields VALUES (8, 22, NULL, 14); -- extra
 
 
 INSERT INTO itemTypeFields VALUES (9, 110, NULL, 1);
