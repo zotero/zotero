@@ -33,7 +33,7 @@ Zotero.Timeline = new function () {
 		
 		var content = '<data>\n';
 		for each(var item in items) {
-			var date = item.getField(dateType, true);
+			var date = item.getField(dateType, true, true);
 			if (date) {
 				var sqlDate = (dateType == 'date') ? Zotero.Date.multipartToSQL(date) : date;
 				sqlDate = sqlDate.replace("00-00", "01-01");
