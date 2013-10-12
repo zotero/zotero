@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.488",
+    PROCESSOR_VERSION: "1.0.489",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -1175,8 +1175,8 @@ CSL.expandMacro = function (macro_key_token) {
     if (!this.sys.xml.getNodeValue(macro_nodes)) {
         throw "CSL style error: undefined macro \"" + mkey + "\"";
     }
-    navi = new this.getNavi(this, macro_nodes);
-    CSL.buildStyle.call(this, navi);
+    var builder = CSL.makeBuilder(this);
+    builder(macro_nodes[0]);
     end_of_macro = new CSL.Token("group", CSL.END);
 	if (macro_key_token.decorations) {
 		end_of_macro.decorations = macro_key_token.decorations.slice();
@@ -1722,15 +1722,49 @@ CSL.Engine.prototype.setCloseQuotesArray = function () {
     ret.push("'");
     this.opt.close_quotes_array = ret;
 };
+CSL.makeBuilder = function (me) {
+    function enterFunc (node) {
+        CSL.XmlToToken.call(node, me, CSL.START);
+    };
+    function leaveFunc (node) {
+        CSL.XmlToToken.call(node, me, CSL.END);
+    };
+    function singletonFunc (node) {
+        CSL.XmlToToken.call(node, me, CSL.SINGLETON);
+    };
+    function buildStyle (node) {
+        var starttag, origparent;
+        if (me.sys.xml.numberofnodes(me.sys.xml.children(node))) {
+            origparent = node;
+            enterFunc(origparent);
+            for (var i=0;i<me.sys.xml.numberofnodes(me.sys.xml.children(origparent));i+=1) {
+                node = me.sys.xml.children(origparent)[i];
+                if (me.sys.xml.nodename(node) === null) {
+                    continue;
+                }
+                if (me.sys.xml.nodename(node) === "date") {
+                    CSL.Util.fixDateNode.call(me, origparent, i, node)
+                    node = me.sys.xml.children(origparent)[i];
+                }
+                buildStyle(node, enterFunc, leaveFunc, singletonFunc);
+            }
+            leaveFunc(origparent);
+        } else {
+            singletonFunc(node);
+        }
+    }
+    return buildStyle;
+};
 CSL.Engine.prototype.buildTokenLists = function (area) {
-    var area_nodes, navi;
+    var builder = CSL.makeBuilder(this);
+    var area_nodes;
     area_nodes = this.sys.xml.getNodesByName(this.cslXml, area);
     if (!this.sys.xml.getNodeValue(area_nodes)) {
         return;
     }
-    navi = new this.getNavi(this, area_nodes);
     this.build.area = area;
-    CSL.buildStyle.call(this, navi);
+    var mynode = area_nodes[0];
+    builder(mynode);
 };
 CSL.Engine.prototype.setStyleAttributes = function () {
     var dummy, attr, key, attributes, attrname;
@@ -1742,72 +1776,6 @@ CSL.Engine.prototype.setStyleAttributes = function () {
             CSL.Attributes[attrname].call(dummy, this, attributes[attrname]);
         }
     }
-};
-CSL.buildStyle  = function (navi) {
-    if (navi.getkids()) {
-        CSL.buildStyle.call(this, navi);
-    } else {
-        if (navi.getbro()) {
-            CSL.buildStyle.call(this, navi);
-        } else {
-            while (navi.nodeList.length > 1) {
-                if (navi.remember()) {
-                    CSL.buildStyle.call(this, navi);
-                }
-            }
-        }
-    }
-};
-CSL.Engine.prototype.getNavi = function (state, myxml) {
-    this.sys = state.sys;
-    this.state = state;
-    this.nodeList = [];
-    this.nodeList.push([0, myxml]);
-    this.depth = 0;
-};
-CSL.Engine.prototype.getNavi.prototype.remember = function () {
-    var node;
-    this.depth += -1;
-    this.nodeList.pop();
-    node = this.nodeList[this.depth][1][(this.nodeList[this.depth][0])];
-    CSL.XmlToToken.call(node, this.state, CSL.END);
-    return this.getbro();
-};
-CSL.Engine.prototype.getNavi.prototype.getbro = function () {
-    var sneakpeek;
-    sneakpeek = this.nodeList[this.depth][1][(this.nodeList[this.depth][0] + 1)];
-    if (sneakpeek) {
-        this.nodeList[this.depth][0] += 1;
-        return true;
-    } else {
-        return false;
-    }
-};
-CSL.Engine.prototype.getNavi.prototype.getkids = function () {
-    var currnode, sneakpeek, pos, node, len;
-    currnode = this.nodeList[this.depth][1][this.nodeList[this.depth][0]];
-    sneakpeek = this.sys.xml.children(currnode);
-    if (this.sys.xml.numberofnodes(sneakpeek) === 0) {
-        if (this.depth) {
-            CSL.XmlToToken.call(currnode, this.state, CSL.SINGLETON);
-        }
-        return false;
-    } else {
-        for (pos in sneakpeek) {
-            node = sneakpeek[pos];
-            if ("date" === this.sys.xml.nodename(node)) {
-                currnode = CSL.Util.fixDateNode.call(this, currnode, pos, node);
-                sneakpeek = this.sys.xml.children(currnode);
-            }
-        }
-        CSL.XmlToToken.call(currnode, this.state, CSL.START);
-        this.depth += 1;
-        this.nodeList.push([0, sneakpeek]);
-        return true;
-    }
-};
-CSL.Engine.prototype.getNavi.prototype.getNodeListValue = function () {
-    return this.nodeList[this.depth][1];
 };
 CSL.Engine.prototype.getTerm = function (term, form, plural, gender, mode, forceDefaultLocale) {
     if (term && term.match(/[A-Z]/) && term === term.toUpperCase()) {
@@ -2093,7 +2061,11 @@ CSL.Engine.prototype.retrieveItem = function (id) {
     }
     var isLegalType = ["legal_case","legislation","gazette","regulation"].indexOf(Item.type) > -1;
     if (!isLegalType && Item.title && this.sys.getAbbreviation) {
-        var jurisdiction = this.transform.loadAbbreviation(Item.jurisdiction, "title", Item.title);
+        var noHints = false;
+        if (!Item.jurisdiction) {
+            noHints = true;
+        }
+        var jurisdiction = this.transform.loadAbbreviation(Item.jurisdiction, "title", Item.title, Item.type, true);
         if (this.transform.abbrevs[jurisdiction].title) {
             if (this.transform.abbrevs[jurisdiction].title[Item.title]) {
                 Item["title-short"] = this.transform.abbrevs[jurisdiction].title[Item.title];
@@ -10429,6 +10401,10 @@ CSL.Transform = function (state) {
             return basevalue;
         }
         var variable = myabbrev_family;
+        var noHints = false;
+        if (["title", "title-short"].indexOf(variable) > -1 && !Item.jurisdiction) {
+            noHints = true;
+        }
         if (CSL.NUMERIC_VARIABLES.indexOf(myabbrev_family) > -1) {
             myabbrev_family = "number";
         }
@@ -10446,7 +10422,7 @@ CSL.Transform = function (state) {
         }
         value = "";
         if (state.sys.getAbbreviation) {
-            var jurisdiction = state.transform.loadAbbreviation(Item.jurisdiction, myabbrev_family, basevalue, Item.type);
+            var jurisdiction = state.transform.loadAbbreviation(Item.jurisdiction, myabbrev_family, basevalue, Item.type, noHints);
             if (state.transform.abbrevs[jurisdiction][myabbrev_family] && basevalue && state.sys.getAbbreviation) {
                 if (state.transform.abbrevs[jurisdiction][myabbrev_family][basevalue]) {
                     value = state.transform.abbrevs[jurisdiction][myabbrev_family][basevalue].replace("{stet}",basevalue);
@@ -10529,7 +10505,7 @@ CSL.Transform = function (state) {
         }
         return ret;
     }
-    function loadAbbreviation(jurisdiction, category, orig, itemType) {
+    function loadAbbreviation(jurisdiction, category, orig, itemType, noHints) {
         var pos, len;
         if (!jurisdiction) {
             jurisdiction = "default";
@@ -10551,10 +10527,6 @@ CSL.Transform = function (state) {
             for (var i=tryList.length - 1; i > -1; i += -1) {
                 if (!this.abbrevs[tryList[i]]) {
                     this.abbrevs[tryList[i]] = new state.sys.AbbreviationSegments();
-                }
-                var noHints = false;
-                if (tryList[i] === "default" && variable === "title") {
-                    noHints = true;
                 }
                 if (!this.abbrevs[tryList[i]][category][orig]) {
                     state.sys.getAbbreviation(state.opt.styleID, this.abbrevs, tryList[i], category, orig, itemType, noHints);
@@ -10939,15 +10911,15 @@ CSL.NumericBlob.prototype.checkLast = function (last) {
 };
 CSL.Util.fixDateNode = function (parent, pos, node) {
     var form, variable, datexml, subnode, partname, attr, val, prefix, suffix, children, key, subchildren, kkey, display, cslid;
-    this.state.build.date_key = true;
+    this.build.date_key = true;
     form = this.sys.xml.getAttributeValue(node, "form");
     var lingo;
     if ("accessed" === this.sys.xml.getAttributeValue(node, "variable")) {
-        lingo = this.state.opt["default-locale"][0];
+        lingo = this.opt["default-locale"][0];
     } else {
         lingo = this.sys.xml.getAttributeValue(node, "lingo");
     }
-    if (!this.state.getDate(form)) {
+    if (!this.getDate(form)) {
         return parent;
     }
     var dateparts = this.sys.xml.getAttributeValue(node, "date-parts");
@@ -10956,8 +10928,8 @@ CSL.Util.fixDateNode = function (parent, pos, node) {
     suffix = this.sys.xml.getAttributeValue(node, "suffix");
     display = this.sys.xml.getAttributeValue(node, "display");
     cslid = this.sys.xml.getAttributeValue(node, "cslid");
-    datexml = this.sys.xml.nodeCopy(this.state.getDate(form, ("accessed" === variable)));
-    this.sys.xml.setAttribute(datexml, 'lingo', this.state.opt.lang);
+    datexml = this.sys.xml.nodeCopy(this.getDate(form, ("accessed" === variable)));
+    this.sys.xml.setAttribute(datexml, 'lingo', this.opt.lang);
     this.sys.xml.setAttribute(datexml, 'form', form);
     this.sys.xml.setAttribute(datexml, 'date-parts', dateparts);
     this.sys.xml.setAttribute(datexml, "cslid", cslid);
@@ -10982,7 +10954,7 @@ CSL.Util.fixDateNode = function (parent, pos, node) {
                         if ("@name" === attr) {
                             continue;
                         }
-                        if (lingo && lingo !== this.state.opt.lang) {
+                        if (lingo && lingo !== this.opt.lang) {
                             if (["@suffix", "@prefix", "@form"].indexOf(attr) > -1) {
                                 continue;
                             }
