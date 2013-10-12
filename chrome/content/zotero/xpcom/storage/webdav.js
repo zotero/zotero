@@ -1091,7 +1091,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			);
 		})
 		.catch(function (e) {
-			var msg = "HTTP " + req.status + " error from WebDAV server "
+			var msg = "HTTP " + e.status + " error from WebDAV server "
 				+ "for PUT request";
 			Zotero.debug(msg, 2);
 			Components.utils.reportError(msg);
