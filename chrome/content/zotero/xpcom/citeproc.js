@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.489",
+    PROCESSOR_VERSION: "1.0.490",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -3454,7 +3454,7 @@ CSL.Engine.Opt = function () {
     this.development_extensions.main_title_from_short_title = false;
     this.development_extensions.normalize_lang_keys_to_lowercase = false;
     this.development_extensions.strict_text_case_locales = false;
-    this.development_extensions.rtl_support = true;
+    this.development_extensions.rtl_support = false;
     this.development_extensions.strict_page_numbers = false;
     this.nodenames = [];
     this.gender = {};
@@ -5447,7 +5447,7 @@ CSL.Node["date-part"] = {
                         }
                     }
                     if (value_end) {
-                        value_end = CSL.Util.Dates[this.strings.name][myform](state, value_end, gender, ("accessed" === date_variable));
+                        value_end = CSL.Util.Dates[this.strings.name][myform](state, value_end, gender, ("accessed" === date_variable), "_end");
                         if (state.tmp.strip_periods) {
                             value_end = value_end.replace(/\./g, "");
                         } else {
@@ -11244,6 +11244,37 @@ CSL.Util.Dates.year["long"] = function (state, num) {
         }
     }
     return num.toString();
+};
+CSL.Util.Dates.year.imperial = function (state, num, end) {
+    if (!num) {
+        if ("boolean" === typeof num) {
+            num = "";
+        } else {
+            num = 0;
+        }
+    }
+    end = end ? "_end" : "";
+    var month = state.tmp.date_object["month" + end];
+    month = month ? ""+month : "1";
+    while (month.length < 2) {
+        month = "0" + month;
+    }
+    var day = state.tmp.date_object["day" + end];
+    day = day ? ""+day : "1";
+    while (day.length < 2) {
+        day = "0" + day;
+    }
+    var date = parseInt(num + month + day, 10);
+    if (date >= 18680908 && date < 19120730) {
+        year = "明治" + (num - 1867);
+    } else if (date >= 19120730 && date < 19261225) {
+        year = "対象" + (num - 1911);
+    } else if (date >= 19261225 && date < 19890108) {
+        year = "昭和" + (num - 1925);
+    } else if (date >= 19890108) {
+        year = "平成" + (num - 1988);
+    }
+    return year;
 };
 CSL.Util.Dates.year["short"] = function (state, num) {
     num = num.toString();
