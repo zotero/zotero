@@ -1871,7 +1871,7 @@
 						var fields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
 						if (fields.indexOf(jurisdictionID) > -1) {
 							var itemType = Zotero.ItemTypes.getName(itemTypeID);
-							if (["report","newspaperArticle"].indexOf(itemType) === -1) {
+							if (["report","newspaperArticle","journalArticle"].indexOf(itemType) === -1) {
 								if (!this.item.getField(jurisdictionID)) {
 									var jurisdictionDefault = Zotero.Prefs.get("import.jurisdictionDefault");
 									var jurisdictionFallback = Zotero.Prefs.get("import.jurisdictionFallback");
@@ -2026,7 +2026,7 @@
 				<![CDATA[
 				  if (!result) {
 				  	var itemType = Zotero.ItemTypes.getName(this.item.itemTypeID);
-				  	if (["report","newspaperArticle"].indexOf(itemType) == -1) {
+				  	if (["report","newspaperArticle","journalArticle"].indexOf(itemType) == -1) {
 				  		result = {val:node.getAttribute("oldValue"),comment:node.getAttribute("oldComment")};
 				  	} else {
 				  		result = {val:"",comment:""};
