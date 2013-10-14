@@ -1,4 +1,4 @@
--- 10052
+-- 10054
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -436,18 +436,19 @@ INSERT INTO itemTypeFields VALUES (4, 3, NULL, 9);
 INSERT INTO itemTypeFields VALUES (4, 28, NULL, 10);
 INSERT INTO itemTypeFields VALUES (4, 29, NULL, 11);
 INSERT INTO itemTypeFields VALUES (4, 25, NULL, 12);
-INSERT INTO itemTypeFields VALUES (4, 87, NULL, 13);
-INSERT INTO itemTypeFields VALUES (4, 26, NULL, 14);
-INSERT INTO itemTypeFields VALUES (4, 13, NULL, 15);
-INSERT INTO itemTypeFields VALUES (4, 116, NULL, 16);
-INSERT INTO itemTypeFields VALUES (4, 1, NULL, 17);
-INSERT INTO itemTypeFields VALUES (4, 27, NULL, 18);
-INSERT INTO itemTypeFields VALUES (4, 123, NULL, 19);
-INSERT INTO itemTypeFields VALUES (4, 19, NULL, 20);
-INSERT INTO itemTypeFields VALUES (4, 62, NULL, 21);
-INSERT INTO itemTypeFields VALUES (4, 18, NULL, 22);
-INSERT INTO itemTypeFields VALUES (4, 2, NULL, 23);
-INSERT INTO itemTypeFields VALUES (4, 22, NULL, 24);
+INSERT INTO itemTypeFields VALUES (4, 1261, NULL, 13);
+INSERT INTO itemTypeFields VALUES (4, 87, NULL, 14);
+INSERT INTO itemTypeFields VALUES (4, 26, NULL, 15);
+INSERT INTO itemTypeFields VALUES (4, 13, NULL, 16);
+INSERT INTO itemTypeFields VALUES (4, 116, NULL, 17);
+INSERT INTO itemTypeFields VALUES (4, 1, NULL, 18);
+INSERT INTO itemTypeFields VALUES (4, 27, NULL, 19);
+INSERT INTO itemTypeFields VALUES (4, 123, NULL, 20);
+INSERT INTO itemTypeFields VALUES (4, 19, NULL, 21);
+INSERT INTO itemTypeFields VALUES (4, 62, NULL, 22);
+INSERT INTO itemTypeFields VALUES (4, 18, NULL, 23);
+INSERT INTO itemTypeFields VALUES (4, 2, NULL, 24);
+INSERT INTO itemTypeFields VALUES (4, 22, NULL, 25);
 
 INSERT INTO itemTypeFields VALUES (5, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (5, 90, NULL, 2);
@@ -1284,10 +1285,12 @@ INSERT INTO itemTypeCreatorTypes VALUES(2,1,1);
 INSERT INTO itemTypeCreatorTypes VALUES(2,2,0);
 INSERT INTO itemTypeCreatorTypes VALUES(2,3,0);
 INSERT INTO itemTypeCreatorTypes VALUES(2,4,0);
+INSERT INTO itemTypeCreatorTypes VALUES(2,16,0);
 INSERT INTO itemTypeCreatorTypes VALUES(2,5,0);
 INSERT INTO itemTypeCreatorTypes VALUES(3,1,1);
 INSERT INTO itemTypeCreatorTypes VALUES(3,2,0);
 INSERT INTO itemTypeCreatorTypes VALUES(3,3,0);
+INSERT INTO itemTypeCreatorTypes VALUES(3,16,0);
 INSERT INTO itemTypeCreatorTypes VALUES(3,29,0);
 INSERT INTO itemTypeCreatorTypes VALUES(3,4,0);
 INSERT INTO itemTypeCreatorTypes VALUES(3,5,0);
