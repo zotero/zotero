@@ -3,6 +3,12 @@
 Zotero.EXTENDED_CREATORS = {
 	"patent":{
 		"recipient":"recipient"
+	},
+	"book":{
+		"recipient":"recipient"
+	},
+	"chapter":{
+		"recipient":"recipient"
 	}
 }
 
@@ -33,7 +39,8 @@ Zotero.EXTENDED_FIELDS = {
         "court":"authority"
 	},
 	"journalArticle": {
-		"status":"status"
+		"status":"status",
+		"jurisdiction":"jurisdiction"
 	},
 	"bill": {
 		"jurisdiction":"jurisdiction",
