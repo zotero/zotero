@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.490",
+    PROCESSOR_VERSION: "1.0.491",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -8754,7 +8754,7 @@ CSL.Node.text = {
                     func = function (state, Item, item) {
                         var parallel_variable = this.variables[0];
                         if (parallel_variable === "title" 
-                            && form === "short") { 
+                            && (form === "short" || Item["title-short"])) { 
                             parallel_variable = "shortTitle";
                         }
                         state.parallel.StartVariable(parallel_variable);
