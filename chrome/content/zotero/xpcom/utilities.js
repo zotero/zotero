@@ -575,6 +575,31 @@ Zotero.Utilities = {
 		return vals;
 	},
 	
+	/**
+	 * Return new array with values shuffled
+	 *
+	 * From http://stackoverflow.com/a/6274398
+	 *
+	 * @param {Array} arr
+	 * @return {Array}
+	 */
+	"arrayShuffle": function (array) {
+		var counter = array.length, temp, index;
+		
+		// While there are elements in the array
+		while (counter--) {
+			// Pick a random index
+			index = (Math.random() * counter) | 0;
+			
+			// And swap the last element with it
+			temp = array[counter];
+			array[counter] = array[index];
+			array[index] = temp;
+		}
+		
+		return array;
+	},
+	
 	
 	/**
 	 * Return new array with duplicate values removed
