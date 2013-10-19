@@ -459,11 +459,29 @@ Zotero.Tag.prototype.save = function (full) {
 			}
 			
 			if (newids.length) {
+				var sql = "SELECT COUNT(*) FROM itemTags WHERE itemID=? AND tagID=?";
+				var countStatement = Zotero.DB.getStatement(sql);
+
 				var sql = "INSERT INTO itemTags (itemID, tagID) VALUES (?,?)";
 				var insertStatement = Zotero.DB.getStatement(sql);
 				
 				var pairs = [];
 				for each(var itemID in newids) {
+					// A costy way of avoiding a sync failure where renaming of a tag
+					// results in a conflict (I think).
+					countStatement.bindInt32Parameter(0, itemID);
+					countStatement.bindInt32Parameter(1, tagID);
+					// No rows
+					if (!countStatement.executeStep()) {
+						countStatement.reset();
+					} else {
+						var value = countStatement.getInt64(0);
+						countStatement.reset();
+						if (value) {
+							continue;
+						}
+					}
+
 					insertStatement.bindInt32Parameter(0, itemID);
 					insertStatement.bindInt32Parameter(1, tagID);
 					
