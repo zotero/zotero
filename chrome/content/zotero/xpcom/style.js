@@ -542,6 +542,8 @@ Zotero.Style.prototype.getCiteProc = function(automaticJournalAbbreviations) {
         citeproc.opt.development_extensions.handle_parallel_articles = true;
         citeproc.opt.development_extensions.main_title_from_short_title = true;
         citeproc.opt.development_extensions.strict_page_numbers = true;
+        citeproc.opt.development_extensions.rtl_support = true;
+        citeproc.opt.development_extensions.expect_and_symbol_form = true;
         if (Zotero.Prefs.get("export.quickCopy.linkOption")) {
             // This gets the processor ready for applying wrappers.
             //
