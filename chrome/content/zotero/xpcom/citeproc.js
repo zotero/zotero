@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.491",
+    PROCESSOR_VERSION: "1.0.492",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -316,8 +316,8 @@ var CSL = {
     ],
     TAG_ESCAPE: function (str) {
         var mx, lst, len, pos, m, buf1, buf2, idx, ret, myret;
-        mx = str.match(/(\"|\'|-|<span\s+class=\"no(?:case|decor)\">.*?<\/span>|<\/?(?:i|sc|b)>|<\/span>)/g);
-        lst = str.split(/(?:\"|\'|-|<span\s+class=\"no(?:case|decor)\">.*?<\/span>|<\/?(?:i|sc|b)>|<\/span>)/g);
+        mx = str.match(/(\"|\'|<span\s+class=\"no(?:case|decor)\">.*?<\/span>|<\/?(?:i|sc|b)>|<\/span>)/g);
+        lst = str.split(/(?:\"|\'|<span\s+class=\"no(?:case|decor)\">.*?<\/span>|<\/?(?:i|sc|b)>|<\/span>)/g);
         myret = [lst[0]];
         for (pos = 1, len = lst.length; pos < len; pos += 1) {
             myret.push(mx[pos - 1]);
@@ -352,7 +352,7 @@ var CSL = {
         ret[ret.length - 1] += str;
         return ret;
     },
-    SKIP_WORDS: ["but", "or", "yet", "so", "for", "and", "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up", "down", "as", "via", "onto", "over", "till", "de", "d'", "von", "van", "before", "after", "c", "et", "through","ca"],
+    SKIP_WORDS: ["about","above","across","afore","after","against","along","alongside","amid","amidst","among","amongst","anenst","apropos","apud","around","as","aside","astride","at","athwart","atop","barring","before","behind","below","beneath","beside","besides","between","beyond","but","by","circa","despite","down","during","except","for","forenenst","from","given","in","inside","into","lest","like","modulo","near","next","notwithstanding","of","off","on","onto","out","over","per","plus","pro","qua","sans","since","than","through"," thru","throughout","thruout","till","to","toward","towards","under","underneath","until","unto","up","upon","versus","vs.","v.","vs","v","via","vis-à-vis","with","within","without","according to","ahead of","apart from","as for","as of","as per","as regards","aside from","back to","because of","close to","due to","except for","far from","inside of","instead of","near to","next to","on to","out from","out of","outside of","prior to","pursuant to","rather than","regardless of","such as","that of","up to","where as","or", "yet", "so", "for", "and", "nor", "a", "an", "the", "de", "d'", "von", "van", "c", "et", "ca"],
     FORMAT_KEY_SEQUENCE: [
         "@strip-periods",
         "@font-style",
@@ -1698,6 +1698,12 @@ CSL.Engine = function (sys, style, lang, forceLang) {
     this.opt["default-locale"][0] = langspec.best;
     this.locale = {};
     this.localeConfigure(langspec);
+    function makeRegExp(lst) {
+        var lst = lst.slice();
+        var ret = new RegExp( "((?:[?!:]*\\s+|-|^)(?:" + lst.join("|") + ")(?=[!?:]*\\s+|-|$))" );
+        return ret;
+    }
+    this.locale[this.opt.lang].opts["skip-words-regexp"] = makeRegExp(this.locale[this.opt.lang].opts["skip-words"]);
     this.registry = new CSL.Registry(this);
     this.buildTokenLists("citation");
     this.buildTokenLists("bibliography");
@@ -3456,6 +3462,7 @@ CSL.Engine.Opt = function () {
     this.development_extensions.strict_text_case_locales = false;
     this.development_extensions.rtl_support = false;
     this.development_extensions.strict_page_numbers = false;
+    this.development_extensions.expect_and_symbol_form = false;
     this.nodenames = [];
     this.gender = {};
     this['cite-lang-prefs'] = {
@@ -5801,7 +5808,11 @@ CSL.Node.institution = {
                 if ("text" === this.strings.and) {
                     this.and_term = state.getTerm("and", "long", 0);
                 } else if ("symbol" === this.strings.and) {
-                    this.and_term = "&";
+                    if (state.opt.development_extensions.expect_and_symbol_form) {
+                        this.and_term = state.getTerm("and", "symbol", 0);
+                    } else {
+                        this.and_term = "&";
+                    }
                 } else if ("none" === this.strings.and) {
                     this.and_term = this.strings.delimiter;
                 }
@@ -8200,7 +8211,11 @@ CSL.Node.name = {
                 if ("text" === this.strings.and) {
                     this.and_term = state.getTerm("and", "long", 0);
                 } else if ("symbol" === this.strings.and) {
-                    this.and_term = "&";
+                    if (state.opt.development_extensions.expect_and_symbol_form) {
+                        this.and_term = state.getTerm("and", "symbol", 0);
+                    } else {
+                        this.and_term = "&";
+                    }
                 }
                 state.tmp.and_term = this.and_term;
                 if (CSL.STARTSWITH_ROMANESQUE_REGEXP.test(this.and_term)) {
@@ -10072,9 +10087,6 @@ CSL.Parallel.prototype.AppendToVariable = function (str, varname) {
     if (this.use_parallels) {
         if (this.ignoreVars.indexOf(this.variable) > -1) {
             return;
-        }
-        if (str && varname === "jurisdiction") {
-            str = str.split(';')[0];
         }
         if (this.try_cite || this.force_collapse) {
             if (this.target !== "back" || true) {
@@ -12459,70 +12471,49 @@ CSL.Output.Formatters["capitalize-all"] = function (state, string) {
 CSL.Output.Formatters.title = function (state, string) {
     var str, words, isAllUpperCase, newString, lastWordIndex, previousWordIndex, upperCaseVariant, lowerCaseVariant, pos, skip, notfirst, notlast, aftercolon, len, idx, tmp, skipword, ppos, mx, lst, myret;
     var SKIP_WORDS = state.locale[state.opt.lang].opts["skip-words"];
-    str = CSL.Output.Formatters.doppelString(string, CSL.TAG_ESCAPE);
     if (!string) {
         return "";
     }
-    mx = str.string.match(/(\s+)/g);
-    lst = str.string.split(/\s+/);
-    myret = [lst[0]];
-    for (pos = 1, len = lst.length; pos < len; pos += 1) {
-        myret.push(mx[pos - 1]);
-        myret.push(lst[pos]);
+    var doppel = CSL.Output.Formatters.doppelString(string, CSL.TAG_ESCAPE);
+    function capitalise (word) {
+        var m = word.match(/([:?!]+\s+|-|^)(.)(.*)/);
+        if (m) {
+            return m[1] + m[2].toUpperCase() + m[3];
+        }
+        return word;
     }
-    words = myret.slice();
-    isAllUpperCase = str.string.toUpperCase() === string && !str.string.match(/[0-9]/);
-    newString = "";
-    lastWordIndex = words.length - 1;
-    previousWordIndex = -1;
-    for (pos = 0; pos <= lastWordIndex;  pos += 2) {
-        if (words[pos].length !== 0 && words[pos].length !== 1 && !/\s+/.test(words[pos])) {
-            upperCaseVariant = words[pos].toUpperCase();
-            lowerCaseVariant = words[pos].toLowerCase();
-            var totallyskip = false;
-            if (!isAllUpperCase || (words.length === 1 && words[pos].length < 4)) {
-                if (words[pos] !== lowerCaseVariant) {
-                    totallyskip = true;
-                }
-            }
-            if (isAllUpperCase || words[pos] === lowerCaseVariant) {
-                skip = false;
-                for (var i = 0, ilen = SKIP_WORDS.length; i < ilen; i += 1) {
-                    skipword = SKIP_WORDS[i];
-                    idx = lowerCaseVariant.indexOf(skipword);
-                    if (idx > -1) {
-                        tmp = lowerCaseVariant.slice(0, idx) + lowerCaseVariant.slice(idx + skipword.length);
-                        if (!tmp.match(/[a-zA-Z]/)) {
-                            skip = true;
-                        }
-                    }
-                }
-                notfirst = pos !== 0;
-                notlast = pos !== lastWordIndex;
-                if (words[previousWordIndex]) {
-                    aftercolon = words[previousWordIndex].slice(-1) === ":";
-                } else {
-                    aftercolon = false;
-                }
-                if (!totallyskip) {
-                    if (skip && notfirst && notlast && !aftercolon) {
-						if (state.opt.development_extensions.allow_force_lowercase) {
-							words[pos] = lowerCaseVariant;
-						}
-                    } else {
-						if (state.opt.development_extensions.allow_force_lowercase) {
-							words[pos] = upperCaseVariant.slice(0, 1) + lowerCaseVariant.substr(1);
-						} else {
-							words[pos] = upperCaseVariant.slice(0, 1) + words[pos].substr(1);
-						}
-                    }
-                }
-            }
-            previousWordIndex = pos;
+    var str = doppel.string;
+    var lst = str.split(state.locale[state.opt.lang].opts["skip-words-regexp"])
+    for (i=1,ilen=lst.length;i<ilen;i+=2) {
+        if (lst[i].match(/^[:?!]/)) {
+            lst[i] = capitalise(lst[i]);
         }
     }
-    str.string = words.join("");
-    return CSL.Output.Formatters.undoppelString(str);
+    if (!lst[0]) {
+        lst[1] = capitalise(lst[1]);
+    }
+    if (lst.length > 2 && !lst[lst.length-1]) {
+        lst[lst.length-2] = capitalise(lst[lst.length-2]);
+    }
+    for (var i=0,ilen=lst.length;i<ilen;i+=2) {
+        var words = lst[i].split(/([:?!]*\s+|-)/);
+        for (k=0,klen=words.length;k<klen;k+=2) {
+            if (words[k].length !== 0) {
+                upperCaseVariant = words[k].toUpperCase();
+                lowerCaseVariant = words[k].toLowerCase();
+                if (words[k].match(/[0-9]/)) {
+                    continue;
+                }
+                if (words[k] === lowerCaseVariant) {
+                    words[k] = capitalise(words[k]);
+                }
+            }
+        }
+        lst[i] = words.join("");
+    }
+    doppel.string = lst.join("");
+    var ret = CSL.Output.Formatters.undoppelString(doppel);
+    return ret;
 };
 CSL.Output.Formatters.doppelString = function (string, rex) {
     var ret, pos, len;
@@ -12530,7 +12521,7 @@ CSL.Output.Formatters.doppelString = function (string, rex) {
     ret.array = rex(string);
     ret.string = "";
     for (var i=0,ilen=ret.array.length; i<ilen; i += 2) {
-        if (ret.array[i-1] === "-") {
+        if (ret.array[i-1] === "-" && false) {
             ret.string += " " + ret.array[i];
         } else {
             ret.string += ret.array[i];
@@ -12545,7 +12536,7 @@ CSL.Output.Formatters.undoppelString = function (str) {
         if ((i % 2)) {
             ret += str.array[i];
         } else {
-            if (str.array[i-1] === "-") {
+            if (str.array[i-1] === "-" && false) {
                 ret += str.string.slice(0, str.array[i].length+1).slice(1);
                 str.string = str.string.slice(str.array[i].length+1);
             } else {
