@@ -2475,6 +2475,8 @@
 				<parameter name="textbox"/>
 				<body>
 				<![CDATA[
+					var creatorID;
+					var numFields = 0;
 					var comment = false;
 					var controller = textbox.controller;
 					
@@ -2483,12 +2485,11 @@
 						if (controller.getValueAt(i) == textbox.value)
 						{
 							comment = controller.getCommentAt(i);
+							var [creatorID, numFields] = comment.split('-');
 							break;
 						}
 					}
-					
-					var [creatorID, numFields] = comment.split('-');
-					
+
 					// If result uses two fields, save both
 					if (numFields==2)
 					{
@@ -3450,7 +3451,7 @@ if (oldCreator.id) {
 						this.item._changedCreators[index + 1] = true;
 						this.item._changedAltCreators[index + 1] = creator.multi._key;
 					}
-					this.item._changed = true;
+					this.item._changedItemData = true;
 					this.item.save();
 					this.refresh();
 				]]>
@@ -3523,8 +3524,8 @@ if (oldCreator.id) {
 				<parameter name="back"/>
 				<body>
 				<![CDATA[
-                    // Was seriously out of line with official Zotero, replaced verbatim
-                    // from official source, 15 March 2013.
+					// Was seriously out of line with official Zotero, replaced verbatim
+					// from official source, 15 March 2013.
 					tabindex = parseInt(tabindex);
 					
 					if (back)
