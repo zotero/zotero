@@ -255,6 +255,11 @@ Zotero.Report = new function() {
 				fieldText = '<a href="' + escapeXML(arr[i]) + '">'
 					+ escapeXML(arr[i]) + '</a>';
 			}
+			// Hyperlink DOI
+			else if (i == 'DOI') {
+				fieldText = '<a href="' + escapeXML('http://doi.org/' + arr[i]) + '">'
+					+ escapeXML(arr[i]) + '</a>';
+			}
 			// Remove SQL date from multipart dates
 			// (e.g. '2006-00-00 Summer 2006' becomes 'Summer 2006')
 			else if (i=='date') {
