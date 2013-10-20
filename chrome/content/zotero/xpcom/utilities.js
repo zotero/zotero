@@ -62,6 +62,7 @@ const CSL_TEXT_MAPPINGS = {
 	"committee":["committee"],
 	"page":["pages"],
 	"volume":["volume","codeNumber"],
+	"volume-title":["volumeTitle"],
 	"issue":["issue"],
 	"number-of-volumes":["numberOfVolumes"],
 	"number-of-pages":["numPages"],	

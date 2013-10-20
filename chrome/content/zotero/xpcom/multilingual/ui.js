@@ -22,7 +22,11 @@ Zotero.EXTENDED_TYPES = {
 
 Zotero.EXTENDED_FIELDS = {
 	"book": {
-        "medium":"medium"
+        "medium":"medium",
+        "volumeTitle":"volume-title"
+	},
+	"bookSection": {
+        "volumeTitle":"volume-title"
 	},
 	"standard": {
         "version":"version",

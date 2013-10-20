@@ -1,4 +1,4 @@
--- 10054
+-- 10056
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -374,6 +374,7 @@ INSERT INTO fields VALUES (1282,'regulatoryBody',NULL);              -- [ADDED]
 INSERT INTO fields VALUES (1283,'conferenceDate',NULL);              -- [ADDED]
 INSERT INTO fields VALUES (1284,'status',NULL);              -- [ADDED]
 INSERT INTO fields VALUES (1285,'publicationNumber',NULL);              -- [ADDED]
+INSERT INTO fields VALUES (1286,'volumeTitle',NULL);              -- [ADDED]
 
 -- book
 INSERT INTO itemTypeFields VALUES (2, 110, NULL, 1);
@@ -381,24 +382,25 @@ INSERT INTO itemTypeFields VALUES (2, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (2, 3, NULL, 3);
 INSERT INTO itemTypeFields VALUES (2, 30, NULL, 4);
 INSERT INTO itemTypeFields VALUES (2, 4, NULL, 5);
-INSERT INTO itemTypeFields VALUES (2, 45, NULL, 6);
-INSERT INTO itemTypeFields VALUES (2, 6, NULL, 7);
-INSERT INTO itemTypeFields VALUES (2, 7, NULL, 8);
-INSERT INTO itemTypeFields VALUES (2, 8, NULL, 9);
-INSERT INTO itemTypeFields VALUES (2, 14, NULL, 10);
-INSERT INTO itemTypeFields VALUES (2, 118, NULL, 11);
-INSERT INTO itemTypeFields VALUES (2, 109, NULL, 12);
-INSERT INTO itemTypeFields VALUES (2, 87, NULL, 13);
-INSERT INTO itemTypeFields VALUES (2, 11, NULL, 14);
-INSERT INTO itemTypeFields VALUES (2, 116, NULL, 15);
-INSERT INTO itemTypeFields VALUES (2, 1, NULL, 16);
-INSERT INTO itemTypeFields VALUES (2, 27, NULL, 17);
-INSERT INTO itemTypeFields VALUES (2, 123, NULL, 18);
-INSERT INTO itemTypeFields VALUES (2, 19, NULL, 19);
-INSERT INTO itemTypeFields VALUES (2, 62, NULL, 20);
-INSERT INTO itemTypeFields VALUES (2, 18, NULL, 21);
-INSERT INTO itemTypeFields VALUES (2, 2, NULL, 22);
-INSERT INTO itemTypeFields VALUES (2, 22, NULL, 23);
+INSERT INTO itemTypeFields VALUES (2, 1286, NULL, 6); -- volumeTitle [ADDED]
+INSERT INTO itemTypeFields VALUES (2, 45, NULL, 7);
+INSERT INTO itemTypeFields VALUES (2, 6, NULL, 8);
+INSERT INTO itemTypeFields VALUES (2, 7, NULL, 9);
+INSERT INTO itemTypeFields VALUES (2, 8, NULL, 10);
+INSERT INTO itemTypeFields VALUES (2, 14, NULL, 11);
+INSERT INTO itemTypeFields VALUES (2, 118, NULL, 12);
+INSERT INTO itemTypeFields VALUES (2, 109, NULL, 13);
+INSERT INTO itemTypeFields VALUES (2, 87, NULL, 14);
+INSERT INTO itemTypeFields VALUES (2, 11, NULL, 15);
+INSERT INTO itemTypeFields VALUES (2, 116, NULL, 16);
+INSERT INTO itemTypeFields VALUES (2, 1, NULL, 17);
+INSERT INTO itemTypeFields VALUES (2, 27, NULL, 18);
+INSERT INTO itemTypeFields VALUES (2, 123, NULL, 19);
+INSERT INTO itemTypeFields VALUES (2, 19, NULL, 20);
+INSERT INTO itemTypeFields VALUES (2, 62, NULL, 21);
+INSERT INTO itemTypeFields VALUES (2, 18, NULL, 22);
+INSERT INTO itemTypeFields VALUES (2, 2, NULL, 23);
+INSERT INTO itemTypeFields VALUES (2, 22, NULL, 24);
 
 INSERT INTO itemTypeFields VALUES (3, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (3, 90, NULL, 2);
@@ -406,23 +408,24 @@ INSERT INTO itemTypeFields VALUES (3, 115, NULL, 3);
 INSERT INTO itemTypeFields VALUES (3, 3, NULL, 4);
 INSERT INTO itemTypeFields VALUES (3, 30, NULL, 5);
 INSERT INTO itemTypeFields VALUES (3, 4, NULL, 6);
-INSERT INTO itemTypeFields VALUES (3, 45, NULL, 7);
-INSERT INTO itemTypeFields VALUES (3, 6, NULL, 8);
-INSERT INTO itemTypeFields VALUES (3, 7, NULL, 9);
-INSERT INTO itemTypeFields VALUES (3, 8, NULL, 10);
-INSERT INTO itemTypeFields VALUES (3, 14, NULL, 11);
-INSERT INTO itemTypeFields VALUES (3, 10, NULL, 12);
-INSERT INTO itemTypeFields VALUES (3, 87, NULL, 13);
-INSERT INTO itemTypeFields VALUES (3, 11, NULL, 14);
-INSERT INTO itemTypeFields VALUES (3, 116, NULL, 15);
-INSERT INTO itemTypeFields VALUES (3, 1, NULL, 16);
-INSERT INTO itemTypeFields VALUES (3, 27, NULL, 17);
-INSERT INTO itemTypeFields VALUES (3, 123, NULL, 18);
-INSERT INTO itemTypeFields VALUES (3, 19, NULL, 19);
-INSERT INTO itemTypeFields VALUES (3, 62, NULL, 20);
-INSERT INTO itemTypeFields VALUES (3, 18, NULL, 21);
-INSERT INTO itemTypeFields VALUES (3, 2, NULL, 22);
-INSERT INTO itemTypeFields VALUES (3, 22, NULL, 23);
+INSERT INTO itemTypeFields VALUES (3, 1286, NULL, 7); -- volumeTitle [ADDED]
+INSERT INTO itemTypeFields VALUES (3, 45, NULL, 8);
+INSERT INTO itemTypeFields VALUES (3, 6, NULL, 9);
+INSERT INTO itemTypeFields VALUES (3, 7, NULL, 10);
+INSERT INTO itemTypeFields VALUES (3, 8, NULL, 11);
+INSERT INTO itemTypeFields VALUES (3, 14, NULL, 12);
+INSERT INTO itemTypeFields VALUES (3, 10, NULL, 13);
+INSERT INTO itemTypeFields VALUES (3, 87, NULL, 14);
+INSERT INTO itemTypeFields VALUES (3, 11, NULL, 15);
+INSERT INTO itemTypeFields VALUES (3, 116, NULL, 16);
+INSERT INTO itemTypeFields VALUES (3, 1, NULL, 17);
+INSERT INTO itemTypeFields VALUES (3, 27, NULL, 18);
+INSERT INTO itemTypeFields VALUES (3, 123, NULL, 19);
+INSERT INTO itemTypeFields VALUES (3, 19, NULL, 20);
+INSERT INTO itemTypeFields VALUES (3, 62, NULL, 21);
+INSERT INTO itemTypeFields VALUES (3, 18, NULL, 22);
+INSERT INTO itemTypeFields VALUES (3, 2, NULL, 23);
+INSERT INTO itemTypeFields VALUES (3, 22, NULL, 24);
 
 INSERT INTO itemTypeFields VALUES (4, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (4, 90, NULL, 2);
