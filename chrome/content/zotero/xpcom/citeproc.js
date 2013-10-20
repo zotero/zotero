@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.494",
+    PROCESSOR_VERSION: "1.0.495",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -11278,13 +11278,13 @@ CSL.Util.Dates.year.imperial = function (state, num, end) {
     }
     var date = parseInt(num + month + day, 10);
     if (date >= 18680908 && date < 19120730) {
-        year = "明治" + (num - 1867);
+        year = '\u660e\u6cbb' + (num - 1867);
     } else if (date >= 19120730 && date < 19261225) {
-        year = "対象" + (num - 1911);
+        year = '\u5927\u6b63' + (num - 1911);
     } else if (date >= 19261225 && date < 19890108) {
-        year = "昭和" + (num - 1925);
+        year = '\u662d\u548c' + (num - 1925);
     } else if (date >= 19890108) {
-        year = "平成" + (num - 1988);
+        year = '\u5e73\u6210' + (num - 1988);
     }
     return year;
 };

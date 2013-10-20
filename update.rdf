@@ -7,14 +7,15 @@
     <RDF:Seq>
       <RDF:li>
         <RDF:Description>
-          <version>4.0.12.SOURCE</version>
+          <version>4.0m402</version>
           <targetApplication>
             <RDF:Description>
               <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
-              <minVersion>17.0</minVersion>
-              <maxVersion>24.*</maxVersion>
-              <updateLink>http://download.zotero.org/extension/zotero.xpi</updateLink>
-              <updateHash>sha1:</updateHash>
+              <minVersion>3.6</minVersion>
+              <maxVersion>23.*</maxVersion>
+              <updateLink>http://gsl-nagoya-u.net/http/pub/zotero-multi-3.xpi</updateLink>
+			  <updateInfoURL>http://gsl-nagoya-u.net/http/pub/zotero-multi-3.xhtml</updateInfoURL>
+              <updateHash>sha1:8e14bf93386f0a40b15da4641242584b3fcf79d7</updateHash>
             </RDF:Description>
           </targetApplication>
         </RDF:Description>
