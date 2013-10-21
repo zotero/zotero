@@ -2310,7 +2310,7 @@
 					var tabindex = elem.getAttribute('ztabindex');
 					
 					if (fieldName) {
-						var m = fieldName.match(/^([a-zA-Z]*)(?:-([0-9])+-(firstName|lastName))*$/);
+						var m = fieldName.match(/^([a-zA-Z]*)(?:-([0-9]+)-(firstName|lastName))*$/);
 						if (m) {
 							var field = m[1];
 							if (m[2]) {
@@ -2739,7 +2739,7 @@
 					var elem;
 					
 					if (fieldName) {
-						var m = fieldName.match(/^([a-zA-Z]*)(?:-([0-9])+-(firstName|lastName))*$/);
+						var m = fieldName.match(/^([a-zA-Z]*)(?:-([0-9]+)-(firstName|lastName))*$/);
 						if (m) {
 							var field = m[1];
 							if (m[2]) {
@@ -2757,7 +2757,9 @@
 
 						// deferSave=true will be overidden if the item has been
 						// saved previously.
-						var deferSave = this._deferCreatorSave;
+						//var deferSave = this._deferCreatorSave;
+						// Well, no, don't defer. Period.
+						deferSave = false;
 						this.modifyCreator(creatorIndex, otherFields, false, deferSave);
 						
 						var c = this.item.getCreator(creatorIndex);
