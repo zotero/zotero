@@ -48,6 +48,10 @@ Zotero.MultiField.prototype._set = function (fieldID, value, lang, force_top) {
 Zotero.MultiField.prototype.get = function (fieldID, langs, honorEmpty) {
 	var val, lang;
 	if (!this.parent._itemDataLoaded) {
+        // Safer path to initialisation, may avoid "itemID not set for object" error.
+	    if ((this.parent._id || this.parent._key) && !this.parent._primaryDataLoaded) {
+		    this.parent.loadPrimaryData(true);
+	    }
 		this.parent._loadItemData();
 	}
 	fieldID = Zotero.ItemFields.getID(fieldID);
