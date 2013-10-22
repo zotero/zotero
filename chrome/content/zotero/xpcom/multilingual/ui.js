@@ -9,6 +9,9 @@ Zotero.EXTENDED_CREATORS = {
 	},
 	"chapter":{
 		"recipient":"recipient"
+	},
+	"hearing":{
+		"testimonyBy":"author"
 	}
 }
 
