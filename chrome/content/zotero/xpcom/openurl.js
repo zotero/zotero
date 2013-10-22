@@ -154,10 +154,9 @@ Zotero.OpenURL = new function() {
 				if(item.title) _mapTag(item.title, "atitle")		
 				if(item.proceedingsTitle) _mapTag(item.proceedingsTitle, (version == "0.1" ? "title" : "btitle"));
 			} else if (item.itemType == "report") {
-			    _mapTag("report", "genre");
-			    if(item.seriesTitle) _mapTag(item.seriesTitle, "series");
-			    if(item.institution) _mapTag(item.institution, "publisher");
-			    if(item.title) _mapTag(item.title, "title")
+				_mapTag("report", "genre");
+				if(item.seriesTitle) _mapTag(item.seriesTitle, "series");
+				if(item.title) _mapTag(item.title, (version == "0.1" ? "title" : "btitle"));
 			} else {
 				_mapTag("bookitem", "genre");
 				if(item.title) _mapTag(item.title, "atitle")		
@@ -401,9 +400,11 @@ Zotero.OpenURL = new function() {
 			} else if(key == "rft.edition") {
 				item.edition = value;
 			} else if(key == "rft.series") {
-			    if(item.itemType == "report"){
-				item.seriesTitle = value;
-			    } else item.series = value;
+				if(item.itemType == "report") {
+					item.seriesTitle = value;
+				} else {
+					item.series = value;
+				}
 			} else if(item.itemType == "thesis") {
 				if(key == "rft.inst") {
 					item.publisher = value;
