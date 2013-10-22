@@ -314,18 +314,18 @@ Zotero.Utilities = {
 	 */
 	"cleanISSN":function(/**String*/ issn) {
 		issn = issn.replace(/[^0-9a-z]+/ig, '').toUpperCase()	//we only want to ignore punctuation, spaces
-						.match(/[0-9]{7}[0-9X]/);	//13 digit or 10 digit
+						.match(/[0-9]{7}[0-9X]/);
 		if(!issn) return false;
 		issn = issn[0];
 
-		// Verify ISBN-10 checksum
+		// Verify ISSN checksum
 		var sum = 0;
 		for (var i = 0; i < 7; i++) {
 			if(issn[i] == 'X') return false;	//X can only be a check digit
 			sum += issn[i] * (8-i);
 		}
 		//check digit might be 'X'
-		sum += (issn[9] == 'X')? 10 : issn[9]*1;
+		sum += (issn[7] == 'X')? 10 : issn[7]*1;
 
 		return (sum % 11 == 0) ? issn.substring(0,4) + '-' + issn.substring(4) : false;
 	},
