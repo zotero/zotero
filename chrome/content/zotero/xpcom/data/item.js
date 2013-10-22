@@ -1074,19 +1074,20 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 			for each(var creator in creators) {
 				if ((itemTypeID == 8 && creator.creatorTypeID == 16) || // 'letter'/'recipient'
 						(itemTypeID == 10 && creator.creatorTypeID == 6)) { // 'interview'/'interviewee'
-					itemTypeName = Zotero.ItemTypes.getName(itemTypeID) + ".to"
 					participants.push(creator);
 				}
 				else if ((itemTypeID == 8 && creator.creatorTypeID == 1) ||   // 'letter'/'author'
 						(itemTypeID == 10 && creator.creatorTypeID == 7)) { // 'interview'/'interviewer'
-					itemTypeName = Zotero.ItemTypes.getName(itemTypeID) + ".from"
 					authors.push(creator);
 				}
 			}
 		}
 
 		if (participants.length === 0) {
+			itemTypeName += ".from"
 			participants = authors;
+		} else {
+			itemTypeName += ".to"
 		}
 		
 		var strParts = [];
