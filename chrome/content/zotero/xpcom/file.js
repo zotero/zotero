@@ -83,10 +83,10 @@ Zotero.File = new function(){
 	
 	
 	/*
-	 * Get the first 128 bytes of the file as a string (multibyte-safe)
+	 * Get the first 200 bytes of the file as a string (multibyte-safe)
 	 */
 	function getSample(file) {
-		return this.getContents(file, null, 128);
+		return this.getContents(file, null, 200);
 	}
 	
 	

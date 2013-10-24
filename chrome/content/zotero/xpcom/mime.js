@@ -233,7 +233,7 @@ Zotero.MIME = new function(){
 				}
 			}
 			// Otherwise allow match anywhere in sample
-			// (128 bytes from getSample() by default)
+			// (200 bytes from getSample() by default)
 			else if (str.indexOf(_snifferEntries[i][0]) != -1) {
 				match = true;
 			}
