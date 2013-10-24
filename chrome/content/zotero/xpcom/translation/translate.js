@@ -92,6 +92,9 @@ Zotero.Translate.Sandbox = {
 			
 			delete item.complete;
 			for(var i in item) {
+				// don't touch underscore-prefixed properties used internally
+				if(i.charAt(0) == '_') continue;
+				
 				var val = item[i];
 				if(!val && val !== 0) {
 					// remove null, undefined, and false properties, and convert objects to strings
