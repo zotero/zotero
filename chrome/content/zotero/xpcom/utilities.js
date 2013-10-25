@@ -757,13 +757,17 @@ Zotero.Utilities = {
 						// not first or last word
 						&& i != 0 && i != lastWordIndex
 						// does not follow a colon
-						&& (previousWordIndex == -1 || words[previousWordIndex][words[previousWordIndex].length-1] != ":")
+						&& (previousWordIndex == -1 || words[previousWordIndex][words[previousWordIndex].length-1].search(/[:\?!]/)==-1)
 					) {
 						words[i] = lowerCaseVariant;
 					} else {
 						// this is not a skip word or comes after a colon;
 						// we must capitalize
-						words[i] = upperCaseVariant.substr(0, 1) + lowerCaseVariant.substr(1);
+						// handle punctuation in the beginning, including multiple, as in "¿Qué pasa?"		
+						var punct = words[i].match(/^[\'\"¡¿“‘„«\s]+/);
+						punct = punct ? punct[0].length+1 : 1;
+						words[i] = words[i].length ? words[i].substr(0, punct).toUpperCase() +
+							words[i].substr(punct).toLowerCase() : words[i];
 					}
 				}
 				
