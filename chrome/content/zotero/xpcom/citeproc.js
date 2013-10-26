@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.497",
+    PROCESSOR_VERSION: "1.0.498",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -996,59 +996,81 @@ CSL.System = {};
 CSL.System.Xml = {
     "Parsing": XML_PARSING
 };
-CSL.getSortCompare = function () {
+CSL.getSortCompare = function (default_locale) {
     if (CSL.stringCompare) {
         return CSL.stringCompare;
     }
     var strcmp;
-    var sortCompare;
     try {
         var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
             .getService(Components.interfaces.nsILocaleService);
         var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
             .getService(Components.interfaces.nsICollationFactory);
-        var collation = collationFactory.CreateCollation(localeService.getApplicationLocale());
+        var collation = collationFactory.CreateCollation(localeService.newLocale(default_locale));
         strcmp = function(a, b) {
             return collation.compareString(1, a, b);
         };
-        CSL.debug("Using collation sort");
+        CSL.debug("Using collation sort: "+default_locale);
     } catch (e) {
         CSL.debug("Using localeCompare sort");
         strcmp = function (a, b) {
             return a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase());
         };
     }
-    if (!strcmp("\u3044", "\u3046")) {
-        var isKana = /^[\u3040-\u309f\u30a0-\u30ff]/;
-        sortCompare = function (a, b) {
-            a = a.replace(/^[\[\]\'\"]*/, "").replace(/[\[\]\'\"]*$/, "");
-            b = b.replace(/^[\[\]\'\"]*/, "").replace(/[\[\]\'\"]*$/, "");
-            var ak = isKana.exec(a);
-            var bk = isKana.exec(b);
-            if (ak || bk) {
-                if (!ak) {
-                    return -1;
-                } else if (!bk) {
-                    return 1;
-                } else if (a < b) {
-                    return -1;
-                } else if (a > b) {
-                    return 1;
+    var isKana = /^[\[\]\'\"]*[\u3040-\u309f\u30a0-\u30ff]/;
+    var stripPunct = function (str) {
+        return str.replace(/^[\[\]\'\"]*/g, "");
+    }
+    var getKanaPreSort = function () {
+        if (strcmp("\u3044", "\u3046")) {
+            return false;
+        } else {
+            return function (a, b) {
+                a = stripPunct(a);
+                b = stripPunct(b);
+                var ak = isKana.exec(a);
+                var bk = isKana.exec(b);
+                if (ak || bk) {
+                    if (!ak) {
+                        return -1;
+                    } else if (!bk) {
+                        return 1;
+                    } else if (a < b) {
+                        return -1;
+                    } else if (a > b) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
                 } else {
-                    return 0;
+                    return false;
                 }
-            } else {
-                return strcmp(a, b);
+            };
+        }
+    }
+    var getBracketPreSort = function () {
+        if (!strcmp("[x","x")) {
+            return false;
+        } else {
+            return function (a, b) {
+                return strcmp(stripPunct(a), stripPunct(b));
             }
-        };
-    } else if (strcmp("[x","x")) {
-        sortCompare = function (a, b) {
-            a = a.replace(/^[\[\]\'\"]*/, "").replace(/[\[\]\'\"]*$/, "");
-            b = b.replace(/^[\[\]\'\"]*/, "").replace(/[\[\]\'\"]*$/, "");
+        }
+    }
+    var kanaPreSort = getKanaPreSort();
+    var bracketPreSort = getBracketPreSort();
+    var sortCompare = function (a, b) {
+        if (kanaPreSort) {
+            var ret = kanaPreSort(a, b);
+            if (false !== ret) {
+                return ret;
+            }
+        }
+        if (bracketPreSort) {
+            return bracketPreSort(a, b);
+        } else {
             return strcmp(a, b);
         }
-    } else {
-        sortCompare = strcmp;
     }
     return sortCompare;
 };
@@ -1696,6 +1718,9 @@ CSL.Engine = function (sys, style, lang, forceLang) {
     langspec = CSL.localeResolve(lang);
     this.opt.lang = langspec.best;
     this.opt["default-locale"][0] = langspec.best;
+    if (!this.opt["default-locale-sort"]) {
+        this.opt["default-locale-sort"] = this.opt["default-locale"][0];
+    }
     this.locale = {};
     this.localeConfigure(langspec);
     function makeRegExp(lst) {
@@ -2842,7 +2867,7 @@ CSL.Output.Queue.prototype.string = function (state, myblobs, blob) {
     }
     for (i=0,ilen=ret.length - 1;i<ilen;i+=1) {
         if ("number" === typeof ret[i].num && "number" === typeof ret[i+1].num && !ret[i+1].UGLY_DELIMITER_SUPPRESS_HACK) {
-            ret[i].strings.suffix = ret[i].strings.suffix + txt_esc(blob_delimiter);
+            ret[i].strings.suffix = ret[i].strings.suffix + (blob_delimiter ? blob_delimiter : "");
             ret[i+1].successor_prefix = "";
             ret[i+1].UGLY_DELIMITER_SUPPRESS_HACK = true;
         }
@@ -9818,6 +9843,10 @@ CSL.Attributes["@default-locale"] = function (state, arg) {
         state.opt["default-locale"] = ["en"];
     }
 };
+CSL.Attributes["@default-locale-sort"] = function (state, arg) {
+    var lst, len, pos, m, ret;
+    state.opt["default-locale-sort"] = arg;
+};
 CSL.Attributes["@demote-non-dropping-particle"] = function (state, arg) {
     state.opt["demote-non-dropping-particle"] = arg;
 };
@@ -13066,7 +13095,7 @@ CSL.Registry.prototype.sorttokens = function () {
 };
 CSL.Registry.Comparifier = function (state, keyset) {
     var sort_directions, len, pos, compareKeys;
-    var sortCompare = CSL.getSortCompare();
+    var sortCompare = CSL.getSortCompare(state.opt["default-locale-sort"]);
     sort_directions = state[keyset].opt.sort_directions;
     this.compareKeys = function (a, b) {
         len = a.sortkeys ? a.sortkeys.length : 0;
