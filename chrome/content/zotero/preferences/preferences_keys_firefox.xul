@@ -46,6 +46,12 @@
 					<label/>
 					<textbox id="textbox-saveToZotero" maxlength="1" size="1" preference="pref-keys-saveToZotero"/>
 				</row>
+				
+				<row insertbefore="zotero-keys-new-item">
+					<label value="&zotero.preferences.keys.newItemFromPage;" control="key-textbox-newItemFromPage"/>
+					<label/>
+					<textbox id="textbox-newItemFromPage" maxlength="1" size="1" preference="pref-keys-newItemFromPage"/>
+				</row>
 			</rows>
 		</grid>
 	</prefpane>

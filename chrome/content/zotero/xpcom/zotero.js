@@ -2324,6 +2324,10 @@ Zotero.Keys = new function() {
 			{
 				name: 'saveToZotero',
 				defaultKey: 'S'
+			},
+			{
+				name: 'newItemFromPage',
+				defaultKey: 'I'
 			}
 		];
 		

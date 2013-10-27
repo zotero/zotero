@@ -66,6 +66,7 @@ pref("extensions.zotero.tagCloud", false);
 pref("extensions.zotero.keys.openZotero", 'Z');
 pref("extensions.zotero.keys.toggleFullscreen", 'F');
 pref("extensions.zotero.keys.saveToZotero", 'S');
+pref("extensions.zotero.keys.newItemFromPage", 'I');
 pref("extensions.zotero.keys.newItem", 'N');
 pref("extensions.zotero.keys.newNote", 'O');
 pref("extensions.zotero.keys.importFromClipboard", 'V');
