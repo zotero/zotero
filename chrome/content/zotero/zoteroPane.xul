@@ -81,6 +81,10 @@
 				<menuitem id="zotero-context-save-image-as-item" class="menu-iconic"
 					label="&zotero.contextMenu.saveImageAsItem;" hidden="true"
 					oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.onImage ? (window.gContextMenu.mediaURL ? window.gContextMenu.mediaURL : window.gContextMenu.imageURL) : window.gContextMenu.bgImageURL, 'artwork')"/>
+				<menu id="zotero-context-save-page-menu" label="&zotero.contextMenu.saveToZotero;"
+					hidden="true">
+					<menupopup id="zotero-context-save-page-menupopup" onpopupshowing="Zotero_Browser.onStatusPopupShowing(event)"/>
+				</menu>
 			</menupopup>
 		</menu>
 	</popup>

@@ -31,6 +31,7 @@
 <!ENTITY zotero.contextMenu.addTextToNewNote			"Create Zotero Item and Note from Selection">
 <!ENTITY zotero.contextMenu.saveLinkAsItem			"Save Link As Zotero Item">
 <!ENTITY zotero.contextMenu.saveImageAsItem		"Save Image As Zotero Item">
+<!ENTITY zotero.contextMenu.saveToZotero		"Save to Zotero">
 
 <!ENTITY zotero.tabs.info.label						"Info">
 <!ENTITY zotero.tabs.notes.label						"Notes">

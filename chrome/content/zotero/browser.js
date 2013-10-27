@@ -411,7 +411,8 @@ var Zotero_Browser = new function() {
 	}
 	
 	/**
-	 * Called when status bar icon is right-clicked
+	 * Called when status bar icon is right-clicked or the "Save to Zotero" submenu
+	 * of the contentAreaContextMenu is shown
 	 */
 	this.onStatusPopupShowing = function(e) {
 		var popup = e.target;

@@ -2864,6 +2864,17 @@ var ZoteroPane = new function()
 			}
 		}
 		
+		var menu = document.getElementById("zotero-context-save-page-menu");
+		if (menu) {
+			// statusImage.hidden is updated on pageshow to reflect scrapability of
+			// current page
+			if (Zotero_Browser.statusImage.hidden) {
+				menu.hidden = true;
+			} else {
+				menu.hidden = false;
+			}
+		}
+		
 		// If Zotero is locked or library is read-only, disable menu items
 		var menu = document.getElementById('zotero-content-area-context-menu');
 		var disabled = Zotero.locked;
