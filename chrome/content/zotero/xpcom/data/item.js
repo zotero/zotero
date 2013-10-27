@@ -204,7 +204,7 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 		} else if(creators.length === 2) {
 			return creators[0].ref.lastName+" "+Zotero.getString('general.and')+" "+creators[1].ref.lastName;
 		} else if(creators.length > 3) {
-			return creators[0].ref.lastName+" et al."
+			return creators[0].ref.lastName+" "+Zotero.getString('general.etAl');
 		}
 	} else if (field === 'id' || Zotero.Items.isPrimaryField(field)) {
 		var privField = '_' + field;
@@ -3379,6 +3379,8 @@ Zotero.Item.prototype.__defineSetter__('attachmentSyncState', function (val) {
 		case Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD:
 		case Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD:
 		case Zotero.Sync.Storage.SYNC_STATE_IN_SYNC:
+		case Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD:
+		case Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD:
 			break;
 			
 		default:

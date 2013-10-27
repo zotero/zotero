@@ -54,9 +54,9 @@ const CSL_TEXT_MAPPINGS = {
 	"collection-number":["seriesNumber"],
 	"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
 	"publisher-place":["place"],
-	"authority":["court"],
+	"authority":["court","legislativeBody"],
 	"page":["pages"],
-	"volume":["volume"],
+	"volume":["volume", "codeNumber"],
 	"issue":["issue"],
 	"number-of-volumes":["numberOfVolumes"],
 	"number-of-pages":["numPages"],	
@@ -80,6 +80,7 @@ const CSL_TEXT_MAPPINGS = {
 	"call-number":["callNumber"],
 	"note":["extra"],
 	"number":["number"],
+	"chapter-number":["session"],
 	"references":["history"],
 	"shortTitle":["shortTitle"],
 	"journalAbbreviation":["journalAbbreviation"],
@@ -1730,7 +1731,7 @@ Zotero.Utilities = {
 	/**
 	 * Generates a valid object key for the server API
 	 */
-	"generateObjectKey":function getKey() {
+	"generateObjectKey":function generateObjectKey() {
 		// TODO: add 'L' and 'Y' after 3.0.11 cut-off
 		var baseString = "23456789ABCDEFGHIJKMNPQRSTUVWXZ";
 		return Zotero.Utilities.randomString(8, baseString);

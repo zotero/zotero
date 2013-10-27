@@ -38,11 +38,14 @@ Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 {
 	this.wrappedJSObject = this;
 	this.rowCount = 0;
+	this.itemGroup = itemGroup;
+	// Deprecated
+	// TODO: remove
+	this._itemGroup = itemGroup;
 	
 	this._initialized = false;
 	this._skipKeypress = false;
 	
-	this._itemGroup = itemGroup;
 	this._sourcesOnly = sourcesOnly;
 	
 	this._callbacks = [];
@@ -59,6 +62,8 @@ Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 	);
 }
 
+Zotero.ItemTreeView.prototype = Object.create(Zotero.LibraryTreeView.prototype);
+Zotero.ItemTreeView.prototype.type = 'item';
 
 Zotero.ItemTreeView.prototype.addCallback = function(callback) {
 	this._callbacks.push(callback);
@@ -2427,6 +2432,11 @@ Zotero.ItemTreeCommandController.prototype.onEvent = function(evt)
  * Start a drag using HTML 5 Drag and Drop
  */
 Zotero.ItemTreeView.prototype.onDragStart = function (event) {
+	// See note in LibraryTreeView::_setDropEffect()
+	if (Zotero.isWin) {
+		event.dataTransfer.effectAllowed = 'move';
+	}
+	
 	var itemIDs = this.saveSelection();
 	var items = Zotero.Items.get(itemIDs);
 	
@@ -2741,17 +2751,14 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 }
 
 
-Zotero.ItemTreeView.prototype.canDrop = function(row, orient, dragData)
-{
-	Zotero.debug("Row is " + row + "; orient is " + orient);
+/**
+ * Called by treechildren.onDragOver() before setting the dropEffect,
+ * which is checked in libraryTreeView.canDrop()
+ */
+Zotero.ItemTreeView.prototype.canDropCheck = function (row, orient, dataTransfer) {
+	//Zotero.debug("Row is " + row + "; orient is " + orient);
 	
-	if (row == -1 && orient == -1) {
-		//return true;
-	}
-	
-	if (!dragData || !dragData.data) {
-		var dragData = Zotero.DragDrop.getDragData(this);
-	}
+	var dragData = Zotero.DragDrop.getDataFromDataTransfer(dataTransfer);
 	if (!dragData) {
 		Zotero.debug("No drag data");
 		return false;
@@ -2869,18 +2876,21 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient, dragData)
 /*
  *  Called when something's been dropped on or next to a row
  */
-Zotero.ItemTreeView.prototype.drop = function(row, orient)
-{
-	var dragData = Zotero.DragDrop.getDragData(this);
-	
-	if (!this.canDrop(row, orient, dragData)) {
+Zotero.ItemTreeView.prototype.drop = function(row, orient, dataTransfer) {
+	if (!this.canDropCheck(row, orient, dataTransfer)) {
 		return false;
 	}
 	
+	var dragData = Zotero.DragDrop.getDataFromDataTransfer(dataTransfer);
+	if (!dragData) {
+		Zotero.debug("No drag data");
+		return false;
+	}
+	var dropEffect = dragData.dropEffect;
 	var dataType = dragData.dataType;
 	var data = dragData.data;
-	
-	var itemGroup = this._itemGroup;
+	var itemGroup = this.itemGroup;
+	var targetLibraryID = itemGroup.isWithinGroup() ? itemGroup.ref.libraryID : null;
 	
 	if (dataType == 'zotero/item') {
 		var ids = data;
@@ -2888,6 +2898,19 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 		if (items.length < 1) {
 			return;
 		}
+		
+		// TEMP: This is always false for now, since cross-library drag
+		// is disallowed in canDropCheck()
+		//
+		// TODO: support items coming from different sources?
+		if (items[0].libraryID == targetLibraryID) {
+			var sameLibrary = true;
+		}
+		else {
+			var sameLibrary = false;
+		}
+		
+		var toMove = [];
 		
 		// Dropped directly on a row
 		if (orient == 0) {
@@ -2926,7 +2949,22 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 						item.save()
 					}
 					itemGroup.ref.addItem(item.id);
+					toMove.push(item.id);
 				}
+			}
+		}
+		
+		// If moving, remove items from source collection
+		if (dropEffect == 'move' && toMove.length) {
+			if (!sameLibrary) {
+				throw new Error("Cannot move items between libraries");
+			}
+			let targetItemGroup = Zotero.DragDrop.getDragSource();
+			if (!targetItemGroup || !targetItemGroup.isCollection()) {
+				throw new Error("Drag source must be a collection");
+			}
+			if (itemGroup.id != targetItemGroup.id) {
+				itemGroup.ref.removeItems(toMove);
 			}
 		}
 	}
@@ -3011,14 +3049,20 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 				
 				try {
 					Zotero.DB.beginTransaction();
-					if (dragData.dropEffect == 'link') {
+					if (dropEffect == 'link') {
 						var itemID = Zotero.Attachments.linkFromFile(file, sourceItemID);
 					}
 					else {
-						if (dragData.dropEffect != 'copy') {
-							Components.utils.reportError("Invalid dropEffect '" + dragData.dropEffect + "' dropping file");
-						}
 						var itemID = Zotero.Attachments.importFromFile(file, sourceItemID, targetLibraryID);
+						// If moving, delete original file
+						if (dragData.dropEffect == 'move') {
+							try {
+								file.remove(false);
+							}
+							catch (e) {
+								Components.utils.reportError("Error deleting original file " + file.path + " after drag");
+							}
+						}
 					}
 					if (parentCollectionID) {
 						var col = Zotero.Collections.get(parentCollectionID);
@@ -3038,55 +3082,6 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 			Zotero.Notifier.commit(unlock);
 		}
 	}
-}
-
-Zotero.ItemTreeView.prototype.onDragEnter = function (event) {
-	Zotero.DragDrop.currentDataTransfer = event.dataTransfer;
-	return false;
-}
-
-/*
- * Called by HTML 5 Drag and Drop when dragging over the tree
- */
-Zotero.ItemTreeView.prototype.onDragOver = function (event) {
-	Zotero.DragDrop.currentDataTransfer = event.dataTransfer;
-	if (event.dataTransfer.types.contains("application/x-moz-file")) {
-		// As of Aug. 2013 nightlies:
-		//
-		// - Setting the dropEffect only works on Linux and OS X.
-		//
-		// - Modifier keys don't show up in the drag event on OS X until the
-		//   drop, so since we can't show a correct effect, we leave it at
-		//   the default 'move', the least misleading option.
-		//
-		// - The cursor effect gets set by the system on Windows 7 and can't
-		//   be overridden.
-		if (!Zotero.isMac) {
-			if (event.ctrlKey && event.shiftKey) {
-				event.dataTransfer.dropEffect = "link";
-			}
-			else {
-				event.dataTransfer.dropEffect = "copy";
-			}
-		}
-	}
-	// Show copy symbol when dragging an item over a collection
-	else if (event.dataTransfer.getData("zotero/item")) {
-		event.dataTransfer.dropEffect = "copy";
-	}
-	return false;
-}
-
-/*
- * Called by HTML 5 Drag and Drop when dropping onto the tree
- */
-Zotero.ItemTreeView.prototype.onDrop = function (event) {
-	return false;
-}
-
-Zotero.ItemTreeView.prototype.onDragExit = function (event) {
-	//Zotero.debug("Clearing drag data");
-	Zotero.DragDrop.currentDataTransfer = null;
 }
 
 
