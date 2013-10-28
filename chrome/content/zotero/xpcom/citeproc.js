@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.498",
+    PROCESSOR_VERSION: "1.0.499",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -1001,6 +1001,9 @@ CSL.getSortCompare = function (default_locale) {
         return CSL.stringCompare;
     }
     var strcmp;
+    if (!default_locale) {
+        default_locale = "en-US";
+    }
     try {
         var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
             .getService(Components.interfaces.nsILocaleService);
@@ -10711,7 +10714,7 @@ CSL.Transform = function (state) {
             }
             if (secondary || tertiary) {
                 state.output.openLevel("empty");
-                primary_tok.strings.suffix = "";
+                primary_tok.strings.suffix = primary_tok.strings.suffix.replace(/[ .,]+$/,"");
                 state.output.append(primary, primary_tok);
                 if (secondary) {
                     secondary_tok = CSL.Util.cloneToken(template_tok);
