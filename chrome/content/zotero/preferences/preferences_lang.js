@@ -755,7 +755,7 @@ Zotero_Preferences.Lang = {
  		    suffixNode.value = suffix;
  	    }
  	    // Do something to store this data in Prefs
- 	    var types = ['persons', 'institutions', 'titles', 'publishers', 'places'];
+ 	    var types = ['persons', 'institutions', 'titles', 'journals', 'publishers', 'places'];
  	    var forms = ['orig', 'translit', 'translat'];
  	    var affixList = [];
  	    for (var i = 0, ilen = types.length; i < ilen; i += 1) {
