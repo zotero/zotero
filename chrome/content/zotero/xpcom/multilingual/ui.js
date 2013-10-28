@@ -358,7 +358,7 @@ Zotero.setCitationLanguages = function (obj, citeproc) {
 	var affixes = Zotero.Prefs.get("csl.citationAffixes");
 	if (affixes) {
 		affixes = affixes.split("|");
-		if (affixes.length === 40) {
+		if (affixes.length === 48) {
 			obj.citationAffixes = affixes;
 		}
 	}
