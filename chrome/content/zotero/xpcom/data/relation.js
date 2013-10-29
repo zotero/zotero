@@ -158,6 +158,8 @@ Zotero.Relation.prototype.save = function () {
 		throw ("Missing object in Zotero.Relation.save()");
 	}
 	
+	Zotero.Relations.editCheck(this);
+	
 	var sql = "INSERT INTO relations "
 				+ "(libraryID, subject, predicate, object, clientDateModified) "
 				+ "VALUES (?, ?, ?, ?, ?)";

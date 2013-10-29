@@ -4006,9 +4006,10 @@ Zotero.Item.prototype.addLinkedItem = function (item) {
 		return false;
 	}
 	
-	// If both group libraries, store relation with source group.
-	// Otherwise, store with personal library.
-	var libraryID = (this.libraryID && item.libraryID) ? this.libraryID : null;
+	// If one of the items is a personal library, store relation with that.
+	// Otherwise, use current item's library (which in calling code is the
+	// new, copied item).
+	var libraryID = (!this.libraryID || !item.libraryID) ? null : this.libraryID;
 	
 	Zotero.Relations.add(libraryID, url1, predicate, url2);
 }
