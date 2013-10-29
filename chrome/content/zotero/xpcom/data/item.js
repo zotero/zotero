@@ -4596,7 +4596,13 @@ Zotero.Item.prototype.addLinkedItem = function (item) {
 		Zotero.debug("Items " + this.key + " and " + item.key + " are already linked");
 		return false;
 	}
-	Zotero.Relations.add(null, url1, predicate, url2);
+	
+	// If one of the items is a personal library, store relation with that.
+	// Otherwise, use current item's library (which in calling code is the
+	// new, copied item).
+	var libraryID = (!this.libraryID || !item.libraryID) ? null : this.libraryID;
+	
+	Zotero.Relations.add(libraryID, url1, predicate, url2);
 }
 
 

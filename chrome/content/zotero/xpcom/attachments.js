@@ -1279,7 +1279,7 @@ Zotero.Attachments = new function(){
 			Zotero.File.copyDirectory(dir, newDir);
 		}
 		
-		attachment.addLinkedItem(newAttachment);
+		newAttachment.addLinkedItem(attachment);
 		return newAttachment.id;
 	}
 	
