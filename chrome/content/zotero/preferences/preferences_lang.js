@@ -787,7 +787,7 @@ Zotero_Preferences.Lang = {
  	    } else {
  		    affixList = '|||||||||||||||||||||||||||||||||||||||'.split('|');
  	    }
- 	    var types = ['persons', 'institutions', 'titles', 'publishers', 'places'];
+ 	    var types = ['persons', 'institutions', 'titles', 'journals', 'publishers', 'places'];
  	    var forms = ['orig', 'translit', 'translat'];
  	    var count = 0;
  	    for (var i = 0, ilen = types.length; i < ilen; i += 1) {
