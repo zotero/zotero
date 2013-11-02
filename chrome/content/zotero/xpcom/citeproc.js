@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.499",
+    PROCESSOR_VERSION: "1.0.500",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -8370,9 +8370,11 @@ CSL.Node.names = {
                     state.build[key] = undefined;
                 }
             }
-            state.build.names_level += -1;
             this.label = state.build.name_label;
-            state.build.name_label = {};
+            if (state.build.names_level === 1) {
+                state.build.name_label = {};
+            }
+            state.build.names_level += -1;
             state.build.names_variables.pop();
             var mywith = "with";
             var with_default_prefix = "";
@@ -8652,10 +8654,10 @@ CSL.Node.substitute = {
 CSL.Node.text = {
     build: function (state, target) {
         var variable, func, form, plural, id, num, number, formatter, firstoutput, specialdelimiter, label, myname, names, name, year, suffix, term, dp, len, pos, n, m, value, flag;
-        CSL.Util.substituteStart.call(this, state, target);
         if (this.postponed_macro) {
-            CSL.expandMacro.call(state, this);
+            return CSL.expandMacro.call(state, this);
         } else {
+            CSL.Util.substituteStart.call(this, state, target);
             if (!this.variables_real) {
                 this.variables_real = [];
             }
@@ -8939,8 +8941,8 @@ CSL.Node.text = {
                 }
             }
             target.push(this);
+            CSL.Util.substituteEnd.call(this, state, target);
         }
-        CSL.Util.substituteEnd.call(this, state, target);
     }
 };
 CSL.Attributes = {};
