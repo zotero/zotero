@@ -881,28 +881,29 @@ INSERT INTO itemTypeFields VALUES (27, 116, NULL, 10);
 INSERT INTO itemTypeFields VALUES (27, 2, NULL, 11);
 INSERT INTO itemTypeFields VALUES (27, 22, NULL, 12);
 
-INSERT INTO itemTypeFields VALUES (28, 110, NULL, 1);
-INSERT INTO itemTypeFields VALUES (28, 90, NULL, 2);
-INSERT INTO itemTypeFields VALUES (28, 63, NULL, 3);
-INSERT INTO itemTypeFields VALUES (28, 28, NULL, 4);
-INSERT INTO itemTypeFields VALUES (28, 4, NULL, 5);
-INSERT INTO itemTypeFields VALUES (28, 45, NULL, 6);
-INSERT INTO itemTypeFields VALUES (28, 7, NULL, 7);
-INSERT INTO itemTypeFields VALUES (28, 76, NULL, 8);
-INSERT INTO itemTypeFields VALUES (28, 14, NULL, 9);
-INSERT INTO itemTypeFields VALUES (28, 77, NULL, 10);
-INSERT INTO itemTypeFields VALUES (28, 87, NULL, 11);
-INSERT INTO itemTypeFields VALUES (28, 11, NULL, 12);
-INSERT INTO itemTypeFields VALUES (28, 116, NULL, 13);
-INSERT INTO itemTypeFields VALUES (28, 91, NULL, 14);
-INSERT INTO itemTypeFields VALUES (28, 1, NULL, 15);
-INSERT INTO itemTypeFields VALUES (28, 27, NULL, 16);
-INSERT INTO itemTypeFields VALUES (28, 123, NULL, 17);
-INSERT INTO itemTypeFields VALUES (28, 19, NULL, 18);
-INSERT INTO itemTypeFields VALUES (28, 62, NULL, 19);
-INSERT INTO itemTypeFields VALUES (28, 18, NULL, 20);
-INSERT INTO itemTypeFields VALUES (28, 2, NULL, 21);
-INSERT INTO itemTypeFields VALUES (28, 22, NULL, 22);
+
+INSERT INTO itemTypeFields VALUES (28, 110, NULL, 1);  --
+INSERT INTO itemTypeFields VALUES (28, 90, NULL, 2);   --
+INSERT INTO itemTypeFields VALUES (28, 63, NULL, 3);   --
+INSERT INTO itemTypeFields VALUES (28, 28, NULL, 4);   --
+INSERT INTO itemTypeFields VALUES (28, 4, NULL, 5);    --
+INSERT INTO itemTypeFields VALUES (28, 45, NULL, 6);   --
+INSERT INTO itemTypeFields VALUES (28, 7, NULL, 7);    --
+INSERT INTO itemTypeFields VALUES (28, 76, NULL, 8);   --
+INSERT INTO itemTypeFields VALUES (28, 14, NULL, 9);   --
+INSERT INTO itemTypeFields VALUES (28, 77, NULL, 10);  --
+INSERT INTO itemTypeFields VALUES (28, 87, NULL, 11);  --
+INSERT INTO itemTypeFields VALUES (28, 11, NULL, 12);  --
+INSERT INTO itemTypeFields VALUES (28, 116, NULL, 13); --
+INSERT INTO itemTypeFields VALUES (28, 91, NULL, 14);  -- websiteTitle [ADDED]
+INSERT INTO itemTypeFields VALUES (28, 1, NULL, 15);   --
+INSERT INTO itemTypeFields VALUES (28, 27, NULL, 16);  --
+INSERT INTO itemTypeFields VALUES (28, 123, NULL, 17); --
+INSERT INTO itemTypeFields VALUES (28, 19, NULL, 18);  --
+INSERT INTO itemTypeFields VALUES (28, 62, NULL, 19);  --
+INSERT INTO itemTypeFields VALUES (28, 18, NULL, 20);  --
+INSERT INTO itemTypeFields VALUES (28, 2, NULL, 21);   --
+INSERT INTO itemTypeFields VALUES (28, 22, NULL, 22);  --
 
 -- tvBroadcast
 INSERT INTO itemTypeFields VALUES (29, 110, NULL, 1);  -- title
