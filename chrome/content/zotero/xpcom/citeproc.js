@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.500",
+    PROCESSOR_VERSION: "1.0.501",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -8946,6 +8946,17 @@ CSL.Node.text = {
     }
 };
 CSL.Attributes = {};
+CSL.Attributes["@genre"] = function (state, arg) {
+    arg = arg.replace("-", " ");
+    var func = function (Item, item) {
+        var ret;
+        if (arg === Item.genre) {
+            return true;
+        }
+        return false;
+    }
+    this.tests.push(func);
+}
 CSL.Attributes["@disambiguate"] = function (state, arg) {
     if (arg === "true") {
         state.opt.has_disambiguate = true;
