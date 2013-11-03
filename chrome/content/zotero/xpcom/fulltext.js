@@ -297,13 +297,18 @@ Zotero.Fulltext = new function(){
 		
 		Zotero.debug("Indexing document '" + document.title + "'");
 		
+		if (!Zotero.MIME.isTextType(document.contentType)) {
+			Zotero.debug(document.contentType + " document is not text", 2);
+			return false;
+		}
+		
 		if (!document.body) {
-			Zotero.debug("Cannot index " + document.contentType + " file in indexDocument()", 2);
+			Zotero.debug("Cannot index " + document.contentType + " file", 2);
 			return false;
 		}
 		
 		if (!document.characterSet){
-			Zotero.debug("Text file didn't have charset in indexFile()", 1);
+			Zotero.debug("Text file didn't have charset", 2);
 			return false;
 		}
 		
@@ -356,7 +361,7 @@ Zotero.Fulltext = new function(){
 			}
 		}
 		
-		if (mimeType.substr(0, 5)!='text/'){
+		if (!Zotero.MIME.isTextType(mimeType)) {
 			Zotero.debug('File is not text in indexFile()', 2);
 			return false;
 		}
@@ -405,6 +410,7 @@ Zotero.Fulltext = new function(){
 	 */
 	function indexPDF(file, itemID, allPages) {
 		if (!_pdfConverter) {
+			Zotero.debug("PDF tools are not installed -- skipping indexing");
 			return false;
 		}
 		
