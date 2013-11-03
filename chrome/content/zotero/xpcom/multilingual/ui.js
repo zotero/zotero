@@ -108,6 +108,9 @@ Zotero.EXTENDED_FIELDS = {
 		"date":"issued",
 		"publisher":"publisher"
 	},
+	"videoRecording": {
+		"websiteTitle":"container-title"
+	},
 	"report": {
 		"bookTitle":"container-title",
 		"jurisdiction":"jurisdiction",
