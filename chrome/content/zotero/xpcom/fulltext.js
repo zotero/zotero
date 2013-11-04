@@ -370,9 +370,22 @@ Zotero.Fulltext = new function(){
 		text = text.replace(/(>)/g, '$1 ');
 		text = this.HTMLToText(text);
 		this.indexString(text, document.characterSet, itemID);
-		
 		var charsIndexed = Math.min(maxLength, text.length);
 		this.setChars(itemID, { indexed: charsIndexed, total: text.length });
+		
+		// Write the converted text to a cache file
+		Q.fcall(function () {
+			let cacheFile = self.getItemCacheFile(itemID);
+			Zotero.debug("Writing converted full-text HTML content to " + cacheFile.path);
+			if (!cacheFile.parent.exists()) {
+				Zotero.Attachments.createDirectoryForItem(itemID);
+			}
+			return Zotero.File.putContentsAsync(cacheFile, text);
+		})
+		.catch(function (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+		})
 	}
 	
 	
@@ -597,6 +610,7 @@ Zotero.Fulltext = new function(){
 	 * @return {Array<Object>}
 	 */
 	this.getUnsyncedContent = function (maxChars) {
+		var maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
 		var first = true;
 		var chars = 0;
 		var contentItems = [];
@@ -632,14 +646,17 @@ Zotero.Fulltext = new function(){
 						}
 						
 						Zotero.debug("Adding full-text content from file for item " + libraryKey);
-						text = Zotero.File.getContents(
-							file, item.attachmentCharset, row.indexedChars
-						);
+						text = Zotero.File.getContents(file, item.attachmentCharset, maxLength);
 						
-						// Split elements to avoid word concatentation
+						// If HTML, convert to plain text first, and cache the result
 						if (item.attachmentMIMEType == 'text/html') {
+							// Split elements to avoid word concatentation
 							text = text.replace(/(>)/g, '$1 ');
+							
 							text = this.HTMLToText(text);
+							
+							// Include in the cache file only as many characters as we've indexed
+							text = text.substr(0, row.indexedChars);
 							
 							// Write the converted text to a cache file
 							Zotero.debug("Writing converted full-text HTML content to "
@@ -651,7 +668,11 @@ Zotero.Fulltext = new function(){
 							.catch(function (e) {
 								Zotero.debug(e, 1);
 								Components.utils.reportError(e);
-							})
+							});
+						}
+						else {
+							// Include only as many characters as we've indexed
+							text = text.substr(0, row.indexedChars);
 						}
 					}
 				}
@@ -1066,6 +1087,12 @@ Zotero.Fulltext = new function(){
 						content = content.replace(/(>)/g, '$1 ');
 						
 						content = this.HTMLToText(content);
+						
+						// Include in the cache file only as many characters as we've indexed
+						let chars = this.getChars(itemID);
+						if (chars && chars.indexedChars) {
+							content = content.substr(0, chars.indexedChars);
+						}
 						
 						// Write the converted text to a cache file for future searches
 						Zotero.debug("Writing converted full-text content to " + cacheFile.path);
