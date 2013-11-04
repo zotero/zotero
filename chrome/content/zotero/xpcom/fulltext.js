@@ -591,7 +591,8 @@ Zotero.Fulltext = new function(){
 		var chars = 0;
 		var contentItems = [];
 		var sql = "SELECT itemID, indexedChars, totalChars, indexedPages, totalPages "
-			+ "FROM fulltextItems WHERE synced=" + SYNC_STATE_UNSYNCED;
+			+ "FROM fulltextItems JOIN items USING (itemID) WHERE synced=" + SYNC_STATE_UNSYNCED
+			+ " ORDER BY clientDateModified DESC";
 		var rows = Zotero.DB.query(sql) || [];
 		for each (let row in rows) {
 			let text;
