@@ -55,6 +55,10 @@ Zotero.Sync = new function() {
 			setting: {
 				singular: 'Setting',
 				plural: 'Settings'
+			},
+			fulltext: {
+				singular: 'Fulltext',
+				plural: 'Fulltexts'
 			}
 		};
 	});
@@ -132,7 +136,7 @@ Zotero.Sync = new function() {
 		}
 		
 		for (var type in this.syncObjects) {
-			if (type == 'setting') {
+			if (type == 'setting' || type == 'fulltext') {
 				continue;
 			}
 			
@@ -450,6 +454,9 @@ Zotero.Sync.EventListener = new function () {
 				var libraryID, key;
 				if (type == 'setting') {
 					[libraryID, key] = ids[i].split("/");
+				}
+				else if (type == 'fulltext') {
+					continue;
 				}
 				else {
 					var oldItem = extraData[ids[i]].old;
@@ -1462,6 +1469,8 @@ Zotero.Sync.Server = new function () {
 			body += '&upload=1';
 		}
 		
+		body += Zotero.Fulltext.getUndownloadedPostData();
+		
 		Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.gettingUpdatedData'));
 		
 		Zotero.HTTP.doPost(url, body, function (xmlhttp) {
@@ -1693,6 +1702,14 @@ Zotero.Sync.Server = new function () {
 							
 							var sql = "UPDATE syncedSettings SET synced=1";
 							Zotero.DB.query(sql);
+							
+							if (syncSession.fulltextItems && syncSession.fulltextItems.length) {
+								let sql = "UPDATE fulltextItems SET synced=1 WHERE itemID=?";
+								for each (let lk in syncSession.fulltextItems) {
+									let item = Zotero.Items.getByLibraryAndKey(lk.libraryID, lk.key);
+									Zotero.DB.query(sql, item.id);
+								}
+							}
 							
 							//throw('break2');
 							
@@ -2825,6 +2842,26 @@ Zotero.Sync.Server.Data = new function() {
 					Zotero.SyncedSettings.setSynchronous(libraryID, name, value, version, true);
 					continue;
 				}
+				else if (type == 'fulltext') {
+					if (!libraryID) {
+						libraryID = 0;
+					}
+					let key = objectNode.getAttribute('key');
+					Zotero.debug("Processing remote full-text content for item " + libraryID + "/" + key);
+					Zotero.Fulltext.setItemContent(
+						libraryID,
+						key,
+						objectNode.textContent,
+						{
+							indexedChars: parseInt(objectNode.getAttribute('indexedChars')),
+							totalChars: parseInt(objectNode.getAttribute('totalChars')),
+							indexedPages: parseInt(objectNode.getAttribute('indexedPages')),
+							totalPages: parseInt(objectNode.getAttribute('totalPages'))
+						},
+						parseInt(objectNode.getAttribute('version'))
+					);
+					continue;
+				}
 				
 				var key = objectNode.getAttribute('key');
 				var objLibraryKeyHash = Zotero[Types].makeLibraryKeyHash(libraryID, key);
@@ -3535,6 +3572,36 @@ Zotero.Sync.Server.Data = new function() {
 				settingsNode.appendChild(settingNode);
 			}
 			docElem.appendChild(settingsNode);
+		}
+		
+		// Add up to 500K characters of full-text content
+		try {
+			var rows = Zotero.Fulltext.getUnsyncedContent(500000);
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+			var rows = [];
+		}
+		if (rows.length) {
+			let fulltextsNode = doc.createElement('fulltexts');
+			syncSession.fulltextItems = [];
+			for (let i=0; i<rows.length; i++) {
+				syncSession.fulltextItems.push({
+					libraryID: rows[i].libraryID,
+					key: rows[i].key
+				})
+				let node = doc.createElement('fulltext');
+				node.setAttribute('libraryID', rows[i].libraryID ? rows[i].libraryID : Zotero.libraryID);
+				node.setAttribute('key', rows[i].key);
+				node.setAttribute('indexedChars', rows[i].indexedChars);
+				node.setAttribute('totalChars', rows[i].totalChars);
+				node.setAttribute('indexedPages', rows[i].indexedPages);
+				node.setAttribute('totalPages', rows[i].totalPages);
+				node.appendChild(doc.createTextNode(_xmlize(rows[i].text)));
+				fulltextsNode.appendChild(node);
+			}
+			docElem.appendChild(fulltextsNode);
 		}
 		
 		// Deletions

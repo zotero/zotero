@@ -271,6 +271,7 @@ CREATE TABLE fulltextItems (
     totalPages INT,
     indexedChars INT,
     totalChars INT,
+    synced INT DEFAULT 0,
     FOREIGN KEY (itemID) REFERENCES items(itemID)
 );
 CREATE INDEX fulltextItems_version ON fulltextItems(version);
