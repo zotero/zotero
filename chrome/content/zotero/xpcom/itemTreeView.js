@@ -1898,7 +1898,7 @@ Zotero.ItemTreeView.prototype.selectItems = function(ids) {
 	
 	var rows = [];
 	for each(var id in ids) {
-		rows.push(this._itemRowMap[id]);
+		if(this._itemRowMap[id] !== undefined) rows.push(this._itemRowMap[id]);
 	}
 	rows.sort(function (a, b) {
 		return a - b;
