@@ -558,7 +558,7 @@ Zotero.Fulltext = new function(){
 	
 	
 	function indexItems(items, complete, ignoreErrors) {
-		if (Array.isArray(items)) {
+		if (!Array.isArray(items)) {
 			items = [items];
 		}
 		var items = Zotero.Items.get(items);
