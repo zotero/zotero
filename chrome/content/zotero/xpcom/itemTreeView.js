@@ -189,7 +189,7 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 			
 			Q.fcall(function () {
 				if (coloredTagsRE.test(key)) {
-					let libraryID = self._itemGroup.libraryID;
+					let libraryID = self._itemGroup.ref.libraryID;
 					libraryID = libraryID ? parseInt(libraryID) : 0;
 					let position = parseInt(key) - 1;
 					return Zotero.Tags.getColorByPosition(libraryID, position)
