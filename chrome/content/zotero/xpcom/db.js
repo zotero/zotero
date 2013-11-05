@@ -796,6 +796,7 @@ Zotero.DBConnection.prototype.closeDatabase = function () {
 		this.stopDummyStatement();
 		var deferred = Q.defer();
 		this._connection.asyncClose(deferred.resolve);
+		this._connection = undefined;
 		return deferred.promise;
 	} else {
 		return Q();

@@ -808,7 +808,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			// remove temp directory
 			Zotero.removeTempDirectory();
 			
-			if(Zotero.initialized && Zotero.DB) {
+			if(Zotero.DB && Zotero.DB._connection) {
 				Zotero.debug("Closing database");
 				
 				// run GC to finalize open statements
