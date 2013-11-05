@@ -32,6 +32,7 @@
 		<preferences>
 			<preference id="pref-sync-autosync" name="extensions.zotero.sync.autoSync" type="bool"/>
 			<preference id="pref-sync-username" name="extensions.zotero.sync.server.username" type="string" instantApply="true"/>
+			<preference id="pref-sync-fulltext-enabled" name="extensions.zotero.sync.fulltext.enabled" type="bool"/>
 			<preference id="pref-storage-enabled" name="extensions.zotero.sync.storage.enabled" type="bool"/>
 			<preference id="pref-storage-protocol" name="extensions.zotero.sync.storage.protocol" type="string"
 				onchange="Zotero_Preferences.Sync.unverifyStorageServer()"/>
@@ -75,6 +76,15 @@
 									<row>
 										<box/>
 										<checkbox label="&zotero.preferences.sync.syncAutomatically;" preference="pref-sync-autosync"/>
+									</row>
+									<row>
+										<box/>
+										<vbox>
+											<!-- TODO: localize -->
+											<checkbox label="Sync full-text content"
+												preference="pref-sync-fulltext-enabled"
+												tooltiptext="Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other computers, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly."/>
+										</vbox>
 									</row>
 									<!--
 									<row>

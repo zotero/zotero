@@ -1368,6 +1368,44 @@ Zotero.Sync.Server = new function () {
 			_error(e);
 		}
 		
+		// TEMP
+		if (Zotero.Prefs.get("sync.fulltext.enabled") &&
+				Zotero.DB.valueQuery("SELECT version FROM version WHERE schema='userdata'") < 77) {
+			// Don't show multiple times on idle
+			_syncInProgress = true;
+			
+			let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+				.getService(Components.interfaces.nsIPromptService);
+			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
+				+ ps.BUTTON_DELAY_ENABLE;
+			let index = ps.confirmEx(
+				null,
+				"New: Full-Text Content Syncing",
+				"Zotero can now sync the full-text content of files in your Zotero libraries "
+					+ "with zotero.org and other computers, allowing you to easily search for "
+					+ "your files wherever you are. The full-text content of your files will "
+					+ "not be shared publicly.\n\n"
+					+ "You can change this setting later from the Sync pane of the Zotero "
+					+ "preferences.",
+				buttonFlags,
+				"Use Full-Text Syncing",
+				"Not Now",
+				null, null, {}
+			);
+			
+			_syncInProgress = false;
+			
+			// Enable
+			if (index == 0) {
+				Zotero.DB.query("UPDATE version SET version=77 WHERE schema='userdata'");
+			}
+			// Disable
+			else {
+				Zotero.Prefs.set("sync.fulltext.enabled", false);
+			}
+		}
+		
 		username = encodeURIComponent(username);
 		password = encodeURIComponent(password);
 		var body = _apiVersionComponent
@@ -1469,7 +1507,12 @@ Zotero.Sync.Server = new function () {
 			body += '&upload=1';
 		}
 		
-		body += Zotero.Fulltext.getUndownloadedPostData();
+		if (Zotero.Prefs.get("sync.fulltext.enabled")) {
+			body += "&ft=1" + Zotero.Fulltext.getUndownloadedPostData();
+		}
+		else {
+			body += "&ft=0";
+		}
 		
 		Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.gettingUpdatedData'));
 		
@@ -3574,34 +3617,36 @@ Zotero.Sync.Server.Data = new function() {
 			docElem.appendChild(settingsNode);
 		}
 		
-		// Add up to 500K characters of full-text content
-		try {
-			var rows = Zotero.Fulltext.getUnsyncedContent(500000);
-		}
-		catch (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
-			var rows = [];
-		}
-		if (rows.length) {
-			let fulltextsNode = doc.createElement('fulltexts');
-			syncSession.fulltextItems = [];
-			for (let i=0; i<rows.length; i++) {
-				syncSession.fulltextItems.push({
-					libraryID: rows[i].libraryID,
-					key: rows[i].key
-				})
-				let node = doc.createElement('fulltext');
-				node.setAttribute('libraryID', rows[i].libraryID ? rows[i].libraryID : Zotero.libraryID);
-				node.setAttribute('key', rows[i].key);
-				node.setAttribute('indexedChars', rows[i].indexedChars);
-				node.setAttribute('totalChars', rows[i].totalChars);
-				node.setAttribute('indexedPages', rows[i].indexedPages);
-				node.setAttribute('totalPages', rows[i].totalPages);
-				node.appendChild(doc.createTextNode(_xmlize(rows[i].text)));
-				fulltextsNode.appendChild(node);
+		if (Zotero.Prefs.get("sync.fulltext.enabled")) {
+			// Add up to 500K characters of full-text content
+			try {
+				var rows = Zotero.Fulltext.getUnsyncedContent(500000);
 			}
-			docElem.appendChild(fulltextsNode);
+			catch (e) {
+				Zotero.debug(e, 1);
+				Components.utils.reportError(e);
+				var rows = [];
+			}
+			if (rows.length) {
+				let fulltextsNode = doc.createElement('fulltexts');
+				syncSession.fulltextItems = [];
+				for (let i=0; i<rows.length; i++) {
+					syncSession.fulltextItems.push({
+						libraryID: rows[i].libraryID,
+						key: rows[i].key
+					})
+					let node = doc.createElement('fulltext');
+					node.setAttribute('libraryID', rows[i].libraryID ? rows[i].libraryID : Zotero.libraryID);
+					node.setAttribute('key', rows[i].key);
+					node.setAttribute('indexedChars', rows[i].indexedChars);
+					node.setAttribute('totalChars', rows[i].totalChars);
+					node.setAttribute('indexedPages', rows[i].indexedPages);
+					node.setAttribute('totalPages', rows[i].totalPages);
+					node.appendChild(doc.createTextNode(_xmlize(rows[i].text)));
+					fulltextsNode.appendChild(node);
+				}
+				docElem.appendChild(fulltextsNode);
+			}
 		}
 		
 		// Deletions
