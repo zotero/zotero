@@ -1381,16 +1381,12 @@ Zotero.Sync.Server = new function () {
 				+ ps.BUTTON_DELAY_ENABLE;
 			let index = ps.confirmEx(
 				null,
-				"New: Full-Text Content Syncing",
-				"Zotero can now sync the full-text content of files in your Zotero libraries "
-					+ "with zotero.org and other linked devices, allowing you to easily search for "
-					+ "your files wherever you are. The full-text content of your files will "
-					+ "not be shared publicly.\n\n"
-					+ "You can change this setting later from the Sync pane of the Zotero "
-					+ "preferences.",
+				Zotero.getString('sync.fulltext.upgradePrompt.title'),
+				Zotero.getString('sync.fulltext.upgradePrompt.text') + "\n\n"
+					+ Zotero.getString('sync.fulltext.upgradePrompt.changeLater'),
 				buttonFlags,
-				"Use Full-Text Syncing",
-				"Not Now",
+				Zotero.getString('sync.fulltext.upgradePrompt.enable'),
+				Zotero.getString('general.notNow'),
 				null, null, {}
 			);
 			

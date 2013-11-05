@@ -80,10 +80,9 @@
 									<row>
 										<box/>
 										<vbox>
-											<!-- TODO: localize -->
-											<checkbox label="Sync full-text content"
+											<checkbox label="&zotero.preferences.sync.syncFullTextContent;"
 												preference="pref-sync-fulltext-enabled"
-												tooltiptext="Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly."/>
+												tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"/>
 										</vbox>
 									</row>
 									<!--
