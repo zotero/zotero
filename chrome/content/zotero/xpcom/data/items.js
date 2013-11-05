@@ -953,6 +953,21 @@ Zotero.Items = new function() {
 		if (!arguments[0] && !this._reloadCache) {
 			return;
 		}
+		// XXX Kludge to avoid error observed under MLZ with
+		// XXX Word for Mac, on an item in a document that had
+		// XXX been removed from MLZ
+		var args;
+		if (arguments[0]) {
+			args = arguments[0].slice();
+			for (var i=args.length-1;i>-1;i+=-1) {
+				if ("string" === typeof args[i] && args[i].indexOf("/") !== -1) {
+					args = args.slice(0,i).concat(args.slice(i+1));
+				}
+			}
+			if (!args.length) {
+				return;
+			}
+		}
 		
 		// Should be the same as parts in Zotero.Item.loadPrimaryData
 		var sql = 'SELECT I.*, '
@@ -966,7 +981,7 @@ Zotero.Items = new function() {
 			+ getSortCreatorSQL()
 			+ ' FROM items I WHERE 1';
 		if (arguments[0]) {
-			sql += ' AND I.itemID IN (' + Zotero.join(arguments[0], ',') + ')';
+			sql += ' AND I.itemID IN (' + Zotero.join(args, ',') + ')';
 		}
 		var itemsRows = Zotero.DB.query(sql),
 			itemIDs = {};
