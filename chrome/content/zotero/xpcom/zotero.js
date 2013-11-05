@@ -472,6 +472,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		if(Zotero.isConnector) {
 			Zotero.debug("Loading in connector mode");
 			Zotero.Connector_Types.init();
+
+			// Store a startupError until we get information from Zotero Standalone
+			Zotero.startupError = Zotero.getString("connector.loadInProgress")
 			
 			if(!Zotero.isFirstLoadThisSession) {
 				// We want to get a checkInitComplete message before initializing if we switched to
@@ -496,6 +499,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	this.initComplete = function() {
 		if(Zotero.initialized) return;
 		this.initialized = true;
+		delete this.startupError;
 		
 		if(Zotero.isConnector) {
 			Zotero.Repo.init();
