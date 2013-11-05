@@ -43,10 +43,6 @@ var Zotero_Preferences = {
 			if(io.pane) {
 				var pane = document.getElementById(io.pane);
 				document.getElementById('zotero-prefs').showPane(pane);
-				// Quick hack to support install prompt from PDF recognize option
-				if (io.action && io.action == 'pdftools-install') {
-					this.Search.checkPDFToolsDownloadVersion();
-				}
 			}
 		} else if(document.location.hash == "#cite") {
 			document.getElementById('zotero-prefs').showPane(document.getElementById("zotero-prefpane-cite"));

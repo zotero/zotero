@@ -34,6 +34,12 @@ Zotero_Preferences.Search = {
 		this.updatePDFToolsStatus();
 		
 		this.updateIndexStats();
+		
+		// Quick hack to support install prompt from PDF recognize option
+		var io = window.arguments[0];
+		if (io.action && io.action == 'pdftools-install') {
+			this.checkPDFToolsDownloadVersion();
+		}
 	},
 	
 	/*

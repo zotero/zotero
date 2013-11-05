@@ -81,7 +81,9 @@ Zotero_File_Exporter.prototype.save = function() {
 		translation.setLocation(fp.file);
 		translation.setTranslator(io.selectedTranslator);
 		translation.setDisplayOptions(io.displayOptions);
-		translation.setHandler("itemDone", Zotero_File_Interface.updateProgress);
+		translation.setHandler("itemDone", function () {
+			Zotero_File_Interface.updateProgress(translation, false);
+		});
 		translation.setHandler("done", this._exportDone);
 		Zotero.UnresponsiveScriptIndicator.disable();
 		Zotero_File_Interface.Progress.show(
@@ -308,7 +310,9 @@ var Zotero_File_Interface = new function() {
 				});
 			}
 			
-			translation.setHandler("itemDone", Zotero_File_Interface.updateProgress);
+			translation.setHandler("itemDone",  function () {
+				Zotero_File_Interface.updateProgress(translation, true);
+			});
 			
 			/*
 			 * closes items imported indicator
@@ -324,12 +328,10 @@ var Zotero_File_Interface = new function() {
 				Zotero_File_Interface.Progress.close();
 				Zotero.UnresponsiveScriptIndicator.enable();
 				
-				if (worked) {
-					if(importCollection) {
-						Zotero.Notifier.trigger('refresh', 'collection', importCollection.id);
-					}
-				} else {
-					if(importCollection) importCollection.erase();
+				if(importCollection) {
+					Zotero.Notifier.trigger('refresh', 'collection', importCollection.id);
+				}
+				if (!worked) {
 					window.alert(Zotero.getString("fileInterface.importError"));
 				}
 			});
@@ -651,33 +653,23 @@ var Zotero_File_Interface = new function() {
 	/**
 	 * Updates progress indicators based on current progress of translation
 	 */
-	this.updateProgress = function(translate) {
+	this.updateProgress = function(translate, closeTransaction) {
 		Zotero.updateZoteroPaneProgressMeter(translate.getProgress());
 		
 		var now = Date.now();
 		
-		// Don't repaint more than 10 times per second unless forced.
-		if(window.zoteroLastRepaint && (now - window.zoteroLastRepaint) < 100) return
+		// Don't repaint more than once per second unless forced.
+		if(window.zoteroLastRepaint && (now - window.zoteroLastRepaint) < 1000) return
 		
-		// Start a nested event queue
-		// TODO Remove when Fx > 14
-		var eventQueuePushed = "pushEventQueue" in Zotero.mainThread;
-		if(eventQueuePushed) {
-			Zotero.mainThread.pushEventQueue(null);
-		}
+		// Add the redraw event onto event queue
+		window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+			.getInterface(Components.interfaces.nsIDOMWindowUtils)
+			.redraw();
 		
-		try {
-			// Add the redraw event onto event queue
-			window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-				.getInterface(Components.interfaces.nsIDOMWindowUtils)
-				.redraw();
-			
-			// Process redraw event
-			Zotero.wait(0);
-		} finally {
-			// Close nested event queue
-			if(eventQueuePushed) Zotero.mainThread.popEventQueue();
-		}
+		// Process redraw event
+		if(closeTransaction) Zotero.DB.commitTransaction();
+		Zotero.wait();
+		if(closeTransaction) Zotero.DB.beginTransaction();
 		
 		window.zoteroLastRepaint = now;
 	}
