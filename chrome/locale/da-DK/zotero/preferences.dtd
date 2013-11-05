@@ -27,7 +27,7 @@
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapporter om &quot;oversættere&quot; uden forbindelse">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillad Zoter.org at tilpasse indhold baseret på den aktuelle Zotero-version">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Hvis den er slået til, vil den aktuelle Zotero-version blive medtaget ved  HTTP-forespørgsler til zotero.org.">
-<!ENTITY zotero.preferences.parseRISRefer "Anvend Zotero til downloadede RIS/Refer-filer">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "Tag automatisk et &quot;Snapshot&quot; når der oprettes Elementer for web-sider">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Vedhæft automatisk tilhørende PDF-filer og andre filer når Elementer gemmes">
 <!ENTITY zotero.preferences.automaticTags "Mærk automatisk Elementer med stikord og emne-grupper">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Opret konto">
 <!ENTITY zotero.preferences.sync.lostPassword "Mistet adgangskode?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkroniser automatisk">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "Om synkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing "Fil-synkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">

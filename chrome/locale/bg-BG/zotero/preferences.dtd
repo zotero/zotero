@@ -27,7 +27,7 @@
 <!ENTITY zotero.preferences.reportTranslationFailure "Осведомява за неработещи преводачи на страници">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Разрешава на zotero.org да персонализира съдържанието според настоящата версия на Зотеро">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Когато е включен, натоящата версия на Зотеро ще бъде добавена в HTTP поискванията към zotero.org.">
-<!ENTITY zotero.preferences.parseRISRefer "Зотеро отваря изтеглените RIS/Refer файлове">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "Автоматично прави снимки при се създават записи от интернет страници">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматично прикачва асоциираните PDF и други файлове при съхранение на записите">
 <!ENTITY zotero.preferences.automaticTags "Автоматично маркира записите с ключови думи и заглавие на темата">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Регистрация">
 <!ENTITY zotero.preferences.sync.lostPassword "Загубена парола?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Автоматично синхронизиране">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "За синхронизирането">
 <!ENTITY zotero.preferences.sync.fileSyncing "Синхронизира файловете">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Адрес:">

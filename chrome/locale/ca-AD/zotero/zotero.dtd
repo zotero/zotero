@@ -5,7 +5,7 @@
 <!ENTITY zotero.general.edit "Edita">
 <!ENTITY zotero.general.delete "Suprimeix">
 
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
+<!ENTITY zotero.errorReport.title "Informe d'error de Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "El registre d&apos;error pot incloure missatges no relacionats amb el Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Espereu mentre s&apos;envia l&apos;informe d&apos;error.">
 <!ENTITY zotero.errorReport.submitted "L&apos;informe d&apos;error ha estat enviat correctament.">
@@ -13,7 +13,7 @@
 <!ENTITY zotero.errorReport.postToForums "Escriu un missatge al fòrum del Zotero (forums.zotero.org) amb aquest número de referència de l&apos;informe, una descripció del problema i qualsevol pas necessari per a reproduir-lo.">
 <!ENTITY zotero.errorReport.notReviewed "Els informes d&apos;error generalment no es revisen ni no es notifiquen al fòrum.">
 
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.title "Auxiliar d'actualització de Zotero">
 <!ENTITY zotero.upgrade.newVersionInstalled "Has instal·lat una nova versió del Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "La vostra base de dades s&apos;ha d&apos;actualitzar per a funcionar amb la nova versió.">
 <!ENTITY zotero.upgrade.autoBackup "Es farà una còpia de seguertat de la base de dades existent abans de fer cap canvi">
@@ -59,17 +59,17 @@
 <!ENTITY zotero.items.dateAdded_column "Data d&apos;incorporació">
 <!ENTITY zotero.items.dateModified_column "Data de modificació">
 <!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archive">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.place_column "Place">
-<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.archive_column "Arxiu">
+<!ENTITY zotero.items.archiveLocation_column "Ubicació a l'arxiu">
+<!ENTITY zotero.items.place_column "Lloc">
+<!ENTITY zotero.items.volume_column "Volum">
 <!ENTITY zotero.items.edition_column "Edició">
 <!ENTITY zotero.items.pages_column "Nre. de pàgines">
-<!ENTITY zotero.items.issue_column "Issue">
-<!ENTITY zotero.items.series_column "Series">
-<!ENTITY zotero.items.seriesTitle_column "Series Title">
-<!ENTITY zotero.items.court_column "Court">
-<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.issue_column "Número">
+<!ENTITY zotero.items.series_column "Sèrie">
+<!ENTITY zotero.items.seriesTitle_column "Títol de la sèrie">
+<!ENTITY zotero.items.court_column "Tribunal">
+<!ENTITY zotero.items.medium_column "Medi/format">
 <!ENTITY zotero.items.genre_column "Gènere">
 <!ENTITY zotero.items.system_column "Sistema">
 <!ENTITY zotero.items.moreColumns.label "Més columnes">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.item.textTransform "Transforma el text">
 <!ENTITY zotero.item.textTransform.titlecase "Majúscules o minúscules del títol">
 <!ENTITY zotero.item.textTransform.sentencecase "Majúscules o minúscules de la frase">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Intercanvia nom i cognoms">
 
 <!ENTITY zotero.toolbar.newNote "Nota nova">
 <!ENTITY zotero.toolbar.note.standalone "Nova nota independent">
@@ -146,8 +146,8 @@
 <!ENTITY zotero.tagColorChooser.title "Tria un color i una posició per a l'etiqueta">
 <!ENTITY zotero.tagColorChooser.color "Color:">
 <!ENTITY zotero.tagColorChooser.position "Posició:">
-<!ENTITY zotero.tagColorChooser.setColor "Set Color">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Estableix el color">
+<!ENTITY zotero.tagColorChooser.removeColor "Elimina el color">
 
 <!ENTITY zotero.lookup.description "Introduïu l'ISBN, DOI, o PMID per cercar en el quadre inferior.">
 <!ENTITY zotero.lookup.button.search "Cerca">
@@ -213,7 +213,7 @@
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abrevia automàticament els títols de les publicacions">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Les abreviacions de la revista MEDLINE es generaràn automàticament ambs els noms de les revistes. S'ignorarà el camp &quot;Revista abr.”.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Emmagatzema les referències al document">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "L'emmagatzematge de les referències en el document augmenta lleugerament la mida del fitxer, però us permet compartir el document amb altres persones sense necessitat de fer servir un grup del Zotero. Per actualitzar els documents creats amb aquesta opció cal tenir la versió Zotero 3.0 o versions posteriors.">

@@ -22,12 +22,12 @@
 <!ENTITY zotero.preferences.fontSize.notes "Veľkosť písma v poznámkach:">
 
 <!ENTITY zotero.preferences.miscellaneous "Rôzne">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
+<!ENTITY zotero.preferences.autoUpdate "Automaticky skontrolovať aktualizácie konvertorov a štýlov ">
 <!ENTITY zotero.preferences.updateNow "Aktualizovať teraz">
 <!ENTITY zotero.preferences.reportTranslationFailure "hlásiť chybné konvertory">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "povoliť stránke zotero.org, aby prispôsobovala svoj obsah podľa aktuálnej verzie Zotera">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Ak je táto voľba povolená, informácia o nainštalovanej verzii Zotera bude pridávaná do hlavičky HTTP požiadaviek zasielaných na zotero.org.">
-<!ENTITY zotero.preferences.parseRISRefer "použiť Zotero ako predvolený program pre prevzaté RIS/Refer súbory">
+<!ENTITY zotero.preferences.parseRISRefer "Použiť Zotero ako predvolený program pre prevzaté BibTeX/RIS/Refer súbory">
 <!ENTITY zotero.preferences.automaticSnapshots "pri vytváraní položiek z webových stránok automaticky urobiť snímku danej stránky">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "pri ukladaní položiek automaticky priložiť prepojené PDF a ostatné súbory">
 <!ENTITY zotero.preferences.automaticTags "automaticky aplikovať kľúčové slová a predmetové heslá ako značky">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Vytvoriť nový účet">
 <!ENTITY zotero.preferences.sync.lostPassword "Stratené heslo?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchronizovať automaticky">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "O synchronizácii">
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronizácia súborov">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -126,12 +128,12 @@
 <!ENTITY zotero.preferences.prefpane.keys "Klávesové skratky">
 
 <!ENTITY zotero.preferences.keys.openZotero "Otvoriť/zatvoriť Zotero">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Uložiť do Zotera (ikona v lište pre adresu)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Prepnúť Zotero do celého okna">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Tabla knižníc Focus">
 <!ENTITY zotero.preferences.keys.quicksearch "Rýchle vyhľadávanie">
-<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
-<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.newItem "Vytvoriť novú položku">
+<!ENTITY zotero.preferences.keys.newNote "Vytvoriť novú poznámku">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Zobraziť/skryť značky">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopírovať vybrané citácie do schránky">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopírovať vybrané položky do schránky">

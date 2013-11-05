@@ -22,12 +22,12 @@
 <!ENTITY zotero.preferences.fontSize.notes "Teckenstorlek på anteckningar">
 
 <!ENTITY zotero.preferences.miscellaneous "Övrigt">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
+<!ENTITY zotero.preferences.autoUpdate "Kolla automatiskt efter uppdaterade källfångare och stilar">
 <!ENTITY zotero.preferences.updateNow "Uppdatera nu">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapportera felaktiga källfångare">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillåt zotero.org att justera innehåll beroende på installerad Zoteroversion">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Visa för zotero.org vilken version av programmet jag använder">
-<!ENTITY zotero.preferences.parseRISRefer "Använd Zotero för att ladda ner RIS/Refer-filer">
+<!ENTITY zotero.preferences.parseRISRefer "Använd Zotero för att ladda ner BibTeX/RIS/Refer-filer">
 <!ENTITY zotero.preferences.automaticSnapshots "Ta automatiskt lokala kopior när källor skapas av hemsidor">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Bifoga automatiskt associerade PDF:er och andra filer när källor sparas">
 <!ENTITY zotero.preferences.automaticTags "Lägg automatiskt till etiketter med nyckelord och ämnesord">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Skapa konto">
 <!ENTITY zotero.preferences.sync.lostPassword "Glömt lösenord?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkronisera automatiskt">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "Om synkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing "Filsynkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -126,12 +128,12 @@
 <!ENTITY zotero.preferences.prefpane.keys "Snabbkommandon">
 
 <!ENTITY zotero.preferences.keys.openZotero "Öppna/Stäng Zotero-panelen">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Spara till Zotero (adressradsikon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Växla fullskärmsläge">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Ruta för fokusbibliotek">
 <!ENTITY zotero.preferences.keys.quicksearch "Snabbsökning">
-<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
-<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.newItem "Lagra en ny källa">
+<!ENTITY zotero.preferences.keys.newNote "Skapa en ny anteckning">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Växla etikettväljare">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiera valda källanteckningar till urklipp">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiera valda källor till urklipp">

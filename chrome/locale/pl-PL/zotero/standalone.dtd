@@ -1,7 +1,7 @@
 <!ENTITY preferencesCmdMac.label "Ustawienia...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Usługi">
-<!ENTITY hideThisAppCmdMac.label "Hide &brandShortName;">
+<!ENTITY hideThisAppCmdMac.label "Ukryj &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
 <!ENTITY hideOtherAppsCmdMac.label "Ukryj inne">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
@@ -54,7 +54,7 @@
 <!ENTITY selectAllCmd.label "Zaznacz wszystko">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Preferences">
+<!ENTITY preferencesCmd.label "Ustawienia">
 <!ENTITY preferencesCmd.accesskey "O">
 <!ENTITY preferencesCmdUnix.label "Ustawienia">
 <!ENTITY preferencesCmdUnix.accesskey "n">
@@ -75,7 +75,7 @@
 
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimalizuj">
-<!ENTITY bringAllToFront.label "Bring All to Front">
+<!ENTITY bringAllToFront.label "Przenieś wszystko na przód">
 <!ENTITY zoomWindow.label "Powiększ">
 <!ENTITY windowMenu.label "Okno">
 
@@ -87,7 +87,7 @@
 <!ENTITY helpMenuWin.label "Pomoc">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "About &brandShortName;">
+<!ENTITY aboutProduct.label "O &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Wsparcie i dokumentacja">
 <!ENTITY productHelp.accesskey "D">

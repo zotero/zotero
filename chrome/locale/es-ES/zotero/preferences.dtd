@@ -22,12 +22,12 @@
 <!ENTITY zotero.preferences.fontSize.notes "Tamaño de letra en las notas:">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscelánea">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
+<!ENTITY zotero.preferences.autoUpdate "Automáticamente comprobar si hay traductores y estilos actualizados ">
 <!ENTITY zotero.preferences.updateNow "Hacerlo ahora">
 <!ENTITY zotero.preferences.reportTranslationFailure "Informar de fallos en los traductores de página">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Permitir que zotero.org personalice contenido basándose en la versión actual de Zotero">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Si se activa, la versión actual de Zotero se añadirá a las peticiones HTTP a zotero.org">
-<!ENTITY zotero.preferences.parseRISRefer "Usar Zotero para los archivos RIS/Refer descargados">
+<!ENTITY zotero.preferences.parseRISRefer "Utilizar Zotero para los archivos descargados en formato BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "Tomar instantáneas automáticamente al crear elementos a partir de páginas Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Adjuntar automáticamente los archivos PDF y de otros tipos al guardar elementos">
 <!ENTITY zotero.preferences.automaticTags "Marcar elementos automáticamente con palabras clave y cabeceras de asunto">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Crear cuenta">
 <!ENTITY zotero.preferences.sync.lostPassword "¿Olvidó su contraseña?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizar automáticamente">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "Acerca de la sincronización">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sincronización de archivos">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -126,12 +128,12 @@
 <!ENTITY zotero.preferences.prefpane.keys "Atajos de teclado">
 
 <!ENTITY zotero.preferences.keys.openZotero "Abrir/cerrar el panel de Zotero">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Guardar en Zotero (ícono de la barra de direcciones)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Conmutar el modo de pantalla completa">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Enfocar el panel de bibliotecas">
 <!ENTITY zotero.preferences.keys.quicksearch "Búsqueda rápida">
-<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
-<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.newItem "Crear un New Item">
+<!ENTITY zotero.preferences.keys.newNote "Crear una Nueva nota">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Conmutar el selector de marcas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar las citas para los ítems seleccionados al portapapeles">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar los ítems seleccionados al portapapeles">

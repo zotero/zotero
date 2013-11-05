@@ -27,7 +27,7 @@
 <!ENTITY zotero.preferences.reportTranslationFailure "گزارش مترجم‌های مشکل‌دار">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "اجازه به zotero.org برای تنظیم محتوا با توجه به نگارش زوترو">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "در صورت انتخاب این گزینه، نگارش زوترو در درخواست‌های HTTP به zotero.org گنجانده می‌شود.">
-<!ENTITY zotero.preferences.parseRISRefer "استفاده از زوترو برای پرونده‌های RIS/Refer بارگیری شده">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "ساخت خودکار «تصویر لحظه‌ای» در زمان ذخیره صفحات وب">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "پیوست خودکار پی‌دی‌اف‌ها و سایر پرونده‌های وابسته در زمان ذخیره آیتم‌ها">
 <!ENTITY zotero.preferences.automaticTags "برچسب زدن خودکار به آیتم‌ها با استفاده از کلمات کلیدی و موضوع‌ها">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "ساخت حساب کاربری">
 <!ENTITY zotero.preferences.sync.lostPassword "گذرواژه را فراموش کرده‌اید؟">
 <!ENTITY zotero.preferences.sync.syncAutomatically "همزمان‌‌سازی خودکار">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "درباره همزمان‌‌سازی">
 <!ENTITY zotero.preferences.sync.fileSyncing "همزمان‌‌سازی پرونده‌ها">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "آدرس:">

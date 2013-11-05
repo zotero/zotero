@@ -27,7 +27,7 @@
 <!ENTITY zotero.preferences.reportTranslationFailure "រាយការណ៍កូដចម្លងគេហទំព័រខូច">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "ទុកឲ zotero.org ផ្លាស់ប្តូរខ្លឹមសារដោយអនុលោមទៅតាមកំណែហ្ស៊ូតេរ៉ូថ្មី">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "ប្រសិនបើអាច កំណែហ្ស៊ូតេរ៉ូថ្មីនឹងត្រូវបញ្ចូលនៅក្នុងសំណើអេចធីធីភី​ទៅកាន់ zotero.org។">
-<!ENTITY zotero.preferences.parseRISRefer "ប្រើហ្ស៊ូតេរ៉ូសម្រាប់ទាញយកឯកសារយោង/អ៊ែរអាយអេស">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "ថតយកអត្ថបទចេញពីគេហទំព័រដោយស្វ័យប្រវត្តិ">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "ភ្ជាប់មកជាមួយដោយស្វ័យប្រវត្តិនូវឯកសារភីឌីអែហ្វ និង ឯកសារដទៃទៀត ខណៈពេលទាញរក្សាឯកសារទុក">
 <!ENTITY zotero.preferences.automaticTags "ដាក់ស្លាកឯកសារដោយប្រើពាក្យគន្លឹះ និង ចំណងជើងអត្ថបទដោយស្វ័យ​ប្រវត្តិ">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "បង្កើតគណនី">
 <!ENTITY zotero.preferences.sync.lostPassword "ភ្លេចលេខសម្ងាត់?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "ធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "អំពីសមកាលកម្ម">
 <!ENTITY zotero.preferences.sync.fileSyncing "ឯកសារកំពុងធ្វើសមកាលកម្ម">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "គេហទំព័រ:">

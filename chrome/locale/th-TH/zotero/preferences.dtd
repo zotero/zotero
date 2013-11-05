@@ -27,7 +27,7 @@
 <!ENTITY zotero.preferences.reportTranslationFailure "รายงานตัวช่วยแปลเว็บไซต์ใช้งานไม่ได้">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "ยินยอมให้ zotero.org ปรับปรุงข้อมูลตามรุ่นปัจจุบันของ Zotero">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "ถ้าเป็นไปได้ Zotero รุ่นปัจจุบันจะถูกเพิ่มใน HTTP โดยร้องขอไปยัง zotero.org">
-<!ENTITY zotero.preferences.parseRISRefer "ใช้ Zotero เพื่อดาวน์โหลดแฟ้ม RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "เก็บภาพหน้าจอโดยอัตโนมัติเมื่อสร้างรายการจากหน้าเว็บ">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "แนบแฟ้ม PDF และแฟ้มอื่นโดยอัตโนมัติเมื่อบันทึกรายการ">
 <!ENTITY zotero.preferences.automaticTags "สร้างแท็กด้วยคำสำคัญและหัวเรื่องโดยอัตโนมัติ">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "สร้างบัญชีผู้ใช้">
 <!ENTITY zotero.preferences.sync.lostPassword "รหัสผ่านหาย?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "ประสานข้อมูลโดยอัตโนมัติ">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "เกี่ยวกับการประสานข้อมูล">
 <!ENTITY zotero.preferences.sync.fileSyncing "ประสานข้อมูลในแฟ้ม">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
