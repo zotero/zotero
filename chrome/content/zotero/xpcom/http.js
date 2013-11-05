@@ -473,29 +473,116 @@ Zotero.HTTP = new function() {
 		var deferred = Q.defer();
 		Zotero.proxyAuthComplete = deferred.promise;
 		
-		var uri = ZOTERO_CONFIG.PROXY_AUTH_URL;
-		
-		Zotero.debug("HTTP GET " + uri);
-		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-					.createInstance();
-		xmlhttp.open("GET", uri, true);
-		
-		xmlhttp.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
-		
-		var useMethodjit = Components.utils.methodjit;
-		/** @ignore */
-		xmlhttp.onreadystatechange = function() {
-			// XXX Remove when we drop support for Fx <24
-			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
-			_stateChange(xmlhttp, function (xmlhttp) {
-				Zotero.debug("Proxy auth request completed with status "
-					+ xmlhttp.status + ": " + xmlhttp.responseText);
+		Q.fcall(function () {
+			var uris = Zotero.Prefs.get('proxyAuthenticationURLs').split(',');
+			uris = Zotero.Utilities.arrayShuffle(uris);
+			uris.unshift(ZOTERO_CONFIG.PROXY_AUTH_URL);
+			
+			return Q.async(function () {
+				let max = 3; // how many URIs to try after the general Zotero one
+				for (let i = 0; i <= max; i++) {
+					let uri = uris.shift();
+					if (!uri) {
+						break;
+					}
+					
+					// For non-Zotero URLs, wait for PAC initialization,
+					// in a rather ugly and inefficient manner
+					if (i == 1) {
+						let installed = yield Q.fcall(_pacInstalled)
+						.then(function (installed) {
+							if (installed) throw true;
+						})
+						.delay(500)
+						.then(_pacInstalled)
+						.then(function (installed) {
+							if (installed) throw true;
+						})
+						.delay(1000)
+						.then(_pacInstalled)
+						.then(function (installed) {
+							if (installed) throw true;
+						})
+						.delay(2000)
+						.then(_pacInstalled)
+						.catch(function () {
+							return true;
+						});
+						if (!installed) {
+							Zotero.debug("No general proxy or PAC file found -- assuming direct connection");
+							break;
+						}
+					}
+					
+					let proxyInfo = yield _proxyAsyncResolve(uri);
+					if (proxyInfo) {
+						Zotero.debug("Proxy required for " + uri + " -- making HEAD request to trigger auth prompt");
+						yield Zotero.HTTP.promise("HEAD", uri, {
+							foreground: true,
+							dontCache: true
+						})
+						.catch(function (e) {
+							Components.utils.reportError(e);
+							var msg = "Error connecting to proxy -- proxied requests may not work";
+							Zotero.log(msg, 'error');
+							Zotero.debug(msg, 1);
+						});
+						break;
+					}
+					else {
+						Zotero.debug("Proxy not required for " + uri);
+					}
+				}
 				deferred.resolve();
-			});
-		};
-		xmlhttp.send(null);
-		return xmlhttp;
+			})();
+		})
+		.catch(function (e) {
+			Components.utils.reportError(e);
+			Zotero.debug(e, 1);
+			deferred.resolve();
+		});
+	}
+	
+	
+	/**
+	 * Test if a PAC file is installed
+	 *
+	 * There might be a better way to do this that doesn't require stepping
+	 * through the error log and doing a fragile string comparison.
+	 */
+	_pacInstalled = function () {
+		return Zotero.getErrors(true).some(function (val) val.indexOf("PAC file installed") == 0)
+	}
+	
+	
+	_proxyAsyncResolve = function (uri) {
+		Components.utils.import("resource://gre/modules/NetUtil.jsm");
+		var pps = Components.classes["@mozilla.org/network/protocol-proxy-service;1"]
+			.getService(Components.interfaces.nsIProtocolProxyService);
+		var deferred = Q.defer();
+		pps.asyncResolve(
+			NetUtil.newURI(uri),
+			0,
+			{
+				onProxyAvailable: function (req, uri, proxyInfo, status) {
+					//Zotero.debug("onProxyAvailable");
+					//Zotero.debug(status);
+					deferred.resolve(proxyInfo);
+				},
+				
+				QueryInterface: function (iid) {
+					const interfaces = [
+						Components.interfaces.nsIProtocolProxyCallback,
+						Components.interfaces.nsISupports
+					];
+					if (!interfaces.some(function(v) { return iid.equals(v) })) {
+						throw Components.results.NS_ERROR_NO_INTERFACE;
+					}
+					return this;
+				},
+			}
+		);
+		return deferred.promise;
 	}
 	
 	

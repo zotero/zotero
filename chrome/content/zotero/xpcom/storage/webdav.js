@@ -600,7 +600,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 					var buttonText = Zotero.getString('general.openDocumentation');
 					var func = function () {
 						var zp = Zotero.getActiveZoteroPane();
-						zp.loadURI("http://www.zotero.org/support/kb/cert_override", { shiftKey: true });
+						zp.loadURI("https://www.zotero.org/support/kb/cert_override", { shiftKey: true });
 					};
 				}
 				// In Firefox display a button to load the WebDAV URL
@@ -619,10 +619,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 					{
 						dialogText: msg,
 						dialogButtonText: buttonText,
-						dialogButtonCallback: function () {
-							var zp = Zotero.getActiveZoteroPane();
-							zp.loadURI(channel.URI.spec, { shiftKey: true });
-						}
+						dialogButtonCallback: func
 					}
 				);
 				throw e;
@@ -1091,7 +1088,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			);
 		})
 		.catch(function (e) {
-			var msg = "HTTP " + req.status + " error from WebDAV server "
+			var msg = "HTTP " + e.status + " error from WebDAV server "
 				+ "for PUT request";
 			Zotero.debug(msg, 2);
 			Components.utils.reportError(msg);

@@ -189,7 +189,7 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 			
 			Q.fcall(function () {
 				if (coloredTagsRE.test(key)) {
-					let libraryID = self._itemGroup.libraryID;
+					let libraryID = self._itemGroup.ref.libraryID;
 					libraryID = libraryID ? parseInt(libraryID) : 0;
 					let position = parseInt(key) - 1;
 					return Zotero.Tags.getColorByPosition(libraryID, position)
@@ -1898,7 +1898,7 @@ Zotero.ItemTreeView.prototype.selectItems = function(ids) {
 	
 	var rows = [];
 	for each(var id in ids) {
-		rows.push(this._itemRowMap[id]);
+		if(this._itemRowMap[id] !== undefined) rows.push(this._itemRowMap[id]);
 	}
 	rows.sort(function (a, b) {
 		return a - b;

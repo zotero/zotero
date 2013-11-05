@@ -486,7 +486,7 @@ Zotero.Attachments = new function(){
 				// No file, so no point running the PDF indexer
 				//Zotero.Fulltext.indexItems([itemID]);
 			}
-			else {
+			else if (Zotero.MIME.isTextType(document.contentType)) {
 				Zotero.Fulltext.indexDocument(document, itemID);
 			}
 		}, 50);
@@ -563,22 +563,20 @@ Zotero.Attachments = new function(){
 				100 //make sure this matches WPD settings in webpagedump/common.js
 			);
 			file.append(fileName)
-
-			if (mimeType == 'application/pdf') {
-				var f = function() {
+			
+			var f = function() {
+				if (mimeType == 'application/pdf') {
 					Zotero.Fulltext.indexPDF(file, itemID);
 					Zotero.Notifier.trigger('refresh', 'item', itemID);
-				};
-			}
-			else {
-				var f = function() {
+				}
+				if (Zotero.MIME.isTextType(mimeType)) {
 					Zotero.Fulltext.indexDocument(document, itemID);
 					Zotero.Notifier.trigger('refresh', 'item', itemID);
-					if (callback) {
-						callback(attachmentItem);
-					}
-				};
-			}
+				}
+				if (callback) {
+					callback(attachmentItem);
+				}
+			};
 			
 			if (mimeType === 'text/html' || mimeType === 'application/xhtml+xml') {
 				var sync = true;
@@ -1251,7 +1249,7 @@ Zotero.Attachments = new function(){
 			Zotero.File.copyDirectory(dir, newDir);
 		}
 		
-		attachment.addLinkedItem(newAttachment);
+		newAttachment.addLinkedItem(attachment);
 		return newAttachment.id;
 	}
 	
@@ -1445,7 +1443,7 @@ Zotero.Attachments = new function(){
 		}
 		
 		var ext = Zotero.File.getExtension(file);
-		if (!Zotero.MIME.hasInternalHandler(mimeType, ext)) {
+		if (!Zotero.MIME.hasInternalHandler(mimeType, ext) || !Zotero.MIME.isTextType(mimeType)) {
 			return;
 		}
 		
