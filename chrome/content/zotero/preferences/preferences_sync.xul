@@ -83,7 +83,7 @@
 											<!-- TODO: localize -->
 											<checkbox label="Sync full-text content"
 												preference="pref-sync-fulltext-enabled"
-												tooltiptext="Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other computers, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly."/>
+												tooltiptext="Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly."/>
 										</vbox>
 									</row>
 									<!--

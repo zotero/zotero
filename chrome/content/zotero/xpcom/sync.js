@@ -1383,7 +1383,7 @@ Zotero.Sync.Server = new function () {
 				null,
 				"New: Full-Text Content Syncing",
 				"Zotero can now sync the full-text content of files in your Zotero libraries "
-					+ "with zotero.org and other computers, allowing you to easily search for "
+					+ "with zotero.org and other linked devices, allowing you to easily search for "
 					+ "your files wherever you are. The full-text content of your files will "
 					+ "not be shared publicly.\n\n"
 					+ "You can change this setting later from the Sync pane of the Zotero "
