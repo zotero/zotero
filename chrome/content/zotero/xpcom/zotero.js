@@ -1953,7 +1953,10 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			'CVE-2009-3555',
 			'OpenGL LayerManager',
 			'trying to re-register CID',
-			'Services.HealthReport'
+			'Services.HealthReport',
+			'[JavaScript Error: "this.docShell is null"',
+			'[JavaScript Error: "downloadable font:',
+			'[JavaScript Error: "Image corrupt or truncated:'
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
