@@ -1398,7 +1398,9 @@ Zotero.Sync.Server = new function () {
 			
 			// Enable
 			if (index == 0) {
+				Zotero.DB.backupDatabase(76, true);
 				Zotero.DB.query("UPDATE version SET version=77 WHERE schema='userdata'");
+				Zotero.wait(1000);
 			}
 			// Disable
 			else {
