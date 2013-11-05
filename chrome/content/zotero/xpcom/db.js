@@ -804,7 +804,7 @@ Zotero.DBConnection.prototype.closeDatabase = function () {
 }
 
 
-Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
+Zotero.DBConnection.prototype.backupDatabase = function (suffix, force) {
 	if (!suffix) {
 		var numBackups = Zotero.Prefs.get("backup.numBackups");
 		if (numBackups < 1) {
@@ -839,7 +839,7 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 	var file = Zotero.getZoteroDatabase(this._dbName);
 	
 	// For standard backup, make sure last backup is old enough to replace
-	if (!suffix) {
+	if (!suffix && !force) {
 		var backupFile = Zotero.getZoteroDatabase(this._dbName, 'bak');
 		if (backupFile.exists()) {
 			var currentDBTime = file.lastModifiedTime;

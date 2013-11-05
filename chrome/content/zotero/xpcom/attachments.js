@@ -567,11 +567,9 @@ Zotero.Attachments = new function(){
 			var f = function() {
 				if (mimeType == 'application/pdf') {
 					Zotero.Fulltext.indexPDF(file, itemID);
-					Zotero.Notifier.trigger('refresh', 'item', itemID);
 				}
-				if (Zotero.MIME.isTextType(mimeType)) {
+				else if (Zotero.MIME.isTextType(mimeType)) {
 					Zotero.Fulltext.indexDocument(document, itemID);
-					Zotero.Notifier.trigger('refresh', 'item', itemID);
 				}
 				if (callback) {
 					callback(attachmentItem);
@@ -981,7 +979,7 @@ Zotero.Attachments = new function(){
 	
 	function getStorageDirectory(itemID) {
 		if (!itemID) {
-			throw ("itemID not provided in Zotero.Attachments.getStorageDirectory()");
+			throw new Error("itemID not provided in Zotero.Attachments.getStorageDirectory()");
 		}
 		var item = Zotero.Items.get(itemID);
 		if (!item) {
