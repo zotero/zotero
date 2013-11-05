@@ -328,12 +328,10 @@ var Zotero_File_Interface = new function() {
 				Zotero_File_Interface.Progress.close();
 				Zotero.UnresponsiveScriptIndicator.enable();
 				
-				if (worked) {
-					if(importCollection) {
-						Zotero.Notifier.trigger('refresh', 'collection', importCollection.id);
-					}
-				} else {
-					if(importCollection) importCollection.erase();
+				if(importCollection) {
+					Zotero.Notifier.trigger('refresh', 'collection', importCollection.id);
+				}
+				if (!worked) {
 					window.alert(Zotero.getString("fileInterface.importError"));
 				}
 			});
