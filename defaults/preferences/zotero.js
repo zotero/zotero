@@ -169,6 +169,7 @@ pref("extensions.zotero.sync.storage.deleteDelayDays", 30);
 pref("extensions.zotero.sync.storage.groups.enabled", true);
 pref("extensions.zotero.sync.storage.downloadMode.personal", "on-sync");
 pref("extensions.zotero.sync.storage.downloadMode.groups", "on-sync");
+pref("extensions.zotero.sync.fulltext.enabled", true);
 
 // Proxy
 pref("extensions.zotero.proxies.autoRecognize", true);

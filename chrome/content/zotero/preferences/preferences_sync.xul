@@ -32,6 +32,7 @@
 		<preferences>
 			<preference id="pref-sync-autosync" name="extensions.zotero.sync.autoSync" type="bool"/>
 			<preference id="pref-sync-username" name="extensions.zotero.sync.server.username" type="string" instantApply="true"/>
+			<preference id="pref-sync-fulltext-enabled" name="extensions.zotero.sync.fulltext.enabled" type="bool"/>
 			<preference id="pref-storage-enabled" name="extensions.zotero.sync.storage.enabled" type="bool"/>
 			<preference id="pref-storage-protocol" name="extensions.zotero.sync.storage.protocol" type="string"
 				onchange="Zotero_Preferences.Sync.unverifyStorageServer()"/>
@@ -75,6 +76,14 @@
 									<row>
 										<box/>
 										<checkbox label="&zotero.preferences.sync.syncAutomatically;" preference="pref-sync-autosync"/>
+									</row>
+									<row>
+										<box/>
+										<vbox>
+											<checkbox label="&zotero.preferences.sync.syncFullTextContent;"
+												preference="pref-sync-fulltext-enabled"
+												tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"/>
+										</vbox>
 									</row>
 									<!--
 									<row>

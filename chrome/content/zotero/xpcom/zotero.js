@@ -555,8 +555,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		Zotero.DB.addCallback('commit', Zotero.Notifier.commit);
 		Zotero.DB.addCallback('rollback', Zotero.Notifier.reset);
 		
-		Zotero.Fulltext.init();
-		
 		// Require >=2.1b3 database to ensure proper locking
 		if (Zotero.isStandalone && Zotero.Schema.getDBVersion('system') > 0 && Zotero.Schema.getDBVersion('system') < 31) {
 			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
@@ -675,6 +673,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			throw(e);
 		}
 
+		Zotero.Fulltext.init();
+		
 		Zotero.DB.startDummyStatement();
 		
 		// Populate combined tables for custom types and fields -- this is likely temporary
@@ -2337,6 +2337,17 @@ Zotero.Prefs = new function(){
 				}
 				else {
 					Zotero.Sync.Runner.IdleListener.unregister();
+				}
+				break;
+			
+			// TEMP
+			case "sync.fulltext.enabled":
+				if (this.get("sync.fulltext.enabled")) {
+					// Disable downgrades if full-text sync is enabled, since otherwise
+					// we could miss full-text content updates
+					if (Zotero.DB.valueQuery("SELECT version FROM version WHERE schema='userdata'") < 77) {
+						Zotero.DB.query("UPDATE version SET version=77 WHERE schema='userdata'");
+					}
 				}
 				break;
 			
