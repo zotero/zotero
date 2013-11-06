@@ -117,7 +117,7 @@ Zotero.Fulltext = new function(){
 		}
 		
 		this.startContentProcessor();
-		Zotero.addShutdownListener(this.stopContentProcessor);
+		Zotero.addShutdownListener(this.stopContentProcessor.bind(this));
 	}
 	
 	
