@@ -594,11 +594,20 @@ Zotero.Fulltext = new function(){
 			+ "FROM fulltextItems JOIN items USING (itemID) WHERE synced=" + SYNC_STATE_UNSYNCED
 			+ " ORDER BY clientDateModified DESC";
 		var rows = Zotero.DB.query(sql) || [];
+		var libraryIsEditable = {};
 		for each (let row in rows) {
 			let text;
 			let itemID = row.itemID;
 			let item = Zotero.Items.get(itemID);
-			let libraryKey = item.libraryID + "/" + item.key;
+			let libraryID = item.libraryID;
+			// Don't send full-text in read-only libraries
+			if (libraryID && libraryIsEditable[libraryID] === undefined) {
+				libraryIsEditable[libraryID] = Zotero.Libraries.isEditable(libraryID);
+				if (!libraryIsEditable[libraryID]) {
+					continue;
+				}
+			}
+			let libraryKey = libraryID + "/" + item.key;
 			let mimeType = item.attachmentMIMEType;
 			if (isCachedMIMEType(mimeType) || Zotero.MIME.isTextType(mimeType)) {
 				try {
