@@ -117,7 +117,7 @@ Zotero.Fulltext = new function(){
 		}
 		
 		this.startContentProcessor();
-		Zotero.addShutdownListener(this.stopContentProcessor);
+		Zotero.addShutdownListener(this.stopContentProcessor.bind(this));
 	}
 	
 	
@@ -594,11 +594,20 @@ Zotero.Fulltext = new function(){
 			+ "FROM fulltextItems JOIN items USING (itemID) WHERE synced=" + SYNC_STATE_UNSYNCED
 			+ " ORDER BY clientDateModified DESC";
 		var rows = Zotero.DB.query(sql) || [];
+		var libraryIsEditable = {};
 		for each (let row in rows) {
 			let text;
 			let itemID = row.itemID;
 			let item = Zotero.Items.get(itemID);
-			let libraryKey = item.libraryID + "/" + item.key;
+			let libraryID = item.libraryID;
+			// Don't send full-text in read-only libraries
+			if (libraryID && libraryIsEditable[libraryID] === undefined) {
+				libraryIsEditable[libraryID] = Zotero.Libraries.isEditable(libraryID);
+				if (!libraryIsEditable[libraryID]) {
+					continue;
+				}
+			}
+			let libraryKey = libraryID + "/" + item.key;
 			let mimeType = item.attachmentMIMEType;
 			if (isCachedMIMEType(mimeType) || Zotero.MIME.isTextType(mimeType)) {
 				try {
@@ -724,41 +733,64 @@ Zotero.Fulltext = new function(){
 	 * Save full-text content and stats to a cache file
 	 */
 	this.setItemContent = function (libraryID, key, text, stats, version) {
+		var libraryKey = libraryID + "/" + key;
 		var item = Zotero.Items.getByLibraryAndKey(libraryID, key);
 		if (!item) {
-			let msg = "Item not found setting full-text content";
+			let msg = "Item " + libraryKey + " not found setting full-text content";
 			Zotero.debug(msg, 1);
 			Components.utils.reportError(msg);
 			return;
 		}
 		var itemID = item.id;
 		
+		var currentVersion = Zotero.DB.valueQuery(
+			"SELECT version FROM fulltextItems WHERE itemID=?", itemID
+		);
+		
 		if (text !== '') {
-			var cacheFile = this.getItemProcessorCacheFile(itemID);
+			var processorCacheFile = this.getItemProcessorCacheFile(itemID);
+			var itemCacheFile = this.getItemCacheFile(itemID);
 			
 			// If a storage directory doesn't exist, create it
-			if (!cacheFile.parent.exists()) {
+			if (!processorCacheFile.parent.exists()) {
 				Zotero.Attachments.createDirectoryForItem(itemID);
 			}
 			
-			Zotero.debug("Writing full-text content and data to " + cacheFile.path);
-			Zotero.File.putContents(cacheFile, JSON.stringify({
-				indexedChars: stats.indexedChars,
-				totalChars: stats.totalChars,
-				indexedPages: stats.indexedPages,
-				totalPages: stats.totalPages,
-				version: version,
-				text: text
-			}));
-			var synced = SYNC_STATE_TO_PROCESS;
+			// If the local version of the content is already up to date and cached, skip
+			if (currentVersion && currentVersion == version && itemCacheFile.exists()) {
+				Zotero.debug("Current full-text content version matches remote for item "
+					+ libraryKey + " -- skipping");
+				var synced = SYNC_STATE_IN_SYNC;
+			}
+			// If the local version is 0 but the text matches, just update the version
+			else if (currentVersion == 0 && itemCacheFile.exists()
+					&& Zotero.File.getContents(itemCacheFile) == text) {
+				Zotero.debug("Current full-text content matches remote for item "
+					+ libraryKey + " -- updating version");
+				var synced = SYNC_STATE_IN_SYNC;
+				Zotero.DB.query("UPDATE fulltextItems SET version=? WHERE itemID=?", [version, itemID]);
+			}
+			else {
+				Zotero.debug("Writing full-text content and data for item " + libraryKey
+					+ " to " + processorCacheFile.path);
+				Zotero.File.putContents(processorCacheFile, JSON.stringify({
+					indexedChars: stats.indexedChars,
+					totalChars: stats.totalChars,
+					indexedPages: stats.indexedPages,
+					totalPages: stats.totalPages,
+					version: version,
+					text: text
+				}));
+				var synced = SYNC_STATE_TO_PROCESS;
+			}
 		}
 		else {
-			Zotero.debug("Marking full-text content for download");
+			Zotero.debug("Marking full-text content for download for item " + libraryKey);
 			var synced = SYNC_STATE_TO_DOWNLOAD;
 		}
 		
-		// Mark the item as unprocessed
-		if (Zotero.DB.valueQuery("SELECT COUNT(*) FROM fulltextItems WHERE itemID=?", itemID)) {
+		// If indexed previously, update the sync state
+		if (currentVersion !== false) {
 			Zotero.DB.query("UPDATE fulltextItems SET synced=? WHERE itemID=?", [synced, itemID]);
 		}
 		// If not yet indexed, add an empty row
