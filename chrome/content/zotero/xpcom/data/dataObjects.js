@@ -342,9 +342,11 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 		if (!libraryID) {
 			return true;
 		}
-		
 		var type = Zotero.Libraries.getType(libraryID);
 		switch (type) {
+			case 'user':
+				return true;
+			
 			case 'group':
 				var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
 				var group = Zotero.Groups.get(groupID);
