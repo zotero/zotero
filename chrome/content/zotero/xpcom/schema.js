@@ -1502,12 +1502,6 @@ Zotero.Schema = new function(){
 			
 			_updateDBVersion('system', _getSchemaSQLVersion('system'));
 			_updateDBVersion('userdata', _getSchemaSQLVersion('userdata'));
-            // Zotero note
-			// TEMP: 77 is for full-text syncing. New users don't need the
-			// prompt, so initialize new databases to 77.
-			//_updateDBVersion('userdata', _getSchemaSQLVersion('userdata'));
-			//_updateDBVersion('userdata', 77);
-			//_updateDBVersion('userdata2', _getSchemaSQLVersion('userdata2'));
 			_updateDBVersion('triggers', _getSchemaSQLVersion('triggers'));
 			_updateDBVersion('multilingual', _getSchemaSQLVersion('multilingual'));
 			_updateDBVersion('zls', _getSchemaSQLVersion('zls'));
