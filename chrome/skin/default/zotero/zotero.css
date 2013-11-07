@@ -345,3 +345,10 @@ label.zotero-text-link {
 #zotero-note-window {
 	padding-bottom: 4px;
 }
+
+/* Undo tree row spacing change in Fx25 on Windows */
+#zotero-collections-tree treechildren::-moz-tree-row,
+#zotero-items-tree treechildren::-moz-tree-row,
+#zotero-prefs treechildren::-moz-tree-row {
+	height: auto;
+}

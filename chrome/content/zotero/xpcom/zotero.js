@@ -42,7 +42,7 @@ const ZOTERO_CONFIG = {
 	BOOKMARKLET_ORIGIN : 'https://www.zotero.org',
 	HTTP_BOOKMARKLET_ORIGIN : 'http://www.zotero.org',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "4.0.12.SOURCE"
+	VERSION: "4.0.14.SOURCE"
 };
 
 // Commonly used imports accessible anywhere
@@ -95,25 +95,29 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	
 	
 	this.__defineGetter__('userID', function () {
+		if (_userID !== undefined) return _userID;
 		var sql = "SELECT value FROM settings WHERE "
 					+ "setting='account' AND key='userID'";
-		return Zotero.DB.valueQuery(sql);
+		return _userID = Zotero.DB.valueQuery(sql);
 	});
 	
 	this.__defineSetter__('userID', function (val) {
 		var sql = "REPLACE INTO settings VALUES ('account', 'userID', ?)";
 		Zotero.DB.query(sql, parseInt(val));
+		_userID = val;
 	});
 	
 	this.__defineGetter__('libraryID', function () {
+		if (_libraryID !== undefined) return _libraryID;
 		var sql = "SELECT value FROM settings WHERE "
 					+ "setting='account' AND key='libraryID'";
-		return Zotero.DB.valueQuery(sql);
+		return _libraryID = Zotero.DB.valueQuery(sql);
 	});
 	
 	this.__defineSetter__('libraryID', function (val) {
 		var sql = "REPLACE INTO settings VALUES ('account', 'libraryID', ?)";
 		Zotero.DB.query(sql, parseInt(val));
+		_libraryID = val;
 	});
 	
 	this.__defineGetter__('username', function () {
@@ -178,6 +182,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	var _startupErrorHandler;
 	var _zoteroDirectory = false;
 	var _localizedStringBundle;
+	var _userID;
+	var _libraryID;
 	var _localUserKey;
 	var _waiting = 0;
 	
@@ -472,6 +478,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		if(Zotero.isConnector) {
 			Zotero.debug("Loading in connector mode");
 			Zotero.Connector_Types.init();
+
+			// Store a startupError until we get information from Zotero Standalone
+			Zotero.startupError = Zotero.getString("connector.loadInProgress")
 			
 			if(!Zotero.isFirstLoadThisSession) {
 				// We want to get a checkInitComplete message before initializing if we switched to
@@ -496,6 +505,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	this.initComplete = function() {
 		if(Zotero.initialized) return;
 		this.initialized = true;
+		delete this.startupError;
 		
 		if(Zotero.isConnector) {
 			Zotero.Repo.init();
@@ -867,7 +877,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			// remove temp directory
 			Zotero.removeTempDirectory();
 			
-			if(Zotero.initialized && Zotero.DB) {
+			if(Zotero.DB && Zotero.DB._connection) {
 				Zotero.debug("Closing database");
 				
 				// run GC to finalize open statements
@@ -2018,7 +2028,10 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			'CVE-2009-3555',
 			'OpenGL LayerManager',
 			'trying to re-register CID',
-			'Services.HealthReport'
+			'Services.HealthReport',
+			'[JavaScript Error: "this.docShell is null"',
+			'[JavaScript Error: "downloadable font:',
+			'[JavaScript Error: "Image corrupt or truncated:'
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
