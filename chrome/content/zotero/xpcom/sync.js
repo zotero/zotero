@@ -1368,42 +1368,6 @@ Zotero.Sync.Server = new function () {
 			_error(e);
 		}
 		
-		// TEMP
-		if (Zotero.Prefs.get("sync.fulltext.enabled") &&
-				Zotero.DB.valueQuery("SELECT version FROM version WHERE schema='userdata'") < 77) {
-			// Don't show multiple times on idle
-			_syncInProgress = true;
-			
-			let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-				.getService(Components.interfaces.nsIPromptService);
-			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-				+ ps.BUTTON_DELAY_ENABLE;
-			let index = ps.confirmEx(
-				null,
-				Zotero.getString('sync.fulltext.upgradePrompt.title'),
-				Zotero.getString('sync.fulltext.upgradePrompt.text') + "\n\n"
-					+ Zotero.getString('sync.fulltext.upgradePrompt.changeLater'),
-				buttonFlags,
-				Zotero.getString('sync.fulltext.upgradePrompt.enable'),
-				Zotero.getString('general.notNow'),
-				null, null, {}
-			);
-			
-			_syncInProgress = false;
-			
-			// Enable
-			if (index == 0) {
-				Zotero.DB.backupDatabase(76, true);
-				Zotero.DB.query("UPDATE version SET version=77 WHERE schema='userdata'");
-				Zotero.wait(1000);
-			}
-			// Disable
-			else {
-				Zotero.Prefs.set("sync.fulltext.enabled", false);
-			}
-		}
-		
 		username = encodeURIComponent(username);
 		password = encodeURIComponent(password);
 		var body = _apiVersionComponent
