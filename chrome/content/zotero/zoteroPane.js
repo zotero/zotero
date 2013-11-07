@@ -135,6 +135,7 @@ var ZoteroPane = new function()
 	}
 	
 	/**
+	/**
 	 * Called on window load or when has been reloaded after switching into or out of connector
 	 * mode
 	 */
@@ -4100,6 +4101,13 @@ var ZoteroPane = new function()
 	 */
 	this.openAboutDialog = function() {
 		window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome');
+	}
+	
+ 	/**
+	 * Opens the MLZ Welcome dialog
+	 */
+	this.openMlzWelcomeDialog = function() {
+		window.openDialog('chrome://zotero/content/mlzwelcome.xul', 'mlzwelcome', 'chrome');
 	}
 	
 	/**
