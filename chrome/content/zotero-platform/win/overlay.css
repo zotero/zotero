@@ -67,6 +67,13 @@
 	-moz-border-left-colors: none;
 }
 
+/* Undo tree row spacing change in Fx25 on Windows */
+#zotero-collections-tree treechildren::-moz-tree-row,
+#zotero-items-tree treechildren::-moz-tree-row,
+#zotero-prefs treechildren::-moz-tree-row {
+	height: 20px;
+}
+
 #zotero-collections-tree {
 	border-width: 0 1px 1px 0;
 }
