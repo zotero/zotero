@@ -63,7 +63,7 @@ Zotero.Libraries = new function () {
 	
 	
 	this.getType = function (libraryID) {
-		if (libraryID === 0 || libraryID == Zotero.libraryID) {
+		if (libraryID === 0 || libraryID == Zotero.libraryID || ("" + libraryID).indexOf('local/') == 0)  {
 			return 'user';
 		}
 		var sql = "SELECT libraryType FROM libraries WHERE libraryID=?";
