@@ -653,7 +653,10 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 						// "Check for updates" button
 						if(index === 0) {
 							if(Zotero.isStandalone) {
-								ZoteroStandalone.checkForUpdates();
+								Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+									.getService(Components.interfaces.nsIWindowWatcher)
+									.openWindow(null, 'chrome://mozapps/content/update/updates.xul',
+										'updateChecker', 'chrome,centerscreen', null);
 							} else {
 								// In Firefox, show the add-on manager
 								Components.utils.import("resource://gre/modules/AddonManager.jsm");
