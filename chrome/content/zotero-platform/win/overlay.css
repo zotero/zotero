@@ -71,7 +71,7 @@
 #zotero-collections-tree treechildren::-moz-tree-row,
 #zotero-items-tree treechildren::-moz-tree-row,
 #zotero-prefs treechildren::-moz-tree-row {
-	height: 20px;
+	height: 1.6em;
 }
 
 #zotero-collections-tree {
