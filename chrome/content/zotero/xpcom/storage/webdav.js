@@ -579,7 +579,6 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		var channel = req.channel;
 		if (!channel instanceof Ci.nsIChannel) {
 			Zotero.Sync.Storage.EventManager.error('No HTTPS channel available');
-			return;
 		}
 		
 		// Check if the error we encountered is really an SSL error
