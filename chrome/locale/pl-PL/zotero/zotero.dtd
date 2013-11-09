@@ -50,7 +50,7 @@
 <!ENTITY zotero.items.year_column "Rok">
 <!ENTITY zotero.items.publisher_column "Wydawca">
 <!ENTITY zotero.items.publication_column "Publikacja">
-<!ENTITY zotero.items.journalAbbr_column "Skrót publikacji">
+<!ENTITY zotero.items.journalAbbr_column "Skrót czasopisma">
 <!ENTITY zotero.items.language_column "Język">
 <!ENTITY zotero.items.accessDate_column "Dostęp">
 <!ENTITY zotero.items.libraryCatalog_column "Katalog biblioteczny">
@@ -58,9 +58,9 @@
 <!ENTITY zotero.items.rights_column "Prawa autorskie">
 <!ENTITY zotero.items.dateAdded_column "Data dodania">
 <!ENTITY zotero.items.dateModified_column "Data modyfikacji">
-<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.extra_column "Ekstra">
 <!ENTITY zotero.items.archive_column "Archiwum">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.archiveLocation_column "Miejsce w archiwum">
 <!ENTITY zotero.items.place_column "Miejsce">
 <!ENTITY zotero.items.volume_column "Tom">
 <!ENTITY zotero.items.edition_column "Wydanie">
@@ -73,7 +73,7 @@
 <!ENTITY zotero.items.genre_column "Rodzaj">
 <!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.moreColumns.label "Więcej kolumn">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.restoreColumnOrder.label "Przywróć porządek kolumn">
 
 <!ENTITY zotero.items.menu.showInLibrary "Wyświetl w bibliotece">
 <!ENTITY zotero.items.menu.attach.note "Dodaj notatkę">
@@ -213,7 +213,7 @@
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatycznie skróć tytuły czasopism">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Skróty czasopism MEDLINE zostaną automatycznie utworzone z wykorzystaniem tytułów czasopism. Pole &quot;Skrót czasopisma&quot; będzie zignorowane.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Zapisz cytowania w dokumencie">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
@@ -240,8 +240,8 @@
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etykieta zostanie usunięte ze wszystkich elementów.">
 
 <!ENTITY zotero.merge.title "Conflict Resolution">
-<!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.of "z">
+<!ENTITY zotero.merge.deleted "Usunięty">
 
 <!ENTITY zotero.proxy.recognized.title "Rozpoznano proxy">
 <!ENTITY zotero.proxy.recognized.warning "Dodaj tylko zaufane serwery proxy, powiązane z twoją stroną biblioteki, szkoły lub organizacji. ">

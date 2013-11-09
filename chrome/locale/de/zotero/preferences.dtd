@@ -27,7 +27,7 @@
 <!ENTITY zotero.preferences.reportTranslationFailure "Fehlerhafte Übersetzer melden">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Zotero.org erlauben, Inhalte auf Basis der aktuellen Zotero-Version anzupassen">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Wenn aktiv, wird die aktuelle Zotero-Version bei HTTP-Anfragen zu zotero.org mit übertragen">
-<!ENTITY zotero.preferences.parseRISRefer "Zotero für heruntergeladene RIS/Refer-Dateien verwenden">
+<!ENTITY zotero.preferences.parseRISRefer "Zotero für heruntergeladene BibTeX/RIS/Refer-Dateien verwenden">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatisch einen Schnappschuss erstellen, sobald ein Eintrag aus einer Webseite erstellt wird">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatisch zugehörige PDFs und andere Dateien beim Speichern von Einträgen anhängen">
 <!ENTITY zotero.preferences.automaticTags "Automatisch Tags aus Schlüsselwörtern und Schlagwörtern erstellen">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Account erstellen">
 <!ENTITY zotero.preferences.sync.lostPassword "Passwort vergessen?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatisch synchronisieren">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "Über Synchronisierung">
 <!ENTITY zotero.preferences.sync.fileSyncing "Datei-Synchronisierung">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -126,12 +128,12 @@
 <!ENTITY zotero.preferences.prefpane.keys "Tastenkombinationen">
 
 <!ENTITY zotero.preferences.keys.openZotero "Zotero-Panel öffnen/schließen">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "In Zotero speichern (Adressleisten-Symbol)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Vollbild-Modus an/aus">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus auf Bibliotheksspalte">
 <!ENTITY zotero.preferences.keys.quicksearch "Schnellsuche">
-<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
-<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.newItem "Neuen Eintrag erstellen">
+<!ENTITY zotero.preferences.keys.newNote "Neue Notiz erstellen">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Tag-Selector an/aus">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Ausgewählte Eintragszitationen in die Zwischenablage kopieren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Ausgewählte Einträge in die Zwischenablage kopieren">

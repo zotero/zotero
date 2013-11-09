@@ -27,7 +27,7 @@
 <!ENTITY zotero.preferences.reportTranslationFailure "回報故障的網站轉譯器">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "允許 zotero.org 依目前的 Zotero 版本來調整內容。">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "如果啟用，目前的 Zotero 版本資訊將會加到對 zotero.org 的 HTTP 請求。">
-<!ENTITY zotero.preferences.parseRISRefer "用 Zotero 處理所下載的 RIS/Refer 檔案">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "從網頁建立項目時自動拍攝快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "儲存項目時自動附加相關的 PDF 檔與其他檔案">
 <!ENTITY zotero.preferences.automaticTags "自動以關鍵字與主標題作為項目的標籤">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "建立帳戶">
 <!ENTITY zotero.preferences.sync.lostPassword "遺失密碼？">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自動同步">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "關於同步">
 <!ENTITY zotero.preferences.sync.fileSyncing "檔案同步中">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">

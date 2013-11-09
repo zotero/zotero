@@ -1,15 +1,15 @@
-<!ENTITY zotero.general.optional "(Optional)">
-<!ENTITY zotero.general.note "Note:">
-<!ENTITY zotero.general.selectAll "Select All">
-<!ENTITY zotero.general.deselectAll "Deselect All">
-<!ENTITY zotero.general.edit "Edit">
-<!ENTITY zotero.general.delete "Delete">
+<!ENTITY zotero.general.optional "(Valfrjálst)">
+<!ENTITY zotero.general.note "Athugasemd:">
+<!ENTITY zotero.general.selectAll "Velja allt">
+<!ENTITY zotero.general.deselectAll "Velja ekkert">
+<!ENTITY zotero.general.edit "Breyta">
+<!ENTITY zotero.general.delete "Eyða">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
-<!ENTITY zotero.errorReport.submissionInProgress "Please wait while the error report is submitted.">
-<!ENTITY zotero.errorReport.submitted "Your error report has been submitted.">
-<!ENTITY zotero.errorReport.reportID "Report ID:">
+<!ENTITY zotero.errorReport.unrelatedMessages "Villuskráin gæti innihaldið skilaboð sem ekki tengjast Zotero.">
+<!ENTITY zotero.errorReport.submissionInProgress "Vinsamlegast bíðið á meðan villuskýrsla er send.">
+<!ENTITY zotero.errorReport.submitted "Villuskýrsla þín hefur verið send.">
+<!ENTITY zotero.errorReport.reportID "Auðkennisnúmer (ID) skýrslu:">
 <!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
 <!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
@@ -174,8 +174,8 @@
 
 <!ENTITY zotero.progress.title "Progress">
 
-<!ENTITY zotero.exportOptions.title "Export...">
-<!ENTITY zotero.exportOptions.format.label "Format:">
+<!ENTITY zotero.exportOptions.title "Flytja út...">
+<!ENTITY zotero.exportOptions.format.label "Snið:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Translator Options">
 
 <!ENTITY zotero.charset.label "Character Encoding">
@@ -183,49 +183,49 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
 
-<!ENTITY zotero.citation.page "Page">
-<!ENTITY zotero.citation.paragraph "Paragraph">
-<!ENTITY zotero.citation.line "Line">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.page "Blaðsíða">
+<!ENTITY zotero.citation.paragraph "Málsgrein">
+<!ENTITY zotero.citation.line "Lína">
+<!ENTITY zotero.citation.suppressAuthor.label "Fela höfund">
+<!ENTITY zotero.citation.prefix.label "Forskeyti:">
+<!ENTITY zotero.citation.suffix.label "Viðskeyti:">
 <!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.italic.label "Skáletur">
+<!ENTITY zotero.richText.bold.label "Feitletur">
+<!ENTITY zotero.richText.underline.label "Undirstrikað">
+<!ENTITY zotero.richText.superscript.label "Hávísir">
+<!ENTITY zotero.richText.subscript.label "Lágvísir">
 
-<!ENTITY zotero.annotate.toolbar.add.label "Add Annotation">
-<!ENTITY zotero.annotate.toolbar.collapse.label "Collapse All Annotations">
-<!ENTITY zotero.annotate.toolbar.expand.label "Expand All Annotations">
-<!ENTITY zotero.annotate.toolbar.highlight.label "Highlight Text">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "Unhighlight Text">
+<!ENTITY zotero.annotate.toolbar.add.label "Bæta við áletrun">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Fela allar áletranir">
+<!ENTITY zotero.annotate.toolbar.expand.label "Sýna allar áletranir">
+<!ENTITY zotero.annotate.toolbar.highlight.label "Auðkenna texta">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "Fjarlægja auðkenningu texta">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "Display Citations As:">
-<!ENTITY zotero.integration.prefs.footnotes.label "Footnotes">
-<!ENTITY zotero.integration.prefs.endnotes.label "Endnotes">
+<!ENTITY zotero.integration.prefs.displayAs.label "Birta tilvísnair sem:">
+<!ENTITY zotero.integration.prefs.footnotes.label "Neðanmálsgreinar">
+<!ENTITY zotero.integration.prefs.endnotes.label "Aftanmálsgreinar">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Format Using:">
-<!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Forsnið samkvæmt:">
+<!ENTITY zotero.integration.prefs.bookmarks.label "Bókamerki">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified.">
 
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Vista tilvísanir í skjali">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Vistun tilvísana í skjali veldur lítilsháttar stækkun skjalanna, en leyfir þér að deila þínum skjölum með öðrum án þess að notar Zotero tól. Til að uppfæra skjöl sem voru búin til með þessari tilvísunaraðferð þarf að nota Zotero útgáfu 3.0 eða síðari útgáfur.">
 
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.showEditor.label "Sýna ritil">
+<!ENTITY zotero.integration.classicView.label "Hefðbundin framsetning">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "Tilvitnanir í heimildaskrá">
 
-<!ENTITY zotero.sync.button "Sync with Zotero Server">
-<!ENTITY zotero.sync.error "Sync Error">
-<!ENTITY zotero.sync.storage.progress "Progress:">
+<!ENTITY zotero.sync.button "Samhæfa Zotero netþjóni">
+<!ENTITY zotero.sync.error "Sæmhæfingarvilla">
+<!ENTITY zotero.sync.storage.progress "Framgangur:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
 

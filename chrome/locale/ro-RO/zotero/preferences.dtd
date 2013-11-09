@@ -22,12 +22,12 @@
 <!ENTITY zotero.preferences.fontSize.notes "Mărimea fontului pentru notă:">
 
 <!ENTITY zotero.preferences.miscellaneous "Diverse">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
+<!ENTITY zotero.preferences.autoUpdate "Verifică în mod automat dacă există translatori și stiluri actualizate">
 <!ENTITY zotero.preferences.updateNow "Actualizează acum">
 <!ENTITY zotero.preferences.reportTranslationFailure "Raportează site-uri cu legături rupte (la translatare)">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Permite zotero.org să modifice conținutul pe bază versiunii curente de Zotero">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Dacă e activată, versiunea curentă de Zotero va fi adăugată la cererile HTTP de la zotero.org">
-<!ENTITY zotero.preferences.parseRISRefer "Folosește Zotero pentru a descărca fișiere RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "Folosește Zotero pentru fișierele descărcate de tip BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "Creează automat instantanee, atunci când sunt create înregistrări din paginile web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Anexează automat fișierele PDF asociate, precum și alte fișiere, atunci când sunt salvate înregistrările">
 <!ENTITY zotero.preferences.automaticTags "Creează automat etichetele pentru înregistrări, împreună cu cuvintele cheie și cu titlurile">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Creează cont">
 <!ENTITY zotero.preferences.sync.lostPassword "Ai uitat parola?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizare automată">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "Despre sincronizare">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sincronizare fișier">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -126,12 +128,12 @@
 <!ENTITY zotero.preferences.prefpane.keys "Scurtături de la tastatură">
 
 <!ENTITY zotero.preferences.keys.openZotero "Deschide/Închide panoul Zotero">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Salvează în Zotero (iconița din bara de adrese)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Extinde pe tot ecranul">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Panou de focalizare biblioteci">
 <!ENTITY zotero.preferences.keys.quicksearch "Căutare rapidă">
-<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
-<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.newItem "Creează o nouă înregistrare">
+<!ENTITY zotero.preferences.keys.newNote "Creează o notă nouă">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Afișează/ascunde selectorul de etichete">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiază citările înregistrărilor selectate în memoria Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiază înregistrările selectate în memoria Clipboard">

@@ -27,7 +27,7 @@
 <!ENTITY zotero.preferences.reportTranslationFailure "Defecte webpagina-vertalers rapporteren">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "zotero.org toestaan om inhoud aan te passen aan de gebruikte Zotero-versie">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Indien aangezet zal de Zotero-versie worden toegevoegd aan naar zotero.org gerichtte HTTP-requests.">
-<!ENTITY zotero.preferences.parseRISRefer "Zotero gebruiken voor gedownloade RIS/Refer-bestanden">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatisch snapshots nemen bij het maken van objecten van webpagina's">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatisch bijbehorende PDF's en andere bestanden toevoegen bij het opslaan van objecten">
 <!ENTITY zotero.preferences.automaticTags "Objecten automatisch labelen met trefwoorden en onderwerpen">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Account aanmaken">
 <!ENTITY zotero.preferences.sync.lostPassword "Wachtwoord vergeten?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatisch synchroniseren">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "Over synchroniseren">
 <!ENTITY zotero.preferences.sync.fileSyncing "Bestandssynchronisatie">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">

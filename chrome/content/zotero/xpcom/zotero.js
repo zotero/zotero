@@ -39,7 +39,7 @@ const ZOTERO_CONFIG = {
 	BOOKMARKLET_ORIGIN : 'https://www.zotero.org',
 	HTTP_BOOKMARKLET_ORIGIN : 'http://www.zotero.org',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "4.0.12.SOURCE"
+	VERSION: "4.0.14.SOURCE"
 };
 
 // Commonly used imports accessible anywhere
@@ -558,8 +558,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		Zotero.DB.addCallback('commit', Zotero.Notifier.commit);
 		Zotero.DB.addCallback('rollback', Zotero.Notifier.reset);
 		
-		Zotero.Fulltext.init();
-		
 		// Require >=2.1b3 database to ensure proper locking
 		if (Zotero.isStandalone && Zotero.Schema.getDBVersion('system') > 0 && Zotero.Schema.getDBVersion('system') < 31) {
 			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
@@ -650,6 +648,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				return false;
 			}
 		}
+		
+		Zotero.Fulltext.init();
 		
 		Zotero.DB.startDummyStatement();
 		
@@ -2285,6 +2285,17 @@ Zotero.Prefs = new function(){
 				}
 				else {
 					Zotero.Sync.Runner.IdleListener.unregister();
+				}
+				break;
+			
+			// TEMP
+			case "sync.fulltext.enabled":
+				if (this.get("sync.fulltext.enabled")) {
+					// Disable downgrades if full-text sync is enabled, since otherwise
+					// we could miss full-text content updates
+					if (Zotero.DB.valueQuery("SELECT version FROM version WHERE schema='userdata'") < 77) {
+						Zotero.DB.query("UPDATE version SET version=77 WHERE schema='userdata'");
+					}
 				}
 				break;
 			

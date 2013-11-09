@@ -27,7 +27,7 @@
 <!ENTITY zotero.preferences.reportTranslationFailure "Hibás adatkonverterek jelentése">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "A Zotero verziójának megfelelő tartalmak mutatása a zotero.org oldalon">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Ha ez be van kapcsolva, a zotero.orgra küldött HTTP kérésekhez hozzáfűzi a Zotero verzióját.">
-<!ENTITY zotero.preferences.parseRISRefer "A Zotero használata RIS/Refer fájlok letöltésére">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "Weboldalon alapuló elem létrehozásakor automatikus pillanatfelvétel készítése">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "A kapcsolódó PDF és más fájlok automatikus csatolása">
 <!ENTITY zotero.preferences.automaticTags "Kulcsszavak és tárgyszavak automatikus hozzárendelése címkeként">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Új felhasználói fiók">
 <!ENTITY zotero.preferences.sync.lostPassword "Elveszett jelszó?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatikus szinkronizálás">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "About Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing "Fájlok szinkronizálása">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">

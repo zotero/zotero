@@ -54,7 +54,7 @@
 <!ENTITY selectAllCmd.label "Izberi vse">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "z">
-<!ENTITY preferencesCmd.label "Preferences">
+<!ENTITY preferencesCmd.label "Nastavitve">
 <!ENTITY preferencesCmd.accesskey "M">
 <!ENTITY preferencesCmdUnix.label "Nastavitve">
 <!ENTITY preferencesCmdUnix.accesskey "N">

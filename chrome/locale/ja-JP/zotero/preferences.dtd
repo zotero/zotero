@@ -22,12 +22,12 @@
 <!ENTITY zotero.preferences.fontSize.notes "メモの文字サイズ:">
 
 <!ENTITY zotero.preferences.miscellaneous "各種設定">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
+<!ENTITY zotero.preferences.autoUpdate "トランスレータとスタイルの更新を自動的に確認する。">
 <!ENTITY zotero.preferences.updateNow "今すぐ更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "壊れたサイト・トランスレータを報告する">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "現行の Zotero のバージョンに基づいて zotero.org が内容をカスタマイズすることを許可する">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "有効化されると、現在の Zotero バージョン情報が zotero.org への HTTP リクエストへ含まれます。">
-<!ENTITY zotero.preferences.parseRISRefer "ダウンロードされた RIS/Refer ファイルに Zotero を使用">
+<!ENTITY zotero.preferences.parseRISRefer "ダウンロード済みの BibTeX/RIS/Refer ファイルに対して Zotero を使用する">
 <!ENTITY zotero.preferences.automaticSnapshots "ウェブページからアイテムを作成するときに自動的にスナップショットを作成する">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "アイテムを作成するときに自動的に関連 PDF や他のファイルを添付する">
 <!ENTITY zotero.preferences.automaticTags "キーワードと件名標目を含むアイテムに自動的にタグを付ける">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "アカウントを作成">
 <!ENTITY zotero.preferences.sync.lostPassword "パスワードを忘れましたか？">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自動的に同期">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "同期（シンク）について">
 <!ENTITY zotero.preferences.sync.fileSyncing "ファイルの同期">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -126,12 +128,12 @@
 <!ENTITY zotero.preferences.prefpane.keys "ショートカットキー">
 
 <!ENTITY zotero.preferences.keys.openZotero "Zotero 画面を開く／閉じる">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Zotero に保存する (アドレスバーのアイコン)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "全画面表示の切り替え">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "ライブラリ画面へ">
 <!ENTITY zotero.preferences.keys.quicksearch "簡易検索">
-<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
-<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.newItem "新しいアイテムを作成する">
+<!ENTITY zotero.preferences.keys.newNote "新しいメモを作成する">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "タグ選択ボックスを表示する／隠す">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "選択されたアイテムの出典表記をクリップボードにコピー">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "選択されたアイテムの参考文献目録をクリップボードにコピー">
