@@ -29,6 +29,7 @@
 <?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/preferences.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css"?>
 
 <!--
 	To add an observer for a preference change, add an appropriate case in
