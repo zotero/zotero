@@ -1368,6 +1368,44 @@ Zotero.Sync.Server = new function () {
 			_error(e);
 		}
 		
+		// TEMP
+		// XXX Zotero was able to use userdata, because it stopped reflecting userdata SQL version at level 76.
+		// XXX In MLZ, judge whether first-time install from presence of an upgrade-specific line in the verison table.
+		if (Zotero.Prefs.get("sync.fulltext.enabled") &&
+			(!Zotero.DB.valueQuery("SELECT COUNT(*) FROM version WHERE schema='fulltext_upgrade'"))) {
+			// Don't show multiple times on idle
+			_syncInProgress = true;
+			
+			let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+				.getService(Components.interfaces.nsIPromptService);
+			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
+				+ ps.BUTTON_DELAY_ENABLE;
+			let index = ps.confirmEx(
+				null,
+				Zotero.getString('sync.fulltext.upgradePrompt.title'),
+				Zotero.getString('sync.fulltext.upgradePrompt.text') + "\n\n"
+					+ Zotero.getString('sync.fulltext.upgradePrompt.changeLater'),
+				buttonFlags,
+				Zotero.getString('sync.fulltext.upgradePrompt.enable'),
+				Zotero.getString('general.notNow'),
+				null, null, {}
+			);
+			
+			_syncInProgress = false;
+			
+			// Enable
+			if (index == 0) {
+				Zotero.DB.backupDatabase(10001, true);
+				Zotero.DB.query("INSERT INTO version VALUES('fulltext_upgrade', 1)");
+				Zotero.wait(1000);
+			}
+			// Disable
+			else {
+				Zotero.Prefs.set("sync.fulltext.enabled", false);
+			}
+		}
+		
 		username = encodeURIComponent(username);
 		password = encodeURIComponent(password);
 		var body = _apiVersionComponent

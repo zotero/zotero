@@ -29,6 +29,8 @@ CREATE TABLE version (
     version INT NOT NULL
 );
 CREATE INDEX schema ON version(schema);
+-- Prevents issuance of upgrade prompt in sync.js, q.v.
+INSERT INTO version VALUES('fulltext_upgrade', 1);
 
 -- Settings that have to be tied to the local database rather than the profile directory
 CREATE TABLE settings (
