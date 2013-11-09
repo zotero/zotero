@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.501",
+    PROCESSOR_VERSION: "1.0.503",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -1697,6 +1697,15 @@ CSL.Engine = function (sys, style, lang, forceLang) {
     this.setStyleAttributes();
     this.opt.xclass = sys.xml.getAttributeValue(this.cslXml, "class");
     this.opt.styleID = this.sys.xml.getStyleId(this.cslXml);
+    if (this.opt.version.slice(0,4) === "1.1m") {
+        this.opt.development_extensions.static_statute_locator = true;
+        this.opt.development_extensions.handle_parallel_articles = true;
+        this.opt.development_extensions.main_title_from_short_title = true;
+        this.opt.development_extensions.strict_page_numbers = true;
+        this.opt.development_extensions.rtl_support = true;
+        this.opt.development_extensions.expect_and_symbol_form = true;
+        this.opt.development_extensions.require_explicit_legal_case_title_short = true;
+    }
     if (lang) {
         lang = lang.replace("_", "-");
     }
@@ -3491,6 +3500,7 @@ CSL.Engine.Opt = function () {
     this.development_extensions.rtl_support = false;
     this.development_extensions.strict_page_numbers = false;
     this.development_extensions.expect_and_symbol_form = false;
+    this.development_extensions.require_explicit_legal_case_title_short = false;
     this.nodenames = [];
     this.gender = {};
     this['cite-lang-prefs'] = {
@@ -3502,6 +3512,7 @@ CSL.Engine.Opt = function () {
         places:['orig'],
         number:['translat']
     };
+    this.has_layout_locale = false;
 };
 CSL.Engine.Tmp = function () {
     this.names_max = new CSL.Stack();
@@ -3596,6 +3607,7 @@ CSL.Engine.Citation = function (state) {
     this.opt.layout_prefix = "";
     this.opt.layout_suffix = "";
     this.opt.layout_delimiter = "";
+    this.opt.sort_locales = {};
 };
 CSL.Engine.Bibliography = function () {
     this.opt = {};
@@ -3608,6 +3620,7 @@ CSL.Engine.Bibliography = function () {
     this.opt.layout_delimiter = "";
     this.opt["line-spacing"] = 1;
     this.opt["entry-spacing"] = 1;
+    this.opt.sort_locales = {};
 };
 CSL.Engine.BibliographySort = function () {
     this.tokens = [];
@@ -8618,6 +8631,7 @@ CSL.Node.number = {
 };
 CSL.Node.sort = {
     build: function (state, target) {
+        target = state[state.build.root + "_sort"].tokens;
         if (this.tokentype === CSL.START) {
             if (state.build.area === "citation") {
                 state.parallel.use_parallels = false;
@@ -8626,12 +8640,25 @@ CSL.Node.sort = {
             state.build.area = state.build.root + "_sort";
             state.build.extension = "_sort";
             var func = function (state, Item) {
+                if (state.opt.has_layout_locale) {
+                    var lang = Item.language ? Item.language : state.opt["default-locale-sort"];
+                    var langspec = CSL.localeResolve(lang);
+                    state.tmp.lang_sort_hold = state.opt.lang;
+                    state.opt.lang = langspec.best;
+                }
             }
             this.execs.push(func);
         }
         if (this.tokentype === CSL.END) {
             state.build.area = state.build.root;
             state.build.extension = "";
+            var func = function (state, Item) {
+                if (state.opt.has_layout_locale) {
+                    state.opt.lang = state.tmp.lang_sort_hold;
+                    delete state.tmp.lang_sort_hold;
+                }
+            }
+            this.execs.push(func);
         }
         target.push(this);
     }
@@ -9422,6 +9449,12 @@ CSL.Attributes["@locale"] = function (state, arg) {
     var func, ret, len, pos, variable, myitem, langspec, lang, lst, i, ilen, fallback;
     if (this.name === "layout") {
         this.locale_raw = arg;
+        var locales = arg.split(/\s+/);
+        state[state.build.area].opt.sort_locales[locales[0]] = CSL.localeResolve(locales[0]);
+        for (var i=1,ilen=locales.length;i<ilen;i+=1) {
+            state[state.build.area].opt.sort_locales[locales[i]] = CSL.localeResolve(locales[0]);
+        }
+        state.opt.has_layout_locale = true;
     } else {
         lst = arg.split(/\s+/);
         var locale_bares = [];
@@ -10492,7 +10525,9 @@ CSL.Transform = function (state) {
                 }
             }
         }
-        if (!value && Item.type !== 'legal_case' && altvar && Item[altvar] && use_field) {
+        if (!value 
+            && (!state.opt.development_extensions.require_explicit_legal_case_title_short || Item.type !== 'legal_case') 
+            && altvar && Item[altvar] && use_field) {
             value = Item[altvar];
         }
         if (!value) {
