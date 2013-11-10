@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.503",
+    PROCESSOR_VERSION: "1.0.504",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -1730,10 +1730,13 @@ CSL.Engine = function (sys, style, lang, forceLang) {
     langspec = CSL.localeResolve(lang);
     this.opt.lang = langspec.best;
     this.opt["default-locale"][0] = langspec.best;
+    this.locale = {};
     if (!this.opt["default-locale-sort"]) {
         this.opt["default-locale-sort"] = this.opt["default-locale"][0];
+    } else {
+        var sortlangspec = CSL.localeResolve(this.opt["default-locale-sort"]);
+        this.localeConfigure(sortlangspec);
     }
-    this.locale = {};
     this.localeConfigure(langspec);
     function makeRegExp(lst) {
         var lst = lst.slice();
