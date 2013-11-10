@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.504",
+    PROCESSOR_VERSION: "1.0.505",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -2714,7 +2714,7 @@ CSL.Output.Queue.prototype.append = function (str, tokname, notSerious, ignorePr
     if (notSerious) {
         ignorePredecessor = true;
     }
-    if (this.state.tmp["doing-macro-with-date"]) {
+    if (this.state.tmp["doing-macro-with-date"] && !notSerious) {
         if (tokname !== "macro-with-date") {
             return false;
         }
