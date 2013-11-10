@@ -1733,9 +1733,6 @@ CSL.Engine = function (sys, style, lang, forceLang) {
     this.locale = {};
     if (!this.opt["default-locale-sort"]) {
         this.opt["default-locale-sort"] = this.opt["default-locale"][0];
-    } else {
-        var sortlangspec = CSL.localeResolve(this.opt["default-locale-sort"]);
-        this.localeConfigure(sortlangspec);
     }
     this.localeConfigure(langspec);
     function makeRegExp(lst) {
@@ -4968,14 +4965,20 @@ CSL.Engine.prototype.updateUncitedItems = function (idList, nosort) {
     this.registry.renumber();
     return this.registry.getSortedIds();
 };
-CSL.localeResolve = function (langstr) {
+CSL.localeResolve = function (langstr, defaultLocale) {
     var ret, langlst;
+    if (!defaultLocale) {
+        defaultLocale = "en-US";
+    }
+    if (!langstr) {
+        langstr = defaultLocale;
+    }
     ret = {};
     langlst = langstr.split(/[\-_]/);
     ret.base = CSL.LANG_BASES[langlst[0]];
     if ("undefined" === typeof ret.base) {
-        CSL.debug("Warning: unknown locale "+langstr+", setting fallback to en-US");
-        return {base:"en-US", best:langstr, bare:langlst[0]};
+        CSL.debug("Warning: unknown locale "+langstr+", setting fallback to "+defaultLocale);
+        return {base:defaultLocale, best:langstr, bare:langlst[0]};
     }
     if (langlst.length === 1 || langlst[1] === "x") {
         ret.best = ret.base.replace("_", "-");
@@ -8644,10 +8647,11 @@ CSL.Node.sort = {
             state.build.extension = "_sort";
             var func = function (state, Item) {
                 if (state.opt.has_layout_locale) {
-                    var lang = Item.language ? Item.language : state.opt["default-locale-sort"];
-                    var langspec = CSL.localeResolve(lang);
+                    var langspec = CSL.localeResolve(Item.language, state.opt["default-locale"][0]);
+                    var sort_locales = state[state.tmp.area.slice(0,-5)].opt.sort_locales;
+                    var langForItem = sort_locales[langspec.best] ? sort_locales[langspec.best] : sort_locales[langspec.base];
                     state.tmp.lang_sort_hold = state.opt.lang;
-                    state.opt.lang = langspec.best;
+                    state.opt.lang = langForItem;
                 }
             }
             this.execs.push(func);
@@ -9450,12 +9454,18 @@ CSL.Attributes["@is-plural"] = function (state, arg) {
 };
 CSL.Attributes["@locale"] = function (state, arg) {
     var func, ret, len, pos, variable, myitem, langspec, lang, lst, i, ilen, fallback;
+    var locale_default = state.opt["default-locale"][0];
     if (this.name === "layout") {
         this.locale_raw = arg;
         var locales = arg.split(/\s+/);
-        state[state.build.area].opt.sort_locales[locales[0]] = CSL.localeResolve(locales[0]);
+        state[state.build.area].opt.sort_locales[state.opt["default-locale"][0]] = state.opt["default-locale"][0];
+        var localeMaster = CSL.localeResolve(locales[0], locale_default);
+        state[state.build.area].opt.sort_locales[localeMaster.best] = localeMaster.best;
+        state[state.build.area].opt.sort_locales[localeMaster.base] = localeMaster.best;
         for (var i=1,ilen=locales.length;i<ilen;i+=1) {
-            state[state.build.area].opt.sort_locales[locales[i]] = CSL.localeResolve(locales[0]);
+            var localeServant = CSL.localeResolve(locales[i], locale_default);
+            state[state.build.area].opt.sort_locales[localeServant.best] = localeMaster.best;
+            state[state.build.area].opt.sort_locales[localeServant.base] = localeMaster.best;
         }
         state.opt.has_layout_locale = true;
     } else {
@@ -9463,7 +9473,7 @@ CSL.Attributes["@locale"] = function (state, arg) {
         var locale_bares = [];
         for (i = 0, ilen = lst.length; i < ilen; i += 1) {
             lang = lst[i];
-            langspec = CSL.localeResolve(lang);
+            langspec = CSL.localeResolve(lang, locale_default);
             if (lst[i].length === 2) {
                 locale_bares.push(langspec.bare);
             }
@@ -9471,7 +9481,6 @@ CSL.Attributes["@locale"] = function (state, arg) {
             lst[i] = langspec;
         }
         var locale_list = lst.slice();
-        var locale_default = state.opt["default-locale"][0];
         var maketest = function (locale_list, locale_default,locale_bares) {
             return function (Item, item) {
                 var key, res;
@@ -9484,7 +9493,7 @@ CSL.Attributes["@locale"] = function (state, arg) {
                 } else {
                     lang = Item.language;
                 }
-                langspec = CSL.localeResolve(lang);
+                langspec = CSL.localeResolve(lang, locale_default);
                 for (i = 0, ilen = locale_list.length; i < ilen; i += 1) {
                     if (langspec.best === locale_list[i].best) {
                         res = true;
@@ -9506,7 +9515,7 @@ CSL.Attributes["@locale-internal"] = function (state, arg) {
         this.locale_bares = [];
         for (i = 0, ilen = lst.length; i < ilen; i += 1) {
             lang = lst[i];
-            langspec = CSL.localeResolve(lang);
+            langspec = CSL.localeResolve(lang, state.opt["default-locale"][0]);
             if (lst[i].length === 2) {
                 this.locale_bares.push(langspec.bare);
             }
@@ -9524,7 +9533,7 @@ CSL.Attributes["@locale-internal"] = function (state, arg) {
                 var langspec = false;
                 if (Item.language) {
                     lang = Item.language;
-                    langspec = CSL.localeResolve(lang);
+                    langspec = CSL.localeResolve(lang, state.opt["default-locale"][0]);
                     if (langspec.best === state.opt["default-locale"][0]) {
                         langspec = false;
                     }
