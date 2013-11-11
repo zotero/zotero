@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.505",
+    PROCESSOR_VERSION: "1.0.506",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -3607,7 +3607,7 @@ CSL.Engine.Citation = function (state) {
     this.opt.layout_prefix = "";
     this.opt.layout_suffix = "";
     this.opt.layout_delimiter = "";
-    this.opt.sort_locales = {};
+    this.opt.sort_locales = [];
 };
 CSL.Engine.Bibliography = function () {
     this.opt = {};
@@ -3620,7 +3620,7 @@ CSL.Engine.Bibliography = function () {
     this.opt.layout_delimiter = "";
     this.opt["line-spacing"] = 1;
     this.opt["entry-spacing"] = 1;
-    this.opt.sort_locales = {};
+    this.opt.sort_locales = [];
 };
 CSL.Engine.BibliographySort = function () {
     this.tokens = [];
@@ -4979,6 +4979,9 @@ CSL.localeResolve = function (langstr, defaultLocale) {
     if ("undefined" === typeof ret.base) {
         CSL.debug("Warning: unknown locale "+langstr+", setting fallback to "+defaultLocale);
         return {base:defaultLocale, best:langstr, bare:langlst[0]};
+    }
+    if (langlst.length === 1) {
+        ret.generic = true;
     }
     if (langlst.length === 1 || langlst[1] === "x") {
         ret.best = ret.base.replace("_", "-");
@@ -8649,7 +8652,19 @@ CSL.Node.sort = {
                 if (state.opt.has_layout_locale) {
                     var langspec = CSL.localeResolve(Item.language, state.opt["default-locale"][0]);
                     var sort_locales = state[state.tmp.area.slice(0,-5)].opt.sort_locales;
-                    var langForItem = sort_locales[langspec.best] ? sort_locales[langspec.best] : sort_locales[state.opt["default-locale"][0]];
+                    var langForItem;
+                    for (var i=0,ilen=sort_locales.length;i<ilen;i+=1) {
+                        langForItem = sort_locales[i][langspec.bare];
+                        if (!langForItem) {
+                            langForItem = sort_locales[i][langspec.best];
+                        }
+                        if (langForItem) {
+                            break;
+                        }
+                    }
+                    if (!langForItem) {
+                        langForItem = state.opt["default-locale"][0];
+                    }
                     state.tmp.lang_sort_hold = state.opt.lang;
                     state.opt.lang = langForItem;
                 }
@@ -9457,15 +9472,24 @@ CSL.Attributes["@locale"] = function (state, arg) {
     var locale_default = state.opt["default-locale"][0];
     if (this.name === "layout") {
         this.locale_raw = arg;
-        var locales = arg.split(/\s+/);
-        state[state.build.area].opt.sort_locales[state.opt["default-locale"][0]] = state.opt["default-locale"][0];
-        var localeMaster = CSL.localeResolve(locales[0], locale_default);
-        state[state.build.area].opt.sort_locales[localeMaster.best] = localeMaster.best;
-        state[state.build.area].opt.sort_locales[localeMaster.base] = localeMaster.best;
-        for (var i=1,ilen=locales.length;i<ilen;i+=1) {
-            var localeServant = CSL.localeResolve(locales[i], locale_default);
-            state[state.build.area].opt.sort_locales[localeServant.best] = localeMaster.best;
-            state[state.build.area].opt.sort_locales[localeServant.base] = localeMaster.best;
+        if (this.tokentype === CSL.START) {
+            var locales = arg.split(/\s+/);
+            var sort_locale = {};
+            var localeMaster = CSL.localeResolve(locales[0], locale_default);
+            if (localeMaster.generic) {
+                sort_locale[localeMaster.generic] = localeMaster.best;
+            } else {
+                sort_locale[localeMaster.best] = localeMaster.best;
+            }
+            for (var i=1,ilen=locales.length;i<ilen;i+=1) {
+                var localeServant = CSL.localeResolve(locales[i], locale_default);
+                if (localeServant.generic) {
+                    sort_locale[localeServant.generic] = localeMaster.best;
+                } else {
+                    sort_locale[localeServant.best] = localeMaster.best;
+                }
+            }
+            state[state.build.area].opt.sort_locales.push(sort_locale);
         }
         state.opt.has_layout_locale = true;
     } else {
