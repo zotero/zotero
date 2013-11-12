@@ -55,8 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Créer un compte">
 <!ENTITY zotero.preferences.sync.lostPassword "Mot de passe oublié ?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchroniser automatiquement">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Synchroniser le texte intégral des pièces jointes indexées">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero peut synchroniser l'intégralité du texte des pièces jointes indexées (PDF et HTML) de vos bibliothèques Zotero avec zotero.org et, ainsi, avec vos autres appareils connectés. Cela vous permet de rechercher facilement dans le contenu de vos fichiers où que vous soyez. Le texte intégral de vos fichiers ne sera pas partagé publiquement.">
 <!ENTITY zotero.preferences.sync.about "À propos de la synchronisation">
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronisation des fichiers">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Adresse (URL) :">
@@ -83,7 +83,7 @@
 
 
 <!ENTITY zotero.preferences.prefpane.search "Recherche">
-<!ENTITY zotero.preferences.search.fulltextCache "Cache en texte intégral">
+<!ENTITY zotero.preferences.search.fulltextCache "Index du texte intégral">
 <!ENTITY zotero.preferences.search.pdfIndexing "Indexation des PDF">
 <!ENTITY zotero.preferences.search.indexStats "Statistiques d'indexation">
 

@@ -1,7 +1,7 @@
 <!ENTITY zotero.preferences.title "Zotero Tercihleri">
 
-<!ENTITY zotero.preferences.default "Varsayılan">
-<!ENTITY zotero.preferences.items "Eserler">
+<!ENTITY zotero.preferences.default "Varsayılan:">
+<!ENTITY zotero.preferences.items "Eser">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Ayarlar">
 
@@ -55,8 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Hesap Oluştur">
 <!ENTITY zotero.preferences.sync.lostPassword "Unutulan Şifre?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Kendiliğinden eşitle">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Tüm-metin içeriği eşitle">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero, Zotero kitaplıklarınızdaki dosyaların tüm-metin içeriklerini zotero.org ve diğer bağlantılı cihazlarla eşitliyebilir. Bu sayede her yerden kolayca dosyalarınızı arayabilirsiniz. Dosyalarınızın tüm-metin içerikleri herkese açık olarak paylaşılmayacaktır.">
 <!ENTITY zotero.preferences.sync.about "Eşitleme Hakkında">
 <!ENTITY zotero.preferences.sync.fileSyncing "Dosya Eşitlemesi">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -84,16 +84,16 @@
 
 <!ENTITY zotero.preferences.prefpane.search "Arama">
 <!ENTITY zotero.preferences.search.fulltextCache "Tüm-Metin Önbellek">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF Dizinleme">
-<!ENTITY zotero.preferences.search.indexStats "Dizin İstatistikleri">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF İndeksleme">
+<!ENTITY zotero.preferences.search.indexStats "İndeks İstatistikleri">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "Dizinli:">
+<!ENTITY zotero.preferences.search.indexStats.indexed "İndeklenmiş:">
 <!ENTITY zotero.preferences.search.indexStats.partial "Kısmi:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "Dizinlenmemiş:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "İndekslenmemiş:">
 <!ENTITY zotero.preferences.search.indexStats.words "Kelimeler:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Her dosyayı dizinlemek için en fazla karakter:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Her dosyadaki dizinlenecek en fazla sayfa sayısı:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Her dosyayı indekslemek için en fazla karakter:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Her dosyadaki indekslenecek en fazla sayfa sayısı:">
 
 <!ENTITY zotero.preferences.prefpane.export "Dışarı Aktar">
 
@@ -157,7 +157,7 @@
 <!ENTITY zotero.preferences.proxies.autoAssociate "Yeni ana sunucuları kendiliğinden ilişkilendir">
 <!ENTITY zotero.preferences.proxies.variables "Vekil düzeninde aşağıdaki değişkenleri kullanabilirsiniz:">
 <!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Yetkili sitenin anabilgisayar adı (ör., www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Yetkili sayfanın başındaki kesmenin çıkartılmış yolu (ör., about/index.html)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Yetkili sayfanın başındaki kesme işaretinin çıkartılmış yolu (ör., about/index.html)">
 <!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Dizin yolu (ör., about/)">
 <!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Dosyaadı (ör., index.html)">
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Herhangi bir dizi">
