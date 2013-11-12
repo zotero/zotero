@@ -36,6 +36,7 @@
 			<preference id="pref-quickCopy-linkOption" name="extensions.zotero.export.quickCopy.linkOption" type="bool"/>
 			<preference id="pref-quickCopy-linkCitationFormReverse" name="extensions.zotero.export.quickCopy.linkCitationFormReverse" type="bool"/>
 			<preference id="pref-export-displayCharsetOption" name="extensions.zotero.export.displayCharsetOption" type="bool"/>
+			<preference id="pref-import-charset" name="extensions.zotero.import.charset" type="string"/>
 		</preferences>
 
 		<groupbox id="zotero-prefpane-export-groupbox">
