@@ -39,7 +39,7 @@ const ZOTERO_CONFIG = {
 	BOOKMARKLET_ORIGIN : 'https://www.zotero.org',
 	HTTP_BOOKMARKLET_ORIGIN : 'http://www.zotero.org',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "4.0.14.SOURCE"
+	VERSION: "4.0.15.SOURCE"
 };
 
 // Commonly used imports accessible anywhere
