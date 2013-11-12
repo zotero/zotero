@@ -44,7 +44,8 @@ const CSL_NAMES_MAPPINGS = {
 	"seriesEditor":"collection-editor",
 	"translator":"translator",
 	"contributor":"contributor",
-	"authority":"authority"
+	"authority":"authority",
+	"commenter":"commenter"
 }
 
 /*
