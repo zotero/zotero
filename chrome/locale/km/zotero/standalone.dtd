@@ -77,7 +77,7 @@
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "បិទភ្ជាប់">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmd.label "ជម្រើស…">
+<!ENTITY preferencesCmd.label "Preferences">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY preferencesCmdMac.label "ជម្រើសអាទិភាព…">
 <!ENTITY preferencesCmdUnix.accesskey "n">

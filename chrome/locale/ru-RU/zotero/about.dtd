@@ -2,12 +2,12 @@
 <!ENTITY zotero.about.close "Закрыть">
 <!ENTITY zotero.about.localizations "Локализация:">
 <!ENTITY zotero.alumni "Бывшие разработчики:">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.citationProcessing "Обработка цитат &amp; библиографии">
 <!ENTITY zotero.createdby "Авторы:">
 <!ENTITY zotero.developers "Разработчики:">
 <!ENTITY zotero.director "Директор:">
 <!ENTITY zotero.directors "Руководители:">
 <!ENTITY zotero.executiveProducer "Глава разработки:">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "Дополнительные ">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Дополнительные сведения об участниках и источниках">
 <!ENTITY zotero.thanks "Особая благодарность:">
 <!ENTITY zotero.version "версия">

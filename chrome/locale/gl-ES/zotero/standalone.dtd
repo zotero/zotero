@@ -77,7 +77,7 @@
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "Pegar">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmd.label "Opcións...">
+<!ENTITY preferencesCmd.label "Preferences">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY preferencesCmdMac.label "Preferencias_">
 <!ENTITY preferencesCmdUnix.accesskey "n">

@@ -4,9 +4,9 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.autoUpdate "Sjekk automatisk for oppdaterte omsetjarar">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.automaticSnapshots "Ta snapshot automatisk når du genererer element frå nettsider">
-<!ENTITY zotero.preferences.automaticTags "Legg til merke automatisk når element inneheld nøkkel- og emneord i hovudteksta">
+<!ENTITY zotero.preferences.automaticTags "Legg til tagg automatisk frå nøkkel- og emneord i hovudteksta">
 <!ENTITY zotero.preferences.charset "Character Encoding">
 <!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
 <!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
@@ -17,10 +17,10 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Tittel">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Oppdatert">
-<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
+<!ENTITY zotero.preferences.cite.wordProcessors "Teksthandsamarar">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Hent teksthandsamartillegg …">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Det er ikkje installert nokon teksthandsamartillegg.">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 <!ENTITY zotero.preferences.dataDir "Lagringsplass">
 <!ENTITY zotero.preferences.dataDir.choose "Vel …">
@@ -40,7 +40,7 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Submit to Zotero Server">
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "View Output">
 <!ENTITY zotero.preferences.default "Standard:">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Lagrar assosierte PDF-filer og andre filer når du lagrar element">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Lagra tilknytte PDF-filer og andre filer ved lagring av element">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Inkluderer URL til trykte artiklar i referansane">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Når dette alternativet ikkje er valt, vil Zotero berre oppgje URL til tidsskriftet, magasinet eller avisa, dersom artikkelen er registrert utan sidetal.">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Hent fleire stilar …">
@@ -53,9 +53,9 @@
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maksimalt tal sider som skal indekserast per fil:">
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Maksimalt tal teikn som skal indekserast per fil:">
 <!ENTITY zotero.preferences.groups "Grupper">
-<!ENTITY zotero.preferences.groups.childFiles "child snapshots and imported files">
-<!ENTITY zotero.preferences.groups.childLinks "child links">
-<!ENTITY zotero.preferences.groups.childNotes "child notes">
+<!ENTITY zotero.preferences.groups.childFiles "undernotat og importerte filer">
+<!ENTITY zotero.preferences.groups.childLinks "underlenkjer">
+<!ENTITY zotero.preferences.groups.childNotes "undernotat">
 <!ENTITY zotero.preferences.groups.tags "tags">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Ta med når element vert kopierte mellom bibliotek:">
 <!ENTITY zotero.preferences.items "items">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Opne/lukk Zotero-panelet">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Forsøk å overstyra snøggtastar i konflikt">
 <!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøk">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Fullskjerm av/på">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Slå merkeveljaren av/på">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -111,7 +111,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
 <!ENTITY zotero.preferences.miscellaneous "Diverse">
 <!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
+<!ENTITY zotero.preferences.openAboutMemory "Opna about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
 <!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
 <!ENTITY zotero.preferences.openurl.caption "Opne URL">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.openurl.search "Leit etter &quot;resolvers&quot;">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versjon:">
-<!ENTITY zotero.preferences.parseRISRefer "Bruk Zotero for nedlasta RIS/Refer-filer">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "Avansert">
 <!ENTITY zotero.preferences.prefpane.cite "Sitering">
@@ -154,7 +154,7 @@
 <!ENTITY zotero.preferences.quickCopy.caption "Snøgg-kopi">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopier som HTML">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Standard utdata-format:">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "Disable Quick Copy when dragging more than">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "Slå av rask kopiering når du drar fleire enn">
 <!ENTITY zotero.preferences.quickCopy.linkCitationFormReverse "Use citation form as default">
 <!ENTITY zotero.preferences.quickCopy.linkOption "Include Zotero link wrappers in QuickCopy citations">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Obs: Riktekst-formatering vert borte i Mac OS X.">
@@ -184,22 +184,22 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Sync attachment files in group libraries using Zotero storage">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Synkroniser filer i gruppebibliotek med Zotero-lagring">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synkroniser vedlegg i biblioteket med">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Ved å bruka Zotero-lagring godtek du ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "vilkåra for bruk">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "Mista passordet?">
 <!ENTITY zotero.preferences.sync.password "Passord:">
 <!ENTITY zotero.preferences.sync.reset "Reset">
-<!ENTITY zotero.preferences.sync.reset.button "Reset...">
+<!ENTITY zotero.preferences.sync.reset.button "Nullstill …">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Full synkronisering med Zotero-tenaren">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local Zotero data with data from the sync server, ignoring sync history.">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reset File Sync History">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Slå ihop Zotero-data med data frå synkroniseringstenaren, og ignorer synkroniseringshistorikken.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Nullstill filsynkroniseringshistorikken">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Force checking of the storage server for all local attachment files.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Erase all local Zotero data and restore from the sync server.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Zotero Server">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Gjenopprett frå Zotero-tenaren">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Slett alle lokale Zotero-data og gjenopprett frå synkroniseringstenaren.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Gjenopprett til Zotero-tenaren">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Erase all servar data and overwrite with local Zotero data.">
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">

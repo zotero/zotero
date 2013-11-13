@@ -77,7 +77,7 @@
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "붙이기">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmd.label "환경설정">
+<!ENTITY preferencesCmd.label "Preferences">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY preferencesCmdMac.label "설정">
 <!ENTITY preferencesCmdUnix.accesskey "n">

@@ -39,7 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "Número de referència de l&apos;informe:">
 <!ENTITY zotero.errorReport.submissionInProgress "Espereu mentre s&apos;envia l&apos;informe d&apos;error.">
 <!ENTITY zotero.errorReport.submitted "L&apos;informe d&apos;error ha estat enviat correctament.">
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
+<!ENTITY zotero.errorReport.title "Informe d'error de Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "El registre d&apos;error pot incloure missatges no relacionats amb el Zotero.">
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.title "Exporta...">
@@ -50,14 +50,14 @@
 <!ENTITY zotero.general.deselectAll "Desselecciona tot">
 <!ENTITY zotero.general.edit "Edita">
 <!ENTITY zotero.general.note "Nota:">
-<!ENTITY zotero.general.optional "(Opciona1)">
+<!ENTITY zotero.general.optional "(Opcional)">
 <!ENTITY zotero.general.selectAll "Selecciona tot">
 <!ENTITY zotero.integration.addEditCitation.title "Afegeix / Edita la cita">
 <!ENTITY zotero.integration.classicView.label "Vista clàssica">
 <!ENTITY zotero.integration.docPrefs.title "Preferències del document">
 <!ENTITY zotero.integration.editBibliography.title "Edita la bibliografia">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Les abreviacions de la revista MEDLINE es generaràn automàticament ambs els noms de les revistes. S'ignorarà el camp &quot;Revista abr.”.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Abrevia automàticament els títols de les publicacions">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Les adreces d&apos;interès es conserven entre el Microsoft Word i l'OpenOffice però es poden veure modificades accidentalment.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Adreces d&apos;interès">
 <!ENTITY zotero.integration.prefs.displayAs.label "Mostra les cites com a:">
@@ -86,28 +86,28 @@
 <!ENTITY zotero.item.add "Afegeix">
 <!ENTITY zotero.item.attachment.file.show "Mostra el fitxer">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Intercanvia nom i cognoms">
 <!ENTITY zotero.item.textTransform "Transforma el text">
 <!ENTITY zotero.item.textTransform.sentencecase "Majúscules o minúscules de la frase">
 <!ENTITY zotero.item.textTransform.titlecase "Majúscules o minúscules del títol">
 <!ENTITY zotero.items.accessDate_column "Data d'accés">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archiveLocation_column "Ubicació a l'arxiu">
+<!ENTITY zotero.items.archive_column "Arxiu">
 <!ENTITY zotero.items.callNumber_column "Codi del catàleg">
-<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.court_column "Tribunal">
 <!ENTITY zotero.items.creator_column "Creador">
 <!ENTITY zotero.items.dateAdded_column "Data d&apos;incorporació">
 <!ENTITY zotero.items.dateModified_column "Data de modificació">
 <!ENTITY zotero.items.date_column "Data">
-<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.edition_column "Edició">
 <!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.issue_column "Issue">
+<!ENTITY zotero.items.genre_column "Gènere">
+<!ENTITY zotero.items.issue_column "Número">
 <!ENTITY zotero.items.itemType "Tipus d'element">
 <!ENTITY zotero.items.journalAbbr_column "Abreviatura de la revista">
 <!ENTITY zotero.items.language_column "Llengua">
 <!ENTITY zotero.items.libraryCatalog_column "Catàleg de la biblioteca">
-<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.medium_column "Medi/format">
 <!ENTITY zotero.items.menu.addTag "Add Tag">
 <!ENTITY zotero.items.menu.attach "Afegeix un adjunt">
 <!ENTITY zotero.items.menu.attach.file "Adjunta la còpia emmagatzemada del fitxer...">
@@ -123,27 +123,27 @@
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaura a la biblioteca">
 <!ENTITY zotero.items.menu.showInLibrary "Mostra a la biblioteca">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.moreColumns.label "Més columnes">
 <!ENTITY zotero.items.numChildren_column "+">
-<!ENTITY zotero.items.pages_column "Pages">
-<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.pages_column "Nre. de pàgines">
+<!ENTITY zotero.items.place_column "Lloc">
 <!ENTITY zotero.items.publication_column "Publicació">
 <!ENTITY zotero.items.publisher_column "Editorial">
 <!ENTITY zotero.items.reporter_column "Reporter">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restableix l'ordre de les columnes">
 <!ENTITY zotero.items.rights_column "Drets">
-<!ENTITY zotero.items.seriesTitle_column "Series Title">
-<!ENTITY zotero.items.series_column "Series">
-<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.seriesTitle_column "Títol de la sèrie">
+<!ENTITY zotero.items.series_column "Sèrie">
+<!ENTITY zotero.items.system_column "Sistema">
 <!ENTITY zotero.items.title_column "Títol">
 <!ENTITY zotero.items.type_column "Tipus">
-<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.volume_column "Volum">
 <!ENTITY zotero.items.year_column "Any">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.button.search "Cerca">
 <!ENTITY zotero.lookup.description "Introduïu l'ISBN, DOI, o PMID per cercar en el quadre inferior.">
-<!ENTITY zotero.merge.deleted "Deleted">
-<!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.deleted "Esborrat">
+<!ENTITY zotero.merge.of "de">
+<!ENTITY zotero.merge.title "Resolució de conflictes">
 <!ENTITY zotero.moreEncodings.label "Més codificacions">
 <!ENTITY zotero.notes.separate "Edita en una finestra separada">
 <!ENTITY zotero.progress.title "Progrés">
@@ -207,11 +207,11 @@
 <!ENTITY zotero.tabs.related.label "Relacionats">
 <!ENTITY zotero.tabs.tags.label "Etiquetes">
 <!ENTITY zotero.tagColorChooser.color "Color:">
-<!ENTITY zotero.tagColorChooser.position "Position:">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
-<!ENTITY zotero.tagColorChooser.setColor "Set Color">
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
+<!ENTITY zotero.tagColorChooser.position "Posició:">
+<!ENTITY zotero.tagColorChooser.removeColor "Elimina el color">
+<!ENTITY zotero.tagColorChooser.setColor "Estableix el color">
+<!ENTITY zotero.tagColorChooser.title "Tria un color i una posició per a l'etiqueta">
+<!ENTITY zotero.tagSelector.assignColor "Assigna color...">
 <!ENTITY zotero.tagSelector.clearAll "Desselecciona-ho tot">
 <!ENTITY zotero.tagSelector.clearVisible "Desselecciona les visibles">
 <!ENTITY zotero.tagSelector.deleteTag "Esborra l'etiqueta...">
@@ -273,7 +273,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Assegureu-vos de revisar">
 <!ENTITY zotero.upgrade.majorUpgradeLink "instruccions d'actualització">
 <!ENTITY zotero.upgrade.newVersionInstalled "Has instal·lat una nova versió del Zotero.">
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.title "Auxiliar d'actualització de Zotero">
 <!ENTITY zotero.upgrade.upgradeInProgress "Espereu que s&apos;acabi el procés d&apos;actualització. Pot trigar uns minuts.">
 <!ENTITY zotero.upgrade.upgradeRequired "La vostra base de dades s&apos;ha d&apos;actualitzar per a funcionar amb la nova versió.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "La vostra base de dades del Zotero s&apos;ha actualitzat correctament">

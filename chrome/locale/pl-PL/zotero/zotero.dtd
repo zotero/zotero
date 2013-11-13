@@ -56,8 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Widok klasyczny">
 <!ENTITY zotero.integration.docPrefs.title "Ustawienia dokumentu">
 <!ENTITY zotero.integration.editBibliography.title "Edytuj bibliografię">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Skróty czasopism MEDLINE zostaną automatycznie utworzone z wykorzystaniem tytułów czasopism. Pole &quot;Skrót czasopisma&quot; będzie zignorowane.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatycznie skróć tytuły czasopism">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Zakładki są zabezpieczone zarówno przez program Microsoft Word jaki i OpenOffice, ale w wyjątkowych przypadkach mogą być modyfikowane.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Zakładki">
 <!ENTITY zotero.integration.prefs.displayAs.label "Wyświetl prośby jako:">
@@ -91,23 +91,23 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Jak w zdaniu">
 <!ENTITY zotero.item.textTransform.titlecase "Kapitaliki">
 <!ENTITY zotero.items.accessDate_column "Dostęp">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.archiveLocation_column "Miejsce w archiwum">
 <!ENTITY zotero.items.archive_column "Archiwum">
 <!ENTITY zotero.items.callNumber_column "Numer klasyfikacyjny">
-<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.court_column "Sąd">
 <!ENTITY zotero.items.creator_column "Twórca">
 <!ENTITY zotero.items.dateAdded_column "Data dodania">
 <!ENTITY zotero.items.dateModified_column "Data modyfikacji">
 <!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.edition_column "Wydanie">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.extra_column "Ekstra">
+<!ENTITY zotero.items.genre_column "Rodzaj">
 <!ENTITY zotero.items.issue_column "Numer">
 <!ENTITY zotero.items.itemType "Typ elementu">
-<!ENTITY zotero.items.journalAbbr_column "Skrót publikacji">
+<!ENTITY zotero.items.journalAbbr_column "Skrót czasopisma">
 <!ENTITY zotero.items.language_column "Język">
 <!ENTITY zotero.items.libraryCatalog_column "Katalog biblioteczny">
-<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.medium_column "Nośnik/Format">
 <!ENTITY zotero.items.menu.addTag "Add Tag">
 <!ENTITY zotero.items.menu.attach "Dodaj załącznik">
 <!ENTITY zotero.items.menu.attach.file "Dołącz zachowaną kopię pliku...">
@@ -123,14 +123,14 @@
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Przywróć do biblioteki">
 <!ENTITY zotero.items.menu.showInLibrary "Wyświetl w bibliotece">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.moreColumns.label "Więcej kolumn">
 <!ENTITY zotero.items.numChildren_column "+">
 <!ENTITY zotero.items.pages_column "Strony">
 <!ENTITY zotero.items.place_column "Miejsce">
 <!ENTITY zotero.items.publication_column "Publikacja">
 <!ENTITY zotero.items.publisher_column "Wydawca">
 <!ENTITY zotero.items.reporter_column "Reporter">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.restoreColumnOrder.label "Przywróć porządek kolumn">
 <!ENTITY zotero.items.rights_column "Prawa autorskie">
 <!ENTITY zotero.items.seriesTitle_column "Tytuł serii">
 <!ENTITY zotero.items.series_column "Seria">
@@ -141,8 +141,8 @@
 <!ENTITY zotero.items.year_column "Rok">
 <!ENTITY zotero.lookup.button.search "Wyszukiwanie">
 <!ENTITY zotero.lookup.description "Wprowadź ISBN, DOI lub PMID aby wyszukać w oknie poniżej.">
-<!ENTITY zotero.merge.deleted "Deleted">
-<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.deleted "Usunięty">
+<!ENTITY zotero.merge.of "z">
 <!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "Więcej kodowań">
 <!ENTITY zotero.notes.separate "Edytuj w oddzielnym oknie">
@@ -273,7 +273,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Upewnij się, że zapoznałeś się z">
 <!ENTITY zotero.upgrade.majorUpgradeLink "instrukcją aktualizacji">
 <!ENTITY zotero.upgrade.newVersionInstalled "Nowa wersja Zotero została zainstalowana.">
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.title "Kreator aktualizacji Zotero">
 <!ENTITY zotero.upgrade.upgradeInProgress "Proszę poczekać na zakończenie procesu aktualizacji. Może to potrwać kilka minut.">
 <!ENTITY zotero.upgrade.upgradeRequired "Baza danych Zotero musi zostać zaktualizowana, aby współpracowała z nową wersją programu.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Baza danych Zotero została zaktualizowana.">

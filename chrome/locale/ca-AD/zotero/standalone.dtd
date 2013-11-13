@@ -77,7 +77,7 @@
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "Enganxa">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmd.label "Opcions...">
+<!ENTITY preferencesCmd.label "Preferències">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY preferencesCmdMac.label "Preferències...">
 <!ENTITY preferencesCmdUnix.accesskey "n">

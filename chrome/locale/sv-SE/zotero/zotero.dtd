@@ -26,7 +26,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Dölj författare">
 <!ENTITY zotero.collections.showUnfiledItems "Visa oregistererade källor">
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Lägg markeringen till Zotero-anteckning">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Skapa en Zotero-anteckning av det valda">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Skapa en Zotero-källa och anteckning av markeringen">
 <!ENTITY zotero.contextMenu.saveImageAsItem "Spara bild som en Zotero-källa">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "Spara länk som en Zotero-källa">
 <!ENTITY zotero.downloadManager.label "Spara till Zotero">
@@ -56,9 +56,9 @@
 <!ENTITY zotero.integration.classicView.label "Klassisk vy">
 <!ENTITY zotero.integration.docPrefs.title "Dokumentinställningar">
 <!ENTITY zotero.integration.editBibliography.title "Redigera källförteckning">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmärken sparas i Microsoft Word och OpenOffice, men kan ändras av misstag.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE-tidskriftsförkortningar genereras automatiskt från tidskriftstitlarna. Tidskriftsförkortningsfältet ignoreras.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Förkorta tidskriftstitlar automatiskt">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmärken sparas i Microsoft Word och LibreOffice, men kan ändras av misstag. Av kompatibilitetsskäl kan inte källhänvisningar läggas till fotnoter eller slutkommentarer när detta alternativ är valt.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bokmärken">
 <!ENTITY zotero.integration.prefs.displayAs.label "Visa källor som:">
 <!ENTITY zotero.integration.prefs.endnotes.label "Slutnoter">
@@ -86,10 +86,10 @@
 <!ENTITY zotero.item.add "Lägg till">
 <!ENTITY zotero.item.attachment.file.show "Visa fil">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Skifta för-/efternman">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Skifta för-/efternamn">
 <!ENTITY zotero.item.textTransform "Omvandla text">
 <!ENTITY zotero.item.textTransform.sentencecase "Vanlig versalisering">
-<!ENTITY zotero.item.textTransform.titlecase "engelsk titelskrivning">
+<!ENTITY zotero.item.textTransform.titlecase "Engelsk Titelskrivning">
 <!ENTITY zotero.items.accessDate_column "Hämtdatum">
 <!ENTITY zotero.items.archiveLocation_column "Hitta i arkiv">
 <!ENTITY zotero.items.archive_column "Arkiv">
@@ -118,7 +118,7 @@
 <!ENTITY zotero.items.menu.attach.snapshot "Bifoga sparad kopia av aktuell sida">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicera vald post">
-<!ENTITY zotero.items.menu.mergeItems "Sammanfoga källor">
+<!ENTITY zotero.items.menu.mergeItems "Sammanfoga källor…">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Återställ till bibliotek">
@@ -132,7 +132,7 @@
 <!ENTITY zotero.items.reporter_column "Reporter">
 <!ENTITY zotero.items.restoreColumnOrder.label "Återställ kolumnordning">
 <!ENTITY zotero.items.rights_column "Rättigheter">
-<!ENTITY zotero.items.seriesTitle_column "Titel på bokserie">
+<!ENTITY zotero.items.seriesTitle_column "Bokseriens titel">
 <!ENTITY zotero.items.series_column "Bokserie">
 <!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.title_column "Titel">
@@ -189,8 +189,8 @@
 <!ENTITY zotero.selectitems.title "Välj källor">
 <!ENTITY zotero.sync.button "Synkronisera med Zoteros server">
 <!ENTITY zotero.sync.error "Synkroniseringsfel">
-<!ENTITY zotero.sync.longTagFixer.character "tecknet">
-<!ENTITY zotero.sync.longTagFixer.characters "tecknen">
+<!ENTITY zotero.sync.longTagFixer.character "tecken">
+<!ENTITY zotero.sync.longTagFixer.characters "tecken">
 <!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Följande etikett i ditt Zoterobibliotek är för lång för att synkronisera med servern:">
 <!ENTITY zotero.sync.longTagFixer.split "Dela">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Dela vid det">
@@ -203,7 +203,7 @@
 <!ENTITY zotero.sync.storage.uploads "Uppladdningar:">
 <!ENTITY zotero.tabs.attachments.label "Bilagor">
 <!ENTITY zotero.tabs.info.label "Information">
-<!ENTITY zotero.tabs.notes.label "Fotnot">
+<!ENTITY zotero.tabs.notes.label "Anteckningar">
 <!ENTITY zotero.tabs.related.label "Liknande källor">
 <!ENTITY zotero.tabs.tags.label "Etiketter">
 <!ENTITY zotero.tagColorChooser.color "Färg:">
@@ -244,7 +244,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "Ny samling...">
 <!ENTITY zotero.toolbar.newGroup "Ny grupp...">
 <!ENTITY zotero.toolbar.newItem.label "Ny post">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Skapa ny post från aktuell sida">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Skapa ny webbsidekälla från aktuell sida">
 <!ENTITY zotero.toolbar.newNote "Ny anteckning">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Ny sparad sökning...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Ny undersamling...">

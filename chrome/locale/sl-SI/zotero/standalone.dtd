@@ -77,7 +77,7 @@
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "Prilepi">
 <!ENTITY preferencesCmd.accesskey "M">
-<!ENTITY preferencesCmd.label "Možnosti ...">
+<!ENTITY preferencesCmd.label "Nastavitve">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY preferencesCmdMac.label "Nastavitve ...">
 <!ENTITY preferencesCmdUnix.accesskey "N">

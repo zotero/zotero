@@ -5,11 +5,11 @@
 <!ENTITY zotero.annotate.toolbar.expand.label "بسط جميع التعليقات">
 <!ENTITY zotero.annotate.toolbar.highlight.label "تمييز النص">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "إلغاء تمييز النص">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.bibliography "ببليوجرافية">
 <!ENTITY zotero.bibliography.copyToClipboard.label "نسخ للحافظة">
 <!ENTITY zotero.bibliography.output.label "شكل المخرجات">
 <!ENTITY zotero.bibliography.outputMethod "Output Method:">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.outputMode "وضع المخرجات:">
 <!ENTITY zotero.bibliography.print.label "طباعة">
 <!ENTITY zotero.bibliography.saveAsHTML.label "حفظ كملف  HTML">
 <!ENTITY zotero.bibliography.saveAsRTF.label "حفظ كملف  RTF">
@@ -33,7 +33,7 @@
 <!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Search pane of the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "اختار اصدارة العنصر المناسبة لاستخدامه كعنصر رئيسي:">
 <!ENTITY zotero.errorReport.notReviewed "لن يتم مراجعة تقارير الخطأ ما لم يكن مشار إليها في المنتديات.">
 <!ENTITY zotero.errorReport.postToForums "برجاء كتابة رسالة في منتديات زوتيرو (forums.zotero.org) تتضمن رقم التقرير، ووصف للمشكلة، والخطوات التي تؤدي لظهورها.">
 <!ENTITY zotero.errorReport.reportID "رقم التقرير:">
@@ -92,14 +92,14 @@
 <!ENTITY zotero.item.textTransform.titlecase "حرف كبير في بداية كل كلمة">
 <!ENTITY zotero.items.accessDate_column "تاريخ الدخول">
 <!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archive_column "الارشيف">
 <!ENTITY zotero.items.callNumber_column "الرقم العام">
 <!ENTITY zotero.items.court_column "Court">
 <!ENTITY zotero.items.creator_column "المؤلف">
 <!ENTITY zotero.items.dateAdded_column "تاريخ الإضافة">
 <!ENTITY zotero.items.dateModified_column "تاريخ التعديل">
 <!ENTITY zotero.items.date_column "التاريخ">
-<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.edition_column "طبعة">
 <!ENTITY zotero.items.extra_column "Extra">
 <!ENTITY zotero.items.genre_column "Genre">
 <!ENTITY zotero.items.issue_column "Issue">
@@ -118,15 +118,15 @@
 <!ENTITY zotero.items.menu.attach.snapshot "إرفاق لقطة للصفحة الحالية">
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "تكرار العنصر المحدد">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.mergeItems "دمج العناصر...">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "استعادة المكتبة">
 <!ENTITY zotero.items.menu.showInLibrary "عرض في المكتبة">
 <!ENTITY zotero.items.moreColumns.label "More Columns">
 <!ENTITY zotero.items.numChildren_column "+">
-<!ENTITY zotero.items.pages_column "Pages">
-<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.pages_column "صفحات">
+<!ENTITY zotero.items.place_column "مكان">
 <!ENTITY zotero.items.publication_column "النشر">
 <!ENTITY zotero.items.publisher_column "الناشر">
 <!ENTITY zotero.items.reporter_column "Reporter">
@@ -137,11 +137,11 @@
 <!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.title_column "العنوان">
 <!ENTITY zotero.items.type_column "النوع">
-<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.volume_column "صوت">
 <!ENTITY zotero.items.year_column "السنة">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.button.search "بحث">
 <!ENTITY zotero.lookup.description "ادخل الترقيم الدولي الموحد للكتاب او معرف مقالات الميدلاين او معرف الوثيقة الرقمية.">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.deleted "محذوف">
 <!ENTITY zotero.merge.of "of">
 <!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.moreEncodings.label "المزيد من الترميزات">
@@ -206,10 +206,10 @@
 <!ENTITY zotero.tabs.notes.label "ملاحظات">
 <!ENTITY zotero.tabs.related.label "عناصر ذات صلة">
 <!ENTITY zotero.tabs.tags.label "أوسمة">
-<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.color "لون:">
 <!ENTITY zotero.tagColorChooser.position "Position:">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
-<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.removeColor "حذف اللون">
+<!ENTITY zotero.tagColorChooser.setColor "ضبط اللون">
 <!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.clearAll "إلغاء تحديد الكل">
@@ -273,7 +273,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "تأكد من أنك قمت بمراجعة">
 <!ENTITY zotero.upgrade.majorUpgradeLink "إرشادات الترقية">
 <!ENTITY zotero.upgrade.newVersionInstalled "لقد قمتَ بتنصيب نسخة جديدة من زوتيرو.">
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.title "معالج تحديث زوتيرو">
 <!ENTITY zotero.upgrade.upgradeInProgress "فضلاً انتظر حتى تنتهي عملية الترقية. قد يستغرق ذلك عدة دقائق.">
 <!ENTITY zotero.upgrade.upgradeRequired "يجب ترقية قاعدة بيانات زوتيرو لكي تعمل مع النسخة الجديدة.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "تم ترقية قاعدة البيانات بنجاح.">

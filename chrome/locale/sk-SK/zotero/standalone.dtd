@@ -77,7 +77,7 @@
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "Vložiť">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmd.label "Možnosti...">
+<!ENTITY preferencesCmd.label "Predvoľby">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY preferencesCmdMac.label "Predvoľby...">
 <!ENTITY preferencesCmdUnix.accesskey "n">

@@ -2,9 +2,9 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Katalog podstawowy:">
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
-<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Przywróć absolutne ścieżki...">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Wybierz...">
-<!ENTITY zotero.preferences.autoUpdate "Automatycznie sprawdzaj, czy są dostępne aktualizacje">
+<!ENTITY zotero.preferences.autoUpdate "Automatycznie sprawdzaj, czy są dostępne aktualizacje tłumaczeń i stylów">
 <!ENTITY zotero.preferences.automaticSnapshots "Podczas tworzenia elementów ze stron internetowych wykonaj zrzut ekranu">
 <!ENTITY zotero.preferences.automaticTags "Automatycznie oznacz elementy zawierające słowa kluczowe i nagłówki tematyczne">
 <!ENTITY zotero.preferences.charset "Kodowanie znaków">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Otwórz/Zamknij okno Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Spróbuj pominąć powtarzające się skróty">
 <!ENTITY zotero.preferences.keys.quicksearch "Szybkie wyszukiwanie">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Przełącz w tryb pełnoekranowy">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Wyświetl/Ukryj wybór etykiet">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -111,7 +111,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Przywróć domyślne">
 <!ENTITY zotero.preferences.miscellaneous "Różne">
 <!ENTITY zotero.preferences.openAboutConfig "Otwórz about:config">
-<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
+<!ENTITY zotero.preferences.openAboutMemory "Otwórz about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "Otwórz edytor CSL">
 <!ENTITY zotero.preferences.openCSLPreview "Otwórz podgląd CSL">
 <!ENTITY zotero.preferences.openurl.caption "openURL">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.openurl.search "Szukaj resolwerów">
 <!ENTITY zotero.preferences.openurl.server "Resolwer:">
 <!ENTITY zotero.preferences.openurl.version "Wersja:">
-<!ENTITY zotero.preferences.parseRISRefer "Używaj Zotero do pobierania plików RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "Używaj Zotero do pobranych plików BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "Zaawansowane">
 <!ENTITY zotero.preferences.prefpane.cite "Cytowanie">
@@ -209,7 +209,7 @@
 <!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.syncServer "Serwer synchronizacji Zotero">
 <!ENTITY zotero.preferences.sync.username "Użytkownik:">
-<!ENTITY zotero.preferences.title "Zotero - opcje">
+<!ENTITY zotero.preferences.title "Ustawienia Zotero">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dni temu">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatycznie usuń z kosza elementy usunięte dawniej niż">
 <!ENTITY zotero.preferences.updateNow "Aktualizuj">

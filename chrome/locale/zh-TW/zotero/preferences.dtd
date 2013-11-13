@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.autoUpdate "自動檢查更新的轉譯器">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.automaticSnapshots "從網頁建立項目時自動拍攝快照">
 <!ENTITY zotero.preferences.automaticTags "自動以關鍵字與主標題作為項目的標籤">
 <!ENTITY zotero.preferences.charset "字元編碼">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "開／關 Zotero 窗格">
 <!ENTITY zotero.preferences.keys.overrideGlobal "嘗試蓋過相衝突的快速鍵">
 <!ENTITY zotero.preferences.keys.quicksearch "快速搜尋">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "切換全螢幕模式">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "切換標籤選擇器">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.openurl.search "搜尋解析器">
 <!ENTITY zotero.preferences.openurl.server "解析器：">
 <!ENTITY zotero.preferences.openurl.version "版本：">
-<!ENTITY zotero.preferences.parseRISRefer "用 Zotero 處理所下載的 RIS/Refer 檔案">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.period "。">
 <!ENTITY zotero.preferences.prefpane.advanced "進階">
 <!ENTITY zotero.preferences.prefpane.cite "引用">

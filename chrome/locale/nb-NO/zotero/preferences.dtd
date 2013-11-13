@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.autoUpdate "Sjekk automatisk for oppdaterte oversettere">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.automaticSnapshots "Ta snapshot automatisk når du genererer elementer fra nettsider">
 <!ENTITY zotero.preferences.automaticTags "Legg til tagger automatisk når elementer inneholder nøkkel- og emneord i hodeteksten">
 <!ENTITY zotero.preferences.charset "Character Encoding">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Åpne/lukk Zotero-panelet">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Forsøk å overstyre snarveier i konflikt">
 <!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøk">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Fullskjerm av/på">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Slå taggvelgeren av/på">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.openurl.search "Let etter &quot;resolvers&quot;">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versjon:">
-<!ENTITY zotero.preferences.parseRISRefer "Bruk Zotero for nedlastede RIS/Refer-filer">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "Avansert">
 <!ENTITY zotero.preferences.prefpane.cite "Cite">

@@ -77,7 +77,7 @@
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "ペースト">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmd.label "オプション...">
+<!ENTITY preferencesCmd.label "環境設定">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY preferencesCmdMac.label "環境設定...">
 <!ENTITY preferencesCmdUnix.accesskey "n">

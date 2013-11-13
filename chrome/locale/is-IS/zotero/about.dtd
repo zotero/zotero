@@ -1,13 +1,13 @@
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
+<!ENTITY zotero.about.additionalSoftware "Forrit þriðja aðila og staðlar:">
 <!ENTITY zotero.about.close "Loka">
-<!ENTITY zotero.about.localizations "Localizations:">
-<!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.about.localizations "Staðir:">
+<!ENTITY zotero.alumni "Fyrrum nemandi:">
+<!ENTITY zotero.citationProcessing "Tilvísunar- og heimildavinnsla">
 <!ENTITY zotero.createdby "Höfundar:">
-<!ENTITY zotero.developers "Þróunaraðilar">
-<!ENTITY zotero.director "Director:">
-<!ENTITY zotero.directors "Stjórnendur">
+<!ENTITY zotero.developers "Hönnuðir:">
+<!ENTITY zotero.director "Stjórnandi:">
+<!ENTITY zotero.directors "Stjórnendur:">
 <!ENTITY zotero.executiveProducer "Framkvæmdastjóri:">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Viðurkenningar">
 <!ENTITY zotero.thanks "Sérstakar þakkir:">
 <!ENTITY zotero.version "útgáfa">

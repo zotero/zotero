@@ -208,7 +208,7 @@
 <!ENTITY zotero.tabs.tags.label "Marcas">
 <!ENTITY zotero.tagColorChooser.color "Color:">
 <!ENTITY zotero.tagColorChooser.position "Posición:">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.removeColor "Borrar color">
 <!ENTITY zotero.tagColorChooser.setColor "Establecer color">
 <!ENTITY zotero.tagColorChooser.title "Escoja un color y posición de la etiqueta">
 <!ENTITY zotero.tagSelector.assignColor "Asignar color...">

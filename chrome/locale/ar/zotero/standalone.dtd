@@ -77,7 +77,7 @@
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "لصق">
 <!ENTITY preferencesCmd.accesskey "ي">
-<!ENTITY preferencesCmd.label "خيارات…">
+<!ENTITY preferencesCmd.label "Preferences">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY preferencesCmdMac.label "تفضيلات ...">
 <!ENTITY preferencesCmdUnix.accesskey "ف">

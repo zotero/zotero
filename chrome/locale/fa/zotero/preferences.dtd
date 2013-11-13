@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.autoUpdate "جستجوی خودکار برای روزآمدسازی مترجم‌ها">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.automaticSnapshots "ساخت خودکار «تصویر لحظه‌ای» در زمان ذخیره صفحات وب">
 <!ENTITY zotero.preferences.automaticTags "برچسب زدن خودکار به آیتم‌ها با استفاده از کلمات کلیدی و موضوع‌ها">
 <!ENTITY zotero.preferences.charset "کدبندی نویسه‌ها">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "باز کردن/بستن قاب زوترو">
 <!ENTITY zotero.preferences.keys.overrideGlobal "تلاش برای لغو کلیدهای میان‌بر ناسازگار">
 <!ENTITY zotero.preferences.keys.quicksearch "جستجوی سریع">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "فعال/غیرفعال کردن حالت تمام‌صفحه">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "روشن/خاموش کردن انتخاب برچسب">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.openurl.search "گشتن به دنبال تشخیص‌دهنده‌ها (resolvers)">
 <!ENTITY zotero.preferences.openurl.server "تشخیص‌دهنده (resolver):">
 <!ENTITY zotero.preferences.openurl.version "نگارش:">
-<!ENTITY zotero.preferences.parseRISRefer "استفاده از زوترو برای پرونده‌های RIS/Refer بارگیری شده">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "پیشرفته">
 <!ENTITY zotero.preferences.prefpane.cite "یادکرد">

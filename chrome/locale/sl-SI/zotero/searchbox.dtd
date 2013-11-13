@@ -9,7 +9,7 @@
 <!ENTITY zotero.search.joinMode.suffix "izmed naslednjih:">
 <!ENTITY zotero.search.name "Ime:">
 <!ENTITY zotero.search.noChildren "Pokaži le vrhnje zadetke">
-<!ENTITY zotero.search.recursive.label "Išči v podmapah">
+<!ENTITY zotero.search.recursive.label "Išči v podzbirkah">
 <!ENTITY zotero.search.saveSearch "Shrani iskanje">
 <!ENTITY zotero.search.search "Išči">
 <!ENTITY zotero.search.textModes.phrase "Fraza">

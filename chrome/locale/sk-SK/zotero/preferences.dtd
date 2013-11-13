@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero použije relatívne cesty pre prepojené súbory príloh vo vnútri základného adresára, čím vám sprístupní súbory na rôznych počítačoch pokiaľ štruktúra súborov vo vnútri základného adresára zostáva rovnaká.">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Prepnúť na absolútne cesty...">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Zvoliť...">
-<!ENTITY zotero.preferences.autoUpdate "automaticky kontrolovať aktualizácie konvertorov">
+<!ENTITY zotero.preferences.autoUpdate "Automaticky skontrolovať aktualizácie konvertorov a štýlov ">
 <!ENTITY zotero.preferences.automaticSnapshots "pri vytváraní položiek z webových stránok automaticky urobiť snímku danej stránky">
 <!ENTITY zotero.preferences.automaticTags "automaticky aplikovať kľúčové slová a predmetové heslá ako značky">
 <!ENTITY zotero.preferences.charset "Kódovanie znakov">
@@ -29,9 +29,9 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Použiť priečinok, do ktorého Firefox ukladá používateľské dáta">
 <!ENTITY zotero.preferences.dbMaintenance "Údržba databázy">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Skontrolovať integritu databázy">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Obnoviť citačné štýly...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Obnoviť štýly...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Obnoviť konvertory...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Obnoviť konvertory a citačné štýly...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Obnoviť konvertory a štýly...">
 <!ENTITY zotero.preferences.debugOutputLogging "Záznam protokolu ladenia chýb">
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Vymazať protokol">
 <!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Povoliť pri novom spustení">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Otvoriť/zatvoriť Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Pokúsiť sa získať kontrolu v prípade konfliktu skratiek s inými rozšíreniami.">
 <!ENTITY zotero.preferences.keys.quicksearch "Rýchle vyhľadávanie">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Uložiť do Zotera (ikona v lište pre adresu)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Prepnúť Zotero do celého okna">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Zobraziť/skryť značky">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -111,7 +111,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Obnoviť predvolené">
 <!ENTITY zotero.preferences.miscellaneous "Rôzne">
 <!ENTITY zotero.preferences.openAboutConfig "Otvoriť about:config">
-<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
+<!ENTITY zotero.preferences.openAboutMemory "Otvoriť about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "Otvoriť CSL Editor">
 <!ENTITY zotero.preferences.openCSLPreview "Otvoriť ukážku CSL ">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.openurl.search "Hľadať resolvery">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Verzia:">
-<!ENTITY zotero.preferences.parseRISRefer "použiť Zotero ako predvolený program pre prevzaté RIS/Refer súbory">
+<!ENTITY zotero.preferences.parseRISRefer "Použiť Zotero ako predvolený program pre prevzaté BibTeX/RIS/Refer súbory">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "Pokročilé">
 <!ENTITY zotero.preferences.prefpane.cite "Citovanie">
@@ -191,22 +191,22 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "Stratené heslo?">
 <!ENTITY zotero.preferences.sync.password "Heslo:">
-<!ENTITY zotero.preferences.sync.reset "Vynulovať">
+<!ENTITY zotero.preferences.sync.reset "Obnova">
 <!ENTITY zotero.preferences.sync.reset.button "Obnoviť...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Úplná synchronizácia so serverom Zotero">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Zlúčiť lokálne dáta s dátami na serveri bez ohľadu predchádzajúce synchronizácie.">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Vymazať históriu synchronizácie súborov">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Obnoviť históriu synchronizácie súborov">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Nechať server znovu preveriť, či obsahuje všetky lokálne prílohy.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Obnoviť dáta zo servera Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Vymazať všetky lokálne dáta a nahradiť ich dátami servera.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Nahradiť dáta na serveri Zotero">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Vymazať všetky dáta na serveri a nahradiť ich lokálnymi.">
-<!ENTITY zotero.preferences.sync.reset.warning1 "Nasledujúce operácie treba použiť iba v zriedkavých, špecifických situáciách a nie pre všeobecné odstraňovanie chýb. V mnohých prípadoch resetovanie zapríčiní dodatočné problémy. Pozri">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Možnosti resetovania synchronizácie">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Nasledujúce operácie treba použiť iba v zriedkavých, špecifických situáciách a nie pre všeobecné odstraňovanie chýb. V mnohých prípadoch obnova zapríčiní dodatočné problémy. Pozri ">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Možnosti obnovy synchronizácie">
 <!ENTITY zotero.preferences.sync.reset.warning3 "pre viac informácií.">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchronizovať automaticky">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Synchronizovať plno-textový obsah">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero teraz môže synchronizovať plno-textový obsah súborov vo vašich knižniciach Zotera so serverom zotero.org a inými pripojenými zariadeniami, čím sa vám umožňuje ľahké vyhľadávanie vo vašich súboroch, nech ste kdekoľvek. Plno-textový obsah vašich súborov sa verejne nezdieľa.">
 <!ENTITY zotero.preferences.sync.syncServer "Synchronizačný server Zotero">
 <!ENTITY zotero.preferences.sync.username "Meno používateľa:">
 <!ENTITY zotero.preferences.title "Predvoľby Zotero">

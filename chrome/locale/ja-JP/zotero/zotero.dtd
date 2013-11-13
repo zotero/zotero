@@ -30,7 +30,7 @@
 <!ENTITY zotero.contextMenu.saveImageAsItem "画像を Zotero アイテムとして保存">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "リンクを Zotero アイテムとして保存">
 <!ENTITY zotero.downloadManager.label "Zotero に保存する">
-<!ENTITY zotero.downloadManager.noPDFTools.description "この機能を利用するには、まず Zotero 環境設定で PDF ツールをインストールする必要があります。">
+<!ENTITY zotero.downloadManager.noPDFTools.description "この機能を利用するには、まず Zotero 環境設定の検索ペインで PDF ツールをインストールする必要があります。">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "添付ファイルは現在選択中のライブラリに保存することができません。その代わり、このアイテムはあなたのライブラリに保存されます。">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "このアイテムの重複するヴァージョンから維持したいフィールドを選択してください:">
 <!ENTITY zotero.duplicatesMerge.versionSelect "土台として用いるアイテムのヴァージョンを選んでください:">

@@ -10,7 +10,7 @@
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.label "关闭">
-<!ENTITY copyBibliographyCmd.label "复制文献目录">
+<!ENTITY copyBibliographyCmd.label "复制引文目录">
 <!ENTITY copyCitationCmd.label "复制引文">
 <!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCmd.key "C">
@@ -77,7 +77,7 @@
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "粘贴">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmd.label "选项…">
+<!ENTITY preferencesCmd.label "首选项">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY preferencesCmdMac.label "首选项…">
 <!ENTITY preferencesCmdUnix.accesskey "n">
@@ -85,17 +85,17 @@
 <!ENTITY printCmd.accesskey "U">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.label "打印…">
-<!ENTITY productHelp.accesskey "H">
+<!ENTITY productHelp.accesskey "D">
 <!ENTITY productHelp.label "支持与文档">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 <!ENTITY quitApplicationCmd.label "退出">
 <!ENTITY quitApplicationCmdMac.key "Q">
-<!ENTITY quitApplicationCmdMac.label "退出Zotero">
+<!ENTITY quitApplicationCmdMac.label "退出 Zotero">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmdWin.label "退出">
 <!ENTITY redoCmd.accesskey "R">
 <!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.label "重做">
+<!ENTITY redoCmd.label "恢复">
 <!ENTITY saveCmd.accesskey "A">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.label "保存…">

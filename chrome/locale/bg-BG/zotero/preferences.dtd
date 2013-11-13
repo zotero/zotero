@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.autoUpdate "Автоматична проверка за усъвременени преводачи">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.automaticSnapshots "Автоматично прави снимки при се създават записи от интернет страници">
 <!ENTITY zotero.preferences.automaticTags "Автоматично маркира записите с ключови думи и заглавие на темата">
 <!ENTITY zotero.preferences.charset "Символен код">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Отваря/Затваря на Панела на Зотеро">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Приоритет в случай на конфликт в клавишните комбинации.">
 <!ENTITY zotero.preferences.keys.quicksearch "Бързо Търсене">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Превключва в Режим на Цял Екран">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Превключване на Избора на Отметки">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.openurl.search "Търси решаващи сървъри">
 <!ENTITY zotero.preferences.openurl.server "Решаващ сървър:">
 <!ENTITY zotero.preferences.openurl.version "Версия:">
-<!ENTITY zotero.preferences.parseRISRefer "Зотеро отваря изтеглените RIS/Refer файлове">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "Допълнителни">
 <!ENTITY zotero.preferences.prefpane.cite "Cite">

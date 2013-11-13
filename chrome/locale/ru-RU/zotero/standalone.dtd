@@ -77,15 +77,15 @@
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "Вставить">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmd.label "Параметры...">
+<!ENTITY preferencesCmd.label "Настройки">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY preferencesCmdMac.label "Настройки…">
 <!ENTITY preferencesCmdUnix.accesskey "n">
 <!ENTITY preferencesCmdUnix.label "Настройки">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "P">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.label "Печать...">
-<!ENTITY productHelp.accesskey "H">
+<!ENTITY productHelp.accesskey "D">
 <!ENTITY productHelp.label "Техническая поддержка и документация">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 <!ENTITY quitApplicationCmd.label "Выйти">
@@ -105,7 +105,7 @@
 <!ENTITY servicesMenuMac.label "Сервисы">
 <!ENTITY showAllAppsCmdMac.label "Показать все">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY toolsMenu.label "Ин">
+<!ENTITY toolsMenu.label "Инструменты">
 <!ENTITY undoCmd.accesskey "U">
 <!ENTITY undoCmd.key "Z">
 <!ENTITY undoCmd.label "Отменить">

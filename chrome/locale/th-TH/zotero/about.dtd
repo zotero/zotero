@@ -1,8 +1,8 @@
 <!ENTITY zotero.about.additionalSoftware "ซอฟต์แวร์จากบุคคลภายนอกและมาตรฐาน:">
 <!ENTITY zotero.about.close "ปิด">
 <!ENTITY zotero.about.localizations "การแปลเป็นภาษาถิ่น:">
-<!ENTITY zotero.alumni "ศิษย์เก่า:">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.alumni "ผู้ที่เคยช่วยเหลือ:">
+<!ENTITY zotero.citationProcessing "กำลังดำเนินการการอ้างอิง &amp; บรรณานุกรม">
 <!ENTITY zotero.createdby "สร้างสรรค์โดย:">
 <!ENTITY zotero.developers "ผู้พัฒนา:">
 <!ENTITY zotero.director "ผู้ควบคุม:">

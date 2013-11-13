@@ -39,7 +39,7 @@
 <!ENTITY zotero.errorReport.reportID "Номер отчета:">
 <!ENTITY zotero.errorReport.submissionInProgress "Подождите, пока отчет об ошибке будет отослан.">
 <!ENTITY zotero.errorReport.submitted "Отчет об ошибке отослан.">
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
+<!ENTITY zotero.errorReport.title "Отчет об ошибке Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Журнал ошибок может содержать сообщения не относящиеся к Zotero.">
 <!ENTITY zotero.exportOptions.format.label "Формат:">
 <!ENTITY zotero.exportOptions.title "Экспорт…">
@@ -56,8 +56,8 @@
 <!ENTITY zotero.integration.classicView.label "Классический вид">
 <!ENTITY zotero.integration.docPrefs.title "Параметры документа">
 <!ENTITY zotero.integration.editBibliography.title "Редактировать библиографию">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Сокращения названий журналов для MEDLINE будут созданы автоматически на основе названий журналов. Параметры поля “Журн. сокр.” будут проигнорированы.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Автоматическое сокращение названий журналов">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Закладки сохраняются при переходе между Microsoft Word и OpenOffice, но могут быть случайно изменены. Из соображений совместимости, когда эта опция выбрана, цитаты не могут быть вставлены в (концевые) сноски.">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Закладки">
 <!ENTITY zotero.integration.prefs.displayAs.label "Отобразить цитаты как:">
@@ -86,28 +86,28 @@
 <!ENTITY zotero.item.add "Добавить">
 <!ENTITY zotero.item.attachment.file.show "Показать файл">
 <!ENTITY zotero.item.creatorTransform "Transform Name Form">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Переключение имя/фамилия">
 <!ENTITY zotero.item.textTransform "Трансформировать Текст">
 <!ENTITY zotero.item.textTransform.sentencecase "Как в предложении">
 <!ENTITY zotero.item.textTransform.titlecase "Каждое Слово с Заглавной">
 <!ENTITY zotero.items.accessDate_column "Дата доступа">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.archiveLocation_column "Место в архиве">
+<!ENTITY zotero.items.archive_column "Архив">
 <!ENTITY zotero.items.callNumber_column "Шифр">
-<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.court_column "Суд">
 <!ENTITY zotero.items.creator_column "Создатель">
 <!ENTITY zotero.items.dateAdded_column "Добавлен">
 <!ENTITY zotero.items.dateModified_column "Изменён">
 <!ENTITY zotero.items.date_column "Дата">
-<!ENTITY zotero.items.edition_column "Edition">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.issue_column "Issue">
+<!ENTITY zotero.items.edition_column "Издание">
+<!ENTITY zotero.items.extra_column "Дополнительно">
+<!ENTITY zotero.items.genre_column "Жанр">
+<!ENTITY zotero.items.issue_column "Выпуск">
 <!ENTITY zotero.items.itemType "Тип документа">
 <!ENTITY zotero.items.journalAbbr_column "Сокращ. журнала">
 <!ENTITY zotero.items.language_column "Язык">
 <!ENTITY zotero.items.libraryCatalog_column "Библ. каталог">
-<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.medium_column "Источник/формат">
 <!ENTITY zotero.items.menu.addTag "Add Tag">
 <!ENTITY zotero.items.menu.attach "Добавить приложение">
 <!ENTITY zotero.items.menu.attach.file "Прикрепить копию файла…">
@@ -123,27 +123,27 @@
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Восстановить в библиотеке">
 <!ENTITY zotero.items.menu.showInLibrary "Показать в библиотеке">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.moreColumns.label "Дополнительные столбцы">
 <!ENTITY zotero.items.numChildren_column "+">
-<!ENTITY zotero.items.pages_column "Pages">
-<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.pages_column "Страницы">
+<!ENTITY zotero.items.place_column "Место">
 <!ENTITY zotero.items.publication_column "Публикация">
 <!ENTITY zotero.items.publisher_column "Издатель">
 <!ENTITY zotero.items.reporter_column "Reporter">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.restoreColumnOrder.label "Восстановить порядок столбцов">
 <!ENTITY zotero.items.rights_column "Права">
-<!ENTITY zotero.items.seriesTitle_column "Series Title">
-<!ENTITY zotero.items.series_column "Series">
-<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.seriesTitle_column "Название серии">
+<!ENTITY zotero.items.series_column "Серия">
+<!ENTITY zotero.items.system_column "Система">
 <!ENTITY zotero.items.title_column "Название">
 <!ENTITY zotero.items.type_column "Тип">
-<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.volume_column "Том">
 <!ENTITY zotero.items.year_column "Год">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.button.search "Поиск">
 <!ENTITY zotero.lookup.description "Введите ISBN, DOI или PMID для поиска в следующее поле.">
-<!ENTITY zotero.merge.deleted "Deleted">
-<!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.merge.deleted "Удалено">
+<!ENTITY zotero.merge.of "для">
+<!ENTITY zotero.merge.title "Разрешение конфликтов">
 <!ENTITY zotero.moreEncodings.label "Ещё кодировки">
 <!ENTITY zotero.notes.separate "Редактировать в отдельном окне">
 <!ENTITY zotero.progress.title "Ход выполнения">
@@ -206,12 +206,12 @@
 <!ENTITY zotero.tabs.notes.label "Заметки">
 <!ENTITY zotero.tabs.related.label "Связанные">
 <!ENTITY zotero.tabs.tags.label "Тэги">
-<!ENTITY zotero.tagColorChooser.color "Color:">
-<!ENTITY zotero.tagColorChooser.position "Position:">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
-<!ENTITY zotero.tagColorChooser.setColor "Set Color">
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
+<!ENTITY zotero.tagColorChooser.color "Цвет:">
+<!ENTITY zotero.tagColorChooser.position "Расположение:">
+<!ENTITY zotero.tagColorChooser.removeColor "Удалить цвет">
+<!ENTITY zotero.tagColorChooser.setColor "Задать цвет">
+<!ENTITY zotero.tagColorChooser.title "Выбрать цвет и расположение тега">
+<!ENTITY zotero.tagSelector.assignColor "Назначить цвет…">
 <!ENTITY zotero.tagSelector.clearAll "Отменить выбор">
 <!ENTITY zotero.tagSelector.clearVisible "Отменить выбор видимых">
 <!ENTITY zotero.tagSelector.deleteTag "Удалить тег…">
@@ -273,7 +273,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Пожалуйста, посмотрите">
 <!ENTITY zotero.upgrade.majorUpgradeLink "инструкцию к обновлению">
 <!ENTITY zotero.upgrade.newVersionInstalled "Вы установили новую версию Zotero.">
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.title "Мастер обновления Zotero">
 <!ENTITY zotero.upgrade.upgradeInProgress "Дождитесь окончания процесса обновления, это может занять какое-то время.">
 <!ENTITY zotero.upgrade.upgradeRequired "Ваша база данных Zotero должна быть обновлена для работы с новой версией.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Ваша база данных Zotero была успешно обновлена.">

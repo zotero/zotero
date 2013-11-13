@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.autoUpdate "Periksa pemutakhiran translator secara automatis">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.automaticSnapshots "Ambil foto secara automatis ketika menyusun item dari laman web">
 <!ENTITY zotero.preferences.automaticTags "Berikan tag pada item dengan kata kunci dan bagian utama subjek secara automatis">
 <!ENTITY zotero.preferences.charset "Pengkodean karakter">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Buka/Tutup  Jendela Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Usahakan kendalikan shortcut yang berkontradiksi">
 <!ENTITY zotero.preferences.keys.quicksearch "Pencarian Cepat">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Hidupkan/Matikan Mode Layar Penuh">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Munculkan/Sembunyikan Selektor Tag">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.openurl.search "Cari resolver">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versi:">
-<!ENTITY zotero.preferences.parseRISRefer "Gunakan Zotero untuk berkas-berkas RIS/Refer terunduh">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "Lebih Lanjut">
 <!ENTITY zotero.preferences.prefpane.cite "Mengutip">

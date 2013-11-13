@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.autoUpdate "Tự động tìm kiếm các bản cập nhật cho các bộ biến đổi">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.automaticSnapshots "Tự động tạo bản lưu khi tạo biểu ghi từ các trang web">
 <!ENTITY zotero.preferences.automaticTags "Tự động dùng các từ khóa và các tiêu đề, mục đề để gắn thẻ cho các biểu ghi">
 <!ENTITY zotero.preferences.charset "Character Encoding">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Mở/Đóng cửa sổ Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Thử ghi đè các phím gõ tắt có xung đột">
 <!ENTITY zotero.preferences.keys.quicksearch "Tìm kiếm nhanh">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Bật/Tắt chế độ Toàn-màn-hình">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Bật/Tắt Bộ-chọn-thẻ">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.openurl.search "Tìm kiếm các resolver">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Phiên bản:">
-<!ENTITY zotero.preferences.parseRISRefer "Dùng Zotero để tải các tệp tin RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "Nâng cao">
 <!ENTITY zotero.preferences.prefpane.cite "Cite">

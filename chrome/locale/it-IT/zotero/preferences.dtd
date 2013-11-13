@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.autoUpdate "Verifica automaticamente la disponibilità di nuovi motori di ricerca">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.automaticSnapshots "Scatta un&apos;istantanea degli elementi estratti dalle pagine web">
 <!ENTITY zotero.preferences.automaticTags "Identifica automaticamente gli elementi attraverso parole chiave e oggetto">
 <!ENTITY zotero.preferences.charset "Codifica dei caratteri">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Apri o chiudi pannello di Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Sovrascrivi le scorciatoie in conflitto">
 <!ENTITY zotero.preferences.keys.quicksearch "Ricerca veloce">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Attiva o disattiva schermo intero">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Attiva o disattiva selettore tag">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.openurl.search "Cerca resolver">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versione:">
-<!ENTITY zotero.preferences.parseRISRefer "Scarica i file RIS/Refer con Zotero">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "Avanzate">
 <!ENTITY zotero.preferences.prefpane.cite "Cita">

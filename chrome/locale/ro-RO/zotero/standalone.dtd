@@ -15,7 +15,7 @@
 <!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.label "Copiere">
-<!ENTITY cutCmd.accesskey "d">
+<!ENTITY cutCmd.accesskey "t">
 <!ENTITY cutCmd.key "X">
 <!ENTITY cutCmd.label "Decupare">
 <!ENTITY deleteCmd.accesskey "D">
@@ -77,15 +77,15 @@
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "Lipire">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmd.label "Opțiuni…">
+<!ENTITY preferencesCmd.label "Preferințe">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY preferencesCmdMac.label "Preferințe...">
 <!ENTITY preferencesCmdUnix.accesskey "n">
 <!ENTITY preferencesCmdUnix.label "Preferințe">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "P">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.label "Imprimă...">
-<!ENTITY productHelp.accesskey "H">
+<!ENTITY productHelp.accesskey "D">
 <!ENTITY productHelp.label "Suport și documentație">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 <!ENTITY quitApplicationCmd.label "Părăsire">
@@ -110,4 +110,4 @@
 <!ENTITY undoCmd.key "Z">
 <!ENTITY undoCmd.label "Anulare">
 <!ENTITY windowMenu.label "Fereastră">
-<!ENTITY zoomWindow.label "Mărire/Micșorare">
+<!ENTITY zoomWindow.label "Panoramare">

@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.autoUpdate "중계기 업데이트 자동 확인">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.automaticSnapshots "웹 페이지  항목을 생성할 때 자동으로 스냅샷 저장">
 <!ENTITY zotero.preferences.automaticTags "핵심어와 주제어가 첨부된 항목 저장시 자동으로 태그 생성">
 <!ENTITY zotero.preferences.charset "문자 인코딩">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Zotero 패널 열기/닫기">
 <!ENTITY zotero.preferences.keys.overrideGlobal "충돌하는 단축키는 무시합니다.">
 <!ENTITY zotero.preferences.keys.quicksearch "빠른 검색">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "전체화면 끄기/켜기">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "태그 선택기 끄기/켜기">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.openurl.search "해석기로 검색">
 <!ENTITY zotero.preferences.openurl.server "해독기:">
 <!ENTITY zotero.preferences.openurl.version "버전:">
-<!ENTITY zotero.preferences.parseRISRefer "내려받은 RIS/Refer 파일을 Zotero에 사용">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "고급">
 <!ENTITY zotero.preferences.prefpane.cite "인용">

@@ -1,10 +1,10 @@
-<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
-<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
-<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
-<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.autoUpdate "Automatisch zoeken naar bijgewerkte vertalers">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Bestanden en mappen">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Standaard bestandsmap">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Gekoppelde Bijlage Bestandsmap">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero gebruik relatieve paden voor gekoppelde bijlagebestanden binnen de standaard bestandsmap, waardoor je toevoeg hebt tot al je bestanden op verschillende computers zolang je bestandsstructuur in de standaard bestandsmap hetzelfde blijft.">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Terug naar Absolute paden...">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Kies...">
+<!ENTITY zotero.preferences.autoUpdate "Controleer automatisch voor geüpdate vertalingen en stijlen">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatisch snapshots nemen bij het maken van objecten van webpagina's">
 <!ENTITY zotero.preferences.automaticTags "Objecten automatisch labelen met trefwoorden en onderwerpen">
 <!ENTITY zotero.preferences.charset "Tekensetcodering">
@@ -62,15 +62,15 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Aanpassingen worden pas zichtbaar in nieuwe vensters">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Verwijzingen van geselecteerde objecten naar klembord kopiëren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Geselecteerde objecten naar klembord kopiëren">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Breng venster Bibliotheken naar voren">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importeren vanaf klembord">
 <!ENTITY zotero.preferences.keys.library "Bibliotheek">
-<!ENTITY zotero.preferences.keys.newItem "Nieuw object aanmaken">
-<!ENTITY zotero.preferences.keys.newNote "Nieuwe aantekening aanmaken">
+<!ENTITY zotero.preferences.keys.newItem "Maak een Nieuw Item">
+<!ENTITY zotero.preferences.keys.newNote "Maak een Nieuwe Notitie">
 <!ENTITY zotero.preferences.keys.openZotero "Openen/Sluiten van Zotero-paneel">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Probeer voorrang te krijgen bij conflicterende sneltoetsen">
 <!ENTITY zotero.preferences.keys.quicksearch "Snelzoeken">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Sla op naar Zotero (adresbalk icoon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Volledige schermweergave">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Label-kiezer tonen">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -111,7 +111,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Standaarden herstellen">
 <!ENTITY zotero.preferences.miscellaneous "Diversen">
 <!ENTITY zotero.preferences.openAboutConfig "about:config openen">
-<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
+<!ENTITY zotero.preferences.openAboutMemory "Open over:geheugen">
 <!ENTITY zotero.preferences.openCSLEdit "CSL-editor openen">
 <!ENTITY zotero.preferences.openCSLPreview "CSL-voorbeeldweergave openen">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.openurl.search "Resolvers opzoeken">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versie:">
-<!ENTITY zotero.preferences.parseRISRefer "Zotero gebruiken voor gedownloade RIS/Refer-bestanden">
+<!ENTITY zotero.preferences.parseRISRefer "Gebruik Zotero voor gedownloade BibTex/RIS/Refer-bestanden">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "Geavanceerd">
 <!ENTITY zotero.preferences.prefpane.cite "Citeren">
@@ -170,7 +170,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Niet geïndexeerd:">
 <!ENTITY zotero.preferences.search.indexStats.words "Woorden:">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF-indexering">
-<!ENTITY zotero.preferences.settings "Settings">
+<!ENTITY zotero.preferences.settings "Instellingen">
 <!ENTITY zotero.preferences.showIn "Zotero laden in:">
 <!ENTITY zotero.preferences.showIn.appTab "App-tabblad">
 <!ENTITY zotero.preferences.showIn.browserPane "Zotero-paneel">
@@ -181,9 +181,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "Account aanmaken">
 <!ENTITY zotero.preferences.sync.fileSyncing "Bestandssynchronisatie">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Gedownloade bestanden">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "op het synchronisatietijdstip">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "zoals benodigd">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Synchroniseer bestanden in groepsbibliotheken met Zotero-opslag">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synchroniseer bestanden in Mijn Bibliotheek met">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Door het gebruiken van Zotero-opslag gaat u akkoord met de bijbehorende">
@@ -201,12 +201,12 @@
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Alle lokale Zotero-gegevens wissen en vervangen door de gegevens van de synchronisatie-server.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Herstellen naar Zotero-server">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Alle gegevens op de server wissen en vervangen door de lokale Zotero-gegevens.">
-<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
-<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
+<!ENTITY zotero.preferences.sync.reset.warning1 "De volgende handelingen moeten alleen uitgevoerd worden in uitzonderlijke, specifieke situaties en zijn niet geschikt voor het oplossen van algemene problemen. In veel gevallen zal resetten leiden tot aanvullende problemen. Kijk">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Synchronisatie reset opties">
+<!ENTITY zotero.preferences.sync.reset.warning3 "voor meer informatie.">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatisch synchroniseren">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Synchroniseer alle volledige tekst-inhoud">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero kan de volledige tekst-inhoud van bestanden in jou Zotero bibliotheek synchroniseren met zotero.org en andere gekoppelde apparaten, zodat je eenvoudig door al je bestanden kunt zoeken waar je ook bent. De volledige tekst-inhoud van je bestanden zal niet publieklijk gedeeld worden.">
 <!ENTITY zotero.preferences.sync.syncServer "Zotero Synchronisatie-server">
 <!ENTITY zotero.preferences.sync.username "Gebruikersnaam:">
 <!ENTITY zotero.preferences.title "Zotero-voorkeuren">

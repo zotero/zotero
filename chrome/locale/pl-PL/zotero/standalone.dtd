@@ -1,12 +1,12 @@
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY aboutProduct.label "About &brandShortName;">
+<!ENTITY aboutProduct.label "O &brandShortName;">
 <!ENTITY addons.label "Dodatki">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchPageDirectionItem.label "Przełącz kierunek strony">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 <!ENTITY bidiSwitchTextDirectionItem.label "Przełącz kierunek tekstu">
-<!ENTITY bringAllToFront.label "Bring All to Front">
+<!ENTITY bringAllToFront.label "Przenieś wszystko na przód">
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.label "Zamknij">
@@ -68,7 +68,7 @@
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY hideOtherAppsCmdMac.label "Ukryj inne">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideThisAppCmdMac.label "Hide &brandShortName;">
+<!ENTITY hideThisAppCmdMac.label "Ukryj &brandShortName;">
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimalizuj">
 <!ENTITY pageSetupCmd.accesskey "U">
@@ -77,7 +77,7 @@
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.label "Wklej">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmd.label "Opcje...">
+<!ENTITY preferencesCmd.label "Ustawienia">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY preferencesCmdMac.label "Ustawienia...">
 <!ENTITY preferencesCmdUnix.accesskey "n">

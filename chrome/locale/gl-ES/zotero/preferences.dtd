@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero usará rutas relativas para os ficheiros anexos que foran ligados ao cartafol principal. Con isto fáise que sexa posible acceder a ficheiros en diferentes computadores sempre e cando a estrututra de ficheiros dentro do cartafol principal se manteña igual.">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Volver ás rutas absolutas...">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Escoller...">
-<!ENTITY zotero.preferences.autoUpdate "Comprobar a actualización de tradutores automaticamente">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.automaticSnapshots "Cando se crean elementos a partir de páxinas web facer capturas automaticamente">
 <!ENTITY zotero.preferences.automaticTags "Etiquetar automaticamente os elementos con palabras clave e epígrafes temáticos">
 <!ENTITY zotero.preferences.charset "Codificación de carácteres">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "Abrir/Pechar o panel de Zotero">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Tratar de anular os accesos directos en conflito">
 <!ENTITY zotero.preferences.keys.quicksearch "Busca rápida">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Cambiar ao modo de pantalla completa">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Alternar o selector de etiquetas">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -111,7 +111,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restablecer os valores por defecto">
 <!ENTITY zotero.preferences.miscellaneous "Miscelánea">
 <!ENTITY zotero.preferences.openAboutConfig "Abrir about:config">
-<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
+<!ENTITY zotero.preferences.openAboutMemory "Abrir about:memory">
 <!ENTITY zotero.preferences.openCSLEdit "Abrir o editor CSL">
 <!ENTITY zotero.preferences.openCSLPreview "Abrir a previsualización de CSL">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.openurl.search "Procura de resolvedores">
 <!ENTITY zotero.preferences.openurl.server "Resolvedor:">
 <!ENTITY zotero.preferences.openurl.version "Versión:">
-<!ENTITY zotero.preferences.parseRISRefer "Usar Zotero para ficheiros RIS/Refer descargados">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "Avanzado">
 <!ENTITY zotero.preferences.prefpane.cite "Cita">

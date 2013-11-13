@@ -1,10 +1,10 @@
-<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
-<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "الملفات والمجلدات">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "الفهرس الرئيسي:">
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
-<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.autoUpdate "التأكد التلقائي من وجود مترجمات مواقع محدثة">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "اختار...">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.automaticSnapshots "أخذ لقطات تلقائية عند إنشاء العناصر من صفحات الويب">
 <!ENTITY zotero.preferences.automaticTags "اضف اوسمة  تلقائية للعناصر بالكلمات المفتاحية ورؤوس الموضوعات">
 <!ENTITY zotero.preferences.charset "ترميز الحروف">
@@ -14,7 +14,7 @@
 <!ENTITY zotero.preferences.cite.styles "الأنماط">
 <!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
 <!ENTITY zotero.preferences.cite.styles.styleManager "مدير الانماط">
-<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "لغة نمط الاستشهاد">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "اسم النمط">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "آخر تحديث">
 <!ENTITY zotero.preferences.cite.wordProcessors "معالجات النصوص">
@@ -49,14 +49,14 @@
 <!ENTITY zotero.preferences.fontSize.medium "متوسط">
 <!ENTITY zotero.preferences.fontSize.notes "حجم خط الملاحظات:">
 <!ENTITY zotero.preferences.fontSize.small "صغير">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fontSize.xlarge "كبير الحجم">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "الحد الاقصى من الصفحات المكشفة للملف الواحد:">
 <!ENTITY zotero.preferences.fulltext.textMaxLength "الحد الاقصى من الاحرف المكشفة للملف الواحد:">
 <!ENTITY zotero.preferences.groups "المجموعات">
 <!ENTITY zotero.preferences.groups.childFiles "اللقطات الفرعية والملفات المستوردة">
 <!ENTITY zotero.preferences.groups.childLinks "الروابط الفرعية">
 <!ENTITY zotero.preferences.groups.childNotes "الملاحظات الفرعية">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "سمات">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "عند نسخ العناصر بين المكتبات، يجب ان تتضمن العناصر على:">
 <!ENTITY zotero.preferences.items "عناصر">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "يتم تفعيل التغييرات في النوافذ الجديدة فقط">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.preferences.keys.openZotero "فتح/إغلاق نافذة زوتيرو">
 <!ENTITY zotero.preferences.keys.overrideGlobal "حاول تجنب الإختصارات المتعارضة">
 <!ENTITY zotero.preferences.keys.quicksearch "البحث السريع">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "التنشيط لوضع ملء الشاشة">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "تنشيط محدد الأوسمة">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -110,16 +110,16 @@
 <!ENTITY zotero.preferences.locate.name "الاسم">
 <!ENTITY zotero.preferences.locate.restoreDefaults "استعادة الاعدادات الافتراضية">
 <!ENTITY zotero.preferences.miscellaneous "أخرى">
-<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
+<!ENTITY zotero.preferences.openAboutConfig "فتح about:config">
 <!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
+<!ENTITY zotero.preferences.openCSLEdit "افتح محرر لغة نمط الاستشهاد">
+<!ENTITY zotero.preferences.openCSLPreview "افتح مستعرض لغة نمط الاستشهاد">
 <!ENTITY zotero.preferences.openurl.caption "الرابط المفتوح">
 <!ENTITY zotero.preferences.openurl.custom "تخصيص...">
 <!ENTITY zotero.preferences.openurl.search "البحث عن مقرر">
 <!ENTITY zotero.preferences.openurl.server "رابط المقرر:">
 <!ENTITY zotero.preferences.openurl.version "الإصدار:">
-<!ENTITY zotero.preferences.parseRISRefer "استخدم زوتيرو لتشغيل الملفات المحملة بصيغ RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "متقدم">
 <!ENTITY zotero.preferences.prefpane.cite "استشهاد">
@@ -170,9 +170,9 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "غير مكشف:">
 <!ENTITY zotero.preferences.search.indexStats.words "الكلمات:">
 <!ENTITY zotero.preferences.search.pdfIndexing "تكشيف ملفات PDF">
-<!ENTITY zotero.preferences.settings "Settings">
+<!ENTITY zotero.preferences.settings "اعدادات">
 <!ENTITY zotero.preferences.showIn "عرض زوتيرو في:">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn.appTab "تبويب التطبيقات">
 <!ENTITY zotero.preferences.showIn.browserPane "جزء التصفح">
 <!ENTITY zotero.preferences.showIn.separateTab "تبويب منفصل">
 <!ENTITY zotero.preferences.statusBarIcon "أيقونة شريط الحالة:">
@@ -181,9 +181,9 @@
 <!ENTITY zotero.preferences.sync.createAccount "تسجيل اشتراك جديد">
 <!ENTITY zotero.preferences.sync.fileSyncing "تزامن الملفات">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "نبذة عن تزامن الملفات">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "تحميل الملفات">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "في وقت التزامن">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "عند الحاجة">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "قم بمزامنة الملفات المرفقة في مجموعة المكتبات باستخدام مساحة تخزين زوتيرو">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "قم بمزامنة الملفات المرفقة في مكتبتي باستخدام">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "باستخدامك مساحة تخزين زوتيرو، فإنك توافق على الالتزام بكافة">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "الرابط:">
 <!ENTITY zotero.preferences.sync.lostPassword "نسيت كلمة المرور؟">
 <!ENTITY zotero.preferences.sync.password "كلمة المرور:">
-<!ENTITY zotero.preferences.sync.reset "Reset">
+<!ENTITY zotero.preferences.sync.reset "اعادة ضبط">
 <!ENTITY zotero.preferences.sync.reset.button "إعادة التعيين...">
 <!ENTITY zotero.preferences.sync.reset.fullSync "التزامن الكامل مع خادم زوتيرو">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "دمج بيانات زوتيرو المحلية مع البيانات من خادم التزامن، مع تجاهل سجل التزامن.">
@@ -202,8 +202,8 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "الاسترجاع إلى خادم زوتيرو">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "حذف جميع بيانات الخادم وإحلال بيانات زوتيرو المحلية على الخادم.">
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
-<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
+<!ENTITY zotero.preferences.sync.reset.warning2 "خيارات اعادة ضبط التزامن">
+<!ENTITY zotero.preferences.sync.reset.warning3 "لمزيد من المعلومات.">
 <!ENTITY zotero.preferences.sync.syncAutomatically "التزامن التلقائي">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
 <!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
