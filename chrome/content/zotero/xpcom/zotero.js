@@ -643,12 +643,17 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 						var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 							.getService(Components.interfaces.nsIPromptService);
 						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_OK)
+							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
 							+ ps.BUTTON_POS_0_DEFAULT;
 						
-						var index = ps.confirmEx(null, "", Zotero.startupError, buttonFlags,
-							Zotero.getString('general.checkForUpdate'), null, null,
-							null, {});
+						var index = ps.confirmEx(
+							null,
+							Zotero.getString('general.error'),
+							Zotero.startupError,
+							buttonFlags,
+							Zotero.getString('general.checkForUpdate'),
+							null, null, null, {}
+						);
 						
 						// "Check for updates" button
 						if(index === 0) {
@@ -667,7 +672,11 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 										addon.applyBackgroundUpdates = AddonManager.AUTOUPDATE_DISABLE;
 										addon.findUpdates({
 												onNoUpdateAvailable: function() {
-													ps.alert(null, '', Zotero.getString('zotero.preferences.update.upToDate'));
+													ps.alert(
+														null,
+														Zotero.getString('general.noUpdatesFound'),
+														Zotero.getString('general.isUpToDate', 'Zotero')
+													);
 												},
 												onUpdateAvailable: function() {
 													// Show available update
