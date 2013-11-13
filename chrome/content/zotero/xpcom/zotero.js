@@ -2028,7 +2028,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			'Services.HealthReport',
 			'[JavaScript Error: "this.docShell is null"',
 			'[JavaScript Error: "downloadable font:',
-			'[JavaScript Error: "Image corrupt or truncated:'
+			'[JavaScript Error: "Image corrupt or truncated:',
+			'[JavaScript Error: "The character encoding of the'
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
