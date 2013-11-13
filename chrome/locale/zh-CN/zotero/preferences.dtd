@@ -55,8 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "创建账户">
 <!ENTITY zotero.preferences.sync.lostPassword "忘记密码?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自动同步">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "同步全文内容">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero能够将Zotero文献库里文件的全文内容同步到zotero.org及其它连接的设备. 启用这一功能后, 无论您在什么地方, 都可以方便地搜索您的文件. 您的文件的全文内容不会共享给公众。">
 <!ENTITY zotero.preferences.sync.about "关于同步">
 <!ENTITY zotero.preferences.sync.fileSyncing "文件同步">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">

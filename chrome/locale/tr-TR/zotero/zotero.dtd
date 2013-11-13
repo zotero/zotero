@@ -36,7 +36,7 @@
 <!ENTITY zotero.tabs.notes.label "Notlar">
 <!ENTITY zotero.tabs.attachments.label "Ekler">
 <!ENTITY zotero.tabs.tags.label "Etiketler">
-<!ENTITY zotero.tabs.related.label "İligili">
+<!ENTITY zotero.tabs.related.label "İlişkili">
 <!ENTITY zotero.notes.separate "Ayrı bir pencerede düzenle">
 
 <!ENTITY zotero.toolbar.duplicate.label "Çift Girişleri Göster">
@@ -72,7 +72,7 @@
 <!ENTITY zotero.items.medium_column "Ortam/Biçim">
 <!ENTITY zotero.items.genre_column "Tür">
 <!ENTITY zotero.items.system_column "Sistem">
-<!ENTITY zotero.items.moreColumns.label "Daha Sütun">
+<!ENTITY zotero.items.moreColumns.label "Başka Sütunlar">
 <!ENTITY zotero.items.restoreColumnOrder.label "Sütun Sırasını Geri Yükle">
 
 <!ENTITY zotero.items.menu.showInLibrary "Kitaplıkta Göster">
@@ -94,7 +94,7 @@
 <!ENTITY zotero.toolbar.newItem.label "Yeni Eser">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Başka türler">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Geçerli Sayfadan Yeni Bir Eser Oluştur">
-<!ENTITY zotero.toolbar.lookup.label "Tanımlayıcılarıyla ile Eser(ler) Ekle">
+<!ENTITY zotero.toolbar.lookup.label "Eser(ler)i Tanımlayıcılarını Kullanarak Ekle">
 <!ENTITY zotero.toolbar.removeItem.label "Eseri Kaldır...">
 <!ENTITY zotero.toolbar.newCollection.label "Yeni Derme...">
 <!ENTITY zotero.toolbar.newGroup "Yeni Grup...">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Gösterilecek etiket yok">
 <!ENTITY zotero.tagSelector.filter "Süzgeç:">
 <!ENTITY zotero.tagSelector.showAutomatic "Otomatik göster">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Bu kütüphane içindeki tüm etiketleri göster">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Bu kitaplık içindeki tüm etiketleri göster">
 <!ENTITY zotero.tagSelector.selectVisible "Görülebileni Seç">
 <!ENTITY zotero.tagSelector.clearVisible "Gürülebileni Seçme">
 <!ENTITY zotero.tagSelector.clearAll "Hiçbirini Seçme">
@@ -154,7 +154,7 @@
 
 <!ENTITY zotero.selectitems.title "Eser Seç">
 <!ENTITY zotero.selectitems.intro.label "Kitaplığınıza eklemek istediğiniz eserleri seçiniz">
-<!ENTITY zotero.selectitems.cancel.label "İptal">
+<!ENTITY zotero.selectitems.cancel.label "İptal et">
 <!ENTITY zotero.selectitems.select.label "Tamam">
 
 <!ENTITY zotero.bibliography.title "Bibliyografya Oluştur">
@@ -250,13 +250,13 @@
 <!ENTITY zotero.proxy.recognized.ignore.label "Yoksay">
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Üst Veriyi Alıyor...">
-<!ENTITY zotero.recognizePDF.cancel.label "İptal">
+<!ENTITY zotero.recognizePDF.cancel.label "İptal et">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF Adı">
 <!ENTITY zotero.recognizePDF.itemName.label "Eser Adı">
 <!ENTITY zotero.recognizePDF.captcha.label "Üst veri alımı devam derken metni aşağıya girebilirsiniz.">
 
 <!ENTITY zotero.rtfScan.title "RTF Tarama">
-<!ENTITY zotero.rtfScan.cancel.label "İptal">
+<!ENTITY zotero.rtfScan.cancel.label "İptal et">
 <!ENTITY zotero.rtfScan.citation.label "Gönderme">
 <!ENTITY zotero.rtfScan.itemName.label "Eser Adı">
 <!ENTITY zotero.rtfScan.unmappedCitations.label "Eşlenmemiş Gönderme">

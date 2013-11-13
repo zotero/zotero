@@ -55,8 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Ustvari račun">
 <!ENTITY zotero.preferences.sync.lostPassword "Ste pozabili geslo?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Uskladi samodejno">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Uskladi vsebino celega besedila">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero lahko odslej usklajuje vsebino celega besedila datotek iz vaših knjižnic Zotero z zotero.org in drugimi povezanimi napravami, s čimer lahko enostavno iščete po svojih datotekah, kjerkoli že ste. Vsebina celega besedila vaših datotek ne bo v skupni javni rabi.">
 <!ENTITY zotero.preferences.sync.about "O usklajevanju">
 <!ENTITY zotero.preferences.sync.fileSyncing "Usklajevanje datotek">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
