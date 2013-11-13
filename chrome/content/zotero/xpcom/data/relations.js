@@ -248,7 +248,10 @@ Zotero.Relations = new function () {
 			}
 			catch (e) {
 				Zotero.debug(e);
-				Zotero.debug(Zotero.DB.query("SELECT * FROM relations"));
+				var rels = Zotero.DB.query("SELECT * FROM relations");
+				for each (let rel in rels) {
+					Zotero.debug(rel);
+				}
 			}
 		}
 	}
