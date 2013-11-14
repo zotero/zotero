@@ -232,6 +232,9 @@ Zotero.Relations = new function () {
 			try {
 				Zotero.DB.beginTransaction();
 				for each(var uri in uris) {
+					Zotero.debug('===');
+					Zotero.debug(uri);
+					
 					// Skip URIs that don't begin with the default prefix,
 					// since they don't correspond to local items
 					if (uri.indexOf(prefix) == -1) {
@@ -248,6 +251,7 @@ Zotero.Relations = new function () {
 			}
 			catch (e) {
 				Zotero.debug(e);
+				Zotero.debug(uris);
 				var rels = Zotero.DB.query("SELECT * FROM relations");
 				for each (let rel in rels) {
 					Zotero.debug(rel);
