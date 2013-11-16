@@ -1965,7 +1965,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	this.purgeDataObjects = function (skipStoragePurge) {
 		Zotero.Creators.purge();
 		Zotero.Tags.purge();
-		Zotero.Fulltext.purgeUnusedWords();
+		// TEMP: Disabled until we have async DB (and maybe SQLite FTS)
+		//Zotero.Fulltext.purgeUnusedWords();
 		Zotero.Items.purge();
 		// DEBUG: this might not need to be permanent
 		Zotero.Relations.purge();
