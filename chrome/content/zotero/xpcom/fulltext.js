@@ -425,6 +425,8 @@ Zotero.Fulltext = new function(){
 			}
 		}
 		
+		Zotero.DB.beginTransaction();
+		
 		this.indexString(text, charset, itemID);
 		
 		// Record the number of characters indexed (unless we're indexing a (PDF) cache file,
@@ -432,6 +434,8 @@ Zotero.Fulltext = new function(){
 		if (!isCacheFile) {
 			this.setChars(itemID, { indexed: text.length, total: totalChars });
 		}
+		
+		Zotero.DB.commitTransaction();
 		
 		return true;
 	}
@@ -540,8 +544,6 @@ Zotero.Fulltext = new function(){
 		var items = Zotero.Items.get(items);
 		var found = [];
 		
-		Zotero.DB.beginTransaction();
-		
 		for each (let item in items) {
 			if (!item.isAttachment()) {
 				continue;
@@ -569,8 +571,6 @@ Zotero.Fulltext = new function(){
 				this.indexFile(file, item.attachmentMIMEType, item.attachmentCharset, itemID, complete);
 			}
 		}
-		
-		Zotero.DB.commitTransaction();
 	}
 	
 	
@@ -1351,8 +1351,6 @@ Zotero.Fulltext = new function(){
 	
 	
 	function rebuildIndex(unindexedOnly){
-		Zotero.DB.beginTransaction();
-		
 		// Get all attachments other than web links
 		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode!="
 			+ Zotero.Attachments.LINK_MODE_LINKED_URL;
@@ -1362,11 +1360,13 @@ Zotero.Fulltext = new function(){
 		}
 		var items = Zotero.DB.columnQuery(sql);
 		if (items) {
+			Zotero.DB.beginTransaction();
 			Zotero.DB.query("DELETE FROM fulltextItemWords WHERE itemID IN (" + sql + ")");
 			Zotero.DB.query("DELETE FROM fulltextItems WHERE itemID IN (" + sql + ")");
+			Zotero.DB.commitTransaction();
+			
 			this.indexItems(items, false, true);
 		}
-		Zotero.DB.commitTransaction();
 	}
 	
 	
