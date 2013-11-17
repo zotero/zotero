@@ -595,6 +595,8 @@ Zotero.Fulltext = new function(){
 			+ " ORDER BY clientDateModified DESC";
 		var rows = Zotero.DB.query(sql) || [];
 		var libraryIsEditable = {};
+		var skips = 0;
+		var maxSkips = 5;
 		for each (let row in rows) {
 			let text;
 			let itemID = row.itemID;
@@ -669,6 +671,11 @@ Zotero.Fulltext = new function(){
 			// If this isn't the first item and it would put us over the limit,
 			// skip it
 			if (!first && maxChars && ((chars + text.length) > maxChars)) {
+				// Don't try more than maxSkips times to fill up to the limit
+				skips++;
+				if (skips == maxSkips) {
+					break;
+				}
 				continue;
 			}
 			chars += text.length;
