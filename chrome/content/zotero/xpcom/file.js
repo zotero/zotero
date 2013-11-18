@@ -245,24 +245,47 @@ Zotero.File = new function(){
 	 * @return {Promise} A Q promise that is resolved when the file has been written
 	 */
 	this.putContentsAsync = function putContentsAsync(file, data, charset) {
-		// Create a stream for async stream copying
-		if(!(data instanceof Components.interfaces.nsIInputStream)) {
-			var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
-					createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-			converter.charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
-			data = converter.convertToInputStream(data);
+		if (typeof data == 'string'
+				&& Zotero.platformMajorVersion >= 19
+				&& (!charset || charset.toLowerCase() == 'utf-8')) {
+			let encoder = new TextEncoder();
+			let array = encoder.encode(data);
+			return Q(OS.File.writeAtomic(
+				file.path,
+				array,
+				{
+					tmpPath: OS.Path.join(Zotero.getTempDirectory().path, file.leafName + ".tmp")
+				}
+			))
+			.catch(function (e) {
+				if (e instanceof OS.File.Error) {
+					Zotero.debug(e);
+					Zotero.debug(e.toString());
+					throw new Error("Error for operation '" + e.operation + "' for " + file.path);
+				}
+				throw e;
+			});
 		}
-		
-		var deferred = Q.defer(),
-			ostream = FileUtils.openSafeFileOutputStream(file);
-		NetUtil.asyncCopy(data, ostream, function(inputStream, status) {  
-			if (!Components.isSuccessCode(status)) {
-				deferred.reject(new Components.Exception("File write operation failed", status));
-				return;
+		else {
+			// Create a stream for async stream copying
+			if(!(data instanceof Components.interfaces.nsIInputStream)) {
+				var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
+						createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+				converter.charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
+				data = converter.convertToInputStream(data);
 			}
-			deferred.resolve();
-		});
-		return deferred.promise; 
+			
+			var deferred = Q.defer(),
+				ostream = FileUtils.openSafeFileOutputStream(file);
+			NetUtil.asyncCopy(data, ostream, function(inputStream, status) {
+				if (!Components.isSuccessCode(status)) {
+					deferred.reject(new Components.Exception("File write operation failed", status));
+					return;
+				}
+				deferred.resolve();
+			});
+			return deferred.promise;
+		}
 	};
 	
 	
