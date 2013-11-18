@@ -85,7 +85,7 @@
 <!ENTITY zotero.items.menu.attach.fileLink "附加文件链接...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "还原到文献库中">
-<!ENTITY zotero.items.menu.duplicateItem "复制条目">
+<!ENTITY zotero.items.menu.duplicateItem "创建条目副本">
 <!ENTITY zotero.items.menu.mergeItems "合并条目…">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "选择作为主条目的条目版本.">
