@@ -929,7 +929,7 @@ Zotero.Fulltext = new function(){
 				cacheFile = self.getItemCacheFile(itemID);
 				
 				Zotero.debug("Writing full-text content to " + cacheFile.path);
-				return Zotero.File.putContentsAsync(cacheFile, data.text, "UTF-8");
+				return Zotero.File.putContentsAsync(cacheFile, data.text);
 			})
 			.then(function () {
 				Zotero.Fulltext.indexString(
