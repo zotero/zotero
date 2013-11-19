@@ -81,6 +81,7 @@ Zotero.Fulltext = new function(){
 	var _idleObserverIsRegistered = false;
 	var _idleObserverDelay = 5;
 	var _processorTimer = null;
+	var _processorBlacklist = {};
 	var _upgradeCheck = true;
 	
 	const SYNC_STATE_UNSYNCED = 0;
@@ -861,6 +862,17 @@ Zotero.Fulltext = new function(){
 				+ SYNC_STATE_TO_PROCESS;
 			itemIDs = Zotero.DB.columnQuery(sql) || [];
 		}
+		
+		var origLen = itemIDs.length;
+		itemIDs = itemIDs.filter(function (id) {
+			return !(id in _processorBlacklist);
+		});
+		if (itemIDs.length < origLen) {
+			let skipped = (origLen - itemIDs.length);
+			Zotero.debug("Skipping large full-text content for " + skipped
+				+ " item" + (skipped == 1 ? '' : 's'));
+		}
+		
 		// If there's no more unprocessed content, stop the idle observer
 		if (!itemIDs.length) {
 			Zotero.debug("No unprocessed full-text content found");
@@ -925,26 +937,38 @@ Zotero.Fulltext = new function(){
 			.then(function (json) {
 				data = JSON.parse(json);
 				
+				// TEMP: until we replace nsISemanticUnitScanner
+				if (data.text.length > 250000) {
+					let item = Zotero.Items.get(itemID);
+					Zotero.debug("Skipping processing of full-text content for item "
+						+ item.libraryKey + " with length " + data.text.length
+						+ " -- will be processed in future version", 2);
+					_processorBlacklist[itemID] = true;
+					return false;
+				}
+				
 				// Write the text content to the regular cache file
 				cacheFile = self.getItemCacheFile(itemID);
 				
 				Zotero.debug("Writing full-text content to " + cacheFile.path);
-				return Zotero.File.putContentsAsync(cacheFile, data.text);
+				return Zotero.File.putContentsAsync(cacheFile, data.text).thenResolve(true);
 			})
-			.then(function () {
-				Zotero.Fulltext.indexString(
-					data.text,
-					"UTF-8",
-					itemID,
-					{
-						indexedChars: data.indexedChars,
-						totalChars: data.totalChars,
-						indexedPages: data.indexedPages,
-						totalPages: data.totalPages
-					},
-					data.version,
-					1
-				);
+			.then(function (index) {
+				if (index) {
+					Zotero.Fulltext.indexString(
+						data.text,
+						"UTF-8",
+						itemID,
+						{
+							indexedChars: data.indexedChars,
+							totalChars: data.totalChars,
+							indexedPages: data.indexedPages,
+							totalPages: data.totalPages
+						},
+						data.version,
+						1
+					);
+				}
 			});
 		})
 		.catch(function (e) {
