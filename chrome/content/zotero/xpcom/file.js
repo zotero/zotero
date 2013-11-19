@@ -248,9 +248,9 @@ Zotero.File = new function(){
 		if (typeof data == 'string'
 				&& Zotero.platformMajorVersion >= 19
 				&& (!charset || charset.toLowerCase() == 'utf-8')) {
-			Zotero.debug('Saving contents using OS.File');
 			let encoder = new TextEncoder();
 			let array = encoder.encode(data);
+			Components.utils.import("resource://gre/modules/osfile.jsm");
 			return Q(OS.File.writeAtomic(
 				file.path,
 				array,
@@ -269,7 +269,6 @@ Zotero.File = new function(){
 			});
 		}
 		else {
-			Zotero.debug('Saving contents using asyncCopy');
 			// Create a stream for async stream copying
 			if(!(data instanceof Components.interfaces.nsIInputStream)) {
 				var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
