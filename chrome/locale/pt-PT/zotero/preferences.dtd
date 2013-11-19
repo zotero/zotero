@@ -55,8 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Criar Conta">
 <!ENTITY zotero.preferences.sync.lostPassword "Esqueceu-se da Palavra-Passe?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizar automaticamente">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sincronizar todo o conteúdo">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "O Zotero pode sincronizar o todo o conteúdo dos arquivos nas suas bibliotecas com o zotero.org e com outros dispositivos ligados, permitindo-lhe pesquisar facilmente os seus arquivos onde quer que esteja. O conteúdo completo dos seus arquivos não será partilhado publicamente.">
 <!ENTITY zotero.preferences.sync.about "Acerca da Sincronização">
 <!ENTITY zotero.preferences.sync.fileSyncing "Arquivo Sincronizando">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">

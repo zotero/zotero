@@ -3,7 +3,7 @@
 <!ENTITY servicesMenuMac.label "Voorzieningen">
 <!ENTITY hideThisAppCmdMac.label "&brandShortName; verbergen">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Anderen verbergen">
+<!ENTITY hideOtherAppsCmdMac.label "Overige verbergen">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Alles tonen">
 <!ENTITY quitApplicationCmdMac.label "Zotero afsluiten">

@@ -81,6 +81,7 @@ Zotero.Fulltext = new function(){
 	var _idleObserverIsRegistered = false;
 	var _idleObserverDelay = 5;
 	var _processorTimer = null;
+	var _processorBlacklist = {};
 	var _upgradeCheck = true;
 	
 	const SYNC_STATE_UNSYNCED = 0;
@@ -425,6 +426,8 @@ Zotero.Fulltext = new function(){
 			}
 		}
 		
+		Zotero.DB.beginTransaction();
+		
 		this.indexString(text, charset, itemID);
 		
 		// Record the number of characters indexed (unless we're indexing a (PDF) cache file,
@@ -432,6 +435,8 @@ Zotero.Fulltext = new function(){
 		if (!isCacheFile) {
 			this.setChars(itemID, { indexed: text.length, total: totalChars });
 		}
+		
+		Zotero.DB.commitTransaction();
 		
 		return true;
 	}
@@ -540,8 +545,6 @@ Zotero.Fulltext = new function(){
 		var items = Zotero.Items.get(items);
 		var found = [];
 		
-		Zotero.DB.beginTransaction();
-		
 		for each (let item in items) {
 			if (!item.isAttachment()) {
 				continue;
@@ -569,8 +572,6 @@ Zotero.Fulltext = new function(){
 				this.indexFile(file, item.attachmentMIMEType, item.attachmentCharset, itemID, complete);
 			}
 		}
-		
-		Zotero.DB.commitTransaction();
 	}
 	
 	
@@ -595,6 +596,8 @@ Zotero.Fulltext = new function(){
 			+ " ORDER BY clientDateModified DESC";
 		var rows = Zotero.DB.query(sql) || [];
 		var libraryIsEditable = {};
+		var skips = 0;
+		var maxSkips = 5;
 		for each (let row in rows) {
 			let text;
 			let itemID = row.itemID;
@@ -669,6 +672,11 @@ Zotero.Fulltext = new function(){
 			// If this isn't the first item and it would put us over the limit,
 			// skip it
 			if (!first && maxChars && ((chars + text.length) > maxChars)) {
+				// Don't try more than maxSkips times to fill up to the limit
+				skips++;
+				if (skips == maxSkips) {
+					break;
+				}
 				continue;
 			}
 			chars += text.length;
@@ -854,6 +862,17 @@ Zotero.Fulltext = new function(){
 				+ SYNC_STATE_TO_PROCESS;
 			itemIDs = Zotero.DB.columnQuery(sql) || [];
 		}
+		
+		var origLen = itemIDs.length;
+		itemIDs = itemIDs.filter(function (id) {
+			return !(id in _processorBlacklist);
+		});
+		if (itemIDs.length < origLen) {
+			let skipped = (origLen - itemIDs.length);
+			Zotero.debug("Skipping large full-text content for " + skipped
+				+ " item" + (skipped == 1 ? '' : 's'));
+		}
+		
 		// If there's no more unprocessed content, stop the idle observer
 		if (!itemIDs.length) {
 			Zotero.debug("No unprocessed full-text content found");
@@ -918,26 +937,38 @@ Zotero.Fulltext = new function(){
 			.then(function (json) {
 				data = JSON.parse(json);
 				
+				// TEMP: until we replace nsISemanticUnitScanner
+				if (data.text.length > 250000) {
+					let item = Zotero.Items.get(itemID);
+					Zotero.debug("Skipping processing of full-text content for item "
+						+ item.libraryKey + " with length " + data.text.length
+						+ " -- will be processed in future version", 2);
+					_processorBlacklist[itemID] = true;
+					return false;
+				}
+				
 				// Write the text content to the regular cache file
 				cacheFile = self.getItemCacheFile(itemID);
 				
 				Zotero.debug("Writing full-text content to " + cacheFile.path);
-				return Zotero.File.putContentsAsync(cacheFile, data.text, "UTF-8");
+				return Zotero.File.putContentsAsync(cacheFile, data.text).thenResolve(true);
 			})
-			.then(function () {
-				Zotero.Fulltext.indexString(
-					data.text,
-					"UTF-8",
-					itemID,
-					{
-						indexedChars: data.indexedChars,
-						totalChars: data.totalChars,
-						indexedPages: data.indexedPages,
-						totalPages: data.totalPages
-					},
-					data.version,
-					1
-				);
+			.then(function (index) {
+				if (index) {
+					Zotero.Fulltext.indexString(
+						data.text,
+						"UTF-8",
+						itemID,
+						{
+							indexedChars: data.indexedChars,
+							totalChars: data.totalChars,
+							indexedPages: data.indexedPages,
+							totalPages: data.totalPages
+						},
+						data.version,
+						1
+					);
+				}
 			});
 		})
 		.catch(function (e) {
@@ -1351,8 +1382,6 @@ Zotero.Fulltext = new function(){
 	
 	
 	function rebuildIndex(unindexedOnly){
-		Zotero.DB.beginTransaction();
-		
 		// Get all attachments other than web links
 		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode!="
 			+ Zotero.Attachments.LINK_MODE_LINKED_URL;
@@ -1362,11 +1391,13 @@ Zotero.Fulltext = new function(){
 		}
 		var items = Zotero.DB.columnQuery(sql);
 		if (items) {
+			Zotero.DB.beginTransaction();
 			Zotero.DB.query("DELETE FROM fulltextItemWords WHERE itemID IN (" + sql + ")");
 			Zotero.DB.query("DELETE FROM fulltextItems WHERE itemID IN (" + sql + ")");
+			Zotero.DB.commitTransaction();
+			
 			this.indexItems(items, false, true);
 		}
-		Zotero.DB.commitTransaction();
 	}
 	
 	
@@ -1582,13 +1613,13 @@ Zotero.Fulltext = new function(){
 	
 	
 	function _markTroubleChars(text){
-		text = text.replace("'", "zoteroapostrophe");
+		text = text.replace(/'/g, "zoteroapostrophe");
 		return text;
 	}
 	
 	
 	function _restoreTroubleChars(text){
-		text = text.replace("zoteroapostrophe", "'");
+		text = text.replace(/zoteroapostrophe/g, "'");
 		return text;
 	}
 }

@@ -39,7 +39,7 @@ const ZOTERO_CONFIG = {
 	BOOKMARKLET_ORIGIN : 'https://www.zotero.org',
 	HTTP_BOOKMARKLET_ORIGIN : 'http://www.zotero.org',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "4.0.15.SOURCE"
+	VERSION: "4.0.16.SOURCE"
 };
 
 // Commonly used imports accessible anywhere
@@ -1965,7 +1965,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	this.purgeDataObjects = function (skipStoragePurge) {
 		Zotero.Creators.purge();
 		Zotero.Tags.purge();
-		Zotero.Fulltext.purgeUnusedWords();
+		// TEMP: Disabled until we have async DB (and maybe SQLite FTS)
+		//Zotero.Fulltext.purgeUnusedWords();
 		Zotero.Items.purge();
 		// DEBUG: this might not need to be permanent
 		Zotero.Relations.purge();
@@ -2028,7 +2029,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			'Services.HealthReport',
 			'[JavaScript Error: "this.docShell is null"',
 			'[JavaScript Error: "downloadable font:',
-			'[JavaScript Error: "Image corrupt or truncated:'
+			'[JavaScript Error: "Image corrupt or truncated:',
+			'[JavaScript Error: "The character encoding of the'
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
