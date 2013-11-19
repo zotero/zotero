@@ -1613,13 +1613,13 @@ Zotero.Fulltext = new function(){
 	
 	
 	function _markTroubleChars(text){
-		text = text.replace("'", "zoteroapostrophe");
+		text = text.replace(/'/g, "zoteroapostrophe");
 		return text;
 	}
 	
 	
 	function _restoreTroubleChars(text){
-		text = text.replace("zoteroapostrophe", "'");
+		text = text.replace(/zoteroapostrophe/g, "'");
 		return text;
 	}
 }
