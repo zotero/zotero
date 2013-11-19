@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.506",
+    PROCESSOR_VERSION: "1.0.508",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -1597,13 +1597,17 @@ CSL.DateParser = function () {
             thedate["date-parts"][0].push(thedate[part]);
             delete thedate[part];
         }
+        thedate["date-parts"].push([]);
         for (i = 0, ilen = slicelen; i < ilen; i += 1) {
             part = ["year_end", "month_end", "day_end"][i];
-            if (thedate[part] && thedate["date-parts"].length === 1) {
-                thedate["date-parts"].push([]);
+            if (!thedate[part]) {
+                break;
             }
             thedate["date-parts"][1].push(thedate[part]);
             delete thedate[part];
+        }
+        if (thedate["date-parts"][0].length !== thedate["date-parts"][1].length) {
+            thedate["date-parts"].pop();
         }
     };
     this.parseNumericDate = function (ret, delim, suff, txt) {
@@ -3475,7 +3479,6 @@ CSL.Engine.Opt = function () {
     this["demote-non-dropping-particle"] = "display-and-sort";
     this["parse-names"] = true;
     this.citation_number_slug = false;
-    this.max_number_of_names = 0;
     this.trigraph = "Aaaa00:AaAa00:AaAA00:AAAA00";
     this.development_extensions = {};
     this.development_extensions.field_hack = true;
@@ -3608,6 +3611,8 @@ CSL.Engine.Citation = function (state) {
     this.opt.layout_suffix = "";
     this.opt.layout_delimiter = "";
     this.opt.sort_locales = [];
+    this.opt.max_number_of_names = 0;
+    this.root = "citation";
 };
 CSL.Engine.Bibliography = function () {
     this.opt = {};
@@ -3621,6 +3626,8 @@ CSL.Engine.Bibliography = function () {
     this.opt["line-spacing"] = 1;
     this.opt["entry-spacing"] = 1;
     this.opt.sort_locales = [];
+    this.opt.max_number_of_names = 0;
+    this.root = "bibliography";
 };
 CSL.Engine.BibliographySort = function () {
     this.tokens = [];
@@ -3628,6 +3635,7 @@ CSL.Engine.BibliographySort = function () {
     this.opt.sort_directions = [];
     this.keys = [];
     this.opt.topdecor = [];
+    this.root = "bibliography";
 };
 CSL.Engine.CitationSort = function () {
     this.tokens = [];
@@ -3635,6 +3643,7 @@ CSL.Engine.CitationSort = function () {
     this.opt.sort_directions = [];
     this.keys = [];
     this.opt.topdecor = [];
+    this.root = "citation";
 };
 CSL.Engine.prototype.previewCitationCluster = function (citation, citationsPre, citationsPost, newMode) {
     var oldMode = this.opt.mode;
@@ -6730,10 +6739,10 @@ CSL.NameOutput.prototype._truncateNameList = function (container, variable, inde
     } else {
         lst = container[variable][index];
     }
-    if (this.state.opt.max_number_of_names 
+    if (this.state[this.state[this.state.tmp.area].root].opt.max_number_of_names 
         && lst.length > 50 
-        && lst.length > (this.state.opt.max_number_of_names + 2)) {
-        lst = lst.slice(0, this.state.opt.max_number_of_names + 2);
+        && lst.length > (this.state[this.state[this.state.tmp.area].root].opt.max_number_of_names + 2)) {
+        lst = lst.slice(0, this.state[this.state[this.state.tmp.area].root].opt.max_number_of_names + 2);
     }
     return lst;
 };
@@ -7713,14 +7722,22 @@ CSL.NameOutput.prototype._stripPeriods = function (tokname, str) {
     return str;
 };
 CSL.NameOutput.prototype._nonDroppingParticle = function (name) {
-    var str = this._stripPeriods("family", name["non-dropping-particle"]);
+    var ndp = name["non-dropping-particle"];
+    if (ndp && this.state.tmp.sort_key_flag) {
+        ndp = ndp.replace(/[\'\u2019]/, "");
+    }
+    var str = this._stripPeriods("family", ndp);
     if (this.state.output.append(str, this.family_decor, true)) {
         return this.state.output.pop();
     }
     return false;
 };
 CSL.NameOutput.prototype._droppingParticle = function (name, pos, j) {
-    var str = this._stripPeriods("given", name["dropping-particle"]);
+    var dp = name["dropping-particle"];
+    if (dp && this.state.tmp.sort_key_flag) {
+        dp = dp.replace(/[\'\u2019]/, "");
+    }
+    var str = this._stripPeriods("given", dp);
     if (name["dropping-particle"] && name["dropping-particle"].match(/^et.?al[^a-z]$/)) {
         if (this.name.strings["et-al-use-last"]) {
             if ("undefined" === typeof j) { 
@@ -7825,10 +7842,10 @@ CSL.NameOutput.prototype._parseName = function (name) {
         noparse = false;
     }
     if (!name["non-dropping-particle"] && name.family && !noparse && name.given) {
-        m = name.family.match(/^((?:[a-z][ \'\u2019a-z]*[-|\s+|\'\u2019]|[ABDVL][^ ][-|\s+][a-z]*\s*|[ABDVL][^ ][^ ][-|\s+][a-z]*\s*))/);
+        m = name.family.match(/^((?:[\'\u2019a-z][ \'\u2019a-z]*[-\s\'\u2019]+|[ABDVL][^ ][-\s]+[a-z]*\s*|[ABDVL][^ ][^ ][-\s]+[a-z]*\s*))/);
         if (m) {
             name.family = name.family.slice(m[1].length);
-            name["non-dropping-particle"] = m[1].replace(/\s+$/, "");
+            name["non-dropping-particle"] = m[1].replace(/\s+$/, "").replace("'", "\u2019");
         }
     }
     if (!name.suffix && name.given) {
@@ -9673,8 +9690,8 @@ CSL.Attributes["@match"] = function (state, arg) {
 };
 CSL.Attributes["@names-min"] = function (state, arg) {
     var val = parseInt(arg, 10);
-    if (state.opt.max_number_of_names < val) {
-        state.opt.max_number_of_names = val;
+    if (state[state.tmp.area].opt.max_number_of_names < val) {
+        state[state.tmp.area].opt.max_number_of_names = val;
     }
     this.strings["et-al-min"] = val;
 };
@@ -9776,8 +9793,8 @@ CSL.Attributes["@name-delimiter"] = function (state, arg) {
 };
 CSL.Attributes["@et-al-min"] = function (state, arg) {
     var val = parseInt(arg, 10);
-    if (state.opt.max_number_of_names < val) {
-        state.opt.max_number_of_names = val;
+    if (state[state.tmp.area].opt.max_number_of_names < val) {
+        state[state.tmp.area].opt.max_number_of_names = val;
     }
     state.setOpt(this, "et-al-min", val);
 };
@@ -9793,8 +9810,8 @@ CSL.Attributes["@et-al-use-last"] = function (state, arg) {
 };
 CSL.Attributes["@et-al-subsequent-min"] = function (state, arg) {
     var val = parseInt(arg, 10);
-    if (state.opt.max_number_of_names < val) {
-        state.opt.max_number_of_names = val;
+    if (state[state.tmp.area].opt.max_number_of_names < val) {
+        state[state.tmp.area].opt.max_number_of_names = val;
     }
     state.setOpt(this, "et-al-subsequent-min", val);
 };
