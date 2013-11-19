@@ -6,7 +6,7 @@ from ConfigParser import ConfigParser
 #from urllib import URLopener
 import urllib
 
-IANA = "http://www.iana.org/assignments/language-subtag-registry"
+IANA = "http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry"
 ISO = "http://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt"
 
 keynames = ['subtag', 'tag', 'type', 'suppressscript', 'scope', 'preferredvalue', 'macrolanguage', 'add', 'description', 'deprecated', 'comment', 'prefix'];
@@ -106,6 +106,7 @@ class Build(Database):
         opener = urllib.URLopener()
         spath = os.getcwd()
         sname = os.path.splitext(os.path.split(sys.argv[0])[-1])[0]
+        print sname
         # input = os.path.join(spath, "%s.txt" % (sname,))
         self.dumpfile = os.path.join(spath, "%s.sql" % (sname,))
 
@@ -117,6 +118,7 @@ class Build(Database):
         #    print "\n  Output will be placed in %s.sql\n" % sname
         #    sys.exit()
 
+        print "Opening %s" % ISO
         ifh = opener.open(ISO)
         sql = 'INSERT INTO isoTagMap VALUES (?,?)'
         while 1:
@@ -130,6 +132,7 @@ class Build(Database):
                 if line[1]:
                     self.db.execute(sql, [line[1], line[2]])
 
+        print "Opening %s" % IANA
         ifh = opener.open(IANA)
         tagDataSet = {}
         skip = False
@@ -166,6 +169,7 @@ class Build(Database):
                 self.processEntry(tagDataSet)
                 tagDataSet = {}
         self.processEntry(tagDataSet)
+        print "Opening %s" % self.dumpfile
         with open(self.dumpfile, 'w') as f:
             f.write(header % self.filedate);
             for line in self.db.iterdump():
