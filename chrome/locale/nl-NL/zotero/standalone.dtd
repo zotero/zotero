@@ -66,7 +66,7 @@
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpTroubleshootingInfo.label "Probleemoplossingsinformatie">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Anderen verbergen">
+<!ENTITY hideOtherAppsCmdMac.label "Overige verbergen">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
 <!ENTITY hideThisAppCmdMac.label "&brandShortName; verbergen">
 <!ENTITY minimizeWindow.key "m">
