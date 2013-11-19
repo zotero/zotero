@@ -28,9 +28,11 @@
 Zotero_Preferences.Search = {
 	init: function () {
 		document.getElementById('fulltext-rebuildIndex').setAttribute('label',
-			Zotero.getString('zotero.preferences.search.rebuildIndex'));
+			Zotero.getString('zotero.preferences.search.rebuildIndex')
+				+ Zotero.getString('punctuation.ellipsis'));
 		document.getElementById('fulltext-clearIndex').setAttribute('label',
-			Zotero.getString('zotero.preferences.search.clearIndex'));
+			Zotero.getString('zotero.preferences.search.clearIndex')
+				+ Zotero.getString('punctuation.ellipsis'));
 		this.updatePDFToolsStatus();
 		
 		this.updateIndexStats();
