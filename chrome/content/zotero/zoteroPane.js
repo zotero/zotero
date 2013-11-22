@@ -773,7 +773,11 @@ var ZoteroPane = new function()
 		
 		if (manual) {
 			// Focus the title field
-			document.getElementById('zotero-editpane-item-box').focusFirstField();
+			if (this.selectItem(itemID)) {
+				setTimeout(function () {
+					document.getElementById('zotero-editpane-item-box').focusFirstField();
+				}, 0);
+			}
 			
 			// Update most-recently-used list for New Item menu
 			this.addItemTypeToNewItemTypeMRU(typeID);
