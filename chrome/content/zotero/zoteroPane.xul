@@ -237,7 +237,7 @@
 					</toolbarbutton>
 					<toolbarseparator id="zotero-fullscreen-close-separator" class="standalone-no-display"/>
 					<toolbarbutton id="zotero-tb-fullscreen" tooltiptext="&zotero.toolbar.tab.tooltip;" oncommand="ZoteroPane_Local.toggleTab();" class="zotero-tb-button standalone-no-display"/>
-					<toolbarbutton id="zotero-close-button" class="tabs-closebutton standalone-no-display" oncommand="ZoteroOverlay.toggleDisplay()"/>
+					<toolbarbutton id="zotero-close-button" class="tabs-closebutton close-icon standalone-no-display" oncommand="ZoteroOverlay.toggleDisplay()"/>
 				</hbox>
 			</toolbar>
 			
