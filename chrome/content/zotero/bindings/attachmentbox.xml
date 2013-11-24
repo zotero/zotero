@@ -401,15 +401,17 @@
 									'',
 									newFilename + ' exists. Overwrite existing file?'
 								);
-								if (confirmed) {
-									item.renameAttachmentFile(newFilename, true);
-									break;
+								if (!confirmed) {
+									// If they said not to overwrite existing file,
+									// start again
+									continue;
 								}
-								// If they said not to overwrite existing file,
-								// start again
-								continue;
+								
+								// Force overwrite, but make sure we check that this doesn't fail
+								renamed = item.renameAttachmentFile(newFilename, true);
 							}
-							else if (renamed == -2) {
+							
+							if (renamed == -2) {
 								nsIPS.alert(
 									window,
 									Zotero.getString('general.error'),
