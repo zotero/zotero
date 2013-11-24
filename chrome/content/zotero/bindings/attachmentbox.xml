@@ -388,22 +388,30 @@
 						
 						// Rename associated file
 						if (checkState.value) {
-							var renamed = item.renameAttachmentFile(newTitle.value);
+							var newFilename = newTitle.value.trim();
+							if (newFilename.search(/\.\w{1,10}$/) == -1) {
+								// User did not specify extension. Use current
+								var oldExt = item.getFilename().match(/\.\w{1,10}$/);
+								if (oldExt) newFilename += oldExt[0];
+							}
+							var renamed = item.renameAttachmentFile(newFilename);
 							if (renamed == -1) {
 								var confirmed = nsIPS.confirm(
 									window,
 									'',
-									newTitle.value + ' exists. Overwrite existing file?'
+									newFilename + ' exists. Overwrite existing file?'
 								);
-								if (confirmed) {
-									item.renameAttachmentFile(newTitle.value, true);
-									break;
+								if (!confirmed) {
+									// If they said not to overwrite existing file,
+									// start again
+									continue;
 								}
-								// If they said not to overwrite existing file,
-								// start again
-								continue;
+								
+								// Force overwrite, but make sure we check that this doesn't fail
+								renamed = item.renameAttachmentFile(newFilename, true);
 							}
-							else if (renamed == -2) {
+							
+							if (renamed == -2) {
 								nsIPS.alert(
 									window,
 									Zotero.getString('general.error'),
