@@ -194,7 +194,7 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 			
 			Q.fcall(function () {
 				if (coloredTagsRE.test(key)) {
-					let libraryID = self._itemGroup.libraryID;
+					let libraryID = self._itemGroup.ref.libraryID;
 					libraryID = libraryID ? parseInt(libraryID) : 0;
 					let position = parseInt(key) - 1;
 					return Zotero.Tags.getColorByPosition(libraryID, position)
@@ -321,6 +321,8 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	if(!Zotero.ItemTreeView._haveCachedFields) yield true;
 	
 	var usiDisabled = Zotero.UnresponsiveScriptIndicator.disable();
+	
+	Zotero.ItemGroupCache.clear();
 	
 	this._searchMode = this._itemGroup.isSearchMode();
 	
@@ -598,8 +600,6 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		// If trash or saved search, just re-run search
 		if (itemGroup.isTrash() || itemGroup.isSearch())
 		{
-			Zotero.ItemGroupCache.clear();
-			
 			// Clear item type icons
 			var items = Zotero.Items.get(ids);
 			for (let i=0; i<items.length; i++) {
@@ -716,16 +716,15 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	}
 	else if(action == 'add')
 	{
-		// If saved search or trash, just re-run search
-		if (itemGroup.isSearch() || itemGroup.isTrash()) {
+		// In some modes, just re-run search
+		if (itemGroup.isSearch() || itemGroup.isTrash() || itemGroup.isUnfiled()) {
 			this.refresh();
 			madeChanges = true;
 			sort = true;
 		}
 		
-		// If not a quicksearch and not background window saved search,
-		// process new items manually
-		else if (quicksearch && quicksearch.value == '')
+		// If not a quicksearch, process new items manually
+		else if (!quicksearch || quicksearch.value == '')
 		{
 			var items = Zotero.Items.get(ids);
 			for each(var item in items) {
@@ -745,7 +744,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 				sort = (items.length == 1) ? items[0].id : true;
 			}
 		}
-		// Otherwise re-run the search, which refreshes the item list
+		// Otherwise re-run the quick search, which refreshes the item list
 		else
 		{
 			// For item adds, clear the quicksearch, unless all the new items
@@ -1807,7 +1806,7 @@ Zotero.ItemTreeView.prototype.selectItem = function(id, expand, noRecurse)
 	// Don't change selection if UI updates are disabled (e.g., during sync)
 	if (Zotero.suppressUIUpdates) {
 		Zotero.debug("Sync is running; not selecting item");
-		return;
+		return false;
 	}
 	
 	// If no row map, we're probably in the process of switching collections,
@@ -1903,7 +1902,7 @@ Zotero.ItemTreeView.prototype.selectItems = function(ids) {
 	
 	var rows = [];
 	for each(var id in ids) {
-		rows.push(this._itemRowMap[id]);
+		if(this._itemRowMap[id] !== undefined) rows.push(this._itemRowMap[id]);
 	}
 	rows.sort(function (a, b) {
 		return a - b;

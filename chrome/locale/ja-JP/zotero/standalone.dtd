@@ -54,7 +54,7 @@
 <!ENTITY selectAllCmd.label "すべてを選択">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Preferences">
+<!ENTITY preferencesCmd.label "環境設定">
 <!ENTITY preferencesCmd.accesskey "O">
 <!ENTITY preferencesCmdUnix.label "環境設定...">
 <!ENTITY preferencesCmdUnix.accesskey "n">

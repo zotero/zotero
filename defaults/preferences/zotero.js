@@ -22,6 +22,8 @@ pref("extensions.zotero.debug.time", false);
 pref("extensions.zotero.automaticScraperUpdates",true);
 pref("extensions.zotero.zoteroDotOrgVersionHeader", true);
 pref("extensions.zotero.triggerProxyAuthentication", true);
+// Proxy auth URLs should respond successfully to HEAD requests over HTTP and HTTPS (in case of forced HTTPS requests)
+pref("extensions.zotero.proxyAuthenticationURLs", 'http://www.acm.org,http://www.ebscohost.com,http://www.elsevier.com,http://www.ieee.org,http://www.jstor.org,http://www.ovid.com,http://www.springer.com,http://www.tandfonline.com');
 pref("extensions.zotero.cacheTranslatorData",true);
 pref("extensions.zotero.showIn", 1);
 pref("extensions.zotero.statusBarIcon", 2);
@@ -142,6 +144,7 @@ pref("extensions.zotero.sync.storage.deleteDelayDays", 30);
 pref("extensions.zotero.sync.storage.groups.enabled", true);
 pref("extensions.zotero.sync.storage.downloadMode.personal", "on-sync");
 pref("extensions.zotero.sync.storage.downloadMode.groups", "on-sync");
+pref("extensions.zotero.sync.fulltext.enabled", true);
 
 // Proxy
 pref("extensions.zotero.proxies.autoRecognize", true);

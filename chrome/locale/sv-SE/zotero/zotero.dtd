@@ -33,7 +33,7 @@
 <!ENTITY zotero.contextMenu.saveImageAsItem "Spara bild som en Zotero-källa">
 
 <!ENTITY zotero.tabs.info.label "Information">
-<!ENTITY zotero.tabs.notes.label "Fotnoter">
+<!ENTITY zotero.tabs.notes.label "Anteckningar">
 <!ENTITY zotero.tabs.attachments.label "Bilagor">
 <!ENTITY zotero.tabs.tags.label "Etiketter">
 <!ENTITY zotero.tabs.related.label "Liknande källor">

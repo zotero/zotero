@@ -19,7 +19,7 @@
 <!ENTITY pageSetupCmd.accesskey "U">
 <!ENTITY printCmd.label "Печать...">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "Закрыть">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
@@ -54,7 +54,7 @@
 <!ENTITY selectAllCmd.label "Выбрать все">
 <!ENTITY selectAllCmd.key "А">
 <!ENTITY selectAllCmd.accesskey "А">
-<!ENTITY preferencesCmd.label "Preferences">
+<!ENTITY preferencesCmd.label "Настройки">
 <!ENTITY preferencesCmd.accesskey "O">
 <!ENTITY preferencesCmdUnix.label "Настройки">
 <!ENTITY preferencesCmdUnix.accesskey "n">
@@ -68,7 +68,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY toolsMenu.label "Ин">
+<!ENTITY toolsMenu.label "Инструменты">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY addons.label "Дополнения">
 
@@ -90,7 +90,7 @@
 <!ENTITY aboutProduct.label "О &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Техническая поддержка и документация">
-<!ENTITY productHelp.accesskey "H">
+<!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Информация об устранении ошибок">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "Отправить отзыв...">

@@ -1454,7 +1454,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient, dataTransfer)
 		//var newItem = Zotero.Items.get(id);
 		
 		// Record link
-		item.addLinkedItem(newItem);
+		newItem.addLinkedItem(item);
 		var newID = id;
 		
 		if (item.isNote()) {
@@ -1477,7 +1477,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient, dataTransfer)
 				newNote.setSource(newItem.id);
 				newNote.save();
 				
-				note.addLinkedItem(newNote);
+				newNote.addLinkedItem(note);
 			}
 		}
 		

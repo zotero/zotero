@@ -580,6 +580,19 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		if (!channel instanceof Ci.nsIChannel) {
 			Zotero.Sync.Storage.EventManager.error('No HTTPS channel available');
 		}
+		
+		// Check if the error we encountered is really an SSL error
+		// Logic borrowed from https://developer.mozilla.org/en-US/docs/How_to_check_the_security_state_of_an_XMLHTTPRequest_over_SSL
+		//  http://mxr.mozilla.org/mozilla-central/source/security/nss/lib/ssl/sslerr.h
+		//  http://mxr.mozilla.org/mozilla-central/source/security/nss/lib/util/secerr.h
+		var secErrLimit = Ci.nsINSSErrorsService.NSS_SEC_ERROR_LIMIT - Ci.nsINSSErrorsService.NSS_SEC_ERROR_BASE;
+		var secErr = Math.abs(Ci.nsINSSErrorsService.NSS_SEC_ERROR_BASE) - (channel.status & 0xffff);
+		var sslErrLimit = Ci.nsINSSErrorsService.NSS_SSL_ERROR_LIMIT - Ci.nsINSSErrorsService.NSS_SSL_ERROR_BASE;
+		var sslErr = Math.abs(Ci.nsINSSErrorsService.NSS_SSL_ERROR_BASE) - (channel.status & 0xffff);
+		if( (secErr < 0 || secErr > secErrLimit) && (sslErr < 0 || sslErr > sslErrLimit) ) {
+			return;
+		}
+		
 		var secInfo = channel.securityInfo;
 		if (secInfo instanceof Ci.nsITransportSecurityInfo) {
 			secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
@@ -600,7 +613,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 					var buttonText = Zotero.getString('general.openDocumentation');
 					var func = function () {
 						var zp = Zotero.getActiveZoteroPane();
-						zp.loadURI("http://www.zotero.org/support/kb/cert_override", { shiftKey: true });
+						zp.loadURI("https://www.zotero.org/support/kb/cert_override", { shiftKey: true });
 					};
 				}
 				// In Firefox display a button to load the WebDAV URL
@@ -619,10 +632,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 					{
 						dialogText: msg,
 						dialogButtonText: buttonText,
-						dialogButtonCallback: function () {
-							var zp = Zotero.getActiveZoteroPane();
-							zp.loadURI(channel.URI.spec, { shiftKey: true });
-						}
+						dialogButtonCallback: func
 					}
 				);
 				throw e;
@@ -1091,7 +1101,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			);
 		})
 		.catch(function (e) {
-			var msg = "HTTP " + req.status + " error from WebDAV server "
+			var msg = "HTTP " + e.status + " error from WebDAV server "
 				+ "for PUT request";
 			Zotero.debug(msg, 2);
 			Components.utils.reportError(msg);

@@ -28,12 +28,20 @@
 Zotero_Preferences.Search = {
 	init: function () {
 		document.getElementById('fulltext-rebuildIndex').setAttribute('label',
-			Zotero.getString('zotero.preferences.search.rebuildIndex'));
+			Zotero.getString('zotero.preferences.search.rebuildIndex')
+				+ Zotero.getString('punctuation.ellipsis'));
 		document.getElementById('fulltext-clearIndex').setAttribute('label',
-			Zotero.getString('zotero.preferences.search.clearIndex'));
+			Zotero.getString('zotero.preferences.search.clearIndex')
+				+ Zotero.getString('punctuation.ellipsis'));
 		this.updatePDFToolsStatus();
 		
 		this.updateIndexStats();
+		
+		// Quick hack to support install prompt from PDF recognize option
+		var io = window.arguments[0];
+		if (io.action && io.action == 'pdftools-install') {
+			this.checkPDFToolsDownloadVersion();
+		}
 	},
 	
 	/*
@@ -439,8 +447,8 @@ Zotero_Preferences.Search = {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_CANCEL);
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+			+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 		
 		var index = ps.confirmEx(null,
 			Zotero.getString('zotero.preferences.search.rebuildIndex'),
@@ -448,13 +456,15 @@ Zotero_Preferences.Search = {
 				Zotero.getString('zotero.preferences.search.indexUnindexed')),
 			buttonFlags,
 			Zotero.getString('zotero.preferences.search.rebuildIndex'),
+			null,
+			// Position 2 because of https://bugzilla.mozilla.org/show_bug.cgi?id=345067
 			Zotero.getString('zotero.preferences.search.indexUnindexed'),
-			null, null, {});
+			null, {});
 		
 		if (index == 0) {
 			Zotero.Fulltext.rebuildIndex();
 		}
-		else if (index == 1) {
+		else if (index == 2) {
 			Zotero.Fulltext.rebuildIndex(true)
 		}
 		
@@ -466,8 +476,8 @@ Zotero_Preferences.Search = {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_CANCEL);
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+			+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 		
 		var index = ps.confirmEx(null,
 			Zotero.getString('zotero.preferences.search.clearIndex'),
@@ -475,13 +485,14 @@ Zotero_Preferences.Search = {
 				Zotero.getString('zotero.preferences.search.clearNonLinkedURLs')),
 			buttonFlags,
 			Zotero.getString('zotero.preferences.search.clearIndex'),
-			Zotero.getString('zotero.preferences.search.clearNonLinkedURLs'),
-			null, null, {});
+			null,
+			// Position 2 because of https://bugzilla.mozilla.org/show_bug.cgi?id=345067
+			Zotero.getString('zotero.preferences.search.clearNonLinkedURLs'), null, {});
 		
 		if (index == 0) {
 			Zotero.Fulltext.clearIndex();
 		}
-		else if (index == 1) {
+		else if (index == 2) {
 			Zotero.Fulltext.clearIndex(true);
 		}
 		

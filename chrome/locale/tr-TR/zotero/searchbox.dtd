@@ -1,13 +1,13 @@
 <!ENTITY zotero.search.name "İsim:">
 
-<!ENTITY zotero.search.joinMode.prefix "Belirtilenle">
-<!ENTITY zotero.search.joinMode.any "herhangi birini">
-<!ENTITY zotero.search.joinMode.all "hepsini">
-<!ENTITY zotero.search.joinMode.suffix "eşleştir:">
+<!ENTITY zotero.search.joinMode.prefix "Aşağıdakilerden">
+<!ENTITY zotero.search.joinMode.any "herhangi birine">
+<!ENTITY zotero.search.joinMode.all "hepsine">
+<!ENTITY zotero.search.joinMode.suffix "uyanları bul:">
 
 <!ENTITY zotero.search.recursive.label "Alt klasörleri araştır">
 <!ENTITY zotero.search.noChildren "Yalnızca üst-seviye eserleri göster">
-<!ENTITY zotero.search.includeParentsAndChildren "Eşleşen eserlerin üst ve alt eserlerini de dahil et">
+<!ENTITY zotero.search.includeParentsAndChildren "Uyan eserlerin üst ve alt eserlerini de dahil et">
 
 <!ENTITY zotero.search.textModes.phrase "Sözcük öbeği">
 <!ENTITY zotero.search.textModes.phraseBinary "Sözcük öbeği (ikili dosyalar içerir)">

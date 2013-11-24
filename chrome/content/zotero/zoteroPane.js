@@ -91,7 +91,7 @@ var ZoteroPane = new function()
 	var self = this,
 		_loaded = false, _madeVisible = false,
 		titlebarcolorState, titleState, observerService,
-		_reloadFunctions = [];
+		_reloadFunctions = [], _beforeReloadFunctions = [];
 	
 	/**
 	 * Called when the window containing Zotero pane is open
@@ -127,6 +127,13 @@ var ZoteroPane = new function()
 		observerService = Components.classes["@mozilla.org/observer-service;1"]
 					  .getService(Components.interfaces.nsIObserverService);
 		observerService.addObserver(_reloadObserver, "zotero-reloaded", false);
+		observerService.addObserver(_reloadObserver, "zotero-before-reload", false);
+		this.addBeforeReloadListener(function(newMode) {
+			if(newMode == "connector") {
+				ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('connector.standaloneOpen'));
+			}
+			return;
+		});
 		this.addReloadListener(_loadPane);
 		
 		// continue loading pane
@@ -138,10 +145,7 @@ var ZoteroPane = new function()
 	 * mode
 	 */
 	function _loadPane() {
-		if(Zotero.isConnector) {
-			ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('connector.standaloneOpen'));
-			return;
-		} else {
+		if(!Zotero.isConnector) {
 			ZoteroPane_Local.clearItemsPaneMessage();
 		}
 		
@@ -771,7 +775,11 @@ var ZoteroPane = new function()
 		
 		if (manual) {
 			// Focus the title field
-			document.getElementById('zotero-editpane-item-box').focusFirstField();
+			if (this.selectItem(itemID)) {
+				setTimeout(function () {
+					document.getElementById('zotero-editpane-item-box').focusFirstField();
+				}, 0);
+			}
 			
 			// Update most-recently-used list for New Item menu
 			this.addItemTypeToNewItemTypeMRU(typeID);
@@ -4107,15 +4115,28 @@ var ZoteroPane = new function()
 	}
 	
 	/**
+	 * Adds or removes a function to be called just before Zotero is reloaded by switching into or
+	 * out of the connector
+	 */
+	this.addBeforeReloadListener = function(/** @param {Function} **/func) {
+		if(_beforeReloadFunctions.indexOf(func) === -1) _beforeReloadFunctions.push(func);
+	}
+	
+	/**
 	 * Implements nsIObserver for Zotero reload
 	 */
 	var _reloadObserver = {	
 		/**
 		 * Called when Zotero is reloaded (i.e., if it is switched into or out of connector mode)
 		 */
-		"observe":function() {
-			Zotero.debug("Reloading Zotero pane");
-			for each(var func in _reloadFunctions) func();
+		"observe":function(aSubject, aTopic, aData) {
+			if(aTopic == "zotero-reloaded") {
+				Zotero.debug("Reloading Zotero pane");
+				for each(var func in _reloadFunctions) func(aData);
+			} else if(aTopic == "zotero-before-reload") {
+				Zotero.debug("Zotero pane caught before-reload event");
+				for each(var func in _beforeReloadFunctions) func(aData);
+			}
 		}
 	};
 }

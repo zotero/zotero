@@ -459,7 +459,7 @@ Zotero.Tag.prototype.save = function (full) {
 			}
 			
 			if (newids.length) {
-				var sql = "INSERT INTO itemTags (itemID, tagID) VALUES (?,?)";
+				var sql = "INSERT OR IGNORE INTO itemTags (itemID, tagID) VALUES (?,?)";
 				var insertStatement = Zotero.DB.getStatement(sql);
 				
 				var pairs = [];

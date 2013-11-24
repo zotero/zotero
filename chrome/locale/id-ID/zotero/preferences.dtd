@@ -27,7 +27,7 @@
 <!ENTITY zotero.preferences.reportTranslationFailure "Laporkan kerusakan translator situs">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Izinkan zotero.org untuk menyusun konten berdasarkan versi Zotero sekarang">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Jika dibolehkan, versi Zotero sekarang akan dimasukkan dalam permintaan HTTP kepada zotero.org.">
-<!ENTITY zotero.preferences.parseRISRefer "Gunakan Zotero untuk berkas-berkas RIS/Refer terunduh">
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "Ambil foto secara automatis ketika menyusun item dari laman web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Lampirkan PDF dan berkas terkait lainnya secara automatis saat menyimpan item">
 <!ENTITY zotero.preferences.automaticTags "Berikan tag pada item dengan kata kunci dan bagian utama subjek secara automatis">
@@ -55,6 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Buat Akun">
 <!ENTITY zotero.preferences.sync.lostPassword "Kehilangan Password?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "SInkronisasikan secara automatis">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "Tentang Sinkronisasi">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sinkronisasi Berkas">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">

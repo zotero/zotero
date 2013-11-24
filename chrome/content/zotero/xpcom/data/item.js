@@ -3004,6 +3004,7 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 		return false;
 	}
 	
+	var origModDate = file.lastModifiedTime;
 	try {
 		newName = Zotero.File.getValidFileName(newName);
 		
@@ -3022,18 +3023,17 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 		// files, since dest.exists() will just show true on a case-insensitive
 		// filesystem anyway.
 		if (file.leafName.toLowerCase() != dest.leafName.toLowerCase()) {
-			if (overwrite) {
-				dest.remove(false);
-			}
-			else if (dest.exists()) {
+			if (!overwrite && dest.exists()) {
 				return -1;
 			}
 		}
 		
-		file.moveTo(null, newName);
 		// Update mod time and clear hash so the file syncs
 		// TODO: use an integer counter instead of mod time for change detection
-		dest.lastModifiedTime = new Date();
+		// Update mod time first, because it may fail for read-only files on Windows
+		file.lastModifiedTime = new Date();
+		file.moveTo(null, newName);
+		
 		this.relinkAttachmentFile(dest);
 		
 		Zotero.DB.beginTransaction();
@@ -3046,6 +3046,8 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 		return true;
 	}
 	catch (e) {
+		// Restore original modification date in case we managed to change it
+		try { file.lastModifiedTime = origModDate } catch (e) {}
 		Zotero.debug(e);
 		Components.utils.reportError(e);
 		return -2;
@@ -4001,9 +4003,10 @@ Zotero.Item.prototype.addLinkedItem = function (item) {
 		return false;
 	}
 	
-	// If both group libraries, store relation with source group.
-	// Otherwise, store with personal library.
-	var libraryID = (this.libraryID && item.libraryID) ? this.libraryID : null;
+	// If one of the items is a personal library, store relation with that.
+	// Otherwise, use current item's library (which in calling code is the
+	// new, copied item).
+	var libraryID = (!this.libraryID || !item.libraryID) ? null : this.libraryID;
 	
 	Zotero.Relations.add(libraryID, url1, predicate, url2);
 }

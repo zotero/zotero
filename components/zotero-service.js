@@ -122,6 +122,7 @@ const xpcomFilesConnector = [
 ];
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 var instanceID = (new Date()).getTime();
 var isFirstLoadThisSession = true;
@@ -166,6 +167,7 @@ ZoteroContext.prototype = {
 	 */
 	"switchConnectorMode":function(isConnector) {
 		if(isConnector !== this.isConnector) {
+			Services.obs.notifyObservers(zContext.Zotero, "zotero-before-reload", isConnector ? "connector" : "full");
 			zContext.Zotero.shutdown().then(function() {
 				// create a new zContext
 				makeZoteroContext(isConnector);

@@ -22,12 +22,12 @@
 <!ENTITY zotero.preferences.fontSize.notes "Velikost pisave opomb:">
 
 <!ENTITY zotero.preferences.miscellaneous "Razno">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
+<!ENTITY zotero.preferences.autoUpdate "Samodejno preveri posodobitve prevajalnikov in slogov">
 <!ENTITY zotero.preferences.updateNow "Posodobi zdaj">
 <!ENTITY zotero.preferences.reportTranslationFailure "Sporoči okvarjene prevajalnike mest">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Dovoli zotero.org prilagoditi vsebino glede na trenutno različico Zotera">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Če je potrjeno, bo trenutna različica Zotera dodana zahtevam HTTP na zotero.org.">
-<!ENTITY zotero.preferences.parseRISRefer "Uporabi Zotero za prenesene datoteke RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "Uporabi Zotero za prenesene datoteke BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "Samodejno naredi posnetek pri ustvarjanju vnosov s spletnih strani">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Samodejno pripni pridružene PDF-je in druge datoteke pri shranjevanju vnosov">
 <!ENTITY zotero.preferences.automaticTags "Samodejno označi vnose s ključnimi besedami in predmetnimi naslovi">
@@ -55,19 +55,21 @@
 <!ENTITY zotero.preferences.sync.createAccount "Ustvari račun">
 <!ENTITY zotero.preferences.sync.lostPassword "Ste pozabili geslo?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Uskladi samodejno">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Uskladi vsebino celega besedila">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero lahko odslej usklajuje vsebino celega besedila datotek iz vaših knjižnic Zotero z zotero.org in drugimi povezanimi napravami, s čimer lahko enostavno iščete po svojih datotekah, kjerkoli že ste. Vsebina celega besedila vaših datotek ne bo v skupni javni rabi.">
 <!ENTITY zotero.preferences.sync.about "O usklajevanju">
 <!ENTITY zotero.preferences.sync.fileSyncing "Usklajevanje datotek">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Uskladi datoteke priponk v Moji knjižnici s/z">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Uskladi datoteke priponk v skupinskih knjižnicah s shrambo Zotero">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "Prenesi datoteke">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Datoteke prenesi">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "ob usklajevanju">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "po potrebi">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Če uporabljate shrambo Zotero, se strinjate z njenimi">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "pravili, omejitvami in pogoji">
-<!ENTITY zotero.preferences.sync.reset.warning1 "Naslednje operacije so uporabne samo v redkih, posebnih primerih in jih ni pametno uporabiti za splošno reševanje težav. V mnogih primerih bo ponastavljanje porodilo nove težave. Oglejte si">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Naslednje operacije so uporabne samo v redkih, posebnih primerih in jih ni pametno uporabiti za splošno reševanje težav. V mnogih primerih bo ponastavljanje porodilo nove težave. Za dodatne informacije si oglejte">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Možnosti ponastavitve uskladitve">
-<!ENTITY zotero.preferences.sync.reset.warning3 "za podrobnosti.">
+<!ENTITY zotero.preferences.sync.reset.warning3 ".">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Polna uskladitev s strežnikom Zotero">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Spoji krajevne podatke Zotero s podatki s strežnika Zotero, pri čemer prezri zgodovino usklajevanja.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Obnovi s strežnika Zotero">
@@ -90,7 +92,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Neindeksirano:">
 <!ENTITY zotero.preferences.search.indexStats.words "Besed:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Največ znakov na indeks na datoteko:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Največ znakov na kazalo na datoteko:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Največ strani na kazalo na datoteko:">
 
 <!ENTITY zotero.preferences.prefpane.export "Izvozi">
@@ -126,12 +128,12 @@
 <!ENTITY zotero.preferences.prefpane.keys "Tipke za bližnjice">
 
 <!ENTITY zotero.preferences.keys.openZotero "Odpri/zapri podokno Zotero">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Shrani v Zotero (ikona v naslovni vrstici)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Vključi/izključi celozaslonski način">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Pozornost na podokno knjižnic">
 <!ENTITY zotero.preferences.keys.quicksearch "Hitro iskanje">
-<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
-<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.newItem "Ustvari nov vnos">
+<!ENTITY zotero.preferences.keys.newNote "Ustvari novo opombo">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Vključi/izključi izbirnik značk">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiraj citate izbranega elementa na odložišče">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiraj izbrane elemente na odložišče">

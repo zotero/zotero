@@ -1394,9 +1394,12 @@ Zotero.Schema = new function(){
 			yield _getSchemaSQLVersion('system').then(function (version) {
 				return _updateDBVersion('system', version);
 			});
-			yield _getSchemaSQLVersion('userdata').then(function (version) {
-				return _updateDBVersion('userdata', version);
-			});
+			// TEMP: 77 is for full-text syncing. New users don't need the
+			// prompt, so initialize new databases to 77.
+			//yield _getSchemaSQLVersion('userdata').then(function (version) {
+			//	return _updateDBVersion('userdata', version);
+			//});
+			yield _updateDBVersion('userdata', 77);
 			yield _getSchemaSQLVersion('userdata3').then(function (version) {
 				return _updateDBVersion('userdata3', version);
 			});
@@ -1749,7 +1752,7 @@ Zotero.Schema = new function(){
 				fromVersion = 76;
 			}
 			
-			if (fromVersion >= toVersion) {
+			if (fromVersion > toVersion) {
 				return false;
 			}
 			

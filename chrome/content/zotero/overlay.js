@@ -133,14 +133,19 @@ var ZoteroOverlay = new function()
 			// Hide browser chrome on Zotero tab
 			XULBrowserWindow.inContentWhitelist.push("chrome://zotero/content/tab.xul");
 			
-			// Close pane if connector is enabled
-			ZoteroPane_Local.addReloadListener(function() {
-				if(Zotero.isConnector) {
+			// Close pane before reload
+			ZoteroPane_Local.addBeforeReloadListener(function(newMode) {
+				if(newMode == "connector") {
 					// save current state
 					_stateBeforeReload = !zoteroPane.hidden && !zoteroPane.collapsed;
 					// ensure pane is closed
 					if(!zoteroPane.collapsed) ZoteroOverlay.toggleDisplay(false, true);
-				} else {
+				}
+			});
+			
+			// Close pane if connector is enabled
+			ZoteroPane_Local.addReloadListener(function() {
+				if(!Zotero.isConnector) {
 					// reopen pane if it was open before
 					ZoteroOverlay.toggleDisplay(_stateBeforeReload, true);
 				}

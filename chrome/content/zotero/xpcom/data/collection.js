@@ -693,54 +693,63 @@ Zotero.Collection.prototype.addItems = function(itemIDs) {
 	
 	var notifierPairs = [];
 	
-	for (var i=0; i<itemIDs.length; i++) {
-		var itemID = itemIDs[i];
-		if (current && current.indexOf(itemID) != -1) {
-			Zotero.debug("Item " + itemID + " already a child of collection "
-				+ this.id + " in Zotero.Collection.addItems()");
-			continue;
+	var reenableScriptIndicator = false;
+	if(itemIDs.length > 25) {
+		// Disable unresponsive script indicator for long lists
+		// Re-enable later only if it wasn't disabled before
+		reenableScriptIndicator = Zotero.UnresponsiveScriptIndicator.disable();
+	}
+
+	try {
+		for (var i=0; i<itemIDs.length; i++) {
+			var itemID = itemIDs[i];
+			if (current && current.indexOf(itemID) != -1) {
+				Zotero.debug("Item " + itemID + " already a child of collection "
+					+ this.id + " in Zotero.Collection.addItems()");
+				continue;
+			}
+			
+			if (!Zotero.Items.get(itemID)) {
+				Zotero.DB.rollbackTransaction();	
+				throw(itemID + ' is not a valid item id');
+			}
+			
+			// If we're already above the max, just increment
+			if (nextOrderIndex>max) {
+				nextOrderIndex++;
+			}
+			else {
+				selectStatement.bindInt32Parameter(0, this.id);
+				selectStatement.executeStep();
+				nextOrderIndex = selectStatement.getInt32(0);
+				selectStatement.reset();
+			}
+			
+			insertStatement.bindInt32Parameter(0, this.id);
+			insertStatement.bindInt32Parameter(1, itemID);
+			insertStatement.bindInt32Parameter(2, nextOrderIndex);
+			
+			try {
+				insertStatement.execute();
+			}
+			catch(e) {
+				var errMsg = Zotero.DB.getLastErrorString()
+					+ " (" + this.id + "," + itemID + "," + nextOrderIndex + ")";
+				throw (e + ' [ERROR: ' + errMsg + ']');
+			}
+			
+			notifierPairs.push(this.id + '-' + itemID);
 		}
 		
-		if (!Zotero.Items.get(itemID)) {
-			Zotero.DB.rollbackTransaction();	
-			throw(itemID + ' is not a valid item id');
-		}
+		sql = "UPDATE collections SET dateModified=?, clientDateModified=? WHERE collectionID=?";
+		Zotero.DB.query(sql, [Zotero.DB.transactionDateTime, Zotero.DB.transactionDateTime, this.id]);
 		
-		// If we're already above the max, just increment
-		if (nextOrderIndex>max) {
-			nextOrderIndex++;
-		}
-		else {
-			selectStatement.bindInt32Parameter(0, this.id);
-			selectStatement.executeStep();
-			nextOrderIndex = selectStatement.getInt32(0);
-			selectStatement.reset();
-		}
-		
-		insertStatement.bindInt32Parameter(0, this.id);
-		insertStatement.bindInt32Parameter(1, itemID);
-		insertStatement.bindInt32Parameter(2, nextOrderIndex);
-		
-		try {
-			insertStatement.execute();
-		}
-		catch(e) {
-			var errMsg = Zotero.DB.getLastErrorString()
-				+ " (" + this.id + "," + itemID + "," + nextOrderIndex + ")";
-			throw (e + ' [ERROR: ' + errMsg + ']');
-		}
-		
-		notifierPairs.push(this.id + '-' + itemID);
-		
-		if ((i % 25) == 0 && Zotero.locked) {
-			Zotero.wait();
+		Zotero.DB.commitTransaction();
+	} finally {
+		if(reenableScriptIndicator) {
+			Zotero.UnresponsiveScriptIndicator.enable();
 		}
 	}
-	
-	sql = "UPDATE collections SET dateModified=?, clientDateModified=? WHERE collectionID=?";
-	Zotero.DB.query(sql, [Zotero.DB.transactionDateTime, Zotero.DB.transactionDateTime, this.id]);
-	
-	Zotero.DB.commitTransaction();
 	
 	Zotero.Collections.reload(this.id);
 	Zotero.Notifier.trigger('add', 'collection-item', notifierPairs);

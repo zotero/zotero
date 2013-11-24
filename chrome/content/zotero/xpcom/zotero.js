@@ -89,25 +89,29 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	
 	this.__defineGetter__('userID', function () {
+		if (_userID !== undefined) return _userID;
 		var sql = "SELECT value FROM settings WHERE "
 					+ "setting='account' AND key='userID'";
-		return Zotero.DB.valueQuery(sql);
+		return _userID = Zotero.DB.valueQuery(sql);
 	});
 	
 	this.__defineSetter__('userID', function (val) {
 		var sql = "REPLACE INTO settings VALUES ('account', 'userID', ?)";
 		Zotero.DB.query(sql, parseInt(val));
+		_userID = val;
 	});
 	
 	this.__defineGetter__('libraryID', function () {
+		if (_libraryID !== undefined) return _libraryID;
 		var sql = "SELECT value FROM settings WHERE "
 					+ "setting='account' AND key='libraryID'";
-		return Zotero.DB.valueQuery(sql);
+		return _libraryID = Zotero.DB.valueQuery(sql);
 	});
 	
 	this.__defineSetter__('libraryID', function (val) {
 		var sql = "REPLACE INTO settings VALUES ('account', 'libraryID', ?)";
 		Zotero.DB.query(sql, parseInt(val));
+		_libraryID = val;
 	});
 	
 	this.__defineGetter__('username', function () {
@@ -188,6 +192,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	var _startupErrorHandler;
 	var _zoteroDirectory = false;
 	var _localizedStringBundle;
+	var _userID;
+	var _libraryID;
 	var _localUserKey;
 	var _waiting = 0;
 	
@@ -477,6 +483,9 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				Zotero.debug("Loading in connector mode");
 				Zotero.Connector_Types.init();
 				
+				// Store a startupError until we get information from Zotero Standalone
+				Zotero.startupError = Zotero.getString("connector.loadInProgress")
+				
 				if(!Zotero.isFirstLoadThisSession) {
 					// We want to get a checkInitComplete message before initializing if we switched to
 					// connector mode because Standalone was launched
@@ -506,6 +515,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		if(Zotero.initialized) return;
 		
 		Zotero.debug("Running initialization callbacks");
+		delete this.startupError;
 		this.initialized = true;
 		this.initializationDeferred.resolve();
 		
@@ -662,6 +672,80 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			.catch(function (e) {
 				Zotero.debug(e, 1);
 				Components.utils.reportError(e); // DEBUG: doesn't always work
+				
+				if (typeof e == 'string' && e.match('newer than SQL file')) {
+					var kbURL = "http://zotero.org/support/kb/newer_db_version";
+					var msg = Zotero.localeJoin([
+							Zotero.getString('startupError.zoteroVersionIsOlder'),
+							Zotero.getString('startupError.zoteroVersionIsOlder.upgrade')
+						]) + "\n\n"
+						+ Zotero.getString('startupError.zoteroVersionIsOlder.current', Zotero.version) + "\n\n"
+						+ Zotero.getString('general.seeForMoreInformation', kbURL);
+					Zotero.startupError = msg;
+					_startupErrorHandler = function() {
+						var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+							.getService(Components.interfaces.nsIPromptService);
+						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+							+ ps.BUTTON_POS_0_DEFAULT;
+						
+						var index = ps.confirmEx(
+							null,
+							Zotero.getString('general.error'),
+							Zotero.startupError,
+							buttonFlags,
+							Zotero.getString('general.checkForUpdate'),
+							null, null, null, {}
+						);
+						
+						// "Check for updates" button
+						if(index === 0) {
+							if(Zotero.isStandalone) {
+								Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+									.getService(Components.interfaces.nsIWindowWatcher)
+									.openWindow(null, 'chrome://mozapps/content/update/updates.xul',
+										'updateChecker', 'chrome,centerscreen', null);
+							} else {
+								// In Firefox, show the add-on manager
+								Components.utils.import("resource://gre/modules/AddonManager.jsm");
+								AddonManager.getAddonByID(ZOTERO_CONFIG['GUID'],
+									function (addon) {
+										// Disable auto-update so that the user is presented with the option
+										var initUpdateState = addon.applyBackgroundUpdates;
+										addon.applyBackgroundUpdates = AddonManager.AUTOUPDATE_DISABLE;
+										addon.findUpdates({
+												onNoUpdateAvailable: function() {
+													ps.alert(
+														null,
+														Zotero.getString('general.noUpdatesFound'),
+														Zotero.getString('general.isUpToDate', 'Zotero')
+													);
+												},
+												onUpdateAvailable: function() {
+													// Show available update
+													Components.classes["@mozilla.org/appshell/window-mediator;1"]
+														.getService(Components.interfaces.nsIWindowMediator)
+														.getMostRecentWindow('navigator:browser')
+														.BrowserOpenAddonsMgr('addons://updates/available');
+												},
+												onUpdateFinished: function() {
+													// Restore add-on auto-update state, but don't fire
+													//  too quickly or the update will not show in the
+													//  add-on manager
+													setTimeout(function() {
+															addon.applyBackgroundUpdates = initUpdateState;
+													}, 1000);
+												}
+											},
+											AddonManager.UPDATE_WHEN_USER_REQUESTED
+										);
+									}
+								);
+							}
+						}
+					};
+				}
+				
 				Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError') + "\n\n" + e;
 				throw true;
 			});
@@ -802,7 +886,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			// remove temp directory
 			Zotero.removeTempDirectory();
 			
-			if(Zotero.initialized && Zotero.DB) {
+			if(Zotero.DB && Zotero.DB._connection) {
 				Zotero.debug("Closing database");
 				
 				// run GC to finalize open statements
@@ -1880,7 +1964,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	this.purgeDataObjects = function (skipStoragePurge) {
 		Zotero.Creators.purge();
 		Zotero.Tags.purge();
-		Zotero.Fulltext.purgeUnusedWords();
+		// TEMP: Disabled until we have async DB (and maybe SQLite FTS)
+		//Zotero.Fulltext.purgeUnusedWords();
 		Zotero.Items.purge();
 		// DEBUG: this might not need to be permanent
 		Zotero.Relations.purge();
@@ -1938,7 +2023,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			'CVE-2009-3555',
 			'OpenGL LayerManager',
 			'trying to re-register CID',
-			'Services.HealthReport'
+			'Services.HealthReport',
+			'[JavaScript Error: "this.docShell is null"',
+			'[JavaScript Error: "downloadable font:',
+			'[JavaScript Error: "Image corrupt or truncated:',
+			'[JavaScript Error: "The character encoding of the'
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
@@ -2250,6 +2339,17 @@ Zotero.Prefs = new function(){
 				}
 				else {
 					Zotero.Sync.Runner.IdleListener.unregister();
+				}
+				break;
+			
+			// TEMP
+			case "sync.fulltext.enabled":
+				if (this.get("sync.fulltext.enabled")) {
+					// Disable downgrades if full-text sync is enabled, since otherwise
+					// we could miss full-text content updates
+					if (Zotero.DB.valueQuery("SELECT version FROM version WHERE schema='userdata'") < 77) {
+						Zotero.DB.query("UPDATE version SET version=77 WHERE schema='userdata'");
+					}
 				}
 				break;
 			
