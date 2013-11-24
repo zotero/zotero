@@ -2215,12 +2215,17 @@
 					
 					var firstSpace = valueText.indexOf(" ");
 					
-					// To support newlines in 'extra' fields, we use multiple
+					// To support newlines in Abstract and Extra fields, use multiple
 					// <description> elements inside a vbox
 					if (useVbox) {
 						var lines = valueText.split("\n");
 						for (var i = 0; i < lines.length; i++) {
 							var descriptionNode = document.createElement("description");
+							// Add non-breaking space to empty lines to prevent them from collapsing.
+							// (Just using CSS min-height results in overflow in some cases.)
+							if (lines[i] === "") {
+								lines[i] = "\u00a0";
+							}
 							var linetext = document.createTextNode(lines[i]);
 							descriptionNode.appendChild(linetext);
 							valueElement.appendChild(descriptionNode);
