@@ -57,6 +57,7 @@ ConcurrentCaller = function (numConcurrent) {
 	this._queue = [];
 	this._logger = null;
 	this._interval = 0;
+	this._pauseUntil = 0;
 };
 
 
@@ -72,6 +73,14 @@ ConcurrentCaller.prototype.setInterval = function (ms) {
 ConcurrentCaller.prototype.setLogger = function (func) {
 	this._logger = func;
 };
+
+
+/**
+ * Don't run any new functions for the specified amount of time
+ */
+ConcurrentCaller.prototype.pause = function (ms) {
+	this._pauseUntil = Date.now() + ms;
+}
 
 
 /**
@@ -128,7 +137,14 @@ ConcurrentCaller.prototype._onFunctionDone = function (promise) {
 			// run it now
 			let f = self._queue.shift();
 			if (f && self._numRunning < self._numConcurrent) {
-				Q.delay(self._interval)
+				// Wait until the specified interval has elapsed or the current
+				// pause (if there is one) is over, whichever is longer
+				let interval = self._interval;
+				let now = Date.now();
+				if (self._pauseUntil > now && (self._pauseUntil - now > interval)) {
+					interval = self._pauseUntil - now;
+				}
+				Q.delay(interval)
 				.then(function () {
 					self._log("Running new function ("
 						+ self._numRunning + "/" + self._numConcurrent + " running, "
