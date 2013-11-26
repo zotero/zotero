@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.fontSize.xlarge "Çok büyük">
 <!ENTITY zotero.preferences.fontSize.notes "Not yazıtipi boyutu:">
 
-<!ENTITY zotero.preferences.miscellaneous "Çeşitli">
+<!ENTITY zotero.preferences.miscellaneous "Diğer Ayarlar">
 <!ENTITY zotero.preferences.autoUpdate "Güncellenmiş çevirmen ve stilleri otomatik olarak ara">
 <!ENTITY zotero.preferences.updateNow "Şimdi Güncelle">
 <!ENTITY zotero.preferences.reportTranslationFailure "Bozuk site çevirmenlerini bildir">
@@ -31,7 +31,7 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratılırken sayfa görünümü otomatik olarak kaydet">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Eserleri kaydederken ilişkilendirilen PDF ve diğer dosyaları da otomatik olarak ekle">
 <!ENTITY zotero.preferences.automaticTags "Anahtar kelimeler ve konu başlıkları ile eserleri otomatik olarak etiketle">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Bu kadar önce çöpe gönderilmiş eserleri sil:">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Bu kadar zaman önce çöpe gönderilmiş eserleri otomatik olarak sil:">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "gün">
 
 <!ENTITY zotero.preferences.groups "Gruplar">
@@ -115,7 +115,7 @@
 <!ENTITY zotero.preferences.cite.styles "Stiller">
 <!ENTITY zotero.preferences.cite.wordProcessors "Sözcük İşlemcileri">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Hiçbir sözcük işlemcisi eklentisi kurulu değildir.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Sözlük İşlemcisi Eklentilerini Al...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Sözcük İşlemcisi Eklentilerini Al...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Klasik Gönderme Ekleme İletişim Kutusunu kullan">
 
@@ -190,7 +190,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Mutlak Yollara Geri Döndür...">
 
 <!ENTITY zotero.preferences.dbMaintenance "Veritabanı Bakımı">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Veritabanı Bütünlüğünü Kontrol et">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Veritabanı Bütünlüğünü Denetle">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Çevirmenleri ve Stilleri Sıfırla">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Çevirmenleri Sıfırla...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stilleri Sıfırla...">
