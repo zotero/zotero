@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.513",
+    PROCESSOR_VERSION: "1.0.514",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -7935,7 +7935,7 @@ CSL.NameOutput.prototype.getName = function (name, slotLocaleset, fallback, stop
         }
     }
     if (!foundTag) {
-        var langTag;
+        var langTag = false;
         if (name.multi && name.multi.main) {
             langTag = name.multi.main;
         } else if (this.Item.language) {
