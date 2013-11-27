@@ -3997,16 +3997,17 @@ var ZoteroPane = new function()
 			var errFunc = Zotero.startupErrorHandler;
 		}
 		
+		// Get the stringbundle manually
+		var src = 'chrome://zotero/locale/zotero.properties';
+		var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
+				getService(Components.interfaces.nsILocaleService);
+		var appLocale = localeService.getApplicationLocale();
+		var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
+			.getService(Components.interfaces.nsIStringBundleService);
+		var stringBundle = stringBundleService.createBundle(src, appLocale);
+		
+		var title = stringBundle.GetStringFromName('general.error');
 		if (!errMsg) {
-			// Get the stringbundle manually
-			var src = 'chrome://zotero/locale/zotero.properties';
-			var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
-					getService(Components.interfaces.nsILocaleService);
-			var appLocale = localeService.getApplicationLocale();
-			var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
-				.getService(Components.interfaces.nsIStringBundleService);
-			var stringBundle = stringBundleService.createBundle(src, appLocale);
-			
 			var errMsg = stringBundle.GetStringFromName('startupError');
 		}
 		
@@ -4022,7 +4023,7 @@ var ZoteroPane = new function()
 			//} else {
 				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 										.getService(Components.interfaces.nsIPromptService);
-				ps.alert(null, "", errMsg);
+				ps.alert(null, title, errMsg);
 			//}
 		}
 	}

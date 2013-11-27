@@ -831,6 +831,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 					Zotero.getString(Zotero.isStandalone ? 'startupError.closeFirefox' : 'startupError.closeStandalone')
 				]);
 				Zotero.startupError = msg;
+			} else {
+				Zotero.startupError = Zotero.getString('startupError') + "\n\n" + e;
 			}
 			
 			Zotero.debug(e.toString(), 1);
