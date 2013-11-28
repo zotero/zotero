@@ -2443,7 +2443,7 @@ Zotero.Prefs = new function(){
 					Zotero.updateQuickSearchBox(win.ZoteroPane.document);
 				}
 				
-				var enumerator = wm.getEnumerator("zotero:item-selector");
+				var enumerator = Services.wm.getEnumerator("zotero:item-selector");
 				while (enumerator.hasMoreElements()) {
 					var win = enumerator.getNext();
 					if (!win.Zotero) continue;
