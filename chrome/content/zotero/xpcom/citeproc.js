@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.514",
+    PROCESSOR_VERSION: "1.0.515",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -7336,7 +7336,7 @@ CSL.NameOutput.prototype.renderInstitutionNames = function () {
 	        if (localesets) {
 		        var slotnames = ["primary", "secondary", "tertiary"];
 		        for (var k = 0, klen = slotnames.length; k < klen; k += 1) {
-			        if (localesets.length - 1 <  j) {
+			        if (localesets.length - 1 <  k) {
 				        break;
 			        }
                     if (localesets[k]) {
