@@ -34,7 +34,7 @@ Zotero.Debug = new function () {
 			Zotero.Prefs.set('debug.store', false);
 		}
 		_level = Zotero.Prefs.get('debug.level');
-		_time = Zotero.Prefs.get('debug.time');
+		_time = forceDebugLog || Zotero.Prefs.get('debug.time');
 		_stackTrace = Zotero.Prefs.get('debug.stackTrace');
 		
 		this.storing = _store;
