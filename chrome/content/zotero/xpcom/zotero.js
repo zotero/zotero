@@ -218,14 +218,18 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	/**
 	 * Initialize the extension
 	 */
-	function init() {
+	function init(options) {
 		if (this.initialized || this.skipLoading) {
 			return false;
 		}
 		
 		// Load in the preferences branch for the extension
 		Zotero.Prefs.init();
-		Zotero.Debug.init();
+		Zotero.Debug.init(options && options.forceDebugLog);
+		
+		if (options) {
+			if (options.openPane) this.openPane = true;
+		}
 		
 		this.mainThread = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
 		

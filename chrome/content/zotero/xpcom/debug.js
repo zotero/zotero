@@ -27,8 +27,8 @@
 Zotero.Debug = new function () {
 	var _console, _stackTrace, _store, _level, _time, _lastTime, _output = [];
 	
-	this.init = function () {
-		_console = Zotero.Prefs.get('debug.log');
+	this.init = function (forceDebugLog) {
+		_console = forceDebugLog || Zotero.Prefs.get('debug.log');
 		_store = Zotero.Prefs.get('debug.store');
 		if (_store) {
 			Zotero.Prefs.set('debug.store', false);
