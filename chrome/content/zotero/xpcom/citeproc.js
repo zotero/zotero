@@ -10728,8 +10728,8 @@ CSL.Transform = function (state) {
             jurisdiction = "default";
         }
         if (!orig) {
-            if (!this.abbrevs[jurisdiction]) {
-                this.abbrevs[jurisdiction] = new state.sys.AbbreviationSegments();
+            if (!state.transform.abbrevs[jurisdiction]) {
+                state.transform.abbrevs[jurisdiction] = new state.sys.AbbreviationSegments();
             }
             return jurisdiction;
         }
@@ -10742,15 +10742,15 @@ CSL.Transform = function (state) {
                 }
             }
             for (var i=tryList.length - 1; i > -1; i += -1) {
-                if (!this.abbrevs[tryList[i]]) {
-                    this.abbrevs[tryList[i]] = new state.sys.AbbreviationSegments();
+                if (!state.transform.abbrevs[tryList[i]]) {
+                    state.transform.abbrevs[tryList[i]] = new state.sys.AbbreviationSegments();
                 }
-                if (!this.abbrevs[tryList[i]][category][orig]) {
-                    state.sys.getAbbreviation(state.opt.styleID, this.abbrevs, tryList[i], category, orig, itemType, noHints);
+                if (!state.transform.abbrevs[tryList[i]][category][orig]) {
+                    state.sys.getAbbreviation(state.opt.styleID, state.transform.abbrevs, tryList[i], category, orig, itemType, noHints);
                 }
-                if (this.abbrevs[tryList[i]][category][orig]) {
+                if (state.transform.abbrevs[tryList[i]][category][orig]) {
                     if (i < tryList.length) {
-                        this.abbrevs[jurisdiction][category][orig] = this.abbrevs[tryList[i]][category][orig];
+                        state.transform.abbrevs[jurisdiction][category][orig] = state.transform.abbrevs[tryList[i]][category][orig];
                     }
                     break;
                 }
@@ -11460,7 +11460,7 @@ CSL.Util.Dates.year["long"] = function (state, num) {
     }
     return num.toString();
 };
-CSL.Util.Dates.year.imperial = function (state, num, end) {
+CSL.Util.Dates.year.imperial = function (state, num, end, makeShort) {
     if (!num) {
         if ("boolean" === typeof num) {
             num = "";
@@ -11480,14 +11480,29 @@ CSL.Util.Dates.year.imperial = function (state, num, end) {
         day = "0" + day;
     }
     var date = parseInt(num + month + day, 10);
+    var label;
+    var offset;
     if (date >= 18680908 && date < 19120730) {
-        year = '\u660e\u6cbb' + (num - 1867);
+        label = '\u660e\u6cbb';
+        offset = 1867;
     } else if (date >= 19120730 && date < 19261225) {
-        year = '\u5927\u6b63' + (num - 1911);
+        label = '\u5927\u6b63';
+        offset = 1911;
     } else if (date >= 19261225 && date < 19890108) {
-        year = '\u662d\u548c' + (num - 1925);
+        label = '\u662d\u548c';
+        offset = 1925;
     } else if (date >= 19890108) {
-        year = '\u5e73\u6210' + (num - 1988);
+        label = '\u5e73\u6210';
+        offset = 1988;
+    }
+    if (label && offset) {
+        if (!state.transform.abbrevs['default']['number'][label]) {
+            state.transform.loadAbbreviation('default', "number", label);
+        }
+        if (state.transform.abbrevs['default']['number'][label]) {
+            label = state.transform.abbrevs['default']['number'][label];
+        };
+        year = label + (num - offset);
     }
     return year;
 };
