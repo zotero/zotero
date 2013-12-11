@@ -295,11 +295,15 @@ function ZoteroService() {
 			try {
 				zContext.Zotero.init(zInitOptions);
 			} catch(e) {
-				// if Zotero should start as a connector, reload it
-				zContext.Zotero.shutdown().then(function() {
-					makeZoteroContext(true);
-					zContext.Zotero.init(zInitOptions);
-				}).done();
+				if(e === "ZOTERO_SHOULD_START_AS_CONNECTOR") {
+					// if Zotero should start as a connector, reload it
+					zContext.Zotero.shutdown().then(function() {
+						makeZoteroContext(true);
+						zContext.Zotero.init(zInitOptions);
+					}).done();
+				} else {
+					throw e;
+				}
 			}
 		}
 		isFirstLoadThisSession = false;	// no longer first load
