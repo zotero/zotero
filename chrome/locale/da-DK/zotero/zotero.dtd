@@ -68,7 +68,7 @@
 <!ENTITY zotero.items.issue_column "Udgivelse">
 <!ENTITY zotero.items.series_column "Serier">
 <!ENTITY zotero.items.seriesTitle_column "Serie titel">
-<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.court_column "Domstol">
 <!ENTITY zotero.items.medium_column "Medium/Format">
 <!ENTITY zotero.items.genre_column "Genre">
 <!ENTITY zotero.items.system_column "System">
