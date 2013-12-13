@@ -759,6 +759,11 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			Zotero.DB.test();
 			
 			var dbfile = Zotero.getZoteroDatabase();
+
+			// Tell any other Zotero instances to release their lock,
+			// in case we lost the lock on the database (how?) and it's
+			// now open in two places at once
+			Zotero.IPC.broadcast("releaseLock "+dbfile.persistentDescriptor);
 			
 			// Test write access on Zotero data directory
 			if (!dbfile.parent.isWritable()) {
@@ -886,8 +891,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				// Zotero.DBConnection.getStatement() explicitly
 				Components.utils.forceGC();
 				
-				// unlock DB
-				return Zotero.DB.closeDatabase().then(function() {				
+				// close DB
+				return Zotero.DB.closeDatabase(true).then(function() {				
 					// broadcast that DB lock has been released
 					Zotero.IPC.broadcast("lockReleased");
 				});

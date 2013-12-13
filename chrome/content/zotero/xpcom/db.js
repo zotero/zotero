@@ -791,12 +791,17 @@ Zotero.DBConnection.prototype.checkException = function (e) {
 }
 
 
-Zotero.DBConnection.prototype.closeDatabase = function () {
+/**
+ * Close the database
+ * @param {Boolean} [permanent] If true, throw an error instead of
+ *     allowing code to re-open the database again
+ */
+Zotero.DBConnection.prototype.closeDatabase = function (permanent) {
 	if(this._connection) {
 		this.stopDummyStatement();
 		var deferred = Q.defer();
 		this._connection.asyncClose(deferred.resolve);
-		this._connection = undefined;
+		this._connection = permanent ? false : null;
 		return deferred.promise;
 	} else {
 		return Q();
@@ -1073,6 +1078,8 @@ Zotero.DBConnection.prototype.getSQLDataType = function(value) {
 Zotero.DBConnection.prototype._getDBConnection = function () {
 	if (this._connection) {
 		return this._connection;
+	} else if (this._connection === false) {
+		throw new Error("Database permanently closed; not re-opening");
 	}
 	
 	this._debug("Opening database '" + this._dbName + "'");
