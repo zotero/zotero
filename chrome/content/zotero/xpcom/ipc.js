@@ -66,7 +66,7 @@ Zotero.IPC = new function() {
 				// Standalone sends this to the Firefox extension to tell the Firefox extension to
 				// release its lock on the Zotero database
 				if(!Zotero.isConnector && (msg.length === 11 ||
-					                       msg.substr(12) === Zotero.getZoteroDirectory().persistentDescriptor)) {
+					                       msg.substr(12) === Zotero.getZoteroDatabase().persistentDescriptor)) {
 					switchConnectorMode(true);
 				}
 			} else if(msg === "lockReleased") {
