@@ -146,11 +146,9 @@ var ZoteroPane = new function()
 	 * mode
 	 */
 	function _loadPane() {
-		if(!Zotero || !Zotero.initialized) return;
+		if(!Zotero || !Zotero.initialized || Zotero.isConnector) return;
 		
-		if(!Zotero.isConnector) {
-			ZoteroPane_Local.clearItemsPaneMessage();
-		}
+		ZoteroPane_Local.clearItemsPaneMessage();
 		
 		//Initialize collections view
 		ZoteroPane_Local.collectionsView = new Zotero.CollectionTreeView();
