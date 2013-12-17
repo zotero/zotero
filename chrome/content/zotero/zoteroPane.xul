@@ -319,7 +319,13 @@
 							zotero-persist="state">
 						<grippy oncommand="ZoteroPane_Local.toggleTagSelector()"/>
 					</splitter>
-					<zoterotagselector id="zotero-tag-selector" zotero-persist="height,showAutomatic,filterToScope"
+					<!-- 'collapsed' is no longer necessary here due to the persisted 'state' on
+					     zotero-tags-splitter, but without this an old-style entry for 'collapsed'
+					     in localstore.rdf can cause the pane to always be closed on Zotero open.
+					     
+					     TODO: deal with this some other way?
+					-->
+					<zoterotagselector id="zotero-tag-selector" zotero-persist="height,collapsed,showAutomatic,filterToScope"
 						oncommand="ZoteroPane_Local.updateTagFilter()"/>
 				</vbox>
 				
