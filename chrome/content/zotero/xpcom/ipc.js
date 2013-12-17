@@ -181,10 +181,17 @@ Zotero.IPC = new function() {
 					{"lpData":ctypes.voidptr_t}
 			]);
 			
-			const appNames = ["Firefox", "Zotero", "Nightly", "Aurora", "Minefield"];
+			// Aurora/Nightly are always named "Firefox" in
+			// application.ini
+			const appNames = ["Firefox", "Zotero"];
+			
+			// Different from Zotero.appName; this corresponds to the
+			// name in application.ini
+			const myAppName = Services.appInfo.name;
+
 			for each(var appName in appNames) {
 				// don't send messages to ourself
-				if(appName === Zotero.appName) continue;
+				if(appName === myAppName) continue;
 				
 				var thWnd = FindWindow(appName+"MessageWindow", null);
 				if(thWnd) {
