@@ -187,7 +187,7 @@ Zotero.IPC = new function() {
 			
 			// Different from Zotero.appName; this corresponds to the
 			// name in application.ini
-			const myAppName = Services.appInfo.name;
+			const myAppName = Services.appinfo.name;
 
 			for each(var appName in appNames) {
 				// don't send messages to ourself
