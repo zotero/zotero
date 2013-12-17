@@ -315,14 +315,16 @@
 						</treecols>
 						<treechildren/>
 					</tree>
-					<splitter id="zotero-tags-splitter" onmouseup="ZoteroPane_Local.updateTagSelectorSize()" collapse="after">
+					<splitter id="zotero-tags-splitter" onmouseup="ZoteroPane_Local.updateTagSelectorSize()" collapse="after"
+							zotero-persist="state">
 						<grippy oncommand="ZoteroPane_Local.toggleTagSelector()"/>
 					</splitter>
-					<zoterotagselector id="zotero-tag-selector" zotero-persist="height,collapsed,showAutomatic,filterToScope"
+					<zoterotagselector id="zotero-tag-selector" zotero-persist="height,showAutomatic,filterToScope"
 						oncommand="ZoteroPane_Local.updateTagFilter()"/>
 				</vbox>
 				
 				<splitter id="zotero-collections-splitter" resizebefore="closest" resizeafter="closest" collapse="before"
+					zotero-persist="state"
 					onmousemove="document.getElementById('zotero-items-toolbar').setAttribute('state', this.getAttribute('state'));ZoteroPane_Local.updateToolbarPosition();"
 					oncommand="ZoteroPane_Local.updateToolbarPosition()">
 					<grippy id="zotero-collections-grippy"/>
