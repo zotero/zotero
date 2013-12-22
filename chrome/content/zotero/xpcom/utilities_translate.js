@@ -243,7 +243,7 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 		if(typeof translate._sandboxLocation === "object") {
 			var protocol = translate._sandboxLocation.location.protocol,
 				host = translate._sandboxLocation.location.host;
-        } else {
+		} else {
 			var url = Components.classes["@mozilla.org/network/io-service;1"] 
 					.getService(Components.interfaces.nsIIOService)
 					.newURI(translate._sandboxLocation, null, null),
@@ -253,11 +253,15 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	}
 	
 	for(var i=0; i<urls.length; i++) {
-		if(this._translate.document && this._translate.document.location
-				&& this._translate.document.location.toString() === urls[i]) {
+		if(translate.document && translate.document.location
+				&& translate.document.location.toString() === urls[i]) {
 			// Document is attempting to reload itself
 			Zotero.debug("Translate: Attempted to load the current document using processDocuments; using loaded document instead");
-			processor(this._translate.document, urls[i]);
+			var url = urls[i];
+			var proxy = translate._currentTranslator.proxy;
+			if(proxy && proxy.isProxied(url)) url = proxy.toProper(url);
+			
+			processor(translate.document, url);
 			urls.splice(i, 1);
 			i--;
 		}
@@ -268,12 +272,15 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 		if(!processor) return;
 		
 		var newLoc = doc.location;
+		var url = newLoc.toString();
+		var proxy = translate._currentTranslator.proxy;
+		if(proxy && proxy.isProxied(url)) url = proxy.toProper(url);
 		if(Zotero.isFx && (protocol != newLoc.protocol || host != newLoc.host)) {
 			// Cross-site; need to wrap
-			processor(Zotero.Translate.DOMWrapper.wrap(doc), newLoc.toString());
+			processor(Zotero.Translate.DOMWrapper.wrap(doc), url);
 		} else {
 			// Not cross-site; no need to wrap
-			processor(doc, newLoc.toString());
+			processor(doc, url);
 		}
 	},
 	function() {

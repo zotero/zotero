@@ -207,57 +207,38 @@ Zotero.Translators = new function() {
 		var properHosts = [];
 		var proxyHosts = [];
 		
-		var properURI = Zotero.Proxies.proxyToProper(uri);
-		var knownProxy = properURI !== uri;
-		if(knownProxy) {
+		var knownProxy = Zotero.Proxies.getKnownProxy(uri);
+		if(knownProxy && knownProxy.isProxied(uri)) {
 			// if we know this proxy, just use the proper URI for detection
-			var searchURIs = [properURI];
+			var searchURIs = [knownProxy.toProper(uri)];
 		} else {
 			var searchURIs = [uri];
-			
-			// if there is a subdomain that is also a TLD, also test against URI with the domain
-			// dropped after the TLD
-			// (i.e., www.nature.com.mutex.gmu.edu => www.nature.com)
-			var m = /^(https?:\/\/)([^\/]+)/i.exec(uri);
-			if(m) {
-				// First, drop the 0- if it exists (this is an III invention)
-				var host = m[2];
-				if(host.substr(0, 2) === "0-") host = host.substr(2);
-				var hostnames = host.split(".");
-				for(var i=1; i<hostnames.length-2; i++) {
-					if(TLDS[hostnames[i].toLowerCase()]) {
-						var properHost = hostnames.slice(0, i+1).join(".");
-						searchURIs.push(m[1]+properHost+uri.substr(m[0].length));
-						properHosts.push(properHost);
-						proxyHosts.push(hostnames.slice(i+1).join("."));
-					}
-				}
+			var potentialProxies = Zotero.Proxies.generatePotentialProxies(uri);
+			for(var i=0; i<potentialProxies.length; i++) {
+				searchURIs.push(potentialProxies[i].toProper(uri));
 			}
+			potentialProxies.unshift(null); // add placeholder for the untouched uri
 		}
 		
-		Zotero.debug("Translators: Looking for translators for "+searchURIs.join(", "));
+		Zotero.debug("Translators: Looking for translators for:\n"+searchURIs.join("\nor "));
 		
 		var converterFunctions = [];
 		for(var i=0; i<allTranslators.length; i++) {
 			for(var j=0; j<searchURIs.length; j++) {
 				if((!allTranslators[i].webRegexp
 						&& allTranslators[i].runMode === Zotero.Translator.RUN_MODE_IN_BROWSER)
-						|| (uri.length < 8192 && allTranslators[i].webRegexp.test(searchURIs[j]))) {
+						|| (searchURIs[j].length < 8192 && allTranslators[i].webRegexp.test(searchURIs[j]))) {
 					// add translator to list
 					potentialTranslators.push(allTranslators[i]);
 					
 					if(j === 0) {
 						if(knownProxy) {
-							converterFunctions.push(Zotero.Proxies.properToProxy);
+							converterFunctions.push(knownProxy);
 						} else {
 							converterFunctions.push(null);
 						}
 					} else {
-						converterFunctions.push(new function() {
-							var re = new RegExp('^https?://(?:[^/]\\.)?'+Zotero.Utilities.quotemeta(properHosts[j-1]), "gi");
-							var proxyHost = proxyHosts[j-1].replace(/\$/g, "$$$$");
-							return function(uri) { return uri.replace(re, "$&."+proxyHost) };
-						});
+						converterFunctions.push(potentialProxies[j]);
 					}
 					
 					// don't add translator more than once

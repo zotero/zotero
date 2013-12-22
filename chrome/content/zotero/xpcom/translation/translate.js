@@ -1050,19 +1050,20 @@ Zotero.Translate.Base.prototype = {
 	/**
 	 * Called on completion of {@link #_getTranslatorsGetPotentialTranslators} call
 	 */
-	"_getTranslatorsTranslatorsReceived":function(allPotentialTranslators, properToProxyFunctions) {
+	"_getTranslatorsTranslatorsReceived":function(allPotentialTranslators, proxyFunctions) {
 		this._potentialTranslators = [];
 		this._foundTranslators = [];
 		
 		// this gets passed out by Zotero.Translators.getWebTranslatorsForLocation() because it is
 		// specific for each translator, but we want to avoid making a copy of a translator whenever
 		// possible.
-		this._properToProxyFunctions = properToProxyFunctions ? properToProxyFunctions : null;
+		this._proxyFunctions = proxyFunctions ? proxyFunctions : null;
 		this._waitingForRPC = false;
 		
 		for(var i=0, n=allPotentialTranslators.length; i<n; i++) {
 			var translator = allPotentialTranslators[i];
 			if(translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER) {
+				if(proxyFunctions[i]) translator.proxy = proxyFunctions[i];
 				this._potentialTranslators.push(translator);
 			} else if(this instanceof Zotero.Translate.Web && Zotero.Connector) {
 				this._waitingForRPC = true;
@@ -1202,9 +1203,10 @@ Zotero.Translate.Base.prototype = {
 		
 		// convert proxy to proper if applicable
 		if(hostPortRe.test(url)) {
-			if(this.translator && this.translator[0]
-					&& this.translator[0].properToProxy && !dontUseProxy) {
-				resolved = this.translator[0].properToProxy(url);
+			if(!dontUseProxy && this.translator && this.translator[0]
+					&& this.translator[0].proxy
+					&& !this.translator[0].proxy.isProxied(url)) {
+				resolved = this.translator[0].proxy.toProxy(url);
 			} else {
 				resolved = url;
 			}
@@ -1275,10 +1277,9 @@ Zotero.Translate.Base.prototype = {
 		if(this._currentState === "detect") {
 			if(this._potentialTranslators.length) {
 				var lastTranslator = this._potentialTranslators.shift();
-				var lastProperToProxyFunction = this._properToProxyFunctions ? this._properToProxyFunctions.shift() : null;
-				
+				var lastProxyFunction = this._proxyFunctions ? this._proxyFunctions.shift() : null;
 				if(returnValue) {
-					var dupeTranslator = {"properToProxy":lastProperToProxyFunction};
+					var dupeTranslator = {};
 					
 					for(var i in lastTranslator) dupeTranslator[i] = lastTranslator[i];
 					if(Zotero.isBookmarklet && returnValue === "server") {
@@ -1690,7 +1691,7 @@ Zotero.Translate.Web.prototype._getTranslatorsGetPotentialTranslators = function
 	Zotero.Translators.getWebTranslatorsForLocation(this.location,
 			function(data) {
 				// data[0] = list of translators
-				// data[1] = list of functions to convert proper URIs to proxied URIs
+				// data[1] = list of functions to convert proper URIs to proxied URIs and vice versa
 				me._getTranslatorsTranslatorsReceived(data[0], data[1]);
 			});
 }
@@ -1713,7 +1714,13 @@ Zotero.Translate.Web.prototype._getSandboxLocation = function() {
 /**
  * Pass document and location to detect* and do* functions
  */
-Zotero.Translate.Web.prototype._getParameters = function() { return [this.document, this.location]; }
+Zotero.Translate.Web.prototype._getParameters = function() {
+	var url = this.location;
+	if(this._currentTranslator.proxy) {
+		url = this._currentTranslator.proxy.toProper(url);
+	}
+	return [this.document, url];
+}
 
 /**
  * Prepare translation
@@ -1884,6 +1891,29 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 			Zotero.HTTP.doPost("http://www.zotero.org/repo/report", postBody);
 		});
 	}
+}
+
+Zotero.Translate.Web.prototype._saveItems = function(items) {
+	var proxy = this._currentTranslator.proxy;
+	if(proxy) {
+		items = items.slice();
+		for(var i=0; i<items.length; i++) {
+			// Deproxify URL field
+			if(items[i].url) {
+				items[i].url = proxy.toProper(items[i].url);
+			}
+			
+			// Proxify unproxified attachment URLs
+			for(var j=0; j<items[i].attachments.length; j++) {
+				var url = items[i].attachments[j].url;
+				if(url && !proxy.isProxied(url)) {
+					items[i].attachments[j].url = proxy.toProxy(url);
+				}
+			}
+		}
+	}
+	
+	return Zotero.Translate.Base.prototype._saveItems.apply(this, [items]);
 }
 
 /**
