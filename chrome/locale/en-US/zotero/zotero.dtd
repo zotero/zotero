@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll						"Deselect All">
 <!ENTITY zotero.general.edit								"Edit">
 <!ENTITY zotero.general.delete 								"Delete">
+<!ENTITY zotero.general.ok								"OK">
+<!ENTITY zotero.general.cancel								"Cancel">
 
 <!ENTITY zotero.errorReport.title							"Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages				"The error log may include messages unrelated to Zotero.">
@@ -283,3 +285,5 @@
 <!ENTITY zotero.downloadManager.label			"Save to Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description	"Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
 <!ENTITY zotero.downloadManager.noPDFTools.description	"To use this feature, you must first install the PDF tools in the Search pane of the Zotero preferences.">
+
+<!ENTITY zotero.captcha.title			"Please enter CAPTCHA">

@@ -33,7 +33,7 @@
  */
 var Zotero_RecognizePDF = new function() {
 	Components.utils.import("resource://zotero/q.js");
-	var _progressWindow, _progressIndicator;
+	var _progressWindow, _progressIndicator, itemRecognizer;
 	
 	/**
 	 * Checks whether a given PDF could theoretically be recognized
@@ -56,7 +56,7 @@ var Zotero_RecognizePDF = new function() {
 		
 		var items = ZoteroPane_Local.getSelectedItems();
 		if (!items) return;
-		var itemRecognizer = new Zotero_RecognizePDF.ItemRecognizer();
+		itemRecognizer = new Zotero_RecognizePDF.ItemRecognizer();
 		itemRecognizer.recognizeItems(items);
 	}	
 	
@@ -70,6 +70,7 @@ var Zotero_RecognizePDF = new function() {
 	this.recognize = function(file, libraryID) {
 		const MAX_PAGES = 7;
 		const GOOGLE_SCHOLAR_QUERY_DELAY = 2000; // in ms
+		var me = this;
 		
 		return _extractText(file, MAX_PAGES).then(function(lines) {
 			// Look for DOI - Use only first 80 lines to avoid catching article references
@@ -104,6 +105,9 @@ var Zotero_RecognizePDF = new function() {
 			// If no DOI or ISBN, query Google Scholar
 			return promise.fail(function(error) {
 				Zotero.debug("RecognizePDF: "+error);
+				
+				// Don't try Google Scholar if we already reached query limit
+				if(itemRecognizer._gsQueryLimitReached) throw new Zotero.Exception.Alert("recognizePDF.limit");
 				
 				// Use only first column from multi-column lines
 				const lineRe = /^[\s_]*([^\s]+(?: [^\s_]+)+)/;
@@ -141,7 +145,7 @@ var Zotero_RecognizePDF = new function() {
 				var nextLine = 0,
 				limited = false,
 				queryGoogle = function() {
-					// Once we hit the CAPTCHA once, don't keep trying
+					// If the users fails (or chooses not) to solve the CAPTCHA, don't keep trying
 					if(limited) throw new Zotero.Exception.Alert("recognizePDF.limit");
 
 					// Take the relevant parts of some lines (exclude hyphenated word)
@@ -189,9 +193,7 @@ var Zotero_RecognizePDF = new function() {
 							translate = new Zotero.Translate.Web();
 
 						if(Zotero.Utilities.xpath(doc, "//form[@action='Captcha']").length) {
-							// Hit CAPTCHA
-							limited = true;
-							throw new Zotero.Exception.Alert("recognizePDF.limit");
+							return _solveCaptcha(xmlhttp, 3);
 						}
 						
 						translate.setTranslator("57a00950-f0d1-4b41-b6ba-44ff0fc30289");
@@ -207,15 +209,25 @@ var Zotero_RecognizePDF = new function() {
 						
 						return deferred.promise;
 					}, function(e) {
-						if(e instanceof Zotero.HTTP.UnexpectedStatusException && e.status == 403) {
-							// Hit hard block
-							throw new Zotero.Exception.Alert("recognizePDF.limit");
+						if(e instanceof Zotero.HTTP.UnexpectedStatusException
+							&& (e.status == 403 || e.status == 503)) {
+							return _solveCaptcha(e.xmlhttp, 3); // Give the user 3 chances to get it right
 						}
 						throw e;
 					});
 				};
-
-				return queryGoogle().fail(queryGoogle).fail(queryGoogle);
+				
+				var retryCount = 2;
+				var retryGS = function(e) {
+					if(!retryCount--) throw e;
+					// Only retry if we can't find matches
+					if(e instanceof Zotero.Exception.Alert && e.name == "recognizePDF.noMatches") {
+						return queryGoogle().catch(retryGS);
+					}
+					throw e;
+				}
+				
+				return queryGoogle().catch(retryGS);
 			});
 		});
 	}
@@ -331,39 +343,87 @@ var Zotero_RecognizePDF = new function() {
 		}
 	
 		// Validate ISBNs
-		var validIsbns = [];
+		var validIsbns = [], cleanISBN;
 		for (var i =0; i < isbns.length; i++) {
-			if(_isValidISBN(isbns[i])) validIsbns.push(isbns[i]);
+			cleanISBN = Zotero.Utilities.cleanISBN(isbns[i]);
+			if(cleanISBN) validIsbns.push(cleanISBN);
 		}
 		return validIsbns;
 	}
 	
-	/**
-	 * Check whether an ISBNs is valid
-	 * @private
-	 * @return {Boolean}
-	 */
-	function _isValidISBN(isbn) {
-		if(isbn.length == 13) {
-			// ISBN-13 should start with 978 or 979 i.e. GS1 for book publishing industry
-			var prefix = isbn.slice(0,3);
-			if (prefix != "978" && prefix != "979") return false;
-			// Verify check digit
-			var check = 0;
-			for (var i = 0; i < 13; i+=2) check += isbn[i]*1;
-			for (i = 1; i < 12; i+=2) check += 3 * isbn[i]*1;
-			return (check % 10 == 0);
-		} else if(isbn.length == 10) {
-			// Verify ISBN-10 check digit
-			var check = 0;
-			for (var i = 0; i < 9; i++) check += isbn[i]*1 * (10-i);
-			// last number might be 'X'
-			if (isbn[9] == 'X' || isbn[9] == 'x') check += 10;
-			else check += isbn[i]*1;
-			return (check % 11 == 0);
+	function _extractCaptchaFormData(doc) {
+		var formData = {};
+		
+		var img = doc.getElementsByTagName('img')[0];
+		if(!img) return;
+		formData.img = img.src;
+		
+		var form = doc.forms[0];
+		if(!form) return;
+		
+		formData.action = form.action;
+		formData.input = {};
+		var inputs = form.getElementsByTagName('input');
+		for(var i=0, n=inputs.length; i<n; i++) {
+			if(!inputs[i].name) continue;
+			formData.input[inputs[i].name] = inputs[i].value;
 		}
-		return false;
+		
+		formData.continue = "http://scholar.google.com";
+		
+		return formData;
 	}
+	
+	function _solveCaptcha(xmlhttp, tries) {
+		var doc = xmlhttp.response;
+		
+		if(tries === undefined) tries = 3;
+		if(!tries) throw new Zotero_RecognizePDF.CaptchaResult(false);
+		tries--;
+		
+		var formData = doc && _extractCaptchaFormData(doc);
+		if(!formData) throw new Zotero.Exception.Alert('recognizePDF.limit');
+
+		var io = { dataIn: {
+			imgUrl: formData.img
+		}};
+		
+		_progressWindow.openDialog("chrome://zotero/content/captcha.xul", "",
+			"chrome,modal,resizable=no,centerscreen", io);
+		
+		if(!io.dataOut) {
+			return Q.reject(new Zotero_RecognizePDF.CaptchaResult(false));
+		}
+		
+		formData.input.captcha = io.dataOut.captcha;
+		var url = '', prop;
+		for(prop in formData.input) {
+			url += '&' + encodeURIComponent(prop) + '='
+				+ encodeURIComponent(formData.input[prop]);
+		}
+		
+		url = formData.action + '?' + url.substr(1);
+		
+		return Zotero.HTTP.promise("GET", url, {"responseType":"document"})
+			.then(function() {
+				throw new Zotero_RecognizePDF.CaptchaResult(true);
+			})
+			.catch(function(e) {
+				if(e instanceof Zotero.HTTP.UnexpectedStatusException
+					&& (e.status == 403 || e.status == 503)) {
+					return _solveCaptcha(e.xmlhttp, tries);
+				}
+				throw e;
+			});
+	}
+	
+	this.CaptchaResult = function(success) {
+		this.success = success;
+	};
+	
+	this.CaptchaResult.prototype.toString = function() {
+		return this.success ? "CAPTCHA successful" : "CAPTCHA failed";
+	};
 
 	/**
 	 * @class Handles UI, etc. for recognizing multiple items
@@ -377,6 +437,7 @@ var Zotero_RecognizePDF = new function() {
 		"_itemsTotal": 0,
 		"_progressWindow": null,
 		"_progressIndicator": null,
+		"_gsQueryLimitReached": false,
 
 		/**
 		 * Retreives metadata for the PDF items passed, displaying a progress dialog during conversion 
@@ -388,7 +449,7 @@ var Zotero_RecognizePDF = new function() {
 			this._items = items.slice();
 			this._itemTotal = items.length;
 			
-			this._progressWindow = window.openDialog("chrome://zotero/content/pdfProgress.xul", "", "chrome,close=yes,resizable=yes,dependent,dialog,centerscreen");
+			_progressWindow = this._progressWindow = window.openDialog("chrome://zotero/content/pdfProgress.xul", "", "chrome,close=yes,resizable=yes,dependent,dialog,centerscreen");
 			this._progressWindow.addEventListener("pageshow", function() { me._onWindowLoaded() }, false);
 		},
 
@@ -427,12 +488,13 @@ var Zotero_RecognizePDF = new function() {
 			}
 			
 			var me = this;
-			this._progressIndicator = this._progressWindow.document.getElementById("progress-indicator");
+			_progressIndicator = this._progressIndicator = this._progressWindow.document.getElementById("progress-indicator");
 			this._progressWindow.document.getElementById("cancel-button").addEventListener("command", function() {
 				me.stop();
 				me._progressWindow.close();
 			}, false);
 			this._progressWindow.addEventListener("close", function() { me.stop() }, false);
+			this._gsQueryLimitReached = false; // Clear query limit flag
 			this._recognizeItem();
 		},
 
@@ -441,6 +503,8 @@ var Zotero_RecognizePDF = new function() {
 		 * @private
 		 */
 		"_recognizeItem": function() {
+			if(this._stopped) return;
+			
 			Components.utils.import("resource://zotero/q.js");
 			
 			const SUCCESS_IMAGE = "chrome://zotero/skin/tick.png";
@@ -458,6 +522,7 @@ var Zotero_RecognizePDF = new function() {
 				itemIcon = this._progressWindow.document.getElementById("item-"+item.id+"-icon"),
 				itemTitle = this._progressWindow.document.getElementById("item-"+item.id+"-title");
 			itemIcon.setAttribute("src", LOADING_IMAGE);
+			itemTitle.setAttribute("label", "");
 			
 			var file = item.getFile(), me = this;
 			
@@ -487,17 +552,28 @@ var Zotero_RecognizePDF = new function() {
 				
 				me._recognizeItem();
 			}, function(error) {
+				if(error instanceof Zotero_RecognizePDF.CaptchaResult && error.success) {
+					// Redo last item
+					me._items.unshift(item);
+					me._recognizeItem();
+					return;
+				}
+				
 				Zotero.debug(error);
 				Zotero.logError(error);
-
+				
+				if(error instanceof Zotero_RecognizePDF.CaptchaResult && !error.success) {
+					error = new Zotero.Exception.Alert("recognizePDF.limit");
+				}
+				
+				if(error instanceof Zotero.Exception.Alert && error.name === "recognizePDF.limit") {
+					this._gsQueryLimitReached = true;;
+				}
+				
 				itemTitle.setAttribute("label", error instanceof Zotero.Exception.Alert ? error.message : Zotero.getString("recognizePDF.error"));
 				itemIcon.setAttribute("src", FAILURE_IMAGE);
 				
-				if(error instanceof Zotero.Exception.Alert && error.name === "recognizePDF.limit") {
-					me._done();
-				} else {
-					me._recognizeItem();
-				}
+				me._recognizeItem();
 			}).fin(function() {
 				// scroll to this item
 				me._progressWindow.document.getElementById("tree").treeBoxObject.scrollToRow(Math.max(0, me._itemTotal-me._items.length-5));
@@ -512,8 +588,6 @@ var Zotero_RecognizePDF = new function() {
 			this._progressIndicator.value = 100;
 			this._progressWindow.document.getElementById("cancel-button").label = Zotero.getString("recognizePDF.close.label");
 			var me = this;
-			this._progressWindow.addEventListener("blur",
-				function() { me._progressWindow.setTimeout(function() { me._progressWindow.close() }, 2000) }, false);
 			this._progressWindow.document.getElementById("label").value = Zotero.getString("recognizePDF.complete.label");
 		}
 	}
