@@ -75,9 +75,20 @@ var Zotero_RecognizePDF = new function() {
 		return _extractText(file, MAX_PAGES).then(function(lines) {
 			// Look for DOI - Use only first 80 lines to avoid catching article references
 			var allText = lines.join("\n"),
-				doi = Zotero.Utilities.cleanDOI(lines.slice(0,80).join('\n')),
+				firstChunk = lines.slice(0,80).join('\n'),
+				doi = Zotero.Utilities.cleanDOI(firstChunk),
 				promise;
 			Zotero.debug(allText);
+			
+			if(!doi) {
+				// Look for a JSTOR stable URL, which can be converted to a DOI by prepending 10.2307
+				doi = firstChunk.match(/www.\jstor\.org\/stable\/(\S+)/i);
+				if(doi) {
+					doi = Zotero.Utilities.cleanDOI(
+						doi[1].indexOf('10.') == 0 ? doi[1] : '10.2307/' + doi[1]
+					);
+				}
+			}
 			
 			if(doi) {
 				// Look up DOI
