@@ -612,7 +612,7 @@ Zotero.Cite.System.prototype = {
 		if(typeof extra === "string") {
 			var m = /(?:^|\n)PMID:\s*([0-9]+)/.exec(extra);
 			if(m) cslItem.PMID = m[1];
-			m = /(?:^|\n)PMCID:\s*([0-9]+)/.exec(extra);
+			m = /(?:^|\n)PMCID:\s*((PMC)?[0-9]+)/.exec(extra);
 			if(m) cslItem.PMCID = m[1];
 		}
 		
