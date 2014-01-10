@@ -71,6 +71,16 @@ Zotero.Fulltext = new function(){
 	
 	const _processorCacheFile = '.zotero-ft-unprocessed';
 	
+
+	const kWbClassSpace =            0;
+	const kWbClassAlphaLetter =      1;
+	const kWbClassPunct =            2;
+	const kWbClassHanLetter =        3;
+	const kWbClassKatakanaLetter =   4;
+	const kWbClassHiraganaLetter =   5;
+	const kWbClassHWKatakanaLetter = 6;
+	const kWbClassThaiLetter =       7;
+
 	var _pdfConverterVersion = null;
 	var _pdfConverterFileName = null;
 	var _pdfConverter = null; // nsIFile to executable
@@ -92,6 +102,12 @@ Zotero.Fulltext = new function(){
 	var self = this;
 	
 	function init() {
+		Zotero.DB.query("ATTACH ':memory:' AS 'indexing'");
+		Zotero.DB.query('CREATE TABLE indexing.fulltextWords (word NOT NULL)');
+
+		this.decoder = Components.classes["@mozilla.org/intl/utf8converterservice;1"].
+			getService(Components.interfaces.nsIUTF8ConverterService);
+
 		var platform = Zotero.platform.replace(' ', '-');
 		_pdfConverterFileName = this.pdfConverterName + '-' + platform;
 		_pdfInfoFileName = this.pdfInfoName + '-' + platform;
@@ -122,6 +138,31 @@ Zotero.Fulltext = new function(){
 	}
 	
 	
+	// this is a port from http://mxr.mozilla.org/mozilla-central/source/intl/lwbrk/src/nsSampleWordBreaker.cpp to
+	// Javascript to avoid the overhead of xpcom calls. The port keeps to the mozilla naming of interfaces/constants as
+	// closely as possible.
+	function getClass(c, cc) {
+		if (cc < 0x2E80) { //alphabetical script
+			if ((cc & 0xFF80) == 0) { // ascii
+				if (c == ' '  || c == "\t" || c == "\r" || c == "\n") { return kWbClassSpace; }
+
+				// deviation from Mozilla algorithm: count "'" as an alphaletter
+				if (c == "'" || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) { return kWbClassAlphaLetter; }
+				return kWbClassPunct;
+			}
+			if ((0xFF80 & cc) == 0x0E00) { return kWbClassThaiLetter; }
+			if (cc == 0x00A0/*NBSP*/) { return kWbClassSpace; }
+			return kWbClassAlphaLetter;
+		}
+
+		if ((cc >= 0x3400 && cc <= 0x9fff) || (cc>= 0xf900 && cc <= 0xfaff)) /*han*/ { return kWbClassHanLetter; }
+		if (cc >= 0x30A0 && cc <= 0x30FF) { return kWbClassKatakanaLetter; }
+		if (cc >= 0x3040 && cc <= 0x309F) { return kWbClassHiraganaLetter; }
+		if (cc>= 0xFF60 && cc <= 0xFF9F) { return kWbClassHWKatakanaLetter; }
+		return kWbClassAlphaLetter;
+	}
+	
+	
 	/*
 	 * Looks for pdftotext-{platform}[.exe] in the Zotero data directory
 	 *
@@ -135,12 +176,12 @@ Zotero.Fulltext = new function(){
 		switch (tool) {
 			case 'converter':
 				var toolName = this.pdfConverterName;
-				var fileName = _pdfConverterFileName
+				var fileName = _pdfConverterFileName;
 				break;
 				
 			case 'info':
 				var toolName = this.pdfInfoName;
-				var fileName = _pdfInfoFileName
+				var fileName = _pdfInfoFileName;
 				break;
 			
 			default:
@@ -214,77 +255,21 @@ Zotero.Fulltext = new function(){
 	 * Index multiple words at once
 	 */
 	function indexWords(itemID, words) {
-		if (!words || !words.length || !itemID){
-			return false;
-		}
-		
-		var existing = [];
-		var done = 0;
-		var maxWords = 999; // compiled limit
-		var numWords = words.length;
-		
+		let chunk;
 		Zotero.DB.beginTransaction();
-		
-		var origWords = [];
-		
-		do {
-			var chunk = words.splice(0, maxWords);
-			origWords = origWords.concat(chunk);
-			
-			var sqlQues = [];
-			var sqlParams = [];
-			
-			for each(var word in chunk) {
-				sqlQues.push('?');
-				sqlParams.push( { string: word } );
-			}
-			
-			var sql = "SELECT word, wordID from fulltextWords WHERE word IN ("
-			sql += sqlQues.join() + ")";
-			var wordIDs = Zotero.DB.query(sql, sqlParams);
-			
-			for (var i in wordIDs) {
-				// Underscore avoids problems with JS reserved words
-				existing['_' + wordIDs[i].word] = wordIDs[i].wordID;
-			}
-			
-			done += chunk.length;
+		Zotero.DB.query("DELETE FROM indexing.fulltextWords");
+		while (words.length > 0) {
+			chunk = words.splice(0, 100);
+			Zotero.DB.query('INSERT INTO indexing.fulltextWords (word) ' + ['SELECT ?' for (word of chunk)].join(' UNION '), chunk);
 		}
-		while (done < numWords);
-		
-		if (!Zotero.DB.valueQuery("SELECT COUNT(*) FROM fulltextItems WHERE itemID=?", itemID)) {
-			let sql = "INSERT INTO fulltextItems (itemID, version) VALUES (?,?)";
-			Zotero.DB.query(sql, [itemID, 0]);
-		}
-		
-		// Handle bound parameters manually for optimal speed
-		var statement1 = Zotero.DB.getStatement("INSERT INTO fulltextWords (word) VALUES (?)");
-		var statement2 = Zotero.DB.getStatement("INSERT OR IGNORE INTO fulltextItemWords VALUES (?,?)");
-		
-		for each(var word in origWords) {
-			// Skip words containing invalid characters
-			if (word.match(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/)) {
-				Zotero.debug("Skipping word '" + word + "' due to invalid characters");
-				continue;
-			}
-			if (existing['_' + word]){
-				var wordID = existing['_' + word];
-			}
-			else {
-				statement1.bindUTF8StringParameter(0, word);
-				statement1.execute()
-				var wordID = Zotero.DB.getLastInsertID();
-			}
-			
-			statement2.bindInt32Parameter(0, wordID);
-			statement2.bindInt32Parameter(1, itemID);
-			statement2.execute();
-		}
-		
-		statement1.reset();
-		statement2.reset();
-		
+		Zotero.DB.query('INSERT OR IGNORE INTO fulltextWords (word) SELECT word FROM indexing.fulltextWords');
+		Zotero.DB.query('DELETE FROM fulltextItemWords WHERE itemID = ?', [itemID]);
+		Zotero.DB.query('INSERT INTO fulltextItemWords (wordID, itemID) SELECT wordID, ? FROM fulltextWords JOIN indexing.fulltextWords USING(word)', [itemID]);
+		Zotero.DB.query("REPLACE INTO fulltextItems (itemID, version) VALUES (?,?)", [itemID, 0]);
+		Zotero.DB.query("DELETE FROM indexing.fulltextWords");
+	
 		Zotero.DB.commitTransaction();
+		return true;
 	}
 	
 	
@@ -937,16 +922,6 @@ Zotero.Fulltext = new function(){
 			.then(function (json) {
 				data = JSON.parse(json);
 				
-				// TEMP: until we replace nsISemanticUnitScanner
-				if (data.text.length > 250000) {
-					let item = Zotero.Items.get(itemID);
-					Zotero.debug("Skipping processing of full-text content for item "
-						+ item.libraryKey + " with length " + data.text.length
-						+ " -- will be processed in future version", 2);
-					_processorBlacklist[itemID] = true;
-					return false;
-				}
-				
 				// Write the text content to the regular cache file
 				cacheFile = self.getItemCacheFile(itemID);
 				
@@ -1553,43 +1528,39 @@ Zotero.Fulltext = new function(){
 			Zotero.debug('No text to index');
 			return;
 		}
-		
-		text = _markTroubleChars(text);
-		
-		var serv = Components.classes["@mozilla.org/intl/semanticunitscanner;1"]
-				.createInstance(Components.interfaces.nsISemanticUnitScanner);
-		
-		var words = [], unique = {}, begin = {}, end = {}, nextPos = 0;
-		serv.start(charset ? charset : null);
-		do {
-			var next = serv.next(text, text.length, nextPos, true, begin, end);
-			var str = text.substring(begin.value, end.value);
-			
-			// Skip non-breaking spaces
-			if (!str || str.charCodeAt(0)==32 || str.charCodeAt(0)==160){
-				nextPos = end.value;
-				begin = {}, end = {};
-				continue;
+
+		try {
+			if (charset && charset != 'utf-8') {
+				text = this.decoder.convertStringToUTF8(text, charset, true);
 			}
-			
-			// Create alphanum hash keys out of the character codes
-			var lc = str.toLowerCase();
-			
-			// And store the unique ones
-			if (!unique[lc]){
-				unique[lc] = true;
-			}
-			
-			nextPos = end.value;
-			begin = {}, end = {};
-		}
-		while (next);
-		
-		for (var i in unique){
-			words.push(_restoreTroubleChars(i));
+		} catch (err) {
+			Zotero.debug(err, 1);
 		}
 		
-		return words;
+		var words = {};
+		var word = '';
+		var cclass = null;
+		var strlen = text.length;
+		for (var i = 0; i < strlen; i++) {
+			var c = text.charAt(i);
+			var cc = getClass(c, text.charCodeAt(i));
+			
+			if (cc == kWbClassSpace || cc == kWbClassPunct) {
+				if (word != '') { words[word] = true; word = ''; }
+			} else if (cc == kWbClassHanLetter) {
+				if (word != '') { words[word] = true; word = ''; }
+				words[c] = true;
+			} else if (cc == cclass) {
+				word += c.toLowerCase();
+			} else {
+				if (word != '') { words[word] = true; }
+				word = c.toLowerCase();
+			}
+			cclass = cc;
+		}
+		if (word != '') { words[word] = true; }
+
+		return Object.keys(words);
 	}
 	
 	
@@ -1609,17 +1580,5 @@ Zotero.Fulltext = new function(){
 			next.parentNode.insertBefore(space, next);
 		}
 		while (next = next.nextSibling);
-	}
-	
-	
-	function _markTroubleChars(text){
-		text = text.replace(/'/g, "zoteroapostrophe");
-		return text;
-	}
-	
-	
-	function _restoreTroubleChars(text){
-		text = text.replace(/zoteroapostrophe/g, "'");
-		return text;
 	}
 }
