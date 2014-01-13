@@ -132,7 +132,7 @@ Zotero.Translate.Sandbox = {
 				var nAttachments = attachments.length;
 				for(var j=0; j<nAttachments; j++) {
 					if(attachments[j].document) {
-						attachments[j].url = attachments[j].document.location.href;
+						attachments[j].url = attachments[j].document.documentURI || attachments[j].document.URL;
 						attachments[j].mimeType = "text/html";
 						delete attachments[j].document;
 					}
