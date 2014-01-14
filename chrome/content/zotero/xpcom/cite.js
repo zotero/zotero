@@ -533,7 +533,95 @@ Zotero.Cite.System.prototype = {
 				&& zoteroItem.getField("pages")
 				&& !Zotero.Prefs.get("export.citePaperJournalArticleURL"));
 		
-		return Zotero.Utilities.itemToCSLJSON(zoteroItem, ignoreURL);
+        // XXXX
+        // XXXX This needs logic of itemToCslJSON (utilities.js) mapped in
+        // XXXX
+
+		var cslItem = {
+			'id':zoteroItem.id,
+			'type':cslType
+		};
+		
+		// get all text variables (there must be a better way)
+		// TODO: does citeproc-js permit short forms?
+		for(var variable in CSL_TEXT_MAPPINGS) {
+			var fields = CSL_TEXT_MAPPINGS[variable];
+			if(variable == "URL" && ignoreURL) continue;
+			for each(var field in fields) {
+				var value = zoteroItem.getField(field, false, true).toString();
+				if(value != "") {
+					// Strip enclosing quotes
+					if(value.match(/^".+"$/)) {
+						value = value.substr(1, value.length-2);
+					}
+					cslItem[variable] = value;
+					break;
+				}
+			}
+		}
+		
+		// separate name variables
+		var authorID = Zotero.CreatorTypes.getPrimaryIDForType(zoteroItem.itemTypeID);
+		var creators = zoteroItem.getCreators();
+		for each(var creator in creators) {
+			if(creator.creatorTypeID == authorID) {
+				var creatorType = "author";
+			} else {
+				var creatorType = Zotero.CreatorTypes.getName(creator.creatorTypeID);
+			}
+			
+			var creatorType = CSL_NAMES_MAPPINGS[creatorType];
+			if(!creatorType) continue;
+			
+			var nameObj = {'family':creator.ref.lastName, 'given':creator.ref.firstName};
+			
+			if(cslItem[creatorType]) {
+				cslItem[creatorType].push(nameObj);
+			} else {
+				cslItem[creatorType] = [nameObj];
+			}
+		}
+		
+		// get date variables
+		for(var variable in CSL_DATE_MAPPINGS) {
+			var date = zoteroItem.getField(CSL_DATE_MAPPINGS[variable], false, true);
+			if(date) {
+				var dateObj = Zotero.Date.strToDate(date);
+				// otherwise, use date-parts
+				var dateParts = [];
+				if(dateObj.year) {
+					// add year, month, and day, if they exist
+					dateParts.push(dateObj.year);
+					if(dateObj.month !== undefined) {
+						dateParts.push(dateObj.month+1);
+						if(dateObj.day) {
+							dateParts.push(dateObj.day);
+						}
+					}
+					cslItem[variable] = {"date-parts":[dateParts]};
+					
+					// if no month, use season as month
+					if(dateObj.part && !dateObj.month) {
+						cslItem[variable].season = dateObj.part;
+					}
+				} else {
+					// if no year, pass date literally
+					cslItem[variable] = {"literal":date};
+				}
+			}
+		}
+
+		// extract PMID
+		var extra = zoteroItem.getField("extra", false, true);
+		if(typeof extra === "string") {
+			var m = /(?:^|\n)PMID:\s*([0-9]+)/.exec(extra);
+			if(m) cslItem.PMID = m[1];
+			m = /(?:^|\n)PMCID:\s*((?:PMC)?[0-9]+)/.exec(extra);
+			if(m) cslItem.PMCID = m[1];
+		}
+		
+		//this._cache[zoteroItem.id] = cslItem;
+		return cslItem;
 	},
 
 	/**

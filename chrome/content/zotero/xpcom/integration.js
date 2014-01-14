@@ -313,7 +313,8 @@ Zotero.Integration = new function() {
 			const BUNDLE_IDS = {
 				"Zotero":"org.zotero.zotero",
 				"Firefox":"org.mozilla.firefox",
-				"Minefield":"org.mozilla.minefield"
+				"Aurora":"org.mozilla.aurora",
+				"Nightly":"org.mozilla.nightly"
 			};
 			
 			if(win) {
@@ -353,13 +354,7 @@ Zotero.Integration = new function() {
 					);
 				}, false);
 			} else {
-				if(Zotero.oscpu == "PPC Mac OS X 10.4" || Zotero.oscpu == "Intel Mac OS X 10.4"
-				   || !BUNDLE_IDS[Zotero.appName]) {
-					// 10.4 doesn't support "tell application id"
-					_executeAppleScript('tell application "'+Zotero.appName+'" to activate');
-				} else {
-					_executeAppleScript('tell application id "'+BUNDLE_IDS[Zotero.appName]+'" to activate');
-				}
+				_executeAppleScript('tell application id "'+BUNDLE_IDS[Zotero.appName]+'" to activate');
 			}
 		} else if(!Zotero.isWin && win) {
 			Components.utils.import("resource://gre/modules/ctypes.jsm");

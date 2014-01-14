@@ -147,7 +147,9 @@ Zotero.Proxies = new function() {
 		try {
 			webNav = channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIWebNavigation);
 			docShell = channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIDocShell);
-		} catch(e) {}
+		} catch(e) {
+			return;
+		}
 		
 		if(!docShell.allowMetaRedirects) return;
 		
