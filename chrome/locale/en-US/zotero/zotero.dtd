@@ -255,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label					"Cancel">
 <!ENTITY zotero.recognizePDF.pdfName.label				"PDF Name">
 <!ENTITY zotero.recognizePDF.itemName.label				"Item Name">
-<!ENTITY zotero.recognizePDF.captcha.label				"Type the text below to continue retrieving metadata.">
 
 <!ENTITY zotero.rtfScan.title		                    "RTF Scan">
 <!ENTITY zotero.rtfScan.cancel.label					"Cancel">
@@ -285,5 +284,3 @@
 <!ENTITY zotero.downloadManager.label			"Save to Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description	"Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
 <!ENTITY zotero.downloadManager.noPDFTools.description	"To use this feature, you must first install the PDF tools in the Search pane of the Zotero preferences.">
-
-<!ENTITY zotero.captcha.title			"Please enter CAPTCHA">

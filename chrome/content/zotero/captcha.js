@@ -28,6 +28,27 @@ var Zotero_Captcha = new function() {
 	
 	this.onLoad = function() {
 		this._io = window.arguments[0];
+		var description = document.getElementById('zotero-captcha-description'),
+			errorMsg = document.getElementById('zotero-captcha-error');
+		
+		if(this._io.dataIn.title) {
+			document.title = this._io.dataIn.title;
+		}
+		
+		if(this._io.dataIn.description) {
+			description.textContent = this._io.dataIn.description;
+			description.hidden = false;
+		} else {
+			description.hidden = true;
+		}
+		
+		if(this._io.dataIn.error) {
+			errorMsg.textContent = this._io.dataIn.error;
+			errorMsg.hidden = false;
+		} else {
+			errorMsg.hidden = true;
+		}
+		
 		document.getElementById('zotero-captcha-image').src = this._io.dataIn.imgUrl;
 		document.getElementById('zotero-captcha-input').focus();
 	}
