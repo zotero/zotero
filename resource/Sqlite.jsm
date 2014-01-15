@@ -16,7 +16,7 @@ Cu.import("resource://gre/modules/commonjs/sdk/core/promise.js");
 Cu.import("resource://gre/modules/osfile.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://services-common/log4moz.js");
+Cu.import("resource://zotero/log4moz.js");
 
 XPCOMUtils.defineLazyModuleGetter(this, "CommonUtils",
                                   "resource://services-common/utils.js");
