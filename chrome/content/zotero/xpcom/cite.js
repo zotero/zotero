@@ -559,13 +559,13 @@ Zotero.Cite.System.prototype = {
 						value = value.substr(1, value.length-2);
 					}
 					cslItem[variable] = value;
-					if (zoteroItem.multi.main[fieldName]) {
-						cslItem.multi.main[variable] = zoteroItem.multi.main[fieldName]
+					if (zoteroItem.multi.main[field]) {
+						cslItem.multi.main[variable] = zoteroItem.multi.main[field]
 					}
-					if (zoteroItem.multi._keys[fieldName]) {
+					if (zoteroItem.multi._keys[field]) {
 						cslItem.multi._keys[variable] = {};
-						for (var langTag in zoteroItem.multi._keys[fieldName]) {
-							cslItem.multi._keys[variable][langTag] = zoteroItem.multi._keys[fieldName][langTag];
+						for (var langTag in zoteroItem.multi._keys[field]) {
+							cslItem.multi._keys[variable][langTag] = zoteroItem.multi._keys[field][langTag];
 						}
 					}
 					break;
@@ -628,7 +628,18 @@ Zotero.Cite.System.prototype = {
 		
 		// get date variables
 		for(var variable in CSL_DATE_MAPPINGS) {
-			var date = zoteroItem.getField(CSL_DATE_MAPPINGS[variable], false, true);
+			var date;
+			for each(var zVar in CSL_DATE_MAPPINGS[variable]) {
+				var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(zoteroItem.itemTypeID, zVar);
+				if (!fieldID) {
+					var fieldID = Zotero.ItemFields.getID(zVar);
+				}
+				var fieldName = Zotero.ItemFields.getName(fieldID);
+				date = zoteroItem.getField(fieldName, false, true);
+				if (date) {
+					break;
+				}
+			}
 			if(date) {
 				if (Zotero.Prefs.get('hackUseCiteprocJsDateParser')) {
 					var raw = Zotero.Date.multipartToStr(date);
