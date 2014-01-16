@@ -4430,9 +4430,10 @@ Zotero.Sync.Server.Data = new function() {
 		
 		// Item creators
 		var i = 0;
+		var pos = 0;
 		var creators = Zotero.Utilities.xpath(itemNode, "creator");
 		for each(var creator in creators) {
-			var pos = parseInt(creator.getAttribute('index'));
+			pos = parseInt(creator.getAttribute('index'));
 			if (pos != i) {
 				throw ('No creator in position ' + i);
 			}
