@@ -62,10 +62,13 @@ Zotero.IPC = new function() {
 			 *    has been received if it is already initialized, SA sends an initComplete message 
 			 *    to Z4Fx.
 			 */
-			if(msg === "releaseLock" && !Zotero.isConnector) {
+			if(msg.substr(0, 11) === "releaseLock") {
 				// Standalone sends this to the Firefox extension to tell the Firefox extension to
 				// release its lock on the Zotero database
-				switchConnectorMode(true);
+				if(!Zotero.isConnector && (msg.length === 11 ||
+					                       msg.substr(12) === Zotero.getZoteroDatabase().persistentDescriptor)) {
+					switchConnectorMode(true);
+				}
 			} else if(msg === "lockReleased") {
 				// The Firefox extension sends this to Standalone to let Standalone know that it has
 				// released its lock
@@ -178,10 +181,17 @@ Zotero.IPC = new function() {
 					{"lpData":ctypes.voidptr_t}
 			]);
 			
-			const appNames = ["Firefox", "Zotero", "Nightly", "Aurora", "Minefield"];
+			// Aurora/Nightly are always named "Firefox" in
+			// application.ini
+			const appNames = ["Firefox", "Zotero"];
+			
+			// Different from Zotero.appName; this corresponds to the
+			// name in application.ini
+			const myAppName = Services.appinfo.name;
+
 			for each(var appName in appNames) {
 				// don't send messages to ourself
-				if(appName === Zotero.appName) continue;
+				if(appName === myAppName) continue;
 				
 				var thWnd = FindWindow(appName+"MessageWindow", null);
 				if(thWnd) {

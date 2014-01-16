@@ -133,6 +133,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 var instanceID = (new Date()).getTime();
 var isFirstLoadThisSession = true;
 var zContext = null;
+var zInitOptions = {};
 
 ZoteroContext = function() {}
 ZoteroContext.prototype = {
@@ -177,7 +178,7 @@ ZoteroContext.prototype = {
 			zContext.Zotero.shutdown().then(function() {
 				// create a new zContext
 				makeZoteroContext(isConnector);
-				zContext.Zotero.init();
+				zContext.Zotero.init(zInitOptions);
 			}).done();
 		}
 		
@@ -300,13 +301,17 @@ function ZoteroService() {
 		if(isFirstLoadThisSession) {
 			makeZoteroContext(false);
 			try {
-				zContext.Zotero.init();
+				zContext.Zotero.init(zInitOptions);
 			} catch(e) {
-				// if Zotero should start as a connector, reload it
-				zContext.Zotero.shutdown().then(function() {
-					makeZoteroContext(true);
-					zContext.Zotero.init();
-				}).done();
+				if(e === "ZOTERO_SHOULD_START_AS_CONNECTOR") {
+					// if Zotero should start as a connector, reload it
+					zContext.Zotero.shutdown().then(function() {
+						makeZoteroContext(true);
+						zContext.Zotero.init(zInitOptions);
+					}).done();
+				} else {
+					throw e;
+				}
 			}
 		}
 		isFirstLoadThisSession = false;	// no longer first load
@@ -349,6 +354,16 @@ function ZoteroCommandLineHandler() {}
 ZoteroCommandLineHandler.prototype = {
 	/* nsICommandLineHandler */
 	handle : function(cmdLine) {
+		// Force debug output
+		if (cmdLine.handleFlag("zoterodebug", false)) {
+			zInitOptions.forceDebugLog = true;
+		}
+		
+		// handler to open Zotero pane at startup in Zotero for Firefox
+		if (!isStandalone() && cmdLine.handleFlag("ZoteroPaneOpen", false)) {
+			zInitOptions.openPane = true;
+		}
+		
 		// handler for Zotero integration commands
 		// this is typically used on Windows only, via WM_COPYDATA rather than the command line
 		var agent = cmdLine.handleFlagWithParam("ZoteroIntegrationAgent", false);
@@ -423,13 +438,6 @@ ZoteroCommandLineHandler.prototype = {
 				}
 			}
 		}
-		// handler to open Zotero pane at startup in Zotero for Firefox
-		else {
-			var zPaneOpen = cmdLine.handleFlag("ZoteroPaneOpen", false);
-			if (zPaneOpen) {
-                this.Zotero.openPane = true;
-            }
-        }
 	},
 	
 	contractID: "@mozilla.org/commandlinehandler/general-startup;1?type=zotero",

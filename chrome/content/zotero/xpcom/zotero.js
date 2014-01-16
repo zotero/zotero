@@ -42,7 +42,7 @@ const ZOTERO_CONFIG = {
 	BOOKMARKLET_ORIGIN : 'https://www.zotero.org',
 	HTTP_BOOKMARKLET_ORIGIN : 'http://www.zotero.org',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "4.0.16.SOURCE"
+	VERSION: "4.0.17.SOURCE"
 };
 
 // Commonly used imports accessible anywhere
@@ -223,7 +223,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	/**
 	 * Initialize the extension
 	 */
-	function init() {
+	function init(options) {
 		var i, ilen, res, sql;
 		if (this.initialized || this.skipLoading) {
 			return false;
@@ -231,7 +231,11 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		// Load in the preferences branch for the extension
 		Zotero.Prefs.init();
-		Zotero.Debug.init();
+		Zotero.Debug.init(options && options.forceDebugLog);
+		
+		if (options) {
+			if (options.openPane) this.openPane = true;
+		}
 		
 		this.mainThread = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
 		
@@ -820,6 +824,11 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			Zotero.DB.test();
 			
 			var dbfile = Zotero.getZoteroDatabase();
+
+			// Tell any other Zotero instances to release their lock,
+			// in case we lost the lock on the database (how?) and it's
+			// now open in two places at once
+			Zotero.IPC.broadcast("releaseLock "+dbfile.persistentDescriptor);
 			
 			// Test write access on Zotero data directory
 			if (!dbfile.parent.isWritable()) {
@@ -947,8 +956,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				// Zotero.DBConnection.getStatement() explicitly
 				Components.utils.forceGC();
 				
-				// unlock DB
-				return Zotero.DB.closeDatabase().then(function() {				
+				// close DB
+				return Zotero.DB.closeDatabase(true).then(function() {				
 					// broadcast that DB lock has been released
 					Zotero.IPC.broadcast("lockReleased");
 				});
