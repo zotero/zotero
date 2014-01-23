@@ -1562,23 +1562,4 @@ Zotero.Fulltext = new function(){
 
 		return Object.keys(words);
 	}
-	
-	
-	/*
-	 * Add spaces between elements, since HTMLToText doesn't
-	 *
-	 * NOTE: SLOW AND NOT USED!
-	 */
-	function _separateElements(node){
-		var next = node;
-		do {
-			if (next.hasChildNodes()){
-				_separateElements(next.firstChild);
-			}
-			
-			var space = node.ownerDocument.createTextNode(' ');
-			next.parentNode.insertBefore(space, next);
-		}
-		while (next = next.nextSibling);
-	}
 }
