@@ -145,13 +145,15 @@ Zotero.Fulltext = new function(){
 		if (cc < 0x2E80) { //alphabetical script
 			if ((cc & 0xFF80) == 0) { // ascii
 				if (c == ' '  || c == "\t" || c == "\r" || c == "\n") { return kWbClassSpace; }
-
-				// deviation from Mozilla algorithm: count "'" as an alphaletter
-				if (c == "'" || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) { return kWbClassAlphaLetter; }
+				if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) { return kWbClassAlphaLetter; }
 				return kWbClassPunct;
 			}
 			if ((0xFF80 & cc) == 0x0E00) { return kWbClassThaiLetter; }
 			if (cc == 0x00A0/*NBSP*/) { return kWbClassSpace; }
+			
+			// General and Supplemental Unicode punctuation
+			if ((cc >= 0x2000 && cc <= 0x206f) || (cc >= 0x2e00 && cc <= 0x2e7f)) { return kWbClassPunct; }
+			
 			return kWbClassAlphaLetter;
 		}
 
@@ -1528,7 +1530,7 @@ Zotero.Fulltext = new function(){
 			Zotero.debug('No text to index');
 			return;
 		}
-
+		
 		try {
 			if (charset && charset != 'utf-8') {
 				text = this.decoder.convertStringToUTF8(text, charset, true);
@@ -1542,24 +1544,62 @@ Zotero.Fulltext = new function(){
 		var cclass = null;
 		var strlen = text.length;
 		for (var i = 0; i < strlen; i++) {
-			var c = text.charAt(i);
-			var cc = getClass(c, text.charCodeAt(i));
+			var charCode = text.charCodeAt(i);
+			var cc = null;
 			
+			// Adjustments
+			if (charCode == 8216 || charCode == 8217) {
+				// Curly quotes to straight
+				var c = "'";
+			}
+			else {
+				var c = text.charAt(i);
+			}
+			
+			// Consider single quote in the middle of a word a letter
+			if (c == "'" && word !== '') {
+				cc = kWbClassAlphaLetter;
+			}
+			
+			if (!cc) {
+				cc = getClass(c, charCode);
+			}
+			
+			// When we reach space or punctuation, store the previous word if there is one
 			if (cc == kWbClassSpace || cc == kWbClassPunct) {
-				if (word != '') { words[word] = true; word = ''; }
+				if (word != '') {
+					words[word] = true;
+					word = '';
+				}
+			// When we reach Han character, store previous word and add Han character
 			} else if (cc == kWbClassHanLetter) {
-				if (word != '') { words[word] = true; word = ''; }
+				if (word !== '') {
+					words[word] = true;
+					word = '';
+				}
 				words[c] = true;
+			// Otherwise, if character class hasn't changed, keep adding characters to previous word
 			} else if (cc == cclass) {
 				word += c.toLowerCase();
+			// If character class is different, store previous word and start new word
 			} else {
-				if (word != '') { words[word] = true; }
+				if (word !== '') {
+					words[word] = true;
+				}
 				word = c.toLowerCase();
 			}
 			cclass = cc;
 		}
-		if (word != '') { words[word] = true; }
-
-		return Object.keys(words);
+		if (word !== '') {
+			words[word] = true;
+		}
+		
+		return Object.keys(words).map(function (w) {
+			// Trim trailing single quotes
+			if (w.slice(-1) == "'") {
+				w = w.substr(0, w.length - 1);
+			}
+			return w;
+		});
 	}
 }
