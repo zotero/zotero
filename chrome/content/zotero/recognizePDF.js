@@ -285,9 +285,11 @@ var Zotero_RecognizePDF = new function() {
 		"_onWindowLoaded": function() {
 			// populate progress window
 			var treechildren = this._progressWindow.document.getElementById("treechildren");
+			this._rowIDs = [];
 			for(var i in this._items) {
 				var treeitem = this._progressWindow.document.createElement('treeitem');
 				var treerow = this._progressWindow.document.createElement('treerow');
+				this._rowIDs.push(this._items[i].id);
 				
 				var treecell = this._progressWindow.document.createElement('treecell');
 				treecell.setAttribute("id", "item-"+this._items[i].id+"-icon");
@@ -306,6 +308,10 @@ var Zotero_RecognizePDF = new function() {
 			}
 			
 			var me = this;
+			// Tree double-click handler
+			this._progressWindow.document.getElementById("tree").addEventListener(
+				"dblclick", function(event) { me._onDblClick(event, this); });
+			
 			this._cancelHandler = function() { me.stop() };
 			this._keypressCancelHandler = function(e) {
 				if(e.keyCode === KeyEvent.DOM_VK_ESCAPE) me.stop();
@@ -347,7 +353,8 @@ var Zotero_RecognizePDF = new function() {
 			
 			var item = this._items.shift(),
 				itemIcon = this._progressWindow.document.getElementById("item-"+item.id+"-icon"),
-				itemTitle = this._progressWindow.document.getElementById("item-"+item.id+"-title");
+				itemTitle = this._progressWindow.document.getElementById("item-"+item.id+"-title"),
+				rowNumber = this._rowIDs.indexOf(item.id);
 			itemIcon.setAttribute("src", LOADING_IMAGE);
 			itemTitle.setAttribute("label", "");
 			
@@ -376,6 +383,7 @@ var Zotero_RecognizePDF = new function() {
 				
 				itemTitle.setAttribute("label", newItem.getField("title"));
 				itemIcon.setAttribute("src", SUCCESS_IMAGE);
+				me._rowIDs[rowNumber] = newItem.id;
 				
 				me._recognizeItem();
 			})
@@ -441,6 +449,22 @@ var Zotero_RecognizePDF = new function() {
 				win.addEventListener("focus", focusListener, false);
 			};
 			win.addEventListener("blur", blurListener, false);
+		},
+		
+		"_onDblClick": function(event, tree) {
+			if (event && tree && event.type == "dblclick") {
+				var itemID = this._rowIDs[tree.treeBoxObject.getRowAt(event.clientX, event.clientY)];
+				if(!itemID) return;
+				
+				var lastWin = (window.ZoteroTab ? window.ZoteroTab.containerWindow : window);
+				
+				if (lastWin.ZoteroOverlay) {
+					lastWin.ZoteroOverlay.toggleDisplay(true);
+				}
+				
+				lastWin.ZoteroPane.selectItem(itemID, false, true);
+				lastWin.focus();
+			}
 		}
 	};
 	
