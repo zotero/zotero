@@ -14,7 +14,9 @@
 		<tree flex="1" id="tree" hidecolumnpicker="true">
 			<treecols>
 				<treecol id="success-col" style="width:20px;"/>
+				<splitter class="tree-splitter" hidden="true"/>
 				<treecol label="&zotero.recognizePDF.pdfName.label;" id="pdf-col" flex="1"/>
+				<splitter class="tree-splitter"/>
 				<treecol label="&zotero.recognizePDF.itemName.label;" id="item-col" flex="2"/>
 			</treecols>
 			<treechildren id="treechildren"/>
