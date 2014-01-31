@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Fravælg alle">
 <!ENTITY zotero.general.edit "Rediger">
 <!ENTITY zotero.general.delete "Slet">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero fejlrapport">
 <!ENTITY zotero.errorReport.unrelatedMessages "Logfilen for fejl kan indeholde meddelelser der ikke har med Zotero at gøre.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Fortryd">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF-filens navn">
 <!ENTITY zotero.recognizePDF.itemName.label "Elementets navn">
-<!ENTITY zotero.recognizePDF.captcha.label "Indtast teksten nedenfor for at fortsætte med indlæsning af metadata.">
 
 <!ENTITY zotero.rtfScan.title "RTF-scanning">
 <!ENTITY zotero.rtfScan.cancel.label "Fortryd">

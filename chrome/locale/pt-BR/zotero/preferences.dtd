@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Preferências Zotero">
+<!ENTITY zotero.preferences.title "Preferências do Zotero">
 
 <!ENTITY zotero.preferences.default "Padrão:">
 <!ENTITY zotero.preferences.items "itens">
@@ -55,8 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Criar conta">
 <!ENTITY zotero.preferences.sync.lostPassword "Esqueceu a senha?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizar automaticamente">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sincronizar todo o conteúdo do texto">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "O Zotero pode sincronizar todo o conteúdo dos textos dos arquivos em sua biblioteca Zotero com zotero.org e outros dispositivos relacionados, permitindo que você procure facilmente seus arquivos onde quer que esteja. O conteúdo completo dos textos de seus arquivos não será compartilhado publicamente.">
 <!ENTITY zotero.preferences.sync.about "Sobre a sincronização">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sincronização de arquivo">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Endereço:">

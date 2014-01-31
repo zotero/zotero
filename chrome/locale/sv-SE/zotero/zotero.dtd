@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Välj bort alla">
 <!ENTITY zotero.general.edit "Ändra">
 <!ENTITY zotero.general.delete "Radera">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero-felrapporting">
 <!ENTITY zotero.errorReport.unrelatedMessages "Felloggen kan innehålla meddelanden som inte har med Zotero att göra.">
@@ -65,7 +67,7 @@
 <!ENTITY zotero.items.volume_column "Volym">
 <!ENTITY zotero.items.edition_column "Upplaga">
 <!ENTITY zotero.items.pages_column "Sidor">
-<!ENTITY zotero.items.issue_column "Nummer">
+<!ENTITY zotero.items.issue_column "Tidskriftsnummer">
 <!ENTITY zotero.items.series_column "Bokserie">
 <!ENTITY zotero.items.seriesTitle_column "Bokseriens titel">
 <!ENTITY zotero.items.court_column "Domstol">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Ångra">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF-namn">
 <!ENTITY zotero.recognizePDF.itemName.label "Källnamn">
-<!ENTITY zotero.recognizePDF.captcha.label "Skriv texten nedan för att fortsätta läsa in metadata.">
 
 <!ENTITY zotero.rtfScan.title "RTF-scanning">
 <!ENTITY zotero.rtfScan.cancel.label "Ångra">

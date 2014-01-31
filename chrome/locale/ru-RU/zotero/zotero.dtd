@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Отмена выделения">
 <!ENTITY zotero.general.edit "Редактировать">
 <!ENTITY zotero.general.delete "Удалить">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Отчет об ошибке Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Журнал ошибок может содержать сообщения не относящиеся к Zotero.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Отмена">
 <!ENTITY zotero.recognizePDF.pdfName.label "Имя PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Имя документа">
-<!ENTITY zotero.recognizePDF.captcha.label "Введите текст ниже для продолжения извлечения метаданных.">
 
 <!ENTITY zotero.rtfScan.title "Сканирование RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Отмена">

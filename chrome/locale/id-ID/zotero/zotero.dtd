@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Hilangkan Semua Pilihan">
 <!ENTITY zotero.general.edit "Edit">
 <!ENTITY zotero.general.delete "Hapus">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Log kesalahan mungkin mengandung pesan yang tidak terkait dengan Zotero.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Batalkan">
 <!ENTITY zotero.recognizePDF.pdfName.label "Nama PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Nama Item">
-<!ENTITY zotero.recognizePDF.captcha.label "Tuliskan teks di bawah ini untuk meneruskan menerima metadata.">
 
 <!ENTITY zotero.rtfScan.title "RTF Scan">
 <!ENTITY zotero.rtfScan.cancel.label "Batalkan">

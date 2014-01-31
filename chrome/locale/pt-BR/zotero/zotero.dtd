@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Desmarcar tudo">
 <!ENTITY zotero.general.edit "Editar">
 <!ENTITY zotero.general.delete "Excluir">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Relatório de erros do Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "O registro de erro pode conter mensagens não relacionadas a Zotero.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Cancelar">
 <!ENTITY zotero.recognizePDF.pdfName.label "Nome do PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Nome do documento">
-<!ENTITY zotero.recognizePDF.captcha.label "Digite o texto abaixo para continuar a recuperação dos metadados.">
 
 <!ENTITY zotero.rtfScan.title "Análise do arquivo RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Cancelar">

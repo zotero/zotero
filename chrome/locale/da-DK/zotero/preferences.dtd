@@ -22,12 +22,12 @@
 <!ENTITY zotero.preferences.fontSize.notes "Skriftstørrelse i noter:">
 
 <!ENTITY zotero.preferences.miscellaneous "Forskelligt">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
+<!ENTITY zotero.preferences.autoUpdate "Kontroller automatisk for oversættelser og typografier">
 <!ENTITY zotero.preferences.updateNow "Opdater nu">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapporter om &quot;oversættere&quot; uden forbindelse">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillad Zoter.org at tilpasse indhold baseret på den aktuelle Zotero-version">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Hvis den er slået til, vil den aktuelle Zotero-version blive medtaget ved  HTTP-forespørgsler til zotero.org.">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "Brug Zotero til at hente BibTeX/RIS/Refer -filer">
 <!ENTITY zotero.preferences.automaticSnapshots "Tag automatisk et &quot;Snapshot&quot; når der oprettes Elementer for web-sider">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Vedhæft automatisk tilhørende PDF-filer og andre filer når Elementer gemmes">
 <!ENTITY zotero.preferences.automaticTags "Mærk automatisk Elementer med stikord og emne-grupper">
@@ -55,8 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Opret konto">
 <!ENTITY zotero.preferences.sync.lostPassword "Mistet adgangskode?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkroniser automatisk">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Synkroniser full-text indhold">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero kan synkronisere full-text indholdet af filer i dit Zoterobibliotek med zotero.org og andre tilknyttede enheder, hvilket tillader dig enkel søgning i dine foler uanset hvor du er. Full-text indholdet af dine filer vil ikke blive delt offentligt.">
 <!ENTITY zotero.preferences.sync.about "Om synkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing "Fil-synkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -128,12 +128,12 @@
 <!ENTITY zotero.preferences.prefpane.keys "Genvejs-taster">
 
 <!ENTITY zotero.preferences.keys.openZotero "Åbn/Luk Zotero-vinduet">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Gem til Zotero (ikon i adresselinjen)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Slå fuldskærmsvisning til/fra">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Panel med fokusbiblioteker">
 <!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøgning">
-<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
-<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.newItem "Opret nyt element">
+<!ENTITY zotero.preferences.keys.newNote "Opret en ny note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Slå Tag selector til/fra">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier valgte henvisninger til udklipsholder">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopier valgte Elementer til udklipsholder">

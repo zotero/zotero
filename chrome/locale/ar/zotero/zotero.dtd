@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "إلغاء تحديد الكل">
 <!ENTITY zotero.general.edit "تحرير">
 <!ENTITY zotero.general.delete "حذف">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "قد يتضمن سجل الاخطاء على رسائل ليس لها علاقة بزوتيرو.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "إلغاء">
 <!ENTITY zotero.recognizePDF.pdfName.label "اسم ملف PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "اسم العنصر">
-<!ENTITY zotero.recognizePDF.captcha.label "اكتب النص التالي لمواصلة استرجاع البيانات الوصفية.">
 
 <!ENTITY zotero.rtfScan.title "فحص ملف RTF">
 <!ENTITY zotero.rtfScan.cancel.label "إلغاء">

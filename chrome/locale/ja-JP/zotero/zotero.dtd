@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "選択をすべて解除">
 <!ENTITY zotero.general.edit "編集">
 <!ENTITY zotero.general.delete "削除">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero エラーレポート">
 <!ENTITY zotero.errorReport.unrelatedMessages "エラー・ログは Zotero とは無関係のメッセージを含んでいる可能性があります。">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "取り消し">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF 名">
 <!ENTITY zotero.recognizePDF.itemName.label "アイテム名">
-<!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
 
 <!ENTITY zotero.rtfScan.title "RTF スキャン">
 <!ENTITY zotero.rtfScan.cancel.label "取り消す">
