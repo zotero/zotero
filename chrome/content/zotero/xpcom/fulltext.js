@@ -1524,10 +1524,15 @@ Zotero.Fulltext = new function(){
 	}
 	
 	
+	/**
+	 * @param {String} text
+	 * @param {String} [charset]
+	 * @return {Array<String>}
+	 */
 	this.semanticSplitter = function (text, charset) {
 		if (!text){
 			Zotero.debug('No text to index');
-			return;
+			return [];
 		}
 		
 		try {
