@@ -1527,7 +1527,7 @@ Zotero.Item.prototype.save = function(options) {
 				var parent = this.getSource();
 				var linkMode = this.attachmentLinkMode;
 				var mimeType = this.attachmentMIMEType;
-				var charsetID = this.attachmentCharset;
+				var charsetID = Zotero.CharacterSets.getID(this.attachmentCharset);
 				var path = this.attachmentPath;
 				var syncState = this.attachmentSyncState;
 				
@@ -1944,7 +1944,7 @@ Zotero.Item.prototype.save = function(options) {
 				let parent = this.getSource();
 				var linkMode = this.attachmentLinkMode;
 				var mimeType = this.attachmentMIMEType;
-				var charsetID = this.attachmentCharset;
+				var charsetID = Zotero.CharacterSets.getID(this.attachmentCharset);
 				var path = this.attachmentPath;
 				var syncState = this.attachmentSyncState;
 				
@@ -3242,7 +3242,7 @@ Zotero.Item.prototype.__defineGetter__('attachmentCharset', function () {
 	}
 	
 	if (this._attachmentCharset != undefined) {
-		return this._attachmentCharset;
+		return Zotero.CharacterSets.getName(this._attachmentCharset);
 	}
 	
 	if (!this.id) {
@@ -3255,7 +3255,7 @@ Zotero.Item.prototype.__defineGetter__('attachmentCharset', function () {
 		charset = null;
 	}
 	this._attachmentCharset = charset;
-	return charset;
+	return Zotero.CharacterSets.getName(charset);
 });
 
 
@@ -4850,8 +4850,7 @@ Zotero.Item.prototype.serialize = function(mode) {
 			arr.attachment = {};
 			arr.attachment.linkMode = this.attachmentLinkMode;
 			arr.attachment.mimeType = this.attachmentMIMEType;
-			var charsetID = this.attachmentCharset;
-			arr.attachment.charset = Zotero.CharacterSets.getName(charsetID);
+			arr.attachment.charset = this.attachmentCharset;
 			arr.attachment.path = this.attachmentPath;
 		}
 		
