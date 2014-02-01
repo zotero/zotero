@@ -54,7 +54,6 @@ Zotero.Fulltext = new function(){
 	this.clearCacheFiles = clearCacheFiles;
 	//this.clearItemContent = clearItemContent;
 	this.purgeUnusedWords = purgeUnusedWords;
-	this.semanticSplitter = semanticSplitter;
 	
 	this.__defineGetter__("pdfToolsDownloadBaseURL", function() { return 'http://www.zotero.org/download/xpdf/'; });
 	this.__defineGetter__("pdfToolsName", function() { return 'Xpdf'; });
@@ -279,7 +278,7 @@ Zotero.Fulltext = new function(){
 		try {
 			Zotero.UnresponsiveScriptIndicator.disable();
 			
-			var words = semanticSplitter(text, charset);
+			var words = this.semanticSplitter(text, charset);
 			
 			Zotero.DB.beginTransaction();
 			
@@ -1525,7 +1524,7 @@ Zotero.Fulltext = new function(){
 	}
 	
 	
-	function semanticSplitter(text, charset){
+	this.semanticSplitter = function (text, charset) {
 		if (!text){
 			Zotero.debug('No text to index');
 			return;
@@ -1536,6 +1535,7 @@ Zotero.Fulltext = new function(){
 				text = this.decoder.convertStringToUTF8(text, charset, true);
 			}
 		} catch (err) {
+			Zotero.debug("Error converting from charset " + charset, 1);
 			Zotero.debug(err, 1);
 		}
 		
