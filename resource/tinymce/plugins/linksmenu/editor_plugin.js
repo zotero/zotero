@@ -117,25 +117,23 @@
 
             t._menu = m;
 
-            if ((el.nodeName == 'A' && !ed.dom.getAttrib(el, 'name')) || !col) {
-                m.add({
-                    title : 'Open Link',
-                    icon : 'link',
-                    cmd : 'openlink',
-                    ui : true
-                });
-                m.add({
-                    title : 'advanced.link_desc',
-                    icon : 'link',
-                    cmd : ed.plugins.advlink ? 'mceAdvLink' : 'mceLink',
-                    ui : true
-                });
-                m.add({
-                    title : 'advanced.unlink_desc',
-                    icon : 'unlink',
-                    cmd : 'UnLink'
-                });
-            }
+            m.add({
+                title : 'Open Link',
+                icon : 'link',
+                cmd : 'openlink',
+                ui : true
+            });
+            m.add({
+                title : 'advanced.link_desc',
+                icon : 'link',
+                cmd : ed.plugins.advlink ? 'mceAdvLink' : 'mceLink',
+                ui : true
+            });
+            m.add({
+                title : 'advanced.unlink_desc',
+                icon : 'unlink',
+                cmd : 'UnLink'
+            });
 
             t.onClick.dispatch(t, m, el, col);
 
