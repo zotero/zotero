@@ -15116,6 +15116,14 @@ tinymce.create('tinymce.ui.Toolbar:tinymce.ui.Container', {
 				selection.collapse(FALSE);
 			},
 
+			// open link command
+			openlink : function(command) {
+			    var node = tinyMCE.activeEditor.selection.getNode();
+			    if (node.nodeName == 'A') {
+			        zoteroHandleEvent({ type: 'openlink', target: node });
+			    }
+			},
+
 			// Override justify commands to use the text formatter engine
 			'JustifyLeft,JustifyCenter,JustifyRight,JustifyFull' : function(command) {
 				var align = command.substring(7);
