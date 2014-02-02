@@ -126,7 +126,7 @@
                 ui : true
             });
             m.add({
-                title : 'advanced.link_desc',
+                title : 'Edit Link',
                 icon : 'link',
                 cmd : ed.plugins.advlink ? 'mceAdvLink' : 'mceLink',
                 ui : true
