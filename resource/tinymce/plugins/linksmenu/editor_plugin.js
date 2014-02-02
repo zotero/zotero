@@ -1,18 +1,9 @@
-/**
- * editor_plugin_src.js
- *
- * Copyright 2009, Moxiecode Systems AB
- * Released under LGPL License.
- *
- * License: http://tinymce.moxiecode.com/license
- * Contributing: http://tinymce.moxiecode.com/contributing
- */
-
 (function() {
     var Event = tinymce.dom.Event, each = tinymce.each, DOM = tinymce.DOM;
 
     /**
-     * This plugin a context menu to TinyMCE editor instances.
+     * This plugin adds a left-click context menu to links in the TinyMCE editor for Zotero.
+     * Code adopted and modified from TinyMCE contextmenu plugin.
      *
      * @class tinymce.plugins.LinksMenu
      */
@@ -100,9 +91,9 @@
         getInfo : function() {
             return {
                 longname : 'Linkmenu',
-                author : 'Moxiecode Systems AB',
-                authorurl : 'http://tinymce.moxiecode.com',
-                infourl : 'http://wiki.moxiecode.com/index.php/TinyMCE:Plugins/linksmenu',
+                author : '',
+                authorurl : '',
+                infourl : '',
                 version : tinymce.majorVersion + "." + tinymce.minorVersion
             };
         },
