@@ -100,7 +100,7 @@
          */
         getInfo : function() {
             return {
-                longname : 'Linkmenu',
+                longname : 'Linksmenu',
                 author : '',
                 authorurl : '',
                 infourl : '',
