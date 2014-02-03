@@ -24,6 +24,14 @@
 
             contextmenuNeverUseNative = ed.settings.contextmenu_never_use_native;
 
+            // add editor command to open links through zoteroHandleEvent
+            ed.addCommand('openlink', function(command) {
+                var node = tinyMCE.activeEditor.selection.getNode();
+                if (node.nodeName == 'A') {
+                    zoteroHandleEvent({ type: 'openlink', target: node });
+                }
+            });
+
             /**
              * This event gets fired when the context menu is shown.
              *
