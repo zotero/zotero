@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Opcions del traductor">
 <!ENTITY zotero.file.choose.label "Trieu un fitxer...">
 <!ENTITY zotero.file.noneSelected.label "No heu seleccionat cap fitxer">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "Suprimeix">
 <!ENTITY zotero.general.deselectAll "Desselecciona tot">
 <!ENTITY zotero.general.edit "Edita">
 <!ENTITY zotero.general.note "Nota:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(Opcional)">
 <!ENTITY zotero.general.selectAll "Selecciona tot">
 <!ENTITY zotero.integration.addEditCitation.title "Afegeix / Edita la cita">

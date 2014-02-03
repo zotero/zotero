@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Translator Options">
 <!ENTITY zotero.file.choose.label "Fitxategia aukeratu...">
 <!ENTITY zotero.file.noneSelected.label "Ez dago hautatutako fitxategirik">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "Ezabatu">
 <!ENTITY zotero.general.deselectAll "Desautatu guztiak">
 <!ENTITY zotero.general.edit "Editatu">
 <!ENTITY zotero.general.note "Oharra:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(aukerakoa)">
 <!ENTITY zotero.general.selectAll "Hautatu guztiak">
 <!ENTITY zotero.integration.addEditCitation.title "Erreferentzia gehitu/editatu">

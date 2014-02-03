@@ -8,7 +8,7 @@
 <!ENTITY zotero.preferences.automaticSnapshots "ウェブページからアイテムを作成するときに自動的にスナップショットを作成する">
 <!ENTITY zotero.preferences.automaticTags "キーワードと件名標目を含むアイテムに自動的にタグを付ける">
 <!ENTITY zotero.preferences.charset "文字コード">
-<!ENTITY zotero.preferences.charset.displayExportOption "文字コードのオプションをエクスポートの際に表示する">
+<!ENTITY zotero.preferences.charset.displayExportOption "文字コードの選択肢をエクスポートの際に表示する">
 <!ENTITY zotero.preferences.charset.importCharset "文字コードをインポート">
 <!ENTITY zotero.preferences.citationOptions.caption "出典表記オプション">
 <!ENTITY zotero.preferences.cite.styles "引用スタイル">
@@ -154,7 +154,7 @@
 <!ENTITY zotero.preferences.quickCopy.caption "クィックコピー">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTMLとしてコピー">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "標準出力形式:">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "アイテム数が右の値より大きい時はドラッグ時のクイックコピーを無効化する">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "アイテム数が右の値より大きい時はドラッグ時のクイックコピーを無効化する:">
 <!ENTITY zotero.preferences.quickCopy.linkCitationFormReverse "Use citation form as default">
 <!ENTITY zotero.preferences.quickCopy.linkOption "Include Zotero link wrappers in QuickCopy citations">
 <!ENTITY zotero.preferences.quickCopy.macWarning "注意: Mac OS X 上ではリッチテキスト形式の書式設定は失われます。">
@@ -173,9 +173,9 @@
 <!ENTITY zotero.preferences.settings "設定">
 <!ENTITY zotero.preferences.showIn "Zoteroを表示するのは:">
 <!ENTITY zotero.preferences.showIn.appTab "アプリタブ">
-<!ENTITY zotero.preferences.showIn.browserPane "ブラウザ画面枠内">
+<!ENTITY zotero.preferences.showIn.browserPane "ブラウザ画面下">
 <!ENTITY zotero.preferences.showIn.separateTab "新しいタブ">
-<!ENTITY zotero.preferences.statusBarIcon "ステータスバーのアイコン:">
+<!ENTITY zotero.preferences.statusBarIcon "ステイタスバーのアイコン:">
 <!ENTITY zotero.preferences.statusBarIcon.none "なし">
 <!ENTITY zotero.preferences.sync.about "同期（シンク）について">
 <!ENTITY zotero.preferences.sync.createAccount "アカウントを作成">
@@ -186,7 +186,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "ファイルをダウンロードする">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Zotero ストレジを利用してグループ・ライブラリの添付ファイルを同期する">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "マイ・ライブラリにある添付ファイルを同期するとき右のプログラムを使う:">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero ストレジを使用することにより、次の使用許諾条件に同意することになります。">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero ストレジをお使いになると、次の使用許諾条件に同意したことになります。">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "使用許諾条件">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.lostPassword "パスワードを忘れましたか？">
@@ -203,7 +203,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "サーバのデータを全て消去して、ローカル（手元）の Zotero データで上書きする。">
 <!ENTITY zotero.preferences.sync.reset.warning1 "次の操作は、稀に起こる特別な状況のためだけのもので、一般的な問題解決に用いられるべきではありません。多くの場合、リセットすることで更なる問題を引き起こします。以下をご参照ください。">
 <!ENTITY zotero.preferences.sync.reset.warning2 "同期リセットの設定">
-<!ENTITY zotero.preferences.sync.reset.warning3 "より詳しい情報はこちら。">
+<!ENTITY zotero.preferences.sync.reset.warning3 "により詳しい情報がございます。">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自動的に同期">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "全文を同期する">
 <!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero はあなたの Zotero ライブラリに含まれるファイルの全文をを zotero.org や他のリンクした機器と同期させることができます。これにより、どこでも簡単にあなたのファイルを探すことができるようになります。あなたのファイルの全文が公開されることはありません。">

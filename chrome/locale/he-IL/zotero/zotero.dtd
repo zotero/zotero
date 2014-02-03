@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "אפשרויות תרגום">
 <!ENTITY zotero.file.choose.label "Choose File...">
 <!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "מחק">
 <!ENTITY zotero.general.deselectAll "Deselect All">
 <!ENTITY zotero.general.edit "ערוך">
 <!ENTITY zotero.general.note "פתק:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(Optional)">
 <!ENTITY zotero.general.selectAll "בחר הכל">
 <!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">

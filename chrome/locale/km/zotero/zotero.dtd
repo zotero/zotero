@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "ជម្រើសកូដចម្លង">
 <!ENTITY zotero.file.choose.label "ជម្រើសឯកសារ...">
 <!ENTITY zotero.file.noneSelected.label "សូមធ្វើការជ្រើសរើសឯកសារណាមួយដែលអ្នកចង់បាន">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "លុបចោល">
 <!ENTITY zotero.general.deselectAll "ដោះជម្រើស">
 <!ENTITY zotero.general.edit "កែតម្រូវ">
 <!ENTITY zotero.general.note "កំណត់ចំណាំ:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(ជម្រើស)">
 <!ENTITY zotero.general.selectAll "ជ្រើសរើសទាំងអស់">
 <!ENTITY zotero.integration.addEditCitation.title "បន្ថែម ឬ កែតម្រូវអាគតដ្ឋាន">

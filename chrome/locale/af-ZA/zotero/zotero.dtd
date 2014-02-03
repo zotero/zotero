@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Vertalerskeuses">
 <!ENTITY zotero.file.choose.label "Choose File...">
 <!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "Skrap">
 <!ENTITY zotero.general.deselectAll "Ontkies alles">
 <!ENTITY zotero.general.edit "Redigeer">
 <!ENTITY zotero.general.note "Nota:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(Opsioneel)">
 <!ENTITY zotero.general.selectAll "Kies alles">
 <!ENTITY zotero.integration.addEditCitation.title "Voeg by/redigeer aanhaling">

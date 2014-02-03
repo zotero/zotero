@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Опције преводиоца">
 <!ENTITY zotero.file.choose.label "Choose File...">
 <!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "Обриши">
 <!ENTITY zotero.general.deselectAll "Поништи изабрано">
 <!ENTITY zotero.general.edit "Уреди">
 <!ENTITY zotero.general.note "Белешка:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(произвољно)">
 <!ENTITY zotero.general.selectAll "Изабери све">
 <!ENTITY zotero.integration.addEditCitation.title "Додај/уреди цитације">

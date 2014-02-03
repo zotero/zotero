@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Opzioni motore di ricerca">
 <!ENTITY zotero.file.choose.label "Choose File...">
 <!ENTITY zotero.file.noneSelected.label "Nessun file selezionato">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "Elimina">
 <!ENTITY zotero.general.deselectAll "Deseleziona tutti">
 <!ENTITY zotero.general.edit "Modifica">
 <!ENTITY zotero.general.note "Nota:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(Facoltativo)">
 <!ENTITY zotero.general.selectAll "Seleziona tutti">
 <!ENTITY zotero.integration.addEditCitation.title "Aggiungi o modifica citazione">

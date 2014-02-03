@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero vil benytte relative stier for tilknyttede vedhæftede filer i databasefolderen, hvilket giver dig mulighed for at tilgå filerne med forskellige computere så længe filstrukturen i databasefolderen forbliver den samme">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Gendan til absolutte stier...">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Vælg...">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
+<!ENTITY zotero.preferences.autoUpdate "Kontroller automatisk for oversættelser og typografier">
 <!ENTITY zotero.preferences.automaticSnapshots "Tag automatisk et &quot;Snapshot&quot; når der oprettes Elementer for web-sider">
 <!ENTITY zotero.preferences.automaticTags "Mærk automatisk Elementer med stikord og emne-grupper">
 <!ENTITY zotero.preferences.charset "Tegnsæt">
@@ -65,12 +65,12 @@
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Panel med fokusbiblioteker">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importer fra udklipsholder">
 <!ENTITY zotero.preferences.keys.library "Library">
-<!ENTITY zotero.preferences.keys.newItem "Opret nyt Element">
-<!ENTITY zotero.preferences.keys.newNote "Opret ny Note">
+<!ENTITY zotero.preferences.keys.newItem "Opret nyt element">
+<!ENTITY zotero.preferences.keys.newNote "Opret en ny note">
 <!ENTITY zotero.preferences.keys.openZotero "Åbn/Luk Zotero-vinduet">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Forsøg at løse overlappende genveje">
 <!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøgning">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Gem til Zotero (ikon i adresselinjen)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Slå fuldskærmsvisning til/fra">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Slå Tag selector til/fra">
 <!ENTITY zotero.preferences.lang.addLanguage "Add a language">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.preferences.openurl.search "Søg efter &quot;resolvers&quot;">
 <!ENTITY zotero.preferences.openurl.server "&quot;Resolver&quot;:">
 <!ENTITY zotero.preferences.openurl.version "Version:">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "Brug Zotero til at hente BibTeX/RIS/Refer -filer">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.prefpane.advanced "Avanceret">
 <!ENTITY zotero.preferences.prefpane.cite "Henvis">
@@ -205,8 +205,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning2 "Synkroniser nulstillingsindstillinger">
 <!ENTITY zotero.preferences.sync.reset.warning3 "for mere information">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkroniser automatisk">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Synkroniser full-text indhold">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero kan synkronisere full-text indholdet af filer i dit Zoterobibliotek med zotero.org og andre tilknyttede enheder, hvilket tillader dig enkel søgning i dine foler uanset hvor du er. Full-text indholdet af dine filer vil ikke blive delt offentligt.">
 <!ENTITY zotero.preferences.sync.syncServer "Zoteros synkroniseringsserver">
 <!ENTITY zotero.preferences.sync.username "Brugernavn:">
 <!ENTITY zotero.preferences.title "Indstillinger for Zotero">

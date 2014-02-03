@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "خيارات المترجم">
 <!ENTITY zotero.file.choose.label "اختر الملف...">
 <!ENTITY zotero.file.noneSelected.label "لم يتم تحديد ملف">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "حذف">
 <!ENTITY zotero.general.deselectAll "إلغاء تحديد الكل">
 <!ENTITY zotero.general.edit "تحرير">
 <!ENTITY zotero.general.note "ملاحظة:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(اختياري)">
 <!ENTITY zotero.general.selectAll "تحديد الكل">
 <!ENTITY zotero.integration.addEditCitation.title "اضافة/تحرير استشهاد مرجعي">

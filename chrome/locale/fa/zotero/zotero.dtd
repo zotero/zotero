@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "گزینه‌های مترجم">
 <!ENTITY zotero.file.choose.label "انتخاب پرونده...">
 <!ENTITY zotero.file.noneSelected.label "هیچ پرونده‌ای انتخاب نشده است">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "حذف">
 <!ENTITY zotero.general.deselectAll "انتخاب هیچ‌کدام">
 <!ENTITY zotero.general.edit "ویرایش">
 <!ENTITY zotero.general.note "یادداشت:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(اختیاری)">
 <!ENTITY zotero.general.selectAll "انتخاب همه">
 <!ENTITY zotero.integration.addEditCitation.title "افزودن/ویرایش یادکرد">

@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Omsetjarval">
 <!ENTITY zotero.file.choose.label "Velg fil …">
 <!ENTITY zotero.file.noneSelected.label "Inga fil vald">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "Slett">
 <!ENTITY zotero.general.deselectAll "Fjern merking">
 <!ENTITY zotero.general.edit "Endre">
 <!ENTITY zotero.general.note "Notat:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(Valfri)">
 <!ENTITY zotero.general.selectAll "Merk alt">
 <!ENTITY zotero.integration.addEditCitation.title "Legg til/endra henvisning">

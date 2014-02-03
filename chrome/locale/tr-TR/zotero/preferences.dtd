@@ -18,7 +18,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Başlık">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Güncelleştirilme">
 <!ENTITY zotero.preferences.cite.wordProcessors "Sözcük İşlemcileri">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Sözlük İşlemcisi Eklentilerini Al...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Sözcük İşlemcisi Eklentilerini Al...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Hiçbir sözcük işlemcisi eklentisi kurulu değildir.">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Klasik Gönderme Ekleme İletişim Kutusunu kullan">
@@ -28,7 +28,7 @@
 <!ENTITY zotero.preferences.dataDir.reveal "Veri Dizinini Göster">
 <!ENTITY zotero.preferences.dataDir.useProfile "Firefox profil dizinini kullan">
 <!ENTITY zotero.preferences.dbMaintenance "Veritabanı Bakımı">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Veritabanı Bütünlüğünü Kontrol et">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Veritabanı Bütünlüğünü Denetle">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stilleri Sıfırla...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Çevirmenleri Sıfırla...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Çevirmenleri ve Stilleri Sıfırla">
@@ -60,7 +60,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Kitaplıklar arası eserler kopyalanırken, bunları ekle:">
 <!ENTITY zotero.preferences.items "Eser">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Değişiklikler yeni açılan pencerelerde etkili olacaktır.">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Seçili Eserin Göndermelerini Pano'ya Kopyala">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Seçili Eserin Göndermelerini Panoya Kopyala">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Seçilen Eserleri Panoya Kopyala">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Dermeler Bölmesine Odaklan">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Panodan İçeri Aktar">
@@ -109,7 +109,7 @@
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Bir Bakma Motoru, Bilgi bölmesindeki Yerini Bul açılırının yeteneklerini genişletir. Bakma Motorlarını aşağıdaki listede etkinleştirerek bu açılıra ekleyebilir ve onları kitaplığınızdaki kaynakların yerlerini bulmak amacıyla webde kullanabilirsiniz.">
 <!ENTITY zotero.preferences.locate.name "Ad">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Varsayılanları Geri Yükle">
-<!ENTITY zotero.preferences.miscellaneous "Çeşitli">
+<!ENTITY zotero.preferences.miscellaneous "Diğer Ayarlar">
 <!ENTITY zotero.preferences.openAboutConfig "about:config'i Aç">
 <!ENTITY zotero.preferences.openAboutMemory "about:memory'yi Aç.">
 <!ENTITY zotero.preferences.openCSLEdit "CSL Düzenleyicisini Aç">
@@ -211,7 +211,7 @@
 <!ENTITY zotero.preferences.sync.username "Kullanıcı:">
 <!ENTITY zotero.preferences.title "Zotero Tercihleri">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "gün">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Bu kadar önce çöpe gönderilmiş eserleri sil:">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Bu kadar zaman önce çöpe gönderilmiş eserleri otomatik olarak sil:">
 <!ENTITY zotero.preferences.updateNow "Şimdi Güncelle">
 <!ENTITY zotero.preferences.userInterface "Kullanıcı Arabirimi">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Zotero.org'a, kullanılan Zotero sürümüne göre içeriği özelleştirme yetkisi ver.">

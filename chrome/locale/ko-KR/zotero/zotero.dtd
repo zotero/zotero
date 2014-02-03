@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "중계기 옵션">
 <!ENTITY zotero.file.choose.label "파일 선택...">
 <!ENTITY zotero.file.noneSelected.label "선택된 파일 없음">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "삭제">
 <!ENTITY zotero.general.deselectAll "모두 선택 해제">
 <!ENTITY zotero.general.edit "편집">
 <!ENTITY zotero.general.note "노트:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(선택항목)">
 <!ENTITY zotero.general.selectAll "모두 선택">
 <!ENTITY zotero.integration.addEditCitation.title "인용 추가/편집">

@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Možnosti prevajanja">
 <!ENTITY zotero.file.choose.label "Izberite datoteko ...">
 <!ENTITY zotero.file.noneSelected.label "Izbrana ni nobena datoteka">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "Izbriši">
 <!ENTITY zotero.general.deselectAll "Ne izberi ničesar">
 <!ENTITY zotero.general.edit "Uredi">
 <!ENTITY zotero.general.note "Opomba:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(neobvezno)">
 <!ENTITY zotero.general.selectAll "Izberi vse">
 <!ENTITY zotero.integration.addEditCitation.title "Dodaj/uredi navedek">

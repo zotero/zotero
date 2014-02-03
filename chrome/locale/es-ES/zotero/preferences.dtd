@@ -205,8 +205,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning2 "Opciones para reestablecer la sincronización">
 <!ENTITY zotero.preferences.sync.reset.warning3 "para más información.">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizar automáticamente">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sincronizar el texto completo del contenido">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero puede sincronizar el texto completo del contenido de los archivos en sus bibliotecas de Zotero con zotero.org y otros dispositivos enlazados, permitiéndole buscar fácilmente en los archivos no importa dónde esté. El texto completo del contenido de sus archivos no se compartirá públicamente.">
 <!ENTITY zotero.preferences.sync.syncServer "Servidor de sincronización Zotero">
 <!ENTITY zotero.preferences.sync.username "Usuario:">
 <!ENTITY zotero.preferences.title "Preferencias de Zotero">

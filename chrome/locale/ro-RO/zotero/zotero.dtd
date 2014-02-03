@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Opțiuni translator">
 <!ENTITY zotero.file.choose.label "Alege fișier...">
 <!ENTITY zotero.file.noneSelected.label "Niciun fișier selectat">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "Ștergere">
 <!ENTITY zotero.general.deselectAll "Deselectează tot">
 <!ENTITY zotero.general.edit "Editare">
 <!ENTITY zotero.general.note "Notă:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(Opțional)">
 <!ENTITY zotero.general.selectAll "Selectează tot">
 <!ENTITY zotero.integration.addEditCitation.title "Adaugă/Editează citarea">

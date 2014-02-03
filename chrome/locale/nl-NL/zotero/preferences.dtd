@@ -26,7 +26,7 @@
 <!ENTITY zotero.preferences.dataDir.choose "Kiezen…">
 <!ENTITY zotero.preferences.dataDir.custom "Aangepast:">
 <!ENTITY zotero.preferences.dataDir.reveal "Opslagmap tonen">
-<!ENTITY zotero.preferences.dataDir.useProfile "Gebruik de profielmap van Firefox">
+<!ENTITY zotero.preferences.dataDir.useProfile "Gebruik de profielmap">
 <!ENTITY zotero.preferences.dbMaintenance "Database-onderhoud">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Controleer database-integriteit">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stijlen herstellen…">

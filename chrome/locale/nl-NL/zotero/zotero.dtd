@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Vertaler-opties">
 <!ENTITY zotero.file.choose.label "Bestand kiezen…">
 <!ENTITY zotero.file.noneSelected.label "Geen bestand geselecteerd">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "Verwijderen">
 <!ENTITY zotero.general.deselectAll "Selectie ongedaan maken">
 <!ENTITY zotero.general.edit "Bewerken">
 <!ENTITY zotero.general.note "Aantekening:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(Optioneel)">
 <!ENTITY zotero.general.selectAll "Alles selecteren">
 <!ENTITY zotero.integration.addEditCitation.title "Verwijzing toevoegen/aanpassen">

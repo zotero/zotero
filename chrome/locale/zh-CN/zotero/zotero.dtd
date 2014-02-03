@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "转换器选项">
 <!ENTITY zotero.file.choose.label "选择文件...">
 <!ENTITY zotero.file.noneSelected.label "未选定文件">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "删除">
 <!ENTITY zotero.general.deselectAll "取消全选">
 <!ENTITY zotero.general.edit "编辑">
 <!ENTITY zotero.general.note "笔记:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(可选)">
 <!ENTITY zotero.general.selectAll "全选">
 <!ENTITY zotero.integration.addEditCitation.title "添加/编辑引文">

@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Možnosti překladače">
 <!ENTITY zotero.file.choose.label "Vybrat soubor...">
 <!ENTITY zotero.file.noneSelected.label "Nebyl vybrán žádný soubor">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "Smazat">
 <!ENTITY zotero.general.deselectAll "Odznačit vše">
 <!ENTITY zotero.general.edit "Editovat">
 <!ENTITY zotero.general.note "Poznámka:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(Volitelné)">
 <!ENTITY zotero.general.selectAll "Vybrat vše">
 <!ENTITY zotero.integration.addEditCitation.title "Přidat/Upravit citaci">

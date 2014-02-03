@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Opsi Translator">
 <!ENTITY zotero.file.choose.label "Pilih Berkas...">
 <!ENTITY zotero.file.noneSelected.label "Tidak ada berkas yang dipilih">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "Hapus">
 <!ENTITY zotero.general.deselectAll "Hilangkan Semua Pilihan">
 <!ENTITY zotero.general.edit "Edit">
 <!ENTITY zotero.general.note "Catatan:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(Opsional)">
 <!ENTITY zotero.general.selectAll "Pilih Semua">
 <!ENTITY zotero.integration.addEditCitation.title "Tambahkan/Edit Sitasi">

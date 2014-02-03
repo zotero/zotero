@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Tõlkija seaded">
 <!ENTITY zotero.file.choose.label "Faili valimine...">
 <!ENTITY zotero.file.noneSelected.label "Faili ei ole valitud">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "Kustutada">
 <!ENTITY zotero.general.deselectAll "Tühistada kõik valikud">
 <!ENTITY zotero.general.edit "Toimetada">
 <!ENTITY zotero.general.note "Märkus:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(Valikuline)">
 <!ENTITY zotero.general.selectAll "Valida kõik">
 <!ENTITY zotero.integration.addEditCitation.title "Lisa/toimeta viidet">

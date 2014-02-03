@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Adatkonverter beállításai">
 <!ENTITY zotero.file.choose.label "Choose File...">
 <!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "Törlés">
 <!ENTITY zotero.general.deselectAll "Kijelölés megszüntetése">
 <!ENTITY zotero.general.edit "Szerkesztés">
 <!ENTITY zotero.general.note "Jegyzet:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(Nem kötelező)">
 <!ENTITY zotero.general.selectAll "Minden kijelölése">
 <!ENTITY zotero.integration.addEditCitation.title "Hivatkozás hozzáadása/szerkesztése">

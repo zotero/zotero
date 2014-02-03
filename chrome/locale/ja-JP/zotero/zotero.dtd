@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "トランスレータのオプション">
 <!ENTITY zotero.file.choose.label "ファイルを選択...">
 <!ENTITY zotero.file.noneSelected.label "ファイルが選択されていません">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "削除">
 <!ENTITY zotero.general.deselectAll "選択をすべて解除">
 <!ENTITY zotero.general.edit "編集">
 <!ENTITY zotero.general.note "メモ:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "（任意）">
 <!ENTITY zotero.general.selectAll "すべて選択">
 <!ENTITY zotero.integration.addEditCitation.title "出典表記を追加・編集">

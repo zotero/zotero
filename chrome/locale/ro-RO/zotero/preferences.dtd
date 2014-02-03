@@ -205,8 +205,8 @@
 <!ENTITY zotero.preferences.sync.reset.warning2 "Opțiuni de resetare sincronizare">
 <!ENTITY zotero.preferences.sync.reset.warning3 "pentru mai multe informații.">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizare automată">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sincronizează conținutul textului complet">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero poate sincroniza, cu zotero.org și alte dispozitive legate, conținutul textului complet al fișierelor din bibliotecile tale Zotero, permițându-ți să cauți cu ușurință în fișierele tale oriunde ai fi. Conținutul textului complet al fișierelor tale nu va fi partajat public.">
 <!ENTITY zotero.preferences.sync.syncServer "Server pentru sincronizare Zotero">
 <!ENTITY zotero.preferences.sync.username "Nume de utilizator:">
 <!ENTITY zotero.preferences.title "Preferințe Zotero">

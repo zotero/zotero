@@ -46,10 +46,12 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Oversættelsesmuligheder">
 <!ENTITY zotero.file.choose.label "Vælg filen...">
 <!ENTITY zotero.file.noneSelected.label "Der er ikke valgt en fil">
+<!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.delete "Slet">
 <!ENTITY zotero.general.deselectAll "Fravælg alle">
 <!ENTITY zotero.general.edit "Rediger">
 <!ENTITY zotero.general.note "Note:">
+<!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.optional "(Valgfrit)">
 <!ENTITY zotero.general.selectAll "Vælg alle">
 <!ENTITY zotero.integration.addEditCitation.title "Tilføj/rediger reference">
@@ -94,7 +96,7 @@
 <!ENTITY zotero.items.archiveLocation_column "Loc. i arkiv">
 <!ENTITY zotero.items.archive_column "Arkiv">
 <!ENTITY zotero.items.callNumber_column "Opstill.signatur">
-<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.court_column "Domstol">
 <!ENTITY zotero.items.creator_column "Ophav">
 <!ENTITY zotero.items.dateAdded_column "Tilføjet den">
 <!ENTITY zotero.items.dateModified_column "Ændret den">
