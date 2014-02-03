@@ -3117,7 +3117,12 @@
 							var newVal = Zotero.Utilities.capitalizeTitle(val.toLowerCase(), true);
 							break;
 						case 'sentence':
-							var newVal = val.length ? val[0].toUpperCase()+val.substr(1).toLowerCase() : val;
+							// capitalize the first letter, including after beginning punctuation
+							// capitalize after :, ?, ! and remove space(s) before those analogous to capitalizeTitle function
+							// also deal with initial punctuation here - open quotes and Spanish beginning quotation marks
+							newVal = val.toLowerCase();					
+							newVal = newVal.replace(/(([:\?!]\s*|^)([\'\"¡¿“‘„«\s]+)?[^\s])/g, function (x) { 
+								return x.replace(/\s+/m, " ").toUpperCase();});
 							break;
 						default:
 							throw ("Invalid transform mode '" + mode + "' in zoteroitembox.textTransform()");

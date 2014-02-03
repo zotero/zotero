@@ -1222,6 +1222,13 @@ Zotero.Schema = new function(){
 	
 	
 	this.integrityCheck = function (fix) {
+		// Just as a sanity check, make sure combined field tables are populated,
+		// so that we don't try to wipe out all data
+		if (!Zotero.DB.valueQuery("SELECT COUNT(*) FROM fieldsCombined")
+				|| !Zotero.DB.valueQuery("SELECT COUNT(*) FROM itemTypeFieldsCombined")) {
+			return false;
+		}
+		
 		// There should be an equivalent SELECT COUNT(*) statement for every
 		// statement run by the DB Repair Tool
 		var queries = [
@@ -1308,8 +1315,8 @@ Zotero.Schema = new function(){
 				"DELETE FROM itemCreators WHERE creatorID NOT IN (SELECT creatorID FROM creators)",
 			],
 			[
-				"SELECT COUNT(*) FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM fields)",
-				"DELETE FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM fields)",
+				"SELECT COUNT(*) FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM fieldsCombined)",
+				"DELETE FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM fieldsCombined)",
 			],
 			[
 				"SELECT COUNT(*) FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)",
@@ -1324,8 +1331,8 @@ Zotero.Schema = new function(){
 			],
 			// Fields not in type
 			[
-				"SELECT COUNT(*) FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM itemTypeFields WHERE itemTypeID=(SELECT itemTypeID FROM items WHERE itemID=itemData.itemID))",
-				"DELETE FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM itemTypeFields WHERE itemTypeID=(SELECT itemTypeID FROM items WHERE itemID=itemData.itemID))",
+				"SELECT COUNT(*) FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM itemTypeFieldsCombined WHERE itemTypeID=(SELECT itemTypeID FROM items WHERE itemID=itemData.itemID))",
+				"DELETE FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM itemTypeFieldsCombined WHERE itemTypeID=(SELECT itemTypeID FROM items WHERE itemID=itemData.itemID))",
 			],
 			// Missing itemAttachments row
 			[
@@ -1393,6 +1400,10 @@ Zotero.Schema = new function(){
 			[
 				"SELECT COUNT(*) FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=14)",
 				"DELETE FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=14)"
+			],
+			[
+				"SELECT COUNT(*) FROM syncedSettings WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM libraries)",
+				"DELETE FROM syncedSettings WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM libraries)"
 			]
 		];
 		
