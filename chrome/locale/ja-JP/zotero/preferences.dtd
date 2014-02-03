@@ -9,10 +9,10 @@
 
 <!ENTITY zotero.preferences.userInterface "ユーザーインターフェース">
 <!ENTITY zotero.preferences.showIn "Zoteroを表示するのは:">
-<!ENTITY zotero.preferences.showIn.browserPane "ブラウザ画面枠内">
+<!ENTITY zotero.preferences.showIn.browserPane "ブラウザ画面下">
 <!ENTITY zotero.preferences.showIn.separateTab "新しいタブ">
 <!ENTITY zotero.preferences.showIn.appTab "アプリタブ">
-<!ENTITY zotero.preferences.statusBarIcon "ステータスバーのアイコン:">
+<!ENTITY zotero.preferences.statusBarIcon "ステイタスバーのアイコン:">
 <!ENTITY zotero.preferences.statusBarIcon.none "なし">
 <!ENTITY zotero.preferences.fontSize "文字サイズ:">
 <!ENTITY zotero.preferences.fontSize.small "小">
@@ -65,11 +65,11 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "必要に応じて">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "同期する際に">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "ファイルをダウンロードする">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero ストレジを使用することにより、次の使用許諾条件に同意することになります。">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero ストレジをお使いになると、次の使用許諾条件に同意したことになります。">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "使用許諾条件">
 <!ENTITY zotero.preferences.sync.reset.warning1 "次の操作は、稀に起こる特別な状況のためだけのもので、一般的な問題解決に用いられるべきではありません。多くの場合、リセットすることで更なる問題を引き起こします。以下をご参照ください。">
 <!ENTITY zotero.preferences.sync.reset.warning2 "同期リセットの設定">
-<!ENTITY zotero.preferences.sync.reset.warning3 "より詳しい情報はこちら。">
+<!ENTITY zotero.preferences.sync.reset.warning3 "により詳しい情報がございます。">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Zotero サーバと完全に同期（シンク）させる">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "同期の履歴を無視し、ローカル（手元）の Zotero データと同期サーバのデータを融合する。">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero サーバーから復元（リストア）する">
@@ -109,7 +109,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "ドメイン／パス">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "（例：wikipedia.org）">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "出力形式">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "アイテム数が右の値より大きい時はドラッグ時のクイックコピーを無効化する">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "アイテム数が右の値より大きい時はドラッグ時のクイックコピーを無効化する:">
 
 <!ENTITY zotero.preferences.prefpane.cite "引用">
 <!ENTITY zotero.preferences.cite.styles "引用スタイル">
@@ -175,7 +175,7 @@
 
 <!ENTITY zotero.preferences.charset "文字コード">
 <!ENTITY zotero.preferences.charset.importCharset "文字コードをインポート">
-<!ENTITY zotero.preferences.charset.displayExportOption "文字コードのオプションをエクスポートの際に表示する">
+<!ENTITY zotero.preferences.charset.displayExportOption "文字コードの選択肢をエクスポートの際に表示する">
 
 <!ENTITY zotero.preferences.dataDir "データ・ディレクトリの場所">
 <!ENTITY zotero.preferences.dataDir.useProfile "Firefox プロファイルのディレクトリを使用する">

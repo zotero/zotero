@@ -303,7 +303,6 @@ label.zotero-text-link {
   margin-bottom: 1em;
 }
 
-
 .zotero-small-progress-indicator {
 	list-style-image: url(chrome://global/skin/icons/notloading_16.png);
 	margin-left: -2px;
@@ -316,4 +315,19 @@ label.zotero-text-link {
 
 #zotero-note-window {
 	padding-bottom: 4px;
+}
+
+#zotero-captcha-description {
+	max-width: 300px;
+	padding-bottom: 4px;
+	text-align: justify;
+}
+
+#zotero-captcha-error {
+	max-width: 300px;
+	padding-bottom: 4px;
+	padding-top: 4px;
+	font-weight: bold;
+	color: red;
+	text-align: center;
 }

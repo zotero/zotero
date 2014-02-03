@@ -4,19 +4,21 @@
 <!ENTITY zotero.general.deselectAll "ไม่เลือกทั้งหมด">
 <!ENTITY zotero.general.edit "แก้ไข">
 <!ENTITY zotero.general.delete "ลบ">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "บันทึกความผิดพลาดอาจรวมข้อความที่ไม่เกี่ยวกับ Zotero ไว้ด้วย">
 <!ENTITY zotero.errorReport.submissionInProgress "โปรดรอในระหว่างที่รายงานข้อผิดพลาดกำลังส่งอยู่">
-<!ENTITY zotero.errorReport.submitted "รายงานข้อผิดพลาดได้รับการส่งเรียบร้อยแล้ว">
+<!ENTITY zotero.errorReport.submitted "รายงานข้อผิดพลาดถูกส่งเรียบร้อยแล้ว">
 <!ENTITY zotero.errorReport.reportID "รหัสรายงาน:">
-<!ENTITY zotero.errorReport.postToForums "กรุณาลงประกาศข้อความในฟอรั่มของ Zotero (forums.zotero.org) โดยใช้รหัสรายงาน รายละเอียดของปัญหาและขั้นตอนที่ำทำให้เกิดปัญหานั้นอีก">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.postToForums "กรุณาส่งข้อความในฟอรั่มของ Zotero (forums.zotero.org) และแจ้งรหัสรายงานนี้ รายละเอียดของปัญหาและขั้นตอนที่ทำให้เกิดปัญหานั้นอีก">
+<!ENTITY zotero.errorReport.notReviewed "รายงานข้อผิดพลาดจะไม่ได้รับการตรวจสอบหากไม่มีการอ้างถึงในฟอรั่ม">
 
 <!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
 <!ENTITY zotero.upgrade.newVersionInstalled "ท่านได้ติดตั้ง Zotero รุ่นใหม่แล้ว">
-<!ENTITY zotero.upgrade.upgradeRequired "ฐานข้อมูล Zotero ของท่าน จำเป็นต้องปรับเป็นรุ่นปัจจุบันก่อนเพื่อให้ทำงานได้กับรุ่นใหม่">
-<!ENTITY zotero.upgrade.autoBackup "ฐานข้อมูลปัจจุบันของท่านจะได้รับการทำสำรองไว้โดยอัตโนมัติ ก่อนที่จะมีการเปลี่ยนแปลงใด ๆ เกิดขึ้น">
+<!ENTITY zotero.upgrade.upgradeRequired "ฐานข้อมูล Zotero ของท่าน ต้องปรับเป็นรุ่นปัจจุบันก่อนเพื่อให้ทำงานได้กับรุ่นใหม่">
+<!ENTITY zotero.upgrade.autoBackup "ฐานข้อมูลปัจจุบันของท่านจะถูกสำรองไว้โดยอัตโนมัติ ก่อนที่จะมีการเปลี่ยนแปลงใด ๆ เกิดขึ้น">
 <!ENTITY zotero.upgrade.majorUpgrade "นี่คือการปรับให้ทันสมัยครั้งสำคัญ">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "ต้องมั่นใจว่าคุณได้ทบทวน">
 <!ENTITY zotero.upgrade.majorUpgradeLink "คำแนะนำการอัพเกรด">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "ยกเลิก">
 <!ENTITY zotero.recognizePDF.pdfName.label "ชื่อ PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "ชื่อรายการ">
-<!ENTITY zotero.recognizePDF.captcha.label "พิมพ์ข้อความข้างล่างเพื่อเรียกข้อมูลเมทาต่อไป">
 
 <!ENTITY zotero.rtfScan.title "กราดตรวจ RTF">
 <!ENTITY zotero.rtfScan.cancel.label "ยกเลิก">

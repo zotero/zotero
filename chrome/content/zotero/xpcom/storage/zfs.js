@@ -684,8 +684,8 @@ Zotero.Sync.Storage.ZFS = (function () {
 		var ios = Components.classes["@mozilla.org/network/io-service;1"].
 					getService(Components.interfaces.nsIIOService);
 		var uri = ios.newURI(url, null, null);
-		uri.username = username;
-		uri.password = password;
+		uri.username = encodeURIComponent(username);
+		uri.password = encodeURIComponent(password);
 		_rootURI = uri;
 		
 		uri = uri.clone();

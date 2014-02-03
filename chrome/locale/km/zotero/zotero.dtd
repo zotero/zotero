@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "ដោះជម្រើស">
 <!ENTITY zotero.general.edit "កែតម្រូវ">
 <!ENTITY zotero.general.delete "លុបចោល">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "កំណត់ហេតុកំហុសអាចបញ្ចូលសារដែលមិនពាក់ព័ន្ធទៅកាន់ហ្ស៊ូតេរ៉ូ។">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "បដិសេធ">
 <!ENTITY zotero.recognizePDF.pdfName.label "ឈ្មោះភីឌីអែហ្វ">
 <!ENTITY zotero.recognizePDF.itemName.label "ឈ្មោះឯកសារ">
-<!ENTITY zotero.recognizePDF.captcha.label "វាយអត្ថបទខាងក្រោម ដើម្បីបន្តស្តារទិន្នន័យមេតា">
 
 <!ENTITY zotero.rtfScan.title "វិភាគអ៊ែរធីអែហ្វ">
 <!ENTITY zotero.rtfScan.cancel.label "បដិសេធ">

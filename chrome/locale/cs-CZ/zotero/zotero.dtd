@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Odznačit vše">
 <!ENTITY zotero.general.edit "Editovat">
 <!ENTITY zotero.general.delete "Smazat">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Chybová zpráva Zotera">
 <!ENTITY zotero.errorReport.unrelatedMessages "Záznam o chybách může obsahovat informace nesouvisející se Zoterem.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Zrušit">
 <!ENTITY zotero.recognizePDF.pdfName.label "Jméno PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Jméno položky">
-<!ENTITY zotero.recognizePDF.captcha.label "Opište níže zobrazený text pro pokračování v získávání metadat.">
 
 <!ENTITY zotero.rtfScan.title "Sken RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Zrušit">

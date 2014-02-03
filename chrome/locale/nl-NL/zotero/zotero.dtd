@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Selectie ongedaan maken">
 <!ENTITY zotero.general.edit "Bewerken">
 <!ENTITY zotero.general.delete "Verwijderen">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero foutrapportage">
 <!ENTITY zotero.errorReport.unrelatedMessages "Het foutenlogboek kan berichten bevatten die niet gerelateerd zijn aan Zotero.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Annuleren">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF-naam">
 <!ENTITY zotero.recognizePDF.itemName.label "Objectnaam">
-<!ENTITY zotero.recognizePDF.captcha.label "Type onderstaande tekst in om door te gaan met het ophalen van metadata.">
 
 <!ENTITY zotero.rtfScan.title "RTF-scan">
 <!ENTITY zotero.rtfScan.cancel.label "Annuleren">

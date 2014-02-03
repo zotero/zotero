@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Fjern merking">
 <!ENTITY zotero.general.edit "Endre">
 <!ENTITY zotero.general.delete "Slett">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Denne feilloggen kan innehalde meldingar som ikkje har noko med Zotero å gjere.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Avbryt">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF-namn">
 <!ENTITY zotero.recognizePDF.itemName.label "Elementnamn">
-<!ENTITY zotero.recognizePDF.captcha.label "Skriv teksten under for å halda fram med å henta metadata.">
 
 <!ENTITY zotero.rtfScan.title "RTF-skann">
 <!ENTITY zotero.rtfScan.cancel.label "Avbryt">

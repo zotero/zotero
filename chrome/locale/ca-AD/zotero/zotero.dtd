@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Desselecciona tot">
 <!ENTITY zotero.general.edit "Edita">
 <!ENTITY zotero.general.delete "Suprimeix">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Informe d'error de Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "El registre d&apos;error pot incloure missatges no relacionats amb el Zotero.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Cancel·la">
 <!ENTITY zotero.recognizePDF.pdfName.label "Nom del PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Nom de l'element">
-<!ENTITY zotero.recognizePDF.captcha.label "Escriviu el text de sota per continuar la recuperació de les metadades.">
 
 <!ENTITY zotero.rtfScan.title "Escaneig de l'RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Cancel·la">

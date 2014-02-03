@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "取消所有選取">
 <!ENTITY zotero.general.edit "編輯">
 <!ENTITY zotero.general.delete "刪除">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "錯誤記錄可能包括了一些和 Zotero 不相關的訊息。">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "取消">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF 名稱">
 <!ENTITY zotero.recognizePDF.itemName.label "項目名稱">
-<!ENTITY zotero.recognizePDF.captcha.label "鍵入以下文字來繼續取回詮釋資料。">
 
 <!ENTITY zotero.rtfScan.title "RTF 掃描">
 <!ENTITY zotero.rtfScan.cancel.label "取消">

@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "انتخاب هیچ‌کدام">
 <!ENTITY zotero.general.edit "ویرایش">
 <!ENTITY zotero.general.delete "حذف">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "گزارش خطا ممکن است شامل پیام‌های غیر مرتبط با زوترو باشد.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "انصراف">
 <!ENTITY zotero.recognizePDF.pdfName.label "نام PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "نام آیتم‌">
-<!ENTITY zotero.recognizePDF.captcha.label "متن زیر را برای ادامه بازیابی فراداده‌ها وارد کنید.">
 
 <!ENTITY zotero.rtfScan.title "پیمایش RTF">
 <!ENTITY zotero.rtfScan.cancel.label "انصراف">

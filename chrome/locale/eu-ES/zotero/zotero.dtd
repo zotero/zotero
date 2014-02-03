@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Desautatu guztiak">
 <!ENTITY zotero.general.edit "Editatu">
 <!ENTITY zotero.general.delete "Ezabatu">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Baztertu">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF Izenburua">
 <!ENTITY zotero.recognizePDF.itemName.label "Item Izenburua">
-<!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
 
 <!ENTITY zotero.rtfScan.title "RTF Scan">
 <!ENTITY zotero.rtfScan.cancel.label "Cancel">

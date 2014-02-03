@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Tühistada kõik valikud">
 <!ENTITY zotero.general.edit "Toimetada">
 <!ENTITY zotero.general.delete "Kustutada">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Vealogi võib sisaldada teateid, mis ei puutu Zoterosse.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Tühistada">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDFi nimi">
 <!ENTITY zotero.recognizePDF.itemName.label "Kirje nimi">
-<!ENTITY zotero.recognizePDF.captcha.label "Jätkamiseks sisestage allolev tekst.">
 
 <!ENTITY zotero.rtfScan.title "RTF Skänn">
 <!ENTITY zotero.rtfScan.cancel.label "Tühistada">
