@@ -138,6 +138,10 @@
 									
 									case 'change':
 										break;
+
+									case 'openlink':
+										ZoteroPane.loadURI(event.target.href);
+										break;
 									
 									default:
 										return;
