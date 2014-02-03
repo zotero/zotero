@@ -118,7 +118,7 @@
 
             p = DOM.getPos(ed.getContentAreaContainer());
 
-            m = ed.controlManager.createDropMenu('contextmenu', {
+            m = ed.controlManager.createDropMenu('linksmenu', {
                 offset_x : p.x + ed.getParam('contextmenu_offset_x', 0),
                 offset_y : p.y + ed.getParam('contextmenu_offset_y', 0),
                 constrain : 1,
