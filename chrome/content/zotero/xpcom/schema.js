@@ -1867,7 +1867,9 @@ Zotero.Schema = new function(){
 		
 		// 77 is a hack for full-text content syncing
 		if (fromVersion == 77) {
-			return false;
+            // Uncommenting this will cause MLZ to superfluously request
+            // an upgrade every time Firefox is started.
+			//return false;
 		}
 		else if (fromVersion > toVersion) {
 			throw("Zotero user data DB version is newer than SQL file");
