@@ -1452,6 +1452,7 @@
 							);
 							t.setAttribute('ontextentered',
 								'document.getBindingParent(this).handleCreatorAutoCompleteSelect(this)');
+							t.setAttribute('completeselectedindex',true);
 						}
 					}
 					var box = elem.parentNode;

@@ -445,6 +445,7 @@
 						t.setAttribute(
 							'autocompletesearchparam', JSON.stringify(params)
 						);
+						t.setAttribute('completeselectedindex', true);
 					}
 					
 					var box = elem.parentNode;
