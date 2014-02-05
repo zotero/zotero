@@ -140,7 +140,10 @@
 										break;
 
 									case 'openlink':
-										ZoteroPane.loadURI(event.target.href);
+										var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+											.getService(Components.interfaces.nsIWindowMediator);
+										win = wm.getMostRecentWindow('navigator:browser');
+										win.ZoteroPane.loadURI(event.target.href, event.modifierKeys);
 										break;
 									
 									default:

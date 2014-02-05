@@ -11646,6 +11646,16 @@ tinymce.create('tinymce.ui.Separator:tinymce.ui.Control', {
 			t.mouseClickFunc = Event.add(co, 'click', function(e) {
 				var m;
 
+				// Added by Zotero
+				//
+				// Record the modifier keys used with the last menu click -- used by linksmenu plugin
+				tinymce.activeEditor.lastClickModifierKeys = {
+					altKey: e.altKey,
+					ctrlKey: e.ctrlKey,
+					metaKey: e.metaKey,
+					shiftKey: e.shiftKey
+				};
+
 				e = e.target;
 
 				if (e && (e = DOM.getParent(e, 'tr')) && !DOM.hasClass(e, cp + 'ItemSub')) {

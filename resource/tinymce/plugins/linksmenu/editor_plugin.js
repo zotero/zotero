@@ -26,9 +26,18 @@
 
 			// add editor command to open links through zoteroHandleEvent
 			ed.addCommand('openlink', function(command) {
-				var node = tinyMCE.activeEditor.selection.getNode();
+				var ed = tinyMCE.activeEditor;
+				var node = ed.selection.getNode();
 				if (node.nodeName == 'A') {
-					zoteroHandleEvent({ type: 'openlink', target: node });
+					zoteroHandleEvent({
+						type: 'openlink',
+						target: node,
+						// We don't seem to be able to access the click event that triggered this
+						// command in order to check the modifier keys used, so instead we save
+						// the keys on every menu click in tiny_mce.js and pass them on here
+						// for use by loadURI().
+						modifierKeys: ed.lastClickModifierKeys
+					});
 				}
 			});
 
@@ -46,9 +55,20 @@
 			};
 
 			showMenu = ed.onClick.add(function(ed, e) {
-				// only show when <a> node + Block TinyMCE menu on ctrlKey and work around Safari issue
-				if (e.target.nodeName != 'A' || ((realCtrlKey !== 0 ? realCtrlKey : e.ctrlKey) && !contextmenuNeverUseNative))
+				// Only show on left-click
+				if (e.button != 0) {
 					return;
+				}
+				
+				// Only show when <a> node
+				if (e.target.nodeName != 'A') {
+					return;
+				}
+				
+				// Block TinyMCE menu on ctrlKey and work around Safari issue
+				if ((realCtrlKey !== 0 ? realCtrlKey : e.ctrlKey) && !contextmenuNeverUseNative) {
+					return;
+				}
 
 				Event.cancel(e);
 
