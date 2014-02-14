@@ -175,7 +175,7 @@
 					}
 					else {
 						citation.citationItems[i].position = parseInt(pos, 10);
-					{
+					}
 					var subcitation = [citation.citationItems[i]];
 					citations += styleEngine.makeCitationCluster(subcitation) + '<br />';
 				}
