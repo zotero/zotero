@@ -78,6 +78,7 @@
 				var fp = Components.classes["@mozilla.org/filepicker;1"]
 					.createInstance(nsIFilePicker);
 				fp.init(window, "Save Citation Style", nsIFilePicker.modeSave);
+				fp.appendFilter("Citation Style Language", "*.csl");
 				//get the filename from the id; we could consider doing even more here like creating the id from filename. 
 				var parser = new DOMParser();
 				var doc = parser.parseFromString(style, 'text/xml');
@@ -219,8 +220,8 @@
 	
 	<vbox flex="1">
 		<hbox align="center">
-		    <button id="zotero-csl-save" label="Save" oncommand="Zotero_CSL_Editor.save()"/>
 		    <button id="preview-refresh-button" label="Refresh" oncommand="Zotero_CSL_Editor.refresh()"/>
+		    <button id="zotero-csl-save" label="Save" oncommand="Zotero_CSL_Editor.save()"/>
 		    <menulist id="zotero-csl-page-type" style="min-height: 1.6em; min-width: 50px" oncommand="Zotero_CSL_Editor.refresh()" />
 		    <label value=":" />
 		    <textbox size="5" id="preview-pages" type="timed" timeout="250" oncommand="Zotero_CSL_Editor.refresh()"/>
