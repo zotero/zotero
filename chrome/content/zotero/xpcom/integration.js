@@ -2320,7 +2320,8 @@ Zotero.Integration.Session.prototype.lookupItems = function(citation, index) {
 		var citationItem = citation.citationItems[i];
 		
 		// get Zotero item
-		var zoteroItem = false;
+		var zoteroItem = false,
+		    needUpdate;
 		if(citationItem.uris) {
 			[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(citationItem.uris);
 			if(needUpdate && index) this.updateIndices[index] = true;

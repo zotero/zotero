@@ -42,7 +42,6 @@
 			this.loadCSL = loadCSL;
 			this.generateBibliography = generateBibliography;
 			this.refresh = refresh;
-			
 			function init() {
 				var cslList = document.getElementById('zotero-csl-list');
 				if (cslList.getAttribute('initialized') == 'true') {
@@ -71,6 +70,31 @@
 				var editor = document.getElementById('zotero-csl-editor')
 				generateBibliography(editor.value);
 
+			}
+			this.save = function() {
+				var editor = document.getElementById('zotero-csl-editor')
+				var style = editor.value;
+				const nsIFilePicker = Components.interfaces.nsIFilePicker;
+				var fp = Components.classes["@mozilla.org/filepicker;1"]
+					.createInstance(nsIFilePicker);
+				fp.init(window, "Save Citation Style", nsIFilePicker.modeSave);
+				fp.appendFilter("Citation Style Language", "*.csl");
+				//get the filename from the id; we could consider doing even more here like creating the id from filename. 
+				var parser = new DOMParser();
+				var doc = parser.parseFromString(style, 'text/xml');
+				var filename = doc.getElementsByTagName("id");
+				if (filename) {
+					filename = filename[0].textContent;
+					fp.defaultString = filename.replace(/.+\//, "") + ".csl";
+				}
+				else {
+					fp.defaultString = "untitled.csl";
+				}
+				var rv = fp.show();
+				if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {				
+					var outputFile = fp.file;
+					Zotero.File.putContents(outputFile, style);
+				}
 			}
 			
 			function handleKeyPress(event) {
@@ -145,7 +169,14 @@
 						citation.citationItems[i].locator = search.value;
 						citation.citationItems[i].label = loc.selectedItem.value;
 					}
-					citation.citationItems[i].position = parseInt(pos, 10);
+					if (pos == 4) {
+						//near note is a subsequent citation with near note set to true;
+						citation.citationItems[i].position = 1;
+						citation.citationItems[i]["near-note"] = true;
+					}
+					else {
+						citation.citationItems[i].position = parseInt(pos, 10);
+					}
 					var subcitation = [citation.citationItems[i]];
 					citations += styleEngine.makeCitationCluster(subcitation) + '<br />';
 				}
@@ -191,6 +222,7 @@
 	<vbox flex="1">
 		<hbox align="center">
 		    <button id="preview-refresh-button" label="Refresh" oncommand="Zotero_CSL_Editor.refresh()"/>
+		    <button id="zotero-csl-save" label="Save" oncommand="Zotero_CSL_Editor.save()"/>
 		    <menulist id="zotero-csl-page-type" style="min-height: 1.6em; min-width: 50px" oncommand="Zotero_CSL_Editor.refresh()" />
 		    <label value=":" />
 		    <textbox size="5" id="preview-pages" type="timed" timeout="250" oncommand="Zotero_CSL_Editor.refresh()"/>
@@ -202,6 +234,7 @@
 		    	    <menuitem label="Subsequent" value="1"/>
 		    	    <menuitem label="Ibid" value="2"/>
 		    	    <menuitem label="Ibid+Locator" value="3"/>
+		    	    <menuitem label="Near Note" value="4"/>
 		    	</menupopup>
 		    </menulist>
 		    <menulist id="zotero-csl-list" style="min-height: 1.6em; min-width: 100px" initialized="false" flex="1" oncommand="Zotero_CSL_Editor.loadCSL(this.selectedItem.value)"/>
