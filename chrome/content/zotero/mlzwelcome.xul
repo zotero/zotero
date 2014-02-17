@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/about.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/about.dtd">
+
+<dialog
+	id="mlz-welcome"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	orient="vertical"
+	buttons="accept"
+	buttonlabelaccept="&zotero.about.close;"
+	onload="moveToAlertPosition();"
+	ondialogaccept="return true;">
+	
+	<vbox id="mlz-welcome-content" width="600">
+		<label id="name" value="MLZ: ReadMe"/>
+		<label class="subhead" value="Description"/>
+        <description class="subcontent">
+          Multilingual Zotero (MLZ) is a variant of the Zotero
+          reference manager, with support for <span style="font-style:italic;">legal citation styles</span>
+          and <span style="font-style:italic;">multilingual content</span>. MLZ is written and maintained by
+          <label class="zotero-text-link"
+          href="http://gsl-nagoya-u.net/faculty/cache/gsliF_Bennett.html"
+          value="Frank Bennett"/>, author of the citation formatter
+          (<label class="zotero-text-link"
+          href="https://bitbucket.org/fbennett/citeproc-js/wiki/Home"
+          value="citeproc-js"/>) that runs in Zotero itself.
+        </description>
+        <description class="subcontent">
+          (Please note that MLZ is not directly supported by the Zotero
+          development team. If you do not require its special
+          features, you are encouraged to use <label
+          class="zotero-text-link" href="http://zotero.org"
+          value="official Zotero"/> instead.)
+        </description>
+		<label class="subhead" value="Components"/>
+        <description class="subcontent">
+          A complete MLZ system consists of the <label
+          class="zotero-text-link" href="http://citationstylist.org/tools/#mlz-client"
+          value="MLZ Client"/> (this program), the <label
+          class="zotero-text-link" href="http://citationstylist.org/tools/#abbreviation-filter"
+          value="Abbreviation"/> <label
+          class="zotero-text-link" href="http://citationstylist.org/tools/#abbreviation-filter"
+          value="Filter"/> plugin for Firefox,
+          and an appropriate <label
+          class="zotero-text-link" href="http://www.zotero.org/support/word_processor_plugin_installation"
+          value="word processor plugin"/> from official Zotero.
+        </description>
+        <description class="subcontent">
+          For legal support, you will also want to check out the MLZ legal styles and
+          their associated abbreviation lists at 
+          <label
+          class="zotero-text-link" href="http://citationstylist.org/tools/#styles"
+          value="http://citationstylist.org/tools/#styles"/>.
+        </description>
+		<label class="subhead" value="Compatibility"/>
+        <description class="subcontent">
+          MLZ can sync to <label class="zotero-text-link"
+          href="http://zotero.org" value="http://zotero.org"/>, and it
+          can share sync data with official Zotero. However, a local
+          MLZ <span style="font-style:italic;">database</span> (on
+          your PC) cannot be accessed directly with the official
+          versions of Zotero for Firefox or Zotero Standalone.
+        </description>
+        <description class="subcontent">
+          Citation styles in the <label class="zotero-text-link"
+          href="http://zotero.org/styles" value="Zotero Style Repository"/>
+          are generally compatible with MLZ. Styles designed
+          for use with MLZ may not work properly with
+          official Zotero.
+        </description>
+		<label class="subhead" value="Getting Help"/>
+        <description class="subcontent">
+          Questions and comments can be posted to the Zotero forums. 
+          Prefix the subject of your posts with "[MLZ]" to flag that they
+          are related to this project. To contact the maintainer
+          directly, see the <label class="zotero-text-link"
+          href="http://citationstylist.org/contact/" value="Contact"/>
+          page of the project website.
+        </description>
+		<label class="subhead" value="Relation to Official Zotero"/>
+        <description class="subcontent">
+          Incorporation of MLZ features into official Zotero (with
+          seamless migration of user data) is intended, but this is a
+          delicate process and will require significant effort. It
+          cannot be rushed. In the interim, the MLZ client offers
+          legal and multilingual functionality to users who require
+          it.
+        </description>
+	</vbox>
+</dialog>

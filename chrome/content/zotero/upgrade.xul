@@ -125,7 +125,10 @@
 	
 	<wizardpage onpageshow="Zotero_Schema_Upgrade.init()" label=" ">
 		<description>&zotero.upgrade.newVersionInstalled;</description>
-		<description id="zotero-upgrade-required">&zotero.upgrade.upgradeRequired; &zotero.upgrade.autoBackup;</description>
+        <description id="zotero-upgrade-required">&zotero.upgrade.upgradeRequired;</description>
+		<description id="zotero-upgrade-backup-note">&zotero.upgrade.autoBackup;</description>
+        <description id="zotero-upgrade-mlz-notice" style="font-style:italic;margin-left:1.5em;">&zotero.upgrade.ifZoteroInfo;
+            &zotero.upgrade.ifZoteroWarning; &zotero.upgrade.ifZoteroChoice;</description>
 		<description id="zotero-major-upgrade" hidden="true">
 			<label value="&zotero.upgrade.majorUpgrade;" style="font-weight: bold"/>
 			&zotero.upgrade.majorUpgradeBeforeLink;

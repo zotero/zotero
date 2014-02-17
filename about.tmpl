@@ -1,0 +1,301 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/about.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/about.dtd">
+
+<dialog
+	id="zotero-about"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	orient="vertical"
+	buttons="accept"
+	buttonlabelaccept="&zotero.about.close;"
+	onload="onLoad(); moveToAlertPosition(); sizeToContent();"
+	ondialogaccept="return true;">
+	
+	<script>
+		<![CDATA[
+			function onLoad()
+			{
+				var translators = {
+					"af-ZA": [
+						"Samuel Murray"
+					],
+					
+					"ar": [
+						"Khaled Fadhel",
+						"Ahmed Rizk"
+					],
+					
+					"bg-BG": [
+						"Peter Stoilov"
+					],
+					
+					"ca-AD": [
+						"Joan Junyent"
+					],
+					
+					"cs-CZ": [
+						"Milan Janíček",
+						"ffvii",
+						"strepon"
+					],
+					
+					"da-DK": [
+						"madsjensen",
+						"Banta"
+					],
+					
+					"de-AT": [
+						"stw"
+					],
+					
+					"de-CH": [
+						"stw"
+					],
+					
+					"de-DE": [
+						"Harald Kliems",
+						"Jason Verber",
+						"Morris Vollmann"
+					],
+					
+					"el-GR": [
+						"DeadAtHeaven",
+						"modestos",
+						"sarandos",
+						"geraki"
+					],
+					
+					"es-ES": [
+						"Alberto González Palomo"
+					],
+					
+					"et-EE": [
+						"aethralis",
+						"brainbulb",
+						"lagle"
+					],
+					
+					"eu-ES": [
+						"David Lindemann",
+						"Goofy"
+					],
+					
+					"fi-FI": [
+						"hirvela"
+					],
+					
+					"fr-FR": [
+						"Marie Léger-St-Jean",
+						"locale_locker",
+						"fiuzzy",
+						"Pascal Pichon",
+						"Jojaba",
+						"La Luciole"
+					],
+					
+					"gl-ES": [
+						"Manuel Meixide"
+					],
+					
+					"he-IL": [
+						"Doron Tilleman"
+					],
+					
+					"hr-HR": [
+						"Vukovic"
+					],
+					
+					"hu-HU": [
+						"Tamas Dombos"
+					],
+					
+					"it-IT": [
+						"Andrea",
+						"Elisabetta Manuele",
+						"Giuliano Masseroni",
+						"Luca Pedrazzi"
+					],
+					
+					"ja-JP": [
+						"himura",
+						"Andreas Bovens",
+						"Michael Schiltz",
+						"ehito",
+						"Tatsuki Sugiura"
+					],
+					
+					"km-KH": [
+						"Sras Hem"
+					],
+					
+					"ko-KR": [
+						"Moonseok Kim",
+						"wtspout"
+					],
+					
+					"mn-MN": [
+						"L. Gantulga"
+					],
+					
+					"nb-NO": [
+						"Finn Arne Jørgensen",
+						"Bernt Øyvind Thorvaldsen"
+					],
+					
+					"nl-NL": [
+						"Rintze Zelle",
+						"Andreas Bovens",
+						"Michael Schiltz"
+					],
+					
+					"pl-PL": [
+						"novacellus",
+						"Pawel Krzyworzeka",
+						"Trevor Owens"
+					],
+					
+					"pt-BR": [
+						"Fábio Baqueiro Figueiredo",
+						"Humberto Sartini"
+					],
+					
+					"pt-PT": [
+						"Manuel Menezes de Sequeira",
+						"tmfs",
+						"gandrenf"
+					],
+					
+					"ro-RO": [
+						"Turcan"
+					],
+					
+					"ru-RU": [
+						"Maxim Yurkin",
+						"Yaroslav"
+					],
+					
+					"sk-SK": [
+						"Milan Regec"
+					],
+					
+					"sl-SI": [
+						"Martin Srebotnjak"
+					],
+					
+					"sr-RS": [
+						"DakSrbija",
+						"Igor Miletic"
+					],
+						
+					"sv-SE": [
+						"Erik Stattin"
+					],
+					
+					"th-TH": [
+						"chin"
+					],
+					
+					"tr-TR": [
+						"Zeki Celikbas"
+					],
+					
+					"vi-VN": [
+						"Đoàn Như Tùng"
+					],
+					
+					"zh-CN": [
+						"santawort",
+						"Wenping Guo",
+						"liyan"
+					],
+					
+					"zh-TW": [
+						"Chun-Chung Chen",
+						"Alan Cheng"
+					]
+				};
+				
+				var box = document.getElementById('zotero-translators-list');
+				
+				for (var locale in translators) {
+					var heading = document.createElement('label');
+					heading.className = 'locale';
+					heading.setAttribute('value', locale + ':');
+					box.appendChild(heading);
+					
+					for each(var person in translators[locale]) {
+						var label = document.createElement('label');
+						label.setAttribute('value', person);
+						box.appendChild(label);
+					}
+				}
+			}
+		]]>
+	</script>
+	
+	<script src="include.js"/>
+	
+	<vbox id="aboutcontent">
+		<label id="name" value="Zotero"/>
+		<hbox>
+			<label class="zotero-text-link" href="http://zotero.org" value="http://zotero.org"/>
+		</hbox>
+		<label id="version" value="4.0m##REVISION##"/>
+        <!--
+		<script>
+			document.getElementById('version').value += Zotero.version;
+		</script>
+        -->
+		<hbox>
+			<vbox id="column1">
+				<label class="subhead" value="&zotero.createdby;"/>
+				<vbox class="subcontent">
+					<label class="zotero-text-link" href="http://chnm.gmu.edu" value="Center for History and New Media"/>
+					<label value="George Mason University"/>
+					<label value="Fairfax, VA, USA"/>
+				</vbox>
+				<label class="subhead" value="&zotero.director;"/>
+				<vbox class="subcontent">
+					<label value="Sean Takats"/>
+				</vbox>
+				<label class="subhead" value="&zotero.developers;"/>
+				<vbox class="subcontent">
+					<label value="Dan Stillman"/>
+					<label value="Simon Kornblith"/>
+					<label value="Faolan Cheslack-Postava"/>
+				</vbox>
+				<label class="subhead" value="&zotero.about.localizations;"/>
+				<vbox class="subcontent">
+					<vbox id="zotero-translators-list"/>
+				</vbox>
+				<label class="zotero-text-link" href="http://www.zotero.org/support/credits_and_acknowledgments" value="&zotero.moreCreditsAndAcknowledgements;"/>
+			</vbox>
+			<vbox id="column2">
+				<label class="subhead" value="Citation &amp; Bibliography Processing"/>
+				<vbox class="subcontent">
+					<label class="zotero-text-link" href="http://citationstyles.org/" value="Citation Style Language"/>
+					<label class="zotero-text-link" href="http://bitbucket.org/fbennett/citeproc-js/" value="citeproc-js (Frank Bennett)"/>
+				</vbox>
+				<label class="subhead" value="&zotero.about.additionalSoftware;"/>
+				<vbox class="subcontent">
+					<label class="zotero-text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="famfamfam (small icons)"/>
+					<label class="zotero-text-link" href="http://appscript.sourceforge.net/py-appscript/" value="py-appscript (MacWord plug-in IPC)"/>
+					<label class="zotero-text-link" href="http://simile.mit.edu/timeline/" value="SIMILE Project (Timeline)"/>
+					<label class="zotero-text-link" href="http://www.w3.org/2005/ajar/tab" value="Tabulator (RDF parser)"/>
+					<label class="zotero-text-link" href="http://tango.freedesktop.org/Tango_Desktop_Project" value="Tango Desktop Project (pref icons)"/>
+					<label class="zotero-text-link" href="http://tinymce.moxiecode.com/" value="TinyMCE (rich-text editing)"/>
+					<label class="zotero-text-link" href="http://www.dbai.tuwien.ac.at/user/pollak/webpagedump/" value="WebPageDump (snapshot code)"/>
+					<label class="zotero-text-link" href="http://www.foolabs.com/xpdf/" value="Xpdf (pdftotext)"/>
+				</vbox>
+				<label class="subhead" value="&zotero.thanks;"/>
+				<vbox class="subcontent">
+					<label class="zotero-text-link" href="http://www.mellon.org/" value="Andrew W. Mellon Foundation"/>
+					<label class="zotero-text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
+					<label class="zotero-text-link" href="http://www.sloan.org/" value="Alfred P. Sloan Foundation"/>
+				</vbox>
+			</vbox>
+		</hbox>
+	</vbox>
+</dialog>

@@ -1,101 +1,113 @@
-<!ENTITY preferencesCmdMac.label "Einstellungen...">
-<!ENTITY preferencesCmdMac.commandkey ",">
-<!ENTITY servicesMenuMac.label "Dienste">
-<!ENTITY hideThisAppCmdMac.label "&brandShortName; ausblenden">
-<!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Andere ausblenden">
-<!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "Alle anzeigen">
-<!ENTITY quitApplicationCmdMac.label "Zotero beenden">
-<!ENTITY quitApplicationCmdMac.key "Q">
-
-
-<!ENTITY fileMenu.label "Datei">
-<!ENTITY fileMenu.accesskey "D">
-<!ENTITY saveCmd.label "Speichern...">
-<!ENTITY saveCmd.key "S">
-<!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Seite einrichten">
-<!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Drucken">
-<!ENTITY printCmd.key "D">
-<!ENTITY printCmd.accesskey "U">
-<!ENTITY closeCmd.label "Schließen">
-<!ENTITY closeCmd.key "W">
-<!ENTITY closeCmd.accesskey "C">
-<!ENTITY quitApplicationCmdWin.label "Beenden">
-<!ENTITY quitApplicationCmdWin.accesskey "x">
-<!ENTITY quitApplicationCmd.label "Beenden">
-<!ENTITY quitApplicationCmd.accesskey "Q">
-
-
-<!ENTITY editMenu.label "Bearbeiten">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Rückgängig">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Wiederholen">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Ausschneiden">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "A">
-<!ENTITY copyCmd.label "Kopieren">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
-<!ENTITY copyCitationCmd.label "Zitation kopieren">
-<!ENTITY copyBibliographyCmd.label "Literaturverzeichnis kopieren">
-<!ENTITY pasteCmd.label "Einfügen">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Löschen">
-<!ENTITY deleteCmd.key "L">
-<!ENTITY deleteCmd.accesskey "L">
-<!ENTITY selectAllCmd.label "Alle auswählen">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "u">
-<!ENTITY preferencesCmd.label "Einstellungen">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Einstellungen">
-<!ENTITY preferencesCmdUnix.accesskey "E">
-<!ENTITY findCmd.label "Suchen">
-<!ENTITY findCmd.accesskey "S">
-<!ENTITY findCmd.commandkey "S">
-<!ENTITY bidiSwitchPageDirectionItem.label "Seitenrichtung ändern">
+<!ENTITY aboutProduct.accesskey "Ü">
+<!ENTITY aboutProduct.label "Über &brandShortName;">
+<!ENTITY addons.label "Add-ons">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
-<!ENTITY bidiSwitchTextDirectionItem.label "Schreibrichtung ändern">
+<!ENTITY bidiSwitchPageDirectionItem.label "Seitenrichtung ändern">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
-
-
-<!ENTITY toolsMenu.label "Werkzeuge">
-<!ENTITY toolsMenu.accesskey "W">
-<!ENTITY addons.label "Add-ons">
-
-
+<!ENTITY bidiSwitchTextDirectionItem.label "Schreibrichtung ändern">
+<!ENTITY bringAllToFront.label "Alle nach vorn bringen">
+<!ENTITY closeCmd.accesskey "C">
+<!ENTITY closeCmd.key "W">
+<!ENTITY closeCmd.label "Schließen">
+<!ENTITY copyBibliographyCmd.label "Literaturverzeichnis kopieren">
+<!ENTITY copyCitationCmd.label "Zitation kopieren">
+<!ENTITY copyCmd.accesskey "C">
+<!ENTITY copyCmd.key "C">
+<!ENTITY copyCmd.label "Kopieren">
+<!ENTITY cutCmd.accesskey "A">
+<!ENTITY cutCmd.key "X">
+<!ENTITY cutCmd.label "Ausschneiden">
+<!ENTITY deleteCmd.accesskey "L">
+<!ENTITY deleteCmd.key "L">
+<!ENTITY deleteCmd.label "Löschen">
+<!ENTITY editMenu.accesskey "E">
+<!ENTITY editMenu.label "Bearbeiten">
+<!ENTITY fileMenu.accesskey "D">
+<!ENTITY fileMenu.label "Datei">
+<!ENTITY findAgainCmd.accesskey "g">
+<!ENTITY findAgainCmd.commandkey "g">
+<!ENTITY findAgainCmd.commandkey2 "VK_F3">
+<!ENTITY findAgainCmd.label "Find Again">
+<!ENTITY findCmd.accesskey "S">
+<!ENTITY findCmd.commandkey "S">
+<!ENTITY findCmd.label "Suchen">
+<!ENTITY findOnCmd.accesskey "F">
+<!ENTITY findOnCmd.commandkey "f">
+<!ENTITY findOnCmd.label "Find in This Page…">
+<!ENTITY fullZoom.accesskey "Z">
+<!ENTITY fullZoom.label "Zoom">
+<!ENTITY fullZoomEnlargeCmd.accesskey "I">
+<!ENTITY fullZoomEnlargeCmd.commandkey "+">
+<!ENTITY fullZoomEnlargeCmd.commandkey2 "=">
+<!ENTITY fullZoomEnlargeCmd.commandkey3 "">
+<!ENTITY fullZoomEnlargeCmd.label "Zoom In">
+<!ENTITY fullZoomReduceCmd.accesskey "O">
+<!ENTITY fullZoomReduceCmd.commandkey "-">
+<!ENTITY fullZoomReduceCmd.commandkey2 "">
+<!ENTITY fullZoomReduceCmd.label "Zoom Out">
+<!ENTITY fullZoomResetCmd.accesskey "R">
+<!ENTITY fullZoomResetCmd.commandkey "0">
+<!ENTITY fullZoomResetCmd.commandkey2 "">
+<!ENTITY fullZoomResetCmd.label "Reset">
+<!ENTITY fullZoomToggleCmd.accesskey "T">
+<!ENTITY fullZoomToggleCmd.label "Zoom Text Only">
+<!ENTITY helpCheckForUpdates.accesskey "U">
+<!ENTITY helpCheckForUpdates.label "Auf Updates überprüfen">
+<!ENTITY helpFeedbackPage.accesskey "F">
+<!ENTITY helpFeedbackPage.label "Feedback senden...">
+<!ENTITY helpMac.commandkey "?">
+<!ENTITY helpMenu.accesskey "H">
+<!ENTITY helpMenu.label "Hilfe">
+<!ENTITY helpMenuWin.accesskey "H">
+<!ENTITY helpMenuWin.label "Hilfe">
+<!ENTITY helpReportErrors.accesskey "e">
+<!ENTITY helpReportErrors.label "Fehlerbericht an Zotero senden">
+<!ENTITY helpTroubleshootingInfo.accesskey "P">
+<!ENTITY helpTroubleshootingInfo.label "Problembehebung">
+<!ENTITY hideOtherAppsCmdMac.commandkey "H">
+<!ENTITY hideOtherAppsCmdMac.label "Andere ausblenden">
+<!ENTITY hideThisAppCmdMac.commandkey "H">
+<!ENTITY hideThisAppCmdMac.label "&brandShortName; ausblenden">
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimieren">
-<!ENTITY bringAllToFront.label "Alle nach vorn bringen">
-<!ENTITY zoomWindow.label "Zoom">
-<!ENTITY windowMenu.label "Fenster">
-
-
-<!ENTITY helpMenu.label "Hilfe">
-<!ENTITY helpMenu.accesskey "H">
-
-
-<!ENTITY helpMenuWin.label "Hilfe">
-<!ENTITY helpMenuWin.accesskey "H">
-<!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "Über &brandShortName;">
-<!ENTITY aboutProduct.accesskey "Ü">
-<!ENTITY productHelp.label "Support und Dokumentation">
+<!ENTITY pageSetupCmd.accesskey "U">
+<!ENTITY pageSetupCmd.label "Seite einrichten">
+<!ENTITY pasteCmd.accesskey "P">
+<!ENTITY pasteCmd.key "V">
+<!ENTITY pasteCmd.label "Einfügen">
+<!ENTITY preferencesCmd.accesskey "O">
+<!ENTITY preferencesCmd.label "Einstellungen">
+<!ENTITY preferencesCmdMac.commandkey ",">
+<!ENTITY preferencesCmdMac.label "Einstellungen...">
+<!ENTITY preferencesCmdUnix.accesskey "E">
+<!ENTITY preferencesCmdUnix.label "Einstellungen">
+<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.key "D">
+<!ENTITY printCmd.label "Drucken">
 <!ENTITY productHelp.accesskey "S">
-<!ENTITY helpTroubleshootingInfo.label "Problembehebung">
-<!ENTITY helpTroubleshootingInfo.accesskey "P">
-<!ENTITY helpFeedbackPage.label "Feedback senden...">
-<!ENTITY helpFeedbackPage.accesskey "F">
-<!ENTITY helpReportErrors.label "Fehlerbericht an Zotero senden">
-<!ENTITY helpReportErrors.accesskey "e">
-<!ENTITY helpCheckForUpdates.label "Auf Updates überprüfen">
-<!ENTITY helpCheckForUpdates.accesskey "U">
+<!ENTITY productHelp.label "Support und Dokumentation">
+<!ENTITY quitApplicationCmd.accesskey "Q">
+<!ENTITY quitApplicationCmd.label "Beenden">
+<!ENTITY quitApplicationCmdMac.key "Q">
+<!ENTITY quitApplicationCmdMac.label "Zotero beenden">
+<!ENTITY quitApplicationCmdWin.accesskey "x">
+<!ENTITY quitApplicationCmdWin.label "Beenden">
+<!ENTITY redoCmd.accesskey "R">
+<!ENTITY redoCmd.key "Y">
+<!ENTITY redoCmd.label "Wiederholen">
+<!ENTITY saveCmd.accesskey "A">
+<!ENTITY saveCmd.key "S">
+<!ENTITY saveCmd.label "Speichern...">
+<!ENTITY selectAllCmd.accesskey "u">
+<!ENTITY selectAllCmd.key "A">
+<!ENTITY selectAllCmd.label "Alle auswählen">
+<!ENTITY servicesMenuMac.label "Dienste">
+<!ENTITY showAllAppsCmdMac.label "Alle anzeigen">
+<!ENTITY toolsMenu.accesskey "W">
+<!ENTITY toolsMenu.label "Werkzeuge">
+<!ENTITY undoCmd.accesskey "U">
+<!ENTITY undoCmd.key "Z">
+<!ENTITY undoCmd.label "Rückgängig">
+<!ENTITY windowMenu.label "Fenster">
+<!ENTITY zoomWindow.label "Zoom">

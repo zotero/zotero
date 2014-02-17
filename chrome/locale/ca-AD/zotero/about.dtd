@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "versió">
+<!ENTITY zotero.about.additionalSoftware "Programari de tercers i estàndards:">
+<!ENTITY zotero.about.close "Tanca">
+<!ENTITY zotero.about.localizations "Traduccions:">
+<!ENTITY zotero.alumni "Alumnes:">
+<!ENTITY zotero.citationProcessing "Processant les cites i bibliografia">
 <!ENTITY zotero.createdby "Creat per:">
+<!ENTITY zotero.developers "Desenvolupadors:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Directors:">
-<!ENTITY zotero.developers "Desenvolupadors:">
-<!ENTITY zotero.alumni "Alumnes:">
-<!ENTITY zotero.about.localizations "Traduccions:">
-<!ENTITY zotero.about.additionalSoftware "Programari de tercers i estàndards:">
 <!ENTITY zotero.executiveProducer "Productor executiu:">
-<!ENTITY zotero.thanks "Agraïments especials:">
-<!ENTITY zotero.about.close "Tanca">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Més crèdits i reconeixements">
-<!ENTITY zotero.citationProcessing "Processant les cites i bibliografia">
+<!ENTITY zotero.thanks "Agraïments especials:">
+<!ENTITY zotero.version "versió">

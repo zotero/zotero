@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "versioon">
+<!ENTITY zotero.about.additionalSoftware "Kolmandate osapoolte tarkvara ja standardid:">
+<!ENTITY zotero.about.close "Sulge">
+<!ENTITY zotero.about.localizations "Tõlked:">
+<!ENTITY zotero.alumni "Kaastöötajad:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Loodud:">
+<!ENTITY zotero.developers "Arendajad:">
 <!ENTITY zotero.director "Juhataja:">
 <!ENTITY zotero.directors "Juhatajad:">
-<!ENTITY zotero.developers "Arendajad:">
-<!ENTITY zotero.alumni "Kaastöötajad:">
-<!ENTITY zotero.about.localizations "Tõlked:">
-<!ENTITY zotero.about.additionalSoftware "Kolmandate osapoolte tarkvara ja standardid:">
 <!ENTITY zotero.executiveProducer "Vastutav produtsent:">
-<!ENTITY zotero.thanks "Tänud:">
-<!ENTITY zotero.about.close "Sulge">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Veel autoreid ja tänusõnu">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.thanks "Tänud:">
+<!ENTITY zotero.version "versioon">

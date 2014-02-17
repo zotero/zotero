@@ -533,9 +533,17 @@ Zotero.Cite.System.prototype = {
 				&& zoteroItem.getField("pages")
 				&& !Zotero.Prefs.get("export.citePaperJournalArticleURL"));
 		
+		// XXXX
+		// XXXX Mapped in logic of itemToCSLJSON (utilities.js) @ 2014-01-16
+		// XXXX
+
 		var cslItem = {
 			'id':zoteroItem.id,
-			'type':cslType
+			'type':cslType,
+			'multi':{
+				'main':{},
+				'_keys':{}
+			}
 		};
 		
 		// get all text variables (there must be a better way)
@@ -551,11 +559,26 @@ Zotero.Cite.System.prototype = {
 						value = value.substr(1, value.length-2);
 					}
 					cslItem[variable] = value;
+					if (zoteroItem.multi.main[field]) {
+						cslItem.multi.main[variable] = zoteroItem.multi.main[field]
+					}
+					if (zoteroItem.multi._keys[field]) {
+						cslItem.multi._keys[variable] = {};
+						for (var langTag in zoteroItem.multi._keys[field]) {
+							cslItem.multi._keys[variable][langTag] = zoteroItem.multi._keys[field][langTag];
+						}
+					}
 					break;
 				}
 			}
 		}
 		
+		// Clean up committee/legislativeBody
+		if (cslItem.committee && cslItem.authority) {
+			cslItem.authority = [cslItem.authority,cslItem.committee].join("|");
+			delete cslItem.committee;
+		}
+
 		// separate name variables
 		var authorID = Zotero.CreatorTypes.getPrimaryIDForType(zoteroItem.itemTypeID);
 		var creators = zoteroItem.getCreators();
@@ -569,8 +592,33 @@ Zotero.Cite.System.prototype = {
 			var creatorType = CSL_NAMES_MAPPINGS[creatorType];
 			if(!creatorType) continue;
 			
-			var nameObj = {'family':creator.ref.lastName, 'given':creator.ref.firstName};
+			if (Zotero.Prefs.get('csl.enableInstitutionFormatting')) {
+				var nameObj = {
+					'family':creator.ref.lastName, 
+					'given':creator.ref.firstName,
+					'isInstitution': creator.ref.fieldMode
+				}
+			} else {
+				var nameObj = {
+					'family':creator.ref.lastName,
+					'given':creator.ref.firstName
+				}
+			}
 			
+			nameObj.multi = {};
+			nameObj.multi._lst = creator.multi._lst.slice();
+			nameObj.multi._key = {};
+			for each (var langTag in creator.multi._lst) {
+				if (!creator.multi._key[langTag]) {
+					nameObj.multi._key[langTag] = {};
+				}
+				nameObj.multi._key[langTag] = {
+					family: creator.multi._key[langTag].lastName,
+					given: creator.multi._key[langTag].firstName
+				}
+			}
+			nameObj.multi.main = creator.multi.main;
+
 			if(cslItem[creatorType]) {
 				cslItem[creatorType].push(nameObj);
 			} else {
@@ -580,30 +628,62 @@ Zotero.Cite.System.prototype = {
 		
 		// get date variables
 		for(var variable in CSL_DATE_MAPPINGS) {
-			var date = zoteroItem.getField(CSL_DATE_MAPPINGS[variable], false, true);
-			if(date) {
-				var dateObj = Zotero.Date.strToDate(date);
-				// otherwise, use date-parts
-				var dateParts = [];
-				if(dateObj.year) {
-					// add year, month, and day, if they exist
-					dateParts.push(dateObj.year);
-					if(dateObj.month !== undefined) {
-						dateParts.push(dateObj.month+1);
-						if(dateObj.day) {
-							dateParts.push(dateObj.day);
-						}
-					}
-					cslItem[variable] = {"date-parts":[dateParts]};
-					
-					// if no month, use season as month
-					if(dateObj.part && !dateObj.month) {
-						cslItem[variable].season = dateObj.part;
-					}
-				} else {
-					// if no year, pass date literally
-					cslItem[variable] = {"literal":date};
+			var date;
+			for each(var zVar in CSL_DATE_MAPPINGS[variable]) {
+				var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(zoteroItem.itemTypeID, zVar);
+				if (!fieldID) {
+					var fieldID = Zotero.ItemFields.getID(zVar);
 				}
+				var fieldName = Zotero.ItemFields.getName(fieldID);
+				date = zoteroItem.getField(fieldName, false, true);
+				if (date) {
+					break;
+				}
+			}
+			if(date) {
+				if (Zotero.Prefs.get('hackUseCiteprocJsDateParser')) {
+					var raw = Zotero.Date.multipartToStr(date);
+					// cslItem[variable] = {raw: raw, "date-parts":[dateParts]};
+					cslItem[variable] = {raw: raw};
+				} else {
+					var dateObj = Zotero.Date.strToDate(date);
+					// otherwise, use date-parts
+					var dateParts = [];
+					if(dateObj.year) {
+						// add year, month, and day, if they exist
+						dateParts.push(dateObj.year);
+						if(dateObj.month !== undefined) {
+							dateParts.push(dateObj.month+1);
+							if(dateObj.day) {
+								dateParts.push(dateObj.day);
+							}
+						}
+						cslItem[variable] = {"date-parts":[dateParts]};
+						
+						// if no month, use season as month
+						if(dateObj.part && !dateObj.month) {
+							cslItem[variable].season = dateObj.part;
+						}
+					} else {
+						// if no year, pass date literally
+						cslItem[variable] = {"literal":date};
+					}
+				}
+			}
+		}
+
+		// Force Fields
+		if (CSL_FORCE_FIELD_CONTENT[itemType]) {
+			for (var variable in CSL_FORCE_FIELD_CONTENT[itemType]) {
+				cslItem[variable] = CSL_FORCE_FIELD_CONTENT[itemType][variable];
+			}
+		}
+		
+		// Force remap
+		if (CSL_FORCE_REMAP[itemType]) {
+			for (var variable in CSL_FORCE_REMAP[itemType]) {
+				cslItem[CSL_FORCE_REMAP[itemType][variable]] = cslItem[variable];
+				delete cslItem[variable];
 			}
 		}
 
@@ -643,5 +723,89 @@ Zotero.Cite.System.prototype = {
 		converterStream.readString(channel.contentLength, str);
 		converterStream.close();
 		return str.value;
+	},
+
+	"wrapCitationEntryHtml":function (str, item_id, locator_txt, suffix_txt) {
+		if (!locator_txt) {
+			locator_txt = "";
+		}
+		if (!suffix_txt) {
+			suffix_txt = "";
+		}
+		return Zotero.Prefs.get("export.quickCopy.citationWrapperHtml")
+			.replace("%%STRING%%", str)
+			.replace("%%LOCATOR%%", locator_txt)
+			.replace("%%SUFFIX%%", suffix_txt)
+			.replace("%%ITEM_ID%%", item_id);
+	},
+
+	"wrapCitationEntryText":function (str, item_id, locator_txt, suffix_txt) {
+		if (!locator_txt) {
+			locator_txt = "";
+		}
+		if (!suffix_txt) {
+			suffix_txt = "";
+		}
+		return Zotero.Prefs.get("export.quickCopy.citationWrapperText")
+			.replace("%%STRING%%", str)
+			.replace("%%LOCATOR%%", locator_txt)
+			.replace("%%SUFFIX%%", suffix_txt)
+			.replace("%%ITEM_ID%%", item_id);
+	},
+
+	/**
+	 * citeproc-js system function for getting abbreviations
+	 * See http://gsl-nagoya-u.net/http/pub/citeproc-doc.html#getabbreviations
+	 * Not currently used because it doesn't scale well to large lists
+	 */
+	"getAbbreviations":function getAbbreviations() {
+		return {};
+	}
+}
+
+Zotero.Cite._monthStrings = false;
+Zotero.Cite.getMonthStrings = function(form, locale) {
+	if(Zotero.Cite._monthStrings){
+		return Zotero.Cite._monthStrings[form];
+	} else {
+		Zotero.Cite._monthStrings = {"long":[], "short":[]};
+
+		var sys = {'xml':new Zotero.CiteProc.CSL.System.Xml.Parsing()};
+		if(!locale) locale = Zotero.locale;
+
+		var cslLocale = Zotero.CiteProc.CSL.localeResolve(Zotero.locale);
+		if(!Zotero.CiteProc.CSL.locale[cslLocale.best]) {
+			let localexml = sys.xml.makeXml(Zotero.Cite.System.retrieveLocale(cslLocale.best));
+			if(!localexml) {
+				if(localexml == "en-US") {
+					throw "No locales.xml file could be found for the preferred locale or for en-US. "+
+						  "Please ensure that the locales directory exists and is properly populated";
+				} else {
+					let localexml = sys.xml.makeXml(Zotero.Cite.System.retrieveLocale(cslLocale.bare));
+					if(!localexml) {
+						Zotero.log("No locale "+cslLocale.best+"; using en-US", "warning");
+						return Zotero.Cite.getMonthStrings(form, "en-US");
+					}
+				}
+			}
+			Zotero.CiteProc.CSL.localeSet.call(Zotero.CiteProc.CSL, sys, localexml, cslLocale.best, cslLocale.best);
+		}
+
+		var locale = Zotero.CiteProc.CSL.locale[cslLocale.best];
+		if(!locale) {
+			Zotero.log("No locale "+cslLocale.best+"; using en-US", "warning");
+			return Zotero.Cite.getMonthStrings(form, "en-US");
+		}
+
+		for(let i=1; i<=12; i++) {
+			let term = locale.terms["month-"+(i<10 ? "0" : "")+i];
+			if(term) {
+				Zotero.Cite._monthStrings["long"][i-1] = term["long"];
+				Zotero.Cite._monthStrings["short"][i-1] = (term["short"] ? term["short"].replace(".", "", "g") : term["long"]);
+			} else {
+				Zotero.log("No month "+i+" specified for locale "+cslLocale.best, "warning");
+			}
+		}
+		return Zotero.Cite._monthStrings[form];
 	}
 };

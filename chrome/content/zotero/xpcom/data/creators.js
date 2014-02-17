@@ -95,19 +95,25 @@ Zotero.Creators = new function() {
 		var sql = "SELECT creatorDataID FROM creatorData WHERE "
 			+ "firstName=? AND lastName=? AND shortName=? "
 			+ "AND fieldMode=? AND birthYear=?";
+		
 		var id = Zotero.DB.valueQuery(sql, params);
 		
 		if (!id && create) {
+
 			id = Zotero.ID.get('creatorData');
+
 			params.unshift(id);
 			
 			sql = "INSERT INTO creatorData (creatorDataID, "
 				+ "firstName, lastName, shortName, fieldMode, birthYear) "
 				+ "VALUES (?, ?, ?, ?, ?, ?)";
+
 			var insertID = Zotero.DB.query(sql, params);
 			if (!id) {
 				id = insertID;
 			}
+
+
 		}
 		
 		Zotero.DB.commitTransaction();
@@ -144,12 +150,12 @@ Zotero.Creators = new function() {
 		return Zotero.DB.valueQuery(sql, params);
 	}
 	
-	
 	function updateData(creatorDataID, fields) {
 		fields = _cleanFields(fields);
 		
 		var sqlFields = [];
 		var sqlParams = [];
+
 		for (var field in fields) {
 			// Skip fields not specified as changeable creator fields
 			if (this.fields.indexOf(field) == -1) {
@@ -168,18 +174,17 @@ Zotero.Creators = new function() {
 		_updateCachedData(creatorDataID);
 	}
 	
-	
 	function deleteData(creatorDataID) {
 		var sql = "DELETE FROM creatorData WHERE creatorDataID=?";
 		Zotero.DB.query(sql, creatorDataID);
 		_updateCachedData(creatorDataID);
 	}
 	
-	
 	/**
 	 * Remove creator(s) from all linked items and call this.purge()
 	 * to delete creator rows
 	 */
+
 	function erase(ids) {
 		ids = Zotero.flattenArguments(ids);
 		
@@ -224,7 +229,9 @@ Zotero.Creators = new function() {
 		
 		// Purge unused creators
 		var sql = 'SELECT creatorID FROM creators WHERE creatorID NOT IN '
-			+ '(SELECT creatorID FROM itemCreators)';
+			+ '(SELECT creatorID FROM itemCreators '
+			+ 'UNION '
+			+ 'SELECT creatorID FROM itemCreatorsAlt)';
 		var toDelete = Zotero.DB.columnQuery(sql);
 		
 		if (toDelete) {
@@ -233,8 +240,12 @@ Zotero.Creators = new function() {
 				delete this._objectCache[creatorID];
 			}
 			
-			var sql = "DELETE FROM creators WHERE creatorID NOT IN "
-				+ "(SELECT creatorID FROM itemCreators)";
+			// XXX: Do we need both suspenders and a belt here?
+			var sql = "DELETE FROM creators "
+				+ "WHERE creatorID NOT IN "
+				+ "(SELECT creatorID FROM itemCreators "
+				+ "UNION "
+				+ "SELECT creatorID FROM itemCreatorsAlt)";
 			Zotero.DB.query(sql);
 		}
 		
@@ -252,8 +263,14 @@ Zotero.Creators = new function() {
 			var sql = "DELETE FROM creatorData WHERE creatorDataID NOT IN "
 				+ "(SELECT creatorDataID FROM creators)";
 			Zotero.DB.query(sql);
+
 		}
 		
+		// Purge unused itemCreatorMain rows
+		var sql = 'DELETE FROM itemCreatorsMain WHERE creatorID NOT IN '
+			+ '(SELECT creatorID FROM creators)';
+		Zotero.DB.query(sql);
+
 		Zotero.Prefs.set('purge.creators', false);
 	}
 	
@@ -313,14 +330,15 @@ Zotero.Creators = new function() {
 					cleanedFields[field] = fields[field] ? fields[field] + '' : '';
 					break;
 				
-				// Integer
+				// Integer (but undefined is undefined)
 				case 'fieldMode':
 					cleanedFields[field] = fields[field] ? fields[field] : 0;
 					break;
 				
-				// Null if empty
+				// Null if empty (but undefined is undefined)
 				case 'birthYear':
 					cleanedFields[field] = fields[field] ? fields[field] : null;
+					break;
 			}
 		}
 		return cleanedFields;
@@ -342,7 +360,6 @@ Zotero.Creators = new function() {
 		return Zotero.DB.rowQuery(sql, creatorDataID);
 	}
 	
-	
 	function _updateCachedData(creatorDataID) {
 		for (var hash in _creatorDataHash) {
 			if (_creatorDataHash[hash] == creatorDataID) {
@@ -351,6 +368,7 @@ Zotero.Creators = new function() {
 		}
 		
 		var creators = getCreatorsWithData(creatorDataID);
+
 		for each(var creatorID in creators) {
 			if (Zotero.Creators._objectCache[creatorID]) {
 				Zotero.Creators._objectCache[creatorID].load();

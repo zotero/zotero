@@ -1,23 +1,18 @@
-<!ENTITY zotero.search.name "ชื่อ:">
-
-<!ENTITY zotero.search.joinMode.prefix "ตรงกับ">
-<!ENTITY zotero.search.joinMode.any "คำใดๆ">
-<!ENTITY zotero.search.joinMode.all "ทั้งหมด">
-<!ENTITY zotero.search.joinMode.suffix "ของรายการดังต่อไปนี้:">
-
-<!ENTITY zotero.search.recursive.label "ค้นหาในคอลเล็คชันย่อย">
-<!ENTITY zotero.search.noChildren "แสดงเฉพาะรายการระดับบนสุด">
+<!ENTITY zotero.search.clear "ล้าง">
+<!ENTITY zotero.search.date.units.days "วัน">
+<!ENTITY zotero.search.date.units.months "เดือน">
+<!ENTITY zotero.search.date.units.years "ปี">
 <!ENTITY zotero.search.includeParentsAndChildren "รวมรายการที่ตรงกันทั้งรายการแม่และรายการลูก">
-
+<!ENTITY zotero.search.joinMode.all "ทั้งหมด">
+<!ENTITY zotero.search.joinMode.any "คำใดๆ">
+<!ENTITY zotero.search.joinMode.prefix "ตรงกับ">
+<!ENTITY zotero.search.joinMode.suffix "ของรายการดังต่อไปนี้:">
+<!ENTITY zotero.search.name "ชื่อ:">
+<!ENTITY zotero.search.noChildren "แสดงเฉพาะรายการระดับบนสุด">
+<!ENTITY zotero.search.recursive.label "ค้นหาในคอลเล็คชันย่อย">
+<!ENTITY zotero.search.saveSearch "บันทึกผลการค้นหา">
+<!ENTITY zotero.search.search "ค้นหา">
 <!ENTITY zotero.search.textModes.phrase "พยางค์">
 <!ENTITY zotero.search.textModes.phraseBinary "พยางค์ (รวมแฟ้มไบนารี)">
 <!ENTITY zotero.search.textModes.regexp "นิพจน์ปรกติ">
 <!ENTITY zotero.search.textModes.regexpCS "นิพจน์ปรกติ (แยกตัวพิมพ์เล็ก-พิมพ์ใหญ่)">
-
-<!ENTITY zotero.search.date.units.days "วัน">
-<!ENTITY zotero.search.date.units.months "เดือน">
-<!ENTITY zotero.search.date.units.years "ปี">
-
-<!ENTITY zotero.search.search "ค้นหา">
-<!ENTITY zotero.search.clear "ล้าง">
-<!ENTITY zotero.search.saveSearch "บันทึกผลการค้นหา">

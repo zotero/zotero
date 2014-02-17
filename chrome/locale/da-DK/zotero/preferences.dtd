@@ -1,209 +1,218 @@
-<!ENTITY zotero.preferences.title "Indstillinger for Zotero">
-
-<!ENTITY zotero.preferences.default "Default:">
-<!ENTITY zotero.preferences.items "Elementer">
-<!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Indstillinger">
-
-<!ENTITY zotero.preferences.prefpane.general "Generelt">
-
-<!ENTITY zotero.preferences.userInterface "Brugerflade">
-<!ENTITY zotero.preferences.showIn "Indlæs Zotero i:">
-<!ENTITY zotero.preferences.showIn.browserPane "Browser-vindue">
-<!ENTITY zotero.preferences.showIn.separateTab "Separat faneblad">
-<!ENTITY zotero.preferences.showIn.appTab "Applikationsfaneblad">
-<!ENTITY zotero.preferences.statusBarIcon "Ikon på statuslinie:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Intet">
-<!ENTITY zotero.preferences.fontSize "Skriftstørrelse:">
-<!ENTITY zotero.preferences.fontSize.small "Lille">
-<!ENTITY zotero.preferences.fontSize.medium "Medium">
-<!ENTITY zotero.preferences.fontSize.large "Stor">
-<!ENTITY zotero.preferences.fontSize.xlarge "Ekstra stor">
-<!ENTITY zotero.preferences.fontSize.notes "Skriftstørrelse i noter:">
-
-<!ENTITY zotero.preferences.miscellaneous "Forskelligt">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Filer og mapper">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Databasefolder:">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Tilknyttet databasefolder for vedhæftninger">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero vil benytte relative stier for tilknyttede vedhæftede filer i databasefolderen, hvilket giver dig mulighed for at tilgå filerne med forskellige computere så længe filstrukturen i databasefolderen forbliver den samme">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Gendan til absolutte stier...">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Vælg...">
 <!ENTITY zotero.preferences.autoUpdate "Kontroller automatisk for oversættelser og typografier">
-<!ENTITY zotero.preferences.updateNow "Opdater nu">
-<!ENTITY zotero.preferences.reportTranslationFailure "Rapporter om &quot;oversættere&quot; uden forbindelse">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillad Zoter.org at tilpasse indhold baseret på den aktuelle Zotero-version">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Hvis den er slået til, vil den aktuelle Zotero-version blive medtaget ved  HTTP-forespørgsler til zotero.org.">
-<!ENTITY zotero.preferences.parseRISRefer "Brug Zotero til at hente BibTeX/RIS/Refer -filer">
 <!ENTITY zotero.preferences.automaticSnapshots "Tag automatisk et &quot;Snapshot&quot; når der oprettes Elementer for web-sider">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Vedhæft automatisk tilhørende PDF-filer og andre filer når Elementer gemmes">
 <!ENTITY zotero.preferences.automaticTags "Mærk automatisk Elementer med stikord og emne-grupper">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Fjern automatisk Elementer fra papirkurven hvis de er slettet for mere end">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dage siden">
-
+<!ENTITY zotero.preferences.charset "Tegnsæt">
+<!ENTITY zotero.preferences.charset.displayExportOption "Vis valgmuligheder for tegnsæt ved eksport">
+<!ENTITY zotero.preferences.charset.importCharset "Importer tegnsæt">
+<!ENTITY zotero.preferences.citationOptions.caption "Valgmuligheder for hensvisninger">
+<!ENTITY zotero.preferences.cite.styles "Bibliografiske formater">
+<!ENTITY zotero.preferences.cite.styles.automaticTitleAbbreviation "Automatically abbreviate journal titles">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Manager til bibliografiske formater">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Opdateret">
+<!ENTITY zotero.preferences.cite.wordProcessors "Teksbehandlere">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Hent plugin til tekstbehandlere...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Der er ikke p.t. installeret et plugin til tekstbehandling.">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Brug den klassiske dialog til Tilføj Henvisning">
+<!ENTITY zotero.preferences.dataDir "Placering af data-mappen">
+<!ENTITY zotero.preferences.dataDir.choose "Vælg...">
+<!ENTITY zotero.preferences.dataDir.custom "Tilpas:">
+<!ENTITY zotero.preferences.dataDir.reveal "Vis data-mappen">
+<!ENTITY zotero.preferences.dataDir.useProfile "Brug profil-mappen">
+<!ENTITY zotero.preferences.dbMaintenance "Vedligeholdelse af databasen">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Tjek databasens gyldighed">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset formater...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset &quot;oversættere&quot;...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset &quot;oversættere&quot; og formater...">
+<!ENTITY zotero.preferences.debugOutputLogging "Debug logning af output">
+<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Ryd output">
+<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Slå til efter genstart">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "linjer som er logget">
+<!ENTITY zotero.preferences.debugOutputLogging.message "Debug-output kan hjælpe Zoteros udviklere med at diagnosticere problemer i Zotero. Debug-logning få Zotero til at reagere langsommere, så du bør have det slået fra medmindre en Zotero-udvikler kræver om det.">
+<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Fremsend til Zotero Server">
+<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Vis output">
+<!ENTITY zotero.preferences.default "Default:">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Vedhæft automatisk tilhørende PDF-filer og andre filer når Elementer gemmes">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Medtag URL'er for trykte artikler i referencer">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Når denne mulighed er valgt fra, medtager Zotero kun URL'er for artikler i tidsskrifter, blade og aviser hvis der ikke er anført sidetal (første og sidste side).">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Hent yderligere formater">
+<!ENTITY zotero.preferences.fontSize "Skriftstørrelse:">
+<!ENTITY zotero.preferences.fontSize.large "Stor">
+<!ENTITY zotero.preferences.fontSize.medium "Medium">
+<!ENTITY zotero.preferences.fontSize.notes "Skriftstørrelse i noter:">
+<!ENTITY zotero.preferences.fontSize.small "Lille">
+<!ENTITY zotero.preferences.fontSize.xlarge "Ekstra stor">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maksimalt antal sider som indekseres per fil:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Maksimalt antal tegn som indekseres per fil:">
 <!ENTITY zotero.preferences.groups "Grupper">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "Når elementer kopieres mellem biblioteker, så medtag:">
-<!ENTITY zotero.preferences.groups.childNotes "underliggende Noter">
 <!ENTITY zotero.preferences.groups.childFiles "underliggende &quot;Snapshots&quot; og importerede filer">
 <!ENTITY zotero.preferences.groups.childLinks "underliggende links">
+<!ENTITY zotero.preferences.groups.childNotes "underliggende Noter">
 <!ENTITY zotero.preferences.groups.tags "etiketter">
-
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "Når elementer kopieres mellem biblioteker, så medtag:">
+<!ENTITY zotero.preferences.items "Elementer">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Ændringer vil kun træde i kraft i nyåbnede vinduer">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier valgte henvisninger til udklipsholder">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopier valgte Elementer til udklipsholder">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Panel med fokusbiblioteker">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Importer fra udklipsholder">
+<!ENTITY zotero.preferences.keys.library "Library">
+<!ENTITY zotero.preferences.keys.newItem "Opret nyt element">
+<!ENTITY zotero.preferences.keys.newNote "Opret en ny note">
+<!ENTITY zotero.preferences.keys.openZotero "Åbn/Luk Zotero-vinduet">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Forsøg at løse overlappende genveje">
+<!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøgning">
+<!ENTITY zotero.preferences.keys.saveToZotero "Gem til Zotero (ikon i adresselinjen)">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Slå fuldskærmsvisning til/fra">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Slå Tag selector til/fra">
+<!ENTITY zotero.preferences.lang.addLanguage "Add a language">
+<!ENTITY zotero.preferences.lang.configureCitations "(3) Configure citations &#8680;">
+<!ENTITY zotero.preferences.lang.csl "CSL:">
+<!ENTITY zotero.preferences.lang.display "Display">
+<!ENTITY zotero.preferences.lang.inCitationsAndBibliographies "In citations and bibliographies">
+<!ENTITY zotero.preferences.lang.insideZotero "Zotero UI">
+<!ENTITY zotero.preferences.lang.institutions "Institutions:">
+<!ENTITY zotero.preferences.lang.journals "Journals:">
+<!ENTITY zotero.preferences.lang.languageList "Languages for Use in Metadata">
+<!ENTITY zotero.preferences.lang.languageRoles "(2) Define language roles &#8681;">
+<!ENTITY zotero.preferences.lang.languages "Languages">
+<!ENTITY zotero.preferences.lang.nickname "Nickname">
+<!ENTITY zotero.preferences.lang.originalNameFormat "Use original formatting conventions for transliterated names">
+<!ENTITY zotero.preferences.lang.persons "Persons:">
+<!ENTITY zotero.preferences.lang.places "Places:">
+<!ENTITY zotero.preferences.lang.primary "primary">
+<!ENTITY zotero.preferences.lang.publishers "Publishers:">
+<!ENTITY zotero.preferences.lang.region "Region">
+<!ENTITY zotero.preferences.lang.script "Script">
+<!ENTITY zotero.preferences.lang.secondary "[secondary]">
+<!ENTITY zotero.preferences.lang.setLocales "(1) Set locales &#8679;">
+<!ENTITY zotero.preferences.lang.showOriginal "Show original form of transliterated names in bibliography">
+<!ENTITY zotero.preferences.lang.sorting "Sorting">
+<!ENTITY zotero.preferences.lang.suppressTitleTransliteration "Suppress transliteration of titles">
+<!ENTITY zotero.preferences.lang.tag "Tag">
+<!ENTITY zotero.preferences.lang.titles "Titles:">
+<!ENTITY zotero.preferences.lang.translation "Translation">
+<!ENTITY zotero.preferences.lang.transliteration "Transliteration">
+<!ENTITY zotero.preferences.lang.ui "UI:">
+<!ENTITY zotero.preferences.lang.variant "Variant">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
+<!ENTITY zotero.preferences.locate.description "Beskrivelse">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Håndtering af søgemaskiner for artikler">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "En søgemaskine udvider mulighederne drop-down-menuen for Lokalisering i Info-vinduet. Hvis man aktiverer søgemaskinerne i nedenstående liste, bliver de føjet til drop-down-menuen og kan anvendes til at lokalisere Elementer fra dit Bibliotek på WWW.">
+<!ENTITY zotero.preferences.locate.name "Navn">
+<!ENTITY zotero.preferences.locate.restoreDefaults "Gendan Defaults">
+<!ENTITY zotero.preferences.miscellaneous "Forskelligt">
+<!ENTITY zotero.preferences.openAboutConfig "Åbn about:config">
+<!ENTITY zotero.preferences.openAboutMemory "Åben about:memory">
+<!ENTITY zotero.preferences.openCSLEdit "Åbn CSL-Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Åbn CSL-Preview">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
-
-<!ENTITY zotero.preferences.openurl.search "Søg efter &quot;resolvers&quot;">
 <!ENTITY zotero.preferences.openurl.custom "Tilpas...">
+<!ENTITY zotero.preferences.openurl.search "Søg efter &quot;resolvers&quot;">
 <!ENTITY zotero.preferences.openurl.server "&quot;Resolver&quot;:">
 <!ENTITY zotero.preferences.openurl.version "Version:">
-
-<!ENTITY zotero.preferences.prefpane.sync "Synkroniser">
-<!ENTITY zotero.preferences.sync.username "Brugernavn:">
-<!ENTITY zotero.preferences.sync.password "Adgangskode:">
-<!ENTITY zotero.preferences.sync.syncServer "Zoteros synkroniseringsserver">
-<!ENTITY zotero.preferences.sync.createAccount "Opret konto">
-<!ENTITY zotero.preferences.sync.lostPassword "Mistet adgangskode?">
-<!ENTITY zotero.preferences.sync.syncAutomatically "Synkroniser automatisk">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Synkroniser full-text indhold">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero kan synkronisere full-text indholdet af filer i dit Zoterobibliotek med zotero.org og andre tilknyttede enheder, hvilket tillader dig enkel søgning i dine foler uanset hvor du er. Full-text indholdet af dine filer vil ikke blive delt offentligt.">
-<!ENTITY zotero.preferences.sync.about "Om synkronisering">
-<!ENTITY zotero.preferences.sync.fileSyncing "Fil-synkronisering">
-<!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synkroniser Vedhæftninger i Mit Bibliotek ved hjælp af">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Synkroniser Vedhæftninger i gruppe-biblioteker ved hjælp af Zoteros online-lager">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "Hent filer">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "under synkronisering">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "efter behov">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Når du anvender Zoteros online-lager, er du forpligtet på dets">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "betingelser">
-<!ENTITY zotero.preferences.sync.reset.warning1 "Følgende operationer er bruges normalt kun i sjældne og meget specielle situationer og bør ikke bruges ved normal problemløsning. I mange tilfælde vil nulstilling føre til yderligere problemer. Se">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Synkroniser nulstillingsindstillinger">
-<!ENTITY zotero.preferences.sync.reset.warning3 "for mere information">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Fuld synkronisering med Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Flet de lokale Zotero-data med data fra synkroniserings-serveren uanset deres synkroniserings-historik.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Gendan fra Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Slet alle lokale Zotero-data og gendan fra synkroniserings-serveren.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Gendan på Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Slet alle server-data og overskriv med lokale data fra Zotero.">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Nulstil historik for fil-synkronisering">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Gennemtving et tjek af lager-serveren for alle lokale Vedhæftninger">
-<!ENTITY zotero.preferences.sync.reset "Nulstil">
-<!ENTITY zotero.preferences.sync.reset.button "Nulstil...">
-
-
+<!ENTITY zotero.preferences.parseRISRefer "Brug Zotero til at hente BibTeX/RIS/Refer -filer">
+<!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.prefpane.advanced "Avanceret">
+<!ENTITY zotero.preferences.prefpane.cite "Henvis">
+<!ENTITY zotero.preferences.prefpane.export "Eksport">
+<!ENTITY zotero.preferences.prefpane.general "Generelt">
+<!ENTITY zotero.preferences.prefpane.keys "Genvejs-taster">
+<!ENTITY zotero.preferences.prefpane.lang "Languages">
+<!ENTITY zotero.preferences.prefpane.locate "Lokaliser">
+<!ENTITY zotero.preferences.prefpane.proxies "Proxyer">
 <!ENTITY zotero.preferences.prefpane.search "Søg">
+<!ENTITY zotero.preferences.prefpane.sync "Synkroniser">
+<!ENTITY zotero.preferences.prefpane.sync.reset "Reset">
+<!ENTITY zotero.preferences.prefpane.sync.settings "Settings">
+<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Enhver tegnstreng">
+<!ENTITY zotero.preferences.proxies.autoAssociate "Tilknyt automatisk nye værter">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Anerkend automatisk ressourcer i proxyer">
+<!ENTITY zotero.preferences.proxies.configured "Konfigurerede proxyer">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Mappe-stien (fx about/)">
+<!ENTITY zotero.preferences.proxies.desc_after_link "for nærmere oplysninger.">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero vil automatisk ekspedere forespørgsler via de gemte proxyer. Se">
+<!ENTITY zotero.preferences.proxies.desc_link "dokumentation om proxyer">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Slå automatisk brug af proxyer fra når domænenavnet indeholder ">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Filnavnet (fx index.html)">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Værtsnanvnet for det site som anvendes som proxy (fx www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.hostname "Værtsnavn">
+<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Stien til proxy-siden med udeladelse af første skråstreg (fx. about/index.html)">
+<!ENTITY zotero.preferences.proxies.proxyOptions "Proxy-indstillinger">
+<!ENTITY zotero.preferences.proxies.scheme "Scheme">
+<!ENTITY zotero.preferences.proxies.transparent "Send forespørgsler gennem tidligere anvendte proxyer">
+<!ENTITY zotero.preferences.proxies.variables "Du kan bruge følgende variable ved tilknytningen af proxyer">
+<!ENTITY zotero.preferences.quickCopy.caption "Hurtig kopi">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopier som HTML">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Standardformat for output:">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "Slå Quick Copy fra hvis du trækker mere end">
+<!ENTITY zotero.preferences.quickCopy.linkCitationFormReverse "Use citation form as default">
+<!ENTITY zotero.preferences.quickCopy.linkOption "Include Zotero link wrappers in QuickCopy citations">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Bemærk:RTF- formattering vil gå tabt på Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domæne/Sti">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(dvs. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output-format">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "site-specikke indstillinger">
+<!ENTITY zotero.preferences.reportTranslationFailure "Rapporter om &quot;oversættere&quot; uden forbindelse">
 <!ENTITY zotero.preferences.search.fulltextCache "Fuldtekst-cache">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF-indeksering">
 <!ENTITY zotero.preferences.search.indexStats "Statistik for indeks">
-
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indekseret:">
 <!ENTITY zotero.preferences.search.indexStats.partial "Delvis:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Ikke indekseret:">
 <!ENTITY zotero.preferences.search.indexStats.words "Ord:">
-
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Maksimalt antal tegn som indekseres per fil:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maksimalt antal sider som indekseres per fil:">
-
-<!ENTITY zotero.preferences.prefpane.export "Eksport">
-
-<!ENTITY zotero.preferences.citationOptions.caption "Valgmuligheder for hensvisninger">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Medtag URL'er for trykte artikler i referencer">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Når denne mulighed er valgt fra, medtager Zotero kun URL'er for artikler i tidsskrifter, blade og aviser hvis der ikke er anført sidetal (første og sidste side).">
-
-<!ENTITY zotero.preferences.quickCopy.caption "Hurtig kopi">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Standardformat for output:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopier som HTML">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Bemærk:RTF- formattering vil gå tabt på Mac OS X.">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "site-specikke indstillinger">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domæne/Sti">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(dvs. wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output-format">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "Slå Quick Copy fra hvis du trækker mere end">
-
-<!ENTITY zotero.preferences.prefpane.cite "Henvis">
-<!ENTITY zotero.preferences.cite.styles "Bibliografiske formater">
-<!ENTITY zotero.preferences.cite.wordProcessors "Teksbehandlere">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Der er ikke p.t. installeret et plugin til tekstbehandling.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Hent plugin til tekstbehandlere...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Brug den klassiske dialog til Tilføj Henvisning">
-
-<!ENTITY zotero.preferences.cite.styles.styleManager "Manager til bibliografiske formater">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Opdateret">
-<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Hent yderligere formater">
-
-<!ENTITY zotero.preferences.prefpane.keys "Genvejs-taster">
-
-<!ENTITY zotero.preferences.keys.openZotero "Åbn/Luk Zotero-vinduet">
-<!ENTITY zotero.preferences.keys.saveToZotero "Gem til Zotero (ikon i adresselinjen)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Slå fuldskærmsvisning til/fra">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Panel med fokusbiblioteker">
-<!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøgning">
-<!ENTITY zotero.preferences.keys.newItem "Opret nyt element">
-<!ENTITY zotero.preferences.keys.newNote "Opret en ny note">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Slå Tag selector til/fra">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier valgte henvisninger til udklipsholder">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopier valgte Elementer til udklipsholder">
-<!ENTITY zotero.preferences.keys.importFromClipboard "Importer fra udklipsholder">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Ændringer vil kun træde i kraft i nyåbnede vinduer">
-
-<!ENTITY zotero.preferences.prefpane.proxies "Proxyer">
-
-<!ENTITY zotero.preferences.proxies.proxyOptions "Proxy-indstillinger">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero vil automatisk ekspedere forespørgsler via de gemte proxyer. Se">
-<!ENTITY zotero.preferences.proxies.desc_link "dokumentation om proxyer">
-<!ENTITY zotero.preferences.proxies.desc_after_link "for nærmere oplysninger.">
-<!ENTITY zotero.preferences.proxies.transparent "Send forespørgsler gennem tidligere anvendte proxyer">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Anerkend automatisk ressourcer i proxyer">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Slå automatisk brug af proxyer fra når domænenavnet indeholder ">
-<!ENTITY zotero.preferences.proxies.configured "Konfigurerede proxyer">
-<!ENTITY zotero.preferences.proxies.hostname "Værtsnavn">
-<!ENTITY zotero.preferences.proxies.scheme "Scheme">
-
-<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
-<!ENTITY zotero.preferences.proxies.autoAssociate "Tilknyt automatisk nye værter">
-<!ENTITY zotero.preferences.proxies.variables "Du kan bruge følgende variable ved tilknytningen af proxyer">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Værtsnanvnet for det site som anvendes som proxy (fx www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Stien til proxy-siden med udeladelse af første skråstreg (fx. about/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Mappe-stien (fx about/)">
-<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Filnavnet (fx index.html)">
-<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Enhver tegnstreng">
-
-<!ENTITY zotero.preferences.prefpane.advanced "Avanceret">
-<!ENTITY zotero.preferences.advanced.filesAndFolders "Filer og mapper">
-
-<!ENTITY zotero.preferences.prefpane.locate "Lokaliser">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Håndtering af søgemaskiner for artikler">
-<!ENTITY zotero.preferences.locate.description "Beskrivelse">
-<!ENTITY zotero.preferences.locate.name "Navn">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "En søgemaskine udvider mulighederne drop-down-menuen for Lokalisering i Info-vinduet. Hvis man aktiverer søgemaskinerne i nedenstående liste, bliver de føjet til drop-down-menuen og kan anvendes til at lokalisere Elementer fra dit Bibliotek på WWW.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
-<!ENTITY zotero.preferences.locate.restoreDefaults "Gendan Defaults">
-
-<!ENTITY zotero.preferences.charset "Tegnsæt">
-<!ENTITY zotero.preferences.charset.importCharset "Importer tegnsæt">
-<!ENTITY zotero.preferences.charset.displayExportOption "Vis valgmuligheder for tegnsæt ved eksport">
-
-<!ENTITY zotero.preferences.dataDir "Placering af data-mappen">
-<!ENTITY zotero.preferences.dataDir.useProfile "Brug profil-mappen">
-<!ENTITY zotero.preferences.dataDir.custom "Tilpas:">
-<!ENTITY zotero.preferences.dataDir.choose "Vælg...">
-<!ENTITY zotero.preferences.dataDir.reveal "Vis data-mappen">
-
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Tilknyttet databasefolder for vedhæftninger">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero vil benytte relative stier for tilknyttede vedhæftede filer i databasefolderen, hvilket giver dig mulighed for at tilgå filerne med forskellige computere så længe filstrukturen i databasefolderen forbliver den samme">
-<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Databasefolder:">
-<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Vælg...">
-<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Gendan til absolutte stier...">
-
-<!ENTITY zotero.preferences.dbMaintenance "Vedligeholdelse af databasen">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Tjek databasens gyldighed">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset &quot;oversættere&quot; og formater...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset &quot;oversættere&quot;...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset formater...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Debug logning af output">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Debug-output kan hjælpe Zoteros udviklere med at diagnosticere problemer i Zotero. Debug-logning få Zotero til at reagere langsommere, så du bør have det slået fra medmindre en Zotero-udvikler kræver om det.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "linjer som er logget">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Slå til efter genstart">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Vis output">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Ryd output">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Fremsend til Zotero Server">
-
-<!ENTITY zotero.preferences.openAboutConfig "Åbn about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Åbn CSL-Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Åbn CSL-Preview">
-<!ENTITY zotero.preferences.openAboutMemory "Åben about:memory">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF-indeksering">
+<!ENTITY zotero.preferences.settings "Indstillinger">
+<!ENTITY zotero.preferences.showIn "Indlæs Zotero i:">
+<!ENTITY zotero.preferences.showIn.appTab "Applikationsfaneblad">
+<!ENTITY zotero.preferences.showIn.browserPane "Browser-vindue">
+<!ENTITY zotero.preferences.showIn.separateTab "Separat faneblad">
+<!ENTITY zotero.preferences.statusBarIcon "Ikon på statuslinie:">
+<!ENTITY zotero.preferences.statusBarIcon.none "Intet">
+<!ENTITY zotero.preferences.sync.about "Om synkronisering">
+<!ENTITY zotero.preferences.sync.createAccount "Opret konto">
+<!ENTITY zotero.preferences.sync.fileSyncing "Fil-synkronisering">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Hent filer">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "under synkronisering">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "efter behov">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Synkroniser Vedhæftninger i gruppe-biblioteker ved hjælp af Zoteros online-lager">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synkroniser Vedhæftninger i Mit Bibliotek ved hjælp af">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Når du anvender Zoteros online-lager, er du forpligtet på dets">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "betingelser">
+<!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
+<!ENTITY zotero.preferences.sync.lostPassword "Mistet adgangskode?">
+<!ENTITY zotero.preferences.sync.password "Adgangskode:">
+<!ENTITY zotero.preferences.sync.reset "Nulstil">
+<!ENTITY zotero.preferences.sync.reset.button "Nulstil...">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Fuld synkronisering med Zotero Server">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Flet de lokale Zotero-data med data fra synkroniserings-serveren uanset deres synkroniserings-historik.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Nulstil historik for fil-synkronisering">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Gennemtving et tjek af lager-serveren for alle lokale Vedhæftninger">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Gendan fra Zotero Server">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Slet alle lokale Zotero-data og gendan fra synkroniserings-serveren.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Gendan på Zotero Server">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Slet alle server-data og overskriv med lokale data fra Zotero.">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Følgende operationer er bruges normalt kun i sjældne og meget specielle situationer og bør ikke bruges ved normal problemløsning. I mange tilfælde vil nulstilling føre til yderligere problemer. Se">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Synkroniser nulstillingsindstillinger">
+<!ENTITY zotero.preferences.sync.reset.warning3 "for mere information">
+<!ENTITY zotero.preferences.sync.syncAutomatically "Synkroniser automatisk">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Synkroniser full-text indhold">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero kan synkronisere full-text indholdet af filer i dit Zoterobibliotek med zotero.org og andre tilknyttede enheder, hvilket tillader dig enkel søgning i dine foler uanset hvor du er. Full-text indholdet af dine filer vil ikke blive delt offentligt.">
+<!ENTITY zotero.preferences.sync.syncServer "Zoteros synkroniseringsserver">
+<!ENTITY zotero.preferences.sync.username "Brugernavn:">
+<!ENTITY zotero.preferences.title "Indstillinger for Zotero">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dage siden">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Fjern automatisk Elementer fra papirkurven hvis de er slettet for mere end">
+<!ENTITY zotero.preferences.updateNow "Opdater nu">
+<!ENTITY zotero.preferences.userInterface "Brugerflade">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillad Zoter.org at tilpasse indhold baseret på den aktuelle Zotero-version">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Hvis den er slået til, vil den aktuelle Zotero-version blive medtaget ved  HTTP-forespørgsler til zotero.org.">

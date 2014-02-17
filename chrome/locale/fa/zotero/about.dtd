@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "نگارش">
+<!ENTITY zotero.about.additionalSoftware "نرم‌افزارها و استاندارهای مورد استفاده">
+<!ENTITY zotero.about.close "بستن">
+<!ENTITY zotero.about.localizations "محلی‌سازی:">
+<!ENTITY zotero.alumni "فارغ‌التحصیلان:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "محصولی از:">
+<!ENTITY zotero.developers "توسعه‌دهندگان:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "مدیران:">
-<!ENTITY zotero.developers "توسعه‌دهندگان:">
-<!ENTITY zotero.alumni "فارغ‌التحصیلان:">
-<!ENTITY zotero.about.localizations "محلی‌سازی:">
-<!ENTITY zotero.about.additionalSoftware "نرم‌افزارها و استاندارهای مورد استفاده">
 <!ENTITY zotero.executiveProducer "مدیر اجرایی:">
-<!ENTITY zotero.thanks "تشکر ویژه از:">
-<!ENTITY zotero.about.close "بستن">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.thanks "تشکر ویژه از:">
+<!ENTITY zotero.version "نگارش">

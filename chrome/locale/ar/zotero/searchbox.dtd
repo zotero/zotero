@@ -1,23 +1,18 @@
-<!ENTITY zotero.search.name "الإسم:">
-
-<!ENTITY zotero.search.joinMode.prefix "طابق">
-<!ENTITY zotero.search.joinMode.any "أيّاً من">
-<!ENTITY zotero.search.joinMode.all "جميع">
-<!ENTITY zotero.search.joinMode.suffix "التالي:">
-
-<!ENTITY zotero.search.recursive.label "ابحث في المجلدات الفرعية">
-<!ENTITY zotero.search.noChildren "اعرض العناصر الرئيسية فقط">
+<!ENTITY zotero.search.clear "مسح">
+<!ENTITY zotero.search.date.units.days "أيام">
+<!ENTITY zotero.search.date.units.months "شهور">
+<!ENTITY zotero.search.date.units.years "سنوات">
 <!ENTITY zotero.search.includeParentsAndChildren "تضمن العناصر الرئيسية والفرعية المطابقة للبحث">
-
+<!ENTITY zotero.search.joinMode.all "جميع">
+<!ENTITY zotero.search.joinMode.any "أيّاً من">
+<!ENTITY zotero.search.joinMode.prefix "طابق">
+<!ENTITY zotero.search.joinMode.suffix "التالي:">
+<!ENTITY zotero.search.name "الإسم:">
+<!ENTITY zotero.search.noChildren "اعرض العناصر الرئيسية فقط">
+<!ENTITY zotero.search.recursive.label "ابحث في المجلدات الفرعية">
+<!ENTITY zotero.search.saveSearch "حفظ البحث">
+<!ENTITY zotero.search.search "بحث">
 <!ENTITY zotero.search.textModes.phrase "جملة">
 <!ENTITY zotero.search.textModes.phraseBinary "جملة (شاملاً الملفات الغير نصية)">
 <!ENTITY zotero.search.textModes.regexp "التعبيرات المنطقية">
 <!ENTITY zotero.search.textModes.regexpCS "التعبيرات المنطقية 'تحسس حالة الأحرف'">
-
-<!ENTITY zotero.search.date.units.days "أيام">
-<!ENTITY zotero.search.date.units.months "شهور">
-<!ENTITY zotero.search.date.units.years "سنوات">
-
-<!ENTITY zotero.search.search "بحث">
-<!ENTITY zotero.search.clear "مسح">
-<!ENTITY zotero.search.saveSearch "حفظ البحث">

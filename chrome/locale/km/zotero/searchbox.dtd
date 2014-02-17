@@ -1,23 +1,18 @@
-<!ENTITY zotero.search.name "ឈ្មោះ:">
-
-<!ENTITY zotero.search.joinMode.prefix "ផ្គូរផ្គង">
-<!ENTITY zotero.search.joinMode.any "មួយផ្នែក">
-<!ENTITY zotero.search.joinMode.all "ទាំងអស់">
-<!ENTITY zotero.search.joinMode.suffix "ដូចខាងក្រោម:">
-
-<!ENTITY zotero.search.recursive.label "ស្វែងរកសំណុំឯកសាររង">
-<!ENTITY zotero.search.noChildren "បង្ហាញតែឯកសារសំខាន់ៗនៅខាងលើបញ្ជីប៉ុណ្ណោះ">
+<!ENTITY zotero.search.clear "សម្អាត">
+<!ENTITY zotero.search.date.units.days "ថ្ងៃ">
+<!ENTITY zotero.search.date.units.months "ខែ">
+<!ENTITY zotero.search.date.units.years "ឆ្នាំ">
 <!ENTITY zotero.search.includeParentsAndChildren "បញ្ចូលបញ្ជីមេ និង បញ្ជីរងដែលបានផ្គូរផ្គង">
-
+<!ENTITY zotero.search.joinMode.all "ទាំងអស់">
+<!ENTITY zotero.search.joinMode.any "មួយផ្នែក">
+<!ENTITY zotero.search.joinMode.prefix "ផ្គូរផ្គង">
+<!ENTITY zotero.search.joinMode.suffix "ដូចខាងក្រោម:">
+<!ENTITY zotero.search.name "ឈ្មោះ:">
+<!ENTITY zotero.search.noChildren "បង្ហាញតែឯកសារសំខាន់ៗនៅខាងលើបញ្ជីប៉ុណ្ណោះ">
+<!ENTITY zotero.search.recursive.label "ស្វែងរកសំណុំឯកសាររង">
+<!ENTITY zotero.search.saveSearch "ទាញរក្សាទុកការស្រាវជ្រាវ">
+<!ENTITY zotero.search.search "ស្វែងរក">
 <!ENTITY zotero.search.textModes.phrase "ឃ្លា">
 <!ENTITY zotero.search.textModes.phraseBinary "ឃ្លា (បញ្ចូលឯកសារពីររួមគ្នា)">
 <!ENTITY zotero.search.textModes.regexp "ការត្រួតពិនិត្យទៀងទាត់">
 <!ENTITY zotero.search.textModes.regexpCS "ការត្រួតពិនិត្យទៀងទាត់ (ករណីដែលត្រូវយកចិត្តទុកដាក់)">
-
-<!ENTITY zotero.search.date.units.days "ថ្ងៃ">
-<!ENTITY zotero.search.date.units.months "ខែ">
-<!ENTITY zotero.search.date.units.years "ឆ្នាំ">
-
-<!ENTITY zotero.search.search "ស្វែងរក">
-<!ENTITY zotero.search.clear "សម្អាត">
-<!ENTITY zotero.search.saveSearch "ទាញរក្សាទុកការស្រាវជ្រាវ">

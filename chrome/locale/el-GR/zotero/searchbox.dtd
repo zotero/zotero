@@ -1,23 +1,18 @@
-<!ENTITY zotero.search.name "Όνομα:">
-
-<!ENTITY zotero.search.joinMode.prefix "Ταίριασμα">
-<!ENTITY zotero.search.joinMode.any "οποιαδήποτε">
-<!ENTITY zotero.search.joinMode.all "όλες">
-<!ENTITY zotero.search.joinMode.suffix "από τα παρακάτω:">
-
-<!ENTITY zotero.search.recursive.label "Αναζήτηση στους υποφακέλους">
-<!ENTITY zotero.search.noChildren "Να εμφανίζονται μόνο τα αντικείμενα ανώτατου επιπέδου">
+<!ENTITY zotero.search.clear "Καθαρισμός">
+<!ENTITY zotero.search.date.units.days "ημέρες">
+<!ENTITY zotero.search.date.units.months "μήνες">
+<!ENTITY zotero.search.date.units.years "έτη">
 <!ENTITY zotero.search.includeParentsAndChildren "Να περιλαμβάνονται τα μητρικά και δευτερεύοντα αντικείμενα των αντικειμένων που ταιριάζουν">
-
+<!ENTITY zotero.search.joinMode.all "όλες">
+<!ENTITY zotero.search.joinMode.any "οποιαδήποτε">
+<!ENTITY zotero.search.joinMode.prefix "Ταίριασμα">
+<!ENTITY zotero.search.joinMode.suffix "από τα παρακάτω:">
+<!ENTITY zotero.search.name "Όνομα:">
+<!ENTITY zotero.search.noChildren "Να εμφανίζονται μόνο τα αντικείμενα ανώτατου επιπέδου">
+<!ENTITY zotero.search.recursive.label "Αναζήτηση στους υποφακέλους">
+<!ENTITY zotero.search.saveSearch "Αποθήκευση αναζήτησης">
+<!ENTITY zotero.search.search "Αναζήτηση">
 <!ENTITY zotero.search.textModes.phrase "Φράση">
 <!ENTITY zotero.search.textModes.phraseBinary "Φράση (συμπ. δυαδικά αρχεία)">
 <!ENTITY zotero.search.textModes.regexp "Regexp">
 <!ENTITY zotero.search.textModes.regexpCS "Regexp (διακριση πεζών-κεφαλαίων)">
-
-<!ENTITY zotero.search.date.units.days "ημέρες">
-<!ENTITY zotero.search.date.units.months "μήνες">
-<!ENTITY zotero.search.date.units.years "έτη">
-
-<!ENTITY zotero.search.search "Αναζήτηση">
-<!ENTITY zotero.search.clear "Καθαρισμός">
-<!ENTITY zotero.search.saveSearch "Αποθήκευση αναζήτησης">

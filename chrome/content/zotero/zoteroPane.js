@@ -142,6 +142,7 @@ var ZoteroPane = new function()
 	}
 	
 	/**
+	/**
 	 * Called on window load or when has been reloaded after switching into or out of connector
 	 * mode
 	 */
@@ -348,7 +349,11 @@ var ZoteroPane = new function()
 		if(this.collectionsView) this.collectionsView.unregister();
 		if(this.itemsView) this.itemsView.unregister();
 		
-		observerService.removeObserver(_reloadObserver, "zotero-reloaded");
+        try {
+		    observerService.removeObserver(_reloadObserver, "zotero-reloaded");
+        } catch (e) {
+            Zotero.debug("Error removing _reloadObserver(): "+e);
+        }
 	}
 	
 	/**
@@ -4102,6 +4107,13 @@ var ZoteroPane = new function()
 	 */
 	this.openAboutDialog = function() {
 		window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome');
+	}
+	
+ 	/**
+	 * Opens the MLZ Welcome dialog
+	 */
+	this.openMlzWelcomeDialog = function() {
+		window.openDialog('chrome://zotero/content/mlzwelcome.xul', 'mlzwelcome', 'chrome');
 	}
 	
 	/**

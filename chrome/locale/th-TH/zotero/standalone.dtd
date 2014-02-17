@@ -1,101 +1,113 @@
-<!ENTITY preferencesCmdMac.label "การตั้งค่าพึงใจ...">
-<!ENTITY preferencesCmdMac.commandkey ",">
-<!ENTITY servicesMenuMac.label "บริการ">
-<!ENTITY hideThisAppCmdMac.label "ซ่อน &brandShortName;">
-<!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "ซ่อนอื่น ๆ">
-<!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "แสดงทั้งหมด">
-<!ENTITY quitApplicationCmdMac.label "ออกจาก Zotero">
-<!ENTITY quitApplicationCmdMac.key "Q">
-
-
-<!ENTITY fileMenu.label "แฟ้ม">
-<!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "บันทึก...">
-<!ENTITY saveCmd.key "S">
-<!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "ตั้งค่าหน้ากระดาษ...">
-<!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "พิมพ์...">
-<!ENTITY printCmd.key "P">
-<!ENTITY printCmd.accesskey "P">
-<!ENTITY closeCmd.label "ปิด">
-<!ENTITY closeCmd.key "W">
-<!ENTITY closeCmd.accesskey "C">
-<!ENTITY quitApplicationCmdWin.label "ออกจากโปรแกรม">
-<!ENTITY quitApplicationCmdWin.accesskey "x">
-<!ENTITY quitApplicationCmd.label "เลิกใช้">
-<!ENTITY quitApplicationCmd.accesskey "Q">
-
-
-<!ENTITY editMenu.label "แก้ไข">
-<!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "เลิกทำ">
-<!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "ทำซ้ำ">
-<!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "ตัด">
-<!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "สำเนา">
-<!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
-<!ENTITY copyCitationCmd.label "สำเนาการอ้างอิง">
-<!ENTITY copyBibliographyCmd.label "สำเนาบรรณานุกรม">
-<!ENTITY pasteCmd.label "วาง">
-<!ENTITY pasteCmd.key "V">
-<!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "ลบ">
-<!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "เลือกทั้งหมด">
-<!ENTITY selectAllCmd.key "A">
-<!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Preferences">
-<!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "ตั้งค่าพึงใจ">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "ค้นหา">
-<!ENTITY findCmd.accesskey "F">
-<!ENTITY findCmd.commandkey "f">
-<!ENTITY bidiSwitchPageDirectionItem.label "สลับทิศทางของหน้า">
+<!ENTITY aboutProduct.accesskey "A">
+<!ENTITY aboutProduct.label "เกี่ยวกับ &brandShortName;">
+<!ENTITY addons.label "โปรแกรมเสริม">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
-<!ENTITY bidiSwitchTextDirectionItem.label "สลับทิศทางของอักษร">
+<!ENTITY bidiSwitchPageDirectionItem.label "สลับทิศทางของหน้า">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
-
-
-<!ENTITY toolsMenu.label "เครื่องมือ">
-<!ENTITY toolsMenu.accesskey "T">
-<!ENTITY addons.label "โปรแกรมเสริม">
-
-
+<!ENTITY bidiSwitchTextDirectionItem.label "สลับทิศทางของอักษร">
+<!ENTITY bringAllToFront.label "นำมาไว้ด้านหน้า">
+<!ENTITY closeCmd.accesskey "C">
+<!ENTITY closeCmd.key "W">
+<!ENTITY closeCmd.label "ปิด">
+<!ENTITY copyBibliographyCmd.label "สำเนาบรรณานุกรม">
+<!ENTITY copyCitationCmd.label "สำเนาการอ้างอิง">
+<!ENTITY copyCmd.accesskey "C">
+<!ENTITY copyCmd.key "C">
+<!ENTITY copyCmd.label "สำเนา">
+<!ENTITY cutCmd.accesskey "t">
+<!ENTITY cutCmd.key "X">
+<!ENTITY cutCmd.label "ตัด">
+<!ENTITY deleteCmd.accesskey "D">
+<!ENTITY deleteCmd.key "D">
+<!ENTITY deleteCmd.label "ลบ">
+<!ENTITY editMenu.accesskey "E">
+<!ENTITY editMenu.label "แก้ไข">
+<!ENTITY fileMenu.accesskey "F">
+<!ENTITY fileMenu.label "แฟ้ม">
+<!ENTITY findAgainCmd.accesskey "g">
+<!ENTITY findAgainCmd.commandkey "g">
+<!ENTITY findAgainCmd.commandkey2 "VK_F3">
+<!ENTITY findAgainCmd.label "Find Again">
+<!ENTITY findCmd.accesskey "F">
+<!ENTITY findCmd.commandkey "f">
+<!ENTITY findCmd.label "ค้นหา">
+<!ENTITY findOnCmd.accesskey "F">
+<!ENTITY findOnCmd.commandkey "f">
+<!ENTITY findOnCmd.label "Find in This Page…">
+<!ENTITY fullZoom.accesskey "Z">
+<!ENTITY fullZoom.label "Zoom">
+<!ENTITY fullZoomEnlargeCmd.accesskey "I">
+<!ENTITY fullZoomEnlargeCmd.commandkey "+">
+<!ENTITY fullZoomEnlargeCmd.commandkey2 "=">
+<!ENTITY fullZoomEnlargeCmd.commandkey3 "">
+<!ENTITY fullZoomEnlargeCmd.label "Zoom In">
+<!ENTITY fullZoomReduceCmd.accesskey "O">
+<!ENTITY fullZoomReduceCmd.commandkey "-">
+<!ENTITY fullZoomReduceCmd.commandkey2 "">
+<!ENTITY fullZoomReduceCmd.label "Zoom Out">
+<!ENTITY fullZoomResetCmd.accesskey "R">
+<!ENTITY fullZoomResetCmd.commandkey "0">
+<!ENTITY fullZoomResetCmd.commandkey2 "">
+<!ENTITY fullZoomResetCmd.label "Reset">
+<!ENTITY fullZoomToggleCmd.accesskey "T">
+<!ENTITY fullZoomToggleCmd.label "Zoom Text Only">
+<!ENTITY helpCheckForUpdates.accesskey "U">
+<!ENTITY helpCheckForUpdates.label "ตรวจสอบรุ่นล่าสุด...">
+<!ENTITY helpFeedbackPage.accesskey "S">
+<!ENTITY helpFeedbackPage.label "ส่งกลับคำแนะนำ...">
+<!ENTITY helpMac.commandkey "?">
+<!ENTITY helpMenu.accesskey "H">
+<!ENTITY helpMenu.label "วิธีใช้">
+<!ENTITY helpMenuWin.accesskey "H">
+<!ENTITY helpMenuWin.label "วิธีใช้">
+<!ENTITY helpReportErrors.accesskey "R">
+<!ENTITY helpReportErrors.label "รายงานความผิดพลาดให้ Zotero...">
+<!ENTITY helpTroubleshootingInfo.accesskey "T">
+<!ENTITY helpTroubleshootingInfo.label "ข้อมูลการแก้ปัญหา">
+<!ENTITY hideOtherAppsCmdMac.commandkey "H">
+<!ENTITY hideOtherAppsCmdMac.label "ซ่อนอื่น ๆ">
+<!ENTITY hideThisAppCmdMac.commandkey "H">
+<!ENTITY hideThisAppCmdMac.label "ซ่อน &brandShortName;">
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "ย่อ">
-<!ENTITY bringAllToFront.label "นำมาไว้ด้านหน้า">
-<!ENTITY zoomWindow.label "ซูม">
-<!ENTITY windowMenu.label "หน้าต่าง">
-
-
-<!ENTITY helpMenu.label "วิธีใช้">
-<!ENTITY helpMenu.accesskey "H">
-
-
-<!ENTITY helpMenuWin.label "วิธีใช้">
-<!ENTITY helpMenuWin.accesskey "H">
-<!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "เกี่ยวกับ &brandShortName;">
-<!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "การช่วยเหลือและเอกสาร">
+<!ENTITY pageSetupCmd.accesskey "U">
+<!ENTITY pageSetupCmd.label "ตั้งค่าหน้ากระดาษ...">
+<!ENTITY pasteCmd.accesskey "P">
+<!ENTITY pasteCmd.key "V">
+<!ENTITY pasteCmd.label "วาง">
+<!ENTITY preferencesCmd.accesskey "O">
+<!ENTITY preferencesCmd.label "Preferences">
+<!ENTITY preferencesCmdMac.commandkey ",">
+<!ENTITY preferencesCmdMac.label "การตั้งค่าพึงใจ...">
+<!ENTITY preferencesCmdUnix.accesskey "n">
+<!ENTITY preferencesCmdUnix.label "ตั้งค่าพึงใจ">
+<!ENTITY printCmd.accesskey "P">
+<!ENTITY printCmd.key "P">
+<!ENTITY printCmd.label "พิมพ์...">
 <!ENTITY productHelp.accesskey "D">
-<!ENTITY helpTroubleshootingInfo.label "ข้อมูลการแก้ปัญหา">
-<!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "ส่งกลับคำแนะนำ...">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "รายงานความผิดพลาดให้ Zotero...">
-<!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpCheckForUpdates.label "ตรวจสอบรุ่นล่าสุด...">
-<!ENTITY helpCheckForUpdates.accesskey "U">
+<!ENTITY productHelp.label "การช่วยเหลือและเอกสาร">
+<!ENTITY quitApplicationCmd.accesskey "Q">
+<!ENTITY quitApplicationCmd.label "เลิกใช้">
+<!ENTITY quitApplicationCmdMac.key "Q">
+<!ENTITY quitApplicationCmdMac.label "ออกจาก Zotero">
+<!ENTITY quitApplicationCmdWin.accesskey "x">
+<!ENTITY quitApplicationCmdWin.label "ออกจากโปรแกรม">
+<!ENTITY redoCmd.accesskey "R">
+<!ENTITY redoCmd.key "Y">
+<!ENTITY redoCmd.label "ทำซ้ำ">
+<!ENTITY saveCmd.accesskey "A">
+<!ENTITY saveCmd.key "S">
+<!ENTITY saveCmd.label "บันทึก...">
+<!ENTITY selectAllCmd.accesskey "A">
+<!ENTITY selectAllCmd.key "A">
+<!ENTITY selectAllCmd.label "เลือกทั้งหมด">
+<!ENTITY servicesMenuMac.label "บริการ">
+<!ENTITY showAllAppsCmdMac.label "แสดงทั้งหมด">
+<!ENTITY toolsMenu.accesskey "T">
+<!ENTITY toolsMenu.label "เครื่องมือ">
+<!ENTITY undoCmd.accesskey "U">
+<!ENTITY undoCmd.key "Z">
+<!ENTITY undoCmd.label "เลิกทำ">
+<!ENTITY windowMenu.label "หน้าต่าง">
+<!ENTITY zoomWindow.label "ซูม">

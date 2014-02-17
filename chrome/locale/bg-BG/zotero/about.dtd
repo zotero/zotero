@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "версия">
+<!ENTITY zotero.about.additionalSoftware "Външен софтуер и стандарти:">
+<!ENTITY zotero.about.close "Затваряне">
+<!ENTITY zotero.about.localizations "Локализации:">
+<!ENTITY zotero.alumni "Възпитаници:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Създаден от:">
+<!ENTITY zotero.developers "Разработчици:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Директори:">
-<!ENTITY zotero.developers "Разработчици:">
-<!ENTITY zotero.alumni "Възпитаници:">
-<!ENTITY zotero.about.localizations "Локализации:">
-<!ENTITY zotero.about.additionalSoftware "Външен софтуер и стандарти:">
 <!ENTITY zotero.executiveProducer "Изпълнителен продуцент:">
-<!ENTITY zotero.thanks "Специални благодарности:">
-<!ENTITY zotero.about.close "Затваряне">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.thanks "Специални благодарности:">
+<!ENTITY zotero.version "версия">

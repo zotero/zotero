@@ -199,6 +199,7 @@
 							'and bibliography: </div><div>'+e+'</div>';
 						throw e;
 				}
+				editor.styleEngine = styleEngine;
 			}
 			
 			
