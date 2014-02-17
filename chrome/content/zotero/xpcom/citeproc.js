@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.517",
+    PROCESSOR_VERSION: "1.0.518",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -780,7 +780,7 @@ CSL_CHROME.prototype.getAttributeValue = function (myxml,name,namespace) {
     return ret;
 }
 CSL_CHROME.prototype.getNodeValue = function (myxml,name) {
-    var ret = "";
+    var ret = null;
     if (name){
         var vals = myxml.getElementsByTagName(name);
         if (vals.length > 0) {
@@ -792,17 +792,18 @@ CSL_CHROME.prototype.getNodeValue = function (myxml,name) {
                 ret = vals[0].text;
             }
         }
-    } else {
-        ret = myxml;
     }
-    if (ret && ret.childNodes && (ret.childNodes.length == 0 || (ret.childNodes.length == 1 && ret.firstChild.nodeName == "#text"))) {
-        if ("undefined" != typeof ret.textContent) {
-            ret = ret.textContent;
-        } else if ("undefined" != typeof ret.innerText) {
-            ret = ret.innerText;
+    if (ret === null && myxml && myxml.childNodes && (myxml.childNodes.length == 0 || (myxml.childNodes.length == 1 && myxml.firstChild.nodeName == "#text"))) {
+        if ("undefined" != typeof myxml.textContent) {
+            ret = myxml.textContent;
+        } else if ("undefined" != typeof myxml.innerText) {
+            ret = myxml.innerText;
         } else {
-            ret = ret.text;
+            ret = myxml.text;
         }
+    }
+    if (ret === null) {
+        ret = myxml;
     }
     return ret;
 }
@@ -10572,7 +10573,6 @@ CSL.Util.Match = function () {
             return false;
         };
     };
-    this[undefined] = this.any;
     this.none = function (token, state, tests) {
         return function (Item, item) {
             for (var i=0,ilen=tests.length;i<ilen;i+=1) {
@@ -10595,6 +10595,7 @@ CSL.Util.Match = function () {
             return true;
         };
     };
+    this[undefined] = this.all;
     this.nand = function (token, state, tests) {
         return function (Item, item) {
             for (var i=0,ilen=tests.length;i<ilen;i+=1) {
@@ -11042,7 +11043,7 @@ CSL.Blob = function (str, token, levelname) {
 CSL.Blob.prototype.push = function (blob) {
     if ("string" === typeof this.blobs) {
         throw "Attempt to push blob onto string object";
-    } else {
+    } else if (false !== blob) {
         blob.alldecor = blob.alldecor.concat(this.alldecor);
         this.blobs.push(blob);
     }
