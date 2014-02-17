@@ -613,8 +613,8 @@ Zotero.Cite.System.prototype = {
 					nameObj.multi._key[langTag] = {};
 				}
 				nameObj.multi._key[langTag] = {
-					lastName: creator.multi._key[langTag].lastName,
-					firstName: creator.multi._key[langTag].firstName
+					family: creator.multi._key[langTag].lastName,
+					given: creator.multi._key[langTag].firstName
 				}
 			}
 			nameObj.multi.main = creator.multi.main;
