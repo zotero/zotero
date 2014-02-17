@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "хувилбар">
+<!ENTITY zotero.about.additionalSoftware "Гуравдагч програм хангамж, стандартууд">
+<!ENTITY zotero.about.close "Хаах">
+<!ENTITY zotero.about.localizations "Нутагшуулалтууд">
+<!ENTITY zotero.alumni "Жил">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Зохион бүтээгч">
+<!ENTITY zotero.developers "Хөгжүүлэгчид">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Захиралууд">
-<!ENTITY zotero.developers "Хөгжүүлэгчид">
-<!ENTITY zotero.alumni "Жил">
-<!ENTITY zotero.about.localizations "Нутагшуулалтууд">
-<!ENTITY zotero.about.additionalSoftware "Гуравдагч програм хангамж, стандартууд">
 <!ENTITY zotero.executiveProducer "Гүйцэтгэх найруулагч">
-<!ENTITY zotero.thanks "Тусгайлан баярлалаа.">
-<!ENTITY zotero.about.close "Хаах">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.thanks "Тусгайлан баярлалаа.">
+<!ENTITY zotero.version "хувилбар">

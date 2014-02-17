@@ -1,4 +1,4 @@
--- 78
+-- 10001
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -29,6 +29,8 @@ CREATE TABLE version (
     version INT NOT NULL
 );
 CREATE INDEX schema ON version(schema);
+-- Prevents issuance of upgrade prompt in sync.js, q.v.
+INSERT INTO version VALUES('fulltext_upgrade', 1);
 
 -- Settings that have to be tied to the local database rather than the profile directory
 CREATE TABLE settings (
@@ -66,6 +68,7 @@ CREATE TABLE itemDataValues (
     valueID INTEGER PRIMARY KEY,
     value UNIQUE
 );
+CREATE INDEX itemDataValues_value ON itemDataValues(value);
 
 -- Type-specific data for individual items
 CREATE TABLE itemData (
@@ -152,6 +155,7 @@ CREATE TABLE creators (
     FOREIGN KEY (creatorDataID) REFERENCES creatorData(creatorDataID)
 );
 CREATE INDEX creators_creatorDataID ON creators(creatorDataID);
+
 
 -- Unique creator data, which can be associated with more than one creator
 CREATE TABLE creatorData (
@@ -402,3 +406,4 @@ CREATE TABLE translatorCache (
 	code TEXT,
 	lastModifiedTime INT
 );
+

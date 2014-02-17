@@ -45,7 +45,7 @@
 	
 	<toolbarpalette id="BrowserToolbarPalette">
 		<toolbarbutton id="zotero-toolbar-button" class="toolbarbutton-1"
-						label="Zotero"
+						label="ML-Zotero"
 						oncommand="ZoteroOverlay.toggleDisplay();"/>
 	</toolbarpalette>
 	
@@ -82,7 +82,7 @@
 	<menupopup id="menu_ToolsPopup">
 		<menuseparator id="zoteroSeparator" insertbefore="devToolsSeparator"/>
 		<menuitem id="tools-zotero" insertbefore="devToolsSeparator"
-			oncommand="ZoteroOverlay.toggleDisplay();" label="Zotero"
+			oncommand="ZoteroOverlay.toggleDisplay();" label="ML-Zotero"
 			key="key_openZotero"/>
 	</menupopup>
 	

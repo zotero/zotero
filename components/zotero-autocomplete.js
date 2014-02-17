@@ -72,6 +72,30 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 		case '':
 			break;
 		
+		case 'zlsPrimary':
+			var sql = 'SELECT D.value AS val,TA.value AS comment FROM zlsSubtags S '
+				+ 'LEFT JOIN zlsSubtagData TA ON S.subtag=TA.id '
+				+ 'LEFT JOIN zlsSubtagData D ON S.description=D.id '
+				+ 'LEFT JOIN zlsSubtagData TY ON S.type=TY.id '
+				+ 'LEFT JOIN zlsSubtagData SC ON S.scope=SC.id '
+				+ 'WHERE D.value LIKE ? '
+				+ 'AND S.deprecated IS NULL '
+				+ 'AND TY.value=? '
+				+ 'AND ('
+					+ 'S.scope IS NULL '
+					+ 'OR NOT SC.value=?'
+				+ ') ORDER BY D.value';
+			var sqlParams = ['%' + searchString + '%', 'language', 'collection'];
+			statement = this._zotero.DB.getStatement(sql, sqlParams);
+			break;
+		
+		case 'jurisdictions':
+			var sql = 'SELECT jurisdictionName as val,jurisdictionID as comment FROM jurisdictions '
+				+ 'WHERE jurisdictionName LIKE ? ORDER BY jurisdictionName'
+			var sqlParams = ['%' + searchString + '%'];
+			statement = this._zotero.DB.getStatement(sql, sqlParams);
+			break;
+		
 		case 'tag':
 			var sql = "SELECT DISTINCT name AS val, NULL AS comment FROM tags WHERE name LIKE ?";
 			var sqlParams = [searchString + '%'];

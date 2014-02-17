@@ -1,286 +1,281 @@
-<!ENTITY zotero.general.optional "(Không bắt buộc)">
-<!ENTITY zotero.general.note "Chú ý:">
-<!ENTITY zotero.general.selectAll "Select All">
-<!ENTITY zotero.general.deselectAll "Deselect All">
-<!ENTITY zotero.general.edit "Edit">
-<!ENTITY zotero.general.delete "Delete">
-<!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
-
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages "Sổ nhật ký lỗi có thể chứa các thông báo lỗi không liên quan tới Zotero.">
-<!ENTITY zotero.errorReport.submissionInProgress "Xin vui lòng chờ trong khi báo cáo lỗi được gửi đi.">
-<!ENTITY zotero.errorReport.submitted "Báo cáo lỗi đã được gửi đi">
-<!ENTITY zotero.errorReport.reportID "ID của Báo cáo:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
-
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
-<!ENTITY zotero.upgrade.newVersionInstalled "Bạn đã cài đặt một phiên bản mới của Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Cơ sở dữ liệu Zotero của bạn phải được nâng cấp để có thể làm việc với phiên bản mới.">
-<!ENTITY zotero.upgrade.autoBackup "Cơ sở dữ liệu hiện tại của bạn sẽ được sao lưu dự phòng một cách tự động trước khi có bất kỳ một thay dổi nào.">
-<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
-<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
-<!ENTITY zotero.upgrade.upgradeInProgress "Xin vui lòng chờ đến khi tiến trình cập nhật kết thúc. Tiến trình có thể sẽ kéo dài trong vài phút.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Cơ sở dữ liệu Zotero của bạn đã được cập nhật thành công.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "Xin vui lòng xem">
-<!ENTITY zotero.upgrade.changeLogLink "sổ nhật ký các thay đổi (changelog)">
-<!ENTITY zotero.upgrade.changeLogAfterLink "để biết có gì mới.">
-
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Thêm phần vừa chọn vào một ghi chép Zotero">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Tạo một biểu ghi và một ghi chép Zotero cho phần vừa chọn">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
-
-<!ENTITY zotero.tabs.info.label "Thông tin">
-<!ENTITY zotero.tabs.notes.label "Ghi chép">
-<!ENTITY zotero.tabs.attachments.label "Phần đính kèm">
-<!ENTITY zotero.tabs.tags.label "Thẻ">
-<!ENTITY zotero.tabs.related.label "Liên quan">
-<!ENTITY zotero.notes.separate "Soạn thảo trong một cửa sổ tách rời">
-
-<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
-<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
-
-<!ENTITY zotero.items.itemType "Item Type">
-<!ENTITY zotero.items.type_column "Loại">
-<!ENTITY zotero.items.title_column "Nhan đề">
-<!ENTITY zotero.items.creator_column "Người tạo lập">
-<!ENTITY zotero.items.date_column "Ngày">
-<!ENTITY zotero.items.year_column "Năm">
-<!ENTITY zotero.items.publisher_column "Nhà xuất bản">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
-<!ENTITY zotero.items.language_column "Ngôn ngữ">
-<!ENTITY zotero.items.accessDate_column "Accessed">
-<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
-<!ENTITY zotero.items.callNumber_column "Ký hiệu xếp giá">
-<!ENTITY zotero.items.rights_column "Quyền hạn">
-<!ENTITY zotero.items.dateAdded_column "Ngày tạo lập">
-<!ENTITY zotero.items.dateModified_column "Ngày thay đổi">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archive">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.place_column "Place">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Edition">
-<!ENTITY zotero.items.pages_column "Pages">
-<!ENTITY zotero.items.issue_column "Issue">
-<!ENTITY zotero.items.series_column "Series">
-<!ENTITY zotero.items.seriesTitle_column "Series Title">
-<!ENTITY zotero.items.court_column "Court">
-<!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "System">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
-
-<!ENTITY zotero.items.menu.showInLibrary "Hiển thị trong Thư viện">
-<!ENTITY zotero.items.menu.attach.note "Tạo một Ghi chép">
-<!ENTITY zotero.items.menu.attach "Add Attachment">
-<!ENTITY zotero.items.menu.attach.snapshot "Đính kèm Bản lưu trang Web của Trang hiện tại">
-<!ENTITY zotero.items.menu.attach.link "Đính kèm Đường dẫn tới Trang hiện tại">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
-<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
-<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
-
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
-<!ENTITY zotero.items.menu.duplicateItem "Sao chép Biểu ghi vừa chọn">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
-
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
-
-<!ENTITY zotero.toolbar.newItem.label "Biểu ghi mới">
-<!ENTITY zotero.toolbar.moreItemTypes.label "Khác">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Tạo một Biểu ghi mới cho Trang hiện tại">
-<!ENTITY zotero.toolbar.lookup.label "Add Item(s) by Identifier">
-<!ENTITY zotero.toolbar.removeItem.label "Xóa biểu ghi...">
-<!ENTITY zotero.toolbar.newCollection.label "Bộ sưu tập mới...">
-<!ENTITY zotero.toolbar.newGroup "New Group...">
-<!ENTITY zotero.toolbar.newSubcollection.label "Bô sưu tập con mới...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Tìm kiếm Định sẵn mới...">
-<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
-<!ENTITY zotero.toolbar.tagSelector.label "Hiển thị/Dấu Bộ-lọc-thẻ">
-<!ENTITY zotero.toolbar.actions.label "Hành động">
-<!ENTITY zotero.toolbar.import.label "Nhập khẩu...">
-<!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.toolbar.export.label "Xuất khẩu Thư viện...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
-<!ENTITY zotero.toolbar.timeline.label "Tạo Tuyến thời gian">
-<!ENTITY zotero.toolbar.preferences.label "Tùy chọn...">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
-<!ENTITY zotero.toolbar.about.label "Giới thiệu về Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Tìm kiếm Nâng cao">
-<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
-<!ENTITY zotero.toolbar.openURL.label "Định vị">
-<!ENTITY zotero.toolbar.openURL.tooltip "Tìm trong thư viện cục bộ của bạn">
-
-<!ENTITY zotero.item.add "Thêm">
-<!ENTITY zotero.item.attachment.file.show "Hiện thị Tập tin">
-<!ENTITY zotero.item.textTransform "Biến đổi Văn bản">
-<!ENTITY zotero.item.textTransform.titlecase "Viết hoa đầu từ">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
-
-<!ENTITY zotero.toolbar.newNote "New Note">
-<!ENTITY zotero.toolbar.note.standalone "Ghi chép Độc lập mới">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
-<!ENTITY zotero.toolbar.attachment.linked "Đường dẫn tới Tập tin...">
-<!ENTITY zotero.toolbar.attachment.add "Tạo một Bản lưu của Tập tin...">
-<!ENTITY zotero.toolbar.attachment.weblink "Lưu Đường dẫn tới Trang hiện tại">
-<!ENTITY zotero.toolbar.attachment.snapshot "Tạo Bản lưu trang Web của Trang hiện tại">
-
-<!ENTITY zotero.tagSelector.noTagsToDisplay "Không có thẻ nào để hiển thị">
-<!ENTITY zotero.tagSelector.filter "Bộ lọc:">
-<!ENTITY zotero.tagSelector.showAutomatic "Hiển thị tự động">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
-<!ENTITY zotero.tagSelector.selectVisible "Chọn các thẻ nhìn thấy được">
-<!ENTITY zotero.tagSelector.clearVisible "Bỏ lựa chọn các thẻ nhìn thấy được">
-<!ENTITY zotero.tagSelector.clearAll "Bỏ tất cả lựa chọn">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
-<!ENTITY zotero.tagSelector.renameTag "Đổi tên Thẻ...">
-<!ENTITY zotero.tagSelector.deleteTag "Xóa Thẻ...">
-
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
-<!ENTITY zotero.tagColorChooser.color "Color:">
-<!ENTITY zotero.tagColorChooser.position "Position:">
-<!ENTITY zotero.tagColorChooser.setColor "Set Color">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
-
-<!ENTITY zotero.lookup.description "Enter one or more ISBNs, DOIs, or PMIDs to look up in the box below.">
-<!ENTITY zotero.lookup.button.search "Search">
-
-<!ENTITY zotero.selectitems.title "Chọn các Biểu ghi">
-<!ENTITY zotero.selectitems.intro.label "Chọn những biểu ghi bạn muốn thêm vào thư viện của bạn">
-<!ENTITY zotero.selectitems.cancel.label "Ngừng">
-<!ENTITY zotero.selectitems.select.label "OK">
-
-<!ENTITY zotero.bibliography.title "Tạo Thư tịch">
-<!ENTITY zotero.bibliography.style.label "Văn phong của Trích dẫn">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
-<!ENTITY zotero.bibliography.saveAsRTF.label "Lưu dưới dạng RTF">
-<!ENTITY zotero.bibliography.saveAsHTML.label "Lưu dưới dạng HTML">
-<!ENTITY zotero.bibliography.copyToClipboard.label "Sao chép vào Clipboard">
-<!ENTITY zotero.bibliography.print.label "In">
-
-<!ENTITY zotero.integration.docPrefs.title "Các tùy chọn về Tài liệu">
-<!ENTITY zotero.integration.addEditCitation.title "Thêm/Soạn thảo Trích dẫn">
-<!ENTITY zotero.integration.editBibliography.title "Soạn thảo Thư tịch">
-<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
-
-<!ENTITY zotero.progress.title "Tiến triển">
-
-<!ENTITY zotero.exportOptions.title "Xuất khẩu...">
-<!ENTITY zotero.exportOptions.format.label "Định dạng:">
-<!ENTITY zotero.exportOptions.translatorOptions.label "Các tùy chọn cho Bộ-biến-đổi">
-
-<!ENTITY zotero.charset.label "Character Encoding">
-<!ENTITY zotero.moreEncodings.label "More Encodings">
-
-<!ENTITY zotero.citation.keepSorted.label "Giữ thứ tự sắp xếp của các Tài liệu nguồn">
-
-<!ENTITY zotero.citation.page "Trang">
-<!ENTITY zotero.citation.paragraph "Đoạn văn">
-<!ENTITY zotero.citation.line "Dòng">
-<!ENTITY zotero.citation.suppressAuthor.label "Bỏ tên Tác giả">
-<!ENTITY zotero.citation.prefix.label "Tiền tố:">
-<!ENTITY zotero.citation.suffix.label "Hậu tố">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
-
-<!ENTITY zotero.richText.italic.label "Nghiêng">
-<!ENTITY zotero.richText.bold.label "Đậm">
-<!ENTITY zotero.richText.underline.label "Gạch dưới">
-<!ENTITY zotero.richText.superscript.label "Chữ viết nhỏ ở trên">
-<!ENTITY zotero.richText.subscript.label "Chữ viết nhỏ ở dưới">
-
 <!ENTITY zotero.annotate.toolbar.add.label "Thêm Chú giải">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Thu gọn tất cả các Chú giải">
+<!ENTITY zotero.annotate.toolbar.duplicatesView.label "Duplicates view">
+<!ENTITY zotero.annotate.toolbar.duplicatesViewCancel.label "Cancel duplicates view">
 <!ENTITY zotero.annotate.toolbar.expand.label "Bung tất cả các Chú giải">
 <!ENTITY zotero.annotate.toolbar.highlight.label "Đánh dấu đoạn văn bản">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Bỏ đánh dấu đoạn văn bản">
-
-<!ENTITY zotero.integration.prefs.displayAs.label "Hiển thị các trích dẫn dưới dạng:">
-<!ENTITY zotero.integration.prefs.footnotes.label "Chú thích cuối trang">
-<!ENTITY zotero.integration.prefs.endnotes.label "Chú thích cuối bài">
-
-<!ENTITY zotero.integration.prefs.formatUsing.label "Định dạng đang sử dụng:">
-<!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Các bookmarks được giữ nguyên giữa các tài liệu Microsoft Word và OpenOffice, nhưng đôi khi chúng có thể bị thay đổi một cách tình cờ.">
-
-
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
-
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.bibliography.bibliography "Bibliography">
+<!ENTITY zotero.bibliography.copyToClipboard.label "Sao chép vào Clipboard">
+<!ENTITY zotero.bibliography.output.label "Định dạng dữ liệu đầu ra">
+<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.print.label "In">
+<!ENTITY zotero.bibliography.saveAsHTML.label "Lưu dưới dạng HTML">
+<!ENTITY zotero.bibliography.saveAsRTF.label "Lưu dưới dạng RTF">
+<!ENTITY zotero.bibliography.style.label "Văn phong của Trích dẫn">
+<!ENTITY zotero.bibliography.title "Tạo Thư tịch">
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.keepSorted.label "Giữ thứ tự sắp xếp của các Tài liệu nguồn">
+<!ENTITY zotero.citation.line "Dòng">
+<!ENTITY zotero.citation.page "Trang">
+<!ENTITY zotero.citation.paragraph "Đoạn văn">
+<!ENTITY zotero.citation.prefix.label "Tiền tố:">
+<!ENTITY zotero.citation.suffix.label "Hậu tố">
+<!ENTITY zotero.citation.suppressAuthor.label "Bỏ tên Tác giả">
+<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Thêm phần vừa chọn vào một ghi chép Zotero">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Tạo một biểu ghi và một ghi chép Zotero cho phần vừa chọn">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
+<!ENTITY zotero.downloadManager.label "Save to Zotero">
+<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Search pane of the Zotero preferences.">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
+<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.reportID "ID của Báo cáo:">
+<!ENTITY zotero.errorReport.submissionInProgress "Xin vui lòng chờ trong khi báo cáo lỗi được gửi đi.">
+<!ENTITY zotero.errorReport.submitted "Báo cáo lỗi đã được gửi đi">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
+<!ENTITY zotero.errorReport.unrelatedMessages "Sổ nhật ký lỗi có thể chứa các thông báo lỗi không liên quan tới Zotero.">
+<!ENTITY zotero.exportOptions.format.label "Định dạng:">
+<!ENTITY zotero.exportOptions.title "Xuất khẩu...">
+<!ENTITY zotero.exportOptions.translatorOptions.label "Các tùy chọn cho Bộ-biến-đổi">
+<!ENTITY zotero.file.choose.label "Choose File...">
+<!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.general.cancel "Cancel">
+<!ENTITY zotero.general.delete "Delete">
+<!ENTITY zotero.general.deselectAll "Deselect All">
+<!ENTITY zotero.general.edit "Edit">
+<!ENTITY zotero.general.note "Chú ý:">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.optional "(Không bắt buộc)">
+<!ENTITY zotero.general.selectAll "Select All">
+<!ENTITY zotero.integration.addEditCitation.title "Thêm/Soạn thảo Trích dẫn">
 <!ENTITY zotero.integration.classicView.label "Classic View">
-
+<!ENTITY zotero.integration.docPrefs.title "Các tùy chọn về Tài liệu">
+<!ENTITY zotero.integration.editBibliography.title "Soạn thảo Thư tịch">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Các bookmarks được giữ nguyên giữa các tài liệu Microsoft Word và OpenOffice, nhưng đôi khi chúng có thể bị thay đổi một cách tình cờ.">
+<!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
+<!ENTITY zotero.integration.prefs.displayAs.label "Hiển thị các trích dẫn dưới dạng:">
+<!ENTITY zotero.integration.prefs.endnotes.label "Chú thích cuối bài">
+<!ENTITY zotero.integration.prefs.footnotes.label "Chú thích cuối trang">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Định dạng đang sử dụng:">
+<!ENTITY zotero.integration.prefs.lang.institutions "Institutions:">
+<!ENTITY zotero.integration.prefs.lang.journals "Journals:">
+<!ENTITY zotero.integration.prefs.lang.languages "Languages">
+<!ENTITY zotero.integration.prefs.lang.languagesInCitations "Languages for use in citations">
+<!ENTITY zotero.integration.prefs.lang.persons "Persons:">
+<!ENTITY zotero.integration.prefs.lang.places "Places:">
+<!ENTITY zotero.integration.prefs.lang.primary "primary">
+<!ENTITY zotero.integration.prefs.lang.publishers "Publishers:">
+<!ENTITY zotero.integration.prefs.lang.secondary "[secondary]">
+<!ENTITY zotero.integration.prefs.lang.sorting "Sorting">
+<!ENTITY zotero.integration.prefs.lang.styleAndFormat "Style &amp; Format">
+<!ENTITY zotero.integration.prefs.lang.titles "Titles:">
+<!ENTITY zotero.integration.prefs.lang.translation "Translation">
+<!ENTITY zotero.integration.prefs.lang.transliteration "Transliteration">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
 <!ENTITY zotero.integration.references.label "Các Tham khảo trong Thư tịch">
-
-<!ENTITY zotero.sync.button "Sync with Zotero Server">
-<!ENTITY zotero.sync.error "Sync Error">
-<!ENTITY zotero.sync.storage.progress "Progress:">
-<!ENTITY zotero.sync.storage.downloads "Downloads:">
-<!ENTITY zotero.sync.storage.uploads "Uploads:">
-
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
-<!ENTITY zotero.sync.longTagFixer.split "Split">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
-<!ENTITY zotero.sync.longTagFixer.character "character">
-<!ENTITY zotero.sync.longTagFixer.characters "characters">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
-
-<!ENTITY zotero.merge.title "Conflict Resolution">
-<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.item.add "Thêm">
+<!ENTITY zotero.item.attachment.file.show "Hiện thị Tập tin">
+<!ENTITY zotero.item.creatorTransform "Transform Name Form">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
+<!ENTITY zotero.item.textTransform "Biến đổi Văn bản">
+<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.titlecase "Viết hoa đầu từ">
+<!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.callNumber_column "Ký hiệu xếp giá">
+<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.creator_column "Người tạo lập">
+<!ENTITY zotero.items.dateAdded_column "Ngày tạo lập">
+<!ENTITY zotero.items.dateModified_column "Ngày thay đổi">
+<!ENTITY zotero.items.date_column "Ngày">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.issue_column "Issue">
+<!ENTITY zotero.items.itemType "Item Type">
+<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.language_column "Ngôn ngữ">
+<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.menu.addTag "Add Tag">
+<!ENTITY zotero.items.menu.attach "Add Attachment">
+<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
+<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+<!ENTITY zotero.items.menu.attach.link "Đính kèm Đường dẫn tới Trang hiện tại">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
+<!ENTITY zotero.items.menu.attach.note "Tạo một Ghi chép">
+<!ENTITY zotero.items.menu.attach.snapshot "Đính kèm Bản lưu trang Web của Trang hiện tại">
+<!ENTITY zotero.items.menu.changeTag "Change Tag">
+<!ENTITY zotero.items.menu.duplicateItem "Sao chép Biểu ghi vừa chọn">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.moveDown "Move Down">
+<!ENTITY zotero.items.menu.moveUp "Move Up">
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.showInLibrary "Hiển thị trong Thư viện">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.publisher_column "Nhà xuất bản">
+<!ENTITY zotero.items.reporter_column "Reporter">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.rights_column "Quyền hạn">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.title_column "Nhan đề">
+<!ENTITY zotero.items.type_column "Loại">
+<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.year_column "Năm">
+<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.description "Enter one or more ISBNs, DOIs, or PMIDs to look up in the box below.">
 <!ENTITY zotero.merge.deleted "Deleted">
-
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+<!ENTITY zotero.notes.separate "Soạn thảo trong một cửa sổ tách rời">
+<!ENTITY zotero.progress.title "Tiến triển">
+<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
+<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
 <!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
-<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
 <!ENTITY zotero.recognizePDF.cancel.label "Cancel">
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
+<!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
 <!ENTITY zotero.recognizePDF.itemName.label "Item Name">
-
-<!ENTITY zotero.rtfScan.title "RTF Scan">
+<!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
+<!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
+<!ENTITY zotero.richText.bold.label "Đậm">
+<!ENTITY zotero.richText.italic.label "Nghiêng">
+<!ENTITY zotero.richText.subscript.label "Chữ viết nhỏ ở dưới">
+<!ENTITY zotero.richText.superscript.label "Chữ viết nhỏ ở trên">
+<!ENTITY zotero.richText.underline.label "Gạch dưới">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
 <!ENTITY zotero.rtfScan.cancel.label "Cancel">
 <!ENTITY zotero.rtfScan.citation.label "Citation">
-<!ENTITY zotero.rtfScan.itemName.label "Item Name">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
-<!ENTITY zotero.rtfScan.introPage.label "Introduction">
+<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
+<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
+<!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
+<!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
+<!ENTITY zotero.rtfScan.inputFile.label "Input File">
 <!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
 <!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
-<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
-<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
-<!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
-<!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
-<!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
-<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
-<!ENTITY zotero.rtfScan.inputFile.label "Input File">
+<!ENTITY zotero.rtfScan.introPage.label "Introduction">
+<!ENTITY zotero.rtfScan.itemName.label "Item Name">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
 <!ENTITY zotero.rtfScan.outputFile.label "Output File">
-
-<!ENTITY zotero.file.choose.label "Choose File...">
-<!ENTITY zotero.file.noneSelected.label "No file selected">
-
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Search pane of the Zotero preferences.">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
+<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
+<!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
+<!ENTITY zotero.rtfScan.title "RTF Scan">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
+<!ENTITY zotero.selectitems.cancel.label "Ngừng">
+<!ENTITY zotero.selectitems.intro.label "Chọn những biểu ghi bạn muốn thêm vào thư viện của bạn">
+<!ENTITY zotero.selectitems.select.label "OK">
+<!ENTITY zotero.selectitems.title "Chọn các Biểu ghi">
+<!ENTITY zotero.sync.button "Sync with Zotero Server">
+<!ENTITY zotero.sync.error "Sync Error">
+<!ENTITY zotero.sync.longTagFixer.character "character">
+<!ENTITY zotero.sync.longTagFixer.characters "characters">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
+<!ENTITY zotero.sync.longTagFixer.split "Split">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
+<!ENTITY zotero.sync.storage.downloads "Downloads:">
+<!ENTITY zotero.sync.storage.progress "Progress:">
+<!ENTITY zotero.sync.storage.uploads "Uploads:">
+<!ENTITY zotero.tabs.attachments.label "Phần đính kèm">
+<!ENTITY zotero.tabs.info.label "Thông tin">
+<!ENTITY zotero.tabs.notes.label "Ghi chép">
+<!ENTITY zotero.tabs.related.label "Liên quan">
+<!ENTITY zotero.tabs.tags.label "Thẻ">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
+<!ENTITY zotero.tagSelector.clearAll "Bỏ tất cả lựa chọn">
+<!ENTITY zotero.tagSelector.clearVisible "Bỏ lựa chọn các thẻ nhìn thấy được">
+<!ENTITY zotero.tagSelector.deleteTag "Xóa Thẻ...">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
+<!ENTITY zotero.tagSelector.filter "Bộ lọc:">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "Không có thẻ nào để hiển thị">
+<!ENTITY zotero.tagSelector.renameTag "Đổi tên Thẻ...">
+<!ENTITY zotero.tagSelector.selectVisible "Chọn các thẻ nhìn thấy được">
+<!ENTITY zotero.tagSelector.showAutomatic "Hiển thị tự động">
+<!ENTITY zotero.toolbar.about.label "Giới thiệu về Zotero">
+<!ENTITY zotero.toolbar.actions.label "Hành động">
+<!ENTITY zotero.toolbar.addChildNote.label "Add Child Note">
+<!ENTITY zotero.toolbar.addStandaloneNote.label "Add Standalone Note">
+<!ENTITY zotero.toolbar.advancedSearch "Tìm kiếm Nâng cao">
+<!ENTITY zotero.toolbar.attachment.add "Tạo một Bản lưu của Tập tin...">
+<!ENTITY zotero.toolbar.attachment.linked "Đường dẫn tới Tập tin...">
+<!ENTITY zotero.toolbar.attachment.snapshot "Tạo Bản lưu trang Web của Trang hiện tại">
+<!ENTITY zotero.toolbar.attachment.weblink "Lưu Đường dẫn tới Trang hiện tại">
+<!ENTITY zotero.toolbar.cancelDuplicatesView.label "Cancel duplicates view">
+<!ENTITY zotero.toolbar.cancelOrphansView.label "Cancel orphans view">
+<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
+<!ENTITY zotero.toolbar.duplicatesView.label "Duplicates view">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
+<!ENTITY zotero.toolbar.export.label "Xuất khẩu Thư viện...">
+<!ENTITY zotero.toolbar.import.label "Nhập khẩu...">
+<!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
+<!ENTITY zotero.toolbar.lookup.label "Add Item(s) by Identifier">
+<!ENTITY zotero.toolbar.moreItemTypes.label "Khác">
+<!ENTITY zotero.toolbar.newCollection.label "Bộ sưu tập mới...">
+<!ENTITY zotero.toolbar.newGroup "New Group...">
+<!ENTITY zotero.toolbar.newItem.label "Biểu ghi mới">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Tạo một Biểu ghi mới cho Trang hiện tại">
+<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Tìm kiếm Định sẵn mới...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Bô sưu tập con mới...">
+<!ENTITY zotero.toolbar.note.child "Add Child Note">
+<!ENTITY zotero.toolbar.note.standalone "Ghi chép Độc lập mới">
+<!ENTITY zotero.toolbar.openURL.label "Định vị">
+<!ENTITY zotero.toolbar.openURL.tooltip "Tìm trong thư viện cục bộ của bạn">
+<!ENTITY zotero.toolbar.orphansView.label "Orphans view">
+<!ENTITY zotero.toolbar.preferences.label "Tùy chọn...">
+<!ENTITY zotero.toolbar.refresh.label "Refresh">
+<!ENTITY zotero.toolbar.removeItem.label "Xóa biểu ghi...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
+<!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
+<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
+<!ENTITY zotero.toolbar.tagSelector.label "Hiển thị/Dấu Bộ-lọc-thẻ">
+<!ENTITY zotero.toolbar.timeline.label "Tạo Tuyến thời gian">
+<!ENTITY zotero.upgrade.autoBackup "Cơ sở dữ liệu hiện tại của bạn sẽ được sao lưu dự phòng một cách tự động trước khi có bất kỳ một thay dổi nào.">
+<!ENTITY zotero.upgrade.changeLogAfterLink "để biết có gì mới.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Xin vui lòng xem">
+<!ENTITY zotero.upgrade.changeLogLink "sổ nhật ký các thay đổi (changelog)">
+<!ENTITY zotero.upgrade.ifZoteroChoice "If this is not desired, cancel the upgrade process now, and reinstall the official Zotero client.">
+<!ENTITY zotero.upgrade.ifZoteroInfo "If you are migrating from official Zotero to MLZ, the next step of the upgrade process will convert your database for use with MLZ.">
+<!ENTITY zotero.upgrade.ifZoteroWarning "After conversion, the database will be accessible only to MLZ clients.">
+<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
+<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
+<!ENTITY zotero.upgrade.newVersionInstalled "Bạn đã cài đặt một phiên bản mới của Zotero.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.upgradeInProgress "Xin vui lòng chờ đến khi tiến trình cập nhật kết thúc. Tiến trình có thể sẽ kéo dài trong vài phút.">
+<!ENTITY zotero.upgrade.upgradeRequired "Cơ sở dữ liệu Zotero của bạn phải được nâng cấp để có thể làm việc với phiên bản mới.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Cơ sở dữ liệu Zotero của bạn đã được cập nhật thành công.">

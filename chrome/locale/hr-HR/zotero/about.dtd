@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "inačica">
+<!ENTITY zotero.about.additionalSoftware "Softveri i standardi za treću stranu:">
+<!ENTITY zotero.about.close "Zatvori">
+<!ENTITY zotero.about.localizations "Lokalizacije:">
+<!ENTITY zotero.alumni "Alumni:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Izradili:">
+<!ENTITY zotero.developers "Razvojni tim:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Ravnatelji:">
-<!ENTITY zotero.developers "Razvojni tim:">
-<!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.about.localizations "Lokalizacije:">
-<!ENTITY zotero.about.additionalSoftware "Softveri i standardi za treću stranu:">
 <!ENTITY zotero.executiveProducer "Izvršni producent:">
-<!ENTITY zotero.thanks "Posebna zahvala:">
-<!ENTITY zotero.about.close "Zatvori">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.thanks "Posebna zahvala:">
+<!ENTITY zotero.version "inačica">

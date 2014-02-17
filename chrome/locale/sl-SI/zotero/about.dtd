@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "različica">
+<!ENTITY zotero.about.additionalSoftware "Uporabljena prog. oprema in podprti standardi:">
+<!ENTITY zotero.about.close "Zapri">
+<!ENTITY zotero.about.localizations "Prevodi:">
+<!ENTITY zotero.alumni "Alumni:">
+<!ENTITY zotero.citationProcessing "Obdelava navedkov in bibliografije">
 <!ENTITY zotero.createdby "Avtor:">
+<!ENTITY zotero.developers "Razvijalci:">
 <!ENTITY zotero.director "Vodja:">
 <!ENTITY zotero.directors "Vodje:">
-<!ENTITY zotero.developers "Razvijalci:">
-<!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.about.localizations "Prevodi:">
-<!ENTITY zotero.about.additionalSoftware "Uporabljena prog. oprema in podprti standardi:">
 <!ENTITY zotero.executiveProducer "Izvršni producent:">
-<!ENTITY zotero.thanks "Posebna zahvala:">
-<!ENTITY zotero.about.close "Zapri">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Več zahval in zaslužnih">
-<!ENTITY zotero.citationProcessing "Obdelava navedkov in bibliografije">
+<!ENTITY zotero.thanks "Posebna zahvala:">
+<!ENTITY zotero.version "različica">

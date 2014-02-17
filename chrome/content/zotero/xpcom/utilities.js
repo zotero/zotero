@@ -32,6 +32,7 @@
  * and it makes the code cleaner
  */
 const CSL_NAMES_MAPPINGS = {
+	"artist":"author",
 	"author":"author",
 	"editor":"editor",
 	"bookAuthor":"container-author",
@@ -41,37 +42,45 @@ const CSL_NAMES_MAPPINGS = {
 	"recipient":"recipient",
 	"reviewedAuthor":"reviewed-author",
 	"seriesEditor":"collection-editor",
-	"translator":"translator"
+	"translator":"translator",
+	"contributor":"contributor",
+	"authority":"authority",
+	"commenter":"commenter"
 }
 
 /*
  * Mappings for text variables
+ * (system_id to key mapping is actually hard-wired in cite.js)
  */
 const CSL_TEXT_MAPPINGS = {
 	"title":["title"],
-	"container-title":["publicationTitle",  "reporter", "code"], /* reporter and code should move to SQL mapping tables */
+	"container-title":["publicationTitle",  "reporter", "code", "album", "websiteTitle"], /* reporter and code should move to SQL mapping tables */
 	"collection-title":["seriesTitle", "series"],
-	"collection-number":["seriesNumber"],
+	"collection-number":["seriesNumber","assemblyNumber","regnalYear","yearAsVolume"],
 	"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
 	"publisher-place":["place"],
-	"authority":["court"],
+	"authority":["court", "legislativeBody", "issuingAuthority","institution"],
+	"committee":["committee"],
 	"page":["pages"],
-	"volume":["volume"],
+	"volume":["volume","codeNumber"],
+	"volume-title":["volumeTitle"],
 	"issue":["issue"],
 	"number-of-volumes":["numberOfVolumes"],
 	"number-of-pages":["numPages"],	
 	"edition":["edition"],
 	"version":["version"],
-	"section":["section"],
-	"genre":["type"],
+	"section":["section","opus"],
+	"genre":["type","reign","supplementName","sessionType"],
+	"chapter-number":["session","meetingNumber"],
 	"source":["libraryCatalog"],
 	"dimensions": ["artworkSize", "runningTime"],
 	"medium":["medium", "system"],
 	"scale":["scale"],
 	"archive":["archive"],
 	"archive_location":["archiveLocation"],
-	"event":["meetingName", "conferenceName"], /* these should be mapped to the same base field in SQL mapping tables */
+	"event":["meetingName", "conferenceName", "resolutionLabel"], /* these should be mapped to the same base field in SQL mapping tables */
 	"event-place":["place"],
+	"archive-place":["place"],
 	"abstract":["abstractNote"],
 	"URL":["url"],
 	"DOI":["DOI"],
@@ -80,18 +89,28 @@ const CSL_TEXT_MAPPINGS = {
 	"call-number":["callNumber"],
 	"note":["extra"],
 	"number":["number"],
+	"rank-number":["priorityNumbers"],
+	"pending-number":["applicationNumber"],
 	"references":["history"],
 	"shortTitle":["shortTitle"],
 	"journalAbbreviation":["journalAbbreviation"],
-	"language":["language"]
+	"language":["language"],
+	"jurisdiction":["jurisdiction"],
+	"status":["status"],
+    "publication-number": ["publicationNumber"]
 }
 
 /*
  * Mappings for dates
- */
+*/
 const CSL_DATE_MAPPINGS = {
-	"issued":"date",
-	"accessed":"accessDate"
+	"issued":["date"],
+	"original-date":["newsCaseDate","priorityDate","originalDate","adoptionDate"],
+	"submitted":["filingDate"],
+	"accessed":["accessDate"],
+	"available-date":["openingDate"],
+	"event-date":["signingDate","conferenceDate"],
+	"publication-date":["publicationDate"]
 }
 
 /*
@@ -116,7 +135,7 @@ const CSL_TYPE_MAPPINGS = {
 	'report':"report",
 	'bill':"bill",
 	'case':"legal_case",
-	'hearing':"bill",				// ??
+	'hearing':"hearing",				// ??
 	'patent':"patent",
 	'statute':"legislation",		// ??
 	'email':"personal_communication",
@@ -126,17 +145,55 @@ const CSL_TYPE_MAPPINGS = {
 	'forumPost':"post",
 	'audioRecording':"song",		// ??
 	'presentation':"speech",
-	'videoRecording':"motion_picture",
+	'videoRecording':"video",
 	'tvBroadcast':"broadcast",
 	'radioBroadcast':"broadcast",
 	'podcast':"song",			// ??
-	'computerProgram':"book"		// ??
+	'computerProgram':"book",		// ??
+	'periodical':'periodical',
+	'gazette':'gazette',
+	'regulation':'regulation',
+	'classic':'classic',
+	'treaty':'treaty',
+	'standard':'standard'
 };
+
+/**
+ * Force Fields
+*/
+const CSL_FORCE_FIELD_CONTENT = {
+	"tvBroadcast":{
+		"genre":"television broadcast"
+	},
+	"radioBroadcast":{
+		"genre":"radio broadcast"
+	},
+	"instantMessage":{
+		"genre":"instant message"
+	},
+	"email":{
+		"genre":"email"
+	},
+	"podcast":{
+		"genre":"podcast"
+	}
+}
+
+const CSL_FORCE_REMAP = {
+	"periodical":{
+		"title":"container-title"
+	}
+}
+
 
 /**
  * @class Functions for text manipulation and other miscellaneous purposes
  */
 Zotero.Utilities = {
+
+	"getCslTypeFromItemType":function(itemType) {
+		return CSL_TYPE_MAPPINGS[itemType];
+	},
 	/**
 	 * Cleans extraneous punctuation off a creator name and parse into first and last name
 	 *
@@ -206,7 +263,326 @@ Zotero.Utilities = {
 
 		return {firstName:firstName, lastName:lastName, creatorType:type};
 	},
+
+	/**
+	 * Sets a multilingual field value
+	 * Used in translators.
+	 *
+	 * @param {Object} obj Item object
+	 * @param {String} field Field name
+	 * @param {String} val Field value
+	 * @param {String} languageTag RFC 5646 language tag
+	 */
+	"setMultiField":function (obj, field, val, languageTag, defaultLanguage) {
+		// Validate parameters
+		if ("string" !== typeof val) {
+			throw "Invalid value for multilingual field";
+		}
+		if (!field) {
+			throw "No field value given to setMultiField";
+		}
+		// Initialize if required
+		if (languageTag) {
+			if (!obj.multi) {
+				obj.multi = {};
+			}
+			if (!obj.multi.main) {
+				obj.multi.main = {};
+			}
+			if (!obj.multi._lsts) {
+				obj.multi._lsts = {};
+			}
+			if (!obj.multi._keys) {
+				obj.multi._keys = {};
+			}
+		}
+		// Set field value
+		if (!obj[field]) {
+			obj[field] = val;
+			if (languageTag && languageTag !== defaultLanguage) {
+				obj.multi.main[field] = languageTag;
+			}
+		} else if (languageTag) {
+			if (!obj.multi._lsts[field]) {
+				obj.multi._lsts[field] = [];
+				obj.multi._keys[field] = {};
+			}
+			obj.multi._keys[field][languageTag] = val;
+			if (obj.multi._lsts[field].indexOf(languageTag) === -1) {
+				obj.multi._lsts[field].push(languageTag);
+			}
+		}
+	},
+
+	/**
+	 * Sets a multilingual creator
+	 * Used in translators.
+	 *
+	 * @param {Object} obj Parent creator object (may be empty)
+	 * @param {String} child Child creator object to be added
+	 * @param {String} languageTag RFC 5646 language tag
+	 */
+	"setMultiCreator":function (obj, child, languageTag, creatorType, defaultLanguage) {
+		// Validate parameters
+		if ("object" !== typeof obj) {
+			throw "Multilingual creator parent must be an object";
+		}
+		if ("object" !== typeof child) {
+			throw "Multilingual creator child must be an object";
+		}
+		if (obj.itemID) {
+			throw "Must give creator as multilingual creator parent, not item";
+		}
+		// Initialize if required
+		if (languageTag) {
+			if (!obj.multi) {
+				obj.multi = {};
+			}
+			if (!obj.multi._lst) {
+				obj.multi._lst = [];
+			}
+			if (!obj.multi._key) {
+				obj.multi._key = {};
+			}
+		}
+		// Set field value
+		if (!obj.lastName) {
+			obj.lastName = child.lastName;
+			obj.firstName = child.firstName;
+			obj.creatorType = creatorType;
+			if (languageTag && languageTag !== defaultLanguage) {
+				obj.multi.main = languageTag;
+			}
+		} else  if (languageTag) {
+			obj.multi._key[languageTag] = child;
+			if (obj.multi._lst.indexOf(languageTag) === -1) {
+				obj.multi._lst.push(languageTag);
+			}
+		}
+	},
+
+	"getMultiCreator":function(obj, fieldName, langTag) {
+		if (!langTag) {
+			return obj[fieldName];
+		} else {
+			return obj.multi._key[langTag][fieldName]
+		}
+	},
+
+	"extractCreatorFields":function(creator, langTag) {
+		if (creator.fieldMode && creator.fieldMode == 1) {
+			// Single-field mode
+			var fields = {
+				lastName: Zotero.Utilities.getMultiCreator(creator, 'lastName', langTag),
+				fieldMode: 1
+			};
+		} else {
+			// Two-field mode
+			var fields = {
+				firstName: Zotero.Utilities.getMultiCreator(creator, 'firstName', langTag),
+				lastName: Zotero.Utilities.getMultiCreator(creator, 'lastName', langTag)
+			};
+		}
+		return fields;
+	},
 	
+	/**
+	 * Retrieves the list of available content languages
+	 */
+	"languageList":function (item) {
+		// XXXX This should really be placed behind a cache in
+		// CachedLanguages(). Code needs a general tidying up.
+		if (item) {
+			var itemLanguages = {};
+			var insertSql = "INSERT INTO zlsTags VALUES (?,?,?)";
+			var snoopSql = "SELECT COUNT (*) FROM zlsTags WHERE tag=?";
+			for (var fieldID in item.multi._keys) {
+				for (var langTag in item.multi._keys[fieldID]) {
+					itemLanguages[langTag] = true;
+				}
+				if (item.multi.main[fieldID]) {
+					itemLanguages[item.multi.main[fieldID]] = true;
+				}
+			}
+			for (var tag in itemLanguages) {
+				if (!Zotero.DB.valueQuery(snoopSql, [tag])) {
+					Zotero.DB.query(insertSql, [tag,tag,null]);
+				}
+			}
+		}
+		var sql = 'SELECT nickname,tag from zlsTags';
+		var result = Zotero.DB.query(sql);
+		if (result) {
+			// Was using strcmp from itemTreeView, but that's
+			// no longer accessible.
+			result.sort();
+		} else {
+			result = [];
+		};
+		return result;
+	},
+
+	"composeDoc":function(doc, titleOrHead, object, suppressURL) {
+		var o;
+		var content = false;
+		// (object) is either a single DOM element, a DOM
+		// collection, or an array of DOM elements or DOM 
+		// collections. Only the first element of a DOM collection 
+		// is used in the constructed document.
+
+		// Punch out early if there is nothing here.
+		if (!object || !(object.length || object.tagName)) {
+			return false;
+		} else if (!object.tagName) {
+			var fail = true;
+			for (var i = 0, ilen = object.length; i < ilen; i += 1) {
+				if (object[i] && (object[i].tagName || object[i].length)) {
+					fail = false;
+					break;
+				}
+			}
+			if (fail) {
+				return false;
+			}
+		}
+
+		// Cast a namespace object
+		// var myns = doc.documentElement.namespaceURI;
+		var myns = "http://www.w3.org/1999/xhtml"
+
+		// Cast a document type for a new custom-spun HTML document
+		//var newDocType = doc.implementation.createDocumentType("html:html", "-//W3C//DTD HTML 4.01 Transitional//EN", "http://www.w3.org/TR/html4/loose.dtd");
+
+		var newDocType = doc.implementation.createDocumentType('html', '', '');
+
+		// Create an empty HTML document
+		var newDoc = doc.implementation.createDocument('http://www.w3.org/1999/xhtml', 'html', newDocType);
+
+		var getHeaderFooter = function (title, footer) {
+			// Cast a headerfooter div for use in the document,
+			// with a horizontal rule at the top
+			var ret = newDoc.createElementNS(myns, "div");
+			var hr = newDoc.createElementNS(myns, "hr");
+			
+			// Cast a div for the title, populate it with the title
+			// text, and insert the unit into the headerfooter object
+			var text = newDoc.createElementNS(myns, "div");
+			text.appendChild(newDoc.createTextNode(title));
+			
+			// Cast a source div, populate it with a simple
+			// label and the URL of the document from which
+			// the text is extracted, bundle the unit up
+			// and insert it into the document HTML node.
+			var source = newDoc.createElementNS(myns, "div");
+			if (!suppressURL) {
+				source.setAttribute("class","mlz-link-button");
+				var source_anchor = newDoc.createElementNS(myns, "a");
+				source_anchor.setAttribute("href", doc.location.href);
+				var source_anchor_text = newDoc.createTextNode("View text online");
+				source_anchor.appendChild(source_anchor_text);
+				source.appendChild(source_anchor);
+			}
+			
+
+
+			if (footer) {
+				ret.appendChild(hr);
+				ret.appendChild(text);
+				ret.appendChild(source);
+			} else {
+				ret.appendChild(text);
+				ret.appendChild(source);
+				ret.appendChild(hr);
+			}
+			return ret;
+		}
+
+
+		// Get the HTML section of the document, into which we will insert things.
+		var html = newDoc.getElementsByTagName("html")[0];
+
+		// Cast a header and a title element,
+		// fill in some details in both; create a base
+		// element and give in a URL ending in html.
+		// merge the two, and insert into the html element
+		var head, title;
+		if ("string" === typeof titleOrHead) {
+			head = newDoc.createElementNS(myns, "head");
+			title = titleOrHead
+		} else if ("object" === typeof titleOrHead) {
+			head = titleOrHead.cloneNode(true);
+			title = titleOrHead.getElementsByTagName("title")[0].textContent;
+		}
+		var base = newDoc.createElementNS(myns, "base");
+		var header_title = newDoc.createElementNS(myns, "title");
+		header_title_text = newDoc.createTextNode(title);
+		header_title.appendChild(header_title_text);
+		head.appendChild(header_title);
+		base.setAttribute("target", "_blank");
+		base.setAttribute("href", doc.location.href);
+		// base.setAttribute("href", 'http://example.com/eg.html');
+		head.appendChild(base);
+		html.appendChild(head);
+
+		// Cast a body element, insert an overall wrapper
+		// div into it, insert the content node
+		// into that, and insert the body into the document.
+		var body = newDoc.createElementNS(myns, "body");
+
+		contentNode = newDoc.createElementNS(myns, "div");
+		contentNode.setAttribute("class","mlz-outer");
+		body.appendChild(contentNode);
+
+		contentNode.appendChild(getHeaderFooter(title));
+
+		if (object.tagName) {
+			// Object is a DOM node. Clone and wrap.
+			content = object.cloneNode(true);
+			contentNode.appendChild(content);
+		} else if (object.length) {
+			for (var i = 0, ilen = object.length; i < ilen; i += 1) {
+				o = object[i];
+				if (o.tagName || o.nodeName === '#text') {
+					// Object is a DOM node. Clone and wrap.
+					content = o.cloneNode(true);
+					contentNode.appendChild(content);
+				} else {
+					// Object is a DOM-list consisting of elements.
+					// If non-zero, clone the first and wrap.
+					if (o.length) {
+						content = o[0].cloneNode(true);
+						contentNode.appendChild(content);
+					}
+				}
+			}
+		}
+
+		contentNode.appendChild(getHeaderFooter(title, true));
+
+		// Insert the body into the document HTML node
+		html.appendChild(body);
+		return newDoc;
+	},
+
+	"getTextContent":function(node) {
+		// Multi-browser fun.
+		// See http://ecmanaut.blogspot.com/2007/02/domnodetextcontent-and-nodeinnertext.html
+		var text = false;	
+		if (node) {
+		// W3C conformant browsers
+			text = node.textContent;
+		}
+		if (!text) {
+			// Opera, IE 6 & 7
+			text = node.innerText;
+		}
+		if (!text) {
+			// Safari
+			text = node.innerHTML;
+		}
+		return text;
+},
+
 	/**
 	 * Removes leading and trailing whitespace from a string
 	 * @type String
@@ -726,6 +1102,7 @@ Zotero.Utilities = {
 		const skipWords = ["but", "or", "yet", "so", "for", "and", "nor", "a", "an",
 			"the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up",
 			"down", "as"];
+		const alwaysLowerCase = ["plc", "v"];
 		
 		// this may only match a single character
 		const delimiterRegexp = /([ \/\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B])/;
@@ -737,8 +1114,9 @@ Zotero.Utilities = {
 		
 		// split words
 		var words = string.split(delimiterRegexp);
-		var isUpperCase = string.toUpperCase() == string;
-		
+		var stringWithoutV = string.replace(/([^A-Za-z])v([^A-Za-z])/, "$1$2");
+		var isUpperCase = stringWithoutV.toUpperCase() == stringWithoutV;
+	
 		var newString = "";
 		var delimiterOffset = words[0].length;
 		var lastWordIndex = words.length-1;
@@ -752,12 +1130,15 @@ Zotero.Utilities = {
 				// only use if word does not already possess some capitalization
 				if(isUpperCase || words[i] == lowerCaseVariant) {
 					if(
-						// a skip word
-						skipWords.indexOf(lowerCaseVariant.replace(/[^a-zA-Z]+/, "")) != -1
-						// not first or last word
-						&& i != 0 && i != lastWordIndex
-						// does not follow a colon
-						&& (previousWordIndex == -1 || words[previousWordIndex][words[previousWordIndex].length-1].search(/[:\?!]/)==-1)
+						alwaysLowerCase.indexOf(lowerCaseVariant.replace(/[^a-zA-Z]+/, "")) != -1
+						|| (
+							// a skip word
+							skipWords.indexOf(lowerCaseVariant.replace(/[^a-zA-Z]+/, "")) != -1
+							// not first word, or last word if not #2 forcing for case names
+								&& i != 0 && i != lastWordIndex
+							// does not follow a colon
+						        && (previousWordIndex == -1 || words[previousWordIndex][words[previousWordIndex].length-1].search(/[:\?!]/)==-1)
+						)
 					) {
 						words[i] = lowerCaseVariant;
 					} else {
@@ -776,7 +1157,7 @@ Zotero.Utilities = {
 			
 			newString += words[i];
 		}
-		
+
 		return newString;
 	},
 	
@@ -1296,7 +1677,6 @@ Zotero.Utilities = {
 		
 		var typeID = Zotero.ItemTypes.getID(item.itemType);
 		if(!typeID) {
-			Zotero.debug("itemToServerJSON: Invalid itemType "+item.itemType+"; using webpage");
 			item.itemType = "webpage";
 			typeID = Zotero.ItemTypes.getID(item.itemType);
 		}
@@ -1420,112 +1800,224 @@ Zotero.Utilities = {
 	 * @param {Zotero.Item} item
 	 * @return {Object} The CSL item
 	 */
-	"itemToCSLJSON":function(item) {
-		if(item instanceof Zotero.Item) {
-			item = item.toArray();
+	"itemToCSLJSON":function(arrayItem, ignoreURL) {
+
+		// convert toArray() if needed.
+		if(arrayItem instanceof Zotero.Item) {
+			arrayItem = arrayItem.toArray();
 		}
-		
-		var itemType = item.itemType;
+
+		var itemType = arrayItem.itemType;
+		var itemTypeID = Zotero.ItemTypes.getID(itemType);
 		var cslType = CSL_TYPE_MAPPINGS[itemType];
 		if(!cslType) cslType = "article";
-		
+
 		var cslItem = {
-			'id':item.itemID,
-			'type':cslType
+			'id':arrayItem.id,
+			'type':cslType,
+			'multi':{
+				'main':{},
+				'_keys':{}
+			}
 		};
 		
-		// Map text fields
-		var itemTypeID = Zotero.ItemTypes.getID(itemType);
+		if (!arrayItem.libraryID) {
+			cslItem.system_id = "0_" + arrayItem.key;
+		} else {
+			cslItem.system_id = arrayItem.libraryID + "_" + arrayItem.key;
+		}
+		cslItem.id = arrayItem.itemID;
+
+		// get all text variables (there must be a better way)
+		// TODO: does citeproc-js permit short forms?
 		for(var variable in CSL_TEXT_MAPPINGS) {
 			var fields = CSL_TEXT_MAPPINGS[variable];
-			for(var i=0, n=fields.length; i<n; i++) {
-				var field = fields[i], value = undefined;
-				
-				if(field in item) {
-					value = item[field];
-				} else {
-					var fieldID = Zotero.ItemFields.getID(field),
-						baseMapping
-					if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)
-							&& (baseMapping = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, fieldID))) {
-						value = item[Zotero.ItemTypes.getName(baseMapping)];
-					}
+			if(variable == "URL" && ignoreURL) continue;
+			for each(var field in fields) {
+				var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, field);
+				if (!fieldID) {
+					var fieldID = Zotero.ItemFields.getID(field);
 				}
-				
-				if(!value) continue;
-				
-				var valueLength = value.length;
-				if(valueLength) {
+				var fieldName = Zotero.ItemFields.getName(fieldID);
+				var value = arrayItem[fieldName];
+				if(value && value != "") {
 					// Strip enclosing quotes
-					if(value[0] === '"' && value[valueLength-1] === '"') {
-						value = value.substr(1, valueLength-2);
+					if(value.match(/^".+"$/)) {
+						value = value.substr(1, value.length-2);
 					}
+					cslItem[variable] = value;
+					if (arrayItem.multi.main[fieldName]) {
+						cslItem.multi.main[variable] = arrayItem.multi.main[fieldName]
+					}
+					if (arrayItem.multi._keys[fieldName]) {
+						cslItem.multi._keys[variable] = {};
+						for (var langTag in arrayItem.multi._keys[fieldName]) {
+							cslItem.multi._keys[variable][langTag] = arrayItem.multi._keys[fieldName][langTag];
+						}
+					}
+					break;
 				}
-				
-				cslItem[variable] = value;
-				break;
 			}
 		}
 		
+		// Clean up committee/legislativeBody
+		if (cslItem.committee && cslItem.authority) {
+			cslItem.authority = [cslItem.authority,cslItem.committee].join("|");
+			delete cslItem.committee;
+		}
+
 		// separate name variables
-		var authorID = Zotero.CreatorTypes.getPrimaryIDForType(item.itemType);
-		var creators = item.creators;
-		if(creators) {
-			for(var i=0, n=creators.length; i<n; i++) {
-				var creator = creators[i];
-				
-				if(creator.creatorTypeID == authorID) {
-					var creatorType = "author";
-				} else {
-					var creatorType = CSL_NAMES_MAPPINGS[creator.creatorType]
+		var authorID = Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID);
+		var authorFieldName = Zotero.CreatorTypes.getName(authorID);
+		if ("undefined" === typeof arrayItem.creators) {
+			arrayItem.creators = [];
+		}
+		var creators = arrayItem.creators.slice();
+
+		// Stir in authority variable
+		if (cslItem.authority) {
+			var nameObj = {
+				'creatorType':'authority',
+				'lastName':cslItem.authority,
+				'firstName':'',
+				'fieldMode': 1,
+				'multi':{'_key':{}}
+			}
+			// _lsts not used in cslItem. Arguably it could be, to fix priorities. One day.
+			for (var langTag in cslItem.multi._keys.authority) {
+				nameObj.multi._key[langTag] = {
+					'lastName':cslItem.multi._keys.authority[langTag],
+					'firstName':''
 				}
-				
-				if(!creatorType) continue;
-				
-				if(creator.fieldMode == 1) {
-					var nameObj = {'literal':creator.lastName};
-				} else {
-					var nameObj = {'family':creator.lastName, 'given':creator.firstName};
+			}
+			nameObj.multi.main = arrayItem.multi.main.authority;
+			creators.push(nameObj);
+			delete cslItem.authority;
+		}
+
+		for each(var creator in creators) {
+			if(creator.creatorType == authorFieldName) {
+				var creatorType = "author";
+			} else if (creator.creatorType === 'authority') {
+				var creatorType = 'authority';
+			} else {
+				var creatorType = creator.creatorType;
+			}
+			
+			var creatorType = CSL_NAMES_MAPPINGS[creatorType];
+			if(!creatorType) continue;
+			
+			if (Zotero.Prefs.get('csl.enableInstitutionFormatting')) {
+				var nameObj = {
+					'family':creator.lastName, 
+					'given':creator.firstName,
+					'isInstitution': creator.fieldMode
 				}
-				
-				if(cslItem[creatorType]) {
-					cslItem[creatorType].push(nameObj);
-				} else {
-					cslItem[creatorType] = [nameObj];
+			} else {
+				var nameObj = {
+					'family':creator.lastName, 
+					'given':creator.firstName
 				}
+			}
+		
+			if (!nameObj.multi) {
+				nameObj.multi = {};
+				nameObj.multi._key = {};
+				nameObj.multi.main = creator.multi.main;
+			}
+			for (var langTag in creator.multi._key) {
+				if (Zotero.Prefs.get('csl.enableInstitutionFormatting')) {
+					nameObj.multi._key[langTag] = {
+						'family':creator.multi._key[langTag].lastName,
+						'given':creator.multi._key[langTag].firstName,
+						'isInstitution': creator.fieldMode
+					};
+				} else {
+					nameObj.multi._key[langTag] = {
+						'family':creator.multi._key[langTag].lastName,
+						'given':creator.multi._key[langTag].firstName
+					};
+				}
+			}
+
+			if(cslItem[creatorType]) {
+				cslItem[creatorType].push(nameObj);
+			} else {
+				cslItem[creatorType] = [nameObj];
 			}
 		}
 		
 		// get date variables
 		for(var variable in CSL_DATE_MAPPINGS) {
-			var date = item[CSL_DATE_MAPPINGS[variable]];
+			var date;
+			for each(var zVar in CSL_DATE_MAPPINGS[variable]) {
+				var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, zVar);
+				if (!fieldID) {
+					var fieldID = Zotero.ItemFields.getID(zVar);
+				}
+				var fieldName = Zotero.ItemFields.getName(fieldID);
+				date = arrayItem[fieldName];
+				if (date) {
+					break;
+				}
+			}
 			if(date) {
-				var dateObj = Zotero.Date.strToDate(date);
-				// otherwise, use date-parts
-				var dateParts = [];
-				if(dateObj.year) {
-					// add year, month, and day, if they exist
-					dateParts.push(dateObj.year);
-					if(dateObj.month !== undefined) {
-						dateParts.push(dateObj.month+1);
-						if(dateObj.day) {
-							dateParts.push(dateObj.day);
-						}
-					}
-					cslItem[variable] = {"date-parts":[dateParts]};
-					
-					// if no month, use season as month
-					if(dateObj.part && !dateObj.month) {
-						cslItem[variable].season = dateObj.part;
-					}
+				if (Zotero.Prefs.get('hackUseCiteprocJsDateParser')) {
+					var raw = Zotero.Date.multipartToStr(date);
+					// cslItem[variable] = {raw: raw, "date-parts":[dateParts]};
+					cslItem[variable] = {raw: raw};
 				} else {
-					// if no year, pass date literally
-					cslItem[variable] = {"literal":date};
+					var dateObj = Zotero.Date.strToDate(date);
+					// otherwise, use date-parts
+					var dateParts = [];
+					if(dateObj.year) {
+						// add year, month, and day, if they exist
+						dateParts.push(dateObj.year);
+						if("number" === typeof dateObj.month) {
+							dateParts.push(dateObj.month+1);
+							if(dateObj.day) {
+								dateParts.push(dateObj.day);
+							}
+						}
+						cslItem[variable] = {"date-parts":[dateParts]};
+					
+						// if no month, use season as month
+						if(dateObj.part && !dateObj.month) {
+							cslItem[variable].season = dateObj.part;
+						}
+					} else {
+						// if no year, pass date literally
+						cslItem[variable] = {"literal":date};
+					}
 				}
 			}
 		}
+
+		// Force Fields
+		if (CSL_FORCE_FIELD_CONTENT[itemType]) {
+			for (var variable in CSL_FORCE_FIELD_CONTENT[itemType]) {
+				cslItem[variable] = CSL_FORCE_FIELD_CONTENT[itemType][variable];
+			}
+		}
 		
-		//this._cache[item.id] = cslItem;
+		// Force remap
+		if (CSL_FORCE_REMAP[itemType]) {
+			for (var variable in CSL_FORCE_REMAP[itemType]) {
+				cslItem[CSL_FORCE_REMAP[itemType][variable]] = cslItem[variable];
+				delete cslItem[variable];
+			}
+		}
+
+		// extract PMID
+		var extra = arrayItem["note"];
+		if(typeof extra === "string") {
+			var m = /(?:^|\n)PMID:\s*([0-9]+)/.exec(extra);
+			if(m) cslItem.PMID = m[1];
+			m = /(?:^|\n)PMCID:\s*([0-9]+)/.exec(extra);
+			if(m) cslItem.PMCID = m[1];
+		}
+		
+		//this._cache[arrayItem.id] = cslItem;
 		return cslItem;
 	},
 	

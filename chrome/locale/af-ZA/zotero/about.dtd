@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "weergawe">
+<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
+<!ENTITY zotero.about.close "Sluit">
+<!ENTITY zotero.about.localizations "Lokaliserings:">
+<!ENTITY zotero.alumni "Alumni:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Geskep deur:">
+<!ENTITY zotero.developers "Ontwikkelaars:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Direkteure:">
-<!ENTITY zotero.developers "Ontwikkelaars:">
-<!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.about.localizations "Lokaliserings:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
 <!ENTITY zotero.executiveProducer "Uitvoerende vervaardiger:">
-<!ENTITY zotero.thanks "Spesiale dank:">
-<!ENTITY zotero.about.close "Sluit">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.thanks "Spesiale dank:">
+<!ENTITY zotero.version "weergawe">

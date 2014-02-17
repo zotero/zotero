@@ -464,6 +464,7 @@ Zotero.Tag.prototype.save = function (full) {
 				
 				var pairs = [];
 				for each(var itemID in newids) {
+
 					insertStatement.bindInt32Parameter(0, itemID);
 					insertStatement.bindInt32Parameter(1, tagID);
 					

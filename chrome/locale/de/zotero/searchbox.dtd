@@ -1,23 +1,18 @@
-<!ENTITY zotero.search.name "Name:">
-
-<!ENTITY zotero.search.joinMode.prefix "Ergebnisse finden mit">
-<!ENTITY zotero.search.joinMode.any "beliebigem">
-<!ENTITY zotero.search.joinMode.all "allen">
-<!ENTITY zotero.search.joinMode.suffix "der folgenden:">
-
-<!ENTITY zotero.search.recursive.label "Untersammlungen durchsuchen">
-<!ENTITY zotero.search.noChildren "Nur Einträge der obersten Ebene anzeigen">
+<!ENTITY zotero.search.clear "Zurücksetzen">
+<!ENTITY zotero.search.date.units.days "Tage">
+<!ENTITY zotero.search.date.units.months "Monate">
+<!ENTITY zotero.search.date.units.years "Jahre">
 <!ENTITY zotero.search.includeParentsAndChildren "Über- und untergeordnete Einträge von Treffern einschließen">
-
+<!ENTITY zotero.search.joinMode.all "allen">
+<!ENTITY zotero.search.joinMode.any "beliebigem">
+<!ENTITY zotero.search.joinMode.prefix "Ergebnisse finden mit">
+<!ENTITY zotero.search.joinMode.suffix "der folgenden:">
+<!ENTITY zotero.search.name "Name:">
+<!ENTITY zotero.search.noChildren "Nur Einträge der obersten Ebene anzeigen">
+<!ENTITY zotero.search.recursive.label "Untersammlungen durchsuchen">
+<!ENTITY zotero.search.saveSearch "Suche speichern">
+<!ENTITY zotero.search.search "Suchen">
 <!ENTITY zotero.search.textModes.phrase "Phrase">
 <!ENTITY zotero.search.textModes.phraseBinary "Phrase (inkl. Binärdateien)">
 <!ENTITY zotero.search.textModes.regexp "Regexp">
 <!ENTITY zotero.search.textModes.regexpCS "Regexp (Beachtung der Groß- und Kleinschreibung)">
-
-<!ENTITY zotero.search.date.units.days "Tage">
-<!ENTITY zotero.search.date.units.months "Monate">
-<!ENTITY zotero.search.date.units.years "Jahre">
-
-<!ENTITY zotero.search.search "Suchen">
-<!ENTITY zotero.search.clear "Zurücksetzen">
-<!ENTITY zotero.search.saveSearch "Suche speichern">

@@ -1,286 +1,281 @@
-<!ENTITY zotero.general.optional "(Valfritt)">
-<!ENTITY zotero.general.note "Anteckning:">
-<!ENTITY zotero.general.selectAll "Välj alla">
-<!ENTITY zotero.general.deselectAll "Välj bort alla">
-<!ENTITY zotero.general.edit "Ändra">
-<!ENTITY zotero.general.delete "Radera">
-<!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
-
-<!ENTITY zotero.errorReport.title "Zotero-felrapporting">
-<!ENTITY zotero.errorReport.unrelatedMessages "Felloggen kan innehålla meddelanden som inte har med Zotero att göra.">
-<!ENTITY zotero.errorReport.submissionInProgress "Var vänlig vänta medan felrapporten skickas.">
-<!ENTITY zotero.errorReport.submitted "Felrapporten har skickats.">
-<!ENTITY zotero.errorReport.reportID "Rapport-ID:">
-<!ENTITY zotero.errorReport.postToForums "Skriv ett meddelande på Zoteros forum (forums.zotero.org) med detta rapport-ID, en beskrivning av problemet, och vad man behöver göra för att få samma fel igen.">
-<!ENTITY zotero.errorReport.notReviewed "Felrapporter brukar inte kontrolleras om ingen skriver om dem på forumen.">
-
-<!ENTITY zotero.upgrade.title "Zotero uppgraderingsguide">
-<!ENTITY zotero.upgrade.newVersionInstalled "Du har installerat en ny version av Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Din Zoterodatabas måste uppgraderas för att fungera med den nya versionen.">
-<!ENTITY zotero.upgrade.autoBackup "Din existerande databas kommer att säkerhetskopieras innan några ändringar görs.">
-<!ENTITY zotero.upgrade.majorUpgrade "Detta är en stor uppgradering.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Var säker på att du läst igenom">
-<!ENTITY zotero.upgrade.majorUpgradeLink "uppgraderingsinstruktionerna">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink "innan du fortsätter.">
-<!ENTITY zotero.upgrade.upgradeInProgress "Var vänlig vänta tills uppgraderingsprocessen avslutas. Det kan ta några minuter.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Zotero lyckades uppdatera databasen">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "Gå till">
-<!ENTITY zotero.upgrade.changeLogLink "Changelog">
-<!ENTITY zotero.upgrade.changeLogAfterLink "för att se vad som är nytt eller ändrat.">
-
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Lägg markeringen till Zotero-anteckning">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Skapa en Zotero-källa och anteckning av markeringen">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Spara länk som en Zotero-källa">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Spara bild som en Zotero-källa">
-
-<!ENTITY zotero.tabs.info.label "Information">
-<!ENTITY zotero.tabs.notes.label "Anteckningar">
-<!ENTITY zotero.tabs.attachments.label "Bilagor">
-<!ENTITY zotero.tabs.tags.label "Etiketter">
-<!ENTITY zotero.tabs.related.label "Liknande källor">
-<!ENTITY zotero.notes.separate "Redigera i ett separat fönster">
-
-<!ENTITY zotero.toolbar.duplicate.label "Visa dubletter">
-<!ENTITY zotero.collections.showUnfiledItems "Visa oregistererade källor">
-
-<!ENTITY zotero.items.itemType "Källtyp">
-<!ENTITY zotero.items.type_column "Typ">
-<!ENTITY zotero.items.title_column "Titel">
-<!ENTITY zotero.items.creator_column "Skapare">
-<!ENTITY zotero.items.date_column "Datum">
-<!ENTITY zotero.items.year_column "År">
-<!ENTITY zotero.items.publisher_column "Förlag">
-<!ENTITY zotero.items.publication_column "Tidskriftens namn">
-<!ENTITY zotero.items.journalAbbr_column "Tidskriftens förkortning">
-<!ENTITY zotero.items.language_column "Språk">
-<!ENTITY zotero.items.accessDate_column "Hämtdatum">
-<!ENTITY zotero.items.libraryCatalog_column "Bokkatalog">
-<!ENTITY zotero.items.callNumber_column "Hyllkod">
-<!ENTITY zotero.items.rights_column "Rättigheter">
-<!ENTITY zotero.items.dateAdded_column "Tillagt datum">
-<!ENTITY zotero.items.dateModified_column "Ändrat datum">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Arkiv">
-<!ENTITY zotero.items.archiveLocation_column "Hitta i arkiv">
-<!ENTITY zotero.items.place_column "Plats">
-<!ENTITY zotero.items.volume_column "Volym">
-<!ENTITY zotero.items.edition_column "Upplaga">
-<!ENTITY zotero.items.pages_column "Sidor">
-<!ENTITY zotero.items.issue_column "Tidskriftsnummer">
-<!ENTITY zotero.items.series_column "Bokserie">
-<!ENTITY zotero.items.seriesTitle_column "Bokseriens titel">
-<!ENTITY zotero.items.court_column "Domstol">
-<!ENTITY zotero.items.medium_column "Media/format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "System">
-<!ENTITY zotero.items.moreColumns.label "Fler kolumner">
-<!ENTITY zotero.items.restoreColumnOrder.label "Återställ kolumnordning">
-
-<!ENTITY zotero.items.menu.showInLibrary "Visa i bibliotek">
-<!ENTITY zotero.items.menu.attach.note "Lägg till anteckning">
-<!ENTITY zotero.items.menu.attach "Lägg till bilaga">
-<!ENTITY zotero.items.menu.attach.snapshot "Bifoga sparad kopia av aktuell sida">
-<!ENTITY zotero.items.menu.attach.link "Bifoga länk till aktuell sida">
-<!ENTITY zotero.items.menu.attach.link.uri "Bifoga länk till URI...">
-<!ENTITY zotero.items.menu.attach.file "Bifoga sparad kopia av filen...">
-<!ENTITY zotero.items.menu.attach.fileLink "Bifoga länk till fil...">
-
-<!ENTITY zotero.items.menu.restoreToLibrary "Återställ till bibliotek">
-<!ENTITY zotero.items.menu.duplicateItem "Duplicera vald post">
-<!ENTITY zotero.items.menu.mergeItems "Sammanfoga källor…">
-
-<!ENTITY zotero.duplicatesMerge.versionSelect "Välj vilken version av källan som ska vara utgångspunkt:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Välj fält att behålla från andra versioner av källan:">
-
-<!ENTITY zotero.toolbar.newItem.label "Ny post">
-<!ENTITY zotero.toolbar.moreItemTypes.label "Mer">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Skapa ny webbsidekälla från aktuell sida">
-<!ENTITY zotero.toolbar.lookup.label "Lägg till källa via referensnummer">
-<!ENTITY zotero.toolbar.removeItem.label "Radera källa...">
-<!ENTITY zotero.toolbar.newCollection.label "Ny samling...">
-<!ENTITY zotero.toolbar.newGroup "Ny grupp...">
-<!ENTITY zotero.toolbar.newSubcollection.label "Ny undersamling...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Ny sparad sökning...">
-<!ENTITY zotero.toolbar.emptyTrash.label "Töm papperskorg">
-<!ENTITY zotero.toolbar.tagSelector.label "Visa/Göm etikettväljare">
-<!ENTITY zotero.toolbar.actions.label "Åtgärder">
-<!ENTITY zotero.toolbar.import.label "Importera...">
-<!ENTITY zotero.toolbar.importFromClipboard "Importera från urklipp">
-<!ENTITY zotero.toolbar.export.label "Exportera bibliotek...">
-<!ENTITY zotero.toolbar.rtfScan.label "Läs in RTF...">
-<!ENTITY zotero.toolbar.timeline.label "Skapa tidslinje">
-<!ENTITY zotero.toolbar.preferences.label "Inställningar...">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Hjälp och dokumentation">
-<!ENTITY zotero.toolbar.about.label "Om Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Avancerad sökning">
-<!ENTITY zotero.toolbar.tab.tooltip "Växla flikläge">
-<!ENTITY zotero.toolbar.openURL.label "Hitta">
-<!ENTITY zotero.toolbar.openURL.tooltip "Hitta på ditt lokala bibliotek">
-
-<!ENTITY zotero.item.add "Lägg till">
-<!ENTITY zotero.item.attachment.file.show "Visa fil">
-<!ENTITY zotero.item.textTransform "Omvandla text">
-<!ENTITY zotero.item.textTransform.titlecase "Engelsk Titelskrivning">
-<!ENTITY zotero.item.textTransform.sentencecase "Vanlig versalisering">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Skifta för-/efternamn">
-
-<!ENTITY zotero.toolbar.newNote "Ny anteckning">
-<!ENTITY zotero.toolbar.note.standalone "Ny fristående anteckning">
-<!ENTITY zotero.toolbar.note.child "Lägg till underliggande anteckning">
-<!ENTITY zotero.toolbar.lookup "Sök med referensnummer...">
-<!ENTITY zotero.toolbar.attachment.linked "Länk till fil...">
-<!ENTITY zotero.toolbar.attachment.add "Lagra kopia av fil...">
-<!ENTITY zotero.toolbar.attachment.weblink "Spara länk till aktuell sida">
-<!ENTITY zotero.toolbar.attachment.snapshot "Ta lokal kopia av aktuell sida">
-
-<!ENTITY zotero.tagSelector.noTagsToDisplay "Inga etiketter att visa">
-<!ENTITY zotero.tagSelector.filter "Filter:">
-<!ENTITY zotero.tagSelector.showAutomatic "Visa automatiskt">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Visa alla etiketter i detta bibliotek">
-<!ENTITY zotero.tagSelector.selectVisible "Välj synliga">
-<!ENTITY zotero.tagSelector.clearVisible "Välj bort synliga">
-<!ENTITY zotero.tagSelector.clearAll "Välj bort alla">
-<!ENTITY zotero.tagSelector.assignColor "Ange färg…">
-<!ENTITY zotero.tagSelector.renameTag "Ändra namn på etikett...">
-<!ENTITY zotero.tagSelector.deleteTag "Radera etikett...">
-
-<!ENTITY zotero.tagColorChooser.title "Ange etikettens färg och plats">
-<!ENTITY zotero.tagColorChooser.color "Färg:">
-<!ENTITY zotero.tagColorChooser.position "Plats:">
-<!ENTITY zotero.tagColorChooser.setColor "Ställ in färg">
-<!ENTITY zotero.tagColorChooser.removeColor "Ta bort färg">
-
-<!ENTITY zotero.lookup.description "Skriv ISBN, DOI, eller PMID i sökfältet nedan.">
-<!ENTITY zotero.lookup.button.search "Sök">
-
-<!ENTITY zotero.selectitems.title "Välj källor">
-<!ENTITY zotero.selectitems.intro.label "Välj vilka källor du vill lägga till i ditt bibliotek">
-<!ENTITY zotero.selectitems.cancel.label "Ångra">
-<!ENTITY zotero.selectitems.select.label "Ok">
-
-<!ENTITY zotero.bibliography.title "Skapa citering/källförteckning">
-<!ENTITY zotero.bibliography.style.label "Referensstil">
-<!ENTITY zotero.bibliography.outputMode "Utmatningsläge">
-<!ENTITY zotero.bibliography.bibliography "Källförteckning">
-<!ENTITY zotero.bibliography.outputMethod "Utmatningsmetod">
-<!ENTITY zotero.bibliography.saveAsRTF.label "Spara som RTF">
-<!ENTITY zotero.bibliography.saveAsHTML.label "Spara som HTML">
-<!ENTITY zotero.bibliography.copyToClipboard.label "Kopiera till urklipp">
-<!ENTITY zotero.bibliography.print.label "Skriv ut">
-
-<!ENTITY zotero.integration.docPrefs.title "Dokumentinställningar">
-<!ENTITY zotero.integration.addEditCitation.title "Lägg till/redigera källhänvisning">
-<!ENTITY zotero.integration.editBibliography.title "Redigera källförteckning">
-<!ENTITY zotero.integration.quickFormatDialog.title "Citering med snabbformat">
-
-<!ENTITY zotero.progress.title "Förlopp">
-
-<!ENTITY zotero.exportOptions.title "Exportera...">
-<!ENTITY zotero.exportOptions.format.label "Format:">
-<!ENTITY zotero.exportOptions.translatorOptions.label "Inställningar för källfångare">
-
-<!ENTITY zotero.charset.label "Teckenkodning">
-<!ENTITY zotero.moreEncodings.label "Fler teckenkodningar">
-
-<!ENTITY zotero.citation.keepSorted.label "Håll källor sorterade">
-
-<!ENTITY zotero.citation.page "Sida">
-<!ENTITY zotero.citation.paragraph "Stycke">
-<!ENTITY zotero.citation.line "Rad">
-<!ENTITY zotero.citation.suppressAuthor.label "Dölj författare">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
-<!ENTITY zotero.citation.editorWarning.label "Varning: Om du redigerar ett citat i redigeraren så kommer det inte längre uppdateras för att spegla förändringar i databasen eller citeringsstilen.">
-
-<!ENTITY zotero.richText.italic.label "Kursiv">
-<!ENTITY zotero.richText.bold.label "Fet">
-<!ENTITY zotero.richText.underline.label "Understrykning">
-<!ENTITY zotero.richText.superscript.label "Upphöjd">
-<!ENTITY zotero.richText.subscript.label "Nedsänkt">
-
 <!ENTITY zotero.annotate.toolbar.add.label "Lägg till anteckning">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Göm alla anteckningar">
+<!ENTITY zotero.annotate.toolbar.duplicatesView.label "Duplicates view">
+<!ENTITY zotero.annotate.toolbar.duplicatesViewCancel.label "Cancel duplicates view">
 <!ENTITY zotero.annotate.toolbar.expand.label "Visa alla anteckningar">
 <!ENTITY zotero.annotate.toolbar.highlight.label "Framhäv text">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Sluta framhäv text">
-
-<!ENTITY zotero.integration.prefs.displayAs.label "Visa källor som:">
-<!ENTITY zotero.integration.prefs.footnotes.label "Fotnoter">
-<!ENTITY zotero.integration.prefs.endnotes.label "Slutnoter">
-
-<!ENTITY zotero.integration.prefs.formatUsing.label "Formatera med:">
-<!ENTITY zotero.integration.prefs.bookmarks.label "Bokmärken">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmärken sparas i Microsoft Word och LibreOffice, men kan ändras av misstag. Av kompatibilitetsskäl kan inte källhänvisningar läggas till fotnoter eller slutkommentarer när detta alternativ är valt.">
-
-
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Förkorta tidskriftstitlar automatiskt">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE-tidskriftsförkortningar genereras automatiskt från tidskriftstitlarna. Tidskriftsförkortningsfältet ignoreras.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Lagra referenserna i dokumentet">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "När du lagerar referenserna i dokument ökar filstorleken något, men det ger dig möjligheten att dela dokumentet till andra utan att använda en Zotero-grupp. Zotero 3.0 eller senare krävs för att redigera dokument som skapats med detta tillval.">
-
-<!ENTITY zotero.integration.showEditor.label "Visa redigerare">
+<!ENTITY zotero.bibliography.bibliography "Källförteckning">
+<!ENTITY zotero.bibliography.copyToClipboard.label "Kopiera till urklipp">
+<!ENTITY zotero.bibliography.output.label "Utdataformat">
+<!ENTITY zotero.bibliography.outputMethod "Utmatningsmetod">
+<!ENTITY zotero.bibliography.outputMode "Utmatningsläge">
+<!ENTITY zotero.bibliography.print.label "Skriv ut">
+<!ENTITY zotero.bibliography.saveAsHTML.label "Spara som HTML">
+<!ENTITY zotero.bibliography.saveAsRTF.label "Spara som RTF">
+<!ENTITY zotero.bibliography.style.label "Referensstil">
+<!ENTITY zotero.bibliography.title "Skapa citering/källförteckning">
+<!ENTITY zotero.charset.label "Teckenkodning">
+<!ENTITY zotero.citation.editorWarning.label "Varning: Om du redigerar ett citat i redigeraren så kommer det inte längre uppdateras för att spegla förändringar i databasen eller citeringsstilen.">
+<!ENTITY zotero.citation.keepSorted.label "Håll källor sorterade">
+<!ENTITY zotero.citation.line "Rad">
+<!ENTITY zotero.citation.page "Sida">
+<!ENTITY zotero.citation.paragraph "Stycke">
+<!ENTITY zotero.citation.prefix.label "Prefix:">
+<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suppressAuthor.label "Dölj författare">
+<!ENTITY zotero.collections.showUnfiledItems "Visa oregistererade källor">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Lägg markeringen till Zotero-anteckning">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Skapa en Zotero-källa och anteckning av markeringen">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Spara bild som en Zotero-källa">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Spara länk som en Zotero-källa">
+<!ENTITY zotero.downloadManager.label "Spara till Zotero">
+<!ENTITY zotero.downloadManager.noPDFTools.description "För att använda denna funktion måste du först installera PDF-verktygen. Du hittar detta tillval i Inställningar.">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Bilagor kan inte läggas till det valda biblioteket. Istället kommer källas att sparas i &quot;Mitt bibliotek&quot;.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Välj fält att behålla från andra versioner av källan:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Välj vilken version av källan som ska vara utgångspunkt:">
+<!ENTITY zotero.errorReport.notReviewed "Felrapporter brukar inte kontrolleras om ingen skriver om dem på forumen.">
+<!ENTITY zotero.errorReport.postToForums "Skriv ett meddelande på Zoteros forum (forums.zotero.org) med detta rapport-ID, en beskrivning av problemet, och vad man behöver göra för att få samma fel igen.">
+<!ENTITY zotero.errorReport.reportID "Rapport-ID:">
+<!ENTITY zotero.errorReport.submissionInProgress "Var vänlig vänta medan felrapporten skickas.">
+<!ENTITY zotero.errorReport.submitted "Felrapporten har skickats.">
+<!ENTITY zotero.errorReport.title "Zotero-felrapporting">
+<!ENTITY zotero.errorReport.unrelatedMessages "Felloggen kan innehålla meddelanden som inte har med Zotero att göra.">
+<!ENTITY zotero.exportOptions.format.label "Format:">
+<!ENTITY zotero.exportOptions.title "Exportera...">
+<!ENTITY zotero.exportOptions.translatorOptions.label "Inställningar för källfångare">
+<!ENTITY zotero.file.choose.label "Välj fil...">
+<!ENTITY zotero.file.noneSelected.label "Ingen fil vald">
+<!ENTITY zotero.general.cancel "Cancel">
+<!ENTITY zotero.general.delete "Radera">
+<!ENTITY zotero.general.deselectAll "Välj bort alla">
+<!ENTITY zotero.general.edit "Ändra">
+<!ENTITY zotero.general.note "Anteckning:">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.optional "(Valfritt)">
+<!ENTITY zotero.general.selectAll "Välj alla">
+<!ENTITY zotero.integration.addEditCitation.title "Lägg till/redigera källhänvisning">
 <!ENTITY zotero.integration.classicView.label "Klassisk vy">
-
+<!ENTITY zotero.integration.docPrefs.title "Dokumentinställningar">
+<!ENTITY zotero.integration.editBibliography.title "Redigera källförteckning">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE-tidskriftsförkortningar genereras automatiskt från tidskriftstitlarna. Tidskriftsförkortningsfältet ignoreras.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Förkorta tidskriftstitlar automatiskt">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmärken sparas i Microsoft Word och LibreOffice, men kan ändras av misstag. Av kompatibilitetsskäl kan inte källhänvisningar läggas till fotnoter eller slutkommentarer när detta alternativ är valt.">
+<!ENTITY zotero.integration.prefs.bookmarks.label "Bokmärken">
+<!ENTITY zotero.integration.prefs.displayAs.label "Visa källor som:">
+<!ENTITY zotero.integration.prefs.endnotes.label "Slutnoter">
+<!ENTITY zotero.integration.prefs.footnotes.label "Fotnoter">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Formatera med:">
+<!ENTITY zotero.integration.prefs.lang.institutions "Institutions:">
+<!ENTITY zotero.integration.prefs.lang.journals "Journals:">
+<!ENTITY zotero.integration.prefs.lang.languages "Languages">
+<!ENTITY zotero.integration.prefs.lang.languagesInCitations "Languages for use in citations">
+<!ENTITY zotero.integration.prefs.lang.persons "Persons:">
+<!ENTITY zotero.integration.prefs.lang.places "Places:">
+<!ENTITY zotero.integration.prefs.lang.primary "primary">
+<!ENTITY zotero.integration.prefs.lang.publishers "Publishers:">
+<!ENTITY zotero.integration.prefs.lang.secondary "[secondary]">
+<!ENTITY zotero.integration.prefs.lang.sorting "Sorting">
+<!ENTITY zotero.integration.prefs.lang.styleAndFormat "Style &amp; Format">
+<!ENTITY zotero.integration.prefs.lang.titles "Titles:">
+<!ENTITY zotero.integration.prefs.lang.translation "Translation">
+<!ENTITY zotero.integration.prefs.lang.transliteration "Transliteration">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "När du lagerar referenserna i dokument ökar filstorleken något, men det ger dig möjligheten att dela dokumentet till andra utan att använda en Zotero-grupp. Zotero 3.0 eller senare krävs för att redigera dokument som skapats med detta tillval.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Lagra referenserna i dokumentet">
+<!ENTITY zotero.integration.quickFormatDialog.title "Citering med snabbformat">
 <!ENTITY zotero.integration.references.label "Referenser i källförteckningen">
-
-<!ENTITY zotero.sync.button "Synkronisera med Zoteros server">
-<!ENTITY zotero.sync.error "Synkroniseringsfel">
-<!ENTITY zotero.sync.storage.progress "Förlopp:">
-<!ENTITY zotero.sync.storage.downloads "Nedladdningar:">
-<!ENTITY zotero.sync.storage.uploads "Uppladdningar:">
-
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Följande etikett i ditt Zoterobibliotek är för lång för att synkronisera med servern:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synkroniserade etiketter måste vara kortare än 256 tecken.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Du kan antingen dela upp etiketten i flera etiketter, förkorta den, eller radera den.">
-<!ENTITY zotero.sync.longTagFixer.split "Dela">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe "Dela vid det">
-<!ENTITY zotero.sync.longTagFixer.character "tecken">
-<!ENTITY zotero.sync.longTagFixer.characters "tecken">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Omarkerade etiketter kommer inte att sparas.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etiketten kommer att raderas från alla källor.">
-
-<!ENTITY zotero.merge.title "Hantera konflikt">
-<!ENTITY zotero.merge.of "av">
+<!ENTITY zotero.integration.showEditor.label "Visa redigerare">
+<!ENTITY zotero.item.add "Lägg till">
+<!ENTITY zotero.item.attachment.file.show "Visa fil">
+<!ENTITY zotero.item.creatorTransform "Transform Name Form">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Skifta för-/efternamn">
+<!ENTITY zotero.item.textTransform "Omvandla text">
+<!ENTITY zotero.item.textTransform.sentencecase "Vanlig versalisering">
+<!ENTITY zotero.item.textTransform.titlecase "Engelsk Titelskrivning">
+<!ENTITY zotero.items.accessDate_column "Hämtdatum">
+<!ENTITY zotero.items.archiveLocation_column "Hitta i arkiv">
+<!ENTITY zotero.items.archive_column "Arkiv">
+<!ENTITY zotero.items.callNumber_column "Hyllkod">
+<!ENTITY zotero.items.court_column "Domstol">
+<!ENTITY zotero.items.creator_column "Skapare">
+<!ENTITY zotero.items.dateAdded_column "Tillagt datum">
+<!ENTITY zotero.items.dateModified_column "Ändrat datum">
+<!ENTITY zotero.items.date_column "Datum">
+<!ENTITY zotero.items.edition_column "Upplaga">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.issue_column "Tidskriftsnummer">
+<!ENTITY zotero.items.itemType "Källtyp">
+<!ENTITY zotero.items.journalAbbr_column "Tidskriftens förkortning">
+<!ENTITY zotero.items.language_column "Språk">
+<!ENTITY zotero.items.libraryCatalog_column "Bokkatalog">
+<!ENTITY zotero.items.medium_column "Media/format">
+<!ENTITY zotero.items.menu.addTag "Add Tag">
+<!ENTITY zotero.items.menu.attach "Lägg till bilaga">
+<!ENTITY zotero.items.menu.attach.file "Bifoga sparad kopia av filen...">
+<!ENTITY zotero.items.menu.attach.fileLink "Bifoga länk till fil...">
+<!ENTITY zotero.items.menu.attach.link "Bifoga länk till aktuell sida">
+<!ENTITY zotero.items.menu.attach.link.uri "Bifoga länk till URI...">
+<!ENTITY zotero.items.menu.attach.note "Lägg till anteckning">
+<!ENTITY zotero.items.menu.attach.snapshot "Bifoga sparad kopia av aktuell sida">
+<!ENTITY zotero.items.menu.changeTag "Change Tag">
+<!ENTITY zotero.items.menu.duplicateItem "Duplicera vald post">
+<!ENTITY zotero.items.menu.mergeItems "Sammanfoga källor…">
+<!ENTITY zotero.items.menu.moveDown "Move Down">
+<!ENTITY zotero.items.menu.moveUp "Move Up">
+<!ENTITY zotero.items.menu.restoreToLibrary "Återställ till bibliotek">
+<!ENTITY zotero.items.menu.showInLibrary "Visa i bibliotek">
+<!ENTITY zotero.items.moreColumns.label "Fler kolumner">
+<!ENTITY zotero.items.numChildren_column "Visa/dölj underordnade">
+<!ENTITY zotero.items.pages_column "Sidor">
+<!ENTITY zotero.items.place_column "Plats">
+<!ENTITY zotero.items.publication_column "Tidskriftens namn">
+<!ENTITY zotero.items.publisher_column "Förlag">
+<!ENTITY zotero.items.reporter_column "Reporter">
+<!ENTITY zotero.items.restoreColumnOrder.label "Återställ kolumnordning">
+<!ENTITY zotero.items.rights_column "Rättigheter">
+<!ENTITY zotero.items.seriesTitle_column "Bokseriens titel">
+<!ENTITY zotero.items.series_column "Bokserie">
+<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.title_column "Titel">
+<!ENTITY zotero.items.type_column "Typ">
+<!ENTITY zotero.items.volume_column "Volym">
+<!ENTITY zotero.items.year_column "År">
+<!ENTITY zotero.lookup.button.search "Sök">
+<!ENTITY zotero.lookup.description "Skriv ISBN, DOI, eller PMID i sökfältet nedan.">
 <!ENTITY zotero.merge.deleted "Raderad">
-
+<!ENTITY zotero.merge.of "av">
+<!ENTITY zotero.merge.title "Hantera konflikt">
+<!ENTITY zotero.moreEncodings.label "Fler teckenkodningar">
+<!ENTITY zotero.notes.separate "Redigera i ett separat fönster">
+<!ENTITY zotero.progress.title "Förlopp">
+<!ENTITY zotero.proxy.recognized.disable.label "Skicka inte automatiskt vidare frågor genom tidigare funna proxies">
+<!ENTITY zotero.proxy.recognized.ignore.label "Ignorera">
 <!ENTITY zotero.proxy.recognized.title "Proxy hittad">
 <!ENTITY zotero.proxy.recognized.warning "Lägg bara till proxies från ditt bibliotek, din skola, eller från ett känt företag">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Andra proxyservrar kan innehålla elakartad kod som kan låtsas vara hemsidor du litar på.">
-<!ENTITY zotero.proxy.recognized.disable.label "Skicka inte automatiskt vidare frågor genom tidigare funna proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "Ignorera">
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Läser av metadata...">
 <!ENTITY zotero.recognizePDF.cancel.label "Ångra">
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF-namn">
+<!ENTITY zotero.recognizePDF.captcha.label "Skriv texten nedan för att fortsätta läsa in metadata.">
 <!ENTITY zotero.recognizePDF.itemName.label "Källnamn">
-
-<!ENTITY zotero.rtfScan.title "RTF-scanning">
+<!ENTITY zotero.recognizePDF.pdfName.label "PDF-namn">
+<!ENTITY zotero.recognizePDF.recognizing.label "Läser av metadata...">
+<!ENTITY zotero.richText.bold.label "Fet">
+<!ENTITY zotero.richText.italic.label "Kursiv">
+<!ENTITY zotero.richText.subscript.label "Nedsänkt">
+<!ENTITY zotero.richText.superscript.label "Upphöjd">
+<!ENTITY zotero.richText.underline.label "Understrykning">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Mångtydiga källhänvisningar">
 <!ENTITY zotero.rtfScan.cancel.label "Ångra">
 <!ENTITY zotero.rtfScan.citation.label "Referens">
-<!ENTITY zotero.rtfScan.itemName.label "Källnamn">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Överblivna källhänvisningar">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Mångtydiga källhänvisningar">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Källhänvisningar kopplade till källa">
-<!ENTITY zotero.rtfScan.introPage.label "Introduktion">
+<!ENTITY zotero.rtfScan.citationsPage.description "Gå igenom listan nedan över igenkända källhänvisningar för att försäkra dig om att Zotero har valt motsvarande källor korrekt. Eventuella överblivna eller mångtydiga källhänvisningar måste åtgärdas innan nästa steg.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Bekräfta hänvisade källor">
+<!ENTITY zotero.rtfScan.completePage.description "Ditt dokument har blivit bearbetat. Försäkra dig om att det är korrekt formaterat.">
+<!ENTITY zotero.rtfScan.completePage.label "RTF-scanning färdig">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero bearbetar och justerar din RTF-fil. ">
+<!ENTITY zotero.rtfScan.formatPage.label "Justerar källhänvisningar">
+<!ENTITY zotero.rtfScan.inputFile.label "Infil">
 <!ENTITY zotero.rtfScan.introPage.description "Zotero kan automatiskt läsa av och omformatera hänvisningar och sätta in en bibliografi i RTF-filer. Välj en RTF-fil nedan för att börja.">
 <!ENTITY zotero.rtfScan.introPage.description2 "Välj en RTF-fil nedan att ladda in och en att spara till:">
-<!ENTITY zotero.rtfScan.scanPage.label "Letar efter hänvisningar">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero letar i ditt dokument efter hänvisningar.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Bekräfta hänvisade källor">
-<!ENTITY zotero.rtfScan.citationsPage.description "Gå igenom listan nedan över igenkända källhänvisningar för att försäkra dig om att Zotero har valt motsvarande källor korrekt. Eventuella överblivna eller mångtydiga källhänvisningar måste åtgärdas innan nästa steg.">
-<!ENTITY zotero.rtfScan.stylePage.label "Dokumentformat">
-<!ENTITY zotero.rtfScan.formatPage.label "Justerar källhänvisningar">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero bearbetar och justerar din RTF-fil. ">
-<!ENTITY zotero.rtfScan.completePage.label "RTF-scanning färdig">
-<!ENTITY zotero.rtfScan.completePage.description "Ditt dokument har blivit bearbetat. Försäkra dig om att det är korrekt formaterat.">
-<!ENTITY zotero.rtfScan.inputFile.label "Infil">
+<!ENTITY zotero.rtfScan.introPage.label "Introduktion">
+<!ENTITY zotero.rtfScan.itemName.label "Källnamn">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Källhänvisningar kopplade till källa">
 <!ENTITY zotero.rtfScan.outputFile.label "Utfil">
-
-<!ENTITY zotero.file.choose.label "Välj fil...">
-<!ENTITY zotero.file.noneSelected.label "Ingen fil vald">
-
-<!ENTITY zotero.downloadManager.label "Spara till Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Bilagor kan inte läggas till det valda biblioteket. Istället kommer källas att sparas i &quot;Mitt bibliotek&quot;.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "För att använda denna funktion måste du först installera PDF-verktygen. Du hittar detta tillval i Inställningar.">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero letar i ditt dokument efter hänvisningar.">
+<!ENTITY zotero.rtfScan.scanPage.label "Letar efter hänvisningar">
+<!ENTITY zotero.rtfScan.stylePage.label "Dokumentformat">
+<!ENTITY zotero.rtfScan.title "RTF-scanning">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Överblivna källhänvisningar">
+<!ENTITY zotero.selectitems.cancel.label "Ångra">
+<!ENTITY zotero.selectitems.intro.label "Välj vilka källor du vill lägga till i ditt bibliotek">
+<!ENTITY zotero.selectitems.select.label "Ok">
+<!ENTITY zotero.selectitems.title "Välj källor">
+<!ENTITY zotero.sync.button "Synkronisera med Zoteros server">
+<!ENTITY zotero.sync.error "Synkroniseringsfel">
+<!ENTITY zotero.sync.longTagFixer.character "tecken">
+<!ENTITY zotero.sync.longTagFixer.characters "tecken">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Följande etikett i ditt Zoterobibliotek är för lång för att synkronisera med servern:">
+<!ENTITY zotero.sync.longTagFixer.split "Dela">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Dela vid det">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Du kan antingen dela upp etiketten i flera etiketter, förkorta den, eller radera den.">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synkroniserade etiketter måste vara kortare än 256 tecken.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etiketten kommer att raderas från alla källor.">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Omarkerade etiketter kommer inte att sparas.">
+<!ENTITY zotero.sync.storage.downloads "Nedladdningar:">
+<!ENTITY zotero.sync.storage.progress "Förlopp:">
+<!ENTITY zotero.sync.storage.uploads "Uppladdningar:">
+<!ENTITY zotero.tabs.attachments.label "Bilagor">
+<!ENTITY zotero.tabs.info.label "Information">
+<!ENTITY zotero.tabs.notes.label "Anteckningar">
+<!ENTITY zotero.tabs.related.label "Liknande källor">
+<!ENTITY zotero.tabs.tags.label "Etiketter">
+<!ENTITY zotero.tagColorChooser.color "Färg:">
+<!ENTITY zotero.tagColorChooser.position "Plats:">
+<!ENTITY zotero.tagColorChooser.removeColor "Ta bort färg">
+<!ENTITY zotero.tagColorChooser.setColor "Ställ in färg">
+<!ENTITY zotero.tagColorChooser.title "Ange etikettens färg och plats">
+<!ENTITY zotero.tagSelector.assignColor "Ange färg…">
+<!ENTITY zotero.tagSelector.clearAll "Välj bort alla">
+<!ENTITY zotero.tagSelector.clearVisible "Välj bort synliga">
+<!ENTITY zotero.tagSelector.deleteTag "Radera etikett...">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Visa alla etiketter i detta bibliotek">
+<!ENTITY zotero.tagSelector.filter "Filter:">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "Inga etiketter att visa">
+<!ENTITY zotero.tagSelector.renameTag "Ändra namn på etikett...">
+<!ENTITY zotero.tagSelector.selectVisible "Välj synliga">
+<!ENTITY zotero.tagSelector.showAutomatic "Visa automatiskt">
+<!ENTITY zotero.toolbar.about.label "Om Zotero">
+<!ENTITY zotero.toolbar.actions.label "Åtgärder">
+<!ENTITY zotero.toolbar.addChildNote.label "Add Child Note">
+<!ENTITY zotero.toolbar.addStandaloneNote.label "Add Standalone Note">
+<!ENTITY zotero.toolbar.advancedSearch "Avancerad sökning">
+<!ENTITY zotero.toolbar.attachment.add "Lagra kopia av fil...">
+<!ENTITY zotero.toolbar.attachment.linked "Länk till fil...">
+<!ENTITY zotero.toolbar.attachment.snapshot "Ta lokal kopia av aktuell sida">
+<!ENTITY zotero.toolbar.attachment.weblink "Spara länk till aktuell sida">
+<!ENTITY zotero.toolbar.cancelDuplicatesView.label "Cancel duplicates view">
+<!ENTITY zotero.toolbar.cancelOrphansView.label "Cancel orphans view">
+<!ENTITY zotero.toolbar.duplicate.label "Visa dubletter">
+<!ENTITY zotero.toolbar.duplicatesView.label "Duplicates view">
+<!ENTITY zotero.toolbar.emptyTrash.label "Töm papperskorg">
+<!ENTITY zotero.toolbar.export.label "Exportera bibliotek...">
+<!ENTITY zotero.toolbar.import.label "Importera...">
+<!ENTITY zotero.toolbar.importFromClipboard "Importera från urklipp">
+<!ENTITY zotero.toolbar.lookup "Sök med referensnummer...">
+<!ENTITY zotero.toolbar.lookup.label "Lägg till källa via referensnummer">
+<!ENTITY zotero.toolbar.moreItemTypes.label "Mer">
+<!ENTITY zotero.toolbar.newCollection.label "Ny samling...">
+<!ENTITY zotero.toolbar.newGroup "Ny grupp...">
+<!ENTITY zotero.toolbar.newItem.label "Ny post">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Skapa ny webbsidekälla från aktuell sida">
+<!ENTITY zotero.toolbar.newNote "Ny anteckning">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Ny sparad sökning...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Ny undersamling...">
+<!ENTITY zotero.toolbar.note.child "Lägg till underliggande anteckning">
+<!ENTITY zotero.toolbar.note.standalone "Ny fristående anteckning">
+<!ENTITY zotero.toolbar.openURL.label "Hitta">
+<!ENTITY zotero.toolbar.openURL.tooltip "Hitta på ditt lokala bibliotek">
+<!ENTITY zotero.toolbar.orphansView.label "Orphans view">
+<!ENTITY zotero.toolbar.preferences.label "Inställningar...">
+<!ENTITY zotero.toolbar.refresh.label "Refresh">
+<!ENTITY zotero.toolbar.removeItem.label "Radera källa...">
+<!ENTITY zotero.toolbar.rtfScan.label "Läs in RTF...">
+<!ENTITY zotero.toolbar.supportAndDocumentation "Hjälp och dokumentation">
+<!ENTITY zotero.toolbar.tab.tooltip "Växla flikläge">
+<!ENTITY zotero.toolbar.tagSelector.label "Visa/Göm etikettväljare">
+<!ENTITY zotero.toolbar.timeline.label "Skapa tidslinje">
+<!ENTITY zotero.upgrade.autoBackup "Din existerande databas kommer att säkerhetskopieras innan några ändringar görs.">
+<!ENTITY zotero.upgrade.changeLogAfterLink "för att se vad som är nytt eller ändrat.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Gå till">
+<!ENTITY zotero.upgrade.changeLogLink "Changelog">
+<!ENTITY zotero.upgrade.ifZoteroChoice "If this is not desired, cancel the upgrade process now, and reinstall the official Zotero client.">
+<!ENTITY zotero.upgrade.ifZoteroInfo "If you are migrating from official Zotero to MLZ, the next step of the upgrade process will convert your database for use with MLZ.">
+<!ENTITY zotero.upgrade.ifZoteroWarning "After conversion, the database will be accessible only to MLZ clients.">
+<!ENTITY zotero.upgrade.majorUpgrade "Detta är en stor uppgradering.">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "innan du fortsätter.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Var säker på att du läst igenom">
+<!ENTITY zotero.upgrade.majorUpgradeLink "uppgraderingsinstruktionerna">
+<!ENTITY zotero.upgrade.newVersionInstalled "Du har installerat en ny version av Zotero.">
+<!ENTITY zotero.upgrade.title "Zotero uppgraderingsguide">
+<!ENTITY zotero.upgrade.upgradeInProgress "Var vänlig vänta tills uppgraderingsprocessen avslutas. Det kan ta några minuter.">
+<!ENTITY zotero.upgrade.upgradeRequired "Din Zoterodatabas måste uppgraderas för att fungera med den nya versionen.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Zotero lyckades uppdatera databasen">

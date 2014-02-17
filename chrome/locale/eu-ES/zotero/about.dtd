@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "bertsioa">
+<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
+<!ENTITY zotero.about.close "Gora askatasuna">
+<!ENTITY zotero.about.localizations "Lokalizazioak:">
+<!ENTITY zotero.alumni "Ikasleak:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Egileak:">
+<!ENTITY zotero.developers "Garatzaileak:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Zuzendariak:">
-<!ENTITY zotero.developers "Garatzaileak:">
-<!ENTITY zotero.alumni "Ikasleak:">
-<!ENTITY zotero.about.localizations "Lokalizazioak:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
 <!ENTITY zotero.executiveProducer "Executive Producer:">
-<!ENTITY zotero.thanks "Mila esker:">
-<!ENTITY zotero.about.close "Gora askatasuna">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.thanks "Mila esker:">
+<!ENTITY zotero.version "bertsioa">

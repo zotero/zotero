@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "versio">
+<!ENTITY zotero.about.additionalSoftware "Ulkopuolisten kehittäjien ohjelmat ja standardit:">
+<!ENTITY zotero.about.close "Sulje">
+<!ENTITY zotero.about.localizations "Lokalisaatiot:">
+<!ENTITY zotero.alumni "Alumnit:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "Luonut:">
+<!ENTITY zotero.developers "Kehittäjät:">
 <!ENTITY zotero.director "Johtaja:">
 <!ENTITY zotero.directors "Johtajat:">
-<!ENTITY zotero.developers "Kehittäjät:">
-<!ENTITY zotero.alumni "Alumnit:">
-<!ENTITY zotero.about.localizations "Lokalisaatiot:">
-<!ENTITY zotero.about.additionalSoftware "Ulkopuolisten kehittäjien ohjelmat ja standardit:">
 <!ENTITY zotero.executiveProducer "Projektipäällikkö:">
-<!ENTITY zotero.thanks "Erityiskiitokset:">
-<!ENTITY zotero.about.close "Sulje">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Lisää kiitoksia">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.thanks "Erityiskiitokset:">
+<!ENTITY zotero.version "versio">

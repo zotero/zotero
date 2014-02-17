@@ -26,9 +26,12 @@
 const ZOTERO_CONFIG = {
 	GUID: 'zotero@chnm.gmu.edu',
 	DB_REBUILD: false, // erase DB and recreate from schema
-	REPOSITORY_URL: 'https://repo.zotero.org/repo',
+	REPOSITORY_URL: 'https://gator3143.hostgator.com/~fbennett/cgi-bin',
 	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
 	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
+	// XXX values used for iterative testing
+	//REPOSITORY_CHECK_INTERVAL: 60, // 24 hours
+	//REPOSITORY_RETRY_INTERVAL: 30, // 1 hour
 	BASE_URI: 'http://zotero.org/',
 	WWW_BASE_URL: 'http://www.zotero.org/',
 	PROXY_AUTH_URL: 'http://zotero.org.s3.amazonaws.com/proxy-auth',
@@ -87,6 +90,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	this.isMac;
 	this.isWin;
 	this.initialURL; // used by Schema to show the changelog on upgrades
+	this.multiFieldIds;   // key object
+	this.multiFieldNames; // key object
 	
 	
 	this.__defineGetter__('userID', function () {
@@ -219,6 +224,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 * Initialize the extension
 	 */
 	function init(options) {
+		var i, ilen, res, sql;
 		if (this.initialized || this.skipLoading) {
 			return false;
 		}
@@ -527,6 +533,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		Zotero.VersionHeader.init();
 		
 		// Check for DB restore
+
 		var restoreFile = dataDir.clone();
 		restoreFile.append('restore-from-server');
 		if (restoreFile.exists()) {
@@ -628,6 +635,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				return false;
 			}
 		}
+
 		// If no userdata upgrade, still might need to process system
 		else {
 			try {
@@ -715,6 +723,32 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			}
 		}
 		
+		Zotero.DB.beginTransaction();
+		try {
+			var dbEditTypeIDs = [17, 20];
+			for (var i = 0, ilen = dbEditTypeIDs.length; i < ilen; i += 1) {
+				var dbEditTypeID = dbEditTypeIDs[i];
+				var shortTitleIdx = Zotero.DB.valueQuery("SELECT orderIndex FROM itemTypeFields WHERE itemTypeID=? AND fieldID=116", [dbEditTypeID]);
+				if (shortTitleIdx && shortTitleIdx != 2) {
+					var rows = Zotero.DB.query("SELECT orderIndex FROM itemTypeFields WHERE itemTypeID=?", [dbEditTypeID]);
+					for (var j = rows.length; j > 1; j += -1) {
+						var row = rows[j];
+						if (j === shortTitleIdx) {
+							Zotero.DB.query("UPDATE itemTypeFields SET orderIndex=0 WHERE orderIndex=? AND itemTypeID=?", [j, dbEditTypeID]);
+						} else if (j < shortTitleIdx) {
+							Zotero.DB.query("UPDATE itemTypeFields SET orderIndex=? WHERE orderIndex=? AND itemTypeID=?", [(j + 1), j, dbEditTypeID]);
+						}
+					}
+					Zotero.DB.query("UPDATE itemTypeFields SET orderIndex=2 WHERE orderIndex=0 AND itemTypeID=?", [dbEditTypeID]);
+				}
+			}
+			Zotero.DB.commitTransaction();
+		} catch(e){
+			Zotero.debug(e);
+			Zotero.DB.rollbackTransaction();
+			throw(e);
+		}
+
 		Zotero.Fulltext.init();
 		
 		Zotero.DB.startDummyStatement();
@@ -724,6 +758,34 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			Zotero.Schema.updateCustomTables();
 		}
 		
+		// XXXZ Load quick-service key sets for identifying multilingualized fields
+		// XXXZ ... _after_ creating the database.
+		// This should really all be done with a call to Zotero.Multi module.
+		var multiBaseFields = ['title', 'shortTitle','publicationTitle', 'series', 'seriesTitle', 'seriesText','publisher', 'reporter', 'court','place','edition','archive','archiveLocation','committee','type','legislativeBody','resolutionLabel','supplementName','institution'];
+		Zotero.multiFieldIds = {};
+		Zotero.multiFieldNames = {};
+		sql = "SELECT fieldID FROM fields " +
+					  "WHERE fieldName in ('" + multiBaseFields.join("','") + "')";
+		res = Zotero.DB.query(sql);
+		for (i = 0, ilen = res.length; i < ilen; i += 1) {
+			Zotero.multiFieldIds[parseInt(res[i].fieldID)] = true;
+		}
+
+		sql = "SELECT fieldID from baseFieldMappings " +
+				  "WHERE baseFieldID in ('" + [key for (key in Zotero.multiFieldIds)].join("','") + "')";
+		res = Zotero.DB.query(sql);
+		for (i = 0, ilen = res.length; i < ilen; i += 1) {
+			Zotero.multiFieldIds[parseInt(res[i].fieldID)] = true;
+		}
+
+		sql = "SELECT fieldName from fields " +
+				  "WHERE fieldID in (" + [key for (key in Zotero.multiFieldIds)].join(",") + ")";
+		res = Zotero.DB.query(sql);
+
+		for (i = 0, ilen = res.length; i < ilen; i += 1) {
+			Zotero.multiFieldNames[res[i].fieldName] = true;
+		}
+
 		// Initialize various services
 		Zotero.Integration.init();
 		
@@ -744,6 +806,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		// Initialize Locate Manager
 		Zotero.LocateManager.init();
+		
+		// Initialize Jurisdictions mapper
+		Zotero.Jurisdiction.init();
 		
 		Zotero.Items.startEmptyTrashTimer();
 		

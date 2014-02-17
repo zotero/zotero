@@ -1,286 +1,281 @@
-<!ENTITY zotero.general.optional "(Opsional)">
-<!ENTITY zotero.general.note "Catatan:">
-<!ENTITY zotero.general.selectAll "Pilih Semua">
-<!ENTITY zotero.general.deselectAll "Hilangkan Semua Pilihan">
-<!ENTITY zotero.general.edit "Edit">
-<!ENTITY zotero.general.delete "Hapus">
-<!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
-
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages "Log kesalahan mungkin mengandung pesan yang tidak terkait dengan Zotero.">
-<!ENTITY zotero.errorReport.submissionInProgress "Mohon tunggu sampai laporan kesalahan dikirimkan.">
-<!ENTITY zotero.errorReport.submitted "Laporan kesalahan Anda telah dikirimkan.">
-<!ENTITY zotero.errorReport.reportID "ID Laporan:">
-<!ENTITY zotero.errorReport.postToForums "Mohon poskan pesan ke forum Zotero (forums.zotero.org) dengan ID Laporan ini, deskripsi masalah, dan langkah-langkah yang diperlukan untuk mereproduksinya.">
-<!ENTITY zotero.errorReport.notReviewed "Laporan kesalahan tidak akan ditinjau ulang kecuali dirujuk di dalam forum.">
-
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
-<!ENTITY zotero.upgrade.newVersionInstalled "Anda telah menginstal versi terbaru Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Database Zotero Anda harus di-upgrade agar dapat bekerja dengan versi terbaru Zotero.">
-<!ENTITY zotero.upgrade.autoBackup "Database Anda saat ini akan di-back up secara automatis sebelum perubahan dilakukan.">
-<!ENTITY zotero.upgrade.majorUpgrade "Ini adalah upgrade utama.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Yakinkan bahwa Anda telah meninjau ulang">
-<!ENTITY zotero.upgrade.majorUpgradeLink "instruksi upgrade">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink "sebelum melanjutkan.">
-<!ENTITY zotero.upgrade.upgradeInProgress "Mohon tunggu sampai proses upgrade selesai dilaksanakan. Hal ini mungkin akan berjalan beberapa menit.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Database Zotero Anda telah berhasil di-upgrade.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "Mohon lihat">
-<!ENTITY zotero.upgrade.changeLogLink "log perubahan">
-<!ENTITY zotero.upgrade.changeLogAfterLink "untuk mengetahui hal-hal apa saja yang baru.">
-
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Tambahkan Pilihan ke Catatan Zotero">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Buat Item Zotero dan Catatan dari Pilihan">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Simpan Tautan sebagai Item Zotero">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Simpan Gambar sebagai Item Zotero">
-
-<!ENTITY zotero.tabs.info.label "Info">
-<!ENTITY zotero.tabs.notes.label "Catatan">
-<!ENTITY zotero.tabs.attachments.label "Lampiran">
-<!ENTITY zotero.tabs.tags.label "Tag">
-<!ENTITY zotero.tabs.related.label "Terkait">
-<!ENTITY zotero.notes.separate "Edit pada Jendela Terpisah">
-
-<!ENTITY zotero.toolbar.duplicate.label "Tunjukkan Duplikat">
-<!ENTITY zotero.collections.showUnfiledItems "Tunjukkan Item-Item yang Belum Diisikan">
-
-<!ENTITY zotero.items.itemType "Jenis Item">
-<!ENTITY zotero.items.type_column "Jenis">
-<!ENTITY zotero.items.title_column "Judul">
-<!ENTITY zotero.items.creator_column "Penyusun">
-<!ENTITY zotero.items.date_column "Tanggal">
-<!ENTITY zotero.items.year_column "Tahun">
-<!ENTITY zotero.items.publisher_column "Penerbit">
-<!ENTITY zotero.items.publication_column "Publikasi">
-<!ENTITY zotero.items.journalAbbr_column "Singkatan Jurnal">
-<!ENTITY zotero.items.language_column "Bahasa">
-<!ENTITY zotero.items.accessDate_column "Diakses">
-<!ENTITY zotero.items.libraryCatalog_column "Katalog Perpustakaan">
-<!ENTITY zotero.items.callNumber_column "Nomor Panggilan">
-<!ENTITY zotero.items.rights_column "Hak">
-<!ENTITY zotero.items.dateAdded_column "Tanggal Ditambahkan">
-<!ENTITY zotero.items.dateModified_column "Tanggal Dimodifikasi">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archive">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.place_column "Place">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Edition">
-<!ENTITY zotero.items.pages_column "Pages">
-<!ENTITY zotero.items.issue_column "Issue">
-<!ENTITY zotero.items.series_column "Series">
-<!ENTITY zotero.items.seriesTitle_column "Series Title">
-<!ENTITY zotero.items.court_column "Court">
-<!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "System">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
-
-<!ENTITY zotero.items.menu.showInLibrary "Tunjukkan dalam Perpustakaan">
-<!ENTITY zotero.items.menu.attach.note "Tambahkan Catatan">
-<!ENTITY zotero.items.menu.attach "Tambahkan Lampiran">
-<!ENTITY zotero.items.menu.attach.snapshot "Lampirkan Snapshot Laman Ini">
-<!ENTITY zotero.items.menu.attach.link "Lampirkan Tautan ke Laman Ini">
-<!ENTITY zotero.items.menu.attach.link.uri "Lampirkan Tautan ke URL...">
-<!ENTITY zotero.items.menu.attach.file "Lampirkan Salinan Berkas Tersimpan">
-<!ENTITY zotero.items.menu.attach.fileLink "Lampirkan Tautan ke Berkas...">
-
-<!ENTITY zotero.items.menu.restoreToLibrary "Kembalikan ke Perpustakaan">
-<!ENTITY zotero.items.menu.duplicateItem "Duplikasi Item Terpilih">
-<!ENTITY zotero.items.menu.mergeItems "Gabungkan Item...">
-
-<!ENTITY zotero.duplicatesMerge.versionSelect "Pilih versi item untuk digunakan sebagai item utama:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Pilih kolom untuk dipertahankan dari versi lain item ini:">
-
-<!ENTITY zotero.toolbar.newItem.label "Item Baru">
-<!ENTITY zotero.toolbar.moreItemTypes.label "Lainnya">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Buat Item Baru dari Laman Saat Ini">
-<!ENTITY zotero.toolbar.lookup.label "Tambahkan Item dengan Nomor Pengenal ">
-<!ENTITY zotero.toolbar.removeItem.label "Buang Item...">
-<!ENTITY zotero.toolbar.newCollection.label "Koleksi Baru...">
-<!ENTITY zotero.toolbar.newGroup "Grup Baru...">
-<!ENTITY zotero.toolbar.newSubcollection.label "Subkoleksi Baru...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Pencarian Tersimpan Baru...">
-<!ENTITY zotero.toolbar.emptyTrash.label "Keranjang Sampah Kosong">
-<!ENTITY zotero.toolbar.tagSelector.label "Tunjukkan/Sembunyikan Selektor Tag">
-<!ENTITY zotero.toolbar.actions.label "Tindakan">
-<!ENTITY zotero.toolbar.import.label "Impor...">
-<!ENTITY zotero.toolbar.importFromClipboard "Impor dari Clipboard">
-<!ENTITY zotero.toolbar.export.label "Ekspor Perpustakaan...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
-<!ENTITY zotero.toolbar.timeline.label "Buat Garis Waktu">
-<!ENTITY zotero.toolbar.preferences.label "Preferensi...">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Dukungan dan Dokuementasi">
-<!ENTITY zotero.toolbar.about.label "Tentang Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Pencarian Lanjutan">
-<!ENTITY zotero.toolbar.tab.tooltip "Hidup/Matikan Mode Tab">
-<!ENTITY zotero.toolbar.openURL.label "Temukan">
-<!ENTITY zotero.toolbar.openURL.tooltip "Temukan melalui perpustakaan lokal Anda">
-
-<!ENTITY zotero.item.add "Tambahkan">
-<!ENTITY zotero.item.attachment.file.show "Tunjukkan Berkas">
-<!ENTITY zotero.item.textTransform "Transformasi Teks">
-<!ENTITY zotero.item.textTransform.titlecase "Title Case">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
-
-<!ENTITY zotero.toolbar.newNote "Catatan Baru">
-<!ENTITY zotero.toolbar.note.standalone "Catatan Mandiri Baru">
-<!ENTITY zotero.toolbar.note.child "Tambahkan Catatan Anak">
-<!ENTITY zotero.toolbar.lookup "Cari dengan Nomor Pengenal">
-<!ENTITY zotero.toolbar.attachment.linked "Tautkan ke Berkas">
-<!ENTITY zotero.toolbar.attachment.add "Simpan Salinan Berkas">
-<!ENTITY zotero.toolbar.attachment.weblink "Simpan Tautan ke Laman Ini">
-<!ENTITY zotero.toolbar.attachment.snapshot "Ambil Snapshot Laman Ini">
-
-<!ENTITY zotero.tagSelector.noTagsToDisplay "Tidak ada tag untuk ditampilkan">
-<!ENTITY zotero.tagSelector.filter "Saring:">
-<!ENTITY zotero.tagSelector.showAutomatic "Tunjukkan Automatis">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Tampilkan Semua Tag di Perpustakaan Ini">
-<!ENTITY zotero.tagSelector.selectVisible "Pilih yang Terlihat">
-<!ENTITY zotero.tagSelector.clearVisible "Hilangkan Pilihan pada yang Terlihat">
-<!ENTITY zotero.tagSelector.clearAll "Hilangkan Semua Pilihan">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
-<!ENTITY zotero.tagSelector.renameTag "Namai Ulang Tag...">
-<!ENTITY zotero.tagSelector.deleteTag "Hapus Tag...">
-
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
-<!ENTITY zotero.tagColorChooser.color "Color:">
-<!ENTITY zotero.tagColorChooser.position "Position:">
-<!ENTITY zotero.tagColorChooser.setColor "Set Color">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
-
-<!ENTITY zotero.lookup.description "Masukkan ISBN, DOI, atau PMID untuk melakukan pencarian pada kotak di bawah ini.">
-<!ENTITY zotero.lookup.button.search "Search">
-
-<!ENTITY zotero.selectitems.title "Pilih item">
-<!ENTITY zotero.selectitems.intro.label "Pilihlah item-item mana yang ingin Anda tambahkan ke dalam perpustakaan Anda">
-<!ENTITY zotero.selectitems.cancel.label "Batalkan">
-<!ENTITY zotero.selectitems.select.label "OK">
-
-<!ENTITY zotero.bibliography.title "Buat Bibliografi">
-<!ENTITY zotero.bibliography.style.label "Gaya Sitasi:">
-<!ENTITY zotero.bibliography.outputMode "Mode Keluaran:">
-<!ENTITY zotero.bibliography.bibliography "Bibliografi">
-<!ENTITY zotero.bibliography.outputMethod "Metode keluaran:">
-<!ENTITY zotero.bibliography.saveAsRTF.label "Simpan sebagai RTF">
-<!ENTITY zotero.bibliography.saveAsHTML.label "Simpan sebagai HTML">
-<!ENTITY zotero.bibliography.copyToClipboard.label "Salin ke Clipboard">
-<!ENTITY zotero.bibliography.print.label "Cetak">
-
-<!ENTITY zotero.integration.docPrefs.title "Preferensi Dokumen">
-<!ENTITY zotero.integration.addEditCitation.title "Tambahkan/Edit Sitasi">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliografi">
-<!ENTITY zotero.integration.quickFormatDialog.title "Format cepat kutipan">
-
-<!ENTITY zotero.progress.title "Progres">
-
-<!ENTITY zotero.exportOptions.title "Ekspor...">
-<!ENTITY zotero.exportOptions.format.label "Format:">
-<!ENTITY zotero.exportOptions.translatorOptions.label "Opsi Translator">
-
-<!ENTITY zotero.charset.label "Pengkodean Karakter">
-<!ENTITY zotero.moreEncodings.label "Pengkodean Lainnya">
-
-<!ENTITY zotero.citation.keepSorted.label "Tetap Urutkan Sumber-sumber">
-
-<!ENTITY zotero.citation.page "Halaman">
-<!ENTITY zotero.citation.paragraph "Paragraf">
-<!ENTITY zotero.citation.line "Garis">
-<!ENTITY zotero.citation.suppressAuthor.label "Sembunyikan Nama Penulis">
-<!ENTITY zotero.citation.prefix.label "Prefiks:">
-<!ENTITY zotero.citation.suffix.label "Sufiks:">
-<!ENTITY zotero.citation.editorWarning.label "Peringatan: Jika anda menyunting kutipan di editor, kutipan tersebut tidak akan diupdate untuk merefleksikan perubahan di database anda atau gaya kutipan tersebut.">
-
-<!ENTITY zotero.richText.italic.label "Tanda Miring">
-<!ENTITY zotero.richText.bold.label "Tanda Tebal">
-<!ENTITY zotero.richText.underline.label "Garis Bawah">
-<!ENTITY zotero.richText.superscript.label "Superskrip">
-<!ENTITY zotero.richText.subscript.label "Subskrip">
-
 <!ENTITY zotero.annotate.toolbar.add.label "Tambahkan Anotasi">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Kempiskan Semua Anotasi">
+<!ENTITY zotero.annotate.toolbar.duplicatesView.label "Duplicates view">
+<!ENTITY zotero.annotate.toolbar.duplicatesViewCancel.label "Cancel duplicates view">
 <!ENTITY zotero.annotate.toolbar.expand.label "Kembangkan Semua Anotasi">
 <!ENTITY zotero.annotate.toolbar.highlight.label "Tandai Teks">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Hilangkan Tanda pada Teks">
-
-<!ENTITY zotero.integration.prefs.displayAs.label "Tampilkan Sitasi sebagai:">
-<!ENTITY zotero.integration.prefs.footnotes.label "Catatan Kaki">
-<!ENTITY zotero.integration.prefs.endnotes.label "Catatan Akhir">
-
-<!ENTITY zotero.integration.prefs.formatUsing.label "Format Menggunakan:">
-<!ENTITY zotero.integration.prefs.bookmarks.label "Bookmark">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmark terjaga dengan baik pada Microsoft Word dan OpenOffice, tetapi berpotensi mengalami perubahan akibat ketidaksengajaan. Demi alasan kompatibilitas, sitasi tidak dapat dimasukkan ke dalam catatan kaki atau catatan akhir bila opsi ini dipilih.">
-
-
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Simpan referensi pada dokumen">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Menyimpan referensi pada dokumen Anda akan sedikit meningkatkan ukuran berkas, tetapi memungkinkan Anda untuk berbagi dokumen Anda dengan orang lain tanpa perlu menggunakan grup Zotero. Zotero versi 3.0 atau lebih baru diperlukan untuk memutakhirkan dokumen yang dibuat dengan pilihan ini.">
-
-<!ENTITY zotero.integration.showEditor.label "Tunjukkan Editor">
+<!ENTITY zotero.bibliography.bibliography "Bibliografi">
+<!ENTITY zotero.bibliography.copyToClipboard.label "Salin ke Clipboard">
+<!ENTITY zotero.bibliography.output.label "Output Format">
+<!ENTITY zotero.bibliography.outputMethod "Metode keluaran:">
+<!ENTITY zotero.bibliography.outputMode "Mode Keluaran:">
+<!ENTITY zotero.bibliography.print.label "Cetak">
+<!ENTITY zotero.bibliography.saveAsHTML.label "Simpan sebagai HTML">
+<!ENTITY zotero.bibliography.saveAsRTF.label "Simpan sebagai RTF">
+<!ENTITY zotero.bibliography.style.label "Gaya Sitasi:">
+<!ENTITY zotero.bibliography.title "Buat Bibliografi">
+<!ENTITY zotero.charset.label "Pengkodean Karakter">
+<!ENTITY zotero.citation.editorWarning.label "Peringatan: Jika anda menyunting kutipan di editor, kutipan tersebut tidak akan diupdate untuk merefleksikan perubahan di database anda atau gaya kutipan tersebut.">
+<!ENTITY zotero.citation.keepSorted.label "Tetap Urutkan Sumber-sumber">
+<!ENTITY zotero.citation.line "Garis">
+<!ENTITY zotero.citation.page "Halaman">
+<!ENTITY zotero.citation.paragraph "Paragraf">
+<!ENTITY zotero.citation.prefix.label "Prefiks:">
+<!ENTITY zotero.citation.suffix.label "Sufiks:">
+<!ENTITY zotero.citation.suppressAuthor.label "Sembunyikan Nama Penulis">
+<!ENTITY zotero.collections.showUnfiledItems "Tunjukkan Item-Item yang Belum Diisikan">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Tambahkan Pilihan ke Catatan Zotero">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Buat Item Zotero dan Catatan dari Pilihan">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Simpan Gambar sebagai Item Zotero">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Simpan Tautan sebagai Item Zotero">
+<!ENTITY zotero.downloadManager.label "Simpan ke Zotero">
+<!ENTITY zotero.downloadManager.noPDFTools.description "Untuk menggunakan fitur ini, Anda harus menginstal aplikasi PDF dalam preferensi Zotero terlebih dahulu.">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Lampiran tidak dapat disimpan ke dalam perpustakaan yang saat ini terpilih. Sebaliknya, item ini akan disimpan ke dalam perpustakaan Anda.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Pilih kolom untuk dipertahankan dari versi lain item ini:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Pilih versi item untuk digunakan sebagai item utama:">
+<!ENTITY zotero.errorReport.notReviewed "Laporan kesalahan tidak akan ditinjau ulang kecuali dirujuk di dalam forum.">
+<!ENTITY zotero.errorReport.postToForums "Mohon poskan pesan ke forum Zotero (forums.zotero.org) dengan ID Laporan ini, deskripsi masalah, dan langkah-langkah yang diperlukan untuk mereproduksinya.">
+<!ENTITY zotero.errorReport.reportID "ID Laporan:">
+<!ENTITY zotero.errorReport.submissionInProgress "Mohon tunggu sampai laporan kesalahan dikirimkan.">
+<!ENTITY zotero.errorReport.submitted "Laporan kesalahan Anda telah dikirimkan.">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
+<!ENTITY zotero.errorReport.unrelatedMessages "Log kesalahan mungkin mengandung pesan yang tidak terkait dengan Zotero.">
+<!ENTITY zotero.exportOptions.format.label "Format:">
+<!ENTITY zotero.exportOptions.title "Ekspor...">
+<!ENTITY zotero.exportOptions.translatorOptions.label "Opsi Translator">
+<!ENTITY zotero.file.choose.label "Pilih Berkas...">
+<!ENTITY zotero.file.noneSelected.label "Tidak ada berkas yang dipilih">
+<!ENTITY zotero.general.cancel "Cancel">
+<!ENTITY zotero.general.delete "Hapus">
+<!ENTITY zotero.general.deselectAll "Hilangkan Semua Pilihan">
+<!ENTITY zotero.general.edit "Edit">
+<!ENTITY zotero.general.note "Catatan:">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.optional "(Opsional)">
+<!ENTITY zotero.general.selectAll "Pilih Semua">
+<!ENTITY zotero.integration.addEditCitation.title "Tambahkan/Edit Sitasi">
 <!ENTITY zotero.integration.classicView.label "Tampilan Klasik">
-
+<!ENTITY zotero.integration.docPrefs.title "Preferensi Dokumen">
+<!ENTITY zotero.integration.editBibliography.title "Edit Bibliografi">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmark terjaga dengan baik pada Microsoft Word dan OpenOffice, tetapi berpotensi mengalami perubahan akibat ketidaksengajaan. Demi alasan kompatibilitas, sitasi tidak dapat dimasukkan ke dalam catatan kaki atau catatan akhir bila opsi ini dipilih.">
+<!ENTITY zotero.integration.prefs.bookmarks.label "Bookmark">
+<!ENTITY zotero.integration.prefs.displayAs.label "Tampilkan Sitasi sebagai:">
+<!ENTITY zotero.integration.prefs.endnotes.label "Catatan Akhir">
+<!ENTITY zotero.integration.prefs.footnotes.label "Catatan Kaki">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Format Menggunakan:">
+<!ENTITY zotero.integration.prefs.lang.institutions "Institutions:">
+<!ENTITY zotero.integration.prefs.lang.journals "Journals:">
+<!ENTITY zotero.integration.prefs.lang.languages "Languages">
+<!ENTITY zotero.integration.prefs.lang.languagesInCitations "Languages for use in citations">
+<!ENTITY zotero.integration.prefs.lang.persons "Persons:">
+<!ENTITY zotero.integration.prefs.lang.places "Places:">
+<!ENTITY zotero.integration.prefs.lang.primary "primary">
+<!ENTITY zotero.integration.prefs.lang.publishers "Publishers:">
+<!ENTITY zotero.integration.prefs.lang.secondary "[secondary]">
+<!ENTITY zotero.integration.prefs.lang.sorting "Sorting">
+<!ENTITY zotero.integration.prefs.lang.styleAndFormat "Style &amp; Format">
+<!ENTITY zotero.integration.prefs.lang.titles "Titles:">
+<!ENTITY zotero.integration.prefs.lang.translation "Translation">
+<!ENTITY zotero.integration.prefs.lang.transliteration "Transliteration">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Menyimpan referensi pada dokumen Anda akan sedikit meningkatkan ukuran berkas, tetapi memungkinkan Anda untuk berbagi dokumen Anda dengan orang lain tanpa perlu menggunakan grup Zotero. Zotero versi 3.0 atau lebih baru diperlukan untuk memutakhirkan dokumen yang dibuat dengan pilihan ini.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Simpan referensi pada dokumen">
+<!ENTITY zotero.integration.quickFormatDialog.title "Format cepat kutipan">
 <!ENTITY zotero.integration.references.label "Referensi dalam Bibliografi">
-
-<!ENTITY zotero.sync.button "Sinkronisasikan dengan Server Zotero">
-<!ENTITY zotero.sync.error "Kesalahan Sinkronisasi">
-<!ENTITY zotero.sync.storage.progress "Progres:">
-<!ENTITY zotero.sync.storage.downloads "Unduh:">
-<!ENTITY zotero.sync.storage.uploads "Unggah:">
-
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Tag berikut ini pada perpustakaan Zotero Anda terlalu panjang untuk disinkronisasikan ke server:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Tag yang disinkronisasikan harus kurang dari 256 karakter.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Anda dapat membagi tag menjadi beberapa bagian, mengedit tag secara manual agar lebih ringkas, atau menghapusnya.">
-<!ENTITY zotero.sync.longTagFixer.split "Bagi">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe "Bagi pada">
-<!ENTITY zotero.sync.longTagFixer.character "karakter">
-<!ENTITY zotero.sync.longTagFixer.characters "karakter">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Tag yang tidak tercelsi tidak akan disimpan.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Tag akan dihapus dari semua item.">
-
-<!ENTITY zotero.merge.title "Conflict Resolution">
-<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.integration.showEditor.label "Tunjukkan Editor">
+<!ENTITY zotero.item.add "Tambahkan">
+<!ENTITY zotero.item.attachment.file.show "Tunjukkan Berkas">
+<!ENTITY zotero.item.creatorTransform "Transform Name Form">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
+<!ENTITY zotero.item.textTransform "Transformasi Teks">
+<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.titlecase "Title Case">
+<!ENTITY zotero.items.accessDate_column "Diakses">
+<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.archive_column "Archive">
+<!ENTITY zotero.items.callNumber_column "Nomor Panggilan">
+<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.creator_column "Penyusun">
+<!ENTITY zotero.items.dateAdded_column "Tanggal Ditambahkan">
+<!ENTITY zotero.items.dateModified_column "Tanggal Dimodifikasi">
+<!ENTITY zotero.items.date_column "Tanggal">
+<!ENTITY zotero.items.edition_column "Edition">
+<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.genre_column "Genre">
+<!ENTITY zotero.items.issue_column "Issue">
+<!ENTITY zotero.items.itemType "Jenis Item">
+<!ENTITY zotero.items.journalAbbr_column "Singkatan Jurnal">
+<!ENTITY zotero.items.language_column "Bahasa">
+<!ENTITY zotero.items.libraryCatalog_column "Katalog Perpustakaan">
+<!ENTITY zotero.items.medium_column "Medium/Format">
+<!ENTITY zotero.items.menu.addTag "Add Subfield">
+<!ENTITY zotero.items.menu.attach "Tambahkan Lampiran">
+<!ENTITY zotero.items.menu.attach.file "Lampirkan Salinan Berkas Tersimpan">
+<!ENTITY zotero.items.menu.attach.fileLink "Lampirkan Tautan ke Berkas...">
+<!ENTITY zotero.items.menu.attach.link "Lampirkan Tautan ke Laman Ini">
+<!ENTITY zotero.items.menu.attach.link.uri "Lampirkan Tautan ke URL...">
+<!ENTITY zotero.items.menu.attach.note "Tambahkan Catatan">
+<!ENTITY zotero.items.menu.attach.snapshot "Lampirkan Snapshot Laman Ini">
+<!ENTITY zotero.items.menu.changeTag "Reset Language">
+<!ENTITY zotero.items.menu.duplicateItem "Duplikasi Item Terpilih">
+<!ENTITY zotero.items.menu.mergeItems "Gabungkan Item...">
+<!ENTITY zotero.items.menu.moveDown "Move Down">
+<!ENTITY zotero.items.menu.moveUp "Move Up">
+<!ENTITY zotero.items.menu.restoreToLibrary "Kembalikan ke Perpustakaan">
+<!ENTITY zotero.items.menu.showInLibrary "Tunjukkan dalam Perpustakaan">
+<!ENTITY zotero.items.moreColumns.label "More Columns">
+<!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.pages_column "Pages">
+<!ENTITY zotero.items.place_column "Place">
+<!ENTITY zotero.items.publication_column "Publikasi">
+<!ENTITY zotero.items.publisher_column "Penerbit">
+<!ENTITY zotero.items.reporter_column "Reporter">
+<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.rights_column "Hak">
+<!ENTITY zotero.items.seriesTitle_column "Series Title">
+<!ENTITY zotero.items.series_column "Series">
+<!ENTITY zotero.items.system_column "System">
+<!ENTITY zotero.items.title_column "Judul">
+<!ENTITY zotero.items.type_column "Jenis">
+<!ENTITY zotero.items.volume_column "Volume">
+<!ENTITY zotero.items.year_column "Tahun">
+<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.description "Masukkan ISBN, DOI, atau PMID untuk melakukan pencarian pada kotak di bawah ini.">
 <!ENTITY zotero.merge.deleted "Deleted">
-
+<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Conflict Resolution">
+<!ENTITY zotero.moreEncodings.label "Pengkodean Lainnya">
+<!ENTITY zotero.notes.separate "Edit pada Jendela Terpisah">
+<!ENTITY zotero.progress.title "Progres">
+<!ENTITY zotero.proxy.recognized.disable.label "Jangan alihkan permintaan melalui proksi yang telah dikenali sebelumnya secara automatis">
+<!ENTITY zotero.proxy.recognized.ignore.label "Abaikan">
 <!ENTITY zotero.proxy.recognized.title "Proksi Dikenali">
 <!ENTITY zotero.proxy.recognized.warning "Hanya tambahkan proksi yang ditautkan dari website perpustakaan, sekolah, atau perusahaan Anda">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Menambahkan proksi lainnya memungkinkan situs-situs yang berbahaya menyamarkan diri menjadi situs yang terpercaya.">
-<!ENTITY zotero.proxy.recognized.disable.label "Jangan alihkan permintaan melalui proksi yang telah dikenali sebelumnya secara automatis">
-<!ENTITY zotero.proxy.recognized.ignore.label "Abaikan">
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Menerima Metadata...">
 <!ENTITY zotero.recognizePDF.cancel.label "Batalkan">
-<!ENTITY zotero.recognizePDF.pdfName.label "Nama PDF">
+<!ENTITY zotero.recognizePDF.captcha.label "Tuliskan teks di bawah ini untuk meneruskan menerima metadata.">
 <!ENTITY zotero.recognizePDF.itemName.label "Nama Item">
-
-<!ENTITY zotero.rtfScan.title "RTF Scan">
+<!ENTITY zotero.recognizePDF.pdfName.label "Nama PDF">
+<!ENTITY zotero.recognizePDF.recognizing.label "Menerima Metadata...">
+<!ENTITY zotero.richText.bold.label "Tanda Tebal">
+<!ENTITY zotero.richText.italic.label "Tanda Miring">
+<!ENTITY zotero.richText.subscript.label "Subskrip">
+<!ENTITY zotero.richText.superscript.label "Superskrip">
+<!ENTITY zotero.richText.underline.label "Garis Bawah">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Sitasi Ambigu">
 <!ENTITY zotero.rtfScan.cancel.label "Batalkan">
 <!ENTITY zotero.rtfScan.citation.label "Sitasi">
-<!ENTITY zotero.rtfScan.itemName.label "Nama Item">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Sitasi yang tidak Terpetakan">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Sitasi Ambigu">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Sitasi yang Terpetakan">
-<!ENTITY zotero.rtfScan.introPage.label "Pendahuluan">
+<!ENTITY zotero.rtfScan.citationsPage.description "Mohon tinjau ulang daftar sitasi-sitasi yang dikenali di bawah ini untuk memastikan bahwa Zotero telah memilih item-item dengan tepat. Semua sitasi yang tidak terpetakan atau ambigu harus diperbaiki terlebih dahulu sebelum Anda melakukan langkah berikutnya.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Memverifikasi Item-item yang Dikutip">
+<!ENTITY zotero.rtfScan.completePage.description "Dokumen Anda telah selesai dipindai dan diproses. Mohon pastikan bahwa dokumen tersebut telah terformat secara tepat.">
+<!ENTITY zotero.rtfScan.completePage.label "Pemindaian RTF selesai">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero sedang memproses dan memformat berkas RTF Anda. Mohon bersabar.">
+<!ENTITY zotero.rtfScan.formatPage.label "Memformat Sitasi">
+<!ENTITY zotero.rtfScan.inputFile.label "Berkas Input">
 <!ENTITY zotero.rtfScan.introPage.description "Zotero dapat secara automatis mengekstrak dan memformat ulang sitasi serta memasukkan bibiliografi ke dalam berkas RTF. Saat ini, fitur Pemindaian RTF ini mendukung sitasi dalam beragam format berikut:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Untuk memulai, pilih berkas input dan output RTF di bawah ini:">
-<!ENTITY zotero.rtfScan.scanPage.label "Memindai Sitasi.">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero sedang memindai dokumen Anda untuk menemukan sitasi. Mohon bersabar.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Memverifikasi Item-item yang Dikutip">
-<!ENTITY zotero.rtfScan.citationsPage.description "Mohon tinjau ulang daftar sitasi-sitasi yang dikenali di bawah ini untuk memastikan bahwa Zotero telah memilih item-item dengan tepat. Semua sitasi yang tidak terpetakan atau ambigu harus diperbaiki terlebih dahulu sebelum Anda melakukan langkah berikutnya.">
-<!ENTITY zotero.rtfScan.stylePage.label "Pemformatan Dokumen">
-<!ENTITY zotero.rtfScan.formatPage.label "Memformat Sitasi">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero sedang memproses dan memformat berkas RTF Anda. Mohon bersabar.">
-<!ENTITY zotero.rtfScan.completePage.label "Pemindaian RTF selesai">
-<!ENTITY zotero.rtfScan.completePage.description "Dokumen Anda telah selesai dipindai dan diproses. Mohon pastikan bahwa dokumen tersebut telah terformat secara tepat.">
-<!ENTITY zotero.rtfScan.inputFile.label "Berkas Input">
+<!ENTITY zotero.rtfScan.introPage.label "Pendahuluan">
+<!ENTITY zotero.rtfScan.itemName.label "Nama Item">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Sitasi yang Terpetakan">
 <!ENTITY zotero.rtfScan.outputFile.label "Berkas Output">
-
-<!ENTITY zotero.file.choose.label "Pilih Berkas...">
-<!ENTITY zotero.file.noneSelected.label "Tidak ada berkas yang dipilih">
-
-<!ENTITY zotero.downloadManager.label "Simpan ke Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Lampiran tidak dapat disimpan ke dalam perpustakaan yang saat ini terpilih. Sebaliknya, item ini akan disimpan ke dalam perpustakaan Anda.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Untuk menggunakan fitur ini, Anda harus menginstal aplikasi PDF dalam preferensi Zotero terlebih dahulu.">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero sedang memindai dokumen Anda untuk menemukan sitasi. Mohon bersabar.">
+<!ENTITY zotero.rtfScan.scanPage.label "Memindai Sitasi.">
+<!ENTITY zotero.rtfScan.stylePage.label "Pemformatan Dokumen">
+<!ENTITY zotero.rtfScan.title "RTF Scan">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Sitasi yang tidak Terpetakan">
+<!ENTITY zotero.selectitems.cancel.label "Batalkan">
+<!ENTITY zotero.selectitems.intro.label "Pilihlah item-item mana yang ingin Anda tambahkan ke dalam perpustakaan Anda">
+<!ENTITY zotero.selectitems.select.label "OK">
+<!ENTITY zotero.selectitems.title "Pilih item">
+<!ENTITY zotero.sync.button "Sinkronisasikan dengan Server Zotero">
+<!ENTITY zotero.sync.error "Kesalahan Sinkronisasi">
+<!ENTITY zotero.sync.longTagFixer.character "karakter">
+<!ENTITY zotero.sync.longTagFixer.characters "karakter">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Tag berikut ini pada perpustakaan Zotero Anda terlalu panjang untuk disinkronisasikan ke server:">
+<!ENTITY zotero.sync.longTagFixer.split "Bagi">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Bagi pada">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Anda dapat membagi tag menjadi beberapa bagian, mengedit tag secara manual agar lebih ringkas, atau menghapusnya.">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Tag yang disinkronisasikan harus kurang dari 256 karakter.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Tag akan dihapus dari semua item.">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Tag yang tidak tercelsi tidak akan disimpan.">
+<!ENTITY zotero.sync.storage.downloads "Unduh:">
+<!ENTITY zotero.sync.storage.progress "Progres:">
+<!ENTITY zotero.sync.storage.uploads "Unggah:">
+<!ENTITY zotero.tabs.attachments.label "Lampiran">
+<!ENTITY zotero.tabs.info.label "Info">
+<!ENTITY zotero.tabs.notes.label "Catatan">
+<!ENTITY zotero.tabs.related.label "Terkait">
+<!ENTITY zotero.tabs.tags.label "Tag">
+<!ENTITY zotero.tagColorChooser.color "Color:">
+<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.setColor "Set Color">
+<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
+<!ENTITY zotero.tagSelector.clearAll "Hilangkan Semua Pilihan">
+<!ENTITY zotero.tagSelector.clearVisible "Hilangkan Pilihan pada yang Terlihat">
+<!ENTITY zotero.tagSelector.deleteTag "Hapus Tag...">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Tampilkan Semua Tag di Perpustakaan Ini">
+<!ENTITY zotero.tagSelector.filter "Saring:">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "Tidak ada tag untuk ditampilkan">
+<!ENTITY zotero.tagSelector.renameTag "Namai Ulang Tag...">
+<!ENTITY zotero.tagSelector.selectVisible "Pilih yang Terlihat">
+<!ENTITY zotero.tagSelector.showAutomatic "Tunjukkan Automatis">
+<!ENTITY zotero.toolbar.about.label "Tentang Zotero">
+<!ENTITY zotero.toolbar.actions.label "Tindakan">
+<!ENTITY zotero.toolbar.addChildNote.label "Add Child Note">
+<!ENTITY zotero.toolbar.addStandaloneNote.label "Add Standalone Note">
+<!ENTITY zotero.toolbar.advancedSearch "Pencarian Lanjutan">
+<!ENTITY zotero.toolbar.attachment.add "Simpan Salinan Berkas">
+<!ENTITY zotero.toolbar.attachment.linked "Tautkan ke Berkas">
+<!ENTITY zotero.toolbar.attachment.snapshot "Ambil Snapshot Laman Ini">
+<!ENTITY zotero.toolbar.attachment.weblink "Simpan Tautan ke Laman Ini">
+<!ENTITY zotero.toolbar.cancelDuplicatesView.label "Cancel duplicates view">
+<!ENTITY zotero.toolbar.cancelOrphansView.label "Cancel orphans view">
+<!ENTITY zotero.toolbar.duplicate.label "Tunjukkan Duplikat">
+<!ENTITY zotero.toolbar.duplicatesView.label "Duplicates view">
+<!ENTITY zotero.toolbar.emptyTrash.label "Keranjang Sampah Kosong">
+<!ENTITY zotero.toolbar.export.label "Ekspor Perpustakaan...">
+<!ENTITY zotero.toolbar.import.label "Impor...">
+<!ENTITY zotero.toolbar.importFromClipboard "Impor dari Clipboard">
+<!ENTITY zotero.toolbar.lookup "Cari dengan Nomor Pengenal">
+<!ENTITY zotero.toolbar.lookup.label "Tambahkan Item dengan Nomor Pengenal ">
+<!ENTITY zotero.toolbar.moreItemTypes.label "Lainnya">
+<!ENTITY zotero.toolbar.newCollection.label "Koleksi Baru...">
+<!ENTITY zotero.toolbar.newGroup "Grup Baru...">
+<!ENTITY zotero.toolbar.newItem.label "Item Baru">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Buat Item Baru dari Laman Saat Ini">
+<!ENTITY zotero.toolbar.newNote "Catatan Baru">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Pencarian Tersimpan Baru...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Subkoleksi Baru...">
+<!ENTITY zotero.toolbar.note.child "Tambahkan Catatan Anak">
+<!ENTITY zotero.toolbar.note.standalone "Catatan Mandiri Baru">
+<!ENTITY zotero.toolbar.openURL.label "Temukan">
+<!ENTITY zotero.toolbar.openURL.tooltip "Temukan melalui perpustakaan lokal Anda">
+<!ENTITY zotero.toolbar.orphansView.label "Orphans view">
+<!ENTITY zotero.toolbar.preferences.label "Preferensi...">
+<!ENTITY zotero.toolbar.refresh.label "Refresh">
+<!ENTITY zotero.toolbar.removeItem.label "Buang Item...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
+<!ENTITY zotero.toolbar.supportAndDocumentation "Dukungan dan Dokuementasi">
+<!ENTITY zotero.toolbar.tab.tooltip "Hidup/Matikan Mode Tab">
+<!ENTITY zotero.toolbar.tagSelector.label "Tunjukkan/Sembunyikan Selektor Tag">
+<!ENTITY zotero.toolbar.timeline.label "Buat Garis Waktu">
+<!ENTITY zotero.upgrade.autoBackup "Database Anda saat ini akan di-back up secara automatis sebelum perubahan dilakukan.">
+<!ENTITY zotero.upgrade.changeLogAfterLink "untuk mengetahui hal-hal apa saja yang baru.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Mohon lihat">
+<!ENTITY zotero.upgrade.changeLogLink "log perubahan">
+<!ENTITY zotero.upgrade.ifZoteroChoice "If this is not desired, cancel the upgrade process now, and reinstall the official Zotero client.">
+<!ENTITY zotero.upgrade.ifZoteroInfo "If you are migrating from official Zotero to MLZ, the next step of the upgrade process will convert your database for use with MLZ.">
+<!ENTITY zotero.upgrade.ifZoteroWarning "After conversion, the database will be accessible only to MLZ clients.">
+<!ENTITY zotero.upgrade.majorUpgrade "Ini adalah upgrade utama.">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "sebelum melanjutkan.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Yakinkan bahwa Anda telah meninjau ulang">
+<!ENTITY zotero.upgrade.majorUpgradeLink "instruksi upgrade">
+<!ENTITY zotero.upgrade.newVersionInstalled "Anda telah menginstal versi terbaru Zotero.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.upgradeInProgress "Mohon tunggu sampai proses upgrade selesai dilaksanakan. Hal ini mungkin akan berjalan beberapa menit.">
+<!ENTITY zotero.upgrade.upgradeRequired "Database Zotero Anda harus di-upgrade agar dapat bekerja dengan versi terbaru Zotero.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Database Zotero Anda telah berhasil di-upgrade.">

@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "verze">
+<!ENTITY zotero.about.additionalSoftware "Software třetích stran a standardy:">
+<!ENTITY zotero.about.close "Zavřít">
+<!ENTITY zotero.about.localizations "Lokalizace:">
+<!ENTITY zotero.alumni "Alumni:">
+<!ENTITY zotero.citationProcessing "Zpracování citací a bibliografie">
 <!ENTITY zotero.createdby "Vytvořili:">
+<!ENTITY zotero.developers "Vývojáři:">
 <!ENTITY zotero.director "Vedoucí:">
 <!ENTITY zotero.directors "Vedoucí:">
-<!ENTITY zotero.developers "Vývojáři:">
-<!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.about.localizations "Lokalizace:">
-<!ENTITY zotero.about.additionalSoftware "Software třetích stran a standardy:">
 <!ENTITY zotero.executiveProducer "Výkonný producent:">
-<!ENTITY zotero.thanks "Zvláštní poděkování:">
-<!ENTITY zotero.about.close "Zavřít">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Další spolupracovníci a poděkování...">
-<!ENTITY zotero.citationProcessing "Zpracování citací a bibliografie">
+<!ENTITY zotero.thanks "Zvláštní poděkování:">
+<!ENTITY zotero.version "verze">

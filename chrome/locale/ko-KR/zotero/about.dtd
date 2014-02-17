@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "버전">
+<!ENTITY zotero.about.additionalSoftware "제3자 소프트웨어 및 기준:">
+<!ENTITY zotero.about.close "닫기">
+<!ENTITY zotero.about.localizations "지역화 담당자:">
+<!ENTITY zotero.alumni "역대 참여자:">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby "제작자:">
+<!ENTITY zotero.developers "개발자:">
 <!ENTITY zotero.director "책임자:">
 <!ENTITY zotero.directors "책임자:">
-<!ENTITY zotero.developers "개발자:">
-<!ENTITY zotero.alumni "역대 참여자:">
-<!ENTITY zotero.about.localizations "지역화 담당자:">
-<!ENTITY zotero.about.additionalSoftware "제3자 소프트웨어 및 기준:">
 <!ENTITY zotero.executiveProducer "행정 프로듀서:">
-<!ENTITY zotero.thanks "감사드릴 분들:">
-<!ENTITY zotero.about.close "닫기">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Zotero 프로젝트에 기여한 분들">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.thanks "감사드릴 분들:">
+<!ENTITY zotero.version "버전">

@@ -33,10 +33,12 @@
 		<preferences>
 			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
 			<preference id="pref-quickCopy-dragLimit" name="extensions.zotero.export.quickCopy.dragLimit" type="int"/>
+			<preference id="pref-quickCopy-linkOption" name="extensions.zotero.export.quickCopy.linkOption" type="bool"/>
+			<preference id="pref-quickCopy-linkCitationFormReverse" name="extensions.zotero.export.quickCopy.linkCitationFormReverse" type="bool"/>
 			<preference id="pref-export-displayCharsetOption" name="extensions.zotero.export.displayCharsetOption" type="bool"/>
 			<preference id="pref-import-charset" name="extensions.zotero.import.charset" type="string"/>
 		</preferences>
-		
+
 		<groupbox id="zotero-prefpane-export-groupbox">
 			<caption label="&zotero.preferences.quickCopy.caption;"/>
 			
@@ -54,13 +56,22 @@
 			<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
 				oncommand="Zotero_Preferences.Export.buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : '');"/>
 			
-			<vbox id="zotero-prefpane-export-siteSettings"/>
-			
+ 			<hbox align="left">
+ 			  <checkbox id="zotero-quickCopy-linkWrapOption" label="&zotero.preferences.quickCopy.linkOption;"
+ 					oncommand="Zotero_Preferences.Export.updateQuickCopyHTMLCheckbox();"
+ 					preference="pref-quickCopy-linkOption"/>
+ 			  <checkbox id="zotero-quickCopy-linkWrapCitationFormReverse" label="&zotero.preferences.quickCopy.linkCitationFormReverse;"
+ 					preference="pref-quickCopy-linkCitationFormReverse"/>
+ 			</hbox>
+ 
 			<hbox align="center">
 				<label value="&zotero.preferences.quickCopy.dragLimit;"/>
 				<textbox preference="pref-quickCopy-dragLimit" size="3"/>
 				<label value="&zotero.preferences.items;" flex="1"/>
 			</hbox>
+
+			<vbox id="zotero-prefpane-export-siteSettings"/>
+			
 		</groupbox>
 		
 		<groupbox>

@@ -2112,7 +2112,7 @@ Zotero.SearchConditions = new function(){
 					contains: true,
 					doesNotContain: true
 				},
-				table: 'itemCreators',
+				table: '(SELECT * FROM itemCreators UNION SELECT itemID,creatorID,creatorTypeID,orderIndex FROM itemCreatorsAlt)',
 				field: "TRIM(firstName || ' ' || lastName)"
 			},
 			
@@ -2124,7 +2124,7 @@ Zotero.SearchConditions = new function(){
 					contains: true,
 					doesNotContain: true
 				},
-				table: 'itemCreators',
+				table: '(SELECT * FROM itemCreators UNION SELECT itemID,creatorID,creatorTypeID,orderIndex FROM itemCreatorsAlt)',
 				field: 'lastName',
 				special: true
 			},
@@ -2137,10 +2137,10 @@ Zotero.SearchConditions = new function(){
 					contains: true,
 					doesNotContain: true
 				},
-				table: 'itemData',
+				table: '(SELECT * FROM itemData UNION SELECT itemID,fieldID,valueID FROM itemDataAlt)',
 				field: 'value',
 				aliases: Zotero.DB.columnQuery("SELECT fieldName FROM fieldsCombined " +
-					"WHERE fieldName NOT IN ('accessDate', 'date', 'pages', " +
+					"WHERE fieldName NOT IN ('accessDate', 'date', 'pages','firstPage', " +
 					"'section','seriesNumber','issue')"),
 				template: true // mark for special handling
 			},
@@ -2185,7 +2185,7 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'itemData',
 				field: 'value',
-				aliases: ['pages', 'section', 'seriesNumber','issue'],
+				aliases: ['pages', 'firstPage', 'section', 'seriesNumber','issue'],
 				template: true // mark for special handling
 			},
 			
@@ -2380,7 +2380,21 @@ Zotero.SearchConditions = new function(){
 			return Zotero.getString('searchConditions.' + str)
 		}
 		catch (e) {
-			return Zotero.ItemFields.getLocalizedString(null, str);
+			// OOOOO: Not sure if this problem is specific to the multilingual
+			// version ... with a completely empty Zotero, we get an error on
+			// these two fields for want of a localized form.  Not sure if
+			// their inclusion (they're pulled out of the itemData table by
+			// the build of the "field" condition in this file) is an
+			// error, or whether there should be localized forms somewhere.
+			// For the present, this workaround allows startup.
+			if (str === 'firstCreator') {
+				var ret = "firstCreator";
+			} else if (str === 'sortCreator') {
+				var ret = "sortCreator";
+			} else {
+				var ret = Zotero.ItemFields.getLocalizedString(null, str);
+			}
+			return ret;
 		}
 	}
 	

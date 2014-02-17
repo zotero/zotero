@@ -12,12 +12,19 @@
 {
 	margin-top: 0 !important;
 	margin-bottom: 0 !important;
+	font-weight: bold !important;
+	color: #888888;
 }
 
 #zotero-view-tabbox tabs tab .tab-text
 {
 	margin-top: .2em !important;
 	margin-bottom: .25em !important;
+}
+
+#zotero-view-tabbox tabs tab[has-content="true"]
+{
+	color: #000000;
 }
 
 #zotero-view-item

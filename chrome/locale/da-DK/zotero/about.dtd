@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "version">
+<!ENTITY zotero.about.additionalSoftware "Tredjepartsprogrammer og standarder:">
+<!ENTITY zotero.about.close "Luk">
+<!ENTITY zotero.about.localizations "Tilpasning til lokale forhold:">
+<!ENTITY zotero.alumni "Alumner:">
+<!ENTITY zotero.citationProcessing "Arbejde med reference og litteraturliste ">
 <!ENTITY zotero.createdby "Oprettet af:">
+<!ENTITY zotero.developers "Udviklere:">
 <!ENTITY zotero.director "Direktør:">
 <!ENTITY zotero.directors "Direktører:">
-<!ENTITY zotero.developers "Udviklere:">
-<!ENTITY zotero.alumni "Alumner:">
-<!ENTITY zotero.about.localizations "Tilpasning til lokale forhold:">
-<!ENTITY zotero.about.additionalSoftware "Tredjepartsprogrammer og standarder:">
 <!ENTITY zotero.executiveProducer "Producent:">
-<!ENTITY zotero.thanks "Særlig tak til:">
-<!ENTITY zotero.about.close "Luk">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Flere anerkendelser">
-<!ENTITY zotero.citationProcessing "Arbejde med reference og litteraturliste ">
+<!ENTITY zotero.thanks "Særlig tak til:">
+<!ENTITY zotero.version "version">

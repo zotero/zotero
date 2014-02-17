@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "版本">
+<!ENTITY zotero.about.additionalSoftware "第三方软件和标准:">
+<!ENTITY zotero.about.close "关闭">
+<!ENTITY zotero.about.localizations "本地化:">
+<!ENTITY zotero.alumni "校友:">
+<!ENTITY zotero.citationProcessing "引用 &amp; 参考文献处理">
 <!ENTITY zotero.createdby "创建者:">
+<!ENTITY zotero.developers "开发人员:">
 <!ENTITY zotero.director "主管:">
 <!ENTITY zotero.directors "技术指导:">
-<!ENTITY zotero.developers "开发人员:">
-<!ENTITY zotero.alumni "校友:">
-<!ENTITY zotero.about.localizations "本地化:">
-<!ENTITY zotero.about.additionalSoftware "第三方软件和标准:">
 <!ENTITY zotero.executiveProducer "执行制作人:">
-<!ENTITY zotero.thanks "特别鸣谢:">
-<!ENTITY zotero.about.close "关闭">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "其它人员 &amp; 致谢">
-<!ENTITY zotero.citationProcessing "引用 &amp; 参考文献处理">
+<!ENTITY zotero.thanks "特别鸣谢:">
+<!ENTITY zotero.version "版本">

@@ -1,23 +1,18 @@
-<!ENTITY zotero.search.name "Nafn:">
-
-<!ENTITY zotero.search.joinMode.prefix "Leita að">
-<!ENTITY zotero.search.joinMode.any "einhverju">
-<!ENTITY zotero.search.joinMode.all "öllum">
-<!ENTITY zotero.search.joinMode.suffix "eftirtaldra orða:">
-
-<!ENTITY zotero.search.recursive.label "Leita í undirsöfnum">
-<!ENTITY zotero.search.noChildren "Sýna eingöngu fyrstu kennileiti úr færslum">
+<!ENTITY zotero.search.clear "Hreinsa">
+<!ENTITY zotero.search.date.units.days "dagar">
+<!ENTITY zotero.search.date.units.months "mánuðir">
+<!ENTITY zotero.search.date.units.years "ár">
 <!ENTITY zotero.search.includeParentsAndChildren "Taka með allar undirskrár í færslum sem finnast">
-
+<!ENTITY zotero.search.joinMode.all "öllum">
+<!ENTITY zotero.search.joinMode.any "einhverju">
+<!ENTITY zotero.search.joinMode.prefix "Leita að">
+<!ENTITY zotero.search.joinMode.suffix "eftirtaldra orða:">
+<!ENTITY zotero.search.name "Nafn:">
+<!ENTITY zotero.search.noChildren "Sýna eingöngu fyrstu kennileiti úr færslum">
+<!ENTITY zotero.search.recursive.label "Leita í undirsöfnum">
+<!ENTITY zotero.search.saveSearch "Vista leit">
+<!ENTITY zotero.search.search "Leita">
 <!ENTITY zotero.search.textModes.phrase "Setningaliður">
 <!ENTITY zotero.search.textModes.phraseBinary "Setningaliður (með stafrænum skrám)">
 <!ENTITY zotero.search.textModes.regexp "Regexp">
 <!ENTITY zotero.search.textModes.regexpCS "Regexp (case-sensitive)">
-
-<!ENTITY zotero.search.date.units.days "dagar">
-<!ENTITY zotero.search.date.units.months "mánuðir">
-<!ENTITY zotero.search.date.units.years "ár">
-
-<!ENTITY zotero.search.search "Leita">
-<!ENTITY zotero.search.clear "Hreinsa">
-<!ENTITY zotero.search.saveSearch "Vista leit">

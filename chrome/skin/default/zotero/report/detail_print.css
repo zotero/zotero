@@ -24,3 +24,10 @@ a {
 	color: #000;
 	text-decoration: none;
 }
+
+@media print {
+    ul.report li.item {
+        page-break-after: always;
+    }
+}
+

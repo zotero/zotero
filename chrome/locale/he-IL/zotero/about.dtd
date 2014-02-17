@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "גירסה">
+<!ENTITY zotero.about.additionalSoftware "תוכנות וסטנדרטים של צד שלישי:">
+<!ENTITY zotero.about.close "סגור">
+<!ENTITY zotero.about.localizations ":לוקליזציה">
+<!ENTITY zotero.alumni ":בוגרים">
+<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
 <!ENTITY zotero.createdby ":נוצר על ידי">
+<!ENTITY zotero.developers ":מפתחים">
 <!ENTITY zotero.director "במאי:">
 <!ENTITY zotero.directors ":במאים">
-<!ENTITY zotero.developers ":מפתחים">
-<!ENTITY zotero.alumni ":בוגרים">
-<!ENTITY zotero.about.localizations ":לוקליזציה">
-<!ENTITY zotero.about.additionalSoftware "תוכנות וסטנדרטים של צד שלישי:">
 <!ENTITY zotero.executiveProducer ":מפיק בפועל">
-<!ENTITY zotero.thanks ":תודות מיוחדות">
-<!ENTITY zotero.about.close "סגור">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.thanks ":תודות מיוחדות">
+<!ENTITY zotero.version "גירסה">

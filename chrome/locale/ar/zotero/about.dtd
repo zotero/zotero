@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "الإصدار">
+<!ENTITY zotero.about.additionalSoftware "معايير وبرمجيات الطرف الثالث:">
+<!ENTITY zotero.about.close "إغلاق">
+<!ENTITY zotero.about.localizations "الترجمات:">
+<!ENTITY zotero.alumni "الخريجين:">
+<!ENTITY zotero.citationProcessing "معالجي الاستشهادات والببليوجرافيات">
 <!ENTITY zotero.createdby "تم انشاؤه بواسطة:">
+<!ENTITY zotero.developers "المطورين:">
 <!ENTITY zotero.director "المخرج:">
 <!ENTITY zotero.directors "المديرين:">
-<!ENTITY zotero.developers "المطورين:">
-<!ENTITY zotero.alumni "الخريجين:">
-<!ENTITY zotero.about.localizations "الترجمات:">
-<!ENTITY zotero.about.additionalSoftware "معايير وبرمجيات الطرف الثالث:">
 <!ENTITY zotero.executiveProducer "المنتج التنفيذي:">
-<!ENTITY zotero.thanks "شكر خاص:">
-<!ENTITY zotero.about.close "إغلاق">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "المزيد من الشكر والتقدير">
-<!ENTITY zotero.citationProcessing "معالجي الاستشهادات والببليوجرافيات">
+<!ENTITY zotero.thanks "شكر خاص:">
+<!ENTITY zotero.version "الإصدار">

@@ -1,13 +1,13 @@
-<!ENTITY zotero.version "version">
+<!ENTITY zotero.about.additionalSoftware "Tredjepartsprogramvara och standarder:">
+<!ENTITY zotero.about.close "Stäng">
+<!ENTITY zotero.about.localizations "Översättningar:">
+<!ENTITY zotero.alumni "Tidigare medlemmar:">
+<!ENTITY zotero.citationProcessing "Citering och källförteckningsbearbetning">
 <!ENTITY zotero.createdby "Skapad av:">
+<!ENTITY zotero.developers "Utvecklare:">
 <!ENTITY zotero.director "Ledare:">
 <!ENTITY zotero.directors "Ledare:">
-<!ENTITY zotero.developers "Utvecklare:">
-<!ENTITY zotero.alumni "Tidigare medlemmar:">
-<!ENTITY zotero.about.localizations "Översättningar:">
-<!ENTITY zotero.about.additionalSoftware "Tredjepartsprogramvara och standarder:">
 <!ENTITY zotero.executiveProducer "Produktionsledare:">
-<!ENTITY zotero.thanks "Särskilt tack:">
-<!ENTITY zotero.about.close "Stäng">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Vi vill också tacka...">
-<!ENTITY zotero.citationProcessing "Citering och källförteckningsbearbetning">
+<!ENTITY zotero.thanks "Särskilt tack:">
+<!ENTITY zotero.version "version">
