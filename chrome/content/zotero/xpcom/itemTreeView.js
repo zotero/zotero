@@ -971,7 +971,9 @@ Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 					order = 'YMD';
 					var join = '-';
 				}
-				var date = Zotero.Date.sqlToDate(val, true);
+				
+				var isUTC = column.id != 'zotero-items-column-accessDate';
+				var date = Zotero.Date.sqlToDate(val, isUTC);
 				var parts = [];
 				for (var i=0; i<3; i++) {
 					switch (order[i]) {
@@ -1001,7 +1003,18 @@ Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 					}
 					
 					val = parts.join(join);
-					val += ' ' + date.toLocaleTimeString();
+					
+					var hasTime;
+					//check if time was set (most likely)
+					if(!isUTC) {
+						hasTime = date.getHours() || date.getMinutes() || date.getSeconds();
+					} else {
+						hasTime = date.getUTCHours() || date.getUTCMinutes() || date.getUTCSeconds();
+					}
+					
+					if(hasTime) {
+						val += ' ' + date.toLocaleTimeString();
+					}
 				}
 			}
 	}
