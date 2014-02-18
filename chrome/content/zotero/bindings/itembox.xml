@@ -1688,7 +1688,7 @@
 						
 						var otherFields = this.getCreatorFields(row);
 						otherFields[creatorField] = value;
-						var lastName = otherFields.lastName;
+						var lastName = otherFields.lastName.trim();
 						
 						//Handle \n\r and \n delimited entries
 						var rawNameArray = lastName.split(/\r\n?|\n/);
