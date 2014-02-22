@@ -830,13 +830,13 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix, force) {
 		return false;
 	}
 	
-	var corruptMarker = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt').exists();
+	var corruptMarker = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt');
 	
 	if (this.skipBackup || Zotero.skipLoading) {
 		this._debug("Skipping backup of database '" + this._dbName + "'", 1);
 		return false;
 	}
-	else if (this._dbIsCorrupt || corruptMarker) {
+	else if (this._dbIsCorrupt || corruptMarker.exists()) {
 		this._debug("Database '" + this._dbName + "' is marked as corrupt--skipping backup", 1);
 		return false;
 	}
@@ -1108,6 +1108,9 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 		}
 	}
 	
+	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+		.getService(Components.interfaces.nsIPromptService);
+	
 	catchBlock: try {
 		var corruptMarker = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt');
 		if (corruptMarker.exists()) {
@@ -1117,16 +1120,21 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 	}
 	catch (e) {
 		if (e.name=='NS_ERROR_FILE_CORRUPTED') {
-			this._debug("Database file '" + file.leafName + "' corrupted", 1);
+			this._debug("Database file '" + file.leafName + "' is marked as corrupted", 1);
 			
 			// No backup file! Eek!
 			if (!backupFile.exists()) {
 				this._debug("No backup file for DB '" + this._dbName + "' exists", 1);
 				
-				// Save damaged filed
-				this._debug('Saving damaged DB file with .damaged extension', 1);
-				var damagedFile = Zotero.getZoteroDatabase(this._dbName, 'damaged');
-				Zotero.moveToUnique(file, damagedFile);
+				// Save damaged file if it exists
+				if (file.exists()) {
+					this._debug('Saving damaged DB file with .damaged extension', 1);
+					var damagedFile = Zotero.getZoteroDatabase(this._dbName, 'damaged');
+					Zotero.moveToUnique(file, damagedFile);
+				}
+				else {
+					this._debug(file.leafName + " does not exist -- creating new database");
+				}
 				
 				// Create new main database
 				var file = Zotero.getZoteroDatabase(this._dbName);
@@ -1136,14 +1144,22 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 					corruptMarker.remove(null);
 				}
 				
-				alert(Zotero.getString('db.dbCorruptedNoBackup', fileName));
+				// FIXME: If damaged file didn't exist, it won't be saved, as the message claims
+				let msg = Zotero.getString('db.dbCorruptedNoBackup', fileName);
+				Zotero.debug(msg, 1);
+				ps.alert(null, Zotero.getString('general.warning'), msg);
 				break catchBlock;
 			}
 			
-			// Save damaged file
-			this._debug('Saving damaged DB file with .damaged extension', 1);
-			var damagedFile = Zotero.getZoteroDatabase(this._dbName, 'damaged');
-			Zotero.moveToUnique(file, damagedFile);
+			// Save damaged file if it exists
+			if (file.exists()) {
+				this._debug('Saving damaged DB file with .damaged extension', 1);
+				var damagedFile = Zotero.getZoteroDatabase(this._dbName, 'damaged');
+				Zotero.moveToUnique(file, damagedFile);
+			}
+			else {
+				this._debug(file.leafName + " does not exist");
+			}
 			
 			// Test the backup file
 			try {
@@ -1155,7 +1171,9 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 				var file = Zotero.getZoteroDatabase(this._dbName);
 				this._connection = store.openDatabase(file);
 				
-				alert(Zotero.getString('db.dbRestoreFailed', fileName));
+				let msg = Zotero.getString('db.dbRestoreFailed', fileName);
+				Zotero.debug(msg, 1);
+				ps.alert(null, Zotero.getString('general.warning'), msg);
 				
 				if (corruptMarker.exists()) {
 					corruptMarker.remove(null);
@@ -1181,12 +1199,18 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 			file.append(fileName);
 			this._connection = store.openDatabase(file);
 			this._debug('Database restored', 1);
+			// FIXME: If damaged file didn't exist, it won't be saved, as the message claims
 			var msg = Zotero.getString('db.dbRestored', [
 				fileName,
 				Zotero.Date.getFileDateString(backupFile),
 				Zotero.Date.getFileTimeString(backupFile)
 			]);
-			alert(msg);
+			Zotero.debug(msg, 1);
+			ps.alert(
+				null,
+				Zotero.getString('general.warning'),
+				msg
+			);
 			
 			if (corruptMarker.exists()) {
 				corruptMarker.remove(null);
