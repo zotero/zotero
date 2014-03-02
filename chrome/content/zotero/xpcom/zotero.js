@@ -725,6 +725,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		}
 		
 		// Initialize various services
+		Zotero.Styles.preinit();
 		Zotero.Integration.init();
 		
 		if(Zotero.Prefs.get("httpServer.enabled")) {
