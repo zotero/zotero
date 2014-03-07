@@ -147,7 +147,7 @@ var ZoteroPane = new function()
 	function _loadPane() {
 		if(!Zotero || !Zotero.initialized || Zotero.isConnector) return;
 		
-		ZoteroPane_Local.clearItemsPaneMessage();
+		ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 		
 		//Initialize collections view
 		ZoteroPane_Local.collectionsView = new Zotero.CollectionTreeView();
