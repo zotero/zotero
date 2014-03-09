@@ -1,0 +1,29 @@
+.zotero-tagsdialog-listbox
+{
+	overflow:auto;
+	margin:5px;
+	-moz-appearance:listbox;
+}
+
+.zotero-tagsdialog-listboxheadercell
+{
+	-moz-appearance:treeheadercell;
+}
+
+
+.zotero-tagsdialog-listboxheadercell-checkbox
+{
+	white-space:nowrap;
+}
+
+
+.zotero-tagsdialog-listitem:hover
+{
+	background-color: rgba(51, 136, 204, 0.2);
+}
+
+
+.zotero-tagsdialog-listbox-content-checkbox
+{
+	white-space:nowrap;
+}

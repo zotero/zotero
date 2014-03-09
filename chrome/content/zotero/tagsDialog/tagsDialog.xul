@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+
+    This is being contributed to the Zotero effort.  
+    This shall be replaced with the Zotero license information.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/tagsDialog.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css"?>
+<dialog
+ xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+ id="tagsDialog"
+ title="Add Tags"
+ ondialogaccept="return onOK();"
+ onload="onLoad();"
+ windowtype="tagsDialogWindowType">
+
+	<script type="application/javascript" src="chrome://zotero/content/tagsDialog/tagsDialog.js"/>
+	<script type="application/javascript"><![CDATA[
+		// JavaScript for immediate, in-line execution
+		
+		var tagsAll = window.arguments[0].inVars.tagsAll;
+		var tagsRecent = window.arguments[0].inVars.tagsRecent;
+		var tagsParent = window.arguments[0].inVars.tagsParent;
+		var tagsArray = window.arguments[0].inVars.tagsArray;
+
+		window.addEventListener("DOMContentLoaded", function (event) {
+			// Set dialog window max width and height
+			document.documentElement.style.maxWidth = ((screen.availWidth || screen.width) - 100) + "px";
+			document.documentElement.style.maxHeight = ((screen.availHeight || screen.height) - 100) + "px";
+
+		}, false);
+
+		function setVBoxWidth(vboxId) {
+			var vboxX = document.getElementById(vboxId);
+			//The following line should give the right number but it doesn't 
+			//widthToUse = (vboxX.scrollWidth + (vboxX.scrollWidth-vboxX.clientWidth) + 3) + "px"; 
+			var widthToUse = vboxX.scrollWidth + 20; // This assumes vertical scrollbar width of 17 and adds 3
+			var minWidthNum = 100;
+			if( widthToUse < minWidthNum) { // ensure a minimum width
+				widthToUse = minWidthNum;
+			}
+			vboxX.style.width = widthToUse + "px";
+		}
+
+		window.addEventListener("load", function (event) {
+			// Set vbox widths to preclude the horizontal scrollbar that appears when a vertical scrollbar is present
+			setVBoxWidth("tagsAllBox");
+			setVBoxWidth("tagsRecentBox");
+			setVBoxWidth("tagsParentBox");
+			setVBoxWidth("tagsArrayBox");
+		}, false);
+
+		function ooga(oX) {
+			let console = (Components.utils.import("resource://gre/modules/devtools/Console.jsm", {})).console; 
+			console.log(oX);
+			//document.getElementsByClassName('allTagsChkBxs').checked=self.checked;
+		}
+
+	]]></script>
+	<hbox flex="2" >
+		<vbox id="tagsAllBox" datasources="javascript:tagsAll" querytype="javascript" ref="." idprefix="tagsAll" 
+		 flex="1" class="zotero-tagsdialog-listbox">
+			<vbox class="zotero-tagsdialog-listboxheadercell" 
+			 onclick="for (cb of document.getElementsByClassName('allTagsChkBxs')) {cb.checked=document.getElementById('allTagsHeaderChkBx').checked;}">
+				<checkbox id="allTagsHeaderChkBx" label="Other Tags" class="zotero-tagsdialog-listboxheadercell-checkbox"/>
+			</vbox>
+			<template>
+				<query idproperty="" filterfunc="" iteminterface=""/>
+				<action>
+					<vbox uri="?" class="zotero-tagsdialog-listitem">
+						<checkbox uri="?" label="?name" class="zotero-tagsdialog-listbox-content-checkbox allTagsChkBxs"/>
+					</vbox>
+				</action>
+			</template>
+		</vbox>
+		<vbox id="tagsRecentBox" datasources="javascript:tagsRecent" querytype="javascript" ref="." idprefix="tagsRecent" 
+		 flex="1" class="zotero-tagsdialog-listbox">
+			<vbox class="zotero-tagsdialog-listboxheadercell" 
+			 onclick="for (cb of document.getElementsByClassName('recentTagsChkBxs')) {cb.checked=document.getElementById('recentTagsHeaderChkBx').checked;}">
+				<checkbox id="recentTagsHeaderChkBx" label="Recently Used Tags" class="zotero-tagsdialog-listboxheadercell-checkbox"/>
+			</vbox>
+			<template>
+				<query idproperty="" filterfunc="" iteminterface=""/>
+				<action>
+					<vbox uri="?" class="zotero-tagsdialog-listitem">
+						<checkbox uri="?" label="?name" class="zotero-tagsdialog-listbox-content-checkbox recentTagsChkBxs"/>
+					</vbox>
+				</action>
+			</template>
+		</vbox>
+		<vbox id="tagsParentBox" datasources="javascript:tagsParent" querytype="javascript" ref="." idprefix="tagsParent" 
+		 flex="1" class="zotero-tagsdialog-listbox">
+			<vbox class="zotero-tagsdialog-listboxheadercell" 
+			 onclick="for (cb of document.getElementsByClassName('parentTagsChkBxs')) {cb.checked=document.getElementById('parentTagsHeaderChkBx').checked;}">
+				<checkbox id="parentTagsHeaderChkBx" label="Parent's Tags" class="zotero-tagsdialog-listboxheadercell-checkbox"/>
+			</vbox>
+			<template>
+				<query idproperty="" filterfunc="" iteminterface=""/>
+				<action>
+					<vbox uri="?" class="zotero-tagsdialog-listitem">
+						<checkbox uri="?" label="?name" class="zotero-tagsdialog-listbox-content-checkbox parentTagsChkBxs"/>
+					</vbox>
+				</action>
+			</template>
+		</vbox>
+		<vbox id="tagsArrayBox" datasources="javascript:tagsArray" querytype="javascript" ref="." idprefix="tagsArray"  
+		 flex="1" class="zotero-tagsdialog-listbox">
+			<vbox class="zotero-tagsdialog-listboxheadercell">
+				<checkbox label="Current Tags" checked="true" disabled="true" class="zotero-tagsdialog-listboxheadercell-checkbox"/>
+			</vbox>
+			<template>
+				<query idproperty="" filterfunc="" iteminterface=""/>
+				<action>
+					<vbox uri="?" class="zotero-tagsdialog-listitem">
+						<checkbox uri="?" label="?name" class="zotero-tagsdialog-listbox-content-checkbox" checked="true" disabled="true"/>
+					</vbox>
+				</action>
+			</template>
+		</vbox>
+	</hbox>
+</dialog>

@@ -720,16 +720,177 @@
 						row.parentNode.removeChild(row);
 						this.item.addTag(value);
 					}
+
+					// Update the recently used tags
+					var tagsRecentArray = Zotero.Prefs.get("tags.recent");
+					if (tagsRecentArray === undefined || tagsRecentArray == "") {
+						tagsRecentArray = new Array();
+					}
+					else {
+						tagsRecentArray = JSON.parse(tagsRecentArray);
+					}
+					for (var iT=0; iT<tagArray.length; iT++) {
+						var iTagToRemove = tagsRecentArray.indexOf(tagArray[iT]); 
+						if ( iTagToRemove != -1) {
+							tagsRecentArray.splice(iTagToRemove,1);
+						}
+						tagsRecentArray.unshift(tagArray[iT]);
+						while (tagsRecentArray.length > 25) {
+							tagsRecentArray.pop();
+						}
+					}
+					Zotero.Prefs.set("tags.recent",JSON.stringify(tagsRecentArray));
 				]]>
 				</body>
 			</method>
 			
 			
+			<method name="popupTagsDialog">
+				<parameter name="textbox"/>
+				<body>
+					<![CDATA[
+
+					// Get all of the current item's library's tags into a sorted array
+					var tagsAllArray = new Array();
+					var tagsAllObjs = Zotero.Tags.getAll(null,this.item.libraryID);
+					for each (let oT in tagsAllObjs) {
+						tagsAllArray.push(oT.name);
+					}
+					tagsAllArray.sort();
+					
+					// Get all recent tags into a sorted array
+					var tagsRecentArray = Zotero.Prefs.get("tags.recent");
+					if (tagsRecentArray === undefined || tagsRecentArray == "") {
+						tagsRecentArray = new Array();
+					}
+					else {
+						tagsRecentArray = JSON.parse(tagsRecentArray);
+						tagsRecentArray.sort();
+					}
+
+					// Get this item's parent's tags into a sorted array
+					var tagsParentArray = new Array();
+					if( this.item.getSource() ) {
+						var tagsParentObjs = Zotero.Items.get( this.item.getSource() ).getTags();
+						for each (let oT in tagsParentObjs) {
+							tagsParentArray.push(oT.name);
+						}
+						tagsParentArray.sort();
+					}
+
+					// Get this item's tags into a sorted array
+					var tagsObjArray = this.item.getTags();
+					var tagsArray = new Array();
+					for (let iT=0; iT<tagsObjArray.length; iT++) {
+						tagsArray.push(tagsObjArray[iT].name);
+					}
+					tagsArray.sort();
+					
+					// Remove this item's tags from the parent, recent, and all-tags arrays
+					for (let iT=0; iT<tagsArray.length; iT++) {
+						var iTagToRemove = tagsParentArray.indexOf(tagsArray[iT]); 
+						if ( iTagToRemove != -1) {
+							tagsParentArray.splice(iTagToRemove,1);
+						}
+						iTagToRemove = tagsRecentArray.indexOf(tagsArray[iT]); 
+						if ( iTagToRemove != -1) {
+							tagsRecentArray.splice(iTagToRemove,1);
+						}
+						iTagToRemove = tagsAllArray.indexOf(tagsArray[iT]); 
+						if ( iTagToRemove != -1) {
+							tagsAllArray.splice(iTagToRemove,1);
+						}
+					}
+
+					// Also remove the parent's tags from the recent and all-tags arrays
+					for (let iT=0; iT<tagsParentArray.length; iT++) {
+						var iTagToRemove = tagsRecentArray.indexOf(tagsParentArray[iT]); 
+						if ( iTagToRemove != -1) {
+							tagsRecentArray.splice(iTagToRemove,1);
+						}
+						iTagToRemove = tagsAllArray.indexOf(tagsParentArray[iT]); 
+						if ( iTagToRemove != -1) {
+							tagsAllArray.splice(iTagToRemove,1);
+						}
+					}
+					
+					// Also remove the recent tags from the all-tags array
+					for (let iT=0; iT<tagsRecentArray.length; iT++) {
+						var iTagToRemove = tagsAllArray.indexOf(tagsRecentArray[iT]); 
+						if ( iTagToRemove != -1) {
+							tagsAllArray.splice(iTagToRemove,1);
+						}
+					}
+
+					// Convert all the arrays to arrays of objects
+					for (let iT=0; iT < tagsAllArray.length; iT++) {
+						tagsAllArray[iT] = {name:tagsAllArray[iT]};
+					}
+					for (let iT=0; iT < tagsRecentArray.length; iT++) {
+						tagsRecentArray[iT] = {name:tagsRecentArray[iT]};
+					}
+					for (let iT=0; iT < tagsParentArray.length; iT++) {
+						tagsParentArray[iT] = {name:tagsParentArray[iT]};
+					}
+					for (let iT=0; iT<tagsArray.length; iT++) {
+						tagsArray[iT] = {name:tagsArray[iT]};
+					}
+
+					// Open a dialog box and show the current tags
+					var varsForTagsDialog = {
+						inVars:{
+							tagsAll:tagsAllArray
+							,tagsRecent:tagsRecentArray
+							,tagsParent:tagsParentArray
+							,tagsArray:tagsArray
+						}, 
+						outVars:{
+							tagsOnePerLine:""
+						}
+					};
+					Zotero.tagsDialogIsOpen = true;
+					window.openDialog('chrome://zotero/content/tagsDialog/tagsDialog.xul',
+						'',
+						'chrome, dialog, modal, centerscreen, resizable=yes',
+						varsForTagsDialog
+					);
+					Zotero.tagsDialogIsOpen = false;
+
+					// Add the tag(s) text to the textbox (one tag per line)
+					var multiline = !!varsForTagsDialog.outVars.tagsOnePerLine.match(/\n/);
+					if (multiline) {
+						this.makeMultiline(textbox, varsForTagsDialog.outVars.tagsOnePerLine);
+					}
+					else {
+						this.makeMultiline(textbox, varsForTagsDialog.outVars.tagsOnePerLine, 1);
+					}
+
+					// Return focus to items pane (because the blur triggers the tag text to be processed)
+					var tree = document.getElementById('zotero-items-tree');
+					if (tree) {
+						tree.focus();
+					}
+				]]>
+				</body>
+			</method>
+
+
 			<method name="new">
 				<body>
 					<![CDATA[
 						var row = this.addDynamicRow();
 						row.firstChild.nextSibling.click();
+						return row;
+					]]>
+				</body>
+			</method>
+			
+			
+			<method name="addFromExisting">
+				<body>
+					<![CDATA[
+						var row = this.addDynamicRow();
+						this.popupTagsDialog(row.firstChild.nextSibling);
 						return row;
 					]]>
 				</body>
@@ -1071,6 +1232,9 @@
 					<xul:button id="addButton" label="&zotero.item.add;"
 						onkeypress="return document.getBindingParent(this)._onAddButtonKeypress(event)"
 						oncommand="document.getBindingParent(this).new();"/>
+					<xul:button id="addFromExistingButton" label="Add from Existing"
+						onkeypress="return document.getBindingParent(this)._onAddButtonKeypress(event)"
+						oncommand="document.getBindingParent(this).addFromExisting();"/>
 				</xul:hbox>
 				<xul:grid>
 					<xul:columns>
