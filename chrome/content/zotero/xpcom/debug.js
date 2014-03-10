@@ -110,7 +110,7 @@ Zotero.Debug = new function () {
 				// log to the Browser Console instead
 				//
 				// TODO: Get rid of the filename and line number
-				if (Zotero.isWin) {
+				if (Zotero.isWin && !Zotero.isStandalone) {
 					const consoleJSM = Components.utils.import("resource://gre/modules/devtools/Console.jsm", {});
 					consoleJSM.console.sendConsoleAPIMessage(output);
 				}
