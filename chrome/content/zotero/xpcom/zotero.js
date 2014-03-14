@@ -2034,7 +2034,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			'function skype_',
 			'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
 			'CVE-2009-3555',
-			'OpenGL LayerManager',
+			'OpenGL',
 			'trying to re-register CID',
 			'Services.HealthReport',
 			'[JavaScript Error: "this.docShell is null"',
