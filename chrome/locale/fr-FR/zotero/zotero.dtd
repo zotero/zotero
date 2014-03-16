@@ -5,7 +5,7 @@
 <!ENTITY zotero.general.edit "Modifier">
 <!ENTITY zotero.general.delete "Supprimer">
 <!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
+<!ENTITY zotero.general.cancel "Annuler">
 
 <!ENTITY zotero.errorReport.title "Rapport d'erreur Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Le journal des erreurs peut comprendre des messages sans rapport avec Zotero.">

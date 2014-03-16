@@ -5,7 +5,7 @@
 <!ENTITY zotero.general.edit "Editare">
 <!ENTITY zotero.general.delete "Ștergere">
 <!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
+<!ENTITY zotero.general.cancel "Anulare">
 
 <!ENTITY zotero.errorReport.title "Raportul de erori Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Jurnalul de erori poate include mesaje fără legătură cu Zotero.">

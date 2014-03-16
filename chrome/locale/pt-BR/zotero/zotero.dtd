@@ -5,7 +5,7 @@
 <!ENTITY zotero.general.edit "Editar">
 <!ENTITY zotero.general.delete "Excluir">
 <!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
+<!ENTITY zotero.general.cancel "Cancelar">
 
 <!ENTITY zotero.errorReport.title "Relatório de erros do Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "O registro de erro pode conter mensagens não relacionadas a Zotero.">
@@ -149,7 +149,7 @@
 <!ENTITY zotero.tagColorChooser.color "Cor:">
 <!ENTITY zotero.tagColorChooser.position "Posição:">
 <!ENTITY zotero.tagColorChooser.setColor "Estabeleça a cor">
-<!ENTITY zotero.tagColorChooser.removeColor "Remova a cor">
+<!ENTITY zotero.tagColorChooser.removeColor "Remover a cor">
 
 <!ENTITY zotero.lookup.description "Inserir ISBN, DOI, ou PMID para buscar na caixa abaixo">
 <!ENTITY zotero.lookup.button.search "Procurar">

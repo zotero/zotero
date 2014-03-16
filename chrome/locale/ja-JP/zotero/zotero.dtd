@@ -5,7 +5,7 @@
 <!ENTITY zotero.general.edit "編集">
 <!ENTITY zotero.general.delete "削除">
 <!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
+<!ENTITY zotero.general.cancel "キャンセル">
 
 <!ENTITY zotero.errorReport.title "Zotero エラーレポート">
 <!ENTITY zotero.errorReport.unrelatedMessages "エラー・ログは Zotero とは無関係のメッセージを含んでいる可能性があります。">

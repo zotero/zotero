@@ -5,7 +5,7 @@
 <!ENTITY zotero.general.edit "Editovat">
 <!ENTITY zotero.general.delete "Smazat">
 <!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
+<!ENTITY zotero.general.cancel "Zrušit">
 
 <!ENTITY zotero.errorReport.title "Chybová zpráva Zotera">
 <!ENTITY zotero.errorReport.unrelatedMessages "Záznam o chybách může obsahovat informace nesouvisející se Zoterem.">

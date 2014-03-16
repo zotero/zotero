@@ -5,7 +5,7 @@
 <!ENTITY zotero.general.edit "Muokkaa">
 <!ENTITY zotero.general.delete "Poista">
 <!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
+<!ENTITY zotero.general.cancel "Peruuta">
 
 <!ENTITY zotero.errorReport.title "Zoteron virheraportti">
 <!ENTITY zotero.errorReport.unrelatedMessages "Virhepäiväkirjassa saattaa olla mukana Zoteroon liittymättömiä viestejä.">
@@ -70,7 +70,7 @@
 <!ENTITY zotero.items.issue_column "Numero">
 <!ENTITY zotero.items.series_column "Sarja">
 <!ENTITY zotero.items.seriesTitle_column "Sarjan nimi">
-<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.court_column "Tuomioistuin">
 <!ENTITY zotero.items.medium_column "Formaatti">
 <!ENTITY zotero.items.genre_column "Genre">
 <!ENTITY zotero.items.system_column "Järjestelmä">
@@ -90,8 +90,8 @@
 <!ENTITY zotero.items.menu.duplicateItem "Monista valittu nimike">
 <!ENTITY zotero.items.menu.mergeItems "Yhdistä kohteet...">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Valitse se nimikkeen pääversio:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Valise kentät, jotka säilytetään muista versioista:">
 
 <!ENTITY zotero.toolbar.newItem.label "Uusi nimike">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Lisää">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.tagSelector.renameTag "Rename Tag...">
 <!ENTITY zotero.tagSelector.deleteTag "Delete Tag...">
 
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.title "Valitse avainsanan väri ja sijainti">
 <!ENTITY zotero.tagColorChooser.color "Väri:">
 <!ENTITY zotero.tagColorChooser.position "Sijainti:">
 <!ENTITY zotero.tagColorChooser.setColor "Aseta väri">
@@ -161,9 +161,9 @@
 
 <!ENTITY zotero.bibliography.title "Luo kirjallisuusluettelo">
 <!ENTITY zotero.bibliography.style.label "Sitaattityyli:">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
+<!ENTITY zotero.bibliography.outputMode "Luettelotyyppi:">
 <!ENTITY zotero.bibliography.bibliography "Lähdeluettelo">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMethod "Vientitapa:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Tallenna RTF-muodossa">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Tallenna HTML-muodossa">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Kopioi leikepöydälle">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Piilota tekijä">
 <!ENTITY zotero.citation.prefix.label "Etuliite:">
 <!ENTITY zotero.citation.suffix.label "Jälkiliite:">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.editorWarning.label "Varoitus: Jos muokkaat viittausta tekstieditorissa, se ei enää päivity tietokannan tietojen tai viittaustyylin perusteella.">
 
 <!ENTITY zotero.richText.italic.label "Kursiivi">
 <!ENTITY zotero.richText.bold.label "Lihavointi">
@@ -214,8 +214,8 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Lyhennä lehtien nimet automaattisesti">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "Lehtien MEDLINE-lyhenteet muodostetaan automaattisesti lehtien nimistä. &quot;Lehden lyhenne&quot; -kenttä ohitetaan.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Tallenna viitteet asiakirjassa">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Viitteiden tallentaminen asiakirjassa kasvattaa hiukan tiedoston kokoa, mutta tällöin tiedoston voi jakaa muiden kanssa käyttämättä Zotero-ryhmää. Tällä toiminnalle luotujen asiakirjojen muokkaamiseen tarvitaan Zotero 3.0 tai uudempi.">
@@ -241,8 +241,8 @@
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Rastittamattomia merkkejä ei tallenneta.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Merkki poistetaan kaikista nimikkeistä.">
 
-<!ENTITY zotero.merge.title "Conflict Resolution">
-<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.title "Ristiriidan selvittäminen">
+<!ENTITY zotero.merge.of "/">
 <!ENTITY zotero.merge.deleted "Poistettu">
 
 <!ENTITY zotero.proxy.recognized.title "Välityspalvelin tunnistettu">
