@@ -813,6 +813,11 @@ Zotero.Sync.Storage.ZFS = (function () {
 									+ " in Zotero.Sync.Storage.ZFS.downloadFile()";
 								Zotero.debug(msg, 1);
 								Components.utils.reportError(msg);
+								// Ignore files not found in S3
+								if (status == 404) {
+									deferred.resolve(false);
+									return;
+								}
 								try {
 									Zotero.debug(Zotero.File.getContents(destFile, null, 4096), 1);
 								}
