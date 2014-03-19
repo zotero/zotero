@@ -50,10 +50,14 @@ Zotero.Styles = new function() {
 	// synchronous call we were using breaks the first drag of the session (on OS X, at least)
 	this.preinit = function () {
 		_renamedStyles = {};
-		Zotero.HTTP.promise("GET", "resource://zotero/schema/renamed-styles.json")
+		Zotero.HTTP.promise(
+			"GET", "resource://zotero/schema/renamed-styles.json", { responseType: 'json' }
+		)
 		.then(function (xmlhttp) {
 			// Map some obsolete styles to current ones
-			_renamedStyles = JSON.parse(xmlhttp.responseText);
+			if (xmlhttp.response) {
+				_renamedStyles = xmlhttp.response;
+			}
 		})
 		.done();
 	}
