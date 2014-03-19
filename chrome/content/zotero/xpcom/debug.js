@@ -111,8 +111,8 @@ Zotero.Debug = new function () {
 				//
 				// TODO: Get rid of the filename and line number
 				if (Zotero.isWin && !Zotero.isStandalone) {
-					const consoleJSM = Components.utils.import("resource://gre/modules/devtools/Console.jsm", {});
-					consoleJSM.console.sendConsoleAPIMessage(output);
+					let console = Components.utils.import("resource://gre/modules/devtools/Console.jsm", {}).console;
+					console.log(output);
 				}
 				// Otherwise dump to the text console
 				else {
