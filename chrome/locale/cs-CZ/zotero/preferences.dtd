@@ -55,8 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Vytvořit účet">
 <!ENTITY zotero.preferences.sync.lostPassword "Ztracené heslo?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchronizovat automaticky">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Synchronizovat plnotextový obsah">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero může synchronizovat plnotextový obsah souborů ve vašich knihovnách Zotera se serverem zotero.org a dalšími propojenými zařízeními. To vám umožní snadno hledat vaše soubory kdekoli se nacházíte. Plnotextový obsah vašich souborů nebude sdílen veřejně.">
 <!ENTITY zotero.preferences.sync.about "O synchronizaci">
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronizace souborů">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">

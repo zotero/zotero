@@ -1,0 +1,286 @@
+<!ENTITY zotero.general.optional "(Neprivalomas)">
+<!ENTITY zotero.general.note "Pastaba:">
+<!ENTITY zotero.general.selectAll "Pažymėti viską">
+<!ENTITY zotero.general.deselectAll "Nieko nežymėti">
+<!ENTITY zotero.general.edit "Redaguoti">
+<!ENTITY zotero.general.delete "Šalinti">
+<!ENTITY zotero.general.ok "Gerai">
+<!ENTITY zotero.general.cancel "Atšaukti">
+
+<!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
+<!ENTITY zotero.errorReport.unrelatedMessages "Klaidų sąraše gali būti žinučių nesusijųsių su Zotero.">
+<!ENTITY zotero.errorReport.submissionInProgress "Prašome palaukti kol siunčiamas klaidų sąrašas.">
+<!ENTITY zotero.errorReport.submitted "Jūsų klaidų sąrašas buvo nusiųstas.">
+<!ENTITY zotero.errorReport.reportID "Pranešimo ID:">
+<!ENTITY zotero.errorReport.postToForums "Parašykite žinutę Zotero forume (forums.zotero.org), nurodydami ataskaitos identifikatorių, aprašydami nesklandumus ir žingsnius, kurie ją sukelia.">
+<!ENTITY zotero.errorReport.notReviewed "Pranešimai apie klaidas peržiūrimi tik tuomet, kai jie yra forume.">
+
+<!ENTITY zotero.upgrade.title "Zotero atnaujinimo vediklis">
+<!ENTITY zotero.upgrade.newVersionInstalled "Jūs įdiegėte naują Zotero versiją.">
+<!ENTITY zotero.upgrade.upgradeRequired "Prieš dirbant su naujają Zotero versija, reikia atnaujinti Zotero duomenų bazę.">
+<!ENTITY zotero.upgrade.autoBackup "Prieš atliekant kokius nors pakeitimus, automatiškai sukursime dabartinės duomenų bazės atsarginę kopiją.">
+<!ENTITY zotero.upgrade.majorUpgrade "Tai reikšmingas atnaujinimas.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Prieš tęsdami būtinai perskaitykite">
+<!ENTITY zotero.upgrade.majorUpgradeLink "atnaujinimo instrukcijas">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink ".">
+<!ENTITY zotero.upgrade.upgradeInProgress "Palaukite, kol baigsime atnaujinti. Tai gali užtrukti kelias minutes.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Jūsiškė duomenų bazė sėkmingai atnaujinta.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Ieškokite">
+<!ENTITY zotero.upgrade.changeLogLink "pakeitimų žurnale">
+<!ENTITY zotero.upgrade.changeLogAfterLink "apie naujoves.">
+
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Iš pažymėto teksto sukurti Zotero pastabą">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Sukurti Zotero įrašą ir pastabą jam iš pažymėto teksto">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Nuorodą išsaugoti kaip Zotero įrašą">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Paveikslėlį įrašyti kaip Zotero elementą">
+
+<!ENTITY zotero.tabs.info.label "Informacija">
+<!ENTITY zotero.tabs.notes.label "Užrašai">
+<!ENTITY zotero.tabs.attachments.label "Priedai">
+<!ENTITY zotero.tabs.tags.label "Gairės">
+<!ENTITY zotero.tabs.related.label "Susiję">
+<!ENTITY zotero.notes.separate "Redaguoti atskirame lange">
+
+<!ENTITY zotero.toolbar.duplicate.label "Rodyti besidubliuojančius">
+<!ENTITY zotero.collections.showUnfiledItems "Rodyti neužpildytus">
+
+<!ENTITY zotero.items.itemType "Įrašo tipas">
+<!ENTITY zotero.items.type_column "Tipas">
+<!ENTITY zotero.items.title_column "Antraštė">
+<!ENTITY zotero.items.creator_column "Kūrėjas">
+<!ENTITY zotero.items.date_column "Data">
+<!ENTITY zotero.items.year_column "Metai">
+<!ENTITY zotero.items.publisher_column "Leidėjas">
+<!ENTITY zotero.items.publication_column "Leidinys">
+<!ENTITY zotero.items.journalAbbr_column "Žurnalo santrumpa">
+<!ENTITY zotero.items.language_column "Kalba">
+<!ENTITY zotero.items.accessDate_column "Žiūrėta">
+<!ENTITY zotero.items.libraryCatalog_column "Išteklius">
+<!ENTITY zotero.items.callNumber_column "Šifras">
+<!ENTITY zotero.items.rights_column "Teisės">
+<!ENTITY zotero.items.dateAdded_column "Pridėjimo laikas">
+<!ENTITY zotero.items.dateModified_column "Keitimo laikas">
+<!ENTITY zotero.items.extra_column "Papildoma">
+<!ENTITY zotero.items.archive_column "Archyvas">
+<!ENTITY zotero.items.archiveLocation_column "Vieta archyve">
+<!ENTITY zotero.items.place_column "Vieta">
+<!ENTITY zotero.items.volume_column "Tomas">
+<!ENTITY zotero.items.edition_column "Leidimas">
+<!ENTITY zotero.items.pages_column "Puslapiai">
+<!ENTITY zotero.items.issue_column "Leidimas">
+<!ENTITY zotero.items.series_column "Serija">
+<!ENTITY zotero.items.seriesTitle_column "Serijos pavadinimas">
+<!ENTITY zotero.items.court_column "Teismas">
+<!ENTITY zotero.items.medium_column "Laikmena/formatas">
+<!ENTITY zotero.items.genre_column "Žanras">
+<!ENTITY zotero.items.system_column "Sistema">
+<!ENTITY zotero.items.moreColumns.label "Daugiau stulpelių">
+<!ENTITY zotero.items.restoreColumnOrder.label "Atstatyti stulpelių tvarką">
+
+<!ENTITY zotero.items.menu.showInLibrary "Rodyti bibliotekoje">
+<!ENTITY zotero.items.menu.attach.note "Įdėti pastabą">
+<!ENTITY zotero.items.menu.attach "Įtraukti priedą">
+<!ENTITY zotero.items.menu.attach.snapshot "Pridėti šio puslapio nuotrauką">
+<!ENTITY zotero.items.menu.attach.link "Pridėti nuorodą į šį puslapį">
+<!ENTITY zotero.items.menu.attach.link.uri "Pridėti URI nuorodą...">
+<!ENTITY zotero.items.menu.attach.file "Pridėti turimą failo kopiją...">
+<!ENTITY zotero.items.menu.attach.fileLink "Pridėti failo nuorodą...">
+
+<!ENTITY zotero.items.menu.restoreToLibrary "Atkurti biblioteką">
+<!ENTITY zotero.items.menu.duplicateItem "Sukurti įrašo kopiją">
+<!ENTITY zotero.items.menu.mergeItems "Apjungti įrašus...">
+
+<!ENTITY zotero.duplicatesMerge.versionSelect "Pasirinkite pagrindinę įrašo versiją:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Pasirinkite senesnių įrašo versijų laukus:">
+
+<!ENTITY zotero.toolbar.newItem.label "Naujas įrašas">
+<!ENTITY zotero.toolbar.moreItemTypes.label "Daugiau">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Iš dabartinio puslapio sukurti interneto puslapį">
+<!ENTITY zotero.toolbar.lookup.label "Įrašą(-us) pridėti pagal identifikatorių">
+<!ENTITY zotero.toolbar.removeItem.label "Pašalinti įrašą...">
+<!ENTITY zotero.toolbar.newCollection.label "Naujas rinkinys...">
+<!ENTITY zotero.toolbar.newGroup "Nauja grupė...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Naujas kolekcija kolekcijoje...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Nauja įsiminta paieška...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Išvalyti šiukšlinę">
+<!ENTITY zotero.toolbar.tagSelector.label "Rodyti/slėpti gairių parinkiklį">
+<!ENTITY zotero.toolbar.actions.label "Veiksmai">
+<!ENTITY zotero.toolbar.import.label "Importuoti...">
+<!ENTITY zotero.toolbar.importFromClipboard "Importuoti iš iškarpinės">
+<!ENTITY zotero.toolbar.export.label "Eksportuoti biblioteką...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF peržvelgimas...">
+<!ENTITY zotero.toolbar.timeline.label "Kurti laiko juostą">
+<!ENTITY zotero.toolbar.preferences.label "Nuostatos...">
+<!ENTITY zotero.toolbar.supportAndDocumentation "Palaikymas ir dokumentacija">
+<!ENTITY zotero.toolbar.about.label "Apie Zotero">
+<!ENTITY zotero.toolbar.advancedSearch "Sudėtingesnė paieška">
+<!ENTITY zotero.toolbar.tab.tooltip "Keisti kortelių veikseną">
+<!ENTITY zotero.toolbar.openURL.label "Rasti vietą">
+<!ENTITY zotero.toolbar.openURL.tooltip "Ieškoti vietinėje bibliotekoje">
+
+<!ENTITY zotero.item.add "Pridėti">
+<!ENTITY zotero.item.attachment.file.show "Rodyti failą">
+<!ENTITY zotero.item.textTransform "Teksto trasformavimas">
+<!ENTITY zotero.item.textTransform.titlecase "Antraštės raidžių lygis">
+<!ENTITY zotero.item.textTransform.sentencecase "Sakinio pavidalu">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Sukeisti vardus ir pavardes">
+
+<!ENTITY zotero.toolbar.newNote "Nauja pastaba">
+<!ENTITY zotero.toolbar.note.standalone "Nauja nesusieta pastaba">
+<!ENTITY zotero.toolbar.note.child "Nauja įrašo pastaba">
+<!ENTITY zotero.toolbar.lookup "Paieška pagal identifikatorių...">
+<!ENTITY zotero.toolbar.attachment.linked "Nuoroda iki failo...">
+<!ENTITY zotero.toolbar.attachment.add "Patalpinti failo kopiją...">
+<!ENTITY zotero.toolbar.attachment.weblink "Įrašyti nuorodą į šį puslapį">
+<!ENTITY zotero.toolbar.attachment.snapshot "Sukurti šio puslapio nuotrauką">
+
+<!ENTITY zotero.tagSelector.noTagsToDisplay "Nėra rodytinų gairių">
+<!ENTITY zotero.tagSelector.filter "Filtras:">
+<!ENTITY zotero.tagSelector.showAutomatic "Rodyti automatiškai">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Rodyti visas šios bibliotekos gaires">
+<!ENTITY zotero.tagSelector.selectVisible "Pasirinkti matomas">
+<!ENTITY zotero.tagSelector.clearVisible "Nesirinkti matomų">
+<!ENTITY zotero.tagSelector.clearAll "Panaikinti pažymėjimą">
+<!ENTITY zotero.tagSelector.assignColor "Priskirti spalvą:">
+<!ENTITY zotero.tagSelector.renameTag "Pervadinti gairę...">
+<!ENTITY zotero.tagSelector.deleteTag "Šalinti gairę...">
+
+<!ENTITY zotero.tagColorChooser.title "Pasirinkite gairės spalvą ir padėtį">
+<!ENTITY zotero.tagColorChooser.color "Spalva:">
+<!ENTITY zotero.tagColorChooser.position "Padėtis:">
+<!ENTITY zotero.tagColorChooser.setColor "Naudoti spalvą">
+<!ENTITY zotero.tagColorChooser.removeColor "Pašalinti spalvą">
+
+<!ENTITY zotero.lookup.description "Į paieškos laukelį įveskite vieną arba kelis ISBN, DOI ar PMID kodus.">
+<!ENTITY zotero.lookup.button.search "Ieškoti">
+
+<!ENTITY zotero.selectitems.title "Pasirinkti įrašus">
+<!ENTITY zotero.selectitems.intro.label "Pasirinkite norimus įtraukti į bilioteką įrašus">
+<!ENTITY zotero.selectitems.cancel.label "Atšaukti">
+<!ENTITY zotero.selectitems.select.label "Gerai">
+
+<!ENTITY zotero.bibliography.title "Sukurti citavimą/bibliografiją">
+<!ENTITY zotero.bibliography.style.label "Citavimo stilius:">
+<!ENTITY zotero.bibliography.outputMode "Išvedimo veiksena:">
+<!ENTITY zotero.bibliography.bibliography "Bibliografija">
+<!ENTITY zotero.bibliography.outputMethod "Išvedimo būdas:">
+<!ENTITY zotero.bibliography.saveAsRTF.label "Įrašyti RTF formatu">
+<!ENTITY zotero.bibliography.saveAsHTML.label "Įrašyti HTML formatu">
+<!ENTITY zotero.bibliography.copyToClipboard.label "Kopijuoti į iškaprinę">
+<!ENTITY zotero.bibliography.print.label "Spausdinti">
+
+<!ENTITY zotero.integration.docPrefs.title "Dokumento nuostatos">
+<!ENTITY zotero.integration.addEditCitation.title "Pridėti/redaguoti citavimą">
+<!ENTITY zotero.integration.editBibliography.title "Redaguoti bibliografiją">
+<!ENTITY zotero.integration.quickFormatDialog.title "Greitasis citavimo formatavimas">
+
+<!ENTITY zotero.progress.title "Eiga">
+
+<!ENTITY zotero.exportOptions.title "Eksportuoti...">
+<!ENTITY zotero.exportOptions.format.label "Formatas:">
+<!ENTITY zotero.exportOptions.translatorOptions.label "Vertimo parinktys">
+
+<!ENTITY zotero.charset.label "Rašmenų koduotė">
+<!ENTITY zotero.moreEncodings.label "Daugiau koduočių">
+
+<!ENTITY zotero.citation.keepSorted.label "Šaltinius automatiškai rikiuoti">
+
+<!ENTITY zotero.citation.page "Puslapis">
+<!ENTITY zotero.citation.paragraph "Pastraipa">
+<!ENTITY zotero.citation.line "Eilutė">
+<!ENTITY zotero.citation.suppressAuthor.label "Trumpinti autorius">
+<!ENTITY zotero.citation.prefix.label "Priešdėlis:">
+<!ENTITY zotero.citation.suffix.label "Priesaga:">
+<!ENTITY zotero.citation.editorWarning.label "Įspėjimas: jei pakeisite citavimą tekstų rengyklėje, jis nebebus atnaujinamas pagal jūsiškę duomenų bazę ar citavimo stilių.">
+
+<!ENTITY zotero.richText.italic.label "Kursyvas">
+<!ENTITY zotero.richText.bold.label "Pusjuodis">
+<!ENTITY zotero.richText.underline.label "Pabraukimas">
+<!ENTITY zotero.richText.superscript.label "Viršutinis indeksas">
+<!ENTITY zotero.richText.subscript.label "Apatinis indeksas">
+
+<!ENTITY zotero.annotate.toolbar.add.label "Pridėti anotaciją">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Suskleisti visas anotacijas">
+<!ENTITY zotero.annotate.toolbar.expand.label "Išplėsti visas anotacijas">
+<!ENTITY zotero.annotate.toolbar.highlight.label "Paryškinti tekstą">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "Panaikinti teksto paryškinimą">
+
+<!ENTITY zotero.integration.prefs.displayAs.label "Citavimo rodymo pavidalas:">
+<!ENTITY zotero.integration.prefs.footnotes.label "Išnaša">
+<!ENTITY zotero.integration.prefs.endnotes.label "Galinė išnaša">
+
+<!ENTITY zotero.integration.prefs.formatUsing.label "Naudotinas formatas:">
+<!ENTITY zotero.integration.prefs.bookmarks.label "Žymelės">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Žymelės išlaikomos tiek „Microsoft Word“, tiek „LibreOffice“ programose, tačiau jas galite netyčia pakeisti. &#xA; Pasirinkę šią parinktį, citavimų negalite įterpti į išnašas ar galines išnašas dėl suderinamumo problemų.">
+
+
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatiškai trumpinti žurnalų pavadinimus">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE žurnalų santrumpos automatiškai sukursimos naudojant žurnalų pavadinimus. Nepaisysima „žurnalo santrumpa“ laukelyje esančios reikšmės.">
+
+<!ENTITY zotero.integration.prefs.storeReferences.label "Nuorodas talpinti dokumente">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Patalpinus nuorodas dokumente, šiek tiek padidėja jo dydis, tačiau tai leis jums dalintis dokumentu su kitais naudotojais, nenaudodami Zotero grupės. Norint atnaujinti dokumentus, reikės Zotero 3.0 arba vėlesnės versijos.">
+
+<!ENTITY zotero.integration.showEditor.label "Rodyti rengyklę">
+<!ENTITY zotero.integration.classicView.label "Klasikinis rodinys">
+
+<!ENTITY zotero.integration.references.label "Nuorodos bibliogafijoje">
+
+<!ENTITY zotero.sync.button "Sinchronizuoti su Zotero serveriu">
+<!ENTITY zotero.sync.error "Sinchronizavimo klaida">
+<!ENTITY zotero.sync.storage.progress "Eiga:">
+<!ENTITY zotero.sync.storage.downloads "Siuntiniai:">
+<!ENTITY zotero.sync.storage.uploads "Įkėlimai:">
+
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Ši gairė yra pernelyg ilga sinchronizavimui su serveriu:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Sincronizuojamos gairės pavadinime gali būti iki 256 rašmenų.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Galite suskaidyti gairę į keletą gairių, savarankiškai pakeisti gairę trumpesne arba ją pašalinti.">
+<!ENTITY zotero.sync.longTagFixer.split "Skaidyti">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Perskirti ties">
+<!ENTITY zotero.sync.longTagFixer.character "rašmeniu">
+<!ENTITY zotero.sync.longTagFixer.characters "rašmenimis">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Nepasirinktos gairės nebus įrašytos.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Ši gairė pašalinsima iš visų įrašų.">
+
+<!ENTITY zotero.merge.title "Konflikto sprendimas">
+<!ENTITY zotero.merge.of "iš">
+<!ENTITY zotero.merge.deleted "Pašalinta">
+
+<!ENTITY zotero.proxy.recognized.title "Įgaliotasis serveris aptiktas">
+<!ENTITY zotero.proxy.recognized.warning "Pridėti tik su jūsiške biblioteka, mokykla ar bendruomenės svetaine susietus įgaliotuosius serverius">
+<!ENTITY zotero.proxy.recognized.warning.secondary "Įtraukdami kitus įgaliotuosius serverius, sudarote sąlygas kenksmingoms svetainėms apsimesti patikimomis svetainėmis.">
+<!ENTITY zotero.proxy.recognized.disable.label "Automatiškai nenukreipinėti užklausų per anksčiau aptiktus įgaliotuosius serverius">
+<!ENTITY zotero.proxy.recognized.ignore.label "Nepaisyti">
+
+<!ENTITY zotero.recognizePDF.recognizing.label "Gaunami meta duomenys...">
+<!ENTITY zotero.recognizePDF.cancel.label "Atšaukti">
+<!ENTITY zotero.recognizePDF.pdfName.label "PDF pavadinimas">
+<!ENTITY zotero.recognizePDF.itemName.label "Įrašo pavainimas">
+
+<!ENTITY zotero.rtfScan.title "RTF peržvelgimas">
+<!ENTITY zotero.rtfScan.cancel.label "Atšaukti">
+<!ENTITY zotero.rtfScan.citation.label "Citavimas">
+<!ENTITY zotero.rtfScan.itemName.label "Įrašo pavadinimas">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Nesusieti citatavimai">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Neaiškūs citavimai">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Susieti citavimai">
+<!ENTITY zotero.rtfScan.introPage.label "Įvadas">
+<!ENTITY zotero.rtfScan.introPage.description "Zotaro gali automatiškai aptikti citavimus, pakeisti jų formatą ir įterpti bibliografiją į raiškiojo teksto formato dokumentus. Dabartinė RTF peržvelgimo funkcija palaiko įvairiausius citavimo formatus:">
+<!ENTITY zotero.rtfScan.introPage.description2 "Norėdami pradėti,  įvedimui pasirinkite RTF dokumentą ir dokumentą išvedimui:">
+<!ENTITY zotero.rtfScan.scanPage.label "Peržvlgiame citavimus">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero dabar ieško dokumente esančių citavimų. Palaukite.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Tikrinti cituotus įrašus">
+<!ENTITY zotero.rtfScan.citationsPage.description "Peržiūrėkite aptiktų citavimų sąrašą, kad būtumėte tikri, jog Zotero tinkamai parinko atitinkamus elementus. Prieš tęsdami turite savarankiškai susieti nesusietus ir neaiškius citavimus.">
+<!ENTITY zotero.rtfScan.stylePage.label "Dokumento formatavimas">
+<!ENTITY zotero.rtfScan.formatPage.label "Formatuojame citavimus">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero apdoroja ir formatuoja RTF dokumentą. Palaukite.">
+<!ENTITY zotero.rtfScan.completePage.label "Raiškiojo teksto formato dokumentų peržvelgimas baigtas">
+<!ENTITY zotero.rtfScan.completePage.description "Jūsiškis dokumentas peržvelgtas ir apdorotas. Pažiūrėkite, ar jis tinkamai suformatuotas.">
+<!ENTITY zotero.rtfScan.inputFile.label "Įvedimo failas">
+<!ENTITY zotero.rtfScan.outputFile.label "Išvedimo failas">
+
+<!ENTITY zotero.file.choose.label "Failo pasirinkimas...">
+<!ENTITY zotero.file.noneSelected.label "Nepasirinkote failo">
+
+<!ENTITY zotero.downloadManager.label "Įrašyti į Zotero">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Priedų negalima įrašyti pasirinktoje bibliotekoje. Šį įrašą įrašysime jūsų bibliotekoje.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "Norėdami naudotis šia funkcija, turite įdiegti PDF įrankius per Zotero nuostatų paieškos skydelį.">

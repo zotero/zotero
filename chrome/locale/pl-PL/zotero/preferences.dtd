@@ -55,8 +55,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "Utwórz konto">
 <!ENTITY zotero.preferences.sync.lostPassword "Zapomniane hasło?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchronizacja automatyczna">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Synchronizuj zawartość pełnotekstową">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero potrafi synchronizować zawartość pełnotekstową plików w twoich bibliotekach za pośrednictwem zotero.org i innych powiązanych urządzeń. Pozwala to łatwo przeszukiwać twoje pliki gdziekolwiek jesteś. Zawartość pełnotekstowa twoich plików nie będzie udostępniana publicznie.">
 <!ENTITY zotero.preferences.sync.about "Informacje o synchronizacji">
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronizacja plików">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -128,7 +128,7 @@
 <!ENTITY zotero.preferences.prefpane.keys "Skróty klawiaturowe">
 
 <!ENTITY zotero.preferences.keys.openZotero "Otwórz/Zamknij okno Zotero">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Zapisz w Zotero (ikona paska adresu)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Przełącz w tryb pełnoekranowy">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Szybkie wyszukiwanie">
@@ -183,7 +183,7 @@
 <!ENTITY zotero.preferences.dataDir.choose "Przeglądaj">
 <!ENTITY zotero.preferences.dataDir.reveal "Wyświetl katalog bazy danych">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Katalog podstawowy załączników">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Katalog podstawowy:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Wybierz...">

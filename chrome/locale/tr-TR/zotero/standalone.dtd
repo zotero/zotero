@@ -44,7 +44,7 @@
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Gönderme Kopyala">
-<!ENTITY copyBibliographyCmd.label "Kaynakça Kopyala">
+<!ENTITY copyBibliographyCmd.label "Bibliyografya Kopyala">
 <!ENTITY pasteCmd.label "Yapıştır">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.accesskey "P">

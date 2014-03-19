@@ -1,0 +1,101 @@
+<!ENTITY preferencesCmdMac.label "Nuostatos...">
+<!ENTITY preferencesCmdMac.commandkey ",">
+<!ENTITY servicesMenuMac.label "Paslaugos">
+<!ENTITY hideThisAppCmdMac.label "Slėpti „&brandShortName;“">
+<!ENTITY hideThisAppCmdMac.commandkey "S">
+<!ENTITY hideOtherAppsCmdMac.label "Slėpti likusius">
+<!ENTITY hideOtherAppsCmdMac.commandkey "S">
+<!ENTITY showAllAppsCmdMac.label "Rodyti visus">
+<!ENTITY quitApplicationCmdMac.label "Baigti darbą su Zotero">
+<!ENTITY quitApplicationCmdMac.key "B">
+
+
+<!ENTITY fileMenu.label "Failas">
+<!ENTITY fileMenu.accesskey "F">
+<!ENTITY saveCmd.label "Įrašyti...">
+<!ENTITY saveCmd.key "S">
+<!ENTITY saveCmd.accesskey "r">
+<!ENTITY pageSetupCmd.label "Puslapio nuostatos...">
+<!ENTITY pageSetupCmd.accesskey "n">
+<!ENTITY printCmd.label "Spausdinti...">
+<!ENTITY printCmd.key "P">
+<!ENTITY printCmd.accesskey "S">
+<!ENTITY closeCmd.label "Užverti">
+<!ENTITY closeCmd.key "W">
+<!ENTITY closeCmd.accesskey "U">
+<!ENTITY quitApplicationCmdWin.label "Išeiti">
+<!ENTITY quitApplicationCmdWin.accesskey "I">
+<!ENTITY quitApplicationCmd.label "Baigti darbą">
+<!ENTITY quitApplicationCmd.accesskey "B">
+
+
+<!ENTITY editMenu.label "Taisa">
+<!ENTITY editMenu.accesskey "T">
+<!ENTITY undoCmd.label "Atšaukti">
+<!ENTITY undoCmd.key "Z">
+<!ENTITY undoCmd.accesskey "A">
+<!ENTITY redoCmd.label "Atstatyti">
+<!ENTITY redoCmd.key "Y">
+<!ENTITY redoCmd.accesskey "t">
+<!ENTITY cutCmd.label "Iškirpti">
+<!ENTITY cutCmd.key "X">
+<!ENTITY cutCmd.accesskey "r">
+<!ENTITY copyCmd.label "Kopijuoti">
+<!ENTITY copyCmd.key "C">
+<!ENTITY copyCmd.accesskey "K">
+<!ENTITY copyCitationCmd.label "Kopijuoti citatą">
+<!ENTITY copyBibliographyCmd.label "Kopijuoti bibliografiją">
+<!ENTITY pasteCmd.label "Įdėti">
+<!ENTITY pasteCmd.key "V">
+<!ENTITY pasteCmd.accesskey "d">
+<!ENTITY deleteCmd.label "Pašalinti">
+<!ENTITY deleteCmd.key "D">
+<!ENTITY deleteCmd.accesskey "š">
+<!ENTITY selectAllCmd.label "Pažymėti viską">
+<!ENTITY selectAllCmd.key "A">
+<!ENTITY selectAllCmd.accesskey "v">
+<!ENTITY preferencesCmd.label "Nuostatos">
+<!ENTITY preferencesCmd.accesskey "N">
+<!ENTITY preferencesCmdUnix.label "Nuostatos">
+<!ENTITY preferencesCmdUnix.accesskey "N">
+<!ENTITY findCmd.label "Ieškoti">
+<!ENTITY findCmd.accesskey "I">
+<!ENTITY findCmd.commandkey "I">
+<!ENTITY bidiSwitchPageDirectionItem.label "Keisti puslapio kryptį">
+<!ENTITY bidiSwitchPageDirectionItem.accesskey "p">
+<!ENTITY bidiSwitchTextDirectionItem.label "Keisti teksto kryptį">
+<!ENTITY bidiSwitchTextDirectionItem.accesskey "e">
+<!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
+
+
+<!ENTITY toolsMenu.label "Priemonės">
+<!ENTITY toolsMenu.accesskey "P">
+<!ENTITY addons.label "Priedai">
+
+
+<!ENTITY minimizeWindow.key "r">
+<!ENTITY minimizeWindow.label "Suskleisti">
+<!ENTITY bringAllToFront.label "Perkelti visus į priekį">
+<!ENTITY zoomWindow.label "Mastelis">
+<!ENTITY windowMenu.label "Langas">
+
+
+<!ENTITY helpMenu.label "Žinynas">
+<!ENTITY helpMenu.accesskey "Ž">
+
+
+<!ENTITY helpMenuWin.label "Žinynas">
+<!ENTITY helpMenuWin.accesskey "Ž">
+<!ENTITY helpMac.commandkey "?">
+<!ENTITY aboutProduct.label "Apie „&brandShortName;“">
+<!ENTITY aboutProduct.accesskey "A">
+<!ENTITY productHelp.label "Pagalba ir dokumentacija">
+<!ENTITY productHelp.accesskey "P">
+<!ENTITY helpTroubleshootingInfo.label "Informacija nesklandumų šalinimui">
+<!ENTITY helpTroubleshootingInfo.accesskey "I">
+<!ENTITY helpFeedbackPage.label "Siųsti atsiliepimą...">
+<!ENTITY helpFeedbackPage.accesskey "S">
+<!ENTITY helpReportErrors.label "Pranešti apie Zotero klaidą...">
+<!ENTITY helpReportErrors.accesskey "r">
+<!ENTITY helpCheckForUpdates.label "Tikrinti, ar yra atnaujinimų...">
+<!ENTITY helpCheckForUpdates.accesskey "T">

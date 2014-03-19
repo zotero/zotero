@@ -113,7 +113,7 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "Henvis">
 <!ENTITY zotero.preferences.cite.styles "Bibliografiske formater">
-<!ENTITY zotero.preferences.cite.wordProcessors "Teksbehandlere">
+<!ENTITY zotero.preferences.cite.wordProcessors "Tekstbehandlere">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Der er ikke p.t. installeret et plugin til tekstbehandling.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Hent plugin til tekstbehandlere...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
