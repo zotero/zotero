@@ -3241,7 +3241,7 @@ Zotero.Item.prototype.__defineGetter__('attachmentCharset', function () {
 		return undefined;
 	}
 	
-	if (this._attachmentCharset != undefined) {
+	if (this._attachmentCharset !== undefined) {
 		return Zotero.CharacterSets.getName(this._attachmentCharset);
 	}
 	
@@ -3264,13 +3264,22 @@ Zotero.Item.prototype.__defineSetter__('attachmentCharset', function (val) {
 		throw (".attachmentCharset can only be set for attachment items");
 	}
 	
-	val = Zotero.CharacterSets.getID(val);
+	var oldVal = this.attachmentCharset;
+	if (oldVal) {
+		oldVal = Zotero.CharacterSets.getID(oldVal);
+	}
+	if (!oldVal) {
+		oldVal = null;
+	}
 	
+	if (val) {
+		val = Zotero.CharacterSets.getID(val);
+	}
 	if (!val) {
 		val = null;
 	}
 	
-	if (val == this.attachmentCharset) {
+	if (val == oldVal) {
 		return;
 	}
 	
