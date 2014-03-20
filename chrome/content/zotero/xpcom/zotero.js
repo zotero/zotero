@@ -2184,7 +2184,10 @@ Zotero.Prefs = new function(){
 				case this.prefBranch.PREF_BOOL:
 					return this.prefBranch.setBoolPref(pref, value);
 				case this.prefBranch.PREF_STRING:
-					return this.prefBranch.setCharPref(pref, value);
+					let str = Cc["@mozilla.org/supports-string;1"]
+						.createInstance(Ci.nsISupportsString);
+					str.data = value;
+					return this.prefBranch.setComplexValue(pref, Ci.nsISupportsString, str);
 				case this.prefBranch.PREF_INT:
 					return this.prefBranch.setIntPref(pref, value);
 				
@@ -2205,7 +2208,9 @@ Zotero.Prefs = new function(){
 					throw ("Invalid preference value '" + value + "' for pref '" + pref + "'");
 			}
 		}
-		catch (e){
+		catch (e) {
+			Components.utils.reportError(e);
+			Zotero.debug(e, 1);
 			throw ("Invalid preference '" + pref + "'");
 		}
 	}
