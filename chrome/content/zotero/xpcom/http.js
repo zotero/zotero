@@ -603,7 +603,7 @@ Zotero.HTTP = new function() {
 		}
 		
 		// Don't display password in console
-		var disp = this.getDisplayURI(uri);
+		var disp = Zotero.HTTP.getDisplayURI(uri);
 		
 		var bodyStart = body.substr(0, 1024);
 		Zotero.debug("HTTP " + method + " "
@@ -653,7 +653,7 @@ Zotero.HTTP = new function() {
 	 */
 	this.WebDAV.doMkCol = function (uri, callback) {
 		// Don't display password in console
-		var disp = this.getDisplayURI(uri);
+		var disp = Zotero.HTTP.getDisplayURI(uri);
 		Zotero.debug("HTTP MKCOL " + disp.spec);
 		
 		if (Zotero.HTTP.browserIsOffline()) {
@@ -687,7 +687,7 @@ Zotero.HTTP = new function() {
 	 */
 	this.WebDAV.doPut = function (uri, body, callback) {
 		// Don't display password in console
-		var disp = this.getDisplayURI(uri);
+		var disp = Zotero.HTTP.getDisplayURI(uri);
 		
 		var bodyStart = "'" + body.substr(0, 1024) + "'";
 		Zotero.debug("HTTP PUT "
@@ -729,7 +729,7 @@ Zotero.HTTP = new function() {
 	 */
 	this.WebDAV.doDelete = function (uri, callback) {
 		// Don't display password in console
-		var disp = this.getDisplayURI(uri);
+		var disp = Zotero.HTTP.getDisplayURI(uri);
 		
 		Zotero.debug("WebDAV DELETE to " + disp.spec);
 		
