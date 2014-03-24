@@ -1107,12 +1107,6 @@ var ZoteroPane = new function()
 		if (this.itemsView)
 		{
 			this.itemsView.unregister();
-			if (this.itemsView.wrappedJSObject.listener) {
-				document.getElementById('zotero-items-tree').removeEventListener(
-					'keypress', this.itemsView.wrappedJSObject.listener, false
-				);
-			}
-			this.itemsView.wrappedJSObject.listener = null;
 			document.getElementById('zotero-items-tree').view = this.itemsView = null;
 		}
 		

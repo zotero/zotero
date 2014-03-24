@@ -257,8 +257,7 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 			})
 			.done();
 		};
-		// Store listener so we can call removeEventListener()
-		// in overlay.js::onCollectionSelected()
+		// Store listener so we can call removeEventListener() in ItemTreeView.unregister()
 		this.listener = listener;
 		tree.addEventListener('keypress', listener);
 		
@@ -911,6 +910,11 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 Zotero.ItemTreeView.prototype.unregister = function()
 {
 	Zotero.Notifier.unregisterObserver(this._unregisterID);
+	if (this.listener) {
+		let tree = this._treebox.treeBody.parentNode;
+		tree.removeEventListener('keypress', this.listener, false);
+		this.listener = null;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
