@@ -363,7 +363,7 @@ Zotero.Styles = new function() {
 					return Zotero.HTTP.promise("GET", source).then(function(xmlhttp) {
 						return _install(xmlhttp.responseText, origin, true);
 					}).fail(function(error) {
-						if(typeof error === "object" && error instanceof Zotero.Exception) {
+						if(typeof error === "object" && error instanceof Zotero.Exception.Alert) {
 							throw new Zotero.Exception.Alert("styles.installSourceError", [origin, source],
 								"styles.install.title", error);
 						} else {
