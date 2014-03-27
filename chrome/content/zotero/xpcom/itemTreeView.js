@@ -2438,8 +2438,16 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 	
 	var itemIDs = this.saveSelection();
 	var items = Zotero.Items.get(itemIDs);
+	var serverJSONObjs = [];
 	
 	event.dataTransfer.setData("zotero/item", itemIDs.join());
+
+	for (var i=0; i<items.length; i++) {
+		serverJSONObjs.push(Zotero.Utilities.itemToServerJSON(items[i].toArray()));
+	}
+	event.dataTransfer.setData('zotero/server-json', JSON.stringify({
+		items: serverJSONObjs
+	}));
 	
 	// Multi-file drag
 	//  - Doesn't work on Windows
