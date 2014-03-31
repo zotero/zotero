@@ -2440,18 +2440,35 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 	if (!Zotero.isWin) {
 		// If at least one file is a non-web-link attachment and can be found,
 		// enable dragging to file system
+		var index = 0;
 		for (var i=0; i<items.length; i++) {
 			if (items[i].isAttachment()
 					&& items[i].attachmentLinkMode
 						!= Zotero.Attachments.LINK_MODE_LINKED_URL
 					&& items[i].getFile()) {
+
+				var file = items[i].getFile();
+				var fph = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+					.createInstance(Components.interfaces.nsIFileProtocolHandler);
+				var uri = fph.getURLSpecFromFile(file);
+				// Add x-moz-file first to allow dragging on KDE and Gmail, GDrive
+				Zotero.debug("Adding files via x-moz-file");
+				event.dataTransfer.mozSetDataAt("application/x-moz-file", file, index);
+				event.dataTransfer.mozSetDataAt("text/x-moz-url", uri + '\n' + file, index);
+				index++;
+
+				event.dataTransfer.effectAllowed = 'all';
+				// Not sure if these below are still needed, but I am not removing them to avoid breaking other possible targets
+				//
 				Zotero.debug("Adding file via x-moz-file-promise");
 				event.dataTransfer.mozSetDataAt(
 					"application/x-moz-file-promise",
 					new Zotero.ItemTreeView.fileDragDataProvider(),
 					0
 				);
-				break;
+
+				//Dont break here, we need to iterate other items to allow multiple file drag
+				//break;
 			}
 		}
 	}
