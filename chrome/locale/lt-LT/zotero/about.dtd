@@ -1,0 +1,13 @@
+<!ENTITY zotero.version "versija">
+<!ENTITY zotero.createdby "Sukurta:">
+<!ENTITY zotero.director "Direktorius:">
+<!ENTITY zotero.directors "Direktoriai:">
+<!ENTITY zotero.developers "Programuotojai:">
+<!ENTITY zotero.alumni "Buvę studentai:">
+<!ENTITY zotero.about.localizations "Vertėjai:">
+<!ENTITY zotero.about.additionalSoftware "Kitos Programos ir Standartai:">
+<!ENTITY zotero.executiveProducer "Vykdomasis Prodiuseris:">
+<!ENTITY zotero.thanks "Dėkojame:">
+<!ENTITY zotero.about.close "Uždaryti">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Papildomi Kreditai ir Padėkos">
+<!ENTITY zotero.citationProcessing "Citatų ir Bibliografijos Apdorojimas">

@@ -716,7 +716,8 @@ Zotero.Search.prototype.search = function(asTempTable){
 	// (a separate fulltext word search filtered by fulltext content)
 	for each(var condition in this._conditions){
 		if (condition['condition']=='fulltextContent'){
-			var filter = function(val, index, array) {
+			var fulltextWordIntersectionFilter = function (val, index, array) !!hash[val]
+			var fulltextWordIntersectionConditionFilter = function(val, index, array) {
 				return hash[val] ?
 					(condition.operator == 'contains') :
 					(condition.operator == 'doesNotContain');
@@ -789,7 +790,7 @@ Zotero.Search.prototype.search = function(asTempTable){
 					}
 					
 					if (ids) {
-						var scopeIDs = ids.filter(filter);
+						var scopeIDs = ids.filter(fulltextWordIntersectionFilter);
 					}
 					else {
 						var scopeIDs = [];
@@ -811,7 +812,7 @@ Zotero.Search.prototype.search = function(asTempTable){
 					hash[val.id] = true;
 				}
 				
-				filteredIDs = scopeIDs.filter(filter);
+				filteredIDs = scopeIDs.filter(fulltextWordIntersectionConditionFilter);
 			}
 			else {
 				var filteredIDs = [];

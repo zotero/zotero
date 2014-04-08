@@ -27,6 +27,7 @@ locale	zotero	it-IT		chrome/locale/it-IT/zotero/
 locale	zotero	ja-JP		chrome/locale/ja-JP/zotero/
 locale	zotero	km			chrome/locale/km/zotero/
 locale	zotero	ko-KR		chrome/locale/ko-KR/zotero/
+locale  zotero  lt-LT           chrome/locale/lt-LT/zotero/
 locale	zotero	mn-MN		chrome/locale/mn-MN/zotero/
 locale	zotero	nb-NO		chrome/locale/nb-NO/zotero/
 locale	zotero	nn-NO		chrome/locale/nn-NO/zotero/

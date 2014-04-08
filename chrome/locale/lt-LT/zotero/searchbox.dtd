@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Pavadinimas:">
+
+<!ENTITY zotero.search.joinMode.prefix "Taikyti">
+<!ENTITY zotero.search.joinMode.any "bet kuriuos">
+<!ENTITY zotero.search.joinMode.all "visus">
+<!ENTITY zotero.search.joinMode.suffix "paieškos kriterijus:">
+
+<!ENTITY zotero.search.recursive.label "Ieškoti poaplankiuose">
+<!ENTITY zotero.search.noChildren "Nerodyti priedų">
+<!ENTITY zotero.search.includeParentsAndChildren "Įtraukti pagrindinius įrašus ir jų priedus">
+
+<!ENTITY zotero.search.textModes.phrase "Frazė">
+<!ENTITY zotero.search.textModes.phraseBinary "Frazė (įsk. skaitmeninius failus)">
+<!ENTITY zotero.search.textModes.regexp "Regexp">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (skiriant didž. ir maž. raides)">
+
+<!ENTITY zotero.search.date.units.days "d.">
+<!ENTITY zotero.search.date.units.months "mėn.">
+<!ENTITY zotero.search.date.units.years "m.">
+
+<!ENTITY zotero.search.search "Ieškoti">
+<!ENTITY zotero.search.clear "Išvalyti">
+<!ENTITY zotero.search.saveSearch "Įsiminti paiešką">

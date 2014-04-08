@@ -504,7 +504,9 @@ var Zotero_Browser = new function() {
 				
 				libraryID = ZoteroPane.getSelectedLibraryID();
 				collection = ZoteroPane.getSelectedCollection();
-			} catch(e) {}
+			} catch(e) {
+				Zotero.debug(e, 1);
+			}
 		}
 		
 		if(Zotero.isConnector) {

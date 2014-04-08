@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Hiçbirini Seçme">
 <!ENTITY zotero.general.edit "Düzenle">
 <!ENTITY zotero.general.delete "Sil">
+<!ENTITY zotero.general.ok "Tamam">
+<!ENTITY zotero.general.cancel "İptal Et">
 
 <!ENTITY zotero.errorReport.title "Zotero Hata Raporu">
 <!ENTITY zotero.errorReport.unrelatedMessages "Hata kaydı Zotero ile ilgili olmayan iletileri de içerebilir.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "İptal et">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF Adı">
 <!ENTITY zotero.recognizePDF.itemName.label "Eser Adı">
-<!ENTITY zotero.recognizePDF.captcha.label "Üst veri alımı devam derken metni aşağıya girebilirsiniz.">
 
 <!ENTITY zotero.rtfScan.title "RTF Tarama">
 <!ENTITY zotero.rtfScan.cancel.label "İptal et">

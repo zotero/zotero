@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Отказ на всички">
 <!ENTITY zotero.general.edit "Редактира">
 <!ENTITY zotero.general.delete "Изтрива">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "Дневника с грешките може да съдържа съобщения несвързани с Зотеро.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Отказ">
 <!ENTITY zotero.recognizePDF.pdfName.label "Име на PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Име на запис">
-<!ENTITY zotero.recognizePDF.captcha.label "Въведете текста по-долу за да продължи извличането на метадани.">
 
 <!ENTITY zotero.rtfScan.title "Преглед на RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Отказ">

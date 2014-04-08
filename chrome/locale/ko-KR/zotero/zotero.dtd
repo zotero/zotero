@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "모두 선택 해제">
 <!ENTITY zotero.general.edit "편집">
 <!ENTITY zotero.general.delete "삭제">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "오류 로그에는 Zotero와 관련이 없는 메시지가 포함될 수 있습니다.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "취소">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF 명">
 <!ENTITY zotero.recognizePDF.itemName.label "항목 명">
-<!ENTITY zotero.recognizePDF.captcha.label "메타 데이터 검색을 진행하려면 아래에 글을 입력하세요.">
 
 <!ENTITY zotero.rtfScan.title "RTF 스캔">
 <!ENTITY zotero.rtfScan.cancel.label "취소">

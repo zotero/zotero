@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Välj bort alla">
 <!ENTITY zotero.general.edit "Ändra">
 <!ENTITY zotero.general.delete "Radera">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Avbryt">
 
 <!ENTITY zotero.errorReport.title "Zotero-felrapporting">
 <!ENTITY zotero.errorReport.unrelatedMessages "Felloggen kan innehålla meddelanden som inte har med Zotero att göra.">
@@ -65,7 +67,7 @@
 <!ENTITY zotero.items.volume_column "Volym">
 <!ENTITY zotero.items.edition_column "Upplaga">
 <!ENTITY zotero.items.pages_column "Sidor">
-<!ENTITY zotero.items.issue_column "Nummer">
+<!ENTITY zotero.items.issue_column "Tidskriftsnummer">
 <!ENTITY zotero.items.series_column "Bokserie">
 <!ENTITY zotero.items.seriesTitle_column "Bokseriens titel">
 <!ENTITY zotero.items.court_column "Domstol">
@@ -245,7 +247,7 @@
 
 <!ENTITY zotero.proxy.recognized.title "Proxy hittad">
 <!ENTITY zotero.proxy.recognized.warning "Lägg bara till proxies från ditt bibliotek, din skola, eller från ett känt företag">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Andra proxies kan innehålla ond kod och låtsas vara hemsidor du litar på.">
+<!ENTITY zotero.proxy.recognized.warning.secondary "Andra proxyservrar kan innehålla elakartad kod som kan låtsas vara hemsidor du litar på.">
 <!ENTITY zotero.proxy.recognized.disable.label "Skicka inte automatiskt vidare frågor genom tidigare funna proxies">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorera">
 
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Ångra">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF-namn">
 <!ENTITY zotero.recognizePDF.itemName.label "Källnamn">
-<!ENTITY zotero.recognizePDF.captcha.label "Skriv texten nedan för att fortsätta läsa in metadata.">
 
 <!ENTITY zotero.rtfScan.title "RTF-scanning">
 <!ENTITY zotero.rtfScan.cancel.label "Ångra">

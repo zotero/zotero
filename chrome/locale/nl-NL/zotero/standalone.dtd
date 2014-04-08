@@ -11,55 +11,55 @@
 
 
 <!ENTITY fileMenu.label "Bestand">
-<!ENTITY fileMenu.accesskey "F">
+<!ENTITY fileMenu.accesskey "B">
 <!ENTITY saveCmd.label "Opslaan...">
 <!ENTITY saveCmd.key "S">
-<!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Pagina Instellingen...">
-<!ENTITY pageSetupCmd.accesskey "U">
+<!ENTITY saveCmd.accesskey "O">
+<!ENTITY pageSetupCmd.label "Pagina instellingen...">
+<!ENTITY pageSetupCmd.accesskey "i">
 <!ENTITY printCmd.label "Afdrukken...">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.accesskey "P">
+<!ENTITY printCmd.accesskey "d">
 <!ENTITY closeCmd.label "Sluiten">
 <!ENTITY closeCmd.key "W">
-<!ENTITY closeCmd.accesskey "C">
+<!ENTITY closeCmd.accesskey "S">
 <!ENTITY quitApplicationCmdWin.label "Afsluiten">
-<!ENTITY quitApplicationCmdWin.accesskey "x">
+<!ENTITY quitApplicationCmdWin.accesskey "A">
 <!ENTITY quitApplicationCmd.label "Afsluiten">
-<!ENTITY quitApplicationCmd.accesskey "Q">
+<!ENTITY quitApplicationCmd.accesskey "A">
 
 
 <!ENTITY editMenu.label "Bewerken">
-<!ENTITY editMenu.accesskey "E">
+<!ENTITY editMenu.accesskey "e">
 <!ENTITY undoCmd.label "Ongedaan maken">
 <!ENTITY undoCmd.key "Z">
-<!ENTITY undoCmd.accesskey "U">
+<!ENTITY undoCmd.accesskey "O">
 <!ENTITY redoCmd.label "Opnieuw uitvoeren">
 <!ENTITY redoCmd.key "Y">
-<!ENTITY redoCmd.accesskey "R">
+<!ENTITY redoCmd.accesskey "u">
 <!ENTITY cutCmd.label "Knippen">
 <!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
+<!ENTITY cutCmd.accesskey "n">
 <!ENTITY copyCmd.label "Kopiëren">
 <!ENTITY copyCmd.key "C">
-<!ENTITY copyCmd.accesskey "C">
+<!ENTITY copyCmd.accesskey "K">
 <!ENTITY copyCitationCmd.label "Verwijzing kopiëren">
 <!ENTITY copyBibliographyCmd.label "Bibliografie kopiëren">
 <!ENTITY pasteCmd.label "Plakken">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Verwijderen">
+<!ENTITY deleteCmd.label "Wissen">
 <!ENTITY deleteCmd.key "D">
-<!ENTITY deleteCmd.accesskey "D">
+<!ENTITY deleteCmd.accesskey "W">
 <!ENTITY selectAllCmd.label "Alles selecteren">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
 <!ENTITY preferencesCmd.label "Voorkeuren">
-<!ENTITY preferencesCmd.accesskey "O">
+<!ENTITY preferencesCmd.accesskey "V">
 <!ENTITY preferencesCmdUnix.label "Voorkeuren">
 <!ENTITY preferencesCmdUnix.accesskey "n">
 <!ENTITY findCmd.label "Zoeken">
-<!ENTITY findCmd.accesskey "F">
+<!ENTITY findCmd.accesskey "Z">
 <!ENTITY findCmd.commandkey "f">
 <!ENTITY bidiSwitchPageDirectionItem.label "Paginarichting wijzigen">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -68,8 +68,8 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY toolsMenu.label "Extra">
-<!ENTITY toolsMenu.accesskey "T">
+<!ENTITY toolsMenu.label "Opties">
+<!ENTITY toolsMenu.accesskey "O">
 <!ENTITY addons.label "Add-ons">
 
 
@@ -87,15 +87,15 @@
 <!ENTITY helpMenuWin.label "Help">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "Over &brandShortName;">
-<!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "Ondersteuning en documentatie">
-<!ENTITY productHelp.accesskey "H">
+<!ENTITY aboutProduct.label "Over Zotero">
+<!ENTITY aboutProduct.accesskey "O">
+<!ENTITY productHelp.label "Ondersteuning en Documentatie">
+<!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Probleemoplossingsinformatie">
-<!ENTITY helpTroubleshootingInfo.accesskey "T">
+<!ENTITY helpTroubleshootingInfo.accesskey "P">
 <!ENTITY helpFeedbackPage.label "Feedback versturen…">
-<!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Foutmeldingen aan Zotero rapporteren…">
-<!ENTITY helpReportErrors.accesskey "R">
+<!ENTITY helpFeedbackPage.accesskey "v">
+<!ENTITY helpReportErrors.label "Foutrapportage opsturen…">
+<!ENTITY helpReportErrors.accesskey "F">
 <!ENTITY helpCheckForUpdates.label "Controleren op updates…">
-<!ENTITY helpCheckForUpdates.accesskey "U">
+<!ENTITY helpCheckForUpdates.accesskey "u">

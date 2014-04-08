@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Desselecciona tot">
 <!ENTITY zotero.general.edit "Edita">
 <!ENTITY zotero.general.delete "Suprimeix">
+<!ENTITY zotero.general.ok "D'acord">
+<!ENTITY zotero.general.cancel "Cancel·la">
 
 <!ENTITY zotero.errorReport.title "Informe d'error de Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "El registre d&apos;error pot incloure missatges no relacionats amb el Zotero.">
@@ -25,7 +27,7 @@
 <!ENTITY zotero.upgrade.upgradeSucceeded "La vostra base de dades del Zotero s&apos;ha actualitzat correctament">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Mireu">
 <!ENTITY zotero.upgrade.changeLogLink "la llista de canvis">
-<!ENTITY zotero.upgrade.changeLogAfterLink "per esbrinar les novetats">
+<!ENTITY zotero.upgrade.changeLogAfterLink "per esbrinar si hi ha novetats">
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Afegeix la selecció a una nota del Zotero">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Crea un element del Zotero i una nota amb la selecció">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Cancel·la">
 <!ENTITY zotero.recognizePDF.pdfName.label "Nom del PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Nom de l'element">
-<!ENTITY zotero.recognizePDF.captcha.label "Escriviu el text de sota per continuar la recuperació de les metadades.">
 
 <!ENTITY zotero.rtfScan.title "Escaneig de l'RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Cancel·la">

@@ -145,9 +145,9 @@ var ZoteroPane = new function()
 	 * mode
 	 */
 	function _loadPane() {
-		if(!Zotero.isConnector) {
-			ZoteroPane_Local.clearItemsPaneMessage();
-		}
+		if(!Zotero || !Zotero.initialized || Zotero.isConnector) return;
+		
+		ZoteroPane_Local.clearItemsPaneMessage();
 		
 		//Initialize collections view
 		ZoteroPane_Local.collectionsView = new Zotero.CollectionTreeView();
@@ -1111,12 +1111,6 @@ var ZoteroPane = new function()
 		if (this.itemsView)
 		{
 			this.itemsView.unregister();
-			if (this.itemsView.wrappedJSObject.listener) {
-				document.getElementById('zotero-items-tree').removeEventListener(
-					'keypress', this.itemsView.wrappedJSObject.listener, false
-				);
-			}
-			this.itemsView.wrappedJSObject.listener = null;
 			document.getElementById('zotero-items-tree').view = this.itemsView = null;
 		}
 		

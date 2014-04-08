@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Deselectează tot">
 <!ENTITY zotero.general.edit "Editare">
 <!ENTITY zotero.general.delete "Ștergere">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Anulare">
 
 <!ENTITY zotero.errorReport.title "Raportul de erori Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Jurnalul de erori poate include mesaje fără legătură cu Zotero.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Anulare">
 <!ENTITY zotero.recognizePDF.pdfName.label "Nume PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Nume înregistrare">
-<!ENTITY zotero.recognizePDF.captcha.label "Tastează textul de mai jos pentru a continua extragerea metadatelor">
 
 <!ENTITY zotero.rtfScan.title "Scanare RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Anulare">

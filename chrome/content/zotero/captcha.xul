@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	onload="Zotero_Captcha.onLoad();"
+	id="zotero-captcha"
+	onkeypress="if(event.keyCode === KeyEvent.DOM_VK_ESCAPE) Zotero_Captcha.cancel();">
+	
+	<script src="include.js"/>
+	<script src="captcha.js"/>
+	
+	<vbox style="padding:10px" align="center" flex="1">
+		<description id="zotero-captcha-description"></description>
+		<image id="zotero-captcha-image" onload="Zotero_Captcha.imageOnLoad();" />
+		<description id="zotero-captcha-error"></description>
+		<textbox id="zotero-captcha-input"
+			onkeypress="if(event.keyCode === KeyEvent.DOM_VK_RETURN) Zotero_Captcha.resolve();" />
+		<hbox>
+			<button label="&zotero.general.ok;" default="true" oncommand="Zotero_Captcha.resolve();" />
+			<button label="&zotero.general.cancel;" oncommand="Zotero_Captcha.cancel();" />
+		</hbox>
+	</vbox>
+</window>

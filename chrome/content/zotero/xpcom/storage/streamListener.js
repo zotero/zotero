@@ -141,6 +141,9 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	// nsIHttpEventSink
 	onRedirect: function (oldChannel, newChannel) {
 		Zotero.debug('onRedirect');
+		
+		var newURL = Zotero.HTTP.getDisplayURI(newChannel.URI).spec;
+		Zotero.debug("Redirecting to " + newURL);
 	},
 	
 	

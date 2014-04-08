@@ -2858,6 +2858,7 @@ Zotero.Sync.Server.Data = new function() {
 			var toSave = [];
 			var toDelete = [];
 			var toReconcile = [];
+			var skipDateModifiedUpdateItems = {};
 			
 			// Display a warning once for each object type
 			syncSession.suppressWarnings = false;
@@ -2977,9 +2978,36 @@ Zotero.Sync.Server.Data = new function() {
 									
 								case 'item':
 									var diff = obj.diff(remoteObj, false, ["dateAdded", "dateModified"]);
-									Zotero.debug('Diff:');
-									Zotero.debug(diff);
-									if (!diff) {
+									if (diff) {
+										Zotero.debug('Diff:');
+										Zotero.debug(diff);
+										
+										try {
+											let dateField;
+											if (!Object.keys(diff[0].primary).length
+													&& !Object.keys(diff[1].primary).length
+													&& !diff[0].creators.length
+													&& !diff[1].creators.length
+													&& Object.keys(diff[0].fields).length == 1
+													&& (dateField = Object.keys(diff[0].fields)[0])
+													&& Zotero.ItemFields.isFieldOfBase(dateField, 'date')
+													&& /[0-9]{2}:[0-9]{2}:[0-9]{2}/.test(diff[0].fields[dateField])
+													&& Zotero.Date.isSQLDateTime(diff[1].fields[dateField])
+													&& diff[1].fields[dateField].substr(11).indexOf(diff[0].fields[dateField]) == 0) {
+												Zotero.debug("Marking local item with corrupted SQL date for overwriting", 2);
+												obj.setField(dateField, diff[1].fields[dateField]);
+												skipDateModifiedUpdateItems[obj.id] = true;
+												syncSession.removeFromUpdated(obj);
+												skipCR = true;
+												break;
+											}
+										}
+										catch (e) {
+											Components.utils.reportError(e);
+											Zotero.debug(e, 1);
+										}
+									}
+									else {
 										// Check if creators changed
 										var creatorsChanged = false;
 										
@@ -3390,7 +3418,9 @@ Zotero.Sync.Server.Data = new function() {
 				// Save parent items first
 				for (var i=0; i<toSave.length; i++) {
 					if (!toSave[i].getSourceKey()) {
-						toSave[i].save();
+						toSave[i].save({
+							skipDateModifiedUpdate: !!skipDateModifiedUpdateItems[toSave[i].id]
+						});
 						toSave.splice(i, 1);
 						i--;
 					}

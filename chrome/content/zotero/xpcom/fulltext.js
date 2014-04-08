@@ -54,7 +54,6 @@ Zotero.Fulltext = new function(){
 	this.clearCacheFiles = clearCacheFiles;
 	//this.clearItemContent = clearItemContent;
 	this.purgeUnusedWords = purgeUnusedWords;
-	this.semanticSplitter = semanticSplitter;
 	
 	this.__defineGetter__("pdfToolsDownloadBaseURL", function() { return 'http://www.zotero.org/download/xpdf/'; });
 	this.__defineGetter__("pdfToolsName", function() { return 'Xpdf'; });
@@ -266,7 +265,7 @@ Zotero.Fulltext = new function(){
 		}
 		Zotero.DB.query('INSERT OR IGNORE INTO fulltextWords (word) SELECT word FROM indexing.fulltextWords');
 		Zotero.DB.query('DELETE FROM fulltextItemWords WHERE itemID = ?', [itemID]);
-		Zotero.DB.query('INSERT INTO fulltextItemWords (wordID, itemID) SELECT wordID, ? FROM fulltextWords JOIN indexing.fulltextWords USING(word)', [itemID]);
+		Zotero.DB.query('INSERT OR IGNORE INTO fulltextItemWords (wordID, itemID) SELECT wordID, ? FROM fulltextWords JOIN indexing.fulltextWords USING(word)', [itemID]);
 		Zotero.DB.query("REPLACE INTO fulltextItems (itemID, version) VALUES (?,?)", [itemID, 0]);
 		Zotero.DB.query("DELETE FROM indexing.fulltextWords");
 	
@@ -279,7 +278,7 @@ Zotero.Fulltext = new function(){
 		try {
 			Zotero.UnresponsiveScriptIndicator.disable();
 			
-			var words = semanticSplitter(text, charset);
+			var words = this.semanticSplitter(text, charset);
 			
 			Zotero.DB.beginTransaction();
 			
@@ -1525,10 +1524,15 @@ Zotero.Fulltext = new function(){
 	}
 	
 	
-	function semanticSplitter(text, charset){
+	/**
+	 * @param {String} text
+	 * @param {String} [charset]
+	 * @return {Array<String>}
+	 */
+	this.semanticSplitter = function (text, charset) {
 		if (!text){
 			Zotero.debug('No text to index');
-			return;
+			return [];
 		}
 		
 		try {
@@ -1536,6 +1540,7 @@ Zotero.Fulltext = new function(){
 				text = this.decoder.convertStringToUTF8(text, charset, true);
 			}
 		} catch (err) {
+			Zotero.debug("Error converting from charset " + charset, 1);
 			Zotero.debug(err, 1);
 		}
 		

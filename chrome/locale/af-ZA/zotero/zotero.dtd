@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Ontkies alles">
 <!ENTITY zotero.general.edit "Redigeer">
 <!ENTITY zotero.general.delete "Skrap">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Cancel">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
 <!ENTITY zotero.recognizePDF.itemName.label "Item Name">
-<!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
 
 <!ENTITY zotero.rtfScan.title "RTF Scan">
 <!ENTITY zotero.rtfScan.cancel.label "Cancel">

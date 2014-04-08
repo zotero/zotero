@@ -41,7 +41,7 @@
 <!ENTITY zotero.preferences.groups.childLinks "alt bağlantılar">
 <!ENTITY zotero.preferences.groups.tags "Etiketler">
 
-<!ENTITY zotero.preferences.openurl.caption "URLAç">
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Çözücü ara">
 <!ENTITY zotero.preferences.openurl.custom "Özel...">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.keys.newItem "Yeni Eser Oluştur">
 <!ENTITY zotero.preferences.keys.newNote "Yeni Not Oluştur">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Konu Seçiciyi Aç">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Seçili Eserin Göndermelerini Pano'ya Kopyala">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Seçili Eserin Göndermelerini Panoya Kopyala">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Seçilen Eserleri Panoya Kopyala">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Panodan İçeri Aktar">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Değişiklikler yeni açılan pencerelerde etkili olacaktır.">

@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Ne izberi ničesar">
 <!ENTITY zotero.general.edit "Uredi">
 <!ENTITY zotero.general.delete "Izbriši">
+<!ENTITY zotero.general.ok "V redu">
+<!ENTITY zotero.general.cancel "Prekliči">
 
 <!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Zapisnik napak lahko vključuje sporočila, ki se ne nanašajo na Zotero.">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Prekliči">
 <!ENTITY zotero.recognizePDF.pdfName.label "Ime PDF">
 <!ENTITY zotero.recognizePDF.itemName.label "Ime vnosa">
-<!ENTITY zotero.recognizePDF.captcha.label "Spodaj vnesite besedilo, da lahko nadaljujete s pridobivanjem metapodatkov.">
 
 <!ENTITY zotero.rtfScan.title "Pregled RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Prekliči">

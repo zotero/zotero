@@ -1527,7 +1527,7 @@ Zotero.Item.prototype.save = function(options) {
 				var parent = this.getSource();
 				var linkMode = this.attachmentLinkMode;
 				var mimeType = this.attachmentMIMEType;
-				var charsetID = this.attachmentCharset;
+				var charsetID = Zotero.CharacterSets.getID(this.attachmentCharset);
 				var path = this.attachmentPath;
 				var syncState = this.attachmentSyncState;
 				
@@ -1944,7 +1944,7 @@ Zotero.Item.prototype.save = function(options) {
 				let parent = this.getSource();
 				var linkMode = this.attachmentLinkMode;
 				var mimeType = this.attachmentMIMEType;
-				var charsetID = this.attachmentCharset;
+				var charsetID = Zotero.CharacterSets.getID(this.attachmentCharset);
 				var path = this.attachmentPath;
 				var syncState = this.attachmentSyncState;
 				
@@ -3236,8 +3236,8 @@ Zotero.Item.prototype.__defineGetter__('attachmentCharset', function () {
 		return undefined;
 	}
 	
-	if (this._attachmentCharset != undefined) {
-		return this._attachmentCharset;
+	if (this._attachmentCharset !== undefined) {
+		return Zotero.CharacterSets.getName(this._attachmentCharset);
 	}
 	
 	if (!this.id) {
@@ -3250,7 +3250,7 @@ Zotero.Item.prototype.__defineGetter__('attachmentCharset', function () {
 		charset = null;
 	}
 	this._attachmentCharset = charset;
-	return charset;
+	return Zotero.CharacterSets.getName(charset);
 });
 
 
@@ -3259,13 +3259,22 @@ Zotero.Item.prototype.__defineSetter__('attachmentCharset', function (val) {
 		throw (".attachmentCharset can only be set for attachment items");
 	}
 	
-	val = Zotero.CharacterSets.getID(val);
+	var oldVal = this.attachmentCharset;
+	if (oldVal) {
+		oldVal = Zotero.CharacterSets.getID(oldVal);
+	}
+	if (!oldVal) {
+		oldVal = null;
+	}
 	
+	if (val) {
+		val = Zotero.CharacterSets.getID(val);
+	}
 	if (!val) {
 		val = null;
 	}
 	
-	if (val == this.attachmentCharset) {
+	if (val == oldVal) {
 		return;
 	}
 	
@@ -4845,8 +4854,7 @@ Zotero.Item.prototype.serialize = function(mode) {
 			arr.attachment = {};
 			arr.attachment.linkMode = this.attachmentLinkMode;
 			arr.attachment.mimeType = this.attachmentMIMEType;
-			var charsetID = this.attachmentCharset;
-			arr.attachment.charset = Zotero.CharacterSets.getName(charsetID);
+			arr.attachment.charset = this.attachmentCharset;
 			arr.attachment.path = this.attachmentPath;
 		}
 		

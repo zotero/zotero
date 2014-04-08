@@ -314,14 +314,22 @@
 							ondragover="return ZoteroPane_Local.collectionsView.onDragOver(event)"
 							ondrop="return ZoteroPane_Local.collectionsView.onDrop(event)"/>
 					</tree>
-					<splitter id="zotero-tags-splitter" onmouseup="ZoteroPane_Local.updateTagSelectorSize()" collapse="after">
+					<splitter id="zotero-tags-splitter" onmouseup="ZoteroPane_Local.updateTagSelectorSize()" collapse="after"
+							zotero-persist="state">
 						<grippy oncommand="ZoteroPane_Local.toggleTagSelector()"/>
 					</splitter>
+					<!-- 'collapsed' is no longer necessary here due to the persisted 'state' on
+					     zotero-tags-splitter, but without this an old-style entry for 'collapsed'
+					     in localstore.rdf can cause the pane to always be closed on Zotero open.
+					     
+					     TODO: deal with this some other way?
+					-->
 					<zoterotagselector id="zotero-tag-selector" zotero-persist="height,collapsed,showAutomatic,filterToScope"
 						oncommand="ZoteroPane_Local.updateTagFilter()"/>
 				</vbox>
 				
 				<splitter id="zotero-collections-splitter" resizebefore="closest" resizeafter="closest" collapse="before"
+					zotero-persist="state"
 					onmousemove="document.getElementById('zotero-items-toolbar').setAttribute('state', this.getAttribute('state'));ZoteroPane_Local.updateToolbarPosition();"
 					oncommand="ZoteroPane_Local.updateToolbarPosition()">
 					<grippy id="zotero-collections-grippy"/>

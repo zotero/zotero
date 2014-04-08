@@ -4,6 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Fravælg alle">
 <!ENTITY zotero.general.edit "Rediger">
 <!ENTITY zotero.general.delete "Slet">
+<!ENTITY zotero.general.ok "OK">
+<!ENTITY zotero.general.cancel "Annullér">
 
 <!ENTITY zotero.errorReport.title "Zotero fejlrapport">
 <!ENTITY zotero.errorReport.unrelatedMessages "Logfilen for fejl kan indeholde meddelelser der ikke har med Zotero at gøre.">
@@ -68,7 +70,7 @@
 <!ENTITY zotero.items.issue_column "Udgivelse">
 <!ENTITY zotero.items.series_column "Serier">
 <!ENTITY zotero.items.seriesTitle_column "Serie titel">
-<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.court_column "Domstol">
 <!ENTITY zotero.items.medium_column "Medium/Format">
 <!ENTITY zotero.items.genre_column "Genre">
 <!ENTITY zotero.items.system_column "System">
@@ -108,7 +110,7 @@
 <!ENTITY zotero.toolbar.export.label "Eksporter Biblioteket ...">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
 <!ENTITY zotero.toolbar.timeline.label "Opret tidslinie">
-<!ENTITY zotero.toolbar.preferences.label "Præferencer...">
+<!ENTITY zotero.toolbar.preferences.label "Indstillinger...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support og dokumentation">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Avanceret søgning">
@@ -253,7 +255,6 @@
 <!ENTITY zotero.recognizePDF.cancel.label "Fortryd">
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF-filens navn">
 <!ENTITY zotero.recognizePDF.itemName.label "Elementets navn">
-<!ENTITY zotero.recognizePDF.captcha.label "Indtast teksten nedenfor for at fortsætte med indlæsning af metadata.">
 
 <!ENTITY zotero.rtfScan.title "RTF-scanning">
 <!ENTITY zotero.rtfScan.cancel.label "Fortryd">

@@ -27,14 +27,14 @@
 Zotero.Debug = new function () {
 	var _console, _stackTrace, _store, _level, _time, _lastTime, _output = [];
 	
-	this.init = function () {
-		_console = Zotero.Prefs.get('debug.log');
+	this.init = function (forceDebugLog) {
+		_console = forceDebugLog || Zotero.Prefs.get('debug.log');
 		_store = Zotero.Prefs.get('debug.store');
 		if (_store) {
 			Zotero.Prefs.set('debug.store', false);
 		}
 		_level = Zotero.Prefs.get('debug.level');
-		_time = Zotero.Prefs.get('debug.time');
+		_time = forceDebugLog || Zotero.Prefs.get('debug.time');
 		_stackTrace = Zotero.Prefs.get('debug.stackTrace');
 		
 		this.storing = _store;
@@ -106,7 +106,18 @@ Zotero.Debug = new function () {
 		if (_console) {
 			var output = 'zotero(' + level + ')' + (_time ? deltaStr : '') + ': ' + message;
 			if(Zotero.isFx && !Zotero.isBookmarklet) {
-				dump(output+"\n\n");
+				// On Windows, where the text console is inexplicably glacial,
+				// log to the Browser Console instead
+				//
+				// TODO: Get rid of the filename and line number
+				if (Zotero.isWin && !Zotero.isStandalone) {
+					let console = Components.utils.import("resource://gre/modules/devtools/Console.jsm", {}).console;
+					console.log(output);
+				}
+				// Otherwise dump to the text console
+				else {
+					dump(output + "\n\n");
+				}
 			} else if(window.console) {
 				window.console.log(output);
 			}

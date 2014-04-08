@@ -132,7 +132,7 @@ Zotero.Translate.Sandbox = {
 				var nAttachments = attachments.length;
 				for(var j=0; j<nAttachments; j++) {
 					if(attachments[j].document) {
-						attachments[j].url = attachments[j].document.location.href;
+						attachments[j].url = attachments[j].document.documentURI || attachments[j].document.URL;
 						attachments[j].mimeType = "text/html";
 						delete attachments[j].document;
 					}
@@ -2604,6 +2604,11 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	 */
 	"getResourceURI":function(resource) {
 		if(typeof(resource) == "string") return resource;
+		
+		const rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+		var values = this.getTargets(resource, rdf + 'value');
+		if(values && values.length) return this.getResourceURI(values[0]);
+		
 		if(resource.uri) return resource.uri;
 		if(resource.toNT == undefined) throw new Error("Zotero.RDF: getResourceURI called on invalid resource");
 		return resource.toNT();

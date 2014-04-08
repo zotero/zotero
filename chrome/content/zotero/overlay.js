@@ -114,7 +114,7 @@ var ZoteroOverlay = new function()
 				else if (iconPref == 0) {
 					var toolbar = icon.parentNode;
 					if (toolbar.id == 'addon-bar') {
-						var palette = doc.getElementById("navigator-toolbox").palette;
+						var palette = document.getElementById("navigator-toolbox").palette;
 						palette.appendChild(icon);
 						toolbar.setAttribute("currentset", toolbar.currentSet);
 						document.persist(toolbar.id, "currentset");

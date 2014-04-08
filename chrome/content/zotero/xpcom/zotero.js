@@ -234,7 +234,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	 *
 	 * @return {Boolean|Promise:Boolean}
 	 */
-	function init() {
+	function init(options) {
 		if (this.initialized || this.skipLoading) {
 			return false;
 		}
@@ -245,7 +245,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		
 		// Load in the preferences branch for the extension
 		Zotero.Prefs.init();
-		Zotero.Debug.init();
+		Zotero.Debug.init(options && options.forceDebugLog);
+		
+		if (options) {
+			if (options.openPane) this.openPane = true;
+		}
 		
 		this.mainThread = Services.tm.mainThread;
 		
@@ -768,6 +772,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			Zotero.DB.test();
 			
 			var dbfile = Zotero.getZoteroDatabase();
+
+			// Tell any other Zotero instances to release their lock,
+			// in case we lost the lock on the database (how?) and it's
+			// now open in two places at once
+			Zotero.IPC.broadcast("releaseLock "+dbfile.persistentDescriptor);
 			
 			// Test write access on Zotero data directory
 			if (!dbfile.parent.isWritable()) {
@@ -894,8 +903,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				// Zotero.DBConnection.getStatement() explicitly
 				Components.utils.forceGC();
 				
-				// unlock DB
-				return Zotero.DB.closeDatabase().then(function() {				
+				// close DB
+				return Zotero.DB.closeDatabase(true).then(function() {				
 					// broadcast that DB lock has been released
 					Zotero.IPC.broadcast("lockReleased");
 				});
@@ -2021,7 +2030,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			'function skype_',
 			'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
 			'CVE-2009-3555',
-			'OpenGL LayerManager',
+			'OpenGL',
 			'trying to re-register CID',
 			'Services.HealthReport',
 			'[JavaScript Error: "this.docShell is null"',
@@ -2167,7 +2176,10 @@ Zotero.Prefs = new function(){
 				case this.prefBranch.PREF_BOOL:
 					return this.prefBranch.setBoolPref(pref, value);
 				case this.prefBranch.PREF_STRING:
-					return this.prefBranch.setCharPref(pref, value);
+					let str = Cc["@mozilla.org/supports-string;1"]
+						.createInstance(Ci.nsISupportsString);
+					str.data = value;
+					return this.prefBranch.setComplexValue(pref, Ci.nsISupportsString, str);
 				case this.prefBranch.PREF_INT:
 					return this.prefBranch.setIntPref(pref, value);
 				
@@ -2188,7 +2200,9 @@ Zotero.Prefs = new function(){
 					throw ("Invalid preference value '" + value + "' for pref '" + pref + "'");
 			}
 		}
-		catch (e){
+		catch (e) {
+			Components.utils.reportError(e);
+			Zotero.debug(e, 1);
 			throw ("Invalid preference '" + pref + "'");
 		}
 	}
