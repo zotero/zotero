@@ -966,6 +966,11 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 				strParts.push(part);
 			}
 			
+			part = this.getField('shortTitle');
+			if (part) {
+				strParts.push(part);
+			}
+			
 			var creators = this.getCreators();
 			if (creators.length && creators[0].creatorTypeID === 1) {
 				strParts.push(creators[0].ref.lastName);
