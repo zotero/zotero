@@ -994,13 +994,14 @@
 		
 		<content>
 			<groupbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" flex="1">
-				<menupopup id="tag-menu">
+				<menupopup id="tag-menu"
+						   onpopupshowing="document.getBindingParent(this)._triggerNode = event.target.triggerNode;">
 					<menuitem label="&zotero.tagSelector.assignColor;"
-						oncommand="_openColorPickerWindow(document.popupNode.getAttribute('value')); event.stopPropagation()"/>
+						oncommand="_openColorPickerWindow(document.getBindingParent(this)._triggerNode.getAttribute('value')); event.stopPropagation()"/>
 					<menuitem label="&zotero.tagSelector.renameTag;"
-						oncommand="document.getBindingParent(this).rename(document.popupNode.getAttribute('value')); event.stopPropagation()"/>
+						oncommand="document.getBindingParent(this).rename(document.getBindingParent(this)._triggerNode.getAttribute('value')); event.stopPropagation()"/>
 					<menuitem label="&zotero.tagSelector.deleteTag;"
-						oncommand="document.getBindingParent(this).delete(document.popupNode.getAttribute('value')); event.stopPropagation()"/>
+						oncommand="document.getBindingParent(this).delete(document.getBindingParent(this)._triggerNode.getAttribute('value')); event.stopPropagation()"/>
 				</menupopup>
 				
 				<vbox id="no-tags-box" align="center" pack="center" flex="1">
