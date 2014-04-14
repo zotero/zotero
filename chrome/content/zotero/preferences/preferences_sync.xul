@@ -31,7 +31,7 @@
 			helpTopic="sync">
 		<preferences>
 			<preference id="pref-sync-autosync" name="extensions.zotero.sync.autoSync" type="bool"/>
-			<preference id="pref-sync-username" name="extensions.zotero.sync.server.username" type="string" instantApply="true"/>
+			<preference id="pref-sync-username" name="extensions.zotero.sync.server.username" type="unichar" instantApply="true"/>
 			<preference id="pref-sync-fulltext-enabled" name="extensions.zotero.sync.fulltext.enabled" type="bool"/>
 			<preference id="pref-storage-enabled" name="extensions.zotero.sync.storage.enabled" type="bool"/>
 			<preference id="pref-storage-protocol" name="extensions.zotero.sync.storage.protocol" type="string"

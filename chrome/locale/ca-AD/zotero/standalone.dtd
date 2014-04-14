@@ -97,5 +97,5 @@
 <!ENTITY helpFeedbackPage.accesskey "S">
 <!ENTITY helpReportErrors.label "Informa d'errors al Zotero">
 <!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpCheckForUpdates.label "Comprova actualitzacions">
+<!ENTITY helpCheckForUpdates.label "Comprova si hi ha actualitzacions...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

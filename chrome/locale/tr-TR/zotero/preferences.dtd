@@ -41,7 +41,7 @@
 <!ENTITY zotero.preferences.groups.childLinks "alt bağlantılar">
 <!ENTITY zotero.preferences.groups.tags "Etiketler">
 
-<!ENTITY zotero.preferences.openurl.caption "URLAç">
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Çözücü ara">
 <!ENTITY zotero.preferences.openurl.custom "Özel...">

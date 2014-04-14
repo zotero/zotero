@@ -5,9 +5,9 @@
 <!ENTITY zotero.search.joinMode.all "alle">
 <!ENTITY zotero.search.joinMode.suffix "volgende voorwaarden:">
 
-<!ENTITY zotero.search.recursive.label "Doorzoek onderliggende mappen">
-<!ENTITY zotero.search.noChildren "Toon alleen topniveau-objecten">
-<!ENTITY zotero.search.includeParentsAndChildren "Toon bijbehorende hoofd- en subobjecten">
+<!ENTITY zotero.search.recursive.label "Doorzoek deelverzamelingen">
+<!ENTITY zotero.search.noChildren "Toon alleen items op het hoogste niveau">
+<!ENTITY zotero.search.includeParentsAndChildren "Toon bijbehorende hoofd- en subitems">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (binaire bestanden inbegrepen)">

@@ -68,12 +68,8 @@ Zotero.HTTP = new function() {
 	this.promise = function promise(method, url, options) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
-			var dispURL = url.clone();
-			if (dispURL.password) {
-				dispURL.password = "********";
-			}
+			var dispURL = this.getDisplayURI(url).spec;
 			url = url.spec;
-			dispURL = dispURL.spec;
 		}
 		else {
 			var dispURL = url;
@@ -212,10 +208,7 @@ Zotero.HTTP = new function() {
 	this.doGet = function(url, onDone, responseCharset, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
-			var disp = url.clone();
-			if (disp.password) {
-				disp.password = "********";
-			}
+			var disp = this.getDisplayURI(url);
 			Zotero.debug("HTTP GET " + disp.spec);
 			url = url.spec;
 		}
@@ -276,10 +269,7 @@ Zotero.HTTP = new function() {
 	this.doPost = function(url, body, onDone, headers, responseCharset, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
-			var disp = url.clone();
-			if (disp.password) {
-				disp.password = "********";
-			}
+			var disp = this.getDisplayURI(url);
 			url = url.spec;
 		}
 		
@@ -363,10 +353,7 @@ Zotero.HTTP = new function() {
 	this.doHead = function(url, onDone, requestHeaders, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
-			var disp = url.clone();
-			if (disp.password) {
-				disp.password = "********";
-			}
+			var disp = this.getDisplayURI(url);
 			Zotero.debug("HTTP HEAD " + disp.spec);
 			url = url.spec;
 		}
@@ -424,10 +411,7 @@ Zotero.HTTP = new function() {
 	 */
 	this.doOptions = function (uri, callback) {
 		// Don't display password in console
-		var disp = uri.clone();
-		if (disp.password) {
-			disp.password = "********";
-		}
+		var disp = this.getDisplayURI(uri);
 		Zotero.debug("HTTP OPTIONS for " + disp.spec);
 		
 		if (Zotero.HTTP.browserIsOffline()){
@@ -619,10 +603,7 @@ Zotero.HTTP = new function() {
 		}
 		
 		// Don't display password in console
-		var disp = uri.clone();
-		if (disp.password) {
-			disp.password = "********";
-		}
+		var disp = Zotero.HTTP.getDisplayURI(uri);
 		
 		var bodyStart = body.substr(0, 1024);
 		Zotero.debug("HTTP " + method + " "
@@ -672,10 +653,7 @@ Zotero.HTTP = new function() {
 	 */
 	this.WebDAV.doMkCol = function (uri, callback) {
 		// Don't display password in console
-		var disp = uri.clone();
-		if (disp.password) {
-			disp.password = "********";
-		}
+		var disp = Zotero.HTTP.getDisplayURI(uri);
 		Zotero.debug("HTTP MKCOL " + disp.spec);
 		
 		if (Zotero.HTTP.browserIsOffline()) {
@@ -709,10 +687,7 @@ Zotero.HTTP = new function() {
 	 */
 	this.WebDAV.doPut = function (uri, body, callback) {
 		// Don't display password in console
-		var disp = uri.clone();
-		if (disp.password) {
-			disp.password = "********";
-		}
+		var disp = Zotero.HTTP.getDisplayURI(uri);
 		
 		var bodyStart = "'" + body.substr(0, 1024) + "'";
 		Zotero.debug("HTTP PUT "
@@ -754,10 +729,7 @@ Zotero.HTTP = new function() {
 	 */
 	this.WebDAV.doDelete = function (uri, callback) {
 		// Don't display password in console
-		var disp = uri.clone();
-		if (disp.password) {
-			disp.password = "********";
-		}
+		var disp = Zotero.HTTP.getDisplayURI(uri);
 		
 		Zotero.debug("WebDAV DELETE to " + disp.spec);
 		
@@ -782,6 +754,15 @@ Zotero.HTTP = new function() {
 		};
 		xmlhttp.send(null);
 		return xmlhttp;
+	}
+	
+	
+	this.getDisplayURI = function (uri) {
+		var disp = uri.clone();
+		if (disp.password) {
+			disp.password = "********";
+		}
+		return disp;
 	}
 	
 	

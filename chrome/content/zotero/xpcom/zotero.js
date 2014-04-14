@@ -39,7 +39,7 @@ const ZOTERO_CONFIG = {
 	BOOKMARKLET_ORIGIN : 'https://www.zotero.org',
 	HTTP_BOOKMARKLET_ORIGIN : 'http://www.zotero.org',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "4.0.18.SOURCE"
+	VERSION: "4.0.20.SOURCE"
 };
 
 // Commonly used imports accessible anywhere
@@ -725,6 +725,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		}
 		
 		// Initialize various services
+		Zotero.Styles.preinit();
 		Zotero.Integration.init();
 		
 		if(Zotero.Prefs.get("httpServer.enabled")) {
@@ -2033,7 +2034,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			'function skype_',
 			'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
 			'CVE-2009-3555',
-			'OpenGL LayerManager',
+			'OpenGL',
 			'trying to re-register CID',
 			'Services.HealthReport',
 			'[JavaScript Error: "this.docShell is null"',
@@ -2183,7 +2184,10 @@ Zotero.Prefs = new function(){
 				case this.prefBranch.PREF_BOOL:
 					return this.prefBranch.setBoolPref(pref, value);
 				case this.prefBranch.PREF_STRING:
-					return this.prefBranch.setCharPref(pref, value);
+					let str = Cc["@mozilla.org/supports-string;1"]
+						.createInstance(Ci.nsISupportsString);
+					str.data = value;
+					return this.prefBranch.setComplexValue(pref, Ci.nsISupportsString, str);
 				case this.prefBranch.PREF_INT:
 					return this.prefBranch.setIntPref(pref, value);
 				
@@ -2204,7 +2208,9 @@ Zotero.Prefs = new function(){
 					throw ("Invalid preference value '" + value + "' for pref '" + pref + "'");
 			}
 		}
-		catch (e){
+		catch (e) {
+			Components.utils.reportError(e);
+			Zotero.debug(e, 1);
 			throw ("Invalid preference '" + pref + "'");
 		}
 	}

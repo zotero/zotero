@@ -48,7 +48,7 @@
 <!ENTITY pasteCmd.label "Colar">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Deletar">
+<!ENTITY deleteCmd.label "Remover">
 <!ENTITY deleteCmd.key "D">
 <!ENTITY deleteCmd.accesskey "D">
 <!ENTITY selectAllCmd.label "Selecionar tudo">
@@ -58,7 +58,7 @@
 <!ENTITY preferencesCmd.accesskey "O">
 <!ENTITY preferencesCmdUnix.label "Preferências">
 <!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Buscar">
+<!ENTITY findCmd.label "Localizar">
 <!ENTITY findCmd.accesskey "F">
 <!ENTITY findCmd.commandkey "f">
 <!ENTITY bidiSwitchPageDirectionItem.label "Inverter direção da página">
@@ -90,12 +90,12 @@
 <!ENTITY aboutProduct.label "Sobre &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Suporte e Documentação">
-<!ENTITY productHelp.accesskey "H">
+<!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Informação de solução de problemas">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "Submeter feedback">
 <!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Reportar erros à Zotero...">
+<!ENTITY helpReportErrors.label "Transmitir erros à Zotero...">
 <!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpCheckForUpdates.label "Verificar disponibilidade de atualizações...">
+<!ENTITY helpCheckForUpdates.label "Buscar atualizações...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

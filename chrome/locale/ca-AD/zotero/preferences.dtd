@@ -12,17 +12,17 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Subfinestra del navegador">
 <!ENTITY zotero.preferences.showIn.separateTab "Pestanya separada">
 <!ENTITY zotero.preferences.showIn.appTab "Pestanya d'aplicacions">
-<!ENTITY zotero.preferences.statusBarIcon "Icona a la barra d&apos;estatus">
+<!ENTITY zotero.preferences.statusBarIcon "Icona de la barra d&apos;estat">
 <!ENTITY zotero.preferences.statusBarIcon.none "Cap">
 <!ENTITY zotero.preferences.fontSize "Mida de lletra:">
 <!ENTITY zotero.preferences.fontSize.small "Petita">
 <!ENTITY zotero.preferences.fontSize.medium "Mitjana">
-<!ENTITY zotero.preferences.fontSize.large "Gran">
-<!ENTITY zotero.preferences.fontSize.xlarge "Molt gran">
+<!ENTITY zotero.preferences.fontSize.large "Grossa">
+<!ENTITY zotero.preferences.fontSize.xlarge "Molt grossa">
 <!ENTITY zotero.preferences.fontSize.notes "Mida de lletra de la nota:">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscel·lània">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
+<!ENTITY zotero.preferences.autoUpdate "Comprova automàticament si hi ha traductors o estils actualitzats">
 <!ENTITY zotero.preferences.updateNow "Actualitza ara">
 <!ENTITY zotero.preferences.reportTranslationFailure "Envia un informe dels transcriptors trencats">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Permeteu que zotero.org personalitzi el contingut en base a la versió actual del Zotero">
@@ -35,7 +35,7 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dies">
 
 <!ENTITY zotero.preferences.groups "Grups">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "Quan copiïs elements entre les biblioteques, inclou:">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "Quan copiïs elements entre les biblioteques, inclou-hi:">
 <!ENTITY zotero.preferences.groups.childNotes "notes descendents">
 <!ENTITY zotero.preferences.groups.childFiles "instantànies descendents i fitxers importats">
 <!ENTITY zotero.preferences.groups.childLinks "enllaços descendents">
@@ -128,7 +128,7 @@
 <!ENTITY zotero.preferences.prefpane.keys "Dreceres de teclat">
 
 <!ENTITY zotero.preferences.keys.openZotero "Obre/Tanca el Zotero">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Desa al Zotero (icona de la barra d'adreces)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Canvia a pantalla completa">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Enfoca la subfinestra de les biblioteques">
 <!ENTITY zotero.preferences.keys.quicksearch "Cerca ràpida">
@@ -163,7 +163,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Qualsevol cadena">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avançat">
-<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Fitxers i carpetes">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localitza">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestor del motor de cerca d'articles">
@@ -186,7 +186,7 @@
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
-<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Tria...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 
 <!ENTITY zotero.preferences.dbMaintenance "Manteniment de la base de dades">

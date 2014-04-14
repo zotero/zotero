@@ -1446,12 +1446,13 @@
 									params.itemID = itemID;
 									params.creatorTypeID = creatorTypeID;
 								}
+								
+								t.setAttribute('ontextentered',
+									'document.getBindingParent(this).handleCreatorAutoCompleteSelect(this)');
 							};
 							t.setAttribute(
 								'autocompletesearchparam', JSON.stringify(params)
 							);
-							t.setAttribute('ontextentered',
-								'document.getBindingParent(this).handleCreatorAutoCompleteSelect(this)');
 						}
 					}
 					var box = elem.parentNode;
@@ -1489,6 +1490,7 @@
 				<![CDATA[
 					var comment = false;
 					var controller = textbox.controller;
+					if (!controller.matchCount) return;
 					
 					for (var i=0; i<controller.matchCount; i++)
 					{
@@ -1688,7 +1690,7 @@
 						
 						var otherFields = this.getCreatorFields(row);
 						otherFields[creatorField] = value;
-						var lastName = otherFields.lastName;
+						var lastName = otherFields.lastName.trim();
 						
 						//Handle \n\r and \n delimited entries
 						var rawNameArray = lastName.split(/\r\n?|\n/);

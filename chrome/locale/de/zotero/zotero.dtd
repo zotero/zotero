@@ -5,7 +5,7 @@
 <!ENTITY zotero.general.edit "Bearbeiten">
 <!ENTITY zotero.general.delete "Löschen">
 <!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
+<!ENTITY zotero.general.cancel "Abbrechen">
 
 <!ENTITY zotero.errorReport.title "Zotero Fehlerbericht">
 <!ENTITY zotero.errorReport.unrelatedMessages "Dieses Fehlerprotokoll kann unter Umständen Nachrichten enthalten, die nicht mit Zotero in Verbindung stehen.">

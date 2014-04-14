@@ -492,54 +492,56 @@ Zotero.Sync.Storage.ZFS = (function () {
 	
 	
 	function onUploadComplete(httpRequest, status, response, data) {
-		var request = data.request;
-		var item = data.item;
-		var uploadKey = data.uploadKey;
-		
-		Zotero.debug("Upload of attachment " + item.key
-			+ " finished with status code " + status);
-		
-		Zotero.debug(response);
-		
-		switch (status) {
-			case 201:
-				break;
+		return Q.try(function () {
+			var request = data.request;
+			var item = data.item;
+			var uploadKey = data.uploadKey;
 			
-			case 500:
-				throw new Error("File upload failed. Please try again.");
+			Zotero.debug("Upload of attachment " + item.key
+				+ " finished with status code " + status);
 			
-			default:
-				var msg = "Unexpected file upload status " + status
-					+ " in Zotero.Sync.Storage.ZFS.onUploadComplete()"
-					+ " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
-				Zotero.debug(msg, 1);
-				Components.utils.reportError(msg);
-				Components.utils.reportError(response);
-				throw new Error(Zotero.Sync.Storage.defaultError);
-		}
-		
-		var uri = getItemURI(item);
-		var body = "update=" + uploadKey + "&mtime=" + item.attachmentModificationTime;
-		
-		// Register upload on server
-		return Zotero.HTTP.promise("POST", uri, { body: body, headers: _headers, successCodes: [204] })
-			.then(function (req) {
-				updateItemFileInfo(item);
-				return {
-					localChanges: true,
-					remoteChanges: true
-				};
-			})
-			.fail(function (e) {
-				var msg = "Unexpected file registration status " + e.status
-					+ " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
-				Zotero.debug(msg, 1);
-				Zotero.debug(e.xmlhttp.responseText);
-				Zotero.debug(e.xmlhttp.getAllResponseHeaders());
-				Components.utils.reportError(msg);
-				Components.utils.reportError(e.xmlhttp.responseText);
-				throw new Error(Zotero.Sync.Storage.defaultError);
-			});
+			Zotero.debug(response);
+			
+			switch (status) {
+				case 201:
+					break;
+				
+				case 500:
+					throw new Error("File upload failed. Please try again.");
+				
+				default:
+					var msg = "Unexpected file upload status " + status
+						+ " in Zotero.Sync.Storage.ZFS.onUploadComplete()"
+						+ " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
+					Zotero.debug(msg, 1);
+					Components.utils.reportError(msg);
+					Components.utils.reportError(response);
+					throw new Error(Zotero.Sync.Storage.defaultError);
+			}
+			
+			var uri = getItemURI(item);
+			var body = "update=" + uploadKey + "&mtime=" + item.attachmentModificationTime;
+			
+			// Register upload on server
+			return Zotero.HTTP.promise("POST", uri, { body: body, headers: _headers, successCodes: [204] })
+				.then(function (req) {
+					updateItemFileInfo(item);
+					return {
+						localChanges: true,
+						remoteChanges: true
+					};
+				})
+				.fail(function (e) {
+					var msg = "Unexpected file registration status " + e.status
+						+ " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
+					Zotero.debug(msg, 1);
+					Zotero.debug(e.xmlhttp.responseText);
+					Zotero.debug(e.xmlhttp.getAllResponseHeaders());
+					Components.utils.reportError(msg);
+					Components.utils.reportError(e.xmlhttp.responseText);
+					throw new Error(Zotero.Sync.Storage.defaultError);
+				});
+		});
 	}
 	
 	
@@ -811,6 +813,11 @@ Zotero.Sync.Storage.ZFS = (function () {
 									+ " in Zotero.Sync.Storage.ZFS.downloadFile()";
 								Zotero.debug(msg, 1);
 								Components.utils.reportError(msg);
+								// Ignore files not found in S3
+								if (status == 404) {
+									deferred.resolve(false);
+									return;
+								}
 								try {
 									Zotero.debug(Zotero.File.getContents(destFile, null, 4096), 1);
 								}

@@ -12,7 +12,7 @@
 
 <!ENTITY fileMenu.label "Tiedosto">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "Tallenna...">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
 <!ENTITY pageSetupCmd.label "Sivun asetukset...">

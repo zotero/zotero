@@ -106,7 +106,18 @@ Zotero.Debug = new function () {
 		if (_console) {
 			var output = 'zotero(' + level + ')' + (_time ? deltaStr : '') + ': ' + message;
 			if(Zotero.isFx && !Zotero.isBookmarklet) {
-				dump(output+"\n\n");
+				// On Windows, where the text console is inexplicably glacial,
+				// log to the Browser Console instead
+				//
+				// TODO: Get rid of the filename and line number
+				if (Zotero.isWin && !Zotero.isStandalone) {
+					let console = Components.utils.import("resource://gre/modules/devtools/Console.jsm", {}).console;
+					console.log(output);
+				}
+				// Otherwise dump to the text console
+				else {
+					dump(output + "\n\n");
+				}
 			} else if(window.console) {
 				window.console.log(output);
 			}
