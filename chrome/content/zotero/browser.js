@@ -812,8 +812,10 @@ Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, transla
 			//and the page is still there
 			&& this.page.document.defaultView && !this.page.document.defaultView.closed
 			//this set of translators is not targeting the same URL as a previous set of translators,
-			// because otherwise we want to use the newer set
-			&& this.page.document.location.href != translate.document.location.href
+			// because otherwise we want to use the newer set,
+			// but only if it's not in a subframe of the previous set
+			&& (this.page.document.location.href != translate.document.location.href ||
+				Zotero.Utilities.Internal.isIframeOf(translate.document.defaultView, this.page.document.defaultView))
 				//the best translator we had was of higher priority than the new set
 			&& (this.page.translators[0].priority < translators[0].priority
 				//or the priority was the same, but...
@@ -823,10 +825,14 @@ Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, transla
 						|| translate.document.defaultView !== this.page.document.defaultView.top)
 			))
 		) {
+			Zotero.debug("Translate: a better translator was already found for this page");
 			return; //keep what we had
 		} else {
 			this.clear(); //clear URL bar icon
 		}
+		
+		Zotero.debug("Translate: found translators for page\n"
+			+ "Best translator: " + translators[0].label + " with priority " + translators[0].priority);
 		
 		this.page.translate = translate;
 		this.page.translators = translators;
@@ -838,6 +844,8 @@ Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, transla
 			&& translate.document.documentURI.substr(0, 7) == "file://") {
 		this._attemptLocalFileImport(translate.document);
 	}
+	
+	if(!translators || !translators.length) Zotero.debug("Translate: No translators found");
 	
 	Zotero_Browser.updateStatus();
 }

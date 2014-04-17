@@ -301,6 +301,19 @@ Zotero.Utilities.Internal = {
 			return null;
 		}
 		return str;
+	},
+	
+	/**
+	 * Determine if one Window is a descendant of another Window
+	 * @param {DOMWindow} suspected child window
+	 * @param {DOMWindow} suspected parent window
+	 * @return {boolean}
+	 */
+	"isIframeOf":function isIframeOf(childWindow, parentWindow) {
+		while(childWindow.parent !== childWindow) {
+			childWindow = childWindow.parent;
+			if(childWindow === parentWindow) return true;
+		}
 	}
 }
 
