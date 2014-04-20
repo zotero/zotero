@@ -75,3 +75,6 @@ contract	@mozilla.org/autocomplete/search;1?name=zotero 	{06a2ed11-d0a4-4ff0-a56
 
 component	{9BC3D762-9038-486A-9D70-C997AF848A7C}			components/zotero-protocol-handler.js
 contract	@mozilla.org/network/protocol;1?name=zotero 	{9BC3D762-9038-486A-9D70-C997AF848A7C}
+
+component {EA696B77-AF80-4063-89AD-4985B14D0EBC} components/jsDatasource.js
+contract @mozilla.org/xul/xul-query-processor;1?name=javascript {EA696B77-AF80-4063-89AD-4985B14D0EBC}
