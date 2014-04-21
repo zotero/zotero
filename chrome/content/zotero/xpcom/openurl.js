@@ -184,7 +184,28 @@ Zotero.OpenURL = new function() {
 				_mapTag(Zotero.Date.strToISO(item.issueDate), "date");
 			}
 		} else {
-			return false;
+			//we map as much as possible to DC for all other types. This will export some info
+			//and work very nicely on roundtrip. All of these fields legal for mtx:dc according to
+			//http://alcme.oclc.org/openurl/servlet/OAIHandler/extension?verb=GetMetadata&metadataPrefix=mtx&identifier=info:ofi/fmt:kev:mtx:dc
+			_mapTag("info:ofi/fmt:kev:mtx:dc", "rft_val_fmt", true);
+			_mapTag(item.itemType, "type");
+			if(item.title) _mapTag(item.title, "title");
+			if(item.publicationTitle) _mapTag(item.publicationTitle, "source");
+			if(item.rights) _mapTag(item.rights, "rights");
+			if(item.publisher) _mapTag(item.publisher, "publisher");
+			if(item.abstractNote) _mapTag(item.abstractNote, "description");
+			if(item.ISBN){
+				 _mapTag("ISBN " + item.ISBN, "identifier");			
+			}
+			else if(item.ISSN){
+				 _mapTag("ISSN " + item.ISSN, "identifier");			
+			}
+			else if(item.DOI){
+				 _mapTag("urn::doi:" + item.DOI, "identifier");			
+			}
+			else if(item.url){
+				 _mapTag(item.url, "identifier");			
+			}
 		}
 		
 		if(item.creators && item.creators.length) {
@@ -223,7 +244,7 @@ Zotero.OpenURL = new function() {
 		if(item.numPages) _mapTag(item.numPages, "tpages");
 		if(item.ISBN) _mapTag(item.ISBN, "isbn");
 		if(item.ISSN) _mapTag(item.ISSN, "issn");
-		
+		if(item.language) _mapTag(item.language, "language");
 		if(asObj) return entries;
 		return entries.join("&");
 	}
