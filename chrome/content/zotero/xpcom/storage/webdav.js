@@ -827,6 +827,11 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		_rootURI = uri;
 	};
 	
+		
+	obj.clearCachedCredentials = function() {
+		_rootURI = _parentURI = undefined;
+		_cachedCredentials = false;
+	};
 	
 	/**
 	 * Begin download process for individual file
