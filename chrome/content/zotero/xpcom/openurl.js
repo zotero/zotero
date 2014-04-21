@@ -136,11 +136,11 @@ Zotero.OpenURL = new function() {
 			}
 			_mapTag("article", "genre");
 			
-			if(item.title) _mapTag(item.title, "atitle")		
-			if(item.publicationTitle) _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "jtitle"))		
-			if(item.journalAbbreviation) _mapTag(item.journalAbbreviation, "stitle");
-			if(item.volume) _mapTag(item.volume, "volume");
-			if(item.issue) _mapTag(item.issue, "issue");
+			_mapTag(item.title, "atitle");
+			_mapTag(item.publicationTitle, (version == "0.1" ? "title" : "jtitle"));
+			_mapTag(item.journalAbbreviation, "stitle");
+			_mapTag(item.volume, "volume");
+			_mapTag(item.issue, "issue");
 		} else if(item.itemType == "book" || item.itemType == "bookSection" || item.itemType == "conferencePaper" || item.itemType == "report") {
 			if(version === "1.0") {
 				_mapTag("info:ofi/fmt:kev:mtx:book", "rft_val_fmt", true);
@@ -148,37 +148,37 @@ Zotero.OpenURL = new function() {
 			
 			if(item.itemType == "book") {
 				_mapTag("book", "genre");
-				if(item.title) _mapTag(item.title, (version == "0.1" ? "title" : "btitle"));
+				_mapTag(item.title, (version == "0.1" ? "title" : "btitle"));
 			} else if (item.itemType == "conferencePaper") {
 				_mapTag("proceeding", "genre");
-				if(item.title) _mapTag(item.title, "atitle")		
-				if(item.proceedingsTitle) _mapTag(item.proceedingsTitle, (version == "0.1" ? "title" : "btitle"));
+				_mapTag(item.title, "atitle");
+				_mapTag(item.proceedingsTitle, (version == "0.1" ? "title" : "btitle"));
 			} else if (item.itemType == "report") {
 				_mapTag("report", "genre");
-				if(item.seriesTitle) _mapTag(item.seriesTitle, "series");
-				if(item.title) _mapTag(item.title, (version == "0.1" ? "title" : "btitle"));
+				_mapTag(item.seriesTitle, "series");
+				_mapTag(item.title, (version == "0.1" ? "title" : "btitle"));
 			} else {
 				_mapTag("bookitem", "genre");
-				if(item.title) _mapTag(item.title, "atitle")		
-				if(item.publicationTitle) _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "btitle"));
+				_mapTag(item.title, "atitle");
+				_mapTag(item.publicationTitle, (version == "0.1" ? "title" : "btitle"));
 			}
 			
-			if(item.place) _mapTag(item.place, "place");
-			if(item.publisher) _mapTag(item.publisher, "publisher")		
-			if(item.edition) _mapTag(item.edition, "edition");
-			if(item.series) _mapTag(item.series, "series");
+			_mapTag(item.place, "place");
+			_mapTag(item.publisher, "publisher");
+			_mapTag(item.edition, "edition");
+			_mapTag(item.series, "series");
 		} else if(item.itemType == "thesis" && version == "1.0") {
 			_mapTag("info:ofi/fmt:kev:mtx:dissertation", "rft_val_fmt", true);
 			
-			if(item.title) _mapTag(item.title, "title");
-			if(item.publisher) _mapTag(item.publisher, "inst");
-			if(item.type) _mapTag(item.type, "degree");
+			_mapTag(item.title, "title");
+			_mapTag(item.publisher, "inst");
+			_mapTag(item.type, "degree");
 		} else if(item.itemType == "patent" && version == "1.0") {
 			_mapTag("info:ofi/fmt:kev:mtx:patent", "rft_val_fmt", true);
 			
-			if(item.title) _mapTag(item.title, "title");
-			if(item.assignee) _mapTag(item.assignee, "assignee");
-			if(item.patentNumber) _mapTag(item.patentNumber, "number");
+			_mapTag(item.title, "title");
+			_mapTag(item.assignee, "assignee");
+			_mapTag(item.patentNumber, "number");
 			
 			if(item.issueDate) {
 				_mapTag(Zotero.Date.strToISO(item.issueDate), "date");
@@ -188,23 +188,18 @@ Zotero.OpenURL = new function() {
 			//and work very nicely on roundtrip. All of these fields legal for mtx:dc according to
 			//http://alcme.oclc.org/openurl/servlet/OAIHandler/extension?verb=GetMetadata&metadataPrefix=mtx&identifier=info:ofi/fmt:kev:mtx:dc
 			_mapTag("info:ofi/fmt:kev:mtx:dc", "rft_val_fmt", true);
+			//lacking something better we use Zotero item types here; no clear alternative and this works for roundtrip
 			_mapTag(item.itemType, "type");
-			if(item.title) _mapTag(item.title, "title");
-			if(item.publicationTitle) _mapTag(item.publicationTitle, "source");
-			if(item.rights) _mapTag(item.rights, "rights");
-			if(item.publisher) _mapTag(item.publisher, "publisher");
-			if(item.abstractNote) _mapTag(item.abstractNote, "description");
-			if(item.ISBN){
-				 _mapTag("ISBN " + item.ISBN, "identifier");			
-			}
-			else if(item.ISSN){
-				 _mapTag("ISSN " + item.ISSN, "identifier");			
-			}
-			else if(item.DOI){
-				 _mapTag("urn::doi:" + item.DOI, "identifier");			
+			_mapTag(item.title, "title");
+			_mapTag(item.publicationTitle, "source");
+			_mapTag(item.rights, "rights");
+			_mapTag(item.publisher, "publisher");
+			_mapTag(item.abstractNote, "description");
+			if(item.DOI){
+				 _mapTag("urn:doi:" + item.DOI, "identifier");
 			}
 			else if(item.url){
-				 _mapTag(item.url, "identifier");			
+				 _mapTag(item.url, "identifier");
 			}
 		}
 		
@@ -241,10 +236,10 @@ Zotero.OpenURL = new function() {
 				if(pages.length >= 2) _mapTag(pages[1], "epage");
 			}
 		}
-		if(item.numPages) _mapTag(item.numPages, "tpages");
-		if(item.ISBN) _mapTag(item.ISBN, "isbn");
-		if(item.ISSN) _mapTag(item.ISSN, "issn");
-		if(item.language) _mapTag(item.language, "language");
+		_mapTag(item.numPages, "tpages");
+		_mapTag(item.ISBN, "isbn");
+		_mapTag(item.ISSN, "issn");
+		_mapTag(item.language, "language");
 		if(asObj) return entries;
 		return entries.join("&");
 	}
