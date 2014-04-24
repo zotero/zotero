@@ -675,7 +675,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 	});
 	
 	
-	obj._init = function (url, username, password) {
+	obj._init = function () {
 		_rootURI = false;
 		_userURI = false;
 		
@@ -695,6 +695,10 @@ Zotero.Sync.Storage.ZFS = (function () {
 		_userURI = uri;
 	};
 	
+	obj.clearCachedCredentials = function() {
+		_rootURI = _userURI = undefined;
+		_cachedCredentials = false;
+	};
 	
 	/**
 	 * Begin download process for individual file
