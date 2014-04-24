@@ -64,16 +64,40 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	onStopRequest: function (request, context, status) {
 		Zotero.debug('onStopRequest with ' + status);
 		
+		// Some errors from https://developer.mozilla.org/en-US/docs/Table_Of_Errors
+		var msg = "";
 		switch (status) {
-			case 0:
-			case 0x804b0002: // NS_BINDING_ABORTED
-				this._onStop(request, status);
-				break;
-			
-			default:
-				throw ("Unexpected request status " + status
-					+ " in Zotero.Sync.Storage.StreamListener.onStopRequest()");
+		// Normal
+		case 0:
+			break;
+		
+		// NS_BINDING_ABORTED
+		case 0x804b0002:
+			msg = "Request cancelled";
+			break;
+		
+		// NS_ERROR_NET_INTERRUPT
+		case 0x804B0047:
+			msg = "Request interrupted";
+			break;
+		
+		// NS_ERROR_NET_TIMEOUT
+		case 0x804B000E:
+			msg = "Request timed out";
+			break;
+		
+		default:
+			msg = "Request failed";
+			break;
 		}
+		
+		if (msg) {
+			msg += " in Zotero.Sync.Storage.StreamListener.onStopRequest() (" + status + ")";
+			Components.utils.reportError(msg);
+			Zotero.debug(msg, 1);
+		}
+		
+		this._onStop(request, status);
 	},
 	
 	// nsIWebProgressListener
@@ -170,7 +194,13 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 		
 		if (!cancelled && request instanceof Components.interfaces.nsIHttpChannel) {
 			request.QueryInterface(Components.interfaces.nsIHttpChannel);
-			status = request.responseStatus;
+			try {
+				status = request.responseStatus;
+			}
+			catch (e) {
+				Zotero.debug("Request responseStatus not available", 1);
+				status = 0;
+			}
 			request.QueryInterface(Components.interfaces.nsIRequest);
 		}
 		
