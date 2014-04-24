@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-8 -8 32 32" width="32px" height="32px">
+	<defs>
+		<style type="text/css"><![CDATA[
+			/* Linux */
+			#s1 {
+				stop-color: #899199;
+			}
+			#s2 {
+				stop-color: #7f868d;
+			}
+			
+			/* Mac OS X (except Aqua on Snow Leopard) */
+			@media (-moz-mac-graphite-theme), (-moz-mac-lion-theme) {
+				#s1 {
+					stop-color: #939393;
+				}
+				#s2 {
+					stop-color: #848484;
+				}
+			}
+			
+			/* Windows Classic & Luna */
+			@media (-moz-windows-theme) {
+				#s1 {
+					stop-color: #899198;
+				}
+				#s2 {
+					stop-color: #737b82;
+				}
+			}
+			
+			/* Windows Aero */
+			@media (-moz-windows-theme: aero), (-moz-windows-theme: aero-lite) {
+				#s1 {
+					stop-color: #85919e;
+				}
+				#s2 {
+					stop-color: #68717d;
+				}
+			}
+		]]></style>
+		<linearGradient x1="0" y1="2" x2="0" y2="30" gradientUnits="userSpaceOnUse" id="lg">
+			<stop id="s1" offset="0" />
+			<stop id="s2" offset="1" />
+		</linearGradient>
+		<filter color-interpolation-filters="sRGB" id="f">
+			<feGaussianBlur result="r8" stdDeviation="0.5" />
+			<feOffset result="r11" dy="0.5" dx="0" />
+			<feComposite in2="r11" operator="in" in="SourceGraphic" result="r6" />
+			<feFlood flood-color="#000" flood-opacity="0.75" in="r6" result="r10" />
+			<feBlend in2="r10" mode="normal" in="r6" result="r12" />
+			<feComposite in2="SourceGraphic" operator="in" result="fbSourceGraphic" />
+			<feColorMatrix values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0" in="fbSourceGraphic" result="fbSourceGraphicAlpha" />
+			<feFlood in="fbSourceGraphic" result="flood" flood-color="#fff" flood-opacity="0.5" />
+			<feComposite in2="fbSourceGraphic" operator="in" in="flood" result="c1" />
+			<feGaussianBlur result="blur" stdDeviation="1.5 0.01" />
+			<feOffset result="offset" dy="1.5" dx="0" />
+			<feComposite in2="offset" operator="over" in="fbSourceGraphic" result="c2" />
+		</filter>
+	</defs>
+	<polygon points="-2.267,-6 18.267,-6 18.267,3.333 7.066,14.533 
+	18.267,14.533 18.267,22 -2.267,22 -2.267,14.533 10.8,1.467 -2.267,1.467" style="fill: url(#lg); stroke: #000; stroke-width: 0.2; stroke-miterlimit: 4; filter: url(#f);" />
+</svg>

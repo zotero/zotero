@@ -24,6 +24,8 @@
 /*
   Add-on bar and toolbar icon
 */
+
+/* Old styling */
 #zotero-toolbar-button {
 	list-style-image: url(chrome://zotero/skin/zotero-z-24px.png);
 }
@@ -38,6 +40,19 @@ toolbar[iconsize="small"] #zotero-toolbar-button {
 
 toolbar[iconsize="small"] #zotero-toolbar-button:active {
 	list-style-image: url(chrome://zotero/skin/zotero-z-16px-active.png);
+}
+
+/* Australis styling */
+#zotero-toolbar-button[cui-areatype="menu-panel"],
+toolbarpaletteitem[place="palette"] > #zotero-toolbar-button,
+#zotero-toolbar-button:active[cui-areatype="menu-panel"],
+toolbarpaletteitem[place="palette"] > #zotero-toolbar-button:active {
+  list-style-image: url("chrome://zotero/skin/zotero-z-32px-australis.svg");
+}
+
+#zotero-toolbar-button[cui-areatype="toolbar"],
+#zotero-toolbar-button:active[cui-areatype="toolbar"] {
+  list-style-image: url("chrome://zotero/skin/zotero-z-16px-australis.svg") !important;
 }
 
 #addon-bar #zotero-toolbar-button {
