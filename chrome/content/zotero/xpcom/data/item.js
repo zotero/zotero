@@ -956,7 +956,8 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 					title = title + ' (' + court + ');
 				}
 			}
-		} else { // civil law cases have only shortTitle as case name
+		} 
+		else { // civil law cases have only shortTitle as case name
 			var strParts = [];
 			var caseinfo = "";
 			
