@@ -948,14 +948,15 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 	else if (itemTypeID == 17) { // 'case' itemTypeID
 		if (title) { // common law cases always have case names
 			var reporter = this.getField('reporter');
-			var court = this.getField('court');
 			if (reporter) { 
-				title = Zotero.localeJoin([title, '(' + reporter + ')']);
-			} else if (court) {
-				title = Zotero.localeJoin([title, '(' + court + ')']);
+				title = title + ' (' + reporter + ')';
+			} else {
+				var court = this.getField('court');
+				if (court) {
+					title = title + ' (' + court + ');
+				}
 			}
-		}
-		else { // civil law cases have only shortTitle as case name
+		} else { // civil law cases have only shortTitle as case name
 			var strParts = [];
 			var caseinfo = "";
 			
