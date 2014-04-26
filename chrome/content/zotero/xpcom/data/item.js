@@ -953,7 +953,7 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 			} else {
 				var court = this.getField('court');
 				if (court) {
-					title = title + ' (' + court + ');
+					title = title + ' (' + court + ')';
 				}
 			}
 		}
