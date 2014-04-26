@@ -31,6 +31,8 @@ Zotero.Sync.Storage.ZFS = (function () {
 		"Zotero-API-Version" : ZOTERO_CONFIG.API_VERSION
 	};
 	var _cachedCredentials = false;
+	var _s3Backoff = 1;
+	var _maxS3Backoff = 60;
 	
 	/**
 	 * Get file metadata on storage server
@@ -463,9 +465,29 @@ Zotero.Sync.Storage.ZFS = (function () {
 				onStop: function (httpRequest, status, response, data) {
 					data.request.setChannel(false);
 					
-					deferred.resolve(
-						onUploadComplete(httpRequest, status, response, data)
-					);
+					// For timeouts from S3, which seem to happen intermittently,
+					// wait a little and try again
+					let timeoutMessage = "Your socket connection to the server was not read from or "
+						+ "written to within the timeout period.";
+					if (status == 400 && response.indexOf(timeoutMessage) != -1) {
+						let libraryKey = Zotero.Items.getLibraryKeyHash(item);
+						let msg = "S3 returned 400 in Zotero.Sync.Storage.ZFS.onUploadComplete()"
+							+ " (" + libraryKey + ") -- retrying"
+						Components.utils.reportError(msg);
+						Zotero.debug(msg, 1);
+						Zotero.debug(response, 1);
+						if (_s3Backoff < _maxS3Backoff) {
+							_s3Backoff *= 2;
+						}
+						Zotero.debug("Delaying " + libraryKey + " upload for " + _s3Backoff + " seconds");
+						Q.delay(_s3Backoff * 1000)
+						.then(function () {
+							deferred.resolve(postFile(request, item, url, uploadKey, params));
+						});
+						return;
+					}
+					
+					deferred.resolve(onUploadComplete(httpRequest, status, response, data));
 				},
 				onCancel: function (httpRequest, status, data) {
 					onUploadCancel(httpRequest, status, data)
@@ -504,6 +526,10 @@ Zotero.Sync.Storage.ZFS = (function () {
 			
 			switch (status) {
 				case 201:
+					// Decrease backoff delay on successful upload
+					if (_s3Backoff > 1) {
+						_s3Backoff /= 2;
+					}
 					break;
 				
 				case 500:
@@ -675,7 +701,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 	});
 	
 	
-	obj._init = function (url, username, password) {
+	obj._init = function () {
 		_rootURI = false;
 		_userURI = false;
 		
@@ -695,6 +721,10 @@ Zotero.Sync.Storage.ZFS = (function () {
 		_userURI = uri;
 	};
 	
+	obj.clearCachedCredentials = function() {
+		_rootURI = _userURI = undefined;
+		_cachedCredentials = false;
+	};
 	
 	/**
 	 * Begin download process for individual file

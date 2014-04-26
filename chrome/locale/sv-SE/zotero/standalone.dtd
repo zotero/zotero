@@ -10,7 +10,7 @@
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 
-<!ENTITY fileMenu.label "Fil">
+<!ENTITY fileMenu.label "Arkiv">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Spara…">
 <!ENTITY saveCmd.key "S">

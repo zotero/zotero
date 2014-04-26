@@ -151,6 +151,7 @@ Zotero_Preferences.Sync = {
 	
 	unverifyStorageServer: function () {
 		Zotero.Prefs.set('sync.storage.verified', false);
+		Zotero.Sync.Storage.WebDAV.clearCachedCredentials();
 		Zotero.Sync.Storage.resetAllSyncStates(null, true, false);
 	},
 	

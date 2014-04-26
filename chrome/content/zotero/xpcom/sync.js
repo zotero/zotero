@@ -1277,6 +1277,9 @@ Zotero.Sync.Server = new function () {
 			break;
 		}
 		
+		// Clear password for file sync
+		Zotero.Sync.Storage.ZFS.clearCachedCredentials();
+		
 		_cachedCredentials = {};
 		
 		var username = this.username;
