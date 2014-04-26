@@ -31,7 +31,7 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Ta automatiskt lokala kopior när källor skapas av hemsidor">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Bifoga automatiskt associerade PDF:er och andra filer när källor sparas">
 <!ENTITY zotero.preferences.automaticTags "Lägg automatiskt till etiketter med nyckelord och ämnesord">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Radera automatiskt källor i papperskorgen som raderats för mer än">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Ta automatiskt bort källor från papperskorgen som lagts dit för mer än">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dagar sen">
 
 <!ENTITY zotero.preferences.groups "Grupper">

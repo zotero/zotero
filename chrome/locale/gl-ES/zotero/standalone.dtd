@@ -1,4 +1,4 @@
-<!ENTITY preferencesCmdMac.label "Preferencias_">
+<!ENTITY preferencesCmdMac.label "Preferencias...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Servizos">
 <!ENTITY hideThisAppCmdMac.label "Agochar &brandShortName;">
@@ -54,14 +54,14 @@
 <!ENTITY selectAllCmd.label "Escoller todo">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Preferences">
+<!ENTITY preferencesCmd.label "Preferencias">
 <!ENTITY preferencesCmd.accesskey "O">
 <!ENTITY preferencesCmdUnix.label "Preferencias">
 <!ENTITY preferencesCmdUnix.accesskey "n">
 <!ENTITY findCmd.label "Buscar">
 <!ENTITY findCmd.accesskey "F">
 <!ENTITY findCmd.commandkey "F">
-<!ENTITY bidiSwitchPageDirectionItem.label "Trocar a dirección de páxina">
+<!ENTITY bidiSwitchPageDirectionItem.label "Cambiar a dirección de páxina">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Cambiar a dirección do texto">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">

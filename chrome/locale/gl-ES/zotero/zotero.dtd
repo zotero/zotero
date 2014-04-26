@@ -4,8 +4,8 @@
 <!ENTITY zotero.general.deselectAll "Desmarcar todo">
 <!ENTITY zotero.general.edit "Editar">
 <!ENTITY zotero.general.delete "Borrar">
-<!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
+<!ENTITY zotero.general.ok "Aceptar">
+<!ENTITY zotero.general.cancel "Cancelar">
 
 <!ENTITY zotero.errorReport.title "Informe de erros de Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "O rexistro de erros pode incluír mensaxes que non gardan relación con Zotero.">
@@ -136,7 +136,7 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Non hai etiquetas que mostrar">
 <!ENTITY zotero.tagSelector.filter "Filtro:">
-<!ENTITY zotero.tagSelector.showAutomatic "Mostrar automáticamente">
+<!ENTITY zotero.tagSelector.showAutomatic "Mostrar automaticamente">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Mostrar todas as etiquetas nesta librería">
 <!ENTITY zotero.tagSelector.selectVisible "Seleccionar o visible">
 <!ENTITY zotero.tagSelector.clearVisible "Desmarcar o visible">
@@ -180,7 +180,7 @@
 <!ENTITY zotero.exportOptions.format.label "Formato:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Opcións do tradutor">
 
-<!ENTITY zotero.charset.label "Codificación de carácteres">
+<!ENTITY zotero.charset.label "Codificación de caracteres">
 <!ENTITY zotero.moreEncodings.label "Máis codificacións">
 
 <!ENTITY zotero.citation.keepSorted.label "Manter as fontes ordenadas">
@@ -191,7 +191,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Eliminar o autor">
 <!ENTITY zotero.citation.prefix.label "Prefixo:">
 <!ENTITY zotero.citation.suffix.label "Sufixo:">
-<!ENTITY zotero.citation.editorWarning.label "Aviso: se editas a cita no editor non se actualizará máis reflictindo os cambios tanto na base de datos como no estilo de citas.">
+<!ENTITY zotero.citation.editorWarning.label "Aviso: se editas a cita no editor non se actualizará máis reflectindo os cambios tanto na base de datos como no estilo de citas.">
 
 <!ENTITY zotero.richText.italic.label "Cursiva">
 <!ENTITY zotero.richText.bold.label "Negriña">
@@ -214,11 +214,11 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Os marcadores consérvanse a través de e OpenOffice e Microsoft Word pero poden ser modificados accidentalmente. Por motivos de compatibilidade, as citas non se insiren nas notas a final de páxina ou nos rodapés cando se activa esa opción.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Títulos de revitas abreviados automaticamente">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Títulos de revistas abreviados automaticamente">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "As abreviaturas das revistas de MEDLINE xeraranse automaticamente empregando os títulos das revistas. O campo «Abrev revista» ignórase.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "Almacenar as referencias no documento">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Almacenar as referencias no documento supón un aumento no peso do ficheiro máis permitelle compartir o documento sen ter que empregar o grupo de Zotero. Precísase ter un Zotero 3.0 ou as versións seguintes para actualizar os ficheiros que se crearon con esta opción.">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Almacenar as referencias no documento supón un aumento no peso do ficheiro máis permítelle compartir o documento sen ter que empregar o grupo de Zotero. Precísase ter un Zotero 3.0 ou as versións seguintes para actualizar os ficheiros que se crearon con esta opción.">
 
 <!ENTITY zotero.integration.showEditor.label "Mostrar o editor">
 <!ENTITY zotero.integration.classicView.label "Vista clásica">
@@ -241,13 +241,13 @@
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Non se gardarán as etiquetas que non estean marcadas.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Eliminarase a etiqueta de todos os elementos.">
 
-<!ENTITY zotero.merge.title "Resolución de conflicto">
+<!ENTITY zotero.merge.title "Resolución de conflito">
 <!ENTITY zotero.merge.of "de">
 <!ENTITY zotero.merge.deleted "Eliminado">
 
 <!ENTITY zotero.proxy.recognized.title "Recoñeceuse o proxy">
 <!ENTITY zotero.proxy.recognized.warning "Engadir só proxies ligados desde a súa biblioteca, escola ou sitio web corporativo">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Engadir outros proxies permítelle a sitios maliciosos que se pasen por sitios nos cales confias.">
+<!ENTITY zotero.proxy.recognized.warning.secondary "Engadir outros proxies permítelle a sitios maliciosos que se pasen por sitios nos cales confías.">
 <!ENTITY zotero.proxy.recognized.disable.label "Non redireccionar automaticamente as solicitudes a través de proxies previamente recoñecidos">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorar">
 
