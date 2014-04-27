@@ -90,23 +90,33 @@ $rdf.Serializer = function () {
     for(var ns in sz.prefixes) {
       namespaces[sz.prefixes[ns]] = ns; // reverse index
     }
-    if('#/'.indexOf(p[p.length - 1]) >= 0) p = p.slice(0, -1);
-    var slash = p.lastIndexOf('/');
-    if(slash >= 0) p = p.slice(slash + 1);
-    var i = 0;
-    while(i < p.length)
-    if(sz.prefixchars.indexOf(p[i]))
+    // trim off illegal characters from the end
+    var i;
+    for(i = p.length - 1; i>=0; i--) {
+      if(sz._notNameChars.indexOf(p.charAt(i)) == -1) break;
+    }
+    p = p.substring(0, i+1);
+    if(p) {
+      // find shortest possible NCName to use as namespace name
+      for(i = p.length - 1; i>=0; i--) {
+        if(sz._notNameChars.indexOf(p.charAt(i)) != -1) break;
+      }
       i++;
-    else
-      break;
-    p = p.slice(0, i);
-    if(p.length < 6 && canUse(p)) return pok; // exact i sbest
-    if(canUse(p.slice(0, 3))) return pok;
-    if(canUse(p.slice(0, 2))) return pok;
-    if(canUse(p.slice(0, 4))) return pok;
-    if(canUse(p.slice(0, 1))) return pok;
-    if(canUse(p.slice(0, 5))) return pok;
-    for(var i = 0;; i++) if(canUse(p.slice(0, 3) + i)) return pok;
+      p = p.substr(i);
+      
+      if(p.length < 6 && canUse(p)) return pok; // exact is best
+      if(canUse(p.slice(0, 3))) return pok;
+      if(canUse(p.slice(0, 2))) return pok;
+      if(canUse(p.slice(0, 4))) return pok;
+      if(canUse(p.slice(0, 1))) return pok;
+      if(canUse(p.slice(0, 5))) return pok;
+      p = p.slice(0, 3);
+    } else {
+      // no suitable characters (weird), fall back to 'ns'
+      p = 'ns';
+      if(canUse(p)) return pok;
+    }
+    for(var i = 0;; i++) if(canUse(p + i)) return pok;
   }
 
 
@@ -267,8 +277,13 @@ $rdf.Serializer = function () {
     return this.statementsToN3(f.statements);
   }
 
-  __Serializer.prototype._notQNameChars = "\t\r\n !\"#$%&'()*.,+/;<=>?@[\\]^`{|}~";
+  __Serializer.prototype._notQNameChars = "\t\r\n !\"#$%&'()*,+/;<=>?@[\\]^`{|}~";
   __Serializer.prototype._notNameChars = (__Serializer.prototype._notQNameChars + ":");
+  __Serializer.prototype._NCNameRegExp = (function() {
+    // escape characters that are unsafe inside RegExp character set
+    var reSafeChars = __Serializer.prototype._notNameChars.replace(/[-\]\\]/g, '\\$&');
+    return new RegExp('[^0-9\\-.' + reSafeChars + '][^' + reSafeChars + ']*$');
+  })();
 
 
   __Serializer.prototype.statementsToN3 = function (sts) {
@@ -822,20 +837,11 @@ $rdf.Serializer = function () {
     function qname(term) {
       var uri = term.uri;
 
-      var j = uri.indexOf('#');
-      if(j < 0 && sz.flags.indexOf('/') < 0) {
-        j = uri.lastIndexOf('/');
-      }
+      var j = uri.search(sz._NCNameRegExp);
       if(j < 0) throw("Cannot make qname out of <" + uri + ">")
-
-      var canSplit = true;
-      for(var k = j + 1; k < uri.length; k++) {
-        if(__Serializer.prototype._notNameChars.indexOf(uri[k]) >= 0) {
-          throw('Invalid character "' + uri[k] + '" cannot be in XML qname for URI: ' + uri);
-        }
-      }
-      var localid = uri.slice(j + 1);
-      var namesp = uri.slice(0, j + 1);
+      
+      var localid = uri.substr(j);
+      var namesp = uri.substr(0, j);
       if(sz.defaultNamespace
         && sz.defaultNamespace == namesp
         && sz.flags.indexOf('d') < 0) { // d -> suppress default
