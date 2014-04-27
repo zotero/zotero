@@ -535,7 +535,8 @@ Zotero.Translate.IO.Read = function(file, mode) {
 	this._openRawStream();
 	
 	// start detecting charset
-	var charset = null;
+	this._charset = null;
+	this._bomLength = 0;
 	
 	// look for a BOM in the document
 	var binStream = Components.classes["@mozilla.org/binaryinputstream;1"].
@@ -551,14 +552,13 @@ Zotero.Translate.IO.Read = function(file, mode) {
 	}
 	
 	if(this._charset) {
+		Zotero.debug("Translate: Found BOM. Setting character encoding to " + this._charset);
 		// BOM found; store its length and go back to the beginning of the file
 		this._bomLength = BOMs[this._charset].length;
-		this._rawStream.QueryInterface(Components.interfaces.nsISeekableStream)
-			.seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, this._bomLength);
 	} else {
-		// look for an XML parse instruction
-		this._bomLength = 0;
+		this._rewind();
 		
+		// look for an XML parse instruction
 		var sStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
 					 .createInstance(Components.interfaces.nsIScriptableInputStream);
 		sStream.init(this._rawStream);
@@ -591,17 +591,21 @@ Zotero.Translate.IO.Read = function(file, mode) {
 					} catch(e) {}
 				}
 				
-				// if we know for certain document is XML, we also know for certain that the
-				// default charset for XML is UTF-8
-				if(!this._charset) this._charset = "UTF-8";
+				if(this._charset) {
+					Zotero.debug("Translate: Found XML parse instruction. Setting character encoding to " + this._charset);
+				} else {
+					// if we know for certain document is XML, we also know for certain that the
+					// default charset for XML is UTF-8
+					this._charset = "UTF-8";
+					Zotero.debug("Translate: XML parse instruction not found. Defaulting to UTF-8 for XML files");
+				}
 			}
 		}
 		
 		// If we managed to get a charset here, then translators shouldn't be able to override it,
 		// since it's almost certainly correct. Otherwise, we allow override.
-		this._allowCharsetOverride = !!this._charset;		
-		this._rawStream.QueryInterface(Components.interfaces.nsISeekableStream)
-			.seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, this._bomLength);
+		this._allowCharsetOverride = !this._charset;
+		this._rewind();
 		
 		if(!this._charset) {
 			// No XML parse instruction or BOM.
@@ -668,6 +672,7 @@ Zotero.Translate.IO.Read = function(file, mode) {
 						break;
 					}
 				}
+				this._rewind();
 			} else {
 				// No need to auto-detect; user has specified a charset
 				this._charset = charsetPref;
@@ -693,13 +698,18 @@ Zotero.Translate.IO.Read.prototype = {
 		this._rawStream.init(this.file, 0x01, 0664, 0);
 	},
 	
-	"_seekToStart":function(charset) {
-		this._openRawStream();
-		
+	"_rewind":function() {
 		this._linesExhausted = false;
 		this._rawStream.QueryInterface(Components.interfaces.nsISeekableStream)
 			.seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, this._bomLength);
+		this._rawStream.QueryInterface(Components.interfaces.nsIFileInputStream);
 		this.bytesRead = this._bomLength;
+	},
+	
+	"_seekToStart":function(charset) {
+		this._openRawStream();
+		
+		this._rewind();
 	
 		this.inputStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 			.createInstance(Components.interfaces.nsIConverterInputStream);
@@ -747,10 +757,10 @@ Zotero.Translate.IO.Read.prototype = {
 		}
 		
 		// seek back to the beginning
-		this._seekToStart(this._allowCharsetOverride ? this._allowCharsetOverride : this._charset);
+		this._seekToStart(this._allowCharsetOverride ? charset : this._charset);
 		
-		if(!_allowCharsetOverride) {
-			Zotero.debug("Translate: setCharacterSet: translate charset override ignored due to BOM or XML parse instruction");
+		if(!this._allowCharsetOverride) {
+			Zotero.debug("Translate: setCharacterSet: translate charset override ignored due to BOM or XML parse instruction. Using " + this._charset);
 		}
 	},
 	
