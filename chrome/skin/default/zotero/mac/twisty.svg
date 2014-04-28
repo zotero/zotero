@@ -1,0 +1,12 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+	 - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<svg  xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      width="16" height="16" viewBox="0 0 16 16">
+  <g fill="#888">
+    <polyline points="3 4 12 4 7.5 12" transform="rotate(-90, 7.5, 7.5)"/>
+  </g>
+</svg>
+
