@@ -175,5 +175,5 @@ pref("extensions.zotero.fallbackLauncher.windows", "");
 //Translators
 pref("extensions.zotero.translators.attachSupplementary", false);
 pref("extensions.zotero.translators.supplementaryAsLink", false);
-pref("extensions.zotero.translators.RIS.import.ignoreUnknown", false);
+pref("extensions.zotero.translators.RIS.import.ignoreUnknown", true);
 pref("extensions.zotero.translators.RIS.import.keepID", false);
