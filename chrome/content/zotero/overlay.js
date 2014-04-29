@@ -124,7 +124,7 @@ var ZoteroOverlay = new function()
 						var property = "firstRunGuidance.toolbarButton";
 						var msg = Zotero.getString(property, shortcut);
 						if (isUpgrade) {
-							msg = Zotero.getString(property + ".new") + " " + msg;
+							msg = Zotero.getString(property + ".upgrade") + " " + msg;
 						}
 						document.getElementById("zotero-toolbar-button-guidance").show(null, msg);
 					}, 0);
