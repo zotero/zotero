@@ -52,7 +52,7 @@
 	<toolbar id="zotero-toolbar" nowindowdrag="true"/>
 	
 	<vbox id="appcontent">
-		<zoteroguidancepanel id="zotero-toolbar-button-guidance" about="toolbarButton" for="zotero-toolbar-button" position="bottomcenter topleft" delay="1000" foregroundonly="true"/>
+		<zoteroguidancepanel id="zotero-toolbar-button-guidance" about="toolbarButton" for="zotero-toolbar-button" position="bottomcenter topleft" delay="1000" foregroundonly="true" noautohide="true"/>
 		<!-- onmouseup shouldn't be necessary but seems to help prevent tag selector from sometimes going off the screen -->
 		<splitter id="zotero-splitter" resizebefore="closest" resizeafter="closest" hidden="true"
 			onmouseup="ZoteroPane.updateTagSelectorSize()"/>

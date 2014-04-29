@@ -74,6 +74,14 @@
 					} else {
 						f();
 					}
+
+					if(this.hasAttribute("noautohide")) {
+						var listener = function() {
+							panel.hidePopup();
+							panel.removeEventListener("click", listener, false);
+						}
+						panel.addEventListener("click", listener, false);
+					}
 				]]>
 				</body>
 			</method>
@@ -87,7 +95,7 @@
 		</implementation>
 		
 		<content>
-			<xul:panel orient="horizontal" style="max-width: 400px" type="arrow" align="top">
+			<xul:panel orient="horizontal" style="max-width: 400px" type="arrow" align="top" xbl:inherits="noautohide">
 				<xul:image src="chrome://zotero/skin/zotero-new-z-48px.png" style="margin-right: 10px; width: 48px; height: 48px;"/>
 				<xul:description flex="1"></xul:description>
 			</xul:panel>
