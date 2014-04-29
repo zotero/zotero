@@ -117,16 +117,10 @@ var ZoteroOverlay = new function()
 						try {
 							isUpgrade = Zotero.Prefs.get("firstRunGuidanceShown.saveIcon");
 						} catch(e) {}
-						
-						var shortcut = Zotero.getString(
-							Zotero.isMac ? "general.keys.cmdShift" : "general.keys.ctrlShift"
-						) + Zotero.Prefs.get("keys.openZotero");
-						var property = "firstRunGuidance.toolbarButton";
-						var msg = Zotero.getString(property, shortcut);
-						if (isUpgrade) {
-							msg = Zotero.getString(property + ".upgrade") + " " + msg;
-						}
-						document.getElementById("zotero-toolbar-button-guidance").show(null, msg);
+						var property = "firstRunGuidance.toolbarButton."+(isUpgrade ? "upgrade" : "new");
+						var shortcut = Zotero.getString(Zotero.isMac ? "general.keys.cmdShift" : "general.keys.ctrlShift")+
+							           Zotero.Prefs.get("keys.openZotero");
+						document.getElementById("zotero-toolbar-button-guidance").show(null, Zotero.getString(property, shortcut));
 					}, 0);
 				}
 			}
