@@ -32,6 +32,7 @@
 		<implementation>
 			<method name="show">
 				<parameter name="forEl"/>
+				<parameter name="text"/>
 				<body>
 				<![CDATA[
 					var about = this.getAttribute("about"),
@@ -48,7 +49,8 @@
 						panel = document.getAnonymousNodes(this)[0];
 					
 					if(!forEl) forEl = document.getElementById(this.getAttribute("for"));
-					var text = Zotero.getString("firstRunGuidance."+about).split("\n");
+					if(!text) text = Zotero.getString("firstRunGuidance."+about);
+					text = text.split("\n");
 					var descriptionNode = panel.lastChild;
 					while(text.length) {
 						var textLine = text.shift();

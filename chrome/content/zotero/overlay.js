@@ -134,6 +134,20 @@ var ZoteroOverlay = new function()
 			icon.setAttribute('tooltiptext', errMsg);
 			icon.setAttribute('error', 'true');
 		}
+
+		if (icon.getAttribute("cui-areatype") == "toolbar") {
+			window.setTimeout(function() {
+				var isUpgrade = false;
+				try {
+					isUpgrade = Zotero.Prefs.get("firstRunGuidanceShown.saveIcon");
+				} catch(e) {}
+
+				var property = "firstRunGuidance.toolbarButton."+(isUpgrade ? "upgrade" : "new");
+				var shortcut = Zotero.getString(Zotero.isMac ? "general.keys.cmdShift" : "general.keys.ctrlShift")+
+					           Zotero.Prefs.get("keys.openZotero");
+				document.getElementById("zotero-toolbar-button-guidance").show(null, Zotero.getString(property, shortcut));
+			}, 0);
+		}
 		
 		// Used for loading pages from upgrade wizard
 		if (Zotero && Zotero.initialURL) {
