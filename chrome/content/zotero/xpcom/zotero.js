@@ -330,16 +330,12 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			if (e.name == 'NS_ERROR_FILE_NOT_FOUND') {
 				Zotero.startupError = Zotero.getString('dataDir.notFound');
 				_startupErrorHandler = function() {
-					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						.getService(Components.interfaces.nsIWindowMediator);
-					var win = wm.getMostRecentWindow('navigator:browser');
-					
 					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 							createInstance(Components.interfaces.nsIPromptService);
 					var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
 						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
 						+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
-					var index = ps.confirmEx(win,
+					var index = ps.confirmEx(null,
 						Zotero.getString('general.error'),
 						Zotero.startupError + '\n\n' +
 						Zotero.getString('dataDir.previousDir') + ' '
