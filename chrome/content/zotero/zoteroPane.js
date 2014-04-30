@@ -631,9 +631,19 @@ var ZoteroPane = new function()
 					try {
 						// Ignore Cmd-Shift-Z keystroke in text areas
 						if (Zotero.isMac && key == 'Z' &&
-								event.originalTarget.localName == 'textarea') {
-							Zotero.debug('Ignoring keystroke in text area');
-							return;
+								(event.originalTarget.localName == 'input'
+									|| event.originalTarget.localName == 'textarea')) {
+							try {
+								var isSearchBar = event.originalTarget.parentNode.parentNode.id == 'zotero-tb-search';
+							}
+							catch (e) {
+								Zotero.debug(e, 1);
+								Components.utils.reportError(e);
+							}
+							if (!isSearchBar) {
+								Zotero.debug('Ignoring keystroke in text field');
+								return;
+							}
 						}
 					}
 					catch (e) {
