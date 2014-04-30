@@ -2420,17 +2420,17 @@ Zotero.Keys = new function() {
 	 * Called by Zotero.init()
 	 */
 	function init() {
-		var actions = Zotero.Prefs.prefBranch.getChildList('keys', {}, {});
+		var cmds = Zotero.Prefs.prefBranch.getChildList('keys', {}, {});
 		
 		// Get the key=>command mappings from the prefs
-		for each(var action in actions) {
-			var action = action.substr(5); // strips 'keys.'
+		for each(var cmd in cmds) {
+			cmd = cmd.substr(5); // strips 'keys.'
 			// Remove old pref
-			if (action == 'overrideGlobal') {
+			if (cmd == 'overrideGlobal') {
 				Zotero.Prefs.clear('keys.overrideGlobal');
 				continue;
 			}
-			_keys[Zotero.Prefs.get('keys.' + action)] = action;
+			_keys[this.getKeyForCommand(cmd)] = cmd;
 		}
 	}
 	
@@ -2453,7 +2453,7 @@ Zotero.Keys = new function() {
 		globalKeys.forEach(function (x) {
 			let keyElem = document.getElementById('key_' + x.name);
 			if (keyElem) {
-				let prefKey = Zotero.Prefs.get('keys.'  + x.name);
+				let prefKey = this.getKeyForCommand(x.name);
 				// Only override the default with the pref if the <key> hasn't
 				// been manually changed and the pref has been
 				if (keyElem.getAttribute('key') == x.defaultKey
@@ -2462,13 +2462,22 @@ Zotero.Keys = new function() {
 					keyElem.setAttribute('key', prefKey);
 				}
 			}
-		});
+		}.bind(this));
 	}
 	
 	
 	function getCommand(key) {
 		key = key.toUpperCase();
 		return _keys[key] ? _keys[key] : false;
+	}
+	
+	
+	this.getKeyForCommand = function (cmd) {
+		try {
+			var key = Zotero.Prefs.get('keys.' + cmd);
+		}
+		catch (e) {}
+		return key !== undefined ? key.toUpperCase() : false;
 	}
 }
 
