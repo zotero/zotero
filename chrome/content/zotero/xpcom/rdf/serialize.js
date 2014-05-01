@@ -678,7 +678,10 @@ $rdf.Serializer = function () {
 
     function escapeForXML(str) {
       if(typeof str == 'undefined') return '@@@undefined@@@@';
-      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+      return str.replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
     }
 
     function relURI(term) {
