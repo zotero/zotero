@@ -47,7 +47,7 @@
 <!ENTITY zotero.items.itemType "Įrašo tipas">
 <!ENTITY zotero.items.type_column "Tipas">
 <!ENTITY zotero.items.title_column "Antraštė">
-<!ENTITY zotero.items.creator_column "Kūrėjas">
+<!ENTITY zotero.items.creator_column "Autorius">
 <!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Metai">
 <!ENTITY zotero.items.publisher_column "Leidėjas">
@@ -100,7 +100,7 @@
 <!ENTITY zotero.toolbar.removeItem.label "Pašalinti įrašą...">
 <!ENTITY zotero.toolbar.newCollection.label "Naujas rinkinys...">
 <!ENTITY zotero.toolbar.newGroup "Nauja grupė...">
-<!ENTITY zotero.toolbar.newSubcollection.label "Naujas kolekcija kolekcijoje...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Naujas poaplankis...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nauja įsiminta paieška...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Išvalyti šiukšlinę">
 <!ENTITY zotero.toolbar.tagSelector.label "Rodyti/slėpti gairių parinkiklį">
@@ -188,7 +188,7 @@
 <!ENTITY zotero.citation.page "Puslapis">
 <!ENTITY zotero.citation.paragraph "Pastraipa">
 <!ENTITY zotero.citation.line "Eilutė">
-<!ENTITY zotero.citation.suppressAuthor.label "Trumpinti autorius">
+<!ENTITY zotero.citation.suppressAuthor.label "Nerodyti autoriaus">
 <!ENTITY zotero.citation.prefix.label "Priešdėlis:">
 <!ENTITY zotero.citation.suffix.label "Priesaga:">
 <!ENTITY zotero.citation.editorWarning.label "Įspėjimas: jei pakeisite citavimą tekstų rengyklėje, jis nebebus atnaujinamas pagal jūsiškę duomenų bazę ar citavimo stilių.">
@@ -225,7 +225,7 @@
 
 <!ENTITY zotero.integration.references.label "Nuorodos bibliogafijoje">
 
-<!ENTITY zotero.sync.button "Sinchronizuoti su Zotero serveriu">
+<!ENTITY zotero.sync.button "Sinchronizavimas su Zotero serveriu">
 <!ENTITY zotero.sync.error "Sinchronizavimo klaida">
 <!ENTITY zotero.sync.storage.progress "Eiga:">
 <!ENTITY zotero.sync.storage.downloads "Siuntiniai:">
