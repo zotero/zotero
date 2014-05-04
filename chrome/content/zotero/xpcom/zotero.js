@@ -39,7 +39,7 @@ const ZOTERO_CONFIG = {
 	BOOKMARKLET_ORIGIN : 'https://www.zotero.org',
 	HTTP_BOOKMARKLET_ORIGIN : 'http://www.zotero.org',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "4.0.20.1.SOURCE"
+	VERSION: "4.0.21.SOURCE"
 };
 
 // Commonly used imports accessible anywhere
@@ -2420,17 +2420,17 @@ Zotero.Keys = new function() {
 	 * Called by Zotero.init()
 	 */
 	function init() {
-		var actions = Zotero.Prefs.prefBranch.getChildList('keys', {}, {});
+		var cmds = Zotero.Prefs.prefBranch.getChildList('keys', {}, {});
 		
 		// Get the key=>command mappings from the prefs
-		for each(var action in actions) {
-			var action = action.substr(5); // strips 'keys.'
+		for each(var cmd in cmds) {
+			cmd = cmd.substr(5); // strips 'keys.'
 			// Remove old pref
-			if (action == 'overrideGlobal') {
+			if (cmd == 'overrideGlobal') {
 				Zotero.Prefs.clear('keys.overrideGlobal');
 				continue;
 			}
-			_keys[Zotero.Prefs.get('keys.' + action)] = action;
+			_keys[this.getKeyForCommand(cmd)] = cmd;
 		}
 	}
 	
@@ -2453,7 +2453,7 @@ Zotero.Keys = new function() {
 		globalKeys.forEach(function (x) {
 			let keyElem = document.getElementById('key_' + x.name);
 			if (keyElem) {
-				let prefKey = Zotero.Prefs.get('keys.'  + x.name);
+				let prefKey = this.getKeyForCommand(x.name);
 				// Only override the default with the pref if the <key> hasn't
 				// been manually changed and the pref has been
 				if (keyElem.getAttribute('key') == x.defaultKey
@@ -2462,13 +2462,22 @@ Zotero.Keys = new function() {
 					keyElem.setAttribute('key', prefKey);
 				}
 			}
-		});
+		}.bind(this));
 	}
 	
 	
 	function getCommand(key) {
 		key = key.toUpperCase();
 		return _keys[key] ? _keys[key] : false;
+	}
+	
+	
+	this.getKeyForCommand = function (cmd) {
+		try {
+			var key = Zotero.Prefs.get('keys.' + cmd);
+		}
+		catch (e) {}
+		return key !== undefined ? key.toUpperCase() : false;
 	}
 }
 
@@ -2509,21 +2518,18 @@ Zotero.VersionHeader = {
 }
 
 Zotero.DragDrop = {
-	currentDataTransfer: null,
+	currentDragEvent: null,
+	currentTarget: null,
+	currentOrientation: 0,
 	
-	getDragData: function (element, firstOnly) {
-		var dt = this.currentDataTransfer;
-		if (!dt) {
-			Zotero.debug("Drag data not available");
-			return false;
-		}
+	getDataFromDataTransfer: function (dataTransfer, firstOnly) {
+		var dt = dataTransfer;
 		
 		var dragData = {
 			dataType: '',
 			data: [],
 			dropEffect: dt.dropEffect
 		};
-		
 		
 		var len = firstOnly ? 1 : dt.mozItemCount;
 		
@@ -2562,6 +2568,46 @@ Zotero.DragDrop = {
 		}
 		
 		return dragData;
+	},
+	
+	
+	getDragSource: function () {
+		var dt = this.currentDragEvent.dataTransfer;
+		if (!dt) {
+			Zotero.debug("Drag data not available", 2);
+			return false;
+		}
+		
+		// For items, the drag source is the ItemGroup of the parent window
+		// of the source tree
+		if (dt.types.contains("zotero/item")) {
+			var sourceNode = dt.mozSourceNode;
+			if (!sourceNode || sourceNode.tagName != 'treechildren'
+					|| sourceNode.parentElement.id != 'zotero-items-tree') {
+				return false;
+			}
+			var win = sourceNode.ownerDocument.defaultView;
+			return win.ZoteroPane.collectionsView.itemGroup;
+		}
+		else {
+			return false;
+		}
+	},
+	
+	
+	getDragTarget: function () {
+		var event = this.currentDragEvent;
+		var target = event.target;
+		if (target.tagName == 'treechildren') {
+			var tree = target.parentNode;
+			if (tree.id == 'zotero-collections-tree') {
+				let row = {}, col = {}, obj = {};
+				tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
+				let win = tree.ownerDocument.defaultView;
+				return win.ZoteroPane.collectionsView.getItemGroupAtRow(row.value);
+			}
+		}
+		return false;
 	}
 }
 

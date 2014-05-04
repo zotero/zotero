@@ -28,7 +28,7 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Leisti zotero.org derinti turinį pagal dabartinę Zotero versiją">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Jei parinktis įgalinta, dabartinė Zotero versija bus automatiškai įtraukta į zotero.org HTTP užklausas.">
 <!ENTITY zotero.preferences.parseRISRefer "Zotero naudoti BibTeX/RIS/Refer failų parsiuntimui">
-<!ENTITY zotero.preferences.automaticSnapshots "Pagal kuriamiems naujiems įrašams automatiškai sukurti nuotraukas">
+<!ENTITY zotero.preferences.automaticSnapshots "Kuriamiems naujiems įrašams automatiškai sukurti nuotraukas">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Įrašant įrašus, automatiškai prisegti susijusius PDF dokumentus ir kitus failus">
 <!ENTITY zotero.preferences.automaticTags "Įrašams automatiškai priskirti gaires su raktažodžiais ir temomis">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatiškai šiukšlinės šalinti įrašus, senesnius nei">
@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "įrašams priklausančias pastabas">
 <!ENTITY zotero.preferences.groups.childFiles "įrašams priklausančias nuotraukas ir importuotus failus">
 <!ENTITY zotero.preferences.groups.childLinks "įrašams priklausančias nuorodas">
-<!ENTITY zotero.preferences.groups.tags "gairės">
+<!ENTITY zotero.preferences.groups.tags "gaires">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -115,7 +115,7 @@
 <!ENTITY zotero.preferences.cite.styles "Stiliai">
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstų rengyklės">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Nerasta įdiegtų teksto rengyklės papildinių.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Diegti papildinius į tekstų rengykles...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Papildinių diegimas į tekstų rengykles...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Naudoti klasikinį citatų įdėjimo langą">
 
