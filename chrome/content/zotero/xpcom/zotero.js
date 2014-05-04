@@ -347,11 +347,11 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 					
 					// Revert to profile directory
 					if (index == 1) {
-						Zotero.chooseZoteroDirectory(false, true);
+						Zotero.chooseZoteroDirectory(Zotero.isStandalone, true);
 					}
 					// Locate data directory
 					else if (index == 2) {
-						Zotero.chooseZoteroDirectory();
+						Zotero.chooseZoteroDirectory(Zotero.isStandalone);
 					}
 				}
 				return;
