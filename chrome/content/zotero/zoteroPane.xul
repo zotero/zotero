@@ -359,7 +359,7 @@
 									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
 								<treecol
-									id="zotero-items-column-type" hidden="true"
+									id="zotero-items-column-itemType" hidden="true"
 									label="&zotero.items.type_column;"
 									width="40" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
@@ -385,21 +385,25 @@
 								<splitter class="tree-splitter"/>
 								<treecol
 									id="zotero-items-column-journalAbbreviation" hidden="true"
+									submenu="true"
 									label="&zotero.items.journalAbbr_column;"
 									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
 								<treecol
 									id="zotero-items-column-language" hidden="true"
+									submenu="true"
 									label="&zotero.items.language_column;"
 									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
 								<treecol
 									id="zotero-items-column-accessDate" hidden="true"
+									submenu="true"
 									label="&zotero.items.accessDate_column;"
 									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
 								<treecol
 									id="zotero-items-column-libraryCatalog" hidden="true"
+									submenu="true"
 									label="&zotero.items.libraryCatalog_column;"
 									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>

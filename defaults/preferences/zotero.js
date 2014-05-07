@@ -61,6 +61,9 @@ pref("extensions.zotero.lastViewedFolder", 'L');
 pref("extensions.zotero.lastLongTagMode", 0);
 pref("extensions.zotero.lastLongTagDelimiter", ";");
 
+pref("extensions.zotero.fallbackSort", 'firstCreator,date,title,dateAdded');
+pref("extensions.zotero.sortCreatorAsString", false);
+
 //Tag Cloud
 pref("extensions.zotero.tagCloud", false);
 

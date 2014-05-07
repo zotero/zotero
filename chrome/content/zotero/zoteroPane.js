@@ -1185,6 +1185,25 @@ var ZoteroPane = new function()
 			this.itemsView.addCallback(_setTagScope);
 			document.getElementById('zotero-items-tree').view = this.itemsView;
 			this.itemsView.selection.clearSelection();
+			
+			// Add events to treecolpicker to update menu before showing/hiding
+			try {
+				let treecols = document.getElementById('zotero-items-columns-header');
+				let treecolpicker = treecols.boxObject.firstChild.nextSibling;
+				let menupopup = treecolpicker.boxObject.firstChild.nextSibling;
+				let attr = menupopup.getAttribute('onpopupshowing');
+				if (attr.indexOf('Zotero') == -1) {
+					menupopup.setAttribute('onpopupshowing', 'ZoteroPane.itemsView.onColumnPickerShowing(event);')
+						// Keep whatever else is there
+						+ ' ' + attr;
+					menupopup.setAttribute('onpopuphidden', 'ZoteroPane.itemsView.onColumnPickerHidden(event);')
+						// Keep whatever else is there
+						+ ' ' + menupopup.getAttribute('onpopuphidden');
+				}
+			}
+			catch (e) {
+				Zotero.debug(e);
+			}
 		}
 		finally {
 			Zotero.UnresponsiveScriptIndicator.enable();
