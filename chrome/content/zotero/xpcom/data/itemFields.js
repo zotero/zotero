@@ -379,7 +379,8 @@ Zotero.ItemFields = new function() {
 	function _fieldCheck(field, func) {
 		var fieldID = self.getID(field);
 		if (!fieldID) {
-			throw ("Invalid field '" + field + (func ? "' in ItemFields." + func + "()" : "'"));
+			Zotero.debug((new Error).stack, 1);
+			throw new Error("Invalid field '" + field + (func ? "' in ItemFields." + func + "()" : "'"));
 		}
 		return fieldID;
 	}
