@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems			"Show Unfiled Items">
 
 <!ENTITY zotero.items.itemType							"Item Type">
-<!ENTITY zotero.items.type_column						"Type">
+<!ENTITY zotero.items.type_column						"Item Type">
 <!ENTITY zotero.items.title_column						"Title">
 <!ENTITY zotero.items.creator_column					"Creator">
 <!ENTITY zotero.items.date_column						"Date">

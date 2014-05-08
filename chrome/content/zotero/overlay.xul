@@ -57,6 +57,8 @@
 		
 		<stack id="zotero-pane-stack" persist="savedHeight" savedHeight="300" hidden="true"/>
 		
+		<zoteroguidancepanel id="zotero-toolbar-button-guidance" about="toolbarButton" for="zotero-toolbar-button" position="bottomcenter topleft" delay="2000" foregroundonly="true"/>
+		
 		<!-- Annotation Toolbar -->
 		<toolbar id="zotero-annotate-tb" crop="end" insertbefore="content" hidden="true">
 			<toolbarbutton id="zotero-annotate-tb-add" tooltiptext="&zotero.annotate.toolbar.add.label;" oncommand="Zotero_Browser.toggleMode(this.id);"/>

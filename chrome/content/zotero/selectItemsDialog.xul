@@ -82,7 +82,7 @@
 					flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 				<splitter class="tree-splitter"/>
 				<treecol
-					id="zotero-items-column-type" hidden="true"
+					id="zotero-items-column-itemType" hidden="true"
 					label="&zotero.items.type_column;"
 					width="40" persist="width ordinal hidden sortActive sortDirection"/>
 				<splitter class="tree-splitter"/>

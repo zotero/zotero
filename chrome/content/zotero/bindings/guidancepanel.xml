@@ -32,8 +32,11 @@
 		<implementation>
 			<method name="show">
 				<parameter name="forEl"/>
+				<parameter name="text"/>
 				<body>
 				<![CDATA[
+					Components.utils.import("resource://gre/modules/Services.jsm");
+
 					var about = this.getAttribute("about"),
 						pref = "firstRunGuidanceShown."+about,
 						shown = false;
@@ -48,7 +51,8 @@
 						panel = document.getAnonymousNodes(this)[0];
 					
 					if(!forEl) forEl = document.getElementById(this.getAttribute("for"));
-					var text = Zotero.getString("firstRunGuidance."+about).split("\n");
+					if(!text) text = Zotero.getString("firstRunGuidance."+about);
+					text = text.split("\n");
 					var descriptionNode = panel.lastChild;
 					while(text.length) {
 						var textLine = text.shift();
@@ -56,10 +60,28 @@
 						if(text.length) descriptionNode.appendChild(document.createElementNS(
 							"http://www.w3.org/1999/xhtml", "br"));
 					}
-					panel.openPopup(forEl, position ? position : "after_start",
-						x ? parseInt(x, 10) : 0, y ? parseInt(y, 10) : 0, false, false, null);
-					
-					Zotero.Prefs.set(pref, true);
+
+					var me = this;
+					var f = function() {
+						if(me.hasAttribute("foregroundonly") && Services.ww.activeWindow != window) return;
+						panel.openPopup(forEl, position ? position : "after_start",
+							x ? parseInt(x, 10) : 0, y ? parseInt(y, 10) : 0, false, false, null);
+						Zotero.Prefs.set(pref, true);
+					};
+
+					if(this.hasAttribute("delay")) {
+						window.setTimeout(f, this.getAttribute("delay"));
+					} else {
+						f();
+					}
+
+					if(this.hasAttribute("noautohide")) {
+						var listener = function() {
+							panel.hidePopup();
+							panel.removeEventListener("click", listener, false);
+						}
+						panel.addEventListener("click", listener, false);
+					}
 				]]>
 				</body>
 			</method>
@@ -73,7 +95,7 @@
 		</implementation>
 		
 		<content>
-			<xul:panel orient="horizontal" style="max-width: 400px" type="arrow" align="top">
+			<xul:panel orient="horizontal" style="max-width: 400px" type="arrow" align="top" xbl:inherits="noautohide">
 				<xul:image src="chrome://zotero/skin/zotero-new-z-48px.png" style="margin-right: 10px; width: 48px; height: 48px;"/>
 				<xul:description flex="1"></xul:description>
 			</xul:panel>

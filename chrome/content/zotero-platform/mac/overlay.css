@@ -190,13 +190,11 @@
 }
 
 #zotero-collections-tree treechildren::-moz-tree-twisty(selected) {
-	-moz-appearance: none;
-	list-style-image: url("chrome://zotero/skin/mac/twisty-selected.png");
+	list-style-image: url("chrome://zotero/skin/mac/twisty-selected.svg");
 }
 
 #zotero-collections-tree treechildren::-moz-tree-twisty(selected, open) {
-	-moz-appearance: none;
-	list-style-image: url("chrome://zotero/skin/mac/twisty-selected-open.png");
+	list-style-image: url("chrome://zotero/skin/mac/twisty-selected-open.svg");
 }
 
 #zotero-collections-splitter, #zotero-items-splitter
@@ -272,18 +270,18 @@
 
 treechildren::-moz-tree-twisty {
 	-moz-appearance: none;
-	width: 11px;
-	height: 11px;
-	list-style-image: url("chrome://zotero/skin/mac/twisty.png");
+	width: 16px;
+	height: 16px;
+	list-style-image: url("chrome://zotero/skin/mac/twisty.svg");
 	-moz-padding-start: 5px;
 	-moz-padding-end: 6px;
 }
 
 treechildren::-moz-tree-twisty(open) {
 	-moz-appearance: none;
-	width: 11px;
-	height: 11px;
-	list-style-image: url("chrome://zotero/skin/mac/twisty-open.png");
+	width: 16px;
+	height: 16px;
+	list-style-image: url("chrome://zotero/skin/mac/twisty-open.svg");
 	-moz-padding-start: 4px;
 	-moz-padding-end: 7px;
 }
@@ -291,23 +289,23 @@ treechildren::-moz-tree-twisty(open) {
 /* How to get active twisty?
 treechildren::-moz-tree-twisty(active) {
 	-moz-appearance: none;
-	list-style-image: url("chrome://zotero/skin/mac/twisty-active.png") !important;
+	list-style-image: url("chrome://zotero/skin/mac/twisty-active.svg") !important;
 }
 
 treechilren::-moz-tree-twisty(active) {
 	-moz-appearance: none;
-	list-style-image: url("chrome://zotero/skin/mac/twisty-active-open.png");
+	list-style-image: url("chrome://zotero/skin/mac/twisty-active-open.svg");
 }
 */
 
 tree:focus treechildren::-moz-tree-twisty(selected) {
 	-moz-appearance: none;
-	list-style-image: url("chrome://zotero/skin/mac/twisty-selected.png");
+	list-style-image: url("chrome://zotero/skin/mac/twisty-selected.svg");
 }
 
 tree:focus treechildren::-moz-tree-twisty(selected, open) {
 	-moz-appearance: none;
-	list-style-image: url("chrome://zotero/skin/mac/twisty-selected-open.png");
+	list-style-image: url("chrome://zotero/skin/mac/twisty-selected-open.svg");
 }
 
 treechildren::-moz-tree-image {

@@ -344,14 +344,12 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				if (e.name == 'NS_ERROR_FILE_NOT_FOUND') {
 					Zotero.startupError = Zotero.getString('dataDir.notFound');
 					_startupErrorHandler = function() {
-						var win = Services.wm.getMostRecentWindow('navigator:browser');
-						
 						var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 								createInstance(Components.interfaces.nsIPromptService);
 						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
 							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
 							+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
-						var index = ps.confirmEx(win,
+						var index = ps.confirmEx(null,
 							Zotero.getString('general.error'),
 							Zotero.startupError + '\n\n' +
 							Zotero.getString('dataDir.previousDir') + ' '
@@ -2411,17 +2409,17 @@ Zotero.Keys = new function() {
 	 * Called by Zotero.init()
 	 */
 	function init() {
-		var actions = Zotero.Prefs.prefBranch.getChildList('keys', {}, {});
+		var cmds = Zotero.Prefs.prefBranch.getChildList('keys', {}, {});
 		
 		// Get the key=>command mappings from the prefs
-		for each(var action in actions) {
-			var action = action.substr(5); // strips 'keys.'
+		for each(var cmd in cmds) {
+			cmd = cmd.substr(5); // strips 'keys.'
 			// Remove old pref
-			if (action == 'overrideGlobal') {
+			if (cmd == 'overrideGlobal') {
 				Zotero.Prefs.clear('keys.overrideGlobal');
 				continue;
 			}
-			_keys[Zotero.Prefs.get('keys.' + action)] = action;
+			_keys[this.getKeyForCommand(cmd)] = cmd;
 		}
 	}
 	
@@ -2444,7 +2442,7 @@ Zotero.Keys = new function() {
 		globalKeys.forEach(function (x) {
 			let keyElem = document.getElementById('key_' + x.name);
 			if (keyElem) {
-				let prefKey = Zotero.Prefs.get('keys.'  + x.name);
+				let prefKey = this.getKeyForCommand(x.name);
 				// Only override the default with the pref if the <key> hasn't
 				// been manually changed and the pref has been
 				if (keyElem.getAttribute('key') == x.defaultKey
@@ -2453,13 +2451,22 @@ Zotero.Keys = new function() {
 					keyElem.setAttribute('key', prefKey);
 				}
 			}
-		});
+		}.bind(this));
 	}
 	
 	
 	function getCommand(key) {
 		key = key.toUpperCase();
 		return _keys[key] ? _keys[key] : false;
+	}
+	
+	
+	this.getKeyForCommand = function (cmd) {
+		try {
+			var key = Zotero.Prefs.get('keys.' + cmd);
+		}
+		catch (e) {}
+		return key !== undefined ? key.toUpperCase() : false;
 	}
 }
 

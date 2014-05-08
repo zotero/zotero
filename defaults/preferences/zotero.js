@@ -61,6 +61,9 @@ pref("extensions.zotero.lastViewedFolder", 'L');
 pref("extensions.zotero.lastLongTagMode", 0);
 pref("extensions.zotero.lastLongTagDelimiter", ";");
 
+pref("extensions.zotero.fallbackSort", 'firstCreator,date,title,dateAdded');
+pref("extensions.zotero.sortCreatorAsString", false);
+
 //Tag Cloud
 pref("extensions.zotero.tagCloud", false);
 
@@ -175,5 +178,5 @@ pref("extensions.zotero.fallbackLauncher.windows", "");
 //Translators
 pref("extensions.zotero.translators.attachSupplementary", false);
 pref("extensions.zotero.translators.supplementaryAsLink", false);
-pref("extensions.zotero.translators.RIS.import.ignoreUnknown", false);
+pref("extensions.zotero.translators.RIS.import.ignoreUnknown", true);
 pref("extensions.zotero.translators.RIS.import.keepID", false);

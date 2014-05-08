@@ -533,7 +533,7 @@ Zotero.Date = new function(){
 		
 		if(date.year) {
 			var dateString = Zotero.Utilities.lpad(date.year, "0", 4);
-			if(date.month) {
+			if (parseInt(date.month) == date.month) {
 				dateString += "-"+Zotero.Utilities.lpad(date.month+1, "0", 2);
 				if(date.day) {
 					dateString += "-"+Zotero.Utilities.lpad(date.day, "0", 2);

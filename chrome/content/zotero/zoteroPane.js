@@ -635,9 +635,19 @@ var ZoteroPane = new function()
 					try {
 						// Ignore Cmd-Shift-Z keystroke in text areas
 						if (Zotero.isMac && key == 'Z' &&
-								event.originalTarget.localName == 'textarea') {
-							Zotero.debug('Ignoring keystroke in text area');
-							return;
+								(event.originalTarget.localName == 'input'
+									|| event.originalTarget.localName == 'textarea')) {
+							try {
+								var isSearchBar = event.originalTarget.parentNode.parentNode.id == 'zotero-tb-search';
+							}
+							catch (e) {
+								Zotero.debug(e, 1);
+								Components.utils.reportError(e);
+							}
+							if (!isSearchBar) {
+								Zotero.debug('Ignoring keystroke in text field');
+								return;
+							}
 						}
 					}
 					catch (e) {
@@ -1179,6 +1189,25 @@ var ZoteroPane = new function()
 			this.itemsView.addCallback(_setTagScope);
 			document.getElementById('zotero-items-tree').view = this.itemsView;
 			this.itemsView.selection.clearSelection();
+			
+			// Add events to treecolpicker to update menu before showing/hiding
+			try {
+				let treecols = document.getElementById('zotero-items-columns-header');
+				let treecolpicker = treecols.boxObject.firstChild.nextSibling;
+				let menupopup = treecolpicker.boxObject.firstChild.nextSibling;
+				let attr = menupopup.getAttribute('onpopupshowing');
+				if (attr.indexOf('Zotero') == -1) {
+					menupopup.setAttribute('onpopupshowing', 'ZoteroPane.itemsView.onColumnPickerShowing(event);')
+						// Keep whatever else is there
+						+ ' ' + attr;
+					menupopup.setAttribute('onpopuphidden', 'ZoteroPane.itemsView.onColumnPickerHidden(event);')
+						// Keep whatever else is there
+						+ ' ' + menupopup.getAttribute('onpopuphidden');
+				}
+			}
+			catch (e) {
+				Zotero.debug(e);
+			}
 		}
 		finally {
 			Zotero.UnresponsiveScriptIndicator.enable();
@@ -3308,16 +3337,12 @@ var ZoteroPane = new function()
 							var collectionID = false;
 						}
 						
-						var attachmentItem = Zotero.Attachments.importFromURL(url, false, false, false, collectionID, mimeType, libraryID);
-						
-						// importFromURL() doesn't trigger the notifier until
-						// after download is complete
-						//
-						// TODO: add a callback to importFromURL()
-						setTimeout(function () {
-							self.selectItem(attachmentItem.id);
-						}, 1001);
-						
+						var attachmentItem = Zotero.Attachments.importFromURL(url, false,
+							false, false, collectionID, mimeType, libraryID,
+							function(attachmentItem) {
+								self.selectItem(attachmentItem.id);
+							});
+							
 						return;
 					}
 				}

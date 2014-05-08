@@ -226,6 +226,14 @@ const Zotero_Lookup = new function () {
 		//switch textboxes
 		mlPanel.setAttribute("collapsed", !on);
 		slPanel.setAttribute("collapsed", !!on);
+
+		// Resize arrow box to fit content
+		if(Zotero.isMac) {
+			var panel = document.getElementById("zotero-lookup-panel");
+			var box = panel.firstChild;
+			panel.sizeTo(box.scrollWidth, box.scrollHeight);
+		}
+
 		dest.focus();
 		return dest;
 	}

@@ -34,6 +34,14 @@ Zotero_Preferences.General = {
 				'zotero.preferences.launchNonNativeFiles', Zotero.appName
 			);
 		}
+		
+		// Only show icon options for Firefox <29
+		if (Zotero.platformMajorVersion < 29) {
+			let statusBarRow = document.getElementById('zotero-prefpane-general-statusBarIcon-row');
+			if (statusBarRow) {
+				statusBarRow.hidden = false;
+			}
+		}
 	},
 	
 	/**

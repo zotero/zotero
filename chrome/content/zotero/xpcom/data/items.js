@@ -300,6 +300,9 @@ Zotero.Items = new function() {
 			if (this.isPrimaryField(field)) {
 				primaryFields.push(field);
 			}
+			else if (field == 'itemType') {
+				primaryFields.push('itemTypeID');
+			}
 			else {
 				fieldIDs.push(Zotero.ItemFields.getID(field));
 				if (Zotero.ItemFields.isBaseField(field)) {

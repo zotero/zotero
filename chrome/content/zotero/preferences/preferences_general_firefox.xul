@@ -48,7 +48,7 @@
 							<radio id="zotero-prefpane-general-showIn-appTab" label="&zotero.preferences.showIn.appTab;" value="3"/>
 						</radiogroup>
 					</row>
-					<row position="2" id="zotero-prefpane-general-statusBarIcon-row">
+					<row position="2" id="zotero-prefpane-general-statusBarIcon-row" hidden="true">
 						<hbox align="center">
 							<label id="statusBarIcon-label" value="&zotero.preferences.statusBarIcon;" control="statusBarIcon"/>
 						</hbox>
