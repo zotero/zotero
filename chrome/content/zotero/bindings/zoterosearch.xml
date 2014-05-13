@@ -205,26 +205,27 @@
 		</implementation>
 		
 		<content>
-			<xul:vbox id="search-box" flex="1" onkeypress="document.getBindingParent(this).handleKeyPress(event)">
-				<xul:groupbox xbl:inherits="flex">
-					<xul:caption align="center">
-						<xul:label value="&zotero.search.joinMode.prefix;"/>
-						<xul:menulist id="joinModeMenu" oncommand="document.getBindingParent(this).updateJoinMode(); event.stopPropagation()">
-							<xul:menupopup>
-								<xul:menuitem label="&zotero.search.joinMode.any;" value="any"/>
-								<xul:menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
-							</xul:menupopup>
-						</xul:menulist>
-						<xul:label value="&zotero.search.joinMode.suffix;"/>
-					</xul:caption>
-					<xul:vbox id="conditions"/>
-				</xul:groupbox>
-				<xul:hbox>
-					<xul:checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="document.getBindingParent(this).updateCheckbox('recursive'); event.stopPropagation()"/>
-					<xul:checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="document.getBindingParent(this).updateCheckbox('noChildren'); event.stopPropagation()"/>
-				</xul:hbox>
-				<xul:checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="document.getBindingParent(this).updateCheckbox('includeParentsAndChildren'); event.stopPropagation()"/>
-			</xul:vbox>
+			<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+					id="search-box" flex="1" onkeypress="document.getBindingParent(this).handleKeyPress(event)">
+				<groupbox xbl:inherits="flex">
+					<caption align="center">
+						<label value="&zotero.search.joinMode.prefix;"/>
+						<menulist id="joinModeMenu" oncommand="document.getBindingParent(this).updateJoinMode(); event.stopPropagation()">
+							<menupopup>
+								<menuitem label="&zotero.search.joinMode.any;" value="any"/>
+								<menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
+							</menupopup>
+						</menulist>
+						<label value="&zotero.search.joinMode.suffix;"/>
+					</caption>
+					<vbox id="conditions"/>
+				</groupbox>
+				<hbox>
+					<checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="document.getBindingParent(this).updateCheckbox('recursive'); event.stopPropagation()"/>
+					<checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="document.getBindingParent(this).updateCheckbox('noChildren'); event.stopPropagation()"/>
+				</hbox>
+				<checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="document.getBindingParent(this).updateCheckbox('includeParentsAndChildren'); event.stopPropagation()"/>
+			</vbox>
 		</content>
 	</binding>
 	
