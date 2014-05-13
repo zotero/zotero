@@ -329,7 +329,8 @@ Zotero.Translate.ItemSaver.prototype = {
 		var file;
 
 		// First, try to parse as absolute path
-		if(((/[a-zA-Z]:\\/.test(path) && Zotero.isWin) || (path[0] === "/" && !Zotero.isWin))
+		if(((/^[a-zA-Z]:\\|^\\\\/.test(path) && Zotero.isWin) // Paths starting with drive letter or network shares starting with \\
+			|| (path[0] === "/" && !Zotero.isWin))
 				&& (file = this._parseAbsolutePath(path))) {
 			Zotero.debug("Translate: Got file "+path+" as absolute path");
 			return file;
