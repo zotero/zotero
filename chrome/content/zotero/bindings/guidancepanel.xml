@@ -54,6 +54,11 @@
 					if(!text) text = Zotero.getString("firstRunGuidance."+about);
 					text = text.split("\n");
 					var descriptionNode = panel.lastChild;
+					
+					while (descriptionNode.hasChildNodes()) {
+						descriptionNode.removeChild(descriptionNode.firstChild);
+					}
+					
 					while(text.length) {
 						var textLine = text.shift();
 						descriptionNode.appendChild(document.createTextNode(textLine));
