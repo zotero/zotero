@@ -3,6 +3,10 @@
 	width: 60em;
 }
 
+caption {
+	font: inherit;
+}
+
 #search-condition menulist[id="operatorsmenu"]
 {
 	width: 15em;
