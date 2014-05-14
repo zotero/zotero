@@ -58,7 +58,7 @@
 		
 		<stack id="zotero-pane-stack" persist="savedHeight" savedHeight="300" hidden="true"/>
 		
-		<zoteroguidancepanel id="zotero-toolbar-button-guidance" about="toolbarButton" for="zotero-toolbar-button" position="bottomcenter topleft" delay="2000" foregroundonly="true"/>
+		<zoteroguidancepanel id="zotero-toolbar-button-guidance" about="toolbarButton" for="zotero-toolbar-button" position="bottomcenter topleft" delay="2000" foregroundonly="true" hidden="true"/>
 		
 		<!-- Annotation Toolbar -->
 		<toolbar id="zotero-annotate-tb" crop="end" insertbefore="content" hidden="true">
@@ -69,6 +69,7 @@
 			<toolbarbutton id="zotero-annotate-tb-unhighlight" tooltiptext="&zotero.annotate.toolbar.unhighlight.label;" oncommand="Zotero_Browser.toggleMode(this.id);"/>
 		</toolbar>
 	</vbox>
+	
 	
 	<!-- Scrape Code -->
 	<hbox id="urlbar-icons">
