@@ -45,15 +45,33 @@
 			function init() {
 				var cslList = document.getElementById('zotero-csl-list');
 				if (cslList.getAttribute('initialized') == 'true') {
+					if (currentStyle) {
+						loadCSL(currentStyle);
+						refresh();
+					}
 					return;
 				}
 				
+				var rawDefaultStyle = Zotero.Prefs.get('export.quickCopy.setting');
+				var defaultStyle = Zotero.QuickCopy.stripContentType(rawDefaultStyle);
+				
 				var styles = Zotero.Styles.getAll();
+				var currentStyle = null;
+				var listPos = 0;
 				for each(var style in styles) {
 					if (style.source) {
 						continue;
 					}
 					var item = cslList.appendItem(style.title, style.styleID);
+					if (!currentStyle || defaultStyle == ('bibliography=' + style.styleID)) {
+						currentStyle = style.styleID;
+						cslList.selectedIndex = listPos;
+					}
+					listPos += 1;
+				}
+				if (currentStyle) {
+					loadCSL(currentStyle);
+					refresh();
 				}
 				var pageList = document.getElementById('zotero-csl-page-type');
 				var locators = Zotero.Cite.labels;
