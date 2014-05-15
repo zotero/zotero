@@ -329,10 +329,16 @@ Zotero.Translate.ItemSaver.prototype = {
 		var file;
 
 		// First, try to parse as absolute path
-		if(((/[a-zA-Z]:\\/.test(path) && Zotero.isWin) || (path[0] === "/" && !Zotero.isWin))
-				&& (file = this._parseAbsolutePath(path))) {
-			Zotero.debug("Translate: Got file "+path+" as absolute path");
-			return file;
+		if((/^[a-zA-Z]:[\\\/]|^\\\\/.test(path) && Zotero.isWin) // Paths starting with drive letter or network shares starting with \\
+			|| (path[0] === "/" && !Zotero.isWin)) {
+			// Forward slashes on Windows are not allowed in filenames, so we can
+			// assume they're meant to be backslashes. Backslashes are technically
+			// allowed on Linux, so the reverse cannot be done reliably.
+			var nativePath = Zotero.isWin ? path.replace('/', '\\', 'g') : path;
+			if (file = this._parseAbsolutePath(nativePath)) {
+				Zotero.debug("Translate: Got file "+nativePath+" as absolute path");
+				return file;
+			}
 		}
 
 		// Next, try to parse as URI
