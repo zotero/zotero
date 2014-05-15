@@ -703,13 +703,28 @@ Zotero.DBConnection.prototype.getNextID = function (table, column) {
 *
 * If _name_ alone is available, returns that
 **/
-Zotero.DBConnection.prototype.getNextName = function (table, field, name)
+Zotero.DBConnection.prototype.getNextName = function (libraryID, table, field, name)
 {
+	if (typeof name == 'undefined') {
+		Zotero.debug("WARNING: The parameters of Zotero.DB.getNextName() have changed -- update your code", 2);
+		[libraryID, table, field, name] = [null, libraryID, table, field];
+	}
+	
 	var sql = "SELECT TRIM(SUBSTR(" + field + ", " + (name.length + 1) + ")) "
 				+ "FROM " + table + " "
-				+ "WHERE " + field + " REGEXP '^" + name + "( [0-9]+)?$' "
-				+ "ORDER BY " + field;
-	var suffixes = this.columnQuery(sql);
+				+ "WHERE " + field + " REGEXP '^" + name + "( [0-9]+)?$' ";
+	if (!libraryID) {
+		// DEBUG: Shouldn't this be replaced automatically with "=?"?
+		sql += " AND libraryID IS NULL";
+		var params = undefined
+	}
+	else {
+		sql += " AND libraryID=?";
+		var params = [libraryID];
+	}
+	sql += " ORDER BY " + field;
+	// TEMP: libraryIDInt
+	var suffixes = this.columnQuery(sql, params);
 	// If none found or first one has a suffix, use default name
 	if (!suffixes || suffixes[0]) {
 		return name;

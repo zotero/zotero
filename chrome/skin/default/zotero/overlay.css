@@ -214,11 +214,6 @@
 	color: inherit;
 }
 
-#zotero-advanced-search-dialog #zotero-items-tree
-{
-	min-height: 250px;
-}
-
 #zotero-items-pane
 {
 	min-width: 290px;

@@ -25,35 +25,33 @@
 	<script src="advancedSearch.js"/>
 	
 	<vbox id="zotero-search-box-container" flex="1">
-	
-	<hbox>
-		<zoterosearch id="zotero-search-box" oncommand="ZoteroAdvancedSearch.search()" flex="1"/>
-	</hbox>
-	
-	<hbox id="zotero-search-buttons">
-		<button label="&zotero.search.search;" default="true" oncommand="ZoteroAdvancedSearch.search()"/>
-		<button label="&zotero.search.clear;" oncommand="ZoteroAdvancedSearch.clear()"/>
-		<button label="&zotero.search.saveSearch;" oncommand="ZoteroAdvancedSearch.save()"/>
-	</hbox>
-	
-	<tree id="zotero-items-tree" flex="1" hidecolumnpicker="true" seltype="multiple"
-			ondblclick="ZoteroAdvancedSearch.onDblClick(event, this)"
-			ondragstart="if (event.target.localName == 'treechildren') { ZoteroAdvancedSearch.itemsView.onDragStart(event); }">
-		<treecols>
-			<treecol
-				id="zotero-items-column-title" primary="true"
-				label="&zotero.items.title_column;"
-				flex="4" persist="width ordinal hidden sortActive sortDirection"/>
-			<splitter class="tree-splitter"/>
-			<treecol
-				id="zotero-items-column-firstCreator"
-				label="&zotero.items.creator_column;"
-				flex="1" persist="width ordinal hidden sortActive sortDirection"/>
-			<splitter class="tree-splitter"/>
-		</treecols>
-		<treechildren alternatingbackground="true"/>
-	</tree>
-	
+		<vbox id="zotero-search-box-controls">
+			<zoterosearch id="zotero-search-box" oncommand="if (this.active) { ZoteroAdvancedSearch.search(); }" flex="1"/>
+			
+			<hbox id="zotero-search-buttons">
+				<button label="&zotero.search.search;" default="true" oncommand="ZoteroAdvancedSearch.search()"/>
+				<button label="&zotero.search.clear;" oncommand="ZoteroAdvancedSearch.clear()"/>
+				<button id="zotero-search-save" label="&zotero.search.saveSearch;" oncommand="ZoteroAdvancedSearch.save()"/>
+			</hbox>
+		</vbox>
+		
+		<tree id="zotero-items-tree" flex="1" hidecolumnpicker="true" seltype="multiple"
+				ondblclick="ZoteroAdvancedSearch.onDblClick(event, this)"
+				ondragstart="if (event.target.localName == 'treechildren') { ZoteroAdvancedSearch.itemsView.onDragStart(event); }">
+			<treecols>
+				<treecol
+					id="zotero-items-column-title" primary="true"
+					label="&zotero.items.title_column;"
+					flex="4" persist="width ordinal hidden sortActive sortDirection"/>
+				<splitter class="tree-splitter"/>
+				<treecol
+					id="zotero-items-column-firstCreator"
+					label="&zotero.items.creator_column;"
+					flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+				<splitter class="tree-splitter"/>
+			</treecols>
+			<treechildren alternatingbackground="true"/>
+		</tree>
 	</vbox>
 	
 	<keyset>
