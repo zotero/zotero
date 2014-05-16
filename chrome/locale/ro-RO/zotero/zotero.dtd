@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Arată înregistrările neîndosariate">
 
 <!ENTITY zotero.items.itemType "Tip înregistrare">
-<!ENTITY zotero.items.type_column "Tip">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Titlu">
 <!ENTITY zotero.items.creator_column "Creator">
 <!ENTITY zotero.items.date_column "Dată">

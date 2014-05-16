@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Rodyti neužpildytus">
 
 <!ENTITY zotero.items.itemType "Įrašo tipas">
-<!ENTITY zotero.items.type_column "Tipas">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Antraštė">
 <!ENTITY zotero.items.creator_column "Autorius">
 <!ENTITY zotero.items.date_column "Data">

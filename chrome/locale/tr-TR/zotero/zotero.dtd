@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Dosyalanmamış Eserleri Göster">
 
 <!ENTITY zotero.items.itemType "Eser Türü">
-<!ENTITY zotero.items.type_column "Tür">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Başlık">
 <!ENTITY zotero.items.creator_column "Yaratan">
 <!ENTITY zotero.items.date_column "Tarih">

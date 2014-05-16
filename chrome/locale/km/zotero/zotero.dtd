@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "បង្ហាញឯកសារមិនទាន់បានតម្កល់ទុក">
 
 <!ENTITY zotero.items.itemType "ប្រភេទឯកសារ">
-<!ENTITY zotero.items.type_column "ប្រភេទ">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "ចំណងជើង">
 <!ENTITY zotero.items.creator_column "អ្នកនិពន្ធ">
 <!ENTITY zotero.items.date_column "កាលបរិច្ឆេទ">

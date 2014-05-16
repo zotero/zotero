@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Visa oregistererade källor">
 
 <!ENTITY zotero.items.itemType "Källtyp">
-<!ENTITY zotero.items.type_column "Typ">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Titel">
 <!ENTITY zotero.items.creator_column "Skapare">
 <!ENTITY zotero.items.date_column "Datum">

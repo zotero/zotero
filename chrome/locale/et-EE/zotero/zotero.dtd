@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Teemata kirjed">
 
 <!ENTITY zotero.items.itemType "Kirje tüüp">
-<!ENTITY zotero.items.type_column "Tüüp">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Pealkiri">
 <!ENTITY zotero.items.creator_column "Autor">
 <!ENTITY zotero.items.date_column "Kuupäev">

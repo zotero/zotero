@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Pokaż Niepowiązane pliki">
 
 <!ENTITY zotero.items.itemType "Typ elementu">
-<!ENTITY zotero.items.type_column "Typ">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Tytuł">
 <!ENTITY zotero.items.creator_column "Twórca">
 <!ENTITY zotero.items.date_column "Data">

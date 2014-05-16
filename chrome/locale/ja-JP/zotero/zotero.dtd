@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "未整理のアイテムを表示">
 
 <!ENTITY zotero.items.itemType "アイテムの種類">
-<!ENTITY zotero.items.type_column "種類">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "題名">
 <!ENTITY zotero.items.creator_column "編著者名">
 <!ENTITY zotero.items.date_column "日時">

@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Pokaži nerazvrščene vnose">
 
 <!ENTITY zotero.items.itemType "Vrsta vnosa">
-<!ENTITY zotero.items.type_column "Vrsta">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Naslov">
 <!ENTITY zotero.items.creator_column "Ustvaril">
 <!ENTITY zotero.items.date_column "Datum">

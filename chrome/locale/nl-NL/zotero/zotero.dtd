@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Ongesorteerde items tonen">
 
 <!ENTITY zotero.items.itemType "Type item">
-<!ENTITY zotero.items.type_column "Type">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Titel">
 <!ENTITY zotero.items.creator_column "Maker">
 <!ENTITY zotero.items.date_column "Datum">
@@ -64,7 +64,7 @@
 <!ENTITY zotero.items.archive_column "Archief">
 <!ENTITY zotero.items.archiveLocation_column "Locatie in archief">
 <!ENTITY zotero.items.place_column "Plaats">
-<!ENTITY zotero.items.volume_column "Jaargang">
+<!ENTITY zotero.items.volume_column "# delen">
 <!ENTITY zotero.items.edition_column "Editie">
 <!ENTITY zotero.items.pages_column "Pagina's">
 <!ENTITY zotero.items.issue_column "Editie">

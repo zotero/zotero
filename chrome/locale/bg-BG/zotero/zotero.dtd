@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
 
 <!ENTITY zotero.items.itemType "Вид запис">
-<!ENTITY zotero.items.type_column "Вид">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Заглавие">
 <!ENTITY zotero.items.creator_column "Създател">
 <!ENTITY zotero.items.date_column "Дата">

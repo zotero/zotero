@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Zobraziť nezaradené exempláre">
 
 <!ENTITY zotero.items.itemType "Typ exemplára">
-<!ENTITY zotero.items.type_column "Typ">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Názov">
 <!ENTITY zotero.items.creator_column "Autor">
 <!ENTITY zotero.items.date_column "Dátum">
