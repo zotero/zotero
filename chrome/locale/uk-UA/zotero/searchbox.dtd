@@ -1,0 +1,25 @@
+<!ENTITY zotero.search.name "Назва:">
+
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
+<!ENTITY zotero.search.joinMode.prefix "Збінаються з">
+<!ENTITY zotero.search.joinMode.any "будь-яким">
+<!ENTITY zotero.search.joinMode.all "всіма">
+<!ENTITY zotero.search.joinMode.suffix "з нижченаведеного:">
+
+<!ENTITY zotero.search.recursive.label "Шукати в пыдпапках">
+<!ENTITY zotero.search.noChildren "Показувати документи тільки верхнього рывня">
+<!ENTITY zotero.search.includeParentsAndChildren "Включити батьківські та дочірні документи, що збігають з шуканим">
+
+<!ENTITY zotero.search.textModes.phrase "Фраза">
+<!ENTITY zotero.search.textModes.phraseBinary "Фраза (вкл. двійкові файли)">
+<!ENTITY zotero.search.textModes.regexp "Регулярний вираз">
+<!ENTITY zotero.search.textModes.regexpCS "Регулярний вираз (з врахуванням регістру)">
+
+<!ENTITY zotero.search.date.units.days "дні">
+<!ENTITY zotero.search.date.units.months "місяці">
+<!ENTITY zotero.search.date.units.years "роки">
+
+<!ENTITY zotero.search.search "Шукати">
+<!ENTITY zotero.search.clear "Очистити">
+<!ENTITY zotero.search.saveSearch "Зберегти пошук">
