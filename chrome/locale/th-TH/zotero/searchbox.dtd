@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "ชื่อ:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "ตรงกับ">
 <!ENTITY zotero.search.joinMode.any "คำใดๆ">
 <!ENTITY zotero.search.joinMode.all "ทั้งหมด">

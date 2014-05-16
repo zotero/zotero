@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "Naam:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "Moet voldoen aan">
 <!ENTITY zotero.search.joinMode.any "één van de">
 <!ENTITY zotero.search.joinMode.all "alle">

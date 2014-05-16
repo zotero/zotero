@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "Nume:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "Potrivire">
 <!ENTITY zotero.search.joinMode.any "oricare">
 <!ENTITY zotero.search.joinMode.all "toate">

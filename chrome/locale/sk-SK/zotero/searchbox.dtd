@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "Meno:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "Zodpovedá">
 <!ENTITY zotero.search.joinMode.any "ktorémukoľvek">
 <!ENTITY zotero.search.joinMode.all "všetkým">

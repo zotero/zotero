@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "名稱：">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "比對">
 <!ENTITY zotero.search.joinMode.any "任一個">
 <!ENTITY zotero.search.joinMode.all "全部">

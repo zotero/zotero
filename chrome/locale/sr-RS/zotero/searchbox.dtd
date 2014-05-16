@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "Име:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "Преклапај">
 <!ENTITY zotero.search.joinMode.any "било шта">
 <!ENTITY zotero.search.joinMode.all "све">

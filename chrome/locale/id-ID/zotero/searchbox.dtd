@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "Nama:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "Cocok">
 <!ENTITY zotero.search.joinMode.any "apapun">
 <!ENTITY zotero.search.joinMode.all "semua">

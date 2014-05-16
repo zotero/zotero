@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "שם:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "השווה">
 <!ENTITY zotero.search.joinMode.any "כל אחד">
 <!ENTITY zotero.search.joinMode.all "הכל">

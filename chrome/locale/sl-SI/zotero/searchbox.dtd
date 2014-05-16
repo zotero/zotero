@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "Ime:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "Ujemanje">
 <!ENTITY zotero.search.joinMode.any "s katerimkoli">
 <!ENTITY zotero.search.joinMode.all "z vsemi">

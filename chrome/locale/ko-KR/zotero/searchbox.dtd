@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "이름:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "다음 조건 중">
 <!ENTITY zotero.search.joinMode.any "아무거나">
 <!ENTITY zotero.search.joinMode.all "모두">
