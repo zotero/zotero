@@ -54,9 +54,9 @@ const CSL_TEXT_MAPPINGS = {
 	"collection-number":["seriesNumber"],
 	"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
 	"publisher-place":["place"],
-	"authority":["court"],
+	"authority":["court","legislativeBody", "issuingAuthority"],
 	"page":["pages"],
-	"volume":["volume"],
+	"volume":["volume", "codeNumber"],
 	"issue":["issue"],
 	"number-of-volumes":["numberOfVolumes"],
 	"number-of-pages":["numPages"],	
@@ -80,7 +80,8 @@ const CSL_TEXT_MAPPINGS = {
 	"call-number":["callNumber"],
 	"note":["extra"],
 	"number":["number"],
-	"references":["history"],
+	"chapter-number":["session"],
+	"references":["history", "references"],
 	"shortTitle":["shortTitle"],
 	"journalAbbreviation":["journalAbbreviation"],
 	"language":["language"]
