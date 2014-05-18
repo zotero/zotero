@@ -39,6 +39,7 @@ const CSL_NAMES_MAPPINGS = {
 	"director":"director",
 	"interviewer":"interviewer",
 	"recipient":"recipient",
+	"assignee":"recipient",
 	"reviewedAuthor":"reviewed-author",
 	"seriesEditor":"collection-editor",
 	"translator":"translator"
@@ -54,7 +55,7 @@ const CSL_TEXT_MAPPINGS = {
 	"collection-number":["seriesNumber"],
 	"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
 	"publisher-place":["place"],
-	"authority":["court","legislativeBody"],
+	"authority":["court","legislativeBody", "issuingAuthority"],
 	"page":["pages"],
 	"volume":["volume", "codeNumber"],
 	"issue":["issue"],
@@ -81,7 +82,7 @@ const CSL_TEXT_MAPPINGS = {
 	"note":["extra"],
 	"number":["number"],
 	"chapter-number":["session"],
-	"references":["history"],
+	"references":["history", "references"],
 	"shortTitle":["shortTitle"],
 	"journalAbbreviation":["journalAbbreviation"],
 	"language":["language"]
