@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Tunjukkan Item-Item yang Belum Diisikan">
 
 <!ENTITY zotero.items.itemType "Jenis Item">
-<!ENTITY zotero.items.type_column "Jenis">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Judul">
 <!ENTITY zotero.items.creator_column "Penyusun">
 <!ENTITY zotero.items.date_column "Tanggal">

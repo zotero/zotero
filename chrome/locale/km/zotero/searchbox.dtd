@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "ឈ្មោះ:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "ផ្គូរផ្គង">
 <!ENTITY zotero.search.joinMode.any "មួយផ្នែក">
 <!ENTITY zotero.search.joinMode.all "ទាំងអស់">

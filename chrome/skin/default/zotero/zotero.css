@@ -341,3 +341,17 @@ label.zotero-text-link {
 	color: red;
 	text-align: center;
 }
+
+#zotero-advanced-search-dialog #zotero-search-box-controls {
+	padding: 3px;
+}
+
+#zotero-advanced-search-dialog #zotero-items-tree
+{
+	min-height: 250px;
+}
+
+#zotero-advanced-search-dialog #zotero-search-buttons
+{
+	margin: 3px 0;
+}

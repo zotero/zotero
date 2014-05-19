@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "미분류 항목 보기">
 
 <!ENTITY zotero.items.itemType "항목 타입">
-<!ENTITY zotero.items.type_column "형식">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "제목">
 <!ENTITY zotero.items.creator_column "창작자">
 <!ENTITY zotero.items.date_column "날짜">

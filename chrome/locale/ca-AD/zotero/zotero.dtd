@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Mostra els elements no arxivats">
 
 <!ENTITY zotero.items.itemType "Tipus d'element">
-<!ENTITY zotero.items.type_column "Tipus">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Títol">
 <!ENTITY zotero.items.creator_column "Creador">
 <!ENTITY zotero.items.date_column "Data">

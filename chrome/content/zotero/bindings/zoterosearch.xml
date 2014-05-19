@@ -42,6 +42,8 @@
 					<![CDATA[
 						this.searchRef = val;
 						
+						this.buildLibraryMenu();
+						
 						var conditionsBox = this.id('conditions');
 						while(conditionsBox.hasChildNodes())
 							conditionsBox.removeChild(conditionsBox.firstChild);
@@ -74,6 +76,49 @@
 					]]>
 				</setter>
 			</property>
+			
+			<method name="buildLibraryMenu">
+				<body><![CDATA[
+					var menulist = this.id('libraryMenu');
+					var menupopup = menulist.firstChild;
+					
+					while (menupopup.hasChildNodes()) {
+						menupopup.removeChild(menupopup.firstChild);
+					}
+					
+					var libraryID = this.searchRef.libraryID;
+					var libraryIndex = 0;
+					
+					// Add My Library
+					var menuitem = document.createElement('menuitem');
+					menuitem.setAttribute('label', Zotero.getString('pane.collections.library'));
+					menuitem.setAttribute('libraryID', 0);
+					menupopup.appendChild(menuitem);
+					
+					// Add groups
+					var groups = Zotero.Groups.getAll();
+					for (let i=0; i<groups.length; i++) {
+						let group = groups[i];
+						let menuitem = document.createElement('menuitem');
+						menuitem.setAttribute('label', group.name);
+						menuitem.setAttribute('libraryID', group.libraryID);
+						if (group.libraryID == libraryID) {
+							libraryIndex = i + 1;
+						}
+						menupopup.appendChild(menuitem);
+					}
+					
+					menulist.appendChild(menupopup);
+					menulist.selectedIndex = libraryIndex;
+					
+					if (this.searchRef.id) {
+						this.id('libraryMenu').disabled = true;
+					}
+					
+					this.updateLibrary();
+				]]></body>
+			</method>
+			
 			<method name="addCondition">
 				<parameter name="ref"/>
 				<body>
@@ -100,6 +145,7 @@
 					]]>
 				</body>
 			</method>
+			
 			<method name="removeCondition">
 				<parameter name="id"/>
 				<body>
@@ -121,6 +167,21 @@
 					]]>
 				</body>
 			</method>
+			
+			<method name="updateLibrary">
+				<body><![CDATA[
+					var menu = this.id('libraryMenu');
+					var libraryID = parseInt(menu.selectedItem.getAttribute('libraryID'));
+					
+				 	if (this.onLibraryChange) {
+				 		this.onLibraryChange(libraryID);
+					}
+					
+					// TODO: libraryIDInt
+					this.searchRef.libraryID = libraryID ? libraryID : null;
+				]]></body>
+			</method>
+			
 			<method name="updateJoinMode">
 				<body>
 					<![CDATA[
@@ -132,6 +193,7 @@
 					]]>
 				</body>
 			</method>
+			
 			<method name="updateCheckbox">
 				<parameter name="condition"/>
 				<body>
@@ -151,12 +213,12 @@
 					]]>
 				</body>
 			</method>
+			
 			<!-- Calls updateSearch() on all search conditions -->
 			<method name="updateSearch">
 				<body>
 					<![CDATA[
 						var conditionsBox = this.id('conditions');
-						
 						if (conditionsBox.hasChildNodes()) {
 							for(var i = 0, len=conditionsBox.childNodes.length; i < len; i++) {
 								conditionsBox.childNodes[i].updateSearch();
@@ -165,6 +227,7 @@
 					]]>
 				</body>
 			</method>
+			
 			<method name="save">
 				<body>
 					<![CDATA[
@@ -181,6 +244,8 @@
 					switch (event.keyCode) {
 						case event.DOM_VK_RETURN:
 						case event.DOM_VK_ENTER:
+							this.active = true;
+							
 							if (event.shiftKey) {
 								this.addCondition();
 							}
@@ -193,7 +258,6 @@
 				</body>
 			</method>
 			
-			
 			<method name="id">
 				<parameter name="id"/>
 				<body>
@@ -205,26 +269,35 @@
 		</implementation>
 		
 		<content>
-			<xul:vbox id="search-box" flex="1" onkeypress="document.getBindingParent(this).handleKeyPress(event)">
-				<xul:groupbox xbl:inherits="flex">
-					<xul:caption align="center">
-						<xul:label value="&zotero.search.joinMode.prefix;"/>
-						<xul:menulist id="joinModeMenu" oncommand="document.getBindingParent(this).updateJoinMode(); event.stopPropagation()">
-							<xul:menupopup>
-								<xul:menuitem label="&zotero.search.joinMode.any;" value="any"/>
-								<xul:menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
-							</xul:menupopup>
-						</xul:menulist>
-						<xul:label value="&zotero.search.joinMode.suffix;"/>
-					</xul:caption>
-					<xul:vbox id="conditions"/>
-				</xul:groupbox>
-				<xul:hbox>
-					<xul:checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="document.getBindingParent(this).updateCheckbox('recursive'); event.stopPropagation()"/>
-					<xul:checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="document.getBindingParent(this).updateCheckbox('noChildren'); event.stopPropagation()"/>
-				</xul:hbox>
-				<xul:checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="document.getBindingParent(this).updateCheckbox('includeParentsAndChildren'); event.stopPropagation()"/>
-			</xul:vbox>
+			<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+					id="search-box" flex="1" onkeypress="document.getBindingParent(this).handleKeyPress(event)">
+				<hbox align="center">
+					<label value="&zotero.search.searchInLibrary;" control="libraryMenu"/>
+					<menulist id="libraryMenu" oncommand="document.getBindingParent(this).updateLibrary();">
+						<menupopup/>
+					</menulist>
+				</hbox>
+				<groupbox xbl:inherits="flex">
+					<caption align="center">
+						<label value="&zotero.search.joinMode.prefix;"/>
+						<menulist id="joinModeMenu" oncommand="document.getBindingParent(this).updateJoinMode();">
+							<menupopup>
+								<menuitem label="&zotero.search.joinMode.any;" value="any"/>
+								<menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
+							</menupopup>
+						</menulist>
+						<label value="&zotero.search.joinMode.suffix;"/>
+					</caption>
+					<vbox id="conditions"/>
+				</groupbox>
+				<hbox>
+					<checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="document.getBindingParent(this).updateCheckbox('recursive');"/>
+					<checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="document.getBindingParent(this).updateCheckbox('noChildren');"/>
+				</hbox>
+				<hbox>
+					<checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="document.getBindingParent(this).updateCheckbox('includeParentsAndChildren');"/>
+				</hbox>
+			</vbox>
 		</content>
 	</binding>
 	

@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "显示未分类条目">
 
 <!ENTITY zotero.items.itemType "条目类型">
-<!ENTITY zotero.items.type_column "类型">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "标题">
 <!ENTITY zotero.items.creator_column "创建者">
 <!ENTITY zotero.items.date_column "日期">

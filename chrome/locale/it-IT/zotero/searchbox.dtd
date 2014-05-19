@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "Nome:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "Trova">
 <!ENTITY zotero.search.joinMode.any "le corrispondenze parziali con i criteri">
 <!ENTITY zotero.search.joinMode.all "le corrispondenze esatte con i criteri">

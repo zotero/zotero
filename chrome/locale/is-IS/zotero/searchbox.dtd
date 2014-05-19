@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "Nafn:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "Leita að">
 <!ENTITY zotero.search.joinMode.any "einhverju">
 <!ENTITY zotero.search.joinMode.all "öllum">

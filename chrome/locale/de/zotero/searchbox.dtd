@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "Name:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "Ergebnisse finden mit">
 <!ENTITY zotero.search.joinMode.any "beliebigem">
 <!ENTITY zotero.search.joinMode.all "allen">

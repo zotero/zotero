@@ -107,7 +107,7 @@ Zotero.Search.prototype._set = function (field, val) {
 			}
 			
 			if (this._loaded) {
-				throw ("Cannot set " + field + " after object is already loaded in Zotero.Search._set()");
+				throw new Error("Cannot set " + field + " after object is already loaded");
 			}
 			//this._checkValue(field, val);
 			this['_' + field] = val;
@@ -379,6 +379,7 @@ Zotero.Search.prototype.save = function(fixGaps) {
 
 Zotero.Search.prototype.clone = function() {
 	var s = new Zotero.Search();
+	s.libraryID = this.libraryID;
 	
 	var conditions = this.getSearchConditions();
 	

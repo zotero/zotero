@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
 
 <!ENTITY zotero.items.itemType "Item mota">
-<!ENTITY zotero.items.type_column "Mota">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Izenburua">
 <!ENTITY zotero.items.creator_column "Egilea">
 <!ENTITY zotero.items.date_column "Data">

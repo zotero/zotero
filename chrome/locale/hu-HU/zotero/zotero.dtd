@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
 
 <!ENTITY zotero.items.itemType "Item Type">
-<!ENTITY zotero.items.type_column "Típus">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Cím">
 <!ENTITY zotero.items.creator_column "Létrehozó">
 <!ENTITY zotero.items.date_column "Dátum">

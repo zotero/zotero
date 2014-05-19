@@ -1,0 +1,13 @@
+<!ENTITY zotero.version "версія">
+<!ENTITY zotero.createdby "Створено:">
+<!ENTITY zotero.director "Директор:">
+<!ENTITY zotero.directors "Директори:">
+<!ENTITY zotero.developers "Розробники:">
+<!ENTITY zotero.alumni "Колишні розробники:">
+<!ENTITY zotero.about.localizations "Локалізації:">
+<!ENTITY zotero.about.additionalSoftware "Програмне забезпечення сторонніх виробників і стандарти:">
+<!ENTITY zotero.executiveProducer "Виконавчий продюсер:">
+<!ENTITY zotero.thanks "Особливі подяки:">
+<!ENTITY zotero.about.close "Закрити">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Більше інформації та подяки">
+<!ENTITY zotero.citationProcessing "Цитування та бібліографічна обробка">

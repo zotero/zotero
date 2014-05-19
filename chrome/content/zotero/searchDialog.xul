@@ -22,7 +22,7 @@
 	<vbox id="zotero-search-box-container" flex="1">
 		<hbox align="center">
 			<label value="&zotero.search.name;"/>
-			<textbox id="search-name" flex="1"/>
+			<textbox id="search-name" width="275" maxlength="80"/>
 		</hbox>
 		<zoterosearch id="search-box" flex="1"/>
 	</vbox>

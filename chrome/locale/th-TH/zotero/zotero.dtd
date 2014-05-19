@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "แสดงรายการที่ไม่ได้จัดกลุ่ม">
 
 <!ENTITY zotero.items.itemType "ประเภทรายการ">
-<!ENTITY zotero.items.type_column "ประเภท">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "ชื่อเรื่อง">
 <!ENTITY zotero.items.creator_column "ผู้สร้าง">
 <!ENTITY zotero.items.date_column "วันที่">

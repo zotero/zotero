@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Näytä arkistoimattomat nimikkeet">
 
 <!ENTITY zotero.items.itemType "Nimikkeen tyyppi">
-<!ENTITY zotero.items.type_column "Tyyppi">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Otsikko">
 <!ENTITY zotero.items.creator_column "Luoja">
 <!ENTITY zotero.items.date_column "Päiväys">

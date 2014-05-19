@@ -54,16 +54,24 @@
 					if(!text) text = Zotero.getString("firstRunGuidance."+about);
 					text = text.split("\n");
 					var descriptionNode = panel.lastChild;
+					
+					while (descriptionNode.hasChildNodes()) {
+						descriptionNode.removeChild(descriptionNode.firstChild);
+					}
+					
 					while(text.length) {
 						var textLine = text.shift();
 						descriptionNode.appendChild(document.createTextNode(textLine));
 						if(text.length) descriptionNode.appendChild(document.createElementNS(
 							"http://www.w3.org/1999/xhtml", "br"));
 					}
-
+					
+					this.setAttribute('onpopuphidden', 'this.hidden = true');
+					
 					var me = this;
 					var f = function() {
 						if(me.hasAttribute("foregroundonly") && Services.ww.activeWindow != window) return;
+						me.hidden = false;
 						panel.openPopup(forEl, position ? position : "after_start",
 							x ? parseInt(x, 10) : 0, y ? parseInt(y, 10) : 0, false, false, null);
 						Zotero.Prefs.set(pref, true);

@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Zobrazit sjednocené položky">
 
 <!ENTITY zotero.items.itemType "Typ položky">
-<!ENTITY zotero.items.type_column "Typ">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Název">
 <!ENTITY zotero.items.creator_column "Tvůrce">
 <!ENTITY zotero.items.date_column "Datum">

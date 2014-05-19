@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "Navn:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "Finn">
 <!ENTITY zotero.search.joinMode.any "hvilken som helst">
 <!ENTITY zotero.search.joinMode.all "alle">

@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "Нэр">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "Үр дүн">
 <!ENTITY zotero.search.joinMode.any "дурын">
 <!ENTITY zotero.search.joinMode.all "бүх">

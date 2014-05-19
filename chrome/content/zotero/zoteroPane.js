@@ -981,6 +981,7 @@ var ZoteroPane = new function()
 		}
 		
 		var s = new Zotero.Search();
+		s.libraryID = this.getSelectedLibraryID();
 		s.addCondition('title', 'contains', '');
 		var io = {dataIn: {search: s}, dataOut: null};
 		window.openDialog('chrome://zotero/content/advancedSearch.xul', '', 'chrome,dialog=no,centerscreen', io);

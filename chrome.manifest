@@ -43,6 +43,7 @@ locale	zotero	sr-RS		chrome/locale/sr-RS/zotero/
 locale	zotero	sv-SE		chrome/locale/sv-SE/zotero/
 locale	zotero	th-TH		chrome/locale/th-TH/zotero/
 locale	zotero	tr-TR		chrome/locale/tr-TR/zotero/
+locale	zotero	uk-UA		chrome/locale/uk-UA/zotero/
 locale	zotero	vi-VN		chrome/locale/vi-VN/zotero/
 locale	zotero	zh-CN		chrome/locale/zh-CN/zotero/
 locale	zotero	zh-TW		chrome/locale/zh-TW/zotero/

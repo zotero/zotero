@@ -1,5 +1,7 @@
 <!ENTITY zotero.search.name "نام:">
 
+<!ENTITY zotero.search.searchInLibrary "Search in library:">
+
 <!ENTITY zotero.search.joinMode.prefix "مطابقت با">
 <!ENTITY zotero.search.joinMode.any "حداقل یکی از">
 <!ENTITY zotero.search.joinMode.all "همه">

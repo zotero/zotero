@@ -1465,13 +1465,14 @@ Zotero.Utilities = {
 		}
 		
 		// separate name variables
-		var authorID = Zotero.CreatorTypes.getPrimaryIDForType(item.itemType);
+		var authorID = Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID);
+		var authorFieldName = Zotero.CreatorTypes.getName(authorID);
 		var creators = item.creators;
 		if(creators) {
 			for(var i=0, n=creators.length; i<n; i++) {
 				var creator = creators[i];
 				
-				if(creator.creatorTypeID == authorID) {
+				if(creator.creatorType == authorFieldName) {
 					var creatorType = "author";
 				} else {
 					var creatorType = CSL_NAMES_MAPPINGS[creator.creatorType]

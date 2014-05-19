@@ -62,6 +62,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 					var msg = "Hash not found in info response in " + funcName
 								+ " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
 					Zotero.debug(msg, 1);
+					Zotero.debug(req.status);
 					Zotero.debug(req.responseText);
 					Components.utils.reportError(msg);
 					try {

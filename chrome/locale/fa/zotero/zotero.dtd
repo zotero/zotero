@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "نمایش آیتم‌های دسته‌بندی نشده">
 
 <!ENTITY zotero.items.itemType "نوع آیتم">
-<!ENTITY zotero.items.type_column "نوع">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "عنوان‌">
 <!ENTITY zotero.items.creator_column "پدیدآورنده">
 <!ENTITY zotero.items.date_column "تاریخ">

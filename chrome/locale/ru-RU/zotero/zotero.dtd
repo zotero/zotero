@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Показать неподшитые документы">
 
 <!ENTITY zotero.items.itemType "Тип документа">
-<!ENTITY zotero.items.type_column "Тип">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Название">
 <!ENTITY zotero.items.creator_column "Создатель">
 <!ENTITY zotero.items.date_column "Дата">

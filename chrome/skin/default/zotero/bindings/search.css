@@ -3,6 +3,29 @@
 	width: 60em;
 }
 
+#search-box > hbox {
+	margin-left: 6px;
+}
+
+groupbox {
+	margin-top: 0;
+	padding-top: 0;
+}
+
+caption {
+	font: inherit;
+	padding-left: 0 !important;
+}
+
+label:first-child, checkbox:first-child {
+	margin-left: 0 !important;
+	padding-left: 0 !important;
+}
+
+checkbox {
+	margin-right: .5em;
+}
+
 #search-condition menulist[id="operatorsmenu"]
 {
 	width: 15em;
@@ -43,25 +66,4 @@
 #search-in-the-last textbox
 {
 	min-width: 3em;
-}
-
-#zotero-advanced-search-dialog
-{
-	padding: 8px 8px 14px;
-	height: 400px;
-}
-
-#zotero-advanced-search-dialog #zotero-search-buttons
-{
-	margin: 3px 0;
-}
-
-#zotero-advanced-search-dialog checkbox
-{
-	margin-right: .5em;
-}
-
-#zotero-advanced-search-dialog #zotero-items-tree
-{
-	min-height: 170px;
 }

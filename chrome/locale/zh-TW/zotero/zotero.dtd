@@ -4,8 +4,8 @@
 <!ENTITY zotero.general.deselectAll "取消所有選取">
 <!ENTITY zotero.general.edit "編輯">
 <!ENTITY zotero.general.delete "刪除">
-<!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
+<!ENTITY zotero.general.ok "確定">
+<!ENTITY zotero.general.cancel "取消">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "錯誤記錄可能包括了一些和 Zotero 不相關的訊息。">
@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "顯示出未歸檔的項目">
 
 <!ENTITY zotero.items.itemType "項目類型">
-<!ENTITY zotero.items.type_column "類型">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "標題">
 <!ENTITY zotero.items.creator_column "創作人">
 <!ENTITY zotero.items.date_column "日期">

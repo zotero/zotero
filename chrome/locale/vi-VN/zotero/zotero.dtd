@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
 
 <!ENTITY zotero.items.itemType "Item Type">
-<!ENTITY zotero.items.type_column "Loại">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Nhan đề">
 <!ENTITY zotero.items.creator_column "Người tạo lập">
 <!ENTITY zotero.items.date_column "Ngày">

@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "عرض العناصر غير المصنفة">
 
 <!ENTITY zotero.items.itemType "نوع العنصر">
-<!ENTITY zotero.items.type_column "النوع">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "العنوان">
 <!ENTITY zotero.items.creator_column "المؤلف">
 <!ENTITY zotero.items.date_column "التاريخ">

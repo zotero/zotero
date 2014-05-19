@@ -43,6 +43,7 @@ var ZoteroAdvancedSearch = new function() {
 		var sbc = document.getElementById('zotero-search-box-container');
 		Zotero.setFontSize(sbc);
 		
+		_searchBox.onLibraryChange = this.onLibraryChange;
 		var io = window.arguments[0];
 		_searchBox.search = io.dataIn.search;
 	}
@@ -50,24 +51,33 @@ var ZoteroAdvancedSearch = new function() {
 	
 	function search() {
 		_searchBox.updateSearch();
+		_searchBox.active = true;
 		
 		// A minimal implementation of Zotero.CollectionTreeView
 		var itemGroup = {
 			isSearchMode: function() { return true; },
 			getItems: function () {
-				//var search = _searchBox.search.clone();
+				var search = _searchBox.search.clone();
 				
-				var s2 = new Zotero.Search();
-				s2.setScope(_searchBox.search);
-				
-				// FIXME: Hack to exclude group libraries for now
-				var groups = Zotero.Groups.getAll();
-				for each(var group in groups) {
-					s2.addCondition('libraryID', 'isNot', group.libraryID);
+				// Hack to create a condition for the search's library --
+				// this logic should really go in the search itself instead of here
+				// and in collectionTreeView.js
+				var conditions = search.getSearchConditions();
+				if (!conditions.some(function (condition) condition.condition == 'libraryID')) {
+					let libraryID = _searchBox.search.libraryID;
+					// TEMP: libraryIDInt
+					if (libraryID) {
+						search.addCondition('libraryID', 'is', libraryID);
+					}
+					else {
+						let groups = Zotero.Groups.getAll();
+						for (let i=0; i<groups.length; i++) {
+							search.addCondition('libraryID', 'isNot', groups[i].libraryID);
+						}
+					}
 				}
 				
-				var ids = s2.search();
-				return Zotero.Items.get(ids);
+				return Zotero.Items.get(search.search());
 			},
 			isLibrary: function () { return false; },
 			isCollection: function () { return false; },
@@ -92,8 +102,11 @@ var ZoteroAdvancedSearch = new function() {
 		document.getElementById('zotero-items-tree').view = null;
 		
 		var s = new Zotero.Search();
+		// Don't clear the selected library
+		s.libraryID = _searchBox.search.libraryID;
 		s.addCondition('title', 'contains', '');
 		_searchBox.search = s;
+		_searchBox.active = false;
 	}
 	
 	
@@ -103,8 +116,12 @@ var ZoteroAdvancedSearch = new function() {
 		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
 		
-		var untitled = Zotero.DB.getNextName('collections', 'collectionName',
-			Zotero.getString('pane.collections.untitled'));
+		var untitled = Zotero.DB.getNextName(
+			_searchBox.search.libraryID,
+			'savedSearches',
+			'savedSearchName',
+			Zotero.getString('pane.collections.untitled')
+		);
 		
 		var name = { value: untitled };
 		var result = promptService.prompt(window,
@@ -124,6 +141,13 @@ var ZoteroAdvancedSearch = new function() {
 		var s = _searchBox.search.clone();
 		s.name = name.value;
 		s.save();
+		
+		window.close();
+	}
+	
+	
+	this.onLibraryChange = function (libraryID) {
+		document.getElementById('zotero-search-save').disabled = !Zotero.Libraries.isEditable(libraryID);
 	}
 	
 	

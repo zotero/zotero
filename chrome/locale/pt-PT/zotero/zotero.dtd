@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Mostrar Itens por Arquivar">
 
 <!ENTITY zotero.items.itemType "Tipo de Item">
-<!ENTITY zotero.items.type_column "Tipo">
+<!ENTITY zotero.items.type_column "Item Type">
 <!ENTITY zotero.items.title_column "Título">
 <!ENTITY zotero.items.creator_column "Criador">
 <!ENTITY zotero.items.date_column "Data">
