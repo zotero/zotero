@@ -377,7 +377,10 @@ Zotero.Utilities.Translate.prototype.doHead = function(url, onDone, headers) {
 			//Set-Cookie intentionally omitted for privacy and security
 			//not exactly headers, but useful anyway
 			'status': xmlhttp.status,
-			'statusText': xmlhttp.statusText
+			'statusText': xmlhttp.statusText,
+			// responseUrl is not part of native xmlhttprequest object.
+			// See Zotero.HTTP.doHead
+			'responseUrl': xmlhttp.responseUrl
 		};
 		try {
 			onDone(headers);

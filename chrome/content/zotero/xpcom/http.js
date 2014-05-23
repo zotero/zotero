@@ -405,6 +405,8 @@ Zotero.HTTP = new function() {
 		xmlhttp.onreadystatechange = function() {
 			// XXX Remove when we drop support for Fx <24
 			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
+			// Add response URL, which could be different from request due to redirects
+			xmlhttp.responseUrl = xmlhttp.channel.URI.spec;
 			_stateChange(xmlhttp, onDone);
 		};
 		
