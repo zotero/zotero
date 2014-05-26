@@ -1370,7 +1370,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			
 			// Use unformatted part of date strings (YYYY-MM-DD) for sorting
 			case 'date':
-				var val = row.ref.getField('date', true);
+				var val = row.ref.getField('date', true, true);
 				if (val) {
 					val = val.substr(0, 10);
 					if (val.indexOf('0000') == 0) {
@@ -1380,7 +1380,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				return val;
 			
 			case 'year':
-				var val = row.ref.getField('date', true);
+				var val = row.ref.getField('date', true, true);
 				if (val) {
 					val = val.substr(0, 4);
 					if (val == '0000') {
