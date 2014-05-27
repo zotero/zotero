@@ -2036,7 +2036,11 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			'[JavaScript Error: "this.docShell is null"',
 			'[JavaScript Error: "downloadable font:',
 			'[JavaScript Error: "Image corrupt or truncated:',
-			'[JavaScript Error: "The character encoding of the'
+			'[JavaScript Error: "The character encoding of the',
+			'nsLivemarkService.js',
+			'Sync.Engine.Tabs',
+			'content-sessionStore.js',
+			'org.mozilla.appSessions'
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
