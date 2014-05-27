@@ -4,11 +4,15 @@ description {
 
 /* Intro pane */
 #zotero-error-message {
-	font-style: italic;
+	background: #FFF;
+}
+
+#zotero-error-message .textbox-textarea {
+	padding: 5px !important
 }
 
 #zotero-unrelated-message {
-	margin: 1em 0 .5em;
+	margin: 1.5em 0 .5em;
 }
 
 #zotero-advance-message {

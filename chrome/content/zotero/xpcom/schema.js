@@ -98,7 +98,7 @@ Zotero.Schema = new function(){
 					   .getService(Components.interfaces.nsIWindowWatcher);
 			var data = {
 				msg: obj.data.msg,
-				e: obj.data.e,
+				errorData: obj.data.e,
 				extraData: "Schema upgrade from " + dbVersion + " to " + schemaVersion
 			};
 			var io = { wrappedJSObject: { Zotero: Zotero, data:  data } };

@@ -3945,12 +3945,11 @@ var ZoteroPane = new function()
 	
 	
 	function reportErrors() {
-		var errors = Zotero.getErrors(true);
 		var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 				   .getService(Components.interfaces.nsIWindowWatcher);
 		var data = {
-			msg: Zotero.getString('errorReport.followingErrors', Zotero.appName),
-			e: errors.join('\n\n'),
+			msg: Zotero.getString('errorReport.followingReportWillBeSubmitted'),
+			errorData: Zotero.getErrors(true),
 			askForSteps: true
 		};
 		var io = { wrappedJSObject: { Zotero: Zotero, data:  data } };

@@ -103,7 +103,7 @@
 					<toolbarbutton id="zotero-tb-group-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
 					<spacer flex="1"/>
 					<toolbarbutton id="zotero-tb-actions-menu" class="zotero-tb-button" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
-						<menupopup id="zotero-tb-actions-popup" onpopupshowing="document.getElementById('cmd_zotero_reportErrors').setAttribute('disabled', Zotero.getErrors().length == 0)">
+						<menupopup id="zotero-tb-actions-popup">
 							<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" command="cmd_zotero_import"/>
 							<menuitem id="zotero-tb-actions-import-clipboard" label="&zotero.toolbar.importFromClipboard;" command="cmd_zotero_importFromClipboard"/>
 							<menuitem id="zotero-tb-actions-export" label="&zotero.toolbar.export.label;" command="cmd_zotero_exportLibrary"/>
