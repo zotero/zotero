@@ -575,6 +575,28 @@ Zotero.CollectionTreeView.prototype.isSelectable = function (row, col) {
 }
 
 
+/**
+ * Tree method for whether to allow inline editing (not to be confused with this.editable)
+ */
+Zotero.CollectionTreeView.prototype.isEditable = function (row, col) {
+	return this.itemGroup.isCollection() && this.editable;
+}
+
+
+Zotero.CollectionTreeView.prototype.setCellText = function (row, col, val) {
+	val = val.trim();
+	if (val === "") {
+		return;
+	}
+	this.itemGroup.ref.name = val;
+	this.itemGroup.ref.save();
+}
+
+
+
+/**
+ * Returns TRUE if the underlying view is editable
+ */
 Zotero.CollectionTreeView.prototype.__defineGetter__('editable', function () {
 	return this._getItemAtRow(this.selection.currentIndex).editable;
 });
@@ -1803,7 +1825,6 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient, dataTransfer)
 ////////////////////////////////////////////////////////////////////////////////
 
 Zotero.CollectionTreeView.prototype.isSorted = function() 							{ return false; }
-Zotero.CollectionTreeView.prototype.isEditable = function(row, idx) 				{ return false; }
 
 /* Set 'highlighted' property on rows set by setHighlightedRows */
 Zotero.CollectionTreeView.prototype.getRowProperties = function(row, prop) {

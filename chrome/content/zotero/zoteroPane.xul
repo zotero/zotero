@@ -301,7 +301,7 @@
 					<tree id="zotero-collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
 						onmouseover="ZoteroPane_Local.collectionsView.setHighlightedRows();"
 						onselect="ZoteroPane_Local.onCollectionSelected();"
-						seltype="cell" flex="1">
+						seltype="cell" flex="1" editable="true">
 						<treecols>
 							<treecol
 								id="zotero-collections-name-column"
