@@ -2349,6 +2349,13 @@ Zotero.Prefs = new function(){
 				}
 				break;
 			
+			case "note.fontSize":
+				var val = this.get('note.fontSize');
+				if (val < 6) {
+					this.set('note.fontSize', 6);
+				}
+				break;
+			
 			case "zoteroDotOrgVersionHeader":
 				if (this.get("zoteroDotOrgVersionHeader")) {
 					Zotero.VersionHeader.register();

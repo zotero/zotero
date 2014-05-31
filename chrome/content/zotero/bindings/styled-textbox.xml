@@ -436,7 +436,7 @@
 										+ "body#zotero-tinymce-note.mceContentBody td, "
 										+ "body#zotero-tinymce-note.mceContentBody pre { "
 											+ "font-size: "
-											+ Zotero.Prefs.get('note.fontSize') + "px; "
+											+ Math.max(6, Zotero.Prefs.get('note.fontSize')) + "px; "
 										+ "} "
 										+ "body#zotero-tinymce-note.mceContentBody, "
 										+ "body#zotero-tinymce-note.mceContentBody p { "
