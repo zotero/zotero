@@ -1622,11 +1622,10 @@ Zotero.Utilities = {
 				
 				if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
 					var date = "";
-					if(cslDate.literal) {
+					if(cslDate.literal || cslDate.raw) {
+						date = cslDate.literal || cslDate.raw;
 						if(variable === "accessed") {
-							date = strToISO(cslDate.literal);
-						} else {
-							date = cslDate.literal;
+							date = Zotero.Date.strToISO(date);
 						}
 					} else {
 						var newDate = Zotero.Utilities.deepCopy(cslDate);
