@@ -542,8 +542,8 @@ var Zotero_Browser = new function() {
 			if(!returnValue) {
 				Zotero_Browser.progress.show();
 				Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-				// Include link to Known Translator Issues page
-				var url = "http://www.zotero.org/documentation/known_translator_issues";
+				// Include link to translator troubleshooting page
+				var url = "https://www.zotero.org/support/troubleshooting_translator_issues";
 				var linkText = '<a href="' + url + '" tooltiptext="' + url + '">'
 					+ Zotero.getString('ingester.scrapeErrorDescription.linkText') + '</a>';
 				Zotero_Browser.progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription", linkText));
