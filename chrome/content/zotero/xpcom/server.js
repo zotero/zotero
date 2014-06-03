@@ -24,7 +24,7 @@
 */
 
 Zotero.Server = new function() {
-	var _onlineObserverRegistered;
+	var _onlineObserverRegistered, serv;
 	this.responseCodes = {
 		200:"OK",
 		201:"Created",
@@ -47,8 +47,13 @@ Zotero.Server = new function() {
 			return;
 		}
 		
+		if(serv) {
+			Zotero.debug("Already listening on port " + serv.port);
+			return;
+		}
+		
 		// start listening on socket
-		var serv = Components.classes["@mozilla.org/network/server-socket;1"]
+		serv = Components.classes["@mozilla.org/network/server-socket;1"]
 					.createInstance(Components.interfaces.nsIServerSocket);
 		try {
 			// bind to a random port on loopback only
@@ -56,12 +61,24 @@ Zotero.Server = new function() {
 			serv.asyncListen(Zotero.Server.SocketListener);
 			
 			Zotero.debug("HTTP server listening on "+(bindAllAddr ? "*": " 127.0.0.1")+":"+serv.port);
+			
+			Zotero.addShutdownListener(this.close.bind(this));
 		} catch(e) {
 			Zotero.debug("Not initializing HTTP server");
+			serv = undefined;
 		}
 		
 		_registerOnlineObserver()
 	}
+	
+	/**
+	 * releases bound port
+	 */
+	this.close = function() {
+		if(!serv) return;
+		serv.close();
+		serv = undefined;
+	};
 	
 	/**
 	 * Parses a query string into a key => value object
