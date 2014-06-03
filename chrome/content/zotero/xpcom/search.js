@@ -2274,8 +2274,7 @@ Zotero.SearchConditions = new function(){
 			_conditions[conditions[i]['name']] = conditions[i];
 		}
 		
-		var sortKeys = [];
-		var sortValues = [];
+		_standardConditions = [];
 		
 		var baseMappedFields = Zotero.ItemFields.getBaseMappedFields();
 		
@@ -2299,23 +2298,18 @@ Zotero.SearchConditions = new function(){
 				continue;
 			}
 			
-			var localized = self.getLocalizedName(i);
-			
-			sortKeys.push(localized);
-			sortValues[localized] = {
+			_standardConditions.push({
 				name: i,
-				localized: localized,
+				localized: self.getLocalizedName(i),
 				operators: _conditions[i]['operators'],
 				flags: _conditions[i]['flags']
-			};
+			});
 		}
 		
-		// Alphabetize by localized name
-		// TODO: locale collation sort
-		sortKeys = sortKeys.sort();
-		for each(var i in sortKeys){
-			_standardConditions.push(sortValues[i]);
-		}
+		var collation = Zotero.getLocaleCollation();
+		_standardConditions.sort(function(a, b) {
+			return collation.compareString(1, a.localized, b.localized);
+		});
 		
 		_initialized = true;
 	}
