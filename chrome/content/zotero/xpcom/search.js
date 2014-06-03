@@ -2277,6 +2277,7 @@ Zotero.SearchConditions = new function(){
 		_standardConditions = [];
 		
 		var baseMappedFields = Zotero.ItemFields.getBaseMappedFields();
+		var locale = Zotero.locale;
 		
 		// Separate standard conditions for menu display
 		for (var i in _conditions){
@@ -2298,9 +2299,17 @@ Zotero.SearchConditions = new function(){
 				continue;
 			}
 			
+			let localized = self.getLocalizedName(i);
+			// Hack to use a different name for "issue" in French locale,
+			// where 'number' and 'issue' are translated the same
+			// https://forums.zotero.org/discussion/14942/
+			if (fieldID == 5 && locale.substr(0, 2).toLowerCase() == 'fr') {
+				localized = "Num\u00E9ro (p\u00E9riodique)";
+			}
+			
 			_standardConditions.push({
 				name: i,
-				localized: self.getLocalizedName(i),
+				localized: localized,
 				operators: _conditions[i]['operators'],
 				flags: _conditions[i]['flags']
 			});
