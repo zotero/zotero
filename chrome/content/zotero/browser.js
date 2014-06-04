@@ -102,15 +102,45 @@ var Zotero_Browser = new function() {
 	 * Initialize some variables and prepare event listeners for when chrome is done loading
 	 */
 	function init() {
-		if (!Zotero || !Zotero.initialized || !window.hasOwnProperty("gBrowser")) {
+		if (!window.hasOwnProperty("gBrowser")) {
 			return;
 		}
 		
-		window.addEventListener("load",
-			function(e) { Zotero_Browser.chromeLoad(e) }, false);
+		var zoteroInitDone;
+		if (!Zotero || !Zotero.initialized) {
+			// Zotero either failed to load or is reloading in Connector mode
+			// In case of the latter, listen for the 'zotero-loaded' event (once) and retry
+			var zoteroInitDone_deferred = Q.defer();
+			var obs = Components.classes["@mozilla.org/observer-service;1"]
+				.getService(Components.interfaces.nsIObserverService);
+			var observer = {
+				"observe":function() {
+					obs.removeObserver(observer, 'zotero-loaded')
+					zoteroInitDone_deferred.resolve();
+				}
+			};
+			obs.addObserver(observer, 'zotero-loaded', false);
+			
+			zoteroInitDone = zoteroInitDone_deferred.promise;
+		} else {
+			zoteroInitDone = Q();
+		}
 		
-		ZoteroPane_Local.addReloadListener(reload);
-		reload();
+		var chromeLoaded = Q.defer();
+		window.addEventListener("load", function(e) { chromeLoaded.resolve() }, false);
+		
+		// Wait for Zotero to init and chrome to load before proceeding
+		Q.all([
+			zoteroInitDone.then(function() {
+				ZoteroPane_Local.addReloadListener(reload);
+				reload();
+			}),
+			chromeLoaded.promise
+		])
+		.then(function() {
+			Zotero_Browser.chromeLoad()
+		})
+		.done();
 	}
 	
 	/**
