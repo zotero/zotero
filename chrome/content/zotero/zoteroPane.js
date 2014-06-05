@@ -3023,7 +3023,7 @@ var ZoteroPane = new function()
 		}
 		
 		var io = { itemID: itemID, collectionID: col, parentItemID: parentItemID };
-		window.openDialog('chrome://zotero/content/note.xul', name, 'chrome,resizable,centerscreen', io);
+		window.openDialog('chrome://zotero/content/note.xul', name, 'chrome,resizable,centerscreen,dialog=false', io);
 	}
 	
 	
