@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Wag asseblief terwyl die foutboodskap voorgelê word">
 <!ENTITY zotero.errorReport.submitted "Die foutboodskap is voorgelê">
 <!ENTITY zotero.errorReport.reportID "Verslag-ID:">

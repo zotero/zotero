@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Anulare">
 
 <!ENTITY zotero.errorReport.title "Raportul de erori Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "Jurnalul de erori poate include mesaje fără legătură cu Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Așteaptă, te rog, ca raportul de eroare să fie trimis.">
 <!ENTITY zotero.errorReport.submitted "Raportul de eroare a fost trimis.">
 <!ENTITY zotero.errorReport.reportID "ID raport:">

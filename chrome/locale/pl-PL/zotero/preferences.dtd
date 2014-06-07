@@ -184,7 +184,7 @@
 <!ENTITY zotero.preferences.dataDir.reveal "Wyświetl katalog bazy danych">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Katalog podstawowy załączników">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero użyje względnych ścieżek dla plików załączników w katalogu bazowym. Pozwoli ci to na dostęp do tych plików na różnych komputerach, tak długo, dopóki stuktura katalogów w katalogach bazowych pozostanie taka sama.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Katalog podstawowy:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Wybierz...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Przywróć absolutne ścieżki...">

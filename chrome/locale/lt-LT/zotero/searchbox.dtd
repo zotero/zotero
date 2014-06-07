@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "Pavadinimas:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Ieškoti bibliotekoje">
 
 <!ENTITY zotero.search.joinMode.prefix "Taikyti">
 <!ENTITY zotero.search.joinMode.any "bet kuriuos">

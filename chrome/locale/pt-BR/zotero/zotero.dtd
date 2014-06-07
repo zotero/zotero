@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Cancelar">
 
 <!ENTITY zotero.errorReport.title "Relatório de erros do Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "O registro de erro pode conter mensagens não relacionadas a Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor, aguarde enquanto o relatório de erro é enviado.">
 <!ENTITY zotero.errorReport.submitted "Seu relatório de erro foi enviado.">
 <!ENTITY zotero.errorReport.reportID "Número de identificação do relatório:">

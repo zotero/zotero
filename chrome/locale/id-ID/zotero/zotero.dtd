@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages "Log kesalahan mungkin mengandung pesan yang tidak terkait dengan Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Mohon tunggu sampai laporan kesalahan dikirimkan.">
 <!ENTITY zotero.errorReport.submitted "Laporan kesalahan Anda telah dikirimkan.">
 <!ENTITY zotero.errorReport.reportID "ID Laporan:">

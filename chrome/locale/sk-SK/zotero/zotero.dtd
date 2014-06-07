@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Zrušiť">
 
 <!ENTITY zotero.errorReport.title "Výkaz chýb Zotera">
-<!ENTITY zotero.errorReport.unrelatedMessages "Hlásenie o chybe môže obsahovať informácie nesúvisiace so Zoterom.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Toto môže obsahovať hlásenia nesúvisiace so Zoterom.">
 <!ENTITY zotero.errorReport.submissionInProgress "Prosím počkajte, kým sa hlásenie o chybe neodošle.">
 <!ENTITY zotero.errorReport.submitted "Hlásenie o chybe bolo odoslané.">
 <!ENTITY zotero.errorReport.reportID "ID hlásenia:">
@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Zobraziť nezaradené exempláre">
 
 <!ENTITY zotero.items.itemType "Typ exemplára">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.type_column "Typ exemplára">
 <!ENTITY zotero.items.title_column "Názov">
 <!ENTITY zotero.items.creator_column "Autor">
 <!ENTITY zotero.items.date_column "Dátum">

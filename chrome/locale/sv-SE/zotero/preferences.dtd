@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.fontSize.medium "Mellan">
 <!ENTITY zotero.preferences.fontSize.large "Stor">
 <!ENTITY zotero.preferences.fontSize.xlarge "Större">
-<!ENTITY zotero.preferences.fontSize.notes "Teckenstorlek på anteckningar">
+<!ENTITY zotero.preferences.fontSize.notes "Teckenstorlek för anteckningar">
 
 <!ENTITY zotero.preferences.miscellaneous "Övrigt">
 <!ENTITY zotero.preferences.autoUpdate "Kolla automatiskt efter uppdaterade källfångare och stilar">
@@ -67,7 +67,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "efter behov">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Genom att använda Zotero Storage går du med på tjänstens">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "avtalsvillkor">
-<!ENTITY zotero.preferences.sync.reset.warning1 "Följande åtgärder är endast till för sällsynta, särskilda situationer och ska inte användas för vanlig felsökning. I många fall kan återställning istället ge upphov till nya problem. Se">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Följande åtgärder är endast till för sällsynta, särskilda situationer och ska inte användas för vanlig felsökning. I många fall kan en återställning istället orsaka nya problem. Se">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Återställningsalternativ för synkronisering">
 <!ENTITY zotero.preferences.sync.reset.warning3 "för mer information.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Komplett synkronisering med Zotero Server">

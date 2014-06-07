@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "İsim:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Kitaplıkta ara:">
 
 <!ENTITY zotero.search.joinMode.prefix "Aşağıdakilerden">
 <!ENTITY zotero.search.joinMode.any "herhangi birine">

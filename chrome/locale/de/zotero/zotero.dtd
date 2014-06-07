@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Abbrechen">
 
 <!ENTITY zotero.errorReport.title "Zotero Fehlerbericht">
-<!ENTITY zotero.errorReport.unrelatedMessages "Dieses Fehlerprotokoll kann unter Umständen Nachrichten enthalten, die nicht mit Zotero in Verbindung stehen.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Unter Umständen sind Nachrichten enthalten, die nicht mit Zotero in Verbindung stehen.">
 <!ENTITY zotero.errorReport.submissionInProgress "Bitte warten Sie, während der Fehlerbericht übermittelt wird.">
 <!ENTITY zotero.errorReport.submitted "Der Fehlerbericht wurde übermittelt.">
 <!ENTITY zotero.errorReport.reportID "Bericht-ID:">
@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Einträge ohne Sammlung anzeigen">
 
 <!ENTITY zotero.items.itemType "Eintragsart">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.type_column "Eintragsart">
 <!ENTITY zotero.items.title_column "Titel">
 <!ENTITY zotero.items.creator_column "Ersteller">
 <!ENTITY zotero.items.date_column "Datum">

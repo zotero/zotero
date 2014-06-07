@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Atšaukti">
 
 <!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
-<!ENTITY zotero.errorReport.unrelatedMessages "Klaidų sąraše gali būti žinučių nesusijųsių su Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Prašome palaukti kol siunčiamas klaidų sąrašas.">
 <!ENTITY zotero.errorReport.submitted "Jūsų klaidų sąrašas buvo nusiųstas.">
 <!ENTITY zotero.errorReport.reportID "Pranešimo ID:">
@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Rodyti neužpildytus">
 
 <!ENTITY zotero.items.itemType "Įrašo tipas">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.type_column "Įrašo tipas">
 <!ENTITY zotero.items.title_column "Antraštė">
 <!ENTITY zotero.items.creator_column "Autorius">
 <!ENTITY zotero.items.date_column "Data">
@@ -86,7 +86,7 @@
 <!ENTITY zotero.items.menu.attach.file "Pridėti turimą failo kopiją...">
 <!ENTITY zotero.items.menu.attach.fileLink "Pridėti failo nuorodą...">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Atkurti biblioteką">
+<!ENTITY zotero.items.menu.restoreToLibrary "Atkurti į biblioteką">
 <!ENTITY zotero.items.menu.duplicateItem "Sukurti įrašo kopiją">
 <!ENTITY zotero.items.menu.mergeItems "Apjungti įrašus...">
 

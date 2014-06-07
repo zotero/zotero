@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Cancelar">
 
 <!ENTITY zotero.errorReport.title "Informe de errores de Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "El informe de errores puede incluir mensajes sin relación con Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Esto puede incluir mensajes no relacionados con Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor, espera mientras se envía el informe de error.">
 <!ENTITY zotero.errorReport.submitted "Se ha enviado el informe de error.">
 <!ENTITY zotero.errorReport.reportID "Identificador de informe:">
@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Mostrar ítems unificados">
 
 <!ENTITY zotero.items.itemType "Tipo de ítem">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.type_column "Tipo de ítem">
 <!ENTITY zotero.items.title_column "Título">
 <!ENTITY zotero.items.creator_column "Creador">
 <!ENTITY zotero.items.date_column "Fecha">

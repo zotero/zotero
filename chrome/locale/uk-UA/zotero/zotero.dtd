@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Відміна">
 
 <!ENTITY zotero.errorReport.title "Звіт про помилку в Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "Журнал помилок може включати в себе повідомлення не пов'язані з Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Це може включати повідомлення, які не відносяться до Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Почекайте, поки звіт про помилку буде передано.">
 <!ENTITY zotero.errorReport.submitted "Ваш звіт про помилку був переданий.">
 <!ENTITY zotero.errorReport.reportID "Номер звіту:">
@@ -36,7 +36,7 @@
 
 <!ENTITY zotero.tabs.info.label "Інформація">
 <!ENTITY zotero.tabs.notes.label "Примітки">
-<!ENTITY zotero.tabs.attachments.label "Додатки">
+<!ENTITY zotero.tabs.attachments.label "Вкладення">
 <!ENTITY zotero.tabs.tags.label "Теги">
 <!ENTITY zotero.tabs.related.label "Пов'язані">
 <!ENTITY zotero.notes.separate "Редагувати в окремому вікні">
@@ -47,7 +47,7 @@
 <!ENTITY zotero.items.itemType "Тип документу">
 <!ENTITY zotero.items.type_column "Тип документа">
 <!ENTITY zotero.items.title_column "Назва">
-<!ENTITY zotero.items.creator_column "Створив">
+<!ENTITY zotero.items.creator_column "Автор">
 <!ENTITY zotero.items.date_column "Дата">
 <!ENTITY zotero.items.year_column "Рік">
 <!ENTITY zotero.items.publisher_column "Видавник">
@@ -79,11 +79,11 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Покзати в бібліотеці">
 <!ENTITY zotero.items.menu.attach.note "Додати примітку">
-<!ENTITY zotero.items.menu.attach "Додати додаток">
+<!ENTITY zotero.items.menu.attach "Додати вкладення">
 <!ENTITY zotero.items.menu.attach.snapshot "Прикріпити знімок поточної сторінки">
 <!ENTITY zotero.items.menu.attach.link "Прикріпити посилання на поточну сторінку">
 <!ENTITY zotero.items.menu.attach.link.uri "Прикріпити посилання на URI…">
-<!ENTITY zotero.items.menu.attach.file "Пркріпити копію фалу...">
+<!ENTITY zotero.items.menu.attach.file "Прикріпити копію фалу...">
 <!ENTITY zotero.items.menu.attach.fileLink "Прикріпити посилання на файл...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Відновити в бібліотеці">
@@ -136,7 +136,7 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Немає тегів для відображення">
 <!ENTITY zotero.tagSelector.filter "Фільтр:">
-<!ENTITY zotero.tagSelector.showAutomatic "Показувати автоматично">
+<!ENTITY zotero.tagSelector.showAutomatic "Показувати автоматичні">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Показувати всі теги в бібліотеці">
 <!ENTITY zotero.tagSelector.selectVisible "Вибрати видимі">
 <!ENTITY zotero.tagSelector.clearVisible "Відмінити вибір видимих">

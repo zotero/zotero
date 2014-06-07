@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "Nombre:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Buscar en biblioteca:">
 
 <!ENTITY zotero.search.joinMode.prefix "Patrón">
 <!ENTITY zotero.search.joinMode.any "cualquiera de">

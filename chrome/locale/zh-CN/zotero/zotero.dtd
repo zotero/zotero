@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "取消">
 
 <!ENTITY zotero.errorReport.title "Zotero 错误报告">
-<!ENTITY zotero.errorReport.unrelatedMessages "错误日志里可能会包含一些与 Zotero 无关的信息.">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "正在提交错误报告, 请稍候.">
 <!ENTITY zotero.errorReport.submitted "错误报告已经提交.">
 <!ENTITY zotero.errorReport.reportID "报告ID:">

@@ -34,7 +34,7 @@
 <!ENTITY undoCmd.label "Скасувати ввід">
 <!ENTITY undoCmd.key "Z">
 <!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Повторити ввід">
+<!ENTITY redoCmd.label "Повторити ввод">
 <!ENTITY redoCmd.key "Y">
 <!ENTITY redoCmd.accesskey "R">
 <!ENTITY cutCmd.label "Вирізати">
@@ -70,7 +70,7 @@
 
 <!ENTITY toolsMenu.label "Інструменти">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY addons.label "Доповнення">
+<!ENTITY addons.label "Надбудови">
 
 
 <!ENTITY minimizeWindow.key "m">

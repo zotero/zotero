@@ -1,6 +1,6 @@
 <!ENTITY zotero.version "verzió">
 <!ENTITY zotero.createdby "Létrehozta:">
-<!ENTITY zotero.director "Director:">
+<!ENTITY zotero.director "Igazgató:">
 <!ENTITY zotero.directors "Igazgatók:">
 <!ENTITY zotero.developers "Fejlesztők:">
 <!ENTITY zotero.alumni "Korábbi munkatársak:">
@@ -9,5 +9,5 @@
 <!ENTITY zotero.executiveProducer "Producer:">
 <!ENTITY zotero.thanks "Külön köszönet:">
 <!ENTITY zotero.about.close "Bezárás">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "További hozzájárulók és elismerések">
+<!ENTITY zotero.citationProcessing "Hivatkozás és bibliográfia feldolgozása">
