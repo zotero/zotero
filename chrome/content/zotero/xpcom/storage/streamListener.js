@@ -192,7 +192,7 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 		Zotero.debug('Request ended with status ' + status);
 		var cancelled = status == 0x804b0002; // NS_BINDING_ABORTED
 		
-		if (!cancelled && request instanceof Components.interfaces.nsIHttpChannel) {
+		if (!cancelled && status == 0 && request instanceof Components.interfaces.nsIHttpChannel) {
 			request.QueryInterface(Components.interfaces.nsIHttpChannel);
 			try {
 				status = request.responseStatus;
@@ -202,6 +202,9 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 				status = 0;
 			}
 			request.QueryInterface(Components.interfaces.nsIRequest);
+		}
+		else {
+			status = 0;
 		}
 		
 		if (this._data.streams) {

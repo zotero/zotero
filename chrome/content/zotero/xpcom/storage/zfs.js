@@ -751,6 +751,8 @@ Zotero.Sync.Storage.ZFS = (function () {
 			throw new Error("Item '" + request.name + "' not found");
 		}
 		
+		var self = this;
+		
 		// Retrieve file info from server to store locally afterwards
 		return getStorageFileInfo(item, request)
 			.then(function (info) {
@@ -869,7 +871,6 @@ Zotero.Sync.Storage.ZFS = (function () {
 											+ " (" + libraryKey + ") -- retrying download"
 										Components.utils.reportError(msg);
 										Zotero.debug(msg, 1);
-										Zotero.debug(response, 1);
 										if (_s3Backoff < _maxS3Backoff) {
 											_s3Backoff *= 2;
 										}
