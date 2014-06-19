@@ -157,7 +157,7 @@ var Zotero_Long_Tag_Fixer = new function () {
 			case 0:
 				// Get checked tags
 				var listbox = document.getElementById('zotero-new-tag-list');
-				var len = Zotero.isFx3 ? listbox.childNodes.length : listbox.childElementCount;
+				var len = listbox.childElementCount;
 				var newTags = [];
 				for (var i=0; i<len; i++) {
 					var li = listbox.childNodes[i];
