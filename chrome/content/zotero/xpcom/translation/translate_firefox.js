@@ -583,12 +583,14 @@ Zotero.Translate.IO.Read = function(file, mode) {
 				const encodingRe = /encoding=['"]([^'"]+)['"]/;
 				var m = encodingRe.exec(firstPart);
 				if(m) {
+					// Make sure encoding is valid
 					try {
-						var charconv = Components.classes["@mozilla.org/charset-converter-manager;1"]
-											   .getService(Components.interfaces.nsICharsetConverterManager)
-											   .getCharsetTitle(m[1]);
-						if(charconv) this._charset = m[1];
-					} catch(e) {}
+						var charconv = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+						                         .getService(Components.interfaces.nsIScriptableUnicodeConverter);
+						charconv.charset = m[1];
+					} catch(e) {
+						Zotero.debug("Translate: Ignoring unknown XML encoding "+m[1]);
+					}
 				}
 				
 				if(this._charset) {
