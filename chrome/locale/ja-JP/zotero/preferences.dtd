@@ -60,7 +60,7 @@
 <!ENTITY zotero.preferences.sync.about "同期（シンク）について">
 <!ENTITY zotero.preferences.sync.fileSyncing "ファイルの同期">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "マイ・ライブラリにある添付ファイルを同期するとき右のプログラムを使う:">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "マイ・ライブラリ内の添付ファイルの同期に右のプログラムを使う:">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Zotero ストレジを利用してグループ・ライブラリの添付ファイルを同期する">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "必要に応じて">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "同期する際に">
@@ -69,7 +69,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "使用許諾条件">
 <!ENTITY zotero.preferences.sync.reset.warning1 "次の操作は、稀に起こる特別な状況のためだけのもので、一般的な問題解決に用いられるべきではありません。多くの場合、リセットすることで更なる問題を引き起こします。以下をご参照ください。">
 <!ENTITY zotero.preferences.sync.reset.warning2 "同期リセットの設定">
-<!ENTITY zotero.preferences.sync.reset.warning3 "により詳しい情報がございます。">
+<!ENTITY zotero.preferences.sync.reset.warning3 "により詳しい情報があります。">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Zotero サーバと完全に同期（シンク）させる">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "同期の履歴を無視し、ローカル（手元）の Zotero データと同期サーバのデータを融合する。">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zotero サーバーから復元（リストア）する">

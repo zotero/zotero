@@ -65,7 +65,7 @@
 <!ENTITY zotero.items.archiveLocation_column "Standort im Archiv">
 <!ENTITY zotero.items.place_column "Ort">
 <!ENTITY zotero.items.volume_column "Volumen">
-<!ENTITY zotero.items.edition_column "Ausgabe">
+<!ENTITY zotero.items.edition_column "Auflage">
 <!ENTITY zotero.items.pages_column "Seiten">
 <!ENTITY zotero.items.issue_column "Ausgabe">
 <!ENTITY zotero.items.series_column "Reihe">

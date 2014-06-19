@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "Nimi:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Otsing kataloogist:">
 
 <!ENTITY zotero.search.joinMode.prefix "Valik">
 <!ENTITY zotero.search.joinMode.any "üks">
@@ -20,6 +20,6 @@
 <!ENTITY zotero.search.date.units.months "kuid">
 <!ENTITY zotero.search.date.units.years "aastaid">
 
-<!ENTITY zotero.search.search "Otsida">
-<!ENTITY zotero.search.clear "Puhastada">
+<!ENTITY zotero.search.search "Otsing">
+<!ENTITY zotero.search.clear "Tühjendada">
 <!ENTITY zotero.search.saveSearch "Otsing salvestada">

@@ -4,10 +4,10 @@
 
 <!ENTITY zotero.search.joinMode.prefix "次の条件">
 <!ENTITY zotero.search.joinMode.any "のいずれか">
-<!ENTITY zotero.search.joinMode.all "すべて">
+<!ENTITY zotero.search.joinMode.all "のすべて">
 <!ENTITY zotero.search.joinMode.suffix "を満たす:">
 
-<!ENTITY zotero.search.recursive.label "サブフォルダを検索する">
+<!ENTITY zotero.search.recursive.label "サブコレクションを検索する">
 <!ENTITY zotero.search.noChildren "最上位階層のアイテムのみを表示">
 <!ENTITY zotero.search.includeParentsAndChildren "一致するアイテムの親アイテムと子アイテムを表示">
 
@@ -21,5 +21,5 @@
 <!ENTITY zotero.search.date.units.years "年間">
 
 <!ENTITY zotero.search.search "検索実行">
-<!ENTITY zotero.search.clear "クリア">
+<!ENTITY zotero.search.clear "消去">
 <!ENTITY zotero.search.saveSearch "検索条件を保存">

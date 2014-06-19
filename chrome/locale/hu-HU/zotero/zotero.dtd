@@ -248,7 +248,7 @@
 <!ENTITY zotero.proxy.recognized.title "Proxy felismerve">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
-<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
+<!ENTITY zotero.proxy.recognized.disable.label "Ne irányítsa át automatikusan a kéréseket az előzőleg felismert proxyikra.">
 <!ENTITY zotero.proxy.recognized.ignore.label "Elutasít">
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Metaadatok kigyűjtése...">
@@ -263,8 +263,8 @@
 <!ENTITY zotero.rtfScan.unmappedCitations.label "Nem felismert hivatkozások">
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Bizonytalan hivatkozások">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Felismert">
-<!ENTITY zotero.rtfScan.introPage.label "Introduction">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. The RTF Scan feature currently supports citations in variations upon the following formats:">
+<!ENTITY zotero.rtfScan.introPage.label "Bevezetés">
+<!ENTITY zotero.rtfScan.introPage.description "A Zotero automatikusan képes kinyerni és újraformázni a hivatkozásokat és bibliográfiát beilleszteni RTF fájlokba. Az RTF Scan jelenleg az alábbi formátumokban támogatja a hivatkozásokat:">
 <!ENTITY zotero.rtfScan.introPage.description2 "A kezdéshez, válasszon egy RTF bemeneti fájlt és egy kimenti fájlt alább:">
 <!ENTITY zotero.rtfScan.scanPage.label "Hivatkozások keresése">
 <!ENTITY zotero.rtfScan.scanPage.description "A Zotero hivatkozásokat keres a dokumentumban. Kérem várjon.">
