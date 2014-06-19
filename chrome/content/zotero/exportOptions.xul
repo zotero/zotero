@@ -3,8 +3,6 @@
 <!DOCTYPE window [
 <!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd" >
 %zoteroDTD;
-<!ENTITY % charsetDTD SYSTEM "chrome://global/locale/charsetOverlay.dtd" >
-%charsetDTD;
 ]>
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
