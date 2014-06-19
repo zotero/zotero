@@ -123,6 +123,11 @@
 							var self = this;
 							
 							this._eventHandler = function (event) {
+								// Necessary in Fx32+
+								if (event.wrappedJSObject) {
+									event = event.wrappedJSObject;
+								}
+								
 								//Zotero.debug(event.type);
 								switch (event.type) {
 									case 'keydown':
