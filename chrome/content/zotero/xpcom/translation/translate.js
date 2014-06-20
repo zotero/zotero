@@ -258,7 +258,6 @@ Zotero.Translate.Sandbox = {
 									item = translate._sandboxManager._copyObject(item);
 								}
 								item.complete = translate._sandboxZotero.Item.prototype.complete;
-								Zotero.debug(item)
 							}
 							arg2(obj, item);
 						} catch(e) {
