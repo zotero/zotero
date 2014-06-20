@@ -1021,7 +1021,14 @@ function async(makeGenerator) {
             }
             return when(result, callback, errback);
         }
-        var generator = makeGenerator.apply(this, arguments);
+        // Added by Dan
+        // If already a generator, use that
+        if (makeGenerator.send) {
+        	var generator = makeGenerator;
+        }
+        else {
+			var generator = makeGenerator.apply(this, arguments);
+		}
         var callback = continuer.bind(continuer, "send");
         var errback = continuer.bind(continuer, "throw");
         return callback();
