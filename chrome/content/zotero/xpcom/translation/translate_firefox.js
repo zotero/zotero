@@ -446,6 +446,7 @@ Zotero.Translate.SandboxManager.prototype = {
 	 */
 	"importObject":function(object, passAsFirstArgument, attachTo) {
 		if(!attachTo) attachTo = this.sandbox.Zotero;
+		if(attachTo.wrappedJSObject) attachTo = attachTo.wrappedJSObject;
 		var newExposedProps = false,
 			sandbox = this.sandbox,
 			me = this;
