@@ -2676,6 +2676,8 @@ Zotero.Sync.Server.Data = new function() {
 	
 	
 	this.processUpdatedXML = function (updatedNode, lastLocalSyncDate, syncSession, defaultLibraryID, callback) {
+		yield true;
+		
 		updatedNode.xpath = function (path) {
 			return Zotero.Utilities.xpath(this, path);
 		};
