@@ -2242,8 +2242,7 @@ Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
  */
 Zotero.Translate.Search.prototype._getParameters = function() {
 	if(Zotero.isFx) {
-		return [this._sandboxManager._copyObject(this.search.wrappedJSObject ?
-		                                         this.search.wrappedJSObject : this.search)];
+		return [this._sandboxManager._copyObject(this.search)];
 	}
 	return [this.search];
 };

@@ -484,6 +484,17 @@ Zotero.Translate.SandboxManager.prototype = {
 			attachTo.__exposedProps__ = object.__exposedProps__;
 		}
 	},
+
+	"_canCopy":function(obj) {
+		if(typeof obj !== "object" || obj === null) return false;
+		var proto = Object.getPrototypeOf(obj),
+		    global = Components.utils.getGlobalForObject(obj);
+		if((proto !== global.Object.prototype && proto !== global.Array.prototype) ||
+		   "__exposedProps__" in obj) {
+			return false;
+		}
+		return true;
+	},
 	
 	/**
 	 * Copies a JavaScript object to this sandbox
@@ -491,19 +502,15 @@ Zotero.Translate.SandboxManager.prototype = {
 	 * @return {Object}
 	 */
 	"_copyObject":function(obj, wm) {
-		if(typeof obj !== "object" || obj === null
-				|| (obj.constructor.name !== "Object" && obj.constructor.name !== "Array")
-				|| "__exposedProps__" in obj) {
-			return obj;
-		}
+		if(!this._canCopy(obj)) return obj
 		if(!wm) wm = new WeakMap();
 		var obj2 = (obj instanceof Array ? this.sandbox.Array() : this.sandbox.Object());
+		if(obj2.wrappedJSObject) obj2 = obj2.wrappedJSObject;
 		for(var i in obj) {
 			if(!obj.hasOwnProperty(i)) continue;
 			
 			var prop1 = obj[i];
-			if(typeof prop1 === "object" && prop1 !== null
-					&& (prop1.constructor.name === "Object" || prop1.constructor.name === "Array")) {
+			if(this._canCopy(prop1)) {
 				var prop2 = wm.get(prop1);
 				if(prop2 === undefined) {
 					prop2 = this._copyObject(prop1, wm);
