@@ -492,7 +492,7 @@ Zotero.Translate.SandboxManager.prototype = {
 	 */
 	"_copyObject":function(obj, wm) {
 		if(typeof obj !== "object" || obj === null
-				|| (obj.__proto__ !== Object.prototype && obj.__proto__ !== Array.prototype)
+				|| (obj.constructor.name !== "Object" && obj.constructor.name !== "Array")
 				|| "__exposedProps__" in obj) {
 			return obj;
 		}
@@ -503,7 +503,7 @@ Zotero.Translate.SandboxManager.prototype = {
 			
 			var prop1 = obj[i];
 			if(typeof prop1 === "object" && prop1 !== null
-					&& (prop1.__proto__ === Object.prototype || prop1.__proto__ === Array.prototype)) {
+					&& (prop1.constructor.name === "Object" || prop1.constructor.name === "Array")) {
 				var prop2 = wm.get(prop1);
 				if(prop2 === undefined) {
 					prop2 = this._copyObject(prop1, wm);
