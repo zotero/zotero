@@ -588,8 +588,9 @@ Zotero.CollectionTreeView.prototype.setCellText = function (row, col, val) {
 	if (val === "") {
 		return;
 	}
-	this.itemGroup.ref.name = val;
-	this.itemGroup.ref.save();
+	var itemGroup = this._getItemAtRow(row);
+	itemGroup.ref.name = val;
+	itemGroup.ref.save();
 }
 
 
