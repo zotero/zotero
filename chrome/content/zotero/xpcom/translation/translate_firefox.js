@@ -463,7 +463,9 @@ Zotero.Translate.SandboxManager.prototype = {
 					attachTo[localKey] = function() {
 						var args = Array.prototype.slice.apply(arguments);
 						for(var i=0; i<args.length; i++) {
-							if(args[i].wrappedJSObject) args[i] = args[i].wrappedJSObject;
+							if(typeof args[i] === "object" && args[i] !== null && args[i].wrappedJSObject) {
+								args[i] = args[i].wrappedJSObject;
+							}
 						}
 						if(passAsFirstArgument) args.unshift(passAsFirstArgument);
 						return me._copyObject(object[localKey].apply(object, args));
