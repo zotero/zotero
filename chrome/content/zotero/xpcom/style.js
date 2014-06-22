@@ -468,7 +468,7 @@ Zotero.Style = function(arg) {
  * Get a citeproc-js CSL.Engine instance
  * @param {Boolean} useAutomaticJournalAbbreviations Whether to automatically abbreviate titles
  */
-Zotero.Style.prototype.getCiteProc = function(automaticJournalAbbreviations) {
+Zotero.Style.prototype.getCiteProc = function(automaticJournalAbbreviations, useVariableWrapper) {
 	var locale = Zotero.Prefs.get('export.bibliographyLocale');
 	if(!locale) {
 		var locale = Zotero.locale;
@@ -519,7 +519,13 @@ Zotero.Style.prototype.getCiteProc = function(automaticJournalAbbreviations) {
 	}
 	
 	try {
-		return new Zotero.CiteProc.CSL.Engine(new Zotero.Cite.System(automaticJournalAbbreviations), xml, locale);
+		var sys = new Zotero.Cite.System(automaticJournalAbbreviations);
+		if (useVariableWrapper) {
+			sys.setVariableWrapper(Zotero.Prefs.get('linkTitles'));
+		} else {
+			sys.setVariableWrapper(false);
+		}
+		return new Zotero.CiteProc.CSL.Engine(sys, xml, locale);
 	} catch(e) {
 		Zotero.logError(e);
 		throw e;
