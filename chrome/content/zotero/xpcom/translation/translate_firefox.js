@@ -464,8 +464,8 @@ Zotero.Translate.SandboxManager.prototype = {
 						var args = Array.prototype.slice.apply(arguments);
 						if(Zotero.platformMajorVersion >= 32) {
 							// This is necessary on Nightly and works
-							// fine on 31, but apparently ZU.xpath in
-							// an unusual way on 24
+							// fine on 31, but apparently breaks
+							// ZU.xpath in an unusual way on 24
 							for(var i=0; i<args.length; i++) {
 								if(typeof args[i] === "object" && args[i] !== null && args[i].wrappedJSObject) {
 									args[i] = args[i].wrappedJSObject;
