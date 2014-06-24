@@ -2346,7 +2346,7 @@ Zotero.Prefs = new function(){
 			case "note.fontSize":
 				var val = this.get('note.fontSize');
 				if (val < 6) {
-					this.set('note.fontSize', 6);
+					this.set('note.fontSize', 11);
 				}
 				break;
 			

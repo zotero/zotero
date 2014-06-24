@@ -441,13 +441,17 @@
 								
 								// Add CSS rules to notes
 								if (self.mode == 'note') {
+									let fontSize = Zotero.Prefs.get('note.fontSize');
+									// Fix empty old font prefs before a value was enforced
+									if (fontSize < 6) {
+										fontSize = 11;
+									}
 									var css = "body#zotero-tinymce-note.mceContentBody, "
 										+ "body#zotero-tinymce-note.mceContentBody p, "
 										+ "body#zotero-tinymce-note.mceContentBody th, "
 										+ "body#zotero-tinymce-note.mceContentBody td, "
 										+ "body#zotero-tinymce-note.mceContentBody pre { "
-											+ "font-size: "
-											+ Math.max(6, Zotero.Prefs.get('note.fontSize')) + "px; "
+											+ "font-size: " + fontSize + "px; "
 										+ "} "
 										+ "body#zotero-tinymce-note.mceContentBody, "
 										+ "body#zotero-tinymce-note.mceContentBody p { "

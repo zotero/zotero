@@ -42,6 +42,8 @@ Zotero_Preferences.General = {
 				statusBarRow.hidden = false;
 			}
 		}
+		
+		document.getElementById('noteFontSize').value = Zotero.Prefs.get('note.fontSize');
 	},
 	
 	/**
