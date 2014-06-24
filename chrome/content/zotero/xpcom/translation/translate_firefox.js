@@ -492,9 +492,7 @@ Zotero.Translate.SandboxManager.prototype = {
 
 	"_canCopy":function(obj) {
 		if(typeof obj !== "object" || obj === null) return false;
-		var proto = Object.getPrototypeOf(obj),
-		    global = Components.utils.getGlobalForObject(obj);
-		if((proto !== global.Object.prototype && proto !== global.Array.prototype) ||
+		if((obj.constructor.name !== "Object" && obj.constructor.name !== "Array") ||
 		   "__exposedProps__" in obj) {
 			return false;
 		}
