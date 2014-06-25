@@ -1485,7 +1485,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		}
 		
 		var locale = appLocale.getCategory('NSILOCALE_COLLATE');
-		var collator = new Intl.Collator(locale);
+		var collator = new Intl.Collator(locale, { ignorePunctuation: true });
 		// Until old code is updated, pretend we're returning an nsICollation
 		return this.collation = {
 			compareString: function (_, a, b) {
