@@ -33,6 +33,7 @@
  */
 const CSL_NAMES_MAPPINGS = {
 	"author":"author",
+	"assignee":"recipient",
 	"editor":"editor",
 	"bookAuthor":"container-author",
 	"composer":"composer",
