@@ -1475,8 +1475,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				.getService(Components.interfaces.nsILocaleService);
 		var appLocale = localeService.getApplicationLocale();
 		
-		// Use nsICollation before Fx29
-		if (Zotero.platformMajorVersion < 29) {
+		// Use nsICollation before Fx30
+		if (Zotero.platformMajorVersion < 30) {
 			var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
 				.getService(Components.interfaces.nsILocaleService);
 			var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
