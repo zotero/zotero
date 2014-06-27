@@ -1484,8 +1484,23 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			return this.collation = collationFactory.CreateCollation(appLocale);
 		}
 		
-		var locale = appLocale.getCategory('NSILOCALE_COLLATE');
-		var collator = new Intl.Collator(locale, { ignorePunctuation: true });
+		try {
+			var locale = appLocale.getCategory('NSILOCALE_COLLATE');
+			// Extract a valid language tag
+			locale = locale.match(/^[a-z]{2}(\-[A-Z]{2})?/)[0];
+			var collator = new Intl.Collator(locale, { ignorePunctuation: true });
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			
+			// If there's an error, just skip sorting
+			collator = {
+				compare: function (a, b) {
+					return 0;
+				}
+			};
+		}
+		
 		// Until old code is updated, pretend we're returning an nsICollation
 		return this.collation = {
 			compareString: function (_, a, b) {
