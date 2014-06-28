@@ -168,6 +168,8 @@
 <!ENTITY zotero.bibliography.saveAsHTML.label			"Save as HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label		"Copy to Clipboard">
 <!ENTITY zotero.bibliography.print.label				"Print">
+<!ENTITY zotero.bibliography.links.label				"Links">
+<!ENTITY zotero.bibliography.linkTitles.label			"Include DOI or URL as a link on the entry title (instead of printing)">
 
 <!ENTITY zotero.integration.docPrefs.title				"Document Preferences">
 <!ENTITY zotero.integration.addEditCitation.title		"Add/Edit Citation">

@@ -107,6 +107,7 @@ pref("extensions.zotero.import.charset", "auto");
 pref("extensions.zotero.import.createNewCollection.fromFileOpenHandler", true);
 pref("extensions.zotero.rtfScan.lastInputFile", "");
 pref("extensions.zotero.rtfScan.lastOutputFile", "");
+pref("extensions.zotero.linkTitles", false);
 
 pref("extensions.zotero.export.quickCopy.setting", 'bibliography=http://www.zotero.org/styles/chicago-note-bibliography');
 pref("extensions.zotero.export.quickCopy.dragLimit", 50);

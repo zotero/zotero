@@ -23,6 +23,14 @@
 				<radio id="bibliography" label="&zotero.bibliography.bibliography;"/>
 			</radiogroup>
 		</groupbox>
+		
+		<groupbox id="zotero-bibliography-links">
+		  <caption label="&zotero.bibliography.links.label;"/>
+		  <checkbox id="zotero-bibliography-title-links"
+					label="&zotero.bibliography.linkTitles.label;"
+					oncommand="Zotero_File_Interface_Bibliography.toggleTitleLinks(event)"/>
+		</groupbox>
+		
 		<groupbox>
 			<caption label="&zotero.bibliography.outputMethod;"/>
 			<radiogroup id="output-method-radio">

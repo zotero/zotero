@@ -72,7 +72,8 @@ Zotero.Cite = {
 	 * @return {String} Bibliography or item list in specified format
 	 */
 	"makeFormattedBibliographyOrCitationList":function(style, items, format, asCitationList) {
-		var cslEngine = style.getCiteProc();
+		// true is for useVariableWrapper: see getCiteProc() in style.js and setVariableWrapper() in cite.js
+		var cslEngine = style.getCiteProc(null, true);
 		cslEngine.setOutputFormat(format);
 		cslEngine.updateItems([item.id for each(item in items)]);
 				
@@ -542,7 +543,6 @@ Zotero.Cite.System.prototype = {
 		// TODO: does citeproc-js permit short forms?
 		for(var variable in CSL_TEXT_MAPPINGS) {
 			var fields = CSL_TEXT_MAPPINGS[variable];
-			if(variable == "URL" && ignoreURL) continue;
 			for each(var field in fields) {
 				var value = zoteroItem.getField(field, false, true).toString();
 				if(value != "") {
@@ -553,6 +553,14 @@ Zotero.Cite.System.prototype = {
 					cslItem[variable] = value;
 					break;
 				}
+			}
+			if(variable == "URL" && (ignoreURL || this.variableWrapper) && cslItem.URL) {
+				cslItem.URL_REAL = cslItem.URL;
+				delete cslItem.URL;
+			};
+			if (variable == "DOI" && this.variableWrapper) {
+				cslItem.DOI_REAL = cslItem.DOI;
+				delete cslItem.DOI;
 			}
 		}
 		
@@ -643,5 +651,41 @@ Zotero.Cite.System.prototype = {
 		converterStream.readString(channel.contentLength, str);
 		converterStream.close();
 		return str.value;
+	},
+	
+	"setVariableWrapper":function(setValue) {
+		if ("boolean" !== typeof setValue) {
+			setValue = Zotero.Prefs.get('linkTitles');
+		}
+		if (setValue) {
+			this.variableWrapper = function(params, prePunct, str, postPunct) {
+				if (params.variableNames[0] === 'title' 
+					&& (params.itemData.URL || params.itemData.URL_REAL || params.itemData.DOI)
+					&& params.context === "bibliography") {
+                    
+					var URL = null;
+					var DOI = params.itemData.DOI;
+					if (DOI) {
+						URL = 'http://dx.doi.org/' + Zotero.Utilities.cleanDOI(DOI)
+					}
+					if (!URL) {
+						URL = params.itemData.URL ? params.itemData.URL : params.itemData.URL_REAL;
+					}
+					if (URL) {
+						if (params.mode === 'rtf') {
+							return prePunct + '{\\field{\\*\\fldinst HYPERLINK "' + URL + '"}{\\fldrslt ' + str + '}}' + postPunct;
+						} else {
+							return prePunct + '<a href="' + URL + '">' + str + '</a>' + postPunct;
+						}
+					} else {
+						return (prePunct + str + postPunct);
+					}
+				} else {
+					return (prePunct + str + postPunct);
+				}
+			}
+		} else {
+			this.variableWrapper = null;
+		}
 	}
 };
