@@ -360,3 +360,4 @@ for(var j in Zotero.Utilities.Translate.prototype) {
 		Zotero.Utilities.Translate.prototype.__exposedProps__[j] = "r";
 	}
 }
+Zotero.Utilities.Translate.prototype.XRegExp.prototype.__exposedProps__ = {"lastIndex": "rw"};
