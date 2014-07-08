@@ -1488,7 +1488,10 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			var locale = appLocale.getCategory('NSILOCALE_COLLATE');
 			// Extract a valid language tag
 			locale = locale.match(/^[a-z]{2}(\-[A-Z]{2})?/)[0];
-			var collator = new Intl.Collator(locale, { ignorePunctuation: true });
+			var collator = new Intl.Collator(locale, {
+				ignorePunctuation: true,
+				numeric: true
+			});
 		}
 		catch (e) {
 			Zotero.debug(e, 1);
