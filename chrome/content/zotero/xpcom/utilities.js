@@ -54,16 +54,16 @@ const CSL_TEXT_MAPPINGS = {
 	"collection-number":["seriesNumber"],
 	"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
 	"publisher-place":["place"],
-	"authority":["court","legislativeBody"],
+	"authority":["court","legislativeBody", "issuingAuthority"],
 	"page":["pages"],
 	"volume":["volume", "codeNumber"],
-	"issue":["issue"],
+	"issue":["issue", "priorityNumbers"],
 	"number-of-volumes":["numberOfVolumes"],
 	"number-of-pages":["numPages"],	
 	"edition":["edition"],
 	"version":["version"],
-	"section":["section"],
-	"genre":["type"],
+	"section":["section", "committee"],
+	"genre":["type", "programmingLanguage"],
 	"source":["libraryCatalog"],
 	"dimensions": ["artworkSize", "runningTime"],
 	"medium":["medium", "system"],
@@ -77,13 +77,14 @@ const CSL_TEXT_MAPPINGS = {
 	"DOI":["DOI"],
 	"ISBN":["ISBN"],
 	"ISSN":["ISSN"],
-	"call-number":["callNumber"],
+	"call-number":["callNumber", "applicationNumber"],
 	"note":["extra"],
 	"number":["number"],
 	"chapter-number":["session"],
-	"references":["history"],
+	"references":["history", "references"],
 	"shortTitle":["shortTitle"],
 	"journalAbbreviation":["journalAbbreviation"],
+	"status":["legalStatus"],
 	"language":["language"]
 }
 
@@ -92,7 +93,8 @@ const CSL_TEXT_MAPPINGS = {
  */
 const CSL_DATE_MAPPINGS = {
 	"issued":"date",
-	"accessed":"accessDate"
+	"accessed":"accessDate",
+	"submitted":"filingDate"
 }
 
 /*
@@ -1620,11 +1622,10 @@ Zotero.Utilities = {
 				
 				if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
 					var date = "";
-					if(cslDate.literal) {
+					if(cslDate.literal || cslDate.raw) {
+						date = cslDate.literal || cslDate.raw;
 						if(variable === "accessed") {
-							date = strToISO(cslDate.literal);
-						} else {
-							date = cslDate.literal;
+							date = Zotero.Date.strToISO(date);
 						}
 					} else {
 						var newDate = Zotero.Utilities.deepCopy(cslDate);

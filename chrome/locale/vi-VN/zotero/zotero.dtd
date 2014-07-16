@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages "Sổ nhật ký lỗi có thể chứa các thông báo lỗi không liên quan tới Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Xin vui lòng chờ trong khi báo cáo lỗi được gửi đi.">
 <!ENTITY zotero.errorReport.submitted "Báo cáo lỗi đã được gửi đi">
 <!ENTITY zotero.errorReport.reportID "ID của Báo cáo:">

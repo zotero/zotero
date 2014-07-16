@@ -66,7 +66,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	this.safeDebug = safeDebug;
 	this.getString = getString;
 	this.localeJoin = localeJoin;
-	this.getLocaleCollation = getLocaleCollation;
 	this.setFontSize = setFontSize;
 	this.flattenArguments = flattenArguments;
 	this.getAncestorByTagName = getAncestorByTagName;
@@ -258,7 +257,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		this.platformVersion = appInfo.platformVersion;
 		this.platformMajorVersion = parseInt(appInfo.platformVersion.match(/^[0-9]+/)[0]);
 		this.isFx = true;
-		
 		this.isStandalone = Services.appinfo.ID == ZOTERO_CONFIG['GUID'];
 		return Q.fcall(function () {
 			if(Zotero.isStandalone) {
@@ -1472,10 +1470,50 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	}
 	
 	
-	function getLocaleCollation() {
-		var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
-			.getService(Components.interfaces.nsICollationFactory);
-		return collationFactory.CreateCollation(Services.locale.getApplicationLocale());
+	this.getLocaleCollation = function () {
+		if (this.collation) {
+			return this.collation;
+		}
+		
+		var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
+				.getService(Components.interfaces.nsILocaleService);
+		var appLocale = localeService.getApplicationLocale();
+		
+		// Use nsICollation before Fx30
+		if (Zotero.platformMajorVersion < 30) {
+			var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
+				.getService(Components.interfaces.nsILocaleService);
+			var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
+				.getService(Components.interfaces.nsICollationFactory);
+			return this.collation = collationFactory.CreateCollation(appLocale);
+		}
+		
+		try {
+			var locale = appLocale.getCategory('NSILOCALE_COLLATE');
+			// Extract a valid language tag
+			locale = locale.match(/^[a-z]{2}(\-[A-Z]{2})?/)[0];
+			var collator = new Intl.Collator(locale, {
+				ignorePunctuation: true,
+				numeric: true
+			});
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			
+			// If there's an error, just skip sorting
+			collator = {
+				compare: function (a, b) {
+					return 0;
+				}
+			};
+		}
+		
+		// Until old code is updated, pretend we're returning an nsICollation
+		return this.collation = {
+			compareString: function (_, a, b) {
+				return collator.compare(a, b);
+			}
+		};
 	}
 	
 	
@@ -2034,7 +2072,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			'[JavaScript Error: "this.docShell is null"',
 			'[JavaScript Error: "downloadable font:',
 			'[JavaScript Error: "Image corrupt or truncated:',
-			'[JavaScript Error: "The character encoding of the'
+			'[JavaScript Error: "The character encoding of the',
+			'nsLivemarkService.js',
+			'Sync.Engine.Tabs',
+			'content-sessionStore.js',
+			'org.mozilla.appSessions'
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
@@ -2333,6 +2375,13 @@ Zotero.Prefs = new function(){
 				}
 				else {
 					Zotero.Schema.stopRepositoryTimer();
+				}
+				break;
+			
+			case "note.fontSize":
+				var val = this.get('note.fontSize');
+				if (val < 6) {
+					this.set('note.fontSize', 11);
 				}
 				break;
 			

@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Налащтування Zotero">
+<!ENTITY zotero.preferences.title "Налаштування Zotero">
 
 <!ENTITY zotero.preferences.default "За замовчуванням:">
 <!ENTITY zotero.preferences.items "документа">
@@ -25,7 +25,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Автоматично перевіряти на наявність оновлених трансляторів та стилів">
 <!ENTITY zotero.preferences.updateNow "Оновити зараз">
 <!ENTITY zotero.preferences.reportTranslationFailure "Повідомити про транслтори сатів, що не працюють">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Дозволити zotero.org моифікувати зміст на снові поточної версії Zotero">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Дозволити zotero.org модифікувати зміст на основі поточної версії Zotero">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Якщо включено, поточна версія Zotero  буде додаватись до HTTP запитам на  zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Використовувати Zotero для завантаження файлів BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "Автоматично робити знімки при створенні документів з веб-сторінок">
@@ -56,7 +56,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Забули пароль?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Синхронізувати автоматично">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Синхронізувати повнотекстовий вміст">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero можете синхронізувати повнотекстовий вміст файлів у ваших бібліотеках Zotero з zotero.org та інших пов'язаних пристроїв, що дозволяє легко знайти ваші файли, де б ви були. Повнотекстовий вміст ваших файлів не передаватиметься публічно.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero можете синхронізувати повнотекстовий вміст файлів у ваших бібліотеках Zotero з zotero.org та інших пов'язаних пристроїв, що дозволяє легко знайти ваші файли, де б ви не були. Повнотекстовий вміст ваших файлів не передаватиметься публічно.">
 <!ENTITY zotero.preferences.sync.about "Про синхронізацію">
 <!ENTITY zotero.preferences.sync.fileSyncing "Синхрнізація фалів">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL-адреса:">
@@ -97,7 +97,7 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Експорт">
 
-<!ENTITY zotero.preferences.citationOptions.caption "НАлашьування цитування">
+<!ENTITY zotero.preferences.citationOptions.caption "Налашьування цитування">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Включати URL паперових статей в посилання">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Коли ця опція відключена, при цитуванні журнальних або газетних статей Zotero додає URL тільки при відсутності у сторінки діапазону сторінок.">
 
@@ -147,13 +147,13 @@
 <!ENTITY zotero.preferences.proxies.desc_link "документацію про проксі">
 <!ENTITY zotero.preferences.proxies.desc_after_link "для додаткової інформації.">
 <!ENTITY zotero.preferences.proxies.transparent "Використати перенаправлення">
-<!ENTITY zotero.preferences.proxies.autoRecognize "АВтоматично розпізнвати проксі, що використовується">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Автоматично розпізнвати проксі, що використовується">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Відключити перенаправлення, коли моє доменне ім'я містить">
 <!ENTITY zotero.preferences.proxies.configured "Налаштовані проксі">
 <!ENTITY zotero.preferences.proxies.hostname "Ім'я хоста">
 <!ENTITY zotero.preferences.proxies.scheme "Схема">
 
-<!ENTITY zotero.preferences.proxies.multiSite "ля багатьох сайтів">
+<!ENTITY zotero.preferences.proxies.multiSite "для багатьох сайтів">
 <!ENTITY zotero.preferences.proxies.autoAssociate "Автоматично зіставляти нові хости">
 <!ENTITY zotero.preferences.proxies.variables "Ви можете використовувати наступні змінні в схемі проксі:">
 <!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Ім'я хоста сайту, що перенаправляється (наприклад, www.zotero.org)">
@@ -169,15 +169,15 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Диспетчер систем пошуку статей">
 <!ENTITY zotero.preferences.locate.description "Опис">
 <!ENTITY zotero.preferences.locate.name "Нзва">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Пошукова система розширює можливості меню, що випадає, &quot;Виявити&quot; в панелі &quot;Інформація&quot;. Включенні Пошукової системи в наведеному списку додасть її і це меню, що випадає, і її можна буде використовувати для пошуку ресурсів в вашій бібліотеці через Інтернет.">
-<!ENTITY zotero.preferences.locate.addDescription "Для додавання Пошукової системи, яка відсутня в списку, відвідайте сторінку бажаної системи в браузері та виберіть &#34;Додати&#34 в панелі пошуку Zotero">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "Пошукова система розширює можливості меню, що випадає, 'Виявити' в панелі 'Інформація'. Включенні Пошукової системи в наведеному списку додасть її і це меню, що випадає, і її можна буде використовувати для пошуку ресурсів в вашій бібліотеці через Інтернет.">
+<!ENTITY zotero.preferences.locate.addDescription "Для додавання Пошукової системи, яка відсутня в списку, відвідайте сторінку бажаної системи в браузері та виберіть 'Додати' в панелі пошуку Zotero">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Відновити знчення за замовчуванням">
 
 <!ENTITY zotero.preferences.charset "Кодування символів">
 <!ENTITY zotero.preferences.charset.importCharset "Кодування символів при імпорті">
 <!ENTITY zotero.preferences.charset.displayExportOption "Показувати вікно вибору кодування символів при експорті">
 
-<!ENTITY zotero.preferences.dataDir "РОзташування каталогу з даними">
+<!ENTITY zotero.preferences.dataDir "Розташування каталогу з даними">
 <!ENTITY zotero.preferences.dataDir.useProfile "Використовувати каталог профілю">
 <!ENTITY zotero.preferences.dataDir.custom "Користувацька:">
 <!ENTITY zotero.preferences.dataDir.choose "Вибрати...">
@@ -197,7 +197,7 @@
 
 <!ENTITY zotero.preferences.debugOutputLogging "Запис інформації відладки">
 <!ENTITY zotero.preferences.debugOutputLogging.message "Інформація відладки може допомогти розробникам Zotero діагностувати помилки, що виникли. Записк інфрмації відладки сповільнить роботу Zotero, тому зазвичай її варто включати, тільки якщо про це просить розробник.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "рядків щаписано">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "рядків записано">
 <!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Включити після перезапуску">
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Подивитись запис">
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Очистити запис">

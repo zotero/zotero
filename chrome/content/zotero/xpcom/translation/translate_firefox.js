@@ -446,6 +446,7 @@ Zotero.Translate.SandboxManager.prototype = {
 	 */
 	"importObject":function(object, passAsFirstArgument, attachTo) {
 		if(!attachTo) attachTo = this.sandbox.Zotero;
+		if(attachTo.wrappedJSObject) attachTo = attachTo.wrappedJSObject;
 		var newExposedProps = false,
 			sandbox = this.sandbox,
 			me = this;
@@ -461,6 +462,16 @@ Zotero.Translate.SandboxManager.prototype = {
 				if(isFunction) {
 					attachTo[localKey] = function() {
 						var args = Array.prototype.slice.apply(arguments);
+						if(Zotero.platformMajorVersion >= 32) {
+							// This is necessary on Nightly and works
+							// fine on 31, but apparently breaks
+							// ZU.xpath in an unusual way on 24
+							for(var i=0; i<args.length; i++) {
+								if(typeof args[i] === "object" && args[i] !== null && args[i].wrappedJSObject) {
+									args[i] = args[i].wrappedJSObject;
+								}
+							}
+						}
 						if(passAsFirstArgument) args.unshift(passAsFirstArgument);
 						return me._copyObject(object[localKey].apply(object, args));
 					};
@@ -483,6 +494,15 @@ Zotero.Translate.SandboxManager.prototype = {
 			attachTo.__exposedProps__ = object.__exposedProps__;
 		}
 	},
+
+	"_canCopy":function(obj) {
+		if(typeof obj !== "object" || obj === null) return false;
+		if((obj.constructor.name !== "Object" && obj.constructor.name !== "Array") ||
+		   "__exposedProps__" in obj) {
+			return false;
+		}
+		return true;
+	},
 	
 	/**
 	 * Copies a JavaScript object to this sandbox
@@ -490,27 +510,23 @@ Zotero.Translate.SandboxManager.prototype = {
 	 * @return {Object}
 	 */
 	"_copyObject":function(obj, wm) {
-		if(typeof obj !== "object" || obj === null
-				|| (obj.__proto__ !== Object.prototype && obj.__proto__ !== Array.prototype)
-				|| "__exposedProps__" in obj) {
-			return obj;
-		}
+		if(!this._canCopy(obj)) return obj
 		if(!wm) wm = new WeakMap();
 		var obj2 = (obj instanceof Array ? this.sandbox.Array() : this.sandbox.Object());
+		var wobj2 = obj2.wrappedJSObject ? obj2.wrappedJSObject : obj2;
 		for(var i in obj) {
 			if(!obj.hasOwnProperty(i)) continue;
 			
 			var prop1 = obj[i];
-			if(typeof prop1 === "object" && prop1 !== null
-					&& (prop1.__proto__ === Object.prototype || prop1.__proto__ === Array.prototype)) {
+			if(this._canCopy(prop1)) {
 				var prop2 = wm.get(prop1);
 				if(prop2 === undefined) {
 					prop2 = this._copyObject(prop1, wm);
 					wm.set(prop1, prop2);
 				}
-				obj2[i] = prop2;
+				wobj2[i] = prop2;
 			} else {
-				obj2[i] = prop1;
+				wobj2[i] = prop1;
 			}
 		}
 		return obj2;
@@ -583,12 +599,14 @@ Zotero.Translate.IO.Read = function(file, mode) {
 				const encodingRe = /encoding=['"]([^'"]+)['"]/;
 				var m = encodingRe.exec(firstPart);
 				if(m) {
+					// Make sure encoding is valid
 					try {
-						var charconv = Components.classes["@mozilla.org/charset-converter-manager;1"]
-											   .getService(Components.interfaces.nsICharsetConverterManager)
-											   .getCharsetTitle(m[1]);
-						if(charconv) this._charset = m[1];
-					} catch(e) {}
+						var charconv = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+						                         .getService(Components.interfaces.nsIScriptableUnicodeConverter);
+						charconv.charset = m[1];
+					} catch(e) {
+						Zotero.debug("Translate: Ignoring unknown XML encoding "+m[1]);
+					}
 				}
 				
 				if(this._charset) {

@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel								"Cancel">
 
 <!ENTITY zotero.errorReport.title							"Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages				"The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages				"This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress			"Please wait while the error report is submitted.">
 <!ENTITY zotero.errorReport.submitted						"Your error report has been submitted.">
 <!ENTITY zotero.errorReport.reportID						"Report ID:">

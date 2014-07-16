@@ -11,6 +11,7 @@
 	height="350"
 	title="&zotero.items.menu.attach.note;"
 	persist="screenX screenY width height"
+	windowtype="zotero:note"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 	<script src="include.js"/>

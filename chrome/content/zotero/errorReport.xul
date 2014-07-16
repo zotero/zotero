@@ -6,7 +6,8 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <wizard xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	id="zotero-error-report" title="&zotero.errorReport.title;">
+	id="zotero-error-report" title="&zotero.errorReport.title;"
+	width="550" height="450">
 	
 	<script>
 	<![CDATA[
@@ -18,47 +19,66 @@
 			var Zotero = obj.Zotero;
 			var data = obj.data;
 			var msg = data.msg;
-			var e = data.e;
+			var errorData = data.errorData;
 			var extraData = data.extraData ? data.extraData : '';
+			var diagnosticInfo = false;
+			
 			
 			function init() {
 				var wizard = document.getElementById('zotero-error-report');
+				var continueButton = wizard.getButton('next');
+				continueButton.disabled = true;
 				
-				if (document.getElementById('zotero-failure-message').hasChildNodes()) {
-					var textNode = document.getElementById('zotero-failure-message').firstChild;
-					document.getElementById('zotero-failure-message').removeChild(textNode);
-				}
-				document.getElementById('zotero-failure-message').appendChild(document.createTextNode(msg));
-				document.getElementById('zotero-error-message').value = e;
-				
-				var continueButtonName = wizard.getButton('next').getAttribute('label');
-				var str = Zotero.getString('errorReport.advanceMessage', continueButtonName);
-				document.getElementById('zotero-advance-message').setAttribute('value', str);
+				Zotero.getSystemInfo(function(info) {
+					var errorDataText = errorData.length
+						? data.errorData.join('\n')
+						: Zotero.getString('errorReport.noErrorsLogged', Zotero.appName);
+					
+					diagnosticInfo = info;
+					
+					var logText = errorDataText + '\n\n'
+						+ (extraData !== '' ? extraData + '\n\n' : '')
+						+ diagnosticInfo;
+					
+					if (document.getElementById('zotero-failure-message').hasChildNodes()) {
+						var textNode = document.getElementById('zotero-failure-message').firstChild;
+						document.getElementById('zotero-failure-message').removeChild(textNode);
+					}
+					
+					document.getElementById('zotero-failure-message').appendChild(document.createTextNode(msg));
+					document.getElementById('zotero-error-message').value = logText;
+					
+					continueButton.disabled = false;
+					continueButton.focus();
+					var str = Zotero.getString(
+						'errorReport.advanceMessage', continueButton.getAttribute('label')
+					);
+					document.getElementById('zotero-advance-message').setAttribute('value', str);
+				});
 			}
 			
 			function sendErrorReport() {
 				var wizard = document.getElementById('zotero-error-report');
-				var continueButtonName = wizard.getButton('next').disabled = true;
+				var continueButton = wizard.getButton('next');
+				continueButton.disabled = true;
 				
-				Zotero.getSystemInfo(function(info) {
-					var parts = {
-						error: "true",
-						errorData: Zotero.getErrors(true).join('\n'),
-						extraData: extraData,
-						diagnostic: info
-					};
-					
-					var body = '';
-					for (var key in parts) {
-						body += key + '=' + encodeURIComponent(parts[key]) + '&';
-					}
-					body = body.substr(0, body.length - 1);
-					var url = 'https://repo.zotero.org/repo/report';
-					Zotero.HTTP.promise('POST', url,
-						{ body: body, successCodes: false, foreground: true })
-					.then(_sendErrorReportCallback)
-					.done();
-				});
+				var parts = {
+					error: "true",
+					errorData: errorData.join('\n'),
+					extraData: extraData,
+					diagnostic: diagnosticInfo
+				};
+				
+				var body = '';
+				for (var key in parts) {
+					body += key + '=' + encodeURIComponent(parts[key]) + '&';
+				}
+				body = body.substr(0, body.length - 1);
+				var url = 'https://repo.zotero.org/repo/report';
+				Zotero.HTTP.promise('POST', url,
+					{ body: body, successCodes: false, foreground: true })
+				.then(_sendErrorReportCallback)
+				.done();
 			}
 			
 			
@@ -113,11 +133,11 @@
 				}
 				
 				wizard.advance();
-				wizard.getButton('cancel').setAttribute('disabled', true);
+				wizard.getButton('cancel').disabled = true;;
 				wizard.canRewind = false;
 				var reportID = reported[0].getAttribute('reportID');
 				document.getElementById('zotero-report-id').setAttribute('value', reportID);
-				document.getElementById('zotero-report-result').setAttribute('hidden', false);
+				document.getElementById('zotero-report-result').hidden = false;
 			}
 		}
 	]]>
@@ -125,7 +145,7 @@
 	
 	<wizardpage onpageshow="Zotero_Error_Report.init()" label=" ">
 		<description id="zotero-failure-message"/>
-		<textbox id="zotero-error-message" class="plain" readonly="true" multiline="true" rows="6"/>
+		<textbox id="zotero-error-message" class="plain" readonly="true" multiline="true" flex="1"/>
 		<description id="zotero-unrelated-message">&zotero.general.note; &zotero.errorReport.unrelatedMessages;</description>
 		<description id="zotero-advance-message"/>
 	</wizardpage>

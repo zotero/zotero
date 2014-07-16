@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages "گزارش خطا ممکن است شامل پیام‌های غیر مرتبط با زوترو باشد.">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "لطفا تا پایان ارسال گزارش خطا، صبر کنید.">
 <!ENTITY zotero.errorReport.submitted "گزارش خطا ارسال شد.">
 <!ENTITY zotero.errorReport.reportID "شناسه گزارش:">

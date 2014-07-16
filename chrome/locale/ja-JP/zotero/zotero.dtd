@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "キャンセル">
 
 <!ENTITY zotero.errorReport.title "Zotero エラーレポート">
-<!ENTITY zotero.errorReport.unrelatedMessages "エラー・ログは Zotero とは無関係のメッセージを含んでいる可能性があります。">
+<!ENTITY zotero.errorReport.unrelatedMessages "エラーの記録にはZotero に無関係のメッセージが含まれている恐れがあります。">
 <!ENTITY zotero.errorReport.submissionInProgress "エラーレポートが送信されるまでお待ちください。">
 <!ENTITY zotero.errorReport.submitted "エラーレポートが送信されました。">
 <!ENTITY zotero.errorReport.reportID "レポート ID:">
@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "未整理のアイテムを表示">
 
 <!ENTITY zotero.items.itemType "アイテムの種類">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.type_column "アイテムの種類">
 <!ENTITY zotero.items.title_column "題名">
 <!ENTITY zotero.items.creator_column "編著者名">
 <!ENTITY zotero.items.date_column "日時">

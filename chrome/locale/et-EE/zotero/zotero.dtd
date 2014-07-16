@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages "Vealogi võib sisaldada teateid, mis ei puutu Zoterosse.">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Palun oodake kuni veateadet saadetakse.">
 <!ENTITY zotero.errorReport.submitted "Teie veateade on saadetud.">
 <!ENTITY zotero.errorReport.reportID "Veateate ID:">

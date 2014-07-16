@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages "오류 로그에는 Zotero와 관련이 없는 메시지가 포함될 수 있습니다.">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "오류 보고가 제출되는 동안 기다려 주세요.">
 <!ENTITY zotero.errorReport.submitted "오류 보고가 제출되었습니다.">
 <!ENTITY zotero.errorReport.reportID "보고서 ID:">

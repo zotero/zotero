@@ -32,7 +32,9 @@ Zotero.Sync.Storage.ZFS = (function () {
 	};
 	var _cachedCredentials = false;
 	var _s3Backoff = 1;
+	var _s3ConsecutiveFailures = 0;
 	var _maxS3Backoff = 60;
+	var _maxS3ConsecutiveFailures = 5;
 	
 	/**
 	 * Get file metadata on storage server
@@ -466,26 +468,35 @@ Zotero.Sync.Storage.ZFS = (function () {
 				onStop: function (httpRequest, status, response, data) {
 					data.request.setChannel(false);
 					
-					// For timeouts from S3, which seem to happen intermittently,
+					// For timeouts and failures from S3, which happen intermittently,
 					// wait a little and try again
 					let timeoutMessage = "Your socket connection to the server was not read from or "
 						+ "written to within the timeout period.";
-					if (status == 400 && response.indexOf(timeoutMessage) != -1) {
-						let libraryKey = Zotero.Items.getLibraryKeyHash(item);
-						let msg = "S3 returned 400 in Zotero.Sync.Storage.ZFS.onUploadComplete()"
-							+ " (" + libraryKey + ") -- retrying"
-						Components.utils.reportError(msg);
-						Zotero.debug(msg, 1);
-						Zotero.debug(response, 1);
-						if (_s3Backoff < _maxS3Backoff) {
-							_s3Backoff *= 2;
+					if (status == 0 || (status == 400 && response.indexOf(timeoutMessage) != -1)) {
+						if (_s3ConsecutiveFailures >= _maxS3ConsecutiveFailures) {
+							Zotero.debug(_s3ConsecutiveFailures
+								+ " consecutive S3 failures -- aborting", 1);
+							_s3ConsecutiveFailures = 0;
 						}
-						Zotero.debug("Delaying " + libraryKey + " upload for " + _s3Backoff + " seconds");
-						Q.delay(_s3Backoff * 1000)
-						.then(function () {
-							deferred.resolve(postFile(request, item, url, uploadKey, params));
-						});
-						return;
+						else {
+							let libraryKey = Zotero.Items.getLibraryKeyHash(item);
+							let msg = "S3 returned " + status
+								+ " (" + libraryKey + ") -- retrying upload"
+							Components.utils.reportError(msg);
+							Zotero.debug(msg, 1);
+							Zotero.debug(response, 1);
+							if (_s3Backoff < _maxS3Backoff) {
+								_s3Backoff *= 2;
+							}
+							_s3ConsecutiveFailures++;
+							Zotero.debug("Delaying " + libraryKey + " upload for "
+								+ _s3Backoff + " seconds", 2);
+							Q.delay(_s3Backoff * 1000)
+							.then(function () {
+								deferred.resolve(postFile(request, item, url, uploadKey, params));
+							});
+							return;
+						}
 					}
 					
 					deferred.resolve(onUploadComplete(httpRequest, status, response, data));
@@ -531,6 +542,8 @@ Zotero.Sync.Storage.ZFS = (function () {
 					if (_s3Backoff > 1) {
 						_s3Backoff /= 2;
 					}
+					// And reset consecutive failures
+					_s3ConsecutiveFailures = 0;
 					break;
 				
 				case 500:
@@ -738,6 +751,8 @@ Zotero.Sync.Storage.ZFS = (function () {
 			throw new Error("Item '" + request.name + "' not found");
 		}
 		
+		var self = this;
+		
 		// Retrieve file info from server to store locally afterwards
 		return getStorageFileInfo(item, request)
 			.then(function (info) {
@@ -839,16 +854,43 @@ Zotero.Sync.Storage.ZFS = (function () {
 							data.request.setChannel(false);
 							
 							if (status != 200) {
+								if (status == 404) {
+									deferred.resolve(false);
+									return;
+								}
+								
+								if (status == 0) {
+									if (_s3ConsecutiveFailures >= _maxS3ConsecutiveFailures) {
+										Zotero.debug(_s3ConsecutiveFailures
+											+ " consecutive S3 failures -- aborting", 1);
+										_s3ConsecutiveFailures = 0;
+									}
+									else {
+										let libraryKey = Zotero.Items.getLibraryKeyHash(item);
+										let msg = "S3 returned " + status
+											+ " (" + libraryKey + ") -- retrying download"
+										Components.utils.reportError(msg);
+										Zotero.debug(msg, 1);
+										if (_s3Backoff < _maxS3Backoff) {
+											_s3Backoff *= 2;
+										}
+										_s3ConsecutiveFailures++;
+										Zotero.debug("Delaying " + libraryKey + " download for "
+											+ _s3Backoff + " seconds", 2);
+										Q.delay(_s3Backoff * 1000)
+										.then(function () {
+											deferred.resolve(self._downloadFile(data.request));
+										});
+										return;
+									}
+								}
+								
 								var msg = "Unexpected status code " + status
 									+ " for request " + data.request.name
 									+ " in Zotero.Sync.Storage.ZFS.downloadFile()";
 								Zotero.debug(msg, 1);
 								Components.utils.reportError(msg);
 								// Ignore files not found in S3
-								if (status == 404) {
-									deferred.resolve(false);
-									return;
-								}
 								try {
 									Zotero.debug(Zotero.File.getContents(destFile, null, 4096), 1);
 								}

@@ -1,14 +1,14 @@
 <!ENTITY zotero.search.name "Назва:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Шукати в бібліотеці:">
 
-<!ENTITY zotero.search.joinMode.prefix "Збінаються з">
+<!ENTITY zotero.search.joinMode.prefix "Збігаються з">
 <!ENTITY zotero.search.joinMode.any "будь-яким">
 <!ENTITY zotero.search.joinMode.all "всіма">
 <!ENTITY zotero.search.joinMode.suffix "з нижченаведеного:">
 
-<!ENTITY zotero.search.recursive.label "Шукати в пыдпапках">
-<!ENTITY zotero.search.noChildren "Показувати документи тільки верхнього рывня">
+<!ENTITY zotero.search.recursive.label "Шукати в підпапках">
+<!ENTITY zotero.search.noChildren "Показувати документи тільки верхнього рівня">
 <!ENTITY zotero.search.includeParentsAndChildren "Включити батьківські та дочірні документи, що збігають з шуканим">
 
 <!ENTITY zotero.search.textModes.phrase "Фраза">

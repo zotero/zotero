@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Annuler">
 
 <!ENTITY zotero.errorReport.title "Rapport d'erreur Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "Le journal des erreurs peut comprendre des messages sans rapport avec Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Il peut y avoir des messages sans lien avec Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Veuillez patienter pendant la transmission du rapport d'erreur.">
 <!ENTITY zotero.errorReport.submitted "Le rapport d'erreur a été transmis.">
 <!ENTITY zotero.errorReport.reportID "ID du rapport :">
@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Afficher les documents sans collection">
 
 <!ENTITY zotero.items.itemType "Type de document">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.type_column "Type de document">
 <!ENTITY zotero.items.title_column "Titre">
 <!ENTITY zotero.items.creator_column "Créateur">
 <!ENTITY zotero.items.date_column "Date">

@@ -2274,10 +2274,10 @@ Zotero.SearchConditions = new function(){
 			_conditions[conditions[i]['name']] = conditions[i];
 		}
 		
-		var sortKeys = [];
-		var sortValues = [];
+		_standardConditions = [];
 		
 		var baseMappedFields = Zotero.ItemFields.getBaseMappedFields();
+		var locale = Zotero.locale;
 		
 		// Separate standard conditions for menu display
 		for (var i in _conditions){
@@ -2299,23 +2299,26 @@ Zotero.SearchConditions = new function(){
 				continue;
 			}
 			
-			var localized = self.getLocalizedName(i);
+			let localized = self.getLocalizedName(i);
+			// Hack to use a different name for "issue" in French locale,
+			// where 'number' and 'issue' are translated the same
+			// https://forums.zotero.org/discussion/14942/
+			if (fieldID == 5 && locale.substr(0, 2).toLowerCase() == 'fr') {
+				localized = "Num\u00E9ro (p\u00E9riodique)";
+			}
 			
-			sortKeys.push(localized);
-			sortValues[localized] = {
+			_standardConditions.push({
 				name: i,
 				localized: localized,
 				operators: _conditions[i]['operators'],
 				flags: _conditions[i]['flags']
-			};
+			});
 		}
 		
-		// Alphabetize by localized name
-		// TODO: locale collation sort
-		sortKeys = sortKeys.sort();
-		for each(var i in sortKeys){
-			_standardConditions.push(sortValues[i]);
-		}
+		var collation = Zotero.getLocaleCollation();
+		_standardConditions.sort(function(a, b) {
+			return collation.compareString(1, a.localized, b.localized);
+		});
 		
 		_initialized = true;
 	}

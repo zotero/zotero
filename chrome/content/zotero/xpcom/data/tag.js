@@ -359,7 +359,9 @@ Zotero.Tag.prototype.save = function (full) {
 		catch (e) {
 			// If an incoming tag is the same as an existing tag, but with a different key,
 			// then delete the old tag and add its linked items to the new tag
-			if (typeof e == 'string' && e.indexOf('columns libraryID, name, type are not unique') != -1) {
+			if (typeof e == 'string' &&
+					(e.indexOf('columns libraryID, name, type are not unique') != -1
+						|| e.indexOf('NS_ERROR_STORAGE_CONSTRAINT') != -1)) {
 				Zotero.debug("Tag matches existing tag with different key -- delete old tag and merging items");
 				
 				// GET existing tag

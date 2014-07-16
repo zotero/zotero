@@ -1627,9 +1627,7 @@ Zotero.Sync.Server = new function () {
 					_error(e);
 				}
 				
-				Components.utils.import("resource://gre/modules/Task.jsm");
-				
-				Task.spawn(Zotero.Sync.Server.Data.processUpdatedXML(
+				Q.async(Zotero.Sync.Server.Data.processUpdatedXML(
 					responseNode.getElementsByTagName('updated')[0],
 					lastLocalSyncDate,
 					syncSession,
@@ -1838,7 +1836,7 @@ Zotero.Sync.Server = new function () {
 							Zotero.HTTP.doPost(url, body, uploadCallback);
 						}
 					}
-				))
+				))()
 				.then(
 					null,
 					function (e) {
@@ -2678,6 +2676,8 @@ Zotero.Sync.Server.Data = new function() {
 	
 	
 	this.processUpdatedXML = function (updatedNode, lastLocalSyncDate, syncSession, defaultLibraryID, callback) {
+		yield true;
+		
 		updatedNode.xpath = function (path) {
 			return Zotero.Utilities.xpath(this, path);
 		};

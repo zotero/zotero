@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Peruuta">
 
 <!ENTITY zotero.errorReport.title "Zoteron virheraportti">
-<!ENTITY zotero.errorReport.unrelatedMessages "Virhepäiväkirjassa saattaa olla mukana Zoteroon liittymättömiä viestejä.">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Odota">
 <!ENTITY zotero.errorReport.submitted "Virheraporttisi on toimitettu.">
 <!ENTITY zotero.errorReport.reportID "Raportin tunnus:">

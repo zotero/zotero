@@ -34,17 +34,12 @@ function onLoad() {
 	// Set font size from pref
 	Zotero.setFontSize(noteEditor);
 	
-	var params = [];
-	var b = document.location.href.substr(document.location.href.indexOf('?')+1).split('&');
-	for(var i = 0; i < b.length; i++)
-	{
-		var mid = b[i].indexOf('=');
-		
-		params[b[i].substr(0,mid)] = b[i].substr(mid+1);
+	if (window.arguments) {
+		var io = window.arguments[0];
 	}
-	var itemID = params.id;
-	var collectionID = params.coll;
-	var parentItemID = params.p;
+	var itemID = io.itemID;
+	var collectionID = io.collectionID;
+	var parentItemID = io.parentItemID;
 	
 	if (itemID) {
 		var ref = Zotero.Items.get(itemID);

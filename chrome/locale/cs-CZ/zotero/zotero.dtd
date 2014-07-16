@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Zrušit">
 
 <!ENTITY zotero.errorReport.title "Chybová zpráva Zotera">
-<!ENTITY zotero.errorReport.unrelatedMessages "Záznam o chybách může obsahovat informace nesouvisející se Zoterem.">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Čekejte, prosím, dokud nebude zpráva o chybách odeslána.">
 <!ENTITY zotero.errorReport.submitted "Zpráva o chybách byla odeslána.">
 <!ENTITY zotero.errorReport.reportID "ID hlášení:">

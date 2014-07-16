@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Avbryt">
 
 <!ENTITY zotero.errorReport.title "Zotero-felrapporting">
-<!ENTITY zotero.errorReport.unrelatedMessages "Felloggen kan innehålla meddelanden som inte har med Zotero att göra.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Det kan innehålla meddelanden som inte har med Zotero att göra.">
 <!ENTITY zotero.errorReport.submissionInProgress "Var vänlig vänta medan felrapporten skickas.">
 <!ENTITY zotero.errorReport.submitted "Felrapporten har skickats.">
 <!ENTITY zotero.errorReport.reportID "Rapport-ID:">
@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Visa oregistererade källor">
 
 <!ENTITY zotero.items.itemType "Källtyp">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.type_column "Källtyp">
 <!ENTITY zotero.items.title_column "Titel">
 <!ENTITY zotero.items.creator_column "Skapare">
 <!ENTITY zotero.items.date_column "Datum">

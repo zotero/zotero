@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "Név:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Keresés könyvtárban:">
 
 <!ENTITY zotero.search.joinMode.prefix "Találat">
 <!ENTITY zotero.search.joinMode.any "bármelyik">
@@ -13,7 +13,7 @@
 
 <!ENTITY zotero.search.textModes.phrase "Kifejezés">
 <!ENTITY zotero.search.textModes.phraseBinary "Kifejezés (bináris állományokban is)">
-<!ENTITY zotero.search.textModes.regexp "Regexp">
+<!ENTITY zotero.search.textModes.regexp "Reguláris kifejezés">
 <!ENTITY zotero.search.textModes.regexpCS "Regexp (kis és nagybetűk megkülönböztetése)">
 
 <!ENTITY zotero.search.date.units.days "nap">

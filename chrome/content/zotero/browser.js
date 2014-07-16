@@ -102,15 +102,45 @@ var Zotero_Browser = new function() {
 	 * Initialize some variables and prepare event listeners for when chrome is done loading
 	 */
 	function init() {
-		if (!Zotero || Zotero.skipLoading || !window.hasOwnProperty("gBrowser")) {
+		if (!window.hasOwnProperty("gBrowser")) {
 			return;
 		}
 		
-		window.addEventListener("load",
-			function(e) { Zotero_Browser.chromeLoad(e) }, false);
+		var zoteroInitDone;
+		if (!Zotero || Zotero.skipLoading) {
+			// Zotero either failed to load or is reloading in Connector mode
+			// In case of the latter, listen for the 'zotero-loaded' event (once) and retry
+			var zoteroInitDone_deferred = Q.defer();
+			var obs = Components.classes["@mozilla.org/observer-service;1"]
+				.getService(Components.interfaces.nsIObserverService);
+			var observer = {
+				"observe":function() {
+					obs.removeObserver(observer, 'zotero-loaded')
+					zoteroInitDone_deferred.resolve();
+				}
+			};
+			obs.addObserver(observer, 'zotero-loaded', false);
+			
+			zoteroInitDone = zoteroInitDone_deferred.promise;
+		} else {
+			zoteroInitDone = Q();
+		}
 		
-		ZoteroPane_Local.addReloadListener(reload);
-		reload();
+		var chromeLoaded = Q.defer();
+		window.addEventListener("load", function(e) { chromeLoaded.resolve() }, false);
+		
+		// Wait for Zotero to init and chrome to load before proceeding
+		Q.all([
+			zoteroInitDone.then(function() {
+				ZoteroPane_Local.addReloadListener(reload);
+				reload();
+			}),
+			chromeLoaded.promise
+		])
+		.then(function() {
+			Zotero_Browser.chromeLoad()
+		})
+		.done();
 	}
 	
 	/**
@@ -542,8 +572,8 @@ var Zotero_Browser = new function() {
 			if(!returnValue) {
 				Zotero_Browser.progress.show();
 				Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-				// Include link to Known Translator Issues page
-				var url = "http://www.zotero.org/documentation/known_translator_issues";
+				// Include link to translator troubleshooting page
+				var url = "https://www.zotero.org/support/troubleshooting_translator_issues";
 				var linkText = '<a href="' + url + '" tooltiptext="' + url + '">'
 					+ Zotero.getString('ingester.scrapeErrorDescription.linkText') + '</a>';
 				Zotero_Browser.progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription", linkText));

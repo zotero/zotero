@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Cancel">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages "Дневника с грешките може да съдържа съобщения несвързани с Зотеро.">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Моля изчакайте докато бъде подаден отчета с грешките.">
 <!ENTITY zotero.errorReport.submitted "Отчета с грешките беше подаден.">
 <!ENTITY zotero.errorReport.reportID "Идентификационен номер на отчета:">

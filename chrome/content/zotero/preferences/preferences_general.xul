@@ -32,7 +32,6 @@
 		
 		<preferences id="zotero-prefpane-general-preferences">
 			<preference id="pref-fontSize" name="extensions.zotero.fontSize" type="string"/>
-			<preference id="pref-noteFontSize" name="extensions.zotero.note.fontSize" type="string"/>
 			<preference id="pref-automaticScraperUpdates" name="extensions.zotero.automaticScraperUpdates" type="bool"/>
 			<preference id="pref-reportTranslationFailure" name="extensions.zotero.reportTranslationFailure" type="bool"/>
 			<preference id="pref-automaticSnapshots" name="extensions.zotero.automaticSnapshots" type="bool"/>
@@ -73,7 +72,8 @@
 							<label value="&zotero.preferences.fontSize.notes;" control="noteFontSize"/>
 						</hbox>
 						<hbox>
-							<menulist id="noteFontSize" preference="pref-noteFontSize" editable="true">
+							<menulist id="noteFontSize" editable="true"
+									onblur="Zotero.Prefs.set('note.fontSize', this.value); this.value = Zotero.Prefs.get('note.fontSize');">
 								<menupopup>
 									<menuitem label="11"/>
 									<menuitem label="12"/>

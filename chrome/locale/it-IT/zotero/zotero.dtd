@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Annulla">
 
 <!ENTITY zotero.errorReport.title "Resoconto di errore Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "Il log degli errori potrebbe includere messaggi non riferibili a Zotero">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Attendere, rapporto di errore in fase di invio.">
 <!ENTITY zotero.errorReport.submitted "Il rapporto di errore è stato inviato.">
 <!ENTITY zotero.errorReport.reportID "ID rapporto:">

@@ -33,7 +33,6 @@
 
 <!DOCTYPE window [
 	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
-	<!ENTITY % charsetDTD SYSTEM "chrome://global/locale/charsetOverlay.dtd" > %charsetDTD;
 	<!ENTITY % textcontextDTD SYSTEM "chrome://global/locale/textcontext.dtd" > %textcontextDTD;
 	<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" > %standaloneDTD;
 	<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd" > %brandDTD;

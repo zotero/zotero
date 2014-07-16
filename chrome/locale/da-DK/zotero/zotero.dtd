@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Annullér">
 
 <!ENTITY zotero.errorReport.title "Zotero fejlrapport">
-<!ENTITY zotero.errorReport.unrelatedMessages "Logfilen for fejl kan indeholde meddelelser der ikke har med Zotero at gøre.">
+<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Vent venligst mens fejlrapporten registreres.">
 <!ENTITY zotero.errorReport.submitted "Din fejlrapport er registreret.">
 <!ENTITY zotero.errorReport.reportID "Rapport-ID:">

@@ -67,7 +67,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "Gerek duyulduğunda">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero deposunu kullandığınızda, bu koşulları kabul etmiş oluyorsunuz:">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "Şartlar ve Koşullar">
-<!ENTITY zotero.preferences.sync.reset.warning1 "Aşağıdaki işlemler, yalnızca ender ve özel durumlar altında kullanılmalı, ve genel sorun göderme amaçlı kullanılmamalıdırlar. Çoğu durumda, sıfırlama ek sorunlara neden olacaktır. Bakınız:">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Aşağıdaki işlemler, yalnızca ender ve özel durumlar altında kullanılmalı, ve genel sorun giderme amaçlı kullanılmamalıdırlar. Birçok durumda, sıfırlama ek sorunlara neden olacaktır. Bakınız:">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Eşitlemeyi Sıfırlama Seçenekleri">
 <!ENTITY zotero.preferences.sync.reset.warning3 "Daha fazla bilgi için">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Zetoro Sunucusu ile Tam Eşitleme">

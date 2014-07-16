@@ -3,43 +3,43 @@
 <!ENTITY zotero.preferences.default "Alapértelmezett">
 <!ENTITY zotero.preferences.items "elemek">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Settings">
+<!ENTITY zotero.preferences.settings "Beállítások">
 
 <!ENTITY zotero.preferences.prefpane.general "Általános">
 
 <!ENTITY zotero.preferences.userInterface "Felhasználói felület">
-<!ENTITY zotero.preferences.showIn "Load Zotero in:">
-<!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
-<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn "Zotero futtatása:">
+<!ENTITY zotero.preferences.showIn.browserPane "Böngésző ablak">
+<!ENTITY zotero.preferences.showIn.separateTab "Új lap">
+<!ENTITY zotero.preferences.showIn.appTab "Lap rögzítése">
 <!ENTITY zotero.preferences.statusBarIcon "Ikon az állapotsorban:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Egyik sem">
 <!ENTITY zotero.preferences.fontSize "Betűméret">
 <!ENTITY zotero.preferences.fontSize.small "Kicsi">
 <!ENTITY zotero.preferences.fontSize.medium "Közepes">
 <!ENTITY zotero.preferences.fontSize.large "Nagy">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fontSize.xlarge "Óriási">
 <!ENTITY zotero.preferences.fontSize.notes "Jegyzet betűmérete:">
 
 <!ENTITY zotero.preferences.miscellaneous "Egyéb">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
+<!ENTITY zotero.preferences.autoUpdate "Fordítók- és stílusfrissítések automatikus ellenőrzése">
 <!ENTITY zotero.preferences.updateNow "Frissítés indítása">
 <!ENTITY zotero.preferences.reportTranslationFailure "Hibás adatkonverterek jelentése">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "A Zotero verziójának megfelelő tartalmak mutatása a zotero.org oldalon">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Ha ez be van kapcsolva, a zotero.orgra küldött HTTP kérésekhez hozzáfűzi a Zotero verzióját.">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "A Zotero használata BibTeX/RIS/Refer fájlok letöltésére">
 <!ENTITY zotero.preferences.automaticSnapshots "Weboldalon alapuló elem létrehozásakor automatikus pillanatfelvétel készítése">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "A kapcsolódó PDF és más fájlok automatikus csatolása">
 <!ENTITY zotero.preferences.automaticTags "Kulcsszavak és tárgyszavak automatikus hozzárendelése címkeként">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatikusan törölje a kukából azokat az elemeket, amelyek">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "napnál régebbiek">
 
 <!ENTITY zotero.preferences.groups "Csoportok">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Amikor könyvtárak között másol elemeket, az alábbiakat másolja:">
 <!ENTITY zotero.preferences.groups.childNotes "kapcsolódó jegyzetek">
 <!ENTITY zotero.preferences.groups.childFiles "kapcsolódó pillanatfelvételek és importált fájlok">
 <!ENTITY zotero.preferences.groups.childLinks "kapcsolódó hivatkozások">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups.tags "címkék">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -55,21 +55,21 @@
 <!ENTITY zotero.preferences.sync.createAccount "Új felhasználói fiók">
 <!ENTITY zotero.preferences.sync.lostPassword "Elveszett jelszó?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatikus szinkronizálás">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
-<!ENTITY zotero.preferences.sync.about "About Syncing">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Teljes szöveg szinkronizálása">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "A Zotero szinkronizálhatja a Zotero könyvtáraiban található fájlok teljes szövegét a zotero.org-gal és egyéb csatolt eszközökkel, lehetővé téve, hogy bárhol könnyedén keressen a fájljaira. A fájlok teljes szövege nem válik nyilvánossá.">
+<!ENTITY zotero.preferences.sync.about "Bővebben a szinkronizálásról">
 <!ENTITY zotero.preferences.sync.fileSyncing "Fájlok szinkronizálása">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "A könyvtáramban található fájlok szinkronizálása">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "A csoport könyvtárához tartozó fájlok szinkronizálása a Zotero tárhely használatával">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Fájlok letöltése">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "szinkronizáláskor">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "szükség szerint">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "A Zotero tárhely használata esetén elfogadom a">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "felhasználási feltételeket">
-<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Az alábbi műveletek kizárólag ritka, egyedi esetekre valók, alkalmazásuk nem javasolt általános hibaelhárításra. A visszaállítás sok esetben további problémákat okoz. Lásd ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
-<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
+<!ENTITY zotero.preferences.sync.reset.warning3 " további információért.">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Teljes szinkornizáció a Zotero szerverrel">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "A helyi adatok összefésülése a szerveren található adatokkal, a szinkronizációs előzmények figyelmen kívül hagyása.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Visszaállítás a Zotero szerverről">
@@ -78,7 +78,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "A szerveren található adatok törlése és frissítése a helyi adatokkal.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "A szinkronizációs előzmények törlése">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Valamennyi helyi csatolmány ellenőrzése a tárhely szerveren">
-<!ENTITY zotero.preferences.sync.reset "Reset">
+<!ENTITY zotero.preferences.sync.reset "Visszaállítás">
 <!ENTITY zotero.preferences.sync.reset.button "Visszaállítás">
 
 
@@ -106,34 +106,34 @@
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Másolás HTML-ként">
 <!ENTITY zotero.preferences.quickCopy.macWarning "Megjegyzés: A formázás Mac OS X alatt elveszik.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Weboldal-specifikus beállítások:">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domén/Útvonal">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(pl: wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Kimeneti formátum">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "A gyorsmásolás kikapcsolása, amikor az elemek száma több, mint">
 
-<!ENTITY zotero.preferences.prefpane.cite "Cite">
-<!ENTITY zotero.preferences.cite.styles "Styles">
-<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
+<!ENTITY zotero.preferences.prefpane.cite "Hivatkozás">
+<!ENTITY zotero.preferences.cite.styles "Stílusok">
+<!ENTITY zotero.preferences.cite.wordProcessors "Szövegszerkesztők">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Nincs szövegszerkesztő plug-in telepítve">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Szövegszerkesztő plug-inek letöltése…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "A klasszikus Add Citation ablak használata">
 
-<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Stílus Kezelő">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Cím">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Frissítve">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "További stílusok telepítése...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Billentyűparancsok">
 
 <!ENTITY zotero.preferences.keys.openZotero "Zotero megnyitása/bezárása">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Mentés Zotero-ba (adress bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Teljesképernyős üzemmód">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Gyorskeresés">
-<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
-<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.newItem "Új elem létrehozása">
+<!ENTITY zotero.preferences.keys.newNote "Új jegyzet létrehozása">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Címkeválasztó mutatása/elrejtése">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kiválasztott hivatkozás másolása a vágólapra">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kiválasztott elemek másolása a vágólapra">
@@ -147,8 +147,8 @@
 <!ENTITY zotero.preferences.proxies.desc_link "proxy leírást">
 <!ENTITY zotero.preferences.proxies.desc_after_link "további információkért.">
 <!ENTITY zotero.preferences.proxies.transparent "Emlékezzen a proxyn keresztül megtekintett erőforrásokra">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Proxy-források automatikus felismerése">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Proxy átirányítás tiltása, ha a domén nevem tartalmaz">
 <!ENTITY zotero.preferences.proxies.configured "Proxyk">
 <!ENTITY zotero.preferences.proxies.hostname "Host neve">
 <!ENTITY zotero.preferences.proxies.scheme "Séma">
@@ -163,15 +163,15 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Bármilyen szöveg">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Haladó">
-<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Fájlok és mappák">
 
-<!ENTITY zotero.preferences.prefpane.locate "Locate">
+<!ENTITY zotero.preferences.prefpane.locate "Elhelyezni">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
-<!ENTITY zotero.preferences.locate.description "Description">
-<!ENTITY zotero.preferences.locate.name "Name">
+<!ENTITY zotero.preferences.locate.description "Leírás">
+<!ENTITY zotero.preferences.locate.name "Név">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
 <!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
-<!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
+<!ENTITY zotero.preferences.locate.restoreDefaults "Visszaállítás alapértelmezettre">
 
 <!ENTITY zotero.preferences.charset "Karakterkódolás">
 <!ENTITY zotero.preferences.charset.importCharset "Karakterkódolás importálása">
@@ -184,10 +184,10 @@
 <!ENTITY zotero.preferences.dataDir.reveal "Az adatkönyvtár mutatása">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
-<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
-<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "A Zotero relatív útvonalakat használ a csatolt fájlokhoz az alap könyvtáron belül , ezzel elérhetővé teszi a fájlokat különböző számítógépeken, amennyiben a fájlszerkezet az alap könyvtárban változatlan.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Alap könyvtár:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Tallózás…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Visszavonás…">
 
 <!ENTITY zotero.preferences.dbMaintenance "Adatbázis karbantartás">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Az adatbázis integritásának ellenőrzése">
@@ -203,7 +203,7 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Output törlése">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Elküldés a Zotero szervernek">
 
-<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
-<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
+<!ENTITY zotero.preferences.openAboutConfig "Az about:config megnyitása">
+<!ENTITY zotero.preferences.openCSLEdit "CSL Szerkesztő megnyitása">
+<!ENTITY zotero.preferences.openCSLPreview "CSL előnézet megnyitása">
+<!ENTITY zotero.preferences.openAboutMemory "Az about:memory megnyitása">
