@@ -198,21 +198,21 @@ Zotero.LibraryTreeView.prototype = {
 		// and 'copy'/'link' for drags with system-default modifier keys,
 		// as long as the actions are allowed by the initial effectAllowed set
 		// in onDragStart, regardless of the effectAllowed or dropEffect set
-		// in onDragOver. To prevent inaccurate 'copy'/'link' cursors, we set
-		// effectAllowed to 'move' in onDragStart, which locks the cursor at
-		// 'move'. ('none' still changes the cursor, but 'copy'/'link' do not.)
+		// in onDragOver. It doesn't seem to be possible to use 'copy' for
+		// the default and 'move' for modified, as we need to in the collections
+		// tree. To prevent inaccurate 'copy'/'link' cursors, we set effectAllowed
+		// to 'copy' in onDragStart, which locks the cursor at 'copy'. ('none' still
+		// changes the cursor, but 'move'/'link' do not.) We use 'copy' instead of
+		// 'move' because with 'move' text can't be dragged to Chrome textareas
+		// (and probably other places), and that seems worse than always showing
+		// 'copy' feedback.
 		//
-		// However, since effectAllowed is enforced, leaving it at 'move'
-		// would prevent our default 'copy' from working, so we also have to
+		// However, since effectAllowed is enforced, leaving it at 'copy'
+		// would prevent our modified 'move' from working, so we also have to
 		// set effectAllowed here (called from onDragOver) to the same action
 		// as the dropEffect. This allows the dropEffect setting (which we use
 		// in the tree's canDrop() and drop() to determine the desired action)
 		// to be changed, even if the cursor doesn't reflect the new setting.
-		//
-		// Update (07/2014): We now use 'copy' for effectAllowed on Windows in
-		// onDragStart, since with 'move' text can't be dragged to Chrome
-		// textareas (and probably other places). This locks the cursor at copy,
-		// even when Shift is used, but that seems less bad.
 		if (Zotero.isWin) {
 			event.dataTransfer.effectAllowed = effect;
 		}
