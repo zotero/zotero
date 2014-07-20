@@ -208,6 +208,11 @@ Zotero.LibraryTreeView.prototype = {
 		// as the dropEffect. This allows the dropEffect setting (which we use
 		// in the tree's canDrop() and drop() to determine the desired action)
 		// to be changed, even if the cursor doesn't reflect the new setting.
+		//
+		// Update (07/2014): We now use 'copy' for effectAllowed on Windows in
+		// onDragStart, since with 'move' text can't be dragged to Chrome
+		// textareas (and probably other places). This locks the cursor at copy,
+		// even when Shift is used, but that seems less bad.
 		if (Zotero.isWin) {
 			event.dataTransfer.effectAllowed = effect;
 		}
