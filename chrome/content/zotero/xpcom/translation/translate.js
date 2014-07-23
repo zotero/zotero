@@ -346,6 +346,7 @@ Zotero.Translate.Sandbox = {
 						if(!Zotero.Utilities.isEmpty(sandbox.exports)) {
 							sandbox.exports.Zotero = sandbox.Zotero;
 							sandbox = sandbox.exports;
+							if(Zotero.isFx && sandbox.wrappedJSObject) sandbox = sandbox.wrappedJSObject;
 						} else {
 							translate._debug("COMPAT WARNING: "+translation.translator[0].label+" does "+
 								"not export any properties. Only detect"+translation._entryFunctionSuffix+
