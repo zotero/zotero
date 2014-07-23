@@ -1490,7 +1490,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			locale = locale.match(/^[a-z]{2}(\-[A-Z]{2})?/)[0];
 			var collator = new Intl.Collator(locale, {
 				ignorePunctuation: true,
-				numeric: true
+				numeric: true,
+				sensitivity: 'base'
 			});
 		}
 		catch (e) {
@@ -1504,10 +1505,44 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			};
 		}
 		
+		// Grab all ASCII punctuation and space at the begining of string
+		var initPunctuationRE = /^[\x20-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E]+/;
+		// Punctuation that should be ignored when sorting
+		var ignoreInitRE = /["'[{(]+$/;
+		
 		// Until old code is updated, pretend we're returning an nsICollation
 		return this.collation = {
 			compareString: function (_, a, b) {
-				return collator.compare(a, b);
+				if (!a && !b) return 0;
+				if (!a || !b) return b ? -1 : 1;
+				
+				// Compare initial punctuation
+				var aInitP = initPunctuationRE.exec(a) || '';
+				var bInitP = initPunctuationRE.exec(b) || '';
+				
+				var aWordStart = 0, bWordStart = 0;
+				if (aInitP) {
+					aWordStart = aInitP[0].length;
+					aInitP = aInitP[0].replace(ignoreInitRE, '');
+				}
+				if (bInitP) {
+					bWordStart = bInitP.length;
+					bInitP = bInitP[0].replace(ignoreInitRE, '');
+				}
+				
+				// If initial punctuation is equivalent, use collator comparison
+				// that ignores all punctuation
+				if (aInitP == bInitP || !aInitP && !bInitP) return collator.compare(a, b);
+				
+				// Otherwise consider "attached" words as well, e.g. the order should be
+				// "__ n", "__z", "_a"
+				// We don't actually care what the attached word is, just whether it's
+				// there, since at this point we're guaranteed to have non-equivalent
+				// initial punctuation
+				if (aWordStart < a.length) aInitP += 'a';
+				if (bWordStart < b.length) bInitP += 'a';
+				
+				return aInitP.localeCompare(bInitP);
 			}
 		};
 	}
