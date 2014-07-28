@@ -339,7 +339,11 @@ Zotero.Server.Connector.SaveItem.prototype = {
 		} catch(e) {}
 		
 		var cookieSandbox = data["uri"] ? new Zotero.CookieSandbox(null, data["uri"],
-			data["cookie"] || "", url.userAgent) : null;
+			data["detailedCookies"] ? "" : data["cookie"] || "", url.userAgent) : null;
+		if(cookieSandbox && data.detailedCookies) {
+			cookieSandbox.addCookiesFromHeader(data.detailedCookies);
+		}
+		
 		for(var i=0; i<data.items.length; i++) {
 			Zotero.Server.Connector.AttachmentProgressManager.add(data.items[i].attachments);
 		}
