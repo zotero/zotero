@@ -88,12 +88,13 @@
 									<menuitem label="96"/>
 								</menupopup>
 							</menulist>
+							<hbox flex="1" align="end" pack="end">
+								<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
+							</hbox>
 						</hbox>
 					</row>
 				</rows>
 			</grid>
-			
-			<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
 		</groupbox>
 		
 		<groupbox id="zotero-prefpane-miscellaneous-groupbox">
@@ -122,17 +123,23 @@
 			<caption label="&zotero.preferences.groups;"/>
 			
 			<label value="&zotero.preferences.groups.whenCopyingInclude;"/>
-			<vbox style="margin-left: 2em">
-				<checkbox label="&zotero.preferences.groups.childNotes;" preference="pref-groups-copyChildNotes"/>
-				<checkbox label="&zotero.preferences.groups.childFiles;" preference="pref-groups-copyChildFileAttachments"/>
-				<checkbox label="&zotero.preferences.groups.childLinks;" preference="pref-groups-copyChildLinks"/>
-				<checkbox label="&zotero.preferences.groups.tags;" preference="pref-groups-copyTags"/>
-			</vbox>
+			<grid style="margin-left: 2em">
+				<columns>
+					<column flex="1"/>
+					<column flex="1"/>
+				</columns>
+				<rows>
+					<row>
+						<checkbox label="&zotero.preferences.groups.childNotes;" preference="pref-groups-copyChildNotes"/>
+						<checkbox label="&zotero.preferences.groups.childFiles;" preference="pref-groups-copyChildFileAttachments"/>
+					</row>
+					<row>
+						<checkbox label="&zotero.preferences.groups.childLinks;" preference="pref-groups-copyChildLinks"/>
+						<checkbox label="&zotero.preferences.groups.tags;" preference="pref-groups-copyTags"/>
+					</row>
+				</rows>
+			</grid>
 		</groupbox>
-		
-		<separator/>
-		<separator/>
+		<script src="preferences_general.js" type="application/javascript;version=1.8"/>
 	</prefpane>
-	
-	<script src="preferences_general.js" type="application/javascript;version=1.8"/>
 </overlay>

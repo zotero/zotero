@@ -32,7 +32,7 @@
 				<separator/>
 				
 				<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings"/>
-				<tree flex="1" id="quickCopy-siteSettings" hidecolumnpicker="true" rows="6" seltype="single"
+				<tree flex="1" id="quickCopy-siteSettings" hidecolumnpicker="true" rows="4" seltype="single"
 						ondblclick="Zotero_Preferences.Export.showQuickCopySiteEditor(this.currentIndex)"
 						onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { Zotero_Preferences.Export.deleteSelectedQuickCopySite(); }">
 					<treecols>

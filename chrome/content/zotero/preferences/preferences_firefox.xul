@@ -81,8 +81,7 @@
 			
 			<separator/>
 			<separator/>
+			<script src="preferences_proxies.js" type="application/javascript;version=1.8"/>
 		</prefpane>
-		
-		<script src="preferences_proxies.js" type="application/javascript;version=1.8"/>
 	</prefwindow>
 </overlay>

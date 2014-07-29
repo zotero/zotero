@@ -105,10 +105,10 @@
 			</rows>
 		</grid>
 		
-		<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
-		
 		<separator/>
-	</prefpane>
+		
+		<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
 	
-	<script src="preferences_keys.js" type="application/javascript;version=1.8"/>
+		<script src="preferences_keys.js" type="application/javascript;version=1.8"/>
+	</prefpane>
 </overlay>

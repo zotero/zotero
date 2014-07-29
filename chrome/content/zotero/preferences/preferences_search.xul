@@ -112,10 +112,6 @@
 				</rows>
 			</grid>
 		</groupbox>
-		
-		<separator/>
-		<separator/>
+		<script src="preferences_search.js" type="application/javascript;version=1.8"/>
 	</prefpane>
-	
-	<script src="preferences_search.js" type="application/javascript;version=1.8"/>
 </overlay>

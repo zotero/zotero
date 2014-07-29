@@ -8,7 +8,9 @@ prefwindow {
 }
 
 prefpane {
-	overflow-y: scroll;
+	overflow-y: auto;
+	margin-bottom: 0px;
+	padding-bottom: 0px;
 }
 
 description, label, checkbox {
@@ -30,8 +32,7 @@ radio[pane]
 
 .statusLine
 {
-	margin: .75em 0;
-	font-size: .85em;
+	font-size: 0.9em;
 }
 
 /* Links within messages */
