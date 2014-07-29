@@ -909,10 +909,11 @@
 						comma.setAttribute('hidden', true);
 						
 						if (!initial) {
+							// Most likely we misinterpreted an institutional author with a comma for a person
 							var first = this._getFieldValue(firstName);
 							if (first && first != this._defaultFirstName) {
 								var last = this._getFieldValue(lastName);
-								this._setFieldValue(lastName, first + ' ' + last);
+								this._setFieldValue(lastName, last + ", " + first);
 							}
 						}
 						
@@ -965,16 +966,26 @@
 						}
 						
 						if (!initial) {
-							// Move all but last word to first name field and show it
-							var last = this._getFieldValue(lastName);
+							let last = this._getFieldValue(lastName);
 							if (last && last != this._defaultFullName) {
-								var lastNameRE = /(.*?)[ ]*([^ ]+[ ]*)$/;
-								var parts = lastNameRE.exec(last);
-								if (parts[2] && parts[2] != last)
-								{
-									this._setFieldValue(lastName, parts[2]);
-									this._setFieldValue(firstName, parts[1]);
+								// If there's a comma then it's last, first.
+								// Otherwise, it's probably first last
+								last = last.split(',');
+								let first;
+								if(last.length > 1) {
+									first = last.slice(1).join(',').trim(); // In case there's more than one comma
+									last = last[0].trim();
+								} else {
+									// Use everything before the last space as first name,
+									// everything after as last
+									last = last[0].trim().split(/\s+/);
+									if (last.length > 1) {
+										first = last.slice(0,last.length-1).join(' ');
+									}
+									last = last[last.length-1];
 								}
+								this._setFieldValue(lastName, last);
+								if (first) this._setFieldValue(firstName, first);
 							}
 						}
 						
