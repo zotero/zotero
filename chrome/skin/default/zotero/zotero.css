@@ -313,6 +313,11 @@ label.zotero-text-link {
   margin-bottom: 1em;
 }
 
+.zotero-warning-extra-attention {
+  font-weight: bold !important;
+  color: red !important;
+}
+
 .zotero-small-progress-indicator {
 	list-style-image: url(chrome://global/skin/icons/notloading_16.png);
 	margin-left: -2px;

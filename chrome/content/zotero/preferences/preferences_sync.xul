@@ -249,7 +249,7 @@
 				
 				<tabpanel id="zotero-reset" orient="vertical">
 					<!-- This doesn't wrap without an explicit width, for some reason -->
-					<description width="45em">&zotero.preferences.sync.reset.warning1;<label style="margin-left: 0; margin-right: 0" class="zotero-text-link" href="http://zotero.org/support/kb/sync_reset_options">&zotero.preferences.sync.reset.warning2;</label>&zotero.preferences.sync.reset.warning3;</description>
+					<description width="45em" class="zotero-warning-extra-attention" style="font-size: 1.1em">&zotero.preferences.sync.reset.warning1;<label style="margin-left: 0; margin-right: 0" class="zotero-text-link" href="http://zotero.org/support/kb/sync_reset_options">&zotero.preferences.sync.reset.warning2;</label>&zotero.preferences.sync.reset.warning3;</description>
 					
 					<radiogroup id="zotero-reset-sync-group"
 							oncommand="Zotero_Preferences.Sync.handleSyncResetSelect(this)">
