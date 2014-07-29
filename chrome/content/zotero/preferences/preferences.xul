@@ -86,6 +86,9 @@
 	<![CDATA[
 		var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
 		observerService.notifyObservers(null, "charsetmenu-selected", "other");
+		
+		// Set max height before the window is shown
+		document.getElementById('zotero-prefs').maxHeight = Math.floor(window.screen.availHeight * 0.9);
 	]]>
 	</script>
 	<script src="preferences.js" type="application/javascript;version=1.8"/>
