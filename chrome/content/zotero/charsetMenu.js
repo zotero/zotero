@@ -31,7 +31,7 @@ var Zotero_Charset_Menu = new function() {
 	 * closer to the top
 	 *
 	 * @param {DOMElement} charsetMenu The menu to populate
-	 * @param {Boolean} exportMenu Whether the menu is to be used for export
+	 * @param {Boolean} [exportMenu] Whether the menu is to be used for export
 	 **/
 	function populate(charsetMenu, exportMenu) {
 		var charsetMap = {};
@@ -42,16 +42,22 @@ var Zotero_Charset_Menu = new function() {
 		var charsetSeparator = document.createElement("menuseparator");
 		charsetPopup.appendChild(charsetSeparator);
 		
-		var charsets = [];
-
-		if(Zotero.platformMajorVersion >= 32) {
+		var charsets = [], pinnedCharsets = [];
+		if (Zotero.platformMajorVersion >= 32) {
 			Components.utils.import("resource://gre/modules/CharsetMenu.jsm");
 			var cmData = CharsetMenu.getData();
-			for each(var charsetList in [cmData.pinnedCharsets, cmData.otherCharsets]) {
+			let pinned = true;
+			for each(var charsetList in [cmData.pinnedCharsets, false, cmData.otherCharsets]) {
+				if (charsetList === false) {
+					// Done with pinned list
+					pinned = false;
+					continue;
+				}
+				
 				for each(var charsetInfo in charsetList) {
-					if(charsetInfo.value == "UTF-8") {
+					if (charsetInfo.value == "UTF-8") {
 						charsets.push({
-							"label":"Unicode (UTF-8)",
+							"label":Zotero.getString("charset.unicode", [charsetInfo.value]),
 							"value":"UTF-8"
 						});
 					} else {
@@ -60,50 +66,62 @@ var Zotero_Charset_Menu = new function() {
 							"value":charsetInfo.value
 						});
 					}
+					
+					if (pinned) pinnedCharsets.push(charsetInfo.value.toUpperCase());
 				}
 			}
 			charsets = charsets.concat([
-				{"label":"UTF-16LE", "value":"UTF-16LE"},
-				{"label":"UTF-16BE", "value":"UTF-16BE"},
-				{"label":"Western (IBM-850)", "value":"IBM850"},
-				{"label":"Western (MacRoman)", "value":"macintosh"}
+				{"label":Zotero.getString("charset.unicode", ["UTF-16LE"]), "value":"UTF-16LE"},
+				{"label":Zotero.getString("charset.unicode", ["UTF-16BE"]), "value":"UTF-16BE"},
+				{"label":Zotero.getString("charset.western", ["IBM-850"]), "value":"IBM850"},
+				{"label":Zotero.getString("charset.western", ["MacRoman"]), "value":"macintosh"}
 			]);
 		} else {
 			var charsetConverter = Components.classes["@mozilla.org/charset-converter-manager;1"].
 				getService(Components.interfaces.nsICharsetConverterManager);
 			var ccCharsets = charsetConverter.getEncoderList();
 			// add charsets to popup in order
-			while(ccCharsets.hasMore()) {
+			while (ccCharsets.hasMore()) {
 				var charset = ccCharsets.getNext();
 				try {
 					var label = charsetConverter.getCharsetTitle(charset);
 				} catch(e) {
 					continue;
 				}
-
-				var isUTF16 = charset.length >= 6 && charset.substr(0, 6) == "UTF-16";
-
-				// Show UTF-16 element appropriately depending on exportMenu
-				if(isUTF16 && exportMenu == (charset == "UTF-16") ||
-						(!exportMenu && charset == "UTF-32LE")) {
+				
+				if (charset == "UTF-16") {
+					// Don't add plain UTF-16. Be specific about endianness
 					continue;
-				} else if(charset == "x-mac-roman") {
+				} else if (charset == "x-mac-roman") {
 					// use the IANA name
 					charset = "macintosh";
-				} else if(!exportMenu && charset == "UTF-32BE") {
-					label = "Unicode (UTF-32)";
-					charset = "UTF-32";
 				}
+				
 				charsets.push({
 					"label":label,
 					"value":charset
 				});
 			}
+			
+			pinnedCharsets = ['UTF-8', 'WINDOWS-1252'];
 		}
-
-		for(var i=0; i<charsets.length; i++) {
+		
+		// Add BOM option for UTF-8 in export menu only
+		if (exportMenu) {
+			charsets.push({
+				label: Zotero.getString("charset.unicode", [Zotero.getString("charset.withBOM", ["UTF-8"])]),
+				value: "UTF-8xBOM"
+			});
+		}
+		
+		// Sort in alphabetical order. Pinned items will get special treatment later
+		charsets.sort(function(a, b) {
+			return a.label.localeCompare(b.label);
+		});
+		
+		for (var i=0; i<charsets.length; i++) {
 			var charset = charsets[i].value,
-			    label = charsets[i].label;
+				label = charsets[i].label;
 
 			// add element
 			var itemNode = document.createElement("menuitem");
@@ -111,26 +129,22 @@ var Zotero_Charset_Menu = new function() {
 			itemNode.setAttribute("value", charset);
 			
 			charsetMap[charset] = itemNode;
-			if(isUTF16 || (label.length >= 7 &&
-					label.substr(0, 7) == "Western")) {
-				charsetPopup.insertBefore(itemNode, charsetSeparator);
-			} else if(charset == "UTF-8") {
-				var oldFirst = (charsetPopup.firstChild ? charsetPopup.firstChild : null);
-				charsetPopup.insertBefore(itemNode, oldFirst);
-				// also add (without BOM) if requested
-				if(exportMenu) {
-					var itemNode = document.createElement("menuitem");
-					itemNode.setAttribute("label", Zotero.getString("charset.UTF8withoutBOM"));
-					itemNode.setAttribute("value", charset+"xBOM");
-					charsetMap[charset+"xBOM"] = itemNode;
-					charsetPopup.insertBefore(itemNode, oldFirst);
+			let pinnedIndex = pinnedCharsets.indexOf(charset.toUpperCase());
+			if (pinnedIndex != -1) {
+				// Insert at the top according to the order in pinnedCharsets
+				let pinnedNode = charsetPopup.firstChild;
+				while (pinnedNode && pinnedNode != charsetSeparator
+					&& pinnedCharsets.indexOf(pinnedNode.getAttribute("value").toUpperCase()) < pinnedIndex
+				) {
+					pinnedNode = pinnedNode.nextSibling;
 				}
+				charsetPopup.insertBefore(itemNode, pinnedNode);
 			} else {
 				charsetPopup.appendChild(itemNode);
 			}
 		}
 		
-		if(!exportMenu) {
+		if (!exportMenu) {
 			var itemNode = document.createElement("menuitem");
 			itemNode.setAttribute("label", Zotero.getString("charset.autoDetect"));
 			itemNode.setAttribute("value", "auto");

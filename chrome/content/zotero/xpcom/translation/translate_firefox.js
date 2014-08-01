@@ -29,9 +29,7 @@
 const BOMs = {
 	"UTF-8":"\xEF\xBB\xBF",
 	"UTF-16BE":"\xFE\xFF",
-	"UTF-16LE":"\xFF\xFE",
-	"UTF-32BE":"\x00\x00\xFE\xFF",
-	"UTF-32LE":"\xFF\xFE\x00\x00"
+	"UTF-16LE":"\xFF\xFE"
 }
 
 Components.utils.import("resource://gre/modules/NetUtil.jsm");
@@ -877,7 +875,20 @@ Zotero.Translate.IO.Write.prototype = {
 								   .createInstance(Components.interfaces.nsIConverterOutputStream);
 		}
 		
-		if(charset == "UTF-8xBOM") charset = "UTF-8";
+		this._writeBOM = false;
+		if (charset.length > 4 && charset.substr(charset.length-4) == "xBOM") {
+			// Explicit flag for writing BOM
+			this._writeBOM = true;
+			charset = charset.substr(0, charset.length-4);
+		} else if (charset.length > 6 && charset.substr(charset.length-6) == "xNoBOM") {
+			// Explicit flag for not writing BOM
+			this._writeBOM = false;
+			charset = charset.substr(0, charset.length-6);
+		} else if (charset == "UTF-16BE" || charset == "UTF-16LE") {
+			// Always write BOM for UTF-16 although it's not required per se
+			this._writeBOM = true;
+		}
+		
 		this.outputStream.init(this._rawStream, charset, 1024, "?".charCodeAt(0));
 		this._charset = charset;
 	},
@@ -885,10 +896,9 @@ Zotero.Translate.IO.Write.prototype = {
 	"write":function(data) {
 		if(!this._charset) this.setCharacterSet("UTF-8");
 		
-		if(!this._writtenToStream && this._charset.substr(this._charset.length-4) == "xBOM"
-		   && BOMs[this._charset.substr(0, this._charset.length-4).toUpperCase()]) {
+		if(!this._writtenToStream && this._writeBOM && BOMs[this._charset]) {
 			// If stream has not yet been written to, and a UTF type has been selected, write BOM
-			this._rawStream.write(BOMs[streamCharset], BOMs[streamCharset].length);
+			this._rawStream.write(BOMs[this._charset], BOMs[this._charset].length);
 		}
 		
 		if(this._charset == "MACINTOSH") {
