@@ -355,3 +355,11 @@ label.zotero-text-link {
 {
 	margin: 3px 0;
 }
+
+.zotero-hidden {
+	visibility: collapse;
+}
+
+.zotero-recommended {
+	font-style: italic;
+}

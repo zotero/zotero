@@ -162,20 +162,46 @@ var Zotero_File_Interface_Export = new function() {
 		}
 		
 		// handle charset popup
-		if(_charsets && translatorOptions.exportCharset) {
-			optionsBox.hidden = undefined;
-			document.getElementById("charset-box").hidden = undefined;
-			var charsetMenu = document.getElementById(OPTION_PREFIX+"exportCharset");
-			var charset = "UTF-8";
-			if(options && options.exportCharset && _charsets[options.exportCharset]) {
-				charset = options.exportCharset;
-			} else if(translatorOptions.exportCharset && _charsets[translatorOptions.exportCharset]) {
-				charset = translatorOptions.exportCharset;
+		if(_charsets) {
+			//Clear recommended option and hidden charset
+			let charsetPopup = document.getElementById(OPTION_PREFIX+"exportCharset").lastChild;
+			let recommended = charsetPopup.getElementsByClassName('zotero-recommended')[0];
+			if (recommended) {
+				charsetPopup.removeChild(recommended);
 			}
 			
-			charsetMenu.selectedItem = _charsets[charset];
-		} else {
-			document.getElementById("charset-box").hidden = true;
+			let hidden = charsetPopup.getElementsByClassName('zotero-hidden');
+			for (let i=0; i<hidden.length; i++) {
+				hidden[i].classList.remove('zotero-hidden');
+			}
+			
+			if (translatorOptions.exportCharset) {
+				optionsBox.hidden = undefined;
+				document.getElementById("charset-box").hidden = undefined;
+				var charsetMenu = document.getElementById(OPTION_PREFIX+"exportCharset");
+				var charset = "UTF-8";
+				if(options && options.exportCharset && _charsets[options.exportCharset]) {
+					charset = options.exportCharset;
+				} else if(translatorOptions.exportCharset && _charsets[translatorOptions.exportCharset]) {
+					charset = translatorOptions.exportCharset;
+				}
+				
+				// Display recommended option at the top
+				if (translatorOptions.exportCharset && _charsets[translatorOptions.exportCharset]) {
+					let recommended = _charsets[translatorOptions.exportCharset];
+					let newNode = recommended.cloneNode();
+					newNode.setAttribute("label", Zotero.getString("charset.recommended", [recommended.getAttribute("label")]));
+					
+					newNode.classList.add('zotero-recommended');
+					recommended.classList.add('zotero-hidden');
+					
+					charsetPopup.insertBefore(newNode, charsetPopup.firstChild);
+				}
+				
+				charsetMenu.selectedItem = _charsets[charset];
+			} else {
+				document.getElementById("charset-box").hidden = true;
+			}
 		}
 		
 		window.sizeToContent();
