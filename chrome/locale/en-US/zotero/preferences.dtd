@@ -175,7 +175,6 @@
 
 <!ENTITY zotero.preferences.charset							"Character Encoding">
 <!ENTITY zotero.preferences.charset.importCharset			"Import Character Encoding">
-<!ENTITY zotero.preferences.charset.displayExportOption		"Display character encoding option on export">
 
 <!ENTITY zotero.preferences.dataDir						"Data Directory Location">
 <!ENTITY zotero.preferences.dataDir.useProfile			"Use profile directory">

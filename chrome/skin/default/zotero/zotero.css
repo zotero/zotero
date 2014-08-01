@@ -363,3 +363,12 @@ label.zotero-text-link {
 .zotero-recommended {
 	font-style: italic;
 }
+
+.zotero-advanced-options>.zotero-advanced-options-label>dropmarker {
+	list-style-image: url("chrome://browser/skin/toolbarbutton-dropdown-arrow.png");
+	transform: rotate(270deg);
+}
+
+.zotero-advanced-options[state=open]>.zotero-advanced-options-label>dropmarker {
+	transform: none;
+}

@@ -33,11 +33,20 @@
 		</hbox>
 		<groupbox id="translator-options">
 			<caption id="translator-options-label" label="&zotero.exportOptions.translatorOptions.label;"/>
-			
-			<vbox id="charset-box" hidden="true">
-				<separator class="thin"/>
-				<label value="&zotero.charset.label;:" control="charset-menu"/>
-				<menulist id="export-option-exportCharset"/>
+			<vbox id="regular-options">
+			</vbox>
+			<vbox id="advanced-options" class="zotero-advanced-options">
+				<hbox onclick="Zotero_File_Interface_Export.toggleAdvancedOptions()"  class="zotero-advanced-options-label">
+					<dropmarker/>
+					<label value="&zotero.exportOptions.advancedOptions.label;"/>
+				</hbox>
+				<vbox id="advanced-options-togglable">
+					<vbox id="charset-box" hidden="true">
+						<separator class="thin"/>
+						<label value="&zotero.charset.label;:" control="charset-menu"/>
+						<menulist id="export-option-exportCharset"/>
+					</vbox>
+				</vbox>
 			</vbox>
 		</groupbox>
 	</vbox>

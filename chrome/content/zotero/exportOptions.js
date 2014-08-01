@@ -57,8 +57,7 @@ var Zotero_File_Interface_Export = new function() {
 		// get format popup
 		var formatPopup = document.getElementById("format-popup");
 		var formatMenu = document.getElementById("format-menu");
-		var optionsBox = document.getElementById("translator-options");
-		var charsetBox = document.getElementById("charset-box");
+		var regularOptions = document.getElementById("regular-options");
 		
 		var selectedTranslator = Zotero.Prefs.get("export.lastTranslator");
 		
@@ -85,7 +84,7 @@ var Zotero_File_Interface_Export = new function() {
 						var checkbox = document.createElement("checkbox");
 						checkbox.setAttribute("id", OPTION_PREFIX+option);
 						checkbox.setAttribute("label", optionLabel);
-						optionsBox.insertBefore(checkbox, charsetBox);
+						regularOptions.appendChild(checkbox);
 					}
 					
 					addedOptions[option] = true;
@@ -108,6 +107,7 @@ var Zotero_File_Interface_Export = new function() {
 			_charsets = Zotero_Charset_Menu.populate(document.getElementById(OPTION_PREFIX+"exportCharset"), true);
 		}
 		
+		this.toggleAdvancedOptions(false);
 		updateOptions(Zotero.Prefs.get("export.translatorSettings"));
 	}
 	
@@ -126,11 +126,12 @@ var Zotero_File_Interface_Export = new function() {
 		}
 		
 		var optionsBox = document.getElementById("translator-options");
+		var regularOptions = document.getElementById("regular-options");
 		optionsBox.hidden = true;
 		var haveOption = false;
-		for(var i=0; i<optionsBox.childNodes.length; i++) {
+		for(var i=0; i<regularOptions.childNodes.length; i++) {
 			// loop through options to see which should be enabled
-			var node = optionsBox.childNodes[i];
+			var node = regularOptions.childNodes[i];
 			// skip non-options
 			if(node.id.length <= OPTION_PREFIX.length
 					|| node.id.substr(0, OPTION_PREFIX.length) != OPTION_PREFIX) {
@@ -204,6 +205,18 @@ var Zotero_File_Interface_Export = new function() {
 			}
 		}
 		
+		// See if we need to hide advanced options
+		var hasVisible = false,
+			advOption = document.getElementById("advanced-options-togglable").firstChild;
+		while (advOption) {
+			if (!advOption.hidden) {
+				hasVisible = true;
+				break;
+			}
+			advOption = advOption.nextSibling;
+		}
+		document.getElementById("advanced-options").hidden = !hasVisible;
+		
 		window.sizeToContent();
 	}
 	
@@ -247,4 +260,17 @@ var Zotero_File_Interface_Export = new function() {
 	function cancel() {
 		window.arguments[0].selectedTranslator = false;
 	}
+	
+	/*
+	 * Show/hide advanced options
+	 * @param {Boolean} [show] If set, indicates whether the advanced
+	 *   options should be shown or not. If omitted, the options toggle
+	 */
+	this.toggleAdvancedOptions = function(show) {
+		var opts = document.getElementById("advanced-options-togglable");
+		opts.hidden = show !== undefined ? !show : !opts.hidden;
+		document.getElementById("advanced-options")
+			.setAttribute("state", opts.hidden ? "closed" : "open");
+		window.sizeToContent();
+	};
 }
