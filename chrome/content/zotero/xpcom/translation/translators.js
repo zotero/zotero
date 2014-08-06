@@ -37,7 +37,7 @@ Zotero.Translators = new function() {
 	/**
 	 * Initializes translator cache, loading all relevant translators into memory
 	 */
-	this.reinit = Q.async(function() {
+	this.reinit = Zotero.Promise.coroutine(function* () {
 		var start = (new Date()).getTime();
 		var transactionStarted = false;
 		
@@ -156,7 +156,7 @@ Zotero.Translators = new function() {
 		.then(function(source) {
 			return Zotero.Translators.load(file, infoRe.exec(source)[0], source);
 		})
-		.fail(function() {
+		.catch(function() {
 			throw "Invalid or missing translator metadata JSON object in " + file.leafName;
 		});
 	}
@@ -388,7 +388,7 @@ Zotero.Translators = new function() {
 			var sameFile = translator && destFile.equals(translator.file);
 			if (sameFile) return;
 			
-			return Q(OS.File.exists(destFile.path))
+			return Zotero.Promise.resolve(OS.File.exists(destFile.path))
 			.then(function (exists) {
 				if (exists) {
 					var msg = "Overwriting translator with same filename '"
@@ -402,7 +402,7 @@ Zotero.Translators = new function() {
 		.then(function () {
 			if (!translator) return;
 			
-			return Q(OS.File.exists(translator.file.path))
+			return Zotero.Promise.resolve(OS.File.exists(translator.file.path))
 			.then(function (exists) {
 				translator.file.remove(false);
 			});

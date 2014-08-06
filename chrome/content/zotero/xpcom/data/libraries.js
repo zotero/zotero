@@ -25,8 +25,17 @@
 
 Zotero.Libraries = new function () {
 	this.exists = function (libraryID) {
-		var sql = "SELECT COUNT(*) FROM libraries WHERE libraryID=?";
-		return !!Zotero.DB.valueQuery(sql, [libraryID]);
+		// Until there are other library types, this can just check groups,
+		// which already preload ids at startup
+		try {
+			return !!Zotero.Groups.getGroupIDFromLibraryID(libraryID);
+		}
+		catch (e) {
+			if (e.getMessage().indexOf("does not exist") != -1) {
+				return false;
+			}
+			throw e;
+		}
 	}
 	
 	
@@ -41,6 +50,11 @@ Zotero.Libraries = new function () {
 		
 		var sql = "INSERT INTO libraries (libraryID, libraryType) VALUES (?, ?)";
 		Zotero.DB.query(sql, [libraryID, type]);
+	}
+	
+	
+	this.dbLibraryID = function (libraryID) {
+		return (libraryID == Zotero.libraryID) ? 0 : libraryID;
 	}
 	
 	
@@ -63,7 +77,7 @@ Zotero.Libraries = new function () {
 	
 	
 	this.getType = function (libraryID) {
-		if (libraryID === 0 || !Zotero.libraryID || libraryID == Zotero.libraryID)  {
+		if (libraryID === 0 || !Zotero.libraryID || libraryID == Zotero.libraryID) {
 			return 'user';
 		}
 		var sql = "SELECT libraryType FROM libraries WHERE libraryID=?";
@@ -72,6 +86,26 @@ Zotero.Libraries = new function () {
 			throw new Error("Library " + libraryID + " does not exist in Zotero.Libraries.getType()");
 		}
 		return libraryType;
+	}
+	
+	/**
+	 * @param {Integer} libraryID
+	 * @return {Promise:Integer}
+	 */
+	this.getVersion = function (libraryID) {
+		var sql = "SELECT version FROM libraries WHERE libraryID=?";
+		return Zotero.DB.valueQueryAsync(sql, libraryID);
+	}
+	
+	
+	/**
+	 * @param {Integer} libraryID
+	 * @param {Integer} version
+	 * @return {Promise}
+	 */
+	this.setVersion = function (libraryID, version) {
+		var sql = "UPDATE libraries SET version=? WHERE libraryID=?";
+		return Zotero.DB.queryAsync(sql, [version, libraryID]);
 	}
 	
 	

@@ -37,50 +37,29 @@ var ZoteroPane = new function()
 	//Privileged methods
 	this.init = init;
 	this.destroy = destroy;
-	this.makeVisible = makeVisible;
 	this.isShowing = isShowing;
 	this.isFullScreen = isFullScreen;
 	this.handleKeyDown = handleKeyDown;
 	this.handleKeyUp = handleKeyUp;
 	this.setHighlightedRowsCallback = setHighlightedRowsCallback;
 	this.handleKeyPress = handleKeyPress;
-	this.newItem = newItem;
-	this.newCollection = newCollection;
-	this.newSearch = newSearch;
-	this.openAdvancedSearchWindow = openAdvancedSearchWindow;
-	this.toggleTagSelector = toggleTagSelector;
-	this.updateTagSelectorSize = updateTagSelectorSize;
-	this.getTagSelection = getTagSelection;
-	this.clearTagSelection = clearTagSelection;
-	this.updateTagFilter = updateTagFilter;
-	this.onCollectionSelected = onCollectionSelected;
-	this.reindexItem = reindexItem;
-	this.duplicateSelectedItem = duplicateSelectedItem;
 	this.editSelectedCollection = editSelectedCollection;
-	this.copySelectedItemsToClipboard = copySelectedItemsToClipboard;
-	this.clearQuicksearch = clearQuicksearch;
 	this.handleSearchKeypress = handleSearchKeypress;
 	this.handleSearchInput = handleSearchInput;
-	this.search = search;
-	this.selectItem = selectItem;
 	this.getSelectedCollection = getSelectedCollection;
 	this.getSelectedSavedSearch = getSelectedSavedSearch;
 	this.getSelectedItems = getSelectedItems;
 	this.getSortedItems = getSortedItems;
 	this.getSortField = getSortField;
 	this.getSortDirection = getSortDirection;
-	this.buildItemContextMenu = buildItemContextMenu;
 	this.loadURI = loadURI;
 	this.setItemsPaneMessage = setItemsPaneMessage;
 	this.clearItemsPaneMessage = clearItemsPaneMessage;
 	this.contextPopupShowing = contextPopupShowing;
 	this.openNoteWindow = openNoteWindow;
-	this.addTextToNote = addTextToNote;
 	this.addAttachmentFromDialog = addAttachmentFromDialog;
-	this.viewAttachment = viewAttachment;
 	this.viewSelectedAttachment = viewSelectedAttachment;
 	this.showAttachmentNotFoundDialog = showAttachmentNotFoundDialog;
-	this.relinkAttachment = relinkAttachment;
 	this.reportErrors = reportErrors;
 	this.displayErrorMessage = displayErrorMessage;
 	
@@ -151,6 +130,10 @@ var ZoteroPane = new function()
 		
 		//Initialize collections view
 		ZoteroPane_Local.collectionsView = new Zotero.CollectionTreeView();
+		// Handle an error in setTree()/refresh()
+		ZoteroPane_Local.collectionsView.onError = function (e) {
+			ZoteroPane_Local.displayErrorMessage();
+		};
 		var collectionsTree = document.getElementById('zotero-collections-tree');
 		collectionsTree.view = ZoteroPane_Local.collectionsView;
 		collectionsTree.controllers.appendController(new Zotero.CollectionTreeCommandController(collectionsTree));
@@ -164,6 +147,11 @@ var ZoteroPane = new function()
 		
 		var menu = document.getElementById("contentAreaContextMenu");
 		menu.addEventListener("popupshowing", ZoteroPane_Local.contextPopupShowing, false);
+		
+		var tagSelector = document.getElementById('zotero-tag-selector');
+		tagSelector.onchange = function () {
+			return ZoteroPane_Local.updateTagFilter();
+		};
 		
 		Zotero.Keys.windowInit(document);
 		
@@ -282,7 +270,7 @@ var ZoteroPane = new function()
 			menuitem.setAttribute("label", itemTypes[i].localized);
 			menuitem.setAttribute("tooltiptext", "");
 			let type = itemTypes[i].id;
-			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, {}, null, true); }, false);
+			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, {}, null, true).done(); }, false);
 			moreMenu.appendChild(menuitem);
 		}
 	}
@@ -320,7 +308,7 @@ var ZoteroPane = new function()
 			menuitem.setAttribute("label", itemTypes[i].localized);
 			menuitem.setAttribute("tooltiptext", "");
 			let type = itemTypes[i].id;
-			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, {}, null, true); }, false);
+			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, {}, null, true).done(); }, false);
 			menuitem.className = "zotero-tb-add";
 			addMenu.insertBefore(menuitem, separator);
 		}
@@ -355,103 +343,98 @@ var ZoteroPane = new function()
 	 * @return {Boolean} True if Zotero pane should be loaded, false otherwise (if an error
 	 * 		occurred)
 	 */
-	function makeVisible()
-	{
+	this.makeVisible = Zotero.Promise.coroutine(function* () {
 		if (Zotero.locked) {
 			Zotero.showZoteroPaneProgressMeter();
 		}
-		Zotero.unlockPromise
-		.then(function () {
-			Zotero.hideZoteroPaneOverlays();
+		
+		yield Zotero.unlockPromise;
+		
+		Zotero.hideZoteroPaneOverlays();
+		
+		// If pane not loaded, load it or display an error message
+		if (!ZoteroPane_Local.loaded) {
+			ZoteroPane_Local.init();
+		}
+		
+		// If Zotero could not be initialized, display an error message and return
+		if (!Zotero || Zotero.skipLoading) {
+			this.displayStartupError();
+			return false;
+		}
+		
+		if(!_madeVisible) {
+			this.buildItemTypeSubMenu();
+		}
+		_madeVisible = true;
+		
+		yield this.unserializePersist();
+		this.updateToolbarPosition();
+		this.updateTagSelectorSize();
+		
+		// restore saved row selection (for tab switching)
+		var containerWindow = (window.ZoteroTab ? window.ZoteroTab.containerWindow : window);
+		if(containerWindow.zoteroSavedCollectionSelection) {
+			yield this.collectionsView.rememberSelection(containerWindow.zoteroSavedCollectionSelection);
+			delete containerWindow.zoteroSavedCollectionSelection;
+		}
+		
+		// restore saved item selection (for tab switching)
+		if(containerWindow.zoteroSavedItemSelection) {
+			let self = this;
+			// hack to restore saved selection after itemTreeView finishes loading
+			window.setTimeout(function() {
+				if(containerWindow.zoteroSavedItemSelection) {
+					yield self.itemsView.rememberSelection(containerWindow.zoteroSavedItemSelection);
+					delete containerWindow.zoteroSavedItemSelection;
+				}
+			}, 51);
+		}
+		
+		// Focus the quicksearch on pane open
+		var searchBar = document.getElementById('zotero-tb-search');
+		setTimeout(function () {
+			searchBar.inputField.select();
+		}, 1);
+		
+		var d = new Date();
+		yield Zotero.purgeDataObjects();
+		var d2 = new Date();
+		Zotero.debug("Purged data tables in " + (d2 - d) + " ms");
+		
+		// Auto-sync on pane open
+		if (Zotero.Prefs.get('sync.autoSync')) {
+			yield Zotero.proxyAuthComplete.delay(1000);
 			
-			// If pane not loaded, load it or display an error message
-			if (!ZoteroPane_Local.loaded) {
-				ZoteroPane_Local.init();
+			if (!Zotero.Sync.Server.enabled) {
+				Zotero.debug('Sync not enabled -- skipping auto-sync', 4);
+				return;
 			}
 			
-			// If Zotero could not be initialized, display an error message and return
-			if (!Zotero || Zotero.skipLoading) {
-				this.displayStartupError();
-				return false;
-			}
-			
-			if(!_madeVisible) {
-				this.buildItemTypeSubMenu();
-			}
-			_madeVisible = true;
-			
-			this.unserializePersist();
-			this.updateToolbarPosition();
-			this.updateTagSelectorSize();
-			
-			// restore saved row selection (for tab switching)
-			var containerWindow = (window.ZoteroTab ? window.ZoteroTab.containerWindow : window);
-			if(containerWindow.zoteroSavedCollectionSelection) {
-				this.collectionsView.rememberSelection(containerWindow.zoteroSavedCollectionSelection);
-				delete containerWindow.zoteroSavedCollectionSelection;
-			}
-			
-			// restore saved item selection (for tab switching)
-			if(containerWindow.zoteroSavedItemSelection) {
-				var me = this;
-				// hack to restore saved selection after itemTreeView finishes loading
-				window.setTimeout(function() {
-					if(containerWindow.zoteroSavedItemSelection) {
-						me.itemsView.rememberSelection(containerWindow.zoteroSavedItemSelection);
-						delete containerWindow.zoteroSavedItemSelection;
-					}
-				}, 51);
-			}
-			
-			// Focus the quicksearch on pane open
-			var searchBar = document.getElementById('zotero-tb-search');
-			setTimeout(function () {
-				searchBar.inputField.select();
-			}, 1);
-			
-			var d = new Date();
-			Zotero.purgeDataObjects();
-			var d2 = new Date();
-			Zotero.debug("Purged data tables in " + (d2 - d) + " ms");
-			
-			// Auto-sync on pane open
-			if (Zotero.Prefs.get('sync.autoSync')) {
-				Zotero.proxyAuthComplete
-				.delay(1000)
-				.then(function () {
-					if (!Zotero.Sync.Server.enabled) {
-						Zotero.debug('Sync not enabled -- skipping auto-sync', 4);
-						return;
-					}
-					
-					if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
-						Zotero.debug('Sync already running -- skipping auto-sync', 4);
-						return;
-					}
-					
-					if (Zotero.Sync.Server.manualSyncRequired) {
-						Zotero.debug('Manual sync required -- skipping auto-sync', 4);
-						return;
-					}
-					
-					Zotero.Sync.Runner.sync({
-						background: true
-					});
-				})
-				.done();
-			}
-			
-			// Set sync icon to spinning or not
-			//
-			// We don't bother setting an error state at open
 			if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
-				Zotero.Sync.Runner.setSyncIcon('animate');
+				Zotero.debug('Sync already running -- skipping auto-sync', 4);
+				return;
 			}
 			
-			return true;
-		}.bind(this))
-		.done();
-	}
+			if (Zotero.Sync.Server.manualSyncRequired) {
+				Zotero.debug('Manual sync required -- skipping auto-sync', 4);
+				return;
+			}
+			
+			Zotero.Sync.Runner.sync({
+				background: true
+			});
+		}
+		
+		// Set sync icon to spinning or not
+		//
+		// We don't bother setting an error state at open
+		if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
+			Zotero.Sync.Runner.setSyncIcon('animate');
+		}
+		
+		return true;
+	});
 	
 	/**
 	 * Function to be called before ZoteroPane_Local is hidden. Does not actually hide the Zotero pane.
@@ -662,49 +645,51 @@ var ZoteroPane = new function()
 					document.getElementById('zotero-tb-search').select();
 					break;
 				case 'newItem':
-					// Default to most recent item type from here or the
-					// New Type menu
-					var mru = Zotero.Prefs.get('newItemTypeMRU');
-					// Or fall back to 'book'
-					var typeID = mru ? mru.split(',')[0] : 2;
-					ZoteroPane_Local.newItem(typeID);
-					let itemBox = document.getElementById('zotero-editpane-item-box');
-					var menu = itemBox.itemTypeMenu;
-					var self = this;
-					var handleTypeChange = function () {
-						self.addItemTypeToNewItemTypeMRU(this.itemTypeMenu.value);
-						itemBox.removeHandler('itemtypechange', handleTypeChange);
-					};
-					// Only update the MRU when the menu is opened for the
-					// keyboard shortcut, not on subsequent opens
-					var removeTypeChangeHandler = function () {
-						itemBox.removeHandler('itemtypechange', handleTypeChange);
-						itemBox.itemTypeMenu.firstChild.removeEventListener('popuphiding', removeTypeChangeHandler);
-						// Focus the title field after menu closes
-						itemBox.focusFirstField();
-					};
-					itemBox.addHandler('itemtypechange', handleTypeChange);
-					itemBox.itemTypeMenu.firstChild.addEventListener('popuphiding', removeTypeChangeHandler);
-					
-					menu.focus();
-					document.getElementById('zotero-editpane-item-box').itemTypeMenu.menupopup.openPopup(menu, "before_start", 0, 0);
+					Zotero.Promise.coroutine(function* () {
+						// Default to most recent item type from here or the
+						// New Type menu
+						var mru = Zotero.Prefs.get('newItemTypeMRU');
+						// Or fall back to 'book'
+						var typeID = mru ? mru.split(',')[0] : 2;
+						yield ZoteroPane_Local.newItem(typeID);
+						let itemBox = document.getElementById('zotero-editpane-item-box');
+						var menu = itemBox.itemTypeMenu;
+						var self = this;
+						var handleTypeChange = function () {
+							self.addItemTypeToNewItemTypeMRU(this.itemTypeMenu.value);
+							itemBox.removeHandler('itemtypechange', handleTypeChange);
+						};
+						// Only update the MRU when the menu is opened for the
+						// keyboard shortcut, not on subsequent opens
+						var removeTypeChangeHandler = function () {
+							itemBox.removeHandler('itemtypechange', handleTypeChange);
+							itemBox.itemTypeMenu.firstChild.removeEventListener('popuphiding', removeTypeChangeHandler);
+							// Focus the title field after menu closes
+							itemBox.focusFirstField();
+						};
+						itemBox.addHandler('itemtypechange', handleTypeChange);
+						itemBox.itemTypeMenu.firstChild.addEventListener('popuphiding', removeTypeChangeHandler);
+						
+						menu.focus();
+						document.getElementById('zotero-editpane-item-box').itemTypeMenu.menupopup.openPopup(menu, "before_start", 0, 0);
+					})();
 					break;
 				case 'newNote':
 					// If a regular item is selected, use that as the parent.
 					// If a child item is selected, use its parent as the parent.
 					// Otherwise create a standalone note.
-					var parent = false;
+					var parentKey = false;
 					var items = ZoteroPane_Local.getSelectedItems();
 					if (items.length == 1) {
 						if (items[0].isRegularItem()) {
-							parent = items[0].id;
+							parentKey = items[0].key;
 						}
 						else {
-							parent = items[0].getSource();
+							parentKey = items[0].parentItemKey;
 						}
 					}
 					// Use key that's not the modifier as the popup toggle
-					ZoteroPane_Local.newNote(event.altKey, parent);
+					ZoteroPane_Local.newNote(event.altKey, parentKey);
 					break;
 				case 'toggleTagSelector':
 					ZoteroPane_Local.toggleTagSelector();
@@ -720,6 +705,9 @@ var ZoteroPane = new function()
 					break;
 				case 'importFromClipboard':
 					Zotero_File_Interface.importFromClipboard();
+					break;
+				case 'sync':
+					Zotero.Sync.Runner.sync();
 					break;
 				default:
 					throw ('Command "' + command + '" not found in ZoteroPane_Local.handleKeyDown()');
@@ -739,7 +727,7 @@ var ZoteroPane = new function()
 	 *
 	 * _data_ is an optional object with field:value for itemData
 	 */
-	function newItem(typeID, data, row, manual)
+	this.newItem = Zotero.Promise.coroutine(function* (typeID, data, row, manual)
 	{
 		if (!Zotero.stateCheck()) {
 			this.displayErrorMessage(true);
@@ -757,46 +745,42 @@ var ZoteroPane = new function()
 		}
 		
 		if (row !== undefined && row !== null) {
-			var itemGroup = this.collectionsView._getItemAtRow(row);
-			var libraryID = itemGroup.ref.libraryID;
+			var collectionTreeRow = this.collectionsView.getRow(row);
+			var libraryID = collectionTreeRow.ref.libraryID;
 		}
 		else {
 			var libraryID = 0;
-			var itemGroup = null;
+			var collectionTreeRow = null;
 		}
 		
-		Zotero.DB.beginTransaction();
-		
-		var item = new Zotero.Item(typeID);
-		item.libraryID = libraryID;
-		for (var i in data) {
-			item.setField(i, data[i]);
-		}
-		var itemID = item.save();
-		
-		if (itemGroup && itemGroup.isCollection()) {
-			itemGroup.ref.addItem(itemID);
-		}
-		
-		Zotero.DB.commitTransaction();
+		let itemID;
+		yield Zotero.DB.executeTransaction(function () {
+			var item = new Zotero.Item(typeID);
+			item.libraryID = libraryID;
+			for (var i in data) {
+				item.setField(i, data[i]);
+			}
+			itemID = yield item.save();
+			
+			if (collectionTreeRow && collectionTreeRow.isCollection()) {
+				collectionTreeRow.ref.addItem(itemID);
+			}
+		});
 		
 		//set to Info tab
 		document.getElementById('zotero-view-item').selectedIndex = 0;
 		
 		if (manual) {
-			// Focus the title field
-			if (this.selectItem(itemID)) {
-				setTimeout(function () {
-					document.getElementById('zotero-editpane-item-box').focusFirstField();
-				}, 0);
-			}
-			
 			// Update most-recently-used list for New Item menu
 			this.addItemTypeToNewItemTypeMRU(typeID);
+			
+			yield this.selectItem(itemID);
+			// Focus the title field
+			document.getElementById('zotero-editpane-item-box').focusFirstField();
 		}
 		
 		return Zotero.Items.get(itemID);
-	}
+	});
 	
 	
 	this.addItemTypeToNewItemTypeMRU = function (itemTypeID) {
@@ -816,8 +800,7 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function newCollection(parent)
-	{
+	this.newCollection = Zotero.Promise.method(function (parentKey) {
 		if (!Zotero.stateCheck()) {
 			this.displayErrorMessage(true);
 			return false;
@@ -828,11 +811,16 @@ var ZoteroPane = new function()
 			return;
 		}
 		
+		var libraryID = this.getSelectedLibraryID();
+		
 		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
-		
-		var untitled = Zotero.DB.getNextName('collections', 'collectionName',
-			Zotero.getString('pane.collections.untitled'));
+		var untitled = Zotero.DB.getNextName(
+			libraryID,
+			'collections',
+			'collectionName',
+			Zotero.getString('pane.collections.untitled')
+		);
 		
 		var newName = { value: untitled };
 		var result = promptService.prompt(window,
@@ -850,11 +838,11 @@ var ZoteroPane = new function()
 		}
 		
 		var collection = new Zotero.Collection;
-		collection.libraryID = this.getSelectedLibraryID();
+		collection.libraryID = libraryID;
 		collection.name = newName.value;
-		collection.parent = parent;
-		collection.save();
-	}
+		collection.parentKey = parentKey;
+		return collection.save();
+	});
 	
 	
 	this.newGroup = function () {
@@ -862,8 +850,7 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function newSearch()
-	{
+	this.newSearch = Zotero.Promise.coroutine(function* () {
 		if (!Zotero.stateCheck()) {
 			this.displayErrorMessage(true);
 			return false;
@@ -871,14 +858,14 @@ var ZoteroPane = new function()
 		
 		var s = new Zotero.Search();
 		s.libraryID = this.getSelectedLibraryID();
-		s.addCondition('title', 'contains', '');
+		yield s.addCondition('title', 'contains', '');
 		
 		var untitled = Zotero.getString('pane.collections.untitled');
 		untitled = Zotero.DB.getNextName('savedSearches', 'savedSearchName',
 			Zotero.getString('pane.collections.untitled'));
 		var io = {dataIn: {search: s, name: untitled}, dataOut: null};
 		window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
-	}
+	});
 	
 	
 	this.setVirtual = function (libraryID, mode, show) {
@@ -967,7 +954,7 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function openAdvancedSearchWindow() {
+	this.openAdvancedSearchWindow = Zotero.Promise.coroutine(function* () {
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator);
 		var enumerator = wm.getEnumerator('zotero:search');
@@ -982,13 +969,14 @@ var ZoteroPane = new function()
 		
 		var s = new Zotero.Search();
 		s.libraryID = this.getSelectedLibraryID();
-		s.addCondition('title', 'contains', '');
+		yield s.addCondition('title', 'contains', '');
+		
 		var io = {dataIn: {search: s}, dataOut: null};
 		window.openDialog('chrome://zotero/content/advancedSearch.xul', '', 'chrome,dialog=no,centerscreen', io);
-	}
+	});
 	
 	
-	function toggleTagSelector(){
+	this.toggleTagSelector = Zotero.Promise.coroutine(function* () {
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		
 		var showing = tagSelector.getAttribute('collapsed') == 'true';
@@ -998,17 +986,17 @@ var ZoteroPane = new function()
 		// If showing, set scope to items in current view
 		// and focus filter textbox
 		if (showing) {
-			_setTagScope();
+			yield this.setTagScope();
 			tagSelector.focusTextbox();
 		}
 		// If hiding, clear selection
 		else {
 			tagSelector.uninit();
 		}
-	}
+	});
 	
 	
-	function updateTagSelectorSize() {
+	this.updateTagSelectorSize = function () {
 		//Zotero.debug('Updating tag selector size');
 		var zoteroPane = document.getElementById('zotero-pane-stack');
 		var splitter = document.getElementById('zotero-tags-splitter');
@@ -1070,28 +1058,30 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function getTagSelection(){
+	function getTagSelection () {
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		return tagSelector.selection ? tagSelector.selection : {};
 	}
 	
 	
-	function clearTagSelection() {
-		if (!Zotero.Utilities.isEmpty(this.getTagSelection())) {
-			var tagSelector = document.getElementById('zotero-tag-selector');
-			tagSelector.clearAll();
+	this.clearTagSelection = Zotero.Promise.coroutine(function* () {
+		if (Zotero.Utilities.isEmpty(getTagSelection())) {
+			return false;
 		}
-	}
+		var tagSelector = document.getElementById('zotero-tag-selector');
+		yield tagSelector.clearAll();
+		return true;
+	});
 	
 	
 	/*
 	 * Sets the tag filter on the items view
 	 */
-	function updateTagFilter(){
+	this.updateTagFilter = Zotero.Promise.coroutine(function* () {
 		if (this.itemsView) {
-			this.itemsView.setFilter('tags', getTagSelection());
+			yield this.itemsView.setFilter('tags', getTagSelection());
 		}
-	}
+	});
 	
 	
 	/*
@@ -1099,53 +1089,55 @@ var ZoteroPane = new function()
 	 *
 	 * Passed to the items tree to trigger on changes
 	 */
-	function _setTagScope() {
-		var itemGroup = self.collectionsView._getItemAtRow(self.collectionsView.selection.currentIndex);
+	this.setTagScope = Zotero.Promise.coroutine(function* () {
+		var collectionTreeRow = self.getCollectionTreeRow();
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		if (!tagSelector.getAttribute('collapsed') ||
 				tagSelector.getAttribute('collapsed') == 'false') {
 			Zotero.debug('Updating tag selector with current tags');
-			if (itemGroup.editable) {
+			if (collectionTreeRow.editable) {
 				tagSelector.mode = 'edit';
 			}
 			else {
 				tagSelector.mode = 'view';
 			}
-			tagSelector.libraryID = itemGroup.ref.libraryID;
-			tagSelector.scope = itemGroup.getChildTags();
+			tagSelector.collectionTreeRow = collectionTreeRow;
+			tagSelector.updateScope = self.setTagScope;
+			tagSelector.libraryID = collectionTreeRow.ref.libraryID;
+			tagSelector.scope = yield collectionTreeRow.getChildTags();
 		}
-	}
+	});
 	
 	
-	function onCollectionSelected()
-	{
-		if (this.itemsView)
-		{
+	this.onCollectionSelected = Zotero.Promise.coroutine(function* () {
+		var collectionTreeRow = this.getCollectionTreeRow();
+		
+		if (this.itemsView.collectionTreeRow == collectionTreeRow) {
+			Zotero.debug("Collection selection hasn't changed");
+			return;
+		}
+		
+		if (this.itemsView) {
 			this.itemsView.unregister();
 			document.getElementById('zotero-items-tree').view = this.itemsView = null;
 		}
 		
-		// Clear quick search and tag selector when switching views
-		document.getElementById('zotero-tb-search').value = "";
-		document.getElementById('zotero-tag-selector').clearAll();
-		
 		if (this.collectionsView.selection.count != 1) {
-			document.getElementById('zotero-items-tree').view = this.itemsView = null;
 			return;
 		}
 		
-		// this.collectionsView.selection.currentIndex != -1
-		
-		var itemgroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+		// Clear quick search and tag selector when switching views
+		document.getElementById('zotero-tb-search').value = "";
+		yield document.getElementById('zotero-tag-selector').clearAll();
 		
 		// Not necessary with seltype="cell", which calls nsITreeView::isSelectable()
-		/*if (itemgroup.isSeparator()) {
+		/*if (collectionTreeRow.isSeparator()) {
 			document.getElementById('zotero-items-tree').view = this.itemsView = null;
 			return;
 		}*/
 		
-		itemgroup.setSearch('');
-		itemgroup.setTags(getTagSelection());
+		collectionTreeRow.setSearch('');
+		collectionTreeRow.setTags(getTagSelection());
 		
 		// Enable or disable toolbar icons and menu options as necessary
 		const disableIfNoEdit = [
@@ -1163,11 +1155,11 @@ var ZoteroPane = new function()
 			
 			// If a trash is selected, new collection depends on the
 			// editability of the library
-			if (itemgroup.isTrash() &&
+			if (collectionTreeRow.isTrash() &&
 					disableIfNoEdit[i] == 'cmd_zotero_newCollection') {
-				if (itemgroup.ref.libraryID) {
+				if (collectionTreeRow.ref.libraryID) {
 					var overrideEditable =
-						Zotero.Libraries.isEditable(itemgroup.ref.libraryID);
+						Zotero.Libraries.isEditable(collectionTreeRow.ref.libraryID);
 				}
 				else {
 					var overrideEditable = true;
@@ -1177,224 +1169,235 @@ var ZoteroPane = new function()
 				var overrideEditable = false;
 			}
 			
-			if (itemgroup.editable || overrideEditable) {
+			if (collectionTreeRow.editable || overrideEditable) {
 				if(el.hasAttribute("disabled")) el.removeAttribute("disabled");
 			} else {
 				el.setAttribute("disabled", "true");
 			}
 		}
 		
+		this.itemsView = new Zotero.ItemTreeView(collectionTreeRow);
+		this.itemsView.onError = function () {
+			ZoteroPane_Local.displayErrorMessage();
+		};
+		this.itemsView.addCallback(this.setTagScope);
+		document.getElementById('zotero-items-tree').view = this.itemsView;
+		this.itemsView.selection.clearSelection();
+		
+		// Add events to treecolpicker to update menu before showing/hiding
 		try {
-			Zotero.UnresponsiveScriptIndicator.disable();
-			this.itemsView = new Zotero.ItemTreeView(itemgroup);
-			this.itemsView.addCallback(_setTagScope);
-			document.getElementById('zotero-items-tree').view = this.itemsView;
-			this.itemsView.selection.clearSelection();
-			
-			// Add events to treecolpicker to update menu before showing/hiding
-			try {
-				let treecols = document.getElementById('zotero-items-columns-header');
-				let treecolpicker = treecols.boxObject.firstChild.nextSibling;
-				let menupopup = treecolpicker.boxObject.firstChild.nextSibling;
-				let attr = menupopup.getAttribute('onpopupshowing');
-				if (attr.indexOf('Zotero') == -1) {
-					menupopup.setAttribute('onpopupshowing', 'ZoteroPane.itemsView.onColumnPickerShowing(event);')
-						// Keep whatever else is there
-						+ ' ' + attr;
-					menupopup.setAttribute('onpopuphidden', 'ZoteroPane.itemsView.onColumnPickerHidden(event);')
-						// Keep whatever else is there
-						+ ' ' + menupopup.getAttribute('onpopuphidden');
-				}
-			}
-			catch (e) {
-				Zotero.debug(e);
+			let treecols = document.getElementById('zotero-items-columns-header');
+			let treecolpicker = treecols.boxObject.firstChild.nextSibling;
+			let menupopup = treecolpicker.boxObject.firstChild.nextSibling;
+			let attr = menupopup.getAttribute('onpopupshowing');
+			if (attr.indexOf('Zotero') == -1) {
+				menupopup.setAttribute('onpopupshowing', 'ZoteroPane.itemsView.onColumnPickerShowing(event);')
+					// Keep whatever else is there
+					+ ' ' + attr;
+				menupopup.setAttribute('onpopuphidden', 'ZoteroPane.itemsView.onColumnPickerHidden(event);')
+					// Keep whatever else is there
+					+ ' ' + menupopup.getAttribute('onpopuphidden');
 			}
 		}
-		finally {
-			Zotero.UnresponsiveScriptIndicator.enable();
+		catch (e) {
+			Zotero.debug(e);
 		}
 		
-		Zotero.Prefs.set('lastViewedFolder', itemgroup.id);
-	}
+		Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
+	});
 	
 	
-	this.getItemGroup = function () {
-		if (!this.collectionsView.selection) {
+	this.getCollectionTreeRow = function () {
+		if (!this.collectionsView.selection.count) {
 			return false;
 		}
-		return this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+		return this.collectionsView.getRow(this.collectionsView.selection.currentIndex);
 	}
 	
 	
+	/**
+	 * @return {Promise}
+	 */
 	this.itemSelected = function (event) {
-		if (!Zotero.stateCheck()) {
-			this.displayErrorMessage();
-			return;
-		}
-		
-		// DEBUG: Is this actually possible?
-		if (!this.itemsView) {
-			Components.utils.reportError("this.itemsView is not defined in ZoteroPane.itemSelected()");
-		}
-		
-		// Display restore button if items selected in Trash
-		if (this.itemsView.selection.count) {
-			document.getElementById('zotero-item-restore-button').hidden
-				= !this.itemsView._itemGroup.isTrash()
-					|| _nonDeletedItemsSelected(this.itemsView);
-		}
-		else {
-			document.getElementById('zotero-item-restore-button').hidden = true;
-		}
-		
-		var tabs = document.getElementById('zotero-view-tabbox');
-		
-		// save note when switching from a note
-		if(document.getElementById('zotero-item-pane-content').selectedIndex == 2) {
-			document.getElementById('zotero-note-editor').save();
-		}
-		
-		var itemGroup = this.getItemGroup();
-		
-		// Single item selected
-		if (this.itemsView.selection.count == 1 && this.itemsView.selection.currentIndex != -1)
-		{
-			var item = this.itemsView.getSelectedItems()[0];
+		return Zotero.spawn(function* () {
+			if (!Zotero.stateCheck()) {
+				this.displayErrorMessage();
+				return;
+			}
 			
-			if (item.isNote()) {
-				var noteEditor = document.getElementById('zotero-note-editor');
-				noteEditor.mode = this.collectionsView.editable ? 'edit' : 'view';
+			// Display restore button if items selected in Trash
+			if (this.itemsView.selection.count) {
+				document.getElementById('zotero-item-restore-button').hidden
+					= !this.getCollectionTreeRow().isTrash()
+						|| _nonDeletedItemsSelected(this.itemsView);
+			}
+			else {
+				document.getElementById('zotero-item-restore-button').hidden = true;
+			}
+			
+			var tabs = document.getElementById('zotero-view-tabbox');
+			
+			// save note when switching from a note
+			if(document.getElementById('zotero-item-pane-content').selectedIndex == 2) {
+				// TODO: only try to save when selected item is different
+				yield document.getElementById('zotero-note-editor').save();
+			}
+			
+			var collectionTreeRow = this.getCollectionTreeRow();
+			
+			// Single item selected
+			if (this.itemsView.selection.count == 1 && this.itemsView.selection.currentIndex != -1)
+			{
+				var item = this.itemsView.getSelectedItems()[0];
 				
-				var clearUndo = noteEditor.item ? noteEditor.item.id != item.id : false;
-				
-				noteEditor.parent = null;
-				noteEditor.item = item;
-				
-				// If loading new or different note, disable undo while we repopulate the text field
-				// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
-				// undo content from another note into the current one.
-				if (clearUndo) {
-					noteEditor.clearUndo();
-				}
-				
-				var viewButton = document.getElementById('zotero-view-note-button');
-				if (this.collectionsView.editable) {
-					viewButton.hidden = false;
-					viewButton.setAttribute('noteID', item.id);
-					if (item.getSource()) {
-						viewButton.setAttribute('sourceID', item.getSource());
+				if (item.isNote()) {
+					var noteEditor = document.getElementById('zotero-note-editor');
+					noteEditor.mode = this.collectionsView.editable ? 'edit' : 'view';
+					
+					var clearUndo = noteEditor.item ? noteEditor.item.id != item.id : false;
+					
+					noteEditor.parent = null;
+					noteEditor.item = item;
+					
+					// If loading new or different note, disable undo while we repopulate the text field
+					// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
+					// undo content from another note into the current one.
+					if (clearUndo) {
+						noteEditor.clearUndo();
+					}
+					
+					var viewButton = document.getElementById('zotero-view-note-button');
+					if (this.collectionsView.editable) {
+						viewButton.hidden = false;
+						viewButton.setAttribute('noteID', item.id);
+						if (!item.isTopLevelItem()) {
+							viewButton.setAttribute('parentItemID', item.parentItemID);
+						}
+						else {
+							viewButton.removeAttribute('parentItemID');
+						}
 					}
 					else {
-						viewButton.removeAttribute('sourceID');
+						viewButton.hidden = true;
+					}
+					
+					document.getElementById('zotero-item-pane-content').selectedIndex = 2;
+				}
+				
+				else if (item.isAttachment()) {
+					var attachmentBox = document.getElementById('zotero-attachment-box');
+					attachmentBox.mode = this.collectionsView.editable ? 'edit' : 'view';
+					attachmentBox.item = item;
+					
+					document.getElementById('zotero-item-pane-content').selectedIndex = 3;
+				}
+				
+				// Regular item
+				else {
+					var isCommons = collectionTreeRow.isBucket();
+					
+					document.getElementById('zotero-item-pane-content').selectedIndex = 1;
+					var tabBox = document.getElementById('zotero-view-tabbox');
+					var pane = tabBox.selectedIndex;
+					tabBox.firstChild.hidden = isCommons;
+					
+					var button = document.getElementById('zotero-item-show-original');
+					if (isCommons) {
+						button.hidden = false;
+						button.disabled = !this.getOriginalItem();
+					}
+					else {
+						button.hidden = true;
+					}
+					
+					if (this.collectionsView.editable) {
+						yield ZoteroItemPane.viewItem(item, null, pane);
+						tabs.selectedIndex = document.getElementById('zotero-view-item').selectedIndex;
+					}
+					else {
+						yield ZoteroItemPane.viewItem(item, 'view', pane);
+						tabs.selectedIndex = document.getElementById('zotero-view-item').selectedIndex;
 					}
 				}
-				else {
-					viewButton.hidden = true;
-				}
-				
-				document.getElementById('zotero-item-pane-content').selectedIndex = 2;
 			}
-			
-			else if (item.isAttachment()) {
-				var attachmentBox = document.getElementById('zotero-attachment-box');
-				attachmentBox.mode = this.collectionsView.editable ? 'edit' : 'view';
-				attachmentBox.item = item;
-				
-				document.getElementById('zotero-item-pane-content').selectedIndex = 3;
-			}
-			
-			// Regular item
+			// Zero or multiple items selected
 			else {
-				var isCommons = itemGroup.isBucket();
+				var count = this.itemsView.selection.count;
 				
-				document.getElementById('zotero-item-pane-content').selectedIndex = 1;
-				var tabBox = document.getElementById('zotero-view-tabbox');
-				var pane = tabBox.selectedIndex;
-				tabBox.firstChild.hidden = isCommons;
-				
-				var button = document.getElementById('zotero-item-show-original');
-				if (isCommons) {
-					button.hidden = false;
-					button.disabled = !this.getOriginalItem();
+				// Display duplicates merge interface in item pane
+				if (collectionTreeRow.isDuplicates()) {
+					if (!collectionTreeRow.editable) {
+						if (count) {
+							var msg = Zotero.getString('pane.item.duplicates.writeAccessRequired');
+						}
+						else {
+							var msg = Zotero.getString('pane.item.selected.zero');
+						}
+						this.setItemPaneMessage(msg);
+					}
+					else if (count) {
+						document.getElementById('zotero-item-pane-content').selectedIndex = 4;
+						
+						// Load duplicates UI code
+						if (typeof Zotero_Duplicates_Pane == 'undefined') {
+							Zotero.debug("Loading duplicatesMerge.js");
+							Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+								.getService(Components.interfaces.mozIJSSubScriptLoader)
+								.loadSubScript("chrome://zotero/content/duplicatesMerge.js");
+						}
+						
+						// On a Select All of more than a few items, display a row
+						// count instead of the usual item type mismatch error
+						var displayNumItemsOnTypeError = count > 5 && count == this.itemsView.rowCount;
+						
+						// Initialize the merge pane with the selected items
+						Zotero_Duplicates_Pane.setItems(this.getSelectedItems(), displayNumItemsOnTypeError);
+					}
+					else {
+						var msg = Zotero.getString('pane.item.duplicates.selectToMerge');
+						this.setItemPaneMessage(msg);
+					}
 				}
+				// Display label in the middle of the item pane
 				else {
-					button.hidden = true;
-				}
-				
-				if (this.collectionsView.editable) {
-					ZoteroItemPane.viewItem(item, null, pane);
-					tabs.selectedIndex = document.getElementById('zotero-view-item').selectedIndex;
-				}
-				else {
-					ZoteroItemPane.viewItem(item, 'view', pane);
-					tabs.selectedIndex = document.getElementById('zotero-view-item').selectedIndex;
-				}
-			}
-		}
-		// Zero or multiple items selected
-		else {
-			var count = this.itemsView.selection.count;
-			
-			// Display duplicates merge interface in item pane
-			if (itemGroup.isDuplicates()) {
-				if (!itemGroup.editable) {
 					if (count) {
-						var msg = Zotero.getString('pane.item.duplicates.writeAccessRequired');
+						var msg = Zotero.getString('pane.item.selected.multiple', count);
 					}
 					else {
-						var msg = Zotero.getString('pane.item.selected.zero');
+						var rowCount = this.itemsView.rowCount;
+						var str = 'pane.item.unselected.';
+						switch (rowCount){
+							case 0:
+								str += 'zero';
+								break;
+							case 1:
+								str += 'singular';
+								break;
+							default:
+								str += 'plural';
+								break;
+						}
+						var msg = Zotero.getString(str, [rowCount]);
 					}
-					this.setItemPaneMessage(msg);
-				}
-				else if (count) {
-					document.getElementById('zotero-item-pane-content').selectedIndex = 4;
 					
-					// Load duplicates UI code
-					if (typeof Zotero_Duplicates_Pane == 'undefined') {
-						Zotero.debug("Loading duplicatesMerge.js");
-						Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-							.getService(Components.interfaces.mozIJSSubScriptLoader)
-							.loadSubScript("chrome://zotero/content/duplicatesMerge.js");
-					}
-					
-					// On a Select All of more than a few items, display a row
-					// count instead of the usual item type mismatch error
-					var displayNumItemsOnTypeError = count > 5 && count == this.itemsView.rowCount;
-					
-					// Initialize the merge pane with the selected items
-					Zotero_Duplicates_Pane.setItems(this.getSelectedItems(), displayNumItemsOnTypeError);
-				}
-				else {
-					var msg = Zotero.getString('pane.item.duplicates.selectToMerge');
 					this.setItemPaneMessage(msg);
 				}
 			}
-			// Display label in the middle of the item pane
-			else {
-				if (count) {
-					var msg = Zotero.getString('pane.item.selected.multiple', count);
-				}
-				else {
-					var rowCount = this.itemsView.rowCount;
-					var str = 'pane.item.unselected.';
-					switch (rowCount){
-						case 0:
-							str += 'zero';
-							break;
-						case 1:
-							str += 'singular';
-							break;
-						default:
-							str += 'plural';
-							break;
-					}
-					var msg = Zotero.getString(str, [rowCount]);
-				}
-				
-				this.setItemPaneMessage(msg);
+		}, this)
+		.then(function () {
+			// See note in itemTreeView.js::selectItem()
+			if (this.itemsView._itemSelectedPromiseResolver) {
+				this.itemsView._itemSelectedPromiseResolver.resolve();
 			}
-		}
-	}
+		}.bind(this))
+		.catch(function (e) {
+			Zotero.debug(e, 1);
+			if (this.itemsView._itemSelectedPromiseResolver) {
+				this.itemsView._itemSelectedPromiseResolver.reject(e);
+			}
+			throw e;
+		}.bind(this));;
+	};
 	
 	
 	/**
@@ -1409,7 +1412,7 @@ var ZoteroPane = new function()
 		for (var i=0, len=itemsView.selection.getRangeCount(); i<len; i++) {
 			itemsView.selection.getRangeAt(i, start, end);
 			for (var j=start.value; j<=end.value; j++) {
-				if (!itemsView._getItemAtRow(j).ref.deleted) {
+				if (!itemsView.getRow(j).ref.deleted) {
 					return true;
 				}
 			}
@@ -1418,11 +1421,14 @@ var ZoteroPane = new function()
 	}
 	
 	
+	/**
+	 * @return {Promise}
+	 */
 	this.updateNoteButtonMenu = function () {
 		var items = ZoteroPane_Local.getSelectedItems();
-		var button = document.getElementById('zotero-tb-add-child-note');
-		button.disabled = !this.canEdit() ||
-			!(items.length == 1 && (items[0].isRegularItem() || !items[0].isTopLevelItem()));
+		var cmd = document.getElementById('cmd_zotero_newChildNote');
+		cmd.setAttribute("disabled", !this.canEdit() ||
+			!(items.length == 1 && (items[0].isRegularItem() || !items[0].isTopLevelItem())));
 	}
 	
 	
@@ -1438,7 +1444,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		var itemgroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+		var collectionTreeRow = this.collectionsView.selectedTreeRow;
 		var canEditFiles = this.canEditFiles();
 		
 		var prefix = "menuitem-iconic zotero-menuitem-attachments-";
@@ -1449,7 +1455,7 @@ var ZoteroPane = new function()
 			
 			switch (className) {
 				case prefix + 'link':
-					node.disabled = itemgroup.isWithinGroup();
+					node.disabled = collectionTreeRow.isWithinGroup();
 					break;
 				
 				case prefix + 'snapshot':
@@ -1492,7 +1498,10 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function reindexItem() {
+	/**
+	 * @return {Promise}
+	 */
+	this.reindexItem = Zotero.Promise.coroutine(function* () {
 		var items = this.getSelectedItems();
 		if (!items) {
 			return;
@@ -1512,44 +1521,47 @@ var ZoteroPane = new function()
 		if (checkPDF) {
 			var installed = this.checkPDFConverter();
 			if (!installed) {
-				document.getElementById('zotero-attachment-box').updateItemIndexedState();
+				yield document.getElementById('zotero-attachment-box').updateItemIndexedState();
 				return;
 			}
 		}
 		
-		Zotero.Fulltext.indexItems(itemIDs, true);
-		document.getElementById('zotero-attachment-box').updateItemIndexedState();
-	}
+		yield Zotero.Fulltext.indexItems(itemIDs, true);
+		yield document.getElementById('zotero-attachment-box').updateItemIndexedState();
+	});
 	
 	
-	function duplicateSelectedItem() {
-		if (!this.canEdit()) {
-			this.displayCannotEditLibraryMessage();
+	/**
+	 * @return {Promise}
+	 */
+	this.duplicateSelectedItem = Zotero.Promise.coroutine(function* () {
+		var self = this;
+		if (!self.canEdit()) {
+			self.displayCannotEditLibraryMessage();
 			return;
 		}
 		
-		var item = this.getSelectedItems()[0];
+		var item = self.getSelectedItems()[0];
+		var newItem;
 		
-		Zotero.DB.beginTransaction();
+		yield Zotero.DB.executeTransaction(function () {
+			// Create new unsaved clone item in target library
+			newItem = new Zotero.Item(item.itemTypeID);
+			newItem.libraryID = item.libraryID;
+			// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
+			var id = yield newItem.save();
+			
+			var newItem = yield Zotero.Items.getAsync(id);
+			item.clone(false, newItem, false, !Zotero.Prefs.get('groups.copyTags'));
+			yield newItem.save();
+			
+			if (self.collectionsView.selectedTreeRow.isCollection() && newItem.isTopLevelItem()) {
+				self.collectionsView.selectedTreeRow.ref.addItem(newItem.id);
+			}
+		});
 		
-		// Create new unsaved clone item in target library
-		var newItem = new Zotero.Item(item.itemTypeID);
-		newItem.libraryID = item.libraryID;
-		// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
-		var id = newItem.save();
-		
-		var newItem = Zotero.Items.get(id);
-		item.clone(false, newItem, false, !Zotero.Prefs.get('groups.copyTags'));
-		newItem.save();
-		
-		if (this.itemsView._itemGroup.isCollection() && !newItem.getSource()) {
-			this.itemsView._itemGroup.ref.addItem(newItem.id);
-		}
-		
-		Zotero.DB.commitTransaction();
-		
-		this.selectItem(newItem.id);
-	}
+		yield self.selectItem(newItem.id);
+	});
 	
 	
 	this.deleteSelectedItem = function () {
@@ -1568,9 +1580,9 @@ var ZoteroPane = new function()
 		if (!this.itemsView || !this.itemsView.selection.count) {
 			return;
 		}
-		var itemGroup = this.itemsView._itemGroup;
+		var collectionTreeRow = this.collectionsView.selectedTreeRow;
 		
-		if (!itemGroup.isTrash() && !itemGroup.isBucket() && !this.canEdit()) {
+		if (!collectionTreeRow.isTrash() && !collectionTreeRow.isBucket() && !this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -1588,39 +1600,39 @@ var ZoteroPane = new function()
 			)
 		};
 		
-		if (itemGroup.isLibrary(true)) {
+		if (collectionTreeRow.isLibrary(true)) {
 			// In library, don't prompt if meta key was pressed
 			var prompt = (force && !fromMenu) ? false : toTrash;
 		}
-		else if (itemGroup.isCollection()) {
+		else if (collectionTreeRow.isCollection()) {
 			// In collection, only prompt if trashing
 			var prompt = force ? toTrash : false;
 		}
-		else if (itemGroup.isSearch() || itemGroup.isUnfiled() || itemGroup.isDuplicates()) {
+		else if (collectionTreeRow.isSearch() || collectionTreeRow.isUnfiled() || collectionTreeRow.isDuplicates()) {
 			if (!force) {
 				return;
 			}
 			var prompt = toTrash;
 		}
 		// Do nothing in trash view if any non-deleted items are selected
-		else if (itemGroup.isTrash()) {
+		else if (collectionTreeRow.isTrash()) {
 			var start = {};
 			var end = {};
 			for (var i=0, len=this.itemsView.selection.getRangeCount(); i<len; i++) {
 				this.itemsView.selection.getRangeAt(i, start, end);
 				for (var j=start.value; j<=end.value; j++) {
-					if (!this.itemsView._getItemAtRow(j).ref.deleted) {
+					if (!this.itemsView.getRow(j).ref.deleted) {
 						return;
 					}
 				}
 			}
 			var prompt = toDelete;
 		}
-		else if (itemGroup.isBucket()) {
+		else if (collectionTreeRow.isBucket()) {
 			var prompt = toDelete;
 		}
 		// Do nothing in share views
-		else if (itemGroup.isShare()) {
+		else if (collectionTreeRow.isShare()) {
 			return;
 		}
 		
@@ -1653,16 +1665,16 @@ var ZoteroPane = new function()
 	
 	
 	this.deleteSelectedCollection = function (deleteItems) {
-		var itemGroup = this.getItemGroup();
+		var collectionTreeRow = this.getCollectionTreeRow();
 		
 		// Remove virtual duplicates collection
-		if (itemGroup.isDuplicates()) {
-			this.setVirtual(itemGroup.ref.libraryID, 'duplicates', false);
+		if (collectionTreeRow.isDuplicates()) {
+			this.setVirtual(collectionTreeRow.ref.libraryID, 'duplicates', false);
 			return;
 		}
 		// Remove virtual unfiled collection
-		else if (itemGroup.isUnfiled()) {
-			this.setVirtual(itemGroup.ref.libraryID, 'unfiled', false);
+		else if (collectionTreeRow.isUnfiled()) {
+			this.setVirtual(collectionTreeRow.ref.libraryID, 'unfiled', false);
 			return;
 		}
 		
@@ -1677,7 +1689,7 @@ var ZoteroPane = new function()
 		buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 		if (this.collectionsView.selection.count == 1) {
-			if (itemGroup.isCollection())
+			if (collectionTreeRow.isCollection())
 			{
 				if (deleteItems) {
 					var index = ps.confirmEx(
@@ -1705,7 +1717,7 @@ var ZoteroPane = new function()
 					this.collectionsView.deleteSelection(deleteItems);
 				}
 			}
-			else if (itemGroup.isSearch())
+			else if (collectionTreeRow.isSearch())
 			{
 				
 				var index = ps.confirmEx(
@@ -1727,9 +1739,9 @@ var ZoteroPane = new function()
 	// Currently used only for Commons to find original linked item
 	this.getOriginalItem = function () {
 		var item = this.getSelectedItems()[0];
-		var itemGroup = this.getItemGroup();
+		var collectionTreeRow = this.getCollectionTreeRow();
 		// TEMP: Commons buckets only
-		return itemGroup.ref.getLocalItem(item);
+		return collectionTreeRow.ref.getLocalItem(item);
 	}
 	
 	
@@ -1739,26 +1751,34 @@ var ZoteroPane = new function()
 			Zotero.debug("Original item not found");
 			return;
 		}
-		this.selectItem(item.id);
+		this.selectItem(item.id).done();
 	}
 	
 	
-	this.restoreSelectedItems = function () {
+	/**
+	 * @return {Promise}
+	 */
+	this.restoreSelectedItems = Zotero.Promise.coroutine(function* () {
 		var items = this.getSelectedItems();
 		if (!items) {
 			return;
 		}
 		
-		Zotero.DB.beginTransaction();
-		for (var i=0; i<items.length; i++) {
-			items[i].deleted = false;
-			items[i].save();
-		}
-		Zotero.DB.commitTransaction();
-	}
+		yield Zotero.DB.executeTransaction(function* () {
+			for (let i=0; i<items.length; i++) {
+				items[i].deleted = false;
+				items[i].save({
+					skipDateModifiedUpdate: true
+				});
+			}
+		}.bind(this));
+	});
 	
 	
-	this.emptyTrash = function () {
+	/**
+	 * @return {Promise}
+	 */
+	this.emptyTrash = Zotero.Promise.coroutine(function* () {
 		var libraryID = this.getSelectedLibraryID();
 		
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
@@ -1771,10 +1791,10 @@ var ZoteroPane = new function()
 				+ Zotero.getString('general.actionCannotBeUndone')
 		);
 		if (result) {
-			Zotero.Items.emptyTrash(libraryID);
-			Zotero.purgeDataObjects(true);
+			let deleted = yield Zotero.Items.emptyTrash(libraryID);
+			yield Zotero.purgeDataObjects(true);
 		}
-	}
+	});
 	
 	
 	function editSelectedCollection()
@@ -1785,7 +1805,7 @@ var ZoteroPane = new function()
 		}
 		
 		if (this.collectionsView.selection.count > 0) {
-			var row = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+			var row = this.collectionsView.getRow(this.collectionsView.selection.currentIndex);
 			
 			if (row.isCollection()) {
 				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
@@ -1813,7 +1833,7 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function copySelectedItemsToClipboard(asCitations) {
+	this.copySelectedItemsToClipboard = function (asCitations) {
 		var items = this.getSelectedItems();
 		if (!items.length) {
 			return;
@@ -1842,7 +1862,7 @@ var ZoteroPane = new function()
 		}
 		
 		var url = (window.content && window.content.location ? window.content.location.href : null);
-		var [mode, format] = Zotero.QuickCopy.getFormatFromURL(url).split('=');
+		var [mode, format] = (yield Zotero.QuickCopy.getFormatFromURL(url)).split('=');
 		var [mode, contentType] = mode.split('/');
 		
 		if (mode == 'bibliography') {
@@ -1865,13 +1885,15 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function clearQuicksearch() {
+	this.clearQuicksearch = Zotero.Promise.coroutine(function* () {
 		var search = document.getElementById('zotero-tb-search');
-		if (search.value != '') {
+		if (search.value !== '') {
 			search.value = '';
-			ZoteroPane_Local.search();
+			yield ZoteroPane_Local.search();
+			return true;
 		}
-	}
+		return false;
+	});
 	
 	
 	function handleSearchKeypress(textbox, event) {
@@ -1910,17 +1932,20 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function search(runAdvanced)
-	{
-		if (this.itemsView) {
-			var search = document.getElementById('zotero-tb-search');
-			if (!runAdvanced && search.value.indexOf('"') != -1) {
-				return;
-			}
-			var searchVal = search.value;
-			this.itemsView.setFilter('search', searchVal);
+	/**
+	 * @return {Promise}
+	 */
+	this.search = Zotero.Promise.coroutine(function* (runAdvanced) {
+		if (!this.itemsView) {
+			return;
 		}
-	}
+		var search = document.getElementById('zotero-tb-search');
+		if (!runAdvanced && search.value.indexOf('"') != -1) {
+			return;
+		}
+		var searchVal = search.value;
+		return this.itemsView.setFilter('search', searchVal);
+	});
 	
 	
 	/*
@@ -1929,13 +1954,13 @@ var ZoteroPane = new function()
 	 * If _inLibrary_, force switch to Library
 	 * If _expand_, open item if it's a container
 	 */
-	function selectItem(itemID, inLibrary, expand)
+	this.selectItem = Zotero.Promise.coroutine(function* (itemID, inLibrary, expand)
 	{
 		if (!itemID) {
 			return false;
 		}
 		
-		var item = Zotero.Items.get(itemID);
+		var item = yield Zotero.Items.getAsync(itemID);
 		if (!item) {
 			return false;
 		}
@@ -1949,23 +1974,23 @@ var ZoteroPane = new function()
 		// If in a different library
 		if (item.libraryID != currentLibraryID) {
 			Zotero.debug("Library ID differs; switching library");
-			this.collectionsView.selectLibrary(item.libraryID);
+			yield this.collectionsView.selectLibrary(item.libraryID);
 		}
 		// Force switch to library view
-		else if (!this.itemsView._itemGroup.isLibrary() && inLibrary) {
+		else if (!this.collectionsView.selectedTreeRow.isLibrary() && inLibrary) {
 			Zotero.debug("Told to select in library; switching to library");
-			this.collectionsView.selectLibrary(item.libraryID);
+			yield this.collectionsView.selectLibrary(item.libraryID);
 		}
 		
-		var selected = this.itemsView.selectItem(itemID, expand);
+		var selected = yield this.itemsView.selectItem(itemID, expand);
 		if (!selected) {
 			Zotero.debug("Item was not selected; switching to library");
-			this.collectionsView.selectLibrary(item.libraryID);
-			this.itemsView.selectItem(itemID, expand);
+			yield this.collectionsView.selectLibrary(item.libraryID);
+			yield this.itemsView.selectItem(itemID, expand);
 		}
 		
 		return true;
-	}
+	});
 	
 	
 	this.getSelectedLibraryID = function () {
@@ -1981,7 +2006,7 @@ var ZoteroPane = new function()
 	function getSelectedSavedSearch(asID)
 	{
 		if (this.collectionsView.selection.count > 0 && this.collectionsView.selection.currentIndex != -1) {
-			var collection = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+			var collection = this.collectionsView.getRow(this.collectionsView.selection.currentIndex);
 			if (collection && collection.isSearch()) {
 				return asID ? collection.ref.id : collection.ref;
 			}
@@ -2010,9 +2035,9 @@ var ZoteroPane = new function()
 				&& this.collectionsView.selection.count > 0
 				&& this.collectionsView.selection.currentIndex != -1) {
 		
-			var itemGroup = this.getItemGroup();
-			if (itemGroup && itemGroup.isGroup()) {
-				return asID ? itemGroup.ref.id : itemGroup.ref;
+			var collectionTreeRow = this.getCollectionTreeRow();
+			if (collectionTreeRow && collectionTreeRow.isGroup()) {
+				return asID ? collectionTreeRow.ref.id : collectionTreeRow.ref;
 			}
 		}
 		return false;
@@ -2051,8 +2076,7 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.buildCollectionContextMenu = function buildCollectionContextMenu()
-	{
+	this.buildCollectionContextMenu = function () {
 		var options = [
 			"newCollection",
 			"newSavedSearch",
@@ -2081,13 +2105,13 @@ var ZoteroPane = new function()
 		
 		var menu = document.getElementById('zotero-collectionmenu');
 		
-		var itemGroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+		var collectionTreeRow = this.collectionsView.selectedTreeRow;
 		
 		// By default things are hidden and visible, so we only need to record
 		// when things are visible and when they're visible but disabled
 		var show = [], disable = [];
 		
-		if (itemGroup.isCollection()) {
+		if (collectionTreeRow.isCollection()) {
 			show = [
 				m.newSubcollection,
 				m.sep1,
@@ -2117,7 +2141,7 @@ var ZoteroPane = new function()
 			menu.childNodes[m.createBibCollection].setAttribute('label', Zotero.getString('pane.collections.menu.createBib.collection'));
 			menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.collections.menu.generateReport.collection'));
 		}
-		else if (itemGroup.isSearch()) {
+		else if (collectionTreeRow.isSearch()) {
 			show = [
 				m.editSelectedCollection,
 				m.deleteCollection,
@@ -2140,25 +2164,25 @@ var ZoteroPane = new function()
 			menu.childNodes[m.createBibCollection].setAttribute('label', Zotero.getString('pane.collections.menu.createBib.savedSearch'));
 			menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.collections.menu.generateReport.savedSearch'));
 		}
-		else if (itemGroup.isTrash()) {
+		else if (collectionTreeRow.isTrash()) {
 			show = [m.emptyTrash];
 		}
-		else if (itemGroup.isGroup()) {
+		else if (collectionTreeRow.isGroup()) {
 			show = [m.newCollection, m.newSavedSearch, m.sep1, m.showDuplicates, m.showUnfiled];
 		}
-		else if (itemGroup.isDuplicates() || itemGroup.isUnfiled()) {
+		else if (collectionTreeRow.isDuplicates() || collectionTreeRow.isUnfiled()) {
 			show = [
 				m.deleteCollection
 			];
 			
 			menu.childNodes[m.deleteCollection].setAttribute('label', Zotero.getString('general.hide'));
 		}
-		else if (itemGroup.isHeader()) {
-			if (itemGroup.ref.id == 'commons-header') {
+		else if (collectionTreeRow.isHeader()) {
+			if (collectionTreeRow.ref.id == 'commons-header') {
 				show = [m.createCommonsBucket];
 			}
 		}
-		else if (itemGroup.isBucket()) {
+		else if (collectionTreeRow.isBucket()) {
 			show = [m.refreshCommonsBucket];
 		}
 		// Library
@@ -2171,13 +2195,13 @@ var ZoteroPane = new function()
 		//
 		// Some actions are disabled via their commands in onCollectionSelected()
 		var s = [m.newSubcollection, m.editSelectedCollection, m.deleteCollection, m.deleteCollectionAndItems];
-		if (itemGroup.isWithinGroup() && !itemGroup.editable && !itemGroup.isDuplicates() && !itemGroup.isUnfiled()) {
+		if (collectionTreeRow.isWithinGroup() && !collectionTreeRow.editable && !collectionTreeRow.isDuplicates() && !collectionTreeRow.isUnfiled()) {
 			disable = disable.concat(s);
 		}
 		
 		// If within non-editable group or trash it empty, disable Empty Trash
-		if (itemGroup.isTrash()) {
-			if ((itemGroup.isWithinGroup() && !itemGroup.isWithinEditableGroup()) || !this.itemsView.rowCount) {
+		if (collectionTreeRow.isTrash()) {
+			if ((collectionTreeRow.isWithinGroup() && !collectionTreeRow.isWithinEditableGroup()) || !this.itemsView.rowCount) {
 				disable.push(m.emptyTrash);
 			}
 		}
@@ -2199,8 +2223,7 @@ var ZoteroPane = new function()
 		}
 	}
 	
-	function buildItemContextMenu()
-	{
+	this.buildItemContextMenu = Zotero.Promise.coroutine(function* () {
 		var options = [
 			'showInLibrary',
 			'sep1',
@@ -2242,9 +2265,9 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		var itemGroup = this.getItemGroup();
+		var collectionTreeRow = this.getCollectionTreeRow();
 		
-		if(itemGroup.isTrash()) {
+		if(collectionTreeRow.isTrash()) {
 			show.push(m.restoreToLibrary);
 		} else {
 			show.push(m.deleteFromLibrary);
@@ -2265,11 +2288,11 @@ var ZoteroPane = new function()
 				}
 				
 				for each(var item in items) {
-					if (canMerge && !item.isRegularItem() || itemGroup.isDuplicates()) {
+					if (canMerge && !item.isRegularItem() || collectionTreeRow.isDuplicates()) {
 						canMerge = false;
 					}
 					
-					if (canIndex && !Zotero.Fulltext.canReindex(item.id)) {
+					if (canIndex && !(yield Zotero.Fulltext.canReindex(item))) {
 						canIndex = false;
 					}
 					
@@ -2278,7 +2301,7 @@ var ZoteroPane = new function()
 					}
 					
 					// Show rename option only if all items are child attachments
-					if (canRename && (!item.isAttachment() || !item.getSource() || item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL)) {
+					if (canRename && (!item.isAttachment() || item.isTopLevelItem() || item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL)) {
 						canRename = false;
 					}
 				}
@@ -2317,7 +2340,7 @@ var ZoteroPane = new function()
 				
 				// Block certain actions on files if no access and at least one item
 				// is an imported attachment
-				if (!itemGroup.filesEditable) {
+				if (!collectionTreeRow.filesEditable) {
 					var hasImportedAttachment = false;
 					for (var i=0; i<items.length; i++) {
 						var item = items[i];
@@ -2335,17 +2358,17 @@ var ZoteroPane = new function()
 			// Single item selected
 			else
 			{
-				var item = this.getSelectedItems()[0];
-				var itemID = item.id;
-				menu.setAttribute('itemID', itemID);
+				let item = this.getSelectedItems()[0];
+				menu.setAttribute('itemID', item.id);
+				menu.setAttribute('itemKey', item.key);
 				
 				// Show in Library
-				if (!itemGroup.isLibrary() && !itemGroup.isWithinGroup()) {
+				if (!collectionTreeRow.isLibrary() && !collectionTreeRow.isWithinGroup()) {
 					show.push(m.showInLibrary, m.sep1);
 				}
 				
 				// Disable actions in the trash
-				if (itemGroup.isTrash()) {
+				if (collectionTreeRow.isTrash()) {
 					disable.push(m.deleteItem);
 				}
 				
@@ -2368,14 +2391,14 @@ var ZoteroPane = new function()
 					}
 					
 					// Attachment rename option
-					if (item.getSource() && item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
+					if (!item.isTopLevelItem() && item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
 						show.push(m.renameAttachments);
 						showSep4 = true;
 					}
 					
 					// If not linked URL, show reindex line
 					if (Zotero.Fulltext.pdfConverterIsRegistered()
-							&& Zotero.Fulltext.canReindex(item.id)) {
+							&& (yield Zotero.Fulltext.canReindex(item))) {
 						show.push(m.reindexItem);
 						showSep4 = true;
 					}
@@ -2393,7 +2416,7 @@ var ZoteroPane = new function()
 				this.updateAttachmentButtonMenu(popup);
 				
 				// Block certain actions on files if no access
-				if (item.isImportedAttachment() && !itemGroup.filesEditable) {
+				if (item.isImportedAttachment() && !collectionTreeRow.filesEditable) {
 					var d = [m.deleteFromLibrary, m.createParent, m.renameAttachments];
 					for each(var val in d) {
 						disable.push(val);
@@ -2405,7 +2428,7 @@ var ZoteroPane = new function()
 		else
 		{
 			// Show in Library
-			if (!itemGroup.isLibrary()) {
+			if (!collectionTreeRow.isLibrary()) {
 				show.push(m.showInLibrary, m.sep1);
 			}
 			
@@ -2414,11 +2437,11 @@ var ZoteroPane = new function()
 		}
 		
 		// TODO: implement menu for remote items
-		if (!itemGroup.editable) {
+		if (!collectionTreeRow.editable) {
 			for (var i in m) {
 				// Still show export/bib/report for non-editable views
 				// (other than Commons buckets, which aren't real items)
-				if (!itemGroup.isBucket()) {
+				if (!collectionTreeRow.isBucket()) {
 					switch (i) {
 						case 'exportItems':
 						case 'createBib':
@@ -2432,7 +2455,7 @@ var ZoteroPane = new function()
 		}
 		
 		// Remove from collection
-		if (itemGroup.isCollection() && !(item && item.getSource()))
+		if (collectionTreeRow.isCollection() && !(item && !item.isTopLevelItem()))
 		{
 			menu.childNodes[m.deleteItem].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
 			show.push(m.deleteItem);
@@ -2466,7 +2489,7 @@ var ZoteroPane = new function()
 		
 		// add locate menu options
 		Zotero_LocateMenu.buildContextMenu(menu, true);
-	}
+	});
 	
 	
 	this.onTreeMouseDown = function (event) {
@@ -2485,13 +2508,13 @@ var ZoteroPane = new function()
 		}
 		
 		if (tree.id == 'zotero-collections-tree') {
-			let itemGroup = ZoteroPane_Local.collectionsView._getItemAtRow(row.value);
+			let collectionTreeRow = ZoteroPane_Local.collectionsView.getRow(row.value);
 			
 			// Prevent the tree's select event from being called for a click
 			// on a library sync error icon
-			if (itemGroup.isLibrary(true)) {
+			if (collectionTreeRow.isLibrary(true)) {
 				if (col.value.id == 'zotero-collections-sync-status-column') {
-					var errors = Zotero.Sync.Runner.getErrors(itemGroup.ref.libraryID);
+					var errors = Zotero.Sync.Runner.getErrors(collectionTreeRow.ref.libraryID);
 					if (errors) {
 						event.stopPropagation();
 						return;
@@ -2503,9 +2526,9 @@ var ZoteroPane = new function()
 		// Automatically select all equivalent items when clicking on an item
 		// in duplicates view
 		else if (tree.id == 'zotero-items-tree') {
-			let itemGroup = ZoteroPane_Local.getItemGroup();
+			let collectionTreeRow = ZoteroPane_Local.getCollectionTreeRow();
 			
-			if (itemGroup.isDuplicates()) {
+			if (collectionTreeRow.isDuplicates()) {
 				// Trigger only on primary-button single clicks without modifiers
 				// (so that items can still be selected and deselected manually)
 				if (!event || event.detail != 1 || event.button != 0 || event.metaKey
@@ -2530,8 +2553,8 @@ var ZoteroPane = new function()
 				}
 				
 				// Duplicated in itemTreeView.js::notify()
-				var itemID = ZoteroPane_Local.itemsView._getItemAtRow(row.value).ref.id;
-				var setItemIDs = itemGroup.ref.getSetItemsByItemID(itemID);
+				var itemID = ZoteroPane_Local.itemsView.getRow(row.value).ref.id;
+				var setItemIDs = collectionTreeRow.ref.getSetItemsByItemID(itemID);
 				ZoteroPane_Local.itemsView.selectItems(setItemIDs);
 				
 				// Prevent the tree's select event from being called here,
@@ -2562,13 +2585,13 @@ var ZoteroPane = new function()
 			}
 			
 			if (tree.id == 'zotero-collections-tree') {
-				let itemGroup = ZoteroPane_Local.collectionsView._getItemAtRow(row.value);
+				let collectionTreeRow = ZoteroPane_Local.collectionsView.getRow(row.value);
 				
 				// Show the error panel when clicking a library-specific
 				// sync error icon
-				if (itemGroup.isLibrary(true)) {
+				if (collectionTreeRow.isLibrary(true)) {
 					if (col.value.id == 'zotero-collections-sync-status-column') {
-						var errors = Zotero.Sync.Runner.getErrors(itemGroup.ref.libraryID);
+						var errors = Zotero.Sync.Runner.getErrors(collectionTreeRow.ref.libraryID);
 						if (!errors) {
 							return;
 						}
@@ -2595,8 +2618,8 @@ var ZoteroPane = new function()
 			// selected during mousedown(), as is the case in duplicates mode),
 			// it fires select() again. We prevent that here.
 			else if (tree.id == 'zotero-items-tree') {
-				let itemGroup = ZoteroPane_Local.getItemGroup();
-				if (itemGroup.isDuplicates()) {
+				let collectionTreeRow = ZoteroPane_Local.getCollectionTreeRow();
+				if (collectionTreeRow.isDuplicates()) {
 					if (event.button != 0 || event.metaKey || event.shiftKey
 						|| event.altKey || event.ctrlKey) {
 						return;
@@ -2614,10 +2637,10 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		var itemGroup = ZoteroPane_Local.getItemGroup();
+		var collectionTreeRow = ZoteroPane_Local.getCollectionTreeRow();
 		
 		// Ignore double-clicks in duplicates view on everything except attachments
-		if (itemGroup.isDuplicates()) {
+		if (collectionTreeRow.isDuplicates()) {
 			var items = ZoteroPane_Local.getSelectedItems();
 			if (items.length != 1 || !items[0].isAttachment()) {
 				event.stopPropagation();
@@ -2637,7 +2660,7 @@ var ZoteroPane = new function()
 				return;
 			}
 			
-			if (itemGroup.isLibrary()) {
+			if (collectionTreeRow.isLibrary()) {
 				var uri = Zotero.URI.getCurrentUserLibraryURI();
 				if (uri) {
 					ZoteroPane_Local.loadURI(uri);
@@ -2646,25 +2669,25 @@ var ZoteroPane = new function()
 				return;
 			}
 			
-			if (itemGroup.isSearch()) {
+			if (collectionTreeRow.isSearch()) {
 				ZoteroPane_Local.editSelectedCollection();
 				return;
 			}
 			
-			if (itemGroup.isGroup()) {
-				var uri = Zotero.URI.getGroupURI(itemGroup.ref, true);
+			if (collectionTreeRow.isGroup()) {
+				var uri = Zotero.URI.getGroupURI(collectionTreeRow.ref, true);
 				ZoteroPane_Local.loadURI(uri);
 				event.stopPropagation();
 				return;
 			}
 			
 			// Ignore double-clicks on Unfiled Items source row
-			if (itemGroup.isUnfiled()) {
+			if (collectionTreeRow.isUnfiled()) {
 				return;
 			}
 			
-			if (itemGroup.isHeader()) {
-				if (itemGroup.ref.id == 'group-libraries-header') {
+			if (collectionTreeRow.isHeader()) {
+				if (collectionTreeRow.ref.id == 'group-libraries-header') {
 					var uri = Zotero.URI.getGroupsURL();
 					ZoteroPane_Local.loadURI(uri);
 					event.stopPropagation();
@@ -2672,8 +2695,8 @@ var ZoteroPane = new function()
 				return;
 			}
 
-			if (itemGroup.isBucket()) {
-				ZoteroPane_Local.loadURI(itemGroup.ref.uri);
+			if (collectionTreeRow.isBucket()) {
+				ZoteroPane_Local.loadURI(collectionTreeRow.ref.uri);
 				event.stopPropagation();
 			}
 		}
@@ -2898,16 +2921,18 @@ var ZoteroPane = new function()
 		var menu = document.getElementById('zotero-content-area-context-menu');
 		var disabled = Zotero.locked;
 		if (!disabled && self.collectionsView.selection && self.collectionsView.selection.count) {
-			var itemGroup = self.collectionsView._getItemAtRow(self.collectionsView.selection.currentIndex);
-			disabled = !itemGroup.editable;
+			var collectionTreeRow = self.collectionsView.selectedTreeRow;
+			disabled = !collectionTreeRow.editable;
 		}
 		for each(var menuitem in menu.firstChild.childNodes) {
 			menuitem.disabled = disabled;
 		}
 	}
 	
-	
-	this.newNote = function (popup, parent, text, citeURI) {
+	/**
+	 * @return {Promise}
+	 */
+	this.newNote = Zotero.Promise.coroutine(function* (popup, parentKey, text, citeURI) {
 		if (!Zotero.stateCheck()) {
 			this.displayErrorMessage(true);
 			return;
@@ -2922,7 +2947,7 @@ var ZoteroPane = new function()
 			if (!text) {
 				text = '';
 			}
-			text = Zotero.Utilities.trim(text);
+			text = text.trim();
 			
 			if (text) {
 				text = '<blockquote'
@@ -2933,16 +2958,17 @@ var ZoteroPane = new function()
 			var item = new Zotero.Item('note');
 			item.libraryID = this.getSelectedLibraryID();
 			item.setNote(text);
-			if (parent) {
-				item.setSource(parent);
+			Zotero.debug(parentKey);
+			if (parentKey) {
+				item.parentKey = parentKey;
 			}
-			var itemID = item.save();
+			var itemID = yield item.save();
 			
-			if (!parent && this.itemsView && this.itemsView._itemGroup.isCollection()) {
-				this.itemsView._itemGroup.ref.addItem(itemID);
+			if (!parentKey && this.itemsView && this.collectionsView.selectedTreeRow.isCollection()) {
+				yield this.collectionsView.selectedTreeRow.ref.addItem(itemID);
 			}
 			
-			this.selectItem(itemID);
+			yield this.selectItem(itemID);
 			
 			document.getElementById('zotero-note-editor').focus();
 		}
@@ -2951,42 +2977,57 @@ var ZoteroPane = new function()
 			// TODO: _text_
 			var c = this.getSelectedCollection();
 			if (c) {
-				this.openNoteWindow(null, c.id, parent);
+				this.openNoteWindow(null, c.id, parentKey);
 			}
 			else {
-				this.openNoteWindow(null, null, parent);
+				this.openNoteWindow(null, null, parentKey);
 			}
 		}
+	});
+	
+	
+	/**
+	 * Creates a child note for the selected item or the selected item's parent
+	 *
+	 * @return {Promise}
+	 */
+	this.newChildNote = function (popup) {
+		var selected = this.getSelectedItems()[0];
+		var parentKey = selected.parentItemKey;
+		parentKey = parentKey ? parentKey : selected.key;
+		this.newNote(popup, parentKey);
 	}
 	
 	
-	function addTextToNote(text, citeURI)
-	{
+	this.addSelectedTextToCurrentNote = Zotero.Promise.coroutine(function* () {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
 		
+		var text = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString();
+		var uri = event.currentTarget.ownerDocument.popupNode.ownerDocument.location.href;
+		
 		if (!text) {
 			return false;
 		}
 		
-		text = Zotero.Utilities.trim(text);
+		text = text.trim();
 		
 		if (!text.length) {
 			return false;
 		}
 		
-		text = '<blockquote'
-					+ (citeURI ? ' cite="' + citeURI + '"' : '')
-					+ '>' + Zotero.Utilities.text2html(text) + "</blockquote>";
+		text = '<blockquote' + (uri ? ' cite="' + uri + '"' : '') + '>'
+			+ Zotero.Utilities.text2html(text) + "</blockquote>";
 		
 		var items = this.getSelectedItems();
+		
 		if (this.itemsView.selection.count == 1 && items[0] && items[0].isNote()) {
 			var note = items[0].getNote()
 			
 			items[0].setNote(note + text);
-			items[0].save();
+			yield items[0].save();
 			
 			var noteElem = document.getElementById('zotero-note-editor')
 			noteElem.focus();
@@ -2994,9 +3035,20 @@ var ZoteroPane = new function()
 		}
 		
 		return false;
-	}
+	});
 	
-	function openNoteWindow(itemID, col, parentItemID)
+	
+	this.createItemAndNoteFromSelectedText = function (event) {
+		var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString();
+		var uri = event.currentTarget.ownerDocument.popupNode.ownerDocument.location.href;
+		var itemID = ZoteroPane.addItemFromPage();
+		var [libraryID, key] = Zotero.Items.getLibraryAndKeyFromID(itemID);
+		ZoteroPane.newNote(false, key, str, uri)
+	};
+	
+	
+	
+	function openNoteWindow(itemID, col, parentKey)
 	{
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
@@ -3024,12 +3076,12 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		var io = { itemID: itemID, collectionID: col, parentItemID: parentItemID };
+		var io = { itemID: itemID, collectionID: col, parentItemKey: parentKey };
 		window.openDialog('chrome://zotero/content/note.xul', name, 'chrome,resizable,centerscreen,dialog=false', io);
 	}
 	
 	
-	this.addAttachmentFromURI = function (link, itemID) {
+	this.addAttachmentFromURI = Zotero.Promise.method(function (link, itemID) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -3046,8 +3098,11 @@ var ZoteroPane = new function()
 		if (!result || !input.value) return false;
 		
 		// Create a new attachment
-		Zotero.Attachments.linkFromURL(input.value, itemID);
-	}
+		return Zotero.Attachments.linkFromURL({
+			url: input.value,
+			parentItemID: itemID
+		});
+	});
 	
 	
 	function addAttachmentFromDialog(link, id)
@@ -3057,8 +3112,8 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		var itemGroup = ZoteroPane_Local.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
-		if (link && itemGroup.isWithinGroup()) {
+		var collectionTreeRow = this.getCollectionTreeRow();
+		if (link && collectionTreeRow.isWithinGroup()) {
 			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 									.getService(Components.interfaces.nsIPromptService);
 			ps.alert(null, "", "Linked files cannot be added to group libraries.");
@@ -3071,7 +3126,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		var libraryID = itemGroup.ref.libraryID;
+		var libraryID = collectionTreeRow.ref.libraryID;
 		
 		var nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
@@ -3103,23 +3158,25 @@ var ZoteroPane = new function()
 	
 	
 	this.addItemFromPage = function (itemType, saveSnapshot, row) {
-		if(Zotero.isConnector) {
-			// In connector, save page via Zotero Standalone
-			var doc = window.content.document;
-			Zotero.Connector.callMethod("saveSnapshot", {"url":doc.location.toString(),
-					"cookie":doc.cookie, "html":doc.documentElement.innerHTML},
-			function(returnValue, status) {
-				_showPageSaveStatus(doc.title);
-			});
-			return;
-		}
-		
-		if ((row || (this.collectionsView && this.collectionsView.selection)) && !this.canEdit(row)) {
-			this.displayCannotEditLibraryMessage();
-			return;
-		}
-		
-		return this.addItemFromDocument(window.content.document, itemType, saveSnapshot, row);
+		return Zotero.Promise.try(function () {
+			if(Zotero.isConnector) {
+				// In connector, save page via Zotero Standalone
+				var doc = window.content.document;
+				Zotero.Connector.callMethod("saveSnapshot", {"url":doc.location.toString(),
+						"cookie":doc.cookie, "html":doc.documentElement.innerHTML},
+				function(returnValue, status) {
+					_showPageSaveStatus(doc.title);
+				});
+				return;
+			}
+			
+			if ((row || (this.collectionsView && this.collectionsView.selection)) && !this.canEdit(row)) {
+				this.displayCannotEditLibraryMessage();
+				return;
+			}
+			
+			return this.addItemFromDocument(window.content.document, itemType, saveSnapshot, row);
+		}.bind(this));
 	}
 	
 	/**
@@ -3140,7 +3197,7 @@ var ZoteroPane = new function()
 	 * @param	{Boolean}			[saveSnapshot]			Force saving or non-saving of a snapshot,
 	 *														regardless of automaticSnapshots pref
 	 */
-	this.addItemFromDocument = function (doc, itemType, saveSnapshot, row) {
+	this.addItemFromDocument = Zotero.Promise.coroutine(function* (doc, itemType, saveSnapshot, row) {
 		_showPageSaveStatus(doc.title);
 		
 		// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
@@ -3189,12 +3246,12 @@ var ZoteroPane = new function()
 				}
 				
 				if (row !== undefined) {
-					var itemGroup = this.collectionsView._getItemAtRow(row);
-					var libraryID = itemGroup.ref.libraryID;
+					var collectionTreeRow = this.collectionsView.getRow(row);
+					var libraryID = collectionTreeRow.ref.libraryID;
 				}
 				else {
 					var libraryID = 0;
-					var itemGroup = null;
+					var collectionTreeRow = null;
 				}
 				//
 				//
@@ -3205,23 +3262,20 @@ var ZoteroPane = new function()
 					return;
 				}
 				
-				if (itemGroup && itemGroup.isCollection()) {
-					var collectionID = itemGroup.ref.id;
+				if (collectionTreeRow && collectionTreeRow.isCollection()) {
+					var collectionID = collectionTreeRow.ref.id;
 				}
 				else {
 					var collectionID = false;
 				}
 				
-				var itemID = Zotero.Attachments.importFromDocument(doc, false, false, collectionID, null, libraryID);
+				let item = yield Zotero.Attachments.importFromDocument({
+					libraryID: libraryID,
+					document: doc,
+					parentCollectionIDs: [collectionID]
+				});
 				
-				// importFromDocument() doesn't trigger the notifier for a second
-				//
-				// The one-second delay is weird but better than nothing
-				var self = this;
-				setTimeout(function () {
-					self.selectItem(itemID);
-				}, 1001);
-				
+				yield this.selectItem(item.id);
 				return;
 			}
 		}
@@ -3236,7 +3290,7 @@ var ZoteroPane = new function()
 			accessDate: "CURRENT_TIMESTAMP"
 		}
 		itemType = Zotero.ItemTypes.getID(itemType);
-		var item = this.newItem(itemType, data, row);
+		var item = yield this.newItem(itemType, data, row);
 		
 		if (item.libraryID) {
 			var group = Zotero.Groups.getByLibraryID(item.libraryID);
@@ -3250,40 +3304,53 @@ var ZoteroPane = new function()
 			var link = false;
 			
 			if (link) {
-				Zotero.Attachments.linkFromDocument(doc, item.id);
+				yield Zotero.Attachments.linkFromDocument({
+					document: doc,
+					parentItemID: item.id
+				});
 			}
 			else if (filesEditable) {
-				Zotero.Attachments.importFromDocument(doc, item.id);
+				yield Zotero.Attachments.importFromDocument({
+					document: doc,
+					parentItemID: item.id
+				});
 			}
 		}
 		
 		return item.id;
-	}
+	});
 	
 	
-	this.addItemFromURL = function (url, itemType, saveSnapshot, row) {
+	this.addItemFromURL = Zotero.Promise.coroutine(function* (url, itemType, saveSnapshot, row) {
 		if (window.content && url == window.content.document.location.href) {
 			return this.addItemFromPage(itemType, saveSnapshot, row);
 		}
 		
-		var self = this;
-		
 		url = Zotero.Utilities.resolveIntermediateURL(url);
 		
-		Zotero.MIME.getMIMETypeFromURL(url, function (mimeType, hasNativeHandler) {
+		return Zotero.MIME.getMIMETypeFromURL(url)
+		.spread(function (mimeType, hasNativeHandler) {
+			var self = this;
+			
 			// If native type, save using a hidden browser
 			if (hasNativeHandler) {
+				var deferred = Zotero.Promise.defer();
+				
 				var processor = function (doc) {
-					ZoteroPane_Local.addItemFromDocument(doc, itemType, saveSnapshot, row);
+					ZoteroPane_Local.addItemFromDocument(doc, itemType, saveSnapshot, row)
+					.then(function () {
+						deferred.resolve()
+					})
 				};
-				
+				// TODO: processDocuments should wait for the processor promise to be resolved
 				var done = function () {}
-				
 				var exception = function (e) {
-					Zotero.debug(e);
+					Zotero.debug(e, 1);
+					deferred.reject(e);
 				}
-				
 				Zotero.HTTP.processDocuments([url], processor, done, exception);
+				
+				return deferred.promise;
 			}
 			// Otherwise create placeholder item, attach attachment, and update from that
 			else {
@@ -3311,12 +3378,12 @@ var ZoteroPane = new function()
 						}
 						
 						if (row !== undefined) {
-							var itemGroup = ZoteroPane_Local.collectionsView._getItemAtRow(row);
-							var libraryID = itemGroup.ref.libraryID;
+							var collectionTreeRow = ZoteroPane_Local.collectionsView.getRow(row);
+							var libraryID = collectionTreeRow.ref.libraryID;
 						}
 						else {
 							var libraryID = 0;
-							var itemGroup = null;
+							var collectionTreeRow = null;
 						}
 						//
 						//
@@ -3327,19 +3394,20 @@ var ZoteroPane = new function()
 							return;
 						}
 						
-						if (itemGroup && itemGroup.isCollection()) {
-							var collectionID = itemGroup.ref.id;
+						if (collectionTreeRow && collectionTreeRow.isCollection()) {
+							var collectionID = collectionTreeRow.ref.id;
 						}
 						else {
 							var collectionID = false;
 						}
 						
+						// TODO: Update for async DB
 						var attachmentItem = Zotero.Attachments.importFromURL(url, false,
 							false, false, collectionID, mimeType, libraryID,
 							function(attachmentItem) {
 								self.selectItem(attachmentItem.id);
 							});
-							
+						
 						return;
 					}
 				}
@@ -3348,39 +3416,39 @@ var ZoteroPane = new function()
 					itemType = 'webpage';
 				}
 				
-				var item = ZoteroPane_Local.newItem(itemType, {}, row);
-				
-				if (item.libraryID) {
-					var group = Zotero.Groups.getByLibraryID(item.libraryID);
-					filesEditable = group.filesEditable;
-				}
-				else {
-					filesEditable = true;
-				}
-				
-				// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
-				if (saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'))) {
-					var link = false;
-					
-					if (link) {
-						//Zotero.Attachments.linkFromURL(doc, item.id);
+				return Zotero.Promise.coroutine(function* () {
+					var item = yield ZoteroPane_Local.newItem(itemType, {}, row)
+					if (item.libraryID) {
+						var group = Zotero.Groups.getByLibraryID(item.libraryID);
+						filesEditable = group.filesEditable;
 					}
-					else if (filesEditable) {
-						var attachmentItem = Zotero.Attachments.importFromURL(url, item.id, false, false, false, mimeType);
-						if (attachmentItem) {
-							item.setField('title', attachmentItem.getField('title'));
-							item.setField('url', attachmentItem.getField('url'));
-							item.setField('accessDate', attachmentItem.getField('accessDate'));
-							item.save();
+					else {
+						filesEditable = true;
+					}
+					
+					// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
+					if (saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'))) {
+						var link = false;
+						
+						if (link) {
+							//Zotero.Attachments.linkFromURL(doc, item.id);
+						}
+						else if (filesEditable) {
+							var attachmentItem = Zotero.Attachments.importFromURL(url, item.id, false, false, false, mimeType);
+							if (attachmentItem) {
+								item.setField('title', attachmentItem.getField('title'));
+								item.setField('url', attachmentItem.getField('url'));
+								item.setField('accessDate', attachmentItem.getField('accessDate'));
+								yield item.save();
+							}
 						}
 					}
-				}
-				
-				return item.id;
-
+					
+					return item.id;
+				})();
 			}
 		});
-	}
+	});
 	
 	
 	/*
@@ -3389,15 +3457,14 @@ var ZoteroPane = new function()
 	 * |itemID|    -- itemID of parent item
 	 * |link|      -- create web link instead of snapshot
 	 */
-	this.addAttachmentFromPage = function (link, itemID)
-	{
+	this.addAttachmentFromPage = Zotero.Promise.method(function (link, itemID) {
 		if (!Zotero.stateCheck()) {
 			this.displayErrorMessage(true);
 			return;
 		}
 		
 		if (typeof itemID != 'number') {
-			throw ("itemID must be an integer in ZoteroPane_Local.addAttachmentFromPage()");
+			throw new Error("itemID must be an integer");
 		}
 		
 		var progressWin = new Zotero.ProgressWindow();
@@ -3409,15 +3476,19 @@ var ZoteroPane = new function()
 		progressWin.startCloseTimer();
 		
 		if (link) {
-			Zotero.Attachments.linkFromDocument(window.content.document, itemID);
+			return Zotero.Attachments.linkFromDocument({
+				document: window.content.document,
+				parentItemID: itemID
+			});
 		}
-		else {
-			Zotero.Attachments.importFromDocument(window.content.document, itemID);
-		}
-	}
+		return Zotero.Attachments.importFromDocument({
+			document: window.content.document,
+			parentItemID: itemID
+		});
+	});
 	
 	
-	this.viewItems = function (items, event) {
+	this.viewItems = Zotero.Promise.coroutine(function* (items, event) {
 		if (items.length > 1) {
 			if (!event || (!event.metaKey && !event.shiftKey)) {
 				event = { metaKey: true, shiftKey: true };
@@ -3429,9 +3500,9 @@ var ZoteroPane = new function()
 				// Prefer local file attachments
 				var uri = Components.classes["@mozilla.org/network/standard-url;1"]
 							.createInstance(Components.interfaces.nsIURI);
-				var snapID = item.getBestAttachment();
-				if (snapID) {
-					ZoteroPane_Local.viewAttachment(snapID, event);
+				let attachment = yield item.getBestAttachment();
+				if (attachment) {
+					yield this.viewAttachment(attachment.id, event);
 					continue;
 				}
 				
@@ -3452,31 +3523,29 @@ var ZoteroPane = new function()
 				if (!uri) {
 					var link = item.getAttachments()[0];
 					if (link) {
-						link = Zotero.Items.get(link);
+						link = yield Zotero.Items.getAsync(link);
 						if (link) uri = link.getField('url');
 					}
 				}
 				
 				if (uri) {
-					ZoteroPane_Local.loadURI(uri, event);
+					this.loadURI(uri, event);
 				}
 			}
 			else if (item.isNote()) {
-				if (!ZoteroPane_Local.collectionsView.editable) {
+				if (!this.collectionsView.editable) {
 					continue;
 				}
 				document.getElementById('zotero-view-note-button').doCommand();
 			}
 			else if (item.isAttachment()) {
-				ZoteroPane_Local.viewAttachment(item.id, event);
+				yield this.viewAttachment(item.id, event);
 			}
 		}
-	}
+	});
 	
 	
-	function viewAttachment(itemIDs, event, noLocateOnMissing, forceExternalViewer) {
-		Components.utils.import("resource://zotero/q.js");
-		
+	this.viewAttachment = Zotero.Promise.coroutine(function* (itemIDs, event, noLocateOnMissing, forceExternalViewer) {
 		// If view isn't editable, don't show Locate button, since the updated
 		// path couldn't be sent back up
 		if (!this.collectionsView.editable) {
@@ -3493,9 +3562,9 @@ var ZoteroPane = new function()
 		}
 		
 		for each(var itemID in itemIDs) {
-			var item = Zotero.Items.get(itemID);
+			var item = yield Zotero.Items.getAsync(itemID);
 			if (!item.isAttachment()) {
-				throw ("Item " + itemID + " is not an attachment in ZoteroPane_Local.viewAttachment()");
+				throw new Error("Item " + itemID + " is not an attachment");
 			}
 			
 			if (item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
@@ -3503,14 +3572,16 @@ var ZoteroPane = new function()
 				continue;
 			}
 			
-			var file = item.getFile();
-			if (file) {
-				Zotero.debug("Opening " + file.path);
+			var path = yield item.getFilePath();
+			if (path) {
+				let file = Zotero.File.pathToFile(path);
+				
+				Zotero.debug("Opening " + path);
 				
 				if(forceExternalViewer !== undefined) {
 					var externalViewer = forceExternalViewer;
 				} else {
-					var mimeType = Zotero.MIME.getMIMETypeFromFile(file);
+					var mimeType = yield Zotero.MIME.getMIMETypeFromFile(file);
 					
 					//var mimeType = attachment.attachmentMIMEType;
 					// TODO: update DB with new info if changed?
@@ -3536,13 +3607,12 @@ var ZoteroPane = new function()
 				}
 				
 				let downloadedItem = item;
-				Q.fcall(function () {
-					return Zotero.Sync.Storage.downloadFile(
-						downloadedItem,
-						{
-							onProgress: function (progress, progressMax) {}
-						});
-				})
+				yield Zotero.Sync.Storage.downloadFile(
+					downloadedItem,
+					{
+						onProgress: function (progress, progressMax) {}
+					}
+				)
 				.then(function () {
 					if (!downloadedItem.getFile()) {
 						ZoteroPane_Local.showAttachmentNotFoundDialog(downloadedItem.id, noLocateOnMissing);
@@ -3554,18 +3624,18 @@ var ZoteroPane = new function()
 					
 					
 					Zotero.Notifier.trigger('redraw', 'item', []);
-					
-					ZoteroPane_Local.viewAttachment(downloadedItem.id, event, false, forceExternalViewer);
+					Zotero.debug('downloaded');
+					Zotero.debug(downloadedItem.id);
+					return ZoteroPane_Local.viewAttachment(downloadedItem.id, event, false, forceExternalViewer);
 				})
-				.fail(function (e) {
+				.catch(function (e) {
 					// TODO: show error somewhere else
 					Zotero.debug(e, 1);
 					ZoteroPane_Local.syncAlert(e);
-				})
-				.done();
+				});
 			}
 		}
-	}
+	});
 	
 	
 	/**
@@ -3633,8 +3703,8 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.showAttachmentInFilesystem = function (itemID, noLocateOnMissing) {
-		var attachment = Zotero.Items.get(itemID)
+	this.showAttachmentInFilesystem = Zotero.Promise.coroutine(function* (itemID, noLocateOnMissing) {
+		var attachment = yield Zotero.Items.getAsync(itemID)
 		if (attachment.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
 			var file = attachment.getFile();
 			if (file) {
@@ -3653,7 +3723,7 @@ var ZoteroPane = new function()
 				this.showAttachmentNotFoundDialog(attachment.id, noLocateOnMissing)
 			}
 		}
-	}
+	});
 	
 	
 	/**
@@ -3669,8 +3739,8 @@ var ZoteroPane = new function()
 			row = this.collectionsView.selection.currentIndex;
 		}
 		
-		var itemGroup = this.collectionsView._getItemAtRow(row);
-		return itemGroup.editable;
+		var collectionTreeRow = this.collectionsView.getRow(row);
+		return collectionTreeRow.editable;
 	}
 	
 	
@@ -3686,10 +3756,10 @@ var ZoteroPane = new function()
 			row = this.collectionsView.selection.currentIndex;
 		}
 		
-		var itemGroup = this.collectionsView._getItemAtRow(row);
+		var collectionTreeRow = this.collectionsView.getRow(row);
 		// TODO: isEditable for user library should just return true
-		if (itemGroup.ref.libraryID) {
-			return Zotero.Libraries.isEditable(itemGroup.ref.libraryID);
+		if (collectionTreeRow.ref.libraryID) {
+			return Zotero.Libraries.isEditable(collectionTreeRow.ref.libraryID);
 		}
 		return true;
 	}
@@ -3708,8 +3778,8 @@ var ZoteroPane = new function()
 			row = this.collectionsView.selection.currentIndex;
 		}
 		
-		var itemGroup = this.collectionsView._getItemAtRow(row);
-		return itemGroup.filesEditable;
+		var collectionTreeRow = this.collectionsView.getRow(row);
+		return collectionTreeRow.filesEditable;
 	}
 	
 	
@@ -3832,12 +3902,11 @@ var ZoteroPane = new function()
 	};
 	
 	
-	this.createParentItemsFromSelected = function () {
+	this.createParentItemsFromSelected = Zotero.Promise.coroutine(function* () {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
-		
 		
 		var items = this.getSelectedItems();
 		for (var i=0; i<items.length; i++) {
@@ -3846,29 +3915,31 @@ var ZoteroPane = new function()
 				throw('Item ' + itemID + ' is not a top-level attachment or note in ZoteroPane_Local.createParentItemsFromSelected()');
 			}
 			
-			Zotero.DB.beginTransaction();
-			// TODO: remove once there are no top-level web attachments
-			if (item.isWebAttachment()) {
-				var parent = new Zotero.Item('webpage');
-			}
-			else {
-				var parent = new Zotero.Item('document');
-			}
-			parent.libraryID = item.libraryID;
-			parent.setField('title', item.getField('title'));
-			if (item.isWebAttachment()) {
-				parent.setField('accessDate', item.getField('accessDate'));
-				parent.setField('url', item.getField('url'));
-			}
-			var itemID = parent.save();
-			item.setSource(itemID);
-			item.save();
-			Zotero.DB.commitTransaction();
+			yield Zotero.DB.executeTransaction(function* () {
+				// TODO: remove once there are no top-level web attachments
+				if (item.isWebAttachment()) {
+					var parent = new Zotero.Item('webpage');
+				}
+				else {
+					var parent = new Zotero.Item('document');
+				}
+				parent.libraryID = item.libraryID;
+				parent.setField('title', item.getField('title'));
+				if (item.isWebAttachment()) {
+					parent.setField('accessDate', item.getField('accessDate'));
+					parent.setField('url', item.getField('url'));
+				}
+				var itemID = yield parent.save();
+				item.parentID = itemID;
+				yield item.save();
+			});
 		}
-	}
+	});
 	
 	
-	this.renameSelectedAttachmentsFromParents = function () {
+	this.renameSelectedAttachmentsFromParents = Zotero.Promise.coroutine(function* () {
+		// TEMP: fix
+		
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -3879,7 +3950,7 @@ var ZoteroPane = new function()
 		for (var i=0; i<items.length; i++) {
 			var item = items[i];
 			
-			if (!item.isAttachment() || !item.getSource() || item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+			if (!item.isAttachment() || item.isTopLevelItem() || item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 				throw('Item ' + itemID + ' is not a child file attachment in ZoteroPane_Local.renameAttachmentFromParent()');
 			}
 			
@@ -3888,8 +3959,9 @@ var ZoteroPane = new function()
 				continue;
 			}
 			
-			var parentItemID = item.getSource();
-			var newName = Zotero.Attachments.getFileBaseNameFromItem(parentItemID);
+			let parentItemID = item.parentItemID;
+			let parentItem = yield Zotero.Items.getAsync(parentItemID);
+			var newName = Zotero.Attachments.getFileBaseNameFromItem(parentItem);
 			
 			var ext = file.leafName.match(/\.[^\.]+$/);
 			if (ext) {
@@ -3903,20 +3975,20 @@ var ZoteroPane = new function()
 			}
 			
 			item.setField('title', newName);
-			item.save();
+			yield item.save();
 		}
 		
 		return true;
-	}
+	});
 	
 	
-	function relinkAttachment(itemID) {
+	this.relinkAttachment = Zotero.Promise.coroutine(function* (itemID) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
 		
-		var item = Zotero.Items.get(itemID);
+		var item = yield Zotero.Items.getAsync(itemID);
 		if (!item) {
 			throw('Item ' + itemID + ' not found in ZoteroPane_Local.relinkAttachment()');
 		}
@@ -3941,7 +4013,7 @@ var ZoteroPane = new function()
 			file.QueryInterface(Components.interfaces.nsILocalFile);
 			item.relinkAttachmentFile(file);
 		}
-	}
+	});
 	
 	
 	function reportErrors() {
@@ -4054,7 +4126,7 @@ var ZoteroPane = new function()
 	/**
 	 * Unserializes zotero-persist elements from preferences
 	 */
-	this.unserializePersist = function() {
+	this.unserializePersist = Zotero.Promise.coroutine(function* () {
 		_unserialized = true;
 		var serializedValues = Zotero.Prefs.get("pane.persist");
 		if(!serializedValues) return;
@@ -4071,10 +4143,10 @@ var ZoteroPane = new function()
 		if(this.itemsView) {
 			// may not yet be initialized
 			try {
-				this.itemsView.sort();
+				yield this.itemsView.sort();
 			} catch(e) {};
 		}
-	}
+	});
 
 	/**
 	 * Serializes zotero-persist elements to preferences

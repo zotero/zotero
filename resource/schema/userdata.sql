@@ -1,4 +1,4 @@
--- 79
+-- 80
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -45,22 +45,25 @@ CREATE TABLE syncedSettings (
     value NOT NULL,
     version INT NOT NULL DEFAULT 0,
     synced INT NOT NULL DEFAULT 0,
-    PRIMARY KEY (setting, libraryID)
+    PRIMARY KEY (setting, libraryID),
+    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
 
--- The foundational table; every item collected has a unique record here
+-- 'items' view and triggers created in triggers.sql
 CREATE TABLE items (
     itemID INTEGER PRIMARY KEY,
     itemTypeID INT NOT NULL,
     dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    libraryID INT,
+    libraryID INT NOT NULL,
     key TEXT NOT NULL,
+    version INT NOT NULL DEFAULT 0,
+    synced INT NOT NULL DEFAULT 0,
     UNIQUE (libraryID, key),
-    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID)
+    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
-
+CREATE INDEX items_synced ON items(synced);
 
 CREATE TABLE itemDataValues (
     valueID INTEGER PRIMARY KEY,
@@ -73,8 +76,8 @@ CREATE TABLE itemData (
     fieldID INT,
     valueID,
     PRIMARY KEY (itemID, fieldID),
-    FOREIGN KEY (itemID) REFERENCES items(itemID),
-    FOREIGN KEY (fieldID) REFERENCES fields(fieldID),
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
+    FOREIGN KEY (fieldID) REFERENCES fieldsCombined(fieldID),
     FOREIGN KEY (valueID) REFERENCES itemDataValues(valueID)
 );
 CREATE INDEX itemData_fieldID ON itemData(fieldID);
@@ -82,147 +85,133 @@ CREATE INDEX itemData_fieldID ON itemData(fieldID);
 -- Note data for note and attachment items
 CREATE TABLE itemNotes (
     itemID INTEGER PRIMARY KEY,
-    sourceItemID INT,
+    parentItemID INT,
     note TEXT,
     title TEXT,
-    FOREIGN KEY (itemID) REFERENCES items(itemID),
-    FOREIGN KEY (sourceItemID) REFERENCES items(itemID)
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
+    FOREIGN KEY (parentItemID) REFERENCES items(itemID) ON DELETE CASCADE
 );
-CREATE INDEX itemNotes_sourceItemID ON itemNotes(sourceItemID);
+CREATE INDEX itemNotes_parentItemID ON itemNotes(parentItemID);
 
 -- Metadata for attachment items
 CREATE TABLE itemAttachments (
     itemID INTEGER PRIMARY KEY,
-    sourceItemID INT,
+    parentItemID INT,
     linkMode INT,
-    mimeType TEXT,
+    contentType TEXT,
     charsetID INT,
     path TEXT,
     originalPath TEXT,
     syncState INT DEFAULT 0,
     storageModTime INT,
     storageHash TEXT,
-    FOREIGN KEY (itemID) REFERENCES items(itemID),
-    FOREIGN KEY (sourceItemID) REFERENCES items(itemID)
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
+    FOREIGN KEY (parentItemID) REFERENCES items(itemID) ON DELETE CASCADE
 );
-CREATE INDEX itemAttachments_sourceItemID ON itemAttachments(sourceItemID);
-CREATE INDEX itemAttachments_mimeType ON itemAttachments(mimeType);
+CREATE INDEX itemAttachments_parentItemID ON itemAttachments(parentItemID);
+CREATE INDEX itemAttachments_contentType ON itemAttachments(contentType);
 CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState);
 
 CREATE TABLE tags (
     tagID INTEGER PRIMARY KEY,
-    name TEXT NOT NULL COLLATE NOCASE,
-    type INT NOT NULL,
-    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    libraryID INT,
-    key TEXT NOT NULL,
-    UNIQUE (libraryID, name, type),
-    UNIQUE (libraryID, key)
+    libraryID INT NOT NULL,
+    name TEXT NOT NULL,
+    UNIQUE (libraryID, name)
 );
 
 CREATE TABLE itemTags (
-    itemID INT,
-    tagID INT,
+    itemID INT NOT NULL,
+    tagID INT NOT NULL,
+    type INT NOT NULL,
     PRIMARY KEY (itemID, tagID),
-    FOREIGN KEY (itemID) REFERENCES items(itemID),
-    FOREIGN KEY (tagID) REFERENCES tags(tagID)
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
+    FOREIGN KEY (tagID) REFERENCES tags(tagID) ON DELETE CASCADE
 );
 CREATE INDEX itemTags_tagID ON itemTags(tagID);
 
 CREATE TABLE itemSeeAlso (
-    itemID INT,
-    linkedItemID INT,
+    itemID INT NOT NULL,
+    linkedItemID INT NOT NULL,
     PRIMARY KEY (itemID, linkedItemID),
-    FOREIGN KEY (itemID) REFERENCES items(itemID),
-    FOREIGN KEY (linkedItemID) REFERENCES items(itemID)
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
+    FOREIGN KEY (linkedItemID) REFERENCES items(itemID) ON DELETE CASCADE
 );
 CREATE INDEX itemSeeAlso_linkedItemID ON itemSeeAlso(linkedItemID);
 
 CREATE TABLE creators (
     creatorID INTEGER PRIMARY KEY,
-    creatorDataID INT NOT NULL,
-    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    libraryID INT,
-    key TEXT NOT NULL,
-    UNIQUE (libraryID, key),
-    FOREIGN KEY (creatorDataID) REFERENCES creatorData(creatorDataID)
-);
-CREATE INDEX creators_creatorDataID ON creators(creatorDataID);
-
--- Unique creator data, which can be associated with more than one creator
-CREATE TABLE creatorData (
-    creatorDataID INTEGER PRIMARY KEY,
     firstName TEXT,
     lastName TEXT,
-    shortName TEXT,
     fieldMode INT,
-    birthYear INT
+    UNIQUE (lastName, firstName, fieldMode)
 );
-CREATE INDEX creatorData_name ON creatorData(lastName, firstName);
 
 CREATE TABLE itemCreators (
-    itemID INT,
-    creatorID INT,
-    creatorTypeID INT DEFAULT 1,
-    orderIndex INT DEFAULT 0,
+    itemID INT NOT NULL,
+    creatorID INT NOT NULL,
+    creatorTypeID INT NOT NULL DEFAULT 1,
+    orderIndex INT NOT NULL DEFAULT 0,
     PRIMARY KEY (itemID, creatorID, creatorTypeID, orderIndex),
-    FOREIGN KEY (itemID) REFERENCES items(itemID),
-    FOREIGN KEY (creatorID) REFERENCES creators(creatorID)
+    UNIQUE (itemID, orderIndex),
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
+    FOREIGN KEY (creatorID) REFERENCES creators(creatorID) ON DELETE CASCADE,
     FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID)
 );
+CREATE INDEX itemCreators_creatorTypeID ON itemCreators(creatorTypeID);
 
 CREATE TABLE collections (
     collectionID INTEGER PRIMARY KEY,
     collectionName TEXT NOT NULL,
     parentCollectionID INT DEFAULT NULL,
-    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    libraryID INT,
+    libraryID INT NOT NULL,
     key TEXT NOT NULL,
+    version INT NOT NULL DEFAULT 0,
+    synced INT NOT NULL DEFAULT 0,
     UNIQUE (libraryID, key),
-    FOREIGN KEY (parentCollectionID) REFERENCES collections(collectionID)
+    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE,
+    FOREIGN KEY (parentCollectionID) REFERENCES collections(collectionID) ON DELETE CASCADE
 );
+CREATE INDEX collections_synced ON collections(synced);
 
 CREATE TABLE collectionItems (
-    collectionID INT,
-    itemID INT,
-    orderIndex INT DEFAULT 0,
+    collectionID INT NOT NULL,
+    itemID INT NOT NULL,
+    orderIndex INT NOT NULL DEFAULT 0,
     PRIMARY KEY (collectionID, itemID),
-    FOREIGN KEY (collectionID) REFERENCES collections(collectionID),
-    FOREIGN KEY (itemID) REFERENCES items(itemID)
+    FOREIGN KEY (collectionID) REFERENCES collections(collectionID) ON DELETE CASCADE,
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE
 );
-CREATE INDEX itemID ON collectionItems(itemID);
+CREATE INDEX collectionItems_itemID ON collectionItems(itemID);
 
 CREATE TABLE savedSearches (
     savedSearchID INTEGER PRIMARY KEY,
     savedSearchName TEXT NOT NULL,
-    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    libraryID INT,
+    libraryID INT NOT NULL,
     key TEXT NOT NULL,
-    UNIQUE (libraryID, key)
+    version INT NOT NULL DEFAULT 0,
+    synced INT NOT NULL DEFAULT 0,
+    UNIQUE (libraryID, key),
+    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
+CREATE INDEX savedSearches_synced ON savedSearches(synced);
 
 CREATE TABLE savedSearchConditions (
-    savedSearchID INT,
-    searchConditionID INT,
-    condition TEXT,
+    savedSearchID INT NOT NULL,
+    searchConditionID INT NOT NULL,
+    condition TEXT NOT NULL,
     operator TEXT,
     value TEXT,
     required NONE,
     PRIMARY KEY (savedSearchID, searchConditionID),
-    FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID)
+    FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID) ON DELETE CASCADE
 );
 
 CREATE TABLE deletedItems (
     itemID INTEGER PRIMARY KEY,
-    dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL
+    dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE
 );
 CREATE INDEX deletedItems_dateDeleted ON deletedItems(dateDeleted);
 
@@ -232,13 +221,15 @@ CREATE TABLE relations (
     predicate TEXT NOT NULL,
     object TEXT NOT NULL,
     clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (subject, predicate, object)
+    PRIMARY KEY (subject, predicate, object),
+    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
 CREATE INDEX relations_object ON relations(object);
 
 CREATE TABLE libraries (
     libraryID INTEGER PRIMARY KEY,
-    libraryType TEXT NOT NULL
+    libraryType TEXT NOT NULL,
+    version INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE users (
@@ -253,15 +244,17 @@ CREATE TABLE groups (
     description TEXT NOT NULL,
     editable INT NOT NULL,
     filesEditable INT NOT NULL,
-    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID)
+    etag TEXT NOT NULL DEFAULT '',
+    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
 
 CREATE TABLE groupItems (
     itemID INTEGER PRIMARY KEY,
-    createdByUserID INT NOT NULL,
-    lastModifiedByUserID INT NOT NULL,
-    FOREIGN KEY (createdByUserID) REFERENCES users(userID),
-    FOREIGN KEY (lastModifiedByUserID) REFERENCES users(userID)
+    createdByUserID INT,
+    lastModifiedByUserID INT,
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
+    FOREIGN KEY (createdByUserID) REFERENCES users(userID) ON DELETE SET NULL,
+    FOREIGN KEY (lastModifiedByUserID) REFERENCES users(userID) ON DELETE SET NULL
 );
 
 CREATE TABLE fulltextItems (
@@ -272,7 +265,7 @@ CREATE TABLE fulltextItems (
     indexedChars INT,
     totalChars INT,
     synced INT DEFAULT 0,
-    FOREIGN KEY (itemID) REFERENCES items(itemID)
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE
 );
 CREATE INDEX fulltextItems_version ON fulltextItems(version);
 
@@ -286,9 +279,20 @@ CREATE TABLE fulltextItemWords (
     itemID INT,
     PRIMARY KEY (wordID, itemID),
     FOREIGN KEY (wordID) REFERENCES fulltextWords(wordID),
-    FOREIGN KEY (itemID) REFERENCES items(itemID)
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE
 );
 CREATE INDEX fulltextItemWords_itemID ON fulltextItemWords(itemID);
+
+CREATE TABLE syncCache (
+    libraryID INT NOT NULL,
+    key TEXT NOT NULL,
+    syncObjectTypeID INT NOT NULL,
+    version INT NOT NULL,
+    data TEXT,
+    PRIMARY KEY (libraryID, key, syncObjectTypeID),
+    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE,
+    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)
+);
 
 CREATE TABLE syncDeleteLog (
     syncObjectTypeID INT NOT NULL,
@@ -296,21 +300,23 @@ CREATE TABLE syncDeleteLog (
     key TEXT NOT NULL,
     timestamp INT NOT NULL,
     UNIQUE (syncObjectTypeID, libraryID, key),
-    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)
+    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID),
+    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
 CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp);
 
 CREATE TABLE storageDeleteLog (
-    libraryID INT,
+    libraryID INT NOT NULL,
     key TEXT NOT NULL,
     timestamp INT NOT NULL,
-    PRIMARY KEY (libraryID, key)
+    PRIMARY KEY (libraryID, key),
+    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
 CREATE INDEX storageDeleteLog_timestamp ON storageDeleteLog(timestamp);
 
 CREATE TABLE annotations (
     annotationID INTEGER PRIMARY KEY,
-    itemID INT,
+    itemID INT NOT NULL,
     parent TEXT,
     textNode INT,
     offset INT,
@@ -321,13 +327,13 @@ CREATE TABLE annotations (
     text TEXT,
     collapsed BOOL,
     dateModified DATE,
-    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)
+    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID) ON DELETE CASCADE
 );
 CREATE INDEX annotations_itemID ON annotations(itemID);
 
 CREATE TABLE highlights (
     highlightID INTEGER PRIMARY KEY,
-    itemID INTEGER,
+    itemID INT NOT NULL,
     startParent TEXT,
     startTextNode INT,
     startOffset INT,
@@ -335,7 +341,7 @@ CREATE TABLE highlights (
     endTextNode INT,
     endOffset INT,
     dateModified DATE,
-    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)
+    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID) ON DELETE CASCADE
 );
 CREATE INDEX highlights_itemID ON highlights(itemID);
 

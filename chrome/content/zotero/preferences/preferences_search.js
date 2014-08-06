@@ -430,8 +430,8 @@ Zotero_Preferences.Search = {
 	},
 	
 	
-	updateIndexStats: function () {
-		var stats = Zotero.Fulltext.getIndexStats();
+	updateIndexStats: Zotero.Promise.coroutine(function* () {
+		var stats = yield Zotero.Fulltext.getIndexStats();
 		document.getElementById('fulltext-stats-indexed').
 			lastChild.setAttribute('value', stats.indexed);
 		document.getElementById('fulltext-stats-partial').
@@ -440,10 +440,10 @@ Zotero_Preferences.Search = {
 			lastChild.setAttribute('value', stats.unindexed);
 		document.getElementById('fulltext-stats-words').
 			lastChild.setAttribute('value', stats.words);
-	},
+	}),
 	
 	
-	rebuildIndexPrompt: function () {
+	rebuildIndexPrompt: Zotero.Promise.coroutine(function* () {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
@@ -462,17 +462,17 @@ Zotero_Preferences.Search = {
 			null, {});
 		
 		if (index == 0) {
-			Zotero.Fulltext.rebuildIndex();
+			yield Zotero.Fulltext.rebuildIndex();
 		}
 		else if (index == 2) {
-			Zotero.Fulltext.rebuildIndex(true)
+			yield Zotero.Fulltext.rebuildIndex(true)
 		}
 		
-		this.updateIndexStats();
-	},
+		yield this.updateIndexStats();
+	}),
 	
 	
-	clearIndexPrompt: function () {
+	clearIndexPrompt: Zotero.Promise.coroutine(function* () {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
@@ -490,12 +490,12 @@ Zotero_Preferences.Search = {
 			Zotero.getString('zotero.preferences.search.clearNonLinkedURLs'), null, {});
 		
 		if (index == 0) {
-			Zotero.Fulltext.clearIndex();
+			yield Zotero.Fulltext.clearIndex();
 		}
 		else if (index == 2) {
-			Zotero.Fulltext.clearIndex(true);
+			yield Zotero.Fulltext.clearIndex(true);
 		}
 		
-		this.updateIndexStats();
-	}
+		yield this.updateIndexStats();
+	})
 };

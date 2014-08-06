@@ -71,6 +71,7 @@ Zotero.CachedTypes = function() {
 		
 		if (!_types['_' + idOrName]) {
 			Zotero.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
+			Zotero.debug((new Error()).stack, 1);
 			return '';
 		}
 		
@@ -90,6 +91,7 @@ Zotero.CachedTypes = function() {
 		
 		if (!_types['_' + idOrName]) {
 			Zotero.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
+			Zotero.debug((new Error()).stack, 1);
 			return false;
 		}
 		

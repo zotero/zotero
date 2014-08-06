@@ -24,7 +24,6 @@
 */
 
 Zotero.ID_Tracker = function () {
-	this.get = get;
 	this.getBigInt = getBigInt;
 	this.skip = skip;
 	this.getTableName = getTableName;
@@ -46,7 +45,7 @@ Zotero.ID_Tracker = function () {
 	/*
 	 * Gets an unused primary key id for a DB table
 	 */
-	function get(table, notNull) {
+	this.get = Zotero.Promise.coroutine(function* (table, notNull) {
 		table = this.getTableName(table);
 		
 		switch (table) {
@@ -62,7 +61,7 @@ Zotero.ID_Tracker = function () {
 			case 'tags':
 			case 'customItemTypes':
 			case 'customFields':
-				var id = _getNextAvailable(table);
+				var id = yield _getNextAvailable(table);
 				if (!id && notNull) {
 					return _getNext(table);
 				}
@@ -72,7 +71,7 @@ Zotero.ID_Tracker = function () {
 			//
 			// TODO: use autoincrement instead where available in 1.5
 			case 'itemDataValues':
-				var id = _getNextAvailable(table);
+				var id = yield _getNextAvailable(table);
 				if (!id) {
 					// If we can't find an empty id quickly, just use MAX() + 1
 					return _getNext(table);
@@ -82,7 +81,7 @@ Zotero.ID_Tracker = function () {
 			default:
 				throw ("Unsupported table '" + table + "' in Zotero.ID.get()");
 		}
-	}
+	});
 	
 	
 	this.isValidKey = function (value) {
@@ -162,9 +161,9 @@ Zotero.ID_Tracker = function () {
 	 * Returns the lowest available unused primary key id for table,
 	 * or NULL if none could be loaded in _loadAvailable()
 	 */
-	function _getNextAvailable(table) {
+	var _getNextAvailable = Zotero.Promise.coroutine(function* (table) {
 		if (!_available[table]) {
-			_loadAvailable(table);
+			yield _loadAvailable(table);
 		}
 		
 		var arr = _available[table];
@@ -189,7 +188,7 @@ Zotero.ID_Tracker = function () {
 			if (_skip[table] && _skip[table][id]) {
 				Zotero.debug("Skipping " + table + " id " + id);
 				if (!_available[table]) {
-					_loadAvailable(table);
+					yield _loadAvailable(table);
 				}
 				continue;
 			}
@@ -198,13 +197,13 @@ Zotero.ID_Tracker = function () {
 			return id;
 		}
 		return null;
-	}
+	});
 	
 	
 	/*
 	 * Get MAX(id) + 1 from table
 	 */
-	function _getNext(table) {
+	var _getNext = Zotero.Promise.coroutine(function* (table) {
 		var column = _getTableColumn(table);
 		
 		var sql = 'SELECT MAX(';
@@ -216,7 +215,7 @@ Zotero.ID_Tracker = function () {
 				}
 			}
 			if (!max) {
-				throw ("_skip['" + table + "'] must contain positive values in Zotero.ID._getNext()");
+				throw new Error("_skip['" + table + "'] must contain positive values");
 			}
 			sql += 'MAX(' + column + ', ' + max + ')';
 		}
@@ -224,14 +223,14 @@ Zotero.ID_Tracker = function () {
 			sql += column;
 		}
 		sql += ')+1 FROM ' + table;
-		return Zotero.DB.valueQuery(sql);
-	}
+		return Zotero.DB.valueQueryAsync(sql);
+	});
 	
 	
 	/*
 	 * Loads available ids for table into memory
 	 */
-	function _loadAvailable(table) {
+	var _loadAvailable = Zotero.Promise.coroutine(function* (table) {
 		Zotero.debug("Loading available ids for table '" + table + "'");
 		
 		var minID = _min[table] ? _min[table] + 1 : 1;
@@ -263,7 +262,7 @@ Zotero.ID_Tracker = function () {
 		var maxID = minID + numIDs - 1;
 		var sql = "SELECT " + column + " FROM " + table
 			+ " WHERE " + column + " BETWEEN ? AND ? ORDER BY " + column;
-		var ids = Zotero.DB.columnQuery(sql, [minID, maxID]);
+		var ids = yield Zotero.DB.columnQueryAsync(sql, [minID, maxID]);
 		// If no ids found, we have numIDs unused ids
 		if (!ids) {
 			maxID = Math.min(maxID, minID + (maxToFind - 1));
@@ -277,7 +276,7 @@ Zotero.ID_Tracker = function () {
 			Zotero.debug('No available ids found between ' + minID + ' and ' + maxID + '; trying next ' + numIDs);
 			minID = maxID + 1;
 			maxID = minID + numIDs - 1;
-			ids = Zotero.DB.columnQuery(sql, [minID, maxID]);
+			ids = yield Zotero.DB.columnQueryAsync(sql, [minID, maxID]);
 			maxTries--;
 		}
 		
@@ -329,37 +328,7 @@ Zotero.ID_Tracker = function () {
 		Zotero.debug("Found " + found + " available ids in table '" + table + "'");
 		
 		_available[table] = available;
-	}
-	
-	
-	/**
-	* Find a unique random id for use in a DB table
-	*
-	* (No longer used)
-	**/
-	function _getRandomID(table, max){
-		var column = _getTableColumn(table);
-		
-		var sql = 'SELECT COUNT(*) FROM ' + table + ' WHERE ' + column + '= ?';
-		
-		if (!max){
-			max = 16383;
-		}
-		
-		max--; // since we use ceil(), decrement max by 1
-		var tries = 3; // # of tries to find a unique id
-		for (var i=0; i<tries; i++) {
-			var rnd = Math.ceil(Math.random() * max);
-			var exists = Zotero.DB.valueQuery(sql, { int: rnd });
-			if (!exists) {
-				return rnd;
-			}
-		}
-		
-		// If no luck after number of tries, try a larger range
-		var sql = 'SELECT MAX(' + column + ') + 1 FROM ' + table;
-		return Zotero.valueQuery(sql);
-	}
+	});
 	
 	
 	function _getTableColumn(table) {

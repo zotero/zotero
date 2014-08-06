@@ -63,7 +63,7 @@ var Zotero_DownloadOverlay = new function() {
 						.getMostRecentWindow("navigator:browser");
 		var libraryID, collection;
 		try {
-			if(win.ZoteroPane.getItemGroup().filesEditable) {
+			if(win.ZoteroPane.getCollectionTreeRow().filesEditable) {
 				libraryID = win.ZoteroPane.getSelectedLibraryID();
 				collection = win.ZoteroPane.getSelectedCollection();
 			}
@@ -147,7 +147,7 @@ var Zotero_DownloadOverlay = new function() {
 		var zoteroSelected = document.getElementById('zotero-radio').selected;
 		var zp = Zotero.getActiveZoteroPane(), canSave = true;
 		try {
-			canSave = zp.getItemGroup().filesEditable;
+			canSave = zp.getCollectionTreeRow().filesEditable;
 		} catch(e) {
 			Zotero.logError(e);
 		};

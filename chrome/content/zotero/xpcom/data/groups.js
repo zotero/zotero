@@ -27,32 +27,39 @@
 Zotero.Groups = new function () {
 	this.__defineGetter__('addGroupURL', function () ZOTERO_CONFIG.WWW_BASE_URL + 'groups/new/');
 	
-	this.get = function (id) {
+	var _groupIDsByLibraryID = {};
+	var _libraryIDsByGroupID = {};
+	
+	
+	this.init = function () {
+		_loadIDs();
+	}
+	
+	this.get = Zotero.Promise.coroutine(function* (id) {
 		if (!id) {
-			throw ("groupID not provided in Zotero.Groups.get()");
+			throw new Error("groupID not provided");
 		}
 		var group = new Zotero.Group;
 		group.id = id;
-		if (!group.exists()) {
+		if (!(yield group.load())) {
 			return false;
 		}
 		return group;
-	}
+	});
 	
 	
-	this.getAll = function () {
+	this.getAll = Zotero.Promise.coroutine(function* () {
 		var groups = [];
 		var sql = "SELECT groupID FROM groups ORDER BY name COLLATE locale";
-		var groupIDs = Zotero.DB.columnQuery(sql);
-		if (!groupIDs) {
+		var groupIDs = yield Zotero.DB.columnQueryAsync(sql);
+		if (!groupIDs.length) {
 			return groups;
 		}
 		for each(var groupID in groupIDs) {
-			var group = this.get(groupID);
-			groups.push(group);
+			groups.push(this.get(groupID));
 		}
-		return groups;
-	}
+		return Zotero.Promise.all(groups);
+	});
 	
 	
 	this.getByLibraryID = function (libraryID) {
@@ -61,24 +68,38 @@ Zotero.Groups = new function () {
 	}
 	
 	
+	this.exists = function (groupID) {
+		return !!_libraryIDsByGroupID[groupID];
+	}
+	
+	
 	this.getGroupIDFromLibraryID = function (libraryID) {
-		var sql = "SELECT groupID FROM groups WHERE libraryID=?";
-		var groupID = Zotero.DB.valueQuery(sql, libraryID);
+		var groupID = _groupIDsByLibraryID[libraryID];
 		if (!groupID) {
-			throw ("Group with libraryID " + libraryID + " does not exist "
-					+ "in Zotero.Groups.getGroupIDFromLibraryID()");
+			throw new Error("Group with libraryID " + libraryID + " does not exist");
 		}
 		return groupID;
 	}
 	
 	
 	this.getLibraryIDFromGroupID = function (groupID) {
-		var sql = "SELECT libraryID FROM groups WHERE groupID=?";
-		var libraryID = Zotero.DB.valueQuery(sql, groupID);
+		var libraryID = _libraryIDsByGroupID[groupID];
 		if (!libraryID) {
-			throw ("Group with groupID " + groupID + " does not exist "
-					+ "in Zotero.Groups.getLibraryIDFromGroupID()");
+			throw new Error("Group with groupID " + groupID + " does not exist");
 		}
 		return libraryID;
+	}
+	
+	
+	function _loadIDs() {
+		var sql = "SELECT libraryID, groupID FROM groups";
+		return Zotero.DB.queryAsync(sql)
+		.then(function (rows) {
+			for (let i=0; i<rows.length; i++) {
+				let row = rows[i];
+				_groupIDsByLibraryID[row.libraryID] = row.groupID;
+				_libraryIDsByGroupID[row.groupID] = row.libraryID;
+			}
+		}.bind(this));
 	}
 }

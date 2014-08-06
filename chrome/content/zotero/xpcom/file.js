@@ -28,19 +28,33 @@
  * @namespace
  */
 Zotero.File = new function(){
-	Components.utils.import("resource://zotero/q.js");
+	//Components.utils.import("resource://zotero/bluebird.js");
 	Components.utils.import("resource://gre/modules/NetUtil.jsm");
 	Components.utils.import("resource://gre/modules/FileUtils.jsm");
 	
 	this.getExtension = getExtension;
 	this.getClosestDirectory = getClosestDirectory;
-	this.getSample = getSample;
 	this.getContentsFromURL = getContentsFromURL;
 	this.putContents = putContents;
 	this.getValidFileName = getValidFileName;
 	this.truncateFileName = truncateFileName;
 	this.getCharsetFromFile = getCharsetFromFile;
 	this.addCharsetListener = addCharsetListener;
+	
+	
+	this.pathToFile = function (pathOrFile) {
+		if (typeof pathOrFile == 'string') {
+			let nsIFile = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
+			nsIFile.initWithPath(pathOrFile);
+			return nsIFile;
+		}
+		else if (pathOrFile instanceof Ci.nsIFile) {
+			return pathOrFile;
+		}
+		
+		throw new Error('Unexpected value provided to Zotero.MIME.pathToFile() (' + pathOrFile + ')');
+	}
+	
 	
 	/**
 	 * Encode special characters in file paths that might cause problems,
@@ -82,11 +96,22 @@ Zotero.File = new function(){
 	}
 	
 	
-	/*
-	 * Get the first 200 bytes of the file as a string (multibyte-safe)
+	/**
+	 * Get the first 200 bytes of a source as a string (multibyte-safe)
+	 *
+	 * @param {nsIURI|nsIFile|string spec|nsIChannel|nsIInputStream} source - The source to read
+	 * @return {Promise}
 	 */
-	function getSample(file) {
-		return this.getContents(file, null, 200);
+	this.getSample = function (file) {
+		var bytes = 200;
+		return this.getContentsAsync(file, null, bytes)
+		.catch(function (e) {
+			if (e.name == 'NS_ERROR_ILLEGAL_INPUT') {
+				Zotero.debug("Falling back to raw bytes");
+				return this.getBinaryContentsAsync(file, bytes);
+			}
+			throw e;
+		}.bind(this));
 	}
 	
 	
@@ -114,7 +139,7 @@ Zotero.File = new function(){
 	 * @return {String} The contents of the file
 	 * @deprecated Use {@link Zotero.File.getContentsAsync} when possible
 	 */
-	this.getContents = function getContents(file, charset, maxLength){
+	this.getContents = function (file, charset, maxLength){
 		var fis;
 		if(file instanceof Components.interfaces.nsIInputStream) {
 			fis = file;
@@ -163,21 +188,36 @@ Zotero.File = new function(){
 	 *
 	 * @param {nsIURI|nsIFile|string spec|nsIChannel|nsIInputStream} source The source to read
 	 * @param {String} [charset] The character set; defaults to UTF-8
-	 * @param {Integer} [maxLength] Maximum length to fetch, in bytes (unimplemented)
+	 * @param {Integer} [maxLength] Maximum length to fetch, in bytes
 	 * @return {Promise} A Q promise that is resolved with the contents of the file
 	 */
-	this.getContentsAsync = function getContentsAsync(source, charset, maxLength) {
+	this.getContentsAsync = function (source, charset, maxLength) {
+		Zotero.debug("Getting contents of " + source);
+		
 		var options = {
-			charset: charset ? Zotero.CharacterSets.getName(charset) : "UTF-8"
+			charset: charset ? Zotero.CharacterSets.getName(charset) : "UTF-8",
+			// This doesn't seem to work -- reading an image file still throws NS_ERROR_ILLEGAL_INPUT
+			replacement: "\uFFFD"
 		};
-		var deferred = Q.defer();
+		var deferred = Zotero.Promise.defer();
 		NetUtil.asyncFetch(source, function(inputStream, status) {
 			if (!Components.isSuccessCode(status)) {
 				deferred.reject(new Components.Exception("File read operation failed", status));
 				return;
 			}
 			
-			deferred.resolve(NetUtil.readInputStreamToString(inputStream, inputStream.available(), options));
+			try {
+				deferred.resolve(
+					NetUtil.readInputStreamToString(
+						inputStream,
+						Math.min(maxLength, inputStream.available()),
+						options
+					)
+				);
+			}
+			catch (e) {
+				deferred.reject(e);
+			}
 		});
 		return deferred.promise;
 	};
@@ -187,17 +227,22 @@ Zotero.File = new function(){
 	 * Get the contents of a binary source asynchronously
 	 *
 	 * @param {nsIURI|nsIFile|string spec|nsIChannel|nsIInputStream} source The source to read
+	 * @param {Integer} [maxLength] Maximum length to fetch, in bytes (unimplemented)
 	 * @return {Promise} A Q promise that is resolved with the contents of the source
 	 */
-	this.getBinaryContentsAsync = function (source) {
-		var deferred = Q.defer();
+	this.getBinaryContentsAsync = function (source, maxLength) {
+		var deferred = Zotero.Promise.defer();
 		NetUtil.asyncFetch(source, function(inputStream, status) {
 			if (!Components.isSuccessCode(status)) {
 				deferred.reject(new Components.Exception("Source read operation failed", status));
 				return;
 			}
-			
-			deferred.resolve(NetUtil.readInputStreamToString(inputStream, inputStream.available()));
+			deferred.resolve(
+				NetUtil.readInputStreamToString(
+					inputStream,
+					Math.min(maxLength, inputStream.available())
+				)
+			);
 		});
 		return deferred.promise;
 	}
@@ -251,20 +296,17 @@ Zotero.File = new function(){
 	
 	/**
 	 * Write data to a file asynchronously
-	 * @param {nsIFile} The file to write to
-	 * @param {String|nsIInputStream} data The string or nsIInputStream to write to the
-	 *     file
-	 * @param {String} [charset] The character set; defaults to UTF-8
-	 * @return {Promise} A Q promise that is resolved when the file has been written
+	 *
+	 * @param {nsIFile} - The file to write to
+	 * @param {String|nsIInputStream} data - The string or nsIInputStream to write to the file
+	 * @param {String} [charset] - The character set; defaults to UTF-8
+	 * @return {Promise} - A promise that is resolved when the file has been written
 	 */
 	this.putContentsAsync = function putContentsAsync(file, data, charset) {
-		if (typeof data == 'string'
-				&& Zotero.platformMajorVersion >= 19
-				&& (!charset || charset.toLowerCase() == 'utf-8')) {
+		if (typeof data == 'string' && (!charset || charset.toLowerCase() == 'utf-8')) {
 			let encoder = new TextEncoder();
 			let array = encoder.encode(data);
-			Components.utils.import("resource://gre/modules/osfile.jsm");
-			return Q(OS.File.writeAtomic(
+			return Zotero.Promise.resolve(OS.File.writeAtomic(
 				file.path,
 				array,
 				{
@@ -290,7 +332,7 @@ Zotero.File = new function(){
 				data = converter.convertToInputStream(data);
 			}
 			
-			var deferred = Q.defer(),
+			var deferred = Zotero.Promise.defer(),
 				ostream = FileUtils.openSafeFileOutputStream(file);
 			NetUtil.asyncCopy(data, ostream, function(inputStream, status) {
 				if (!Components.isSuccessCode(status)) {
@@ -311,7 +353,7 @@ Zotero.File = new function(){
 	 *                            FALSE if missing
 	 */
 	this.deleteIfExists = function deleteIfExists(path) {
-		return Q(OS.File.remove(path))
+		return Zotero.Promise.resolve(OS.File.remove(path))
 		.thenResolve(true)
 		.catch(function (e) {
 			if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
@@ -329,7 +371,7 @@ Zotero.File = new function(){
 	 * The DirectoryInterator is passed as the first parameter to the generator.
 	 * A StopIteration error will be caught automatically.
 	 *
-	 * Zotero.File.iterateDirectory(path, function (iterator) {
+	 * Zotero.File.iterateDirectory(path, function* (iterator) {
 	 *    while (true) {
 	 *        var entry = yield iterator.next();
 	 *        [...]
@@ -340,7 +382,7 @@ Zotero.File = new function(){
 	 */
 	this.iterateDirectory = function iterateDirectory(path, generator) {
 		var iterator = new OS.File.DirectoryIterator(path);
-		return Q.async(generator)(iterator)
+		return Zotero.Promise.coroutine(generator)(iterator)
 		.catch(function (e) {
 			if (e != StopIteration) {
 				throw e;

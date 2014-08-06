@@ -265,7 +265,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 				channel.setRequestHeader('Keep-Alive', '', false);
 				channel.setRequestHeader('Connection', '', false);
 				
-				var deferred = Q.defer();
+				var deferred = Zotero.Promise.defer();
 				
 				var listener = new Zotero.Sync.Storage.StreamListener(
 					{
@@ -276,7 +276,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 							data.request.setChannel(false);
 							
 							deferred.resolve(
-								Q.fcall(function () {
+								Zotero.Promise.try(function () {
 									return onUploadComplete(httpRequest, status, response, data);
 								})
 							);
@@ -479,13 +479,13 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		};
 		
 		if (files.length == 0) {
-			return Q(results);
+			return Zotero.Promise.resolve(results);
 		}
 		
 		let deleteURI = _rootURI.clone();
 		// This should never happen, but let's be safe
 		if (!deleteURI.spec.match(/\/$/)) {
-			return Q.reject("Root URI does not end in slash in "
+			return Zotero.Promise.reject("Root URI does not end in slash in "
 				+ "Zotero.Sync.Storage.WebDAV.deleteStorageFiles()");
 		}
 		
@@ -559,12 +559,8 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		Components.utils.import("resource://zotero/concurrent-caller.js");
 		var caller = new ConcurrentCaller(4);
 		caller.stopOnError = true;
-		caller.setLogger(function (msg) {
-			Zotero.debug("[ConcurrentCaller] " + msg);
-		});
-		caller.setErrorLogger(function (msg) {
-			Components.utils.reportError(msg);
-		});
+		caller.setLogger(function (msg) Zotero.debug(msg));
+		caller.onError(function (e) Components.utils.reportError(e));
 		return caller.fcall(funcs)
 		.then(function () {
 			return results;
@@ -883,7 +879,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 					destFile.remove(false);
 				}
 				
-				var deferred = Q.defer();
+				var deferred = Zotero.Promise.defer();
 				
 				var listener = new Zotero.Sync.Storage.StreamListener(
 					{
@@ -977,7 +973,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	
 	
 	obj._uploadFile = function (request) {
-		var deferred = Q.defer();
+		var deferred = Zotero.Promise.defer();
 		var created = Zotero.Sync.Storage.createUploadFile(
 			request,
 			function (data) {
@@ -986,14 +982,14 @@ Zotero.Sync.Storage.WebDAV = (function () {
 					return;
 				}
 				deferred.resolve(
-					Q.fcall(function () {
+					Zotero.Promise.try(function () {
 						return processUploadFile(data);
 					})
 				);
 			}
 		);
 		if (!created) {
-			return Q(false);
+			return Zotero.Promise.resolve(false);
 		}
 		return deferred.promise;
 	};
@@ -1005,7 +1001,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 		
 		// Cache the credentials at the root URI
 		var self = this;
-		return Q.fcall(function () {
+		return Zotero.Promise.try(function () {
 			return self._cacheCredentials();
 		})
 		.then(function () {
@@ -1066,7 +1062,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 						+ "for GET request");
 				}
 				
-				return Q.reject(e);
+				return Zotero.Promise.reject(e);
 			}
 			// TODO: handle browser offline exception
 			else {
@@ -1128,7 +1124,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			Zotero.debug("Credentials are cached");
 			_cachedCredentials = true;
 		})
-		.fail(function (e) {
+		.catch(function (e) {
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
 				var msg = "HTTP " + e.status + " error from WebDAV server "
 					+ "for OPTIONS request";
@@ -1142,7 +1138,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	
 	
 	obj._checkServer = function () {
-		var deferred = Q.defer();
+		var deferred = Zotero.Promise.defer();
 		
 		try {
 			// Clear URIs
@@ -1564,7 +1560,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	 * @param	{Function}	callback		Passed number of files deleted
 	 */
 	obj._purgeDeletedStorageFiles = function () {
-		return Q.fcall(function () {
+		return Zotero.Promise.try(function () {
 			if (!this.includeUserFiles) {
 				return false;
 			}
@@ -1614,7 +1610,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	 * Delete orphaned storage files older than a day before last sync time
 	 */
 	obj._purgeOrphanedStorageFiles = function () {
-		return Q.fcall(function () {
+		return Zotero.Promise.try(function () {
 			const daysBeforeSyncTime = 1;
 			
 			if (!this.includeUserFiles) {
@@ -1639,10 +1635,10 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			
 			var lastSyncDate = new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000);
 			
-			var deferred = Q.defer();
+			var deferred = Zotero.Promise.defer();
 			
 			Zotero.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (xmlhttp) {
-				Q.fcall(function () {
+				Zotero.Promise.try(function () {
 					Zotero.debug(xmlhttp.responseText);
 					
 					var funcName = "Zotero.Sync.Storage.purgeOrphanedStorageFiles()";

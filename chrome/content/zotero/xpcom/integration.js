@@ -127,7 +127,7 @@ Zotero.Integration = new function() {
 			Zotero.logError(e);
 		}
 		
-		Q.delay(1000).then(_checkPluginVersions);
+		Zotero.Promise.delay(1000).then(_checkPluginVersions);
 	}
 	
 	/**
@@ -177,13 +177,13 @@ Zotero.Integration = new function() {
 		return function _checkPluginVersions() {
 			if(integrationVersionsOK) {
 				if(integrationVersionsOK === true) {
-					return Q.resolve(integrationVersionsOK);
+					return Zotero.Promise.resolve(integrationVersionsOK);
 				} else {
-					return Q.reject(integrationVersionsOK);
+					return Zotero.Promise.reject(integrationVersionsOK);
 				}
 			}
 			
-			var deferred = Q.defer();
+			var deferred = Zotero.Promise.defer();
 			AddonManager.getAddonsByIDs(INTEGRATION_PLUGINS, function(addons) {
 				for(var i in addons) {
 					var addon = addons[i];
@@ -237,8 +237,8 @@ Zotero.Integration = new function() {
 				// Try to execute the command; otherwise display an error in alert service or word processor
 				// (depending on what is possible)
 				document = (application.getDocument && docId ? application.getDocument(docId) : application.getActiveDocument());
-				return Q.resolve((new Zotero.Integration.Document(application, document))[command]());
-			}).fail(function(e) {
+				return Zotero.Promise.resolve((new Zotero.Integration.Document(application, document))[command]());
+			}).catch(function(e) {
 				if(!(e instanceof Zotero.Exception.UserCancelled)) {
 					try {
 						var displayError = null;
@@ -295,7 +295,7 @@ Zotero.Integration = new function() {
 				
 				if(Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
 					var oldWindow = Zotero.Integration.currentWindow;
-					Q.delay(100).then(function() {
+					Zotero.Promise.delay(100).then(function() {
 						oldWindow.close();
 					});
 				}
@@ -689,7 +689,7 @@ Zotero.Integration = new function() {
 		Zotero.Integration.currentWindow = window;
 		Zotero.Integration.activate(window);
 		
-		var deferred = Q.defer();
+		var deferred = Zotero.Promise.defer();
 		var listener = function() {
 			if(window.location.toString() === "about:blank") return;
 			
@@ -760,7 +760,7 @@ Zotero.Integration.MissingItemException.prototype = {
 		this.fieldGetter._doc.activate();
 		var result = this.fieldGetter._doc.displayAlert(msg, 1, 3);
 		if(result == 0) {			// Cancel
-			return Q.reject(new Zotero.Exception.UserCancelled("document update"));
+			return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("document update"));
 		} else if(result == 1) {	// No
 			for each(var reselectKey in this.reselectKeys) {
 				this.fieldGetter._removeCodeKeys[reselectKey] = true;
@@ -817,7 +817,7 @@ Zotero.Integration.CorruptFieldException.prototype = {
 			Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_YES_NO_CANCEL);
 		
 		if(result == 0) {
-			return Q.reject(new Zotero.Exception.UserCancelled("document update"));
+			return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("document update"));
 		} else if(result == 1) {		// No
 			this.fieldGetter._removeCodeFields[this.fieldIndex] = true;
 			return this.fieldGetter._processFields(this.fieldIndex+1);
@@ -873,12 +873,12 @@ Zotero.Integration.CorruptBibliographyException.prototype = {
 					Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
 					Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
 		if(result == 0) {
-			return Q.reject(new Zotero.Exception.UserCancelled("clearing corrupted bibliography"));
+			return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("clearing corrupted bibliography"));
 		} else {
 			this.fieldGetter._bibliographyData = "";
 			this.fieldGetter._session.bibliographyHasChanged = true;
 			this.fieldGetter._session.bibliographyDataHasChanged = true;
-			return Q.resolve(true);
+			return Zotero.Promise.resolve(true);
 		}
 	}
 };
@@ -947,7 +947,7 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 			
 			// if no fields, throw an error
 			if(!haveFields) {
-				return Q.reject(new Zotero.Exception.Alert(
+				return Zotero.Promise.reject(new Zotero.Exception.Alert(
 				"integration.error.mustInsertCitation",
 				[], "integration.error.title"));
 			} else {
@@ -958,7 +958,7 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 		// Set doc prefs if no data string yet
 		this._session = this._createNewSession(data);
 		this._session.setData(data);
-		if(dontRunSetDocPrefs) return Q.resolve(false);
+		if(dontRunSetDocPrefs) return Zotero.Promise.resolve(false);
 		
 		return this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
 		this._app.secondaryFieldType).then(function(status) {
@@ -984,16 +984,16 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
 				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
 			if(!warning) {
-				return Q.reject(new Zotero.Exception.UserCancelled("document upgrade"));
+				return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("document upgrade"));
 			}
 		} else if(data.dataVersion > DATA_VERSION) {
-			return Q.reject(new Zotero.Exception.Alert("integration.error.newerDocumentVersion",
+			return Zotero.Promise.reject(new Zotero.Exception.Alert("integration.error.newerDocumentVersion",
 					[data.zoteroVersion, Zotero.version], "integration.error.title"));
 		}
 		
 		if(data.prefs.fieldType !== this._app.primaryFieldType
 				&& data.prefs.fieldType !== this._app.secondaryFieldType) {
-			return Q.reject(new Zotero.Exception.Alert("integration.error.fieldTypeMismatch",
+			return Zotero.Promise.reject(new Zotero.Exception.Alert("integration.error.fieldTypeMismatch",
 					[], "integration.error.title"));
 		}
 		
@@ -1013,14 +1013,14 @@ Zotero.Integration.Document.prototype._getSession = function _getSession(require
 						return me._session;
 					});
 				} else {
-					return Q.reject(e);
+					return Zotero.Promise.reject(e);
 				}
 			}
 			
 			this._doc.setDocumentData(this._session.data.serializeXML());
 			this._session.reload = true;
 		}
-		return Q.resolve(this._session);
+		return Zotero.Promise.resolve(this._session);
 	}
 };
 
@@ -1165,7 +1165,7 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 			return fieldGetter.updateSession().then(setDocPrefs);
 		} else {
 			// Can get fields while dialog is open
-			return Q.all([
+			return Zotero.Promise.all([
 				fieldGetter.get(),
 				setDocPrefs()
 			]).spread(function (fields, setDocPrefs) {
@@ -1272,7 +1272,7 @@ Zotero.Integration.Fields = function(session, doc, fieldErrorHandler) {
 Zotero.Integration.Fields.prototype.addField = function(note) {
 	// Get citation types if necessary
 	if(!this._doc.canInsertField(this._session.data.prefs['fieldType'])) {
-		return Q.reject(new Zotero.Exception.Alert("integration.error.cannotInsertHere",
+		return Zotero.Promise.reject(new Zotero.Exception.Alert("integration.error.cannotInsertHere",
 		[], "integration.error.title"));
 	}
 	
@@ -1281,7 +1281,7 @@ Zotero.Integration.Fields.prototype.addField = function(note) {
 		if(!this._doc.displayAlert(Zotero.getString("integration.replace"),
 				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
 				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL)) {
-			return Q.reject(new Zotero.Exception.UserCancelled("inserting citation"));
+			return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("inserting citation"));
 		}
 	}
 	
@@ -1290,7 +1290,7 @@ Zotero.Integration.Fields.prototype.addField = function(note) {
 			(note ? this._session.data.prefs["noteType"] : 0));
 	}
 	
-	return Q.resolve(field);
+	return Zotero.Promise.resolve(field);
 }
 
 /**
@@ -1321,11 +1321,11 @@ Zotero.Integration.Fields.prototype.getCodeTypeAndContent = function(rawCode) {
 Zotero.Integration.Fields.prototype.get = function get() {
 	// If we already have fields, just return them
 	if(this._fields) {
-		return Q.resolve(this._fields);
+		return Zotero.Promise.resolve(this._fields);
 	}
 	
 	// Create a new promise and add it to promise list
-	var deferred = Q.defer();
+	var deferred = Zotero.Promise.defer();
 	
 	// If already getting fields, just return the promise
 	if(this._deferreds) {
@@ -1737,7 +1737,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field) {
 	}
 	
 	var me = this;
-	return Q(field).then(function(field) {
+	return Zotero.Promise.resolve(field).then(function(field) {
 		if(!citation) {
 			field.setCode("TEMP");
 			citation = {"citationItems":[], "properties":{}};
@@ -1757,7 +1757,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field) {
 		}
 		
 		if(newField) {
-			return io.promise.fail(function(e) {
+			return io.promise.catch(function(e) {
 				// Try to delete new field on failure
 				try {
 					field.delete();
@@ -1792,7 +1792,7 @@ Zotero.Integration.CitationEditInterface = function(citation, field, fieldGetter
 	this.style = session.style;
 	
 	// Start getting citation data
-	this._acceptDeferred = Q.defer();
+	this._acceptDeferred = Zotero.Promise.defer();
 	this._fieldIndexPromise = fieldGetter.get().then(function(fields) {
 		for(var i=0, n=fields.length; i<n; i++) {
 			if(fields[i].equals(field)) {
@@ -1802,7 +1802,7 @@ Zotero.Integration.CitationEditInterface = function(citation, field, fieldGetter
 	});
 	
 	var me = this;
-	this.promise = this._fieldIndexPromise.then(function(fieldIndex) {
+	this.promise = this._fieldIndexZotero.Promise.then(function(fieldIndex) {
 		me._fieldIndex = fieldIndex;
 		return me._acceptDeferred.promise;
 	}).then(function(progressCallback) {
@@ -1843,7 +1843,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	 */
 	"_updateSession":function _updateSession(resolveErrors) {
 		var me = this;
-		if(this._sessionUpdatePromise && this._sessionUpdatePromise.isFulfilled()) {
+		if(this._sessionUpdatePromise && this._sessionUpdateZotero.Promise.isFulfilled()) {
 			// Session has already been updated. If we were deferring resolving an error,
 			// and we are supposed to resolve it now, then do that
 			if(this._sessionUpdateError) {
@@ -1852,13 +1852,13 @@ Zotero.Integration.CitationEditInterface.prototype = {
 						delete me._sessionUpdateError;
 					});
 				} else {
-					return Q.reject(this._sessionUpdateError);
+					return Zotero.Promise.reject(this._sessionUpdateError);
 				}
 			} else {
-				return Q.resolve(true);
+				return Zotero.Promise.resolve(true);
 			}
 		} else {
-			var deferred = Q.defer();
+			var deferred = Zotero.Promise.defer();
 			
 			this._sessionUpdateResolveErrors = this._sessionUpdateResolveErrors || resolveErrors;
 			this._sessionUpdateDeferreds.push(deferred);
@@ -1937,7 +1937,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	 * @return {Promise} A promise resolved by the items
 	 */
 	"getItems":function() {
-		if(this._fieldIndexPromise.isFulfilled()
+		if(this._fieldIndexZotero.Promise.isFulfilled()
 				|| Zotero.Utilities.isEmpty(this._session.citationsByItemID)) {
 			// Either we already have field data for this run or we have no item data at all.
 			// Update session before continuing.
@@ -1950,7 +1950,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 		} else {
 			// We have item data left over from a previous run with this document, so we don't need
 			// to wait.
-			return Q.resolve(this._getItems());
+			return Zotero.Promise.resolve(this._getItems());
 		}
 	},
 	

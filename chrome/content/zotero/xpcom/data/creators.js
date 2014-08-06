@@ -25,327 +25,195 @@
 
 
 Zotero.Creators = new function() {
-	Zotero.DataObjects.apply(this, ['creator']);
-	this.constructor.prototype = new Zotero.DataObjects();
+	this.fields = ['firstName', 'lastName', 'fieldMode'];
+	this.totes = 0;
 	
-	this.get = get;
-	this.getDataID = getDataID;
-	this.getCreatorsWithData = getCreatorsWithData;
-	this.countCreatorsWithData = countCreatorsWithData;
-	this.updateData = updateData;
-	this.deleteData = deleteData;
-	this.erase = erase;
-	this.purge = purge;
-	
-	this.__defineGetter__('fields', function () ['firstName', 'lastName', 'shortName', 'fieldMode', 'birthYear']);
-	
-	var _creatorDataHash = {}; // creatorDataIDs indexed by md5 hash of data
+	var _creatorCache = {};
 	
 	/*
-	 * Returns a Zotero.Creator object for a given creatorID
+	 * Returns creator data in internal format for a given creatorID
 	 */
-	function get(creatorID) {
+	this.getAsync = Zotero.Promise.coroutine(function* (creatorID) {
 		if (!creatorID) {
-			throw ("creatorID not provided in Zotero.Creators.get()");
+			throw new Error("creatorID not provided");
 		}
 		
-		if (this._objectCache[creatorID]) {
-			return this._objectCache[creatorID];
+		if (_creatorCache[creatorID]) {
+			return this.cleanData(_creatorCache[creatorID]);
 		}
 		
-		var sql = 'SELECT COUNT(*) FROM creators WHERE creatorID=?';
-		var result = Zotero.DB.valueQuery(sql, creatorID);
-		
-		if (!result) {
-			return false;
+		var sql = "SELECT * FROM creators WHERE creatorID=?";
+		var row = yield Zotero.DB.rowQueryAsync(sql, creatorID);
+		if (!row) {
+			throw new Error("Creator " + creatorID + " not found");
 		}
-		
-		var creator = new Zotero.Creator;
-		creator.id = creatorID;
-		this._objectCache[creatorID] = creator;
-		return this._objectCache[creatorID];
+		return _creatorCache[creatorID] = this.cleanData({
+			firstName: row.firstName, // avoid "DB column 'name' not found" warnings from the DB row Proxy
+			lastName: row.lastName,
+			fieldMode: row.fieldMode
+		});
+	});
+	
+	
+	this.getItemsWithCreator = function (creatorID) {
+		var sql = "SELECT DISTINCT itemID FROM itemCreators WHERE creatorID=?";
+		return Zotero.DB.columnQueryAsync(sql, creatorID);
+	}
+	
+	
+	this.countItemAssociations = function (creatorID) {
+		var sql = "SELECT COUNT(*) FROM itemCreators WHERE creatorID=?";
+		return Zotero.DB.valueQueryAsync(sql, creatorID);
 	}
 	
 	
 	/**
-	 * Returns the creatorDataID matching given fields
+	 * Returns the creatorID matching given fields, or creates a new creator and returns its id
 	 *
-	 * @param	array	fields
-	 * @param	bool	create		If no matching creatorDataID, create one
+	 * @param {Object} data  Creator data in API JSON format
+	 * @param {Boolean} [create=false]  If no matching creator, create one
+	 * @return {Promise<Integer>}  creatorID
 	 */
-	function getDataID(fields, create) {
-		fields = _cleanFields(fields);
-		
-		if (!fields.firstName && !fields.lastName) {
-			throw ("First or last name must be provided in Zotero.Creators.getDataID()");
-		}
-		
-		var hash = _getHash(fields);
-		if (_creatorDataHash[hash]) {
-			return _creatorDataHash[hash];
-		}
-		
-		var params = [];
-		for each(var field in fields) {
-			params.push(field);
-		}
-		
-		Zotero.DB.beginTransaction();
-		
-		var sql = "SELECT creatorDataID FROM creatorData WHERE "
-			+ "firstName=? AND lastName=? AND shortName=? "
-			+ "AND fieldMode=? AND birthYear=?";
-		var id = Zotero.DB.valueQuery(sql, params);
-		
-		if (!id && create) {
-			id = Zotero.ID.get('creatorData');
-			params.unshift(id);
-			
-			sql = "INSERT INTO creatorData (creatorDataID, "
-				+ "firstName, lastName, shortName, fieldMode, birthYear) "
-				+ "VALUES (?, ?, ?, ?, ?, ?)";
-			var insertID = Zotero.DB.query(sql, params);
-			if (!id) {
-				id = insertID;
+	this.getIDFromData = Zotero.Promise.method(function (data, create) {
+		data = this.cleanData(data);
+		return Zotero.DB.executeTransaction(function* () {
+			var sql = "SELECT creatorID FROM creators WHERE "
+				+ "firstName=? AND lastName=? AND fieldMode=?";
+			var id = yield Zotero.DB.valueQueryAsync(
+				sql, [data.firstName, data.lastName, data.fieldMode]
+			);
+			if (!id && create) {
+				id = yield Zotero.ID.get('creators');
+				let sql = "INSERT INTO creators (creatorID, firstName, lastName, fieldMode) "
+					+ "VALUES (?, ?, ?, ?)";
+				let insertID = yield Zotero.DB.queryAsync(
+					sql, [id, data.firstName, data.lastName, data.fieldMode]
+				);
+				if (!id) {
+					id = insertID;
+				}
 			}
+			return id;
+		});
+	});
+	
+	
+	this.updateCreator = Zotero.Promise.coroutine(function* (creatorID, creatorData) {
+		var creator = yield this.get(creatorID);
+		if (!creator) {
+			throw new Error("Creator " + creatorID + " doesn't exist");
 		}
-		
-		Zotero.DB.commitTransaction();
-		
-		if (id) {
-			_creatorDataHash[hash] = id;
-		}
-		
-		return id;
-	}
-	
-	
-	function getCreatorsWithData(creatorDataID, libraryID) {
-		var sql = "SELECT creatorID FROM creators WHERE creatorDataID=?";
-		if (libraryID !== undefined) {
-			sql += " AND libraryID=?";
-			return Zotero.DB.columnQuery(sql, [creatorDataID, libraryID])
-		}
-		return Zotero.DB.columnQuery(sql, [creatorDataID]);
-	}
-	
-	
-	function countCreatorsWithData(creatorDataID, libraryID) {
-		var sql = "SELECT COUNT(*) FROM creators WHERE creatorDataID=?";
-		return Zotero.DB.valueQuery(sql, [creatorDataID]);
-	}
-	
-	
-	function updateData(creatorDataID, fields) {
-		fields = _cleanFields(fields);
-		
-		var sqlFields = [];
-		var sqlParams = [];
-		for (var field in fields) {
-			// Skip fields not specified as changeable creator fields
-			if (this.fields.indexOf(field) == -1) {
-				continue;
-			}
-			sqlFields.push(field + '=?');
-			sqlParams.push(fields[field]);
-		}
-		
-		var sql = "UPDATE creatorData SET " + sqlFields.join(', ')
-			+ " WHERE creatorDataID=?";
-		
-		sqlParams.push(creatorDataID);
-		Zotero.DB.query(sql, sqlParams);
-		
-		_updateCachedData(creatorDataID);
-	}
-	
-	
-	function deleteData(creatorDataID) {
-		var sql = "DELETE FROM creatorData WHERE creatorDataID=?";
-		Zotero.DB.query(sql, creatorDataID);
-		_updateCachedData(creatorDataID);
-	}
+		creator.fieldMode = creatorData.fieldMode;
+		creator.firstName = creatorData.firstName;
+		creator.lastName = creatorData.lastName;
+		return creator.save();
+	});
 	
 	
 	/**
-	 * Remove creator(s) from all linked items and call this.purge()
-	 * to delete creator rows
+	 * Delete obsolete creator rows from database and clear internal cache entries
+	 *
+	 * @return {Promise}
 	 */
-	function erase(ids) {
-		ids = Zotero.flattenArguments(ids);
-		
-		var unlock = Zotero.Notifier.begin(true);
-		Zotero.UnresponsiveScriptIndicator.disable();
-		try {
-			Zotero.DB.beginTransaction();
-			for each(var id in ids) {
-				var creator = this.get(id);
-				if (!creator) {
-					Zotero.debug('Creator ' + id + ' does not exist in Creators.erase()!', 1);
-					Zotero.Notifier.trigger('delete', 'creator', id);
-					continue;
-				}
-				creator.erase();
-				creator = undefined;
-			}
-			this.purge();
-			Zotero.DB.commitTransaction();
-		}
-		catch (e) {
-			Zotero.DB.rollbackTransaction();
-			throw (e);
-		}
-		finally {
-			Zotero.Notifier.commit(unlock);
-			Zotero.UnresponsiveScriptIndicator.enable();
-		}
-	}
-	
-	
-	/*
-	 * Delete obsolete creator/creatorData rows from database
-	 * and clear internal array entries
-	 */
-	function purge() {
+	this.purge = Zotero.Promise.coroutine(function* () {
 		if (!Zotero.Prefs.get('purge.creators')) {
 			return;
 		}
 		
 		Zotero.debug("Purging creator tables");
 		
-		// Purge unused creators
 		var sql = 'SELECT creatorID FROM creators WHERE creatorID NOT IN '
 			+ '(SELECT creatorID FROM itemCreators)';
-		var toDelete = Zotero.DB.columnQuery(sql);
-		
-		if (toDelete) {
+		var toDelete = yield Zotero.DB.columnQueryAsync(sql);
+		if (toDelete.length) {
 			// Clear creator entries in internal array
-			for each(var creatorID in toDelete) {
-				delete this._objectCache[creatorID];
+			for (let i=0; i<toDelete.length; i++) {
+				delete _creatorCache[toDelete[i]];
 			}
 			
 			var sql = "DELETE FROM creators WHERE creatorID NOT IN "
 				+ "(SELECT creatorID FROM itemCreators)";
-			Zotero.DB.query(sql);
-		}
-		
-		// Purge unused creatorData rows
-		var sql = 'SELECT creatorDataID FROM creatorData WHERE creatorDataID NOT IN '
-			+ '(SELECT creatorDataID FROM creators)';
-		var toDelete = Zotero.DB.columnQuery(sql);
-		
-		if (toDelete) {
-			// Clear creator entries in internal array
-			for each(var creatorDataID in toDelete) {
-				_updateCachedData(creatorDataID);
-			}
-			
-			var sql = "DELETE FROM creatorData WHERE creatorDataID NOT IN "
-				+ "(SELECT creatorDataID FROM creators)";
-			Zotero.DB.query(sql);
+			yield Zotero.DB.queryAsync(sql);
 		}
 		
 		Zotero.Prefs.set('purge.creators', false);
-	}
+	});
 	
 	
-	this._load = function () {
-		if (!arguments[0] && !this._reloadCache) {
-			return;
+	this.cleanData = function (data) {
+		// Validate data
+		if (data.name === undefined && data.lastName === undefined) {
+			throw new Error("Creator data must contain either 'name' or 'firstName'/'lastName' properties");
+		}
+		if (data.name !== undefined && (data.firstName !== undefined || data.lastName !== undefined)) {
+			throw new Error("Creator data cannot contain both 'name' and 'firstName'/'lastName' properties");
+		}
+		if (data.name !== undefined && data.fieldMode === 0) {
+			throw new Error("'fieldMode' cannot be 0 with 'name' property");
+		}
+		if (data.fieldMode === 1 && !(data.firstName === undefined || data.firstName === "")) {
+			throw new Error("'fieldMode' cannot be 1 with 'firstName' property");
+		}
+		if (data.name !== undefined && typeof data.name != 'string') {
+			throw new Error("'name' must be a string");
+		}
+		if (data.firstName !== undefined && typeof data.firstName != 'string') {
+			throw new Error("'firstName' must be a string");
+		}
+		if (data.lastName !== undefined && typeof data.lastName != 'string') {
+			throw new Error("'lastName' must be a string");
 		}
 		
-		if (this._reloadCache) {
-			Zotero.debug("Clearing creator data hash");
-			_creatorDataHash = {};
-		}
-		
-		var sql = "SELECT C.*, CD.* FROM creators C NATURAL JOIN creatorData CD "
-					+ "WHERE 1";
-		if (arguments[0]) {
-			sql += " AND creatorID IN (" + Zotero.join(arguments[0], ",") + ")";
-		}
-		var rows = Zotero.DB.query(sql);
-		var ids = [];
-		for each(var row in rows) {
-			var id = row.creatorID;
-			ids.push(id);
-			
-			// Creator doesn't exist -- create new object and stuff in array
-			if (!this._objectCache[id]) {
-				this.get(id);
-			}
-			// Existing creator -- reload in place
-			else {
-				this._objectCache[id].loadFromRow(row);
-			}
-		}
-		
-		// If loading all creators, remove old creators that no longer exist
-		if (!arguments[0]) {
-			for each(var c in this._objectCache) {
-				if (ids.indexOf(c.id) == -1) {
-					this.unload(c.id);
-				}
-			}
-			
-			this._reloadCache = false;
-		}
-	}
-	
-	
-	function _cleanFields(fields) {
-		var cleanedFields = {};
-		for each(var field in Zotero.Creators.fields) {
+		var cleanedData = {
+			fieldMode: 0,
+			firstName: '',
+			lastName: ''
+		};
+		for (i=0; i<this.fields.length; i++) {
+			let field = this.fields[i];
+			let val = data[field];
 			switch (field) {
-				// Strings
-				case 'firstName':
-				case 'lastName':
-				case 'shortName':
-					cleanedFields[field] = fields[field] ? fields[field] + '' : '';
-					break;
-				
-				// Integer
-				case 'fieldMode':
-					cleanedFields[field] = fields[field] ? fields[field] : 0;
-					break;
-				
-				// Null if empty
-				case 'birthYear':
-					cleanedFields[field] = fields[field] ? fields[field] : null;
-			}
-		}
-		return cleanedFields;
-	}
-	
-	
-	function _getHash(fields) {
-		var hashFields = [];
-		for each(var field in Zotero.Creators.fields) {
-			hashFields.push(fields[field]);
-		}
-		
-		return Zotero.Utilities.Internal.md5(hashFields.join('_'));
-	}
-	
-	
-	function _getDataFromID(creatorDataID) {
-		var sql = "SELECT * FROM creatorData WHERE creatorDataID=?";
-		return Zotero.DB.rowQuery(sql, creatorDataID);
-	}
-	
-	
-	function _updateCachedData(creatorDataID) {
-		for (var hash in _creatorDataHash) {
-			if (_creatorDataHash[hash] == creatorDataID) {
-				delete _creatorDataHash[hash];
+			case 'firstName':
+			case 'lastName':
+				cleanedData[field] = val.trim();
+				break;
+			
+			case 'fieldMode':
+				cleanedData[field] = val ? parseInt(val) : 0;
+				break;
 			}
 		}
 		
-		var creators = getCreatorsWithData(creatorDataID);
-		for each(var creatorID in creators) {
-			if (Zotero.Creators._objectCache[creatorID]) {
-				Zotero.Creators._objectCache[creatorID].load();
+		// Handle API JSON format
+		if (data.name !== undefined) {
+			cleanedData.lastName = data.name.trim();
+			cleanedData.fieldMode = 1;
+		}
+		
+		var creatorType = data.creatorType || data.creatorTypeID;
+		if (creatorType) {
+			cleanedData.creatorTypeID = Zotero.CreatorTypes.getID(creatorType);
+			if (!cleanedData.creatorTypeID) {
+				let msg = "'" + creatorType + "' isn't a valid creator type";
+				Zotero.debug(msg, 2);
+				Components.utils.reportError(msg);
 			}
 		}
+		
+		return cleanedData;
+	}
+	
+	
+	this.internalToJSON = function (fields) {
+		var obj = {};
+		if (fields.fieldMode == 1) {
+			obj.name = fields.lastName;
+		}
+		else {
+			obj.firstName = fields.firstName;
+			obj.lastName = fields.lastName;
+		}
+		obj.creatorType = Zotero.CreatorTypes.getName(fields.creatorTypeID);
+		return obj;
 	}
 }

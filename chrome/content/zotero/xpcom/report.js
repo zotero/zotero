@@ -220,7 +220,7 @@ Zotero.Report = new function() {
 				case 'key':
 				case 'itemType':
 				case 'itemID':
-				case 'sourceItemID':
+				case 'parentItemID':
 				case 'title':
 				case 'firstCreator':
 				case 'creators':

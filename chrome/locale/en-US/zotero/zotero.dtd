@@ -135,6 +135,7 @@
 <!ENTITY zotero.toolbar.attachment.snapshot			"Take Snapshot of Current Page">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay			"No tags to display">
+<!ENTITY zotero.tagSelector.loadingTags            "Loading tags…">
 <!ENTITY zotero.tagSelector.filter					"Filter:">
 <!ENTITY zotero.tagSelector.showAutomatic			"Show Automatic">
 <!ENTITY zotero.tagSelector.displayAllInLibrary	"Display All Tags in This Library">

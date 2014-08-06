@@ -210,7 +210,7 @@ var Zotero_File_Interface = new function() {
 		}
 		
 		var translation = new Zotero.Translate.Import();
-		(file ? Q(file) : translation.getTranslators().then(function(translators) {
+		(file ? Zotero.Promise.resolve(file) : translation.getTranslators().then(function(translators) {
 			const nsIFilePicker = Components.interfaces.nsIFilePicker;
 			var fp = Components.classes["@mozilla.org/filepicker;1"]
 					.createInstance(nsIFilePicker);

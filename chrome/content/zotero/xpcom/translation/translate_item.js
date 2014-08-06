@@ -216,7 +216,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		return topLevelCollection;
 	},
 	
-	"_saveAttachmentFile":function(attachment, parentID, attachmentCallback) {
+	"_saveAttachmentFile": Zotero.Promise.coroutine(function* (attachment, parentID, attachmentCallback) {
 		const urlRe = /(([a-z][-+\.a-z0-9]*):\/\/[^\s]*)/i; //according to RFC3986
 		Zotero.debug("Translate: Adding attachment", 4);
 			
@@ -241,36 +241,45 @@ Zotero.Translate.ItemSaver.prototype = {
 		if(!attachment.path) {
 			// create from URL
 			attachment.linkMode = "linked_file";
-			try {
-				var myID = Zotero.Attachments.linkFromURL(attachment.url, parentID,
-						(attachment.mimeType ? attachment.mimeType : undefined),
-						(attachment.title ? attachment.title : undefined));
-			} catch(e) {
+			var newItem = yield Zotero.Attachments.linkFromURL({
+				url: attachment.url,
+				parentItemID: parentID,
+				contentType: attachment.mimeType ? attachment.mimeType : undefined,
+				title: attachment.title ? attachment.title : undefined
+			})
+			.catch(function (e) {
 				Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
 				attachmentCallback(attachment, false, e);
+			});
+			if (!newItem) {
 				return false;
 			}
-			Zotero.debug("Translate: Created attachment; id is "+myID, 4);
+			Zotero.debug("Translate: Created attachment; id is " + newItem.id, 4);
 			attachmentCallback(attachment, 100);
-			var newItem = Zotero.Items.get(myID);
 		} else {
 			var file = this._parsePath(attachment.path);
 			if(!file) return;
 			
 			if (attachment.url) {
 				attachment.linkMode = "imported_url";
-				var myID = Zotero.Attachments.importSnapshotFromFile(file,
-					attachment.url, attachment.title, attachment.mimeType, attachment.charset,
-					parentID);
+				var newItem = yield Zotero.Attachments.importSnapshotFromFile({
+					file: file,
+					url: attachment.url,
+					title: attachment.title,
+					contentType: attachment.mimeType,
+					charset: attachment.charset,
+					parentItemID: parentID
+				});
 			}
 			else {
 				attachment.linkMode = "imported_file";
-				var myID = Zotero.Attachments.importFromFile(file, parentID);
+				var newItem = yield Zotero.Attachments.importFromFile({
+					file: file,
+					parentItemID: parentID
+				});
 			}
 			attachmentCallback(attachment, 100);
 		}
-		
-		var newItem = Zotero.Items.get(myID);
 		
 		// save fields
 		attachment.itemType = "attachment";
@@ -281,10 +290,10 @@ Zotero.Translate.ItemSaver.prototype = {
 			newItem.setNote(attachment.note);
 		}
 		
-		newItem.save();
+		yield newItem.save();
 		
 		return newItem;
-	},
+	}),
 
 	"_parsePathURI":function(path) {
 		try {
@@ -381,7 +390,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		return false;
 	},
 	
-	"_saveAttachmentDownload":function(attachment, parentID, attachmentCallback) {
+	"_saveAttachmentDownload": Zotero.Promise.coroutine(function* (attachment, parentID, attachmentCallback) {
 		Zotero.debug("Translate: Adding attachment", 4);
 		
 		if(!attachment.url && !attachment.document) {
@@ -413,80 +422,99 @@ Zotero.Translate.ItemSaver.prototype = {
 				// if snapshot is explicitly set to false, attach as link
 				attachment.linkMode = "linked_url";
 				if(attachment.document) {
-					try {
-						Zotero.Attachments.linkFromURL(attachment.document.location.href, parentID,
-								(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
-								title);
-						attachmentCallback(attachment, 100);
-					} catch(e) {
+					yield Zotero.Attachments.linkFromURL({
+						url: attachment.document.location.href,
+						parentItemID: parentID,
+						contentType: attachment.mimeType ? attachment.mimeType : attachment.document.contentType,
+						title: title
+					})
+					.catch(function (e) {
 						Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
 						attachmentCallback(attachment, false, e);
-					}
+					});
+					
+					attachmentCallback(attachment, 100);
+					
 					return true;
 				} else {
 					if(!attachment.mimeType || !title) {
 						Zotero.debug("Translate: Either mimeType or title is missing; attaching file will be slower", 3);
 					}
 					
-					try {
-						Zotero.Attachments.linkFromURL(attachment.url, parentID,
-								(attachment.mimeType ? attachment.mimeType : undefined),
-								title);
-						attachmentCallback(attachment, 100);
-					} catch(e) {
+					yield Zotero.Attachments.linkFromURL({
+						url: attachment.url,
+						parentItemID: parentID,
+						contentType: attachment.mimeType ? attachment.mimeType : undefined,
+						title: title
+					})
+					.catch(function (e) {
 						Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
 						attachmentCallback(attachment, false, e);
-					}
+					});
+					
+					attachmentCallback(attachment, 100);
+					
 					return true;
 				}
 			} else {
 				// if snapshot is not explicitly set to false, retrieve snapshot
 				if(attachment.document) {
-					try {
-						attachment.linkMode = "imported_url";
-						Zotero.Attachments.importFromDocument(attachment.document,
-							parentID, title, null, function(status, err) {
-								if(status) {
-									attachmentCallback(attachment, 100);
-								} else {
-									attachmentCallback(attachment, false, err);
-								}
-							}, this._libraryID);
-						attachmentCallback(attachment, 0);
-					} catch(e) {
+					attachment.linkMode = "imported_url";
+					
+					attachmentCallback(attachment, 0);
+					
+					yield Zotero.Attachments.importFromDocument({
+						libraryID: this._libraryID,
+						document: attachment.document,
+						parentItemID: parentID,
+						title: title
+					})
+					.then(function (attachmentItem) {
+						attachmentCallback(attachment, 100);
+					})
+					.catch(function (e) {
 						Zotero.debug("Translate: Error attaching document", 2);
 						attachmentCallback(attachment, false, e);
-					}
+					});
+					
 					return true;
 				// Save attachment if snapshot pref enabled or not HTML
 				// (in which case downloadAssociatedFiles applies)
 				} else {
 					var mimeType = (attachment.mimeType ? attachment.mimeType : null);
-					var fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentID);
-					try {
-						Zotero.debug('Importing attachment from URL');
-						attachment.linkMode = "imported_url";
-						Zotero.Attachments.importFromURL(attachment.url, parentID, title,
-							fileBaseName, null, mimeType, this._libraryID, function(status, err) {
-								// TODO: actually indicate progress during download
-								if(status) {
-									attachmentCallback(attachment, 100);
-								} else {
-									attachmentCallback(attachment, false, err);
-								}
-							}, this._cookieSandbox);
-						attachmentCallback(attachment, 0);
-					} catch(e) {
+					let parentItem = yield Zotero.Items.getAsync(parentID);
+					var fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem);
+					
+					Zotero.debug('Importing attachment from URL');
+					attachment.linkMode = "imported_url";
+					
+					attachmentCallback(attachment, 0);
+					
+					yield Zotero.Attachments.importFromURL({
+						libraryID: this._libraryID,
+						url: attachment.url,
+						parentItemID: parentID,
+						title: title,
+						fileBaseName: fileBaseName,
+						contentType: mimeType,
+						cookieSandbox: this._cookieSandbox
+					})
+					.then(function (attachmentItem) {
+						// TODO: actually indicate progress during download
+						attachmentCallback(attachment, 100);
+					})
+					.catch(function (e) {
 						Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
 						attachmentCallback(attachment, false, e);
-					}
+					});
+					
 					return true;
 				}
 			}
 		}
 		
 		return false;
-	},
+	}),
 	
 	"_saveFields":function(item, newItem) {
 		// fields that should be handled differently
@@ -587,7 +615,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			myNote.libraryID = this._libraryID;
 			myNote.setNote(typeof note == "object" ? note.note : note);
 			if(parentID) {
-				myNote.setSource(parentID);
+				myNote.parentID = parentID;
 			}
 			var noteID = myNote.save();
 			
@@ -706,7 +734,7 @@ Zotero.Translate.ItemGetter.prototype = {
 	},
 	
 	"setAll":function(getChildCollections) {
-		this._itemsLeft = Zotero.Items.getAll(true);
+		this._itemsLeft = Zotero.Items.getAll(0, true);
 		
 		if(getChildCollections) {
 			this._collectionsLeft = Zotero.getCollections();

@@ -302,8 +302,8 @@ Zotero.MIMETypeHandler = new function () {
 		inputStream.close();
 		
 		var me = this;
-		Q(_typeHandlers[this._contentType](readString, (this._request.name ? this._request.name : null),
-			this._contentType, channel)).fail(function(e) {
+		Zotero.Promise.resolve(_typeHandlers[this._contentType](readString, (this._request.name ? this._request.name : null),
+			this._contentType, channel)).catch(function(e) {
 				// if there was an error, handle using nsIExternalHelperAppService
 				var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"].
 					getService(Components.interfaces.nsIExternalHelperAppService);

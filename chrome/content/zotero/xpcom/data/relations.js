@@ -27,6 +27,7 @@ Zotero.Relations = new function () {
 	Zotero.DataObjects.apply(this, ['relation']);
 	this.constructor.prototype = new Zotero.DataObjects();
 	
+	this.__defineGetter__('relatedItemPredicate', function () "dc:relation");
 	this.__defineGetter__('linkedObjectPredicate', function () "owl:sameAs");
 	this.__defineGetter__('deletedItemPredicate', function () 'dc:isReplacedBy');
 	
@@ -49,13 +50,13 @@ Zotero.Relations = new function () {
 	/**
 	 * @return	{Object[]}
 	 */
-	this.getByURIs = function (subject, predicate, object) {
+	this.getByURIs = Zotero.Promise.coroutine(function* (subject, predicate, object) {
 		if (predicate) {
 			predicate = _getPrefixAndValue(predicate).join(':');
 		}
 		
 		if (!subject && !predicate && !object) {
-			throw ("No values provided in Zotero.Relations.get()");
+			throw new Error("No values provided");
 		}
 		
 		var sql = "SELECT ROWID FROM relations WHERE 1";
@@ -72,42 +73,42 @@ Zotero.Relations = new function () {
 			sql += " AND object=?";
 			params.push(object);
 		}
-		var rows = Zotero.DB.columnQuery(sql, params);
+		var rows = yield Zotero.DB.columnQueryAsync(sql, params);
 		if (!rows) {
 			return [];
 		}
 		
 		var toReturn = [];
-		for each(var id in rows) {
+		for (let i=0; i<rows.length; i++) {
 			var relation = new Zotero.Relation;
-			relation.id = id; 
+			relation.id = rows[i]; 
 			toReturn.push(relation);
 		}
 		return toReturn;
-	}
+	});
 	
 	
-	this.getSubject = function (subject, predicate, object) {
+	this.getSubject = Zotero.Promise.coroutine(function* (subject, predicate, object) {
 		var subjects = [];
-		var relations = this.getByURIs(subject, predicate, object);
+		var relations = yield this.getByURIs(subject, predicate, object);
 		for each(var relation in relations) {
 			subjects.push(relation.subject);
 		}
 		return subjects;
-	}
+	});
 	
 	
-	this.getObject = function (subject, predicate, object) {
+	this.getObject = Zotero.Promise.coroutine(function* (subject, predicate, object) {
 		var objects = [];
-		var relations = this.getByURIs(subject, predicate, object);
+		var relations = yield this.getByURIs(subject, predicate, object);
 		for each(var relation in relations) {
 			objects.push(relation.object);
 		}
 		return objects;
-	}
+	});
 	
 	
-	this.updateUser = function (fromUserID, fromLibraryID, toUserID, toLibraryID) {
+	this.updateUser = Zotero.Promise.coroutine(function* (fromUserID, fromLibraryID, toUserID, toLibraryID) {
 		if (!fromUserID) {
 			throw ("Invalid source userID " + fromUserID + " in Zotero.Relations.updateUserID");
 		}
@@ -121,24 +122,22 @@ Zotero.Relations = new function () {
 			throw ("Invalid target libraryID " + toLibraryID + " in Zotero.Relations.updateUserID");
 		}
 		
-		Zotero.DB.beginTransaction();
-		
-		var sql = "UPDATE relations SET libraryID=? WHERE libraryID=?";
-		Zotero.DB.query(sql, [toLibraryID, fromLibraryID]);
-		
-		sql = "UPDATE relations SET "
-				+ "subject=REPLACE(subject, 'zotero.org/users/" + fromUserID + "', "
-					+ "'zotero.org/users/" + toUserID + "'), "
-				+ "object=REPLACE(object, 'zotero.org/users/" + fromUserID + "', "
-					+ "'zotero.org/users/" + toUserID + "') "
-					+ "WHERE predicate IN (?, ?)";
-		Zotero.DB.query(sql, [this.linkedObjectPredicate, this.deletedItemPredicate]);
-		
-		Zotero.DB.commitTransaction();
-	}
+		yield Zotero.DB.executeTransaction(function* () {
+			var sql = "UPDATE relations SET libraryID=? WHERE libraryID=?";
+			Zotero.DB.query(sql, [toLibraryID, fromLibraryID]);
+			
+			sql = "UPDATE relations SET "
+					+ "subject=REPLACE(subject, 'zotero.org/users/" + fromUserID + "', "
+						+ "'zotero.org/users/" + toUserID + "'), "
+					+ "object=REPLACE(object, 'zotero.org/users/" + fromUserID + "', "
+						+ "'zotero.org/users/" + toUserID + "') "
+						+ "WHERE predicate IN (?, ?)";
+			Zotero.DB.query(sql, [this.linkedObjectPredicate, this.deletedItemPredicate]);
+		}.bind(this));
+	});
 	
 	
-	this.add = function (libraryID, subject, predicate, object) {
+	this.add = Zotero.Promise.coroutine(function* (libraryID, subject, predicate, object) {
 		predicate = _getPrefixAndValue(predicate).join(':');
 		
 		var relation = new Zotero.Relation;
@@ -154,24 +153,24 @@ Zotero.Relations = new function () {
 		relation.subject = subject;
 		relation.predicate = predicate;
 		relation.object = object;
-		relation.save();
-	}
+		yield relation.save();
+	});
 	
 	
 	/**
 	 * Copy relations from one object to another within the same library
 	 */
-	this.copyURIs = function (libraryID, fromURI, toURI) {
-		var rels = this.getByURIs(fromURI);
+	this.copyURIs = Zotero.Promise.coroutine(function* (libraryID, fromURI, toURI) {
+		var rels = yield this.getByURIs(fromURI);
 		for each(var rel in rels) {
-			this.add(libraryID, toURI, rel.predicate, rel.object);
+			yield this.add(libraryID, toURI, rel.predicate, rel.object);
 		}
 		
-		var rels = this.getByURIs(false, false, fromURI);
+		var rels = yield this.getByURIs(false, false, fromURI);
 		for each(var rel in rels) {
-			this.add(libraryID, rel.subject, rel.predicate, toURI);
+			yield this.add(libraryID, rel.subject, rel.predicate, toURI);
 		}
-	}
+	});
 	
 	
 	/**
@@ -179,73 +178,72 @@ Zotero.Relations = new function () {
 	 * @param {String[]} ignorePredicates
 	 */
 	this.eraseByURIPrefix = function (prefix, ignorePredicates) {
-		Zotero.DB.beginTransaction();
-		
-		prefix = prefix + '%';
-		var sql = "SELECT ROWID FROM relations WHERE (subject LIKE ? OR object LIKE ?)";
-		var params = [prefix, prefix];
-		if (ignorePredicates) {
-			for each(var ignorePredicate in ignorePredicates) {
-				sql += " AND predicate != ?";
-				params.push(ignorePredicate);
+		return Zotero.DB.executeTransaction(function* () {
+			prefix = prefix + '%';
+			var sql = "SELECT ROWID FROM relations WHERE (subject LIKE ? OR object LIKE ?)";
+			var params = [prefix, prefix];
+			if (ignorePredicates) {
+				for each(var ignorePredicate in ignorePredicates) {
+					sql += " AND predicate != ?";
+					params.push(ignorePredicate);
+				}
 			}
-		}
-		var ids = Zotero.DB.columnQuery(sql, params);
-		
-		for each(var id in ids) {
-			var relation = this.get(id);
-			relation.erase();
-		}
-		
-		Zotero.DB.commitTransaction();
+			var ids = yield Zotero.DB.columnQueryAsync(sql, params);
+			
+			for (let i=0; i<ids.length; i++) {
+				let relation = yield this.get(ids[i]);
+				yield relation.erase();
+			}
+		}.bind(this));
 	}
 	
 	
+	/**
+	 * @return {Promise}
+	 */
 	this.eraseByURI = function (uri, ignorePredicates) {
-		Zotero.DB.beginTransaction();
-		
-		var sql = "SELECT ROWID FROM relations WHERE (subject=? OR object=?)";
-		var params = [uri, uri];
-		if (ignorePredicates) {
-			for each(var ignorePredicate in ignorePredicates) {
-				sql += " AND predicate != ?";
-				params.push(ignorePredicate);
+		return Zotero.DB.executeTransaction(function* () {
+			var sql = "SELECT ROWID FROM relations WHERE (subject=? OR object=?)";
+			var params = [uri, uri];
+			if (ignorePredicates) {
+				for each(var ignorePredicate in ignorePredicates) {
+					sql += " AND predicate != ?";
+					params.push(ignorePredicate);
+				}
 			}
-		}
-		var ids = Zotero.DB.columnQuery(sql, params);
-		
-		for each(var id in ids) {
-			var relation = this.get(id);
-			relation.erase();
-		}
-		
-		Zotero.DB.commitTransaction();
+			var ids = yield Zotero.DB.columnQueryAsync(sql, params);
+			
+			for (let i=0; i<ids.length; i++) {
+				let relation = yield this.get(ids[i]);
+				yield relation.erase();
+			}
+		}.bind(this));
 	}
 	
 	
-	this.purge = function () {
+	this.purge = Zotero.Promise.coroutine(function* () {
 		var sql = "SELECT subject FROM relations WHERE predicate != ? "
 				+ "UNION SELECT object FROM relations WHERE predicate != ?";
-		var uris = Zotero.DB.columnQuery(sql, [this.deletedItemPredicate, this.deletedItemPredicate]);
+		var uris = yield Zotero.DB.columnQueryAsync(sql, [this.deletedItemPredicate, this.deletedItemPredicate]);
 		if (uris) {
 			var prefix = Zotero.URI.defaultPrefix;
-			Zotero.DB.beginTransaction();
-			for each(var uri in uris) {
-				// Skip URIs that don't begin with the default prefix,
-				// since they don't correspond to local items
-				if (uri.indexOf(prefix) == -1) {
-					continue;
+			yield Zotero.DB.executeTransaction(function* () {
+				for each(var uri in uris) {
+					// Skip URIs that don't begin with the default prefix,
+					// since they don't correspond to local items
+					if (uri.indexOf(prefix) == -1) {
+						continue;
+					}
+					if (uri.indexOf(/\/items\//) != -1 && !Zotero.URI.getURIItem(uri)) {
+						this.eraseByURI(uri);
+					}
+					if (uri.indexOf(/\/collections\//) != -1 && !Zotero.URI.getURICollection(uri)) {
+						this.eraseByURI(uri);
+					}
 				}
-				if (uri.indexOf(/\/items\//) != -1 && !Zotero.URI.getURIItem(uri)) {
-					this.eraseByURI(uri);
-				}
-				if (uri.indexOf(/\/collections\//) != -1 && !Zotero.URI.getURICollection(uri)) {
-					this.eraseByURI(uri);
-				}
-			}
-			Zotero.DB.commitTransaction();
+			}.bind(this));
 		}
-	}
+	});
 	
 	
 	this.xmlToRelation = function (relationNode) {

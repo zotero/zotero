@@ -216,9 +216,9 @@ function ChromeExtensionHandler() {
 				for (var i=0; i<results.length; i++) {
 					// Don't add child items directly
 					// (instead mark their parents for inclusion below)
-					var sourceItemID = results[i].getSource();
-					if (sourceItemID) {
-						searchParentIDs[sourceItemID] = true;
+					var parentItemID = results[i].getSource();
+					if (parentItemID) {
+						searchParentIDs[parentItemID] = true;
 						searchChildIDs[results[i].getID()] = true;
 						
 						// Don't include all child items if any child

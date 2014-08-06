@@ -33,11 +33,11 @@ const ZoteroStandalone = new function() {
 	 * Run when standalone window first opens
 	 */
 	this.onLoad = function() {
-		Q.fcall(function () {
+		Zotero.Promise.try(function () {
 			if(!Zotero) {
 				throw true;
 			}
-			if(Zotero.initializationPromise.isPending()) {
+			if(Zotero.initializationZotero.Promise.isPending()) {
 				Zotero.showZoteroPaneProgressMeter();
 			}
 			return Zotero.initializationPromise;

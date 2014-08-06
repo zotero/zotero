@@ -329,6 +329,8 @@
 						html = '<div style="'+bodyStyle+'"><p>'+html+"</p></div>";
 					}
 					
+					Zotero.debug("SETTING CONTENT TO " + html);
+					
 					this._editor.setContent(html);
 					return val;
 				]]></setter>

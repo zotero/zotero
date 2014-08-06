@@ -34,7 +34,7 @@ Zotero.Styles = new function() {
 	
 	var _renamedStyles = null;
 	
-	Components.utils.import("resource://zotero/q.js");
+	//Components.utils.import("resource://zotero/bluebird.js");
 	Components.utils.import("resource://gre/modules/Services.jsm");
 	
 	this.xsltProcessor = null;
@@ -179,7 +179,7 @@ Zotero.Styles = new function() {
 	 *    with the validation error if validation fails, or resolved if it is not.
 	 */
 	this.validate = function(style) {
-		var deferred = Q.defer(),
+		var deferred = Zotero.Promise.defer(),
 			worker = new Worker("resource://zotero/csl-validator.js"); 
 		worker.onmessage = function(event) {
 			if(event.data) {
@@ -212,7 +212,7 @@ Zotero.Styles = new function() {
 			styleInstalled = _install(style, origin);
 		}
 		
-		styleInstalled.fail(function(error) {
+		styleInstalled.catch(function(error) {
 			// Unless user cancelled, show an alert with the error
 			if(typeof error === "object" && error instanceof Zotero.Exception.UserCancelled) return;
 			if(typeof error === "object" && error instanceof Zotero.Exception.Alert) {
@@ -238,7 +238,7 @@ Zotero.Styles = new function() {
 		if(!_initialized || !_cacheTranslatorData) Zotero.Styles.init();
 		
 		var existingFile, destFile, source, styleID
-		return Q.fcall(function() {
+		return Zotero.Promise.try(function() {
 			// First, parse style and make sure it's valid XML
 			var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 					.createInstance(Components.interfaces.nsIDOMParser),
@@ -334,7 +334,7 @@ Zotero.Styles = new function() {
 				}
 			}
 		
-			return Zotero.Styles.validate(style).fail(function(validationErrors) {
+			return Zotero.Styles.validate(style).catch(function(validationErrors) {
 				Zotero.logError("Style from "+origin+" failed to validate:\n\n"+validationErrors);
 				
 				// If validation fails on the parent of a dependent style, ignore it (for now)
@@ -362,7 +362,7 @@ Zotero.Styles = new function() {
 				if(source.substr(0, 7) === "http://" || source.substr(0, 8) === "https://") {
 					return Zotero.HTTP.promise("GET", source).then(function(xmlhttp) {
 						return _install(xmlhttp.responseText, origin, true);
-					}).fail(function(error) {
+					}).catch(function(error) {
 						if(typeof error === "object" && error instanceof Zotero.Exception.Alert) {
 							throw new Zotero.Exception.Alert("styles.installSourceError", [origin, source],
 								"styles.install.title", error);

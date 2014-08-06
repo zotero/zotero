@@ -41,7 +41,6 @@ const ZOTERO_CONFIG = {
 };
 
 // Commonly used imports accessible anywhere
-Components.utils.import("resource://zotero/q.js");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm");
@@ -85,6 +84,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	this.isWin;
 	this.initialURL; // used by Schema to show the changelog on upgrades
 	
+	Components.utils.import("resource://zotero/bluebird.js", this);
 	
 	this.__defineGetter__('userID', function () {
 		if (_userID !== undefined) return _userID;
@@ -162,7 +162,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		_locked = lock;
 		
 		if (!wasLocked && lock) {
-			this.unlockDeferred = Q.defer();
+			this.unlockDeferred = Zotero.Promise.defer();
 			this.unlockPromise = this.unlockDeferred.promise;
 		}
 		else if (wasLocked && !lock) {
@@ -237,7 +237,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			return false;
 		}
 		
-		this.initializationDeferred = Q.defer();
+		this.initializationDeferred = Zotero.Promise.defer();
 		this.initializationPromise = this.initializationDeferred.promise;
 		this.locked = true;
 		
@@ -257,11 +257,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		this.platformMajorVersion = parseInt(appInfo.platformVersion.match(/^[0-9]+/)[0]);
 		this.isFx = true;
 		this.isStandalone = Services.appinfo.ID == ZOTERO_CONFIG['GUID'];
-		return Q.fcall(function () {
+		return Zotero.Promise.try(function () {
 			if(Zotero.isStandalone) {
 				return Services.appinfo.version;
 			} else {
-				var deferred = Q.defer();
+				var deferred = Zotero.Promise.defer();
 				Components.utils.import("resource://gre/modules/AddonManager.jsm");
 				AddonManager.getAddonByID(
 					ZOTERO_CONFIG.GUID,
@@ -494,7 +494,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				}
 			} else {
 				Zotero.debug("Loading in full mode");
-				return Q.fcall(_initFull)
+				return Zotero.Promise.try(_initFull)
 				.then(function (success) {
 					if(!success) return false;
 					
@@ -537,7 +537,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	 *
 	 * @return {Promise:Boolean}
 	 */
-	function _initFull() {
+	var _initFull = Zotero.Promise.coroutine(function* () {
 		Zotero.VersionHeader.init();
 		
 		// Check for DB restore
@@ -573,17 +573,14 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		Zotero.HTTP.triggerProxyAuth();
 		
 		// Add notifier queue callbacks to the DB layer
-		Zotero.DB.addCallback('begin', Zotero.Notifier.begin);
-		Zotero.DB.addCallback('commit', Zotero.Notifier.commit);
-		Zotero.DB.addCallback('rollback', Zotero.Notifier.reset);
+		Zotero.DB.addCallback('begin', function () { return Zotero.Notifier.begin(); });
+		Zotero.DB.addCallback('commit', function () { return Zotero.Notifier.commit(); });
+		Zotero.DB.addCallback('rollback', function () { return Zotero.Notifier.reset(); });
 		
-		return Q.fcall(function () {
+		try {
 			// Require >=2.1b3 database to ensure proper locking
-			if (!Zotero.isStandalone) {
-				return;
-			}
-			return Zotero.Schema.getDBVersion('system')
-			.then(function (dbSystemVersion) {
+			if (Zotero.isStandalone) {
+				let dbSystemVersion = yield Zotero.Schema.getDBVersion('system');
 				if (dbSystemVersion > 0 && dbSystemVersion < 31) {
 					var dir = Zotero.getProfileDirectory();
 					dir.append('zotero');
@@ -636,11 +633,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 					
 					throw true;
 				}
-			});
-		})
-		.then(function () {
-			return Zotero.Schema.updateSchema()
-			.then(function (updated) {
+			}
+			
+			try {
+				var updated = yield Zotero.Schema.updateSchema();
+			
 				Zotero.locked = false;
 				
 				// Initialize various services
@@ -650,7 +647,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 					Zotero.Server.init();
 				}
 				
-				Zotero.Fulltext.init();
+				yield Zotero.Fulltext.init();
 				
 				Zotero.Notifier.registerObserver(Zotero.Tags, 'setting');
 				
@@ -666,18 +663,22 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				// Initialize Locate Manager
 				Zotero.LocateManager.init();
 				
+				Zotero.Collections.init();
+				Zotero.Items.init();
+				Zotero.Searches.init();
+				Zotero.Groups.init();
+				
 				Zotero.Items.startEmptyTrashTimer();
-			})
-			.catch(function (e) {
+			}
+			catch (e) {
 				Zotero.debug(e, 1);
 				Components.utils.reportError(e); // DEBUG: doesn't always work
 				
-				if (typeof e == 'string' && e.match('newer than SQL file')) {
-					var kbURL = "http://zotero.org/support/kb/newer_db_version";
-					var msg = Zotero.localeJoin([
-							Zotero.getString('startupError.zoteroVersionIsOlder'),
-							Zotero.getString('startupError.zoteroVersionIsOlder.upgrade')
-						]) + "\n\n"
+				if (typeof e == 'string' && (e.indexOf('newer than SQL file') != -1
+							|| e.indexOf('Database is incompatible') != -1)) {
+					var kbURL = "https://www.zotero.org/support/kb/newer_db_version";
+					var msg = Zotero.getString('startupError.zoteroVersionIsOlder')
+						+ " " + Zotero.getString('startupError.zoteroVersionIsOlder.upgrade') + "\n\n"
 						+ Zotero.getString('startupError.zoteroVersionIsOlder.current', Zotero.version) + "\n\n"
 						+ Zotero.getString('general.seeForMoreInformation', kbURL);
 					Zotero.startupError = msg;
@@ -747,16 +748,15 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				
 				Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError') + "\n\n" + e;
 				throw true;
-			});
-		})
-		.then(function () {
+			};
+			
 			return true;
-		})
-		.catch(function (e) {
+		}
+		catch (e) {
 			Zotero.skipLoading = true;
 			return false;
-		});
-	}
+		}
+	});
 	
 	/**
 	 * Initializes the DB connection
@@ -907,10 +907,10 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				});
 			}
 			
-			return Q();
+			return Zotero.Promise.resolve();
 		} catch(e) {
 			Zotero.debug(e);
-			return Q.reject(e);
+			return Zotero.Promise.reject(e);
 		}
 	}
 	
@@ -1320,7 +1320,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	}
 	
 	/**
-	 * Log a JS error to the Mozilla JS error console.
+	 * Log a JS error to the Mozilla JS error console and the text console
 	 * @param {Exception} err
 	 */
 	function logError(err) {
@@ -1688,6 +1688,20 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		};
 	};
 	
+	
+	this.serial = function (fn) {
+		Components.utils.import("resource://zotero/concurrent-caller.js");
+		var caller = new ConcurrentCaller(1);
+		caller.setLogger(Zotero.debug);
+		return function () {
+			var args = arguments;
+			return caller.fcall(function () {
+				return fn.apply(this, args);
+			}.bind(this));
+		};
+	}
+	
+	
 	/**
 	 * Pumps a generator until it yields false. See itemTreeView.js for an example.
 	 *
@@ -1747,12 +1761,21 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	 * Pumps a generator until it yields false. Unlike the above, this returns a promise.
 	 */
 	this.promiseGenerator = function(generator, ms) {
-		var deferred = Q.defer();
+		var deferred = Zotero.Promise.defer();
 		this.pumpGenerator(generator, ms,
 			function(e) { deferred.reject(e); },
 			function(data) { deferred.resolve(data) });
 		return deferred.promise;
 	};
+	
+	
+	this.spawn = function (generator, thisObject) {
+		if (thisObject) {
+			return Zotero.Promise.coroutine(generator.bind(thisObject))();
+		}
+		return Zotero.Promise.coroutine(generator)();
+	}
+	
 	
 	/**
 	 * Emulates the behavior of window.setTimeout, but ensures that callbacks do not get called
@@ -2027,22 +2050,24 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	/*
 	 * Clear entries that no longer exist from various tables
 	 */
-	this.purgeDataObjects = function (skipStoragePurge) {
-		Zotero.Creators.purge();
-		Zotero.Tags.purge();
+	this.purgeDataObjects = Zotero.Promise.coroutine(function* (skipStoragePurge) {
+		yield Zotero.Creators.purge();
+		yield Zotero.Tags.purge();
 		// TEMP: Disabled until we have async DB (and maybe SQLite FTS)
 		//Zotero.Fulltext.purgeUnusedWords();
-		Zotero.Items.purge();
+		yield Zotero.Items.purge();
 		// DEBUG: this might not need to be permanent
 		Zotero.Relations.purge();
-	}
+	});
 	
 	
 	this.reloadDataObjects = function () {
-		Zotero.Tags.reloadAll();
-		Zotero.Collections.reloadAll();
-		Zotero.Creators.reloadAll();
-		Zotero.Items.reloadAll();
+		return Zotero.Promise.all([
+			Zotero.Tags.reloadAll(),
+			Zotero.Collections.reloadAll(),
+			Zotero.Creators.reloadAll(),
+			Zotero.Items.reloadAll()
+		]);
 	}
 	
 	
@@ -2577,8 +2602,7 @@ Zotero.VersionHeader = {
 }
 
 Zotero.DragDrop = {
-	currentDragEvent: null,
-	currentTarget: null,
+	currentEvent: null,
 	currentOrientation: 0,
 	
 	getDataFromDataTransfer: function (dataTransfer, firstOnly) {
@@ -2630,23 +2654,22 @@ Zotero.DragDrop = {
 	},
 	
 	
-	getDragSource: function () {
-		var dt = this.currentDragEvent.dataTransfer;
-		if (!dt) {
+	getDragSource: function (dataTransfer) {
+		if (!dataTransfer) {
 			Zotero.debug("Drag data not available", 2);
 			return false;
 		}
 		
-		// For items, the drag source is the ItemGroup of the parent window
+		// For items, the drag source is the CollectionTreeRow of the parent window
 		// of the source tree
-		if (dt.types.contains("zotero/item")) {
-			var sourceNode = dt.mozSourceNode;
+		if (dataTransfer.types.contains("zotero/item")) {
+			var sourceNode = dataTransfer.mozSourceNode;
 			if (!sourceNode || sourceNode.tagName != 'treechildren'
 					|| sourceNode.parentElement.id != 'zotero-items-tree') {
 				return false;
 			}
 			var win = sourceNode.ownerDocument.defaultView;
-			return win.ZoteroPane.collectionsView.itemGroup;
+			return win.ZoteroPane.collectionsView.selectedTreeRow;
 		}
 		else {
 			return false;
@@ -2654,8 +2677,7 @@ Zotero.DragDrop = {
 	},
 	
 	
-	getDragTarget: function () {
-		var event = this.currentDragEvent;
+	getDragTarget: function (event) {
 		var target = event.target;
 		if (target.tagName == 'treechildren') {
 			var tree = target.parentNode;
@@ -2663,7 +2685,7 @@ Zotero.DragDrop = {
 				let row = {}, col = {}, obj = {};
 				tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
 				let win = tree.ownerDocument.defaultView;
-				return win.ZoteroPane.collectionsView.getItemGroupAtRow(row.value);
+				return win.ZoteroPane.collectionsView.getRow(row.value);
 			}
 		}
 		return false;

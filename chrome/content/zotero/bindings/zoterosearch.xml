@@ -177,8 +177,7 @@
 				 		this.onLibraryChange(libraryID);
 					}
 					
-					// TODO: libraryIDInt
-					this.searchRef.libraryID = libraryID ? libraryID : null;
+					this.searchRef.libraryID = libraryID;
 				]]></body>
 			</method>
 			

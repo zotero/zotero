@@ -97,7 +97,7 @@ Zotero.Server.Connector.GetTranslators.prototype = {
 			Zotero.Translators.getAll().then(function(translators) {
 				var responseData = me._serializeTranslators(translators);
 				sendResponseCallback(200, "application/json", JSON.stringify(responseData));
-			}).fail(function(e) {
+			}).catch(function(e) {
 				sendResponseCallback(500);
 				throw e;
 			}).done();
@@ -440,7 +440,11 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 					
 					// save snapshot
 					if(filesEditable) {
-						Zotero.Attachments.importFromDocument(doc, itemID);
+						// TODO: async
+						Zotero.Attachments.importFromDocument({
+							document: doc,
+							parentItemID: itemID
+						});
 					}
 					
 					sendResponseCallback(201);

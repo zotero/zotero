@@ -53,7 +53,7 @@ Zotero.Sync.Storage.QueueManager = new function () {
 			Zotero.debug("No files to sync" + suffix);
 		}
 		
-		return Q.allSettled(promises)
+		return Zotero.Promise.allSettled(promises)
 		.then(function (results) {
 			Zotero.debug("All storage queues are finished" + suffix);
 			

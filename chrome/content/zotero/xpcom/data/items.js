@@ -32,101 +32,73 @@ Zotero.Items = new function() {
 	this.constructor.prototype = new Zotero.DataObjects();
 	
 	// Privileged methods
-	this.get = get;
-	this.exist = exist;
-	this.getAll = getAll;
 	this.add = add;
-	this.cacheFields = cacheFields;
-	this.erase = erase;
-	this.getFirstCreatorSQL = getFirstCreatorSQL;
 	this.getSortTitle = getSortTitle;
 	
-	this.__defineGetter__('primaryFields', function () {
-		if (!_primaryFields.length) {
-			_primaryFields = Zotero.DB.getColumns('items');
-			_primaryFields.splice(_primaryFields.indexOf('clientDateModified'), 1);
-			_primaryFields = _primaryFields.concat(
-				['firstCreator', 'numNotes', 'numAttachments', 'sourceItemID']
-			);
+	Object.defineProperty(this, "_primaryDataSQLParts", {
+		get: function () {
+			return _primaryDataSQLParts ?  _primaryDataSQLParts : (_primaryDataSQLParts = {
+				itemID: "O.itemID",
+				itemTypeID: "O.itemTypeID",
+				dateAdded: "O.dateAdded",
+				dateModified: "O.dateModified",
+				libraryID: "O.libraryID",
+				key: "O.key",
+				// 'itemVersion' because computerProgram has 'version'
+				itemVersion: "O.version AS itemVersion",
+				synced: "O.synced",
+				
+				firstCreator: _getFirstCreatorSQL(),
+				sortCreator: _getSortCreatorSQL(),
+				
+				deleted: "DI.itemID IS NOT NULL AS deleted",
+				
+				numNotes: "(SELECT COUNT(*) FROM itemNotes INo "
+					+ "WHERE parentItemID=O.itemID AND "
+					+ "INo.itemID NOT IN (SELECT itemID FROM deletedItems)) AS numNotes",
+				
+				numNotesTrashed: "(SELECT COUNT(*) FROM itemNotes INo "
+					+ "WHERE parentItemID=O.itemID AND "
+					+ "INo.itemID IN (SELECT itemID FROM deletedItems)) AS numNotesTrashed",
+				
+				numNotesEmbedded: "(SELECT COUNT(*) FROM itemAttachments IA "
+					+ "JOIN itemNotes USING (itemID) "
+					+ "WHERE IA.parentItemID=O.itemID AND "
+					+ "note!='' AND note!='" + Zotero.Notes.defaultNote + "' AND "
+					+ "IA.itemID NOT IN (SELECT itemID FROM deletedItems)) AS numNotesEmbedded",
+				
+				numNotesEmbeddedTrashed: "(SELECT COUNT(*) FROM itemAttachments IA "
+					+ "JOIN itemNotes USING (itemID) "
+					+ "WHERE IA.parentItemID=O.itemID AND "
+					+ "note!='' AND note!='" + Zotero.Notes.defaultNote + "' AND "
+					+ "IA.itemID IN (SELECT itemID FROM deletedItems)) "
+					+ "AS numNotesEmbeddedTrashed",
+				
+				numAttachments: "(SELECT COUNT(*) FROM itemAttachments IA WHERE parentItemID=O.itemID AND "
+					+ "IA.itemID NOT IN (SELECT itemID FROM deletedItems)) AS numAttachments",
+				
+				numAttachmentsTrashed: "(SELECT COUNT(*) FROM itemAttachments IA WHERE parentItemID=O.itemID AND "
+					+ "IA.itemID IN (SELECT itemID FROM deletedItems)) AS numAttachmentsTrashed",
+				
+				parentID: "(CASE O.itemTypeID WHEN 14 THEN IAP.itemID WHEN 1 THEN INoP.itemID END) AS parentID",
+				parentKey: "(CASE O.itemTypeID WHEN 14 THEN IAP.key WHEN 1 THEN INoP.key END) AS parentKey",
+				
+				attachmentCharset: "IA.charsetID AS attachmentCharset",
+				attachmentLinkMode: "IA.linkMode AS attachmentLinkMode",
+				attachmentContentType: "IA.contentType AS attachmentContentType",
+				attachmentPath: "IA.path AS attachmentPath",
+				attachmentSyncState: "IA.syncState AS attachmentSyncState"
+			});
 		}
-		
-		// Once primary fields have been cached, get rid of getter for speed purposes
-		delete this.primaryFields;
-		this.primaryFields = _primaryFields;
-		
-		return _primaryFields;
 	});
 	
-	
 	// Private members
-	var _cachedFields = [];
+	var _primaryDataSQLParts;
+	var _cachedFields = {};
 	var _firstCreatorSQL = '';
-	var _primaryFields = [];
+	var _sortCreatorSQL = '';
 	var _emptyTrashIdleObserver = null;
 	var _emptyTrashTimer = null;
-	
-	
-	/*
-	 * Retrieves (and loads, if necessary) an arbitrary number of items
-	 *
-	 * Can be passed ids as individual parameters or as an array of ids, or both
-	 *
-	 * If only one argument and it's an id, return object directly;
-	 * otherwise, return array
-	 */
-	function get() {
-		var toLoad = [];
-		var loaded = [];
-		
-		if (!arguments[0]) {
-			Zotero.debug('No arguments provided to Items.get()');
-			return false;
-		}
-		
-		var ids = Zotero.flattenArguments(arguments);
-		
-		for (var i=0; i<ids.length; i++) {
-			// Check if already loaded
-			if (!this._objectCache[ids[i]]) {
-				toLoad.push(ids[i]);
-			}
-		}
-		
-		// New items to load
-		if (toLoad.length) {
-			this._load(toLoad);
-		}
-		
-		// If single id, return the object directly
-		if (arguments[0] && typeof arguments[0]!='object'
-				&& typeof arguments[1]=='undefined') {
-			if (!this._objectCache[arguments[0]]) {
-				Zotero.debug("Item " + arguments[0] + " doesn't exist", 2);
-				return false;
-			}
-			return this._objectCache[arguments[0]];
-		}
-		
-		// Otherwise, build return array
-		for (i=0; i<ids.length; i++) {
-			if (!this._objectCache[ids[i]]) {
-				Zotero.debug("Item " + ids[i] + " doesn't exist", 2);
-				continue;
-			}
-			loaded.push(this._objectCache[ids[i]]);
-		}
-		
-		return loaded;
-	}
-	
-	
-	function exist(itemIDs) {
-		var sql = "SELECT itemID FROM items WHERE itemID IN ("
-			+ itemIDs.map(function () '?').join() + ")";
-		var exist = Zotero.DB.columnQuery(sql, itemIDs);
-		return exist ? exist : [];
-	}
-	
 	
 	
 	/**
@@ -137,36 +109,38 @@ Zotero.Items = new function() {
 	 *											Zotero.Item objects
 	 * @return {Zotero.Item[]|Integer[]}
 	 */
-	this.getDeleted = function (libraryID, asIDs, days) {
+	this.getDeleted = Zotero.Promise.coroutine(function* (libraryID, asIDs, days) {
 		var sql = "SELECT itemID FROM items JOIN deletedItems USING (itemID) "
 				+ "WHERE libraryID=?";
-		
 		if (days) {
 			sql += " AND dateDeleted<=DATE('NOW', '-" + parseInt(days) + " DAYS')";
 		}
 		
-		var ids = Zotero.DB.columnQuery(sql, [libraryID]);
-		if (!ids) {
+		var ids = yield Zotero.DB.columnQueryAsync(sql, [libraryID]);
+		if (!ids.length) {
 			return [];
 		}
 		if (asIDs) {
 			return ids;
 		}
-		return this.get(ids);
-	}
+		return this.getAsync(ids);
+	});
 	
 	
-	/*
-	 * Returns all items in the database
+	/**
+	 * Returns all items in a given library
 	 *
-	 * If |onlyTopLevel|, don't include child items
+	 * @param  {Integer}  libraryID
+	 * @param  {Boolean}  [onlyTopLevel=false]   If true, don't include child items
+	 * @param  {Boolean}  [includeDeleted=false] If true, include deleted items
+	 * @return {Promise<Array<Zotero.Item>>}
 	 */
-	function getAll(onlyTopLevel, libraryID, includeDeleted) {
+	this.getAll = Zotero.Promise.coroutine(function* (libraryID, onlyTopLevel, includeDeleted) {
 		var sql = 'SELECT A.itemID FROM items A';
 		if (onlyTopLevel) {
 			sql += ' LEFT JOIN itemNotes B USING (itemID) '
 			+ 'LEFT JOIN itemAttachments C ON (C.itemID=A.itemID) '
-			+ 'WHERE B.sourceItemID IS NULL AND C.sourceItemID IS NULL';
+			+ 'WHERE B.parentItemID IS NULL AND C.parentItemID IS NULL';
 		}
 		else {
 			sql += " WHERE 1";
@@ -175,9 +149,9 @@ Zotero.Items = new function() {
 			sql += " AND A.itemID NOT IN (SELECT itemID FROM deletedItems)";
 		}
 		sql += " AND libraryID=?";
-		var ids = Zotero.DB.columnQuery(sql, libraryID);
-		return this.get(ids);
-	}
+		var ids = yield Zotero.DB.columnQueryAsync(sql, libraryID);
+		return this.getAsync(ids);
+	});
 	
 	
 	/*
@@ -247,38 +221,47 @@ Zotero.Items = new function() {
 		}
 		var id = item.save();
 		
-		return this.get(id);
+		return this.getAsync(id);
 	}
 	
 	
-	this.isPrimaryField = function (field) {
-		return this.primaryFields.indexOf(field) != -1;
-	}
-	
-	
-	function cacheFields(fields, items) {
+	this.cacheFields = Zotero.Promise.coroutine(function* (libraryID, fields, items) {
 		if (items && items.length == 0) {
 			return;
 		}
 		
+		var t = new Date;
+		
+		fields = fields.concat();
+		
+		// Needed for display titles for some item types
+		if (fields.indexOf('title') != -1) {
+			fields.push('reporter', 'court');
+		}
+		
 		Zotero.debug("Caching fields [" + fields.join() + "]"
-			+ (items ? " for " + items.length + " items" : ''));
+			+ (items ? " for " + items.length + " items" : '')
+			+ " in library " + libraryID);
+		
 		if (items && items.length > 0) {
-			this._load(items);
+			yield this._load(libraryID, items);
 		}
 		else {
-			this._load();
+			yield this._load(libraryID);
 		}
 		
 		var primaryFields = [];
 		var fieldIDs = [];
 		for each(var field in fields) {
 			// Check if field already cached
-			if (_cachedFields.indexOf(field) != -1) {
+			if (_cachedFields[libraryID] && _cachedFields[libraryID].indexOf(field) != -1) {
 				continue;
 			}
 			
-			_cachedFields.push(field);
+			if (!_cachedFields[libraryID]) {
+				_cachedFields[libraryID] = [];
+			}
+			_cachedFields[libraryID].push(field);
 			
 			if (this.isPrimaryField(field)) {
 				primaryFields.push(field);
@@ -295,84 +278,87 @@ Zotero.Items = new function() {
 		}
 		
 		if (primaryFields.length) {
-			var sql = "SELECT itemID, " + primaryFields.join(', ') + " FROM items";
+			var sql = "SELECT O.itemID, "
+				+ primaryFields.map((val) => this.getPrimaryDataSQLPart(val)).join(', ')
+				+ this.primaryDataSQLFrom + " AND O.libraryID=?";
+			var params = [libraryID];
 			if (items) {
-				sql += " WHERE itemID IN (" + items.join() + ")";
+				sql += " AND O.itemID IN (" + items.join() + ")";
 			}
-			var rows = Zotero.DB.query(sql);
-			for each(var row in rows) {
-				//Zotero.debug('Calling loadFromRow for item ' + row.itemID);
-				this._objectCache[row.itemID].loadFromRow(row);
-			}
+			yield Zotero.DB.queryAsync(
+				sql,
+				params,
+				{
+					onRow: function (row) {
+						let obj = {
+							itemID: row.getResultByIndex(0)
+						};
+						for (let i=0; i<primaryFields.length; i++) {
+							obj[primaryFields[i]] = row.getResultByIndex(i);
+						}
+						Zotero.debug(obj.itemID);
+						Zotero.debug(Object.keys(this._objectCache));
+						this._objectCache[obj.itemID].loadFromRow(rowObj);
+					}.bind(this)
+				}
+			);
 		}
 		
 		// All fields already cached
 		if (!fieldIDs.length) {
+			Zotero.debug('All fields already cached');
 			return;
 		}
 		
-		var allItemIDs = Zotero.DB.columnQuery("SELECT itemID FROM items");
+		var sql = "SELECT itemID FROM items WHERE libraryID=?";
+		var params = [libraryID];
+		var allItemIDs = yield Zotero.DB.columnQueryAsync(sql, params);
 		var itemFieldsCached = {};
 		
-		var sql = "SELECT itemID, fieldID, value FROM itemData "
-			+ "NATURAL JOIN itemDataValues WHERE ";
+		var sql = "SELECT itemID, fieldID, value FROM items JOIN itemData USING (itemID) "
+			+ "JOIN itemDataValues USING (valueID) WHERE libraryID=?";
+		var params = [libraryID];
 		if (items) {
-			sql += "itemID IN (" + items.join() + ") AND ";
+			sql += " AND itemID IN (" + items.join() + ")";
 		}
-		sql += "fieldID IN (" + fieldIDs.join() + ")";
-		
-		var itemDataRows = Zotero.DB.query(sql);
-		for each(var row in itemDataRows) {
-			//Zotero.debug('Setting field ' + row.fieldID + ' for item ' + row.itemID);
-			if (this._objectCache[row.itemID]) {
-				this._objectCache[row.itemID].setField(row.fieldID, row.value, true);
-			}
-			else {
-				if (!missingItems) {
-					var missingItems = {};
-				}
-				if (!missingItems[row.itemID]) {
-					missingItems[row.itemID] = true;
-					Components.utils.reportError("itemData row references nonexistent item " + row.itemID);
-				}
-			}
-			
-			if (!itemFieldsCached[row.itemID]) {
-				itemFieldsCached[row.itemID] = {};
-			}
-			itemFieldsCached[row.itemID][row.fieldID] = true;
-		}
-		
-		// If 'title' is one of the fields, load in note titles
-		if (fields.indexOf('title') != -1) {
-			var titleFieldID = Zotero.ItemFields.getID('title');
-			var sql = "SELECT itemID, title FROM itemNotes WHERE itemID"
-				+ " NOT IN (SELECT itemID FROM itemAttachments)";
-			if (items) {
-				sql += " AND itemID IN (" + items.join() + ")";
-			}
-			var rows = Zotero.DB.query(sql);
-			
-			for each(var row in rows) {
-				//Zotero.debug('Setting title for note ' + row.itemID);
-				if (this._objectCache[row.itemID]) {
-					this._objectCache[row.itemID].setField(titleFieldID, row.title, true);
-				}
-				else {
-					if (!missingItems) {
-						var missingItems = {};
+		sql += " AND fieldID IN (" + fieldIDs.join() + ")";
+		yield Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				onRow: function (row) {
+					let itemID = row.getResultByIndex(0);
+					let fieldID = row.getResultByIndex(1);
+					let value = row.getResultByIndex(2);
+					
+					//Zotero.debug('Setting field ' + fieldID + ' for item ' + itemID);
+					if (this._objectCache[itemID]) {
+						this._objectCache[itemID].setField(fieldID, value, true);
 					}
-					if (!missingItems[row.itemID]) {
-						missingItems[row.itemID] = true;
-						Components.utils.reportError("itemData row references nonexistent item " + row.itemID);
+					else {
+						if (!missingItems) {
+							var missingItems = {};
+						}
+						if (!missingItems[itemID]) {
+							missingItems[itemID] = true;
+							Zotero.debug("itemData row references nonexistent item " + itemID);
+							Components.utils.reportError("itemData row references nonexistent item " + itemID);
+						}
 					}
-				}
+					
+					if (!itemFieldsCached[itemID]) {
+						itemFieldsCached[itemID] = {};
+					}
+					itemFieldsCached[itemID][fieldID] = true;
+				}.bind(this)
 			}
-		}
+		);
 		
 		// Set nonexistent fields in the cache list to false (instead of null)
-		for each(var itemID in allItemIDs) {
-			for each(var fieldID in fieldIDs) {
+		for (let i=0; i<allItemIDs.length; i++) {
+			let itemID = allItemIDs[i];
+			for (let j=0; j<fieldIDs.length; j++) {
+				let fieldID = fieldIDs[j];
 				if (Zotero.ItemFields.isValidForType(fieldID, this._objectCache[itemID].itemTypeID)) {
 					if (!itemFieldsCached[itemID] || !itemFieldsCached[itemID][fieldID]) {
 						//Zotero.debug('Setting field ' + fieldID + ' to false for item ' + itemID);
@@ -381,7 +367,56 @@ Zotero.Items = new function() {
 				}
 			}
 		}
-	}
+		
+		// If 'title' is one of the fields, load in display titles (note titles, letter titles...)
+		if (fields.indexOf('title') != -1) {
+			var titleFieldID = Zotero.ItemFields.getID('title');
+			
+			// Note titles
+			var sql = "SELECT itemID, title FROM items JOIN itemNotes USING (itemID) "
+				+ "WHERE libraryID=? AND itemID NOT IN (SELECT itemID FROM itemAttachments)";
+			var params = [libraryID];
+			if (items) {
+				sql += " AND itemID IN (" + items.join() + ")";
+			}
+			
+			yield Zotero.DB.queryAsync(
+				sql,
+				params,
+				{
+					onRow: function (row) {
+						let itemID = row.getResultByIndex(0);
+						let title = row.getResultByIndex(1);
+						
+						//Zotero.debug('Setting title for note ' + row.itemID);
+						if (this._objectCache[itemID]) {
+							this._objectCache[itemID].setField(titleFieldID, title, true);
+						}
+						else {
+							if (!missingItems) {
+								var missingItems = {};
+							}
+							if (!missingItems[itemID]) {
+								missingItems[itemID] = true;
+								Components.utils.reportError(
+									"itemData row references nonexistent item " + itemID
+								);
+							}
+						}
+					}.bind(this)
+				}
+			);
+			
+			// Display titles
+			for (let i=0; i<allItemIDs.length; i++) {
+				let itemID = allItemIDs[i];
+				let item = this._objectCache[itemID];
+				yield this._objectCache[itemID].loadDisplayTitle()
+			}
+		}
+		
+		Zotero.debug("Cached fields in " + ((new Date) - t) + "ms");
+	});
 	
 	
 	this.merge = function (item, otherItems) {
@@ -398,7 +433,7 @@ Zotero.Items = new function() {
 				
 				// TODO: Skip identical children?
 				
-				attachment.setSource(item.id);
+				attachment.parentID = item.id;
 				attachment.save();
 			}
 			
@@ -419,8 +454,7 @@ Zotero.Items = new function() {
 			}
 			
 			// Related items
-			var relatedItems = otherItem.relatedItemsBidirectional;
-			Zotero.debug(item._getRelatedItems(true));
+			var relatedItems = otherItem.relatedItems;
 			for each(var relatedItemID in relatedItems) {
 				item.addRelatedItem(relatedItemID);
 			}
@@ -450,54 +484,49 @@ Zotero.Items = new function() {
 	this.trash = function (ids) {
 		ids = Zotero.flattenArguments(ids);
 		
-		Zotero.UnresponsiveScriptIndicator.disable();
-		try {
-			Zotero.DB.beginTransaction();
-			for each(var id in ids) {
-				var item = this.get(id);
+		return Zotero.DB.executeTransaction(function* () {
+			for (let i=0; i<ids.length; i++) {
+				let id = ids[i];
+				let item = yield this.getAsync(id);
 				if (!item) {
 					Zotero.debug('Item ' + id + ' does not exist in Items.trash()!', 1);
 					Zotero.Notifier.trigger('delete', 'item', id);
 					continue;
 				}
 				item.deleted = true;
-				item.save();
+				yield item.save({
+					skipDateModifiedUpdate: true
+				});
 			}
-			Zotero.DB.commitTransaction();
-		}
-		catch (e) {
-			Zotero.DB.rollbackTransaction();
-			throw (e);
-		}
-		finally {
-			Zotero.UnresponsiveScriptIndicator.enable();
-		}
+		}.bind(this));
 	}
 	
 	
 	/**
 	 * @param	{Integer}	days	Only delete items deleted more than this many days ago
 	 */
-	this.emptyTrash = function (libraryID, days, limit) {
+	this.emptyTrash = Zotero.Promise.coroutine(function* (libraryID, days, limit) {
 		var t = new Date();
 		
-		Zotero.DB.beginTransaction();
-		var deletedIDs = this.getDeleted(libraryID, true, days);
-		if (deletedIDs.length) {
-			if (limit) {
-				deletedIDs = deletedIDs.slice(0, limit - 1)
-			}
-			this.erase(deletedIDs);
-			Zotero.Notifier.trigger('refresh', 'trash', libraryID);
-		}
-		Zotero.DB.commitTransaction();
+		var deletedIDs = [];
 		
+		yield Zotero.DB.executeTransaction(function* () {
+			deletedIDs = yield this.getDeleted(libraryID, true, days);
+			if (deletedIDs.length) {
+				if (limit) {
+					deletedIDs = deletedIDs.slice(0, limit - 1)
+				}
+				yield this.erase(deletedIDs);
+				Zotero.Notifier.trigger('refresh', 'trash', libraryID);
+			}
+		}.bind(this));
+			
 		if (deletedIDs.length) {
 			Zotero.debug("Emptied " + deletedIDs.length + " item(s) from trash in " + (new Date() - t) + " ms");
 		}
 		
 		return deletedIDs.length;
-	}
+	});
 	
 	
 	/**
@@ -519,23 +548,24 @@ Zotero.Items = new function() {
 					// TODO: increase number after dealing with slow
 					// tag.getLinkedItems() call during deletes
 					var num = 10;
-					var deleted = Zotero.Items.emptyTrash(null, days, num);
-					
-					if (!deleted) {
-						_emptyTrashTimer = null;
-						return;
-					}
-					
-					// Set a timer to do more every few seconds
-					if (!_emptyTrashTimer) {
-						_emptyTrashTimer = Components.classes["@mozilla.org/timer;1"].
-											createInstance(Components.interfaces.nsITimer);
-					}
-					_emptyTrashTimer.init(
-						_emptyTrashIdleObserver.observe,
-						5 * 1000,
-						Components.interfaces.nsITimer.TYPE_ONE_SHOT
-					);
+					Zotero.Items.emptyTrash(null, days, num)
+					.then(function (deleted) {
+						if (!deleted) {
+							_emptyTrashTimer = null;
+							return;
+						}
+						
+						// Set a timer to do more every few seconds
+						if (!_emptyTrashTimer) {
+							_emptyTrashTimer = Components.classes["@mozilla.org/timer;1"]
+								.createInstance(Components.interfaces.nsITimer);
+						}
+						_emptyTrashTimer.init(
+							_emptyTrashIdleObserver.observe,
+							5 * 1000,
+							Components.interfaces.nsITimer.TYPE_ONE_SHOT
+						);
+					});
 				}
 				// When no longer idle, cancel timer
 				else if (topic == 'back') {
@@ -555,50 +585,66 @@ Zotero.Items = new function() {
 	/**
 	 * Delete item(s) from database and clear from internal array
 	 *
-	 * @param	{Integer|Integer[]}	ids					Item ids
+	 * @param {Integer|Integer[]} ids - Item ids
+	 * @return {Promise}
 	 */
-	function erase(ids) {
-		ids = Zotero.flattenArguments(ids);
-		
-		var usiDisabled = Zotero.UnresponsiveScriptIndicator.disable();
-		try {
-			Zotero.DB.beginTransaction();
-			for each(var id in ids) {
-				var item = this.get(id);
+	this.erase = function (ids) {
+		return Zotero.DB.executeTransaction(function* () {
+			ids = Zotero.flattenArguments(ids);
+			
+			for (let i=0; i<ids.length; i++) {
+				let id = ids[i];
+				let item = yield this.getAsync(id);
 				if (!item) {
 					Zotero.debug('Item ' + id + ' does not exist in Items.erase()!', 1);
 					continue;
 				}
-				item.erase(); // calls unload()
-				item = undefined;
+				yield item.erase(); // calls unload()
 			}
-			Zotero.DB.commitTransaction();
-		}
-		catch (e) {
-			Zotero.DB.rollbackTransaction();
-			throw (e);
-		}
-		finally {
-			if (usiDisabled) {
-				Zotero.UnresponsiveScriptIndicator.enable();
-			}
-		}
-	}
+		}.bind(this));
+	};
 	
 	
 	/**
 	 * Purge unused data values
 	 */
-	this.purge = function () {
+	this.purge = Zotero.Promise.coroutine(function* () {
 		if (!Zotero.Prefs.get('purge.items')) {
 			return;
 		}
 		
 		var sql = "DELETE FROM itemDataValues WHERE valueID NOT IN "
 					+ "(SELECT valueID FROM itemData)";
-		Zotero.DB.query(sql);
+		yield Zotero.DB.queryAsync(sql);
 		
 		Zotero.Prefs.set('purge.items', false)
+	});
+	
+	
+	this._getPrimaryDataSQL = function () {
+		// This should match Zotero.Item.loadPrimaryData, but with all possible columns
+		return "SELECT "
+			+ Object.keys(this._primaryDataSQLParts).map((val) => this._primaryDataSQLParts[val]).join(', ')
+			+ this.primaryDataSQLFrom;
+	};
+	
+	
+	this.primaryDataSQLFrom = " FROM items O "
+		+ "LEFT JOIN itemAttachments IA USING (itemID) "
+		+ "LEFT JOIN items IAP ON (IA.parentItemID=IAP.itemID) "
+		+ "LEFT JOIN itemNotes INo ON (O.itemID=INo.itemID) "
+		+ "LEFT JOIN items INoP ON (INo.parentItemID=INoP.itemID) "
+		+ "LEFT JOIN deletedItems DI ON (O.itemID=DI.itemID) "
+		+ "WHERE 1";
+	
+	
+	this._postLoad = function (libraryID, ids) {
+		if (!ids) {
+			if (!_cachedFields[libraryID]) {
+				_cachedFields[libraryID] = [];
+			}
+			_cachedFields[libraryID] = this.primaryFields.concat();
+		}
 	}
 	
 	
@@ -607,7 +653,7 @@ Zotero.Items = new function() {
 	 *
 	 * Why do we do this entirely in SQL? Because we're crazy. Crazy like foxes.
 	 */
-	function getFirstCreatorSQL() {
+	function _getFirstCreatorSQL() {
 		if (_firstCreatorSQL) {
 			return _firstCreatorSQL;
 		}
@@ -620,90 +666,84 @@ Zotero.Items = new function() {
 			"CASE (" +
 				"SELECT COUNT(*) FROM itemCreators IC " +
 				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=I.itemTypeID) " +
-				"WHERE itemID=I.itemID AND primaryField=1" +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
+				"WHERE itemID=O.itemID AND primaryField=1" +
 			") " +
 			"WHEN 0 THEN NULL " +
 			"WHEN 1 THEN (" +
 				"SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
-				"NATURAL JOIN creatorData " +
 				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=I.itemTypeID) " +
-				"WHERE itemID=I.itemID AND primaryField=1" +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
+				"WHERE itemID=O.itemID AND primaryField=1" +
 			") " +
 			"WHEN 2 THEN (" +
 				"SELECT " +
 				"(SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
-				"NATURAL JOIN creatorData " +
 				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=I.itemTypeID) " +
-				"WHERE itemID=I.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
+				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
 				" || ' " + localizedAnd + " ' || " +
 				"(SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
-				"NATURAL JOIN creatorData " +
 				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=I.itemTypeID) " +
-				"WHERE itemID=I.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1,1)" +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
+				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1,1)" +
 			") " +
 			"ELSE (" +
 				"SELECT " +
 				"(SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
-				"NATURAL JOIN creatorData " +
 				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=I.itemTypeID) " +
-				"WHERE itemID=I.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
+				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
 				" || ' " + localizedEtAl + "' " + 
 			") " +
 			"END, " +
 			
 			// Then try editors
 			"CASE (" +
-				"SELECT COUNT(*) FROM itemCreators WHERE itemID=I.itemID AND creatorTypeID IN (3)" +
+				"SELECT COUNT(*) FROM itemCreators WHERE itemID=O.itemID AND creatorTypeID IN (3)" +
 			") " +
 			"WHEN 0 THEN NULL " +
 			"WHEN 1 THEN (" +
 				"SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				"NATURAL JOIN creatorData " +
-				"WHERE itemID=I.itemID AND creatorTypeID IN (3)" +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (3)" +
 			") " +
 			"WHEN 2 THEN (" +
 				"SELECT " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators NATURAL JOIN creatorData " +
-				"WHERE itemID=I.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1)" +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1)" +
 				" || ' " + localizedAnd + " ' || " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators NATURAL JOIN creatorData " +
-				"WHERE itemID=I.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1,1) " +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1,1) " +
 			") " +
 			"ELSE (" +
 				"SELECT " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators NATURAL JOIN creatorData " +
-				"WHERE itemID=I.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1)" +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1)" +
 				" || ' " + localizedEtAl + "' " +
 			") " +
 			"END, " +
 			
 			// Then try contributors
 			"CASE (" +
-				"SELECT COUNT(*) FROM itemCreators WHERE itemID=I.itemID AND creatorTypeID IN (2)" +
+				"SELECT COUNT(*) FROM itemCreators WHERE itemID=O.itemID AND creatorTypeID IN (2)" +
 			") " +
 			"WHEN 0 THEN NULL " +
 			"WHEN 1 THEN (" +
 				"SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				"NATURAL JOIN creatorData " +
-				"WHERE itemID=I.itemID AND creatorTypeID IN (2)" +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (2)" +
 			") " +
 			"WHEN 2 THEN (" +
 				"SELECT " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators NATURAL JOIN creatorData " +
-				"WHERE itemID=I.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
 				" || ' " + localizedAnd + " ' || " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators NATURAL JOIN creatorData " +
-				"WHERE itemID=I.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1,1) " +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1,1) " +
 			") " +
 			"ELSE (" +
 				"SELECT " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators NATURAL JOIN creatorData " +
-				"WHERE itemID=I.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
+				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
 				" || ' " + localizedEtAl + "' " + 
 			") " +
 			"END" +
@@ -714,8 +754,130 @@ Zotero.Items = new function() {
 	}
 	
 	
+	/*
+	 * Generate SQL to retrieve sortCreator field
+	 */
+	function _getSortCreatorSQL() {
+		if (_sortCreatorSQL) {
+			return _sortCreatorSQL;
+		}
+		
+		var nameSQL = "lastName || ' ' || firstName ";
+		
+		var sql = "COALESCE(" +
+			// First try for primary creator types
+			"CASE (" +
+				"SELECT COUNT(*) FROM itemCreators IC " +
+				"LEFT JOIN itemTypeCreatorTypes ITCT " +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
+				"WHERE itemID=O.itemID AND primaryField=1" +
+			") " +
+			"WHEN 0 THEN NULL " +
+			"WHEN 1 THEN (" +
+				"SELECT " + nameSQL + "FROM itemCreators IC NATURAL JOIN creators " +
+				"LEFT JOIN itemTypeCreatorTypes ITCT " +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
+				"WHERE itemID=O.itemID AND primaryField=1" +
+			") " +
+			"WHEN 2 THEN (" +
+				"SELECT " +
+				"(SELECT " + nameSQL + " FROM itemCreators IC NATURAL JOIN creators " +
+				"LEFT JOIN itemTypeCreatorTypes ITCT " +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
+				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
+				" || ' ' || " +
+				"(SELECT " + nameSQL + " FROM itemCreators IC NATURAL JOIN creators " +
+				"LEFT JOIN itemTypeCreatorTypes ITCT " +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
+				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1,1)" +
+			") " +
+			"ELSE (" +
+				"SELECT " +
+				"(SELECT " + nameSQL + " FROM itemCreators IC NATURAL JOIN creators " +
+				"LEFT JOIN itemTypeCreatorTypes ITCT " +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
+				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
+				" || ' ' || " +
+				"(SELECT " + nameSQL + " FROM itemCreators IC NATURAL JOIN creators " +
+				"LEFT JOIN itemTypeCreatorTypes ITCT " +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
+				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1,1)" +
+				" || ' ' || " +
+				"(SELECT " + nameSQL + " FROM itemCreators IC NATURAL JOIN creators " +
+				"LEFT JOIN itemTypeCreatorTypes ITCT " +
+				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
+				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 2,1)" +
+			") " +
+			"END, " +
+			
+			// Then try editors
+			"CASE (" +
+				"SELECT COUNT(*) FROM itemCreators WHERE itemID=O.itemID AND creatorTypeID IN (3)" +
+			") " +
+			"WHEN 0 THEN NULL " +
+			"WHEN 1 THEN (" +
+				"SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (3)" +
+			") " +
+			"WHEN 2 THEN (" +
+				"SELECT " +
+				"(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1)" +
+				" || ' ' || " +
+				"(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1,1) " +
+			") " +
+			"ELSE (" +
+				"SELECT " +
+				"(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1)" +
+				" || ' ' || " +
+				"(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 1,1)" +
+				" || ' ' || " +
+				"(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (3) ORDER BY orderIndex LIMIT 2,1)" +
+			") " +
+			"END, " +
+			
+			// Then try contributors
+			"CASE (" +
+				"SELECT COUNT(*) FROM itemCreators WHERE itemID=O.itemID AND creatorTypeID IN (2)" +
+			") " +
+			"WHEN 0 THEN NULL " +
+			"WHEN 1 THEN (" +
+				"SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (2)" +
+			") " +
+			"WHEN 2 THEN (" +
+				"SELECT " +
+				"(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
+				" || ' ' || " +
+				"(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1,1) " +
+			") " +
+			"ELSE (" +
+				"SELECT " +
+				"(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1)" +
+				" || ' ' || " + 
+				"(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 1,1)" +
+				" || ' ' || " + 
+				"(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators " +
+				"WHERE itemID=O.itemID AND creatorTypeID IN (2) ORDER BY orderIndex LIMIT 2,1)" +
+			") " +
+			"END" +
+		") AS sortCreator";
+		
+		_sortCreatorSQL = sql;
+		return sql;
+	}
+	
+	
 	function getSortTitle(title) {
-		if (!title) {
+		if (title === false || title === undefined) {
 			return '';
 		}
 		if (typeof title == 'number') {
@@ -723,57 +885,4 @@ Zotero.Items = new function() {
 		}
 		return title.replace(/^[\[\'\"](.*)[\'\"\]]?$/, '$1')
 	}
-	
-	
-	this._load = function () {
-		if (!arguments[0] && !this._reloadCache) {
-			return;
-		}
-		
-		// Should be the same as parts in Zotero.Item.loadPrimaryData
-		var sql = 'SELECT I.*, '
-			+ getFirstCreatorSQL() + ', '
-			+ "(SELECT COUNT(*) FROM itemNotes INo WHERE sourceItemID=I.itemID AND "
-			+ "INo.itemID NOT IN (SELECT itemID FROM deletedItems)) AS numNotes, "
-			+ "(SELECT COUNT(*) FROM itemAttachments IA WHERE sourceItemID=I.itemID AND "
-			+ "IA.itemID NOT IN (SELECT itemID FROM deletedItems)) AS numAttachments, "
-			+ "(CASE I.itemTypeID WHEN 14 THEN (SELECT sourceItemID FROM itemAttachments IA WHERE IA.itemID=I.itemID) "
-			+ "WHEN 1 THEN (SELECT sourceItemID FROM itemNotes INo WHERE INo.itemID=I.itemID) END) AS sourceItemID "
-			+ 'FROM items I WHERE 1';
-		if (arguments[0]) {
-			sql += ' AND I.itemID IN (' + Zotero.join(arguments[0], ',') + ')';
-		}
-		var itemsRows = Zotero.DB.query(sql),
-			itemIDs = {};
-		for(var i=0, n=itemsRows.length; i<n; i++) {
-			var row = itemsRows[i],
-				itemID = row.itemID;
-			itemIDs[itemID] = true;
-			
-			// Item doesn't exist -- create new object and stuff in array
-			if (!this._objectCache[itemID]) {
-				var item = new Zotero.Item();
-				item.loadFromRow(row, true);
-				this._objectCache[itemID] = item;
-			}
-			// Existing item -- reload in place
-			else {
-				this._objectCache[itemID].loadFromRow(row, true);
-			}
-		}
-		
-		// If loading all items, remove old items that no longer exist
-		if (!arguments[0]) {
-			for each(var c in this._objectCache) {
-				if (!itemIDs[c.id]) {
-					this.unload(c.id);
-				}
-			}
-			
-			_cachedFields = ['itemID', 'itemTypeID', 'dateAdded', 'dateModified',
-				'firstCreator', 'numNotes', 'numAttachments', 'sourceItemID', 'numChildren'];
-			this._reloadCache = false;
-		}
-	}
 }
-

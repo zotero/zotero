@@ -131,7 +131,7 @@ Zotero.Translator.prototype.init = function(info) {
  * Load code for a translator
  */
 Zotero.Translator.prototype.getCode = function() {
-	if(this.code) return Q(this.code);
+	if(this.code) return Zotero.Promise.resolve(this.code);
 
 	var me = this;
 	if(Zotero.isConnector) {

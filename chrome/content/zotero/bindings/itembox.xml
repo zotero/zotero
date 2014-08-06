@@ -347,7 +347,7 @@
 							// createValueElement() adds the itemTypeID as an attribute
 							// and converts it to a localized string for display
 							if (fieldName == 'itemType') {
-								val = this.item.getField('itemTypeID');
+								val = this.item.itemTypeID;
 							}
 							else {
 								val = this.item.getField(fieldName);
@@ -530,8 +530,8 @@
 							max = num;
 						}
 						for (var i = 0; i < max; i++) {
-							this.addCreatorRow(this.item.getCreator(i).ref,
-								this.item.getCreator(i).creatorTypeID);
+							let data = this.item.getCreator(i);
+							this.addCreatorRow(data, data.creatorType);
 							
 							// Display "+" button on all but last row
 							if (i == max - 2) {
@@ -553,7 +553,7 @@
 							this._displayAllCreators = true;
 							
 							if (this._addCreatorRow) {
-								this.addCreatorRow(false, this.item.getCreator(max-1).creatorTypeID, true); 
+								this.addCreatorRow(false, this.item.getCreator(max-1).creatorType, true); 
 								this._addCreatorRow = false;
 								this.disableCreatorAddButtons();
 							}
@@ -659,8 +659,8 @@
 			
 			
 			<method name="addCreatorRow">
-				<parameter name="creator"/>
-				<parameter name="creatorTypeID"/>
+				<parameter name="creatorData"/>
+				<parameter name="creatorTypeIDOrName"/>
 				<parameter name="unsaved"/>
 				<parameter name="defaultRow"/>
 				<body>
@@ -668,26 +668,34 @@
 					// getCreatorFields(), switchCreatorMode() and handleCreatorAutoCompleteSelect()
 					// may need need to be adjusted if this DOM structure changes
 					
-					if (!creator) {
-						creator = {
-							firstName: '',
-							lastName: '',
-							fieldMode: Zotero.Prefs.get('lastCreatorFieldMode')
-						};
+					var fieldMode = Zotero.Prefs.get('lastCreatorFieldMode');
+					var firstName = '';
+					var lastName = '';
+					if (creatorData) {
+						fieldMode = creatorData.fieldMode;
+						firstName = creatorData.firstName;
+						lastName = creatorData.lastName;
 					}
 					
-					if (creator.fieldMode == 1) {
-						var firstName = '';
-						var lastName = creator.lastName ? creator.lastName : this._defaultFullName;
+					// Sub in placeholder text for empty fields
+					if (fieldMode == 1) {
+						if (lastName === "") {
+							lastName = this._defaultFullName;
+						}
 					}
 					else {
-						var firstName = creator.firstName ? creator.firstName : this._defaultFirstName;
-						var lastName = creator.lastName ? creator.lastName : this._defaultLastName;
+						if (firstName === "") {
+							firstName = this._defaultFirstName;
+						}
+						if (lastName === "") {
+							lastName = this._defaultLastName;
+						}
 					}
 					
 					// Use the first entry in the drop-down for the default type if none specified
-					var typeID = creatorTypeID ?
-						creatorTypeID : this._creatorTypeMenu.childNodes[0].getAttribute('typeid');
+					var typeID = creatorTypeIDOrName
+						? Zotero.CreatorTypes.getID(creatorTypeIDOrName)
+						: this._creatorTypeMenu.childNodes[0].getAttribute('typeid');
 					
 					var typeBox = document.createElement("hbox");
 					typeBox.setAttribute("typeid", typeID);
@@ -738,7 +746,7 @@
 							tabindex + 1
 						)
 					);
-					if (creator.fieldMode) {
+					if (fieldMode) {
 						firstlast.lastChild.setAttribute('hidden', true);
 					}
 					
@@ -782,7 +790,7 @@
 						this.disableButton(addButton);
 					}
 					else {
-						this._enablePlusButton(addButton, typeID, creator.fieldMode);
+						this._enablePlusButton(addButton, typeID, fieldMode);
 					}
 					hbox.appendChild(addButton);
 					
@@ -797,7 +805,7 @@
 					this.addDynamicRow(typeBox, hbox, true);
 					
 					// Set single/double field toggle mode
-					if (creator.fieldMode) {
+					if (fieldMode) {
 						this.switchCreatorMode(hbox.parentNode, 1, true);
 					}
 					else {
@@ -1169,16 +1177,11 @@
 				<body>
 				<![CDATA[
 					button.setAttribute('disabled', false);
-					button.setAttribute("onclick",
-						"var parent = document.getBindingParent(this); "
-						+ "parent.disableButton(this); "
-						+ "var creator = new Zotero.Creator; "
-						+ "creator.fieldMode = " + (fieldMode ? fieldMode : 0) + "; "
-						+ "parent.addCreatorRow("
-							+ "creator, "
-							+ (creatorTypeID ? creatorTypeID : 'false') + ", true"
-						+ ");"
-					);
+					button.onclick = function () {
+						var parent = document.getBindingParent(this);
+						parent.disableButton(this);
+						parent.addCreatorRow(null, creatorTypeID, true);
+					};
 				]]>
 				</body>
 			</method>
@@ -1373,8 +1376,10 @@
 					
 					var [field, creatorIndex, creatorField] = fieldName.split('-');
 					if (field == 'creator') {
-						var c = this.item.getCreator(creatorIndex);
-						var value = c ? c.ref[creatorField] : '';
+						var value = this.item.getCreator(creatorIndex)[creatorField];
+						if (value === undefined) {
+							value = "";
+						}
 						var itemID = this.item.id;
 					}
 					else {
@@ -1487,72 +1492,73 @@
 			-->
 			<method name="handleCreatorAutoCompleteSelect">
 				<parameter name="textbox"/>
-				<body>
-				<![CDATA[
-					var comment = false;
-					var controller = textbox.controller;
-					if (!controller.matchCount) return;
-					
-					for (var i=0; i<controller.matchCount; i++)
-					{
-						if (controller.getValueAt(i) == textbox.value)
+				<body><![CDATA[
+					return Zotero.spawn(function* () {
+						var comment = false;
+						var controller = textbox.controller;
+						if (!controller.matchCount) return;
+						
+						for (var i=0; i<controller.matchCount; i++)
 						{
-							comment = controller.getCommentAt(i);
-							break;
-						}
-					}
-					
-					var [creatorID, numFields] = comment.split('-');
-					
-					// If result uses two fields, save both
-					if (numFields==2)
-					{
-						// Manually clear autocomplete controller's reference to
-						// textbox to prevent error next time around
-						textbox.mController.input = null;
-						
-						var [field, creatorIndex, creatorField] =
-							textbox.getAttribute('fieldname').split('-');
-						
-						// Stay focused
-						this._lastTabIndex = parseInt(textbox.getAttribute('ztabindex')) - 1;
-						this._tabDirection = 1;
-						
-						var creator = Zotero.Creators.get(creatorID);
-						
-						var otherField = creatorField == 'lastName' ? 'firstName' : 'lastName';
-						
-						// Update this textbox
-						textbox.setAttribute('value', creator[creatorField]);
-						textbox.value = creator[creatorField];
-						
-						// Update the other label
-						if (otherField=='firstName'){
-							var label = textbox.nextSibling.nextSibling;
-						}
-						else if (otherField=='lastName'){
-							var label = textbox.previousSibling.previousSibling;
+							if (controller.getValueAt(i) == textbox.value)
+							{
+								comment = controller.getCommentAt(i);
+								break;
+							}
 						}
 						
-						//this._setFieldValue(label, creator[otherField]);
-						if (label.firstChild){
-							label.firstChild.nodeValue = creator[otherField];
-						}
-						else {
-							label.value = creator[otherField];
+						Zotero.debug(comment);
+						var [creatorID, numFields] = comment.split('-');
+						
+						// If result uses two fields, save both
+						if (numFields==2)
+						{
+							// Manually clear autocomplete controller's reference to
+							// textbox to prevent error next time around
+							textbox.mController.input = null;
+							
+							var [field, creatorIndex, creatorField] =
+								textbox.getAttribute('fieldname').split('-');
+							
+							// Stay focused
+							this._lastTabIndex = parseInt(textbox.getAttribute('ztabindex')) - 1;
+							this._tabDirection = 1;
+							
+							var creator = yield Zotero.Creators.getAsync(creatorID);
+							
+							var otherField = creatorField == 'lastName' ? 'firstName' : 'lastName';
+							
+							// Update this textbox
+							textbox.setAttribute('value', creator[creatorField]);
+							textbox.value = creator[creatorField];
+							
+							// Update the other label
+							if (otherField=='firstName'){
+								var label = textbox.nextSibling.nextSibling;
+							}
+							else if (otherField=='lastName'){
+								var label = textbox.previousSibling.previousSibling;
+							}
+							
+							//this._setFieldValue(label, creator[otherField]);
+							if (label.firstChild){
+								label.firstChild.nodeValue = creator[otherField];
+							}
+							else {
+								label.value = creator[otherField];
+							}
+							
+							var row = Zotero.getAncestorByTagName(textbox, 'row');
+							
+							var fields = this.getCreatorFields(row);
+							fields[creatorField] = creator[creatorField];
+							fields[otherField] = creator[otherField];
+							yield this.modifyCreator(creatorIndex, fields);
 						}
 						
-						var row = Zotero.getAncestorByTagName(textbox, 'row');
-						
-						var fields = this.getCreatorFields(row);
-						fields[creatorField] = creator[creatorField];
-						fields[otherField] = creator[otherField];
-						this.modifyCreator(creatorIndex, fields);
-					}
-					
-					// Otherwise let the autocomplete popup handle matters
-				]]>
-				</body>
+						// Otherwise let the autocomplete popup handle matters
+					}, this);
+				]]></body>
 			</method>
 			
 			
@@ -1719,8 +1725,8 @@
 								
 								//Shift existing creators
 								for (var i=initNumCreators-1; i>=creatorIndex; i--) {
-									var shiftedCreator = this.item.getCreator(i);
-									this.item.setCreator(nameArray.length+i,shiftedCreator.ref,shiftedCreator.creatorTypeID);
+									let shiftedCreatorData = this.item.getCreator(i);
+									this.item.setCreator(nameArray.length + i, shiftedCreatorData);
 								}
 							}
 							
@@ -1753,7 +1759,7 @@
 						}
 	
 						var val = this.item.getCreator(creatorIndex);
-						val = val ? val.ref[creatorField] : null;
+						val = val ? val[creatorField] : null;
 						
 						if (!val) {
 							// Reset to '(first)'/'(last)'/'(name)'
@@ -1977,10 +1983,8 @@
 					var label2 = label1.parentNode.lastChild;
 					
 					var fields = {
-						lastName: label1.firstChild ? label1.firstChild.nodeValue
-							: label1.value,
-						firstName: label2.firstChild ? label2.firstChild.nodeValue
-							: label2.value,
+						lastName: label1.firstChild ? label1.firstChild.nodeValue : label1.value,
+						firstName: label2.firstChild ? label2.firstChild.nodeValue : label2.value,
 						fieldMode: label1.getAttribute('fieldMode')
 							? parseInt(label1.getAttribute('fieldMode')) : 0,
 						creatorTypeID: parseInt(typeID),
@@ -1996,6 +2000,9 @@
 						fields.lastName = '';
 					}
 					
+					Zotero.debug("RETURNING FIELDS");
+					Zotero.debug(fields);
+					
 					return fields;
 				]]>
 				</body>
@@ -2006,14 +2013,11 @@
 				<parameter name="index"/>
 				<parameter name="fields"/>
 				<parameter name="changeGlobally"/>
-				<body>
-				<![CDATA[
-				try {
-					
+				<body><![CDATA[
+				return Zotero.Promise.try(function () {
 					var libraryID = this.item.libraryID;
 					var firstName = fields.firstName;
 					var lastName = fields.lastName;
-					//var shortName = fields.shortName;
 					var fieldMode = fields.fieldMode;
 					var creatorTypeID = fields.creatorTypeID;
 					
@@ -2025,130 +2029,27 @@
 							return;
 						}
 						this.item.removeCreator(index);
-						this.item.save();
+						if (this.saveOnEdit) {
+							return this.item.save();
+						}
 						return;
 					}
 					
-					Zotero.DB.beginTransaction();
-					
-					var newCreator = new Zotero.Creator;
-					newCreator.libraryID = libraryID;
-					newCreator.setFields(fields);
-					
-					var newLinkedCreators = [];
-					var creatorDataID = Zotero.Creators.getDataID(fields);
-					if (creatorDataID) {
-						newLinkedCreators = Zotero.Creators.getCreatorsWithData(creatorDataID, libraryID);
+					var changed = this.item.setCreator(index, fields);
+					if (changed && this.saveOnEdit) {
+						return this.item.save();
 					}
-					
-					if (oldCreator) {
-						if (oldCreator.ref.equals(newCreator) || (oldCreator.ref.libraryID != newCreator.libraryID)) {
-							if (oldCreator.creatorTypeID == creatorTypeID) {
-								Zotero.debug("Creator " + oldCreator.ref.id + " hasn't changed");
-							}
-							// Just change creatorTypeID
-							else {
-								this.item.setCreator(index, oldCreator.ref, creatorTypeID);
-								if (this.saveOnEdit) {
-									this.item.save();
-								}
-							}
-							Zotero.DB.commitTransaction();
-							return;
-						}
-						
-						oldCreator = oldCreator.ref;
-					}
-					
-					var creator;
-					var creatorID;
-					
-					if (oldCreator) {
-						var numLinkedItems = oldCreator.countLinkedItems();
-						// Creator is linked only to the current item
-						if (numLinkedItems == 1) {
-							if (newLinkedCreators.length) {
-								// Use the first creator found with this data
-								// TODO: support choosing among options
-								creatorID = newLinkedCreators[0];
-								creator = Zotero.Creators.get(creatorID);
-							}
-							else {
-								oldCreator.setFields(fields);
-								//creatorID = oldCreator.save();
-								creator = oldCreator;
-							}
-						}
-						// Creator is linked to multiple items with changeGlobally off
-						else if (!changeGlobally) {
-							if (newLinkedCreators.length) {
-								// Use the first creator found with this data
-								// TODO: support choosing among options
-								creatorID = newLinkedCreators[0];
-								creator = Zotero.Creators.get(creatorID);
-							}
-							else {
-								//creatorID = newCreator.save();
-								creator = newCreator;
-							}
-						}
-						// Creator is linked to multiple items with changeGlobally on
-						else {
-							throw ('changeGlobally unimplemented');
-							if (newLinkedCreators.length) {
-								// Use the first creator found with this data
-								// TODO: support choosing among options
-								creatorID = newLinkedCreators[0];
-								
-								// TODO: switch all linked items to this creator
-							}
-							else {
-								creatorID = newCreator.save();
-								
-								// TODO: switch all linked items to new creatorID
-							}
-						}
-					}
-					// No existing creator
-					else {
-						if (newLinkedCreators.length) {
-							creatorID = newLinkedCreators[0];
-							creator = Zotero.Creators.get(creatorID);
-						}
-						else {
-							//creatorID = newCreator.save();
-							creator = newCreator;
-						}
-					}
-					
-					this.item.setCreator(index, creator, creatorTypeID);
-					if (this.saveOnEdit) {
-						try {
-							this.item.save();
-						}
-						catch (e) {
-							// DEBUG: Errors aren't being logged in Fx3.1b4pre without this
-							Zotero.debug(e);
-							Components.utils.reportError(e);
-							throw (e);
-						}
-					}
-					
-					Zotero.DB.commitTransaction();
-				
-				}
-				catch (e) {
-					Zotero.debug(e);
-					Components.utils.reportError(e);
-					throw (e);
-				}
-				]]>
-				</body>
+				}.bind(this));
+				]]></body>
 			</method>
 			
 			
+			<!--
+			  @return {Promise}
+			-->
 			<method name="swapNames">
 				<body><![CDATA[
+				return Zotero.Promise.try(function () {
 					var row = Zotero.getAncestorByTagName(document.popupNode, 'row');
 					var typeBox = row.getElementsByAttribute('popup', 'creator-type-menu')[0];
 					var creatorIndex = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
@@ -2157,16 +2058,20 @@
 					var firstName = fields.firstName;
 					fields.lastName = firstName;
 					fields.firstName = lastName;
-					this.modifyCreator(creatorIndex, fields);
-					this.item.save();
+					return this.modifyCreator(creatorIndex, fields);
+				}.bind(this));
 				]]></body>
 			</method>
 			
+			<!--
+			  @return {Promise}
+			-->
 			<method name="moveCreator">
 				<parameter name="index"/>
 				<parameter name="moveUp"/>
 				<body>
 				<![CDATA[
+				return Zotero.Promise.try(function () {
 					if (index == 0 && moveUp) {
 						Zotero.debug("Can't move up creator 0");
 						return;
@@ -2177,13 +2082,14 @@
 					}
 					
 					var newIndex = moveUp ? index - 1 : index + 1;
-					var creator = this.item.getCreator(index);
-					var swapCreator = this.item.getCreator(newIndex);
-					this.item.setCreator(newIndex, creator.ref, creator.creatorTypeID);
-					this.item.setCreator(index, swapCreator.ref, swapCreator.creatorTypeID);
+					var a = this.item.getCreator(index);
+					var b = this.item.getCreator(newIndex);
+					this.item.setCreator(newIndex, a);
+					this.item.setCreator(index, b);
 					if (this.saveOnEdit) {
-						this.item.save();
+						return this.item.save();
 					}
+				}.bind(this));
 				]]>
 				</body>
 			</method>
@@ -2206,24 +2112,6 @@
 				]]>
 				</body>
 			</method>
-			
-			<!--
-			/*
-			function modifyCreatorByID(index, creatorID, creatorTypeID) {
-				throw ('Unimplemented');
-				var oldCreator = _itemBeingEdited.getCreator(index);
-				if (creator) {
-					oldCreator = creator.ref;
-					var oldCreatorID = oldCreator.creatorID;
-				}
-				
-				Zotero.debug("Old creatorID is " + oldCreatorID);
-				
-				_itemBeingEdited.setCreator(index, firstName, lastName, typeID, fieldMode);
-				_itemBeingEdited.save();
-			}
-			*/
-			-->
 			
 			
 			<method name="focusFirstField">
@@ -2329,14 +2217,14 @@
 			
 			
 			<method name="blurOpenField">
-				<body>
-				<![CDATA[
-					var textboxes = document.getAnonymousNodes(this)[0].getElementsByTagName('textbox');
-					if (textboxes && textboxes.length) {
-						textboxes[0].inputField.blur();
-					}
-				]]>
-				</body>
+				<body><![CDATA[
+					return Zotero.spawn(function* () {
+						var textboxes = document.getAnonymousNodes(this)[0].getElementsByTagName('textbox');
+						if (textboxes && textboxes.length) {
+							yield this.blurHandler(textboxes[0].inputField);
+						}
+					}, this);
+				]]></body>
 			</method>
 			
 			
@@ -2455,7 +2343,7 @@
 							var item = document.getBindingParent(this).item;
 							var exists = item.hasCreatorAt(index);
 							if (exists) {
-								var fieldMode = item.getCreator(index).ref.fieldMode;
+								var fieldMode = item.getCreator(index).name !== undefined ? 1 : 0;
 							}
 							var hideTransforms = !exists || !!fieldMode;
 							return !hideTransforms;">

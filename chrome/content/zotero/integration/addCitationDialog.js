@@ -141,9 +141,9 @@ var Zotero_Citation_Dialog = new function () {
 				
 				// If we're in a different library, switch libraries
 				var id = io.citation.citationItems[0].id;
-				var itemGroup = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
+				var collectionTreeRow = collectionsView.selectedTreeRow;
 				var item = Zotero.Items.get(id);
-				if(item.libraryID != itemGroup.ref.libraryID) {
+				if(item.libraryID != collectionTreeRow.ref.libraryID) {
 					collectionsView.selectLibrary(item.libraryID);
 				}
 				var selected = itemsView.selectItem(id);

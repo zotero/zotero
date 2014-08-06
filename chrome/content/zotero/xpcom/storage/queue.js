@@ -225,7 +225,7 @@ Zotero.Sync.Storage.Queue.prototype.addRequest = function (request, highPriority
 Zotero.Sync.Storage.Queue.prototype.start = function () {
 	if (!this._deferred || this._deferred.promise.isFulfilled()) {
 		Zotero.debug("Creating deferred for queue " + this.name);
-		this._deferred = Q.defer();
+		this._deferred = Zotero.Promise.defer();
 	}
 	// The queue manager needs to know what queues were running in the
 	// current session
@@ -284,7 +284,7 @@ Zotero.Sync.Storage.Queue.prototype.advance = function () {
 		
 		let requestName = name;
 		
-		Q.fcall(function () {
+		Zotero.Promise.try(function () {
 			var promise = request.start();
 			self.advance();
 			return promise;
@@ -319,7 +319,7 @@ Zotero.Sync.Storage.Queue.prototype.advance = function () {
 		
 		let requestName = request.name;
 		
-		// This isn't in an fcall() because the request needs to get marked
+		// This isn't in a Zotero.Promise.try() because the request needs to get marked
 		// as running immediately so that it doesn't get run again by a
 		// subsequent advance() call.
 		try {
@@ -330,8 +330,7 @@ Zotero.Sync.Storage.Queue.prototype.advance = function () {
 			self.error(e);
 		}
 		
-		Q.when(promise)
-		.then(function (result) {
+		promise.then(function (result) {
 			if (result.localChanges) {
 				self._localChanges = true;
 			}

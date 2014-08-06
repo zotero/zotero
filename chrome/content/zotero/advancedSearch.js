@@ -53,32 +53,24 @@ var ZoteroAdvancedSearch = new function() {
 		_searchBox.updateSearch();
 		_searchBox.active = true;
 		
-		// A minimal implementation of Zotero.CollectionTreeView
-		var itemGroup = {
+		// A minimal implementation of Zotero.CollectionTreeRow
+		var collectionTreeRow = {
+			ref: _searchBox.search,
 			isSearchMode: function() { return true; },
-			getItems: function () {
-				var search = _searchBox.search.clone();
+			getItems: Zotero.Promise.coroutine(function* () {
+				var search = yield _searchBox.search.clone();
 				
 				// Hack to create a condition for the search's library --
 				// this logic should really go in the search itself instead of here
 				// and in collectionTreeView.js
 				var conditions = search.getSearchConditions();
 				if (!conditions.some(function (condition) condition.condition == 'libraryID')) {
-					let libraryID = _searchBox.search.libraryID;
-					// TEMP: libraryIDInt
-					if (libraryID) {
-						search.addCondition('libraryID', 'is', libraryID);
-					}
-					else {
-						let groups = Zotero.Groups.getAll();
-						for (let i=0; i<groups.length; i++) {
-							search.addCondition('libraryID', 'isNot', groups[i].libraryID);
-						}
-					}
+					yield search.addCondition('libraryID', 'is', _searchBox.search.libraryID);
 				}
 				
-				return Zotero.Items.get(search.search());
-			},
+				var ids = yield search.search();
+				return Zotero.Items.get(ids);
+			}),
 			isLibrary: function () { return false; },
 			isCollection: function () { return false; },
 			isSearch: function () { return true; },
@@ -90,7 +82,7 @@ var ZoteroAdvancedSearch = new function() {
 			this.itemsView.unregister();
 		}
 		
-		this.itemsView = new Zotero.ItemTreeView(itemGroup, false);
+		this.itemsView = new Zotero.ItemTreeView(collectionTreeRow, false);
 		document.getElementById('zotero-items-tree').view = this.itemsView;
 	}
 	
@@ -104,9 +96,11 @@ var ZoteroAdvancedSearch = new function() {
 		var s = new Zotero.Search();
 		// Don't clear the selected library
 		s.libraryID = _searchBox.search.libraryID;
-		s.addCondition('title', 'contains', '');
-		_searchBox.search = s;
-		_searchBox.active = false;
+		s.addCondition('title', 'contains', '')
+		.then(function () {
+			_searchBox.search = s;
+			_searchBox.active = false;
+		});
 	}
 	
 	
@@ -138,11 +132,14 @@ var ZoteroAdvancedSearch = new function() {
 			name.value = untitled;
 		}
 		
-		var s = _searchBox.search.clone();
-		s.name = name.value;
-		s.save();
-		
-		window.close();
+		return _searchBox.search.clone()
+		.then(function (s) {
+			s.name = name.value;
+			return s.save();
+		})
+		.then(function () {
+			window.close()
+		});
 	}
 	
 	

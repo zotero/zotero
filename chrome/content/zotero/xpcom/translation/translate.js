@@ -313,7 +313,7 @@ Zotero.Translate.Sandbox = {
 				}
 				
 				var translator = translation.translator[0];
-				(typeof translator === "object" ? Q(translator) : Zotero.Translators.get(translator)).
+				(typeof translator === "object" ? Zotero.Promise.resolve(translator) : Zotero.Translators.get(translator)).
 				then(function(translator) {
 					return translation._loadTranslator(translator);
 				}).then(function() {
@@ -354,7 +354,7 @@ Zotero.Translate.Sandbox = {
 					
 					callback(sandbox);
 					translate.decrementAsyncProcesses("safeTranslator#getTranslatorObject()");
-				}).fail(function(e) {
+				}).catch(function(e) {
 					translate.complete(false, e);
 					return;
 				});
@@ -977,7 +977,7 @@ Zotero.Translate.Base.prototype = {
 		if(checkSetTranslator) {
 			// setTranslator must be called beforehand if checkSetTranslator is set
 			if( !this.translator || !this.translator[0] ) {
-				return Q.reject(new Error("getTranslators: translator must be set via setTranslator before calling" +
+				return Zotero.Promise.reject(new Error("getTranslators: translator must be set via setTranslator before calling" +
 										  " getTranslators with the checkSetTranslator flag"));
 			}
 			var promises = new Array();
@@ -992,8 +992,8 @@ Zotero.Translate.Base.prototype = {
 				/**TODO: check that the translator is of appropriate type?*/
 				if(t) promises.push(t);
 			}
-			if(!promises.length) return Q.reject(new Error("getTranslators: no valid translators were set"));
-			potentialTranslators = Q.all(promises);
+			if(!promises.length) return Zotero.Promise.reject(new Error("getTranslators: no valid translators were set"));
+			potentialTranslators = Zotero.Promise.all(promises);
 		} else {
 			potentialTranslators = this._getTranslatorsGetPotentialTranslators();
 		}
@@ -1022,7 +1022,7 @@ Zotero.Translate.Base.prototype = {
 			// Attach handler for translators, so that we can return a
 			// promise that provides them.
 			// TODO make me._detect() return a promise
-			var deferred = Q.defer(),
+			var deferred = Zotero.Promise.defer(),
 				translatorsHandler = function(obj, translators) {
 					me.removeHandler("translators", translatorsHandler);
 					deferred.resolve(translators);
@@ -1054,7 +1054,7 @@ Zotero.Translate.Base.prototype = {
 			}
 
 			return deferred.promise;
-		}).fail(function(e) {
+		}).catch(function(e) {
 			Zotero.logError(e);
 			me.complete(false, e);
 		});
@@ -1441,7 +1441,7 @@ Zotero.Translate.Base.prototype = {
 					"ZOTERO_TRANSLATOR_INFO"],
 				(translator.file ? translator.file.path : translator.label));
 			me._translatorInfo = me._sandboxManager.sandbox.ZOTERO_TRANSLATOR_INFO;
-		}).fail(function(e) {
+		}).catch(function(e) {
 			me.complete(false, e);
 		});
 	},
@@ -2060,7 +2060,7 @@ Zotero.Translate.Export.prototype.complete = function(returnValue, error) {
  */
 Zotero.Translate.Export.prototype.getTranslators = function() {
 	if(this._currentState === "detect") {
-		return Q.reject(new Error("getTranslators: detection is already running"));
+		return Zotero.Promise.reject(new Error("getTranslators: detection is already running"));
 	}
 	var me = this;
 	return Zotero.Translators.getAllForType(this.type).then(function(translators) {

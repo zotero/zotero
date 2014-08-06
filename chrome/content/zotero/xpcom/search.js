@@ -24,37 +24,25 @@
 */
 
 Zotero.Search = function() {
-	if (arguments[0]) {
-		throw ("Zotero.Search constructor doesn't take any parameters");
-	}
+	var dataTypes = [
+		'primaryData',
+		'conditions'
+	];
+	Zotero.DataObject.apply(this, ['search', 'searches', dataTypes]);
 	
-	this._loaded = false;
-	this._init();
-}
-
-
-Zotero.Search.prototype._init = function () {
-	// Public members for access by public methods -- do not access directly
-	this._id = null;
-	this._libraryID = null;
-	this._key = null;
 	this._name = null;
-	this._dateAdded = null;
-	this._dateModified = null;
-	
-	this._changed = false;
-	this._previousData = false;
 	
 	this._scope = null;
 	this._scopeIncludeChildren = null;
 	this._sql = null;
-	this._sqlParams = null;
+	this._sqlParams = false;
 	this._maxSearchConditionID = 0;
 	this._conditions = [];
 	this._hasPrimaryConditions = false;
 }
 
-
+Zotero.Search.prototype = Object.create(Zotero.DataObject.prototype);
+Zotero.Search.constructor = Zotero.Search;
 
 Zotero.Search.prototype.getID = function(){
 	Zotero.debug('Zotero.Search.getName() is deprecated -- use Search.id');
@@ -72,7 +60,6 @@ Zotero.Search.prototype.setName = function(val) {
 }
 
 
-Zotero.Search.prototype.__defineGetter__('objectType', function () { return 'search'; });
 Zotero.Search.prototype.__defineGetter__('id', function () { return this._get('id'); });
 Zotero.Search.prototype.__defineSetter__('id', function (val) { this._set('id', val); });
 Zotero.Search.prototype.__defineGetter__('libraryID', function () { return this._get('libraryID'); });
@@ -81,102 +68,57 @@ Zotero.Search.prototype.__defineGetter__('key', function () { return this._get('
 Zotero.Search.prototype.__defineSetter__('key', function (val) { this._set('key', val) });
 Zotero.Search.prototype.__defineGetter__('name', function () { return this._get('name'); });
 Zotero.Search.prototype.__defineSetter__('name', function (val) { this._set('name', val); });
-Zotero.Search.prototype.__defineGetter__('dateAdded', function () { return this._get('dateAdded'); });
-Zotero.Search.prototype.__defineSetter__('dateAdded', function (val) { this._set('dateAdded', val); });
-Zotero.Search.prototype.__defineGetter__('dateModified', function () { return this._get('dateModified'); });
-Zotero.Search.prototype.__defineSetter__('dateModified', function (val) { this._set('dateModified', val); });
+Zotero.Search.prototype.__defineGetter__('version', function () { return this._get('version'); });
+Zotero.Search.prototype.__defineSetter__('version', function (val) { this._set('version', val); });
+Zotero.Search.prototype.__defineGetter__('synced', function () { return this._get('synced'); });
+Zotero.Search.prototype.__defineSetter__('synced', function (val) { this._set('synced', val); });
 
 Zotero.Search.prototype.__defineGetter__('conditions', function (arr) { this.getSearchConditions(); });
 
-
-Zotero.Search.prototype._get = function (field) {
-	if ((this._id || this._key) && !this._loaded) {
-		this.load();
+Zotero.Search.prototype._set = function (field, value) {
+	if (field == 'id' || field == 'libraryID' || field == 'key') {
+		return this._setIdentifier(field, value);
 	}
-	return this['_' + field];
-}
-
-
-Zotero.Search.prototype._set = function (field, val) {
+	
 	switch (field) {
-		case 'id':
-		case 'libraryID':
-		case 'key':
-			if (field == 'libraryID') {
-				val = Zotero.DataObjectUtilities.checkLibraryID(val);
-			}
-			
-			if (val == this['_' + field]) {
-				return;
-			}
-			
-			if (this._loaded) {
-				throw new Error("Cannot set " + field + " after object is already loaded");
-			}
-			
-			//this._checkValue(field, val);
-			
-			this['_' + field] = val;
-			return;
-		
-		case 'name':
-			val = Zotero.Utilities.trim(val);
-			break;
+	case 'name':
+		value = value.trim();
+		break;
+	
+	case 'version':
+		value = parseInt(value);
+		break;
+	
+	case 'synced':
+		value = !!value;
+		break;
 	}
 	
-	if (this.id || this.key) {
-		if (!this._loaded) {
-			this.load();
-		}
-	}
-	else {
-		this._loaded = true;
-	}
+	this._requireData('primaryData');
 	
-	if (this['_' + field] != val) {
+	if (this['_' + field] != value) {
 		this._prepFieldChange(field);
 		
 		switch (field) {
 			default:
-				this['_' + field] = val;
+				this['_' + field] = value;
 		}
 	}
-}
-
-
-/**
- * Check if saved search exists in the database
- *
- * @return	bool			TRUE if the search exists, FALSE if not
- */
-Zotero.Search.prototype.exists = function() {
-	if (!this.id) {
-		throw ('searchID not set in Zotero.Search.exists()');
-	}
-	
-	var sql = "SELECT COUNT(*) FROM savedSearches WHERE savedSearchID=?";
-	return !!Zotero.DB.valueQuery(sql, this.id);
 }
 
 
 /*
  * Load a saved search from the DB
  */
-Zotero.Search.prototype.load = function() {
-	// Changed in 1.5
-	if (arguments[0]) {
-		throw ('Parameter no longer allowed in Zotero.Search.load()');
-	}
+Zotero.Search.prototype.loadPrimaryData = Zotero.Promise.coroutine(function* (reload) {
+	if (this._loaded.primaryData && !reload) return;
 	
 	var id = this._id;
 	var key = this._key;
 	var libraryID = this._libraryID;
 	var desc = id ? id : libraryID + "/" + key;
 	
-	var sql = "SELECT S.*, "
-		+ "MAX(searchConditionID) AS maxID "
-		+ "FROM savedSearches S LEFT JOIN savedSearchConditions "
-		+ "USING (savedSearchID) WHERE ";
+	var sql = "SELECT * FROM savedSearches WHERE ";
 	if (id) {
 		sql += "savedSearchID=?";
 		var params = id;
@@ -185,32 +127,778 @@ Zotero.Search.prototype.load = function() {
 		sql += "key=? AND libraryID=?";
 		var params = [key, libraryID];
 	}
-	sql += " GROUP BY savedSearchID";
-	var data = Zotero.DB.rowQuery(sql, params);
+	var data = yield Zotero.DB.rowQueryAsync(sql, params);
 	
-	this._loaded = true;
+	this._loaded.primaryData = true;
+	this._clearChanged('primaryData');
 	
 	if (!data) {
 		return;
 	}
 	
-	this._init();
-	this._id = data.savedSearchID;
-	this._libraryID = data.libraryID;
-	this._key = data.key;
-	this._name = data.savedSearchName;
-	this._dateAdded = data.dateAdded;
-	this._dateModified = data.dateModified;
-	this._maxSearchConditionID = data.maxID;
+	this.loadFromRow(data);
+});
+
+
+Zotero.Search.prototype.loadFromRow = function (row) {
+	this._id = row.savedSearchID;
+	this._libraryID = row.libraryID;
+	this._key = row.key;
+	this._name = row.savedSearchName;
+	this._version = row.version;
+	this._synced = !!row.synced;
+	
+	this._loaded.primaryData = true;
+	this._clearChanged('primaryData');
+	this._identified = true;
+}
+
+
+/*
+ * Save the search to the DB and return a savedSearchID
+ *
+ * If there are gaps in the searchConditionIDs, |fixGaps| must be true
+ * and the caller must dispose of the search or reload the condition ids,
+ * which may change after the save.
+ *
+ * For new searches, name must be set called before saving
+ */
+Zotero.Search.prototype.save = Zotero.Promise.coroutine(function* (fixGaps) {
+	try {
+		Zotero.Searches.editCheck(this);
+		
+		if (!this.name) {
+			throw('Name not provided for saved search');
+		}
+		
+		var isNew = !this.id;
+		
+		// Register this item's identifiers in Zotero.DataObjects on transaction commit,
+		// before other callbacks run
+		var searchID, libraryID, key;
+		if (isNew) {
+			var transactionOptions = {
+				onCommit: function () {
+					Zotero.Searches.registerIdentifiers(searchID, libraryID, key);
+				}
+			};
+		}
+		else {
+			var transactionOptions = null;
+		}
+		
+		return Zotero.DB.executeTransaction(function* () {
+			searchID = this._id = this.id ? this.id : yield Zotero.ID.get('savedSearches');
+			libraryID = this.libraryID;
+			key = this._key = this.key ? this.key : this._generateKey();
+			
+			Zotero.debug("Saving " + (isNew ? 'new ' : '') + "search " + this.id);
+			
+			var columns = [
+				'savedSearchID',
+				'savedSearchName',
+				'clientDateModified',
+				'libraryID',
+				'key',
+				'version',
+				'synced'
+			];
+			var placeholders = columns.map(function () '?').join();
+			var sqlValues = [
+				searchID ? { int: searchID } : null,
+				{ string: this.name },
+				Zotero.DB.transactionDateTime,
+				this.libraryID ? this.libraryID : 0,
+				key,
+				this.version ? this.version : 0,
+				this.synced ? 1 : 0
+			];
+			
+			var sql = "REPLACE INTO savedSearches (" + columns.join(', ') + ") "
+				+ "VALUES (" + placeholders + ")";
+			var insertID = yield Zotero.DB.queryAsync(sql, sqlValues);
+			if (!searchID) {
+				searchID = insertID;
+			}
+			
+			if (!isNew) {
+				var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
+				Zotero.DB.query(sql, this.id);
+			}
+			
+			// Close gaps in savedSearchIDs
+			var saveConditions = {};
+			var i = 1;
+			for (var id in this._conditions) {
+				if (!fixGaps && id != i) {
+					Zotero.DB.rollbackTransaction();
+					throw ('searchConditionIDs not contiguous and |fixGaps| not set in save() of saved search ' + this._id);
+				}
+				saveConditions[i] = this._conditions[id];
+				i++;
+			}
+			
+			this._conditions = saveConditions;
+			
+			for (var i in this._conditions){
+				var sql = "INSERT INTO savedSearchConditions (savedSearchID, "
+					+ "searchConditionID, condition, operator, value, required) "
+					+ "VALUES (?,?,?,?,?,?)";
+				
+				// Convert condition and mode to "condition[/mode]"
+				var condition = this._conditions[i].mode ?
+					this._conditions[i].condition + '/' + this._conditions[i].mode :
+					this._conditions[i].condition
+				
+				var sqlParams = [
+					searchID,
+					i,
+					condition,
+					this._conditions[i].operator ? this._conditions[i].operator : null,
+					this._conditions[i].value ? this._conditions[i].value : null,
+					this._conditions[i].required ? 1 : null
+				];
+				Zotero.DB.query(sql, sqlParams);
+			}
+			
+			
+			if (isNew) {
+				Zotero.Notifier.trigger('add', 'search', this.id);
+			}
+			else {
+				Zotero.Notifier.trigger('modify', 'search', this.id, this._previousData);
+			}
+			
+			if (isNew && this.libraryID) {
+				var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
+				var group = Zotero.Groups.get(groupID);
+				group.clearSearchCache();
+			}
+			
+			if (isNew) {
+				var id = this.id;
+				this._disabled = true;
+				return id;
+			}
+			
+			yield this.reload();
+			this._clearChanged();
+			
+			return isNew ? this.id : true;
+		}.bind(this), transactionOptions);
+	}
+	catch (e) {
+		try {
+			yield this.reload();
+			this._clearChanged();
+		}
+		catch (e2) {
+			Zotero.debug(e2, 1);
+		}
+		
+		Zotero.debug(e, 1);
+		throw e;
+	}
+});
+
+
+Zotero.Search.prototype.clone = Zotero.Promise.coroutine(function* (libraryID) {
+	var s = new Zotero.Search();
+	s.libraryID = libraryID === undefined ? this.libraryID : libraryID;
+	
+	var conditions = this.getSearchConditions();
+	
+	for each(var condition in conditions) {
+		var name = condition.mode ?
+			condition.condition + '/' + condition.mode :
+			condition.condition
+			
+		yield s.addCondition(name, condition.operator, condition.value,
+			condition.required);
+	}
+	
+	return s;
+});
+
+
+Zotero.Search.prototype.addCondition = Zotero.Promise.coroutine(function* (condition, operator, value, required) {
+	yield this.loadPrimaryData();
+	
+	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
+		throw ("Invalid operator '" + operator + "' for condition " + condition);
+	}
+	
+	// Shortcut to add a condition on every table -- does not return an id
+	if (condition.match(/^quicksearch/)) {
+		var parts = Zotero.SearchConditions.parseSearchString(value);
+		
+		for each(var part in parts) {
+			yield this.addCondition('blockStart');
+			
+			// If search string is 8 characters, see if this is a item key
+			if (operator == 'contains' && part.text.length == 8) {
+				yield this.addCondition('key', 'is', part.text, false);
+			}
+			
+			if (condition == 'quicksearch-titleCreatorYear') {
+				yield this.addCondition('title', operator, part.text, false);
+				yield this.addCondition('publicationTitle', operator, part.text, false);
+				yield this.addCondition('year', operator, part.text, false);
+			}
+			else {
+				yield this.addCondition('field', operator, part.text, false);
+				yield this.addCondition('tag', operator, part.text, false);
+				yield this.addCondition('note', operator, part.text, false);
+			}
+			yield this.addCondition('creator', operator, part.text, false);
+			
+			if (condition == 'quicksearch-everything') {
+				yield this.addCondition('annotation', operator, part.text, false);
+				
+				if (part.inQuotes) {
+					yield this.addCondition('fulltextContent', operator, part.text, false);
+				}
+				else {
+					var splits = Zotero.Fulltext.semanticSplitter(part.text);
+					for each(var split in splits) {
+						yield this.addCondition('fulltextWord', operator, split, false);
+					}
+				}
+			}
+			
+			yield this.addCondition('blockEnd');
+		}
+		
+		if (condition == 'quicksearch-titleCreatorYear') {
+			yield this.addCondition('noChildren', 'true');
+		}
+		
+		return false;
+	}
+	// Shortcut to add a collection
+	else if (condition == 'collectionID') {
+		var c = yield Zotero.Collections.getAsync(value);
+		if (!c) {
+			var msg = "Collection " + value + " not found";
+			Zotero.debug(msg, 2);
+			Components.utils.reportError(msg);
+			return;
+		}
+		var lkh = Zotero.Collections.getLibraryKeyHash(c);
+		// TEMP: Bluebird return yield
+		return yield this.addCondition('collection', operator, lkh, required);
+	}
+	// Shortcut to add a saved search
+	else if (condition == 'savedSearchID') {
+		var s = yield Zotero.Searches.getAsync(value);
+		if (!s) {
+			var msg = "Saved search " + value + " not found";
+			Zotero.debug(msg, 2);
+			Components.utils.reportError(msg);
+			return;
+		}
+		var lkh = Zotero.Searches.getLibraryKeyHash(s);
+		// TEMP: Bluebird return yield
+		return yield this.addCondition('savedSearch', operator, lkh, required);
+	}
+	
+	var searchConditionID = ++this._maxSearchConditionID;
+	
+	let mode;
+	[condition, mode] = Zotero.SearchConditions.parseCondition(condition);
+	
+	this._conditions[searchConditionID] = {
+		id: searchConditionID,
+		condition: condition,
+		mode: mode,
+		operator: operator,
+		value: value,
+		required: required
+	};
+	
+	this._sql = null;
+	this._sqlParams = false;
+	return searchConditionID;
+});
+
+
+/*
+ * Sets scope of search to the results of the passed Search object
+ */
+Zotero.Search.prototype.setScope = function (searchObj, includeChildren) {
+	this._scope = searchObj;
+	this._scopeIncludeChildren = includeChildren;
+}
+
+
+/**
+ * @param {Number} searchConditionID
+ * @param {String} condition
+ * @param {String} operator
+ * @param {String} value
+ * @param {Boolean} [required]
+ * @return {Promise}
+ */
+Zotero.Search.prototype.updateCondition = Zotero.Promise.coroutine(function* (searchConditionID, condition, operator, value, required){
+	yield this.loadPrimaryData();
+	
+	if (typeof this._conditions[searchConditionID] == 'undefined'){
+		throw new Error('Invalid searchConditionID ' + searchConditionID);
+	}
+	
+	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
+		throw new Error("Invalid operator '" + operator + "' for condition " + condition);
+	}
+	
+	var [condition, mode] = Zotero.SearchConditions.parseCondition(condition);
+	
+	this._conditions[searchConditionID] = {
+		id: parseInt(searchConditionID),
+		condition: condition,
+		mode: mode,
+		operator: operator,
+		value: value,
+		required: required
+	};
+	
+	this._sql = null;
+	this._sqlParams = false;
+});
+
+
+Zotero.Search.prototype.removeCondition = Zotero.Promise.coroutine(function* (searchConditionID){
+	yield this.loadPrimaryData();
+	
+	if (typeof this._conditions[searchConditionID] == 'undefined'){
+		throw ('Invalid searchConditionID ' + searchConditionID + ' in removeCondition()');
+	}
+	
+	delete this._conditions[searchConditionID];
+});
+
+
+/*
+ * Returns an array with 'condition', 'operator', 'value', 'required'
+ * for the given searchConditionID
+ */
+Zotero.Search.prototype.getSearchCondition = function(searchConditionID){
+	this._requireData('primaryData');
+	return this._conditions[searchConditionID];
+}
+
+
+/*
+ * Returns a multidimensional array of conditions/operator/value sets
+ * used in the search, indexed by searchConditionID
+ */
+Zotero.Search.prototype.getSearchConditions = function(){
+	this._requireData('primaryData');
+	
+	var conditions = [];
+	for (var id in this._conditions) {
+		var condition = this._conditions[id];
+		conditions[id] = {
+			id: id,
+			condition: condition.condition,
+			mode: condition.mode,
+			operator: condition.operator,
+			value: condition.value,
+			required: condition.required
+		};
+	}
+	return conditions;
+}
+
+
+Zotero.Search.prototype.hasPostSearchFilter = function() {
+	this._requireData('primaryData');
+	for each(var i in this._conditions){
+		if (i.condition == 'fulltextContent'){
+			return true;
+		}
+	}
+	return false;
+}
+
+
+/**
+ * Run the search and return an array of item ids for results
+ *
+ * @param {Boolean} [asTempTable=false]
+ * @return {Promise}
+ */
+Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable) {
+	var tmpTable;
+	
+	try {
+		yield this.loadPrimaryData();
+		
+		if (!this._sql){
+			yield this._buildQuery();
+		}
+		
+		// Default to 'all' mode
+		var joinMode = 'all';
+		
+		// Set some variables for conditions to avoid further lookups
+		for each(var condition in this._conditions) {
+			switch (condition.condition) {
+				case 'joinMode':
+					if (condition.operator == 'any') {
+						joinMode = 'any';
+					}
+					break;
+				
+				case 'fulltextContent':
+					var fulltextContent = true;
+					break;
+				
+				case 'includeParentsAndChildren':
+					if (condition.operator == 'true') {
+						var includeParentsAndChildren = true;
+					}
+					break;
+				
+				case 'includeParents':
+					if (condition.operator == 'true') {
+						var includeParents = true;
+					}
+					break;
+				
+				case 'includeChildren':
+					if (condition.operator == 'true') {
+						var includeChildren = true;
+					}
+					break;
+				
+				case 'blockStart':
+					var hasQuicksearch = true;
+					break;
+			}
+		}
+		
+		// Run a subsearch to define the superset of possible results
+		if (this._scope) {
+			// If subsearch has post-search filter, run and insert ids into temp table
+			if (this._scope.hasPostSearchFilter()) {
+				var ids = yield this._scope.search();
+				if (!ids) {
+					return [];
+				}
+				
+				Zotero.debug('g');
+				Zotero.debug(ids);
+				tmpTable = yield Zotero.Search.idsToTempTable(ids);
+			}
+			// Otherwise, just copy to temp table directly
+			else {
+				tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
+				var sql = "CREATE TEMPORARY TABLE " + tmpTable + " AS "
+					+ (yield this._scope.getSQL());
+				yield Zotero.DB.queryAsync(sql, yield this._scope.getSQLParams());
+				var sql = "CREATE INDEX " + tmpTable + "_itemID ON " + tmpTable + "(itemID)";
+				yield Zotero.DB.queryAsync(sql);
+			}
+			
+			// Search ids in temp table
+			var sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE itemID IN (" + this._sql + ") "
+				+ "AND ("
+				+ "itemID IN (SELECT itemID FROM " + tmpTable + ")";
+			
+			if (this._scopeIncludeChildren) {
+				sql += " OR itemID IN (SELECT itemID FROM itemAttachments"
+				+ " WHERE parentItemID IN (SELECT itemID FROM " + tmpTable + ")) OR "
+				+ "itemID IN (SELECT itemID FROM itemNotes"
+				+ " WHERE parentItemID IN (SELECT itemID FROM " + tmpTable + "))";
+			}
+			sql += ")";
+			
+			var res = yield Zotero.DB.valueQueryAsync(sql, this._sqlParams);
+			var ids = res ? res.split(",") : [];
+			/*
+			// DEBUG: Should this be here?
+			//
+			if (!ids) {
+				Zotero.DB.query("DROP TABLE " + tmpTable);
+				Zotero.DB.commitTransaction();
+				return false;
+			}
+			*/
+		}
+		// Or just run main search
+		else {
+			var ids = yield Zotero.DB.columnQueryAsync(this._sql, this._sqlParams);
+		}
+		
+		//Zotero.debug('IDs from main search or subsearch: ');
+		//Zotero.debug(ids);
+		
+		//Zotero.debug('Join mode: ' + joinMode);
+		
+		// Filter results with fulltext search
+		//
+		// If join mode ALL, return the (intersection of main and fulltext word search)
+		// filtered by fulltext content
+		//
+		// If join mode ANY or there's a quicksearch (which we assume
+		// fulltextContent is part of), return the union of the main search and
+		// (a separate fulltext word search filtered by fulltext content)
+		for each(var condition in this._conditions){
+			if (condition['condition']=='fulltextContent'){
+				var fulltextWordIntersectionFilter = function (val, index, array) !!hash[val];
+				var fulltextWordIntersectionConditionFilter = function(val, index, array) {
+					return hash[val] ?
+						(condition.operator == 'contains') :
+						(condition.operator == 'doesNotContain');
+				};
+				
+				// Regexp mode -- don't use fulltext word index
+				if (condition.mode && condition.mode.indexOf('regexp') == 0) {
+					// In an ANY search, only bother scanning items that
+					// haven't already been found by the main search
+					if (joinMode == 'any') {
+						if (!tmpTable) {
+							Zotero.debug('=');
+							Zotero.debug(ids);
+							tmpTable = yield Zotero.Search.idsToTempTable(ids);
+						}
+						
+						var sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE "
+							+ "itemID NOT IN (SELECT itemID FROM " + tmpTable + ")";
+						var res = yield Zotero.DB.valueQuery(sql);
+						var scopeIDs = res ? res.split(",") : [];
+					}
+					// If an ALL search, scan only items from the main search
+					else {
+						var scopeIDs = ids;
+					}
+				}
+				// If not regexp mode, run a new search against the fulltext word
+				// index for words in this phrase
+				else {
+					Zotero.debug('Running subsearch against fulltext word index');
+					var s = new Zotero.Search();
+					
+					// Add any necessary conditions to the fulltext word search --
+					// those that are required in an ANY search and any outside the
+					// quicksearch in an ALL search
+					for each(var c in this._conditions) {
+						if (c.condition == 'blockStart') {
+							var inQS = true;
+							continue;
+						}
+						else if (c.condition == 'blockEnd') {
+							inQS = false;
+							continue;
+						}
+						else if (c.condition == 'fulltextContent' ||
+								c.condition == 'fulltextContent' ||
+									inQS) {
+							continue;
+						}
+						else if (joinMode == 'any' && !c.required) {
+							continue;
+						}
+						yield s.addCondition(c.condition, c.operator, c.value);
+					}
+					
+					var splits = Zotero.Fulltext.semanticSplitter(condition.value);
+					for each(var split in splits){
+						yield s.addCondition('fulltextWord', condition.operator, split);
+					}
+					var fulltextWordIDs = yield s.search();
+					
+					//Zotero.debug("Fulltext word IDs");
+					//Zotero.debug(fulltextWordIDs);
+					
+					// If ALL mode, set intersection of main search and fulltext word index
+					// as the scope for the fulltext content search
+					if (joinMode == 'all' && !hasQuicksearch) {
+						var hash = {};
+						for (let i=0; i<fulltextWordIDs.length; i++) {
+							hash[fulltextWordIDs[i].id] = true;
+						}
+						
+						if (ids) {
+							var scopeIDs = ids.filter(fulltextWordIntersectionFilter);
+						}
+						else {
+							var scopeIDs = [];
+						}
+					}
+					// If ANY mode, just use fulltext word index hits for content search,
+					// since the main results will be added in below
+					else {
+						var scopeIDs = fulltextWordIDs;
+					}
+				}
+				
+				if (scopeIDs && scopeIDs.length) {
+					var fulltextIDs = yield Zotero.Fulltext.findTextInItems(scopeIDs,
+						condition['value'], condition['mode']);
+					
+					var hash = {};
+					for (let i=0; i<fulltextIDs.length; i++) {
+						hash[fulltextIDs[i].id] = true;
+					}
+					
+					filteredIDs = scopeIDs.filter(fulltextWordIntersectionConditionFilter);
+				}
+				else {
+					var filteredIDs = [];
+				}
+				
+				//Zotero.debug("Filtered IDs:")
+				//Zotero.debug(filteredIDs);
+				
+				// If join mode ANY, add any new items from the fulltext content
+				// search to the main search results
+				//
+				// We only do this if there are primary conditions that alter the
+				// main search, since otherwise all items will match
+				if (this._hasPrimaryConditions &&
+						(joinMode == 'any' || hasQuicksearch) && ids) {
+					//Zotero.debug("Adding filtered IDs to main set");
+					for (let i=0; i<filteredIDs.length; i++) {
+						let id = filteredIDs[i];
+						if (ids.indexOf(id) == -1) {
+							ids.push(id);
+						}
+					}
+				}
+				else {
+					//Zotero.debug("Replacing main set with filtered IDs");
+					ids = filteredIDs;
+				}
+			}
+		}
+		
+		if (this.hasPostSearchFilter() &&
+				(includeParentsAndChildren || includeParents || includeChildren)) {
+		Zotero.debug('b');
+		Zotero.debug(ids);
+			var tmpTable = yield Zotero.Search.idsToTempTable(ids);
+			
+			if (includeParentsAndChildren || includeParents) {
+				//Zotero.debug("Adding parent items to result set");
+				var sql = "SELECT parentItemID FROM itemAttachments "
+					+ "WHERE itemID IN (SELECT itemID FROM " + tmpTable + ") "
+						+ " AND parentItemID IS NOT NULL "
+					+ "UNION SELECT parentItemID FROM itemNotes "
+						+ "WHERE itemID IN (SELECT itemID FROM " + tmpTable + ")"
+						+ " AND parentItemID IS NOT NULL";
+			}
+			
+			if (includeParentsAndChildren || includeChildren) {
+				//Zotero.debug("Adding child items to result set");
+				var childrenSQL = "SELECT itemID FROM itemAttachments WHERE "
+					+ "parentItemID IN (SELECT itemID FROM " + tmpTable + ") UNION "
+					+ "SELECT itemID FROM itemNotes WHERE parentItemID IN "
+					+ "(SELECT itemID FROM " + tmpTable + ")";
+					
+				if (includeParentsAndChildren || includeParents) {
+					sql += " UNION " + childrenSQL;
+				}
+				else {
+					sql = childrenSQL;
+				}
+			}
+			
+			sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE itemID IN (" + sql + ")";
+			var res = yield Zotero.DB.valueQueryAsync(sql);
+			var parentChildIDs = res ? res.split(",") : [];
+			
+			// Add parents and children to main ids
+			if (parentChildIDs) {
+				for (var i=0; i<parentChildIDs.length; i++) {
+					var id = parentChildIDs[i];
+					if (ids.indexOf(id) == -1) {
+						ids.push(id);
+					}
+				}
+			}
+		}
+	}
+	finally {
+		if (tmpTable && !asTempTable) {
+			yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
+		}
+	}
+	
+	//Zotero.debug('Final result set');
+	//Zotero.debug(ids);
+	
+	if (!ids || !ids.length) {
+		return [];
+	}
+	
+	if (asTempTable) {
+		Zotero.debug('c');
+		Zotero.debug(ids);
+		return Zotero.Search.idsToTempTable(ids);
+	}
+	return ids;
+});
+
+
+Zotero.Search.prototype.serialize = function() {
+	var obj = {
+		primary: {
+			id: this.id,
+			libraryID: this.libraryID,
+			key: this.key
+		},
+		fields: {
+			name: this.name,
+		},
+		conditions: this.getSearchConditions()
+	};
+	return obj;
+}
+
+
+/*
+ * Get the SQL string for the search
+ */
+Zotero.Search.prototype.getSQL = Zotero.Promise.coroutine(function* () {
+	if (!this._sql) {
+		yield this._buildQuery();
+	}
+	return this._sql;
+});
+
+
+Zotero.Search.prototype.getSQLParams = Zotero.Promise.coroutine(function* () {
+	if (!this._sql) {
+		yield this._buildQuery();
+	}
+	return this._sqlParams;
+});
+
+
+Zotero.Search.prototype.loadConditions = Zotero.Promise.coroutine(function* (reload) {
+	Zotero.debug("Loading conditions for search " + this.libraryKey);
+	
+	if (this._loaded.conditions && !reload) {
+		return;
+	}
+	
+	if (!this.id) {
+		throw new Error('ID not set for object before attempting to load conditions');
+	}
 	
 	var sql = "SELECT * FROM savedSearchConditions "
 		+ "WHERE savedSearchID=? ORDER BY searchConditionID";
-	var conditions = Zotero.DB.query(sql, this._id);
+	var conditions = yield Zotero.DB.queryAsync(sql, this.id);
+	
+	if (conditions.length) {
+		this._maxSearchConditionID = conditions[conditions.length - 1].searchConditionID;
+	}
 	
 	// Reindex conditions, in case they're not contiguous in the DB
 	var conditionID = 1;
 	
-	for (var i in conditions) {
+	for (let i=0; i<conditions.length; i++) {
 		// Parse "condition[/mode]"
 		var [condition, mode] =
 			Zotero.SearchConditions.parseCondition(conditions[i]['condition']);
@@ -233,718 +921,16 @@ Zotero.Search.prototype.load = function() {
 			id: conditionID,
 			condition: condition,
 			mode: mode,
-			operator: conditions[i]['operator'],
-			value: conditions[i]['value'],
-			required: conditions[i]['required']
+			operator: conditions[i].operator,
+			value: conditions[i].value,
+			required: conditions[i].required
 		};
 		
 		conditionID++;
 	}
-}
-
-
-/*
- * Save the search to the DB and return a savedSearchID
- *
- * If there are gaps in the searchConditionIDs, |fixGaps| must be true
- * and the caller must dispose of the search or reload the condition ids,
- * which may change after the save.
- *
- * For new searches, name must be set called before saving
- */
-Zotero.Search.prototype.save = function(fixGaps) {
-	Zotero.Searches.editCheck(this);
 	
-	if (!this.name) {
-		throw('Name not provided for saved search');
-	}
-	
-	Zotero.DB.beginTransaction();
-	
-	var isNew = !this.id || !this.exists();
-	
-	try {
-		var searchID = this.id ? this.id : Zotero.ID.get('savedSearches');
-		
-		Zotero.debug("Saving " + (isNew ? 'new ' : '') + "search " + this.id);
-		
-		var key = this.key ? this.key : this._generateKey();
-		
-		var columns = [
-			'savedSearchID',
-			'savedSearchName',
-			'dateAdded',
-			'dateModified',
-			'clientDateModified',
-			'libraryID',
-			'key'
-		];
-		var placeholders = ['?', '?', '?', '?', '?', '?', '?'];
-		var sqlValues = [
-			searchID ? { int: searchID } : null,
-			{ string: this.name },
-			// If date added isn't set, use current timestamp
-			this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime,
-			// If date modified hasn't changed, use current timestamp
-			this._changed.dateModified ?
-				this.dateModified : Zotero.DB.transactionDateTime,
-			Zotero.DB.transactionDateTime,
-			this.libraryID ? this.libraryID : 0,
-			key
-		];
-		
-		var sql = "REPLACE INTO savedSearches (" + columns.join(', ') + ") "
-			+ "VALUES (" + placeholders + ")";
-		var insertID = Zotero.DB.query(sql, sqlValues);
-		if (!searchID) {
-			searchID = insertID;
-		}
-		
-		if (!isNew) {
-			var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
-			Zotero.DB.query(sql, this.id);
-		}
-		
-		// Close gaps in savedSearchIDs
-		var saveConditions = {};
-		var i = 1;
-		for (var id in this._conditions) {
-			if (!fixGaps && id != i) {
-				Zotero.DB.rollbackTransaction();
-				throw ('searchConditionIDs not contiguous and |fixGaps| not set in save() of saved search ' + this._id);
-			}
-			saveConditions[i] = this._conditions[id];
-			i++;
-		}
-		
-		this._conditions = saveConditions;
-		
-		// TODO: use proper bound parameters once DB class is updated
-		for (var i in this._conditions){
-			var sql = "INSERT INTO savedSearchConditions (savedSearchID, "
-				+ "searchConditionID, condition, operator, value, required) "
-				+ "VALUES (?,?,?,?,?,?)";
-			
-			// Convert condition and mode to "condition[/mode]"
-			var condition = this._conditions[i].mode ?
-				this._conditions[i].condition + '/' + this._conditions[i].mode :
-				this._conditions[i].condition
-			
-			var sqlParams = [
-				searchID, i, condition,
-				this._conditions[i].operator
-					? this._conditions[i].operator : null,
-				this._conditions[i].value
-					? this._conditions[i].value : null,
-				this._conditions[i].required
-					? 1 : null
-			];
-			Zotero.DB.query(sql, sqlParams);
-		}
-		
-		
-		if (isNew && this.libraryID) {
-			var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
-			var group = Zotero.Groups.get(groupID);
-			group.clearSearchCache();
-		}
-		
-		Zotero.DB.commitTransaction();
-	}
-	catch (e) {
-		Zotero.DB.rollbackTransaction();
-		throw (e);
-	}
-	
-	// If successful, set values in object
-	if (!this.id) {
-		this._id = searchID;
-	}
-	
-	if (!this.key) {
-		this._key = key;
-	}
-	
-	if (isNew) {
-		Zotero.Notifier.trigger('add', 'search', this.id);
-	}
-	else {
-		Zotero.Notifier.trigger('modify', 'search', this.id, this._previousData);
-	}
-	
-	return this._id;
-}
-
-
-Zotero.Search.prototype.clone = function() {
-	var s = new Zotero.Search();
-	s.libraryID = this.libraryID;
-	
-	var conditions = this.getSearchConditions();
-	
-	for each(var condition in conditions) {
-		var name = condition.mode ?
-			condition.condition + '/' + condition.mode :
-			condition.condition
-			
-		s.addCondition(name, condition.operator, condition.value,
-			condition.required);
-	}
-	
-	return s;
-}
-
-
-Zotero.Search.prototype.addCondition = function(condition, operator, value, required) {
-	if ((this.id || this.key) && !this._loaded) {
-		this.load();
-	}
-	
-	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
-		throw ("Invalid operator '" + operator + "' for condition " + condition);
-	}
-	
-	// Shortcut to add a condition on every table -- does not return an id
-	if (condition.match(/^quicksearch/)) {
-		var parts = Zotero.SearchConditions.parseSearchString(value);
-		
-		for each(var part in parts) {
-			this.addCondition('blockStart');
-			
-			// If search string is 8 characters, see if this is a item key
-			if (operator == 'contains' && part.text.length == 8) {
-				this.addCondition('key', 'is', part.text, false);
-			}
-			
-			if (condition == 'quicksearch-titleCreatorYear') {
-				this.addCondition('title', operator, part.text, false);
-				this.addCondition('publicationTitle', operator, part.text, false);
-				this.addCondition('year', operator, part.text, false);
-			}
-			else {
-				this.addCondition('field', operator, part.text, false);
-				this.addCondition('tag', operator, part.text, false);
-				this.addCondition('note', operator, part.text, false);
-			}
-			this.addCondition('creator', operator, part.text, false);
-			
-			if (condition == 'quicksearch-everything') {
-				this.addCondition('annotation', operator, part.text, false);
-				
-				if (part.inQuotes) {
-					this.addCondition('fulltextContent', operator, part.text, false);
-				}
-				else {
-					var splits = Zotero.Fulltext.semanticSplitter(part.text);
-					for each(var split in splits) {
-						this.addCondition('fulltextWord', operator, split, false);
-					}
-				}
-			}
-			
-			this.addCondition('blockEnd');
-		}
-		
-		if (condition == 'quicksearch-titleCreatorYear') {
-			this.addCondition('noChildren', 'true');
-		}
-		
-		return false;
-	}
-	// Shortcut to add a collection
-	else if (condition == 'collectionID') {
-		var c = Zotero.Collections.get(value);
-		if (!c) {
-			var msg = "Collection " + value + " not found";
-			Zotero.debug(msg, 2);
-			Components.utils.reportError(msg);
-			return;
-		}
-		var lkh = Zotero.Collections.getLibraryKeyHash(c);
-		return this.addCondition('collection', operator, lkh, required);
-	}
-	// Shortcut to add a saved search
-	else if (condition == 'savedSearchID') {
-		var s = Zotero.Searches.get(value);
-		if (!s) {
-			var msg = "Saved search " + value + " not found";
-			Zotero.debug(msg, 2);
-			Components.utils.reportError(msg);
-			return;
-		}
-		var lkh = Zotero.Searches.getLibraryKeyHash(s);
-		return this.addCondition('savedSearch', operator, lkh, required);
-	}
-	
-	var searchConditionID = ++this._maxSearchConditionID;
-	
-	var [condition, mode] = Zotero.SearchConditions.parseCondition(condition);
-	
-	this._conditions[searchConditionID] = {
-		id: searchConditionID,
-		condition: condition,
-		mode: mode,
-		operator: operator,
-		value: value,
-		required: required
-	};
-	
-	this._sql = null;
-	this._sqlParams = null;
-	return searchConditionID;
-}
-
-
-/*
- * Sets scope of search to the results of the passed Search object
- */
-Zotero.Search.prototype.setScope = function (searchObj, includeChildren) {
-	this._scope = searchObj;
-	this._scopeIncludeChildren = includeChildren;
-}
-
-
-Zotero.Search.prototype.updateCondition = function(searchConditionID, condition, operator, value, required){
-	if ((this.id || this.key) && !this._loaded) {
-		this.load();
-	}
-	
-	if (typeof this._conditions[searchConditionID] == 'undefined'){
-		throw ('Invalid searchConditionID ' + searchConditionID + ' in updateCondition()');
-	}
-	
-	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
-		throw ("Invalid operator '" + operator + "' for condition " + condition);
-	}
-	
-	var [condition, mode] = Zotero.SearchConditions.parseCondition(condition);
-	
-	this._conditions[searchConditionID] = {
-		id: parseInt(searchConditionID),
-		condition: condition,
-		mode: mode,
-		operator: operator,
-		value: value,
-		required: required
-	};
-	
-	this._sql = null;
-	this._sqlParams = null;
-}
-
-
-Zotero.Search.prototype.removeCondition = function(searchConditionID){
-	if ((this.id || this.key) && !this._loaded) {
-		this.load();
-	}
-	
-	if (typeof this._conditions[searchConditionID] == 'undefined'){
-		throw ('Invalid searchConditionID ' + searchConditionID + ' in removeCondition()');
-	}
-	
-	delete this._conditions[searchConditionID];
-}
-
-
-/*
- * Returns an array with 'condition', 'operator', 'value', 'required'
- * for the given searchConditionID
- */
-Zotero.Search.prototype.getSearchCondition = function(searchConditionID){
-	if ((this.id || this.key) && !this._loaded) {
-		this.load();
-	}
-	return this._conditions[searchConditionID];
-}
-
-
-/*
- * Returns a multidimensional array of conditions/operator/value sets
- * used in the search, indexed by searchConditionID
- */
-Zotero.Search.prototype.getSearchConditions = function(){
-	if ((this.id || this.key) && !this._loaded) {
-		this.load();
-	}
-	var conditions = [];
-	for (var id in this._conditions) {
-		var condition = this._conditions[id];
-		conditions[id] = {
-			id: id,
-			condition: condition.condition,
-			mode: condition.mode,
-			operator: condition.operator,
-			value: condition.value,
-			required: condition.required
-		};
-	}
-	return conditions;
-}
-
-
-Zotero.Search.prototype.hasPostSearchFilter = function() {
-	if ((this.id || this.key) && !this._loaded) {
-		this.load();
-	}
-	for each(var i in this._conditions){
-		if (i.condition == 'fulltextContent'){
-			return true;
-		}
-	}
-	return false;
-}
-
-
-/*
- * Run the search and return an array of item ids for results
- */
-Zotero.Search.prototype.search = function(asTempTable){
-	if ((this.id || this.key) && !this._loaded) {
-		this.load();
-	}
-	
-	if (!this._sql){
-		this._buildQuery();
-	}
-	
-	// Default to 'all' mode
-	var joinMode = 'all';
-	
-	// Set some variables for conditions to avoid further lookups
-	for each(var condition in this._conditions) {
-		switch (condition.condition) {
-			case 'joinMode':
-				if (condition.operator == 'any') {
-					joinMode = 'any';
-				}
-				break;
-			
-			case 'fulltextContent':
-				var fulltextContent = true;
-				break;
-			
-			case 'includeParentsAndChildren':
-				if (condition.operator == 'true') {
-					var includeParentsAndChildren = true;
-				}
-				break;
-			
-			case 'includeParents':
-				if (condition.operator == 'true') {
-					var includeParents = true;
-				}
-				break;
-			
-			case 'includeChildren':
-				if (condition.operator == 'true') {
-					var includeChildren = true;
-				}
-				break;
-			
-			case 'blockStart':
-				var hasQuicksearch = true;
-				break;
-		}
-	}
-	
-	// Run a subsearch to define the superset of possible results
-	if (this._scope) {
-		Zotero.DB.beginTransaction();
-		
-		// If subsearch has post-search filter, run and insert ids into temp table
-		if (this._scope.hasPostSearchFilter()) {
-			var ids = this._scope.search();
-			if (!ids) {
-				Zotero.DB.commitTransaction();
-				return false;
-			}
-			
-			var tmpTable = Zotero.Search.idsToTempTable(ids);
-		}
-		// Otherwise, just copy to temp table directly
-		else {
-			var tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
-			var sql = "CREATE TEMPORARY TABLE " + tmpTable + " AS "
-				+ this._scope.getSQL();
-			Zotero.DB.query(sql, this._scope.getSQLParams());
-			var sql = "CREATE INDEX " + tmpTable + "_itemID ON " + tmpTable + "(itemID)";
-			Zotero.DB.query(sql);
-		}
-		
-		// Search ids in temp table
-		var sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE itemID IN (" + this._sql + ") "
-			+ "AND ("
-			+ "itemID IN (SELECT itemID FROM " + tmpTable + ")";
-		
-		if (this._scopeIncludeChildren) {
-			sql += " OR itemID IN (SELECT itemID FROM itemAttachments"
-			+ " WHERE sourceItemID IN (SELECT itemID FROM " + tmpTable + ")) OR "
-			+ "itemID IN (SELECT itemID FROM itemNotes"
-			+ " WHERE sourceItemID IN (SELECT itemID FROM " + tmpTable + "))";
-		}
-		sql += ")";
-		
-		var res = Zotero.DB.valueQuery(sql, this._sqlParams),
-			ids = res ? res.split(",") : [];
-		/*
-		// DEBUG: Should this be here?
-		//
-		if (!ids) {
-			Zotero.DB.query("DROP TABLE " + tmpTable);
-			Zotero.DB.commitTransaction();
-			return false;
-		}
-		*/
-	}
-	// Or just run main search
-	else {
-		var ids = Zotero.DB.columnQuery(this._sql, this._sqlParams);
-	}
-	
-	//Zotero.debug('IDs from main search or subsearch: ');
-	//Zotero.debug(ids);
-	
-	//Zotero.debug('Join mode: ' + joinMode);
-	
-	// Filter results with fulltext search
-	//
-	// If join mode ALL, return the (intersection of main and fulltext word search)
-	// filtered by fulltext content
-	//
-	// If join mode ANY or there's a quicksearch (which we assume
-	// fulltextContent is part of), return the union of the main search and
-	// (a separate fulltext word search filtered by fulltext content)
-	for each(var condition in this._conditions){
-		if (condition['condition']=='fulltextContent'){
-			var fulltextWordIntersectionFilter = function (val, index, array) !!hash[val]
-			var fulltextWordIntersectionConditionFilter = function(val, index, array) {
-				return hash[val] ?
-					(condition.operator == 'contains') :
-					(condition.operator == 'doesNotContain');
-			};
-			
-			// Regexp mode -- don't use fulltext word index
-			if (condition.mode && condition.mode.indexOf('regexp') == 0) {
-				// In an ANY search, only bother scanning items that
-				// haven't already been found by the main search
-				if (joinMode == 'any') {
-					if (!tmpTable) {
-						Zotero.DB.beginTransaction();
-						var tmpTable = Zotero.Search.idsToTempTable(ids);
-					}
-					
-					var sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE "
-						+ "itemID NOT IN (SELECT itemID FROM " + tmpTable + ")";
-					var res = Zotero.DB.valueQuery(sql);
-					var scopeIDs = res ? res.split(",") : [];
-				}
-				// If an ALL search, scan only items from the main search
-				else {
-					var scopeIDs = ids;
-				}
-			}
-			// If not regexp mode, run a new search against the fulltext word
-			// index for words in this phrase
-			else {
-				Zotero.debug('Running subsearch against fulltext word index');
-				var s = new Zotero.Search();
-				
-				// Add any necessary conditions to the fulltext word search --
-				// those that are required in an ANY search and any outside the
-				// quicksearch in an ALL search
-				for each(var c in this._conditions) {
-					if (c.condition == 'blockStart') {
-						var inQS = true;
-						continue;
-					}
-					else if (c.condition == 'blockEnd') {
-						inQS = false;
-						continue;
-					}
-					else if (c.condition == 'fulltextContent' ||
-							c.condition == 'fulltextContent' ||
-								inQS) {
-						continue;
-					}
-					else if (joinMode == 'any' && !c.required) {
-						continue;
-					}
-					s.addCondition(c.condition, c.operator, c.value);
-				}
-				
-				var splits = Zotero.Fulltext.semanticSplitter(condition.value);
-				for each(var split in splits){
-					s.addCondition('fulltextWord', condition.operator, split);
-				}
-				var fulltextWordIDs = s.search();
-				
-				//Zotero.debug("Fulltext word IDs");
-				//Zotero.debug(fulltextWordIDs);
-				
-				// If ALL mode, set intersection of main search and fulltext word index
-				// as the scope for the fulltext content search
-				if (joinMode == 'all' && !hasQuicksearch) {
-					var hash = {};
-					for each(var id in fulltextWordIDs){
-						hash[id] = true;
-					}
-					
-					if (ids) {
-						var scopeIDs = ids.filter(fulltextWordIntersectionFilter);
-					}
-					else {
-						var scopeIDs = [];
-					}
-				}
-				// If ANY mode, just use fulltext word index hits for content search,
-				// since the main results will be added in below
-				else {
-					var scopeIDs = fulltextWordIDs;
-				}
-			}
-			
-			if (scopeIDs && scopeIDs.length) {
-				var fulltextIDs = Zotero.Fulltext.findTextInItems(scopeIDs,
-					condition['value'], condition['mode']);
-				
-				var hash = {};
-				for each(var val in fulltextIDs){
-					hash[val.id] = true;
-				}
-				
-				filteredIDs = scopeIDs.filter(fulltextWordIntersectionConditionFilter);
-			}
-			else {
-				var filteredIDs = [];
-			}
-			
-			//Zotero.debug("Filtered IDs:")
-			//Zotero.debug(filteredIDs);
-			
-			// If join mode ANY, add any new items from the fulltext content
-			// search to the main search results
-			//
-			// We only do this if there are primary conditions that alter the
-			// main search, since otherwise all items will match
-			if (this._hasPrimaryConditions &&
-					(joinMode == 'any' || hasQuicksearch) && ids) {
-				//Zotero.debug("Adding filtered IDs to main set");
-				for each(var id in filteredIDs) {
-					if (ids.indexOf(id) == -1) {
-						ids.push(id);
-					}
-				}
-			}
-			else {
-				//Zotero.debug("Replacing main set with filtered IDs");
-				ids = filteredIDs;
-			}
-		}
-	}
-	
-	if (tmpTable) {
-		Zotero.DB.query("DROP TABLE " + tmpTable);
-		Zotero.DB.commitTransaction();
-	}
-	
-	if (this.hasPostSearchFilter() &&
-			(includeParentsAndChildren || includeParents || includeChildren)) {
-		Zotero.DB.beginTransaction();
-		var tmpTable = Zotero.Search.idsToTempTable(ids);
-		
-		if (includeParentsAndChildren || includeParents) {
-			//Zotero.debug("Adding parent items to result set");
-			var sql = "SELECT sourceItemID FROM itemAttachments "
-				+ "WHERE itemID IN (SELECT itemID FROM " + tmpTable + ") "
-					+ " AND sourceItemID IS NOT NULL "
-				+ "UNION SELECT sourceItemID FROM itemNotes "
-					+ "WHERE itemID IN (SELECT itemID FROM " + tmpTable + ")"
-					+ " AND sourceItemID IS NOT NULL";
-		}
-		
-		if (includeParentsAndChildren || includeChildren) {
-			//Zotero.debug("Adding child items to result set");
-			var childrenSQL = "SELECT itemID FROM itemAttachments WHERE "
-				+ "sourceItemID IN (SELECT itemID FROM " + tmpTable + ") UNION "
-				+ "SELECT itemID FROM itemNotes WHERE sourceItemID IN "
-				+ "(SELECT itemID FROM " + tmpTable + ")";
-				
-			if (includeParentsAndChildren || includeParents) {
-				sql += " UNION " + childrenSQL;
-			}
-			else {
-				sql = childrenSQL;
-			}
-		}
-		
-		sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE itemID IN (" + sql + ")";
-		var res = Zotero.DB.valueQuery(sql);
-		var parentChildIDs = res ? res.split(",") : [];
-		Zotero.DB.query("DROP TABLE " + tmpTable);
-		Zotero.DB.commitTransaction();
-		
-		// Add parents and children to main ids
-		if (parentChildIDs) {
-			for (var i=0; i<parentChildIDs.length; i++) {
-				var id = parentChildIDs[i];
-				if (ids.indexOf(id) == -1) {
-					ids.push(id);
-				}
-			}
-		}
-	}
-	
-	//Zotero.debug('Final result set');
-	//Zotero.debug(ids);
-	
-	if (!ids || !ids.length) {
-		return false;
-	}
-	
-	if (asTempTable) {
-		var table = Zotero.Search.idsToTempTable(ids);
-		return table;
-	}
-	
-	return ids;
-}
-
-
-Zotero.Search.prototype.serialize = function() {
-	var obj = {
-		primary: {
-			id: this.id,
-			libraryID: this.libraryID,
-			key: this.key,
-			dateAdded: this.dateAdded,
-			dateModified: this.dateModified
-		},
-		fields: {
-			name: this.name,
-		},
-		conditions: this.getSearchConditions()
-	};
-	return obj;
-}
-
-
-/*
- * Get the SQL string for the search
- */
-Zotero.Search.prototype.getSQL = function(){
-	if (!this._sql){
-		this._buildQuery();
-	}
-	return this._sql;
-}
-
-
-Zotero.Search.prototype.getSQLParams = function(){
-	if (!this._sql){
-		this._buildQuery();
-	}
-	return this._sqlParams;
-}
+	this._loaded.conditions = true;
+});
 
 
 Zotero.Search.prototype._prepFieldChange = function (field) {
@@ -969,56 +955,30 @@ Zotero.Search.idsToTempTable = function (ids) {
 	
 	var tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
 	
-	Zotero.DB.beginTransaction();
-	
-	var sql = "CREATE TEMPORARY TABLE " + tmpTable + " (itemID INT)";
-	Zotero.DB.query(sql);
-	
-	var sql = "INSERT INTO " + tmpTable + " SELECT ? ";
-	for (var i=0; i<(N_COMBINED_INSERTS-1); i++) {
-		sql += "UNION SELECT ? ";
-	}
-	
-	var insertStatement = Zotero.DB.getStatement(sql),
-		n = ids.length;
-	for (var i=0; i<n; i+=N_COMBINED_INSERTS) {
-		for (var j=0; j<N_COMBINED_INSERTS; j++) {
-			insertStatement.bindInt32Parameter(j, ids[i+j]);
+	return Zotero.DB.executeTransaction(function* () {
+		var sql = "CREATE TEMPORARY TABLE " + tmpTable + " (itemID INT)";
+		yield Zotero.DB.queryAsync(sql);
+		
+		var ids2 = ids ? ids.concat() : [];
+		while (ids2.length) {
+			let chunk = ids2.splice(0, N_COMBINED_INSERTS);
+			let sql = 'INSERT INTO ' + tmpTable + ' '
+				+ chunk.map(function () "SELECT ?").join(" UNION ");
+			yield Zotero.DB.queryAsync(sql, chunk, { debug: false });
 		}
-		try {
-			insertStatement.execute();
-		}
-		catch (e) {
-			throw (Zotero.DB.getLastErrorString());
-		}
-	}
-	insertStatement.finalize();
-	
-	var nRemainingInserts = (n % N_COMBINED_INSERTS);
-	var remainingInsertStart = n-nRemainingInserts-1;
-	var sql = "INSERT INTO " + tmpTable + " SELECT ? ";
-	for (var i=remainingInsertStart; i<n; i++) {
-		sql += "UNION SELECT ? ";
-	}
-	
-	var insertStatement = Zotero.DB.getStatement(sql);
-	for (var j=remainingInsertStart; j<n; j++) {
-		insertStatement.bindInt32Parameter(j-remainingInsertStart, ids[remainingInsertStart]);
-	}
-	
-	var sql = "CREATE INDEX " + tmpTable + "_itemID ON " + tmpTable + "(itemID)";
-	Zotero.DB.query(sql);
-	
-	Zotero.DB.commitTransaction();
-	
-	return tmpTable;
+		
+		var sql = "CREATE INDEX " + tmpTable + "_itemID ON " + tmpTable + "(itemID)";
+		yield Zotero.DB.queryAsync(sql);
+		
+		return tmpTable;
+	});
 }
 
 
 /*
  * Build the SQL query for the search
  */
-Zotero.Search.prototype._buildQuery = function(){
+Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	var sql = 'SELECT itemID FROM items';
 	var sqlParams = [];
 	// Separate ANY conditions for 'required' condition support
@@ -1108,27 +1068,27 @@ Zotero.Search.prototype._buildQuery = function(){
 				+ "SELECT itemID FROM deletedItems "
 				+ "UNION "
 				+ "SELECT itemID FROM itemNotes "
-				+ "WHERE sourceItemID IS NOT NULL AND "
-				+ "sourceItemID IN (SELECT itemID FROM deletedItems) "
+				+ "WHERE parentItemID IS NOT NULL AND "
+				+ "parentItemID IN (SELECT itemID FROM deletedItems) "
 				+ "UNION "
 				+ "SELECT itemID FROM itemAttachments "
-				+ "WHERE sourceItemID IS NOT NULL AND "
-				+ "sourceItemID IN (SELECT itemID FROM deletedItems) "
+				+ "WHERE parentItemID IS NOT NULL AND "
+				+ "parentItemID IN (SELECT itemID FROM deletedItems) "
 			+ ")";
 	
 	if (noChildren){
 		sql += " AND (itemID NOT IN (SELECT itemID FROM itemNotes "
-			+ "WHERE sourceItemID IS NOT NULL) AND itemID NOT IN "
+			+ "WHERE parentItemID IS NOT NULL) AND itemID NOT IN "
 			+ "(SELECT itemID FROM itemAttachments "
-			+ "WHERE sourceItemID IS NOT NULL))";
+			+ "WHERE parentItemID IS NOT NULL))";
 	}
 	
 	if (unfiled) {
 		sql += " AND (itemID NOT IN (SELECT itemID FROM collectionItems) "
 			// Exclude children
 			+ "AND itemID NOT IN "
-			+ "(SELECT itemID FROM itemAttachments WHERE sourceItemID IS NOT NULL "
-			+ "UNION SELECT itemID FROM itemNotes WHERE sourceItemID IS NOT NULL)"
+			+ "(SELECT itemID FROM itemAttachments WHERE parentItemID IS NOT NULL "
+			+ "UNION SELECT itemID FROM itemNotes WHERE parentItemID IS NOT NULL)"
 			+ ")";
 	}
 	
@@ -1224,7 +1184,7 @@ Zotero.Search.prototype._buildQuery = function(){
 						if (condition.value) {
 							var lkh = Zotero.Collections.parseLibraryKeyHash(condition.value);
 							if (lkh) {
-								col = Zotero.Collections.getByLibraryAndKey(lkh.libraryID, lkh.key);
+								col = yield Zotero.Collections.getByLibraryAndKey(lkh.libraryID, lkh.key);
 							}
 						}
 						if (!col) {
@@ -1265,7 +1225,7 @@ Zotero.Search.prototype._buildQuery = function(){
 						if (condition.value) {
 							var lkh = Zotero.Searches.parseLibraryKeyHash(condition.value);
 							if (lkh) {
-								search = Zotero.Searches.getByLibraryAndKey(lkh.libraryID, lkh.key);
+								search = yield Zotero.Searches.getByLibraryAndKey(lkh.libraryID, lkh.key);
 							}
 						}
 						if (!search) {
@@ -1287,14 +1247,14 @@ Zotero.Search.prototype._buildQuery = function(){
 						// or that this slows things down with large libraries
 						// -- should probably use a temporary table instead
 						if (hasFilter){
-							var subids = search.search();
+							let subids = yield search.search();
 							condSQL += subids.join();
 						}
 						// Otherwise just put the SQL in a subquery
 						else {
-							condSQL += search.getSQL();
-							var subpar = search.getSQLParams();
-							for (var k in subpar){
+							condSQL += yield search.getSQL();
+							let subpar = yield search.getSQLParams();
+							for (let k in subpar){
 								condSQLParams.push(subpar[k]);
 							}
 						}
@@ -1334,13 +1294,12 @@ Zotero.Search.prototype._buildQuery = function(){
 					
 					case 'creator':
 					case 'lastName':
-						condSQL += "creatorID IN (SELECT creatorID FROM creators "
-							+ "NATURAL JOIN creatorData WHERE ";
+						condSQL += "creatorID IN (SELECT creatorID FROM creators WHERE ";
 						openParens++;
 						break;
 					
 					case 'childNote':
-						condSQL += "itemID IN (SELECT sourceItemID FROM "
+						condSQL += "itemID IN (SELECT parentItemID FROM "
 							+ "itemNotes WHERE ";
 						openParens++;
 						break;
@@ -1589,18 +1548,18 @@ Zotero.Search.prototype._buildQuery = function(){
 				
 				if (includeParentsAndChildren || includeParents) {
 					var parentSQL = "SELECT itemID FROM items WHERE "
-						+ "itemID IN (SELECT sourceItemID FROM itemAttachments "
+						+ "itemID IN (SELECT parentItemID FROM itemAttachments "
 							+ "WHERE itemID IN (" + condSQL + ")) "
-						+ "OR itemID IN (SELECT sourceItemID FROM itemNotes "
+						+ "OR itemID IN (SELECT parentItemID FROM itemNotes "
 							+ "WHERE itemID IN (" + condSQL + ")) ";
 					var parentSQLParams = condSQLParams.concat(condSQLParams);
 				}
 				
 				if (includeParentsAndChildren || includeChildren) {
 					var childrenSQL = "SELECT itemID FROM itemAttachments WHERE "
-						+ "sourceItemID IN (" + condSQL + ") UNION "
+						+ "parentItemID IN (" + condSQL + ") UNION "
 						+ "SELECT itemID FROM itemNotes "
-						+ "WHERE sourceItemID IN (" + condSQL + ")";
+						+ "WHERE parentItemID IN (" + condSQL + ")";
 					var childSQLParams = condSQLParams.concat(condSQLParams);
 				}
 				
@@ -1680,8 +1639,8 @@ Zotero.Search.prototype._buildQuery = function(){
 	}
 	
 	this._sql = sql;
-	this._sqlParams = sqlParams.length ? sqlParams : null;
-}
+	this._sqlParams = sqlParams.length ? sqlParams : false;
+});
 
 
 Zotero.Search.prototype._generateKey = function () {
@@ -1694,38 +1653,16 @@ Zotero.Searches = new function(){
 	Zotero.DataObjects.apply(this, ['search', 'searches', 'savedSearch', 'savedSearches']);
 	this.constructor.prototype = new Zotero.DataObjects();
 	
-	this.get = get;
-	this.erase = erase;
-	
-	
-	/**
-	 * Retrieve a saved search
-	 *
-	 * @param	int				id		savedSearchID
-	 * @return	object|bool				Zotero.Search object,
-	 *										or false if it doesn't exist
-	 */
-	function get(id) {
-		var sql = "SELECT COUNT(*) FROM savedSearches WHERE savedSearchID=?";
-		if (Zotero.DB.valueQuery(sql, id)) {
-			var search = new Zotero.Search;
-			search.id = id;
-			return search;
-		}
-		return false;
-	}
-	
-	
 	/**
 	 * Returns an array of Zotero.Search objects, ordered by name
 	 *
 	 * @param	{Integer}	[libraryID=0]
 	 */
-	this.getAll = function (libraryID) {
+	this.getAll = Zotero.Promise.coroutine(function* (libraryID) {
 		var sql = "SELECT savedSearchID AS id, savedSearchName AS name "
 				+ "FROM savedSearches WHERE libraryID=?";
 		sql += " ORDER BY name COLLATE NOCASE";
-		var rows = Zotero.DB.query(sql, [libraryID ? libraryID : 0]);
+		var rows = yield Zotero.DB.queryAsync(sql, [libraryID ? libraryID : 0]);
 		if (!rows) {
 			return [];
 		}
@@ -1737,37 +1674,46 @@ Zotero.Searches = new function(){
 		});
 		
 		var searches = [];
-		for each(var row in rows) {
-			var search = new Zotero.Search;
-			search.id = row.id;
+		for (i=0; i<rows.length; i++) {
+			let search = new Zotero.Search;
+			search.id = rows[i].id;
+			yield search.loadPrimaryData();
 			searches.push(search);
 		}
 		return searches;
-	}
+	});
 	
 	
 	/*
 	 * Delete a given saved search from the DB
 	 */
-	function erase(ids) {
+	this.erase = Zotero.Promise.coroutine(function* (ids) {
 		ids = Zotero.flattenArguments(ids);
 		var notifierData = {};
 		
-		Zotero.DB.beginTransaction();
-		for each(var id in ids) {
-			var search = new Zotero.Search;
-			search.id = id;
-			notifierData[id] = { old: search.serialize() };
-			
-			var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
-			Zotero.DB.query(sql, id);
-			
-			var sql = "DELETE FROM savedSearches WHERE savedSearchID=?";
-			Zotero.DB.query(sql, id);
-		}
-		Zotero.DB.commitTransaction();
+		yield Zotero.DB.executeTransaction(function* () {
+			for (let i=0; i<ids.length; i++) {
+				let id = ids[i];
+				var search = new Zotero.Search;
+				search.id = id;
+				notifierData[id] = { old: search.serialize() };
+				
+				var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
+				yield Zotero.DB.queryAsync(sql, id);
+				
+				var sql = "DELETE FROM savedSearches WHERE savedSearchID=?";
+				yield Zotero.DB.queryAsync(sql, id);
+			}
+		});
 		
 		Zotero.Notifier.trigger('delete', 'search', ids, notifierData);
+	});
+	
+	
+	this._getPrimaryDataSQL = function () {
+		// This should be the same as the query in Zotero.Search.loadPrimaryData(),
+		// just without a specific savedSearchID
+		return "SELECT O.* FROM savedSearches O WHERE 1";
 	}
 }
 

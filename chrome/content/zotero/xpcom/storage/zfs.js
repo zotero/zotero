@@ -278,7 +278,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 				}
 				return uploadCallback(item, url, uploadKey, params);
 			})
-			.fail(function (e) {
+			.catch(function (e) {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
 					if (e.status == 413) {
 						var retry = e.xmlhttp.getResponseHeader('Retry-After');
@@ -458,7 +458,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 		
 		request.setChannel(channel);
 		
-		var deferred = Q.defer();
+		var deferred = Zotero.Promise.defer();
 		
 		var listener = new Zotero.Sync.Storage.StreamListener(
 			{
@@ -571,7 +571,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 						remoteChanges: true
 					};
 				})
-				.fail(function (e) {
+				.catch(function (e) {
 					var msg = "Unexpected file registration status " + e.status
 						+ " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
 					Zotero.debug(msg, 1);
@@ -835,7 +835,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 					Zotero.File.checkFileAccessError(e, destFile, 'create');
 				}
 				
-				var deferred = Q.defer();
+				var deferred = Zotero.Promise.defer();
 				
 				var listener = new Zotero.Sync.Storage.StreamListener(
 					{
@@ -960,7 +960,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 	obj._uploadFile = function (request) {
 		var item = Zotero.Sync.Storage.getItemFromRequestName(request.name);
 		if (Zotero.Attachments.getNumFiles(item) > 1) {
-			var deferred = Q.defer();
+			var deferred = Zotero.Promise.defer();
 			var created = Zotero.Sync.Storage.createUploadFile(
 				request,
 				function (data) {
@@ -972,7 +972,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 				}
 			);
 			if (!created) {
-				return Q(false);
+				return Zotero.Promise.resolve(false);
 			}
 			return deferred.promise;
 		}
@@ -989,7 +989,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 		var lastSyncURI = this._getLastSyncURI(libraryID);
 		
 		var self = this;
-		return Q.fcall(function () {
+		return Zotero.Promise.try(function () {
 			// Cache the credentials at the root
 			return self._cacheCredentials();
 		})
@@ -1010,14 +1010,14 @@ Zotero.Sync.Storage.ZFS = (function () {
 				+ libraryID + " was " + date);
 			return ts;
 		})
-		.fail(function (e) {
+		.catch(function (e) {
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
 				if (e.status == 401 || e.status == 403) {
 					Zotero.debug("Clearing ZFS authentication credentials", 2);
 					_cachedCredentials = false;
 				}
 				
-				return Q.reject(e);
+				return Zotero.Promise.reject(e);
 			}
 			// TODO: handle browser offline exception
 			else {
@@ -1054,7 +1054,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 					sql, ['storage_zfs_' + libraryID, { int: ts }]
 				);
 			})
-			.fail(function (e) {
+			.catch(function (e) {
 				var msg = "Unexpected status code " + e.xmlhttp.status
 					+ " setting last file sync time";
 				Zotero.debug(msg, 1);
@@ -1089,7 +1089,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 	obj._cacheCredentials = function () {
 		if (_cachedCredentials) {
 			Zotero.debug("ZFS credentials are already cached");
-			return Q();
+			return Zotero.Promise.resolve();
 		}
 		
 		var uri = this.rootURI;
@@ -1126,7 +1126,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 	 * Remove all synced files from the server
 	 */
 	obj._purgeDeletedStorageFiles = function () {
-		return Q.fcall(function () {
+		return Zotero.Promise.try(function () {
 			// Cache the credentials at the root
 			return this._cacheCredentials();
 		}.bind(this))

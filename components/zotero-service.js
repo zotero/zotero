@@ -60,23 +60,23 @@ const xpcomFilesLocal = [
 	'cite',
 	'cookieSandbox',
 	'data_access',
+	'data/dataObject',
 	'data/dataObjects',
+	'data/dataObjectLoader',
 	'data/dataObjectUtilities',
 	'data/cachedTypes',
+	'data/notes',
 	'data/item',
 	'data/items',
 	'data/collection',
 	'data/collections',
-	'data/creator',
 	'data/creators',
 	'data/group',
 	'data/groups',
 	'data/itemFields',
-	'data/notes',
 	'data/libraries',
 	'data/relation',
 	'data/relations',
-	'data/tag',
 	'data/tags',
 	'db',
 	'duplicates',
@@ -95,6 +95,9 @@ const xpcomFilesLocal = [
 	'server',
 	'style',
 	'sync',
+	'sync/syncEngine',
+	'sync/syncAPI',
+	'sync/syncLocal',
 	'storage',
 	'storage/streamListener',
 	'storage/queueManager',
@@ -295,9 +298,7 @@ function ZoteroService() {
 		
 		if(isFirstLoadThisSession) {
 			makeZoteroContext(false);
-			Q.fcall(function () {
-				return zContext.Zotero.init(zInitOptions);
-			})
+			zContext.Zotero.init(zInitOptions)
 			.catch(function (e) {
 				dump(e + "\n\n");
 				Components.utils.reportError(e);

@@ -311,16 +311,22 @@ Zotero.MIME = new function(){
 	 * Try to determine the MIME type of the file, using a few different
 	 * techniques
 	 */
-	this.getMIMETypeFromFile = function (file) {
-		var str = Zotero.File.getSample(file);
+	this.getMIMETypeFromFile = Zotero.Promise.coroutine(function* (file) {
+		var str = yield Zotero.File.getSample(file);
 		var ext = Zotero.File.getExtension(file);
 		
 		return this.getMIMETypeFromData(str, ext);
-	}
+	});
 	
 	
-	this.getMIMETypeFromURL = function (url, callback, cookieSandbox) {
-		Zotero.HTTP.doHead(url, function(xmlhttp) {
+	/**
+	 * @param {String} url
+	 * @param {Zotero.CookieSandbox} [cookieSandbox]
+	 * @return {Promise}
+	 */
+	this.getMIMETypeFromURL = function (url, cookieSandbox) {
+		return Zotero.HTTP.promise("HEAD", url, { cookieSandbox: cookieSandbox, successCodes: false })
+		.then(function (xmlhttp) {
 			if (xmlhttp.status != 200 && xmlhttp.status != 204) {
 				Zotero.debug("Attachment HEAD request returned with status code "
 					+ xmlhttp.status + " in Zotero.MIME.getMIMETypeFromURL()", 2);
@@ -331,7 +337,7 @@ Zotero.MIME = new function(){
 			}
 			
 			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
-						.createInstance(Components.interfaces.nsIURL);
+				.createInstance(Components.interfaces.nsIURL);
 			nsIURL.spec = url;
 			
 			// Override MIME type to application/pdf if extension is .pdf --
@@ -344,10 +350,10 @@ Zotero.MIME = new function(){
 			}
 			
 			var ext = nsIURL.fileExtension;
-			var hasNativeHandler = Zotero.MIME.hasNativeHandler(mimeType, ext)
+			var hasNativeHandler = Zotero.MIME.hasNativeHandler(mimeType, ext);
 			
-			callback(mimeType, hasNativeHandler);
-		}, undefined, cookieSandbox);
+			return [mimeType, hasNativeHandler];
+		});
 	}
 	
 	
@@ -407,11 +413,11 @@ Zotero.MIME = new function(){
 	}
 	
 	
-	this.fileHasInternalHandler = function (file){
-		var mimeType = this.getMIMETypeFromFile(file);
+	this.fileHasInternalHandler = Zotero.Promise.coroutine(function* (file){
+		var mimeType = yield this.getMIMETypeFromFile(file);
 		var ext = Zotero.File.getExtension(file);
 		return hasInternalHandler(mimeType, ext);
-	}
+	});
 	
 	
 	/*

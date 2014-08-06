@@ -50,7 +50,7 @@ var ZoteroItemPane = new function() {
 	/*
 	 * Load a top-level item
 	 */
-	this.viewItem = function (item, mode, index) {
+	this.viewItem = Zotero.Promise.coroutine(function* (item, mode, index) {
 		if (!index) {
 			index = 0;
 		}
@@ -77,7 +77,7 @@ var ZoteroItemPane = new function() {
 			switch (index) {
 				case 0:
 				case 2:
-					box.blurOpenField();
+					yield box.blurOpenField();
 					// DEBUG: Currently broken
 					//box.scrollToTop();
 					break;
@@ -94,10 +94,13 @@ var ZoteroItemPane = new function() {
 				_notesList.removeChild(_notesList.firstChild);
 			}
 			
-			var notes = Zotero.Items.get(item.getNotes());
+			yield item.loadChildItems();
+			let notes = yield Zotero.Items.getAsync(item.getNotes());
 			if (notes.length) {
-				for(var i = 0; i < notes.length; i++) {
+				for (var i = 0; i < notes.length; i++) {
+					let note = notes[i];
 					let id = notes[i].id;
+					yield note.loadItemData();
 					
 					var icon = document.createElement('image');
 					icon.className = "zotero-box-icon";
@@ -105,7 +108,7 @@ var ZoteroItemPane = new function() {
 					
 					var label = document.createElement('label');
 					label.className = "zotero-box-label";
-					var title = Zotero.Notes.noteToTitle(notes[i].getNote());
+					var title = note.getNoteTitle();
 					title = title ? title : Zotero.getString('pane.item.notes.untitled');
 					label.setAttribute('value', title);
 					label.setAttribute('flex','1');	//so that the long names will flex smaller
@@ -144,12 +147,14 @@ var ZoteroItemPane = new function() {
 		else {
 			box.mode = 'edit';
 		}
+		
+		yield [item.loadItemData(), item.loadCreators()];
 		box.item = item;
-	}
+	});
 	
 	
 	this.addNote = function (popup) {
-		ZoteroPane_Local.newNote(popup, _lastItem.id);
+		ZoteroPane_Local.newNote(popup, _lastItem.key);
 	}
 	
 	

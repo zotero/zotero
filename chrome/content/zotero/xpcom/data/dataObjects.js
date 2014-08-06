@@ -51,7 +51,139 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	}
 	
 	this._objectCache = {};
-	this._reloadCache = true;
+	this._objectKeys = {};
+	this._objectIDs = {};
+	this._loadedLibraries = {};
+	this._loadPromise = null;
+	
+	// Public properties
+	this.table = this._ZDO_table;
+	
+	
+	this.init = function () {
+		this._loadIDsAndKeys();
+	}
+	
+	
+	this.__defineGetter__('primaryFields', function () {
+		var primaryFields = Object.keys(this._primaryDataSQLParts);
+		
+		// Once primary fields have been cached, get rid of getter for speed purposes
+		delete this.primaryFields;
+		this.primaryFields = primaryFields;
+		
+		return primaryFields;
+	});
+	
+	
+	this.isPrimaryField = function (field) {
+		return this.primaryFields.indexOf(field) != -1;
+	}
+	
+	
+	/**
+	 * Retrieves one or more already-loaded items
+	 *
+	 * If an item hasn't been loaded, an error is thrown
+	 *
+	 * @param {Array|Integer} ids  An individual object id or an array of object ids
+	 * @return {Zotero.[Object]|Array<Zotero.[Object]>} A Zotero.[Object], if a scalar id was passed;
+	 *                                          otherwise, an array of Zotero.[Object]
+	 */
+	this.get = function (ids) {
+		if (Array.isArray(ids)) {
+			var singleObject = false;
+		}
+		else {
+			var singleObject = true;
+			ids = [ids];
+		}
+		
+		var toReturn = [];
+		
+		for (let i=0; i<ids.length; i++) {
+			let id = ids[i];
+			// Check if already loaded
+			if (!this._objectCache[id]) {
+				throw new Error(this._ZDO_Object + " " + id + " not yet loaded");
+			}
+			toReturn.push(this._objectCache[id]);
+		}
+		
+		// If single id, return the object directly
+		if (singleObject) {
+			return toReturn.length ? toReturn[0] : false;
+		}
+		
+		return toReturn;
+	};
+	
+	
+	/**
+	 * Retrieves (and loads, if necessary) one or more items
+	 *
+	 * @param {Array|Integer} ids  An individual object id or an array of object ids
+	 * @param {Object} options  'noCache': Don't cache loaded objects
+	 * @return {Zotero.[Object]|Array<Zotero.[Object]>} A Zotero.[Object], if a scalar id was passed;
+	 *                                          otherwise, an array of Zotero.[Object]
+	 */
+	this.getAsync = Zotero.Promise.coroutine(function* (ids, options) {
+		// Serialize loads
+		if (this._loadPromise && this._loadPromise.isPending()) {
+			yield this._loadPromise;
+		}
+		var deferred = Zotero.Promise.defer();
+		this._loadPromise = deferred.promise;
+		
+		var toLoad = [];
+		var toReturn = [];
+		
+		if (!ids) {
+			throw new Error("No arguments provided to " + this._ZDO_Objects + ".get()");
+		}
+		
+		if (Array.isArray(ids)) {
+			var singleObject = false;
+		}
+		else {
+			var singleObject = true;
+			ids = [ids];
+		}
+		
+		for (let i=0; i<ids.length; i++) {
+			let id = ids[i];
+			// Check if already loaded
+			if (this._objectCache[id]) {
+				toReturn.push(this._objectCache[id]);
+			}
+			else {
+				toLoad.push(id);
+			}
+		}
+		
+		// New object to load
+		if (toLoad.length) {
+			let loaded = yield this._load(null, toLoad, options);
+			for (let i=0; i<toLoad.length; i++) {
+				let id = toLoad[i];
+				let obj = loaded[id];
+				if (!obj) {
+					Zotero.debug(this._ZDO_Object + " " + id + " doesn't exist", 2);
+					continue;
+				}
+				toReturn.push(obj);
+			}
+		}
+		
+		deferred.resolve();
+		
+		// If single id, return the object directly
+		if (singleObject) {
+			return toReturn.length ? toReturn[0] : false;
+		}
+		
+		return toReturn;
+	});
 	
 	
 	this.makeLibraryKeyHash = function (libraryID, key) {
@@ -83,7 +215,7 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	 * @param	{String}			key
 	 * @return	{Zotero.DataObject}			Zotero data object, or FALSE if not found
 	 */
-	this.getByLibraryAndKey = function (libraryID, key) {
+	this.getByLibraryAndKey = Zotero.Promise.coroutine(function* (libraryID, key, options) {
 		var sql = "SELECT ROWID FROM " + this._ZDO_table + " WHERE ";
 		if (this._ZDO_idOnly) {
 			sql += "ROWID=?";
@@ -93,130 +225,147 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 			sql += "libraryID=? AND key=?";
 			var params = [libraryID, key];
 		}
-		var id = Zotero.DB.valueQuery(sql, params);
+		var id = yield Zotero.DB.valueQueryAsync(sql, params);
 		if (!id) {
 			return false;
 		}
-		return Zotero[this._ZDO_Objects].get(id);
+		return Zotero[this._ZDO_Objects].get(id, options);
+	});
+	
+	
+	this.exists = function (itemID) {
+		return !!this.getLibraryAndKeyFromID(itemID);
 	}
 	
 	
-	this.getOlder = function (date) {
+	/**
+	 * @return {Array} Array with libraryID and key
+	 */
+	this.getLibraryAndKeyFromID = function (id) {
+		return this._objectKeys[id] ? this._objectKeys[id] : false;
+	}
+	
+	
+	this.getIDFromLibraryAndKey = function (libraryID, key) {
+		return this._objectIDs[libraryID][key] ? this._objectIDs[libraryID][key] : false;
+	}
+	
+	
+	this.getOlder = function (libraryID, date) {
 		if (!date || date.constructor.name != 'Date') {
 			throw ("date must be a JS Date in "
 				+ "Zotero." + this._ZDO_Objects + ".getOlder()")
 		}
 		
-		var sql = "SELECT ROWID FROM " + this._ZDO_table + " WHERE ";
-		if (this._ZDO_object == 'relation') {
-			sql += "clientDateModified<?";
-		}
-		else {
-			sql += "dateModified<?";
-		}
-		return Zotero.DB.columnQuery(sql, Zotero.Date.dateToSQL(date, true));
+		var sql = "SELECT ROWID FROM " + this._ZDO_table
+			+ " WHERE libraryID=? AND clientDateModified<?";
+		return Zotero.DB.columnQuery(sql, [libraryID, Zotero.Date.dateToSQL(date, true)]);
 	}
 	
 	
-	this.getNewer = function (date, ignoreFutureDates) {
-		if (date && date.constructor.name != 'Date') {
+	this.getNewer = function (libraryID, date, ignoreFutureDates) {
+		if (!date || date.constructor.name != 'Date') {
 			throw ("date must be a JS Date in "
 				+ "Zotero." + this._ZDO_Objects + ".getNewer()")
 		}
 		
-		var sql = "SELECT ROWID FROM " + this._ZDO_table;
-		if (date) {
-			sql += " WHERE clientDateModified>?";
-			if (ignoreFutureDates) {
-				sql += " AND clientDateModified<=CURRENT_TIMESTAMP";
-			}
-			return Zotero.DB.columnQuery(sql, Zotero.Date.dateToSQL(date, true));
+		var sql = "SELECT ROWID FROM " + this._ZDO_table
+			+ " WHERE libraryID=? AND clientDateModified>?";
+		if (ignoreFutureDates) {
+			sql += " AND clientDateModified<=CURRENT_TIMESTAMP";
 		}
-		return Zotero.DB.columnQuery(sql);
+		return Zotero.DB.columnQuery(sql, [libraryID, Zotero.Date.dateToSQL(date, true)]);
 	}
 	
 	
-	/*
-	 * Reloads data for specified items into internal array
-	 *
-	 * Can be passed ids as individual parameters or as an array of ids, or both
+	/**
+	 * @param {Integer} libraryID
+	 * @return {Promise} A promise for an array of object ids
 	 */
-	this.reload = function () {
-		if (!arguments[0]) {
-			return false;
-		}
+	this.getUnsynced = function (libraryID) {
+		var sql = "SELECT " + this._ZDO_id + " FROM " + this._ZDO_table
+			+ " WHERE libraryID=? AND synced=0";
+		return Zotero.DB.columnQueryAsync(sql, [libraryID]);
+	}
+	
+	
+	/**
+	 * Get JSON from the sync cache that hasn't yet been written to the
+	 * main object tables
+	 *
+	 * @param {Integer} libraryID
+	 * @return {Promise} A promise for an array of JSON objects
+	 */
+	this.getUnwrittenData = function (libraryID) {
+		var sql = "SELECT data FROM syncCache SC "
+			+ "LEFT JOIN " + this._ZDO_table + " "
+			+ "USING (libraryID) "
+			+ "WHERE SC.libraryID=? AND "
+			+ "syncObjectTypeID IN (SELECT syncObjectTypeID FROM "
+			+ "syncObjectTypes WHERE name='" + this._ZDO_object + "') "
+			+ "AND IFNULL(O.version, 0) < SC.version";
+		return Zotero.DB.columnQueryAsync(sql, [libraryID]);
+	}
+	
+	
+	/**
+	 * Reload loaded data of loaded objects
+	 *
+	 * @param {Array|Number} ids - An id or array of ids
+	 * @param {Array} [dataTypes] - Data types to reload (e.g., 'primaryData'), or all loaded
+	 *                              types if not provided
+     * @param {Boolean} [reloadUnchanged=false] - Reload even data that hasn't changed internally.
+     *                                            This should be set to true for data that was
+     *                                            changed externally (e.g., globally renamed tags).
+     */
+	this.reload = Zotero.Promise.coroutine(function* (ids, dataTypes, reloadUnchanged) {
+		ids = Zotero.flattenArguments(ids);
 		
-		var ids = Zotero.flattenArguments(arguments);
-		Zotero.debug('Reloading ' + this._ZDO_objects + ' ' + ids);
+		Zotero.debug('Reloading ' + (dataTypes ? dataTypes + ' for ' : '')
+			+ this._ZDO_objects + ' ' + ids);
 		
-		/*
-		// Reset cache keys to itemIDs stored in database using object keys
-		var sql = "SELECT " + this._ZDO_id + " AS id, key FROM " + this._ZDO_table
-					+ " WHERE " + this._ZDO_id + " IN ("
-					+ ids.map(function () '?').join() + ")";
-		var rows = Zotero.DB.query(sql, ids);
-		
-		var keyIDs = {};
-		for each(var row in rows) {
-			keyIDs[row.key] = row.id
-		}
-		var store = {};
-		
-		Zotero.debug('==================');
-		for (var id in this._objectCache) {
-			Zotero.debug('id is ' + id);
-			var obj = this._objectCache[id];
-			//Zotero.debug(obj);
-			var dbID = keyIDs[obj.key];
-			Zotero.debug("DBID: " + dbID);
-			if (!dbID || id == dbID) {
-				Zotero.debug('continuing');
-				continue;
+		for (let i=0; i<ids.length; i++) {
+			if (this._objectCache[ids[i]]) {
+				yield this._objectCache[ids[i]].reload(dataTypes, reloadUnchanged);
 			}
-			Zotero.debug('Assigning ' + dbID + ' to store');
-			store[dbID] = obj;
-			Zotero.debug('deleting ' + id);
-			delete this._objectCache[id];
 		}
-		Zotero.debug('------------------');
-		for (var id in store) {
-			Zotero.debug(id);
-			if (this._objectCache[id]) {
-				throw("Existing " + this._ZDO_object + " " + id
-					+ " exists in cache in Zotero.DataObjects.reload()");
-			}
-			this._objectCache[id] = store[id];
-		}
-		*/
-		
-		// If there's an internal reload hook, call it
-		if (this._reload) {
-			this._reload(ids)
-		}
-		
-		// Reload data
-		this._load(ids);
 		
 		return true;
-	}
+	});
 	
 	
-	this.reloadAll = function () {
+	this.reloadAll = function (libraryID) {
 		Zotero.debug("Reloading all " + this._ZDO_objects);
 		
 		// Remove objects not stored in database
 		var sql = "SELECT ROWID FROM " + this._ZDO_table;
-		var ids = Zotero.DB.columnQuery(sql);
-		
-		for (var id in this._objectCache) {
-			if (!ids || ids.indexOf(parseInt(id)) == -1) {
-				delete this._objectCache[id];
-			}
+		var params = [];
+		if (libraryID !== undefined) {
+			sql += ' WHERE libraryID=?';
+			params.push(libraryID);
 		}
-		
-		// Reload data
-		this._reloadCache = true;
-		this._load();
+		return Zotero.DB.columnQueryAsync(sql, params)
+		.then(function (ids) {
+			for (var id in this._objectCache) {
+				if (!ids || ids.indexOf(parseInt(id)) == -1) {
+					delete this._objectCache[id];
+				}
+			}
+			
+			// Reload data
+			this._loadedLibraries[libraryID] = false;
+			return this._load(libraryID);
+		});
+	}
+	
+	
+	this.registerIdentifiers = function (id, libraryID, key) {
+		Zotero.debug("Registering " + this._ZDO_object + " " + id + " as " + libraryID + "/" + key);
+		if (!this._objectIDs[libraryID]) {
+			this._objectIDs[libraryID] = {};
+		}
+		this._objectIDs[libraryID][key] = id;
+		this._objectKeys[id] = [libraryID, key];
 	}
 	
 	
@@ -228,7 +377,13 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	this.unload = function () {
 		var ids = Zotero.flattenArguments(arguments);
 		for (var i=0; i<ids.length; i++) {
-			delete this._objectCache[ids[i]];
+			let id = ids[i];
+			let [libraryID, key] = this.getLibraryAndKeyFromID(id);
+			if (key) {
+				delete this._objectIDs[libraryID][key];
+				delete this._objectKeys[id];
+			}
+			delete this._objectCache[id];
 		}
 	}
 	
@@ -342,5 +497,121 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 			throw ("Cannot edit " + this._ZDO_object + " in read-only Zotero library");
 		}
 	}
+	
+	
+	this.getPrimaryDataSQLPart = function (part) {
+		var sql = this._primaryDataSQLParts[part];
+		if (!sql) {
+			throw new Error("Invalid primary data SQL part '" + part + "'");
+		}
+		return sql;
+	}
+	
+	
+	this._load = Zotero.Promise.coroutine(function* (libraryID, ids, options) {
+		var loaded = {};
+		
+		// If library isn't an integer (presumably false or null), skip it
+		if (parseInt(libraryID) != libraryID) {
+			libraryID = false;
+		}
+		
+		if (libraryID === false && !ids) {
+			throw new Error("Either libraryID or ids must be provided");
+		}
+		
+		if (libraryID !== false && this._loadedLibraries[libraryID]) {
+			return loaded;
+		}
+		
+		// _getPrimaryDataSQL() should use "O" for the primary table alias
+		var sql = this._getPrimaryDataSQL();
+		var params = [];
+		if (libraryID !== false) {
+			sql += ' AND O.libraryID=?';
+			params.push(libraryID);
+		}
+		if (ids) {
+			sql += ' AND O.' + this._ZDO_id + ' IN (' + ids.join(',') + ')';
+		}
+		
+		var t = new Date();
+		yield Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				onRow: function (row) {
+					var id = row.getResultByIndex(this._ZDO_id);
+					var columns = Object.keys(this._primaryDataSQLParts);
+					var rowObj = {};
+					for (let i=0; i<columns.length; i++) {
+						rowObj[columns[i]] = row.getResultByIndex(i);
+					}
+					var obj;
+					
+					// Existing object -- reload in place
+					if (this._objectCache[id]) {
+						this._objectCache[id].loadFromRow(rowObj, true);
+						obj = this._objectCache[id];
+					}
+					// Object doesn't exist -- create new object and stuff in cache
+					else {
+						obj = new Zotero[this._ZDO_Object];
+						obj.loadFromRow(rowObj, true);
+						if (!options || !options.noCache) {
+							this._objectCache[id] = obj;
+						}
+					}
+					loaded[id] = obj;
+				}.bind(this)
+			}
+		);
+		Zotero.debug("Loaded " + this._ZDO_objects + " in " + ((new Date) - t) + "ms");
+		
+		if (!ids) {
+			this._loadedLibraries[libraryID] = true;
+			
+			// If loading all objects, remove cached objects that no longer exist
+			for (let i in this._objectCache) {
+				let obj = this._objectCache[i];
+				if (libraryID !== false && obj.libraryID !== libraryID) {
+					continue;
+				}
+				if (!loaded[obj.id]) {
+					this.unload(obj.id);
+				}
+			}
+			
+			if (this._postLoad) {
+				this._postLoad(libraryID, ids);
+			}
+		}
+		
+		return loaded;
+	});
+	
+	
+	this._loadIDsAndKeys = function () {
+		var sql = "SELECT ROWID AS id, libraryID, key FROM " + this._ZDO_table;
+		return Zotero.DB.queryAsync(sql)
+		.then(function (rows) {
+			for (let i=0; i<rows.length; i++) {
+				let row = rows[i];
+				this._objectKeys[row.id] = [row.libraryID, row.key];
+				if (!this._objectIDs[row.libraryID]) {
+					this._objectIDs[row.libraryID] = {};
+				}
+				this._objectIDs[row.libraryID][row.key] = row.id;
+			}
+		}.bind(this));
+	}
 }
 
+
+Zotero.DataObjects.UnloadedDataException = function (msg, dataType) {
+	this.message = msg;
+	this.dataType = dataType;
+	this.stack = (new Error).stack;
+}
+Zotero.DataObjects.UnloadedDataException.prototype = Object.create(Error.prototype);
+Zotero.DataObjects.UnloadedDataException.prototype.name = "UnloadedDataException"

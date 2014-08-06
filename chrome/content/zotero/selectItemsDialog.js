@@ -66,7 +66,7 @@ function onCollectionSelected()
 
 	if(collectionsView.selection.count == 1 && collectionsView.selection.currentIndex != -1)
 	{
-		var collection = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
+		var collection = collectionsView.getRow(collectionsView.selection.currentIndex);
 		collection.setSearch('');
 		
 		try {

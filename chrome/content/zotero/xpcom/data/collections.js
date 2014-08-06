@@ -31,20 +31,22 @@ Zotero.Collections = new function() {
 	Zotero.DataObjects.apply(this, ['collection']);
 	this.constructor.prototype = new Zotero.DataObjects();
 	
-	this.get = get;
-	this.add = add;
-	this.erase = erase;
-	
-	/*
-	 * Returns a Zotero.Collection object for a collectionID
-	 */
-	function get(id) {
-		if (this._reloadCache) {
-			this.reloadAll();
-		}
-		return this._objectCache[id] ? this._objectCache[id] : false;
-	}
-	
+	this._primaryDataSQLParts = {
+		collectionID: "O.collectionID",
+		name: "O.collectionName AS name",
+		libraryID: "O.libraryID",
+		key: "O.key",
+		version: "O.version",
+		synced: "O.synced",
+		
+		parentID: "O.parentCollectionID AS parentID",
+		parentKey: "CP.key AS parentKey",
+		
+		hasChildCollections: "(SELECT COUNT(*) FROM collections WHERE "
+			+ "parentCollectionID=O.collectionID) != 0 AS hasChildCollections",
+		hasChildItems: "(SELECT COUNT(*) FROM collectionItems WHERE "
+			+ "collectionID=O.collectionID) != 0 AS hasChildItems "
+	};
 	
 	/**
 	* Add new collection to DB and return Collection object
@@ -54,19 +56,84 @@ Zotero.Collections = new function() {
 	*
 	* Returns true on success; false on error
 	**/
-	function add(name, parent) {
+	this.add = function (name, parent) {
 		var col = new Zotero.Collection;
 		col.name = name;
 		col.parent = parent;
 		var id = col.save();
-		return this.get(id);
+		return this.getAsync(id);
 	}
+	
+	
+	/*
+	 * Zotero.getCollections(parent)
+	 *
+	 * Returns an array of all collections are children of a collection
+	 * as Zotero.Collection instances
+	 *
+	 * Takes parent collectionID as optional parameter;
+	 * by default, returns root collections
+	 */
+	this.getByParent = Zotero.Promise.coroutine(function* (libraryID, parent, recursive) {
+		var toReturn = [];
+		
+		if (!parent) {
+			parent = null;
+		}
+		
+		var sql = "SELECT collectionID AS id, collectionName AS name FROM collections C "
+			+ "WHERE libraryID=? AND parentCollectionID " + (parent ? '= ' + parent : 'IS NULL');
+		var children = yield Zotero.DB.queryAsync(sql, [libraryID]);
+		
+		if (!children) {
+			Zotero.debug('No child collections of collection ' + parent, 5);
+			return toReturn;
+		}
+		
+		// Do proper collation sort
+		var collation = Zotero.getLocaleCollation();
+		children.sort(function (a, b) {
+			return collation.compareString(1, a.name, b.name);
+		});
+		
+		for (var i=0, len=children.length; i<len; i++) {
+			var obj = yield this.getAsync(children[i].id);
+			if (!obj) {
+				throw ('Collection ' + children[i].id + ' not found');
+			}
+			
+			toReturn.push(obj);
+			
+			// If recursive, get descendents
+			if (recursive) {
+				var desc = obj.getDescendents(false, 'collection');
+				for (var j in desc) {
+					var obj2 = yield this.getAsync(desc[j]['id']);
+					if (!obj2) {
+						throw new Error('Collection ' + desc[j] + ' not found');
+					}
+					
+					// TODO: This is a quick hack so that we can indent subcollections
+					// in the search dialog -- ideally collections would have a
+					// getLevel() method, but there's no particularly quick way
+					// of calculating that without either storing it in the DB or
+					// changing the schema to Modified Preorder Tree Traversal,
+					// and I don't know if we'll actually need it anywhere else.
+					obj2.level = desc[j].level;
+					
+					toReturn.push(obj2);
+				}
+			}
+		}
+		
+		return toReturn;
+	});
 	
 	
 	this.getCollectionsContainingItems = function (itemIDs, asIDs) {
 		// If an unreasonable number of items, don't try
 		if (itemIDs.length > 100) {
-			return Q([]);
+			return Zotero.Promise.resolve([]);
 		}
 		
 		var sql = "SELECT collectionID FROM collections WHERE ";
@@ -86,28 +153,45 @@ Zotero.Collections = new function() {
 	
 	
 	/**
-	 * Invalidate child collection cache in specified collections, skipping
-	 * any that aren't loaded
+	 * Invalidate child collection cache in specified collections, skipping any that aren't loaded
+	 *
+	 * @param	{Integer|Integer[]}	ids		One or more collectionIDs
+	 */
+	this.refreshChildCollections = Zotero.Promise.coroutine(function* (ids) {
+		ids = Zotero.flattenArguments(ids);
+		
+		for (let i=0; i<ids.length; i++) {
+			let id = ids[i];
+			if (this._objectCache[id]) {
+				yield this._objectCache[id]._refreshChildCollections();
+			}
+		}
+	});
+	
+	
+	/**
+	 * Invalidate child item cache in specified collections, skipping any that aren't loaded
 	 *
 	 * @param	{Integer|Integer[]}	ids		One or more itemIDs
 	 */
-	this.refreshChildCollections = function (ids) {
+	this.refreshChildItems = Zotero.Promise.coroutine(function* (ids) {
 		ids = Zotero.flattenArguments(ids);
 		
-		for each(var id in ids) {
+		for (let i=0; i<ids.length; i++) {
+			let id = ids[i];
 			if (this._objectCache[id]) {
-				this._objectCache[id]._refreshChildCollections();
+				yield this._objectCache[id]._refreshChildItems();
 			}
 		}
-	}
+	});
 	
 	
-	function erase(ids) {
+	this.erase = function (ids) {
 		ids = Zotero.flattenArguments(ids);
 		
 		Zotero.DB.beginTransaction();
 		for each(var id in ids) {
-			var collection = this.get(id);
+			var collection = this.getAsync(id);
 			if (collection) {
 				collection.erase();
 			}
@@ -120,50 +204,14 @@ Zotero.Collections = new function() {
 	}
 	
 	
-	this._load = function () {
-		if (!arguments[0] && !this._reloadCache) {
-			return;
-		}
-		
-		this._reloadCache = false;
-		
+	this._getPrimaryDataSQL = function () {
 		// This should be the same as the query in Zotero.Collection.load(),
 		// just without a specific collectionID
-		var sql = "SELECT C.*, "
-			+ "(SELECT COUNT(*) FROM collections WHERE "
-			+ "parentCollectionID=C.collectionID)!=0 AS hasChildCollections, "
-			+ "(SELECT COUNT(*) FROM collectionItems WHERE "
-			+ "collectionID=C.collectionID)!=0 AS hasChildItems "
-			+ "FROM collections C WHERE 1";
-		if (arguments[0]) {
-			sql += " AND collectionID IN (" + Zotero.join(arguments[0], ",") + ")";
-		}
-		var rows = Zotero.DB.query(sql);
-		var ids = [];
-		for each(var row in rows) {
-			var id = row.collectionID;
-			ids.push(id);
-			
-			// Collection doesn't exist -- create new object and stuff in array
-			if (!this._objectCache[id]) {
-				//this.get(id);
-				this._objectCache[id] = new Zotero.Collection;
-				this._objectCache[id].loadFromRow(row);
-			}
-			// Existing collection -- reload in place
-			else {
-				this._objectCache[id].loadFromRow(row);
-			}
-		}
-		
-		// If loading all creators, remove old creators that no longer exist
-		if (!arguments[0]) {
-			for each(var c in this._objectCache) {
-				if (ids.indexOf(c.id) == -1) {
-					this.unload(c.id);
-				}
-			}
-		}
+		return "SELECT "
+			+ Object.keys(this._primaryDataSQLParts).map(key => this._primaryDataSQLParts[key]).join(", ") + " "
+			+ "FROM collections O "
+			+ "LEFT JOIN collections CP ON (O.parentCollectionID=CP.collectionID) "
+			+ "WHERE 1";
 	}
 }
 

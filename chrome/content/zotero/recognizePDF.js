@@ -32,7 +32,6 @@
  * @namespace
  */
 var Zotero_RecognizePDF = new function() {
-	Components.utils.import("resource://zotero/q.js");
 	var _progressWindow, _progressIndicator;
 	
 	/**
@@ -40,8 +39,9 @@ var Zotero_RecognizePDF = new function() {
 	 * @returns {Boolean} True if the PDF can be recognized, false if it cannot be
 	 */
 	this.canRecognize = function(/**Zotero.Item*/ item) {
-		return (item.attachmentMIMEType &&
-			item.attachmentMIMEType == "application/pdf" && !item.getSource());
+		return item.attachmentMIMEType
+			&& item.attachmentMIMEType == "application/pdf"
+			&& item.isTopLevelItem();
 	}
 	
 	/**
@@ -110,12 +110,12 @@ var Zotero_RecognizePDF = new function() {
 					translate.setSearch({"itemType":"book", "ISBN":isbns[0]});
 					promise = _promiseTranslate(translate, libraryID);
 				} else {
-					promise = Q.reject("No ISBN or DOI found");
+					promise = Zotero.Promise.reject("No ISBN or DOI found");
 				}
 			}
 			
 			// If no DOI or ISBN, query Google Scholar
-			return promise.fail(function(error) {
+			return promise.catch(function(error) {
 				Zotero.debug("RecognizePDF: "+error);
 				return me.GSFullTextSearch.findItem(lines, libraryID, stopCheckCallback);
 			});
@@ -183,7 +183,7 @@ var Zotero_RecognizePDF = new function() {
 	 * @return {Promise}
 	 */
 	function _promiseTranslate(translate, libraryID) {
-		var deferred = Q.defer();
+		var deferred = Zotero.Promise.defer();
 		translate.setHandler("select", function(translate, items, callback) {
 			for(var i in items) {
 				var obj = {};
@@ -337,8 +337,6 @@ var Zotero_RecognizePDF = new function() {
 		 * @private
 		 */
 		"_recognizeItem": function() {
-			Components.utils.import("resource://zotero/q.js");
-			
 			const SUCCESS_IMAGE = "chrome://zotero/skin/tick.png";
 			const FAILURE_IMAGE = "chrome://zotero/skin/cross.png";
 			const LOADING_IMAGE = "chrome://global/skin/icons/loading_16.png";
@@ -383,7 +381,7 @@ var Zotero_RecognizePDF = new function() {
 				}
 				
 				// put old item as a child of the new item
-				item.setSource(newItem.id);
+				item.parentID = newItem.id;
 				item.save();
 				
 				itemTitle.setAttribute("label", newItem.getField("title"));

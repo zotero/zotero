@@ -30,6 +30,31 @@
  * @class Utility functions not made available to translators
  */
 Zotero.Utilities.Internal = {
+	/**
+	 * Run a function on chunks of a given size of an array's elements.
+	 *
+	 * @param {Array} arr
+	 * @param {Integer} chunkSize
+	 * @param {Function} func
+	 * @return {Array} The return values from the successive runs
+	 */
+	"forEachChunkAsync": Zotero.Promise.coroutine(function* (arr, chunkSize, func) {
+		var retValues = [];
+		var tmpArray = arr.concat();
+		var num = arr.length;
+		var done = 0;
+		
+		do {
+			var chunk = tmpArray.splice(0, chunkSize);
+			done += chunk.length;
+			retValues.push(yield func(chunk));
+		}
+		while (done < num);
+		
+		return retValues;
+	}),
+	
+	
 	 /*
 	 * Adapted from http://developer.mozilla.org/en/docs/nsICryptoHash
 	 *
@@ -98,7 +123,7 @@ Zotero.Utilities.Internal = {
 	"md5Async": function (file, base64) {
 		const CHUNK_SIZE = 16384;
 		
-		var deferred = Q.defer();
+		var deferred = Zotero.Promise.defer();
 		
 		function toHexString(charCode) {
 			return ("0" + charCode.toString(16)).slice(-2);
@@ -256,14 +281,14 @@ Zotero.Utilities.Internal = {
 	 */
 	"exec":function(cmd, args) {
 		if(!cmd.isExecutable()) {
-			return Q.reject(cmd.path+" is not an executable");
+			return Zotero.Promise.reject(cmd.path+" is not an executable");
 		}
 		
 		var proc = Components.classes["@mozilla.org/process/util;1"].
 				createInstance(Components.interfaces.nsIProcess);
 		proc.init(cmd);
 		
-		var deferred = Q.defer();
+		var deferred = Zotero.Promise.defer();
 		proc.runwAsync(args, args.length, {"observe":function(subject, topic) {
 			if(topic !== "process-finished") {
 				deferred.reject(new Error(cmd.path+" failed"));
@@ -312,6 +337,30 @@ Zotero.Utilities.Internal = {
 		while(childWindow.parent !== childWindow) {
 			childWindow = childWindow.parent;
 			if(childWindow === parentWindow) return true;
+		}
+	},
+	
+	
+	/**
+	 * A generator that yields promises that delay for the given intervals
+	 *
+	 * @param {Array<Integer>} intervals An array of intervals in milliseconds
+	 * @param {Boolean} [finite=FALSE] If TRUE, repeat the last interval forever
+	 */
+	"delayGenerator": function (intervals, finite) {
+		var lastInterval = intervals[intervals.length - 1];
+		while (true) {
+			let interval = intervals.shift();
+			if (interval) {
+				lastInterval = interval;
+				yield Zotero.Promise.delay(interval);
+			}
+			else if (finite) {
+				yield Zotero.Promise.delay(lastInterval);
+			}
+			else {
+				break;
+			}
 		}
 	}
 }

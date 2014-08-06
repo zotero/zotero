@@ -27,6 +27,13 @@ var noteEditor;
 var notifierUnregisterID;
 
 function onLoad() {
+	Zotero.spawn(function* () {
+		Zotero.debug('=-=-=');
+		var bar = yield Zotero.Promise.delay(1000).return('DONE');
+		Zotero.debug(bar);
+		Zotero.debug('-----');
+	});
+	
 	noteEditor = document.getElementById('zotero-note-editor');
 	noteEditor.mode = 'edit';
 	noteEditor.focus();
@@ -39,38 +46,40 @@ function onLoad() {
 	}
 	var itemID = io.itemID;
 	var collectionID = io.collectionID;
-	var parentItemID = io.parentItemID;
+	var parentItemKey = io.parentItemKey;
 	
-	if (itemID) {
-		var ref = Zotero.Items.get(itemID);
-		
-		var clearUndo = noteEditor.item ? noteEditor.item.id != ref.id : false;
-		
-		noteEditor.item = ref;
-		
-		// If loading new or different note, disable undo while we repopulate the text field
-		// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
-		// undo content from another note into the current one.
-		if (clearUndo) {
-			noteEditor.clearUndo();
-		}
-		
-		document.title = ref.getNoteTitle();
-	}
-	else {
-		if (parentItemID) {
-			var ref = Zotero.Items.get(parentItemID);
-			noteEditor.parent = ref;
+	return Zotero.spawn(function* () {
+		if (itemID) {
+			var ref = yield Zotero.Items.getAsync(itemID);
+			
+			var clearUndo = noteEditor.item ? noteEditor.item.id != ref.id : false;
+			
+			noteEditor.item = ref;
+			
+			// If loading new or different note, disable undo while we repopulate the text field
+			// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
+			// undo content from another note into the current one.
+			if (clearUndo) {
+				noteEditor.clearUndo();
+			}
+			
+			document.title = ref.getNoteTitle();
 		}
 		else {
-			if (collectionID && collectionID != '' && collectionID != 'undefined') {
-				noteEditor.collection = Zotero.Collections.get(collectionID);
+			if (parentItemKey) {
+				var ref = Zotero.Items.getByLibraryAndKey(parentItemKey);
+				noteEditor.parentItem = ref;
 			}
+			else {
+				if (collectionID && collectionID != '' && collectionID != 'undefined') {
+					noteEditor.collection = Zotero.Collections.get(collectionID);
+				}
+			}
+			noteEditor.refresh();
 		}
-		noteEditor.refresh();
-	}
-	
-	notifierUnregisterID = Zotero.Notifier.registerObserver(NotifyCallback, 'item');
+		
+		notifierUnregisterID = Zotero.Notifier.registerObserver(NotifyCallback, 'item');
+	});
 }
 
 function onUnload()

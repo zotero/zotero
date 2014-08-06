@@ -201,7 +201,7 @@ Zotero.ItemFields = new function() {
 		
 		var baseFieldID = this.getID(baseField);
 		if (!baseFieldID) {
-			throw ("Invalid field '" + baseField + '" for base field in ItemFields.getFieldIDFromTypeAndBase()');
+			throw new Error("Invalid field '" + baseField + '" for base field');
 		}
 		
 		if (fieldID == baseFieldID) {
@@ -233,12 +233,12 @@ Zotero.ItemFields = new function() {
 	function getFieldIDFromTypeAndBase(itemType, baseField) {
 		var itemTypeID = Zotero.ItemTypes.getID(itemType);
 		if (!itemTypeID) {
-			throw new Error("Invalid item type '" + itemType + "' in ItemFields.getFieldIDFromTypeAndBase()");
+			throw new Error("Invalid item type '" + itemType + "'");
 		}
 		
 		var baseFieldID = this.getID(baseField);
 		if (!baseFieldID) {
-			throw new Error("Invalid field '" + baseField + '" for base field in ItemFields.getFieldIDFromTypeAndBase()');
+			throw new Error("Invalid field '" + baseField + '" for base field');
 		}
 		
 		return _baseTypeFields[itemTypeID][baseFieldID];

@@ -73,27 +73,31 @@
 			</property>
 			<property name="summary">
 				<getter>
-					<![CDATA[
+				<![CDATA[
+					return Zotero.spawn(function* () {
 						var r = "";
-					
+						
 						if (this.item) {
-							var related = this.item.relatedItemsBidirectional;
+							yield this.item.loadRelations();
+							var related = this.item.relatedItems;
 							if (related) {
-								related = Zotero.Items.get(related);
+								related = yield Zotero.Items.getAsync(related);
 								for(var i = 0; i < related.length; i++) {
 									r = r + related[i].getDisplayTitle() + ", ";
 								}
 								r = r.substr(0,r.length-2);
 							}
 						}
-					
+						
 						return r;
-					]]>
+					}, this);
+				]]>
 				</getter>
 			</property>
 			<method name="reload">
 				<body>
-					<![CDATA[
+				<![CDATA[
+					return Zotero.spawn(function* () {
 						var addButton = this.id('addButton');
 						addButton.hidden = !this.editable;
 						
@@ -102,9 +106,10 @@
 							rows.removeChild(rows.firstChild);
 						
 						if (this.item) {
-							var related = this.item.relatedItemsBidirectional;
+							yield this.item.loadRelations();
+							var related = this.item.relatedItems;
 							if (related) {
-								related = Zotero.Items.get(related);
+								related = yield Zotero.Items.getAsync(related);
 								for (var i = 0; i < related.length; i++) {
 									var icon= document.createElement("image");
 									icon.className = "zotero-box-icon";
@@ -169,12 +174,13 @@
 								this.updateCount();
 							}
 						}
-					]]>
+					}, this);
+				]]>
 				</body>
 			</method>
 			<method name="add">
-				<body>
-					<![CDATA[
+				<body><![CDATA[
+					return Zotero.spawn(function* () {
 						var io = {dataIn: null, dataOut: null};
 						
 						window.openDialog('chrome://zotero/content/selectItemsDialog.xul', '',
@@ -182,7 +188,7 @@
 						
 						if(io.dataOut) {
 							if (io.dataOut.length) {
-								var relItem = Zotero.Items.get(io.dataOut[0]);
+								var relItem = yield Zotero.Items.getAsync(io.dataOut[0]);
 								if (relItem.libraryID != this.item.libraryID) {
 									// FIXME
 									var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
@@ -194,27 +200,27 @@
 							for(var i = 0; i < io.dataOut.length; i++) {
 								this.item.addRelatedItem(io.dataOut[i]);
 							}
-							this.item.save();
+							yield this.item.save();
 						}
-					]]>
-				</body>
+					}, this);
+				]]></body>
 			</method>
 			<method name="remove">
 				<parameter name="id"/>
-				<body>
-					<![CDATA[
+				<body><![CDATA[
+					return Zotero.spawn(function* () {
 						if(id) {
 							// TODO: set attribute on reload to determine
 							// which of these is necessary
 							this.item.removeRelatedItem(id);
-							this.item.save();
+							yield this.item.save();
 							
-							var item = Zotero.Items.get(id);
+							var item = yield Zotero.Items.getAsync(id);
 							item.removeRelatedItem(this.item.id);
-							item.save();
+							yield item.save();
 						}
-					]]>
-				</body>
+					});
+				]]></body>
 			</method>
 			<method name="showItem">
 				<parameter name="id"/>
@@ -257,7 +263,7 @@
 				<body>
 					<![CDATA[
 						if (count == null) {
-							var count = this.item.relatedItemsBidirectional.length;
+							var count = this.item.relatedItems.length;
 						}
 						
 						var str = 'pane.item.related.count.';

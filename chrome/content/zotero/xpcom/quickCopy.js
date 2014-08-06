@@ -27,7 +27,6 @@
 Zotero.QuickCopy = new function() {
 	this.getContentType = getContentType;
 	this.stripContentType = stripContentType;
-	this.getFormatFromURL = getFormatFromURL;
 	this.getContentFromItems = getContentFromItems;
 	
 	var _formattedNames = {};
@@ -96,7 +95,7 @@ Zotero.QuickCopy = new function() {
 	}
 	
 	
-	function getFormatFromURL(url) {
+	this.getFormatFromURL = Zotero.Promise.coroutine(function* (url) {
 		if (!url) {
 			return Zotero.Prefs.get("export.quickCopy.setting");
 		}
@@ -118,7 +117,7 @@ Zotero.QuickCopy = new function() {
 		var sql = "SELECT key AS domainPath, value AS format FROM settings "
 			+ "WHERE setting='quickCopySite' AND (key LIKE ? OR key LIKE ?)";
 		var urlDomain = urlHostPort.match(/[^\.]+\.[^\.]+$/);
-		var rows = Zotero.DB.query(sql, ['%' + urlDomain + '%', '/%']);
+		var rows = yield Zotero.DB.queryAsync(sql, ['%' + urlDomain + '%', '/%']);
 		for each(var row in rows) {
 			var [domain, path] = row.domainPath.split(/\//);
 			path = '/' + (path ? path : '');
@@ -157,7 +156,7 @@ Zotero.QuickCopy = new function() {
 		}
 		
 		return Zotero.Prefs.get("export.quickCopy.setting");
-	}
+	});
 	
 	
 	/*

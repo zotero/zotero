@@ -28,363 +28,413 @@
  * Same structure as Zotero.Creators -- make changes in both places if possible
  */
 Zotero.Tags = new function() {
-	Zotero.DataObjects.apply(this, ['tag']);
-	this.constructor.prototype = new Zotero.DataObjects();
-	
 	this.MAX_COLORED_TAGS = 6;
 	
-	var _tags = {}; // indexed by tag text
+	var _tagIDsByName = {};
+	var _tagNamesByID = {};
+	var _loaded = {};
 	
-	var _libraryColors = [];
+	var _libraryColors = {};
 	var _libraryColorsByName = {};
 	var _itemsListImagePromises = {};
 	var _itemsListExtraImagePromises = {};
 	
-	this.get = get;
-	this.getName = getName;
-	this.getID = getID;
-	this.getIDs = getIDs;
-	this.getTypes = getTypes;
-	this.getAll = getAll;
-	this.getAllWithinSearch = getAllWithinSearch;
-	this.getTagItems = getTagItems;
-	this.search = search;
-	this.rename = rename;
-	this.erase = erase;
-	this.purge = purge;
 	
-	
-	/*
-	 * Returns a tag and type for a given tagID
-	 */
-	function get(id, skipCheck) {
-		if (this._reloadCache) {
-			this.reloadAll();
-		}
-		return this._objectCache[id] ? this._objectCache[id] : false;
-	}
-	
-	
-	/*
+	/**
 	 * Returns a tag for a given tagID
+	 *
+	 * @param {Number} libraryID
+	 * @param {Number} tagID
 	 */
-	function getName(tagID) {
-		if (this._objectCache[tagID]) {
-			return this._objectCache[tagID].name;
+	this.getName = function (libraryID, tagID) {
+		if (!tagID) {
+			throw new Error("tagID not provided");
 		}
-		
-		// Populate cache
-		var tag = this.get(tagID);
-		
-		return this._objectCache[tagID] ? this._objectCache[tagID].name : false;
+		if (_tagNamesByID[tagID]) {
+			return _tagNamesByID[tagID].name;
+		}
+		_requireLoad(libraryID);
+		return false;
 	}
 	
 	
-	/*
-	 * Returns the tagID matching given tag and type
+	/**
+	 * Returns the tagID matching a given tag
+	 *
+	 * @param {Number} libraryID
+	 * @param {String} name
 	 */
-	function getID(name, type, libraryID) {
-		name = Zotero.Utilities.trim(name);
-		var lcname = name.toLowerCase();
-		
-		if (!libraryID) {
-			libraryID = 0;
+	this.getID = function (libraryID, name) {
+		if (_tagIDsByName[libraryID] && _tagIDsByName[libraryID]['_' + name]) {
+			return _tagIDsByName[libraryID]['_' + name];
 		}
-		
-		if (_tags[libraryID] && _tags[libraryID][type] && _tags[libraryID][type]['_' + lcname]) {
-			return _tags[libraryID][type]['_' + lcname];
-		}
-		
-		// FIXME: COLLATE NOCASE doesn't work for Unicode characters, so this
-		// won't find Äbc if "äbc" is entered and will allow a duplicate tag
-		// to be created
-		var sql = "SELECT tagID FROM tags WHERE name=? AND type=? AND libraryID=?";
-		var tagID = Zotero.DB.valueQuery(sql, [name, type, libraryID]);
-		if (tagID) {
-			if (!_tags[libraryID]) {
-				_tags[libraryID] = {};
+		_requireLoad(libraryID);
+		return false;
+	};
+	
+	
+	/**
+	 * Returns the tagID matching given fields, or creates a new tag and returns its id
+	 *
+	 * @param {Number} libraryID
+	 * @param {String} name - Tag data in API JSON format
+	 * @param {Boolean} [create=false] - If no matching tag, create one
+	 * @return {Promise<Integer>} tagID
+	 */
+	this.getIDFromName = Zotero.Promise.method(function (libraryID, name, create) {
+		data = this.cleanData({
+			tag: name
+		});
+		return Zotero.DB.executeTransaction(function* () {
+			var sql = "SELECT tagID FROM tags WHERE libraryID=? AND name=?";
+			var id = yield Zotero.DB.valueQueryAsync(sql, [libraryID, data.tag]);
+			if (!id && create) {
+				id = yield Zotero.ID.get('tags');
+				let sql = "INSERT INTO tags (tagID, libraryID, name) VALUES (?, ?, ?)";
+				let insertID = yield Zotero.DB.queryAsync(sql, [id, libraryID, data.tag]);
+				if (!id) {
+					id = insertID;
+				}
+				_cacheTag(libraryID, id, data.tag);
 			}
-			if (!_tags[libraryID][type]) {
-				_tags[libraryID][type] = [];
-			}
-			_tags[libraryID][type]['_' + lcname] = tagID;
-		}
-		
-		return tagID;
-	}
-	
-	
-	/*
-	 * Returns all tagIDs for this tag (of all types)
-	 */
-	function getIDs(name, libraryID) {
-		name = Zotero.Utilities.trim(name);
-		var sql = "SELECT tagID FROM tags WHERE name=? AND libraryID=?";
-		return Zotero.DB.columnQuery(sql, [name, libraryID]);
-	}
+			return id;
+		});
+	});
 	
 	
 	/*
 	 * Returns an array of tag types for tags matching given tag
 	 */
-	function getTypes(name, libraryID) {
-		name = Zotero.Utilities.trim(name);
-		var sql = "SELECT type FROM tags WHERE name=? AND libraryID=?";
-		return Zotero.DB.columnQuery(sql, [name, libraryID]);
-	}
+	this.getTypes = Zotero.Promise.method(function (name, libraryID) {
+		if (libraryID != parseInt(libraryID)) {
+			throw new Error("libraryID must be an integer");
+		}
+		
+		var sql = "SELECT type FROM tags WHERE libraryID=? AND name=?";
+		return Zotero.DB.columnQueryAsync(sql, [libraryID, name.trim()]);
+	});
 	
 	
 	/**
 	 * Get all tags indexed by tagID
 	 *
-	 * _types_ is an optional array of tag types to fetch
+	 * @param {Number} libraryID
+	 * @param {Array}  [types]    Tag types to fetch
+	 * @return {Promise<Array>}   A promise for an array containing tag objects in API JSON format
+	 *                            [{ { tag: "foo" }, { tag: "bar", type: 1 }]
 	 */
-	function getAll(types, libraryID) {
-		var sql = "SELECT tagID, name FROM tags WHERE libraryID=?";
+	this.getAll = Zotero.Promise.coroutine(function* (libraryID, types) {
+		var sql = "SELECT DISTINCT name AS tag, type FROM tags "
+			+ "JOIN itemTags USING (tagID) WHERE libraryID=?";
 		var params = [libraryID];
 		if (types) {
 			sql += " AND type IN (" + types.join() + ")";
 		}
-		if (params.length) {
-			var tags = Zotero.DB.query(sql, params);
-		}
-		else {
-			var tags = Zotero.DB.query(sql);
-		}
-		if (!tags) {
-			return {};
-		}
-		
-		var indexed = {};
-		for (var i=0; i<tags.length; i++) {
-			var tag = this.get(tags[i].tagID, true);
-			indexed[tags[i].tagID] = tag;
-		}
-		return indexed;
-	}
+		var rows = yield Zotero.DB.queryAsync(sql, params);
+		return rows.map((row) => this.cleanData(row));
+	});
 	
 	
-	/*
+	/**
 	 * Get all tags within the items of a Zotero.Search object
 	 *
-	 * _types_ is an optional array of tag types to fetch
+	 * @param {Zotero.Search} search
+	 * @param {Array} [types] Array of tag types to fetch
+	 * @param {String|Promise<String>} [tmpTable] Temporary table with items to use
 	 */
-	function getAllWithinSearch(search, types, tmpTable) {
-		// Save search results to temporary table
-		if(!tmpTable) {
-			try {
-				var tmpTable = search.search(true);
-			}
-			catch (e) {
-				if (typeof e == 'string'
-						&& e.match(/Saved search [0-9]+ does not exist/)) {
-					Zotero.DB.rollbackTransaction();
-					Zotero.debug(e, 2);
-				}
-				else {
-					throw (e);
-				}
-			}
-			if (!tmpTable) {
-				return {};
-			}
+	this.getAllWithinSearch = Zotero.Promise.coroutine(function* (search, types) {
+		// Save search results to temporary table, if one isn't provided
+		var tmpTable = yield search.search(true);
+		if (!tmpTable) {
+			return {};
 		}
+		return this.getAllWithinSearchResults(tmpTable, types);
+	});
+	
+	
+	/**
+	 * Get all tags within the items of a temporary table of search results
+	 *
+	 * @param {String|Promise<String>} tmpTable  Temporary table with items to use
+	 * @param {Array} [types]  Array of tag types to fetch
+	 * @return {Promise<Object>}  Promise for object with tag data in API JSON format, keyed by tagID
+	 */
+	this.getAllWithinSearchResults = Zotero.Promise.coroutine(function* (tmpTable, types) {
+		tmpTable = yield Zotero.Promise.resolve(tmpTable);
 		
-		var sql = "SELECT DISTINCT tagID, name, type FROM itemTags "
-			+ "NATURAL JOIN tags WHERE itemID IN "
+		var sql = "SELECT DISTINCT name AS tag, type FROM itemTags "
+			+ "JOIN tags USING (tagID) WHERE itemID IN "
 			+ "(SELECT itemID FROM " + tmpTable + ") ";
 		if (types) {
 			sql += "AND type IN (" + types.join() + ") ";
 		}
-		var tags = Zotero.DB.query(sql);
+		var rows = yield Zotero.DB.queryAsync(sql);
 		
 		if(!tmpTable) {
-			Zotero.DB.query("DROP TABLE " + tmpTable);
+			yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
 		}
 		
-		if (!tags) {
-			return {};
-		}
-		
-		var collation = Zotero.getLocaleCollation();
-		tags.sort(function(a, b) {
-			return collation.compareString(1, a.name, b.name);
-		});
-		
-		var indexed = {};
-		for (var i=0; i<tags.length; i++) {
-			var tagID = tags[i].tagID;
-			indexed[tagID] = this.get(tagID, true);
-		}
-		return indexed;
-	}
+		return rows.map((row) => this.cleanData(row));
+	});
 	
 	
 	/**
 	 * Get the items associated with the given saved tag
 	 *
-	 * @param	{Integer}	tagID
-	 * @return	{Integer[]|FALSE}
+	 * @param  {Number}             tagID
+	 * @return {Promise<Number[]>}  A promise for an array of itemIDs
 	 */
-	function getTagItems(tagID) {
+	this.getTagItems = function (tagID) {
 		var sql = "SELECT itemID FROM itemTags WHERE tagID=?";
-		return Zotero.DB.columnQuery(sql, tagID) || [];
+		return Zotero.DB.columnQueryAsync(sql, tagID);
 	}
 	
 	
-	function search(str) {
-		var sql = 'SELECT tagID, name, type FROM tags';
+	this.search = Zotero.Promise.coroutine(function* (str) {
+		var sql = 'SELECT name AS tag, type FROM tags';
 		if (str) {
 			sql += ' WHERE name LIKE ?';
 		}
-		var tags = Zotero.DB.query(sql, str ? '%' + str + '%' : undefined);
-		
-		if (!tags) {
-			return {};
+		var rows = yield Zotero.DB.queryAsync(sql, str ? '%' + str + '%' : undefined);
+		return rows.map((row) => this.cleanData(row));
+	});
+	
+	
+	this.load = Zotero.Promise.coroutine(function* (libraryID, reload) {
+		if (_loaded[libraryID] && !reload) {
+			return;
 		}
 		
-		var collation = Zotero.getLocaleCollation();
-		tags.sort(function(a, b) {
-			return collation.compareString(1, a.name, b.name);
-		});
+		Zotero.debug("Loading tags in library " + libraryID);
 		
-		var indexed = {};
+		var sql = 'SELECT tagID AS id, name FROM tags WHERE libraryID=?';
+		var tags = yield Zotero.DB.queryAsync(sql, libraryID);
+		
+		_tagIDsByName[libraryID] = {}
+		
 		for (var i=0; i<tags.length; i++) {
-			var tag = this.get(tags[i].tagID, true);
-			indexed[tags[i].tagID] = tag;
+			let tag = tags[i];
+			_tagIDsByName[libraryID]['_' + tag.name] = tag.id;
+			_tagNamesByID[tag.id] = tag.name;
 		}
-		return indexed;
-	}
+		
+		_loaded[libraryID] = true;
+	});
 	
 	
 	/**
 	 * Rename a tag and update the tag colors setting accordingly if necessary
 	 *
+	 * @param {Number} tagID
+	 * @param {String} newName
 	 * @return {Promise}
 	 */
-	function rename(tagID, newName) {
-		var tagObj, libraryID, oldName, oldType, notifierData, self = this;
-		return Q.fcall(function () {
-			Zotero.debug('Renaming tag', 4);
+	this.rename = Zotero.Promise.coroutine(function* (libraryID, oldName, newName) {
+		Zotero.debug("Renaming tag '" + oldName + "' to '" + newName + "'", 4);
+		
+		oldName = oldName.trim();
+		newName = newName.trim();
+		
+		if (oldName == newName) {
+			Zotero.debug("Tag name hasn't changed", 2);
+			return;
+		}
+		
+		yield Zotero.Tags.load(libraryID);
+		var oldTagID = this.getID(libraryID, oldName);
+		
+		// We need to know if the old tag has a color assigned so that
+		// we can assign it to the new name
+		var oldColorData = yield this.getColor(libraryID, oldName);
+		
+		yield Zotero.DB.executeTransaction(function* () {
+			var oldItemIDs = yield this.getTagItems(oldTagID);
+			var newTagID = yield this.getIDFromName(libraryID, newName, true);
 			
-			newName = newName.trim();
-			
-			tagObj = self.get(tagID);
-			libraryID = tagObj.libraryID;
-			oldName = tagObj.name;
-			oldType = tagObj.type;
-			notifierData = {};
-			notifierData[tagID] = { old: tagObj.serialize() };
-			
-			if (oldName == newName) {
-				Zotero.debug("Tag name hasn't changed", 2);
-				return;
-			}
-			
-			// We need to know if the old tag has a color assigned so that
-			// we can assign it to the new name
-			return self.getColor(libraryID, oldName);
-		})
-		.then(function (oldColorData) {
-			Zotero.DB.beginTransaction();
-			
-			var sql = "SELECT tagID, name FROM tags WHERE name=? AND type=0 AND libraryID=?";
-			var row = Zotero.DB.rowQuery(sql, [newName, libraryID]);
-			if (row) {
-				var existingTagID = row.tagID;
-				var existingName = row.name;
-			}
-			
-			// New tag already exists as manual tag
-			if (existingTagID
-					// Tag check is case-insensitive, so make sure we have a different tag
-					&& existingTagID != tagID) {
-				
-				var changed = false;
-				var itemsAdded = false;
-				
-				// Change case of existing manual tag before switching automatic
-				if (oldName.toLowerCase() == newName.toLowerCase() || existingName != newName) {
-					var sql = "UPDATE tags SET name=? WHERE tagID=?";
-					Zotero.DB.query(sql, [newName, existingTagID]);
-					changed = true;
-				}
-				
-				var itemIDs = self.getTagItems(tagID);
-				var existingItemIDs = self.getTagItems(existingTagID);
-				
-				// Would be easier to just call removeTag(tagID) and addTag(existingID)
-				// here, but this is considerably more efficient
-				var sql = "UPDATE OR REPLACE itemTags SET tagID=? WHERE tagID=?";
-				Zotero.DB.query(sql, [existingTagID, tagID]);
-				
-				// Manual purge of old tag
-				sql = "DELETE FROM tags WHERE tagID=?";
-				Zotero.DB.query(sql, tagID);
-				if (_tags[libraryID] && _tags[libraryID][oldType]) {
-					delete _tags[libraryID][oldType]['_' + oldName];
-				}
-				delete self._objectCache[tagID];
-				Zotero.Notifier.trigger('delete', 'tag', tagID, notifierData);
-				
-				// Simulate tag removal on items that used old tag
-				var itemTags = [];
-				for (var i in itemIDs) {
-					itemTags.push(itemIDs[i] + '-' + tagID);
-				}
-				Zotero.Notifier.trigger('remove', 'item-tag', itemTags);
-				
-				// And send tag add for new tag (except for those that already had it)
-				var itemTags = [];
-				for (var i in itemIDs) {
-					if (existingItemIDs.indexOf(itemIDs[i]) == -1) {
-						itemTags.push(itemIDs[i] + '-' + existingTagID);
-						itemsAdded = true;
-					}
-				}
-				
-				if (changed) {
-					if (itemsAdded) {
-						Zotero.Notifier.trigger('add', 'item-tag', itemTags);
-					}
+			yield Zotero.Utilities.Internal.forEachChunkAsync(
+				oldItemIDs,
+				Zotero.DB.MAX_BOUND_PARAMETERS - 2,
+				Zotero.Promise.coroutine(function* (chunk) {
+					let placeholders = chunk.map(function () '?').join(',');
 					
-					// Mark existing tag as updated
-					sql = "UPDATE tags SET dateModified=CURRENT_TIMESTAMP, "
-							+ "clientDateModified=CURRENT_TIMESTAMP WHERE tagID=?";
-					Zotero.DB.query(sql, existingTagID);
-					Zotero.Notifier.trigger('modify', 'tag', existingTagID);
-					Zotero.Tags.reload(existingTagID);
+					// This is ugly, but it's much faster than doing replaceTag() for each item
+					let sql = 'UPDATE OR REPLACE itemTags SET tagID=?, type=0 '
+						+ 'WHERE tagID=? AND itemID IN (' + placeholders + ')';
+					yield Zotero.DB.queryAsync(sql, [newTagID, oldTagID].concat(chunk));
+					
+					sql = 'UPDATE items SET clientDateModified=? '
+						+ 'WHERE itemID IN (' + placeholders + ')'
+					yield Zotero.DB.queryAsync(sql, [Zotero.DB.transactionDateTime].concat(chunk));
+					
+					yield Zotero.Items.reload(oldItemIDs, ['tags'], true);
+				})
+			);
+			
+			var notifierData = {};
+			notifierData[newName] = {
+				old: {
+					tag: oldName
 				}
+			};
+			Zotero.Notifier.trigger(
+				'modify',
+				'item-tag',
+				oldItemIDs.map(function (itemID) itemID + '-' + newName),
+				notifierData
+			);
+			
+			yield this.purge(libraryID, oldTagID);
+		}.bind(this));
+		
+		if (oldColorData) {
+			// Remove color from old tag
+			yield this.setColor(libraryID, oldName);
+			
+			// Add color to new tag
+			yield this.setColor(
+				libraryID,
+				newName,
+				oldColorData.color,
+				oldColorData.position
+			);
+		}
+	});
+	
+	
+	/**
+	 * @return {Promise}
+	 */
+	this.erase = Zotero.Promise.coroutine(function* (libraryID, tagIDs) {
+		tagIDs = Zotero.flattenArguments(tagIDs);
+		
+		var deletedNames = [];
+		var oldItemIDs = [];
+		
+		yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.Tags.load(libraryID);
+			
+			for (let i=0; i<tagIDs.length; i++) {
+				let tagID = tagIDs[i];
+				let name = this.getName(libraryID, tagID);
+				if (name === false) {
+					continue;
+				}
+				deletedNames.push(name);
+				oldItemIDs = oldItemIDs.concat(yield this.getTagItems(tagID));
 				
-				// TODO: notify linked items?
-				//Zotero.Notifier.trigger('modify', 'item', itemIDs);
+				// This causes a cascading delete from itemTags
+				let sql = "DELETE FROM tags WHERE tagID=?";
+				yield Zotero.DB.queryAsync(sql, [tagID]);
 			}
+			
+			yield this.purge(libraryID, tagIDs);
+			
+			// Update internal timestamps on all items that had these tags
+			yield Zotero.Utilities.Internal.forEachChunkAsync(
+				Zotero.Utilities.arrayUnique(oldItemIDs),
+				Zotero.DB.MAX_BOUND_PARAMETERS - 1,
+				Zotero.Promise.coroutine(function* (chunk) {
+					let placeholders = chunk.map(function () '?').join(',');
+					
+					sql = 'UPDATE items SET clientDateModified=? '
+						+ 'WHERE itemID IN (' + placeholders + ')'
+					yield Zotero.DB.queryAsync(sql, [Zotero.DB.transactionDateTime].concat(chunk));
+					
+					yield Zotero.Items.reload(oldItemIDs, ['tags']);
+				})
+			);
+		}.bind(this));
+		
+		// Also delete tag color setting
+		//
+		// Note that this isn't done in purge(), so the setting will not
+		// be removed if the tag is just removed from all items without
+		// being explicitly deleted.
+		for (let i=0; i<deletedNames.length; i++) {
+			this.setColor(libraryID, deletedNames[i], false);
+		}
+	});
+	
+	
+	/**
+	 * Delete obsolete tags from database and clear internal cache entries
+	 *
+	 * @param {Number} libraryID
+	 * @param {Number|Number[]} [tagIDs] - tagID or array of tagIDs to purge
+	 * @return {Promise}
+	 */
+	this.purge = Zotero.Promise.coroutine(function* (libraryID, tagIDs) {
+		if (!tagIDs && !Zotero.Prefs.get('purge.tags')) {
+			return;
+		}
+		
+		if (tagIDs) {
+			tagIDs = Zotero.flattenArguments(tagIDs);
+		}
+		
+		yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.Tags.load(libraryID);
+			
+			// Use given tags, as long as they're orphaned
+			if (tagIDs) {
+				let sql = "CREATE TEMPORARY TABLE tagDelete (tagID INT PRIMARY KEY)";
+				yield Zotero.DB.queryAsync(sql);
+				for (let i=0; i<tagIDs.length; i++) {
+					yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO tagDelete VALUES (?)", tagIDs[i]);
+				}
+				sql = "SELECT * FROM tagDelete WHERE tagID NOT IN (SELECT tagID FROM itemTags)";
+				var toDelete = yield Zotero.DB.columnQueryAsync(sql);
+			}
+			// Look for orphaned tags
 			else {
-				tagObj.name = newName;
-				// Set all renamed tags to manual
-				tagObj.type = 0;
-				tagObj.save();
+				var sql = "CREATE TEMPORARY TABLE tagDelete AS "
+					+ "SELECT tagID FROM tags WHERE tagID "
+					+ "NOT IN (SELECT tagID FROM itemTags)";
+				yield Zotero.DB.queryAsync(sql);
+				
+				sql = "CREATE INDEX tagDelete_tagID ON tagDelete(tagID)";
+				yield Zotero.DB.queryAsync(sql);
+				
+				sql = "SELECT * FROM tagDelete";
+				var toDelete = yield Zotero.DB.columnQueryAsync(sql);
+				
+				if (!toDelete) {
+					sql = "DROP TABLE tagDelete";
+					return Zotero.DB.queryAsync(sql);
+				}
 			}
 			
-			Zotero.DB.commitTransaction();
-			
-			if (oldColorData) {
-				// Remove color from old tag
-				return self.setColor(libraryID, oldName)
-				// Add color to new tag
-				.then(function () {
-					return self.setColor(
-						libraryID,
-						newName,
-						oldColorData.color,
-						oldColorData.position
-					);
-				});
+			notifierData = {};
+			for (let i=0; i<toDelete.length; i++) {
+				let id = toDelete[i];
+				if (_tagNamesByID[id]) {
+					notifierData[id] = {
+						old: {
+							libraryID: libraryID,
+							tag: _tagNamesByID[id]
+						}
+					};
+				}
 			}
-		});
-	}
+			
+			_unload(libraryID, toDelete);
+			
+			sql = "DELETE FROM tags WHERE tagID IN (SELECT tagID FROM tagDelete);";
+			yield Zotero.DB.queryAsync(sql);
+			
+			sql = "DROP TABLE tagDelete";
+			yield Zotero.DB.queryAsync(sql);
+			
+			Zotero.Notifier.trigger('delete', 'tag', toDelete, notifierData);
+		}.bind(this));
+		
+		Zotero.Prefs.set('purge.tags', false);
+	});
 	
 	
+	//
+	// Tag color methods
+	//
 	/**
 	 *
 	 * @param {Integer} libraryID
@@ -405,7 +455,7 @@ Zotero.Tags = new function() {
 	 *
 	 * @param {Integer} libraryID
 	 * @param {Integer} position The position of the tag, starting at 0
-	 * @return {Promise} A Q promise for an object containing 'name' and 'color'
+	 * @return {Promise} A promise for an object containing 'name' and 'color'
 	 */
 	this.getColorByPosition = function (libraryID, position) {
 		return this.getColors(libraryID)
@@ -418,40 +468,36 @@ Zotero.Tags = new function() {
 	
 	/**
 	 * @param {Integer} libraryID
-	 * @return {Promise} A Q promise for an object with tag names as keys and
+	 * @return {Promise} A promise for an object with tag names as keys and
 	 *                   objects containing 'color' and 'position' as values
 	 */
-	this.getColors = function (libraryID) {
-		var self = this;
-		return Q.fcall(function () {
-			if (_libraryColorsByName[libraryID]) {
-				return _libraryColorsByName[libraryID];
-			}
-			
-			return Zotero.SyncedSettings.get(libraryID, 'tagColors')
-			.then(function (tagColors) {
-				// If the colors became available from another run
-				if (_libraryColorsByName[libraryID]) {
-					return _libraryColorsByName[libraryID];
-				}
-				
-				tagColors = tagColors || [];
-				
-				_libraryColors[libraryID] = tagColors;
-				_libraryColorsByName[libraryID] = {};
-				
-				// Also create object keyed by name for quick checking for individual tag colors
-				for (var i=0; i<tagColors.length; i++) {
-					_libraryColorsByName[libraryID][tagColors[i].name] = {
-						color: tagColors[i].color,
-						position: i
-					};
-				}
-				
-				return _libraryColorsByName[libraryID];
-			});
-		});
-	}
+	this.getColors = Zotero.Promise.coroutine(function* (libraryID) {
+		if (_libraryColorsByName[libraryID]) {
+			return _libraryColorsByName[libraryID];
+		}
+		
+		var tagColors = yield Zotero.SyncedSettings.get(libraryID, 'tagColors');
+		
+		// If the colors became available from another run
+		if (_libraryColorsByName[libraryID]) {
+			return _libraryColorsByName[libraryID];
+		}
+		
+		tagColors = tagColors || [];
+		
+		_libraryColors[libraryID] = tagColors;
+		_libraryColorsByName[libraryID] = {};
+		
+		// Also create object keyed by name for quick checking for individual tag colors
+		for (let i=0; i<tagColors.length; i++) {
+			_libraryColorsByName[libraryID][tagColors[i].name] = {
+				color: tagColors[i].color,
+				position: i
+			};
+		}
+		
+		return _libraryColorsByName[libraryID];
+	});
 	
 	
 	/**
@@ -459,78 +505,74 @@ Zotero.Tags = new function() {
 	 *
 	 * @return {Promise}
 	 */
-	this.setColor = function (libraryID, name, color, position) {
+	this.setColor = Zotero.Promise.coroutine(function* (libraryID, name, color, position) {
 		if (!Number.isInteger(libraryID)) {
 			throw new Error("libraryID must be an integer");
 		}
 		
-		var self = this;
-		return this.getColors(libraryID)
-		.then(function () {
-			var tagColors = _libraryColors[libraryID];
-			var tagIDs = self.getIDs(name, libraryID);
-			
-			// Unset
-			if (!color) {
-				// Trying to clear color on tag that doesn't have one
-				if (!_libraryColorsByName[libraryID][name]) {
-					return;
-				}
-				
-				tagColors = tagColors.filter(function (val) val.name != name);
+		yield this.load(libraryID);
+		yield this.getColors(libraryID);
+		
+		var tagColors = _libraryColors[libraryID];
+		
+		// Unset
+		if (!color) {
+			// Trying to clear color on tag that doesn't have one
+			if (!_libraryColorsByName[libraryID][name]) {
+				return;
 			}
-			else {
-				// Get current position if present
-				var currentPosition = -1;
-				for (var i=0; i<tagColors.length; i++) {
-					if (tagColors[i].name == name) {
-						currentPosition = i;
-						break;
-					}
-				}
-				
-				// Remove if present
-				if (currentPosition != -1) {
-					// If no position was specified, we'll reinsert into the same place
-					if (typeof position == 'undefined') {
-						position = currentPosition;
-					}
-					tagColors.splice(currentPosition, 1);
-				}
-				var newObj = {
-					name: name,
-					color: color
-				};
-				// If no position or after end, add at end
-				if (typeof position == 'undefined' || position >= tagColors.length) {
-					tagColors.push(newObj);
-				}
-				// Otherwise insert into new position
-				else {
-					tagColors.splice(position, 0, newObj);
+			
+			tagColors = tagColors.filter(function (val) val.name != name);
+		}
+		else {
+			// Get current position if present
+			var currentPosition = -1;
+			for (let i=0; i<tagColors.length; i++) {
+				if (tagColors[i].name == name) {
+					currentPosition = i;
+					break;
 				}
 			}
 			
-			if (tagColors.length) {
-				return Zotero.SyncedSettings.set(libraryID, 'tagColors', tagColors);
+			// Remove if present
+			if (currentPosition != -1) {
+				// If no position was specified, we'll reinsert into the same place
+				if (typeof position == 'undefined') {
+					position = currentPosition;
+				}
+				tagColors.splice(currentPosition, 1);
 			}
+			var newObj = {
+				name: name,
+				color: color
+			};
+			// If no position or after end, add at end
+			if (typeof position == 'undefined' || position >= tagColors.length) {
+				tagColors.push(newObj);
+			}
+			// Otherwise insert into new position
 			else {
-				return Zotero.SyncedSettings.set(libraryID, 'tagColors');
+				tagColors.splice(position, 0, newObj);
 			}
-		});
-	};
+		}
+		
+		if (tagColors.length) {
+			return Zotero.SyncedSettings.set(libraryID, 'tagColors', tagColors);
+		}
+		else {
+			return Zotero.SyncedSettings.set(libraryID, 'tagColors');
+		}
+	});
 	
 	
 	/**
 	 * Update caches and trigger redrawing of items in the items list
 	 * when a 'tagColors' setting is modified
 	 */
-	this.notify = function (event, type, ids, extraData) {
+	this.notify = Zotero.Promise.coroutine(function* (event, type, ids, extraData) {
 		if (type != 'setting') {
 			return;
 		}
-		
-		var self = this;
 		
 		for (let i=0; i<ids.length; i++) {
 			let libraryID, setting;
@@ -545,83 +587,77 @@ Zotero.Tags = new function() {
 			delete _libraryColorsByName[libraryID];
 			
 			// Get the tag colors for each library in which they were modified
-			Zotero.SyncedSettings.get(libraryID, 'tagColors')
-			.then(function (tagColors) {
-				if (!tagColors) {
-					tagColors = [];
-				}
-				
-				let id = libraryID + "/" + setting;
-				if ((event == 'modify' || event == 'delete') && extraData[id].changed) {
-					var previousTagColors = extraData[id].changed.value;
-				}
-				else {
-					var previousTagColors = [];
-				}
-				
-				var affectedItems = [];
-				
-				// Get all items linked to previous or current tag colors
-				var tagNames = tagColors.concat(previousTagColors).map(function (val) val.name);
-				tagNames = Zotero.Utilities.arrayUnique(tagNames);
-				for (let i=0; i<tagNames.length; i++) {
-					let tagIDs = self.getIDs(tagNames[i], libraryID) || [];
-					for (let i=0; i<tagIDs.length; i++) {
-						affectedItems = affectedItems.concat(self.getTagItems(tagIDs[i]));
-					}
-				};
-				
-				if (affectedItems.length) {
-					Zotero.Notifier.trigger('redraw', 'item', affectedItems, { column: 'title' });
-				}
-			})
-			.done();
+			let tagColors = yield Zotero.SyncedSettings.get(libraryID, 'tagColors');
+			if (!tagColors) {
+				tagColors = [];
+			}
+			
+			let id = libraryID + "/" + setting;
+			if ((event == 'modify' || event == 'delete') && extraData[id].changed) {
+				var previousTagColors = extraData[id].changed.value;
+			}
+			else {
+				var previousTagColors = [];
+			}
+			
+			var affectedItems = [];
+			
+			// Get all items linked to previous or current tag colors
+			var tagNames = tagColors.concat(previousTagColors).map(function (val) val.name);
+			tagNames = Zotero.Utilities.arrayUnique(tagNames);
+			for (let i=0; i<tagNames.length; i++) {
+				let tagID = this.getID(libraryID, tagNames[i]);
+				affectedItems = affectedItems.concat(yield this.getTagItems(tagID));
+			};
+			
+			if (affectedItems.length) {
+				Zotero.Notifier.trigger('redraw', 'item', affectedItems, { column: 'title' });
+			}
 		}
-	};
+	});
 	
 	
-	this.toggleItemsListTags = function (libraryID, items, name) {
-		var self = this;
-		return Q.fcall(function () {
-			var tagIDs = self.getIDs(name, libraryID) || [];
-			// If there's a color setting but no matching tag, don't throw
-			// an error (though ideally this wouldn't be possible).
-			if (!tagIDs.length) {
-				return;
-			}
-			var tags = tagIDs.map(function (tagID) {
-				return Zotero.Tags.get(tagID, true);
-			});
-			
-			if (!items.length) {
-				return;
-			}
-			
-			Zotero.DB.beginTransaction();
-			
+	this.toggleItemsListTags = Zotero.Promise.coroutine(function* (libraryID, items, tagName) {
+		if (!items.length) {
+			return;
+		}
+		
+		yield this.load(libraryID);
+		var tagID = this.getID(libraryID, tagName);
+		
+		// If there's a color setting but no matching tag, don't throw
+		// an error (though ideally this wouldn't be possible).
+		if (!tagID) {
+			return;
+		}
+		
+		return Zotero.DB.executeTransaction(function* () {
 			// Base our action on the first item. If it has the tag,
 			// remove the tag from all items. If it doesn't, add it to all.
 			var firstItem = items[0];
 			// Remove from all items
-			if (firstItem.hasTags(tagIDs)) {
-				for (var i=0; i<items.length; i++) {
-					for (var j=0; j<tags.length; j++) {
-						tags[j].removeItem(items[i].id);
-					}
+			if (firstItem.hasTag(tagName)) {
+				for (let i=0; i<items.length; i++) {
+					let item = items[i];
+					item.removeTag(tagName);
+					yield item.save({
+						skipDateModifiedUpdate: true
+					});
 				}
-				tags.forEach(function (tag) tag.save());
 				Zotero.Prefs.set('purge.tags', true);
 			}
 			// Add to all items
 			else {
-				for (var i=0; i<items.length; i++) {
-					items[i].addTag(name);
+				for (let i=0; i<items.length; i++) {
+					let item = items[i];
+					item.addTag(tagName);
+					yield item.save({
+						skipDateModifiedUpdate: true
+					});
 				}
 			}
-			
-			Zotero.DB.commitTransaction();
-		});
-	};
+		}.bind(this));
+	});
 	
 	
 	/**
@@ -676,7 +712,7 @@ Zotero.Tags = new function() {
 		// If there's no extra iamge, resolve a promise now
 		if (!extraImage) {
 			var dataURI = canvas.toDataURL("image/png");
-			var dataURIPromise = Q(dataURI);
+			var dataURIPromise = Zotero.Promise.resolve(dataURI);
 			_itemsListImagePromises[hash] = dataURIPromise;
 			return dataURIPromise;
 		}
@@ -702,8 +738,8 @@ Zotero.Tags = new function() {
 			img.src = uri.spec;
 			
 			// Mark that we've started loading
-			var deferred = Q.defer();
-			var extraImageDeferred = Q.defer();
+			var deferred = Zotero.Promise.defer();
+			var extraImageDeferred = Zotero.Promise.defer();
 			_itemsListExtraImagePromises[extraImage] = extraImageDeferred.promise;
 			
 			// When extra image has loaded, draw it
@@ -711,7 +747,7 @@ Zotero.Tags = new function() {
 				ctx.drawImage(img, x, 0);
 				
 				var dataURI = canvas.toDataURL("image/png");
-				var dataURIPromise = Q(dataURI);
+				var dataURIPromise = Zotero.Promise.resolve(dataURI);
 				_itemsListImagePromises[hash] = dataURIPromise;
 				
 				// Fulfill the promise for this call
@@ -732,7 +768,7 @@ Zotero.Tags = new function() {
 			ctx.drawImage(img, x, 0);
 			
 			var dataURI = canvas.toDataURL("image/png");
-			var dataURIPromise = Q(dataURI);
+			var dataURIPromise = Zotero.Promise.resolve(dataURI);
 			_itemsListImagePromises[hash] = dataURIPromise;
 			return dataURIPromise;
 		});
@@ -782,189 +818,73 @@ Zotero.Tags = new function() {
 	}
 	
 	
-	/**
-	 * @return {Promise}
-	 */
-	function erase(ids) {
-		ids = Zotero.flattenArguments(ids);
-		
-		var deleted = [];
-		
-		Zotero.DB.beginTransaction();
-		for each(var id in ids) {
-			var tag = this.get(id);
-			if (tag) {
-				deleted.push({
-					libraryID: tag.libraryID,
-					name: tag.name
-				});
-				tag.erase();
-			}
+	this.cleanData = function (data) {
+		// Validate data
+		if (data.tag === undefined) {
+			throw new Error("Tag data must contain 'tag' property");
 		}
-		Zotero.DB.commitTransaction();
-		
-		// Also delete tag color setting
-		//
-		// Note that this isn't done in purge(), so the setting will not
-		// be removed if the tag is just removed from all items without
-		// without being explicitly deleted.
-		for (var i in deleted) {
-			this.setColor(deleted[i].libraryID, deleted[i].name, false);
+		if (data.type !== undefined && data.type != 0 && data.type != 1) {
+			throw new Error("Tag 'type' must be 0 or 1");
 		}
+		
+		var cleanedData = {};
+		cleanedData.tag = (data.tag + '').trim();
+		if (data.type) {
+			cleanedData.type = parseInt(data.type);
+		}
+		return cleanedData;
 	}
 	
 	
 	/**
-	 * Delete obsolete tags from database and clear internal array entries
-	 *
-	 * @param	[Integer[]|Integer]		[tagIDs]	tagID or array of tagIDs to purge
+	 * Clear cache to reload
 	 */
-	function purge(tagIDs) {
-		if (!tagIDs && !Zotero.Prefs.get('purge.tags')) {
-			return;
-		}
-		
-		if (tagIDs) {
-			tagIDs = Zotero.flattenArguments(tagIDs);
-		}
-		
-		Zotero.UnresponsiveScriptIndicator.disable();
-		try {
-			Zotero.DB.beginTransaction();
-			
-			// Use given tags
-			if (tagIDs) {
-				var sql = "CREATE TEMPORARY TABLE tagDelete (tagID INT PRIMARY KEY)";
-				Zotero.DB.query(sql);
-				for each(var id in tagIDs) {
-					Zotero.DB.query("INSERT OR IGNORE INTO tagDelete VALUES (?)", id);
-				}
-				// Remove duplicates
-				var toDelete = Zotero.DB.columnQuery("SELECT * FROM tagDelete");
-			}
-			// Look for orphaned tags
-			else {
-				var sql = "CREATE TEMPORARY TABLE tagDelete AS "
-					+ "SELECT tagID FROM tags WHERE tagID "
-					+ "NOT IN (SELECT tagID FROM itemTags)";
-				Zotero.DB.query(sql);
-				
-				sql = "CREATE INDEX tagDelete_tagID ON tagDelete(tagID)";
-				Zotero.DB.query(sql);
-				
-				sql = "SELECT * FROM tagDelete";
-				var toDelete = Zotero.DB.columnQuery(sql);
-				
-				if (!toDelete) {
-					sql = "DROP TABLE tagDelete";
-					Zotero.DB.query(sql);
-					Zotero.DB.commitTransaction();
-					Zotero.Prefs.set('purge.tags', false);
-					return;
-				}
-			}
-			
-			var notifierData = {};
-			
-			for each(var tagID in toDelete) {
-				var tag = Zotero.Tags.get(tagID);
-				if (tag) {
-					notifierData[tagID] = { old: tag.serialize() }
-				}
-			}
-			
-			this.unload(toDelete);
-			
-			sql = "DELETE FROM tags WHERE tagID IN "
-				+ "(SELECT tagID FROM tagDelete);";
-			Zotero.DB.query(sql);
-			
-			sql = "DROP TABLE tagDelete";
-			Zotero.DB.query(sql);
-			
-			Zotero.DB.commitTransaction();
-			
-			Zotero.Notifier.trigger('delete', 'tag', toDelete, notifierData);
-		}
-		catch (e) {
-			Zotero.DB.rollbackTransaction();
-			throw (e);
-		}
-		finally {
-			Zotero.UnresponsiveScriptIndicator.enable();
-		}
-		
-		Zotero.Prefs.set('purge.tags', false);
+	this.reload = function () {
+		_tagNamesByID = {};
+		_tagIDsByName = {};
 	}
 	
 	
-	/**
-	 * Internal reload hook to clear cache
-	 */
-	this._reload = function (ids) {
-		_tags = {};
+	this._getPrimaryDataSQL = function () {
+		// This should be the same as the query in Zotero.Tag.load(),
+		// just without a specific tagID
+		return "SELECT * FROM tags O WHERE 1";
 	}
 	
+	
+	function _requireLoad(libraryID) {
+		if (!_loaded[libraryID]) {
+			throw new Zotero.DataObjects.UnloadedDataException(
+				"Tag data has not been loaded for library " + libraryID,
+				"tags"
+			);
+		}
+	}
+	
+	
+	function _cacheTag(libraryID, tagID, name) {
+		_tagNamesByID[tagID] = name;
+		if (!_tagIDsByName[libraryID]) {
+			_tagIDsByName[libraryID] = {};
+		}
+		_tagIDsByName[libraryID]['_' + name] = tagID;
+	}
 	
 	/**
 	 * Unload tags from caches
 	 *
-	 * @param	int|array	ids	 	One or more tagIDs
+	 * @param {Number} libraryID
+	 * @param {Number|Array<Number>} ids One or more tagIDs
 	 */
-	this.unload = function () {
-		var ids = Zotero.flattenArguments(arguments);
+	function _unload(libraryID, ids) {
+		var ids = Zotero.flattenArguments(ids);
 		
-		for each(var id in ids) {
-			var tag = this._objectCache[id];
-			delete this._objectCache[id];
-			var libraryID = tag.libraryID;
-			if (tag && _tags[libraryID] && _tags[libraryID][tag.type]) {
-				delete _tags[libraryID][tag.type]['_' + tag.name];
-			}
-		}
-	}
-	
-	
-	this._load = function () {
-		if (!arguments[0]) {
-			if (!this._reloadCache) {
-				return;
-			}
-			_tags = {};
-			this._reloadCache = false;
-		}
-		
-		// This should be the same as the query in Zotero.Tag.load(),
-		// just without a specific tagID
-		var sql = "SELECT * FROM tags WHERE 1";
-		if (arguments[0]) {
-			sql += " AND tagID IN (" + Zotero.join(arguments[0], ",") + ")";
-		}
-		var rows = Zotero.DB.query(sql);
-		
-		var ids = [];
-		for each(var row in rows) {
-			var id = row.tagID;
-			ids.push(id);
-			
-			// Tag doesn't exist -- create new object and stuff in array
-			if (!this._objectCache[id]) {
-				//this.get(id);
-				this._objectCache[id] = new Zotero.Tag;
-				this._objectCache[id].loadFromRow(row);
-			}
-			// Existing tag -- reload in place
-			else {
-				this._objectCache[id].loadFromRow(row);
-			}
-		}
-		
-		if (!arguments[0]) {
-			// If loading all tags, remove old tags that no longer exist
-			for each(var c in this._objectCache) {
-				if (ids.indexOf(c.id) == -1) {
-					this.unload(c.id);
-				}
+		for (let i=0; i<ids.length; i++) {
+			let id = ids[i];
+			let tagName = _tagNamesByID[id];
+			delete _tagNamesByID[id];
+			if (tagName && _tagIDsByName[libraryID]) {
+				delete _tagIDsByName[libraryID]['_' + tagName];
 			}
 		}
 	}

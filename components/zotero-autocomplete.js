@@ -106,12 +106,16 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 			if (searchParams.fieldMode == 2) {
 				var sql = "SELECT DISTINCT CASE fieldMode WHEN 1 THEN lastName "
 					+ "WHEN 0 THEN firstName || ' ' || lastName END AS val, NULL AS comment "
-					+ "FROM creators NATURAL JOIN creatorData WHERE CASE fieldMode "
+					+ "FROM creators ";
+				if (searchParams.libraryID !== undefined) {
+					sql += "JOIN itemCreators USING (creatorID) JOIN items USING (itemID) ";
+				}
+				sql += "WHERE CASE fieldMode "
 					+ "WHEN 1 THEN lastName "
 					+ "WHEN 0 THEN firstName || ' ' || lastName END "
 					+ "LIKE ? ";
 				var sqlParams = [searchString + '%'];
-				if (typeof searchParams.libraryID != 'undefined') {
+				if (searchParams.libraryID !== undefined) {
 					sql += " AND libraryID=?";
 					sqlParams.push(searchParams.libraryID);
 				}
@@ -139,8 +143,11 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 						+ "ELSE 2 END AS comment";
 				}
 				
-				var fromSQL = " FROM creators NATURAL JOIN creatorData "
-					+ "WHERE " + subField + " LIKE ? " + "AND fieldMode=?";
+				var fromSQL = " FROM creators "
+				if (searchParams.libraryID !== undefined) {
+					fromSQL += "JOIN itemCreators USING (creatorID) JOIN items USING (itemID) ";
+				}
+				fromSQL += "WHERE " + subField + " LIKE ? " + "AND fieldMode=?";
 				var sqlParams = [
 					searchString + '%',
 					searchParams.fieldMode ? searchParams.fieldMode : 0
@@ -155,7 +162,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 					}
 					fromSQL += ")";
 				}
-				if (typeof searchParams.libraryID != 'undefined') {
+				if (searchParams.libraryID !== undefined) {
 					fromSQL += " AND libraryID=?";
 					sqlParams.push(searchParams.libraryID);
 				}

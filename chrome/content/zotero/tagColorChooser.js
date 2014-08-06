@@ -28,37 +28,37 @@ var _io;
 
 var Zotero_Tag_Color_Chooser = new function() {
 	this.init = function () {
-		// Set font size from pref
-		Zotero.setFontSize(document.getElementById("tag-color-chooser-container"));
-		
-		if (window.arguments && window.arguments.length) {
-			_io = window.arguments[0];
-			if (_io.wrappedJSObject) _io = _io.wrappedJSObject;
-		}
-		if (typeof _io.libraryID == 'undefined') throw new Error("libraryID not set");
-		if (typeof _io.name == 'undefined' || _io.name === "") throw new Error("name not set");
-		
-		window.sizeToContent();
-		
 		var dialog = document.getElementById('tag-color-chooser');
-		var colorPicker = document.getElementById('color-picker');
-		var tagPosition = document.getElementById('tag-position');
 		
-		colorPicker.setAttribute('cols', 3);
-		colorPicker.setAttribute('tileWidth', 24);
-		colorPicker.setAttribute('tileHeight', 24);
-		colorPicker.colors = [
-			'#990000', '#CC9933', '#FF9900',
-			'#FFCC00', '#007439', '#1049A9',
-			'#9999FF', '#CC66CC', '#993399'
-		];
-		
-		var maxTags = document.getElementById('max-tags');
-		maxTags.value = Zotero.getString('tagColorChooser.maxTags', Zotero.Tags.MAX_COLORED_TAGS);
-		
-		var self = this;
-		Zotero.Tags.getColors(_io.libraryID)
-		.then(function (tagColors) {
+		return Zotero.spawn(function* () {
+			// Set font size from pref
+			Zotero.setFontSize(document.getElementById("tag-color-chooser-container"));
+			
+			if (window.arguments && window.arguments.length) {
+				_io = window.arguments[0];
+				if (_io.wrappedJSObject) _io = _io.wrappedJSObject;
+			}
+			if (typeof _io.libraryID == 'undefined') throw new Error("libraryID not set");
+			if (typeof _io.name == 'undefined' || _io.name === "") throw new Error("name not set");
+			
+			window.sizeToContent();
+			
+			var colorPicker = document.getElementById('color-picker');
+			var tagPosition = document.getElementById('tag-position');
+			
+			colorPicker.setAttribute('cols', 3);
+			colorPicker.setAttribute('tileWidth', 24);
+			colorPicker.setAttribute('tileHeight', 24);
+			colorPicker.colors = [
+				'#990000', '#CC9933', '#FF9900',
+				'#FFCC00', '#007439', '#1049A9',
+				'#9999FF', '#CC66CC', '#993399'
+			];
+			
+			var maxTags = document.getElementById('max-tags');
+			maxTags.value = Zotero.getString('tagColorChooser.maxTags', Zotero.Tags.MAX_COLORED_TAGS);
+			
+			var tagColors = yield Zotero.Tags.getColors(_io.libraryID);
 			var colorData = tagColors[_io.name];
 			
 			// Color
@@ -72,6 +72,7 @@ var Zotero_Tag_Color_Chooser = new function() {
 				for (var i in tagColors) {
 					usedColors.push(tagColors[i].color);
 				}
+				
 				var unusedColors = Zotero.Utilities.arrayDiff(
 					colorPicker.colors, usedColors
 				);
@@ -103,15 +104,16 @@ var Zotero_Tag_Color_Chooser = new function() {
 				tagPosition.selectedIndex = 0;
 			}
 			
-			self.onPositionChange();
+			this.onPositionChange();
 			window.sizeToContent();
-		})
+		}.bind(this))
 		.catch(function (e) {
 			Zotero.debug(e, 1);
 			Components.utils.reportError(e);
-			dialog.cancelDialog();
-		})
-		.done();
+			if (dialog.cancelDialog) {
+				dialog.cancelDialog();
+			}
+		});
 	};
 	
 	

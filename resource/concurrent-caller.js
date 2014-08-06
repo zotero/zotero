@@ -24,19 +24,19 @@
 */
 
 EXPORTED_SYMBOLS = ["ConcurrentCaller"];
-Components.utils.import("resource://zotero/q.js");
+Components.utils.import("resource://zotero/bluebird.js");
 
 /**
  * Call a fixed number of functions at once, queueing the rest until slots
  * open and returning a promise for the final completion. The functions do
  * not need to return promises, but they should if they have asynchronous
- * work to perform..
+ * work to perform.
  *
  * Example:
  *
  *   var caller = new ConcurrentCaller(2);
  *   caller.stopOnError = true;
- *   caller.fcall([foo, bar, baz, qux).done();
+ *   caller.fcall([foo, bar, baz, qux);
  *
  * In this example, foo and bar would run immediately, and baz and qux would
  * be queued for later. When foo or bar finished, baz would be run, followed
@@ -93,16 +93,16 @@ ConcurrentCaller.prototype.fcall = function (func) {
 			//this._log("Running fcall on function");
 			promises.push(this.fcall(func[i]));
 		}
-		return Q.allSettled(promises);
+		return Promise.settle(promises);
 	}
 	
 	// If we're at the maximum number of concurrent functions,
 	// queue this function for later
 	if (this._numRunning == this._numConcurrent) {
 		this._log("Already at " + this._numConcurrent + " -- queueing for later");
-		var deferred = Q.defer();
+		var deferred = Promise.defer();
 		this._queue.push({
-			func: Q.fbind(func),
+			func: Promise.method(func),
 			deferred: deferred
 		});
 		return deferred.promise;
@@ -112,7 +112,7 @@ ConcurrentCaller.prototype.fcall = function (func) {
 	
 	// Otherwise run it now
 	this._numRunning++;
-	return this._onFunctionDone(Q.fcall(func));
+	return this._onFunctionDone(Promise.try(func));
 }
 
 
@@ -124,58 +124,55 @@ ConcurrentCaller.prototype.stop = function () {
 
 ConcurrentCaller.prototype._onFunctionDone = function (promise) {
 	var self = this;
-	return Q.when(
-		promise,
-		function (promise) {
-			self._numRunning--;
-			
-			self._log("Done with function ("
-				+ self._numRunning + "/" + self._numConcurrent + " running, "
-				+ self._queue.length + " queued)");
-			
-			// If there's a function to call and we're under the concurrent limit,
-			// run it now
-			let f = self._queue.shift();
-			if (f && self._numRunning < self._numConcurrent) {
-				// Wait until the specified interval has elapsed or the current
-				// pause (if there is one) is over, whichever is longer
-				let interval = self._interval;
-				let now = Date.now();
-				if (self._pauseUntil > now && (self._pauseUntil - now > interval)) {
-					interval = self._pauseUntil - now;
-				}
-				Q.delay(interval)
-				.then(function () {
-					self._log("Running new function ("
-						+ self._numRunning + "/" + self._numConcurrent + " running, "
-						+ self._queue.length + " queued)");
-					
-					self._numRunning++;
-					var p = self._onFunctionDone(f.func());
-					f.deferred.resolve(p);
-				});
+	return promise.then(function (promise) {
+		self._numRunning--;
+		
+		self._log("Done with function ("
+			+ self._numRunning + "/" + self._numConcurrent + " running, "
+			+ self._queue.length + " queued)");
+		
+		// If there's a function to call and we're under the concurrent limit,
+		// run it now
+		let f = self._queue.shift();
+		if (f && self._numRunning < self._numConcurrent) {
+			// Wait until the specified interval has elapsed or the current
+			// pause (if there is one) is over, whichever is longer
+			let interval = self._interval;
+			let now = Date.now();
+			if (self._pauseUntil > now && (self._pauseUntil - now > interval)) {
+				interval = self._pauseUntil - now;
 			}
-			
-			return promise;
-		},
-		function (e) {
-			self._numRunning--;
-			
-			self._log("Done with function (" + self._numRunning + "/" + self._numConcurrent + ", "
-				+ self._queue.length + " in queue)");
-			
-			if (self.onError) {
-				self.onError(e);
-			}
-			
-			if (self.stopOnError && self._queue.length) {
-				self._log("Stopping on error: " + e);
-				self._queue = [];
-			}
-			
-			throw e;
+			Promise.delay(interval)
+			.then(function () {
+				self._log("Running new function ("
+					+ self._numRunning + "/" + self._numConcurrent + " running, "
+					+ self._queue.length + " queued)");
+				
+				self._numRunning++;
+				var p = self._onFunctionDone(f.func());
+				f.deferred.resolve(p);
+			});
 		}
-	);
+		
+		return promise;
+	})
+	.catch(function (e) {
+		self._numRunning--;
+		
+		self._log("Done with function (" + self._numRunning + "/" + self._numConcurrent + ", "
+			+ self._queue.length + " in queue)");
+		
+		if (self.onError) {
+			self.onError(e);
+		}
+		
+		if (self.stopOnError && self._queue.length) {
+			self._log("Stopping on error: " + e);
+			self._queue = [];
+		}
+		
+		throw e;
+	});
 };
 
 

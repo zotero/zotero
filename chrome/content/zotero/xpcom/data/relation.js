@@ -106,32 +106,32 @@ Zotero.Relation.prototype._set = function (field, val) {
  *
  * @return	bool			TRUE if the relation exists, FALSE if not
  */
-Zotero.Relation.prototype.exists = function () {
+Zotero.Relation.prototype.exists = Zotero.Promise.coroutine(function* () {
 	if (this.id) {
 		var sql = "SELECT COUNT(*) FROM relations WHERE relationID=?";
-		return !!Zotero.DB.valueQuery(sql, this.id);
+		return !!(yield Zotero.DB.valueQueryAsync(sql, this.id));
 	}
 	
 	if (this.libraryID && this.subject && this.predicate && this.object) {
 		var sql = "SELECT COUNT(*) FROM relations WHERE libraryID=? AND "
 					+ "subject=? AND predicate=? AND object=?";
 		var params = [this.libraryID, this.subject, this.predicate, this.object];
-		return !!Zotero.DB.valueQuery(sql, params);
+		return !!(yield Zotero.DB.valueQueryAsync(sql, params));
 	}
 	
 	throw ("ID or libraryID/subject/predicate/object not set in Zotero.Relation.exists()");
-}
+});
 
 
 
-Zotero.Relation.prototype.load = function () {
+Zotero.Relation.prototype.load = Zotero.Promise.coroutine(function* () {
 	var id = this._id;
 	if (!id) {
-		throw ("ID not set in Zotero.Relation.load()");
+		throw new Error("ID not set");
 	}
 	
 	var sql = "SELECT * FROM relations WHERE ROWID=?";
-	var row = Zotero.DB.rowQuery(sql, id);
+	var row = yield Zotero.DB.rowQueryAsync(sql, id);
 	if (!row) {
 		return;
 	}
@@ -144,10 +144,11 @@ Zotero.Relation.prototype.load = function () {
 	this._loaded = true;
 	
 	return true;
-}
+});
 
 
-Zotero.Relation.prototype.save = function () {
+// TODO: async
+Zotero.Relation.prototype.save = Zotero.Promise.coroutine(function* () {
 	if (this.id) {
 		throw ("Existing relations cannot currently be altered in Zotero.Relation.save()");
 	}
@@ -168,7 +169,7 @@ Zotero.Relation.prototype.save = function () {
 				+ "(libraryID, subject, predicate, object, clientDateModified) "
 				+ "VALUES (?, ?, ?, ?, ?)";
 	try {
-		var insertID = Zotero.DB.query(
+		var insertID = yield Zotero.DB.queryAsync(
 			sql,
 			[
 				this.libraryID,
@@ -181,39 +182,35 @@ Zotero.Relation.prototype.save = function () {
 	}
 	catch (e) {
 		// If above failed, try deleting existing row, in case libraryID has changed
-		Zotero.DB.beginTransaction();
-		
-		var sql2 = "SELECT COUNT(*) FROM relations WHERE subject=? AND predicate=? AND object=?";
-		if (Zotero.DB.valueQuery(sql2, [this.subject, this.predicate, this.object])) {
-			// Delete
-			sql2 = "DELETE FROM relations WHERE subject=? AND predicate=? AND object=?";
-			Zotero.DB.query(sql2, [this.subject, this.predicate, this.object]);
-			
-			// Insert with original query
-			var insertID = Zotero.DB.query(
-				sql,
-				[
-					this.libraryID,
-					this.subject,
-					this.predicate,
-					this.object,
-					Zotero.DB.transactionDateTime
-				]
-			);
-		}
-		
-		Zotero.DB.commitTransaction();
+		yield Zotero.DB.executeTransaction(function* () {
+			var sql2 = "SELECT COUNT(*) FROM relations WHERE subject=? AND predicate=? AND object=?";
+			if (yield Zotero.DB.valueQueryAsync(sql2, [this.subject, this.predicate, this.object])) {
+				// Delete
+				sql2 = "DELETE FROM relations WHERE subject=? AND predicate=? AND object=?";
+				yield Zotero.DB.queryAsync(sql2, [this.subject, this.predicate, this.object]);
+				
+				// Insert with original query
+				var insertID = yield Zotero.DB.queryAsync(
+					sql,
+					[
+						this.libraryID,
+						this.subject,
+						this.predicate,
+						this.object,
+						Zotero.DB.transactionDateTime
+					]
+				);
+			}
+		}.bind(this));
 	}
 	return insertID;
-}
+});
 
 
-Zotero.Relation.prototype.erase = function () {
+Zotero.Relation.prototype.erase = Zotero.Promise.coroutine(function* () {
 	if (!this.id) {
 		throw ("ID not set in Zotero.Relation.erase()");
 	}
-	
-	Zotero.DB.beginTransaction();
 	
 	var deleteData = {};
 	deleteData[this.id] = {
@@ -221,12 +218,10 @@ Zotero.Relation.prototype.erase = function () {
 	}
 	
 	var sql = "DELETE FROM relations WHERE ROWID=?";
-	Zotero.DB.query(sql, [this.id]);
-	
-	Zotero.DB.commitTransaction();
+	yield Zotero.DB.queryAsync(sql, [this.id]);
 	
 	Zotero.Notifier.trigger('delete', 'relation', [this.id], deleteData);
-}
+});
 
 
 Zotero.Relation.prototype.toXML = function (doc) {

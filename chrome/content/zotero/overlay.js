@@ -60,7 +60,7 @@ var ZoteroOverlay = new function()
 		
 		var self = this;
 		
-		Q.fcall(function () {
+		Zotero.Promise.try(function () {
 			if (!Zotero || Zotero.skipLoading) {
 				throw true;
 			}
@@ -227,9 +227,14 @@ var ZoteroOverlay = new function()
 	 *     the foreground.
 	 */
 	this.toggleDisplay = function(makeVisible, dontRefocus)
-	{	
+	{
 		if (!Zotero || Zotero.skipLoading) {
 			ZoteroPane.displayStartupError();
+			return;
+		}
+		
+		// Don't do anything if pane is already showing
+		if (makeVisible && ZoteroPane.isShowing()) {
 			return;
 		}
 		

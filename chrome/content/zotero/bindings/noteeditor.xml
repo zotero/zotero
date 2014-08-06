@@ -98,11 +98,11 @@
 				</setter>
 			</property>
 			
-			<field name="_parent"/>
-			<property name="parent" onget="return this._parent;">
+			<field name="_parentItem"/>
+			<property name="parentItem" onget="return this._parentItem;">
 				<setter>
 					<![CDATA[
-						this._parent = this._id('links').parent = val;
+						this._parentItem = this._id('links').parentItem = val;
 					]]>
 				</setter>
 			</property>
@@ -112,20 +112,22 @@
 			<field name="_item"/>
 			<property name="item" onget="return this._item;">
 				<setter>
-					<![CDATA[
+				<![CDATA[
+					Zotero.spawn(function* () {
 						this._item = val;
 						// TODO: use clientDateModified instead
 						this._mtime = val.getField('dateModified');
 						
-						var parent = this.item.getSourceKey();
-						if (parent) {
-							this.parent = Zotero.Items.getByLibraryAndKey(this.item.libraryID, parent);
+						var parentKey = this.item.parentKey;
+						if (parentKey) {
+							this.parentItem = yield Zotero.Items.getByLibraryAndKey(this.item.libraryID, parentKey);
 						}
 						
 						this._id('links').item = this.item;
 						
-						this.refresh();
-					]]>
+						yield this.refresh();
+					}, this);
+				]]>
 				</setter>
 			</property>
 			
@@ -155,109 +157,112 @@
 			<property name="value" onget="return this._id('noteField').value;" onset="this._id('noteField').value = val;"/>
 			
 			<method name="refresh">
-				<body>
-				<![CDATA[
-					Zotero.debug('Refreshing note editor');
-					
-					var textbox = this._id('noteField');
-					var textboxReadOnly = this._id('noteFieldReadOnly');
-					var button = this._id('goButton');
-					
-					if (this.editable) {
-						textbox.hidden = false;
-						textboxReadOnly.hidden = true;
-					}
-					else {
-						textbox.hidden = true;
-						textboxReadOnly.hidden = false;
-						textbox = textboxReadOnly;
-					}
-					
-					//var scrollPos = textbox.inputField.scrollTop;
-					if (this.item) {
-						textbox.value = this.item.getNote();
-					}
-					else {
-						textbox.value = ''
-					}
-					//textbox.inputField.scrollTop = scrollPos;
-					
-					this._id('linksbox').hidden = !(this.displayTags && this.displayRelated);
-					
-					if (this.keyDownHandler) {
-						textbox.setAttribute('onkeydown',
-							'document.getBindingParent(this).handleKeyDown(event)');
-					}
-					else {
-						textbox.removeAttribute('onkeydown');
-					}
-					
-					if (this.commandHandler) {
-						textbox.setAttribute('oncommand',
-							'document.getBindingParent(this).commandHandler()');
-					}
-					else {
-						textbox.removeAttribute('oncommand');
-					}
-					
-					if (this.displayButton) {
-						button.label = this.buttonCaption;
-						button.hidden = false;
-						button.setAttribute('oncommand',
-							'document.getBindingParent(this).clickHandler(this)');
-					}
-					else {
-						button.hidden = true;
-					}
-				]]>
-				</body>
+				<body><![CDATA[
+					return Zotero.spawn(function* () {
+						Zotero.debug('Refreshing note editor');
+						
+						var textbox = this._id('noteField');
+						var textboxReadOnly = this._id('noteFieldReadOnly');
+						var button = this._id('goButton');
+						
+						if (this.editable) {
+							textbox.hidden = false;
+							textboxReadOnly.hidden = true;
+						}
+						else {
+							textbox.hidden = true;
+							textboxReadOnly.hidden = false;
+							textbox = textboxReadOnly;
+						}
+						
+						//var scrollPos = textbox.inputField.scrollTop;
+						if (this.item) {
+							yield this.item.loadNote();
+							textbox.value = this.item.getNote();
+						}
+						else {
+							textbox.value = '';
+						}
+						//textbox.inputField.scrollTop = scrollPos;
+						
+						this._id('linksbox').hidden = !(this.displayTags && this.displayRelated);
+						
+						if (this.keyDownHandler) {
+							textbox.setAttribute('onkeydown',
+								'document.getBindingParent(this).handleKeyDown(event)');
+						}
+						else {
+							textbox.removeAttribute('onkeydown');
+						}
+						
+						if (this.commandHandler) {
+							textbox.setAttribute('oncommand',
+								'document.getBindingParent(this).commandHandler()');
+						}
+						else {
+							textbox.removeAttribute('oncommand');
+						}
+						
+						if (this.displayButton) {
+							button.label = this.buttonCaption;
+							button.hidden = false;
+							button.setAttribute('oncommand',
+								'document.getBindingParent(this).clickHandler(this)');
+						}
+						else {
+							button.hidden = true;
+						}
+					}, this);
+				]]></body>
 			</method>
 			
 			<method name="save">
 				<body>
 					<![CDATA[
-						if (this._mode == 'view') {
-							Zotero.debug("Not saving read-only note");
-							return;
-						}
-						
-						// Update note
-						var noteField = this._id('noteField');
-						if (this.item) {
-							// If note is reselected automatically after save
-							// from external note window, don't overwrite content
-							//
-							// TODO: use clientDateModified instead
-							if (this.item.getField('dateModified') != this._mtime) {
-								Zotero.debug("Note has already been changed", 4);
+						return Zotero.spawn(function* () {
+							if (this._mode == 'view') {
+								Zotero.debug("Not saving read-only note");
 								return;
 							}
 							
-							this.item.setNote(noteField.value);
-							if (this.saveOnEdit) {
-								this.item.save();
+							// Update note
+							var noteField = this._id('noteField');
+							if (this.item) {
+								// If note is reselected automatically after save
+								// from external note window, don't overwrite content
+								//
+								// TODO: use clientDateModified instead
+								if (this.item.getField('dateModified') != this._mtime) {
+									Zotero.debug("Note has already been changed", 4);
+									return;
+								}
+								
+								let changed = this.item.setNote(noteField.value);
+								if (changed && this.saveOnEdit) {
+									yield this.item.save();
+								}
+								return;
 							}
-							return;
-						}
-						
-						// Create new note
-						var item = new Zotero.Item('note');
-						if (this.parent) {
-							item.libraryID = this.parent.libraryID;
-						}
-						item.setNote(noteField.value);
-						if (this.parent) {
-							item.setSource(this.parent.id);
-						}
-						if (this.saveOnEdit) {
-							var id = item.save();
 							
-							if (!this.parent && this.collection) {
-								this.collection.addItem(id);
+							// Create new note
+							var item = new Zotero.Item('note');
+							if (this.parentItem) {
+								item.libraryID = this.parentItem.libraryID;
 							}
-						}
-						
-						this.item = Zotero.Items.get(id);
+							item.setNote(noteField.value);
+							if (this.parentItem) {
+								item.parentKey = this.parentItem.key;
+							}
+							if (this.saveOnEdit) {
+								var id = yield item.save();
+								
+								if (!this.parentItem && this.collection) {
+									this.collection.addItem(id);
+								}
+							}
+							
+							this.item = yield Zotero.Items.getAsync(id);
+						}.bind(this));
 					]]>
 				</body>
 			</method>
@@ -378,11 +383,11 @@
 				]]>
 				</setter>
 			</property>
-			<field name="_parent"/>
-			<property name="parent" onget="return this._parent;">
+			<field name="_parentItem"/>
+			<property name="parentItem" onget="return this._parentItem;">
 				<setter>
 				<![CDATA[
-					this._parent = val;
+					this._parentItem = val;
 					
 					var parentText = this.id('parentText');
 					if (parentText.firstChild) {
@@ -392,25 +397,25 @@
 					if (this._parent && this.getAttribute('notitle') != '1') {
 						this.id('parent-row').hidden = undefined;
 						this.id('parentLabel').value = Zotero.getString('pane.item.parentItem');
-						parentText.appendChild(document.createTextNode(this._parent.getDisplayTitle(true)));
+						parentText.appendChild(document.createTextNode(this._parentItem.getDisplayTitle(true)));
 					}
 				]]>
 				</setter>
 			</property>
 			<method name="tagsClick">
-				<body>
-					<![CDATA[
-						this.id('tags').reload();
+				<body><![CDATA[
+					Zotero.spawn(function* () {
+						yield this.id('tags').reload();
 						var x = this.boxObject.screenX;
 						var y = this.boxObject.screenY;
 						this.id('tagsPopup').openPopupAtScreen(x, y, false);
-					]]>
-				</body>
+					}, this);
+				]]></body>
 			</method>
 			<method name="updateTagsSummary">
-				<body>
-					<![CDATA[
-						var v = this.id('tags').summary;
+				<body><![CDATA[
+					Zotero.spawn(function* () {
+						var v = yield this.id('tags').summary;
 						
 						if (!v || v == "") {
 							v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
@@ -419,13 +424,14 @@
 						this.id('tagsLabel').value = Zotero.getString('itemFields.tags')
 							+ Zotero.getString('punctuation.colon');
 						this.id('tagsClick').value = v;
-					]]>
-				</body>
+					}, this);
+				]]></body>
 			</method>
 			<method name="seeAlsoClick">
-				<body>
-					<![CDATA[
-						var relatedList = this.item.relatedItemsBidirectional;
+				<body><![CDATA[
+					Zotero.spawn(function* () {
+						yield this.item.loadRelations();
+						var relatedList = this.item.relatedItems;
 						if (relatedList.length > 0) {
 							var x = this.boxObject.screenX;
 							var y = this.boxObject.screenY;
@@ -434,13 +440,13 @@
 						else {
 							this.id('seeAlso').add();
 						}
-					]]>
-				</body>
+					}, this);
+				]]></body>
 			</method>
 			<method name="updateSeeAlsoSummary">
-				<body>
-					<![CDATA[
-						var v = this.id('seeAlso').summary;
+				<body><![CDATA[
+					Zotero.spawn(function* () {
+						var v = yield this.id('seeAlso').summary;
 						
 						if (!v || v == "") {
 							v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
@@ -449,8 +455,8 @@
 						this.id('seeAlsoLabel').value = Zotero.getString('itemFields.related')
 							+ Zotero.getString('punctuation.colon');
 						this.id('seeAlsoClick').value = v;
-					]]>
-				</body>
+					}, this)
+				]]></body>
 			</method>
 			<method name="parentClick">
 				<body>
@@ -479,9 +485,11 @@
 						var zp = lastWin.ZoteroPane;
 					}
 					
-					var parentID = this.item.getSource();
-					zp.clearQuicksearch();
-					zp.selectItem(parentID);
+					Zotero.spawn(function* () {
+						var parentID = this.item.parentID;
+						yield zp.clearQuicksearch();
+						zp.selectItem(parentID);
+					}, this);
 				]]>
 				</body>
 			</method>

@@ -145,7 +145,7 @@ var Zotero_Duplicates_Pane = new function () {
 	
 	this.merge = function () {
 		var itembox = document.getElementById('zotero-duplicates-merge-item-box');
-		Zotero.ItemGroupCache.clear();
+		Zotero.CollectionTreeCache.clear();
 		Zotero.Items.merge(itembox.item, _otherItems);
 	}
 }

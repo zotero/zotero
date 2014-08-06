@@ -45,7 +45,7 @@ Zotero.LibraryTreeView.prototype = {
 	 * Called by HTML 5 Drag and Drop when dragging over the tree
 	 */
 	onDragEnter: function (event) {
-		Zotero.DragDrop.currentDragEvent = event;
+		Zotero.DragDrop.currentEvent = event;
 		return false;
 	},
 	
@@ -60,7 +60,7 @@ Zotero.LibraryTreeView.prototype = {
 		// Prevent modifier keys from doing their normal things
 		event.preventDefault();
 		
-		Zotero.DragDrop.currentDragEvent = event;
+		Zotero.DragDrop.currentEvent = event;
 		
 		var target = event.target;
 		if (target.tagName != 'treechildren') {
@@ -83,28 +83,25 @@ Zotero.LibraryTreeView.prototype = {
 			return;
 		}
 		
-		if (event.dataTransfer.getData("zotero/collection")) {
-			this._setDropEffect(event, "move");
-		}
-		else if (event.dataTransfer.getData("zotero/item")) {
-			var sourceItemGroup = Zotero.DragDrop.getDragSource();
-			if (sourceItemGroup) {
+		if (event.dataTransfer.getData("zotero/item")) {
+			var sourceCollectionTreeRow = Zotero.DragDrop.getDragSource();
+			if (sourceCollectionTreeRow) {
 				if (this.type == 'collection') {
-					var targetItemGroup = Zotero.DragDrop.getDragTarget();
+					var targetCollectionTreeRow = Zotero.DragDrop.getDragTarget();
 				}
 				else if (this.type == 'item') {
-					var targetItemGroup = this.itemGroup;
+					var targetCollectionTreeRow = this.collectionTreeRow;
 				}
 				else {
 					throw new Error("Invalid type '" + this.type + "'");
 				}
 				
-				if (!targetItemGroup) {
+				if (!targetCollectionTreeRow) {
 					this._setDropEffect(event, "none");
 					return false;
 				}
 				
-				if (sourceItemGroup.id == targetItemGroup.id) {
+				if (sourceCollectionTreeRow.id == targetCollectionTreeRow.id) {
 					// Ignore drag into the same collection
 					if (this.type == 'collection') {
 						this._setDropEffect(event, "none");
@@ -116,12 +113,12 @@ Zotero.LibraryTreeView.prototype = {
 					return false;
 				}
 				// If the source isn't a collection, the action has to be a copy
-				if (!sourceItemGroup.isCollection()) {
+				if (!sourceCollectionTreeRow.isCollection()) {
 					this._setDropEffect(event, "copy");
 					return false;
 				}
 				// For now, all cross-library drags are copies
-				if (sourceItemGroup.ref.libraryID != targetItemGroup.ref.libraryID) {
+				if (sourceCollectionTreeRow.ref.libraryID != targetCollectionTreeRow.ref.libraryID) {
 					this._setDropEffect(event, "copy");
 					return false;
 				}
@@ -172,7 +169,7 @@ Zotero.LibraryTreeView.prototype = {
 		// See note above
 		if (event.dataTransfer.types.contains("application/x-moz-file")) {
 			if (Zotero.isMac) {
-				Zotero.DragDrop.currentDragEvent = event;
+				Zotero.DragDrop.currentEvent = event;
 				if (event.metaKey) {
 					if (event.altKey) {
 						event.dataTransfer.dropEffect = 'link';
@@ -192,7 +189,7 @@ Zotero.LibraryTreeView.prototype = {
 	
 	onDragExit: function (event) {
 		//Zotero.debug("Clearing drag data");
-		Zotero.DragDrop.currentDragEvent = null;
+		Zotero.DragDrop.currentEvent = null;
 	},
 	
 	

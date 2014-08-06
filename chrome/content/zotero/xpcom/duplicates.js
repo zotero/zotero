@@ -39,47 +39,35 @@ Zotero.Duplicates = function (libraryID) {
 Zotero.Duplicates.prototype.__defineGetter__('name', function () Zotero.getString('pane.collections.duplicate'));
 Zotero.Duplicates.prototype.__defineGetter__('libraryID', function () this._libraryID);
 
-
 /**
  * Get duplicates, populate a temporary table, and return a search based
  * on that table
  *
  * @return {Zotero.Search}
  */
-Zotero.Duplicates.prototype.getSearchObject = function () {
-	Zotero.DB.beginTransaction();
-	
-	var sql = "DROP TABLE IF EXISTS tmpDuplicates";
-	Zotero.DB.query(sql);
-	
-	var sql = "CREATE TEMPORARY TABLE tmpDuplicates "
-				+ "(id INTEGER PRIMARY KEY)";
-	Zotero.DB.query(sql);
-	
-	this._findDuplicates();
-	var ids = this._sets.findAll(true);
-	
-	sql = "INSERT INTO tmpDuplicates VALUES (?)";
-	var insertStatement = Zotero.DB.getStatement(sql);
-	
-	for each(var id in ids) {
-		insertStatement.bindInt32Parameter(0, id);
+Zotero.Duplicates.prototype.getSearchObject = Zotero.Promise.coroutine(function* () {
+	yield Zotero.DB.executeTransaction(function* () {
+		var sql = "DROP TABLE IF EXISTS tmpDuplicates";
+		yield Zotero.DB.queryAsync(sql);
 		
-		try {
-			insertStatement.execute();
+		var sql = "CREATE TEMPORARY TABLE tmpDuplicates "
+					+ "(id INTEGER PRIMARY KEY)";
+		yield Zotero.DB.queryAsync(sql);
+		
+		this._findDuplicates();
+		var ids = this._sets.findAll(true);
+		
+		sql = "INSERT INTO tmpDuplicates VALUES (?)";
+		for (let i=0; i<ids.length; i++) {
+			yield Zotero.DB.queryAsync(sql, [ids[i]], { debug: false })
 		}
-		catch(e) {
-			throw (e + ' [ERROR: ' + Zotero.DB.getLastErrorString() + ']');
-		}
-	}
-	
-	Zotero.DB.commitTransaction();
+	}.bind(this));
 	
 	var s = new Zotero.Search;
 	s.libraryID = this._libraryID;
-	s.addCondition('tempTable', 'is', 'tmpDuplicates');
+	yield s.addCondition('tempTable', 'is', 'tmpDuplicates');
 	return s;
-}
+});
 
 
 /**
@@ -308,7 +296,6 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 			else {
 				var sql = "SELECT lastName, firstName, fieldMode FROM itemCreators "
 							+ "JOIN creators USING (creatorID) "
-							+ "JOIN creatorData USING (creatorDataID) "
 							+ "WHERE itemID=? ORDER BY orderIndex LIMIT 10";
 				aCreatorRows = Zotero.DB.query(sql, a.itemID);
 				creatorRowsCache[a.itemID] = aCreatorRows;
@@ -321,7 +308,6 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 			else {
 				var sql = "SELECT lastName, firstName, fieldMode FROM itemCreators "
 							+ "JOIN creators USING (creatorID) "
-							+ "JOIN creatorData USING (creatorDataID) "
 							+ "WHERE itemID=? ORDER BY orderIndex LIMIT 10";
 				bCreatorRows = Zotero.DB.query(sql, b.itemID);
 				creatorRowsCache[b.itemID] = bCreatorRows;

@@ -22,6 +22,9 @@ Zotero.HTTP = new function() {
 			if (xmlhttp.channel.URI.password) {
 				xmlhttp.channel.URI.password = "********";
 			}
+			if (xmlhttp.channel.URI.spec) {
+				xmlhttp.channel.URI.spec = xmlhttp.channel.URI.spec.replace(/key=[^&]+&?/, "key=********");
+			}
 		}
 		catch (e) {
 			Zotero.debug(e, 1);
@@ -76,6 +79,9 @@ Zotero.HTTP = new function() {
 			var dispURL = url;
 		}
 		
+		// Don't display API key in console
+		dispURL = dispURL.replace(/key=[^&]+&?/, "").replace(/\?$/, "");
+		
 		if(options && options.body) {
 			var bodyStart = options.body.substr(0, 1024);
 			// Don't display sync password or session id in console
@@ -91,14 +97,14 @@ Zotero.HTTP = new function() {
 		}
 		
 		if (this.browserIsOffline()) {
-			return Q.fcall(function() {
+			return Zotero.Promise.try(function() {
 				Zotero.debug("HTTP " + method + " " + dispURL + " failed: "
 					+ "Browser is offline");
 				throw new this.BrowserOfflineException();
 			});
 		}
 		
-		var deferred = Q.defer();
+		var deferred = Zotero.Promise.defer();
 		
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 					.createInstance();
@@ -451,19 +457,19 @@ Zotero.HTTP = new function() {
 		if (!Zotero.isStandalone
 				|| !Zotero.Prefs.get("triggerProxyAuthentication")
 				|| Zotero.HTTP.browserIsOffline()) {
-			Zotero.proxyAuthComplete = Q();
+			Zotero.proxyAuthComplete = Zotero.Promise.resolve();
 			return false;
 		}
 		
-		var deferred = Q.defer();
+		var deferred = Zotero.Promise.defer();
 		Zotero.proxyAuthComplete = deferred.promise;
 		
-		Q.fcall(function () {
+		Zotero.Promise.try(function () {
 			var uris = Zotero.Prefs.get('proxyAuthenticationURLs').split(',');
 			uris = Zotero.Utilities.arrayShuffle(uris);
 			uris.unshift(ZOTERO_CONFIG.PROXY_AUTH_URL);
 			
-			return Q.async(function () {
+			return Zotero.spawn(function* () {
 				let max = 3; // how many URIs to try after the general Zotero one
 				for (let i = 0; i <= max; i++) {
 					let uri = uris.shift();
@@ -474,7 +480,7 @@ Zotero.HTTP = new function() {
 					// For non-Zotero URLs, wait for PAC initialization,
 					// in a rather ugly and inefficient manner
 					if (i == 1) {
-						let installed = yield Q.fcall(_pacInstalled)
+						let installed = yield Zotero.Promise.try(_pacInstalled)
 						.then(function (installed) {
 							if (installed) throw true;
 						})
@@ -519,7 +525,7 @@ Zotero.HTTP = new function() {
 					}
 				}
 				deferred.resolve();
-			})();
+			});
 		})
 		.catch(function (e) {
 			Components.utils.reportError(e);
@@ -544,7 +550,7 @@ Zotero.HTTP = new function() {
 		Components.utils.import("resource://gre/modules/NetUtil.jsm");
 		var pps = Components.classes["@mozilla.org/network/protocol-proxy-service;1"]
 			.getService(Components.interfaces.nsIProtocolProxyService);
-		var deferred = Q.defer();
+		var deferred = Zotero.Promise.defer();
 		pps.asyncResolve(
 			NetUtil.newURI(uri),
 			0,

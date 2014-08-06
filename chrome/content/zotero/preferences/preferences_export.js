@@ -181,7 +181,7 @@ Zotero_Preferences.Export = {
 	},
 	
 	
-	refreshQuickCopySiteList: function () {
+	refreshQuickCopySiteList: Zotero.Promise.coroutine(function* () {
 		var treechildren = document.getElementById('quickCopy-siteSettings-rows');
 		while (treechildren.hasChildNodes()) {
 			treechildren.removeChild(treechildren.firstChild);
@@ -189,37 +189,31 @@ Zotero_Preferences.Export = {
 		
 		var sql = "SELECT key AS domainPath, value AS format FROM settings "
 			+ "WHERE setting='quickCopySite' ORDER BY domainPath COLLATE NOCASE";
-		var siteData = Zotero.DB.query(sql);
+		var siteData = yield Zotero.DB.queryAsync(sql);
 		
-		if (!siteData) {
-			return;
+		for (var i=0; i<siteData.length; i++) {
+			let treeitem = document.createElement('treeitem');
+			let treerow = document.createElement('treerow');
+			let domainCell = document.createElement('treecell');
+			let formatCell = document.createElement('treecell');
+			let HTMLCell = document.createElement('treecell');
+			
+			domainCell.setAttribute('label', siteData[i].domainPath);
+			
+			yield Zotero.QuickCopy.getFormattedNameFromSetting(siteData[i].format)
+			.then(function (formatted) {
+				formatCell.setAttribute('label', formatted);
+				var copyAsHTML = Zotero.QuickCopy.getContentType(siteData[i].format) == 'html';
+				HTMLCell.setAttribute('label', copyAsHTML ? '   ✓   ' : '');
+				
+				treerow.appendChild(domainCell);
+				treerow.appendChild(formatCell);
+				treerow.appendChild(HTMLCell);
+				treeitem.appendChild(treerow);
+				treechildren.appendChild(treeitem);
+			});
 		}
-		
-		Q.async(function () {
-			for (var i=0; i<siteData.length; i++) {
-				let treeitem = document.createElement('treeitem');
-				let treerow = document.createElement('treerow');
-				let domainCell = document.createElement('treecell');
-				let formatCell = document.createElement('treecell');
-				let HTMLCell = document.createElement('treecell');
-				
-				domainCell.setAttribute('label', siteData[i].domainPath);
-				
-				yield Zotero.QuickCopy.getFormattedNameFromSetting(siteData[i].format)
-				.then(function (formatted) {
-					formatCell.setAttribute('label', formatted);
-					var copyAsHTML = Zotero.QuickCopy.getContentType(siteData[i].format) == 'html';
-					HTMLCell.setAttribute('label', copyAsHTML ? '   ✓   ' : '');
-					
-					treerow.appendChild(domainCell);
-					treerow.appendChild(formatCell);
-					treerow.appendChild(HTMLCell);
-					treeitem.appendChild(treerow);
-					treechildren.appendChild(treeitem);
-				});
-			}
-		})().done();
-	},
+	}),
 	
 	
 	deleteSelectedQuickCopySite: function () {

@@ -41,7 +41,7 @@ Zotero.Sync.Storage.Request = function (name, callbacks) {
 	this.progress = 0;
 	this.progressMax = 0;
 	
-	this._deferred = Q.defer();
+	this._deferred = Zotero.Promise.defer();
 	this._running = false;
 	this._stopping = false;
 	this._percentage = 0;
@@ -199,7 +199,7 @@ Zotero.Sync.Storage.Request.prototype.start = function () {
 	//
 	// The main sync logic is triggered here.
 	
-	Q.all([f(this) for each(f in this._onStart)])
+	Zotero.Promise.all([f(this) for each(f in this._onStart)])
 	.then(function (results) {
 		return {
 			localChanges: results.some(function (val) val && val.localChanges == true),

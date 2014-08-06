@@ -79,6 +79,7 @@ pref("extensions.zotero.keys.quicksearch", 'K');
 pref("extensions.zotero.keys.copySelectedItemCitationsToClipboard", 'A');
 pref("extensions.zotero.keys.copySelectedItemsToClipboard", 'C');
 pref("extensions.zotero.keys.toggleTagSelector", 'T');
+pref("extensions.zotero.keys.sync", 'Y');
 
 // Fulltext indexing
 pref("extensions.zotero.fulltext.textMaxLength", 500000);
