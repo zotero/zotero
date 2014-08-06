@@ -101,6 +101,10 @@ Zotero.Collection.prototype._set = function (field, val) {
 		case 'id':
 		case 'libraryID':
 		case 'key':
+			if (field == 'libraryID') {
+				val = Zotero.DataObjectUtilities.checkLibraryID(val);
+			}
+			
 			if (val == this['_' + field]) {
 				return;
 			}
@@ -108,7 +112,9 @@ Zotero.Collection.prototype._set = function (field, val) {
 			if (this._loaded) {
 				throw ("Cannot set " + field + " after object is already loaded in Zotero.Collection._set()");
 			}
+			
 			//this._checkValue(field, val);
+			
 			this['_' + field] = val;
 			return;
 		
@@ -183,15 +189,8 @@ Zotero.Collection.prototype.load = function() {
 		var params = id;
 	}
 	else {
-		sql += "key=?";
-		var params = [key];
-		if (libraryID) {
-			sql += " AND libraryID=?";
-			params.push(libraryID);
-		}
-		else {
-			sql += " AND libraryID IS NULL";
-		}
+		sql += "key=? AND libraryID=?";
+		var params = [key, libraryID];
 	}
 	var data = Zotero.DB.rowQuery(sql, params);
 	
@@ -434,12 +433,12 @@ Zotero.Collection.prototype.save = function () {
 			this._changed.dateModified ?
 				this.dateModified : Zotero.DB.transactionDateTime,
 			Zotero.DB.transactionDateTime,
-			this.libraryID ? this.libraryID : null,
+			this.libraryID ? this.libraryID : 0,
 			key
 		];
 		
-		var sql = "REPLACE INTO collections (" + columns.join(', ') + ") VALUES ("
-			+ placeholders.join(', ') + ")";
+		var sql = "REPLACE INTO collections (" + columns.join(', ') + ") "
+			+ "VALUES (" + placeholders + ")";
 		var insertID = Zotero.DB.query(sql, sqlValues);
 		if (!collectionID) {
 			collectionID = insertID;
@@ -1192,7 +1191,7 @@ Zotero.Collection.prototype.addLinkedCollection = function (collection) {
 	
 	// If both group libraries, store relation with source group.
 	// Otherwise, store with personal library.
-	var libraryID = (this.libraryID && collection.libraryID) ? this.libraryID : null;
+	var libraryID = (this.libraryID && collection.libraryID) ? this.libraryID : 0;
 	
 	Zotero.Relations.add(libraryID, url1, predicate, url2);
 }

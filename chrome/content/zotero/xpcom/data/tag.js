@@ -86,6 +86,10 @@ Zotero.Tag.prototype._set = function (field, val) {
 		case 'id':
 		case 'libraryID':
 		case 'key':
+			if (field == 'libraryID') {
+				val = Zotero.DataObjectUtilities.checkLibraryID(val);
+			}
+			
 			if (val == this['_' + field]) {
 				return;
 			}
@@ -93,7 +97,9 @@ Zotero.Tag.prototype._set = function (field, val) {
 			if (this._loaded) {
 				throw ("Cannot set " + field + " after object is already loaded in Zotero.Tag._set()");
 			}
+			
 			//this._checkValue(field, val);
+			
 			this['_' + field] = val;
 			return;
 		
@@ -158,15 +164,8 @@ Zotero.Tag.prototype.load = function() {
 		var params = id;
 	}
 	else {
-		sql += "key=?";
-		var params = [key];
-		if (libraryID) {
-			sql += " AND libraryID=?";
-			params.push(libraryID);
-		}
-		else {
-			sql += " AND libraryID IS NULL";
-		}
+		sql += "key=? AND libraryID=?";
+		var params = [key, libraryID];
 	}
 	var row = Zotero.DB.rowQuery(sql, params);
 	
@@ -192,7 +191,7 @@ Zotero.Tag.prototype.loadFromRow = function (row) {
 				continue;
 			
 			case 'libraryID':
-				this['_' + col] = row[col] ? row[col] : null;
+				this['_' + col] = row[col];
 				continue;
 		}
 		this['_' + col] = (!row[col] && row[col] !== 0) ? '' : row[col];
@@ -321,7 +320,7 @@ Zotero.Tag.prototype.save = function (full) {
 			'libraryID',
 			'key'
 		];
-		var placeholders = ['?', '?', '?', '?', '?', '?', '?', '?'];
+		var placeholders = columns.map(function () '?').join();
 		var sqlValues = [
 			tagID ? { int: tagID } : null,
 			{ string: this.name },
@@ -332,14 +331,14 @@ Zotero.Tag.prototype.save = function (full) {
 			this._changed.dateModified ?
 				this.dateModified : Zotero.DB.transactionDateTime,
 			Zotero.DB.transactionDateTime,
-			this.libraryID ? this.libraryID : null,
+			this.libraryID ? this.libraryID : 0,
 			key
 		];
 		
 		try {
 			if (isNew) {
-				var sql = "INSERT INTO tags (" + columns.join(', ') + ") VALUES ("
-					+ placeholders.join(', ') + ")";
+				var sql = "INSERT INTO tags (" + columns.join(', ') + ") "
+					+ "VALUES (" + placeholders + ")";
 				var insertID = Zotero.DB.query(sql, sqlValues);
 				if (!tagID) {
 					tagID = insertID;
@@ -381,8 +380,8 @@ Zotero.Tag.prototype.save = function (full) {
 				
 				// Save again
 				if (isNew) {
-					var sql = "INSERT INTO tags (" + columns.join(', ') + ") VALUES ("
-						+ placeholders.join(', ') + ")";
+					var sql = "INSERT INTO tags (" + columns.join(', ') + ") "
+						+ "VALUES (" + placeholders + ")";
 					var insertID = Zotero.DB.query(sql, sqlValues);
 					if (!tagID) {
 						tagID = insertID;

@@ -112,8 +112,6 @@ Zotero.Item.prototype.__defineGetter__('itemID', function () {
 });
 Zotero.Item.prototype.__defineSetter__('id', function (val) { this.setField('id', val); });
 Zotero.Item.prototype.__defineGetter__('libraryID', function () { return this.getField('libraryID'); });
-// Temporary until everything expects an integer
-Zotero.Item.prototype.__defineGetter__('libraryIDInt', function () { var libraryID = this.getField('libraryID'); return libraryID ? parseInt(libraryID) : 0; });
 Zotero.Item.prototype.__defineSetter__('libraryID', function (val) { this.setField('libraryID', val); });
 Zotero.Item.prototype.__defineGetter__('key', function () { return this.getField('key'); });
 Zotero.Item.prototype.__defineSetter__('key', function (val) { this.setField('key', val) });
@@ -132,7 +130,7 @@ Zotero.Item.prototype.__defineSetter__('relatedItems', function (arr) { this._se
 Zotero.Item.prototype.__defineGetter__('relatedItemsReverse', function () { var ids = this._getRelatedItemsReverse(); return ids; });
 Zotero.Item.prototype.__defineGetter__('relatedItemsBidirectional', function () { var ids = this._getRelatedItemsBidirectional(); return ids; });
 
-Zotero.Item.prototype.__defineGetter__('libraryKey', function () this.libraryIDInt + "/" + this.key);
+Zotero.Item.prototype.__defineGetter__('libraryKey', function () this.libraryID + "/" + this.key);
 
 Zotero.Item.prototype.getID = function() {
 	Zotero.debug('Item.getID() is deprecated -- use Item.id');
@@ -344,15 +342,8 @@ Zotero.Item.prototype.loadPrimaryData = function(allowFail) {
 		var params = id;
 	}
 	else {
-		sql += "key=? ";
-		var params = [key];
-		if (libraryID) {
-			sql += "AND libraryID=? ";
-			params.push(libraryID);
-		}
-		else {
-			sql += "AND libraryID IS NULL ";
-		}
+		sql += "key=? AND libraryID=? ";
+		var params = [key, libraryID];
 	}
 	sql += (where.length ? ' AND ' + where.join(' AND ') : '');
 	var row = Zotero.DB.rowQuery(sql, params);
@@ -398,7 +389,7 @@ Zotero.Item.prototype.loadFromRow = function(row, reload) {
 					break;
 				
 				case 'libraryID':
-					this['_' + col] = row[col] ? row[col] : null;
+					this['_' + col] = row[col];
 					break;
 				
 				case 'numNotes':
@@ -707,6 +698,10 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		case 'id':
 		case 'libraryID':
 		case 'key':
+			if (field == 'libraryID') {
+				value = Zotero.DataObjectUtilities.checkLibraryID(value);
+			}
+			
 			if (value == this['_' + field]) {
 				return;
 			}
@@ -714,7 +709,6 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 			if (this._primaryDataLoaded) {
 				throw ("Cannot set " + field + " after object is already loaded in Zotero.Item.setField()");
 			}
-			//this._checkValue(field, val);
 			this['_' + field] = value;
 			return;
 	}
@@ -1323,7 +1317,7 @@ Zotero.Item.prototype.save = function(options) {
 				this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime,
 				this.dateModified ? this.dateModified : Zotero.DB.transactionDateTime,
 				Zotero.DB.transactionDateTime,
-				this.libraryID ? this.libraryID : null,
+				this.libraryID ? this.libraryID : 0,
 				key
 			);
 			
@@ -2181,7 +2175,7 @@ Zotero.Item.prototype.save = function(options) {
 				}
 			}
 			// Refresh trash
-			Zotero.Notifier.trigger('refresh', 'trash', this.libraryID ? this.libraryID : 0);
+			Zotero.Notifier.trigger('refresh', 'trash', this.libraryID);
 			if (this._deleted) {
 				Zotero.Notifier.trigger('trash', 'item', this.id);
 			}
@@ -3784,7 +3778,7 @@ Zotero.Item.prototype.addTag = function(name, type) {
 	var tagID = Zotero.Tags.getID(name, type, this.libraryID);
 	if (!tagID) {
 		var tag = new Zotero.Tag;
-		tag.libraryID = this.libraryID ? this.libraryID : null;
+		tag.libraryID = this.libraryID;
 		tag.name = name;
 		tag.type = type;
 		var tagID = tag.save();
@@ -4025,7 +4019,7 @@ Zotero.Item.prototype.addLinkedItem = function (item) {
 	// If one of the items is a personal library, store relation with that.
 	// Otherwise, use current item's library (which in calling code is the
 	// new, copied item).
-	var libraryID = (!this.libraryID || !item.libraryID) ? null : this.libraryID;
+	var libraryID = (!this.libraryID || !item.libraryID) ? 0 : this.libraryID;
 	
 	Zotero.Relations.add(libraryID, url1, predicate, url2);
 }

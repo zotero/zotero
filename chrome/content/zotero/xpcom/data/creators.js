@@ -122,26 +122,17 @@ Zotero.Creators = new function() {
 	
 	function getCreatorsWithData(creatorDataID, libraryID) {
 		var sql = "SELECT creatorID FROM creators WHERE creatorDataID=?";
-		var params = [creatorDataID];
-		if (libraryID) {
+		if (libraryID !== undefined) {
 			sql += " AND libraryID=?";
-			params.push(libraryID);
+			return Zotero.DB.columnQuery(sql, [creatorDataID, libraryID])
 		}
-		else {
-			sql += " AND libraryID IS NULL";
-		}
-		return Zotero.DB.columnQuery(sql, params);
+		return Zotero.DB.columnQuery(sql, [creatorDataID]);
 	}
 	
 	
 	function countCreatorsWithData(creatorDataID, libraryID) {
 		var sql = "SELECT COUNT(*) FROM creators WHERE creatorDataID=?";
-		var params = [creatorDataID];
-		if (libraryID) {
-			sql += " AND libraryID=?";
-			params.push(libraryID);
-		}
-		return Zotero.DB.valueQuery(sql, params);
+		return Zotero.DB.valueQuery(sql, [creatorDataID]);
 	}
 	
 	

@@ -132,31 +132,20 @@ Zotero.Items = new function() {
 	/**
 	 * Return items marked as deleted
 	 *
-	 * @param {Number|NULL}  libraryID
+	 * @param {Integer}  libraryID
 	 * @param {Boolean}  asIDs			Return itemIDs instead of
 	 *											Zotero.Item objects
 	 * @return {Zotero.Item[]|Integer[]}
 	 */
 	this.getDeleted = function (libraryID, asIDs, days) {
-		// Throw warning for pre-3.0b3 arguments
-		if (typeof libraryID == 'boolean') {
-			throw new Error("libraryID must be a number or null");
-		}
-		
 		var sql = "SELECT itemID FROM items JOIN deletedItems USING (itemID) "
-				+ "WHERE libraryID"  + (libraryID ? "=?" : " IS NULL");
+				+ "WHERE libraryID=?";
 		
 		if (days) {
 			sql += " AND dateDeleted<=DATE('NOW', '-" + parseInt(days) + " DAYS')";
 		}
 		
-		if (libraryID) {
-			var ids = Zotero.DB.columnQuery(sql, [libraryID]);
-		}
-		else {
-			var ids = Zotero.DB.columnQuery(sql);
-		}
-		
+		var ids = Zotero.DB.columnQuery(sql, [libraryID]);
 		if (!ids) {
 			return [];
 		}
@@ -185,14 +174,8 @@ Zotero.Items = new function() {
 		if (!includeDeleted) {
 			sql += " AND A.itemID NOT IN (SELECT itemID FROM deletedItems)";
 		}
-		if (libraryID) {
-			sql += " AND libraryID=?";
-			var ids = Zotero.DB.columnQuery(sql, libraryID);
-		}
-		else {
-			sql += " AND libraryID IS NULL";
-			var ids = Zotero.DB.columnQuery(sql);
-		}
+		sql += " AND libraryID=?";
+		var ids = Zotero.DB.columnQuery(sql, libraryID);
 		return this.get(ids);
 	}
 	
@@ -505,7 +488,7 @@ Zotero.Items = new function() {
 				deletedIDs = deletedIDs.slice(0, limit - 1)
 			}
 			this.erase(deletedIDs);
-			Zotero.Notifier.trigger('refresh', 'trash', libraryID ? libraryID : 0);
+			Zotero.Notifier.trigger('refresh', 'trash', libraryID);
 		}
 		Zotero.DB.commitTransaction();
 		

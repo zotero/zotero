@@ -94,7 +94,7 @@ const Zotero_Lookup = new function () {
 			return false;
 		}
 
-		var libraryID = null;
+		var libraryID = false;
 		var collection = false;
 		try {
 			libraryID = ZoteroPane_Local.getSelectedLibraryID();

@@ -64,7 +64,7 @@ var Zotero_RecognizePDF = new function() {
 	 * Retrieves metadata for a PDF and saves it as an item
 	 *
 	 * @param {nsIFile} file The PDF file to retrieve metadata for
-	 * @param {Integer|null} libraryID The library in which to save the PDF
+	 * @param {Integer} libraryID The library in which to save the PDF
 	 * @param {Function} stopCheckCallback Function that returns true if the
 	 *                   process is to be interrupted
 	 * @return {Promise} A promise resolved when PDF metadata has been retrieved

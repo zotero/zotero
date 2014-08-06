@@ -98,16 +98,8 @@ Zotero.Tags = new function() {
 		// FIXME: COLLATE NOCASE doesn't work for Unicode characters, so this
 		// won't find Äbc if "äbc" is entered and will allow a duplicate tag
 		// to be created
-		var sql = "SELECT tagID FROM tags WHERE name=? AND type=? AND libraryID";
-		var params = [name, type];
-		if (libraryID) {
-			sql += "=?";
-			params.push(libraryID);
-		}
-		else {
-			sql += " IS NULL";
-		}
-		var tagID = Zotero.DB.valueQuery(sql, params);
+		var sql = "SELECT tagID FROM tags WHERE name=? AND type=? AND libraryID=?";
+		var tagID = Zotero.DB.valueQuery(sql, [name, type, libraryID]);
 		if (tagID) {
 			if (!_tags[libraryID]) {
 				_tags[libraryID] = {};
@@ -127,16 +119,8 @@ Zotero.Tags = new function() {
 	 */
 	function getIDs(name, libraryID) {
 		name = Zotero.Utilities.trim(name);
-		var sql = "SELECT tagID FROM tags WHERE name=? AND libraryID";
-		var params = [name];
-		if (libraryID) {
-			sql += "=?";
-			params.push(libraryID);
-		}
-		else {
-			sql += " IS NULL";
-		}
-		return Zotero.DB.columnQuery(sql, params);
+		var sql = "SELECT tagID FROM tags WHERE name=? AND libraryID=?";
+		return Zotero.DB.columnQuery(sql, [name, libraryID]);
 	}
 	
 	
@@ -145,16 +129,8 @@ Zotero.Tags = new function() {
 	 */
 	function getTypes(name, libraryID) {
 		name = Zotero.Utilities.trim(name);
-		var sql = "SELECT type FROM tags WHERE name=? AND libraryID";
-		var params = [name];
-		if (libraryID) {
-			sql += "=?";
-			params.push(libraryID);
-		}
-		else {
-			sql += " IS NULL";
-		}
-		return Zotero.DB.columnQuery(sql, params);
+		var sql = "SELECT type FROM tags WHERE name=? AND libraryID=?";
+		return Zotero.DB.columnQuery(sql, [name, libraryID]);
 	}
 	
 	
@@ -164,15 +140,8 @@ Zotero.Tags = new function() {
 	 * _types_ is an optional array of tag types to fetch
 	 */
 	function getAll(types, libraryID) {
-		var sql = "SELECT tagID, name FROM tags WHERE libraryID";
-		var params = [];
-		if (libraryID) {
-			sql += "=?";
-			params.push(libraryID);
-		}
-		else {
-			sql += " IS NULL";
-		}
+		var sql = "SELECT tagID, name FROM tags WHERE libraryID=?";
+		var params = [libraryID];
 		if (types) {
 			sql += " AND type IN (" + types.join() + ")";
 		}
@@ -314,7 +283,7 @@ Zotero.Tags = new function() {
 			
 			// We need to know if the old tag has a color assigned so that
 			// we can assign it to the new name
-			return self.getColor(libraryID ? parseInt(libraryID) : 0, oldName);
+			return self.getColor(libraryID, oldName);
 		})
 		.then(function (oldColorData) {
 			Zotero.DB.beginTransaction();
@@ -400,14 +369,12 @@ Zotero.Tags = new function() {
 			Zotero.DB.commitTransaction();
 			
 			if (oldColorData) {
-				var libraryIDInt = libraryID ? parseInt(libraryID) : 0
-				
 				// Remove color from old tag
-				return self.setColor(libraryIDInt, oldName)
+				return self.setColor(libraryID, oldName)
 				// Add color to new tag
 				.then(function () {
 					return self.setColor(
-						libraryIDInt,
+						libraryID,
 						newName,
 						oldColorData.color,
 						oldColorData.position
@@ -493,7 +460,7 @@ Zotero.Tags = new function() {
 	 * @return {Promise}
 	 */
 	this.setColor = function (libraryID, name, color, position) {
-		if (libraryID === null) {
+		if (!Number.isInteger(libraryID)) {
 			throw new Error("libraryID must be an integer");
 		}
 		
@@ -828,7 +795,7 @@ Zotero.Tags = new function() {
 			var tag = this.get(id);
 			if (tag) {
 				deleted.push({
-					libraryID: tag.libraryID ? parseInt(tag.libraryID) : 0,
+					libraryID: tag.libraryID,
 					name: tag.name
 				});
 				tag.erase();
@@ -950,7 +917,7 @@ Zotero.Tags = new function() {
 		for each(var id in ids) {
 			var tag = this._objectCache[id];
 			delete this._objectCache[id];
-			var libraryID = tag.libraryID ? tag.libraryID : 0;
+			var libraryID = tag.libraryID;
 			if (tag && _tags[libraryID] && _tags[libraryID][tag.type]) {
 				delete _tags[libraryID][tag.type]['_' + tag.name];
 			}

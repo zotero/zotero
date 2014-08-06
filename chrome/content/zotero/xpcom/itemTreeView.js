@@ -195,7 +195,6 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 			Q.fcall(function () {
 				if (coloredTagsRE.test(key)) {
 					let libraryID = self._itemGroup.ref.libraryID;
-					libraryID = libraryID ? parseInt(libraryID) : 0;
 					let position = parseInt(key) - 1;
 					return Zotero.Tags.getColorByPosition(libraryID, position)
 					.then(function (colorData) {
@@ -1038,8 +1037,7 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 		
 		var colorData = [];
 		for (let i=0, len=tags.length; i<len; i++) {
-			let libraryIDInt = item.libraryIDInt; // TEMP
-			colorData.push(Zotero.Tags.getColor(libraryIDInt, tags[i].name));
+			colorData.push(Zotero.Tags.getColor(item.libraryID, tags[i].name));
 		}
 		var self = this;
 		Q.all(colorData)
@@ -3014,7 +3012,7 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient, dataTransfer) {
 	var dataType = dragData.dataType;
 	var data = dragData.data;
 	var itemGroup = this.itemGroup;
-	var targetLibraryID = itemGroup.isWithinGroup() ? itemGroup.ref.libraryID : null;
+	var targetLibraryID = itemGroup.ref.libraryID;
 	
 	if (dataType == 'zotero/item') {
 		var ids = data;
@@ -3102,12 +3100,7 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient, dataTransfer) {
 			return;
 		}
 		
-		if (itemGroup.isWithinGroup()) {
-			var targetLibraryID = itemGroup.ref.libraryID;
-		}
-		else {
-			var targetLibraryID = null;
-		}
+		var targetLibraryID = itemGroup.ref.libraryID;
 		
 		var sourceItemID = false;
 		var parentCollectionID = false;

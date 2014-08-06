@@ -73,6 +73,10 @@ Zotero.Relation.prototype._set = function (field, val) {
 			if (this._loaded) {
 				throw ("Cannot set " + field + " after object is already loaded in Zotero.Relation._set()");
 			}
+			
+			if (field == 'libraryID') {
+				val = parseInt(val);
+			}
 			this['_' + field] = val;
 			return;
 	}

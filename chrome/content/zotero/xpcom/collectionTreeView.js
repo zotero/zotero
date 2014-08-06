@@ -139,27 +139,27 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 	
 	if (this.hideSources.indexOf('duplicates') == -1) {
 		try {
-			this._duplicateLibraries = Zotero.Prefs.get('duplicateLibraries').split(',');
+			this._duplicateLibraries = Zotero.Prefs.get('duplicateLibraries').split(',').map(function (val) parseInt(val));
 		}
 		catch (e) {
 			// Add to personal library by default
 			Zotero.Prefs.set('duplicateLibraries', '0');
-			this._duplicateLibraries = ['0'];
+			this._duplicateLibraries = [0];
 		}
 	}
 	
 	try {
-		this._unfiledLibraries = Zotero.Prefs.get('unfiledLibraries').split(',');
+		this._unfiledLibraries = Zotero.Prefs.get('unfiledLibraries').split(',').map(function (val) parseInt(val));
 	}
 	catch (e) {
 		// Add to personal library by default
 		Zotero.Prefs.set('unfiledLibraries', '0');
-		this._unfiledLibraries = ['0'];
+		this._unfiledLibraries = [0];
 	}
 	
 	var self = this;
 	var library = {
-		libraryID: null
+		libraryID: 0
 	};
 	
 	 // itemgroup, level, beforeRow, startOpen
@@ -436,7 +436,7 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 			break;
 		
 		case 'trash':
-			if (this._trashNotEmpty[itemGroup.ref.libraryID ? itemGroup.ref.libraryID : 0]) {
+			if (this._trashNotEmpty[itemGroup.ref.libraryID]) {
 				collectionType += '-full';
 			}
 			break;
@@ -490,7 +490,6 @@ Zotero.CollectionTreeView.prototype.isContainerEmpty = function(row)
 	}
 	if (itemGroup.isGroup()) {
 		var libraryID = itemGroup.ref.libraryID;
-		libraryID = (libraryID ? libraryID : 0) + '';
 		
 		return !itemGroup.ref.hasCollections()
 				&& !itemGroup.ref.hasSearches()
@@ -701,7 +700,7 @@ Zotero.CollectionTreeView.prototype.expandToCollection = function(collectionID) 
 ///
 ////////////////////////////////////////////////////////////////////////////////
 /**
- * @param	{Integer|null}		libraryID		Library to select, or null for local library
+ * @param	{Integer}		libraryID		Library to select
  */
 Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
 	if (Zotero.suppressUIUpdates) {
@@ -884,7 +883,6 @@ Zotero.CollectionTreeView.prototype._expandRow = function (row, forceOpen) {
 	var isCollection = itemGroup.isCollection();
 	var level = this.getLevel(row);
 	var libraryID = itemGroup.ref.libraryID;
-	var intLibraryID = libraryID ? libraryID : 0;
 	
 	if (isGroup) {
 		var group = Zotero.Groups.getByLibraryID(libraryID);
@@ -897,8 +895,8 @@ Zotero.CollectionTreeView.prototype._expandRow = function (row, forceOpen) {
 	if (isLibrary) {
 		var savedSearches = Zotero.Searches.getAll(libraryID);
 		var showDuplicates = (this.hideSources.indexOf('duplicates') == -1
-				&& this._duplicateLibraries.indexOf(intLibraryID) != -1);
-		var showUnfiled = this._unfiledLibraries.indexOf(intLibraryID) != -1;
+				&& this._duplicateLibraries.indexOf(libraryID) != -1);
+		var showUnfiled = this._unfiledLibraries.indexOf(libraryID) != -1;
 		var showTrash = this.hideSources.indexOf('trash') == -1;
 	}
 	else {
@@ -959,7 +957,7 @@ Zotero.CollectionTreeView.prototype._expandRow = function (row, forceOpen) {
 	
 	// Duplicate items
 	if (showDuplicates) {
-		var d = new Zotero.Duplicates(intLibraryID);
+		var d = new Zotero.Duplicates(libraryID);
 		this._showRow(new Zotero.ItemGroup('duplicates', d), level + 1, row + 1 + newRows);
 		newRows++;
 	}
@@ -967,9 +965,7 @@ Zotero.CollectionTreeView.prototype._expandRow = function (row, forceOpen) {
 	// Unfiled items
 	if (showUnfiled) {
 		var s = new Zotero.Search;
-		if (isGroup) {
-			s.libraryID = libraryID;
-		}
+		s.libraryID = libraryID;
 		s.name = Zotero.getString('pane.collections.unfiled');
 		s.addCondition('libraryID', 'is', libraryID);
 		s.addCondition('unfiled', 'true');
@@ -986,7 +982,7 @@ Zotero.CollectionTreeView.prototype._expandRow = function (row, forceOpen) {
 			this._showRow(new Zotero.ItemGroup('trash', ref), level + 1, row + 1 + newRows);
 			newRows++;
 		}
-		this._trashNotEmpty[intLibraryID] = !!deletedItems.length;
+		this._trashNotEmpty[libraryID] = !!deletedItems.length;
 	}
 	
 	return newRows;
@@ -1071,12 +1067,12 @@ Zotero.CollectionTreeView.prototype.rememberSelection = function(selection)
 
 
 /**
- * Returns libraryID, null for personal library, or false if not a library
+ * Returns libraryID or FALSE if not a library
  */
 Zotero.CollectionTreeView.prototype.getSelectedLibraryID = function() {
 	var itemGroup = this._getItemAtRow(this.selection.currentIndex);
 	return itemGroup && itemGroup.ref && itemGroup.ref.libraryID !== undefined
-			&& (itemGroup.ref.libraryID ? itemGroup.ref.libraryID : null);
+			&& itemGroup.ref.libraryID;
 }
 
 
@@ -1550,7 +1546,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient, dataTransfer)
 	}
 	
 	
-	var targetLibraryID = itemGroup.isWithinGroup() ? itemGroup.ref.libraryID : null;
+	var targetLibraryID = itemGroup.ref.libraryID;
 	var targetCollectionID = itemGroup.isCollection() ? itemGroup.ref.id : false;
 	
 	if (dataType == 'zotero/collection') {
@@ -1741,12 +1737,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient, dataTransfer)
 		Zotero.DB.commitTransaction();
 	}
 	else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
-		if (itemGroup.isWithinGroup()) {
-			var targetLibraryID = itemGroup.ref.libraryID;
-		}
-		else {
-			var targetLibraryID = null;
-		}
+		var targetLibraryID = itemGroup.ref.libraryID;
 		
 		if (itemGroup.isCollection()) {
 			var parentCollectionID = itemGroup.ref.id;
@@ -1915,13 +1906,13 @@ Zotero.ItemGroup.prototype.__defineGetter__('id', function () {
 			return 'S' + this.ref.id;
 		
 		case 'duplicates':
-			return 'D' + (this.ref.libraryID ? this.ref.libraryID : 0);
+			return 'D' + this.ref.libraryID;
 		
 		case 'unfiled':
-			return 'U' + (this.ref.libraryID ? this.ref.libraryID : 0);
+			return 'U' + this.ref.libraryID;
 		
 		case 'trash':
-			return 'T' + (this.ref.libraryID ? this.ref.libraryID : 0);
+			return 'T' + this.ref.libraryID;
 		
 		case 'header':
 			if (this.ref.id == 'group-libraries-header') {
@@ -2156,12 +2147,8 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 	}
 	else {
 		var s = new Zotero.Search();
-		if (this.isLibrary()) {
-			s.addCondition('libraryID', 'is', null);
-			s.addCondition('noChildren', 'true');
-			includeScopeChildren = true;
-		}
-		else if (this.isGroup()) {
+		// Library root
+		if (this.isLibrary(true)) {
 			s.addCondition('libraryID', 'is', this.ref.libraryID);
 			s.addCondition('noChildren', 'true');
 			includeScopeChildren = true;

@@ -29,7 +29,7 @@ Zotero.Duplicates = function (libraryID) {
 	}
 	
 	if (!libraryID) {
-		libraryID = null;
+		libraryID = 0;
 	}
 	
 	this._libraryID = libraryID;

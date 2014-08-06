@@ -102,6 +102,10 @@ Zotero.Search.prototype._set = function (field, val) {
 		case 'id':
 		case 'libraryID':
 		case 'key':
+			if (field == 'libraryID') {
+				val = Zotero.DataObjectUtilities.checkLibraryID(val);
+			}
+			
 			if (val == this['_' + field]) {
 				return;
 			}
@@ -109,7 +113,9 @@ Zotero.Search.prototype._set = function (field, val) {
 			if (this._loaded) {
 				throw new Error("Cannot set " + field + " after object is already loaded");
 			}
+			
 			//this._checkValue(field, val);
+			
 			this['_' + field] = val;
 			return;
 		
@@ -176,15 +182,8 @@ Zotero.Search.prototype.load = function() {
 		var params = id;
 	}
 	else {
-		sql += "key=?";
-		var params = [key];
-		if (libraryID) {
-			sql += " AND libraryID=?";
-			params.push(libraryID);
-		}
-		else {
-			sql += " AND libraryID IS NULL";
-		}
+		sql += "key=? AND libraryID=?";
+		var params = [key, libraryID];
 	}
 	sql += " GROUP BY savedSearchID";
 	var data = Zotero.DB.rowQuery(sql, params);
@@ -290,12 +289,12 @@ Zotero.Search.prototype.save = function(fixGaps) {
 			this._changed.dateModified ?
 				this.dateModified : Zotero.DB.transactionDateTime,
 			Zotero.DB.transactionDateTime,
-			this.libraryID ? this.libraryID : this.libraryID,
+			this.libraryID ? this.libraryID : 0,
 			key
 		];
 		
-		var sql = "REPLACE INTO savedSearches (" + columns.join(', ') + ") VALUES ("
-			+ placeholders.join(', ') + ")";
+		var sql = "REPLACE INTO savedSearches (" + columns.join(', ') + ") "
+			+ "VALUES (" + placeholders + ")";
 		var insertID = Zotero.DB.query(sql, sqlValues);
 		if (!searchID) {
 			searchID = insertID;
@@ -1720,21 +1719,13 @@ Zotero.Searches = new function(){
 	/**
 	 * Returns an array of Zotero.Search objects, ordered by name
 	 *
-	 * @param	{Integer|null}	[libraryID=null]
+	 * @param	{Integer}	[libraryID=0]
 	 */
 	this.getAll = function (libraryID) {
 		var sql = "SELECT savedSearchID AS id, savedSearchName AS name "
-				+ "FROM savedSearches WHERE libraryID";
-		if (libraryID) {
-			sql += "=?";
-			var params = [libraryID];
-		}
-		else {
-			sql += " IS NULL";
-			var params = null;
-		}
+				+ "FROM savedSearches WHERE libraryID=?";
 		sql += " ORDER BY name COLLATE NOCASE";
-		var rows = Zotero.DB.query(sql, params);
+		var rows = Zotero.DB.query(sql, [libraryID ? libraryID : 0]);
 		if (!rows) {
 			return [];
 		}

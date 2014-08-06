@@ -77,9 +77,6 @@
 			<property name="libraryID" onget="return this._libraryID">
 				<setter>
 				<![CDATA[
-					// TEMP: libraryIDInt
-					val = val ? parseInt(val) : 0;
-					
 					if (this._libraryID != val) {
 						this._dirty = true;
 					}

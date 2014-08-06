@@ -207,7 +207,7 @@
 						this.id('addButton').hidden = !this.editable;
 						
 						var self = this;
-						return Zotero.Tags.getColors(self.item.libraryIDInt)
+						return Zotero.Tags.getColors(self.item.libraryID)
 						.then(function (colors) {
 							self._tagColors = colors;
 							

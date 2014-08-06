@@ -442,7 +442,6 @@
 							var rows = [];
 							
 							var libraryID = this.parent.search.libraryID;
-							libraryID = libraryID ? libraryID : null;
 							var cols = Zotero.getCollections(false, true, libraryID);
 							for (var i in cols) {
 								// Indent subcollections
@@ -461,7 +460,6 @@
 						case 'savedSearch':
 							var rows = [];
 							var libraryID = this.parent.search.libraryID;
-							libraryID = libraryID ? libraryID : null;
 							var searches = Zotero.Searches.getAll(libraryID);
 							for (var i in searches) {
 								if (searches[i].id != this.parent.search.id) {

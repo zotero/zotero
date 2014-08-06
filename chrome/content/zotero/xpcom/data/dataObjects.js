@@ -55,7 +55,6 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	
 	
 	this.makeLibraryKeyHash = function (libraryID, key) {
-		var libraryID = libraryID ? libraryID : 0;
 		return libraryID + '_' + key;
 	}
 	
@@ -70,57 +69,29 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 		if (!key) {
 			return false;
 		}
-		libraryID = parseInt(libraryID);
 		return {
-			libraryID: libraryID ? libraryID : null,
+			libraryID: parseInt(libraryID),
 			key: key
 		};
 	}
 	
 	
 	/**
-	 * Retrieves an object of the current by its key
-	 *
-	 * @param	{String}			key
-	 * @return	{Zotero.DataObject}			Zotero data object, or FALSE if not found
-	 */
-	this.getByKey = function (key) {
-		if (arguments.length > 1) {
-			throw ("getByKey() takes only one argument");
-		}
-		
-		Components.utils.reportError("Zotero." + this._ZDO_Objects
-			+ ".getByKey() is deprecated -- use getByLibraryAndKey()");
-		
-		return this.getByLibraryAndKey(null, key);
-	}
-	
-	
-	/**
 	 * Retrieves an object by its libraryID and key
 	 *
-	 * @param	{Integer|NULL}		libraryID
+	 * @param	{Integer}		libraryID
 	 * @param	{String}			key
 	 * @return	{Zotero.DataObject}			Zotero data object, or FALSE if not found
 	 */
 	this.getByLibraryAndKey = function (libraryID, key) {
 		var sql = "SELECT ROWID FROM " + this._ZDO_table + " WHERE ";
-		var params = [];
 		if (this._ZDO_idOnly) {
 			sql += "ROWID=?";
-			params.push(key);
+			var params = [key]
 		}
 		else {
-			sql += "libraryID";
-			if (libraryID && libraryID !== '0') {
-				sql += "=? ";
-				params.push(libraryID);
-			}
-			else {
-				sql += " IS NULL ";
-			}
-			sql += "AND key=?";
-			params.push(key);
+			sql += "libraryID=? AND key=?";
+			var params = [libraryID, key];
 		}
 		var id = Zotero.DB.valueQuery(sql, params);
 		if (!id) {

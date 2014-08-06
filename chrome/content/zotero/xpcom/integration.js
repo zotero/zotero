@@ -2309,7 +2309,8 @@ Zotero.Integration.Session.prototype.lookupItems = function(citation, index) {
 			}
 		} else {
 			if(citationItem.key) {
-				zoteroItem = Zotero.Items.getByKey(citationItem.key);
+				// DEBUG: why no library id?
+				zoteroItem = Zotero.Items.getByLibraryAndKey(0, citationItem.key);
 			} else if(citationItem.itemID) {
 				zoteroItem = Zotero.Items.get(citationItem.itemID);
 			} else if(citationItem.id) {
@@ -2705,7 +2706,8 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 		} else {
 			for(var itemID in documentData.uncited) {
 				// if not yet in item set, add to item set
-				var zoteroItem = Zotero.Items.getByKey(itemID);
+				// DEBUG: why no libraryID?
+				var zoteroItem = Zotero.Items.getByLibraryAndKey(0, itemID);
 				if(!zoteroItem) zoteroItem = Zotero.Items.get(itemID);
 				if(zoteroItem) this.uncitedItems[zoteroItem.id] = true;
 			}
@@ -2733,7 +2735,8 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 		} else {
 			// old style hash
 			for(var itemID in documentData.custom) {
-				var zoteroItem = Zotero.Items.getByKey(itemID);
+				// DEBUG: why no libraryID?
+				var zoteroItem = Zotero.Items.getByLibraryAndKey(0, itemID);
 				if(!zoteroItem) zoteroItem = Zotero.Items.get(itemID);
 				if(!zoteroItem) continue;
 				

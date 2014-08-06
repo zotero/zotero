@@ -156,13 +156,8 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 					fromSQL += ")";
 				}
 				if (typeof searchParams.libraryID != 'undefined') {
-					if (searchParams.libraryID) {
-						fromSQL += " AND libraryID=?";
-						sqlParams.push(searchParams.libraryID);
-					}
-					else {
-						fromSQL += " AND libraryID IS NULL";
-					}
+					fromSQL += " AND libraryID=?";
+					sqlParams.push(searchParams.libraryID);
 				}
 				
 				sql += fromSQL;

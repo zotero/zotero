@@ -89,6 +89,10 @@ Zotero.Creator.prototype._set = function (field, val) {
 		case 'id':
 		case 'libraryID':
 		case 'key':
+			if (field == 'libraryID') {
+				val = Zotero.DataObjectUtilities.checkLibraryID(val);
+			}
+			
 			if (val == this['_' + field]) {
 				return;
 			}
@@ -96,7 +100,9 @@ Zotero.Creator.prototype._set = function (field, val) {
 			if (this._loaded) {
 				throw ("Cannot set " + field + " after object is already loaded in Zotero.Creator._set()");
 			}
+			
 			this._checkValue(field, val);
+			
 			this['_' + field] = val;
 			return;
 		
@@ -241,7 +247,7 @@ Zotero.Creator.prototype.save = function () {
 			'libraryID',
 			'key'
 		];
-		var placeholders = ['?', '?', '?', '?', '?', '?', '?'];
+		var placeholders = columns.map(function () '?').join();
 		var sqlValues = [
 			creatorID ? { int: creatorID } : null,
 			{ int: creatorDataID },
@@ -251,13 +257,13 @@ Zotero.Creator.prototype.save = function () {
 			this._changed.dateModified ?
 				this.dateModified : Zotero.DB.transactionDateTime,
 			Zotero.DB.transactionDateTime,
-			this.libraryID ? this.libraryID : null,
+			this.libraryID ? this.libraryID : 0,
 			key
 		];
 		
 		if (isNew) {
-			var sql = "INSERT INTO creators (" + columns.join(', ') + ") VALUES ("
-						+ placeholders.join(', ') + ")";
+			var sql = "INSERT INTO creators (" + columns.join(', ') + ") "
+				+ "VALUES (" + placeholders + ")";
 			var insertID = Zotero.DB.query(sql, sqlValues);
 			if (!creatorID) {
 				creatorID = insertID;
@@ -456,21 +462,14 @@ Zotero.Creator.prototype.load = function (allowFail) {
 		throw ("ID or key not set in Zotero.Creator.load()");
 	}
 	
-	var sql = "SELECT C.*, CD.* FROM creators C NATURAL JOIN creatorData CD WHERE ";
+	var sql = "SELECT O.*, CD.* FROM creators O NATURAL JOIN creatorData CD WHERE ";
 	if (id) {
 		sql += "creatorID=?";
 		var params = id;
 	}
 	else {
-		sql += "key=?";
-		var params = [key];
-		if (libraryID) {
-			sql += " AND libraryID=?";
-			params.push(libraryID);
-		}
-		else {
-			sql += " AND libraryID IS NULL";
-		}
+		sql += "key=? AND libraryID=?";
+		var params = [key, libraryID];
 	}
 	var row = Zotero.DB.rowQuery(sql, params);
 	
@@ -500,7 +499,7 @@ Zotero.Creator.prototype.loadFromRow = function (row) {
 				continue;
 			
 			case 'libraryID':
-				this['_' + col] = row[col] ? row[col] : null;
+				this['_' + col] = row[col];
 				continue;
 		}
 		this['_' + col] = row[col] ? row[col] : '';
@@ -524,7 +523,7 @@ Zotero.Creator.prototype._checkValue = function (field, value) {
 			break;
 		
 		case 'libraryID':
-			if (value && parseInt(value) != value) {
+			if (parseInt(value) != value) {
 				this._invalidValueError(field, value);
 			}
 			break;

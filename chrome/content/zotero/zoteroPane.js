@@ -761,7 +761,7 @@ var ZoteroPane = new function()
 			var libraryID = itemGroup.ref.libraryID;
 		}
 		else {
-			var libraryID = null;
+			var libraryID = 0;
 			var itemGroup = null;
 		}
 		
@@ -885,12 +885,12 @@ var ZoteroPane = new function()
 		switch (mode) {
 			case 'duplicates':
 				var prefKey = 'duplicateLibraries';
-				var lastViewedFolderID = 'D' + (libraryID ? libraryID : 0);
+				var lastViewedFolderID = 'D' + libraryID;
 				break;
 			
 			case 'unfiled':
 				var prefKey = 'unfiledLibraries';
-				var lastViewedFolderID = 'U' + (libraryID ? libraryID : 0);
+				var lastViewedFolderID = 'U' + libraryID;
 				break;
 			
 			default:
@@ -2491,8 +2491,7 @@ var ZoteroPane = new function()
 			// on a library sync error icon
 			if (itemGroup.isLibrary(true)) {
 				if (col.value.id == 'zotero-collections-sync-status-column') {
-					var libraryID = itemGroup.isLibrary() ? 0 : itemGroup.ref.libraryID;
-					var errors = Zotero.Sync.Runner.getErrors(libraryID);
+					var errors = Zotero.Sync.Runner.getErrors(itemGroup.ref.libraryID);
 					if (errors) {
 						event.stopPropagation();
 						return;
@@ -2569,8 +2568,7 @@ var ZoteroPane = new function()
 				// sync error icon
 				if (itemGroup.isLibrary(true)) {
 					if (col.value.id == 'zotero-collections-sync-status-column') {
-						var libraryID = itemGroup.isLibrary() ? 0 : itemGroup.ref.libraryID;
-						var errors = Zotero.Sync.Runner.getErrors(libraryID);
+						var errors = Zotero.Sync.Runner.getErrors(itemGroup.ref.libraryID);
 						if (!errors) {
 							return;
 						}
@@ -3195,7 +3193,7 @@ var ZoteroPane = new function()
 					var libraryID = itemGroup.ref.libraryID;
 				}
 				else {
-					var libraryID = null;
+					var libraryID = 0;
 					var itemGroup = null;
 				}
 				//
@@ -3317,7 +3315,7 @@ var ZoteroPane = new function()
 							var libraryID = itemGroup.ref.libraryID;
 						}
 						else {
-							var libraryID = null;
+							var libraryID = 0;
 							var itemGroup = null;
 						}
 						//

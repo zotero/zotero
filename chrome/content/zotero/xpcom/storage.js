@@ -259,10 +259,7 @@ Zotero.Sync.Storage = new function () {
 						+ "WHERE libraryID=? AND syncState=?";
 					var downloadForced = !!Zotero.DB.valueQuery(
 						sql,
-						[
-							libraryID == 0 ? null : libraryID,
-							Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD
-						]
+						[libraryID, Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD]
 					);
 					
 					// If we don't have any forced downloads, we can skip
@@ -414,12 +411,11 @@ Zotero.Sync.Storage = new function () {
 	// Public methods
 	//
 	this.queueItem = function (item, highPriority) {
-		if (item.libraryID) {
-			var library = item.libraryID;
+		var library = item.libraryID;
+		if (libraryID) {
 			var mode = Zotero.Sync.Storage.ZFS;
 		}
 		else {
-			var library = 0;
 			var mode = Zotero.Sync.Storage.ZFS.includeUserFiles
 				? Zotero.Sync.Storage.ZFS : Zotero.Sync.Storage.WebDAV;
 		}
@@ -451,7 +447,7 @@ Zotero.Sync.Storage = new function () {
 		
 		var queue = Zotero.Sync.Storage.QueueManager.get(queue, library);
 		var request = new Zotero.Sync.Storage.Request(
-			(item.libraryID ? item.libraryID : 0) + '/' + item.key, callbacks
+			item.libraryID + '/' + item.key, callbacks
 		);
 		if (queue.type == 'upload') {
 			try {
@@ -653,7 +649,7 @@ Zotero.Sync.Storage = new function () {
 	
 	
 	/**
-	 * @param {NULL|Integer|'groups'} [libraryID]
+	 * @param {Integer|'groups'} [libraryID]
 	 */
 	this.downloadAsNeeded = function (libraryID) {
 		// Personal library
@@ -668,7 +664,7 @@ Zotero.Sync.Storage = new function () {
 	
 	
 	/**
-	 * @param {NULL|Integer|'groups'} [libraryID]
+	 * @param {Integer|'groups'} [libraryID]
 	 */
 	this.downloadOnSync = function (libraryID) {
 		// Personal library
@@ -768,7 +764,7 @@ Zotero.Sync.Storage = new function () {
 				);
 				if (libraryID !== false) {
 					sql += " AND libraryID=?";
-					params.push(libraryID == 0 ? null : libraryID);
+					params.push(libraryID);
 				}
 				if (chunk.length) {
 					sql += " AND itemID IN (" + chunk.map(function () '?').join() + ")";
@@ -1018,10 +1014,6 @@ Zotero.Sync.Storage = new function () {
 		.then(function () {
 			// TODO: start sync icon
 			var library = item.libraryID;
-			if (!library) {
-				library = 0;
-			}
-			
 			var queue = Zotero.Sync.Storage.QueueManager.get(
 				'download', library
 			);
@@ -1201,7 +1193,7 @@ Zotero.Sync.Storage = new function () {
 	this.getItemDownloadImageNumber = function (item) {
 		var numImages = 64;
 		
-		var lk = (item.libraryID ? item.libraryID : 0) + "/" + item.key;
+		var lk = item.libraryID + "/" + item.key;
 		
 		if (typeof _itemDownloadPercentages[lk] == 'undefined') {
 			return false;
@@ -1267,10 +1259,10 @@ Zotero.Sync.Storage = new function () {
 		//var sql = "UPDATE itemAttachments SET syncState=?, storageModTime=NULL, storageHash=NULL";
 		var sql = "UPDATE itemAttachments SET syncState=?";
 		if (includeUserFiles && !includeGroupFiles) {
-			sql += " WHERE itemID IN (SELECT itemID FROM items WHERE libraryID IS NULL)";
+			sql += " WHERE itemID IN (SELECT itemID FROM items WHERE libraryID = 0)";
 		}
 		else if (!includeUserFiles && includeGroupFiles) {
-			sql += " WHERE itemID IN (SELECT itemID FROM items WHERE libraryID IS NOT NULL)";
+			sql += " WHERE itemID IN (SELECT itemID FROM items WHERE libraryID != 0)";
 		}
 		Zotero.DB.query(sql, [syncState]);
 		
@@ -1880,10 +1872,7 @@ Zotero.Sync.Storage = new function () {
 	function _getFilesToDownload(libraryID, forcedOnly) {
 		var sql = "SELECT itemID FROM itemAttachments JOIN items USING (itemID) "
 					+ "WHERE libraryID=? AND syncState IN (?";
-		var params = [
-			libraryID == 0 ? null : libraryID,
-			Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD
-		];
+		var params = [libraryID, Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD];
 		if (!forcedOnly) {
 			sql += ",?";
 			params.push(Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD);
@@ -1916,7 +1905,7 @@ Zotero.Sync.Storage = new function () {
 		];
 		if (typeof libraryID != 'undefined') {
 			sql += " AND libraryID=?";
-			params.push(libraryID == 0 ? null : libraryID);
+			params.push(libraryID);
 		}
 		else {
 			throw new Error("libraryID not specified");
@@ -1943,7 +1932,7 @@ Zotero.Sync.Storage = new function () {
 			+ "WHERE libraryID=? AND linkMode IN (?,?) AND syncState IN (?) AND "
 			+ "storageModTime>=?";
 		var params = [
-			libraryID == 0 ? null : libraryID,
+			libraryID,
 			Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
 			Zotero.Attachments.LINK_MODE_IMPORTED_URL,
 			Zotero.Sync.Storage.SYNC_STATE_IN_SYNC,

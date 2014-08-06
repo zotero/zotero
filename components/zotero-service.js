@@ -61,6 +61,7 @@ const xpcomFilesLocal = [
 	'cookieSandbox',
 	'data_access',
 	'data/dataObjects',
+	'data/dataObjectUtilities',
 	'data/cachedTypes',
 	'data/item',
 	'data/items',

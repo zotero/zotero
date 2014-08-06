@@ -696,7 +696,7 @@ function ChromeExtensionHandler() {
 						default:
 							type = 'library';
 							var s = new Zotero.Search();
-							s.addCondition('libraryID', 'is', id ? id : null);
+							s.addCondition('libraryID', 'is', id ? id : 0);
 							s.addCondition('noChildren', 'true');
 							var ids = s.search();
 							var results = Zotero.Items.get(ids);
