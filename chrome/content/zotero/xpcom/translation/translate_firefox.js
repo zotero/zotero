@@ -572,42 +572,46 @@ Zotero.Translate.IO.Read = function(file, mode) {
 	} else {
 		this._rewind();
 		
-		// look for an XML parse instruction
-		var sStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
-					 .createInstance(Components.interfaces.nsIScriptableInputStream);
-		sStream.init(this._rawStream);
-		
 		// read until we see if the file begins with a parse instruction
-		const whitespaceRe = /\s/g;
-		var read;
+		const whitespaceRe = /\s/;
+		var read, firstByteNull;
 		do {
-			read = sStream.read(1);
-		} while(whitespaceRe.test(read))
+			read = binStream.readBytes(1);
+			if (firstByteNull === undefined) firstByteNull = read == '\x00';
+		} while(read == '\x00' || whitespaceRe.test(read))
 		
 		if(read == "<") {
-			var firstPart = read + sStream.read(4);
-			if(firstPart == "<?xml") {
+			var firstPart = read + binStream.readBytes(8).replace(/\x00/g, '');
+			if(firstPart.substr(0,5) == "<?xml") {
 				// got a parse instruction, read until it ends
-				read = true;
+				read = binStream.readBytes(1);
 				while((read !== false) && (read !== ">")) {
-					read = sStream.read(1);
-					firstPart += read;
+					if(read != '\x00') firstPart += read;
+					read = binStream.readBytes(1);
 				}
 				
-				const encodingRe = /encoding=['"]([^'"]+)['"]/;
+				const encodingRe = /encoding=(['"])(.*?)\1/;
 				var m = encodingRe.exec(firstPart);
 				if(m) {
 					// Make sure encoding is valid
 					try {
 						var charconv = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
 						                         .getService(Components.interfaces.nsIScriptableUnicodeConverter);
-						charconv.charset = m[1];
+						charconv.charset = m[2]; // Throws NS_ERROR_UCONV_NOCONV if invalid
+						this._charset = m[2];
 					} catch(e) {
-						Zotero.debug("Translate: Ignoring unknown XML encoding "+m[1]);
+						Zotero.debug("Translate: Ignoring unknown XML encoding "+m[2]);
 					}
 				}
 				
 				if(this._charset) {
+					if (this._charset.toUpperCase().substr(0,6) == 'UTF-16') {
+						this._charset = this._charset.toUpperCase();
+						if (this._charset == 'UTF-16') {
+							// Figure out endianness
+							this._charset += firstByteNull ? 'BE' : 'LE';
+						}
+					}
 					Zotero.debug("Translate: Found XML parse instruction. Setting character encoding to " + this._charset);
 				} else {
 					// if we know for certain document is XML, we also know for certain that the
@@ -667,22 +671,11 @@ Zotero.Translate.IO.Read = function(file, mode) {
 					
 					// if the regexp continues to fail, this is not UTF-8
 					if(!isUTF8) {
-						// Can't be UTF-8; see if a default charset is defined
-						var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-										.getService(Components.interfaces.nsIPrefBranch);
-						try {
-							this._charset = prefs.getComplexValue("intl.charset.default",
-								Components.interfaces.nsIPrefLocalizedString).toString();
-						} catch(e) {}
-						
-						if(!this._charset) {
-							try {
-								this._charset = prefs.getCharPref("intl.charset.default");
-							} catch(e) {}
-							
-							
-							// ISO-8859-1 by default
-							if(!this._charset) this._charset = "ISO-8859-1";
+						if (fileContents.indexOf('\x00') != -1) {
+							// Most likely UTF-16. Check endianness
+							this._charset = 'UTF-16' + (fileContents[0] == '\x00' ? 'BE' : 'LE');
+						} else {
+							this._charset = "ISO-8859-1";
 						}
 						
 						break;
