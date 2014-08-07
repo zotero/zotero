@@ -746,7 +746,7 @@ Zotero.Translate.IO.Read.prototype = {
 						  .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
 		var baseURI = fileHandler.getURLSpecFromFile(this.file);
 		
-		Zotero.debug("Translate: Initializing RDF data store");
+		Zotero.debug("Translate: Initializing RDF data store from file. (Character encoding: " + this._charset + ")");
 		this._dataStore = new Zotero.RDF.AJAW.IndexedFormula();
 		var parser = new Zotero.RDF.AJAW.RDFParser(this._dataStore);
 		try {
@@ -756,7 +756,7 @@ Zotero.Translate.IO.Read.prototype = {
 			this.RDF = new Zotero.Translate.IO._RDFSandbox(this._dataStore);
 		} catch(e) {
 			this.close();
-			throw "Translate: No RDF found";
+			throw "Translate: No RDF found.\n" + e;
 		}
 	},
 	

@@ -2292,7 +2292,8 @@ Zotero.Translate.IO = {
 		}
 		
 		if(nodes.getElementsByTagName("parsererror").length) {
-			throw "DOMParser error: loading data into data store failed";
+			throw "DOMParser error: loading data into data store failed:\n"
+				+ nodes.getElementsByTagName("parsererror")[0].firstChild.textContent;
 		}
 		
 		if("normalize" in nodes) nodes.normalize();
@@ -2332,7 +2333,7 @@ Zotero.Translate.IO.String.prototype = {
 	},
 	
 	"_initRDF":function(callback) {
-		Zotero.debug("Translate: Initializing RDF data store");
+		Zotero.debug("Translate: Initializing RDF data store from string.");
 		this._dataStore = new Zotero.RDF.AJAW.IndexedFormula();
 		this.RDF = new Zotero.Translate.IO._RDFSandbox(this._dataStore);
 		
