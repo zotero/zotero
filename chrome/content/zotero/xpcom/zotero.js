@@ -1237,7 +1237,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			file.launch();
 		}
 		catch (e) {
-			Zotero.debug("launch() not supported -- trying fallback executable");
+			Zotero.debug(e, 2);
+			Zotero.debug("launch() not supported -- trying fallback executable", 2);
 			
 			try {
 				if (Zotero.isWin) {
