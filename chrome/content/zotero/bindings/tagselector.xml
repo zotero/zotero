@@ -212,12 +212,14 @@
 				<body>
 				<![CDATA[
 					Zotero.spawn(function* () {
+						Zotero.debug('Refreshing tags selector');
+						var t = new Date;
+						
 						if (!this._initialized) {
 							this.init();
 							fetch = true;
 						}
 						
-						Zotero.debug('Refreshing tags selector');
 						var emptyColored = true;
 						var emptyRegular = true;
 						var tagsToggleBox = this.id('tags-toggle');
@@ -447,6 +449,8 @@
 						
 						// Clear "Loading tags…" after the first load
 						this.id('no-tags-deck').selectedIndex = 1;
+						
+						Zotero.debug("Loaded tag selector in " + (new Date - t) + " ms");
 					}, this);
 				]]>
 				</body>
