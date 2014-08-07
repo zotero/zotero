@@ -641,6 +641,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				Zotero.locked = false;
 				
 				// Initialize various services
+				Zotero.Styles.preinit();
 				Zotero.Integration.init();
 				
 				if(Zotero.Prefs.get("httpServer.enabled")) {
