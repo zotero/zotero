@@ -1356,7 +1356,7 @@ Zotero.Item.prototype.save = Zotero.Promise.coroutine(function* (options) {
 			
 			// Parent item
 			let parentItem = this.parentKey;
-			parentItem = parentItem ? yield Zotero.Items.getByLibraryAndKey(this.libraryID, parentItem) : null;
+			parentItem = parentItem ? Zotero.Items.getByLibraryAndKey(this.libraryID, parentItem) : null;
 			if (this._changed.parentKey) {
 				if (isNew) {
 					if (!parentItem) {
@@ -1394,7 +1394,7 @@ Zotero.Item.prototype.save = Zotero.Promise.coroutine(function* (options) {
 					
 					var oldParentKey = this._previousData.parentKey;
 					if (oldParentKey) {
-						var oldParentItem = yield Zotero.Items.getByLibraryAndKey(this.libraryID, oldParentKey);
+						var oldParentItem = Zotero.Items.getByLibraryAndKey(this.libraryID, oldParentKey);
 						if (oldParentItem) {
 							let oldParentItemNotifierData = {};
 							//oldParentItemNotifierData[oldParentItem.id] = {};
@@ -2088,13 +2088,15 @@ Zotero.Item.prototype.numAttachments = function(includeTrashed) {
 
 
 /**
- * Get an nsILocalFile for the attachment, or false if it doesn't exist
+ * Get an nsILocalFile for the attachment, or false for invalid paths
+ *
+ * This no longer checks whether a file exists
  *
  * @return {nsILocalFile|false}  An nsIFile, or false for invalid paths
  */
-Zotero.Item.prototype.getFile = function (skipExistsCheck) {
-	if (arguments.length > 1) {
-		Zotero.debug("WARNING: Zotero.Item.prototype.getFile() no longer takes two parameters");
+Zotero.Item.prototype.getFile = function () {
+	if (arguments.length) {
+		Zotero.debug("WARNING: Zotero.Item.prototype.getFile() no longer takes any arguments");
 	}
 	
 	if (!this.isAttachment()) {
@@ -2186,21 +2188,17 @@ Zotero.Item.prototype.getFile = function (skipExistsCheck) {
 		}
 	}
 	
-	if (!skipExistsCheck && !file.exists()) {
-		return false;
-	}
-	
 	return file;
 };
 
 
 /**
- * Get the absolute file path for the attachment, or false if the associated file doesn't exist
+ * Get the absolute file path for the attachment
  *
  * @return {Promise<string|false>} - A promise for either the absolute file path of the attachment
- *                                    or false for invalid paths or if the file doesn't exist
+ *                                    or false for invalid paths
  */
-Zotero.Item.prototype.getFilePath = Zotero.Promise.coroutine(function* (skipExistsCheck) {
+Zotero.Item.prototype.getFilePath = function () {
 	if (!this.isAttachment()) {
 		throw new Error("getFilePath() can only be called on attachment items");
 	}
@@ -2216,7 +2214,137 @@ Zotero.Item.prototype.getFilePath = Zotero.Promise.coroutine(function* (skipExis
 	if (!path) {
 		Zotero.debug("Attachment path is empty", 2);
 		if (!skipExistsCheck) {
-			yield this._updateAttachmentStates(false);
+			this._updateAttachmentStates(false);
+		}
+		return false;
+	}
+	
+	// Imported file with relative path
+	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
+			linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
+		try {
+			if (path.indexOf("storage:") == -1) {
+				Zotero.debug("Invalid attachment path '" + path + "'", 2);
+				throw ('Invalid path');
+			}
+			// Strip "storage:"
+			var path = path.substr(8);
+			// setRelativeDescriptor() silently uses the parent directory on Windows
+			// if the filename contains certain characters, so strip them —
+			// but don't skip characters outside of XML range, since they may be
+			// correct in the opaque relative descriptor string
+			//
+			// This is a bad place for this, since the change doesn't make it
+			// back up to the sync server, but we do it to make sure we don't
+			// accidentally use the parent dir. Syncing to OS X, which doesn't
+			// exhibit this bug, will properly correct such filenames in
+			// storage.js and propagate the change
+			if (Zotero.isWin) {
+				path = Zotero.File.getValidFileName(path, true);
+			}
+			var file = Zotero.Attachments.getStorageDirectory(this);
+			file.QueryInterface(Components.interfaces.nsILocalFile);
+			file.setRelativeDescriptor(file, path);
+		}
+		catch (e) {
+			Zotero.debug(e);
+			
+			// See if this is a persistent path
+			// (deprecated for imported attachments)
+			Zotero.debug('Trying as persistent descriptor');
+			
+			try {
+				var file = Components.classes["@mozilla.org/file/local;1"].
+					createInstance(Components.interfaces.nsILocalFile);
+				file.persistentDescriptor = path;
+				
+				// If valid, convert this to a relative descriptor in the background
+				OS.File.exists(file.path)
+				.then(function (exists) {
+					if (exists) {
+						return Zotero.DB.queryAsync(
+							"UPDATE itemAttachments SET path=? WHERE itemID=?",
+							["storage:" + file.leafName, this._id]
+						);
+					}
+				});
+			}
+			catch (e) {
+				Zotero.debug('Invalid persistent descriptor', 2);
+				this._updateAttachmentStates(false);
+				return false;
+			}
+		}
+	}
+	// Linked file with relative path
+	else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE &&
+			path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0) {
+		var file = Zotero.Attachments.resolveRelativePath(path);
+		if (!file) {
+			this._updateAttachmentStates(false);
+			return false;
+		}
+	}
+	else {
+		var file = Components.classes["@mozilla.org/file/local;1"].
+			createInstance(Components.interfaces.nsILocalFile);
+		
+		try {
+			file.persistentDescriptor = path;
+		}
+		catch (e) {
+			// See if this is an old relative path (deprecated)
+			Zotero.debug('Invalid persistent descriptor -- trying relative');
+			try {
+				var refDir = (linkMode == this.LINK_MODE_LINKED_FILE)
+					? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
+				file.setRelativeDescriptor(refDir, path);
+				// If valid, convert this to a persistent descriptor in the background
+				OS.File.exists(file.path)
+				.then(function (exists) {
+					if (exists) {
+						return Zotero.DB.queryAsync(
+							"UPDATE itemAttachments SET path=? WHERE itemID=?",
+							[file.persistentDescriptor, this._id]
+						);
+					}
+				});
+			}
+			catch (e) {
+				Zotero.debug('Invalid relative descriptor', 2);
+				this._updateAttachmentStates(false);
+				return false;
+			}
+		}
+	}
+	
+	return file.path;
+};
+
+
+/**
+ * Get the absolute path for the attachment, if it exists
+ *
+ * @return {Promise<String|false>} - A promise for either the absolute path of the attachment
+ *                                    or false for invalid paths or if the file doesn't exist
+ */
+Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* (skipExistsCheck) {
+	if (!this.isAttachment()) {
+		throw new Error("getFilePathAsync() can only be called on attachment items");
+	}
+	
+	var linkMode = this.attachmentLinkMode;
+	var path = this.attachmentPath;
+	
+	// No associated files for linked URLs
+	if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+		return false;
+	}
+	
+	if (!path) {
+		Zotero.debug("Attachment path is empty", 2);
+		if (!skipExistsCheck) {
+			this._updateAttachmentStates(false);
 		}
 		return false;
 	}
@@ -2269,7 +2397,7 @@ Zotero.Item.prototype.getFilePath = Zotero.Promise.coroutine(function* (skipExis
 			catch (e) {
 				Zotero.debug('Invalid persistent descriptor', 2);
 				if (!skipExistsCheck) {
-					yield this._updateAttachmentStates(false);
+					this._updateAttachmentStates(false);
 				}
 				return false;
 			}
@@ -2280,7 +2408,7 @@ Zotero.Item.prototype.getFilePath = Zotero.Promise.coroutine(function* (skipExis
 			path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0) {
 		var file = Zotero.Attachments.resolveRelativePath(path);
 		if (!skipExistsCheck && !file) {
-			yield this._updateAttachmentStates(false);
+			this._updateAttachmentStates(false);
 			return false;
 		}
 	}
@@ -2307,32 +2435,33 @@ Zotero.Item.prototype.getFilePath = Zotero.Promise.coroutine(function* (skipExis
 			catch (e) {
 				Zotero.debug('Invalid relative descriptor', 2);
 				if (!skipExistsCheck) {
-					yield this._updateAttachmentStates(false);
+					this._updateAttachmentStates(false);
 				}
 				return false;
 			}
 		}
 	}
 	
-	path = file.path;
+	var path = file.path;
 	
 	if (!skipExistsCheck && !(yield OS.File.exists(path))) {
 		Zotero.debug("Attachment file '" + path + "' not found", 2);
-		yield this._updateAttachmentStates(false);
+		this._updateAttachmentStates(false);
 		return false;
 	}
 	
 	if (!skipExistsCheck) {
-		yield this._updateAttachmentStates(true);
+		this._updateAttachmentStates(true);
 	}
-	return path;
+	return file.path;
 });
+
 
 
 /**
  * Update file existence state of this item and best attachment state of parent item
  */
-Zotero.Item.prototype._updateAttachmentStates = Zotero.Promise.coroutine(function* (exists) {
+Zotero.Item.prototype._updateAttachmentStates = function (exists) {
 	this._fileExists = exists;
 	
 	if (this.isTopLevelItem()) {
@@ -2351,9 +2480,18 @@ Zotero.Item.prototype._updateAttachmentStates = Zotero.Promise.coroutine(functio
 		return;
 	}
 	
-	var item = yield Zotero.Items.getByLibraryAndKey(this.libraryID, parentKey);
+	try {
+		var item = Zotero.Items.getByLibraryAndKey(this.libraryID, parentKey);
+	}
+	catch (e) {
+		if (e instanceof Zotero.Items.UnloadedDataException) {
+			Zotero.debug("Attachment parent not yet loaded in Zotero.Item.updateAttachmentStates()", 2);
+			return;
+		}
+		throw e;
+	}
 	item.clearBestAttachmentState();
-});
+};
 
 
 Zotero.Item.prototype.getFilename = function () {
@@ -2366,7 +2504,6 @@ Zotero.Item.prototype.getFilename = function () {
 	}
 	
 	var file = this.getFile();
-	// Invalid path
 	if (!file) {
 		return '';
 	}
@@ -2377,7 +2514,7 @@ Zotero.Item.prototype.getFilename = function () {
 /**
  * Asynchronous cached check for file existence, used for items view
  *
- * This is updated only initially and on subsequent getFilePath() calls.
+ * This is updated only initially and on subsequent getFilePathAsync() calls.
  */
 Zotero.Item.prototype.fileExists = Zotero.Promise.coroutine(function* () {
 	if (this._fileExists !== null) {
@@ -2392,9 +2529,7 @@ Zotero.Item.prototype.fileExists = Zotero.Promise.coroutine(function* () {
 		throw new Error("Zotero.Item.fileExists() cannot be called on link attachments");
 	}
 	
-	var exists = !!(yield this.getFilePath());
-	yield this._updateAttachmentStates(exists);
-	return exists;
+	return !!(yield this.getFilePathAsync());
 });
 
 
@@ -2794,7 +2929,7 @@ Zotero.Item.prototype.__defineGetter__('attachmentModificationTime', Zotero.Prom
 		return undefined;
 	}
 	
-	var path = yield this.getFilePath();
+	var path = yield this.getFilePathAsync();
 	if (!path) {
 		return undefined;
 	}
@@ -2832,7 +2967,7 @@ Zotero.Item.prototype.__defineGetter__('attachmentHash', function () {
 		return undefined;
 	}
 	
-	return Zotero.Utilities.Internal.md5(file);
+	return Zotero.Utilities.Internal.md5(file) || undefined;
 });
 
 
@@ -2855,6 +2990,11 @@ Zotero.Item.prototype.__defineGetter__('attachmentText', Zotero.Promise.coroutin
 	}
 	
 	var file = this.getFile();
+	
+	if (!(yield OS.File.exists(file.path))) {
+		file = false;
+	}
+	
 	var cacheFile = Zotero.Fulltext.getItemCacheFile(this);
 	if (!file) {
 		if (cacheFile.exists()) {
@@ -3820,7 +3960,7 @@ Zotero.Item.prototype.erase = Zotero.Promise.coroutine(function* () {
 		}
 		
 		var parentItem = this.parentKey;
-		parentItem = parentItem ? yield Zotero.Items.getByLibraryAndKey(this.libraryID, parentItem) : null;
+		parentItem = parentItem ? Zotero.Items.getByLibraryAndKey(this.libraryID, parentItem) : null;
 		
 		// // Delete associated attachment files
 		if (this.isAttachment()) {

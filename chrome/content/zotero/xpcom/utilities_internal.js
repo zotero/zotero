@@ -75,6 +75,10 @@ Zotero.Utilities.Internal = {
 			ch.update(data, data.length);
 		}
 		else if (strOrFile instanceof Components.interfaces.nsIFile) {
+			if (!strOrFile.exists()) {
+				return false;
+			}
+			
 			// Otherwise throws (NS_ERROR_NOT_AVAILABLE) [nsICryptoHash.updateFromStream]
 			if (!strOrFile.fileSize) {
 				// MD5 for empty string

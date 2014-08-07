@@ -120,7 +120,7 @@
 						
 						var parentKey = this.item.parentKey;
 						if (parentKey) {
-							this.parentItem = yield Zotero.Items.getByLibraryAndKey(this.item.libraryID, parentKey);
+							this.parentItem = Zotero.Items.getByLibraryAndKey(this.item.libraryID, parentKey);
 						}
 						
 						this._id('links').item = this.item;

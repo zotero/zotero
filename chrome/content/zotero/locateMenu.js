@@ -499,7 +499,7 @@ var Zotero_LocateMenu = new function() {
 			var attachments = item.isAttachment() ? [item] : (yield item.getBestAttachments());
 			for each(var attachment in attachments) {
 				if(attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) {
-					var path = yield attachment.getFilePath();
+					var path = yield attachment.getFilePathAsync();
 					if (path) {
 						var ext = Zotero.File.getExtension(Zotero.File.pathToFile(path));
 						if(!attachment.attachmentMIMEType || 

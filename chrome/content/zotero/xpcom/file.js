@@ -186,13 +186,18 @@ Zotero.File = new function(){
 	/**
 	 * Get the contents of a text source asynchronously
 	 *
-	 * @param {nsIURI|nsIFile|string spec|nsIChannel|nsIInputStream} source The source to read
+	 * @param {nsIURI|nsIFile|string spec|string path|nsIChannel|nsIInputStream} source The source to read
 	 * @param {String} [charset] The character set; defaults to UTF-8
 	 * @param {Integer} [maxLength] Maximum length to fetch, in bytes
 	 * @return {Promise} A Q promise that is resolved with the contents of the file
 	 */
 	this.getContentsAsync = function (source, charset, maxLength) {
 		Zotero.debug("Getting contents of " + source);
+		
+		// If path is given, convert to file:// URL
+		if (typeof source == 'string' && !source.match(/^file:/)) {
+			source = 'file://' + source;
+		}
 		
 		var options = {
 			charset: charset ? Zotero.CharacterSets.getName(charset) : "UTF-8",

@@ -319,7 +319,7 @@ Zotero.Collection.prototype.save = Zotero.Promise.coroutine(function* () {
 			
 			// Verify parent
 			if (this._parentKey) {
-				let newParent = yield Zotero.Collections.getByLibraryAndKey(
+				let newParent = Zotero.Collections.getByLibraryAndKey(
 					this.libraryID, this._parentKey
 				);
 				

@@ -1363,7 +1363,7 @@ Zotero.ItemTreeView.prototype.sort = Zotero.Promise.coroutine(function* (itemID)
 			
 			case 'hasAttachment':
 				if (item.isAttachment()) {
-					var state = item.fileExists() ? 1 : -1;
+					var state = item.fileExistsCached() ? 1 : -1;
 				}
 				else if (item.isRegularItem()) {
 					var state = item.getBestAttachmentState();

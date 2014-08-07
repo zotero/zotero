@@ -1184,7 +1184,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						if (condition.value) {
 							var lkh = Zotero.Collections.parseLibraryKeyHash(condition.value);
 							if (lkh) {
-								col = yield Zotero.Collections.getByLibraryAndKey(lkh.libraryID, lkh.key);
+								col = Zotero.Collections.getByLibraryAndKey(lkh.libraryID, lkh.key);
 							}
 						}
 						if (!col) {
@@ -1225,7 +1225,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						if (condition.value) {
 							var lkh = Zotero.Searches.parseLibraryKeyHash(condition.value);
 							if (lkh) {
-								search = yield Zotero.Searches.getByLibraryAndKey(lkh.libraryID, lkh.key);
+								search = Zotero.Searches.getByLibraryAndKey(lkh.libraryID, lkh.key);
 							}
 						}
 						if (!search) {

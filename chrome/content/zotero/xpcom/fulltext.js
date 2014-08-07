@@ -325,26 +325,29 @@ Zotero.Fulltext = new function(){
 	
 	
 	/**
+	 * @param {String} path
 	 * @param {Boolean} [complete=FALSE]  Index the file in its entirety, ignoring maxLength
 	 */
-	var indexFile = Zotero.Promise.coroutine(function* (file, mimeType, charset, itemID, complete, isCacheFile) {
-		if (!file.exists()){
+	var indexFile = Zotero.Promise.coroutine(function* (path, contentType, charset, itemID, complete, isCacheFile) {
+		if (!(yield OS.File.exists(path))) {
 			Zotero.debug('File not found in indexFile()', 2);
 			return false;
 		}
 		
-		if (!itemID){ throw ('Item ID not provided to indexFile()'); }
-		
-		if (!mimeType) {
-			Zotero.debug("MIME type not provided in indexFile()", 1);
+		if (!contentType) {
+			Zotero.debug("Content type not provided in indexFile()", 1);
 			return false;
 		}
 		
-		if (mimeType == 'application/pdf') {
-			return this.indexPDF(file, itemID, complete);
+		if (!itemID) {
+			throw new Error('Item ID not provided');
 		}
 		
-		if (!Zotero.MIME.isTextType(mimeType)) {
+		if (contentType == 'application/pdf') {
+			return this.indexPDF(path, itemID, complete);
+		}
+		
+		if (!Zotero.MIME.isTextType(contentType)) {
 			Zotero.debug('File is not text in indexFile()', 2);
 			return false;
 		}
@@ -354,13 +357,13 @@ Zotero.Fulltext = new function(){
 			return false;
 		}
 		
-		Zotero.debug('Indexing file ' + file.path);
+		Zotero.debug('Indexing file ' + path);
 		
-		var text = yield Zotero.File.getContentsAsync(file, charset);
+		var text = yield Zotero.File.getContentsAsync(path, charset);
 		var totalChars = text.length;
 		var maxLength = complete ? false : Zotero.Prefs.get('fulltext.textMaxLength');
 		
-		if (mimeType == 'text/html') {
+		if (contentType == 'text/html') {
 			let obj = yield convertItemHTMLToText(itemID, text, maxLength);
 			text = obj.text;
 			totalChars = obj.totalChars;
@@ -394,7 +397,7 @@ Zotero.Fulltext = new function(){
 	 * @param {Boolean} [allPages] - If true, index all pages rather than pdfMaxPages
 	 * @return {Promise}
 	 */
-	this.indexPDF = Zotero.Promise.coroutine(function* (file, itemID, allPages) {
+	this.indexPDF = Zotero.Promise.coroutine(function* (filePath, itemID, allPages) {
 		if (!_pdfConverter) {
 			Zotero.debug("PDF tools are not installed -- skipping indexing");
 			return false;
@@ -410,23 +413,22 @@ Zotero.Fulltext = new function(){
 		// If file is stored outside of Zotero, create a directory for the item
 		// in the storage directory and save the cache file there
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-			var cacheFile = yield Zotero.Attachments.createDirectoryForItem(item);
+			var parentDirPath = (yield Zotero.Attachments.createDirectoryForItem(item)).path;
 		}
 		else {
-			var cacheFile = file.parent;
+			var parentDirPath = OS.Path.dirname(filePath);
 		}
-		cacheFile.append(this.pdfConverterCacheFile);
+		var cacheFilePath = OS.Path.join(parentDirPath, this.pdfConverterCacheFile);
 		
 		if (_pdfInfo) {
-			var infoFile = cacheFile.parent;
-			infoFile.append(this.pdfInfoCacheFile);
-			Zotero.debug('Running pdfinfo "' + file.path + '" "' + infoFile.path + '"');
+			var infoFilePath = OS.Path.join(parentDirPath, this.pdfInfoCacheFile);
+			Zotero.debug('Running pdfinfo "' + filePath + '" "' + infoFilePath + '"');
 			
 			var proc = Components.classes["@mozilla.org/process/util;1"].
 					createInstance(Components.interfaces.nsIProcess);
 			proc.init(_pdfInfo);
 			
-			var args = [file.path, infoFile.path];
+			var args = [filePath, infoFilePath];
 			try {
 				proc.runw(true, args, args.length);
 				var totalPages = yield getTotalPagesFromFile(itemID);
@@ -440,8 +442,8 @@ Zotero.Fulltext = new function(){
 		}
 		
 		Zotero.debug('Running pdftotext -enc UTF-8 -nopgbrk '
-			+ (allPages ? '' : '-l ' + maxPages) + ' "' + file.path + '" "'
-			+ cacheFile.path + '"');
+			+ (allPages ? '' : '-l ' + maxPages) + ' "' + filePath + '" "'
+			+ cacheFilePath + '"');
 		
 		var proc = Components.classes["@mozilla.org/process/util;1"].
 				createInstance(Components.interfaces.nsIProcess);
@@ -457,7 +459,7 @@ Zotero.Fulltext = new function(){
 			args.push('-l', maxPages);
 			var pagesIndexed = Math.min(maxPages, totalPages);
 		}
-		args.push(file.path, cacheFile.path);
+		args.push(filePath, cacheFilePath);
 		try {
 			proc.runw(true, args, args.length);
 		}
@@ -466,10 +468,11 @@ Zotero.Fulltext = new function(){
 			return false;
 		}
 		
-		if (!cacheFile.exists()) {
-			var msg = file.leafName + " was not indexed";
-			if (!file.leafName.match(/^[\u0000-\u007F]+$/)) {
-				msg += " -- PDFs with filenames containing extended characters cannot currently be indexed due to a Firefox limitation";
+		if (!(yield OS.File.exists(cacheFilePath))) {
+			let fileName = OS.Path.basename(filePath);
+			let msg = fileName + " was not indexed";
+			if (!fileName.match(/^[\u0000-\u007F]+$/)) {
+				msg += " -- PDFs with filenames containing extended characters cannot currently be indexed due to a Mozilla limitation";
 			}
 			Zotero.debug(msg, 2);
 			Components.utils.reportError(msg);
@@ -477,7 +480,7 @@ Zotero.Fulltext = new function(){
 		}
 		
 		yield Zotero.DB.executeTransaction(function* () {
-			yield indexFile(cacheFile, 'text/plain', 'utf-8', itemID, true, true);
+			yield indexFile(cacheFilePath, 'text/plain', 'utf-8', itemID, true, true);
 			yield setPages(itemID, { indexed: pagesIndexed, total: totalPages });
 		});
 		
@@ -500,24 +503,24 @@ Zotero.Fulltext = new function(){
 			
 			let itemID = item.id;
 			
-			var file = yield item.getFile();
-			if (!file){
+			var path = yield item.getFilePathAsync();
+			if (!path) {
 				Zotero.debug("No file to index for item " + itemID + " in Fulltext.indexItems()");
 				continue;
 			}
 			
 			if (ignoreErrors) {
 				try {
-					yield indexFile(file, item.attachmentMIMEType, item.attachmentCharset, itemID, complete);
+					yield indexFile(path, item.attachmentContentType, item.attachmentCharset, itemID, complete);
 				}
 				catch (e) {
 					Zotero.debug(e, 1);
-					Components.utils.reportError("Error indexing " + file.path);
+					Components.utils.reportError("Error indexing " + path);
 					Components.utils.reportError(e);
 				}
 			}
 			else {
-				yield indexFile(file, item.attachmentMIMEType, item.attachmentCharset, itemID, complete);
+				yield indexFile(path, item.attachmentContentType, item.attachmentCharset, itemID, complete);
 			}
 		}
 	});
@@ -693,7 +696,7 @@ Zotero.Fulltext = new function(){
 	 */
 	this.setItemContent = Zotero.Promise.coroutine(function* (libraryID, key, text, stats, version) {
 		var libraryKey = libraryID + "/" + key;
-		var item = yield Zotero.Items.getByLibraryAndKey(libraryID, key);
+		var item = Zotero.Items.getByLibraryAndKey(libraryID, key);
 		if (!item) {
 			let msg = "Item " + libraryKey + " not found setting full-text content";
 			Zotero.debug(msg, 1);

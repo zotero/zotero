@@ -105,7 +105,7 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 			let id = ids[i];
 			// Check if already loaded
 			if (!this._objectCache[id]) {
-				throw new Error(this._ZDO_Object + " " + id + " not yet loaded");
+				throw new this.UnloadedDataException(this._ZDO_Object + " " + id + " not yet loaded");
 			}
 			toReturn.push(this._objectCache[id]);
 		}
@@ -215,21 +215,28 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	 * @param	{String}			key
 	 * @return	{Zotero.DataObject}			Zotero data object, or FALSE if not found
 	 */
-	this.getByLibraryAndKey = Zotero.Promise.coroutine(function* (libraryID, key, options) {
-		var sql = "SELECT ROWID FROM " + this._ZDO_table + " WHERE ";
-		if (this._ZDO_idOnly) {
-			sql += "ROWID=?";
-			var params = [key]
-		}
-		else {
-			sql += "libraryID=? AND key=?";
-			var params = [libraryID, key];
-		}
-		var id = yield Zotero.DB.valueQueryAsync(sql, params);
+	this.getByLibraryAndKey = function (libraryID, key, options) {
+		var id = this.getIDFromLibraryAndKey(libraryID, key);
 		if (!id) {
 			return false;
 		}
 		return Zotero[this._ZDO_Objects].get(id, options);
+	};
+	
+	
+	/**
+	 * Asynchronously retrieves an object by its libraryID and key
+	 *
+	 * @param {Integer} - libraryID
+	 * @param {String} - key
+	 * @return {Promise<Zotero.DataObject>} - Promise for a data object, or FALSE if not found
+	 */
+	this.getByLibraryAndKeyAsync = Zotero.Promise.coroutine(function* (libraryID, key, options) {
+		var id = this.getIDFromLibraryAndKey(libraryID, key);
+		if (!id) {
+			return false;
+		}
+		return Zotero[this._ZDO_Objects].getAsync(id, options);
 	});
 	
 	

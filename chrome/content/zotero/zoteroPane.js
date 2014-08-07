@@ -1512,7 +1512,7 @@ var ZoteroPane = new function()
 		for (var i=0; i<items.length; i++) {
 			// If any PDFs, we need to make sure the converter is installed and
 			// prompt for installation if not
-			if (!checkPDF && items[i].attachmentMIMEType && items[i].attachmentMIMEType == "application/pdf") {
+			if (!checkPDF && items[i].attachmentContentType && items[i].attachmentContentType == "application/pdf") {
 				checkPDF = true;
 			}
 			itemIDs.push(items[i].id);
@@ -3572,7 +3572,7 @@ var ZoteroPane = new function()
 				continue;
 			}
 			
-			var path = yield item.getFilePath();
+			var path = yield item.getFilePathAsync();
 			if (path) {
 				let file = Zotero.File.pathToFile(path);
 				

@@ -668,7 +668,7 @@ Zotero.Attachments = new function(){
 		// We'll index it later if it fails. (This may not be necessary.)
 		setTimeout(function () {
 			if (contentType == 'application/pdf') {
-				Zotero.Fulltext.indexPDF(file, attachmentItem.id);
+				Zotero.Fulltext.indexPDF(file.path, attachmentItem.id);
 			}
 			else if (Zotero.MIME.isTextType(contentType)) {
 				Zotero.Fulltext.indexDocument(document, attachmentItem.id);
@@ -788,7 +788,7 @@ Zotero.Attachments = new function(){
 	 * If a directory exists with the same name, move it to orphaned-files
 	 *
 	 * @param {Number} itemID - Item id
-	 * @return {Promise}
+	 * @return {Promise<nsIFile>}
 	 */
 	this.createDirectoryForItem = Zotero.Promise.coroutine(function* (item) {
 		if (!(item instanceof Zotero.Item)) {
