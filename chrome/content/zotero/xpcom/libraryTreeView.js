@@ -197,20 +197,25 @@ Zotero.LibraryTreeView.prototype = {
 	
 	
 	_setDropEffect: function (event, effect) {
-		// On Windows (in Fx26), Firefox uses 'move' for unmodified drags,
-		// and 'copy'/'link' for drags with system-default modifier keys,
+		// On Windows (in Fx26), Firefox uses 'move' for unmodified drags
+		// and 'copy'/'link' for drags with system-default modifier keys
 		// as long as the actions are allowed by the initial effectAllowed set
 		// in onDragStart, regardless of the effectAllowed or dropEffect set
-		// in onDragOver. To prevent inaccurate 'copy'/'link' cursors, we set
-		// effectAllowed to 'move' in onDragStart, which locks the cursor at
-		// 'move'. ('none' still changes the cursor, but 'copy'/'link' do not.)
+		// in onDragOver. It doesn't seem to be possible to use 'copy' for
+		// the default and 'move' for modified, as we need to in the collections
+		// tree. To prevent inaccurate cursor feedback, we set effectAllowed to
+		// 'copy' in onDragStart, which locks the cursor at 'copy'. ('none' still
+		// changes the cursor, but 'move'/'link' do not.) It'd be better to use
+		// the unadorned 'move', but we use 'copy' instead because with 'move' text
+		// can't be dragged to some external programs (e.g., Chrome, Notepad++),
+		// which seems worse than always showing 'copy' feedback.
 		//
-		// However, since effectAllowed is enforced, leaving it at 'move'
-		// would prevent our default 'copy' from working, so we also have to
-		// set effectAllowed here (called from onDragOver) to the same action
-		// as the dropEffect. This allows the dropEffect setting (which we use
-		// in the tree's canDrop() and drop() to determine the desired action)
-		// to be changed, even if the cursor doesn't reflect the new setting.
+		// However, since effectAllowed is enforced, leaving it at 'copy'
+		// would prevent our modified 'move' in the collections tree from working,
+		// so we also have to set effectAllowed here (called from onDragOver) to
+		// the same action as the dropEffect. This allows the dropEffect setting
+		// (which we use in the tree's canDrop() and drop() to determine the desired
+		// action) to be changed, even if the cursor doesn't reflect the new setting.
 		if (Zotero.isWin) {
 			event.dataTransfer.effectAllowed = effect;
 		}

@@ -78,6 +78,11 @@
 	border-width: 0 1px 1px 0;
 }
 
+/* Restore row highlighting on drag over, though I'm not sure how we're losing it to begin with. */
+#zotero-collections-tree treechildren::-moz-tree-row(dropOn) {
+	background-color: Highlight;
+}
+
 #zotero-items-tree {
 	border-width: 0 1px;
 }

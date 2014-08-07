@@ -2558,7 +2558,7 @@ Zotero.ItemTreeCommandController.prototype.onEvent = function(evt)
 Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 	// See note in LibraryTreeView::_setDropEffect()
 	if (Zotero.isWin) {
-		event.dataTransfer.effectAllowed = 'move';
+		event.dataTransfer.effectAllowed = 'copy';
 	}
 	
 	var itemIDs = this.saveSelection();
@@ -2896,7 +2896,7 @@ Zotero.ItemTreeView.prototype.canDropCheck = function (row, orient, dataTransfer
 	
 	var itemGroup = this._itemGroup;
 	
-	if (orient == 0) {
+	if (row != -1 && orient == 0) {
 		var rowItem = this._getItemAtRow(row).ref; // the item we are dragging over
 	}
 	
@@ -2904,7 +2904,7 @@ Zotero.ItemTreeView.prototype.canDropCheck = function (row, orient, dataTransfer
 		var items = Zotero.Items.get(ids);
 		
 		// Directly on a row
-		if (orient == 0) {
+		if (rowItem) {
 			var canDrop = false;
 			
 			for each(var item in items) {
@@ -2981,7 +2981,7 @@ Zotero.ItemTreeView.prototype.canDropCheck = function (row, orient, dataTransfer
 	}
 	else if (dataType == "text/x-moz-url" || dataType == 'application/x-moz-file') {
 		// Disallow direct drop on a non-regular item (e.g. note)
-		if (orient == 0) {
+		if (rowItem) {
 			if (!rowItem.isRegularItem()) {
 				return false;
 			}
