@@ -273,7 +273,7 @@
 						if (this.displayDateModified) {
 							this._id("dateModified-label").value = Zotero.getString('itemFields.dateModified')
 								+ Zotero.getString('punctuation.colon');
-							var mtime = this.item.attachmentModificationTime;
+							var mtime = yield this.item.attachmentModificationTime;
 							if (mtime) {
 								this._id("dateModified").value = new Date(mtime).toLocaleString();
 							}
