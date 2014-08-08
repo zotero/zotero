@@ -29,26 +29,15 @@ Zotero.DataObject = function (objectType, objectTypePlural, dataTypes) {
 	this._objectTypePlural = objectTypePlural ? objectTypePlural : objectType + 's';
 	this._dataTypes = dataTypes;
 	
-	// Public members for access by public methods -- do not access directly
-	if (this._id === undefined) {
-		this._id = null;
-	}
-	if (this._libraryID === undefined) {
-		this._libraryID = null;
-	}
-	if (this._key === undefined) {
-		this._key = null;
-	}
-	
+	this._id = null;
+	this._libraryID = null;
+	this._key = null;
 	this._dateAdded = null;
 	this._dateModified = null;
 	this._version = null;
 	this._synced = null;
 	this._identified = false;
 	
-	if (this._dataTypes === undefined) {
-		throw new Error("this._dataTypes is undefined");
-	}
 	this._loaded = {};
 	for (let i=0; i<this._dataTypes.length; i++) {
 		this._loaded[this._dataTypes[i]] = false;
