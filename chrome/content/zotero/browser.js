@@ -159,7 +159,7 @@ var Zotero_Browser = new function() {
 		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
 		if(tab.page.translators && tab.page.translators.length) {
 			tab.page.translate.setTranslator(translator || tab.page.translators[0]);
-			Zotero_Browser.performTranslation(tab.page.translate);
+			Zotero_Browser.performTranslation(tab.page.translate); // TODO: async
 		}
 	}
 	
@@ -493,7 +493,7 @@ var Zotero_Browser = new function() {
 	 * have been called
 	 * @param {Zotero.Translate} translate
 	 */
-	this.performTranslation = function(translate, libraryID, collection) {
+	this.performTranslation = Zotero.Promise.coroutine(function* (translate, libraryID, collection) {
 		if (Zotero.locked) {
 			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
 			var desc = Zotero.localeJoin([
@@ -506,15 +506,7 @@ var Zotero_Browser = new function() {
 			return;
 		}
 		
-		if (!Zotero.stateCheck()) {
-			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-			var desc = Zotero.getString("ingester.scrapeErrorDescription.previousError")
-				+ ' ' + Zotero.getString("general.restartFirefoxAndTryAgain", Zotero.appName);
-			Zotero_Browser.progress.addDescription(desc);
-			Zotero_Browser.progress.show();
-			Zotero_Browser.progress.startCloseTimer(8000);
-			return;
-		}
+		yield Zotero.DB.waitForTransaction();
 		
 		Zotero_Browser.progress.show();
 		Zotero_Browser.isScraping = true;
@@ -615,7 +607,7 @@ var Zotero_Browser = new function() {
 		});
 		
 		translate.translate(libraryID);
-	}
+	});
 	
 	
 	//////////////////////////////////////////////////////////////////////////////

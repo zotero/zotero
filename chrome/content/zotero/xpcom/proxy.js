@@ -45,13 +45,13 @@ Zotero.Proxies = new function() {
 	/**
 	 * Initializes http-on-examine-response observer to intercept page loads and gets preferences
 	 */
-	this.init = function() {
+	this.init = Zotero.Promise.coroutine(function* () {
 		if(!this.proxies) {
 			var me = this;
 			Zotero.MIMETypeHandler.addObserver(function(ch) { me.observe(ch) });
 			
-			var rows = Zotero.DB.query("SELECT * FROM proxies");
-			Zotero.Proxies.proxies = [new Zotero.Proxy(row) for each(row in rows)];
+			var rows = yield Zotero.DB.queryAsync("SELECT * FROM proxies");
+			Zotero.Proxies.proxies = [(yield this.newProxyFromRow(row)) for each(row in rows)];
 			
 			for each(var proxy in Zotero.Proxies.proxies) {
 				for each(var host in proxy.hosts) {
@@ -69,7 +69,19 @@ Zotero.Proxies = new function() {
 		Zotero.Proxies.lastIPCheck = 0;
 		Zotero.Proxies.lastIPs = "";
 		Zotero.Proxies.disabledByDomain = false;
-	}
+	});
+	
+	
+	/**
+	 * @param {Object} row - Database row with proxy data
+	 * @return {Promise<Zotero.Proxy>}
+	 */
+	this.newProxyFromRow = Zotero.Promise.coroutine(function* (row) {
+		var proxy = new Zotero.Proxy;
+		yield proxy._loadFromRow(row);
+		return proxy;
+	});
+	
 	
 	/**
 	 * Observe method to capture page loads and determine if they're going through an EZProxy.
@@ -457,13 +469,9 @@ Zotero.Proxies = new function() {
  * @constructor
  * @class Represents an individual proxy server
  */
-Zotero.Proxy = function(row) {
-	if(row) {
-		this._loadFromRow(row);
-	} else {
-		this.hosts = [];
-		this.multiHost = false;
-	}
+Zotero.Proxy = function () {
+	this.hosts = [];
+	this.multiHost = false;
 }
 
 /**
@@ -622,10 +630,11 @@ Zotero.Proxy.prototype.save = function(transparent) {
 /**
  * Reverts to the previously saved version of this proxy
  */
-Zotero.Proxy.prototype.revert = function() {
-	if(!this.proxyID) throw "Cannot revert an unsaved proxy";
-	this._loadFromRow(Zotero.DB.rowQuery("SELECT * FROM proxies WHERE proxyID = ?", [this.proxyID]));
-}
+Zotero.Proxy.prototype.revert = Zotero.Promise.coroutine(function* () {
+	if (!this.proxyID) throw new Error("Cannot revert an unsaved proxy");
+	var row = yield Zotero.DB.rowQueryAsync("SELECT * FROM proxies WHERE proxyID = ?", [this.proxyID]);
+	yield this._loadFromRow(row);
+});
 
 /**
  * Deletes this proxy
@@ -703,14 +712,14 @@ Zotero.Proxy.prototype.toProxy = function(uri) {
  * Loads a proxy object from a DB row
  * @private
  */
-Zotero.Proxy.prototype._loadFromRow = function(row) {
+Zotero.Proxy.prototype._loadFromRow = Zotero.Promise.coroutine(function* (row) {
 	this.proxyID = row.proxyID;
 	this.multiHost = !!row.multiHost;
 	this.autoAssociate = !!row.autoAssociate;
 	this.scheme = row.scheme;
-	this.hosts = Zotero.DB.columnQuery("SELECT hostname FROM proxyHosts WHERE proxyID = ? ORDER BY hostname", row.proxyID);
+	this.hosts = Zotero.DB.columnQueryAsync("SELECT hostname FROM proxyHosts WHERE proxyID = ? ORDER BY hostname", row.proxyID);
 	this.compileRegexp();
-}
+});
 
 /**
  * Detectors for various proxy systems

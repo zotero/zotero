@@ -329,7 +329,7 @@ Zotero.DataObject.prototype._requireData = function (dataType) {
 		this._loaded[dataType] = true;
 	}
 	else if (!this._loaded[dataType]) {
-		throw new Zotero.DataObjects.UnloadedDataException(
+		throw new Zotero.Exception.UnloadedDataException(
 			"'" + dataType + "' not loaded for " + this._objectType + " ("
 				+ this._id + "/" + this._libraryID + "/" + this._key + ")",
 			this._objectType + dataType[0].toUpperCase() + dataType.substr(1)

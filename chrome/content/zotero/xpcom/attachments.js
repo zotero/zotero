@@ -82,6 +82,7 @@ Zotero.Attachments = new function(){
 			yield _postProcessFile(itemID, newFile, contentType);
 		}.bind(this))
 		.catch(function (e) {
+			Zotero.debug(e, 1);
 			var msg = "Failed importing file " + file.path;
 			Components.utils.reportError(msg);
 			Zotero.debug(msg, 1);

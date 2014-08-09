@@ -28,7 +28,6 @@ var ZoteroAdvancedSearch = new function() {
 	this.onLoad = onLoad;
 	this.search = search;
 	this.clear = clear;
-	this.save = save;
 	this.onDblClick = onDblClick;
 	this.onUnload = onUnload;
 	
@@ -104,13 +103,13 @@ var ZoteroAdvancedSearch = new function() {
 	}
 	
 	
-	function save() {
+	this.save = Zotero.Promise.coroutine(function* () {
 		_searchBox.updateSearch();
 		
 		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
 		
-		var untitled = Zotero.DB.getNextName(
+		var untitled = yield Zotero.DB.getNextName(
 			_searchBox.search.libraryID,
 			'savedSearches',
 			'savedSearchName',
@@ -132,15 +131,12 @@ var ZoteroAdvancedSearch = new function() {
 			name.value = untitled;
 		}
 		
-		return _searchBox.search.clone()
-		.then(function (s) {
-			s.name = name.value;
-			return s.save();
-		})
-		.then(function () {
-			window.close()
-		});
-	}
+		var s = yield _searchBox.search.clone();
+		s.name = name.value;
+		yield s.save();
+		
+		window.close()
+	});
 	
 	
 	this.onLibraryChange = function (libraryID) {

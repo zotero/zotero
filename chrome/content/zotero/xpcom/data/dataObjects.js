@@ -61,7 +61,7 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	
 	
 	this.init = function () {
-		this._loadIDsAndKeys();
+		return this._loadIDsAndKeys();
 	}
 	
 	
@@ -105,7 +105,7 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 			let id = ids[i];
 			// Check if already loaded
 			if (!this._objectCache[id]) {
-				throw new this.UnloadedDataException(this._ZDO_Object + " " + id + " not yet loaded");
+				throw new Zotero.Exception.UnloadedDataException(this._ZDO_Object + " " + id + " not yet loaded");
 			}
 			toReturn.push(this._objectCache[id]);
 		}
@@ -598,27 +598,16 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	});
 	
 	
-	this._loadIDsAndKeys = function () {
+	this._loadIDsAndKeys = Zotero.Promise.coroutine(function* () {
 		var sql = "SELECT ROWID AS id, libraryID, key FROM " + this._ZDO_table;
-		return Zotero.DB.queryAsync(sql)
-		.then(function (rows) {
-			for (let i=0; i<rows.length; i++) {
-				let row = rows[i];
-				this._objectKeys[row.id] = [row.libraryID, row.key];
-				if (!this._objectIDs[row.libraryID]) {
-					this._objectIDs[row.libraryID] = {};
-				}
-				this._objectIDs[row.libraryID][row.key] = row.id;
+		var rows = yield Zotero.DB.queryAsync(sql);
+		for (let i=0; i<rows.length; i++) {
+			let row = rows[i];
+			this._objectKeys[row.id] = [row.libraryID, row.key];
+			if (!this._objectIDs[row.libraryID]) {
+				this._objectIDs[row.libraryID] = {};
 			}
-		}.bind(this));
-	}
+			this._objectIDs[row.libraryID][row.key] = row.id;
+		}
+	});
 }
-
-
-Zotero.DataObjects.UnloadedDataException = function (msg, dataType) {
-	this.message = msg;
-	this.dataType = dataType;
-	this.stack = (new Error).stack;
-}
-Zotero.DataObjects.UnloadedDataException.prototype = Object.create(Error.prototype);
-Zotero.DataObjects.UnloadedDataException.prototype.name = "UnloadedDataException"

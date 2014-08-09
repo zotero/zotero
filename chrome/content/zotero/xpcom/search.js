@@ -1653,6 +1653,13 @@ Zotero.Searches = new function(){
 	Zotero.DataObjects.apply(this, ['search', 'searches', 'savedSearch', 'savedSearches']);
 	this.constructor.prototype = new Zotero.DataObjects();
 	
+	
+	this.init = Zotero.Promise.coroutine(function* () {
+		yield this.constructor.prototype.init.apply(this);
+		yield Zotero.SearchConditions.init();
+	});
+	
+	
 	/**
 	 * Returns an array of Zotero.Search objects, ordered by name
 	 *
@@ -1765,7 +1772,7 @@ Zotero.SearchConditions = new function(){
 	 *  - template (special handling)
 	 *  - noLoad (can't load from saved search)
 	 */
-	function _init(){
+	this.init = Zotero.Promise.coroutine(function* () {
 		var conditions = [
 			//
 			// Special conditions
@@ -2076,9 +2083,9 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'itemData',
 				field: 'value',
-				aliases: Zotero.DB.columnQuery("SELECT fieldName FROM fieldsCombined " +
-					"WHERE fieldName NOT IN ('accessDate', 'date', 'pages', " +
-					"'section','seriesNumber','issue')"),
+				aliases: yield Zotero.DB.columnQueryAsync("SELECT fieldName FROM fieldsCombined "
+					+ "WHERE fieldName NOT IN ('accessDate', 'date', 'pages', "
+					+ "'section','seriesNumber','issue')"),
 				template: true // mark for special handling
 			},
 			
@@ -2256,19 +2263,13 @@ Zotero.SearchConditions = new function(){
 		_standardConditions.sort(function(a, b) {
 			return collation.compareString(1, a.localized, b.localized);
 		});
-		
-		_initialized = true;
-	}
+	});
 	
 	
 	/*
 	 * Get condition data
 	 */
 	function get(condition){
-		if (!_initialized){
-			_init();
-		}
-		
 		return _conditions[condition];
 	}
 	
@@ -2279,10 +2280,6 @@ Zotero.SearchConditions = new function(){
 	 * Does not include special conditions, only ones that would show in a drop-down list
 	 */
 	function getStandardConditions(){
-		if (!_initialized){
-			_init();
-		}
-		
 		// TODO: return copy instead
 		return _standardConditions;
 	}
@@ -2292,10 +2289,6 @@ Zotero.SearchConditions = new function(){
 	 * Check if an operator is valid for a given condition
 	 */
 	function hasOperator(condition, operator){
-		if (!_initialized){
-			_init();
-		}
-		
 		var [condition, mode] = this.parseCondition(condition);
 		
 		if (!_conditions[condition]){
@@ -2369,12 +2362,5 @@ Zotero.SearchConditions = new function(){
 		}
 		
 		return [condition, mode];
-	}
-	
-	
-	this.reload = function () {
-		_initialized = false;
-		_conditions = {};
-		_standardConditions = [];
 	}
 }

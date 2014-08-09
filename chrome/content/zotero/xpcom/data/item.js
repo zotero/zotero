@@ -242,7 +242,7 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 	// or this field has to be populated (e.g., by Zotero.Items.cacheFields())
 	// before getField() is called.
 	if (value === null) {
-		throw new Zotero.DataObjects.UnloadedDataException(
+		throw new Zotero.Exception.UnloadedDataException(
 			"Item data not loaded and field '" + field + "' not set", "itemData"
 		);
 	}
@@ -2484,7 +2484,7 @@ Zotero.Item.prototype._updateAttachmentStates = function (exists) {
 		var item = Zotero.Items.getByLibraryAndKey(this.libraryID, parentKey);
 	}
 	catch (e) {
-		if (e instanceof Zotero.Items.UnloadedDataException) {
+		if (e instanceof Zotero.Exception.UnloadedDataException) {
 			Zotero.debug("Attachment parent not yet loaded in Zotero.Item.updateAttachmentStates()", 2);
 			return;
 		}

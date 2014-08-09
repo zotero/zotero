@@ -145,3 +145,12 @@ Zotero.Exception.UserCancelled.prototype = {
 	"name":"UserCancelledException",
 	"toString":function() { return "User cancelled "+this.whatCancelled+"."; }
 };
+
+
+Zotero.Exception.UnloadedDataException = function (msg, dataType) {
+	this.message = msg;
+	this.dataType = dataType;
+	this.stack = (new Error).stack;
+}
+Zotero.Exception.UnloadedDataException.prototype = Object.create(Error.prototype);
+Zotero.Exception.UnloadedDataException.prototype.name = "UnloadedDataException"

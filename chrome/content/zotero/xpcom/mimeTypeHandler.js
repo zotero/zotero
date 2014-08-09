@@ -153,7 +153,7 @@ Zotero.MIMETypeHandler = new function () {
 			
 			// translate using first available
 			translation.setTranslator(translators[0]);
-			frontWindow.Zotero_Browser.performTranslation(translation);
+			return frontWindow.Zotero_Browser.performTranslation(translation);
 		});
 	}
 	

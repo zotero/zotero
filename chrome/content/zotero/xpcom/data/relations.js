@@ -142,13 +142,13 @@ Zotero.Relations = new function () {
 		
 		var relation = new Zotero.Relation;
 		if (!libraryID) {
-			libraryID = Zotero.libraryID;
+			libraryID = Zotero.Users.getCurrentLibraryID();
 		}
 		if (libraryID) {
 			relation.libraryID = parseInt(libraryID);
 		}
 		else {
-			relation.libraryID = "local/" + Zotero.getLocalUserKey(true);
+			relation.libraryID = "local/" + Zotero.Users.getLocalUserKey();
 		}
 		relation.subject = subject;
 		relation.predicate = predicate;
@@ -253,9 +253,9 @@ Zotero.Relations = new function () {
 			relation.libraryID = parseInt(libraryID);
 		}
 		else {
-			libraryID = Zotero.libraryID;
+			libraryID = Zotero.Users.getCurrentLibraryID();
 			if (!libraryID) {
-				libraryID = Zotero.getLocalUserKey(true);
+				libraryID = Zotero.Users.getLocalUserKey();
 			}
 			relation.libraryID = parseInt(libraryID);
 		}

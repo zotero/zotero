@@ -47,11 +47,11 @@ Zotero_Preferences.Advanced = {
 	},
 	
 	
-	runIntegrityCheck: function () {
+	runIntegrityCheck: Zotero.Promise.coroutine(function* () {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 			.getService(Components.interfaces.nsIPromptService);
 		
-		var ok = Zotero.DB.integrityCheck();
+		var ok = yield Zotero.DB.integrityCheck();
 		if (ok) {
 			ok = Zotero.Schema.integrityCheck();
 			if (!ok) {
@@ -110,7 +110,7 @@ Zotero_Preferences.Advanced = {
 			Zotero.getString('general.' + str),
 			Zotero.getString('db.integrityCheck.' + str)
 			+ (!ok ? "\n\n" + Zotero.getString('db.integrityCheck.dbRepairTool') : ''));
-	},
+	}),
 	
 	
 	resetTranslatorsAndStyles: function () {

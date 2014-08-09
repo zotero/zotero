@@ -731,7 +731,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 		_rootURI = uri;
 		
 		uri = uri.clone();
-		uri.spec += 'users/' + Zotero.userID + '/';
+		uri.spec += 'users/' + Zotero.Users.getCurrentUserID() + '/';
 		_userURI = uri;
 	};
 	
@@ -1132,7 +1132,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 		}.bind(this))
 		then(function () {
 			// If we don't have a user id we've never synced and don't need to bother
-			if (!Zotero.userID) {
+			if (!Zotero.Users.getCurrentUserID()) {
 				return false;
 			}
 			

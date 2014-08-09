@@ -729,10 +729,7 @@ var ZoteroPane = new function()
 	 */
 	this.newItem = Zotero.Promise.coroutine(function* (typeID, data, row, manual)
 	{
-		if (!Zotero.stateCheck()) {
-			this.displayErrorMessage(true);
-			return false;
-		}
+		yield Zotero.DB.waitForTransaction();
 		
 		if ((row === undefined || row === null) && this.collectionsView.selection) {
 			row = this.collectionsView.selection.currentIndex;
@@ -754,7 +751,7 @@ var ZoteroPane = new function()
 		}
 		
 		let itemID;
-		yield Zotero.DB.executeTransaction(function () {
+		yield Zotero.DB.executeTransaction(function* () {
 			var item = new Zotero.Item(typeID);
 			item.libraryID = libraryID;
 			for (var i in data) {
@@ -763,7 +760,7 @@ var ZoteroPane = new function()
 			itemID = yield item.save();
 			
 			if (collectionTreeRow && collectionTreeRow.isCollection()) {
-				collectionTreeRow.ref.addItem(itemID);
+				yield collectionTreeRow.ref.addItem(itemID);
 			}
 		});
 		
@@ -800,11 +797,8 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.newCollection = Zotero.Promise.method(function (parentKey) {
-		if (!Zotero.stateCheck()) {
-			this.displayErrorMessage(true);
-			return false;
-		}
+	this.newCollection = Zotero.Promise.coroutine(function* (parentKey) {
+		yield Zotero.DB.waitForTransaction();
 		
 		if (!this.canEditLibrary()) {
 			this.displayCannotEditLibraryMessage();
@@ -815,7 +809,7 @@ var ZoteroPane = new function()
 		
 		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
-		var untitled = Zotero.DB.getNextName(
+		var untitled = yield Zotero.DB.getNextName(
 			libraryID,
 			'collections',
 			'collectionName',
@@ -851,17 +845,14 @@ var ZoteroPane = new function()
 	
 	
 	this.newSearch = Zotero.Promise.coroutine(function* () {
-		if (!Zotero.stateCheck()) {
-			this.displayErrorMessage(true);
-			return false;
-		}
+		yield Zotero.DB.waitForTransaction();
 		
 		var s = new Zotero.Search();
 		s.libraryID = this.getSelectedLibraryID();
 		yield s.addCondition('title', 'contains', '');
 		
 		var untitled = Zotero.getString('pane.collections.untitled');
-		untitled = Zotero.DB.getNextName('savedSearches', 'savedSearchName',
+		untitled = yield Zotero.DB.getNextName('savedSearches', 'savedSearchName',
 			Zotero.getString('pane.collections.untitled'));
 		var io = {dataIn: {search: s, name: untitled}, dataOut: null};
 		window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
@@ -939,11 +930,8 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.openLookupWindow = function () {
-		if (!Zotero.stateCheck()) {
-			this.displayErrorMessage(true);
-			return false;
-		}
+	this.openLookupWindow = Zotero.Promise.coroutine(function* () {
+		yield Zotero.DB.waitForTransaction();
 		
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
@@ -951,7 +939,7 @@ var ZoteroPane = new function()
 		}
 		
 		window.openDialog('chrome://zotero/content/lookup.xul', 'zotero-lookup', 'chrome,modal');
-	}
+	});
 	
 	
 	this.openAdvancedSearchWindow = Zotero.Promise.coroutine(function* () {
@@ -1220,10 +1208,7 @@ var ZoteroPane = new function()
 	 */
 	this.itemSelected = function (event) {
 		return Zotero.spawn(function* () {
-			if (!Zotero.stateCheck()) {
-				this.displayErrorMessage();
-				return;
-			}
+			yield Zotero.DB.waitForTransaction();
 			
 			// Display restore button if items selected in Trash
 			if (this.itemsView.selection.count) {
@@ -2933,10 +2918,7 @@ var ZoteroPane = new function()
 	 * @return {Promise}
 	 */
 	this.newNote = Zotero.Promise.coroutine(function* (popup, parentKey, text, citeURI) {
-		if (!Zotero.stateCheck()) {
-			this.displayErrorMessage(true);
-			return;
-		}
+		yield Zotero.DB.waitForTransaction();
 		
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
@@ -3230,10 +3212,7 @@ var ZoteroPane = new function()
 				//
 				// Duplicate newItem() checks here
 				//
-				if (!Zotero.stateCheck()) {
-					this.displayErrorMessage(true);
-					return false;
-				}
+				yield Zotero.DB.waitForTransaction();
 				
 				// Currently selected row
 				if (row === undefined && this.collectionsView && this.collectionsView.selection) {
@@ -3328,126 +3307,118 @@ var ZoteroPane = new function()
 		
 		url = Zotero.Utilities.resolveIntermediateURL(url);
 		
-		return Zotero.MIME.getMIMETypeFromURL(url)
-		.spread(function (mimeType, hasNativeHandler) {
-			var self = this;
+		let [mimeType, hasNativeHandler] = yield Zotero.MIME.getMIMETypeFromURL(url);
+		
+		// If native type, save using a hidden browser
+		if (hasNativeHandler) {
+			var deferred = Zotero.Promise.defer();
 			
-			// If native type, save using a hidden browser
-			if (hasNativeHandler) {
-				var deferred = Zotero.Promise.defer();
-				
-				var processor = function (doc) {
-					ZoteroPane_Local.addItemFromDocument(doc, itemType, saveSnapshot, row)
-					.then(function () {
-						deferred.resolve()
-					})
-				};
-				// TODO: processDocuments should wait for the processor promise to be resolved
-				var done = function () {}
-				var exception = function (e) {
-					Zotero.debug(e, 1);
-					deferred.reject(e);
-				}
-				Zotero.HTTP.processDocuments([url], processor, done, exception);
-				
-				return deferred.promise;
+			var processor = function (doc) {
+				ZoteroPane_Local.addItemFromDocument(doc, itemType, saveSnapshot, row)
+				.then(function () {
+					deferred.resolve()
+				})
+			};
+			// TODO: processDocuments should wait for the processor promise to be resolved
+			var done = function () {}
+			var exception = function (e) {
+				Zotero.debug(e, 1);
+				deferred.reject(e);
 			}
-			// Otherwise create placeholder item, attach attachment, and update from that
-			else {
-				// TODO: this, needless to say, is a temporary hack
-				if (itemType == 'temporaryPDFHack') {
-					itemType = null;
+			Zotero.HTTP.processDocuments([url], processor, done, exception);
+			
+			return deferred.promise;
+		}
+		// Otherwise create placeholder item, attach attachment, and update from that
+		else {
+			// TODO: this, needless to say, is a temporary hack
+			if (itemType == 'temporaryPDFHack') {
+				itemType = null;
+				
+				if (mimeType == 'application/pdf') {
+					//
+					// Duplicate newItem() checks here
+					//
+					yield Zotero.DB.waitForTransaction();
 					
-					if (mimeType == 'application/pdf') {
-						//
-						// Duplicate newItem() checks here
-						//
-						if (!Zotero.stateCheck()) {
-							ZoteroPane_Local.displayErrorMessage(true);
-							return false;
-						}
-						
-						// Currently selected row
-						if (row === undefined) {
-							row = ZoteroPane_Local.collectionsView.selection.currentIndex;
-						}
-						
-						if (!ZoteroPane_Local.canEdit(row)) {
-							ZoteroPane_Local.displayCannotEditLibraryMessage();
-							return;
-						}
-						
-						if (row !== undefined) {
-							var collectionTreeRow = ZoteroPane_Local.collectionsView.getRow(row);
-							var libraryID = collectionTreeRow.ref.libraryID;
-						}
-						else {
-							var libraryID = 0;
-							var collectionTreeRow = null;
-						}
-						//
-						//
-						//
-						
-						if (!ZoteroPane_Local.canEditFiles(row)) {
-							ZoteroPane_Local.displayCannotEditLibraryFilesMessage();
-							return;
-						}
-						
-						if (collectionTreeRow && collectionTreeRow.isCollection()) {
-							var collectionID = collectionTreeRow.ref.id;
-						}
-						else {
-							var collectionID = false;
-						}
-						
-						// TODO: Update for async DB
-						var attachmentItem = Zotero.Attachments.importFromURL(url, false,
-							false, false, collectionID, mimeType, libraryID,
-							function(attachmentItem) {
-								self.selectItem(attachmentItem.id);
-							});
-						
+					// Currently selected row
+					if (row === undefined) {
+						row = ZoteroPane_Local.collectionsView.selection.currentIndex;
+					}
+					
+					if (!ZoteroPane_Local.canEdit(row)) {
+						ZoteroPane_Local.displayCannotEditLibraryMessage();
 						return;
 					}
-				}
-				
-				if (!itemType) {
-					itemType = 'webpage';
-				}
-				
-				return Zotero.Promise.coroutine(function* () {
-					var item = yield ZoteroPane_Local.newItem(itemType, {}, row)
-					if (item.libraryID) {
-						var group = Zotero.Groups.getByLibraryID(item.libraryID);
-						filesEditable = group.filesEditable;
+					
+					if (row !== undefined) {
+						var collectionTreeRow = ZoteroPane_Local.collectionsView.getRow(row);
+						var libraryID = collectionTreeRow.ref.libraryID;
 					}
 					else {
-						filesEditable = true;
+						var libraryID = 0;
+						var collectionTreeRow = null;
+					}
+					//
+					//
+					//
+					
+					if (!ZoteroPane_Local.canEditFiles(row)) {
+						ZoteroPane_Local.displayCannotEditLibraryFilesMessage();
+						return;
 					}
 					
-					// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
-					if (saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'))) {
-						var link = false;
-						
-						if (link) {
-							//Zotero.Attachments.linkFromURL(doc, item.id);
-						}
-						else if (filesEditable) {
-							var attachmentItem = Zotero.Attachments.importFromURL(url, item.id, false, false, false, mimeType);
-							if (attachmentItem) {
-								item.setField('title', attachmentItem.getField('title'));
-								item.setField('url', attachmentItem.getField('url'));
-								item.setField('accessDate', attachmentItem.getField('accessDate'));
-								yield item.save();
-							}
-						}
+					if (collectionTreeRow && collectionTreeRow.isCollection()) {
+						var collectionID = collectionTreeRow.ref.id;
+					}
+					else {
+						var collectionID = false;
 					}
 					
-					return item.id;
-				})();
+					// TODO: Update for async DB
+					var attachmentItem = Zotero.Attachments.importFromURL(url, false,
+						false, false, collectionID, mimeType, libraryID,
+						function(attachmentItem) {
+							self.selectItem(attachmentItem.id);
+						});
+					
+					return;
+				}
 			}
-		});
+			
+			if (!itemType) {
+				itemType = 'webpage';
+			}
+			
+			var item = yield ZoteroPane_Local.newItem(itemType, {}, row)
+			if (item.libraryID) {
+				var group = Zotero.Groups.getByLibraryID(item.libraryID);
+				filesEditable = group.filesEditable;
+			}
+			else {
+				filesEditable = true;
+			}
+			
+			// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
+			if (saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'))) {
+				var link = false;
+				
+				if (link) {
+					//Zotero.Attachments.linkFromURL(doc, item.id);
+				}
+				else if (filesEditable) {
+					var attachmentItem = Zotero.Attachments.importFromURL(url, item.id, false, false, false, mimeType);
+					if (attachmentItem) {
+						item.setField('title', attachmentItem.getField('title'));
+						item.setField('url', attachmentItem.getField('url'));
+						item.setField('accessDate', attachmentItem.getField('accessDate'));
+						yield item.save();
+					}
+				}
+			}
+			
+			return item.id;
+		}
 	});
 	
 	
@@ -3457,11 +3428,8 @@ var ZoteroPane = new function()
 	 * |itemID|    -- itemID of parent item
 	 * |link|      -- create web link instead of snapshot
 	 */
-	this.addAttachmentFromPage = Zotero.Promise.method(function (link, itemID) {
-		if (!Zotero.stateCheck()) {
-			this.displayErrorMessage(true);
-			return;
-		}
+	this.addAttachmentFromPage = Zotero.Promise.coroutine(function* (link, itemID) {
+		yield Zotero.DB.waitForTransaction();
 		
 		if (typeof itemID != 'number') {
 			throw new Error("itemID must be an integer");

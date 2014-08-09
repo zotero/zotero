@@ -43,8 +43,8 @@
  * 
  */
 Zotero.CachedTypes = function() {
-	var _types = [];
-	var _typesLoaded;
+	this._types = null;
+	this._typesArray = null;
 	var self = this;
 	
 	// Override these variables in child classes
@@ -57,11 +57,38 @@ Zotero.CachedTypes = function() {
 	
 	this.getName = getName;
 	this.getID = getID;
-	this.getTypes = getTypes;
+	
+	
+	this.init = Zotero.Promise.coroutine(function* () {
+		this._types = {};
+		this._typesArray = [];
+		
+		var types = yield this._getTypesFromDB();
+		for (let i=0; i<types.length; i++) {
+			let type = types[i];
+			// Store as both id and name for access by either
+			var typeData = {
+				id: types[i].id,
+				name: types[i].name,
+				custom: this._hasCustom ? !!types[i].custom : false
+			}
+			this._types['_' + types[i].id] = typeData;
+			if (this._ignoreCase) {
+				this._types['_' + types[i].name.toLowerCase()] = this._types['_' + types[i].id];
+			}
+			else {
+				this._types['_' + types[i].name] = this._types['_' + types[i].id];
+			}
+			this._typesArray.push(typeData);
+		}
+	});
+	
 	
 	function getName(idOrName) {
-		if (!_typesLoaded) {
-			_load();
+		if (!this._types) {
+			throw new Zotero.Exception.UnloadedDataException(
+				this._typeDesc[0].toUpperCase() + this._typeDesc.substr(1) + " data not yet loaded"
+			);
 		}
 		
 		if (this._ignoreCase) {
@@ -69,19 +96,21 @@ Zotero.CachedTypes = function() {
 			idOrName = idOrName.toLowerCase();
 		}
 		
-		if (!_types['_' + idOrName]) {
+		if (!this._types['_' + idOrName]) {
 			Zotero.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
 			Zotero.debug((new Error()).stack, 1);
 			return '';
 		}
 		
-		return _types['_' + idOrName]['name'];
+		return this._types['_' + idOrName]['name'];
 	}
 	
 	
 	function getID(idOrName) {
-		if (!_typesLoaded) {
-			_load();
+		if (!this._types) {
+			throw new Zotero.Exception.UnloadedDataException(
+				this._typeDesc[0].toUpperCase() + this._typeDesc.substr(1) + " data not yet loaded"
+			);
 		}
 		
 		if (this._ignoreCase) {
@@ -89,18 +118,37 @@ Zotero.CachedTypes = function() {
 			idOrName = idOrName.toLowerCase();
 		}
 		
-		if (!_types['_' + idOrName]) {
+		if (!this._types['_' + idOrName]) {
 			Zotero.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
 			Zotero.debug((new Error()).stack, 1);
 			return false;
 		}
 		
-		return _types['_' + idOrName]['id'];
+		return this._types['_' + idOrName]['id'];
 	}
 	
 	
-	function getTypes(where, params) {
-		return Zotero.DB.query(
+	this.getTypes = function () {
+		if (!this._typesArray) {
+			throw new Zotero.Exception.UnloadedDataException(
+				this._typeDesc[0].toUpperCase() + this._typeDesc.substr(1) + " data not yet loaded"
+			);
+		}
+		return this._typesArray;
+	}
+	
+	
+	// Currently used only for item types
+	this.isCustom = function (idOrName) {
+		return this._types['_' + idOrName] && this._types['_' + idOrName].custom ? this._types['_' + idOrName].custom : false;
+	}
+	
+	
+	/**
+	 * @return {Promise}
+	 */
+	this._getTypesFromDB = function (where, params) {
+		return Zotero.DB.queryAsync(
 			'SELECT ' + this._idCol + ' AS id, '
 				+ this._nameCol + ' AS name'
 				+ (this._hasCustom ? ', custom' : '')
@@ -108,46 +156,8 @@ Zotero.CachedTypes = function() {
 				+ (where ? ' ' + where : ''),
 			params ? params : false
 		);
-	}
-	
-	
-	// Currently used only for item types
-	this.isCustom = function (idOrName) {
-		if (!_typesLoaded) {
-			_load();
-		}
-		
-		return _types['_' + idOrName] && _types['_' + idOrName].custom ? _types['_' + idOrName].custom : false;
-	}
-	
-	
-	this.reload = function () {
-		_typesLoaded = false;
-	}
-	
-	
-	function _load() {
-		_types = [];
-		
-		var types = self.getTypes();
-		for (var i in types) {
-			// Store as both id and name for access by either
-			var typeData = {
-				id: types[i]['id'],
-				name: types[i]['name'],
-				custom: types[i].custom ? types[i].custom : false
-			}
-			_types['_' + types[i]['id']] = typeData;
-			if (self._ignoreCase) {
-				_types['_' + types[i]['name'].toLowerCase()] = _types['_' + types[i]['id']];
-			}
-			else {
-				_types['_' + types[i]['name']] = _types['_' + types[i]['id']];
-			}
-		}
-		
-		_typesLoaded = true;
-	}
+	};
+
 }
 
 
@@ -169,22 +179,35 @@ Zotero.CreatorTypes = new function() {
 	var _creatorTypesByItemType = {};
 	var _isValidForItemType = {};
 	
-	function getTypesForItemType(itemTypeID) {
-		if (_creatorTypesByItemType[itemTypeID]) {
-			return _creatorTypesByItemType[itemTypeID];
-		}
+	
+	this.init = Zotero.Promise.coroutine(function* () {
+		yield this.constructor.prototype.init.apply(this);
 		
-		var sql = "SELECT creatorTypeID AS id, creatorType AS name "
+		var sql = "SELECT itemTypeID, creatorTypeID AS id, creatorType AS name "
 			+ "FROM itemTypeCreatorTypes NATURAL JOIN creatorTypes "
 			// DEBUG: sort needs to be on localized strings in itemPane.js
 			// (though still put primary field at top)
-			+ "WHERE itemTypeID=? ORDER BY primaryField=1 DESC, name";
-		var types = Zotero.DB.query(sql, itemTypeID);
-		if (!types) {
-			types = [];
+			+ "ORDER BY primaryField=1 DESC, name";
+		var rows = yield Zotero.DB.queryAsync(sql);
+		for (let i=0; i<rows.length; i++) {
+			let row = rows[i];
+			let itemTypeID = row.itemTypeID;
+			if (!_creatorTypesByItemType[itemTypeID]) {
+				_creatorTypesByItemType[itemTypeID] = [];
+			}
+			_creatorTypesByItemType[itemTypeID].push({
+				id: row.id,
+				name: row.name
+			});
+		}
+	});
+	
+	
+	function getTypesForItemType(itemTypeID) {
+		if (!_creatorTypesByItemType[itemTypeID]) {
+			throw new Error("Creator types not loaded for itemTypeID " + itemTypeID);
 		}
 		
-		_creatorTypesByItemType[itemTypeID] = types;
 		return _creatorTypesByItemType[itemTypeID];
 	}
 	
@@ -245,10 +268,6 @@ Zotero.ItemTypes = new function() {
 	Zotero.CachedTypes.apply(this, arguments);
 	this.constructor.prototype = new Zotero.CachedTypes();
 	
-	this.getPrimaryTypes = getPrimaryTypes;
-	this.getSecondaryTypes = getSecondaryTypes;
-	this.getHiddenTypes = getHiddenTypes;
-	this.getLocalizedString = getLocalizedString;
 	this.getImageSrc = getImageSrc;
 	
 	this.customIDOffset = 10000;
@@ -259,10 +278,18 @@ Zotero.ItemTypes = new function() {
 	this._table = 'itemTypesCombined';
 	this._hasCustom = true;
 	
+	var _primaryTypes;
+	var _secondaryTypes;
+	var _hiddenTypes;
+	
 	var _customImages = {};
 	var _customLabels = {};
 	
-	function getPrimaryTypes() {
+	
+	this.init = Zotero.Promise.coroutine(function* () {
+		yield this.constructor.prototype.init.apply(this);
+		
+		// Primary types
 		var limit = 5;
 		
 		// TODO: get rid of ' AND itemTypeID!=5' and just remove display=2
@@ -294,31 +321,57 @@ Zotero.ItemTypes = new function() {
 			params = false;
 		}
 		sql += 'LIMIT ' + limit;
+		_primaryTypes = yield this._getTypesFromDB(sql, params);
 		
-		return this.getTypes(sql, params);
+		// Secondary types
+		_secondaryTypes = yield this._getTypesFromDB('WHERE display IN (1,2)');
+		
+		// Hidden types
+		_hiddenTypes = yield this._getTypesFromDB('WHERE display=0')
+		
+		// Custom labels and icons
+		var sql = "SELECT customItemTypeID AS id, label, icon FROM customItemTypes";
+		var rows = yield Zotero.DB.queryAsync(sql);
+		for (let i=0; i<rows.length; i++) {
+			let row = rows[i];
+			let id = row.id;
+			_customLabels[id] = row.label;
+			_customImages[id] = row.icon;
+		}
+	});
+	
+	
+	this.getPrimaryTypes = function () {
+		if (!_primaryTypes) {
+			throw new Zotero.Exception.UnloadedDataException("Primary item type data not yet loaded");
+		}
+		return _primaryTypes;
 	}
 
-	function getSecondaryTypes() {
-		return this.getTypes('WHERE display IN (1,2)');
+	this.getSecondaryTypes = function () {
+		if (!_secondaryTypes) {
+			throw new Zotero.Exception.UnloadedDataException("Secondary item type data not yet loaded");
+		}
+		return _secondaryTypes;
 	}
 	
-	function getHiddenTypes() {
-		return this.getTypes('WHERE display=0');
+	this.getHiddenTypes = function () {
+		if (!_hiddenTypes) {
+			throw new Zotero.Exception.UnloadedDataException("Hidden item type data not yet loaded");
+		}
+		return _hiddenTypes;
 	}
 	
-	function getLocalizedString(idOrName) {
+	this.getLocalizedString = function (idOrName) {
 		var typeName = this.getName(idOrName);
 		
 		// For custom types, use provided label
 		if (this.isCustom(idOrName)) {
 			var id = this.getID(idOrName) - this.customIDOffset;
-			if (_customLabels[id]) {
-				return _customLabels[id];
+			if (!_customLabels[id]) {
+				throw new Error("Label not available for custom field " + idOrName);
 			}
-			var sql = "SELECT label FROM customItemTypes WHERE customItemTypeID=?";
-			var label = Zotero.DB.valueQuery(sql, id);
-			_customLabels[id] = label;
-			return label;
+			return _customLabels[id];
 		}
 		
 		return Zotero.getString("itemTypes." + typeName);
@@ -327,15 +380,10 @@ Zotero.ItemTypes = new function() {
 	function getImageSrc(itemType) {
 		if (this.isCustom(itemType)) {
 			var id = this.getID(itemType) - this.customIDOffset;
-			if (_customImages[id]) {
-				return _customImages[id];
+			if (!_customImages[id]) {
+				throw new Error("Image not available for custom field " + itemType);
 			}
-			var sql = "SELECT icon FROM customItemTypes WHERE customItemTypeID=?";
-			var src = Zotero.DB.valueQuery(sql, id);
-			if (src) {
-				_customImages[id] = src;
-				return src;
-			}
+			return _customImages[id];
 		}
 		
 		switch (itemType) {
@@ -396,14 +444,14 @@ Zotero.FileTypes = new function() {
 	this._nameCol = 'fileType';
 	this._table = 'fileTypes';
 	
-	this.getIDFromMIMEType = getIDFromMIMEType;
-	
-	function getIDFromMIMEType(mimeType) {
+	/**
+	 * @return {Promise<Integer>} fileTypeID
+	 */
+	this.getIDFromMIMEType = function (mimeType) {
 		var sql = "SELECT fileTypeID FROM fileTypeMIMETypes "
 			+ "WHERE ? LIKE mimeType || '%'";
-			
-		return Zotero.DB.valueQuery(sql, [mimeType]);
-	}
+		return Zotero.DB.valueQueryAsync(sql, [mimeType]);
+	};
 }
 
 

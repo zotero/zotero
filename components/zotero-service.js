@@ -109,6 +109,7 @@ const xpcomFilesLocal = [
 	'syncedSettings',
 	'timeline',
 	'uri',
+	'users',
 	'translation/translate_item',
 	'translation/translators',
 	'server_connector'

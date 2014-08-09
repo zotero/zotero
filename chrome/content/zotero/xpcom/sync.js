@@ -71,6 +71,9 @@ Zotero.Sync = new function() {
 	
 	
 	this.init = function () {
+		Zotero.debug("Syncing is disabled", 1);
+		return;
+		
 		Zotero.DB.beginTransaction();
 		
 		var sql = "SELECT version FROM version WHERE schema='syncdeletelog'";
@@ -2373,7 +2376,7 @@ Zotero.Sync.Server = new function () {
 		
 		if (lastUserID != userID || lastLibraryID != libraryID) {
 			if (!lastLibraryID) {
-				var repl = "local/" + Zotero.getLocalUserKey();
+				var repl = "local/" + Zotero.Users.getLocalUserKey();
 			}
 			
 			Zotero.userID = userID;

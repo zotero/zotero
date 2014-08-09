@@ -51,7 +51,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
  (function(){
 	// Privileged (public) methods
 	this.init = init;
-	this.stateCheck = stateCheck;
 	this.getProfileDirectory = getProfileDirectory;
 	this.getZoteroDirectory = getZoteroDirectory;
 	this.getStorageDirectory = getStorageDirectory;
@@ -86,64 +85,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	Components.utils.import("resource://zotero/bluebird.js", this);
 	
-	this.__defineGetter__('userID', function () {
-		if (_userID !== undefined) return _userID;
-		var sql = "SELECT value FROM settings WHERE "
-					+ "setting='account' AND key='userID'";
-		return _userID = Zotero.DB.valueQuery(sql);
-	});
-	
-	this.__defineSetter__('userID', function (val) {
-		var sql = "REPLACE INTO settings VALUES ('account', 'userID', ?)";
-		Zotero.DB.query(sql, parseInt(val));
-		_userID = val;
-	});
-	
-	this.__defineGetter__('libraryID', function () {
-		if (_libraryID !== undefined) return _libraryID;
-		var sql = "SELECT value FROM settings WHERE "
-					+ "setting='account' AND key='libraryID'";
-		return _libraryID = Zotero.DB.valueQuery(sql);
-	});
-	
-	this.__defineSetter__('libraryID', function (val) {
-		var sql = "REPLACE INTO settings VALUES ('account', 'libraryID', ?)";
-		Zotero.DB.query(sql, parseInt(val));
-		_libraryID = val;
-	});
-	
-	this.__defineGetter__('username', function () {
-		var sql = "SELECT value FROM settings WHERE "
-					+ "setting='account' AND key='username'";
-		return Zotero.DB.valueQuery(sql);
-	});
-	
-	this.__defineSetter__('username', function (val) {
-		var sql = "REPLACE INTO settings VALUES ('account', 'username', ?)";
-		Zotero.DB.query(sql, val);
-	});
-	
 	this.getActiveZoteroPane = function() {
 		return Services.wm.getMostRecentWindow("navigator:browser").ZoteroPane;
-	};
-	
-	this.getLocalUserKey = function (generate) {
-		if (_localUserKey) {
-			return _localUserKey;
-		}
-		
-		var sql = "SELECT value FROM settings WHERE "
-					+ "setting='account' AND key='localUserKey'";
-		var key = Zotero.DB.valueQuery(sql);
-		
-		// Generate a local user key if we don't have a global library id
-		if (!key && generate) {
-			key = Zotero.randomString(8);
-			var sql = "INSERT INTO settings VALUES ('account', 'localUserKey', ?)";
-			Zotero.DB.query(sql, key);
-		}
-		_localUserKey = key;
-		return key;
 	};
 	
 	/**
@@ -568,7 +511,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			}
 		}
 		
-		if(!_initDB()) return false;
+		if(!(yield _initDB())) return false;
 		
 		Zotero.HTTP.triggerProxyAuth();
 		
@@ -640,6 +583,15 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			
 				Zotero.locked = false;
 				
+				yield Zotero.Users.init();
+				yield Zotero.Libraries.init();
+				
+				yield Zotero.ItemTypes.init();
+				yield Zotero.ItemFields.init();
+				yield Zotero.CreatorTypes.init();
+				yield Zotero.CharacterSets.init();
+				yield Zotero.FileTypes.init();
+				
 				// Initialize various services
 				Zotero.Styles.preinit();
 				Zotero.Integration.init();
@@ -656,7 +608,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				Zotero.Sync.Runner.init();
 				
 				Zotero.MIMETypeHandler.init();
-				Zotero.Proxies.init();
+				yield Zotero.Proxies.init();
 				
 				// Initialize keyboard shortcuts
 				Zotero.Keys.init();
@@ -762,10 +714,10 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	/**
 	 * Initializes the DB connection
 	 */
-	function _initDB(haveReleasedLock) {
+	var _initDB = Zotero.Promise.coroutine(function* (haveReleasedLock) {
 		try {
 			// Test read access
-			Zotero.DB.test();
+			yield Zotero.DB.test();
 			
 			var dbfile = Zotero.getZoteroDatabase();
 
@@ -843,7 +795,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		}
 		
 		return true;
-	}
+	});
 	
 	/**
 	 * Called when the DB has been released by another Zotero process to perform necessary 
@@ -858,21 +810,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			_waitingForDBLock = false;
 		}
 	}
-	
-	/*
-	 * Check if a DB transaction is open and, if so, disable Zotero
-	 */
-	function stateCheck() {
-		if(!Zotero.isConnector && Zotero.DB.transactionInProgress()) {
-			Zotero.logError("State check failed due to transaction in progress");
-			this.initialized = false;
-			this.skipLoading = true;
-			return false;
-		}
-		
-		return true;
-	}
-	
 	
 	this.shutdown = function() {
 		Zotero.debug("Shutting down Zotero");
@@ -893,14 +830,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			// remove temp directory
 			Zotero.removeTempDirectory();
 			
-			if(Zotero.DB && Zotero.DB._connection) {
-				Zotero.debug("Closing database");
-				
-				// run GC to finalize open statements
-				// TODO remove this and finalize statements created with
-				// Zotero.DBConnection.getStatement() explicitly
-				Components.utils.forceGC();
-				
+			if (Zotero.DB && Zotero.DB._connectionAsync) {
 				// close DB
 				return Zotero.DB.closeDatabase(true).then(function() {				
 					// broadcast that DB lock has been released

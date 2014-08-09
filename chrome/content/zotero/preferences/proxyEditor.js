@@ -122,7 +122,7 @@ var Zotero_ProxyEditor = new function() {
 				window, Zotero.getString("proxies.error"),
 				Zotero.getString("proxies.error." + error, hasErrors)
 			);
-			if(window.arguments && window.arguments[0]) proxy.revert();
+			if(window.arguments && window.arguments[0]) proxy.revert(); // async
 			return false;
 		}
 		proxy.save(true);

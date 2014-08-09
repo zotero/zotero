@@ -54,7 +54,7 @@ Zotero.Schema = new function(){
 			return dbVersion;
 		})
 		.catch(function (e) {
-			return Zotero.DB.tableExistsAsync('version')
+			return Zotero.DB.tableExists('version')
 			.then(function (exists) {
 				if (exists) {
 					throw e;
@@ -101,7 +101,7 @@ Zotero.Schema = new function(){
 				}
 			})
 			.then(function () {
-				return Zotero.DB.executeTransaction(function (conn) {
+				return Zotero.DB.executeTransaction(function* (conn) {
 					var updated = yield _updateSchema('system');
 					
 					// Update custom tables if they exist so that changes are in
@@ -112,7 +112,7 @@ Zotero.Schema = new function(){
 					updated = yield _migrateUserDataSchema(userdata);
 					yield _updateSchema('triggers');
 					
-					Zotero.DB.asyncResult(updated);
+					return updated;
 				})
 				.then(function (updated) {
 					// Populate combined tables for custom types and fields
@@ -307,29 +307,26 @@ Zotero.Schema = new function(){
 		}
 	});
 	
-	function _reloadSchema() {
-		Zotero.Schema.updateCustomTables()
-		.then(function () {
-			Zotero.ItemTypes.reload();
-			Zotero.ItemFields.reload();
-			Zotero.SearchConditions.reload();
-			
-			// Update item type menus in every open window
-			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						.getService(Components.interfaces.nsIWindowMediator);
-			var enumerator = wm.getEnumerator("navigator:browser");
-			while (enumerator.hasMoreElements()) {
-				var win = enumerator.getNext();
-				win.ZoteroPane.buildItemTypeSubMenu();
-				win.document.getElementById('zotero-editpane-item-box').buildItemTypeMenu();
-			}
-		})
-		.done();
-	}
+	var _reloadSchema = Zotero.Promise.coroutine(function* () {
+		yield Zotero.Schema.updateCustomTables();
+		yield Zotero.ItemTypes.load();
+		yield Zotero.ItemFields.load();
+		yield Zotero.SearchConditions.init();
+		
+		// Update item type menus in every open window
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					.getService(Components.interfaces.nsIWindowMediator);
+		var enumerator = wm.getEnumerator("navigator:browser");
+		while (enumerator.hasMoreElements()) {
+			var win = enumerator.getNext();
+			win.ZoteroPane.buildItemTypeSubMenu();
+			win.document.getElementById('zotero-editpane-item-box').buildItemTypeMenu();
+		}
+	});
 	
 	
 	this.updateCustomTables = function (skipDelete, skipSystem) {
-		return Zotero.DB.executeTransaction(function (conn) {
+		return Zotero.DB.executeTransaction(function* (conn) {
 			Zotero.debug("Updating custom tables");
 			
 			if (!skipDelete) {
@@ -926,10 +923,8 @@ Zotero.Schema = new function(){
 	 * @param	{Boolean}	force	Force a repository query regardless of how
 	 *									long it's been since the last check
 	 */
-	this.updateFromRepository = function (force) {
-		return Zotero.Promise.try(function () {
-			if (force) return true;
-			
+	this.updateFromRepository = Zotero.Promise.coroutine(function* (force) {
+		if (!force) {
 			if (_remoteUpdateInProgress) {
 				Zotero.debug("A remote update is already in progress -- not checking repository");
 				return false;
@@ -942,108 +937,99 @@ Zotero.Schema = new function(){
 			}
 			
 			// Determine the earliest local time that we'd query the repository again
-			return self.getDBVersion('lastcheck')
-			.then(function (lastCheck) {
-				var nextCheck = new Date();
-				nextCheck.setTime((lastCheck + ZOTERO_CONFIG.REPOSITORY_CHECK_INTERVAL) * 1000);
-				
-				var now = new Date();
-				
-				// If enough time hasn't passed, don't update
-				if (now < nextCheck) {
-					Zotero.debug('Not enough time since last update -- not checking repository', 4);
-					// Set the repository timer to the remaining time
-					_setRepositoryTimer(Math.round((nextCheck.getTime() - now.getTime()) / 1000));
-					return false;
+			let lastCheck = yield this.getDBVersion('lastcheck');
+			let nextCheck = new Date();
+			nextCheck.setTime((lastCheck + ZOTERO_CONFIG.REPOSITORY_CHECK_INTERVAL) * 1000);
+			
+			// If enough time hasn't passed, don't update
+			var now = new Date();
+			if (now < nextCheck) {
+				Zotero.debug('Not enough time since last update -- not checking repository', 4);
+				// Set the repository timer to the remaining time
+				_setRepositoryTimer(Math.round((nextCheck.getTime() - now.getTime()) / 1000));
+				return false;
+			}
+		}
+		
+		if (_localUpdateInProgress) {
+			Zotero.debug('A local update is already in progress -- delaying repository check', 4);
+			_setRepositoryTimer(600);
+			return;
+		}
+		
+		if (Zotero.locked) {
+			Zotero.debug('Zotero is locked -- delaying repository check', 4);
+			_setRepositoryTimer(600);
+			return;
+		}
+		
+		// If transaction already in progress, delay by ten minutes
+		yield Zotero.DB.waitForTransaction();
+		
+		// Get the last timestamp we got from the server
+		var lastUpdated = yield this.getDBVersion('repository');
+		
+		try {
+			var url = ZOTERO_CONFIG.REPOSITORY_URL + '/updated?'
+				+ (lastUpdated ? 'last=' + lastUpdated + '&' : '')
+				+ 'version=' + Zotero.version;
+			
+			Zotero.debug('Checking repository for updates');
+			
+			_remoteUpdateInProgress = true;
+			
+			if (force) {
+				if (force == 2) {
+					url += '&m=2';
 				}
-				
-				return true;
-			});
-		})
-		.then(function (update) {
-			if (!update) return;
-			
-			if (_localUpdateInProgress) {
-				Zotero.debug('A local update is already in progress -- delaying repository check', 4);
-				_setRepositoryTimer(600);
-				return;
+				else {
+					url += '&m=1';
+				}
 			}
 			
-			if (Zotero.locked) {
-				Zotero.debug('Zotero is locked -- delaying repository check', 4);
-				_setRepositoryTimer(600);
-				return;
+			// Send list of installed styles
+			var styles = Zotero.Styles.getAll();
+			var styleTimestamps = [];
+			for (var id in styles) {
+				var updated = Zotero.Date.sqlToDate(styles[id].updated);
+				updated = updated ? updated.getTime() / 1000 : 0;
+				var selfLink = styles[id].url;
+				var data = {
+					id: id,
+					updated: updated
+				};
+				if (selfLink) {
+					data.url = selfLink;
+				}
+				styleTimestamps.push(data);
 			}
+			var body = 'styles=' + encodeURIComponent(JSON.stringify(styleTimestamps));
 			
-			// If transaction already in progress, delay by ten minutes
-			if (Zotero.DB.transactionInProgress()) {
-				Zotero.debug('Transaction in progress -- delaying repository check', 4)
-				_setRepositoryTimer(600);
-				return;
+			try {
+				let xmlhttp = Zotero.HTTP.promise("POST", url, { body: body });
+				return _updateFromRepositoryCallback(xmlhttp, !!force);
 			}
-			
-			// Get the last timestamp we got from the server
-			return self.getDBVersion('repository')
-			.then(function (lastUpdated) {
-				var url = ZOTERO_CONFIG['REPOSITORY_URL'] + '/updated?'
-					+ (lastUpdated ? 'last=' + lastUpdated + '&' : '')
-					+ 'version=' + Zotero.version;
-				
-				Zotero.debug('Checking repository for updates');
-				
-				_remoteUpdateInProgress = true;
-				
-				if (force) {
-					if (force == 2) {
-						url += '&m=2';
+			catch (e) {
+				if (e instanceof Zotero.HTTP.BrowserOfflineException || e.xmlhttp) {
+					let msg = " -- retrying in " + ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL
+					if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+						Zotero.debug("Browser is offline" + msg, 2);
 					}
 					else {
-						url += '&m=1';
+						Components.utils.reportError(e);
+						Zotero.debug("Error updating from repository " + msg, 1);
 					}
+					// TODO: instead, add an observer to start and stop timer on online state change
+					_setRepositoryTimer(ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL);
+					return;
 				}
-				
-				// Send list of installed styles
-				var styles = Zotero.Styles.getAll();
-				var styleTimestamps = [];
-				for (var id in styles) {
-					var updated = Zotero.Date.sqlToDate(styles[id].updated);
-					updated = updated ? updated.getTime() / 1000 : 0;
-					var selfLink = styles[id].url;
-					var data = {
-						id: id,
-						updated: updated
-					};
-					if (selfLink) {
-						data.url = selfLink;
-					}
-					styleTimestamps.push(data);
-				}
-				var body = 'styles=' + encodeURIComponent(JSON.stringify(styleTimestamps));
-				
-				return Zotero.HTTP.promise("POST", url, { body: body })
-				.then(function (xmlhttp) {
-					return _updateFromRepositoryCallback(xmlhttp, !!force);
-				})
-				.catch(function (e) {
-					if (e instanceof Zotero.HTTP.BrowserOfflineException || e.xmlhttp) {
-						var msg = " -- retrying in " + ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL
-						if (e instanceof Zotero.HTTP.BrowserOfflineException) {
-							Zotero.debug("Browser is offline" + msg);
-						}
-						else {
-							Components.utils.reportError(e);
-							Zotero.debug("Error updating from repository " + msg);
-						}
-						// TODO: instead, add an observer to start and stop timer on online state change
-						_setRepositoryTimer(ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL);
-						return;
-					}
-					throw e;
-				});
-			})
-			.finally(function () _remoteUpdateInProgress = false);
-		});
-	}
+				throw e;
+			};
+		}
+		finally {
+			_remoteUpdateInProgress = false;
+		}
+	});
 	
 	
 	this.stopRepositoryTimer = function () {
@@ -1394,7 +1380,7 @@ Zotero.Schema = new function(){
 	 * Create new DB schema
 	 */
 	function _initializeSchema(){
-		return Zotero.DB.executeTransaction(function (conn) {
+		return Zotero.DB.executeTransaction(function* (conn) {
 			// Enable auto-vacuuming
 			yield Zotero.DB.queryAsync("PRAGMA page_size = 4096");
 			yield Zotero.DB.queryAsync("PRAGMA encoding = 'UTF-8'");
@@ -1536,7 +1522,7 @@ Zotero.Schema = new function(){
 		var styleUpdates = xmlhttp.responseXML.getElementsByTagName('style');
 		
 		if (!translatorUpdates.length && !styleUpdates.length){
-			return Zotero.DB.executeTransaction(function (conn) {
+			return Zotero.DB.executeTransaction(function* (conn) {
 				// Store the timestamp provided by the server
 				yield _updateDBVersion('repository', currentTime);
 				
@@ -1579,7 +1565,7 @@ Zotero.Schema = new function(){
 		.then(function (update) {
 			if (!update) return false;
 			
-			return Zotero.DB.executeTransaction(function (conn) {
+			return Zotero.DB.executeTransaction(function* (conn) {
 				// Store the timestamp provided by the server
 				yield _updateDBVersion('repository', currentTime);
 				
@@ -1766,7 +1752,7 @@ Zotero.Schema = new function(){
 			
 			Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
 			
-			return Zotero.DB.executeTransaction(function (conn) {
+			return Zotero.DB.executeTransaction(function* (conn) {
 				// Step through version changes until we reach the current version
 				//
 				// Each block performs the changes necessary to move from the
@@ -2020,7 +2006,7 @@ Zotero.Schema = new function(){
 						yield Zotero.DB.queryAsync("CREATE TABLE groupItems (\n    itemID INTEGER PRIMARY KEY,\n    createdByUserID INT,\n    lastModifiedByUserID INT,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,\n    FOREIGN KEY (createdByUserID) REFERENCES users(userID) ON DELETE SET NULL,\n    FOREIGN KEY (lastModifiedByUserID) REFERENCES users(userID) ON DELETE SET NULL\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO groupItems SELECT * FROM groupItemsOld");
 						
-						let cols = yield Zotero.DB.getColumnsAsync('fulltextItems');
+						let cols = yield Zotero.DB.getColumns('fulltextItems');
 						if (cols.indexOf("synced") == -1) {
 							Zotero.DB.queryAsync("ALTER TABLE fulltextItems ADD COLUMN synced INT DEFAULT 0");
 							Zotero.DB.queryAsync("REPLACE INTO settings (setting, key, value) VALUES ('fulltext', 'downloadAll', 1)");

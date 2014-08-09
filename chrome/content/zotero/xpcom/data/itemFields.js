@@ -29,13 +29,13 @@ Zotero.ItemFields = new function() {
 	var _fields = {};
 	var _fieldsFormats = [];
 	var _fieldsLoaded;
+	var _itemTypeFieldsLoaded;
 	var _fieldFormats = [];
 	var _itemTypeFields = [];
 	var _baseTypeFields = [];
+	var _baseMappedFields = [];
 	var _typeFieldIDsByBase = {};
 	var _typeFieldNamesByBase = {};
-	
-	var self = this;
 	
 	// Privileged methods
 	this.getName = getName;
@@ -46,10 +46,52 @@ Zotero.ItemFields = new function() {
 	this.getItemTypeFields = getItemTypeFields;
 	this.isBaseField = isBaseField;
 	this.isFieldOfBase = isFieldOfBase;
-	this.getBaseMappedFields = getBaseMappedFields;
 	this.getFieldIDFromTypeAndBase = getFieldIDFromTypeAndBase;
 	this.getBaseIDFromTypeAndField = getBaseIDFromTypeAndField;
 	this.getTypeFieldsFromBase = getTypeFieldsFromBase;
+	
+	
+	/*
+	 * Load all fields into an internal hash array
+	 */
+	this.init = Zotero.Promise.coroutine(function* () {
+		_fields = {};
+		_fieldsFormats = [];
+		
+		var result = yield Zotero.DB.queryAsync('SELECT * FROM fieldFormats');
+		
+		for (var i=0; i<result.length; i++) {
+			_fieldFormats[result[i]['fieldFormatID']] = {
+				regex: result[i]['regex'],
+				isInteger: result[i]['isInteger']
+			};
+		}
+		
+		var fields = yield Zotero.DB.queryAsync('SELECT * FROM fieldsCombined');
+		
+		var fieldItemTypes = yield _getFieldItemTypes();
+		
+		var sql = "SELECT DISTINCT baseFieldID FROM baseFieldMappingsCombined";
+		var baseFields = yield Zotero.DB.columnQueryAsync(sql);
+		
+		for each(var field in fields) {
+			_fields[field['fieldID']] = {
+				id: field['fieldID'],
+				name: field.fieldName,
+				label: field.label,
+				custom: !!field.custom,
+				isBaseField: (baseFields.indexOf(field['fieldID']) != -1),
+				formatID: field['fieldFormatID'],
+				itemTypes: fieldItemTypes[field['fieldID']]
+			};
+			// Store by name as well as id
+			_fields[field['fieldName']] = _fields[field['fieldID']];
+		}
+		
+		_fieldsLoaded = true;
+		yield _loadBaseTypeFields();
+		yield _loadItemTypeFields();
+	});
 	
 	
 	/*
@@ -57,7 +99,7 @@ Zotero.ItemFields = new function() {
 	 */
 	function getID(field) {
 		if (!_fieldsLoaded) {
-			_loadFields();
+			throw new Zotero.Exception.UnloadedDataException("Item field data not yet loaded");
 		}
 		
 		if (typeof field == 'number') {
@@ -73,7 +115,7 @@ Zotero.ItemFields = new function() {
 	 */
 	function getName(field) {
 		if (!_fieldsLoaded) {
-			_loadFields();
+			throw new Zotero.Exception.UnloadedDataException("Item field data not yet loaded");
 		}
 		
 		return _fields[field] ? _fields[field]['name'] : false;
@@ -167,24 +209,18 @@ Zotero.ItemFields = new function() {
 	 * Returns an array of fieldIDs for a given item type
 	 */
 	function getItemTypeFields(itemTypeID) {
-		if (!_fieldsLoaded) {
-			_loadFields();
-		}
-		
-		if (_itemTypeFields[itemTypeID]) {
-			return _itemTypeFields[itemTypeID];
-		}
-		
 		if (!itemTypeID) {
-			throw("Invalid item type id '" + itemTypeID
-				+ "' provided to getItemTypeFields()");
+			throw new Error("Invalid item type id '" + itemTypeID + "'");
 		}
 		
-		var sql = 'SELECT fieldID FROM itemTypeFieldsCombined '
-			+ 'WHERE itemTypeID=' + itemTypeID + ' ORDER BY orderIndex';
-		var fields = Zotero.DB.columnQuery(sql);
+		if (!_itemTypeFieldsLoaded) {
+			throw new Zotero.Exception.UnloadedDataException("Item field data not yet loaded");
+		}
 		
-		_itemTypeFields[itemTypeID] = fields ? fields : [];
+		if (!_itemTypeFields[itemTypeID]) {
+			throw new Error("Item type field data not found for itemTypeID " + itemTypeID);
+		}
+		
 		return _itemTypeFields[itemTypeID];
 	}
 	
@@ -213,8 +249,8 @@ Zotero.ItemFields = new function() {
 	}
 	
 	
-	function getBaseMappedFields() {
-		return Zotero.DB.columnQuery("SELECT DISTINCT fieldID FROM baseFieldMappingsCombined");
+	this.getBaseMappedFields = function () {
+		return _baseMappedFields.concat();
 	}
 	
 	
@@ -367,17 +403,12 @@ Zotero.ItemFields = new function() {
 	}
 	
 	
-	this.reload = function () {
-		_fieldsLoaded = false;
-	}
-	
-	
 	/**
 	* Check whether a field is valid, throwing an exception if not
 	* (since it should never actually happen)
 	**/
 	function _fieldCheck(field, func) {
-		var fieldID = self.getID(field);
+		var fieldID = Zotero.ItemFields.getID(field);
 		if (!fieldID) {
 			Zotero.debug((new Error).stack, 1);
 			throw new Error("Invalid field '" + field + (func ? "' in ItemFields." + func + "()" : "'"));
@@ -389,29 +420,28 @@ Zotero.ItemFields = new function() {
 	/*
 	 * Returns hash array of itemTypeIDs for which a given field is valid
 	 */
-	function _getFieldItemTypes() {
+	var _getFieldItemTypes = Zotero.Promise.coroutine(function* () {
 		var sql = 'SELECT fieldID, itemTypeID FROM itemTypeFieldsCombined';
-		
-		var results = Zotero.DB.query(sql);
+		var results = yield Zotero.DB.queryAsync(sql);
 		
 		if (!results) {
 			throw ('No fields in itemTypeFields!');
 		}
-		var fields = new Array();
-		for (var i=0; i<results.length; i++) {
-			if (!fields[results[i]['fieldID']]) {
-				fields[results[i]['fieldID']] = new Array();
+		var fields = [];
+		for (let i=0; i<results.length; i++) {
+			if (!fields[results[i].fieldID]) {
+				fields[results[i].fieldID] = [];
 			}
-			fields[results[i]['fieldID']][results[i]['itemTypeID']] = true;
+			fields[results[i].fieldID][results[i].itemTypeID] = true;
 		}
 		return fields;
-	}
+	});
 	
 	
 	/*
 	 * Build a lookup table for base field mappings
 	 */
-	function _loadBaseTypeFields() {
+	var _loadBaseTypeFields = Zotero.Promise.coroutine(function* () {
 		_typeFieldIDsByBase = {};
 		_typeFieldNamesByBase = {};
 		
@@ -420,10 +450,10 @@ Zotero.ItemFields = new function() {
 			+ "FROM itemTypesCombined IT LEFT JOIN fieldsCombined F "
 			+ "LEFT JOIN baseFieldMappingsCombined BFM"
 			+ " ON (IT.itemTypeID=BFM.itemTypeID AND F.fieldID=BFM.baseFieldID)";
-		var rows = Zotero.DB.query(sql);
+		var rows = yield Zotero.DB.queryAsync(sql);
 		
 		var sql = "SELECT DISTINCT baseFieldID FROM baseFieldMappingsCombined";
-		var baseFields = Zotero.DB.columnQuery(sql);
+		var baseFields = yield Zotero.DB.columnQueryAsync(sql);
 		
 		var fields = [];
 		for each(var row in rows) {
@@ -444,13 +474,11 @@ Zotero.ItemFields = new function() {
 				fields[row.itemTypeID][row.baseFieldID] = false;
 			}
 		}
-		
 		_baseTypeFields = fields;
-		
 		
 		var sql = "SELECT baseFieldID, fieldID, fieldName "
 			+ "FROM baseFieldMappingsCombined JOIN fieldsCombined USING (fieldID)";
-		var rows = Zotero.DB.query(sql);
+		var rows = yield Zotero.DB.queryAsync(sql);
 		for each(var row in rows) {
 			if (!_typeFieldIDsByBase[row['baseFieldID']]) {
 				_typeFieldIDsByBase[row['baseFieldID']] = [];
@@ -459,50 +487,31 @@ Zotero.ItemFields = new function() {
 			_typeFieldIDsByBase[row['baseFieldID']].push(row['fieldID']);
 			_typeFieldNamesByBase[row['baseFieldID']].push(row['fieldName']);
 		}
-	}
+		
+		// Get all fields mapped to base types
+		sql = "SELECT DISTINCT fieldID FROM baseFieldMappingsCombined";
+		_baseMappedFields = yield Zotero.DB.columnQueryAsync(sql);
+		
+		_baseTypeFieldsLoaded = true;
+	});
 	
 	
-	/*
-	 * Load all fields into an internal hash array
-	 */
-	function _loadFields() {
-		_fields = {};
-		_fieldsFormats = [];
-		_itemTypeFields = [];
+	var _loadItemTypeFields = Zotero.Promise.coroutine(function* () {
+		var sql = 'SELECT itemTypeID, fieldID FROM itemTypeFieldsCombined ORDER BY orderIndex';
+		var rows = yield Zotero.DB.queryAsync(sql);
 		
-		var result = Zotero.DB.query('SELECT * FROM fieldFormats');
+		_itemTypeFields = {};
+		_itemTypeFields[1] = []; // notes have no fields
 		
-		for (var i=0; i<result.length; i++) {
-			_fieldFormats[result[i]['fieldFormatID']] = {
-				regex: result[i]['regex'],
-				isInteger: result[i]['isInteger']
-			};
+		for (let i=0; i<rows.length; i++) {
+			let row = rows[i];
+			let itemTypeID = row.itemTypeID;
+			if (!_itemTypeFields[itemTypeID]) {
+				_itemTypeFields[itemTypeID] = [];
+			}
+			_itemTypeFields[itemTypeID].push(row.fieldID);
 		}
 		
-		var fields = Zotero.DB.query('SELECT * FROM fieldsCombined');
-		
-		var fieldItemTypes = _getFieldItemTypes();
-		
-		var sql = "SELECT DISTINCT baseFieldID FROM baseFieldMappingsCombined";
-		var baseFields = Zotero.DB.columnQuery(sql);
-		
-		for each(var field in fields) {
-			_fields[field['fieldID']] = {
-				id: field['fieldID'],
-				name: field.fieldName,
-				label: field.label,
-				custom: !!field.custom,
-				isBaseField: (baseFields.indexOf(field['fieldID']) != -1),
-				formatID: field['fieldFormatID'],
-				itemTypes: fieldItemTypes[field['fieldID']]
-			};
-			// Store by name as well as id
-			_fields[field['fieldName']] = _fields[field['fieldID']];
-		}
-		
-		_fieldsLoaded = true;
-		
-		_loadBaseTypeFields();
-	}
+		_itemTypeFieldsLoaded = true;
+	});
 }
-

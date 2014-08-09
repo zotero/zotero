@@ -37,12 +37,11 @@ Zotero.URI = new function () {
 	 * @return	{String|False}		e.g., 'http://zotero.org/users/v3aG8nQf'
 	 */
 	this.getLocalUserURI = function () {
-		var key = Zotero.getLocalUserKey();
+		var key = Zotero.Users.getLocalUserKey();
 		if (!key) {
 			return false;
 		}
-		
-		return _baseURI + "users/local/" + Zotero.getLocalUserKey();
+		return _baseURI + "users/local/" + key;
 	}
 	
 	
@@ -52,7 +51,7 @@ Zotero.URI = new function () {
 	 * @return	{String}
 	 */
 	this.getCurrentUserURI = function (noLocal) {
-		var userID = Zotero.userID;
+		var userID = Zotero.Users.getCurrentUserID();
 		if (!userID && noLocal) {
 			throw new Exception("Local userID not available and noLocal set in Zotero.URI.getCurrentUserURI()");
 		}
@@ -60,12 +59,12 @@ Zotero.URI = new function () {
 			return _baseURI + "users/" + userID;
 		}
 		
-		return _baseURI + "users/local/" + Zotero.getLocalUserKey(true);
+		return _baseURI + "users/local/" + Zotero.Users.getLocalUserKey();
 	}
 	
 	
 	this.getCurrentUserLibraryURI = function () {
-		var userID = Zotero.userID;
+		var userID = Zotero.Users.getCurrentUserID();
 		if (!userID) {
 			return false;
 		}
@@ -87,7 +86,7 @@ Zotero.URI = new function () {
 		
 		switch (libraryType) {
 			case 'user':
-				var id = Zotero.userID;
+				var id = Zotero.Users.getCurrentUserID();
 				if (!id) {
 					throw new Exception("User id not available in Zotero.URI.getLibraryPath()");
 				}
@@ -269,7 +268,7 @@ Zotero.URI = new function () {
 						}
 					}
 				} else {
-					if(id == Zotero.userID)  {
+					if(id == Zotero.Users.getCurrentUserID())  {
 						return null;
 					}
 				}

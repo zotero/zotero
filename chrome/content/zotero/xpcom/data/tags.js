@@ -854,7 +854,7 @@ Zotero.Tags = new function() {
 	
 	function _requireLoad(libraryID) {
 		if (!_loaded[libraryID]) {
-			throw new Zotero.DataObjects.UnloadedDataException(
+			throw new Zotero.Exception.UnloadedDataException(
 				"Tag data has not been loaded for library " + libraryID,
 				"tags"
 			);

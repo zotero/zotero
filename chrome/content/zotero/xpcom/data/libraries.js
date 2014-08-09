@@ -24,6 +24,23 @@
 */
 
 Zotero.Libraries = new function () {
+	var _libraryData = {};
+	
+	this.init = Zotero.Promise.coroutine(function* () {
+		// Library data
+		var sql = "SELECT * FROM libraries";
+		var rows = yield Zotero.DB.queryAsync(sql);
+		for (let i=0; i<rows.length; i++) {
+			let row = rows[i];
+			_libraryData[row.libraryID] = {
+				type: row.libraryType,
+				version: row.version
+			};
+		}
+		
+		// Current library
+	});
+	
 	this.exists = function (libraryID) {
 		// Until there are other library types, this can just check groups,
 		// which already preload ids at startup
@@ -54,7 +71,7 @@ Zotero.Libraries = new function () {
 	
 	
 	this.dbLibraryID = function (libraryID) {
-		return (libraryID == Zotero.libraryID) ? 0 : libraryID;
+		return (libraryID == Zotero.Users.getCurrentLibraryID()) ? 0 : libraryID;
 	}
 	
 	
@@ -77,24 +94,24 @@ Zotero.Libraries = new function () {
 	
 	
 	this.getType = function (libraryID) {
-		if (libraryID === 0 || !Zotero.libraryID || libraryID == Zotero.libraryID) {
+		if (libraryID === 0) {
 			return 'user';
 		}
-		var sql = "SELECT libraryType FROM libraries WHERE libraryID=?";
-		var libraryType = Zotero.DB.valueQuery(sql, libraryID);
-		if (!libraryType) {
-			throw new Error("Library " + libraryID + " does not exist in Zotero.Libraries.getType()");
+		if (!_libraryTypes[libraryID]) {
+			throw new Error("Library data not loaded for library " + libraryID);
 		}
-		return libraryType;
+		return _libraryTypes[libraryID].type;
 	}
 	
 	/**
 	 * @param {Integer} libraryID
-	 * @return {Promise:Integer}
+	 * @return {Integer}
 	 */
 	this.getVersion = function (libraryID) {
-		var sql = "SELECT version FROM libraries WHERE libraryID=?";
-		return Zotero.DB.valueQueryAsync(sql, libraryID);
+		if (!_libraryTypes[libraryID]) {
+			throw new Error("Library data not loaded for library " + libraryID);
+		}
+		return _libraryTypes[libraryID].version;
 	}
 	
 	
@@ -103,10 +120,12 @@ Zotero.Libraries = new function () {
 	 * @param {Integer} version
 	 * @return {Promise}
 	 */
-	this.setVersion = function (libraryID, version) {
+	this.setVersion = Zotero.Promise.coroutine(function* (libraryID, version) {
+		version = parseInt(version);
 		var sql = "UPDATE libraries SET version=? WHERE libraryID=?";
-		return Zotero.DB.queryAsync(sql, [version, libraryID]);
-	}
+		yield Zotero.DB.queryAsync(sql, [version, libraryID]);
+		_libraryTypes[libraryID] = version;
+	});
 	
 	
 	this.isEditable = function (libraryID) {
