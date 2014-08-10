@@ -70,13 +70,11 @@ Zotero.DBConnection = function(dbName) {
 	// Private members
 	this._dbName = dbName;
 	this._shutdown = false;
-	this._connection = null;
 	this._connectionAsync = null;
 	this._transactionDate = null;
 	this._lastTransactionDate = null;
 	this._transactionRollback = false;
 	this._transactionNestingLevel = 0;
-	this._transactionWaitLevel = 0;
 	this._asyncTransactionNestingLevel = 0;
 	this._callbacks = {
 		begin: [],
@@ -115,11 +113,6 @@ Zotero.DBConnection.prototype.test = function () {
 Zotero.DBConnection.prototype.getAsyncStatement = Zotero.Promise.coroutine(function* (sql) {
 	var conn = yield this._getConnectionAsync();
 	conn = conn._connection;
-	
-	// TODO: limit to Zotero.DB, not all Zotero.DBConnections?
-	if (conn.transactionInProgress && Zotero.waiting > this._transactionWaitLevel) {
-		throw ("Cannot access database layer from a higher wait level if a transaction is open");
-	}
 	
 	try {
 		this._debug(sql, 5);
@@ -258,30 +251,36 @@ Zotero.DBConnection.prototype.parseQueryAndParams = function (sql, params, optio
  *
  * Warning: This will freeze if used with a write statement within executeTransaction()!
  *
- * @param  {mozIStorageAsyncStatement}  statement
- * @return {Promise}  Resolved on completion, rejected with a reason on error,
- *                    and progressed with a mozIStorageRow for SELECT queries
+ * @param {mozIStorageAsyncStatement} statement - Statement to run
+ * @param {Function} [progressHandler] - Function to pass each available row to for SELECT queries
+ * @return {Promise} - Resolved on completion, rejected with a reason on error
  */
-Zotero.DBConnection.prototype.executeAsyncStatement = function (statement) {
-	var deferred = Zotero.Promise.defer();
+Zotero.DBConnection.prototype.executeAsyncStatement = Zotero.Promise.method(function (statement, progressHandler) {
+	var resolve;
+	var reject;
 	statement.executeAsync({
 		handleResult: function (resultSet) {
-			deferred.progress(resultSet.getNextRow());
+			if (progressHandler) {
+				progressHandler(resultSet.getNextRow());
+			}
 		},
 		
 		handleError: function (e) {
-			deferred.reject(e);
+			reject(e);
 		},
 		
 		handleCompletion: function (reason) {
 			if (reason != Components.interfaces.mozIStorageStatementCallback.REASON_FINISHED) {
-				deferred.reject(reason);
+				reject(reason);
 			}
-			deferred.resolve();
+			resolve();
 		}
 	});
-	return deferred.promise;
-}
+	return new Zotero.Promise(function () {
+		resolve = arguments[0];
+		reject = arguments[1];
+	});
+});
 
 
 /*
@@ -859,7 +858,7 @@ Zotero.DBConnection.prototype.executeSQLFile = function (sql) {
 	var statements = sql.split(";")
 		.map(function (x) x.replace(/TEMPSEMI/g, ";"));
 	
-	return this.executeTransaction(function () {
+	return this.executeTransaction(function* () {
 		var statement;
 		while (statement = statements.shift()) {
 			yield Zotero.DB.queryAsync(statement);
