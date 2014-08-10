@@ -40,13 +40,7 @@ var Zotero = Components.classes["@zotero.org/Zotero;1"]
 /*
  * Implements nsIAutoCompleteSearch
  */
-function ZoteroAutoComplete() {
-	// Get the Zotero object
-	this._zotero = Components.classes["@zotero.org/Zotero;1"]
-				.getService(Components.interfaces.nsISupports)
-				.wrappedJSObject;
-}
-
+function ZoteroAutoComplete() {}
 
 ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (searchString, searchParams, previousResult, listener) {
 	// FIXME
@@ -61,7 +55,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 	this._listener = listener;
 	this._cancelled = false;
 	
-	this._zotero.debug("Starting autocomplete search with data '"
+	Zotero.debug("Starting autocomplete search with data '"
 		+ searchParams + "'" + " and string '" + searchString + "'");
 	
 	searchParams = JSON.parse(searchParams);
@@ -183,7 +177,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 			break;
 			
 		case 'accessDate':
-			var fieldID = this._zotero.ItemFields.getID('accessDate');
+			var fieldID = Zotero.ItemFields.getID('accessDate');
 			
 			var sql = "SELECT DISTINCT DATE(value, 'localtime') AS val, NULL AS comment FROM itemData "
 				+ "WHERE fieldID=? AND value LIKE ? ORDER BY value";
@@ -191,9 +185,9 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 			break;
 		
 		default:
-			var fieldID = this._zotero.ItemFields.getID(fieldName);
+			var fieldID = Zotero.ItemFields.getID(fieldName);
 			if (!fieldID) {
-				this._zotero.debug("'" + fieldName + "' is not a valid autocomplete scope", 1);
+				Zotero.debug("'" + fieldName + "' is not a valid autocomplete scope", 1);
 				this.updateResults([], false, Ci.nsIAutoCompleteResult.RESULT_IGNORED);
 				return;
 			}
@@ -232,7 +226,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 	}
 	var resultCode;
 	try {
-		let results = yield this._zotero.DB.queryAsync(sql, sqlParams, { onRow: onRow });
+		let results = yield Zotero.DB.queryAsync(sql, sqlParams, { onRow: onRow });
 		// Post-process the results
 		if (resultsCallback) {
 			resultsCallback(results);
@@ -243,12 +237,12 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 			)
 		}
 		resultCode = null;
-		this._zotero.debug("Autocomplete query completed");
+		Zotero.debug("Autocomplete query completed");
 	}
 	catch (e) {
 		Zotero.debug(e, 1);
 		resultCode = Ci.nsIAutoCompleteResult.RESULT_FAILURE;
-		this._zotero.debug("Autocomplete query aborted");
+		Zotero.debug("Autocomplete query aborted");
 	}
 	finally {
 		this.updateResults(null, null, false, resultCode);
@@ -257,7 +251,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 
 
 ZoteroAutoComplete.prototype.updateResult = function (result, comment) {
-	this._zotero.debug("Appending autocomplete value '" + result + "'" + (comment ? " (" + comment + ")" : ""));
+	Zotero.debug("Appending autocomplete value '" + result + "'" + (comment ? " (" + comment + ")" : ""));
 	// Add to nsIAutoCompleteResult
 	this._result.appendMatch(result, comment ? comment : null);
 	// Add to our own list
@@ -283,12 +277,12 @@ ZoteroAutoComplete.prototype.updateResults = function (results, comments, ongoin
 		
 		if (this._results.indexOf(result) == -1) {
 			comment = comments[i] ? comments[i] : null;
-			this._zotero.debug("Adding autocomplete value '" + result + "'" + (comment ? " (" + comment + ")" : ""));
+			Zotero.debug("Adding autocomplete value '" + result + "'" + (comment ? " (" + comment + ")" : ""));
 			this._result.appendMatch(result, comment, null, null);
 			this._results.push(result);
 		}
 		else {
-			//this._zotero.debug("Skipping existing value '" + result + "'");
+			//Zotero.debug("Skipping existing value '" + result + "'");
 		}
 	}
 	
@@ -316,7 +310,7 @@ ZoteroAutoComplete.prototype.updateResults = function (results, comments, ongoin
 
 // FIXME
 ZoteroAutoComplete.prototype.stopSearch = function(){
-	this._zotero.debug('Stopping autocomplete search');
+	Zotero.debug('Stopping autocomplete search');
 	this._cancelled = true;
 }
 
