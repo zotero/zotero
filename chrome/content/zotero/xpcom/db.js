@@ -656,15 +656,19 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params, options) {
 			}
 		}
 		if (options && options.onRow) {
-			// Errors in onRow aren't shown by default, so we wrap them in a try/catch
+			// Errors in onRow don't stop the query unless StopIteration is thrown
 			onRow = function (row) {
 				try {
 					options.onRow(row);
 				}
 				catch (e) {
+					if (e instanceof StopIteration) {
+						Zotero.debug("Query cancelled");
+						throw e;
+					}
 					Zotero.debug(e, 1);
 					Components.utils.reportError(e);
-					throw e;
+					throw StopIteration;
 				}
 			}
 		}
