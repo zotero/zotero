@@ -486,7 +486,7 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 		}
 	}
 	
-	var conn = yield this._getConnectionAsync();
+	var conn = yield this._getConnectionAsync(options);
 	try {
 		if (conn.transactionInProgress) {
 			Zotero.debug("Async DB transaction in progress -- increasing level to "
@@ -642,8 +642,8 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params, options) {
 	let conn;
 	let self = this;
 	let onRow = null;
-	return this._getConnectionAsync().
-	then(function (c) {
+	return this._getConnectionAsync(options)
+	.then(function (c) {
 		conn = c;
 		[sql, params] = self.parseQueryAndParams(sql, params);
 		if (Zotero.Debug.enabled && (!options || options.debug === undefined || options.debug === true)) {
@@ -737,7 +737,7 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params, options) {
 /**
  * @param {String} sql  SQL statement to run
  * @param {Array|String|Integer} [params]  SQL parameters to bind
- * @return {Promise<Array|Boolean>}  A Q promise for either the value or FALSE if no result
+ * @return {Promise<Array|Boolean>}  A promise for either the value or FALSE if no result
  */
 Zotero.DBConnection.prototype.valueQueryAsync = function (sql, params) {
 	let self = this;
@@ -787,7 +787,7 @@ Zotero.DBConnection.prototype.rowQueryAsync = function (sql, params) {
 /**
  * @param {String} sql SQL statement to run
  * @param {Array|String|Integer} [params] SQL parameters to bind
- * @return {Promise<Array>}  A Q promise for an array of values in the column
+ * @return {Promise<Array>}  A promise for an array of values in the column
  */
 Zotero.DBConnection.prototype.columnQueryAsync = function (sql, params) {
 	let conn;
@@ -941,7 +941,10 @@ Zotero.DBConnection.prototype.closeDatabase = Zotero.Promise.coroutine(function*
 });
 
 
-Zotero.DBConnection.prototype.backupDatabase = function (suffix, force) {
+Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function* (suffix, force) {
+	var storageService = Components.classes["@mozilla.org/storage/service;1"]
+		.getService(Components.interfaces.mozIStorageService);
+	
 	if (!suffix) {
 		var numBackups = Zotero.Prefs.get("backup.numBackups");
 		if (numBackups < 1) {
@@ -957,149 +960,160 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix, force) {
 		return false;
 	}
 	
-	if (this.transactionInProgress()) {
-		//this._debug("Transaction in progress--skipping backup of DB '" + this._dbName + "'", 2);
+	if (this._backupPromise && this._backupPromise.isPending()) {
+		this._debug("Database " + this._dbName + " is already being backed up -- skipping", 2);
 		return false;
 	}
 	
-	var corruptMarker = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt');
+	// Start a promise that will be resolved when the backup is finished
+	var resolveBackupPromise;
+	yield this.waitForTransaction();
+	this._backupPromise = new Zotero.Promise(function () {
+		resolveBackupPromise = arguments[0];
+	});
 	
-	if (this.skipBackup || Zotero.skipLoading) {
-		this._debug("Skipping backup of database '" + this._dbName + "'", 1);
-		return false;
-	}
-	else if (this._dbIsCorrupt || corruptMarker.exists()) {
-		this._debug("Database '" + this._dbName + "' is marked as corrupt--skipping backup", 1);
-		return false;
-	}
-	
-	var file = Zotero.getZoteroDatabase(this._dbName);
-	
-	// For standard backup, make sure last backup is old enough to replace
-	if (!suffix && !force) {
-		var backupFile = Zotero.getZoteroDatabase(this._dbName, 'bak');
-		if (backupFile.exists()) {
-			var currentDBTime = file.lastModifiedTime;
-			var lastBackupTime = backupFile.lastModifiedTime;
-			if (currentDBTime == lastBackupTime) {
-				//Zotero.debug("Database '" + this._dbName + "' hasn't changed -- skipping backup");
-				return;
-			}
-			
-			var now = new Date();
-			var intervalMinutes = Zotero.Prefs.get('backup.interval');
-			var interval = intervalMinutes * 60 *  1000;
-			if ((now - lastBackupTime) < interval) {
-				//Zotero.debug("Last backup of database '" + this._dbName
-				//	+ "' was less than " + intervalMinutes + " minutes ago -- skipping backup");
-				return;
-			}
-		}
-	}
-	
-	this._debug("Backing up database '" + this._dbName + "'");
-	
-	// Copy via a temporary file so we don't run into disk space issues
-	// after deleting the old backup file
-	var tmpFile = Zotero.getZoteroDatabase(this._dbName, 'tmp');
-	if (tmpFile.exists()) {
-		try {
-			tmpFile.remove(false);
-		}
-		catch (e) {
-			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
-				alert("Cannot delete " + tmpFile.leafName);
-			}
-			throw (e);
-		}
-	}
-	
-	// Turn off DB locking before backup and reenable after, since otherwise
-	// the lock is lost
 	try {
-		if (DB_LOCK_EXCLUSIVE) {
-			this.query("PRAGMA locking_mode=NORMAL");
+		var corruptMarker = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt');
+		
+		if (this.skipBackup || Zotero.skipLoading) {
+			this._debug("Skipping backup of database '" + this._dbName + "'", 1);
+			return false;
+		}
+		else if (this._dbIsCorrupt || corruptMarker.exists()) {
+			this._debug("Database '" + this._dbName + "' is marked as corrupt -- skipping backup", 1);
+			return false;
 		}
 		
-		var store = Components.classes["@mozilla.org/storage/service;1"].
-			getService(Components.interfaces.mozIStorageService);
-		store.backupDatabaseFile(file, tmpFile.leafName, file.parent);
-	}
-	catch (e) {
-		Zotero.debug(e);
-		Components.utils.reportError(e);
-		return false;
-	}
-	finally {
-		if (DB_LOCK_EXCLUSIVE) {
-			this.query("PRAGMA locking_mode=EXCLUSIVE");
-		}
-	}
-	
-	// Opened database files can't be moved on Windows, so we have to skip
-	// the extra integrity check (unless we wanted to write two copies of
-	// the database, but that doesn't seem like a great idea)
-	if (!Zotero.isWin) {
-		try {
-			var store = Components.classes["@mozilla.org/storage/service;1"].
-				getService(Components.interfaces.mozIStorageService);
+		var file = Zotero.getZoteroDatabase(this._dbName);
+		
+		// For standard backup, make sure last backup is old enough to replace
+		/*if (!suffix && !force) {
+			var backupFile = Zotero.getZoteroDatabase(this._dbName, 'bak');
+			if (yield OS.File.exists(backupFile.path)) {
+				var currentDBTime = (yield OS.File.stat(file.path)).lastModificationDate;
+				var lastBackupTime = (yield OS.File.stat(backupFile.path)).lastModificationDate;
+				if (currentDBTime == lastBackupTime) {
+					Zotero.debug("Database '" + this._dbName + "' hasn't changed -- skipping backup");
+					return;
+				}
 				
-			var connection = store.openDatabase(tmpFile);
+				var now = new Date();
+				var intervalMinutes = Zotero.Prefs.get('backup.interval');
+				var interval = intervalMinutes * 60 *  1000;
+				if ((now - lastBackupTime) < interval) {
+					Zotero.debug("Last backup of database '" + this._dbName
+						+ "' was less than " + intervalMinutes + " minutes ago -- skipping backup");
+					return;
+				}
+			}
+		}*/
+		
+		this._debug("Backing up database '" + this._dbName + "'");
+		
+		// Copy via a temporary file so we don't run into disk space issues
+		// after deleting the old backup file
+		var tmpFile = Zotero.getZoteroDatabase(this._dbName, 'tmp');
+		if (yield OS.File.exists(tmpFile.path)) {
+			try {
+				yield OS.File.remove(tmpFile.path);
+			}
+			catch (e) {
+				if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+					alert("Cannot delete " + tmpFile.leafName);
+				}
+				throw (e);
+			}
 		}
-		catch (e){
-			this._debug("Database file '" + tmpFile.leafName + "' is corrupt--skipping backup");
-			if (tmpFile.exists()) {
-				tmpFile.remove(null);
+		
+		// Turn off DB locking before backup and reenable after, since otherwise
+		// the lock is lost
+		try {
+			if (DB_LOCK_EXCLUSIVE) {
+				yield this.queryAsync("PRAGMA locking_mode=NORMAL", false, { inBackup: true });
+			}
+			storageService.backupDatabaseFile(file, tmpFile.leafName, file.parent);
+		}
+		catch (e) {
+			Zotero.debug(e);
+			Components.utils.reportError(e);
+			return false;
+		}
+		finally {
+			if (DB_LOCK_EXCLUSIVE) {
+				yield this.queryAsync("PRAGMA locking_mode=EXCLUSIVE", false, { inBackup: true });
+			}
+		}
+		
+		// Open the backup to check for corruption
+		try {
+			var connection = storageService.openDatabase(tmpFile);
+		}
+		catch (e) {
+			this._debug("Database file '" + tmpFile.leafName + "' is corrupt -- skipping backup");
+			if (yield OS.File.exists(tmpFile.path)) {
+				yield OS.File.remove(tmpFile.path);
 			}
 			return false;
 		}
-	}
-	
-	// Special backup
-	if (!suffix && numBackups > 1) {
-		var zdir = Zotero.getZoteroDirectory();
-		
-		// Remove oldest backup file
-		var targetFile = Zotero.getZoteroDatabase(this._dbName, (numBackups - 1) + '.bak')
-		if (targetFile.exists()) {
-			targetFile.remove(false);
+		finally {
+			let resolve;
+			connection.asyncClose({
+				complete: function () {
+					resolve();
+				}
+			});
+			yield new Zotero.Promise(function () {
+				resolve = arguments[0];
+			});
 		}
 		
-		// Shift old versions up
-		for (var i=(numBackups - 1); i>=1; i--) {
-			var targetNum = i;
-			var sourceNum = targetNum - 1;
-			
-			var targetFile = Zotero.getZoteroDatabase(
-				this._dbName, targetNum + '.bak'
-			);
-			var sourceFile = Zotero.getZoteroDatabase(
-				this._dbName, sourceNum ? sourceNum + '.bak' : 'bak'
-			);
-			
-			if (!sourceFile.exists()) {
-				continue;
+		// Special backup
+		if (!suffix && numBackups > 1) {
+			// Remove oldest backup file
+			var targetFile = Zotero.getZoteroDatabase(this._dbName, (numBackups - 1) + '.bak')
+			if (yield OS.File.exists(targetFile.path)) {
+				yield OS.File.remove(targetFile.path);
 			}
 			
-			Zotero.debug("Moving " + sourceFile.leafName + " to " + targetFile.leafName);
-			sourceFile.moveTo(zdir, targetFile.leafName);
+			// Shift old versions up
+			for (var i=(numBackups - 1); i>=1; i--) {
+				var targetNum = i;
+				var sourceNum = targetNum - 1;
+				
+				var targetFile = Zotero.getZoteroDatabase(
+					this._dbName, targetNum + '.bak'
+				);
+				var sourceFile = Zotero.getZoteroDatabase(
+					this._dbName, sourceNum ? sourceNum + '.bak' : 'bak'
+				);
+				
+				if (!(yield OS.File.exists(sourceFile.path))) {
+					continue;
+				}
+				
+				Zotero.debug("Moving " + sourceFile.leafName + " to " + targetFile.leafName);
+				yield OS.File.move(sourceFile.path, targetFile.path);
+			}
 		}
+		
+		var backupFile = Zotero.getZoteroDatabase(
+			this._dbName, (suffix ? suffix + '.' : '') + 'bak'
+		);
+		
+		// Remove old backup file
+		if (yield OS.File.exists(backupFile.path)) {
+			OS.File.remove(backupFile.path);
+		}
+		
+		yield OS.File.move(tmpFile.path, backupFile.path);
+		Zotero.debug("Backed up to " + backupFile.leafName);
+		
+		return true;
 	}
-	
-	var backupFile = Zotero.getZoteroDatabase(
-		this._dbName, (suffix ? suffix + '.' : '') + 'bak'
-	);
-	
-	// Remove old backup file
-	if (backupFile.exists()) {
-		backupFile.remove(false);
+	finally {
+		resolveBackupPromise();
 	}
-	
-	Zotero.debug("Backed up to " + backupFile.leafName);
-	tmpFile.moveTo(tmpFile.parent, backupFile.leafName);
-	
-	return true;
-}
+});
 
 
 /**
@@ -1135,7 +1149,13 @@ Zotero.DBConnection.prototype.getSQLDataType = function(value) {
 /*
  * Retrieve a link to the data store asynchronously
  */
-Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(function* () {
+Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(function* (options) {
+	// If a backup is in progress, wait until it's done
+	if (this._backupPromise && this._backupPromise.isPending() && (!options || !options.inBackup)) {
+		Zotero.debug("Waiting for database backup to complete", 2);
+		yield this._backupPromise;
+	}
+	
 	if (this._connectionAsync) {
 		return this._connectionAsync;
 	}

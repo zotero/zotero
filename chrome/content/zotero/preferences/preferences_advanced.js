@@ -69,7 +69,7 @@ Zotero_Preferences.Advanced = {
 				
 				if (index == 0) {
 					// Safety first
-					Zotero.DB.backupDatabase();
+					yield Zotero.DB.backupDatabase();
 					
 					// Fix the errors
 					Zotero.Schema.integrityCheck(true);
