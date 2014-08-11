@@ -1170,7 +1170,6 @@ var ZoteroPane = new function()
 		};
 		this.itemsView.addCallback(this.setTagScope);
 		document.getElementById('zotero-items-tree').view = this.itemsView;
-		this.itemsView.selection.clearSelection();
 		
 		// Add events to treecolpicker to update menu before showing/hiding
 		try {
