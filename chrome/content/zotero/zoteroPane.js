@@ -3489,10 +3489,11 @@ var ZoteroPane = new function()
 				
 				// Fall back to first attachment link
 				if (!uri) {
-					var link = item.getAttachments()[0];
-					if (link) {
-						link = yield Zotero.Items.getAsync(link);
-						if (link) uri = link.getField('url');
+					yield item.loadChildItems();
+					let attachmentID = item.getAttachments()[0];
+					if (attachmentID) {
+						let attachment = yield Zotero.Items.getAsync(attachmentID);
+						if (attachment) uri = attachment.getField('url');
 					}
 				}
 				
