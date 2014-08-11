@@ -53,7 +53,7 @@ Zotero_Preferences.Advanced = {
 		
 		var ok = yield Zotero.DB.integrityCheck();
 		if (ok) {
-			ok = Zotero.Schema.integrityCheck();
+			ok = yield Zotero.Schema.integrityCheck();
 			if (!ok) {
 				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
@@ -72,10 +72,10 @@ Zotero_Preferences.Advanced = {
 					yield Zotero.DB.backupDatabase();
 					
 					// Fix the errors
-					Zotero.Schema.integrityCheck(true);
+					yield Zotero.Schema.integrityCheck(true);
 					
 					// And run the check again
-					ok = Zotero.Schema.integrityCheck();
+					ok = yield Zotero.Schema.integrityCheck();
 					var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING);
 					if (ok) {
 						var str = 'success';

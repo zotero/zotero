@@ -69,6 +69,8 @@ Zotero.Schema = new function(){
 	 * Checks if the DB schema exists and is up-to-date, updating if necessary
 	 */
 	this.updateSchema = function () {
+		// TODO: Check database integrity first with Zotero.DB.integrityCheck()
+		
 		// 'userdata' is the last upgrade step run in _migrateUserDataSchema() based on the
 		// version in the schema file. Upgrade steps may or may not break DB compatibility.
 		//
@@ -113,7 +115,7 @@ Zotero.Schema = new function(){
 					yield _updateSchema('triggers');
 					
 					return updated;
-				})
+				}.bind(this))
 				.then(function (updated) {
 					// Populate combined tables for custom types and fields
 					// -- this is likely temporary
@@ -1101,11 +1103,11 @@ Zotero.Schema = new function(){
 	}
 	
 	
-	this.integrityCheck = function (fix) {
+	this.integrityCheck = Zotero.Promise.coroutine(function* (fix) {
 		// Just as a sanity check, make sure combined field tables are populated,
 		// so that we don't try to wipe out all data
-		if (!Zotero.DB.valueQuery("SELECT COUNT(*) FROM fieldsCombined")
-				|| !Zotero.DB.valueQuery("SELECT COUNT(*) FROM itemTypeFieldsCombined")) {
+		if (!(yield Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM fieldsCombined"))
+				|| !(yield Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM itemTypeFieldsCombined"))) {
 			return false;
 		}
 		
@@ -1261,12 +1263,8 @@ Zotero.Schema = new function(){
 			// Delete empty creators
 			// This may cause itemCreator gaps, but that's better than empty creators
 			[
-				"SELECT COUNT(*) FROM creatorData WHERE firstName='' AND lastName=''",
-				[
-					"DELETE FROM itemCreators WHERE creatorID IN (SELECT creatorID FROM creators WHERE creatorDataID IN (SELECT creatorDataID FROM creatorData WHERE firstName='' AND lastName=''))",
-					"DELETE FROM creators WHERE creatorDataID IN (SELECT creatorDataID FROM creatorData WHERE firstName='' AND lastName='')",
-					"DELETE FROM creatorData WHERE firstName='' AND lastName=''"
-				],
+				"SELECT COUNT(*) FROM creators WHERE firstName='' AND lastName=''",
+				"DELETE FROM creators WHERE firstName='' AND lastName=''"
 			],
 			
 			// Non-attachment items in the full-text index
@@ -1288,35 +1286,38 @@ Zotero.Schema = new function(){
 		];
 		
 		for each(var sql in queries) {
-			if (Zotero.DB.valueQuery(sql[0])) {
-				Zotero.debug("Test failed!", 1);
-				
-				if (fix) {
-					try {
-						// Single query
-						if (typeof sql[1] == 'string') {
-							Zotero.DB.valueQuery(sql[1]);
-						}
-						// Multiple queries
-						else {
-							for each(var s in sql[1]) {
-								Zotero.DB.valueQuery(s);
-							}
-						}
-						continue;
-					}
-					catch (e) {
-						Zotero.debug(e);
-						Components.utils.reportError(e);
-					}
-				}
-				
-				return false;
+			let errorsFound = yield Zotero.DB.valueQueryAsync(sql[0]);
+			if (!errorsFound) {
+				continue;
 			}
+			
+			Zotero.debug("Test failed!", 1);
+			
+			if (fix) {
+				try {
+					// Single query
+					if (typeof sql[1] == 'string') {
+						yield Zotero.DB.queryAsync(sql[1]);
+					}
+					// Multiple queries
+					else {
+						for each(var s in sql[1]) {
+							yield Zotero.DB.queryAsync(s);
+						}
+					}
+					continue;
+				}
+				catch (e) {
+					Zotero.debug(e);
+					Components.utils.reportError(e);
+				}
+			}
+			
+			return false;
 		}
 		
 		return true;
-	}
+	});
 	
 	
 	/////////////////////////////////////////////////////////////////
