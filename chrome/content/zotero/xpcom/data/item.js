@@ -155,21 +155,6 @@ Zotero.Item.prototype.isPrimaryField = function (fieldName) {
 // Public Zotero.Item methods
 //
 //////////////////////////////////////////////////////////////////////////////
-/**
- * Check if item exists in the database
- *
- * @return	bool			TRUE if the item exists, FALSE if not
- */
-Zotero.Item.prototype.exists = function() {
-	if (!this.id) {
-		throw ('itemID not set in Zotero.Item.exists()');
-	}
-	
-	var sql = "SELECT COUNT(*) FROM items WHERE itemID=?";
-	return !!Zotero.DB.valueQuery(sql, this.id);
-}
-
-
 /*
  * Retrieves (and loads from DB, if necessary) an itemData field value
  *

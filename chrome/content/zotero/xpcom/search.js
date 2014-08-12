@@ -97,7 +97,8 @@ Zotero.Search.prototype._set = function (field, value) {
 	this._requireData('primaryData');
 	
 	if (this['_' + field] != value) {
-		this._prepFieldChange(field);
+		this._markFieldChange(field, this['_' + field]);
+		this._changed.primaryData = true;
 		
 		switch (field) {
 			default:
@@ -223,7 +224,7 @@ Zotero.Search.prototype.save = Zotero.Promise.coroutine(function* (fixGaps) {
 			
 			if (!isNew) {
 				var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
-				Zotero.DB.query(sql, this.id);
+				yield Zotero.DB.queryAsync(sql, this.id);
 			}
 			
 			// Close gaps in savedSearchIDs
@@ -258,7 +259,7 @@ Zotero.Search.prototype.save = Zotero.Promise.coroutine(function* (fixGaps) {
 					this._conditions[i].value ? this._conditions[i].value : null,
 					this._conditions[i].required ? 1 : null
 				];
-				Zotero.DB.query(sql, sqlParams);
+				yield Zotero.DB.queryAsync(sql, sqlParams);
 			}
 			
 			
@@ -271,7 +272,7 @@ Zotero.Search.prototype.save = Zotero.Promise.coroutine(function* (fixGaps) {
 			
 			if (isNew && this.libraryID) {
 				var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
-				var group = Zotero.Groups.get(groupID);
+				var group = yield Zotero.Groups.get(groupID);
 				group.clearSearchCache();
 			}
 			
@@ -665,7 +666,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 						
 						var sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE "
 							+ "itemID NOT IN (SELECT itemID FROM " + tmpTable + ")";
-						var res = yield Zotero.DB.valueQuery(sql);
+						var res = yield Zotero.DB.valueQueryAsync(sql);
 						var scopeIDs = res ? res.split(",") : [];
 					}
 					// If an ALL search, scan only items from the main search
@@ -931,20 +932,6 @@ Zotero.Search.prototype.loadConditions = Zotero.Promise.coroutine(function* (rel
 	
 	this._loaded.conditions = true;
 });
-
-
-Zotero.Search.prototype._prepFieldChange = function (field) {
-	if (!this._changed) {
-		this._changed = {};
-	}
-	this._changed[field] = true;
-	
-	// Save a copy of the data before changing
-	// TODO: only save previous data if search exists
-	if (this.id && this.exists() && !this._previousData) {
-		this._previousData = this.serialize();
-	}
-}
 
 
 /*
@@ -1273,7 +1260,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							+ 'WHERE fileTypeID IN ('
 							+ 'SELECT fileTypeID FROM fileTypes WHERE '
 							+ 'fileTypeID=?)';
-						var patterns = Zotero.DB.columnQuery(ftSQL, { int: condition.value });
+						var patterns = yield Zotero.DB.columnQueryAsync(ftSQL, { int: condition.value });
 						if (patterns) {
 							for each(str in patterns) {
 								condSQL += 'mimeType LIKE ? OR ';

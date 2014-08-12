@@ -90,7 +90,8 @@ Zotero.Collection.prototype._set = function (field, value) {
 	}
 	
 	if (this['_' + field] != value) {
-		this._prepFieldChange(field);
+		this._markFieldChange(field, this['_' + field]);
+		this._changed.primaryData = true;
 		
 		switch (field) {
 			default:
@@ -189,20 +190,6 @@ Zotero.Collection.prototype.hasChildItems = function() {
 	}
 	this._requireData('primaryData');
 	return false;
-}
-
-/**
- * Check if collection exists in the database
- *
- * @return	bool			TRUE if the collection exists, FALSE if not
- */
-Zotero.Collection.prototype.exists = function() {
-	if (!this.id) {
-		throw ('collectionID not set in Zotero.Collection.exists()');
-	}
-	
-	var sql = "SELECT COUNT(*) FROM collections WHERE collectionID=?";
-	return !!Zotero.DB.valueQuery(sql, this.id);
 }
 
 
@@ -896,20 +883,6 @@ Zotero.Collection.prototype.addLinkedCollection = Zotero.Promise.coroutine(funct
 //
 // Private methods
 //
-Zotero.Collection.prototype._prepFieldChange = function (field) {
-	if (!this._changed) {
-		this._changed = {};
-	}
-	this._changed[field] = true;
-	
-	// Save a copy of the data before changing
-	// TODO: only save previous data if collection exists
-	if (this.id && this.exists() && !this._previousData) {
-		this._previousData = this.serialize();
-	}
-}
-
-
 Zotero.Collection.prototype.reloadHasChildCollections = Zotero.Promise.coroutine(function* () {
 	var sql = "SELECT COUNT(*) FROM collections WHERE parentCollectionID=?";
 	this._hasChildCollections = !!(yield Zotero.DB.valueQueryAsync(sql, this.id));
