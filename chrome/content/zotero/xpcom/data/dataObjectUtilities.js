@@ -27,15 +27,30 @@
 Zotero.DataObjectUtilities = {
 	"checkLibraryID": function (libraryID) {
 		if (libraryID === null) {
-			Zotero.debug("Deprecated: libraryID cannot be NULL\n\n" + Components.stack, 2);
+			Zotero.debug("Deprecated: libraryID cannot be NULL", 2, 1);
 		}
 		else {
 			var intValue = parseInt(libraryID);
-			if (libraryID != intValue) {
-				throw new Error("libraryID must be an integer");
+			if (libraryID != intValue || intValue < 0) {
+				throw new Error("libraryID must be a positive integer");
 			}
 		}
 		return intValue;
+	},
+	
+	"checkDataID": function(dataID) {
+		var intValue = parseInt(dataID);
+		if (dataID != intValue || dataID < 0)
+			throw new Error("id must be a positive integer");
+		return intValue;
+	},
+	
+	"checkKey": function(key) {
+		if (!key) return null;
+		if (!Zotero.Utilities.isValidObjectKey(key)) {
+			throw new Error("key is not valid");
+		}
+		return key;
 	},
 	
 	"getObjectTypePlural": function getObjectTypePlural(objectType) {

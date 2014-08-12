@@ -83,13 +83,6 @@ Zotero.ID_Tracker = function () {
 		}
 	});
 	
-	
-	this.isValidKey = function (value) {
-		var re = /^[23456789ABCDEFGHIJKLMNPQRSTUVWXYZ]{8}$/
-		return re.test(value);
-	}
-	
-	
 	function getBigInt(max) {
 		if (!max) {
 			max = 9007199254740991;

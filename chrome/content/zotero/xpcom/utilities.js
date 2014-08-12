@@ -1812,16 +1812,26 @@ Zotero.Utilities = {
 		return Zotero.ItemTypes.getImageSrc(attachment.mimeType === "application/pdf"
 							? "attachment-pdf" : "attachment-snapshot");
 	},
-
+	
+	"allowedKeyChars": "23456789ABCDEFGHIJKLMNPQRSTUVWXYZ",
+	
 	/**
 	 * Generates a valid object key for the server API
 	 */
 	"generateObjectKey":function generateObjectKey() {
-		// TODO: add 'L' and 'Y' after 3.0.11 cut-off
-		var baseString = "23456789ABCDEFGHIJKMNPQRSTUVWXZ";
-		return Zotero.Utilities.randomString(8, baseString);
+		return Zotero.Utilities.randomString(8, Zotero.Utilities.allowedKeyChars);
 	},
-
+	
+	/**
+	 * Check if an object key is in a valid format
+	 */
+	"isValidObjectKey":function(key) {
+		if (!Zotero.Utilities.objectKeyRegExp) {
+			Zotero.Utilities.objectKeyRegExp = new RegExp('^[' + Zotero.Utilities.allowedKeyChars + ']{8}$');
+		}
+		return Zotero.Utilities.objectKeyRegExp.test(key);
+	},
+	
 	/**
 	 * Provides unicode support and other additional features for regular expressions
 	 * See https://github.com/slevithan/xregexp for usage

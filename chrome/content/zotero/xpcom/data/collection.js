@@ -1008,8 +1008,3 @@ Zotero.Collection.prototype._refreshChildItems = Zotero.Promise.coroutine(functi
 		return this.loadChildItems(true);
 	}
 });
-
-
-Zotero.Collection.prototype._generateKey = function () {
-	return Zotero.Utilities.generateObjectKey();
-}
