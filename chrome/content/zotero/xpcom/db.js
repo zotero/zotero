@@ -385,8 +385,6 @@ Zotero.DBConnection.prototype.getColumns = function (table) {
 * For example, if "Untitled" and "Untitled 2" and "Untitled 4",
 * returns "Untitled 3"
 *
-* DEBUG: doesn't work once there's an "Untitled 10"
-*
 * If _name_ alone is available, returns that
 **/
 Zotero.DBConnection.prototype.getNextName = Zotero.Promise.coroutine(function* (libraryID, table, field, name)
@@ -396,15 +394,17 @@ Zotero.DBConnection.prototype.getNextName = Zotero.Promise.coroutine(function* (
 		[libraryID, table, field, name] = [null, libraryID, table, field];
 	}
 	
-	var sql = "SELECT TRIM(SUBSTR(" + field + ", " + (name.length + 1) + ")) "
+	var sql = "SELECT SUBSTR(" + field + ", " + (name.length + 1) + ") "
 				+ "FROM " + table + " "
-				+ "WHERE " + field + " REGEXP '^" + name + "( [0-9]+)?$' "
-				+ "AND libraryID=?"
+				+ "WHERE libraryID=? AND "
+				+ field + " LIKE '" + name + "%' "
 				+ " ORDER BY " + field;
 	var params = [libraryID];
 	var suffixes = yield this.columnQueryAsync(sql, params);
+	suffixes.filter(function (x) x.match(/^( [0-9]+)?$/));
+	
 	// If none found or first one has a suffix, use default name
-	if (!suffixes || suffixes[0]) {
+	if (!suffixes.length || suffixes[0]) {
 		return name;
 	}
 	
@@ -1296,38 +1296,6 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 			.getService(Components.interfaces.nsIIdleService);
 	idleService.addIdleObserver(this, 60);
 	idleService = null;
-	
-	/*// User-defined functions
-	// TODO: move somewhere else?
-	
-	// Levenshtein distance UDF
-	var lev = {
-		onFunctionCall: function (arg) {
-			var a = arg.getUTF8String(0);
-			var b = arg.getUTF8String(1);
-			return Zotero.Utilities.levenshtein(a, b);
-		}
-	};
-	this._connection.createFunction('levenshtein', 2, lev);
-	
-	// Regexp UDF
-	var rx = {
-		onFunctionCall: function (arg) {
-			var re = new RegExp(arg.getUTF8String(0));
-			var str = arg.getUTF8String(1);
-			return re.test(str);
-		}
-	};
-	this._connection.createFunction('regexp', 2, rx);
-	
-	// text2html UDF
-	var rx = {
-		onFunctionCall: function (arg) {
-			var str = arg.getUTF8String(0);
-			return Zotero.Utilities.text2html(str, true);
-		}
-	};
-	this._connection.createFunction('text2html', 1, rx);*/
 	
 	return this._connectionAsync;
 });
