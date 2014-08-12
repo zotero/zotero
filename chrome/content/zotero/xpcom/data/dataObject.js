@@ -23,10 +23,21 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.DataObject = function (objectType, objectTypePlural, dataTypes) {
+/**
+ *
+ * @param {String} objectType
+ * @param {String[]} dataTypes A set of data types that can be loaded for this data object
+ *
+ * @property {String} (readOnly) objectType
+ * @property {String} (readOnly) libraryKey
+ * @property {String|null} parentKey Null if no parent
+ * @property {Integer|false|undefined} parentID False if no parent. Undefined if not applicable (e.g. search objects)
+ */
+
+Zotero.DataObject = function (objectType, dataTypes) {
 	this._objectType = objectType;
 	this._ObjectType = objectType[0].toUpperCase() + objectType.substr(1);
-	this._objectTypePlural = objectTypePlural ? objectTypePlural : objectType + 's';
+	this._objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 	this._dataTypes = dataTypes;
 	
 	this._id = null;
@@ -46,12 +57,20 @@ Zotero.DataObject = function (objectType, objectTypePlural, dataTypes) {
 	this._clearChanged();
 };
 
-Zotero.DataObject.prototype.__defineGetter__('objectType', function () { return this._objectType; });
-Zotero.DataObject.prototype.__defineGetter__('libraryKey', function () this.libraryID + "/" + this.key);
-Zotero.DataObject.prototype.__defineGetter__('parentKey', function () this._parentKey );
-Zotero.DataObject.prototype.__defineSetter__('parentKey', function (val) this._setParentKey(val) );
-Zotero.DataObject.prototype.__defineGetter__('parentID', function () this._getParentID() );
-Zotero.DataObject.prototype.__defineSetter__('parentID', function (val) this._setParentID(val) );
+Zotero.Utilities.Internal.defineProperty(Zotero.DataObject, 'objectType', {
+	get: function() this._objectType
+});
+Zotero.Utilities.Internal.defineProperty(Zotero.DataObject, 'libraryKey', {
+	get: function() this._libraryID + "/" + this._key
+});
+Zotero.Utilities.Internal.defineProperty(Zotero.DataObject, 'parentKey', {
+	get: function() this._parentKey,
+	set: function(v) this._setParentKey(v)
+});
+Zotero.Utilities.Internal.defineProperty(Zotero.DataObject, 'parentID', {
+	get: function() this._getParentID(),
+	set: function(v) this._setParentID(v)
+});
 
 
 Zotero.DataObject.prototype._get = function (field) {
@@ -82,7 +101,7 @@ Zotero.DataObject.prototype._setIdentifier = function (field, value) {
 		if (this._key) {
 			throw new Error("Cannot set id if key is already set");
 		}
-		value = parseInt(value);
+		value = Zotero.DataObjectUtilities.checkDataID(value);
 		this._identified = true;
 		break;
 		
@@ -91,12 +110,13 @@ Zotero.DataObject.prototype._setIdentifier = function (field, value) {
 		break;
 		
 	case 'key':
-		if (this._libraryID === undefined) {
+		if (this._libraryID === null) {
 			throw new Error("libraryID must be set before key");
 		}
 		if (this._id) {
 			throw new Error("Cannot set key if id is already set");
 		}
+		value = Zotero.DataObjectUtilities.checkKey(value);
 		this._identified = true;
 	}
 	
@@ -129,25 +149,36 @@ Zotero.DataObject.prototype._getParentID = function () {
  * Set the id of the parent object
  *
  * @param {Number|false} [id=false]
+ * @return {Boolean} True if changed, false if stayed the same
  */
 Zotero.DataObject.prototype._setParentID = function (id) {
-	return this._setParentKey(id ? this._getClass().getLibraryAndKeyFromID(id)[1] : false);
+	return this._setParentKey(
+		id
+		? this._getClass().getLibraryAndKeyFromID(Zotero.DataObjectUtilities.checkDataID(id))[1]
+		: null
+	);
 }
 
-
+/**
+ * Set the key of the parent object
+ *
+ * @param {String|null} [key=null]
+ * @return {Boolean} True if changed, false if stayed the same
+ */
 Zotero.DataObject.prototype._setParentKey = function(key) {
 	if (this._objectType == 'item') {
 		if (!this.isNote() && !this.isAttachment()) {
 			throw new Error("_setParentKey() can only be called on items of type 'note' or 'attachment'");
 		}
 	}
+	key = Zotero.DataObjectUtilities.checkKey(key);
 	
 	if (this._parentKey == key) {
 		return false;
 	}
 	this._markFieldChange('parentKey', this._parentKey);
 	this._changed.parentKey = true;
-	this._parentKey = key ? key : null;
+	this._parentKey = key;
 	this._parentID = null;
 	return true;
 }
@@ -156,7 +187,8 @@ Zotero.DataObject.prototype._setParentKey = function(key) {
 /**
  * Returns all relations of the object
  *
- * @return object Object with predicates as keys and URIs as values
+ * @return {object} Object with predicates as keys and URI[], or URI (as string)
+ *   in the case of a single object, as values
  */
 Zotero.DataObject.prototype.getRelations = function () {
 	this._requireData('relations');
@@ -187,14 +219,15 @@ Zotero.DataObject.prototype.getRelations = function () {
 /**
  * Updates the object's relations
  *
- * @param {Object} newRelations Object with predicates as keys and URIs/arrays-of-URIs as values
+ * @param {Object} newRelations Object with predicates as keys and URI[] as values
+ * @return {Boolean} True if changed, false if stayed the same
  */
 Zotero.DataObject.prototype.setRelations = function (newRelations) {
 	this._requireData('relations');
 	
 	// There can be more than one object for a given predicate, so build
-	// flat arrays with individual predicate-object pairs converted to
-	// JSON strings so we can use array_diff to determine what changed
+	// flat arrays with individual predicate-object pairs so we can use
+	// array_diff to determine what changed
 	var oldRelations = this._relations;
 	
 	var sortFunc = function (a, b) {
@@ -208,13 +241,8 @@ Zotero.DataObject.prototype.setRelations = function (newRelations) {
 	var newRelationsFlat = [];
 	for (let predicate in newRelations) {
 		let object = newRelations[predicate];
-		if (Array.isArray(object)) {
-			for (let i=0; i<object.length; i++) {
-				newRelationsFlat.push([predicate, object[i]]);
-			}
-		}
-		else {
-			newRelationsFlat.push([predicate, object]);
+		for (let i=0; i<object.length; i++) {
+			newRelationsFlat.push([predicate, object[i]]);
 		}
 	}
 	
@@ -227,7 +255,7 @@ Zotero.DataObject.prototype.setRelations = function (newRelations) {
 		newRelationsFlat.sort(sortFunc);
 		
 		for (let i=0; i<oldRelations.length; i++) {
-			if (!newRelationsFlat || oldRelations[i] != newRelationsFlat[i]) {
+			if (oldRelations[i] != newRelationsFlat[i]) {
 				changed = true;
 				break;
 			}
@@ -240,17 +268,20 @@ Zotero.DataObject.prototype.setRelations = function (newRelations) {
 	}
 	
 	this._markFieldChange('relations', this._relations);
+	this._changed.relations = true;
 	// Store relations internally as array of predicate-object pairs
 	this._relations = newRelationsFlat;
-	this._changed.relations = true;
+	return true;
 }
 
 
 /**
  * Return an object in the specified library equivalent to this object
+ * @param {Integer} [libraryID=0]
+ * @return {Object|false} Linked item, or false if not found
  */
 Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function* (libraryID) {
-	if (libraryID == this.libraryID) {
+	if (libraryID == this._libraryID) {
 		throw new Error(this._ObjectType + " is already in library " + libraryID);
 	}
 	
@@ -273,6 +304,7 @@ Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function
 	else {
 		var libraryObjectPrefix = Zotero.URI.getCurrentUserURI() + "/" + this._objectTypePlural + "/";
 	}
+	
 	for (let i=0; i<links.length; i++) {
 		let link = links[i];
 		if (link.indexOf(libraryObjectPrefix) == 0) {
@@ -292,7 +324,7 @@ Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function
 /**
  * Reloads loaded, changed data
  *
- * @param {Array} [dataTypes] - Data types to reload, or all loaded types if not provide
+ * @param {String[]} [dataTypes] - Data types to reload, or all loaded types if not provide
  * @param {Boolean} [reloadUnchanged=false] - Reload even data that hasn't changed internally.
  *                                            This should be set to true for data that was
  *                                            changed externally (e.g., globally renamed tags).
@@ -319,8 +351,18 @@ Zotero.DataObject.prototype.reload = Zotero.Promise.coroutine(function* (dataTyp
 	}
 });
 
-
+/**
+ * Checks wheteher a given data type has been loaded
+ *
+ * @param {String} [dataType=primaryData] Data type to check
+ * @throws {Zotero.DataObjects.UnloadedDataException} If not loaded, unless the
+ *   data has not yet been "identified"
+ */
 Zotero.DataObject.prototype._requireData = function (dataType) {
+	if (this._loaded[dataType] === undefined) {
+		throw new Error(dataType + " is not a valid data type for " + this._ObjectType + " objects");
+	}
+	
 	if (dataType != 'primaryData') {
 		this._requireData('primaryData');
 	}
@@ -332,18 +374,24 @@ Zotero.DataObject.prototype._requireData = function (dataType) {
 		throw new Zotero.Exception.UnloadedDataException(
 			"'" + dataType + "' not loaded for " + this._objectType + " ("
 				+ this._id + "/" + this._libraryID + "/" + this._key + ")",
-			this._objectType + dataType[0].toUpperCase() + dataType.substr(1)
+			dataType
 		);
 	}
 }
 
-
-
+/**
+ * Returns a global Zotero class object given a data object. (e.g. Zotero.Items)
+ * @return {obj} One of Zotero data classes
+ */
 Zotero.DataObject.prototype._getClass = function () {
 	return Zotero.DataObjectUtilities.getClassForObjectType(this._objectType);
 }
 
-
+/**
+ * Loads data for a given data type
+ * @param {String} dataType
+ * @param {Boolean} reload
+ */
 Zotero.DataObject.prototype._loadDataType = function (dataType, reload) {
 	return this["load" + dataType[0].toUpperCase() + dataType.substr(1)](reload);
 }
@@ -351,6 +399,8 @@ Zotero.DataObject.prototype._loadDataType = function (dataType, reload) {
 
 /**
  * Save old version of data that's being changed, to pass to the notifier
+ * @param {String} field
+ * @param {} oldValue
  */
 Zotero.DataObject.prototype._markFieldChange = function (field, oldValue) {
 	// Only save if object already exists and field not already changed
@@ -360,7 +410,10 @@ Zotero.DataObject.prototype._markFieldChange = function (field, oldValue) {
 	this._previousData[field] = oldValue;
 }
 
-
+/**
+ * Clears log of changed values
+ * @param {String} [dataType] data type/field to clear. Defaults to clearing everything
+ */
 Zotero.DataObject.prototype._clearChanged = function (dataType) {
 	if (dataType) {
 		delete this._changed[dataType];
@@ -372,12 +425,18 @@ Zotero.DataObject.prototype._clearChanged = function (dataType) {
 	}
 }
 
-
+/**
+ * Clears field change log
+ * @param {String} field
+ */
 Zotero.DataObject.prototype._clearFieldChange = function (field) {
 	delete this._previousData[field];
 }
 
-
+/**
+ * Generates data object key
+ * @return {String} key
+ */
 Zotero.DataObject.prototype._generateKey = function () {
 	return Zotero.Utilities.generateObjectKey();
 }
