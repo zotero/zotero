@@ -41,7 +41,7 @@ Zotero.Debug = new function () {
 		this.enabled = _console || _store;
 	}
 	
-	this.log = function (message, level) {
+	this.log = function (message, level, stack) {
 		if (!_console && !_store) {
 			return;
 		}
@@ -92,15 +92,24 @@ Zotero.Debug = new function () {
 			deltaStr = '(+' + delta + ')';
 		}
 		
-		if (_stackTrace) {
-			var stack = (new Error()).stack;
-			var nl1Index = stack.indexOf("\n")
-			var nl2Index = stack.indexOf("\n", nl1Index+1);
-			var line2 = stack.substring(nl1Index+2, nl2Index-1);
-			var debugLine = line2.substr(line2.indexOf("@"));
-			
-			stack = stack.substring(nl2Index, stack.length-1);
-			message += "\n"+debugLine+stack;
+		if (stack === true) {
+			// Display stack starting from where this was called
+			stack = Components.stack.caller;
+		} else if (stack >= 0) {
+			let i = stack;
+			stack = Components.stack.caller;
+			while(stack && i--) {
+				stack = stack.caller;
+			}
+		} else if (_stackTrace) {
+			// Stack trace enabled globally
+			stack = Components.stack.caller;
+		} else {
+			stack = undefined;
+		}
+		
+		if (stack) {
+			message += '\n' + Zotero.Debug.stackToString(stack);
 		}
 		
 		if (_console) {
@@ -194,4 +203,20 @@ Zotero.Debug = new function () {
 	this.clear = function () {
 		_output = [];
 	}
+	
+	/**
+	 * Format a stack trace for output in the same way that Error.stack does
+	 * @param {Components.stack} stack
+	 * @param {Integer} [lines=5] Number of lines to format
+	 */
+	this.stackToString = function (stack, lines) {
+		if (!lines) lines = 5;
+		var str = '';
+		while(stack && lines--) {
+			str += '\n  ' + (stack.name || '') + '@' + stack.filename
+				+ ':' + stack.lineNumber;
+			stack = stack.caller;
+		}
+		return str.substr(1);
+	};
 }
