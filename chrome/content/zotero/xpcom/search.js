@@ -28,7 +28,7 @@ Zotero.Search = function() {
 		'primaryData',
 		'conditions'
 	];
-	Zotero.DataObject.apply(this, ['search', 'searches', dataTypes]);
+	Zotero.DataObject.apply(this, ['search', dataTypes]);
 	
 	this._name = null;
 	

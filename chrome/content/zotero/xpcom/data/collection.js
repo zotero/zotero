@@ -29,7 +29,7 @@ Zotero.Collection = function() {
 		'childCollections',
 		'childItems'
 	];
-	Zotero.DataObject.apply(this, ['collection', false, dataTypes]);
+	Zotero.DataObject.apply(this, ['collection', dataTypes]);
 	
 	this._name = null;
 	this._parentID = null;

@@ -43,7 +43,7 @@ Zotero.Item = function(itemTypeOrID) {
 		'collections',
 		'relations'
 	];
-	Zotero.DataObject.apply(this, ['item', false, dataTypes]);
+	Zotero.DataObject.apply(this, ['item', dataTypes]);
 	
 	this._disabled = false;
 	
