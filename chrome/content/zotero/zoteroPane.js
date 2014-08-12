@@ -1890,7 +1890,7 @@ var ZoteroPane = new function()
 				ZoteroPane_Local.clearItemsPaneMessage();
 			}, 1);
 		}
-		else if (event.keyCode == event.DOM_VK_RETURN || event.keyCode == event.DOM_VK_ENTER) {
+		else if (event.keyCode == event.DOM_VK_RETURN) {
 			ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('searchInProgress'));
 			setTimeout(function () {
 				ZoteroPane_Local.search(true);

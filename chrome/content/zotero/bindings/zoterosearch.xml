@@ -242,7 +242,6 @@
 				<![CDATA[
 					switch (event.keyCode) {
 						case event.DOM_VK_RETURN:
-						case event.DOM_VK_ENTER:
 							this.active = true;
 							
 							if (event.shiftKey) {

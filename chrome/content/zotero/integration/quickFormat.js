@@ -1032,7 +1032,7 @@ var Zotero_QuickFormat = new function () {
 		if(qfGuidance) qfGuidance.hide();
 		
 		var keyCode = event.keyCode;
-		if(keyCode === event.DOM_VK_RETURN || keyCode === event.DOM_VK_ENTER) {
+		if (keyCode === event.DOM_VK_RETURN) {
 			event.preventDefault();
 			if(!_bubbleizeSelected() && !_getEditorContent()) {
 				_accept();
@@ -1234,7 +1234,7 @@ var Zotero_QuickFormat = new function () {
 	 */
 	this.onPanelKeyPress = function(event) {
 		var keyCode = event.keyCode;
-		if(keyCode === event.DOM_VK_RETURN || keyCode === event.DOM_VK_ENTER) {
+		if (keyCode === event.DOM_VK_RETURN) {
 			document.getElementById("citation-properties").hidePopup();
 		}
 	};
