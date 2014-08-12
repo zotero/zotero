@@ -1642,13 +1642,6 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	this._sqlParams = sqlParams.length ? sqlParams : false;
 });
 
-
-Zotero.Search.prototype._generateKey = function () {
-	return Zotero.Utilities.generateObjectKey();
-}
-
-
-
 Zotero.Searches = new function(){
 	Zotero.DataObjects.apply(this, ['search', 'searches', 'savedSearch', 'savedSearches']);
 	this.constructor.prototype = new Zotero.DataObjects();

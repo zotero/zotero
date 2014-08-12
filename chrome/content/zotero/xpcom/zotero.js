@@ -1217,10 +1217,21 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	 *
 	 * Uses prefs e.z.debug.log and e.z.debug.level (restart required)
 	 *
-	 * Defaults to log level 3 if level not provided
+	 * @param {} message
+	 * @param {Integer} [level=3]
+	 * @param {Boolean|Integer} [stack] Whether to display the calling stack.
+	 *   If true, stack is displayed starting from the caller. If an integer,
+	 *   that many stack levels will be omitted starting from the caller.
 	 */
-	function debug(message, level) {
-		Zotero.Debug.log(message, level);
+	function debug(message, level, stack) {
+		// Account for this alias
+		if (stack === true) {
+			stack = 1;
+		} else if (stack >= 0) {
+			stack++;
+		}
+		
+		Zotero.Debug.log(message, level, stack);
 	}
 	
 	

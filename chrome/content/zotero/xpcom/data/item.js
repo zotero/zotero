@@ -4694,14 +4694,12 @@ Zotero.Item.prototype._getRelatedItems = function () {
 	
 	var predicate = Zotero.Relations.relatedItemPredicate;
 	
-	var relations = this.getRelations();
-	if (!relations[predicate]) {
+	var relatedItemURIs = this.getRelations()[predicate];
+	if (!relatedItemURIs) {
 		return [];
 	}
 	
-	var relatedItemURIs = typeof relations[predicate] == 'string'
-		? [relations[predicate]]
-		: relations[predicate];
+	if (typeof relatedItemURIs == 'string') relatedItemURIs = [relatedItemURIs];
 	
 	// Pull out object values from related-item relations, turn into items, and pull out keys
 	var keys = [];
