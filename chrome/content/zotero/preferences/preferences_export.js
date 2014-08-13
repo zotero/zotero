@@ -47,7 +47,7 @@ Zotero_Preferences.Export = {
 		var menulist = document.getElementById("zotero-quickCopy-menu");
 		menulist.setAttribute('preference', "pref-quickCopy-setting");
 		this.buildQuickCopyFormatDropDown(menulist, Zotero.QuickCopy.getContentType(format), format);
-		this.updateQuickCopyHTMLCheckbox();
+		this.updateQuickCopyHTMLCheckbox(document);
 		
 		if (!Zotero.isStandalone) {
 			this.refreshQuickCopySiteList();
@@ -91,7 +91,7 @@ Zotero_Preferences.Export = {
 			var itemNode = document.createElement("menuitem");
 			itemNode.setAttribute("value", val);
 			itemNode.setAttribute("label", style.title);
-			itemNode.setAttribute("oncommand", 'Zotero_Preferences.Export.updateQuickCopyHTMLCheckbox()');
+			itemNode.setAttribute("oncommand", 'Zotero_Preferences.Export.updateQuickCopyHTMLCheckbox(document)');
 			popup.appendChild(itemNode);
 			
 			if (baseVal == currentFormat) {
@@ -119,7 +119,7 @@ Zotero_Preferences.Export = {
 				var itemNode = document.createElement("menuitem");
 				itemNode.setAttribute("value", val);
 				itemNode.setAttribute("label", translators[i].label);
-				itemNode.setAttribute("oncommand", 'Zotero_Preferences.Export.updateQuickCopyHTMLCheckbox()');
+				itemNode.setAttribute("oncommand", 'Zotero_Preferences.Export.updateQuickCopyHTMLCheckbox(document)');
 				popup.appendChild(itemNode);
 				
 				if (val == currentFormat) {
@@ -133,11 +133,11 @@ Zotero_Preferences.Export = {
 	},
 	
 	
-	updateQuickCopyHTMLCheckbox: function () {
-		var format = document.getElementById('zotero-quickCopy-menu').value;
+	updateQuickCopyHTMLCheckbox: function (doc) {
+		var format = doc.getElementById('zotero-quickCopy-menu').value;
 		var mode, contentType;
 		
-		var checkbox = document.getElementById('zotero-quickCopy-copyAsHTML');
+		var checkbox = doc.getElementById('zotero-quickCopy-copyAsHTML');
 		[mode, format] = format.split('=');
 		[mode, contentType] = mode.split('/');
 		
