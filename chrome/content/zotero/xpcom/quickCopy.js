@@ -29,53 +29,42 @@ Zotero.QuickCopy = new function() {
 	this.stripContentType = stripContentType;
 	this.getContentFromItems = getContentFromItems;
 	
-	var _formattedNames = {};
+	var _siteSettings;
+	var _formattedNames;
 	
-	
-	var _init = Zotero.lazy(function () {
-		Zotero.debug("Initializing Quick Copy");
-		
-		var translation = new Zotero.Translate.Export;
-		return translation.getTranslators()
-		.then(function (translators) {
-			// add styles to list
-			var styles = Zotero.Styles.getVisible();
-			for each(var style in styles) {
-				_formattedNames['bibliography=' + style.styleID] = style.title;
-			}
-			
-			for (var i=0; i<translators.length; i++) {
-				// Skip RDF formats
-				switch (translators[i].translatorID) {
-					case '6e372642-ed9d-4934-b5d1-c11ac758ebb7':
-					case '14763d24-8ba0-45df-8f52-b8d1108e7ac9':
-						continue;
-				}
-				_formattedNames['export=' + translators[i].translatorID] = translators[i].label;
-			}
-		});
+	this.init = Zotero.Promise.coroutine(function* () {
+		yield this.loadSiteSettings();
 	});
 	
 	
-	this.getFormattedNameFromSetting = function (setting) {
-		return _init()
-		.then(function () {
-			var name = _formattedNames[this.stripContentType(setting)];
-			return name ? name : '';
-		}.bind(this));
-	}
+	this.loadSiteSettings = Zotero.Promise.coroutine(function* () {
+		var sql = "SELECT key AS domainPath, value AS format FROM settings "
+			+ "WHERE setting='quickCopySite'";
+		var rows = yield Zotero.DB.queryAsync(sql);
+		// Unproxify storage row
+		_siteSettings = [for (row of rows) { domainPath: row.domainPath, format: row.format }];
+	});
 	
-	this.getSettingFromFormattedName = function (name) {
-		return _init()
-		.then(function () {
-			for (var setting in _formattedNames) {
-				if (_formattedNames[setting] == name) {
-					return setting;
-				}
+	
+	this.getFormattedNameFromSetting = Zotero.Promise.coroutine(function* (setting) {
+		if (!_formattedNames) {
+			yield _loadFormattedNames();
+		}
+		var name = _formattedNames[this.stripContentType(setting)];
+		return name ? name : '';
+	});
+	
+	this.getSettingFromFormattedName = Zotero.Promise.coroutine(function* (name) {
+		if (!_formattedNames) {
+			yield _loadFormattedNames();
+		}
+		for (var setting in _formattedNames) {
+			if (_formattedNames[setting] == name) {
+				return setting;
 			}
-			return '';
-		});
-	}
+		}
+		return '';
+	});
 	
 	
 	/*
@@ -95,7 +84,7 @@ Zotero.QuickCopy = new function() {
 	}
 	
 	
-	this.getFormatFromURL = Zotero.Promise.coroutine(function* (url) {
+	this.getFormatFromURL = function (url) {
 		if (!url) {
 			return Zotero.Prefs.get("export.quickCopy.setting");
 		}
@@ -112,13 +101,21 @@ Zotero.QuickCopy = new function() {
 			return Zotero.Prefs.get("export.quickCopy.setting");
 		}
 		
-		var matches = [];
+		if (!_siteSettings) {
+			throw new Zotero.Exception.UnloadedDataException("Quick Copy site settings not loaded");
+		}
 		
-		var sql = "SELECT key AS domainPath, value AS format FROM settings "
-			+ "WHERE setting='quickCopySite' AND (key LIKE ? OR key LIKE ?)";
 		var urlDomain = urlHostPort.match(/[^\.]+\.[^\.]+$/);
-		var rows = yield Zotero.DB.queryAsync(sql, ['%' + urlDomain + '%', '/%']);
-		for each(var row in rows) {
+		var matches = [];
+		for (let i=0; i<_siteSettings.length; i++) {
+			let row = _siteSettings[i];
+			
+			// Only concern ourselves with entries containing the current domain
+			// or paths that apply to all domains
+			if (!row.domainPath.contains(urlDomain) && !row.domainPath.startsWith('/')) {
+				continue;
+			}
+			
 			var [domain, path] = row.domainPath.split(/\//);
 			path = '/' + (path ? path : '');
 			var re = new RegExp(domain + '$');
@@ -156,7 +153,7 @@ Zotero.QuickCopy = new function() {
 		}
 		
 		return Zotero.Prefs.get("export.quickCopy.setting");
-	});
+	};
 	
 	
 	/*
@@ -364,4 +361,32 @@ Zotero.QuickCopy = new function() {
 		
 		throw ("Invalid mode '" + mode + "' in Zotero.QuickCopy.getContentFromItems()");
 	}
+	
+	
+	var _loadFormattedNames = Zotero.Promise.coroutine(function* () {
+		var t = new Date;
+		Zotero.debug("Loading formatted names for Quick Copy");
+		
+		var translation = new Zotero.Translate.Export;
+		var translators = yield translation.getTranslators();
+		
+		// add styles to list
+		_formattedNames = {};
+		var styles = Zotero.Styles.getVisible();
+		for each(var style in styles) {
+			_formattedNames['bibliography=' + style.styleID] = style.title;
+		}
+		
+		for (var i=0; i<translators.length; i++) {
+			// Skip RDF formats
+			switch (translators[i].translatorID) {
+				case '6e372642-ed9d-4934-b5d1-c11ac758ebb7':
+				case '14763d24-8ba0-45df-8f52-b8d1108e7ac9':
+					continue;
+			}
+			_formattedNames['export=' + translators[i].translatorID] = translators[i].label;
+		}
+		
+		Zotero.debug("Loaded formatted names for Quick Copy in " + (new Date - t) + " ms");
+	});
 }

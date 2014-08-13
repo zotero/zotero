@@ -146,7 +146,7 @@ Zotero_Preferences.Export = {
 	},
 	
 	
-	showQuickCopySiteEditor: function (index) {
+	showQuickCopySiteEditor: Zotero.Promise.coroutine(function* (index) {
 		var treechildren = document.getElementById('quickCopy-siteSettings-rows');
 		
 		if (index != undefined && index > -1 && index < treechildren.childNodes.length) {
@@ -156,29 +156,28 @@ Zotero_Preferences.Export = {
 			var asHTML = treerow.childNodes[2].getAttribute('label') != '';
 		}
 		
-		Zotero.QuickCopy.getSettingFromFormattedName(format)
-		.then(function (format) {
-			if (asHTML) {
-				format = format.replace('bibliography=', 'bibliography/html=');
-			}
-			
-			var io = {domain: domain, format: format, ok: false};
-			window.openDialog('chrome://zotero/content/preferences/quickCopySiteEditor.xul', "zotero-preferences-quickCopySiteEditor", "chrome, modal", io);
-			
-			if (!io.ok) {
-				return;
-			}
-			
-			if (domain && domain != io.domain) {
-				Zotero.DB.query("DELETE FROM settings WHERE setting='quickCopySite' AND key=?", [domain]);
-			}
-			
-			Zotero.DB.query("REPLACE INTO settings VALUES ('quickCopySite', ?, ?)", [io.domain, io.format]);
-			
-			this.refreshQuickCopySiteList();
-		}.bind(this))
-		.done();
-	},
+		var format = yield Zotero.QuickCopy.getSettingFromFormattedName(format);
+		if (asHTML) {
+			format = format.replace('bibliography=', 'bibliography/html=');
+		}
+		
+		var io = {domain: domain, format: format, ok: false};
+		window.openDialog('chrome://zotero/content/preferences/quickCopySiteEditor.xul', "zotero-preferences-quickCopySiteEditor", "chrome, modal", io);
+		
+		if (!io.ok) {
+			return;
+		}
+		
+		if (domain && domain != io.domain) {
+			yield Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='quickCopySite' AND key=?", [domain]);
+		}
+		
+		yield Zotero.DB.queryAsync("REPLACE INTO settings VALUES ('quickCopySite', ?, ?)", [io.domain, io.format]);
+		
+		yield Zotero.QuickCopy.loadSiteSettings();
+		
+		yield this.refreshQuickCopySiteList();
+	}),
 	
 	
 	refreshQuickCopySiteList: Zotero.Promise.coroutine(function* () {
@@ -200,29 +199,28 @@ Zotero_Preferences.Export = {
 			
 			domainCell.setAttribute('label', siteData[i].domainPath);
 			
-			yield Zotero.QuickCopy.getFormattedNameFromSetting(siteData[i].format)
-			.then(function (formatted) {
-				formatCell.setAttribute('label', formatted);
-				var copyAsHTML = Zotero.QuickCopy.getContentType(siteData[i].format) == 'html';
-				HTMLCell.setAttribute('label', copyAsHTML ? '   ✓   ' : '');
-				
-				treerow.appendChild(domainCell);
-				treerow.appendChild(formatCell);
-				treerow.appendChild(HTMLCell);
-				treeitem.appendChild(treerow);
-				treechildren.appendChild(treeitem);
-			});
+			var formatted = yield Zotero.QuickCopy.getFormattedNameFromSetting(siteData[i].format);
+			formatCell.setAttribute('label', formatted);
+			var copyAsHTML = Zotero.QuickCopy.getContentType(siteData[i].format) == 'html';
+			HTMLCell.setAttribute('label', copyAsHTML ? '   ✓   ' : '');
+			
+			treerow.appendChild(domainCell);
+			treerow.appendChild(formatCell);
+			treerow.appendChild(HTMLCell);
+			treeitem.appendChild(treerow);
+			treechildren.appendChild(treeitem);
 		}
 	}),
 	
 	
-	deleteSelectedQuickCopySite: function () {
+	deleteSelectedQuickCopySite: Zotero.Promise.coroutine(function* () {
 		var tree = document.getElementById('quickCopy-siteSettings');
 		var treeitem = tree.lastChild.childNodes[tree.currentIndex];
 		var domainPath = treeitem.firstChild.firstChild.getAttribute('label');
-		Zotero.DB.query("DELETE FROM settings WHERE setting='quickCopySite' AND key=?", [domainPath]);
+		yield Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='quickCopySite' AND key=?", [domainPath]);
+		yield Zotero.QuickCopy.loadSiteSettings();
 		this.refreshQuickCopySiteList();
-	},
+	}),
 	
 	
 	updateQuickCopyInstructions: function () {

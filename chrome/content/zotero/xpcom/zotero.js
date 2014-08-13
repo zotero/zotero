@@ -621,6 +621,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				Zotero.Searches.init();
 				Zotero.Groups.init();
 				
+				// TODO: Delay until after UI is shown
+				yield Zotero.QuickCopy.init();
 				Zotero.Items.startEmptyTrashTimer();
 			}
 			catch (e) {

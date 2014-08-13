@@ -167,14 +167,13 @@ Zotero.CreatorTypes = new function() {
 	
 	this.getTypesForItemType = getTypesForItemType;
 	this.isValidForItemType = isValidForItemType;
-	this.getPrimaryIDForType = getPrimaryIDForType;
 	
 	this._typeDesc = 'creator type';
 	this._idCol = 'creatorTypeID';
 	this._nameCol = 'creatorType';
 	this._table = 'creatorTypes';
 	
-	var _primaryIDCache = {};
+	var _primaryIDCache;
 	var _hasCreatorTypeCache = {};
 	var _creatorTypesByItemType = {};
 	var _isValidForItemType = {};
@@ -199,6 +198,16 @@ Zotero.CreatorTypes = new function() {
 				id: row.id,
 				name: row.name
 			});
+		}
+		
+		// Load primary creator type ids
+		_primaryIDCache = {};
+		var sql = "SELECT itemTypeID, creatorTypeID FROM itemTypeCreatorTypes "
+			+ "WHERE primaryField=1";
+		var rows = yield Zotero.DB.queryAsync(sql);
+		for (let i=0; i<rows.length; i++) {
+			let row = rows[i];
+			_primaryIDCache[row.itemTypeID] = row.creatorTypeID;
 		}
 	});
 	
@@ -248,18 +257,18 @@ Zotero.CreatorTypes = new function() {
 	}
 	
 	
-	function getPrimaryIDForType(itemTypeID) {
-		if (_primaryIDCache[itemTypeID]) {
-			return _primaryIDCache[itemTypeID];
+	this.getPrimaryIDForType = function (itemTypeID) {
+		if (!_primaryIDCache) {
+			throw new Zotero.Exception.UnloadedDataException(
+				"Primary creator types not yet loaded"
+			);
 		}
-		var sql = "SELECT creatorTypeID FROM itemTypeCreatorTypes "
-			+ "WHERE itemTypeID=? AND primaryField=1";
-		var creatorTypeID = Zotero.DB.valueQuery(sql, itemTypeID);
-		if (!creatorTypeID) {
+		
+		if (_primaryIDCache[itemTypeID] === undefined) {
 			return false;
 		}
-		_primaryIDCache[itemTypeID] = creatorTypeID;
-		return creatorTypeID;
+		
+		return _primaryIDCache[itemTypeID];
 	}
 }
 

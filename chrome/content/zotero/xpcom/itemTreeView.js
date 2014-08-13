@@ -2473,49 +2473,45 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 		}
 	}
 	
-	// Quick Copy is asynchronous
-	Zotero.spawn(function* () {
-		// Get Quick Copy format for current URL
-		var url = this._ownerDocument.defaultView.content && this._ownerDocument.defaultView.content.location ?
-					this._ownerDocument.defaultView.content.location.href : null;
-		//var format = yield Zotero.QuickCopy.getFormatFromURL(url);
-		var format = 'bibliography=http://www.zotero.org/styles/chicago-note-bibliography';
-		
-		Zotero.debug("Dragging with format " + (yield Zotero.QuickCopy.getFormattedNameFromSetting(format)));
-		
-		var exportCallback = function(obj, worked) {
-			if (!worked) {
-				Zotero.log(Zotero.getString("fileInterface.exportError"), 'warning');
-				return;
-			}
-			
-			var text = obj.string.replace(/\r\n/g, "\n");
-			event.dataTransfer.setData("text/plain", text);
+	// Get Quick Copy format for current URL
+	var url = this._ownerDocument.defaultView.content && this._ownerDocument.defaultView.content.location ?
+				this._ownerDocument.defaultView.content.location.href : null;
+	var format = Zotero.QuickCopy.getFormatFromURL(url);
+	
+	Zotero.debug("Dragging with format " + format);
+	
+	var exportCallback = function(obj, worked) {
+		if (!worked) {
+			Zotero.log(Zotero.getString("fileInterface.exportError"), 'warning');
+			return;
 		}
 		
-		try {
-			var [mode, ] = format.split('=');
-			if (mode == 'export') {
-				Zotero.QuickCopy.getContentFromItems(items, format, exportCallback);
-			}
-			else if (mode.indexOf('bibliography') == 0) {
-				var content = Zotero.QuickCopy.getContentFromItems(items, format, null, event.shiftKey);
-				if (content) {
-					if (content.html) {
-						event.dataTransfer.setData("text/html", content.html);
-					}
-					event.dataTransfer.setData("text/plain", content.text);
+		var text = obj.string.replace(/\r\n/g, "\n");
+		event.dataTransfer.setData("text/plain", text);
+	}
+	
+	try {
+		var [mode, ] = format.split('=');
+		if (mode == 'export') {
+			Zotero.QuickCopy.getContentFromItems(items, format, exportCallback);
+		}
+		else if (mode.indexOf('bibliography') == 0) {
+			var content = Zotero.QuickCopy.getContentFromItems(items, format, null, event.shiftKey);
+			if (content) {
+				if (content.html) {
+					event.dataTransfer.setData("text/html", content.html);
 				}
-			}
-			else {
-				Components.utils.reportError("Invalid Quick Copy mode '" + mode + "'");
+				event.dataTransfer.setData("text/plain", content.text);
 			}
 		}
-		catch (e) {
-			Zotero.debug(e);
-			Components.utils.reportError(e + " with format '" + format + "'");
+		else {
+			Components.utils.reportError("Invalid Quick Copy mode '" + mode + "'");
 		}
-	}.bind(this));
+	}
+	catch (e) {
+		Zotero.debug(e);
+		Components.utils.reportError(e + " with format '" + format + "'");
+	}
 };
 
 
