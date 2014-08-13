@@ -245,7 +245,7 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 	var savedSelection = this.saveSelection();
 	
 	if (action == 'delete') {
-		var selectedIndex = this.selection.count ? this.selection.selectedIndex : 0;
+		var selectedIndex = this.selection.count ? this.selection.currentIndex : 0;
 		
 		//Since a delete involves shifting of rows, we have to do it in order
 		
@@ -287,14 +287,18 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 			for(var i=0, len=rows.length; i<len; i++)
 			{
 				var row = rows[i];
-				this._removeRow(row-i);
-				this._treebox.rowCountChanged(row-i,-1);
+				this._removeRow(row);
+				this._treebox.rowCountChanged(row, -1);
 			}
 			
 			this._refreshCollectionRowMap();
 		}
 		
 		if (!this.selection.count) {
+			// If last row was selected, stay on the last row
+			if (selectedIndex >= this.rowCount) {
+				selectedIndex = this.rowCount - 1;
+			};
 			this.selection.select(selectedIndex)
 		}
 	}
@@ -343,7 +347,9 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 					this.rememberSelection(savedSelection);
 					break;
 				}
-				this.selection.select(this._collectionRowMap[collection.id]);
+				let row = this._collectionRowMap[collection.id];
+				this._treebox.ensureRowIsVisible(row);
+				this.selection.select(row);
 				break;
 				
 			case 'search':

@@ -646,12 +646,12 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 					// The container refresh above takes care of adding the new row.
 					else if (!this.isContainer(row) && parentIndex == -1 && parentItemID) {
 						this._removeRow(row);
-						this._treebox.rowCountChanged(row + 1, -1)
+						this._treebox.rowCountChanged(row, -1)
 					}
 					// If moved from under another item to top level, remove old row and add new one
 					else if (!this.isContainer(row) && parentIndex != -1 && !parentItemID) {
 						this._removeRow(row);
-						this._treebox.rowCountChanged(row + 1, -1)
+						this._treebox.rowCountChanged(row, -1)
 						
 						this._addRow(
 							this._rows,
