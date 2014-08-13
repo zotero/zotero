@@ -37,8 +37,6 @@ Zotero.Libraries = new function () {
 				version: row.version
 			};
 		}
-		
-		// Current library
 	});
 	
 	this.exists = function (libraryID) {
@@ -97,10 +95,10 @@ Zotero.Libraries = new function () {
 		if (libraryID === 0) {
 			return 'user';
 		}
-		if (!_libraryTypes[libraryID]) {
+		if (!_libraryData[libraryID]) {
 			throw new Error("Library data not loaded for library " + libraryID);
 		}
-		return _libraryTypes[libraryID].type;
+		return _libraryData[libraryID].type;
 	}
 	
 	/**
@@ -108,10 +106,10 @@ Zotero.Libraries = new function () {
 	 * @return {Integer}
 	 */
 	this.getVersion = function (libraryID) {
-		if (!_libraryTypes[libraryID]) {
+		if (!_libraryData[libraryID]) {
 			throw new Error("Library data not loaded for library " + libraryID);
 		}
-		return _libraryTypes[libraryID].version;
+		return _libraryData[libraryID].version;
 	}
 	
 	
@@ -124,7 +122,7 @@ Zotero.Libraries = new function () {
 		version = parseInt(version);
 		var sql = "UPDATE libraries SET version=? WHERE libraryID=?";
 		yield Zotero.DB.queryAsync(sql, [version, libraryID]);
-		_libraryTypes[libraryID] = version;
+		_libraryData[libraryID] = version;
 	});
 	
 	
