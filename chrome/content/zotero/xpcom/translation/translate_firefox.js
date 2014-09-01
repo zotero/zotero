@@ -512,7 +512,7 @@ Zotero.Translate.SandboxManager.prototype = {
 	"_copyObject":function(obj, wm) {
 		if(!this._canCopy(obj)) return obj
 		if(!wm) wm = new WeakMap();
-		var obj2 = (obj instanceof Array ? this.sandbox.Array() : this.sandbox.Object());
+		var obj2 = (obj.constructor.name === "Array" ? this.sandbox.Array() : this.sandbox.Object());
 		var wobj2 = obj2.wrappedJSObject ? obj2.wrappedJSObject : obj2;
 		for(var i in obj) {
 			if(!obj.hasOwnProperty(i)) continue;
