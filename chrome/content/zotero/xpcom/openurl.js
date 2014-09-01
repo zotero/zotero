@@ -480,6 +480,7 @@ Zotero.OpenURL = new function() {
 				// same last name, and the same first name up to a point), keep
 				// the plain author, since it might have a middle initial
 				if(item.creators[j].lastName == complexAu[i].lastName &&
+				   item.creators[j].firstName &&
 				   (item.creators[j].firstName == complexAu[i].firstName == "" ||
 				   (item.creators[j].firstName.length >= complexAu[i].firstName.length &&
 				   item.creators[j].firstName.substr(0, complexAu[i].firstName.length) == complexAu[i].firstName))) {
