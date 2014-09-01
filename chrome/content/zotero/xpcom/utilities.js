@@ -910,6 +910,9 @@ Zotero.Utilities = {
 	 * @param	{Function}		onDone			Function to call when done
 	 */
 	 "processAsync":function (sets, callbacks, onDone) {
+		if(sets.wrappedJSObject) sets = sets.wrappedJSObject;
+		if(callbacks.wrappedJSObject) callbacks = callbacks.wrappedJSObject;
+
 		var currentSet;
 		var index = 0;
 		
