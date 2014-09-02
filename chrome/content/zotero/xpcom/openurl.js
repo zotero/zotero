@@ -384,30 +384,28 @@ Zotero.OpenURL = new function() {
 				item.ISSN = value;
 			} else if(key == "rft.aulast" || key == "rft.invlast") {
 				var lastCreator = complexAu[complexAu.length-1];
-				if(complexAu.length && !lastCreator.lastName && !lastCreator.institutional) {
+				if(complexAu.length && !lastCreator.lastName) {
 					lastCreator.lastName = value;
 				} else {
-					complexAu.push(_cloneIfNecessary({lastName:value, creatorType:(key == "rft.aulast" ? "author" : "inventor"), offset:item.creators.length}, item));
+					complexAu.push({lastName:value, creatorType:"author", offset:item.creators.length});
 				}
 			} else if(key == "rft.aufirst" || key == "rft.invfirst") {
 				var lastCreator = complexAu[complexAu.length-1];
-				if(complexAu.length && !lastCreator.firstName && !lastCreator.institutional) {
+				if(complexAu.length && !lastCreator.firstName && !lastCreator.fieldMode) {
 					lastCreator.firstName = value;
 				} else {
-					complexAu.push(_cloneIfNecessary({firstName:value, creatorType:(key == "rft.aufirst" ? "author" : "inventor"), offset:item.creators.length}, item));
+					complexAu.push({firstName:value, creatorType:"author", offset:item.creators.length});
 				}
 			} else if(key == "rft.au" || key == "rft.creator" || key == "rft.contributor" || key == "rft.inventor") {
 				if(key == "rft.contributor") {
 					var type = "contributor";
-				} else if(key == "rft.inventor") {
-					var type = "inventor";
 				} else {
 					var type = "author";
 				}
 				
 				item.creators.push(_cloneIfNecessary(Zotero.Utilities.cleanAuthor(value, type, value.indexOf(",") !== -1), item));
 			} else if(key == "rft.aucorp") {
-				complexAu.push(_cloneIfNecessary({lastName:value, isInstitution:true}, item));
+				complexAu.push({lastName:value, creatorType:"author", fieldMode:1, offset:item.creators.length});
 			} else if(key == "rft.isbn" && !item.ISBN) {
 				item.ISBN = value;
 			} else if(key == "rft.pub" || key == "rft.publisher") {
@@ -475,26 +473,39 @@ Zotero.OpenURL = new function() {
 		
 		// combine two lists of authors, eliminating duplicates
 		for(var i=0; i<complexAu.length; i++) {
+			// If the COinS is messed up, we could end up with authors with first names
+			// and no last names. We can try to salvage this by making that the last name
+			if (!complexAu[i].lastName && complexAu[i].firstName) {
+				complexAu[i].lastName = complexAu[i].firstName;
+				delete complexAu[i].firstName;
+			}
+			if (!complexAu[i].firstName) complexAu[i].fieldMode = 1;
+			// We should _never_ end up with an author with no first _and_ last name,
+			// so at this point, we're guaranteed to have a last name
+			
 			var pushMe = true;
-			var offset = complexAu[i].offset;
-			delete complexAu[i].offset;
 			for (var j = 0; j < item.creators.length; j++) {
-			    // if there's a plain author that is close to this author (the
-			    // same last name, and the same first name up to a point), keep
-			    // the plain author, since it might have a middle initial
-			    if (item.creators[j].lastName == complexAu[i].lastName &&
-			        item.creators[j].firstName &&
-			        ((item.creators[j].firstName == "" && complexAu[i].firstName == "") ||
-			            (item.creators[j].firstName.length >= complexAu[i].firstName.length &&
-			                item.creators[j].firstName.substr(0, complexAu[i].firstName.length) == complexAu[i].firstName))) {
-			        pushMe = false;
-			        break;
-			    }
+					// if there's a plain author that is close to this author (the
+					// same last name, and the same first name up to a point), keep
+					// the plain author, since it might have a middle initial
+					if (item.creators[j].lastName == complexAu[i].lastName
+						&& (item.creators[j].firstName == complexAu[i].firstName
+							|| !complexAu[i].firstName
+							|| (item.creators[j].firstName
+								&& item.creators[j].firstName.substr(0, complexAu[i].firstName.length) == complexAu[i].firstName
+							)
+						)
+					) {
+							pushMe = false;
+							break;
+					}
 			}
 			// Splice in the complex creator at the correct location,
 			// accounting for previous insertions
-			if(pushMe) {
-				item.creators.splice(offset + inserted, 0, complexAu[i]);
+			if (pushMe) {
+				var offset = complexAu[i].offset;
+				delete complexAu[i].offset;
+				item.creators.splice(offset + inserted, 0, _cloneIfNecessary(complexAu[i], item));
 				inserted++;
 			}
 		}
