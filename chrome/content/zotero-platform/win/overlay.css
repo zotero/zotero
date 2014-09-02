@@ -90,7 +90,7 @@
 #zotero-view-item {
 	padding: 0 !important;
 	-moz-appearance: none;
-	background-color: white;
+	background-color: -moz-field;
 	border-width: 1px 0 0  1px;
 }
 

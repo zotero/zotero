@@ -11,7 +11,7 @@ groupbox
 	overflow-x: hidden;
 	overflow-y: auto;
 	display: block; /* allow labels to wrap instead of all being in one line */
-	background-color: white;
+	background-color: -moz-field;
 }
 
 checkbox
