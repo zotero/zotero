@@ -1542,7 +1542,7 @@ Zotero.Utilities = {
 	},
 	
 	/**
-	 * Converts an item in CSL JSON format to a Zotero tiem
+	 * Converts an item in CSL JSON format to a Zotero item
 	 * @param {Zotero.Item} item
 	 * @param {Object} cslItem
 	 */
@@ -1614,6 +1614,9 @@ Zotero.Utilities = {
 						item.setCreator(item.getCreators().length, creator, creatorTypeID);
 					} else {
 						creator.creatorType = Zotero.CreatorTypes.getName(creatorTypeID);
+						if(Zotero.isFx && !Zotero.isBookmarklet && Zotero.platformMajorVersion >= 32) {
+							creator = Components.utils.cloneInto(creator, item);
+						}
 						item.creators.push(creator);
 					}
 				}
