@@ -478,17 +478,18 @@ Zotero.OpenURL = new function() {
 			var pushMe = true;
 			var offset = complexAu[i].offset;
 			delete complexAu[i].offset;
-			for(var j=0; j<item.creators.length; j++) {
-				// if there's a plain author that is close to this author (the
-				// same last name, and the same first name up to a point), keep
-				// the plain author, since it might have a middle initial
-				if(item.creators[j].lastName == complexAu[i].lastName &&
-				   (item.creators[j].firstName == complexAu[i].firstName == "" ||
-				   (item.creators[j].firstName.length >= complexAu[i].firstName.length &&
-				   item.creators[j].firstName.substr(0, complexAu[i].firstName.length) == complexAu[i].firstName))) {
-					pushMe = false;
-					break;
-				}
+			for (var j = 0; j < item.creators.length; j++) {
+			    // if there's a plain author that is close to this author (the
+			    // same last name, and the same first name up to a point), keep
+			    // the plain author, since it might have a middle initial
+			    if (item.creators[j].lastName == complexAu[i].lastName &&
+			        item.creators[j].firstName &&
+			        (item.creators[j].firstName == complexAu[i].firstName == "" ||
+			            (item.creators[j].firstName.length >= complexAu[i].firstName.length &&
+			                item.creators[j].firstName.substr(0, complexAu[i].firstName.length) == complexAu[i].firstName))) {
+			        pushMe = false;
+			        break;
+			    }
 			}
 			// Splice in the complex creator at the correct location,
 			// accounting for previous insertions
