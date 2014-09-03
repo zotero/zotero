@@ -1974,7 +1974,7 @@ Zotero.Sync.Server = new function () {
 						catch (e) {
 							Zotero.debug(e);
 						}
-						var kbURL = 'http://zotero.org/support/kb/ssl_certificate_error';
+						var kbURL = 'https://zotero.org/support/kb/ssl_certificate_error';
 						_error(Zotero.getString('sync.storage.error.webdav.sslCertificateError', host) + "\n\n"
 							+ Zotero.getString('general.seeForMoreInformation', kbURL),
 							false, noReloadOnFailure);
