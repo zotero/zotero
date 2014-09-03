@@ -212,10 +212,20 @@ Zotero.File = new function(){
 			}
 			
 			try {
+				var bytesToFetch = inputStream.available();
+				if (maxLength && maxLength < bytesToFetch) {
+					bytesToFetch = maxLength;
+				}
+				
+				if (bytesToFetch == 0) {
+					deferred.resolve("");
+					return;
+				}
+				
 				deferred.resolve(
 					NetUtil.readInputStreamToString(
 						inputStream,
-						Math.min(maxLength, inputStream.available()),
+						bytesToFetch,
 						options
 					)
 				);
