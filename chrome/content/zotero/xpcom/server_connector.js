@@ -370,8 +370,8 @@ Zotero.Server.Connector.SaveItem.prototype = {
 					sendResponseCallback(500);
 				}
 			} else {
+				Zotero.logError(items);
 				sendResponseCallback(500);
-				throw newItems;
 			}
 		}, Zotero.Server.Connector.AttachmentProgressManager.onProgress);
 	}
