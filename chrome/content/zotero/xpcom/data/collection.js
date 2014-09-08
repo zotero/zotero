@@ -121,8 +121,7 @@ Zotero.Collection.prototype.loadPrimaryData = Zotero.Promise.coroutine(function*
 	var key = this._key;
 	var libraryID = this._libraryID;
 	
-	// Should be same as query in Zotero.Collections, just with collectionID
-	var sql = Zotero.Collections._getPrimaryDataSQL();
+	var sql = Zotero.Collections.getPrimaryDataSQL();
 	if (id) {
 		sql += " AND O.collectionID=?";
 		var params = id;

@@ -204,7 +204,7 @@ Zotero.Collections = new function() {
 	}
 	
 	
-	this._getPrimaryDataSQL = function () {
+	this.getPrimaryDataSQL = function () {
 		// This should be the same as the query in Zotero.Collection.load(),
 		// just without a specific collectionID
 		return "SELECT "

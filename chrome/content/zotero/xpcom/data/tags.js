@@ -845,7 +845,7 @@ Zotero.Tags = new function() {
 	}
 	
 	
-	this._getPrimaryDataSQL = function () {
+	this.getPrimaryDataSQL = function () {
 		// This should be the same as the query in Zotero.Tag.load(),
 		// just without a specific tagID
 		return "SELECT * FROM tags O WHERE 1";

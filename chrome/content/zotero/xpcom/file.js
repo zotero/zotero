@@ -189,7 +189,7 @@ Zotero.File = new function(){
 	 * @param {nsIURI|nsIFile|string spec|string path|nsIChannel|nsIInputStream} source The source to read
 	 * @param {String} [charset] The character set; defaults to UTF-8
 	 * @param {Integer} [maxLength] Maximum length to fetch, in bytes
-	 * @return {Promise} A Q promise that is resolved with the contents of the file
+	 * @return {Promise} A promise that is resolved with the contents of the file
 	 */
 	this.getContentsAsync = function (source, charset, maxLength) {
 		Zotero.debug("Getting contents of " + source);
@@ -243,7 +243,7 @@ Zotero.File = new function(){
 	 *
 	 * @param {nsIURI|nsIFile|string spec|nsIChannel|nsIInputStream} source The source to read
 	 * @param {Integer} [maxLength] Maximum length to fetch, in bytes (unimplemented)
-	 * @return {Promise} A Q promise that is resolved with the contents of the source
+	 * @return {Promise} A promise that is resolved with the contents of the source
 	 */
 	this.getBinaryContentsAsync = function (source, maxLength) {
 		var deferred = Zotero.Promise.defer();

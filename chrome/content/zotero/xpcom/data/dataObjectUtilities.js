@@ -53,6 +53,12 @@ Zotero.DataObjectUtilities = {
 		return key;
 	},
 	
+	
+	getObjectTypeSingular: function (objectTypePlural) {
+		return objectTypePlural.replace(/(s|es)$/, '');
+	},
+	
+	
 	"getObjectTypePlural": function getObjectTypePlural(objectType) {
 		return objectType == 'search' ? 'searches' : objectType + 's';
 	},

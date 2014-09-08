@@ -186,17 +186,38 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	});
 	
 	
+	/**
+	 * @deprecated - use .libraryKey
+	 */
 	this.makeLibraryKeyHash = function (libraryID, key) {
+		Zotero.debug("WARNING: Zotero.DataObjects.makeLibraryKeyHash() is deprecated -- use obj.libraryKey instead");
 		return libraryID + '_' + key;
 	}
 	
 	
+	/**
+	 * @deprecated - use .libraryKey
+	 */
 	this.getLibraryKeyHash = function (obj) {
+		Zotero.debug("WARNING: Zotero.DataObjects.getLibraryKeyHash() is deprecated -- use obj.libraryKey instead");
 		return this.makeLibraryKeyHash(obj.libraryID, obj.key);
 	}
 	
 	
+	this.parseLibraryKey = function (libraryKey) {
+		var [libraryID, key] = libraryKey.split('/');
+		return {
+			libraryID: parseInt(libraryID),
+			key: key
+		};
+	}
+	
+	
+	/**
+	 * @deprecated - Use Zotero.DataObjects.parseLibraryKey()
+	 */
 	this.parseLibraryKeyHash = function (libraryKey) {
+		Zotero.debug("WARNING: Zotero.DataObjects.parseLibraryKeyHash() is deprecated -- use .parseLibraryKey() instead");
 		var [libraryID, key] = libraryKey.split('_');
 		if (!key) {
 			return false;
@@ -254,7 +275,8 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	
 	
 	this.getIDFromLibraryAndKey = function (libraryID, key) {
-		return this._objectIDs[libraryID][key] ? this._objectIDs[libraryID][key] : false;
+		return (this._objectIDs[libraryID] && this._objectIDs[libraryID][key])
+			? this._objectIDs[libraryID][key] : false;
 	}
 	
 	
@@ -531,8 +553,8 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 			return loaded;
 		}
 		
-		// _getPrimaryDataSQL() should use "O" for the primary table alias
-		var sql = this._getPrimaryDataSQL();
+		// getPrimaryDataSQL() should use "O" for the primary table alias
+		var sql = this.getPrimaryDataSQL();
 		var params = [];
 		if (libraryID !== false) {
 			sql += ' AND O.libraryID=?';

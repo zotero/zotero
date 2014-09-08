@@ -176,8 +176,9 @@
 				 	if (this.onLibraryChange) {
 				 		this.onLibraryChange(libraryID);
 					}
-					
-					this.searchRef.libraryID = libraryID;
+					if (!this.searchRef.id) {
+						this.searchRef.libraryID = libraryID;
+					}
 				]]></body>
 			</method>
 			

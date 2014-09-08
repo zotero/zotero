@@ -44,7 +44,11 @@ var ZoteroAdvancedSearch = new function() {
 		
 		_searchBox.onLibraryChange = this.onLibraryChange;
 		var io = window.arguments[0];
-		_searchBox.search = io.dataIn.search;
+		
+		io.dataIn.search.loadPrimaryData()
+		.then(function () {
+			_searchBox.search = io.dataIn.search;
+		});
 	}
 	
 	
@@ -62,6 +66,7 @@ var ZoteroAdvancedSearch = new function() {
 				// Hack to create a condition for the search's library --
 				// this logic should really go in the search itself instead of here
 				// and in collectionTreeView.js
+				yield search.loadPrimaryData();
 				var conditions = search.getSearchConditions();
 				if (!conditions.some(function (condition) condition.condition == 'libraryID')) {
 					yield search.addCondition('libraryID', 'is', _searchBox.search.libraryID);

@@ -30,25 +30,23 @@ var Zotero_Timeline_Interface = new function() {
 	 */
 	this.loadTimeline = function () {
 		var uri = 'zotero://timeline/';
+		
 		var col = ZoteroPane_Local.getSelectedCollection();
-		
 		if (col) {
-			ZoteroPane_Local.loadURI(uri + 'collection/' + Zotero.Collections.getLibraryKeyHash(col));
-			return;
+			uri += Zotero.API.getLibraryPrefix(col.libraryID) + '/collections/' + col.key;
 		}
-		
-		var s = ZoteroPane_Local.getSelectedSavedSearch();
-		if (s) {
-			ZoteroPane_Local.loadURI(uri + 'search/' + Zotero.Searches.getLibraryKeyHash(s));
-			return;
+		else {
+			var s = ZoteroPane_Local.getSelectedSavedSearch();
+			if (s) {
+				uri += Zotero.API.getLibraryPrefix(s.libraryID) + '/searches/' + s.key;
+			}
+			else {
+				let libraryID = ZoteroPane_Local.getSelectedLibraryID();
+				if (libraryID) {
+					uri += Zotero.API.getLibraryPrefix(libraryID);
+				}
+			}
 		}
-		
-		var l = ZoteroPane_Local.getSelectedLibraryID();
-		if (l) {
-			ZoteroPane_Local.loadURI(uri + 'library/' + l);
-			return;
-		}
-		
 		ZoteroPane_Local.loadURI(uri);
 	}
 }

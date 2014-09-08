@@ -293,7 +293,7 @@ Zotero.Item.prototype.loadPrimaryData = Zotero.Promise.coroutine(function* (relo
 	if (!columns.length) {
 		return;
 	}
-	// This should match Zotero.Items._getPrimaryDataSQL(), but without
+	// This should match Zotero.Items.getPrimaryDataSQL(), but without
 	// necessarily including all columns
 	var sql = "SELECT " + columns.join(", ") + Zotero.Items.primaryDataSQLFrom;
 	if (id) {
@@ -923,9 +923,9 @@ Zotero.Item.prototype.getCreator = function (pos) {
  * @param  {Integer} pos
  * @return {Object|Boolean} The API JSON creator data at the given position, or FALSE if none
  */
-Zotero.Item.prototype.getCreatorsJSON = function (pos) {
+Zotero.Item.prototype.getCreatorJSON = function (pos) {
 	this._requireData('creators');
-	return this._creators[pos] ? Zotero.Creators.internalToAPIJSON(this._creators[pos]) : false;
+	return this._creators[pos] ? Zotero.Creators.internalToJSON(this._creators[pos]) : false;
 }
 
 
@@ -954,7 +954,7 @@ Zotero.Item.prototype.getCreators = function () {
  */
 Zotero.Item.prototype.getCreatorsAPIData = function () {
 	this._requireData('creators');
-	return this._creators.map(function (data) Zotero.Creators.internalToAPIJSON(data));
+	return this._creators.map(function (data) Zotero.Creators.internalToJSON(data));
 }
 
 
@@ -2075,7 +2075,7 @@ Zotero.Item.prototype.numAttachments = function(includeTrashed) {
 /**
  * Get an nsILocalFile for the attachment, or false for invalid paths
  *
- * This no longer checks whether a file exists
+ * Note: This no longer checks whether a file exists
  *
  * @return {nsILocalFile|false}  An nsIFile, or false for invalid paths
  */
@@ -4150,12 +4150,8 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 	}
 	
 	var obj = {};
-	if (options && options.includeKey) {
-		obj.itemKey = this.key;
-	}
-	if (options && options.includeVersion) {
-		obj.itemVersion = this.version;
-	}
+	obj.itemKey = this.key;
+	obj.itemVersion = this.version;
 	obj.itemType = Zotero.ItemTypes.getName(this.itemTypeID);
 	
 	// Fields
@@ -4170,7 +4166,7 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 	// Creators
 	if (this.isRegularItem()) {
 		yield this.loadCreators()
-		obj.creators = this.getCreators();
+		obj.creators = this.getCreatorsAPIData();
 	}
 	else {
 		var parent = this.parentKey;
@@ -4200,14 +4196,8 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 	obj.tags = [];
 	yield this.loadTags()
 	var tags = yield this.getTags();
-	for each (let tag in tags) {
-		let tagObj = {};
-		tagObj.tag = tag.name;
-		let type = tag.type;
-		if (type != 0 || mode == 'full') {
-			tagObj.type = tag.type;
-		}
-		obj.tags.push(tagObj);
+	for (let i=0; i<tags.length; i++) {
+		obj.tags.push(tags[i]);
 	}
 	
 	// Collections
@@ -4248,10 +4238,8 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 		obj.deleted = deleted;
 	}
 	
-	if (options && options.includeDate) {
-		obj.dateAdded = this.dateAdded;
-		obj.dateModified = this.dateModified;
-	}
+	obj.dateAdded = Zotero.Date.sqlToISO8601(this.dateAdded);
+	obj.dateModified = Zotero.Date.sqlToISO8601(this.dateModified);
 	
 	if (mode == 'patch') {
 		for (let i in patchBase) {
@@ -4276,6 +4264,34 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 	return obj;
 });
 
+
+Zotero.Item.prototype.toResponseJSON = Zotero.Promise.coroutine(function* (options, patchBase) {
+	var json = {
+		key: this.key,
+		version: this.version,
+		meta: {},
+		data: yield this.toJSON(options, patchBase)
+	};
+	
+	// TODO: library block?
+	
+	// creatorSummary
+	var firstCreator = this.getField('firstCreator');
+	if (firstCreator) {
+		json.meta.creatorSummary = firstCreator;
+	}
+	// parsedDate
+	var parsedDate = Zotero.Date.multipartToSQL(this.getField('date', true, true));
+	if (parsedDate) {
+		// 0000?
+		json.meta.parsedDate = parsedDate;
+	}
+	// numChildren
+	if (this.isRegularItem()) {
+		json.meta.numChildren = this.numChildren();
+	}
+	return json;
+})
 
 
 //////////////////////////////////////////////////////////////////////////////

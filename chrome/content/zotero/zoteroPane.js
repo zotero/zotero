@@ -43,7 +43,6 @@ var ZoteroPane = new function()
 	this.handleKeyUp = handleKeyUp;
 	this.setHighlightedRowsCallback = setHighlightedRowsCallback;
 	this.handleKeyPress = handleKeyPress;
-	this.editSelectedCollection = editSelectedCollection;
 	this.handleSearchKeypress = handleSearchKeypress;
 	this.handleSearchInput = handleSearchInput;
 	this.getSelectedCollection = getSelectedCollection;
@@ -1781,8 +1780,7 @@ var ZoteroPane = new function()
 	});
 	
 	
-	function editSelectedCollection()
-	{
+	this.editSelectedCollection = function () {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -1807,11 +1805,17 @@ var ZoteroPane = new function()
 			else {
 				var s = new Zotero.Search();
 				s.id = row.ref.id;
-				var io = {dataIn: {search: s, name: row.getName()}, dataOut: null};
-				window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
-				if (io.dataOut) {
-					this.onCollectionSelected(); //reload itemsView
-				}
+				s.loadPrimaryData()
+				.then(function () {
+					return s.loadConditions();
+				})
+				.then(function () {
+					var io = {dataIn: {search: s, name: row.getName()}, dataOut: null};
+					window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
+					if (io.dataOut) {
+						this.onCollectionSelected(); //reload itemsView
+					}
+				}.bind(this));
 			}
 		}
 	}
