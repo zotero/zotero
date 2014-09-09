@@ -451,7 +451,7 @@
 									}
 									indent += '- ';
 								}
-								rows.push([indent + cols[i].name, 'C' + Zotero.Collections.getLibraryKeyHash(cols[i])]);
+								rows.push([indent + cols[i].name, 'C' + cols[i].key]);
 							}
 							this.createValueMenu(rows);
 							break;
@@ -462,7 +462,7 @@
 							var searches = Zotero.Searches.getAll(libraryID);
 							for (var i in searches) {
 								if (searches[i].id != this.parent.search.id) {
-									rows.push([searches[i].name, 'S' + Zotero.Searches.getLibraryKeyHash(searches[i])]);
+									rows.push([searches[i].name, 'S' + searches[i].key]);
 								}
 							}
 							this.createValueMenu(rows);

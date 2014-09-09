@@ -197,7 +197,7 @@ Zotero.Items = new function() {
 		var s = new Zotero.Search;
 		yield s.addCondition('libraryID', 'is', params.libraryID);
 		if (params.scopeObject == 'collections') {
-			yield s.addCondition('collection', 'is', params.libraryID + '/' + params.scopeObjectKey);
+			yield s.addCondition('collection', 'is', params.scopeObjectKey);
 		}
 		yield s.addCondition('title', 'contains', 'test');
 		var ids = yield s.search();

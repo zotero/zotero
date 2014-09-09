@@ -2216,9 +2216,9 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	}
 	else {
 		var s = new Zotero.Search();
+		yield s.addCondition('libraryID', 'is', this.ref.libraryID);
 		// Library root
 		if (this.isLibrary(true)) {
-			yield s.addCondition('libraryID', 'is', this.ref.libraryID);
 			yield s.addCondition('noChildren', 'true');
 			includeScopeChildren = true;
 		}
@@ -2231,7 +2231,6 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 			includeScopeChildren = true;
 		}
 		else if (this.isTrash()) {
-			yield s.addCondition('libraryID', 'is', this.ref.libraryID);
 			yield s.addCondition('deleted', 'true');
 		}
 		else {

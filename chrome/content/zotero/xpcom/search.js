@@ -389,9 +389,7 @@ Zotero.Search.prototype.addCondition = Zotero.Promise.coroutine(function* (condi
 			Components.utils.reportError(msg);
 			return;
 		}
-		var lkh = Zotero.Collections.getLibraryKeyHash(c);
-		// TEMP: Bluebird return yield
-		return yield this.addCondition('collection', operator, lkh, required);
+		return this.addCondition('collection', operator, c.key, required);
 	}
 	// Shortcut to add a saved search
 	else if (condition == 'savedSearchID') {
@@ -402,9 +400,7 @@ Zotero.Search.prototype.addCondition = Zotero.Promise.coroutine(function* (condi
 			Components.utils.reportError(msg);
 			return;
 		}
-		var lkh = Zotero.Searches.getLibraryKeyHash(s);
-		// TEMP: Bluebird return yield
-		return yield this.addCondition('savedSearch', operator, lkh, required);
+		return this.addCondition('savedSearch', operator, s.key, required);
 	}
 	
 	var searchConditionID = ++this._maxSearchConditionID;
@@ -836,7 +832,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 	}
 	finally {
 		if (tmpTable && !asTempTable) {
-			yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
+			yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS " + tmpTable);
 		}
 	}
 	
@@ -1185,87 +1181,104 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						break;
 					
 					case 'collection':
-						var col;
-						if (condition.value) {
-							var lkh = Zotero.Collections.parseLibraryKeyHash(condition.value);
-							if (lkh) {
-								col = yield Zotero.Collections.getByLibraryAndKeyAsync(lkh.libraryID, lkh.key);
+					case 'savedSearch':
+						let obj;
+						let objLibraryID;
+						let objKey = condition.value;
+						let objectType = condition.name == 'collection' ? 'collection' : 'search';
+						let objectTypeClass = Zotero.DataObjectUtilities.getClassForObjectType(objectType);
+						
+						// Old-style library-key hash
+						if (objKey.contains('_')) {
+							[objLibraryID, objKey] = objKey.split('_');
+						}
+						// libraryID assigned on search
+						else if (this.libraryID !== null) {
+							objLibraryID = this.libraryID;
+						}
+						
+						// If search doesn't have a libraryID, check all possible libraries
+						// for the collection/search
+						if (objLibraryID === undefined) {
+							let foundLibraryID = false;
+							for each (let c in this._conditions) {
+								if (c.condition == 'libraryID' && c.operator == 'is') {
+									foundLibraryID = true;
+									obj = yield objectTypeClass.getByLibraryAndKeyAsync(
+										c.value, objKey
+									);
+									if (obj) {
+										break;
+									}
+								}
+							}
+							if (!foundLibraryID) {
+								Zotero.debug("WARNING: libraryID condition not found for "
+									+ objectType + " in search", 2);
 							}
 						}
-						if (!col) {
-							var msg = "Collection " + condition.value + " specified in saved search doesn't exist";
+						else {
+							col = yield objectTypeClass.getByLibraryAndKeyAsync(
+								objLibraryID, objKey
+							);
+						}
+						if (!obj) {
+							var msg = objectType.charAt(0).toUpperCase() + objectType.substr(1)
+								+ " " + objKey + " specified in search not found";
 							Zotero.debug(msg, 2);
 							Zotero.log(msg, 'warning', 'chrome://zotero/content/xpcom/search.js');
-							col = {
+							if (objectType == 'search') {
+								continue;
+							}
+							obj = {
 								id: 0
 							};
 						}
 						
-						var q = ['?'];
-						var p = [col.id];
-						
-						// Search descendent collections if recursive search
-						if (recursive){
-							var descendents = col.getDescendents(false, 'collection');
-							if (descendents){
-								for (var k in descendents){
-									q.push('?');
-									p.push({int:descendents[k]['id']});
+						if (objectType == 'collection') {
+							var q = ['?'];
+							var p = [obj.id];
+							
+							// Search descendent collections if recursive search
+							if (recursive){
+								var descendents = col.getDescendents(false, 'collection');
+								if (descendents){
+									for (var k in descendents){
+										q.push('?');
+										p.push({int:descendents[k]['id']});
+									}
 								}
 							}
+							
+							condSQL += "collectionID IN (" + q.join() + ")";
+							condSQLParams = condSQLParams.concat(p);
 						}
-						
-						condSQL += "collectionID IN (" + q.join() + ")";
-						condSQLParams = condSQLParams.concat(p);
-						
-						skipOperators = true;
-						break;
-					
-					case 'savedSearch':
-						condSQL += "itemID ";
-						if (condition['operator']=='isNot'){
-							condSQL += "NOT ";
-						}
-						condSQL += "IN (";
-						
-						var search;
-						if (condition.value) {
-							var lkh = Zotero.Searches.parseLibraryKeyHash(condition.value);
-							if (lkh) {
-								search = Zotero.Searches.getByLibraryAndKey(lkh.libraryID, lkh.key);
-							}
-						}
-						if (!search) {
-							var msg = "Search " + condition.value + " specified in saved search doesn't exist";
-							Zotero.debug(msg, 2);
-							Zotero.log(msg, 'warning', 'chrome://zotero/content/xpcom/search.js');
-							continue;
-						}
-						
-						// Check if there are any post-search filters
-						var hasFilter = search.hasPostSearchFilter();
-						
-						// This is an ugly and inefficient way of doing a
-						// subsearch, but it's necessary if there are any
-						// post-search filters (e.g. fulltext scanning) in the
-						// subsearch
-						//
-						// DEBUG: it's possible there's a query length limit here
-						// or that this slows things down with large libraries
-						// -- should probably use a temporary table instead
-						if (hasFilter){
-							let subids = yield search.search();
-							condSQL += subids.join();
-						}
-						// Otherwise just put the SQL in a subquery
 						else {
-							condSQL += yield search.getSQL();
-							let subpar = yield search.getSQLParams();
-							for (let k in subpar){
-								condSQLParams.push(subpar[k]);
+								// Check if there are any post-search filters
+							var hasFilter = search.hasPostSearchFilter();
+							
+							// This is an ugly and inefficient way of doing a
+							// subsearch, but it's necessary if there are any
+							// post-search filters (e.g. fulltext scanning) in the
+							// subsearch
+							//
+							// DEBUG: it's possible there's a query length limit here
+							// or that this slows things down with large libraries
+							// -- should probably use a temporary table instead
+							if (hasFilter){
+								let subids = yield search.search();
+								condSQL += subids.join();
 							}
+							// Otherwise just put the SQL in a subquery
+							else {
+								condSQL += yield search.getSQL();
+								let subpar = yield search.getSQLParams();
+								for (let k in subpar){
+									condSQLParams.push(subpar[k]);
+								}
+							}
+							condSQL += ")";
 						}
-						condSQL += ")";
 						
 						skipOperators = true;
 						break;
