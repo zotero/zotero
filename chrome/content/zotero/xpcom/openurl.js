@@ -243,6 +243,13 @@ Zotero.OpenURL = new function() {
 		if(asObj) return entries;
 		return entries.join("&");
 	}
+
+	function _cloneIfNecessary(obj1, obj2) {
+		if(Zotero.isFx && !Zotero.isBookmarklet && Zotero.platformMajorVersion >= 32) {
+			return Components.utils.cloneInto(obj1, obj2);
+		}
+		return obj1;
+	}
 	
 	/*
 	 * Generates an item in the format returned by item.fromArray() given an
@@ -380,14 +387,14 @@ Zotero.OpenURL = new function() {
 				if(complexAu.length && !lastCreator.lastName && !lastCreator.institutional) {
 					lastCreator.lastName = value;
 				} else {
-					complexAu.push({lastName:value, creatorType:(key == "rft.aulast" ? "author" : "inventor"), offset:item.creators.length});
+					complexAu.push(_cloneIfNecessary({lastName:value, creatorType:(key == "rft.aulast" ? "author" : "inventor"), offset:item.creators.length}, item));
 				}
 			} else if(key == "rft.aufirst" || key == "rft.invfirst") {
 				var lastCreator = complexAu[complexAu.length-1];
 				if(complexAu.length && !lastCreator.firstName && !lastCreator.institutional) {
 					lastCreator.firstName = value;
 				} else {
-					complexAu.push({firstName:value, creatorType:(key == "rft.aufirst" ? "author" : "inventor"), offset:item.creators.length});
+					complexAu.push(_cloneIfNecessary({firstName:value, creatorType:(key == "rft.aufirst" ? "author" : "inventor"), offset:item.creators.length}, item));
 				}
 			} else if(key == "rft.au" || key == "rft.creator" || key == "rft.contributor" || key == "rft.inventor") {
 				if(key == "rft.contributor") {
@@ -398,13 +405,9 @@ Zotero.OpenURL = new function() {
 					var type = "author";
 				}
 				
-				if(value.indexOf(",") !== -1) {
-					item.creators.push(Zotero.Utilities.cleanAuthor(value, type, true));
-				} else {
-					item.creators.push(Zotero.Utilities.cleanAuthor(value, type, false));
-				}
+				item.creators.push(_cloneIfNecessary(Zotero.Utilities.cleanAuthor(value, type, value.indexOf(",") !== -1), item));
 			} else if(key == "rft.aucorp") {
-				complexAu.push({lastName:value, isInstitution:true});
+				complexAu.push(_cloneIfNecessary({lastName:value, isInstitution:true}, item));
 			} else if(key == "rft.isbn" && !item.ISBN) {
 				item.ISBN = value;
 			} else if(key == "rft.pub" || key == "rft.publisher") {
@@ -475,17 +478,18 @@ Zotero.OpenURL = new function() {
 			var pushMe = true;
 			var offset = complexAu[i].offset;
 			delete complexAu[i].offset;
-			for(var j=0; j<item.creators.length; j++) {
-				// if there's a plain author that is close to this author (the
-				// same last name, and the same first name up to a point), keep
-				// the plain author, since it might have a middle initial
-				if(item.creators[j].lastName == complexAu[i].lastName &&
-				   (item.creators[j].firstName == complexAu[i].firstName == "" ||
-				   (item.creators[j].firstName.length >= complexAu[i].firstName.length &&
-				   item.creators[j].firstName.substr(0, complexAu[i].firstName.length) == complexAu[i].firstName))) {
-					pushMe = false;
-					break;
-				}
+			for (var j = 0; j < item.creators.length; j++) {
+			    // if there's a plain author that is close to this author (the
+			    // same last name, and the same first name up to a point), keep
+			    // the plain author, since it might have a middle initial
+			    if (item.creators[j].lastName == complexAu[i].lastName &&
+			        item.creators[j].firstName &&
+			        ((item.creators[j].firstName == "" && complexAu[i].firstName == "") ||
+			            (item.creators[j].firstName.length >= complexAu[i].firstName.length &&
+			                item.creators[j].firstName.substr(0, complexAu[i].firstName.length) == complexAu[i].firstName))) {
+			        pushMe = false;
+			        break;
+			    }
 			}
 			// Splice in the complex creator at the correct location,
 			// accounting for previous insertions

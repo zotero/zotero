@@ -462,16 +462,6 @@ Zotero.Translate.SandboxManager.prototype = {
 				if(isFunction) {
 					attachTo[localKey] = function() {
 						var args = Array.prototype.slice.apply(arguments);
-						if(Zotero.platformMajorVersion >= 32) {
-							// This is necessary on Nightly and works
-							// fine on 31, but apparently breaks
-							// ZU.xpath in an unusual way on 24
-							for(var i=0; i<args.length; i++) {
-								if(typeof args[i] === "object" && args[i] !== null && args[i].wrappedJSObject) {
-									args[i] = args[i].wrappedJSObject;
-								}
-							}
-						}
 						if(passAsFirstArgument) args.unshift(passAsFirstArgument);
 						return me._copyObject(object[localKey].apply(object, args));
 					};
@@ -512,7 +502,7 @@ Zotero.Translate.SandboxManager.prototype = {
 	"_copyObject":function(obj, wm) {
 		if(!this._canCopy(obj)) return obj
 		if(!wm) wm = new WeakMap();
-		var obj2 = (obj instanceof Array ? this.sandbox.Array() : this.sandbox.Object());
+		var obj2 = (obj.constructor.name === "Array" ? this.sandbox.Array() : this.sandbox.Object());
 		var wobj2 = obj2.wrappedJSObject ? obj2.wrappedJSObject : obj2;
 		for(var i in obj) {
 			if(!obj.hasOwnProperty(i)) continue;

@@ -80,7 +80,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.536",
+    PROCESSOR_VERSION: "1.0.539",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -1029,11 +1029,16 @@ CSL.getSortCompare = function (default_locale) {
         return CSL.stringCompare;
     }
     var strcmp;
+    var strcmp_opts = {
+        sensitivity:"base",
+        ignorePunctuation:true,
+        numeric:true
+   }
     if (!default_locale) {
         default_locale = "en-US";
     }
     strcmp = function (a, b) {
-        return a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase());
+        return a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase(),default_locale,strcmp_opts);
     };
     var stripPunct = function (str) {
         return str.replace(/^[\[\]\'\"]*/g, "");
@@ -4262,6 +4267,7 @@ CSL.getAmbiguousCite = function (Item, disambig, visualForm) {
     };
     if (this.registry.registry[Item.id] 
         && this.registry.citationreg.citationsByItemId
+        && this.registry.citationreg.citationsByItemId[Item.id]
         && this.registry.citationreg.citationsByItemId[Item.id].length 
         && visualForm) {
         if (this.citation.opt["givenname-disambiguation-rule"] === "by-cite") {
@@ -7362,7 +7368,9 @@ CSL.NameOutput.prototype._runDisambigNames = function (lst, pos) {
             param = paramx;
         }
         if (!this.state.tmp.just_looking && this.item && this.item.position === CSL.POSITION_FIRST) {
-            param = paramx;
+            if (paramx > param) {
+                param = paramx;
+            }
         }
         if (!this.state.tmp.sort_key_flag) {
             this.state.tmp.disambig_settings.givens[pos][i] = param;
