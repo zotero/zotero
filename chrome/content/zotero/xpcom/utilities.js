@@ -910,6 +910,9 @@ Zotero.Utilities = {
 	 * @param	{Function}		onDone			Function to call when done
 	 */
 	 "processAsync":function (sets, callbacks, onDone) {
+		if(sets.wrappedJSObject) sets = sets.wrappedJSObject;
+		if(callbacks.wrappedJSObject) callbacks = callbacks.wrappedJSObject;
+
 		var currentSet;
 		var index = 0;
 		
@@ -1040,11 +1043,20 @@ Zotero.Utilities = {
 		
 		var results = [];
 		for(var i=0, n=elements.length; i<n; i++) {
-			var element = elements[i];
+			// For some reason, if elements is wrapped by an object
+			// Xray, we won't be able to unwrap the DOMWrapper around
+			// the element. So waive the object Xray.
+			var element = elements.wrappedJSObject ? elements.wrappedJSObject[i] : elements[i];
 			
 			// Firefox 5 hack, so we will preserve Fx5DOMWrappers
 			var isWrapped = Zotero.Translate.DOMWrapper && Zotero.Translate.DOMWrapper.isWrapped(element);
 			if(isWrapped) element = Zotero.Translate.DOMWrapper.unwrap(element);
+
+			// We waived the object Xray above, which will waive the
+			// DOM Xray, so make sure we have a DOM Xray wrapper.
+			if(Zotero.isFx) {
+				element = new XPCNativeWrapper(element);
+			}
 			
 			if(element.ownerDocument) {
 				var rootDoc = element.ownerDocument;
@@ -1530,7 +1542,7 @@ Zotero.Utilities = {
 	},
 	
 	/**
-	 * Converts an item in CSL JSON format to a Zotero tiem
+	 * Converts an item in CSL JSON format to a Zotero item
 	 * @param {Zotero.Item} item
 	 * @param {Object} cslItem
 	 */
@@ -1602,6 +1614,9 @@ Zotero.Utilities = {
 						item.setCreator(item.getCreators().length, creator, creatorTypeID);
 					} else {
 						creator.creatorType = Zotero.CreatorTypes.getName(creatorTypeID);
+						if(Zotero.isFx && !Zotero.isBookmarklet && Zotero.platformMajorVersion >= 32) {
+							creator = Components.utils.cloneInto(creator, item);
+						}
 						item.creators.push(creator);
 					}
 				}
