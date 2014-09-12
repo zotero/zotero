@@ -1444,6 +1444,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			}
 		}
 		catch (e){
+			Components.utils.reportError(e);
+			Zotero.debug(e, 1);
 			throw ('Localized string not available for ' + name);
 		}
 		return l10n;
