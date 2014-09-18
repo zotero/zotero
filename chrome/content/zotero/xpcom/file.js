@@ -347,7 +347,7 @@ Zotero.File = new function(){
 				}
 				
 				// Preserve extension
-				var matches = file.leafName.match(/\.[a-z0-9]{0,20}$/);
+				var matches = file.leafName.match(/\.[a-z0-9]{0,20}$/i);
 				var ext = matches ? matches[0] : "";
 				
 				if (pathError) {
