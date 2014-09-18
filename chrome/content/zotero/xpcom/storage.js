@@ -1518,6 +1518,7 @@ Zotero.Sync.Storage = new function () {
 					destFile.remove(false);
 				}
 				catch (e) {}
+				// TODO: localize
 				var msg = "Due to a Windows path length limitation, your Zotero data directory "
 					+ "is too deep in the filesystem for syncing to work reliably. "
 					+ "Please relocate your Zotero data to a higher directory.";
@@ -1695,6 +1696,7 @@ Zotero.Sync.Storage = new function () {
 					}
 					catch (e) {}
 					zipReader.close();
+					// TODO: localize
 					var msg = "Due to a Windows path length limitation, your Zotero data directory "
 						+ "is too deep in the filesystem for syncing to work reliably. "
 						+ "Please relocate your Zotero data to a higher directory.";
