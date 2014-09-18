@@ -1543,7 +1543,7 @@ Zotero.Sync.Storage = new function () {
 		var returnFile = null;
 		// processDownload() needs to know that we're renaming the file
 		if (renamed) {
-			var returnFile = destFile.clone();
+			returnFile = destFile.clone();
 		}
 		return returnFile;
 	}
