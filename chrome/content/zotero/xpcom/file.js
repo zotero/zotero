@@ -354,7 +354,8 @@ Zotero.File = new function(){
 					let pathLength = pathByteLength - fileNameByteLength;
 					newLength -= pathLength;
 					
-					if (newLength < 5) {
+					// Make sure there's a least 1 character of the basename left over
+					if (newLength - ext.length < 1) {
 						throw new Error("Path is too long");
 					}
 				}
