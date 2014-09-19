@@ -1447,8 +1447,10 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			if (e.name == 'NS_ERROR_ILLEGAL_VALUE') {
 				Zotero.debug(params, 1);
 			}
-			Components.utils.reportError(e);
-			Zotero.debug(e, 1);
+			else if (e.name != 'NS_ERROR_FAILURE') {
+				Components.utils.reportError(e);
+				Zotero.debug(e, 1);
+			}
 			throw ('Localized string not available for ' + name);
 		}
 		return l10n;
