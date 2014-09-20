@@ -908,9 +908,9 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 		}
 		
 		if (participants.length > 0) {
-			var names = [];
-			for each(participant in participants) {
-				names.push(participant.ref.lastName);
+			let names = [];
+			for (let i=0; i<4; i++) {
+				names.push(participants[i].ref.lastName);
 			}
 			switch (names.length) {
 				case 1:
