@@ -36,10 +36,11 @@
  */
 Zotero.CollectionTreeView = function()
 {
+	Zotero.LibraryTreeView.apply(this);
+	
 	this.itemToSelect = null;
 	this.hideSources = [];
 	
-	this._treebox = null;
 	this._highlightedRows = {};
 	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search', 'share', 'group', 'trash', 'bucket'], 'collectionTreeView');
 	this._containerState = {};
@@ -56,6 +57,8 @@ Object.defineProperty(Zotero.CollectionTreeView.prototype, "selectedTreeRow", {
 		return this.getRow(this.selection.currentIndex);
 	}
 });
+
+
 
 /*
  *  Called by the tree itself
@@ -93,6 +96,9 @@ Zotero.CollectionTreeView.prototype.setTree = Zotero.Promise.coroutine(function*
 		var row = yield this.getLastViewedRow();
 		this.selection.select(row);
 		this._treebox.ensureRowIsVisible(row);
+		
+		yield this._runListeners('load');
+		this._initialized = true;
 	}
 	catch (e) {
 		Zotero.debug(e, 1);

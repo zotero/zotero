@@ -2190,6 +2190,18 @@ Zotero.SearchConditions = new function(){
 			},
 			
 			{
+				name: 'itemID',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'items',
+				field: 'itemID',
+				special: true,
+				noLoad: true
+			},
+			
+			{
 				name: 'annotation',
 				operators: {
 					contains: true,

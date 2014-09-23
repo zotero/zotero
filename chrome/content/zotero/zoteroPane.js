@@ -32,6 +32,7 @@ var ZoteroPane = new function()
 	var _unserialized = false;
 	this.collectionsView = false;
 	this.itemsView = false;
+	this._listeners = {};
 	this.__defineGetter__('loaded', function () _loaded);
 	
 	//Privileged methods
@@ -1099,7 +1100,7 @@ var ZoteroPane = new function()
 	this.onCollectionSelected = Zotero.Promise.coroutine(function* () {
 		var collectionTreeRow = this.getCollectionTreeRow();
 		
-		if (this.itemsView.collectionTreeRow == collectionTreeRow) {
+		if (this.itemsView && this.itemsView.collectionTreeRow == collectionTreeRow) {
 			Zotero.debug("Collection selection hasn't changed");
 			return;
 		}
@@ -1167,7 +1168,14 @@ var ZoteroPane = new function()
 		this.itemsView.onError = function () {
 			ZoteroPane_Local.displayErrorMessage();
 		};
-		this.itemsView.addCallback(this.setTagScope);
+		// If any queued load listeners, set them to run when the tree is ready
+		if (this._listeners.itemsLoaded) {
+			let listener;
+			while (listener = this._listeners.itemsLoaded.shift()) {
+				this.itemsView.addEventListener('load', listener);
+			}
+		}
+		this.itemsView.addEventListener('load', this.setTagScope);
 		document.getElementById('zotero-items-tree').view = this.itemsView;
 		
 		// Add events to treecolpicker to update menu before showing/hiding
@@ -1953,31 +1961,74 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		if (!this.itemsView) {
-			Components.utils.reportError("Items view not set in ZoteroPane_Local.selectItem()");
-			return false;
+		// Restore window if it's in the dock
+		if (window.windowState == Components.interfaces.nsIDOMChromeWindow.STATE_MINIMIZED) {
+			window.restore();
 		}
 		
-		var currentLibraryID = this.getSelectedLibraryID();
-		// If in a different library
-		if (item.libraryID != currentLibraryID) {
-			Zotero.debug("Library ID differs; switching library");
-			yield this.collectionsView.selectLibrary(item.libraryID);
-		}
-		// Force switch to library view
-		else if (!this.collectionsView.selectedTreeRow.isLibrary() && inLibrary) {
-			Zotero.debug("Told to select in library; switching to library");
-			yield this.collectionsView.selectLibrary(item.libraryID);
+		if (!this.collectionsView) {
+			throw new Error("Collections view not loaded");
 		}
 		
-		var selected = yield this.itemsView.selectItem(itemID, expand);
-		if (!selected) {
-			Zotero.debug("Item was not selected; switching to library");
-			yield this.collectionsView.selectLibrary(item.libraryID);
-			yield this.itemsView.selectItem(itemID, expand);
-		}
+		var self = this;
+		this.collectionsView.addEventListener('load', function () {
+			Zotero.spawn(function* () {
+				var currentLibraryID = self.getSelectedLibraryID();
+				// If in a different library
+				if (item.libraryID != currentLibraryID) {
+					Zotero.debug("Library ID differs; switching library");
+					yield self.collectionsView.selectLibrary(item.libraryID);
+				}
+				// Force switch to library view
+				else if (!self.collectionsView.selectedTreeRow.isLibrary() && inLibrary) {
+					Zotero.debug("Told to select in library; switching to library");
+					yield self.collectionsView.selectLibrary(item.libraryID);
+				}
+				
+				self.addEventListener('itemsLoaded', function () {
+					Zotero.spawn(function* () {
+						var selected = yield self.itemsView.selectItem(itemID, expand);
+						if (!selected) {
+							Zotero.debug("Item was not selected; switching to library");
+							yield self.collectionsView.selectLibrary(item.libraryID);
+							yield self.itemsView.selectItem(itemID, expand);
+						}
+					});
+				});
+			});
+		});
+		
+		// open Zotero pane
+		this.show();
 		
 		return true;
+	});
+	
+	
+	this.addEventListener = function (event, listener) {
+		if (event == 'itemsLoaded') {
+			if (this.itemsView) {
+				this.itemsView.addEventListener('load', listener);
+			}
+			else {
+				if (!this._listeners.itemsLoaded) {
+					this._listeners.itemsLoaded = [];
+				}
+				this._listeners.itemsLoaded.push(listener);
+			}
+		}
+	};
+	
+	
+	this._runListeners = Zotero.Promise.coroutine(function* (event) {
+		if (!this._listeners[event]) {
+			return;
+		}
+		
+		var listener;
+		while (listener = this._listeners[event].shift()) {
+			yield Zotero.Promise.resolve(listener());
+		}
 	});
 	
 	

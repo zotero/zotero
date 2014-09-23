@@ -110,6 +110,7 @@ function ZoteroProtocolHandler() {
 				}
 				
 				var params = {
+					objectType: 'item',
 					format: 'html',
 					sort: 'title'
 				};
@@ -793,47 +794,68 @@ function ZoteroProtocolHandler() {
 	var SelectExtension = {
 		newChannel: function (uri) {
 			return new AsyncChannel(uri, function* () {
-				generateContent:try {
-					var mimeType, content = '';
-					
-					var [path, queryString] = uri.path.substr(1).split('?');
-					var [type, id] = path.split('/');
-					
-					// currently only able to select one item
-					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						.getService(Components.interfaces.nsIWindowMediator);
-					var win = wm.getMostRecentWindow("navigator:browser");
-					
-					// restore window if it's in the dock
-					if(win.windowState == Components.interfaces.nsIDOMChromeWindow.STATE_MINIMIZED) {
-						win.restore();
-					}
-					
-					// open Zotero pane
-					win.ZoteroPane.show();
-					
-					if(!id) return;
-					
-					var lkh = Zotero.Items.parseLibraryKeyHash(id);
+				var path = uri.path;
+				if (!path) {
+					return 'Invalid URL';
+				}
+				// Strip leading '/'
+				path = path.substr(1);
+				var mimeType, content = '';
+				
+				var params = {
+					objectType: 'item'
+				};
+				var router = new Zotero.Router(params);
+				
+				// Item within a collection or search
+				router.add('library/:scopeObject/:scopeObjectKey/items/:objectKey', function () {
+					params.libraryID = 0;
+				});
+				router.add('groups/:groupID/:scopeObject/:scopeObjectKey/items/:objectKey');
+				
+				// All items
+				router.add('library/items/:objectKey', function () {
+					params.libraryID = 0;
+				});
+				router.add('groups/:groupID/items/:objectKey');
+				
+				// Old-style URLs
+				router.add('item/:id', function () {
+					var lkh = Zotero.Items.parseLibraryKeyHash(params.id);
 					if (lkh) {
-						var item = Zotero.Items.getByLibraryAndKey(lkh.libraryID, lkh.key);
+						params.libraryID = lkh.libraryID;
+						params.objectKey = lkh.key;
 					}
 					else {
-						var item = Zotero.Items.get(id);
+						params.objectID = params.id;
 					}
-					if (!item) {
-						var msg = "Item " + id + " not found in zotero://select";
-						Zotero.debug(msg, 2);
-						Components.utils.reportError(msg);
-						return;
-					}
-					
-					win.ZoteroPane.selectItem(item.id);
+					delete params.id;
+				});
+				router.run(path);
+				
+				try {
+					Zotero.API.parseParams(params);
+					var results = yield Zotero.API.getResultsFromParams(params);
 				}
-				catch (e){
-					Zotero.debug(e);
-					throw (e);
+				catch (e) {
+					Zotero.debug(e, 1);
+					return e.toString();
 				}
+				
+				
+				if (!results.length) {
+					var msg = "Selected items not found";
+					Zotero.debug(msg, 2);
+					Components.utils.reportError(msg);
+					return;
+				}
+				
+				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					.getService(Components.interfaces.nsIWindowMediator);
+				var win = wm.getMostRecentWindow("navigator:browser");
+				
+				// TODO: Currently only able to select one item
+				yield win.ZoteroPane.selectItem(results[0].id);
 			});
 		}
 	};
@@ -1226,13 +1248,18 @@ AsyncChannel.prototype = {
 				});
 				return promise;
 			}
+			else if (data === undefined) {
+				this.cancel(0x804b0002); // BINDING_ABORTED
+			}
 			else {
 				throw new Error("Invalid return type (" + typeof data + ") from generator passed to AsyncChannel");
 			}
 		}.bind(this))
 		.then(function () {
-			Zotero.debug("AsyncChannel request succeeded in " + (new Date - t) + " ms");
-			channel._isPending = false;
+			if (this._isPending) {
+				Zotero.debug("AsyncChannel request succeeded in " + (new Date - t) + " ms");
+				channel._isPending = false;
+			}
 		})
 		.catch(function (e) {
 			Zotero.debug(e, 1);

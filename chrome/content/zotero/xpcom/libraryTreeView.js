@@ -23,8 +23,35 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.LibraryTreeView = function () {};
+Zotero.LibraryTreeView = function () {
+	this._initialized = false;
+	this._listeners = {
+		load: []
+	};
+};
+
 Zotero.LibraryTreeView.prototype = {
+	addEventListener: function(event, listener) {
+		if (event == 'load') {
+			// If already initialized run now
+			if (this._initialized) {
+				listener();
+			}
+			else {
+				this._listeners[event].push(listener);
+			}
+		}
+	},
+	
+	
+	_runListeners: Zotero.Promise.coroutine(function* (event) {
+		var listener;
+		while (listener = this._listeners[event].shift()) {
+			yield Zotero.Promise.resolve(listener());
+		}
+	}),
+	
+	
 	/**
 	 *  Called while a drag is over the tree
 	 */

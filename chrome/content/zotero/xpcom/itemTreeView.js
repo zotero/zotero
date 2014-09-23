@@ -35,18 +35,16 @@
  *  Constructor for the ItemTreeView object
  */
 Zotero.ItemTreeView = function (collectionTreeRow, sourcesOnly) {
+	Zotero.LibraryTreeView.apply(this);
+	
 	this.wrappedJSObject = this;
 	this.rowCount = 0;
 	this.collectionTreeRow = collectionTreeRow;
 	
-	this._initialized = false;
 	this._skipKeypress = false;
 	
 	this._sourcesOnly = sourcesOnly;
 	
-	this._callbacks = [];
-	
-	this._treebox = null;
 	this._ownerDocument = null;
 	this._needsSort = false;
 	
@@ -61,17 +59,6 @@ Zotero.ItemTreeView = function (collectionTreeRow, sourcesOnly) {
 
 Zotero.ItemTreeView.prototype = Object.create(Zotero.LibraryTreeView.prototype);
 Zotero.ItemTreeView.prototype.type = 'item';
-
-Zotero.ItemTreeView.prototype.addCallback = function(callback) {
-	this._callbacks.push(callback);
-}
-
-
-Zotero.ItemTreeView.prototype._runCallbacks = Zotero.Promise.coroutine(function* () {
-	for each(var cb in this._callbacks) {
-		yield Zotero.Promise.resolve(cb());
-	}
-});
 
 
 /**
@@ -251,12 +238,12 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 		yield this.sort();
 		
 		// Only yield if there are callbacks; otherwise, we're almost done
-		if(this._callbacks.length && this._waitAfter && Date.now() > this._waitAfter) yield Zotero.Promise.resolve();
+		if (this._listeners.load.length && this._waitAfter && Date.now() > this._waitAfter) yield Zotero.Promise.resolve();
 		
 		yield this.expandMatchParents();
 		
-		//Zotero.debug('Running callbacks in itemTreeView.setTree()', 4);
-		yield this._runCallbacks();
+		yield this._runListeners('load');
+		this._initialized = true;
 		
 		if (this._ownerDocument.defaultView.ZoteroPane_Local) {
 			this._ownerDocument.defaultView.ZoteroPane_Local.clearItemsPaneMessage();
@@ -1805,8 +1792,7 @@ Zotero.ItemTreeView.prototype.setFilter = Zotero.Promise.coroutine(function* (ty
 	//this._treebox.endUpdateBatch();
 	this.selection.selectEventsSuppressed = false;
 	
-	//Zotero.debug('Running callbacks in itemTreeView.setFilter()', 4);
-	yield this._runCallbacks();
+	yield this._runListeners('load');
 });
 
 
