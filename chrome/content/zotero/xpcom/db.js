@@ -624,6 +624,9 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 
 
 Zotero.DBConnection.prototype.waitForTransaction = function () {
+	if (!this._transactionPromise) {
+		return Zotero.Promise.resolve();
+	}
 	Zotero.debug("Waiting for transaction to finish");
 	return this._transactionPromise.then(function () {
 		Zotero.debug("Done waiting for transaction");
@@ -955,7 +958,7 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 		}
 	}
 	
-	if (Zotero.locked) {
+	if (Zotero.locked && !force) {
 		this._debug("Zotero is locked -- skipping backup of DB '" + this._dbName + "'", 2);
 		return false;
 	}
@@ -987,7 +990,7 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 		var file = Zotero.getZoteroDatabase(this._dbName);
 		
 		// For standard backup, make sure last backup is old enough to replace
-		/*if (!suffix && !force) {
+		if (!suffix && !force) {
 			var backupFile = Zotero.getZoteroDatabase(this._dbName, 'bak');
 			if (yield OS.File.exists(backupFile.path)) {
 				var currentDBTime = (yield OS.File.stat(file.path)).lastModificationDate;
@@ -1006,7 +1009,7 @@ Zotero.DBConnection.prototype.backupDatabase = Zotero.Promise.coroutine(function
 					return;
 				}
 			}
-		}*/
+		}
 		
 		this._debug("Backing up database '" + this._dbName + "'");
 		

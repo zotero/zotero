@@ -99,7 +99,7 @@ Zotero.Schema = new function(){
 			// If upgrading userdata, make backup of database first
 			.then(function (schemaVersion) {
 				if (userdata < schemaVersion) {
-					return Zotero.DB.backupDatabase(userdata);
+					return Zotero.DB.backupDatabase(userdata, true);
 				}
 			})
 			.then(function () {
