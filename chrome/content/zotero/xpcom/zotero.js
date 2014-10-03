@@ -1316,7 +1316,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 * @param {Exception} err
 	 */
 	function logError(err) {
-		Zotero.debug(log, 1);
+		Zotero.debug(err, 1);
 		log(err.message ? err.message : err.toString(), "error",
 			err.fileName ? err.fileName : (err.filename ? err.filename : null), null,
 			err.lineNumber ? err.lineNumber : null, null);
