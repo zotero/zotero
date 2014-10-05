@@ -1627,7 +1627,7 @@ Zotero.Sync.Server = new function () {
 					_error(e);
 				}
 				
-				Q.async(Zotero.Sync.Server.Data.processUpdatedXML(
+				var result = Q.async(Zotero.Sync.Server.Data.processUpdatedXML(
 					responseNode.getElementsByTagName('updated')[0],
 					lastLocalSyncDate,
 					syncSession,
@@ -1836,13 +1836,11 @@ Zotero.Sync.Server = new function () {
 							Zotero.HTTP.doPost(url, body, uploadCallback);
 						}
 					}
-				))()
-				.then(
-					null,
-					function (e) {
-						errorHandler(e);
-					}
-				);
+				))();
+				
+				if (Q.isPromise(result)) {
+					result.catch(errorHandler);
+				}
 			}
 			catch (e) {
 				_error(e);
@@ -2676,8 +2674,6 @@ Zotero.Sync.Server.Data = new function() {
 	
 	
 	this.processUpdatedXML = function (updatedNode, lastLocalSyncDate, syncSession, defaultLibraryID, callback) {
-		yield true;
-		
 		updatedNode.xpath = function (path) {
 			return Zotero.Utilities.xpath(this, path);
 		};
