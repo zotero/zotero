@@ -1943,7 +1943,7 @@ Zotero.Schema = new function(){
 						yield Zotero.DB.queryAsync("ALTER TABLE itemTags RENAME TO itemTagsOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE itemTags (\n    itemID INT NOT NULL,\n    tagID INT NOT NULL,\n    type INT NOT NULL,\n    PRIMARY KEY (itemID, tagID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,\n    FOREIGN KEY (tagID) REFERENCES tags(tagID) ON DELETE CASCADE\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO itemTags SELECT itemID, T.tagID, TOld.type FROM itemTagsOld ITO JOIN tagsOld TOld USING (tagID) JOIN tags T ON (IFNULL(TOld.libraryID, 0)=T.libraryID AND TOld.name=T.name COLLATE BINARY)");
-						yield Zotero.DB.queryAsync("DROP INDEX itemTags_tagID");
+						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS itemTags_tagID");
 						yield Zotero.DB.queryAsync("CREATE INDEX itemTags_tagID ON itemTags(tagID)");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE syncedSettings RENAME TO syncedSettingsOld");
@@ -1953,7 +1953,7 @@ Zotero.Schema = new function(){
 						yield Zotero.DB.queryAsync("ALTER TABLE itemData RENAME TO itemDataOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE itemData (\n    itemID INT,\n    fieldID INT,\n    valueID,\n    PRIMARY KEY (itemID, fieldID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,\n    FOREIGN KEY (fieldID) REFERENCES fieldsCombined(fieldID),\n    FOREIGN KEY (valueID) REFERENCES itemDataValues(valueID)\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO itemData SELECT * FROM itemDataOld");
-						yield Zotero.DB.queryAsync("DROP INDEX itemData_fieldID");
+						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS itemData_fieldID");
 						yield Zotero.DB.queryAsync("CREATE INDEX itemData_fieldID ON itemData(fieldID)");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE itemNotes RENAME TO itemNotesOld");
@@ -1966,13 +1966,13 @@ Zotero.Schema = new function(){
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO itemAttachments SELECT * FROM itemAttachmentsOld");
 						yield Zotero.DB.queryAsync("CREATE INDEX itemAttachments_parentItemID ON itemAttachments(parentItemID)");
 						yield Zotero.DB.queryAsync("CREATE INDEX itemAttachments_contentType ON itemAttachments(contentType)");
-						yield Zotero.DB.queryAsync("DROP INDEX itemAttachments_syncState");
+						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS itemAttachments_syncState");
 						yield Zotero.DB.queryAsync("CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState)");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE itemSeeAlso RENAME TO itemSeeAlsoOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE itemSeeAlso (\n    itemID INT NOT NULL,\n    linkedItemID INT NOT NULL,\n    PRIMARY KEY (itemID, linkedItemID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,\n    FOREIGN KEY (linkedItemID) REFERENCES items(itemID) ON DELETE CASCADE\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO itemSeeAlso SELECT * FROM itemSeeAlsoOld");
-						yield Zotero.DB.queryAsync("DROP INDEX itemSeeAlso_linkedItemID");
+						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS itemSeeAlso_linkedItemID");
 						yield Zotero.DB.queryAsync("CREATE INDEX itemSeeAlso_linkedItemID ON itemSeeAlso(linkedItemID)");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE collectionItems RENAME TO collectionItemsOld");
@@ -1989,14 +1989,14 @@ Zotero.Schema = new function(){
 						yield Zotero.DB.queryAsync("ALTER TABLE deletedItems RENAME TO deletedItemsOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE deletedItems (\n    itemID INTEGER PRIMARY KEY,\n    dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO deletedItems SELECT * FROM deletedItemsOld");
-						yield Zotero.DB.queryAsync("DROP INDEX deletedItems_dateDeleted");
+						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS deletedItems_dateDeleted");
 						yield Zotero.DB.queryAsync("CREATE INDEX deletedItems_dateDeleted ON deletedItems(dateDeleted)");
 						
 						yield Zotero.DB.queryAsync("UPDATE relations SET libraryID=0 WHERE libraryID=(SELECT value FROM settings WHERE setting='account' AND key='libraryID')");
 						yield Zotero.DB.queryAsync("ALTER TABLE relations RENAME TO relationsOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE relations (\n    libraryID INT NOT NULL,\n    subject TEXT NOT NULL,\n    predicate TEXT NOT NULL,\n    object TEXT NOT NULL,\n    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    PRIMARY KEY (subject, predicate, object),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO relations SELECT * FROM relationsOld");
-						yield Zotero.DB.queryAsync("DROP INDEX relations_object");
+						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS relations_object");
 						yield Zotero.DB.queryAsync("CREATE INDEX relations_object ON relations(object)");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE groups RENAME TO groupsOld");
@@ -2020,8 +2020,8 @@ Zotero.Schema = new function(){
 						yield Zotero.DB.queryAsync("CREATE TABLE fulltextItemWords (\n    wordID INT,\n    itemID INT,\n    PRIMARY KEY (wordID, itemID),\n    FOREIGN KEY (wordID) REFERENCES fulltextWords(wordID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO fulltextItemWords SELECT * FROM fulltextItemWordsOld");
 						
-						yield Zotero.DB.queryAsync("DROP INDEX fulltextItems_version");
-						yield Zotero.DB.queryAsync("DROP INDEX fulltextItemWords_itemID");
+						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS fulltextItems_version");
+						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS fulltextItemWords_itemID");
 						yield Zotero.DB.queryAsync("CREATE INDEX fulltextItems_version ON fulltextItems(version)");
 						yield Zotero.DB.queryAsync("CREATE INDEX fulltextItemWords_itemID ON fulltextItemWords(itemID)");
 						
@@ -2029,32 +2029,32 @@ Zotero.Schema = new function(){
 						yield Zotero.DB.queryAsync("ALTER TABLE syncDeleteLog RENAME TO syncDeleteLogOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE syncDeleteLog (\n    syncObjectTypeID INT NOT NULL,\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    timestamp INT NOT NULL,\n    UNIQUE (syncObjectTypeID, libraryID, key),\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO syncDeleteLog SELECT * FROM syncDeleteLogOld");
-						yield Zotero.DB.queryAsync("DROP INDEX syncDeleteLog_timestamp");
+						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS syncDeleteLog_timestamp");
 						yield Zotero.DB.queryAsync("CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp)");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE storageDeleteLog RENAME TO storageDeleteLogOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE storageDeleteLog (\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    timestamp INT NOT NULL,\n    PRIMARY KEY (libraryID, key),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO storageDeleteLog SELECT * FROM storageDeleteLogOld");
-						yield Zotero.DB.queryAsync("DROP INDEX storageDeleteLog_timestamp");
+						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS storageDeleteLog_timestamp");
 						yield Zotero.DB.queryAsync("CREATE INDEX storageDeleteLog_timestamp ON storageDeleteLog(timestamp)");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE annotations RENAME TO annotationsOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE annotations (\n    annotationID INTEGER PRIMARY KEY,\n    itemID INT NOT NULL,\n    parent TEXT,\n    textNode INT,\n    offset INT,\n    x INT,\n    y INT,\n    cols INT,\n    rows INT,\n    text TEXT,\n    collapsed BOOL,\n    dateModified DATE,\n    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID) ON DELETE CASCADE\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO annotations SELECT * FROM annotationsOld");
-						yield Zotero.DB.queryAsync("DROP INDEX annotations_itemID");
+						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS annotations_itemID");
 						yield Zotero.DB.queryAsync("CREATE INDEX annotations_itemID ON annotations(itemID)");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE highlights RENAME TO highlightsOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE highlights (\n    highlightID INTEGER PRIMARY KEY,\n    itemID INT NOT NULL,\n    startParent TEXT,\n    startTextNode INT,\n    startOffset INT,\n    endParent TEXT,\n    endTextNode INT,\n    endOffset INT,\n    dateModified DATE,\n    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID) ON DELETE CASCADE\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO highlights SELECT * FROM highlightsOld");
-						yield Zotero.DB.queryAsync("DROP INDEX highlights_itemID");
+						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS highlights_itemID");
 						yield Zotero.DB.queryAsync("CREATE INDEX highlights_itemID ON highlights(itemID)");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE customBaseFieldMappings RENAME TO customBaseFieldMappingsOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE customBaseFieldMappings (\n    customItemTypeID INT,\n    baseFieldID INT,\n    customFieldID INT,\n    PRIMARY KEY (customItemTypeID, baseFieldID, customFieldID),\n    FOREIGN KEY (customItemTypeID) REFERENCES customItemTypes(customItemTypeID),\n    FOREIGN KEY (baseFieldID) REFERENCES fields(fieldID),\n    FOREIGN KEY (customFieldID) REFERENCES customFields(customFieldID)\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO customBaseFieldMappings SELECT * FROM customBaseFieldMappingsOld");
-						yield Zotero.DB.queryAsync("DROP INDEX customBaseFieldMappings_baseFieldID");
-						yield Zotero.DB.queryAsync("DROP INDEX customBaseFieldMappings_customFieldID");
+						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS customBaseFieldMappings_baseFieldID");
+						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS customBaseFieldMappings_customFieldID");
 						yield Zotero.DB.queryAsync("CREATE INDEX customBaseFieldMappings_baseFieldID ON customBaseFieldMappings(baseFieldID)");
 						yield Zotero.DB.queryAsync("CREATE INDEX customBaseFieldMappings_customFieldID ON customBaseFieldMappings(customFieldID)");
 						
