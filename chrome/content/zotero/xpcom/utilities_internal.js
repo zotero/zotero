@@ -346,6 +346,16 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
+	 * Returns a DOMDocument object not attached to any window
+	 */
+	"getDOMDocument": function() {
+		return Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser)
+			.parseFromString("<!DOCTYPE html><html></html>", "text/html");
+	},
+	
+	
+	/**
 	 * A generator that yields promises that delay for the given intervals
 	 *
 	 * @param {Array<Integer>} intervals An array of intervals in milliseconds
