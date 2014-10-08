@@ -310,8 +310,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 								var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 											.getService(Components.interfaces.nsIWindowMediator);
 								var win = wm.getMostRecentWindow("navigator:browser");
-								var browser = win.getBrowser();
-								browser.selectedTab = browser.addTab(url);
+								win.ZoteroPane.loadURI(url);
 							}
 						}
 						
