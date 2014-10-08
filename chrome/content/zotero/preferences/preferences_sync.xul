@@ -148,8 +148,8 @@
 												onsynctopreference="Zotero_Preferences.Sync.unverifyStorageServer()"
 												style="padding: 0; width: 7em">
 											<menupopup>
-												<menuitem label="http" value="http" style="padding: 0"/>
 												<menuitem label="https" value="https" style="padding: 0"/>
+												<menuitem label="http" value="http" style="padding: 0"/>
 											</menupopup>
 										</menulist>
 										<label value="://"/>
