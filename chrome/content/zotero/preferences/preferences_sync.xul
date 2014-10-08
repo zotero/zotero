@@ -240,7 +240,7 @@
 						<vbox>
 							<hbox id="storage-terms" style="margin-top: .4em; display: block" align="center">
 								<label>&zotero.preferences.sync.fileSyncing.tos1;</label>
-								<label class="zotero-text-link" href="http://www.digitalscholar.org/z_terms" value="&zotero.preferences.sync.fileSyncing.tos2;"/>
+								<label class="zotero-text-link" href="https://www.zotero.org/support/terms/terms_of_service" value="&zotero.preferences.sync.fileSyncing.tos2;"/>
 								<label>&zotero.preferences.period;</label>
 							</hbox>
 						</vbox>
