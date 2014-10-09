@@ -92,7 +92,7 @@ Zotero.Libraries = new function () {
 	
 	
 	this.getType = function (libraryID) {
-		if (libraryID === 0) {
+		if (this.dbLibraryID(libraryID) === 0) {
 			return 'user';
 		}
 		if (!_libraryData[libraryID]) {
