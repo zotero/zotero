@@ -142,7 +142,7 @@
 					Zotero.spawn(function* () {
 						Zotero.debug('Refreshing attachment box');
 						
-						yield [this.item.loadItemData(), this.item.loadNote()];
+						yield Zotero.Promise.all([this.item.loadItemData(), this.item.loadNote()]);
 						
 						var attachmentBox = document.getAnonymousNodes(this)[0];
 						var title = this._id('title');

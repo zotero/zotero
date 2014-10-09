@@ -380,7 +380,7 @@ var Zotero_LocateMenu = new function() {
 			return _getURL(item).then((val) => val !== false);
 		}
 		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
-			var urls = yield [_getURL(item) for each(item in items)];
+			var urls = yield Zotero.Promise.all([_getURL(item) for each(item in items)]);
 			ZoteroPane_Local.loadURI([url for each(url in urls) if(url)], event);
 		});
 		

@@ -288,10 +288,10 @@ Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function
 	var predicate = Zotero.Relations.linkedObjectPredicate;
 	var uri = Zotero.URI['get' + this._ObjectType + 'URI'](this);
 	
-	var links = yield [
+	var links = yield Zotero.Promise.all([
 		Zotero.Relations.getSubject(false, predicate, uri),
 		Zotero.Relations.getObject(uri, predicate, false)
-	];
+	]);
 	links = links[0].concat(links[1]);
 	
 	if (!links.length) {

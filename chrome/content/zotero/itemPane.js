@@ -148,7 +148,7 @@ var ZoteroItemPane = new function() {
 			box.mode = 'edit';
 		}
 		
-		yield [item.loadItemData(), item.loadCreators()];
+		yield Zotero.Promise.all([item.loadItemData(), item.loadCreators()]);
 		box.item = item;
 	});
 	

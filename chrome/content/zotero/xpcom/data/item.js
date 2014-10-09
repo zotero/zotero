@@ -1080,7 +1080,7 @@ Zotero.Item.prototype.addRelatedItem = Zotero.Promise.coroutine(function* (itemI
 		return false;
 	}
 	
-	var current = yield this._getRelatedItems(true);
+	var current = this._getRelatedItems(true);
 	if (current.indexOf(itemID) != -1) {
 		Zotero.debug("Item " + this.id + " already related to item "
 			+ itemID + " in Zotero.Item.addItem()");
@@ -1115,7 +1115,7 @@ Zotero.Item.prototype.removeRelatedItem = Zotero.Promise.coroutine(function* (it
 	}
 	itemID = parsedInt;
 	
-	var current = yield this._getRelatedItems(true);
+	var current = this._getRelatedItems(true);
 	var index = current.indexOf(itemID);
 	
 	if (index == -1) {
@@ -1630,7 +1630,7 @@ Zotero.Item.prototype.save = Zotero.Promise.coroutine(function* (options) {
 			if (this._changed.relatedItems) {
 				var removed = [];
 				var newids = [];
-				var currentIDs = yield this._getRelatedItems(true);
+				var currentIDs = this._getRelatedItems(true);
 				
 				for each(var id in currentIDs) {
 					newids.push(id);
@@ -1655,7 +1655,7 @@ Zotero.Item.prototype.save = Zotero.Promise.coroutine(function* (options) {
 			if (this._changed.relatedItems) {
 				var removed = [];
 				var newids = [];
-				var currentIDs = yield this._getRelatedItems(true);
+				var currentIDs = this._getRelatedItems(true);
 				
 				for each(var id in this._previousData.related) {
 					if (currentIDs.indexOf(id) == -1) {
@@ -4195,7 +4195,7 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 	// Tags
 	obj.tags = [];
 	yield this.loadTags()
-	var tags = yield this.getTags();
+	var tags = this.getTags();
 	for (let i=0; i<tags.length; i++) {
 		obj.tags.push(tags[i]);
 	}
@@ -4724,7 +4724,7 @@ Zotero.Item.prototype._setRelatedItems = Zotero.Promise.coroutine(function* (ite
 		throw ('ids must be an array in Zotero.Items._setRelatedItems()');
 	}
 	
-	var currentIDs = yield this._getRelatedItems(true);
+	var currentIDs = this._getRelatedItems(true);
 	var oldIDs = []; // children being kept
 	var newIDs = []; // new children
 	
