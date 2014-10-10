@@ -476,6 +476,7 @@
 						}
 						
 						var creatorTypes = Zotero.CreatorTypes.getTypesForItemType(this.item.itemTypeID);
+
 						var localized = {};
 						for (var i=0; i<creatorTypes.length; i++) {
 							localized[creatorTypes[i]['name']]
@@ -531,7 +532,7 @@
 						}
 						for (var i = 0; i < max; i++) {
 							let data = this.item.getCreator(i);
-							this.addCreatorRow(data, data.creatorType);
+							this.addCreatorRow(data, data.creatorTypeID);
 							
 							// Display "+" button on all but last row
 							if (i == max - 2) {
@@ -553,7 +554,7 @@
 							this._displayAllCreators = true;
 							
 							if (this._addCreatorRow) {
-								this.addCreatorRow(false, this.item.getCreator(max-1).creatorType, true); 
+								this.addCreatorRow(false, this.item.getCreator(max-1).creatorTypeID, true);
 								this._addCreatorRow = false;
 								this.disableCreatorAddButtons();
 							}
