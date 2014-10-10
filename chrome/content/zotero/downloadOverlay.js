@@ -63,13 +63,18 @@ var Zotero_DownloadOverlay = new function() {
 						.getMostRecentWindow("navigator:browser");
 		var libraryID, collection;
 		try {
-			if(win.ZoteroPane.getItemGroup().filesEditable) {
+			let itemGroup = win.ZoteroPane.getItemGroup();
+			if (itemGroup.filesEditable) {
 				libraryID = win.ZoteroPane.getSelectedLibraryID();
 				collection = win.ZoteroPane.getSelectedCollection();
 			}
 			// TODO: Just show an error instead?
 			else {
-				Zotero.debug("Cannot save files to library -- saving to personal library instead");
+				Zotero.debug("libraryID: " + itemGroup.ref.libraryID);
+				Zotero.debug("editable: " + itemGroup.ref.editable);
+				Zotero.debug("filesEditable: " + itemGroup.ref.filesEditable);
+				Zotero.debug("Cannot save files to library " + itemGroup.ref.libraryID
+					+ " -- saving to personal library instead");
 			}
 		} catch(e) {
 			Zotero.debug(e, 1);
