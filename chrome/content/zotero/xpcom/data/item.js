@@ -952,7 +952,7 @@ Zotero.Item.prototype.getCreators = function () {
  * @return {Array<Object>} An array of creator data objects in API JSON format
  *                         ('firstName'/'lastName' or 'name', 'creatorType')
  */
-Zotero.Item.prototype.getCreatorsAPIData = function () {
+Zotero.Item.prototype.getCreatorsJSON = function () {
 	this._requireData('creators');
 	return this._creators.map(function (data) Zotero.Creators.internalToJSON(data));
 }
@@ -1007,6 +1007,16 @@ Zotero.Item.prototype.setCreator = function (orderIndex, data) {
 	this._changed.creators[orderIndex] = true;
 	this._creators[orderIndex] = data;
 	return true;
+}
+
+
+/**
+ * @param {Object[]} data - An array of creator data in internal or API JSON format
+ */
+Zotero.Item.prototype.setCreators = function (data) {
+	for (let i = 0; i < data.length; i++) {
+		this.setCreator(i, data[i]);
+	}
 }
 
 
@@ -4166,7 +4176,7 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 	// Creators
 	if (this.isRegularItem()) {
 		yield this.loadCreators()
-		obj.creators = this.getCreatorsAPIData();
+		obj.creators = this.getCreatorsJSON();
 	}
 	else {
 		var parent = this.parentKey;
