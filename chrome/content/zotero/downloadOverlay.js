@@ -70,16 +70,13 @@ var Zotero_DownloadOverlay = new function() {
 			}
 			// TODO: Just show an error instead?
 			else {
-				Zotero.debug("libraryID: " + itemGroup.ref.libraryID);
-				Zotero.debug("editable: " + itemGroup.ref.editable);
-				Zotero.debug("filesEditable: " + itemGroup.ref.filesEditable);
+				Zotero.debug(itemGroup, 2);
 				Zotero.debug("Cannot save files to library " + itemGroup.ref.libraryID
-					+ " -- saving to personal library instead");
+					+ " -- saving to personal library instead", 2);
 			}
 		} catch(e) {
 			Zotero.debug(e, 1);
 		};
-		Zotero.debug("Library ID is " + libraryID);
 		
 		var recognizePDF = document.getElementById('zotero-recognizePDF').checked
 				&& !document.getElementById('zotero-recognizePDF').hidden
