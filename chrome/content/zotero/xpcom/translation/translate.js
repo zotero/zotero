@@ -385,9 +385,17 @@ Zotero.Translate.Sandbox = {
 					if(sandbox) return sandbox;
 				}
 			};
-			
-			// TODO security is not super-tight here, as someone could pass something into arg
-			// that gets evaluated in the wrong scope in Fx < 4. We should wrap this.
+
+			if(Zotero.isFx && Zotero.platformMajorVersion >= 33) {
+				for(var i in safeTranslator) {
+					if (typeof(safeTranslator[i]) === "function") {
+						let func = safeTranslator[i];
+						safeTranslator[i] = translate._sandboxManager._makeContentForwarder(function() {
+							func.apply(safeTranslator, this.args.wrappedJSObject);
+						});
+					}
+				}
+			}
 			
 			return safeTranslator;
 		},
@@ -434,7 +442,7 @@ Zotero.Translate.Sandbox = {
 		 */
 		"selectItems":function(translate, items, callback) {
 			function transferObject(obj) {
-				return Zotero.isFx ? translate._sandboxManager.sandbox.JSON.parse(JSON.stringify(obj)) : obj;
+				return Zotero.isFx ? translate._sandboxManager._copyObject(obj) : obj;
 			}
 			
 			if(Zotero.Utilities.isEmpty(items)) {
