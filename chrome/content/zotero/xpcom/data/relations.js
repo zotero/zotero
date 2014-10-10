@@ -79,11 +79,14 @@ Zotero.Relations = new function () {
 		}
 		
 		var toReturn = [];
+		var loads = [];
 		for (let i=0; i<rows.length; i++) {
 			var relation = new Zotero.Relation;
-			relation.id = rows[i]; 
+			relation.id = rows[i];
+			loads.push(relation.load());
 			toReturn.push(relation);
 		}
+		yield Zotero.Promise.all(loads);
 		return toReturn;
 	});
 	

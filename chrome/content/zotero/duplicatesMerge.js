@@ -130,16 +130,21 @@ var Zotero_Duplicates_Pane = new function () {
 		// Add master item's values to the beginning of each set of
 		// alternative values so that they're still available if the item box
 		// modifies the item
-		var diff = item.multiDiff(_otherItems, _ignoreFields);
-		if (diff) {
-			var itemValues = item.serialize()
-			for (var i in diff) {
-				diff[i].unshift(itemValues.fields[i]);
+		Zotero.spawn(function* () {
+			var diff = yield item.multiDiff(_otherItems, _ignoreFields);
+			if (diff) {
+				let itemValues = yield item.toJSON();
+				for (let i in diff) {
+					diff[i].unshift(itemValues[i] !== undefined ? itemValues[i] : '');
+				}
+				itembox.fieldAlternatives = diff;
 			}
-			itembox.fieldAlternatives = diff;
-		}
-		
-		itembox.item = item.clone(true);
+			
+			var newItem = yield item.copy();
+			yield newItem.loadItemData();
+			yield newItem.loadCreators();
+			itembox.item = newItem;
+		});
 	}
 	
 	

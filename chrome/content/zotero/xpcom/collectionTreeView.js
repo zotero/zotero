@@ -1567,23 +1567,15 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			return Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
 		}
 		
-		// Create new unsaved clone item in target library
-		var newItem = new Zotero.Item(item.itemTypeID);
-		newItem.libraryID = targetLibraryID;
-		// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
-		var id = yield newItem.save();
-		newItem = yield Zotero.Items.getAsync(id);
-		yield item.clone(false, newItem, false, !Zotero.Prefs.get('groups.copyTags'));
-		yield newItem.save();
-		//var id = newItem.save();
-		//var newItem = Zotero.Items.get(id);
+		// Create new clone item in target library
+		var newItem = item.clone(targetLibraryID, false, !Zotero.Prefs.get('groups.copyTags'));
+		var newItemID = yield newItem.save();
 		
 		// Record link
 		yield newItem.addLinkedItem(item);
-		var newID = id;
 		
 		if (item.isNote()) {
-			return newID;
+			return newItemID;
 		}
 		
 		// For regular items, add child items if prefs and permissions allow
@@ -1593,14 +1585,9 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			var noteIDs = item.getNotes();
 			var notes = yield Zotero.Items.getAsync(noteIDs);
 			for each(var note in notes) {
-				var newNote = new Zotero.Item('note');
-				newNote.libraryID = targetLibraryID;
-				// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
-				var id = yield newNote.save();
-				newNote = yield Zotero.Items.getAsync(id);
-				yield note.clone(false, newNote);
-				newNote.parentID = newItem.id;
-				yield newNote.save();
+				let newNote = note.clone(targetLibraryID);
+				newNote.parentID = newItemID;
+				yield newNote.save()
 				
 				yield newNote.addLinkedItem(note);
 			}

@@ -869,7 +869,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 						// Mirror ZoteroPane.onTreeMouseDown behavior
 						var itemID = this._rows[previousRow].ref.id;
 						var setItemIDs = collectionTreeRow.ref.getSetItemsByItemID(itemID);
-						yield this.selectItems(setItemIDs);
+						this.selectItems(setItemIDs);
 					}
 				}
 				else {

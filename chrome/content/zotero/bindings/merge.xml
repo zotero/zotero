@@ -71,7 +71,7 @@
 					}
 					
 					// Clone object so changes in merge pane don't affect it
-					this._leftpane.ref = val.clone(true);
+					this._leftpane.ref = val.copy();
 					this._leftpane.original = val;
 				]]>
 				</setter>
@@ -97,7 +97,7 @@
 						}
 						
 						// Clone object so changes in merge pane don't affect it
-						this._rightpane.ref = val.clone(true);
+						this._rightpane.ref = val.copy();
 						this._rightpane.original = val;
 					}
 					

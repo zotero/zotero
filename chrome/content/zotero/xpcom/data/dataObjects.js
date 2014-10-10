@@ -421,73 +421,64 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	
 	
 	/**
-	 * @param	{Object}		data1				Serialized copy of first object
-	 * @param	{Object}		data2				Serialized copy of second object
-	 * @param	{Array}		diff					Empty array to put diff data in
-	 * @param	{Boolean}	[includeMatches=false]	Include all fields, even those
-	 *													that aren't different
+	 * @param {Object} data1 - JSON of first object
+	 * @param {Object} data2 - JSON of second object
+	 * @param {Array} diff - Empty array to put diff data in
+	 * @param {Boolean} [includeMatches=false] - Include all fields, even those
+	 *                                           that aren't different
 	 */
 	this.diff = function (data1, data2, diff, includeMatches) {
 		diff.push({}, {});
 		var numDiffs = 0;
 		
-		var subs = ['primary', 'fields'];
-		var skipFields = ['collectionID', 'creatorID', 'itemID', 'searchID', 'tagID', 'libraryID', 'key'];
+		var skipFields = ['collectionKey', 'itemKey', 'searchKey'];
 		
-		for each(var sub in subs) {
-			diff[0][sub] = {};
-			diff[1][sub] = {};
-			for (var field in data1[sub]) {
-				if (skipFields.indexOf(field) != -1) {
-					continue;
-				}
-				
-				if (!data1[sub][field] && !data2[sub][field]) {
-					continue;
-				}
-				
-				var changed = !data1[sub][field] || !data2[sub][field] ||
-						data1[sub][field] != data2[sub][field];
-				
-				if (includeMatches || changed) {
-					diff[0][sub][field] = data1[sub][field] ?
-						data1[sub][field] : '';
-					diff[1][sub][field] = data2[sub][field] ?
-						data2[sub][field] : '';
-				}
-				
-				if (changed) {
-					numDiffs++;
-				}
+		for (var field in data1) {
+			if (skipFields.indexOf(field) != -1) {
+				continue;
 			}
 			
-			// DEBUG: some of this is probably redundant
-			for (var field in data2[sub]) {
-				if (skipFields.indexOf(field) != -1) {
-					continue;
-				}
-				
-				if (diff[0][sub][field] != undefined) {
-					continue;
-				}
-				
-				if (!data1[sub][field] && !data2[sub][field]) {
-					continue;
-				}
-				
-				var changed = !data1[sub][field] || !data2[sub][field] ||
-						data1[sub][field] != data2[sub][field];
-				
-				if (includeMatches || changed) {
-					diff[0][sub][field] = data1[sub][field] ?
-						data1[sub][field] : '';
-					diff[1][sub][field] = data2[sub][field] ?
-						data2[sub][field] : '';
-				}
-				
-				if (changed) {
-					numDiffs++;
-				}
+			if (data1[field] === false && (data2[field] === false || data2[field] === undefined)) {
+				continue;
+			}
+			
+			var changed = data1[field] !== data2[field];
+			
+			if (includeMatches || changed) {
+				diff[0][field] = data1[field] !== false ? data1[field] : '';
+				diff[1][field] = (data2[field] !== false && data2[field] !== undefined)
+					? data2[field] : '';
+			}
+			
+			if (changed) {
+				numDiffs++;
+			}
+		}
+		
+		// DEBUG: some of this is probably redundant
+		for (var field in data2) {
+			if (skipFields.indexOf(field) != -1) {
+				continue;
+			}
+			
+			if (diff[0][field] !== undefined) {
+				continue;
+			}
+			
+			if (data2[field] === false && (data1[field] === false || data1[field] === undefined)) {
+				continue;
+			}
+			
+			var changed = data1[field] !== data2[field];
+			
+			if (includeMatches || changed) {
+				diff[0][field] = (data1[field] !== false && data1[field] !== undefined)
+					? data1[field] : '';
+				diff[1][field] = data2[field] !== false ? data2[field] : '';
+			}
+			
+			if (changed) {
+				numDiffs++;
 			}
 		}
 		

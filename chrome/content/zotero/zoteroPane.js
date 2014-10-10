@@ -1387,7 +1387,7 @@ var ZoteroPane = new function()
 				this.itemsView._itemSelectedPromiseResolver.reject(e);
 			}
 			throw e;
-		}.bind(this));;
+		}.bind(this));
 	};
 	
 	

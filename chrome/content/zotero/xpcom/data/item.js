@@ -232,7 +232,7 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 		);
 	}
 	
-	var value = value ? value : '';
+	value = value ? value : '';
 	
 	if (!unformatted) {
 		// Multipart date fields
@@ -251,18 +251,11 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
  * @return	{Integer{}|String[]}
  */
 Zotero.Item.prototype.getUsedFields = Zotero.Promise.coroutine(function* (asNames) {
-	if (!this.id) {
-		return [];
-	}
-	var sql = "SELECT fieldID FROM itemData WHERE itemID=?";
-	if (asNames) {
-		sql = "SELECT fieldName FROM fields WHERE fieldID IN (" + sql + ")";
-	}
-	var fields = yield Zotero.DB.columnQueryAsync(sql, this._id);
-	if (!fields) {
-		return [];
-	}
-	return fields;
+	this._requireData('itemData');
+	
+	return Object.keys(this._itemData)
+		.filter(id => this._itemData[id] !== false)
+		.map(id => asNames ? Zotero.ItemFields.getName(id) : parseInt(id));
 });
 
 
@@ -1581,7 +1574,8 @@ Zotero.Item.prototype.save = Zotero.Promise.coroutine(function* (options) {
 				for (let i=0; i<toAdd.length; i++) {
 					let tag = toAdd[i];
 					let tagID = yield Zotero.Tags.getIDFromName(this.libraryID, tag.tag, true);
-					let sql = "INSERT INTO itemTags (itemID, tagID, type) VALUES (?, ?, ?)";
+					// "OR REPLACE" allows changing type
+					let sql = "INSERT OR REPLACE INTO itemTags (itemID, tagID, type) VALUES (?, ?, ?)";
 					yield Zotero.DB.queryAsync(sql, [this.id, tagID, tag.type ? tag.type : 0]);
 					Zotero.Notifier.trigger('add', 'item-tag', this.id + '-' + tag.tag);
 				}
@@ -3248,31 +3242,35 @@ Zotero.Item.prototype.setTags = function (tags) {
 
 
 /**
- * Add a single manual tag to the item. If an automatic tag with the same name already exists,
- * replace it with a manual one.
+ * Add a single tag to the item. If type is 1 and an automatic tag with the same name already
+ * exists, replace it with a manual one.
  *
  * A separate save() is required to update the database.
  *
  * @param {String} name
+ * @param {Number} [type=0]
  */
-Zotero.Item.prototype.addTag = function (name) {
+Zotero.Item.prototype.addTag = function (name, type) {
+	type = type ? parseInt(type) : 0;
+	
 	var changed = false;
 	var tags = this.getTags();
 	for (let i=0; i<tags.length; i++) {
 		let tag = tags[i];
 		if (tag.tag === name) {
-			if (!tag.type) {
+			if (tag.type == type) {
 				Zotero.debug("Tag '" + name + "' already exists on item " + this.libraryKey);
 				return false;
 			}
-			tag.type = 0;
+			tag.type = type;
 			changed = true;
 			break;
 		}
 	}
 	if (!changed) {
 		tags.push({
-			tag: name
+			tag: name,
+			type: type
 		});
 	}
 	this.setTags(tags);
@@ -3706,24 +3704,25 @@ Zotero.Item.prototype.diff = function (item, includeMatches, ignoreFields) {
  *
  * Currently compares only item data, not primary fields
  */
-Zotero.Item.prototype.multiDiff = function (otherItems, ignoreFields) {
-	var thisData = this.serialize();
+Zotero.Item.prototype.multiDiff = Zotero.Promise.coroutine(function* (otherItems, ignoreFields) {
+	var thisData = yield this.toJSON();
 	
 	var alternatives = {};
 	var hasDiffs = false;
 	
-	for each(var otherItem in otherItems) {
-		var diff = [];
-		var otherData = otherItem.serialize();
-		var numDiffs = Zotero.Items.diff(thisData, otherData, diff);
+	for (let i = 0; i < otherItems.length; i++) {
+		let otherItem = otherItems[i];
+		let diff = [];
+		let otherData = yield otherItem.toJSON();
+		let numDiffs = Zotero.Items.diff(thisData, otherData, diff);
 		
 		if (numDiffs) {
-			for (var field in diff[1].fields) {
+			for (let field in diff[1]) {
 				if (ignoreFields && ignoreFields.indexOf(field) != -1) {
 					continue;
 				}
 				
-				var value = diff[1].fields[field];
+				var value = diff[1][field];
 				
 				if (!alternatives[field]) {
 					hasDiffs = true;
@@ -3742,143 +3741,41 @@ Zotero.Item.prototype.multiDiff = function (otherItems, ignoreFields) {
 	}
 	
 	return alternatives;
-}
+});
 
 
 /**
  * Returns an unsaved copy of the item
  *
- * @param  {Boolean}       [includePrimary=false]
- * @param  {Zotero.Item}   [newItem=null]         Target item for clone (used to pass a saved
- *                                                    item for duplicating items with tags)
- * @param  {Boolean}       [unsaved=false]        Skip properties that require a saved object (e.g., tags)
- * @param  {Boolean}       [skipTags=false]       Skip tags (implied by 'unsaved')
+ * @param {Number} [libraryID] - libraryID of the new item, or the same as original if omitted
+ * @param {Boolean} [skipTags=false] - Skip tags
  */
-Zotero.Item.prototype.clone = function(includePrimary, newItem, unsaved, skipTags) {
+Zotero.Item.prototype.clone = function(libraryID, skipTags) {
 	Zotero.debug('Cloning item ' + this.id);
 	
-	if (includePrimary && newItem) {
-		throw ("includePrimary and newItem parameters are mutually exclusive in Zotero.Item.clone()");
+	if (libraryID !== undefined && libraryID !== null && typeof libraryID !== 'number') {
+		throw new Error("libraryID must be null or an integer");
 	}
 	
-	if (unsaved) {
-		skipTags = true;
+	this._requireData('primaryData');
+	
+	if (libraryID === undefined || libraryID === null) {
+		libraryID = this.libraryID;
 	}
+	var sameLibrary = libraryID == this.libraryID;
 	
-	Zotero.DB.beginTransaction();
+	var newItem = new Zotero.Item;
+	newItem.setType(this.itemTypeID);
 	
-	// TODO: get rid of serialize() call
-	var obj = this.serialize();
-	
-	var itemTypeID = this.itemTypeID;
-	
-	if (newItem) {
-		var sameLibrary = newItem.libraryID == this.libraryID;
-	}
-	else {
-		var newItem = new Zotero.Item;
-		var sameLibrary = true;
-		
-		if (includePrimary) {
-			newItem.id = this.id;
-			newItem.libraryID = this.libraryID;
-			newItem.key = this.key;
-			newItem.setType(itemTypeID);
-			for (var field in obj.primary) {
-				switch (field) {
-					case 'itemID':
-					case 'itemType':
-					case 'libraryID':
-					case 'key':
-						continue;
-				}
-				newItem.setField(field, obj.primary[field]);
-			}
-		}
-		else {
-			newItem.setType(itemTypeID);
-		}
-	}
-	
-	var changedFields = {};
-	for (var field in obj.fields) {
-		var fieldID = Zotero.ItemFields.getID(field);
-		if (fieldID && Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
-			newItem.setField(field, obj.fields[field]);
-			changedFields[field] = true;
-		}
-	}
-	// If modifying an existing item, clear other fields not in the cloned item
-	if (newItem) {
-		var previousFields = this.getUsedFields(true);
-		for each(var field in previousFields) {
-			if (!changedFields[field] && Zotero.ItemFields.isValidForType(field, itemTypeID)) {
-				newItem.setField(field, false);
-			}
-		}
+	var fieldIDs = this.getUsedFields();
+	for (let i = 0; i < fieldIDs.length; i++) {
+		let fieldID = fieldIDs[i];
+		newItem.setField(fieldID, this.getField(fieldID));
 	}
 	
 	// Regular item
 	if (this.isRegularItem()) {
-		if (includePrimary) {
-			// newItem = loaded from db
-			// obj = in-memory
-			var max = Math.max(newItem.numCreators(), this.numCreators());
-			var deleteOffset = 0;
-			for (var i=0; i<max; i++) {
-				var newIndex = i - deleteOffset;
-				
-				// Remove existing creators (loaded because we set the itemID
-				// above) not in the in-memory version
-				if (!obj.creators[i]) {
-					if (newItem.getCreator(newIndex)) {
-						newItem.removeCreator(newIndex);
-						deleteOffset++;
-					}
-					continue;
-				}
-				// Add in-memory creators
-				newItem.setCreator(
-					newIndex, this.getCreator(i).ref, obj.creators[i].creatorTypeID
-				);
-			}
-		}
-		else {
-			// If overwriting an existing item, clear existing creators
-			if (newItem) {
-				for (var i=newItem.numCreators()-1; i>=0; i--) {
-					if (newItem.getCreator(i)) {
-						newItem.removeCreator(i);
-					}
-				}
-			}
-			
-			var i = 0;
-			for (var c in obj.creators) {
-				var creator = this.getCreator(c).ref;
-				var creatorTypeID = this.getCreator(c).creatorTypeID;
-				
-				if (!sameLibrary) {
-					var creatorDataID = Zotero.Creators.getDataID(this.getCreator(c).ref);
-					var creatorIDs = Zotero.Creators.getCreatorsWithData(creatorDataID, newItem.libraryID);
-					if (creatorIDs) {
-						// TODO: support multiple creators?
-						var creator = Zotero.Creators.get(creatorIDs[0]);
-					}
-					else {
-						var newCreator = new Zotero.Creator;
-						newCreator.libraryID = newItem.libraryID;
-						newCreator.setFields(creator);
-						var creator = newCreator;
-					}
-					
-					var creatorTypeID = this.getCreator(c).creatorTypeID;
-				}
-				
-				newItem.setCreator(i, creator, creatorTypeID);
-				i++;
-			}
-		}
+		newItem.setCreators(newItem.getCreators());
 	}
 	else {
 		newItem.setNote(this.getNote());
@@ -3904,26 +3801,28 @@ Zotero.Item.prototype.clone = function(includePrimary, newItem, unsaved, skipTag
 		}
 	}
 	
-	if (!skipTags && obj.tags) {
-		for each(var tag in obj.tags) {
-			if (sameLibrary) {
-				newItem.addTagByID(tag.primary.tagID);
-			}
-			else {
-				newItem.addTag(tag.fields.name, tag.fields.type);
-			}
-		}
+	if (!skipTags) {
+		newItem.setTags(this.getTags());
 	}
 	
-	if (obj.related && sameLibrary) {
+	if (sameLibrary) {
 		// DEBUG: this will add reverse-only relateds too
-		newItem.relatedItems = obj.related;
+		newItem.setRelations(this.getRelations());
 	}
-	
-	Zotero.DB.commitTransaction();
 	
 	return newItem;
 }
+
+
+/**
+ * @return {Promise<Zotero.Item>} - A copy of the item with primary data loaded
+ */
+Zotero.Item.prototype.copy = Zotero.Promise.coroutine(function* () {
+	var newItem = new Zotero.Item;
+	newItem.id = this.id;
+	yield newItem.loadPrimaryData();
+	return newItem;
+});;
 
 
 /**

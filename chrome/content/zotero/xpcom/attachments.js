@@ -1067,22 +1067,15 @@ Zotero.Attachments = new function(){
 			throw ("Attachment is already in library " + libraryID);
 		}
 		
-		var newAttachment = new Zotero.Item('attachment');
-		newAttachment.libraryID = libraryID;
-		// Link mode needs to be set when saving new attachment
-		newAttachment.attachmentLinkMode = linkMode;
+		var newAttachment = attachment.clone(libraryID);
 		if (attachment.isImportedAttachment()) {
 			// Attachment path isn't copied over by clone() if libraryID is different
 			newAttachment.attachmentPath = attachment.attachmentPath;
 		}
-		// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
-		var id = newAttachment.save();
-		newAttachment = Zotero.Items.get(id);
-		attachment.clone(false, newAttachment);
 		if (parentItemID) {
-			newAttachment.setSource(parentItemID);
+			newAttachment.parentID = parentItemID;
 		}
-		newAttachment.save();
+		yield newAttachment.save();
 		
 		// Copy over files if they exist
 		if (newAttachment.isImportedAttachment() && attachment.getFile()) {
@@ -1091,7 +1084,7 @@ Zotero.Attachments = new function(){
 			Zotero.File.copyDirectory(dir, newDir);
 		}
 		
-		newAttachment.addLinkedItem(attachment);
+		yield newAttachment.addLinkedItem(attachment);
 		return newAttachment.id;
 	});
 	
