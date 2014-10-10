@@ -2672,6 +2672,9 @@ Zotero.DragDrop = {
 				return false;
 			}
 			var win = sourceNode.ownerDocument.defaultView;
+			if (win.document.documentElement.getAttribute('windowtype') == 'zotero:search') {
+				return win.ZoteroAdvancedSearch.itemsView.itemGroup;
+			}
 			return win.ZoteroPane.collectionsView.itemGroup;
 		}
 		else {

@@ -35,6 +35,7 @@ var ZoteroAdvancedSearch = new function() {
 	this.itemsView = false;
 	
 	var _searchBox;
+	var _libraryID;
 	
 	function onLoad() {
 		_searchBox = document.getElementById('zotero-search-box');
@@ -53,8 +54,11 @@ var ZoteroAdvancedSearch = new function() {
 		_searchBox.updateSearch();
 		_searchBox.active = true;
 		
-		// A minimal implementation of Zotero.CollectionTreeView
+		// A minimal implementation of Zotero.ItemGroup
 		var itemGroup = {
+			ref: {
+				libraryID: _libraryID
+			},
 			isSearchMode: function() { return true; },
 			getItems: function () {
 				var search = _searchBox.search.clone();
@@ -147,6 +151,7 @@ var ZoteroAdvancedSearch = new function() {
 	
 	
 	this.onLibraryChange = function (libraryID) {
+		_libraryID = libraryID;
 		document.getElementById('zotero-search-save').disabled = !Zotero.Libraries.isEditable(libraryID);
 	}
 	
