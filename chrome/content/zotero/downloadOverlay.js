@@ -67,7 +67,14 @@ var Zotero_DownloadOverlay = new function() {
 				libraryID = win.ZoteroPane.getSelectedLibraryID();
 				collection = win.ZoteroPane.getSelectedCollection();
 			}
-		} catch(e) {};
+			// TODO: Just show an error instead?
+			else {
+				Zotero.debug("Cannot save files to library -- saving to personal library instead");
+			}
+		} catch(e) {
+			Zotero.debug(e, 1);
+		};
+		Zotero.debug("Library ID is " + libraryID);
 		
 		var recognizePDF = document.getElementById('zotero-recognizePDF').checked
 				&& !document.getElementById('zotero-recognizePDF').hidden
