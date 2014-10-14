@@ -47,6 +47,54 @@
   padding: 5px 1px 5px 11px;
 }
 
+
+/*
+ * The searchbox focus ring is incorrect in Yosemite pre-Fx34, so use the old searchbox shape
+ * (with code borrowed from the Fx Add-ons window and icons borrowed from the Fx searchbar).
+ * These styles, the 'oldsearchfield' assignment in zoteroPane.js, and the Search.png icons
+ * can be removed after Fx31 ESR.
+ *
+ * Note: This uses navigator.oscpu in zoteroPane.js to test for Yosemite instead of
+ * -moz-mac-yosemite-theme here because the latter isn't defined in Fx31.
+ */
+#zotero-pane-stack[oldsearchfield] textbox[type=search] {
+	margin: 0;
+	-moz-appearance: none;
+	padding: 3px 5px 2px;
+	border: 1px solid rgba(60,73,97,0.5);
+	border-radius: 10000px;
+	box-shadow: inset 0 1px 1px rgba(0,0,0,0.15), 0 1px rgba(255,255,255,0.25);
+	background-clip: padding-box;
+}
+
+#zotero-pane-stack[oldsearchfield] textbox[type=search][focused] {
+	box-shadow: 0 0 1px -moz-mac-focusring inset, 0 0 4px 1px -moz-mac-focusring, 0 0 1.5px 1px -moz-mac-focusring, inset 0 1px 1px rgba(0,0,0,0.15);
+	border-color: -moz-mac-focusring;
+}
+
+#zotero-pane-stack[oldsearchfield] textbox[type=search] > .textbox-input-box {
+	-moz-padding-start: 15px;
+	background: url("chrome://zotero/skin/mac/moz/Search.png") left no-repeat;
+	background-size: 14px;
+}
+
+@media (min-resolution: 2dppx) {
+	#zotero-pane-stack[oldsearchfield] textbox[type=search] > .textbox-input-box {
+		background: url("chrome://zotero/skin/mac/moz/Search@2x.png") left no-repeat;
+		background-size: 14px;
+	}
+}
+
+#zotero-pane-stack[oldsearchfield] textbox[type=search] > .textbox-input-box:-moz-locale-dir(rtl) {
+	background-position: right;
+}
+
+#zotero-pane-stack[oldsearchfield] textbox[type=search] > .textbox-input-box > html|*.textbox-input::-moz-placeholder {
+	opacity: 1.0;
+}
+/* End searchbox focus fix */
+
+
 #zotero-tb-search-menu-button
 {
 	margin: -6px -2px -6px -16px;

@@ -124,6 +124,12 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'win');
 		}
 		
+		// Use pre-Yosemite search fields before Fx34
+		// See note in chrome/content/zotero-platform/mac/overlay.css
+		if (Zotero.isMac && Zotero.platformMajorVersion < 34 && Zotero.oscpu.contains(' 10.10')) {
+			document.getElementById('zotero-pane-stack').setAttribute('oldsearchfield', 'true')
+		}
+		
 		// register an observer for Zotero reload
 		observerService = Components.classes["@mozilla.org/observer-service;1"]
 					  .getService(Components.interfaces.nsIObserverService);
