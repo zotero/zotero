@@ -80,7 +80,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.539",
+    PROCESSOR_VERSION: "1.0.543",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -237,7 +237,7 @@ var CSL = {
     MULTI_FIELDS: ["event", "publisher", "publisher-place", "event-place", "title", "container-title", "collection-title", "authority","edition","genre","title-short","medium","jurisdiction","archive","archive-place"],
     CITE_FIELDS: ["first-reference-note-number", "locator", "locator-revision"],
     MINIMAL_NAME_FIELDS: ["literal", "family"],
-    SWAPPING_PUNCTUATION: [".", "!", "?", ":",","],
+    SWAPPING_PUNCTUATION: [".", "!", "?", ":", ","],
     TERMINAL_PUNCTUATION: [":", ".", ";", "!", "?", " "],
     NONE: 0,
     NUMERIC: 1,
@@ -2595,6 +2595,9 @@ CSL.Engine.prototype.setAbbreviations = function (arg) {
         this.sys.setAbbreviations(arg);
     }
 };
+CSL.Engine.prototype.setSuppressTrailingPunctuation = function (arg) {
+    this.citation.opt.suppressTrailingPunctuation = !!arg;
+};
 CSL.Output = {};
 CSL.Output.Queue = function (state) {
     this.levelname = ["top"];
@@ -3209,19 +3212,30 @@ CSL.Output.Queue.adjust = function (punctInQuote) {
         return false;
     }
     function matchLastChar(blob, chr) {
-        if (blob.strings.suffix.slice(0, 1) === chr) {
-            return true;
-        } else if ("string" === typeof blob.blobs) {
+        if (!PUNCT[chr]) {
+            return false;
+        }
+        if ("string" === typeof blob.blobs) {
             if (blob.blobs.slice(-1) === chr) {
                 return true;
             } else {
                 return false;
             }
+        } else {
+            var child = blob.blobs[blob.blobs.length-1];
+            if (child) {
+                var childChar = child.strings.suffix.slice(-1);
+                if (!childChar) {
+                    return matchLastChar(child,chr);
+                } else if (child.strings.suffix.slice(-1) == chr) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
         }
-        for (var i=0,ilen=blob.blobs.length;i<ilen;i++) {
-            if (matchLastChar(blob.blobs[i])) return true;
-        }
-        return false;
     };
     function mergeChars (First, first, Second, second, merge_right) {
         FirstStrings = "blobs" === first ? First : First.strings;
@@ -3282,7 +3296,13 @@ CSL.Output.Queue.adjust = function (punctInQuote) {
         }
     };
     function upward (parent) {
-        if ("object" !== typeof parent || "object" !== typeof parent.blobs || !parent.blobs.length) {
+        if (parent.blobs && "string" == typeof parent.blobs) {
+            if (PUNCT[parent.strings.suffix.slice(0,1)]
+                && parent.strings.suffix.slice(0,1) === parent.blobs.slice(-1)) {
+                parent.strings.suffix = parent.strings.suffix.slice(1);
+            }
+            return;
+        } else if ("object" !== typeof parent || "object" !== typeof parent.blobs || !parent.blobs.length) {
             return;
         }
         var parentDecorations = blobHasDecorations(parent,true);
@@ -3343,8 +3363,14 @@ CSL.Output.Queue.adjust = function (punctInQuote) {
             }
         }
     };
-    function downward (parent) {
-        if ("object" !== typeof parent || "object" !== typeof parent.blobs || !parent.blobs.length) {
+    function downward (parent, top) {
+        if (parent.blobs && "string" == typeof parent.blobs) {
+            if (PUNCT[parent.strings.suffix.slice(0,1)]
+                && parent.strings.suffix.slice(0,1) === parent.blobs.slice(-1)) {
+                parent.strings.suffix = parent.strings.suffix.slice(1);
+            }
+            return;
+        } else if ("object" !== typeof parent || "object" !== typeof parent.blobs || !parent.blobs.length) {
             return;
         }
         var parentStrings = parent.strings;
@@ -3379,24 +3405,27 @@ CSL.Output.Queue.adjust = function (punctInQuote) {
                         if (PUNCT[parentChar]) {
                             if (!blobEndsInNumber(child)) {
                                 mergeChars(child, 'suffix', parent, 'suffix');
+                                if (parentStrings.suffix.slice(0,1) === ".") {
+                                    childStrings.suffix += parentStrings.suffix.slice(0,1);
+                                    parentStrings.suffix = parentStrings.suffix.slice(1);
+                                }
                             }
                         }
                         if (childStrings.suffix.slice(-1) === " " && parentStrings.suffix.slice(0,1)) {
                             parentStrings.suffix = parentStrings.suffix.slice(1);
                         }
-                    } else {
-                        if (matchLastChar(child,parent.strings.suffix.slice(0,1))) {
-                            parent.strings.suffix = parent.strings.suffix.slice(1);
-                        }   
                     }
                     if (PUNCT_OR_SPACE[childStrings.suffix.slice(0,1)]) {
                         if ("string" === typeof child.blobs && child.blobs.slice(-1) === childStrings.suffix.slice(0,1)) {
                             childStrings.suffix = childStrings.suffix.slice(1);
                         }
                         if (childStrings.suffix.slice(-1) === parentStrings.suffix.slice(0, 1)) {
-                            childStrings.suffix = childStrings.suffix.slice(0, -1);
+                            parentStrings.suffix = parentStrings.suffix.slice(0, -1);
                         }
                     }
+                }
+                if (matchLastChar(parent,parent.strings.suffix.slice(0,1))) {
+                    parent.strings.suffix = parent.strings.suffix.slice(1);
                 }
             } else if (parentStrings.delimiter) {
                 if (PUNCT_OR_SPACE[parentStrings.delimiter.slice(0,1)]
@@ -4198,7 +4227,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
         this.tmp.citation_id = "" + citation.citationID;
         obj = [];
         obj.push(citationsPre.length);
-        obj.push(this.process_CitationCluster.call(this, sortedItems));
+        obj.push(this.process_CitationCluster.call(this, sortedItems, citation.citationID));
         ret.push(obj);
         ret.sort(function (a, b) {
             if (a[0] > b[0]) {
@@ -4329,9 +4358,14 @@ CSL.getCitationCluster = function (inputList, citationID) {
     this.tmp.last_years_used = [];
     this.tmp.backref_index = [];
     this.tmp.cite_locales = [];
+    var suppressTrailingPunctuation = false;
+    if (this.opt.xclass === "note" && this.citation.opt.suppressTrailingPunctuation) {
+        suppressTrailingPunctuation = true;
+    }
     if (citationID) {
-        this.registry.citationreg.citationById[citationID].properties.backref_index = false;
-        this.registry.citationreg.citationById[citationID].properties.backref_citation = false;
+        if (this.registry.citationreg.citationById[citationID].properties["suppress-trailing-punctuation"]) {
+            suppressTrailingPunctuation = true;
+        }
     }
     if (this.opt.xclass === "note") {
         var parasets = [];
@@ -4460,7 +4494,9 @@ CSL.getCitationCluster = function (inputList, citationID) {
               && this.sys.wrapCitationEntry
               && !this.tmp.just_looking
               && this.tmp.area === "citation")) { 
-            this.output.queue[this.output.queue.length - 1].strings.suffix = use_layout_suffix;
+            if (!suppressTrailingPunctuation) {
+                this.output.queue[this.output.queue.length - 1].strings.suffix = use_layout_suffix;
+            }
             this.output.queue[0].strings.prefix = this.citation.opt.layout_prefix;
         }
     }
@@ -4933,7 +4969,7 @@ CSL.getBibliographyEntries = function (bibsection) {
         for (var j=0,jlen=this.output.queue.length;j<jlen;j+=1) {
             this.output.adjust.upward(this.output.queue[j]);
             this.output.adjust.leftward(this.output.queue[j]);
-            this.output.adjust.downward(this.output.queue[j]);
+            this.output.adjust.downward(this.output.queue[j],true);
             this.output.adjust.fix(this.output.queue[j]);
         }
         res = this.output.string(this, this.output.queue)[0];
@@ -6408,15 +6444,17 @@ CSL.Node.layout = {
                     var sp;
                     if (item && item.prefix) {
                         sp = "";
-                        var test_prefix = item.prefix.replace(/<[^>]+>/g, "").replace(/["'\u201d\u2019]/g,"").replace(/\s+$/, "").replace(/^[.\s]+/, "");
+                        var test_prefix = item.prefix.replace(/<[^>]+>/g, "").replace(/["'\u201d\u2019\u00bb\u202f\u00a0 ]+$/g,"");
+                        var test_char = test_prefix.slice(-1);
                         if (test_prefix.match(CSL.ENDSWITH_ROMANESQUE_REGEXP)) {
                             sp = " ";
-                        } else if (CSL.TERMINAL_PUNCTUATION.slice(0,-1).indexOf(test_prefix.slice(-1))) {
+                        } else if (CSL.TERMINAL_PUNCTUATION.slice(0,-1).indexOf(test_char) > -1) {
+                            sp = " ";
+                        } else if (test_char.match(/[\)\],0-9]/)) {
                             sp = " ";
                         }
                         var ignorePredecessor = false;
-                        if (CSL.TERMINAL_PUNCTUATION.slice(0,-1).indexOf(test_prefix.slice(-1)) > -1
-                            && test_prefix.slice(0, 1) != test_prefix.slice(0, 1).toLowerCase()) {
+                        if (CSL.TERMINAL_PUNCTUATION.slice(0,-1).indexOf(test_char) > -1) {
                             state.tmp.term_predecessor = false;
                             ignorePredecessor = true;
                         }
@@ -7213,6 +7251,10 @@ CSL.NameOutput.prototype.setCommonTerm = function () {
                 return;
             }
             freeters_offset += 1;
+        }
+        if (this.persons[v].length !== this.persons[vv].length) {
+            this.common_term = false;
+            return;
         }
         for (var j = 0, jlen = this.persons[v].length; j < jlen; j += 1) {
             if (this.etal_spec[v].persons[j] !== this.etal_spec[vv].persons[j]
@@ -12654,7 +12696,7 @@ CSL.Util.FlipFlopper.prototype.init = function (str, blob) {
 };
 CSL.Util.FlipFlopper.prototype._normalizeString = function (str) {
     var i, ilen;
-    str = str.replace(/\s+'\s+/," ’ ","g");
+    str = str.replace(/\s+'\s+/g," ’ ");
     if (str.indexOf(this.quotechars[0]) > -1) {
         for (i = 0, ilen = 2; i < ilen; i += 1) {
             if (this.quotechars[i + 2]) {
