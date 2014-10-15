@@ -450,9 +450,11 @@ Zotero.Translate.SandboxManager.prototype = {
 	"importObject":function(object, passAsFirstArgument, attachTo) {
 		if(!attachTo) attachTo = this.sandbox.Zotero;
 		if(attachTo.wrappedJSObject) attachTo = attachTo.wrappedJSObject;
-		var sandbox = this.sandbox, me = this;
-		for(var key in (object.__exposedProps__ ? object.__exposedProps__ : object)) {
+		var newExposedProps = false, sandbox = this.sandbox, me = this;
+		if(!object.__exposedProps__) newExposedProps = {};
+		for(var key in (newExposedProps ? object : object.__exposedProps__)) {
 			let localKey = key;
+			if(newExposedProps) newExposedProps[localKey] = "r";
 			
 			var type = typeof object[localKey];
 			var isFunction = type === "function";
@@ -490,6 +492,12 @@ Zotero.Translate.SandboxManager.prototype = {
 				attachTo[localKey] = object[localKey];
 			}
 		}
+
+		if(newExposedProps) {
+			attachTo.__exposedProps__ = newExposedProps;
+		} else {
+			attachTo.__exposedProps__ = object.__exposedProps__;
+		}
 	},
 
 	"_canCopy":function(obj) {
@@ -507,7 +515,7 @@ Zotero.Translate.SandboxManager.prototype = {
 	 * @return {Object}
 	 */
 	"_copyObject":function(obj, wm) {
-		if(!this._canCopy(obj)) return obj
+		if(!this._canCopy(obj)) return obj;
 		if(!wm) wm = new WeakMap();
 		var obj2 = (obj.constructor.name === "Array" ? this.sandbox.Array() : this.sandbox.Object());
 		var wobj2 = obj2.wrappedJSObject ? obj2.wrappedJSObject : obj2;
