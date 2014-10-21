@@ -332,7 +332,10 @@ Zotero.File = new function(){
 				let fileNameByteLength = Zotero.Utilities.Internal.byteLength(file.leafName);
 				
 				// Windows API only allows paths of 260 characters
-				if (e.name == "NS_ERROR_FILE_NOT_FOUND" && pathByteLength > 260) {
+				//
+				// I think this should be >260 but we had a report of an error with exactly
+				// 260 chars: https://forums.zotero.org/discussion/41410
+				if (e.name == "NS_ERROR_FILE_NOT_FOUND" && pathByteLength >= 260) {
 					Zotero.debug("Path is " + file.path);
 					pathError = true;
 				}
