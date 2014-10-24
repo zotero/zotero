@@ -95,30 +95,34 @@ var Zotero_RecognizePDF = new function() {
 				// Look up DOI
 				Zotero.debug("RecognizePDF: Found DOI: "+doi);
 				
-				var translate = new Zotero.Translate.Search();
-				translate.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
-				translate.setSearch({"itemType":"journalArticle", "DOI":doi});
-				promise = _promiseTranslate(translate, libraryID);
+				var translateDOI = new Zotero.Translate.Search();
+				translateDOI.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
+				translateDOI.setSearch({"itemType":"journalArticle", "DOI":doi});
+				promise = _promiseTranslate(translateDOI, libraryID);
 			} else {
-				// Look for ISBNs if no DOI
-				var isbns = _findISBNs(allText);
-				if(isbns.length) {
-					Zotero.debug("RecognizePDF: Found ISBNs: " + isbns);
-					
-					var translate = new Zotero.Translate.Search();
-					translate.setTranslator("c73a4a8c-3ef1-4ec8-8229-7531ee384cc4"); 
-					translate.setSearch({"itemType":"book", "ISBN":isbns[0]});
-					promise = _promiseTranslate(translate, libraryID);
-				} else {
-					promise = Q.reject("No ISBN or DOI found");
-				}
+				promise = Q.reject("No DOI found in text");
 			}
 			
-			// If no DOI or ISBN, query Google Scholar
-			return promise.fail(function(error) {
-				Zotero.debug("RecognizePDF: "+error);
-				return me.GSFullTextSearch.findItem(lines, libraryID, stopCheckCallback);
-			});
+			return promise
+				// Look for ISBNs if no DOI
+				.fail(function(error) {
+					Zotero.debug("RecognizePDF: " + error);
+					var isbns = _findISBNs(allText);
+					if (isbns.length) {
+						Zotero.debug("RecognizePDF: Found ISBNs: " + isbns);
+						
+						var translate = new Zotero.Translate.Search();
+						translate.setSearch({"itemType":"book", "ISBN":isbns[0]});
+						return _promiseTranslate(translate, libraryID);
+					} else {
+						return Q.reject("No ISBN found in text.");
+					}
+				})
+				// If no DOI or ISBN, query Google Scholar
+				.fail(function(error) {
+					Zotero.debug("RecognizePDF: " + error);
+					return me.GSFullTextSearch.findItem(lines, libraryID, stopCheckCallback);
+				});
 		});
 	}
 	
@@ -196,7 +200,10 @@ var Zotero_RecognizePDF = new function() {
 			if(success && translate.newItems.length) {
 				deferred.resolve(translate.newItems[0]);
 			} else {
-				deferred.reject("Translation with Google Scholar failed");
+				deferred.reject(translate.translator && translate.translator.length
+					? "Translation with " + translate.translator.map(t => t.label) + " failed"
+					: "Could not find a translator for given search item"
+				);
 			}
 		});
 		translate.translate(libraryID, false);

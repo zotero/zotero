@@ -1112,12 +1112,22 @@ Zotero.Translate.Base.prototype = {
 	 * @param 	{Boolean}				[saveAttachments=true]	Exclude attachments (e.g., snapshots) on import
 	 */
 	"translate":function(libraryID, saveAttachments) {		// initialize properties specific to each translation
-		this._currentState = "translate";
-		
 		if(!this.translator || !this.translator.length) {
-			this.complete(false, new Error("No translator specified"));
+			var args = arguments;
+			Zotero.debug("Translate: translate called without specifying a translator. Running detection first.");
+			this.setHandler('translators', function(me, translators) {
+				if(!translators.length) {
+					me.complete(false, "Could not find an appropriate translator");
+				} else {
+					me.setTranslator(translators);
+					Zotero.Translate.Base.prototype.translate.apply(me, args);
+				}
+			});
+			this.getTranslators();
 			return;
 		}
+		
+		this._currentState = "translate";
 		
 		this._libraryID = libraryID;
 		this._saveAttachments = saveAttachments === undefined || saveAttachments;
@@ -2157,6 +2167,19 @@ Zotero.Translate.Export.prototype._prepareTranslation = function() {
 	
 	this._sandboxManager.importObject(this._io);
 }
+
+/**
+ * Overload Zotero.Translate.Base#translate to make sure that
+ *   Zotero.Translate.Export#translate is not called without setting a
+ *   translator first. Doesn't make sense to run detection for export.
+ */
+Zotero.Translate.Export.prototype.translate = function() {
+	if(!this.translator || !this.translator.length) {
+		this.complete(false, new Error("Export translation initiated without setting a translator"));
+	} else {
+		Zotero.Translate.Base.prototype.translate.apply(this, arguments);
+	}
+};
 
 /**
  * Return the progress of the import operation, or null if progress cannot be determined
