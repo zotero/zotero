@@ -413,6 +413,22 @@ Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
 	var translate = Zotero.Translate.newInstance(this.type);
 	
 	if(this.type === "web") {
+		if (!this.translator.webRegexp) {
+			this._debug(this, "TranslatorTester: Web translator missing target regexp");
+		} else {
+			var url;
+			try {
+				url = doc.location.href;
+			} catch(e) {
+				this._debug(this, "TranslatorTester: Could not read document URL. Skipping target regexp check");
+			}
+			// TODO: Make sure url is not proxied
+			if (url && !this.translator.webRegexp.test(url)) {
+				testDoneCallback(this, test, "failed", "Target regexp did not match document URL: " + url);
+				callback({});
+				return;
+			}
+		}
 		translate.setDocument(doc);
 	} else if(this.type === "import") {
 		translate.setString(test.input);
