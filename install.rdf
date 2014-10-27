@@ -29,5 +29,14 @@
       </Description>
     </em:targetApplication>
     
+    <!-- Palemoon -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{8de7fcbb-c55c-4fbe-bfc5-fc555c87dbc4}</em:id>
+        <em:minVersion>25</em:minVersion>
+        <em:maxVersion>25.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+    
   </Description>
 </RDF>
