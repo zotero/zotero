@@ -590,7 +590,7 @@ var ZoteroPane = new function()
 			}
 			else if ((event.keyCode == event.DOM_VK_BACK_SPACE && Zotero.isMac) ||
 					event.keyCode == event.DOM_VK_DELETE) {
-				// If Cmd/Ctrl delete, use forced mode, which does different
+				// If Cmd/Shift delete, use forced mode, which does different
 				// things depending on the context
 				var force = event.metaKey || (!Zotero.isMac && event.shiftKey);
 				ZoteroPane_Local.deleteSelectedItems(force);
