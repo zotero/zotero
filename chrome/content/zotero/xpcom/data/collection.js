@@ -24,12 +24,7 @@
 */
 
 Zotero.Collection = function() {
-	let dataTypes = [
-		'primaryData',
-		'childCollections',
-		'childItems'
-	];
-	Zotero.DataObject.apply(this, ['collection', dataTypes]);
+	Zotero.Collection._super.apply(this);
 	
 	this._name = null;
 	this._parentID = null;
@@ -42,8 +37,16 @@ Zotero.Collection = function() {
 	this._childItems = [];
 }
 
-Zotero.Collection.prototype = Object.create(Zotero.DataObject.prototype);
+Zotero.Collection._super = Zotero.DataObject;
+Zotero.Collection.prototype = Object.create(Zotero.Collection._super.prototype);
 Zotero.Collection.constructor = Zotero.Collection;
+
+Zotero.Collection.prototype._objectType = 'collection';
+Zotero.Collection.prototype._dataTypes = Zotero.Collection._super.prototype._dataTypes.concat([
+	'primaryData',
+	'childCollections',
+	'childItems'
+]);
 
 Zotero.Collection.prototype.__defineGetter__('id', function () { return this._get('id'); });
 Zotero.Collection.prototype.__defineSetter__('id', function (val) { this._set('id', val); });

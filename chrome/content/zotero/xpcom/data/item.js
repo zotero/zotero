@@ -32,18 +32,7 @@ Zotero.Item = function(itemTypeOrID) {
 		throw ("Zotero.Item constructor only takes one parameter");
 	}
 	
-	var dataTypes = [
-		'primaryData',
-		'itemData',
-		'note',
-		'creators',
-		'childItems',
-		'relatedItems', // TODO: remove
-		'tags',
-		'collections',
-		'relations'
-	];
-	Zotero.DataObject.apply(this, ['item', dataTypes]);
+	Zotero.Item._super.apply(this);
 	
 	this._disabled = false;
 	
@@ -100,10 +89,23 @@ Zotero.Item = function(itemTypeOrID) {
 	}
 }
 
-Zotero.Item.prototype = Object.create(Zotero.DataObject.prototype);
+Zotero.Item._super = Zotero.DataObject;
+Zotero.Item.prototype = Object.create(Zotero.Item._super.prototype);
 Zotero.Item.constructor = Zotero.Item;
 
-Zotero.Item.prototype.__defineGetter__('objectType', function () { return 'item'; });
+Zotero.Item.prototype._objectType = 'item';
+Zotero.Item.prototype._dataTypes = Zotero.Item._super.prototype._dataTypes.concat([
+	'primaryData',
+	'itemData',
+	'note',
+	'creators',
+	'childItems',
+	'relatedItems', // TODO: remove
+	'tags',
+	'collections',
+	'relations'
+]);
+
 Zotero.Item.prototype.__defineGetter__('id', function () this._id);
 Zotero.Item.prototype.__defineGetter__('itemID', function () {
 	Zotero.debug("Item.itemID is deprecated -- use Item.id");
@@ -149,6 +151,17 @@ Zotero.Item.prototype.isPrimaryField = function (fieldName) {
 	return Zotero.Items.isPrimaryField(fieldName);
 }
 
+Zotero.Item.prototype._get = function (fieldName) {
+	throw new Error("_get is not valid for items");
+}
+
+Zotero.Item.prototype._setParentKey = function() {
+	if (!this.isNote() && !this.isAttachment()) {
+		throw new Error("_setParentKey() can only be called on items of type 'note' or 'attachment'");
+	}
+	
+	Zotero.Item._super.prototype._setParentKey.apply(this, arguments);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //

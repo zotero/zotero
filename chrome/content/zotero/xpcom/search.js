@@ -24,11 +24,7 @@
 */
 
 Zotero.Search = function() {
-	var dataTypes = [
-		'primaryData',
-		'conditions'
-	];
-	Zotero.DataObject.apply(this, ['search', dataTypes]);
+	Zotero.Search._super.apply(this);
 	
 	this._name = null;
 	
@@ -41,8 +37,15 @@ Zotero.Search = function() {
 	this._hasPrimaryConditions = false;
 }
 
-Zotero.Search.prototype = Object.create(Zotero.DataObject.prototype);
+Zotero.Search._super = Zotero.DataObject;
+Zotero.Search.prototype = Object.create(Zotero.Search._super.prototype);
 Zotero.Search.constructor = Zotero.Search;
+
+Zotero.Search.prototype._objectType = 'search';
+Zotero.Search.prototype._dataTypes = Zotero.Search._super.prototype._dataTypes.concat([
+	'primaryData',
+	'conditions'
+]);
 
 Zotero.Search.prototype.getID = function(){
 	Zotero.debug('Zotero.Search.getName() is deprecated -- use Search.id');
