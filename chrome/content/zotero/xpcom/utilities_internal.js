@@ -496,7 +496,7 @@ Zotero.Utilities.Internal = {
 	},
 	
 	/**
-	 * Defines property on the object's prototype.
+	 * Defines property on the object
 	 * More compact way to do Object.defineProperty
 	 *
 	 * @param {Object} obj Target object
@@ -510,7 +510,7 @@ Zotero.Utilities.Internal = {
 			if (!desc.hasOwnProperty(p)) continue;
 			d[p] = desc[p];
 		}
-		Object.defineProperty(obj.prototype, prop, d);
+		Object.defineProperty(obj, prop, d);
 	}
 }
 

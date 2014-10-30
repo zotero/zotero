@@ -55,17 +55,17 @@ Zotero.DataObject = function () {
 Zotero.DataObject.prototype._objectType = 'dataObject';
 Zotero.DataObject.prototype._dataTypes = [];
 
-Zotero.Utilities.Internal.defineProperty(Zotero.DataObject, 'objectType', {
+Zotero.Utilities.Internal.defineProperty(Zotero.DataObject.prototype, 'objectType', {
 	get: function() this._objectType
 });
-Zotero.Utilities.Internal.defineProperty(Zotero.DataObject, 'libraryKey', {
+Zotero.Utilities.Internal.defineProperty(Zotero.DataObject.prototype, 'libraryKey', {
 	get: function() this._libraryID + "/" + this._key
 });
-Zotero.Utilities.Internal.defineProperty(Zotero.DataObject, 'parentKey', {
+Zotero.Utilities.Internal.defineProperty(Zotero.DataObject.prototype, 'parentKey', {
 	get: function() this._parentKey,
 	set: function(v) this._setParentKey(v)
 });
-Zotero.Utilities.Internal.defineProperty(Zotero.DataObject, 'parentID', {
+Zotero.Utilities.Internal.defineProperty(Zotero.DataObject.prototype, 'parentID', {
 	get: function() this._getParentID(),
 	set: function(v) this._setParentID(v)
 });
