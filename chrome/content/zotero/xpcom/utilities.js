@@ -411,11 +411,7 @@ Zotero.Utilities = {
 				// Create a node and use the textContent property to do unescaping where
 				// possible, because this approach preserves line endings in the HTML
 				if(node === undefined) {
-					var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-						 .createInstance(Components.interfaces.nsIDOMParser);
-					var domDocument = parser.parseFromString("<!DOCTYPE html><html></html>",
-						"text/html");
-					node = domDocument.createElement("div");
+					node = Zotero.Utilities.Internal.getDOMDocument().createElement("div");
 				}
 				
 				node.innerHTML = str;
@@ -438,6 +434,20 @@ Zotero.Utilities = {
 				return ("textContent" in node ? node.textContent : node.innerText).replace(/ {2,}/g, " ");
 			}
 		};
+	},
+	
+	/**
+	 * Converts text inside a DOM object to plain text preserving text formatting
+	 * appropriate for given field
+	 * 
+	 * @param {DOMNode} rootNode Node containing all the text that needs to be extracted
+	 * @param {String} targetField Zotero item field that the text is meant for
+	 *
+	 * @return {String} Zotero formatted string
+	 */
+	"dom2text": function(rootNode, targetField) {
+		// TODO: actually do this
+		return Zotero.Utilities.trimInternal(rootNode.textContent);
 	},
 	
 	/**

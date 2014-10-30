@@ -24,7 +24,18 @@
 */
 
 Zotero.Libraries = new function () {
-	var _libraryData = {};
+	let _libraryData = {},
+		_userLibraryID,
+		_libraryDataLoaded = false;
+	
+	Zotero.Utilities.Internal.defineProperty(this, 'userLibraryID', {
+		get: function() { 
+			if (!_libraryDataLoaded) {
+				throw new Error("Library data not yet loaded");
+			}
+			return _userLibraryID;
+		}
+	});
 	
 	this.init = Zotero.Promise.coroutine(function* () {
 		// Library data
@@ -36,25 +47,28 @@ Zotero.Libraries = new function () {
 				type: row.libraryType,
 				version: row.version
 			};
+			if (row.libraryType == 'user') {
+				_userLibraryID = row.libraryID;
+			}
 		}
+		_libraryDataLoaded = true;
 	});
 	
-	this.exists = function (libraryID) {
-		// Until there are other library types, this can just check groups,
-		// which already preload ids at startup
-		try {
-			return !!Zotero.Groups.getGroupIDFromLibraryID(libraryID);
-		}
-		catch (e) {
-			if (e.getMessage().indexOf("does not exist") != -1) {
-				return false;
-			}
-			throw e;
-		}
+	function _getLibraryDataFromDB (libraryID) {
+		var sql = "SELECT * FROM libraries WHERE libraryID=?";
+		return Zotero.DB.queryAsync(sql, [libraryID])
+		.then(function(rows) {
+			return rows[0];
+		});
 	}
 	
 	
-	this.add = function (libraryID, type) {
+	this.exists = function (libraryID) {
+		return _libraryData[libraryID] !== undefined;
+	}
+	
+	
+	this.add = Zotero.Promise.coroutine(function* (libraryID, type) {
 		switch (type) {
 			case 'group':
 				break;
@@ -64,9 +78,16 @@ Zotero.Libraries = new function () {
 		}
 		
 		var sql = "INSERT INTO libraries (libraryID, libraryType) VALUES (?, ?)";
-		Zotero.DB.query(sql, [libraryID, type]);
-	}
-	
+		yield Zotero.DB.queryAsync(sql, [libraryID, type]);
+		// Re-fetch from DB to get auto-filled defaults
+		var newData = yield _getLibraryDataFromDB(libraryID);
+		_libraryData[newData.libraryID] = {
+			type: newData.libraryType,
+			version: newData.version
+		};
+		
+		return newData;
+	});
 	
 	this.dbLibraryID = function (libraryID) {
 		return (libraryID == Zotero.Users.getCurrentLibraryID()) ? 0 : libraryID;
@@ -74,12 +95,10 @@ Zotero.Libraries = new function () {
 	
 	
 	this.getName = function (libraryID) {
-		if (!libraryID) {
-			return Zotero.getString('pane.collections.library');
-		}
-		
 		var type = this.getType(libraryID);
 		switch (type) {
+			case 'user':
+				return Zotero.getString('pane.collections.library');
 			case 'group':
 				var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
 				var group = Zotero.Groups.get(groupID);
@@ -92,10 +111,10 @@ Zotero.Libraries = new function () {
 	
 	
 	this.getType = function (libraryID) {
-		if (this.dbLibraryID(libraryID) === 0) {
+		if (libraryID === Zotero.Libraries.userLibraryID) {
 			return 'user';
 		}
-		if (!_libraryData[libraryID]) {
+		if (!this.exists(libraryID)) {
 			throw new Error("Library data not loaded for library " + libraryID);
 		}
 		return _libraryData[libraryID].type;
@@ -106,7 +125,7 @@ Zotero.Libraries = new function () {
 	 * @return {Integer}
 	 */
 	this.getVersion = function (libraryID) {
-		if (!_libraryData[libraryID]) {
+		if (!this.exists(libraryID)) {
 			throw new Error("Library data not loaded for library " + libraryID);
 		}
 		return _libraryData[libraryID].version;
@@ -122,7 +141,7 @@ Zotero.Libraries = new function () {
 		version = parseInt(version);
 		var sql = "UPDATE libraries SET version=? WHERE libraryID=?";
 		yield Zotero.DB.queryAsync(sql, [version, libraryID]);
-		_libraryData[libraryID] = version;
+		_libraryData[libraryID].version = version;
 	});
 	
 	

@@ -346,6 +346,16 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
+	 * Returns a DOMDocument object not attached to any window
+	 */
+	"getDOMDocument": function() {
+		return Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser)
+			.parseFromString("<!DOCTYPE html><html></html>", "text/html");
+	},
+	
+	
+	/**
 	 * A generator that yields promises that delay for the given intervals
 	 *
 	 * @param {Array<Integer>} intervals An array of intervals in milliseconds
@@ -486,7 +496,7 @@ Zotero.Utilities.Internal = {
 	},
 	
 	/**
-	 * Defines property on the object's prototype.
+	 * Defines property on the object
 	 * More compact way to do Object.defineProperty
 	 *
 	 * @param {Object} obj Target object
@@ -500,7 +510,7 @@ Zotero.Utilities.Internal = {
 			if (!desc.hasOwnProperty(p)) continue;
 			d[p] = desc[p];
 		}
-		Object.defineProperty(obj.prototype, prop, d);
+		Object.defineProperty(obj, prop, d);
 	}
 }
 

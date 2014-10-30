@@ -24,21 +24,16 @@
 */
 
 /**
- *
- * @param {String} objectType
- * @param {String[]} dataTypes A set of data types that can be loaded for this data object
- *
  * @property {String} (readOnly) objectType
  * @property {String} (readOnly) libraryKey
  * @property {String|null} parentKey Null if no parent
  * @property {Integer|false|undefined} parentID False if no parent. Undefined if not applicable (e.g. search objects)
  */
 
-Zotero.DataObject = function (objectType, dataTypes) {
-	this._objectType = objectType;
+Zotero.DataObject = function () {
+	let objectType = this._objectType;
 	this._ObjectType = objectType[0].toUpperCase() + objectType.substr(1);
 	this._objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
-	this._dataTypes = dataTypes;
 	
 	this._id = null;
 	this._libraryID = null;
@@ -57,27 +52,26 @@ Zotero.DataObject = function (objectType, dataTypes) {
 	this._clearChanged();
 };
 
-Zotero.Utilities.Internal.defineProperty(Zotero.DataObject, 'objectType', {
+Zotero.DataObject.prototype._objectType = 'dataObject';
+Zotero.DataObject.prototype._dataTypes = [];
+
+Zotero.Utilities.Internal.defineProperty(Zotero.DataObject.prototype, 'objectType', {
 	get: function() this._objectType
 });
-Zotero.Utilities.Internal.defineProperty(Zotero.DataObject, 'libraryKey', {
+Zotero.Utilities.Internal.defineProperty(Zotero.DataObject.prototype, 'libraryKey', {
 	get: function() this._libraryID + "/" + this._key
 });
-Zotero.Utilities.Internal.defineProperty(Zotero.DataObject, 'parentKey', {
+Zotero.Utilities.Internal.defineProperty(Zotero.DataObject.prototype, 'parentKey', {
 	get: function() this._parentKey,
 	set: function(v) this._setParentKey(v)
 });
-Zotero.Utilities.Internal.defineProperty(Zotero.DataObject, 'parentID', {
+Zotero.Utilities.Internal.defineProperty(Zotero.DataObject.prototype, 'parentID', {
 	get: function() this._getParentID(),
 	set: function(v) this._setParentID(v)
 });
 
 
 Zotero.DataObject.prototype._get = function (field) {
-	if (this._objectType == 'item') {
-		throw new Error("_get is not valid for items");
-	}
-	
 	if (this['_' + field] !== null) {
 		return this['_' + field];
 	}
@@ -166,11 +160,6 @@ Zotero.DataObject.prototype._setParentID = function (id) {
  * @return {Boolean} True if changed, false if stayed the same
  */
 Zotero.DataObject.prototype._setParentKey = function(key) {
-	if (this._objectType == 'item') {
-		if (!this.isNote() && !this.isAttachment()) {
-			throw new Error("_setParentKey() can only be called on items of type 'note' or 'attachment'");
-		}
-	}
 	key = Zotero.DataObjectUtilities.checkKey(key);
 	
 	if (this._parentKey == key) {
