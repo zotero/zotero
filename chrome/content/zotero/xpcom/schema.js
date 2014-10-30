@@ -1409,6 +1409,8 @@ Zotero.Schema = new function(){
 			});
 			yield _updateDBVersion('compatibility', _maxCompatibility);
 			
+			yield Zotero.DB.queryAsync("INSERT INTO libraries VALUES (0, 'user', 0)");
+			
 			if (!Zotero.Schema.skipDefaultData) {
 				// Quick Start Guide web page item
 				var sql = "INSERT INTO items VALUES(1, 13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, 'ABCD2345', 0, 0)";
