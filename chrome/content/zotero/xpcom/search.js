@@ -1735,6 +1735,8 @@ Zotero.Searches = new function(){
 				let id = ids[i];
 				var search = new Zotero.Search;
 				search.id = id;
+				yield search.loadPrimaryData();
+				yield search.loadConditions();
 				notifierData[id] = { old: search.serialize() };
 				
 				var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
