@@ -445,7 +445,6 @@ Zotero.DataObject.prototype.editCheck = function () {
  */
 Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) {
 	var env = {
-		arguments: arguments,
 		transactionOptions: null,
 		options: options || {}
 	};

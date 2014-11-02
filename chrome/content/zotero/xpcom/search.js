@@ -181,17 +181,8 @@ Zotero.Search.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 	return Zotero.Search._super.prototype._initSave.apply(this, arguments);
 });
 
-/*
- * Save the search to the DB and return a savedSearchID
- *
- * If there are gaps in the searchConditionIDs, |fixGaps| must be true
- * and the caller must dispose of the search or reload the condition ids,
- * which may change after the save.
- *
- * For new searches, name must be set called before saving
- */
 Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
-	var fixGaps = env.arguments[0];
+	var fixGaps = env.options.fixGaps;
 	var isNew = env.isNew;
 	
 	var searchID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('savedSearches');
