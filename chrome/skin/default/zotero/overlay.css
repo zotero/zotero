@@ -278,7 +278,7 @@
 	list-style-image: url('chrome://zotero/skin/toolbar-collection-add.png');
 }
 
-#zotero-tb-feed-add
+#zotero-tb-feed-add, .zotero-menuitem-new-feed
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-feed-add.png');
 }
@@ -371,6 +371,16 @@
 .zotero-menuitem-edit-collection
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-collection-edit.png');
+}
+
+.zotero-menuitem-edit-feed
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-feed-edit.png');
+}
+
+.zotero-menuitem-refresh-feed
+{
+	list-style-image: url('chrome://zotero/skin/arrow_refresh.png');
 }
 
 .zotero-menuitem-delete-collection
