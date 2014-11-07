@@ -110,4 +110,40 @@ Zotero.Feeds = new function() {
 		
 		return !!Object.keys(this._cache.urlByLibraryID).length
 	}
+
+	this.scheduleNextFeedCheck = Zotero.Promise.coroutine(function* () {
+		Zotero.debug("Scheduling next feed update.");
+		let sql = "SELECT ( CASE "
+			+ "WHEN lastCheck IS NULL THEN 0 "
+			+ "ELSE julianday(lastCheck, 'utc') + (refreshInterval/1440.0) - julianday('now', 'utc') "
+			+ "END ) * 1440 AS nextCheck "
+			+ "FROM feeds WHERE refreshInterval IS NOT NULL "
+			+ "ORDER BY nextCheck ASC LIMIT 1";
+		var nextCheck = yield Zotero.DB.valueQueryAsync(sql);
+
+		if (this._nextFeedCheck) {
+			this._nextFeedCheck.cancel();
+			this._nextFeedCheck = null;
+		}
+
+		if (nextCheck !== false) {
+			nextCheck = nextCheck > 0 ? Math.ceil(nextCheck * 60000) : 0;
+			Zotero.debug("Next feed check in " + nextCheck/60000 + " minutes");
+			this._nextFeedCheck = Zotero.Promise.delay(nextCheck).cancellable();
+			Zotero.Promise.all([this._nextFeedCheck, globalFeedCheckDelay])
+			.then(() => {
+				globalFeedCheckDelay = Zotero.Promise.delay(60000); // Don't perform auto-updates more than once per minute
+				return this.updateFeeds()
+			})
+			.catch(e => {
+				if (e instanceof Zotero.Promise.CancellationError) {
+					Zotero.debug('Next update check cancelled');
+					return;
+				}
+				throw e;
+			});
+		} else {
+			Zotero.debug("No feeds with auto-update.");
+		}
+	});
 }

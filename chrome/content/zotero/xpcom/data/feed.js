@@ -271,3 +271,112 @@ Zotero.Feed.prototype._finalizeErase = Zotero.Promise.method(function(env) {
 	Zotero.Feeds.unregister(this.libraryID);
 	return Zotero.Feed._super.prototype._finalizeErase.apply(this, arguments);
 });
+
+Zotero.Feed.prototype.getExpiredFeedItemIDs = Zotero.Promise.coroutine(function* () {
+	let sql = "SELECT itemID AS id FROM feedItems "
+		+ "WHERE readTimestamp IS NOT NULL "
+		+ "AND (julianday(readTimestamp, 'utc') + (?) - julianday('now', 'utc')) > 0";
+	let expiredIDs = yield Zotero.DB.queryAsync(sql, [{int: this.cleanupAfter}]);
+	return expiredIDs.map(row => row.id);
+});
+
+Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
+	let errorMessage = '';
+	try {
+		// Clear expired items
+		if (this.cleanupAfter) {
+			let expiredItems = yield this.getExpiredFeedItemIDs();
+			Zotero.debug("Cleaning up read feed items...");
+			if (expiredItems.length) {
+				Zotero.debug(expiredItems.join(', '));
+				yield Zotero.FeedItems.erase(expiredItems);
+			} else {
+				Zotero.debug("No expired feed items");
+			}
+		}
+	} catch(e) {
+		Zotero.debug("Error clearing expired feed items.");
+		Zotero.debug(e);
+	}
+	
+	try {
+		let fr = new Zotero.FeedReader(this.url);
+		let itemIterator = fr.createItemIterator();
+		let item, toAdd = [], processedGUIDs = [];
+		while (item = yield itemIterator.next().value) {
+			if (item.dateModified && this.lastUpdate
+				&& item.dateModified < this.lastUpdate
+			) {
+				Zotero.debug("Item modification date before last update date (" + this._feedLastCheck + ")");
+				Zotero.debug(item);
+				// We can stop now
+				fr.terminate();
+				break;
+			}
+			
+			if (processedGUIDs.indexOf(item.guid) != -1) {
+				Zotero.debug("Feed item " + item.guid + " already processed from feed.");
+				continue;
+			}
+			processedGUIDs.push(item.guid);
+			
+			Zotero.debug("New feed item retrieved:");
+			Zotero.debug(item);
+			
+			let feedItem = yield Zotero.FeedItems.getAsyncByGUID(item.guid);
+			if (!feedItem) {
+				feedItem = new Zotero.FeedItem();
+				feedItem.guid = item.guid;
+				feedItem.setCollections([this.id]);
+			} else {
+				Zotero.debug("Feed item " + item.guid + " already in library.");
+				if (item.dateModified && feedItem.dateModified
+					&& feedItem.dateModified == item.dateModified
+				) {
+					Zotero.debug("Modification date has not changed. Skipping update.");
+					continue;
+				}
+				Zotero.debug("Updating metadata");
+				yield feedItem.loadItemData();
+				yield feedItem.loadCreators();
+				feedItem.isRead = false;
+			}
+			
+			// Delete invalid data
+			delete item.guid;
+			
+			feedItem.fromJSON(item);
+			toAdd.push(feedItem);
+		}
+		
+		// Save in reverse order
+		let savePromises = new Array(toAdd.length);
+		for (let i=toAdd.length-1; i>=0; i--) {
+			yield toAdd[i].save({skipEditCheck: true, setDateModified: true});
+		}
+		
+		this.lastUpdate = Zotero.Date.dateToSQL(new Date(), true);
+	} catch(e) {
+		Zotero.debug("Error processing feed from " + this.url);
+		Zotero.debug(e);
+		errorMessage = e.message || 'Error processing feed';
+	}
+	
+	this.lastCheck = Zotero.Date.dateToSQL(new Date(), true);
+	this.lastCheckError = errorMessage || null;
+	yield this.save({skipEditCheck: true});
+});
+
+Zotero.Feed.prototype.updateFeed = function() {
+	return this._updateFeed()
+	.finally(function() {
+		Zotero.Feeds.scheduleNextFeedCheck();
+	});
+}
+
+Zotero.Feed.prototype.erase = Zotero.Promise.coroutine(function* () {
+	yield this.loadChildItems();
+	let childItemIDs = this.getChildItems(true, true);
+	yield Zotero.FeedItems.erase(childItemIDs);
+	return Zotero.Feed._super.prototype.erase.call(this); // Don't tell it to delete child items. They're already gone
+})
