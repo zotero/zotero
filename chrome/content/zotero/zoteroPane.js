@@ -839,6 +839,19 @@ var ZoteroPane = new function()
 		return collection.saveTx();
 	});
 	
+	this.newFeed = function() {
+		let data = {};
+		window.openDialog('chrome://zotero/content/feedSettings.xul', 
+			null, 'centerscreen, modal', data);
+		if (!data.cancelled) {
+			let feed = new Zotero.Feed();
+			feed.url = data.url;
+			feed.name = data.title;
+			feed.refreshInterval = data.ttl;
+			feed.cleanupAfter = data.cleanAfter;
+			feed.save({skipEditCheck: true});
+		}
+	}
 	
 	this.newGroup = function () {
 		this.loadURI(Zotero.Groups.addGroupURL);

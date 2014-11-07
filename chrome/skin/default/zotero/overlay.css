@@ -278,6 +278,11 @@
 	list-style-image: url('chrome://zotero/skin/toolbar-collection-add.png');
 }
 
+#zotero-tb-feed-add
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-feed-add.png');
+}
+
 #zotero-tb-group-add
 {
 	list-style-image: url('chrome://zotero/skin/group_add.png');

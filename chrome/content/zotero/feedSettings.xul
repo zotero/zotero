@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<!DOCTYPE window [
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd" > %zoteroDTD;
+]>
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	title="&zotero.feedSettings.title;" buttons="cancel,accept"
+	buttonlabelaccept="&zotero.feedSettings.saveButton.label;"
+	ondialogaccept="Zotero_Feed_Settings.accept()"
+	ondialogcancel="Zotero_Feed_Settings.cancel()"
+	id="zotero-feed-settings"
+	onload="Zotero_Feed_Settings.init()">
+	
+	<script src="include.js"/>
+	<script src="feedSettings.js"/>
+	
+	<vbox>
+		<hbox align="center">
+			<label value="&zotero.feedSettings.url.label;" control="feed-url"/>
+			<textbox id="feed-url" flex="1" type="search" size="2"
+				oninput="Zotero_Feed_Settings.invalidateUrl()"
+				oncommand="Zotero_Feed_Settings.validateUrl()"
+				focused="true" newlines="replacewithspaces"
+				style="width: 30em; max-width: 30em"/>
+		</hbox>
+		<hbox align="center">
+			<label value="&zotero.feedSettings.title.label;" control="feed-url"/>
+			<textbox id="feed-title" flex="1" newlines="replacewithspaces"/>
+		</hbox>
+		<vbox id="advanced-options" class="zotero-advanced-options">
+			<hbox onclick="Zotero_Feed_Settings.toggleAdvancedOptions()"  class="zotero-advanced-options-label">
+				<dropmarker/>
+				<label value="&zotero.general.advancedOptions.label;"/>
+			</hbox>
+			<vbox id="advanced-options-togglable">
+				<hbox align="center">
+					<label value="&zotero.feedSettings.refresh.label1;" control="feed-ttl"/>
+					<textbox id="feed-ttl" type="number" min="0" increment="1" size="3"/>
+					<label value="&zotero.feedSettings.refresh.label2;" control="feed-ttl"/>
+				</hbox>
+				<hbox align="center">
+					<label value="&zotero.feedSettings.cleanAfter.label1;" control="feed-cleanAfter"/>
+					<textbox id="feed-cleanAfter" type="number" min="0" increment="1" size="2"/>
+					<label value="&zotero.feedSettings.cleanAfter.label2;" control="feed-cleanAfter"/>
+				</hbox>
+			</vbox>
+		</vbox>
+	</vbox>
+</dialog>
