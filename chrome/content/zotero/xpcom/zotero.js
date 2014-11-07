@@ -1414,7 +1414,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	 */
 	this.defineProperty = function(obj, prop, desc, opts) {
 		if (typeof prop != 'string') throw new Error("Property must be a string");
-		var d = { __proto__: null, enumerable: true }; // Enumerable by default
+		var d = { __proto__: null, enumerable: true, configurable: true }; // Enumerable by default
 		for (let p in desc) {
 			if (!desc.hasOwnProperty(p)) continue;
 			d[p] = desc[p];
