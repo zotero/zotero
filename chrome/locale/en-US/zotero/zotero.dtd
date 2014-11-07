@@ -10,6 +10,7 @@
 <!ENTITY zotero.general.cancel								"Cancel">
 <!ENTITY zotero.general.refresh								"Refresh">
 <!ENTITY zotero.general.saveAs								"Save As…">
+<!ENTITY zotero.general.advancedOptions.label				"Advanced Options">
 
 <!ENTITY zotero.errorReport.title							"Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages				"This may include messages unrelated to Zotero.">
@@ -103,6 +104,7 @@
 <!ENTITY zotero.toolbar.lookup.label				"Add Item(s) by Identifier">
 <!ENTITY zotero.toolbar.removeItem.label				"Remove Item…">
 <!ENTITY zotero.toolbar.newCollection.label			"New Collection…">
+<!ENTITY zotero.toolbar.newFeed.label			"New Feed…">
 <!ENTITY zotero.toolbar.newGroup						"New Group…">
 <!ENTITY zotero.toolbar.newSubcollection.label			"New Subcollection…">
 <!ENTITY zotero.toolbar.newSavedSearch.label			"New Saved Search…">
@@ -253,6 +255,17 @@
 <!ENTITY zotero.proxy.recognized.warning.secondary		"Adding other proxies allows malicious sites to masquerade as sites you trust."> 
 <!ENTITY zotero.proxy.recognized.disable.label			"Do not automatically redirect requests through previously recognized proxies">
 <!ENTITY zotero.proxy.recognized.ignore.label			"Ignore">
+
+<!ENTITY zotero.feedSettings.title                      "Feed Settings">
+<!ENTITY zotero.feedSettings.saveButton.label           "Save">
+<!ENTITY zotero.feedSettings.url.label                  "URL">
+<!ENTITY zotero.feedSettings.title.label                "Title">
+<!ENTITY zotero.feedSettings.refresh.label1             "Refresh Interval:">
+<!ENTITY zotero.feedSettings.refresh.label2             "hour(s)">
+<!ENTITY zotero.feedSettings.title.label                "Title">
+<!ENTITY zotero.feedSettings.cleanAfter.label1         "Remove read articles after ">
+<!ENTITY zotero.feedSettings.cleanAfter.label2         "day(s)">
+
 
 <!ENTITY zotero.recognizePDF.recognizing.label			"Retrieving Metadata…">
 <!ENTITY zotero.recognizePDF.cancel.label					"Cancel">
