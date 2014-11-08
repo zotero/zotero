@@ -419,9 +419,10 @@ var Zotero_File_Interface = new function() {
 		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
 							   getService(Components.interfaces.nsIClipboard);
 		var style = Zotero.Styles.get(style);
-		
+		var cslEngine = style.getCiteProc();
+        
 		// add HTML
-		var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, "html", asCitations);
+ 		var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html", asCitations);
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -430,7 +431,7 @@ var Zotero_File_Interface = new function() {
 		
 		// add text (or HTML source)
 		if(!asHTML) {
-			var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, "text", asCitations);
+			var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text", asCitations);
 		}
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
@@ -516,7 +517,8 @@ var Zotero_File_Interface = new function() {
 			}
 			else {
 				var style = Zotero.Styles.get(io.style);
-				var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style,
+				var cslEngine = style.getCiteProc();
+				var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine,
 					items, format, io.mode === "citations");
 			}
 		} catch(e) {
