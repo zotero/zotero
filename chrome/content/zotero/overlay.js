@@ -97,6 +97,17 @@ var ZoteroOverlay = new function()
 		if (Zotero && Zotero.initialized){
 			document.getElementById('appcontent').addEventListener('mousemove', Zotero.ProgressWindowSet.updateTimers, false);
 			if (icon) {
+				// TODO: move to strings
+				let str = 'Zotero';
+				let key = Zotero.Keys.getKeyForCommand('openZotero');
+				if (key) {
+					str += ' ('
+						+ (Zotero.isMac ? '⇧⌘' : Zotero.getString('general.keys.ctrlShift'))
+						+ key
+					+ ')';
+				}
+				icon.setAttribute('tooltiptext', str);
+				
 				if (iconPref == 1) {
 					icon.setAttribute('compact', true);
 				}
