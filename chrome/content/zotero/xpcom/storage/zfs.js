@@ -413,7 +413,8 @@ Zotero.Sync.Storage.ZFS = (function () {
 		
 		var fis = Components.classes["@mozilla.org/network/file-input-stream;1"]
 					.createInstance(Components.interfaces.nsIFileInputStream);
-		fis.init(file, 0x01, 0, Components.interfaces.nsIFileInputStream.CLOSE_ON_EOF);
+		fis.init(file, 0x01, 0, Components.interfaces.nsIFileInputStream.CLOSE_ON_EOF
+			| Components.interfaces.nsIFileInputStream.REOPEN_ON_REWIND);
 		
 		var bis = Components.classes["@mozilla.org/network/buffered-input-stream;1"]
 					.createInstance(Components.interfaces.nsIBufferedInputStream)
