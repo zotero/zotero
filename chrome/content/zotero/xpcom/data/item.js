@@ -89,9 +89,7 @@ Zotero.Item = function(itemTypeOrID) {
 	}
 }
 
-Zotero.Item._super = Zotero.DataObject;
-Zotero.Item.prototype = Object.create(Zotero.Item._super.prototype);
-Zotero.Item.constructor = Zotero.Item;
+Zotero.extendClass(Zotero.DataObject, Zotero.Item);
 
 Zotero.Item.prototype._objectType = 'item';
 Zotero.Item.prototype._dataTypes = Zotero.Item._super.prototype._dataTypes.concat([

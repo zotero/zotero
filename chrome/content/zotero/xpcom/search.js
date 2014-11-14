@@ -37,9 +37,7 @@ Zotero.Search = function() {
 	this._hasPrimaryConditions = false;
 }
 
-Zotero.Search._super = Zotero.DataObject;
-Zotero.Search.prototype = Object.create(Zotero.Search._super.prototype);
-Zotero.Search.constructor = Zotero.Search;
+Zotero.extendClass(Zotero.DataObject, Zotero.Search);
 
 Zotero.Search.prototype._objectType = 'search';
 Zotero.Search.prototype._dataTypes = Zotero.Search._super.prototype._dataTypes.concat([
