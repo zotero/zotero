@@ -103,7 +103,7 @@ Zotero.ItemFields = new function() {
 		}
 		
 		if (typeof field == 'number') {
-			return field;
+			return _fields[field] ? field : false;
 		}
 		
 		return _fields[field] ? _fields[field]['id'] : false;
