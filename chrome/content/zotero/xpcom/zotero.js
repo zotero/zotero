@@ -1531,6 +1531,12 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		};
 	}
 	
+	this.defineProperty(this, "localeCompare", {
+		get: function() {
+			var collation = this.getLocaleCollation();
+			return collation.compareString.bind(collation, 1);
+		}
+	}, {lazy: true});
 	
 	/*
 	 * Sets font size based on prefs -- intended for use on root element
