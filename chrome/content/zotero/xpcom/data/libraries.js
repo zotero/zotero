@@ -177,4 +177,12 @@ Zotero.Libraries = new function () {
 				throw new Error("Unsupported library type '" + type + "' in Zotero.Libraries.getName()");
 		}
 	}
+	
+	this.isGroupLibrary = function (libraryID) {
+		if (!_libraryDataLoaded) {
+			throw new Error("Library data not yet loaded");
+		}
+		
+		return this.getType(libraryID) == 'group';
+	}
 }
