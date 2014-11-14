@@ -173,6 +173,13 @@ Zotero.Search.prototype.loadFromRow = function (row) {
 	this._identified = true;
 }
 
+Zotero.Search.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
+	if (!this.name) {
+		throw('Name not provided for saved search');
+	}
+	
+	return Zotero.Search._super.prototype._initSave.apply(this, arguments);
+});
 
 /*
  * Save the search to the DB and return a savedSearchID
@@ -183,142 +190,107 @@ Zotero.Search.prototype.loadFromRow = function (row) {
  *
  * For new searches, name must be set called before saving
  */
-Zotero.Search.prototype.save = Zotero.Promise.coroutine(function* (fixGaps) {
-	try {
-		Zotero.Searches.editCheck(this);
-		
-		if (!this.name) {
-			throw('Name not provided for saved search');
-		}
-		
-		var isNew = !this.id;
-		
-		// Register this item's identifiers in Zotero.DataObjects on transaction commit,
-		// before other callbacks run
-		var searchID, libraryID, key;
-		if (isNew) {
-			var transactionOptions = {
-				onCommit: function () {
-					Zotero.Searches.registerIdentifiers(searchID, libraryID, key);
-				}
-			};
-		}
-		else {
-			var transactionOptions = null;
-		}
-		
-		return Zotero.DB.executeTransaction(function* () {
-			searchID = this._id = this.id ? this.id : yield Zotero.ID.get('savedSearches');
-			libraryID = this.libraryID;
-			key = this._key = this.key ? this.key : this._generateKey();
-			
-			Zotero.debug("Saving " + (isNew ? 'new ' : '') + "search " + this.id);
-			
-			var columns = [
-				'savedSearchID',
-				'savedSearchName',
-				'clientDateModified',
-				'libraryID',
-				'key',
-				'version',
-				'synced'
-			];
-			var placeholders = columns.map(function () '?').join();
-			var sqlValues = [
-				searchID ? { int: searchID } : null,
-				{ string: this.name },
-				Zotero.DB.transactionDateTime,
-				this.libraryID ? this.libraryID : 0,
-				key,
-				this.version ? this.version : 0,
-				this.synced ? 1 : 0
-			];
-			
-			var sql = "REPLACE INTO savedSearches (" + columns.join(', ') + ") "
-				+ "VALUES (" + placeholders + ")";
-			var insertID = yield Zotero.DB.queryAsync(sql, sqlValues);
-			if (!searchID) {
-				searchID = insertID;
-			}
-			
-			if (!isNew) {
-				var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
-				yield Zotero.DB.queryAsync(sql, this.id);
-			}
-			
-			// Close gaps in savedSearchIDs
-			var saveConditions = {};
-			var i = 1;
-			for (var id in this._conditions) {
-				if (!fixGaps && id != i) {
-					Zotero.DB.rollbackTransaction();
-					throw ('searchConditionIDs not contiguous and |fixGaps| not set in save() of saved search ' + this._id);
-				}
-				saveConditions[i] = this._conditions[id];
-				i++;
-			}
-			
-			this._conditions = saveConditions;
-			
-			for (var i in this._conditions){
-				var sql = "INSERT INTO savedSearchConditions (savedSearchID, "
-					+ "searchConditionID, condition, operator, value, required) "
-					+ "VALUES (?,?,?,?,?,?)";
-				
-				// Convert condition and mode to "condition[/mode]"
-				var condition = this._conditions[i].mode ?
-					this._conditions[i].condition + '/' + this._conditions[i].mode :
-					this._conditions[i].condition
-				
-				var sqlParams = [
-					searchID,
-					i,
-					condition,
-					this._conditions[i].operator ? this._conditions[i].operator : null,
-					this._conditions[i].value ? this._conditions[i].value : null,
-					this._conditions[i].required ? 1 : null
-				];
-				yield Zotero.DB.queryAsync(sql, sqlParams);
-			}
-			
-			
-			if (isNew) {
-				Zotero.Notifier.trigger('add', 'search', this.id);
-			}
-			else {
-				Zotero.Notifier.trigger('modify', 'search', this.id, this._previousData);
-			}
-			
-			if (isNew && this.libraryID) {
-				var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
-				var group = yield Zotero.Groups.get(groupID);
-				group.clearSearchCache();
-			}
-			
-			if (isNew) {
-				var id = this.id;
-				this._disabled = true;
-				return id;
-			}
-			
-			yield this.reload();
-			this._clearChanged();
-			
-			return isNew ? this.id : true;
-		}.bind(this), transactionOptions);
+Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
+	var fixGaps = env.arguments[0];
+	var isNew = env.isNew;
+	
+	var searchID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('savedSearches');
+	var libraryID = env.libraryID = this.libraryID;
+	var key = env.key = this._key = this.key ? this.key : this._generateKey();
+	
+	var columns = [
+		'savedSearchID',
+		'savedSearchName',
+		'clientDateModified',
+		'libraryID',
+		'key',
+		'version',
+		'synced'
+	];
+	var placeholders = columns.map(function () '?').join();
+	var sqlValues = [
+		searchID ? { int: searchID } : null,
+		{ string: this.name },
+		Zotero.DB.transactionDateTime,
+		this.libraryID ? this.libraryID : 0,
+		key,
+		this.version ? this.version : 0,
+		this.synced ? 1 : 0
+	];
+	
+	var sql = "REPLACE INTO savedSearches (" + columns.join(', ') + ") "
+		+ "VALUES (" + placeholders + ")";
+	var insertID = yield Zotero.DB.queryAsync(sql, sqlValues);
+	if (!searchID) {
+		searchID = env.id = insertID;
 	}
-	catch (e) {
-		try {
-			yield this.reload();
-			this._clearChanged();
-		}
-		catch (e2) {
-			Zotero.debug(e2, 1);
-		}
-		
-		Zotero.debug(e, 1);
-		throw e;
+	
+	if (!isNew) {
+		var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
+		yield Zotero.DB.queryAsync(sql, this.id);
 	}
+	
+	// Close gaps in savedSearchIDs
+	var saveConditions = {};
+	var i = 1;
+	for (var id in this._conditions) {
+		if (!fixGaps && id != i) {
+			Zotero.DB.rollbackTransaction();
+			throw ('searchConditionIDs not contiguous and |fixGaps| not set in save() of saved search ' + this._id);
+		}
+		saveConditions[i] = this._conditions[id];
+		i++;
+	}
+	
+	this._conditions = saveConditions;
+	
+	for (var i in this._conditions){
+		var sql = "INSERT INTO savedSearchConditions (savedSearchID, "
+			+ "searchConditionID, condition, operator, value, required) "
+			+ "VALUES (?,?,?,?,?,?)";
+		
+		// Convert condition and mode to "condition[/mode]"
+		var condition = this._conditions[i].mode ?
+			this._conditions[i].condition + '/' + this._conditions[i].mode :
+			this._conditions[i].condition
+		
+		var sqlParams = [
+			searchID,
+			i,
+			condition,
+			this._conditions[i].operator ? this._conditions[i].operator : null,
+			this._conditions[i].value ? this._conditions[i].value : null,
+			this._conditions[i].required ? 1 : null
+		];
+		yield Zotero.DB.queryAsync(sql, sqlParams);
+	}
+});
+
+Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
+	var isNew = env.isNew;
+	if (isNew) {
+		Zotero.Notifier.trigger('add', 'search', this.id);
+	}
+	else {
+		Zotero.Notifier.trigger('modify', 'search', this.id, this._previousData);
+	}
+	
+	if (isNew && this.libraryID) {
+		var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
+		var group = yield Zotero.Groups.get(groupID);
+		group.clearSearchCache();
+	}
+	
+	if (isNew) {
+		var id = this.id;
+		this._disabled = true;
+		return id;
+	}
+	
+	yield this.reload();
+	this._clearChanged();
+	
+	return isNew ? this.id : true;
 });
 
 

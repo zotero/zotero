@@ -425,6 +425,98 @@ Zotero.DataObject.prototype._clearFieldChange = function (field) {
 	delete this._previousData[field];
 }
 
+
+Zotero.DataObject.prototype.isEditable = function () {
+	return Zotero.Libraries.isEditable(this.libraryID);
+}
+
+
+Zotero.DataObject.prototype.editCheck = function () {
+	if (!Zotero.Sync.Server.updatesInProgress && !Zotero.Sync.Storage.updatesInProgress && !this.isEditable()) {
+		throw ("Cannot edit " + this._objectType + " in read-only Zotero library");
+	}
+}
+
+/**
+ * Save changes to database
+ *
+ * @return {Promise<Integer|Boolean>}  Promise for itemID of new item,
+ *                                     TRUE on item update, or FALSE if item was unchanged
+ */
+Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) {
+	var env = {
+		arguments: arguments,
+		transactionOptions: null,
+		options: options || {}
+	};
+	
+	var proceed = yield this._initSave(env);
+	if (!proceed) return false;
+	
+	if (env.isNew) {
+		Zotero.debug('Saving data for new ' + this._objectType + ' to database', 4);
+	}
+	else {
+		Zotero.debug('Updating database with new ' + this._objectType + ' data', 4);
+	}
+	
+	return Zotero.DB.executeTransaction(function* () {
+		yield this._saveData(env);
+		return yield this._finalizeSave(env);
+	}.bind(this), env.transactionOptions)
+	.catch(e => {
+		return this._recoverFromSaveError(env, e)
+		.catch(function(e2) {
+			Zotero.debug(e2, 1);
+		})
+		.then(function() {
+			Zotero.debug(e, 1);
+			throw e;
+		})
+	});
+});
+
+Zotero.DataObject.prototype.hasChanged = function() {
+	Zotero.debug(this._changed);
+	return !!Object.keys(this._changed).filter(dataType => this._changed[dataType]).length
+}
+
+Zotero.DataObject.prototype._saveData = function() {
+	throw new Error("Zotero.DataObject.prototype._saveData is an abstract method");
+}
+
+Zotero.DataObject.prototype._finalizeSave = function() {
+	throw new Error("Zotero.DataObject.prototype._finalizeSave is an abstract method");
+}
+
+Zotero.DataObject.prototype._recoverFromSaveError = Zotero.Promise.coroutine(function* () {
+	yield this.reload(null, true);
+	this._clearChanged();
+});
+
+Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
+	env.isNew = !this.id;
+	
+	this.editCheck();
+	
+	if (!this.hasChanged()) {
+		Zotero.debug(this._ObjectType + ' ' + this.id + ' has not changed', 4);
+		return false;
+	}
+	
+	// Register this object's identifiers in Zotero.DataObjects on transaction commit,
+	// before other callbacks run
+	if (env.isNew) {
+		env.transactionOptions = {
+			onCommit: () => {
+				this.ObjectsClass.registerIdentifiers(env.id, env.libraryID, env.key);
+			}
+		};
+	}
+	
+	return true;
+});
+
 /**
  * Generates data object key
  * @return {String} key
