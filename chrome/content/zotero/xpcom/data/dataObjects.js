@@ -50,6 +50,10 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 			this._ZDO_idOnly = false;
 	}
 	
+	Zotero.defineProperty(this, 'idColumn', {
+		get: function() this._ZDO_id
+	});
+	
 	this._objectCache = {};
 	this._objectKeys = {};
 	this._objectIDs = {};

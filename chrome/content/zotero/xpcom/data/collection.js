@@ -128,38 +128,6 @@ Zotero.Collection.prototype.getName = function() {
 
 
 /*
- * Build collection from database
- */
-Zotero.Collection.prototype.loadPrimaryData = Zotero.Promise.coroutine(function* (reload) {
-	if (this._loaded.primaryData && !reload) return;
-	
-	var id = this._id;
-	var key = this._key;
-	var libraryID = this._libraryID;
-	
-	var sql = this.ObjectsClass.getPrimaryDataSQL();
-	if (id) {
-		sql += " AND O.collectionID=?";
-		var params = id;
-	}
-	else {
-		sql += " AND O.libraryID=? AND O.key=?";
-		var params = [libraryID, key];
-	}
-	var data = yield Zotero.DB.rowQueryAsync(sql, params);
-	
-	this._loaded.primaryData = true;
-	this._clearChanged('primaryData');
-	
-	if (!data) {
-		return;
-	}
-	
-	this.loadFromRow(data);
-});
-
-
-/*
  * Populate collection data from a database row
  */
 Zotero.Collection.prototype.loadFromRow = function(row) {

@@ -302,61 +302,6 @@ Zotero.Item.prototype.getUsedFields = function(asNames) {
 
 
 /*
- * Build object from database
- */
-Zotero.Item.prototype.loadPrimaryData = Zotero.Promise.coroutine(function* (reload, failOnMissing) {
-	if (this._loaded.primaryData && !reload) return;
-	
-	var id = this._id;
-	var key = this._key;
-	var libraryID = this._libraryID;
-	
-	if (!id && !key) {
-		throw new Error('ID or key not set in Zotero.Item.loadPrimaryData()');
-	}
-	
-	var columns = [], join = [], where = [];
-	var primaryFields = this.ObjectsClass.primaryFields;
-	for (let i=0; i<primaryFields.length; i++) {
-		let field = primaryFields[i];
-		// If field not already set
-		if (field == 'itemID' || this['_' + field] === null || reload) {
-			columns.push(this.ObjectsClass.getPrimaryDataSQLPart(field));
-		}
-	}
-	if (!columns.length) {
-		return;
-	}
-	// This should match Zotero.Items.getPrimaryDataSQL(), but without
-	// necessarily including all columns
-	var sql = "SELECT " + columns.join(", ") + this.ObjectsClass.primaryDataSQLFrom;
-	if (id) {
-		sql += " AND O.itemID=? ";
-		var params = id;
-	}
-	else {
-		sql += " AND O.key=? AND O.libraryID=? ";
-		var params = [key, libraryID];
-	}
-	sql += (where.length ? ' AND ' + where.join(' AND ') : '');
-	var row = yield Zotero.DB.rowQueryAsync(sql, params);
-	
-	if (!row) {
-		if (failOnMissing) {
-			throw new Error("Item " + (id ? id : libraryID + "/" + key)
-				+ " not found in Zotero.Item.loadPrimaryData()");
-		}
-		this._loaded.primaryData = true;
-		this._clearChanged('primaryData');
-		return;
-	}
-	
-	this.loadFromRow(row, reload);
-	return;
-});
-
-
-/*
  * Populate basic item data from a database row
  */
 Zotero.Item.prototype.loadFromRow = function(row, reload) {
@@ -365,6 +310,11 @@ Zotero.Item.prototype.loadFromRow = function(row, reload) {
 		this.setType(row.itemTypeID, true);
 	}
 	
+	this._parseRowData(row);
+	this._finalizeLoadFromRow(row);
+}
+
+Zotero.Item.prototype._parseRowData = function(row) {
 	if (false) {
 		var primaryFields = this.ObjectsClass.primaryFields;
 		for (let i=0; i<primaryFields.length; i++) {
@@ -498,6 +448,9 @@ Zotero.Item.prototype.loadFromRow = function(row, reload) {
 			}
 		}
 	}
+}
+
+Zotero.Item.prototype._finalizeLoadFromRow = function(row) {
 	this._loaded.primaryData = true;
 	this._clearChanged('primaryData');
 	this._identified = true;

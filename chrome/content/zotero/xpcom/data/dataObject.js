@@ -324,6 +324,60 @@ Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function
 	return false;
 });
 
+/*
+ * Build object from database
+ */
+Zotero.DataObject.prototype.loadPrimaryData = Zotero.Promise.coroutine(function* (reload, failOnMissing) {
+	if (this._loaded.primaryData && !reload) return;
+	
+	var id = this.id;
+	var key = this.key;
+	var libraryID = this.libraryID;
+	
+	if (!id && !key) {
+		throw new Error('ID or key not set in Zotero.' + this._ObjectType + '.loadPrimaryData()');
+	}
+	
+	var columns = [], join = [], where = [];
+	var primaryFields = this.ObjectsClass.primaryFields;
+	var idField = this.ObjectsClass.idColumn;
+	for (let i=0; i<primaryFields.length; i++) {
+		let field = primaryFields[i];
+		// If field not already set
+		if (field == idField || this['_' + field] === null || reload) {
+			columns.push(this.ObjectsClass.getPrimaryDataSQLPart(field));
+		}
+	}
+	if (!columns.length) {
+		return;
+	}
+	
+	// This should match Zotero.*.primaryDataSQL, but without
+	// necessarily including all columns
+	var sql = "SELECT " + columns.join(", ") + this.ObjectsClass.primaryDataSQLFrom;
+	if (id) {
+		sql += " AND O." + idField + "=? ";
+		var params = id;
+	}
+	else {
+		sql += " AND O.key=? AND O.libraryID=? ";
+		var params = [key, libraryID];
+	}
+	sql += (where.length ? ' AND ' + where.join(' AND ') : '');
+	var row = yield Zotero.DB.rowQueryAsync(sql, params);
+	
+	if (!row) {
+		if (failOnMissing) {
+			throw new Error(this._ObjectType + " " + (id ? id : libraryID + "/" + key)
+				+ " not found in Zotero." + this._ObjectType + ".loadPrimaryData()");
+		}
+		this._loaded.primaryData = true;
+		this._clearChanged('primaryData');
+		return;
+	}
+	
+	this.loadFromRow(row, reload);
+});
 
 /**
  * Reloads loaded, changed data
