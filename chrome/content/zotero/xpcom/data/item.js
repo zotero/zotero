@@ -200,13 +200,13 @@ Zotero.Item.prototype._setParentKey = function() {
 /*
  * Retrieves (and loads from DB, if necessary) an itemData field value
  *
- * Field can be passed as fieldID or fieldName
- *
- * If |unformatted| is true, skip any special processing of DB value
- *		(e.g. multipart date field) (default false)
- *
- * If |includeBaseMapped| is true and field is a base field, returns value of
- * 		type-specific field instead (e.g. 'label' for 'publisher' in 'audioRecording')
+ * @param {String|Integer} field fieldID or fieldName
+ * @param {Boolean} [unformatted] Skip any special processing of DB value
+ *   (e.g. multipart date field)
+ * @param {Boolean} includeBaseMapped If true and field is a base field, returns
+ *   value of type-specific field instead
+ *   (e.g. 'label' for 'publisher' in 'audioRecording')
+ * @return {String} Value as string or empty string if value is not present
  */
 Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped) {
 	// We don't allow access after saving to force use of the centrally cached
@@ -236,6 +236,8 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 		var privField = '_' + field;
 		//Zotero.debug('Returning ' + (this[privField] ? this[privField] : '') + ' (typeof ' + typeof this[privField] + ')');
 		return this[privField];
+	} else if (field == 'year') {
+		return this.getField('date', true, true).substr(0,4);
 	}
 	
 	if (this.isNote()) {
