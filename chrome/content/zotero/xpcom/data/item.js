@@ -69,9 +69,9 @@ Zotero.Item = function(itemTypeOrID) {
 	this._attachments = null;
 	this._notes = null;
 	
-	this._tags = {};
-	this._collections = {};
-	this._relations = {};
+	this._tags = [];
+	this._collections = [];
+	this._relations = [];
 	
 	this._bestAttachmentState = null;
 	this._fileExists = null;
@@ -291,13 +291,13 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
  * @param	{Boolean}				asNames
  * @return	{Integer{}|String[]}
  */
-Zotero.Item.prototype.getUsedFields = Zotero.Promise.coroutine(function* (asNames) {
+Zotero.Item.prototype.getUsedFields = function(asNames) {
 	this._requireData('itemData');
 	
 	return Object.keys(this._itemData)
-		.filter(id => this._itemData[id] !== false)
+		.filter(id => this._itemData[id] !== false && this._itemData[id] !== null)
 		.map(id => asNames ? Zotero.ItemFields.getName(id) : parseInt(id));
-});
+};
 
 
 
@@ -1325,7 +1325,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 				continue;
 			}
 			
-			let previousCreatorID = this._previousData.creators[orderIndex]
+			let previousCreatorID = !isNew && this._previousData.creators[orderIndex]
 				? this._previousData.creators[orderIndex].id
 				: false;
 			let newCreatorID = yield Zotero.Creators.getIDFromData(creatorData, true);
@@ -1603,7 +1603,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	
 	// Collections
 	if (this._changed.collections) {
-		let oldCollections = this._previousData.collections;
+		let oldCollections = this._previousData.collections || [];
 		let newCollections = this._collections;
 		
 		let toAdd = Zotero.Utilities.arrayDiff(newCollections, oldCollections);
@@ -3766,6 +3766,7 @@ Zotero.Item.prototype.clone = function(libraryID, skipTags) {
 	var sameLibrary = libraryID == this.libraryID;
 	
 	var newItem = new Zotero.Item;
+	newItem.libraryID = libraryID;
 	newItem.setType(this.itemTypeID);
 	
 	var fieldIDs = this.getUsedFields();
@@ -3950,7 +3951,7 @@ Zotero.Item.prototype.fromJSON = function (json) {
 		
 		case 'dateAdded':
 		case 'dateModified':
-			item[field] = val;
+			this['_'+field] = val;
 			break;
 		
 		case 'tags':
@@ -3999,8 +4000,9 @@ Zotero.Item.prototype.fromJSON = function (json) {
 		if (!changedFields[field] &&
 				// Invalid fields will already have been cleared by the type change
 				Zotero.ItemFields.isValidForType(
-					Zotero.ItemFields.getID(field), data.itemTypeID
-				)) {
+					Zotero.ItemFields.getID(field), this.itemTypeID
+				)
+		) {
 			this.setField(field, false);
 		}
 	}
@@ -4009,18 +4011,17 @@ Zotero.Item.prototype.fromJSON = function (json) {
 	this.deleted = !!json.deleted;
 	
 	// Creators
-	var numCreators = 0;
+	let pos = 0;
 	if (json.creators) {
-		for each (let creator in json.creators) {
-			this.setCreator(pos, creator);
-			numCreators++;
+		while (pos<json.creators.length) {
+			this.setCreator(pos, json.creators[pos]);
+			pos++;
 		}
 	}
 	// Remove item's remaining creators not in JSON
-	var rem = this.numCreators() - numCreators;
-	for (let j = 0; j < rem; j++) {
+	while (pos < this.numCreators()) {
 		// Keep removing last creator
-		this.removeCreator(numCreators);
+		this.removeCreator(this.numCreators() - 1);
 	}
 	
 	// Both notes and attachments might have parents and notes
@@ -4257,20 +4258,21 @@ Zotero.Item.prototype.loadItemData = Zotero.Promise.coroutine(function* (reload)
 	
 	this._loaded.itemData = true;
 	this._clearChanged('itemData');
-	this.loadDisplayTitle(reload);
+	yield this.loadDisplayTitle(reload);
 });
 
 
 Zotero.Item.prototype.loadNote = Zotero.Promise.coroutine(function* (reload) {
-	Zotero.debug("Loading note data for item " + this.libraryKey);
-	
 	if (this._loaded.note && !reload) {
 		return;
 	}
 	
 	if (!this.isNote() && !this.isAttachment()) {
-		throw new Error("Can only load note for note or attachment item");
+		Zotero.debug("Can only load note for note or attachment item");
+		return;
 	}
+	
+	Zotero.debug("Loading note data for item " + this.libraryKey);
 	
 	var sql = "SELECT note FROM itemNotes WHERE itemID=?";
 	var row = yield Zotero.DB.rowQueryAsync(sql, this.id);
@@ -4459,6 +4461,12 @@ Zotero.Item.prototype.loadCreators = Zotero.Promise.coroutine(function* (reload)
 
 Zotero.Item.prototype.loadChildItems = Zotero.Promise.coroutine(function* (reload) {
 	if (this._loaded.childItems && !reload) {
+		return;
+	}
+	
+	
+	if (this.isNote() || this.isAttachment()) {
+		Zotero.debug("Can only load child items for regular item");
 		return;
 	}
 	
@@ -4722,7 +4730,7 @@ Zotero.Item.prototype._getOldCreators = function () {
 Zotero.Item.prototype._disabledCheck = function () {
 	if (this._disabled) {
 		var msg = "New Zotero.Item objects shouldn't be accessed after save -- use Zotero.Items.get()";
-		Zotero.debug(msg, 2);
+		Zotero.debug(msg, 2, true);
 		Components.utils.reportError(msg);
 	}
 }

@@ -885,7 +885,7 @@ Zotero.Collection.prototype.loadChildCollections = Zotero.Promise.coroutine(func
 	
 	this._childCollections = [];
 	
-	if (ids) {
+	if (ids.length) {
 		for each(var id in ids) {
 			var col = yield this.ObjectsClass.getAsync(id);
 			if (!col) {
