@@ -34,6 +34,8 @@ Zotero.DataObject = function () {
 	let objectType = this._objectType;
 	this._ObjectType = objectType[0].toUpperCase() + objectType.substr(1);
 	this._objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
+	this._ObjectTypePlural = this._objectTypePlural[0].toUpperCase() + this._objectTypePlural.substr(1);
+	this._ObjectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 	
 	this._id = null;
 	this._libraryID = null;
@@ -53,7 +55,7 @@ Zotero.DataObject = function () {
 };
 
 Zotero.DataObject.prototype._objectType = 'dataObject';
-Zotero.DataObject.prototype._dataTypes = [];
+Zotero.DataObject.prototype._dataTypes = ['primaryData'];
 
 Zotero.defineProperty(Zotero.DataObject.prototype, 'objectType', {
 	get: function() this._objectType
@@ -63,6 +65,9 @@ Zotero.defineProperty(Zotero.DataObject.prototype, 'id', {
 });
 Zotero.defineProperty(Zotero.DataObject.prototype, 'libraryID', {
 	get: function() this._libraryID
+});
+Zotero.defineProperty(Zotero.DataObject.prototype, 'key', {
+	get: function() this._key
 });
 Zotero.defineProperty(Zotero.DataObject.prototype, 'libraryKey', {
 	get: function() this._libraryID + "/" + this._key
@@ -77,7 +82,7 @@ Zotero.defineProperty(Zotero.DataObject.prototype, 'parentID', {
 });
 
 Zotero.defineProperty(Zotero.DataObject.prototype, 'ObjectsClass', {
-	get: function() Zotero.DataObjectUtilities.getObjectsClassForObjectType(this.objectType)
+	get: function() this._ObjectsClass
 });
 
 
