@@ -718,8 +718,14 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 			case 'itemTypeID':
 			case 'dateAdded':
 			case 'dateModified':
+				 break;
+
 			case 'version':
+				value = parseInt(value);
+				break;
+
 			case 'synced':
+				value = !!value;
 				break;
 				
 			default:
@@ -744,15 +750,6 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 				this.setType(value, loadIn);
 			}
 			else {
-				switch (field) {
-				case 'version':
-					value = parseInt(value);
-					break;
-				
-				case 'synced':
-					value = !!value;
-					break;
-				}
 				
 				this['_' + field] = value;
 				
