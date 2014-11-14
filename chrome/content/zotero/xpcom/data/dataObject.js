@@ -576,6 +576,50 @@ Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 });
 
 /**
+ * Delete object from database
+ */
+Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* () {
+	var env = {};
+	
+	var proceed = yield this._eraseInit(env);
+	if (!proceed) return false;
+	
+	Zotero.debug('Deleting ' + this.objectType + ' ' + this.id);
+	
+	yield Zotero.DB.executeTransaction(function* () {
+		yield this._eraseData(env);
+		yield this._erasePreCommit(env);
+	}.bind(this))
+	.catch(e => {
+		return this._eraseRecoverFromFailure(env);
+	});
+	
+	return this._erasePostCommit(env);
+});
+
+Zotero.DataObject.prototype._eraseInit = function(env) {
+	if (!this.id) return Zotero.Promise.resolve(false);
+	
+	return Zotero.Promise.resolve(true);
+};
+
+Zotero.DataObject.prototype._eraseData = function(env) {
+	throw new Error("Zotero.DataObject.prototype._eraseData is an abstract method");
+};
+
+Zotero.DataObject.prototype._erasePreCommit = function(env) {
+	return Zotero.Promise.resolve();
+};
+
+Zotero.DataObject.prototype._erasePostCommit = function(env) {
+	return Zotero.Promise.resolve();
+};
+
+Zotero.DataObject.prototype._eraseRecoverFromFailure = function(env) {
+	throw new Error("Zotero.DataObject.prototype._eraseRecoverFromFailure is an abstract method");
+};
+
+/**
  * Generates data object key
  * @return {String} key
  */

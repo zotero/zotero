@@ -3780,99 +3780,89 @@ Zotero.Item.prototype.copy = Zotero.Promise.coroutine(function* () {
 });;
 
 
-/**
- * Delete item from database and clear from Zotero.Items internal array
- *
- * Items.erase() should be used for multiple items
- */
-Zotero.Item.prototype.erase = Zotero.Promise.coroutine(function* () {
-	if (!this.id) {
-		return false;
+Zotero.Item.prototype._eraseInit = Zotero.Promise.coroutine(function* (env) {
+	var proceed = yield Zotero.Item._super.prototype._eraseInit.apply(this, arguments);
+	if (!proceed) return false;
+	
+	env.deletedItemNotifierData = {};
+	env.deletedItemNotifierData[this.id] = { old: this.toJSON() };
+	
+	return true;
+});
+
+Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
+	// Remove item from parent collections
+	var parentCollectionIDs = this.collections;
+	if (parentCollectionIDs) {
+		for (var i=0; i<parentCollectionIDs.length; i++) {
+			let parentCollection = yield Zotero.Collections.getAsync(parentCollectionIDs[i]);
+			yield parentCollection.removeItem(this.id);
+		}
 	}
 	
-	Zotero.debug('Deleting item ' + this.id);
+	var parentItem = this.parentKey;
+	parentItem = parentItem ? this.ObjectsClass.getByLibraryAndKey(this.libraryID, parentItem) : null;
 	
-	var changedItems = [];
-	var changedItemsNotifierData = {};
-	var deletedItemNotifierData = {};
+	// // Delete associated attachment files
+	if (this.isAttachment()) {
+		let linkMode = this.getAttachmentLinkMode();
+		// If link only, nothing to delete
+		if (linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
+			try {
+				let file = Zotero.Attachments.getStorageDirectory(this);
+				yield OS.File.removeDir(file.path, {
+					ignoreAbsent: true,
+					ignorePermissions: true
+				});
+			}
+			catch (e) {
+				Zotero.debug(e, 2);
+				Components.utils.reportError(e);
+			}
+		}
+	}
+	// Regular item
+	else {
+		let sql = "SELECT itemID FROM itemNotes WHERE parentItemID=?1 UNION "
+			+ "SELECT itemID FROM itemAttachments WHERE parentItemID=?1";
+		let toDelete = yield Zotero.DB.columnQueryAsync(sql, [this.id]);
+		for (let i=0; i<toDelete.length; i++) {
+			let obj = yield this.ObjectsClass.getAsync(toDelete[i]);
+			yield obj.erase();
+		}
+	}
 	
-	yield Zotero.DB.executeTransaction(function* () {
-		deletedItemNotifierData[this.id] = { old: this.toJSON() };
-		
-		// Remove item from parent collections
-		var parentCollectionIDs = this.collections;
-		if (parentCollectionIDs) {
-			for (var i=0; i<parentCollectionIDs.length; i++) {
-				let parentCollection = yield this.ContainerObjectsClass.getAsync(parentCollectionIDs[i]);
-				yield parentCollection.removeItem(this.id);
-			}
-		}
-		
-		var parentItem = this.parentKey;
-		parentItem = parentItem ? this.ObjectsClass.getByLibraryAndKey(this.libraryID, parentItem) : null;
-		
-		// // Delete associated attachment files
-		if (this.isAttachment()) {
-			let linkMode = this.getAttachmentLinkMode();
-			// If link only, nothing to delete
-			if (linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
-				try {
-					let file = Zotero.Attachments.getStorageDirectory(this);
-					yield OS.File.removeDir(file.path, {
-						ignoreAbsent: true,
-						ignorePermissions: true
-					});
-				}
-				catch (e) {
-					Zotero.debug(e, 2);
-					Components.utils.reportError(e);
-				}
-			}
-		}
-		// Regular item
-		else {
-			let sql = "SELECT itemID FROM itemNotes WHERE parentItemID=?1 UNION "
-				+ "SELECT itemID FROM itemAttachments WHERE parentItemID=?1";
-			let toDelete = yield Zotero.DB.columnQueryAsync(sql, [this.id]);
-			for (let i=0; i<toDelete.length; i++) {
-				let obj = yield this.ObjectsClass.getAsync(toDelete[i]);
-				yield obj.erase();
-			}
-		}
-		
-		// Flag related items for notification
-		// TEMP: Do something with relations
-		/*var relateds = this._getRelatedItems(true);
-		for each(var id in relateds) {
-			let relatedItem = this.ObjectsClass.get(id);
-		}*/
-		
-		// Clear fulltext cache
-		if (this.isAttachment()) {
-			yield Zotero.Fulltext.clearItemWords(this.id);
-			//Zotero.Fulltext.clearItemContent(this.id);
-		}
-		
-		// Remove relations (except for merge tracker)
-		var uri = Zotero.URI.getItemURI(this);
-		yield Zotero.Relations.eraseByURI(uri, [Zotero.Relations.deletedItemPredicate]);
-		
-		yield Zotero.DB.queryAsync('DELETE FROM items WHERE itemID=?', this.id);
-		
-		if (parentItem) {
-			yield parentItem.reload(['primaryData', 'childItems'], true);
-			parentItem.clearBestAttachmentState();
-		}
-	}.bind(this));
+	// Flag related items for notification
+	// TEMP: Do something with relations
+	/*var relateds = this._getRelatedItems(true);
+	for each(var id in relateds) {
+		let relatedItem = Zotero.Items.get(id);
+	}*/
+	
+	// Clear fulltext cache
+	if (this.isAttachment()) {
+		yield Zotero.Fulltext.clearItemWords(this.id);
+		//Zotero.Fulltext.clearItemContent(this.id);
+	}
+	
+	// Remove relations (except for merge tracker)
+	var uri = Zotero.URI.getItemURI(this);
+	yield Zotero.Relations.eraseByURI(uri, [Zotero.Relations.deletedItemPredicate]);
+	
+	env.parentItem = parentItem;
+});
+
+Zotero.Item.prototype._erasePreCommit = Zotero.Promise.coroutine(function* (env) {
+	yield Zotero.DB.queryAsync('DELETE FROM items WHERE itemID=?', this.id);
+	
+	if (env.parentItem) {
+		yield env.parentItem.reload(['primaryData', 'childItems'], true);
+		env.parentItem.clearBestAttachmentState();
+	}
 	
 	this.ObjectsClass.unload(this.id);
 	
-	// Send notification of changed items
-	if (changedItems.length) {
-		Zotero.Notifier.trigger('modify', 'item', changedItems, changedItemsNotifierData);
-	}
-	
-	Zotero.Notifier.trigger('delete', 'item', this.id, deletedItemNotifierData);
+	Zotero.Notifier.trigger('delete', 'item', this.id, env.deletedItemNotifierData);
 	
 	Zotero.Prefs.set('purge.items', true);
 	Zotero.Prefs.set('purge.creators', true);
