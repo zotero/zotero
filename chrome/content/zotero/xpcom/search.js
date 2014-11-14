@@ -62,21 +62,33 @@ Zotero.Search.prototype.setName = function(val) {
 	this.name = val;
 }
 
-
-Zotero.Search.prototype.__defineGetter__('id', function () { return this._get('id'); });
-Zotero.Search.prototype.__defineSetter__('id', function (val) { this._set('id', val); });
-Zotero.Search.prototype.__defineGetter__('libraryID', function () { return this._get('libraryID'); });
-Zotero.Search.prototype.__defineSetter__('libraryID', function (val) { return this._set('libraryID', val); });
-Zotero.Search.prototype.__defineGetter__('key', function () { return this._get('key'); });
-Zotero.Search.prototype.__defineSetter__('key', function (val) { this._set('key', val) });
-Zotero.Search.prototype.__defineGetter__('name', function () { return this._get('name'); });
-Zotero.Search.prototype.__defineSetter__('name', function (val) { this._set('name', val); });
-Zotero.Search.prototype.__defineGetter__('version', function () { return this._get('version'); });
-Zotero.Search.prototype.__defineSetter__('version', function (val) { this._set('version', val); });
-Zotero.Search.prototype.__defineGetter__('synced', function () { return this._get('synced'); });
-Zotero.Search.prototype.__defineSetter__('synced', function (val) { this._set('synced', val); });
-
-Zotero.Search.prototype.__defineGetter__('conditions', function (arr) { this.getSearchConditions(); });
+Zotero.defineProperty(Zotero.Search.prototype, 'id', {
+	get: function() this._get('id'),
+	set: function(val) this._set('id', val)
+});
+Zotero.defineProperty(Zotero.Search.prototype, 'libraryID', {
+	get: function() this._get('libraryID'),
+	set: function(val) this._set('libraryID', val)
+});
+Zotero.defineProperty(Zotero.Search.prototype, 'key', {
+	get: function() this._get('key'),
+	set: function(val) this._set('key', val)
+});
+Zotero.defineProperty(Zotero.Search.prototype, 'name', {
+	get: function() this._get('name'),
+	set: function(val) this._set('name', val)
+});
+Zotero.defineProperty(Zotero.Search.prototype, 'version', {
+	get: function() this._get('version'),
+	set: function(val) this._set('version', val)
+});
+Zotero.defineProperty(Zotero.Search.prototype, 'synced', {
+	get: function() this._get('synced'),
+	set: function(val) this._set('synced', val)
+});
+Zotero.defineProperty(Zotero.Search.prototype, 'conditions', {
+	get: function() this.getSearchConditions()
+});
 
 Zotero.Search.prototype._set = function (field, value) {
 	if (field == 'id' || field == 'libraryID' || field == 'key') {

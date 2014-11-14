@@ -106,35 +106,62 @@ Zotero.Item.prototype._dataTypes = Zotero.Item._super.prototype._dataTypes.conca
 	'relations'
 ]);
 
-Zotero.Item.prototype.__defineGetter__('id', function () this._id);
-Zotero.Item.prototype.__defineGetter__('itemID', function () {
-	Zotero.debug("Item.itemID is deprecated -- use Item.id");
-	return this._id;
+Zotero.defineProperty(Zotero.Item.prototype, 'id', {
+	get: function() this._id,
+	set: function(val) this.setField('id', val)
 });
-Zotero.Item.prototype.__defineSetter__('id', function (val) { this.setField('id', val); });
-Zotero.Item.prototype.__defineGetter__('libraryID', function () this._libraryID );
-Zotero.Item.prototype.__defineSetter__('libraryID', function (val) { this.setField('libraryID', val); });
-Zotero.Item.prototype.__defineGetter__('key', function () this._key );
-Zotero.Item.prototype.__defineSetter__('key', function (val) { this.setField('key', val) });
-Zotero.Item.prototype.__defineGetter__('itemTypeID', function () this._itemTypeID);
-Zotero.Item.prototype.__defineGetter__('dateAdded', function () this._dateAdded );
-Zotero.Item.prototype.__defineGetter__('dateModified', function () this._dateModified );
-Zotero.Item.prototype.__defineGetter__('version', function () this._itemVersion );
-Zotero.Item.prototype.__defineSetter__('version', function (val) { return this.setField('itemVersion', val); });
-Zotero.Item.prototype.__defineGetter__('synced', function () this._synced );
-Zotero.Item.prototype.__defineSetter__('synced', function (val) { return this.setField('synced', val); });
+Zotero.defineProperty(Zotero.Item.prototype, 'itemID', {
+	get: function() {
+		Zotero.debug("Item.itemID is deprecated -- use Item.id");
+		return this._id;
+	}
+});
+Zotero.defineProperty(Zotero.Item.prototype, 'libraryID', {
+	get: function() this._libraryID,
+	set: function(val) this.setField('libraryID', val)
+});
+Zotero.defineProperty(Zotero.Item.prototype, 'key', {
+	get: function() this._key,
+	set: function(val) this.setField('key', val)
+});
+Zotero.defineProperty(Zotero.Item.prototype, 'itemTypeID', {
+	get: function() this._itemTypeID
+});
+Zotero.defineProperty(Zotero.Item.prototype, 'dateAdded', {
+	get: function() this._dateAdded
+});
+Zotero.defineProperty(Zotero.Item.prototype, 'dateModified', {
+	get: function() this._dateModified
+});
+Zotero.defineProperty(Zotero.Item.prototype, 'version', {
+	get: function() this._itemVersion,
+	set: function(val) this.setField('version', val)
+});
+Zotero.defineProperty(Zotero.Item.prototype, 'synced', {
+	get: function() this._synced,
+	set: function(val) this.setField('synced', val)
+});
 
 // .parentKey and .parentID defined in dataObject.js, but create aliases
-Zotero.Item.prototype.__defineGetter__('parentItemKey', function () this._parentKey );
-Zotero.Item.prototype.__defineSetter__('parentItemKey', function (val) this._setParentKey(val) );
-Zotero.Item.prototype.__defineGetter__('parentItemID', function () this._getParentID() );
-Zotero.Item.prototype.__defineSetter__('parentItemID', function (val) this._setParentID(val) );
+Zotero.defineProperty(Zotero.Item.prototype, 'parentItemID', {
+	get: function() this.parentID,
+	set: function(val) this.parentID = val
+});
+Zotero.defineProperty(Zotero.Item.prototype, 'parentItemKey', {
+	get: function() this.parentKey,
+	set: function(val) this.parentKey = val
+});
 
-Zotero.Item.prototype.__defineGetter__('firstCreator', function () this._firstCreator );
-Zotero.Item.prototype.__defineGetter__('sortCreator', function () this._sortCreator );
-
-Zotero.Item.prototype.__defineGetter__('relatedItems', function () { return this._getRelatedItems(true); });
-Zotero.Item.prototype.__defineSetter__('relatedItems', function (arr) { this._setRelatedItems(arr); });
+Zotero.defineProperty(Zotero.Item.prototype, 'firstCreator', {
+	get: function() this._firstCreator
+});
+Zotero.defineProperty(Zotero.Item.prototype, 'sortCreator', {
+	get: function() this._sortCreator
+});
+Zotero.defineProperty(Zotero.Item.prototype, 'relatedItems', {
+	get: function() this._getRelatedItems(true),
+	set: function(arr) this._setRelatedItems(arr)
+});
 
 Zotero.Item.prototype.getID = function() {
 	Zotero.debug('Item.getID() is deprecated -- use Item.id');
@@ -1059,28 +1086,27 @@ Zotero.Item.prototype.removeCreator = function(orderIndex, allowMissing) {
 	return true;
 }
 
-
-Zotero.Item.prototype.__defineGetter__('deleted', function () {
-	if (!this.id) {
-		return false;
+Zotero.defineProperty(Zotero.Item.prototype, 'deleted', {
+	get: function() {
+		if (!this.id) {
+			return false;
+		}
+		if (this._deleted !== null) {
+			return this._deleted;
+		}
+		this._requireData('primaryData');
+	},
+	set: function(val) {
+		var deleted = !!val;
+		
+		if (this._deleted == deleted) {
+			Zotero.debug("Deleted state hasn't changed for item " + this.id);
+			return;
+		}
+		this._markFieldChange('deleted', !!this._deleted);
+		this._changed.deleted = true;
+		this._deleted = deleted;
 	}
-	if (this._deleted !== null) {
-		return this._deleted;
-	}
-	this._requireData('primaryData');
-});
-
-
-Zotero.Item.prototype.__defineSetter__('deleted', function (val) {
-	var deleted = !!val;
-	
-	if (this._deleted == deleted) {
-		Zotero.debug("Deleted state hasn't changed for item " + this.id);
-		return;
-	}
-	this._markFieldChange('deleted', !!this._deleted);
-	this._changed.deleted = true;
-	this._deleted = deleted;
 });
 
 
@@ -2688,39 +2714,39 @@ Zotero.Item.prototype.getAttachmentLinkMode = function() {
  * Possible values specified as constants in Zotero.Attachments
  * (e.g. Zotero.Attachments.LINK_MODE_LINKED_FILE)
  */
-Zotero.Item.prototype.__defineGetter__('attachmentLinkMode', function () {
-	if (!this.isAttachment()) {
-		return undefined;
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentLinkMode', {
+	get: function() {
+		if (!this.isAttachment()) {
+			return undefined;
+		}
+		return this._attachmentLinkMode;
+	},
+	set: function(val) {
+		if (!this.isAttachment()) {
+			throw (".attachmentLinkMode can only be set for attachment items");
+		}
+		
+		switch (val) {
+			case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
+			case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
+			case Zotero.Attachments.LINK_MODE_LINKED_FILE:
+			case Zotero.Attachments.LINK_MODE_LINKED_URL:
+				break;
+				
+			default:
+				throw ("Invalid attachment link mode '" + val
+					+ "' in Zotero.Item.attachmentLinkMode setter");
+		}
+		
+		if (val === this.attachmentLinkMode) {
+			return;
+		}
+		if (!this._changed.attachmentData) {
+			this._changed.attachmentData = {};
+		}
+		this._changed.attachmentData.linkMode = true;
+		this._attachmentLinkMode = val;
 	}
-	return this._attachmentLinkMode;
-});
-
-
-Zotero.Item.prototype.__defineSetter__('attachmentLinkMode', function (val) {
-	if (!this.isAttachment()) {
-		throw (".attachmentLinkMode can only be set for attachment items");
-	}
-	
-	switch (val) {
-		case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
-		case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
-		case Zotero.Attachments.LINK_MODE_LINKED_FILE:
-		case Zotero.Attachments.LINK_MODE_LINKED_URL:
-			break;
-			
-		default:
-			throw ("Invalid attachment link mode '" + val
-				+ "' in Zotero.Item.attachmentLinkMode setter");
-	}
-	
-	if (val === this.attachmentLinkMode) {
-		return;
-	}
-	if (!this._changed.attachmentData) {
-		this._changed.attachmentData = {};
-	}
-	this._changed.attachmentData.linkMode = true;
-	this._attachmentLinkMode = val;
 });
 
 
@@ -2729,40 +2755,42 @@ Zotero.Item.prototype.getAttachmentMIMEType = function() {
 	return this.attachmentContentType;
 };
 
-Zotero.Item.prototype.__defineGetter__('attachmentMIMEType', function () {
-	Zotero.debug(".attachmentMIMEType deprecated -- use .attachmentContentType");
-	return this.attachmentContentType;
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentMIMEType', {
+	get: function() {
+		Zotero.debug(".attachmentMIMEType deprecated -- use .attachmentContentType");
+		return this.attachmentContentType;
+	}
 });
 
 /**
  * Content type of an attachment (e.g. 'text/plain')
  */
-Zotero.Item.prototype.__defineGetter__('attachmentContentType', function () {
-	if (!this.isAttachment()) {
-		return undefined;
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentContentType', {
+	get: function() {
+		if (!this.isAttachment()) {
+			return undefined;
+		}
+		return this._attachmentContentType;
+	},
+	set: function(val) {
+		if (!this.isAttachment()) {
+			throw (".attachmentContentType can only be set for attachment items");
+		}
+		
+		if (!val) {
+			val = '';
+		}
+		
+		if (val == this.attachmentContentType) {
+			return;
+		}
+		
+		if (!this._changed.attachmentData) {
+			this._changed.attachmentData = {};
+		}
+		this._changed.attachmentData.contentType = true;
+		this._attachmentContentType = val;
 	}
-	return this._attachmentContentType;
-});
-
-
-Zotero.Item.prototype.__defineSetter__('attachmentContentType', function (val) {
-	if (!this.isAttachment()) {
-		throw (".attachmentContentType can only be set for attachment items");
-	}
-	
-	if (!val) {
-		val = '';
-	}
-	
-	if (val == this.attachmentContentType) {
-		return;
-	}
-	
-	if (!this._changed.attachmentData) {
-		this._changed.attachmentData = {};
-	}
-	this._changed.attachmentData.contentType = true;
-	this._attachmentContentType = val;
 });
 
 
@@ -2775,76 +2803,75 @@ Zotero.Item.prototype.getAttachmentCharset = function() {
 /**
  * Character set of an attachment
  */
-Zotero.Item.prototype.__defineGetter__('attachmentCharset', function () {
-	if (!this.isAttachment()) {
-		return undefined;
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentCharset', {
+	get: function() {
+		if (!this.isAttachment()) {
+			return undefined;
+		}
+		return this._attachmentCharset
+	},
+	set: function(val) {
+		if (!this.isAttachment()) {
+			throw (".attachmentCharset can only be set for attachment items");
+		}
+		
+		var oldVal = this.attachmentCharset;
+		if (oldVal) {
+			oldVal = Zotero.CharacterSets.getID(oldVal);
+		}
+		if (!oldVal) {
+			oldVal = null;
+		}
+		
+		if (val) {
+			val = Zotero.CharacterSets.getID(val);
+		}
+		if (!val) {
+			val = null;
+		}
+		
+		if (val == oldVal) {
+			return;
+		}
+		
+		if (!this._changed.attachmentData) {
+			this._changed.attachmentData= {};
+		}
+		this._changed.attachmentData.charset = true;
+		this._attachmentCharset = val;
 	}
-	return this._attachmentCharset
 });
 
-
-Zotero.Item.prototype.__defineSetter__('attachmentCharset', function (val) {
-	if (!this.isAttachment()) {
-		throw (".attachmentCharset can only be set for attachment items");
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
+	get: function() {
+		if (!this.isAttachment()) {
+			return undefined;
+		}
+		return this._attachmentPath;
+	},
+	set: function(val) {
+		if (!this.isAttachment()) {
+			throw (".attachmentPath can only be set for attachment items");
+		}
+		
+		if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+			throw ('attachmentPath cannot be set for link attachments');
+		}
+		
+		if (!val) {
+			val = '';
+		}
+		
+		if (val == this.attachmentPath) {
+			return;
+		}
+		
+		if (!this._changed.attachmentData) {
+			this._changed.attachmentData = {};
+		}
+		this._changed.attachmentData.path = true;
+		this._attachmentPath = val;
 	}
-	
-	var oldVal = this.attachmentCharset;
-	if (oldVal) {
-		oldVal = Zotero.CharacterSets.getID(oldVal);
-	}
-	if (!oldVal) {
-		oldVal = null;
-	}
-	
-	if (val) {
-		val = Zotero.CharacterSets.getID(val);
-	}
-	if (!val) {
-		val = null;
-	}
-	
-	if (val == oldVal) {
-		return;
-	}
-	
-	if (!this._changed.attachmentData) {
-		this._changed.attachmentData= {};
-	}
-	this._changed.attachmentData.charset = true;
-	this._attachmentCharset = val;
-});
-
-
-Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
-	if (!this.isAttachment()) {
-		return undefined;
-	}
-	return this._attachmentPath;
-});
-
-
-Zotero.Item.prototype.__defineSetter__('attachmentPath', function (val) {
-	if (!this.isAttachment()) {
-		throw (".attachmentPath can only be set for attachment items");
-	}
-	
-	if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-		throw ('attachmentPath cannot be set for link attachments');
-	}
-	
-	if (!val) {
-		val = '';
-	}
-	
-	if (val == this.attachmentPath) {
-		return;
-	}
-	
-	if (!this._changed.attachmentData) {
-		this._changed.attachmentData = {};
-	}
-	this._changed.attachmentData.path = true;
-	this._attachmentPath = val;
 });
 
 
@@ -2865,51 +2892,51 @@ Zotero.Item.prototype.updateAttachmentPath = function () {
 };
 
 
-Zotero.Item.prototype.__defineGetter__('attachmentSyncState', function () {
-	if (!this.isAttachment()) {
-		return undefined;
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentSyncState', {
+	get: function() {
+		if (!this.isAttachment()) {
+			return undefined;
+		}
+		return this._attachmentSyncState;
+	},
+	set: function(val) {
+		if (!this.isAttachment()) {
+			throw ("attachmentSyncState can only be set for attachment items");
+		}
+		
+		switch (this.attachmentLinkMode) {
+			case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
+			case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
+				break;
+				
+			default:
+				throw ("attachmentSyncState can only be set for snapshots and "
+					+ "imported files");
+		}
+		
+		switch (val) {
+			case Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD:
+			case Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD:
+			case Zotero.Sync.Storage.SYNC_STATE_IN_SYNC:
+			case Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD:
+			case Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD:
+				break;
+				
+			default:
+				throw ("Invalid sync state '" + val
+					+ "' in Zotero.Item.attachmentSyncState setter");
+		}
+		
+		if (val == this.attachmentSyncState) {
+			return;
+		}
+		
+		if (!this._changed.attachmentData) {
+			this._changed.attachmentData = {};
+		}
+		this._changed.attachmentData.syncState = true;
+		this._attachmentSyncState = val;
 	}
-	return this._attachmentSyncState;
-});
-
-
-Zotero.Item.prototype.__defineSetter__('attachmentSyncState', function (val) {
-	if (!this.isAttachment()) {
-		throw ("attachmentSyncState can only be set for attachment items");
-	}
-	
-	switch (this.attachmentLinkMode) {
-		case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
-		case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
-			break;
-			
-		default:
-			throw ("attachmentSyncState can only be set for snapshots and "
-				+ "imported files");
-	}
-	
-	switch (val) {
-		case Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD:
-		case Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD:
-		case Zotero.Sync.Storage.SYNC_STATE_IN_SYNC:
-		case Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD:
-		case Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD:
-			break;
-			
-		default:
-			throw ("Invalid sync state '" + val
-				+ "' in Zotero.Item.attachmentSyncState setter");
-	}
-	
-	if (val == this.attachmentSyncState) {
-		return;
-	}
-	
-	if (!this._changed.attachmentData) {
-		this._changed.attachmentData = {};
-	}
-	this._changed.attachmentData.syncState = true;
-	this._attachmentSyncState = val;
 });
 
 
@@ -2922,29 +2949,31 @@ Zotero.Item.prototype.__defineSetter__('attachmentSyncState', function (val) {
  * @return {Promise<Number|undefined>} File modification time as timestamp in milliseconds,
  *                                     or undefined if no file
  */
-Zotero.Item.prototype.__defineGetter__('attachmentModificationTime', Zotero.Promise.coroutine(function* () {
-	if (!this.isAttachment()) {
-		return undefined;
-	}
-	
-	if (!this.id) {
-		return undefined;
-	}
-	
-	var path = yield this.getFilePathAsync();
-	if (!path) {
-		return undefined;
-	}
-	
-	var fmtime = OS.File.stat(path).lastModificationDate;
-	
-	if (fmtime < 1) {
-		Zotero.debug("File mod time " + fmtime + " is less than 1 -- interpreting as 1", 2);
-		fmtime = 1;
-	}
-	
-	return fmtime;
-}));
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentModificationTime', {
+	get: Zotero.Promise.coroutine(function* () {
+		if (!this.isAttachment()) {
+			return undefined;
+		}
+		
+		if (!this.id) {
+			return undefined;
+		}
+		
+		var path = yield this.getFilePathAsync();
+		if (!path) {
+			return undefined;
+		}
+		
+		var fmtime = OS.File.stat(path).lastModificationDate;
+		
+		if (fmtime < 1) {
+			Zotero.debug("File mod time " + fmtime + " is less than 1 -- interpreting as 1", 2);
+			fmtime = 1;
+		}
+		
+		return fmtime;
+	})
+});
 
 
 /**
@@ -2955,21 +2984,23 @@ Zotero.Item.prototype.__defineGetter__('attachmentModificationTime', Zotero.Prom
  *
  * @return	{String}		MD5 hash of file as hex string
  */
-Zotero.Item.prototype.__defineGetter__('attachmentHash', function () {
-	if (!this.isAttachment()) {
-		return undefined;
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentHash', {
+	get: function () {
+		if (!this.isAttachment()) {
+			return undefined;
+		}
+		
+		if (!this.id) {
+			return undefined;
+		}
+		
+		var file = this.getFile();
+		if (!file) {
+			return undefined;
+		}
+		
+		return Zotero.Utilities.Internal.md5(file) || undefined;
 	}
-	
-	if (!this.id) {
-		return undefined;
-	}
-	
-	var file = this.getFile();
-	if (!file) {
-		return undefined;
-	}
-	
-	return Zotero.Utilities.Internal.md5(file) || undefined;
 });
 
 
@@ -2982,84 +3013,86 @@ Zotero.Item.prototype.__defineGetter__('attachmentHash', function () {
  *
  * @return {Promise<String>} - A promise for attachment text or empty string if unavailable
  */
-Zotero.Item.prototype.__defineGetter__('attachmentText', Zotero.Promise.coroutine(function* () {
-	if (!this.isAttachment()) {
-		return undefined;
-	}
-	
-	if (!this.id) {
-		return null;
-	}
-	
-	var file = this.getFile();
-	
-	if (!(yield OS.File.exists(file.path))) {
-		file = false;
-	}
-	
-	var cacheFile = Zotero.Fulltext.getItemCacheFile(this);
-	if (!file) {
-		if (cacheFile.exists()) {
-			var str = yield Zotero.File.getContentsAsync(cacheFile);
-			
-			return str.trim();
-		}
-		return '';
-	}
-	
-	var contentType = this.attachmentContentType;
-	if (!contentType) {
-		contentType = yield Zotero.MIME.getMIMETypeFromFile(file);
-		if (contentType) {
-			this.attachmentContentType = contentType;
-			yield this.save();
-		}
-	}
-	
-	var str;
-	if (Zotero.Fulltext.isCachedMIMEType(contentType)) {
-		var reindex = false;
-		
-		if (!cacheFile.exists()) {
-			Zotero.debug("Regenerating item " + this.id + " full-text cache file");
-			reindex = true;
-		}
-		// Fully index item if it's not yet
-		else if (!(yield Zotero.Fulltext.isFullyIndexed(this))) {
-			Zotero.debug("Item " + this.id + " is not fully indexed -- caching now");
-			reindex = true;
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentText', {
+	get: Zotero.Promise.coroutine(function* () {
+		if (!this.isAttachment()) {
+			return undefined;
 		}
 		
-		if (reindex) {
-			if (!Zotero.Fulltext.pdfConverterIsRegistered()) {
-				Zotero.debug("PDF converter is unavailable -- returning empty .attachmentText", 3);
-				return '';
+		if (!this.id) {
+			return null;
+		}
+		
+		var file = this.getFile();
+		
+		if (!(yield OS.File.exists(file.path))) {
+			file = false;
+		}
+		
+		var cacheFile = Zotero.Fulltext.getItemCacheFile(this);
+		if (!file) {
+			if (cacheFile.exists()) {
+				var str = yield Zotero.File.getContentsAsync(cacheFile);
+				
+				return str.trim();
 			}
-			yield Zotero.Fulltext.indexItems(this.id, false);
-		}
-		
-		if (!cacheFile.exists()) {
-			Zotero.debug("Cache file doesn't exist after indexing -- returning empty .attachmentText");
 			return '';
 		}
-		str = yield Zotero.File.getContentsAsync(cacheFile);
-	}
-	
-	else if (contentType == 'text/html') {
-		str = yield Zotero.File.getContentsAsync(file);
-		str = Zotero.Utilities.unescapeHTML(str);
-	}
-	
-	else if (contentType == 'text/plain') {
-		str = yield Zotero.File.getContentsAsync(file);
-	}
-	
-	else {
-		return '';
-	}
-	
-	return str.trim();
-}));
+		
+		var contentType = this.attachmentContentType;
+		if (!contentType) {
+			contentType = yield Zotero.MIME.getMIMETypeFromFile(file);
+			if (contentType) {
+				this.attachmentContentType = contentType;
+				yield this.save();
+			}
+		}
+		
+		var str;
+		if (Zotero.Fulltext.isCachedMIMEType(contentType)) {
+			var reindex = false;
+			
+			if (!cacheFile.exists()) {
+				Zotero.debug("Regenerating item " + this.id + " full-text cache file");
+				reindex = true;
+			}
+			// Fully index item if it's not yet
+			else if (!(yield Zotero.Fulltext.isFullyIndexed(this))) {
+				Zotero.debug("Item " + this.id + " is not fully indexed -- caching now");
+				reindex = true;
+			}
+			
+			if (reindex) {
+				if (!Zotero.Fulltext.pdfConverterIsRegistered()) {
+					Zotero.debug("PDF converter is unavailable -- returning empty .attachmentText", 3);
+					return '';
+				}
+				yield Zotero.Fulltext.indexItems(this.id, false);
+			}
+			
+			if (!cacheFile.exists()) {
+				Zotero.debug("Cache file doesn't exist after indexing -- returning empty .attachmentText");
+				return '';
+			}
+			str = yield Zotero.File.getContentsAsync(cacheFile);
+		}
+		
+		else if (contentType == 'text/html') {
+			str = yield Zotero.File.getContentsAsync(file);
+			str = Zotero.Utilities.unescapeHTML(str);
+		}
+		
+		else if (contentType == 'text/plain') {
+			str = yield Zotero.File.getContentsAsync(file);
+		}
+		
+		else {
+			return '';
+		}
+		
+		return str.trim();
+	})
+});
 
 
 

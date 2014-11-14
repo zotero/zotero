@@ -48,27 +48,39 @@ Zotero.Collection.prototype._dataTypes = Zotero.Collection._super.prototype._dat
 	'childItems'
 ]);
 
-Zotero.Collection.prototype.__defineGetter__('id', function () { return this._get('id'); });
-Zotero.Collection.prototype.__defineSetter__('id', function (val) { this._set('id', val); });
-Zotero.Collection.prototype.__defineGetter__('libraryID', function () { return this._get('libraryID'); });
-Zotero.Collection.prototype.__defineSetter__('libraryID', function (val) { return this._set('libraryID', val); });
-Zotero.Collection.prototype.__defineGetter__('key', function () { return this._get('key'); });
-Zotero.Collection.prototype.__defineSetter__('key', function (val) { this._set('key', val) });
-Zotero.Collection.prototype.__defineGetter__('name', function () { return this._get('name'); });
-Zotero.Collection.prototype.__defineSetter__('name', function (val) { this._set('name', val); });
-// .parentKey and .parentID defined in dataObject.js
-Zotero.Collection.prototype.__defineGetter__('version', function () { return this._get('version'); });
-Zotero.Collection.prototype.__defineSetter__('version', function (val) { this._set('version', val); });
-Zotero.Collection.prototype.__defineGetter__('synced', function () { return this._get('synced'); });
-Zotero.Collection.prototype.__defineSetter__('synced', function (val) { this._set('synced', val); });
-
-Zotero.Collection.prototype.__defineGetter__('parent', function (val) {
-	Zotero.debug("WARNING: Zotero.Collection.prototype.parent has been deprecated -- use .parentID or .parentKey", 2);
-	return this.parentID;
+Zotero.defineProperty(Zotero.Collection.prototype, 'id', {
+	get: function() this._get('id'),
+	set: function(val) this._set('id', val)
 });
-Zotero.Collection.prototype.__defineSetter__('parent', function (val) {
-	Zotero.debug("WARNING: Zotero.Collection.prototype.parent has been deprecated -- use .parentID or .parentKey", 2);
-	this.parentID = val;
+Zotero.defineProperty(Zotero.Collection.prototype, 'libraryID', {
+	get: function() this._get('libraryID'),
+	set: function(val) this._set('libraryID', val)
+});
+Zotero.defineProperty(Zotero.Collection.prototype, 'key', {
+	get: function() this._get('key'),
+	set: function(val) this._set('key', val)
+});
+Zotero.defineProperty(Zotero.Collection.prototype, 'name', {
+	get: function() this._get('name'),
+	set: function(val) this._set('name', val)
+});
+Zotero.defineProperty(Zotero.Collection.prototype, 'version', {
+	get: function() this._get('version'),
+	set: function(val) this._set('version', val)
+});
+Zotero.defineProperty(Zotero.Collection.prototype, 'synced', {
+	get: function() this._get('synced'),
+	set: function(val) this._set('synced', val)
+});
+Zotero.defineProperty(Zotero.Collection.prototype, 'parent', {
+	get: function() {
+		Zotero.debug("WARNING: Zotero.Collection.prototype.parent has been deprecated -- use .parentID or .parentKey", 2);
+		return this.parentID;
+	},
+	set: function(val) {
+		Zotero.debug("WARNING: Zotero.Collection.prototype.parent has been deprecated -- use .parentID or .parentKey", 2);
+		this.parentID = val;
+	}
 });
 
 Zotero.Collection.prototype._set = function (field, value) {
