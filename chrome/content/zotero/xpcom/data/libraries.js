@@ -28,7 +28,7 @@ Zotero.Libraries = new function () {
 		_userLibraryID,
 		_libraryDataLoaded = false;
 	
-	Zotero.Utilities.Internal.defineProperty(this, 'userLibraryID', {
+	Zotero.defineProperty(this, 'userLibraryID', {
 		get: function() { 
 			if (!_libraryDataLoaded) {
 				throw new Error("Library data not yet loaded");

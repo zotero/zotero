@@ -1400,6 +1400,24 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	}
 	
 	
+	/**
+	 * Defines property on the object
+	 * More compact way to do Object.defineProperty
+	 *
+	 * @param {Object} obj Target object
+	 * @param {String} prop Property to be defined
+	 * @param {Object} desc Propery descriptor. If not overriden, "enumerable" is true
+	 */
+	this.defineProperty = function(obj, prop, desc) {
+		if (typeof prop != 'string') throw new Error("Property must be a string");
+		var d = { __proto__: null, enumerable: true }; // Enumerable by default
+		for (let p in desc) {
+			if (!desc.hasOwnProperty(p)) continue;
+			d[p] = desc[p];
+		}
+		Object.defineProperty(obj, prop, d);
+	}
+	
 	/*
 	 * This function should be removed
 	 *
