@@ -132,7 +132,8 @@ Zotero.defineProperty(Zotero.Item.prototype, 'dateAdded', {
 	get: function() this._dateAdded
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'dateModified', {
-	get: function() this._dateModified
+	get: function() this._dateModified,
+	set: function(val) this.setField('dateModified', val)
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'version', {
 	get: function() this._itemVersion,
@@ -717,8 +718,15 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		switch (field) {
 			case 'itemTypeID':
 			case 'dateAdded':
+				break;
+			
 			case 'dateModified':
-				 break;
+				// Make sure it's valid
+				let date = Zotero.Date.sqlToDate(value, true);
+				if (!date) throw new Error("Invalid SQL date: " + value);
+				
+				value = Zotero.Date.dateToSQL(date);
+				break;
 
 			case 'version':
 				value = parseInt(value);
@@ -1168,7 +1176,11 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		this.synced ? 1 : 0
 	);
 	
-	if (isNew) {
+	if (this._changed.primaryData && this._changed.primaryData._dateModified) {
+		sqlColumns.push('dateModified', 'clientDateModified');
+		sqlValues.push(this.dateModified, Zotero.DB.transactionDateTime);
+	}
+	else if (isNew) {
 		sqlColumns.push('dateModified', 'clientDateModified');
 		sqlValues.push(Zotero.DB.transactionDateTime, Zotero.DB.transactionDateTime);
 	}
