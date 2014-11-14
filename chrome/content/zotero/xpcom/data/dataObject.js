@@ -447,6 +447,14 @@ Zotero.DataObject.prototype._loadDataType = function (dataType, reload) {
 	return this["load" + dataType[0].toUpperCase() + dataType.substr(1)](reload);
 }
 
+Zotero.DataObject.prototype.loadAllData = function (reload) {
+	let loadPromises = new Array(this._dataTypes.length);
+	for (let i=0; i<this._dataTypes.length; i++) {
+		loadPromises[i] = this._loadDataType(this._dataTypes[i], reload);
+	}
+	
+	return Zotero.Promise.all(loadPromises);
+}
 
 /**
  * Save old version of data that's being changed, to pass to the notifier

@@ -101,7 +101,7 @@ Zotero.Item.prototype._dataTypes = Zotero.Item._super.prototype._dataTypes.conca
 	'note',
 	'creators',
 	'childItems',
-	'relatedItems', // TODO: remove
+//	'relatedItems', // TODO: remove
 	'tags',
 	'collections',
 	'relations'
