@@ -563,7 +563,7 @@ Zotero.DataObject.prototype._recoverFromSaveError = Zotero.Promise.coroutine(fun
 Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 	env.isNew = !this.id;
 	
-	this.editCheck();
+	if (!env.options.skipEditCheck) this.editCheck();
 	
 	if (!this.hasChanged()) {
 		Zotero.debug(this._ObjectType + ' ' + this.id + ' has not changed', 4);
