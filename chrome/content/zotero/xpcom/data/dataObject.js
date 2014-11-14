@@ -58,6 +58,12 @@ Zotero.DataObject.prototype._dataTypes = [];
 Zotero.defineProperty(Zotero.DataObject.prototype, 'objectType', {
 	get: function() this._objectType
 });
+Zotero.defineProperty(Zotero.DataObject.prototype, 'id', {
+	get: function() this._id
+});
+Zotero.defineProperty(Zotero.DataObject.prototype, 'libraryID', {
+	get: function() this._libraryID
+});
 Zotero.defineProperty(Zotero.DataObject.prototype, 'libraryKey', {
 	get: function() this._libraryID + "/" + this._key
 });
