@@ -70,6 +70,10 @@ Zotero.defineProperty(Zotero.DataObject.prototype, 'parentID', {
 	set: function(v) this._setParentID(v)
 });
 
+Zotero.defineProperty(Zotero.DataObject.prototype, 'ObjectsClass', {
+	get: function() Zotero.DataObjectUtilities.getObjectsClassForObjectType(this.objectType)
+});
+
 
 Zotero.DataObject.prototype._get = function (field) {
 	if (this['_' + field] !== null) {
@@ -135,7 +139,7 @@ Zotero.DataObject.prototype._getParentID = function () {
 	if (!this._parentKey) {
 		return false;
 	}
-	return this._parentID = this._getClass().getIDFromLibraryAndKey(this._libraryID, this._parentKey);
+	return this._parentID = this.ObjectsClass.getIDFromLibraryAndKey(this._libraryID, this._parentKey);
 }
 
 
@@ -148,7 +152,7 @@ Zotero.DataObject.prototype._getParentID = function () {
 Zotero.DataObject.prototype._setParentID = function (id) {
 	return this._setParentKey(
 		id
-		? this._getClass().getLibraryAndKeyFromID(Zotero.DataObjectUtilities.checkDataID(id))[1]
+		? this.ObjectsClass.getLibraryAndKeyFromID(Zotero.DataObjectUtilities.checkDataID(id))[1]
 		: null
 	);
 }
@@ -368,13 +372,6 @@ Zotero.DataObject.prototype._requireData = function (dataType) {
 	}
 }
 
-/**
- * Returns a global Zotero class object given a data object. (e.g. Zotero.Items)
- * @return {obj} One of Zotero data classes
- */
-Zotero.DataObject.prototype._getClass = function () {
-	return Zotero.DataObjectUtilities.getClassForObjectType(this._objectType);
-}
 
 /**
  * Loads data for a given data type

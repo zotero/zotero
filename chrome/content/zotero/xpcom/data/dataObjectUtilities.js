@@ -59,12 +59,12 @@ Zotero.DataObjectUtilities = {
 	},
 	
 	
-	"getObjectTypePlural": function getObjectTypePlural(objectType) {
+	"getObjectTypePlural": function(objectType) {
 		return objectType == 'search' ? 'searches' : objectType + 's';
 	},
 	
 	
-	"getClassForObjectType": function getClassForObjectType(objectType) {
+	"getObjectsClassForObjectType": function(objectType) {
 		var objectTypePlural = this.getObjectTypePlural(objectType);
 		var className = objectTypePlural[0].toUpperCase() + objectTypePlural.substr(1);
 		return Zotero[className]
