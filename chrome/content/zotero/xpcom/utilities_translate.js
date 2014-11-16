@@ -361,6 +361,18 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
 	}, headers, responseCharset, translate.cookieSandbox ? translate.cookieSandbox : undefined);
 }
 
+Zotero.Utilities.Translate.prototype.toProxy = function(url) {
+	var proxy = this._translate._currentTranslator.proxy;
+	if (proxy && !proxy.isProxied(url)) return proxy.toProxy(url);
+	return url;
+}
+
+Zotero.Utilities.Translate.prototype.toProper = function(url) {
+	var proxy = this._translate._currentTranslator.proxy;
+	if (proxy) return proxy.toProper(url);
+	return url;
+}
+
 Zotero.Utilities.Translate.prototype.__exposedProps__ = {"HTTP":"r"};
 for(var j in Zotero.Utilities.Translate.prototype) {
 	if(typeof Zotero.Utilities.Translate.prototype[j] === "function" && j[0] !== "_" && j != "Translate") {
