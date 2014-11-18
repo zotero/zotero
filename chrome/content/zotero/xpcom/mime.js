@@ -395,12 +395,8 @@ Zotero.MIME = new function(){
 				.getService(Components.interfaces.nsIAppShellService)
 				.hiddenDOMWindow.navigator.mimeTypes;
 		
-		for (var i in types){
-			// DEBUG
-			Zotero.debug('=======');
-			Zotero.debug(i);
-			Zotero.debug(types[i].type);
-			if (types[i].type && types[i].type == mimeType){
+		for (let type of types) {
+			if (type.type && type.type == mimeType) {
 				Zotero.debug('MIME type ' + mimeType + ' can be handled by plugins');
 				return true;
 			}
