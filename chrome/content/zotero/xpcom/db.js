@@ -701,9 +701,10 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params, options) {
 						return target.getResultByName(name);
 					}
 					catch (e) {
-						Zotero.debug((new Error).stack, 2);
-						Zotero.debug("DB column '" + name + "' not found", 2);
-						return undefined;
+						Zotero.debug(e, 1);
+						var msg = "DB column '" + name + "' not found";
+						Zotero.debug(msg, 1);
+						throw new Error(msg);
 					}
 				}
 			};
