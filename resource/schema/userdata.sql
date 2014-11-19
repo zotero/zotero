@@ -49,7 +49,7 @@ CREATE TABLE syncedSettings (
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
 
--- 'items' view and triggers created in triggers.sql
+-- Primary data applicable to all items
 CREATE TABLE items (
     itemID INTEGER PRIMARY KEY,
     itemTypeID INT NOT NULL,
@@ -229,7 +229,8 @@ CREATE INDEX relations_object ON relations(object);
 CREATE TABLE libraries (
     libraryID INTEGER PRIMARY KEY,
     libraryType TEXT NOT NULL,
-    version INT NOT NULL DEFAULT 0
+    version INT NOT NULL DEFAULT 0,
+    lastsync INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE users (
@@ -298,21 +299,21 @@ CREATE TABLE syncDeleteLog (
     syncObjectTypeID INT NOT NULL,
     libraryID INT NOT NULL,
     key TEXT NOT NULL,
-    timestamp INT NOT NULL,
+    synced INT NOT NULL DEFAULT 0,
     UNIQUE (syncObjectTypeID, libraryID, key),
     FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID),
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
-CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp);
+CREATE INDEX syncDeleteLog_synced ON syncDeleteLog(synced);
 
 CREATE TABLE storageDeleteLog (
     libraryID INT NOT NULL,
     key TEXT NOT NULL,
-    timestamp INT NOT NULL,
+    synced INT NOT NULL DEFAULT 0,
     PRIMARY KEY (libraryID, key),
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
-CREATE INDEX storageDeleteLog_timestamp ON storageDeleteLog(timestamp);
+CREATE INDEX storageDeleteLog_synced ON storageDeleteLog(synced);
 
 CREATE TABLE annotations (
     annotationID INTEGER PRIMARY KEY,

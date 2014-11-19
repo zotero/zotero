@@ -1409,7 +1409,7 @@ Zotero.Schema = new function(){
 			});
 			yield _updateDBVersion('compatibility', _maxCompatibility);
 			
-			yield Zotero.DB.queryAsync("INSERT INTO libraries VALUES (0, 'user', 0)");
+			yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, libraryType) VALUES (0, 'user')");
 			
 			if (!Zotero.Schema.skipDefaultData) {
 				// Quick Start Guide web page item
@@ -1770,6 +1770,7 @@ Zotero.Schema = new function(){
 						
 						yield Zotero.DB.queryAsync("INSERT INTO libraries VALUES (0, 'user')");
 						yield Zotero.DB.queryAsync("ALTER TABLE libraries ADD COLUMN version INT NOT NULL DEFAULT 0");
+						yield Zotero.DB.queryAsync("ALTER TABLE libraries ADD COLUMN lastsync INT NOT NULL DEFAULT 0");
 						yield Zotero.DB.queryAsync("CREATE TABLE syncCache (\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    syncObjectTypeID INT NOT NULL,\n    version INT NOT NULL,\n    data TEXT,\n    PRIMARY KEY (libraryID, key, syncObjectTypeID),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE,\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)\n)");
 						
 						yield Zotero.DB.queryAsync("DROP TRIGGER IF EXISTS fki_annotations_itemID_itemAttachments_itemID");
@@ -2029,16 +2030,16 @@ Zotero.Schema = new function(){
 						
 						yield Zotero.DB.queryAsync("UPDATE syncDeleteLog SET libraryID=0 WHERE libraryID=(SELECT value FROM settings WHERE setting='account' AND key='libraryID')");
 						yield Zotero.DB.queryAsync("ALTER TABLE syncDeleteLog RENAME TO syncDeleteLogOld");
-						yield Zotero.DB.queryAsync("CREATE TABLE syncDeleteLog (\n    syncObjectTypeID INT NOT NULL,\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    timestamp INT NOT NULL,\n    UNIQUE (syncObjectTypeID, libraryID, key),\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
+						yield Zotero.DB.queryAsync("CREATE TABLE syncDeleteLog (\n    syncObjectTypeID INT NOT NULL,\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    synced INT NOT NULL DEFAULT 0,\n    UNIQUE (syncObjectTypeID, libraryID, key),\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO syncDeleteLog SELECT * FROM syncDeleteLogOld");
 						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS syncDeleteLog_timestamp");
-						yield Zotero.DB.queryAsync("CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp)");
+						yield Zotero.DB.queryAsync("CREATE INDEX syncDeleteLog_synced ON syncDeleteLog(synced)");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE storageDeleteLog RENAME TO storageDeleteLogOld");
-						yield Zotero.DB.queryAsync("CREATE TABLE storageDeleteLog (\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    timestamp INT NOT NULL,\n    PRIMARY KEY (libraryID, key),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
+						yield Zotero.DB.queryAsync("CREATE TABLE storageDeleteLog (\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    synced INT NOT NULL DEFAULT 0,\n    PRIMARY KEY (libraryID, key),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO storageDeleteLog SELECT * FROM storageDeleteLogOld");
 						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS storageDeleteLog_timestamp");
-						yield Zotero.DB.queryAsync("CREATE INDEX storageDeleteLog_timestamp ON storageDeleteLog(timestamp)");
+						yield Zotero.DB.queryAsync("CREATE INDEX storageDeleteLog_synced ON storageDeleteLog(synced)");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE annotations RENAME TO annotationsOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE annotations (\n    annotationID INTEGER PRIMARY KEY,\n    itemID INT NOT NULL,\n    parent TEXT,\n    textNode INT,\n    offset INT,\n    x INT,\n    y INT,\n    cols INT,\n    rows INT,\n    text TEXT,\n    collapsed BOOL,\n    dateModified DATE,\n    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID) ON DELETE CASCADE\n)");

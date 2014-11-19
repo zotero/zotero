@@ -43,24 +43,13 @@ Zotero.Libraries = new function () {
 		var rows = yield Zotero.DB.queryAsync(sql);
 		for (let i=0; i<rows.length; i++) {
 			let row = rows[i];
-			_libraryData[row.libraryID] = {
-				type: row.libraryType,
-				version: row.version
-			};
+			_libraryData[row.libraryID] = parseDBRow(row);
 			if (row.libraryType == 'user') {
 				_userLibraryID = row.libraryID;
 			}
 		}
 		_libraryDataLoaded = true;
 	});
-	
-	function _getLibraryDataFromDB (libraryID) {
-		var sql = "SELECT * FROM libraries WHERE libraryID=?";
-		return Zotero.DB.queryAsync(sql, [libraryID])
-		.then(function(rows) {
-			return rows[0];
-		});
-	}
 	
 	
 	this.exists = function (libraryID) {
@@ -79,14 +68,12 @@ Zotero.Libraries = new function () {
 		
 		var sql = "INSERT INTO libraries (libraryID, libraryType) VALUES (?, ?)";
 		yield Zotero.DB.queryAsync(sql, [libraryID, type]);
-		// Re-fetch from DB to get auto-filled defaults
-		var newData = yield _getLibraryDataFromDB(libraryID);
-		_libraryData[newData.libraryID] = {
-			type: newData.libraryType,
-			version: newData.version
-		};
 		
-		return newData;
+		// Re-fetch from DB to get auto-filled defaults
+		var sql = "SELECT * FROM libraries WHERE libraryID=?";
+		var row = Zotero.DB.rowQueryAsync(sql, [libraryID]);
+		_libraryData[row.libraryID] = parseDBRow(row);
+		return row;
 	});
 	
 	this.dbLibraryID = function (libraryID) {
@@ -120,6 +107,7 @@ Zotero.Libraries = new function () {
 		return _libraryData[libraryID].type;
 	}
 	
+	
 	/**
 	 * @param {Integer} libraryID
 	 * @return {Integer}
@@ -143,6 +131,23 @@ Zotero.Libraries = new function () {
 		yield Zotero.DB.queryAsync(sql, [version, libraryID]);
 		_libraryData[libraryID].version = version;
 	});
+	
+	
+	this.getLastSyncTime = function (libraryID) {
+		return _libraryData[libraryID].lastSyncTime;
+	};
+	
+	
+	/**
+	 * @param {Integer} libraryID
+	 * @param {Date} lastSyncTime
+     */
+	this.setLastSyncTime = function (libraryID, lastSyncTime) {
+		var lastSyncTime = Math.round(lastSyncTime.getTime() / 1000);
+		return Zotero.DB.valueQueryAsync(
+			"UPDATE libraries SET lastsync=? WHERE libraryID=?", [lastSyncTime, libraryID]
+		);
+	};
 	
 	
 	this.isEditable = function (libraryID) {
@@ -184,5 +189,14 @@ Zotero.Libraries = new function () {
 		}
 		
 		return this.getType(libraryID) == 'group';
+	}
+	
+	
+	function parseDBRow(row) {
+		return {
+			type: row.libraryType,
+			version: row.version,
+			lastSyncTime: row.lastsync != 0 ? new Date(row.lastsync * 1000) : false
+		};
 	}
 }
