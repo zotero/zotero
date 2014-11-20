@@ -389,7 +389,7 @@ Zotero.Translate.Sandbox = {
 			if(Zotero.isFx && Zotero.platformMajorVersion >= 33) {
 				for(var i in safeTranslator) {
 					if (typeof(safeTranslator[i]) === "function") {
-						let func = safeTranslator[i];
+						var func = safeTranslator[i];
 						safeTranslator[i] = translate._sandboxManager._makeContentForwarder(function() {
 							func.apply(safeTranslator, this.args.wrappedJSObject);
 						});
