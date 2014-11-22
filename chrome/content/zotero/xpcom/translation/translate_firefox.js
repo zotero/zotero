@@ -802,6 +802,12 @@ Zotero.Translate.IO.Read.prototype = {
 			if(this._linesExhausted) return false;
 			this._linesExhausted = !this.inputStream.readLine(str);
 			this.bytesRead += str.value.length+1; // only approximate
+			// Seems to have some issues with \r, since it returns one terminal \r
+			// if a string contains \r\r\n This can cause issues with regexp, so we
+			// strip it off
+			if (str.indexOf("\r") != -1) {
+				str = str.replace(/\r+/g, '');
+			}
 		}
 		
 		return str.value;
