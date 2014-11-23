@@ -107,7 +107,9 @@
 				<parameter name="skipRefresh"/>
 				<body>
 				<![CDATA[
-					this._search = val ? val.toLowerCase() : false;
+					this._search = val
+						? val.toLowerCase().normalize()
+						: false;
 					
 					if (!skipRefresh) {
 						this.refresh();

@@ -114,7 +114,7 @@ Zotero.Search.prototype._set = function (field, val) {
 			return;
 		
 		case 'name':
-			val = Zotero.Utilities.trim(val);
+			val = Zotero.Utilities.trim(val).normalize();
 			break;
 	}
 	
@@ -481,6 +481,8 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 	
 	var [condition, mode] = Zotero.SearchConditions.parseCondition(condition);
 	
+	if (typeof value == 'string') value = value.normalize();
+	
 	this._conditions[searchConditionID] = {
 		id: searchConditionID,
 		condition: condition,
@@ -519,6 +521,8 @@ Zotero.Search.prototype.updateCondition = function(searchConditionID, condition,
 	}
 	
 	var [condition, mode] = Zotero.SearchConditions.parseCondition(condition);
+	
+	if (typeof value == 'string') value = value.normalize();
 	
 	this._conditions[searchConditionID] = {
 		id: parseInt(searchConditionID),

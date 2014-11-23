@@ -691,7 +691,7 @@ Zotero.Item.prototype.inCollection = function(collectionID) {
  */
 Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	if (typeof value == 'string') {
-		value = value.trim();
+		value = value.trim().normalize();
 	}
 	
 	this._disabledCheck();
