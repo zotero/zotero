@@ -39,7 +39,7 @@ Zotero.Group.prototype._init = function () {
 	this._description = null;
 	this._editable = null;
 	this._filesEditable = null;
-	this._etag = null;
+	this._version = null;
 	
 	this._loaded = false;
 	this._changed = false;
@@ -61,8 +61,8 @@ Zotero.Group.prototype.__defineGetter__('editable', function () { return this._g
 Zotero.Group.prototype.__defineSetter__('editable', function (val) { this._set('editable', val); });
 Zotero.Group.prototype.__defineGetter__('filesEditable', function () { if (!this.editable) { return false; } return this._get('filesEditable'); });
 Zotero.Group.prototype.__defineSetter__('filesEditable', function (val) { this._set('filesEditable', val); });
-Zotero.Group.prototype.__defineGetter__('etag', function () { return this._get('etag'); });
-Zotero.Group.prototype.__defineSetter__('etag', function (val) { this._set('etag', val); });
+Zotero.Group.prototype.__defineGetter__('version', function () { return this._get('version'); });
+Zotero.Group.prototype.__defineSetter__('version', function (val) { this._set('version', val); });
 
 Zotero.Group.prototype._get = function (field) {
 	if (this['_' + field] !== null) {
@@ -143,7 +143,7 @@ Zotero.Group.prototype.loadFromRow = function(row) {
 	this._description = row.description;
 	this._editable = !!row.editable;
 	this._filesEditable = !!row.filesEditable;
-	this._etag = row.etag;
+	this._version = row.version;
 }
 
 
@@ -247,7 +247,7 @@ Zotero.Group.prototype.save = function () {
 			'description',
 			'editable',
 			'filesEditable',
-			'etag'
+			'version'
 		];
 		var placeholders = columns.map(function () '?').join();
 		var sqlValues = [
@@ -257,7 +257,7 @@ Zotero.Group.prototype.save = function () {
 			this.description,
 			this.editable ? 1 : 0,
 			this.filesEditable ? 1 : 0,
-			this.etag
+			this.version
 		];
 		
 		if (isNew) {

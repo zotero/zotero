@@ -245,7 +245,7 @@ CREATE TABLE groups (
     description TEXT NOT NULL,
     editable INT NOT NULL,
     filesEditable INT NOT NULL,
-    etag TEXT NOT NULL DEFAULT '',
+    version INT NOT NULL,
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
 
