@@ -1444,22 +1444,47 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	
 	var firstCreatorSortCache = {};
 	
+	// Regexp to extract the whole string up to an optional "and" or "et al."
+	var andEtAlRegExp = new RegExp(
+		// Extract the beginning of the string in non-greedy mode
+		"^.+?"
+		// up to either the end of the string, "et al." at the end of string
+		+ "(?=(?: " + Zotero.getString('general.etAl').replace('.', '\.') + ")?$"
+		// or ' and '
+		+ "| " + Zotero.getString('general.and') + " "
+		+ ")"
+	);
+	
 	function creatorSort(a, b) {
 		//
-		// Try sorting by first word in firstCreator field, since we already have it
+		// Try sorting by the first name in the firstCreator field, since we already have it
+		//
+		// For sortCreatorAsString mode, just use the whole string
 		//
 		var aItemID = a.id,
 			bItemID = b.id,
 			fieldA = firstCreatorSortCache[aItemID],
 			fieldB = firstCreatorSortCache[bItemID];
 		if (fieldA === undefined) {
-			var matches = Zotero.Items.getSortTitle(a.getField('firstCreator')).match(/^[^\s]+/);
-			var fieldA = matches ? matches[0] : '';
+			let firstCreator = Zotero.Items.getSortTitle(a.getField('firstCreator'));
+			if (sortCreatorAsString) {
+				var fieldA = firstCreator;
+			}
+			else {
+				var matches = andEtAlRegExp.exec(firstCreator);
+				var fieldA = matches ? matches[0] : '';
+			}
 			firstCreatorSortCache[aItemID] = fieldA;
 		}
 		if (fieldB === undefined) {
-			var matches = Zotero.Items.getSortTitle(b.getField('firstCreator')).match(/^[^\s]+/);
-			var fieldB = matches ? matches[0] : '';
+			let firstCreator = Zotero.Items.getSortTitle(b.getField('firstCreator'));
+			if (sortCreatorAsString) {
+				var fieldB = firstCreator;
+			}
+			else {
+				var matches = andEtAlRegExp.exec(firstCreator);
+				var fieldB = matches ? matches[0] : '';
+			}
 			firstCreatorSortCache[bItemID] = fieldB;
 		}
 		
@@ -1473,7 +1498,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		}
 		
 		//
-		// If first word is the same, compare actual creators
+		// If first name is the same, compare actual creators
 		//
 		var aRef = a.ref,
 			bRef = b.ref,
