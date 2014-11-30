@@ -672,20 +672,7 @@ var wpdCommon = {
 
 			// has the url the same filetype like the file extension?
 			//save file to target
-			try
-			{
-				try {
-					wbp.saveURI(nsIURL, null, null, null, null, file);
-				} catch(e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
-					// https://bugzilla.mozilla.org/show_bug.cgi?id=794602
-					// XXX Always use when we no longer support Firefox < 18
-					wbp.saveURI(nsIURL, null, null, null, null, file, null);
-				}
-			}catch(e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
-				// https://bugzilla.mozilla.org/show_bug.cgi?id=704320
-				// One more parameter
-				wbp.saveURI(nsIURL, null, null, null, null, null, file, null);
-			}
+			Zotero.Utilities.saveURI(wbp, nsIURL, file);
 
 			return true;
 

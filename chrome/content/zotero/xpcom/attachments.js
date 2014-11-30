@@ -347,20 +347,7 @@ Zotero.Attachments = new function(){
 				var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
 							.createInstance(Components.interfaces.nsIURL);
 				nsIURL.spec = url;
-				try
-				{
-					try {
-						wbp.saveURI(nsIURL, null, null, null, null, file);
-					} catch(e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
-						// https://bugzilla.mozilla.org/show_bug.cgi?id=794602
-						// XXX Always use when we no longer support Firefox < 18
-						wbp.saveURI(nsIURL, null, null, null, null, file, null);
-					}
-				}catch(e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
-					// https://bugzilla.mozilla.org/show_bug.cgi?id=704320
-					// One more parameter
-					wbp.saveURI(nsIURL, null, null, null, null, null, file, null);
-				}
+				Zotero.Utilities.saveURI(wbp, nsIURL, file);
 
 				
 				return attachmentItem;
@@ -671,20 +658,7 @@ Zotero.Attachments = new function(){
 						throw (e);
 					}
 				});
-				try
-				{
-					try {
-						wbp.saveURI(nsIURL, null, null, null, null, file);
-					} catch(e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
-						// https://bugzilla.mozilla.org/show_bug.cgi?id=794602
-						// XXX Always use when we no longer support Firefox < 18
-						wbp.saveURI(nsIURL, null, null, null, null, file, null);
-					}
-				}catch(e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
-					// https://bugzilla.mozilla.org/show_bug.cgi?id=704320
-					// One more parameter
-					wbp.saveURI(nsIURL, null, null, null, null, null, file, null);
-				}
+				Zotero.Utilities.saveURI(wbp, nsIURL, file);
 			}
 			
 			// Add to collections
