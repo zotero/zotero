@@ -471,13 +471,13 @@ Zotero.Translate.SandboxManager.prototype = {
 								}
 							}
 							if(passAsFirstArgument) args.unshift(passAsFirstArgument);
-							return me._copyObject(object[localKey].apply(object, args));
+							return me.copyObject(object[localKey].apply(object, args));
 						});
 					} else {
 						attachTo[localKey] = function() {
 							var args = Array.prototype.slice.apply(arguments);
 							if(passAsFirstArgument) args.unshift(passAsFirstArgument);
-							return me._copyObject(object[localKey].apply(object, args));
+							return me.copyObject(object[localKey].apply(object, args));
 						};
 					}
 				} else {
@@ -514,7 +514,7 @@ Zotero.Translate.SandboxManager.prototype = {
 	 * @param {Object} obj
 	 * @return {Object}
 	 */
-	"_copyObject":function(obj, wm) {
+	"copyObject":function(obj, wm) {
 		if(!this._canCopy(obj)) return obj;
 		if(!wm) wm = new WeakMap();
 		var obj2 = (obj.constructor.name === "Array" ? this.sandbox.Array() : this.sandbox.Object());
@@ -526,7 +526,7 @@ Zotero.Translate.SandboxManager.prototype = {
 			if(this._canCopy(prop1)) {
 				var prop2 = wm.get(prop1);
 				if(prop2 === undefined) {
-					prop2 = this._copyObject(prop1, wm);
+					prop2 = this.copyObject(prop1, wm);
 					wm.set(prop1, prop2);
 				}
 				wobj2[i] = prop2;
@@ -535,6 +535,53 @@ Zotero.Translate.SandboxManager.prototype = {
 			}
 		}
 		return obj2;
+	},
+
+	"newChild":function() {
+		return new Zotero.Translate.ChildSandboxManager(this);
+	}
+}
+
+Zotero.Translate.ChildSandboxManager = function(parent) {
+	this._wrappedSandbox = new parent.sandbox.Object();
+	this._wrappedSandbox.Zotero = new parent.sandbox.Object();
+	this.sandbox = this._wrappedSandbox.wrappedJSObject;
+	this._parent = parent;
+}
+Zotero.Translate.ChildSandboxManager.prototype = {
+	"eval":function(code, functions, path) {
+		// eval in sandbox scope
+		if(functions) {
+			for(var i = 0; i < functions.length; i++) {
+				delete this.sandbox[functions[i]];
+			}
+		}
+		this._parent.sandbox._withSandbox = this._wrappedSandbox;
+		Components.utils.evalInSandbox("with(_withSandbox){"+code+"};", this._parent.sandbox, "1.8", path, 1);
+		if(functions) {
+			for(var i = 0; i < functions.length; i++) {
+				try {
+					this._wrappedSandbox[functions[i]] = Components.utils.evalInSandbox(functions[i], this._parent.sandbox);
+				} catch(e) {}
+			}
+		}
+		this._parent.sandbox._withSandbox = undefined;
+	},
+	"importObject":function(object, passAsFirstArgument, attachTo) {
+		if(!attachTo) attachTo = this.sandbox.Zotero;
+		// Zotero.debug(object);
+		// Zotero.debug(attachTo);
+		this._parent.importObject(object, passAsFirstArgument, attachTo);
+		// Zotero.debug(attachTo);
+	},
+	"copyObject":function(obj) {
+		return this._parent.copyObject(obj);
+	},
+	"newChild":function() {
+		return this._parent.newChild();
+	},
+	"_makeContentForwarder":function(f) {
+		return this._parent._makeContentForwarder(f);
 	}
 }
 

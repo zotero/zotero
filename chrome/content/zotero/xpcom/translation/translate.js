@@ -240,7 +240,7 @@ Zotero.Translate.Sandbox = {
 				if(!Zotero.isBookmarklet) arg = JSON.parse(JSON.stringify(arg));
 				return translation.setSearch(arg);
 			};
-			safeTranslator.setDocument = function(arg) { return translation.setDocument(arg) };
+			safeTranslator.setDocument = function(arg) { return translation.setDocument(new XPCNativeWrapper(arg)) };
 			var errorHandlerSet = false;
 			safeTranslator.setHandler = function(arg1, arg2) {
 				if(arg1 === "error") errorHandlerSet = true;
@@ -249,14 +249,6 @@ Zotero.Translate.Sandbox = {
 						try {
 							item = item.wrappedJSObject ? item.wrappedJSObject : item;
 							if(arg1 == "itemDone") {
-								var sbZotero = translate._sandboxManager.sandbox.Zotero;
-								if(sbZotero.wrappedJSObject) sbZotero = sbZotero.wrappedJSObject;
-								if(Zotero.isFx && !Zotero.isBookmarklet
-										&& (translate instanceof Zotero.Translate.Web
-										|| translate instanceof Zotero.Translate.Search)) {
-									// Necessary to get around object wrappers in Firefox
-									item = translate._sandboxManager._copyObject(item);
-								}
 								item.complete = translate._sandboxZotero.Item.prototype.complete;
 							}
 							arg2(obj, item);
@@ -346,7 +338,6 @@ Zotero.Translate.Sandbox = {
 						if(!Zotero.Utilities.isEmpty(sandbox.exports)) {
 							sandbox.exports.Zotero = sandbox.Zotero;
 							sandbox = sandbox.exports;
-							if(Zotero.isFx && sandbox.wrappedJSObject) sandbox = sandbox.wrappedJSObject;
 						} else {
 							translate._debug("COMPAT WARNING: "+translation.translator[0].label+" does "+
 								"not export any properties. Only detect"+translation._entryFunctionSuffix+
@@ -389,10 +380,11 @@ Zotero.Translate.Sandbox = {
 			if(Zotero.isFx && Zotero.platformMajorVersion >= 33) {
 				for(var i in safeTranslator) {
 					if (typeof(safeTranslator[i]) === "function") {
-						var func = safeTranslator[i];
-						safeTranslator[i] = translate._sandboxManager._makeContentForwarder(function() {
-							func.apply(safeTranslator, this.args.wrappedJSObject);
-						});
+						safeTranslator[i] = translate._sandboxManager._makeContentForwarder(function(func) {
+							return function() {
+								func.apply(safeTranslator, this.args.wrappedJSObject);
+							}
+						}(safeTranslator[i]));
 					}
 				}
 			}
@@ -442,7 +434,7 @@ Zotero.Translate.Sandbox = {
 		 */
 		"selectItems":function(translate, items, callback) {
 			function transferObject(obj) {
-				return Zotero.isFx ? translate._sandboxManager._copyObject(obj) : obj;
+				return Zotero.isFx ? translate._sandboxManager.copyObject(obj) : obj;
 			}
 			
 			if(Zotero.Utilities.isEmpty(items)) {
@@ -1502,7 +1494,11 @@ Zotero.Translate.Base.prototype = {
 	 */
 	"_generateSandbox":function() {
 		Zotero.debug("Translate: Binding sandbox to "+(typeof this._sandboxLocation == "object" ? this._sandboxLocation.document.location : this._sandboxLocation), 4);
-		this._sandboxManager = new Zotero.Translate.SandboxManager(this._sandboxLocation);
+		if (this._parentTranslator && this._parentTranslator._sandboxManager.newChild) {
+			this._sandboxManager = this._parentTranslator._sandboxManager.newChild();
+		} else {
+			this._sandboxManager = new Zotero.Translate.SandboxManager(this._sandboxLocation);
+		}
 		const createArrays = "['creators', 'notes', 'tags', 'seeAlso', 'attachments']";
 		var src = "var Zotero = {};"+
 		"Zotero.Item = function (itemType) {"+
@@ -2274,7 +2270,7 @@ Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
  */
 Zotero.Translate.Search.prototype._getParameters = function() {
 	if(Zotero.isFx) {
-		return [this._sandboxManager._copyObject(this.search)];
+		return [this._sandboxManager.copyObject(this.search)];
 	}
 	return [this.search];
 };
