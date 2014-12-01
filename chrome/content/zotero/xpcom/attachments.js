@@ -1046,6 +1046,11 @@ Zotero.Attachments = new function(){
 			return path;
 		}
 		
+		if (!baseDir.exists()) {
+			Zotero.debug("Base directory '" + baseDir.path + "' doesn't exist", 2);
+			return path;
+		}
+		
 		// Get nsIFile for file
 		var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
 			.createInstance(Components.interfaces.nsILocalFile);
