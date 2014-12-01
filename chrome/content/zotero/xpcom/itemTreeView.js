@@ -569,11 +569,15 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 				if (action == 'delete' || action == 'trash' ||
 						!itemGroup.ref.hasItem(ids[i])) {
 					let row = this._itemRowMap[ids[i]];
+					
 					// Row might already be gone (e.g. if this is a child and
 					// 'modify' was sent to parent)
-					if (row != undefined) {
-						rows.push(row);
+					if (row == undefined) {
+						continue;
 					}
+					
+					rows.push(row);
+					
 					// Remove child items of removed parents
 					if (this.isContainer(row) && this.isContainerOpen(row)) {
 						while (++row < this.rowCount && this.getLevel(row) > 0) {
