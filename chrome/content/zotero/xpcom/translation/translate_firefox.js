@@ -545,7 +545,7 @@ Zotero.Translate.SandboxManager.prototype = {
 Zotero.Translate.ChildSandboxManager = function(parent) {
 	this._wrappedSandbox = new parent.sandbox.Object();
 	this._wrappedSandbox.Zotero = new parent.sandbox.Object();
-	this.sandbox = this._wrappedSandbox.wrappedJSObject;
+	this.sandbox = this._wrappedSandbox.wrappedJSObject || this._wrappedSandbox;
 	this._parent = parent;
 }
 Zotero.Translate.ChildSandboxManager.prototype = {
