@@ -80,7 +80,7 @@ Zotero.Cite = {
 			if(bibliography) return bibliography;
 		}
 		
-		var styleClass = style.class;
+		var styleClass = cslEngine.opt.class;
 		var citations = [cslEngine.appendCitationCluster({"citationItems":[{"id":item.id}], "properties":{}}, true)[0][1]
 			for each(item in items)];
 		
