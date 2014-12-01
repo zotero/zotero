@@ -469,6 +469,17 @@ Zotero.Translate.SandboxManager.prototype = {
 								if(args[i] instanceof Components.interfaces.nsISupports) {
 									args[i] = new XPCNativeWrapper(args[i]);
 								}
+								// For callback functions, make sure to copy arguments to sandbox
+								else if(typeof args[i] == 'function') {
+									let origFunc = args[i];
+									args[i] = function() {
+										let newArgs = [];
+										for (let i=0; i<arguments.length; i++) {
+											newArgs.push(me._copyObject(arguments[i]));
+										}
+										return origFunc.apply(null, newArgs);
+									};
+								}
 							}
 							if(passAsFirstArgument) args.unshift(passAsFirstArgument);
 							return me._copyObject(object[localKey].apply(object, args));
