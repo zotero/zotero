@@ -637,37 +637,48 @@ Zotero.Translate.Sandbox = {
 				Zotero.debug("Translate: monitorDOMChanges can only be called during the 'detect' stage");
 				return;
 			}
-
-			var window = translate.document.defaultView
+			
+			var window = translate.document.defaultView;
 			var mutationObserver = window && ( window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver );
 			if(!mutationObserver) {
 				Zotero.debug("Translate: This browser does not support mutation observers.");
 				return;
 			}
-
-			var translator = translate._potentialTranslators[0];
-			if(!translate._registeredDOMObservers[translator.translatorID])
-				translate._registeredDOMObservers[translator.translatorID] = [];
-			var obs = translate._registeredDOMObservers[translator.translatorID];
-
-			//do not re-register observer by the same translator for the same node
-			if(obs.indexOf(target) != -1) {
-				Zotero.debug("Translate: Already monitoring this node");
+			
+			if (typeof WeakMap == 'undefined') {
+				Zotero.debug("Translator: monitorDOMChanges requires WeakMap support.");
 				return;
 			}
-
-			obs.push(target);
-
+			
+			if (!translate._registeredDOMObservers.targets) {
+				translate._registeredDOMObservers.targets = new WeakMap();
+			}
+			
+			var currentObservers = translate._registeredDOMObservers.targets.get(target);
+			if (!currentObservers) {
+				currentObservers = [];
+				translate._registeredDOMObservers.targets.set(target, currentObservers)
+			}
+			
+			var translatorID = translate._potentialTranslators[0].translatorID;
+			//do not re-register observer by the same translator for the same node
+			if (currentObservers.indexOf(translatorID) != -1) {
+				Zotero.debug("Translate: Translator " + translatorID + " is already monitoring this node");
+				return;
+			}
+			currentObservers.push(translatorID);
+			
 			var observer = new mutationObserver(function(mutations, observer) {
-				obs.splice(obs.indexOf(target),1);
-				observer.disconnect();
-				
 				Zotero.debug("Translate: Page modified.");
-				//we don't really care what got updated
+				//we don't really care what got updated, we redo detection for the whole tab
 				var doc = mutations[0].target.ownerDocument;
 				translate._runHandler("pageModified", doc);
 			});
-
+			
+			// Keep track of all observers for this translate instance so we can cancel
+			// them before redoing detection
+			translate._registeredDOMObservers.observers.push(observer);
+			
 			observer.observe(target, config || {childList: true, subtree: true});
 			Zotero.debug("Translate: Mutation observer registered on <" + target.nodeName + "> node");
 		}
@@ -1641,7 +1652,7 @@ Zotero.Translate.Base.prototype = {
  *     this Translate instance.
  */
 Zotero.Translate.Web = function() {
-	this._registeredDOMObservers = {}
+	this._registeredDOMObservers = { observers: [] };
 	this.init();
 }
 Zotero.Translate.Web.prototype = new Zotero.Translate.Base();
@@ -1880,6 +1891,23 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 			Zotero.HTTP.doPost("http://www.zotero.org/repo/report", postBody);
 		});
 	}
+}
+
+/**
+ * Disconnects any MutationObserver's tied to this translate instance
+ */
+Zotero.Translate.Web.prototype.clearMutationObservers = function() {
+	Zotero.debug("Translate: Disconnecting mutation observers");
+	var observers = this._registeredDOMObservers.observers;
+	for (var i=0; i<observers.length; i++) {
+		try {
+			// Observer may already be dead
+			observers[i].disconnect();
+		} catch(e) {}
+	}
+	
+	// Drop the target WeakMap as well
+	this._registeredDOMObservers = { observers: [] };
 }
 
 /**

@@ -332,7 +332,7 @@ var Zotero_Browser = new function() {
 		}
 		
 		// detect translators
-		tab.detectTranslators(rootDoc, doc);
+		tab.detectTranslators(doc);
 		
 		// register metadata updated event
 		if(isHTML) {
@@ -378,9 +378,38 @@ var Zotero_Browser = new function() {
 		try {
 			var rootDoc = (doc instanceof HTMLDocument ? doc.defaultView.top.document : doc);
 			var browser = Zotero_Browser.tabbrowser.getBrowserForDocument(rootDoc);
+			if (!browser) return;
+			
 			var tab = _getTabObject(browser);
-			if(doc == tab.page.document || doc == rootDoc) tab.clear();
-			tab.detectTranslators(rootDoc, doc);
+			if (!tab) return;
+			
+			if (tab._detectTimeout) {
+				Zotero.debug("pageModified event already triggered");
+				return;
+			}
+			
+			var docsOnPage = [];
+			for (var i=0; i<tab._translateInstances.length; i++) {
+				var doc = tab._translateInstances[i].document;
+				if (doc && docsOnPage.indexOf(doc) == -1) docsOnPage.push(doc);
+			}
+			
+			tab.clear();
+			tab.clearObservers();
+			// Delay detection by 500ms to avoid lots of DOM events from triggering
+			// detection too often
+			tab._detectTimeout = rootDoc.defaultView.setTimeout(function() {
+					delete tab._detectTimeout;
+					Zotero.debug("Redoing detection for " + docsOnPage.length + " documents");
+					for (var i=0; i<docsOnPage.length; i++) {
+						// Make sure not to redo detection on dead documents
+						if (docsOnPage[i] instanceof HTMLDocument) {
+							tab.detectTranslators(docsOnPage[i]);
+						}
+					}
+				},
+				500
+			);
 		} catch(e) {
 			Zotero.debug(e);
 		}
@@ -395,6 +424,7 @@ var Zotero_Browser = new function() {
 		var tab = _getTabObject(event.target);
 		if(tab.page && tab.page.annotations) tab.page.annotations.save();
 		tab.clear();
+		tab.clearObservers();
 		
 		// To execute if document object does not exist
 		toggleMode();
@@ -705,6 +735,7 @@ var Zotero_Browser = new function() {
 Zotero_Browser.Tab = function(browser) {
 	this.browser = browser;
 	this.page = new Object();
+	this._translateInstances = [];
 }
 
 /*
@@ -715,15 +746,26 @@ Zotero_Browser.Tab.prototype.clear = function() {
 	this.page = new Object();
 }
 
+/**
+ * Clears all Zotero MutationObserver's belonging to all documents on the page
+ */
+Zotero_Browser.Tab.prototype.clearObservers = function() {
+	while (this._translateInstances.length) {
+		this._translateInstances.pop()
+			.clearMutationObservers();
+	}
+}
+
 /*
  * detects translators for this browser object
  */
-Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {	
+Zotero_Browser.Tab.prototype.detectTranslators = function(doc) {	
 	if(doc instanceof HTMLDocument && doc.documentURI.substr(0, 6) != "about:") {
 		// get translators
 		var me = this;
 		
 		var translate = new Zotero.Translate.Web();
+		this._translateInstances.push(translate);
 		translate.setDocument(doc);
 		translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
 		translate.setHandler("pageModified", function(translate, doc) { Zotero_Browser.itemUpdated(doc) });
