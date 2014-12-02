@@ -302,6 +302,10 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 			case 'year':
 				field = 'date';
 				break;
+			
+			case 'itemType':
+				field = 'itemTypeID';
+				break;
 		}
 		if (cacheFields.indexOf(field) == -1) {
 			cacheFields = cacheFields.concat(field);
