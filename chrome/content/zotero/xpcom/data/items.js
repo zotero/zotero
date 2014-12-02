@@ -285,7 +285,7 @@ Zotero.Items = function() {
 						}
 						Zotero.debug(obj.itemID);
 						Zotero.debug(Object.keys(this._objectCache));
-						this._objectCache[obj.itemID].loadFromRow(rowObj);
+						this._objectCache[obj.itemID].loadFromRow(obj);
 					}.bind(this)
 				}
 			);
