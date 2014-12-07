@@ -444,10 +444,6 @@ Zotero.Style = function(arg) {
 		Zotero.Styles.ns);
 	this.updated = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:updated[1]',
 		Zotero.Styles.ns).replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
-	this.categories = [category.getAttribute("term")
-		for each(category in Zotero.Utilities.xpath(doc,
-			'/csl:style/csl:info[1]/csl:category', Zotero.Styles.ns))
-		if(category.hasAttribute("term"))];
 	this.locale = Zotero.Utilities.xpathText(doc, '/csl:style/@default-locale',
 		Zotero.Styles.ns) || null;
 	this._class = doc.documentElement.getAttribute("class");
@@ -456,7 +452,21 @@ Zotero.Style = function(arg) {
 		Zotero.Styles.ns).length;
 	this._hasBibliography = !!doc.getElementsByTagName("bibliography").length;
 	this._version = doc.documentElement.getAttribute("version");
-	if(!this._version) this._version = "0.8";
+	if(!this._version) {
+		this._version = "0.8";
+		
+		//In CSL 0.8.1, the "term" attribute on cs:category stored both
+		//citation formats and fields.
+		this.categories = [category.getAttribute("term")
+		for each(category in Zotero.Utilities.xpath(doc,
+			'/csl:style/csl:info[1]/csl:category', Zotero.Styles.ns))
+			if(category.hasAttribute("term"))];
+	} else {
+		//CSL 1.0 introduced a dedicated "citation-format" attribute on cs:category 
+		this.categories = Zotero.Utilities.xpathText(doc,
+			'/csl:style/csl:info[1]/csl:category[@citation-format][1]/@citation-format',
+			Zotero.Styles.ns);
+	}
 	
 	this.source = Zotero.Utilities.xpathText(doc,
 		'/csl:style/csl:info[1]/csl:link[@rel="source" or @rel="independent-parent"][1]/@href',
