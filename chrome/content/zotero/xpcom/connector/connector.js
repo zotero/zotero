@@ -245,24 +245,6 @@ Zotero.Connector_Debug = new function() {
 	 * Submit data to the sserver
 	 */
 	this.submitReport = function(callback) {
-		var uploadCallback = function (xmlhttp) {
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-									.getService(Components.interfaces.nsIPromptService);
-			
-			if (!xmlhttp.responseXML) {
-				callback(false, 'Invalid response from server');
-				return;
-			}
-			var reported = xmlhttp.responseXML.getElementsByTagName('reported');
-			if (reported.length != 1) {
-				callback(false, 'The server returned an error. Please try again.');
-				return;
-			}
-			
-			var reportID = reported[0].getAttribute('reportID');
-			callback(true, reportID);
-		}
-		
 		Zotero.HTTP.doPost("http://www.zotero.org/repo/report?debug=1", Zotero.Debug.get(),
 			function(xmlhttp) {
 				if (!xmlhttp.responseXML) {
