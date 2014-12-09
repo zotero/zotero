@@ -1877,7 +1877,7 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 						   "&lastUpdated=" + encodeURIComponent(translator.lastUpdated) +
 						   "&diagnostic=" + encodeURIComponent(info) +
 						   "&errorData=" + encodeURIComponent(errorString);
-			Zotero.HTTP.doPost("http://www.zotero.org/repo/report", postBody);
+			Zotero.HTTP.doPost(ZOTERO_CONFIG.REPOSITORY_URL + "report", postBody);
 		});
 	}
 }

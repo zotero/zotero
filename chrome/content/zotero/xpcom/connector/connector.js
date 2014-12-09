@@ -245,7 +245,7 @@ Zotero.Connector_Debug = new function() {
 	 * Submit data to the sserver
 	 */
 	this.submitReport = function(callback) {
-		Zotero.HTTP.doPost("http://www.zotero.org/repo/report?debug=1", Zotero.Debug.get(),
+		Zotero.HTTP.doPost(ZOTERO_CONFIG.REPOSITORY_URL + "report?debug=1", Zotero.Debug.get(),
 			function(xmlhttp) {
 				if (!xmlhttp.responseXML) {
 					callback(false, 'Invalid response from server');
