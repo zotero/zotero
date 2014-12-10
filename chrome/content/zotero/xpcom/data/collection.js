@@ -113,7 +113,7 @@ Zotero.Collection.prototype._set = function (field, val) {
 			return;
 		
 		case 'name':
-			val = Zotero.Utilities.trim(val);
+			val = Zotero.Utilities.trim(val).normalize();
 			break;
 	}
 	
