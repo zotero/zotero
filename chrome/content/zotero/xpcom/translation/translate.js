@@ -240,7 +240,13 @@ Zotero.Translate.Sandbox = {
 				if(!Zotero.isBookmarklet) arg = JSON.parse(JSON.stringify(arg));
 				return translation.setSearch(arg);
 			};
-			safeTranslator.setDocument = function(arg) { return translation.setDocument(new XPCNativeWrapper(arg)) };
+			safeTranslator.setDocument = function(arg) {
+				if (Zotero.isFx && !Zotero.isBookmarklet) {
+					return translation.setDocument(new XPCNativeWrapper(arg));
+				} else {
+					return translation.setDocument(arg);
+				}
+			};
 			var errorHandlerSet = false;
 			safeTranslator.setHandler = function(arg1, arg2) {
 				if(arg1 === "error") errorHandlerSet = true;
