@@ -94,6 +94,19 @@ Zotero.FeedItems = new Proxy(function() {
 		return this.getAsync(id);
 	});
 	
+	this.toggleReadById = Zotero.Promise.coroutine(function* (ids, state) {
+		if (!Array.isArray(ids)) {
+			if (typeof ids != 'string') throw new Error('ids must be a string or array in Zotero.FeedItems.toggleReadById');
+			
+			ids = [ids];
+		}
+		
+		let items = yield this.getAsync(ids);
+		for (let i=0; i<items.length; i++) {
+			items[i].toggleRead(state);
+		}
+	});
+	
 	return this;
 }.call({}),
 

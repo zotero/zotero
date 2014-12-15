@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-// Add some feed methods, but otherwise proxy to Zotero.Collections
+// Mimics Zotero.Libraries
 Zotero.Feeds = new function() {
 	this._cache = null;
 	
@@ -105,12 +105,15 @@ Zotero.Feeds = new function() {
 			.map(id => Zotero.Libraries.get(id));
 	}
 	
+	this.get = Zotero.Libraries.get;
+	
 	this.haveFeeds = function() {
 		if (!this._cache) throw new Error("Zotero.Feeds cache is not initialized");
 		
 		return !!Object.keys(this._cache.urlByLibraryID).length
 	}
 
+	let globalFeedCheckDelay = Zotero.Promise.resolve();
 	this.scheduleNextFeedCheck = Zotero.Promise.coroutine(function* () {
 		Zotero.debug("Scheduling next feed update.");
 		let sql = "SELECT ( CASE "
@@ -145,5 +148,25 @@ Zotero.Feeds = new function() {
 		} else {
 			Zotero.debug("No feeds with auto-update.");
 		}
+	});
+	
+	this.updateFeeds = Zotero.Promise.coroutine(function* () {
+		let sql = "SELECT libraryID AS id FROM feeds "
+			+ "WHERE refreshInterval IS NOT NULL "
+			+ "AND ( lastCheck IS NULL "
+				+ "OR (julianday(lastCheck, 'utc') + (refreshInterval/1440) - julianday('now', 'utc')) <= 0 )";
+		let needUpdate = yield Zotero.DB.queryAsync(sql).map(row => row.id);
+		Zotero.debug("Running update for feeds: " + needUpdate.join(', '));
+		let feeds = Zotero.Libraries.get(needUpdate);
+		let updatePromises = [];
+		for (let i=0; i<feeds.length; i++) {
+			updatePromises.push(feeds[i]._updateFeed());
+		}
+		
+		return Zotero.Promise.settle(updatePromises)
+		.then(() => {
+			Zotero.debug("All feed updates done.");
+			this.scheduleNextFeedCheck()
+		});
 	});
 }
