@@ -1660,6 +1660,9 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		
 		let toAdd = Zotero.Utilities.arrayDiff(newCollections, oldCollections);
 		let toRemove = Zotero.Utilities.arrayDiff(oldCollections, newCollections);
+
+		env.collectionsAdded = toAdd;
+		env.collectionsRemoved = toRemove;
 		
 		if (toAdd.length) {
 			for (let i=0; i<toAdd.length; i++) {

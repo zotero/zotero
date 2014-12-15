@@ -215,6 +215,12 @@
 	color: inherit;
 }
 
+/* Style unread items/collections in bold */
+#zotero-items-tree treechildren::-moz-tree-cell-text(unread),
+#zotero-collections-tree treechildren::-moz-tree-cell-text(unread) {
+	font-weight: bold;
+}
+
 #zotero-items-pane
 {
 	min-width: 290px;
