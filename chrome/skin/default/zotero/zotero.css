@@ -242,6 +242,10 @@ label.zotero-text-link {
 	background: rgb(89, 139, 236);
 }
 
+.zotero-message-error
+{
+	font-weight: bold;
+}
 
 #zotero-progress-box
 {
@@ -354,4 +358,16 @@ label.zotero-text-link {
 #zotero-advanced-search-dialog #zotero-search-buttons
 {
 	margin: 3px 0;
+}
+
+#zotero-attach-uri-container
+{
+	width: 30em;
+	max-width: 30em;
+}
+
+#zotero-attach-uri-message
+{
+	width: 29.5em;
+	max-width: 29.5em;
 }
