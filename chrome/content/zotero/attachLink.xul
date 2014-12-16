@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<dialog
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	buttons="accept,cancel"
+	ondialogaccept="return Zotero_AttachLink.submit();"
+	
+	id="zotero-attach-uri-dialog"
+	title="&zotero.attachLink.title;"
+	>
+	
+	<script src="include.js"/>
+	<script src="AttachLink.js"/>
+	
+	<vbox id="zotero-attach-uri-container">
+		<hbox>
+			<description id="zotero-attach-uri-message" class="zotero-message-error"></description>
+		</hbox>
+		<hbox align="center">
+			<label id="zotero-attach-uri-label-input" value="&zotero.attachLink.label.link;" control="zotero-attach-uri-input"></label>
+			<textbox id="zotero-attach-uri-input" flex="1"/>
+		</hbox>
+		<hbox align="center">
+			<label id="zotero-attach-uri-label-title" value="&zotero.attachLink.label.title;" control="zotero-attach-uri-title"></label>
+			<textbox id="zotero-attach-uri-title" flex="1" placeholder="&zotero.general.optional;"/>
+		</hbox>
+	</vbox>
+</dialog>

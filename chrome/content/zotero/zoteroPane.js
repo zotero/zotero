@@ -3038,19 +3038,13 @@ var ZoteroPane = new function()
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.getService(Components.interfaces.nsIPromptService);
 		
-		var input = {};
-		var check = {value : false};
-		
-		// TODO: Allow title to be specified?
-		var result = ps.prompt(null, Zotero.getString('pane.items.attach.link.uri.title'),
-			Zotero.getString('pane.items.attach.link.uri'), input, "", {});
-		if (!result || !input.value) return false;
-		
-		// Create a new attachment
-		Zotero.Attachments.linkFromURL(input.value, itemID);
+		var io = {};
+		window.openDialog('chrome://zotero/content/attachLink.xul', 
+			'zotero-attach-uri-dialog', 'centerscreen, modal', io);
+		if (io.out) {
+			Zotero.Attachments.linkFromURL(io.out.link, itemID, null, io.out.title);
+		}
 	}
 	
 	
