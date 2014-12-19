@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "Jméno:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Hledat v knihovně:">
 
 <!ENTITY zotero.search.joinMode.prefix "Odpovídá">
 <!ENTITY zotero.search.joinMode.any "některému">

@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "Simpan ke Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Lampiran tidak dapat disimpan ke dalam perpustakaan yang saat ini terpilih. Sebaliknya, item ini akan disimpan ke dalam perpustakaan Anda.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Untuk menggunakan fitur ini, Anda harus menginstal aplikasi PDF dalam preferensi Zotero terlebih dahulu.">
+
+<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.label.link "Link:">
+<!ENTITY zotero.attachLink.label.title "Title:">
+
+

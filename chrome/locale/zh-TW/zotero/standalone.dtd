@@ -1,51 +1,51 @@
-<!ENTITY preferencesCmdMac.label "偏好設定...">
+<!ENTITY preferencesCmdMac.label "偏好設定…">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "服務">
 <!ENTITY hideThisAppCmdMac.label "隱藏 &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
 <!ENTITY hideOtherAppsCmdMac.label "隱藏其他">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "顯示所有">
+<!ENTITY showAllAppsCmdMac.label "顯示全部">
 <!ENTITY quitApplicationCmdMac.label "結束 Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 
-<!ENTITY fileMenu.label "檔案">
+<!ENTITY fileMenu.label "檔案 (F)">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "儲存...">
+<!ENTITY saveCmd.label "儲存…">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "頁面設定...">
+<!ENTITY pageSetupCmd.label "頁面設定…">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "列印...">
+<!ENTITY printCmd.label "列印…">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "P">
-<!ENTITY closeCmd.label "關閉">
+<!ENTITY closeCmd.label "關閉 (C)">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY quitApplicationCmdWin.label "退出">
-<!ENTITY quitApplicationCmdWin.accesskey "x">
-<!ENTITY quitApplicationCmd.label "結束">
+<!ENTITY quitApplicationCmdWin.label "退出 (X)">
+<!ENTITY quitApplicationCmdWin.accesskey "X">
+<!ENTITY quitApplicationCmd.label "結束 (Q)">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
 <!ENTITY editMenu.label "編輯">
 <!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "撤消">
+<!ENTITY undoCmd.label "撤消 (U)">
 <!ENTITY undoCmd.key "Z">
 <!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "重做">
+<!ENTITY redoCmd.label "復原撤消 (R)">
 <!ENTITY redoCmd.key "Y">
 <!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "剪下">
+<!ENTITY cutCmd.label "剪下 (T)">
 <!ENTITY cutCmd.key "X">
-<!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "複製">
+<!ENTITY cutCmd.accesskey "T">
+<!ENTITY copyCmd.label "複製 (C)">
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.accesskey "C">
-<!ENTITY copyCitationCmd.label "複製引用文獻">
-<!ENTITY copyBibliographyCmd.label "複製參考書目">
-<!ENTITY pasteCmd.label "貼上">
+<!ENTITY copyCitationCmd.label "複製成引用文獻條">
+<!ENTITY copyBibliographyCmd.label "複製成參考文獻條">
+<!ENTITY pasteCmd.label "貼上 (P)">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.accesskey "P">
 <!ENTITY deleteCmd.label "刪除">
@@ -54,48 +54,48 @@
 <!ENTITY selectAllCmd.label "全選">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "偏好">
+<!ENTITY preferencesCmd.label "偏好設定 (N)">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "偏好設定">
-<!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "搜尋">
+<!ENTITY preferencesCmdUnix.label "偏好設定 (N)">
+<!ENTITY preferencesCmdUnix.accesskey "N">
+<!ENTITY findCmd.label "搜尋 (F)">
 <!ENTITY findCmd.accesskey "F">
 <!ENTITY findCmd.commandkey "f">
-<!ENTITY bidiSwitchPageDirectionItem.label "切換頁面方向">
-<!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
-<!ENTITY bidiSwitchTextDirectionItem.label "切換文字方向">
-<!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
+<!ENTITY bidiSwitchPageDirectionItem.label "切換頁面方向 (G)">
+<!ENTITY bidiSwitchPageDirectionItem.accesskey "G">
+<!ENTITY bidiSwitchTextDirectionItem.label "切換文字方向 (W)">
+<!ENTITY bidiSwitchTextDirectionItem.accesskey "W">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY toolsMenu.label "工具">
+<!ENTITY toolsMenu.label "工具 (T)">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY addons.label "附加">
+<!ENTITY addons.label "附加元件">
 
 
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "最小化">
-<!ENTITY bringAllToFront.label "將所有帶到前面">
+<!ENTITY bringAllToFront.label "全部移到上層">
 <!ENTITY zoomWindow.label "縮放">
 <!ENTITY windowMenu.label "視窗">
 
 
-<!ENTITY helpMenu.label "說明">
+<!ENTITY helpMenu.label "說明 (H)">
 <!ENTITY helpMenu.accesskey "H">
 
 
-<!ENTITY helpMenuWin.label "說明">
+<!ENTITY helpMenuWin.label "說明 (H)">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
 <!ENTITY aboutProduct.label "關於 &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "支援及說明文件">
-<!ENTITY productHelp.accesskey "H">
-<!ENTITY helpTroubleshootingInfo.label "修理故障的資訊">
+<!ENTITY productHelp.accesskey "D">
+<!ENTITY helpTroubleshootingInfo.label "診斷之資訊 (T)">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "提交回應意見…">
+<!ENTITY helpFeedbackPage.label "回饋 (S)…">
 <!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "向 Zotero 回報錯誤…">
+<!ENTITY helpReportErrors.label "向 Zotero 回報錯誤 (R)…">
 <!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpCheckForUpdates.label "檢查更新…">
+<!ENTITY helpCheckForUpdates.label "檢查更新 (U)…">
 <!ENTITY helpCheckForUpdates.accesskey "U">
