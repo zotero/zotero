@@ -285,8 +285,8 @@
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Do zvolené knihovny nemohou být uloženy přílohy. Tato položka bude místo toho uložena do vaší knihovny.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Pokud chcete využít této funkce, musíte nejdříve v nastavení Zotera nainstalovat nástroje pro práci s PDF.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
+<!ENTITY zotero.attachLink.title "Připojit odkaz na URI">
+<!ENTITY zotero.attachLink.label.link "Odkaz:">
+<!ENTITY zotero.attachLink.label.title "Název:">
 
 

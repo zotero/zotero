@@ -285,8 +285,8 @@
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Ekler şu an seçili olan kitaplığa kaydedilemedi. Bu eser kitaplığınıza kaydedilecek.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Bu özelliği kullanabilmek için, önce Zotero tercihlerindeki Arama bölmesinde PDF araçlarını kurmanız gerekmektedir.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
+<!ENTITY zotero.attachLink.title "URI'ye Bağlantı Ekle.">
+<!ENTITY zotero.attachLink.label.link "Bağlantı">
+<!ENTITY zotero.attachLink.label.title "Başlık">
 
 

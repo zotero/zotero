@@ -81,10 +81,10 @@
 <!ENTITY zotero.items.menu.attach.note "Ajouter une note">
 <!ENTITY zotero.items.menu.attach "Ajouter une pièce jointe">
 <!ENTITY zotero.items.menu.attach.snapshot "Joindre une capture de la page courante">
-<!ENTITY zotero.items.menu.attach.link "Joindre le lien vers la page courante">
-<!ENTITY zotero.items.menu.attach.link.uri "Joindre le lien vers l'URI…">
-<!ENTITY zotero.items.menu.attach.file "Joindre une copie enregistrée du fichier…">
-<!ENTITY zotero.items.menu.attach.fileLink "Joindre un lien vers le fichier…">
+<!ENTITY zotero.items.menu.attach.link "Joindre un lien vers la page courante">
+<!ENTITY zotero.items.menu.attach.link.uri "Joindre un lien vers un URI…">
+<!ENTITY zotero.items.menu.attach.file "Joindre une copie enregistrée d'un fichier…">
+<!ENTITY zotero.items.menu.attach.fileLink "Joindre un lien vers un fichier…">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaurer vers la bibliothèque">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliquer le document">
@@ -285,8 +285,8 @@
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Les pièces jointes ne peuvent pas être enregistrées dans la bibliothèque sélectionnée. Ce document sera enregistré dans votre bibliothèque à la place.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Pour utiliser cette fonctionnalité, vous devez d'abord installer les outils PDF depuis le panneau Recherche des préférences de Zotero.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
+<!ENTITY zotero.attachLink.title "Joindre un lien vers un URI">
+<!ENTITY zotero.attachLink.label.link "Lien :">
+<!ENTITY zotero.attachLink.label.title "Titre :">
 
 

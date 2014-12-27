@@ -44,8 +44,8 @@
 <!ENTITY zotero.toolbar.duplicate.label "Vis duplikat">
 <!ENTITY zotero.collections.showUnfiledItems "Vis uplasserte objekt">
 
-<!ENTITY zotero.items.itemType "Objekttype">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.itemType "Type">
+<!ENTITY zotero.items.type_column "Type">
 <!ENTITY zotero.items.title_column "Tittel">
 <!ENTITY zotero.items.creator_column "Namn">
 <!ENTITY zotero.items.date_column "Dato">
