@@ -1783,29 +1783,7 @@ Zotero.Utilities = {
 	 * Provides unicode support and other additional features for regular expressions
 	 * See https://github.com/slevithan/xregexp for usage
 	 */
-	 "XRegExp": XRegExp,
+	 "XRegExp": XRegExp
 
-	 /**
-	 * saveURI wrapper function
-	 * @param {nsIWebBrowserPersist} nsIWebBrowserPersist
-	 * @param {nsIURI} source URL
-	 * @param {nsISupports} target file
-	 */
-	 "saveURI": function(wbp, source, target)
-	 {
-		try
-		{
-			try {
-				wbp.saveURI(source, null, null, null, null, target);
-			} catch(e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
-				// https://bugzilla.mozilla.org/show_bug.cgi?id=794602
-				// XXX Always use when we no longer support Firefox < 18
-				wbp.saveURI(source, null, null, null, null, target, null);
-			}
-		}catch(e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
-			// https://bugzilla.mozilla.org/show_bug.cgi?id=704320
-			// One more parameter
-			wbp.saveURI(source, null, null, null, null, null, target, null);
-		}
-	 }
+	 
 }

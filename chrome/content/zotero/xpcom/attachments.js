@@ -658,7 +658,7 @@ Zotero.Attachments = new function(){
 						throw (e);
 					}
 				});
-				Zotero.Utilities.saveURI(wbp, nsIURL, file);
+				Zotero.Utilities.Internal.saveURI(wbp, nsIURL, file);
 			}
 			
 			// Add to collections

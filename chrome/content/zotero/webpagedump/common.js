@@ -672,7 +672,7 @@ var wpdCommon = {
 
 			// has the url the same filetype like the file extension?
 			//save file to target
-			Zotero.Utilities.saveURI(wbp, nsIURL, file);
+			Zotero.Utilities.Internal.saveURI(wbp, nsIURL, file);
 
 			return true;
 
