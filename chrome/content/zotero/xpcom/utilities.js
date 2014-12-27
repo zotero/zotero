@@ -1159,96 +1159,133 @@ Zotero.Utilities = {
 	 *
 	 * Adapted from http://binnyva.blogspot.com/2005/10/dump-function-javascript-equivalent-of.html
 	 */
-	"varDump":function(arr,level,maxLevel,parentObjects,path) {
-		var dumped_text = "";
-		if (level === undefined){
+	"varDump": function(obj,level,maxLevel,parentObjects,path) {
+		// Simple dump
+		var type = typeof obj;
+		if (type == 'number' || type == 'undefined' || type == 'boolean' || obj === null) {
+			if (!level) {
+				// When dumping these directly, make sure to distinguish them from regular
+				// strings as output by Zotero.debug (i.e. no quotes)
+				return '===>' + obj + '<=== (' + type + ')';
+			}
+			else {
+				return '' + obj;
+			}
+		}
+		else if (type == 'string') {
+			return JSON.stringify(obj);
+		}
+		else if (type == 'function') {
+			var funcStr = ('' + obj).trim();
+			if (!level) {
+				// Dump function contents as well if only dumping function
+				return funcStr;
+			}
+			
+			// Display [native code] label for native functions, but make it one line
+			if (/^[^{]+{\s*\[native code\]\s*}$/i.test(funcStr)) {
+				return funcStr.replace(/\s*(\[native code\])\s*/i, ' $1 ');
+			}
+			
+			// For non-native functions, display an elipsis
+			return ('' + obj).replace(/{[\s\S]*}/, '{...}');
+		}
+		else if (type != 'object') {
+			return '<<Unknown type: ' + type + '>> ' + obj;
+		}
+		
+		// More complex dump with indentation for objects
+		if (level === undefined) {
 			level = 0;
 		}
-
+		
 		if (maxLevel === undefined) {
 			maxLevel = 4;
 		}
-
-		// The padding given at the beginning of the line.
-		var level_padding = "";
-		for (var j=0;j<level+1;j++){
-			level_padding += "    ";
-		}
-
-		if (level > maxLevel){
-			return dumped_text + level_padding + "<<Maximum depth reached>>...\n";
+		
+		var objType = Object.prototype.toString.call(obj);
+		
+		if (level > maxLevel) {
+			return objType + " <<Maximum depth reached>>";
 		}
 		
-		if (typeof(arr) == 'object') { // Array/Hashes/Objects
-			var isRequest = Zotero.isFx && !Zotero.isBookmarklet
-				&& arr instanceof Components.interfaces.nsIRequest;
-			
-			//array for checking recursion
-			//initialise at first itteration
-			if(!parentObjects) {
-				parentObjects = [arr];
-				path = ['ROOT'];
+		// The padding given at the beginning of the line.
+		var level_padding = "";
+		for (var j=0; j<level+1; j++) {
+			level_padding += "    ";
+		}
+		
+		//Special handling for Error
+		var isError = obj instanceof Error;
+		if (!isError && obj.constructor) {
+			switch (obj.constructor.name) {
+				case 'Error':
+				case 'EvalError':
+				case 'RangeError':
+				case 'ReferenceError':
+				case 'SyntaxError':
+				case 'TypeError':
+				case 'URIError':
+					isError = true;
 			}
-
-			for (var item in arr) {
-				try {
-					// Don't display nsIRequest.name, which can contain password
-					if (isRequest && item == 'name') {
-						dumped_text += level_padding + "'" + item + "' => <<Skipped>>\n";
-						continue;
-					}
-					
-					var value = arr[item];
-				} catch(e) {
-					dumped_text += level_padding + "'" + item + "' => <<Access Denied>>\n";
+		}
+		if (isError) {
+			return (obj.constructor.name ? obj.constructor.name : 'Error') + ': '
+				+ (obj.message ? ('' + obj.message).replace(/^/gm, level_padding).trim() : '')
+				+ '\n' + level_padding + "===== Stack Trace =====\n"
+				+ (obj.stack ? obj.stack.trim().replace(/^(?=.)/gm, level_padding) : '')
+				+ '\n' + level_padding + "=======================";
+		}
+		
+		// Only dump single level for nsIDOMNode objects (including document)
+		if (Zotero.isFx && !Zotero.isBookmarklet
+			&& obj instanceof Components.interfaces.nsIDOMNode
+		) {
+			level = maxLevel;
+		}
+		
+		// Recursion checking
+		if(!parentObjects) {
+			parentObjects = [obj];
+			path = ['ROOT'];
+		}
+		
+		var isArray = objType == '[object Array]'
+		var dumpedText = isArray ? '[' : objType + ' {';
+		for (var prop in obj) {
+			dumpedText += '\n' + level_padding + JSON.stringify(prop) + ": ";
+			
+			try {
+				var value = obj[prop];
+			} catch(e) {
+				dumpedText += "<<Access Denied>>";
+				continue;
+			}
+			
+			// Check for recursion
+			if (typeof(value) == 'object') {
+				var i = parentObjects.indexOf(value);
+				if(i != -1) {
+					var parentName = path.slice(0,i+1).join('->');
+					dumpedText += "<<Reference to parent object " + parentName + " >>";
 					continue;
 				}
-				
-				if (typeof(value) == 'object') { // If it is an array
-					//check for recursion
-					var i = parentObjects.indexOf(value);
-					if(i != -1) {
-						var parentName = path.slice(0,i+1).join('->');
-						dumped_text += level_padding + "'" + item + "' => <<Reference to parent object " + parentName + " >>\n";
-						continue;
-					}
-
-					var openBrace = '{', closeBrace = '}';
-					var type = Object.prototype.toString.call(value);
-					if(type == '[object Array]') {
-						openBrace = '[';
-						closeBrace = ']';
-					}
-
-					dumped_text += level_padding + "'" + item + "' => " + type + ' ' + openBrace;
-					//only recurse if there's anything in the object, purely cosmetical
-					try {
-						for(var i in value) {
-							dumped_text += "\n" + Zotero.Utilities.varDump(value,level+1,maxLevel,parentObjects.concat([value]),path.concat([item])) + level_padding;
-							break;
-						}
-					} catch(e) {
-						dumped_text += "<<Error processing object:\n" + e + ">>\n";
-					}
-					dumped_text += closeBrace + "\n";
-				}
-				else {
-					if (typeof value == 'function'){
-						dumped_text += level_padding + "'" + item + "' => function(...){...} \n";
-					}
-					else if (typeof value == 'number') {
-						dumped_text += level_padding + "'" + item + "' => " + value + "\n";
-					}
-					else {
-						dumped_text += level_padding + "'" + item + "' => \"" + value + "\"\n";
-					}
-				}
+			}
+			
+			try {
+				dumpedText += Zotero.Utilities.varDump(value,level+1,maxLevel,parentObjects.concat([value]),path.concat([prop]));
+			} catch(e) {
+				dumpedText += "<<Error processing property: " + e.message + " (" + value + ")>>";
 			}
 		}
-		else { // Stings/Chars/Numbers etc.
-			dumped_text = "===>"+arr+"<===("+typeof(arr)+")";
+		
+		var lastChar = dumpedText.charAt(dumpedText.length - 1);
+		if (lastChar != '[' && lastChar != '{') {
+			dumpedText += '\n' + level_padding.substr(4);
 		}
-		return dumped_text;
+		dumpedText += isArray ? ']' : '}';
+		
+		return dumpedText;
 	},
 	
 	/**

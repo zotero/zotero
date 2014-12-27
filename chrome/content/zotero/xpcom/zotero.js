@@ -46,7 +46,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	this.logError = logError;
 	this.getErrors = getErrors;
 	this.getSystemInfo = getSystemInfo;
-	this.safeDebug = safeDebug;
 	this.getString = getString;
 	this.localeJoin = localeJoin;
 	this.setFontSize = setFontSize;
@@ -1397,22 +1396,6 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		Components.utils.import("resource://gre/modules/AddonManager.jsm");
 		AddonManager.getAllAddons(onHaveInstalledAddons);
 	}
-	
-	
-	function safeDebug(obj){
-		for (var i in obj){
-			try {
-				Zotero.debug(i + ': ' + obj[i]);
-			}
-			catch (e){
-				try {
-					Zotero.debug(i + ': ERROR');
-				}
-				catch (e){}
-			}
-		}
-	}
-	
 	
 	function getString(name, params){
 		try {
