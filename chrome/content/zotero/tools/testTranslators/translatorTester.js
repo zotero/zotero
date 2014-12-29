@@ -195,6 +195,8 @@ Zotero_TranslatorTester = function(translator, type, debugCallback) {
 	}
 };
 
+Zotero_TranslatorTester.DEFER_DELAY = 30000; // Delay for deferred tests
+
 /**
  * Removes document objects, which contain cyclic references, and other fields to be ignored from items
  * @param {Object} Item, in the format returned by Zotero.Item.serialize()
@@ -374,7 +376,14 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 	var hiddenBrowser = Zotero.HTTP.processDocuments(test.url,
 		function(doc) {
 			if(test.defer) {
-				Zotero.setTimeout(function() { runTest(doc) }, 30000, true);
+				me._debug(this, "TranslatorTesting: Waiting "
+					+ (Zotero_TranslatorTester.DEFER_DELAY/1000)
+					+ " second(s) for page content to settle"
+				);
+				Zotero.setTimeout(
+					function() {runTest(hiddenBrowser.contentDocument) },
+					Zotero_TranslatorTester.DEFER_DELAY, true
+				);
 			} else {
 				runTest(doc);
 			}
@@ -385,6 +394,8 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 		},
 		true
 	);
+	
+	hiddenBrowser.docShell.allowMetaRedirects = true;
 };
 
 /**
