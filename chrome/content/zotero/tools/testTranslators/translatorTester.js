@@ -319,7 +319,7 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
 	var testNumber = this.tests.length-this.pending.length;
 	var me = this;
 	
-	this._debug(this, "\nTranslatorTester: Running "+this.translator.label+" Test "+testNumber);
+	this._debug(this, "TranslatorTester: Running "+this.translator.label+" Test "+testNumber);
 	
 	var executedCallback = false;
 	var callback = function(obj, test, status, message) {
