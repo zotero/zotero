@@ -255,7 +255,7 @@
 	background-color: #8b8b8b !important;
 }
 
-#zotero-collections-splitter[state=collapsed]
+#zotero-collections-splitter[state=collapsed], #zotero-items-splitter[state=collapsed]
 {
 	border-right: 1px;
 	border-color: #A5A5A5;
@@ -267,7 +267,7 @@
 	padding: 0;
 }
 
-#zotero-collections-splitter[state=collapsed] > grippy
+#zotero-collections-splitter[state=collapsed] > grippy, #zotero-items-splitter[state=collapsed] > grippy
 {
 	-moz-appearance: none;
 	background-image: url("chrome://zotero/skin/mac/vgrippy.png");
@@ -297,7 +297,7 @@
 	height: 8px;
 }
 
-#zotero-tags-splitter > grippy:hover, #zotero-collections-splitter > grippy:hover
+#zotero-tags-splitter > grippy:hover, #zotero-collections-splitter > grippy:hover, #zotero-items-splitter  > grippy:hover
 {
 	background-color:transparent;
 }

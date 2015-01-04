@@ -4100,18 +4100,51 @@ var ZoteroPane = new function()
 	 */
 	this.updateToolbarPosition = function() {
 		if(document.getElementById("zotero-pane-stack").hidden) return;
-		const PANES = ["collections", "items"];
-		for each(var paneName in PANES) {
-			var pane = document.getElementById("zotero-"+paneName+"-pane");
-			var splitter = document.getElementById("zotero-"+paneName+"-splitter");
-			var toolbar = document.getElementById("zotero-"+paneName+"-toolbar");
-			
-			var paneComputedStyle = window.getComputedStyle(pane, null);
-			var splitterComputedStyle = window.getComputedStyle(splitter, null);
-			
-			toolbar.style.width = paneComputedStyle.getPropertyValue("width");
-			toolbar.style.marginRight = splitterComputedStyle.getPropertyValue("width");
+		
+		var collectionsPane = document.getElementById("zotero-collections-pane");
+		var collectionsToolbar = document.getElementById("zotero-collections-toolbar");
+		var collectionsSplitter = document.getElementById("zotero-collections-splitter");
+		var itemsPane = document.getElementById("zotero-items-pane");
+		var itemsToolbar = document.getElementById("zotero-items-toolbar");
+		var itemsSplitter = document.getElementById("zotero-items-splitter");
+		var itemPane = document.getElementById("zotero-item-pane");
+		var itemToolbar = document.getElementById("zotero-item-toolbar");
+		
+		var collectionsPaneComputedStyle = window.getComputedStyle(collectionsPane, null);
+		var collectionsSplitterComputedStyle = window.getComputedStyle(collectionsSplitter, null);
+		var itemsPaneComputedStyle = window.getComputedStyle(itemsPane, null);
+		var itemsSplitterComputedStyle = window.getComputedStyle(itemsSplitter, null);
+		var itemPaneComputedStyle = window.getComputedStyle(itemPane, null);
+		
+		var collectionsPaneWidth = collectionsPaneComputedStyle.getPropertyValue("width");
+		var collectionsSplitterWidth = collectionsSplitterComputedStyle.getPropertyValue("width");
+		var itemsPaneWidth = itemsPaneComputedStyle.getPropertyValue("width");
+		var itemsSplitterWidth = itemsSplitterComputedStyle.getPropertyValue("width");
+		var itemPaneWidth = itemPaneComputedStyle.getPropertyValue("width");
+		
+		collectionsToolbar.style.width = collectionsPaneWidth;
+		collectionsToolbar.style.marginRight = collectionsSplitterWidth;
+		itemsToolbar.style.marginRight = itemsSplitterWidth;
+		
+		var itemsToolbarWidthNumber = parseInt(itemsPaneWidth, 10);
+
+		if (collectionsPane.collapsed) {
+			var collectionsToolbarComputedStyle = window.getComputedStyle(collectionsToolbar, null);
+			var collectionsToolbarWidth = collectionsToolbarComputedStyle.getPropertyValue("width");// real width (nonzero) after the new definition
+			itemsToolbarWidthNumber = itemsToolbarWidthNumber-parseInt(collectionsToolbarWidth, 10);
 		}
+
+		if (itemPane.collapsed) {
+		// Then the itemsToolbar and itemToolbar share the same space, and it seems best to use some flex attribute from right (because there might be other icons appearing or vanishing).
+			itemsToolbar.style.removeProperty('width');
+			itemsToolbar.setAttribute("flex", "1");
+			itemToolbar.setAttribute("flex", "0");
+		} else {
+ 			itemsToolbar.style.width = itemsToolbarWidthNumber + "px";
+			itemsToolbar.setAttribute("flex", "0");
+			itemToolbar.setAttribute("flex", "1");
+		}
+
 	}
 	
 	/**
