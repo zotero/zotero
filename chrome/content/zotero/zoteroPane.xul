@@ -538,9 +538,11 @@
 					</deck>
 				</vbox>
 				
-				<splitter id="zotero-items-splitter" resizebefore="closest" resizeafter="closest"
+				<splitter id="zotero-items-splitter" resizebefore="closest" resizeafter="closest" collapse="after" zotero-persist="state"
 					onmousemove="ZoteroPane_Local.updateToolbarPosition()"
-					oncommand="ZoteroPane_Local.updateToolbarPosition()"/>
+					oncommand="ZoteroPane_Local.updateToolbarPosition()">
+					<grippy id="zotero-items-grippy"/>
+				</splitter>
 				
 				<!-- itemPane.xul -->
 				<vbox id="zotero-item-pane"/>

@@ -222,7 +222,7 @@
 #zotero-item-pane
 {
 	width: 338px;
-	min-width: 338px;
+	min-width: 250px;
 }
 
 #zotero-pane .toolbar
