@@ -28,22 +28,17 @@ Zotero.Connector = new function() {
 	const CONNECTOR_API_VERSION = 2;
 	
 	var _ieStandaloneIframeTarget, _ieConnectorCallbacks;
-	this.isOnline = null;
+	// As of Chrome 38 (and corresponding Opera version 24?) pages loaded over
+	// https (i.e. the zotero bookmarklet iframe) can not send requests over
+	// http, so pinging Standalone at http://127.0.0.1 fails.
+	// Disable for all browsers, except IE, which may be used frequently with ZSA
+	this.isOnline = Zotero.isBookmarklet && !Zotero.isIE ? false : null;
 	
 	/**
 	 * Checks if Zotero is online and passes current status to callback
 	 * @param {Function} callback
 	 */
 	this.checkIsOnline = function(callback) {
-		// As of Chrome 38 (and corresponding Opera version 24?) pages loaded over
-		// https (i.e. the zotero bookmarklet iframe) can not send requests over
-		// http, so pinging Standalone at http://127.0.0.1 fails.
-		// Disable for all browsers, except IE, which may be used frequently with ZSA
-		if(Zotero.isBookmarklet && !Zotero.isIE) {
-			callback(false);
-			return;
-		}
-		
 		// Only check once in bookmarklet
 		if(Zotero.isBookmarklet && this.isOnline !== null) {
 			callback(this.isOnline);
