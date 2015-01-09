@@ -331,6 +331,13 @@ Zotero.Proxies = new function() {
 		return (onlyReturnIfProxied ? false : url);
 	}
 	
+	this.getKnownProxy = function(url) {
+		var uri = ioService.newURI(url, null, null);
+		if(Zotero.Proxies.hosts[uri.hostPort] && Zotero.Proxies.hosts[uri.hostPort].proxyID) {
+			return new Zotero.SimpleProxy(Zotero.Proxies.hosts[uri.hostPort]);
+		}
+	}
+	
 	/**
 	 * Determines whether a host is blacklisted, i.e., whether we should refuse to save transparent
 	 * proxy entries for this host. This is necessary because EZProxy offers to proxy all Google and
@@ -713,6 +720,47 @@ Zotero.Proxy.prototype._loadFromRow = function(row) {
 }
 
 /**
+ * A proxy wrapper to simplify usage in translators
+ * @param {Function | Zotero.Proxy} toProper toProper function or a Zotero.Proxy object
+ * @param {Function} [toProxy]
+ */
+Zotero.SimpleProxy = function(toProper, toProxy) {
+	if(toProper && toProper instanceof Zotero.Proxy) {
+		this.wrapProxy(toProper);
+		return;
+	}
+	
+	if(toProper) this.toProper = toProper;
+	if(toProxy) this.toProxy = toProxy;
+};
+
+Zotero.SimpleProxy.prototype.isProxied = function(url) {
+	if(this.toProper) {
+		return this.toProper(url) != url;
+	}
+	return false;
+};
+
+Zotero.SimpleProxy.prototype.wrapProxy = function(proxy) {
+	this._proxy = proxy;
+	
+	this.toProper = function(url) {
+		if(this._proxy.regexp) {
+			var m = this._proxy.regexp.exec(url);
+			if(m) {
+				return this._proxy.toProper(m);
+			}
+		}
+		return url;
+	};
+	
+	this.toProxy = function(url) {
+		var uri = ioService.newURI(url, null, null);
+		return this._proxy.toProxy(uri);
+	};
+}
+
+/**
  * Detectors for various proxy systems
  * @namespace
  */
@@ -1002,3 +1050,48 @@ Zotero.Proxies.DNS = new function() {
 		return domain;
 	}
 };
+
+Zotero.Proxies.generatePotentialProxies = function(uri) {
+	var proxies = [];
+	// if there is a subdomain that is also a TLD, also test against URI with the domain
+	// dropped after the TLD
+	// (i.e., www.nature.com.mutex.gmu.edu => www.nature.com)
+	var m = /^(https?:\/\/)([^\/]+)/i.exec(uri);
+	if(m) {
+		// First, drop the 0- if it exists (this is an III invention)
+		var host = m[2];
+		var prefix = "";
+		if(host.substr(0, 2) === "0-") {
+			host = host.substr(2);
+			prefix = "0-";
+		}
+		var hostnames = host.split(".");
+		for(var i=1; i<hostnames.length-2; i++) {
+			if(TLDS[hostnames[i].toLowerCase()]) {
+				var proxyHost = "." + hostnames.slice(i+1).join(".");
+				proxies.push(new Zotero.SimpleProxy(
+					// toProper
+					(function(proxyHost) {
+						var regexp = new RegExp(
+							"(^https?://)" + Zotero.Utilities.quotemeta(prefix) + "([^/]+)"
+							+ Zotero.Utilities.quotemeta(proxyHost) + "(?=/|$)",
+							"i");
+						return function(url) {
+							return url.replace(regexp, "$1$2");
+						};
+					})(proxyHost),
+					
+					//toProxy
+					(function(proxyHost) {
+						return function(url) {
+							return url.replace(
+								/(https?:\/\/)([^\/]+)/i,
+								"$1" + prefix + "$2" + proxyHost);
+						};
+					})(proxyHost)
+				));
+			}
+		}
+	}
+	return proxies;
+}
