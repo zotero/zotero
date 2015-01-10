@@ -1739,17 +1739,18 @@
 								}
 							}
 							
-							//Add the creators in lastNameArray one at a time
+							// Add the creators in lastNameArray one at a time
 							for each(var tempName in nameArray) {
 								// Check for tab to determine creator name format
-								otherFields.fieldMode = (tempName.indexOf('\t') == -1) ? 1 : 0;
-								if (otherFields.fieldMode == 0) {
-									otherFields.lastName=tempName.split('\t')[0];
-									otherFields.firstName=tempName.split('\t')[1];
-								} 
-								else {
-									otherFields.lastName=tempName;
-									otherFields.firstName='';
+								if (tempName.indexOf('\t') != -1) {
+									otherFields.fieldMode = 0;
+									[otherFields.lastName, otherFields.firstName] = tempName.split('\t');
+								} else if (tempName.indexOf(',') != -1 && otherFields.fieldMode == 0) {
+									[otherFields.lastName, otherFields.firstName] = tempName.split(',');
+								} else {
+									otherFields.fieldMode = 1;
+									otherFields.lastName = tempName;
+									otherFields.firstName = '';
 								}
 								this.modifyCreator(creatorIndex,otherFields);
 								creatorIndex++;
@@ -1975,8 +1976,22 @@
 						default:
 							throw ("Invalid transform mode '" + mode + "' in zoteroitembox.textTransform()");
 					}
-					this._setFieldValue(label, newVal);
-					this._modifyField(label.getAttribute('fieldname'), newVal, this.saveOnEdit);
+					
+					var currentFieldName = label.getAttribute('fieldname');
+					// currentFieldName is either
+					// creator field, e.g. creator-2-lastName
+					// or, single field, e.g. title
+					if (currentFieldName.startsWith('creator-')) {
+						var row = Zotero.getAncestorByTagName(document.popupNode, 'row');
+						var creatorIndex = parseInt(currentFieldName.split('-')[1]);
+						var fields = this.getCreatorFields(row);
+						fields[currentFieldName.split('-')[2]] = newVal;
+						this.modifyCreator(creatorIndex, fields);
+						this.item.save();
+					} else {
+						this._setFieldValue(label, newVal);
+						this._modifyField(currentFieldName, newVal, this.saveOnEdit);
+					}
 
 				]]>
 				</body>
@@ -2476,6 +2491,8 @@
 							return !hideTransforms;">
 						<menuitem label="&zotero.item.creatorTransform.nameSwap;"
 							oncommand="document.getBindingParent(this).swapNames();"/>
+						<menuitem label="&zotero.item.creatorTransform.titlecase;"
+							oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'title')"/>
 					</menupopup>
 					<zoteroguidancepanel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
 				</popupset>
