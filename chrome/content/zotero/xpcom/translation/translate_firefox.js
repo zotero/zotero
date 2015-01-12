@@ -423,7 +423,7 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	this.sandbox.XMLSerializer.__exposedProps__ = {"prototype":"r"};
 	this.sandbox.XMLSerializer.prototype = {"__exposedProps__":{"serializeToString":"r"}};
 
-	var expr = "(function(x) { return function() { this.args = arguments; return x.apply(this); }.bind({}); })";
+	var expr = "(function(x) { return function() { this.args = arguments; return Function.prototype.apply.call(x, this); }.bind({}); })";
 	this._makeContentForwarder = Components.utils.evalInSandbox(expr, sandbox);
 
 	if (Zotero.platformMajorVersion >= 35) {
