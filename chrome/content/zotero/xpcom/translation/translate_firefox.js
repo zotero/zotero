@@ -174,6 +174,8 @@ Zotero.Translate.DOMWrapper = new function() {
 		// Handle our special API.
 		if (name == "__wrappedObject")
 			return { value: this.wrappedObject, writeable: false, configurable: false, enumerable: false };
+		if (name == "__wrapperOverrides")
+			return { value: this.overrides, writeable: false, configurable: false, enumerable: false };
 		// Handle __exposedProps__.
 		if (name == "__exposedProps__")
 			return { value: ExposedPropsWaiver, writable: false, configurable: false, enumerable: false };
@@ -196,7 +198,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		
 		// Hack for overriding some properties
 		if (this.overrides.hasOwnProperty(name))
-			return this.overrides[name];
+			return { "enumerable": true, "value": this.overrides[name] };
 		// Case 1: Own Properties.
 		//
 		// This one is easy, thanks to Object.getOwnPropertyDescriptor().
@@ -425,28 +427,29 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	this._makeContentForwarder = Components.utils.evalInSandbox(expr, sandbox);
 
 	if (Zotero.platformMajorVersion >= 35) {
-		var _proxy = Components.utils.evalInSandbox('(function (target, x) {'+
-		'	return new Proxy(x, ProxyHandler(target));'+
+		var _proxy = Components.utils.evalInSandbox('(function (target, x, overrides) {'+
+		'	return new Proxy(x, ProxyHandler(target, overrides));'+
 		'})', sandbox);
-		var wrap = this.wrap = function(target, x) {
+		var wrap = this.wrap = function(target, x, overrides) {
 			if (target === null || (typeof target !== "object" && typeof target !== "function")) return target;
 			if (!x) x = new sandbox.Object();
-			return _proxy(target, x);
+			return _proxy(target, x, overrides);
 		};
 		var me = this;
 		sandbox.ProxyHandler = this._makeContentForwarder(function() {
 			var target = (this.args.wrappedJSObject || this.args)[0];
+			var overrides = (this.args.wrappedJSObject || this.args)[1] || {};
 			if(target instanceof Components.interfaces.nsISupports) {
 				target = new XPCNativeWrapper(target);
 			}
 			var ret = new sandbox.Object();
 			ret.wrappedJSObject.has = function(x, prop) {
-				return prop in target;
+				return overrides.hasOwnProperty(prop) || prop in target;
 			};
 			ret.wrappedJSObject.get = function(x, prop, receiver) {
 				if (prop === "__wrappedObject") return target;
 				if (prop === "__wrappingManager") return me;
-				var y = target[prop];
+				var y = overrides.hasOwnProperty(prop) ? overrides[prop] : target[prop];
 				if (y === null || (typeof y !== "object" && typeof y !== "function")) return y;
 				return wrap(y, typeof y === "function" ? function() {
 					var args = Array.prototype.slice.apply(arguments);

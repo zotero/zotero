@@ -990,17 +990,11 @@ Zotero.HTTP = new function() {
 	 	if(typeof url !== "object") {
 	 		url = Services.io.newURI(url, null, null).QueryInterface(Components.interfaces.nsIURL);
 		}
-
-		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-             .createInstance(Components.interfaces.nsIDOMParser);
-		var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
-			.getService(Components.interfaces.nsIScriptSecurityManager);
-		parser.init(secMan.getCodebasePrincipal(url), url, url);
 		return Zotero.Translate.DOMWrapper.wrap(doc, {
-			"documentURI":{ "enumerable":true, "value":url.spec },
-			"URL":{ "enumerable":true, "value":url.spec },
-			"location":{ "enumerable":true, "value":(new Zotero.HTTP.Location(url)) },
-			"defaultView":{ "enumerable":true, "value":(new Zotero.HTTP.Window(url)) }
+			"documentURI":url.spec,
+			"URL":url.spec,
+			"location":new Zotero.HTTP.Location(url),
+			"defaultView":new Zotero.HTTP.Window(url)
 		});
 	 }
 }

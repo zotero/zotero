@@ -1172,7 +1172,7 @@ Zotero.Translate.Base.prototype = {
 		
 		// translate
 		try {
-			Function.prototype.apply.apply(this._sandboxManager.sandbox["do"+this._entryFunctionSuffix], [null, this._getParameters()]);
+			Function.prototype.apply.call(this._sandboxManager.sandbox["do"+this._entryFunctionSuffix], null, this._getParameters());
 		} catch(e) {
 			this.complete(false, e);
 			return false;
@@ -1445,7 +1445,7 @@ Zotero.Translate.Base.prototype = {
 		this.incrementAsyncProcesses("Zotero.Translate#getTranslators");
 		
 		try {
-			var returnValue = Function.prototype.apply.apply(this._sandboxManager.sandbox["detect"+this._entryFunctionSuffix], [null, this._getParameters()]);
+			var returnValue = Function.prototype.apply.call(this._sandboxManager.sandbox["detect"+this._entryFunctionSuffix], null, this._getParameters());
 		} catch(e) {
 			this.complete(false, e);
 			return;
@@ -1718,7 +1718,14 @@ Zotero.Translate.Web.prototype._getSandboxLocation = function() {
 /**
  * Pass document and location to detect* and do* functions
  */
-Zotero.Translate.Web.prototype._getParameters = function() { return [this.document, this.location]; }
+Zotero.Translate.Web.prototype._getParameters = function() {
+	if (Zotero.Translate.DOMWrapper && Zotero.Translate.DOMWrapper.isWrapped(this.document)) {
+		return [this._sandboxManager.wrap(Zotero.Translate.DOMWrapper.unwrap(this.document), null,
+			                              this.document.__wrapperOverrides), this.location];
+	} else {
+		return [this.document, this.location];
+	}
+};
 
 /**
  * Prepare translation
