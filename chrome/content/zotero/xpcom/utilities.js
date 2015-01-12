@@ -229,7 +229,7 @@ Zotero.Utilities = {
 	 */
 	"trimInternal":function(/**String*/ s) {
 		if (typeof(s) != "string") {
-			throw "trimInternal: argument must be a string";
+			throw new Error("trimInternal: argument must be a string");
 		}
 		
 		s = s.replace(/[\xA0\r\n\s]+/g, " ");
@@ -1046,11 +1046,11 @@ Zotero.Utilities = {
 			// For some reason, if elements is wrapped by an object
 			// Xray, we won't be able to unwrap the DOMWrapper around
 			// the element. So waive the object Xray.
-			var element = elements.wrappedJSObject ? elements.wrappedJSObject[i] : elements[i];
+			var maybeWrappedEl = elements.wrappedJSObject ? elements.wrappedJSObject[i] : elements[i];
 			
 			// Firefox 5 hack, so we will preserve Fx5DOMWrappers
-			var isWrapped = Zotero.Translate.DOMWrapper && Zotero.Translate.DOMWrapper.isWrapped(element);
-			if(isWrapped) element = Zotero.Translate.DOMWrapper.unwrap(element);
+			var isWrapped = Zotero.Translate.DOMWrapper && Zotero.Translate.DOMWrapper.isWrapped(maybeWrappedEl);
+			var element = isWrapped ? Zotero.Translate.DOMWrapper.unwrap(maybeWrappedEl) : maybeWrappedEl;
 
 			// We waived the object Xray above, which will waive the
 			// DOM Xray, so make sure we have a DOM Xray wrapper.
@@ -1083,7 +1083,7 @@ Zotero.Utilities = {
 				var newEl;
 				while(newEl = xpathObject.iterateNext()) {
 					// Firefox 5 hack
-					results.push(isWrapped ? Zotero.Translate.DOMWrapper.wrap(newEl) : newEl);
+					results.push(isWrapped ? Zotero.Translate.DOMWrapper.wrapIn(newEl, maybeWrappedEl) : newEl);
 				}
 			} else if("selectNodes" in element) {
 				// We use JavaScript-XPath in IE for HTML documents, but with an XML
@@ -1125,6 +1125,8 @@ Zotero.Utilities = {
 		var strings = new Array(elements.length);
 		for(var i=0, n=elements.length; i<n; i++) {
 			var el = elements[i];
+			if(el.wrappedJSObject) el = el.wrappedJSObject;
+			if(Zotero.Translate.DOMWrapper) el = Zotero.Translate.DOMWrapper.unwrap(el);
 			strings[i] =
 				(el.nodeType === 2 /*ATTRIBUTE_NODE*/ && "value" in el) ? el.value
 				: "textContent" in el ? el.textContent
