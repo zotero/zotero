@@ -1,0 +1,10 @@
+<!ENTITY zotero.cslpreview		"Zotero Style Preview">
+<!ENTITY zotero.cslpreview.refresh		"Refresh">
+
+<!ENTITY zotero.cslpreview.citationFormat		"Citation Format:">
+<!ENTITY zotero.cslpreview.citationFormat.all		"all">
+<!ENTITY zotero.cslpreview.citationFormat.author		"author">
+<!ENTITY zotero.cslpreview.citationFormat.authorDate		"author-date">
+<!ENTITY zotero.cslpreview.citationFormat.label		"label">
+<!ENTITY zotero.cslpreview.citationFormat.note		"note">
+<!ENTITY zotero.cslpreview.citationFormat.numeric		"numeric">

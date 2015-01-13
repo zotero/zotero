@@ -30,7 +30,7 @@
 	id="csl-edit"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	onload="Zotero_CSL_Editor.init();"
-	title="Zotero Reference Test pane">
+	title="Zotero Style Editor">
 	
 	<script src="chrome://zotero/content/include.js"/>
 	

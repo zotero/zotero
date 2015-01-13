@@ -27,11 +27,13 @@
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/cslpreview.dtd">
+
 <window
 	id="csl-preview"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	onload="Zotero_CSL_Preview.init();"
-	title="Zotero Preview pane">
+	title="&zotero.cslpreview;">
 	
 	<script src="chrome://zotero/content/include.js"/>
 	
@@ -46,13 +48,13 @@
 				//refresh();
 				
 				var iframe = document.getElementById('zotero-csl-preview-box');
-				iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p>Select one or more items in Zotero and click the "Refresh" button to see how these items are rendered by the installed CSL citation styles.</p></body></html>';
+				iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p>' + Zotero.getString('cslpreview.instruction') + '</p></body></html>';
 			}
 			function refresh() {
 				var iframe = document.getElementById('zotero-csl-preview-box');
 				var items = Zotero.getActiveZoteroPane().getSelectedItems();
 				if (items.length === 0) {
-					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No items selected in Zotero.</p></body></html>';
+					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">' + Zotero.getString('cslpreview.warning.noItems') + '</p></body></html>';
 					return;
 				}
 				var progressWin = new Zotero.ProgressWindow();
@@ -120,21 +122,21 @@
 		}();
 	]]>
 	</script>
-	<!-- NEEDS LOCALISING -->
+
 	<vbox flex="1">
 	   <hbox >
 		<hbox align="center">
-			<button id="preview-refresh-button" label="Refresh" oncommand="Zotero_CSL_Preview.refresh()"/>
+			<button id="preview-refresh-button" label="&zotero.cslpreview.refresh;" oncommand="Zotero_CSL_Preview.refresh()"/>
 			<groupbox orient="horizontal" align="center">
-				<label value="Citation format:" />
+				<label value="&zotero.cslpreview.citationFormat;" />
 				<menulist id="citation-format" oncommand="Zotero_CSL_Preview.refresh()">
 					<menupopup>
-						<menuitem label="all" value="all"/>
-						<menuitem label="author" value="author"/>
-						<menuitem label="author-date" value="author-date"/>
-						<menuitem label="label" value="label"/>
-						<menuitem label="note" value="note"/>
-						<menuitem label="numeric" value="numeric"/>
+						<menuitem value="all" label="&zotero.cslpreview.citationFormat.all;"/>
+						<menuitem value="author" label="&zotero.cslpreview.citationFormat.author;"/>
+						<menuitem value="author-date" label="&zotero.cslpreview.citationFormat.authorDate;"/>
+						<menuitem value="label" label="&zotero.cslpreview.citationFormat.label;"/>
+						<menuitem value="note" label="&zotero.cslpreview.citationFormat.note;"/>
+						<menuitem value="numeric" label="&zotero.cslpreview.citationFormat.numeric;"/>
 					</menupopup>
 				</menulist>
 			</groupbox>
