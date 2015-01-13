@@ -259,6 +259,13 @@ Zotero.Translate.Sandbox = {
 							item = item.wrappedJSObject ? item.wrappedJSObject : item;
 							if(arg1 == "itemDone") {
 								item.complete = translate._sandboxZotero.Item.prototype.complete;
+							} else if(arg1 == "translators" && Zotero.isFx && !Zotero.isBookmarklet) {
+								var translators = new translate._sandboxManager.sandbox.Array();
+								translators = translators.wrappedJSObject || translators;
+								for (var i=0; i<item.length; i++) {
+									translators.push(item[i]);
+								}
+								item = translators;
 							}
 							arg2(obj, item);
 						} catch(e) {
