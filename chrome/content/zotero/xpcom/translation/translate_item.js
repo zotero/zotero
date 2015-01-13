@@ -412,9 +412,10 @@ Zotero.Translate.ItemSaver.prototype = {
 				}
 			}
 			
+			var doc = undefined;
 			if(attachment.document) {
-				attachment.document = Zotero.Translate.DOMWrapper.unwrap(attachment.document);
-				if(!attachment.title) attachment.title = attachment.document.title;
+				doc = new XPCNativeWrapper(Zotero.Translate.DOMWrapper.unwrap(attachment.document));
+				if(!attachment.title) attachment.title = doc.title;
 			}
 			var title = attachment.title || null;
 			if(!title) {
@@ -426,9 +427,9 @@ Zotero.Translate.ItemSaver.prototype = {
 				// if snapshot is explicitly set to false, attach as link
 				attachment.linkMode = "linked_url";
 				let url, mimeType;
-				if(attachment.document) {
-					url = attachment.document.location.href;
-					mimeType = attachment.mimeType ? attachment.mimeType : attachment.document.contentType;
+				if(doc) {
+					url = doc.location.href;
+					mimeType = attachment.mimeType ? attachment.mimeType : doc.contentType;
 				} else {
 					url = attachment.url
 					mimeType = attachment.mimeType ? attachment.mimeType : undefined;
@@ -464,10 +465,10 @@ Zotero.Translate.ItemSaver.prototype = {
 				return true;
 			} else {
 				// if snapshot is not explicitly set to false, retrieve snapshot
-				if(attachment.document) {
+				if(doc) {
 					try {
 						attachment.linkMode = "imported_url";
-						Zotero.Attachments.importFromDocument(attachment.document,
+						Zotero.Attachments.importFromDocument(doc,
 							parentID, title, null, function(status, err) {
 								if(status) {
 									attachmentCallback(attachment, 100);
