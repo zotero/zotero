@@ -404,7 +404,7 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 			this.__exposedProps__ = {"parseFromString":"r"};
 			this.parseFromString = function(str, contentType) {
 				var xhr = sandbox.XMLHttpRequest();
-				xhr.open("GET", "data:"+contentType+";base64,"+btoa(str), false);
+				xhr.open("GET", "data:"+contentType+";charset=utf-8,"+encodeURIComponent(str), false);
 				xhr.send();
 				if (!xhr.responseXML) throw new Error("error parsing XML");
 				return xhr.responseXML;
