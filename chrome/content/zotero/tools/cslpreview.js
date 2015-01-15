@@ -33,13 +33,13 @@ var Zotero_CSL_Preview = new function() {
 		//refresh();
 		
 		var iframe = document.getElementById('zotero-csl-preview-box');
-		iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p>' + Zotero.getString('cslpreview.instruction') + '</p></body></html>';
+		iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p>' + Zotero.getString('styles.preview.instructions') + '</p></body></html>';
 	}
 	function refresh() {
 		var iframe = document.getElementById('zotero-csl-preview-box');
 		var items = Zotero.getActiveZoteroPane().getSelectedItems();
 		if (items.length === 0) {
-			iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">' + Zotero.getString('cslpreview.warning.noItems') + '</p></body></html>';
+			iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">' + Zotero.getString('styles.editor.warning.noItems') + '</p></body></html>';
 			return;
 		}
 		var progressWin = new Zotero.ProgressWindow();

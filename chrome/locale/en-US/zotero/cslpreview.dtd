@@ -1,10 +1,9 @@
-<!ENTITY zotero.cslpreview		"Zotero Style Preview">
-<!ENTITY zotero.cslpreview.refresh		"Refresh">
+<!ENTITY styles.preview		"Zotero Style Preview">
 
-<!ENTITY zotero.cslpreview.citationFormat		"Citation Format:">
-<!ENTITY zotero.cslpreview.citationFormat.all		"all">
-<!ENTITY zotero.cslpreview.citationFormat.author		"author">
-<!ENTITY zotero.cslpreview.citationFormat.authorDate		"author-date">
-<!ENTITY zotero.cslpreview.citationFormat.label		"label">
-<!ENTITY zotero.cslpreview.citationFormat.note		"note">
-<!ENTITY zotero.cslpreview.citationFormat.numeric		"numeric">
+<!ENTITY styles.preview.citationFormat		"Citation Format:">
+<!ENTITY styles.preview.citationFormat.all		"all">
+<!ENTITY styles.preview.citationFormat.author		"author">
+<!ENTITY styles.preview.citationFormat.authorDate		"author-date">
+<!ENTITY styles.preview.citationFormat.label		"label">
+<!ENTITY styles.preview.citationFormat.note		"note">
+<!ENTITY styles.preview.citationFormat.numeric		"numeric">

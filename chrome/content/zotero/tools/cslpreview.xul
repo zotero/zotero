@@ -27,37 +27,37 @@
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 
-<!DOCTYPE window SYSTEM "chrome://zotero/locale/cslpreview.dtd">
+<!DOCTYPE window [
+	<!ENTITY % cslpreviewDTD SYSTEM "chrome://zotero/locale/cslpreview.dtd"> %cslpreviewDTD;
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+]>
 
 <window
 	id="csl-preview"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	onload="Zotero_CSL_Preview.init();"
-	title="&zotero.cslpreview;">
+	title="&styles.preview;">
 	
 	<script src="chrome://zotero/content/include.js"/>
 	<script src="cslpreview.js"/>
 
 	<vbox flex="1">
-	   <hbox >
 		<hbox align="center">
-			<button id="preview-refresh-button" label="&zotero.cslpreview.refresh;" oncommand="Zotero_CSL_Preview.refresh()"/>
-			<groupbox orient="horizontal" align="center">
-				<label value="&zotero.cslpreview.citationFormat;" />
-				<menulist id="citation-format" oncommand="Zotero_CSL_Preview.refresh()">
-					<menupopup>
-						<menuitem value="all" label="&zotero.cslpreview.citationFormat.all;"/>
-						<menuitem value="author" label="&zotero.cslpreview.citationFormat.author;"/>
-						<menuitem value="author-date" label="&zotero.cslpreview.citationFormat.authorDate;"/>
-						<menuitem value="label" label="&zotero.cslpreview.citationFormat.label;"/>
-						<menuitem value="note" label="&zotero.cslpreview.citationFormat.note;"/>
-						<menuitem value="numeric" label="&zotero.cslpreview.citationFormat.numeric;"/>
-					</menupopup>
-				</menulist>
-			</groupbox>
+			<button id="preview-refresh-button" label="&zotero.general.refresh;" oncommand="Zotero_CSL_Preview.refresh()"/>
+			
+			<label value="&styles.preview.citationFormat;" />
+			<menulist id="citation-format" oncommand="Zotero_CSL_Preview.refresh()">
+				<menupopup>
+					<menuitem value="all" label="&styles.preview.citationFormat.all;"/>
+					<menuitem value="author" label="&styles.preview.citationFormat.author;"/>
+					<menuitem value="author-date" label="&styles.preview.citationFormat.authorDate;"/>
+					<menuitem value="label" label="&styles.preview.citationFormat.label;"/>
+					<menuitem value="note" label="&styles.preview.citationFormat.note;"/>
+					<menuitem value="numeric" label="&styles.preview.citationFormat.numeric;"/>
+				</menupopup>
+			</menulist>
 		</hbox>
-	   </hbox>
-	   <iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em; background:white;" overflow="auto" type="content"/>
+		<iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em; background:white;" overflow="auto" type="content"/>
 	</vbox>
 	
 </window>

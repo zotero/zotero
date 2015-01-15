@@ -69,20 +69,20 @@ var Zotero_CSL_Editor = new function() {
 		}
 		
 		pageList.selectedIndex = 0;
-		cslList.setAttribute('initialized', true)
+		cslList.setAttribute('initialized', true);
 	}
 	function refresh() {
-		var editor = document.getElementById('zotero-csl-editor')
+		var editor = document.getElementById('zotero-csl-editor');
 		generateBibliography(editor.value);
 
 	}
 	this.save = function() {
-		var editor = document.getElementById('zotero-csl-editor')
+		var editor = document.getElementById('zotero-csl-editor');
 		var style = editor.value;
 		const nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
 			.createInstance(nsIFilePicker);
-		fp.init(window, "Save Citation Style", nsIFilePicker.modeSave);
+		fp.init(window, Zotero.getString('styles.editor.save'), nsIFilePicker.modeSave);
 		fp.appendFilter("Citation Style Language", "*.csl");
 		//get the filename from the id; we could consider doing even more here like creating the id from filename. 
 		var parser = new DOMParser();
@@ -100,7 +100,7 @@ var Zotero_CSL_Editor = new function() {
 			var outputFile = fp.file;
 			Zotero.File.putContents(outputFile, style);
 		}
-	}
+	};
 	
 	function handleKeyPress(event) {
 		if (event.keyCode == 9 &&
@@ -112,7 +112,7 @@ var Zotero_CSL_Editor = new function() {
 	
 	
 	function loadCSL(cslID) {
-		var editor = document.getElementById('zotero-csl-editor')
+		var editor = document.getElementById('zotero-csl-editor');
 		var style = Zotero.Styles.get(cslID);
 		editor.value = Zotero.File.getContents(style.file);
 		editor.cslID = cslID;
@@ -127,26 +127,16 @@ var Zotero_CSL_Editor = new function() {
 		
 		var items = Zotero.getActiveZoteroPane().getSelectedItems();
 		if (items.length == 0) {
-			iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No references selected in Zotero.</p></body></html>';
+			iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">' + Zotero.getString('styles.editor.warning.noItems') + '</p></body></html>';
 			return;
 		}
 		var styleObject, styleEngine;
-		if (str.indexOf("<defaults") != -1) {
-			iframe.contentDocument.documentElement.innerHTML = 
-				'<div>'
-				+ "Old-style CSLs are no longer supported."
-				+ '</div>';
-			return;
-		}
-		else {
-			try {
-				styleObject = new Zotero.Style(str);
-				styleEngine = styleObject.getCiteProc();
-			} catch(e) {
-				iframe.contentDocument.documentElement.innerHTML = '<div>Error parsing '+
-					'style: </div><div>'+e+'</div>';
-				throw e;
-			}
+		try {
+			styleObject = new Zotero.Style(str);
+			styleEngine = styleObject.getCiteProc();
+		} catch(e) {
+			iframe.contentDocument.documentElement.innerHTML = '<div>' + Zotero.getString('styles.editor.warning.parseError') + '</div><div>'+e+'</div>';
+			throw e;
 		}
 		
 		var itemIds = [items[i].id for (i in items)];
@@ -167,10 +157,10 @@ var Zotero_CSL_Editor = new function() {
 		var search = document.getElementById('preview-pages');
 		var loc = document.getElementById('zotero-csl-page-type');
 		var pos = document.getElementById('zotero-ref-position').selectedItem.value;
-		var citations = '<h1>Single Citations</h1>';
+		var citations = '<h3>' + Zotero.getString('styles.editor.output.individualCitations') + '</h3>';
 		for (var i=0; i<citation.citationItems.length; i++) {
 			citation.citationItems[i]['suppress-author'] = author;
-			if (search.value != '') {
+			if (search.value !== '') {
 				citation.citationItems[i].locator = search.value;
 				citation.citationItems[i].label = loc.selectedItem.value;
 			}
@@ -187,21 +177,18 @@ var Zotero_CSL_Editor = new function() {
 		}
 		
 		try {
-			var multCitations = '<hr><h1>Multi Citations <span style="font-size:smaller;">(all with position "first")</span></h1>' +
+			var multCitations = '<hr><h3>' + Zotero.getString('styles.editor.output.singleCitation') + '</h3>' +
 				styleEngine.previewCitationCluster(citation, [], [], "html");
 
 			// Generate bibliography
 			styleEngine.updateItems(itemIds);
-			var bibliography = '<hr/><h1>Bibliography</h1>' + 
+			var bibliography = '<hr/><h3>' + Zotero.getString('styles.bibliography') + '</h3>' + 
 				Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
 
 			iframe.contentDocument.documentElement.innerHTML = 
-				'<div style="white-space: pre-wrap">'
-				+ citations + multCitations + bibliography
-				+ '</div>';
+				'<div>' + citations + multCitations + bibliography + '</div>';
 		} catch(e) {
-				iframe.contentDocument.documentElement.innerHTML = '<div>Error generating citations '+
-					'and bibliography: </div><div>'+e+'</div>';
+				iframe.contentDocument.documentElement.innerHTML = '<div>' + Zotero.getString('styles.editor.warning.renderError') + '</div><div>'+e+'</div>';
 				throw e;
 		}
 	}
@@ -219,4 +206,4 @@ var Zotero_CSL_Editor = new function() {
 			controller.doCommandWithParams(command, params);
 		}
 	}
-}
+}();
