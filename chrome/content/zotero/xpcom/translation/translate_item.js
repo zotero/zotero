@@ -229,25 +229,25 @@ Zotero.Translate.ItemSaver.prototype = {
 		if(!attachment.path) {
 			let url = Zotero.Attachments.cleanAttachmentURI(attachment.url);
 			if (!url) {
-				let e = "Translate: Invalid attachment URL specified <" + attachment.url + ">";
-				Zotero.debug(e, 2);
-				attachmentCallback(attachment, false, e);
-				return false;
-			}
-			attachment.url = url;
-			url = Components.classes["@mozilla.org/network/io-service;1"]
-				.getService(Components.interfaces.nsIIOService)
-				.newURI(url, null, null); // This cannot fail, since we check above
-			
-			// see if this is actually a file URL
-			if(url.scheme == "file") {
+				Zotero.debug("Translate: Invalid attachment.url specified <" + attachment.url + "> Will attempt to treat it as path.");
 				attachment.path = attachment.url;
 				attachment.url = false;
-			} else if(url.scheme != "http" && url.scheme != "https") {
-				let e = "Translate: " + url.scheme + " protocol is not allowed for attachments from translators.";
-				Zotero.debug(e, 2);
-				attachmentCallback(attachment, false, e);
-				return false;
+			} else {
+				attachment.url = url;
+				url = Components.classes["@mozilla.org/network/io-service;1"]
+					.getService(Components.interfaces.nsIIOService)
+					.newURI(url, null, null); // This cannot fail, since we check above
+				
+				// see if this is actually a file URL
+				if(url.scheme == "file") {
+					attachment.path = attachment.url;
+					attachment.url = false;
+				} else if(url.scheme != "http" && url.scheme != "https") {
+					let e = "Translate: " + url.scheme + " protocol is not allowed for attachments from translators.";
+					Zotero.debug(e, 2);
+					attachmentCallback(attachment, false, e);
+					return false;
+				}
 			}
 		}
 		
@@ -268,7 +268,12 @@ Zotero.Translate.ItemSaver.prototype = {
 			var newItem = Zotero.Items.get(myID);
 		} else {
 			var file = this._parsePath(attachment.path);
-			if(!file) return;
+			if(!file) {
+				let e = "Translate: Could not parse attachment path <" + attachment.path + ">";
+				Zotero.debug(e, 2);
+				attachmentCallback(attachment, false, e);
+				return false;
+			}
 			
 			if (attachment.url) {
 				attachment.linkMode = "imported_url";
