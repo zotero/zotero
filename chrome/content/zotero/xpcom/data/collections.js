@@ -27,9 +27,10 @@
 /*
  * Primary interface for accessing Zotero collection
  */
-Zotero.Collections = new function() {
-	Zotero.DataObjects.apply(this, ['collection']);
-	this.constructor.prototype = new Zotero.DataObjects();
+Zotero.Collections = function() {
+	this.constructor = null;
+	
+	this._ZDO_object = 'collection';
 	
 	this._primaryDataSQLParts = {
 		collectionID: "O.collectionID",
@@ -45,8 +46,12 @@ Zotero.Collections = new function() {
 		hasChildCollections: "(SELECT COUNT(*) FROM collections WHERE "
 			+ "parentCollectionID=O.collectionID) != 0 AS hasChildCollections",
 		hasChildItems: "(SELECT COUNT(*) FROM collectionItems WHERE "
-			+ "collectionID=O.collectionID) != 0 AS hasChildItems "
+			+ "collectionID=O.collectionID) != 0 AS hasChildItems"
 	};
+	
+		
+	this._primaryDataSQLFrom = "FROM collections O "
+			+ "LEFT JOIN collections CP ON (O.parentCollectionID=CP.collectionID)";
 	
 	/**
 	* Add new collection to DB and return Collection object
@@ -74,59 +79,66 @@ Zotero.Collections = new function() {
 	 * Takes parent collectionID as optional parameter;
 	 * by default, returns root collections
 	 */
-	this.getByParent = Zotero.Promise.coroutine(function* (libraryID, parent, recursive) {
-		var toReturn = [];
+	this.getByParent = Zotero.Promise.coroutine(function* (libraryID, parentID, recursive) {
+		let children;
 		
-		if (!parent) {
-			parent = null;
+		if (parentID) {
+			let parent = yield this.getAsync(parentID);
+			yield parent.loadChildCollections();
+			children = parent.getChildCollections();
+			if (!children.length) Zotero.debug('No child collections in collection ' + parentID, 5);
+		} else if (libraryID || libraryID === 0) {
+			children = this.getCollectionsInLibrary(libraryID);
+			if (!children.length) Zotero.debug('No child collections in library ' + libraryID, 5);
+		} else {
+			throw new Error("Either library ID or parent collection ID must be provided to getNumCollectionsByParent");
 		}
 		
-		var sql = "SELECT collectionID AS id, collectionName AS name FROM collections C "
-			+ "WHERE libraryID=? AND parentCollectionID " + (parent ? '= ' + parent : 'IS NULL');
-		var children = yield Zotero.DB.queryAsync(sql, [libraryID]);
-		
-		if (!children) {
-			Zotero.debug('No child collections of collection ' + parent, 5);
-			return toReturn;
+		if (!children.length) {
+			return children;
 		}
 		
 		// Do proper collation sort
-		var collation = Zotero.getLocaleCollation();
-		children.sort(function (a, b) {
-			return collation.compareString(1, a.name, b.name);
-		});
+		children.sort(function (a, b) Zotero.localeCompare(a.name, b.name));
 		
+		if (!recursive) return children;
+		
+		let toReturn = [];
 		for (var i=0, len=children.length; i<len; i++) {
-			var obj = yield this.getAsync(children[i].id);
-			if (!obj) {
-				throw ('Collection ' + children[i].id + ' not found');
-			}
-			
+			var obj = children[i];
 			toReturn.push(obj);
 			
-			// If recursive, get descendents
-			if (recursive) {
-				var desc = obj.getDescendents(false, 'collection');
-				for (var j in desc) {
-					var obj2 = yield this.getAsync(desc[j]['id']);
-					if (!obj2) {
-						throw new Error('Collection ' + desc[j] + ' not found');
-					}
-					
-					// TODO: This is a quick hack so that we can indent subcollections
-					// in the search dialog -- ideally collections would have a
-					// getLevel() method, but there's no particularly quick way
-					// of calculating that without either storing it in the DB or
-					// changing the schema to Modified Preorder Tree Traversal,
-					// and I don't know if we'll actually need it anywhere else.
-					obj2.level = desc[j].level;
-					
-					toReturn.push(obj2);
+			var desc = obj.getDescendents(false, 'collection');
+			for (var j in desc) {
+				var obj2 = yield this.getAsync(desc[j]['id']);
+				if (!obj2) {
+					throw new Error('Collection ' + desc[j] + ' not found');
 				}
+				
+				// TODO: This is a quick hack so that we can indent subcollections
+				// in the search dialog -- ideally collections would have a
+				// getLevel() method, but there's no particularly quick way
+				// of calculating that without either storing it in the DB or
+				// changing the schema to Modified Preorder Tree Traversal,
+				// and I don't know if we'll actually need it anywhere else.
+				obj2.level = desc[j].level;
+				
+				toReturn.push(obj2);
 			}
 		}
 		
 		return toReturn;
+	});
+	
+	
+	this.getCollectionsInLibrary = Zotero.Promise.coroutine(function* (libraryID) {
+		let sql = "SELECT collectionID AS id FROM collections C "
+			+ "WHERE libraryID=? AND parentCollectionId IS NULL";
+		let ids = yield Zotero.DB.queryAsync(sql, [libraryID]);
+		let collections = yield this.getAsync(ids.map(function(row) row.id));
+		if (!collections.length) return collections;
+		
+		return collections.sort(function (a, b) Zotero.localeCompare(a.name, b.name));
 	});
 	
 	
@@ -145,8 +157,8 @@ Zotero.Collections = new function() {
 		}
 		sql = sql.substring(0, sql.length - 5);
 		return Zotero.DB.columnQueryAsync(sql, sqlParams)
-		.then(function (collectionIDs) {
-			return asIDs ? collectionIDs : Zotero.Collections.get(collectionIDs);
+		.then(collectionIDs => {
+			return asIDs ? collectionIDs : this.get(collectionIDs);
 		});
 		
 	}
@@ -186,32 +198,23 @@ Zotero.Collections = new function() {
 	});
 	
 	
-	this.erase = function (ids) {
+	this.erase = function(ids) {
 		ids = Zotero.flattenArguments(ids);
 		
-		Zotero.DB.beginTransaction();
-		for each(var id in ids) {
-			var collection = this.getAsync(id);
-			if (collection) {
-				collection.erase();
+		return Zotero.DB.executeTransaction(function* () {
+			for each(var id in ids) {
+				var collection = yield this.getAsync(id);
+				if (collection) {
+					yield collection.erase();
+				}
+				collection = undefined;
 			}
-			collection = undefined;
-		}
-		
-		this.unload(ids);
-		
-		Zotero.DB.commitTransaction();
-	}
+			
+			this.unload(ids);
+		});
+	};
 	
+	Zotero.DataObjects.call(this);
 	
-	this.getPrimaryDataSQL = function () {
-		// This should be the same as the query in Zotero.Collection.load(),
-		// just without a specific collectionID
-		return "SELECT "
-			+ Object.keys(this._primaryDataSQLParts).map(key => this._primaryDataSQLParts[key]).join(", ") + " "
-			+ "FROM collections O "
-			+ "LEFT JOIN collections CP ON (O.parentCollectionID=CP.collectionID) "
-			+ "WHERE 1";
-	}
-}
-
+	return this;
+}.bind(Object.create(Zotero.DataObjects.prototype))();

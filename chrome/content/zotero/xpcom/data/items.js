@@ -27,17 +27,16 @@
 /*
  * Primary interface for accessing Zotero items
  */
-Zotero.Items = new function() {
-	Zotero.DataObjects.apply(this, ['item']);
-	this.constructor.prototype = new Zotero.DataObjects();
+Zotero.Items = function() {
+	this.constructor = null;
 	
-	// Privileged methods
-	this.add = add;
-	this.getSortTitle = getSortTitle;
+	this._ZDO_object = 'item';
 	
-	Object.defineProperty(this, "_primaryDataSQLParts", {
+	// This needs to wait until all Zotero components are loaded to initialize,
+	// but otherwise it can be just a simple property
+	Zotero.defineProperty(this, "_primaryDataSQLParts", {
 		get: function () {
-			return _primaryDataSQLParts ?  _primaryDataSQLParts : (_primaryDataSQLParts = {
+			return {
 				itemID: "O.itemID",
 				itemTypeID: "O.itemTypeID",
 				dateAdded: "O.dateAdded",
@@ -88,18 +87,17 @@ Zotero.Items = new function() {
 				attachmentContentType: "IA.contentType AS attachmentContentType",
 				attachmentPath: "IA.path AS attachmentPath",
 				attachmentSyncState: "IA.syncState AS attachmentSyncState"
-			});
+			};
 		}
-	});
+	}, {lazy: true});
 	
-	// Private members
-	var _primaryDataSQLParts;
-	var _cachedFields = {};
-	var _firstCreatorSQL = '';
-	var _sortCreatorSQL = '';
-	var _emptyTrashIdleObserver = null;
-	var _emptyTrashTimer = null;
 	
+	this._primaryDataSQLFrom = "FROM items O "
+		+ "LEFT JOIN itemAttachments IA USING (itemID) "
+		+ "LEFT JOIN items IAP ON (IA.parentItemID=IAP.itemID) "
+		+ "LEFT JOIN itemNotes INo ON (O.itemID=INo.itemID) "
+		+ "LEFT JOIN items INoP ON (INo.parentItemID=INoP.itemID) "
+		+ "LEFT JOIN deletedItems DI ON (O.itemID=DI.itemID)";
 	
 	/**
 	 * Return items marked as deleted
@@ -215,8 +213,7 @@ Zotero.Items = new function() {
 	};
 	
 	
-	
-	
+	this._cachedFields = {};
 	this.cacheFields = Zotero.Promise.coroutine(function* (libraryID, fields, items) {
 		if (items && items.length == 0) {
 			return;
@@ -246,14 +243,14 @@ Zotero.Items = new function() {
 		var fieldIDs = [];
 		for each(var field in fields) {
 			// Check if field already cached
-			if (_cachedFields[libraryID] && _cachedFields[libraryID].indexOf(field) != -1) {
+			if (this._cachedFields[libraryID] && this._cachedFields[libraryID].indexOf(field) != -1) {
 				continue;
 			}
 			
-			if (!_cachedFields[libraryID]) {
-				_cachedFields[libraryID] = [];
+			if (!this._cachedFields[libraryID]) {
+				this._cachedFields[libraryID] = [];
 			}
-			_cachedFields[libraryID].push(field);
+			this._cachedFields[libraryID].push(field);
 			
 			if (this.isPrimaryField(field)) {
 				primaryFields.push(field);
@@ -403,7 +400,7 @@ Zotero.Items = new function() {
 			for (let i=0; i<allItemIDs.length; i++) {
 				let itemID = allItemIDs[i];
 				let item = this._objectCache[itemID];
-				yield this._objectCache[itemID].loadDisplayTitle()
+				yield item.loadDisplayTitle()
 			}
 		}
 		
@@ -428,7 +425,7 @@ Zotero.Items = new function() {
 				// Move child items to master
 				var ids = otherItem.getAttachments(true).concat(otherItem.getNotes(true));
 				for each(var id in ids) {
-					var attachment = yield Zotero.Items.getAsync(id);
+					var attachment = yield this.getAsync(id);
 					
 					// TODO: Skip identical children?
 					
@@ -480,7 +477,7 @@ Zotero.Items = new function() {
 			}
 			
 			yield item.save();
-		});
+		}.bind(this));
 	};
 	
 	
@@ -535,9 +532,11 @@ Zotero.Items = new function() {
 	/**
 	 * Start idle observer to delete trashed items older than a certain number of days
 	 */
+	this._emptyTrashIdleObserver = null;
+	this._emptyTrashTimer = null;
 	this.startEmptyTrashTimer = function () {
-		_emptyTrashIdleObserver = {
-			observe: function (subject, topic, data) {
+		this._emptyTrashIdleObserver = {
+			observe: (subject, topic, data) => {
 				if (topic == 'idle' || topic == 'timer-callback') {
 					var days = Zotero.Prefs.get('trashAutoEmptyDays');
 					if (!days) {
@@ -551,20 +550,20 @@ Zotero.Items = new function() {
 					// TODO: increase number after dealing with slow
 					// tag.getLinkedItems() call during deletes
 					var num = 10;
-					Zotero.Items.emptyTrash(null, days, num)
-					.then(function (deleted) {
+					this.emptyTrash(null, days, num)
+					.then(deleted => {
 						if (!deleted) {
-							_emptyTrashTimer = null;
+							this._emptyTrashTimer = null;
 							return;
 						}
 						
 						// Set a timer to do more every few seconds
-						if (!_emptyTrashTimer) {
-							_emptyTrashTimer = Components.classes["@mozilla.org/timer;1"]
+						if (!this._emptyTrashTimer) {
+							this._emptyTrashTimer = Components.classes["@mozilla.org/timer;1"]
 								.createInstance(Components.interfaces.nsITimer);
 						}
-						_emptyTrashTimer.init(
-							_emptyTrashIdleObserver.observe,
+						this._emptyTrashTimer.init(
+							this._emptyTrashIdleObserver.observe,
 							5 * 1000,
 							Components.interfaces.nsITimer.TYPE_ONE_SHOT
 						);
@@ -572,8 +571,8 @@ Zotero.Items = new function() {
 				}
 				// When no longer idle, cancel timer
 				else if (topic == 'back') {
-					if (_emptyTrashTimer) {
-						_emptyTrashTimer.cancel();
+					if (this._emptyTrashTimer) {
+						this._emptyTrashTimer.cancel();
 					}
 				}
 			}
@@ -581,7 +580,7 @@ Zotero.Items = new function() {
 		
 		var idleService = Components.classes["@mozilla.org/widget/idleservice;1"].
 							getService(Components.interfaces.nsIIdleService);
-		idleService.addIdleObserver(_emptyTrashIdleObserver, 305);
+		idleService.addIdleObserver(this._emptyTrashIdleObserver, 305);
 	}
 	
 	
@@ -624,28 +623,12 @@ Zotero.Items = new function() {
 	});
 	
 	
-	this.getPrimaryDataSQL = function () {
-		return "SELECT "
-			+ Object.keys(this._primaryDataSQLParts).map((val) => this._primaryDataSQLParts[val]).join(', ')
-			+ this.primaryDataSQLFrom;
-	};
-	
-	
-	this.primaryDataSQLFrom = " FROM items O "
-		+ "LEFT JOIN itemAttachments IA USING (itemID) "
-		+ "LEFT JOIN items IAP ON (IA.parentItemID=IAP.itemID) "
-		+ "LEFT JOIN itemNotes INo ON (O.itemID=INo.itemID) "
-		+ "LEFT JOIN items INoP ON (INo.parentItemID=INoP.itemID) "
-		+ "LEFT JOIN deletedItems DI ON (O.itemID=DI.itemID) "
-		+ "WHERE 1";
-	
-	
 	this._postLoad = function (libraryID, ids) {
 		if (!ids) {
-			if (!_cachedFields[libraryID]) {
-				_cachedFields[libraryID] = [];
+			if (!this._cachedFields[libraryID]) {
+				this._cachedFields[libraryID] = [];
 			}
-			_cachedFields[libraryID] = this.primaryFields.concat();
+			this._cachedFields[libraryID] = this.primaryFields.concat();
 		}
 	}
 	
@@ -655,6 +638,7 @@ Zotero.Items = new function() {
 	 *
 	 * Why do we do this entirely in SQL? Because we're crazy. Crazy like foxes.
 	 */
+	var _firstCreatorSQL = '';
 	function _getFirstCreatorSQL() {
 		if (_firstCreatorSQL) {
 			return _firstCreatorSQL;
@@ -759,6 +743,7 @@ Zotero.Items = new function() {
 	/*
 	 * Generate SQL to retrieve sortCreator field
 	 */
+	var _sortCreatorSQL = '';
 	function _getSortCreatorSQL() {
 		if (_sortCreatorSQL) {
 			return _sortCreatorSQL;
@@ -878,7 +863,7 @@ Zotero.Items = new function() {
 	}
 	
 	
-	function getSortTitle(title) {
+	this.getSortTitle = function(title) {
 		if (title === false || title === undefined) {
 			return '';
 		}
@@ -887,4 +872,8 @@ Zotero.Items = new function() {
 		}
 		return title.replace(/^[\[\'\"](.*)[\'\"\]]?$/, '$1')
 	}
-}
+	
+	Zotero.DataObjects.call(this);
+	
+	return this;
+}.bind(Object.create(Zotero.DataObjects.prototype))();

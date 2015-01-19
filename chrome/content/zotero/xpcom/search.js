@@ -1637,29 +1637,25 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	this._sqlParams = sqlParams.length ? sqlParams : false;
 });
 
-Zotero.Searches = new function(){
-	Zotero.DataObjects.apply(this, ['search', 'searches', 'savedSearch', 'savedSearches']);
-	this.constructor.prototype = new Zotero.DataObjects();
+Zotero.Searches = function() {
+	this.constructor = null;
 	
-	Object.defineProperty(this, "_primaryDataSQLParts", {
-		get: function () {
-			return _primaryDataSQLParts ?  _primaryDataSQLParts : (_primaryDataSQLParts = {
-				savedSearchID: "O.savedSearchID",
-				name: "O.savedSearchName",
-				libraryID: "O.libraryID",
-				key: "O.key",
-				version: "O.version",
-				synced: "O.synced"
-			});
-		}
-	});
+	this._ZDO_object = 'search';
+	this._ZDO_id = 'savedSearch';
+	this._ZDO_table = 'savedSearches';
 	
-	
-	var _primaryDataSQLParts;
+	this._primaryDataSQLParts = {
+		savedSearchID: "O.savedSearchID",
+		name: "O.savedSearchName",
+		libraryID: "O.libraryID",
+		key: "O.key",
+		version: "O.version",
+		synced: "O.synced"
+	}
 	
 	
 	this.init = Zotero.Promise.coroutine(function* () {
-		yield this.constructor.prototype.init.apply(this);
+		yield Zotero.DataObjects.prototype.init.apply(this);
 		yield Zotero.SearchConditions.init();
 	});
 	
@@ -1730,7 +1726,11 @@ Zotero.Searches = new function(){
 			+ Object.keys(this._primaryDataSQLParts).map(key => this._primaryDataSQLParts[key]).join(", ") + " "
 			+ "FROM savedSearches O WHERE 1";
 	}
-}
+	
+	Zotero.DataObjects.call(this);
+	
+	return this;
+}.bind(Object.create(Zotero.DataObjects.prototype))();
 
 
 
