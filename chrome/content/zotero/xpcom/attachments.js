@@ -457,7 +457,8 @@ Zotero.Attachments = new function(){
 					title = dir[dir.length - 2];
 				}
 			}
-			else {
+			
+			if (!title) {
 				title = url;
 			}
 		}
