@@ -70,7 +70,7 @@ var Zotero_RecognizePDF = new function() {
 	 * @return {Promise} A promise resolved when PDF metadata has been retrieved
 	 */
 	this.recognize = function(file, libraryID, stopCheckCallback) {
-		const MAX_PAGES = 7;
+		const MAX_PAGES = 15;
 		var me = this;
 		
 		return _extractText(file, MAX_PAGES).then(function(lines) {
