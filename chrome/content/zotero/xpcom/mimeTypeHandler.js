@@ -107,7 +107,10 @@ Zotero.MIMETypeHandler = new function () {
 	 */
 	function _importHandler(string, uri, contentType, channel) {
 		var win = channel.notificationCallbacks.getInterface(Components.interfaces.nsIDOMWindow).top;
-		if(!win) throw "Attempt to import from a channel without an attached document refused";
+		if(!win) {
+			Zotero.debug("Attempt to import from a channel without an attached document refused");
+			return false;
+		}
 		
 		var hostPort = channel.URI.hostPort.replace(";", "_", "g");
 		
@@ -129,7 +132,7 @@ Zotero.MIMETypeHandler = new function () {
 			bag.setPropertyAsBool("allowTabModal", true);
 		
 			var continueDownload = prompt.confirmCheck(title, text, checkMsg, checkValue);
-			if(!continueDownload) return;
+			if(!continueDownload) return false;
 			if(checkValue.value) {
 				// add to allowed sites if desired
 				Zotero.Prefs.set("ingester.allowedSites", allowedSitesString+";"+hostPort);
@@ -148,12 +151,14 @@ Zotero.MIMETypeHandler = new function () {
 		var translators = translation.getTranslators();
 		if(!translators.length) {
 			// we lied. we can't really translate this file.
-			throw "No translator found for handled RIS, Refer or ISI file"
+			Zotero.debug("No translator found to handle this file");
+			return false;
 		}
 		
 		// translate using first available
 		translation.setTranslator(translators[0]);
 		frontWindow.Zotero_Browser.performTranslation(translation);
+		return true;
 	}
 	
 	/**
@@ -300,11 +305,16 @@ Zotero.MIMETypeHandler = new function () {
 		convStream.close();
 		inputStream.close();
 		
+		var handled = false;
 		try {
-			_typeHandlers[this._contentType](readString, (this._request.name ? this._request.name : null),
+			handled = _typeHandlers[this._contentType](readString, (this._request.name ? this._request.name : null),
 				this._contentType, channel);
 		} catch(e) {
-			// if there was an error, handle using nsIExternalHelperAppService
+			Zotero.debug(e);
+		}
+		
+		if (!handled) {
+			// handle using nsIExternalHelperAppService
 			var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"].
 				getService(Components.interfaces.nsIExternalHelperAppService);
 			var frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
@@ -317,10 +327,6 @@ Zotero.MIMETypeHandler = new function () {
 				streamListener.onDataAvailable(this._request, context, inputStream, 0, this._storageStream.length);
 				streamListener.onStopRequest(channel, context, status);
 			}
-			this._storageStream.close();
-			
-			// then throw our error
-			throw e;
 		}
 		
 		this._storageStream.close();
