@@ -34,6 +34,8 @@ Zotero.DataObject = function () {
 	let objectType = this._objectType;
 	this._ObjectType = objectType[0].toUpperCase() + objectType.substr(1);
 	this._objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
+	this._ObjectTypePlural = this._objectTypePlural[0].toUpperCase() + this._objectTypePlural.substr(1);
+	this._ObjectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 	
 	this._id = null;
 	this._libraryID = null;
@@ -53,21 +55,34 @@ Zotero.DataObject = function () {
 };
 
 Zotero.DataObject.prototype._objectType = 'dataObject';
-Zotero.DataObject.prototype._dataTypes = [];
+Zotero.DataObject.prototype._dataTypes = ['primaryData'];
 
-Zotero.Utilities.Internal.defineProperty(Zotero.DataObject.prototype, 'objectType', {
+Zotero.defineProperty(Zotero.DataObject.prototype, 'objectType', {
 	get: function() this._objectType
 });
-Zotero.Utilities.Internal.defineProperty(Zotero.DataObject.prototype, 'libraryKey', {
+Zotero.defineProperty(Zotero.DataObject.prototype, 'id', {
+	get: function() this._id
+});
+Zotero.defineProperty(Zotero.DataObject.prototype, 'libraryID', {
+	get: function() this._libraryID
+});
+Zotero.defineProperty(Zotero.DataObject.prototype, 'key', {
+	get: function() this._key
+});
+Zotero.defineProperty(Zotero.DataObject.prototype, 'libraryKey', {
 	get: function() this._libraryID + "/" + this._key
 });
-Zotero.Utilities.Internal.defineProperty(Zotero.DataObject.prototype, 'parentKey', {
+Zotero.defineProperty(Zotero.DataObject.prototype, 'parentKey', {
 	get: function() this._parentKey,
 	set: function(v) this._setParentKey(v)
 });
-Zotero.Utilities.Internal.defineProperty(Zotero.DataObject.prototype, 'parentID', {
+Zotero.defineProperty(Zotero.DataObject.prototype, 'parentID', {
 	get: function() this._getParentID(),
 	set: function(v) this._setParentID(v)
+});
+
+Zotero.defineProperty(Zotero.DataObject.prototype, 'ObjectsClass', {
+	get: function() this._ObjectsClass
 });
 
 
@@ -135,7 +150,7 @@ Zotero.DataObject.prototype._getParentID = function () {
 	if (!this._parentKey) {
 		return false;
 	}
-	return this._parentID = this._getClass().getIDFromLibraryAndKey(this._libraryID, this._parentKey);
+	return this._parentID = this.ObjectsClass.getIDFromLibraryAndKey(this._libraryID, this._parentKey);
 }
 
 
@@ -148,7 +163,7 @@ Zotero.DataObject.prototype._getParentID = function () {
 Zotero.DataObject.prototype._setParentID = function (id) {
 	return this._setParentKey(
 		id
-		? this._getClass().getLibraryAndKeyFromID(Zotero.DataObjectUtilities.checkDataID(id))[1]
+		? this.ObjectsClass.getLibraryAndKeyFromID(Zotero.DataObjectUtilities.checkDataID(id))[1]
 		: null
 	);
 }
@@ -309,6 +324,60 @@ Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function
 	return false;
 });
 
+/*
+ * Build object from database
+ */
+Zotero.DataObject.prototype.loadPrimaryData = Zotero.Promise.coroutine(function* (reload, failOnMissing) {
+	if (this._loaded.primaryData && !reload) return;
+	
+	var id = this.id;
+	var key = this.key;
+	var libraryID = this.libraryID;
+	
+	if (!id && !key) {
+		throw new Error('ID or key not set in Zotero.' + this._ObjectType + '.loadPrimaryData()');
+	}
+	
+	var columns = [], join = [], where = [];
+	var primaryFields = this.ObjectsClass.primaryFields;
+	var idField = this.ObjectsClass.idColumn;
+	for (let i=0; i<primaryFields.length; i++) {
+		let field = primaryFields[i];
+		// If field not already set
+		if (field == idField || this['_' + field] === null || reload) {
+			columns.push(this.ObjectsClass.getPrimaryDataSQLPart(field));
+		}
+	}
+	if (!columns.length) {
+		return;
+	}
+	
+	// This should match Zotero.*.primaryDataSQL, but without
+	// necessarily including all columns
+	var sql = "SELECT " + columns.join(", ") + this.ObjectsClass.primaryDataSQLFrom;
+	if (id) {
+		sql += " AND O." + idField + "=? ";
+		var params = id;
+	}
+	else {
+		sql += " AND O.key=? AND O.libraryID=? ";
+		var params = [key, libraryID];
+	}
+	sql += (where.length ? ' AND ' + where.join(' AND ') : '');
+	var row = yield Zotero.DB.rowQueryAsync(sql, params);
+	
+	if (!row) {
+		if (failOnMissing) {
+			throw new Error(this._ObjectType + " " + (id ? id : libraryID + "/" + key)
+				+ " not found in Zotero." + this._ObjectType + ".loadPrimaryData()");
+		}
+		this._loaded.primaryData = true;
+		this._clearChanged('primaryData');
+		return;
+	}
+	
+	this.loadFromRow(row, reload);
+});
 
 /**
  * Reloads loaded, changed data
@@ -368,13 +437,6 @@ Zotero.DataObject.prototype._requireData = function (dataType) {
 	}
 }
 
-/**
- * Returns a global Zotero class object given a data object. (e.g. Zotero.Items)
- * @return {obj} One of Zotero data classes
- */
-Zotero.DataObject.prototype._getClass = function () {
-	return Zotero.DataObjectUtilities.getClassForObjectType(this._objectType);
-}
 
 /**
  * Loads data for a given data type
@@ -385,6 +447,14 @@ Zotero.DataObject.prototype._loadDataType = function (dataType, reload) {
 	return this["load" + dataType[0].toUpperCase() + dataType.substr(1)](reload);
 }
 
+Zotero.DataObject.prototype.loadAllData = function (reload) {
+	let loadPromises = new Array(this._dataTypes.length);
+	for (let i=0; i<this._dataTypes.length; i++) {
+		loadPromises[i] = this._loadDataType(this._dataTypes[i], reload);
+	}
+	
+	return Zotero.Promise.all(loadPromises);
+}
 
 /**
  * Save old version of data that's being changed, to pass to the notifier
@@ -421,6 +491,141 @@ Zotero.DataObject.prototype._clearChanged = function (dataType) {
 Zotero.DataObject.prototype._clearFieldChange = function (field) {
 	delete this._previousData[field];
 }
+
+
+Zotero.DataObject.prototype.isEditable = function () {
+	return Zotero.Libraries.isEditable(this.libraryID);
+}
+
+
+Zotero.DataObject.prototype.editCheck = function () {
+	if (!Zotero.Sync.Server.updatesInProgress && !Zotero.Sync.Storage.updatesInProgress && !this.isEditable()) {
+		throw ("Cannot edit " + this._objectType + " in read-only Zotero library");
+	}
+}
+
+/**
+ * Save changes to database
+ *
+ * @return {Promise<Integer|Boolean>}  Promise for itemID of new item,
+ *                                     TRUE on item update, or FALSE if item was unchanged
+ */
+Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) {
+	var env = {
+		transactionOptions: null,
+		options: options || {}
+	};
+	
+	var proceed = yield this._initSave(env);
+	if (!proceed) return false;
+	
+	if (env.isNew) {
+		Zotero.debug('Saving data for new ' + this._objectType + ' to database', 4);
+	}
+	else {
+		Zotero.debug('Updating database with new ' + this._objectType + ' data', 4);
+	}
+	
+	return Zotero.DB.executeTransaction(function* () {
+		yield this._saveData(env);
+		return yield this._finalizeSave(env);
+	}.bind(this), env.transactionOptions)
+	.catch(e => {
+		return this._recoverFromSaveError(env, e)
+		.catch(function(e2) {
+			Zotero.debug(e2, 1);
+		})
+		.then(function() {
+			Zotero.debug(e, 1);
+			throw e;
+		})
+	});
+});
+
+Zotero.DataObject.prototype.hasChanged = function() {
+	Zotero.debug(this._changed);
+	return !!Object.keys(this._changed).filter(dataType => this._changed[dataType]).length
+}
+
+Zotero.DataObject.prototype._saveData = function() {
+	throw new Error("Zotero.DataObject.prototype._saveData is an abstract method");
+}
+
+Zotero.DataObject.prototype._finalizeSave = function() {
+	throw new Error("Zotero.DataObject.prototype._finalizeSave is an abstract method");
+}
+
+Zotero.DataObject.prototype._recoverFromSaveError = Zotero.Promise.coroutine(function* () {
+	yield this.reload(null, true);
+	this._clearChanged();
+});
+
+Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
+	env.isNew = !this.id;
+	
+	if (!env.options.skipEditCheck) this.editCheck();
+	
+	if (!this.hasChanged()) {
+		Zotero.debug(this._ObjectType + ' ' + this.id + ' has not changed', 4);
+		return false;
+	}
+	
+	// Register this object's identifiers in Zotero.DataObjects on transaction commit,
+	// before other callbacks run
+	if (env.isNew) {
+		env.transactionOptions = {
+			onCommit: () => {
+				this.ObjectsClass.registerIdentifiers(env.id, env.libraryID, env.key);
+			}
+		};
+	}
+	
+	return true;
+});
+
+/**
+ * Delete object from database
+ */
+Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* () {
+	var env = {};
+	
+	var proceed = yield this._eraseInit(env);
+	if (!proceed) return false;
+	
+	Zotero.debug('Deleting ' + this.objectType + ' ' + this.id);
+	
+	yield Zotero.DB.executeTransaction(function* () {
+		yield this._eraseData(env);
+		yield this._erasePreCommit(env);
+	}.bind(this))
+	.catch(e => {
+		return this._eraseRecoverFromFailure(env);
+	});
+	
+	return this._erasePostCommit(env);
+});
+
+Zotero.DataObject.prototype._eraseInit = function(env) {
+	if (!this.id) return Zotero.Promise.resolve(false);
+	
+	return Zotero.Promise.resolve(true);
+};
+
+Zotero.DataObject.prototype._eraseData = function(env) {
+	throw new Error("Zotero.DataObject.prototype._eraseData is an abstract method");
+};
+
+Zotero.DataObject.prototype._erasePreCommit = function(env) {
+	return Zotero.Promise.resolve();
+};
+
+Zotero.DataObject.prototype._erasePostCommit = function(env) {
+	return Zotero.Promise.resolve();
+};
+
+Zotero.DataObject.prototype._eraseRecoverFromFailure = function(env) {
+	throw new Error("Zotero.DataObject.prototype._eraseRecoverFromFailure is an abstract method");
+};
 
 /**
  * Generates data object key

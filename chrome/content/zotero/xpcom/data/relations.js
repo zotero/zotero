@@ -23,18 +23,15 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Relations = new function () {
-	Zotero.DataObjects.apply(this, ['relation']);
-	this.constructor.prototype = new Zotero.DataObjects();
+Zotero.Relations = function () {
+	this.constructor = null;
 	
-	this.__defineGetter__('relatedItemPredicate', function () "dc:relation");
-	this.__defineGetter__('linkedObjectPredicate', function () "owl:sameAs");
-	this.__defineGetter__('deletedItemPredicate', function () 'dc:isReplacedBy');
+	this._ZDO_object = 'relation';
+	this._ZDO_idOnly = true;
 	
-	var _namespaces = {
-		dc: 'http://purl.org/dc/elements/1.1/',
-		owl: 'http://www.w3.org/2002/07/owl#'
-	};
+	Zotero.defineProperty(this, 'relatedItemPredicate', {value: 'dc:relation'});
+	Zotero.defineProperty(this, 'linkedObjectPredicate', {value: 'owl:sameAs'});
+	Zotero.defineProperty(this, 'deletedItemPredicate', {value: 'dc:isReplacedBy'});
 	
 	this.get = function (id) {
 		if (typeof id != 'number') {
@@ -52,7 +49,7 @@ Zotero.Relations = new function () {
 	 */
 	this.getByURIs = Zotero.Promise.coroutine(function* (subject, predicate, object) {
 		if (predicate) {
-			predicate = _getPrefixAndValue(predicate).join(':');
+			predicate = this._getPrefixAndValue(predicate).join(':');
 		}
 		
 		if (!subject && !predicate && !object) {
@@ -141,7 +138,7 @@ Zotero.Relations = new function () {
 	
 	
 	this.add = Zotero.Promise.coroutine(function* (libraryID, subject, predicate, object) {
-		predicate = _getPrefixAndValue(predicate).join(':');
+		predicate = this._getPrefixAndValue(predicate).join(':');
 		
 		var relation = new Zotero.Relation;
 		if (!libraryID) {
@@ -272,11 +269,15 @@ Zotero.Relations = new function () {
 		return relation;
 	}
 	
+	this._namespaces = {
+		dc: 'http://purl.org/dc/elements/1.1/',
+		owl: 'http://www.w3.org/2002/07/owl#'
+	};
 	
-	function _getPrefixAndValue(uri) {
+	this._getPrefixAndValue = function(uri) {
 		var [prefix, value] = uri.split(':');
 		if (prefix && value) {
-			if (!_namespaces[prefix]) {
+			if (!this._namespaces[prefix]) {
 				throw ("Invalid prefix '" + prefix + "' in Zotero.Relations._getPrefixAndValue()");
 			}
 			return [prefix, value];
@@ -290,4 +291,8 @@ Zotero.Relations = new function () {
 		}
 		throw ("Invalid namespace in URI '" + uri + "' in Zotero.Relations._getPrefixAndValue()");
 	}
-}
+	
+	Zotero.DataObjects.call(this);
+	
+	return this;
+}.bind(Object.create(Zotero.DataObjects.prototype))();

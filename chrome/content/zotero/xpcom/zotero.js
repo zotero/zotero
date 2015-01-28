@@ -1400,6 +1400,40 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	}
 	
 	
+	/**
+	 * Defines property on the object
+	 * More compact way to do Object.defineProperty
+	 *
+	 * @param {Object} obj Target object
+	 * @param {String} prop Property to be defined
+	 * @param {Object} desc Propery descriptor. If not overriden, "enumerable" is true
+	 * @param {Object} opts Options:
+	 *   lazy {Boolean} If true, the _getter_ is intended for late
+	 *     initialization of the property. The getter is replaced with a simple
+	 *     property once initialized.
+	 */
+	this.defineProperty = function(obj, prop, desc, opts) {
+		if (typeof prop != 'string') throw new Error("Property must be a string");
+		var d = { __proto__: null, enumerable: true, configurable: true }; // Enumerable by default
+		for (let p in desc) {
+			if (!desc.hasOwnProperty(p)) continue;
+			d[p] = desc[p];
+		}
+		
+		if (opts) {
+			if (opts.lazy && d.get) {
+				let getter = d.get;
+				d.get = function() {
+					var val = getter.call(this);
+					this[prop] = val; // Replace getter with value
+					return val;
+				}
+			}
+		}
+		
+		Object.defineProperty(obj, prop, d);
+	}
+	
 	/*
 	 * This function should be removed
 	 *
@@ -1497,6 +1531,12 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		};
 	}
 	
+	this.defineProperty(this, "localeCompare", {
+		get: function() {
+			var collation = this.getLocaleCollation();
+			return collation.compareString.bind(collation, 1);
+		}
+	}, {lazy: true});
 	
 	/*
 	 * Sets font size based on prefs -- intended for use on root element
@@ -1578,6 +1618,46 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		return file;
 	}
 	
+	
+	/**
+	 * Defines property on the object
+	 * More compact way to do Object.defineProperty
+	 *
+	 * @param {Object} obj Target object
+	 * @param {String} prop Property to be defined
+	 * @param {Object} desc Propery descriptor. If not overriden, "enumerable" is true
+	 * @param {Object} opts Options:
+	 *   lateInit {Boolean} If true, the _getter_ is intended for late
+	 *     initialization of the property. The getter is replaced with a simple
+	 *     property once initialized.
+	 */
+	this.defineProperty = function(obj, prop, desc, opts) {
+		if (typeof prop != 'string') throw new Error("Property must be a string");
+		var d = { __proto__: null, enumerable: true, configurable: true }; // Enumerable by default
+		for (let p in desc) {
+			if (!desc.hasOwnProperty(p)) continue;
+			d[p] = desc[p];
+		}
+		
+		if (opts) {
+			if (opts.lateInit && d.get) {
+				let getter = d.get;
+				d.get = function() {
+					var val = getter.call(this);
+					this[prop] = val; // Replace getter with value
+					return val;
+				}
+			}
+		}
+		
+		Object.defineProperty(obj, prop, d);
+	}
+	
+	this.extendClass = function(superClass, newClass) {
+		newClass._super = superClass;
+		newClass.prototype = Object.create(superClass.prototype);
+		newClass.prototype.constructor = newClass;
+	}
 	
 	/**
 	 * Allow other events (e.g., UI updates) on main thread to be processed if necessary

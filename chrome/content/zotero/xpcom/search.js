@@ -37,13 +37,10 @@ Zotero.Search = function() {
 	this._hasPrimaryConditions = false;
 }
 
-Zotero.Search._super = Zotero.DataObject;
-Zotero.Search.prototype = Object.create(Zotero.Search._super.prototype);
-Zotero.Search.constructor = Zotero.Search;
+Zotero.extendClass(Zotero.DataObject, Zotero.Search);
 
 Zotero.Search.prototype._objectType = 'search';
 Zotero.Search.prototype._dataTypes = Zotero.Search._super.prototype._dataTypes.concat([
-	'primaryData',
 	'conditions'
 ]);
 
@@ -62,21 +59,33 @@ Zotero.Search.prototype.setName = function(val) {
 	this.name = val;
 }
 
-
-Zotero.Search.prototype.__defineGetter__('id', function () { return this._get('id'); });
-Zotero.Search.prototype.__defineSetter__('id', function (val) { this._set('id', val); });
-Zotero.Search.prototype.__defineGetter__('libraryID', function () { return this._get('libraryID'); });
-Zotero.Search.prototype.__defineSetter__('libraryID', function (val) { return this._set('libraryID', val); });
-Zotero.Search.prototype.__defineGetter__('key', function () { return this._get('key'); });
-Zotero.Search.prototype.__defineSetter__('key', function (val) { this._set('key', val) });
-Zotero.Search.prototype.__defineGetter__('name', function () { return this._get('name'); });
-Zotero.Search.prototype.__defineSetter__('name', function (val) { this._set('name', val); });
-Zotero.Search.prototype.__defineGetter__('version', function () { return this._get('version'); });
-Zotero.Search.prototype.__defineSetter__('version', function (val) { this._set('version', val); });
-Zotero.Search.prototype.__defineGetter__('synced', function () { return this._get('synced'); });
-Zotero.Search.prototype.__defineSetter__('synced', function (val) { this._set('synced', val); });
-
-Zotero.Search.prototype.__defineGetter__('conditions', function (arr) { this.getSearchConditions(); });
+Zotero.defineProperty(Zotero.Search.prototype, 'id', {
+	get: function() this._get('id'),
+	set: function(val) this._set('id', val)
+});
+Zotero.defineProperty(Zotero.Search.prototype, 'libraryID', {
+	get: function() this._get('libraryID'),
+	set: function(val) this._set('libraryID', val)
+});
+Zotero.defineProperty(Zotero.Search.prototype, 'key', {
+	get: function() this._get('key'),
+	set: function(val) this._set('key', val)
+});
+Zotero.defineProperty(Zotero.Search.prototype, 'name', {
+	get: function() this._get('name'),
+	set: function(val) this._set('name', val)
+});
+Zotero.defineProperty(Zotero.Search.prototype, 'version', {
+	get: function() this._get('version'),
+	set: function(val) this._set('version', val)
+});
+Zotero.defineProperty(Zotero.Search.prototype, 'synced', {
+	get: function() this._get('synced'),
+	set: function(val) this._set('synced', val)
+});
+Zotero.defineProperty(Zotero.Search.prototype, 'conditions', {
+	get: function() this.getSearchConditions()
+});
 
 Zotero.Search.prototype._set = function (field, value) {
 	if (field == 'id' || field == 'libraryID' || field == 'key') {
@@ -161,152 +170,115 @@ Zotero.Search.prototype.loadFromRow = function (row) {
 	this._identified = true;
 }
 
+Zotero.Search.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
+	if (!this.name) {
+		throw('Name not provided for saved search');
+	}
+	
+	return Zotero.Search._super.prototype._initSave.apply(this, arguments);
+});
 
-/*
- * Save the search to the DB and return a savedSearchID
- *
- * If there are gaps in the searchConditionIDs, |fixGaps| must be true
- * and the caller must dispose of the search or reload the condition ids,
- * which may change after the save.
- *
- * For new searches, name must be set called before saving
- */
-Zotero.Search.prototype.save = Zotero.Promise.coroutine(function* (fixGaps) {
-	try {
-		Zotero.Searches.editCheck(this);
-		
-		if (!this.name) {
-			throw('Name not provided for saved search');
-		}
-		
-		var isNew = !this.id;
-		
-		// Register this item's identifiers in Zotero.DataObjects on transaction commit,
-		// before other callbacks run
-		var searchID, libraryID, key;
-		if (isNew) {
-			var transactionOptions = {
-				onCommit: function () {
-					Zotero.Searches.registerIdentifiers(searchID, libraryID, key);
-				}
-			};
-		}
-		else {
-			var transactionOptions = null;
-		}
-		
-		return Zotero.DB.executeTransaction(function* () {
-			searchID = this._id = this.id ? this.id : yield Zotero.ID.get('savedSearches');
-			libraryID = this.libraryID;
-			key = this._key = this.key ? this.key : this._generateKey();
-			
-			Zotero.debug("Saving " + (isNew ? 'new ' : '') + "search " + this.id);
-			
-			var columns = [
-				'savedSearchID',
-				'savedSearchName',
-				'clientDateModified',
-				'libraryID',
-				'key',
-				'version',
-				'synced'
-			];
-			var placeholders = columns.map(function () '?').join();
-			var sqlValues = [
-				searchID ? { int: searchID } : null,
-				{ string: this.name },
-				Zotero.DB.transactionDateTime,
-				this.libraryID ? this.libraryID : 0,
-				key,
-				this.version ? this.version : 0,
-				this.synced ? 1 : 0
-			];
-			
-			var sql = "REPLACE INTO savedSearches (" + columns.join(', ') + ") "
-				+ "VALUES (" + placeholders + ")";
-			var insertID = yield Zotero.DB.queryAsync(sql, sqlValues);
-			if (!searchID) {
-				searchID = insertID;
-			}
-			
-			if (!isNew) {
-				var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
-				yield Zotero.DB.queryAsync(sql, this.id);
-			}
-			
-			// Close gaps in savedSearchIDs
-			var saveConditions = {};
-			var i = 1;
-			for (var id in this._conditions) {
-				if (!fixGaps && id != i) {
-					Zotero.DB.rollbackTransaction();
-					throw ('searchConditionIDs not contiguous and |fixGaps| not set in save() of saved search ' + this._id);
-				}
-				saveConditions[i] = this._conditions[id];
-				i++;
-			}
-			
-			this._conditions = saveConditions;
-			
-			for (var i in this._conditions){
-				var sql = "INSERT INTO savedSearchConditions (savedSearchID, "
-					+ "searchConditionID, condition, operator, value, required) "
-					+ "VALUES (?,?,?,?,?,?)";
-				
-				// Convert condition and mode to "condition[/mode]"
-				var condition = this._conditions[i].mode ?
-					this._conditions[i].condition + '/' + this._conditions[i].mode :
-					this._conditions[i].condition
-				
-				var sqlParams = [
-					searchID,
-					i,
-					condition,
-					this._conditions[i].operator ? this._conditions[i].operator : null,
-					this._conditions[i].value ? this._conditions[i].value : null,
-					this._conditions[i].required ? 1 : null
-				];
-				yield Zotero.DB.queryAsync(sql, sqlParams);
-			}
-			
-			
-			if (isNew) {
-				Zotero.Notifier.trigger('add', 'search', this.id);
-			}
-			else {
-				Zotero.Notifier.trigger('modify', 'search', this.id, this._previousData);
-			}
-			
-			if (isNew && this.libraryID) {
-				var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
-				var group = yield Zotero.Groups.get(groupID);
-				group.clearSearchCache();
-			}
-			
-			if (isNew) {
-				var id = this.id;
-				this._disabled = true;
-				return id;
-			}
-			
-			yield this.reload();
-			this._clearChanged();
-			
-			return isNew ? this.id : true;
-		}.bind(this), transactionOptions);
+Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
+	var fixGaps = env.options.fixGaps;
+	var isNew = env.isNew;
+	
+	var searchID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('savedSearches');
+	var libraryID = env.libraryID = this.libraryID;
+	var key = env.key = this._key = this.key ? this.key : this._generateKey();
+	
+	var columns = [
+		'savedSearchID',
+		'savedSearchName',
+		'clientDateModified',
+		'libraryID',
+		'key',
+		'version',
+		'synced'
+	];
+	var placeholders = columns.map(function () '?').join();
+	var sqlValues = [
+		searchID ? { int: searchID } : null,
+		{ string: this.name },
+		Zotero.DB.transactionDateTime,
+		this.libraryID ? this.libraryID : 0,
+		key,
+		this.version ? this.version : 0,
+		this.synced ? 1 : 0
+	];
+	
+	var sql = "REPLACE INTO savedSearches (" + columns.join(', ') + ") "
+		+ "VALUES (" + placeholders + ")";
+	var insertID = yield Zotero.DB.queryAsync(sql, sqlValues);
+	if (!searchID) {
+		searchID = env.id = insertID;
 	}
-	catch (e) {
-		try {
-			yield this.reload();
-			this._clearChanged();
-		}
-		catch (e2) {
-			Zotero.debug(e2, 1);
-		}
-		
-		Zotero.debug(e, 1);
-		throw e;
+	
+	if (!isNew) {
+		var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
+		yield Zotero.DB.queryAsync(sql, this.id);
 	}
+	
+	// Close gaps in savedSearchIDs
+	var saveConditions = {};
+	var i = 1;
+	for (var id in this._conditions) {
+		if (!fixGaps && id != i) {
+			Zotero.DB.rollbackTransaction();
+			throw ('searchConditionIDs not contiguous and |fixGaps| not set in save() of saved search ' + this._id);
+		}
+		saveConditions[i] = this._conditions[id];
+		i++;
+	}
+	
+	this._conditions = saveConditions;
+	
+	for (var i in this._conditions){
+		var sql = "INSERT INTO savedSearchConditions (savedSearchID, "
+			+ "searchConditionID, condition, operator, value, required) "
+			+ "VALUES (?,?,?,?,?,?)";
+		
+		// Convert condition and mode to "condition[/mode]"
+		var condition = this._conditions[i].mode ?
+			this._conditions[i].condition + '/' + this._conditions[i].mode :
+			this._conditions[i].condition
+		
+		var sqlParams = [
+			searchID,
+			i,
+			condition,
+			this._conditions[i].operator ? this._conditions[i].operator : null,
+			this._conditions[i].value ? this._conditions[i].value : null,
+			this._conditions[i].required ? 1 : null
+		];
+		yield Zotero.DB.queryAsync(sql, sqlParams);
+	}
+});
+
+Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
+	var isNew = env.isNew;
+	if (isNew) {
+		Zotero.Notifier.trigger('add', 'search', this.id);
+	}
+	else {
+		Zotero.Notifier.trigger('modify', 'search', this.id, this._previousData);
+	}
+	
+	if (isNew && Zotero.Libraries.isGroupLibrary(this.libraryID)) {
+		var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
+		var group = yield Zotero.Groups.get(groupID);
+		group.clearSearchCache();
+	}
+	
+	if (isNew) {
+		var id = this.id;
+		this._disabled = true;
+		return id;
+	}
+	
+	yield this.reload();
+	this._clearChanged();
+	
+	return isNew ? this.id : true;
 });
 
 
@@ -1189,7 +1161,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						let objLibraryID;
 						let objKey = condition.value;
 						let objectType = condition.name == 'collection' ? 'collection' : 'search';
-						let objectTypeClass = Zotero.DataObjectUtilities.getClassForObjectType(objectType);
+						let objectTypeClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 						
 						// Old-style library-key hash
 						if (objKey.contains('_')) {
@@ -1665,29 +1637,25 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	this._sqlParams = sqlParams.length ? sqlParams : false;
 });
 
-Zotero.Searches = new function(){
-	Zotero.DataObjects.apply(this, ['search', 'searches', 'savedSearch', 'savedSearches']);
-	this.constructor.prototype = new Zotero.DataObjects();
+Zotero.Searches = function() {
+	this.constructor = null;
 	
-	Object.defineProperty(this, "_primaryDataSQLParts", {
-		get: function () {
-			return _primaryDataSQLParts ?  _primaryDataSQLParts : (_primaryDataSQLParts = {
-				savedSearchID: "O.savedSearchID",
-				name: "O.savedSearchName",
-				libraryID: "O.libraryID",
-				key: "O.key",
-				version: "O.version",
-				synced: "O.synced"
-			});
-		}
-	});
+	this._ZDO_object = 'search';
+	this._ZDO_id = 'savedSearch';
+	this._ZDO_table = 'savedSearches';
 	
-	
-	var _primaryDataSQLParts;
+	this._primaryDataSQLParts = {
+		savedSearchID: "O.savedSearchID",
+		name: "O.savedSearchName",
+		libraryID: "O.libraryID",
+		key: "O.key",
+		version: "O.version",
+		synced: "O.synced"
+	}
 	
 	
 	this.init = Zotero.Promise.coroutine(function* () {
-		yield this.constructor.prototype.init.apply(this);
+		yield Zotero.DataObjects.prototype.init.apply(this);
 		yield Zotero.SearchConditions.init();
 	});
 	
@@ -1735,6 +1703,8 @@ Zotero.Searches = new function(){
 				let id = ids[i];
 				var search = new Zotero.Search;
 				search.id = id;
+				yield search.loadPrimaryData();
+				yield search.loadConditions();
 				notifierData[id] = { old: search.serialize() };
 				
 				var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
@@ -1756,7 +1726,11 @@ Zotero.Searches = new function(){
 			+ Object.keys(this._primaryDataSQLParts).map(key => this._primaryDataSQLParts[key]).join(", ") + " "
 			+ "FROM savedSearches O WHERE 1";
 	}
-}
+	
+	Zotero.DataObjects.call(this);
+	
+	return this;
+}.bind(Object.create(Zotero.DataObjects.prototype))();
 
 
 

@@ -1971,6 +1971,7 @@ var ZoteroPane = new function()
 		}
 		
 		var self = this;
+		var deferred = Zotero.Promise.defer();
 		this.collectionsView.addEventListener('load', function () {
 			Zotero.spawn(function* () {
 				var currentLibraryID = self.getSelectedLibraryID();
@@ -1993,15 +1994,22 @@ var ZoteroPane = new function()
 							yield self.collectionsView.selectLibrary(item.libraryID);
 							yield self.itemsView.selectItem(itemID, expand);
 						}
+						deferred.resolve(true);
+					})
+					.catch(function(e) {
+						deferred.reject(e);
 					});
 				});
+			})
+			.catch(function(e) {
+				deferred.reject(e);
 			});
 		});
 		
 		// open Zotero pane
 		this.show();
 		
-		return true;
+		return deferred.promise;
 	});
 	
 	

@@ -201,7 +201,7 @@ Zotero.API.Data = {
 		var params = this.parsePath(path);
 		//Zotero.debug(params);
 		
-		return Zotero.DataObjectUtilities.getClassForObjectType(params.objectType)
+		return Zotero.DataObjectUtilities.getObjectsClassForObjectType(params.objectType)
 			.apiDataGenerator(params);
 	}
 };

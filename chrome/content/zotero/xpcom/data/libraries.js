@@ -28,7 +28,7 @@ Zotero.Libraries = new function () {
 		_userLibraryID,
 		_libraryDataLoaded = false;
 	
-	Zotero.Utilities.Internal.defineProperty(this, 'userLibraryID', {
+	Zotero.defineProperty(this, 'userLibraryID', {
 		get: function() { 
 			if (!_libraryDataLoaded) {
 				throw new Error("Library data not yet loaded");
@@ -176,5 +176,13 @@ Zotero.Libraries = new function () {
 			default:
 				throw new Error("Unsupported library type '" + type + "' in Zotero.Libraries.getName()");
 		}
+	}
+	
+	this.isGroupLibrary = function (libraryID) {
+		if (!_libraryDataLoaded) {
+			throw new Error("Library data not yet loaded");
+		}
+		
+		return this.getType(libraryID) == 'group';
 	}
 }

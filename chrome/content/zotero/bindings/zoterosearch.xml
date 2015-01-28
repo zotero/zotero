@@ -232,7 +232,7 @@
 				<body>
 					<![CDATA[
 						this.updateSearch();
-						return this.search.save(true);
+						return this.search.save({fixGaps: true});
 					]]>
 				</body>
 			</method>
