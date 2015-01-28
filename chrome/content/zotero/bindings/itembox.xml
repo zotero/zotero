@@ -1036,7 +1036,6 @@
 				<body>
 				<![CDATA[
 					var sbo = document.getAnonymousNodes(this)[0].boxObject;
-					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
 					sbo.ensureElementIsVisible(elem);
 				]]>
 				</body>
