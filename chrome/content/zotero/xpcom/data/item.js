@@ -382,7 +382,7 @@ Zotero.Item.prototype._parseRowData = function(row) {
 			this._sortCreator = row.sortCreator ? row.sortCreator : '';
 		}
 		if (row.attachmentCharset !== undefined) {
-			this._attachmentCharset = row.attachmentCharset ? parseInt(row.attachmentCharset) : null;
+			this._attachmentCharset = row.attachmentCharset ? row.attachmentCharset : null;
 		}
 		if (row.attachmentLinkMode !== undefined) {
 			this._attachmentLinkMode = parseInt(row.attachmentLinkMode);
@@ -434,7 +434,6 @@ Zotero.Item.prototype._parseRowData = function(row) {
 					break;
 				
 				case 'parentID':
-				case 'attachmentCharset':
 					this['_' + col] = val ? parseInt(val) : false;
 					break;
 				
@@ -1495,7 +1494,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let parent = this.parentID;
 		let linkMode = this.attachmentLinkMode;
 		let contentType = this.attachmentContentType;
-		let charsetID = Zotero.CharacterSets.getID(this.attachmentCharset);
+		let charsetID = yield Zotero.CharacterSets.add(this.attachmentCharset);
 		let path = this.attachmentPath;
 		let syncState = this.attachmentSyncState;
 		
@@ -2734,22 +2733,18 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentCharset', {
 			throw (".attachmentCharset can only be set for attachment items");
 		}
 		
-		var oldVal = this.attachmentCharset;
-		if (oldVal) {
-			oldVal = Zotero.CharacterSets.getID(oldVal);
+		if (typeof val == 'number') {
+			oldVal = Zotero.CharacterSets.getID(this.attachmentCharset);
 		}
-		if (!oldVal) {
-			oldVal = null;
+		else {
+			oldVal = this.attachmentCharset;
 		}
 		
-		if (val) {
-			val = Zotero.CharacterSets.getID(val);
-		}
 		if (!val) {
-			val = null;
+			val = "";
 		}
 		
-		if (val == oldVal) {
+		if (val === oldVal) {
 			return;
 		}
 		
@@ -4043,7 +4038,7 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 		if (this.isAttachment()) {
 			obj.linkMode = this.attachmentLinkMode;
 			obj.contentType = this.attachmentContentType;
-			obj.charset = Zotero.CharacterSets.getName(this.attachmentCharset);
+			obj.charset = this.attachmentCharset;
 			obj.path = this.attachmentPath;
 		}
 		

@@ -49,6 +49,12 @@ CREATE TABLE syncedSettings (
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
 
+CREATE TABLE charsets (
+    charsetID INTEGER PRIMARY KEY,
+    charset TEXT UNIQUE
+);
+CREATE INDEX charsets_charset ON charsets(charset);
+
 -- Primary data applicable to all items
 CREATE TABLE items (
     itemID INTEGER PRIMARY KEY,
@@ -101,14 +107,15 @@ CREATE TABLE itemAttachments (
     contentType TEXT,
     charsetID INT,
     path TEXT,
-    originalPath TEXT,
     syncState INT DEFAULT 0,
     storageModTime INT,
     storageHash TEXT,
     FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
-    FOREIGN KEY (parentItemID) REFERENCES items(itemID) ON DELETE CASCADE
+    FOREIGN KEY (parentItemID) REFERENCES items(itemID) ON DELETE CASCADE,
+    FOREIGN KEY (charsetID) REFERENCES charsets(charsetID) ON DELETE SET NULL
 );
 CREATE INDEX itemAttachments_parentItemID ON itemAttachments(parentItemID);
+CREATE INDEX itemAttachments_charsetID ON itemAttachments(charsetID);
 CREATE INDEX itemAttachments_contentType ON itemAttachments(contentType);
 CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState);
 

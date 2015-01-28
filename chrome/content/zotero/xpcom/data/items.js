@@ -82,7 +82,7 @@ Zotero.Items = function() {
 				parentID: "(CASE O.itemTypeID WHEN 14 THEN IAP.itemID WHEN 1 THEN INoP.itemID END) AS parentID",
 				parentKey: "(CASE O.itemTypeID WHEN 14 THEN IAP.key WHEN 1 THEN INoP.key END) AS parentKey",
 				
-				attachmentCharset: "IA.charsetID AS attachmentCharset",
+				attachmentCharset: "CS.charset AS attachmentCharset",
 				attachmentLinkMode: "IA.linkMode AS attachmentLinkMode",
 				attachmentContentType: "IA.contentType AS attachmentContentType",
 				attachmentPath: "IA.path AS attachmentPath",
@@ -97,7 +97,8 @@ Zotero.Items = function() {
 		+ "LEFT JOIN items IAP ON (IA.parentItemID=IAP.itemID) "
 		+ "LEFT JOIN itemNotes INo ON (O.itemID=INo.itemID) "
 		+ "LEFT JOIN items INoP ON (INo.parentItemID=INoP.itemID) "
-		+ "LEFT JOIN deletedItems DI ON (O.itemID=DI.itemID)";
+		+ "LEFT JOIN deletedItems DI ON (O.itemID=DI.itemID) "
+		+ "LEFT JOIN charsets CS ON (IA.charsetID=CS.charsetID)";
 	
 	/**
 	 * Return items marked as deleted
@@ -618,6 +619,9 @@ Zotero.Items = function() {
 		var sql = "DELETE FROM itemDataValues WHERE valueID NOT IN "
 					+ "(SELECT valueID FROM itemData)";
 		yield Zotero.DB.queryAsync(sql);
+		
+		// Purge unused charsetIDs (if attachments were deleted)
+		yield Zotero.CharacterSets.purge();
 		
 		Zotero.Prefs.set('purge.items', false)
 	});

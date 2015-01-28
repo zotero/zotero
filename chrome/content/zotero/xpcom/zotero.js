@@ -2083,6 +2083,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		yield Zotero.Items.purge();
 		// DEBUG: this might not need to be permanent
 		Zotero.Relations.purge();
+		yield Zotero.CharacterSets.purge();
 	});
 	
 	

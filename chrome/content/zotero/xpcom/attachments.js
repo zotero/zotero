@@ -478,7 +478,6 @@ Zotero.Attachments = new function(){
 		var url = document.location.href;
 		var title = document.title; // TODO: don't use Mozilla-generated title for images, etc.
 		var contentType = document.contentType;
-		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
 		
 		var itemID;
 		yield Zotero.DB.executeTransaction(function* () {
@@ -487,7 +486,7 @@ Zotero.Attachments = new function(){
 				title: title,
 				linkMode: this.LINK_MODE_LINKED_URL,
 				contentType: contentType,
-				charset: charsetID,
+				charset: document.characterSet,
 				parentItemID: parentItemID
 			});
 			
@@ -552,8 +551,6 @@ Zotero.Attachments = new function(){
 			100 //make sure this matches WPD settings in webpagedump/common.js
 		);
 		tmpFile.append(fileName);
-		
-		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
 		
 		// If we're using the title from the document, make some adjustments
 		if (!options.title) {
@@ -620,7 +617,7 @@ Zotero.Attachments = new function(){
 			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
 			attachmentItem.parentID = parentItemID;
 			attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
-			attachmentItem.attachmentCharset = charsetID;
+			attachmentItem.attachmentCharset = document.characterSet;
 			attachmentItem.attachmentContentType = contentType;
 			var itemID = yield attachmentItem.save();
 			
@@ -1300,12 +1297,12 @@ Zotero.Attachments = new function(){
 			Zotero.unlockPromise
 			.then(function () {
 				return Zotero.spawn(function* () {
-					var charsetID = Zotero.CharacterSets.getID(charset);
-					if (charsetID) {
+					if (charset) {
 						var disabled = Zotero.Notifier.disable();
 						
 						var item = yield Zotero.Items.getAsync(itemID);
-						item.attachmentCharset = charsetID;
+						charset = yield Zotero.CharacterSets.add(charset);
+						item.attachmentCharset = charset;
 						yield item.save();
 						
 						if (disabled) {

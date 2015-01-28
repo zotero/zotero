@@ -65,21 +65,7 @@ Zotero.CachedTypes = function() {
 		
 		var types = yield this._getTypesFromDB();
 		for (let i=0; i<types.length; i++) {
-			let type = types[i];
-			// Store as both id and name for access by either
-			var typeData = {
-				id: types[i].id,
-				name: types[i].name,
-				custom: this._hasCustom ? !!types[i].custom : false
-			}
-			this._types['_' + types[i].id] = typeData;
-			if (this._ignoreCase) {
-				this._types['_' + types[i].name.toLowerCase()] = this._types['_' + types[i].id];
-			}
-			else {
-				this._types['_' + types[i].name] = this._types['_' + types[i].id];
-			}
-			this._typesArray.push(typeData);
+			this._cacheTypeData(types[i]);
 		}
 	});
 	
@@ -157,7 +143,24 @@ Zotero.CachedTypes = function() {
 			params ? params : false
 		);
 	};
-
+	
+	
+	this._cacheTypeData = function (type) {
+		// Store as both id and name for access by either
+		var typeData = {
+			id: type.id,
+			name: type.name,
+			custom: this._hasCustom ? !!type.custom : false
+		}
+		this._types['_' + type.id] = typeData;
+		if (this._ignoreCase) {
+			this._types['_' + type.name.toLowerCase()] = this._types['_' + type.id];
+		}
+		else {
+			this._types['_' + type.name] = this._types['_' + type.id];
+		}
+		this._typesArray.push(typeData);
+	}
 }
 
 
@@ -479,5 +482,51 @@ Zotero.CharacterSets = new function() {
 	function getAll() {
 		return this.getTypes();
 	}
+	
+	
+	/**
+	 * @param {String} name - Type name to add
+	 * @return {Integer|False} - The type id (new or existing), or false if invalid type name
+	 */
+	this.add = Zotero.Promise.coroutine(function* (name) {
+		if (typeof name != 'string' || name === "") {
+			return false;
+		}
+		
+		var id = this.getID(name);
+		if (id) {
+			return id;
+		}
+		
+		name = name.toLowerCase();
+		
+		// Don't allow too-long or non-ASCII names
+		if (name.length > 50 || !name.match(/[^a-z0-9\-_]/)) {
+			return false;
+		}
+		
+		var sql = "INSERT INTO " + this._table + " (" + this._nameCol + ") VALUES (?)";
+		yield Zotero.DB.queryAsync(sql, name);
+		
+		sql = "SELECT id FROM " + this._table + " WHERE " + this._nameCol + "=?";
+		var id = yield Zotero.DB.valueQueryAsync(sql, name);
+		
+		this._cacheTypeData({
+			id: id,
+			name: name
+		});
+		
+		return id;
+	});
+	
+	
+	/**
+	 * @return {Promise}
+	 */
+	this.purge = function () {
+		var sql = "DELETE FROM " + this._table + " WHERE " + this._idCol + " NOT IN "
+			+ "(SELECT " + this._idCol + " FROM itemAttachments)";
+		return Zotero.DB.queryAsync(sql);
+	};
 }
 
