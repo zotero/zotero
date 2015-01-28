@@ -260,7 +260,7 @@ Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env)
 		Zotero.Notifier.trigger('add', 'search', this.id);
 	}
 	else {
-		Zotero.Notifier.trigger('modify', 'search', this.id, this._previousData);
+		Zotero.Notifier.trigger('modify', 'search', this.id, { changed: this._previousData });
 	}
 	
 	if (isNew && Zotero.Libraries.isGroupLibrary(this.libraryID)) {

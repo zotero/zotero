@@ -138,11 +138,18 @@ Zotero.Notifier = new function(){
 			// Merge extraData keys
 			if (extraData) {
 				Zotero.debug("ADDING EXTRA DATA");
-				for (var dataID in extraData) {
-					Zotero.debug(dataID);
-					if (extraData[dataID]) {
-						Zotero.debug("YES");
-						_queue[type][event].data[dataID] = extraData[dataID];
+				// If just a single id, extra data can be keyed by id or passed directly
+				if (ids.length == 1) {
+					let id = ids[0];
+					_queue[type][event].data[id] = extraData[id] ? extraData[id] : extraData;
+				}
+				// For multiple ids, check for data keyed by the id
+				else {
+					for (let i = 0; i < ids.length; i++) {
+						let id = ids[i];
+						if (extraData[id]) {
+							_queue[type][event].data[id] = extraData[id];
+						}
 					}
 				}
 			}

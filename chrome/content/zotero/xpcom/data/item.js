@@ -1218,9 +1218,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		sqlValues.push(parseInt(itemID));
 		yield Zotero.DB.queryAsync(sql, sqlValues);
 		
-		var notifierData = {};
-		notifierData[itemID] = { changed: this._previousData };
-		Zotero.Notifier.trigger('modify', 'item', itemID, notifierData);
+		Zotero.Notifier.trigger('modify', 'item', itemID, { changed: this._previousData });
 	}
 	
 	//
