@@ -89,8 +89,7 @@ ConcurrentCaller.prototype.pause = function (ms) {
 ConcurrentCaller.prototype.fcall = function (func) {
 	if (Array.isArray(func)) {
 		var promises = [];
-		for (var i in func) {
-			//this._log("Running fcall on function");
+		for (let i = 0; i < func.length; i++) {
 			promises.push(this.fcall(func[i]));
 		}
 		return Promise.settle(promises);
@@ -117,14 +116,14 @@ ConcurrentCaller.prototype.fcall = function (func) {
 
 
 ConcurrentCaller.prototype.stop = function () {
-	self._log("Clearing queue");
-	self._queue = [];
+	this._log("Clearing queue");
+	this._queue = [];
 };
 
 
 ConcurrentCaller.prototype._onFunctionDone = function (promise) {
 	var self = this;
-	return promise.then(function (promise) {
+	return promise.then(function (result) {
 		self._numRunning--;
 		
 		self._log("Done with function ("
@@ -142,6 +141,7 @@ ConcurrentCaller.prototype._onFunctionDone = function (promise) {
 			if (self._pauseUntil > now && (self._pauseUntil - now > interval)) {
 				interval = self._pauseUntil - now;
 			}
+			// We don't wait for this because it resolves the passed promise, not this one
 			Promise.delay(interval)
 			.then(function () {
 				self._log("Running new function ("
@@ -149,17 +149,17 @@ ConcurrentCaller.prototype._onFunctionDone = function (promise) {
 					+ self._queue.length + " queued)");
 				
 				self._numRunning++;
-				var p = self._onFunctionDone(f.func());
-				f.deferred.resolve(p);
+				var result = self._onFunctionDone(f.func());
+				f.deferred.resolve(result);
 			});
 		}
 		
-		return promise;
+		return result;
 	})
 	.catch(function (e) {
 		self._numRunning--;
 		
-		self._log("Done with function (" + self._numRunning + "/" + self._numConcurrent + ", "
+		self._log("Error in function (" + self._numRunning + "/" + self._numConcurrent + ", "
 			+ self._queue.length + " in queue)");
 		
 		if (self.onError) {
