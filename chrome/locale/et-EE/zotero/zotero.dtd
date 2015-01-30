@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Kustutada">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Cancel">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Title:">
-
-

@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "نام:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "جستجو در کتابخانه:">
 
 <!ENTITY zotero.search.joinMode.prefix "مطابقت با">
 <!ENTITY zotero.search.joinMode.any "حداقل یکی از">
@@ -13,7 +13,7 @@
 
 <!ENTITY zotero.search.textModes.phrase "عبارت">
 <!ENTITY zotero.search.textModes.phraseBinary "عبارت (شامل پرونده‌های دودویی)‏">
-<!ENTITY zotero.search.textModes.regexp "Regexp">
+<!ENTITY zotero.search.textModes.regexp "عبارت با قاعده (Regexp)">
 <!ENTITY zotero.search.textModes.regexpCS "Regexp (حساس به حروف کوچک و بزرگ)">
 
 <!ENTITY zotero.search.date.units.days "روز">

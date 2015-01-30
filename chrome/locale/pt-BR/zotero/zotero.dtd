@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Excluir">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Cancelar">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Relatório de erros do Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Pode incluir mensagens não relacionadas ao Zotero.">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Title:">
-
-

@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Видалити">
 <!ENTITY zotero.general.ok "Гаразд">
 <!ENTITY zotero.general.cancel "Відміна">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Звіт про помилку в Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Це може включати повідомлення, які не відносяться до Zotero.">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Прикріпити посилання на URI">
 <!ENTITY zotero.attachLink.label.link "Посилання:">
 <!ENTITY zotero.attachLink.label.title "Назва">
-
-

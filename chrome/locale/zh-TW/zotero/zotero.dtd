@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "刪除">
 <!ENTITY zotero.general.ok "確定">
 <!ENTITY zotero.general.cancel "取消">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Zotero 錯誤報告">
 <!ENTITY zotero.errorReport.unrelatedMessages "這可能包括無關於 Zotero 的訊息。">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Title:">
-
-

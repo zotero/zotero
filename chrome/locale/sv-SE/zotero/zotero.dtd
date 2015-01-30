@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Radera">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Avbryt">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Zotero-felrapporting">
 <!ENTITY zotero.errorReport.unrelatedMessages "Det kan innehålla meddelanden som inte har med Zotero att göra.">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Bifoga länk till URI">
 <!ENTITY zotero.attachLink.label.link "Länk:">
 <!ENTITY zotero.attachLink.label.title "Titel:">
-
-

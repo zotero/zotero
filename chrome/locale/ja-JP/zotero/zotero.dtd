@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "削除">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "キャンセル">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Zotero エラーレポート">
 <!ENTITY zotero.errorReport.unrelatedMessages "エラーの記録にはZotero に無関係のメッセージが含まれている恐れがあります。">
@@ -285,8 +287,6 @@
 <!ENTITY zotero.downloadManager.saveToLibrary.description "添付ファイルは現在選択中のライブラリに保存することができません。その代わり、このアイテムはあなたのライブラリに保存されます。">
 <!ENTITY zotero.downloadManager.noPDFTools.description "この機能を利用するには、まず Zotero 環境設定の検索ペインで PDF ツールをインストールする必要があります。">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
-
-
+<!ENTITY zotero.attachLink.title "URIへのリンクを添付する">
+<!ENTITY zotero.attachLink.label.link "リンク:">
+<!ENTITY zotero.attachLink.label.title "題:">

@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Slet">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Annullér">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Zotero fejlrapport">
 <!ENTITY zotero.errorReport.unrelatedMessages "Dette kan inkludere beskeder, som ikke har noget med Zotero at gøre.">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Title:">
-
-

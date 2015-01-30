@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Eyða">
 <!ENTITY zotero.general.ok "Í lagi">
 <!ENTITY zotero.general.cancel "Hætta við">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Zotero villutilkynning">
 <!ENTITY zotero.errorReport.unrelatedMessages "Hér gætu einnig verið skilaboð ótengd Zotero.">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Title:">
-
-

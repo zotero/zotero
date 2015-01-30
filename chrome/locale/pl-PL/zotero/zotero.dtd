@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Usuń">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Anuluj">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Raport błędów Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Może zawierać informacje niezwiązane z Zotero.">
@@ -285,8 +287,6 @@
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Załączniki nie mogą być zapisane w aktualnie wybranej bibliotece. Ten element zostanie zapisany zamiast tego w twojej bibliotece.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Aby użyć tej funkcji, musisz najpierw zainstalować narzędzia PDF w ustawieniach Zotero.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
-
-
+<!ENTITY zotero.attachLink.title "Dołącz odnośnik do URI">
+<!ENTITY zotero.attachLink.label.link "Odnośnik:">
+<!ENTITY zotero.attachLink.label.title "Tytuł:">

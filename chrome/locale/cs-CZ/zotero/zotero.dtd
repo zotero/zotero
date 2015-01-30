@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Smazat">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Zrušit">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Chybová zpráva Zotera">
 <!ENTITY zotero.errorReport.unrelatedMessages "Může obsahovat zprávy nesouvisející se Zoterem.">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Připojit odkaz na URI">
 <!ENTITY zotero.attachLink.label.link "Odkaz:">
 <!ENTITY zotero.attachLink.label.title "Název:">
-
-

@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Šalinti">
 <!ENTITY zotero.general.ok "Gerai">
 <!ENTITY zotero.general.cancel "Atšaukti">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
 <!ENTITY zotero.errorReport.unrelatedMessages "Čia gali būti pranešimų, visai nesusijusių su Zotero.">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Title:">
-
-

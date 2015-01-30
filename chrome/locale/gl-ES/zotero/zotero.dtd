@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Borrar">
 <!ENTITY zotero.general.ok "Aceptar">
 <!ENTITY zotero.general.cancel "Cancelar">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Informe de erros de Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Isto pode conter mensaxes que non estean relacionadas con Zotero.">
@@ -285,8 +287,6 @@
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Os anexos non se poden gardar na librería que se escolleu. En vez de alí, ese documento gardarase na súa biblioteca.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Para empregar esta característica ten que instalar primeiro as ferramentas de PDF dende as preferencias de Zotero.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
-
-
+<!ENTITY zotero.attachLink.title "Engadirlle unha ligazón á URI:">
+<!ENTITY zotero.attachLink.label.link "Ligazón:">
+<!ENTITY zotero.attachLink.label.title "Título:">

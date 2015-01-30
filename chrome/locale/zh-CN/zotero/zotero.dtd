@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "删除">
 <!ENTITY zotero.general.ok "确定">
 <!ENTITY zotero.general.cancel "取消">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Zotero 错误报告">
 <!ENTITY zotero.errorReport.unrelatedMessages "这里可能包括和Zotero无关的消息。">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Title:">
-
-

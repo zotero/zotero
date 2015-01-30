@@ -87,7 +87,7 @@
 <!ENTITY helpMenuWin.label "?">
 <!ENTITY helpMenuWin.accesskey "?">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "À propos &brandShortName;">
+<!ENTITY aboutProduct.label "À propos de &brandShortName;">
 <!ENTITY aboutProduct.accesskey "p">
 <!ENTITY productHelp.label "Assistance et documentation">
 <!ENTITY productHelp.accesskey "A">

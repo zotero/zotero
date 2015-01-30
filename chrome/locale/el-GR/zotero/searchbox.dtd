@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "Όνομα:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Αναζήτηση στην βιβλιοθήκη:">
 
 <!ENTITY zotero.search.joinMode.prefix "Ταίριασμα">
 <!ENTITY zotero.search.joinMode.any "οποιαδήποτε">
@@ -13,7 +13,7 @@
 
 <!ENTITY zotero.search.textModes.phrase "Φράση">
 <!ENTITY zotero.search.textModes.phraseBinary "Φράση (συμπ. δυαδικά αρχεία)">
-<!ENTITY zotero.search.textModes.regexp "Regexp">
+<!ENTITY zotero.search.textModes.regexp "Κανονική έκφραση regexp">
 <!ENTITY zotero.search.textModes.regexpCS "Regexp (διακριση πεζών-κεφαλαίων)">
 
 <!ENTITY zotero.search.date.units.days "ημέρες">

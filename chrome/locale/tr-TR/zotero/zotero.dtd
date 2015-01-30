@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Sil">
 <!ENTITY zotero.general.ok "Tamam">
 <!ENTITY zotero.general.cancel "İptal Et">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Zotero Hata Raporu">
 <!ENTITY zotero.errorReport.unrelatedMessages "Bu, Zotero ile ilgili olmayan mesajlar içerebilir.">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "URI'ye Bağlantı Ekle.">
 <!ENTITY zotero.attachLink.label.link "Bağlantı">
 <!ENTITY zotero.attachLink.label.title "Başlık">
-
-
