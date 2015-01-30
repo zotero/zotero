@@ -2203,7 +2203,7 @@ Zotero.Prefs = new function(){
 				case branch.PREF_BOOL:
 					return branch.getBoolPref(pref);
 				case branch.PREF_STRING:
-					return branch.getCharPref(pref);
+					return '' + branch.getComplexValue(pref, Components.interfaces.nsISupportsString);
 				case branch.PREF_INT:
 					return branch.getIntPref(pref);
 			}
