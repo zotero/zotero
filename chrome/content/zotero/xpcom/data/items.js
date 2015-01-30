@@ -256,9 +256,6 @@ Zotero.Items = function() {
 			if (this.isPrimaryField(field)) {
 				primaryFields.push(field);
 			}
-			else if (field == 'itemType') {
-				primaryFields.push('itemTypeID');
-			}
 			else {
 				fieldIDs.push(Zotero.ItemFields.getID(field));
 				if (Zotero.ItemFields.isBaseField(field)) {
@@ -288,7 +285,7 @@ Zotero.Items = function() {
 						}
 						Zotero.debug(obj.itemID);
 						Zotero.debug(Object.keys(this._objectCache));
-						this._objectCache[obj.itemID].loadFromRow(rowObj);
+						this._objectCache[obj.itemID].loadFromRow(obj);
 					}.bind(this)
 				}
 			);

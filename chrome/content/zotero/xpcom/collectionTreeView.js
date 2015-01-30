@@ -184,9 +184,9 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 						rows,
 						new Zotero.CollectionTreeRow('group', groups[i]),
 						1,
-						beforeRow ? beforeRow + i + newRows : null
+						beforeRow ? beforeRow + newRows : null
 					);
-					newRows += yield self._expandRow(rows, row);
+					newRows += 1 + ( yield self._expandRow(rows, row) );
 				}
 				return newRows;
 			})
