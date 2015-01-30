@@ -169,7 +169,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Håndtering af søgemaskiner for artikler">
 <!ENTITY zotero.preferences.locate.description "Beskrivelse">
 <!ENTITY zotero.preferences.locate.name "Navn">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "En søgemaskine udvider mulighederne drop-down-menuen for Lokalisering i Info-vinduet. Hvis man aktiverer søgemaskinerne i nedenstående liste, bliver de føjet til drop-down-menuen og kan anvendes til at lokalisere Elementer fra dit Bibliotek på WWW.">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "En søgemaskine udvider mulighederne i drop-down-menuen for Find i Info-fanebladet. Hvis man aktiverer søgemaskinerne i nedenstående liste, bliver de føjet til drop-down-menuen og kan anvendes til at lokalisere elementer fra dit bibliotek på WWW.">
 <!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Gendan Defaults">
 

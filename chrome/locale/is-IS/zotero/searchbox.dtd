@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "Nafn:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Leita í safni:">
 
 <!ENTITY zotero.search.joinMode.prefix "Leita að">
 <!ENTITY zotero.search.joinMode.any "einhverju">
@@ -14,7 +14,7 @@
 <!ENTITY zotero.search.textModes.phrase "Setningaliður">
 <!ENTITY zotero.search.textModes.phraseBinary "Setningaliður (með stafrænum skrám)">
 <!ENTITY zotero.search.textModes.regexp "Regexp">
-<!ENTITY zotero.search.textModes.regexpCS "Regexp (case-sensitive)">
+<!ENTITY zotero.search.textModes.regexpCS "Leitartexti (næmur fyrir há- og lágstöfum)">
 
 <!ENTITY zotero.search.date.units.days "dagar">
 <!ENTITY zotero.search.date.units.months "mánuðir">

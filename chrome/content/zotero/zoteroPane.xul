@@ -174,7 +174,7 @@
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link standalone-no-display" label="&zotero.items.menu.attach.link;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(true, itemID)"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="&zotero.items.menu.attach.file;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
-							<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(true, itemID);"/>
+							<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(true, itemID);" id="zotero-tb-attachment-add-file-link"/>
 						</menupopup>
 					</toolbarbutton>
 					<toolbarseparator/>
@@ -538,9 +538,11 @@
 					</deck>
 				</vbox>
 				
-				<splitter id="zotero-items-splitter" resizebefore="closest" resizeafter="closest"
+				<splitter id="zotero-items-splitter" resizebefore="closest" resizeafter="closest" collapse="after" zotero-persist="state"
 					onmousemove="ZoteroPane_Local.updateToolbarPosition()"
-					oncommand="ZoteroPane_Local.updateToolbarPosition()"/>
+					oncommand="ZoteroPane_Local.updateToolbarPosition()">
+					<grippy id="zotero-items-grippy"/>
+				</splitter>
 				
 				<!-- itemPane.xul -->
 				<vbox id="zotero-item-pane"/>

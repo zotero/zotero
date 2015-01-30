@@ -63,11 +63,19 @@ var Zotero_DownloadOverlay = new function() {
 						.getMostRecentWindow("navigator:browser");
 		var libraryID, collection;
 		try {
-			if(win.ZoteroPane.getItemGroup().filesEditable) {
+			let itemGroup = win.ZoteroPane.getItemGroup();
+			if (itemGroup.filesEditable) {
 				libraryID = win.ZoteroPane.getSelectedLibraryID();
 				collection = win.ZoteroPane.getSelectedCollection();
 			}
-		} catch(e) {};
+			// TODO: Just show an error instead?
+			else {
+				Zotero.debug("Cannot save files to library " + itemGroup.ref.libraryID
+					+ " -- saving to personal library instead", 2);
+			}
+		} catch(e) {
+			Zotero.debug(e, 1);
+		};
 		
 		var recognizePDF = document.getElementById('zotero-recognizePDF').checked
 				&& !document.getElementById('zotero-recognizePDF').hidden

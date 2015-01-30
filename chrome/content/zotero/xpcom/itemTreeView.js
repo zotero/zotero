@@ -568,10 +568,21 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 			for (var i=0, len=ids.length; i<len; i++) {
 				if (action == 'delete' || action == 'trash' ||
 						!itemGroup.ref.hasItem(ids[i])) {
+					let row = this._itemRowMap[ids[i]];
+					
 					// Row might already be gone (e.g. if this is a child and
 					// 'modify' was sent to parent)
-					if (this._itemRowMap[ids[i]] != undefined) {
-						rows.push(this._itemRowMap[ids[i]]);
+					if (row == undefined) {
+						continue;
+					}
+					
+					rows.push(row);
+					
+					// Remove child items of removed parents
+					if (this.isContainer(row) && this.isContainerOpen(row)) {
+						while (++row < this.rowCount && this.getLevel(row) > 0) {
+							rows.push(row);
+						}
 					}
 				}
 			}
@@ -1444,22 +1455,47 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	
 	var firstCreatorSortCache = {};
 	
+	// Regexp to extract the whole string up to an optional "and" or "et al."
+	var andEtAlRegExp = new RegExp(
+		// Extract the beginning of the string in non-greedy mode
+		"^.+?"
+		// up to either the end of the string, "et al." at the end of string
+		+ "(?=(?: " + Zotero.getString('general.etAl').replace('.', '\.') + ")?$"
+		// or ' and '
+		+ "| " + Zotero.getString('general.and') + " "
+		+ ")"
+	);
+	
 	function creatorSort(a, b) {
 		//
-		// Try sorting by first word in firstCreator field, since we already have it
+		// Try sorting by the first name in the firstCreator field, since we already have it
+		//
+		// For sortCreatorAsString mode, just use the whole string
 		//
 		var aItemID = a.id,
 			bItemID = b.id,
 			fieldA = firstCreatorSortCache[aItemID],
 			fieldB = firstCreatorSortCache[bItemID];
 		if (fieldA === undefined) {
-			var matches = Zotero.Items.getSortTitle(a.getField('firstCreator')).match(/^[^\s]+/);
-			var fieldA = matches ? matches[0] : '';
+			let firstCreator = Zotero.Items.getSortTitle(a.getField('firstCreator'));
+			if (sortCreatorAsString) {
+				var fieldA = firstCreator;
+			}
+			else {
+				var matches = andEtAlRegExp.exec(firstCreator);
+				var fieldA = matches ? matches[0] : '';
+			}
 			firstCreatorSortCache[aItemID] = fieldA;
 		}
 		if (fieldB === undefined) {
-			var matches = Zotero.Items.getSortTitle(b.getField('firstCreator')).match(/^[^\s]+/);
-			var fieldB = matches ? matches[0] : '';
+			let firstCreator = Zotero.Items.getSortTitle(b.getField('firstCreator'));
+			if (sortCreatorAsString) {
+				var fieldB = firstCreator;
+			}
+			else {
+				var matches = andEtAlRegExp.exec(firstCreator);
+				var fieldB = matches ? matches[0] : '';
+			}
 			firstCreatorSortCache[bItemID] = fieldB;
 		}
 		
@@ -1473,7 +1509,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		}
 		
 		//
-		// If first word is the same, compare actual creators
+		// If first name is the same, compare actual creators
 		//
 		var aRef = a.ref,
 			bRef = b.ref,

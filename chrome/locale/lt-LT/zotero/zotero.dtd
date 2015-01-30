@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Atšaukti">
 
 <!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
-<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Čia gali būti pranešimų, visai nesusijusių su Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Prašome palaukti kol siunčiamas klaidų sąrašas.">
 <!ENTITY zotero.errorReport.submitted "Jūsų klaidų sąrašas buvo nusiųstas.">
 <!ENTITY zotero.errorReport.reportID "Pranešimo ID:">
@@ -65,9 +65,9 @@
 <!ENTITY zotero.items.archiveLocation_column "Vieta archyve">
 <!ENTITY zotero.items.place_column "Vieta">
 <!ENTITY zotero.items.volume_column "Tomas">
-<!ENTITY zotero.items.edition_column "Leidimas">
+<!ENTITY zotero.items.edition_column "Leidimas/numeris">
 <!ENTITY zotero.items.pages_column "Puslapiai">
-<!ENTITY zotero.items.issue_column "Leidimas">
+<!ENTITY zotero.items.issue_column "Numeris">
 <!ENTITY zotero.items.series_column "Serija">
 <!ENTITY zotero.items.seriesTitle_column "Serijos pavadinimas">
 <!ENTITY zotero.items.court_column "Teismas">
@@ -119,7 +119,7 @@
 <!ENTITY zotero.toolbar.openURL.tooltip "Ieškoti vietinėje bibliotekoje">
 
 <!ENTITY zotero.item.add "Pridėti">
-<!ENTITY zotero.item.attachment.file.show "Rodyti failą">
+<!ENTITY zotero.item.attachment.file.show "Atverti failo aplanką">
 <!ENTITY zotero.item.textTransform "Teksto trasformavimas">
 <!ENTITY zotero.item.textTransform.titlecase "Antraštės raidžių lygis">
 <!ENTITY zotero.item.textTransform.sentencecase "Sakinio pavidalu">
@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "Įrašyti į Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Priedų negalima įrašyti pasirinktoje bibliotekoje. Šį įrašą įrašysime jūsų bibliotekoje.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Norėdami naudotis šia funkcija, turite įdiegti PDF įrankius per Zotero nuostatų paieškos skydelį.">
+
+<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.label.link "Link:">
+<!ENTITY zotero.attachLink.label.title "Title:">
+
+

@@ -11,6 +11,8 @@
 	
 	<script>
 	<![CDATA[
+		Components.utils.import("resource://zotero/config.js");
+		
 		var Zotero_Error_Report = new function() {
 			this.init = init;
 			this.sendErrorReport = sendErrorReport;
@@ -74,7 +76,7 @@
 					body += key + '=' + encodeURIComponent(parts[key]) + '&';
 				}
 				body = body.substr(0, body.length - 1);
-				var url = 'https://repo.zotero.org/repo/report';
+				var url = ZOTERO_CONFIG.REPOSITORY_URL + "report";
 				Zotero.HTTP.promise('POST', url,
 					{ body: body, successCodes: false, foreground: true })
 				.then(_sendErrorReportCallback)

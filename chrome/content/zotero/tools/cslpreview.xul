@@ -43,26 +43,29 @@
 			this.generateBibliography = generateBibliography;
 
 			function init() { 
-				//refresh(); 
+				//refresh();
+				
+				var iframe = document.getElementById('zotero-csl-preview-box');
+				iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p>Select one or more items in Zotero and click the "Refresh" button to see how these items are rendered by the installed CSL citation styles.</p></body></html>';
 			}
 			function refresh() {
 				var iframe = document.getElementById('zotero-csl-preview-box');
 				var items = Zotero.getActiveZoteroPane().getSelectedItems();
-				if (items.length == 0) {
-					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No references selected in Zotero.</p></body></html>';
+				if (items.length === 0) {
+					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No items selected in Zotero.</p></body></html>';
 					return;
 				}
 				var progressWin = new Zotero.ProgressWindow();
 				// XXX needs its own string really!
 				progressWin.changeHeadline(Zotero.getString("pane.items.menu.createBib.multiple"));
 				var icon = 'chrome://zotero/skin/treeitem-attachment-file.png';
-				progressWin.addLines(document.title, icon)
+				progressWin.addLines(document.title, icon);
 				progressWin.show();
 				progressWin.startCloseTimer();
 				var f = function() {
 					var styles = Zotero.Styles.getAll();
 					// XXX needs its own string really for the title!
-					var str = '<html><head><title></title></head><body><h1>Citation/Bibliography list<h1>';
+					var str = '<html><head><title></title></head><body>';
 					for each(var style in styles) {
 						if (style.source) {
 							continue;
@@ -70,14 +73,15 @@
 						Zotero.debug("Generate Bib for " + style.title);
 						var cite = generateBibliography(style);
 						if (cite) {
-							str += '<hr><h2>' + style.title + '</h2>';
+							str += '<h3>' + style.title + '</h3>';
 							str += cite;
+							str += '<hr>';
 						}
 					}
 
 					str += '</body></html>';
 					iframe.contentDocument.documentElement.innerHTML = str;			
-				}
+				};
 				// Give progress window time to appear
 				setTimeout(f, 100);
 			}
@@ -86,33 +90,13 @@
 				var iframe = document.getElementById('zotero-csl-preview-box');
 				
 				var items = Zotero.getActiveZoteroPane().getSelectedItems();
-				if (items.length == 0) {
-					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No references selected in Zotero.</p></body></html>';
+				if (items.length === 0) {
 					return '';
 				}
 				
-				var authordate = document.getElementById("format-author-date");
-				var numeric = document.getElementById("format-numeric");
-				Zotero.debug("style class is " + style.class);
-				if (document.getElementById("format-note").checked == false && style.class == "note") {
-					Zotero.debug("CSL IGNORE NOTE one");
-					return '';
-				}
-				if (document.getElementById("format-in-text").checked == false && style.class == "in-text") {
-					Zotero.debug("CSL IGNORE IN-TEXT one");
-					return '';
-				}
-				var terms = new Object();
-				for each(var cat in style.categories) {
-					Zotero.debug("TERM is " + cat.toString());
-					terms[cat.toString()] = true;
-				}
-				if (!numeric.checked && terms["numeric"]) {
-					Zotero.debug("CSL IGNORE this numeric");
-					return '';
-				}
-				if (!authordate.checked && terms["author-date"]) {
-					Zotero.debug("CSL IGNORE this AD");
+				var citationFormat = document.getElementById("citation-format").selectedItem.value;
+				if (citationFormat != "all" && citationFormat != style.categories) {
+					Zotero.debug("CSL IGNORE: citation format is " + style.categories);
 					return '';
 				}
 				var styleEngine = style.getCiteProc();
@@ -123,19 +107,17 @@
 					[], [], "html");
 			
 				// Generate bibliography
-				if(!style.hasBibliography) {
-					var bibliography = '';
-				} else {
+				var bibliography = '';
+				if(style.hasBibliography) {
 					styleEngine.updateItems([item.id for each(item in items)]);
-					var bibliography = '<p>' + Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
+					bibliography = Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
 				}
 				
-				return '<div>' +
-					citations + bibliography + '</div>';
+				return '<p>' + citations + '</p>' + bibliography;
 			}
 			
 			
-		}
+		}();
 	]]>
 	</script>
 	<!-- NEEDS LOCALISING -->
@@ -144,18 +126,20 @@
 		<hbox align="center">
 			<button id="preview-refresh-button" label="Refresh" oncommand="Zotero_CSL_Preview.refresh()"/>
 			<groupbox orient="horizontal" align="center">
-				<label value="Class:"/>
-				<checkbox id="format-in-text" label="In-Text" checked="true"/>
-				<checkbox id="format-note" label="Notes" checked="true"/>
-			</groupbox>
-			<groupbox orient="horizontal" align="center">
-				<label value="Citation form:"/>
-				<checkbox id="format-author-date" label="Author Date" checked="true"/>
-				<checkbox id="format-numeric" label="Numeric" checked="true"/>
+				<label value="Citation format:" />
+				<menulist id="citation-format" oncommand="Zotero_CSL_Preview.refresh()">
+					<menupopup>
+						<menuitem label="all" value="all"/>
+						<menuitem label="author" value="author"/>
+						<menuitem label="author-date" value="author-date"/>
+						<menuitem label="label" value="label"/>
+						<menuitem label="note" value="note"/>
+						<menuitem label="numeric" value="numeric"/>
+					</menupopup>
+				</menulist>
 			</groupbox>
 		</hbox>
 	   </hbox>
-	   <splitter/>
 	   <iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em; background:white;" overflow="auto" type="content"/>
 	</vbox>
 	

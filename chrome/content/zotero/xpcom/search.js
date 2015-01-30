@@ -114,7 +114,7 @@ Zotero.Search.prototype._set = function (field, val) {
 			return;
 		
 		case 'name':
-			val = Zotero.Utilities.trim(val);
+			val = Zotero.Utilities.trim(val).normalize();
 			break;
 	}
 	
@@ -420,6 +420,8 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 			if (condition == 'quicksearch-titleCreatorYear') {
 				this.addCondition('title', operator, part.text, false);
 				this.addCondition('publicationTitle', operator, part.text, false);
+				this.addCondition('shortTitle', operator, part.text, false);
+				this.addCondition('court', operator, part.text, false);
 				this.addCondition('year', operator, part.text, false);
 			}
 			else {
@@ -481,6 +483,8 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 	
 	var [condition, mode] = Zotero.SearchConditions.parseCondition(condition);
 	
+	if (typeof value == 'string') value = value.normalize();
+	
 	this._conditions[searchConditionID] = {
 		id: searchConditionID,
 		condition: condition,
@@ -519,6 +523,8 @@ Zotero.Search.prototype.updateCondition = function(searchConditionID, condition,
 	}
 	
 	var [condition, mode] = Zotero.SearchConditions.parseCondition(condition);
+	
+	if (typeof value == 'string') value = value.normalize();
 	
 	this._conditions[searchConditionID] = {
 		id: parseInt(searchConditionID),
@@ -2383,6 +2389,7 @@ Zotero.SearchConditions = new function(){
 			return Zotero.getString('searchConditions.' + str)
 		}
 		catch (e) {
+			Zotero.debug("String not found for searchConditions." + str, 2);
 			return Zotero.ItemFields.getLocalizedString(null, str);
 		}
 	}

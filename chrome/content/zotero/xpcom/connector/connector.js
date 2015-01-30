@@ -28,7 +28,11 @@ Zotero.Connector = new function() {
 	const CONNECTOR_API_VERSION = 2;
 	
 	var _ieStandaloneIframeTarget, _ieConnectorCallbacks;
-	this.isOnline = null;
+	// As of Chrome 38 (and corresponding Opera version 24?) pages loaded over
+	// https (i.e. the zotero bookmarklet iframe) can not send requests over
+	// http, so pinging Standalone at http://127.0.0.1 fails.
+	// Disable for all browsers, except IE, which may be used frequently with ZSA
+	this.isOnline = Zotero.isBookmarklet && !Zotero.isIE ? false : null;
 	
 	/**
 	 * Checks if Zotero is online and passes current status to callback
@@ -36,7 +40,10 @@ Zotero.Connector = new function() {
 	 */
 	this.checkIsOnline = function(callback) {
 		// Only check once in bookmarklet
-		if(Zotero.isBookmarklet && this.isOnline !== null) callback(this.isOnline);
+		if(Zotero.isBookmarklet && this.isOnline !== null) {
+			callback(this.isOnline);
+			return;
+		}
 		
 		if(Zotero.isIE) {
 			if(window.location.protocol !== "http:") {
@@ -233,25 +240,7 @@ Zotero.Connector_Debug = new function() {
 	 * Submit data to the sserver
 	 */
 	this.submitReport = function(callback) {
-		var uploadCallback = function (xmlhttp) {
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-									.getService(Components.interfaces.nsIPromptService);
-			
-			if (!xmlhttp.responseXML) {
-				callback(false, 'Invalid response from server');
-				return;
-			}
-			var reported = xmlhttp.responseXML.getElementsByTagName('reported');
-			if (reported.length != 1) {
-				callback(false, 'The server returned an error. Please try again.');
-				return;
-			}
-			
-			var reportID = reported[0].getAttribute('reportID');
-			callback(true, reportID);
-		}
-		
-		Zotero.HTTP.doPost("http://www.zotero.org/repo/report?debug=1", Zotero.Debug.get(),
+		Zotero.HTTP.doPost(ZOTERO_CONFIG.REPOSITORY_URL + "report?debug=1", Zotero.Debug.get(),
 			function(xmlhttp) {
 				if (!xmlhttp.responseXML) {
 					callback(false, 'Invalid response from server');

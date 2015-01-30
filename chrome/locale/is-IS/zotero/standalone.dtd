@@ -12,12 +12,12 @@
 
 <!ENTITY fileMenu.label "Skrá">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "Vista...">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "Uppsetning síðu...">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "Prenta...">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "Loka">
@@ -43,7 +43,7 @@
 <!ENTITY copyCmd.label "Afrita">
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.accesskey "C">
-<!ENTITY copyCitationCmd.label "Aftrita tilvísun">
+<!ENTITY copyCitationCmd.label "Afrita tilvísun">
 <!ENTITY copyBibliographyCmd.label "Afrita heimildaskrá">
 <!ENTITY pasteCmd.label "Líma">
 <!ENTITY pasteCmd.key "V">
@@ -54,48 +54,48 @@
 <!ENTITY selectAllCmd.label "Velja allt">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Preferences">
+<!ENTITY preferencesCmd.label "Stillingar">
 <!ENTITY preferencesCmd.accesskey "O">
 <!ENTITY preferencesCmdUnix.label "Kjörstillingar">
 <!ENTITY preferencesCmdUnix.accesskey "n">
 <!ENTITY findCmd.label "Finna">
 <!ENTITY findCmd.accesskey "F">
 <!ENTITY findCmd.commandkey "f">
-<!ENTITY bidiSwitchPageDirectionItem.label "Switch Page Direction">
+<!ENTITY bidiSwitchPageDirectionItem.label "Snúa við síðustefnu">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
-<!ENTITY bidiSwitchTextDirectionItem.label "Switch Text Direction">
+<!ENTITY bidiSwitchTextDirectionItem.label "Snúa við textastefnu">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY toolsMenu.label "Tools">
+<!ENTITY toolsMenu.label "Verkfæri">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY addons.label "Add-ons">
+<!ENTITY addons.label "Viðbætur (add-ons)">
 
 
 <!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minimize">
-<!ENTITY bringAllToFront.label "Bring All to Front">
-<!ENTITY zoomWindow.label "Zoom">
-<!ENTITY windowMenu.label "Window">
+<!ENTITY minimizeWindow.label "Minnka">
+<!ENTITY bringAllToFront.label "Færa allt framfyrir">
+<!ENTITY zoomWindow.label "Þysja inn">
+<!ENTITY windowMenu.label "Gluggi">
 
 
-<!ENTITY helpMenu.label "Help">
+<!ENTITY helpMenu.label "Hjálp">
 <!ENTITY helpMenu.accesskey "H">
 
 
-<!ENTITY helpMenuWin.label "Help">
+<!ENTITY helpMenuWin.label "Hjálp">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "About &brandShortName;">
+<!ENTITY aboutProduct.label "Um &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "Support and Documentation">
+<!ENTITY productHelp.label "Stuðningur og leiðbeiningar">
 <!ENTITY productHelp.accesskey "D">
-<!ENTITY helpTroubleshootingInfo.label "Troubleshooting Information">
+<!ENTITY helpTroubleshootingInfo.label "Upplýsingar um lausn vandamála">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Submit Feedback…">
+<!ENTITY helpFeedbackPage.label "Senda athugasemdir...">
 <!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Report Errors to Zotero…">
+<!ENTITY helpReportErrors.label "Tilkynna villur til Zotero...">
 <!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpCheckForUpdates.label "Check for Updates…">
+<!ENTITY helpCheckForUpdates.label "Kanna tilvist uppfærslna...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

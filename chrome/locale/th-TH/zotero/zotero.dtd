@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "บันทึกไปยัง Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "ไม่สามารถบันทึกเอกสารแนบไปยังไลบรารี่ที่เลือกได้ รายการนี้จะถูกบันทึกไปยังไลบรารี่ของคุณแทน">
 <!ENTITY zotero.downloadManager.noPDFTools.description "การใช้คุณสมบัตินี้คุณต้องติดตั้งเครื่องมือ PDF ในการตั้งค่าพึงใจของ Zotero">
+
+<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.label.link "Link:">
+<!ENTITY zotero.attachLink.label.title "Title:">
+
+

@@ -691,7 +691,7 @@ Zotero.Item.prototype.inCollection = function(collectionID) {
  */
 Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	if (typeof value == 'string') {
-		value = value.trim();
+		value = value.trim().normalize();
 	}
 	
 	this._disabledCheck();
@@ -877,11 +877,12 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 	var itemTypeName = Zotero.ItemTypes.getName(itemTypeID);
 	
 	if (!title && (itemTypeID == 8 || itemTypeID == 10)) { // 'letter' and 'interview' itemTypeIDs
-		var creators = this.getCreators();
-		var authors = [];
-		var participants = [];
+		let creators = this.getCreators();
+		let authors = [];
+		let participants = [];
 		if (creators) {
-			for each(var creator in creators) {
+			for (let i=0; i<creators.length; i++) {
+				let creator = creators[i];
 				if ((itemTypeID == 8 && creator.creatorTypeID == 16) || // 'letter'/'recipient'
 						(itemTypeID == 10 && creator.creatorTypeID == 7)) { // 'interview'/'interviewer'
 					participants.push(creator);
@@ -896,9 +897,9 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 		var strParts = [];
 		
 		if (includeAuthorAndDate) {
-			var names = [];
-			for each(author in authors) {
-				names.push(author.ref.lastName);
+			let names = [];
+			for (let i=0; i<authors.length; i++) {
+				names.push(authors[i].ref.lastName);
 			}
 			
 			// TODO: Use same logic as getFirstCreatorSQL() (including "et al.")
@@ -908,9 +909,10 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 		}
 		
 		if (participants.length > 0) {
-			var names = [];
-			for each(participant in participants) {
-				names.push(participant.ref.lastName);
+			let names = [];
+			let max = Math.min(4, participants.length);
+			for (let i=0; i<max; i++) {
+				names.push(participants[i].ref.lastName);
 			}
 			switch (names.length) {
 				case 1:

@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Cancelar">
 
 <!ENTITY zotero.errorReport.title "Relatório de erros do Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Pode incluir mensagens não relacionadas ao Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor, aguarde enquanto o relatório de erro é enviado.">
 <!ENTITY zotero.errorReport.submitted "Seu relatório de erro foi enviado.">
 <!ENTITY zotero.errorReport.reportID "Número de identificação do relatório:">
@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "Mostrar itens sem coleção">
 
 <!ENTITY zotero.items.itemType "Tipo do item">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.type_column "Tipo de item">
 <!ENTITY zotero.items.title_column "Título">
 <!ENTITY zotero.items.creator_column "Criador">
 <!ENTITY zotero.items.date_column "Data">
@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "Salvar para o Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Anexos não podem ser salvos na biblioteca selecionada. Esse documento será salvo em sua biblioteca.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Para utilizar esse recurso você deve primeiro instalar as ferramentas de PDF nas preferências do Zotero.">
+
+<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.label.link "Link:">
+<!ENTITY zotero.attachLink.label.title "Title:">
+
+

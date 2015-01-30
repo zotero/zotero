@@ -135,8 +135,8 @@
 <!ENTITY zotero.preferences.keys.newItem "Lagra en ny källa">
 <!ENTITY zotero.preferences.keys.newNote "Skapa en ny anteckning">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Växla etikettväljare">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiera valda källanteckningar till urklipp">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiera valda källor till urklipp">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiera markerade källor som noter till urklipp">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiera markerade källor till urklipp">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Klistra in från urklipp">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Ändringarna gäller bara i nya fönster">
 

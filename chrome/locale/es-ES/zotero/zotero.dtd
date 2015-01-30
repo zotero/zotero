@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "Guardar en Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Los archivos adjuntos no se pueden guardar en la biblioteca seleccionada. Así, este ítem será guardado en su biblioteca.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Para utilizar esta función, debe primeramente instalar las herramientas PDF en las preferencias de Zotero.">
+
+<!ENTITY zotero.attachLink.title "Adjuntar enlace a URI">
+<!ENTITY zotero.attachLink.label.link "Enlace:">
+<!ENTITY zotero.attachLink.label.title "Título:">
+
+

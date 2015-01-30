@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "Salva in Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "La libreria selezionata non può essere usata per salvare allegati. Questo oggetto sarà salvato nella tua libreria.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Per usare questa funzionalità, è necessario prima installare gli strumenti PDF tramite le impostazioni di Zotero.">
+
+<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.label.link "Link:">
+<!ENTITY zotero.attachLink.label.title "Title:">
+
+

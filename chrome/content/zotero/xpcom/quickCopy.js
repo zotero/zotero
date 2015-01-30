@@ -356,8 +356,9 @@ Zotero.QuickCopy = new function() {
 				var text = csl.previewCitationCluster(citation, [], [], "text"); 
 			} else {
 				var style = Zotero.Styles.get(format);
-				var html = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, "html");
-				var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, "text");
+				var cslEngine = style.getCiteProc();
+ 				var html = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html");
+				var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text");
 			}
 			
 			return {text:(contentType == "html" ? html : text), html:html};

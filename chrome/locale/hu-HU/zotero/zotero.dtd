@@ -90,7 +90,7 @@
 <!ENTITY zotero.items.menu.duplicateItem "Kiválasztott elem duplikálása">
 <!ENTITY zotero.items.menu.mergeItems "Elemek összefésülése…">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Válassza ki azt az elemverziót, amit mester elemnek kíván használni: ">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
 
 <!ENTITY zotero.toolbar.newItem.label "Új elem">
@@ -141,11 +141,11 @@
 <!ENTITY zotero.tagSelector.selectVisible "Látható címkék kiválasztása">
 <!ENTITY zotero.tagSelector.clearVisible "Látható címkék kiválasztásának megszüntetése">
 <!ENTITY zotero.tagSelector.clearAll "Összes címke kiválasztásának megszüntetése">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
+<!ENTITY zotero.tagSelector.assignColor "Szín kiválasztása…">
 <!ENTITY zotero.tagSelector.renameTag "Címke átnevezése...">
 <!ENTITY zotero.tagSelector.deleteTag "Címke törlése...">
 
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.title "Válassza ki a címke színét és a pozíciót.">
 <!ENTITY zotero.tagColorChooser.color "Szín:">
 <!ENTITY zotero.tagColorChooser.position "Helyzet:">
 <!ENTITY zotero.tagColorChooser.setColor "Szín beállítása">
@@ -161,9 +161,9 @@
 
 <!ENTITY zotero.bibliography.title "Bibliográfia létrehozása">
 <!ENTITY zotero.bibliography.style.label "Hivatkozási stílus:">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMode "Kimeneti mód:">
+<!ENTITY zotero.bibliography.bibliography "Bibliográfia">
+<!ENTITY zotero.bibliography.outputMethod "Kimeneti metódus:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Mentés RTF-ként">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Mentés HTML-ként">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Másolás a vágólapra">
@@ -217,7 +217,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.prefs.storeReferences.label "A dokumentum tárolt hivatkozásai">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
 
 <!ENTITY zotero.integration.showEditor.label "Editor megjelenítése">
@@ -246,7 +246,7 @@
 <!ENTITY zotero.merge.deleted "Deleted">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy felismerve">
-<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
+<!ENTITY zotero.proxy.recognized.warning "Csak a könyvtárból, iskolából vagy vállalati weboldalról linkelt proxy-t adható hozzá">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
 <!ENTITY zotero.proxy.recognized.disable.label "Ne irányítsa át automatikusan a kéréseket az előzőleg felismert proxyikra.">
 <!ENTITY zotero.proxy.recognized.ignore.label "Elutasít">
@@ -274,7 +274,7 @@
 <!ENTITY zotero.rtfScan.formatPage.label "Hivatkozás formázása">
 <!ENTITY zotero.rtfScan.formatPage.description "A Zotero feldolgozza és formázza az RTF fájlt. Kérem várjon.">
 <!ENTITY zotero.rtfScan.completePage.label "Az RTF átvizsgálása befejeződött">
-<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
+<!ENTITY zotero.rtfScan.completePage.description "A dokumentum átvizsgálása és feldolgozása megtörtént. Győződjön meg róla, hogy megfelelően van formázva.">
 <!ENTITY zotero.rtfScan.inputFile.label "Bemeneti fájl">
 <!ENTITY zotero.rtfScan.outputFile.label "Kimeneti fájl">
 
@@ -282,5 +282,11 @@
 <!ENTITY zotero.file.noneSelected.label "Nincs fájl kiválasztva">
 
 <!ENTITY zotero.downloadManager.label "Mentés Zotero-ba">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Search pane of the Zotero preferences.">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "A csatolmányok nem menthetőek a jelenleg kiválasztott könyvtárba. Ez az elem a saját könyvtárába lesz mentve.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "Ahhoz, hogy ezt a tulajdonságot használja, először telepítenie kell a PDF tools-t a Zotero beállítások keresőpaneljén.">
+
+<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.label.link "Link:">
+<!ENTITY zotero.attachLink.label.title "Cím:">
+
+

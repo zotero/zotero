@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "In Zotero speichern">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Anhänge können in der aktuell gewählten Bibliothek nicht gespeichert werden. Der Eintrag wird stattdessen in Ihrer Bibliothek gespeichert.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Um diese Funktion zu nutzen, müssen Sie zuerst die PDF-Werkzeuge in den Zotero-Einstellungen installieren.">
+
+<!ENTITY zotero.attachLink.title "Link zu einer URI anhängen">
+<!ENTITY zotero.attachLink.label.link "Link:">
+<!ENTITY zotero.attachLink.label.title "Titel:">
+
+

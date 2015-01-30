@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "Zotero로 저장">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "첨부물을 현재 선택한 라이브러리에 저장할 수 없습니다. 그 대신 귀하의 라이브러리에 저장됩니다.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "이 기능을 사용하려면, 먼저 Zotero 환경설정에서 PDF 도구를 인스톨해야 합니다.">
+
+<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.label.link "Link:">
+<!ENTITY zotero.attachLink.label.title "Title:">
+
+

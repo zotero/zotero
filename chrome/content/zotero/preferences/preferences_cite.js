@@ -66,7 +66,6 @@ Zotero_Preferences.Cite = {
 			var treerow = document.createElement('treerow');
 			var titleCell = document.createElement('treecell');
 			var updatedCell = document.createElement('treecell');
-			var cslCell = document.createElement('treecell');
 			
 			if (style.updated) {
 				var updatedDate = Zotero.Date.formatDate(Zotero.Date.strToDate(style.updated), true);
@@ -78,14 +77,9 @@ Zotero_Preferences.Cite = {
 			treeitem.setAttribute('id', 'zotero-csl-' + style.styleID);
 			titleCell.setAttribute('label', style.title);
 			updatedCell.setAttribute('label', updatedDate);
-			// if not EN
-			if(style.type == "csl") {
-				cslCell.setAttribute('src', 'chrome://zotero/skin/tick.png');
-			}
 			
 			treerow.appendChild(titleCell);
 			treerow.appendChild(updatedCell);
-			treerow.appendChild(cslCell);
 			treeitem.appendChild(treerow);
 			treechildren.appendChild(treeitem);
 			
