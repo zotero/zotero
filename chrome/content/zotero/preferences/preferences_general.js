@@ -35,30 +35,7 @@ Zotero_Preferences.General = {
 			);
 		}
 		
-		// Only show icon options for Firefox <29
-		if (Zotero.platformMajorVersion < 29) {
-			let statusBarRow = document.getElementById('zotero-prefpane-general-statusBarIcon-row');
-			if (statusBarRow) {
-				statusBarRow.hidden = false;
-			}
-		}
-		
 		document.getElementById('noteFontSize').value = Zotero.Prefs.get('note.fontSize');
-	},
-	
-	/**
-	 * Sets "Status bar icon" to "None" if Zotero is set to load in separate tab
-	 */
-	handleShowInPreferenceChange: function () {
-		var showInSeparateTab = document.getElementById("zotero-prefpane-general-showIn-separateTab");
-		var showInAppTab = document.getElementById("zotero-prefpane-general-showIn-appTab");
-		if(showInAppTab.selected) {
-			document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-none');
-			Zotero.Prefs.set("statusBarIcon", 0);
-		} else {
-			document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-full');
-			Zotero.Prefs.set("statusBarIcon", 2);
-		}
 	},
 	
 	

@@ -73,7 +73,7 @@ grid row hbox:first-child
 }
 
 
-#showIn radio, #statusBarIcon radio
+#showIn radio
 {
 	width: 120px;
 }
@@ -81,11 +81,6 @@ grid row hbox:first-child
 #fontSize radio
 {
 	margin-right: 20px;
-}
-
-#statusBarIcon radio .radio-icon
-{
-	margin-left: 6px;
 }
 
 
