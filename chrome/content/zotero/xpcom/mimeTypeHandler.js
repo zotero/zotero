@@ -55,28 +55,48 @@ Zotero.MIMETypeHandler = new function () {
 		_observers = [];
 		
 		if(Zotero.Prefs.get("parseEndNoteMIMETypes")) {
-			this.addHandler("application/x-endnote-refer", _importHandler, true);
-			this.addHandler("application/x-research-info-systems", _importHandler, true);
-			this.addHandler("application/x-inst-for-scientific-info", _importHandler, true);
-
-			this.addHandler("text/x-bibtex", _importHandler, true);
-			this.addHandler("application/x-bibtex", _importHandler, true);
-
-			//
-			// And some non-standard ones
-			//
-			this.addHandler("text/x-research-info-systems", _importHandler, true);
-			// Nature uses this one
-			this.addHandler("text/application/x-research-info-systems", _importHandler, true);
-			// Cell uses this one
-			this.addHandler("text/ris", _importHandler, true);
-			// Not even trying
-			this.addHandler("ris", _importHandler, true);
+			this.registerMetadataHandlers();
 		}
+		Zotero.Prefs.registerObserver("parseEndNoteMIMETypes", function(val) {
+			if (val) this.registerMetadataHandlers();
+			else this.unregisterMetadataHandlers();
+		}.bind(this));
+		
 		this.addHandler("application/vnd.citationstyles.style+xml", function(a1, a2) { Zotero.Styles.install(a1, a2) });
 		this.addHandler("text/x-csl", function(a1, a2) { Zotero.Styles.install(a1, a2) }); // deprecated
 		this.addHandler("application/x-zotero-schema", Zotero.Schema.importSchema);
 		this.addHandler("application/x-zotero-settings", Zotero.Prefs.importSettings);
+	}
+	
+	// MIME types that Zotero should handle when parseEndNoteMIMETypes preference
+	// is enabled
+	var metadataMIMETypes = [
+		"application/x-endnote-refer", "application/x-research-info-systems",
+		"application/x-inst-for-scientific-info",
+		"text/x-bibtex", "application/x-bibtex",
+		// Non-standard
+		"text/x-research-info-systems",
+		"text/application/x-research-info-systems", // Nature serves this
+		"text/ris", // Cell serves this
+		"ris" // Not even trying
+	];
+	
+	/**
+	 * Registers MIME types for parseEndNoteMIMETypes preference
+	 */
+	this.registerMetadataHandlers = function() {
+		for (var i=0; i<metadataMIMETypes.length; i++) {
+			this.addHandler(metadataMIMETypes[i], _importHandler, true);
+		}
+	}
+	
+	/**
+	 * Unregisters MIME types for parseEndNoteMIMETypes preference
+	 */
+	this.unregisterMetadataHandlers = function() {
+		for (var i=0; i<metadataMIMETypes.length; i++) {
+			this.removeHandler(metadataMIMETypes[i]);
+		}
 	}
 	
 	/**
@@ -90,6 +110,18 @@ Zotero.MIMETypeHandler = new function () {
 	this.addHandler = function(type, fn, ignoreContentDisposition) {
 		_typeHandlers[type] = fn;
 		_ignoreContentDispositionTypes.push(type);
+	}
+	
+	/**
+	 * Removes a handler for a specific MIME type
+	 * @param {String} type MIME type to handle
+	 */
+	this.removeHandler = function(type) {
+		delete _typeHandlers[type];
+		var i = _ignoreContentDispositionTypes.indexOf(type);
+		if (i != -1) {
+			_ignoreContentDispositionTypes.splice(i, 1);
+		}
 	}
 	
 	/**
@@ -107,7 +139,10 @@ Zotero.MIMETypeHandler = new function () {
 	 */
 	function _importHandler(string, uri, contentType, channel) {
 		var win = channel.notificationCallbacks.getInterface(Components.interfaces.nsIDOMWindow).top;
-		if(!win) throw "Attempt to import from a channel without an attached document refused";
+		if(!win) {
+			Zotero.debug("Attempt to import from a channel without an attached document refused");
+			return false;
+		}
 		
 		var hostPort = channel.URI.hostPort.replace(";", "_", "g");
 		
@@ -129,7 +164,7 @@ Zotero.MIMETypeHandler = new function () {
 			bag.setPropertyAsBool("allowTabModal", true);
 		
 			var continueDownload = prompt.confirmCheck(title, text, checkMsg, checkValue);
-			if(!continueDownload) return;
+			if(!continueDownload) return false;
 			if(checkValue.value) {
 				// add to allowed sites if desired
 				Zotero.Prefs.set("ingester.allowedSites", allowedSitesString+";"+hostPort);
@@ -148,12 +183,14 @@ Zotero.MIMETypeHandler = new function () {
 		var translators = translation.getTranslators();
 		if(!translators.length) {
 			// we lied. we can't really translate this file.
-			throw "No translator found for handled RIS, Refer or ISI file"
+			Zotero.debug("No translator found to handle this file");
+			return false;
 		}
 		
 		// translate using first available
 		translation.setTranslator(translators[0]);
 		frontWindow.Zotero_Browser.performTranslation(translation);
+		return true;
 	}
 	
 	/**
@@ -300,11 +337,16 @@ Zotero.MIMETypeHandler = new function () {
 		convStream.close();
 		inputStream.close();
 		
+		var handled = false;
 		try {
-			_typeHandlers[this._contentType](readString, (this._request.name ? this._request.name : null),
+			handled = _typeHandlers[this._contentType](readString, (this._request.name ? this._request.name : null),
 				this._contentType, channel);
 		} catch(e) {
-			// if there was an error, handle using nsIExternalHelperAppService
+			Zotero.debug(e);
+		}
+		
+		if (!handled) {
+			// handle using nsIExternalHelperAppService
 			var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"].
 				getService(Components.interfaces.nsIExternalHelperAppService);
 			var frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
@@ -317,10 +359,6 @@ Zotero.MIMETypeHandler = new function () {
 				streamListener.onDataAvailable(this._request, context, inputStream, 0, this._storageStream.length);
 				streamListener.onStopRequest(channel, context, status);
 			}
-			this._storageStream.close();
-			
-			// then throw our error
-			throw e;
 		}
 		
 		this._storageStream.close();
