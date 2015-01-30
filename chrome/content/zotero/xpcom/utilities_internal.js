@@ -469,5 +469,21 @@ Zotero.Utilities.Internal.Base64 = {
 		 }
 		 
 		 return string;
-	 }
+	 },
+	/**
+	 * saveURI wrapper function
+	 * @param {nsIWebBrowserPersist} nsIWebBrowserPersist
+	 * @param {nsIURI} source URL
+	 * @param {nsISupports} target file
+	 */
+	saveURI: function (wbp, source, target) {
+   		// Firefox 35 and below
+		try {
+			wbp.saveURI(source, null, null, null, null, target, null);
+		}
+		// Firefox 36+ needs one more parameter
+		catch (e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
+			wbp.saveURI(source, null, null, null, null, null, target, null);
+		}
+	}
  }

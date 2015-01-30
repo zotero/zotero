@@ -1823,4 +1823,6 @@ Zotero.Utilities = {
 	 * See https://github.com/slevithan/xregexp for usage
 	 */
 	 "XRegExp": XRegExp
+
+	 
 }
