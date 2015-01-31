@@ -79,8 +79,7 @@ var ZoteroOverlay = new function()
 		
 		var iconPref = prefBranch.getIntPref('statusBarIcon');
 		
-		// If this is the first run, add icon to add-on bar if not
-		// in the window already and not hidden by the Zotero prefs
+		// Add icon to toolbar if not in the window already and not hidden by the pref
 		if (!document.getElementById("zotero-toolbar-button") && iconPref != 0) {
 			navBar.insertItem("zotero-toolbar-button");
 			navBar.setAttribute("currentset", navBar.currentSet);
