@@ -2293,67 +2293,6 @@ Zotero.Prefs = new function(){
 	
 	// Handlers for some Zotero preferences
 	var _handlers = [
-		[ "statusBarIcon", function(val) {
-			var doc = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						.getService(Components.interfaces.nsIWindowMediator)
-						.getMostRecentWindow("navigator:browser").document;
-			
-			var addonBar = doc.getElementById("addon-bar");
-			var icon = doc.getElementById("zotero-toolbar-button");
-			// When the customize window is open, toolbar buttons seem to
-			// become wrapped in toolbarpaletteitems, which we need to remove
-			// manually if we change the pref to hidden or else the customize
-			// window doesn't close.
-			var wrapper = doc.getElementById("wrapper-zotero-toolbar-button");
-			var palette = doc.getElementById("navigator-toolbox").palette;
-			var inAddonBar = false;
-			if (icon) {
-				// Because of the potential wrapper, don't just use .parentNode
-				var toolbar = Zotero.getAncestorByTagName(icon, "toolbar");
-				inAddonBar = toolbar == addonBar;
-			}
-			
-			if (val == 0) {
-				// If showing in add-on bar, hide
-				if (!icon || !inAddonBar) {
-					return;
-				}
-				palette.appendChild(icon);
-				if (wrapper) {
-					addonBar.removeChild(wrapper);
-				}
-				addonBar.setAttribute("currentset", addonBar.currentSet);
-				doc.persist(addonBar.id, "currentset");
-			}
-			else {
-				// If showing somewhere else, remove it from there
-				if (icon && !inAddonBar) {
-					palette.appendChild(icon);
-					if (wrapper) {
-						toolbar.removeChild(wrapper);
-					}
-					toolbar.setAttribute("currentset", toolbar.currentSet);
-					doc.persist(toolbar.id, "currentset");
-				}
-				
-				// If not showing in add-on bar, add
-				if (!inAddonBar) {
-					var icon = addonBar.insertItem("zotero-toolbar-button");
-					addonBar.setAttribute("currentset", addonBar.currentSet);
-					doc.persist(addonBar.id, "currentset");
-					addonBar.setAttribute("collapsed", false);
-					doc.persist(addonBar.id, "collapsed");
-				}
-				// And make small
-				if (val == 1) {
-					icon.setAttribute("compact", true);
-				}
-				// Or large
-				else if (val == 2) {
-					icon.removeAttribute("compact");
-				}
-			}
-		}],
 		[ "automaticScraperUpdates", function(val) {
 			if (val){
 				Zotero.Schema.updateFromRepository();
