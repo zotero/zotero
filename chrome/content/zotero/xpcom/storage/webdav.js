@@ -963,7 +963,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 					.createInstance(nsIWBP);
 				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
 				wbp.progressListener = listener;
-				Zotero.Utilities.Internal.saveURI(wbp, nsIURL, file);
+				Zotero.Utilities.Internal.saveURI(wbp, uri, destFile);
 				
 				return deferred.promise;
 			});

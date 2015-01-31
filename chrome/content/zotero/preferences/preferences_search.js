@@ -392,7 +392,7 @@ Zotero_Preferences.Search = {
 		
 		wbp.progressListener = progressListener;
 		Zotero.debug("Saving " + uri.spec + " to " + fileURL.spec);
-		Zotero.Utilities.Internal.saveURI(wbp, nsIURL, file);
+		Zotero.Utilities.Internal.saveURI(wbp, uri, fileURL);
 	},
 	
 	
