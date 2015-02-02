@@ -348,11 +348,12 @@ Zotero.Attachments = new function(){
 							.createInstance(Components.interfaces.nsIURL);
 				nsIURL.spec = url;
 				Zotero.Utilities.Internal.saveURI(wbp, nsIURL, file);
-
 				
 				return attachmentItem;
 			}
 			catch (e){
+				Zotero.debug(e, 1);
+				Components.utils.reportError(e);
 				Zotero.DB.rollbackTransaction();
 				
 				try {
