@@ -347,7 +347,7 @@ Zotero.Attachments = new function(){
 				var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
 							.createInstance(Components.interfaces.nsIURL);
 				nsIURL.spec = url;
-				Zotero.Utilities.saveURI(wbp, nsIURL, file);
+				Zotero.Utilities.Internal.saveURI(wbp, nsIURL, file);
 
 				
 				return attachmentItem;
