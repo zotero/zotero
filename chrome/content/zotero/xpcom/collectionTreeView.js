@@ -73,6 +73,8 @@ Zotero.CollectionTreeView.prototype.setTree = function(treebox)
 	var self = this;
 	
 	tree.addEventListener('keypress', function(event) {
+		if (tree.editingRow != -1) return; // In-line editing active
+		
 		var key = String.fromCharCode(event.which);
 		
 		if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
