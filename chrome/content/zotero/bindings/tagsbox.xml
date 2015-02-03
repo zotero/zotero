@@ -1027,9 +1027,7 @@
 				<parameter name="elem"/>
 				<body>
 				<![CDATA[
-					var scrollbox = document.getAnonymousNodes(this)[0];
-					var sbo = scrollbox.boxObject;
-					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
+					var sbo = document.getAnonymousNodes(this)[0].boxObject;
 					sbo.ensureElementIsVisible(elem);
 				]]>
 				</body>
