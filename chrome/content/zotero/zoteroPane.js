@@ -866,7 +866,7 @@ var ZoteroPane = new function()
 		return collection.saveTx();
 	});
 	
-	this.newFeed = function() {
+	this.newFeed = Zotero.Promise.coroutine(function() {
 		let data = {};
 		window.openDialog('chrome://zotero/content/feedSettings.xul', 
 			null, 'centerscreen, modal', data);
@@ -876,9 +876,10 @@ var ZoteroPane = new function()
 			feed.name = data.title;
 			feed.refreshInterval = data.ttl;
 			feed.cleanupAfter = data.cleanAfter;
-			feed.save({skipEditCheck: true});
+			yield feed.save({skipEditCheck: true});
+			Zotero.Feeds.scheduleNextFeedCheck();
 		}
-	}
+	});
 	
 	this.newGroup = function () {
 		this.loadURI(Zotero.Groups.addGroupURL);
