@@ -36,6 +36,7 @@
 	
 	<script src="chrome://zotero/content/include.js"/>
 	<script src="preferences.js"/>
+	<script src="preferences_export.js"/>
 	
 	<script>
 	<![CDATA[
@@ -46,6 +47,14 @@
 				var io = window.arguments[0];
 				io.domain = document.getElementById('zotero-quickCopy-domain').value;
 				io.format = document.getElementById('zotero-quickCopy-menu').value;
+				
+				var menulist = document.getElementById('zotero-quickCopy-locale-menu');
+				if (menulist.disabled === false) {
+					io.locale = menulist.value;
+				} else {
+					io.locale = "";
+				}
+				
 				io.ok = true;
 			}
 		}
@@ -55,10 +64,21 @@
 	<vbox id="zotero-preferences-quickCopySiteEditor">
 		<label value="&zotero.preferences.quickCopy.siteEditor.domainPath; &zotero.preferences.quickCopy.siteEditor.domainPath.example;" control="zotero-quickCopy-domain"/>
 		<textbox id="zotero-quickCopy-domain"/>
+		
 		<separator class="thin"/>
+		
 		<label value="&zotero.preferences.quickCopy.siteEditor.outputFormat;" control="zotero-quickCopy-menu"/>
 		<menulist id="zotero-quickCopy-menu"/>
+		
 		<separator class="thin"/>
+		
+		<label id="zotero-quickCopy-locale-menu-label" value="&zotero.preferences.quickCopy.locale;" control="zotero-quickCopy-locale-menu"/>
+		<hbox align="center">
+			<menulist id="zotero-quickCopy-locale-menu"/>
+		</hbox>
+		
+		<separator class="thin"/>
+		
 		<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
 			oncommand="window.opener.Zotero_Preferences.Export.buildQuickCopyFormatDropDown(
 				document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : ''
@@ -68,13 +88,19 @@
 	<script>
 	<![CDATA[
 		var io = window.arguments[0];
+		var contentType = io.asHTML ? 'html' : '';
 		document.getElementById('zotero-quickCopy-domain').value = io.domain ? io.domain : '';
 		window.opener.Zotero_Preferences.Export.buildQuickCopyFormatDropDown(
 			document.getElementById('zotero-quickCopy-menu'),
-			Zotero.QuickCopy.getContentType(io.format),
+			contentType,
 			io.format
 		);
-		window.opener.Zotero_Preferences.Export.updateQuickCopyHTMLCheckbox();
+		window.opener.Zotero_Preferences.Export.populateQuickCopyLocaleList(
+			document.getElementById('zotero-quickCopy-locale-menu'),
+			io.locale
+		);
+		document.getElementById('zotero-quickCopy-copyAsHTML').checked = io.asHTML;
+		Zotero_Preferences.Export.updateQuickCopyUI();
 	]]>
 	</script>
 </dialog>

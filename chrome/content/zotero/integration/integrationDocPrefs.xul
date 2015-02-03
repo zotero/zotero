@@ -48,6 +48,13 @@
 			<listbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
 		</groupbox>
 		
+		<groupbox>
+			<hbox align="center">
+				<caption label="&zotero.bibliography.locale.label;"/>
+				<menulist id="locale-menu" oncommand="Zotero_File_Interface_Bibliography.localeChanged(this.selectedItem.value)"/>
+			</hbox>
+		</groupbox>
+		
 		<groupbox id="displayAs-groupbox">
 			<caption label="&zotero.integration.prefs.displayAs.label;"/>
 			<radiogroup id="displayAs" orient="horizontal">

@@ -42,6 +42,7 @@
 					<treecols>
 						<treecol id="quickCopy-urlColumn" label="&zotero.preferences.quickCopy.siteEditor.domainPath;" flex="1"/>
 						<treecol id="quickCopy-formatColumn" label="&zotero.preferences.quickCopy.siteEditor.outputFormat;" flex="2"/>
+						<treecol id="quickCopy-localeColumn" label="&zotero.preferences.quickCopy.siteEditor.locale;"/>
 						<treecol id="quickCopy-copyAsHTML" label="HTML"/>
 					</treecols>
 					<treechildren id="quickCopy-siteSettings-rows"/>

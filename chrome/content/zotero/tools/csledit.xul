@@ -58,6 +58,7 @@
 					<menuitem label="near-note" value="4"/>
 				</menupopup>
 			</menulist>
+			<menulist id="locale-menu" oncommand="Zotero_CSL_Editor.refresh()"/>
 			<menulist id="zotero-csl-list" style="min-height: 1.6em; min-width: 100px" initialized="false" flex="1" oncommand="Zotero_CSL_Editor.loadCSL(this.selectedItem.value)"/>
 		</hbox>
 		<textbox id="zotero-csl-editor" type="timed" timeout="250" multiline="true"

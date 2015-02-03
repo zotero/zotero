@@ -25,27 +25,61 @@
 
 
 Zotero.QuickCopy = new function() {
-	this.getFormattedNameFromSetting = getFormattedNameFromSetting;
-	this.getSettingFromFormattedName = getSettingFromFormattedName;
-	this.getContentType = getContentType;
-	this.stripContentType = stripContentType;
-	this.getFormatFromURL = getFormatFromURL;
-	this.getContentFromItems = getContentFromItems;
 	
 	var _initialized = false;
 	var _formattedNames = {};
 	
+	/*
+	 * Return Quick Copy setting object from string, stringified object, or object
+	 * 
+	 * Example string format: "bibliography/html=http://www.zotero.org/styles/apa"
+	 *
+	 * Quick Copy setting object has the following properties:
+	 * - "mode": "bibliography" (for styles) or "export" (for export translators)
+	 * - "contentType: "" (plain text output) or "html" (HTML output; for styles
+	 *   only)
+	 * - "id": style ID or export translator ID
+	 * - "locale": locale code (for styles only)
+	 */
+	this.unserializeSetting = function (setting) {
+		var settingObject = {};
+		
+		if (typeof setting === 'string' || setting instanceof String) {
+			try {
+				// First test if string input is a stringified object
+				settingObject = JSON.parse(setting);
+			} catch (e) {
+				// Try parsing as formatted string
+				var parsedSetting = setting.match(/(bibliography|export)(?:\/([^=]+))?=(.+)$/);
+				if (parsedSetting) {
+					settingObject.mode = parsedSetting[1];
+					settingObject.contentType = parsedSetting[2] || '';
+					settingObject.id = parsedSetting[3];
+					settingObject.locale = '';
+				}
+			}
+		} else {
+			// Return input if not a string; it might already be an object
+			return setting;
+		}
+		
+		return settingObject;
+	};
 	
-	function getFormattedNameFromSetting(setting) {
+	
+	this.getFormattedNameFromSetting = function (setting) {
 		if (!_initialized) {
 			_init();
 		}
 		
-		var name = _formattedNames[this.stripContentType(setting)];
+		var format = this.unserializeSetting(setting);
+		
+		var name = _formattedNames[format.mode + "=" + format.id];
 		return name ? name : '';
-	}
+	};
 	
-	function getSettingFromFormattedName(name) {
+	
+	this.getSettingFromFormattedName = function (name) {
 		if (!_initialized) {
 			_init();
 		}
@@ -57,29 +91,15 @@ Zotero.QuickCopy = new function() {
 		}
 		
 		return '';
-	}
+	};
 	
 	
-	/*
-	 * Returns the setting with any contentType stripped from the mode part
-	 */
-	function getContentType(setting) {
-		var matches = setting.match(/(?:bibliography|export)\/([^=]+)=.+$/, '$1');
-		return matches ? matches[1] : '';
-	}
-	
-	
-	/*
-	 * Returns the setting with any contentType stripped from the mode part
-	 */
-	function stripContentType(setting) {
-		return setting.replace(/(bibliography|export)(?:\/[^=]+)?=(.+)$/, '$1=$2');
-	}
-	
-	
-	function getFormatFromURL(url) {
+	this.getFormatFromURL = function(url) {
+		var quickCopyPref = Zotero.Prefs.get("export.quickCopy.setting");
+		quickCopyPref = JSON.stringify(this.unserializeSetting(quickCopyPref));
+		
 		if (!url) {
-			return Zotero.Prefs.get("export.quickCopy.setting");
+			return quickCopyPref;
 		}
 		
 		var ioService = Components.classes["@mozilla.org/network/io-service;1"]
@@ -91,7 +111,7 @@ Zotero.QuickCopy = new function() {
 			var urlPath = nsIURI.path;
 		}
 		catch (e) {
-			return Zotero.Prefs.get("export.quickCopy.setting");
+			return quickCopyPref;
 		}
 		
 		var matches = [];
@@ -100,13 +120,14 @@ Zotero.QuickCopy = new function() {
 			+ "WHERE setting='quickCopySite' AND (key LIKE ? OR key LIKE ?)";
 		var urlDomain = urlHostPort.match(/[^\.]+\.[^\.]+$/);
 		var rows = Zotero.DB.query(sql, ['%' + urlDomain + '%', '/%']);
-		for each(var row in rows) {
-			var [domain, path] = row.domainPath.split(/\//);
+		for (let i = 0; i < rows.length; i++) {
+			let row = rows[i];
+			let [domain, path] = row.domainPath.split(/\//);
 			path = '/' + (path ? path : '');
-			var re = new RegExp(domain + '$');
-			if (urlHostPort.match(re) && urlPath.indexOf(path) == 0) {
+			let re = new RegExp(domain + '$');
+			if (urlHostPort.match(re) && urlPath.indexOf(path) === 0) {
 				matches.push({
-					format: row.format,
+					format: JSON.stringify(this.unserializeSetting(row.format)),
 					domainLength: domain.length,
 					pathLength: path.length
 				});
@@ -130,15 +151,15 @@ Zotero.QuickCopy = new function() {
 			}
 			
 			return -1;
-		}
+		};
 		
 		if (matches.length) {
 			matches.sort(sort);
 			return matches[0].format;
+		} else {
+			return quickCopyPref;
 		}
-		
-		return Zotero.Prefs.get("export.quickCopy.setting");
-	}
+	};
 	
 	
 	/*
@@ -146,8 +167,9 @@ Zotero.QuickCopy = new function() {
 	 *
 	 * |items| is an array of Zotero.Item objects
 	 *
-	 * |format| is a Quick Copy format string
-	 *    (e.g. "bibliography=http://purl.org/net/xbiblio/csl/styles/apa.csl")
+	 * |format| may be a Quick Copy format string
+	 * (e.g. "bibliography=http://www.zotero.org/styles/apa")
+	 * or an Quick Copy format object
 	 *
 	 * |callback| is only necessary if using an export format and should be
 	 * a function suitable for Zotero.Translate.setHandler, taking parameters
@@ -157,25 +179,24 @@ Zotero.QuickCopy = new function() {
 	 * If bibliography format, the process is synchronous and an object
 	 * contain properties 'text' and 'html' is returned.
 	 */
-	function getContentFromItems(items, format, callback, modified) {
+	this.getContentFromItems = function (items, format, callback, modified) {
 		if (items.length > Zotero.Prefs.get('export.quickCopy.dragLimit')) {
 			Zotero.debug("Skipping quick copy for " + items.length + " items");
 			return false;
 		}
 		
-		var [mode, format] = format.split('=');
-		var [mode, contentType] = mode.split('/');
+		format = this.unserializeSetting(format);
 		
-		if (mode == 'export') {
+		if (format.mode == 'export') {
 			var translation = new Zotero.Translate.Export;
 			translation.noWait = true;	// needed not to break drags
 			translation.setItems(items);
-			translation.setTranslator(format);
+			translation.setTranslator(format.id);
 			translation.setHandler("done", callback);
 			translation.translate();
 			return true;
 		}
-		else if (mode == 'bibliography') {
+		else if (format.mode == 'bibliography') {
 			// Move notes to separate array
 			var allNotes = true;
 			var notes = [];
@@ -320,32 +341,35 @@ Zotero.QuickCopy = new function() {
 				}
 				
 				var content = {
-					text: contentType == "html" ? html : text,
+					text: format.contentType == "html" ? html : text,
 					html: copyHTML
 				};
 				
 				return content;
 			}
 			
+			// determine locale preference
+			var locale = format.locale ? format.locale : Zotero.Prefs.get('export.quickCopy.locale');
+			
 			// Copy citations if shift key pressed
 			if (modified) {
-				var csl = Zotero.Styles.get(format).getCiteProc();
+				var csl = Zotero.Styles.get(format.id).getCiteProc(locale);
 				csl.updateItems([item.id for each(item in items)]);
 				var citation = {citationItems:[{id:item.id} for each(item in items)], properties:{}};
 				var html = csl.previewCitationCluster(citation, [], [], "html"); 
 				var text = csl.previewCitationCluster(citation, [], [], "text"); 
 			} else {
-				var style = Zotero.Styles.get(format);
-				var cslEngine = style.getCiteProc();
+				var style = Zotero.Styles.get(format.id);
+				var cslEngine = style.getCiteProc(locale);
  				var html = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html");
 				var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text");
 			}
 			
-			return {text:(contentType == "html" ? html : text), html:html};
+			return {text:(format.contentType == "html" ? html : text), html:html};
 		}
 		
-		throw ("Invalid mode '" + mode + "' in Zotero.QuickCopy.getContentFromItems()");
-	}
+		throw ("Invalid mode '" + format.mode + "' in Zotero.QuickCopy.getContentFromItems()");
+	};
 	
 	
 	function _init() {

@@ -17,6 +17,12 @@
 			<listbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
 		</groupbox>
 		<groupbox>
+			<hbox align="center">
+				<caption label="&zotero.bibliography.locale.label;"/>
+				<menulist id="locale-menu" oncommand="Zotero_File_Interface_Bibliography.localeChanged(this.selectedItem.value)"/>
+			</hbox>
+		</groupbox>
+		<groupbox>
 			<caption label="&zotero.bibliography.outputMode;"/>
 			<radiogroup id="output-mode-radio">
 				<radio id="citations"/>

@@ -496,7 +496,8 @@ var Zotero_RTFScan = new function() {
 	function _formatRTF() {
 		// load style and create ItemSet with all items
 		var zStyle = Zotero.Styles.get(document.getElementById("style-listbox").selectedItem.value)
-		var style = zStyle.getCiteProc();
+		var locale = document.getElementById("locale-menu").selectedItem.value;
+		var style = zStyle.getCiteProc(locale);
 		style.setOutputFormat("rtf");
 		var isNote = style.class == "note";
 		
@@ -596,6 +597,9 @@ var Zotero_RTFScan = new function() {
 		}
 		
 		Zotero.File.putContents(outputFile, contents);
+		
+		// save locale
+		Zotero.Prefs.set("export.lastLocale", locale);
 		
 		document.documentElement.canAdvance = true;
 		document.documentElement.advance();

@@ -33,6 +33,7 @@
 		<preferences>
 			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
 			<preference id="pref-quickCopy-dragLimit" name="extensions.zotero.export.quickCopy.dragLimit" type="int"/>
+			<preference id="pref-quickCopy-locale" name="extensions.zotero.export.quickCopy.locale" type="string"/>
 			<preference id="pref-export-displayCharsetOption" name="extensions.zotero.export.displayCharsetOption" type="bool"/>
 			<preference id="pref-import-charset" name="extensions.zotero.import.charset" type="string"/>
 		</preferences>
@@ -49,10 +50,15 @@
 			<label value="&zotero.preferences.quickCopy.defaultOutputFormat;" control="quickCopy-menu"/>
 			<menulist id="zotero-quickCopy-menu"/>
 			
-			<separator class="thin"/>
-			
-			<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
-				oncommand="Zotero_Preferences.Export.buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : '');"/>
+			<hbox align="center">
+				<label id="zotero-quickCopy-locale-menu-label" value="&zotero.preferences.quickCopy.locale;" control="zotero-quickCopy-locale-menu"/>
+				<menulist id="zotero-quickCopy-locale-menu"/>
+				
+				<separator orient="vertical" width="15px"/>
+				
+				<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
+					oncommand="Zotero_Preferences.Export.buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : '');"/>
+			</hbox>
 			
 			<vbox id="zotero-prefpane-export-siteSettings"/>
 			

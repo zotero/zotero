@@ -2670,12 +2670,12 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 		event.dataTransfer.setData("text/plain", text);
 	}
 	
+	format = Zotero.QuickCopy.unserializeSetting(format);
 	try {
-		var [mode, ] = format.split('=');
-		if (mode == 'export') {
+		if (format.mode == 'export') {
 			Zotero.QuickCopy.getContentFromItems(items, format, exportCallback);
 		}
-		else if (mode.indexOf('bibliography') == 0) {
+		else if (format.mode == 'bibliography') {
 			var content = Zotero.QuickCopy.getContentFromItems(items, format, null, event.shiftKey);
 			if (content) {
 				if (content.html) {
@@ -2685,11 +2685,11 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 			}
 		}
 		else {
-			Components.utils.reportError("Invalid Quick Copy mode '" + mode + "'");
+			Components.utils.reportError("Invalid Quick Copy mode");
 		}
 	}
 	catch (e) {
-		Components.utils.reportError(e + " with format '" + format + "'");
+		Components.utils.reportError(e + " with '" + format.id + "'");
 	}
 }
 

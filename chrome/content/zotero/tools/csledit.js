@@ -30,6 +30,11 @@ var Zotero_CSL_Editor = new function() {
 	this.generateBibliography = generateBibliography;
 	this.refresh = refresh;
 	function init() {
+		var quickCopyLocale = Zotero.Prefs.get("export.quickCopy.locale");
+		var menulist = document.getElementById("locale-menu");
+		
+		Zotero.Styles.populateLocaleList(menulist, quickCopyLocale);
+		
 		var cslList = document.getElementById('zotero-csl-list');
 		if (cslList.getAttribute('initialized') == 'true') {
 			if (currentStyle) {
@@ -39,8 +44,8 @@ var Zotero_CSL_Editor = new function() {
 			return;
 		}
 		
-		var rawDefaultStyle = Zotero.Prefs.get('export.quickCopy.setting');
-		var defaultStyle = Zotero.QuickCopy.stripContentType(rawDefaultStyle);
+		var quickCopyFormat = Zotero.Prefs.get('export.quickCopy.setting');
+		quickCopyFormat = Zotero.QuickCopy.unserializeSetting(quickCopyFormat);
 		
 		var styles = Zotero.Styles.getAll();
 		var currentStyle = null;
@@ -50,7 +55,7 @@ var Zotero_CSL_Editor = new function() {
 				continue;
 			}
 			var item = cslList.appendItem(style.title, style.styleID);
-			if (!currentStyle || defaultStyle == ('bibliography=' + style.styleID)) {
+			if (!currentStyle || (quickCopyFormat.mode == 'bibliography' && quickCopyFormat.id == style.styleID)) {
 				currentStyle = style.styleID;
 				cslList.selectedIndex = listPos;
 			}
@@ -130,10 +135,12 @@ var Zotero_CSL_Editor = new function() {
 			iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">' + Zotero.getString('styles.editor.warning.noItems') + '</p></body></html>';
 			return;
 		}
+		
+		var locale = document.getElementById("locale-menu").selectedItem.value;
 		var styleObject, styleEngine;
 		try {
 			styleObject = new Zotero.Style(str);
-			styleEngine = styleObject.getCiteProc();
+			styleEngine = styleObject.getCiteProc(locale);
 		} catch(e) {
 			iframe.contentDocument.documentElement.innerHTML = '<div>' + Zotero.getString('styles.editor.warning.parseError') + '</div><div>'+e+'</div>';
 			throw e;

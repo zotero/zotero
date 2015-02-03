@@ -81,9 +81,35 @@ Zotero.Styles = new function() {
 		
 		// hidden dir
 		dir.append("hidden");
-		if(dir.exists()) i += _readStylesFromDirectory(dir, true);
+		if (dir.exists()) i += _readStylesFromDirectory(dir, true);
 		
 		Zotero.debug("Cached "+i+" styles in "+((new Date()).getTime() - start)+" ms");
+		
+		// transfer and reset "export.bibliographyLocale" pref value
+		var bibliographyLocale = '';
+		bibliographyLocale = Zotero.Prefs.get("export.bibliographyLocale");
+		if (bibliographyLocale) {
+			Zotero.Prefs.set("export.lastLocale", bibliographyLocale);
+			Zotero.Prefs.set("export.quickCopy.locale", bibliographyLocale);
+			Zotero.Prefs.clear("export.bibliographyLocale");
+		}
+		
+		// load available CSL locales
+		var localeFile = {};
+		var locales = {};
+		var primaryDialects = {};
+		var localesLocation = "chrome://zotero/content/locale/csl/locales.json";
+		localeFile = JSON.parse(Zotero.File.getContentsFromURL(localesLocation));
+		
+		primaryDialects = localeFile["primary-dialects"];
+		
+		// only keep localized language name
+		for (let locale in localeFile["language-names"]) {
+			locales[locale] = localeFile["language-names"][locale][0];
+		}
+		
+		this.locales = locales;
+		this.primaryDialects = primaryDialects;
 	}
 	
 	/**
@@ -399,6 +425,74 @@ Zotero.Styles = new function() {
 			}
 		});
 	}
+	
+	/**
+	 * Populate menulist with locales
+	 */
+	this.populateLocaleList = function(menulist, prefLocale) {
+		if(!_initialized) this.init();
+		
+		// Reset menulist
+		menulist.selectedItem = null;
+		menulist.removeAllItems();
+		
+		var doc = menulist.ownerDocument;
+		var popup = doc.createElement('menupopup');
+		menulist.appendChild(popup);
+		
+		var desiredLocale = "";
+		var fallbackLocale = Zotero.locale;
+		
+		// Primary dialect conversion (e.g. "en" to "en-US")
+		if (Zotero.Styles.primaryDialects[prefLocale] !== undefined) {
+			prefLocale = Zotero.Styles.primaryDialects[prefLocale];
+		}
+		if (Zotero.Styles.primaryDialects[fallbackLocale] !== undefined) {
+			fallbackLocale = Zotero.Styles.primaryDialects[fallbackLocale];
+		}
+		
+		if (prefLocale) {
+			desiredLocale = prefLocale;
+		} else {
+			desiredLocale = fallbackLocale;
+		}
+		
+		var menuLocales = {};
+		var menuLocalesKeys = [];
+		var styleLocales = Zotero.Styles.locales;
+		
+		for (let locale in styleLocales) {
+			menuLocales[locale] = styleLocales[locale];
+		}
+		
+		menuLocalesKeys = Object.keys(menuLocales);
+		menuLocalesKeys.sort();
+		
+		if (fallbackLocale && menuLocales[fallbackLocale] === undefined) {
+			menuLocales[fallbackLocale] = fallbackLocale;
+			menuLocalesKeys.unshift(fallbackLocale);
+		}
+		if (prefLocale && menuLocales[prefLocale] === undefined) {
+			menuLocales[prefLocale] = prefLocale;
+			menuLocalesKeys.unshift(prefLocale);
+		}
+		
+		var itemNode;
+		for (let i=0; i<menuLocalesKeys.length; i++) {
+			var menuValue = menuLocalesKeys[i];
+			var menuLabel = menuLocales[menuLocalesKeys[i]];
+			itemNode = doc.createElement("menuitem");
+			itemNode.setAttribute("value", menuValue);
+			itemNode.setAttribute("label", menuLabel);
+			popup.appendChild(itemNode);
+			
+			if (menuValue == desiredLocale) {
+				menulist.selectedItem = itemNode;
+			}
+		}
+		
+		return desiredLocale;
+	};
 }
 
 /**
@@ -478,10 +572,10 @@ Zotero.Style = function(arg) {
 
 /**
  * Get a citeproc-js CSL.Engine instance
- * @param {Boolean} useAutomaticJournalAbbreviations Whether to automatically abbreviate titles
+ * @param {String} locale Locale code
+ * @param {Boolean} automaticJournalAbbreviations Whether to automatically abbreviate titles
  */
-Zotero.Style.prototype.getCiteProc = function(automaticJournalAbbreviations) {
-	var locale = Zotero.Prefs.get('export.bibliographyLocale');
+Zotero.Style.prototype.getCiteProc = function(locale, automaticJournalAbbreviations) {
 	if(!locale) {
 		var locale = Zotero.locale;
 		if(!locale) {
