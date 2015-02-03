@@ -1726,7 +1726,9 @@ Zotero.Translate.Web.prototype._getSandboxLocation = function() {
  * Pass document and location to detect* and do* functions
  */
 Zotero.Translate.Web.prototype._getParameters = function() {
-	if (Zotero.Translate.DOMWrapper && Zotero.Translate.DOMWrapper.isWrapped(this.document)) {
+	if (Zotero.Translate.DOMWrapper &&
+		Zotero.Translate.DOMWrapper.isWrapped(this.document) &&
+		Zotero.platformMajorVersion >= 35) {
 		return [this._sandboxManager.wrap(Zotero.Translate.DOMWrapper.unwrap(this.document), null,
 			                              this.document.__wrapperOverrides), this.location];
 	} else {
