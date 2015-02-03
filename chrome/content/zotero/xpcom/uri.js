@@ -133,6 +133,14 @@ Zotero.URI = new function () {
 	}
 	
 	
+	this.getFeedItemURI = function(feedItem) {
+		return this.getItemURI(feedItem);
+	}
+	
+	this.getFeedItemPath = function(feedItem) {
+		return this.getItemPath(feedItem);
+	}
+	
 	/**
 	 * Return URI of collection, which might be a local URI if user hasn't synced
 	 */
@@ -146,6 +154,14 @@ Zotero.URI = new function () {
 	 */
 	this.getCollectionPath = function (collection) {
 		return this._getObjectPath(collection);
+	}
+	
+	this.getFeedURI = function(feed) {
+		return this.getLibraryURI(feed);
+	}
+	
+	this.getFeedPath = function(feed) {
+		return this.getLibraryPath(feed);
 	}
 	
 	
@@ -172,7 +188,7 @@ Zotero.URI = new function () {
 			return path;
 		}
 		
-		if (obj instanceof Zotero.Item) {
+		if (obj instanceof Zotero.Item || obj instanceof Zotero.Feed) {
 			return path + '/items/' + obj.key;
 		}
 		
@@ -208,6 +224,9 @@ Zotero.URI = new function () {
 		return this._getURIObject(itemURI, 'item');
 	}
 	
+	this.getURIFeedItem = function (feedItemURI) {
+		return this._getURIObject(feedItemURI, 'feedItem');
+	}
 	
 	/**
 	 * @param {String} itemURI
@@ -263,6 +282,11 @@ Zotero.URI = new function () {
 	this.getURILibrary = function (libraryURI) {
 		let library = this._getURIObjectLibrary(libraryURI);
 		return library ? library.id : false;
+	}
+
+
+	this.getURIFeed = function (feedURI) {
+		return this._getURIObjectLibrary(feedURI, 'feed');
 	}
 	
 	

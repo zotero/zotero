@@ -877,7 +877,7 @@ var ZoteroPane = new function()
 			feed.refreshInterval = data.ttl;
 			feed.cleanupAfter = data.cleanAfter;
 			yield feed.save({skipEditCheck: true});
-			Zotero.Feeds.scheduleNextFeedCheck();
+			yield feed.updateFeed();
 		}
 	});
 	

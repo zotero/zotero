@@ -315,7 +315,7 @@ Zotero.CollectionTreeView.prototype.selectWait = Zotero.Promise.method(function 
  *  Called by Zotero.Notifier on any changes to collections in the data layer
  */
 Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* (action, type, ids, extraData) {
-	if (type == 'feed' && action == 'unreadCountUpdated') {
+	if (type == 'feed' && (action == 'unreadCountUpdated' || action == 'statusChanged')) {
 		for (let i=0; i<ids.length; i++) {
 			this._treebox.invalidateRow(this._rowMap['L' + ids[i]]);
 		}
@@ -719,6 +719,11 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 	switch (collectionType) {
 		case 'library':
 		case 'feed':
+			if (treeRow.ref.updating) {
+				collectionType += '-updating';
+			} else if (treeRow.ref.lastCheckError) {
+				collectionType += '-error';
+			}
 			break;
 		
 		case 'trash':
