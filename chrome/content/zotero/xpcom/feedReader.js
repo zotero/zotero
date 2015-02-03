@@ -45,7 +45,7 @@
  *
  * @property {Zotero.Promise<Object>} feedProperties An object
  *   representing feed properties
- * @property {Zotero.Promise<FeedItem>*} itemIterator Returns an iterator
+ * @property {Zotero.Promise<FeedItem>*} ItemIterator Returns an iterator
  *   for feed items. The iterator returns FeedItem promises that have to be
  *   resolved before requesting the next promise. When all items are exhausted.
  *   the promise resolves to null.
@@ -170,17 +170,10 @@ Zotero.FeedReader = new function() {
 	}
 	
 	/*
-	 * Format JS date as SQL date + time zone offset
+	 * Format JS date as SQL date
 	 */
 	function formatDate(date) {
-		let offset = (date.getTimezoneOffset() / 60) * -1;
-		let absOffset = Math.abs(offset);
-		offset = offset
-			? ' ' + (offset < 0 ? '-' : '+')
-				+ Zotero.Utilities.lpad(Math.floor(absOffset), '0', 2)
-				+ ('' + ( (absOffset - Math.floor(absOffset)) || '' )).substr(1) // Get ".5" fraction or "" otherwise
-			: '';
-		return Zotero.Date.dateToSQL(date, false) + offset;
+		return Zotero.Date.dateToSQL(date, true);
 	}
 	
 	/*
@@ -268,7 +261,6 @@ Zotero.FeedReader = new function() {
 		if (!item.dateModified) {
 			// When there's no reliable modification date, we can assume that item doesn't get updated
 			Zotero.debug("FeedReader: Feed item missing a modification date (" + item.guid + ")");
-			item.dateModified = null;
 		}
 		
 		if (!item.date && item.dateModified) {
@@ -470,7 +462,9 @@ Zotero.FeedReader = new function() {
 		
 		Zotero.debug("FeedReader: Fetching feed from " + feedUrl.spec);
 		
-		this._channel = ios.newChannelFromURI(feedUrl);
+		this._channel = ios.newChannelFromURI2(feedUrl, null, 
+			Services.scriptSecurityManager.getSystemPrincipal(), null, 
+			Ci.nsILoadInfo.SEC_NORMAL, Ci.nsIContentPolicy.TYPE_OTHER);
 		this._channel.asyncOpen(feedProcessor, null); // Sends an HTTP request
 	}
 	
@@ -486,21 +480,25 @@ Zotero.FeedReader = new function() {
 	 * is terminated ahead of time, in which case it will be rejected with the reason
 	 * for termination.
 	 */
-	Zotero.defineProperty(FeedReader.prototype, 'itemIterator', {
+	Zotero.defineProperty(FeedReader.prototype, 'ItemIterator', {
 		get: function() {
 			let items = this._feedItems;
-			return new function() {
-				let i = 0;
-				this.next = function() {
-					let item = items[i++];
-					return {
-						value: item ? item.promise : null,
-						done: i >= items.length
-					};
+			
+			let iterator = function() {
+				this.index = 0;
+			};
+			
+			iterator.prototype.next = function() {
+				let item = items[this.index++];
+				return {
+					value: item ? item.promise : null,
+					done: this.index >= items.length
 				};
-			}
+			};
+			
+			return iterator;
 		}
-	});
+	}, {lazy: true});
 	
 	/*
 	 * Terminate feed processing at any given time
@@ -521,8 +519,8 @@ Zotero.FeedReader = new function() {
 		}
 		
 		// Close feed connection
-		if (channel.isPending) {
-			channel.cancel(Components.results.NS_BINDING_ABORTED);
+		if (this._channel.isPending) {
+			this._channel.cancel(Components.results.NS_BINDING_ABORTED);
 		}
 	};
 	

@@ -48,6 +48,7 @@ Zotero.CollectionTreeView = function()
 			'collection',
 			'search',
 			'publications',
+			'feed',
 			'share',
 			'group',
 			'feedItem',
@@ -315,7 +316,7 @@ Zotero.CollectionTreeView.prototype.selectWait = Zotero.Promise.method(function 
  *  Called by Zotero.Notifier on any changes to collections in the data layer
  */
 Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* (action, type, ids, extraData) {
-	if (type == 'feed' && action == 'unreadCountUpdated') {
+	if (type == 'feed' && (action == 'unreadCountUpdated' || action == 'statusChanged')) {
 		for (let i=0; i<ids.length; i++) {
 			this._treebox.invalidateRow(this._rowMap['L' + ids[i]]);
 		}
@@ -492,7 +493,7 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 			case 'feed':
 			case 'group':
 				yield this.reload();
-				yield this.selectByID(currentTreeRow.id);
+				yield this.selectByID("L" + id);
 				break;
 		}
 	}
@@ -719,6 +720,11 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 	switch (collectionType) {
 		case 'library':
 		case 'feed':
+			if (treeRow.ref.updating) {
+				collectionType += '-updating';
+			} else if (treeRow.ref.lastCheckError) {
+				collectionType += '-error';
+			}
 			break;
 		
 		case 'trash':
@@ -730,6 +736,9 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 		case 'header':
 			if (treeRow.ref.id == 'group-libraries-header') {
 				collectionType = 'groups';
+			}
+			else if (treeRow.ref.id == 'feed-libraries-header') {
+				collectionType = 'feedLibrary';
 			}
 			else if (treeRow.ref.id == 'commons-header') {
 				collectionType = 'commons';

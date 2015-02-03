@@ -105,7 +105,7 @@ Zotero.Feeds = new function() {
 			.map(id => Zotero.Libraries.get(id));
 	}
 	
-	this.get = Zotero.Libraries.get;
+	this.get = Zotero.Libraries.get.bind(Zotero.Libraries);
 	
 	this.haveFeeds = function() {
 		if (!this._cache) throw new Error("Zotero.Feeds cache is not initialized");
@@ -154,8 +154,8 @@ Zotero.Feeds = new function() {
 		let sql = "SELECT libraryID AS id FROM feeds "
 			+ "WHERE refreshInterval IS NOT NULL "
 			+ "AND ( lastCheck IS NULL "
-				+ "OR (julianday(lastCheck, 'utc') + (refreshInterval/1440) - julianday('now', 'utc')) <= 0 )";
-		let needUpdate = yield Zotero.DB.queryAsync(sql).map(row => row.id);
+				+ "OR (julianday(lastCheck, 'utc') + (refreshInterval/1440.0) - julianday('now', 'utc')) <= 0 )";
+		let needUpdate = (yield Zotero.DB.queryAsync(sql)).map(row => row.id);
 		Zotero.debug("Running update for feeds: " + needUpdate.join(', '));
 		let feeds = Zotero.Libraries.get(needUpdate);
 		let updatePromises = [];

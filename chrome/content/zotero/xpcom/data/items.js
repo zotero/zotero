@@ -133,9 +133,10 @@ Zotero.Items = function() {
 	 * @param  {Integer}  libraryID
 	 * @param  {Boolean}  [onlyTopLevel=false]   If true, don't include child items
 	 * @param  {Boolean}  [includeDeleted=false] If true, include deleted items
-	 * @return {Promise<Array<Zotero.Item>>}
+	 * @param  {Boolean}  [onlyIDs=false] 		 If true, resolves only with IDs
+	 * @return {Promise<Array<Zotero.Item|Integer>>}
 	 */
-	this.getAll = Zotero.Promise.coroutine(function* (libraryID, onlyTopLevel, includeDeleted) {
+	this.getAll = Zotero.Promise.coroutine(function* (libraryID, onlyTopLevel, includeDeleted, onlyIDs=false) {
 		var sql = 'SELECT A.itemID FROM items A';
 		if (onlyTopLevel) {
 			sql += ' LEFT JOIN itemNotes B USING (itemID) '
@@ -150,6 +151,9 @@ Zotero.Items = function() {
 		}
 		sql += " AND libraryID=?";
 		var ids = yield Zotero.DB.columnQueryAsync(sql, libraryID);
+		if (onlyIDs) {
+			return ids;
+		}
 		return this.getAsync(ids);
 	});
 	

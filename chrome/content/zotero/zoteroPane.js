@@ -522,22 +522,7 @@ var ZoteroPane = new function()
 				}
 				
 				let itemIDs = this.getSelectedItems(true);
-				Zotero.FeedItems.getAsync(itemIDs)
-				.then(function(feedItems) {
-					// Determine what most items are set to;
-					let allUnread = true;
-					for (let item of feedItems) {
-						if (item.isRead) {
-							allUnread = false;
-							break;
-						}
-					}
-					
-					// If something is unread, toggle all read by default
-					for (let i=0; i<feedItems.length; i++) {
-						feedItems[i].toggleRead(!allUnread);
-					}
-				});
+				Zotero.FeedItems.toggleReadByID(itemIDs);
 			}
 		}
 	}
@@ -866,7 +851,7 @@ var ZoteroPane = new function()
 		return collection.saveTx();
 	});
 	
-	this.newFeed = Zotero.Promise.coroutine(function() {
+	this.newFeed = Zotero.Promise.coroutine(function* () {
 		let data = {};
 		window.openDialog('chrome://zotero/content/feedSettings.xul', 
 			null, 'centerscreen, modal', data);
@@ -877,7 +862,7 @@ var ZoteroPane = new function()
 			feed.refreshInterval = data.ttl;
 			feed.cleanupAfter = data.cleanAfter;
 			yield feed.save({skipEditCheck: true});
-			Zotero.Feeds.scheduleNextFeedCheck();
+			yield feed.updateFeed();
 		}
 	});
 	
@@ -1774,48 +1759,40 @@ var ZoteroPane = new function()
 		buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 		if (this.collectionsView.selection.count == 1) {
-			if (collectionTreeRow.isCollection())
-			{
+			var title, message;
+			// Work out the required title and message
+			if (collectionTreeRow.isCollection()) {
 				if (deleteItems) {
-					var index = ps.confirmEx(
-						null,
-						Zotero.getString('pane.collections.deleteWithItems.title'),
-						Zotero.getString('pane.collections.deleteWithItems'),
-						buttonFlags,
-						Zotero.getString('pane.collections.deleteWithItems.title'),
-						"", "", "", {}
-					);
+					title = Zotero.getString('pane.collections.deleteWithItems.title');
+					message = Zotero.getString('pane.collections.deleteWithItems');
 				}
 				else {
-					var index = ps.confirmEx(
-						null,
-						Zotero.getString('pane.collections.delete.title'),
-						Zotero.getString('pane.collections.delete')
+					title = Zotero.getString('pane.collections.delete.title');
+					message = Zotero.getString('pane.collections.delete')
 							+ "\n\n"
-							+ Zotero.getString('pane.collections.delete.keepItems'),
-						buttonFlags,
-						Zotero.getString('pane.collections.delete.title'),
-						"", "", "", {}
-					);
-				}
-				if (index == 0) {
-					this.collectionsView.deleteSelection(deleteItems);
+							+ Zotero.getString('pane.collections.delete.keepItems');
 				}
 			}
-			else if (collectionTreeRow.isSearch())
-			{
-				
-				var index = ps.confirmEx(
-					null,
-					Zotero.getString('pane.collections.deleteSearch.title'),
-					Zotero.getString('pane.collections.deleteSearch'),
-					buttonFlags,
-					Zotero.getString('pane.collections.deleteSearch.title'),
-					"", "", "", {}
-				);
-				if (index == 0) {
-					this.collectionsView.deleteSelection();
-				}
+			else if (collectionTreeRow.isFeed()) {
+				title = Zotero.getString('pane.feed.deleteWithItems.title');
+				message = Zotero.getString('pane.feed.deleteWithItems');
+			}
+			else if (collectionTreeRow.isSearch()) {
+				title = Zotero.getString('pane.collections.deleteSearch.title');
+				message = Zotero.getString('pane.collections.deleteSearch');
+			}
+			
+			// Display prompt
+			var index = ps.confirmEx(
+				null,
+				title,
+				message,
+				buttonFlags,
+				title,
+				"", "", "", {}
+			);
+			if (index == 0) {
+				this.collectionsView.deleteSelection(deleteItems);
 			}
 		}
 	}
@@ -2230,6 +2207,7 @@ var ZoteroPane = new function()
 			"newCollection",
 			"newSavedSearch",
 			"newSubcollection",
+			"newFeed",
 			"refreshFeed",
 			"sep1",
 			"showDuplicates",
