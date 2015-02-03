@@ -23,7 +23,7 @@
  * 
  */
 /**
- * bluebird build version 2.9.3
+ * bluebird build version 2.9.6
  * Features enabled: core, race, call_get, generators, map, nodeify, promisify, props, reduce, settle, some, progress, cancel, using, filter, any, each, timers
 */
 !function(e){
@@ -93,8 +93,8 @@
     });
     return;
     
-	
-	if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Promise=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof _dereq_=="function"&&_dereq_;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof _dereq_=="function"&&_dereq_;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+    
+    if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Promise=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof _dereq_=="function"&&_dereq_;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof _dereq_=="function"&&_dereq_;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 "use strict";
 module.exports = function(Promise) {
 var SomePromiseArray = Promise._SomePromiseArray;
@@ -329,17 +329,21 @@ var getMethodCaller;
 var getGetter;
 if (!true) {
 var makeMethodCaller = function (methodName) {
-    return new Function("obj", "                                             \n\
-        'use strict'                                                         \n\
-        var len = this.length;                                               \n\
-        switch(len) {                                                        \n\
-            case 1: return obj.methodName(this[0]);                          \n\
-            case 2: return obj.methodName(this[0], this[1]);                 \n\
-            case 3: return obj.methodName(this[0], this[1], this[2]);        \n\
-            case 0: return obj.methodName();                                 \n\
-            default: return obj.methodName.apply(obj, this);                 \n\
-        }                                                                    \n\
-        ".replace(/methodName/g, methodName));
+    return new Function("ensureMethod", "                                    \n\
+        return function(obj) {                                               \n\
+            'use strict'                                                     \n\
+            var len = this.length;                                           \n\
+            ensureMethod(obj, 'methodName');                                 \n\
+            switch(len) {                                                    \n\
+                case 1: return obj.methodName(this[0]);                      \n\
+                case 2: return obj.methodName(this[0], this[1]);             \n\
+                case 3: return obj.methodName(this[0], this[1], this[2]);    \n\
+                case 0: return obj.methodName();                             \n\
+                default:                                                     \n\
+                    return obj.methodName.apply(obj, this);                  \n\
+            }                                                                \n\
+        };                                                                   \n\
+        ".replace(/methodName/g, methodName))(ensureMethod);
 };
 
 var makeGetter = function (propertyName) {
@@ -376,8 +380,21 @@ getGetter = function(name) {
 };
 }
 
+function ensureMethod(obj, methodName) {
+    var fn;
+    if (obj != null) fn = obj[methodName];
+    if (typeof fn !== "function") {
+        var message = "Object " + util.classString(obj) + " has no method '" +
+            util.toString(methodName) + "'";
+        throw new Promise.TypeError(message);
+    }
+    return fn;
+}
+
 function caller(obj) {
-    return obj[this.pop()].apply(obj, this);
+    var methodName = this.pop();
+    var fn = ensureMethod(obj, methodName);
+    return fn.apply(obj, this);
 }
 Promise.prototype.call = function (methodName) {
     var $_len = arguments.length;var args = new Array($_len - 1); for(var $_i = 1; $_i < $_len; ++$_i) {args[$_i - 1] = arguments[$_i];}
@@ -472,7 +489,7 @@ Promise.prototype.fork = function (didFulfill, didReject, didProgress) {
 "use strict";
 module.exports = function() {
 var async = _dereq_("./async.js");
-var inherits = _dereq_("./util.js").inherits;
+var util = _dereq_("./util.js");
 var bluebirdFramePattern =
     /[\\\/]bluebird[\\\/]js[\\\/](main|debug|zalgo|instrumented)/;
 var stackFramePattern = null;
@@ -485,7 +502,7 @@ function CapturedTrace(parent) {
     captureStackTrace(this, CapturedTrace);
     if (length > 32) this.uncycle();
 }
-inherits(CapturedTrace, Error);
+util.inherits(CapturedTrace, Error);
 
 CapturedTrace.prototype.uncycle = function() {
     var length = this._length;
@@ -882,9 +899,7 @@ var captureStackTrace = (function stackDetection() {
 
 var fireDomEvent;
 var fireGlobalEvent = (function() {
-    if (typeof process !== "undefined" &&
-        typeof process.version === "string" &&
-        typeof window === "undefined") {
+    if (util.isNode) {
         return function(name, reason, promise) {
             if (name === "rejectionHandled") {
                 return process.emit(name, promise);
@@ -1061,17 +1076,14 @@ return createContext;
 "use strict";
 module.exports = function(Promise, CapturedTrace) {
 var async = _dereq_("./async.js");
+var Warning = _dereq_("./errors.js").Warning;
 var util = _dereq_("./util.js");
 var canAttachTrace = util.canAttachTrace;
 var unhandledRejectionHandled;
 var possiblyUnhandledRejection;
-var debugging = false || !!(
-    typeof process !== "undefined" &&
-    typeof process.execPath === "string" &&
-    typeof process.env === "object" &&
-    (process.env["BLUEBIRD_DEBUG"] ||
-        process.env["NODE_ENV"] === "development")
-);
+var debugging = false || (util.isNode &&
+                    (!!process.env["BLUEBIRD_DEBUG"] ||
+                     process.env["NODE_ENV"] === "development"));
 
 Promise.prototype._ensurePossibleRejectionHandled = function () {
     this._setRejectionIsUnhandled();
@@ -1158,6 +1170,18 @@ Promise.prototype._attachExtraTrace = function (error, ignoreSelf) {
     }
 };
 
+Promise.prototype._warn = function(message) {
+    var warning = new Warning(message);
+    var ctx = this._peekContext();
+    if (ctx) {
+        ctx.attachExtraTrace(warning);
+    } else {
+        var parsed = CapturedTrace.parseStackAndMessage(warning);
+        warning.stack = parsed.message + "\n" + parsed.stack.join("\n");
+    }
+    CapturedTrace.formatAndLogError(warning, "");
+};
+
 Promise.onPossiblyUnhandledRejection = function (fn) {
     possiblyUnhandledRejection = typeof fn === "function" ? fn : undefined;
 };
@@ -1189,7 +1213,7 @@ return function() {
 };
 };
 
-},{"./async.js":2,"./util.js":38}],11:[function(_dereq_,module,exports){
+},{"./async.js":2,"./errors.js":13,"./util.js":38}],11:[function(_dereq_,module,exports){
 "use strict";
 var util = _dereq_("./util.js");
 var isPrimitive = util.isPrimitive;
@@ -1274,6 +1298,8 @@ function subError(nameProperty, defaultMessage) {
         notEnumerableProp(this, "name", nameProperty);
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, this.constructor);
+        } else {
+            Error.call(this);
         }
     }
     inherits(SubError, Error);
@@ -1281,6 +1307,7 @@ function subError(nameProperty, defaultMessage) {
 }
 
 var _TypeError, _RangeError;
+var Warning = subError("Warning", "warning");
 var CancellationError = subError("CancellationError", "cancellation error");
 var TimeoutError = subError("TimeoutError", "timeout error");
 var AggregateError = subError("AggregateError", "aggregate error");
@@ -1359,7 +1386,8 @@ module.exports = {
     CancellationError: errorTypes.CancellationError,
     OperationalError: errorTypes.OperationalError,
     TimeoutError: errorTypes.TimeoutError,
-    AggregateError: errorTypes.AggregateError
+    AggregateError: errorTypes.AggregateError,
+    Warning: Warning
 };
 
 },{"./es5.js":14,"./util.js":38}],14:[function(_dereq_,module,exports){
@@ -2152,7 +2180,6 @@ var PromiseResolver = _dereq_("./promise_resolver.js");
 var nodebackForPromise = PromiseResolver._nodebackForPromise;
 var errorObj = util.errorObj;
 var tryCatch = util.tryCatch;
-
 function Promise(resolver) {
     if (typeof resolver !== "function") {
         throw new TypeError("the promise constructor requires a resolver function\u000a\u000a    See http://goo.gl/EC22Yn\u000a");
@@ -2203,10 +2230,19 @@ Promise.prototype.reflect = function () {
 };
 
 Promise.prototype.then = function (didFulfill, didReject, didProgress) {
+    if (isDebugging() && arguments.length > 0 &&
+        typeof didFulfill !== "function" &&
+        typeof didReject !== "function") {
+        var msg = ".then() only accepts functions but was passed: " +
+                util.classString(didFulfill);
+        if (arguments.length > 1) {
+            msg += ", " + util.classString(didReject);
+        }
+        this._warn(msg);
+    }
     return this._then(didFulfill, didReject, didProgress,
         undefined, undefined);
 };
-
 
 Promise.prototype.done = function (didFulfill, didReject, didProgress) {
     var promise = this._then(didFulfill, didReject, didProgress,
@@ -3775,7 +3811,7 @@ Promise.reduce = function (promises, fn, initialValue, _each) {
 },{"./util.js":38}],31:[function(_dereq_,module,exports){
 "use strict";
 var schedule;
-if (typeof process === "object" && typeof process.version === "string") {
+if (_dereq_("./util.js").isNode) {
     var version = process.version.split(".").map(Number);
     schedule = (version[0] === 0 && version[1] > 10) || (version[0] > 0)
         ? global.setImmediate : process.nextTick;
@@ -3801,7 +3837,7 @@ else {
 }
 module.exports = schedule;
 
-},{}],32:[function(_dereq_,module,exports){
+},{"./util.js":38}],32:[function(_dereq_,module,exports){
 "use strict";
 module.exports =
     function(Promise, PromiseArray) {
@@ -4194,12 +4230,16 @@ Promise.prototype.delay = function (ms) {
 };
 
 function successClear(value) {
-    clearTimeout(+this);
+    var handle = this;
+    if (handle instanceof Number) handle = +handle;
+    clearTimeout(handle);
     return value;
 }
 
 function failureClear(reason) {
-    clearTimeout(+this);
+    var handle = this;
+    if (handle instanceof Number) handle = +handle;
+    clearTimeout(handle);
     throw reason;
 }
 
@@ -4653,6 +4693,10 @@ var ensureErrorObject = (function() {
     }
 })();
 
+function classString(obj) {
+    return {}.toString.call(obj);
+}
+
 var ret = {
     isClass: isClass,
     isIdentifier: isIdentifier,
@@ -4678,7 +4722,10 @@ var ret = {
     canAttachTrace: canAttachTrace,
     ensureErrorObject: ensureErrorObject,
     originatesFromRejection: originatesFromRejection,
-    markAsOriginatingFromRejection: markAsOriginatingFromRejection
+    markAsOriginatingFromRejection: markAsOriginatingFromRejection,
+    classString: classString,
+    isNode: typeof process !== "undefined" &&
+        classString(process).toLowerCase() === "[object process]"
 };
 try {throw new Error(); } catch (e) {ret.lastLineError = e;}
 module.exports = ret;
