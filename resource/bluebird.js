@@ -33,10 +33,10 @@
     EXPORTED_SYMBOLS = ["Promise"];
     
     // Set BackstagePass (which contains .Error, etc.) as global object
-    global = this;
+    self = this;
     
     // Provide an implementation of setTimeout
-    global.setTimeout = new function() {
+    self.setTimeout = new function() {
         // We need to maintain references to running nsITimers. Otherwise, they can
         // get garbage collected before they fire.
         var _runningTimers = [];
@@ -70,15 +70,15 @@
                     Components.classes["@mozilla.org/consoleservice;1"]
                         .getService(Components.interfaces.nsIConsoleService)
                         .logMessage(scriptError);
-                    global.debug(err, 1);
-                    global.debug(err.stack, 1);
+                    self.debug(err, 1);
+                    self.debug(err.stack, 1);
                 }
             }}, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
             _runningTimers.push(timer);
         }
     };
     
-    global.debug = function (msg) {
+    self.debug = function (msg) {
         dump(msg + "\n\n");
     };
     
@@ -86,9 +86,9 @@
     // TEMP: Only turn on if debug logging enabled?
     Promise.longStackTraces();
     Promise.onPossiblyUnhandledRejection(function(error) {
-        global.debug('===========');
-        global.debug(error);
-        global.debug(error.stack);
+        self.debug('===========');
+        self.debug(error);
+        self.debug(error.stack);
         throw error;
     });
     return;
