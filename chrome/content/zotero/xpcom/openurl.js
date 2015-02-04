@@ -74,7 +74,7 @@ Zotero.OpenURL = new function() {
 			
 			if(resolver.getElementsByTagName("Z39.88-2004").length > 0) {
 				var version = "1.0";
-			} else if(resolver.getElementsByTagName("OpenUrl 0.1").length > 0) {
+			} else if(resolver.getElementsByTagName("OpenURL_0.1").length > 0) {
 				var version = "0.1";
 			} else {
 				continue;
