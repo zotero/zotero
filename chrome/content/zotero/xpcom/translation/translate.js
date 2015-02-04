@@ -631,6 +631,13 @@ Zotero.Translate.Sandbox = {
 				
 				for(var i=0; i<item.attachments.length; i++) {
 					var attachment = item.attachments[i];
+					
+					// Web translators are not allowed to use attachment.path
+					if (attachment.path) {
+						if (!attachment.url) attachment.url = attachment.path;
+						delete attachment.path;
+					}
+					
 					if(attachment.url) {
 						// Remap attachment (but not link) URLs
 						attachment.url = translate.resolveURL(attachment.url, attachment.snapshot === false);
