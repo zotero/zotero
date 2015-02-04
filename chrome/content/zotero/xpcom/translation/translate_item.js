@@ -226,32 +226,64 @@ Zotero.Translate.ItemSaver.prototype = {
 			return false;
 		}
 		
-		if(!attachment.path) {
-			let url = Zotero.Attachments.cleanAttachmentURI(attachment.url);
-			if (!url) {
-				Zotero.debug("Translate: Invalid attachment.url specified <" + attachment.url + "> Will attempt to treat it as path.");
-				attachment.path = attachment.url;
-				attachment.url = false;
-			} else {
-				attachment.url = url;
-				url = Components.classes["@mozilla.org/network/io-service;1"]
-					.getService(Components.interfaces.nsIIOService)
-					.newURI(url, null, null); // This cannot fail, since we check above
-				
-				// see if this is actually a file URL
-				if(url.scheme == "file") {
-					attachment.path = attachment.url;
-					attachment.url = false;
-				} else if(url.scheme != "http" && url.scheme != "https") {
-					let e = "Translate: " + url.scheme + " protocol is not allowed for attachments from translators.";
+		let done = false;
+		if (attachment.path) {
+			var file = this._parsePath(attachment.path);
+			if(!file) {
+				let asUrl = Zotero.Attachments.cleanAttachmentURI(attachment.path);
+				if (!attachment.url && !asUrl) {
+					let e = "Translate: Could not parse attachment path <" + attachment.path + ">";
 					Zotero.debug(e, 2);
 					attachmentCallback(attachment, false, e);
 					return false;
+				} else if (!attachment.url && asUrl) {
+					Zotero.debug("Translate: attachment path looks like a URI: " + attachment.path);
+					attachment.url = asUrl;
+					delete attachment.path;
 				}
+			} else {
+				if (attachment.url) {
+					attachment.linkMode = "imported_url";
+					var myID = Zotero.Attachments.importSnapshotFromFile(file,
+						attachment.url, attachment.title, attachment.mimeType, attachment.charset,
+						parentID);
+				}
+				else {
+					attachment.linkMode = "imported_file";
+					var myID = Zotero.Attachments.importFromFile(file, parentID);
+				}
+				attachmentCallback(attachment, 100);
+				done = true;
 			}
 		}
 		
-		if(!attachment.path) {
+		if(!done) {
+			let url = Zotero.Attachments.cleanAttachmentURI(attachment.url);
+			if (!url) {
+				let e = "Translate: Invalid attachment.url specified <" + attachment.url + ">";
+				Zotero.debug(e, 2);
+				attachmentCallback(attachment, false, e);
+				return false;
+			}
+			
+			attachment.url = url;
+			url = Components.classes["@mozilla.org/network/io-service;1"]
+				.getService(Components.interfaces.nsIIOService)
+				.newURI(url, null, null); // This cannot fail, since we check above
+			
+			// see if this is actually a file URL
+			if(url.scheme == "file") {
+				let e = "Translate: Local file attachments cannot be specified in attachment.url";
+				Zotero.debug(e, 2);
+				attachmentCallback(attachment, false, e);
+				return false;
+			} else if(url.scheme != "http" && url.scheme != "https") {
+				let e = "Translate: " + url.scheme + " protocol is not allowed for attachments from translators.";
+				Zotero.debug(e, 2);
+				attachmentCallback(attachment, false, e);
+				return false;
+			}
+			
 			// At this point, must be a valid HTTP/HTTPS url
 			attachment.linkMode = "linked_file";
 			try {
@@ -264,27 +296,6 @@ Zotero.Translate.ItemSaver.prototype = {
 				return false;
 			}
 			Zotero.debug("Translate: Created attachment; id is "+myID, 4);
-			attachmentCallback(attachment, 100);
-			var newItem = Zotero.Items.get(myID);
-		} else {
-			var file = this._parsePath(attachment.path);
-			if(!file) {
-				let e = "Translate: Could not parse attachment path <" + attachment.path + ">";
-				Zotero.debug(e, 2);
-				attachmentCallback(attachment, false, e);
-				return false;
-			}
-			
-			if (attachment.url) {
-				attachment.linkMode = "imported_url";
-				var myID = Zotero.Attachments.importSnapshotFromFile(file,
-					attachment.url, attachment.title, attachment.mimeType, attachment.charset,
-					parentID);
-			}
-			else {
-				attachment.linkMode = "imported_file";
-				var myID = Zotero.Attachments.importFromFile(file, parentID);
-			}
 			attachmentCallback(attachment, 100);
 		}
 		
