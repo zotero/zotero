@@ -170,17 +170,10 @@ Zotero.FeedReader = new function() {
 	}
 	
 	/*
-	 * Format JS date as SQL date + time zone offset
+	 * Format JS date as SQL date
 	 */
 	function formatDate(date) {
-		let offset = (date.getTimezoneOffset() / 60) * -1;
-		let absOffset = Math.abs(offset);
-		offset = offset
-			? ' ' + (offset < 0 ? '-' : '+')
-				+ Zotero.Utilities.lpad(Math.floor(absOffset), '0', 2)
-				+ ('' + ( (absOffset - Math.floor(absOffset)) || '' )).substr(1) // Get ".5" fraction or "" otherwise
-			: '';
-		return Zotero.Date.dateToSQL(date, false) + offset;
+		return Zotero.Date.dateToSQL(date, true);
 	}
 	
 	/*
@@ -268,7 +261,6 @@ Zotero.FeedReader = new function() {
 		if (!item.dateModified) {
 			// When there's no reliable modification date, we can assume that item doesn't get updated
 			Zotero.debug("FeedReader: Feed item missing a modification date (" + item.guid + ")");
-			item.dateModified = null;
 		}
 		
 		if (!item.date && item.dateModified) {
@@ -470,7 +462,9 @@ Zotero.FeedReader = new function() {
 		
 		Zotero.debug("FeedReader: Fetching feed from " + feedUrl.spec);
 		
-		this._channel = ios.newChannelFromURI(feedUrl);
+		this._channel = ios.newChannelFromURI2(feedUrl, null, 
+			Services.scriptSecurityManager.getSystemPrincipal(), null, 
+			Ci.nsILoadInfo.SEC_NORMAL, Ci.nsIContentPolicy.TYPE_OTHER);
 		this._channel.asyncOpen(feedProcessor, null); // Sends an HTTP request
 	}
 	

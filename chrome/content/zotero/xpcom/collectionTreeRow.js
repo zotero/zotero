@@ -149,14 +149,14 @@ Zotero.CollectionTreeRow.prototype.isWithinEditableGroup = function () {
 }
 
 Zotero.CollectionTreeRow.prototype.__defineGetter__('editable', function () {
-	if (this.isTrash() || this.isShare() || this.isBucket() || this.isFeed()) {
+	if (this.isTrash() || this.isShare() || this.isBucket()) {
 		return false;
 	}
 	if (!this.isWithinGroup() || this.isPublications()) {
 		return true;
 	}
 	var libraryID = this.ref.libraryID;
-	if (this.isGroup()) {
+	if (this.isGroup() || this.isFeed()) {
 		return this.ref.editable;
 	}
 	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled()) {

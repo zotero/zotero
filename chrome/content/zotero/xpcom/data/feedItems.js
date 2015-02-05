@@ -94,14 +94,25 @@ Zotero.FeedItems = new Proxy(function() {
 		return this.getAsync(id);
 	});
 	
-	this.toggleReadById = Zotero.Promise.coroutine(function* (ids, state) {
+	this.toggleReadByID = Zotero.Promise.coroutine(function* (ids, state) {
 		if (!Array.isArray(ids)) {
-			if (typeof ids != 'string') throw new Error('ids must be a string or array in Zotero.FeedItems.toggleReadById');
+			if (typeof ids != 'string') throw new Error('ids must be a string or array in Zotero.FeedItems.toggleReadByID');
 			
 			ids = [ids];
 		}
-		
 		let items = yield this.getAsync(ids);
+		
+		if (state == undefined) {
+			// If state undefined, toggle read if at least one unread
+			state = true;
+			for (let item of items) {
+				if (item.isRead) {
+					state = false;
+					break;
+				}
+			}
+		}
+		
 		for (let i=0; i<items.length; i++) {
 			items[i].toggleRead(state);
 		}

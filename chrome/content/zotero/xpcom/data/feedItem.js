@@ -132,38 +132,6 @@ Zotero.FeedItem.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		yield Zotero.DB.queryAsync(sql, [env.id, this.guid, this._feedItemReadTime]);
 		
 		this._clearChanged('feedItemData');
-		
-/*	let itemID;
-	if (env.isNew) {
-		// For new items, run this first so we get an item ID
-		yield Zotero.FeedItem._super.prototype._saveData.apply(this, arguments);
-		itemID = env.id;
-	} else {
-		itemID = this.id;
-	}
-	
-	}
-	
-	if (!env.isNew) {
-		if (this.hasChanged()) {
-			yield Zotero.FeedItem._super.prototype._saveData.apply(this, arguments);
-		} else {
-			env.skipPrimaryDataReload = true;
-		}
-		Zotero.Notifier.trigger('modify', 'feedItem', itemID);
-	} else {
-		Zotero.Notifier.trigger('add', 'feedItem', itemID);
-	}
-	
-	if (env.collectionsAdded || env.collectionsRemoved) {
-		let affectedCollections = (env.collectionsAdded || [])
-			.concat(env.collectionsRemoved || []);
-		if (affectedCollections.length) {
-			let feeds = yield Zotero.Feeds.getAsync(affectedCollections);
-			for (let i=0; i<feeds.length; i++) {
-				feeds[i].updateUnreadCount();
-			}
-		}*/
 	}
 });
 
@@ -174,7 +142,6 @@ Zotero.FeedItem.prototype.toggleRead = Zotero.Promise.coroutine(function* (state
 	if (changed) {
 		yield this.save({skipEditCheck: true, skipDateModifiedUpdate: true});
 		
-		yield this.loadCollections();
 		let feed = Zotero.Feeds.get(this.libraryID);
 		feed.updateUnreadCount();
 	}

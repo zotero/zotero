@@ -48,6 +48,7 @@ Zotero.CollectionTreeView = function()
 			'collection',
 			'search',
 			'publications',
+			'feed',
 			'share',
 			'group',
 			'feedItem',
@@ -492,7 +493,7 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 			case 'feed':
 			case 'group':
 				yield this.reload();
-				yield this.selectByID(currentTreeRow.id);
+				yield this.selectByID("L" + id);
 				break;
 		}
 	}
@@ -735,6 +736,9 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 		case 'header':
 			if (treeRow.ref.id == 'group-libraries-header') {
 				collectionType = 'groups';
+			}
+			else if (treeRow.ref.id == 'feed-libraries-header') {
+				collectionType = 'feedLibrary';
 			}
 			else if (treeRow.ref.id == 'commons-header') {
 				collectionType = 'commons';

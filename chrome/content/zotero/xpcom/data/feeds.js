@@ -105,7 +105,7 @@ Zotero.Feeds = new function() {
 			.map(id => Zotero.Libraries.get(id));
 	}
 	
-	this.get = Zotero.Libraries.get;
+	this.get = Zotero.Libraries.get.bind(Zotero.Libraries);
 	
 	this.haveFeeds = function() {
 		if (!this._cache) throw new Error("Zotero.Feeds cache is not initialized");
