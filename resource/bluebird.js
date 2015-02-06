@@ -4676,7 +4676,7 @@ function originatesFromRejection(e) {
 
 function canAttachTrace(obj) {
     // Added by Zotero
-    return obj.message && obj.stack && es5.propertyIsWritable(obj, "stack");
+    return obj && obj.stack && es5.propertyIsWritable(obj, "stack");
     
     return obj instanceof Error && es5.propertyIsWritable(obj, "stack");
 }
