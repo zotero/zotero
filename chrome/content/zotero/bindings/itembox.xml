@@ -1978,17 +1978,17 @@
 					}
 					
 					var currentFieldName = label.getAttribute('fieldname');
-					// currentFieldName is either
-					// creator field, e.g. creator-2-lastName
-					// or, single field, e.g. title
+					// Creator field (e.g., creator-2-lastName)
 					if (currentFieldName.startsWith('creator-')) {
-						var row = Zotero.getAncestorByTagName(document.popupNode, 'row');
-						var creatorIndex = parseInt(currentFieldName.split('-')[1]);
-						var fields = this.getCreatorFields(row);
+						let row = Zotero.getAncestorByTagName(document.popupNode, 'row');
+						let creatorIndex = parseInt(currentFieldName.split('-')[1]);
+						let fields = this.getCreatorFields(row);
 						fields[currentFieldName.split('-')[2]] = newVal;
 						this.modifyCreator(creatorIndex, fields);
 						this.item.save();
-					} else {
+					}
+					// Single field (e.g., title)
+					else {
 						this._setFieldValue(label, newVal);
 						this._modifyField(currentFieldName, newVal, this.saveOnEdit);
 					}

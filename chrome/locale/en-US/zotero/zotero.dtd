@@ -126,6 +126,7 @@
 <!ENTITY zotero.item.textTransform.titlecase			"Title Case">
 <!ENTITY zotero.item.textTransform.sentencecase			"Sentence case">
 <!ENTITY zotero.item.creatorTransform.nameSwap      	"Swap first/last names">
+<!ENTITY zotero.item.creatorTransform.titlecase			"Convert to Title Case">
 
 <!ENTITY zotero.toolbar.newNote				"New Note">
 <!ENTITY zotero.toolbar.note.standalone				"New Standalone Note">
