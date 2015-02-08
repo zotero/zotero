@@ -310,6 +310,34 @@ Zotero.Utilities = {
 
 		return false;
 	},
+	
+	/*
+	 * Convert ISBN 10 to ISBN 13
+	 * @param {String} isbn ISBN 10 or ISBN 13
+	 *   cleanISBN
+	 * @return {String} ISBN-13
+	 */
+	"toISBN13": function(isbn) {
+		if (!/^(?:97[89])?\d{9}[\dxX]$/.test(isbn)
+			&& !(isbn = Zotero.Utilities.cleanISBN(isbn))
+		) {
+			throw new Error('Invalid ISBN: ' + isbn);
+		}
+		
+		if (isbn.length == 13) return isbn; // Recalculate check digit?
+		
+		isbn = '978' + isbn.substr(0,9);
+		
+		var sum = 0;
+		for (var i = 0; i < 12; i++) {
+			sum += isbn[i] * (i%2 ? 3 : 1);
+		}
+		
+		var checkDigit = 10 - (sum % 10);
+		if (checkDigit == 10) checkDigit = 0;
+		
+		return isbn + checkDigit;
+	},
 
 	/**
 	 * Clean and validate ISSN.
