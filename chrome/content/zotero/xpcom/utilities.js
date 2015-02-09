@@ -1541,6 +1541,11 @@ Zotero.Utilities = {
 				if (!value) continue;
 				
 				if (typeof value == 'string') {
+					if (field == 'ISBN') {
+						var isbn = value.match(/^(?:97[89]-?)?(?:\d-?){9}[\dx](?!-)\b/i);
+						if (isbn) value = isbn[0];
+					}
+					
 					// Strip enclosing quotes
 					if(value.charAt(0) == '"' && value.indexOf('"', 1) == value.length - 1) {
 						value = value.substring(1, value.length-1);
