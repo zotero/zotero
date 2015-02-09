@@ -1504,89 +1504,78 @@ Zotero.Utilities = {
 	
 	/**
 	 * Converts an item from toArray() format to citeproc-js JSON
-	 * @param {Zotero.Item} item
+	 * @param {Zotero.Item} zoteroItem
 	 * @return {Object} The CSL item
 	 */
-	"itemToCSLJSON":function(item) {
-		if(item instanceof Zotero.Item) {
-			item = item.toArray();
+	"itemToCSLJSON":function(zoteroItem) {
+		if (zoteroItem instanceof Zotero.Item) {
+			zoteroItem = zoteroItem.toArray();
 		}
 		
-		var itemType = item.itemType;
-		var cslType = CSL_TYPE_MAPPINGS[itemType];
-		if(!cslType) cslType = "article";
+		var cslType = CSL_TYPE_MAPPINGS[zoteroItem.itemType] || "article";
+		var itemTypeID = Zotero.ItemTypes.getID(zoteroItem.itemType);
 		
 		var cslItem = {
-			'id':item.itemID,
+			'id':zoteroItem.itemID,
 			'type':cslType
 		};
 		
-		// Map text fields
-		var itemTypeID = Zotero.ItemTypes.getID(itemType);
+		// get all text variables (there must be a better way)
 		for(var variable in CSL_TEXT_MAPPINGS) {
 			var fields = CSL_TEXT_MAPPINGS[variable];
 			for(var i=0, n=fields.length; i<n; i++) {
-				var field = fields[i], value = undefined;
+				var field = fields[i],
+					value;
 				
-				if(field in item) {
-					value = item[field];
+				if(field in zoteroItem) {
+					value = zoteroItem[field];
 				} else {
 					var fieldID = Zotero.ItemFields.getID(field),
-						baseMapping
+						baseMapping;
 					if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)
 							&& (baseMapping = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, fieldID))) {
-						value = item[Zotero.ItemTypes.getName(baseMapping)];
+						value = zoteroItem[Zotero.ItemTypes.getName(baseMapping)];
 					}
 				}
 				
-				if(!value) continue;
+				if (!value) continue;
 				
-				var valueLength = value.length;
-				if(valueLength) {
+				if (typeof value == 'string') {
 					// Strip enclosing quotes
-					if(value[0] === '"' && value[valueLength-1] === '"') {
-						value = value.substr(1, valueLength-2);
+					if(value.charAt(0) == '"' && value.indexOf('"', 1) == value.length - 1) {
+						value = value.substring(1, value.length-1);
 					}
+					cslItem[variable] = value;
+					break;
 				}
-				
-				cslItem[variable] = value;
-				break;
 			}
 		}
 		
 		// separate name variables
-		var authorID = Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID);
-		var authorFieldName = Zotero.CreatorTypes.getName(authorID);
-		var creators = item.creators;
-		if(creators) {
-			for(var i=0, n=creators.length; i<n; i++) {
-				var creator = creators[i];
-				
-				if(creator.creatorType == authorFieldName) {
-					var creatorType = "author";
-				} else {
-					var creatorType = CSL_NAMES_MAPPINGS[creator.creatorType]
-				}
-				
-				if(!creatorType) continue;
-				
-				if(creator.fieldMode == 1) {
-					var nameObj = {'literal':creator.lastName};
-				} else {
-					var nameObj = {'family':creator.lastName, 'given':creator.firstName};
-				}
-				
-				if(cslItem[creatorType]) {
-					cslItem[creatorType].push(nameObj);
-				} else {
-					cslItem[creatorType] = [nameObj];
-				}
+		var author = Zotero.CreatorTypes.getName(Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID));
+		var creators = zoteroItem.creators;
+		for(var i=0; i<creators.length; i++) {
+			var creator = creators[i];
+			var creatorType = creator.creatorType;
+			if(creatorType == author) {
+				creatorType = "author";
+			}
+			
+			creatorType = CSL_NAMES_MAPPINGS[creatorType];
+			if(!creatorType) continue;
+			
+			var nameObj = {'family':creator.lastName, 'given':creator.firstName};
+			
+			if(cslItem[creatorType]) {
+				cslItem[creatorType].push(nameObj);
+			} else {
+				cslItem[creatorType] = [nameObj];
 			}
 		}
 		
 		// get date variables
 		for(var variable in CSL_DATE_MAPPINGS) {
-			var date = item[CSL_DATE_MAPPINGS[variable]];
+			var date = zoteroItem[CSL_DATE_MAPPINGS[variable]];
 			if(date) {
 				var dateObj = Zotero.Date.strToDate(date);
 				// otherwise, use date-parts
@@ -1612,8 +1601,17 @@ Zotero.Utilities = {
 				}
 			}
 		}
+
+		// extract PMID
+		var extra = zoteroItem.extra;
+		if(typeof extra === "string") {
+			var m = /(?:^|\n)PMID:\s*([0-9]+)/.exec(extra);
+			if(m) cslItem.PMID = m[1];
+			m = /(?:^|\n)PMCID:\s*((?:PMC)?[0-9]+)/.exec(extra);
+			if(m) cslItem.PMCID = m[1];
+		}
 		
-		//this._cache[item.id] = cslItem;
+		//this._cache[zoteroItem.id] = cslItem;
 		return cslItem;
 	},
 	
