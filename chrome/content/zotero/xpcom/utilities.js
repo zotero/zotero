@@ -1238,7 +1238,7 @@ Zotero.Utilities = {
 			if (isError) {
 				header = obj.constructor.name ? obj.constructor.name : 'Error';
 			} else {
-				header = obj.name ? obj.name + ' ' : '') + 'Exception';
+				header = (obj.name ? obj.name + ' ' : '') + 'Exception';
 			}
 			
 			return header + ': '
