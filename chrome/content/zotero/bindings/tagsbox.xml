@@ -1033,9 +1033,10 @@
 				<parameter name="elem"/>
 				<body>
 				<![CDATA[
-					var scrollbox = document.getAnonymousNodes(this)[0];
-					var sbo = scrollbox.boxObject;
-					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
+					var sbo = document.getAnonymousNodes(this)[0].boxObject;
+					if (Zotero.platformMajorVersion < 36) {
+						sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
+					}
 					sbo.ensureElementIsVisible(elem);
 				]]>
 				</body>
