@@ -1217,9 +1217,10 @@ Zotero.Utilities = {
 			level_padding += "    ";
 		}
 		
-		//Special handling for Error
+		//Special handling for Error or Exception
+		var isException = Zotero.isFx && !Zotero.isBookmarklet && obj instanceof Components.interfaces.nsIException;
 		var isError = obj instanceof Error;
-		if (!isError && obj.constructor) {
+		if (!isException && !isError && obj.constructor && obj.stack) {
 			switch (obj.constructor.name) {
 				case 'Error':
 				case 'EvalError':
@@ -1231,8 +1232,16 @@ Zotero.Utilities = {
 					isError = true;
 			}
 		}
-		if (isError) {
-			return (obj.constructor.name ? obj.constructor.name : 'Error') + ': '
+		
+		if (isError || isException) {
+			var header = '';
+			if (isError) {
+				header = obj.constructor.name ? obj.constructor.name : 'Error';
+			} else {
+				header = obj.name ? obj.name + ' ' : '') + 'Exception';
+			}
+			
+			return header + ': '
 				+ (obj.message ? ('' + obj.message).replace(/^/gm, level_padding).trim() : '')
 				+ '\n' + level_padding + "===== Stack Trace =====\n"
 				+ (obj.stack ? obj.stack.trim().replace(/^(?=.)/gm, level_padding) : '')
