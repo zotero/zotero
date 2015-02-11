@@ -401,14 +401,17 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 		this.sandbox.DOMParser = sandboxLocation.DOMParser;
 	} else {
 		this.sandbox.DOMParser = function() {
-			this.__exposedProps__ = {"parseFromString":"r"};
-			this.parseFromString = function(str, contentType) {
+			var obj = new sandbox.Object();
+			var wrappedObj = obj.wrappedJSObject || obj;
+			wrappedObj.__exposedProps__ = {"parseFromString":"r"};
+			wrappedObj.parseFromString = function(str, contentType) {
 				var xhr = sandbox.XMLHttpRequest();
 				xhr.open("GET", "data:"+contentType+";charset=utf-8,"+encodeURIComponent(str), false);
 				xhr.send();
 				if (!xhr.responseXML) throw new Error("error parsing XML");
 				return xhr.responseXML;
 			}
+			return obj;
 		};
 	}
 	this.sandbox.DOMParser.__exposedProps__ = {"prototype":"r"};
@@ -416,9 +419,12 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	this.sandbox.XMLSerializer = function() {
 		var s = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
 			.createInstance(Components.interfaces.nsIDOMSerializer);
-		this.serializeToString = function(doc) {
+		var obj = new sandbox.Object();
+		var wrappedObj = obj.wrappedJSObject || obj;
+		wrappedObj.serializeToString = function(doc) {
 			return s.serializeToString(Zotero.Translate.DOMWrapper.unwrap(doc));
 		};
+		return obj;
 	};
 	this.sandbox.XMLSerializer.__exposedProps__ = {"prototype":"r"};
 	this.sandbox.XMLSerializer.prototype = {"__exposedProps__":{"serializeToString":"r"}};
@@ -443,10 +449,11 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 				target = new XPCNativeWrapper(target);
 			}
 			var ret = new sandbox.Object();
-			ret.wrappedJSObject.has = function(x, prop) {
+			var wrappedRet = ret.wrappedJSObject || ret;
+			wrappedRet.has = function(x, prop) {
 				return overrides.hasOwnProperty(prop) || prop in target;
 			};
-			ret.wrappedJSObject.get = function(x, prop, receiver) {
+			wrappedRet.get = function(x, prop, receiver) {
 				if (prop === "__wrappedObject") return target;
 				if (prop === "__wrappingManager") return me;
 				var y = overrides.hasOwnProperty(prop) ? overrides[prop] : target[prop];
@@ -461,10 +468,10 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 					return wrap(y.apply(target, args));
 				} : new sandbox.Object());
 			};
-			ret.wrappedJSObject.ownKeys = function(x) {
+			wrappedRet.ownKeys = function(x) {
 				return Components.utils.cloneInto(target.getOwnPropertyNames(), sandbox);
 			};
-			ret.wrappedJSObject.enumerate = function(x) {
+			wrappedRet.enumerate = function(x) {
 				var y = new sandbox.Array();
 				for (var i in target) y.wrappedJSObject.push(i);
 				return y;
