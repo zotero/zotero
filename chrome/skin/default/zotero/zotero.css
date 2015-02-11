@@ -357,3 +357,8 @@ label.zotero-text-link {
 	width: 29.5em;
 	max-width: 29.5em;
 }
+
+#zotero-csl-button-bar
+{
+	min-height: 2.4em;
+}
