@@ -226,6 +226,17 @@ Zotero.Translate.ItemSaver.prototype = {
 			return false;
 		}
 		
+		if (attachment.path) {
+			var url = Zotero.Attachments.cleanAttachmentURI(attachment.path, false);
+			if (url && /^(?:https?|ftp):/.test(url)) {
+				// A web URL. Don't bother parsing it as path below
+				// Some paths may look like URIs though, so don't just test for 'file'
+				// E.g. C:\something
+				if (!attachment.url) attachment.url = attachment.path;
+				delete attachment.path;
+			}
+		}
+		
 		let done = false;
 		if (attachment.path) {
 			var file = this._parsePath(attachment.path);
@@ -318,43 +329,73 @@ Zotero.Translate.ItemSaver.prototype = {
 	"_parsePathURI":function(path) {
 		try {
 			var uri = Services.io.newURI(path, "", this._baseURI);
+		} catch(e) {
+			Zotero.debug("Translate: " + path + " is not a valid URI");
+			return false;
+		}
+		
+		try {
 			var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
-			if(file.path != '/' && file.exists()) return file;
 		}
 		catch (e) {
-			Zotero.logError(e);
+			Zotero.debug("Translate: " + uri.spec + " is not a file URI");
+			return false;
 		}
-		return false;
+		
+		if(file.path == '/') {
+			Zotero.debug("Translate: " + path + " points to root directory");
+			return false;
+		}
+		
+		if(!file.exists()) {
+			Zotero.debug("Translate: File at " + file.path + " does not exist");
+			return false;
+		}
+		
+		return file;
 	},
 
 	"_parseAbsolutePath":function(path) {
+		var file = Components.classes["@mozilla.org/file/local;1"].
+			createInstance(Components.interfaces.nsILocalFile);
 		try {
-			// First, try to parse absolute paths using initWithPath
-			var file = Components.classes["@mozilla.org/file/local;1"].
-				createInstance(Components.interfaces.nsILocalFile);
 			file.initWithPath(path);
-			if(file.exists()) return file;
 		} catch(e) {
-			Zotero.logError(e);
+			Zotero.debug("Translate: Invalid absolute path: " + path);
+			return false;
 		}
-		return false;
+		
+		if(!file.exists()) {
+			Zotero.debug("Translate: File at absolute path " + file.path + " does not exist");
+			return false;
+		}
+		
+		return file;
 	},
 
 	"_parseRelativePath":function(path) {
-		try {
-			var file = this._baseURI.QueryInterface(Components.interfaces.nsIFileURL).file.parent;
-			var splitPath = path.split(/\//g);
-			for(var i=0; i<splitPath.length; i++) {
-				if(splitPath[i] !== "") file.append(splitPath[i]);
-			}
-			if(file.exists()) return file;
-		} catch(e) {
-			Zotero.logError(e);
+		if (!this._baseURI) {
+			Zotero.debug("Translate: Cannot parse as relative path. No base URI available.");
+			return false;
 		}
-		return false;
+		
+		var file = this._baseURI.QueryInterface(Components.interfaces.nsIFileURL).file.parent;
+		var splitPath = path.split(/\//g);
+		for(var i=0; i<splitPath.length; i++) {
+			if(splitPath[i] !== "") file.append(splitPath[i]);
+		}
+		
+		if(!file.exists()) {
+			Zotero.debug("Translate: File at " + file.path + " does not exist");
+			return false;
+		}
+		
+		return file;
 	},
 
 	"_parsePath":function(path) {
+		Zotero.debug("Translate: Attempting to parse path " + path);
+		
 		var file;
 
 		// First, try to parse as absolute path
