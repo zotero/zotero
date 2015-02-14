@@ -143,7 +143,7 @@ Zotero.Connector = new function() {
 	 * @param	{Object}		data			RPC data. See documentation above.
 	 * @param	{Function}		callback		Function to be called when requests complete.
 	 */
-	this.callMethod = function(method, data, callback) {
+	this.callMethod = function(method, data, callback, tab) {
 		// Don't bother trying if not online in bookmarklet
 		if(Zotero.isBookmarklet && this.isOnline === false) {
 			callback(false, 0);
@@ -211,6 +211,57 @@ Zotero.Connector = new function() {
 					"X-Zotero-Connector-API-Version":CONNECTOR_API_VERSION
 				});
 		}
+	},
+	
+	/**
+	 * Adds detailed cookies to the data before sending "saveItems" request to
+	 *  the server/Standalone
+	 *
+	 * @param	{Object} data RPC data. See documentation above.
+	 * @param	{Function} callback Function to be called when requests complete.
+	 */
+	this.setCookiesThenSaveItems = function(data, callback, tab) {
+		if(Zotero.isFx && !Zotero.isBookmarklet && data.uri) {
+			var host = Services.ios.newURI(data.uri, null, null).host;
+			var cookieEnum = Services.cookies.getCookiesFromHost(host);
+			var cookieHeader = '';
+			while(cookieEnum.hasMoreElements()) {
+				var cookie = cookieEnum.getNext().QueryInterface(Components.interfaces.nsICookie2);
+				cookieHeader += '\n' + cookie.name + '=' + cookie.value
+					+ ';Domain=' + cookie.host
+					+ (cookie.path ? ';Path=' + cookie.path : '')
+					+ (!cookie.isDomain ? ';hostOnly' : '') //not a legit flag, but we have to use it internally
+					+ (cookie.isSecure ? ';secure' : '');
+			}
+			
+			if(cookieHeader) {
+				data.detailedCookies = cookieHeader.substr(1);
+			}
+			
+			this.callMethod("saveItems", data, callback, tab);
+			return;
+		} else if(Zotero.isChrome && !Zotero.isBookmarklet) {
+			var self = this;
+			chrome.cookies.getAll({url: tab.url}, function(cookies) {
+				var cookieHeader = '';
+				for(var i=0, n=cookies.length; i<n; i++) {
+					cookieHeader += '\n' + cookies[i].name + '=' + cookies[i].value
+						+ ';Domain=' + cookies[i].domain
+						+ (cookies[i].path ? ';Path=' + cookies[i].path : '')
+						+ (cookies[i].hostOnly ? ';hostOnly' : '') //not a legit flag, but we have to use it internally
+						+ (cookies[i].secure ? ';secure' : '');
+				}
+				
+				if(cookieHeader) {
+					data.detailedCookies = cookieHeader.substr(1);
+				}
+				
+				self.callMethod("saveItems", data, callback, tab);
+			});
+			return;
+		}
+		
+		this.callMethod("saveItems", data, callback, tab);
 	}
 }
 

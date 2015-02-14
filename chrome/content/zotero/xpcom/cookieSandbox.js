@@ -47,11 +47,9 @@ Zotero.CookieSandbox = function(browser, uri, cookieData, userAgent) {
 	
 	this._cookies = {};
 	if(cookieData) {
-		var splitCookies = cookieData.split(/; ?/);
+		var splitCookies = cookieData.split(/;\s*/);
 		for each(var cookie in splitCookies) {
-			var key = cookie.substr(0, cookie.indexOf("="));
-			var value = cookie.substr(cookie.indexOf("=")+1);
-			this._cookies[key] = value;
+			this.setCookie(cookie, this.URI.host);
 		}
 	}
 	
@@ -63,29 +61,93 @@ Zotero.CookieSandbox = function(browser, uri, cookieData, userAgent) {
 	}
 }
 
+/**
+ * Normalizes the host string: lower-case, remove leading period, some more cleanup
+ * @param {String} host;
+ */
+Zotero.CookieSandbox.normalizeHost = function(host) {
+	return host.trim().toLowerCase().replace(/^\.+|[:\/].*/g, '');
+}
+
+/**
+ * Normalizes the path string
+ * @param {String} path;
+ */
+Zotero.CookieSandbox.normalizePath = function(path) {
+	return '/' + path.trim().replace(/^\/+|[?#].*/g, '');
+}
+
+/**
+ * Generates a semicolon-separated string of cookie values from a list of cookies
+ * @param {Object} cookies Object containing key: value cookie pairs
+ */
+Zotero.CookieSandbox.generateCookieString = function(cookies) {
+	var str = '';
+	for(var key in cookies) {
+		str += '; ' + key + '=' + cookies[key];
+	}
+	
+	return str ? str.substr(2) : '';
+}
+
 Zotero.CookieSandbox.prototype = {
 	/**
 	 * Adds cookies to this CookieSandbox based on a cookie header
 	 * @param {String} cookieString;
+	 * @param {nsIURI} [uri] URI of the header origin.
+	                   Used to verify same origin. If omitted validation is not performed
 	 */
-	"addCookiesFromHeader":function(cookieString) {
+	"addCookiesFromHeader":function(cookieString, uri) {
 		var cookies = cookieString.split("\n");
+		if(uri) {
+			var validDomain = '.' + Zotero.CookieSandbox.normalizeHost(uri.host);
+		}
+		
 		for(var i=0, n=cookies.length; i<n; i++) {
-			var cookieInfo = cookies[i].split(/; ?/);
-			var secure = false;
+			var cookieInfo = cookies[i].split(/;\s*/);
+			var secure = false, path = '', domain = '', hostOnly = false;
 			
 			for(var j=1, m=cookieInfo.length; j<m; j++) {
-				if(cookieInfo[j].substr(0, cookieInfo[j].indexOf("=")).toLowerCase() === "secure") {
-					secure = true;
-					break;
+				var pair = cookieInfo[j].split(/\s*=\s*/);
+				switch(pair[0].trim().toLowerCase()) {
+					case 'secure':
+						secure = true;
+						break;
+					case 'domain':
+						domain = pair[1];
+						break;
+					case 'path':
+						path = pair[1];
+						break;
+					case 'hostonly':
+						hostOnly = true;
+						break;
+				}
+				
+				if(secure && domain && path && hostOnly) break;
+			}
+			
+			// Domain must be a suffix of the host setting the cookie
+			if(validDomain && domain) {
+				var normalizedDomain = Zotero.CookieSandbox.normalizeHost(domain);
+				var substrMatch = validDomain.lastIndexOf(normalizedDomain);
+				var publicSuffix;
+				try { publicSuffix = Services.eTLD.getPublicSuffix(uri) }  catch(e) {}
+				if(substrMatch == -1 || !publicSuffix || publicSuffix == normalizedDomain
+					|| (substrMatch + normalizedDomain.length != validDomain.length)
+					|| (validDomain.charAt(substrMatch-1) != '.')) {
+					Zotero.debug("CookieSandbox: Ignoring attempt to set a cookie for different host");
+					continue;
 				}
 			}
 			
-			if(!secure) {
-				var key = cookieInfo[0].substr(0, cookieInfo[0].indexOf("="));
-				var value = cookieInfo[0].substr(cookieInfo[0].indexOf("=")+1);
-				this._cookies[key] = value;
+			// When no domain is set, use requestor's host (hostOnly cookie)
+			if(validDomain && !domain) {
+				domain = validDomain.substr(1);
+				hostOnly = true;
 			}
+			
+			this.setCookie(cookieInfo[0], domain, path, secure, hostOnly);
 		}
 	},
 	
@@ -104,12 +166,111 @@ Zotero.CookieSandbox.prototype = {
 	"attachToInterfaceRequestor": function(ir) {
 		Zotero.CookieSandbox.Observer.trackedInterfaceRequestors.push(Components.utils.getWeakReference(ir.QueryInterface(Components.interfaces.nsIInterfaceRequestor)));
 		Zotero.CookieSandbox.Observer.trackedInterfaceRequestorSandboxes.push(this);
+	},
+	
+	/**
+	 * Set a cookie for a specified host
+	 * @param {String} cookiePair A single cookie pair in the form key=value
+	 * @param {String} [host] Host to bind the cookie to.
+	 *                        Defaults to the host set on this.URI
+	 * @param {String} [path]
+	 * @param {Boolean} [secure] Whether the cookie has the secure attribute set
+	 * @param {Boolean} [hostOnly] Whether the cookie is a host-only cookie
+	 */
+	"setCookie": function(cookiePair, host, path, secure, hostOnly) {
+		var splitAt = cookiePair.indexOf('=');
+		if(splitAt === -1) {
+			Zotero.debug("CookieSandbox: Not setting invalid cookie.");
+			return;
+		}
+		var pair = [cookiePair.substring(0,splitAt), cookiePair.substring(splitAt+1)];
+		var name = pair[0].trim();
+		var value = pair[1].trim();
+		if(!name) {
+			Zotero.debug("CookieSandbox: Ignoring attempt to set cookie with no name");
+			return;
+		}
+		
+		host = '.' + Zotero.CookieSandbox.normalizeHost(host);
+		
+		if(!path) path = '/';
+		path = Zotero.CookieSandbox.normalizePath(path);
+		
+		if(!this._cookies[host]) {
+			this._cookies[host] = {};
+		}
+		
+		if(!this._cookies[host][path]) {
+			this._cookies[host][path] = {};
+		}
+		
+		/*Zotero.debug("CookieSandbox: adding cookie " + name + '='
+			+ value + ' for host ' + host + ' and path ' + path 
+			+ '[' + (hostOnly?'hostOnly,':'') + (secure?'secure':'') + ']');*/
+		
+		this._cookies[host][path][name] = {
+			value: value,
+			secure: !!secure,
+			hostOnly: !!hostOnly
+		};
+	},
+	
+	/**
+	 * Returns a list of cookies that should be sent to the given URI
+	 * @param {nsIURI} uri
+	 */
+	"getCookiesForURI": function(uri) {
+		var hostParts = Zotero.CookieSandbox.normalizeHost(uri.host).split('.'),
+			pathParts = Zotero.CookieSandbox.normalizePath(uri.path).split('/'),
+			cookies = {}, found = false, secure = uri.scheme.toUpperCase() == 'HTTPS';
+		
+		// Fetch cookies starting from the highest level domain
+		var cookieHost = '.' + hostParts[hostParts.length-1];
+		for(var i=hostParts.length-2; i>=0; i--) {
+			cookieHost = '.' + hostParts[i] + cookieHost;
+			if(this._cookies[cookieHost]) {
+				found = this._getCookiesForPath(cookies, this._cookies[cookieHost], pathParts, secure, i==0) || found;
+			}
+		}
+		
+		//Zotero.debug("CookieSandbox: returning cookies:");
+		//Zotero.debug(cookies);
+		
+		return found ? cookies : null;
+	},
+	
+	"_getCookiesForPath": function(cookies, cookiePaths, pathParts, secure, isHost) {
+		var found = false;
+		var path = '';
+		for(var i=0, n=pathParts.length; i<n; i++) {
+			path += pathParts[i];
+			var cookiesForPath = cookiePaths[path];
+			if(cookiesForPath) {
+				for(var key in cookiesForPath) {
+					if(cookiesForPath[key].secure && !secure) continue;
+					if(cookiesForPath[key].hostOnly && !isHost) continue;
+					
+					found = true;
+					cookies[key] = cookiesForPath[key].value;
+				}
+			}
+			
+			// Also check paths with trailing / (but not for last part)
+			path += '/';
+			cookiesForPath = cookiePaths[path];
+			if(cookiesForPath && i != n-1) {
+				for(var key in cookiesForPath) {
+					if(cookiesForPath[key].secure && !secure) continue;
+					if(cookiesForPath[key].hostOnly && !isHost) continue;
+					
+					found = true;
+					cookies[key] = cookiesForPath[key].value;
+				}
+			}
+		}
+		return found;
 	}
 }
-
-Zotero.CookieSandbox.prototype.__defineGetter__("cookieString", function() {
-	return [key+"="+this._cookies[key] for(key in this._cookies)].join("; ");
-});
 
 /**
  * nsIObserver implementation for adding, clearing, and slurping cookies
@@ -218,8 +379,12 @@ Zotero.CookieSandbox.Observer = new function() {
 		}
 		
 		if(topic == "http-on-modify-request") {
-			// clear cookies to be sent to other domains
-			if(!trackedBy || channel.URI.host != trackedBy.URI.host) {
+			// Clear cookies to be sent to other domains if we're not explicitly managing them
+			if(trackedBy) {
+				var cookiesForURI = trackedBy.getCookiesForURI(channel.URI);
+			}
+			
+			if(!trackedBy || !cookiesForURI) {
 				channel.setRequestHeader("Cookie", "", false);
 				channel.setRequestHeader("Cookie2", "", false);
 				Zotero.debug("CookieSandbox: Cleared cookies to be sent to "+channelURI, 5);
@@ -231,26 +396,27 @@ Zotero.CookieSandbox.Observer = new function() {
 			}
 			
 			// add cookies to be sent to this domain
-			channel.setRequestHeader("Cookie", trackedBy.cookieString, false);
+			channel.setRequestHeader("Cookie", Zotero.CookieSandbox.generateCookieString(cookiesForURI), false);
 			Zotero.debug("CookieSandbox: Added cookies for request to "+channelURI, 5);
 		} else if(topic == "http-on-examine-response") {
 			// clear cookies being received
 			try {
 				var cookieHeader = channel.getResponseHeader("Set-Cookie");
 			} catch(e) {
+				Zotero.debug("CookieSandbox: No Set-Cookie header received for "+channelURI, 5);
 				return;
 			}
+			
 			channel.setResponseHeader("Set-Cookie", "", false);
 			channel.setResponseHeader("Set-Cookie2", "", false);
 			
-			// don't process further if these cookies are for another set of domains
-			if(!trackedBy || channel.URI.host != trackedBy.URI.host) {
-				Zotero.debug("CookieSandbox: Rejected cookies from "+channelURI, 5);
+			if(!cookieHeader || !trackedBy) {
+				Zotero.debug("CookieSandbox: Not tracking received cookies for "+channelURI, 5);
 				return;
 			}
 			
-			// put new cookies into our sandbox
-			if(cookieHeader) trackedBy.addCookiesFromHeader(cookieHeader);
+			// Put new cookies into our sandbox
+			trackedBy.addCookiesFromHeader(cookieHeader, channel.URI);
 			
 			Zotero.debug("CookieSandbox: Slurped cookies from "+channelURI, 5);
 		}
