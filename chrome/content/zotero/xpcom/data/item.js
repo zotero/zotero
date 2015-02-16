@@ -2836,7 +2836,10 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			// accidentally use the parent dir. Syncing to OS X, which doesn't
 			// exhibit this bug, will properly correct such filenames in
 			// storage.js and propagate the change
-			if (Zotero.isWin) {
+			//
+			// The one exception on other platforms is '/', which is interpreted
+			// as a directory by setRelativeDescriptor, so strip in that case too.
+			if (Zotero.isWin || path.indexOf('/') != -1) {
 				path = Zotero.File.getValidFileName(path, true);
 			}
 			var file = Zotero.Attachments.getStorageDirectory(this.id);
