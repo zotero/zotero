@@ -77,7 +77,7 @@
 			<menupopup id="zotero-status-image-context" onpopupshowing="Zotero_Browser.onStatusPopupShowing(event)"/>
 		</popupset>
 		<image src="chrome://zotero/skin/treeitem-book.png" id="zotero-status-image"
-			onclick="if(event.button === 0) Zotero_Browser.scrapeThisPage()" context="zotero-status-image-context"
+			onclick="if(event.button === 0) Zotero_Browser.scrapeThisPage(null, event)" context="zotero-status-image-context"
 			position="1" hidden="true"/>
 		<zoteroguidancepanel id="zotero-status-image-guidance" about="saveIcon" for="zotero-status-image" x="8"/>
 	</hbox>

@@ -40,7 +40,6 @@
 
 var Zotero_Browser = new function() {
 	this.init = init;
-	this.scrapeThisPage = scrapeThisPage;
 	this.annotatePage = annotatePage;
 	this.toggleMode = toggleMode;
 	this.toggleCollapsed = toggleCollapsed;
@@ -155,12 +154,24 @@ var Zotero_Browser = new function() {
 	 * Scrapes a page (called when the capture icon is clicked
 	 * @return	void
 	 */
-	function scrapeThisPage(translator) {
+	this.scrapeThisPage = function (translator, event) {
 		// Perform translation
 		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
 		if(tab.page.translators && tab.page.translators.length) {
 			tab.page.translate.setTranslator(translator || tab.page.translators[0]);
 			Zotero_Browser.performTranslation(tab.page.translate);
+		}
+		else {
+			// Keep in sync with cmd_zotero_newItemFromCurrentPage
+			//
+			// DEBUG: Possible to just trigger command directly with event? Assigning it to the
+			// command property of the icon doesn't seem to work, and neither does goDoCommand()
+			// from chrome://global/content/globalOverlay.js. Getting the command by id and
+			// running doCommand() works but doesn't pass the event.
+			ZoteroPane.addItemFromPage(
+				'temporaryPDFHack',
+				(event && event.shiftKey) ? !Zotero.Prefs.get('automaticSnapshots') : null
+			);
 		}
 	}
 	
@@ -449,6 +460,11 @@ var Zotero_Browser = new function() {
 		
 		var tab = _getTabObject(this.tabbrowser.selectedBrowser);
 		var translators = tab.page.translators;
+		
+		// Don't show context menu for web page items, for now
+		// TODO: Show with/without snapshots option?
+		if (!translators) return;
+		
 		for(var i=0, n=translators.length; i<n; i++) {
 			let translator = translators[i];
 			
@@ -460,7 +476,7 @@ var Zotero_Browser = new function() {
 				: Zotero.ItemTypes.getImageSrc(translator.itemType)));
 			menuitem.setAttribute("class", "menuitem-iconic");
 			menuitem.addEventListener("command", function(e) {
-				scrapeThisPage(translator);
+				scrapeThisPage(translator, e);
 			}, false);
 			popup.appendChild(menuitem);
 		}
@@ -718,8 +734,15 @@ Zotero_Browser.Tab.prototype.clear = function() {
 /*
  * detects translators for this browser object
  */
-Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {	
-	if(doc instanceof HTMLDocument && doc.documentURI.substr(0, 6) != "about:") {
+Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
+	this.page.saveEnabled = true;
+	
+	if (doc instanceof HTMLDocument) {
+		if (doc.documentURI.startsWith("about:")) {
+			this.page.saveEnabled = false;
+			return;
+		}
+		
 		// get translators
 		var me = this;
 		
@@ -790,6 +813,10 @@ Zotero_Browser.Tab.prototype._attemptLocalFileImport = function(doc) {
  * current page, or false if the page cannot be scraped
  */
 Zotero_Browser.Tab.prototype.getCaptureIcon = function() {
+	if (!this.page.saveEnabled) {
+		return false;
+	}
+	
 	if(this.page.translators && this.page.translators.length) {
 		var itemType = this.page.translators[0].itemType;
 		return (itemType === "multiple"
@@ -797,10 +824,15 @@ Zotero_Browser.Tab.prototype.getCaptureIcon = function() {
 				: Zotero.ItemTypes.getImageSrc(itemType));
 	}
 	
-	return false;
+	// TODO: Show icons for images, PDFs, etc.?
+	return "chrome://zotero/skin/treeitem-webpage.png";
 }
 
 Zotero_Browser.Tab.prototype.getCaptureTooltip = function() {
+	if (!this.page.saveEnabled) {
+		return '';
+	}
+	
 	if (this.page.translators && this.page.translators.length) {
 		var arr = [Zotero.getString('ingester.saveToZotero')];
 		if (this.page.translators[0].itemType == 'multiple') {
@@ -809,7 +841,22 @@ Zotero_Browser.Tab.prototype.getCaptureTooltip = function() {
 		arr.push (' ' , '(' + this.page.translators[0].label + ')');
 		return Zotero.localeJoin(arr, '');
 	}
-	return '';
+	
+	// TODO: Different captions for images, PDFs, etc.?
+	return Zotero.getString('ingester.saveToZotero')
+		+ " (" + Zotero.getString('itemTypes.webpage') + ")";
+}
+
+Zotero_Browser.Tab.prototype.getCaptureCommand = function () {
+	if (!this.page.saveEnabled) {
+		return '';
+	}
+	
+	if (this.page.translators && this.page.translators.length) {
+		return '';
+	}
+	
+	return 'cmd_zotero_newItemFromCurrentPage';
 }
 
 
@@ -867,6 +914,7 @@ Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, transla
 		this.page.translate = translate;
 		this.page.translators = translators;
 		this.page.document = translate.document;
+		this.page.saveEnabled = true;
 	
 		this.page.translate.clearHandlers("select");
 		this.page.translate.setHandler("select", this._selectItems);
