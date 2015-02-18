@@ -70,89 +70,21 @@ var ZoteroOverlay = new function()
 		
 		observerService.addObserver(zoteroObserver, "browser-delayed-startup-finished", false);
 		
-		// Make Zotero icon visible, if requested
+		// Set a flag for hi-res displays
+		Zotero.hiRes = window.devicePixelRatio > 1;
+		
+		// Clear old Zotero icon pref
 		var prefBranch = Components.classes["@mozilla.org/preferences-service;1"]
 							.getService(Components.interfaces.nsIPrefService)
 							.getBranch('extensions.zotero.');
+		prefBranch.clearUserPref('statusBarIcon');
 		
-		var navBar = document.getElementById('nav-bar');
-		
-		var iconPref = prefBranch.getIntPref('statusBarIcon');
-		
-		// Add icon to toolbar if not in the window already and not hidden by the pref
-		if (!document.getElementById("zotero-toolbar-button") && iconPref != 0) {
-			navBar.insertItem("zotero-toolbar-button");
-			navBar.setAttribute("currentset", navBar.currentSet);
-			document.persist(navBar.id, "currentset");
-			navBar.setAttribute("collapsed", false);
-			document.persist(navBar.id, "collapsed");
-		}
-		
-		var icon = document.getElementById('zotero-toolbar-button');
-		
-		// Add a listener for toolbar change events
-		window.addEventListener("customizationchange", onToolbarChange, false);
+		// Add toolbar icon
+		Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
 		
 		if (Zotero && Zotero.initialized){
+			// TODO: Add only when progress window is open
 			document.getElementById('appcontent').addEventListener('mousemove', Zotero.ProgressWindowSet.updateTimers, false);
-			if (icon) {
-				// TODO: move to strings
-				let str = 'Zotero';
-				let key = Zotero.Keys.getKeyForCommand('openZotero');
-				if (key) {
-					str += ' ('
-						+ (Zotero.isMac ? '⇧⌘' : Zotero.getString('general.keys.ctrlShift'))
-						+ key
-					+ ')';
-				}
-				icon.setAttribute('tooltiptext', str);
-				
-				// If hidden in prefs, remove from add-on bar
-				if (iconPref == 0) {
-					var toolbar = icon.parentNode;
-					if (toolbar.id == 'nav-bar') {
-						var palette = document.getElementById("navigator-toolbox").palette;
-						palette.appendChild(icon);
-						toolbar.setAttribute("currentset", toolbar.currentSet);
-						document.persist(toolbar.id, "currentset");
-					}
-				}
-
-				if (icon.getAttribute("cui-areatype") == "toolbar") {
-					window.setTimeout(function() {
-						var isUpgrade = false;
-						try {
-							isUpgrade = Zotero.Prefs.get("firstRunGuidanceShown.saveIcon");
-						} catch(e) {}
-						var property = "firstRunGuidance.toolbarButton."+(isUpgrade ? "upgrade" : "new");
-						var shortcut = Zotero.getString(Zotero.isMac ? "general.keys.cmdShift" : "general.keys.ctrlShift")+
-							           Zotero.Prefs.get("keys.openZotero");
-						document.getElementById("zotero-toolbar-button-guidance").show(null, Zotero.getString(property, shortcut));
-					}, 0);
-				}
-			}
-		}
-		else {
-			if (Zotero) {
-				var errMsg = Zotero.startupError;
-			}
-			
-			// Use defaults if necessary
-			if (!errMsg) {
-				// Get the stringbundle manually
-				var src = 'chrome://zotero/locale/zotero.properties';
-				var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
-						getService(Components.interfaces.nsILocaleService);
-				var appLocale = localeService.getApplicationLocale();
-				var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
-					.getService(Components.interfaces.nsIStringBundleService);
-				var stringBundle = stringBundleService.createBundle(src, appLocale);
-				
-				var errMsg = stringBundle.GetStringFromName('startupError');
-			}
-			
-			icon.setAttribute('tooltiptext', errMsg);
-			icon.setAttribute('error', 'true');
 		}
 		
 		// Used for loading pages from upgrade wizard
@@ -191,28 +123,7 @@ var ZoteroOverlay = new function()
 	}
 	
 	
-    function onToolbarChange(e) {
-    	// e.target seems to be navigator-toolbox in all cases,
-    	// so check the nav-bar directly
-    	var navBar = document.getElementById("nav-bar");
-    	var icon = document.getElementById("zotero-toolbar-button");
-    	if (icon) {
-    		// If dragged to nav bar
-			if (navBar.getElementsByAttribute("id", "zotero-toolbar-button").length) {
-				var statusBarPref = Zotero.Prefs.get("statusBarIcon");
-				// If pref set to hide, force to full
-				if (statusBarPref == 0) {
-					Zotero.Prefs.set("statusBarIcon", 1)
-				}
-				return;
-			}
-    	}
-    	Zotero.Prefs.set("statusBarIcon", 0);
-    }
-    
-    
 	this.onUnload = function() {
-		window.removeEventListener("customizationchange", onToolbarChange, false);
 		ZoteroPane.destroy();
 	}
 	

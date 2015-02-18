@@ -43,12 +43,6 @@
 	
 	<popup id="contentAreaContextMenu"/>
 	
-	<toolbarpalette id="BrowserToolbarPalette">
-		<toolbarbutton id="zotero-toolbar-button" class="toolbarbutton-1"
-						label="Zotero"
-						oncommand="ZoteroOverlay.toggleDisplay();"/>
-	</toolbarpalette>
-	
 	<toolbar id="zotero-toolbar" nowindowdrag="true"/>
 	
 	<vbox id="appcontent">
