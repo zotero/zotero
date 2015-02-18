@@ -3,6 +3,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="16px" height="16px">
 	<defs>
 		<style type="text/css"><![CDATA[
+			polygon {
+				stroke: #000;
+			}
+			
 			/* Linux */
 			#s1 {
 				stop-color: #899199;
@@ -13,11 +17,14 @@
 			
 			/* Mac OS X (except Aqua on Snow Leopard) */
 			@media (-moz-mac-graphite-theme), (-moz-mac-lion-theme) {
+				polygon {
+					stroke: #4d4d4d;
+				}
 				#s1 {
-					stop-color: #939393;
+					stop-color: #4d4d4d;
 				}
 				#s2 {
-					stop-color: #848484;
+					stop-color: #4d4d4d;
 				}
 			}
 			
@@ -61,5 +68,5 @@
 		</filter>
 	</defs>
 	<polygon points="2.867,1 13.133,1 13.133,5.667 7.533,11.267 13.133,11.267 
-	13.133,15 2.867,15 2.867,11.267 9.399,4.733 2.867,4.733" style="fill: url(#lg); stroke: #000; stroke-width: 0.2; stroke-miterlimit: 4; filter: url(#f);" />
+	13.133,15 2.867,15 2.867,11.267 9.399,4.733 2.867,4.733" style="fill: url(#lg); stroke-width: 0.2; stroke-miterlimit: 4; filter: url(#f);" />
 </svg>
