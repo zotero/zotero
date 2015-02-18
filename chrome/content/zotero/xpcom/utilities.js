@@ -1090,15 +1090,15 @@ Zotero.Utilities = {
 				// document, we need to use selectNodes
 				if(namespaces) {
 					var ieNamespaces = [];
-					for(var i in namespaces) {
-						if(!i) continue;
-						ieNamespaces.push('xmlns:'+i+'="'+Zotero.Utilities.htmlSpecialChars(namespaces[i])+'"');
+					for(var j in namespaces) {
+						if(!j) continue;
+						ieNamespaces.push('xmlns:'+j+'="'+Zotero.Utilities.htmlSpecialChars(namespaces[j])+'"');
 					}
 					rootDoc.setProperty("SelectionNamespaces", ieNamespaces.join(" "));
 				}
 				var nodes = element.selectNodes(xpath);
-				for(var i=0; i<nodes.length; i++) {
-					results.push(nodes[i]);
+				for(var j=0; j<nodes.length; j++) {
+					results.push(nodes[j]);
 				}
 			} else {
 				throw new Error("XPath functionality not available");

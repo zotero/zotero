@@ -1962,9 +1962,9 @@ Zotero.Schema = new function(){
 						var rows = Zotero.DB.query("SELECT * FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)");
 						if (rows) {
 							for (var j=0; j<rows.length; j++) {
-								for (var j=0; j<values.length; j++) {
+								for (var k=0; k<values.length; k++) {
 									var valueID = Zotero.ID.get('itemDataValues');
-									Zotero.DB.query("INSERT INTO itemDataValues VALUES (?,?)", [valueID, values[j]]);
+									Zotero.DB.query("INSERT INTO itemDataValues VALUES (?,?)", [valueID, values[k]]);
 									Zotero.DB.query("UPDATE itemData SET valueID=? WHERE itemID=? AND fieldID=?", [valueID, rows[j]['itemID'], rows[j]['fieldID']]);
 								}
 							}
