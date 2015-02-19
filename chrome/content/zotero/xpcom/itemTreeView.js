@@ -1764,6 +1764,12 @@ Zotero.ItemTreeView.prototype.selectItem = function(id, expand, noRecurse)
 	// Get the row of the parent, if there is one
 	var parentRow = null;
 	var item = Zotero.Items.get(id);
+	
+	// Can't select a deleted item if we're not in the trash
+	if (item.deleted && !this.itemGroup.isTrash()) {
+		return false;
+	}
+	
 	var parent = item.getSource();
 	if (parent && this._itemRowMap[parent] != undefined) {
 		parentRow = this._itemRowMap[parent];

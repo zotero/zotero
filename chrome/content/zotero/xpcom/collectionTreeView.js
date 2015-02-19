@@ -749,6 +749,54 @@ Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
 }
 
 
+Zotero.CollectionTreeView.prototype.selectTrash = function (libraryID) {
+	if (Zotero.suppressUIUpdates) {
+		Zotero.debug("UI updates suppressed -- not changing library selection");
+		return false;
+	}
+	
+	// Check if trash is already selected
+	if (this.selection.currentIndex != -1) {
+		let itemGroup = this._getItemAtRow(this.selection.currentIndex);
+		if (itemGroup.isTrash() && itemGroup.ref.libraryID == libraryID) {
+			this._treebox.ensureRowIsVisible(this.selection.currentIndex);
+			return true;
+		}
+	}
+	
+	// If in My Library and it's collapsed, open it
+	if (!libraryID && !this.isContainerOpen(0)) {
+		this.toggleOpenState(0);
+	}
+	
+	// Find library trash
+	for (let i = 0; i < this.rowCount; i++) {
+		let itemGroup = this._getItemAtRow(i);
+		
+		// If group header is closed, open it
+		if (itemGroup.isHeader() && itemGroup.ref.id == 'group-libraries-header'
+				&& !this.isContainerOpen(i)) {
+			this.toggleOpenState(i);
+			continue;
+		}
+		
+		if (itemGroup.isLibrary(true) && itemGroup.ref.libraryID == libraryID
+				&& !this.isContainerOpen(i)) {
+			this.toggleOpenState(i);
+			continue;
+		}
+		
+		if (itemGroup.isTrash() && itemGroup.ref.libraryID == libraryID) {
+			this._treebox.ensureRowIsVisible(i);
+			this.selection.select(i);
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+
 /**
  * Select the last-viewed source
  */

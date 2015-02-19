@@ -1411,6 +1411,14 @@ var ZoteroPane = new function()
 		for (var i=0, len=itemsView.selection.getRangeCount(); i<len; i++) {
 			itemsView.selection.getRangeAt(i, start, end);
 			for (var j=start.value; j<=end.value; j++) {
+				let itemRow = itemsView._getItemAtRow(j);
+				
+				// DEBUG: Not sure how this is possible, but it was happening while switching
+				// to an item in the trash in a collapsed library from another library
+				if (!itemRow) {
+					Zotero.debug("Item row " + j + " not found in _nonDeletedItemsSelected()", 2);
+					continue;
+				}
 				if (!itemsView._getItemAtRow(j).ref.deleted) {
 					return true;
 				}
@@ -1961,8 +1969,14 @@ var ZoteroPane = new function()
 		
 		var selected = this.itemsView.selectItem(itemID, expand);
 		if (!selected) {
-			Zotero.debug("Item was not selected; switching to library");
-			this.collectionsView.selectLibrary(item.libraryID);
+			if (item.deleted) {
+				Zotero.debug("Item is deleted; switching to trash");
+				this.collectionsView.selectTrash(item.libraryID);
+			}
+			else {
+				Zotero.debug("Item was not selected; switching to library");
+				this.collectionsView.selectLibrary(item.libraryID);
+			}
 			this.itemsView.selectItem(itemID, expand);
 		}
 		
