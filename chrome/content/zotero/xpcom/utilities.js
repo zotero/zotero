@@ -278,13 +278,20 @@ Zotero.Utilities = {
 	/**
 	 * Clean and validate ISBN.
 	 * Return isbn if valid, otherwise return false
+	 * @param {String} isbn
+	 * @param {Boolean} [dontValidate=false] Do not validate check digit
+	 * @return {String|Boolean} Valid ISBN or false
 	 */
-	"cleanISBN":function(/**String*/ isbn) {
+	"cleanISBN":function(isbn, dontValidate) {
 		isbn = isbn.replace(/[^0-9a-z]+/ig, '').toUpperCase()	//we only want to ignore punctuation, spaces
-						.match(/(?:97[89][0-9]{10}|[0-9]{9}[0-9X])/);	//13 digit or 10 digit
+						.match(/\b(?:97[89][0-9]{10}|[0-9]{9}[0-9X])\b/);	//13 digit or 10 digit
 		if(!isbn) return false;
 		isbn = isbn[0];
-
+		
+		if (dontValidate && (isbn.length == 10 || isbn.length == 13)) {
+			return isbn;
+		}
+		
 		if(isbn.length == 10) {
 			// Verify ISBN-10 checksum
 			var sum = 0;
@@ -1542,6 +1549,7 @@ Zotero.Utilities = {
 				
 				if (typeof value == 'string') {
 					if (field == 'ISBN') {
+						// Only use the first ISBN in CSL JSON
 						var isbn = value.match(/^(?:97[89]-?)?(?:\d-?){9}[\dx](?!-)\b/i);
 						if (isbn) value = isbn[0];
 					}
