@@ -1025,7 +1025,10 @@ Zotero.Sync.Runner = new function () {
 				
 				var button = doc.createElement('button');
 				button.setAttribute('label', buttonText);
-				button.onclick = buttonCallback;
+				button.onclick = function () {
+					buttonCallback.call(this);
+					panel.hidePopup();
+				}
 				buttons.appendChild(button);
 			}
 			
