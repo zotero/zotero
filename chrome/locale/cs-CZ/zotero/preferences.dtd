@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Panel prohlížeče">
 <!ENTITY zotero.preferences.showIn.separateTab "Samostatný panel">
 <!ENTITY zotero.preferences.showIn.appTab "Panel aplikace">
-<!ENTITY zotero.preferences.statusBarIcon "Ikona ve stavovém řádku:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Žádná">
 <!ENTITY zotero.preferences.fontSize "Velikost písma:">
 <!ENTITY zotero.preferences.fontSize.small "Malá">
 <!ENTITY zotero.preferences.fontSize.medium "Střední">

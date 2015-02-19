@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "جزء التصفح">
 <!ENTITY zotero.preferences.showIn.separateTab "تبويب منفصل">
 <!ENTITY zotero.preferences.showIn.appTab "تبويب التطبيقات">
-<!ENTITY zotero.preferences.statusBarIcon "أيقونة شريط الحالة:">
-<!ENTITY zotero.preferences.statusBarIcon.none "بدون أيقونة">
 <!ENTITY zotero.preferences.fontSize "حجم الخط:">
 <!ENTITY zotero.preferences.fontSize.small "صغير">
 <!ENTITY zotero.preferences.fontSize.medium "متوسط">

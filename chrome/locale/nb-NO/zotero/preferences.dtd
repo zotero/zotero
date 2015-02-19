@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
 <!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
-<!ENTITY zotero.preferences.statusBarIcon "Ikon på statuslinje:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Ingen">
 <!ENTITY zotero.preferences.fontSize "Skriftstørrelse">
 <!ENTITY zotero.preferences.fontSize.small "Liten">
 <!ENTITY zotero.preferences.fontSize.medium "Medium">

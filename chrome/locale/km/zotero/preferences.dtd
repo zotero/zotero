@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "ផ្ទាំងកម្មវិធីរុករក">
 <!ENTITY zotero.preferences.showIn.separateTab "ផ្ទាំងកម្មវិធីដោយឡែក">
 <!ENTITY zotero.preferences.showIn.appTab "ផ្ទាំងបន្ទាត់ថេប">
-<!ENTITY zotero.preferences.statusBarIcon "និម្មិតសញ្ញារបារស្ថានភាព:">
-<!ENTITY zotero.preferences.statusBarIcon.none "គ្មាន">
 <!ENTITY zotero.preferences.fontSize "ទំហំអក្សរៈ">
 <!ENTITY zotero.preferences.fontSize.small "តូច">
 <!ENTITY zotero.preferences.fontSize.medium "មធ្យម">

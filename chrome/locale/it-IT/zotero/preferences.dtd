@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "finestra nella parte inferiore del browser">
 <!ENTITY zotero.preferences.showIn.separateTab "tab separato">
 <!ENTITY zotero.preferences.showIn.appTab "tab applicazione">
-<!ENTITY zotero.preferences.statusBarIcon "Icona nella barra di stato:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Nessuna">
 <!ENTITY zotero.preferences.fontSize "Dimensione testo:">
 <!ENTITY zotero.preferences.fontSize.small "piccolo">
 <!ENTITY zotero.preferences.fontSize.medium "medio">

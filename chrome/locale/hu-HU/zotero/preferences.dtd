@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Böngésző ablak">
 <!ENTITY zotero.preferences.showIn.separateTab "Új lap">
 <!ENTITY zotero.preferences.showIn.appTab "Lap rögzítése">
-<!ENTITY zotero.preferences.statusBarIcon "Ikon az állapotsorban:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Egyik sem">
 <!ENTITY zotero.preferences.fontSize "Betűméret">
 <!ENTITY zotero.preferences.fontSize.small "Kicsi">
 <!ENTITY zotero.preferences.fontSize.medium "Közepes">

@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "ช่องเบราเซอร์">
 <!ENTITY zotero.preferences.showIn.separateTab "แยกแท็บ">
 <!ENTITY zotero.preferences.showIn.appTab "แท็บโปรแกรม">
-<!ENTITY zotero.preferences.statusBarIcon "ไอคอนแถบสถานะ:">
-<!ENTITY zotero.preferences.statusBarIcon.none "ไม่มี">
 <!ENTITY zotero.preferences.fontSize "ขนาดตัวอักษร:">
 <!ENTITY zotero.preferences.fontSize.small "เล็ก">
 <!ENTITY zotero.preferences.fontSize.medium "กลาง">

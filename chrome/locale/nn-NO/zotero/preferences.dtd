@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Ramme i nettlesaren">
 <!ENTITY zotero.preferences.showIn.separateTab "Eiga fane">
 <!ENTITY zotero.preferences.showIn.appTab "App-fane">
-<!ENTITY zotero.preferences.statusBarIcon "Ikon på statuslinje:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Ingen">
 <!ENTITY zotero.preferences.fontSize "Skriftstorleik">
 <!ENTITY zotero.preferences.fontSize.small "Liten">
 <!ENTITY zotero.preferences.fontSize.medium "Middels">

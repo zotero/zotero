@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Zotero-venster">
 <!ENTITY zotero.preferences.showIn.separateTab "Eigen tabblad">
 <!ENTITY zotero.preferences.showIn.appTab "App-tabblad">
-<!ENTITY zotero.preferences.statusBarIcon "Add-onbalk pictogram:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Geen">
 <!ENTITY zotero.preferences.fontSize "Lettergrootte:">
 <!ENTITY zotero.preferences.fontSize.small "Klein">
 <!ENTITY zotero.preferences.fontSize.medium "Middelgroot">

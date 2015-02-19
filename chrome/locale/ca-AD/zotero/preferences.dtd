@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Subfinestra del navegador">
 <!ENTITY zotero.preferences.showIn.separateTab "Pestanya separada">
 <!ENTITY zotero.preferences.showIn.appTab "Pestanya d'aplicacions">
-<!ENTITY zotero.preferences.statusBarIcon "Icona de la barra d&apos;estat">
-<!ENTITY zotero.preferences.statusBarIcon.none "Cap">
 <!ENTITY zotero.preferences.fontSize "Mida de lletra:">
 <!ENTITY zotero.preferences.fontSize.small "Petita">
 <!ENTITY zotero.preferences.fontSize.medium "Mitjana">

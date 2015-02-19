@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Panou browser">
 <!ENTITY zotero.preferences.showIn.separateTab "Filă separată">
 <!ENTITY zotero.preferences.showIn.appTab "Filă aplicație">
-<!ENTITY zotero.preferences.statusBarIcon "Imaginea din bara de stare:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Niciuna">
 <!ENTITY zotero.preferences.fontSize "Mărime caractere:">
 <!ENTITY zotero.preferences.fontSize.small "Mici">
 <!ENTITY zotero.preferences.fontSize.medium "Medii">

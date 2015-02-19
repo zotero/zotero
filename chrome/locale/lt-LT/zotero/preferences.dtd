@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Naršyklės skydelyje">
 <!ENTITY zotero.preferences.showIn.separateTab "Atskiroje kortelėje">
 <!ENTITY zotero.preferences.showIn.appTab "Programos kortelėje">
-<!ENTITY zotero.preferences.statusBarIcon "Ženkliukas būsenos juostoje:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Jokio">
 <!ENTITY zotero.preferences.fontSize "Šrifto dydis:">
 <!ENTITY zotero.preferences.fontSize.small "Mažas">
 <!ENTITY zotero.preferences.fontSize.medium "Vidutinis">

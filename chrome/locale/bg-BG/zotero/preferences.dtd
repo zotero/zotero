@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
 <!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
-<!ENTITY zotero.preferences.statusBarIcon "Икона в лентата за състоянието">
-<!ENTITY zotero.preferences.statusBarIcon.none "Няма">
 <!ENTITY zotero.preferences.fontSize "Размер на шрифта:">
 <!ENTITY zotero.preferences.fontSize.small "Малък">
 <!ENTITY zotero.preferences.fontSize.medium "Среден">

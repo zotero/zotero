@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Nýjum vafraglugga">
 <!ENTITY zotero.preferences.showIn.separateTab "Nýjum flipa">
 <!ENTITY zotero.preferences.showIn.appTab "Flipa í smáforriti">
-<!ENTITY zotero.preferences.statusBarIcon "Teikn í stöðuglugga:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Engu">
 <!ENTITY zotero.preferences.fontSize "Stærð leturs:">
 <!ENTITY zotero.preferences.fontSize.small "Smátt">
 <!ENTITY zotero.preferences.fontSize.medium "Meðalstórt">

@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Tarayıcı bölmesi">
 <!ENTITY zotero.preferences.showIn.separateTab "Ayrı sekme">
 <!ENTITY zotero.preferences.showIn.appTab "Uygulama sekmesi">
-<!ENTITY zotero.preferences.statusBarIcon "Durum çubuğu simgesi:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Hiçbiri">
 <!ENTITY zotero.preferences.fontSize "Yazıtipi boyutu:">
 <!ENTITY zotero.preferences.fontSize.small "Küçük">
 <!ENTITY zotero.preferences.fontSize.medium "Orta">

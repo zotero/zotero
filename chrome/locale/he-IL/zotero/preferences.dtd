@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
 <!ENTITY zotero.preferences.showIn.separateTab "לשונית נפרדת">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
-<!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
-<!ENTITY zotero.preferences.statusBarIcon.none "None">
 <!ENTITY zotero.preferences.fontSize ":גודל גופן">
 <!ENTITY zotero.preferences.fontSize.small "קטן">
 <!ENTITY zotero.preferences.fontSize.medium "בינוני">

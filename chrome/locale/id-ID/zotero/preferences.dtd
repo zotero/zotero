@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Jendela peramban">
 <!ENTITY zotero.preferences.showIn.separateTab "Tab terpisah">
 <!ENTITY zotero.preferences.showIn.appTab "Tab App">
-<!ENTITY zotero.preferences.statusBarIcon "Logo bar status:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Tidak ada">
 <!ENTITY zotero.preferences.fontSize "Ukuran font:">
 <!ENTITY zotero.preferences.fontSize.small "Kecil">
 <!ENTITY zotero.preferences.fontSize.medium "Sedang">

@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "podoknu brskalnika">
 <!ENTITY zotero.preferences.showIn.separateTab "ločenem zavihku">
 <!ENTITY zotero.preferences.showIn.appTab "zavihku programa">
-<!ENTITY zotero.preferences.statusBarIcon "Ikona v vrstici stanja:">
-<!ENTITY zotero.preferences.statusBarIcon.none "brez">
 <!ENTITY zotero.preferences.fontSize "Velikost pisave:">
 <!ENTITY zotero.preferences.fontSize.small "majhna">
 <!ENTITY zotero.preferences.fontSize.medium "srednja">

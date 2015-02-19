@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Brauseri paanil">
 <!ENTITY zotero.preferences.showIn.separateTab "Eraldi">
 <!ENTITY zotero.preferences.showIn.appTab "Rakenduse tab">
-<!ENTITY zotero.preferences.statusBarIcon "Staatusriba ikoon:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Puudub">
 <!ENTITY zotero.preferences.fontSize "Fondi suurus:">
 <!ENTITY zotero.preferences.fontSize.small "Väike">
 <!ENTITY zotero.preferences.fontSize.medium "Keskmine">

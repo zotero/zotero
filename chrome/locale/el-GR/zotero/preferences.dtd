@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Πλαίσιο περιηγητή">
 <!ENTITY zotero.preferences.showIn.separateTab "Διαχωρισμός καρτέλας">
 <!ENTITY zotero.preferences.showIn.appTab "Καρτέλα εφαρμογών">
-<!ENTITY zotero.preferences.statusBarIcon "Εικονίδιο γραμμής κατάστασης:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Κανένα">
 <!ENTITY zotero.preferences.fontSize "Μέγεθος γραμματοσειράς:">
 <!ENTITY zotero.preferences.fontSize.small "Μικρό">
 <!ENTITY zotero.preferences.fontSize.medium "Μέσο">

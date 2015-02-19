@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Panel de navegador">
 <!ENTITY zotero.preferences.showIn.separateTab "Pestaña de separación">
 <!ENTITY zotero.preferences.showIn.appTab "Pestaña de aplicación">
-<!ENTITY zotero.preferences.statusBarIcon "Icono en la barra de estado:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Nada">
 <!ENTITY zotero.preferences.fontSize "Tamaño de letra:">
 <!ENTITY zotero.preferences.fontSize.small "Pequeña">
 <!ENTITY zotero.preferences.fontSize.medium "Mediana">

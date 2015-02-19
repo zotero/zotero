@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "브라우저 창">
 <!ENTITY zotero.preferences.showIn.separateTab "분리 탭">
 <!ENTITY zotero.preferences.showIn.appTab "어플리케이션 탭">
-<!ENTITY zotero.preferences.statusBarIcon "상태 표시줄 아이콘:">
-<!ENTITY zotero.preferences.statusBarIcon.none "없음">
 <!ENTITY zotero.preferences.fontSize "글꼴 크기:">
 <!ENTITY zotero.preferences.fontSize.small "작게">
 <!ENTITY zotero.preferences.fontSize.medium "중간">

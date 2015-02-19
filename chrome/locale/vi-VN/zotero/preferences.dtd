@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
 <!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
-<!ENTITY zotero.preferences.statusBarIcon "Biểu tượng trong thanh trạng thái:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Không biểu tượng">
 <!ENTITY zotero.preferences.fontSize "Cỡ chữ:">
 <!ENTITY zotero.preferences.fontSize.small "Nhỏ">
 <!ENTITY zotero.preferences.fontSize.medium "Trung bình">

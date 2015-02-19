@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Selainikkuna">
 <!ENTITY zotero.preferences.showIn.separateTab "Erillinen välilehti">
 <!ENTITY zotero.preferences.showIn.appTab "Sovellusvälilehti">
-<!ENTITY zotero.preferences.statusBarIcon "Tilarivin kuvake:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Ei mitään">
 <!ENTITY zotero.preferences.fontSize "Kirjasinkoko:">
 <!ENTITY zotero.preferences.fontSize.small "Pieni">
 <!ENTITY zotero.preferences.fontSize.medium "Keskikokoinen">

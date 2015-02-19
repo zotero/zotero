@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Текущей панели">
 <!ENTITY zotero.preferences.showIn.separateTab "Отдельной вкладке">
 <!ENTITY zotero.preferences.showIn.appTab "Вкладке приложения">
-<!ENTITY zotero.preferences.statusBarIcon "Вид в строке состояния:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Нет">
 <!ENTITY zotero.preferences.fontSize "Размер шрифта:">
 <!ENTITY zotero.preferences.fontSize.small "Маленький">
 <!ENTITY zotero.preferences.fontSize.medium "Средний">

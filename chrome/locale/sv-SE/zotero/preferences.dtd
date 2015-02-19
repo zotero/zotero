@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "webbläsarfönstret">
 <!ENTITY zotero.preferences.showIn.separateTab "ny flik">
 <!ENTITY zotero.preferences.showIn.appTab "programflik">
-<!ENTITY zotero.preferences.statusBarIcon "Ikon i statusfält:">
-<!ENTITY zotero.preferences.statusBarIcon.none "ingen ikon">
 <!ENTITY zotero.preferences.fontSize "Teckenstorlek:">
 <!ENTITY zotero.preferences.fontSize.small "Liten">
 <!ENTITY zotero.preferences.fontSize.medium "Mellan">

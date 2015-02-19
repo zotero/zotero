@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "un panneau du navigateur">
 <!ENTITY zotero.preferences.showIn.separateTab "un onglet séparé">
 <!ENTITY zotero.preferences.showIn.appTab "un onglet applicatif">
-<!ENTITY zotero.preferences.statusBarIcon "Icône dans la barre d'état :">
-<!ENTITY zotero.preferences.statusBarIcon.none "Aucune">
 <!ENTITY zotero.preferences.fontSize "Taille des caractères :">
 <!ENTITY zotero.preferences.fontSize.small "Petite">
 <!ENTITY zotero.preferences.fontSize.medium "Moyenne">

@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Поточній панелі">
 <!ENTITY zotero.preferences.showIn.separateTab "Окремій вкладці">
 <!ENTITY zotero.preferences.showIn.appTab "Вкладці додатку">
-<!ENTITY zotero.preferences.statusBarIcon "Знакоч в рядку стану:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Немає">
 <!ENTITY zotero.preferences.fontSize "Розмір шрифту:">
 <!ENTITY zotero.preferences.fontSize.small "Маленький">
 <!ENTITY zotero.preferences.fontSize.medium "Середній">
