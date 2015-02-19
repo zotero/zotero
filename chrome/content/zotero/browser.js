@@ -485,7 +485,7 @@ var Zotero_Browser = new function() {
 				: Zotero.ItemTypes.getImageSrc(translator.itemType)));
 			menuitem.setAttribute("class", "menuitem-iconic");
 			menuitem.addEventListener("command", function(e) {
-				scrapeThisPage(translator, e);
+				Zotero_Browser.scrapeThisPage(translator, e);
 			}, false);
 			popup.appendChild(menuitem);
 		}
