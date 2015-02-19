@@ -521,7 +521,6 @@
 #zotero-tb-sync-error, #zotero-tb-sync-error[mode=warning]
 {
 	list-style-image: url(chrome://zotero/skin/error.png);
-	margin-right: -5px;
 }
 
 #zotero-tb-sync-error[mode=error]
