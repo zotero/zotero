@@ -25,7 +25,7 @@
 
 
 Zotero.Error = function (message, error, data) {
-	this.name = "ZOTERO_ERROR";
+	this.name = "Zotero Error";
 	this.message = message;
 	this.data = data;
 	if (parseInt(error) == error) {
@@ -35,6 +35,8 @@ Zotero.Error = function (message, error, data) {
 		this.error = Zotero.Error["ERROR_" + error] ? Zotero.Error["ERROR_" + error] : 0;
 	}
 }
+Zotero.Error.prototype = new Error;
+
 
 Zotero.Error.ERROR_UNKNOWN = 0;
 Zotero.Error.ERROR_MISSING_OBJECT = 1;

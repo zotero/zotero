@@ -2416,7 +2416,7 @@ Zotero.Sync.Server = new function () {
 	
 	
 	function _error(e, extraInfo, skipReload) {
-		if (e.name && e.name == 'ZOTERO_ERROR') {
+		if (e instanceof Zotero.Error) {
 			switch (e.error) {
 				case Zotero.Error.ERROR_MISSING_OBJECT:
 				case Zotero.Error.ERROR_FULL_SYNC_REQUIRED:
