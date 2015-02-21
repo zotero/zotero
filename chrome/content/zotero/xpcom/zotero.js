@@ -292,6 +292,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		else {
 			Zotero.dir = 'ltr';
 		}
+		Zotero.rtl = Zotero.dir == 'rtl';
 
 		// Make sure that Zotero Standalone is not running as root
 		if(Zotero.isStandalone && !Zotero.isWin) _checkRoot();

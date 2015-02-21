@@ -1,3 +1,79 @@
+/*
+ As of Fx36, the built-in Mac styles don't properly handle a menu-button within a combined
+ button, so we need this ungodly mess.
+*/
+#zotero-toolbar-buttons[cui-areatype="toolbar"] > separator,
+#zotero-toolbar-save-button[cui-areatype="toolbar"]:not(:hover) > .toolbarbutton-menubutton-dropmarker::before,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button {
+	box-shadow: none;
+}
+
+#zotero-toolbar-save-button[cui-areatype="toolbar"] {
+	margin-top: 3px !important;
+	margin-bottom: 3px !important;
+	border-right: 0;
+	border-width: 1px;
+	border-style: solid;
+	border-color: transparent;
+}
+
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-button,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker {
+	border-width: 1px;
+	border-style: solid;
+	border-color: var(--toolbarbutton-hover-bordercolor) !important;
+	box-shadow: var(--toolbarbutton-hover-boxshadow) !important;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker::before {
+	background: none;
+}
+
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-button {
+	border-right: 1px solid transparent;
+}
+
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker {
+	border-left: 1px solid transparent;
+}
+
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > .toolbarbutton-menubutton-dropmarker {
+	background: inherit;
+}
+
+#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-dropmarker:hover {
+	background: var(--toolbarbutton-hover-background);
+}
+
+#zotero-toolbar-main-button[cui-areatype="toolbar"] {
+	margin-right: 0;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	padding-right: 1px;
+}
+#zotero-toolbar-save-button[cui-areatype="toolbar"] {
+	margin-top: 3px;
+	margin-bottom: 3px;
+	margin-left: -1px;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	border-left: 0 solid transparent;
+}
+
+#zotero-toolbar-main-button[cui-areatype="toolbar"] {
+	border-right: 1px solid transparent;
+}
+#zotero-toolbar-save-button[cui-areatype="toolbar"]:hover {
+	border-left: 0 solid transparent;
+}
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-button {
+	border-left: 1px solid transparent;
+}
+/* End toolbar icons */
+
+
 #zotero-splitter
 {
 	border-top: none;

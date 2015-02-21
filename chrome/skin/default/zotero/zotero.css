@@ -22,16 +22,53 @@
 }
 
 /*
-  Toolbar icons
-*/
-#zotero-toolbar-button {
+ *
+ * Toolbar icons
+ *
+ */
+#zotero-toolbar-main-button {
 	list-style-image: url("chrome://zotero/skin/zotero-z-16px-australis.svg");
 }
 
-#zotero-toolbar-button[cui-areatype="menu-panel"],
-toolbarpaletteitem[place="palette"] > #zotero-toolbar-button {
+#zotero-toolbar-main-button[cui-areatype="menu-panel"],
+toolbarpaletteitem[place="palette"] #zotero-toolbar-main-button {
 	list-style-image: url("chrome://zotero/skin/zotero-z-32px-australis.svg");
 }
+
+#zotero-toolbar-save-button,
+#zotero-toolbar-save-button-single {
+	list-style-image: url("chrome://zotero/skin/treeitem-webpage.png");
+}
+
+#zotero-toolbar-save-button[cui-areatype="menu-panel"],
+#zotero-toolbar-save-button-single[cui-areatype="menu-panel"],
+toolbarpaletteitem[place="palette"] #zotero-toolbar-save-button,
+toolbarpaletteitem[place="palette"] #zotero-toolbar-save-button-single {
+	list-style-image: url("chrome://zotero/skin/treeitem-webpage@2x.png");
+}
+
+@media (min-resolution: 1.5dppx) {
+	#zotero-toolbar-save-button[cui-areatype="toolbar"],
+	#zotero-toolbar-save-button-single[cui-areatype="toolbar"] {
+		list-style-image: url("chrome://zotero/skin/treeitem-webpage@2x.png");
+	}
+	
+	/* Necessary in Fx36 to keep 2x icon from being rendered at full size */
+	#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-button > .toolbarbutton-icon,
+	#zotero-toolbar-save-button-single[cui-areatype="toolbar"] > .toolbarbutton-menubutton-button > .toolbarbutton-icon {
+		width: 16px;
+	}
+}
+
+/* Show webpage icon in gray when no translators, except on hover */
+#zotero-toolbar-save-button:not(:hover):not(.translate),
+#zotero-toolbar-save-button-single:not(:hover):not(.translate),
+#zotero-toolbar-save-button[disabled="true"],
+#zotero-toolbar-save-button-single[disabled="true"] {
+	filter: grayscale(100%);
+}
+/* End toolbar icons */
+
 
 /* Bindings */
 textbox[multiline="true"][type="timed"]

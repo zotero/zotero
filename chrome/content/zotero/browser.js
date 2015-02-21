@@ -53,7 +53,6 @@ var Zotero_Browser = new function() {
 	
 	this.tabbrowser = null;
 	this.appcontent = null;
-	this.statusImage = null;
 	this.isScraping = false;
 	
 	var _browserData = new Object();
@@ -235,7 +234,6 @@ var Zotero_Browser = new function() {
 	function chromeLoad() {
 		this.tabbrowser = gBrowser;
 		this.appcontent = document.getElementById("appcontent");
-		this.statusImage = document.getElementById("zotero-status-image");
 		
 		// this gives us onLocationChange, for updating when tabs are switched/created
 		gBrowser.tabContainer.addEventListener("TabClose",
@@ -281,6 +279,7 @@ var Zotero_Browser = new function() {
 		if(reset) reset.addEventListener("command",
 			function(e) { Zotero_Browser.resize(e) }, false);
 	}
+	
 	
 	/*
 	 * An event handler called when a new document is loaded. Creates a new document
@@ -429,26 +428,32 @@ var Zotero_Browser = new function() {
 	function updateStatus() {
 		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
 		
-		var state = tab.getCaptureState();
-		if (state != tab.CAPTURE_STATE_DISABLED) {
-			Zotero_Browser.statusImage.src = tab.getCaptureIcon();
-			Zotero_Browser.statusImage.tooltipText = tab.getCaptureTooltip();
-			if (state == tab.CAPTURE_STATE_TRANSLATABLE) {
-				Zotero_Browser.statusImage.classList.add('translate');
+		Components.utils.import("resource:///modules/CustomizableUI.jsm");
+		var buttons = getSaveButtons();
+		if (buttons.length) {
+			let state = tab.getCaptureState();
+			let icon = tab.getCaptureIcon();
+			let tooltiptext = tab.getCaptureTooltip();
+			for (let { button, placement } of buttons) {
+				button.image = icon;
+				button.tooltipText = tooltiptext;
+				if (state == tab.CAPTURE_STATE_TRANSLATABLE) {
+					button.classList.add('translate');
+					
+					// Show guidance panel if necessary
+					
+					if (placement.area == 'nav-bar') {
+						button.addEventListener("load", function() {
+							document.getElementById("zotero-status-image-guidance").show();
+						});
+					}
+					// TODO: Different guidance for web pages?
+				}
+				else {
+					button.classList.remove('translate');
+				}
+				button.removeAttribute('disabled');
 			}
-			else {
-				Zotero_Browser.statusImage.classList.remove('translate');
-			}
-			Zotero_Browser.statusImage.hidden = false;
-			
-			if (state == tab.CAPTURE_STATE_TRANSLATABLE) {
-				Zotero_Browser.statusImage.addEventListener("load", function() {
-					document.getElementById("zotero-status-image-guidance").show();
-				}, false);
-			}
-			// TODO: Different guidance for web pages?
-		} else {
-			Zotero_Browser.statusImage.hidden = true;
 		}
 		
 		// set annotation bar status
@@ -460,6 +465,35 @@ var Zotero_Browser = new function() {
 		}
 	}
 	
+	function getSaveButtons() {
+		Components.utils.import("resource:///modules/CustomizableUI.jsm");
+		var buttons = [];
+		
+		var placement = CustomizableUI.getPlacementOfWidget("zotero-toolbar-buttons");
+		if (placement) {
+			let button = document.getElementById("zotero-toolbar-save-button");
+			if (button) {
+				buttons.push({
+					button: button,
+					placement: placement
+				});
+			}
+		}
+		
+		placement = CustomizableUI.getPlacementOfWidget("zotero-toolbar-save-button-single");
+		if (placement) {
+			let button = document.getElementById("zotero-toolbar-save-button-single");
+			if (button) {
+				buttons.push({
+					button: button,
+					placement: placement
+				});
+			}
+		}
+		
+		return buttons;
+	}
+	
 	/**
 	 * Called when status bar icon is right-clicked
 	 */
@@ -468,50 +502,78 @@ var Zotero_Browser = new function() {
 		while(popup.hasChildNodes()) popup.removeChild(popup.lastChild);
 		
 		var tab = _getTabObject(this.tabbrowser.selectedBrowser);
-		var translators = tab.page.translators;
 		
-		// Don't show context menu for web page items, for now
-		// TODO: Show with/without snapshots option?
-		if (!translators) return;
-		
-		for(var i=0, n=translators.length; i<n; i++) {
-			let translator = translators[i];
+		if (tab.getCaptureState() == tab.CAPTURE_STATE_TRANSLATABLE) {
+			let translators = tab.page.translators;
+			for (var i=0, n = translators.length; i < n; i++) {
+				let translator = translators[i];
+				
+				let menuitem = document.createElement("menuitem");
+				menuitem.setAttribute("label",
+					Zotero.getString("ingester.saveToZoteroUsing", translator.label));
+				menuitem.setAttribute("image", (translator.itemType === "multiple"
+					? "chrome://zotero/skin/treesource-collection.png"
+					: Zotero.ItemTypes.getImageSrc(translator.itemType)));
+				menuitem.setAttribute("class", "menuitem-iconic");
+				menuitem.addEventListener("command", function(e) {
+					Zotero_Browser.scrapeThisPage(translator, e);
+				}, false);
+				popup.appendChild(menuitem);
+			}
 			
-			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("label",
-				Zotero.getString("ingester.saveToZoteroUsing", translator.label));
-			menuitem.setAttribute("image", (translator.itemType === "multiple"
-				? "chrome://zotero/skin/treesource-collection.png"
-				: Zotero.ItemTypes.getImageSrc(translator.itemType)));
+			popup.appendChild(document.createElement("menuseparator"));
+			
+			let menuitem = document.createElement("menuitem");
+			menuitem.setAttribute("label", Zotero.getString("locate.libraryLookup.label"));
+			menuitem.setAttribute("tooltiptext", Zotero.getString("locate.libraryLookup.tooltip"));
+			menuitem.setAttribute("image", "chrome://zotero/skin/locate-library-lookup.png");
 			menuitem.setAttribute("class", "menuitem-iconic");
-			menuitem.addEventListener("command", function(e) {
-				Zotero_Browser.scrapeThisPage(translator, e);
-			}, false);
+			menuitem.addEventListener("command", _constructLookupFunction(tab, function(event, obj) {
+				var urls = [];
+				for each(var item in obj.newItems) {
+					var url = Zotero.OpenURL.resolve(item);
+					if(url) urls.push(url);
+				}
+				ZoteroPane.loadURI(urls, event);
+			}), false);
+			popup.appendChild(menuitem);		
+			
+			var locateEngines = Zotero.LocateManager.getVisibleEngines();
+			Zotero_LocateMenu.addLocateEngines(popup, locateEngines,
+				_constructLookupFunction(tab, function(e, obj) {
+					Zotero_LocateMenu.locateItem(e, obj.newItems);
+				}), true);
+		}
+		else {
+			let webPageIcon = tab.getCaptureIcon();
+			let automaticSnapshots = Zotero.Prefs.get('automaticSnapshots');
+			let snapshotEvent = {
+				shiftKey: !automaticSnapshots
+			};
+			let noSnapshotEvent = {
+				shiftKey: automaticSnapshots
+			};
+			
+			let menuitem = document.createElement("menuitem");
+			menuitem.setAttribute("label", "Save to Zotero as Web Page (with snapshot)");
+			menuitem.setAttribute("image", webPageIcon);
+			menuitem.setAttribute("class", "menuitem-iconic");
+			menuitem.addEventListener("command", function (event) {
+				Zotero_Browser.scrapeThisPage(null, snapshotEvent);
+				event.stopPropagation();
+			});
+			popup.appendChild(menuitem);
+			
+			menuitem = document.createElement("menuitem");
+			menuitem.setAttribute("label", "Save to Zotero as Web Page (without snapshot)");
+			menuitem.setAttribute("image", webPageIcon);
+			menuitem.setAttribute("class", "menuitem-iconic");
+			menuitem.addEventListener("command", function (event) {
+				Zotero_Browser.scrapeThisPage(null, noSnapshotEvent);
+				event.stopPropagation();
+			});
 			popup.appendChild(menuitem);
 		}
-		
-		popup.appendChild(document.createElement("menuseparator"));
-		
-		var menuitem = document.createElement("menuitem");
-		menuitem.setAttribute("label", Zotero.getString("locate.libraryLookup.label"));
-		menuitem.setAttribute("tooltiptext", Zotero.getString("locate.libraryLookup.tooltip"));
-		menuitem.setAttribute("image", "chrome://zotero/skin/locate-library-lookup.png");
-		menuitem.setAttribute("class", "menuitem-iconic");
-		menuitem.addEventListener("command", _constructLookupFunction(tab, function(event, obj) {
-			var urls = [];
-			for each(var item in obj.newItems) {
-				var url = Zotero.OpenURL.resolve(item);
-				if(url) urls.push(url);
-			}
-			ZoteroPane.loadURI(urls, event);
-		}), false);
-		popup.appendChild(menuitem);		
-		
-		var locateEngines = Zotero.LocateManager.getVisibleEngines();
-		Zotero_LocateMenu.addLocateEngines(popup, locateEngines,
-			_constructLookupFunction(tab, function(e, obj) {
-				Zotero_LocateMenu.locateItem(e, obj.newItems);
-			}), true);
 	}
 	
 	/**
@@ -838,9 +900,6 @@ Zotero_Browser.Tab.prototype.getCaptureIcon = function() {
 	var suffix = Zotero.hiRes ? "@2x" : "";
 	
 	switch (this.getCaptureState()) {
-	case this.CAPTURE_STATE_DISABLED:
-		return false;
-	
 	case this.CAPTURE_STATE_TRANSLATABLE:
 		var itemType = this.page.translators[0].itemType;
 		return (itemType === "multiple"
@@ -856,21 +915,33 @@ Zotero_Browser.Tab.prototype.getCaptureIcon = function() {
 Zotero_Browser.Tab.prototype.getCaptureTooltip = function() {
 	switch (this.getCaptureState()) {
 	case this.CAPTURE_STATE_DISABLED:
-		return '';
+		var text = Zotero.getString('ingester.saveToZotero');
+		break;
 	
 	case this.CAPTURE_STATE_TRANSLATABLE:
-		var arr = [Zotero.getString('ingester.saveToZotero')];
+		var text = Zotero.getString('ingester.saveToZotero');
 		if (this.page.translators[0].itemType == 'multiple') {
-			arr.push('...');
+			text += '…';
 		}
-		arr.push (' ' , '(' + this.page.translators[0].label + ')');
-		return Zotero.localeJoin(arr, '');
+		text += ' (' + this.page.translators[0].label + ')';
+		break;
 	
 	// TODO: Different captions for images, PDFs, etc.?
 	default:
-		return Zotero.getString('ingester.saveToZotero')
+		var text = Zotero.getString('ingester.saveToZotero')
 			+ " (" + Zotero.getString('itemTypes.webpage') + ")";
 	}
+	
+	var key = Zotero.Keys.getKeyForCommand('saveToZotero');
+	if (key) {
+		// Add RLE mark in RTL mode to make shortcut render the right way
+		text += (Zotero.rtl ? ' \u202B' : ' ') + '('
+		+ (Zotero.isMac ? '⇧⌘' : Zotero.getString('general.keys.ctrlShift'))
+		+ key
+		+ ')';
+	}
+	
+	return text;
 }
 
 Zotero_Browser.Tab.prototype.getCaptureCommand = function () {
