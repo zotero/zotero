@@ -654,10 +654,13 @@ var wpdCommon = {
 		if (MODE_SIMULATE) return true;
 		try {
 			//new obj_URI object
-			var obj_URI = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService).newURI(aSourceURL, null, null);
+			var obj_URI = Components.classes["@mozilla.org/network/io-service;1"]
+				.getService(Components.interfaces.nsIIOService)
+				.newURI(aSourceURL, null, null);
 
 			//new file object
-			var obj_TargetFile = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+			var obj_TargetFile = Components.classes["@mozilla.org/file/local;1"]
+				.createInstance(Components.interfaces.nsILocalFile);
 			//set file with path
 			// NOTE: This function has a known bug on the macintosh and other OSes
 			// which do not represent file locations as paths. If you do use this
@@ -665,17 +668,19 @@ var wpdCommon = {
 			obj_TargetFile.initWithPath(aTargetFilename);
 
 			//new persistence object
-			var obj_Persist = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"].createInstance(Components.interfaces.nsIWebBrowserPersist);
+			var obj_Persist = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+				.createInstance(Components.interfaces.nsIWebBrowserPersist);
 
 			// set flags
 			const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-			var flags = nsIWBP.PERSIST_FLAGS_REPLACE_EXISTING_FILES | nsIWBP.PERSIST_FLAGS_FROM_CACHE;
+			var flags = nsIWBP.PERSIST_FLAGS_REPLACE_EXISTING_FILES
+				| nsIWBP.PERSIST_FLAGS_FROM_CACHE;
 			//nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
 			obj_Persist.persistFlags = flags;
 
 			// has the url the same filetype like the file extension?
 			//save file to target
-			Zotero.Utilities.Internal.saveURI(wbp, obj_URI, obj_TargetFile);
+			Zotero.Utilities.Internal.saveURI(obj_Persist, obj_URI, obj_TargetFile);
 
 			return true;
 
