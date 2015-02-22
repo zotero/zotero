@@ -310,8 +310,10 @@ var wpdCommon = {
 	},
 
 	// add a line to the error list (displays a maximum of 15 errors)
-	addError: function (aError) {
-		Zotero.debug('ERROR: ' + aError);
+	addError: function (errorMsg, errorObj) {
+		if (errorMsg) Zotero.debug(errorMsg);
+		if (errorObj) Zotero.debug(errorObj);
+		/*
 		if (this.errCount < WPD_MAXUIERRORCOUNT) {
 			if (this.errList.indexOf(aError) > -1) return; // is the same
 			this.errList = this.errList + aError + "\n";
@@ -319,6 +321,7 @@ var wpdCommon = {
 			this.errList = this.errList + '...';
 		}
 		this.errCount++;
+		*/
 	},
 
 	saveWebPage: function (aDestFile) {
@@ -505,7 +508,7 @@ var wpdCommon = {
 			var aBaseURLObj = this.convertURLToObject(aBaseURL);
 			return aBaseURLObj.resolve(aRelURL);
 		} catch (ex) {
-			this.addError("[wpdCommon.resolveURL]:\n -> aBaseURL: " + aBaseURL + "\n -> aRelURL: " + aRelURL + "\n -> " + ex);
+			this.addError("[wpdCommon.resolveURL]:\n -> aBaseURL: " + aBaseURL + "\n -> aRelURL: " + aRelURL, ex);
 		}
 		return "";
 	},
@@ -516,7 +519,7 @@ var wpdCommon = {
 			aURLObj.spec = aURL
 			return aURLObj.asciiHost;
 		} catch (ex) {
-			this.addError("[wpdCommon.getHostName]:\n -> aURL: " + aURL + "\n -> " + ex);
+			this.addError("[wpdCommon.getHostName]:\n -> aURL: " + aURL, ex);
 		}
 		return "";
 	},
@@ -527,7 +530,7 @@ var wpdCommon = {
 			aURLObj.spec = aURL
 			return aURLObj.asciiSpec;
 		} catch (ex) {
-			this.addError("[wpdCommon.getHostName]:\n -> aURL: " + aURL + "\n -> " + ex);
+			this.addError("[wpdCommon.getHostName]:\n -> aURL: " + aURL, ex);
 		}
 		return "";
 	},
@@ -577,7 +580,7 @@ var wpdCommon = {
 			if (text) output = output.split(/\n/g);
 			return output;
 		} catch (ex) {
-			this.addError("[wpdCommon.readFile]:\n -> str_Filename: " + str_Filename + "\n -> " + ex);
+			this.addError("[wpdCommon.readFile]:\n -> str_Filename: " + str_Filename, ex);
 		}
 		return "";
 	},
@@ -621,7 +624,7 @@ var wpdCommon = {
 			obj_Transport.close();
 			return true;
 		} catch (ex) {
-			this.addError("[wpdCommon.writeFile]:\n -> str_Filename: " + str_Filename + "\n -> " + ex);
+			this.addError("[wpdCommon.writeFile]:\n -> str_Filename: " + str_Filename, ex);
 		}
 		return false;
 	},
@@ -651,10 +654,13 @@ var wpdCommon = {
 		if (MODE_SIMULATE) return true;
 		try {
 			//new obj_URI object
-			var obj_URI = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService).newURI(aSourceURL, null, null);
+			var obj_URI = Components.classes["@mozilla.org/network/io-service;1"]
+				.getService(Components.interfaces.nsIIOService)
+				.newURI(aSourceURL, null, null);
 
 			//new file object
-			var obj_TargetFile = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+			var obj_TargetFile = Components.classes["@mozilla.org/file/local;1"]
+				.createInstance(Components.interfaces.nsILocalFile);
 			//set file with path
 			// NOTE: This function has a known bug on the macintosh and other OSes
 			// which do not represent file locations as paths. If you do use this
@@ -662,23 +668,25 @@ var wpdCommon = {
 			obj_TargetFile.initWithPath(aTargetFilename);
 
 			//new persistence object
-			var obj_Persist = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"].createInstance(Components.interfaces.nsIWebBrowserPersist);
+			var obj_Persist = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+				.createInstance(Components.interfaces.nsIWebBrowserPersist);
 
 			// set flags
 			const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-			var flags = nsIWBP.PERSIST_FLAGS_REPLACE_EXISTING_FILES | nsIWBP.PERSIST_FLAGS_FROM_CACHE;
+			var flags = nsIWBP.PERSIST_FLAGS_REPLACE_EXISTING_FILES
+				| nsIWBP.PERSIST_FLAGS_FROM_CACHE;
 			//nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
 			obj_Persist.persistFlags = flags;
 
 			// has the url the same filetype like the file extension?
 			//save file to target
-			Zotero.Utilities.Internal.saveURI(wbp, obj_URI, obj_TargetFile);
+			Zotero.Utilities.Internal.saveURI(obj_Persist, obj_URI, obj_TargetFile);
 
 			return true;
 
 		} catch (ex) {
 			aSourceURL = this.removeGETFromURL(aSourceURL);
-			this.addError("[wpdCommon.downloadFile]:\n -> aSourceURL: " + aSourceURL.substring(aSourceURL.length - 60) + "\n -> aTargetFilename: " + aTargetFilename + "\n -> " + ex);
+			this.addError("[wpdCommon.downloadFile]:\n -> aSourceURL: " + aSourceURL.substring(aSourceURL.length - 60) + "\n -> aTargetFilename: " + aTargetFilename, ex);
 		}
 		return false;
 	},
