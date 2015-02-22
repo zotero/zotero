@@ -17,6 +17,10 @@
 	border-color: transparent;
 }
 
+#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-button {
+	min-width: 27px;
+}
+
 #zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-button,
 #zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker {
 	border-width: 1px;
