@@ -310,8 +310,10 @@ var wpdCommon = {
 	},
 
 	// add a line to the error list (displays a maximum of 15 errors)
-	addError: function (aError) {
-		Zotero.debug('ERROR: ' + aError);
+	addError: function (errorMsg, errorObj) {
+		if (errorMsg) Zotero.debug(errorMsg);
+		if (errorObj) Zotero.debug(errorObj);
+		/*
 		if (this.errCount < WPD_MAXUIERRORCOUNT) {
 			if (this.errList.indexOf(aError) > -1) return; // is the same
 			this.errList = this.errList + aError + "\n";
@@ -319,6 +321,7 @@ var wpdCommon = {
 			this.errList = this.errList + '...';
 		}
 		this.errCount++;
+		*/
 	},
 
 	saveWebPage: function (aDestFile) {
@@ -505,7 +508,7 @@ var wpdCommon = {
 			var aBaseURLObj = this.convertURLToObject(aBaseURL);
 			return aBaseURLObj.resolve(aRelURL);
 		} catch (ex) {
-			this.addError("[wpdCommon.resolveURL]:\n -> aBaseURL: " + aBaseURL + "\n -> aRelURL: " + aRelURL + "\n -> " + ex);
+			this.addError("[wpdCommon.resolveURL]:\n -> aBaseURL: " + aBaseURL + "\n -> aRelURL: " + aRelURL, ex);
 		}
 		return "";
 	},
@@ -516,7 +519,7 @@ var wpdCommon = {
 			aURLObj.spec = aURL
 			return aURLObj.asciiHost;
 		} catch (ex) {
-			this.addError("[wpdCommon.getHostName]:\n -> aURL: " + aURL + "\n -> " + ex);
+			this.addError("[wpdCommon.getHostName]:\n -> aURL: " + aURL, ex);
 		}
 		return "";
 	},
@@ -527,7 +530,7 @@ var wpdCommon = {
 			aURLObj.spec = aURL
 			return aURLObj.asciiSpec;
 		} catch (ex) {
-			this.addError("[wpdCommon.getHostName]:\n -> aURL: " + aURL + "\n -> " + ex);
+			this.addError("[wpdCommon.getHostName]:\n -> aURL: " + aURL, ex);
 		}
 		return "";
 	},
@@ -577,7 +580,7 @@ var wpdCommon = {
 			if (text) output = output.split(/\n/g);
 			return output;
 		} catch (ex) {
-			this.addError("[wpdCommon.readFile]:\n -> str_Filename: " + str_Filename + "\n -> " + ex);
+			this.addError("[wpdCommon.readFile]:\n -> str_Filename: " + str_Filename, ex);
 		}
 		return "";
 	},
@@ -621,7 +624,7 @@ var wpdCommon = {
 			obj_Transport.close();
 			return true;
 		} catch (ex) {
-			this.addError("[wpdCommon.writeFile]:\n -> str_Filename: " + str_Filename + "\n -> " + ex);
+			this.addError("[wpdCommon.writeFile]:\n -> str_Filename: " + str_Filename, ex);
 		}
 		return false;
 	},
@@ -678,7 +681,7 @@ var wpdCommon = {
 
 		} catch (ex) {
 			aSourceURL = this.removeGETFromURL(aSourceURL);
-			this.addError("[wpdCommon.downloadFile]:\n -> aSourceURL: " + aSourceURL.substring(aSourceURL.length - 60) + "\n -> aTargetFilename: " + aTargetFilename + "\n -> " + ex);
+			this.addError("[wpdCommon.downloadFile]:\n -> aSourceURL: " + aSourceURL.substring(aSourceURL.length - 60) + "\n -> aTargetFilename: " + aTargetFilename, ex);
 		}
 		return false;
 	},

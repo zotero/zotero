@@ -503,7 +503,7 @@ var wpdDOMSaver = {
 							aNode.setAttribute("src", this.relativeLinkFix(newFileName));
 						}
 					} catch (ex) {
-						wpdCommon.addError("[wpdCommon.processDOMNode]:\n -> aNode.nodeName: " + aNode.nodeName + "\n -> " + ex);
+						wpdCommon.addError("[wpdCommon.processDOMNode]:\n -> aNode.nodeName: " + aNode.nodeName, ex);
 					}
 					break;
 				case "xmp":
@@ -525,7 +525,7 @@ var wpdDOMSaver = {
 				aNode.removeAttribute("onload");
 			}
 		} catch (ex) {
-			wpdCommon.addError("[wpdDOMSaver.processDOMNode]:\n -> aNode.nodeName: " + aNode.nodeName + "\n -> " + ex);
+			wpdCommon.addError("[wpdDOMSaver.processDOMNode]:\n -> aNode.nodeName: " + aNode.nodeName, ex);
 		}
 		return aNode;
 	},
@@ -750,7 +750,7 @@ var wpdDOMSaver = {
 			}
 			return newFileName;
 		} catch (ex) {
-			wpdCommon.addError("[wpdDOMSaver.download]\n -> aURLSpec: " + aURLSpec + "\n -> " + ex);
+			wpdCommon.addError("[wpdDOMSaver.download]\n -> aURLSpec: " + aURLSpec, ex);
 			return "";
 		}
 	},
@@ -784,7 +784,7 @@ var wpdDOMSaver = {
 
 			rootNode.insertBefore(aDocument.createTextNode("\n"), rootNode.firstChild);
 		} catch (ex) {
-			wpdCommon.addError("[wpdDOMSaver.createDocTypeNode]\n -> " + ex);
+			wpdCommon.addError("[wpdDOMSaver.createDocTypeNode]", ex);
 		}
 	},
 
@@ -795,7 +795,7 @@ var wpdDOMSaver = {
 		try {
 			return aHTMLText.replace("<wpd_doctype></wpd_doctype>", this.getDocType(aDocument));
 		} catch (ex) {
-			wpdCommon.addError("[wpdDOMSaver.replaceDocType]\n -> " + ex);
+			wpdCommon.addError("[wpdDOMSaver.replaceDocType]", ex);
 		}
 		return aHTMLText;
 	},
@@ -857,7 +857,7 @@ var wpdDOMSaver = {
 
 			rootNode.firstChild.insertBefore(aDocument.createTextNode("\n"), rootNode.firstChild.firstChild);
 		} catch (ex) {
-			wpdCommon.addError("[wpdDOMSaver.createMetaCharsetNode]\n -> " + ex);
+			wpdCommon.addError("[wpdDOMSaver.createMetaCharsetNode]", ex);
 		}
 	},
 
@@ -872,7 +872,7 @@ var wpdDOMSaver = {
 			rootNode.firstChild.insertBefore(aDocument.createTextNode("\n"), rootNode.firstChild.firstChild);
 			rootNode.firstChild.insertBefore(metaNode, rootNode.firstChild.firstChild);
 		} catch (ex) {
-			wpdCommon.addError("[wpdDOMSaver.createMetaNameNode]\n -> " + ex);
+			wpdCommon.addError("[wpdDOMSaver.createMetaNameNode]", ex);
 		}
 	},
 
@@ -981,7 +981,7 @@ var wpdDOMSaver = {
 				Zotero.debug("[wpdDOMSaver.saveDocumentCSS]: " + this.currentDir + aFileName);
 				// write css file
 				var CSSFile = this.currentDir + aFileName;
-				if (!wpdCommon.writeFile(CSSText, CSSFile)) wpdCommon.addError("[wpdDOMSaver.saveDocumentCSS]: could not write CSS File\n");
+				if (!wpdCommon.writeFile(CSSText, CSSFile)) wpdCommon.addError("[wpdDOMSaver.saveDocumentCSS]: could not write CSS File");
 				return aFileName;
 			}
 		}
@@ -1051,7 +1051,7 @@ var wpdDOMSaver = {
 
 		// and write the file...
 		var HTMLFile = this.currentDir + aFileName;
-		if (!wpdCommon.writeFile(HTMLText, HTMLFile)) wpdCommon.addError("[wpdDOMSaver.saveDocumentHTML]: could not write HTML File\n");
+		if (!wpdCommon.writeFile(HTMLText, HTMLFile)) wpdCommon.addError("[wpdDOMSaver.saveDocumentHTML]: could not write HTML File");
 
 		return aFileName;
 	},
@@ -1083,7 +1083,7 @@ var wpdDOMSaver = {
 		try {
 			return this.saveDocumentEx(this.document, this.name);
 		} catch (ex) {
-			wpdCommon.addError("[wpdDOMSaver.saveHTMLDocument]\n -> " + ex);
+			wpdCommon.addError("[wpdDOMSaver.saveHTMLDocument]", ex);
 		}
 	}
 
