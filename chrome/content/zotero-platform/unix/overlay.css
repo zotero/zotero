@@ -1,3 +1,77 @@
+/*
+ As of Fx36, the built-in styles don't properly handle a menu-button within combined buttons.
+*/
+#zotero-toolbar-main-button[cui-areatype="toolbar"] {
+	padding-right: 0;
+	margin-right: -1px;
+}
+
+#zotero-toolbar-main-button[cui-areatype="toolbar"] > .toolbarbutton-icon {
+	padding-right: 5px;
+}
+
+#zotero-toolbar-buttons[cui-areatype="toolbar"] > separator {
+	/* Copied from .toolbarbutton-menubutton-dropmarker::before */
+	display: -moz-box;
+	width: 1px;
+	height: 18px;
+	-moz-margin-end: -1px;
+	background-image: var(--toolbarbutton-combined-backgroundimage);
+	background-clip: padding-box;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 1px 18px;
+	box-shadow: var(--toolbarbutton-combined-boxshadow);
+}
+
+#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-button {
+	padding-left: 0;
+}
+
+#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-button > .toolbarbutton-icon {
+	padding-left: 6px;
+	padding-right: 6px;
+}
+
+#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-dropmarker {
+	height: 32px;
+}
+
+#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-dropmarker > .dropmarker-icon {
+	margin-top: 4px;
+	margin-bottom: 4px;
+	height: 24px;
+	padding-left: 9px;
+}
+
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-main-button .toolbarbutton-icon,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button .toolbarbutton-icon,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button .dropmarker-icon {
+	border-color: var(--toolbarbutton-hover-bordercolor) !important;
+}
+
+#zotero-toolbar-save-button[cui-areatype="toolbar"]:hover > .toolbarbutton-menubutton-button > .toolbarbutton-icon,
+#zotero-toolbar-save-button[cui-areatype="toolbar"]:hover > .toolbarbutton-menubutton-dropmarker > .dropmarker-icon {
+	background: inherit;
+}
+
+#zotero-toolbar-buttons[cui-areatype="toolbar"] > #zotero-toolbar-save-button > .toolbarbutton-menubutton-button:hover > .toolbarbutton-icon,
+/* This selector doesn't work, so the dropmarker doesn't get a hover effect. :hover doesn't seem
+ to have an effect on either part of the dropmarker */
+#zotero-toolbar-buttons[cui-areatype="toolbar"] > #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker:hover > .dropmarker-icon {
+	background: var(--toolbarbutton-hover-background) !important;
+}
+
+#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-button:not([disabled="true"]):hover:active > .toolbarbutton-icon,
+#zotero-toolbar-save-button[cui-areatype="toolbar"][open="true"] > .toolbarbutton-menubutton-dropmarker:not([disabled="true"]) > .dropmarker-icon {
+	background: var(--toolbarbutton-active-background);
+	box-shadow: var(--toolbarbutton-active-boxshadow);
+	border-color: var(--toolbarbutton-active-bordercolor);
+	transition-duration: 10ms;
+}
+/* End toolbar buttons */
+
+
 .zotero-tb-button:not([type=menu]) {
 	margin-right: 4px;
 }
