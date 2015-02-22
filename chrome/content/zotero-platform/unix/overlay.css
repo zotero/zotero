@@ -29,6 +29,7 @@
 }
 
 #zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-button > .toolbarbutton-icon {
+	width: 30px;
 	padding-left: 6px;
 	padding-right: 6px;
 }
