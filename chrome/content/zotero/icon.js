@@ -175,19 +175,19 @@ function getTooltipText(button) {
 			if (key) {
 				// Add RLE mark in RTL mode to make shortcut render the right way
 				text += (Zotero.rtl ? ' \u202B' : ' ') + '('
-				+ (Zotero.isMac ? '⇧⌘' : Zotero.getString('general.keys.ctrlShift'))
-				+ key
-				+ ')';
+					+ (Zotero.isMac ? '⇧⌘' : Zotero.getString('general.keys.ctrlShift'))
+					+ key
+					+ ')';
 			}
 			
 		}
 		else {
 			if (Zotero) {
-				var errMsg = Zotero.startupError;
+				text = Zotero.startupError;
 			}
 			
 			// Use defaults if necessary
-			if (!errMsg) {
+			if (!text) {
 				// Get the stringbundle manually
 				let src = 'chrome://zotero/locale/zotero.properties';
 				let localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1']
@@ -203,6 +203,7 @@ function getTooltipText(button) {
 	
 	case 'save':
 		text = Zotero.getString('ingester.saveToZotero');
+		break;
 	}
 	return text;
 }
