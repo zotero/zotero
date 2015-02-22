@@ -54,9 +54,9 @@ toolbarpaletteitem[place="palette"] #zotero-toolbar-save-button-single {
 	}
 }
 
-/* Show webpage icon in gray when no translators, except on hover */
-#zotero-toolbar-save-button:not(:hover):not(.translate),
-#zotero-toolbar-save-button-single:not(:hover):not(.translate),
+/* Show webpage icon in gray when no translators */
+#zotero-toolbar-save-button:not(.translate),
+#zotero-toolbar-save-button-single:not(.translate),
 #zotero-toolbar-save-button[disabled="true"],
 #zotero-toolbar-save-button-single[disabled="true"] {
 	filter: grayscale(100%);
