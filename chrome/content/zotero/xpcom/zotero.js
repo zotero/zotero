@@ -2679,6 +2679,11 @@ Zotero.Browser = new function() {
 		if(!(myBrowsers instanceof Array)) myBrowsers = [myBrowsers];
 		for(var i=0; i<myBrowsers.length; i++) {
 			var myBrowser = myBrowsers[i];
+			
+			// Browsers take a while to get GC'ed. Drop it from cookie tracking so
+			// we can stop observing cookie-related events faster
+			Zotero.CookieSandbox.Observer.dropBrowser(myBrowser);
+			
 			myBrowser.stop();
 			myBrowser.destroy();
 			myBrowser.parentNode.removeChild(myBrowser);
