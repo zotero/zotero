@@ -170,7 +170,7 @@ function getTooltipText(button) {
 	switch (button) {
 	case 'main':
 		if (Zotero && Zotero.initialized) {
-			text = 'Zotero';
+			text = Zotero.getString('general.open', Zotero.clientName);
 			let key = Zotero.Keys.getKeyForCommand('openZotero');
 			if (key) {
 				// Add RLE mark in RTL mode to make shortcut render the right way
