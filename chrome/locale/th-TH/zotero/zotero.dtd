@@ -125,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "แปลงแบบอักษร">
 <!ENTITY zotero.item.textTransform.titlecase "แบบชื่อเรื่อง">
 <!ENTITY zotero.item.textTransform.sentencecase "แบบประโยค">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 
 <!ENTITY zotero.toolbar.newNote "หมายเหตุใหม่">
 <!ENTITY zotero.toolbar.note.standalone "หมายเหตุแบบสแตนด์อะโลนใหม่">

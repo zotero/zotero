@@ -202,6 +202,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Objavi na strežniku Zotero">
 
 <!ENTITY zotero.preferences.openAboutConfig "Odpri about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Odpri urejevalnik CSL">
-<!ENTITY zotero.preferences.openCSLPreview "Odpri predogled CSL">
+<!ENTITY zotero.preferences.openCSLEdit "Odpri urejevalnik sloga">
+<!ENTITY zotero.preferences.openCSLPreview "Odpri predogled sloga">
 <!ENTITY zotero.preferences.openAboutMemory "Odprite about:memory">

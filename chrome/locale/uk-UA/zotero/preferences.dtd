@@ -202,6 +202,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Відправити на сервер Zotero">
 
 <!ENTITY zotero.preferences.openAboutConfig "Відкрити about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Відкрити редактор CSL">
-<!ENTITY zotero.preferences.openCSLPreview "Відкрити попередній перегляд CSL">
+<!ENTITY zotero.preferences.openCSLEdit "Відкрити редактор стилю">
+<!ENTITY zotero.preferences.openCSLPreview "Відкрити попередній перегляд стилю">
 <!ENTITY zotero.preferences.openAboutMemory "Відкрити about:memory">

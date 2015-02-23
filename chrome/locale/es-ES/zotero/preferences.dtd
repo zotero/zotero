@@ -202,6 +202,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Enviar al servidor Zotero">
 
 <!ENTITY zotero.preferences.openAboutConfig "Abrir about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Abrir editor CSL">
-<!ENTITY zotero.preferences.openCSLPreview "Abrir prevista CSL">
+<!ENTITY zotero.preferences.openCSLEdit "Abrir editor de estilo">
+<!ENTITY zotero.preferences.openCSLPreview "Abrir previsualizador de estilo">
 <!ENTITY zotero.preferences.openAboutMemory "Abrir about:memory">

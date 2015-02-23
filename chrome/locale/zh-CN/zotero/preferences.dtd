@@ -202,6 +202,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "提交到 Zotero 服务器">
 
 <!ENTITY zotero.preferences.openAboutConfig "打开配置编辑器">
-<!ENTITY zotero.preferences.openCSLEdit "打开 CSL 编辑器">
-<!ENTITY zotero.preferences.openCSLPreview "打开 CSL 预览">
+<!ENTITY zotero.preferences.openCSLEdit "打开样式编辑器">
+<!ENTITY zotero.preferences.openCSLPreview "打开样式预览">
 <!ENTITY zotero.preferences.openAboutMemory "打开内存管理器">
