@@ -213,6 +213,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		this.mainThread = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
 		
+		this.clientName = ZOTERO_CONFIG.CLIENT_NAME;
+		
 		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
 			.getService(Components.interfaces.nsIXULAppInfo);
 		this.platformVersion = appInfo.platformVersion;

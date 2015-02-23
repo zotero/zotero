@@ -1,5 +1,6 @@
 var ZOTERO_CONFIG = {
 	GUID: 'zotero@chnm.gmu.edu',
+	CLIENT_NAME: 'Zotero',
 	REPOSITORY_URL: 'https://repo.zotero.org/repo/',
 	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
 	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
