@@ -17,8 +17,27 @@
 	border-color: transparent;
 }
 
+#zotero-toolbar-main-button[cui-areatype="toolbar"] {
+	margin-right: 0;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	padding-right: 2px;
+	padding-left: 2px;
+}
+
+#zotero-toolbar-save-button[cui-areatype="toolbar"] {
+	margin-top: 3px;
+	margin-bottom: 3px;
+	margin-left: -1px;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	border-left: 0 solid transparent;
+}
+
 #zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-button {
-	min-width: 27px;
+	min-width: 26px;
+	padding-left: 1px;
+	padding-right: 1px;
 }
 
 #zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-button,
@@ -52,21 +71,6 @@
 }
 
 #zotero-toolbar-main-button[cui-areatype="toolbar"] {
-	margin-right: 0;
-	border-top-right-radius: 0;
-	border-bottom-right-radius: 0;
-	padding-right: 1px;
-}
-#zotero-toolbar-save-button[cui-areatype="toolbar"] {
-	margin-top: 3px;
-	margin-bottom: 3px;
-	margin-left: -1px;
-	border-top-left-radius: 0;
-	border-bottom-left-radius: 0;
-	border-left: 0 solid transparent;
-}
-
-#zotero-toolbar-main-button[cui-areatype="toolbar"] {
 	border-right: 1px solid transparent;
 }
 #zotero-toolbar-save-button[cui-areatype="toolbar"]:hover {
@@ -85,7 +89,6 @@
 }
 
 /* End toolbar icons */
-
 
 #zotero-splitter
 {
