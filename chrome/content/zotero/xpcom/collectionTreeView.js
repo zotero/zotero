@@ -1758,8 +1758,12 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient, dataTransfer)
 		
 		// Add items to target collection
 		if (targetCollectionID) {
-			var collection = Zotero.Collections.get(targetCollectionID);
-			collection.addItems(newIDs);
+			let ids = newIDs.filter(function (itemID) {
+				var item = Zotero.Items.get(itemID);
+				return !item.getSource();
+			});
+			let collection = Zotero.Collections.get(targetCollectionID);
+			collection.addItems(ids);
 		}
 		
 		// If moving, remove items from source collection
