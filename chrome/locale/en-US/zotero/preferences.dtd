@@ -129,6 +129,7 @@
 
 <!ENTITY zotero.preferences.keys.openZotero				"Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.newItemFromPage "Create Web Page Item from Current Page">
 <!ENTITY zotero.preferences.keys.toggleFullscreen			"Toggle Fullscreen Mode">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane		"Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch				"Quick Search">

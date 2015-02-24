@@ -32,6 +32,7 @@
 		<preferences>
 			<preference id="pref-keys-openZotero" name="extensions.zotero.keys.openZotero" type="string"/>
 			<preference id="pref-keys-saveToZotero" name="extensions.zotero.keys.saveToZotero" type="string"/>
+			<preference id="pref-keys-newItemFromPage" name="extensions.zotero.keys.newItemFromPage" type="string"/>
 			<preference id="pref-keys-toggleFullscreen" name="extensions.zotero.keys.toggleFullscreen" type="string"/>
 			<preference id="pref-keys-library" name="extensions.zotero.keys.library" type="string"/>
 			<preference id="pref-keys-quicksearch" name="extensions.zotero.keys.quicksearch" type="string"/>

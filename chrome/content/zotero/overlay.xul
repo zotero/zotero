@@ -101,5 +101,9 @@
 			 key="S"
 			 oncommand="Zotero_Browser.scrapeThisPage();"
 			 modifiers="accel shift" />
+		 <key id="key_newItemFromPage"
+		 	 key="I"
+		 	 oncommand="ZoteroPane.addItemFromPage();"
+		 	 modifiers="accel shift" />
 	</keyset>
 </overlay>
