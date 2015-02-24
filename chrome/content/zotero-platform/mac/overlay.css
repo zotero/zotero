@@ -347,16 +347,22 @@
 	background-color: #8b8b8b !important;
 }
 
-#zotero-collections-splitter[state=collapsed], #zotero-items-splitter[state=collapsed]
-{
-	border-right: 1px;
-	border-color: #A5A5A5;
+#zotero-collections-splitter[state=collapsed], #zotero-items-splitter[state=collapsed] {
+	border: 0 solid #d6d6d6 !important;
 	max-width: 8px !important;
 	min-width: 8px !important;
 	width: 8px !important;
 	background-image: url("chrome://zotero/skin/mac/vsplitter.png");
 	background-repeat: repeat-y;
 	padding: 0;
+}
+
+#zotero-collections-splitter[state=collapsed] {
+	border-right-width: 1px !important;
+}
+
+#zotero-items-splitter[state=collapsed] {
+	border-left-width: 1px !important;
 }
 
 #zotero-collections-splitter[state=collapsed] > grippy, #zotero-items-splitter[state=collapsed] > grippy
