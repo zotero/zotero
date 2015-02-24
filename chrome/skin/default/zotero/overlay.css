@@ -605,6 +605,8 @@
 #zotero-items-pane-message-box
 {
 	-moz-appearance: listbox;
+	text-align: center;
+	padding: 20px;
 }
 
 #zotero-items-pane-message-box description:not(:first-child) {
