@@ -46,6 +46,7 @@ const xpcomFilesAll = [
 	'translation/translate_firefox',
 	'translation/tlds',
 	'utilities',
+	'isbn',
 	'utilities_internal',
 	'utilities_translate'
 ];

@@ -616,6 +616,32 @@ Zotero.Translate.Sandbox = {
 					if(setShortTitle) item.shortTitle = title;
 				}
 				
+				/* Clean up ISBNs
+				 * Allow multiple ISBNs, but...
+				 * (1) validate all ISBNs
+				 * (2) convert all ISBNs to ISBN-13
+				 * (3) remove any duplicates
+				 * (4) separate them with space
+				 */
+				if (item.ISBN) {
+					// Match ISBNs with groups separated by various dashes or even spaces
+					var isbnRe = /\b(?:97[89][\s\x2D\xAD\u2010-\u2015\u2043\u2212]*)?(?:\d[\s\x2D\xAD\u2010-\u2015\u2043\u2212]*){9}[\dx](?![\x2D\xAD\u2010-\u2015\u2043\u2212])\b/gi,
+						validISBNs = [],
+						isbn;
+					while (isbn = isbnRe.exec(item.ISBN)) {
+						var validISBN = Zotero.Utilities.cleanISBN(isbn[0]);
+						if (!validISBN) {
+							// Back up and move up one character
+							isbnRe.lastIndex = isbn.index + 1;
+							continue;
+						}
+						
+						var isbn13 = Zotero.Utilities.toISBN13(validISBN);
+						if (validISBNs.indexOf(isbn13) == -1) validISBNs.push(isbn13);
+					}
+					item.ISBN = validISBNs.join(' ');
+				}
+				
 				// refuse to save very long tags
 				if(item.tags) {
 					for(var i=0; i<item.tags.length; i++) {

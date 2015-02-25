@@ -821,6 +821,24 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		value = value.replace(/[\r\n]+/g, " ");;
 	}
 	
+	if (fieldID == Zotero.ItemFields.getID('ISBN')) {
+		// Hyphenate ISBNs, but only if everything is in expected format and valid
+		let isbns = ('' + value).trim().split(/\s*[,;]\s*|\s+/),
+			newISBNs = '',
+			failed = false;
+		for (let i=0; i<isbns.length; i++) {
+			let isbn = Zotero.Utilities.Internal.hyphenateISBN(isbns[i]);
+			if (!isbn) {
+				failed = true;
+				break;
+			}
+			
+			newISBNs += ' ' + isbn;
+		}
+		
+		if (!failed) value = newISBNs.substr(1);
+	}
+	
 	if (!loadIn) {
 		// Save date field as multipart date
 		// TEMP - filingDate
