@@ -1569,28 +1569,7 @@ Zotero.Translate.Base.prototype = {
 			"Zotero.Collection.prototype.complete = function() { Zotero._collectionDone(this); };";
 		}
 		
-		if(Zotero.isFx && !Zotero.isBookmarklet) {
-			// workaround for inadvertant attempts to pass E4X back from sandbox
-			src += "Zotero.Item.prototype.complete = function() { "+
-					"for(var key in this) {"+
-					"if("+createArrays+".indexOf(key) !== -1) {"+
-						"for each(var item in this[key]) {"+
-							"for(var key2 in item) {"+
-								"if(typeof item[key2] === 'xml') {"+
-									"item[key2] = item[key2].toString();"+
-								"}"+
-							"}"+
-						"}"+
-					"} else if(typeof this[key] === 'xml') {"+
-						"this[key] = this[key].toString();"+
-					"}"+
-				"}";
-		} else {
-			src += "Zotero.Item.prototype.complete = function() { ";
-		}
-		
-		src += "Zotero._itemDone(this);"+
-		"}";
+		src += "Zotero.Item.prototype.complete = function() { Zotero._itemDone(this); }";
 
 		this._sandboxManager.eval(src);
 		this._sandboxManager.importObject(this.Sandbox, this);
