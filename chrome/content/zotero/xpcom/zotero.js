@@ -580,8 +580,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			
 			try {
 				var updated = yield Zotero.Schema.updateSchema();
-			
-				Zotero.locked = false;
 				
 				yield Zotero.Users.init();
 				yield Zotero.Libraries.init();
@@ -591,6 +589,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				yield Zotero.CreatorTypes.init();
 				yield Zotero.CharacterSets.init();
 				yield Zotero.FileTypes.init();
+				
+				Zotero.locked = false;
 				
 				// Initialize various services
 				Zotero.Styles.preinit();

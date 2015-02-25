@@ -32,7 +32,6 @@ var ZoteroOverlay = new function()
 	var toolbarCollapseState, showInPref;
 	var zoteroPane, zoteroSplitter;
 	var _stateBeforeReload = false;
-	var _initializationDeferred, _initializationPromise;
 	
 	this.isTab = false;
 	
@@ -64,7 +63,7 @@ var ZoteroOverlay = new function()
 			if (!Zotero || Zotero.skipLoading) {
 				throw true;
 			}
-			return Zotero.unlockPromise;
+			return Zotero.Promise.all([Zotero.initializationPromise, Zotero.unlockPromise]);
 		})
 		.then(function () {
 			Zotero.debug("Initializing overlay");
@@ -165,6 +164,8 @@ var ZoteroOverlay = new function()
 			});
 		})
 		.catch(function (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
 			var errMsg = Zotero ? Zotero.startupError : null;
 			// Use defaults if necessary
 			if (!errMsg) {

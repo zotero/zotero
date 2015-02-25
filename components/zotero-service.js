@@ -316,13 +316,12 @@ function ZoteroService() {
 			})
 			.then(function () {
 				zContext.Zotero.debug("Initialized in "+(Date.now() - start)+" ms");
-			})
-			.done();
+				isFirstLoadThisSession = false;
+			});
 		}
 		else {
 			zContext.Zotero.debug("Already initialized");
 		}
-		isFirstLoadThisSession = false;
 		this.wrappedJSObject = zContext.Zotero;
 	} catch(e) {
 		var msg = typeof e == 'string' ? e : e.name;
