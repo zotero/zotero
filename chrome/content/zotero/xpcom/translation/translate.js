@@ -582,17 +582,25 @@ Zotero.Translate.Sandbox = {
 					item.accessDate = "CURRENT_TIMESTAMP";
 				}
 				
-				//consider type-specific "title" alternatives
+				// Make sure title is set. Missing title most likely indicates failed
+				// translation. Allow explicit empty string as a way to indicate
+				// legitimate cases for items with no title.
+				
+				// Consider type-specific "title" alternatives
 				var altTitle = Zotero.ItemFields.getName(Zotero.ItemFields.getFieldIDFromTypeAndBase(item.itemType, 'title'));
 				if(altTitle && item[altTitle]) item.title = item[altTitle];
 				
-				if(!item.title) {
+				if (!item.title && item.shortTitle) item.title = item.shortTitle;
+				
+				if(!item.title && item.title !== '') {
 					translate.complete(false, new Error("No title specified for item"));
 					return;
 				}
 				
 				// create short title
-				if(item.shortTitle === undefined && Zotero.Utilities.fieldIsValidForType("shortTitle", item.itemType)) {		
+				if(item.title && !item.shortTitle
+					&& Zotero.Utilities.fieldIsValidForType("shortTitle", item.itemType)
+				) {
 					// only set if changes have been made
 					var setShortTitle = false;
 					var title = item.title;
