@@ -616,6 +616,15 @@ Zotero.Translate.Sandbox = {
 					if(setShortTitle) item.shortTitle = title;
 				}
 				
+				// Creators with no first name should be fieldMode: 1
+				for (var i=0; i<item.creators.length; i++) {
+					if (!item.creators[i].firstName && item.creators[i].fieldMode !== 1) {
+						Zotero.debug("Translate: creator missing first name, but fieldMode !== 1");
+						delete item.creators[i].firstName; // In case it's empty string
+						item.creators[i].fieldMode = 1;
+					}
+				}
+				
 				// Clean up DOI
 				if (item.DOI) {
 					item.DOI = Zotero.Utilities.cleanDOI('' + item.DOI);
