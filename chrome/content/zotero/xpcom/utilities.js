@@ -1554,6 +1554,12 @@ Zotero.Utilities = {
 						if (isbn) value = isbn[0];
 					}
 					
+					if (field == 'ISSN') {
+						// Only use the first ISSN
+						var issn = value.match(/^\d{4}-\d{4}\b/);
+						if (issn) value = issn[0];
+					}
+					
 					// Strip enclosing quotes
 					if(value.charAt(0) == '"' && value.indexOf('"', 1) == value.length - 1) {
 						value = value.substring(1, value.length-1);
