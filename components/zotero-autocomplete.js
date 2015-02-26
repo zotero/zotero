@@ -84,18 +84,8 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 					+ "SELECT tagID FROM itemTags WHERE itemID = ?))";
 				sqlParams.push(searchParams.itemID);
 			}
-			
+			sql += " ORDER BY val COLLATE locale";
 			statement = this._zotero.DB.getStatement(sql, sqlParams);
-			
-			var resultsCallback = function (results) {
-				if (!results) {
-					return;
-				}
-				var collation = self._zotero.getLocaleCollation();
-				results.sort(function(a, b) {
-					return collation.compareString(1, a.val, b.val);
-				});
-			}
 			break;
 		
 		case 'creator':
@@ -244,13 +234,6 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 				if (comment) {
 					comments.push(comment);
 				}
-			}
-			
-			if (resultsCallback) {
-				if (comments.length) {
-					throw ("Cannot sort results with comments in ZoteroAutoComplete.startSearch()");
-				}
-				resultsCallback(results);
 			}
 			
 			self.updateResults(results, comments, true);
