@@ -282,6 +282,8 @@ Zotero.ProgressWindow = function(_window){
 	 */
 	this.ItemProgress = _deferUntilWindowLoad(function(iconSrc, title, parentItemProgress) {
 		this._itemText = _progressWindow.document.createElement("description");
+		
+		if (!title && title !== 0) title = ''; // Don't display things like "undefined"
 		this._itemText.appendChild(_progressWindow.document.createTextNode(title));
 		this._itemText.setAttribute("class", "zotero-progress-item-label");
 		this._itemText.setAttribute("crop", "end");
