@@ -713,6 +713,11 @@ Zotero.Translate.ItemSaver.prototype = {
 			tagsToAdd[0] = []; // user tags
 			tagsToAdd[1] = []; // automatic tags
 			
+			if (typeof item.tags == 'string') {
+				Zotero.debug("WARNING: item.tags set to string. Should be an array");
+				item.tags = [item.tags];
+			}
+			
 			for(var i=0; i<item.tags.length; i++) {
 				var tag = item.tags[i];
 				
