@@ -1924,6 +1924,9 @@ Zotero.Sync.Server = new function () {
 		sql = "INSERT INTO version VALUES ('syncdeletelog', ?)";
 		Zotero.DB.query(sql, Zotero.Date.getUnixTimestamp());
 		
+		var sql = "UPDATE syncedSettings SET synced=0";
+		Zotero.DB.query(sql);
+		
 		Zotero.DB.commitTransaction();
 	}
 	
