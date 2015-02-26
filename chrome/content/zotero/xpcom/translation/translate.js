@@ -642,6 +642,26 @@ Zotero.Translate.Sandbox = {
 					item.ISBN = validISBNs.join(' ');
 				}
 				
+				/* Clean up ISSN
+				 * Validate and put in same format as ISBN
+				 */
+				if (item.ISSN) {
+					var issnRe = /\b(\d{4})(?:\s*[\x2D\xAD\u2010-\u2015\u2043\u2212]\s*)?(\d{4})\b/g,
+						validISSNs = [],
+						issn;
+					while (issn = issnRe.exec(item.ISSN)) {
+						var validISSN = Zotero.Utilities.cleanISSN(issn[1] + issn[2]);
+						if (!validISSN) {
+							// Back up and move up one character
+							issnRe.lastIndex = issn.index + 1;
+							continue;
+						}
+						
+						if (validISSNs.indexOf(validISSN) == -1) validISSNs.push(validISSN);
+					}
+					item.ISSN = validISSNs.join(' ');
+				}
+				
 				// refuse to save very long tags
 				if(item.tags) {
 					for(var i=0; i<item.tags.length; i++) {
