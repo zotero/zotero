@@ -616,6 +616,12 @@ Zotero.Translate.Sandbox = {
 					if(setShortTitle) item.shortTitle = title;
 				}
 				
+				// Clean up DOI
+				if (item.DOI) {
+					item.DOI = Zotero.Utilities.cleanDOI('' + item.DOI);
+					if (!item.DOI) delete item.DOI;
+				}
+				
 				/* Clean up ISBNs
 				 * Allow multiple ISBNs, but...
 				 * (1) validate all ISBNs
