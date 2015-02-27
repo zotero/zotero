@@ -26,12 +26,8 @@
  * Toolbar icons
  *
  */
-#zotero-toolbar-main-button {
-	list-style-image: url("chrome://zotero/skin/zotero-z-16px-australis.svg");
-}
-
-#zotero-toolbar-main-button[cui-areatype="menu-panel"],
-toolbarpaletteitem[place="palette"] #zotero-toolbar-main-button {
+#zotero-toolbar-main-button,
+#zotero-toolbar-main-button-single {
 	list-style-image: url("chrome://zotero/skin/zotero-z-32px-australis.svg");
 }
 
@@ -52,6 +48,19 @@ toolbarpaletteitem[place="palette"] #zotero-toolbar-save-button-single {
 	#zotero-toolbar-save-button-single[cui-areatype="toolbar"] {
 		list-style-image: url("chrome://zotero/skin/treeitem-webpage@2x.png");
 	}
+}
+
+/* Show single icon for combo buttons in palette */
+toolbarpaletteitem[place="palette"] #zotero-toolbar-main-button {
+	list-style-image: url("chrome://zotero/skin/zotero-z-32px-australis.svg");
+}
+toolbarpaletteitem[place="palette"] #zotero-toolbar-buttons separator,
+toolbarpaletteitem[place="palette"] #zotero-toolbar-buttons #zotero-toolbar-save-button {
+	display:none;
+}
+
+toolbarpaletteitem[place="palette"] #zotero-toolbar-save-button-single {
+	padding: 3px 1px;
 }
 
 /* Show webpage icon in gray when no translators */

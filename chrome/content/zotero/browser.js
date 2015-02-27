@@ -426,23 +426,23 @@ var Zotero_Browser = new function() {
 	 * thereof of the current page
 	 */
 	function updateStatus() {
+		if (!Zotero_Browser.tabbrowser) return;
 		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
 		
 		Components.utils.import("resource:///modules/CustomizableUI.jsm");
 		var buttons = getSaveButtons();
 		if (buttons.length) {
 			let state = tab.getCaptureState();
-			let icon = tab.getCaptureIcon();
 			let tooltiptext = tab.getCaptureTooltip();
 			for (let { button, placement } of buttons) {
-				button.image = icon;
+				let inToolbar = placement.area == CustomizableUI.AREA_NAVBAR;
+				button.image = tab.getCaptureIcon(Zotero.hiDPI || !inToolbar);
 				button.tooltipText = tooltiptext;
 				if (state == tab.CAPTURE_STATE_TRANSLATABLE) {
 					button.classList.add('translate');
 					
 					// Show guidance panel if necessary
-					
-					if (placement.area == 'nav-bar') {
+					if (inToolbar) {
 						button.addEventListener("load", function() {
 							document.getElementById("zotero-status-image-guidance").show();
 						});
@@ -545,7 +545,7 @@ var Zotero_Browser = new function() {
 				}), true);
 		}
 		else {
-			let webPageIcon = tab.getCaptureIcon();
+			let webPageIcon = tab.getCaptureIcon(Zotero.hiDPI);
 			let automaticSnapshots = Zotero.Prefs.get('automaticSnapshots');
 			let snapshotEvent = {
 				shiftKey: !automaticSnapshots
@@ -896,8 +896,8 @@ Zotero_Browser.Tab.prototype.getCaptureState = function () {
  * returns the URL of the image representing the translator to be called on the
  * current page, or false if the page cannot be scraped
  */
-Zotero_Browser.Tab.prototype.getCaptureIcon = function() {
-	var suffix = Zotero.hiRes ? "@2x" : "";
+Zotero_Browser.Tab.prototype.getCaptureIcon = function (hiDPI) {
+	var suffix = hiDPI ? "@2x" : "";
 	
 	switch (this.getCaptureState()) {
 	case this.CAPTURE_STATE_TRANSLATABLE:

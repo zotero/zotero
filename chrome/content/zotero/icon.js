@@ -50,6 +50,21 @@ CustomizableUI.addListener({
 				null, Zotero.getString(property, shortcut)
 			);
 		}
+		else if (id == getSingleID('save')) {
+			Zotero_Browser.updateStatus();
+		}
+	},
+	
+	onWidgetRemoved: function (id, area) {
+		if (id == comboButtonsID) {
+			var item = document.getElementById(id);
+			updateItemForArea(item, null);
+		}
+		// Clear dynamic image from save icon and revert to CSS
+		else if (id == getSingleID('save')) {
+			let button = document.getElementById(id);
+			button.image = "";
+		}
 	},
 	
 	// Save icon in panel isn't in DOM until menu is shown once and therefore isn't updated
@@ -57,13 +72,13 @@ CustomizableUI.addListener({
 	// doesn't remain disabled
 	onAreaNodeRegistered: function (area, node) {
 		if (area == CustomizableUI.AREA_PANEL) {
-			var placement = CustomizableUI.getPlacementOfWidget("zotero-toolbar-buttons")
+			var placement = CustomizableUI.getPlacementOfWidget(comboButtonsID)
 			var update = false;
 			if (placement && placement.area == CustomizableUI.AREA_PANEL) {
 				update = true;
 			}
 			else {
-				placement = CustomizableUI.getPlacementOfWidget("zotero-toolbar-save-button-single");
+				placement = CustomizableUI.getPlacementOfWidget(getSingleID('save'));
 				if (placement && placement.area == CustomizableUI.AREA_PANEL) {
 					update = true;
 				}
@@ -75,12 +90,11 @@ CustomizableUI.addListener({
 	}
 })
 
-
 // Create the combo buttons, which go in the toolbar by default
 CustomizableUI.createWidget({
 	id: comboButtonsID,
 	type: 'custom',
-	label: 'zotero',
+	label: 'Zotero',
 	tooltiptext: "Zotero",
 	defaultArea: CustomizableUI.AREA_NAVBAR,
 	onBuild: function (document) {
@@ -88,11 +102,10 @@ CustomizableUI.createWidget({
 		
 		var item = document.createElementNS(kNSXUL, "toolbaritem");
 		item.setAttribute("id", comboButtonsID);
+		item.setAttribute("label", "Zotero (Combo)"); // TODO: localize
 		// Set this as an attribute in addition to the property to make sure we can style correctly.
 		item.setAttribute("removable", "true");
 		item.classList.add("chromeclass-toolbar-additional");
-		item.classList.add("toolbaritem-combined-buttons");
-		item.classList.add("panel-wide-item");
 		
 		['main', 'save'].map(button => {
 			return {
@@ -124,10 +137,20 @@ CustomizableUI.createWidget({
 	}
 });
 
+// Create the independent Z button, which isn't shown by default
+CustomizableUI.createWidget({
+	id: getSingleID('main'),
+	label: Zotero.clientName,
+	tooltiptext: getTooltipText('main'),
+	defaultArea: false,
+	onCommand: function (event) {
+		ZoteroOverlay.toggleDisplay();
+	}
+});
 
 // Create the independent save button, which isn't shown by default
 CustomizableUI.createWidget({
-	id: getID('save') + '-single',
+	id: getSingleID('save'),
 	label: Zotero.getString('ingester.saveToZotero'),
 	tooltiptext: getTooltipText('save'),
 	defaultArea: false,
@@ -155,6 +178,10 @@ function getID(button) {
 	}
 }
 
+function getSingleID(button) {
+	return getID(button) + '-single';
+}
+
 function getCommand(button) {
 	switch (button) {
 	case 'main':
@@ -170,7 +197,7 @@ function getTooltipText(button) {
 	switch (button) {
 	case 'main':
 		if (Zotero && Zotero.initialized) {
-			text = Zotero.getString('general.open', Zotero.clientName);
+			text = Zotero.clientName;
 			let key = Zotero.Keys.getKeyForCommand('openZotero');
 			if (key) {
 				// Add RLE mark in RTL mode to make shortcut render the right way
@@ -210,17 +237,35 @@ function getTooltipText(button) {
 
 /**
  * Set various attributes that allow treeitem and subelements to be styled properly
+ * in the different areas
  */
 function updateItemForArea(item, area) {
-	var areaType = CustomizableUI.getAreaType(area);
-	var inPanel = area == CustomizableUI.AREA_PANEL;
-	var classes = inPanel ? "panel-combined-button" : "toolbarbutton-1 toolbarbutton-combined";
-	item.setAttribute("cui-areatype", areaType);
-	var buttons = item.getElementsByTagName('toolbarbutton');
-	for (let i = 0; i < buttons.length; i++) {
-		let button = buttons[i];
-		button.setAttribute("class", classes);
-		button.setAttribute("cui-areatype", areaType);
+	if (area) {
+		var areaType = CustomizableUI.getAreaType(area);
+		var inPanel = area == CustomizableUI.AREA_PANEL;
+		var classes = inPanel ? "panel-combined-button" : "toolbarbutton-1 toolbarbutton-combined";
+		item.setAttribute("cui-areatype", areaType);
+		item.classList.add("toolbaritem-combined-buttons");
+		if (inPanel) {
+			item.classList.add("panel-wide-item");
+		}
+		var buttons = item.getElementsByTagName('toolbarbutton');
+		for (let i = 0; i < buttons.length; i++) {
+			let button = buttons[i];
+			button.setAttribute("class", classes);
+			button.setAttribute("cui-areatype", areaType);
+		}
+	}
+	// In customization palette pretend it's a single icon
+	else {
+		item.classList.remove("toolbaritem-combined-buttons");
+		item.classList.remove("panel-wide-item");
+		var buttons = item.getElementsByTagName('toolbarbutton');
+		for (let i = 0; i < buttons.length; i++) {
+			let button = buttons[i];
+			button.setAttribute("class", "toolbarbutton-1");
+			button.removeAttribute("cui-areatype");
+		}
 	}
 }
 

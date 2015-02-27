@@ -6,6 +6,7 @@
 }
 
 #zotero-toolbar-main-button[cui-areatype="toolbar"] .toolbarbutton-icon {
+	width: 28px;
 	margin-left: 2px;
 	margin-right: -1px;
 	padding-left: 5px !important;
