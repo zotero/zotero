@@ -32,6 +32,21 @@ var comboButtonsID = 'zotero-toolbar-buttons';
 CustomizableUI.addListener({
 	onWidgetAdded: function (id, area, position) {
 		if (id == comboButtonsID) {
+			// When dropping combo button into panel, add two independent buttons instead
+			if (area == CustomizableUI.AREA_PANEL) {
+				let mainID = getSingleID('main');
+				let saveID = getSingleID('save');
+				CustomizableUI.removeWidgetFromArea(id);
+				// Remove independent main and save buttons first if they're already in panel
+				CustomizableUI.removeWidgetFromArea(mainID);
+				CustomizableUI.removeWidgetFromArea(saveID);
+				CustomizableUI.addWidgetToArea(mainID, area, position);
+				let placement = CustomizableUI.getPlacementOfWidget(mainID)
+				let mainPos = placement.position;
+				CustomizableUI.addWidgetToArea(saveID, area, mainPos + 1);
+				return;
+			}
+			
 			var item = document.getElementById(id);
 			// Element may not exist yet if it was added to the panel
 			if (item) {
