@@ -25,8 +25,6 @@
 -->
 
 
-<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 <?xul-overlay href="chrome://zotero/content/zoteroPane.xul"?>
 <?xul-overlay href="chrome://zotero/content/itemPane.xul"?>
 
