@@ -742,9 +742,9 @@ Zotero.Sync.Storage = new function () {
 				itemIDs = Object.keys(itemModTimes ? itemModTimes : {});
 			}
 			
-			// Can only handle 999 bound parameters at a time
+			// Can only handle a certain number of bound parameters at a time
 			var numIDs = itemIDs.length;
-			var maxIDs = 990;
+			var maxIDs = Zotero.DB.MAX_BOUND_PARAMETERS - 10;
 			var done = 0;
 			var rows = [];
 			
