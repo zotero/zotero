@@ -1532,7 +1532,7 @@ Zotero.Utilities = {
 			var fields = CSL_TEXT_MAPPINGS[variable];
 			for(var i=0, n=fields.length; i<n; i++) {
 				var field = fields[i],
-					value;
+					value = null;
 				
 				if(field in zoteroItem) {
 					value = zoteroItem[field];
