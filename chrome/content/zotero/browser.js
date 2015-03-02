@@ -517,6 +517,7 @@ var Zotero_Browser = new function() {
 				menuitem.setAttribute("class", "menuitem-iconic");
 				menuitem.addEventListener("command", function(e) {
 					Zotero_Browser.scrapeThisPage(translator, e);
+					e.stopPropagation();
 				}, false);
 				popup.appendChild(menuitem);
 			}
