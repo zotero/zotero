@@ -282,39 +282,41 @@ Zotero.Utilities = {
 	 * @param {Boolean} [dontValidate=false] Do not validate check digit
 	 * @return {String|Boolean} Valid ISBN or false
 	 */
-	"cleanISBN":function(isbn, dontValidate) {
-		isbn = isbn.replace(/[^0-9a-z]+/ig, '').toUpperCase()	//we only want to ignore punctuation, spaces
-						.match(/\b(?:97[89][0-9]{10}|[0-9]{9}[0-9X])\b/);	//13 digit or 10 digit
-		if(!isbn) return false;
-		isbn = isbn[0];
-		
-		if (dontValidate && (isbn.length == 10 || isbn.length == 13)) {
-			return isbn;
-		}
-		
-		if(isbn.length == 10) {
-			// Verify ISBN-10 checksum
-			var sum = 0;
-			for (var i = 0; i < 9; i++) {
-				if(isbn[i] == 'X') return false;	//X can only be a check digit
-				sum += isbn[i] * (10-i);
+	"cleanISBN":function(isbnStr, dontValidate) {
+		isbnStr = isbnStr.toUpperCase()
+			.replace(/[\x2D\xAD\u2010-\u2015\u2043\u2212]+/g, ''); // Ignore dashes
+		var isbnRE = /\b(?:97[89]\s*(?:\d\s*){9}\d|(?:\d\s*){9}[\dX])\b/g,
+			isbnMatch;
+		while(isbnMatch = isbnRE.exec(isbnStr)) {
+			var isbn = isbnMatch[0].replace(/\s+/g, '');
+			
+			if (dontValidate) {
+				return isbn;
 			}
-			//check digit might be 'X'
-			sum += (isbn[9] == 'X')? 10 : isbn[9]*1;
-
-			return (sum % 11 == 0) ? isbn : false;
+			
+			if(isbn.length == 10) {
+				// Verify ISBN-10 checksum
+				var sum = 0;
+				for (var i = 0; i < 9; i++) {
+					sum += isbn[i] * (10-i);
+				}
+				//check digit might be 'X'
+				sum += (isbn[9] == 'X')? 10 : isbn[9]*1;
+	
+				if (sum % 11 == 0) return isbn;
+			} else {
+				// Verify ISBN 13 checksum
+				var sum = 0;
+				for (var i = 0; i < 12; i+=2) sum += isbn[i]*1;	//to make sure it's int
+				for (var i = 1; i < 12; i+=2) sum += isbn[i]*3;
+				sum += isbn[12]*1; //add the check digit
+	
+				if (sum % 10 == 0 ) return isbn;
+			}
+			
+			isbnRE.lastIndex = isbnMatch.index + 1; // Retry the same spot + 1
 		}
-
-		if(isbn.length == 13) {
-			// Verify checksum
-			var sum = 0;
-			for (var i = 0; i < 12; i+=2) sum += isbn[i]*1;	//to make sure it's int
-			for (var i = 1; i < 12; i+=2) sum += isbn[i]*3;
-			sum += isbn[12]*1; //add the check digit
-
-			return (sum % 10 == 0 )? isbn : false;
-		}
-
+		
 		return false;
 	},
 	
@@ -324,16 +326,17 @@ Zotero.Utilities = {
 	 *   cleanISBN
 	 * @return {String} ISBN-13
 	 */
-	"toISBN13": function(isbn) {
-		if (!/^(?:97[89])?\d{9}[\dxX]$/.test(isbn)
-			&& !(isbn = Zotero.Utilities.cleanISBN(isbn))
-		) {
-			throw new Error('Invalid ISBN: ' + isbn);
+	"toISBN13": function(isbnStr) {
+		var isbn;
+		if (!(isbn = Zotero.Utilities.cleanISBN(isbnStr, true))) {
+			throw new Error('ISBN not found in "' + isbnStr + '"');
 		}
 		
-		if (isbn.length == 13) return isbn; // Recalculate check digit?
-		
-		isbn = '978' + isbn.substr(0,9);
+		if (isbn.length == 13) {
+			isbn = isbn.substr(0,12); // Strip off check digit and re-calculate it
+		} else {
+			isbn = '978' + isbn.substr(0,9);
+		}
 		
 		var sum = 0;
 		for (var i = 0; i < 12; i++) {
@@ -350,22 +353,30 @@ Zotero.Utilities = {
 	 * Clean and validate ISSN.
 	 * Return issn if valid, otherwise return false
 	 */
-	"cleanISSN":function(/**String*/ issn) {
-		issn = issn.replace(/[^0-9a-z]+/ig, '').toUpperCase()	//we only want to ignore punctuation, spaces
-						.match(/[0-9]{7}[0-9X]/);
-		if(!issn) return false;
-		issn = issn[0];
-
-		// Verify ISSN checksum
-		var sum = 0;
-		for (var i = 0; i < 7; i++) {
-			if(issn[i] == 'X') return false;	//X can only be a check digit
-			sum += issn[i] * (8-i);
+	"cleanISSN":function(/**String*/ issnStr) {
+		issnStr = issnStr.toUpperCase()
+			.replace(/[\x2D\xAD\u2010-\u2015\u2043\u2212]+/g, ''); // Ignore dashes
+		var issnRE = /\b(?:\d\s*){7}[\dX]\b/g,
+			issnMatch;
+		while (issnMatch = issnRE.exec(issnStr)) {
+			var issn = issnMatch[0].replace(/\s+/g, '');
+			
+			// Verify ISSN checksum
+			var sum = 0;
+			for (var i = 0; i < 7; i++) {
+				sum += issn[i] * (8-i);
+			}
+			//check digit might be 'X'
+			sum += (issn[7] == 'X')? 10 : issn[7]*1;
+	
+			if (sum % 11 == 0) {
+				return issn.substring(0,4) + '-' + issn.substring(4);
+			}
+			
+			issnRE.lastIndex = issnMatch.index + 1; // Retry same spot + 1
 		}
-		//check digit might be 'X'
-		sum += (issn[7] == 'X')? 10 : issn[7]*1;
-
-		return (sum % 11 == 0) ? issn.substring(0,4) + '-' + issn.substring(4) : false;
+		
+		return false;
 	},
 	
 	/**
