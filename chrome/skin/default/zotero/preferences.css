@@ -236,15 +236,15 @@ grid row hbox:first-child
 	height: 250px;
 }
 
+#styleManager-updated
+{
+	width: 105px;
+}
+
 /* Shortcut Keys pane */
 #zotero-prefpane-keys row
 {
 	-moz-box-align: center;
-}
-
-#styleManager-updated
-{
-	width: 105px;
 }
 
 #zotero-prefpane-keys textbox
