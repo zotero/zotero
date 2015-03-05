@@ -242,19 +242,14 @@ grid row hbox:first-child
 }
 
 /* Shortcut Keys pane */
-#zotero-prefpane-keys row
+#zotero-prefpane-advanced-keys-tab row
 {
 	-moz-box-align: center;
 }
 
-#zotero-prefpane-keys textbox
+#zotero-prefpane-advanced-keys-tab textbox
 {
 	margin-left: -1px;
-}
-
-#zotero-prefpane-keys checkbox
-{
-	margin: .75em 0;
 }
 
 treechildren::-moz-tree-checkbox {
