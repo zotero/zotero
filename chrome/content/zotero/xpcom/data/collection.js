@@ -606,7 +606,10 @@ Zotero.Collection.prototype.erase = function(deleteItems) {
 	return Zotero.DB.executeTransaction(function* () {
 		var descendents = yield this.getDescendents(false, null, true);
 		var items = [];
-		notifierData[this.id] = { old: this.toJSON() };
+		notifierData[this.id] = {
+			libraryID: this.libraryID,
+			key: this.key
+		};
 		
 		var del = [];
 		for(var i=0, len=descendents.length; i<len; i++) {
@@ -615,7 +618,10 @@ Zotero.Collection.prototype.erase = function(deleteItems) {
 				collections.push(descendents[i].id);
 				var c = yield this.ObjectsClass.getAsync(descendents[i].id);
 				if (c) {
-					notifierData[c.id] = { old: c.toJSON() };
+					notifierData[c.id] = {
+						libraryID: c.libraryID,
+						key: c.key
+					};
 				}
 			}
 			// Descendent items

@@ -847,6 +847,10 @@ Zotero.Utilities = {
 		return newString;
 	},
 	
+	"capitalize": function (str) {
+		return str[0].toUpperCase() + str.substr(1);
+	},
+	
 	/**
 	 * Replaces accented characters in a string with ASCII equivalents
 	 *

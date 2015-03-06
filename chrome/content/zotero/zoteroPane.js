@@ -523,13 +523,17 @@ var ZoteroPane = new function()
 	function setHighlightedRowsCallback() {
 		var itemIDs = ZoteroPane_Local.getSelectedItems(true);
 		if (itemIDs && itemIDs.length) {
-			Zotero.Collections.getCollectionsContainingItems(itemIDs, true)
-			.then(function (collectionIDs) {
-				if (collectionIDs) {
-					ZoteroPane_Local.collectionsView.setHighlightedRows(collectionIDs);
+			Zotero.Promise.coroutine(function* () {
+				var collectionIDs = yield Zotero.Collections.getCollectionsContainingItems(itemIDs, true);
+				var ids = collectionIDs.map(id => "C" + id);
+				Zotero.debug(Zotero.Items.get(itemIDs).some(item => !item.publication));
+				if (!Zotero.Items.get(itemIDs).some(item => !item.publication)) {
+					ids.push("P");
 				}
-			})
-			.done();
+				if (ids.length) {
+					ZoteroPane_Local.collectionsView.setHighlightedRows(ids);
+				}
+			})();
 		}
 	}
 	
@@ -1543,7 +1547,7 @@ var ZoteroPane = new function()
 			var id = yield newItem.save();
 			
 			var newItem = yield Zotero.Items.getAsync(id);
-			item.clone(false, newItem, false, !Zotero.Prefs.get('groups.copyTags'));
+			yield item.clone(false, newItem, false, !Zotero.Prefs.get('groups.copyTags'));
 			yield newItem.save();
 			
 			if (self.collectionsView.selectedTreeRow.isCollection() && newItem.isTopLevelItem()) {
@@ -1591,7 +1595,10 @@ var ZoteroPane = new function()
 			)
 		};
 		
-		if (collectionTreeRow.isLibrary(true)) {
+		if (collectionTreeRow.isPublications()) {
+			var prompt = toDelete;
+		}
+		else if (collectionTreeRow.isLibrary(true)) {
 			// In library, don't prompt if meta key was pressed
 			var prompt = (force && !fromMenu) ? false : toTrash;
 		}

@@ -101,6 +101,9 @@ var ZoteroOverlay = new function()
 			
 			observerService.addObserver(zoteroObserver, "browser-delayed-startup-finished", false);
 			
+			// Set a flag for hi-res displays
+			Zotero.hiDPI = window.devicePixelRatio > 1;
+			
 			// Add a listener for toolbar change events
 			window.addEventListener("customizationchange", onToolbarChange, false);
 			

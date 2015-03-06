@@ -86,9 +86,14 @@ Zotero.URI = new function () {
 		
 		switch (libraryType) {
 			case 'user':
+			case 'publications':
 				var id = Zotero.Users.getCurrentUserID();
 				if (!id) {
 					throw new Exception("User id not available in Zotero.URI.getLibraryPath()");
+				}
+				
+				if (libraryType == 'publications') {
+					return "users/" + id + "/publications";
 				}
 				break;
 			
@@ -171,9 +176,32 @@ Zotero.URI = new function () {
 	 *
 	 * @param	{String}				itemURI
 	 * @param	{Zotero.Item|FALSE}
+	 * @return {Promise<Zotero.Item|FALSE>}
 	 */
-	this.getURIItem = function (itemURI) {
+	this.getURIItem = Zotero.Promise.method(function (itemURI) {
+		var {libraryID, key} = this._getURIObject(itemURI, 'item');
+		if (!key) return false;
+		return Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
+	});
+	
+	
+	/**
+	 * @param {String} itemURI
+	 * @return {Object|FALSE} - Object with 'libraryID' and 'key', or FALSE if item not found
+	 */
+	this.getURIItemLibraryKey = function (itemURI) {
 		return this._getURIObject(itemURI, 'item');
+	}
+	
+	
+	/**
+	 * @param {String} itemURI
+	 * @return {Integer|FALSE} - itemID of matching item, or FALSE if none
+	 */
+	this.getURIItemID = function (itemURI) {
+		var {libraryID, key} = this._getURIObject(itemURI, 'item');
+		if (!key) return false;
+		return Zotero.Items.getIDFromLibraryAndKey(libraryID, key);
 	}
 	
 	
@@ -182,9 +210,32 @@ Zotero.URI = new function () {
 	 *
 	 * @param	{String}				collectionURI
 	 * @param	{Zotero.Collection|FALSE}
+	 * @return {Promise<Zotero.Collection|FALSE>}
 	 */
-	this.getURICollection = function (collectionURI) {
+	this.getURICollection = Zotero.Promise.method(function (collectionURI) {
+		var {libraryID, key} = this._getURIObject(collectionURI, 'collection');
+		if (!key) return false;
+		return Zotero.Collections.getByLibraryAndKeyAsync(libraryID, key);
+	});
+	
+	
+	/**
+	 * @param {String} collectionURI
+	 * @return {Object|FALSE} - Object with 'libraryID' and 'key', or FALSE if item not found
+	 */
+	this.getURICollectionLibraryKey = function (collectionURI) {
 		return this._getURIObject(collectionURI, 'collection');
+	}
+	
+	
+	/**
+	 * @param {String} collectionURI
+	 * @return {Integer|FALSE} - collectionID of matching collection, or FALSE if none
+	 */
+	this.getURICollectionID = function (collectionURI) {
+		var {libraryID, key} = this._getURIObject(collectionURI, 'item');
+		if (!key) return false;
+		return Zotero.Collections.getIDFromLibraryAndKey(libraryID, key);
 	}
 	
 	
@@ -192,28 +243,25 @@ Zotero.URI = new function () {
 	 * Convert a library URI into a libraryID
 	 *
 	 * @param	{String}				libraryURI
-	 * @return	{Zotero.Collection|FALSE}
+	 * @return {Integer|FALSE} - libraryID, or FALSE if no matching library
 	 */
 	this.getURILibrary = function (libraryURI) {
-		return this._getURIObject(libraryURI, "library");
+		var {libraryID} = this._getURIObject(libraryURI, "library");
+		return libraryID !== undefined ? libraryID : false;
 	}
 	
 	
 	/**
 	 * Convert an object URI into an object (item, collection, etc.)
 	 *
-	 * @param	{String}	objectURI
-	 * @param	{"item"|"collection"|"library"}	[type]	The type of object to return. If the object
-	 *     is valid but not available, returns "false". Note that if type is "library", this
-	 *     this function may return null for the default library, which is distinct from false.
-	 *					
-	 * @return	{Zotero.Item|Zotero.Collection|Integer|NULL|FALSE}
+	 * @param {String}	objectURI
+	 * @param {'library'|'collection'|'item'} - The type of URI to expect
+	 * @return {Object|FALSE} - An object containing 'libraryID' and, if applicable, 'key',
+	 *                          or FALSE if library not found
 	 */
 	this._getURIObject = function (objectURI, type) {
-		var Types = type[0].toUpperCase() + type.substr(1) + 's';
-		var types = Types.toLowerCase();
-		
-		var libraryType = null;
+		var libraryType;
+		var libraryTypeID;
 		
 		// If this is a local URI, compare to the local user key
 		if (objectURI.match(/\/users\/local\//)) {
@@ -229,72 +277,82 @@ Zotero.URI = new function () {
 				}
 			}
 			*/
-			var libraryType = 'user';
-			var id = null;
+			libraryType = 'user';
+			libraryTypeID = null;
 		}
 		
 		// If not found, try global URI
 		if (!libraryType) {
-			if (objectURI.indexOf(_baseURI) != 0) {
-				throw ("Invalid base URI '" + objectURI + "' in Zotero.URI._getURIObject()");
+			if (!objectURI.startsWith(_baseURI)) {
+				throw new Error("Invalid base URI '" + objectURI + "'");
 			}
 			objectURI = objectURI.substr(_baseURI.length);
-			var typeRE = /^(users|groups)\/([0-9]+)(?:\/|$)/;
-			var matches = objectURI.match(typeRE);
+			let typeRE = /^(users|groups)\/([0-9]+)(?:\/|$)/;
+			let matches = objectURI.match(typeRE);
 			if (!matches) {
-				throw ("Invalid library URI '" + objectURI + "' in Zotero.URI._getURIObject()");
+				throw new Error("Invalid library URI '" + objectURI + "'");
 			}
-			var libraryType = matches[1].substr(0, matches[1].length-1);
-			var id = matches[2];
+			libraryType = matches[1].substr(0, matches[1].length-1);
+			libraryTypeID = matches[2];
 			objectURI = objectURI.replace(typeRE, '');
 		}
 		
-		if (libraryType == 'group') {
-			if (!Zotero.Groups.get(id)) {
+		if (libraryType == 'user' && objectURI.startsWith('publications/')) {
+			libraryType = 'publications';
+		}
+		
+		if (libraryType == 'user') {
+			var libraryID = Zotero.Libraries.userLibraryID;
+		}
+		else if (libraryType == 'group') {
+			if (!Zotero.Groups.exists(libraryTypeID)) {
 				return false;
 			}
-			var libraryID = Zotero.Groups.getLibraryIDFromGroupID(id);
+			var libraryID = Zotero.Groups.getLibraryIDFromGroupID(libraryTypeID);
+		}
+		else if (libraryType == 'publications') {
+			var libraryID = Zotero.Libraries.publicationsLibraryID;
 		}
 		
 		if(type === 'library') {
 			if (libraryType == 'user') {
-				if(id === null) {
+				if (libraryTypeID) {
+					if (libraryTypeID == Zotero.Users.getCurrentUserID())  {
+						return {
+							libraryID: libraryID
+						};
+					}
+				}
+				else {
 					var localUserURI = this.getLocalUserURI();
 					if (localUserURI) {
 						localUserURI += "/";
-						if (objectURI.indexOf(localUserURI) == 0) {
-							objectURI = objectURI.substr(localUserURI.length);
-							return null;
+						if (objectURI.startsWith(localUserURI)) {
+							return {
+								libraryID: Zotero.Libraries.userLibraryID
+							};
 						}
 					}
-				} else {
-					if(id == Zotero.Users.getCurrentUserID())  {
-						return null;
-					}
 				}
-				
 				return false;
 			}
 			
 			if (libraryType == 'group') {
-				return libraryID;
+				return {
+					libraryID: libraryID
+				};
 			}
 		} else {
-			// TODO: objectID-based URI?
-			var re = new RegExp(types + "\/([A-Z0-9]{8})");
+			var re = /(?:items|collections)\/([A-Z0-9]{8})/;
 			var matches = objectURI.match(re);
 			if (!matches) {
 				throw ("Invalid object URI '" + objectURI + "' in Zotero.URI._getURIObject()");
 			}
-			var objectKey = matches[1];
-	
-			if (libraryType == 'user') {
-				return Zotero[Types].getByLibraryAndKey(null, objectKey);
-			}
-			
-			if (libraryType == 'group') {
-				return Zotero[Types].getByLibraryAndKey(libraryID, objectKey);
-			}
+			let objectKey = matches[1];
+			return {
+				libraryID: libraryID,
+				key: objectKey
+			};
 		}
 	}
 }

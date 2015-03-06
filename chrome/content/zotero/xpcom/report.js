@@ -143,7 +143,7 @@ Zotero.Report.HTML = new function () {
 				}
 				for (let i=0; i<rels.length; i++) {
 					let rel = rels[i];
-					let relItem = Zotero.URI.getURIItem(rel);
+					let relItem = yield Zotero.URI.getURIItem(rel);
 					if (relItem) {
 						content += '\t\t\t\t\t<li id="item_' + relItem.key + '">';
 						content += escapeXML(relItem.getDisplayTitle());

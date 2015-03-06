@@ -10,6 +10,12 @@
 	overflow: hidden;
 }
 
+/* Why is this necessary? */
+#zotero-collections-tree treechildren::-moz-tree-image,
+#zotero-items-tree treechildren::-moz-tree-image {
+	margin-right: 5px;
+}
+
 #zotero-collections-pane
 {
 	min-width: 150px;
@@ -20,17 +26,17 @@
 	min-height: 5.2em;
 }
 
-#zotero-collections-tree treechildren::-moz-tree-image(primary)
-{
-	margin-right: 5px;
+#zotero-collections-tree treechildren::-moz-tree-row {
+	height: 1.7em;
 }
 
-#zotero-collections-tree #zotero-collections-sync-status-column {
-	width: 35px;
-}
+/*#zotero-collections-tree treechildren::-moz-tree-separator {
+	border: none;
+}*/
 
-#zotero-collections-tree[hidevscroll] #zotero-collections-sync-status-column {
-	width: 21px;
+#zotero-collections-tree treechildren::-moz-tree-twisty(notwisty),
+#zotero-collections-tree treechildren::-moz-tree-twisty(header) {
+	width: 0;
 }
 
 /* Set by setHighlightedRows() and getRowProperties() in collectionTreeView.js) */
@@ -38,11 +44,6 @@
 {
 	background: #FFFF99 !important;
 }
-
-/*#zotero-collections-tree treechildren::-moz-tree-row(separator)
-{
-	height: .25em;
-}*/
 
 #zotero-pane splitter
 {
@@ -58,11 +59,6 @@
 
 #zotero-items-column-numNotes {
 	text-align: center;
-}
-
-#zotero-items-tree treechildren::-moz-tree-image
-{
-	margin-right: 5px;
 }
 
 #zotero-items-tree treechildren::-moz-tree-image(hasAttachment, pie)

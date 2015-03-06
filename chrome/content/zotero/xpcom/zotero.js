@@ -2079,7 +2079,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		//Zotero.Fulltext.purgeUnusedWords();
 		yield Zotero.Items.purge();
 		// DEBUG: this might not need to be permanent
-		Zotero.Relations.purge();
+		yield Zotero.Relations.purge();
 		yield Zotero.CharacterSets.purge();
 	});
 	
@@ -2679,7 +2679,7 @@ Zotero.DragDrop = {
 	
 	getDragSource: function (dataTransfer) {
 		if (!dataTransfer) {
-			Zotero.debug("Drag data not available", 2);
+			//Zotero.debug("Drag data not available", 2);
 			return false;
 		}
 		

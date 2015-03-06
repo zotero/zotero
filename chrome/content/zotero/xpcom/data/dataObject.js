@@ -292,6 +292,7 @@ Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function
 	var predicate = Zotero.Relations.linkedObjectPredicate;
 	var uri = Zotero.URI['get' + this._ObjectType + 'URI'](this);
 	
+	// Get all relations with this object as the subject or object
 	var links = yield Zotero.Promise.all([
 		Zotero.Relations.getSubject(false, predicate, uri),
 		Zotero.Relations.getObject(uri, predicate, false)
@@ -311,7 +312,7 @@ Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function
 	
 	for (let i=0; i<links.length; i++) {
 		let link = links[i];
-		if (link.indexOf(libraryObjectPrefix) == 0) {
+		if (link.startsWith(libraryObjectPrefix)) {
 			var obj = yield Zotero.URI['getURI' + this._ObjectType](link);
 			if (!obj) {
 				Zotero.debug("Referenced linked " + this._objectType + " '" + link + "' not found "
@@ -599,6 +600,7 @@ Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* () {
 		yield this._erasePreCommit(env);
 	}.bind(this))
 	.catch(e => {
+		Zotero.debug(e);
 		return this._eraseRecoverFromFailure(env);
 	});
 	

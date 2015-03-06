@@ -476,6 +476,11 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				yield this.refresh();
 			}
 		}
+		else if (type == 'publications') {
+			if (collectionTreeRow.isPublications()) {
+				yield this.refresh();
+			}
+		}
 		// If refreshing a single item, clear caches and then unselect and reselect row
 		else if (savedSelection.length == 1 && savedSelection[0] == ids[0]) {
 			let row = this._itemRowMap[ids[0]];
@@ -545,7 +550,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			var rows = [];
 			for (var i=0, len=ids.length; i<len; i++) {
 				let push = false;
-				if (action == 'delete' && action == 'trash') {
+				if (action == 'delete' || action == 'trash') {
 					push = true;
 				}
 				else {
@@ -627,8 +632,15 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 					var parentItemID = this.getRow(row).ref.parentItemID;
 					var parentIndex = this.getParentIndex(row);
 					
-					if (this.isContainer(row))
-					{
+					// Top-level item
+					if (this.isContainer(row)) {
+						// If removed from My Publications, remove row
+						if (collectionTreeRow.isPublications() && !item.publication) {
+							this._removeRow(row);
+							this._treebox.rowCountChanged(row, -1)
+							continue;
+						}
+						
 						//yield this.toggleOpenState(row);
 						//yield this.toggleOpenState(row);
 						sort = id;
@@ -1753,7 +1765,7 @@ Zotero.ItemTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(functio
 	if (collectionTreeRow.isBucket()) {
 		collectionTreeRow.ref.deleteItems(ids);
 	}
-	else if (collectionTreeRow.isTrash()) {
+	else if (collectionTreeRow.isTrash() || collectionTreeRow.isPublications()) {
 		Zotero.Items.erase(ids);
 	}
 	else if (collectionTreeRow.isLibrary(true) || force) {

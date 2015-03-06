@@ -1007,7 +1007,6 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					continue;
 				
 				case 'unfiled':
-					this._conditions[i]['operator']
 					var unfiled = this._conditions[i]['operator'] == 'true';
 					continue;
 				
@@ -1704,7 +1703,10 @@ Zotero.Searches = function() {
 				search.id = id;
 				yield search.loadPrimaryData();
 				yield search.loadConditions();
-				notifierData[id] = { old: search.serialize() };
+				notifierData[id] = {
+					libraryID: this.libraryID,
+					old: search.serialize() // TODO: replace with toJSON()
+				};
 				
 				var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
 				yield Zotero.DB.queryAsync(sql, id);
@@ -1712,7 +1714,7 @@ Zotero.Searches = function() {
 				var sql = "DELETE FROM savedSearches WHERE savedSearchID=?";
 				yield Zotero.DB.queryAsync(sql, id);
 			}
-		});
+		}.bind(this));
 		
 		Zotero.Notifier.trigger('delete', 'search', ids, notifierData);
 	});
@@ -1784,8 +1786,6 @@ Zotero.SearchConditions = new function(){
 			//
 			// Special conditions
 			//
-			
-			
 			{
 				name: 'deleted',
 				operators: {

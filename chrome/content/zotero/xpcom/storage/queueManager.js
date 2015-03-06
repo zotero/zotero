@@ -301,14 +301,14 @@ Zotero.Sync.Storage.QueueManager = new function () {
 	}
 	
 	
-	function _reconcileConflicts(conflicts) {
+	var _reconcileConflicts = Zotero.Promise.coroutine(function* (conflicts) {
 		var objectPairs = [];
 		for each(var conflict in conflicts) {
 			var item = Zotero.Sync.Storage.getItemFromRequestName(conflict.name);
-			var item1 = item.clone(false, false, true);
+			var item1 = yield item.clone(false, false, true);
 			item1.setField('dateModified',
 				Zotero.Date.dateToSQL(new Date(conflict.localData.modTime), true));
-			var item2 = item.clone(false, false, true);
+			var item2 = yield item.clone(false, false, true);
 			item2.setField('dateModified',
 				Zotero.Date.dateToSQL(new Date(conflict.remoteData.modTime), true));
 			objectPairs.push([item1, item2]);
@@ -342,7 +342,7 @@ Zotero.Sync.Storage.QueueManager = new function () {
 		}
 		
 		return io.dataOut;
-	}
+	});
 	
 	
 	function _processMergeData(data) {

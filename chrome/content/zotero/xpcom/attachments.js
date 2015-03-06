@@ -1064,7 +1064,8 @@ Zotero.Attachments = new function(){
 			throw ("Attachment is already in library " + libraryID);
 		}
 		
-		var newAttachment = attachment.clone(libraryID);
+		attachment.loadItemData();
+		var newAttachment = yield attachment.clone(libraryID);
 		if (attachment.isImportedAttachment()) {
 			// Attachment path isn't copied over by clone() if libraryID is different
 			newAttachment.attachmentPath = attachment.attachmentPath;

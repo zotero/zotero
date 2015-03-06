@@ -1420,6 +1420,7 @@ Zotero.Schema = new function(){
 			yield _updateDBVersion('compatibility', _maxCompatibility);
 			
 			yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, libraryType) VALUES (?, 'user')", userLibraryID);
+			yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, libraryType) VALUES (2, 'publications')");
 			
 			if (!Zotero.Schema.skipDefaultData) {
 				// Quick Start Guide web page item
@@ -1775,6 +1776,7 @@ Zotero.Schema = new function(){
 						yield _updateDBVersion('compatibility', 1);
 						
 						yield Zotero.DB.queryAsync("INSERT INTO libraries VALUES (1, 'user')");
+						yield Zotero.DB.queryAsync("INSERT INTO libraries VALUES (2, 'publications')");
 						
 						let oldUserLibraryID = yield Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='account' AND key='libraryID'");
 						

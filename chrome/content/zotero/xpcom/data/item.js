@@ -77,6 +77,7 @@ Zotero.Item = function(itemTypeOrID) {
 	this._fileExists = null;
 	
 	this._deleted = null;
+	this._publication = null;
 	this._hasNote = null;
 	
 	this._noteAccessTime = null;
@@ -1037,28 +1038,35 @@ Zotero.Item.prototype.removeCreator = function(orderIndex, allowMissing) {
 	return true;
 }
 
-Zotero.defineProperty(Zotero.Item.prototype, 'deleted', {
-	get: function() {
-		if (!this.id) {
-			return false;
+
+// Define 'deleted' and 'publication' properties
+for (let name of ['deleted', 'publication']) {
+	let prop = '_' + name;
+	
+	Zotero.defineProperty(Zotero.Item.prototype, name, {
+		get: function() {
+			if (!this.id) {
+				return false;
+			}
+			if (this[prop] !== null) {
+				return this[prop];
+			}
+			this._requireData('primaryData');
+		},
+		set: function(val) {
+			val = !!val;
+			
+			if (this[prop] == val) {
+				Zotero.debug(Zotero.Utilities.capitalize(name)
+					+ " state hasn't changed for item " + this.id);
+				return;
+			}
+			this._markFieldChange('publication', !!this[prop]);
+			this._changed[name] = true;
+			this[prop] = val;
 		}
-		if (this._deleted !== null) {
-			return this._deleted;
-		}
-		this._requireData('primaryData');
-	},
-	set: function(val) {
-		var deleted = !!val;
-		
-		if (this._deleted == deleted) {
-			Zotero.debug("Deleted state hasn't changed for item " + this.id);
-			return;
-		}
-		this._markFieldChange('deleted', !!this._deleted);
-		this._changed.deleted = true;
-		this._deleted = deleted;
-	}
-});
+	});
+}
 
 
 Zotero.Item.prototype.addRelatedItem = Zotero.Promise.coroutine(function* (itemID) {
@@ -1407,7 +1415,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	
 	// Trashed status
 	if (this._changed.deleted) {
-		if (this.deleted) {
+		if (this._deleted) {
 			sql = "REPLACE INTO deletedItems (itemID) VALUES (?)";
 		}
 		else {
@@ -3710,14 +3718,14 @@ Zotero.Item.prototype.multiDiff = Zotero.Promise.coroutine(function* (otherItems
  * @param {Number} [libraryID] - libraryID of the new item, or the same as original if omitted
  * @param {Boolean} [skipTags=false] - Skip tags
  */
-Zotero.Item.prototype.clone = function(libraryID, skipTags) {
+Zotero.Item.prototype.clone = Zotero.Promise.coroutine(function* (libraryID, skipTags) {
 	Zotero.debug('Cloning item ' + this.id);
 	
 	if (libraryID !== undefined && libraryID !== null && typeof libraryID !== 'number') {
 		throw new Error("libraryID must be null or an integer");
 	}
 	
-	this._requireData('primaryData');
+	yield this.loadPrimaryData();
 	
 	if (libraryID === undefined || libraryID === null) {
 		libraryID = this.libraryID;
@@ -3728,6 +3736,7 @@ Zotero.Item.prototype.clone = function(libraryID, skipTags) {
 	newItem.libraryID = libraryID;
 	newItem.setType(this.itemTypeID);
 	
+	yield this.loadItemData();
 	var fieldIDs = this.getUsedFields();
 	for (let i = 0; i < fieldIDs.length; i++) {
 		let fieldID = fieldIDs[i];
@@ -3736,9 +3745,11 @@ Zotero.Item.prototype.clone = function(libraryID, skipTags) {
 	
 	// Regular item
 	if (this.isRegularItem()) {
+		yield this.loadCreators();
 		newItem.setCreators(newItem.getCreators());
 	}
 	else {
+		yield this.loadNote();
 		newItem.setNote(this.getNote());
 		if (sameLibrary) {
 			var parent = this.parentKey;
@@ -3763,16 +3774,18 @@ Zotero.Item.prototype.clone = function(libraryID, skipTags) {
 	}
 	
 	if (!skipTags) {
+		yield this.loadTags();
 		newItem.setTags(this.getTags());
 	}
 	
 	if (sameLibrary) {
 		// DEBUG: this will add reverse-only relateds too
+		yield this.loadRelations();
 		newItem.setRelations(this.getRelations());
 	}
 	
 	return newItem;
-}
+});
 
 
 /**
@@ -3791,7 +3804,10 @@ Zotero.Item.prototype._eraseInit = Zotero.Promise.coroutine(function* (env) {
 	if (!proceed) return false;
 	
 	env.deletedItemNotifierData = {};
-	env.deletedItemNotifierData[this.id] = { old: this.toJSON() };
+	env.deletedItemNotifierData[this.id] = {
+		libraryID: this.libraryID,
+		key: this.key
+	};
 	
 	return true;
 });
@@ -4572,9 +4588,9 @@ Zotero.Item.prototype._getRelatedItems = function () {
 	// Pull out object values from related-item relations, turn into items, and pull out keys
 	var keys = [];
 	for (let i=0; i<relatedItemURIs.length; i++) {
-		item = Zotero.URI.getURIItem(relatedItemURIs[i]);
-		if (item) {
-			keys.push(item.key);
+		let {libraryID, key} = Zotero.URI.getURIItemLibraryKey(relatedItemURIs[i]);
+		if (key) {
+			keys.push(key);
 		}
 	}
 	return keys;

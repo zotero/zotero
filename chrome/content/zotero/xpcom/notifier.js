@@ -28,7 +28,8 @@ Zotero.Notifier = new function(){
 	var _disabled = false;
 	var _types = [
 		'collection', 'search', 'share', 'share-items', 'item', 'file',
-		'collection-item', 'item-tag', 'tag', 'setting', 'group', 'trash', 'bucket', 'relation'
+		'collection-item', 'item-tag', 'tag', 'setting', 'group', 'trash', 'publications',
+		'bucket', 'relation'
 	];
 	var _inTransaction;
 	var _locked = false;
@@ -50,7 +51,7 @@ Zotero.Notifier = new function(){
 			
 			for (var i=0; i<types.length; i++){
 				if (_types.indexOf(types[i]) == -1){
-					throw ('Invalid type ' + types[i] + ' in registerObserver()');
+					throw new Error('Invalid type ' + types[i] + ' in registerObserver()');
 				}
 			}
 		}

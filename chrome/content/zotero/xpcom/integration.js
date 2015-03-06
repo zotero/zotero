@@ -3100,6 +3100,8 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
 		
 		// Next try getting URI directly
 		try {
+			// TEMP
+			throw new Error("getURIItem() is now async");
 			zoteroItem = Zotero.URI.getURIItem(uri);
 			if(zoteroItem) {
 				// Ignore items in the trash
@@ -3134,6 +3136,8 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
 			seen.push(uri);
 			
 			try {
+				// TEMP
+				throw new Error("getURIItem() is now async");
 				zoteroItem = Zotero.URI.getURIItem(uri);
 				if(zoteroItem) {
 					// Ignore items in the trash

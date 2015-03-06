@@ -105,6 +105,7 @@ Zotero.LibraryTreeView.prototype = {
 		else {
 			throw new Error("Invalid tree id '" + tree.id + "'");
 		}
+		
 		if (!view.canDropCheck(row.value, Zotero.DragDrop.currentOrientation, event.dataTransfer)) {
 			this._setDropEffect(event, "none");
 			return;

@@ -51,8 +51,8 @@ Zotero.Relation.prototype.__defineSetter__('object', function (val) { this._set(
 
 
 Zotero.Relation.prototype._get = function (field) {
-	if (this._id && !this._loaded) {
-		this.load();
+	if (!this._loaded) {
+		throw new Error("Data not loaded for relation " + this._id);
 	}
 	return this['_' + field];
 }
@@ -214,7 +214,8 @@ Zotero.Relation.prototype.erase = Zotero.Promise.coroutine(function* () {
 	
 	var deleteData = {};
 	deleteData[this.id] = {
-		old: this.serialize()
+		libraryID: this.libraryID,
+		key: Zotero.Utilities.Internal.md5(this.subject + "_" + this.predicate + "_" + this.object)
 	}
 	
 	var sql = "DELETE FROM relations WHERE ROWID=?";
@@ -249,15 +250,11 @@ Zotero.Relation.prototype.serialize = function () {
 	var key = Zotero.Utilities.Internal.md5(this.subject + "_" + this.predicate + "_" + this.object);
 	
 	var obj = {
-		primary: {
-			libraryID: this.libraryID,
-			key: key,
-		},
-		fields: {
-			subject: this.subject,
-			predicate: this.predicate,
-			object: this.object
-		}
+		libraryID: this.libraryID,
+		key: key,
+		subject: this.subject,
+		predicate: this.predicate,
+		object: this.object
 	};
 	return obj;
 }
