@@ -59,10 +59,6 @@ toolbarpaletteitem[place="palette"] #zotero-toolbar-buttons #zotero-toolbar-save
 	display:none;
 }
 
-toolbarpaletteitem[place="palette"] #zotero-toolbar-save-button-single {
-	padding: 3px 1px;
-}
-
 /* Show webpage icon in gray when no translators */
 #zotero-toolbar-save-button:not(.translate),
 #zotero-toolbar-save-button-single:not(.translate),
