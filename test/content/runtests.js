@@ -1,0 +1,88 @@
+Components.utils.import("resource://gre/modules/FileUtils.jsm");
+Components.utils.import("resource://gre/modules/osfile.jsm")
+
+var ZoteroUnit = Components.classes["@mozilla.org/commandlinehandler/general-startup;1?type=zotero-unit"].
+	             getService(Components.interfaces.nsISupports).
+	             wrappedJSObject;
+var dump = ZoteroUnit.dump;
+
+function quit(failed) {
+	// Quit with exit status
+	if(!failed) {
+		OS.File.writeAtomic(FileUtils.getFile("ProfD", ["success"]).path, Uint8Array(0));
+	}
+	Components.classes['@mozilla.org/toolkit/app-startup;1'].
+	getService(Components.interfaces.nsIAppStartup).
+	quit(Components.interfaces.nsIAppStartup.eForceQuit);
+}
+
+function Reporter(runner) {
+	var indents = 0, passed = 0, failed = 0;
+
+	function indent() {
+		return Array(indents).join('  ');
+	}
+
+	runner.on('start', function(){});
+
+	runner.on('suite', function(suite){
+		++indents;
+		dump(indent()+suite.title+"\n");
+	});
+
+	runner.on('suite end', function(suite){
+		--indents;
+		if (1 == indents) dump("\n");
+	});
+
+	runner.on('pending', function(test){
+		dump(indent()+"pending  -"+test.title);
+	});
+
+	runner.on('pass', function(test){
+		passed++;
+		var msg = "\r"+indent()+Mocha.reporters.Base.symbols.ok+" "+test.title;
+		if ('fast' != test.speed) {
+			msg += " ("+Math.round(test.duration)+" ms)";
+		}
+		dump(msg+"\n");
+	});
+
+	runner.on('fail', function(test, err){
+		failed++;
+		dump("\r"+indent()+Mocha.reporters.Base.symbols.err+" "+test.title+"\n");
+	});
+
+	runner.on('end', function() {
+		dump(passed+"/"+(passed+failed)+" tests passed.\n");
+		quit(failed != 0);
+	});
+}
+
+// Setup Mocha
+mocha.setup({ui:"bdd", reporter:Reporter});
+var assert = chai.assert,
+    expect = chai.expect;
+
+// Set up tests to run
+if(ZoteroUnit.tests) {
+	document.body.appendChild(document.createTextNode("Running tests..."));
+	var torun = ZoteroUnit.tests == "all" ? Object.keys(TESTS) : ZoteroUnit.tests.split(",");
+
+	for(var key of torun) {
+		if(!TESTS[key]) {
+			dump("Invalid test set "+torun+"\n");
+			quit(true);
+		}
+		for(var test of TESTS[key]) {
+			var el = document.createElement("script");
+			el.type = "application/javascript;version=1.8";
+			el.src = "resource://zotero-unit-tests/"+test;
+			document.body.appendChild(el);
+		}
+	}
+}
+
+window.onload = function() {
+	mocha.run();
+};

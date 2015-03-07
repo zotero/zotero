@@ -1,0 +1,16 @@
+language: cpp
+compiler:
+    - gcc
+env:
+    matrix:
+        - FIREFOXVERSION="36.0.1"
+        - FIREFOXVERSION="31.5.0esr"
+notifications:
+    email: false
+before_install:
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+    - wget http://ftp.mozilla.org/pub/firefox/releases/${FIREFOXVERSION}/linux-x86_64/en-US/firefox-${FIREFOXVERSION}.tar.bz2
+    - tar -xjf firefox-${FIREFOXVERSION}.tar.bz2
+script:
+    - test/runtests.sh -x firefox/firefox
