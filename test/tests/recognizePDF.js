@@ -31,4 +31,22 @@ describe("PDF Recognition", function() {
 			assert.equal(item.getField("libraryCatalog"), "CrossRef");
 		});
 	});
+
+	it("should recognize a PDF without a DOI", function() {
+		this.timeout(30000);
+		// Import the PDF
+		var testdir = getTestDataDirectory();
+		testdir.append("recognizePDF_test_GS.pdf");
+		var id = Zotero.Attachments.importFromFile(testdir);
+
+		// Recognize the PDF
+		win.ZoteroPane.selectItem(id);
+		win.Zotero_RecognizePDF.recognizeSelected();
+
+		return waitForItemEvent("add").then(function(ids) {
+			var item = Zotero.Items.get(ids[0]);
+			assert.equal(item.getField("title"), "Scaling study of an improved fermion action on quenched lattices");
+			assert.equal(item.getField("libraryCatalog"), "Google Scholar");
+		});
+	});
 });
