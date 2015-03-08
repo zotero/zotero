@@ -825,28 +825,46 @@ Zotero.HTTP = new function() {
 			firedLoadEvent = true;
 		};
 		
+		var pageLoadFailed = function(e, hiddenBrowser) {
+			hiddenBrowser.removeEventListener("pageshow", onPageShow, true);
+			hiddenBrowser.removeEventListener("load", onLoad, true);
+			hiddenBrowser.zotero_loaded = true;
+			
+			if (exception) {
+				try {
+					exception(e);
+				} catch(e2) {
+					if(!dontDelete) Zotero.Browser.deleteHiddenBrowser(hiddenBrowsers);
+					throw (e2);
+				}
+			} else {
+				if(!dontDelete) Zotero.Browser.deleteHiddenBrowser(hiddenBrowsers);
+				throw(e);
+			}
+		}
+		
 		/**
 		 * Loads the next page
 		 * @inner
 		 */
+		// Browser from event object doesn't carry over properties that we set
+		// e.g. zotero_loaded
+		// Loads are sequential, so this should be fine
+		var currentBrowser;
 		var doLoad = function() {
 			if(currentURL < urls.length) {
-				var url = urls[currentURL],
-					hiddenBrowser = hiddenBrowsers[currentURL];
+				var url = urls[currentURL];
+				currentBrowser = hiddenBrowsers[currentURL];
 				firedPageShowEvent = 0;
 				currentURL++;
 				try {
 					Zotero.debug("Zotero.HTTP.processDocuments: Loading "+url);
 					firedLoadEvent = false;
-					hiddenBrowser.loadURI(url);
+					currentBrowser.zotero_requestedURL = url;
+					currentBrowser.loadURI(url);
 				} catch(e) {
-					if(exception) {
-						exception(e);
-						return;
-					} else {
-						if(!dontDelete) Zotero.Browser.deleteHiddenBrowser(hiddenBrowsers);
-						throw(e);
-					}
+					pageLoadFailed(e, currentBrowser);
+					return;
 				}
 			} else {
 				if(!dontDelete) Zotero.Browser.deleteHiddenBrowser(hiddenBrowsers);
@@ -874,12 +892,26 @@ Zotero.HTTP = new function() {
 			 */
 			if (!firedLoadEvent && !e.persisted) return;
 			
-			var hiddenBrowser = e.currentTarget,
+			if (currentBrowser.zotero_loaded) return;
+			
+			// Besides our custom properties, e.currentTarget (hiddenBrowser) is
+			// different from currentBrowser in other ways.
+			// e.g. hiddenBrowser.contentDocument.readyState != currentBrowser.contentDocument.readyState
+			var hiddenBrowser = e.currentTarget;
 				doc = hiddenBrowser.contentDocument;
-			if(hiddenBrowser.zotero_loaded) return;
 			if(!doc) return;
+			
 			var url = doc.documentURI;
-			if(url === "about:blank") return;
+			if (url == "about:blank" && doc.readyState == "complete") {
+				// Page failed to load due to network error (e.g. server not found)
+				pageLoadFailed(new Error("Zotero.HTTP.processDocuments: Failed to load page from "
+						+ currentBrowser.zotero_requestedURL),
+					currentBrowser
+				);
+				return;
+			}
+			if (url == "about:blank") return;
+			
 			if(doc.readyState === "loading" && (firedPageShowEvent++) < 120) {
 				// Try again in a second
 				Zotero.setTimeout(onPageShow.bind(this, {"currentTarget":hiddenBrowser}), 1000);
