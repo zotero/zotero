@@ -10,6 +10,11 @@ describe("PDF Recognition", function() {
 			win = w;
 		});
 	});
+	afterEach(function() {
+		for(let win of getWindows("chrome://zotero/content/pdfProgress.xul")) {
+			win.close();
+		}
+	});
 	after(function() {
 		win.close();
 	});
