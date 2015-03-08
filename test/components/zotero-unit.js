@@ -32,6 +32,7 @@ ZoteroUnit.prototype = {
 	/* nsICommandLineHandler */
 	handle:function(cmdLine) {
 		this.tests = cmdLine.handleFlagWithParam("test", false);
+		this.noquit = cmdLine.handleFlag("noquit", false);
 	},
 
 	dump:function(x) {

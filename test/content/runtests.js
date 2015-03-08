@@ -1,5 +1,5 @@
 Components.utils.import("resource://gre/modules/FileUtils.jsm");
-Components.utils.import("resource://gre/modules/osfile.jsm")
+Components.utils.import("resource://gre/modules/osfile.jsm");
 
 var ZoteroUnit = Components.classes["@mozilla.org/commandlinehandler/general-startup;1?type=zotero-unit"].
 	             getService(Components.interfaces.nsISupports).
@@ -11,9 +11,11 @@ function quit(failed) {
 	if(!failed) {
 		OS.File.writeAtomic(FileUtils.getFile("ProfD", ["success"]).path, Uint8Array(0));
 	}
-	Components.classes['@mozilla.org/toolkit/app-startup;1'].
-	getService(Components.interfaces.nsIAppStartup).
-	quit(Components.interfaces.nsIAppStartup.eForceQuit);
+	if(!ZoteroUnit.noquit) {
+		Components.classes['@mozilla.org/toolkit/app-startup;1'].
+		getService(Components.interfaces.nsIAppStartup).
+		quit(Components.interfaces.nsIAppStartup.eForceQuit);
+	}
 }
 
 function Reporter(runner) {
@@ -50,7 +52,9 @@ function Reporter(runner) {
 
 	runner.on('fail', function(test, err){
 		failed++;
-		dump("\r"+indent()+Mocha.reporters.Base.symbols.err+" "+test.title+"\n");
+		dump("\r"+indent()+Mocha.reporters.Base.symbols.err+" "+test.title+"\n"+
+		     indent()+"  "+err.toString()+" at\n"+
+		     indent()+"    "+err.stack.replace("\n", "\n"+indent()+"    ", "g"));
 	});
 
 	runner.on('end', function() {
