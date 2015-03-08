@@ -1,15 +1,25 @@
 /**
+ * Waits for a DOM event on the specified node. Returns a promise
+ * resolved with the event.
+ */
+function waitForDOMEvent(target, event, capture) {
+	var deferred = Q.defer();
+	var func = function(ev) {
+		target.removeEventListener("event", func, capture);
+		deferred.resolve(ev);
+	}
+	target.addEventListener(event, func, capture);
+	return deferred.promise;
+}
+
+/**
  * Open a window. Returns a promise for the window.
  */
 function loadWindow(winurl, argument) {
-	var deferred = Q.defer();
 	var win = window.openDialog(winurl, "_blank", "chrome", argument);
-	var func = function() {
-		win.removeEventListener("load", func, false);
-		deferred.resolve(win);
-	};
-	win.addEventListener("load", func, false);
-	return deferred.promise;
+	return waitForDOMEvent(win, "load").then(function() {
+		return win;
+	});
 }
 
 /**
@@ -47,7 +57,7 @@ function waitForWindow(uri) {
 		var win = subject.QueryInterface(Components.interfaces.nsIDOMWindow);
 		win.addEventListener("load", loadobserver, false);
 	}};
-	var enumerator = Services.ww.registerNotification(winobserver);
+	Services.ww.registerNotification(winobserver);
 	return deferred.promise;
 }
 
@@ -66,7 +76,57 @@ function waitForItemEvent(event) {
 }
 
 /**
- * Ensures that the PDF tools are installed, or installs them if not. Returns a promise.
+ * Looks for windows with a specific URL.
+ */
+function getWindows(uri) {
+	Components.utils.import("resource://gre/modules/Services.jsm");
+	var enumerator = Services.wm.getEnumerator(null);
+	var wins = [];
+	while(enumerator.hasMoreElements()) {
+		var win = enumerator.getNext();
+		if(win.location == uri) {
+			wins.push(win);
+		}
+	}
+	return wins;
+}
+
+/**
+ * Resolve a promise when a specified callback returns true. interval
+ * specifies the interval between checks. timeout specifies when we
+ * should assume failure.
+ */
+function waitForCallback(cb, interval, timeout) {
+	var deferred = Q.defer();
+	if(interval === undefined) interval = 100;
+	if(timeout === undefined) timeout = 10000;
+	var start = Date.now();
+	var id = setInterval(function() {
+		var success = cb();
+		if(success) {
+			clearInterval(id);
+			deferred.resolve(success);
+		} else if(Date.now() - start > timeout*1000) {
+			clearInterval(id);
+			deferred.reject(new Error("Promise timed out"));
+		}
+	}, interval);
+	return deferred.promise;
+}
+
+/**
+ * Returns a promise that is resolved once the translators are loaded.
+ */
+function waitForTranslators() {
+	return waitForCallback(function() {
+		// Just wait for the zotero.org translator to load
+		return !!Zotero.Translators.get("c82c574d-7fe8-49ca-a360-a05d6e34fec0");
+	});
+}
+
+/**
+ * Ensures that the PDF tools are installed, or installs them if not.
+ * Returns a promise.
  */
 function installPDFTools() {
 	if(Zotero.Fulltext.pdfConverterIsRegistered() && Zotero.Fulltext.pdfInfoIsRegistered()) {
@@ -84,15 +144,11 @@ function installPDFTools() {
 			dlg.document.documentElement.acceptDialog();
 
 			// Wait for install to finish
-			var deferred = Q.defer();
-			var id = setInterval(function() {
-				if(Zotero.Fulltext.pdfConverterIsRegistered() && Zotero.Fulltext.pdfInfoIsRegistered()) {
-					win.close();
-					clearInterval(id);
-					deferred.resolve(true);
-				}
-			}, 500);
-			return deferred.promise;
+			return waitForCallback(function() {
+				return Zotero.Fulltext.pdfConverterIsRegistered() && Zotero.Fulltext.pdfInfoIsRegistered();
+			}, 500, 30000).finally(function() {
+				win.close();
+			});
 		});
 	});
 }
