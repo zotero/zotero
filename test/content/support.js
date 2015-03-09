@@ -115,16 +115,6 @@ function waitForCallback(cb, interval, timeout) {
 }
 
 /**
- * Returns a promise that is resolved once the translators are loaded.
- */
-function waitForTranslators() {
-	return waitForCallback(function() {
-		// Just wait for the zotero.org translator to load
-		return !!Zotero.Translators.get("c82c574d-7fe8-49ca-a360-a05d6e34fec0");
-	});
-}
-
-/**
  * Ensures that the PDF tools are installed, or installs them if not.
  * Returns a promise.
  */

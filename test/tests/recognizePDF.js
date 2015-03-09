@@ -4,11 +4,12 @@ describe("PDF Recognition", function() {
 	var win;
 	before(function() {
 		this.timeout(60000);
-		return installPDFTools().then(function() {
-			return loadZoteroPane();
-		}).then(function(w) {
+		// Load Zotero pane, install PDF tools, and load the
+		// translators
+		return Q.all([loadZoteroPane().then(function(w) {
 			win = w;
-		});
+			return Zotero.Schema.updateBundledFiles('translators', null, false);
+		}), installPDFTools()]);
 	});
 	afterEach(function() {
 		for(let win of getWindows("chrome://zotero/content/pdfProgress.xul")) {

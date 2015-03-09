@@ -9,10 +9,11 @@ describe("Add Item by Identifier", function() {
 	var win;
 	before(function() {
 		this.timeout(5000);
+		// Load a Zotero pane and update the translators (needed to
+		// make sure they're available before we run the tests)
 		return loadZoteroPane().then(function(w) {
 			win = w;
-		}).then(function() {
-			return waitForTranslators();
+			return Zotero.Schema.updateBundledFiles('translators', null, false);
 		});
 	});
 	after(function() {
