@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Veel stiile...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Kiirvaliku klahvid">
-
 <!ENTITY zotero.preferences.keys.openZotero "Avada/Sulgeda Zotero aken">
 <!ENTITY zotero.preferences.keys.saveToZotero "Salvestada Zoterosse (aadressiriba ikoon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Täisekraan režiim">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Täpsemalt">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Failid ja kataloogid">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Otsing">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikli otsingumootori haldaja">

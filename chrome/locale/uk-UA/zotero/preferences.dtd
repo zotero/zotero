@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Завантажити додаткові стилі...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Гарячі клавіши">
-
 <!ENTITY zotero.preferences.keys.openZotero "Відкрити/закрити панель Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Зберегти в Zotero (значок в адресному рядку браузера)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Перключенні повноекранного режиму">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Розширені">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Файли та каталоги">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Виявлені">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Диспетчер систем пошуку статей">

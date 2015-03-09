@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Hanki lisää tyylejä...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
-
 <!ENTITY zotero.preferences.keys.openZotero "Avaa/sulje Zotero-ikkuna">
 <!ENTITY zotero.preferences.keys.saveToZotero "Tallenna Zoteroon (osoitepalkin kuvake)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Koko ruudun tila">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Lisäasetukset">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Tiedostot ja kansiot">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Paikanna">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikkelihakumoottorin hallinta">

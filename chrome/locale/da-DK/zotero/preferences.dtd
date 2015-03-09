@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Hent yderligere formater">
 
-<!ENTITY zotero.preferences.prefpane.keys "Genvejs-taster">
-
 <!ENTITY zotero.preferences.keys.openZotero "Åbn/Luk Zotero-vinduet">
 <!ENTITY zotero.preferences.keys.saveToZotero "Gem til Zotero (ikon i adresselinjen)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Slå fuldskærmsvisning til/fra">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avanceret">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Filer og mapper">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Lokaliser">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Håndtering af søgemaskiner for artikler">

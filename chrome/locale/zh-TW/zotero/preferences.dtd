@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "文獻條樣式語言 CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "獲取更多樣式…">
 
-<!ENTITY zotero.preferences.prefpane.keys "快鍵">
-
 <!ENTITY zotero.preferences.keys.openZotero "開/關 Zotero 窗格">
 <!ENTITY zotero.preferences.keys.saveToZotero "儲存到 Zotero (網址列圖示)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "切換全螢幕模式">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "進階">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "檔案與資料夾">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "查詢">
 <!ENTITY zotero.preferences.locate.locateEngineManager "論文查詢引擎管理器">

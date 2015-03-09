@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "دریافت شیوه‌های بیشتر...">
 
-<!ENTITY zotero.preferences.prefpane.keys "کلیدهای میان‌بر">
-
 <!ENTITY zotero.preferences.keys.openZotero "باز کردن/بستن قاب زوترو">
 <!ENTITY zotero.preferences.keys.saveToZotero "ذخیره در زوترو ( نماد نوار آدرس)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "فعال/غیرفعال کردن حالت تمام‌صفحه">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "پیشرفته">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "پرونده‌ها و پوشه‌ها">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "مکان‌یابی">
 <!ENTITY zotero.preferences.locate.locateEngineManager "سامان‌دهی مکان‌یاب مقالات">

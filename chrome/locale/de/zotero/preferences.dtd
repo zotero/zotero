@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Weitere Stile hinzufügen...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Tastenkombinationen">
-
 <!ENTITY zotero.preferences.keys.openZotero "Zotero-Panel öffnen/schließen">
 <!ENTITY zotero.preferences.keys.saveToZotero "In Zotero speichern (Adressleisten-Symbol)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Vollbild-Modus an/aus">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Erweitert">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Dateien und Ordner">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Finden">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikel Finder verwalten">

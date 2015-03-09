@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Lägg till ytterligare stilar...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Snabbkommandon">
-
 <!ENTITY zotero.preferences.keys.openZotero "Öppna/Stäng Zotero-panelen">
 <!ENTITY zotero.preferences.keys.saveToZotero "Spara till Zotero (adressradsikon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Växla fullskärmsläge">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avancerat">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Filer och kataloger">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Hitta">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Hantera söktjänst för artiklar">

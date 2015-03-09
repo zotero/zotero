@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "ស៊ីអេសអិល">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "បន្ថែមរចនាបថថ្មី...">
 
-<!ENTITY zotero.preferences.prefpane.keys "ផ្លូវកាត់">
-
 <!ENTITY zotero.preferences.keys.openZotero "បើក/បិទផ្ទាំងហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "បើកពេញអេក្រង់">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "ជាន់ខ្ពស់">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "ឯកសារនិងថតឯកសារ">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "ទីតាំងឯកសារ">
 <!ENTITY zotero.preferences.locate.locateEngineManager "ម៉ាស៊ីនគ្រប់គ្រងស្វែងរកអត្ថបទ">

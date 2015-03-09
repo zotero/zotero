@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "获取其它样式...">
 
-<!ENTITY zotero.preferences.prefpane.keys "快捷键">
-
 <!ENTITY zotero.preferences.keys.openZotero "开/关 Zotero 面板">
 <!ENTITY zotero.preferences.keys.saveToZotero "保存到Zotero (地址栏图标)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "切换全屏模式">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "高级">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "文件和文件夹">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "定位">
 <!ENTITY zotero.preferences.locate.locateEngineManager "文章检索引擎管理器">

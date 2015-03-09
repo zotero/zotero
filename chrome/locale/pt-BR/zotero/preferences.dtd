@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Obter estilos aditionais...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Teclas de atalho">
-
 <!ENTITY zotero.preferences.keys.openZotero "Abrir/Fechar painel Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Salvar para o Zotero (ícone da barra de endereços)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Alternar Modo Tela Cheia">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avançado">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Arquivos e Pastas">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localizar">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gerenciador dos mecanismos de pesquisa de artigos">

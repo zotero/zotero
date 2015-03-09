@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Dapatkan gaya tambahan">
 
-<!ENTITY zotero.preferences.prefpane.keys "Shortcut">
-
 <!ENTITY zotero.preferences.keys.openZotero "Buka/Tutup  Jendela Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Hidupkan/Matikan Mode Layar Penuh">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Lebih Lanjut">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Temukan">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Pengelola Mesin Pencarian Artikel">

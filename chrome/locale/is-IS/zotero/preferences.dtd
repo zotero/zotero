@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "Tilvísunarmál - CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Ná í viðbótar leturstíla...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Flýtihnappar">
-
 <!ENTITY zotero.preferences.keys.openZotero "Opna/Loka Zotero svæði">
 <!ENTITY zotero.preferences.keys.saveToZotero "Vista í Zotero (tákn birt í vefslóðareit)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Víxla úr og í Heilskjáarham">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Ítarlegt">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Skrár og möppur">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Staðsetja">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Stýring á greinaleitarvél">

@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Získat další styly...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Klávesové zkratky">
-
 <!ENTITY zotero.preferences.keys.openZotero "Otevřít/Zavřít Zotero panel">
 <!ENTITY zotero.preferences.keys.saveToZotero "Uložit do Zotera (ikona v adresním řádku)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Zapnutí celoobrazového módu">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Pokročilé">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Soubory a Složky">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Najít">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Správce mechanismu pro vyhledávání článků">

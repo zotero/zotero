@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "รับรูปแบบเพิ่มเติม...">
 
-<!ENTITY zotero.preferences.prefpane.keys "คีย์ลัด">
-
 <!ENTITY zotero.preferences.keys.openZotero "เปิด/ปิดแผง Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "เปลี่ยนสู่แบบเต็มจอ">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "ขั้นสูง">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "แฟ้มและโฟลเดอร์">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "หาที่ตั้ง">
 <!ENTITY zotero.preferences.locate.locateEngineManager "ตัวจัดการเครื่องมือค้นหาบทความ">

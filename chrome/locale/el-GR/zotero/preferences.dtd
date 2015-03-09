@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Λήψη επιπλέον στυλ...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Πλήκτρα συντόμευσης">
-
 <!ENTITY zotero.preferences.keys.openZotero "Άνοιγμα/Κλείσιμο του πλαισίου Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Αποθήκευση στο Zotero (εικονίδιο γραμμής διεύθυνσης)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Εναλλαγή σε λειτουργία πλήρους οθόνης">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Προχωρημένα">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Αρχεία και Φάκελοι">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Εντοπισμός">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Διαχειριστής Μηχανής Αναζήτησης Άρθρων">

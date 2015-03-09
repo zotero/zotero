@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Meer stijlen installeren...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Sneltoetsen">
-
 <!ENTITY zotero.preferences.keys.openZotero "Openen/Sluiten van Zotero-venster">
 <!ENTITY zotero.preferences.keys.saveToZotero "Sla op naar Zotero (adresbalk icoon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Volledige schermweergave">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Geavanceerd">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Bestanden en mappen">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Opzoeken">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Manager voor artikel-zoekmachines">

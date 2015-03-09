@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "لغة نمط الاستشهاد">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "احصل على انماط اضافية...">
 
-<!ENTITY zotero.preferences.prefpane.keys "اختصارات">
-
 <!ENTITY zotero.preferences.keys.openZotero "فتح/إغلاق نافذة زوتيرو">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "التنشيط لوضع ملء الشاشة">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "متقدم">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "الملفات والمجلدات">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "تحديد موقع المقتنى">
 <!ENTITY zotero.preferences.locate.locateEngineManager "إدارة محرك البحث">

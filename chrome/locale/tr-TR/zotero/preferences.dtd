@@ -123,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Ek stiller indir...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Kısayol Tuşları">
-
 <!ENTITY zotero.preferences.keys.openZotero "Zotero Bölmesini Aç/Kapa">
 <!ENTITY zotero.preferences.keys.saveToZotero "Zotero'ya Kaydet (adres çubuğu ikonu)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Tam Ekran Moduna Geç">
@@ -162,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Gelişmiş">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Dosyalar ve Klasörler">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Yerini Belirle">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Makale Bakma Motoru Yöneticisi">
