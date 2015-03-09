@@ -31,6 +31,7 @@ Zotero_Preferences.Advanced = {
 	
 	init: function () {
 		Zotero_Preferences.Debug_Output.init();
+		Zotero_Preferences.Keys.init();
 	},
 	
 	revealDataDirectory: function () {
@@ -808,6 +809,36 @@ Zotero_Preferences.Debug_Output = {
 	onUnload: function () {
 		if (this._timer) {
 			this._timer.cancel();
+		}
+	}
+};
+
+
+Zotero_Preferences.Keys = {
+	init: function () {
+		var rows = document.getElementById('zotero-prefpane-advanced-keys-tab').getElementsByTagName('row');
+		for (var i=0; i<rows.length; i++) {
+			// Display the appropriate modifier keys for the platform
+			rows[i].firstChild.nextSibling.value = Zotero.isMac ? Zotero.getString('general.keys.cmdShift') : Zotero.getString('general.keys.ctrlShift');
+		}
+		
+		var textboxes = document.getElementById('zotero-keys-rows').getElementsByTagName('textbox');
+		for (let i=0; i<textboxes.length; i++) {
+			let textbox = textboxes[i];
+			textbox.value = textbox.value.toUpperCase();
+			// .value takes care of the initial value, and this takes care of direct pref changes
+			// while the window is open
+			textbox.setAttribute('onsyncfrompreference', 'return Zotero_Preferences.Keys.capitalizePref(this.id)');
+			textbox.setAttribute('oninput', 'this.value = this.value.toUpperCase()');
+		}
+	},
+	
+	
+	capitalizePref: function (id) {
+		var elem = document.getElementById(id);
+		var pref = document.getElementById(elem.getAttribute('preference'));
+		if (pref.value) {
+			return pref.value.toUpperCase();
 		}
 	}
 };
