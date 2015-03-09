@@ -54,6 +54,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	this.join = join;
 	this.randomString = randomString;
 	this.moveToUnique = moveToUnique;
+	this.reinit = reinit; // defined in zotero-service.js
 	
 	// Public properties
 	this.initialized = false;

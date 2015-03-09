@@ -1,5 +1,6 @@
 var TESTS = {
-	"recognizePDF":["recognizePDF.js"],
+	"support":["support.js"],
+	"utilities":["utilities.js"],
 	"lookup":["lookup.js"],
-	"utilities":["utilities.js"]
+	"recognizePDF":["recognizePDF.js"]
 };

@@ -165,3 +165,14 @@ function getTestDataDirectory() {
 	return Services.io.newURI(resource.resolveURI(resURI), null, null).
 	       QueryInterface(Components.interfaces.nsIFileURL).file;
 }
+
+/**
+ * Resets the Zotero DB and restarts Zotero. Returns a promise resolved
+ * when this finishes.
+ */
+function resetDB() {
+	var db = Zotero.getZoteroDatabase();
+	return Zotero.reinit(function() {
+		db.remove(false);
+	});
+}
