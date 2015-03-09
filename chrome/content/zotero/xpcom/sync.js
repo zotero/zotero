@@ -2101,7 +2101,19 @@ Zotero.Sync.Server = new function () {
 					var background = Zotero.Sync.Runner.background;
 					setTimeout(function () {
 						var libraryID = parseInt(firstChild.getAttribute('libraryID'));
-						var group = Zotero.Groups.getByLibraryID(libraryID);
+						
+						try {
+							var group = Zotero.Groups.getByLibraryID(libraryID);
+						}
+						catch (e) {
+							// Not sure how this is possible, but it's affecting some people
+							// TODO: Clean up in schema updates with FK check
+							if (!Zotero.Libraries.exists(libraryID)) {
+								let sql = "DELETE FROM syncedSettings WHERE libraryID=?";
+								Zotero.DB.query(sql, libraryID);
+								return;
+							}
+						}
 						
 						var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 												.getService(Components.interfaces.nsIPromptService);
