@@ -94,6 +94,10 @@
 #zotero-toolbar-save-button[cui-areatype="toolbar"] > menupopup {
 	margin-top: -5px;
 }
+
+#zotero-toolbar-main-button-single[cui-areatype="toolbar"] .toolbarbutton-icon {
+	width: 32px;
+}
 /* End toolbar buttons */
 
 #zotero-tb-search-menu-button {

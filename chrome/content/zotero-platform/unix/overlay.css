@@ -86,6 +86,10 @@
 	box-shadow: var(--toolbarbutton-active-boxshadow);
 	transition-duration: 10ms;
 }
+
+#zotero-toolbar-main-button-single[cui-areatype="toolbar"] .toolbarbutton-icon {
+	width: 32px;
+}
 /* End toolbar buttons */
 
 
