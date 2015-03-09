@@ -36,6 +36,7 @@
 				<body>
 				<![CDATA[
 					Components.utils.import("resource://gre/modules/Services.jsm");
+					if(!Zotero.Prefs.get("firstRunGuidance")) return;
 
 					var about = this.getAttribute("about"),
 						pref = "firstRunGuidanceShown."+about,
