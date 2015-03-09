@@ -71,24 +71,43 @@ var assert = chai.assert,
     expect = chai.expect;
 
 // Set up tests to run
+var run = true;
 if(ZoteroUnit.tests) {
-	document.body.appendChild(document.createTextNode("Running tests..."));
-	var torun = ZoteroUnit.tests == "all" ? Object.keys(TESTS) : ZoteroUnit.tests.split(",");
+	var testDirectory = getTestDataDirectory().parent,
+	    testFiles = [];
+	if(ZoteroUnit.tests == "all") {
+		var enumerator = testDirectory.directoryEntries;
+		while(enumerator.hasMoreElements()) {
+			var file = enumerator.getNext().QueryInterface(Components.interfaces.nsIFile);
+			if(file.leafName.endsWith(".js")) {
+				testFiles.push(file.leafName);
+			}
+		}
+	} else {
+		var specifiedTests = ZoteroUnit.tests.split(",");
+		for(var test of specifiedTests) {
+			var fname = test+".js",
+			    file = testDirectory.clone();
+			file.append(fname);
+			if(!file.exists()) {
+				dump("Invalid test file "+test+"\n");
+				run = false;
+				quit(true);
+			}
+			testFiles.push(fname);
+		}
+	}
 
-	for(var key of torun) {
-		if(!TESTS[key]) {
-			dump("Invalid test set "+torun+"\n");
-			quit(true);
-		}
-		for(var test of TESTS[key]) {
-			var el = document.createElement("script");
-			el.type = "application/javascript;version=1.8";
-			el.src = "resource://zotero-unit-tests/"+test;
-			document.body.appendChild(el);
-		}
+	for(var fname of testFiles) {
+		var el = document.createElement("script");
+		el.type = "application/javascript;version=1.8";
+		el.src = "resource://zotero-unit-tests/"+fname;
+		document.body.appendChild(el);
 	}
 }
 
-window.onload = function() {
-	mocha.run();
-};
+if(run) {
+	window.onload = function() {
+		mocha.run();
+	};
+}
