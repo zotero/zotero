@@ -55,6 +55,8 @@ echo "`dirname "$CWD"`" > "$PROFILE/extensions/zotero@chnm.gmu.edu"
 cat <<EOF > "$PROFILE/prefs.js"
 user_pref("extensions.autoDisableScopes", 0);
 user_pref("extensions.zotero.debug.log", $DEBUG);
+user_pref("extensions.zotero.firstRunGuidance", false);
+user_pref("extensions.zotero.firstRun2", false);
 EOF
 
 MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$FX_EXECUTABLE" -profile "$PROFILE" \

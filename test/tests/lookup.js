@@ -1,15 +1,8 @@
 function lookupIdentifier(win, identifier) {
-	var tbbutton = win.document.getElementById("zotero-tb-lookup");
-	tbbutton.open = true;
-	return waitForDOMEvent(win.document.getElementById("zotero-lookup-panel"), "popupshown").then(function() {
-		tbbutton.open = true; // Shouldn't be necessary, but seems to be on Fx ESR under Xvfb
-		var textbox = win.document.getElementById("zotero-lookup-textbox");
-		textbox.value = identifier;
-		textbox.focus();
-		EventUtils.synthesizeKey("VK_RETURN", {}, win);
-		var closePromise = waitForDOMEvent(win.document.getElementById("zotero-lookup-panel"), "popuphidden");
-		return waitForItemEvent("add");
-	});
+	var textbox = win.document.getElementById("zotero-lookup-textbox");
+	textbox.value = identifier;
+	win.Zotero_Lookup.accept(textbox);
+	return waitForItemEvent("add");
 }
 
 describe("Add Item by Identifier", function() {
