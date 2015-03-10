@@ -259,7 +259,9 @@ Zotero_TranslatorTester._sanitizeItem = function(item, testItem, keepValidFields
 	if(!keepValidFields && "accessDate" in item) delete item.accessDate;
 
 	//sort tags, if they're still there
-	if(item.tags && typeof item.tags === "object" && "sort" in item.tags) item.tags.sort();
+	if(item.tags && typeof item.tags === "object" && "sort" in item.tags) {
+		item.tags = Zotero.Utilities.arrayUnique(item.tags).sort();
+	}
 	
 	return item;
 };
