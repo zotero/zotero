@@ -41,7 +41,7 @@
 	<script src="csledit.js"/>
 	
 	<vbox flex="1">
-		<hbox align="center">
+		<hbox id="zotero-csl-button-bar" align="center">
 			<button id="preview-refresh-button" label="&zotero.general.refresh;" oncommand="Zotero_CSL_Editor.refresh()"/>
 			<button id="zotero-csl-save" label="&zotero.general.saveAs;" oncommand="Zotero_CSL_Editor.save()"/>
 			<menulist id="zotero-csl-page-type" style="min-height: 1.6em; min-width: 50px" oncommand="Zotero_CSL_Editor.refresh()" />
