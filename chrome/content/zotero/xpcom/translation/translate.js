@@ -1249,16 +1249,22 @@ Zotero.Translate.Base.prototype = {
 			} else {
 				resolved = url;
 			}
-		} else if(Zotero.isFx) {
+		} else if(Zotero.isFx && this.location) {
 			resolved = Components.classes["@mozilla.org/network/io-service;1"].
 				getService(Components.interfaces.nsIIOService).
 				newURI(this.location, "", null).resolve(url);
-		} else if(Zotero.isNode) {
+		} else if(Zotero.isNode && this.location) {
 			resolved = require('url').resolve(this.location, url);
+		} else if (this.document) {
+			var a = this.document.createElement('a');
+			a.href = url;
+			resolved = a.href;
+		} else if (url.indexOf('//') == 0) {
+			// Protocol-relative URL with no associated web page
+			// Use HTTP by default
+			resolved = 'http:' + url;
 		} else {
-			var a = document.createElement('a');
-	        a.href = url;
-	        resolved = a.href;
+			throw new Error('Cannot resolve relative URL without an associated web page: ' + url);
 		}
 		
 		/*var m = hostPortRe.exec(resolved);
