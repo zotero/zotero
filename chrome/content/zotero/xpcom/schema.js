@@ -1104,6 +1104,8 @@ Zotero.Schema = new function(){
 	
 	
 	this.integrityCheck = Zotero.Promise.coroutine(function* (fix) {
+		var userLibraryID = Zotero.Libraries.userLibraryID;
+		
 		// Just as a sanity check, make sure combined field tables are populated,
 		// so that we don't try to wipe out all data
 		if (!(yield Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM fieldsCombined"))
@@ -1233,9 +1235,15 @@ Zotero.Schema = new function(){
 			
 			// Wrong library tags
 			[
-				"SELECT COUNT(*) FROM tags NATURAL JOIN itemTags JOIN items USING (itemID) WHERE IFNULL(tags.libraryID, 0)!=IFNULL(items.libraryID,0)",
+				"SELECT COUNT(*) FROM tags NATURAL JOIN itemTags JOIN items USING (itemID) WHERE "
+					+ "IFNULL(tags.libraryID, " + userLibraryID + ") != IFNULL(items.libraryID, " + userLibraryID + ")",
 				[
-					"CREATE TEMPORARY TABLE tmpWrongLibraryTags AS SELECT itemTags.ROWID AS tagRowID, tagID, name, itemID, IFNULL(tags.libraryID,0) AS tagLibraryID, IFNULL(items.libraryID,0) AS itemLibraryID FROM tags NATURAL JOIN itemTags JOIN items USING (itemID) WHERE IFNULL(tags.libraryID, 0)!=IFNULL(items.libraryID,0)",
+					"CREATE TEMPORARY TABLE tmpWrongLibraryTags AS "
+						+ "SELECT itemTags.ROWID AS tagRowID, tagID, name, itemID, "
+						+ "IFNULL(tags.libraryID, " + userLibraryID + ") AS tagLibraryID, "
+						+ "IFNULL(items.libraryID, " + userLibraryID + ") AS itemLibraryID "
+						+ "FROM tags NATURAL JOIN itemTags JOIN items USING (itemID) "
+						+ "WHERE IFNULL(tags.libraryID, " + userLibraryID + ") != IFNULL(items.libraryID, " + userLibraryID + ")",
 					"DELETE FROM itemTags WHERE ROWID IN (SELECT tagRowID FROM tmpWrongLibraryTags)",
 					"DROP TABLE tmpWrongLibraryTags"
 				]
@@ -1255,8 +1263,8 @@ Zotero.Schema = new function(){
 			// migration step to delete 'libraries' rows not in 'groups'
 			//"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM libraries)"
 			[
-				"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM groups)",
-				"DELETE FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM libraries)",
+				"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != " + userLibraryID + " AND libraryID NOT IN (SELECT libraryID FROM groups)",
+				"DELETE FROM syncDeleteLog WHERE libraryID != " + userLibraryID + " AND libraryID NOT IN (SELECT libraryID FROM libraries)",
 			],
 			
 			
@@ -1280,8 +1288,8 @@ Zotero.Schema = new function(){
 				"DELETE FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=14)"
 			],
 			[
-				"SELECT COUNT(*) FROM syncedSettings WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM libraries)",
-				"DELETE FROM syncedSettings WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM libraries)"
+				"SELECT COUNT(*) FROM syncedSettings WHERE libraryID != " + userLibraryID + " AND libraryID NOT IN (SELECT libraryID FROM libraries)",
+				"DELETE FROM syncedSettings WHERE libraryID != " + userLibraryID + " AND libraryID NOT IN (SELECT libraryID FROM libraries)"
 			]
 		];
 		
@@ -1382,6 +1390,8 @@ Zotero.Schema = new function(){
 	 */
 	function _initializeSchema(){
 		return Zotero.DB.executeTransaction(function* (conn) {
+			var userLibraryID = 1;
+			
 			// Enable auto-vacuuming
 			yield Zotero.DB.queryAsync("PRAGMA page_size = 4096");
 			yield Zotero.DB.queryAsync("PRAGMA encoding = 'UTF-8'");
@@ -1409,12 +1419,12 @@ Zotero.Schema = new function(){
 			});
 			yield _updateDBVersion('compatibility', _maxCompatibility);
 			
-			yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, libraryType) VALUES (0, 'user')");
+			yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, libraryType) VALUES (?, 'user')", userLibraryID);
 			
 			if (!Zotero.Schema.skipDefaultData) {
 				// Quick Start Guide web page item
-				var sql = "INSERT INTO items VALUES(1, 13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, 'ABCD2345', 0, 0)";
-				yield Zotero.DB.queryAsync(sql);
+				var sql = "INSERT INTO items VALUES(1, 13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 'ABCD2345', 0, 0)";
+				yield Zotero.DB.queryAsync(sql, userLibraryID);
 				var sql = "INSERT INTO itemDataValues VALUES (1, ?)";
 				yield Zotero.DB.queryAsync(sql, Zotero.getString('install.quickStartGuide'));
 				var sql = "INSERT INTO itemData VALUES (1, 110, 1)";
@@ -1431,8 +1441,8 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync(sql);
 				
 				// Welcome note
-				var sql = "INSERT INTO items VALUES(2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, 'ABCD3456', 0, 0)";
-				yield Zotero.DB.queryAsync(sql);
+				var sql = "INSERT INTO items VALUES(2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 'ABCD3456', 0, 0)";
+				yield Zotero.DB.queryAsync(sql, userLibraryID);
 				var welcomeTitle = Zotero.getString('install.quickStartGuide.message.welcome');
 				var welcomeMsg = '<div class="zotero-note znv1"><p><strong>' + welcomeTitle + '</strong></p>'
 					+ '<p>' + Zotero.getString('install.quickStartGuide.message.view') + '</p>'
@@ -1764,11 +1774,13 @@ Zotero.Schema = new function(){
 					if (i == 80) {
 						yield _updateDBVersion('compatibility', 1);
 						
-						yield Zotero.DB.queryAsync("CREATE TABLE IF NOT EXISTS syncedSettings (\n    setting TEXT NOT NULL,\n    libraryID INT NOT NULL,\n    value NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    synced INT NOT NULL DEFAULT 0,\n    PRIMARY KEY (setting, libraryID)\n)");
+						yield Zotero.DB.queryAsync("INSERT INTO libraries VALUES (1, 'user')");
+						
+						let oldUserLibraryID = yield Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='account' AND key='libraryID'");
+						
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO syncObjectTypes VALUES (7, 'setting')");
 						yield Zotero.DB.queryAsync("DELETE FROM version WHERE schema IN ('userdata2', 'userdata3')");
 						
-						yield Zotero.DB.queryAsync("INSERT INTO libraries VALUES (0, 'user')");
 						yield Zotero.DB.queryAsync("ALTER TABLE libraries ADD COLUMN version INT NOT NULL DEFAULT 0");
 						yield Zotero.DB.queryAsync("ALTER TABLE libraries ADD COLUMN lastsync INT NOT NULL DEFAULT 0");
 						yield Zotero.DB.queryAsync("CREATE TABLE syncCache (\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    syncObjectTypeID INT NOT NULL,\n    version INT NOT NULL,\n    data TEXT,\n    PRIMARY KEY (libraryID, key, syncObjectTypeID),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE,\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)\n)");
@@ -1919,12 +1931,12 @@ Zotero.Schema = new function(){
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE collections RENAME TO collectionsOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE collections (\n    collectionID INTEGER PRIMARY KEY,\n    collectionName TEXT NOT NULL,\n    parentCollectionID INT DEFAULT NULL,\n    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    synced INT NOT NULL DEFAULT 0,\n    UNIQUE (libraryID, key),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE,\n    FOREIGN KEY (parentCollectionID) REFERENCES collections(collectionID) ON DELETE CASCADE\n)");
-						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO collections SELECT collectionID, collectionName, parentCollectionID, clientDateModified, IFNULL(libraryID, 0), key, 0, 0 FROM collectionsOld ORDER BY collectionID DESC");
+						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO collections SELECT collectionID, collectionName, parentCollectionID, clientDateModified, IFNULL(libraryID, 1), key, 0, 0 FROM collectionsOld ORDER BY collectionID DESC");
 						yield Zotero.DB.queryAsync("CREATE INDEX collections_synced ON collections(synced)");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE items RENAME TO itemsOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE items (\n    itemID INTEGER PRIMARY KEY,\n    itemTypeID INT NOT NULL,\n    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    synced INT NOT NULL DEFAULT 0,\n    UNIQUE (libraryID, key),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
-						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO items SELECT itemID, itemTypeID, dateAdded, dateModified, clientDateModified, IFNULL(libraryID, 0), key, 0, 0 FROM itemsOld ORDER BY dateAdded DESC");
+						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO items SELECT itemID, itemTypeID, dateAdded, dateModified, clientDateModified, IFNULL(libraryID, 1), key, 0, 0 FROM itemsOld ORDER BY dateAdded DESC");
 						yield Zotero.DB.queryAsync("CREATE INDEX items_synced ON items(synced)");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE creators RENAME TO creatorsOld");
@@ -1937,20 +1949,22 @@ Zotero.Schema = new function(){
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE savedSearches RENAME TO savedSearchesOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE savedSearches (\n    savedSearchID INTEGER PRIMARY KEY,\n    savedSearchName TEXT NOT NULL,\n    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    synced INT NOT NULL DEFAULT 0,\n    UNIQUE (libraryID, key),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
-						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO savedSearches SELECT savedSearchID, savedSearchName, clientDateModified, IFNULL(libraryID, 0), key, 0, 0 FROM savedSearchesOld ORDER BY savedSearchID DESC");
+						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO savedSearches SELECT savedSearchID, savedSearchName, clientDateModified, IFNULL(libraryID, 1), key, 0, 0 FROM savedSearchesOld ORDER BY savedSearchID DESC");
 						yield Zotero.DB.queryAsync("CREATE INDEX savedSearches_synced ON savedSearches(synced)");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE tags RENAME TO tagsOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE tags (\n    tagID INTEGER PRIMARY KEY,\n    libraryID INT NOT NULL,\n    name TEXT NOT NULL,\n    UNIQUE (libraryID, name)\n)");
-						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO tags SELECT tagID, IFNULL(libraryID, 0), name FROM tagsOld");
+						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO tags SELECT tagID, IFNULL(libraryID, 1), name FROM tagsOld");
 						yield Zotero.DB.queryAsync("ALTER TABLE itemTags RENAME TO itemTagsOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE itemTags (\n    itemID INT NOT NULL,\n    tagID INT NOT NULL,\n    type INT NOT NULL,\n    PRIMARY KEY (itemID, tagID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,\n    FOREIGN KEY (tagID) REFERENCES tags(tagID) ON DELETE CASCADE\n)");
-						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO itemTags SELECT itemID, T.tagID, TOld.type FROM itemTagsOld ITO JOIN tagsOld TOld USING (tagID) JOIN tags T ON (IFNULL(TOld.libraryID, 0)=T.libraryID AND TOld.name=T.name COLLATE BINARY)");
+						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO itemTags SELECT itemID, T.tagID, TOld.type FROM itemTagsOld ITO JOIN tagsOld TOld USING (tagID) JOIN tags T ON (IFNULL(TOld.libraryID, 1)=T.libraryID AND TOld.name=T.name COLLATE BINARY)");
 						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS itemTags_tagID");
 						yield Zotero.DB.queryAsync("CREATE INDEX itemTags_tagID ON itemTags(tagID)");
 						
+						yield Zotero.DB.queryAsync("CREATE TABLE IF NOT EXISTS syncedSettings (\n    setting TEXT NOT NULL,\n    libraryID INT NOT NULL,\n    value NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    synced INT NOT NULL DEFAULT 0,\n    PRIMARY KEY (setting, libraryID)\n)");
 						yield Zotero.DB.queryAsync("ALTER TABLE syncedSettings RENAME TO syncedSettingsOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE syncedSettings (\n    setting TEXT NOT NULL,\n    libraryID INT NOT NULL,\n    value NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    synced INT NOT NULL DEFAULT 0,\n    PRIMARY KEY (setting, libraryID),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
+						yield Zotero.DB.queryAsync("UPDATE syncedSettingsOld SET libraryID=1 WHERE libraryID=0");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO syncedSettings SELECT * FROM syncedSettingsOld");
 						
 						yield Zotero.DB.queryAsync("ALTER TABLE itemData RENAME TO itemDataOld");
@@ -1996,7 +2010,7 @@ Zotero.Schema = new function(){
 						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS deletedItems_dateDeleted");
 						yield Zotero.DB.queryAsync("CREATE INDEX deletedItems_dateDeleted ON deletedItems(dateDeleted)");
 						
-						yield Zotero.DB.queryAsync("UPDATE relations SET libraryID=0 WHERE libraryID=(SELECT value FROM settings WHERE setting='account' AND key='libraryID')");
+						yield Zotero.DB.queryAsync("UPDATE relations SET libraryID=1 WHERE libraryID=?", oldUserLibraryID);
 						yield Zotero.DB.queryAsync("ALTER TABLE relations RENAME TO relationsOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE relations (\n    libraryID INT NOT NULL,\n    subject TEXT NOT NULL,\n    predicate TEXT NOT NULL,\n    object TEXT NOT NULL,\n    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    PRIMARY KEY (subject, predicate, object),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO relations SELECT * FROM relationsOld");
@@ -2029,7 +2043,7 @@ Zotero.Schema = new function(){
 						yield Zotero.DB.queryAsync("CREATE INDEX fulltextItems_version ON fulltextItems(version)");
 						yield Zotero.DB.queryAsync("CREATE INDEX fulltextItemWords_itemID ON fulltextItemWords(itemID)");
 						
-						yield Zotero.DB.queryAsync("UPDATE syncDeleteLog SET libraryID=0 WHERE libraryID=(SELECT value FROM settings WHERE setting='account' AND key='libraryID')");
+						yield Zotero.DB.queryAsync("UPDATE syncDeleteLog SET libraryID=1 WHERE libraryID=?", oldUserLibraryID);
 						yield Zotero.DB.queryAsync("ALTER TABLE syncDeleteLog RENAME TO syncDeleteLogOld");
 						yield Zotero.DB.queryAsync("CREATE TABLE syncDeleteLog (\n    syncObjectTypeID INT NOT NULL,\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    synced INT NOT NULL DEFAULT 0,\n    UNIQUE (syncObjectTypeID, libraryID, key),\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
 						yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO syncDeleteLog SELECT * FROM syncDeleteLogOld");
@@ -2061,6 +2075,8 @@ Zotero.Schema = new function(){
 						yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS customBaseFieldMappings_customFieldID");
 						yield Zotero.DB.queryAsync("CREATE INDEX customBaseFieldMappings_baseFieldID ON customBaseFieldMappings(baseFieldID)");
 						yield Zotero.DB.queryAsync("CREATE INDEX customBaseFieldMappings_customFieldID ON customBaseFieldMappings(customFieldID)");
+						
+						yield Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='account' AND key='libraryID'");
 						
 						yield Zotero.DB.queryAsync("DROP TABLE annotationsOld");
 						yield Zotero.DB.queryAsync("DROP TABLE collectionItemsOld");

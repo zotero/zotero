@@ -375,7 +375,7 @@ var Zotero_QuickFormat = new function () {
 				var citedItem = citedItems[i];
 				// Tabulate number of items in document for each library
 				if(!citedItem.cslItemID) {
-					var libraryID = citedItem.libraryID ? citedItem.libraryID : 0;
+					var libraryID = citedItem.libraryID;
 					if(libraryID in nCitedItemsFromLibrary) {
 						nCitedItemsFromLibrary[libraryID]++;
 					} else {
@@ -399,7 +399,7 @@ var Zotero_QuickFormat = new function () {
 		for each(var citationItem in io.citation.citationItems) {
 			var citedItem = Zotero.Cite.getItem(citationItem.id);
 			if(!citedItem.cslItemID) {
-				var libraryID = citedItem.libraryID ? citedItem.libraryID : 0;
+				var libraryID = citedItem.libraryID;
 				if(libraryID in nCitedItemsFromLibrary) {
 					nCitedItemsFromLibrary[libraryID]++;
 				} else {
@@ -412,7 +412,7 @@ var Zotero_QuickFormat = new function () {
 			var items = Zotero.Items.get(searchResultIDs);
 			
 			items.sort(function _itemSort(a, b) {
-				var libA = a.libraryID ? a.libraryID : 0, libB = b.libraryID ? b.libraryID : 0;
+				var libA = a.libraryID, libB = b.libraryID;
 				if(libA !== libB) {
 					// Sort by number of cites for library
 					if(nCitedItemsFromLibrary[libA] && !nCitedItemsFromLibrary[libB]) {

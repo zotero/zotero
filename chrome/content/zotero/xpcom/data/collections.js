@@ -86,10 +86,8 @@ Zotero.Collections = function() {
 			let parent = yield this.getAsync(parentID);
 			yield parent.loadChildCollections();
 			children = parent.getChildCollections();
-			if (!children.length) Zotero.debug('No child collections in collection ' + parentID, 5);
-		} else if (libraryID || libraryID === 0) {
-			children = this.getCollectionsInLibrary(libraryID);
-			if (!children.length) Zotero.debug('No child collections in library ' + libraryID, 5);
+		} else if (libraryID) {
+			children = yield this.getCollectionsInLibrary(libraryID);
 		} else {
 			throw new Error("Either library ID or parent collection ID must be provided to getNumCollectionsByParent");
 		}

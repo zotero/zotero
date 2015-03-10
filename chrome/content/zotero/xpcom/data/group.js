@@ -349,7 +349,7 @@ Zotero.Group.prototype.erase = Zotero.Promise.coroutine(function* () {
 		
 		// Delete settings
 		sql = "DELETE FROM syncedSettings WHERE libraryID=?";
-		yield Zotero.DB.queryAsync(sql, this.libraryID ? parseInt(this.libraryID) : 0);
+		yield Zotero.DB.queryAsync(sql, this.libraryID);
 		
 		// Delete group
 		sql = "DELETE FROM groups WHERE groupID=?";

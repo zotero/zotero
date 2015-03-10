@@ -90,6 +90,8 @@ function ZoteroProtocolHandler() {
 		
 		newChannel: function (uri) {
 			return new AsyncChannel(uri, function* () {
+				var userLibraryID = Zotero.Libraries.userLibraryID;
+				
 				var path = uri.path;
 				if (!path) {
 					return 'Invalid URL';
@@ -118,13 +120,13 @@ function ZoteroProtocolHandler() {
 				
 				// Items within a collection or search
 				router.add('library/:scopeObject/:scopeObjectKey/items/report.html', function () {
-					params.libraryID = 0;
+					params.libraryID = userLibraryID;
 				});
 				router.add('groups/:groupID/:scopeObject/:scopeObjectKey/items/report.html');
 				
 				// All items
 				router.add('library/items/report.html', function () {
-					params.libraryID = 0;
+					params.libraryID = userLibraryID;
 				});
 				router.add('groups/:groupID/items/report.html');
 				
@@ -472,6 +474,8 @@ function ZoteroProtocolHandler() {
 		
 		newChannel: function (uri) {
 			return new AsyncChannel(uri, function* () {
+				var userLibraryID = Zotero.Libraries.userLibraryID;
+				
 				path = uri.spec.match(/zotero:\/\/[^/]+(.*)/)[1];
 				if (!path) {
 					this.contentType = 'text/html';
@@ -483,14 +487,14 @@ function ZoteroProtocolHandler() {
 				
 				// HTML
 				router.add('library/:scopeObject/:scopeObjectKey', function () {
-					params.libraryID = 0;
+					params.libraryID = userLibraryID;
 					params.controller = 'html';
 				});
 				router.add('groups/:groupID/:scopeObject/:scopeObjectKey', function () {
 					params.controller = 'html';
 				});
 				router.add('library', function () {
-					params.libraryID = 0;
+					params.libraryID = userLibraryID;
 					params.controller = 'html';
 				});
 				router.add('groups/:groupID', function () {
@@ -499,14 +503,14 @@ function ZoteroProtocolHandler() {
 				
 				// Data
 				router.add('data/library/:scopeObject/:scopeObjectKey', function () {
-					params.libraryID = 0;
+					params.libraryID = userLibraryID;
 					params.controller = 'data';
 				});
 				router.add('data/groups/:groupID/:scopeObject/:scopeObjectKey', function () {
 					params.controller = 'data';
 				});
 				router.add('data/library', function () {
-					params.libraryID = 0;
+					params.libraryID = userLibraryID;
 					params.controller = 'data';
 				});
 				router.add('data/groups/:groupID', function () {
@@ -542,7 +546,7 @@ function ZoteroProtocolHandler() {
 				});
 				router.add('/', function () {
 					params.controller = 'html';
-					params.libraryID = 0;
+					params.libraryID = userLibraryID;
 				});
 				
 				var parsed = router.run(path);
@@ -794,6 +798,8 @@ function ZoteroProtocolHandler() {
 	var SelectExtension = {
 		newChannel: function (uri) {
 			return new AsyncChannel(uri, function* () {
+				var userLibraryID = Zotero.Libraries.userLibraryID;
+				
 				var path = uri.path;
 				if (!path) {
 					return 'Invalid URL';
@@ -809,13 +815,13 @@ function ZoteroProtocolHandler() {
 				
 				// Item within a collection or search
 				router.add('library/:scopeObject/:scopeObjectKey/items/:objectKey', function () {
-					params.libraryID = 0;
+					params.libraryID = userLibraryID;
 				});
 				router.add('groups/:groupID/:scopeObject/:scopeObjectKey/items/:objectKey');
 				
 				// All items
 				router.add('library/items/:objectKey', function () {
-					params.libraryID = 0;
+					params.libraryID = userLibraryID;
 				});
 				router.add('groups/:groupID/items/:objectKey');
 				

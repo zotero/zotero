@@ -161,7 +161,7 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 	
 	var self = this;
 	var library = {
-		libraryID: 0
+		libraryID: Zotero.Libraries.userLibraryID
 	};
 	
 	 // treeRow, level, beforeRow, startOpen
@@ -948,11 +948,6 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 	
 	// Add collections
 	for (var i = 0, len = collections.length; i < len; i++) {
-		// In personal library root, skip group collections
-		if (!isGroup && !isCollection && collections[i].libraryID) {
-			continue;
-		}
-		
 		var newRow = this._addRow(
 			rows,
 			new Zotero.CollectionTreeRow('collection', collections[i]),
@@ -1758,10 +1753,8 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 				}
 				
 				if (toReconcile.length) {
-					var sourceName = items[0].libraryID ? Zotero.Libraries.getName(items[0].libraryID)
-										: Zotero.getString('pane.collections.library');
-					var targetName = targetLibraryID ? Zotero.Libraries.getName(libraryID)
-										: Zotero.getString('pane.collections.library');
+					var sourceName = Zotero.Libraries.getName(items[0].libraryID);
+					var targetName = Zotero.Libraries.getName(targetLibraryID);
 					
 					var io = {
 						dataIn: {

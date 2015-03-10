@@ -672,7 +672,6 @@ Zotero.Fulltext = new function(){
 			let itemID = itemIDs[i];
 			let item = yield Zotero.Items.getAsync(itemID);
 			let libraryID = item.libraryID
-			libraryID = libraryID ? libraryID : Zotero.Users.getCurrentLibraryID();
 			if (!undownloaded[libraryID]) {
 				undownloaded[libraryID] = [];
 			}

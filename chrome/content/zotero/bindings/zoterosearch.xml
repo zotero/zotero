@@ -92,7 +92,7 @@
 					// Add My Library
 					var menuitem = document.createElement('menuitem');
 					menuitem.setAttribute('label', Zotero.getString('pane.collections.library'));
-					menuitem.setAttribute('libraryID', 0);
+					menuitem.setAttribute('libraryID', Zotero.Libraries.userLibraryID);
 					menupopup.appendChild(menuitem);
 					
 					// Add groups

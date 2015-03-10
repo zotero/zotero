@@ -1074,7 +1074,7 @@ Zotero.Translate.Base.prototype = {
 	 * translators, but new code should use {@link Zotero.Translate.Base#setHandler} to register a 
 	 * "done" handler to determine when execution of web/search translators is complete.
 	 *
-	 * @param 	{Integer|FALSE}	[libraryID=0]		Library in which to save items,
+	 * @param 	{Integer|FALSE}	[libraryID]		Library in which to save items,
 	 *																or NULL for default library;
 	 *																if FALSE, don't save items
 	 * @param 	{Boolean}				[saveAttachments=true]	Exclude attachments (e.g., snapshots) on import

@@ -183,7 +183,7 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	var isNew = env.isNew;
 	
 	var searchID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('savedSearches');
-	var libraryID = env.libraryID = this.libraryID;
+	var libraryID = env.libraryID = this.libraryID || Zotero.Libraries.userLibraryID;
 	var key = env.key = this._key = this.key ? this.key : this._generateKey();
 	
 	var columns = [
@@ -200,7 +200,7 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		searchID ? { int: searchID } : null,
 		{ string: this.name },
 		Zotero.DB.transactionDateTime,
-		this.libraryID ? this.libraryID : 0,
+		this.libraryID,
 		key,
 		this.version ? this.version : 0,
 		this.synced ? 1 : 0
@@ -1663,16 +1663,15 @@ Zotero.Searches = function() {
 	/**
 	 * Returns an array of Zotero.Search objects, ordered by name
 	 *
-	 * @param	{Integer}	[libraryID=0]
+	 * @param	{Integer}	[libraryID]
 	 */
 	this.getAll = Zotero.Promise.coroutine(function* (libraryID) {
-		var sql = "SELECT savedSearchID AS id, savedSearchName AS name "
-				+ "FROM savedSearches WHERE libraryID=?";
-		sql += " ORDER BY name COLLATE NOCASE";
-		var rows = yield Zotero.DB.queryAsync(sql, [libraryID ? libraryID : 0]);
-		if (!rows) {
-			return [];
+		var sql = "SELECT savedSearchID AS id, savedSearchName AS name FROM savedSearches ";
+		if (libraryID) {
+			sql += "WHERE libraryID=? ";
+			var params = libraryID;
 		}
+		var rows = yield Zotero.DB.queryAsync(sql, params);
 		
 		// Do proper collation sort
 		var collation = Zotero.getLocaleCollation();

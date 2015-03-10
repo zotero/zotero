@@ -42,7 +42,7 @@ Zotero.getCollections = function(parent, recursive, libraryID) {
 	
 	var sql = "SELECT collectionID AS id, collectionName AS name FROM collections C "
 		+ "WHERE libraryID=? AND parentCollectionID " + (parent ? '=' + parent : 'IS NULL');
-	var children = Zotero.DB.query(sql, [libraryID ? libraryID : 0]);
+	var children = Zotero.DB.query(sql, [libraryID ? libraryID : Zotero.Libraries.userLibraryID]);
 	
 	if (!children) {
 		Zotero.debug('No child collections of collection ' + parent, 5);

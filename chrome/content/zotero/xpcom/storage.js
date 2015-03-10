@@ -360,7 +360,8 @@ Zotero.Sync.Storage = new function () {
 				}
 				
 				// If WebDAV sync enabled, purge deleted and orphaned files
-				if (libraryID == 0 && Zotero.Sync.Storage.WebDAV.includeUserFiles) {
+				if (libraryID == Zotero.Libraries.userLibraryID
+						&& Zotero.Sync.Storage.WebDAV.includeUserFiles) {
 					Zotero.Sync.Storage.WebDAV.purgeDeletedStorageFiles()
 					.then(function () {
 						return Zotero.Sync.Storage.WebDAV.purgeOrphanedStorageFiles();
@@ -1259,11 +1260,14 @@ Zotero.Sync.Storage = new function () {
 		
 		//var sql = "UPDATE itemAttachments SET syncState=?, storageModTime=NULL, storageHash=NULL";
 		var sql = "UPDATE itemAttachments SET syncState=?";
+		var params = [syncState];
 		if (includeUserFiles && !includeGroupFiles) {
-			sql += " WHERE itemID IN (SELECT itemID FROM items WHERE libraryID = 0)";
+			sql += " WHERE itemID IN (SELECT itemID FROM items WHERE libraryID = ?)";
+			params.push(Zotero.Libraries.userLibraryID);
 		}
 		else if (!includeUserFiles && includeGroupFiles) {
-			sql += " WHERE itemID IN (SELECT itemID FROM items WHERE libraryID != 0)";
+			sql += " WHERE itemID IN (SELECT itemID FROM items WHERE libraryID != ?)";
+			params.push(Zotero.Libraries.userLibraryID);
 		}
 		Zotero.DB.query(sql, [syncState]);
 		

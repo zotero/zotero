@@ -1073,8 +1073,8 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	
 	
 	obj._setLastSyncTime = function (libraryID, localLastSyncID) {
-		if (libraryID) {
-			throw new Error("libraryID must be 0");
+		if (libraryID != Zotero.Libraries.userLibraryID) {
+			throw new Error("libraryID must be user library");
 		}
 		
 		// DEBUG: is this necessary for WebDAV?

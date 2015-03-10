@@ -29,7 +29,7 @@ Zotero.Sync.Storage.QueueManager = new function () {
 	var _currentQueues = [];
 	
 	this.start = function (libraryID) {
-		if (libraryID === 0 || libraryID) {
+		if (libraryID) {
 			var queues = this.getAll(libraryID);
 			var suffix = " for library " + libraryID;
 		}
@@ -76,7 +76,7 @@ Zotero.Sync.Storage.QueueManager = new function () {
 	};
 	
 	this.stop = function (libraryID) {
-		if (libraryID === 0 || libraryID) {
+		if (libraryID) {
 			var queues = this.getAll(libraryID);
 		}
 		else {

@@ -1065,7 +1065,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 	
 	
 	obj._getLastSyncURI = function (libraryID) {
-		if (libraryID === 0) {
+		if (libraryID === Zotero.Libraries.userLibraryID) {
 			var lastSyncURI = this.userURI;
 		}
 		else if (libraryID) {

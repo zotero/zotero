@@ -281,7 +281,7 @@ Zotero.DataObject.prototype.setRelations = function (newRelations) {
 
 /**
  * Return an object in the specified library equivalent to this object
- * @param {Integer} [libraryID=0]
+ * @param {Integer} [libraryID]
  * @return {Object|false} Linked item, or false if not found
  */
 Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function* (libraryID) {

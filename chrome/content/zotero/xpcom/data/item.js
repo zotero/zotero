@@ -1155,8 +1155,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	//
 	// If available id value, use it -- otherwise we'll use autoincrement
 	var itemID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('items');
-	Zotero.debug('=');
-	var libraryID = env.libraryID = this.libraryID;
+	var libraryID = env.libraryID = this.libraryID || Zotero.Libraries.userLibraryID;
 	var key = env.key = this._key = this.key ? this.key : this._generateKey();
 	
 	sqlColumns.push(
@@ -1171,7 +1170,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	sqlValues.push(
 		{ int: itemTypeID },
 		this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime,
-		this.libraryID ? this.libraryID : 0,
+		this.libraryID,
 		key,
 		this.version ? this.version : 0,
 		this.synced ? 1 : 0
@@ -3444,7 +3443,10 @@ Zotero.Item.prototype.addLinkedItem = Zotero.Promise.coroutine(function* (item) 
 	// If one of the items is a personal library, store relation with that.
 	// Otherwise, use current item's library (which in calling code is the
 	// new, copied item).
-	var libraryID = (!this.libraryID || !item.libraryID) ? 0 : this.libraryID;
+	var userLibraryID = Zotero.Libraries.userLibraryID;
+	var libraryID = (this.libraryID == userLibraryID || item.libraryID == userLibraryID)
+		? userLibraryID
+		: this.libraryID;
 	
 	yield Zotero.Relations.add(libraryID, url1, predicate, url2);
 });

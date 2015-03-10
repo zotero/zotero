@@ -278,8 +278,8 @@ Zotero.DataObjects.prototype.getLibraryAndKeyFromID = function (id) {
 
 
 Zotero.DataObjects.prototype.getIDFromLibraryAndKey = function (libraryID, key) {
-	if (libraryID === null) {
-		throw new Error("libraryID cannot be NULL (did you mean 0?)");
+	if (!libraryID) {
+		throw new Error("libraryID not provided");
 	}
 	return (this._objectIDs[libraryID] && this._objectIDs[libraryID][key])
 		? this._objectIDs[libraryID][key] : false;

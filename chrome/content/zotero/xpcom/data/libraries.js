@@ -76,10 +76,6 @@ Zotero.Libraries = new function () {
 		return row;
 	});
 	
-	this.dbLibraryID = function (libraryID) {
-		return (libraryID == Zotero.Users.getCurrentLibraryID()) ? 0 : libraryID;
-	}
-	
 	
 	this.getName = function (libraryID) {
 		var type = this.getType(libraryID);
@@ -98,9 +94,6 @@ Zotero.Libraries = new function () {
 	
 	
 	this.getType = function (libraryID) {
-		if (libraryID === Zotero.Libraries.userLibraryID) {
-			return 'user';
-		}
 		if (!this.exists(libraryID)) {
 			throw new Error("Library data not loaded for library " + libraryID);
 		}

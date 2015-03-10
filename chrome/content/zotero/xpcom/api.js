@@ -157,12 +157,13 @@ Zotero.API.Data = {
 	 * Parse a relative URI path and return parameters for the request
 	 */
 	parsePath: function (path) {
+		var userLibraryID = Zotero.Libraries.userLibraryID;
 		var params = {};
 		var router = new Zotero.Router(params);
 		
 		// Top-level objects
 		router.add('library/:controller/top', function () {
-			params.libraryID = 0;
+			params.libraryID = userLibraryID;
 			params.subset = 'top';
 		});
 		router.add('groups/:groupID/:controller/top', function () {
@@ -170,7 +171,7 @@ Zotero.API.Data = {
 		});
 		
 		router.add('library/:scopeObject/:scopeObjectKey/items/:objectKey/:subset', function () {
-			params.libraryID = 0;
+			params.libraryID = userLibraryID;
 			params.controller = 'items';
 		});
 		router.add('groups/:groupID/:scopeObject/:scopeObjectKey/items/:objectKey/:subset', function () {
@@ -179,7 +180,7 @@ Zotero.API.Data = {
 		
 		// All objects
 		router.add('library/:controller', function () {
-			params.libraryID = 0;
+			params.libraryID = userLibraryID;
 		});
 		router.add('groups/:groupID/:controller', function () {});
 		

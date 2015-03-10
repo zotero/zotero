@@ -63,7 +63,7 @@ Zotero.Relation.prototype._set = function (field, val) {
 		case 'id':
 		case 'libraryID':
 			if (field == 'libraryID' && !val) {
-				throw ("libraryID cannot be empty in Zotero.Relation._set()");
+				throw new Error("libraryID cannot be empty in Zotero.Relation._set()");
 			}
 			
 			if (val == this['_' + field]) {

@@ -133,9 +133,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	var _startupErrorHandler;
 	var _zoteroDirectory = false;
 	var _localizedStringBundle;
-	var _userID;
-	var _libraryID;
-	var _localUserKey;
 	var _waiting = 0;
 	
 	var _locked = false;

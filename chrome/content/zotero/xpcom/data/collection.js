@@ -287,7 +287,7 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 	var isNew = env.isNew;
 
 	var collectionID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('collections');
-	var libraryID = env.libraryID = this.libraryID;
+	var libraryID = env.libraryID = this.libraryID || Zotero.Libraries.userLibraryID;
 	var key = env.key = this._key = this.key ? this.key : this._generateKey();
 	
 	Zotero.debug("Saving collection " + this.id);
@@ -307,7 +307,7 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 		{ string: this.name },
 		env.parent ? env.parent : null,
 		Zotero.DB.transactionDateTime,
-		this.libraryID ? this.libraryID : 0,
+		this.libraryID,
 		key,
 		this.version ? this.version : 0,
 		this.synced ? 1 : 0
@@ -829,7 +829,10 @@ Zotero.Collection.prototype.addLinkedCollection = Zotero.Promise.coroutine(funct
 	
 	// If both group libraries, store relation with source group.
 	// Otherwise, store with personal library.
-	var libraryID = (this.libraryID && collection.libraryID) ? this.libraryID : 0;
+	var userLibraryID = Zotero.Libraries.userLibraryID;
+	var libraryID = (this.libraryID != userLibraryID && collection.libraryID != userLibraryID)
+		? this.libraryID
+		: Zotero.Libraries.userLibraryID;
 	
 	yield Zotero.Relations.add(libraryID, url1, predicate, url2);
 });

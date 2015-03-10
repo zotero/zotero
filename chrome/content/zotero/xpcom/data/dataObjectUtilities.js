@@ -26,21 +26,19 @@
 
 Zotero.DataObjectUtilities = {
 	"checkLibraryID": function (libraryID) {
-		if (libraryID === null) {
-			Zotero.debug("Deprecated: libraryID cannot be NULL", 2, 1);
+		if (!libraryID) {
+			throw new Error("libraryID not provided");
 		}
-		else {
-			var intValue = parseInt(libraryID);
-			if (libraryID != intValue || intValue < 0) {
-				throw new Error("libraryID must be a positive integer");
-			}
+		var intValue = parseInt(libraryID);
+		if (libraryID != intValue || intValue <= 0) {
+			throw new Error("libraryID must be a positive integer");
 		}
 		return intValue;
 	},
 	
 	"checkDataID": function(dataID) {
 		var intValue = parseInt(dataID);
-		if (dataID != intValue || dataID < 0)
+		if (dataID != intValue || dataID <= 0)
 			throw new Error("id must be a positive integer");
 		return intValue;
 	},

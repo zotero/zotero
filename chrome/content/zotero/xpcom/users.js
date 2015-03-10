@@ -33,14 +33,15 @@ Zotero.Users = new function () {
 		var sql = "SELECT value FROM settings WHERE setting='account' AND key='userID'";
 		_userID = yield Zotero.DB.valueQueryAsync(sql);
 		
-		sql = "SELECT value FROM settings WHERE setting='account' AND key='libraryID'";
-		_libraryID = yield Zotero.DB.valueQueryAsync(sql);
-		
-		sql = "SELECT value FROM settings WHERE setting='account' AND key='username'";
-		_username = yield Zotero.DB.valueQueryAsync(sql);
-		
+		if (_userID) {
+			sql = "SELECT value FROM settings WHERE setting='account' AND key='libraryID'";
+			_libraryID = yield Zotero.DB.valueQueryAsync(sql);
+			
+			sql = "SELECT value FROM settings WHERE setting='account' AND key='username'";
+			_username = yield Zotero.DB.valueQueryAsync(sql);
+		}
 		// If we don't have a global user id, generate a local user key
-		if (!_userID) {
+		else {
 			sql = "SELECT value FROM settings WHERE setting='account' AND key='localUserKey'";
 			let key = yield Zotero.DB.valueQueryAsync(sql);
 			// Generate a local user key if we don't have one
@@ -54,42 +55,21 @@ Zotero.Users = new function () {
 	});
 	
 	
-	this.getCurrentUserID = function () {
-		return _userID;
-	};
-	
-	
-	this.setCurrentUserID = Zotero.Promise.coroutine(function* (val) {
+	this.getCurrentUserID = () => _userID;
+	this.setCurrentUserID = function (val) {
 		val = parseInt(val);
+		_userID = val;
 		var sql = "REPLACE INTO settings VALUES ('account', 'userID', ?)";
-		Zotero.DB.queryAsync(sql, val);
-		_userID = val;
-	});
-	
-	
-	this.getCurrentLibraryID = function () {
-		return _libraryID;
+		return Zotero.DB.queryAsync(sql, val);
 	};
 	
 	
-	this.setCurrentLibraryID = Zotero.Promise.coroutine(function* (val) {
-		val = parseInt(val);
-		var sql = "REPLACE INTO settings VALUES ('account', 'libraryID', ?)";
-		Zotero.DB.queryAsync(sql, val);
+	this.getCurrentUsername = () => _username;
+	this.setCurrentUsername = function (val) {
 		_userID = val;
-	});
-	
-	
-	this.getCurrentUsername = function () {
-		return _username;
-	};
-	
-	
-	this.setCurrentUsername = Zotero.Promise.coroutine(function* (val) {
 		var sql = "REPLACE INTO settings VALUES ('account', 'username', ?)";
-		Zotero.DB.queryAsync(sql, val);
-		_userID = val;
-	});
+		return Zotero.DB.queryAsync(sql, val);
+	};
 	
 	
 	this.getLocalUserKey = function () {

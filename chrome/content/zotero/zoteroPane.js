@@ -746,7 +746,7 @@ var ZoteroPane = new function()
 			var libraryID = collectionTreeRow.ref.libraryID;
 		}
 		else {
-			var libraryID = 0;
+			var libraryID = Zotero.Libraries.userLibraryID;
 			var collectionTreeRow = null;
 		}
 		
@@ -883,7 +883,7 @@ var ZoteroPane = new function()
 		}
 		
 		if (!libraryID) {
-			libraryID = 0;
+			libraryID = Zotero.Libraries.userLibraryID;
 		}
 		
 		var newids = [];
@@ -3291,7 +3291,7 @@ var ZoteroPane = new function()
 					var libraryID = collectionTreeRow.ref.libraryID;
 				}
 				else {
-					var libraryID = 0;
+					var libraryID = Zotero.Libraries.userLibraryID;
 					var collectionTreeRow = null;
 				}
 				//
@@ -3418,7 +3418,7 @@ var ZoteroPane = new function()
 						var libraryID = collectionTreeRow.ref.libraryID;
 					}
 					else {
-						var libraryID = 0;
+						var libraryID = Zotero.Libraries.userLibraryID;
 						var collectionTreeRow = null;
 					}
 					//
