@@ -1597,6 +1597,12 @@ var ZoteroPane = new function()
 				'pane.items.delete' + (this.itemsView.selection.count > 1 ? '.multiple' : '')
 			)
 		};
+		var toRemove = {
+			title: Zotero.getString('pane.items.remove.title'),
+			text: Zotero.getString(
+				'pane.items.remove' + (this.itemsView.selection.count > 1 ? '.multiple' : '')
+			)
+		};
 		
 		if (itemGroup.isLibrary(true)) {
 			// In library, don't prompt if meta key was pressed
@@ -1604,7 +1610,7 @@ var ZoteroPane = new function()
 		}
 		else if (itemGroup.isCollection()) {
 			// In collection, only prompt if trashing
-			var prompt = force ? toTrash : false;
+			var prompt = force ? toTrash : toRemove;
 		}
 		else if (itemGroup.isSearch() || itemGroup.isUnfiled() || itemGroup.isDuplicates()) {
 			if (!force) {
