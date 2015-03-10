@@ -1429,7 +1429,7 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync(sql, Zotero.getString('install.quickStartGuide'));
 				var sql = "INSERT INTO itemData VALUES (1, 110, 1)";
 				yield Zotero.DB.queryAsync(sql);
-				var sql = "INSERT INTO itemDataValues VALUES (2, 'http://zotero.org/support/quick_start_guide')";
+				var sql = "INSERT INTO itemDataValues VALUES (2, 'https://www.zotero.org/support/quick_start_guide')";
 				yield Zotero.DB.queryAsync(sql);
 				var sql = "INSERT INTO itemData VALUES (1, 1, 2)";
 				yield Zotero.DB.queryAsync(sql);
