@@ -1527,7 +1527,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	}
 	
 	// Tags
-	if (this._changed.tags) {
+	if (this._changed.tags && this._previousData.tags) {
 		let oldTags = this._previousData.tags;
 		let newTags = this._tags;
 		
