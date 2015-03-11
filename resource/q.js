@@ -66,12 +66,9 @@
 			var _runningTimers = [];
 			
 			return function setTimeout(func, ms) {
-				var useMethodjit = Components.utils.methodjit,
-					timer = Components.classes["@mozilla.org/timer;1"].
+				var timer = Components.classes["@mozilla.org/timer;1"].
 						createInstance(Components.interfaces.nsITimer);
 				timer.initWithCallback({"notify":function() {
-                    // XXX Remove when we drop support for Fx <24
-					if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
 					
 					// Remove timer from array so it can be garbage collected
 					_runningTimers.splice(_runningTimers.indexOf(timer), 1);
