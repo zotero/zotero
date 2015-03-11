@@ -27,6 +27,9 @@ Zotero.Schema = new function(){
 	this.skipDefaultData = false;
 	this.dbInitialized = false;
 	this.goToChangeLog = false;
+
+	var _schemaUpdateDeferred = Q.defer();
+	this.schemaUpdatePromise = _schemaUpdateDeferred.promise;
 	
 	var _dbVersions = [];
 	var _schemaVersions = [];
@@ -121,7 +124,9 @@ Zotero.Schema = new function(){
 		// 'user' is for pre-1.0b2 'user' table
 		if (!dbVersion && !this.getDBVersion('schema') && !this.getDBVersion('user')){
 			Zotero.debug('Database does not exist -- creating\n');
-			_initializeSchema();
+			_initializeSchema().then(function() {
+				_schemaUpdateDeferred.resolve(true);
+			});
 			return true;
 		}
 		
@@ -219,6 +224,7 @@ Zotero.Schema = new function(){
 			Zotero.Schema.updateBundledFiles(null, false, true)
 			.finally(function () {
 				Zotero.UnresponsiveScriptIndicator.enable();
+				_schemaUpdateDeferred.resolve(true);
 			})
 			.done();
 		}, 5000);
@@ -1507,7 +1513,7 @@ Zotero.Schema = new function(){
 			throw(e);
 		}
 		
-		Zotero.Schema.updateBundledFiles(null, null, true)
+		return Zotero.Schema.updateBundledFiles(null, null, true)
 		.catch(function (e) {
 			Zotero.debug(e);
 			Zotero.logError(e);

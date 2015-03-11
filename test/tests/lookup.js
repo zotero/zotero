@@ -13,7 +13,6 @@ describe("Add Item by Identifier", function() {
 		// make sure they're available before we run the tests)
 		return loadZoteroPane().then(function(w) {
 			win = w;
-			return Zotero.Schema.updateBundledFiles('translators', null, false);
 		});
 	});
 	after(function() {

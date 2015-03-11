@@ -164,5 +164,7 @@ function resetDB() {
 	var db = Zotero.getZoteroDatabase();
 	return Zotero.reinit(function() {
 		db.remove(false);
+	}).then(function() {
+		return Zotero.Schema.schemaUpdatePromise;
 	});
 }

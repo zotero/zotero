@@ -108,6 +108,8 @@ if(ZoteroUnit.tests) {
 
 if(run) {
 	window.onload = function() {
-		mocha.run();
+		Zotero.Schema.schemaUpdatePromise.then(function() {
+			mocha.run();
+		}).done();
 	};
 }

@@ -8,7 +8,6 @@ describe("PDF Recognition", function() {
 		// translators
 		return Q.all([loadZoteroPane().then(function(w) {
 			win = w;
-			return Zotero.Schema.updateBundledFiles('translators', null, false);
 		}), installPDFTools()]);
 	});
 	afterEach(function() {
