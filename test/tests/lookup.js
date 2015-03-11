@@ -20,14 +20,14 @@ describe("Add Item by Identifier", function() {
 	});
 
 	it("should add an ISBN-10", function() {
-		this.timeout(10000);
+		this.timeout(20000);
 		return lookupIdentifier(win, "0838985890").then(function(ids) {
 			var item = Zotero.Items.get(ids[0]);
 			assert.equal(item.getField("title"), "Zotero: a guide for librarians, researchers, and educators");
 		});
 	});
 	it("should add an ISBN-13", function() {
-		this.timeout(10000);
+		this.timeout(20000);
 		return lookupIdentifier(win, "978-0838985892").then(function(ids) {
 			var item = Zotero.Items.get(ids[0]);
 			assert.equal(item.getField("title"), "Zotero: a guide for librarians, researchers, and educators");
