@@ -4918,6 +4918,192 @@ Zotero.Item.prototype.serialize = function(mode) {
 	return arr;
 }
 
+/**
+ * Serializes Zotero Item into Zotero web server API JSON format
+ * 
+ * @param {Object} options
+ *   mode {String}: [new|full|patch] "new" is default. "full" mode includes all
+ *     fields even if empty. "patch" returns only fields that are different from
+ *     those in patchBase
+ *   patchBase {Object}: Item in API JSON format to be compared to in
+ *     "patch" mode. Required if "patch" mode is specified
+ */
+Zotero.Item.prototype.toJSON = function(options) {
+	if (this.id || this.key) {
+		if (!this._primaryDataLoaded) {
+			this.loadPrimaryData(true);
+		}
+		
+		if (this.id) {
+			if (!this._itemDataLoaded) this._loadItemData();
+			if (this.isRegularItem() && !this._creatorsLoaded) this._loadCreators();
+			if (!this._relatedItemsLoaded) this._loadRelatedItems();
+		}
+	}
+	
+	if (this.hasChanged()) {
+		throw new Error("Cannot generate JSON from changed item");
+	}
+	
+	options = options || {};
+	let mode = options.mode || 'new';
+	let patchBase = options.patchBase;
+	
+	if (mode == 'patch') {
+		if (!patchBase) {
+			throw new Error('Cannot use "patch" mode if patchBase not provided');
+		}
+	}
+	else if (patchBase) {
+		Zotero.debug('Zotero.Item.toJSON: ignoring provided patchBase in "' + mode + '" mode', 2);
+	}
+	
+	let obj = {
+		key: this.key || false,
+		version: 1,
+		itemType: Zotero.ItemTypes.getName(this.itemTypeID),
+		tags: [],
+		collections: [],
+		relations: {}
+	};
+	
+	// Type-specific fields
+	for (let i in this._itemData) {
+		let val = '' + this.getField(i);
+		if (val !== '' || mode == 'full') {
+			let name = Zotero.ItemFields.getName(i);
+			if (name == 'version') {
+				// Changed in API v3 to avoid clash with 'version' above
+				// Remove this after https://github.com/zotero/zotero/issues/670
+				name = 'versionNumber';
+			}
+			
+			obj[name] = val;
+		}
+	}
+	
+	if (this.isRegularItem()) {
+		// Creators
+		obj.creators = [];
+		let creators = this.getCreators();
+		for (let i=0; i<creators.length; i++) {
+			let creator = creators[i].ref;
+			let creatorObj = {
+				creatorType: Zotero.CreatorTypes.getName(creators[i].creatorTypeID)
+			};
+			
+			if (creator.fieldMode == 1) {
+				creatorObj.name = creator.lastName;
+			} else {
+				creatorObj.lastName = creator.lastName;
+				creatorObj.firstName = creator.firstName;
+			}
+			
+			obj.creators.push(creatorObj);
+		}
+	}
+	else {
+		// Notes or Attachments
+		let parent = this.getSourceKey();
+		if (parent || mode == 'full') {
+			obj.parentItem = parent ? parent : false;
+		}
+		
+		// Notes and embedded attachment notes
+		let note = this.getNote();
+		if (note !== "" || mode == 'full') {
+			obj.note = note;
+		}
+	}
+	
+	// Attachment fields
+	if (this.isAttachment()) {
+		obj.linkMode = ['imported_file','imported_url','linked_file','linked_url'][this.attachmentLinkMode];
+		obj.contentType = this.attachmentMIMEType;
+		obj.charset = this.attachmentCharset;
+		obj.path = this.attachmentPath;
+	}
+	
+	// Tags
+	let tags = this.getTags();
+	for (let i=0; i<tags.length; i++) {
+		let tag = {
+			tag: tags[i].name
+		};
+		if (tags[i].type) tag.type = tags[i].type
+		
+		obj.tags.push(tag);
+	}
+	
+	// Collections
+	if (this.id) {
+		let collections = this.getCollections();
+		for (let i=0; i<collections.length; i++) {
+			let collection = Zotero.Collections.get(collections[i]);
+			obj.collections.push(collection.key);
+		}
+	}
+	
+	// Relations
+	if (this.key) {
+		// Relations other than through the "Related" tab
+		let itemURI = Zotero.URI.getItemURI(this),
+			rels = Zotero.Relations.getByURIs(itemURI);
+		for (let i=0; i<rels.length; i++) {
+			let rel = rels[i].load();
+			obj.relations[rel.predicate] = rel.object;
+		}
+		
+		// Related items (in both directions)
+		let relatedItems = this._getRelatedItemsBidirectional();
+		let pred = 'dc:relation';
+		for (let i=0; i<relatedItems.length; i++) {
+			let item = Zotero.Items.get(relatedItems[i]);
+			let uri = Zotero.URI.getItemURI(item);
+			if (obj.relations[pred]) {
+				if (typeof obj.relations[pred] == 'string') {
+					obj.relations[pred] = [uri];
+				}
+				obj.relations[pred].push(uri)
+			}
+			else {
+				obj.relations[pred] = uri;
+			}
+		}
+	}
+	
+	// Deleted
+	let deleted = this.deleted;
+	if (deleted || mode == 'full') {
+		obj.deleted = deleted;
+	}
+	
+	obj.dateAdded = Zotero.Date.sqlToISO8601(this.dateAdded);
+	obj.dateModified = Zotero.Date.sqlToISO8601(this.dateModified);
+	
+	if (mode == 'patch') {
+		// For "patch" mode, remove fields that have the same values
+		for (let i in patchBase) {
+			switch (i) {
+				case 'itemKey':
+				case 'itemVersion':
+				case 'dateModified':
+					continue;
+			}
+			
+			if (i in obj) {
+				if (obj[i] === patchBase[i]) {
+					delete obj[i];
+				}
+			}
+			else {
+				obj[i] = "";
+			}
+		}
+	}
+	
+	return obj;
+};
 
 
 //////////////////////////////////////////////////////////////////////////////
