@@ -69,6 +69,8 @@ Zotero.Proxies = new function() {
 		Zotero.Proxies.lastIPCheck = 0;
 		Zotero.Proxies.lastIPs = "";
 		Zotero.Proxies.disabledByDomain = false;
+
+		Zotero.Proxies.showRedirectNotification = Zotero.Prefs.get("proxies.showRedirectNotification");
 	}
 	
 	/**
@@ -107,7 +109,7 @@ Zotero.Proxies = new function() {
 				if(!bw) return;
 				_showNotification(bw,
 					Zotero.getString('proxies.notification.associated.label', [host, channel.URI.hostPort]),
-					"settings", function() { _prefsOpenCallback(bw[1]) });
+					[{ label: "proxies.notification.settings.button", callback: function() { _prefsOpenCallback(bw[1]); } }]);
 			}
 		} else {
 			// otherwise, try to detect a proxy
@@ -132,7 +134,7 @@ Zotero.Proxies = new function() {
 					// Ask to save only if automatic proxy recognition is on
 					savedTransparent = _showNotification(bw,
 						Zotero.getString('proxies.notification.recognized.label', [proxy.hosts[0], channel.URI.hostPort]),
-						"enable", function() { _showDialog(proxy.hosts[0], channel.URI.hostPort, proxy) });
+						[{ label: "proxies.notification.enable.button", callback: function() { _showDialog(proxy.hosts[0], channel.URI.hostPort, proxy); } }]);
 				}
 				
 				proxy.save();
@@ -234,9 +236,15 @@ Zotero.Proxies = new function() {
 		
 		// Otherwise, redirect. Note that we save the URI we're redirecting from as the
 		// referrer, since we can't make a proper redirect
-		_showNotification(bw,
-			Zotero.getString('proxies.notification.redirected.label', [channel.URI.hostPort, proxiedURI.hostPort]),
-			"settings", function() { _prefsOpenCallback(bw[1]) });
+		if(Zotero.Proxies.showRedirectNotification) {
+			_showNotification(bw,
+				Zotero.getString('proxies.notification.redirected.label', [channel.URI.hostPort, proxiedURI.hostPort]),
+				[
+					{ label: "general.dontShowAgain", callback: function() { _disableRedirectNotification(); } },
+					{ label: "proxies.notification.settings.button", callback: function() { _prefsOpenCallback(bw[1]); } }
+				]);
+		}
+
 		browser.loadURIWithFlags(proxied, 0, channel.URI, null, null);
 	}
 	
@@ -417,25 +425,36 @@ Zotero.Proxies = new function() {
 	  * Show a proxy-related notification
 	  * @param	{Array}		bw			output of _getBrowserWindow
 	  * @param	{String}	label		notification text
-	  * @param	{String}	button		button text ("settings" or "enable")
-	  * @param	{Function}	callback	callback to be executed if button is pressed
+	  * @param	{Array}	  buttons		dicts of button label resource string and associated callback
 	  */
-	 function _showNotification(bw, label, button, callback) {
+	 function _showNotification(bw, label, buttons) {
 	 	var browser = bw[0];
 	 	var window = bw[1];
-	 	
+
+		buttons = buttons.map(function(button) {
+			return {
+				label: Zotero.getString(button.label),
+				callback: button.callback
+			}
+		});
+
 		var listener = function() {
 			var nb = window.gBrowser.getNotificationBox();
 			nb.appendNotification(label,
 				'zotero-proxy', 'chrome://browser/skin/Info.png', nb.PRIORITY_WARNING_MEDIUM,
-				[{
-					label:Zotero.getString('proxies.notification.'+button+'.button'),
-					callback:callback
-				}]);
+				buttons);
 			browser.removeEventListener("pageshow", listener, false);
 		}
 		
 		browser.addEventListener("pageshow", listener, false);
+	 }
+
+	 /**
+		* Disables proxy redirection notification
+		*/
+	 function _disableRedirectNotification() {
+		 Zotero.Proxies.showRedirectNotification = false;
+		 Zotero.Prefs.set("proxies.showRedirectNotification",false);
 	 }
 	 
 	 /**
