@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "para mayor información.">
 <!ENTITY zotero.preferences.proxies.transparent "Habilitar el redireccionamiento del servidor proxy">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Automáticamente reconocer recursos proxificados">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification			"Show notification when automatically redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Deshabilitar el redireccionamiento del servidor proxy cuando el nombre del dominio contenga">
 <!ENTITY zotero.preferences.proxies.configured "Servidores proxies configurados">
 <!ENTITY zotero.preferences.proxies.hostname "Nombre del sistema">

@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "voor meer informatie.">
 <!ENTITY zotero.preferences.proxies.transparent "Proxy-omleiding inschakelen">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification			"Show notification when automatically redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Proxy-omleiding niet gebruiken wanneer mijn domeinnaam ... bevat:">
 <!ENTITY zotero.preferences.proxies.configured "Ingestelde proxies">
 <!ENTITY zotero.preferences.proxies.hostname "Hostname">

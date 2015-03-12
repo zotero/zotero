@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "til frekari upplýsinga.">
 <!ENTITY zotero.preferences.proxies.transparent "Virkja framvísun leppa">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Sjálvirk auðkenning á leppagögnum">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification			"Show notification when automatically redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Afvirkja framvísun leppa þegar mitt nafn á léni inniheldur">
 <!ENTITY zotero.preferences.proxies.configured "Stilltir leppar">
 <!ENTITY zotero.preferences.proxies.hostname "Nafn hýsitölvu">

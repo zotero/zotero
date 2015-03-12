@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "további információkért.">
 <!ENTITY zotero.preferences.proxies.transparent "Emlékezzen a proxyn keresztül megtekintett erőforrásokra">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Proxy-források automatikus felismerése">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification			"Show notification when automatically redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Proxy átirányítás tiltása, ha a domén nevem tartalmaz">
 <!ENTITY zotero.preferences.proxies.configured "Proxyk">
 <!ENTITY zotero.preferences.proxies.hostname "Host neve">

@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "för mer information.">
 <!ENTITY zotero.preferences.proxies.transparent "Kom ihåg tidigare proxyservrar automatiskt">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Upptäck proxytjänster automatiskt">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification			"Show notification when automatically redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Inaktivera proxy-omdirigering när mitt domännamn innehåller">
 <!ENTITY zotero.preferences.proxies.configured "Inställda proxyservrar">
 <!ENTITY zotero.preferences.proxies.hostname "Hostnamn">

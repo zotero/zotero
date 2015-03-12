@@ -69,6 +69,8 @@ Zotero.Proxies = new function() {
 		Zotero.Proxies.lastIPCheck = 0;
 		Zotero.Proxies.lastIPs = "";
 		Zotero.Proxies.disabledByDomain = false;
+
+		Zotero.Proxies.showRedirectNotification = Zotero.Prefs.get("proxies.showRedirectNotification");
 	}
 	
 	/**
@@ -234,9 +236,12 @@ Zotero.Proxies = new function() {
 		
 		// Otherwise, redirect. Note that we save the URI we're redirecting from as the
 		// referrer, since we can't make a proper redirect
-		_showNotification(bw,
-			Zotero.getString('proxies.notification.redirected.label', [channel.URI.hostPort, proxiedURI.hostPort]),
-			"settings", function() { _prefsOpenCallback(bw[1]) });
+		if(Zotero.Proxies.showRedirectNotification) {
+			_showNotification(bw,
+				Zotero.getString('proxies.notification.redirected.label', [channel.URI.hostPort, proxiedURI.hostPort]),
+				"settings", function() { _prefsOpenCallback(bw[1]) });
+		}
+
 		browser.loadURIWithFlags(proxied, 0, channel.URI, null, null);
 	}
 	

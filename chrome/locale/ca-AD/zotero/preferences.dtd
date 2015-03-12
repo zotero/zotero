@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "per a més informació.">
 <!ENTITY zotero.preferences.proxies.transparent "Habilita la redirecció del servidor intermediari">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Reconeix automàticament els recursos dels servidors intermediaris">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification			"Show notification when automatically redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Desactiva la redirecció del servidor intermediari quan el nom del domini contingui">
 <!ENTITY zotero.preferences.proxies.configured "Servidors intermediaris configurats">
 <!ENTITY zotero.preferences.proxies.hostname "Nom de l'amfitrió">

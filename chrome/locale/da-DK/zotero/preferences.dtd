@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "for nærmere oplysninger.">
 <!ENTITY zotero.preferences.proxies.transparent "Send forespørgsler gennem tidligere anvendte proxyer">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Anerkend automatisk ressourcer i proxyer">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification			"Show notification when automatically redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Slå automatisk brug af proxyer fra når domænenavnet indeholder ">
 <!ENTITY zotero.preferences.proxies.configured "Konfigurerede proxyer">
 <!ENTITY zotero.preferences.proxies.hostname "Værtsnavn">

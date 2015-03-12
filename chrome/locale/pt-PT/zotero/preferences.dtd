@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "para mais informação.">
 <!ENTITY zotero.preferences.proxies.transparent "Lembrar automaticamente recursos com cópia local">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Reconhecer automaticamente recursos com proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification			"Show notification when automatically redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Desactivar redireccionamento de proxy quando o meu nome de domínio contiver ">
 <!ENTITY zotero.preferences.proxies.configured "Cópias Locais Configuradas">
 <!ENTITY zotero.preferences.proxies.hostname "Nome do anfitrião">
