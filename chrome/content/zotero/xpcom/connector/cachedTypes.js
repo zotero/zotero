@@ -87,7 +87,7 @@ Zotero.Connector_Types = new function() {
 				} else if(Zotero.isChrome) {
 					return chrome.extension.getURL("images/"+icon);
 				} else if(Zotero.isSafari) {
-					return safari.extension.baseURI+"images/itemTypes/"+icon;
+					return safari.extension.baseURI+"images/"+icon;
 				}
 			};
 		}
