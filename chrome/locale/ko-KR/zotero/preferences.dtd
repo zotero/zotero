@@ -201,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Zotero 서버에 제출">
 
 <!ENTITY zotero.preferences.openAboutConfig "config 열기">
-<!ENTITY zotero.preferences.openCSLEdit "CSL 에디터 열기">
-<!ENTITY zotero.preferences.openCSLPreview "CSL 미리보기 열기">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Open about:memory">

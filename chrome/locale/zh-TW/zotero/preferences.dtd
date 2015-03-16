@@ -201,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "提交到 Zotero 伺服器">
 
 <!ENTITY zotero.preferences.openAboutConfig "開啟 about:config">
-<!ENTITY zotero.preferences.openCSLEdit "編輯文獻條樣式">
-<!ENTITY zotero.preferences.openCSLPreview "預覽文獻條樣式">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "開啟 about:memory">

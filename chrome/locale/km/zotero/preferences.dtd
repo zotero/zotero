@@ -201,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "ដាក់ជូនម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
 
 <!ENTITY zotero.preferences.openAboutConfig "បើកអំពី:config">
-<!ENTITY zotero.preferences.openCSLEdit "បើកកំណែតម្រូវស៊ីអេសអិល">
-<!ENTITY zotero.preferences.openCSLPreview "បើកពិនិត្យមើលស៊ីអេសអិល">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Open about:memory">

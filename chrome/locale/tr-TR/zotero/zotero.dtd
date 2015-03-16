@@ -6,8 +6,8 @@
 <!ENTITY zotero.general.delete "Sil">
 <!ENTITY zotero.general.ok "Tamam">
 <!ENTITY zotero.general.cancel "İptal Et">
-<!ENTITY zotero.general.refresh "Refresh">
-<!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.refresh "Yenile">
+<!ENTITY zotero.general.saveAs "Farklı Kaydet...">
 
 <!ENTITY zotero.errorReport.title "Zotero Hata Raporu">
 <!ENTITY zotero.errorReport.unrelatedMessages "Bu, Zotero ile ilgili olmayan mesajlar içerebilir.">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Metni Dönüştür">
 <!ENTITY zotero.item.textTransform.titlecase "Başlık Biçimi">
 <!ENTITY zotero.item.textTransform.sentencecase "Cümle Biçimi">
-<!ENTITY zotero.item.creatorTransform.nameSwap "İlk ve soy adlarını takas et">
+<!ENTITY zotero.item.creatorTransform.nameSwap "İlk ve Soyadları Takas Et">
 
 <!ENTITY zotero.toolbar.newNote "Yeni Not">
 <!ENTITY zotero.toolbar.note.standalone "Yeni Bağımsız Not">

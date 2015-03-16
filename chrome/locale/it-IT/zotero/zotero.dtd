@@ -125,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Modifica testo">
 <!ENTITY zotero.item.textTransform.titlecase "Maiuscolo">
 <!ENTITY zotero.item.textTransform.sentencecase "Maiuscole">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Inverti nomi e cognomi">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 
 <!ENTITY zotero.toolbar.newNote "Nuovo appunto">
 <!ENTITY zotero.toolbar.note.standalone "Nuova nota">

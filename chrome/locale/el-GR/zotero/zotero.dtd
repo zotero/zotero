@@ -125,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Μετασχηματισμός κειμένου">
 <!ENTITY zotero.item.textTransform.titlecase "Μορφή γραμμάτων τίτλου">
 <!ENTITY zotero.item.textTransform.sentencecase "Μορφή γραμμάτων πρότασης">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Εναλλαγή μεταξύ ονόματος και επιθέτου">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 
 <!ENTITY zotero.toolbar.newNote "Νέα σημείωση">
 <!ENTITY zotero.toolbar.note.standalone "Νέα αυτόνομη σημείωση">

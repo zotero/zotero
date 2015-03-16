@@ -201,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "ارسال سجل الاخطاء لخادم زوتيرو">
 
 <!ENTITY zotero.preferences.openAboutConfig "فتح about:config">
-<!ENTITY zotero.preferences.openCSLEdit "افتح محرر لغة نمط الاستشهاد">
-<!ENTITY zotero.preferences.openCSLPreview "افتح مستعرض لغة نمط الاستشهاد">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Open about:memory">

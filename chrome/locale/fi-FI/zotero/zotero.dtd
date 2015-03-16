@@ -125,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Muunna teksti">
 <!ENTITY zotero.item.textTransform.titlecase "Otsikon aakkoslaji">
 <!ENTITY zotero.item.textTransform.sentencecase "Lauseenkaltainen">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Vaihda etu- ja sukunimi">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 
 <!ENTITY zotero.toolbar.newNote "Uusi muistiinpano">
 <!ENTITY zotero.toolbar.note.standalone "Uusi itsenäinen muistiinpano">

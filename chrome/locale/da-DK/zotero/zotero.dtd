@@ -6,8 +6,8 @@
 <!ENTITY zotero.general.delete "Slet">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Annullér">
-<!ENTITY zotero.general.refresh "Refresh">
-<!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.refresh "Opdatér">
+<!ENTITY zotero.general.saveAs "Gem som...">
 
 <!ENTITY zotero.errorReport.title "Zotero fejlrapport">
 <!ENTITY zotero.errorReport.unrelatedMessages "Dette kan inkludere beskeder, som ikke har noget med Zotero at gøre.">
@@ -32,7 +32,7 @@
 <!ENTITY zotero.upgrade.changeLogAfterLink "for at se nyhederne.">
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Overfør den markerede tekst til din note i Zotero">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Opret Zotero-element og note udfra markering">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Opret Zotero-element og note ud fra markering">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "Gem link som Zotero-element.">
 <!ENTITY zotero.contextMenu.saveImageAsItem "Gem billede som Zotero-element.">
 
@@ -97,8 +97,8 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Nyt element">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mere">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Opret nyt element udfra den aktuelle side">
-<!ENTITY zotero.toolbar.lookup.label "Tilføj elementet ud fra identifikationen">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Opret nyt element ud fra den aktuelle side">
+<!ENTITY zotero.toolbar.lookup.label "Tilføj element(er) ud fra identifikator">
 <!ENTITY zotero.toolbar.removeItem.label "Fjern ...">
 <!ENTITY zotero.toolbar.newCollection.label "Ny Samling...">
 <!ENTITY zotero.toolbar.newGroup "Ny Gruppe ...">
@@ -107,10 +107,10 @@
 <!ENTITY zotero.toolbar.emptyTrash.label "Tøm affald">
 <!ENTITY zotero.toolbar.tagSelector.label "Vis/skjul mærkat-søgning">
 <!ENTITY zotero.toolbar.actions.label "Handlinger">
-<!ENTITY zotero.toolbar.import.label "Import...">
+<!ENTITY zotero.toolbar.import.label "Importér...">
 <!ENTITY zotero.toolbar.importFromClipboard "Hent fra udklipsholder">
-<!ENTITY zotero.toolbar.export.label "Eksporter Biblioteket ...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
+<!ENTITY zotero.toolbar.export.label "Eksportér bibliotek...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF-scanning...">
 <!ENTITY zotero.toolbar.timeline.label "Opret tidslinie">
 <!ENTITY zotero.toolbar.preferences.label "Indstillinger...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support og dokumentation">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Transformer tekst">
 <!ENTITY zotero.item.textTransform.titlecase "Betydende ord med stort ">
 <!ENTITY zotero.item.textTransform.sentencecase "Første bogstav med stort">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Byt rundt på fornavn og efternavn">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Ombyt fornavn/efternavn">
 
 <!ENTITY zotero.toolbar.newNote "Ny note">
 <!ENTITY zotero.toolbar.note.standalone "Ny selvstændig note">
@@ -178,7 +178,7 @@
 
 <!ENTITY zotero.progress.title "Fremgang">
 
-<!ENTITY zotero.exportOptions.title "Eksport...">
+<!ENTITY zotero.exportOptions.title "Eksportér...">
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Oversættelsesmuligheder">
 
@@ -266,7 +266,7 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Flertydige teksthenvisnnger">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Teksthenvisninger med korrespondence">
 <!ENTITY zotero.rtfScan.introPage.label "Introduktion">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. The RTF Scan feature currently supports citations in variations upon the following formats:">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero kan automatisk uddrage og reformatere henvisninger og indsætte en referenceliste i en RTF-fil. RTF-scanningsfunktionen understøtter henvisninger i følgende formater:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Vælg en RTF-fil som input og en output-fil nedenfor:">
 <!ENTITY zotero.rtfScan.scanPage.label "Scanner efter referencer i dokumentet">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero scanner dit dokument for referencer. Vent venligst.">
@@ -280,13 +280,13 @@
 <!ENTITY zotero.rtfScan.inputFile.label "Inputfil">
 <!ENTITY zotero.rtfScan.outputFile.label "Outputfil">
 
-<!ENTITY zotero.file.choose.label "Vælg filen...">
+<!ENTITY zotero.file.choose.label "Vælg fil...">
 <!ENTITY zotero.file.noneSelected.label "Der er ikke valgt en fil">
 
 <!ENTITY zotero.downloadManager.label "Gem til Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Vedhæftede filer kan ikke gemmes til det valgte bibliotek. Dette element vil blive gemt i dit bibliotek i stedet.">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Vedhæftede filer kan ikke gemmes i det valgte bibliotek. Dette element vil blive gemt i dit bibliotek i stedet.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "For at bruge denne funktion skal du først installere PDF-værktøjerne i Zoteros indstillinger.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
+<!ENTITY zotero.attachLink.title "Tilføj henvisning til URI">
+<!ENTITY zotero.attachLink.label.link "Henvisning:">
+<!ENTITY zotero.attachLink.label.title "Titel:">

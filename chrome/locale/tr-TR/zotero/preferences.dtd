@@ -201,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Zotero Sunucusuna Gönder">
 
 <!ENTITY zotero.preferences.openAboutConfig "about:config'i Aç">
-<!ENTITY zotero.preferences.openCSLEdit "CSL Düzenleyicisini Aç">
-<!ENTITY zotero.preferences.openCSLPreview "CSL Ön İzlemesini Aç">
+<!ENTITY zotero.preferences.openCSLEdit "Stil Düzenleyicisini Aç">
+<!ENTITY zotero.preferences.openCSLPreview "Stil Önizleyicisini Aç">
 <!ENTITY zotero.preferences.openAboutMemory "about:memory'yi Aç.">

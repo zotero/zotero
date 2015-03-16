@@ -6,11 +6,11 @@
 <!ENTITY zotero.general.delete "Verwijderen">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Annuleren">
-<!ENTITY zotero.general.refresh "Refresh">
-<!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.refresh "Vernieuwen">
+<!ENTITY zotero.general.saveAs "Opslaan als...">
 
 <!ENTITY zotero.errorReport.title "Zotero-foutrapportage">
-<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Dit bevat mogelijk berichten die niet gerelateerd zijn aan Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Even geduld a.u.b. totdat het foutenrapport is verstuurd.">
 <!ENTITY zotero.errorReport.submitted "Het foutenrapport is verstuurd.">
 <!ENTITY zotero.errorReport.reportID "Rapport ID:">
@@ -125,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Hoofdlettergebruik wijzigen">
 <!ENTITY zotero.item.textTransform.titlecase "Alle woorden (Elke Eerste Letter)">
 <!ENTITY zotero.item.textTransform.sentencecase "Eerste woord (van een zin)">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Draai voor/achternamen om">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Draai Voor-/Achter- namen om">
 
 <!ENTITY zotero.toolbar.newNote "Nieuwe aantekening">
 <!ENTITY zotero.toolbar.note.standalone "Nieuwe zelfstandige aantekening">
@@ -287,6 +287,6 @@
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Bijlages kunnen niet in de nu geselecteerde bibliotheek worden opgeslagen. Dit item zal daarom in plaats hiervan in uw bibliotheek worden opgeslagen.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Om deze functie te gebruiken moet u eerst de PDF-hulpprogramma's installen via de Zotero-voorkeuren.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
+<!ENTITY zotero.attachLink.title "Koppel verwijzing aan een URI">
+<!ENTITY zotero.attachLink.label.link "Verwijzing:">
+<!ENTITY zotero.attachLink.label.title "Titel:">

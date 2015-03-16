@@ -125,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Varpa texta">
 <!ENTITY zotero.item.textTransform.titlecase "Stafagerð titils">
 <!ENTITY zotero.item.textTransform.sentencecase "Stafagerð setninga">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Skipta á nöfnum/eftirnöfnum">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 
 <!ENTITY zotero.toolbar.newNote "Ný athugasemd">
 <!ENTITY zotero.toolbar.note.standalone "Ný sjálfstæð athugasemd">

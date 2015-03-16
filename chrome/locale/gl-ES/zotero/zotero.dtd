@@ -125,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Transformar o texto">
 <!ENTITY zotero.item.textTransform.titlecase "Maiúsculas comezando cada palabra">
 <!ENTITY zotero.item.textTransform.sentencecase "Maiúsculas comezando cada oración">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Cambiar nome/apelidos">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 
 <!ENTITY zotero.toolbar.newNote "Nota nova">
 <!ENTITY zotero.toolbar.note.standalone "Nova nota independente">

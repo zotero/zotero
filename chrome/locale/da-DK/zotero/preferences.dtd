@@ -190,7 +190,7 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Tjek databasens gyldighed">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset &quot;oversættere&quot; og formater...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset &quot;oversættere&quot;...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset formater...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Nulstil formater...">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Debug logning af output">
 <!ENTITY zotero.preferences.debugOutputLogging.message "Debug-output kan hjælpe Zoteros udviklere med at diagnosticere problemer i Zotero. Debug-logning få Zotero til at reagere langsommere, så du bør have det slået fra medmindre en Zotero-udvikler kræver om det.">
@@ -201,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Fremsend til Zotero Server">
 
 <!ENTITY zotero.preferences.openAboutConfig "Åbn about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Åbn CSL-Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Åbn CSL-Preview">
+<!ENTITY zotero.preferences.openCSLEdit "Åbn formatredigering">
+<!ENTITY zotero.preferences.openCSLPreview "Åbn formatforhåndsvisning">
 <!ENTITY zotero.preferences.openAboutMemory "Åben about:memory">

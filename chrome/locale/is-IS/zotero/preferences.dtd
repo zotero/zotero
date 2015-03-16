@@ -201,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Senda til Zotero netþjóns">
 
 <!ENTITY zotero.preferences.openAboutConfig "Opna um: stillingar">
-<!ENTITY zotero.preferences.openCSLEdit "Opna CSL ritil">
-<!ENTITY zotero.preferences.openCSLPreview "Opna CSL forskoðun">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Opna um: minni">
