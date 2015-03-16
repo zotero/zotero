@@ -268,9 +268,9 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 		if(!processor) return;
 		
 		var newLoc = doc.location;
-		if(Zotero.isFx && (protocol != newLoc.protocol || host != newLoc.host)) {
+		if(Zotero.isFx && !Zotero.isBookmarklet && (protocol != newLoc.protocol || host != newLoc.host)) {
 			// Cross-site; need to wrap
-			processor(Zotero.Translate.DOMWrapper.wrap(doc), newLoc.toString());
+			processor(translate._sandboxManager.wrap(doc), newLoc.toString());
 		} else {
 			// Not cross-site; no need to wrap
 			processor(doc, newLoc.toString());

@@ -54,9 +54,9 @@
 <!ENTITY zotero.preferences.sync.syncServer "Zotero samhæfingarþjónn">
 <!ENTITY zotero.preferences.sync.createAccount "Nýr notandi">
 <!ENTITY zotero.preferences.sync.lostPassword "Týnt lykilorð?">
-<!ENTITY zotero.preferences.sync.syncAutomatically "Sjamhæfa sjálfkrafa">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncAutomatically "Samhæfa sjálfkrafa">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Samhæfa innihald skjala">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero getur samhæft innihald skjala í Zotero safninu þínu við zotero.org og önnur nettengd tæki sem gerir þér kleift að leita að þínum skjölum hvar sem þú ert. Innihaldi skjalanna er ekki deilt með öðrum.">
 <!ENTITY zotero.preferences.sync.about "Um samhæfingu">
 <!ENTITY zotero.preferences.sync.fileSyncing "Samhæfing skráa">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "slóð:">

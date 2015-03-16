@@ -432,8 +432,29 @@ Zotero.Attachments = new function(){
 		}
 		
 		// If no title provided, figure it out from the URL
-		if (!title){
-			title = url.substring(url.lastIndexOf('/')+1);
+		// Web addresses with paths will be whittled to the last element
+		// excluding references and queries. All others are the full string
+		if (!title) {
+			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+				.getService(Components.interfaces.nsIIOService);
+			var titleURL = ioService.newURI(url, null, null);
+
+			if (titleURL.scheme == 'http' || titleURL.scheme == 'https') {
+				titleURL = titleURL.QueryInterface(Components.interfaces.nsIURL);
+				if (titleURL.path == '/') {
+					title = titleURL.host;
+				}
+				else if (titleURL.fileName) {
+					title = titleURL.fileName;
+				}
+				else {
+					var dir = titleURL.directory.split('/');
+					title = dir[dir.length - 2];
+				}
+			}
+			else {
+				title = url;
+			}
 		}
 		
 		// Override MIME type to application/pdf if extension is .pdf --
@@ -677,6 +698,33 @@ Zotero.Attachments = new function(){
 	});
 	
 	
+	this.cleanAttachmentURI = function (uri, tryHttp) {
+		uri = uri.trim();
+		if (!uri) return false;
+		
+		var ios = Components.classes["@mozilla.org/network/io-service;1"]
+			.getService(Components.interfaces.nsIIOService);
+		try {
+			return ios.newURI(uri, null, null).spec // Valid URI if succeeds
+		} catch (e) {
+			if (e instanceof Components.Exception
+				&& e.result == Components.results.NS_ERROR_MALFORMED_URI
+			) {
+				if (tryHttp && /\w\.\w/.test(uri)) {
+					// Assume it's a URL missing "http://" part
+					try {
+						return ios.newURI('http://' + uri, null, null).spec;
+					} catch (e) {}
+				}
+				
+				Zotero.debug('cleanAttachmentURI: Invalid URI: ' + uri, 2);
+				return false;
+			}
+			throw e;
+		}
+	}
+	
+	
 	/*
 	 * Create a new attachment with a missing file
 	 */
@@ -884,6 +932,11 @@ Zotero.Attachments = new function(){
 		catch (e) {
 			Zotero.debug(e, 1);
 			Components.utils.reportError(e);
+			return path;
+		}
+		
+		if (!baseDir.exists()) {
+			Zotero.debug("Base directory '" + baseDir.path + "' doesn't exist", 2);
 			return path;
 		}
 		

@@ -175,7 +175,7 @@ Zotero.Creators = new function() {
 			switch (field) {
 			case 'firstName':
 			case 'lastName':
-				cleanedData[field] = val.trim();
+				cleanedData[field] = val.trim().normalize();
 				break;
 			
 			case 'fieldMode':

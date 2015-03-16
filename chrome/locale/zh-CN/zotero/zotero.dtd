@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "取消">
 
 <!ENTITY zotero.errorReport.title "Zotero 错误报告">
-<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "这里可能包括和Zotero无关的消息。">
 <!ENTITY zotero.errorReport.submissionInProgress "正在提交错误报告, 请稍候.">
 <!ENTITY zotero.errorReport.submitted "错误报告已经提交.">
 <!ENTITY zotero.errorReport.reportID "报告ID:">
@@ -45,7 +45,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "显示未分类条目">
 
 <!ENTITY zotero.items.itemType "条目类型">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.type_column "条目类型">
 <!ENTITY zotero.items.title_column "标题">
 <!ENTITY zotero.items.creator_column "创建者">
 <!ENTITY zotero.items.date_column "日期">
@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "保存到 Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "附件无法保存到当前选中的文献库. 不过, 该条目将被保存到您的文献库中.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "要使用该功能, 您必须在 Zotero 首选项中的搜索选项卡里安装 PDF 工具.">
+
+<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.label.link "Link:">
+<!ENTITY zotero.attachLink.label.title "Title:">
+
+

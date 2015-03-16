@@ -58,9 +58,8 @@
 								onselect="document.getElementById('styleManager-delete').disabled = undefined"
 								onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { Zotero_Preferences.Cite.deleteSelectedStyle(); }">
 							<treecols>
-								<treecol id="styleManager-title" label="&zotero.preferences.cite.styles.styleManager.title;" flex="3"/>
-								<treecol id="styleManager-updated" label="&zotero.preferences.cite.styles.styleManager.updated;" flex="1"/>
-								<treecol id="styleManager-csl" label="&zotero.preferences.cite.styles.styleManager.csl;"/>
+								<treecol id="styleManager-title" label="&zotero.preferences.cite.styles.styleManager.title;" flex="1"/>
+								<treecol id="styleManager-updated" label="&zotero.preferences.cite.styles.styleManager.updated;"/>
 							</treecols>
 							<treechildren id="styleManager-rows"/>
 						</tree>

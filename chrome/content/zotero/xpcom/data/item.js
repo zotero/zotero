@@ -694,7 +694,7 @@ Zotero.Item.prototype.getFieldsNotInType = function (itemTypeID, allowBaseConver
  */
 Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	if (typeof value == 'string') {
-		value = value.trim();
+		value = value.trim().normalize();
 	}
 	
 	this._disabledCheck();
@@ -4286,9 +4286,9 @@ Zotero.Item.prototype.loadDisplayTitle = Zotero.Promise.coroutine(function* (rel
 		var creatorsData = this.getCreators();
 		var authors = [];
 		var participants = [];
-		for (let j=0; j<creatorsData.length; j++) {
-			let creatorData = creatorsData[j];
-			let creatorTypeID = creatorsData[j].creatorTypeID;
+		for (let i=0; i<creatorsData.length; i++) {
+			let creatorData = creatorsData[i];
+			let creatorTypeID = creatorsData[i].creatorTypeID;
 			if ((itemTypeID == 8 && creatorTypeID == 16) || // 'letter'
 					(itemTypeID == 10 && creatorTypeID == 7)) { // 'interview'
 				participants.push(creatorData);
@@ -4302,11 +4302,12 @@ Zotero.Item.prototype.loadDisplayTitle = Zotero.Promise.coroutine(function* (rel
 		var strParts = [];
 		if (participants.length > 0) {
 			let names = [];
-			for (let j=0; j<participants.length; j++) {
+			let max = Math.min(4, participants.length);
+			for (let i=0; i<max; i++) {
 				names.push(
-					participants[j].name !== undefined
-						? participants[j].name
-						: participants[j].lastName
+					participants[i].name !== undefined
+						? participants[i].name
+						: participants[i].lastName
 				);
 			}
 			switch (names.length) {

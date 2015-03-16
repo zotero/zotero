@@ -1,13 +1,13 @@
 <!ENTITY zotero.search.name "Nome:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Procurar na biblioteca:">
 
 <!ENTITY zotero.search.joinMode.prefix "Comparar">
 <!ENTITY zotero.search.joinMode.any "qualquer">
 <!ENTITY zotero.search.joinMode.all "tudo">
 <!ENTITY zotero.search.joinMode.suffix "do seguinte:">
 
-<!ENTITY zotero.search.recursive.label "Pesquisar subpastas">
+<!ENTITY zotero.search.recursive.label "Pesquisar subcoleções">
 <!ENTITY zotero.search.noChildren "Mostrar apenas itens no nível mais alto">
 <!ENTITY zotero.search.includeParentsAndChildren "Incluir itens em níveis acima e abaixo dos items localizados">
 

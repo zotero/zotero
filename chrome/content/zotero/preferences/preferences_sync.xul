@@ -148,8 +148,8 @@
 												onsynctopreference="Zotero_Preferences.Sync.unverifyStorageServer()"
 												style="padding: 0; width: 7em">
 											<menupopup>
-												<menuitem label="http" value="http" style="padding: 0"/>
 												<menuitem label="https" value="https" style="padding: 0"/>
+												<menuitem label="http" value="http" style="padding: 0"/>
 											</menupopup>
 										</menulist>
 										<label value="://"/>
@@ -240,7 +240,7 @@
 						<vbox>
 							<hbox id="storage-terms" style="margin-top: .4em; display: block" align="center">
 								<label>&zotero.preferences.sync.fileSyncing.tos1;</label>
-								<label class="zotero-text-link" href="http://www.digitalscholar.org/z_terms" value="&zotero.preferences.sync.fileSyncing.tos2;"/>
+								<label class="zotero-text-link" href="https://www.zotero.org/support/terms/terms_of_service" value="&zotero.preferences.sync.fileSyncing.tos2;"/>
 								<label>&zotero.preferences.period;</label>
 							</hbox>
 						</vbox>

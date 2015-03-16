@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.cancel "Cancelar">
 
 <!ENTITY zotero.errorReport.title "Relatório de Erros do Zotero">
-<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Pode incluir mensagens sem relação com o Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor aguarde enquanto o relatório de erro é enviado.">
 <!ENTITY zotero.errorReport.submitted "O relatório de erro foi enviado.">
 <!ENTITY zotero.errorReport.reportID "ID de Relatório:">
@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "Guardar no Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Não é possível guardar anexos na biblioteca seleccionada neste momento. Este item será por isso guardado na sua biblioteca.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Para usar esta funcionalidade tem de instalar primeiro as ferramentas PDF nas suas preferências do Zotero.">
+
+<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.label.link "Link:">
+<!ENTITY zotero.attachLink.label.title "Title:">
+
+

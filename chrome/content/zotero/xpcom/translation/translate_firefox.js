@@ -49,7 +49,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	};
 	
 	function isWrapper(x) {
-		return isWrappable(x) && (typeof x.SpecialPowers_wrappedObject !== "undefined");
+		return isWrappable(x) && (typeof x.__wrappedObject !== "undefined");
 	};
 	
 	function unwrapIfWrapped(x) {
@@ -130,7 +130,7 @@ Zotero.Translate.DOMWrapper = new function() {
 			throw "Trying to unwrap a non-wrapped object!";
 	
 		// Unwrap.
-		return x.SpecialPowers_wrappedObject;
+		return x.__wrappedObject;
 	};
 	
 	function crawlProtoChain(obj, fn) {
@@ -172,8 +172,10 @@ Zotero.Translate.DOMWrapper = new function() {
 	SpecialPowersHandler.prototype.doGetPropertyDescriptor = function(name, own) {
 	
 		// Handle our special API.
-		if (name == "SpecialPowers_wrappedObject")
+		if (name == "__wrappedObject")
 			return { value: this.wrappedObject, writeable: false, configurable: false, enumerable: false };
+		if (name == "__wrapperOverrides")
+			return { value: this.overrides, writeable: false, configurable: false, enumerable: false };
 		// Handle __exposedProps__.
 		if (name == "__exposedProps__")
 			return { value: ExposedPropsWaiver, writable: false, configurable: false, enumerable: false };
@@ -196,7 +198,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		
 		// Hack for overriding some properties
 		if (this.overrides.hasOwnProperty(name))
-			return this.overrides[name];
+			return { "enumerable": true, "value": this.overrides[name] };
 		// Case 1: Own Properties.
 		//
 		// This one is easy, thanks to Object.getOwnPropertyDescriptor().
@@ -281,7 +283,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	
 		// Insert our special API. It's not enumerable, but getPropertyNames()
 		// includes non-enumerable properties.
-		var specialAPI = 'SpecialPowers_wrappedObject';
+		var specialAPI = '__wrappedObject';
 		if (props.indexOf(specialAPI) == -1)
 			props.push(specialAPI);
 		
@@ -366,6 +368,14 @@ Zotero.Translate.DOMWrapper = new function() {
 			return obj;
 		}
 	}
+
+	/**
+	 * Wraps an object in the same sandbox as another object
+	 */
+	this.wrapIn = function(obj, insamebox) {
+		if(insamebox.__wrappingManager) return insamebox.__wrappingManager.wrap(obj);
+		return this.wrap(obj);
+	}
 	
 	/**
 	 * Checks whether an object is wrapped by a DOM wrapper
@@ -381,7 +391,8 @@ Zotero.Translate.DOMWrapper = new function() {
  * @param {String|window} sandboxLocation
  */
 Zotero.Translate.SandboxManager = function(sandboxLocation) {
-	this.sandbox = new Components.utils.Sandbox(sandboxLocation);
+	// sandboxLocation = Components.classes["@mozilla.org/systemprincipal;1"].createInstance(Components.interfaces.nsIPrincipal);
+	var sandbox = this.sandbox = new Components.utils.Sandbox(sandboxLocation, {wantComponents:false, wantGlobalProperties:["XMLHttpRequest"]});
 	this.sandbox.Zotero = {};
 	
 	// import functions missing from global scope into Fx sandbox
@@ -389,28 +400,14 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	if(typeof sandboxLocation === "object" && "DOMParser" in sandboxLocation) {
 		this.sandbox.DOMParser = sandboxLocation.DOMParser;
 	} else {
-		var sandbox = this.sandbox;
 		this.sandbox.DOMParser = function() {
-			var uri, principal;
-			// get URI
-			if(typeof sandboxLocation === "string") {	// if sandbox specified by URI
-				var secMan = Services.scriptSecurityManager;
-				uri = Services.io.newURI(sandboxLocation, "UTF-8", null);
-				principal = (secMan.getCodebasePrincipal || secMan.getSimpleCodebasePrincipal)(uri);
-			} else {									// if sandbox specified by DOM document
-				principal = sandboxLocation.document.nodePrincipal;
-				uri = sandboxLocation.document.documentURIObject;
-			}
-			
-			// initialize DOM parser
-			var _DOMParser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-				.createInstance(Components.interfaces.nsIDOMParser);
-			_DOMParser.init(principal, uri, uri);
-			
-			// expose parseFromString
 			this.__exposedProps__ = {"parseFromString":"r"};
 			this.parseFromString = function(str, contentType) {
-				return Zotero.Translate.DOMWrapper.wrap(_DOMParser.parseFromString(str, contentType));
+				var xhr = sandbox.XMLHttpRequest();
+				xhr.open("GET", "data:"+contentType+";charset=utf-8,"+encodeURIComponent(str), false);
+				xhr.send();
+				if (!xhr.responseXML) throw new Error("error parsing XML");
+				return xhr.responseXML;
 			}
 		};
 	}
@@ -425,6 +422,58 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	};
 	this.sandbox.XMLSerializer.__exposedProps__ = {"prototype":"r"};
 	this.sandbox.XMLSerializer.prototype = {"__exposedProps__":{"serializeToString":"r"}};
+
+	var expr = "(function(x) { return function() { this.args = arguments; return Function.prototype.apply.call(x, this); }.bind({}); })";
+	this._makeContentForwarder = Components.utils.evalInSandbox(expr, sandbox);
+
+	if (Zotero.platformMajorVersion >= 35) {
+		var _proxy = Components.utils.evalInSandbox('(function (target, x, overrides) {'+
+		'	return new Proxy(x, ProxyHandler(target, overrides));'+
+		'})', sandbox);
+		var wrap = this.wrap = function(target, x, overrides) {
+			if (target === null || (typeof target !== "object" && typeof target !== "function")) return target;
+			if (!x) x = new sandbox.Object();
+			return _proxy(target, x, overrides);
+		};
+		var me = this;
+		sandbox.ProxyHandler = this._makeContentForwarder(function() {
+			var target = (this.args.wrappedJSObject || this.args)[0];
+			var overrides = (this.args.wrappedJSObject || this.args)[1] || {};
+			if(target instanceof Components.interfaces.nsISupports) {
+				target = new XPCNativeWrapper(target);
+			}
+			var ret = new sandbox.Object();
+			ret.wrappedJSObject.has = function(x, prop) {
+				return overrides.hasOwnProperty(prop) || prop in target;
+			};
+			ret.wrappedJSObject.get = function(x, prop, receiver) {
+				if (prop === "__wrappedObject") return target;
+				if (prop === "__wrappingManager") return me;
+				var y = overrides.hasOwnProperty(prop) ? overrides[prop] : target[prop];
+				if (y === null || (typeof y !== "object" && typeof y !== "function")) return y;
+				return wrap(y, typeof y === "function" ? function() {
+					var args = Array.prototype.slice.apply(arguments);
+					for (var i = 0; i < args.length; i++) {
+						if (typeof args[i] === "object" && args[i] !== null &&
+							args[i].wrappedJSObject && args[i].wrappedJSObject.__wrappedObject)
+							args[i] = new XPCNativeWrapper(args[i].wrappedJSObject.__wrappedObject);
+					}
+					return wrap(y.apply(target, args));
+				} : new sandbox.Object());
+			};
+			ret.wrappedJSObject.ownKeys = function(x) {
+				return Components.utils.cloneInto(target.getOwnPropertyNames(), sandbox);
+			};
+			ret.wrappedJSObject.enumerate = function(x) {
+				var y = new sandbox.Array();
+				for (var i in target) y.wrappedJSObject.push(i);
+				return y;
+			};
+			return ret;
+		});
+	} else {
+		this.wrap = Zotero.Translate.DOMWrapper.wrap;
+	}
 }
 
 Zotero.Translate.SandboxManager.prototype = {
@@ -447,9 +496,7 @@ Zotero.Translate.SandboxManager.prototype = {
 	"importObject":function(object, passAsFirstArgument, attachTo) {
 		if(!attachTo) attachTo = this.sandbox.Zotero;
 		if(attachTo.wrappedJSObject) attachTo = attachTo.wrappedJSObject;
-		var newExposedProps = false,
-			sandbox = this.sandbox,
-			me = this;
+		var newExposedProps = false, sandbox = this.sandbox, me = this;
 		if(!object.__exposedProps__) newExposedProps = {};
 		for(var key in (newExposedProps ? object : object.__exposedProps__)) {
 			let localKey = key;
@@ -460,13 +507,27 @@ Zotero.Translate.SandboxManager.prototype = {
 			var isObject = typeof object[localKey] === "object";
 			if(isFunction || isObject) {
 				if(isFunction) {
-					attachTo[localKey] = function() {
-						var args = Array.prototype.slice.apply(arguments);
-						if(passAsFirstArgument) args.unshift(passAsFirstArgument);
-						return me._copyObject(object[localKey].apply(object, args));
-					};
+					if (Zotero.platformMajorVersion >= 33) {
+						attachTo[localKey] = this._makeContentForwarder(function() {
+							var args = Array.prototype.slice.apply(this.args.wrappedJSObject || this.args);
+							for(var i = 0; i<args.length; i++) {
+								// Make sure we keep XPCNativeWrappers
+								if(args[i] instanceof Components.interfaces.nsISupports) {
+									args[i] = new XPCNativeWrapper(args[i]);
+								}
+							}
+							if(passAsFirstArgument) args.unshift(passAsFirstArgument);
+							return me.copyObject(object[localKey].apply(object, args));
+						});
+					} else {
+						attachTo[localKey] = function() {
+							var args = Array.prototype.slice.apply(arguments);
+							if(passAsFirstArgument) args.unshift(passAsFirstArgument);
+							return me.copyObject(object[localKey].apply(object, args));
+						};
+					}
 				} else {
-					attachTo[localKey] = {};
+					attachTo[localKey] = new sandbox.Object();
 				}
 				
 				// attach members
@@ -477,7 +538,7 @@ Zotero.Translate.SandboxManager.prototype = {
 				attachTo[localKey] = object[localKey];
 			}
 		}
-		
+
 		if(newExposedProps) {
 			attachTo.__exposedProps__ = newExposedProps;
 		} else {
@@ -488,7 +549,7 @@ Zotero.Translate.SandboxManager.prototype = {
 	"_canCopy":function(obj) {
 		if(typeof obj !== "object" || obj === null) return false;
 		if((obj.constructor.name !== "Object" && obj.constructor.name !== "Array") ||
-		   "__exposedProps__" in obj) {
+		   "__exposedProps__" in obj || (obj.wrappedJSObject && obj.wrappedJSObject.__wrappingManager)) {
 			return false;
 		}
 		return true;
@@ -499,8 +560,8 @@ Zotero.Translate.SandboxManager.prototype = {
 	 * @param {Object} obj
 	 * @return {Object}
 	 */
-	"_copyObject":function(obj, wm) {
-		if(!this._canCopy(obj)) return obj
+	"copyObject":function(obj, wm) {
+		if(!this._canCopy(obj)) return obj;
 		if(!wm) wm = new WeakMap();
 		var obj2 = (obj.constructor.name === "Array" ? this.sandbox.Array() : this.sandbox.Object());
 		var wobj2 = obj2.wrappedJSObject ? obj2.wrappedJSObject : obj2;
@@ -511,7 +572,7 @@ Zotero.Translate.SandboxManager.prototype = {
 			if(this._canCopy(prop1)) {
 				var prop2 = wm.get(prop1);
 				if(prop2 === undefined) {
-					prop2 = this._copyObject(prop1, wm);
+					prop2 = this.copyObject(prop1, wm);
 					wm.set(prop1, prop2);
 				}
 				wobj2[i] = prop2;
@@ -520,6 +581,56 @@ Zotero.Translate.SandboxManager.prototype = {
 			}
 		}
 		return obj2;
+	},
+
+	"newChild":function() {
+		return new Zotero.Translate.ChildSandboxManager(this);
+	}
+}
+
+Zotero.Translate.ChildSandboxManager = function(parent) {
+	this._wrappedSandbox = new parent.sandbox.Object();
+	this._wrappedSandbox.Zotero = new parent.sandbox.Object();
+	this.sandbox = this._wrappedSandbox.wrappedJSObject || this._wrappedSandbox;
+	this._parent = parent;
+}
+Zotero.Translate.ChildSandboxManager.prototype = {
+	"eval":function(code, functions, path) {
+		// eval in sandbox scope
+		if(functions) {
+			for(var i = 0; i < functions.length; i++) {
+				delete this.sandbox[functions[i]];
+			}
+		}
+		this._parent.sandbox._withSandbox = this._wrappedSandbox;
+		Components.utils.evalInSandbox("with(_withSandbox){"+code+"};", this._parent.sandbox, "1.8", path, 1);
+		if(functions) {
+			for(var i = 0; i < functions.length; i++) {
+				try {
+					this._wrappedSandbox[functions[i]] = Components.utils.evalInSandbox(functions[i], this._parent.sandbox);
+				} catch(e) {}
+			}
+		}
+		this._parent.sandbox._withSandbox = undefined;
+	},
+	"importObject":function(object, passAsFirstArgument, attachTo) {
+		if(!attachTo) attachTo = this.sandbox.Zotero;
+		// Zotero.debug(object);
+		// Zotero.debug(attachTo);
+		this._parent.importObject(object, passAsFirstArgument, attachTo);
+		// Zotero.debug(attachTo);
+	},
+	"copyObject":function(obj) {
+		return this._parent.copyObject(obj);
+	},
+	"newChild":function() {
+		return this._parent.newChild();
+	},
+	"_makeContentForwarder":function(f) {
+		return this._parent._makeContentForwarder(f);
+	},
+	"wrap":function(x) {
+		return this._parent.wrap(x);
 	}
 }
 
@@ -532,10 +643,11 @@ Zotero.Translate.IO.maintainedInstances = [];
 
 /******* (Native) Read support *******/
 
-Zotero.Translate.IO.Read = function(file, mode) {
+Zotero.Translate.IO.Read = function(file, sandboxManager) {
 	Zotero.Translate.IO.maintainedInstances.push(this);
 	
 	this.file = file;
+	this._sandboxManager = sandboxManager;
 	
 	// open file
 	this._openRawStream();
@@ -800,7 +912,7 @@ Zotero.Translate.IO.Read.prototype = {
 			this._xmlInvalid = true;
 			throw e;
 		}
-		return (Zotero.isFx ? Zotero.Translate.DOMWrapper.wrap(xml) : xml);
+		return (Zotero.isFx ? this._sandboxManager.wrap(xml) : xml);
 	},
 	
 	"init":function(newMode, callback) {

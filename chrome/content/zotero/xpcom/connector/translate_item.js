@@ -196,7 +196,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		Zotero.API.createItem({"items":newItems}, function(statusCode, response) {
 			if(statusCode !== 200) {
 				callback(false, new Error("Save to server failed with "+statusCode+" "+response));
-				retrun;
+				return;
 			}
 
 			try {

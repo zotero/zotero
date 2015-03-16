@@ -828,7 +828,7 @@ Zotero.Tags = new function() {
 		}
 		
 		var cleanedData = {};
-		cleanedData.tag = (data.tag + '').trim();
+		cleanedData.tag = (data.tag + '').trim().normalize();
 		if (data.type) {
 			cleanedData.type = parseInt(data.type);
 		}

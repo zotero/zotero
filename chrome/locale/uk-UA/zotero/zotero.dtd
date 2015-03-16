@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "Зберегти в Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Вкладення не можуть бути збережені в обрану бібліотеку. Натомість, цей документ буде збережений в вашу бібліотеку.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Щоб використати цю функцію, необхідно встановити PDF утиліту, вказану в налаштуваннях Zotero.">
+
+<!ENTITY zotero.attachLink.title "Прикріпити посилання на URI">
+<!ENTITY zotero.attachLink.label.link "Посилання:">
+<!ENTITY zotero.attachLink.label.title "Назва">
+
+

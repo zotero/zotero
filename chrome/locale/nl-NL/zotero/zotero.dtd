@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "Opslaan in Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Bijlages kunnen niet in de nu geselecteerde bibliotheek worden opgeslagen. Dit item zal daarom in plaats hiervan in uw bibliotheek worden opgeslagen.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Om deze functie te gebruiken moet u eerst de PDF-hulpprogramma's installen via de Zotero-voorkeuren.">
+
+<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.label.link "Link:">
+<!ENTITY zotero.attachLink.label.title "Title:">
+
+

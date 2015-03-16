@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "ទាញរក្សាទុកក្នុងហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "កម្ជាប់មិនអាចទាញមករក្សាទុកនៅក្នុងបណ្ណល័យដែលកំពុងជ្រើសរើសនោះទេ។ ឯកសារនេះនឹងត្រូវទាញមករក្សាទុកនៅក្នុងបណ្ណល័យរបស់អ្នក។">
 <!ENTITY zotero.downloadManager.noPDFTools.description "ដើម្បីប្រើលក្ខណៈពិសេស​នេះ ដំបូងអ្នកត្រូវដំឡើងឧបករណ៏ភីឌីអែហ្វនៅ​ក្នុង​​ជម្រើសអាទិភាពហ្ស៊ូតេរ៉ូជាមុនសិន។">
+
+<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.label.link "Link:">
+<!ENTITY zotero.attachLink.label.title "Title:">
+
+

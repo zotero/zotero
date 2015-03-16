@@ -94,7 +94,7 @@ Zotero.Search.prototype._set = function (field, value) {
 	
 	switch (field) {
 	case 'name':
-		value = value.trim();
+		value = value.trim().normalize();
 		break;
 	
 	case 'version':
@@ -323,6 +323,8 @@ Zotero.Search.prototype.addCondition = Zotero.Promise.coroutine(function* (condi
 			if (condition == 'quicksearch-titleCreatorYear') {
 				yield this.addCondition('title', operator, part.text, false);
 				yield this.addCondition('publicationTitle', operator, part.text, false);
+				yield this.addCondition('shortTitle', operator, part.text, false);
+				yield this.addCondition('court', operator, part.text, false);
 				yield this.addCondition('year', operator, part.text, false);
 			}
 			else {
@@ -383,6 +385,8 @@ Zotero.Search.prototype.addCondition = Zotero.Promise.coroutine(function* (condi
 	let mode;
 	[condition, mode] = Zotero.SearchConditions.parseCondition(condition);
 	
+	if (typeof value == 'string') value = value.normalize();
+	
 	this._conditions[searchConditionID] = {
 		id: searchConditionID,
 		condition: condition,
@@ -427,6 +431,8 @@ Zotero.Search.prototype.updateCondition = Zotero.Promise.coroutine(function* (se
 	}
 	
 	var [condition, mode] = Zotero.SearchConditions.parseCondition(condition);
+	
+	if (typeof value == 'string') value = value.normalize();
 	
 	this._conditions[searchConditionID] = {
 		id: parseInt(searchConditionID),
@@ -2337,6 +2343,7 @@ Zotero.SearchConditions = new function(){
 			return Zotero.getString('searchConditions.' + str)
 		}
 		catch (e) {
+			Zotero.debug("String not found for searchConditions." + str, 2);
 			return Zotero.ItemFields.getLocalizedString(null, str);
 		}
 	}

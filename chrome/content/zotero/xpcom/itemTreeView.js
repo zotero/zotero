@@ -560,12 +560,19 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				// Row might already be gone (e.g. if this is a child and
 				// 'modify' was sent to parent)
 				let row = this._itemRowMap[ids[i]];
-				if (push && row != undefined) {
+				if (push && row !== undefined) {
 					// Don't remove child items from collections, because it's handled by 'modify'
 					if (action == 'remove' && this.getParentIndex(row) != -1) {
 						continue;
 					}
 					rows.push(row);
+					
+					// Remove child items of removed parents
+					if (this.isContainer(row) && this.isContainerOpen(row)) {
+						while (++row < this.rowCount && this.getLevel(row) > 0) {
+							rows.push(row);
+						}
+					}
 				}
 			}
 			
@@ -1456,9 +1463,25 @@ Zotero.ItemTreeView.prototype.sort = Zotero.Promise.coroutine(function* (itemID)
 	
 	var creatorSortCache = {};
 	
+	// Regexp to extract the whole string up to an optional "and" or "et al."
+	var andEtAlRegExp = new RegExp(
+		// Extract the beginning of the string in non-greedy mode
+		"^.+?"
+		// up to either the end of the string, "et al." at the end of string
+		+ "(?=(?: " + Zotero.getString('general.etAl').replace('.', '\.') + ")?$"
+		// or ' and '
+		+ "| " + Zotero.getString('general.and') + " "
+		+ ")"
+	);
+	
 	function creatorSort(a, b) {
 		var itemA = a.ref;
 		var itemB = b.ref;
+		//
+		// Try sorting by the first name in the firstCreator field, since we already have it
+		//
+		// For sortCreatorAsString mode, just use the whole string
+		//
 		var aItemID = a.id,
 			bItemID = b.id,
 			fieldA = creatorSortCache[aItemID],
@@ -1467,13 +1490,25 @@ Zotero.ItemTreeView.prototype.sort = Zotero.Promise.coroutine(function* (itemID)
 		var sortStringA = itemA[prop];
 		var sortStringB = itemB[prop];
 		if (fieldA === undefined) {
-			var matches = Zotero.Items.getSortTitle(sortStringA).match(/^[^\s]+/);
-			var fieldA = matches ? matches[0] : '';
+			let firstCreator = Zotero.Items.getSortTitle(sortStringA);
+			if (sortCreatorAsString) {
+				var fieldA = firstCreator;
+			}
+			else {
+				var matches = andEtAlRegExp.exec(firstCreator);
+				var fieldA = matches ? matches[0] : '';
+			}
 			creatorSortCache[aItemID] = fieldA;
 		}
 		if (fieldB === undefined) {
-			var matches = Zotero.Items.getSortTitle(sortStringB).match(/^[^\s]+/);
-			var fieldB = matches ? matches[0] : '';
+			let firstCreator = Zotero.Items.getSortTitle(sortStringB);
+			if (sortCreatorAsString) {
+				var fieldB = firstCreator;
+			}
+			else {
+				var matches = andEtAlRegExp.exec(firstCreator);
+				var fieldB = matches ? matches[0] : '';
+			}
 			creatorSortCache[bItemID] = fieldB;
 		}
 		

@@ -282,5 +282,11 @@
 <!ENTITY zotero.file.noneSelected.label "Ingen fil vald">
 
 <!ENTITY zotero.downloadManager.label "Spara till Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Bilagor kan inte läggas till det valda biblioteket. Istället kommer källas att sparas i &quot;Mitt bibliotek&quot;.">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Bilagor kan inte läggas till det valda biblioteket. Istället kommer källan att sparas i &quot;Mitt bibliotek&quot;.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "För att använda denna funktion måste du först installera PDF-verktygen. Du hittar detta tillval i Inställningar.">
+
+<!ENTITY zotero.attachLink.title "Bifoga länk till URI">
+<!ENTITY zotero.attachLink.label.link "Länk:">
+<!ENTITY zotero.attachLink.label.title "Titel:">
+
+

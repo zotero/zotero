@@ -44,8 +44,8 @@
 <!ENTITY zotero.toolbar.duplicate.label "Vis duplikat">
 <!ENTITY zotero.collections.showUnfiledItems "Vis uplasserte objekt">
 
-<!ENTITY zotero.items.itemType "Objekttype">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.itemType "Type">
+<!ENTITY zotero.items.type_column "Type">
 <!ENTITY zotero.items.title_column "Tittel">
 <!ENTITY zotero.items.creator_column "Namn">
 <!ENTITY zotero.items.date_column "Dato">
@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "Lagra til Zotero">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Vedlegg kan ikkje lagrast til det valde biblioteket. Lagrar til hovudbiblioteket i staden.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "For å bruka denne funksjonen må du fyrst installera PDF-verktøya i innstillingar-dialogen til Zotero.">
+
+<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.label.link "Link:">
+<!ENTITY zotero.attachLink.label.title "Title:">
+
+

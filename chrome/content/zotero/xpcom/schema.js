@@ -1008,7 +1008,7 @@ Zotero.Schema = new function(){
 			var body = 'styles=' + encodeURIComponent(JSON.stringify(styleTimestamps));
 			
 			try {
-				let xmlhttp = Zotero.HTTP.promise("POST", url, { body: body });
+				let xmlhttp = Zotero.HTTP.promise("POST", ZOTERO_CONFIG.REPOSITORY_URL, { body: body });
 				return _updateFromRepositoryCallback(xmlhttp, !!force);
 			}
 			catch (e) {

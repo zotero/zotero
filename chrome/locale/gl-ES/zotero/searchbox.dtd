@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "Nome:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Buscar na librería:">
 
 <!ENTITY zotero.search.joinMode.prefix "Comparar con">
 <!ENTITY zotero.search.joinMode.any "calquera">

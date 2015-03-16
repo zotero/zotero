@@ -23,24 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
-const ZOTERO_CONFIG = {
-	GUID: 'zotero@chnm.gmu.edu',
-	REPOSITORY_URL: 'https://repo.zotero.org/repo',
-	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
-	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
-	BASE_URI: 'http://zotero.org/',
-	WWW_BASE_URL: 'http://www.zotero.org/',
-	PROXY_AUTH_URL: 'http://zotero.org.s3.amazonaws.com/proxy-auth',
-	SYNC_URL: 'https://sync.zotero.org/',
-	API_URL: 'https://api.zotero.org/',
-	API_VERSION: 2,
-	PREF_BRANCH: 'extensions.zotero.',
-	BOOKMARKLET_ORIGIN : 'https://www.zotero.org',
-	HTTP_BOOKMARKLET_ORIGIN : 'http://www.zotero.org',
-	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/'
-};
-
 // Commonly used imports accessible anywhere
+Components.utils.import("resource://zotero/config.js");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm");
@@ -61,7 +45,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	this.logError = logError;
 	this.getErrors = getErrors;
 	this.getSystemInfo = getSystemInfo;
-	this.safeDebug = safeDebug;
 	this.getString = getString;
 	this.localeJoin = localeJoin;
 	this.setFontSize = setFontSize;
@@ -1262,10 +1245,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	}
 	
 	/**
-	 * Log a JS error to the Mozilla JS error console and the text console
+	 * Log a JS error to the Mozilla error console and debug output
 	 * @param {Exception} err
 	 */
 	function logError(err) {
+		Zotero.debug(err, 1);
 		log(err.message ? err.message : err.toString(), "error",
 			err.fileName ? err.fileName : (err.filename ? err.filename : null), null,
 			err.lineNumber ? err.lineNumber : null, null);
@@ -1362,22 +1346,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		AddonManager.getAllAddons(onHaveInstalledAddons);
 	}
 	
-	
-	function safeDebug(obj){
-		for (var i in obj){
-			try {
-				Zotero.debug(i + ': ' + obj[i]);
-			}
-			catch (e){
-				try {
-					Zotero.debug(i + ': ERROR');
-				}
-				catch (e){}
-			}
-		}
-	}
-	
-	
 	function getString(name, params){
 		try {
 			if (params != undefined){
@@ -1391,6 +1359,13 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			}
 		}
 		catch (e){
+			if (e.name == 'NS_ERROR_ILLEGAL_VALUE') {
+				Zotero.debug(params, 1);
+			}
+			else if (e.name != 'NS_ERROR_FAILURE') {
+				Components.utils.reportError(e);
+				Zotero.debug(e, 1);
+			}
 			throw ('Localized string not available for ' + name);
 		}
 		return l10n;
@@ -2692,6 +2667,9 @@ Zotero.DragDrop = {
 				return false;
 			}
 			var win = sourceNode.ownerDocument.defaultView;
+			if (win.document.documentElement.getAttribute('windowtype') == 'zotero:search') {
+				return win.ZoteroAdvancedSearch.itemsView.collectionTreeRow;
+			}
 			return win.ZoteroPane.collectionsView.selectedTreeRow;
 		}
 		else {

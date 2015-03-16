@@ -160,7 +160,9 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 				}
 				// If no comparison function, check for exact match
 				else {
-					if (rows[i].value !== rows[j].value) {
+					if (!rows[i].value || !rows[j].value
+						|| (rows[i].value !== rows[j].value)
+					) {
 						break;
 					}
 				}
@@ -197,8 +199,8 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 		let newRows = [];
 		for (let i = 0; i < rows.length; i++) {
 			let row = rows[i];
-			// Ignore formatting
-			let newVal = (row.value + '').replace(/[^\dX]+/ig, '').toUpperCase();
+			let newVal = Zotero.Utilities.cleanISBN('' + row.value);
+			if (!newVal) continue;
 			isbnCache[row.itemID] = newVal;
 			newRows.push({
 				itemID: row.itemID,

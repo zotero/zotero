@@ -34,6 +34,7 @@ var ZoteroAdvancedSearch = new function() {
 	this.itemsView = false;
 	
 	var _searchBox;
+	var _libraryID;
 	
 	function onLoad() {
 		_searchBox = document.getElementById('zotero-search-box');
@@ -145,6 +146,7 @@ var ZoteroAdvancedSearch = new function() {
 	
 	
 	this.onLibraryChange = function (libraryID) {
+		_libraryID = libraryID;
 		document.getElementById('zotero-search-save').disabled = !Zotero.Libraries.isEditable(libraryID);
 	}
 	

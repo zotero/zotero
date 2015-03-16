@@ -284,3 +284,9 @@
 <!ENTITY zotero.downloadManager.label "Zoterosse salvestamine">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Valitud raamatukokku ei ole võimalik manuseid salvestada. See kirje salvestatakse teie isiklikku raamatukokku.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Selle funktsiooni kasutamiseks on kõigepealt tarvis paigaldada PDF tööriistad Zotero seadetes.">
+
+<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.label.link "Link:">
+<!ENTITY zotero.attachLink.label.title "Title:">
+
+

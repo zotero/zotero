@@ -93,7 +93,7 @@ Zotero.Collection.prototype._set = function (field, value) {
 	
 	switch (field) {
 		case 'name':
-			value = value.trim();
+			value = value.trim().normalize();
 			break;
 		
 		case 'version':
