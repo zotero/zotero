@@ -329,7 +329,7 @@
 				</vbox>
 				
 				<splitter id="zotero-collections-splitter" resizebefore="closest" resizeafter="closest" collapse="before"
-					zotero-persist="state"
+					zotero-persist="state" tooltiptext="Resize left pane"
 					onmousemove="document.getElementById('zotero-items-toolbar').setAttribute('state', this.getAttribute('state'));ZoteroPane_Local.updateToolbarPosition();"
 					oncommand="ZoteroPane_Local.updateToolbarPosition()">
 					<grippy id="zotero-collections-grippy"/>
@@ -538,7 +538,7 @@
 					</deck>
 				</vbox>
 				
-				<splitter id="zotero-items-splitter" resizebefore="closest" resizeafter="closest" collapse="after" zotero-persist="state"
+				<splitter id="zotero-items-splitter" resizebefore="closest" resizeafter="closest" collapse="after" zotero-persist="state" tooltiptext="Resize right pane"
 					onmousemove="ZoteroPane_Local.updateToolbarPosition()"
 					oncommand="ZoteroPane_Local.updateToolbarPosition()">
 					<grippy id="zotero-items-grippy"/>

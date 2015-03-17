@@ -48,6 +48,17 @@
 	height: .25em;
 }*/
 
+#zotero-pane splitter[state="collapsed"] > grippy
+{
+	width: 14px;
+	background-position: 50% 50%;
+}
+
+#zotero-pane splitter[state="collapsed"]
+{
+	width: 20px;
+}
+
 #zotero-pane splitter
 {
 	border: 0;
