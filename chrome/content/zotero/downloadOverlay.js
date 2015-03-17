@@ -82,7 +82,7 @@ var Zotero_DownloadOverlay = new function() {
 				&& !document.getElementById('zotero-recognizePDF').disabled;
 		
 		// set up callback
-		var callback = function(item) {
+		var callback = function(item, e) {
 			if(!win) return;
 						
 			if(item) {
@@ -92,6 +92,7 @@ var Zotero_DownloadOverlay = new function() {
 			} else {
 				progressWin.addDescription(Zotero.getString("save.link.error"));
 				progressWin.startCloseTimer(8000);
+				Zotero.logError(e);
 			}
 			
 			if(recognizePDF) {

@@ -3358,8 +3358,9 @@ var ZoteroPane = new function()
 						
 						var attachmentItem = Zotero.Attachments.importFromURL(url, false,
 							false, false, collectionID, mimeType, libraryID,
-							function(attachmentItem) {
-								self.selectItem(attachmentItem.id);
+							function(attachmentItem, e) {
+								if (attachmentItem) self.selectItem(attachmentItem.id);
+								else Zotero.logError(e);
 							});
 							
 						return;

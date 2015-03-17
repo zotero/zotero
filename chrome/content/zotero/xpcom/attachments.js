@@ -203,6 +203,8 @@ Zotero.Attachments = new function(){
 			mimeType, libraryID, callback, cookieSandbox) {
 		Zotero.debug('Importing attachment from URL');
 		
+		callback = callback || function(_, e) { if (e) throw e };
+		
 		if (sourceItemID && parentCollectionIDs) {
 			var msg = "parentCollectionIDs is ignored when sourceItemID is set in Zotero.Attachments.importFromURL()";
 			Zotero.debug(msg, 2);
@@ -216,8 +218,7 @@ Zotero.Attachments = new function(){
 		var urlRe = /^https?:\/\/[^\s]*$/;
 		var matches = urlRe.exec(url);
 		if (!matches) {
-			if(callback) callback(false);
-			throw ("Invalid URL '" + url + "' in Zotero.Attachments.importFromURL()");
+			callback(false, new Error("Invalid URL '" + url));
 		}
 		
 		// Save using a hidden browser
@@ -225,7 +226,7 @@ Zotero.Attachments = new function(){
 			var browser = Zotero.HTTP.processDocuments(url, function() {
 				var importCallback = function (item, e) {
 					Zotero.Browser.deleteHiddenBrowser(browser);
-					if(callback) callback(item, e);
+					callback(item, e);
 				};
 				try {
 					Zotero.Attachments.importFromDocument(browser.contentDocument,
@@ -303,7 +304,7 @@ Zotero.Attachments = new function(){
 							Zotero.debug(errString, 2);
 							Zotero.debug(str);
 							attachmentItem.erase();
-							if(callback) callback(false, new Error(errString));
+							callback(false, new Error(errString));
 							return;
 						}
 						
@@ -316,7 +317,7 @@ Zotero.Attachments = new function(){
 						Zotero.Notifier.trigger('add', 'item', itemID);
 						Zotero.Notifier.trigger('modify', 'item', sourceItemID);
 				
-						if(callback) callback(attachmentItem);
+						callback(attachmentItem);
 						
 						// We don't have any way of knowing that the file
 						// is flushed to disk, so we just wait a second
@@ -331,7 +332,7 @@ Zotero.Attachments = new function(){
 					catch (e) {
 						// Clean up
 						attachmentItem.erase();
-						if(callback) callback(false, e);
+						callback(false, e);
 						
 						throw (e);
 					}
@@ -530,6 +531,8 @@ Zotero.Attachments = new function(){
 	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs, callback, libraryID) {
 		Zotero.debug('Importing attachment from document');
 		
+		callback = callback || function(_, e) { if (e) throw e }
+		
 		if (sourceItemID && parentCollectionIDs) {
 			var msg = "parentCollectionIDs is ignored when sourceItemID is set in Zotero.Attachments.importFromDocument()";
 			Zotero.debug(msg, 2);
@@ -594,15 +597,19 @@ Zotero.Attachments = new function(){
 			file.append(fileName)
 			
 			var f = function() {
-				if (mimeType == 'application/pdf') {
-					Zotero.Fulltext.indexPDF(file, itemID);
+				try {
+					if (mimeType == 'application/pdf') {
+						Zotero.Fulltext.indexPDF(file, itemID);
+					}
+					else if (Zotero.MIME.isTextType(mimeType)) {
+						Zotero.Fulltext.indexDocument(document, itemID);
+					}
+				} catch(e) {
+					Zotero.debug("Error trying to index attachment");
+					Zotero.logError(e);
 				}
-				else if (Zotero.MIME.isTextType(mimeType)) {
-					Zotero.Fulltext.indexDocument(document, itemID);
-				}
-				if (callback) {
-					callback(attachmentItem);
-				}
+				
+				callback(attachmentItem);
 			};
 			
 			if (mimeType === 'text/html' || mimeType === 'application/xhtml+xml') {
@@ -657,7 +664,7 @@ Zotero.Attachments = new function(){
 						// Clean up
 						var item = Zotero.Items.get(itemID);
 						item.erase();
-						if(callback) callback(false, e);
+						callback(false, e);
 						
 						throw (e);
 					}
@@ -713,7 +720,7 @@ Zotero.Attachments = new function(){
 			
 			Zotero.DB.rollbackTransaction();
 			
-			throw (e);
+			callback(false, e);
 		}
 	}
 	
