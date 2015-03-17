@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "جزء التصفح">
 <!ENTITY zotero.preferences.showIn.separateTab "تبويب منفصل">
 <!ENTITY zotero.preferences.showIn.appTab "تبويب التطبيقات">
-<!ENTITY zotero.preferences.statusBarIcon "أيقونة شريط الحالة:">
-<!ENTITY zotero.preferences.statusBarIcon.none "بدون أيقونة">
 <!ENTITY zotero.preferences.fontSize "حجم الخط:">
 <!ENTITY zotero.preferences.fontSize.small "صغير">
 <!ENTITY zotero.preferences.fontSize.medium "متوسط">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "لغة نمط الاستشهاد">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "احصل على انماط اضافية...">
 
-<!ENTITY zotero.preferences.prefpane.keys "اختصارات">
-
 <!ENTITY zotero.preferences.keys.openZotero "فتح/إغلاق نافذة زوتيرو">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "التنشيط لوضع ملء الشاشة">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "متقدم">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "الملفات والمجلدات">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "تحديد موقع المقتنى">
 <!ENTITY zotero.preferences.locate.locateEngineManager "إدارة محرك البحث">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "ارسال سجل الاخطاء لخادم زوتيرو">
 
 <!ENTITY zotero.preferences.openAboutConfig "فتح about:config">
-<!ENTITY zotero.preferences.openCSLEdit "افتح محرر لغة نمط الاستشهاد">
-<!ENTITY zotero.preferences.openCSLPreview "افتح مستعرض لغة نمط الاستشهاد">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Open about:memory">

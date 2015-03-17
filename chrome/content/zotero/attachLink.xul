@@ -14,7 +14,7 @@
 	>
 	
 	<script src="include.js"/>
-	<script src="AttachLink.js"/>
+	<script src="attachLink.js"/>
 	
 	<vbox id="zotero-attach-uri-container">
 		<hbox>

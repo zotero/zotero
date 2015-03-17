@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Supprimer">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Annuler">
+<!ENTITY zotero.general.refresh "Actualiser">
+<!ENTITY zotero.general.saveAs "Enregistrer sous…">
 
 <!ENTITY zotero.errorReport.title "Rapport d'erreur Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Il peut y avoir des messages sans lien avec Zotero.">
@@ -103,7 +105,7 @@
 <!ENTITY zotero.toolbar.newSubcollection.label "Nouvelle sous-collection…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nouvelle recherche enregistrée…">
 <!ENTITY zotero.toolbar.emptyTrash.label "Vider la corbeille">
-<!ENTITY zotero.toolbar.tagSelector.label "Montrer/cacher le sélecteur de marqueurs">
+<!ENTITY zotero.toolbar.tagSelector.label "Afficher / Cacher le sélecteur de marqueurs">
 <!ENTITY zotero.toolbar.actions.label "Actions">
 <!ENTITY zotero.toolbar.import.label "Importer…">
 <!ENTITY zotero.toolbar.importFromClipboard "Importer depuis le presse-papiers">
@@ -114,7 +116,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Assistance et documentation">
 <!ENTITY zotero.toolbar.about.label "À propos de Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Recherche avancée">
-<!ENTITY zotero.toolbar.tab.tooltip "Bascule du mode onglet">
+<!ENTITY zotero.toolbar.tab.tooltip "Activer / Désactiver le mode onglet">
 <!ENTITY zotero.toolbar.openURL.label "Localiser">
 <!ENTITY zotero.toolbar.openURL.tooltip "Chercher dans votre bibliothèque locale">
 
@@ -123,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Transformer le texte">
 <!ENTITY zotero.item.textTransform.titlecase "Initiales En Majuscules">
 <!ENTITY zotero.item.textTransform.sentencecase "Lettre capitale en début de phrase">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Inverser les prénom/nom">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Inverser prénom/nom">
 
 <!ENTITY zotero.toolbar.newNote "Nouvelle note">
 <!ENTITY zotero.toolbar.note.standalone "Nouvelle note indépendante">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Joindre un lien vers un URI">
 <!ENTITY zotero.attachLink.label.link "Lien :">
 <!ENTITY zotero.attachLink.label.title "Titre :">
-
-

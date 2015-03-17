@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "webbläsarfönstret">
 <!ENTITY zotero.preferences.showIn.separateTab "ny flik">
 <!ENTITY zotero.preferences.showIn.appTab "programflik">
-<!ENTITY zotero.preferences.statusBarIcon "Ikon i statusfält:">
-<!ENTITY zotero.preferences.statusBarIcon.none "ingen ikon">
 <!ENTITY zotero.preferences.fontSize "Teckenstorlek:">
 <!ENTITY zotero.preferences.fontSize.small "Liten">
 <!ENTITY zotero.preferences.fontSize.medium "Mellan">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Lägg till ytterligare stilar...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Snabbkommandon">
-
 <!ENTITY zotero.preferences.keys.openZotero "Öppna/Stäng Zotero-panelen">
 <!ENTITY zotero.preferences.keys.saveToZotero "Spara till Zotero (adressradsikon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Växla fullskärmsläge">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avancerat">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Filer och kataloger">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Hitta">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Hantera söktjänst för artiklar">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Skicka till Zotero Server">
 
 <!ENTITY zotero.preferences.openAboutConfig "Öppna about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Öppna CSL-redigerare">
-<!ENTITY zotero.preferences.openCSLPreview "Öppna CSL-förhandsvisning">
+<!ENTITY zotero.preferences.openCSLEdit "Öppna stilredigerare">
+<!ENTITY zotero.preferences.openCSLPreview "Öppna förhandsgranskning av stil">
 <!ENTITY zotero.preferences.openAboutMemory "Öppna about:memory">

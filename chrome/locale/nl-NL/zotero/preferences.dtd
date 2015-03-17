@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Zotero-venster">
 <!ENTITY zotero.preferences.showIn.separateTab "Eigen tabblad">
 <!ENTITY zotero.preferences.showIn.appTab "App-tabblad">
-<!ENTITY zotero.preferences.statusBarIcon "Add-onbalk pictogram:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Geen">
 <!ENTITY zotero.preferences.fontSize "Lettergrootte:">
 <!ENTITY zotero.preferences.fontSize.small "Klein">
 <!ENTITY zotero.preferences.fontSize.medium "Middelgroot">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Meer stijlen installeren...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Sneltoetsen">
-
 <!ENTITY zotero.preferences.keys.openZotero "Openen/Sluiten van Zotero-venster">
 <!ENTITY zotero.preferences.keys.saveToZotero "Sla op naar Zotero (adresbalk icoon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Volledige schermweergave">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Geavanceerd">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Bestanden en mappen">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Opzoeken">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Manager voor artikel-zoekmachines">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Naar Zotero-server opsturen">
 
 <!ENTITY zotero.preferences.openAboutConfig "about:config openen">
-<!ENTITY zotero.preferences.openCSLEdit "CSL-editor openen">
-<!ENTITY zotero.preferences.openCSLPreview "CSL-voorbeeldweergave openen">
+<!ENTITY zotero.preferences.openCSLEdit "Open CSL-stijl bewerker">
+<!ENTITY zotero.preferences.openCSLPreview "Open CSL-stijl voorbeeld">
 <!ENTITY zotero.preferences.openAboutMemory "about:memory openen">

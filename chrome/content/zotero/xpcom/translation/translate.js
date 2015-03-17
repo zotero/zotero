@@ -590,6 +590,32 @@ Zotero.Translate.Sandbox = {
 					if(setShortTitle) item.shortTitle = title;
 				}
 				
+				/* Clean up ISBNs
+				 * Allow multiple ISBNs, but...
+				 * (1) validate all ISBNs
+				 * (2) convert all ISBNs to ISBN-13
+				 * (3) remove any duplicates
+				 * (4) separate them with space
+				 */
+				if (item.ISBN) {
+					// Match ISBNs with groups separated by various dashes or even spaces
+					var isbnRe = /\b(?:97[89][\s\x2D\xAD\u2010-\u2015\u2043\u2212]*)?(?:\d[\s\x2D\xAD\u2010-\u2015\u2043\u2212]*){9}[\dx](?![\x2D\xAD\u2010-\u2015\u2043\u2212])\b/gi,
+						validISBNs = [],
+						isbn;
+					while (isbn = isbnRe.exec(item.ISBN)) {
+						var validISBN = Zotero.Utilities.cleanISBN(isbn[0]);
+						if (!validISBN) {
+							// Back up and move up one character
+							isbnRe.lastIndex = isbn.index + 1;
+							continue;
+						}
+						
+						var isbn13 = Zotero.Utilities.toISBN13(validISBN);
+						if (validISBNs.indexOf(isbn13) == -1) validISBNs.push(isbn13);
+					}
+					item.ISBN = validISBNs.join(' ');
+				}
+				
 				// refuse to save very long tags
 				if(item.tags) {
 					for(var i=0; i<item.tags.length; i++) {
@@ -605,6 +631,13 @@ Zotero.Translate.Sandbox = {
 				
 				for(var i=0; i<item.attachments.length; i++) {
 					var attachment = item.attachments[i];
+					
+					// Web translators are not allowed to use attachment.path
+					if (attachment.path) {
+						if (!attachment.url) attachment.url = attachment.path;
+						delete attachment.path;
+					}
+					
 					if(attachment.url) {
 						// Remap attachment (but not link) URLs
 						attachment.url = translate.resolveURL(attachment.url, attachment.snapshot === false);
@@ -1189,16 +1222,22 @@ Zotero.Translate.Base.prototype = {
 			} else {
 				resolved = url;
 			}
-		} else if(Zotero.isFx) {
+		} else if(Zotero.isFx && this.location) {
 			resolved = Components.classes["@mozilla.org/network/io-service;1"].
 				getService(Components.interfaces.nsIIOService).
 				newURI(this.location, "", null).resolve(url);
-		} else if(Zotero.isNode) {
+		} else if(Zotero.isNode && this.location) {
 			resolved = require('url').resolve(this.location, url);
+		} else if (this.document) {
+			var a = this.document.createElement('a');
+			a.href = url;
+			resolved = a.href;
+		} else if (url.indexOf('//') == 0) {
+			// Protocol-relative URL with no associated web page
+			// Use HTTP by default
+			resolved = 'http:' + url;
 		} else {
-			var a = document.createElement('a');
-	        a.href = url;
-	        resolved = a.href;
+			throw new Error('Cannot resolve relative URL without an associated web page: ' + url);
 		}
 		
 		/*var m = hostPortRe.exec(resolved);
@@ -1500,28 +1539,7 @@ Zotero.Translate.Base.prototype = {
 			"Zotero.Collection.prototype.complete = function() { Zotero._collectionDone(this); };";
 		}
 		
-		if(Zotero.isFx && !Zotero.isBookmarklet) {
-			// workaround for inadvertant attempts to pass E4X back from sandbox
-			src += "Zotero.Item.prototype.complete = function() { "+
-					"for(var key in this) {"+
-					"if("+createArrays+".indexOf(key) !== -1) {"+
-						"for each(var item in this[key]) {"+
-							"for(var key2 in item) {"+
-								"if(typeof item[key2] === 'xml') {"+
-									"item[key2] = item[key2].toString();"+
-								"}"+
-							"}"+
-						"}"+
-					"} else if(typeof this[key] === 'xml') {"+
-						"this[key] = this[key].toString();"+
-					"}"+
-				"}";
-		} else {
-			src += "Zotero.Item.prototype.complete = function() { ";
-		}
-		
-		src += "Zotero._itemDone(this);"+
-		"}";
+		src += "Zotero.Item.prototype.complete = function() { Zotero._itemDone(this); }";
 
 		this._sandboxManager.eval(src);
 		this._sandboxManager.importObject(this.Sandbox, this);
@@ -1690,7 +1708,9 @@ Zotero.Translate.Web.prototype._getSandboxLocation = function() {
  * Pass document and location to detect* and do* functions
  */
 Zotero.Translate.Web.prototype._getParameters = function() {
-	if (Zotero.Translate.DOMWrapper && Zotero.Translate.DOMWrapper.isWrapped(this.document)) {
+	if (Zotero.Translate.DOMWrapper &&
+		Zotero.Translate.DOMWrapper.isWrapped(this.document) &&
+		Zotero.platformMajorVersion >= 35) {
 		return [this._sandboxManager.wrap(Zotero.Translate.DOMWrapper.unwrap(this.document), null,
 			                              this.document.__wrapperOverrides), this.location];
 	} else {

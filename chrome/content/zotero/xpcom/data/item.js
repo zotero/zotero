@@ -815,6 +815,24 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		value = value.replace(/[\r\n]+/g, " ");;
 	}
 	
+	if (fieldID == Zotero.ItemFields.getID('ISBN')) {
+		// Hyphenate ISBNs, but only if everything is in expected format and valid
+		let isbns = ('' + value).trim().split(/\s*[,;]\s*|\s+/),
+			newISBNs = '',
+			failed = false;
+		for (let i=0; i<isbns.length; i++) {
+			let isbn = Zotero.Utilities.Internal.hyphenateISBN(isbns[i]);
+			if (!isbn) {
+				failed = true;
+				break;
+			}
+			
+			newISBNs += ' ' + isbn;
+		}
+		
+		if (!failed) value = newISBNs.substr(1);
+	}
+	
 	if (!loadIn) {
 		// Save date field as multipart date
 		// TEMP - filingDate
@@ -2320,7 +2338,10 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* (ski
 			// accidentally use the parent dir. Syncing to OS X, which doesn't
 			// exhibit this bug, will properly correct such filenames in
 			// storage.js and propagate the change
-			if (Zotero.isWin) {
+			//
+			// The one exception on other platforms is '/', which is interpreted
+			// as a directory by setRelativeDescriptor, so strip in that case too.
+			if (Zotero.isWin || path.indexOf('/') != -1) {
 				path = Zotero.File.getValidFileName(path, true);
 			}
 			var file = Zotero.Attachments.getStorageDirectory(this);

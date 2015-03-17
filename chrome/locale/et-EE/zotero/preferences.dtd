@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Brauseri paanil">
 <!ENTITY zotero.preferences.showIn.separateTab "Eraldi">
 <!ENTITY zotero.preferences.showIn.appTab "Rakenduse tab">
-<!ENTITY zotero.preferences.statusBarIcon "Staatusriba ikoon:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Puudub">
 <!ENTITY zotero.preferences.fontSize "Fondi suurus:">
 <!ENTITY zotero.preferences.fontSize.small "Väike">
 <!ENTITY zotero.preferences.fontSize.medium "Keskmine">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Veel stiile...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Kiirvaliku klahvid">
-
 <!ENTITY zotero.preferences.keys.openZotero "Avada/Sulgeda Zotero aken">
 <!ENTITY zotero.preferences.keys.saveToZotero "Salvestada Zoterosse (aadressiriba ikoon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Täisekraan režiim">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Täpsemalt">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Failid ja kataloogid">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Otsing">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikli otsingumootori haldaja">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Saata Zotero serverisse">
 
 <!ENTITY zotero.preferences.openAboutConfig "Avada about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Avada CSL redaktor">
-<!ENTITY zotero.preferences.openCSLPreview "Avada CSL eelvaade">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Avada about:memory">

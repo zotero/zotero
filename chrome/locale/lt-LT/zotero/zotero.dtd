@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Šalinti">
 <!ENTITY zotero.general.ok "Gerai">
 <!ENTITY zotero.general.cancel "Atšaukti">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
 <!ENTITY zotero.errorReport.unrelatedMessages "Čia gali būti pranešimų, visai nesusijusių su Zotero.">
@@ -123,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Teksto trasformavimas">
 <!ENTITY zotero.item.textTransform.titlecase "Antraštės raidžių lygis">
 <!ENTITY zotero.item.textTransform.sentencecase "Sakinio pavidalu">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Sukeisti vardus ir pavardes">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 
 <!ENTITY zotero.toolbar.newNote "Nauja pastaba">
 <!ENTITY zotero.toolbar.note.standalone "Nauja nesusieta pastaba">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Title:">
-
-

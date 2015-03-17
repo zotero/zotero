@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Böngésző ablak">
 <!ENTITY zotero.preferences.showIn.separateTab "Új lap">
 <!ENTITY zotero.preferences.showIn.appTab "Lap rögzítése">
-<!ENTITY zotero.preferences.statusBarIcon "Ikon az állapotsorban:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Egyik sem">
 <!ENTITY zotero.preferences.fontSize "Betűméret">
 <!ENTITY zotero.preferences.fontSize.small "Kicsi">
 <!ENTITY zotero.preferences.fontSize.medium "Közepes">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "További stílusok telepítése...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Billentyűparancsok">
-
 <!ENTITY zotero.preferences.keys.openZotero "Zotero megnyitása/bezárása">
 <!ENTITY zotero.preferences.keys.saveToZotero "Mentés Zotero-ba (adress bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Teljesképernyős üzemmód">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Haladó">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Fájlok és mappák">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Elhelyezni">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Elküldés a Zotero szervernek">
 
 <!ENTITY zotero.preferences.openAboutConfig "Az about:config megnyitása">
-<!ENTITY zotero.preferences.openCSLEdit "CSL Szerkesztő megnyitása">
-<!ENTITY zotero.preferences.openCSLPreview "CSL előnézet megnyitása">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Az about:memory megnyitása">

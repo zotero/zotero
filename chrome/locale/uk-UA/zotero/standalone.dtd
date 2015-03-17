@@ -44,7 +44,7 @@
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Копіювати цитату">
-<!ENTITY copyBibliographyCmd.label "Копіювати бібліографію">
+<!ENTITY copyBibliographyCmd.label "Копіювати список літератури">
 <!ENTITY pasteCmd.label "Вставити">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.accesskey "P">

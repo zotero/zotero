@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Panou browser">
 <!ENTITY zotero.preferences.showIn.separateTab "Filă separată">
 <!ENTITY zotero.preferences.showIn.appTab "Filă aplicație">
-<!ENTITY zotero.preferences.statusBarIcon "Imaginea din bara de stare:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Niciuna">
 <!ENTITY zotero.preferences.fontSize "Mărime caractere:">
 <!ENTITY zotero.preferences.fontSize.small "Mici">
 <!ENTITY zotero.preferences.fontSize.medium "Medii">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Obține stiluri suplimentare...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Scurtături de la tastatură">
-
 <!ENTITY zotero.preferences.keys.openZotero "Deschide/Închide panoul Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Salvează în Zotero (iconița din bara de adrese)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Extinde pe tot ecranul">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avansate">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Fișiere și dosare">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localizează">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Manager pentru motorul de căutare a articolelor">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Trimitere către serverul Zotero">
 
 <!ENTITY zotero.preferences.openAboutConfig "Deschide about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Deschide editorul CSL">
-<!ENTITY zotero.preferences.openCSLPreview "Deschide Previzualizare CSL">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Deschide about:memory">

@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "瀏覽器窗格">
 <!ENTITY zotero.preferences.showIn.separateTab "不同的頁籤">
 <!ENTITY zotero.preferences.showIn.appTab "App 頁籤">
-<!ENTITY zotero.preferences.statusBarIcon "狀態列圖示：">
-<!ENTITY zotero.preferences.statusBarIcon.none "無">
 <!ENTITY zotero.preferences.fontSize "字型大小：">
 <!ENTITY zotero.preferences.fontSize.small "小">
 <!ENTITY zotero.preferences.fontSize.medium "中">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "文獻條樣式語言 CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "獲取更多樣式…">
 
-<!ENTITY zotero.preferences.prefpane.keys "快鍵">
-
 <!ENTITY zotero.preferences.keys.openZotero "開/關 Zotero 窗格">
 <!ENTITY zotero.preferences.keys.saveToZotero "儲存到 Zotero (網址列圖示)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "切換全螢幕模式">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "進階">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "檔案與資料夾">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "查詢">
 <!ENTITY zotero.preferences.locate.locateEngineManager "論文查詢引擎管理器">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "提交到 Zotero 伺服器">
 
 <!ENTITY zotero.preferences.openAboutConfig "開啟 about:config">
-<!ENTITY zotero.preferences.openCSLEdit "編輯文獻條樣式">
-<!ENTITY zotero.preferences.openCSLPreview "預覽文獻條樣式">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "開啟 about:memory">

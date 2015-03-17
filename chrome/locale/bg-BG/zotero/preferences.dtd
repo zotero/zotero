@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
 <!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
 <!ENTITY zotero.preferences.showIn.appTab "App tab">
-<!ENTITY zotero.preferences.statusBarIcon "Икона в лентата за състоянието">
-<!ENTITY zotero.preferences.statusBarIcon.none "Няма">
 <!ENTITY zotero.preferences.fontSize "Размер на шрифта:">
 <!ENTITY zotero.preferences.fontSize.small "Малък">
 <!ENTITY zotero.preferences.fontSize.medium "Среден">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Инсталира на допълнителни стилове...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Клавишни Комбинации">
-
 <!ENTITY zotero.preferences.keys.openZotero "Отваря/Затваря на Панела на Зотеро">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Превключва в Режим на Цял Екран">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Допълнителни">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Locate">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Изпраща до сървъра на Зотеро">
 
 <!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Open about:memory">

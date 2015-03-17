@@ -87,6 +87,8 @@ Zotero.CollectionTreeView.prototype.setTree = Zotero.Promise.coroutine(function*
 		// Add a keypress listener for expand/collapse
 		var tree = this._treebox.treeBody.parentNode;
 		tree.addEventListener('keypress', function(event) {
+			if (tree.editingRow != -1) return; // In-line editing active
+			
 			var key = String.fromCharCode(event.which);
 			
 			if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
@@ -772,6 +774,54 @@ Zotero.CollectionTreeView.prototype.selectLibrary = Zotero.Promise.coroutine(fun
 	
 	return false;
 });
+
+
+Zotero.CollectionTreeView.prototype.selectTrash = function (libraryID) {
+	if (Zotero.suppressUIUpdates) {
+		Zotero.debug("UI updates suppressed -- not changing library selection");
+		return false;
+	}
+	
+	// Check if trash is already selected
+	if (this.selection.currentIndex != -1) {
+		let itemGroup = this._getItemAtRow(this.selection.currentIndex);
+		if (itemGroup.isTrash() && itemGroup.ref.libraryID == libraryID) {
+			this._treebox.ensureRowIsVisible(this.selection.currentIndex);
+			return true;
+		}
+	}
+	
+	// If in My Library and it's collapsed, open it
+	if (!libraryID && !this.isContainerOpen(0)) {
+		this.toggleOpenState(0);
+	}
+	
+	// Find library trash
+	for (let i = 0; i < this.rowCount; i++) {
+		let itemGroup = this._getItemAtRow(i);
+		
+		// If group header is closed, open it
+		if (itemGroup.isHeader() && itemGroup.ref.id == 'group-libraries-header'
+				&& !this.isContainerOpen(i)) {
+			this.toggleOpenState(i);
+			continue;
+		}
+		
+		if (itemGroup.isLibrary(true) && itemGroup.ref.libraryID == libraryID
+				&& !this.isContainerOpen(i)) {
+			this.toggleOpenState(i);
+			continue;
+		}
+		
+		if (itemGroup.isTrash() && itemGroup.ref.libraryID == libraryID) {
+			this._treebox.ensureRowIsVisible(i);
+			this.selection.select(i);
+			return true;
+		}
+	}
+	
+	return false;
+}
 
 
 /**
@@ -1826,8 +1876,12 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			
 			// Add items to target collection
 			if (targetCollectionID) {
+				let ids = newIDs.filter(function (itemID) {
+					var item = Zotero.Items.get(itemID);
+					return !item.getSource();
+				});
 				var collection = yield Zotero.Collections.getAsync(targetCollectionID);
-				yield collection.addItems(newIDs);
+				yield collection.addItems(ids);
 			}
 			
 			// If moving, remove items from source collection

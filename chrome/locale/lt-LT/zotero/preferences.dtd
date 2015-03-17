@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Naršyklės skydelyje">
 <!ENTITY zotero.preferences.showIn.separateTab "Atskiroje kortelėje">
 <!ENTITY zotero.preferences.showIn.appTab "Programos kortelėje">
-<!ENTITY zotero.preferences.statusBarIcon "Ženkliukas būsenos juostoje:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Jokio">
 <!ENTITY zotero.preferences.fontSize "Šrifto dydis:">
 <!ENTITY zotero.preferences.fontSize.small "Mažas">
 <!ENTITY zotero.preferences.fontSize.medium "Vidutinis">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Parsisiųsti papildomų stilių...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Spartieji klavišai">
-
 <!ENTITY zotero.preferences.keys.openZotero "Atverti/užverti Zotero skydelį">
 <!ENTITY zotero.preferences.keys.saveToZotero "Įrašyti į Zotero (ženkliukas adreso juostoje)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Įjungti/išungti viso ekrano veikseną">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Sudėtingiau">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Failai ir katalogai">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Rasti vietą">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Straipsnių paieškos variklių tvarkytuvė">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Išsiųsti į Zotero serverį">
 
 <!ENTITY zotero.preferences.openAboutConfig "Atverti about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Atverti CSL rengyklę">
-<!ENTITY zotero.preferences.openCSLPreview "Atverti CSL žiūryklę">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Atverti about:memory">

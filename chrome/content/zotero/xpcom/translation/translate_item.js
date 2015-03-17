@@ -226,14 +226,65 @@ Zotero.Translate.ItemSaver.prototype = {
 			return false;
 		}
 		
-		if(!attachment.path) {
+		if (attachment.path) {
+			var url = Zotero.Attachments.cleanAttachmentURI(attachment.path, false);
+			if (url && /^(?:https?|ftp):/.test(url)) {
+				// A web URL. Don't bother parsing it as path below
+				// Some paths may look like URIs though, so don't just test for 'file'
+				// E.g. C:\something
+				if (!attachment.url) attachment.url = attachment.path;
+				delete attachment.path;
+			}
+		}
+		
+		let done = false;
+		if (attachment.path) {
+			var file = this._parsePath(attachment.path);
+			if(!file) {
+				let asUrl = Zotero.Attachments.cleanAttachmentURI(attachment.path);
+				if (!attachment.url && !asUrl) {
+					let e = "Translate: Could not parse attachment path <" + attachment.path + ">";
+					Zotero.debug(e, 2);
+					attachmentCallback(attachment, false, e);
+					return false;
+				} else if (!attachment.url && asUrl) {
+					Zotero.debug("Translate: attachment path looks like a URI: " + attachment.path);
+					attachment.url = asUrl;
+					delete attachment.path;
+				}
+			} else {
+				if (attachment.url) {
+					attachment.linkMode = "imported_url";
+					var myID = yield Zotero.Attachments.importSnapshotFromFile({
+						file: file,
+						url: attachment.url,
+						title: attachment.title,
+						contentType: attachment.mimeType,
+						charset: attachment.charset,
+						parentItemID: parentID
+					});
+				}
+				else {
+					attachment.linkMode = "imported_file";
+					var myID = yield Zotero.Attachments.importFromFile({
+						file: file,
+						parentItemID: parentID
+					});
+				}
+				attachmentCallback(attachment, 100);
+				done = true;
+			}
+		}
+		
+		if(!done) {
 			let url = Zotero.Attachments.cleanAttachmentURI(attachment.url);
 			if (!url) {
-				let e = "Translate: Invalid attachment URL specified <" + attachment.url + ">";
+				let e = "Translate: Invalid attachment.url specified <" + attachment.url + ">";
 				Zotero.debug(e, 2);
 				attachmentCallback(attachment, false, e);
 				return false;
 			}
+			
 			attachment.url = url;
 			url = Components.classes["@mozilla.org/network/io-service;1"]
 				.getService(Components.interfaces.nsIIOService)
@@ -241,17 +292,17 @@ Zotero.Translate.ItemSaver.prototype = {
 			
 			// see if this is actually a file URL
 			if(url.scheme == "file") {
-				attachment.path = attachment.url;
-				attachment.url = false;
+				let e = "Translate: Local file attachments cannot be specified in attachment.url";
+				Zotero.debug(e, 2);
+				attachmentCallback(attachment, false, e);
+				return false;
 			} else if(url.scheme != "http" && url.scheme != "https") {
 				let e = "Translate: " + url.scheme + " protocol is not allowed for attachments from translators.";
 				Zotero.debug(e, 2);
 				attachmentCallback(attachment, false, e);
 				return false;
 			}
-		}
-		
-		if(!attachment.path) {
+			
 			// At this point, must be a valid HTTP/HTTPS url
 			attachment.linkMode = "linked_file";
 			var newItem = yield Zotero.Attachments.linkFromURL({
@@ -268,29 +319,6 @@ Zotero.Translate.ItemSaver.prototype = {
 				return false;
 			}
 			Zotero.debug("Translate: Created attachment; id is " + newItem.id, 4);
-			attachmentCallback(attachment, 100);
-		} else {
-			var file = this._parsePath(attachment.path);
-			if(!file) return;
-			
-			if (attachment.url) {
-				attachment.linkMode = "imported_url";
-				var newItem = yield Zotero.Attachments.importSnapshotFromFile({
-					file: file,
-					url: attachment.url,
-					title: attachment.title,
-					contentType: attachment.mimeType,
-					charset: attachment.charset,
-					parentItemID: parentID
-				});
-			}
-			else {
-				attachment.linkMode = "imported_file";
-				var newItem = yield Zotero.Attachments.importFromFile({
-					file: file,
-					parentItemID: parentID
-				});
-			}
 			attachmentCallback(attachment, 100);
 		}
 		
@@ -311,43 +339,73 @@ Zotero.Translate.ItemSaver.prototype = {
 	"_parsePathURI":function(path) {
 		try {
 			var uri = Services.io.newURI(path, "", this._baseURI);
+		} catch(e) {
+			Zotero.debug("Translate: " + path + " is not a valid URI");
+			return false;
+		}
+		
+		try {
 			var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
-			if(file.path != '/' && file.exists()) return file;
 		}
 		catch (e) {
-			Zotero.logError(e);
+			Zotero.debug("Translate: " + uri.spec + " is not a file URI");
+			return false;
 		}
-		return false;
+		
+		if(file.path == '/') {
+			Zotero.debug("Translate: " + path + " points to root directory");
+			return false;
+		}
+		
+		if(!file.exists()) {
+			Zotero.debug("Translate: File at " + file.path + " does not exist");
+			return false;
+		}
+		
+		return file;
 	},
 
 	"_parseAbsolutePath":function(path) {
+		var file = Components.classes["@mozilla.org/file/local;1"].
+			createInstance(Components.interfaces.nsILocalFile);
 		try {
-			// First, try to parse absolute paths using initWithPath
-			var file = Components.classes["@mozilla.org/file/local;1"].
-				createInstance(Components.interfaces.nsILocalFile);
 			file.initWithPath(path);
-			if(file.exists()) return file;
 		} catch(e) {
-			Zotero.logError(e);
+			Zotero.debug("Translate: Invalid absolute path: " + path);
+			return false;
 		}
-		return false;
+		
+		if(!file.exists()) {
+			Zotero.debug("Translate: File at absolute path " + file.path + " does not exist");
+			return false;
+		}
+		
+		return file;
 	},
 
 	"_parseRelativePath":function(path) {
-		try {
-			var file = this._baseURI.QueryInterface(Components.interfaces.nsIFileURL).file.parent;
-			var splitPath = path.split(/\//g);
-			for(var i=0; i<splitPath.length; i++) {
-				if(splitPath[i] !== "") file.append(splitPath[i]);
-			}
-			if(file.exists()) return file;
-		} catch(e) {
-			Zotero.logError(e);
+		if (!this._baseURI) {
+			Zotero.debug("Translate: Cannot parse as relative path. No base URI available.");
+			return false;
 		}
-		return false;
+		
+		var file = this._baseURI.QueryInterface(Components.interfaces.nsIFileURL).file.parent;
+		var splitPath = path.split(/\//g);
+		for(var i=0; i<splitPath.length; i++) {
+			if(splitPath[i] !== "") file.append(splitPath[i]);
+		}
+		
+		if(!file.exists()) {
+			Zotero.debug("Translate: File at " + file.path + " does not exist");
+			return false;
+		}
+		
+		return file;
 	},
 
 	"_parsePath":function(path) {
+		Zotero.debug("Translate: Attempting to parse path " + path);
+		
 		var file;
 
 		// First, try to parse as absolute path

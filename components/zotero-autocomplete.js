@@ -82,7 +82,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 					+ "SELECT tagID FROM itemTags WHERE itemID = ?))";
 				sqlParams.push(searchParams.itemID);
 			}
-			sql += " ORDER BY name COLLATE locale";
+			sql += " ORDER BY val COLLATE locale";
 			break;
 		
 		case 'creator':

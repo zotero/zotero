@@ -1,35 +1,35 @@
-<!ENTITY preferencesCmdMac.label "Preferences…">
+<!ENTITY preferencesCmdMac.label "تنظیمات">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Services">
 <!ENTITY hideThisAppCmdMac.label "Hide &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
 <!ENTITY hideOtherAppsCmdMac.label "Hide Others">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "Show All">
+<!ENTITY showAllAppsCmdMac.label "نمایش همه">
 <!ENTITY quitApplicationCmdMac.label "Quit Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 
-<!ENTITY fileMenu.label "File">
+<!ENTITY fileMenu.label "پرونده">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "ذخیره...">
 <!ENTITY saveCmd.key "S">
-<!ENTITY saveCmd.accesskey "A">
+<!ENTITY saveCmd.accesskey "S">
 <!ENTITY pageSetupCmd.label "Page Setup…">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "پرینت">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "P">
-<!ENTITY closeCmd.label "Close">
+<!ENTITY closeCmd.label "بستن">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY quitApplicationCmdWin.label "Exit">
+<!ENTITY quitApplicationCmdWin.label "خروج">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
-<!ENTITY quitApplicationCmd.label "Quit">
+<!ENTITY quitApplicationCmd.label "خروج">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Edit">
+<!ENTITY editMenu.label "ویرایش">
 <!ENTITY editMenu.accesskey "E">
 <!ENTITY undoCmd.label "Undo">
 <!ENTITY undoCmd.key "Z">
@@ -40,7 +40,7 @@
 <!ENTITY cutCmd.label "Cut">
 <!ENTITY cutCmd.key "X">
 <!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Copy">
+<!ENTITY copyCmd.label "کپی">
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.accesskey "C">
 <!ENTITY copyCitationCmd.label "Copy Citation">
@@ -48,17 +48,17 @@
 <!ENTITY pasteCmd.label "Paste">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Delete">
+<!ENTITY deleteCmd.label "حذف">
 <!ENTITY deleteCmd.key "D">
 <!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Select All">
+<!ENTITY selectAllCmd.label "انتخاب همه">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Preferences">
+<!ENTITY preferencesCmd.label "تنظیمات">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Preferences">
+<!ENTITY preferencesCmdUnix.label "تنظیمات">
 <!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Find">
+<!ENTITY findCmd.label "یافتن">
 <!ENTITY findCmd.accesskey "F">
 <!ENTITY findCmd.commandkey "f">
 <!ENTITY bidiSwitchPageDirectionItem.label "Switch Page Direction">
@@ -68,34 +68,34 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY toolsMenu.label "Tools">
+<!ENTITY toolsMenu.label "ابزارها">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY addons.label "Add-ons">
+<!ENTITY addons.label "افزودنی‌ها">
 
 
 <!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minimize">
+<!ENTITY minimizeWindow.label "کوچک‌ کردن">
 <!ENTITY bringAllToFront.label "Bring All to Front">
-<!ENTITY zoomWindow.label "Zoom">
-<!ENTITY windowMenu.label "Window">
+<!ENTITY zoomWindow.label "بزرگنمایی">
+<!ENTITY windowMenu.label "پنجره">
 
 
-<!ENTITY helpMenu.label "Help">
+<!ENTITY helpMenu.label "راهنما">
 <!ENTITY helpMenu.accesskey "H">
 
 
-<!ENTITY helpMenuWin.label "Help">
+<!ENTITY helpMenuWin.label "راهنما">
 <!ENTITY helpMenuWin.accesskey "H">
-<!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "About &brandShortName;">
+<!ENTITY helpMac.commandkey "؟">
+<!ENTITY aboutProduct.label "درباره زوترو">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Support and Documentation">
 <!ENTITY productHelp.accesskey "D">
-<!ENTITY helpTroubleshootingInfo.label "Troubleshooting Information">
+<!ENTITY helpTroubleshootingInfo.label "اطلاعات عیب‌یابی">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Submit Feedback…">
+<!ENTITY helpFeedbackPage.label "ارسال بازخورد...">
 <!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Report Errors to Zotero…">
+<!ENTITY helpReportErrors.label "گزارش خطاها به زوترو">
 <!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpCheckForUpdates.label "Check for Updates…">
+<!ENTITY helpCheckForUpdates.label "بررسی بروزرسانی...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

@@ -25,8 +25,6 @@
 -->
 
 
-<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 <?xul-overlay href="chrome://zotero/content/zoteroPane.xul"?>
 <?xul-overlay href="chrome://zotero/content/itemPane.xul"?>
 
@@ -42,12 +40,6 @@
 	
 	<popup id="contentAreaContextMenu"/>
 	
-	<toolbarpalette id="BrowserToolbarPalette">
-		<toolbarbutton id="zotero-toolbar-button" class="toolbarbutton-1"
-						label="Zotero"
-						oncommand="ZoteroOverlay.toggleDisplay();"/>
-	</toolbarpalette>
-	
 	<toolbar id="zotero-toolbar" nowindowdrag="true"/>
 	
 	<vbox id="appcontent">
@@ -57,7 +49,9 @@
 		
 		<stack id="zotero-pane-stack" persist="savedHeight" savedHeight="300" hidden="true"/>
 		
-		<zoteroguidancepanel id="zotero-toolbar-button-guidance" about="toolbarButton" for="zotero-toolbar-button" position="bottomcenter topleft" delay="2000" foregroundonly="true" hidden="true"/>
+		<zoteroguidancepanel id="zotero-toolbar-button-guidance" about="toolbarButton" for="zotero-toolbar-main-button"
+			position="bottomcenter topleft" delay="2000" foregroundonly="true"/>
+		<zoteroguidancepanel id="zotero-status-image-guidance" about="saveIcon" for="zotero-toolbar-save-button" x="17"/>
 		
 		<!-- Annotation Toolbar -->
 		<toolbar id="zotero-annotate-tb" crop="end" insertbefore="content" hidden="true">
@@ -70,17 +64,6 @@
 	</vbox>
 	
 	
-	<!-- Scrape Code -->
-	<hbox id="urlbar-icons">
-		<popupset>
-			<menupopup id="zotero-status-image-context" onpopupshowing="Zotero_Browser.onStatusPopupShowing(event)"/>
-		</popupset>
-		<image src="chrome://zotero/skin/treeitem-book.png" id="zotero-status-image"
-			onclick="if(event.button === 0) Zotero_Browser.scrapeThisPage()" context="zotero-status-image-context"
-			position="1" hidden="true"/>
-		<zoteroguidancepanel id="zotero-status-image-guidance" about="saveIcon" for="zotero-status-image" x="8"/>
-	</hbox>
-		
 	<menupopup id="menu_ToolsPopup">
 		<menuseparator id="zoteroSeparator" insertbefore="devToolsSeparator"/>
 		<menuitem id="tools-zotero" insertbefore="devToolsSeparator"

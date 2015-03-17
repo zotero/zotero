@@ -73,7 +73,7 @@ grid row hbox:first-child
 }
 
 
-#showIn radio, #statusBarIcon radio
+#showIn radio
 {
 	width: 120px;
 }
@@ -81,11 +81,6 @@ grid row hbox:first-child
 #fontSize radio
 {
 	margin-right: 20px;
-}
-
-#statusBarIcon radio .radio-icon
-{
-	margin-left: 6px;
 }
 
 
@@ -241,25 +236,20 @@ grid row hbox:first-child
 	height: 250px;
 }
 
-/* Shortcut Keys pane */
-#zotero-prefpane-keys row
-{
-	-moz-box-align: center;
-}
-
 #styleManager-updated
 {
 	width: 105px;
 }
 
-#zotero-prefpane-keys textbox
+/* Shortcut Keys pane */
+#zotero-prefpane-advanced-keys-tab row
 {
-	margin-left: -1px;
+	-moz-box-align: center;
 }
 
-#zotero-prefpane-keys checkbox
+#zotero-prefpane-advanced-keys-tab textbox
 {
-	margin: .75em 0;
+	margin-left: -1px;
 }
 
 treechildren::-moz-tree-checkbox {

@@ -1,7 +1,11 @@
-#zotero-status-image
-{
+#zotero-status-image {
 	width: 16px;
 	height: 16px;
+	margin-right: 3px;
+}
+
+#zotero-status-image:not(.translate):not(:hover) {
+	filter: grayscale(100%);
 }
 
 #zotero-pane
@@ -513,7 +517,6 @@
 #zotero-tb-sync-error, #zotero-tb-sync-error[mode=warning]
 {
 	list-style-image: url(chrome://zotero/skin/error.png);
-	margin-right: -5px;
 }
 
 #zotero-tb-sync-error[mode=error]

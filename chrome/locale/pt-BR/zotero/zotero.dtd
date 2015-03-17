@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Excluir">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Cancelar">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Relatório de erros do Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Pode incluir mensagens não relacionadas ao Zotero.">
@@ -123,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Transformar texto">
 <!ENTITY zotero.item.textTransform.titlecase "Iniciais Em Maiúsculo">
 <!ENTITY zotero.item.textTransform.sentencecase "Maiúscula no início da frase">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Trocar primeiro/último nomes">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 
 <!ENTITY zotero.toolbar.newNote "Nova nota">
 <!ENTITY zotero.toolbar.note.standalone "Nova nota standalone">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Title:">
-
-

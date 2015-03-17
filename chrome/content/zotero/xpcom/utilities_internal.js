@@ -294,6 +294,25 @@ Zotero.Utilities.Internal = {
 		}
 	},
 	
+	
+	/**
+	 * saveURI wrapper function
+	 * @param {nsIWebBrowserPersist} nsIWebBrowserPersist
+	 * @param {nsIURI} source URL
+	 * @param {nsISupports} target file
+	 */
+	saveURI: function (wbp, source, target) {
+		// Firefox 35 and below
+		try {
+			wbp.saveURI(source, null, null, null, null, target, null);
+		}
+		// Firefox 36+ needs one more parameter
+		catch (e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
+			wbp.saveURI(source, null, null, null, null, null, target, null);
+		}
+	},
+	
+	
 	/**
 	 * Launch a process
 	 * @param {nsIFile} cmd Path to command to launch
@@ -510,6 +529,81 @@ Zotero.Utilities.Internal = {
 		}, 0, 0, null);
 		
 		return pipe.inputStream;
+	},
+	
+	
+	/**
+	 * Hyphenate an ISBN based on the registrant table available from
+	 * https://www.isbn-international.org/range_file_generation
+	 * See isbn.js
+	 *
+	 * @param {String} isbn ISBN-10 or ISBN-13
+	 * @param {Boolean} dontValidate Do not attempt to validate check digit
+	 * @return {String} Hyphenated ISBN or empty string if invalid ISBN is supplied
+	 */
+	"hyphenateISBN": function(isbn, dontValidate) {
+		isbn = Zotero.Utilities.cleanISBN(isbn, dontValidate);
+		if (!isbn) return '';
+		
+		var ranges = Zotero.ISBN.ranges,
+			parts = [],
+			uccPref,
+			i = 0;
+		if (isbn.length == 10) {
+			uccPref = '978';
+		} else {
+			uccPref = isbn.substr(0,3);
+			if (!ranges[uccPref]) return ''; // Probably invalid ISBN, but the checksum is OK
+			parts.push(uccPref);
+			i = 3; // Skip ahead
+		}
+		
+		var group = '',
+			found = false;
+		while (i < isbn.length-3 /* check digit, publication, registrant */) {
+			group += isbn.charAt(i);
+			if (ranges[uccPref][group]) {
+				parts.push(group);
+				found = true;
+				break;
+			}
+			i++;
+		}
+		
+		if (!found) return ''; // Did not find a valid group
+		
+		// Array of registrant ranges that are valid for a group
+		// Array always contains an even number of values (as string)
+		// From left to right, the values are paired so that the first indicates a
+		// lower bound of the range and the right indicates an upper bound
+		// The ranges are sorted by increasing number of characters
+		var regRanges = ranges[uccPref][group];
+		
+		var registrant = '';
+		found = false;
+		i++; // Previous loop 'break'ed early
+		while (!found && i < isbn.length-2 /* check digit, publication */) {
+			registrant += isbn.charAt(i);
+			
+			for(let j=0; j < regRanges.length && registrant.length >= regRanges[j].length; j+=2) {
+				if(registrant.length == regRanges[j].length
+					&& registrant >= regRanges[j] && registrant <= regRanges[j+1] // Falls within the range
+				) {
+					parts.push(registrant);
+					found = true;
+					break;
+				}
+			}
+			
+			i++;
+		}
+		
+		if (!found) return ''; // Outside of valid range, but maybe we need to update our data
+		
+		parts.push(isbn.substring(i,isbn.length-1)); // Publication is the remainder up to last digit
+		parts.push(isbn.charAt(isbn.length-1)); // Check digit
+		
+		return parts.join('-');
 	}
 }
 

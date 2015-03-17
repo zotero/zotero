@@ -28,6 +28,9 @@ Zotero.Schema = new function(){
 	this.dbInitialized = false;
 	this.goToChangeLog = false;
 	
+	var _schemaUpdateDeferred = Zotero.Promise.defer();
+	this.schemaUpdatePromise = _schemaUpdateDeferred.promise;
+	
 	var _dbVersions = [];
 	var _schemaVersions = [];
 	var _maxCompatibility = 1;
@@ -80,7 +83,10 @@ Zotero.Schema = new function(){
 		.spread(function (userdata, compatibility) {
 			if (!userdata) {
 				Zotero.debug('Database does not exist -- creating\n');
-				return _initializeSchema().return(true);
+				return _initializeSchema()
+				.then(function() {
+					return _schemaUpdateDeferred.resolve(true);
+				});
 			}
 			
 			// We don't handle upgrades from pre-Zotero 2.1 databases
@@ -164,7 +170,9 @@ Zotero.Schema = new function(){
 						/*Zotero.initializationPromise
 						.delay(5000)
 						.then(function () Zotero.Schema.updateBundledFiles(null, false, true))
-						.done();*/
+						.finally(function () {
+							_schemaUpdateDeferred.resolve(true);
+						})*/
 						
 						return updated;
 					});

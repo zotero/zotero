@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "ช่องเบราเซอร์">
 <!ENTITY zotero.preferences.showIn.separateTab "แยกแท็บ">
 <!ENTITY zotero.preferences.showIn.appTab "แท็บโปรแกรม">
-<!ENTITY zotero.preferences.statusBarIcon "ไอคอนแถบสถานะ:">
-<!ENTITY zotero.preferences.statusBarIcon.none "ไม่มี">
 <!ENTITY zotero.preferences.fontSize "ขนาดตัวอักษร:">
 <!ENTITY zotero.preferences.fontSize.small "เล็ก">
 <!ENTITY zotero.preferences.fontSize.medium "กลาง">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "รับรูปแบบเพิ่มเติม...">
 
-<!ENTITY zotero.preferences.prefpane.keys "คีย์ลัด">
-
 <!ENTITY zotero.preferences.keys.openZotero "เปิด/ปิดแผง Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "เปลี่ยนสู่แบบเต็มจอ">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "ขั้นสูง">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "แฟ้มและโฟลเดอร์">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "หาที่ตั้ง">
 <!ENTITY zotero.preferences.locate.locateEngineManager "ตัวจัดการเครื่องมือค้นหาบทความ">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "ส่งไปเครื่องบริการของ Zotero">
 
 <!ENTITY zotero.preferences.openAboutConfig "เปิด about:config">
-<!ENTITY zotero.preferences.openCSLEdit "เปิดตัวจัดการ CSL">
-<!ENTITY zotero.preferences.openCSLPreview "เปิดดูตัวอย่าง CSL">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "เปิด about:memory">

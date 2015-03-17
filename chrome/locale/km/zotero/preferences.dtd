@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "ផ្ទាំងកម្មវិធីរុករក">
 <!ENTITY zotero.preferences.showIn.separateTab "ផ្ទាំងកម្មវិធីដោយឡែក">
 <!ENTITY zotero.preferences.showIn.appTab "ផ្ទាំងបន្ទាត់ថេប">
-<!ENTITY zotero.preferences.statusBarIcon "និម្មិតសញ្ញារបារស្ថានភាព:">
-<!ENTITY zotero.preferences.statusBarIcon.none "គ្មាន">
 <!ENTITY zotero.preferences.fontSize "ទំហំអក្សរៈ">
 <!ENTITY zotero.preferences.fontSize.small "តូច">
 <!ENTITY zotero.preferences.fontSize.medium "មធ្យម">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "ស៊ីអេសអិល">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "បន្ថែមរចនាបថថ្មី...">
 
-<!ENTITY zotero.preferences.prefpane.keys "ផ្លូវកាត់">
-
 <!ENTITY zotero.preferences.keys.openZotero "បើក/បិទផ្ទាំងហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "បើកពេញអេក្រង់">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "ជាន់ខ្ពស់">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "ឯកសារនិងថតឯកសារ">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "ទីតាំងឯកសារ">
 <!ENTITY zotero.preferences.locate.locateEngineManager "ម៉ាស៊ីនគ្រប់គ្រងស្វែងរកអត្ថបទ">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "ដាក់ជូនម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
 
 <!ENTITY zotero.preferences.openAboutConfig "បើកអំពី:config">
-<!ENTITY zotero.preferences.openCSLEdit "បើកកំណែតម្រូវស៊ីអេសអិល">
-<!ENTITY zotero.preferences.openCSLPreview "បើកពិនិត្យមើលស៊ីអេសអិល">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Open about:memory">

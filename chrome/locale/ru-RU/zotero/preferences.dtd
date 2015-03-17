@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Текущей панели">
 <!ENTITY zotero.preferences.showIn.separateTab "Отдельной вкладке">
 <!ENTITY zotero.preferences.showIn.appTab "Вкладке приложения">
-<!ENTITY zotero.preferences.statusBarIcon "Вид в строке состояния:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Нет">
 <!ENTITY zotero.preferences.fontSize "Размер шрифта:">
 <!ENTITY zotero.preferences.fontSize.small "Маленький">
 <!ENTITY zotero.preferences.fontSize.medium "Средний">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Загрузить дополнительные стили…">
 
-<!ENTITY zotero.preferences.prefpane.keys "Горячие клавиши">
-
 <!ENTITY zotero.preferences.keys.openZotero "Открыть/закрыть панель Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Сохранить в Zotero (значок в адресной строке браузера)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Переключение полноэкранного режима">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Расширенные">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Файлы и папки">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Обнаружение">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Диспетчер систем поиска статей">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Отправить на сервер Zotero">
 
 <!ENTITY zotero.preferences.openAboutConfig "Открыть about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Открыть редактор CSL">
-<!ENTITY zotero.preferences.openCSLPreview "Открыть предварительный просмотр CSL">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Открыть страницу about:memory">

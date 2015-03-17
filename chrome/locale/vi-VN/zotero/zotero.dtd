@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Delete">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Cancel">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
@@ -123,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Biến đổi Văn bản">
 <!ENTITY zotero.item.textTransform.titlecase "Viết hoa đầu từ">
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last names">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 
 <!ENTITY zotero.toolbar.newNote "New Note">
 <!ENTITY zotero.toolbar.note.standalone "Ghi chép Độc lập mới">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Title:">
-
-

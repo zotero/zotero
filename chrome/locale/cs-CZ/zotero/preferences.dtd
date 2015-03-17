@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Panel prohlížeče">
 <!ENTITY zotero.preferences.showIn.separateTab "Samostatný panel">
 <!ENTITY zotero.preferences.showIn.appTab "Panel aplikace">
-<!ENTITY zotero.preferences.statusBarIcon "Ikona ve stavovém řádku:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Žádná">
 <!ENTITY zotero.preferences.fontSize "Velikost písma:">
 <!ENTITY zotero.preferences.fontSize.small "Malá">
 <!ENTITY zotero.preferences.fontSize.medium "Střední">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Získat další styly...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Klávesové zkratky">
-
 <!ENTITY zotero.preferences.keys.openZotero "Otevřít/Zavřít Zotero panel">
 <!ENTITY zotero.preferences.keys.saveToZotero "Uložit do Zotera (ikona v adresním řádku)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Zapnutí celoobrazového módu">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Pokročilé">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Soubory a Složky">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Najít">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Správce mechanismu pro vyhledávání článků">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Odeslat na Zotero Server">
 
 <!ENTITY zotero.preferences.openAboutConfig "Otevřít about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Otevřít editor CSL">
-<!ENTITY zotero.preferences.openCSLPreview "Otevřít náhled CSL">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Otevřít about:memory">

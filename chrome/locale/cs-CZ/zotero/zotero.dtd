@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Smazat">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Zrušit">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Chybová zpráva Zotera">
 <!ENTITY zotero.errorReport.unrelatedMessages "Může obsahovat zprávy nesouvisející se Zoterem.">
@@ -123,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Převést text">
 <!ENTITY zotero.item.textTransform.titlecase "Velká Písmena">
 <!ENTITY zotero.item.textTransform.sentencecase "Velké první písmeno">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Přehodit jméno/příjmení">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 
 <!ENTITY zotero.toolbar.newNote "Nová poznámka">
 <!ENTITY zotero.toolbar.note.standalone "Nová samostatná poznámka">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Připojit odkaz na URI">
 <!ENTITY zotero.attachLink.label.link "Odkaz:">
 <!ENTITY zotero.attachLink.label.title "Název:">
-
-

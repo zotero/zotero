@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Tarayıcı bölmesi">
 <!ENTITY zotero.preferences.showIn.separateTab "Ayrı sekme">
 <!ENTITY zotero.preferences.showIn.appTab "Uygulama sekmesi">
-<!ENTITY zotero.preferences.statusBarIcon "Durum çubuğu simgesi:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Hiçbiri">
 <!ENTITY zotero.preferences.fontSize "Yazıtipi boyutu:">
 <!ENTITY zotero.preferences.fontSize.small "Küçük">
 <!ENTITY zotero.preferences.fontSize.medium "Orta">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Ek stiller indir...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Kısayol Tuşları">
-
 <!ENTITY zotero.preferences.keys.openZotero "Zotero Bölmesini Aç/Kapa">
 <!ENTITY zotero.preferences.keys.saveToZotero "Zotero'ya Kaydet (adres çubuğu ikonu)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Tam Ekran Moduna Geç">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Gelişmiş">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Dosyalar ve Klasörler">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Yerini Belirle">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Makale Bakma Motoru Yöneticisi">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Zotero Sunucusuna Gönder">
 
 <!ENTITY zotero.preferences.openAboutConfig "about:config'i Aç">
-<!ENTITY zotero.preferences.openCSLEdit "CSL Düzenleyicisini Aç">
-<!ENTITY zotero.preferences.openCSLPreview "CSL Ön İzlemesini Aç">
+<!ENTITY zotero.preferences.openCSLEdit "Stil Düzenleyicisini Aç">
+<!ENTITY zotero.preferences.openCSLPreview "Stil Önizleyicisini Aç">
 <!ENTITY zotero.preferences.openAboutMemory "about:memory'yi Aç.">

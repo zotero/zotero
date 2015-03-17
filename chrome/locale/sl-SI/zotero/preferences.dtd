@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "podoknu brskalnika">
 <!ENTITY zotero.preferences.showIn.separateTab "ločenem zavihku">
 <!ENTITY zotero.preferences.showIn.appTab "zavihku programa">
-<!ENTITY zotero.preferences.statusBarIcon "Ikona v vrstici stanja:">
-<!ENTITY zotero.preferences.statusBarIcon.none "brez">
 <!ENTITY zotero.preferences.fontSize "Velikost pisave:">
 <!ENTITY zotero.preferences.fontSize.small "majhna">
 <!ENTITY zotero.preferences.fontSize.medium "srednja">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Dobi dodatne sloge ...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Tipke za bližnjice">
-
 <!ENTITY zotero.preferences.keys.openZotero "Odpri/zapri podokno Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Shrani v Zotero (ikona v naslovni vrstici)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Vključi/izključi celozaslonski način">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Napredno">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Datoteke in mape">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Lociraj">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Upravitelj pogona iskanja člankov">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Objavi na strežniku Zotero">
 
 <!ENTITY zotero.preferences.openAboutConfig "Odpri about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Odpri urejevalnik CSL">
-<!ENTITY zotero.preferences.openCSLPreview "Odpri predogled CSL">
+<!ENTITY zotero.preferences.openCSLEdit "Odpri urejevalnik sloga">
+<!ENTITY zotero.preferences.openCSLPreview "Odpri predogled sloga">
 <!ENTITY zotero.preferences.openAboutMemory "Odprite about:memory">

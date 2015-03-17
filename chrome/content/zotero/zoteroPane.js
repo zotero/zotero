@@ -1413,7 +1413,16 @@ var ZoteroPane = new function()
 		for (var i=0, len=itemsView.selection.getRangeCount(); i<len; i++) {
 			itemsView.selection.getRangeAt(i, start, end);
 			for (var j=start.value; j<=end.value; j++) {
-				if (!itemsView.getRow(j).ref.deleted) {
+				let itemRow = itemsView.getRow(j);
+				
+				// DEBUG: Not sure how this is possible, but it was happening while switching
+				// to an item in the trash in a collapsed library from another library
+				if (!itemRow) {
+					Zotero.debug("Item row " + j + " not found in _nonDeletedItemsSelected()", 2);
+					continue;
+				}
+				
+				if (!itemRow.ref.deleted) {
 					return true;
 				}
 			}
@@ -1600,6 +1609,12 @@ var ZoteroPane = new function()
 				'pane.items.delete' + (this.itemsView.selection.count > 1 ? '.multiple' : '')
 			)
 		};
+		var toRemove = {
+			title: Zotero.getString('pane.items.remove.title'),
+			text: Zotero.getString(
+				'pane.items.remove' + (this.itemsView.selection.count > 1 ? '.multiple' : '')
+			)
+		};
 		
 		if (collectionTreeRow.isPublications()) {
 			var prompt = toDelete;
@@ -1610,7 +1625,7 @@ var ZoteroPane = new function()
 		}
 		else if (collectionTreeRow.isCollection()) {
 			// In collection, only prompt if trashing
-			var prompt = force ? toTrash : false;
+			var prompt = force ? toTrash : toRemove;
 		}
 		else if (collectionTreeRow.isSearch() || collectionTreeRow.isUnfiled() || collectionTreeRow.isDuplicates()) {
 			if (!force) {
@@ -2003,8 +2018,14 @@ var ZoteroPane = new function()
 					Zotero.spawn(function* () {
 						var selected = yield self.itemsView.selectItem(itemID, expand);
 						if (!selected) {
-							Zotero.debug("Item was not selected; switching to library");
-							yield self.collectionsView.selectLibrary(item.libraryID);
+							if (item.deleted) {
+								Zotero.debug("Item is deleted; switching to trash");
+								this.collectionsView.selectTrash(item.libraryID);
+							}
+							else {
+								Zotero.debug("Item was not selected; switching to library");
+								yield this.collectionsView.selectLibrary(item.libraryID);
+							}
 							yield self.itemsView.selectItem(itemID, expand);
 						}
 						deferred.resolve(true);

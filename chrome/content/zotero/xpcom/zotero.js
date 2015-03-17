@@ -52,6 +52,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	this.getAncestorByTagName = getAncestorByTagName;
 	this.randomString = randomString;
 	this.moveToUnique = moveToUnique;
+	this.reinit = reinit; // defined in zotero-service.js
 	
 	// Public properties
 	this.initialized = false;
@@ -174,6 +175,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		
 		this.mainThread = Services.tm.mainThread;
 		
+		this.clientName = ZOTERO_CONFIG.CLIENT_NAME;
+		
 		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
 			.getService(Components.interfaces.nsIXULAppInfo);
 		this.platformVersion = appInfo.platformVersion;
@@ -252,7 +255,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			else {
 				Zotero.dir = 'ltr';
 			}
-	
+			Zotero.rtl = Zotero.dir == 'rtl';
+			
 			// Make sure that Zotero Standalone is not running as root
 			if(Zotero.isStandalone && !Zotero.isWin) _checkRoot();
 			
@@ -2240,7 +2244,7 @@ Zotero.Prefs = new function(){
 				case branch.PREF_BOOL:
 					return branch.getBoolPref(pref);
 				case branch.PREF_STRING:
-					return branch.getCharPref(pref);
+					return '' + branch.getComplexValue(pref, Components.interfaces.nsISupportsString);
 				case branch.PREF_INT:
 					return branch.getIntPref(pref);
 			}
@@ -2327,6 +2331,63 @@ Zotero.Prefs = new function(){
 		// TODO: parse settings XML
 	}
 	
+	// Handlers for some Zotero preferences
+	var _handlers = [
+		[ "automaticScraperUpdates", function(val) {
+			if (val){
+				Zotero.Schema.updateFromRepository();
+			}
+			else {
+				Zotero.Schema.stopRepositoryTimer();
+			}
+		}],
+		[ "note.fontSize", function(val) {
+			if (val < 6) {
+				Zotero.Prefs.set('note.fontSize', 11);
+			}
+		}],
+		[ "zoteroDotOrgVersionHeader", function(val) {
+			if (val) {
+				Zotero.VersionHeader.register();
+			}
+			else {
+				Zotero.VersionHeader.unregister();
+			}
+		}],
+		[ "zoteroDotOrgVersionHeader", function(val) {
+			if (val) {
+				Zotero.VersionHeader.register();
+			}
+			else {
+				Zotero.VersionHeader.unregister();
+			}
+		}],
+		[ "sync.autoSync", function(val) {
+			if (val) {
+				Zotero.Sync.Runner.IdleListener.register();
+			}
+			else {
+				Zotero.Sync.Runner.IdleListener.unregister();
+			}
+		}],
+		[ "search.quicksearch-mode", function(val) {
+			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						.getService(Components.interfaces.nsIWindowMediator);
+			var enumerator = wm.getEnumerator("navigator:browser");
+			while (enumerator.hasMoreElements()) {
+				var win = enumerator.getNext();
+				if (!win.ZoteroPane) continue;
+				Zotero.updateQuickSearchBox(win.ZoteroPane.document);
+			}
+			
+			var enumerator = wm.getEnumerator("zotero:item-selector");
+			while (enumerator.hasMoreElements()) {
+				var win = enumerator.getNext();
+				if (!win.Zotero) continue;
+				Zotero.updateQuickSearchBox(win.document);
+			}
+		}]
+	];
 	
 	//
 	// Methods to register a preferences observer
@@ -2334,6 +2395,11 @@ Zotero.Prefs = new function(){
 	function register(){
 		this.prefBranch.QueryInterface(Components.interfaces.nsIPrefBranch2);
 		this.prefBranch.addObserver("", this, false);
+		
+		// Register pre-set handlers
+		for (var i=0; i<_handlers.length; i++) {
+			this.registerObserver(_handlers[i][0], _handlers[i][1]);
+		}
 	}
 	
 	function unregister(){
@@ -2343,143 +2409,48 @@ Zotero.Prefs = new function(){
 		this.prefBranch.removeObserver("", this);
 	}
 	
+	/**
+	 * @param {nsIPrefBranch} subject The nsIPrefBranch we're observing (after appropriate QI)
+	 * @param {String} topic The string defined by NS_PREFBRANCH_PREFCHANGE_TOPIC_ID
+	 * @param {String} data The name of the pref that's been changed (relative to subject)
+	 */
 	function observe(subject, topic, data){
-		if(topic!="nsPref:changed"){
+		if (topic != "nsPref:changed" || !_observers[data] || !_observers[data].length) {
 			return;
 		}
 		
-		try {
-		
-		// subject is the nsIPrefBranch we're observing (after appropriate QI)
-		// data is the name of the pref that's been changed (relative to subject)
-		switch (data) {
-			case "statusBarIcon":
-				var doc = Services.wm.getMostRecentWindow("navigator:browser").document;
-				
-				var addonBar = doc.getElementById("addon-bar");
-				var icon = doc.getElementById("zotero-toolbar-button");
-				// When the customize window is open, toolbar buttons seem to
-				// become wrapped in toolbarpaletteitems, which we need to remove
-				// manually if we change the pref to hidden or else the customize
-				// window doesn't close.
-				var wrapper = doc.getElementById("wrapper-zotero-toolbar-button");
-				var palette = doc.getElementById("navigator-toolbox").palette;
-				var inAddonBar = false;
-				if (icon) {
-					// Because of the potential wrapper, don't just use .parentNode
-					var toolbar = Zotero.getAncestorByTagName(icon, "toolbar");
-					inAddonBar = toolbar == addonBar;
-				}
-				var val = this.get("statusBarIcon");
-				if (val == 0) {
-					// If showing in add-on bar, hide
-					if (!icon || !inAddonBar) {
-						return;
-					}
-					palette.appendChild(icon);
-					if (wrapper) {
-						addonBar.removeChild(wrapper);
-					}
-					addonBar.setAttribute("currentset", addonBar.currentSet);
-					doc.persist(addonBar.id, "currentset");
-				}
-				else {
-					// If showing somewhere else, remove it from there
-					if (icon && !inAddonBar) {
-						palette.appendChild(icon);
-						if (wrapper) {
-							toolbar.removeChild(wrapper);
-						}
-						toolbar.setAttribute("currentset", toolbar.currentSet);
-						doc.persist(toolbar.id, "currentset");
-					}
-					
-					// If not showing in add-on bar, add
-					if (!inAddonBar) {
-						var icon = addonBar.insertItem("zotero-toolbar-button");
-						addonBar.setAttribute("currentset", addonBar.currentSet);
-						doc.persist(addonBar.id, "currentset");
-						addonBar.setAttribute("collapsed", false);
-						doc.persist(addonBar.id, "collapsed");
-					}
-					// And make small
-					if (val == 1) {
-						icon.setAttribute("compact", true);
-					}
-					// Or large
-					else if (val == 2) {
-						icon.removeAttribute("compact");
-					}
-				}
-				break;
-			
-			case "automaticScraperUpdates":
-				if (this.get('automaticScraperUpdates')){
-					Zotero.Schema.updateFromRepository();
-				}
-				else {
-					Zotero.Schema.stopRepositoryTimer();
-				}
-				break;
-			
-			case "note.fontSize":
-				var val = this.get('note.fontSize');
-				if (val < 6) {
-					this.set('note.fontSize', 11);
-				}
-				break;
-			
-			case "zoteroDotOrgVersionHeader":
-				if (this.get("zoteroDotOrgVersionHeader")) {
-					Zotero.VersionHeader.register();
-				}
-				else {
-					Zotero.VersionHeader.unregister();
-				}
-				break;
-			
-			case "sync.autoSync":
-				if (this.get("sync.autoSync")) {
-					Zotero.Sync.Runner.IdleListener.register();
-				}
-				else {
-					Zotero.Sync.Runner.IdleListener.unregister();
-				}
-				break;
-			
-			// TEMP
-			case "sync.fulltext.enabled":
-				if (this.get("sync.fulltext.enabled")) {
-					// Disable downgrades if full-text sync is enabled, since otherwise
-					// we could miss full-text content updates
-					if (Zotero.DB.valueQuery("SELECT version FROM version WHERE schema='userdata'") < 77) {
-						Zotero.DB.query("UPDATE version SET version=77 WHERE schema='userdata'");
-					}
-				}
-				break;
-			
-			case "search.quicksearch-mode":
-				var enumerator = Services.wm.getEnumerator("navigator:browser");
-				while (enumerator.hasMoreElements()) {
-					var win = enumerator.getNext();
-					if (!win.ZoteroPane) continue;
-					Zotero.updateQuickSearchBox(win.ZoteroPane.document);
-				}
-				
-				var enumerator = Services.wm.getEnumerator("zotero:item-selector");
-				while (enumerator.hasMoreElements()) {
-					var win = enumerator.getNext();
-					if (!win.Zotero) continue;
-					Zotero.updateQuickSearchBox(win.document);
-				}
-				break;
+		var obs = _observers[data];
+		for (var i=0; i<obs.length; i++) {
+			try {
+				obs[i](this.get(data));
+			}
+			catch (e) {
+				Zotero.debug("Error while executing preference observer handler for " + data);
+				Zotero.debug(e);
+			}
+		}
+	}
+	
+	var _observers = {};
+	this.registerObserver = function(name, handler) {
+		_observers[name] = _observers[name] || [];
+		_observers[name].push(handler);
+	}
+	
+	this.unregisterObserver = function(name, handler) {
+		var obs = _observers[name];
+		if (!obs) {
+			Zotero.debug("No preferences observer registered for " + name);
+			return;
 		}
 		
+		var i = obs.indexOf(handler);
+		if (i == -1) {
+			Zotero.debug("Handler was not registered for preference " + name);
+			return;
 		}
-		catch (e) {
-			Zotero.debug(e);
-			throw (e);
-		}
+		
+		obs.splice(i, 1);
 	}
 }
 

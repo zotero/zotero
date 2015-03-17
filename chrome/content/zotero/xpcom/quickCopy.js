@@ -279,11 +279,10 @@ Zotero.QuickCopy = new function() {
 				for(var i=0; i<ps.length; i++) {
 					var p = ps[i],
 						paddingLeft = p.style.paddingLeft;
-					Zotero.debug("PADDING LEFT "+paddingLeft);
 					if(paddingLeft && paddingLeft.substr(paddingLeft.length-2) === "px") {
 						var paddingPx = parseInt(paddingLeft, 10),
 							ztabs = "";
-						for(var i=30; i<=paddingPx; i+=30) ztabs += ZTAB;
+						for (let j = 30; j <= paddingPx; j += 30) ztabs += ZTAB;
 						p.insertBefore(textDoc.createTextNode(ztabs), p.firstChild);
 					}
 				}

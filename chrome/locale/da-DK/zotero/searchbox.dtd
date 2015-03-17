@@ -8,7 +8,7 @@
 <!ENTITY zotero.search.joinMode.suffix "de følgende:">
 
 <!ENTITY zotero.search.recursive.label "Søg i underliggende mapper">
-<!ENTITY zotero.search.noChildren "Vis kun de øverste Elementer">
+<!ENTITY zotero.search.noChildren "Vis kun elementer på øverste niveau">
 <!ENTITY zotero.search.includeParentsAndChildren "Inkluder overordnede og underordnede elementer i resultatet af søgningen">
 
 <!ENTITY zotero.search.textModes.phrase "Tekststreng">

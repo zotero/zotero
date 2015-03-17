@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Selainikkuna">
 <!ENTITY zotero.preferences.showIn.separateTab "Erillinen välilehti">
 <!ENTITY zotero.preferences.showIn.appTab "Sovellusvälilehti">
-<!ENTITY zotero.preferences.statusBarIcon "Tilarivin kuvake:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Ei mitään">
 <!ENTITY zotero.preferences.fontSize "Kirjasinkoko:">
 <!ENTITY zotero.preferences.fontSize.small "Pieni">
 <!ENTITY zotero.preferences.fontSize.medium "Keskikokoinen">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Hanki lisää tyylejä...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
-
 <!ENTITY zotero.preferences.keys.openZotero "Avaa/sulje Zotero-ikkuna">
 <!ENTITY zotero.preferences.keys.saveToZotero "Tallenna Zoteroon (osoitepalkin kuvake)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Koko ruudun tila">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Lisäasetukset">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Tiedostot ja kansiot">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Paikanna">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikkelihakumoottorin hallinta">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Lähetä Zotero-palvelimelle">
 
 <!ENTITY zotero.preferences.openAboutConfig "Avaa about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Avaa CSL-muokkain">
-<!ENTITY zotero.preferences.openCSLPreview "Avaa CSL-esikatselu">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Avaa about:memory">

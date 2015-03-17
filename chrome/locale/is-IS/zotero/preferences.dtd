@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Nýjum vafraglugga">
 <!ENTITY zotero.preferences.showIn.separateTab "Nýjum flipa">
 <!ENTITY zotero.preferences.showIn.appTab "Flipa í smáforriti">
-<!ENTITY zotero.preferences.statusBarIcon "Teikn í stöðuglugga:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Engu">
 <!ENTITY zotero.preferences.fontSize "Stærð leturs:">
 <!ENTITY zotero.preferences.fontSize.small "Smátt">
 <!ENTITY zotero.preferences.fontSize.medium "Meðalstórt">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "Tilvísunarmál - CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Ná í viðbótar leturstíla...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Flýtihnappar">
-
 <!ENTITY zotero.preferences.keys.openZotero "Opna/Loka Zotero svæði">
 <!ENTITY zotero.preferences.keys.saveToZotero "Vista í Zotero (tákn birt í vefslóðareit)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Víxla úr og í Heilskjáarham">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Ítarlegt">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Skrár og möppur">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Staðsetja">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Stýring á greinaleitarvél">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Senda til Zotero netþjóns">
 
 <!ENTITY zotero.preferences.openAboutConfig "Opna um: stillingar">
-<!ENTITY zotero.preferences.openCSLEdit "Opna CSL ritil">
-<!ENTITY zotero.preferences.openCSLPreview "Opna CSL forskoðun">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Opna um: minni">

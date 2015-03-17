@@ -1028,7 +1028,10 @@ Zotero.Sync.Runner = new function () {
 				
 				var button = doc.createElement('button');
 				button.setAttribute('label', buttonText);
-				button.onclick = buttonCallback;
+				button.onclick = function () {
+					buttonCallback.call(this);
+					panel.hidePopup();
+				}
 				buttons.appendChild(button);
 			}
 			
@@ -1924,6 +1927,9 @@ Zotero.Sync.Server = new function () {
 		sql = "INSERT INTO version VALUES ('syncdeletelog', ?)";
 		Zotero.DB.query(sql, Zotero.Date.getUnixTimestamp());
 		
+		var sql = "UPDATE syncedSettings SET synced=0";
+		Zotero.DB.query(sql);
+		
 		Zotero.DB.commitTransaction();
 	}
 	
@@ -2104,7 +2110,19 @@ Zotero.Sync.Server = new function () {
 					var background = Zotero.Sync.Runner.background;
 					setTimeout(function () {
 						var libraryID = parseInt(firstChild.getAttribute('libraryID'));
-						var group = Zotero.Groups.getByLibraryID(libraryID);
+						
+						try {
+							var group = Zotero.Groups.getByLibraryID(libraryID);
+						}
+						catch (e) {
+							// Not sure how this is possible, but it's affecting some people
+							// TODO: Clean up in schema updates with FK check
+							if (!Zotero.Libraries.exists(libraryID)) {
+								let sql = "DELETE FROM syncedSettings WHERE libraryID=?";
+								Zotero.DB.query(sql, libraryID);
+								return;
+							}
+						}
 						
 						var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 												.getService(Components.interfaces.nsIPromptService);
@@ -2130,6 +2148,42 @@ Zotero.Sync.Server = new function () {
 							return;
 						}
 					}, 1);
+					break;
+				
+				case 'NOTE_TOO_LONG':
+					if (!Zotero.Sync.Runner.background) {
+						let libraryKey = xmlhttp.responseXML.firstChild.getElementsByTagName('item');
+						if (libraryKey.length) {
+							let [libraryID, key] = libraryKey[0].textContent.split('/');
+							if (Zotero.Libraries.getType(libraryID) == 'user') {
+								libraryID = null;
+							}
+							let item = Zotero.Items.getByLibraryAndKey(libraryID, key);
+							if (item) {
+								let msg = xmlhttp.responseXML.firstChild.getElementsByTagName('error')[0].textContent;
+								let e = new Zotero.Error(
+									msg,
+									0,
+									{
+										dialogText: msg,
+										dialogButtonText: Zotero.getString('pane.items.showItemInLibrary'),
+										dialogButtonCallback: function () {
+											var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+												.getService(Components.interfaces.nsIWindowMediator);
+											var win = wm.getMostRecentWindow("navigator:browser");
+											win.ZoteroPane.selectItem(item.id);
+										}
+									}
+								);
+								_error(e);
+							}
+							else {
+								let msg = "Long note " + libraryKey[0].textContent + " not found!";
+								Zotero.debug(msg, 1);
+								Components.utils.reportError(msg);
+							}
+						}
+					}
 					break;
 				
 				case 'TAG_TOO_LONG':
@@ -2419,7 +2473,7 @@ Zotero.Sync.Server = new function () {
 	
 	
 	function _error(e, extraInfo, skipReload) {
-		if (e.name && e.name == 'ZOTERO_ERROR') {
+		if (e instanceof Zotero.Error) {
 			switch (e.error) {
 				case Zotero.Error.ERROR_MISSING_OBJECT:
 				case Zotero.Error.ERROR_FULL_SYNC_REQUIRED:

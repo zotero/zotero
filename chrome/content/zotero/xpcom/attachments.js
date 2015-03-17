@@ -305,7 +305,7 @@ Zotero.Attachments = new function(){
 			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
 				.createInstance(Components.interfaces.nsIURL);
 			nsIURL.spec = url;
-			wbp.saveURI(nsIURL, null, null, null, null, tmpFile, null);
+			Zotero.Utilities.Internal.saveURI(wbp, nsIURL, tmpFile);
 			yield deferred.promise;
 			
 			// Create DB item
@@ -452,7 +452,8 @@ Zotero.Attachments = new function(){
 					title = dir[dir.length - 2];
 				}
 			}
-			else {
+			
+			if (!title) {
 				title = url;
 			}
 		}
@@ -613,7 +614,7 @@ Zotero.Attachments = new function(){
 			wbp.progressListener = new Zotero.WebProgressFinishListener(function () {
 				deferred.resolve();
 			});
-			wbp.saveURI(nsIURL, null, null, null, null, file, null);
+			Zotero.Utilities.Internal.saveURI(wbp, nsIURL, file);
 			yield deferred.promise;
 		}
 		

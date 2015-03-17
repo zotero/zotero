@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Видалити">
 <!ENTITY zotero.general.ok "Гаразд">
 <!ENTITY zotero.general.cancel "Відміна">
+<!ENTITY zotero.general.refresh "Оновити">
+<!ENTITY zotero.general.saveAs "Зберегти як...">
 
 <!ENTITY zotero.errorReport.title "Звіт про помилку в Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Це може включати повідомлення, які не відносяться до Zotero.">
@@ -123,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Трансформувати текст">
 <!ENTITY zotero.item.textTransform.titlecase "Кожне Слово з Заголовної Букви">
 <!ENTITY zotero.item.textTransform.sentencecase "Як у реченні">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Переключення ім'я/прізвие">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Поміняти місцями ім'я та прізвище">
 
 <!ENTITY zotero.toolbar.newNote "Нова примітка">
 <!ENTITY zotero.toolbar.note.standalone "Нова окрема примітка">
@@ -159,10 +161,10 @@
 <!ENTITY zotero.selectitems.cancel.label "Відмінити">
 <!ENTITY zotero.selectitems.select.label "Гаразд">
 
-<!ENTITY zotero.bibliography.title "Створити бібліографію">
+<!ENTITY zotero.bibliography.title "Створити цитування/список літератури">
 <!ENTITY zotero.bibliography.style.label "Стиль цитування:">
 <!ENTITY zotero.bibliography.outputMode "Режим вводу:">
-<!ENTITY zotero.bibliography.bibliography "Бібліографія">
+<!ENTITY zotero.bibliography.bibliography "Список літератури">
 <!ENTITY zotero.bibliography.outputMethod "Метод вводу:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Зберегти як RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Зберегти як HTML">
@@ -171,7 +173,7 @@
 
 <!ENTITY zotero.integration.docPrefs.title "Налаштування документу">
 <!ENTITY zotero.integration.addEditCitation.title "Додати/редагувати цитату">
-<!ENTITY zotero.integration.editBibliography.title "Редагувати бібліографію">
+<!ENTITY zotero.integration.editBibliography.title "Редагувати список літератури">
 <!ENTITY zotero.integration.quickFormatDialog.title "Швидке форматування цитати">
 
 <!ENTITY zotero.progress.title "Хід виконання">
@@ -223,7 +225,7 @@
 <!ENTITY zotero.integration.showEditor.label "Покзати редактор">
 <!ENTITY zotero.integration.classicView.label "Класичний вигляд">
 
-<!ENTITY zotero.integration.references.label "Посилання і бібліографії">
+<!ENTITY zotero.integration.references.label "Посилання в списку літератури">
 
 <!ENTITY zotero.sync.button "Синхронізувати з сервером Zotero">
 <!ENTITY zotero.sync.error "Помилка сінхронізації">
@@ -264,7 +266,7 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Неоднозначні цитати">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Визначені цитати">
 <!ENTITY zotero.rtfScan.introPage.label "Вступ">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero може автоматично витягти і переформатувати цитати та вставити бібліографію в файл RTF. Наразі функція сканування RTF розпізнає цитати в наступних форматах:">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero може автоматично витягти і переформатувати цитати та вставити список літератури в файл RTF. Наразі функція сканування RTF розпізнає цитати в наступних форматах:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Щоб почати, виберіть нижче вхідний файл RTF та вихідний файл:">
 <!ENTITY zotero.rtfScan.scanPage.label "Сканування на наявність цитат">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero сканує ваш документ на наявність цитат. Зачекайте, будь ласка.">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Прикріпити посилання на URI">
 <!ENTITY zotero.attachLink.label.link "Посилання:">
 <!ENTITY zotero.attachLink.label.title "Назва">
-
-

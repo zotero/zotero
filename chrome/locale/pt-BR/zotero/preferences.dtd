@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Painel do navegador">
 <!ENTITY zotero.preferences.showIn.separateTab "Aba separada">
 <!ENTITY zotero.preferences.showIn.appTab "Aba de aplicativo">
-<!ENTITY zotero.preferences.statusBarIcon "Ícone da barra de status:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Nenhum">
 <!ENTITY zotero.preferences.fontSize "Tamanho da fonte:">
 <!ENTITY zotero.preferences.fontSize.small "Pequena">
 <!ENTITY zotero.preferences.fontSize.medium "Média">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Obter estilos aditionais...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Teclas de atalho">
-
 <!ENTITY zotero.preferences.keys.openZotero "Abrir/Fechar painel Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Salvar para o Zotero (ícone da barra de endereços)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Alternar Modo Tela Cheia">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avançado">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Arquivos e Pastas">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localizar">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gerenciador dos mecanismos de pesquisa de artigos">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Enviar ao servidor Zotero">
 
 <!ENTITY zotero.preferences.openAboutConfig "Abrir about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Abrir editor de CSL">
-<!ENTITY zotero.preferences.openCSLPreview "Abrir pré-visualização de CSL">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Abrir about:memory">

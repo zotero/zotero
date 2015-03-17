@@ -1,0 +1,9 @@
+<!ENTITY styles.preview		"Zotero Style Preview">
+
+<!ENTITY styles.preview.citationFormat		"Citation Format:">
+<!ENTITY styles.preview.citationFormat.all		"all">
+<!ENTITY styles.preview.citationFormat.author		"author">
+<!ENTITY styles.preview.citationFormat.authorDate		"author-date">
+<!ENTITY styles.preview.citationFormat.label		"label">
+<!ENTITY styles.preview.citationFormat.note		"note">
+<!ENTITY styles.preview.citationFormat.numeric		"numeric">

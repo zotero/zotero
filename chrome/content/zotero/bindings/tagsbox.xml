@@ -1028,6 +1028,9 @@
 				<body>
 				<![CDATA[
 					var sbo = document.getAnonymousNodes(this)[0].boxObject;
+					if (Zotero.platformMajorVersion < 36) {
+						sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
+					}
 					sbo.ensureElementIsVisible(elem);
 				]]>
 				</body>

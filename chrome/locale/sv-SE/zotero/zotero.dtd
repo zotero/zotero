@@ -1,11 +1,13 @@
 <!ENTITY zotero.general.optional "(Valfritt)">
 <!ENTITY zotero.general.note "Anteckning:">
-<!ENTITY zotero.general.selectAll "Välj alla">
-<!ENTITY zotero.general.deselectAll "Välj bort alla">
+<!ENTITY zotero.general.selectAll "Markera allt">
+<!ENTITY zotero.general.deselectAll "Avmarkera allt">
 <!ENTITY zotero.general.edit "Ändra">
 <!ENTITY zotero.general.delete "Radera">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Avbryt">
+<!ENTITY zotero.general.refresh "Uppdatera">
+<!ENTITY zotero.general.saveAs "Spara som…">
 
 <!ENTITY zotero.errorReport.title "Zotero-felrapporting">
 <!ENTITY zotero.errorReport.unrelatedMessages "Det kan innehålla meddelanden som inte har med Zotero att göra.">
@@ -103,7 +105,7 @@
 <!ENTITY zotero.toolbar.newSubcollection.label "Ny undersamling...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Ny sparad sökning...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Töm papperskorg">
-<!ENTITY zotero.toolbar.tagSelector.label "Visa/Göm etikettväljare">
+<!ENTITY zotero.toolbar.tagSelector.label "Visa/göm etikettväljare">
 <!ENTITY zotero.toolbar.actions.label "Åtgärder">
 <!ENTITY zotero.toolbar.import.label "Importera...">
 <!ENTITY zotero.toolbar.importFromClipboard "Importera från urklipp">
@@ -138,9 +140,9 @@
 <!ENTITY zotero.tagSelector.filter "Filter:">
 <!ENTITY zotero.tagSelector.showAutomatic "Visa automatiskt">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Visa alla etiketter i detta bibliotek">
-<!ENTITY zotero.tagSelector.selectVisible "Välj synliga">
-<!ENTITY zotero.tagSelector.clearVisible "Välj bort synliga">
-<!ENTITY zotero.tagSelector.clearAll "Välj bort alla">
+<!ENTITY zotero.tagSelector.selectVisible "Markera synliga">
+<!ENTITY zotero.tagSelector.clearVisible "Avmarkera synliga">
+<!ENTITY zotero.tagSelector.clearAll "Avmarkera alla">
 <!ENTITY zotero.tagSelector.assignColor "Ange färg…">
 <!ENTITY zotero.tagSelector.renameTag "Ändra namn på etikett...">
 <!ENTITY zotero.tagSelector.deleteTag "Radera etikett...">
@@ -154,7 +156,7 @@
 <!ENTITY zotero.lookup.description "Skriv ISBN, DOI, eller PMID i sökfältet nedan.">
 <!ENTITY zotero.lookup.button.search "Sök">
 
-<!ENTITY zotero.selectitems.title "Välj källor">
+<!ENTITY zotero.selectitems.title "Markera källor">
 <!ENTITY zotero.selectitems.intro.label "Välj vilka källor du vill lägga till i ditt bibliotek">
 <!ENTITY zotero.selectitems.cancel.label "Ångra">
 <!ENTITY zotero.selectitems.select.label "Ok">
@@ -288,5 +290,3 @@
 <!ENTITY zotero.attachLink.title "Bifoga länk till URI">
 <!ENTITY zotero.attachLink.label.link "Länk:">
 <!ENTITY zotero.attachLink.label.title "Titel:">
-
-

@@ -45,6 +45,30 @@
 							insertbefore="zotero-prefpane-advanced-openbuttons"/>
 					</groupbox>
 				</tabpanel>
+		
+				<tabpanel id="zotero-prefpane-advanced-keys-tab">
+					<grid id="zotero-keys-grid">
+						<rows id="zotero-keys-rows">
+							<row insertbefore="zotero-keys-new-item">
+								<label value="&zotero.preferences.keys.openZotero;" control="key-textbox-openZotero"/>
+								<label/>
+								<textbox id="textbox-openZotero" maxlength="1" size="1" preference="pref-keys-openZotero"/>
+							</row>
+							
+							<row insertbefore="zotero-keys-new-item">
+								<label value="&zotero.preferences.keys.toggleFullscreen;" control="textbox-toggleFullscreen"/>
+								<label/>
+								<textbox id="textbox-toggleFullscreen" maxlength="1" size="1" preference="pref-keys-toggleFullscreen"/>
+							</row>
+							
+							<row insertbefore="zotero-keys-new-item">
+								<label value="&zotero.preferences.keys.saveToZotero;" control="key-textbox-saveToZotero"/>
+								<label/>
+								<textbox id="textbox-saveToZotero" maxlength="1" size="1" preference="pref-keys-saveToZotero"/>
+							</row>
+						</rows>
+					</grid>
+				</tabpanel>		
 			</tabpanels>
 		</tabbox>
 	</prefpane>

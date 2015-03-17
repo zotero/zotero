@@ -1,0 +1,4 @@
+<!ENTITY styles.editor "Zotero Style Editor">
+
+<!ENTITY styles.editor.suppressAuthor "Suppress Author">
+<!ENTITY styles.editor.citePosition "Cite Position:">

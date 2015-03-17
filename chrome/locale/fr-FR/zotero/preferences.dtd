@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "un panneau du navigateur">
 <!ENTITY zotero.preferences.showIn.separateTab "un onglet séparé">
 <!ENTITY zotero.preferences.showIn.appTab "un onglet applicatif">
-<!ENTITY zotero.preferences.statusBarIcon "Icône dans la barre d'état :">
-<!ENTITY zotero.preferences.statusBarIcon.none "Aucune">
 <!ENTITY zotero.preferences.fontSize "Taille des caractères :">
 <!ENTITY zotero.preferences.fontSize.small "Petite">
 <!ENTITY zotero.preferences.fontSize.medium "Moyenne">
@@ -125,18 +123,16 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Obtenir des styles supplémentaires…">
 
-<!ENTITY zotero.preferences.prefpane.keys "Raccourcis">
-
-<!ENTITY zotero.preferences.keys.openZotero "Ouvrir/fermer le panneau Zotero">
+<!ENTITY zotero.preferences.keys.openZotero "Ouvrir / Fermer le panneau Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Enregistrer dans Zotero (icône de la barre d'adresse)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Bascule du mode plein écran">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Bascule vers le panneau Ma Bibliothèque">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Activer / Désactiver le mode plein écran">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Placer le curseur dans le volet de gauche (bibliothèques)">
 <!ENTITY zotero.preferences.keys.quicksearch "Recherche rapide">
 <!ENTITY zotero.preferences.keys.newItem "Créer un nouveau document">
 <!ENTITY zotero.preferences.keys.newNote "Créer une nouvelle note">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Bascule du sélecteur de marqueurs">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copier les citations du document sélectionné dans le presse-papiers">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copier les documents sélectionnés dans le presse-papiers">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Afficher / Cacher le sélecteur de marqueurs">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copier dans le presse-papiers les documents sélectionnés, comme des citations">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copier dans le presse-papiers les documents sélectionnés, comme une bibliographie">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importer du presse-papiers">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Les modifications ne prennent effet que dans les nouvelles fenêtres.">
 
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avancées">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Fichiers et dossiers">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localiser">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestion des moteurs de recherche d'articles">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Transmettre au serveur de Zotero">
 
 <!ENTITY zotero.preferences.openAboutConfig "Ouvrir about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Ouvrir CSL Editor (test des styles installés)">
-<!ENTITY zotero.preferences.openCSLPreview "Ouvrir CSL Preview (aperçu des styles installés)">
+<!ENTITY zotero.preferences.openCSLEdit "Ouvrir l'Éditeur de style">
+<!ENTITY zotero.preferences.openCSLPreview "Ouvrir l'Aperçu des styles">
 <!ENTITY zotero.preferences.openAboutMemory "Ouvrir about:memory">

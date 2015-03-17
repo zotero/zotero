@@ -27,120 +27,37 @@
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 
+<!DOCTYPE window [
+	<!ENTITY % cslpreviewDTD SYSTEM "chrome://zotero/locale/cslpreview.dtd"> %cslpreviewDTD;
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+]>
+
 <window
 	id="csl-preview"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	onload="Zotero_CSL_Preview.init();"
-	title="Zotero Preview pane">
+	title="&styles.preview;">
 	
 	<script src="chrome://zotero/content/include.js"/>
-	
-	<script>
-	<![CDATA[
-		var Zotero_CSL_Preview = new function() {
-			this.init = init;
-			this.refresh = refresh;
-			this.generateBibliography = generateBibliography;
+	<script src="cslpreview.js"/>
 
-			function init() { 
-				//refresh();
-				
-				var iframe = document.getElementById('zotero-csl-preview-box');
-				iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p>Select one or more items in Zotero and click the "Refresh" button to see how these items are rendered by the installed CSL citation styles.</p></body></html>';
-			}
-			function refresh() {
-				var iframe = document.getElementById('zotero-csl-preview-box');
-				var items = Zotero.getActiveZoteroPane().getSelectedItems();
-				if (items.length === 0) {
-					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No items selected in Zotero.</p></body></html>';
-					return;
-				}
-				var progressWin = new Zotero.ProgressWindow();
-				// XXX needs its own string really!
-				progressWin.changeHeadline(Zotero.getString("pane.items.menu.createBib.multiple"));
-				var icon = 'chrome://zotero/skin/treeitem-attachment-file.png';
-				progressWin.addLines(document.title, icon);
-				progressWin.show();
-				progressWin.startCloseTimer();
-				var f = function() {
-					var styles = Zotero.Styles.getAll();
-					// XXX needs its own string really for the title!
-					var str = '<html><head><title></title></head><body>';
-					for each(var style in styles) {
-						if (style.source) {
-							continue;
-						}
-						Zotero.debug("Generate Bib for " + style.title);
-						var cite = generateBibliography(style);
-						if (cite) {
-							str += '<h3>' + style.title + '</h3>';
-							str += cite;
-							str += '<hr>';
-						}
-					}
-
-					str += '</body></html>';
-					iframe.contentDocument.documentElement.innerHTML = str;			
-				};
-				// Give progress window time to appear
-				setTimeout(f, 100);
-			}
-			 
-			function generateBibliography(style) {
-				var iframe = document.getElementById('zotero-csl-preview-box');
-				
-				var items = Zotero.getActiveZoteroPane().getSelectedItems();
-				if (items.length === 0) {
-					return '';
-				}
-				
-				var citationFormat = document.getElementById("citation-format").selectedItem.value;
-				if (citationFormat != "all" && citationFormat != style.categories) {
-					Zotero.debug("CSL IGNORE: citation format is " + style.categories);
-					return '';
-				}
-				var styleEngine = style.getCiteProc();
-				
-				// Generate multiple citations
-				var citations = styleEngine.previewCitationCluster(
-					{"citationItems":[{"id":item.id} for each(item in items)], "properties":{}},
-					[], [], "html");
-			
-				// Generate bibliography
-				var bibliography = '';
-				if(style.hasBibliography) {
-					styleEngine.updateItems([item.id for each(item in items)]);
-					bibliography = Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
-				}
-				
-				return '<p>' + citations + '</p>' + bibliography;
-			}
-			
-			
-		}();
-	]]>
-	</script>
-	<!-- NEEDS LOCALISING -->
 	<vbox flex="1">
-	   <hbox >
 		<hbox align="center">
-			<button id="preview-refresh-button" label="Refresh" oncommand="Zotero_CSL_Preview.refresh()"/>
-			<groupbox orient="horizontal" align="center">
-				<label value="Citation format:" />
-				<menulist id="citation-format" oncommand="Zotero_CSL_Preview.refresh()">
-					<menupopup>
-						<menuitem label="all" value="all"/>
-						<menuitem label="author" value="author"/>
-						<menuitem label="author-date" value="author-date"/>
-						<menuitem label="label" value="label"/>
-						<menuitem label="note" value="note"/>
-						<menuitem label="numeric" value="numeric"/>
-					</menupopup>
-				</menulist>
-			</groupbox>
+			<button id="preview-refresh-button" label="&zotero.general.refresh;" oncommand="Zotero_CSL_Preview.refresh()"/>
+			
+			<label value="&styles.preview.citationFormat;" />
+			<menulist id="citation-format" oncommand="Zotero_CSL_Preview.refresh()">
+				<menupopup>
+					<menuitem value="all" label="&styles.preview.citationFormat.all;"/>
+					<menuitem value="author" label="&styles.preview.citationFormat.author;"/>
+					<menuitem value="author-date" label="&styles.preview.citationFormat.authorDate;"/>
+					<menuitem value="label" label="&styles.preview.citationFormat.label;"/>
+					<menuitem value="note" label="&styles.preview.citationFormat.note;"/>
+					<menuitem value="numeric" label="&styles.preview.citationFormat.numeric;"/>
+				</menupopup>
+			</menulist>
 		</hbox>
-	   </hbox>
-	   <iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em; background:white;" overflow="auto" type="content"/>
+		<iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em; background:white;" overflow="auto" type="content"/>
 	</vbox>
 	
 </window>

@@ -196,6 +196,8 @@ Zotero_TranslatorTester = function(translator, type, debugCallback) {
 	}
 };
 
+Zotero_TranslatorTester.DEFER_DELAY = 30000; // Delay for deferred tests
+
 /**
  * Removes document objects, which contain cyclic references, and other fields to be ignored from items
  * @param {Object} Item, in the format returned by Zotero.Item.serialize()
@@ -258,7 +260,9 @@ Zotero_TranslatorTester._sanitizeItem = function(item, testItem, keepValidFields
 	if(!keepValidFields && "accessDate" in item) delete item.accessDate;
 
 	//sort tags, if they're still there
-	if(item.tags && typeof item.tags === "object" && "sort" in item.tags) item.tags.sort();
+	if(item.tags && typeof item.tags === "object" && "sort" in item.tags) {
+		item.tags = Zotero.Utilities.arrayUnique(item.tags).sort();
+	}
 	
 	return item;
 };
@@ -318,7 +322,7 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
 	var testNumber = this.tests.length-this.pending.length;
 	var me = this;
 	
-	this._debug(this, "\nTranslatorTester: Running "+this.translator.label+" Test "+testNumber);
+	this._debug(this, "TranslatorTester: Running "+this.translator.label+" Test "+testNumber);
 	
 	var executedCallback = false;
 	var callback = function(obj, test, status, message) {
@@ -375,7 +379,14 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 	var hiddenBrowser = Zotero.HTTP.processDocuments(test.url,
 		function(doc) {
 			if(test.defer) {
-				Zotero.setTimeout(function() { runTest(doc) }, 30000, true);
+				me._debug(this, "TranslatorTesting: Waiting "
+					+ (Zotero_TranslatorTester.DEFER_DELAY/1000)
+					+ " second(s) for page content to settle"
+				);
+				Zotero.setTimeout(
+					function() {runTest(hiddenBrowser.contentDocument) },
+					Zotero_TranslatorTester.DEFER_DELAY, true
+				);
 			} else {
 				runTest(doc);
 			}
@@ -386,6 +397,8 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 		},
 		true
 	);
+	
+	hiddenBrowser.docShell.allowMetaRedirects = true;
 };
 
 /**

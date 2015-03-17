@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Törlés">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Mégse">
+<!ENTITY zotero.general.refresh "Refresh">
+<!ENTITY zotero.general.saveAs "Save As…">
 
 <!ENTITY zotero.errorReport.title "Zotero hibajelentés">
 <!ENTITY zotero.errorReport.unrelatedMessages "Tartalmazhat a Zotero-tól független üzeneteket.">
@@ -70,7 +72,7 @@
 <!ENTITY zotero.items.issue_column "Szám">
 <!ENTITY zotero.items.series_column "Sorozat">
 <!ENTITY zotero.items.seriesTitle_column "Sorozat címe">
-<!ENTITY zotero.items.court_column "Court">
+<!ENTITY zotero.items.court_column "Bíróság">
 <!ENTITY zotero.items.medium_column "Közepes/Formátum">
 <!ENTITY zotero.items.genre_column "Műfaj">
 <!ENTITY zotero.items.system_column "Rendszer">
@@ -123,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Szöveg átalakítása">
 <!ENTITY zotero.item.textTransform.titlecase "Szókezdő">
 <!ENTITY zotero.item.textTransform.sentencecase "Mondatkezdő">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Keresztnév/vezetéknév felcserélése">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 
 <!ENTITY zotero.toolbar.newNote "Új jegyzet">
 <!ENTITY zotero.toolbar.note.standalone "Új önálló jegyzet">
@@ -191,7 +193,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Szerző figyelmen kívül hagyása">
 <!ENTITY zotero.citation.prefix.label "Előtag:">
 <!ENTITY zotero.citation.suffix.label "Utótag:">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.editorWarning.label "Figyelmeztetés: Ha a szerkesztőben szerkeszt egy hivatkozást, akkor nem fog frissülni és nem fogja megjeleníteni az adatbázis vagy a hivatkozási stílus változásait.">
 
 <!ENTITY zotero.richText.italic.label "Dőlt">
 <!ENTITY zotero.richText.bold.label "Félkövér">
@@ -218,7 +220,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "A dokumentum tárolt hivatkozásai">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "A hivatkozások tárolása a dokumentumban növeli a fájl méretét, de lehetővé teszi, a dokumentum megosztását másokkal, anélkül, hogy Zotero csoportot használjon. Zotero 3.0 vagy későbbi verzió szükséges az előbbi opcióval létrehozott dokumentumok frissítéséhez.">
 
 <!ENTITY zotero.integration.showEditor.label "Editor megjelenítése">
 <!ENTITY zotero.integration.classicView.label "Klasszikus nézet">
@@ -269,7 +271,7 @@
 <!ENTITY zotero.rtfScan.scanPage.label "Hivatkozások keresése">
 <!ENTITY zotero.rtfScan.scanPage.description "A Zotero hivatkozásokat keres a dokumentumban. Kérem várjon.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Hivatkozott elemek ellenőrzése">
-<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Kérem, tekintse át az alábbi felismert hivatkozásokat, hogy meggyőződjön arról, hogy a Zotero a helyesen választotta ki a megfelelő elemeket. A nem egyértelmű vagy mappa nélküli hivatkozásokat javítani kell, mielőtt rátér a következő lépésre.">
 <!ENTITY zotero.rtfScan.stylePage.label "Dokumentum formázása">
 <!ENTITY zotero.rtfScan.formatPage.label "Hivatkozás formázása">
 <!ENTITY zotero.rtfScan.formatPage.description "A Zotero feldolgozza és formázza az RTF fájlt. Kérem várjon.">
@@ -285,8 +287,6 @@
 <!ENTITY zotero.downloadManager.saveToLibrary.description "A csatolmányok nem menthetőek a jelenleg kiválasztott könyvtárba. Ez az elem a saját könyvtárába lesz mentve.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Ahhoz, hogy ezt a tulajdonságot használja, először telepítenie kell a PDF tools-t a Zotero beállítások keresőpaneljén.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.title "Link csatolása az URI-hoz">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Cím:">
-
-

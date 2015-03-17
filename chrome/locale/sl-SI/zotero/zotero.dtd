@@ -6,6 +6,8 @@
 <!ENTITY zotero.general.delete "Izbriši">
 <!ENTITY zotero.general.ok "V redu">
 <!ENTITY zotero.general.cancel "Prekliči">
+<!ENTITY zotero.general.refresh "Osveži">
+<!ENTITY zotero.general.saveAs "Shrani kot ...">
 
 <!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Vključuje lahko sporočila, ki se ne nanašajo na Zotero.">
@@ -123,7 +125,7 @@
 <!ENTITY zotero.item.textTransform "Preoblikuj besedilo">
 <!ENTITY zotero.item.textTransform.titlecase "Velike Začetnice">
 <!ENTITY zotero.item.textTransform.sentencecase "Kot v stavku">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Zamenjaj imena in priimke">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Zamenjaj ime/priimek">
 
 <!ENTITY zotero.toolbar.newNote "Nova opomba">
 <!ENTITY zotero.toolbar.note.standalone "Nova samostojna opomba">
@@ -285,8 +287,6 @@
 <!ENTITY zotero.downloadManager.saveToLibrary.description "V trenutno izbrano knjižnico priponk ni mogoče shraniti. Vnos bo namesto tega shranjen v vašo knjižnico.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Če želite uporabiti to funkcijo, morate najprej namestiti orodja PDF v nastavitvah Zotera.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
-
-
+<!ENTITY zotero.attachLink.title "URI pripni povezavo">
+<!ENTITY zotero.attachLink.label.link "Povezava:">
+<!ENTITY zotero.attachLink.label.title "Naslov:">

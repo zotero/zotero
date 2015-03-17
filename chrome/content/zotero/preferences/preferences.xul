@@ -68,11 +68,6 @@
 			image="chrome://zotero/skin/prefs-styles.png"
 			src="chrome://zotero/content/preferences/preferences_cite.xul"/>
 	
-	<prefpane id="zotero-prefpane-keys"
-			label="&zotero.preferences.prefpane.keys;"
-			image="chrome://zotero/skin/prefs-keys.png"
-			src="chrome://zotero/content/preferences/preferences_keys.xul"/>
-	
 	<prefpane id="zotero-prefpane-advanced"
 			label="&zotero.preferences.prefpane.advanced;"
 			image="chrome://zotero/skin/prefs-advanced.png"

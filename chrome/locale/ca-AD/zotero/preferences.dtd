@@ -12,8 +12,6 @@
 <!ENTITY zotero.preferences.showIn.browserPane "Subfinestra del navegador">
 <!ENTITY zotero.preferences.showIn.separateTab "Pestanya separada">
 <!ENTITY zotero.preferences.showIn.appTab "Pestanya d'aplicacions">
-<!ENTITY zotero.preferences.statusBarIcon "Icona de la barra d&apos;estat">
-<!ENTITY zotero.preferences.statusBarIcon.none "Cap">
 <!ENTITY zotero.preferences.fontSize "Mida de lletra:">
 <!ENTITY zotero.preferences.fontSize.small "Petita">
 <!ENTITY zotero.preferences.fontSize.medium "Mitjana">
@@ -125,8 +123,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Aconsegueix estils addicionals...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Dreceres de teclat">
-
 <!ENTITY zotero.preferences.keys.openZotero "Obre/Tanca el Zotero">
 <!ENTITY zotero.preferences.keys.saveToZotero "Desa al Zotero (icona de la barra d'adreces)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Canvia a pantalla completa">
@@ -164,6 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avançat">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Fitxers i carpetes">
+<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localitza">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestor del motor de cerca d'articles">
@@ -204,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Tramet al servidor del Zotero">
 
 <!ENTITY zotero.preferences.openAboutConfig "Obri about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Obri l'editor CSL">
-<!ENTITY zotero.preferences.openCSLPreview "Obri la previsualització CSL">
+<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
 <!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
