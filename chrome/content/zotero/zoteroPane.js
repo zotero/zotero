@@ -911,7 +911,8 @@ var ZoteroPane = new function()
 		}
 		
 		var newids = [];
-		for each(var id in ids) {
+		for (let i = 0; i < ids.length; i++) {
+			let id = ids[i];
 			id = parseInt(id);
 			if (isNaN(id)) {
 				continue;
@@ -1442,7 +1443,7 @@ var ZoteroPane = new function()
 		var disabled = !this.canEdit() || !(items.length == 1 && items[0].isRegularItem());
 		
 		if (disabled) {
-			for each(var node in popup.childNodes) {
+			for (let node of popup.childNodes) {
 				node.disabled = true;
 			}
 			return;
@@ -1844,7 +1845,8 @@ var ZoteroPane = new function()
 		// automatically converting text/html to plaintext rather than using
 		// text/unicode. (That may be fixable, however.)
 		var canCopy = false;
-		for each(var item in items) {
+		for (let i = 0; i < items.length; i++) {
+			let item = items[i];
 			if (item.isRegularItem()) {
 				canCopy = true;
 				break;
@@ -2096,9 +2098,8 @@ var ZoteroPane = new function()
 		];
 		
 		var m = {};
-		var i = 0;
-		for each(var option in options) {
-			m[option] = i++;
+		for (let i = 0; i < options.length; i++) {
+			m[options[i]] = i;
 		}
 		
 		var menu = document.getElementById('zotero-collectionmenu');
@@ -2205,7 +2206,8 @@ var ZoteroPane = new function()
 		}
 		
 		// Hide and enable all actions by default (so if they're shown they're enabled)
-		for each(var pos in m) {
+		for (let i in m) {
+			let pos = m[i];
 			menu.childNodes[pos].setAttribute('hidden', true);
 			menu.childNodes[pos].setAttribute('disabled', false);
 		}
@@ -2246,9 +2248,8 @@ var ZoteroPane = new function()
 		];
 		
 		var m = {};
-		var i = 0;
-		for each(var option in options) {
-			m[option] = i++;
+		for (let i = 0; i < options.length; i++) {
+			m[options[i]] = i;
 		}
 		
 		var menu = document.getElementById('zotero-itemmenu');
@@ -2286,7 +2287,8 @@ var ZoteroPane = new function()
 					canIndex = false;
 				}
 				
-				for each(var item in items) {
+				for (let i = 0; i < items.length; i++) {
+					let item = items[i];
 					if (canMerge && !item.isRegularItem() || itemGroup.isDuplicates()) {
 						canMerge = false;
 					}
@@ -2318,7 +2320,8 @@ var ZoteroPane = new function()
 				}
 				
 				var canCreateParent = true;
-				for each(var item in items) {
+				for (let i = 0; i < items.length; i++) {
+					let item = items[i];
 					if (!item.isTopLevelItem() || !item.isAttachment()) {
 						canCreateParent = false;
 						break;
@@ -2416,10 +2419,9 @@ var ZoteroPane = new function()
 				
 				// Block certain actions on files if no access
 				if (item.isImportedAttachment() && !itemGroup.filesEditable) {
-					var d = [m.deleteFromLibrary, m.createParent, m.renameAttachments];
-					for each(var val in d) {
-						disable.push(val);
-					}
+					[m.deleteFromLibrary, m.createParent, m.renameAttachments].forEach(function (x) {
+						disable.push(x);
+					});
 				}
 			}
 		}
@@ -2471,7 +2473,8 @@ var ZoteroPane = new function()
 		menu.childNodes[m.reindexItem].setAttribute('label', Zotero.getString('pane.items.menu.reindexItem' + multiple));
 		
 		// Hide and enable all actions by default (so if they're shown they're enabled)
-		for each(var pos in m) {
+		for (let i in m) {
+			let pos = m[i];
 			menu.childNodes[pos].setAttribute('hidden', true);
 			menu.childNodes[pos].setAttribute('disabled', false);
 		}
@@ -2770,7 +2773,8 @@ var ZoteroPane = new function()
 			uris = [uris];
 		}
 		
-		for each(var uri in uris) {
+		for (let i = 0; i < uris.length; i++) {
+			let uri = uris[i];
 			// Ignore javascript: and data: URIs
 			if (uri.match(/^(javascript|data):/)) {
 				return;
@@ -2925,7 +2929,7 @@ var ZoteroPane = new function()
 			var itemGroup = self.collectionsView._getItemAtRow(self.collectionsView.selection.currentIndex);
 			disabled = !itemGroup.editable;
 		}
-		for each(var menuitem in menu.firstChild.childNodes) {
+		for (let menuitem of menu.firstChild.childNodes) {
 			menuitem.disabled = disabled;
 		}
 	}
@@ -3442,7 +3446,8 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		for each(var item in items) {
+		for (let i = 0; i < items.length; i++) {
+			let item = items[i];
 			if (item.isRegularItem()) {
 				// Prefer local file attachments
 				var uri = Components.classes["@mozilla.org/network/standard-url;1"]
@@ -3510,7 +3515,8 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		for each(var itemID in itemIDs) {
+		for (let i = 0; i < itemIDs.length; i++) {
+			let itemID = itemIDs[i];
 			var item = Zotero.Items.get(itemID);
 			if (!item.isAttachment()) {
 				throw ("Item " + itemID + " is not an attachment in ZoteroPane_Local.viewAttachment()");
@@ -4101,12 +4107,12 @@ var ZoteroPane = new function()
 	this.serializePersist = function() {
 		if(!_unserialized) return;
 		var serializedValues = {};
-		for each(var el in document.getElementsByAttribute("zotero-persist", "*")) {
+		for (let el of document.getElementsByAttribute("zotero-persist", "*")) {
 			if(!el.getAttribute) continue;
 			var id = el.getAttribute("id");
 			if(!id) continue;
 			var elValues = {};
-			for each(var attr in el.getAttribute("zotero-persist").split(/[\s,]+/)) {
+			for (let attr of el.getAttribute("zotero-persist").split(/[\s,]+/)) {
 				var attrValue = el.getAttribute(attr);
 				elValues[attr] = attrValue;
 			}
@@ -4200,10 +4206,10 @@ var ZoteroPane = new function()
 		"observe":function(aSubject, aTopic, aData) {
 			if(aTopic == "zotero-reloaded") {
 				Zotero.debug("Reloading Zotero pane");
-				for each(var func in _reloadFunctions) func(aData);
+				for (let func of _reloadFunctions) func(aData);
 			} else if(aTopic == "zotero-before-reload") {
 				Zotero.debug("Zotero pane caught before-reload event");
-				for each(var func in _beforeReloadFunctions) func(aData);
+				for (let func of _beforeReloadFunctions) func(aData);
 			}
 		}
 	};

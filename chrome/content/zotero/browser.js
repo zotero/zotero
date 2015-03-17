@@ -296,7 +296,8 @@ var Zotero_Browser = new function() {
 			// ignore blacklisted domains
 			try {
 				if(doc.domain) {
-					for each(var blacklistedURL in _blacklist) {
+					for (let i = 0; i < _blacklist.length; i++) {
+						let blacklistedURL = _blacklist[i];
 						if(doc.domain.substr(doc.domain.length-blacklistedURL.length) == blacklistedURL) {
 							Zotero.debug("Ignoring blacklisted URL "+doc.location);
 							return;
@@ -531,8 +532,8 @@ var Zotero_Browser = new function() {
 			menuitem.setAttribute("class", "menuitem-iconic");
 			menuitem.addEventListener("command", _constructLookupFunction(tab, function(event, obj) {
 				var urls = [];
-				for each(var item in obj.newItems) {
-					var url = Zotero.OpenURL.resolve(item);
+				for (let i = 0; i < obj.newItems.length; i++) {
+					var url = Zotero.OpenURL.resolve(obj.newItems[i]);
 					if(url) urls.push(url);
 				}
 				ZoteroPane.loadURI(urls, event);
@@ -837,7 +838,8 @@ Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
 Zotero_Browser.Tab.prototype._searchFrames = function(rootDoc, searchDoc) {
 	if(rootDoc == searchDoc) return true;
 	var frames = rootDoc.getElementsByTagName("frame");
-	for each(var frame in frames) {
+	for (let i = 0; i < frames.length; i++) {
+		let frame = frames[i];
 		if(frame.contentDocument &&
 				(frame.contentDocument == searchDoc ||
 				this._searchFrames(frame.contentDocument, searchDoc))) {
@@ -846,7 +848,8 @@ Zotero_Browser.Tab.prototype._searchFrames = function(rootDoc, searchDoc) {
 	}
 	
 	var frames = rootDoc.getElementsByTagName("iframe");
-	for each(var frame in frames) {
+	for (let i = 0; i < frames.length; i++) {
+		let frame = frames[i];
 		if(frame.contentDocument &&
 				(frame.contentDocument == searchDoc ||
 				this._searchFrames(frame.contentDocument, searchDoc))) {

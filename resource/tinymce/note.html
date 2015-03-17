@@ -39,13 +39,12 @@
 				zoteroInit(ed);
 			});
 			
-			var commands = ["Cut", "Copy", "Paste"];
-			for each(var command in commands) {
+			["Cut", "Copy", "Paste"].forEach(function (command) {
 				let cmd = command;
 				ed.addCommand(command, function (ui, value) {
 					zoteroExecCommand(ed.getDoc(), cmd, ui, value);
 				});
-			}
+			});
 		},
 		
 		fix_list_elements : true,
