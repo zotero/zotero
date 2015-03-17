@@ -1155,13 +1155,7 @@ var ZoteroPane = new function()
 			// editability of the library
 			if (collectionTreeRow.isTrash() &&
 					disableIfNoEdit[i] == 'cmd_zotero_newCollection') {
-				if (collectionTreeRow.ref.libraryID) {
-					var overrideEditable =
-						Zotero.Libraries.isEditable(collectionTreeRow.ref.libraryID);
-				}
-				else {
-					var overrideEditable = true;
-				}
+				var overrideEditable = Zotero.Libraries.isEditable(collectionTreeRow.ref.libraryID);
 			}
 			else {
 				var overrideEditable = false;
@@ -3360,14 +3354,7 @@ var ZoteroPane = new function()
 		}
 		itemType = Zotero.ItemTypes.getID(itemType);
 		var item = yield this.newItem(itemType, data, row);
-		
-		if (item.libraryID) {
-			var group = Zotero.Groups.getByLibraryID(item.libraryID);
-			var filesEditable = group.filesEditable;
-		}
-		else {
-			var filesEditable = true;
-		}
+		var filesEditable = Zotero.Libraries.isFilesEditable(item.libraryID);
 		
 		if (saveSnapshot) {
 			var link = false;
@@ -3481,13 +3468,7 @@ var ZoteroPane = new function()
 			}
 			
 			var item = yield ZoteroPane_Local.newItem(itemType, {}, row)
-			if (item.libraryID) {
-				var group = Zotero.Groups.getByLibraryID(item.libraryID);
-				filesEditable = group.filesEditable;
-			}
-			else {
-				filesEditable = true;
-			}
+			var filesEditable = Zotero.Libraries.isFilesEditable(item.libraryID);
 			
 			// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
 			if (saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'))) {
@@ -3816,11 +3797,7 @@ var ZoteroPane = new function()
 		}
 		
 		var collectionTreeRow = this.collectionsView.getRow(row);
-		// TODO: isEditable for user library should just return true
-		if (collectionTreeRow.ref.libraryID) {
-			return Zotero.Libraries.isEditable(collectionTreeRow.ref.libraryID);
-		}
-		return true;
+		return Zotero.Libraries.isEditable(collectionTreeRow.ref.libraryID);
 	}
 	
 	

@@ -146,9 +146,16 @@ Zotero.API = {
 	
 	
 	getLibraryPrefix: function (libraryID) {
-		return libraryID
-			? 'groups/' + Zotero.Groups.getGroupIDFromLibraryID(libraryID)
-			: 'library';
+		switch (Zotero.Libraries.getType(libraryID)) {
+		case 'user':
+			return 'library';
+		
+		case 'publications':
+			return 'publications';
+		
+		case 'groups':
+			return 'groups/' + Zotero.Groups.getGroupIDFromLibraryID(libraryID);
+		}
 	}
 };
 
