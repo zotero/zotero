@@ -77,7 +77,6 @@ Zotero.Item = function(itemTypeOrID) {
 	this._fileExists = null;
 	
 	this._deleted = null;
-	this._publication = null;
 	this._hasNote = null;
 	
 	this._noteAccessTime = null;
@@ -1057,8 +1056,8 @@ Zotero.Item.prototype.removeCreator = function(orderIndex, allowMissing) {
 }
 
 
-// Define 'deleted' and 'publication' properties
-for (let name of ['deleted', 'publication']) {
+// Define 'deleted' property (and any others that follow the same pattern in the future)
+for (let name of ['deleted']) {
 	let prop = '_' + name;
 	
 	Zotero.defineProperty(Zotero.Item.prototype, name, {
@@ -1079,7 +1078,7 @@ for (let name of ['deleted', 'publication']) {
 					+ " state hasn't changed for item " + this.id);
 				return;
 			}
-			this._markFieldChange('publication', !!this[prop]);
+			this._markFieldChange(name, !!this[prop]);
 			this._changed[name] = true;
 			this[prop] = val;
 		}
