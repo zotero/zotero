@@ -1186,8 +1186,6 @@ AsyncChannel.prototype = {
 		Zotero.debug("AsyncChannel's asyncOpen called");
 		var t = new Date;
 		
-		let channel = this;
-		
 		// Proxy requests to other zotero:// URIs
 		let uri2 = this.URI.clone();
 		if (uri2.path.startsWith('/proxy/')) {
