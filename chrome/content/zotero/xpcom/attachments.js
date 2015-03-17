@@ -223,12 +223,16 @@ Zotero.Attachments = new function(){
 		// Save using a hidden browser
 		var nativeHandlerImport = function () {
 			var browser = Zotero.HTTP.processDocuments(url, function() {
-				var importCallback = function (item) {
+				var importCallback = function (item, e) {
 					Zotero.Browser.deleteHiddenBrowser(browser);
-					if(callback) callback(item);
+					if(callback) callback(item, e);
 				};
-				Zotero.Attachments.importFromDocument(browser.contentDocument,
-					sourceItemID, forceTitle, parentCollectionIDs, importCallback, libraryID);
+				try {
+					Zotero.Attachments.importFromDocument(browser.contentDocument,
+						sourceItemID, forceTitle, parentCollectionIDs, importCallback, libraryID);
+				} catch (e) {
+					importCallback(false, e);
+				}
 			}, undefined, undefined, true, cookieSandbox);
 		};
 		
@@ -606,13 +610,11 @@ Zotero.Attachments = new function(){
 				
 				// Load WebPageDump code
 				var wpd = {"Zotero":Zotero};
-				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-					.getService(Components.interfaces.mozIJSSubScriptLoader)
-					.loadSubScript("chrome://zotero/content/webpagedump/common.js", wpd);
-				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-					.getService(Components.interfaces.mozIJSSubScriptLoader)
-					.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js", wpd);
-
+				let loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+					.getService(Components.interfaces.mozIJSSubScriptLoader);
+				loader.loadSubScript("chrome://zotero/content/webpagedump/common.js", wpd);
+				loader.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js", wpd);
+				
 				wpd.wpdDOMSaver.init(file.path, document);
 				wpd.wpdDOMSaver.saveHTMLDocument();
 
@@ -697,18 +699,19 @@ Zotero.Attachments = new function(){
 			return itemID;
 		}
 		catch (e) {
-			Zotero.DB.rollbackTransaction();
-			
 			try {
-				// Clean up
+				// Hack to make sure that the item tree gets updated correctly
+				// Otherwise, a twisty is displayed even though the attachment is gone
 				if (itemID) {
-					var itemDir = this.getStorageDirectory(itemID);
-					if (itemDir.exists()) {
-						itemDir.remove(true);
-					}
+					let item = Zotero.Items.get(itemID);
+					item.erase();
+					// Note: If removing hack, make sure to delete files from storage
+					// directory, since rollbackTransaction will not take care of this
 				}
 			}
 			catch (e) {}
+			
+			Zotero.DB.rollbackTransaction();
 			
 			throw (e);
 		}
