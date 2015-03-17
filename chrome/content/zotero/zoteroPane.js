@@ -1548,19 +1548,12 @@ var ZoteroPane = new function()
 		var item = self.getSelectedItems()[0];
 		var newItem;
 		
-		yield Zotero.DB.executeTransaction(function () {
-			// Create new unsaved clone item in target library
-			newItem = new Zotero.Item(item.itemTypeID);
-			newItem.libraryID = item.libraryID;
-			// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
-			var id = yield newItem.save();
-			
-			var newItem = yield Zotero.Items.getAsync(id);
-			yield item.clone(false, newItem, false, !Zotero.Prefs.get('groups.copyTags'));
+		yield Zotero.DB.executeTransaction(function* () {
+			newItem = yield item.clone(null, !Zotero.Prefs.get('groups.copyTags'));
 			yield newItem.save();
 			
 			if (self.collectionsView.selectedTreeRow.isCollection() && newItem.isTopLevelItem()) {
-				self.collectionsView.selectedTreeRow.ref.addItem(newItem.id);
+				yield self.collectionsView.selectedTreeRow.ref.addItem(newItem.id);
 			}
 		});
 		

@@ -3737,6 +3737,7 @@ Zotero.Item.prototype.multiDiff = Zotero.Promise.coroutine(function* (otherItems
  *
  * @param {Number} [libraryID] - libraryID of the new item, or the same as original if omitted
  * @param {Boolean} [skipTags=false] - Skip tags
+ * @return {Promise<Zotero.Item>}
  */
 Zotero.Item.prototype.clone = Zotero.Promise.coroutine(function* (libraryID, skipTags) {
 	Zotero.debug('Cloning item ' + this.id);
