@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avancerat">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Filer och kataloger">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Genvägar">
 
 <!ENTITY zotero.preferences.prefpane.locate "Hitta">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Hantera söktjänst för artiklar">

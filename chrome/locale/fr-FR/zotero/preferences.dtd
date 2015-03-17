@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avancées">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Fichiers et dossiers">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Raccourcis clavier">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localiser">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestion des moteurs de recherche d'articles">

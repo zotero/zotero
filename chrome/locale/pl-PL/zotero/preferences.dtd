@@ -17,17 +17,17 @@
 <!ENTITY zotero.preferences.fontSize.medium "średnia">
 <!ENTITY zotero.preferences.fontSize.large "duża">
 <!ENTITY zotero.preferences.fontSize.xlarge "bardzo duża">
-<!ENTITY zotero.preferences.fontSize.notes "Wielkość czcionki notatek:">
+<!ENTITY zotero.preferences.fontSize.notes "Wielkość czcionki w notatkach:">
 
 <!ENTITY zotero.preferences.miscellaneous "Różne">
-<!ENTITY zotero.preferences.autoUpdate "Automatycznie sprawdzaj, czy są dostępne aktualizacje tłumaczeń i stylów">
-<!ENTITY zotero.preferences.updateNow "Aktualizuj">
-<!ENTITY zotero.preferences.reportTranslationFailure "Zgłoś stronę z niedziałającym tłumaczeniem">
+<!ENTITY zotero.preferences.autoUpdate "Automatycznie sprawdzaj, czy są dostępne aktualizacje translatorów i stylów">
+<!ENTITY zotero.preferences.updateNow "Aktualizuj teraz">
+<!ENTITY zotero.preferences.reportTranslationFailure "Zgłoś niedziałający translator strony">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Pozwól zotero.org dostosować zawartość opierając się na aktualnej wersji Zotero">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Jeśli zaznaczone, bieżąca wersja Zotero będzie dodana do nagłówka HTTP żądań zotero.org.">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Jeśli zaznaczone, bieżąca wersja Zotero będzie dołączona w nagłówku HTTP podczas zapytań zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Używaj Zotero do pobranych plików BibTeX/RIS/Refer">
-<!ENTITY zotero.preferences.automaticSnapshots "Podczas tworzenia elementów ze stron internetowych wykonaj zrzut ekranu">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Zapisując element dołączaj powiązane pliki">
+<!ENTITY zotero.preferences.automaticSnapshots "Podczas tworzenia elementów ze stron internetowych automatycznie wykonaj zrzut ekranu">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Zapisując element dołączaj powiązane pliki PDF i inne">
 <!ENTITY zotero.preferences.automaticTags "Automatycznie oznacz elementy zawierające słowa kluczowe i nagłówki tematyczne">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatycznie usuń z kosza elementy usunięte dawniej niż">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dni temu">
@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.groups.childLinks "potomne linki">
 <!ENTITY zotero.preferences.groups.tags "znaczniki">
 
-<!ENTITY zotero.preferences.openurl.caption "openURL">
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Szukaj resolwerów">
 <!ENTITY zotero.preferences.openurl.custom "Dostosuj...">
@@ -132,9 +132,9 @@
 <!ENTITY zotero.preferences.keys.newNote "Utwórz nową notatkę">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Wyświetl/Ukryj wybór etykiet">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiuje wybrane odnośniki bibliograficzne do schowka">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiuj zaznaczony element do schowka">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiuj zaznaczone elementy do schowka">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importuj ze schowka">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Zmiany zostaną zastosowane w nowym oknie">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Zmiany zostaną zastosowane tylko w nowych oknach">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Serwery proxy">
 
@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Zaawansowane">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Pliki i katalogi">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Skróty klawiaturowe">
 
 <!ENTITY zotero.preferences.prefpane.locate "Wyszukaj">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Zarządzanie silnikami wyszukiwania">
