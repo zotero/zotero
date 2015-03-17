@@ -1080,11 +1080,7 @@ var wpdDOMSaver = {
 	// Main Routine: call it for saving the actual active top window
 	// (be sure to call the init function at the top of this file before)
 	saveHTMLDocument: function () {
-		try {
-			return this.saveDocumentEx(this.document, this.name);
-		} catch (ex) {
-			wpdCommon.addError("[wpdDOMSaver.saveHTMLDocument]", ex);
-		}
+		return this.saveDocumentEx(this.document, this.name);
 	}
 
 };
