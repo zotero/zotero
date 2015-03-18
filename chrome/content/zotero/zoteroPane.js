@@ -4063,6 +4063,13 @@ var ZoteroPane = new function()
 			if(!el) return;
 			var elValues = serializedValues[id];
 			for(var attr in elValues) {
+				// TEMP: For now, ignore persisted collapsed state for item pane splitter
+				if (el.id == 'zotero-items-splitter') continue;
+				// And don't restore to min-width if splitter was collapsed
+				if (el.id == 'zotero-item-pane' && attr == 'width' && elValues[attr] == 250
+						&& serializedValues['zotero-items-splitter'].state == 'collapsed') {
+					continue;
+				}
 				el.setAttribute(attr, elValues[attr]);
 			}
 		}
