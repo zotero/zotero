@@ -28,7 +28,7 @@ Zotero.Sync.Storage.QueueManager = new function () {
 	var _queues = {};
 	var _currentQueues = [];
 	
-	this.start = function (libraryID) {
+	this.start = Zotero.Promise.coroutine(function* (libraryID) {
 		if (libraryID) {
 			var queues = this.getAll(libraryID);
 			var suffix = " for library " + libraryID;
@@ -53,27 +53,27 @@ Zotero.Sync.Storage.QueueManager = new function () {
 			Zotero.debug("No files to sync" + suffix);
 		}
 		
-		return Zotero.Promise.allSettled(promises)
-		.then(function (results) {
-			Zotero.debug("All storage queues are finished" + suffix);
-			
-			results.forEach(function (result) {
-				// Check for conflicts to resolve
-				if (result.state == "fulfilled") {
-					result = result.value;
-					if (result.conflicts.length) {
-						Zotero.debug("Reconciling conflicts for library " + result.libraryID);
-						Zotero.debug(result.conflicts);
-						var data = _reconcileConflicts(result.conflicts);
-						if (data) {
-							_processMergeData(data);
-						}
+		var results = yield Zotero.Promise.allSettled(promises);
+		Zotero.debug("All storage queues are finished" + suffix);
+		
+		for (let i = 0; i < results.length; i++) {
+			let result = results[i];
+			// Check for conflicts to resolve
+			if (result.state == "fulfilled") {
+				result = result.value;
+				if (result.conflicts.length) {
+					Zotero.debug("Reconciling conflicts for library " + result.libraryID);
+					Zotero.debug(result.conflicts);
+					var data = yield _reconcileConflicts(result.conflicts);
+					if (data) {
+						_processMergeData(data);
 					}
 				}
-			});
-			return promises;
-		});
-	};
+			}
+		}
+		
+		return promises;
+	});
 	
 	this.stop = function (libraryID) {
 		if (libraryID) {
