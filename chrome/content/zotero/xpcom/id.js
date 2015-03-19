@@ -53,6 +53,7 @@ Zotero.ID_Tracker = function () {
 			//
 			// Callers need to handle a potential NULL for these unless they
 			// pass |notNull|
+			case 'libraries':
 			case 'items':
 			case 'creators':
 			case 'creatorData':
@@ -138,6 +139,7 @@ Zotero.ID_Tracker = function () {
 			case 'creatorData':
 			case 'itemDataValues':
 			case 'items':
+			case 'libraries':
 			case 'savedSearches':
 			case 'tags':
 			case 'customItemTypes':
@@ -241,6 +243,7 @@ Zotero.ID_Tracker = function () {
 			case 'tags':
 				break;
 			
+			case 'libraries':
 			case 'collections':
 			case 'savedSearches':
 			case 'customItemTypes':
@@ -326,6 +329,9 @@ Zotero.ID_Tracker = function () {
 	
 	function _getTableColumn(table) {
 		switch (table) {
+			case 'libraries':
+				return 'libraryID';
+			
 			case 'itemDataValues':
 				return 'valueID';
 			
