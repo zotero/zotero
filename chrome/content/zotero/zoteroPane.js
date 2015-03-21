@@ -1610,7 +1610,13 @@ var ZoteroPane = new function()
 			var prompt = (force && !fromMenu) ? false : toTrash;
 		}
 		else if (itemGroup.isCollection()) {
-			// In collection, only prompt if trashing
+			
+			// Ignore unmodified action if only child items are selected
+			if (!force && this.itemsView.getSelectedItems().every(item => !item.isTopLevelItem())) {
+				return;
+			}
+			
+			// In collection
 			var prompt = force ? toTrash : toRemove;
 		}
 		else if (itemGroup.isSearch() || itemGroup.isUnfiled() || itemGroup.isDuplicates()) {
