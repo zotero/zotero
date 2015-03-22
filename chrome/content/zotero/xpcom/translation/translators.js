@@ -38,11 +38,6 @@ Zotero.Translators = new function() {
 	 * Initializes translator cache, loading all translator metadata into memory
 	 */
 	this.reinit = Zotero.Promise.coroutine(function* () {
-		if (_initialized) {
-			Zotero.debug("Translators already initialized", 2);
-			return;
-		}
-		
 		Zotero.debug("Initializing translators");
 		var start = new Date;
 		_initialized = true;
@@ -80,7 +75,6 @@ Zotero.Translators = new function() {
 					else {
 						lastModifiedTime = (yield OS.File.stat(path)).lastModificationDate.getTime();
 					}
-					let lastModified
 					
 					var dbCacheEntry = false;
 					if (dbCache[fileName]) {
@@ -90,12 +84,12 @@ Zotero.Translators = new function() {
 						}
 					}
 					
+					// Get JSON from cache if possible
 					if(dbCacheEntry) {
-						// get JSON from cache if possible
 						var translator = Zotero.Translators.load(dbCacheEntry.metadataJSON, path);
-						filesInCache[fileName] = true;
-					} else {
-						// otherwise, load from file
+					}
+					// Otherwise, load from file
+					else {
 						var translator = yield Zotero.Translators.loadFromFile(path);
 					}
 					
@@ -105,28 +99,42 @@ Zotero.Translators = new function() {
 						continue;
 					}
 					
+					// Check if there's already a cached translator with the same id
 					if (_translators[translator.translatorID]) {
-						// same translator is already cached
-						translator.logError('Translator with ID '+
-							translator.translatorID+' already loaded from "'+
-							_translators[translator.translatorID].fileName + '"');
-					} else {
-						// add to cache
-						_translators[translator.translatorID] = translator;
-						for(var type in TRANSLATOR_TYPES) {
-							if(translator.translatorType & TRANSLATOR_TYPES[type]) {
-								_cache[type].push(translator);
-							}
+						let existingTranslator = _translators[translator.translatorID];
+						// If cached translator is older, delete it
+						if (existingTranslator.lastUpdated < translator.lastUpdated) {
+							translator.logError("Deleting older translator "
+								+ existingTranslator.fileName + " with same ID as "
+								+ translator.fileName);
+							yield OS.File.remove(existingTranslator.path);
+							delete _translators[translator.translatorID];
 						}
-						
-						if (!dbCacheEntry) {
-							yield Zotero.Translators.cacheInDB(
-								fileName,
-								translator.serialize(TRANSLATOR_REQUIRED_PROPERTIES.
-													 concat(TRANSLATOR_OPTIONAL_PROPERTIES)),
-								lastModifiedTime
-							);
+						// If cached translator is newer or the same, delete the current one
+						else {
+							translator.logError("Translator " + existingTranslator.fileName
+								+ " with same ID is already loaded -- deleting "
+								+ translator.fileName);
+							yield OS.File.remove(translator.path);
+							continue;
 						}
+					}
+					
+					// add to cache
+					_translators[translator.translatorID] = translator;
+					for (let type in TRANSLATOR_TYPES) {
+						if (translator.translatorType & TRANSLATOR_TYPES[type]) {
+							_cache[type].push(translator);
+						}
+					}
+					
+					if (!dbCacheEntry) {
+						yield Zotero.Translators.cacheInDB(
+							fileName,
+							translator.serialize(TRANSLATOR_REQUIRED_PROPERTIES.
+												 concat(TRANSLATOR_OPTIONAL_PROPERTIES)),
+							lastModifiedTime
+						);
 					}
 					
 					numCached++;
@@ -137,7 +145,7 @@ Zotero.Translators = new function() {
 			iterator.close();
 		}
 		
-		// Remove translators from DB as necessary
+		// Remove translators from DB cache if no file
 		for (let fileName in dbCache) {
 			if (!filesInCache[fileName]) {
 				yield Zotero.DB.queryAsync(
@@ -358,15 +366,15 @@ Zotero.Translators = new function() {
 	 * @param	{String}		code
 	 * @return	{Promise<nsIFile>}
 	 */
-	this.save = function(metadata, code) {
+	this.save = Zotero.Promise.coroutine(function* (metadata, code) {
 		if (!metadata.translatorID) {
 			throw ("metadata.translatorID not provided in Zotero.Translators.save()");
 		}
 		
 		if (!metadata.translatorType) {
 			var found = false;
-			for each(var type in TRANSLATOR_TYPES) {
-				if (metadata.translatorType & type) {
+			for (let type in TRANSLATOR_TYPES) {
+				if (metadata.translatorType & TRANSLATOR_TYPES[type]) {
 					found = true;
 					break;
 				}
@@ -377,26 +385,25 @@ Zotero.Translators = new function() {
 		}
 		
 		if (!metadata.label) {
-			throw ("metadata.label not provided in Zotero.Translators.save()");
+			throw new Error("metadata.label not provided");
 		}
 		
 		if (!metadata.priority) {
-			throw ("metadata.priority not provided in Zotero.Translators.save()");
+			throw new Error("metadata.priority not provided");
 		}
 		
 		if (!metadata.lastUpdated) {
-			throw ("metadata.lastUpdated not provided in Zotero.Translators.save()");
+			throw new Error("metadata.lastUpdated not provided");
 		}
 		
 		if (!code) {
-			throw ("code not provided in Zotero.Translators.save()");
+			throw new Error("code not provided");
 		}
 		
 		var fileName = Zotero.Translators.getFileNameFromLabel(
 			metadata.label, metadata.translatorID
 		);
-		var destFile = Zotero.getTranslatorsDirectory();
-		destFile.append(fileName);
+		var destFile = OS.Path.join(Zotero.getTranslatorsDirectory().path, fileName);
 		
 		// JSON.stringify has the benefit of indenting JSON
 		var metadataJSON = JSON.stringify(metadata, null, "\t");
@@ -404,38 +411,23 @@ Zotero.Translators = new function() {
 		var str = metadataJSON + "\n\n" + code,
 			translator;
 		
-		return Zotero.Translators.get(metadata.translatorID)
-		.then(function(gTranslator) {
-			translator = gTranslator;
-			var sameFile = translator && destFile.equals(translator.file);
-			if (sameFile) return;
-			
-			return Zotero.Promise.resolve(OS.File.exists(destFile.path))
-			.then(function (exists) {
-				if (exists) {
-					var msg = "Overwriting translator with same filename '"
-						+ fileName + "'";
-					Zotero.debug(msg, 1);
-					Zotero.debug(metadata, 1);
-					Components.utils.reportError(msg);
-				}
-			});
-		})
-		.then(function () {
-			if (!translator) return;
-			
-			return Zotero.Promise.resolve(OS.File.exists(translator.file.path))
-			.then(function (exists) {
-				translator.file.remove(false);
-			});
-		})
-		.then(function () {
-			Zotero.debug("Saving translator '" + metadata.label + "'");
-			Zotero.debug(str);
-			return Zotero.File.putContentsAsync(destFile, str)
-			.thenResolve(destFile);
-		});
-	}
+		var translator = Zotero.Translators.get(metadata.translatorID);
+		var sameFile = translator && destFile == translator.path;
+		if (sameFile) return;
+		
+		var exists = yield OS.File.exists(destFile);
+		if (exists) {
+			var msg = "Overwriting translator with same filename '"
+				+ fileName + "'";
+			Zotero.debug(msg, 1);
+			Zotero.debug(metadata, 1);
+			Components.utils.reportError(msg);
+		}
+		
+		Zotero.debug("Saving translator '" + metadata.label + "'");
+		Zotero.debug(metadata);
+		return Zotero.File.putContentsAsync(destFile, str).return(destFile);
+	});
 	
 	this.cacheInDB = function(fileName, metadataJSON, lastModifiedTime) {
 		return Zotero.DB.queryAsync(

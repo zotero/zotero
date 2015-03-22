@@ -1011,7 +1011,7 @@ Zotero.Schema = new function(){
 		var lastUpdated = yield this.getDBVersion('repository');
 		
 		try {
-			var url = ZOTERO_CONFIG.REPOSITORY_URL + '/updated?'
+			var url = ZOTERO_CONFIG.REPOSITORY_URL + 'updated?'
 				+ (lastUpdated ? 'last=' + lastUpdated + '&' : '')
 				+ 'version=' + Zotero.version;
 			
@@ -1669,7 +1669,7 @@ Zotero.Schema = new function(){
 	 *
 	 * @return {Promise}
 	 */
-	function _translatorXMLToFile(xmlnode) {
+	var _translatorXMLToFile = Zotero.Promise.coroutine(function* (xmlnode) {
 		// Don't split >4K chunks into multiple nodes
 		// https://bugzilla.mozilla.org/show_bug.cgi?id=194231
 		xmlnode.normalize();
@@ -1678,9 +1678,9 @@ Zotero.Schema = new function(){
 		
 		// Delete local version of remote translators with priority 0
 		if (xmlnode.getElementsByTagName('priority')[0].firstChild.nodeValue === "0") {
-			if (translator && translator.file.exists()) {
+			if (translator && (yield OS.File.exists(translator.path))) {
 				Zotero.debug("Deleting translator '" + translator.label + "'");
-				translator.file.remove(false);
+				yield OS.File.remove(translator.path);
 			}
 			return false;
 		}
@@ -1707,7 +1707,7 @@ Zotero.Schema = new function(){
 			metadata.browserSupport = browserSupport;
 		}
 		
-		for each(var attr in ["configOptions", "displayOptions", "hiddenPrefs"]) {
+		for (let attr of ["configOptions", "displayOptions", "hiddenPrefs"]) {
 			try {
 				var tags = xmlnode.getElementsByTagName(attr);
 				if(tags.length && tags[0].firstChild) {
@@ -1730,14 +1730,14 @@ Zotero.Schema = new function(){
 		code = (detectCode ? detectCode + "\n\n" : "") + code;
 		
 		return Zotero.Translators.save(metadata, code);
-	}
+	});
 	
 	
 	/**
 	 * Traverse an XML style node from the repository and
 	 * update the local styles folder with the style data
 	 */
-	function _styleXMLToFile(xmlnode) {
+	var _styleXMLToFile = Zotero.Promise.coroutine(function* (xmlnode) {
 		// Don't split >4K chunks into multiple nodes
 		// https://bugzilla.mozilla.org/show_bug.cgi?id=194231
 		xmlnode.normalize();
@@ -1749,7 +1749,7 @@ Zotero.Schema = new function(){
 		if (!xmlnode.firstChild) {
 			var style = Zotero.Styles.get(uri);
 			if (style) {
-				style.file.remove(null);
+				yield OS.File.remove(style.path);
 			}
 			return;
 		}
@@ -1758,19 +1758,17 @@ Zotero.Schema = new function(){
 		var oldID = xmlnode.getAttribute('oldID');
 		if (oldID) {
 			var style = Zotero.Styles.get(oldID, true);
-			if (style && style.file.exists()) {
+			if (style && (yield OS.File.exists(style.path))) {
 				Zotero.debug("Deleting renamed style '" + oldID + "'");
-				style.file.remove(false);
+				yield OS.File.remove(style.path);
 			}
 		}
 		
 		var str = xmlnode.firstChild.nodeValue;
 		var style = Zotero.Styles.get(uri);
 		if (style) {
-			if (style.file.exists()) {
-				style.file.remove(false);
-			}
-			var destFile = style.file;
+			yield Zotero.File.removeIfExists(style.path);
+			var destFile = style.path;
 		}
 		else {
 			// Get last part of URI for filename
@@ -1778,17 +1776,19 @@ Zotero.Schema = new function(){
 			if (!matches) {
 				throw ("Invalid style URI '" + uri + "' from repository");
 			}
-			var destFile = Zotero.getStylesDirectory();
-			destFile.append(matches[1] + ".csl");
-			if (destFile.exists()) {
-				throw ("Different style with filename '" + matches[1]
-					+ "' already exists in Zotero.Schema._styleXMLToFile()");
+			var destFile = OS.Path.join(
+				Zotero.getStylesDirectory().path,
+				matches[1] + ".csl"
+			);
+			if (yield OS.File.exists(destFile)) {
+				throw new Error("Different style with filename '" + matches[1]
+					+ "' already exists");
 			}
 		}
 		
 		Zotero.debug("Saving style '" + uri + "'");
 		return Zotero.File.putContentsAsync(destFile, str);
-	}
+	});
 	
 	
 	// TODO
