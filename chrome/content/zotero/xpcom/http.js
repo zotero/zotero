@@ -46,9 +46,14 @@ Zotero.HTTP = new function() {
 		return this.message;
 	};
 	
+	this.promise = function () {
+		Zotero.debug("Zotero.HTTP.promise() is deprecated -- use Zotero.HTTP.request()", 2);
+		return this.request.apply(this, arguments);
+	}
+	
 	/**
 	 * Get a promise for a HTTP request
-	 * 
+	 *
 	 * @param {String} method The method of the request ("GET", "POST", "HEAD", or "OPTIONS")
 	 * @param {nsIURI|String}	url				URL to request
 	 * @param {Object} [options] Options for HTTP request:<ul>
@@ -69,7 +74,7 @@ Zotero.HTTP = new function() {
 	 *     succeeds, or rejected if the browser is offline or a non-2XX status response
 	 *     code is received (or a code not in options.successCodes if provided).
 	 */
-	this.promise = function promise(method, url, options) {
+	this.request = function (method, url, options) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
 			var dispURL = this.getDisplayURI(url).spec;
