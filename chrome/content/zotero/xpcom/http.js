@@ -75,6 +75,8 @@ Zotero.HTTP = new function() {
 	 *     code is received (or a code not in options.successCodes if provided).
 	 */
 	this.request = function (method, url, options) {
+		options = options || {};
+		
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
 			var dispURL = this.getDisplayURI(url).spec;
@@ -87,7 +89,7 @@ Zotero.HTTP = new function() {
 		// Don't display API key in console
 		dispURL = dispURL.replace(/key=[^&]+&?/, "").replace(/\?$/, "");
 		
-		if(options && options.body) {
+		if (options.body) {
 			var bodyStart = options.body.substr(0, 1024);
 			// Don't display sync password or session id in console
 			bodyStart = bodyStart.replace(/password=[^&]+/, 'password=********');
@@ -114,13 +116,13 @@ Zotero.HTTP = new function() {
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 					.createInstance();
 		// Prevent certificate/authentication dialogs from popping up
-		if (!options || !options.foreground) {
+		if (!options.foreground) {
 			xmlhttp.mozBackgroundRequest = true;
 		}
 		xmlhttp.open(method, url, true);
 		
 		// Pass the request to a callback
-		if (options && options.requestObserver) {
+		if (options.requestObserver) {
 			options.requestObserver(xmlhttp);
 		}
 		
@@ -138,24 +140,24 @@ Zotero.HTTP = new function() {
 			channel.forceAllowThirdPartyCookie = true;
 			
 			// Set charset
-			if (options && options.responseCharset) {
+			if (options.responseCharset) {
 				channel.contentCharset = responseCharset;
 			}
 			
 			// Disable caching if requested
-			if(options && options.dontCache) {
+			if (options.dontCache) {
 				channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 			}
 		}
 
 		// Set responseType
-		if(options && options.responseType) {
+		if (options.responseType) {
 			xmlhttp.responseType = options.responseType;
 		}
 		
 		// Send headers
 		var headers = (options && options.headers) || {};
-		if (options && options.body && !headers["Content-Type"]) {
+		if (options.body && !headers["Content-Type"]) {
 			headers["Content-Type"] = "application/x-www-form-urlencoded";
 		}
 		if (options.debug) {
@@ -168,11 +170,11 @@ Zotero.HTTP = new function() {
 		xmlhttp.onloadend = function() {
 			var status = xmlhttp.status;
 			
-			if (options && options.successCodes) {
+			if (options.successCodes) {
 				var success = options.successCodes.indexOf(status) != -1;
 			}
 			// Explicit FALSE means allow any status code
-			else if (options && options.successCodes === false) {
+			else if (options.successCodes === false) {
 				var success = true;
 			}
 			else if(isFile) {
@@ -183,7 +185,7 @@ Zotero.HTTP = new function() {
 			}
 			
 			if(success) {
-				if (options && options.debug) {
+				if (options.debug) {
 					Zotero.debug("HTTP " + method + " " + dispURL
 						+ " succeeded with " + xmlhttp.status);
 					Zotero.debug(xmlhttp.responseText);
@@ -193,18 +195,18 @@ Zotero.HTTP = new function() {
 				var msg = "HTTP " + method + " " + dispURL + " failed: "
 					+ "Unexpected status code " + xmlhttp.status;
 				Zotero.debug(msg, 1);
-				if (options && options.debug) {
+				if (options.debug) {
 					Zotero.debug(xmlhttp.responseText);
 				}
 				deferred.reject(new Zotero.HTTP.UnexpectedStatusException(xmlhttp, msg));
 			}
 		};
 		
-		if(options && options.cookieSandbox) {
+		if (options.cookieSandbox) {
 			options.cookieSandbox.attachToInterfaceRequestor(xmlhttp);
 		}
 		
-		xmlhttp.send((options && options.body) || null);
+		xmlhttp.send(options.body || null);
 		
 		return deferred.promise;
 	};
