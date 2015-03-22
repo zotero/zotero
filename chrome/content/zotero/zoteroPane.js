@@ -897,7 +897,8 @@ var ZoteroPane = new function()
 		}
 		
 		var newids = [];
-		for each(var id in ids) {
+		for (let i = 0; i < ids.length; i++) {
+			let id = ids[i];
 			id = parseInt(id);
 			if (isNaN(id)) {
 				continue;
@@ -1442,7 +1443,7 @@ var ZoteroPane = new function()
 		var disabled = !this.canEdit() || !(items.length == 1 && items[0].isRegularItem());
 		
 		if (disabled) {
-			for each(var node in popup.childNodes) {
+			for (let node of popup.childNodes) {
 				node.disabled = true;
 			}
 			return;
@@ -1611,7 +1612,12 @@ var ZoteroPane = new function()
 			var prompt = (force && !fromMenu) ? false : toTrash;
 		}
 		else if (collectionTreeRow.isCollection()) {
-			// In collection, only prompt if trashing
+			
+			// Ignore unmodified action if only child items are selected
+			if (!force && this.itemsView.getSelectedItems().every(item => !item.isTopLevelItem())) {
+				return;
+			}
+			
 			var prompt = force ? toTrash : toRemove;
 		}
 		else if (collectionTreeRow.isSearch() || collectionTreeRow.isUnfiled() || collectionTreeRow.isDuplicates()) {
@@ -1859,7 +1865,8 @@ var ZoteroPane = new function()
 		// automatically converting text/html to plaintext rather than using
 		// text/unicode. (That may be fixable, however.)
 		var canCopy = false;
-		for each(var item in items) {
+		for (let i = 0; i < items.length; i++) {
+			let item = items[i];
 			if (item.isRegularItem()) {
 				canCopy = true;
 				break;
@@ -2166,9 +2173,8 @@ var ZoteroPane = new function()
 		];
 		
 		var m = {};
-		var i = 0;
-		for each(var option in options) {
-			m[option] = i++;
+		for (let i = 0; i < options.length; i++) {
+			m[options[i]] = i;
 		}
 		
 		var menu = document.getElementById('zotero-collectionmenu');
@@ -2275,7 +2281,8 @@ var ZoteroPane = new function()
 		}
 		
 		// Hide and enable all actions by default (so if they're shown they're enabled)
-		for each(var pos in m) {
+		for (let i in m) {
+			let pos = m[i];
 			menu.childNodes[pos].setAttribute('hidden', true);
 			menu.childNodes[pos].setAttribute('disabled', false);
 		}
@@ -2315,9 +2322,8 @@ var ZoteroPane = new function()
 		];
 		
 		var m = {};
-		var i = 0;
-		for each(var option in options) {
-			m[option] = i++;
+		for (let i = 0; i < options.length; i++) {
+			m[options[i]] = i;
 		}
 		
 		var menu = document.getElementById('zotero-itemmenu');
@@ -2355,7 +2361,8 @@ var ZoteroPane = new function()
 					canIndex = false;
 				}
 				
-				for each(var item in items) {
+				for (let i = 0; i < items.length; i++) {
+					let item = items[i];
 					if (canMerge && !item.isRegularItem() || collectionTreeRow.isDuplicates()) {
 						canMerge = false;
 					}
@@ -2387,7 +2394,8 @@ var ZoteroPane = new function()
 				}
 				
 				var canCreateParent = true;
-				for each(var item in items) {
+				for (let i = 0; i < items.length; i++) {
+					let item = items[i];
 					if (!item.isTopLevelItem() || !item.isAttachment()) {
 						canCreateParent = false;
 						break;
@@ -2485,10 +2493,9 @@ var ZoteroPane = new function()
 				
 				// Block certain actions on files if no access
 				if (item.isImportedAttachment() && !collectionTreeRow.filesEditable) {
-					var d = [m.deleteFromLibrary, m.createParent, m.renameAttachments];
-					for each(var val in d) {
-						disable.push(val);
-					}
+					[m.deleteFromLibrary, m.createParent, m.renameAttachments].forEach(function (x) {
+						disable.push(x);
+					});
 				}
 			}
 		}
@@ -2540,7 +2547,8 @@ var ZoteroPane = new function()
 		menu.childNodes[m.reindexItem].setAttribute('label', Zotero.getString('pane.items.menu.reindexItem' + multiple));
 		
 		// Hide and enable all actions by default (so if they're shown they're enabled)
-		for each(var pos in m) {
+		for (let i in m) {
+			let pos = m[i];
 			menu.childNodes[pos].setAttribute('hidden', true);
 			menu.childNodes[pos].setAttribute('disabled', false);
 		}
@@ -2837,7 +2845,8 @@ var ZoteroPane = new function()
 			uris = [uris];
 		}
 		
-		for each(var uri in uris) {
+		for (let i = 0; i < uris.length; i++) {
+			let uri = uris[i];
 			// Ignore javascript: and data: URIs
 			if (uri.match(/^(javascript|data):/)) {
 				return;
@@ -2992,7 +3001,7 @@ var ZoteroPane = new function()
 			var collectionTreeRow = self.collectionsView.selectedTreeRow;
 			disabled = !collectionTreeRow.editable;
 		}
-		for each(var menuitem in menu.firstChild.childNodes) {
+		for (let menuitem of menu.firstChild.childNodes) {
 			menuitem.disabled = disabled;
 		}
 	}
@@ -3527,7 +3536,8 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		for each(var item in items) {
+		for (let i = 0; i < items.length; i++) {
+			let item = items[i];
 			if (item.isRegularItem()) {
 				// Prefer local file attachments
 				var uri = Components.classes["@mozilla.org/network/standard-url;1"]
@@ -3594,7 +3604,8 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		for each(var itemID in itemIDs) {
+		for (let i = 0; i < itemIDs.length; i++) {
+			let itemID = itemIDs[i];
 			var item = yield Zotero.Items.getAsync(itemID);
 			if (!item.isAttachment()) {
 				throw new Error("Item " + itemID + " is not an attachment");
@@ -4165,6 +4176,14 @@ var ZoteroPane = new function()
 			if(!el) return;
 			var elValues = serializedValues[id];
 			for(var attr in elValues) {
+				// TEMP: For now, ignore persisted collapsed state for item pane splitter
+				if (el.id == 'zotero-items-splitter') continue;
+				// And don't restore to min-width if splitter was collapsed
+				if (el.id == 'zotero-item-pane' && attr == 'width' && elValues[attr] == 250
+						&& 'zotero-items-splitter' in serializedValues
+						&& serializedValues['zotero-items-splitter'].state == 'collapsed') {
+					continue;
+				}
 				el.setAttribute(attr, elValues[attr]);
 			}
 		}
@@ -4183,12 +4202,12 @@ var ZoteroPane = new function()
 	this.serializePersist = function() {
 		if(!_unserialized) return;
 		var serializedValues = {};
-		for each(var el in document.getElementsByAttribute("zotero-persist", "*")) {
+		for (let el of document.getElementsByAttribute("zotero-persist", "*")) {
 			if(!el.getAttribute) continue;
 			var id = el.getAttribute("id");
 			if(!id) continue;
 			var elValues = {};
-			for each(var attr in el.getAttribute("zotero-persist").split(/[\s,]+/)) {
+			for (let attr of el.getAttribute("zotero-persist").split(/[\s,]+/)) {
 				var attrValue = el.getAttribute(attr);
 				elValues[attr] = attrValue;
 			}
@@ -4282,10 +4301,10 @@ var ZoteroPane = new function()
 		"observe":function(aSubject, aTopic, aData) {
 			if(aTopic == "zotero-reloaded") {
 				Zotero.debug("Reloading Zotero pane");
-				for each(var func in _reloadFunctions) func(aData);
+				for (let func of _reloadFunctions) func(aData);
 			} else if(aTopic == "zotero-before-reload") {
 				Zotero.debug("Zotero pane caught before-reload event");
-				for each(var func in _beforeReloadFunctions) func(aData);
+				for (let func of _beforeReloadFunctions) func(aData);
 			}
 		}
 	};

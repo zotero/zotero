@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "詳細">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "ファイルとフォルダ">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "ショートカット">
 
 <!ENTITY zotero.preferences.prefpane.locate "所在確認">
 <!ENTITY zotero.preferences.locate.locateEngineManager "所在確認エンジンの管理">
