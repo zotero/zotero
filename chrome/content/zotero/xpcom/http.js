@@ -158,6 +158,9 @@ Zotero.HTTP = new function() {
 		if (options && options.body && !headers["Content-Type"]) {
 			headers["Content-Type"] = "application/x-www-form-urlencoded";
 		}
+		if (options.debug) {
+			Zotero.debug(headers);
+		}
 		for (var header in headers) {
 			xmlhttp.setRequestHeader(header, headers[header]);
 		}
