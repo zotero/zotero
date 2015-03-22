@@ -28,7 +28,6 @@
  * @namespace
  */
 Zotero.File = new function(){
-	//Components.utils.import("resource://zotero/bluebird.js");
 	Components.utils.import("resource://gre/modules/NetUtil.jsm");
 	Components.utils.import("resource://gre/modules/FileUtils.jsm");
 	
@@ -44,15 +43,20 @@ Zotero.File = new function(){
 	
 	this.pathToFile = function (pathOrFile) {
 		if (typeof pathOrFile == 'string') {
-			let nsIFile = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
-			nsIFile.initWithPath(pathOrFile);
-			return nsIFile;
+			return new FileUtils.File(pathOrFile);
 		}
 		else if (pathOrFile instanceof Ci.nsIFile) {
 			return pathOrFile;
 		}
-		
-		throw new Error('Unexpected value provided to Zotero.MIME.pathToFile() (' + pathOrFile + ')');
+		throw new Error('Unexpected value provided to Zotero.File.pathToFile() (' + pathOrFile + ')');
+	}
+	
+	
+	this.pathToFileURI = function (path) {
+		var file = new FileUtils.File(path);
+		var ios = Components.classes["@mozilla.org/network/io-service;1"]
+			.getService(Components.interfaces.nsIIOService);
+		return ios.newFileURI(file).spec;
 	}
 	
 	
@@ -133,7 +137,7 @@ Zotero.File = new function(){
 	
 	/**
 	 * Get the contents of a file or input stream
-	 * @param {nsIFile|nsIInputStream} file The file to read
+	 * @param {nsIFile|nsIInputStream|string path} file The file to read
 	 * @param {String} [charset] The character set; defaults to UTF-8
 	 * @param {Integer} [maxLength] The maximum number of bytes to read
 	 * @return {String} The contents of the file
@@ -141,6 +145,11 @@ Zotero.File = new function(){
 	 */
 	this.getContents = function (file, charset, maxLength){
 		var fis;
+		
+		if (typeof file == 'string') {
+			file = new FileUtils.File(file);
+		}
+		
 		if(file instanceof Components.interfaces.nsIInputStream) {
 			fis = file;
 		} else if(file instanceof Components.interfaces.nsIFile) {
@@ -282,7 +291,7 @@ Zotero.File = new function(){
 	 * Return a promise for the contents of a URL as a string
 	 */
 	this.getContentsFromURLAsync = function (url) {
-		return Zotero.HTTP.promise("GET", url, { responseType: "text" })
+		return Zotero.HTTP.request("GET", url, { responseType: "text" })
 		.then(function (xmlhttp) {
 			return xmlhttp.response;
 		});
@@ -364,16 +373,16 @@ Zotero.File = new function(){
 	/**
 	 * Delete a file if it exists, asynchronously
 	 *
-	 * @return {Promise<Boolean>} A Q promise for TRUE if file was deleted,
-	 *                            FALSE if missing
+	 * @return {Promise<Boolean>} A promise for TRUE if file was deleted, FALSE if missing
 	 */
-	this.deleteIfExists = function deleteIfExists(path) {
+	this.removeIfExists = function (path) {
 		return Zotero.Promise.resolve(OS.File.remove(path))
-		.thenResolve(true)
+		.return(true)
 		.catch(function (e) {
 			if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
 				return false;
 			}
+			Zotero.debug(path, 1);
 			throw e;
 		});
 	}
@@ -572,6 +581,19 @@ Zotero.File = new function(){
 			}
 			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
 		}
+	}
+	
+	
+	this.createDirectoryIfMissingAsync = function (path) {
+		return Zotero.Promise.resolve(
+			OS.File.makeDir(
+				path,
+				{
+					ignoreExisting: true,
+					unixMode: 0755
+				}
+			)
+		);
 	}
 	
 	

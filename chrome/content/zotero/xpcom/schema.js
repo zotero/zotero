@@ -71,7 +71,7 @@ Zotero.Schema = new function(){
 	/*
 	 * Checks if the DB schema exists and is up-to-date, updating if necessary
 	 */
-	this.updateSchema = function () {
+	this.updateSchema = Zotero.Promise.coroutine(function* () {
 		// TODO: Check database integrity first with Zotero.DB.integrityCheck()
 		
 		// 'userdata' is the last upgrade step run in _migrateUserDataSchema() based on the
@@ -79,107 +79,104 @@ Zotero.Schema = new function(){
 		//
 		// 'compatibility' is incremented manually by upgrade steps in order to break DB
 		// compatibility with older versions.
-		return Zotero.Promise.all([this.getDBVersion('userdata'), this.getDBVersion('compatibility')])
-		.spread(function (userdata, compatibility) {
-			if (!userdata) {
-				Zotero.debug('Database does not exist -- creating\n');
-				return _initializeSchema()
-				.then(function() {
+		var versions = yield Zotero.Promise.all([
+			this.getDBVersion('userdata'), this.getDBVersion('compatibility')
+		]);
+		var [userdata, compatibility] = versions;
+		if (!userdata) {
+			Zotero.debug('Database does not exist -- creating\n');
+			return _initializeSchema()
+			.then(function() {
+				Zotero.initializationPromise
+				.then(1000)
+				.then(function () {
+					return Zotero.Schema.updateBundledFiles();
+				})
+				.then(function () {
 					return _schemaUpdateDeferred.resolve(true);
 				});
-			}
-			
-			// We don't handle upgrades from pre-Zotero 2.1 databases
-			if (userdata < 76) {
-				let msg = Zotero.getString('upgrade.nonupgradeableDB1')
-					+ "\n\n" + Zotero.getString('upgrade.nonupgradeableDB2', "4.0");
-				throw new Error(msg);
-			}
-			
-			if (compatibility > _maxCompatibility) {
-				throw new Error("Database is incompatible this Zotero version "
-					+ "(" + compatibility + " > "  + _maxCompatibility + ")");
-			}
-			
-			return _getSchemaSQLVersion('userdata')
-			// If upgrading userdata, make backup of database first
-			.then(function (schemaVersion) {
-				if (userdata < schemaVersion) {
-					return Zotero.DB.backupDatabase(userdata, true);
-				}
-			})
-			.then(function () {
-				return Zotero.DB.executeTransaction(function* (conn) {
-					var updated = yield _updateSchema('system');
-					
-					// Update custom tables if they exist so that changes are in
-					// place before user data migration
-					if (Zotero.DB.tableExists('customItemTypes')) {
-						yield Zotero.Schema.updateCustomTables(updated);
-					}
-					updated = yield _migrateUserDataSchema(userdata);
-					yield _updateSchema('triggers');
-					
-					return updated;
-				}.bind(this))
-				.then(function (updated) {
-					// Populate combined tables for custom types and fields
-					// -- this is likely temporary
-					//
-					// We do this even if updated in case custom fields were
-					// changed during user data migration
-					return Zotero.Schema.updateCustomTables()
-					.then(function () {
-						if (updated) {
-							// Upgrade seems to have been a success -- delete any previous backups
-							var maxPrevious = userdata - 1;
-							var file = Zotero.getZoteroDirectory();
-							var toDelete = [];
-							try {
-								var files = file.directoryEntries;
-								while (files.hasMoreElements()) {
-									var file = files.getNext();
-									file.QueryInterface(Components.interfaces.nsIFile);
-									if (file.isDirectory()) {
-										continue;
-									}
-									var matches = file.leafName.match(/zotero\.sqlite\.([0-9]{2,})\.bak/);
-									if (!matches) {
-										continue;
-									}
-									if (matches[1]>=28 && matches[1]<=maxPrevious) {
-										toDelete.push(file);
-									}
-								}
-								for each(var file in toDelete) {
-									Zotero.debug('Removing previous backup file ' + file.leafName);
-									file.remove(false);
-								}
-							}
-							catch (e) {
-								Zotero.debug(e);
-							}
-						}
-						
-						// After a delay, start update of bundled files and repo updates
-						//
-						// **************
-						// TEMP TEMP TEMP
-						// **************
-						//
-						/*Zotero.initializationPromise
-						.delay(5000)
-						.then(function () Zotero.Schema.updateBundledFiles(null, false, true))
-						.finally(function () {
-							_schemaUpdateDeferred.resolve(true);
-						})*/
-						
-						return updated;
-					});
-				});
 			});
+		}
+		
+		// We don't handle upgrades from pre-Zotero 2.1 databases
+		if (userdata < 76) {
+			let msg = Zotero.getString('upgrade.nonupgradeableDB1')
+				+ "\n\n" + Zotero.getString('upgrade.nonupgradeableDB2', "4.0");
+			throw new Error(msg);
+		}
+		
+		if (compatibility > _maxCompatibility) {
+			throw new Error("Database is incompatible this Zotero version "
+				+ "(" + compatibility + " > "  + _maxCompatibility + ")");
+		}
+		
+		var schemaVersion = yield _getSchemaSQLVersion('userdata');
+		
+		// If upgrading userdata, make backup of database first
+		if (userdata < schemaVersion) {
+			yield Zotero.DB.backupDatabase(userdata, true);
+		}
+		
+		var updated = yield Zotero.DB.executeTransaction(function* (conn) {
+			var updated = yield _updateSchema('system');
+			
+			// Update custom tables if they exist so that changes are in
+			// place before user data migration
+			if (Zotero.DB.tableExists('customItemTypes')) {
+				yield Zotero.Schema.updateCustomTables(updated);
+			}
+			updated = yield _migrateUserDataSchema(userdata);
+			yield _updateSchema('triggers');
+			
+			return updated;
+		}.bind(this));
+		
+		// Populate combined tables for custom types and fields
+		// -- this is likely temporary
+		//
+		// We do this even if updated in case custom fields were
+		// changed during user data migration
+		yield Zotero.Schema.updateCustomTables()
+		
+		if (updated) {
+			// Upgrade seems to have been a success -- delete any previous backups
+			var maxPrevious = userdata - 1;
+			var file = Zotero.getZoteroDirectory();
+			var toDelete = [];
+			try {
+				var files = file.directoryEntries;
+				while (files.hasMoreElements()) {
+					var file = files.getNext();
+					file.QueryInterface(Components.interfaces.nsIFile);
+					if (file.isDirectory()) {
+						continue;
+					}
+					var matches = file.leafName.match(/zotero\.sqlite\.([0-9]{2,})\.bak/);
+					if (!matches) {
+						continue;
+					}
+					if (matches[1]>=28 && matches[1]<=maxPrevious) {
+						toDelete.push(file);
+					}
+				}
+				for each(var file in toDelete) {
+					Zotero.debug('Removing previous backup file ' + file.leafName);
+					file.remove(false);
+				}
+			}
+			catch (e) {
+				Zotero.debug(e);
+			}
+		}
+		
+		Zotero.initializationPromise
+		.then(1000)
+		.then(function () {
+			return Zotero.Schema.updateBundledFiles();
 		});
-	}
+		
+		return updated;
+	});
 	
 	
 	// This is mostly temporary
@@ -393,95 +390,117 @@ Zotero.Schema = new function(){
 	 * Update styles and translators in data directory with versions from
 	 * ZIP file (XPI) or directory (source) in extension directory
 	 *
-	 * @param	{String}	[mode]					'translators' or 'styles'
-	 * @param	{Boolean}	[skipDeleteUpdated]		Skip updating of the file deleting version --
-	 *												since deleting uses a single version table key,
-	 * 												it should only be updated the last time through
+	 * @param {String} [mode] - 'translators' or 'styles'
 	 * @return {Promise}
 	 */
-	this.updateBundledFiles = function(mode, skipDeleteUpdate, runRemoteUpdateWhenComplete) {
-		if (_localUpdateInProgress) return Zotero.Promise.resolve();
+	this.updateBundledFiles = Zotero.Promise.coroutine(function* (mode) {
+		if (_localUpdateInProgress) {
+			Zotero.debug("Bundled file update already in progress", 2);
+			return;
+		}
 		
-		return Zotero.Promise.try(function () {
-			_localUpdateInProgress = true;
+		_localUpdateInProgress = true;
+		
+		try {
+			yield Zotero.proxyAuthComplete.delay(1000);
 			
-			// Get path to addon and then call updateBundledFilesCallback
+			// Get path to add-on
 			
 			// Synchronous in Standalone
 			if (Zotero.isStandalone) {
-				var jar = Components.classes["@mozilla.org/file/directory_service;1"]
+				var installLocation = Components.classes["@mozilla.org/file/directory_service;1"]
 					.getService(Components.interfaces.nsIProperties)
 					.get("AChrom", Components.interfaces.nsIFile).parent;
-				jar.append("zotero.jar");
-				return _updateBundledFilesCallback(jar, mode, skipDeleteUpdate);
+				installLocation.append("zotero.jar");
+			}
+			// Asynchronous in Firefox
+			else {
+				let resolve, reject;
+				let promise = new Zotero.Promise(function () {
+					resolve = arguments[0];
+					reject = arguments[1];
+				});
+				Components.utils.import("resource://gre/modules/AddonManager.jsm");
+				AddonManager.getAddonByID(
+					ZOTERO_CONFIG.GUID,
+					function (addon) {
+						try {
+							installLocation = addon.getResourceURI()
+								.QueryInterface(Components.interfaces.nsIFileURL).file;
+						}
+						catch (e) {
+							reject(e);
+							return;
+						}
+						resolve();
+					}
+				);
+				yield promise;
+			}
+			installLocation = installLocation.path;
+			
+			// Update files
+			switch (mode) {
+			case 'styles':
+				yield Zotero.Styles.init();
+				var updated = yield _updateBundledFilesAtLocation(installLocation, mode);
+			
+			case 'translators':
+				yield Zotero.Translators.init();
+				var updated = yield _updateBundledFilesAtLocation(installLocation, mode);
+			
+			default:
+				yield Zotero.Translators.init();
+				let up1 = yield _updateBundledFilesAtLocation(installLocation, 'translators', true);
+				yield Zotero.Styles.init();
+				let up2 = yield _updateBundledFilesAtLocation(installLocation, 'styles');
+				var updated = up1 || up2;
 			}
 			
-			// Asynchronous in Firefox
-			var deferred = Zotero.Promise.defer();
-			Components.utils.import("resource://gre/modules/AddonManager.jsm");
-			AddonManager.getAddonByID(
-				ZOTERO_CONFIG['GUID'],
-				function(addon) {
-					var up = _updateBundledFilesCallback(
-						addon.getResourceURI().QueryInterface(Components.interfaces.nsIFileURL).file,
-						mode,
-						skipDeleteUpdate
-					);
-					deferred.resolve(up);
-				}
-			);
-			return deferred.promise;
-		})
-		.then(function (updated) {
-			if (runRemoteUpdateWhenComplete) {
-				if (updated) {
-					if (Zotero.Prefs.get('automaticScraperUpdates')) {
-						Zotero.unlockPromise
-						.then(Zotero.proxyAuthComplete)
-						.delay(1000)
-						.then(function () Zotero.Schema.updateFromRepository(2))
-						.done();
-					}
-				}
-				else {
-					Zotero.unlockPromise
-					.then(Zotero.proxyAuthComplete)
-					.delay(1000)
-					.then(function () Zotero.Schema.updateFromRepository(false))
-					.done();
-				}
-			}
-		});
-	}
-	
-	/**
-	 * Callback to update bundled files, after finding the path to the Zotero install location
-	 */
-	function _updateBundledFilesCallback(installLocation, mode, skipDeleteUpdate) {
-		_localUpdateInProgress = false;
-		
-		if (!mode) {
-			var up1 = _updateBundledFilesCallback(installLocation, 'translators', true);
-			var up2 = _updateBundledFilesCallback(installLocation, 'styles', false);
-			return up1 || up2;
+			_schemaUpdateDeferred.resolve(true);
+		}
+		finally {
+			_localUpdateInProgress = false;
 		}
 		
-		var xpiZipReader, isUnpacked = installLocation.isDirectory();
+		if (updated) {
+			if (Zotero.Prefs.get('automaticScraperUpdates')) {
+				yield Zotero.Schema.updateFromRepository(2);
+			}
+		}
+		else {
+			yield Zotero.Schema.updateFromRepository(false);
+		}
+	});
+	
+	/**
+	 * Update bundled files in a given location
+	 *
+	 * @param {String} installLocation - Path to XPI or source dir
+	 * @param {'translators','styles'} mode
+	 * @param {Boolean} [skipVersionUpdates=false]
+	 */
+	var _updateBundledFilesAtLocation = Zotero.Promise.coroutine(function* (installLocation, mode, skipVersionUpdates) {
+		Components.utils.import("resource://gre/modules/FileUtils.jsm");
+		
+		var isUnpacked = (yield OS.File.stat(installLocation)).isDir;
 		if(!isUnpacked) {
-			xpiZipReader = Components.classes["@mozilla.org/libjar/zip-reader;1"]
+			var xpiZipReader = Components.classes["@mozilla.org/libjar/zip-reader;1"]
 					.createInstance(Components.interfaces.nsIZipReader);
-			xpiZipReader.open(installLocation);
-
+			xpiZipReader.open(new FileUtils.File(installLocation));
+			
 			if(Zotero.isStandalone && !xpiZipReader.hasEntry("translators.index")) {
 				// Symlinked dev Standalone build
-				var installLocation2 = installLocation.parent,
-					translatorsDir = installLocation2.clone();
-				translatorsDir.append("translators");
-				if(translatorsDir.exists()) {
-					installLocation = installLocation2;
+				let parentDir = OS.Path.dirname(installLocation);
+				let translatorsDir = OS.Path.join(parentDir, 'translators');
+				if (yield OS.File.exists(translatorsDir)) {
+					installLocation = parentDir;
 					isUnpacked = true;
 					xpiZipReader.close();
 				}
+			}
+			else {
+				var zipFileName = OS.Path.basename(installLocation);
 			}
 		}
 		
@@ -489,148 +508,149 @@ Zotero.Schema = new function(){
 			case "translators":
 				var titleField = 'label';
 				var fileExt = ".js";
+				var destDir = Zotero.getTranslatorsDirectory().path;
 				break;
 			
 			case "styles":
 				var titleField = 'title';
 				var fileExt = ".csl";
-				var hiddenDir = Zotero.getStylesDirectory();
-				hiddenDir.append('hidden');
+				var destDir = Zotero.getStylesDirectory().path;
+				var hiddenDir = OS.Path.join(destDir, 'hidden');
 				break;
 			
 			default:
-				throw ("Invalid mode '" + mode + "' in Zotero.Schema.updateBundledFiles()");
+				throw new Error("Invalid mode '" + mode + "'");
 		}
 		
-		var modes = mode;
-		mode = mode.substr(0, mode.length - 1);
-		var Mode = mode[0].toUpperCase() + mode.substr(1);
-		var Modes = Mode + "s";
+		var modeType = mode.substr(0, mode.length - 1);
+		var ModeType = Zotero.Utilities.capitalize(modeType);
+		var Mode = Zotero.Utilities.capitalize(mode);
 		
-		var repotime = Zotero.File.getContentsFromURL("resource://zotero/schema/repotime.txt");
+		var repotime = yield Zotero.File.getContentsFromURLAsync("resource://zotero/schema/repotime.txt");
 		var date = Zotero.Date.sqlToDate(repotime, true);
 		repotime = Zotero.Date.toUnixTimestamp(date);
 		
 		var fileNameRE = new RegExp("^[^\.].+\\" + fileExt + "$");
 		
-		var destDir = Zotero["get" + Modes + "Directory"]();
-		
 		// If directory is empty, force reinstall
 		var forceReinstall = true;
-		var entries = destDir.directoryEntries;
-		while (entries.hasMoreElements()) {
-			var file = entries.getNext();
-			file.QueryInterface(Components.interfaces.nsIFile);
-			if (!file.leafName.match(fileNameRE) || file.isDirectory()) {
-				continue;
+		let iterator = new OS.File.DirectoryIterator(destDir);
+		try {
+			outer:
+			while (true) {
+				let entries = yield iterator.nextBatch(10);
+				if (!entries.length) break;
+				for (let i = 0; i < entries.length; i++) {
+					let entry = entries[i];
+					if (!entry.name.match(fileNameRE) || entry.isDir) {
+						continue;
+					}
+					// Not empty
+					forceReinstall = false;
+					break outer;
+				}
 			}
-			// Not empty
-			forceReinstall = false;
-			break;
+		}
+		finally {
+			iterator.close();
 		}
 		
 		//
 		// Delete obsolete files
 		//
 		var sql = "SELECT version FROM version WHERE schema='delete'";
-		var lastVersion = Zotero.DB.valueQuery(sql);
+		var lastVersion = yield Zotero.DB.valueQueryAsync(sql);
 		
 		if(isUnpacked) {
-			var deleted = installLocation.clone();
-			deleted.append('deleted.txt');
+			var deleted = OS.Path.join(installLocation, 'deleted.txt');
 			// In source builds, deleted.txt is in the translators directory
-			if (!deleted.exists()) {
-				deleted = installLocation.clone();
-				deleted.append('translators');
-				deleted.append('deleted.txt');
-			}
-			if (!deleted.exists()) {
-				deleted = false;
+			if (!(yield OS.File.exists(deleted))) {
+				deleted = OS.Path.join(installLocation, 'translators', 'deleted.txt');
+				if (!(yield OS.File.exists(deleted))) {
+					deleted = false;
+				}
 			}
 		} else {
 			var deleted = xpiZipReader.getInputStream("deleted.txt");
 		}
 		
-		deleted = Zotero.File.getContents(deleted);
+		deleted = yield Zotero.File.getContentsAsync(deleted);
 		deleted = deleted.match(/^([^\s]+)/gm);
 		var version = deleted.shift();
 		
 		if (!lastVersion || lastVersion < version) {
 			var toDelete = [];
-			var entries = destDir.directoryEntries;
-			while (entries.hasMoreElements()) {
-				var file = entries.getNext();
-				file.QueryInterface(Components.interfaces.nsIFile);
-				
-				if (!file.exists() // symlink to non-existent file
-						|| file.isDirectory()) {
-					continue;
-				}
-				
-				switch (file.leafName) {
-					// Delete incorrectly named files saved via repo pre-1.5b3
-					case 'ama':
-					case 'apa':
-					case 'apsa':
-					case 'asa':
-					case 'chicago-author-date':
-					case 'chicago-fullnote-bibliography':
-					case 'chicago-note':
-					case 'chicago-note-bibliography':
-					case 'harvard1':
-					case 'ieee':
-					case 'mhra':
-					case 'mhra_note_without_bibliography':
-					case 'mla':
-					case 'nature':
-					case 'nlm':
-					case 'vancouver':
-					
-					// Remove update script (included with 3.0 accidentally)
-					case 'update':
-					
-					// Delete renamed/obsolete files
-					case 'chicago-note.csl':
-					case 'mhra_note_without_bibliography.csl':
-					case 'mhra.csl':
-					case 'mla.csl':
-						toDelete.push(file);
-						continue;
-					
-					// Be a little more careful with this one, in case someone
-					// created a custom 'aaa' style
-					case 'aaa.csl':
-						var str = Zotero.File.getContents(file, false, 300);
-						if (str.indexOf("<title>American Anthropological Association</title>") != -1) {
-							toDelete.push(file);
+			let iterator = new OS.File.DirectoryIterator(destDir);
+			try {
+				while (true) {
+					let entries = yield iterator.nextBatch(10);
+					if (!entries.length) break;
+					for (let i = 0; i < entries.length; i++) {
+						let entry = entries[i];
+						
+						if ((entry.isSymLink && !(yield OS.File.exists(entry.path))) // symlink to non-existent file
+								|| entry.isDir) {
+							continue;
 						}
-						continue;
+						
+						if (mode == 'styles') {
+							switch (entry.name) {
+								// Remove update script (included with 3.0 accidentally)
+								case 'update':
+								
+								// Delete renamed/obsolete files
+								case 'chicago-note.csl':
+								case 'mhra_note_without_bibliography.csl':
+								case 'mhra.csl':
+								case 'mla.csl':
+									toDelete.push(entry.path);
+									continue;
+								
+								// Be a little more careful with this one, in case someone
+								// created a custom 'aaa' style
+								case 'aaa.csl':
+									let str = yield Zotero.File.getContentsAsync(entry.path, false, 300);
+									if (str.indexOf("<title>American Anthropological Association</title>") != -1) {
+										toDelete.push(entry.path);
+									}
+									continue;
+							}
+						}
+						
+						if (forceReinstall || !entry.name.match(fileNameRE)) {
+							continue;
+						}
+						
+						if (mode == 'translators') {
+							// TODO: Change if the APIs change
+							let newObj = new Zotero[Mode].loadFromFile(entry.path);
+							if (deleted.indexOf(newObj[modeType + "ID"]) == -1) {
+								continue;
+							}
+							toDelete.push(entry.path);
+						}
+					}
 				}
-				
-				if (forceReinstall || !file.leafName.match(fileNameRE)) {
-					continue;
-				}
-				
-				var newObj = new Zotero[Mode](file);
-				if (deleted.indexOf(newObj[mode + "ID"]) == -1) {
-					continue;
-				}
-				toDelete.push(file);
+			}
+			finally {
+				iterator.close();
 			}
 			
-			for each(var file in toDelete) {
-				Zotero.debug("Deleting " + file.path);
+			for (let i = 0; i < toDelete.length; i++) {
+				let path = toDelete[i];
+				Zotero.debug("Deleting " + path);
 				try {
-					file.remove(false);
+					yield OS.File.remove(path);
 				}
 				catch (e) {
-					Zotero.debug(e);
+					Components.utils.reportError(e);
+					Zotero.debug(e, 1);
 				}
 			}
 			
-			if (!skipDeleteUpdate) {
-				sql = "REPLACE INTO version (schema, version) VALUES ('delete', ?)";
-				Zotero.DB.query(sql, version);
+			if (!skipVersionUpdates) {
+				let sql = "REPLACE INTO version (schema, version) VALUES ('delete', ?)";
+				yield Zotero.DB.queryAsync(sql, version);
 			}
 		}
 		
@@ -638,107 +658,76 @@ Zotero.Schema = new function(){
 		// Update files
 		//
 		var sql = "SELECT version FROM version WHERE schema=?";
-		var lastModTime = Zotero.DB.valueQuery(sql, modes);
-		
-		var zipFileName = modes + ".zip", zipFile;
-		if(isUnpacked) {
-			zipFile = installLocation.clone();
-			zipFile.append(zipFileName);
-			if(!zipFile.exists()) zipFile = undefined;
-		} else {
-			if(xpiZipReader.hasEntry(zipFileName)) {
-				zipFile = xpiZipReader.getEntry(zipFileName);
-			}
-		}
+		var lastModTime = yield Zotero.DB.valueQueryAsync(sql, mode);
 		
 		// XPI installation
-		if (zipFile) {
-			var modTime = Math.round(zipFile.lastModifiedTime / 1000);
+		if (!isUnpacked) {
+			var modTime = Math.round(
+				(yield OS.File.stat(installLocation)).lastModificationDate.getTime() / 1000
+			);
 			
 			if (!forceReinstall && lastModTime && modTime <= lastModTime) {
-				Zotero.debug("Installed " + modes + " are up-to-date with " + zipFileName);
+				Zotero.debug("Installed " + mode + " are up-to-date with " + zipFileName);
 				return false;
 			}
 			
-			Zotero.debug("Updating installed " + modes + " from " + zipFileName);
+			Zotero.debug("Updating installed " + mode + " from " + zipFileName);
 			
-			if (mode == 'translator') {
+			let tmpDir = Zotero.getTempDirectory().path;
+			
+			if (mode == 'translators') {
 				// Parse translators.index
-				var indexFile;
-				if(isUnpacked) {
-					indexFile = installLocation.clone();
-					indexFile.append('translators.index');
-					if (!indexFile.exists()) {
-						Components.utils.reportError("translators.index not found in Zotero.Schema.updateBundledFiles()");
-						return false;
-					}
-				} else {
-					if(!xpiZipReader.hasEntry("translators.index")) {
-						Components.utils.reportError("translators.index not found in Zotero.Schema.updateBundledFiles()");
-						return false;
-					}
-					var indexFile = xpiZipReader.getInputStream("translators.index");
+				if (!xpiZipReader.hasEntry("translators.index")) {
+					Components.utils.reportError("translators.index not found");
+					return false;
 				}
+				let indexFile = xpiZipReader.getInputStream("translators.index");
 				
-				indexFile = Zotero.File.getContents(indexFile);
+				indexFile = yield Zotero.File.getContentsAsync(indexFile);
 				indexFile = indexFile.split("\n");
-				var index = {};
-				for each(var line in indexFile) {
+				let index = {};
+				for (let i = 0; i < indexFile.length; i++) {
+					let line = indexFile[i];
 					if (!line) {
 						continue;
 					}
-					var [fileName, translatorID, label, lastUpdated] = line.split(',');
+					let [translatorID, label, lastUpdated] = line.split(',');
 					if (!translatorID) {
-						Components.utils.reportError("Invalid translatorID '" + translatorID + "' in Zotero.Schema.updateBundledFiles()");
+						Components.utils.reportError("Invalid translatorID '" + translatorID + "'");
 						return false;
 					}
 					index[translatorID] = {
 						label: label,
 						lastUpdated: lastUpdated,
-						fileName: fileName, // Numbered JS file within ZIP
 						extract: true
 					};
 				}
 				
-				var sql = "SELECT translatorJSON FROM translatorCache";
-				var dbCache = Zotero.DB.columnQuery(sql);
+				let sql = "SELECT metadataJSON FROM translatorCache";
+				let dbCache = yield Zotero.DB.columnQueryAsync(sql);
 				// If there's anything in the cache, see what we actually need to extract
 				if (dbCache) {
-					for each(var json in dbCache) {
-						var metadata = JSON.parse(json);
-						var id = metadata.translatorID;
+					for (let i = 0; i < dbCache.length; i++) {
+						let metadata = JSON.parse(dbCache[i]);
+						let id = metadata.translatorID;
 						if (index[id] && index[id].lastUpdated == metadata.lastUpdated) {
 							index[id].extract = false;
 						}
 					}
 				}
-			}
-			
-			var zipReader = Components.classes["@mozilla.org/libjar/zip-reader;1"]
-					.createInstance(Components.interfaces.nsIZipReader);
-			if(isUnpacked) {
-				zipReader.open(zipFile);
-			} else {
-				zipReader.openInner(xpiZipReader, zipFileName);
-			}
-			var tmpDir = Zotero.getTempDirectory();
-			
-			if (mode == 'translator') {
-				for (var translatorID in index) {
+				
+				for (let translatorID in index) {
 					// Use index file and DB cache for translator entries,
 					// extracting only what's necessary
-					var entry = index[translatorID];
+					let entry = index[translatorID];
 					if (!entry.extract) {
 						//Zotero.debug("Not extracting '" + entry.label + "' -- same version already in cache");
 						continue;
 					}
 					
-					var tmpFile = tmpDir.clone();
-					tmpFile.append(entry.fileName);
-					if (tmpFile.exists()) {
-						tmpFile.remove(false);
-					}
-					zipReader.extract(entry.fileName, tmpFile);
+					let tmpFile = OS.Path.join(tmpDir, entry.fileName)
+					yield Zotero.File.removeIfExists(tmpFile);
+					xpiZipReader.extract("translators/" + entry.fileName, new FileUtils.File(tmpFile));
 					
 					var existingObj = Zotero.Translators.get(translatorID);
 					if (!existingObj) {
@@ -746,185 +735,227 @@ Zotero.Schema = new function(){
 					}
 					else {
 						Zotero.debug("Updating translator '" + existingObj.label + "'");
-						if (existingObj.file.exists()) {
-							existingObj.file.remove(false);
-						}
+						yield Zotero.File.removeIfExists(existingObj.path);
 					}
 					
-					var fileName = Zotero.Translators.getFileNameFromLabel(
+					let fileName = Zotero.Translators.getFileNameFromLabel(
 						entry.label, translatorID
 					);
 					
-					var destFile = destDir.clone();
-					destFile.append(fileName);
-					if (destFile.exists()) {
-						var msg = "Overwriting translator with same filename '"
-							+ fileName + "'";
-						Zotero.debug(msg, 1);
-						Components.utils.reportError(msg + " in Zotero.Schema.updateBundledFiles()");
-						destFile.remove(false);
+					let destFile = OS.Path.join(destDir, fileName);
+					try {
+						yield OS.File.move(tmpFile, destFile, {
+							noOverwrite: true
+						});
 					}
-					
-					tmpFile.moveTo(destDir, fileName);
-					
-					Zotero.wait();
+					catch (e) {
+						if (e instanceof OS.File.Error && e.becauseExists) {
+							// Could overwrite automatically, but we want to log this
+							let msg = "Overwriting translator with same filename '" + fileName + "'";
+							Zotero.debug(msg, 1);
+							Components.utils.reportError(msg);
+							yield OS.File.move(tmpFile, destFile);
+						}
+						else {
+							throw e;
+						}
+					}
 				}
 			}
 			// Styles
 			else {
-				var entries = zipReader.findEntries(null);
+				let entries = zipReader.findEntries('styles/*.csl');
 				while (entries.hasMore()) {
-					var entry = entries.getNext();
+					let entry = entries.getNext();
+					let fileName = entry.substr(7); // strip 'styles/'
 					
-					var tmpFile = tmpDir.clone();
-					tmpFile.append(entry);
-					if (tmpFile.exists()) {
-						tmpFile.remove(false);
-					}
-					zipReader.extract(entry, tmpFile);
-					var newObj = new Zotero[Mode](tmpFile);
+					let tmpFile = OS.Path.join(tmpDir, fileName);
+					yield Zotero.File.removeIfExists(tmpFile);
+					zipReader.extract(entry, new FileUtils.File(tmpFile));
+					let code = yield Zotero.File.getContentsAsync(tmpFile);
+					let newObj = new Zotero.Style(code);
 					
-					var existingObj = Zotero[Modes].get(newObj[mode + "ID"]);
+					let existingObj = Zotero.Styles.get(newObj[modeType + "ID"]);
 					if (!existingObj) {
-						Zotero.debug("Installing " + mode + " '" + newObj[titleField] + "'");
+						Zotero.debug("Installing style '" + newObj[titleField] + "'");
 					}
 					else {
 						Zotero.debug("Updating "
 							+ (existingObj.hidden ? "hidden " : "")
-							+ mode + " '" + existingObj[titleField] + "'");
-						if (existingObj.file.exists()) {
-							existingObj.file.remove(false);
-						}
+							+ "style '" + existingObj[titleField] + "'");
+						yield Zotero.File.removeIfExists(existingObj.path);
 					}
-					
-					var fileName = tmpFile.leafName;
 					
 					if (!existingObj || !existingObj.hidden) {
-						tmpFile.moveTo(destDir, fileName);
+						yield OS.File.move(tmpFile, OS.Path.join(destDir, fileName));
 					}
 					else {
-						tmpFile.moveTo(hiddenDir, fileName);
+						yield OS.File.move(tmpFile, OS.Path.join(hiddenDir, fileName));
 					}
-					
-					Zotero.wait();
 				}
 			}
 			
-			zipReader.close();
 			if(xpiZipReader) xpiZipReader.close();
 		}
 		// Source installation
 		else {
-			var sourceDir = installLocation.clone();
-			sourceDir.append(modes);
-			if (!sourceDir.exists()) {
-				Components.utils.reportError("No " + modes + " ZIP file or directory "
-					+ " in Zotero.Schema.updateBundledFiles()");
-				return false;
-			}
+			let sourceDir = OS.Path.join(installLocation, mode);
 			
-			var entries = sourceDir.directoryEntries;
 			var modTime = 0;
-			var sourceFilesExist = false;
-			while (entries.hasMoreElements()) {
-				var file = entries.getNext();
-				file.QueryInterface(Components.interfaces.nsIFile);
-				// File might not exist in an source build with style symlinks
-				if (!file.exists()
-						|| !file.leafName.match(fileNameRE)
-						|| file.isDirectory()) {
-					continue;
+			let sourceFilesExist = false;
+			let iterator;
+			try {
+				iterator = new OS.File.DirectoryIterator(sourceDir);
+			}
+			catch (e) {
+				if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+					let msg = "No " + mode + " directory";
+					Zotero.debug(msg, 1);
+					Components.utils.reportError(msg);
+					return false;
 				}
-				sourceFilesExist = true;
-				var fileModTime = Math.round(file.lastModifiedTime / 1000);
-				if (fileModTime > modTime) {
-					modTime = fileModTime;
+				throw e;
+			}
+			try {
+				while (true) {
+					let entries = yield iterator.nextBatch(10); // TODO: adjust as necessary
+					if (!entries.length) break;
+					for (let i = 0; i < entries.length; i++) {
+						let entry = entries[i];
+						if (!entry.name.match(fileNameRE) || entry.isDir) {
+							continue;
+						}
+						sourceFilesExist = true;
+						let d;
+						if ('winLastWriteDate' in entry) {
+							d = entry.winLastWriteDate;
+						}
+						else {
+							d = (yield OS.File.stat(entry.path)).lastModificationDate;
+						}
+						let fileModTime = Math.round(d.getTime() / 1000);
+						if (fileModTime > modTime) {
+							modTime = fileModTime;
+						}
+					}
 				}
+			}
+			finally {
+				iterator.close();
 			}
 			
 			// Don't attempt installation for source build with missing styles
 			if (!sourceFilesExist) {
-				Zotero.debug("No source " + mode + " files exist -- skipping update");
+				Zotero.debug("No source " + modeType + " files exist -- skipping update");
 				return false;
 			}
 			
 			if (!forceReinstall && lastModTime && modTime <= lastModTime) {
-				Zotero.debug("Installed " + modes + " are up-to-date with " + modes + " directory");
+				Zotero.debug("Installed " + mode + " are up-to-date with " + mode + " directory");
 				return false;
 			}
 			
-			Zotero.debug("Updating installed " + modes + " from " + modes + " directory");
+			Zotero.debug("Updating installed " + mode + " from " + mode + " directory");
 			
-			var entries = sourceDir.directoryEntries;
-			while (entries.hasMoreElements()) {
-				var file = entries.getNext();
-				file.QueryInterface(Components.interfaces.nsIFile);
-				if (!file.exists() || !file.leafName.match(fileNameRE) || file.isDirectory()) {
-					continue;
-				}
-				var newObj = new Zotero[Mode](file);
-				var existingObj = Zotero[Modes].get(newObj[mode + "ID"]);
-				if (!existingObj) {
-					Zotero.debug("Installing " + mode + " '" + newObj[titleField] + "'");
-				}
-				else {
-					Zotero.debug("Updating "
-						+ (existingObj.hidden ? "hidden " : "")
-						+ mode + " '" + existingObj[titleField] + "'");
-					if (existingObj.file.exists()) {
-						existingObj.file.remove(false);
-					}
-				}
-				
-				if (mode == 'translator') {
-					var fileName = Zotero.Translators.getFileNameFromLabel(
-						newObj[titleField], newObj.translatorID
-					);
-				}
-				else if (mode == 'style') {
-					var fileName = file.leafName;
-				}
-				
-				try {
-					var destFile = destDir.clone();
-					destFile.append(fileName);
-					if (destFile.exists()) {
-						var msg = "Overwriting " + mode + " with same filename '"
-							+ fileName + "'";
-						Zotero.debug(msg, 1);
-						Components.utils.reportError(msg + " in Zotero.Schema.updateBundledFiles()");
-						destFile.remove(false);
-					}
+			iterator = new OS.File.DirectoryIterator(sourceDir);
+			try {
+				while (true) {
+					let entries = yield iterator.nextBatch(10); // TODO: adjust as necessary
+					if (!entries.length) break;
 					
-					if (!existingObj || !existingObj.hidden) {
-						file.copyTo(destDir, fileName);
-					}
-					else {
-						file.copyTo(hiddenDir, fileName);
+					for (let i = 0; i < entries.length; i++) {
+						let entry = entries[i];
+						if (!entry.name.match(fileNameRE) || entry.isDir) {
+							continue;
+						}
+						let newObj;
+						if (mode == 'styles') {
+							let code = yield Zotero.File.getContentsAsync(entry.path);
+							newObj = new Zotero.Style(code);
+						}
+						else if (mode == 'translators') {
+							newObj = yield Zotero.Translators.loadFromFile(entry.path);
+						}
+						let existingObj = Zotero[Mode].get(newObj[modeType + "ID"]);
+						if (!existingObj) {
+							Zotero.debug("Installing " + modeType + " '" + newObj[titleField] + "'");
+						}
+						else {
+							Zotero.debug("Updating "
+								+ (existingObj.hidden ? "hidden " : "")
+								+ modeType + " '" + existingObj[titleField] + "'");
+							yield Zotero.File.removeIfExists(existingObj.path);
+						}
+						
+						let fileName;
+						if (mode == 'translators') {
+							fileName = Zotero.Translators.getFileNameFromLabel(
+								newObj[titleField], newObj.translatorID
+							);
+						}
+						else if (mode == 'styles') {
+							fileName = entry.name;
+						}
+						
+						try {
+							let destFile = OS.Path.join(destDir, fileName);
+							
+							try {
+								if (!existingObj || !existingObj.hidden) {
+									yield OS.File.copy(entry.path, destFile, {
+										noOverwrite: true
+									});
+								}
+								else {
+									yield OS.File.copy(entry.path, OS.Path.join(hiddenDir, fileName), {
+										noOverwrite: true
+									});
+								}
+							}
+							catch (e) {
+								if (e instanceof OS.File.Error && e.becauseExists) {
+									// Could overwrite automatically, but we want to log this
+									let msg = "Overwriting " + modeType + " with same filename "
+										+ "'" + fileName + "'";
+									Zotero.debug(msg, 1);
+									Components.utils.reportError(msg);
+									if (!existingObj || !existingObj.hidden) {
+										yield OS.File.copy(entry.path, destFile);
+									}
+									else {
+										yield OS.File.copy(entry.path, OS.Path.join(hiddenDir, fileName));
+									}
+								}
+								else {
+									throw e;
+								}
+							}
+						}
+						catch (e) {
+							Components.utils.reportError("Error copying file " + fileName + ": " + e);
+						}
 					}
 				}
-				catch (e) {
-					Components.utils.reportError("Error copying file " + fileName + ": " + e);
-				}
-				
-				Zotero.wait();
+			}
+			finally {
+				iterator.close();
 			}
 		}
 		
-		Zotero.DB.beginTransaction();
+		yield Zotero.DB.executeTransaction(function* () {
+			var sql = "REPLACE INTO version VALUES (?, ?)";
+			yield Zotero.DB.queryAsync(sql, [mode, modTime]);
+			
+			if (!skipVersionUpdates) {
+				sql = "REPLACE INTO version VALUES ('repository', ?)";
+				yield Zotero.DB.queryAsync(sql, repotime);
+			}
+		});
 		
-		var sql = "REPLACE INTO version VALUES (?, ?)";
-		Zotero.DB.query(sql, [modes, modTime]);
-		
-		var sql = "REPLACE INTO version VALUES ('repository', ?)";
-		Zotero.DB.query(sql, repotime);
-		
-		Zotero.DB.commitTransaction();
-		
-		Zotero[Modes].init();
+		yield Zotero[Mode].reinit();
 		
 		return true;
-	}
+	});
 	
 	
 	/**
@@ -998,7 +1029,7 @@ Zotero.Schema = new function(){
 			}
 			
 			// Send list of installed styles
-			var styles = Zotero.Styles.getAll();
+			var styles = yield Zotero.Styles.getAll();
 			var styleTimestamps = [];
 			for (var id in styles) {
 				var updated = Zotero.Date.sqlToDate(styles[id].updated);
@@ -1016,7 +1047,7 @@ Zotero.Schema = new function(){
 			var body = 'styles=' + encodeURIComponent(JSON.stringify(styleTimestamps));
 			
 			try {
-				let xmlhttp = Zotero.HTTP.promise("POST", ZOTERO_CONFIG.REPOSITORY_URL, { body: body });
+				var xmlhttp = yield Zotero.HTTP.request("POST", url, { body: body });
 				return _updateFromRepositoryCallback(xmlhttp, !!force);
 			}
 			catch (e) {
@@ -1027,11 +1058,17 @@ Zotero.Schema = new function(){
 					}
 					else {
 						Components.utils.reportError(e);
+						Zotero.debug(xmlhttp.status, 1);
+						Zotero.debug(xmlhttp.responseText, 1);
 						Zotero.debug("Error updating from repository " + msg, 1);
 					}
 					// TODO: instead, add an observer to start and stop timer on online state change
 					_setRepositoryTimer(ZOTERO_CONFIG.REPOSITORY_RETRY_INTERVAL);
 					return;
+				}
+				if (xmlhttp) {
+					Zotero.debug(xmlhttp.status, 1);
+					Zotero.debug(xmlhttp.responseText, 1);
 				}
 				throw e;
 			};
@@ -1050,65 +1087,62 @@ Zotero.Schema = new function(){
 	}
 	
 	
-	this.resetTranslatorsAndStyles = function (callback) {
+	this.resetTranslatorsAndStyles = Zotero.Promise.coroutine(function* () {
 		Zotero.debug("Resetting translators and styles");
 		
 		var sql = "DELETE FROM version WHERE schema IN "
 			+ "('translators', 'styles', 'repository', 'lastcheck')";
-		Zotero.DB.query(sql);
+		yield Zotero.DB.queryAsync(sql);
 		_dbVersions.repository = null;
 		_dbVersions.lastcheck = null;
 		
 		var translatorsDir = Zotero.getTranslatorsDirectory();
+		var stylesDir = Zotero.getStylesDirectory();
+		
 		translatorsDir.remove(true);
-		Zotero.getTranslatorsDirectory(); // recreate directory
-		return Zotero.Translators.reinit()
-		.then(function () self.updateBundledFiles('translators', null, false))
-		.then(function () {
-			var stylesDir = Zotero.getStylesDirectory();
-			stylesDir.remove(true);
-			Zotero.getStylesDirectory(); // recreate directory
-			Zotero.Styles.init();
-			return self.updateBundledFiles('styles', null, true);
-		})
-		.then(callback);
-	}
+		stylesDir.remove(true);
+		
+		// Recreate directories
+		Zotero.getTranslatorsDirectory();
+		Zotero.getStylesDirectory();
+		
+		yield Zotero.Promise.all(Zotero.Translators.reinit(), Zotero.Styles.reinit());
+		yield this.updateBundledFiles();
+	});
 	
 	
-	this.resetTranslators = function (callback, skipUpdate) {
+	this.resetTranslators = Zotero.Promise.coroutine(function* () {
 		Zotero.debug("Resetting translators");
 		
 		var sql = "DELETE FROM version WHERE schema IN "
 			+ "('translators', 'repository', 'lastcheck')";
-		Zotero.DB.query(sql);
+		yield Zotero.DB.queryAsync(sql);
 		_dbVersions.repository = null;
 		_dbVersions.lastcheck = null;
 		
 		var translatorsDir = Zotero.getTranslatorsDirectory();
 		translatorsDir.remove(true);
 		Zotero.getTranslatorsDirectory(); // recreate directory
-		return Zotero.Translators.reinit()
-		.then(function () self.updateBundledFiles('translators', null, true))
-		.then(callback);
-	}
+		yield Zotero.Translators.reinit();
+		return this.updateBundledFiles('translators');
+	});
 	
 	
-	this.resetStyles = function (callback) {
+	this.resetStyles = Zotero.Promise.coroutine(function* () {
 		Zotero.debug("Resetting translators and styles");
 		
 		var sql = "DELETE FROM version WHERE schema IN "
 			+ "('styles', 'repository', 'lastcheck')";
-		Zotero.DB.query(sql);
+		yield Zotero.DB.queryAsync(sql);
 		_dbVersions.repository = null;
 		_dbVersions.lastcheck = null;
 		
 		var stylesDir = Zotero.getStylesDirectory();
 		stylesDir.remove(true);
 		Zotero.getStylesDirectory(); // recreate directory
-		return Zotero.Styles.init()
-		.then(function () self.updateBundledFiles('styles', null, true))
-		.then(callback);
-	}
+		yield Zotero.Styles.reinit()
+		return this.updateBundledFiles('styles');
+	});
 	
 	
 	this.integrityCheck = Zotero.Promise.coroutine(function* (fix) {
@@ -1465,16 +1499,10 @@ Zotero.Schema = new function(){
 		.catch(function (e) {
 			Zotero.debug(e, 1);
 			Components.utils.reportError(e);
-			alert('Error initializing Zotero database');
+			let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+				.getService(Components.interfaces.nsIPromptService);
+			ps.alert(null, Zotero.getString('general.error'), Zotero.getString('startupError'));
 			throw e;
-		})
-		.then(function () {
-			return Zotero.Schema.updateBundledFiles(null, null, true)
-			.catch(function (e) {
-				Zotero.debug(e);
-				Zotero.logError(e);
-				alert('Error updating Zotero translators and styles');
-			});
 		});
 	}
 	
@@ -1523,6 +1551,8 @@ Zotero.Schema = new function(){
 					Zotero.debug('No network connection', 2);
 				}
 				else {
+					Zotero.debug(xmlhttp.status);
+					Zotero.debug(xmlhttp.responseText);
 					Zotero.debug('Invalid response from repository', 2);
 				}
 			}
@@ -1794,6 +1824,9 @@ Zotero.Schema = new function(){
 						yield Zotero.DB.queryAsync("ALTER TABLE libraries ADD COLUMN version INT NOT NULL DEFAULT 0");
 						yield Zotero.DB.queryAsync("ALTER TABLE libraries ADD COLUMN lastsync INT NOT NULL DEFAULT 0");
 						yield Zotero.DB.queryAsync("CREATE TABLE syncCache (\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    syncObjectTypeID INT NOT NULL,\n    version INT NOT NULL,\n    data TEXT,\n    PRIMARY KEY (libraryID, key, syncObjectTypeID),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE,\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)\n)");
+						
+						yield Zotero.DB.queryAsync("DROP TABLE translatorCache");
+						yield Zotero.DB.queryAsync("CREATE TABLE translatorCache (\n    fileName TEXT PRIMARY KEY,\n    metadataJSON TEXT,\n    lastModifiedTime INT\n);");
 						
 						yield Zotero.DB.queryAsync("DROP TRIGGER IF EXISTS fki_annotations_itemID_itemAttachments_itemID");
 						yield Zotero.DB.queryAsync("DROP TRIGGER IF EXISTS fku_annotations_itemID_itemAttachments_itemID");

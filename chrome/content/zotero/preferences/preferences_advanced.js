@@ -134,8 +134,7 @@ Zotero_Preferences.Advanced = {
 				if (Zotero_Preferences.Export) {
 					Zotero_Preferences.Export.populateQuickCopyList();
 				}
-			})
-			.done();
+			});
 		}
 	},
 	
@@ -160,8 +159,7 @@ Zotero_Preferences.Advanced = {
 				if (Zotero_Preferences.Export) {
 					Zotero_Preferences.Export.populateQuickCopyList();
 				}
-			})
-			.done();
+			});
 		}
 	},
 	
@@ -186,8 +184,7 @@ Zotero_Preferences.Advanced = {
 				if (Zotero_Preferences.Export) {
 					Zotero_Preferences.Export.populateQuickCopyList();
 				}
-			})
-			.done();
+			});
 		}
 	},
 	

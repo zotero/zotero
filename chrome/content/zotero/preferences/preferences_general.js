@@ -39,27 +39,24 @@ Zotero_Preferences.General = {
 	},
 	
 	
-	updateTranslators: function () {
-		Zotero.Schema.updateFromRepository(true)
-		.then(function (updated) {
-			var button = document.getElementById('updateButton');
-			if (button) {
-				if (updated===-1) {
-					var label = Zotero.getString('zotero.preferences.update.upToDate');
-				}
-				else if (updated) {
-					var label = Zotero.getString('zotero.preferences.update.updated');
-				}
-				else {
-					var label = Zotero.getString('zotero.preferences.update.error');
-				}
-				button.setAttribute('label', label);
-				
-				if (updated && Zotero_Preferences.Cite) {
-					Zotero_Preferences.Cite.refreshStylesList();
-				}
+	updateTranslators: Zotero.Promise.coroutine(function* () {
+		var updated = yield Zotero.Schema.updateFromRepository(true);
+		var button = document.getElementById('updateButton');
+		if (button) {
+			if (updated===-1) {
+				var label = Zotero.getString('zotero.preferences.update.upToDate');
 			}
-		})
-		.done();
-	}
+			else if (updated) {
+				var label = Zotero.getString('zotero.preferences.update.updated');
+			}
+			else {
+				var label = Zotero.getString('zotero.preferences.update.error');
+			}
+			button.setAttribute('label', label);
+			
+			if (updated && Zotero_Preferences.Cite) {
+				yield Zotero_Preferences.Cite.refreshStylesList();
+			}
+		}
+	})
 }

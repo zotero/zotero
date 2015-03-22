@@ -61,7 +61,8 @@ var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browser
  * @property {String} lastUpdated SQL-style date and time of translator's last update
  * @property {String} code The executable JavaScript for the translator
  * @property {Boolean} cacheCode Whether to cache code for this session (non-connector only)
- * @property {nsIFile} [file] File corresponding to this translator (non-connector only)
+ * @property {String} [path] File path corresponding to this translator (non-connector only)
+ * @property {String} [fileName] File name corresponding to this translator (non-connector only)
  */
 Zotero.Translator = function(info) {
 	this.init(info);
@@ -119,7 +120,10 @@ Zotero.Translator.prototype.init = function(info) {
 		delete this.webRegexp;
 	}
 	
-	if(info.file) this.file = info.file;
+	if (info.path) {
+		this.path = info.path;
+		this.fileName = OS.Path.basename(info.path);
+	}
 	if(info.code && this.cacheCode) {
 		this.code = info.code;
 	} else if(this.hasOwnProperty("code")) {
@@ -148,7 +152,7 @@ Zotero.Translator.prototype.getCode = function() {
 			return code;
 		});
 	} else {
-		var promise = Zotero.File.getContentsAsync(this.file);
+		var promise = Zotero.File.getContentsAsync(this.path);
 		if(this.cacheCode) {
 			// Cache target-less web translators for session, since we
 			// will use them a lot
@@ -168,7 +172,7 @@ Zotero.Translator.prototype.serialize = function(properties) {
 	var info = {};
 	for(var i in properties) {
 		var property = properties[i];
-		info[property] = translator[property];
+		info[property] = this[property];
 	}
 	return info;
 }
@@ -182,10 +186,12 @@ Zotero.Translator.prototype.serialize = function(properties) {
  * @param {Integer} colNumber
  */
 Zotero.Translator.prototype.logError = function(message, type, line, lineNumber, colNumber) {
-	if(Zotero.isFx && this.file) {
+	if (Zotero.isFx && this.path) {
+		Components.utils.import("resource://gre/modules/FileUtils.jsm");
+		var file = new FileUtils.File(this.path);
 		var ios = Components.classes["@mozilla.org/network/io-service;1"].
 			getService(Components.interfaces.nsIIOService);
-		Zotero.log(message, type ? type : "error", ios.newFileURI(this.file).spec);
+		Zotero.log(message, type ? type : "error", ios.newFileURI(file).spec);
 	} else {
 		Zotero.logError(message);
 	}

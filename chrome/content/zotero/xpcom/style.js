@@ -30,28 +30,50 @@
  */
 Zotero.Styles = new function() {
 	var _initialized = false;
-	var _styles, _visibleStyles, _cacheTranslatorData;
+	var _styles, _visibleStyles;
 	
 	var _renamedStyles = null;
 	
-	//Components.utils.import("resource://zotero/bluebird.js");
 	Components.utils.import("resource://gre/modules/Services.jsm");
+	Components.utils.import("resource://gre/modules/FileUtils.jsm");
 	
 	this.xsltProcessor = null;
-	this.ios = Components.classes["@mozilla.org/network/io-service;1"].
-		getService(Components.interfaces.nsIIOService);
-	
 	this.ns = {
 		"csl":"http://purl.org/net/xbiblio/csl"
 	};
-
-	// TEMP
-	// Until we get asynchronous style loading, load renamed styles at startup, since the
-	// synchronous call we were using breaks the first drag of the session (on OS X, at least)
-	this.preinit = function () {
+	
+	
+	/**
+	 * Initializes styles cache, loading metadata for styles into memory
+	 */
+	this.reinit = Zotero.Promise.coroutine(function* () {
+		Zotero.debug("Initializing styles");
+		var start = new Date;
+		_initialized = true;
+		
+		_styles = {};
+		_visibleStyles = [];
+		this.lastCSL = null;
+		
+		// main dir
+		var dir = Zotero.getStylesDirectory().path;
+		var num = yield _readStylesFromDirectory(dir, false);
+		
+		// hidden dir
+		var hiddenDir = OS.Path.join(dir, 'hidden');
+		if (yield OS.File.exists(hiddenDir)) {
+			num += yield _readStylesFromDirectory(hiddenDir, true);
+		}
+		
+		Zotero.debug("Cached " + num + " styles in " + (new Date - start) + " ms");
+		
 		_renamedStyles = {};
-		Zotero.HTTP.promise(
-			"GET", "resource://zotero/schema/renamed-styles.json", { responseType: 'json' }
+		yield Zotero.HTTP.request(
+			"GET",
+			"resource://zotero/schema/renamed-styles.json",
+			{
+				responseType: 'json'
+			}
 		)
 		.then(function (xmlhttp) {
 			// Map some obsolete styles to current ones
@@ -59,87 +81,70 @@ Zotero.Styles = new function() {
 				_renamedStyles = xmlhttp.response;
 			}
 		})
-		.done();
-	}
-	
-	/**
-	 * Initializes styles cache, loading metadata for styles into memory
-	 */
-	this.init = function() {
-		_initialized = true;
-		
-		var start = (new Date()).getTime()
-		
-		_styles = {};
-		_visibleStyles = [];
-		_cacheTranslatorData = Zotero.Prefs.get("cacheTranslatorData");
-		this.lastCSL = null;
-		
-		// main dir
-		var dir = Zotero.getStylesDirectory();
-		var i = _readStylesFromDirectory(dir, false);
-		
-		// hidden dir
-		dir.append("hidden");
-		if(dir.exists()) i += _readStylesFromDirectory(dir, true);
-		
-		Zotero.debug("Cached "+i+" styles in "+((new Date()).getTime() - start)+" ms");
-	}
+	});
+	this.init = Zotero.lazy(this.reinit);
 	
 	/**
 	 * Reads all styles from a given directory and caches their metadata
 	 * @private
 	 */
-	function _readStylesFromDirectory(dir, hidden) {
-		var i = 0;
-		var contents = dir.directoryEntries;
-		while(contents.hasMoreElements()) {
-			var file = contents.getNext().QueryInterface(Components.interfaces.nsIFile),
-				filename = file.leafName;
-			if(!filename || filename[0] === "."
-					|| filename.substr(-4).toLowerCase() !== ".csl"
-					|| file.isDirectory()) continue;
-			
-			try {
-				var style = new Zotero.Style(file);
-			}
-			catch (e) {
-				Zotero.log(
-					"Error loading style '" + file.leafName + "': " + e.message,
-					"error",
-					file.path,
-					null,
-					e.lineNumber
-				);
-				continue;
-			}
-			if(style.styleID) {
-				if(_styles[style.styleID]) {
-					// same style is already cached
-					Zotero.log('Style with ID '+style.styleID+' already loaded from "'+
-						_styles[style.styleID].file.leafName+'"', "error",
-						Zotero.Styles.ios.newFileURI(style.file).spec);
-				} else {
-					// add to cache
-					_styles[style.styleID] = style;
-					_styles[style.styleID].hidden = hidden;
-					if(!hidden) _visibleStyles.push(style);
+	var _readStylesFromDirectory = Zotero.Promise.coroutine(function* (dir, hidden) {
+		var numCached = 0;
+		
+		var iterator = new OS.File.DirectoryIterator(dir);
+		try {
+			while (true) {
+				let entries = yield iterator.nextBatch(10); // TODO: adjust as necessary
+				if (!entries.length) break;
+				
+				for (let i = 0; i < entries.length; i++) {
+					let entry = entries[i];
+					let path = entry.path;
+					let fileName = entry.name;
+					if (!fileName || fileName[0] === "."
+							|| fileName.substr(-4).toLowerCase() !== ".csl"
+							|| entry.isDir) continue;
+					
+					try {
+						let code = yield Zotero.File.getContentsAsync(path);
+						var style = new Zotero.Style(code, path);
+					}
+					catch (e) {
+						Components.utils.reportError(e);
+						Zotero.debug(e, 1);
+						continue;
+					}
+					if(style.styleID) {
+						// same style is already cached
+						if (_styles[style.styleID]) {
+							Components.utils.reportError('Style with ID ' + style.styleID
+								+ ' already loaded from ' + _styles[style.styleID].fileName);
+						} else {
+							// add to cache
+							_styles[style.styleID] = style;
+							_styles[style.styleID].hidden = hidden;
+							if(!hidden) _visibleStyles.push(style);
+						}
+					}
+					numCached++;
 				}
 			}
-			i++;
 		}
-		return i;
-	}
+		finally {
+			iterator.close();
+		}
+		return numCached;
+	});
 	
 	/**
 	 * Gets a style with a given ID
 	 * @param {String} id
 	 * @param {Boolean} skipMappings Don't automatically return renamed style
 	 */
-	this.get = function(id, skipMappings) {
-		if(!_initialized) this.init();
-		
-		// TODO: With asynchronous style loading, move renamedStyles call back here
+	this.get = function (id, skipMappings) {
+		if (!_initialized) {
+			throw new Zotero.Exception.UnloadedDataException("Styles not yet loaded", 'styles');
+		}
 		
 		if(!skipMappings) {
 			var prefix = "http://www.zotero.org/styles/";
@@ -156,20 +161,24 @@ Zotero.Styles = new function() {
 	
 	/**
 	 * Gets all visible styles
-	 * @return {Zotero.Style[]} An array of Zotero.Style objects
+	 * @return {Promise<Zotero.Style[]>} A promise for an array of Zotero.Style objects
 	 */
-	this.getVisible = function() {
-		if(!_initialized || !_cacheTranslatorData) this.init();
-		return _visibleStyles.slice(0);
+	this.getVisible = function () {
+		return this.init().then(function () {
+			return _visibleStyles.slice(0);
+		});
 	}
 	
 	/**
 	 * Gets all styles
-	 * @return {Object} An object whose keys are style IDs, and whose values are Zotero.Style objects
+	 *
+	 * @return {Promise<Object>} A promise for an object with style IDs for keys and
+	 *                           Zotero.Style objects for values
 	 */
-	this.getAll = function() {
-		if(!_initialized || !_cacheTranslatorData) this.init();
-		return _styles;
+	this.getAll = function () {
+		return this.init().then(function () {
+			return _styles;
+		});
 	}
 	
 	/**
@@ -200,8 +209,9 @@ Zotero.Styles = new function() {
 	 * @param {String} origin The origin of the style, either a filename or URL, to be
 	 *     displayed in dialogs referencing the style
 	 */
-	this.install = function(style, origin) {
+	this.install = Zotero.Promise.coroutine(function* (style, origin) {
 		var styleInstalled;
+		
 		if(style instanceof Components.interfaces.nsIFile) {
 			// handle nsIFiles
 			var url = Services.io.newFileURI(style);
@@ -224,7 +234,7 @@ Zotero.Styles = new function() {
 					origin, "styles.install.title", error)).present();
 			}
 		}).done();
-	}
+	});
 	
 	/**
 	 * Installs a style
@@ -234,176 +244,183 @@ Zotero.Styles = new function() {
 	 * @param {Boolean} [hidden] Whether style is to be hidden.
 	 * @return {Promise}
 	 */
-	function _install(style, origin, hidden) {
-		if(!_initialized || !_cacheTranslatorData) Zotero.Styles.init();
+	var _install = Zotero.Promise.coroutine(function* (style, origin, hidden) {
+		if (!_initialized) yield Zotero.Styles.init();
 		
 		var existingFile, destFile, source, styleID
-		return Zotero.Promise.try(function() {
-			// First, parse style and make sure it's valid XML
-			var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-					.createInstance(Components.interfaces.nsIDOMParser),
-				doc = parser.parseFromString(style, "application/xml");
-			
-			styleID = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:id[1]',
-					Zotero.Styles.ns),
-				// Get file name from URL
-				m = /[^\/]+$/.exec(styleID),
-				fileName = Zotero.File.getValidFileName(m ? m[0] : styleID),
-				title = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:title[1]',
-					Zotero.Styles.ns);
-			
-			if(!styleID || !title) {
-				// If it's not valid XML, we'll return a promise that immediately resolves
-				// to an error
-				throw new Zotero.Exception.Alert("styles.installError", origin,
-					"styles.install.title", "Style is not valid XML, or the styleID or title is missing");
-			}
-				
-			// look for a parent
-			source = Zotero.Utilities.xpathText(doc,
-				'/csl:style/csl:info[1]/csl:link[@rel="source" or @rel="independent-parent"][1]/@href',
+		
+		// First, parse style and make sure it's valid XML
+		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+				.createInstance(Components.interfaces.nsIDOMParser),
+			doc = parser.parseFromString(style, "application/xml");
+		
+		styleID = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:id[1]',
+				Zotero.Styles.ns),
+			// Get file name from URL
+			m = /[^\/]+$/.exec(styleID),
+			fileName = Zotero.File.getValidFileName(m ? m[0] : styleID),
+			title = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:title[1]',
 				Zotero.Styles.ns);
-			if(source == styleID) {
-				throw new Zotero.Exception.Alert("styles.installError", origin,
-					"styles.install.title", "Style references itself as source");
+		
+		if(!styleID || !title) {
+			// If it's not valid XML, we'll return a promise that immediately resolves
+			// to an error
+			throw new Zotero.Exception.Alert("styles.installError", origin,
+				"styles.install.title", "Style is not valid XML, or the styleID or title is missing");
+		}
+			
+		// look for a parent
+		source = Zotero.Utilities.xpathText(doc,
+			'/csl:style/csl:info[1]/csl:link[@rel="source" or @rel="independent-parent"][1]/@href',
+			Zotero.Styles.ns);
+		if(source == styleID) {
+			throw new Zotero.Exception.Alert("styles.installError", origin,
+				"styles.install.title", "Style references itself as source");
+		}
+		
+		// ensure csl extension
+		if(fileName.substr(-4).toLowerCase() != ".csl") fileName += ".csl";
+		
+		destFile = Zotero.getStylesDirectory();
+		var destFileHidden = destFile.clone();
+		destFile.append(fileName);
+		destFileHidden.append("hidden");
+		if(hidden) Zotero.File.createDirectoryIfMissing(destFileHidden);
+		destFileHidden.append(fileName);
+		
+		// look for an existing style with the same styleID or filename
+		var existingTitle;
+		if(_styles[styleID]) {
+			existingFile = _styles[styleID].file;
+			existingTitle = _styles[styleID].title;
+		} else {
+			if(destFile.exists()) {
+				existingFile = destFile;
+			} else if(destFileHidden.exists()) {
+				existingFile = destFileHidden;
 			}
 			
-			// ensure csl extension
-			if(fileName.substr(-4).toLowerCase() != ".csl") fileName += ".csl";
-			
-			destFile = Zotero.getStylesDirectory();
-			var destFileHidden = destFile.clone();
-			destFile.append(fileName);
-			destFileHidden.append("hidden");
-			if(hidden) Zotero.File.createDirectoryIfMissing(destFileHidden);
-			destFileHidden.append(fileName);
-			
-			// look for an existing style with the same styleID or filename
-			var existingTitle;
-			if(_styles[styleID]) {
-				existingFile = _styles[styleID].file;
-				existingTitle = _styles[styleID].title;
-			} else {
-				if(destFile.exists()) {
-					existingFile = destFile;
-				} else if(destFileHidden.exists()) {
-					existingFile = destFileHidden;
-				}
-				
-				if(existingFile) {
-					// find associated style
-					for each(var existingStyle in _styles) {
-						if(destFile.equals(existingStyle.file)) {
-							existingTitle = existingStyle.title;
-							break;
-						}
-					}
-				}
-			}
-			
-			// also look for an existing style with the same title
-			if(!existingFile) {
-				for each(var existingStyle in Zotero.Styles.getAll()) {
-					if(title === existingStyle.title) {
-						existingFile = existingStyle.file;
+			if(existingFile) {
+				// find associated style
+				for each(var existingStyle in _styles) {
+					if(destFile.equals(existingStyle.file)) {
 						existingTitle = existingStyle.title;
 						break;
 					}
 				}
 			}
-			
-			// display a dialog to tell the user we're about to install the style
-			if(hidden) {
-				destFile = destFileHidden;
-			} else {
-				if(existingTitle) {
-					var text = Zotero.getString('styles.updateStyle', [existingTitle, title, origin]);
-				} else {
-					var text = Zotero.getString('styles.installStyle', [title, origin]);
-				}
-				
-				var index = Services.prompt.confirmEx(null, Zotero.getString('styles.install.title'),
-					text,
-					((Services.prompt.BUTTON_POS_0) * (Services.prompt.BUTTON_TITLE_IS_STRING)
-					+ (Services.prompt.BUTTON_POS_1) * (Services.prompt.BUTTON_TITLE_CANCEL)),
-					Zotero.getString('general.install'), null, null, null, {}
-				);
-				
-				if(index !== 0) {
-					throw new Zotero.Exception.UserCancelled("style installation");
-				}
-			}
+		}
 		
-			return Zotero.Styles.validate(style).catch(function(validationErrors) {
-				Zotero.logError("Style from "+origin+" failed to validate:\n\n"+validationErrors);
-				
-				// If validation fails on the parent of a dependent style, ignore it (for now)
-				if(hidden) return;
-				
-				// If validation fails on a different style, we ask the user if s/he really
-				// wants to install it
-				Components.utils.import("resource://gre/modules/Services.jsm");
-				var shouldInstall = Services.prompt.confirmEx(null,
-					Zotero.getString('styles.install.title'),
-					Zotero.getString('styles.validationWarning', origin),
-					(Services.prompt.BUTTON_POS_0) * (Services.prompt.BUTTON_TITLE_OK)
-					+ (Services.prompt.BUTTON_POS_1) * (Services.prompt.BUTTON_TITLE_CANCEL)
-					+ Services.prompt.BUTTON_POS_1_DEFAULT + Services.prompt.BUTTON_DELAY_ENABLE,
-					null, null, null, null, {}
-				);
-				if(shouldInstall !== 0) {
-					throw new Zotero.Exception.UserCancelled("style installation");
-				}
-			});
-		}).then(function() {
-			// User wants to install/update		
-			if(source && !_styles[source]) {
-				// Need to fetch source
-				if(source.substr(0, 7) === "http://" || source.substr(0, 8) === "https://") {
-					return Zotero.HTTP.promise("GET", source).then(function(xmlhttp) {
-						return _install(xmlhttp.responseText, origin, true);
-					}).catch(function(error) {
-						if(typeof error === "object" && error instanceof Zotero.Exception.Alert) {
-							throw new Zotero.Exception.Alert("styles.installSourceError", [origin, source],
-								"styles.install.title", error);
-						} else {
-							throw error;
-						}
-					});
-				} else {
-					throw new Zotero.Exception.Alert("styles.installSourceError", [origin, source],
-						"styles.install.title", "Source CSL URI is invalid");
+		// also look for an existing style with the same title
+		if(!existingFile) {
+			let styles = yield Zotero.Styles.getAll();
+			for (let i in styles) {
+				let existingStyle = styles[i];
+				if(title === existingStyle.title) {
+					existingFile = existingStyle.file;
+					existingTitle = existingStyle.title;
+					break;
 				}
 			}
-		}).then(function() {
-			// Dependent style has been retrieved if there was one, so we're ready to
-			// continue
+		}
+		
+		// display a dialog to tell the user we're about to install the style
+		if(hidden) {
+			destFile = destFileHidden;
+		} else {
+			if(existingTitle) {
+				var text = Zotero.getString('styles.updateStyle', [existingTitle, title, origin]);
+			} else {
+				var text = Zotero.getString('styles.installStyle', [title, origin]);
+			}
 			
-			// Remove any existing file with a different name
-			if(existingFile) existingFile.remove(false);
+			var index = Services.prompt.confirmEx(null, Zotero.getString('styles.install.title'),
+				text,
+				((Services.prompt.BUTTON_POS_0) * (Services.prompt.BUTTON_TITLE_IS_STRING)
+				+ (Services.prompt.BUTTON_POS_1) * (Services.prompt.BUTTON_TITLE_CANCEL)),
+				Zotero.getString('general.install'), null, null, null, {}
+			);
 			
-			return Zotero.File.putContentsAsync(destFile, style);
-		}).then(function() {			
-			// Cache
-			Zotero.Styles.init();
+			if(index !== 0) {
+				throw new Zotero.Exception.UserCancelled("style installation");
+			}
+		}
+		
+		yield Zotero.Styles.validate(style)
+		.catch(function(validationErrors) {
+			Zotero.logError("Style from " + origin + " failed to validate:\n\n" + validationErrors);
 			
-			// Refresh preferences windows
-			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"].
-				getService(Components.interfaces.nsIWindowMediator);
-			var enumerator = wm.getEnumerator("zotero:pref");
-			while(enumerator.hasMoreElements()) {
-				var win = enumerator.getNext();
-				if(win.Zotero_Preferences.Cite) {
-					win.Zotero_Preferences.Cite.refreshStylesList(styleID);
-				}
+			// If validation fails on the parent of a dependent style, ignore it (for now)
+			if(hidden) return;
+			
+			// If validation fails on a different style, we ask the user if s/he really
+			// wants to install it
+			Components.utils.import("resource://gre/modules/Services.jsm");
+			var shouldInstall = Services.prompt.confirmEx(null,
+				Zotero.getString('styles.install.title'),
+				Zotero.getString('styles.validationWarning', origin),
+				(Services.prompt.BUTTON_POS_0) * (Services.prompt.BUTTON_TITLE_OK)
+				+ (Services.prompt.BUTTON_POS_1) * (Services.prompt.BUTTON_TITLE_CANCEL)
+				+ Services.prompt.BUTTON_POS_1_DEFAULT + Services.prompt.BUTTON_DELAY_ENABLE,
+				null, null, null, null, {}
+			);
+			if(shouldInstall !== 0) {
+				throw new Zotero.Exception.UserCancelled("style installation");
 			}
 		});
-	}
+		
+		// User wants to install/update
+		if(source && !_styles[source]) {
+			// Need to fetch source
+			if(source.substr(0, 7) === "http://" || source.substr(0, 8) === "https://") {
+				try {
+					let xmlhttp = yield Zotero.HTTP.request("GET", source);
+					yield _install(xmlhttp.responseText, origin, true);
+				}
+				catch (e) {
+					if (typeof e === "object" && e instanceof Zotero.Exception.Alert) {
+						throw new Zotero.Exception.Alert(
+							"styles.installSourceError",
+							[origin, source],
+							"styles.install.title",
+							e
+						);
+					}
+					throw e;
+				}
+			} else {
+				throw new Zotero.Exception.Alert("styles.installSourceError", [origin, source],
+					"styles.install.title", "Source CSL URI is invalid");
+			}
+		}
+		
+		// Dependent style has been retrieved if there was one, so we're ready to
+		// continue
+		
+		// Remove any existing file with a different name
+		if(existingFile) existingFile.remove(false);
+		
+		yield Zotero.File.putContentsAsync(destFile, style);
+		
+		yield Zotero.Styles.reinit();
+		
+		// Refresh preferences windows
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"].
+			getService(Components.interfaces.nsIWindowMediator);
+		var enumerator = wm.getEnumerator("zotero:pref");
+		while(enumerator.hasMoreElements()) {
+			var win = enumerator.getNext();
+			if(win.Zotero_Preferences.Cite) {
+				yield win.Zotero_Preferences.Cite.refreshStylesList(styleID);
+			}
+		}
+	});
 }
 
 /**
  * @class Represents a style file and its metadata
- * @property {nsIFile} file The path to the style file
+ * @property {String} path The path to the style file
+ * @property {String} fileName The name of the style file
  * @property {String} styleID
  * @property {String} url The URL where the style can be found (rel="self")
  * @property {String} type "csl" for CSL styles
@@ -416,25 +433,25 @@ Zotero.Styles = new function() {
  * @property {Boolean} hidden True if this style is hidden in style selection dialogs, false if it
  *	is not
  */
-Zotero.Style = function(arg) {
-	if(typeof arg === "string") {
-		this.string = arg;
-	} else if(typeof arg === "object") {
-		this.file = arg;
-	} else {
-		throw "Invalid argument passed to Zotero.Style";
+Zotero.Style = function (style, path) {
+	if (typeof style != "string") {
+		throw new Error("Style code must be a string");
 	}
 	
 	this.type = "csl";
 	
-	var style = typeof arg === "string" ? arg : Zotero.File.getContents(arg),
-		parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 			.createInstance(Components.interfaces.nsIDOMParser),
 		doc = parser.parseFromString(style, "application/xml");
 	if(doc.documentElement.localName === "parsererror") {
 		throw new Error("File is not valid XML");
 	}
-				
+	
+	if (path) {
+		this.path = path;
+		this.fileName = OS.Path.basename(path);
+	}
+	
 	this.styleID = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:id[1]',
 		Zotero.Styles.ns);
 	this.url = Zotero.Utilities.xpathText(doc,
@@ -494,8 +511,10 @@ Zotero.Style.prototype.getCiteProc = function(automaticJournalAbbreviations) {
 	if(this.source) {
 		var parentStyle = Zotero.Styles.get(this.source);
 		if(!parentStyle) {
-			throw(new Error('Style references '+this.source+', but this style is not installed',
-				Zotero.Styles.ios.newFileURI(this.file).spec, null));
+			throw new Error(
+				'Style references ' + this.source + ', but this style is not installed',
+				Zotero.Utilities.pathToFileURI(this.path)
+			);
 		}
 		var version = parentStyle._version;
 		
@@ -552,11 +571,6 @@ Zotero.Style.prototype.getCiteProc = function(automaticJournalAbbreviations) {
 	}
 };
 
-Zotero.Style.prototype.__defineGetter__("csl", function() {
-	Zotero.logError("Zotero.Style.csl is deprecated. Use Zotero.Style.getCiteProc()");
-	return this.getCiteProc();
-});
-
 Zotero.Style.prototype.__defineGetter__("class",
 /**
  * Retrieves the style class, either from the metadata that's already loaded or by loading the file
@@ -578,8 +592,7 @@ function() {
 		// use hasBibliography from source style
 		var parentStyle = Zotero.Styles.get(this.source);
 		if(!parentStyle) {
-			throw(new Error('Style references '+this.source+', but this style is not installed',
-				Zotero.Styles.ios.newFileURI(this.file).spec, null));
+			throw new Error('Style references missing parent ' + this.source);
 		}
 		return parentStyle.hasBibliography;
 	}
@@ -610,12 +623,11 @@ function() {
 		// parent/child
 		var formatCSL = Zotero.Styles.get(this.source);
 		if(!formatCSL) {
-			throw(new Error('Style references '+this.source+', but this style is not installed',
-				Zotero.Styles.ios.newFileURI(this.file).spec, null));
+			throw new Error('Style references missing parent ' + this.source);
 		}
-		return formatCSL.file;
-	} else if(this.file) {
-		return this.file;
+		return formatCSL.path;
+	} else if (this.path) {
+		return this.path;
 	}
 	return null;
 });
@@ -633,15 +645,16 @@ Zotero.Style.prototype.getXML = function() {
 /**
  * Deletes a style
  */
-Zotero.Style.prototype.remove = function() {
-	if(!this.file) {
-		throw "Cannot delete a style with no associated file."
+Zotero.Style.prototype.remove = Zotero.Promise.coroutine(function* () {
+	if (!this.path) {
+		throw new Error("Cannot delete a style with no associated file")
 	}
 	
 	// make sure no styles depend on this one
 	var dependentStyles = false;
-	var styles = Zotero.Styles.getAll();
-	for each(var style in styles) {
+	var styles = yield Zotero.Styles.getAll();
+	for (let i in styles) {
+		let style = styles[i];
 		if(style.source == this.styleID) {
 			dependentStyles = true;
 			break;
@@ -650,13 +663,12 @@ Zotero.Style.prototype.remove = function() {
 	
 	if(dependentStyles) {
 		// copy dependent styles to hidden directory
-		var hiddenDir = Zotero.getStylesDirectory();
-		hiddenDir.append("hidden");
-		Zotero.File.createDirectoryIfMissing(hiddenDir);
-		this.file.moveTo(hiddenDir, null);
+		let hiddenDir = OS.Path.join(Zotero.getStylesDirectory().path, 'hidden');
+		yield Zotero.File.createDirectoryIfMissingAsync(hiddenDir);
+		yield OS.File.move(this.path, OS.Path.join(hiddenDir, OS.Path.basename(this.path)));
 	} else {
 		// remove defunct files
-		this.file.remove(false);
+		yield OS.File.remove(this.path);
 	}
 	
 	// check to see if this style depended on a hidden one
@@ -666,7 +678,9 @@ Zotero.Style.prototype.remove = function() {
 			var deleteSource = true;
 			
 			// check to see if any other styles depend on the hidden one
-			for each(var style in Zotero.Styles.getAll()) {
+			let styles = yield Zotero.Styles.getAll();
+			for (let i in styles) {
+				let style = styles[i];
 				if(style.source == this.source && style.styleID != this.styleID) {
 					deleteSource = false;
 					break;
@@ -675,10 +689,10 @@ Zotero.Style.prototype.remove = function() {
 			
 			// if it was only this style with the dependency, delete the source
 			if(deleteSource) {
-				source.remove();
+				yield source.remove();
 			}
 		}
 	}
 	
-	Zotero.Styles.init();
-}
+	return Zotero.Styles.reinit();
+});

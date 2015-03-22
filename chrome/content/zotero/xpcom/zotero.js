@@ -485,7 +485,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				
 				// Recreate database with no quick start guide
 				Zotero.Schema.skipDefaultData = true;
-				Zotero.Schema.updateSchema();
+				yield Zotero.Schema.updateSchema();
 				
 				Zotero.restoreFromServer = true;
 			}
@@ -577,7 +577,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				Zotero.locked = false;
 				
 				// Initialize various services
-				Zotero.Styles.preinit();
 				Zotero.Integration.init();
 				
 				if(Zotero.Prefs.get("httpServer.enabled")) {
@@ -605,8 +604,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				Zotero.Searches.init();
 				Zotero.Groups.init();
 				
-				// TODO: Delay until after UI is shown
 				yield Zotero.QuickCopy.init();
+				
 				Zotero.Items.startEmptyTrashTimer();
 			}
 			catch (e) {

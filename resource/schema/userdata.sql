@@ -411,8 +411,7 @@ CREATE INDEX customBaseFieldMappings_baseFieldID ON customBaseFieldMappings(base
 CREATE INDEX customBaseFieldMappings_customFieldID ON customBaseFieldMappings(customFieldID);
 
 CREATE TABLE translatorCache (
-	leafName TEXT PRIMARY KEY,
-	translatorJSON TEXT,
-	code TEXT,
-	lastModifiedTime INT
+    fileName TEXT PRIMARY KEY,
+    metadataJSON TEXT,
+    lastModifiedTime INT
 );
