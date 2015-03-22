@@ -1602,7 +1602,7 @@ Zotero.Schema = new function(){
 				
 				// Rebuild caches
 				yield Zotero.Translators.reinit();
-				Zotero.Styles.init();
+				yield Zotero.Styles.reinit();
 			}
 			catch (e) {
 				Zotero.debug(e, 1);
