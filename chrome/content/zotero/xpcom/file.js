@@ -321,52 +321,49 @@ Zotero.File = new function(){
 	/**
 	 * Write data to a file asynchronously
 	 *
-	 * @param {nsIFile} - The file to write to
+	 * @param {String|nsIFile} - String path or nsIFile to write to
 	 * @param {String|nsIInputStream} data - The string or nsIInputStream to write to the file
 	 * @param {String} [charset] - The character set; defaults to UTF-8
 	 * @return {Promise} - A promise that is resolved when the file has been written
 	 */
-	this.putContentsAsync = function putContentsAsync(file, data, charset) {
+	this.putContentsAsync = function putContentsAsync(path, data, charset) {
+		if (path instanceof Ci.nsIFile) {
+			path = this.fileToPath(path);
+		}
+		
 		if (typeof data == 'string' && (!charset || charset.toLowerCase() == 'utf-8')) {
 			let encoder = new TextEncoder();
 			let array = encoder.encode(data);
 			return Zotero.Promise.resolve(OS.File.writeAtomic(
-				file.path,
+				path,
 				array,
 				{
-					tmpPath: OS.Path.join(Zotero.getTempDirectory().path, file.leafName + ".tmp")
+					tmpPath: OS.Path.join(
+						Zotero.getTempDirectory().path,
+						OS.Path.basename(path) + ".tmp"
+					)
 				}
-			))
-			.catch(function (e) {
-				Zotero.debug(e); // TEMP
-				if (e instanceof OS.File.Error) {
-					Zotero.debug(e);
-					Zotero.debug(e.toString());
-					throw new Error("Error for operation '" + e.operation + "' for " + file.path);
-				}
-				throw e;
-			});
+			));
 		}
-		else {
-			// Create a stream for async stream copying
-			if(!(data instanceof Components.interfaces.nsIInputStream)) {
-				var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
-						createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-				converter.charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
-				data = converter.convertToInputStream(data);
+		
+		// Create a stream for async stream copying
+		if(!(data instanceof Components.interfaces.nsIInputStream)) {
+			var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
+					createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+			converter.charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
+			data = converter.convertToInputStream(data);
+		}
+		
+		var deferred = Zotero.Promise.defer(),
+			ostream = FileUtils.openSafeFileOutputStream(file);
+		NetUtil.asyncCopy(data, ostream, function(inputStream, status) {
+			if (!Components.isSuccessCode(status)) {
+				deferred.reject(new Components.Exception("File write operation failed", status));
+				return;
 			}
-			
-			var deferred = Zotero.Promise.defer(),
-				ostream = FileUtils.openSafeFileOutputStream(file);
-			NetUtil.asyncCopy(data, ostream, function(inputStream, status) {
-				if (!Components.isSuccessCode(status)) {
-					deferred.reject(new Components.Exception("File write operation failed", status));
-					return;
-				}
-				deferred.resolve();
-			});
-			return deferred.promise;
-		}
+			deferred.resolve();
+		});
+		return deferred.promise;
 	};
 	
 	
