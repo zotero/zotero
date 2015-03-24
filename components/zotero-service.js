@@ -364,7 +364,7 @@ ZoteroCommandLineHandler.prototype = {
 	/* nsICommandLineHandler */
 	handle : function(cmdLine) {
 		// Force debug output
-		if (cmdLine.handleFlag("zoterodebug", false)) {
+		if (cmdLine.handleFlag("ZoteroDebug", false)) {
 			zInitOptions.forceDebugLog = true;
 		}
 		
