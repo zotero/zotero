@@ -168,3 +168,124 @@ function resetDB() {
 		return Zotero.Schema.schemaUpdatePromise;
 	});
 }
+
+/**
+ * Generates sample item data that is stored in data/sampleItemData.js
+ */
+function generateAllTypesAndFieldsData() {
+	let data = {},
+		itemTypes = Zotero.ItemTypes.getTypes(),
+		// For most fields, use the field name as the value, but this doesn't
+		// work well for some fields that expect values in certain formats
+		specialValues = {
+			date: '1999-12-31',
+			accessDate: '1999-12-31 23:59:59',
+			number: '3',
+			ISBN: '978-1-234-56789-7',
+			ISSN: '1234-5679',
+			url: 'http://www.example.com',
+			pages: '1-10',
+			DOI: '10.1234/example.doi',
+			runningTime: '1:22:33',
+			language: 'en-US'
+		},
+		// Additional fields that should use values from above
+		specialValueMap = {
+			date: ['filingDate'],
+			number: ['numPages', 'issue', 'volume', 'numberOfVolumes', 'edition',
+				'seriesNumber']
+		},
+		// Item types and fields that should not be included in sample data
+		excludeItemTypes = ['note', 'attachment'],
+		excludeItemFields = [];
+	
+	// Convenince object for quick special value lookups
+	let coercedValues = {}
+	for (let field in specialValues) {
+		coercedValues[field] = specialValues[field];
+	}
+	for (let field in specialValueMap) {
+		for (let i = 0; i < specialValueMap[field].length; i++) {
+			coercedValues[specialValueMap[field][i]] = specialValues[field];
+		}
+	}
+	
+	for (let i = 0; i < itemTypes.length; i++) {
+		if (excludeItemTypes.indexOf(itemTypes[i].name) != -1) continue;
+		
+		let itemFields = data[itemTypes[i].name] = {
+			itemType: itemTypes[i].name
+		};
+		
+		let fields = Zotero.ItemFields.getItemTypeFields(itemTypes[i].id).sort();
+		for (let j = 0; j < fields.length; j++) {
+			let field = fields[j];
+			field = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypes[i].id, field) || field;
+			
+			if (excludeItemFields.indexOf(field) != -1) continue;
+			
+			let name = Zotero.ItemFields.getName(field);
+			
+			// Use field name as field value
+			let value = coercedValues[name] || name.charAt(0).toUpperCase() + name.substr(1);
+			
+			value = value.replace(/([a-z])([A-Z])/g, '$1 $2')
+				.replace(/ [A-Z](?=[a-z])/g, m => m.toLowerCase());
+			itemFields[name] = value;
+		}
+		
+		let creatorTypes = Zotero.CreatorTypes.getTypesForItemType(itemTypes[i].id),
+			creators = itemFields.creators = [];
+		for (let j = 0; j < creatorTypes.length; j++) {
+			creators.push({
+				creatorType: creatorTypes[j].name,
+				firstName: 'First',
+				lastName: 'Last'
+			});
+		}
+	}
+	
+	return data;
+}
+
+/**
+ * Loads specified sample data from file
+ */
+function loadSampleData(dataName = 'allTypesAndFields') {
+	Components.utils.import("resource://gre/modules/Services.jsm");
+	let data = {};
+	Services.scriptloader.loadSubScript('resource://zotero-unit-tests/data/' + dataName + '.js', data, 'UTF-8');
+	return data.data;
+}
+
+/**
+ * Populates the database with sample items that have all fields filled in
+ * The field values should be in the form exactly as they would appear in Zotero
+ */
+function populateDBWithSampleData(data) {
+	for (let itemName in data) {
+		let item = data[itemName];
+		let zItem = new Zotero.Item(item.itemType);
+		for (let itemField in item) {
+			if (itemField == 'itemType') continue;
+			
+			if (itemField == 'creators') {
+				let creators = item[itemField];
+				for (let i=0; i<creators.length; i++) {
+					let creator = new Zotero.Creator();
+					creator.firstName = creators[i].firstName;
+					creator.lastName = creators[i].lastName;
+					creator = Zotero.Creators.get(creator.save());
+					
+					zItem.setCreator(i, creator, creators[i].creatorType);
+				}
+				continue;
+			}
+			
+			zItem.setField(itemField, item[itemField]);
+		}
+		item.id = zItem.save();
+	}
+	
+	return data;
+}
