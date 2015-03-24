@@ -33,6 +33,9 @@ ZoteroUnit.prototype = {
 	handle:function(cmdLine) {
 		this.tests = cmdLine.handleFlagWithParam("test", false);
 		this.noquit = cmdLine.handleFlag("noquit", false);
+		this.makeTestData = cmdLine.handleFlag("makeTestData", false);
+		this.noquit = !this.makeTestData && this.noquit;
+		this.runTests = !this.makeTestData;
 	},
 
 	dump:function(x) {

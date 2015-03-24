@@ -15,36 +15,44 @@ function makePath {
 }
 
 DEBUG=false
-if [ "`uname`" == "Darwin" ]; then
-	FX_EXECUTABLE="/Applications/Firefox.app/Contents/MacOS/firefox"
-else
-	FX_EXECUTABLE="firefox"
+if [ -z "$FX_EXECUTABLE" ]; then
+	if [ "`uname`" == "Darwin" ]; then
+		FX_EXECUTABLE="/Applications/Firefox.app/Contents/MacOS/firefox"
+	else
+		FX_EXECUTABLE="firefox"
+	fi
 fi
+
 FX_ARGS=""
+ZOTERO_ARGS=""
 
 function usage {
 	cat >&2 <<DONE
-Usage: $0 [-x FX_EXECUTABLE] [TESTS...]
+Usage: $0 [option] [TESTS...]
 Options
- -x FX_EXECUTABLE    path to Firefox executable (default: $FX_EXECUTABLE)
- -d                  enable debug logging
  -c                  open JavaScript console and don't quit on completion
+ -d                  enable debug logging
+ -g                  generate test data and quit
+ -x FX_EXECUTABLE    path to Firefox executable (default: $FX_EXECUTABLE)
  TESTS               set of tests to run (default: all)
 DONE
 	exit 1
 }
 
-while getopts "x:dc" opt; do
+while getopts "x:dcg" opt; do
 	case $opt in
 		x)
 			FX_EXECUTABLE="$OPTARG"
 			;;
 		d)
-            DEBUG=true
-            ;;
-        c)
-            FX_ARGS="-jsconsole -noquit"
-            ;;
+			DEBUG=true
+			;;
+		c)
+			FX_ARGS="-jsconsole -noquit"
+			;;
+		g)
+			ZOTERO_ARGS="$ZOTERO_ARGS -makeTestData"
+			;;
 		*)
 			usage
 			;;
@@ -87,13 +95,14 @@ if [ -z $IS_CYGWIN ]; then
 	echo "`MOZ_NO_REMOTE=1 NO_EM_RESTART=1 \"$FX_EXECUTABLE\" -v`"
 fi
 
+
 if [ "$TRAVIS" = true ]; then
-	FX_ARGS="$FX_ARGS --ZoteroNoUserInput"
+	ZOTERO_ARGS="$ZOTERO_ARGS -ZoteroNoUserInput"
 fi
 
 makePath FX_PROFILE "$PROFILE"
 MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$FX_EXECUTABLE" -profile "$FX_PROFILE" \
-    -chrome chrome://zotero-unit/content/runtests.html -test "$TESTS" $FX_ARGS
+    -chrome chrome://zotero-unit/content/runtests.html -test "$TESTS" $ZOTERO_ARGS $FX_ARGS
 
 # Check for success
 test -e "$PROFILE/success"
