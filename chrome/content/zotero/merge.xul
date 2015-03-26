@@ -48,10 +48,18 @@
 		<description id="zotero-merge-instructions"/>
 		<zoteromergegroup flex="1"/>
 		<separator class="thin"/>
-		<hbox id="zotero-step-count">
-			<label id="zotero-merge-num-objects"/>
-			<label value="&zotero.merge.of;"/>
-			<label id="zotero-merge-total-objects"/>
+		<hbox align="center">
+			<separator orient="vertical" flex="1"/>
+			<hbox>
+				<checkbox id="resolve-all"
+					oncommand="Zotero_Merge_Window.onResolveAllChange(this.checked)"/>
+			</hbox>
+			<separator orient="vertical"/>
+			<hbox id="zotero-step-count">
+				<label id="zotero-merge-num-objects"/>
+				<label value="&zotero.merge.of;"/>
+				<label id="zotero-merge-total-objects"/>
+			</hbox>
 		</hbox>
 	</wizardpage>
 </wizard>

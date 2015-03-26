@@ -62,6 +62,7 @@ var Zotero_Merge_Window = new function () {
 		}
 		
 		_mergeGroup.type = _io.dataIn.type;
+		_mergeGroup.onSelectionChange = _updateResolveAllCheckbox;
 		
 		switch (_mergeGroup.type) {
 			case 'item':
@@ -77,6 +78,8 @@ var Zotero_Merge_Window = new function () {
 		_mergeGroup.leftCaption = _io.dataIn.captions[0];
 		_mergeGroup.rightCaption = _io.dataIn.captions[1];
 		_mergeGroup.mergeCaption = _io.dataIn.captions[2];
+		
+		_resolveAllCheckbox = document.getElementById('resolve-all');
 		
 		_numObjects = document.getElementById('zotero-merge-num-objects');
 		document.getElementById('zotero-merge-total-objects').value = _objects.length;
@@ -101,8 +104,15 @@ var Zotero_Merge_Window = new function () {
 		
 		// Restore previously merged object into merge pane
 		_mergeGroup.merge = _merged[_pos].ref;
-		_mergeGroup.leftpane.removeAttribute("selected");
-		_mergeGroup.rightpane.removeAttribute("selected");
+		if (_merged[_pos].id == _mergeGroup.left.id) {
+			_mergeGroup.leftpane.setAttribute("selected", "true");
+			_mergeGroup.rightpane.removeAttribute("selected");
+		}
+		else {
+			_mergeGroup.leftpane.removeAttribute("selected");
+			_mergeGroup.rightpane.setAttribute("selected", "true");
+		}
+		_updateResolveAllCheckbox();
 		
 		if (_mergeGroup.type == 'item') {
 			_updateChangedCreators();
@@ -125,7 +135,7 @@ var Zotero_Merge_Window = new function () {
 	
 	
 	function onNext() {
-		if (_pos + 1 == _objects.length) {
+		if (_pos + 1 == _objects.length || _resolveAllCheckbox.checked) {
 			return true;
 		}
 		
@@ -160,43 +170,17 @@ var Zotero_Merge_Window = new function () {
 			return;
 		}
 		
+		_updateResolveAllCheckbox();
+		
 		if (_mergeGroup.type == 'item') {
 			_updateChangedCreators();
 		}
 		
-		// On Windows the buttons don't move when one is hidden
-		if ((_pos + 1) != _objects.length) {
-			var nextButton = _wizard.getButton("next");
-			
-			if (Zotero.isMac) {
-				nextButton.setAttribute("hidden", "false");
-				_wizard.getButton("finish").setAttribute("hidden", "true");
-			}
-			else {
-				var buttons = document.getAnonymousElementByAttribute(_wizard, "anonid", "Buttons");
-				var deck = document.getAnonymousElementByAttribute(buttons, "anonid", "WizardButtonDeck");
-				deck.selectedIndex = 1;
-			}
-			
-			_setInstructionsString(nextButton.label);
+		if (_isLastConflict()) {
+			_showFinishButton();
 		}
-		// Last object
 		else {
-			var finishButton = _wizard.getButton("finish");
-			
-			if (Zotero.isMac) {
-				_wizard.getButton("next").setAttribute("hidden", "true");
-				finishButton.setAttribute("hidden", "false");
-			}
-			// Windows uses a deck to switch between the Next and Finish buttons
-			// TODO: check Linux
-			else {
-				var buttons = document.getAnonymousElementByAttribute(_wizard, "anonid", "Buttons");
-				var deck = document.getAnonymousElementByAttribute(buttons, "anonid", "WizardButtonDeck");
-				deck.selectedIndex = 0;
-			}
-			
-			_setInstructionsString(finishButton.label);
+			_showNextButton();
 		}
 		
 		return false;
@@ -204,7 +188,20 @@ var Zotero_Merge_Window = new function () {
 	
 	
 	function onFinish() {
-		_merged[_pos] = _getCurrentMergeObject();
+		// If using one side for all remaining, update merge object
+		if (!_isLastConflict() && _resolveAllCheckbox.checked) {
+			let useRemote = _mergeGroup.rightpane.getAttribute("selected") == "true";
+			for (let i = _pos; i < _objects.length; i++) {
+				_merged[i] = _getMergeObject(
+					_objects[i][useRemote ? 1 : 0],
+					_objects[i][0],
+					_objects[i][1]
+				);
+			}
+		}
+		else {
+			_merged[_pos] = _getCurrentMergeObject();
+		}
 		
 		_io.dataOut = _merged;
 		return true;
@@ -216,18 +213,83 @@ var Zotero_Merge_Window = new function () {
 	}
 	
 	
-	function _getCurrentMergeObject() {
-		var id = _mergeGroup.merge == 'deleted' ?
-			(_mergeGroup.left == 'deleted'
-				? _mergeGroup.right.id : _mergeGroup.left.id)
-			: _mergeGroup.merge.id;
+	this.onResolveAllChange = function (resolveAll) {
+		if (resolveAll || _isLastConflict()) {
+			_showFinishButton();
+		}
+		else {
+			_showNextButton();
+		}
+	}
+	
+	function _updateResolveAllCheckbox() {
+		if (_mergeGroup.rightpane.getAttribute("selected") == 'true') {
+			var label = 'sync.merge.resolveAllRemote';
+		}
+		else {
+			var label = 'sync.merge.resolveAllLocal';
+		}
+		_resolveAllCheckbox.label = Zotero.getString(label);
+	}
+	
+	
+	function _isLastConflict() {
+		return (_pos + 1) == _objects.length;
+	}
+	
+	
+	function _showNextButton() {
+		var nextButton = _wizard.getButton("next");
+		
+		if (Zotero.isMac) {
+			nextButton.setAttribute("hidden", "false");
+			_wizard.getButton("finish").setAttribute("hidden", "true");
+		}
+		else {
+			var buttons = document.getAnonymousElementByAttribute(_wizard, "anonid", "Buttons");
+			var deck = document.getAnonymousElementByAttribute(buttons, "anonid", "WizardButtonDeck");
+			deck.selectedIndex = 1;
+		}
+		
+		_setInstructionsString(nextButton.label);
+	}
+	
+	
+	function _showFinishButton() {
+		var finishButton = _wizard.getButton("finish");
+		
+		if (Zotero.isMac) {
+			_wizard.getButton("next").setAttribute("hidden", "true");
+			finishButton.setAttribute("hidden", "false");
+		}
+		// Windows uses a deck to switch between the Next and Finish buttons
+		// TODO: check Linux
+		else {
+			var buttons = document.getAnonymousElementByAttribute(_wizard, "anonid", "Buttons");
+			var deck = document.getAnonymousElementByAttribute(buttons, "anonid", "WizardButtonDeck");
+			deck.selectedIndex = 0;
+		}
+		
+		_setInstructionsString(finishButton.label);
+	}
+	
+	
+	function _getMergeObject(ref, left, right) {
+		var id = ref == 'deleted'
+			? (left == 'deleted' ? right.id : left.id)
+			: ref.id;
 		
 		return {
 			id: id,
-			ref: _mergeGroup.merge,
-			left: _mergeGroup.left,
-			right: _mergeGroup.right
+			ref: ref,
+			left: left,
+			right: right
 		};
+	}
+	
+	
+	function _getCurrentMergeObject() {
+		return _getMergeObject(_mergeGroup.merge, _mergeGroup.left, _mergeGroup.right);
 	}
 	
 	
