@@ -2558,6 +2558,7 @@ Zotero.Sync.Server = new function () {
 		}
 		
 		Zotero.debug(e, 1);
+		Components.utils.reportError(e);
 		
 		_syncInProgress = false;
 		Zotero.DB.rollbackAllTransactions();
