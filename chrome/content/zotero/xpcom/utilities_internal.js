@@ -274,6 +274,9 @@ Zotero.Utilities.Internal = {
 	 * @param {nsISupports} target file
 	 */
 	saveURI: function (wbp, source, target) {
+		// Handle gzip encoding
+		wbp.persistFlags |= Ci.nsIWebBrowserPersist.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
+		
 		// Firefox 35 and below
 		try {
 			wbp.saveURI(source, null, null, null, null, target, null);
