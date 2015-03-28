@@ -177,14 +177,18 @@ Zotero_Preferences.Search = {
 					var converterVersion = xmlhttp.responseText.split(/\s/)[0];
 					var infoVersion = xmlhttp.responseText.split(/\s/)[1];
 					
+					// Install if not installed, version unknown, Xpdf 3.02 (to upgrade to Poppler),
+					// or outdated
 					var converterVersionAvailable = converterVersion &&
 						(!converterIsRegistered ||
-							Zotero.Fulltext.pdfConverterVersion == 'UNKNOWN' ||
-							converterVersion > Zotero.Fulltext.pdfConverterVersion);
+							Zotero.Fulltext.pdfConverterVersion == 'UNKNOWN'
+								|| (converterVersion != '3.02' && Zotero.Fulltext.pdfConverterVersion == '3.02')
+								||  converterVersion > Zotero.Fulltext.pdfConverterVersion);
 					var infoVersionAvailable = infoVersion &&
 						(!infoIsRegistered ||
-							Zotero.Fulltext.pdfInfoVersion == 'UNKNOWN' ||
-							infoVersion > Zotero.Fulltext.pdfInfoVersion);
+							Zotero.Fulltext.pdfInfoVersion == 'UNKNOWN'
+								|| (infoVersion != '3.02' && Zotero.Fulltext.pdfInfoVersion == '3.02')
+								|| infoVersion > Zotero.Fulltext.pdfInfoVersion);
 					var bothAvailable = converterVersionAvailable && infoVersionAvailable;
 					
 					/*
@@ -246,7 +250,44 @@ Zotero_Preferences.Search = {
 								info: infoVersionAvailable ?
 									infoVersion : null
 							};
-							self.installPDFTools(installVersions);
+							
+							document.getElementById('pdftools-update-button').disabled = true;
+							var str = Zotero.getString('zotero.preferences.search.pdf.downloading');
+							document.getElementById('pdftools-update-button').setAttribute('label', str);
+							
+							if (converterVersionAvailable && infoVersionAvailable) {
+								Zotero.Fulltext.downloadPDFTool('converter', converterVersion, function (success) {
+									if (!success) {
+										self.onPDFToolsDownloadError("Error downloading pdftotext");
+										return;
+									}
+									Zotero.Fulltext.downloadPDFTool('info', infoVersion, function (success) {
+										if (!success) {
+											self.onPDFToolsDownloadError("Error downloading pdfinfo");
+											return;
+										}
+										self.updatePDFToolsStatus();
+									});
+								});
+							}
+							else if (converterVersionAvailable) {
+								Zotero.Fulltext.downloadPDFTool('converter', converterVersion, function (success) {
+									if (!success) {
+										self.onPDFToolsDownloadError("Error downloading pdftotext");
+										return;
+									}
+									self.updatePDFToolsStatus();
+								});
+							}
+							else {
+								Zotero.Fulltext.downloadPDFTool('info', infoVersion, function (success) {
+									if (!success) {
+										self.onPDFToolsDownloadError("Error downloading pdfinfo");
+										return;
+									}
+									self.updatePDFToolsStatus();
+								});
+							}
 						}
 					}
 				}
@@ -264,135 +305,6 @@ Zotero_Preferences.Search = {
 		if (!sent) {
 			this.onPDFToolsDownloadError();
 		}
-	},
-	
-	
-	/*
-	 * Begin installation of specified PDF tools from server -- does a HEAD call to
-	 * make sure file exists and then calls downloadPDFTool() if so
-	 */
-	installPDFTools: function (installVersions) {
-		if (!installVersions) {
-			installVersions = {
-				converter: true,
-				info: true
-			};
-		}
-		
-		// We install the converter first if it's available
-		var url = Zotero.Fulltext.pdfToolsDownloadBaseURL;
-		if (installVersions.converter) {
-			var tool = 'converter';
-			var version = installVersions.converter;
-			url += Zotero.Fulltext.pdfConverterFileName + '-' + installVersions.converter;
-		}
-		else if (installVersions.info) {
-			var tool = 'info';
-			var version = installVersions.info;
-			url += Zotero.Fulltext.pdfInfoFileName + '-' + installVersions.info;
-		}
-		else {
-			return; 
-		}
-		
-		// Find latest version for this platform
-		var self = this;
-		var sent = Zotero.HTTP.doHead(url, function (xmlhttp) {
-			try {
-				if (xmlhttp.status == 200) {
-					// If doing both and on converter, chain pdfinfo
-					if (installVersions.converter && installVersions.info) {
-						self.downloadPDFTool(tool, version, function () {
-							return self.installPDFTools({ info: installVersions.info });
-						});
-					}
-					else {
-						self.downloadPDFTool(tool, version);
-					}
-				}
-				// Version not found for platform
-				else if (xmlhttp.status == 404) {
-					self.onPDFToolsDownloadError(404);
-				}
-			}
-			catch (e) {
-				self.onPDFToolsDownloadError(e);
-			}
-		});
-		
-		// Browser is offline
-		if (!sent) {
-			self.onPDFToolsDownloadError();
-		}
-	},
-	
-	
-	/*
-	 * Download and install specified PDF tool
-	 */
-	downloadPDFTool: function (tool, version, callback) {
-		var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-							.getService(Components.interfaces.nsIIOService);
-		
-		if (tool == 'converter') {
-			var fileName = Zotero.Fulltext.pdfConverterFileName; 
-		}
-		else {
-			var fileName = Zotero.Fulltext.pdfInfoFileName;
-		}
-		
-		
-		var url = Zotero.Fulltext.pdfToolsDownloadBaseURL + fileName + '-' + version;
-		var uri = ioService.newURI(url, null, null);
-		
-		var file = Zotero.getZoteroDirectory();
-		file.append(fileName);
-		var fileURL = ioService.newFileURI(file);
-		
-		const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-		var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-					.createInstance(nsIWBP);
-		
-		var self = this;
-		var progressListener = new Zotero.WebProgressFinishListener(function () {
-			// Set permissions to 755
-			if (Zotero.isMac) {
-				file.permissions = 33261;
-			}
-			else if (Zotero.isLinux) {
-				file.permissions = 493;
-			}
-			
-			// Write the version number to a file
-			var versionFile = Zotero.getZoteroDirectory();
-			versionFile.append(fileName + '.version');
-			Zotero.File.putContents(versionFile, version + '');
-			
-			Zotero.Fulltext.registerPDFTool(tool);
-			
-			// Used to install info tool after converter
-			if (callback) {
-				callback();
-			}
-			// If done
-			else {
-				self.updatePDFToolsStatus();
-			}
-		});
-		
-		/*
-		var tr = Components.classes["@mozilla.org/transfer;1"].
-			createInstance(Components.interfaces.nsITransfer);
-		tr.init(uri, fileURL, "", null, null, null, wbp);
-		*/
-		
-		document.getElementById('pdftools-update-button').disabled = true;
-		var str = Zotero.getString('zotero.preferences.search.pdf.downloading');
-		document.getElementById('pdftools-update-button').setAttribute('label', str);
-		
-		wbp.progressListener = progressListener;
-		Zotero.debug("Saving " + uri.spec + " to " + fileURL.spec);
-		Zotero.Utilities.Internal.saveURI(wbp, uri, fileURL);
 	},
 	
 	
