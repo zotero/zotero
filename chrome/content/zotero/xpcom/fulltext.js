@@ -165,6 +165,78 @@ Zotero.Fulltext = new function(){
 	
 	
 	/*
+	 * Download and install latest PDF tool
+	 */
+	this.downloadPDFTool = function (tool, version, callback) {
+		try {
+			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+				.getService(Components.interfaces.nsIIOService);
+			
+			if (tool == 'converter') {
+				var fileName = this.pdfConverterFileName;
+			}
+			else {
+				var fileName = this.pdfInfoFileName;
+			}
+			
+			var spec = this.pdfToolsDownloadBaseURL + fileName + '-' + version;
+			var uri = ioService.newURI(spec, null, null);
+			
+			var file = Zotero.getTempDirectory();
+			file.append(fileName);
+			
+			Components.utils.import("resource://gre/modules/NetUtil.jsm");
+			Components.utils.import("resource://gre/modules/FileUtils.jsm");
+			
+			Zotero.debug("Saving " + uri.spec + " to " + file.path);
+			var output = FileUtils.openSafeFileOutputStream(file);
+			NetUtil.asyncFetch(uri, function (is, status) {
+				if (!Components.isSuccessCode(status)) {
+					Zotero.debug(status, 1);
+					Components.utils.reportError(status);
+					if (callback) {
+						callback(false);
+					}
+					return;
+				}
+				
+				Zotero.File.putContentsAsync(file, is)
+				.then(function () {
+					// Set permissions to 755
+					if (Zotero.isMac) {
+						file.permissions = 33261;
+					}
+					else if (Zotero.isLinux) {
+						file.permissions = 493;
+					}
+					
+					var destDir = Zotero.getZoteroDirectory()
+					file.moveTo(destDir, null);
+					
+					// Write the version number to a file
+					var versionFile = destDir.clone();
+					versionFile.append(fileName + '.version');
+					Zotero.File.putContents(versionFile, version + '');
+					
+					Zotero.Fulltext.registerPDFTool(tool);
+					
+					if (callback) {
+						callback(true);
+					}
+				});
+			});
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+			if (callback) {
+				callback(false);
+			}
+		}
+	};
+	
+	
+	/*
 	 * Looks for pdftotext-{platform}[.exe] in the Zotero data directory
 	 *
 	 * {platform} is navigator.platform, with spaces replaced by hyphens
