@@ -2083,7 +2083,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			'nsLivemarkService.js',
 			'Sync.Engine.Tabs',
 			'content-sessionStore.js',
-			'org.mozilla.appSessions'
+			'org.mozilla.appSessions',
+			'bad script XDR magic number'
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
