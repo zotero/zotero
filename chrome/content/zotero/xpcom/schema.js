@@ -1899,7 +1899,8 @@ Zotero.Schema = new function(){
 			return false;
 		}
 		else if (fromVersion > toVersion) {
-			throw("Zotero user data DB version is newer than SQL file");
+			throw new Error("Zotero user data DB version is newer than SQL file "
+				+ "(" + toVersion + " < " + fromVersion + ")");
 		}
 		
 		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);

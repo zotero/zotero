@@ -608,13 +608,13 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				var updated = Zotero.Schema.updateSchema();
 			}
 			catch (e) {
-				if (typeof e == 'string' && e.match('newer than SQL file')) {
-					var kbURL = "http://zotero.org/support/kb/newer_db_version";
-					var msg = Zotero.localeJoin([
-							Zotero.getString('startupError.zoteroVersionIsOlder'),
-							Zotero.getString('startupError.zoteroVersionIsOlder.upgrade')
-						]) + "\n\n"
-						+ Zotero.getString('startupError.zoteroVersionIsOlder.current', Zotero.version) + "\n\n"
+				if (e.toString().match('newer than SQL file')) {
+					let versions = e.toString().match(/\((\d+) < \d+\)/);
+					let kbURL = "https://www.zotero.org/support/kb/newer_db_version";
+					let msg = Zotero.getString('startupError.zoteroVersionIsOlder') + " "
+						+ Zotero.getString('startupError.zoteroVersionIsOlder.upgrade') + "\n\n"
+						+ Zotero.getString('startupError.zoteroVersionIsOlder.current', Zotero.version) + "\n"
+						+ (versions ? "DB: " + versions[1] + "\n\n" : "\n")
 						+ Zotero.getString('general.seeForMoreInformation', kbURL);
 					Zotero.startupError = msg;
 					_startupErrorHandler = function() {
