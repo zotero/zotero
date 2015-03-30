@@ -46,7 +46,7 @@ describe("Zotero.Utilities", function() {
 			assert.equal(cleanISBN('9781' + ignoredChars + '234567897'), '9781234567897', 'stripped off all ignored characters');
 			
 			let isbnChars = ignoredChars + '1234567890';
-			for (let i=1; i<65536; i++) {
+			for (let i=1; i<1327; i++) { // More common characters through Cyrillic letters
 				let c = String.fromCharCode(i);
 				if (isbnChars.indexOf(c) != -1) continue;
 				
@@ -143,7 +143,7 @@ describe("Zotero.Utilities", function() {
 			assert.equal(cleanISSN('1' + ignoredChars + '2345679'), '1234-5679', 'stripped off all ignored characters');
 			
 			let isbnChars = ignoredChars + '1234567890';
-			for (let i=1; i<65536; i++) {
+			for (let i=1; i<1327; i++) { // More common characters through Cyrillic letters
 				let c = String.fromCharCode(i);
 				if (isbnChars.indexOf(c) != -1) continue;
 				
