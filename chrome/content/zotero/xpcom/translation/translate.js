@@ -1505,8 +1505,15 @@ Zotero.Translate.Base.prototype = {
 	 * Called when all translators have been collected for detection
 	 */
 	"_detectTranslatorsCollected":function() {
-		Zotero.debug("Translate: All translator detect calls and RPC calls complete");
+		Zotero.debug("Translate: All translator detect calls and RPC calls complete:");
 		this._foundTranslators.sort(function(a, b) { return a.priority-b.priority });
+		if (this._foundTranslators.length) {
+			this._foundTranslators.forEach(function(t) {
+				Zotero.debug("\t" + t.label + ": " + t.priority);
+			});
+		} else {
+			Zotero.debug("\tNo suitable translators found");
+		}
 		this._runHandler("translators", this._foundTranslators);
 	},
 	
