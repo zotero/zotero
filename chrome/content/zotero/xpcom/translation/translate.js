@@ -1505,8 +1505,15 @@ Zotero.Translate.Base.prototype = {
 	 * Called when all translators have been collected for detection
 	 */
 	"_detectTranslatorsCollected":function() {
-		Zotero.debug("Translate: All translator detect calls and RPC calls complete");
+		Zotero.debug("Translate: All translator detect calls and RPC calls complete:");
 		this._foundTranslators.sort(function(a, b) { return a.priority-b.priority });
+		if (this._foundTranslators.length) {
+			this._foundTranslators.forEach(function(t) {
+				Zotero.debug("\t" + t.label + ": " + t.priority);
+			});
+		} else {
+			Zotero.debug("\tNo suitable translators found");
+		}
 		this._runHandler("translators", this._foundTranslators);
 	},
 	
@@ -1528,7 +1535,8 @@ Zotero.Translate.Base.prototype = {
 		this._aborted = false;
 		this.saveQueue = [];
 		
-		Zotero.debug("Translate: Parsing code for "+translator.label, 4);
+		Zotero.debug("Translate: Parsing code for " + translator.label + " "
+			+ "(" + translator.translatorID + ", " + translator.lastUpdated + ")", 4);
 		
 		try {
 			this._sandboxManager.eval("var exports = {}, ZOTERO_TRANSLATOR_INFO = "+translator.code,
