@@ -1528,7 +1528,8 @@ Zotero.Translate.Base.prototype = {
 		this._aborted = false;
 		this.saveQueue = [];
 		
-		Zotero.debug("Translate: Parsing code for "+translator.label, 4);
+		Zotero.debug("Translate: Parsing code for " + translator.label + " "
+			+ "(" + translator.translatorID + ", " + translator.lastUpdated + ")", 4);
 		
 		try {
 			this._sandboxManager.eval("var exports = {}, ZOTERO_TRANSLATOR_INFO = "+translator.code,
