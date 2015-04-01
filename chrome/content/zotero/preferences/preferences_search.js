@@ -162,138 +162,120 @@ Zotero_Preferences.Search = {
 	 * if a newer version is available
 	 */
 	checkPDFToolsDownloadVersion: function () {
-		var url = Zotero.Fulltext.pdfToolsDownloadBaseURL
-					+ Zotero.platform.replace(' ', '-') + '.latest';
+		var url = Zotero.Fulltext.pdfToolsDownloadBaseURL + 'latest.json';
 		
 		// Find latest version for this platform
 		var self = this;
 		var sent = Zotero.HTTP.doGet(url, function (xmlhttp) {
 			try {
-				if (xmlhttp.status == 200) {
-					var converterIsRegistered = Zotero.Fulltext.pdfConverterIsRegistered();
-					var infoIsRegistered = Zotero.Fulltext.pdfInfoIsRegistered();
-					var bothRegistered = converterIsRegistered && infoIsRegistered;
+				if (xmlhttp.status != 200) {
+					throw new Error("Unexpected response code " + xmlhttp.status);
+				}
+				
+				var platform = Zotero.platform.replace(/\s/g, '-');
+				var json = JSON.parse(xmlhttp.responseText);
+				var latestVersion = json[platform] || json['default'];
+				
+				Zotero.debug("Latest PDF tools version for " + platform + " is " + latestVersion);
+				
+				var converterIsRegistered = Zotero.Fulltext.pdfConverterIsRegistered();
+				var infoIsRegistered = Zotero.Fulltext.pdfInfoIsRegistered();
+				var bothRegistered = converterIsRegistered && infoIsRegistered;
+				
+				// Install if not installed, version unknown, outdated, or
+				// Xpdf 3.02/3.04 (to upgrade to Poppler),
+				var converterVersionAvailable = (!converterIsRegistered ||
+						Zotero.Fulltext.pdfConverterVersion == 'UNKNOWN'
+							|| latestVersion > Zotero.Fulltext.pdfConverterVersion
+							|| (latestVersion != '3.02' && Zotero.Fulltext.pdfConverterVersion == '3.02')
+							|| (latestVersion != '3.02' && latestVersion != '3.04' && Zotero.Fulltext.pdfConverterVersion == '3.04'));
+				var infoVersionAvailable = (!infoIsRegistered ||
+						Zotero.Fulltext.pdfInfoVersion == 'UNKNOWN'
+							|| latestVersion > Zotero.Fulltext.pdfInfoVersion
+							|| (latestVersion != '3.02' && Zotero.Fulltext.pdfInfoVersion == '3.02')
+							|| (latestVersion != '3.02' && latestVersion != '3.04' && Zotero.Fulltext.pdfInfoVersion == '3.04'));
+				var bothAvailable = converterVersionAvailable && infoVersionAvailable;
+				
+				// Up to date -- disable update button
+				if (!converterVersionAvailable && !infoVersionAvailable) {
+					var button = document.getElementById('pdftools-update-button');
+					button.setAttribute('label', Zotero.getString('zotero.preferences.update.upToDate'));
+					button.setAttribute('disabled', true);
+				}
+				// New version available -- display update prompt
+				else {
+					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
+							createInstance(Components.interfaces.nsIPromptService);
+					var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 					
-					var converterVersion = xmlhttp.responseText.split(/\s/)[0];
-					var infoVersion = xmlhttp.responseText.split(/\s/)[1];
+					var msg = Zotero.getString('zotero.preferences.search.pdf.available'
+						+ ((converterIsRegistered || infoIsRegistered) ? 'Updates' : 'Downloads'),
+						[Zotero.platform, 'zotero.org']) + '\n\n';
 					
-					// Install if not installed, version unknown, Xpdf 3.02 (to upgrade to Poppler),
-					// or outdated
-					var converterVersionAvailable = converterVersion &&
-						(!converterIsRegistered ||
-							Zotero.Fulltext.pdfConverterVersion == 'UNKNOWN'
-								|| (converterVersion != '3.02' && Zotero.Fulltext.pdfConverterVersion == '3.02')
-								||  converterVersion > Zotero.Fulltext.pdfConverterVersion);
-					var infoVersionAvailable = infoVersion &&
-						(!infoIsRegistered ||
-							Zotero.Fulltext.pdfInfoVersion == 'UNKNOWN'
-								|| (infoVersion != '3.02' && Zotero.Fulltext.pdfInfoVersion == '3.02')
-								|| infoVersion > Zotero.Fulltext.pdfInfoVersion);
-					var bothAvailable = converterVersionAvailable && infoVersionAvailable;
-					
-					/*
-					Zotero.debug(converterIsRegistered);
-					Zotero.debug(infoIsRegistered);
-					Zotero.debug(converterVersion);
-					Zotero.debug(infoVersion);
-					Zotero.debug(Zotero.Fulltext.pdfConverterVersion);
-					Zotero.debug(Zotero.Fulltext.pdfInfoVersion);
-					Zotero.debug(converterVersionAvailable);
-					Zotero.debug(infoVersionAvailable);
-					*/
-					
-					// Up to date -- disable update button
-					if (!converterVersionAvailable && !infoVersionAvailable) {
-						var button = document.getElementById('pdftools-update-button');
-						button.setAttribute('label', Zotero.getString('zotero.preferences.update.upToDate'));
-						button.setAttribute('disabled', true);
+					if (converterVersionAvailable) {
+						let tvp = Zotero.getString('zotero.preferences.search.pdf.toolVersionPlatform',
+							[Zotero.Fulltext.pdfConverterName, latestVersion]);
+						msg += '- ' + tvp + '\n';
 					}
-					// New version available -- display update prompt
-					else {
-						var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
-								createInstance(Components.interfaces.nsIPromptService);
-						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+					if (infoVersionAvailable) {
+						let tvp = Zotero.getString('zotero.preferences.search.pdf.toolVersionPlatform',
+							[Zotero.Fulltext.pdfInfoName, latestVersion]);
+						msg += '- ' + tvp + '\n';
+					}
+					msg += '\n';
+					msg += Zotero.getString('zotero.preferences.search.pdf.zoteroCanInstallVersion'
+							+ (bothAvailable ? 's' : ''));
+					
+					var index = ps.confirmEx(null,
+						converterIsRegistered ?
+							Zotero.getString('general.updateAvailable') : '',
+						msg,
+						buttonFlags,
+						converterIsRegistered ?
+							Zotero.getString('general.upgrade') :
+							Zotero.getString('general.install'),
+						null, null, null, {});
+					
+					if (index == 0) {
+						document.getElementById('pdftools-update-button').disabled = true;
+						var str = Zotero.getString('zotero.preferences.search.pdf.downloading');
+						document.getElementById('pdftools-update-button').setAttribute('label', str);
 						
-						var msg = Zotero.getString('zotero.preferences.search.pdf.available'
-							+ ((converterIsRegistered || infoIsRegistered) ? 'Updates' : 'Downloads'),
-							[Zotero.platform, 'zotero.org']) + '\n\n';
-						
-						if (converterVersionAvailable) {
-							let tvp = Zotero.getString('zotero.preferences.search.pdf.toolVersionPlatform',
-								[Zotero.Fulltext.pdfConverterName, converterVersion]);
-							msg += '- ' + tvp + '\n';
-						}
-						if (infoVersionAvailable) {
-							let tvp = Zotero.getString('zotero.preferences.search.pdf.toolVersionPlatform',
-								[Zotero.Fulltext.pdfInfoName, infoVersion]);
-							msg += '- ' + tvp + '\n';
-						}
-						msg += '\n';
-						msg += Zotero.getString('zotero.preferences.search.pdf.zoteroCanInstallVersion'
-								+ (bothAvailable ? 's' : ''));
-						
-						var index = ps.confirmEx(null,
-							converterIsRegistered ?
-								Zotero.getString('general.updateAvailable') : '',
-							msg,
-							buttonFlags,
-							converterIsRegistered ?
-								Zotero.getString('general.upgrade') :
-								Zotero.getString('general.install'),
-							null, null, null, {});
-						
-						if (index == 0) {
-							var installVersions = {
-								converter: converterVersionAvailable ?
-									converterVersion : null,
-								info: infoVersionAvailable ?
-									infoVersion : null
-							};
-							
-							document.getElementById('pdftools-update-button').disabled = true;
-							var str = Zotero.getString('zotero.preferences.search.pdf.downloading');
-							document.getElementById('pdftools-update-button').setAttribute('label', str);
-							
-							if (converterVersionAvailable && infoVersionAvailable) {
-								Zotero.Fulltext.downloadPDFTool('converter', converterVersion, function (success) {
-									if (!success) {
-										self.onPDFToolsDownloadError("Error downloading pdftotext");
-										return;
-									}
-									Zotero.Fulltext.downloadPDFTool('info', infoVersion, function (success) {
-										if (!success) {
-											self.onPDFToolsDownloadError("Error downloading pdfinfo");
-											return;
-										}
-										self.updatePDFToolsStatus();
-									});
-								});
-							}
-							else if (converterVersionAvailable) {
-								Zotero.Fulltext.downloadPDFTool('converter', converterVersion, function (success) {
-									if (!success) {
-										self.onPDFToolsDownloadError("Error downloading pdftotext");
-										return;
-									}
-									self.updatePDFToolsStatus();
-								});
-							}
-							else {
-								Zotero.Fulltext.downloadPDFTool('info', infoVersion, function (success) {
+						if (converterVersionAvailable && infoVersionAvailable) {
+							Zotero.Fulltext.downloadPDFTool('converter', latestVersion, function (success) {
+								if (!success) {
+									self.onPDFToolsDownloadError("Error downloading pdftotext");
+									return;
+								}
+								Zotero.Fulltext.downloadPDFTool('info', latestVersion, function (success) {
 									if (!success) {
 										self.onPDFToolsDownloadError("Error downloading pdfinfo");
 										return;
 									}
 									self.updatePDFToolsStatus();
 								});
-							}
+							});
+						}
+						else if (converterVersionAvailable) {
+							Zotero.Fulltext.downloadPDFTool('converter', latestVersion, function (success) {
+								if (!success) {
+									self.onPDFToolsDownloadError("Error downloading pdftotext");
+									return;
+								}
+								self.updatePDFToolsStatus();
+							});
+						}
+						else {
+							Zotero.Fulltext.downloadPDFTool('info', latestVersion, function (success) {
+								if (!success) {
+									self.onPDFToolsDownloadError("Error downloading pdfinfo");
+									return;
+								}
+								self.updatePDFToolsStatus();
+							});
 						}
 					}
-				}
-				// Version not found for platform
-				else if (xmlhttp.status == 404) {
-					self.onPDFToolsDownloadError(404);
 				}
 			}
 			catch (e) {
