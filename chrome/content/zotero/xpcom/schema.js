@@ -1660,8 +1660,11 @@ Zotero.Schema = new function(){
 				else if (installConverter) {
 					Zotero.Fulltext.downloadPDFTool('converter', availableVersion, checkResult);
 				}
-				else {
+				else if (installInfo) {
 					Zotero.Fulltext.downloadPDFTool('info', availableVersion, checkResult);
+				}
+				else {
+					Zotero.debug("PDF tools are up to date");
 				}
 			}
 		};
