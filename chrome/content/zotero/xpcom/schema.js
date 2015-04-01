@@ -1584,6 +1584,9 @@ Zotero.Schema = new function(){
 		var styleUpdates = xmlhttp.responseXML.getElementsByTagName('style');
 		
 		var updatePDFTools = function () {
+			// No updates for PPC
+			if (Zotero.platform == 'MacPPC') return;
+			
 			let pdfToolsUpdates = xmlhttp.responseXML.getElementsByTagName('pdftools');
 			if (pdfToolsUpdates.length) {
 				let availableVersion = pdfToolsUpdates[0].getAttribute('version');
