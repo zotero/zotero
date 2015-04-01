@@ -339,7 +339,7 @@ Zotero.Fulltext = new function(){
 		
 		case 'info':
 			// Modified 3.02 version doesn't use redirection script
-			if (version == '3.02') break;
+			if (version.startsWith('3.02')) break;
 			
 			var script = Zotero.getZoteroDirectory();
 			script.append('pdfinfo.' + _getScriptExtension())
@@ -600,7 +600,7 @@ Zotero.Fulltext = new function(){
 		cacheFile.append(this.pdfConverterCacheFile);
 		
 		// Modified 3.02 version that can output a text file directly
-		if (_pdfInfo && _pdfInfoVersion == '3.02') {
+		if (_pdfInfo && _pdfInfoVersion.startsWith('3.02')) {
 			var infoFile = cacheFile.parent;
 			infoFile.append(this.pdfInfoCacheFile);
 			

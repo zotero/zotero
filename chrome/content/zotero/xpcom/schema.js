@@ -1606,17 +1606,25 @@ Zotero.Schema = new function(){
 				
 				if (Zotero.Fulltext.pdfInfoIsRegistered()) {
 					let currentVersion = Zotero.Fulltext.pdfInfoVersion;
-					if (currentVersion < availableVersion || currentVersion == '3.02'
+					if (currentVersion < availableVersion || currentVersion.startsWith('3.02')
 							|| currentVersion == 'UNKNOWN') {
 						installInfo = true;
 					}
 				}
+				// Install missing component if one is installed
+				else if (Zotero.Fulltext.pdfConverterIsRegistered()) {
+					installInfo = true;
+				}
 				if (Zotero.Fulltext.pdfConverterIsRegistered()) {
 					let currentVersion = Zotero.Fulltext.pdfConverterVersion;
-					if (currentVersion < availableVersion || currentVersion == '3.02'
+					if (currentVersion < availableVersion || currentVersion.startsWith('3.02')
 							|| currentVersion == 'UNKNOWN') {
 						installConverter = true;
 					}
+				}
+				// Install missing component if one is installed
+				else if (Zotero.Fulltext.pdfInfoIsRegistered()) {
+					installConverter = true;
 				}
 				
 				let prefKey = 'pdfToolsInstallError';
