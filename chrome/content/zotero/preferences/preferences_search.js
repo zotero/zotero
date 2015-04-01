@@ -187,13 +187,17 @@ Zotero_Preferences.Search = {
 				var converterVersionAvailable = (!converterIsRegistered ||
 						Zotero.Fulltext.pdfConverterVersion == 'UNKNOWN'
 							|| latestVersion > Zotero.Fulltext.pdfConverterVersion
-							|| (latestVersion != '3.02' && Zotero.Fulltext.pdfConverterVersion == '3.02')
-							|| (latestVersion != '3.02' && latestVersion != '3.04' && Zotero.Fulltext.pdfConverterVersion == '3.04'));
+							|| (!latestVersion.startsWith('3.02')
+								&& Zotero.Fulltext.pdfConverterVersion.startsWith('3.02'))
+							|| (!latestVersion.startsWith('3.02') && latestVersion != '3.04'
+								&& Zotero.Fulltext.pdfConverterVersion == '3.04'));
 				var infoVersionAvailable = (!infoIsRegistered ||
 						Zotero.Fulltext.pdfInfoVersion == 'UNKNOWN'
 							|| latestVersion > Zotero.Fulltext.pdfInfoVersion
-							|| (latestVersion != '3.02' && Zotero.Fulltext.pdfInfoVersion == '3.02')
-							|| (latestVersion != '3.02' && latestVersion != '3.04' && Zotero.Fulltext.pdfInfoVersion == '3.04'));
+							|| (!latestVersion.startsWith('3.02')
+								&& Zotero.Fulltext.pdfInfoVersion.startsWith('3.02'))
+							|| (!latestVersion.startsWith('3.02') && latestVersion != '3.04'
+								&& Zotero.Fulltext.pdfInfoVersion == '3.04'));
 				var bothAvailable = converterVersionAvailable && infoVersionAvailable;
 				
 				// Up to date -- disable update button
