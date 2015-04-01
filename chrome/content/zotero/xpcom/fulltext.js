@@ -309,6 +309,21 @@ Zotero.Fulltext = new function(){
 			return false;
 		}
 		
+		var versionFile = exec.parent;
+		versionFile.append(fileName + '.version');
+		if (versionFile.exists()) {
+			try {
+				var version = Zotero.File.getSample(versionFile).split(/[\r\n\s]/)[0];
+			}
+			catch (e) {
+				Zotero.debug(e, 1);
+				Components.utils.reportError(e);
+			}
+		}
+		if (!version) {
+			var version = 'UNKNOWN';
+		}
+		
 		// If scripts exist, use those instead
 		switch (tool) {
 		case 'converter':
@@ -323,6 +338,9 @@ Zotero.Fulltext = new function(){
 			break;
 		
 		case 'info':
+			// Modified 3.02 version doesn't use redirection script
+			if (version == '3.02') break;
+			
 			var script = Zotero.getZoteroDirectory();
 			script.append('pdfinfo.' + _getScriptExtension())
 			// The redirection script is necessary to run pdfinfo
@@ -333,21 +351,6 @@ Zotero.Fulltext = new function(){
 			Zotero.debug(toolName + " redirection script registered");
 			_pdfInfoScript = script;
 			break;
-		}
-		
-		var versionFile = exec.parent;
-		versionFile.append(fileName + '.version');
-		if (versionFile.exists()) {
-			try {
-				var version = Zotero.File.getSample(versionFile).split(/[\r\n\s]/)[0];
-			}
-			catch (e) {
-				Zotero.debug(e, 1);
-				Components.utils.reportError(e);
-			}
-		}
-		if (!version) {
-			var version = 'UNKNOWN';
 		}
 		
 		switch (tool) {
@@ -596,7 +599,30 @@ Zotero.Fulltext = new function(){
 		}
 		cacheFile.append(this.pdfConverterCacheFile);
 		
-		if (_pdfInfoScript) {
+		// Modified 3.02 version that can output a text file directly
+		if (_pdfInfo && _pdfInfoVersion == '3.02') {
+			var infoFile = cacheFile.parent;
+			infoFile.append(this.pdfInfoCacheFile);
+			
+			var args = [file.path, infoFile.path];
+			
+			Zotero.debug("Running " + _pdfInfo.path + ' '
+				+ args.map(arg => "'" + arg + "'").join(' '));
+			
+			var proc = Components.classes["@mozilla.org/process/util;1"]
+				.createInstance(Components.interfaces.nsIProcess);
+			proc.init(_pdfInfo);
+			
+			try {
+				proc.runw(true, args, args.length);
+				var totalPages = this.getTotalPagesFromFile(itemID);
+			}
+			catch (e) {
+				Zotero.debug("Error running pdfinfo");
+			}
+		}
+		// Use redirection script
+		else if (_pdfInfoScript) {
 			var infoFile = cacheFile.parent;
 			infoFile.append(this.pdfInfoCacheFile);
 			
