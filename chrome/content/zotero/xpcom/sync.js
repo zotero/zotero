@@ -956,7 +956,7 @@ Zotero.Sync.Runner = new function () {
 			
 			var panel = Zotero.Sync.Runner.updateErrorPanel(doc, errors);
 			
-			panel.openPopup(this, "after_end", 4, 0, false, false);
+			panel.openPopup(this, "after_end", 15, 0, false, false);
 		}
 	}
 	
