@@ -421,6 +421,8 @@ Zotero.CollectionTreeView.prototype.getCellText = function(row, column)
 
 Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 {
+	var suffix = Zotero.hiDPI ? "@2x" : "";
+	
 	var itemGroup = this._getItemAtRow(row);
 	var collectionType = itemGroup.type;
 	
@@ -458,10 +460,13 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 		
 		case 'collection':
 		case 'search':
-			return "chrome://zotero-platform/content/treesource-" + collectionType + ".png";
+			if (Zotero.isMac) {
+				return "chrome://zotero-platform/content/treesource-" + collectionType + ".png";
+			}
+			break;
 	}
 	
-	return "chrome://zotero/skin/treesource-" + collectionType + ".png";
+	return "chrome://zotero/skin/treesource-" + collectionType + suffix + ".png";
 }
 
 Zotero.CollectionTreeView.prototype.isContainer = function(row)

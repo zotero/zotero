@@ -667,12 +667,14 @@ Zotero.Tags = new function() {
 	 * @return {Q Promise} A Q promise for a data: URL for a PNG
 	 */
 	this.generateItemsListImage = function (colors, extraImage) {
-		var swatchWidth = 8;
-		var separator = 3;
-		var extraImageSeparator = 1;
-		var extraImageWidth = 16;
-		var canvasHeight = 16;
-		var swatchHeight = 8;
+		var multiplier = (extraImage && extraImage.indexOf('2x') != -1) ? 2 : 1;
+		
+		var swatchWidth = 8 * multiplier;
+		var separator = 3 * multiplier;
+		var extraImageSeparator = 1 * multiplier;
+		var extraImageWidth = 16 * multiplier;
+		var canvasHeight = 16 * multiplier;
+		var swatchHeight = 8 * multiplier;
 		var prependExtraImage = true;
 		
 		var hash = colors.join("") + (extraImage ? extraImage : "");

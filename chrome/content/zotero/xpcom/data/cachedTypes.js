@@ -323,6 +323,8 @@ Zotero.ItemTypes = new function() {
 	}
 	
 	function getImageSrc(itemType) {
+		var suffix = Zotero.hiDPI ? "@2x" : "";
+		
 		if (this.isCustom(itemType)) {
 			var id = this.getID(itemType) - this.customIDOffset;
 			if (_customImages[id]) {
@@ -337,50 +339,57 @@ Zotero.ItemTypes = new function() {
 		}
 		
 		switch (itemType) {
+			// Use treeitem.png
 			case 'attachment-file':
+			case 'document':
+				break;
+			
+			// HiDPI images available
 			case 'attachment-link':
-			case 'attachment-snapshot':
 			case 'attachment-web-link':
-			case 'attachment-pdf':
 			case 'artwork':
 			case 'audioRecording':
 			case 'bill':
-			case 'blogPost':
 			case 'book':
 			case 'bookSection':
-			case 'case':
 			case 'computerProgram':
-			case 'conferencePaper':
-			case 'dictionaryEntry':
-			case 'document':
-			case 'email':
-			case 'encyclopediaArticle':
 			case 'film':
-			case 'forumPost':
-			case 'hearing':
 			case 'instantMessage':
 			case 'interview':
 			case 'journalArticle':
 			case 'letter':
 			case 'magazineArticle':
-			case 'manuscript':
-			case 'map':
 			case 'newspaperArticle':
 			case 'note':
+			case 'report':
+			case 'webpage':
+				return "chrome://zotero/skin/treeitem-" + itemType + suffix + ".png";
+			
+			// No HiDPI images available
+			case 'attachment-snapshot':
+			case 'attachment-pdf':
+			case 'blogPost':
+			case 'case':
+			case 'conferencePaper':
+			case 'dictionaryEntry':
+			case 'email':
+			case 'encyclopediaArticle':
+			case 'forumPost':
+			case 'hearing':
+			case 'manuscript':
+			case 'map':
 			case 'patent':
 			case 'podcast':
 			case 'presentation':
 			case 'radioBroadcast':
-			case 'report':
 			case 'statute':
 			case 'thesis':
 			case 'tvBroadcast':
 			case 'videoRecording':
-			case 'webpage':
 				return "chrome://zotero/skin/treeitem-" + itemType + ".png";
 		}
 		
-		return "chrome://zotero/skin/treeitem.png";
+		return "chrome://zotero/skin/treeitem" + suffix + ".png";
 	}
 }
 

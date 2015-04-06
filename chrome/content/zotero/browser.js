@@ -907,7 +907,7 @@ Zotero_Browser.Tab.prototype.getCaptureIcon = function (hiDPI) {
 	case this.CAPTURE_STATE_TRANSLATABLE:
 		var itemType = this.page.translators[0].itemType;
 		return (itemType === "multiple"
-				? "chrome://zotero/skin/treesource-collection.png"
+				? "chrome://zotero/skin/treesource-collection" + suffix + ".png"
 				: Zotero.ItemTypes.getImageSrc(itemType));
 	
 	// TODO: Show icons for images, PDFs, etc.?

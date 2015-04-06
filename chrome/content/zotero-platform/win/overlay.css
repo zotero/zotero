@@ -100,6 +100,16 @@
 }
 /* End toolbar buttons */
 
+@media (min-resolution: 1dppx) {
+	#zotero-toolbar .toolbarbutton-icon {
+		width: 16px;
+	}
+	
+	#zotero-tb-sync > .toolbarbutton-icon {
+		width: 20px;
+	}
+}
+
 #zotero-tb-search-menu-button {
 	margin: 0 -1px 0 -4px;
 	border: 0;

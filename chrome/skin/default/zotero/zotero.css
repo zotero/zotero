@@ -43,13 +43,6 @@ toolbarpaletteitem[place="palette"] #zotero-toolbar-save-button-single {
 	list-style-image: url("chrome://zotero/skin/treeitem-webpage@2x.png");
 }
 
-@media (min-resolution: 1.5dppx) {
-	#zotero-toolbar-save-button[cui-areatype="toolbar"],
-	#zotero-toolbar-save-button-single[cui-areatype="toolbar"] {
-		list-style-image: url("chrome://zotero/skin/treeitem-webpage@2x.png");
-	}
-}
-
 /* Show single icon for combo buttons in palette */
 toolbarpaletteitem[place="palette"] #zotero-toolbar-main-button {
 	list-style-image: url("chrome://zotero/skin/zotero-z-32px-australis.svg");
@@ -369,4 +362,13 @@ label.zotero-text-link {
 {
 	width: 29.5em;
 	max-width: 29.5em;
+}
+
+
+/* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
+@media (min-resolution: 1.5dppx) {
+	#zotero-toolbar-save-button,#zotero-toolbar-save-button-single  { list-style-image: url("chrome://zotero/skin/treeitem-webpage@2x.png"); }
+	#zotero-toolbar-save-button[cui-areatype="menu-panel"],#zotero-toolbar-save-button-single[cui-areatype="menu-panel"],toolbarpaletteitem[place="palette"] #zotero-toolbar-save-button,toolbarpaletteitem[place="palette"] #zotero-toolbar-save-button-single  { list-style-image: url("chrome://zotero/skin/treeitem-webpage@2x.png"); }
+	.zotero-scrape-popup-library { list-style-image: url('chrome://zotero/skin/treesource-library@2x.png'); }
+	.zotero-scrape-popup-collection { list-style-image: url('chrome://zotero/skin/treesource-collection@2x.png'); }
 }

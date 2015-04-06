@@ -287,11 +287,6 @@
 }
 
 
-#zotero-tb-tag-selector
-{
-	list-style-image: url(chrome://zotero/skin/tag-selector.png);
-}
-
 #zotero-collections-tree, #zotero-items-tree, #zotero-item-pane > groupbox
 {
 	margin: 0;
@@ -408,7 +403,7 @@
 
 .zotero-menuitem-attachments-file
 {
-	list-style-image: url('chrome://zotero/skin/treeitem-attachment-file.png');
+	list-style-image: url('chrome://zotero/skin/treeitem.png');
 }
 
 .zotero-menuitem-attachments-link
@@ -668,4 +663,35 @@
 
 .zotero-box-label {
 	margin-left: 3px !important;
+}
+
+
+/* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
+@media (min-resolution: 1.5dppx) {
+	#zotero-tb-collection-add { list-style-image: url('chrome://zotero/skin/toolbar-collection-add@2x.png'); }
+	#zotero-tb-actions-menu { list-style-image: url('chrome://zotero/skin/cog@2x.png'); }
+	#zotero-tb-add { list-style-image: url('chrome://zotero/skin/toolbar-item-add@2x.png'); }
+	#zotero-tb-attachment-add { list-style-image: url('chrome://zotero/skin/attach@2x.png'); }
+	#zotero-tb-note-add { list-style-image: url('chrome://zotero/skin/toolbar-note-add@2x.png'); }
+	#zotero-menuitem-note { list-style-image: url('chrome://zotero/skin/treeitem-note@2x.png'); }
+	.zotero-menuitem-new-saved-search { list-style-image: url('chrome://zotero/skin/treesource-search@2x.png'); }
+	.zotero-menuitem-show-duplicates { list-style-image: url('chrome://zotero/skin/treesource-duplicates@2x.png'); }
+	.zotero-menuitem-show-unfiled { list-style-image: url('chrome://zotero/skin/treesource-unfiled@2x.png'); }
+	.zotero-menuitem-new-collection { list-style-image: url('chrome://zotero/skin/toolbar-collection-add@2x.png'); }
+	.zotero-menuitem-edit-collection { list-style-image: url('chrome://zotero/skin/toolbar-collection-edit@2x.png'); }
+	.zotero-menuitem-delete-collection { list-style-image: url('chrome://zotero/skin/toolbar-collection-delete@2x.png'); }
+	.zotero-menuitem-show-in-library { list-style-image: url('chrome://zotero/skin/treesource-library@2x.png'); }
+	.zotero-menuitem-move-to-trash { list-style-image: url('chrome://zotero/skin/treesource-trash-full@2x.png'); }
+	.zotero-menuitem-attach-note { list-style-image: url('chrome://zotero/skin/toolbar-note-add@2x.png'); }
+	.zotero-menuitem-attach { list-style-image: url('chrome://zotero/skin/attach@2x.png'); }
+	.zotero-menuitem-attachments-file { list-style-image: url('chrome://zotero/skin/treeitem@2x.png'); }
+	.zotero-menuitem-attachments-link { list-style-image: url('chrome://zotero/skin/treeitem-attachment-link@2x.png'); }
+	.zotero-menuitem-attachments-web-link { list-style-image: url('chrome://zotero/skin/treeitem-attachment-web-link@2x.png'); }
+	.zotero-menuitem-create-report { list-style-image: url('chrome://zotero/skin/treeitem-report@2x.png'); }
+	#zotero-tb-advanced-search { list-style-image: url('chrome://zotero/skin/toolbar-advanced-search@2x.png'); }
+	#zotero-tb-locate { list-style-image: url('chrome://zotero/skin/toolbar-go-arrow@2x.png'); }
+	#zotero-tb-sync-storage-cancel { list-style-image: url(chrome://zotero/skin/control_stop_blue@2x.png); margin-right: 0; }
+	#zotero-tb-sync-error, #zotero-tb-sync-error[mode=warning] { list-style-image: url(chrome://zotero/skin/error@2x.png); }
+	#zotero-tb-sync-error[mode=error] { list-style-image: url(chrome://zotero/skin/exclamation@2x.png); }
+	#zotero-pane-stack[fullscreenmode="true"] #zotero-tb-fullscreen { list-style-image: url('chrome://zotero/skin/toolbar-fullscreen-top@2x.png'); }
 }
