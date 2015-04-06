@@ -100,7 +100,7 @@
 }
 /* End toolbar buttons */
 
-@media (min-resolution: 1dppx) {
+@media (min-resolution: 1.5dppx) {
 	#zotero-toolbar .toolbarbutton-icon {
 		width: 16px;
 	}

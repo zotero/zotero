@@ -108,8 +108,12 @@
 }
 
 @media (min-resolution: 1.5dppx) {
-	.zotero-tb-button > .toolbarbutton-icon {
+	#zotero-pane .toolbarbutton-icon {
 		max-width: 28px;
+	}
+	
+	#zotero-tb-sync-error .toolbarbutton-icon {
+		width: 16px;
 	}
 }
 
