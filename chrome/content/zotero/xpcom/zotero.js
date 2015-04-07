@@ -210,6 +210,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		if (options) {
 			if (options.openPane) this.openPane = true;
+			if (options.noUserInput) this.noUserInput = true;
 		}
 		
 		this.mainThread = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;

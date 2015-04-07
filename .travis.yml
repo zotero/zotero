@@ -2,15 +2,22 @@ language: cpp
 compiler:
     - gcc
 env:
-    matrix:
-        - FIREFOXVERSION="36.0.1"
-        - FIREFOXVERSION="31.5.0esr"
+    - FX_PATH_SUFFIX=""
+    - FX_PATH_SUFFIX="-esr"
+    - FX_PATH_SUFFIX="-beta"
+#    - FX_PATH_SUFFIX="-prior-esr"
+matrix:
+    fast_finish: true
+    allow_failures:
+        - env: FX_PATH_SUFFIX="-beta"
+        - env: FX_PATH_SUFFIX="-prior-esr"
 notifications:
     email: false
-before_install:
+install:
+    - wget -r -l1 -np -nd -R "index.html*" "http://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest${FX_PATH_SUFFIX}/linux-x86_64/en-US/?F=0&P=*.tar.*"
+    - tar -xf firefox-*.tar.*
+before_script:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
-    - wget http://ftp.mozilla.org/pub/firefox/releases/${FIREFOXVERSION}/linux-x86_64/en-US/firefox-${FIREFOXVERSION}.tar.bz2
-    - tar -xjf firefox-${FIREFOXVERSION}.tar.bz2
 script:
     - test/runtests.sh -x firefox/firefox

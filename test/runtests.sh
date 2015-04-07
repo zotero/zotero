@@ -77,6 +77,15 @@ user_pref("extensions.zotero.firstRunGuidance", false);
 user_pref("extensions.zotero.firstRun2", false);
 EOF
 
+# -v flag on Windows makes Firefox process hang
+if [ -z $IS_CYGWIN ]; then
+	echo "`MOZ_NO_REMOTE=1 NO_EM_RESTART=1 \"$FX_EXECUTABLE\" -v`"
+fi
+
+if [ "$TRAVIS" = true ]; then
+	FX_ARGS="$FX_ARGS --ZoteroNoUserInput"
+fi
+
 makePath FX_PROFILE "$PROFILE"
 MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$FX_EXECUTABLE" -profile "$FX_PROFILE" \
     -chrome chrome://zotero-unit/content/runtests.html -test "$TESTS" $FX_ARGS
