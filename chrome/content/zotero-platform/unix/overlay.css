@@ -125,9 +125,3 @@
 #zotero-tb-search .textbox-search-icon {
 	visibility: hidden;
 }
-
-/* As of Fx37, the tree doesn't scale HiDPI images properly on Linux */
-#zotero-collections-tree treechildren::-moz-tree-image,
-#zotero-items-tree treechildren::-moz-tree-image {
-	height: 16px;
-}

@@ -24,6 +24,12 @@
 	min-height: 5.2em;
 }
 
+/* As of Fx37, the tree doesn't scale HiDPI images properly on Windows and Linux */
+#zotero-collections-tree treechildren::-moz-tree-image,
+#zotero-items-tree treechildren::-moz-tree-image {
+	height: 16px;
+}
+
 #zotero-collections-tree treechildren::-moz-tree-image(primary)
 {
 	margin-right: 5px;
