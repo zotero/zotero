@@ -318,21 +318,21 @@ var Zotero_QuickFormat = new function () {
 					Zotero.debug("Searched cited items");
 				}
 				
-				_updateItemList(citedItems, citedItemsMatchingSearch, searchResultIDs, isAsync);
+				_updateItemList(citedItems, citedItemsMatchingSearch, str, searchResultIDs, isAsync);
 			}).done();
 			
 			if(!completed) {
 				// We are going to have to wait until items have been retrieved from the document.
 				// Until then, show item list without cited items.
 				Zotero.debug("Getting cited items asynchronously");
-				_updateItemList(false, false, searchResultIDs);
+				_updateItemList(false, false, str, searchResultIDs);
 				isAsync = true;
 			} else {
 				Zotero.debug("Got cited items synchronously");
 			}
 		} else {
 			// No search conditions, so just clear the box
-			_updateItemList([], [], []);
+			_updateItemList([], [], "", []);
 		}
 	}
 	
@@ -353,7 +353,7 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Updates the item list
 	 */
-	function _updateItemList(citedItems, citedItemsMatchingSearch, searchResultIDs, preserveSelection) {
+	function _updateItemList(citedItems, citedItemsMatchingSearch, searchString, searchResultIDs, preserveSelection) {
 		var selectedIndex = 1, previousItemID;
 		
 		// Do this so we can preserve the selected item after cited items have been loaded
@@ -411,7 +411,25 @@ var Zotero_QuickFormat = new function () {
 		if(searchResultIDs.length && (!citedItemsMatchingSearch || citedItemsMatchingSearch.length < 50)) {
 			var items = Zotero.Items.get(searchResultIDs);
 			
+			searchString = searchString.toLowerCase();
+			
 			items.sort(function _itemSort(a, b) {
+				var creatorsA = a.getCreators(), creatorsB = b.getCreators(),
+					caExists = creatorsA.length ? 1 : 0, cbExists = creatorsB.length ? 1 : 0;
+				
+				// Favor left-bound name matches (e.g., "Baum" < "Appelbaum"),
+				// using last name of first author
+				if (caExists && cbExists) {
+					let caStartsWith = creatorsA[0].ref.lastName.toLowerCase().indexOf(searchString) == 0;
+					let cbStartsWith = creatorsB[0].ref.lastName.toLowerCase().indexOf(searchString) == 0;
+					if (caStartsWith && !cbStartsWith) {
+						return -1;
+					}
+					else if (!caStartsWith && cbStartsWith) {
+						return 1;
+					}
+				}
+				
 				var libA = a.libraryID ? a.libraryID : 0, libB = b.libraryID ? b.libraryID : 0;
 				if(libA !== libB) {
 					// Sort by number of cites for library
@@ -430,8 +448,6 @@ var Zotero_QuickFormat = new function () {
 				}
 			
 				// Sort by last name of first author
-				var creatorsA = a.getCreators(), creatorsB = b.getCreators(),
-					caExists = creatorsA.length ? 1 : 0, cbExists = creatorsB.length ? 1 : 0;
 				if(caExists !== cbExists) {
 					return cbExists-caExists;
 				} else if(caExists) {
