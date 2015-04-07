@@ -412,16 +412,16 @@ var Zotero_QuickFormat = new function () {
 			var items = Zotero.Items.get(searchResultIDs);
 			
 			searchString = searchString.toLowerCase();
+			var collation = Zotero.getLocaleCollation();
 			
 			items.sort(function _itemSort(a, b) {
-				var creatorsA = a.getCreators(), creatorsB = b.getCreators(),
-					caExists = creatorsA.length ? 1 : 0, cbExists = creatorsB.length ? 1 : 0;
+				var firstCreatorA = a.firstCreator, firstCreatorB = b.firstCreator;
 				
 				// Favor left-bound name matches (e.g., "Baum" < "Appelbaum"),
 				// using last name of first author
-				if (caExists && cbExists) {
-					let caStartsWith = creatorsA[0].ref.lastName.toLowerCase().indexOf(searchString) == 0;
-					let cbStartsWith = creatorsB[0].ref.lastName.toLowerCase().indexOf(searchString) == 0;
+				if (firstCreatorA && firstCreatorB) {
+					let caStartsWith = firstCreatorA.toLowerCase().indexOf(searchString) == 0;
+					let cbStartsWith = firstCreatorB.toLowerCase().indexOf(searchString) == 0;
 					if (caStartsWith && !cbStartsWith) {
 						return -1;
 					}
@@ -448,10 +448,12 @@ var Zotero_QuickFormat = new function () {
 				}
 			
 				// Sort by last name of first author
-				if(caExists !== cbExists) {
-					return cbExists-caExists;
-				} else if(caExists) {
-					return creatorsA[0].ref.lastName.localeCompare(creatorsB[0].ref.lastName);
+				if (firstCreatorA !== "" && firstCreatorB === "") {
+					return -1;
+				} else if (firstCreatorA === "" && firstCreatorB !== "") {
+					return 1
+				} else if (firstCreatorA) {
+					return collation.compareString(1, firstCreatorA, firstCreatorB);
 				}
 				
 				// Sort by date
