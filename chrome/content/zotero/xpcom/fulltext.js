@@ -381,6 +381,25 @@ Zotero.Fulltext = new function(){
 	}
 	
 	
+	this.getPDFConverterExecAndArgs = function () {
+		if (!this.pdfConverterIsRegistered()) {
+			throw new Error("PDF converter is not registered");
+		}
+		
+		if (_pdfConverterScript) {
+			return {
+				exec: _pdfConverterScript,
+				args: [_pdfConverter.path]
+			}
+		}
+		
+		return {
+			exec: _pdfConverter,
+			args: []
+		}
+	}
+	
+	
 	/*
 	 * Returns true if MIME type is converted to text and cached before indexing
 	 *   (e.g. application/pdf is run through pdftotext)
@@ -640,17 +659,18 @@ Zotero.Fulltext = new function(){
 				var totalPages = this.getTotalPagesFromFile(itemID);
 			}
 			catch (e) {
-				Zotero.debug("Error running pdfinfo");
+				Components.utils.reportError(e);
+				Zotero.debug("Error running pdfinfo", 1);
+				Zotero.debug(e, 1);
 			}
 		}
 		else {
 			Zotero.debug(this.pdfInfoName + " is not available");
 		}
 		
-		var args = []
-		if (_pdfConverterScript) {
-			args.push(_pdfConverter.path);
-		}
+		var proc = Components.classes["@mozilla.org/process/util;1"]
+			.createInstance(Components.interfaces.nsIProcess);
+		var {exec, args} = this.getPDFConverterExecAndArgs();
 		args.push('-enc', 'UTF-8', '-nopgbrk');
 		
 		if (allPages) {
@@ -664,24 +684,16 @@ Zotero.Fulltext = new function(){
 		}
 		args.push(file.path, cacheFile.path);
 		
-		var proc = Components.classes["@mozilla.org/process/util;1"]
-			.createInstance(Components.interfaces.nsIProcess);
-		if (_pdfConverterScript) {
-			Zotero.debug("Running " + _pdfConverterScript.path + ' '
-				+ args.map(arg => "'" + arg + "'").join(' '));
-			proc.init(_pdfConverterScript);
-		}
-		else {
-			Zotero.debug("Running " + _pdfConverter.path + ' '
-				+ args.map(arg => "'" + arg + "'").join(' '));
-			proc.init(_pdfConverter);
-		}
+		Zotero.debug("Running " + exec.path + " " + args.map(arg => "'" + arg + "'").join(" "));
 		
 		try {
+			proc.init(exec);
 			proc.runw(true, args, args.length);
 		}
 		catch (e) {
-			Zotero.debug("Error running pdftotext");
+			Components.utils.reportError(e);
+			Zotero.debug("Error running pdftotext", 1);
+			Zotero.debug(e, 1);
 			return false;
 		}
 		
