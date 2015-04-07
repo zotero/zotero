@@ -730,9 +730,16 @@ Zotero_Preferences.Debug_Output = {
 				}
 			};
 			try {
-				req.sendAsBinary(data);
+				// Send binary data
+				let numBytes = data.length, ui8Data = new Uint8Array(numBytes);
+				for (let i = 0; i < numBytes; i++) {
+					ui8Data[i] = data.charCodeAt(i) & 0xff;
+				}
+				req.send(ui8Data);
 			}
 			catch (e) {
+				Zotero.debug(e, 1);
+				Components.utils.reportError(e);
 				ps.alert(
 					null,
 					Zotero.getString('general.error'),

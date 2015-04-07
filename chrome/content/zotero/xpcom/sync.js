@@ -1804,7 +1804,12 @@ Zotero.Sync.Server = new function () {
 									}
 								};
 								try {
-									req.sendAsBinary(data);
+									// Send binary data
+									let numBytes = data.length, ui8Data = new Uint8Array(numBytes);
+									for (let i = 0; i < numBytes; i++) {
+										ui8Data[i] = data.charCodeAt(i) & 0xff;
+									}
+									req.send(ui8Data);
 								}
 								catch (e) {
 									_error(e);
