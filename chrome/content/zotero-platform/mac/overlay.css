@@ -179,7 +179,7 @@
 	background-size: 14px;
 }
 
-@media (min-resolution: 2dppx) {
+@media (min-resolution: 1.5dppx) {
 	#zotero-pane-stack[oldsearchfield] textbox[type=search] > .textbox-input-box {
 		background: url("chrome://zotero/skin/mac/moz/Search@2x.png") left no-repeat;
 		background-size: 14px;
