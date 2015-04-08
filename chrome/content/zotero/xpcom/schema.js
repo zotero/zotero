@@ -1604,27 +1604,51 @@ Zotero.Schema = new function(){
 					return;
 				}
 				
-				if (Zotero.Fulltext.pdfInfoIsRegistered()) {
-					let currentVersion = Zotero.Fulltext.pdfInfoVersion;
-					if (currentVersion < availableVersion || currentVersion.startsWith('3.02')
-							|| currentVersion == 'UNKNOWN') {
+				// TEMP
+				if (Zotero.isWin) {
+					if (Zotero.Fulltext.pdfInfoIsRegistered()) {
+						if (Zotero.Fulltext.pdfInfoVersion != '3.02a') {
+							installInfo = true;
+						}
+					}
+					// Install missing component if one is installed
+					else if (Zotero.Fulltext.pdfConverterIsRegistered()) {
 						installInfo = true;
 					}
-				}
-				// Install missing component if one is installed
-				else if (Zotero.Fulltext.pdfConverterIsRegistered()) {
-					installInfo = true;
-				}
-				if (Zotero.Fulltext.pdfConverterIsRegistered()) {
-					let currentVersion = Zotero.Fulltext.pdfConverterVersion;
-					if (currentVersion < availableVersion || currentVersion.startsWith('3.02')
-							|| currentVersion == 'UNKNOWN') {
+					if (Zotero.Fulltext.pdfConverterIsRegistered()) {
+						if (Zotero.Fulltext.pdfConverterVersion != '3.02a') {
+							installConverter = true;
+						}
+					}
+					// Install missing component if one is installed
+					else if (Zotero.Fulltext.pdfInfoIsRegistered()) {
 						installConverter = true;
 					}
+					availableVersion = '3.02';
 				}
-				// Install missing component if one is installed
-				else if (Zotero.Fulltext.pdfInfoIsRegistered()) {
-					installConverter = true;
+				else {
+					if (Zotero.Fulltext.pdfInfoIsRegistered()) {
+						let currentVersion = Zotero.Fulltext.pdfInfoVersion;
+						if (currentVersion < availableVersion || currentVersion.startsWith('3.02')
+								|| currentVersion == 'UNKNOWN') {
+							installInfo = true;
+						}
+					}
+					// Install missing component if one is installed
+					else if (Zotero.Fulltext.pdfConverterIsRegistered()) {
+						installInfo = true;
+					}
+					if (Zotero.Fulltext.pdfConverterIsRegistered()) {
+						let currentVersion = Zotero.Fulltext.pdfConverterVersion;
+						if (currentVersion < availableVersion || currentVersion.startsWith('3.02')
+								|| currentVersion == 'UNKNOWN') {
+							installConverter = true;
+						}
+					}
+					// Install missing component if one is installed
+					else if (Zotero.Fulltext.pdfInfoIsRegistered()) {
+						installConverter = true;
+					}
 				}
 				
 				let prefKey = 'pdfToolsInstallError';

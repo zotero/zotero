@@ -142,7 +142,7 @@ var Zotero_RecognizePDF = new function() {
 		var {exec, args} = Zotero.Fulltext.getPDFConverterExecAndArgs();
 		args.push('-enc', 'UTF-8', '-nopgbrk', '-layout', '-l', pages, file.path, cacheFile.path);
 		
-		Zotero.debug("RecognizePDF: Running " + exec + " " + args.map(arg => "'" + arg + "'").join(" "));
+		Zotero.debug("RecognizePDF: Running " + exec.path + " " + args.map(arg => "'" + arg + "'").join(" "));
 		
 		return Zotero.Utilities.Internal.exec(exec, args).then(function() {
 			if(!cacheFile.exists()) {
