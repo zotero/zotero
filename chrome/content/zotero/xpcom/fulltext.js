@@ -191,7 +191,6 @@ Zotero.Fulltext = new function(){
 			Components.utils.import("resource://gre/modules/FileUtils.jsm");
 			
 			Zotero.debug("Saving " + uri.spec + " to " + file.path);
-			var output = FileUtils.openSafeFileOutputStream(file);
 			NetUtil.asyncFetch(uri, function (is, status) {
 				if (!Components.isSuccessCode(status)) {
 					Zotero.debug(status, 1);
@@ -204,9 +203,28 @@ Zotero.Fulltext = new function(){
 				
 				Zotero.File.putContentsAsync(file, is)
 				.then(function () {
+					// Delete if too small, since a 404 might not be detected above
+					if (file.fileSize < 50000) {
+						var msg = file.path + " is too small -- deleting";
+						Zotero.debug(msg, 1);
+						Components.utils.reportError(msg);
+						try {
+							file.remove(false);
+						}
+						catch (e) {
+							Zotero.debug(e, 1);
+							Components.utils.reportError(e);
+						}
+						if (callback) {
+							callback(false);
+						}
+						return;
+					}
+					
 					var scriptExt = _getScriptExtension();
 					// On Windows, write out script to hide pdftotext console window
-					if (tool == 'converter') {
+					// TEMP: disabled
+					if (false && tool == 'converter') {
 						if (Zotero.isWin) {
 							var content = Zotero.File.getContentsFromURL('resource://zotero/hide.' + scriptExt);
 							var scriptFile = Zotero.getTempDirectory();
@@ -215,7 +233,8 @@ Zotero.Fulltext = new function(){
 						}
 					}
 					// Write out output redirection script for pdfinfo
-					else if (tool == 'info') {
+					// TEMP: disabled on Windows
+					else if (!Zotero.isWin && tool == 'info') {
 						var content = Zotero.File.getContentsFromURL('resource://zotero/redirect.' + scriptExt);
 						var scriptFile = Zotero.getTempDirectory();
 						scriptFile.append('pdfinfo.' + scriptExt);
@@ -246,6 +265,10 @@ Zotero.Fulltext = new function(){
 					// Write the version number to a file
 					var versionFile = destDir.clone();
 					versionFile.append(fileName + '.version');
+					// TEMP
+					if (Zotero.isWin) {
+						version = '3.02a';
+					}
 					Zotero.File.putContents(versionFile, version + '');
 					
 					Zotero.Fulltext.registerPDFTool(tool);
@@ -327,7 +350,8 @@ Zotero.Fulltext = new function(){
 		// If scripts exist, use those instead
 		switch (tool) {
 		case 'converter':
-			if (Zotero.isWin) {
+			// TEMP: disabled
+			if (false && Zotero.isWin) {
 				var script = Zotero.getZoteroDirectory();
 				script.append('pdftotext.' + _getScriptExtension())
 				if (script.exists()) {

@@ -182,23 +182,34 @@ Zotero_Preferences.Search = {
 				var infoIsRegistered = Zotero.Fulltext.pdfInfoIsRegistered();
 				var bothRegistered = converterIsRegistered && infoIsRegistered;
 				
+				// On Windows, install if not installed or anything other than 3.02a
+				if (Zotero.isWin) {
+					var converterVersionAvailable = !converterIsRegistered
+						|| Zotero.Fulltext.pdfConverterVersion != '3.02a';
+					var infoVersionAvailable = !infoIsRegistered
+						|| Zotero.Fulltext.pdfInfoVersion != '3.02a';
+					var bothAvailable = converterVersionAvailable && infoVersionAvailable;
+					latestVersion = "3.02a";
+				}
 				// Install if not installed, version unknown, outdated, or
 				// Xpdf 3.02/3.04 (to upgrade to Poppler),
-				var converterVersionAvailable = (!converterIsRegistered ||
-						Zotero.Fulltext.pdfConverterVersion == 'UNKNOWN'
-							|| latestVersion > Zotero.Fulltext.pdfConverterVersion
-							|| (!latestVersion.startsWith('3.02')
-								&& Zotero.Fulltext.pdfConverterVersion.startsWith('3.02'))
-							|| (!latestVersion.startsWith('3.02') && latestVersion != '3.04'
-								&& Zotero.Fulltext.pdfConverterVersion == '3.04'));
-				var infoVersionAvailable = (!infoIsRegistered ||
-						Zotero.Fulltext.pdfInfoVersion == 'UNKNOWN'
-							|| latestVersion > Zotero.Fulltext.pdfInfoVersion
-							|| (!latestVersion.startsWith('3.02')
-								&& Zotero.Fulltext.pdfInfoVersion.startsWith('3.02'))
-							|| (!latestVersion.startsWith('3.02') && latestVersion != '3.04'
-								&& Zotero.Fulltext.pdfInfoVersion == '3.04'));
-				var bothAvailable = converterVersionAvailable && infoVersionAvailable;
+				else {
+					var converterVersionAvailable = (!converterIsRegistered ||
+							Zotero.Fulltext.pdfConverterVersion == 'UNKNOWN'
+								|| latestVersion > Zotero.Fulltext.pdfConverterVersion
+								|| (!latestVersion.startsWith('3.02')
+									&& Zotero.Fulltext.pdfConverterVersion.startsWith('3.02'))
+								|| (!latestVersion.startsWith('3.02') && latestVersion != '3.04'
+									&& Zotero.Fulltext.pdfConverterVersion == '3.04'));
+					var infoVersionAvailable = (!infoIsRegistered ||
+							Zotero.Fulltext.pdfInfoVersion == 'UNKNOWN'
+								|| latestVersion > Zotero.Fulltext.pdfInfoVersion
+								|| (!latestVersion.startsWith('3.02')
+									&& Zotero.Fulltext.pdfInfoVersion.startsWith('3.02'))
+								|| (!latestVersion.startsWith('3.02') && latestVersion != '3.04'
+									&& Zotero.Fulltext.pdfInfoVersion == '3.04'));
+					var bothAvailable = converterVersionAvailable && infoVersionAvailable;
+				}
 				
 				// Up to date -- disable update button
 				if (!converterVersionAvailable && !infoVersionAvailable) {
