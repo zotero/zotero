@@ -2148,21 +2148,6 @@ Zotero.ItemGroup.prototype.getSearchResults = function(asTempTable) {
 	
 	if(!Zotero.ItemGroupCache.lastResults) {
 		var s = this.getSearchObject();
-	
-		// FIXME: Hack to exclude group libraries for now
-		if (this.isSearch()) {
-			var currentLibraryID = this.ref.libraryID;
-			if (currentLibraryID) {
-				s.addCondition('libraryID', 'is', currentLibraryID);
-			}
-			else {
-				var groups = Zotero.Groups.getAll();
-				for each(var group in groups) {
-					s.addCondition('libraryID', 'isNot', group.libraryID);
-				}
-			}
-		}
-		
 		Zotero.ItemGroupCache.lastResults = s.search();
 		Zotero.ItemGroupCache.lastItemGroup = this;
 	}

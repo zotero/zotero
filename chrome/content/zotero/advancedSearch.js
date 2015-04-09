@@ -62,25 +62,7 @@ var ZoteroAdvancedSearch = new function() {
 			isSearchMode: function() { return true; },
 			getItems: function () {
 				var search = _searchBox.search.clone();
-				
-				// Hack to create a condition for the search's library --
-				// this logic should really go in the search itself instead of here
-				// and in collectionTreeView.js
-				var conditions = search.getSearchConditions();
-				if (!conditions.some(function (condition) condition.condition == 'libraryID')) {
-					let libraryID = _searchBox.search.libraryID;
-					// TEMP: libraryIDInt
-					if (libraryID) {
-						search.addCondition('libraryID', 'is', libraryID);
-					}
-					else {
-						let groups = Zotero.Groups.getAll();
-						for (let i=0; i<groups.length; i++) {
-							search.addCondition('libraryID', 'isNot', groups[i].libraryID);
-						}
-					}
-				}
-				
+				search.libraryID = _libraryID;
 				return Zotero.Items.get(search.search());
 			},
 			isLibrary: function () { return false; },

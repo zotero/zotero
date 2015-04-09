@@ -36,7 +36,7 @@ Zotero.Search = function() {
 Zotero.Search.prototype._init = function () {
 	// Public members for access by public methods -- do not access directly
 	this._id = null;
-	this._libraryID = null;
+	this._libraryID; // TEMP: libraryIDInt
 	this._key = null;
 	this._name = null;
 	this._dateAdded = null;
@@ -290,7 +290,7 @@ Zotero.Search.prototype.save = function(fixGaps) {
 			this._changed.dateModified ?
 				this.dateModified : Zotero.DB.transactionDateTime,
 			Zotero.DB.transactionDateTime,
-			this.libraryID ? this.libraryID : this.libraryID,
+			this.libraryID ? this.libraryID : null,
 			key
 		];
 		
@@ -1139,6 +1139,23 @@ Zotero.Search.prototype._buildQuery = function(){
 			+ ")";
 	}
 	
+	// Limit to library search belongs to
+	//
+	// This is equivalent to adding libraryID as a search condition,
+	// but it works with ANY
+	if (this.libraryID !== undefined) {
+		sql += " AND (itemID IN (SELECT itemID FROM items WHERE libraryID";
+		// TEMP: libraryIDInt
+		if (this.libraryID) {
+			sql += "=?";
+			sqlParams.push(this.libraryID);
+		}
+		else {
+			sql += " IS NULL";
+		}
+		sql += "))";
+	}
+	
 	if (this._hasPrimaryConditions) {
 		sql += " AND ";
 		
@@ -1755,6 +1772,7 @@ Zotero.Searches = new function(){
 		for each(var row in rows) {
 			var search = new Zotero.Search;
 			search.id = row.id;
+			search.libraryID = libraryID;
 			searches.push(search);
 		}
 		return searches;
