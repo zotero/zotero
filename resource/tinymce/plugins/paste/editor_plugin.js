@@ -152,6 +152,15 @@
 
 				// Check if browser supports direct plaintext access
 				if (e.clipboardData || dom.doc.dataTransfer) {
+					// Added by Zotero
+					// Get HTML from the clipboard directly
+					var html = e.clipboardData && e.clipboardData.getData('text/html');
+					if (html) {
+						e.preventDefault();
+						process({content : html});
+						return;
+					}
+
 					textContent = (e.clipboardData || dom.doc.dataTransfer).getData('Text');
 
 					if (ed.pasteAsPlainText) {
@@ -247,14 +256,6 @@
 							// WebKit will split the div into multiple ones so this will loop through then all and join them to get the whole HTML string
 							each(nl, function(n) {
 								var child = n.firstChild;
-
-								// Added by Zotero
-								// fix copy/paste of non-http links
-								var links = n.querySelectorAll('a');
-								for (var i = 0; i < links.length; i++) {
-									if (!links[i].href && links[i].getAttribute('data-mce-href'))
-										links[i].setAttribute('href', links[i].getAttribute('data-mce-href'));
-								}
 
 								// WebKit inserts a DIV container with lots of odd styles
 								if (child && child.nodeName == 'DIV' && child.style.marginTop && child.style.backgroundColor) {
