@@ -328,8 +328,10 @@ function ZoteroService() {
 		
 		zContext.Zotero.debug("Initialized in "+(Date.now() - start)+" ms");
 	} catch(e) {
-		var msg = typeof e == 'string' ? e : e.name;
-		dump(e + "\n\n");
+		var msg = e instanceof Error
+			? e.name + ': ' + e.message + '\n' + e.fileName + ':' + e.lineNumber + '\n' + e.stack
+			: '' + e;
+		dump(msg + '\n');
 		Components.utils.reportError(e);
 		throw e;
 	}
