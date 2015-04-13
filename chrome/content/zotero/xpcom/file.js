@@ -328,7 +328,7 @@ Zotero.File = new function(){
 	 */
 	this.putContentsAsync = function putContentsAsync(path, data, charset) {
 		if (path instanceof Ci.nsIFile) {
-			path = this.fileToPath(path);
+			path = path.path;
 		}
 		
 		if (typeof data == 'string' && (!charset || charset.toLowerCase() == 'utf-8')) {
@@ -355,7 +355,7 @@ Zotero.File = new function(){
 		}
 		
 		var deferred = Zotero.Promise.defer(),
-			ostream = FileUtils.openSafeFileOutputStream(file);
+			ostream = FileUtils.openSafeFileOutputStream(path);
 		NetUtil.asyncCopy(data, ostream, function(inputStream, status) {
 			if (!Components.isSuccessCode(status)) {
 				deferred.reject(new Components.Exception("File write operation failed", status));
