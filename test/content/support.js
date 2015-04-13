@@ -3,7 +3,7 @@
  * resolved with the event.
  */
 function waitForDOMEvent(target, event, capture) {
-	var deferred = Q.defer();
+	var deferred = Zotero.Promise.defer();
 	var func = function(ev) {
 		target.removeEventListener("event", func, capture);
 		deferred.resolve(ev);
@@ -32,7 +32,7 @@ function loadZoteroPane() {
 		// Hack to wait for pane load to finish. This is the same hack
 		// we use in ZoteroPane.js, so either it's not good enough
 		// there or it should be good enough here.
-		return Q.delay(52).then(function() {
+		return Zotero.Promise.delay(52).then(function() {
 			return win;
 		});
 	});
@@ -42,7 +42,7 @@ function loadZoteroPane() {
  * Waits for a window with a specific URL to open. Returns a promise for the window.
  */
 function waitForWindow(uri) {
-	var deferred = Q.defer();
+	var deferred = Zotero.Promise.defer();
 	Components.utils.import("resource://gre/modules/Services.jsm");
 	var loadobserver = function(ev) {
 		ev.originalTarget.removeEventListener("load", loadobserver, false);
@@ -65,7 +65,7 @@ function waitForWindow(uri) {
  * Waits for a single item event. Returns a promise for the item ID(s).
  */
 function waitForItemEvent(event) {
-	var deferred = Q.defer();
+	var deferred = Zotero.Promise.defer();
 	var notifierID = Zotero.Notifier.registerObserver({notify:function(ev, type, ids, extraData) {
 		if(ev == event) {
 			Zotero.Notifier.unregisterObserver(notifierID);
@@ -97,7 +97,7 @@ function getWindows(uri) {
  * should assume failure.
  */
 function waitForCallback(cb, interval, timeout) {
-	var deferred = Q.defer();
+	var deferred = Zotero.Promise.defer();
 	if(interval === undefined) interval = 100;
 	if(timeout === undefined) timeout = 10000;
 	var start = Date.now();
@@ -120,7 +120,7 @@ function waitForCallback(cb, interval, timeout) {
  */
 function installPDFTools() {
 	if(Zotero.Fulltext.pdfConverterIsRegistered() && Zotero.Fulltext.pdfInfoIsRegistered()) {
-		return Q(true);
+		return Zotero.Promise.resolve(true);
 	}
 
 	// Begin install procedure

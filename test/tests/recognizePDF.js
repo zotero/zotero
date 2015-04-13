@@ -6,7 +6,7 @@ describe("PDF Recognition", function() {
 		this.timeout(60000);
 		// Load Zotero pane, install PDF tools, and load the
 		// translators
-		return Q.all([loadZoteroPane().then(function(w) {
+		return Zotero.Promise.all([loadZoteroPane().then(function(w) {
 			win = w;
 		}), installPDFTools()]);
 	});
