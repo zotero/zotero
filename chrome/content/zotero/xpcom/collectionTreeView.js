@@ -492,13 +492,16 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 		
 		case 'collection':
 		case 'search':
-			return "chrome://zotero-platform/content/treesource-" + collectionType + ".png";
+			if (Zotero.isMac) {
+				return "chrome://zotero-platform/content/treesource-" + collectionType + ".png";
+			}
+			break;
 		
 		case 'publications':
 			return "chrome://zotero/skin/treeitem-journalArticle" + suffix + ".png";
 	}
 	
-	return "chrome://zotero/skin/treesource-" + collectionType + ".png";
+	return "chrome://zotero/skin/treesource-" + collectionType + suffix + ".png";
 }
 
 Zotero.CollectionTreeView.prototype.isContainer = function(row)
@@ -2254,21 +2257,6 @@ Zotero.CollectionTreeRow.prototype.getSearchResults = Zotero.Promise.coroutine(f
 	
 	if(!Zotero.CollectionTreeCache.lastResults) {
 		var s = yield this.getSearchObject();
-		
-		// FIXME: Hack to exclude group libraries for now
-		if (this.isSearch()) {
-			var currentLibraryID = this.ref.libraryID;
-			if (currentLibraryID) {
-				yield s.addCondition('libraryID', 'is', currentLibraryID);
-			}
-			else {
-				var groups = yield Zotero.Groups.getAll();
-				for each(var group in groups) {
-					yield s.addCondition('libraryID', 'isNot', group.libraryID);
-				}
-			}
-		}
-		
 		Zotero.CollectionTreeCache.lastResults = yield s.search();
 		Zotero.CollectionTreeCache.lastTreeRow = this;
 	}

@@ -340,8 +340,10 @@ function ZoteroService() {
 		}
 		this.wrappedJSObject = zContext.Zotero;
 	} catch(e) {
-		var msg = typeof e == 'string' ? e : e.name;
-		dump(e + "\n\n");
+		var msg = e instanceof Error
+			? e.name + ': ' + e.message + '\n' + e.fileName + ':' + e.lineNumber + '\n' + e.stack
+			: '' + e;
+		dump(msg + '\n');
 		Components.utils.reportError(e);
 		throw e;
 	}
@@ -376,7 +378,7 @@ ZoteroCommandLineHandler.prototype = {
 	/* nsICommandLineHandler */
 	handle : function(cmdLine) {
 		// Force debug output
-		if (cmdLine.handleFlag("zoterodebug", false)) {
+		if (cmdLine.handleFlag("ZoteroDebug", false)) {
 			zInitOptions.forceDebugLog = true;
 		}
 		
@@ -458,6 +460,10 @@ ZoteroCommandLineHandler.prototype = {
 					}
 				}
 			}
+		}
+		
+		if (cmdLine.handleFlag("ZoteroNoUserInput", false)) {
+			zInitOptions.noUserInput = true;
 		}
 	},
 	

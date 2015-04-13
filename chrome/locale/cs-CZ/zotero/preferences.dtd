@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Pokročilé">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Soubory a Složky">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Klávesové zkratky">
 
 <!ENTITY zotero.preferences.prefpane.locate "Najít">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Správce mechanismu pro vyhledávání článků">
@@ -201,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Odeslat na Zotero Server">
 
 <!ENTITY zotero.preferences.openAboutConfig "Otevřít about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
+<!ENTITY zotero.preferences.openCSLEdit "Otevřít Editor stylů">
+<!ENTITY zotero.preferences.openCSLPreview "Otevřít Náhled stylů">
 <!ENTITY zotero.preferences.openAboutMemory "Otevřít about:memory">

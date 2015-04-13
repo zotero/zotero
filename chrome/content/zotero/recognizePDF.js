@@ -139,13 +139,10 @@ var Zotero_RecognizePDF = new function() {
 			cacheFile.remove(false);
 		}
 		
-		var exec = Zotero.getZoteroDirectory();
-		exec.append(Zotero.Fulltext.pdfConverterFileName);
+		var {exec, args} = Zotero.Fulltext.getPDFConverterExecAndArgs();
+		args.push('-enc', 'UTF-8', '-nopgbrk', '-layout', '-l', pages, file.path, cacheFile.path);
 		
-		var args = ['-enc', 'UTF-8', '-nopgbrk', '-layout', '-l', pages];
-		args.push(file.path, cacheFile.path);
-		
-		Zotero.debug('RecognizePDF: Running pdftotext '+args.join(" "));
+		Zotero.debug("RecognizePDF: Running " + exec.path + " " + args.map(arg => "'" + arg + "'").join(" "));
 		
 		return Zotero.Utilities.Internal.exec(exec, args).then(function() {
 			if(!cacheFile.exists()) {

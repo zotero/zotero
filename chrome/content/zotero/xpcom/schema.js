@@ -1573,6 +1573,116 @@ Zotero.Schema = new function(){
 		var translatorUpdates = xmlhttp.responseXML.getElementsByTagName('translator');
 		var styleUpdates = xmlhttp.responseXML.getElementsByTagName('style');
 		
+		var updatePDFTools = function () {
+			// No updates for PPC
+			if (Zotero.platform == 'MacPPC') return;
+			
+			let pdfToolsUpdates = xmlhttp.responseXML.getElementsByTagName('pdftools');
+			if (pdfToolsUpdates.length) {
+				let availableVersion = pdfToolsUpdates[0].getAttribute('version');
+				let installInfo = false;
+				let installConverter = false;
+				
+				// Don't auto-install if not installed
+				if (!Zotero.Fulltext.pdfInfoIsRegistered() && !Zotero.Fulltext.pdfConverterIsRegistered()) {
+					return;
+				}
+				
+				// TEMP
+				if (Zotero.isWin) {
+					if (Zotero.Fulltext.pdfInfoIsRegistered()) {
+						if (Zotero.Fulltext.pdfInfoVersion != '3.02a') {
+							installInfo = true;
+						}
+					}
+					// Install missing component if one is installed
+					else if (Zotero.Fulltext.pdfConverterIsRegistered()) {
+						installInfo = true;
+					}
+					if (Zotero.Fulltext.pdfConverterIsRegistered()) {
+						if (Zotero.Fulltext.pdfConverterVersion != '3.02a') {
+							installConverter = true;
+						}
+					}
+					// Install missing component if one is installed
+					else if (Zotero.Fulltext.pdfInfoIsRegistered()) {
+						installConverter = true;
+					}
+					availableVersion = '3.02';
+				}
+				else {
+					if (Zotero.Fulltext.pdfInfoIsRegistered()) {
+						let currentVersion = Zotero.Fulltext.pdfInfoVersion;
+						if (currentVersion < availableVersion || currentVersion.startsWith('3.02')
+								|| currentVersion == 'UNKNOWN') {
+							installInfo = true;
+						}
+					}
+					// Install missing component if one is installed
+					else if (Zotero.Fulltext.pdfConverterIsRegistered()) {
+						installInfo = true;
+					}
+					if (Zotero.Fulltext.pdfConverterIsRegistered()) {
+						let currentVersion = Zotero.Fulltext.pdfConverterVersion;
+						if (currentVersion < availableVersion || currentVersion.startsWith('3.02')
+								|| currentVersion == 'UNKNOWN') {
+							installConverter = true;
+						}
+					}
+					// Install missing component if one is installed
+					else if (Zotero.Fulltext.pdfInfoIsRegistered()) {
+						installConverter = true;
+					}
+				}
+				
+				let prefKey = 'pdfToolsInstallError';
+				let lastTry = 0, delay = 43200000; // half a day, so doubles to a day initially
+				try {
+					[lastTry, delay] = Zotero.Prefs.get(prefKey).split(';');
+				}
+				catch (e) {}
+				
+				// Allow an additional minute, since repo updates might not be exact
+				if (Date.now() < (parseInt(lastTry) + parseInt(delay) - 60000)) {
+					Zotero.debug("Now enough time since last PDF tools installation failure -- skipping", 2);
+					return;
+				}
+				
+				var checkResult = function (success) {
+					if (success) {
+						try {
+							Zotero.Prefs.clear(prefKey);
+						}
+						catch (e) {}
+					}
+					else {
+						// Keep doubling delay, to a max of 1 week
+						Zotero.Prefs.set(prefKey, Date.now() + ";" + Math.min(delay * 2, 7*24*60*60*1000));
+						
+						let msg = "Error downloading PDF tool";
+						Zotero.debug(msg, 1);
+						throw new Error(msg);
+					}
+				};
+				
+				if (installConverter && installInfo) {
+					Zotero.Fulltext.downloadPDFTool('converter', availableVersion, function (success) {
+						checkResult(success);
+						Zotero.Fulltext.downloadPDFTool('info', availableVersion, checkResult);
+					});
+				}
+				else if (installConverter) {
+					Zotero.Fulltext.downloadPDFTool('converter', availableVersion, checkResult);
+				}
+				else if (installInfo) {
+					Zotero.Fulltext.downloadPDFTool('info', availableVersion, checkResult);
+				}
+				else {
+					Zotero.debug("PDF tools are up to date");
+				}
+			}
+		};
+		
 		if (!translatorUpdates.length && !styleUpdates.length){
 			return Zotero.DB.executeTransaction(function* (conn) {
 				// Store the timestamp provided by the server
@@ -1586,7 +1696,11 @@ Zotero.Schema = new function(){
 				if (!manual) {
 					_setRepositoryTimer(ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']);
 				}
+				
 				return Zotero.Promise.resolve(true);
+			})
+			.tap(function () {
+				updatePDFTools();
 			});
 		}
 		
@@ -1631,6 +1745,9 @@ Zotero.Schema = new function(){
 				
 				return true;
 			});
+		})
+		.tap(function () {
+			updatePDFTools();
 		});
 	}
 	

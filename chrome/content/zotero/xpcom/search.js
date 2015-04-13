@@ -1073,6 +1073,15 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 			+ ")";
 	}
 	
+	// Limit to library search belongs to
+	//
+	// This is equivalent to adding libraryID as a search condition,
+	// but it works with ANY
+	if (this.libraryID !== null) {
+		sql += " AND (itemID IN (SELECT itemID FROM items WHERE libraryID=?))";
+		sqlParams.push(this.libraryID);
+	}
+	
 	if (this._hasPrimaryConditions) {
 		sql += " AND ";
 		
@@ -1687,6 +1696,7 @@ Zotero.Searches = function() {
 		var searches = [];
 		for (var i=0; i<rows.length; i++) {
 			let search = new Zotero.Search;
+			search.libraryID = libraryID;
 			search.id = rows[i].id;
 			yield search.loadPrimaryData();
 			searches.push(search);

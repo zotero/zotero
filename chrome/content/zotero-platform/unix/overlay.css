@@ -1,12 +1,21 @@
-﻿/*
+/*
  As of Fx36, the built-in styles don't properly handle a menu-button within combined buttons.
 */
+#zotero-toolbar-main-button-single[cui-areatype="toolbar"] .toolbarbutton-icon,
+#zotero-toolbar-save-button-single[cui-areatype="toolbar"] .toolbarbutton-icon {
+	width: 32px;
+}
+
+#zotero-toolbar-main-button[cui-areatype="toolbar"] .toolbarbutton-icon,
+#zotero-toolbar-save-button[cui-areatype="toolbar"] .toolbarbutton-icon {
+	width: 28px;
+}
+
 #zotero-toolbar-main-button[cui-areatype="toolbar"] {
 	margin-right: -1px;
 }
 
 #zotero-toolbar-main-button[cui-areatype="toolbar"] .toolbarbutton-icon {
-	width: 28px !important;
 	margin-left: 2px;
 	margin-right: -3px;
 	padding-left: 5px !important;
@@ -27,16 +36,6 @@
 }
 
 #zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-dropmarker {
-	margin-top: 2px;
-	margin-bottom: 2px;
-}
-
-#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-dropmarker .dropmarker-icon {
-	padding-left: 14px !important;
-	padding-right: 3px !important;
-}
-
-#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-dropmarker {
 	margin-top: 6px;
 	margin-bottom: 6px;
 }
@@ -45,6 +44,16 @@
 #zotero-toolbar-save-button[cui-areatype="toolbar"][open] > .toolbarbutton-menubutton-dropmarker > .dropmarker-icon {
 	margin-top: 0;
 	margin-bottom: 0;
+}
+
+#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-dropmarker .dropmarker-icon {
+	padding-left: 14px !important;
+	padding-right: 3px !important;
+}
+
+#zotero-toolbar-save-button-single[cui-areatype="toolbar"] > .toolbarbutton-menubutton-dropmarker > .dropmarker-icon {
+	margin-top: 3px;
+	margin-bottom: 3px;
 }
 
 #zotero-toolbar-buttons[cui-areatype="toolbar"] > separator {
@@ -86,12 +95,18 @@
 	box-shadow: var(--toolbarbutton-active-boxshadow);
 	transition-duration: 10ms;
 }
-
-#zotero-toolbar-main-button-single[cui-areatype="toolbar"] .toolbarbutton-icon {
-	width: 32px;
-}
 /* End toolbar buttons */
 
+
+@media (min-resolution: 1.5dppx) {
+	#zotero-toolbar .toolbarbutton-icon {
+		width: 16px;
+	}
+	
+	#zotero-tb-sync > .toolbarbutton-icon {
+		width: 20px;
+	}
+}
 
 .zotero-tb-button:not([type=menu]) {
 	margin-right: 4px;

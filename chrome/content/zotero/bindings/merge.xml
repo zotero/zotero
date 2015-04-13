@@ -124,6 +124,8 @@
 			<property name="rightpane" onget="return this._rightpane"/>
 			<property name="mergepane" onget="return this._mergepane"/>
 			
+			<property name="onSelectionChange"/>
+			
 			<field name="_leftpane"/>
 			<field name="_rightpane"/>
 			<field name="_mergepane"/>
@@ -396,6 +398,10 @@
 					}
 					else {
 						mergepane.ref = pane.original;
+					}
+					
+					if (mergegroup.onSelectionChange) {
+						mergegroup.onSelectionChange();
 					}
 				]]>
 				</body>

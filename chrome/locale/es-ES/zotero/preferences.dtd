@@ -1,6 +1,6 @@
 <!ENTITY zotero.preferences.title "Preferencias de Zotero">
 
-<!ENTITY zotero.preferences.default "Inicial:">
+<!ENTITY zotero.preferences.default "Predeterminado:">
 <!ENTITY zotero.preferences.items "elementos">
 <!ENTITY zotero.preferences.period ",">
 <!ENTITY zotero.preferences.settings "Preferencias">
@@ -48,7 +48,7 @@
 
 <!ENTITY zotero.preferences.prefpane.sync "Sincronizar">
 <!ENTITY zotero.preferences.sync.username "Usuario:">
-<!ENTITY zotero.preferences.sync.password "Clave:">
+<!ENTITY zotero.preferences.sync.password "Contraseña:">
 <!ENTITY zotero.preferences.sync.syncServer "Servidor de sincronización Zotero">
 <!ENTITY zotero.preferences.sync.createAccount "Crear cuenta">
 <!ENTITY zotero.preferences.sync.lostPassword "¿Olvidó su contraseña?">
@@ -130,7 +130,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Búsqueda rápida">
 <!ENTITY zotero.preferences.keys.newItem "Crear un nuevo elemento">
 <!ENTITY zotero.preferences.keys.newNote "Crear una Nueva nota">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Conmutar el selector de marcas">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Conmutar el selector de etiquetas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar las citas para los elementos seleccionados al portapapeles">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar los elementos seleccionados al portapapeles">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importar desde el portapapeles">
@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avanzadas">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Archivos y carpetas">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Atajos">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localizar">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Administrador de motor de búsqueda de artículo">
@@ -194,7 +194,7 @@
 
 <!ENTITY zotero.preferences.debugOutputLogging "Registro de emisión de depuración">
 <!ENTITY zotero.preferences.debugOutputLogging.message "La emisión de depuración puede ayudar a los desarrolladores de Zotero a diagnosticar problemas. Como el registro de depuración enlentece a Zotero, deberías dejarlo desactivado normalmente a menos que algún desarrollador de Zotero te pida la salida de depuración.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "líneas en el registro">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "líneas registradas">
 <!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Activar tras el reinicio">
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Ver salida">
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Limpiar salida">

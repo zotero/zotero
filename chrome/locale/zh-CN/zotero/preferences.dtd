@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "高级">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "文件和文件夹">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "快捷键">
 
 <!ENTITY zotero.preferences.prefpane.locate "定位">
 <!ENTITY zotero.preferences.locate.locateEngineManager "文章检索引擎管理器">

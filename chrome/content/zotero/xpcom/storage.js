@@ -861,7 +861,7 @@ Zotero.Sync.Storage = new function () {
 							Zotero.debug("Remote mod time for item " + lk + " is " + itemModTimes[item.id]);
 							
 							// Ignore attachments whose stored mod times haven't changed
-							if (row.storageModTime == itemModTimes[id]) {
+							if (row.storageModTime == itemModTimes[item.id]) {
 								Zotero.debug("Storage mod time (" + row.storageModTime + ") "
 									+ "hasn't changed for item " + lk);
 								return;
@@ -1596,16 +1596,6 @@ Zotero.Sync.Storage = new function () {
 				Zotero.File.checkFileAccessError(e, destFile, 'create');
 			}
 			
-			var origPath = destFile.path;
-			var origFileName = destFile.leafName;
-			destFile.normalize();
-			if (origPath != destFile.path) {
-				var msg = "ZIP file " + zipFile.leafName + " contained symlink '"
-					+ origFileName + "'";
-				Zotero.debug(msg, 1);
-				Components.utils.reportError(msg + " in " + funcName);
-				continue;
-			}
 			destFile.permissions = 0644;
 			
 			// If we're renaming the main file, processDownload() needs to know
@@ -1635,18 +1625,7 @@ Zotero.Sync.Storage = new function () {
 				continue;
 			}
 			
-			// Firefox (as of 3.0.1) can't detect symlinks (at least on OS X),
-			// so use pre/post-normalized path to check
-			var origPath = file.path;
-			var origFileName = file.leafName;
-			file.normalize();
-			if (origPath != file.path) {
-				var msg = "Not deleting symlink '" + origFileName + "'";
-				Zotero.debug(msg, 2);
-				Components.utils.reportError(msg + " in " + funcName);
-				continue;
-			}
-			// This should be redundant with above check, but let's do it anyway
+			// Check symlink awareness, just to be safe
 			if (!parentDir.contains(file, false)) {
 				var msg = "Storage directory doesn't contain '" + file.leafName + "'";
 				Zotero.debug(msg, 2);

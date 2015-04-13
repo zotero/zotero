@@ -1,12 +1,24 @@
-﻿﻿/*
+/*
  As of Fx36, the built-in styles don't properly handle a menu-button within combined buttons.
 */
+#zotero-toolbar-main-button-single[cui-areatype="toolbar"] .toolbarbutton-icon {
+	width: 32px;
+}
+
+#zotero-toolbar-save-button-single[cui-areatype="toolbar"] .toolbarbutton-icon {
+	width: 30px;
+}
+
+#zotero-toolbar-main-button[cui-areatype="toolbar"] .toolbarbutton-icon,
+#zotero-toolbar-save-button[cui-areatype="toolbar"] .toolbarbutton-icon {
+	width: 28px;
+}
+
 #zotero-toolbar-main-button[cui-areatype="toolbar"] {
 	margin-right: -1px !important;
 }
 
 #zotero-toolbar-main-button[cui-areatype="toolbar"] .toolbarbutton-icon {
-	width: 28px;
 	margin-left: 2px;
 	margin-right: -1px;
 	padding-left: 5px !important;
@@ -94,11 +106,17 @@
 #zotero-toolbar-save-button[cui-areatype="toolbar"] > menupopup {
 	margin-top: -5px;
 }
-
-#zotero-toolbar-main-button-single[cui-areatype="toolbar"] .toolbarbutton-icon {
-	width: 32px;
-}
 /* End toolbar buttons */
+
+@media (min-resolution: 1.5dppx) {
+	#zotero-toolbar .toolbarbutton-icon {
+		width: 16px;
+	}
+	
+	#zotero-tb-sync > .toolbarbutton-icon {
+		width: 20px;
+	}
+}
 
 #zotero-tb-search-menu-button {
 	margin: 0 -1px 0 -4px;

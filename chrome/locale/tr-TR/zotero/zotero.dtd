@@ -104,7 +104,7 @@
 <!ENTITY zotero.toolbar.newGroup "Yeni Grup...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Yeni Alt Derme...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Yeni Kaydedilen Arama...">
-<!ENTITY zotero.toolbar.emptyTrash.label "Çöpü Boşalt">
+<!ENTITY zotero.toolbar.emptyTrash.label "Çöp Sepetini Boşalt">
 <!ENTITY zotero.toolbar.tagSelector.label "Etiket Seçiciyi Göster/Gizle">
 <!ENTITY zotero.toolbar.actions.label "Eylemler">
 <!ENTITY zotero.toolbar.import.label "İçeri Aktar...">

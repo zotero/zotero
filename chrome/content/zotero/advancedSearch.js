@@ -63,16 +63,7 @@ var ZoteroAdvancedSearch = new function() {
 			isSearchMode: function() { return true; },
 			getItems: Zotero.Promise.coroutine(function* () {
 				var search = yield _searchBox.search.clone();
-				
-				// Hack to create a condition for the search's library --
-				// this logic should really go in the search itself instead of here
-				// and in collectionTreeView.js
-				yield search.loadPrimaryData();
-				var conditions = search.getSearchConditions();
-				if (!conditions.some(function (condition) condition.condition == 'libraryID')) {
-					yield search.addCondition('libraryID', 'is', _searchBox.search.libraryID);
-				}
-				
+				search.libraryID = _libraryID;
 				var ids = yield search.search();
 				return Zotero.Items.get(ids);
 			}),

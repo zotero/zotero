@@ -797,6 +797,9 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		value = false;
 	}
 	
+	// Make sure to use type-specific field ID if available
+	fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID) || fieldID;
+	
 	if (value !== false && !Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
 		var msg = "'" + field + "' is not a valid field for type " + itemTypeID;
 		

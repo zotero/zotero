@@ -107,6 +107,16 @@
 	margin-left: 7px;
 }
 
+@media (min-resolution: 1.5dppx) {
+	#zotero-pane .toolbarbutton-icon {
+		max-width: 28px;
+	}
+	
+	#zotero-tb-sync-error .toolbarbutton-icon {
+		width: 16px;
+	}
+}
+
 .zotero-tb-button, .zotero-tb-button:first-child, .zotero-tb-button:last-child {
   -moz-margin-start: 0 !important;
   -moz-margin-end: 3px !important;
@@ -169,7 +179,7 @@
 	background-size: 14px;
 }
 
-@media (min-resolution: 2dppx) {
+@media (min-resolution: 1.5dppx) {
 	#zotero-pane-stack[oldsearchfield] textbox[type=search] > .textbox-input-box {
 		background: url("chrome://zotero/skin/mac/moz/Search@2x.png") left no-repeat;
 		background-size: 14px;
@@ -465,6 +475,16 @@ treechildren::-moz-tree-image {
 #zotero-tb-note-add
 {
 	list-style-image: url('chrome://zotero/skin/mac/toolbar-note-add.png');
+}
+
+@media (min-resolution: 1.5dppx) {
+	#zotero-tb-advanced-search {
+		list-style-image: url('chrome://zotero/skin/mac/toolbar-advanced-search@2x.png');
+	}
+	
+	#zotero-tb-note-add {
+		list-style-image: url('chrome://zotero/skin/mac/toolbar-note-add@2x.png');
+	}
 }
 
 #zotero-tb-actions-menu

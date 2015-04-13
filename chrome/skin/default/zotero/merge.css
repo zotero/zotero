@@ -40,8 +40,9 @@ wizard > deck {
 	padding: 0;
 }
 
-#zotero-step-count {
-	-moz-box-pack: end;
+
+#resolve-all {
+	font-size: 1.1em;
 }
 
 #zotero-step-count label:first-child {

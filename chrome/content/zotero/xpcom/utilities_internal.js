@@ -302,6 +302,9 @@ Zotero.Utilities.Internal = {
 	 * @param {nsISupports} target file
 	 */
 	saveURI: function (wbp, source, target) {
+		// Handle gzip encoding
+		wbp.persistFlags |= Ci.nsIWebBrowserPersist.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
+		
 		// Firefox 35 and below
 		try {
 			wbp.saveURI(source, null, null, null, null, target, null);
@@ -315,11 +318,16 @@ Zotero.Utilities.Internal = {
 	
 	/**
 	 * Launch a process
-	 * @param {nsIFile} cmd Path to command to launch
+	 * @param {nsIFile|String} cmd Path to command to launch
 	 * @param {String[]} args Arguments given
 	 * @return {Promise} Promise resolved to true if command succeeds, or an error otherwise
 	 */
 	"exec":function(cmd, args) {
+		if (typeof cmd == 'string') {
+			Components.utils.import("resource://gre/modules/FileUtils.jsm");
+			cmd = new FileUtils.File(cmd);
+		}
+		
 		if(!cmd.isExecutable()) {
 			return Zotero.Promise.reject(cmd.path+" is not an executable");
 		}

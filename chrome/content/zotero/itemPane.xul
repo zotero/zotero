@@ -24,7 +24,6 @@
     ***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://zotero/skin/itemPane.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero-platform/content/itemPane.css" type="text/css"?>
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 

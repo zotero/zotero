@@ -959,7 +959,7 @@ Zotero.Sync.Runner = new function () {
 			
 			var panel = Zotero.Sync.Runner.updateErrorPanel(doc, errors);
 			
-			panel.openPopup(this, "after_end", 4, 0, false, false);
+			panel.openPopup(this, "after_end", 15, 0, false, false);
 		}
 	}
 	
@@ -1807,7 +1807,12 @@ Zotero.Sync.Server = new function () {
 									}
 								};
 								try {
-									req.sendAsBinary(data);
+									// Send binary data
+									let numBytes = data.length, ui8Data = new Uint8Array(numBytes);
+									for (let i = 0; i < numBytes; i++) {
+										ui8Data[i] = data.charCodeAt(i) & 0xff;
+									}
+									req.send(ui8Data);
 								}
 								catch (e) {
 									_error(e);
@@ -2561,6 +2566,7 @@ Zotero.Sync.Server = new function () {
 		}
 		
 		Zotero.debug(e, 1);
+		Components.utils.reportError(e);
 		
 		_syncInProgress = false;
 		Zotero.DB.rollbackAllTransactions();

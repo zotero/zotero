@@ -171,6 +171,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		
 		if (options) {
 			if (options.openPane) this.openPane = true;
+			if (options.noUserInput) this.noUserInput = true;
 		}
 		
 		this.mainThread = Services.tm.mainThread;
@@ -612,12 +613,13 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				Zotero.debug(e, 1);
 				Components.utils.reportError(e); // DEBUG: doesn't always work
 				
-				if (typeof e == 'string' && (e.indexOf('newer than SQL file') != -1
-							|| e.indexOf('Database is incompatible') != -1)) {
-					var kbURL = "https://www.zotero.org/support/kb/newer_db_version";
-					var msg = Zotero.getString('startupError.zoteroVersionIsOlder')
-						+ " " + Zotero.getString('startupError.zoteroVersionIsOlder.upgrade') + "\n\n"
-						+ Zotero.getString('startupError.zoteroVersionIsOlder.current', Zotero.version) + "\n\n"
+				if (e.toString().match('newer than SQL file')) {
+					let versions = e.toString().match(/\((\d+) < \d+\)/);
+					let kbURL = "https://www.zotero.org/support/kb/newer_db_version";
+					let msg = Zotero.getString('startupError.zoteroVersionIsOlder') + " "
+						+ Zotero.getString('startupError.zoteroVersionIsOlder.upgrade') + "\n\n"
+						+ Zotero.getString('startupError.zoteroVersionIsOlder.current', Zotero.version) + "\n"
+						+ (versions ? "DB: " + versions[1] + "\n\n" : "\n")
 						+ Zotero.getString('general.seeForMoreInformation', kbURL);
 					Zotero.startupError = msg;
 					_startupErrorHandler = function() {
@@ -2123,7 +2125,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			'nsLivemarkService.js',
 			'Sync.Engine.Tabs',
 			'content-sessionStore.js',
-			'org.mozilla.appSessions'
+			'org.mozilla.appSessions',
+			'bad script XDR magic number'
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
