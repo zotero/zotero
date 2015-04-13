@@ -93,7 +93,7 @@ Zotero.Schema = new function(){
 					return Zotero.Schema.updateBundledFiles();
 				})
 				.then(function () {
-					return _schemaUpdateDeferred.resolve(true);
+					_schemaUpdateDeferred.resolve(true);
 				});
 			});
 		}
@@ -173,6 +173,9 @@ Zotero.Schema = new function(){
 		.then(1000)
 		.then(function () {
 			return Zotero.Schema.updateBundledFiles();
+		})
+		.then(function () {
+			_schemaUpdateDeferred.resolve(true);
 		});
 		
 		return updated;
@@ -456,8 +459,6 @@ Zotero.Schema = new function(){
 				let up2 = yield _updateBundledFilesAtLocation(installLocation, 'styles');
 				var updated = up1 || up2;
 			}
-			
-			_schemaUpdateDeferred.resolve(true);
 		}
 		finally {
 			_localUpdateInProgress = false;
