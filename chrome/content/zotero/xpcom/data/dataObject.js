@@ -611,11 +611,7 @@ Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* () {
 	yield Zotero.DB.executeTransaction(function* () {
 		yield this._eraseData(env);
 		yield this._erasePreCommit(env);
-	}.bind(this))
-	.catch(e => {
-		Zotero.debug(e);
-		return this._eraseRecoverFromFailure(env);
-	});
+	}.bind(this));
 	
 	return this._erasePostCommit(env);
 });
@@ -636,10 +632,6 @@ Zotero.DataObject.prototype._erasePreCommit = function(env) {
 
 Zotero.DataObject.prototype._erasePostCommit = function(env) {
 	return Zotero.Promise.resolve();
-};
-
-Zotero.DataObject.prototype._eraseRecoverFromFailure = function(env) {
-	throw new Error("Zotero.DataObject.prototype._eraseRecoverFromFailure is an abstract method");
 };
 
 /**
