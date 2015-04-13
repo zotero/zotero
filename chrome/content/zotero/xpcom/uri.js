@@ -73,7 +73,15 @@ Zotero.URI = new function () {
 	
 	
 	this.getLibraryURI = function (libraryID) {
-		var path = this.getLibraryPath(libraryID);
+		try {
+			var path = this.getLibraryPath(libraryID);
+		}
+		catch (e) {
+			if (e.error == Zotero.Error.ERROR_USER_NOT_AVAILABLE) {
+				return this.getCurrentUserURI();
+			}
+			throw e;
+		}
 		return _baseURI + path;
 	}
 	
@@ -89,7 +97,7 @@ Zotero.URI = new function () {
 			case 'publications':
 				var id = Zotero.Users.getCurrentUserID();
 				if (!id) {
-					throw new Exception("User id not available in Zotero.URI.getLibraryPath()");
+					throw new Zotero.Error("User id not available", "USER_NOT_AVAILABLE");
 				}
 				
 				if (libraryType == 'publications') {
@@ -113,12 +121,7 @@ Zotero.URI = new function () {
 	 * Return URI of item, which might be a local URI if user hasn't synced
 	 */
 	this.getItemURI = function (item) {
-		if (item.libraryID) {
-			var baseURI = this.getLibraryURI(item.libraryID);
-		}
-		else {
-			var baseURI =  this.getCurrentUserURI();
-		}
+		var baseURI = this.getLibraryURI(item.libraryID);
 		return baseURI + "/items/" + item.key;
 	}
 	
@@ -135,12 +138,7 @@ Zotero.URI = new function () {
 	 * Return URI of collection, which might be a local URI if user hasn't synced
 	 */
 	this.getCollectionURI = function (collection) {
-		if (collection.libraryID) {
-			var baseURI = this.getLibraryURI(collection.libraryID);
-		}
-		else {
-			var baseURI =  this.getCurrentUserURI();
-		}
+		var baseURI = this.getLibraryURI(collection.libraryID);
 		return baseURI + "/collections/" + collection.key;
 	}
 	
