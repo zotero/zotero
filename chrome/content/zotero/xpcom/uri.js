@@ -53,7 +53,7 @@ Zotero.URI = new function () {
 	this.getCurrentUserURI = function (noLocal) {
 		var userID = Zotero.Users.getCurrentUserID();
 		if (!userID && noLocal) {
-			throw new Exception("Local userID not available and noLocal set in Zotero.URI.getCurrentUserURI()");
+			throw new Error("Local userID not available and noLocal set in Zotero.URI.getCurrentUserURI()");
 		}
 		if (userID) {
 			return _baseURI + "users/" + userID;
