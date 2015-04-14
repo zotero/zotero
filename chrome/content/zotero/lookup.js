@@ -87,10 +87,11 @@ const Zotero_Lookup = new function () {
 		}
 
 		if(!items.length) {
-			var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-											.getService(Components.interfaces.nsIPromptService);
-			prompts.alert(window, Zotero.getString("lookup.failure.title"),
-				Zotero.getString("lookup.failureToID.description"));
+			Zotero.alert(
+				window,
+				Zotero.getString("lookup.failure.title"),
+				Zotero.getString("lookup.failureToID.description")
+			);
 			return false;
 		}
 
@@ -127,10 +128,11 @@ const Zotero_Lookup = new function () {
 						if(successful) {
 							document.getElementById("zotero-lookup-panel").hidePopup();
 						} else {
-							var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-																			.getService(Components.interfaces.nsIPromptService);
-							prompts.alert(window, Zotero.getString("lookup.failure.title"),
-								Zotero.getString("lookup.failure.description"));
+							Zotero.alert(
+								window,
+								Zotero.getString("lookup.failure.title"),
+								Zotero.getString("lookup.failure.description")
+							);
 						}
 					}
 				});
