@@ -1260,6 +1260,29 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			err.lineNumber ? err.lineNumber : null, null);
 	}
 	
+	
+	/**
+	 * Display an alert in a given window
+	 *
+	 * This is just a wrapper around nsIPromptService.alert() that takes the Zotero.noUserInput
+	 * flag into consideration
+	 *
+	 * @param {Window}
+	 * @param {String} title
+	 * @param {String} msg
+	 */
+	this.alert = function (window, title, msg) {
+		if (this.noUserInput) {
+			Zotero.debug("Not displaying alert: " + title + ": " + msg);
+			return;
+		}
+		
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		ps.alert(window, title, msg);
+	}
+	
+	
 	function getErrors(asStrings) {
 		var errors = [];
 		
