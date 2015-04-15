@@ -66,6 +66,19 @@ function Reporter(runner) {
 
 // Setup Mocha
 mocha.setup({ui:"bdd", reporter:Reporter});
+
+// Enable Bluebird generator support in Mocha
+(function () {
+	var Runnable = Mocha.Runnable;
+	var run = Runnable.prototype.run;
+	Runnable.prototype.run = function (fn) {
+		if (this.fn.constructor.name === 'GeneratorFunction') {
+			this.fn = Zotero.Promise.coroutine(this.fn);
+		}
+		return run.call(this, fn);
+	};
+})();
+
 var assert = chai.assert,
     expect = chai.expect;
 
