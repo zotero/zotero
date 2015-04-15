@@ -283,14 +283,6 @@ Zotero.DBConnection.prototype.executeAsyncStatement = Zotero.Promise.method(func
 });
 
 
-/*
- * Only for use externally with this.getStatement()
- */
-Zotero.DBConnection.prototype.getLastErrorString = function () {
-	var db = this._getDBConnection();
-	return db.lastErrorString;
-}
-
 
 Zotero.DBConnection.prototype.addCallback = function (type, cb) {
 	switch (type) {
@@ -324,34 +316,10 @@ Zotero.DBConnection.prototype.removeCallback = function (type, id) {
 }
 
 
-Zotero.DBConnection.prototype.transactionInProgress = function () {
-	var db = this._getDBConnection();
-	return db.transactionInProgress;
-}
-
-
-/**
- * Safety function used on shutdown to make sure we're not stuck in the
- * middle of a transaction
- *
- * NOTE: No longer used
- */
-Zotero.DBConnection.prototype.commitAllTransactions = function () {
-	if (this.transactionInProgress()) {
-		var level = this._transactionNestingLevel;
-		this._transactionNestingLevel = 0;
-		try {
-			this.commitTransaction();
-		}
-		catch (e) {}
-		return level ? level : true;
-	}
-	return false;
-}
-
-
 /*
  * Used on shutdown to rollback all open transactions
+ *
+ * TODO: update or remove
  */
 Zotero.DBConnection.prototype.rollbackAllTransactions = function () {
 	if (this.transactionInProgress()) {
