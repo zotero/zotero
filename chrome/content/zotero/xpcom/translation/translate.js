@@ -321,10 +321,8 @@ Zotero.Translate.Sandbox = {
 				}
 				
 				var translator = translation.translator[0];
-				(typeof translator === "object" ? Zotero.Promise.resolve(translator) : Zotero.Translators.get(translator)).
-				then(function(translator) {
-					return translation._loadTranslator(translator);
-				}).then(function() {
+				translator = typeof translator === "object" ? translator : Zotero.Translators.get(translator);
+				translation._loadTranslator(translator).then(function() {
 					if(Zotero.isFx && !Zotero.isBookmarklet) {
 						// do same origin check
 						var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
@@ -1161,11 +1159,9 @@ Zotero.Translate.Base.prototype = {
 			this._loadTranslator(this.translator[0]).then(function() { me._translateTranslatorLoaded() });
 		} else {
 			// need to get translator first
-			Zotero.Translators.get(this.translator[0]).
-			then(function(translator) {
-				me.translator[0] = translator;
-				me._loadTranslator(translator).then(function() { me._translateTranslatorLoaded() });
-			});
+			let translator = Zotero.Translators.get(this.translator[0]);
+			this.translator[0] = translator;
+			this._loadTranslator(translator).then(function() { me._translateTranslatorLoaded() });
 		}
 	},
 	
