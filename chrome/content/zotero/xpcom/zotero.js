@@ -610,12 +610,12 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			}
 			catch (e) {
 				if (e.toString().match('newer than SQL file')) {
-					let versions = e.toString().match(/\((\d+) < \d+\)/);
+					let versions = e.toString().match(/\((\d+) < (\d+)\)/);
 					let kbURL = "https://www.zotero.org/support/kb/newer_db_version";
 					let msg = Zotero.getString('startupError.zoteroVersionIsOlder') + " "
 						+ Zotero.getString('startupError.zoteroVersionIsOlder.upgrade') + "\n\n"
-						+ Zotero.getString('startupError.zoteroVersionIsOlder.current', Zotero.version) + "\n"
-						+ (versions ? "DB: " + versions[1] + "\n\n" : "\n")
+						+ Zotero.getString('startupError.zoteroVersionIsOlder.current', Zotero.version)
+						+ (versions ? " (" + versions[1] + " < " + versions[2] + ")" : "") + "\n\n"
 						+ Zotero.getString('general.seeForMoreInformation', kbURL);
 					Zotero.startupError = msg;
 					_startupErrorHandler = function() {
