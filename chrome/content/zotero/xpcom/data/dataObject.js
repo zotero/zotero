@@ -47,9 +47,7 @@ Zotero.DataObject = function () {
 	this._identified = false;
 	
 	this._loaded = {};
-	for (let i=0; i<this._dataTypes.length; i++) {
-		this._loaded[this._dataTypes[i]] = false;
-	}
+	this._markAllDataTypeLoadStates(false);
 	
 	this._clearChanged();
 };
@@ -372,8 +370,11 @@ Zotero.DataObject.prototype.loadPrimaryData = Zotero.Promise.coroutine(function*
 			throw new Error(this._ObjectType + " " + (id ? id : libraryID + "/" + key)
 				+ " not found in Zotero." + this._ObjectType + ".loadPrimaryData()");
 		}
-		this._loaded.primaryData = true;
 		this._clearChanged('primaryData');
+		
+		// If object doesn't exist, mark all data types as loaded
+		this._markAllDataTypeLoadStates(true);
+		
 		return;
 	}
 	
@@ -455,6 +456,12 @@ Zotero.DataObject.prototype.loadAllData = function (reload) {
 	}
 	
 	return Zotero.Promise.all(loadPromises);
+}
+
+Zotero.DataObject.prototype._markAllDataTypeLoadStates = function (loaded) {
+	for (let i = 0; i < this._dataTypes.length; i++) {
+		this._loaded[this._dataTypes[i]] = loaded;
+	}
 }
 
 /**
