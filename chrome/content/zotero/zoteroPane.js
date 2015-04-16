@@ -859,7 +859,7 @@ var ZoteroPane = new function()
 		
 		var s = new Zotero.Search();
 		s.libraryID = this.getSelectedLibraryID();
-		yield s.addCondition('title', 'contains', '');
+		s.addCondition('title', 'contains', '');
 		
 		var untitled = Zotero.getString('pane.collections.untitled');
 		untitled = yield Zotero.DB.getNextName('savedSearches', 'savedSearchName',
@@ -953,7 +953,7 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.openAdvancedSearchWindow = Zotero.Promise.coroutine(function* () {
+	this.openAdvancedSearchWindow = function () {
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator);
 		var enumerator = wm.getEnumerator('zotero:search');
@@ -968,11 +968,11 @@ var ZoteroPane = new function()
 		
 		var s = new Zotero.Search();
 		s.libraryID = this.getSelectedLibraryID();
-		yield s.addCondition('title', 'contains', '');
+		s.addCondition('title', 'contains', '');
 		
 		var io = {dataIn: {search: s}, dataOut: null};
 		window.openDialog('chrome://zotero/content/advancedSearch.xul', '', 'chrome,dialog=no,centerscreen', io);
-	});
+	};
 	
 	
 	this.toggleTagSelector = Zotero.Promise.coroutine(function* () {

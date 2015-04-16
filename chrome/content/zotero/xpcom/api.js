@@ -78,7 +78,7 @@ Zotero.API = {
 					s2.setScope(s);
 					var groups = Zotero.Groups.getAll();
 					for each(var group in groups) {
-						yield s2.addCondition('libraryID', 'isNot', group.libraryID);
+						s2.addCondition('libraryID', 'isNot', group.libraryID);
 					}
 					var ids = yield s2.search();
 					break;
@@ -90,29 +90,29 @@ Zotero.API = {
 					
 					var s = new Zotero.Search;
 					if (params.libraryID !== undefined) {
-						yield s.addCondition('libraryID', 'is', params.libraryID);
+						s.addCondition('libraryID', 'is', params.libraryID);
 					}
 					
 					if (params.objectKey) {
-						yield s.addCondition('key', 'is', params.objectKey);
+						s.addCondition('key', 'is', params.objectKey);
 					}
 					else if (params.objectID) {
 						Zotero.debug('adding ' + params.objectID);
-						yield s.addCondition('itemID', 'is', params.objectID);
+						s.addCondition('itemID', 'is', params.objectID);
 					}
 					
 					if (params.itemKey) {
-						yield s.addCondition('blockStart');
+						s.addCondition('blockStart');
 						for (let i=0; i<params.itemKey.length; i++) {
 							let itemKey = params.itemKey[i];
-							yield s.addCondition('key', 'is', itemKey);
+							s.addCondition('key', 'is', itemKey);
 						}
-						yield s.addCondition('blockEnd');
+						s.addCondition('blockEnd');
 					}
 					
 					// Display all top-level items
 					/*if (params.onlyTopLevel) {
-						yield s.addCondition('noChildren', 'true');
+						s.addCondition('noChildren', 'true');
 					}*/
 					
 					var ids = yield s.search();

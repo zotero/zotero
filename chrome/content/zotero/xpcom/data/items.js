@@ -194,11 +194,11 @@ Zotero.Items = function() {
 	this.apiDataGenerator = function* (params) {
 		Zotero.debug(params);
 		var s = new Zotero.Search;
-		yield s.addCondition('libraryID', 'is', params.libraryID);
+		s.addCondition('libraryID', 'is', params.libraryID);
 		if (params.scopeObject == 'collections') {
-			yield s.addCondition('collection', 'is', params.scopeObjectKey);
+			s.addCondition('collection', 'is', params.scopeObjectKey);
 		}
-		yield s.addCondition('title', 'contains', 'test');
+		s.addCondition('title', 'contains', 'test');
 		var ids = yield s.search();
 		
 		yield '[\n';

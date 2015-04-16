@@ -1054,8 +1054,8 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 		let s = new Zotero.Search;
 		s.libraryID = libraryID;
 		s.name = Zotero.getString('pane.collections.unfiled');
-		yield s.addCondition('libraryID', 'is', libraryID);
-		yield s.addCondition('unfiled', 'true');
+		s.addCondition('libraryID', 'is', libraryID);
+		s.addCondition('unfiled', 'true');
 		this._addRow(rows, new Zotero.CollectionTreeRow('unfiled', s), level + 1, row + 1 + newRows);
 		newRows++;
 	}
@@ -2295,22 +2295,22 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	}
 	else {
 		var s = new Zotero.Search();
-		yield s.addCondition('libraryID', 'is', this.ref.libraryID);
+		s.addCondition('libraryID', 'is', this.ref.libraryID);
 		// Library root
 		if (this.isLibrary(true)) {
-			yield s.addCondition('noChildren', 'true');
+			s.addCondition('noChildren', 'true');
 			includeScopeChildren = true;
 		}
 		else if (this.isCollection()) {
-			yield s.addCondition('noChildren', 'true');
-			yield s.addCondition('collectionID', 'is', this.ref.id);
+			s.addCondition('noChildren', 'true');
+			s.addCondition('collectionID', 'is', this.ref.id);
 			if (Zotero.Prefs.get('recursiveCollections')) {
-				yield s.addCondition('recursive', 'true');
+				s.addCondition('recursive', 'true');
 			}
 			includeScopeChildren = true;
 		}
 		else if (this.isTrash()) {
-			yield s.addCondition('deleted', 'true');
+			s.addCondition('deleted', 'true');
 		}
 		else {
 			throw new Error('Invalid search mode in Zotero.CollectionTreeRow.getSearchObject()');
@@ -2320,19 +2320,19 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	// Create the outer (filter) search
 	var s2 = new Zotero.Search();
 	if (this.isTrash()) {
-		yield s2.addCondition('deleted', 'true');
+		s2.addCondition('deleted', 'true');
 	}
 	s2.setScope(s, includeScopeChildren);
 	
 	if (this.searchText) {
 		var cond = 'quicksearch-' + Zotero.Prefs.get('search.quicksearch-mode');
-		yield s2.addCondition(cond, 'contains', this.searchText);
+		s2.addCondition(cond, 'contains', this.searchText);
 	}
 	
 	if (this.tags){
 		for (var tag in this.tags){
 			if (this.tags[tag]){
-				yield s2.addCondition('tag', 'is', tag);
+				s2.addCondition('tag', 'is', tag);
 			}
 		}
 	}

@@ -67,7 +67,7 @@ Zotero.Duplicates.prototype.getSearchObject = Zotero.Promise.coroutine(function*
 	
 	var s = new Zotero.Search;
 	s.libraryID = this._libraryID;
-	yield s.addCondition('tempTable', 'is', 'tmpDuplicates');
+	s.addCondition('tempTable', 'is', 'tmpDuplicates');
 	return s;
 });
 

@@ -598,7 +598,7 @@ function ZoteroProtocolHandler() {
 						search.setScope(s);
 						var groups = yield Zotero.Groups.getAll();
 						for each(var group in groups) {
-							yield search.addCondition('libraryID', 'isNot', group.libraryID);
+							search.addCondition('libraryID', 'isNot', group.libraryID);
 						}
 						break;
 				}
@@ -624,8 +624,8 @@ function ZoteroProtocolHandler() {
 							}
 							
 							let s = new Zotero.Search();
-							yield s.addCondition('libraryID', 'is', params.libraryID);
-							yield s.addCondition('noChildren', 'true');
+							s.addCondition('libraryID', 'is', params.libraryID);
+							s.addCondition('noChildren', 'true');
 							var ids = yield s.search();
 							var results = yield Zotero.Items.getAsync(ids);
 					}

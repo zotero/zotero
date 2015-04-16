@@ -62,7 +62,7 @@ var ZoteroAdvancedSearch = new function() {
 			ref: _searchBox.search,
 			isSearchMode: function() { return true; },
 			getItems: Zotero.Promise.coroutine(function* () {
-				var search = yield _searchBox.search.clone();
+				var search = _searchBox.search.clone();
 				search.libraryID = _libraryID;
 				var ids = yield search.search();
 				return Zotero.Items.get(ids);
@@ -128,7 +128,7 @@ var ZoteroAdvancedSearch = new function() {
 			name.value = untitled;
 		}
 		
-		var s = yield _searchBox.search.clone();
+		var s = _searchBox.search.clone();
 		s.name = name.value;
 		yield s.save();
 		

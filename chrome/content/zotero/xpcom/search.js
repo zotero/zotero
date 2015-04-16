@@ -282,7 +282,7 @@ Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env)
 });
 
 
-Zotero.Search.prototype.clone = Zotero.Promise.coroutine(function* (libraryID) {
+Zotero.Search.prototype.clone = function (libraryID) {
 	var s = new Zotero.Search();
 	s.libraryID = libraryID === undefined ? this.libraryID : libraryID;
 	
@@ -293,19 +293,19 @@ Zotero.Search.prototype.clone = Zotero.Promise.coroutine(function* (libraryID) {
 			condition.condition + '/' + condition.mode :
 			condition.condition
 			
-		yield s.addCondition(name, condition.operator, condition.value,
+		s.addCondition(name, condition.operator, condition.value,
 			condition.required);
 	}
 	
 	return s;
-});
+};
 
 
-Zotero.Search.prototype.addCondition = Zotero.Promise.coroutine(function* (condition, operator, value, required) {
+Zotero.Search.prototype.addCondition = function (condition, operator, value, required) {
 	this._requireData('conditions');
 	
 	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
-		throw ("Invalid operator '" + operator + "' for condition " + condition);
+		throw new Error("Invalid operator '" + operator + "' for condition " + condition);
 	}
 	
 	// Shortcut to add a condition on every table -- does not return an id
@@ -313,71 +313,79 @@ Zotero.Search.prototype.addCondition = Zotero.Promise.coroutine(function* (condi
 		var parts = Zotero.SearchConditions.parseSearchString(value);
 		
 		for each(var part in parts) {
-			yield this.addCondition('blockStart');
+			this.addCondition('blockStart');
 			
 			// If search string is 8 characters, see if this is a item key
 			if (operator == 'contains' && part.text.length == 8) {
-				yield this.addCondition('key', 'is', part.text, false);
+				this.addCondition('key', 'is', part.text, false);
 			}
 			
 			if (condition == 'quicksearch-titleCreatorYear') {
-				yield this.addCondition('title', operator, part.text, false);
-				yield this.addCondition('publicationTitle', operator, part.text, false);
-				yield this.addCondition('shortTitle', operator, part.text, false);
-				yield this.addCondition('court', operator, part.text, false);
-				yield this.addCondition('year', operator, part.text, false);
+				this.addCondition('title', operator, part.text, false);
+				this.addCondition('publicationTitle', operator, part.text, false);
+				this.addCondition('shortTitle', operator, part.text, false);
+				this.addCondition('court', operator, part.text, false);
+				this.addCondition('year', operator, part.text, false);
 			}
 			else {
-				yield this.addCondition('field', operator, part.text, false);
-				yield this.addCondition('tag', operator, part.text, false);
-				yield this.addCondition('note', operator, part.text, false);
+				this.addCondition('field', operator, part.text, false);
+				this.addCondition('tag', operator, part.text, false);
+				this.addCondition('note', operator, part.text, false);
 			}
-			yield this.addCondition('creator', operator, part.text, false);
+			this.addCondition('creator', operator, part.text, false);
 			
 			if (condition == 'quicksearch-everything') {
-				yield this.addCondition('annotation', operator, part.text, false);
+				this.addCondition('annotation', operator, part.text, false);
 				
 				if (part.inQuotes) {
-					yield this.addCondition('fulltextContent', operator, part.text, false);
+					this.addCondition('fulltextContent', operator, part.text, false);
 				}
 				else {
 					var splits = Zotero.Fulltext.semanticSplitter(part.text);
 					for each(var split in splits) {
-						yield this.addCondition('fulltextWord', operator, split, false);
+						this.addCondition('fulltextWord', operator, split, false);
 					}
 				}
 			}
 			
-			yield this.addCondition('blockEnd');
+			this.addCondition('blockEnd');
 		}
 		
 		if (condition == 'quicksearch-titleCreatorYear') {
-			yield this.addCondition('noChildren', 'true');
+			this.addCondition('noChildren', 'true');
 		}
 		
 		return false;
 	}
-	// Shortcut to add a collection
+	// Shortcut to add a collection (which must be loaded first)
 	else if (condition == 'collectionID') {
-		var c = yield Zotero.Collections.getAsync(value);
-		if (!c) {
-			var msg = "Collection " + value + " not found";
+		let [libraryID, key] = Zotero.Collections.getLibraryAndKeyFromID(value);
+		if (!key) {
+			let msg = "Collection " + value + " not found";
 			Zotero.debug(msg, 2);
 			Components.utils.reportError(msg);
 			return;
 		}
-		return this.addCondition('collection', operator, c.key, required);
+		if (this.libraryID && libraryID != this.libraryID) {
+			Zotero.logError(new Error("Collection " + value + " is in different library"));
+			return;
+		}
+		return this.addCondition('collection', operator, key, required);
 	}
-	// Shortcut to add a saved search
+	// Shortcut to add a saved search (which must be loaded first)
 	else if (condition == 'savedSearchID') {
-		var s = yield Zotero.Searches.getAsync(value);
-		if (!s) {
-			var msg = "Saved search " + value + " not found";
+		let [libraryID, key] = Zotero.Searches.getLibraryAndKeyFromID(value);
+		if (!key) {
+			let msg = "Saved search " + value + " not found";
 			Zotero.debug(msg, 2);
 			Components.utils.reportError(msg);
 			return;
 		}
-		return this.addCondition('savedSearch', operator, s.key, required);
+		if (this.libraryID && libraryID != this.libraryID) {
+			Zotero.logError(new Error("Collection " + value + " is in different library"));
+			return;
+		}
+		return this.addCondition('savedSearch', operator, key, required);
 	}
 	
 	var searchConditionID = ++this._maxSearchConditionID;
@@ -399,7 +407,7 @@ Zotero.Search.prototype.addCondition = Zotero.Promise.coroutine(function* (condi
 	this._sql = null;
 	this._sqlParams = false;
 	return searchConditionID;
-});
+}
 
 
 /*
@@ -691,12 +699,12 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 						else if (joinMode == 'any' && !c.required) {
 							continue;
 						}
-						yield s.addCondition(c.condition, c.operator, c.value);
+						s.addCondition(c.condition, c.operator, c.value);
 					}
 					
 					var splits = Zotero.Fulltext.semanticSplitter(condition.value);
 					for each(var split in splits){
-						yield s.addCondition('fulltextWord', condition.operator, split);
+						s.addCondition('fulltextWord', condition.operator, split);
 					}
 					var fulltextWordIDs = yield s.search();
 					
