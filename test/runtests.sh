@@ -29,12 +29,13 @@ Options
  -x FX_EXECUTABLE    path to Firefox executable (default: $FX_EXECUTABLE)
  -d                  enable debug logging
  -c                  open JavaScript console and don't quit on completion
+ -b                  skip bundled translator/style installation
  TESTS               set of tests to run (default: all)
 DONE
 	exit 1
 }
 
-while getopts "x:dc" opt; do
+while getopts "x:dcb" opt; do
 	case $opt in
 		x)
 			FX_EXECUTABLE="$OPTARG"
@@ -45,6 +46,9 @@ while getopts "x:dc" opt; do
         c)
             FX_ARGS="-jsconsole -noquit"
             ;;
+        b)
+        	SKIP_BUNDLED=true
+        	;;
 		*)
 			usage
 			;;
@@ -88,6 +92,10 @@ fi
 
 if [ "$TRAVIS" = true ]; then
 	FX_ARGS="$FX_ARGS --ZoteroNoUserInput"
+fi
+
+if [ "$SKIP_BUNDLED" = true ]; then
+	FX_ARGS="$FX_ARGS -ZoteroSkipBundledFiles"
 fi
 
 makePath FX_PROFILE "$PROFILE"

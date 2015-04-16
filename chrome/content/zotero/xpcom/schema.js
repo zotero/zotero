@@ -397,6 +397,11 @@ Zotero.Schema = new function(){
 	 * @return {Promise}
 	 */
 	this.updateBundledFiles = Zotero.Promise.coroutine(function* (mode) {
+		if (Zotero.skipBundledFiles) {
+			Zotero.debug("Skipping bundled file installation");
+			return;
+		}
+		
 		if (_localUpdateInProgress) {
 			Zotero.debug("Bundled file update already in progress", 2);
 			return;

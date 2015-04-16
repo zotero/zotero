@@ -172,6 +172,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		if (options) {
 			if (options.openPane) this.openPane = true;
 			if (options.noUserInput) this.noUserInput = true;
+			if (options.skipBundledFiles) this.skipBundledFiles = true;
 		}
 		
 		this.mainThread = Services.tm.mainThread;

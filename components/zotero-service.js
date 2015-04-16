@@ -465,6 +465,9 @@ ZoteroCommandLineHandler.prototype = {
 		if (cmdLine.handleFlag("ZoteroNoUserInput", false)) {
 			zInitOptions.noUserInput = true;
 		}
+		if (cmdLine.handleFlag("ZoteroSkipBundledFiles", false)) {
+			zInitOptions.skipBundledFiles = true;
+		}
 	},
 	
 	contractID: "@mozilla.org/commandlinehandler/general-startup;1?type=zotero",
