@@ -172,7 +172,7 @@ Zotero.Search.prototype.loadFromRow = function (row) {
 
 Zotero.Search.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 	if (!this.name) {
-		throw('Name not provided for saved search');
+		throw new Error('Name not provided for saved search');
 	}
 	
 	return Zotero.Search._super.prototype._initSave.apply(this, arguments);
@@ -199,7 +199,6 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	var sqlValues = [
 		searchID ? { int: searchID } : null,
 		{ string: this.name },
-		Zotero.DB.transactionDateTime,
 		this.libraryID,
 		key,
 		this.version ? this.version : 0,
@@ -478,14 +477,14 @@ Zotero.Search.prototype.getCondition = function(searchConditionID){
 
 
 /*
- * Returns a multidimensional array of conditions/operator/value sets
- * used in the search, indexed by searchConditionID
+ * Returns an object of conditions/operator/value sets used in the search,
+ * indexed by searchConditionID
  */
 Zotero.Search.prototype.getConditions = function(){
 	this._requireData('conditions');
-	var conditions = [];
-	for (var id in this._conditions) {
-		var condition = this._conditions[id];
+	var conditions = {};
+	for (let id in this._conditions) {
+		let condition = this._conditions[id];
 		conditions[id] = {
 			id: id,
 			condition: condition.condition,
@@ -2340,7 +2339,7 @@ Zotero.SearchConditions = new function(){
 		}
 		
 		if (!_conditions[condition]){
-			throw ("Invalid condition '" + condition + "' in hasOperator()");
+			throw new Error("Invalid condition '" + condition + "' in hasOperator()");
 		}
 		
 		if (!operator && typeof _conditions[condition]['operators'] == 'undefined'){

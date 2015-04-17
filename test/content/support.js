@@ -115,6 +115,13 @@ function waitForCallback(cb, interval, timeout) {
 }
 
 /**
+ * Return a promise for the error thrown by a promise, or false if none
+ */
+function getPromiseError(promise) {
+	return promise.thenReturn(false).catch(e => e);
+}
+
+/**
  * Ensures that the PDF tools are installed, or installs them if not.
  * Returns a promise.
  */
