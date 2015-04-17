@@ -48,6 +48,12 @@ var ZoteroAdvancedSearch = new function() {
 		
 		io.dataIn.search.loadPrimaryData()
 		.then(function () {
+			return Zotero.Groups.getAll();
+		})
+		.then(function (groups) {
+			// Since the search box can be used as a modal dialog, which can't use promises,
+			// it expects groups to be passed in.
+			_searchBox.groups = groups;
 			_searchBox.search = io.dataIn.search;
 		});
 	}

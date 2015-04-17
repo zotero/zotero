@@ -1809,7 +1809,7 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.editSelectedCollection = function () {
+	this.editSelectedCollection = Zotero.Promise.coroutine(function* () {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -1832,22 +1832,32 @@ var ZoteroPane = new function()
 				}
 			}
 			else {
-				var s = new Zotero.Search();
+				let s = new Zotero.Search();
 				s.id = row.ref.id;
-				s.loadPrimaryData()
-				.then(function () {
-					return s.loadConditions();
-				})
-				.then(function () {
-					var io = {dataIn: {search: s, name: row.getName()}, dataOut: null};
-					window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
-					if (io.dataOut) {
-						this.onCollectionSelected(); //reload itemsView
-					}
-				}.bind(this));
+				yield s.loadPrimaryData();
+				yield s.loadConditions();
+				let groups = [];
+				// Promises don't work in the modal dialog, so get the group name here, if
+				// applicable, and pass it in. We only need the group that this search belongs
+				// to, if any, since the library drop-down is disabled for saved searches.
+				if (Zotero.Libraries.getType(s.libraryID) == 'group') {
+					groups.push(yield Zotero.Groups.getByLibraryID(s.libraryID));
+				}
+				var io = {
+					dataIn: {
+						search: s,
+						name: row.getName(),
+						groups: groups
+					},
+					dataOut: null
+				};
+				window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
+				if (io.dataOut) {
+					this.onCollectionSelected(); //reload itemsView
+				}
 			}
 		}
-	}
+	});
 	
 	
 	this.copySelectedItemsToClipboard = function (asCitations) {

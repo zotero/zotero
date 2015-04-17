@@ -36,6 +36,8 @@
 		</resources>
 		
 		<implementation>
+			<property name="groups"/>
+			
 			<field name="searchRef"/>
 			<property name="search" onget="return this.searchRef;">
 				<setter>
@@ -49,28 +51,25 @@
 							conditionsBox.removeChild(conditionsBox.firstChild);
 						
 						var conditions = this.search.getConditions();
-						
-						for(var id in conditions)
-						{
+						for (let id in conditions) {
+							let condition = conditions[id];
 							// Checkboxes
-							switch (conditions[id]['condition']) {
+							switch (condition.condition) {
 								case 'recursive':
 								case 'noChildren':
 								case 'includeParentsAndChildren':
-									var checkbox = conditions[id]['condition'] + 'Checkbox';
-									this.id(checkbox).setAttribute('condition',id);
-									this.id(checkbox).checked = (conditions[id]['operator']=='true');
+									let checkbox = condition.condition + 'Checkbox';
+									this.id(checkbox).setAttribute('condition', id);
+									this.id(checkbox).checked = condition.operator == 'true';
 									continue;
 							}
 							
-							if(conditions[id]['condition'] == 'joinMode')
-							{
-								this.id('joinModeMenu').setAttribute('condition',id);
-								this.id('joinModeMenu').value = conditions[id]['operator'];
+							if(condition.condition == 'joinMode') {
+								this.id('joinModeMenu').setAttribute('condition', id);
+								this.id('joinModeMenu').value = condition.operator;
 							}
-							else
-							{
-								this.addCondition(conditions[id]);
+							else {
+								this.addCondition(condition);
 							}
 						}
 					]]>
@@ -96,9 +95,8 @@
 					menupopup.appendChild(menuitem);
 					
 					// Add groups
-					var groups = Zotero.Groups.getAll();
-					for (let i=0; i<groups.length; i++) {
-						let group = groups[i];
+					for (let i = 0; i < this.groups.length; i++) {
+						let group = this.groups[i];
 						let menuitem = document.createElement('menuitem');
 						menuitem.setAttribute('label', group.name);
 						menuitem.setAttribute('libraryID', group.libraryID);
@@ -232,7 +230,7 @@
 				<body>
 					<![CDATA[
 						this.updateSearch();
-						return this.search.save({fixGaps: true});
+						return this.search.save();
 					]]>
 				</body>
 			</method>

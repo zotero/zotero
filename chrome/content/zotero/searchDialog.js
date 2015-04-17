@@ -35,7 +35,9 @@ function doLoad()
 	
 	io = window.arguments[0];
 	
-	document.getElementById('search-box').search = io.dataIn.search;
+	var searchBox = document.getElementById('search-box');
+	searchBox.groups = io.dataIn.groups;
+	searchBox.search = io.dataIn.search;
 	document.getElementById('search-name').value = io.dataIn.name;
 }
 

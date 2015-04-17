@@ -32,8 +32,8 @@ Zotero.Search = function() {
 	this._scopeIncludeChildren = null;
 	this._sql = null;
 	this._sqlParams = false;
-	this._maxSearchConditionID = 0;
-	this._conditions = [];
+	this._maxSearchConditionID = -1;
+	this._conditions = {};
 	this._hasPrimaryConditions = false;
 }
 
@@ -179,7 +179,6 @@ Zotero.Search.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 });
 
 Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
-	var fixGaps = env.options.fixGaps;
 	var isNew = env.isNew;
 	
 	var searchID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('savedSearches');
@@ -217,39 +216,28 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		yield Zotero.DB.queryAsync(sql, this.id);
 	}
 	
-	// Close gaps in savedSearchIDs
-	var saveConditions = {};
-	var i = 1;
-	for (var id in this._conditions) {
-		if (!fixGaps && id != i) {
-			Zotero.DB.rollbackTransaction();
-			throw ('searchConditionIDs not contiguous and |fixGaps| not set in save() of saved search ' + this._id);
-		}
-		saveConditions[i] = this._conditions[id];
-		i++;
-	}
-	
-	this._conditions = saveConditions;
-	
-	for (var i in this._conditions){
-		var sql = "INSERT INTO savedSearchConditions (savedSearchID, "
-			+ "searchConditionID, condition, operator, value, required) "
-			+ "VALUES (?,?,?,?,?,?)";
+	var i = 0;
+	var sql = "INSERT INTO savedSearchConditions "
+		+ "(savedSearchID, searchConditionID, condition, operator, value, required) "
+		+ "VALUES (?,?,?,?,?,?)";
+	for (let id in this._conditions) {
+		let condition = this._conditions[id];
 		
 		// Convert condition and mode to "condition[/mode]"
-		var condition = this._conditions[i].mode ?
-			this._conditions[i].condition + '/' + this._conditions[i].mode :
-			this._conditions[i].condition
+		let conditionString = condition.mode ?
+			condition.condition + '/' + condition.mode :
+			condition.condition
 		
 		var sqlParams = [
 			searchID,
 			i,
-			condition,
-			this._conditions[i].operator ? this._conditions[i].operator : null,
-			this._conditions[i].value ? this._conditions[i].value : null,
-			this._conditions[i].required ? 1 : null
+			conditionString,
+			condition.operator ? condition.operator : null,
+			condition.value ? condition.value : null,
+			condition.required ? 1 : null
 		];
 		yield Zotero.DB.queryAsync(sql, sqlParams);
+		i++;
 	}
 });
 
@@ -274,6 +262,7 @@ Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env)
 		return id;
 	}
 	
+	yield this.loadPrimaryData(true);
 	yield this.reload();
 	this._clearChanged();
 	
@@ -400,11 +389,13 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 		mode: mode,
 		operator: operator,
 		value: value,
-		required: required
+		required: !!required
 	};
 	
 	this._sql = null;
 	this._sqlParams = false;
+	this._markFieldChange('conditions', this._conditions);
+	this._changed.conditions = true;
 	return searchConditionID;
 }
 
@@ -426,8 +417,8 @@ Zotero.Search.prototype.setScope = function (searchObj, includeChildren) {
  * @param {Boolean} [required]
  * @return {Promise}
  */
-Zotero.Search.prototype.updateCondition = Zotero.Promise.coroutine(function* (searchConditionID, condition, operator, value, required){
-	yield this.loadPrimaryData();
+Zotero.Search.prototype.updateCondition = function (searchConditionID, condition, operator, value, required) {
+	this._requireData('conditions');
 	
 	if (typeof this._conditions[searchConditionID] == 'undefined'){
 		throw new Error('Invalid searchConditionID ' + searchConditionID);
@@ -447,23 +438,27 @@ Zotero.Search.prototype.updateCondition = Zotero.Promise.coroutine(function* (se
 		mode: mode,
 		operator: operator,
 		value: value,
-		required: required
+		required: !!required
 	};
 	
 	this._sql = null;
 	this._sqlParams = false;
-});
+	this._markFieldChange('conditions', this._conditions);
+	this._changed.conditions = true;
+}
 
 
-Zotero.Search.prototype.removeCondition = Zotero.Promise.coroutine(function* (searchConditionID){
-	yield this.loadPrimaryData();
+Zotero.Search.prototype.removeCondition = function (searchConditionID) {
+	this._requireData('conditions');
 	
 	if (typeof this._conditions[searchConditionID] == 'undefined'){
 		throw ('Invalid searchConditionID ' + searchConditionID + ' in removeCondition()');
 	}
 	
 	delete this._conditions[searchConditionID];
-});
+	this._markFieldChange('conditions', this._conditions);
+	this._changed.conditions = true;
+}
 
 
 /*
@@ -896,38 +891,37 @@ Zotero.Search.prototype.loadConditions = Zotero.Promise.coroutine(function* (rel
 		this._maxSearchConditionID = conditions[conditions.length - 1].searchConditionID;
 	}
 	
-	// Reindex conditions, in case they're not contiguous in the DB
-	var conditionID = 1;
+	this._conditions = {};
 	
+	// Reindex conditions, in case they're not contiguous in the DB
 	for (let i=0; i<conditions.length; i++) {
-		// Parse "condition[/mode]"
-		var [condition, mode] =
-			Zotero.SearchConditions.parseCondition(conditions[i]['condition']);
+		let condition = conditions[i];
 		
-		var cond = Zotero.SearchConditions.get(condition);
+		// Parse "condition[/mode]"
+		let [conditionName, mode] = Zotero.SearchConditions.parseCondition(condition.condition);
+		
+		let cond = Zotero.SearchConditions.get(conditionName);
 		if (!cond || cond.noLoad) {
-			Zotero.debug("Invalid saved search condition '" + condition + "' -- skipping", 2);
+			Zotero.debug("Invalid saved search condition '" + conditionName + "' -- skipping", 2);
 			continue;
 		}
 		
 		// Convert itemTypeID to itemType
 		//
 		// TEMP: This can be removed at some point
-		if (condition == 'itemTypeID') {
-			condition = 'itemType';
-			conditions[i].value = Zotero.ItemTypes.getName(conditions[i].value);
+		if (conditionName == 'itemTypeID') {
+			conditionName = 'itemType';
+			condition.value = Zotero.ItemTypes.getName(condition.value);
 		}
 		
-		this._conditions[conditionID] = {
-			id: conditionID,
-			condition: condition,
+		this._conditions[i] = {
+			id: i,
+			condition: conditionName,
 			mode: mode,
-			operator: conditions[i].operator,
-			value: conditions[i].value,
-			required: conditions[i].required
+			operator: condition.operator,
+			value: condition.value,
+			required: !!condition.required
 		};
-		
-		conditionID++;
 	}
 	
 	this._loaded.conditions = true;
