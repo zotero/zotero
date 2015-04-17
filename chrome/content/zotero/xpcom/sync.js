@@ -4711,7 +4711,7 @@ Zotero.Sync.Server.Data = new function() {
 		searchElem.setAttribute('dateAdded', search.dateAdded);
 		searchElem.setAttribute('dateModified', search.dateModified);
 		
-		var conditions = search.getSearchConditions();
+		var conditions = search.getConditions();
 		if (conditions) {
 			for each(var condition in conditions) {
 				var conditionElem = doc.createElement('condition');
@@ -4770,7 +4770,7 @@ Zotero.Sync.Server.Data = new function() {
 			if (mode) {
 				name = name + '/' + mode;
 			}
-			if (search.getSearchCondition(conditionID)) {
+			if (search.getCondition(conditionID)) {
 				search.updateCondition(
 					conditionID,
 					name,
@@ -4793,7 +4793,7 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		conditionID++;
-		while (search.getSearchCondition(conditionID)) {
+		while (search.getCondition(conditionID)) {
 			search.removeCondition(conditionID);
 			conditionID++;
 		}

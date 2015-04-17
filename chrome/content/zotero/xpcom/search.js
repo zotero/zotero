@@ -84,7 +84,7 @@ Zotero.defineProperty(Zotero.Search.prototype, 'synced', {
 	set: function(val) this._set('synced', val)
 });
 Zotero.defineProperty(Zotero.Search.prototype, 'conditions', {
-	get: function() this.getSearchConditions()
+	get: function() this.getConditions()
 });
 
 Zotero.Search.prototype._set = function (field, value) {
@@ -286,7 +286,7 @@ Zotero.Search.prototype.clone = function (libraryID) {
 	var s = new Zotero.Search();
 	s.libraryID = libraryID === undefined ? this.libraryID : libraryID;
 	
-	var conditions = this.getSearchConditions();
+	var conditions = this.getConditions();
 	
 	for each(var condition in conditions) {
 		var name = condition.mode ?
@@ -471,7 +471,7 @@ Zotero.Search.prototype.removeCondition = Zotero.Promise.coroutine(function* (se
  * Returns an array with 'condition', 'operator', 'value', 'required'
  * for the given searchConditionID
  */
-Zotero.Search.prototype.getSearchCondition = function(searchConditionID){
+Zotero.Search.prototype.getCondition = function(searchConditionID){
 	this._requireData('conditions');
 	return this._conditions[searchConditionID];
 }
@@ -481,7 +481,7 @@ Zotero.Search.prototype.getSearchCondition = function(searchConditionID){
  * Returns a multidimensional array of conditions/operator/value sets
  * used in the search, indexed by searchConditionID
  */
-Zotero.Search.prototype.getSearchConditions = function(){
+Zotero.Search.prototype.getConditions = function(){
 	this._requireData('conditions');
 	var conditions = [];
 	for (var id in this._conditions) {
@@ -851,7 +851,7 @@ Zotero.Search.prototype.serialize = function() {
 		fields: {
 			name: this.name,
 		},
-		conditions: this.getSearchConditions()
+		conditions: this.getConditions()
 	};
 	return obj;
 }

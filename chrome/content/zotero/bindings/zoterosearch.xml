@@ -48,7 +48,7 @@
 						while(conditionsBox.hasChildNodes())
 							conditionsBox.removeChild(conditionsBox.firstChild);
 						
-						var conditions = this.search.getSearchConditions();
+						var conditions = this.search.getConditions();
 						
 						for(var id in conditions)
 						{
@@ -131,7 +131,7 @@
 						
 						// Default to an empty 'title' condition
 						if (!ref) {
-							ref = this.search.getSearchCondition(this.search.addCondition("title","contains",""))
+							ref = this.search.getCondition(this.search.addCondition("title","contains",""))
 						}
 						
 						condition.initWithParentAndCondition(this, ref);
