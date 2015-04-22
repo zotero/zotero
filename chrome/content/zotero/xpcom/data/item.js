@@ -4257,8 +4257,7 @@ Zotero.Item.prototype.loadNote = Zotero.Promise.coroutine(function* (reload) {
 	}
 	
 	if (!this.isNote() && !this.isAttachment()) {
-		Zotero.debug("Can only load note for note or attachment item");
-		return;
+		throw new Error("Can only load note for note or attachment item");
 	}
 	
 	Zotero.debug("Loading note data for item " + this.libraryKey);
@@ -4456,8 +4455,7 @@ Zotero.Item.prototype.loadChildItems = Zotero.Promise.coroutine(function* (reloa
 	
 	
 	if (this.isNote() || this.isAttachment()) {
-		Zotero.debug("Can only load child items for regular item");
-		return;
+		throw new Error("Can only load child items for regular item");
 	}
 	
 	// Attachments
