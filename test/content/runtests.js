@@ -10,7 +10,7 @@ var dump = ZoteroUnit.dump;
 function quit(failed) {
 	// Quit with exit status
 	if(!failed) {
-		OS.File.writeAtomic(FileUtils.getFile("ProfD", ["success"]).path, Uint8Array(0));
+		OS.File.writeAtomic(FileUtils.getFile("ProfD", ["success"]).path, new Uint8Array(0));
 	}
 	if(!ZoteroUnit.noquit) {
 		Components.classes['@mozilla.org/toolkit/app-startup;1'].
