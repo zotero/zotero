@@ -465,6 +465,15 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 				}
 			}
 			
+			try {
+				var result = yield Zotero.Promise.coroutine(func)();
+			}
+			catch (e) {
+				Zotero.debug("Rolled back nested async DB transaction", 5);
+				this._asyncTransactionNestingLevel = 0;
+				throw e;
+			}
+			
 			Zotero.debug("Decreasing async DB transaction level to "
 				+ --this._asyncTransactionNestingLevel, 5);
 			return result;
@@ -489,78 +498,77 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 				}
 			}
 			var result = yield conn.executeTransaction(func);
-			try {
-				Zotero.debug("Committed async DB transaction", 5);
-				
-				// Clear transaction time
-				if (this._transactionDate) {
-					this._transactionDate = null;
-				}
-				
-				if (options) {
-					// Function to run once transaction has been committed but before any
-					// permanent callbacks
-					if (options.onCommit) {
-						this._callbacks.current.commit.push(options.onCommit);
-					}
-					this._callbacks.current.rollback = [];
-					
-					if (options.vacuumOnCommit) {
-						Zotero.debug('Vacuuming database');
-						yield Zotero.DB.queryAsync('VACUUM');
-					}
-				}
-				
-				// Run temporary commit callbacks
-				var f;
-				while (f = this._callbacks.current.commit.shift()) {
-					yield Zotero.Promise.resolve(f());
-				}
-				
-				// Run commit callbacks
-				for (var i=0; i<this._callbacks.commit.length; i++) {
-					if (this._callbacks.commit[i]) {
-						yield this._callbacks.commit[i]();
-					}
-				}
-				
-				setTimeout(resolve, 0);
-				
-				return result;
+			Zotero.debug("Committed async DB transaction", 5);
+			
+			// Clear transaction time
+			if (this._transactionDate) {
+				this._transactionDate = null;
 			}
-			catch (e) {
-				Zotero.debug("Rolled back async DB transaction", 5);
-				Zotero.debug(e, 1);
-				
-				try {
-					if (options) {
-						// Function to run once transaction has been committed but before any
-						// permanent callbacks
-						if (options.onRollback) {
-							this._callbacks.current.rollback.push(options.onRollback);
-						}
-					}
-					
-					// Run temporary commit callbacks
-					var f;
-					while (f = this._callbacks.current.rollback.shift()) {
-						yield Zotero.Promise.resolve(f());
-					}
-					
-					// Run rollback callbacks
-					for (var i=0; i<this._callbacks.rollback.length; i++) {
-						if (this._callbacks.rollback[i]) {
-							yield Zotero.Promise.resolve(this._callbacks.rollback[i]());
-						}
-					}
+			
+			if (options) {
+				// Function to run once transaction has been committed but before any
+				// permanent callbacks
+				if (options.onCommit) {
+					this._callbacks.current.commit.push(options.onCommit);
 				}
-				finally {
-					setTimeout(reject, 0);
-				}
+				this._callbacks.current.rollback = [];
 				
-				throw e;
+				if (options.vacuumOnCommit) {
+					Zotero.debug('Vacuuming database');
+					yield Zotero.DB.queryAsync('VACUUM');
+				}
+			}
+			
+			// Run temporary commit callbacks
+			var f;
+			while (f = this._callbacks.current.commit.shift()) {
+				yield Zotero.Promise.resolve(f());
+			}
+			
+			// Run commit callbacks
+			for (var i=0; i<this._callbacks.commit.length; i++) {
+				if (this._callbacks.commit[i]) {
+					yield this._callbacks.commit[i]();
+				}
+			}
+			
+			setTimeout(resolve, 0);
+			
+			return result;
+		}
+	}
+	catch (e) {
+		Zotero.debug("Rolled back async DB transaction", 5);
+		Zotero.debug(e, 1);
+		
+		if (options) {
+			// Function to run once transaction has been committed but before any
+			// permanent callbacks
+			if (options.onRollback) {
+				this._callbacks.current.rollback.push(options.onRollback);
 			}
 		}
+		
+		// Run temporary commit callbacks
+		var f;
+		while (f = this._callbacks.current.rollback.shift()) {
+			yield Zotero.Promise.resolve(f());
+		}
+		
+		// Run rollback callbacks
+		for (var i=0; i<this._callbacks.rollback.length; i++) {
+			if (this._callbacks.rollback[i]) {
+				yield Zotero.Promise.resolve(this._callbacks.rollback[i]());
+			}
+		}
+		
+		if (reject) {
+			setTimeout(function () {
+				reject(e);
+			}, 0);
+		}
+		
+		throw e;
 	}
 	finally {
 		// Reset options back to their previous values
