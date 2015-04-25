@@ -3126,7 +3126,7 @@ var ZoteroPane = new function()
 		var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString();
 		var uri = event.currentTarget.ownerDocument.popupNode.ownerDocument.location.href;
 		var itemID = ZoteroPane.addItemFromPage();
-		var [libraryID, key] = Zotero.Items.getLibraryAndKeyFromID(itemID);
+		var {libraryID, key} = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		ZoteroPane.newNote(false, key, str, uri)
 	};
 	

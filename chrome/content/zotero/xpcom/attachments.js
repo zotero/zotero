@@ -50,7 +50,8 @@ Zotero.Attachments = new function(){
 			// Create a new attachment
 			var attachmentItem = new Zotero.Item('attachment');
 			if (parentItemID) {
-				let [parentLibraryID, parentKey] = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+				let {libraryID: parentLibraryID, key: parentKey} =
+					Zotero.Items.getLibraryAndKeyFromID(parentItemID);
 				attachmentItem.libraryID = parentLibraryID;
 			}
 			else if (libraryID) {
@@ -151,7 +152,7 @@ Zotero.Attachments = new function(){
 		yield Zotero.DB.executeTransaction(function* () {
 			// Create a new attachment
 			var attachmentItem = new Zotero.Item('attachment');
-			let [libraryID, parentKey] = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+			let {libraryID, key: parentKey} = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
 			attachmentItem.libraryID = libraryID;
 			attachmentItem.setField('title', title);
 			attachmentItem.setField('url', url);
@@ -318,7 +319,8 @@ Zotero.Attachments = new function(){
 					attachmentItem.libraryID = libraryID;
 				}
 				else if (parentItemID) {
-					let [parentLibraryID, parentKey] = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+					let {libraryID: parentLibraryID, key: parentKey} =
+						Zotero.Items.getLibraryAndKeyFromID(parentItemID);
 					attachmentItem.libraryID = parentLibraryID;
 				}
 				attachmentItem.setField('title', title ? title : fileName);
@@ -627,7 +629,8 @@ Zotero.Attachments = new function(){
 				attachmentItem.libraryID = libraryID;
 			}
 			else if (parentItemID) {
-				let [parentLibraryID, parentKey] = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+				let {libraryID: parentLibraryID, key: parentKey} =
+					Zotero.Items.getLibraryAndKeyFromID(parentItemID);
 				Zotero.debug('==-=');
 				Zotero.debug(parentItemID);
 				Zotero.debug(parentLibraryID);
@@ -862,7 +865,7 @@ Zotero.Attachments = new function(){
 		if (!itemID) {
 			throw new Error("itemID not provided");
 		}
-		var [libraryID, key] = Zotero.Items.getLibraryAndKeyFromID(itemID);
+		var {libraryID, key} = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		if (!key) {
 			throw new Error("Item " + itemID + " not found");
 		}
@@ -1287,7 +1290,8 @@ Zotero.Attachments = new function(){
 		return Zotero.DB.executeTransaction(function* () {
 			var attachmentItem = new Zotero.Item('attachment');
 			if (parentItemID) {
-				let [parentLibraryID, parentKey] = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+				let {libraryID: parentLibraryID, key: parentKey} =
+					Zotero.Items.getLibraryAndKeyFromID(parentItemID);
 				if (parentLibraryID && linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 					throw new Error("Cannot save linked file in non-local library");
 				}

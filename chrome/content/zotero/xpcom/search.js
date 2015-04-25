@@ -347,7 +347,7 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 	}
 	// Shortcut to add a collection (which must be loaded first)
 	else if (condition == 'collectionID') {
-		let [libraryID, key] = Zotero.Collections.getLibraryAndKeyFromID(value);
+		let {libraryID, key} = Zotero.Collections.getLibraryAndKeyFromID(value);
 		if (!key) {
 			let msg = "Collection " + value + " not found";
 			Zotero.debug(msg, 2);
@@ -362,7 +362,7 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 	}
 	// Shortcut to add a saved search (which must be loaded first)
 	else if (condition == 'savedSearchID') {
-		let [libraryID, key] = Zotero.Searches.getLibraryAndKeyFromID(value);
+		let {libraryID, key} = Zotero.Searches.getLibraryAndKeyFromID(value);
 		if (!key) {
 			let msg = "Saved search " + value + " not found";
 			Zotero.debug(msg, 2);

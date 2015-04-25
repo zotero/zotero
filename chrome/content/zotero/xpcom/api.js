@@ -130,7 +130,7 @@ Zotero.API = {
 				// Filter results by item key
 				if (params.itemKey) {
 					ids = ids.filter(function (id) {
-						var [libraryID, key] = Zotero.Items.getLibraryAndKeyFromID(id);
+						var {libraryID, key} = Zotero.Items.getLibraryAndKeyFromID(id);
 						return params.itemKey.indexOf(key) !== -1;
 					});
 				}

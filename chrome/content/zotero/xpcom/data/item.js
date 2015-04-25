@@ -4103,7 +4103,7 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 	// Collections
 	yield this.loadCollections();
 	obj.collections = this.getCollections().map(function (id) {
-		return this.ContainerObjectsClass.getLibraryAndKeyFromID(id)[1];
+		return this.ContainerObjectsClass.getLibraryAndKeyFromID(id).key;
 	}.bind(this));
 	
 	// Relations

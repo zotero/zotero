@@ -161,7 +161,7 @@ Zotero.DataObject.prototype._getParentID = function () {
 Zotero.DataObject.prototype._setParentID = function (id) {
 	return this._setParentKey(
 		id
-		? this.ObjectsClass.getLibraryAndKeyFromID(Zotero.DataObjectUtilities.checkDataID(id))[1]
+		? this.ObjectsClass.getLibraryAndKeyFromID(Zotero.DataObjectUtilities.checkDataID(id)).key
 		: null
 	);
 }

@@ -270,10 +270,11 @@ Zotero.DataObjects.prototype.exists = function (itemID) {
 
 
 /**
- * @return {Array} Array with libraryID and key
+ * @return {Object} Object with 'libraryID' and 'key'
  */
 Zotero.DataObjects.prototype.getLibraryAndKeyFromID = function (id) {
-	return this._objectKeys[id] ? this._objectKeys[id] : false;
+	var lk = this._objectKeys[id];
+	return lk ? { libraryID: lk[0], key: lk[1] } : false;
 }
 
 
@@ -413,7 +414,7 @@ Zotero.DataObjects.prototype.unload = function () {
 	var ids = Zotero.flattenArguments(arguments);
 	for (var i=0; i<ids.length; i++) {
 		let id = ids[i];
-		let [libraryID, key] = this.getLibraryAndKeyFromID(id);
+		let {libraryID, key} = this.getLibraryAndKeyFromID(id);
 		if (key) {
 			delete this._objectIDs[libraryID][key];
 			delete this._objectKeys[id];
