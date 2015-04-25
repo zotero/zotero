@@ -70,7 +70,6 @@
                     Components.classes["@mozilla.org/consoleservice;1"]
                         .getService(Components.interfaces.nsIConsoleService)
                         .logMessage(scriptError);
-                    self.debug(err, 1);
                     self.debug(err.stack, 1);
                 }
             }}, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
@@ -86,9 +85,10 @@
     // TEMP: Only turn on if debug logging enabled?
     Promise.longStackTraces();
     Promise.onPossiblyUnhandledRejection(function(error) {
-        self.debug('===========');
-        self.debug(error);
-        self.debug(error.stack);
+		// Ignore some errors during tests
+		if (error.message && error.message.indexOf(' -- ignore') != -1) return;
+		
+        self.debug('Unhandled rejection:\n\n' + error.stack);
         throw error;
     });
     return;
