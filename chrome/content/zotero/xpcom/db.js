@@ -89,10 +89,6 @@ Zotero.DBConnection = function(dbName) {
 	this._self = this;
 	
 	this._transactionPromise = null;
-	
-	// Get GeneratorFunction, so we can test for an ES6 generator
-	var g = function* () { yield 1; };
-	this._generatorFunction = Object.getPrototypeOf(g).constructor;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -459,20 +455,6 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 		if (conn.transactionInProgress) {
 			Zotero.debug("Async DB transaction in progress -- increasing level to "
 				+ ++this._asyncTransactionNestingLevel, 5);
-			
-			try {
-				// Check for ES5 generators, which don't work properly
-				if (func.isGenerator() && !(func instanceof this._generatorFunction)) {
-					Zotero.debug(func);
-					throw new Error("func must be an ES6 generator");
-				}
-				var result = yield Zotero.Promise.coroutine(func)();
-			}
-			catch (e) {
-				Zotero.debug("Rolled back nested async DB transaction", 5);
-				this._asyncTransactionNestingLevel = 0;
-				throw e;
-			}
 			
 			if (options) {
 				if (options.onCommit) {
