@@ -1338,24 +1338,24 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	}
 	
 	// Parent item
-	let parentItem = this.parentKey;
-	parentItem = parentItem ? this.ObjectsClass.getByLibraryAndKey(this.libraryID, parentItem) : null;
+	var parentItemKey = this.parentKey;
+	var parentItemID = this.ObjectsClass.getIDFromLibraryAndKey(this.libraryID, parentItemKey) || null;
 	if (this._changed.parentKey) {
 		if (isNew) {
-			if (!parentItem) {
+			if (!parentItemID) {
 				// TODO: clear caches?
-				let msg = this._parentKey + " is not a valid item key";
+				let msg = parentItemKey + " is not a valid item key";
 				throw new Zotero.Error(msg, "MISSING_OBJECT");
 			}
 			
 			let newParentItemNotifierData = {};
 			//newParentItemNotifierData[newParentItem.id] = {};
-			Zotero.Notifier.trigger('modify', 'item', parentItem.id, newParentItemNotifierData);
+			Zotero.Notifier.trigger('modify', 'item', parentItemID, newParentItemNotifierData);
 			
 			switch (Zotero.ItemTypes.getName(itemTypeID)) {
 				case 'note':
 				case 'attachment':
-					reloadParentChildItems[parentItem.id] = true;
+					reloadParentChildItems[parentItemID] = true;
 					break;
 			}
 		}
@@ -1363,25 +1363,25 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			let type = Zotero.ItemTypes.getName(itemTypeID);
 			let Type = type[0].toUpperCase() + type.substr(1);
 			
-			if (this._parentKey) {
-				if (!parentItem) {
+			if (parentItemKey) {
+				if (!parentItemID) {
 					// TODO: clear caches
-					let msg = "Cannot set source to invalid item " + this._parentKey;
+					let msg = "Cannot set source to invalid item " + parentItemKey;
 					throw new Zotero.Error(msg, "MISSING_OBJECT");
 				}
 				
 				let newParentItemNotifierData = {};
 				//newParentItemNotifierData[newParentItem.id] = {};
-				Zotero.Notifier.trigger('modify', 'item', parentItem.id, newParentItemNotifierData);
+				Zotero.Notifier.trigger('modify', 'item', parentItemID, newParentItemNotifierData);
 			}
 			
-			var oldParentKey = this._previousData.parentKey;
+			let oldParentKey = this._previousData.parentKey;
 			if (oldParentKey) {
-				var oldParentItem = this.ObjectsClass.getByLibraryAndKey(this.libraryID, oldParentKey);
-				if (oldParentItem) {
+				let oldParentItemID = this.ObjectsClass.getIDFromLibraryAndKey(this.libraryID, oldParentKey);
+				if (oldParentItemID) {
 					let oldParentItemNotifierData = {};
-					//oldParentItemNotifierData[oldParentItem.id] = {};
-					Zotero.Notifier.trigger('modify', 'item', oldParentItem.id, oldParentItemNotifierData);
+					//oldParentItemNotifierData[oldParentItemID] = {};
+					Zotero.Notifier.trigger('modify', 'item', oldParentItemID, oldParentItemNotifierData);
 				}
 				else {
 					Zotero.debug("Old source item " + oldParentKey
@@ -1394,7 +1394,10 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			if (!oldParentKey) {
 				let sql = "SELECT collectionID FROM collectionItems WHERE itemID=?";
 				let changedCollections = yield Zotero.DB.columnQueryAsync(sql, this.id);
-				if (changedCollections) {
+				if (changedCollections.length) {
+					let parentItem = yield this.ObjectsClass.getByLibraryAndKeyAsync(
+						this.libraryID, oldParentKey
+					)
 					for (let i=0; i<changedCollections.length; i++) {
 						yield parentItem.loadCollections();
 						parentItem.addToCollection(changedCollections[i]);
@@ -1407,7 +1410,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 							changedCollections[i] + '-' + this.id
 						);
 					}
-					parentItem.save({
+					yield parentItem.save({
 						skipDateModifiedUpdate: true
 					});
 				}
@@ -1416,18 +1419,18 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			// Update DB, if not a note or attachment we're changing below
 			if (!this._changed.attachmentData &&
 					(!this._changed.note || !this.isNote())) {
-				var sql = "UPDATE item" + Type + "s SET parentItemID=? "
+				let sql = "UPDATE item" + Type + "s SET parentItemID=? "
 							+ "WHERE itemID=?";
-				var bindParams = [parentItem ? parentItem.id : null, this.id];
+				let bindParams = [parentItemID, this.id];
 				yield Zotero.DB.queryAsync(sql, bindParams);
 			}
 			
 			// Update the counts of the previous and new sources
-			if (oldParentItem) {
-				reloadParentChildItems[oldParentItem.id] = true;
+			if (oldParentItemID) {
+				reloadParentChildItems[oldParentItemID] = true;
 			}
-			if (parentItem) {
-				reloadParentChildItems[parentItem.id] = true;
+			if (parentItemID) {
+				reloadParentChildItems[parentItemID] = true;
 			}
 		}
 	}
@@ -1458,8 +1461,8 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			Zotero.Notifier.trigger('trash', 'item', this.id);
 		}
 		
-		if (parentItem) {
-			reloadParentChildItems[parentItem.id] = true;
+		if (parentItemID) {
+			reloadParentChildItems[parentItemID] = true;
 		}
 	}
 	
@@ -1497,8 +1500,8 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		}
 		yield Zotero.DB.queryAsync(sql, params);
 		
-		if (parentItem) {
-			reloadParentChildItems[parentItem.id] = true;
+		if (parentItemID) {
+			reloadParentChildItems[parentItemID] = true;
 		}
 	}
 	
@@ -1507,15 +1510,14 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	//
 	if (!isNew) {
 		// If attachment title changes, update parent attachments
-		if (this._changed.itemData && this._changed.itemData[110] && this.isAttachment() && parentItem) {
-			reloadParentChildItems[parentItem.id] = true;
+		if (this._changed.itemData && this._changed.itemData[110] && this.isAttachment() && parentItemID) {
+			reloadParentChildItems[parentItemID] = true;
 		}
 	}
 	
 	if (this.isAttachment() || this._changed.attachmentData) {
 		let sql = "REPLACE INTO itemAttachments (itemID, parentItemID, linkMode, "
 			+ "contentType, charsetID, path, syncState) VALUES (?,?,?,?,?,?,?)";
-		let parent = this.parentID;
 		let linkMode = this.attachmentLinkMode;
 		let contentType = this.attachmentContentType;
 		let charsetID = yield Zotero.CharacterSets.add(this.attachmentCharset);
@@ -1538,7 +1540,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		
 		let params = [
 			itemID,
-			parent ? parent : null,
+			parentItemID,
 			{ int: linkMode },
 			contentType ? { string: contentType } : null,
 			charsetID ? { int: charsetID } : null,
@@ -1548,8 +1550,8 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		yield Zotero.DB.queryAsync(sql, params);
 		
 		// Clear cached child attachments of the parent
-		if (!isNew && parentItem) {
-			reloadParentChildItems[parentItem.id] = true;
+		if (!isNew && parentItemID) {
+			reloadParentChildItems[parentItemID] = true;
 		}
 	}
 	
