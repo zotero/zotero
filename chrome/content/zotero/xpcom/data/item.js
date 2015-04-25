@@ -267,10 +267,9 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 		return '';
 	}
 	
-	// Either item data has to be loaded (which sets empty valid fields to false)
-	// or this field has to be populated (e.g., by Zotero.Items.cacheFields())
-	// before getField() is called.
-	if (value === null) {
+	// If the item is identified (has an id or key), this field has to be populated (e.g., by
+	// Zotero.Items.cacheFields()) or item data has to be loaded
+	if (this._identified && value === null && !this._loaded.itemData) {
 		throw new Zotero.Exception.UnloadedDataException(
 			"Item data not loaded and field '" + field + "' not set", "itemData"
 		);
