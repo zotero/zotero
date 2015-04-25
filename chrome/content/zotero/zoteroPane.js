@@ -2033,7 +2033,7 @@ var ZoteroPane = new function()
 							yield self.itemsView.selectItem(itemID, expand);
 						}
 						deferred.resolve(true);
-					})
+					}, this)
 					.catch(function(e) {
 						deferred.reject(e);
 					});
