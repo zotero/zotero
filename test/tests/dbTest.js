@@ -82,5 +82,26 @@ describe("Zotero.DB", function() {
 			
 			yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
 		});
+		
+		it("should not commit nested transactions", function* () {
+			var tmpTable = "tmpNoCommitNested";
+			yield Zotero.DB.queryAsync("CREATE TABLE " + tmpTable + " (foo INT)");
+			try {
+				yield Zotero.DB.executeTransaction(function* () {
+					yield Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (1)");
+					yield Zotero.DB.executeTransaction(function* () {
+						yield Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (2)");
+						throw 'Aborting transaction -- ignore';
+					});
+				});
+			}
+			catch (e) {
+				if (typeof e != 'string' || !e.startsWith('Aborting transaction')) throw e;
+			}
+			var count = yield Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM " + tmpTable);
+			assert.equal(count, 0);
+			
+			yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
+		});
 	})
 });
