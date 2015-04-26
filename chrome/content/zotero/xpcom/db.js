@@ -48,7 +48,7 @@ Zotero.DBConnection = function(dbName) {
 			return this._transactionDate;
 		}
 		
-		Zotero.debug("Zotero.DB.transactionDate retrieved with no transaction", 2);
+		throw new Error("Transaction not in progress");
 		
 		// Use second granularity rather than millisecond
 		// for comparison purposes
