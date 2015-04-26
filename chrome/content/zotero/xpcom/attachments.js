@@ -616,7 +616,7 @@ Zotero.Attachments = new function(){
 			wbp.progressListener = new Zotero.WebProgressFinishListener(function () {
 				deferred.resolve();
 			});
-			Zotero.Utilities.Internal.saveURI(wbp, nsIURL, file);
+			Zotero.Utilities.Internal.saveURI(wbp, nsIURL, tmpFile);
 			yield deferred.promise;
 		}
 		
