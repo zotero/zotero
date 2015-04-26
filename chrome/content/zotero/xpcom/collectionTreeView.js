@@ -1721,7 +1721,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		
 		// Collection drag between libraries
 		if (targetLibraryID != droppedCollection.libraryID) {
-			yield Zotero.DB.executeTransaction(function () {
+			yield Zotero.DB.executeTransaction(function* () {
 				function copyCollections(descendents, parentID, addItems) {
 					for each(var desc in descendents) {
 						// Collections
@@ -1948,12 +1948,12 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 					// Otherwise file, so fall through
 				}
 				
-				yield Zotero.DB.executeTransaction(function () {
+				yield Zotero.DB.executeTransaction(function* () {
 					if (dropEffect == 'link') {
-						var itemID = Zotero.Attachments.linkFromFile(file);
+						var itemID = yield Zotero.Attachments.linkFromFile(file);
 					}
 					else {
-						var itemID = Zotero.Attachments.importFromFile(file, false, targetLibraryID);
+						var itemID = yield Zotero.Attachments.importFromFile(file, false, targetLibraryID);
 						// If moving, delete original file
 						if (dragData.dropEffect == 'move') {
 							try {

@@ -3079,12 +3079,12 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 					// Otherwise file, so fall through
 				}
 				
-				yield Zotero.DB.executeTransaction(function () {
+				yield Zotero.DB.executeTransaction(function* () {
 					if (dropEffect == 'link') {
-						var itemID = Zotero.Attachments.linkFromFile(file, parentItemID);
+						var itemID = yield Zotero.Attachments.linkFromFile(file, parentItemID);
 					}
 					else {
-						var itemID = Zotero.Attachments.importFromFile(file, parentItemID, targetLibraryID);
+						var itemID = yield Zotero.Attachments.importFromFile(file, parentItemID, targetLibraryID);
 						// If moving, delete original file
 						if (dragData.dropEffect == 'move') {
 							try {
