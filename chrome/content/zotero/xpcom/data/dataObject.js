@@ -561,8 +561,9 @@ Zotero.DataObject.prototype.hasChanged = function() {
 }
 
 Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
-	if (!this.libraryID) {
-		throw new Error("libraryID must be set before saving " + this._objectType);
+	// Default to user library if not specified
+	if (this.libraryID === null) {
+		this.libraryID = Zotero.Libraries.userLibraryID;
 	}
 	
 	env.isNew = !this.id;

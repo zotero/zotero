@@ -3,7 +3,6 @@ describe("Zotero.Items", function() {
 		it("should return a libraryID and key within a transaction", function* () {
 			return Zotero.DB.executeTransaction(function* () {
 				var item = new Zotero.Item('book');
-				item.libraryID = Zotero.Libraries.userLibraryID;
 				var itemID = yield item.save();
 				
 				var {libraryID, key} = Zotero.Items.getLibraryAndKeyFromID(itemID);
@@ -19,7 +18,6 @@ describe("Zotero.Items", function() {
 			try {
 				yield Zotero.DB.executeTransaction(function* () {
 					var item = new Zotero.Item('book');
-					item.libraryID = Zotero.Libraries.userLibraryID;
 					itemID = yield item.save();
 					throw 'Aborting transaction -- ignore';
 				});
