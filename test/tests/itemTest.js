@@ -29,8 +29,6 @@ describe("Zotero.Item", function() {
 				var childItemID = yield item.save();
 				
 				item = yield Zotero.Items.getAsync(childItemID);
-				Zotero.debug('=-=-=');
-				Zotero.debug(item.parentID);
 				assert.ok(item.parentID);
 				assert.equal(item.parentID, parentItemID);
 			}.bind(this));
