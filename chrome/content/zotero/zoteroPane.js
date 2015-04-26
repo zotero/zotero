@@ -3191,10 +3191,17 @@ var ZoteroPane = new function()
 		}
 		
 		var collectionTreeRow = this.getCollectionTreeRow();
-		if (link && collectionTreeRow.isWithinGroup()) {
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-									.getService(Components.interfaces.nsIPromptService);
-			ps.alert(null, "", "Linked files cannot be added to group libraries.");
+		if (link) {
+			if (collectionTreeRow.isWithinGroup()) {
+				Zotero.alert(null, "", "Linked files cannot be added to group libraries.");
+			}
+			else if (collectionTreeRow.isPublications()) {
+				Zotero.alert(
+					null,
+					Zotero.getString('general.error'),
+					Zotero.getString('publications.error.linkedFilesCannotBeAdded')
+				);
+			}
 			return;
 		}
 		
@@ -3777,6 +3784,45 @@ var ZoteroPane = new function()
 				this.showAttachmentNotFoundDialog(attachment.id, noLocateOnMissing)
 			}
 		}
+	});
+	
+	
+	this.showPublicationsWizard = Zotero.Promise.coroutine(function* (items) {
+		var io = {
+			hasFiles: false,
+			hasNotes: false,
+			hasRights: null // 'all', 'some', or 'none'
+		};
+		var allItemsHaveRights = true;
+		var noItemsHaveRights = true;
+		// Determine whether any/all items have files, notes, or Rights values
+		for (let i = 0; i < items.length; i++) {
+			let item = items[i];
+			
+			yield item.loadItemData();
+			yield item.loadChildItems();
+			
+			// Files
+			if (!io.hasFiles && item.numAttachments()) {
+				let attachments = item.getAttachments();
+				attachments = yield Zotero.Items.getAsync(attachments);
+				io.hasFiles = attachments.some(attachment => attachment.isFileAttachment());
+			}
+			// Notes
+			if (!io.hasNotes && item.numNotes()) {
+				io.hasNotes = true;
+			}
+			// Rights
+			if (item.getField('rights')) {
+				noItemsHaveRights = false;
+			}
+			else {
+				allItemsHaveRights = false;
+			}
+		}
+		io.hasRights = allItemsHaveRights ? 'all' : (noItemsHaveRights ? 'none' : 'some');
+		window.openDialog('chrome://zotero/content/publicationsDialog.xul','','chrome,modal', io);
+		return io.license ? io : false;
 	});
 	
 	

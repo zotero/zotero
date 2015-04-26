@@ -289,6 +289,7 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 	var collectionID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('collections');
 	var libraryID = env.libraryID = this.libraryID || Zotero.Libraries.userLibraryID;
 	var key = env.key = this._key = this.key ? this.key : this._generateKey();
+	var libraryType = env.libraryType = Zotero.Libraries.getType(libraryID);
 	
 	Zotero.debug("Saving collection " + this.id);
 	

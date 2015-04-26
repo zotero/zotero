@@ -177,6 +177,7 @@ label.zotero-text-link {
 	text-decoration: underline;
 	border: 1px solid transparent;
 	cursor: pointer;
+	color: -moz-nativehyperlinktext;
 }
 
 .zotero-clicky

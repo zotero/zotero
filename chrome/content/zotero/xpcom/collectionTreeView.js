@@ -1353,7 +1353,7 @@ Zotero.CollectionTreeView.prototype.canDropCheck = function (row, orient, dataTr
 				
 				if (treeRow.isPublications() && treeRow.ref.libraryID != item.libraryID) {
 					if (item.isAttachment() || item.isNote()) {
-						Zotero.debug("Standalone attachments and notes cannot be added to My Publications");
+						Zotero.debug("Top-level attachments and notes cannot be added to My Publications");
 						return false;
 					}
 					skip = false;
@@ -1575,7 +1575,15 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 	var sourceTreeRow = Zotero.DragDrop.getDragSource(dataTransfer);
 	var targetTreeRow = Zotero.DragDrop.getDragTarget(event);
 	
-	var copyItem = Zotero.Promise.coroutine(function* (item, targetLibraryID) {
+	var copyOptions = {
+		tags: Zotero.Prefs.get('groups.copyTags'),
+		childNotes: Zotero.Prefs.get('groups.copyChildNotes'),
+		childLinks: Zotero.Prefs.get('groups.copyChildLinks'),
+		childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments')
+	};
+	var copyItem = Zotero.Promise.coroutine(function* (item, targetLibraryID, options) {
+		var targetLibraryType = Zotero.Libraries.getType(targetLibraryID);
+		
 		// Check if there's already a copy of this item in the library
 		var linkedItem = yield item.getLinkedItem(targetLibraryID);
 		if (linkedItem) {
@@ -1651,7 +1659,15 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		}
 		
 		// Create new clone item in target library
-		var newItem = yield item.clone(targetLibraryID, false, !Zotero.Prefs.get('groups.copyTags'));
+		var newItem = yield item.clone(targetLibraryID, false, !options.tags);
+		
+		// Set Rights field for My Publications
+		if (options.license) {
+			if (!options.useRights || !newItem.getField('rights')) {
+				newItem.setField('rights', options.licenseName);
+			}
+		}
+		
 		var newItemID = yield newItem.save();
 		
 		// Record link
@@ -1664,7 +1680,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		// For regular items, add child items if prefs and permissions allow
 		
 		// Child notes
-		if (Zotero.Prefs.get('groups.copyChildNotes')) {
+		if (options.childNotes) {
 			yield item.loadChildItems();
 			var noteIDs = item.getNotes();
 			var notes = yield Zotero.Items.getAsync(noteIDs);
@@ -1678,9 +1694,8 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		}
 		
 		// Child attachments
-		var copyChildLinks = Zotero.Prefs.get('groups.copyChildLinks');
-		var copyChildFileAttachments = Zotero.Prefs.get('groups.copyChildFileAttachments');
-		if (copyChildLinks || copyChildFileAttachments) {
+		if (options.childLinks || options.childFileAttachments) {
+			yield item.loadChildItems();
 			var attachmentIDs = item.getAttachments();
 			var attachments = yield Zotero.Items.getAsync(attachmentIDs);
 			for each(var attachment in attachments) {
@@ -1694,19 +1709,19 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 				
 				// Skip imported files if we don't have pref and permissions
 				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-					if (!copyChildLinks) {
+					if (!options.childLinks) {
 						Zotero.debug("Skipping child link attachment on drag");
 						continue;
 					}
 				}
 				else {
-					if (!copyChildFileAttachments || !targetTreeRow.filesEditable) {
+					if (!options.childFileAttachments
+							|| (!targetTreeRow.filesEditable && !targetTreeRow.isPublications())) {
 						Zotero.debug("Skipping child file attachment on drag");
 						continue;
 					}
 				}
-				
-				Zotero.Attachments.copyAttachmentToLibrary(attachment, targetLibraryID, newItemID);
+				yield Zotero.Attachments.copyAttachmentToLibrary(attachment, targetLibraryID, newItemID);
 			}
 		}
 		
@@ -1747,7 +1762,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 						// Items
 						else {
 							var item = yield Zotero.Items.getAsync(desc.id);
-							var id = yield copyItem(item, targetLibraryID);
+							var id = yield copyItem(item, targetLibraryID, copyOptions);
 							// Standalone attachments might not get copied
 							if (!id) {
 								continue;
@@ -1797,6 +1812,19 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			return;
 		}
 		
+		if (targetTreeRow.isPublications()) {
+			let items = yield Zotero.Items.getAsync(ids);
+			let io = yield this._treebox.treeBody.ownerDocument.defaultView.ZoteroPane
+				.showPublicationsWizard(items);
+			copyOptions.childNotes = io.includeNotes;
+			copyOptions.childFileAttachments = io.includeFiles;
+			copyOptions.childLinks = true;
+			copyOptions.tags = true; // TODO: add checkbox
+			['useRights', 'license', 'licenseName'].forEach(function (field) {
+				copyOptions[field] = io[field];
+			});
+		}
+		
 		yield Zotero.DB.executeTransaction(function* () {
 			var items = yield Zotero.Items.getAsync(ids);
 			if (!items) {
@@ -1833,7 +1861,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 				
 				var newIDs = [];
 				for each(var item in newItems) {
-					var id = yield copyItem(item, targetLibraryID)
+					var id = yield copyItem(item, targetLibraryID, copyOptions)
 					// Standalone attachments might not get copied
 					if (!id) {
 						continue;
@@ -2167,7 +2195,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('editable', function () {
 	if (this.isTrash() || this.isShare() || this.isBucket()) {
 		return false;
 	}
-	if (this.isPublications || !this.isWithinGroup()) {
+	if (!this.isWithinGroup() || this.isPublications()) {
 		return true;
 	}
 	var libraryID = this.ref.libraryID;
@@ -2190,7 +2218,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('filesEditable', function ()
 	if (this.isTrash() || this.isShare()) {
 		return false;
 	}
-	if (!this.isWithinGroup()) {
+	if (!this.isWithinGroup() || this.isPublications()) {
 		return true;
 	}
 	var libraryID = this.ref.libraryID;

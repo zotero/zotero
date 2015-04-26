@@ -641,13 +641,6 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 					
 					// Top-level item
 					if (this.isContainer(row)) {
-						// If removed from My Publications, remove row
-						if (collectionTreeRow.isPublications() && !item.publication) {
-							this._removeRow(row);
-							this._treebox.rowCountChanged(row, -1)
-							continue;
-						}
-						
 						//yield this.toggleOpenState(row);
 						//yield this.toggleOpenState(row);
 						sort = id;
@@ -754,7 +747,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			for (let i=0; i<items.length; i++) {
 				let item = items[i];
 				// if the item belongs in this collection
-				if ((((collectionTreeRow.isLibrary() || collectionTreeRow.isGroup())
+				if (((collectionTreeRow.isLibrary(true)
 						&& collectionTreeRow.ref.libraryID == item.libraryID)
 						|| (collectionTreeRow.isCollection() && item.inCollection(collectionTreeRow.ref.id)))
 					// if we haven't already added it to our hash map

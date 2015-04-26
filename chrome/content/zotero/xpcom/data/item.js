@@ -1184,6 +1184,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	var itemID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('items');
 	var libraryID = env.libraryID = this.libraryID || Zotero.Libraries.userLibraryID;
 	var key = env.key = this._key = this.key ? this.key : this._generateKey();
+	var libraryType = env.libraryType = Zotero.Libraries.getType(libraryID);
 	
 	sqlColumns.push(
 		'itemTypeID',
@@ -1435,9 +1436,17 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		}
 	}
 	
+	if (libraryType == 'publications' && !this.isRegularItem() && !parentItemID) {
+		throw new Error("Top-level attachments and notes cannot be added to My Publications");
+	}
+	
 	// Trashed status
 	if (this._changed.deleted) {
 		if (this._deleted) {
+			if (libraryType == 'publications') {
+				throw new Error("Items in My Publications cannot be moved to trash");
+			}
+			
 			sql = "REPLACE INTO deletedItems (itemID) VALUES (?)";
 		}
 		else {
@@ -1525,6 +1534,10 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let syncState = this.attachmentSyncState;
 		
 		if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+			if (libraryType == 'publications') {
+				throw new Error("Linked files cannot be added to My Publications");
+			}
+			
 			// Save attachment within attachment base directory as relative path
 			if (Zotero.Prefs.get('saveRelativeAttachmentPath')) {
 				path = Zotero.Attachments.getBaseDirectoryRelativePath(path);
@@ -1592,6 +1605,10 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	
 	// Collections
 	if (this._changed.collections) {
+		if (libraryType == 'publications') {
+			throw new Error("Items in My Publications cannot be added to collections");
+		}
+		
 		let oldCollections = this._previousData.collections || [];
 		let newCollections = this._collections;
 		

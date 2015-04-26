@@ -1,4 +1,6 @@
-﻿<!ENTITY zotero.general.optional							"(Optional)">
+﻿<!ENTITY zotero.general.yes                               "Yes">
+<!ENTITY zotero.general.no                                "No">
+<!ENTITY zotero.general.optional							"(Optional)">
 <!ENTITY zotero.general.note								"Note:">
 <!ENTITY zotero.general.selectAll							"Select All">
 <!ENTITY zotero.general.deselectAll						"Deselect All">

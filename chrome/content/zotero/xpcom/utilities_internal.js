@@ -400,6 +400,40 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
+	 * Update HTML links within XUL
+	 *
+	 * @param {HTMLElement} elem - HTML element to modify
+	 * @param {Object} [options] - Properties:
+	 *                                 .linkEvent - An object to pass to ZoteroPane.loadURI() to
+	 *                                 simulate modifier keys for link clicks. For example, to
+	 *                                 force links to open in new windows, pass with
+	 *                                 .shiftKey = true. If not provided, the actual event will
+	 *                                 be used instead.
+	 */
+	updateHTMLInXUL: function (elem, options) {
+		options = options || {};
+		var links = elem.getElementsByTagName('a');
+		for (let i = 0; i < links.length; i++) {
+			let a = links[i];
+			let href = a.getAttribute('href');
+			a.setAttribute('tooltiptext', href);
+			a.onclick = function (event) {
+				try {
+					let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					   .getService(Components.interfaces.nsIWindowMediator);
+					let win = wm.getMostRecentWindow("navigator:browser");
+					win.ZoteroPane_Local.loadURI(href, options.linkEvent || event)
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				return false;
+			};
+		}
+	},
+	
+	
+	/**
 	 * A generator that yields promises that delay for the given intervals
 	 *
 	 * @param {Array<Integer>} intervals An array of intervals in milliseconds

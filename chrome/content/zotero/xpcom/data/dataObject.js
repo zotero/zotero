@@ -507,6 +507,11 @@ Zotero.DataObject.prototype.isEditable = function () {
 
 
 Zotero.DataObject.prototype.editCheck = function () {
+	if ((this._objectType == 'collection' || this._objectType == 'search')
+			&& Zotero.Libraries.getType(this.libraryID) == 'publications') {
+		throw new Error(this._ObjectTypePlural + " cannot be added to My Publications");
+	}
+	
 	if (!Zotero.Sync.Server.updatesInProgress && !Zotero.Sync.Storage.updatesInProgress && !this.isEditable()) {
 		throw ("Cannot edit " + this._objectType + " in read-only Zotero library");
 	}
