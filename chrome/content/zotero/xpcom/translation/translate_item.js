@@ -745,7 +745,7 @@ Zotero.Translate.ItemSaver.prototype = {
 }
 
 Zotero.Translate.ItemGetter = function() {
-	this._itemsLeft = null;
+	this._itemsLeft = [];
 	this._collectionsLeft = null;
 	this._exportFileDirectory = null;
 	this.legacy = false;
