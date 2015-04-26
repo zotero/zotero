@@ -1,33 +1,35 @@
 describe("Zotero.DB", function() {
 	describe("#executeTransaction()", function () {
 		it("should roll back on error", function* () {
-			yield Zotero.DB.queryAsync("CREATE TABLE tmpRollbackOnError (foo INT)");
-			yield Zotero.DB.queryAsync("INSERT INTO tmpRollbackOnError VALUES (1)");
+			var tmpTable = "tmpRollbackOnError";
+			yield Zotero.DB.queryAsync("CREATE TABLE " + tmpTable + " (foo INT)");
+			yield Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (1)");
 			try {
 				yield Zotero.DB.executeTransaction(function* () {
-					yield Zotero.DB.queryAsync("INSERT INTO tmpRollbackOnError VALUES (2)");
+					yield Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (2)");
 					throw 'Aborting transaction -- ignore';
 				});
 			}
 			catch (e) {
 				if (typeof e != 'string' || !e.startsWith('Aborting transaction')) throw e;
 			}
-			var count = yield Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM tmpRollbackOnError");
+			var count = yield Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM " + tmpTable + "");
 			assert.equal(count, 1);
 			
 			var conn = yield Zotero.DB._getConnectionAsync();
 			assert.isFalse(conn.transactionInProgress);
 			
-			yield Zotero.DB.queryAsync("DROP TABLE tmpRollbackOnError");
+			yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
 		});
 		
 		it("should run onRollback callbacks", function* () {
+			var tmpTable = "tmpOnRollback";
 			var callbackRan = false;
-			yield Zotero.DB.queryAsync("CREATE TABLE tmpOnRollback (foo INT)");
+			yield Zotero.DB.queryAsync("CREATE TABLE " + tmpTable + " (foo INT)");
 			try {
 				yield Zotero.DB.executeTransaction(
 					function* () {
-						yield Zotero.DB.queryAsync("INSERT INTO tmpOnRollback VALUES (1)");
+						yield Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (1)");
 						throw 'Aborting transaction -- ignore';
 					},
 					{
@@ -42,19 +44,20 @@ describe("Zotero.DB", function() {
 			}
 			assert.ok(callbackRan);
 			
-			yield Zotero.DB.queryAsync("DROP TABLE tmpOnRollback");
+			yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
 		});
 		
 		it("should run onRollback callbacks for nested transactions", function* () {
+			var tmpTable = "tmpOnNestedRollback";
 			var callback1Ran = false;
 			var callback2Ran = false;
-			yield Zotero.DB.queryAsync("CREATE TABLE tmpOnNestedRollback (foo INT)");
+			yield Zotero.DB.queryAsync("CREATE TABLE " + tmpTable + " (foo INT)");
 			try {
 				yield Zotero.DB.executeTransaction(function* () {
-					yield Zotero.DB.queryAsync("INSERT INTO tmpOnNestedRollback VALUES (1)");
+					yield Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (1)");
 					yield Zotero.DB.executeTransaction(
 						function* () {
-							yield Zotero.DB.queryAsync("INSERT INTO tmpOnNestedRollback VALUES (2)");
+							yield Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (2)");
 							
 							throw 'Aborting transaction -- ignore';
 						},
@@ -77,7 +80,7 @@ describe("Zotero.DB", function() {
 			assert.ok(callback1Ran);
 			assert.ok(callback2Ran);
 			
-			yield Zotero.DB.queryAsync("DROP TABLE tmpOnNestedRollback");
+			yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
 		});
 	})
 });
