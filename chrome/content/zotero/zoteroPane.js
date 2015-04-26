@@ -2024,16 +2024,16 @@ var ZoteroPane = new function()
 						if (!selected) {
 							if (item.deleted) {
 								Zotero.debug("Item is deleted; switching to trash");
-								this.collectionsView.selectTrash(item.libraryID);
+								self.collectionsView.selectTrash(item.libraryID);
 							}
 							else {
 								Zotero.debug("Item was not selected; switching to library");
-								yield this.collectionsView.selectLibrary(item.libraryID);
+								yield self.collectionsView.selectLibrary(item.libraryID);
 							}
 							yield self.itemsView.selectItem(itemID, expand);
 						}
 						deferred.resolve(true);
-					}, this)
+					})
 					.catch(function(e) {
 						deferred.reject(e);
 					});
