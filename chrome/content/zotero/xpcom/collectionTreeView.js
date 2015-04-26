@@ -2152,7 +2152,7 @@ Zotero.CollectionTreeRow.prototype.isShare = function()
 
 // Special
 Zotero.CollectionTreeRow.prototype.isWithinGroup = function () {
-	return this.ref && !!this.ref.libraryID;
+	return this.ref && Zotero.Libraries.getType(this.ref.libraryID) == 'group';
 }
 
 Zotero.CollectionTreeRow.prototype.isWithinEditableGroup = function () {
