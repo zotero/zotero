@@ -5062,7 +5062,7 @@ Zotero.Item.prototype.toJSON = function(options) {
 			let uri = Zotero.URI.getItemURI(item);
 			if (obj.relations[pred]) {
 				if (typeof obj.relations[pred] == 'string') {
-					obj.relations[pred] = [uri];
+					obj.relations[pred] = [obj.relations[pred]];
 				}
 				obj.relations[pred].push(uri)
 			}
@@ -5284,7 +5284,7 @@ Zotero.Item.prototype._getRelatedItemsBidirectional = function () {
 			}
 		}
 	}
-	else if (!related) {
+	else if (!related.length) {
 		return [];
 	}
 	return related;
