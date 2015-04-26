@@ -23,10 +23,19 @@ function loadWindow(winurl, argument) {
 }
 
 /**
+ * Open a browser window and return a promise for the window
+ *
+ * @return {Promise<ChromeWindow>}
+ */
+function loadBrowserWindow() {
+	return loadWindow("chrome://browser/content/browser.xul");
+}
+
+/**
  * Loads a Zotero pane in a new window. Returns the containing window.
  */
 function loadZoteroPane() {
-	return loadWindow("chrome://browser/content/browser.xul").then(function(win) {
+	return loadBrowserWindow().then(function(win) {
 		win.ZoteroOverlay.toggleDisplay(true);
 
 		// Hack to wait for pane load to finish. This is the same hack
