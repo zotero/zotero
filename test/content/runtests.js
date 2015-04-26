@@ -1,5 +1,4 @@
 Components.utils.import("resource://gre/modules/osfile.jsm");
-Components.utils.import("resource://zotero/q.js");
 var EventUtils = Components.utils.import("resource://zotero-unit/EventUtils.jsm");
 
 var ZoteroUnit = Components.classes["@mozilla.org/commandlinehandler/general-startup;1?type=zotero-unit"].

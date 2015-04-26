@@ -1,3 +1,5 @@
+Components.utils.import("resource://zotero/q.js");
+
 // Useful "constants"
 var sqlDateTimeRe = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 var isoDateTimeRe = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
@@ -160,6 +162,28 @@ function getTestDataDirectory() {
 	return Services.io.newURI(resource.resolveURI(resURI), null, null).
 	       QueryInterface(Components.interfaces.nsIFileURL).file;
 }
+
+/**
+ * Returns an absolute path to an empty temporary directory
+ * (i.e., test/tests/data)
+ */
+var getTempDirectory = Q.async(function getTempDirectory() {
+	Components.utils.import("resource://gre/modules/osfile.jsm");
+	let path,
+		attempts = 3,
+		zoteroTmpDirPath = Zotero.getTempDirectory().path;
+	while (attempts--) {
+		path = OS.Path.join(zoteroTmpDirPath, Zotero.Utilities.randomString());
+		try {
+			yield OS.File.makeDir(path, { ignoreExisting: false });
+			break;
+		} catch (e) {
+			if (!attempts) throw e; // Throw on last attempt
+		}
+	}
+	
+	Q.return(path);
+});
 
 /**
  * Resets the Zotero DB and restarts Zotero. Returns a promise resolved
