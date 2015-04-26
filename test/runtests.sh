@@ -79,6 +79,7 @@ mkdir "$PROFILE/zotero"
 
 cat <<EOF > "$PROFILE/prefs.js"
 user_pref("extensions.autoDisableScopes", 0);
+user_pref("browser.uitour.enabled", false);
 user_pref("extensions.zotero.debug.log", $DEBUG);
 user_pref("extensions.zotero.debug.time", $DEBUG);
 user_pref("extensions.zotero.firstRunGuidance", false);
