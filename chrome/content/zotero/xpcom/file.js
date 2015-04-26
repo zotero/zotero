@@ -261,12 +261,18 @@ Zotero.File = new function(){
 				deferred.reject(new Components.Exception("Source read operation failed", status));
 				return;
 			}
-			deferred.resolve(
-				NetUtil.readInputStreamToString(
-					inputStream,
-					Math.min(maxLength, inputStream.available())
-				)
-			);
+			try {
+				var availableBytes = inputStream.available();
+				deferred.resolve(
+					NetUtil.readInputStreamToString(
+						inputStream,
+						maxLength ? Math.min(maxLength, availableBytes) : availableBytes
+					)
+				);
+			}
+			catch (e) {
+				deferred.reject(e);
+			}
 		});
 		return deferred.promise;
 	}
