@@ -1327,7 +1327,7 @@ Zotero.Attachments = new function(){
 	 *
 	 * @return {Promise}
 	 */
-	function _postProcessFile(itemID, file, contentType){
+	var _postProcessFile = Zotero.Promise.coroutine(function* (itemID, file, contentType) {
 		// Don't try to process if MIME type is unknown
 		if (!contentType) {
 			return;
@@ -1387,7 +1387,7 @@ Zotero.Attachments = new function(){
 		browser.loadURI(url);
 		
 		return deferred.promise;
-	}
+	});
 	
 	/**
 	 * Determines if a given document is an instance of PDFJS
