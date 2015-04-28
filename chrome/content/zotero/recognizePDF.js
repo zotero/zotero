@@ -672,17 +672,22 @@ var Zotero_RecognizePDF = new function() {
 			return (delay > 0 ? Q.delay(delay) : Q())
 			.then(function() {
 				Zotero.HTTP.lastGoogleScholarQueryTime = Date.now();
-				return Zotero.HTTP.promise("GET", url, {"responseType":"document"})
+				var deferred = Q.defer();
+				Zotero.HTTP.processDocuments(url,
+					function(doc) { deferred.resolve(doc) },
+					null,
+					function(e) { deferred.reject(e) }
+				);
+				return deferred.promise;
 			})
-			.then(function(xmlhttp) {
-				return _checkCaptchaOK(xmlhttp, 3);
+			.then(function(doc) {
+				return _checkCaptchaOK(doc, 3);
 			},
 			function(e) {
 				return _checkCaptchaError(e, 3);
 			})
-			.then(function(xmlhttp) {
-				var doc = xmlhttp.response,
-					deferred = Q.defer(),
+			.then(function(doc) {
+				var deferred = Q.defer(),
 					translate = new Zotero.Translate.Web();
 				
 				translate.setTranslator("57a00950-f0d1-4b41-b6ba-44ff0fc30289");
@@ -711,19 +716,19 @@ var Zotero_RecognizePDF = new function() {
 		/**
 		 * Check for CAPTCHA on a page with HTTP 200 status
 		 * @private
-		 * @param {XMLHttpRequest} xmlhttp
+		 * @param {HTMLDocument} doc
 		 * @param {Integer} tries Number of queries to attempt before giving up
 		 * @return {Promise} A promise resolved when PDF metadata has been retrieved
 		 */
-		function _checkCaptchaOK(xmlhttp, tries) {
+		function _checkCaptchaOK(doc, tries) {
 			if(stopCheckCallback && stopCheckCallback()) {
 				throw new Zotero.Exception.Alert('recognizePDF.stopped');
 			}
 			
-			if(Zotero.Utilities.xpath(xmlhttp.response, "//form[@action='Captcha']").length) {
-				return _solveCaptcha(xmlhttp, tries);
+			if(Zotero.Utilities.xpath(doc, "//form[@action='Captcha']").length) {
+				return _solveCaptcha(doc, tries);
 			}
-			return xmlhttp;
+			return doc;
 		}
 		
 		/**
@@ -740,8 +745,8 @@ var Zotero_RecognizePDF = new function() {
 				throw new Zotero.Exception.Alert('recognizePDF.stopped');
 			}
 			
-			// Check for captcha on error page
-			if(e instanceof Zotero.HTTP.UnexpectedStatusException
+			// TODO: Check for captcha on error page
+			if(false && e instanceof Zotero.HTTP.UnexpectedStatusException
 				&& (e.status == 403 || e.status == 503) && e.xmlhttp.response) {
 				if(_extractCaptchaFormData(e.xmlhttp.response)) {
 					return _solveCaptcha(e.xmlhttp, tries);
@@ -772,13 +777,11 @@ var Zotero_RecognizePDF = new function() {
 		/**
 		 * Prompt user to enter CPATCHA
 		 * @private
-		 * @param {XMLHttpRequest} xmlhttp
+		 * @param {HTMLDocument} doc
 		 * @param {Integer} [tries] Number of queries to attempt before giving up
 		 * @return {Promise} A promise resolved when PDF metadata has been retrieved
 		 */
-		function _solveCaptcha(xmlhttp, tries) {
-			var doc = xmlhttp.response;
-			
+		function _solveCaptcha(doc, tries) {
 			if(tries === undefined) tries = 3;
 			
 			if(!tries) {
@@ -816,13 +819,20 @@ var Zotero_RecognizePDF = new function() {
 			
 			url = formData.action + '?' + url.substr(1);
 			
-			return Zotero.HTTP.promise("GET", url, {"responseType":"document"})
-				.then(function(xmlhttp) {
-					return _checkCaptchaOK(xmlhttp, tries);
-				},
-				function(e) {
-					return _checkCaptchaError(e, tries);
-				});
+			var deferred = Q.defer();
+			Zotero.HTTP.processDocuments(url,
+				function(doc) { deferred.resolve(doc) },
+				null,
+				function(e) { deferred.reject(e) }
+			);
+			
+			return deferred.promise
+			.then(function(doc) {
+				return _checkCaptchaOK(doc, tries);
+			},
+			function(e) {
+				return _checkCaptchaError(e, tries);
+			});
 		}
 		
 		/**
