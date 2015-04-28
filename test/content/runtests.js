@@ -105,7 +105,7 @@ function Reporter(runner) {
 	});
 
 	runner.on('pending', function(test){
-		dump(indent()+"pending  -"+test.title);
+		dump("\r"+indent()+"pending  -"+test.title+"\n");
 	});
 
 	runner.on('pass', function(test){
