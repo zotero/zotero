@@ -431,6 +431,9 @@ Zotero.Utilities.Internal = {
 			// SQL instead of ISO-8601
 			item.dateAdded = zoteroItem.dateAdded;
 			item.dateModified = zoteroItem.dateModified;
+			if (item.accessDate) {
+				item.accessDate = zoteroItem.getField('accessDate');
+			}
 			
 			// Map base fields
 			for (let field in item) {

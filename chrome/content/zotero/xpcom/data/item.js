@@ -4978,6 +4978,10 @@ Zotero.Item.prototype.toJSON = function(options) {
 				name = 'versionNumber';
 			}
 			
+			if (name == 'accessDate') {
+				val = Zotero.Date.dateToISO(Zotero.Date.sqlToDate(val));
+			}
+			
 			obj[name] = val;
 		}
 	}
