@@ -4471,9 +4471,8 @@ Zotero.Item.prototype.loadChildItems = Zotero.Promise.coroutine(function* (reloa
 		return;
 	}
 	
-	
 	if (this.isNote() || this.isAttachment()) {
-		throw new Error("Can only load child items for regular item");
+		return;
 	}
 	
 	// Attachments
