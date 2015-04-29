@@ -124,9 +124,13 @@ Zotero.Schema = new function(){
 		// 'user' is for pre-1.0b2 'user' table
 		if (!dbVersion && !this.getDBVersion('schema') && !this.getDBVersion('user')){
 			Zotero.debug('Database does not exist -- creating\n');
-			_initializeSchema().then(function() {
-				_schemaUpdateDeferred.resolve(true);
-			});
+			try {
+				_schemaUpdateDeferred.resolve(_initializeSchema());
+			} catch(e) {
+				_schemaUpdateDeferred.reject(e);
+				throw e;
+			}
+			
 			return true;
 		}
 		
@@ -444,11 +448,9 @@ Zotero.Schema = new function(){
 	 * 												it should only be updated the last time through
 	 */
 	this.updateBundledFiles = function(mode, skipDeleteUpdate, runRemoteUpdateWhenComplete) {
-		if (_localUpdateInProgress) return Q();
+		if (_localUpdateInProgress) return _localUpdateInProgress;
 		
-		return Q.fcall(function () {
-			_localUpdateInProgress = true;
-			
+		_localUpdateInProgress = Q.fcall(function () {
 			// Get path to addon and then call updateBundledFilesCallback
 			
 			// Synchronous in Standalone
@@ -477,26 +479,37 @@ Zotero.Schema = new function(){
 			return deferred.promise;
 		})
 		.then(function (updated) {
-			if (runRemoteUpdateWhenComplete) {
-				var deferred = Q.defer();
-				if (updated) {
-					if (Zotero.Prefs.get('automaticScraperUpdates')) {
-						Zotero.proxyAuthComplete
-						.then(function () {
-							Zotero.Schema.updateFromRepository(2, function () deferred.resolve());
-						})
-					}
-				}
-				else {
-					Zotero.proxyAuthComplete
+			if (!runRemoteUpdateWhenComplete) return;
+			
+			var deferred = Q.defer();
+			var updatePromise;
+			if (updated) {
+				if (Zotero.Prefs.get('automaticScraperUpdates')) {
+					updatePromise = Zotero.proxyAuthComplete
 					.then(function () {
-						Zotero.Schema.updateFromRepository(false, function () deferred.resolve());
+						Zotero.Schema.updateFromRepository(2, function () deferred.resolve());
 					})
-					.done();
 				}
-				return deferred.promise;
 			}
+			else {
+				updatePromise = Zotero.proxyAuthComplete
+				.then(function () {
+					Zotero.Schema.updateFromRepository(false, function () deferred.resolve());
+				})
+			}
+			
+			if (updatePromise) {
+				updatePromise.catch(function(e) {
+					deferred.reject(e);
+				});
+			} else {
+				deferred.resolve();
+			}
+			
+			return deferred.promise;
 		});
+		
+		return _localUpdateInProgress;
 	}
 	
 	/**
@@ -1518,6 +1531,7 @@ Zotero.Schema = new function(){
 			Zotero.debug(e);
 			Zotero.logError(e);
 			alert('Error updating Zotero translators and styles');
+			throw e;
 		});
 	}
 	
