@@ -180,6 +180,15 @@ Zotero.Date = new function(){
 	}
 	
 	
+	var _re8601 = /^([0-9]{4})(-([0-9]{2})(-([0-9]{2})(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?$/;
+	
+	/**
+	 * @return {Boolean} - True if string is an ISO 8601 date, false if not
+	 */
+	this.isISODate = function (str) {
+		return _re8601.test(str);
+	}
+	
 	/**
 	 * Convert an ISO 8601–formatted UTC date/time to a JS Date
 	 *
@@ -189,8 +198,7 @@ Zotero.Date = new function(){
 	 * @return	{Date}					JS Date
 	 */
 	this.isoToDate = function (isoDate) {
-		var re8601 = /([0-9]{4})(-([0-9]{2})(-([0-9]{2})(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?/;
-		var d = isoDate.match(re8601);
+		var d = isoDate.match(_re8601);
 		
 		var offset = 0;
 		var date = new Date(d[1], 0, 1);
@@ -209,6 +217,11 @@ Zotero.Date = new function(){
 		offset -= date.getTimezoneOffset();
 		var time = (Number(date) + (offset * 60 * 1000));
 		return new Date(time);
+	}
+	
+	
+	this.isoToSQL = function (isoDate) {
+		return this.dateToSQL(this.isoToDate(isoDate), true);
 	}
 	
 	
