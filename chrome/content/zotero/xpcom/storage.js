@@ -1615,7 +1615,7 @@ Zotero.Sync.Storage = new function () {
 				var fileName = entryName;
 			}
 			
-			if (fileName.indexOf('.') == 0) {
+			if (fileName.startsWith('.zotero')) {
 				Zotero.debug("Skipping " + fileName);
 				continue;
 			}
@@ -1760,7 +1760,7 @@ Zotero.Sync.Storage = new function () {
 		var filesToDelete = [];
 		var file;
 		while (file = otherFiles.nextFile) {
-			if (file.leafName[0] == '.') {
+			if (file.leafName.startsWith('.zotero')) {
 				continue;
 			}
 			
@@ -1861,7 +1861,7 @@ Zotero.Sync.Storage = new function () {
 				continue;
 			}
 			var fileName = file.getRelativeDescriptor(rootDir);
-			if (fileName.indexOf('.') == 0) {
+			if (fileName.startsWith('.zotero')) {
 				Zotero.debug('Skipping file ' + fileName);
 				continue;
 			}
