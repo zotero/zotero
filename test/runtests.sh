@@ -14,7 +14,6 @@ function makePath {
 	eval $__assignTo="'$__path'"
 }
 
-DEBUG=false
 if [ "`uname`" == "Darwin" ]; then
 	FX_EXECUTABLE="/Applications/Firefox.app/Contents/MacOS/firefox"
 else
@@ -29,12 +28,17 @@ Options
  -x FX_EXECUTABLE    path to Firefox executable (default: $FX_EXECUTABLE)
  -d                  enable debug logging
  -c                  open JavaScript console and don't quit on completion
+ -t                  run only translator-dependent tests
  TESTS               set of tests to run (default: all)
 DONE
 	exit 1
 }
 
-while getopts "x:dc" opt; do
+DEBUG=false
+UPDATE_TRANSLATORS=true
+TRANSLATOR_TESTS=false
+
+while getopts "x:dct" opt; do
 	case $opt in
 		x)
 			FX_EXECUTABLE="$OPTARG"
@@ -45,6 +49,10 @@ while getopts "x:dc" opt; do
         c)
             FX_ARGS="-jsconsole -noquit"
             ;;
+		t)
+			UPDATE_TRANSLATORS=false
+			TRANSLATOR_TESTS=true
+			;;
 		*)
 			usage
 			;;
@@ -58,6 +66,10 @@ else
 	ARGS=("${@:1}")
 	function join { local IFS="$1"; shift; echo "$*"; }
 	TESTS="$(join , "${ARGS[@]}")"
+fi
+
+if [ "$TRANSLATOR_TESTS" = true ]; then
+	TESTS="translatorDependentFeatures"
 fi
 
 # Set up profile directory
@@ -79,6 +91,7 @@ user_pref("extensions.zotero.debug.log", $DEBUG);
 user_pref("extensions.zotero.debug.time", $DEBUG);
 user_pref("extensions.zotero.firstRunGuidance", false);
 user_pref("extensions.zotero.firstRun2", false);
+user_pref("extensions.zotero.automaticScraperUpdates", $UPDATE_TRANSLATORS);
 EOF
 
 # -v flag on Windows makes Firefox process hang
