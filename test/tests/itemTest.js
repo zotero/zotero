@@ -34,4 +34,36 @@ describe("Zotero.Item", function() {
 			}.bind(this));
 		});
 	});
+	
+	describe("#attachmentFilename", function () {
+		it("should get and set a filename for a stored file", function* () {
+			var filename = "test.txt";
+			
+			// Create parent item
+			var item = new Zotero.Item("book");
+			var parentItemID = yield item.save();
+			
+			// Create attachment item
+			var item = new Zotero.Item("attachment");
+			item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			item.parentID = parentItemID;
+			var itemID = yield item.save();
+			
+			// Should be empty when unset
+			assert.equal(item.attachmentFilename, '');
+			
+			// Set filename
+			item.attachmentFilename = filename;
+			yield item.save();
+			item = yield Zotero.Items.getAsync(itemID);
+			
+			// Check filename
+			assert.equal(item.attachmentFilename, filename);
+			
+			// Check full path
+			var file = Zotero.Attachments.getStorageDirectory(item);
+			file.append(filename);
+			assert.equal(item.getFile().path, file.path);
+		});
+	});
 });

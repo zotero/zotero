@@ -2487,6 +2487,8 @@ Zotero.Item.prototype._updateAttachmentStates = function (exists) {
 
 
 Zotero.Item.prototype.getFilename = function () {
+	Zotero.debug("getFilename() deprecated -- use .attachmentFilename");
+	return this.attachmentFilename;
 	if (!this.isAttachment()) {
 		throw new Error("getFileName() can only be called on attachment items");
 	}
@@ -2801,6 +2803,43 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentCharset', {
 		this._attachmentCharset = val;
 	}
 });
+
+
+/**
+ * Get or set the filename of file attachments
+ *
+ * This will return the filename for all file attachments, but the filename can only be set
+ * for stored file attachments. Linked file attachments should be set using .attachmentPath.
+ */
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentFilename', {
+	get: function () {
+		if (!this.isAttachment()) {
+			return undefined;
+		}
+		var file = this.getFile();
+		if (!file) {
+			return '';
+		}
+		return file.leafName;
+	},
+	set: function (val) {
+		if (!this.isAttachment()) {
+			throw new Error("Attachment filename can only be set for attachment items");
+		}
+		var linkMode = this.attachmentLinkMode;
+		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE
+				|| linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+			throw new Error("Attachment filename can only be set for stored files");
+		}
+		
+		if (!val) {
+			throw new Error("Attachment filename cannot be blank");
+		}
+		
+		this.attachmentPath = 'storage:' + val;
+	}
+});
+
 
 Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
 	get: function() {
