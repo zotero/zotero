@@ -236,8 +236,7 @@ Zotero.CollectionTreeView.prototype.reload = function()
 /*
  *  Called by Zotero.Notifier on any changes to collections in the data layer
  */
-Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* (action, type, ids)
-{
+Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* (action, type, ids, extraData) {
 	if ((!ids || ids.length == 0) && action != 'refresh' && action != 'redraw') {
 		return;
 	}
@@ -346,12 +345,12 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 	else if(action == 'add')
 	{
 		// Multiple adds not currently supported
-		ids = ids[0];
+		let id = ids[0];
 		
 		switch (type)
 		{
 			case 'collection':
-				var collection = yield Zotero.Collections.getAsync(ids);
+				var collection = yield Zotero.Collections.getAsync(id);
 				
 				// Open container if creating subcollection
 				var parentID = collection.parentID;
@@ -367,8 +366,10 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 					break;
 				}
 				let row = this._collectionRowMap[collection.id];
-				this._treebox.ensureRowIsVisible(row);
-				this.selection.select(row);
+				if (!extraData[id] || !extraData[id].skipSelect) {
+					this._treebox.ensureRowIsVisible(row);
+					this.selection.select(row);
+				}
 				break;
 				
 			case 'search':
@@ -377,7 +378,9 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 					this.rememberSelection(savedSelection);
 					break;
 				}
-				this.selection.select(this._rowMap['S' + ids]);
+				if (!extraData[id] || !extraData[id].skipSelect) {
+					this.selection.select(this._rowMap['S' + id]);
+				}
 				break;
 			
 			case 'group':

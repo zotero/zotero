@@ -242,8 +242,6 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 		
 		yield this.expandMatchParents();
 		
-		yield this._runListeners('load');
-		this._initialized = true;
 		
 		if (this._ownerDocument.defaultView.ZoteroPane_Local) {
 			this._ownerDocument.defaultView.ZoteroPane_Local.clearItemsPaneMessage();
@@ -258,6 +256,9 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 		
 		delete this._waitAfter;
 		Zotero.debug("Set tree in "+(Date.now()-start)+" ms");
+		
+		this._initialized = true;
+		yield this._runListeners('load');
 	}
 	catch (e) {
 		Components.utils.reportError(e);
@@ -836,9 +837,11 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				this._refreshItemRowMap();
 			}
 			
-			// Reset to Info tab
-			this._ownerDocument.getElementById('zotero-view-tabbox').selectedIndex = 0;
-			yield this.selectItem(singleSelect);
+			if (!extraData[singleSelect] || !extraData[singleSelect].skipSelect) {
+				// Reset to Info tab
+				this._ownerDocument.getElementById('zotero-view-tabbox').selectedIndex = 0;
+				yield this.selectItem(singleSelect);
+			}
 		}
 		// If single item is selected and was modified
 		else if (action == 'modify' && ids.length == 1 &&
@@ -1585,6 +1588,9 @@ Zotero.ItemTreeView.prototype.sort = Zotero.Promise.coroutine(function* (itemID)
  *  Select an item
  */
 Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (id, expand, noRecurse) {
+	var selected = this.getSelectedItems(true);
+	var alreadySelected = selected.length == 1 && selected[0] == id;
+	
 	// Don't change selection if UI updates are disabled (e.g., during sync)
 	if (Zotero.suppressUIUpdates) {
 		Zotero.debug("Sync is running; not selecting item");
@@ -1656,7 +1662,7 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 	// itemSelected() isn't waited for and 'yield selectItem(itemID)' continues before the
 	// itembox has been refreshed. To get around this, we make a promise resolver that's
 	// triggered by itemSelected() when it's done.
-	if (!this.selection.selectEventsSuppressed) {
+	if (!alreadySelected && !this.selection.selectEventsSuppressed) {
 		var itemSelectedPromise = new Zotero.Promise(function () {
 			this._itemSelectedPromiseResolver = {
 				resolve: arguments[0],
@@ -1673,7 +1679,7 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 	}
 	this.selection.select(row);
 	
-	if (!this.selection.selectEventsSuppressed) {
+	if (!alreadySelected && !this.selection.selectEventsSuppressed) {
 		yield itemSelectedPromise;
 	}
 	

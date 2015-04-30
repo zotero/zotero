@@ -358,10 +358,10 @@ Zotero.Collection.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
 	}
 	
 	if (isNew) {
-		Zotero.Notifier.trigger('add', 'collection', this.id);
+		Zotero.Notifier.trigger('add', 'collection', this.id, env.notifierData);
 	}
-	else {
-		Zotero.Notifier.trigger('modify', 'collection', this.id, { changed: this._previousData });
+	else if (!env.options.skipNotifier) {
+		Zotero.Notifier.trigger('modify', 'collection', this.id, env.notifierData);
 	}
 	
 	// Invalidate cached child collections

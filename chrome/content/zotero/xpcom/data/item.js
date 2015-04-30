@@ -1238,14 +1238,18 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			itemID = env.id = insertID;
 		}
 		
-		Zotero.Notifier.trigger('add', 'item', itemID);
+		if (!env.options.skipNotifier) {
+			Zotero.Notifier.trigger('add', 'item', itemID, env.notifierData);
+		}
 	}
 	else {
 		var sql = "UPDATE items SET " + sqlColumns.join("=?, ") + "=? WHERE itemID=?";
 		sqlValues.push(parseInt(itemID));
 		yield Zotero.DB.queryAsync(sql, sqlValues);
 		
-		Zotero.Notifier.trigger('modify', 'item', itemID, { changed: this._previousData });
+		if (!env.options.skipNotifier) {
+			Zotero.Notifier.trigger('modify', 'item', itemID, env.notifierData);
+		}
 	}
 	
 	//
@@ -1411,9 +1415,15 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 							changedCollections[i] + '-' + this.id
 						);
 					}
-					yield parentItem.save({
+					let parentOptions = {
 						skipDateModifiedUpdate: true
-					});
+					};
+					// Apply options (e.g., skipNotifier) from outer save
+					for (let o in env.options) {
+						if (!o.startsWith('skip')) continue;
+						parentOptions[o] = env.options[o];
+					}
+					yield parentItem.save(parentOptions);
 				}
 			}
 			

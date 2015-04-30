@@ -245,10 +245,10 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
 	var isNew = env.isNew;
 	if (isNew) {
-		Zotero.Notifier.trigger('add', 'search', this.id);
+		Zotero.Notifier.trigger('add', 'search', this.id, env.notifierData);
 	}
-	else {
-		Zotero.Notifier.trigger('modify', 'search', this.id, { changed: this._previousData });
+	else if (!env.options.skipNotifier) {
+		Zotero.Notifier.trigger('modify', 'search', this.id, env.notifierData);
 	}
 	
 	if (isNew && Zotero.Libraries.isGroupLibrary(this.libraryID)) {

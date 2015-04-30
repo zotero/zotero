@@ -1090,6 +1090,7 @@ var ZoteroPane = new function()
 	 */
 	this.setTagScope = Zotero.Promise.coroutine(function* () {
 		var collectionTreeRow = self.getCollectionTreeRow();
+		if (!collectionTreeRow) return;
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		if (!tagSelector.getAttribute('collapsed') ||
 				tagSelector.getAttribute('collapsed') == 'false') {
@@ -1109,6 +1110,8 @@ var ZoteroPane = new function()
 	
 	
 	this.onCollectionSelected = Zotero.Promise.coroutine(function* () {
+		yield Zotero.DB.waitForTransaction();
+		
 		var collectionTreeRow = this.getCollectionTreeRow();
 		
 		if (this.itemsView && this.itemsView.collectionTreeRow == collectionTreeRow) {
@@ -1220,6 +1223,11 @@ var ZoteroPane = new function()
 	this.itemSelected = function (event) {
 		return Zotero.spawn(function* () {
 			yield Zotero.DB.waitForTransaction();
+			
+			if (!this.itemsView) {
+				Zotero.debug("Items view not available in itemSelected", 2);
+				return;
+			}
 			
 			// Display restore button if items selected in Trash
 			if (this.itemsView.selection.count) {
@@ -1382,13 +1390,13 @@ var ZoteroPane = new function()
 		}, this)
 		.then(function () {
 			// See note in itemTreeView.js::selectItem()
-			if (this.itemsView._itemSelectedPromiseResolver) {
+			if (this.itemsView && this.itemsView._itemSelectedPromiseResolver) {
 				this.itemsView._itemSelectedPromiseResolver.resolve();
 			}
 		}.bind(this))
 		.catch(function (e) {
 			Zotero.debug(e, 1);
-			if (this.itemsView._itemSelectedPromiseResolver) {
+			if (this.itemsView && this.itemsView._itemSelectedPromiseResolver) {
 				this.itemsView._itemSelectedPromiseResolver.reject(e);
 			}
 			throw e;

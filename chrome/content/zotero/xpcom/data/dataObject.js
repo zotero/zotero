@@ -544,6 +544,13 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) 
 			throw new Error("_finalizeSave not implement for Zotero." + this._ObjectType);
 		}
 		
+		env.notifierData = {};
+		if (env.options.skipSelect) {
+			env.notifierData.skipSelect = true;
+		}
+		if (!env.isNew) {
+			env.changed = this._previousData;
+		}
 		yield this._saveData(env);
 		yield Zotero.DataObject.prototype._finalizeSave.call(this, env);
 		return this._finalizeSave(env);
