@@ -40,7 +40,6 @@ Zotero.Item = function(itemTypeOrID) {
 	this._itemTypeID = null;
 	this._firstCreator = null;
 	this._sortCreator = null;
-	this._itemVersion = null;
 	this._numNotes = null;
 	this._numNotesTrashed = null;
 	this._numNotesEmbedded = null;
@@ -136,7 +135,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'dateModified', {
 	set: function(val) this.setField('dateModified', val)
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'version', {
-	get: function() this._itemVersion,
+	get: function() this._version,
 	set: function(val) this.setField('version', val)
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'synced', {
@@ -344,8 +343,8 @@ Zotero.Item.prototype._parseRowData = function(row) {
 		if (row.dateModified !== undefined) {
 			this._dateModified = row.dateModified;
 		}
-		if (row.itemVersion !== undefined) {
-			this._itemVersion = parseInt(row.itemVersion);
+		if (row.version !== undefined) {
+			this._version = parseInt(row.version);
 		}
 		if (row.numNotes !== undefined) {
 			this._numNotes = parseInt(row.numNotes);
@@ -418,7 +417,7 @@ Zotero.Item.prototype._parseRowData = function(row) {
 					this['_' + col] = val;
 					break;
 				
-				case 'itemVersion':
+				case 'version':
 				case 'numNotes':
 				case 'numNotesTrashed':
 				case 'numNotesEmbedded':
@@ -4123,8 +4122,8 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 	}
 	
 	var obj = {};
-	obj.itemKey = this.key;
-	obj.itemVersion = this.version;
+	obj.key = this.key;
+	obj.version = this.version;
 	obj.itemType = Zotero.ItemTypes.getName(this.itemTypeID);
 	
 	// Fields
@@ -4217,8 +4216,8 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 	if (mode == 'patch') {
 		for (let i in patchBase) {
 			switch (i) {
-			case 'itemKey':
-			case 'itemVersion':
+			case 'key':
+			case 'version':
 			case 'dateModified':
 				continue;
 			}

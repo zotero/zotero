@@ -43,8 +43,7 @@ Zotero.Items = function() {
 				dateModified: "O.dateModified",
 				libraryID: "O.libraryID",
 				key: "O.key",
-				// 'itemVersion' because computerProgram has 'version'
-				itemVersion: "O.version AS itemVersion",
+				version: "O.version",
 				synced: "O.synced",
 				
 				firstCreator: _getFirstCreatorSQL(),

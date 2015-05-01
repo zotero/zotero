@@ -1,4 +1,4 @@
--- 31
+-- 32
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -23,6 +23,7 @@
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
 
+PRAGMA defer_foreign_keys = true;
 
 -- Valid item types ("book," "journalArticle," etc.)
 DROP TABLE IF EXISTS itemTypes;
@@ -295,7 +296,7 @@ INSERT INTO fields VALUES (77,'runningTime',NULL);
 INSERT INTO fields VALUES (78,'network',NULL);
 INSERT INTO fields VALUES (79,'postType',NULL);
 INSERT INTO fields VALUES (80,'audioFileType',NULL);
-INSERT INTO fields VALUES (81,'version',NULL);
+INSERT INTO fields VALUES (81,'versionNumber',NULL);
 INSERT INTO fields VALUES (82,'system',NULL);
 INSERT INTO fields VALUES (83,'company',NULL);
 INSERT INTO fields VALUES (84,'conferenceName',NULL);
@@ -1185,3 +1186,5 @@ INSERT INTO "syncObjectTypes" VALUES(4, 'search');
 INSERT INTO "syncObjectTypes" VALUES(5, 'tag');
 INSERT INTO "syncObjectTypes" VALUES(6, 'relation');
 INSERT INTO "syncObjectTypes" VALUES(7, 'setting');
+
+PRAGMA defer_foreign_keys = false;

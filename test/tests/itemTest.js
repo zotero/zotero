@@ -1,4 +1,4 @@
-describe("Zotero.Item", function() {
+describe("Zotero.Item", function () {
 	describe("#getField()", function () {
 		it("should return false for valid unset fields on unsaved items", function* () {
 			var item = new Zotero.Item('book');
@@ -17,6 +17,24 @@ describe("Zotero.Item", function() {
 			assert.equal(item.getField('invalid'), false);
 		});
 	});
+	
+	describe("#setField", function () {
+		it("should save version as object version", function* () {
+			var item = new Zotero.Item('book');
+			item.setField("version", 1);
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			assert.equal(item.getField("version"), 1);
+		});
+		
+		it("should save versionNumber for computerProgram", function () {
+			var item = new Zotero.Item('computerProgram');
+			item.setField("versionNumber", "1.0");
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			assert.equal(item.getField("versionNumber"), "1.0");
+		});
+	})
 	
 	describe("#parentID", function () {
 		it("should create a child note", function () {
