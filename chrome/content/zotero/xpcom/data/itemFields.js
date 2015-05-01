@@ -137,20 +137,7 @@ Zotero.ItemFields = new function() {
 		
 		// TODO: different labels for different item types
 		
-		try {
-			_fieldCheck(field, 'getLocalizedString');
-		}
-		// TEMP
-		catch (e) {
-			try {
-				asfasfa();
-			}
-			catch (e2) {
-				Zotero.debug(e2);
-			}
-			Zotero.debug(e);
-			throw (e);
-		}
+		_fieldCheck(field, 'getLocalizedString');
 		
 		if (_fields[field].label) {
 			return _fields[field].label;
