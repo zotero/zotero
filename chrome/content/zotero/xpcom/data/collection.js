@@ -692,6 +692,20 @@ Zotero.Collection.prototype.serialize = function(nested) {
 }
 
 
+Zotero.Collection.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
+	yield this.loadAllData();
+	
+	if (!json.name) {
+		throw new Error("'name' property not provided for collection");
+	}
+	this.name = json.name;
+	this.parentKey = json.parentCollection ? json.parentCollection : false;
+	
+	// TODO
+	//this.setRelations(json.relations);
+});
+
+
 Zotero.Collection.prototype.toJSON = function (options, patch) {
 	var obj = {};
 	if (options && options.includeKey) {

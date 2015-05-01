@@ -852,6 +852,25 @@ Zotero.Search.prototype.serialize = function() {
 }
 
 
+Zotero.Search.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
+	yield this.loadAllData();
+	
+	if (!json.name) {
+		throw new Error("'name' property not provided for search");
+	}
+	this.name = json.name;
+	
+	for (let i = 0; i < json.conditions.length; i++) {
+		let condition = json.conditions[i];
+		this.addCondition(
+			condition.condition,
+			condition.operator,
+			condition.value
+		);
+	}
+});
+
+
 /*
  * Get the SQL string for the search
  */

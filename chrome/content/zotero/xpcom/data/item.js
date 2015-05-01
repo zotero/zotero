@@ -3988,26 +3988,44 @@ Zotero.Item.prototype.isCollection = function() {
 }
 
 
-Zotero.Item.prototype.fromJSON = function (json) {
-	if (json.itemKey) this.key = json.itemKey;
-	if (json.itemType) this.setType(Zotero.ItemTypes.getID(json.itemType));
+Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
+	yield this.loadAllData();
 	
-	var changedFields = {};
+	this.setType(Zotero.ItemTypes.getID(json.itemType));
+	
+	var isValidForType = {};
+	var setFields = {};
 	
 	// Primary data
 	for (var field in json) {
 		let val = json[field];
 		
 		switch (field) {
-		case 'itemKey':
+		case 'key':
+		case 'version':
 		case 'itemType':
 		case 'creators':
-		case 'deleted':
+		case 'note':
+		// Use?
+		case 'md5':
+		case 'mtime':
 			break;
 		
 		case 'dateAdded':
 		case 'dateModified':
-			this['_'+field] = val;
+			this['_' + field] = Zotero.Date.dateToSQL(Zotero.Date.isoToDate(val), true);
+			break;
+		
+		case 'parentItem':
+			this.parentKey = val;
+			break;
+		
+		case 'deleted':
+			this.deleted = !!val;
+			break;
+		
+		case 'creators':
+			this.setCreators(json.creators);
 			break;
 		
 		case 'tags':
@@ -4037,47 +4055,35 @@ Zotero.Item.prototype.fromJSON = function (json) {
 			this.attachmentCharset = val;
 			break;
 		
+		case 'filename':
+			this.attachmentFilename = val;
+			break;
+		
 		case 'path':
 			this.attachmentPath = val;
 			break;
 		
 		// Item fields
 		default:
-			let changed = this.setField(field, json[field]);
-			if (changed) {
-				changedFields[field] = true;
+			isValidForType[field] = Zotero.ItemFields.isValidForType(
+				Zotero.ItemFields.getID(field), this.itemTypeID
+			);
+			if (!isValidForType[field]) {
+				Zotero.logError("Discarding unknown JSON field " + field);
+				continue;
 			}
+			this.setField(field, json[field]);
+			setFields[field] = true;
 		}
 	}
 	
 	// Clear existing fields not specified
 	var previousFields = this.getUsedFields(true);
-	for each(let field in previousFields) {
-		if (!changedFields[field] &&
-				// Invalid fields will already have been cleared by the type change
-				Zotero.ItemFields.isValidForType(
-					Zotero.ItemFields.getID(field), this.itemTypeID
-				)
-		) {
+	for (let field of previousFields) {
+		// Invalid fields will already have been cleared by the type change
+		if (!setFields[field] && isValidForType[field]) {
 			this.setField(field, false);
 		}
-	}
-	
-	// Deleted item flag
-	this.deleted = !!json.deleted;
-	
-	// Creators
-	let pos = 0;
-	if (json.creators) {
-		while (pos<json.creators.length) {
-			this.setCreator(pos, json.creators[pos]);
-			pos++;
-		}
-	}
-	// Remove item's remaining creators not in JSON
-	while (pos < this.numCreators()) {
-		// Keep removing last creator
-		this.removeCreator(this.numCreators() - 1);
 	}
 	
 	// Both notes and attachments might have parents and notes
@@ -4088,7 +4094,7 @@ Zotero.Item.prototype.fromJSON = function (json) {
 		let note = json.note;
 		this.setNote(note !== undefined ? note : "");
 	}
-}
+});
 
 
 /**
