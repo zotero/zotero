@@ -1,5 +1,41 @@
 describe("Zotero.DB", function() {
 	describe("#executeTransaction()", function () {
+		it("should nest concurrent transactions", Zotero.Promise.coroutine(function* () {
+			var tmpTable = "tmpWaitForTransactions";
+			yield Zotero.DB.queryAsync("CREATE TABLE " + tmpTable + " (foo INT)");
+			
+			var resolve1, resolve2, reject1, reject2;
+			var promise1 = new Promise(function (resolve, reject) {
+				resolve1 = resolve;
+				reject1 = reject;
+			});
+			var promise2 = new Promise(function (resolve, reject) {
+				resolve2 = resolve;
+				reject2 = reject;
+			});
+			
+			Zotero.DB.executeTransaction(function* () {
+				yield Zotero.Promise.delay(100);
+				assert.equal(Zotero.DB._asyncTransactionNestingLevel, 0);
+				yield Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (2)");
+				// Make sure we're still in a transaction
+				Zotero.DB.transactionDate;
+			})
+			.then(resolve1)
+			.catch(reject1);
+			
+			Zotero.DB.executeTransaction(function* () {
+				assert.equal(Zotero.DB._asyncTransactionNestingLevel, 1);
+				yield Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (1)");
+				// Make sure we're still in a transaction
+				Zotero.DB.transactionDate;
+			})
+			.then(resolve2)
+			.catch(reject2);
+			
+			yield Zotero.Promise.all([promise1, promise2]);
+		}));
+		
 		it("should roll back on error", function* () {
 			var tmpTable = "tmpRollbackOnError";
 			yield Zotero.DB.queryAsync("CREATE TABLE " + tmpTable + " (foo INT)");

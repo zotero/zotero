@@ -450,9 +450,8 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 		}
 	}
 	
-	var conn = yield this._getConnectionAsync(options);
 	try {
-		if (conn.transactionInProgress) {
+		if (this._inTransaction) {
 			Zotero.debug("Async DB transaction in progress -- increasing level to "
 				+ ++this._asyncTransactionNestingLevel, 5);
 			
@@ -469,7 +468,7 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 				var result = yield Zotero.Promise.coroutine(func)();
 			}
 			catch (e) {
-				Zotero.debug("Rolled back nested async DB transaction", 5);
+				Zotero.debug("Rolling back nested async DB transaction", 5);
 				this._asyncTransactionNestingLevel = 0;
 				throw e;
 			}
@@ -480,6 +479,8 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 		}
 		else {
 			Zotero.debug("Beginning async DB transaction", 5);
+			
+			this._inTransaction = true;
 			
 			var resolve;
 			var reject;
@@ -497,8 +498,10 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 					this._callbacks.begin[i]();
 				}
 			}
+			var conn = yield this._getConnectionAsync(options);
 			var result = yield conn.executeTransaction(func);
 			Zotero.debug("Committed async DB transaction", 5);
+			this._inTransaction = false;
 			
 			// Clear transaction time
 			if (this._transactionDate) {
@@ -540,6 +543,7 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 	catch (e) {
 		Zotero.debug("Rolled back async DB transaction", 5);
 		Zotero.debug(e, 1);
+		this._inTransaction = false;
 		
 		if (options) {
 			// Function to run once transaction has been committed but before any
