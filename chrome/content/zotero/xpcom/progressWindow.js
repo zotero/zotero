@@ -291,6 +291,7 @@ Zotero.ProgressWindow = function(_window){
 		this._image.setAttribute("flex", 0);
 		this._image.style.width = "16px";
 		this._image.style.backgroundRepeat = "no-repeat";
+		this._image.style.backgroundSize = "16px";
 		this.setIcon(iconSrc);
 		
 		this._hbox = _progressWindow.document.createElement("hbox");
