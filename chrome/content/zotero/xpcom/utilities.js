@@ -1549,10 +1549,10 @@ Zotero.Utilities = {
 					value = zoteroItem[field];
 				} else {
 					var fieldID = Zotero.ItemFields.getID(field),
-						baseMapping;
-					if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)
-							&& (baseMapping = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, fieldID))) {
-						value = zoteroItem[Zotero.ItemTypes.getName(baseMapping)];
+						fieldMapping;
+					if((fieldMapping = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID))
+							&& Zotero.ItemFields.isValidForType(fieldMapping, itemTypeID)){
+						value = zoteroItem[Zotero.ItemFields.getName(fieldMapping)];
 					}
 				}
 				
