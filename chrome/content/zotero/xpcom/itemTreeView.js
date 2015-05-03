@@ -932,7 +932,9 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	}
 	
 	//this._treebox.endUpdateBatch();
+	var promise = this._getItemSelectedPromise();
 	this.selection.selectEventsSuppressed = false;
+	yield promise;
 });
 
 /*
@@ -1588,9 +1590,6 @@ Zotero.ItemTreeView.prototype.sort = Zotero.Promise.coroutine(function* (itemID)
  *  Select an item
  */
 Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (id, expand, noRecurse) {
-	var selected = this.getSelectedItems(true);
-	var alreadySelected = selected.length == 1 && selected[0] == id;
-	
 	// Don't change selection if UI updates are disabled (e.g., during sync)
 	if (Zotero.suppressUIUpdates) {
 		Zotero.debug("Sync is running; not selecting item");
@@ -1655,20 +1654,14 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 		row = this._itemRowMap[id];
 	}
 	
-	
 	// This function calls nsITreeSelection.select(), which triggers the <tree>'s 'onselect'
 	// attribute, which calls ZoteroPane.itemSelected(), which calls ZoteroItemPane.viewItem(),
 	// which refreshes the itembox. But since the 'onselect' doesn't handle promises,
 	// itemSelected() isn't waited for and 'yield selectItem(itemID)' continues before the
 	// itembox has been refreshed. To get around this, we make a promise resolver that's
 	// triggered by itemSelected() when it's done.
-	if (!alreadySelected && !this.selection.selectEventsSuppressed) {
-		var itemSelectedPromise = new Zotero.Promise(function () {
-			this._itemSelectedPromiseResolver = {
-				resolve: arguments[0],
-				reject: arguments[1]
-			};
-		}.bind(this));
+	if (!this.selection.selectEventsSuppressed) {
+		var itemSelectedPromise = this._getItemSelectedPromise(id);
 	}
 	
 	this.selection.select(row);
@@ -1679,7 +1672,7 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 	}
 	this.selection.select(row);
 	
-	if (!alreadySelected && !this.selection.selectEventsSuppressed) {
+	if (!this.selection.selectEventsSuppressed) {
 		yield itemSelectedPromise;
 	}
 	
@@ -1703,6 +1696,23 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 	
 	return true;
 });
+
+
+Zotero.ItemTreeView.prototype._getItemSelectedPromise = function (itemID) {
+	if (itemID) {
+		var selected = this.getSelectedItems(true);
+		var alreadySelected = selected.length == 1 && selected[0] == itemID;
+		if (alreadySelected) {
+			return Zotero.Promise.resolve();
+		}
+	}
+	return new Zotero.Promise(function () {
+		this._itemSelectedPromiseResolver = {
+			resolve: arguments[0],
+			reject: arguments[1]
+		};
+	}.bind(this));
+}
 
 
 /**

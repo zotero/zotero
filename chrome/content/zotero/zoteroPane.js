@@ -781,12 +781,11 @@ var ZoteroPane = new function()
 			// Update most-recently-used list for New Item menu
 			this.addItemTypeToNewItemTypeMRU(typeID);
 			
-			yield this.selectItem(itemID);
 			// Focus the title field
 			document.getElementById('zotero-editpane-item-box').focusFirstField();
 		}
 		
-		return Zotero.Items.get(itemID);
+		return Zotero.Items.getAsync(itemID);
 	});
 	
 	

@@ -18,7 +18,6 @@ describe("Zotero.ItemTreeView", function() {
 		
 		var item = new Zotero.Item('book');
 		existingItemID = yield item.save();
-		yield Zotero.Promise.delay(100);
 	});
 	after(function () {
 		if (win) {
@@ -53,7 +52,6 @@ describe("Zotero.ItemTreeView", function() {
 			var id = yield item.save();
 			
 			// New item should be selected
-			yield Zotero.Promise.delay(100);
 			var selected = itemsView.getSelectedItems();
 			assert.lengthOf(selected, 1);
 			assert.equal(selected[0].id, id);
@@ -92,7 +90,6 @@ describe("Zotero.ItemTreeView", function() {
 			});
 			
 			// Existing item should still be selected
-			yield Zotero.Promise.delay(100);
 			selected = itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 1);
 			assert.equal(selected[0], existingItemID);
@@ -103,7 +100,6 @@ describe("Zotero.ItemTreeView", function() {
 			var item = new Zotero.Item('book');
 			var id = yield item.save();
 			item = yield Zotero.Items.getAsync(id);
-			yield Zotero.Promise.delay(100);
 			
 			itemsView.selection.clearSelection();
 			assert.lengthOf(itemsView.getSelectedItems(), 0);
@@ -112,7 +108,6 @@ describe("Zotero.ItemTreeView", function() {
 			yield item.save();
 			
 			// Modified item should not be selected
-			yield Zotero.Promise.delay(100);
 			assert.lengthOf(itemsView.getSelectedItems(), 0);
 		});
 		
@@ -121,7 +116,6 @@ describe("Zotero.ItemTreeView", function() {
 			var item = new Zotero.Item('book');
 			var id = yield item.save();
 			item = yield Zotero.Items.getAsync(id);
-			yield Zotero.Promise.delay(100);
 			
 			yield itemsView.selectItem(id);
 			var selected = itemsView.getSelectedItems(true);
@@ -132,7 +126,6 @@ describe("Zotero.ItemTreeView", function() {
 			yield item.save();
 			
 			// Modified item should still be selected
-			yield Zotero.Promise.delay(100);
 			selected = itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 1);
 			assert.equal(selected[0], id);

@@ -1680,20 +1680,9 @@
 			
 			<method name="hideEditor">
 				<parameter name="textbox"/>
-				<body>
-				<![CDATA[
-				try {
+				<body><![CDATA[
+				return Zotero.spawn(function* () {
 					Zotero.debug('Hiding editor');
-					/*
-					var textbox = Zotero.getAncestorByTagName(t, 'textbox');
-					if (!textbox){
-						Zotero.debug('Textbox not found in hideEditor');
-						return;
-					}
-					*/
-					
-					// TODO: get rid of this?
-					var saveChanges = this.saveOnEdit;
 					
 					// Prevent autocomplete breakage in Firefox 3
 					if (textbox.mController) {
@@ -1738,7 +1727,7 @@
 							if (creatorsToShift > 0) { 
 								//Add extra creators
 								for (var i=0;i<nameArray.length;i++) {
-									this.modifyCreator(i+initNumCreators,otherFields);
+									yield this.modifyCreator(i + initNumCreators, otherFields, true);
 								}
 								
 								//Shift existing creators
@@ -1760,7 +1749,7 @@
 									otherFields.lastName=tempName;
 									otherFields.firstName='';
 								}
-								this.modifyCreator(creatorIndex,otherFields);
+								yield this.modifyCreator(creatorIndex, otherFields, true);
 								creatorIndex++;
 							}
 							this._tabDirection = tabDirectionBuffer;
@@ -1773,9 +1762,13 @@
 							}
 						}
 						else {
-							this.modifyCreator(creatorIndex, otherFields);
+							yield this.modifyCreator(creatorIndex, otherFields);
 						}
-	
+						
+						if (this.saveOnEdit) {
+							yield this.item.save();
+						}
+						
 						var val = this.item.getCreator(creatorIndex);
 						val = val ? val[creatorField] : null;
 						
@@ -1885,15 +1878,8 @@
 						var focusBox = this._dynamicFields;
 						this._focusNextField(focusBox, this._lastTabIndex, this._tabDirection == -1);
 					}
-				}
-				// Thrown errors don't seem to show up within XBL without explicit logging
-				catch (e) {
-					Zotero.debug(e);
-					Components.utils.reportError(e);
-					throw (e);
-				}
-				]]>
-				</body>
+				}, this);
+				]]></body>
 			</method>
 			
 			
@@ -2030,7 +2016,7 @@
 			<method name="modifyCreator">
 				<parameter name="index"/>
 				<parameter name="fields"/>
-				<parameter name="changeGlobally"/>
+				<parameter name="skipSave"/>
 				<body><![CDATA[
 				return Zotero.Promise.try(function () {
 					var libraryID = this.item.libraryID;
@@ -2047,14 +2033,14 @@
 							return;
 						}
 						this.item.removeCreator(index);
-						if (this.saveOnEdit) {
+						if (this.saveOnEdit && !skipSave) {
 							return this.item.save();
 						}
 						return;
 					}
 					
 					var changed = this.item.setCreator(index, fields);
-					if (changed && this.saveOnEdit) {
+					if (changed && this.saveOnEdit && !skipSave) {
 						return this.item.save();
 					}
 				}.bind(this));
@@ -2157,75 +2143,52 @@
 				<![CDATA[
 					tabindex = parseInt(tabindex);
 					
-					if (back)
-					{
-						switch (tabindex)
-						{
-							case 1:
-								//Zotero.debug('At beginning');
-								document.getElementById('item-type-menu').focus();
-								return false;
-							
-							case this._tabIndexMinCreators:
-								var nextIndex = 1; // Title field
+					// Get all fields with ztabindex attributes
+					var tabbableFields = box.querySelectorAll('label[ztabindex]');
+					
+					if (!tabbableFields.length) {
+						Zotero.debug("No tabbable fields found");
+						return false;
+					}
+					
+					var next;
+					if (back) {
+						Zotero.debug('Looking for previous tabindex before ' + tabindex, 4);
+						for (let i = tabbableFields.length - 1; i >= 0; i--) {
+							if (parseInt(tabbableFields[i].getAttribute('ztabindex')) < tabindex) {
+								next = tabbableFields[i];
 								break;
-							
-							case this._tabIndexMinFields:
-								// No creators
-								if (this._tabIndexMaxCreators == 0) {
-									var nextIndex = 1; // Title field
-								}
-								else {
-									var nextIndex = this._tabIndexMaxCreators;
-								}
-								break;
-							
-							default:
-								var nextIndex = tabindex - 1;
+							}
 						}
-					}
-					else
-					{
-						switch (tabindex)
-						{
-							case 1:
-								var nextIndex = this._tabIndexMinCreators;
-								break;
-							
-							case this._tabIndexMaxCreators:
-								var nextIndex = this._tabIndexMinFields;
-								break;
-							
-							case this._tabIndexMaxFields:
-								//Zotero.debug('At end');
-								return false;
-							
-							default:
-								var nextIndex = tabindex + 1;
-						}
-					}
-					
-					Zotero.debug('Looking for tabindex ' + nextIndex, 4);
-					
-					var next = box.getElementsByAttribute('ztabindex', nextIndex);
-					if (!next[0])
-					{
-						//Zotero.debug("Next field not found");
-						return this._focusNextField(box, nextIndex, back);
-					}
-					
-					next[0].click();
-					
-					// DEBUG: next[0] is always equal to the target element,
-					// but for some reason it's necessary to scroll to the next
-					// element when moving forward for the target element to
-					// be fully in view
-					if (!back && next[0].parentNode.nextSibling) {
-						var visElem = next[0].parentNode.nextSibling;
 					}
 					else {
-						var visElem = next[0];
+					Zotero.debug('Looking for next tabindex after ' + tabindex, 4);
+						for (var pos = 0; pos < tabbableFields.length; pos++) {
+							if (parseInt(tabbableFields[pos].getAttribute('ztabindex')) > tabindex) {
+								next = tabbableFields[pos];
+								break;
+							}
+						}
 					}
+					
+					if (!next) {
+						Zotero.debug("Next field not found");
+						return false;
+					}
+					
+					next.click();
+					
+					// 1) next.parentNode is always null for some reason
+					// 2) For some reason it's necessary to scroll to the next element when
+					// moving forward for the target element to be fully in view
+					if (!back && tabbableFields[pos + 1]) {
+						Zotero.debug("Scrolling to next field");
+						var visElem = tabbableFields[pos + 1];
+					}
+					else {
+						var visElem = next;
+					}
+					// DEBUG: This doesn't seem to work anymore
 					this.ensureElementIsVisible(visElem);
 					
 					return true;

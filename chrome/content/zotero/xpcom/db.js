@@ -441,6 +441,9 @@ Zotero.DBConnection.prototype.getNextName = Zotero.Promise.coroutine(function* (
  * @return {Promise} - Promise for result of generator function
  */
 Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(function* (func, options) {
+	options = options || {};
+	var resolve;
+	
 	// Set temporary options for this transaction that will be reset at the end
 	var origOptions = {};
 	if (options) {
@@ -450,18 +453,20 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 		}
 	}
 	
+	if ((options.exclusive && this._inTransaction) || this._inExclusiveTransaction) {
+		yield Zotero.DB.waitForTransaction();
+	}
+	
 	try {
 		if (this._inTransaction) {
 			Zotero.debug("Async DB transaction in progress -- increasing level to "
 				+ ++this._asyncTransactionNestingLevel, 5);
 			
-			if (options) {
-				if (options.onCommit) {
-					this._callbacks.current.commit.push(options.onCommit);
-				}
-				if (options.onRollback) {
-					this._callbacks.current.rollback.push(options.onRollback);
-				}
+			if (options.onCommit) {
+				this._callbacks.current.commit.push(options.onCommit);
+			}
+			if (options.onRollback) {
+				this._callbacks.current.rollback.push(options.onRollback);
 			}
 			
 			try {
@@ -481,12 +486,10 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 			Zotero.debug("Beginning async DB transaction", 5);
 			
 			this._inTransaction = true;
+			this._inExclusiveTransaction = options.exclusive;
 			
-			var resolve;
-			var reject;
 			this._transactionPromise = new Zotero.Promise(function () {
 				resolve = arguments[0];
-				reject = arguments[1];
 			});
 			
 			// Set a timestamp for this transaction
@@ -535,8 +538,6 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 				}
 			}
 			
-			setTimeout(resolve, 0);
-			
 			return result;
 		}
 	}
@@ -544,6 +545,7 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 		Zotero.debug("Rolled back async DB transaction", 5);
 		Zotero.debug(e, 1);
 		this._inTransaction = false;
+		this._inExclusiveTransaction = false;
 		
 		if (options) {
 			// Function to run once transaction has been committed but before any
@@ -566,12 +568,6 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 			}
 		}
 		
-		if (reject) {
-			setTimeout(function () {
-				reject(e);
-			}, 0);
-		}
-		
 		throw e;
 	}
 	finally {
@@ -581,18 +577,21 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 				this[option] = origOptions[option];
 			}
 		}
+		
+		// Process all resolvers
+		if (resolve) {
+			resolve.call();
+		}
 	}
 });
 
 
 Zotero.DBConnection.prototype.waitForTransaction = function () {
-	if (!this._transactionPromise) {
+	if (!this._inTransaction) {
 		return Zotero.Promise.resolve();
 	}
 	Zotero.debug("Waiting for transaction to finish");
-	return this._transactionPromise.then(function () {
-		Zotero.debug("Done waiting for transaction");
-	});
+	return this._transactionPromise;
 };
 
 
