@@ -120,48 +120,11 @@ Zotero.Search.prototype._set = function (field, value) {
 }
 
 
-/*
- * Load a saved search from the DB
- */
-Zotero.Search.prototype.loadPrimaryData = Zotero.Promise.coroutine(function* (reload) {
-	if (this._loaded.primaryData && !reload) return;
-	
-	var id = this._id;
-	var key = this._key;
-	var libraryID = this._libraryID;
-	var desc = id ? id : libraryID + "/" + key;
-	
-	if (!id && !key) {
-		throw new Error('ID or key not set');
-	}
-	
-	var sql = Zotero.Searches.getPrimaryDataSQL()
-	if (id) {
-		sql += " AND savedSearchID=?";
-		var params = id;
-	}
-	else {
-		sql += " AND key=? AND libraryID=?";
-		var params = [key, libraryID];
-	}
-	var data = yield Zotero.DB.rowQueryAsync(sql, params);
-	
-	this._loaded.primaryData = true;
-	this._clearChanged('primaryData');
-	
-	if (!data) {
-		return;
-	}
-	
-	this.loadFromRow(data);
-});
-
-
 Zotero.Search.prototype.loadFromRow = function (row) {
 	this._id = row.savedSearchID;
 	this._libraryID = row.libraryID;
 	this._key = row.key;
-	this._name = row.savedSearchName;
+	this._name = row.name;
 	this._version = row.version;
 	this._synced = !!row.synced;
 	
@@ -171,15 +134,18 @@ Zotero.Search.prototype.loadFromRow = function (row) {
 }
 
 Zotero.Search.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
+	if (!this.libraryID) {
+		throw new Error('libraryID must be set before saving search');
+	}
 	if (!this.name) {
 		throw new Error('Name not provided for saved search');
 	}
-	
 	return Zotero.Search._super.prototype._initSave.apply(this, arguments);
 });
 
 Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	var isNew = env.isNew;
+	var options = env.options;
 	
 	var searchID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('savedSearches');
 	var libraryID = env.libraryID = this.libraryID || Zotero.Libraries.userLibraryID;
@@ -189,7 +155,6 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	var columns = [
 		'savedSearchID',
 		'savedSearchName',
-		'clientDateModified',
 		'libraryID',
 		'key',
 		'version',
@@ -204,12 +169,27 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		this.version ? this.version : 0,
 		this.synced ? 1 : 0
 	];
+	if (isNew || !options.skipClientDateModified) {
+		columns.push('clientDateModified');
+		sqlValues.push(Zotero.DB.transactionDateTime);
+	}
 	
-	var sql = "REPLACE INTO savedSearches (" + columns.join(', ') + ") "
-		+ "VALUES (" + placeholders + ")";
-	var insertID = yield Zotero.DB.queryAsync(sql, sqlValues);
-	if (!searchID) {
-		searchID = env.id = insertID;
+	if (isNew) {
+		let placeholders = columns.map(function () '?').join();
+		let sql = "INSERT INTO savedSearches (" + columns.join(', ') + ") "
+			+ "VALUES (" + placeholders + ")";
+		var insertID = yield Zotero.DB.queryAsync(sql, sqlValues);
+		if (!searchID) {
+			searchID = env.id = insertID;
+		}
+	}
+	else {
+		columns.shift();
+		sqlValues.push(sqlValues.shift());
+		let sql = 'UPDATE savedSearches SET '
+			+ columns.map(function (x) x + '=?').join(', ')
+			+ ' WHERE savedSearchID=?';
+		yield Zotero.DB.queryAsync(sql, sqlValues);
 	}
 	
 	if (!isNew) {
@@ -1674,18 +1654,19 @@ Zotero.Searches = function() {
 	this.constructor = null;
 	
 	this._ZDO_object = 'search';
-	this._ZDO_id = 'savedSearch';
+	this._ZDO_id = 'savedSearchID';
 	this._ZDO_table = 'savedSearches';
 	
 	this._primaryDataSQLParts = {
 		savedSearchID: "O.savedSearchID",
-		name: "O.savedSearchName",
+		name: "O.savedSearchName AS name",
 		libraryID: "O.libraryID",
 		key: "O.key",
 		version: "O.version",
 		synced: "O.synced"
 	}
 	
+	this._primaryDataSQLFrom = "FROM savedSearches O";
 	
 	this.init = Zotero.Promise.coroutine(function* () {
 		yield Zotero.DataObjects.prototype.init.apply(this);
@@ -1715,7 +1696,6 @@ Zotero.Searches = function() {
 		var searches = [];
 		for (var i=0; i<rows.length; i++) {
 			let search = new Zotero.Search;
-			search.libraryID = libraryID;
 			search.id = rows[i].id;
 			yield search.loadPrimaryData();
 			searches.push(search);

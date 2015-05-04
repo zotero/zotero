@@ -169,7 +169,7 @@ Zotero.Creators = new function() {
 			firstName: '',
 			lastName: ''
 		};
-		for (i=0; i<this.fields.length; i++) {
+		for (let i=0; i<this.fields.length; i++) {
 			let field = this.fields[i];
 			let val = data[field];
 			switch (field) {

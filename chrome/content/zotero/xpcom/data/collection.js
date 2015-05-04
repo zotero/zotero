@@ -258,7 +258,7 @@ Zotero.Collection.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 	
 		// Verify parent
 	if (this._parentKey) {
-		let newParent = this.ObjectsClass.getByLibraryAndKey(
+		let newParent = yield this.ObjectsClass.getByLibraryAndKeyAsync(
 			this.libraryID, this._parentKey
 		);
 		
@@ -285,6 +285,7 @@ Zotero.Collection.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 
 Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	var isNew = env.isNew;
+	var options = env.options;
 
 	var collectionID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('collections');
 	var libraryID = env.libraryID = this.libraryID || Zotero.Libraries.userLibraryID;
@@ -311,10 +312,14 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 		this.version ? this.version : 0,
 		this.synced ? 1 : 0
 	];
+	if (isNew || !options.skipClientDateModified) {
+		columns.push('clientDateModified');
+		sqlValues.push(Zotero.DB.transactionDateTime);
+	}
+	
 	if (isNew) {
-		var placeholders = columns.map(function () '?').join();
-		
-		var sql = "REPLACE INTO collections (" + columns.join(', ') + ") "
+		let placeholders = columns.map(function () '?').join();
+		let sql = "INSERT INTO collections (" + columns.join(', ') + ") "
 			+ "VALUES (" + placeholders + ")";
 		var insertID = yield Zotero.DB.queryAsync(sql, sqlValues);
 		if (!collectionID) {

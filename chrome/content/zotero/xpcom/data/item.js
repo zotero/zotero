@@ -36,7 +36,7 @@ Zotero.Item = function(itemTypeOrID) {
 	
 	this._disabled = false;
 	
-	// loadPrimaryData (additional properties in dataObjet.js)
+	// loadPrimaryData (additional properties in dataObject.js)
 	this._itemTypeID = null;
 	this._firstCreator = null;
 	this._sortCreator = null;
@@ -290,7 +290,7 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 
 /**
  * @param	{Boolean}				asNames
- * @return	{Integer{}|String[]}
+ * @return	{Integer[]|String[]}
  */
 Zotero.Item.prototype.getUsedFields = function(asNames) {
 	this._requireData('itemData');
@@ -711,7 +711,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		this._requireData('primaryData');
 		
 		if (loadIn) {
-			throw('Cannot set primary field ' + field + ' in loadIn mode in Zotero.Item.setField()');
+			throw new Error('Cannot set primary field ' + field + ' in loadIn mode in Zotero.Item.setField()');
 		}
 		
 		switch (field) {
@@ -736,7 +736,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 				break;
 				
 			default:
-				throw ('Primary field ' + field + ' cannot be changed in Zotero.Item.setField()');
+				throw new Error('Primary field ' + field + ' cannot be changed in Zotero.Item.setField()');
 			
 		}
 		
@@ -1534,7 +1534,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		}
 	}
 	
-	if (this.isAttachment() || this._changed.attachmentData) {
+	if (this._changed.attachmentData) {
 		let sql = "REPLACE INTO itemAttachments (itemID, parentItemID, linkMode, "
 			+ "contentType, charsetID, path, syncState) VALUES (?,?,?,?,?,?,?)";
 		let linkMode = this.attachmentLinkMode;
@@ -3803,7 +3803,9 @@ Zotero.Item.prototype.multiDiff = Zotero.Promise.coroutine(function* (otherItems
 
 
 /**
- * Returns an unsaved copy of the item
+ * Returns an unsaved copy of the item without an itemID or key
+ *
+ * This is used to duplicate items and copy them between libraries.
  *
  * @param {Number} [libraryID] - libraryID of the new item, or the same as original if omitted
  * @param {Boolean} [skipTags=false] - Skip tags
@@ -3997,7 +3999,7 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 	var setFields = {};
 	
 	// Primary data
-	for (var field in json) {
+	for (let field in json) {
 		let val = json[field];
 		
 		switch (field) {
