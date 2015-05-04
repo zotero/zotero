@@ -707,7 +707,7 @@ Zotero.CollectionTreeView.prototype.collapseLibrary = Zotero.Promise.coroutine(f
 	//this._treebox.endUpdateBatch();
 	
 	// Select the collapsed library
-	yield this.selectLibrary(selectedLibraryID);
+	this.selectLibrary(selectedLibraryID);
 });
 
 
@@ -746,7 +746,7 @@ Zotero.CollectionTreeView.prototype.expandToCollection = Zotero.Promise.coroutin
 /**
  * @param	{Integer}		libraryID		Library to select
  */
-Zotero.CollectionTreeView.prototype.selectLibrary = Zotero.Promise.coroutine(function* (libraryID) {
+Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
 	if (Zotero.suppressUIUpdates) {
 		Zotero.debug("UI updates suppressed -- not changing library selection");
 		return false;
@@ -779,7 +779,7 @@ Zotero.CollectionTreeView.prototype.selectLibrary = Zotero.Promise.coroutine(fun
 	}
 	
 	return false;
-});
+}
 
 
 Zotero.CollectionTreeView.prototype.selectTrash = function (libraryID) {

@@ -2014,19 +2014,7 @@ var ZoteroPane = new function()
 		var self = this;
 		var deferred = Zotero.Promise.defer();
 		this.collectionsView.addEventListener('load', function () {
-			Zotero.spawn(function* () {
-				var currentLibraryID = self.getSelectedLibraryID();
-				// If in a different library
-				if (item.libraryID != currentLibraryID) {
-					Zotero.debug("Library ID differs; switching library");
-					yield self.collectionsView.selectLibrary(item.libraryID);
-				}
-				// Force switch to library view
-				else if (!self.collectionsView.selectedTreeRow.isLibrary() && inLibrary) {
-					Zotero.debug("Told to select in library; switching to library");
-					yield self.collectionsView.selectLibrary(item.libraryID);
-				}
-				
+			try {
 				self.addEventListener('itemsLoaded', function () {
 					Zotero.spawn(function* () {
 						var selected = yield self.itemsView.selectItem(itemID, expand);
@@ -2037,7 +2025,7 @@ var ZoteroPane = new function()
 							}
 							else {
 								Zotero.debug("Item was not selected; switching to library");
-								yield self.collectionsView.selectLibrary(item.libraryID);
+								self.collectionsView.selectLibrary(item.libraryID);
 							}
 							yield self.itemsView.selectItem(itemID, expand);
 						}
@@ -2047,10 +2035,22 @@ var ZoteroPane = new function()
 						deferred.reject(e);
 					});
 				});
-			})
-			.catch(function(e) {
+				
+				var currentLibraryID = self.getSelectedLibraryID();
+				// If in a different library
+				if (item.libraryID != currentLibraryID) {
+					Zotero.debug("Library ID differs; switching library");
+					self.collectionsView.selectLibrary(item.libraryID);
+				}
+				// Force switch to library view
+				else if (!self.collectionsView.selectedTreeRow.isLibrary() && inLibrary) {
+					Zotero.debug("Told to select in library; switching to library");
+					self.collectionsView.selectLibrary(item.libraryID);
+				}
+			}
+			catch (e) {
 				deferred.reject(e);
-			});
+			}
 		});
 		
 		// open Zotero pane

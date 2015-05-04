@@ -12,14 +12,14 @@ describe("Zotero.CollectionTreeView", function() {
 	
 	// Select library
 	// TODO: Add a selectCollection() function and select a collection instead
-	var resetSelection = Zotero.Promise.coroutine(function* () {
-		yield collectionsView.selectLibrary(Zotero.Libraries.userLibraryID);
+	var resetSelection = function () {
+		collectionsView.selectLibrary(Zotero.Libraries.userLibraryID);
 		assert.equal(collectionsView.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
-	});
+	}
 	
 	describe("#notify()", function () {
 		it("should select a new collection", function* () {
-			yield resetSelection();
+			resetSelection();
 			
 			// Create collection
 			var collection = new Zotero.Collection;
@@ -33,7 +33,7 @@ describe("Zotero.CollectionTreeView", function() {
 		});
 		
 		it("shouldn't select a new collection if skipNotifier is passed", function* () {
-			yield resetSelection();
+			resetSelection();
 			
 			// Create collection with skipNotifier flag
 			var collection = new Zotero.Collection;
@@ -47,7 +47,7 @@ describe("Zotero.CollectionTreeView", function() {
 		});
 		
 		it("shouldn't select a new collection if skipSelect is passed", function* () {
-			yield resetSelection();
+			resetSelection();
 			
 			// Create collection with skipSelect flag
 			var collection = new Zotero.Collection;
@@ -68,7 +68,7 @@ describe("Zotero.CollectionTreeView", function() {
 			collection = yield Zotero.Collections.getAsync(id);
 			yield Zotero.Promise.delay(100);
 			
-			yield resetSelection();
+			resetSelection();
 			
 			collection.name = "No select on modify 2";
 			yield collection.save();
