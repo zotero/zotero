@@ -342,7 +342,7 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 				this.libraryID, this.parentKey
 			));
 		}
-		if (this.id) {
+		if (!isNew) {
 			Zotero.Notifier.trigger('move', 'collection', this.id);
 		}
 		env.parentIDs = parentIDs;
