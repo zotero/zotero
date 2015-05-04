@@ -27,7 +27,6 @@ describe("Zotero.CollectionTreeView", function() {
 			var id = yield collection.save();
 			
 			// New collection should be selected
-			yield Zotero.Promise.delay(100);
 			var selected = collectionsView.getSelectedCollection(true);
 			assert.equal(selected, id);
 		});
@@ -66,7 +65,6 @@ describe("Zotero.CollectionTreeView", function() {
 			collection.name = "No select on modify";
 			var id = yield collection.save();
 			collection = yield Zotero.Collections.getAsync(id);
-			yield Zotero.Promise.delay(100);
 			
 			resetSelection();
 			
@@ -74,7 +72,6 @@ describe("Zotero.CollectionTreeView", function() {
 			yield collection.save();
 			
 			// Modified collection should not be selected
-			yield Zotero.Promise.delay(100);
 			assert.equal(collectionsView.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
 		});
 		
@@ -84,7 +81,6 @@ describe("Zotero.CollectionTreeView", function() {
 			collection.name = "Reselect on modify";
 			var id = yield collection.save();
 			collection = yield Zotero.Collections.getAsync(id);
-			yield Zotero.Promise.delay(100);
 			
 			var selected = collectionsView.getSelectedCollection(true);
 			assert.equal(selected, id);
@@ -93,7 +89,6 @@ describe("Zotero.CollectionTreeView", function() {
 			yield collection.save();
 			
 			// Modified collection should still be selected
-			yield Zotero.Promise.delay(100);
 			selected = collectionsView.getSelectedCollection(true);
 			assert.equal(selected, id);
 		});
