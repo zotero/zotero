@@ -32,20 +32,30 @@ function loadBrowserWindow() {
 }
 
 /**
- * Loads a Zotero pane in a new window. Returns the containing window.
+ * Loads a Zotero pane in a new window and selects My Library. Returns the containing window.
  */
-function loadZoteroPane() {
-	return loadBrowserWindow().then(function(win) {
-		win.ZoteroOverlay.toggleDisplay(true);
-
-		// Hack to wait for pane load to finish. This is the same hack
-		// we use in ZoteroPane.js, so either it's not good enough
-		// there or it should be good enough here.
-		return Zotero.Promise.delay(52).then(function() {
-			return win;
-		});
-	});
-}
+var loadZoteroPane = Zotero.Promise.coroutine(function* () {
+	var win = yield loadBrowserWindow();
+	win.ZoteroOverlay.toggleDisplay(true);
+	
+	// Hack to wait for pane load to finish. This is the same hack
+	// we use in ZoteroPane.js, so either it's not good enough
+	// there or it should be good enough here.
+	yield Zotero.Promise.delay(52);
+	
+	var zp = win.ZoteroPane;
+	var cv = zp.collectionsView;
+	var resolve1, resolve2;
+	var promise1 = new Zotero.Promise(() => resolve1 = arguments[0]);
+	var promise2 = new Zotero.Promise(() => resolve2 = arguments[0]);
+	cv.addEventListener('load', () => resolve1())
+	yield promise1;
+	cv.selection.select(0);
+	zp.addEventListener('itemsLoaded', () => resolve2());
+	yield promise2;
+	
+	return win;
+});
 
 /**
  * Waits for a window with a specific URL to open. Returns a promise for the window.

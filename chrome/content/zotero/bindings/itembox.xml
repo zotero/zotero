@@ -1682,8 +1682,6 @@
 				<parameter name="textbox"/>
 				<body><![CDATA[
 				return Zotero.spawn(function* () {
-					if (textbox.localName == 'textarea') return;
-					
 					Zotero.debug('Hiding editor');
 					
 					// Prevent autocomplete breakage in Firefox 3
@@ -1785,11 +1783,7 @@
 							}
 						}
 						
-						elem = this.createValueElement(
-							val,
-							fieldName,
-							tabindex
-						);
+						var newVal = val;
 					}
 					
 					// Fields
@@ -1854,17 +1848,22 @@
 							}
 						}
 						
-						this._modifyField(fieldName, value, this.saveOnEdit);
+						yield this._modifyField(fieldName, value, this.saveOnEdit);
 						
+						var newVal = this.item.getField(fieldName);
+					}
+					
+					// If box is still open (due to field not being modified and there not being
+					// a refresh), close it manually
+					if (textbox && textbox.parentNode) {
 						elem = this.createValueElement(
 							this.item.getField(fieldName),
 							fieldName,
 							tabindex
 						);
+						var box = textbox.parentNode;
+						box.replaceChild(elem,textbox);
 					}
-					
-					var box = textbox.parentNode;
-					box.replaceChild(elem,textbox);
 					
 					if(field === 'creator') {
 						// Reset creator mode settings here so that flex attribute gets reset
@@ -1912,14 +1911,14 @@
 				<parameter name="field"/>
 				<parameter name="value"/>
 				<parameter name="save"/>
-				<body>
-				<![CDATA[
-					this.item.setField(field,value);
-					if (save) {
-						this.item.save();
-					}
-				]]>
-				</body>
+				<body><![CDATA[
+					return Zotero.spawn(function* () {
+						this.item.setField(field, value);
+						if (save) {
+							yield this.item.save();
+						}
+					}, this);
+				]]></body>
 			</method>
 			
 			
@@ -1973,8 +1972,7 @@
 							throw ("Invalid transform mode '" + mode + "' in zoteroitembox.textTransform()");
 					}
 					this._setFieldValue(label, newVal);
-					this._modifyField(label.getAttribute('fieldname'), newVal, this.saveOnEdit);
-
+					this._modifyField(label.getAttribute('fieldname'), newVal, this.saveOnEdit).done();
 				]]>
 				</body>
 			</method>
@@ -2204,7 +2202,7 @@
 					return Zotero.spawn(function* () {
 						var textboxes = document.getAnonymousNodes(this)[0].getElementsByTagName('textbox');
 						if (textboxes && textboxes.length) {
-							yield this.blurHandler(textboxes[0].inputField);
+							yield this.blurHandler(textboxes[0]);
 						}
 					}, this);
 				]]></body>

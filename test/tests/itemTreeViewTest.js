@@ -4,25 +4,13 @@ describe("Zotero.ItemTreeView", function() {
 	// Load Zotero pane and select library
 	before(function* () {
 		win = yield loadZoteroPane();
-		var zp = win.ZoteroPane;
-		var cv = zp.collectionsView;
-		var resolve1, resolve2;
-		var promise1 = new Zotero.Promise(() => resolve1 = arguments[0]);
-		var promise2 = new Zotero.Promise(() => resolve2 = arguments[0]);
-		cv.addEventListener('load', () => resolve1())
-		yield promise1;
-		cv.selection.select(0);
-		zp.addEventListener('itemsLoaded', () => resolve2());
-		yield promise2;
-		itemsView = zp.itemsView;
+		itemsView = win.ZoteroPane.itemsView;
 		
 		var item = new Zotero.Item('book');
 		existingItemID = yield item.save();
 	});
 	after(function () {
-		if (win) {
-			win.close();
-		}
+		win.close();
 	});
 	
 	describe("#selectItem()", function () {

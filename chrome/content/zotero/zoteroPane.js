@@ -751,6 +751,8 @@ var ZoteroPane = new function()
 			}
 		}
 		
+		yield ZoteroItemPane.blurOpenField();
+		
 		if (row !== undefined && row !== null) {
 			var collectionTreeRow = this.collectionsView.getRow(row);
 			var libraryID = collectionTreeRow.ref.libraryID;

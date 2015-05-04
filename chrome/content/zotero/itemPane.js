@@ -153,6 +153,23 @@ var ZoteroItemPane = new function() {
 	});
 	
 	
+	this.blurOpenField = Zotero.Promise.coroutine(function* () {
+		var tabBox = document.getElementById('zotero-view-tabbox');
+		switch (tabBox.selectedIndex) {
+		case 0:
+			var box = _itemBox;
+			break;
+			
+		case 2:
+			var box = _tagsBox;
+			break;
+		}
+		if (box) {
+			yield box.blurOpenField();
+		}
+	});
+	
+	
 	this.addNote = function (popup) {
 		ZoteroPane_Local.newNote(popup, _lastItem.key);
 	}
