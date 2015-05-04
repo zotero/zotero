@@ -639,37 +639,45 @@ Zotero.CollectionTreeView.prototype.hasNextSibling = function(row, afterIndex)
 /*
  *  Opens/closes the specified row
  */
-Zotero.CollectionTreeView.prototype.toggleOpenState = Zotero.Promise.coroutine(function* (row)
-{
-	var count = 0;
-	var thisLevel = this.getLevel(row);
-	
-	//this._treebox.beginUpdateBatch();
+Zotero.CollectionTreeView.prototype.toggleOpenState = Zotero.Promise.coroutine(function* (row) {
 	if (this.isContainerOpen(row)) {
-		while((row + 1 < this._rows.length) && (this.getLevel(row + 1) > thisLevel))
-		{
-			this._removeRow(row+1);
-			count--;
-		}
-		// Remove from the end of the row's children
-		this._treebox.rowCountChanged(row + 1 + Math.abs(count), count);
+		return this._closeContainer(row);
 	}
-	else {
-		var treeRow = this.getRow(row);
-		if (treeRow.isLibrary(true) || treeRow.isCollection()) {
-			count = yield this._expandRow(this._rows, row, true);
-		}
-		this.rowCount += count;
-		this._treebox.rowCountChanged(row + 1, count);
+	
+	var count = 0;
+	
+	var treeRow = this.getRow(row);
+	if (treeRow.isLibrary(true) || treeRow.isCollection()) {
+		count = yield this._expandRow(this._rows, row, true);
 	}
+	this.rowCount += count;
+	this._treebox.rowCountChanged(row + 1, count);
 	
 	// Toggle container open value
-	this._rows[row][1] = !this._rows[row][1];
+	this._rows[row][1] = true;
 	this._treebox.invalidateRow(row);
-	//this._treebox.endUpdateBatch();
 	this._refreshRowMap();
-	yield this._rememberOpenStates();
 });
+
+
+Zotero.CollectionTreeView.prototype._closeContainer = function (row) {
+	if (!this.isContainerOpen(row)) return;
+	
+	var count = 0;
+	var level = this.getLevel(row);
+	
+	// Remove child rows
+	while ((row + 1 < this._rows.length) && (this.getLevel(row + 1) > level)) {
+		this._removeRow(row + 1);
+		count--;
+	}
+	// Mark as removed from the end of the row's children
+	this._treebox.rowCountChanged(row + 1 + Math.abs(count), count);
+	
+	this._rows[row][1] = false;
+	this._treebox.invalidateRow(row);
+	this._refreshRowMap();
+}
 
 
 Zotero.CollectionTreeView.prototype.isSelectable = function (row, col) {
@@ -744,7 +752,7 @@ Zotero.CollectionTreeView.prototype.expandLibrary = Zotero.Promise.coroutine(fun
 });
 
 
-Zotero.CollectionTreeView.prototype.collapseLibrary = Zotero.Promise.coroutine(function* () {
+Zotero.CollectionTreeView.prototype.collapseLibrary = function () {
 	var selectedLibraryID = this.getSelectedLibraryID();
 	if (selectedLibraryID === false) {
 		return;
@@ -764,8 +772,8 @@ Zotero.CollectionTreeView.prototype.collapseLibrary = Zotero.Promise.coroutine(f
 		
 		found = true;
 		
-		if (this.isContainer(i) && this.isContainerOpen(i)) {
-			yield this.toggleOpenState(i);
+		if (this.isContainer(i)) {
+			this._closeContainer(i);
 		}
 	}
 	
@@ -773,7 +781,7 @@ Zotero.CollectionTreeView.prototype.collapseLibrary = Zotero.Promise.coroutine(f
 	
 	// Select the collapsed library
 	this.selectLibrary(selectedLibraryID);
-});
+};
 
 
 Zotero.CollectionTreeView.prototype.expandToCollection = Zotero.Promise.coroutine(function* (collectionID) {
@@ -870,7 +878,7 @@ Zotero.CollectionTreeView.prototype.selectCollection = Zotero.Promise.coroutine(
 });
 
 
-Zotero.CollectionTreeView.prototype.selectTrash = function (libraryID) {
+Zotero.CollectionTreeView.prototype.selectTrash = Zotero.Promise.coroutine(function* (libraryID) {
 	if (Zotero.suppressUIUpdates) {
 		Zotero.debug("UI updates suppressed -- not changing library selection");
 		return false;
@@ -887,7 +895,7 @@ Zotero.CollectionTreeView.prototype.selectTrash = function (libraryID) {
 	
 	// If in My Library and it's collapsed, open it
 	if (!libraryID && !this.isContainerOpen(0)) {
-		this.toggleOpenState(0);
+		yield this.toggleOpenState(0);
 	}
 	
 	// Find library trash
@@ -897,13 +905,13 @@ Zotero.CollectionTreeView.prototype.selectTrash = function (libraryID) {
 		// If group header is closed, open it
 		if (itemGroup.isHeader() && itemGroup.ref.id == 'group-libraries-header'
 				&& !this.isContainerOpen(i)) {
-			this.toggleOpenState(i);
+			yield this.toggleOpenState(i);
 			continue;
 		}
 		
 		if (itemGroup.isLibrary(true) && itemGroup.ref.libraryID == libraryID
 				&& !this.isContainerOpen(i)) {
-			this.toggleOpenState(i);
+			yield this.toggleOpenState(i);
 			continue;
 		}
 		
@@ -915,7 +923,7 @@ Zotero.CollectionTreeView.prototype.selectTrash = function (libraryID) {
 	}
 	
 	return false;
-}
+});
 
 
 /**
@@ -1001,8 +1009,8 @@ Zotero.CollectionTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(f
 
 	//collapse open collections
 	for (let i=0; i<this.rowCount; i++) {
-		if (this.selection.isSelected(i) && this.isContainer(i) && this.isContainerOpen(i)) {
-			yield this.toggleOpenState(i);
+		if (this.selection.isSelected(i) && this.isContainer(i)) {
+			this._closeContainer(i);
 		}
 	}
 	this._refreshRowMap();
