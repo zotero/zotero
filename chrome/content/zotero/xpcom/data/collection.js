@@ -27,8 +27,6 @@ Zotero.Collection = function() {
 	Zotero.Collection._super.apply(this);
 	
 	this._name = null;
-	this._parentID = null;
-	this._parentKey = null;
 	
 	this._hasChildCollections = null;
 	this._childCollections = [];

@@ -45,6 +45,8 @@ Zotero.DataObject = function () {
 	this._version = null;
 	this._synced = null;
 	this._identified = false;
+	this._parentID = null;
+	this._parentKey = null;
 	
 	this._loaded = {};
 	this._markAllDataTypeLoadStates(false);
@@ -162,18 +164,22 @@ Zotero.DataObject.prototype._setParentID = function (id) {
 	return this._setParentKey(
 		id
 		? this.ObjectsClass.getLibraryAndKeyFromID(Zotero.DataObjectUtilities.checkDataID(id)).key
-		: null
+		: false
 	);
 }
 
 /**
  * Set the key of the parent object
  *
- * @param {String|null} [key=null]
+ * @param {String|false} [key=false]
  * @return {Boolean} True if changed, false if stayed the same
  */
 Zotero.DataObject.prototype._setParentKey = function(key) {
-	key = Zotero.DataObjectUtilities.checkKey(key);
+	if (this._objectType == 'search') {
+		throw new Error("Cannot set parent key for search");
+	}
+	
+	key = Zotero.DataObjectUtilities.checkKey(key) || false;
 	
 	if (this._parentKey == key) {
 		return false;
