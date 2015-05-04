@@ -783,7 +783,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	
 	var fieldID = Zotero.ItemFields.getID(field);
 	if (!fieldID) {
-		throw ('"' + field + '" is not a valid itemData field.');
+		throw new Error('"' + field + '" is not a valid itemData field');
 	}
 	
 	if (loadIn && this.isNote() && field == 110) { // title
@@ -1230,7 +1230,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		sqlColumns.unshift('itemID');
 		sqlValues.unshift(parseInt(itemID));
 		
-		var sql = "INSERT INTO items (" + sqlColumns.join(", ") + ") "
+		let sql = "INSERT INTO items (" + sqlColumns.join(", ") + ") "
 			+ "VALUES (" + sqlValues.map(function () "?").join() + ")";
 		var insertID = yield Zotero.DB.queryAsync(sql, sqlValues);
 		if (!itemID) {
@@ -1242,7 +1242,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		}
 	}
 	else {
-		var sql = "UPDATE items SET " + sqlColumns.join("=?, ") + "=? WHERE itemID=?";
+		let sql = "UPDATE items SET " + sqlColumns.join("=?, ") + "=? WHERE itemID=?";
 		sqlValues.push(parseInt(itemID));
 		yield Zotero.DB.queryAsync(sql, sqlValues);
 		
@@ -1380,8 +1380,9 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			}
 			
 			let oldParentKey = this._previousData.parentKey;
+			let oldParentItemID;
 			if (oldParentKey) {
-				let oldParentItemID = this.ObjectsClass.getIDFromLibraryAndKey(this.libraryID, oldParentKey);
+				oldParentItemID = this.ObjectsClass.getIDFromLibraryAndKey(this.libraryID, oldParentKey);
 				if (oldParentItemID) {
 					let oldParentItemNotifierData = {};
 					//oldParentItemNotifierData[oldParentItemID] = {};

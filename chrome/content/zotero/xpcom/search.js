@@ -653,8 +653,6 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 					// haven't already been found by the main search
 					if (joinMode == 'any') {
 						if (!tmpTable) {
-							Zotero.debug('=');
-							Zotero.debug(ids);
 							tmpTable = yield Zotero.Search.idsToTempTable(ids);
 						}
 						
