@@ -1682,6 +1682,8 @@
 				<parameter name="textbox"/>
 				<body><![CDATA[
 				return Zotero.spawn(function* () {
+					if (textbox.localName == 'textarea') return;
+					
 					Zotero.debug('Hiding editor');
 					
 					// Prevent autocomplete breakage in Firefox 3
