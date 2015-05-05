@@ -20,13 +20,13 @@ describe("Zotero.ItemTreeView", function() {
 		 */
 		it("should return if item is already selected", function* () {
 			yield itemsView.selectItem(existingItemID);
-			var selected = itemsView.getSelectedItems();
+			var selected = itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 1);
-			assert.equal(selected[0].id, existingItemID);
+			assert.equal(selected[0], existingItemID);
 			yield itemsView.selectItem(existingItemID);
-			selected = itemsView.getSelectedItems();
+			selected = itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 1);
-			assert.equal(selected[0].id, existingItemID);
+			assert.equal(selected[0], existingItemID);
 		});
 	})
 	
@@ -48,9 +48,9 @@ describe("Zotero.ItemTreeView", function() {
 		it("shouldn't select a new item if skipNotifier is passed", function* () {
 			// Select existing item
 			yield itemsView.selectItem(existingItemID);
-			var selected = itemsView.getSelectedItems();
+			var selected = itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 1);
-			assert.equal(selected[0].id, existingItemID);
+			assert.equal(selected[0], existingItemID);
 			
 			// Create item with skipNotifier flag
 			var item = new Zotero.Item('book');
@@ -59,17 +59,17 @@ describe("Zotero.ItemTreeView", function() {
 			});
 			
 			// Existing item should still be selected
-			selected = itemsView.getSelectedItems();
+			selected = itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 1);
-			assert.equal(selected[0].id, existingItemID);
+			assert.equal(selected[0], existingItemID);
 		});
 		
 		it("shouldn't select a new item if skipSelect is passed", function* () {
 			// Select existing item
 			yield itemsView.selectItem(existingItemID);
-			var selected = itemsView.getSelectedItems();
+			var selected = itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 1);
-			assert.equal(selected[0].id, existingItemID);
+			assert.equal(selected[0], existingItemID);
 			
 			// Create item with skipSelect flag
 			var item = new Zotero.Item('book');
