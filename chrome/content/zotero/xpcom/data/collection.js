@@ -360,11 +360,13 @@ Zotero.Collection.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
 		group.clearCollectionCache();
 	}
 	
-	if (isNew) {
-		Zotero.Notifier.trigger('add', 'collection', this.id, env.notifierData);
-	}
-	else if (!env.options.skipNotifier) {
-		Zotero.Notifier.trigger('modify', 'collection', this.id, env.notifierData);
+	if (!env.options.skipNotifier) {
+		if (isNew) {
+			Zotero.Notifier.trigger('add', 'collection', this.id, env.notifierData);
+		}
+		else  {
+			Zotero.Notifier.trigger('modify', 'collection', this.id, env.notifierData);
+		}
 	}
 	
 	// Invalidate cached child collections
