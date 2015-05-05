@@ -51,6 +51,7 @@ Zotero.DataObject = function () {
 	this._parentKey = null;
 	
 	this._loaded = {};
+	this._skipDataTypeLoad = {};
 	this._markAllDataTypeLoadStates(false);
 	
 	this._clearChanged();
@@ -471,7 +472,10 @@ Zotero.DataObject.prototype._loadDataType = function (dataType, reload) {
 Zotero.DataObject.prototype.loadAllData = function (reload) {
 	let loadPromises = new Array(this._dataTypes.length);
 	for (let i=0; i<this._dataTypes.length; i++) {
-		loadPromises[i] = this._loadDataType(this._dataTypes[i], reload);
+		let type = this._dataTypes[i];
+		if (!this._skipDataTypeLoad[type]) {
+			loadPromises[i] = this._loadDataType(type, reload);
+		}
 	}
 	
 	return Zotero.Promise.all(loadPromises);

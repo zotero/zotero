@@ -463,6 +463,11 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		return true;
 	}
 	
+	// Adjust 'note' data type based on whether the item is an attachment or note
+	var isAttachment = Zotero.ItemTypes.getID('attachment') == itemTypeID;
+	var isNote = Zotero.ItemTypes.getID('note') == itemTypeID;
+	this._skipDataTypeLoad.note = !(isAttachment || isNote);
+	
 	var oldItemTypeID = this._itemTypeID;
 	if (oldItemTypeID) {
 		if (loadIn) {

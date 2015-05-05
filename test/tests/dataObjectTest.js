@@ -3,6 +3,32 @@
 describe("Zotero.DataObject", function() {
 	var types = ['collection', 'item', 'search'];
 	
+	describe("#loadAllData()", function () {
+		it("should load data on a regular item", function* () {
+			var item = new Zotero.Item('book');
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			yield item.loadAllData();
+			assert.throws(item.getNote.bind(item), 'getNote() can only be called on notes and attachments');
+		})
+		
+		it("should load data on an attachment item", function* () {
+			var item = new Zotero.Item('attachment');
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			yield item.loadAllData();
+			assert.equal(item.getNote(), '');
+		})
+		
+		it("should load data on a note item", function* () {
+			var item = new Zotero.Item('note');
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			yield item.loadAllData();
+			assert.equal(item.getNote(), '');
+		})
+	})
+	
 	describe("#save()", function () {
 		it("should add new identifiers to cache", function* () {
 			// Collection
