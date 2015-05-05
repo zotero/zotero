@@ -13,7 +13,9 @@ function waitForDOMEvent(target, event, capture) {
 }
 
 /**
- * Open a window. Returns a promise for the window.
+ * Open a chrome window and return a promise for the window
+ *
+ * @return {Promise<ChromeWindow>}
  */
 function loadWindow(winurl, argument) {
 	var win = window.openDialog(winurl, "_blank", "chrome", argument);
@@ -28,7 +30,10 @@ function loadWindow(winurl, argument) {
  * @return {Promise<ChromeWindow>}
  */
 function loadBrowserWindow() {
-	return loadWindow("chrome://browser/content/browser.xul");
+	var win = window.openDialog("chrome://browser/content/browser.xul");
+	return waitForDOMEvent(win, "load").then(function() {
+		return win;
+	});
 }
 
 /**
