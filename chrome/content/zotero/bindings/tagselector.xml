@@ -600,20 +600,18 @@
 			
 			<method name="clearVisible">
 				<body><![CDATA[
-					return Zotero.spawn(function* () {
-						var tagsToggleBox = this.id('tags-toggle');
-						
-						var labels = Zotero.Utilities.xpath(tagsToggleBox, 'label[@selected="true"]');
-						for (var i=0; i<labels.length; i++){
-							var label = labels[i];
-							label.setAttribute('selected', 'false');
-							delete this.selection[label.value];
-						}
-						
-						if (this.onchange) {
-							this.onchange();
-						}
-					}, this);
+					var tagsToggleBox = this.id('tags-toggle');
+					
+					var labels = Zotero.Utilities.xpath(tagsToggleBox, 'label[@selected="true"]');
+					for (var i=0; i<labels.length; i++){
+						var label = labels[i];
+						label.setAttribute('selected', 'false');
+						delete this.selection[label.value];
+					}
+					
+					if (this.onchange) {
+						this.onchange();
+					}
 				]]></body>
 			</method>
 			

@@ -1,3 +1,5 @@
+"use strict";
+
 describe("Zotero.CollectionTreeView", function() {
 	var win, collectionsView;
 	

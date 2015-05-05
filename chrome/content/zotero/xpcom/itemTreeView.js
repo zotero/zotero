@@ -64,10 +64,10 @@ Zotero.ItemTreeView.prototype.type = 'item';
 /**
  * Called by the tree itself
  */
-Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (treebox)
+Zotero.ItemTreeView.prototype.setTree = Zotero.serial(Zotero.Promise.coroutine(function* (treebox)
 {
 	try {
-		//Zotero.debug("Calling setTree()");
+		Zotero.debug("Setting item tree");
 		var start = Date.now();
 		// Try to set the window document if not yet set
 		if (treebox && !this._ownerDocument) {
@@ -85,7 +85,13 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 		}
 		
 		if (!treebox) {
-			Components.utils.reportError("Passed treebox empty in setTree()");
+			Zotero.debug("Treebox not passed in setTree()", 2);
+			return;
+		}
+		
+		if (!this._ownerDocument) {
+			Zotero.debug("No owner document in setTree()", 2);
+			return;
 		}
 		
 		this._treebox = treebox;
@@ -102,8 +108,6 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 			}
 			return;
 		}
-		
-		yield Zotero.DB.waitForTransaction();
 		
 		yield this.refresh();
 		
@@ -235,9 +239,7 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 		tree._handleEnter = function () {};
 		
 		yield this.sort();
-		
 		yield this.expandMatchParents();
-		
 		
 		if (this._ownerDocument.defaultView.ZoteroPane_Local) {
 			this._ownerDocument.defaultView.ZoteroPane_Local.clearItemsPaneMessage();
@@ -256,13 +258,14 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 		yield this._runListeners('load');
 	}
 	catch (e) {
+		Zotero.debug(e, 1);
 		Components.utils.reportError(e);
 		if (this.onError) {
 			this.onError(e);
 		}
 		throw e;
-	};
-});
+	}
+}));
 
 
 /**
@@ -331,27 +334,32 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 	var added = 0;
 	
 	for (let i=0, len=newItems.length; i < len; i++) {
+		let item = newItems[i];
+		
 		// Only add regular items if sourcesOnly is set
-		if (this._sourcesOnly && !newItems[i].isRegularItem()) {
+		if (this._sourcesOnly && !item.isRegularItem()) {
 			continue;
 		}
 		
 		// Don't add child items directly (instead mark their parents for
 		// inclusion below)
-		let parentItemID = newItems[i].parentItemID;
+		let parentItemID = item.parentItemID;
 		if (parentItemID) {
 			newSearchParentIDs[parentItemID] = true;
 		}
 		// Add top-level items
 		else {
+			yield item.loadItemData();
+			yield item.loadCollections();
+			
 			this._addRow(
 				newRows,
-				new Zotero.ItemTreeRow(newItems[i], 0, false),
+				new Zotero.ItemTreeRow(item, 0, false),
 				added + 1
 			);
 			added++;
 		}
-		newSearchItemIDs[newItems[i].id] = true;
+		newSearchItemIDs[item.id] = true;
 	}
 	
 	// Add parents of matches if not matches themselves
@@ -925,9 +933,13 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	}
 	
 	//this._treebox.endUpdateBatch();
-	var promise = this._getItemSelectedPromise();
+	if (madeChanges) {
+		var promise = this._getItemSelectedPromise();
+	}
 	this.selection.selectEventsSuppressed = false;
-	yield promise;
+	if (madeChanges) {
+		yield promise;
+	}
 });
 
 /*

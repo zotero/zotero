@@ -155,13 +155,11 @@ Zotero.Tags = new function() {
 	/**
 	 * Get all tags within the items of a temporary table of search results
 	 *
-	 * @param {String|Promise<String>} tmpTable  Temporary table with items to use
+	 * @param {String} tmpTable  Temporary table with items to use
 	 * @param {Array} [types]  Array of tag types to fetch
 	 * @return {Promise<Object>}  Promise for object with tag data in API JSON format, keyed by tagID
 	 */
 	this.getAllWithinSearchResults = Zotero.Promise.coroutine(function* (tmpTable, types) {
-		tmpTable = yield Zotero.Promise.resolve(tmpTable);
-		
 		var sql = "SELECT DISTINCT name AS tag, type FROM itemTags "
 			+ "JOIN tags USING (tagID) WHERE itemID IN "
 			+ "(SELECT itemID FROM " + tmpTable + ") ";

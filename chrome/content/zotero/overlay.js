@@ -93,7 +93,12 @@ var ZoteroOverlay = new function()
 			prefBranch.clearUserPref('statusBarIcon');
 			
 			// Add toolbar icon
-			Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
+			try {
+				Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 			
 			// TODO: Add only when progress window is open
 			document.getElementById('appcontent').addEventListener('mousemove', Zotero.ProgressWindowSet.updateTimers, false);

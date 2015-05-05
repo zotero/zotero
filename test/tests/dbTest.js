@@ -1,11 +1,17 @@
 describe("Zotero.DB", function() {
 	var tmpTable = "tmpDBTest";
 	
+	before(function* () {
+		this.timeout(5000);
+		Zotero.debug("Waiting for DB activity to settle");
+		yield Zotero.DB.waitForTransaction();
+		yield Zotero.Promise.delay(1000);
+	});
 	beforeEach(function* () {
-		Zotero.DB.queryAsync("DROP TABLE IF EXISTS " + tmpTable);
+		yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS " + tmpTable);
 	});
 	after(function* () {
-		Zotero.DB.queryAsync("DROP TABLE IF EXISTS " + tmpTable);
+		yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS " + tmpTable);
 	});
 	
 	describe("#executeTransaction()", function () {

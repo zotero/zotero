@@ -2392,7 +2392,7 @@ Zotero.CollectionTreeRow.prototype.getItems = Zotero.Promise.coroutine(function*
 	if (!ids.length) {
 		return []
 	}
-	return Zotero.Items.get(ids);
+	return Zotero.Items.getAsync(ids);
 });
 
 Zotero.CollectionTreeRow.prototype.getSearchResults = Zotero.Promise.coroutine(function* (asTempTable) {
@@ -2493,7 +2493,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
  *
  * @return {Promise}
  */
-Zotero.CollectionTreeRow.prototype.getChildTags = Zotero.Promise.method(function () {
+Zotero.CollectionTreeRow.prototype.getChildTags = Zotero.Promise.coroutine(function* () {
 	switch (this.type) {
 		// TODO: implement?
 		case 'share':
@@ -2502,8 +2502,8 @@ Zotero.CollectionTreeRow.prototype.getChildTags = Zotero.Promise.method(function
 		case 'bucket':
 			return false;
 	}
-	
-	return Zotero.Tags.getAllWithinSearchResults(this.getSearchResults(true));
+	var results = yield this.getSearchResults(true);
+	return Zotero.Tags.getAllWithinSearchResults(results);
 });
 
 

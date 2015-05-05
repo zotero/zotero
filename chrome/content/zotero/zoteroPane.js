@@ -1111,9 +1111,10 @@ var ZoteroPane = new function()
 	
 	
 	this.onCollectionSelected = Zotero.Promise.coroutine(function* () {
-		yield Zotero.DB.waitForTransaction();
-		
 		var collectionTreeRow = this.getCollectionTreeRow();
+		if (!collectionTreeRow) {
+			return;
+		}
 		
 		if (this.itemsView && this.itemsView.collectionTreeRow == collectionTreeRow) {
 			Zotero.debug("Collection selection hasn't changed");
@@ -1131,7 +1132,12 @@ var ZoteroPane = new function()
 		
 		// Clear quick search and tag selector when switching views
 		document.getElementById('zotero-tb-search').value = "";
-		yield document.getElementById('zotero-tag-selector').clearAll();
+		
+		// XBL functions might not yet be available
+		var tagSelector = document.getElementById('zotero-tag-selector');
+		if (tagSelector.clearAll) {
+			tagSelector.clearAll();
+		}
 		
 		// Not necessary with seltype="cell", which calls nsITreeView::isSelectable()
 		/*if (collectionTreeRow.isSeparator()) {
