@@ -1350,8 +1350,10 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		if (isNew) {
 			if (!parentItemID) {
 				// TODO: clear caches?
-				let msg = parentItemKey + " is not a valid item key";
-				throw new Zotero.Error(msg, "MISSING_OBJECT");
+				let msg = "Parent item " + this.libraryID + "/" + parentItemKey + " not found";
+				let e = new Error(msg);
+				e.name = "ZoteroMissingObjectError";
+				throw e;
 			}
 			
 			let newParentItemNotifierData = {};
@@ -1372,8 +1374,10 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			if (parentItemKey) {
 				if (!parentItemID) {
 					// TODO: clear caches
-					let msg = "Cannot set source to invalid item " + parentItemKey;
-					throw new Zotero.Error(msg, "MISSING_OBJECT");
+					let msg = "Parent item " + this.libraryID + "/" + parentItemKey + " not found";
+					let e = new Error(msg);
+					e.name = "ZoteroMissingObjectError";
+					throw e;
 				}
 				
 				let newParentItemNotifierData = {};
