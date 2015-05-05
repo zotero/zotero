@@ -123,36 +123,13 @@ ConcurrentCaller.prototype.stop = function () {
 
 ConcurrentCaller.prototype._onFunctionDone = function (promise) {
 	var self = this;
+	
 	return promise.then(function (result) {
 		self._numRunning--;
 		
 		self._log("Done with function ("
 			+ self._numRunning + "/" + self._numConcurrent + " running, "
 			+ self._queue.length + " queued)");
-		
-		// If there's a function to call and we're under the concurrent limit,
-		// run it now
-		let f = self._queue.shift();
-		if (f && self._numRunning < self._numConcurrent) {
-			// Wait until the specified interval has elapsed or the current
-			// pause (if there is one) is over, whichever is longer
-			let interval = self._interval;
-			let now = Date.now();
-			if (self._pauseUntil > now && (self._pauseUntil - now > interval)) {
-				interval = self._pauseUntil - now;
-			}
-			// We don't wait for this because it resolves the passed promise, not this one
-			Promise.delay(interval)
-			.then(function () {
-				self._log("Running new function ("
-					+ self._numRunning + "/" + self._numConcurrent + " running, "
-					+ self._queue.length + " queued)");
-				
-				self._numRunning++;
-				var result = self._onFunctionDone(f.func());
-				f.deferred.resolve(result);
-			});
-		}
 		
 		return result;
 	})
@@ -172,6 +149,28 @@ ConcurrentCaller.prototype._onFunctionDone = function (promise) {
 		}
 		
 		throw e;
+	})
+	.finally(function () {
+		// If there's a function to call and we're under the concurrent limit, run it now
+		var f = self._queue.shift();
+		if (f && self._numRunning < self._numConcurrent) {
+			// Wait until the specified interval has elapsed or the current
+			// pause (if there is one) is over, whichever is longer
+			let interval = self._interval;
+			let now = Date.now();
+			if (self._pauseUntil > now && (self._pauseUntil - now > interval)) {
+				interval = self._pauseUntil - now;
+			}
+			Promise.delay(interval)
+			.then(function () {
+				self._log("Running new function ("
+					+ self._numRunning + "/" + self._numConcurrent + " running, "
+					+ self._queue.length + " queued)");
+				
+				self._numRunning++;
+				f.deferred.resolve(self._onFunctionDone(f.func()));
+			});
+		}
 	});
 };
 
