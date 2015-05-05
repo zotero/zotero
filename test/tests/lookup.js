@@ -5,7 +5,7 @@ function lookupIdentifier(win, identifier) {
 	return waitForItemEvent("add");
 }
 
-describe("Add Item by Identifier", function() {
+describe.skip("Add Item by Identifier", function() {
 	var win;
 	before(function() {
 		this.timeout(5000);

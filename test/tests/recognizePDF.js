@@ -1,4 +1,4 @@
-describe("PDF Recognition", function() {
+describe.skip("PDF Recognition", function() {
 	Components.utils.import("resource://gre/modules/FileUtils.jsm");
 
 	var win;
