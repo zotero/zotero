@@ -335,9 +335,9 @@ Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function
 Zotero.DataObject.prototype.loadPrimaryData = Zotero.Promise.coroutine(function* (reload, failOnMissing) {
 	if (this._loaded.primaryData && !reload) return;
 	
-	var id = this.id;
-	var key = this.key;
-	var libraryID = this.libraryID;
+	var id = this._id;
+	var key = this._key;
+	var libraryID = this._libraryID;
 	
 	if (!id && !key) {
 		throw new Error('ID or key not set in Zotero.' + this._ObjectType + '.loadPrimaryData()');
