@@ -134,9 +134,6 @@ Zotero.Search.prototype.loadFromRow = function (row) {
 }
 
 Zotero.Search.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
-	if (!this.libraryID) {
-		throw new Error('libraryID must be set before saving search');
-	}
 	if (!this.name) {
 		throw new Error('Name not provided for saved search');
 	}

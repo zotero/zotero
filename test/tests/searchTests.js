@@ -1,18 +1,7 @@
 describe("Zotero.Search", function() {
 	describe("#save()", function () {
-		it("should fail without a libraryID", function* () {
-			var s = new Zotero.Search;
-			s.name = "Test";
-			s.addCondition('title', 'is', 'test');
-			var e = yield getPromiseError(s.save());
-			assert.ok(e);
-			assert.equal(e.constructor.name, Error.prototype.constructor.name); // TEMP: Error mismatch
-			assert.equal(e.message, "libraryID must be set before saving search");
-		});
-		
 		it("should fail without a name", function* () {
 			var s = new Zotero.Search;
-			s.libraryID = Zotero.Libraries.userLibraryID;
 			s.addCondition('title', 'is', 'test');
 			var e = yield getPromiseError(s.save());
 			assert.ok(e);
@@ -23,7 +12,6 @@ describe("Zotero.Search", function() {
 		it("should save a new search", function* () {
 			// Save search
 			var s = new Zotero.Search;
-			s.libraryID = Zotero.Libraries.userLibraryID;
 			s.name = "Test";
 			s.addCondition('title', 'is', 'test');
 			var id = yield s.save();
@@ -33,6 +21,7 @@ describe("Zotero.Search", function() {
 			s = yield Zotero.Searches.getAsync(id);
 			assert.ok(s);
 			assert.instanceOf(s, Zotero.Search);
+			assert.equal(s.libraryID, Zotero.Libraries.userLibraryID);
 			assert.equal(s.name, "Test");
 			yield s.loadConditions();
 			var conditions = s.getConditions();
