@@ -2699,13 +2699,21 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentLinkMode', {
 			throw (".attachmentLinkMode can only be set for attachment items");
 		}
 		
+		// Allow 'imported_url', etc.
+		if (typeof val == 'string') {
+			let code = Zotero.Attachments["LINK_MODE_" + val.toUpperCase()];
+			if (code !== undefined) {
+				val = code;
+			}
+		}
+		
 		switch (val) {
 			case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
 			case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
 			case Zotero.Attachments.LINK_MODE_LINKED_FILE:
 			case Zotero.Attachments.LINK_MODE_LINKED_URL:
 				break;
-				
+			
 			default:
 				throw ("Invalid attachment link mode '" + val
 					+ "' in Zotero.Item.attachmentLinkMode setter");
