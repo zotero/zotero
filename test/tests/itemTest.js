@@ -19,6 +19,49 @@ describe("Zotero.Item", function () {
 	});
 	
 	describe("#setField", function () {
+		it("should mark a field as changed", function () {
+			var item = new Zotero.Item('book');
+			item.setField('title', 'Foo');
+			assert.ok(item._changed.itemData[Zotero.ItemFields.getID('title')]);
+			assert.ok(item.hasChanged());
+		})
+		
+		it("should clear an existing field set to a falsy value", function () {
+			var field = 'title';
+			var fieldID = Zotero.ItemFields.getID(field);
+			var item = new Zotero.Item('book');
+			item.setField(field, 'Foo');
+			id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			
+			item.setField(field, "");
+			assert.ok(item._changed.itemData[fieldID]);
+			assert.ok(item.hasChanged());
+			yield item.reload();
+			
+			assert.isFalse(item.hasChanged());
+			
+			item.setField(field, false);
+			assert.ok(item._changed.itemData[fieldID]);
+			assert.ok(item.hasChanged());
+			yield item.reload();
+			
+			assert.isFalse(item.hasChanged());
+			
+			item.setField(field, null);
+			assert.ok(item._changed.itemData[fieldID]);
+			assert.ok(item.hasChanged());
+			
+			yield item.save();
+			assert.isFalse(item.getField(fieldID));
+		})
+		
+		it("should not mark an empty field set to an empty string as changed", function () {
+			var item = new Zotero.Item('book');
+			item.setField('url', '');
+			assert.isUndefined(item._changed.itemData);
+		})
+		
 		it("should save version as object version", function* () {
 			var item = new Zotero.Item('book');
 			item.setField("version", 1);

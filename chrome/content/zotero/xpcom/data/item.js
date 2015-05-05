@@ -789,7 +789,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		return true;
 	}
 	
-	if (value === "") {
+	if (value === "" || value === null || value === false) {
 		value = false;
 	}
 	
@@ -850,9 +850,8 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		}
 		
 		// If existing value, make sure it's actually changing
-		if ((typeof this._itemData[fieldID] == 'undefined' && value === false)
-				|| (typeof this._itemData[fieldID] != 'undefined'
-					&& this._itemData[fieldID] === value)) {
+		if ((this._itemData[fieldID] === null && value === false)
+				|| (this._itemData[fieldID] !== null && this._itemData[fieldID] === value)) {
 			return false;
 		}
 		
@@ -1264,7 +1263,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			let value = this.getField(fieldID, true);
 			
 			// If field changed and is empty, mark row for deletion
-			if (!value) {
+			if (value === '') {
 				del.push(fieldID);
 				continue;
 			}
