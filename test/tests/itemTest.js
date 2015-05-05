@@ -80,19 +80,47 @@ describe("Zotero.Item", function () {
 	})
 	
 	describe("#parentID", function () {
-		it("should create a child note", function () {
-			return Zotero.DB.executeTransaction(function* () {
-				var item = new Zotero.Item('book');
-				var parentItemID = yield item.save();
-				
-				item = new Zotero.Item('note');
-				item.parentID = parentItemID;
-				var childItemID = yield item.save();
-				
-				item = yield Zotero.Items.getAsync(childItemID);
-				assert.ok(item.parentID);
-				assert.equal(item.parentID, parentItemID);
-			}.bind(this));
+		it("should create a child note", function* () {
+			var item = new Zotero.Item('book');
+			var parentItemID = yield item.save();
+			
+			item = new Zotero.Item('note');
+			item.parentID = parentItemID;
+			var childItemID = yield item.save();
+			
+			item = yield Zotero.Items.getAsync(childItemID);
+			assert.ok(item.parentID);
+			assert.equal(item.parentID, parentItemID);
+		});
+	});
+	
+	describe("#parentKey", function () {
+		it("should be false for an unsaved attachment", function () {
+			var item = new Zotero.Item('attachment');
+			assert.isFalse(item.parentKey);
+		});
+		
+		it("should be false on an unsaved non-attachment item", function () {
+			var item = new Zotero.Item('book');
+			assert.isFalse(item.parentKey);
+		});
+		
+		it("should not be marked as changed setting to false on an unsaved item", function () {
+			var item = new Zotero.Item('attachment');
+			item.attachmentLinkMode = 'linked_url';
+			item.parentKey = false;
+			assert.isUndefined(item._changed.parentKey);
+		});
+		
+		it("should not mark item as changed if false and no existing parent", function* () {
+			var item = new Zotero.Item('attachment');
+			item.attachmentLinkMode = 'linked_url';
+			item.url = "https://www.zotero.org/";
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			
+			item.parentKey = false;
+			assert.isFalse(item.hasChanged());
 		});
 	});
 	

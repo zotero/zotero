@@ -26,8 +26,10 @@
 /**
  * @property {String} (readOnly) objectType
  * @property {String} (readOnly) libraryKey
- * @property {String|null} parentKey Null if no parent
- * @property {Integer|false|undefined} parentID False if no parent. Undefined if not applicable (e.g. search objects)
+ * @property {String|false|undefined} parentKey - False if no parent, or undefined if not
+ *                                                applicable (e.g. search objects)
+ * @property {Integer|false|undefined} parentID - False if no parent, or undefined if not
+ *                                                applicable (e.g. search objects)
  */
 
 Zotero.DataObject = function () {
@@ -73,7 +75,7 @@ Zotero.defineProperty(Zotero.DataObject.prototype, 'libraryKey', {
 	get: function() this._libraryID + "/" + this._key
 });
 Zotero.defineProperty(Zotero.DataObject.prototype, 'parentKey', {
-	get: function() this._parentKey,
+	get: function () this._getParentKey(),
 	set: function(v) this._setParentKey(v)
 });
 Zotero.defineProperty(Zotero.DataObject.prototype, 'parentID', {
@@ -148,6 +150,9 @@ Zotero.DataObject.prototype._getParentID = function () {
 		return this._parentID;
 	}
 	if (!this._parentKey) {
+		if (this._objectType == 'search') {
+			return undefined;
+		}
 		return false;
 	}
 	return this._parentID = this.ObjectsClass.getIDFromLibraryAndKey(this._libraryID, this._parentKey);
@@ -168,6 +173,14 @@ Zotero.DataObject.prototype._setParentID = function (id) {
 	);
 }
 
+
+Zotero.DataObject.prototype._getParentKey = function () {
+	if (this._objectType == 'search') {
+		return undefined;
+	}
+	return this._parentKey ? this._parentKey : false
+}
+
 /**
  * Set the key of the parent object
  *
@@ -181,7 +194,7 @@ Zotero.DataObject.prototype._setParentKey = function(key) {
 	
 	key = Zotero.DataObjectUtilities.checkKey(key) || false;
 	
-	if (this._parentKey == key) {
+	if (key === this._parentKey || (!this._parentKey && !key)) {
 		return false;
 	}
 	this._markFieldChange('parentKey', this._parentKey);
