@@ -781,7 +781,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	
 	let itemTypeID = this.itemTypeID;
 	if (!itemTypeID) {
-		throw ('Item type must be set before setting field data');
+		throw new Error('Item type must be set before setting field data');
 	}
 	
 	var fieldID = Zotero.ItemFields.getID(field);
@@ -1173,7 +1173,10 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	var options = env.options;
 	
 	var itemTypeID = this.itemTypeID;
-		
+	if (!itemTypeID) {
+		throw new Error("Item type must be set before saving");
+	}
+	
 	var sqlColumns = [];
 	var sqlValues = [];
 	var reloadParentChildItems = {};

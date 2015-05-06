@@ -19,6 +19,11 @@ describe("Zotero.Item", function () {
 	});
 	
 	describe("#setField", function () {
+		it("should throw an error if item type isn't set", function* () {
+			var item = new Zotero.Item;
+			assert.throws(item.setField.bind(item, 'title', 'test'), "Item type must be set before setting field data");
+		})
+		
 		it("should mark a field as changed", function () {
 			var item = new Zotero.Item('book');
 			item.setField('title', 'Foo');
