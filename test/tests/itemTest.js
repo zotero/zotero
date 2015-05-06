@@ -79,6 +79,83 @@ describe("Zotero.Item", function () {
 		});
 	})
 	
+	describe("#dateModified", function () {
+		it("should use given Date Modified for a new item", function* () {
+			var dateModified = "2015-05-05 17:18:12";
+			var item = new Zotero.Item('book');
+			item.dateModified = dateModified;
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			assert.equal(item.dateModified, dateModified);
+		})
+		
+		it("should use given Date Modified when skipDateModifiedUpdate is set for a new item", function* () {
+			var dateModified = "2015-05-05 17:18:12";
+			var item = new Zotero.Item('book');
+			item.dateModified = dateModified;
+			var id = yield item.save({
+				skipDateModifiedUpdate: true
+			});
+			item = yield Zotero.Items.getAsync(id);
+			assert.equal(item.dateModified, dateModified);
+		})
+		
+		it("should use current time if Date Modified was not given for an existing item", function* () {
+			var dateModified = "2015-05-05 17:18:12";
+			var item = new Zotero.Item('book');
+			item.dateModified = dateModified;
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			
+			// Save again without changing Date Modified
+			yield item.loadItemData();
+			item.setField('title', 'Test');
+			yield item.save()
+			
+			assert.closeTo(Zotero.Date.sqlToDate(item.dateModified, true).getTime(), Date.now(), 1000);
+		})
+		
+		it("should use current time if the existing Date Modified value was given for an existing item", function* () {
+			var dateModified = "2015-05-05 17:18:12";
+			var item = new Zotero.Item('book');
+			item.dateModified = dateModified;
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			
+			// Set Date Modified to existing value
+			yield item.loadItemData();
+			item.setField('title', 'Test');
+			item.dateModified = dateModified;
+			yield item.save()
+			assert.closeTo(Zotero.Date.sqlToDate(item.dateModified, true).getTime(), Date.now(), 1000);
+		})
+		
+		it("should use current time if Date Modified is not given when skipDateModifiedUpdate is set for a new item", function* () {
+			var item = new Zotero.Item('book');
+			var id = yield item.save({
+				skipDateModifiedUpdate: true
+			});
+			item = yield Zotero.Items.getAsync(id);
+			assert.closeTo(Zotero.Date.sqlToDate(item.dateModified, true).getTime(), Date.now(), 1000);
+		})
+		
+		it("should keep original Date Modified when skipDateModifiedUpdate is set for an existing item", function* () {
+			var dateModified = "2015-05-05 17:18:12";
+			var item = new Zotero.Item('book');
+			item.dateModified = dateModified;
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			
+			// Resave with skipDateModifiedUpdate
+			yield item.loadItemData();
+			item.setField('title', 'Test');
+			yield item.save({
+				skipDateModifiedUpdate: true
+			})
+			assert.equal(item.dateModified, dateModified);
+		})
+	})
+	
 	describe("#parentID", function () {
 		it("should create a child note", function* () {
 			var item = new Zotero.Item('book');

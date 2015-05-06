@@ -727,7 +727,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 				let date = Zotero.Date.sqlToDate(value, true);
 				if (!date) throw new Error("Invalid SQL date: " + value);
 				
-				value = Zotero.Date.dateToSQL(date);
+				value = Zotero.Date.dateToSQL(date, true);
 				break;
 
 			case 'version':
@@ -1205,27 +1205,26 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		this.synced ? 1 : 0
 	);
 	
-	if (this._changed.primaryData && this._changed.primaryData._dateModified) {
-		sqlColumns.push('dateModified', 'clientDateModified');
-		sqlValues.push(this.dateModified, Zotero.DB.transactionDateTime);
+	// If a new item and Date Modified hasn't been provided, or an existing item and
+	// Date Modified hasn't changed from its previous value and skipDateModifiedUpdate wasn't
+	// passed, use the current timestamp
+	if (!this.dateModified
+			|| ((!this._changed.primaryData || !this._changed.primaryData.dateModified)
+				&& !options.skipDateModifiedUpdate)) {
+		sqlColumns.push('dateModified');
+		sqlValues.push(Zotero.DB.transactionDateTime);
 	}
-	else if (isNew) {
-		sqlColumns.push('dateModified', 'clientDateModified');
-		sqlValues.push(Zotero.DB.transactionDateTime, Zotero.DB.transactionDateTime);
+	// Otherwise, if a new Date Modified was provided, use that. (This would also work when
+	// skipDateModifiedUpdate was passed and there's an existing value, but in that case we
+	// can just not change the field at all.)
+	else if (this._changed.primaryData && this._changed.primaryData.dateModified) {
+		sqlColumns.push('dateModified');
+		sqlValues.push(this.dateModified);
 	}
-	else {
-		for each (let field in ['dateModified', 'clientDateModified']) {
-			switch (field) {
-			case 'dateModified':
-			case 'clientDateModified':
-				let skipFlag = "skip" + field[0].toUpperCase() + field.substr(1) + "Update";
-				if (!options[skipFlag]) {
-					sqlColumns.push(field);
-					sqlValues.push(Zotero.DB.transactionDateTime);
-				}
-				break;
-			}
-		}
+	
+	if (isNew || !options.skipClientDateModifiedUpdate) {
+		sqlColumns.push('clientDateModified');
+		sqlValues.push(Zotero.DB.transactionDateTime);
 	}
 	
 	if (isNew) {
@@ -4029,7 +4028,7 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 		
 		case 'dateAdded':
 		case 'dateModified':
-			this['_' + field] = Zotero.Date.dateToSQL(Zotero.Date.isoToDate(val), true);
+			this[field] = Zotero.Date.dateToSQL(Zotero.Date.isoToDate(val), true);
 			break;
 		
 		case 'parentItem':
