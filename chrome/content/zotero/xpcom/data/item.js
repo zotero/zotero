@@ -1587,8 +1587,8 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	}
 	
 	// Tags
-	if (this._changed.tags && this._previousData.tags) {
-		let oldTags = this._previousData.tags;
+	if (this._changed.tags) {
+		let oldTags = this._previousData.tags || [];
 		let newTags = this._tags;
 		
 		// Convert to individual JSON objects, diff, and convert back

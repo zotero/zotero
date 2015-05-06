@@ -261,5 +261,61 @@ describe("Zotero.Item", function () {
 			file.append(filename);
 			assert.equal(item.getFile().path, file.path);
 		});
-	});
+	})
+	
+	describe("#setTags", function () {
+		it("should save an array of tags in API JSON format", function* () {
+			var tags = [
+				{
+					tag: "A"
+				},
+				{
+					tag: "B"
+				}
+			];
+			var item = new Zotero.Item('journalArticle');
+			item.setTags(tags);
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			yield item.loadTags();
+			assert.sameDeepMembers(item.getTags(tags), tags);
+		})
+		
+		it("shouldn't mark item as changed if tags haven't changed", function* () {
+			var tags = [
+				{
+					tag: "A"
+				},
+				{
+					tag: "B"
+				}
+			];
+			var item = new Zotero.Item('journalArticle');
+			item.setTags(tags);
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			yield item.loadTags();
+			item.setTags(tags);
+			assert.isFalse(item.hasChanged());
+		})
+		
+		it("should remove an existing tag", function* () {
+			var tags = [
+				{
+					tag: "A"
+				},
+				{
+					tag: "B"
+				}
+			];
+			var item = new Zotero.Item('journalArticle');
+			item.setTags(tags);
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			yield item.loadTags();
+			item.setTags(tags.slice(0));
+			yield item.save();
+			assert.sameDeepMembers(item.getTags(tags), tags.slice(0));
+		})
+	})
 });
