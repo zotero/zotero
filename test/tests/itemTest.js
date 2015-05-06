@@ -201,6 +201,31 @@ describe("Zotero.Item", function () {
 		});
 	});
 	
+	describe("#attachmentCharset", function () {
+		it("should get and set a value", function* () {
+			var charset = 'utf-8';
+			var item = new Zotero.Item("attachment");
+			item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			item.attachmentCharset = charset;
+			var itemID = yield item.save();
+			item = yield Zotero.Items.getAsync(itemID);
+			assert.equal(item.attachmentCharset, charset);
+		})
+		
+		it("should not be marked as changed if not changed", function* () {
+			var charset = 'utf-8';
+			var item = new Zotero.Item("attachment");
+			item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			item.attachmentCharset = charset;
+			var itemID = yield item.save();
+			item = yield Zotero.Items.getAsync(itemID);
+			
+			// Set charset to same value
+			item.attachmentCharset = charset
+			assert.isFalse(item.hasChanged());
+		})
+	})
+	
 	describe("#attachmentFilename", function () {
 		it("should get and set a filename for a stored file", function* () {
 			var filename = "test.txt";

@@ -106,7 +106,6 @@ Zotero.CachedTypes = function() {
 		
 		if (!this._types['_' + idOrName]) {
 			Zotero.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
-			Zotero.debug((new Error()).stack, 1);
 			return false;
 		}
 		
@@ -510,14 +509,14 @@ Zotero.CharacterSets = new function() {
 		name = name.toLowerCase();
 		
 		// Don't allow too-long or non-ASCII names
-		if (name.length > 50 || !name.match(/[^a-z0-9\-_]/)) {
+		if (name.length > 50 || !name.match(/^[a-z0-9\-_]+$/)) {
 			return false;
 		}
 		
 		var sql = "INSERT INTO " + this._table + " (" + this._nameCol + ") VALUES (?)";
 		yield Zotero.DB.queryAsync(sql, name);
 		
-		sql = "SELECT id FROM " + this._table + " WHERE " + this._nameCol + "=?";
+		sql = "SELECT " + this._idCol + " FROM " + this._table + " WHERE " + this._nameCol + "=?";
 		var id = yield Zotero.DB.valueQueryAsync(sql, name);
 		
 		this._cacheTypeData({
