@@ -584,9 +584,10 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) 
 			Zotero.debug(e2, 1);
 		})
 		.then(function() {
-			// Don't log expected errors
-			if (e.name != 'ZoteroUnknownFieldError'
-					&& e.name != 'ZoteroMissingObjectError') {
+			if (options.errorHandler(e)) {
+				options.errorHandler(e);
+			}
+			else {
 				Zotero.debug(e, 1);
 			}
 			throw e;
