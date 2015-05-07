@@ -2029,7 +2029,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			if (targetCollectionID) {
 				let ids = newIDs.filter(function (itemID) {
 					var item = Zotero.Items.get(itemID);
-					return !item.getSource();
+					return item.isTopLevelItem();
 				});
 				var collection = yield Zotero.Collections.getAsync(targetCollectionID);
 				yield collection.addItems(ids);
