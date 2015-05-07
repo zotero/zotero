@@ -109,6 +109,9 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.serial(Zotero.Promise.coroutine(f
 		}
 		
 		yield this.refresh();
+		if (!this._treebox.treeBody) {
+			return;
+		}
 		
 		// Add a keypress listener for expand/collapse
 		var tree = this._treebox.treeBody.parentNode;
