@@ -593,7 +593,11 @@ var Zotero_RecognizePDF = new function() {
 			const lineRe = /^[\s_]*([^\s]+(?: [^\s_]+)+)/;
 			var cleanedLines = [], cleanedLineLengths = [];
 			for(var i=0; i<lines.length && cleanedLines.length<100; i++) {
-				var m = lineRe.exec(lines[i]);
+				var m = lineRe.exec(
+					lines[i]
+					// Replace non-breaking spaces
+					.replace(/\xA0/g, ' ')
+				);
 				if(m && m[1].split(' ').length > 3) {
 					cleanedLines.push(m[1]);
 					cleanedLineLengths.push(m[1].length);
