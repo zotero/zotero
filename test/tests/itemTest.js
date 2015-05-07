@@ -204,6 +204,42 @@ describe("Zotero.Item", function () {
 			item.parentKey = false;
 			assert.isFalse(item.hasChanged());
 		});
+		
+		it("should move a top-level note under another item", function* () {
+			var noteItem = new Zotero.Item('note');
+			var id = yield noteItem.save()
+			noteItem = yield Zotero.Items.getAsync(id);
+			
+			var item = new Zotero.Item('book');
+			id = yield item.save();
+			var { libraryID, key } = Zotero.Items.getLibraryAndKeyFromID(id);
+			
+			noteItem.parentKey = key;
+			yield noteItem.save();
+			
+			assert.isFalse(noteItem.isTopLevelItem());
+		})
+		
+		it("should remove top-level item from collections when moving it under another item", function* () {
+			// Create a collection
+			var collection = new Zotero.Collection;
+			collection.name = "Test";
+			var collectionID = yield collection.save();
+			
+			// Create a top-level note and add it to a collection
+			var noteItem = new Zotero.Item('note');
+			noteItem.addToCollection(collectionID);
+			var id = yield noteItem.save()
+			noteItem = yield Zotero.Items.getAsync(id);
+			
+			var item = new Zotero.Item('book');
+			id = yield item.save();
+			var { libraryID, key } = Zotero.Items.getLibraryAndKeyFromID(id);
+			noteItem.parentKey = key;
+			yield noteItem.save();
+			
+			assert.isFalse(noteItem.isTopLevelItem());
+		})
 	});
 	
 	describe("#attachmentCharset", function () {

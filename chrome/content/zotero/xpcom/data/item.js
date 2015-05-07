@@ -1409,7 +1409,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 				let changedCollections = yield Zotero.DB.columnQueryAsync(sql, this.id);
 				if (changedCollections.length) {
 					let parentItem = yield this.ObjectsClass.getByLibraryAndKeyAsync(
-						this.libraryID, oldParentKey
+						this.libraryID, parentItemKey
 					)
 					for (let i=0; i<changedCollections.length; i++) {
 						yield parentItem.loadCollections();
