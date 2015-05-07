@@ -28,6 +28,8 @@ Zotero.LibraryTreeView = function () {
 	this._listeners = {
 		load: []
 	};
+	this._rows = [];
+	this._rowMap = {};
 };
 
 Zotero.LibraryTreeView.prototype = {
@@ -50,6 +52,79 @@ Zotero.LibraryTreeView.prototype = {
 			yield Zotero.Promise.resolve(listener());
 		}
 	}),
+	
+	
+	/**
+	 * Returns a reference to the tree row at a given row
+	 */
+	getRow: function(row) {
+		return this._rows[row];
+	},
+	
+	
+	/**
+	 * Add a tree row to the main array, update the row count, tell the treebox that the row
+	 * count changed, and update the row map
+	 *
+	 * @param {Array} newRows - Array to operate on
+	 * @param {Zotero.ItemTreeRow} itemTreeRow
+	 * @param {Number} [beforeRow] - Row index to insert new row before
+	 */
+	_addRow: function (treeRow, beforeRow) {
+		this._addRowToArray(this._rows, treeRow, beforeRow);
+		this.rowCount++;
+		this._treebox.rowCountChanged(beforeRow, 1);
+		// Increment all rows in map at or above insertion point
+		for (let i in this._rowMap) {
+			if (this._rowMap[i] >= beforeRow) {
+				this._rowMap[i]++
+			}
+		}
+		// Add new row to map
+		this._rowMap[treeRow.id] = beforeRow;
+	},
+	
+	
+	/**
+	 * Add a tree row into a given array
+	 *
+	 * @param {Array} array - Array to operate on
+	 * @param {Zotero.CollectionTreeRow|ItemTreeRow} treeRow
+	 * @param {Number} beforeRow - Row index to insert new row before
+	 */
+	_addRowToArray: function (array, treeRow, beforeRow) {
+		array.splice(beforeRow, 0, treeRow);
+	},
+	
+	
+	/**
+	* Remove a row from the main array, decrement the row count, tell the treebox that the row
+	* count changed, delete the row from the map, and optionally update all rows above it in the map
+	*/
+	_removeRow: function (row, skipMapUpdate) {
+		var id = this._rows[row].id;
+		this._rows.splice(row, 1);
+		this.rowCount--;
+		this._treebox.rowCountChanged(row + 1, -1);
+		delete this._rowMap[id];
+		if (!skipMapUpdate) {
+			for (let i in this._rowMap) {
+				if (this._rowMap[i] > row) {
+					this._rowMap[i]--;
+				}
+			}
+		}
+	},
+	
+	
+	getLevel: function (row) {
+		return this._rows[row].level;
+	},
+	
+	
+	isContainerOpen: function(row) {
+		return this._rows[row].isOpen;
+	},
 	
 	
 	/**

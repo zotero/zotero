@@ -136,7 +136,7 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 	// Record open states before refreshing
 	if (this._rows) {
 		for (var i=0, len=this._rows.length; i<len; i++) {
-			var treeRow = this._rows[i][0]
+			var treeRow = this._rows[i];
 			if (treeRow.ref && treeRow.ref.id == 'commons-header') {
 				var commonsExpand = this.isContainerOpen(i);
 			}
@@ -172,43 +172,51 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 	
 	var oldCount = this.rowCount || 0;
 	var newRows = [];
-	
-	var self = this;
+	var added = 0;
 	
 	//
 	// Add "My Library"
 	//
-	this._addRow(
+	this._addRowToArray(
 		newRows,
-		new Zotero.CollectionTreeRow('library', { libraryID: Zotero.Libraries.userLibraryID })
+		new Zotero.CollectionTreeRow('library', { libraryID: Zotero.Libraries.userLibraryID }),
+		added++
 	);
-	yield this._expandRow(newRows, 0);
+	added += yield this._expandRow(newRows, 0);
 	
-	this._addRow(newRows, new Zotero.CollectionTreeRow('separator', false));
+	this._addRowToArray(newRows, new Zotero.CollectionTreeRow('separator', false), added++);
 	
 	// Add "My Publications"
-	this._addRow(
+	this._addRowToArray(
 		newRows,
 		new Zotero.CollectionTreeRow('publications', {
 			libraryID: Zotero.Libraries.publicationsLibraryID
-		})
+		}),
+		added++
 	);
 	
 	// Add groups
 	var groups = yield Zotero.Groups.getAll();
 	if (groups.length) {
-		this._addRow(newRows, new Zotero.CollectionTreeRow('separator', false));
-		var row = this._addRow(
+		this._addRowToArray(
+			newRows,
+			new Zotero.CollectionTreeRow('separator', false),
+			added++
+		);
+		this._addRowToArray(
 			newRows,
 			new Zotero.CollectionTreeRow('header', {
 				id: "group-libraries-header",
 				label: Zotero.getString('pane.collections.groupLibraries'),
 				libraryID: -1
-			}, 0)
+			}, 0),
+			added++
 		);
 		for (let i = 0, len = groups.length; i < len; i++) {
-			this._rowMap['L' + groups[i].libraryID] = this._addRow(
-				newRows, new Zotero.CollectionTreeRow('group', groups[i])
+			this._addRowToArray(
+				newRows,
+				new Zotero.CollectionTreeRow('group', groups[i]),
+				added++
 			);
 		}
 	}
@@ -244,8 +252,8 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 		return;
 	}
 	
-	if (!this._collectionRowMap) {
-		Zotero.debug("Collection row map didn't exist in collectionTreeView.notify()");
+	if (!this._rowMap) {
+		Zotero.debug("Row map didn't exist in collectionTreeView.notify()");
 		return;
 	}
 	
@@ -326,9 +334,9 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 		for (var i=0; i<ids.length; i++) {
 			var collection = yield Zotero.Collections.getAsync(ids[i]);
 			var parentID = collection.parentID;
-			if (parentID && this._collectionRowMap[parentID] &&
-					!this.isContainerOpen(this._collectionRowMap[parentID])) {
-				yield this.toggleOpenState(this._collectionRowMap[parentID]);
+			if (parentID && this._rowMap["C" + parentID] &&
+					!this.isContainerOpen(this._rowMap["C" + parentID])) {
+				yield this.toggleOpenState(this._rowMap["C" + parentID]);
 			}
 		}
 		
@@ -392,14 +400,14 @@ Zotero.CollectionTreeView.prototype._addSortedRow = Zotero.Promise.coroutine(fun
 		let parentID = collection.parentID;
 		
 		// If parent isn't visible, don't add
-		if (parentID && this._collectionRowMap[parentID] === undefined) {
+		if (parentID && this._rowMap["C" + parentID] === undefined) {
 			return false;
 		}
 		
 		let libraryID = collection.libraryID;
 		let startRow;
 		if (parentID) {
-			startRow = this._collectionRowMap[parentID];
+			startRow = this._rowMap["C" + parentID];
 		}
 		else {
 			startRow = this._rowMap['L' + libraryID];
@@ -450,9 +458,7 @@ Zotero.CollectionTreeView.prototype._addSortedRow = Zotero.Promise.coroutine(fun
 			}
 		}
 		this._addRow(
-			this._rows,
-			new Zotero.CollectionTreeRow('collection', collection),
-			level,
+			new Zotero.CollectionTreeRow('collection', collection, level),
 			beforeRow
 		);
 	}
@@ -476,37 +482,27 @@ Zotero.CollectionTreeView.prototype._addSortedRow = Zotero.Promise.coroutine(fun
 			var inSearches = false;
 			for (let i = startRow; i < this.rowCount; i++) {
 				let treeRow = this.getRow(i);
+				Zotero.debug(treeRow.id);
 				beforeRow = i;
 				
-				// If we've moved on to a different library, stop
-				if (treeRow.ref.libraryID != libraryID) {
-					break;
-				}
-				
+				// If we've reached something other than collections, stop
 				if (treeRow.isSearch()) {
-					inSearches = true;
-					
 					// If current search sorts after, stop
 					if (Zotero.localeCompare(treeRow.ref.name, search.name) > 0) {
 						break;
 					}
 				}
-				// If we've found searches but then see something other than a search, stop
-				else if (inSearches) {
+				// If it's not a search and it's not a collection, stop
+				else if (!treeRow.isCollection()) {
 					break;
 				}
 			}
 		}
 		this._addRow(
-			this._rows,
-			new Zotero.CollectionTreeRow('search', search),
-			level,
+			new Zotero.CollectionTreeRow('search', search, level),
 			beforeRow
 		);
 	}
-	this.rowCount++;
-	this._treebox.rowCountChanged(beforeRow, 1);
-	this._refreshRowMap();
 	return true;
 });
 
@@ -525,7 +521,7 @@ Zotero.CollectionTreeView.prototype.setHighlightedRows = Zotero.Promise.coroutin
 		if (id[0] == 'C') {
 			id = id.substr(1);
 			yield this.expandToCollection(id);
-			row = this._collectionRowMap[id];
+			row = this._rowMap["C" + id];
 		}
 		if (row) {
 			this._highlightedRows[row] = true;
@@ -621,11 +617,6 @@ Zotero.CollectionTreeView.prototype.isContainer = function(row)
 	return treeRow.isLibrary(true) || treeRow.isCollection() || treeRow.isPublications() || treeRow.isBucket();
 }
 
-Zotero.CollectionTreeView.prototype.isContainerOpen = function(row)
-{
-	return this._rows[row][1];
-}
-
 /*
  * Returns true if the collection has no child collections
  */
@@ -651,11 +642,6 @@ Zotero.CollectionTreeView.prototype.isContainerEmpty = function(row)
 		return !treeRow.ref.hasChildCollections();
 	}
 	return true;
-}
-
-Zotero.CollectionTreeView.prototype.getLevel = function(row)
-{
-	return this._rows[row][2];
 }
 
 Zotero.CollectionTreeView.prototype.getParentIndex = function(row)
@@ -798,7 +784,7 @@ Zotero.CollectionTreeView.prototype.expandToCollection = Zotero.Promise.coroutin
 		yield this.toggleOpenState(libraryRow);
 	}
 	
-	var row = this._collectionRowMap[collectionID];
+	var row = this._rowMap["C" + collectionID];
 	if (row !== undefined) {
 		return true;
 	}
@@ -809,7 +795,7 @@ Zotero.CollectionTreeView.prototype.expandToCollection = Zotero.Promise.coroutin
 		col = yield Zotero.Collections.getAsync(parentID);
 	}
 	for each(var id in path) {
-		row = this._collectionRowMap[id];
+		row = this._rowMap["C" + id];
 		if (!this.isContainerOpen(row)) {
 			yield this.toggleOpenState(row);
 		}
@@ -957,8 +943,8 @@ Zotero.CollectionTreeView.prototype.getLastViewedRow = Zotero.Promise.coroutine(
 	var select = 0;
 	if (matches) {
 		if (matches[1] == 'C') {
-			if (this._collectionRowMap[matches[2]]) {
-				select = this._collectionRowMap[matches[2]];
+			if (this._rowMap["C" + matches[2]]) {
+				select = this._rowMap["C" + matches[2]];
 			}
 			// Search recursively
 			else {
@@ -986,11 +972,11 @@ Zotero.CollectionTreeView.prototype.getLastViewedRow = Zotero.Promise.coroutine(
 					lastCol = par;
 					path.push(lastCol);
 				}
-				while (!this._collectionRowMap[lastCol] && failsafe > 0)
+				while (!this._rowMap["C" + lastCol] && failsafe > 0)
 				if (path.length) {
 					for (var i=path.length-1; i>=0; i--) {
 						var id = path[i];
-						var row = this._collectionRowMap[id];
+						var row = this._rowMap["C" + id];
 						if (!row) {
 							var msg = "Collection not found in tree in "
 								+ "Zotero.CollectionTreeView.setTree()";
@@ -1000,8 +986,8 @@ Zotero.CollectionTreeView.prototype.getLastViewedRow = Zotero.Promise.coroutine(
 						}
 						if (!this.isContainerOpen(row)) {
 							yield this.toggleOpenState(row);
-							if (this._collectionRowMap[matches[2]]) {
-								select = this._collectionRowMap[matches[2]];
+							if (this._rowMap["C" + matches[2]]) {
+								select = this._rowMap["C" + matches[2]];
 								break;
 							}
 						}
@@ -1081,8 +1067,8 @@ Zotero.CollectionTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(f
  * Expand row based on last state, or manually from toggleOpenState()
  */
 Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(function* (rows, row, forceOpen) {
-	var treeRow = rows[row][0];
-	var level = rows[row][2];
+	var treeRow = rows[row];
+	var level = rows[row].level;
 	var isLibrary = treeRow.isLibrary(true);
 	var isGroup = treeRow.isGroup();
 	var isCollection = treeRow.isCollection();
@@ -1120,7 +1106,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 	if (!forceOpen &&
 			(this._containerState[treeRow.id] === false
 				|| (isCollection && !this._containerState[treeRow.id]))) {
-		rows[row][1] = false;
+		rows[row].isOpen = false;
 		return 0;
 	}
 	
@@ -1129,7 +1115,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 	// If this isn't a manual open, set the initial state depending on whether
 	// there are child nodes
 	if (!forceOpen) {
-		rows[row][1] = startOpen;
+		rows[row].isOpen = startOpen;
 	}
 	
 	if (!startOpen) {
@@ -1140,17 +1126,15 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 	
 	// Add collections
 	for (var i = 0, len = collections.length; i < len; i++) {
-		var newRow = this._addRow(
+		let beforeRow = row + 1 + newRows;
+		this._addRowToArray(
 			rows,
-			new Zotero.CollectionTreeRow('collection', collections[i]),
-			level + 1,
-			row + 1 + newRows
+			new Zotero.CollectionTreeRow('collection', collections[i], level + 1),
+			beforeRow
 		);
-		
-		// Recursively expand child collections that should be open
-		newRows += yield this._expandRow(rows, newRow);
-		
 		newRows++;
+		// Recursively expand child collections that should be open
+		newRows += yield this._expandRow(rows, beforeRow);
 	}
 	
 	if (isCollection) {
@@ -1159,14 +1143,22 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 	
 	// Add searches
 	for (var i = 0, len = savedSearches.length; i < len; i++) {
-		this._addRow(rows, new Zotero.CollectionTreeRow('search', savedSearches[i]), level + 1, row + 1 + newRows);
+		this._addRowToArray(
+			rows,
+			new Zotero.CollectionTreeRow('search', savedSearches[i], level + 1),
+			row + 1 + newRows
+		);
 		newRows++;
 	}
 	
 	// Duplicate items
 	if (showDuplicates) {
 		let d = new Zotero.Duplicates(libraryID);
-		this._addRow(rows, new Zotero.CollectionTreeRow('duplicates', d), level + 1, row + 1 + newRows);
+		this._addRowToArray(
+			rows,
+			new Zotero.CollectionTreeRow('duplicates', d, level + 1),
+			row + 1 + newRows
+		);
 		newRows++;
 	}
 	
@@ -1177,7 +1169,11 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 		s.name = Zotero.getString('pane.collections.unfiled');
 		s.addCondition('libraryID', 'is', libraryID);
 		s.addCondition('unfiled', 'true');
-		this._addRow(rows, new Zotero.CollectionTreeRow('unfiled', s), level + 1, row + 1 + newRows);
+		this._addRowToArray(
+			rows,
+			new Zotero.CollectionTreeRow('unfiled', s, level + 1),
+			row + 1 + newRows
+		);
 		newRows++;
 	}
 	
@@ -1187,7 +1183,11 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 			var ref = {
 				libraryID: libraryID
 			};
-			this._addRow(rows, new Zotero.CollectionTreeRow('trash', ref), level + 1, row + 1 + newRows);
+			this._addRowToArray(
+				rows,
+				new Zotero.CollectionTreeRow('trash', ref, level + 1),
+				row + 1 + newRows
+			);
 			newRows++;
 		}
 		this._trashNotEmpty[libraryID] = !!deletedItems.length;
@@ -1195,45 +1195,6 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 	
 	return newRows;
 });
-
-
-/*
- *  Called by various view functions to show a row
- */
-Zotero.CollectionTreeView.prototype._addRow = function (rows, treeRow, level, beforeRow) {
-	if (!level) {
-		level = 0;
-	}
-	
-	if (!beforeRow) {
-		beforeRow = rows.length;
-	}
-	
-	rows.splice(beforeRow, 0, [treeRow, false, level]);
-	
-	return beforeRow;
-}
-
-
-/*
- *  Called by view to hide specified row
- */
-Zotero.CollectionTreeView.prototype._removeRow = function(row)
-{
-	this._rows.splice(row,1);
-	this.rowCount--;
-	if (this.selection.isSelected(row)) {
-		this.selection.toggleSelect(row);
-	}
-}
-
-
-/**
- * Returns Zotero.CollectionTreeRow at row
- */
-Zotero.CollectionTreeView.prototype.getRow = function (row) {
-	return this._rows[row][0];
-}
 
 
 /**
@@ -1295,16 +1256,8 @@ Zotero.CollectionTreeView.prototype.rememberSelection = Zotero.Promise.coroutine
  */
 Zotero.CollectionTreeView.prototype._refreshRowMap = function() {
 	this._rowMap = {};
-	this._collectionRowMap = {};
 	for (let i = 0, len = this.rowCount; i < len; i++) {
-		let treeRow = this.getRow(i);
-		
-		this._rowMap[treeRow.id] = i;
-		
-		// Collections get special treatment for now
-		if (treeRow.isCollection()) {
-			this._collectionRowMap[treeRow.ref.id] = i;
-		}
+		this._rowMap[this.getRow(i).id] = i;
 	}
 }
 
@@ -2197,10 +2150,12 @@ Zotero.CollectionTreeCache = {
 	})
 };
 
-Zotero.CollectionTreeRow = function(type, ref)
+Zotero.CollectionTreeRow = function(type, ref, level, isOpen)
 {
 	this.type = type;
 	this.ref = ref;
+	this.level = level || 0
+	this.isOpen = isOpen || false;
 }
 
 

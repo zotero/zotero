@@ -94,5 +94,36 @@ describe("Zotero.CollectionTreeView", function() {
 			selected = collectionsView.getSelectedCollection(true);
 			assert.equal(selected, id);
 		});
+		
+		it("should add a saved search after collections", function* () {
+			var collection = new Zotero.Collection;
+			collection.name = "Test";
+			var collectionID = yield collection.save();
+			var cv = win.ZoteroPane.collectionsView;
+			
+			var search = new Zotero.Search;
+			search.name = "A Test Search";
+			search.addCondition('title', 'contains', 'test');
+			var searchID = yield search.save();
+			
+			var collectionRow = cv._rowMap["C" + collectionID];
+			var searchRow = cv._rowMap["S" + searchID];
+			var duplicatesRow = cv._rowMap["D" + Zotero.Libraries.userLibraryID];
+			var unfiledRow = cv._rowMap["U" + Zotero.Libraries.userLibraryID];
+			
+			assert.isAbove(searchRow, collectionRow);
+			// If there's a duplicates row or an unfiled row, add before those.
+			// Otherwise, add before the trash
+			if (duplicatesRow !== undefined) {
+				assert.isBelow(searchRow, duplicatesRow);
+			}
+			else if (unfiledRow !== undefined) {
+				assert.isBelow(searchRow, unfiledRow);
+			}
+			else {
+				var trashRow = cv._rowMap["T" + Zotero.Libraries.userLibraryID];
+				assert.isBelow(searchRow, trashRow);
+			}
+		})
 	})
 })
