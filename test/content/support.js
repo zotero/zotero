@@ -30,7 +30,7 @@ function loadWindow(winurl, argument) {
  * @return {Promise<ChromeWindow>}
  */
 function loadBrowserWindow() {
-	var win = window.openDialog("chrome://browser/content/browser.xul");
+	var win = window.openDialog("chrome://browser/content/browser.xul", "", "all,height=400,width=1000");
 	return waitForDOMEvent(win, "load").then(function() {
 		return win;
 	});
