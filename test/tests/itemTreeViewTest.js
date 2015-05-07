@@ -31,9 +31,19 @@ describe("Zotero.ItemTreeView", function() {
 	})
 	
 	describe("#notify()", function () {
+		beforeEach(function () {
+			sinon.spy(win.ZoteroPane, "itemSelected");
+		})
+		
+		afterEach(function () {
+			win.ZoteroPane.itemSelected.restore();
+		})
+		
 		it("should select a new item", function* () {
 			itemsView.selection.clearSelection();
 			assert.lengthOf(itemsView.getSelectedItems(), 0);
+			
+			assert.equal(win.ZoteroPane.itemSelected.callCount, 1);
 			
 			// Create item
 			var item = new Zotero.Item('book');
@@ -43,6 +53,10 @@ describe("Zotero.ItemTreeView", function() {
 			var selected = itemsView.getSelectedItems();
 			assert.lengthOf(selected, 1);
 			assert.equal(selected[0].id, id);
+			
+			// Item should have been selected once
+			assert.equal(win.ZoteroPane.itemSelected.callCount, 2);
+			assert.ok(win.ZoteroPane.itemSelected.returnValues[1].value());
 		});
 		
 		it("shouldn't select a new item if skipNotifier is passed", function* () {
@@ -52,11 +66,17 @@ describe("Zotero.ItemTreeView", function() {
 			assert.lengthOf(selected, 1);
 			assert.equal(selected[0], existingItemID);
 			
+			// Reset call count on spy
+			win.ZoteroPane.itemSelected.reset();
+			
 			// Create item with skipNotifier flag
 			var item = new Zotero.Item('book');
 			var id = yield item.save({
 				skipNotifier: true
 			});
+			
+			// No select events should have occurred
+			assert.equal(win.ZoteroPane.itemSelected.callCount, 0);
 			
 			// Existing item should still be selected
 			selected = itemsView.getSelectedItems(true);
@@ -71,11 +91,19 @@ describe("Zotero.ItemTreeView", function() {
 			assert.lengthOf(selected, 1);
 			assert.equal(selected[0], existingItemID);
 			
+			// Reset call count on spy
+			win.ZoteroPane.itemSelected.reset();
+			
 			// Create item with skipSelect flag
 			var item = new Zotero.Item('book');
 			var id = yield item.save({
 				skipSelect: true
 			});
+			
+			// itemSelected should have been called once (from 'selectEventsSuppressed = false'
+			// in notify()) as a no-op
+			assert.equal(win.ZoteroPane.itemSelected.callCount, 1);
+			assert.isFalse(win.ZoteroPane.itemSelected.returnValues[0].value());
 			
 			// Existing item should still be selected
 			selected = itemsView.getSelectedItems(true);
@@ -91,15 +119,23 @@ describe("Zotero.ItemTreeView", function() {
 			
 			itemsView.selection.clearSelection();
 			assert.lengthOf(itemsView.getSelectedItems(), 0);
+			// Reset call count on spy
+			win.ZoteroPane.itemSelected.reset();
 			
+			// Modify item
 			item.setField('title', 'no select on modify');
 			yield item.save();
+			
+			// itemSelected should have been called once (from 'selectEventsSuppressed = false'
+			// in notify()) as a no-op
+			assert.equal(win.ZoteroPane.itemSelected.callCount, 1);
+			assert.isFalse(win.ZoteroPane.itemSelected.returnValues[0].value());
 			
 			// Modified item should not be selected
 			assert.lengthOf(itemsView.getSelectedItems(), 0);
 		});
 		
-		it("should reselect a selected modified item", function* () {
+		it("should maintain selection on a selected modified item", function* () {
 			// Create item
 			var item = new Zotero.Item('book');
 			var id = yield item.save();
@@ -110,8 +146,17 @@ describe("Zotero.ItemTreeView", function() {
 			assert.lengthOf(selected, 1);
 			assert.equal(selected[0], id);
 			
-			item.setField('title', 'reselect on modify');
+			// Reset call count on spy
+			win.ZoteroPane.itemSelected.reset();
+			
+			// Modify item
+			item.setField('title', 'maintain selection on modify');
 			yield item.save();
+			
+			// itemSelected should have been called once (from 'selectEventsSuppressed = false'
+			// in notify()) as a no-op
+			assert.equal(win.ZoteroPane.itemSelected.callCount, 1);
+			assert.isFalse(win.ZoteroPane.itemSelected.returnValues[0].value());
 			
 			// Modified item should still be selected
 			selected = itemsView.getSelectedItems(true);

@@ -34,6 +34,7 @@ var ZoteroPane = new function()
 	this.itemsView = false;
 	this._listeners = {};
 	this.__defineGetter__('loaded', function () _loaded);
+	var _lastSelectedItems = [];
 	
 	//Privileged methods
 	this.init = init;
@@ -1229,11 +1230,23 @@ var ZoteroPane = new function()
 	 */
 	this.itemSelected = function (event) {
 		return Zotero.spawn(function* () {
+			var selectedItems = this.itemsView.getSelectedItems();
+			
+			// Check if selection has actually changed. The onselect event that calls this
+			// can be called in various situations where the selection didn't actually change,
+			// such as whenever selectEventsSuppressed is set to false.
+			var ids = selectedItems.map(item => item.id);
+			ids.sort();
+			if (Zotero.Utilities.arrayEquals(_lastSelectedItems, ids)) {
+				return false;
+			}
+			_lastSelectedItems = ids;
+			
 			yield Zotero.DB.waitForTransaction();
 			
 			if (!this.itemsView) {
 				Zotero.debug("Items view not available in itemSelected", 2);
-				return;
+				return false;
 			}
 			
 			// Display restore button if items selected in Trash
@@ -1259,7 +1272,7 @@ var ZoteroPane = new function()
 			// Single item selected
 			if (this.itemsView.selection.count == 1 && this.itemsView.selection.currentIndex != -1)
 			{
-				var item = this.itemsView.getSelectedItems()[0];
+				var item = selectedItems[0];
 				
 				if (item.isNote()) {
 					var noteEditor = document.getElementById('zotero-note-editor');
@@ -1362,7 +1375,7 @@ var ZoteroPane = new function()
 						var displayNumItemsOnTypeError = count > 5 && count == this.itemsView.rowCount;
 						
 						// Initialize the merge pane with the selected items
-						Zotero_Duplicates_Pane.setItems(this.getSelectedItems(), displayNumItemsOnTypeError);
+						Zotero_Duplicates_Pane.setItems(selectedItems, displayNumItemsOnTypeError);
 					}
 					else {
 						var msg = Zotero.getString('pane.item.duplicates.selectToMerge');
@@ -1394,12 +1407,15 @@ var ZoteroPane = new function()
 					this.setItemPaneMessage(msg);
 				}
 			}
+			
+			return true;
 		}, this)
-		.then(function () {
+		.then(function (result) {
 			// See note in itemTreeView.js::selectItem()
 			if (this.itemsView && this.itemsView._itemSelectedPromiseResolver) {
 				this.itemsView._itemSelectedPromiseResolver.resolve();
 			}
+			return result;
 		}.bind(this))
 		.catch(function (e) {
 			Zotero.debug(e, 1);

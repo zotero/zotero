@@ -352,7 +352,7 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 			yield item.loadItemData();
 			yield item.loadCollections();
 			
-			this._addRow(
+			this._addRowToArray(
 				newRows,
 				new Zotero.ItemTreeRow(item, 0, false),
 				added + 1
@@ -366,7 +366,7 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 	for (let id in newSearchParentIDs) {
 		if (!newSearchItemIDs[id]) {
 			let item = yield Zotero.Items.getAsync(id);
-			this._addRow(
+			this._addRowToArray(
 				newRows,
 				new Zotero.ItemTreeRow(item, 0, false),
 				added + 1
@@ -587,7 +587,6 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 					if(row != null)
 					{
 						this._removeRow(row-i);
-						this._treebox.rowCountChanged(row-i,-1);
 					}
 				}
 				
@@ -619,15 +618,11 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		{
 			var items = yield Zotero.Items.getAsync(ids);
 			
-			for each(var item in items) {
+			for (let i = 0; i < items.length; i++) {
+				let item = items[i];
 				let id = item.id;
 				
-				// Make sure row map is up to date
-				// if we made changes in a previous loop
-				if (madeChanges) {
-					this._refreshItemRowMap();
-				}
-				var row = this._itemRowMap[id];
+				let row = this._itemRowMap[id];
 				
 				// Deleted items get a modify that we have to ignore when
 				// not viewing the trash
@@ -636,35 +631,25 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				}
 				
 				// Item already exists in this view
-				if( row != null)
-				{
-					var parentItemID = this.getRow(row).ref.parentItemID;
-					var parentIndex = this.getParentIndex(row);
+				if (row !== undefined) {
+					let parentItemID = this.getRow(row).ref.parentItemID;
+					let parentIndex = this.getParentIndex(row);
 					
-					// Top-level item
+					// Top-level items just have to be resorted
 					if (this.isContainer(row)) {
-						//yield this.toggleOpenState(row);
-						//yield this.toggleOpenState(row);
 						sort = id;
 					}
 					// If item moved from top-level to under another item, remove the old row.
-					// The container refresh above takes care of adding the new row.
-					else if (!this.isContainer(row) && parentIndex == -1 && parentItemID) {
+					else if (parentIndex == -1 && parentItemID) {
 						this._removeRow(row);
-						this._treebox.rowCountChanged(row, -1)
 					}
 					// If moved from under another item to top level, remove old row and add new one
-					else if (!this.isContainer(row) && parentIndex != -1 && !parentItemID) {
+					else if (parentIndex != -1 && !parentItemID) {
 						this._removeRow(row);
-						this._treebox.rowCountChanged(row, -1)
 						
-						this._addRow(
-							this._rows,
-							new Zotero.ItemTreeRow(item, 0, false),
-							this.rowCount
-						);
-						this.rowCount++;
-						this._treebox.rowCountChanged(this.rowCount - 1, 1);
+						let beforeRow = this.rowCount;
+						this._addRow(new Zotero.ItemTreeRow(item, 0, false), beforeRow);
+						
 						sort = id;
 					}
 					// If not moved from under one item to another, just resort the row,
@@ -672,13 +657,14 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 					else if (!(parentItemID && parentIndex != -1 && this._itemRowMap[parentItemID] != parentIndex)) {
 						sort = id;
 					}
+					
 					madeChanges = true;
 				}
-				// Otherwise, for a top-level item in a root view or a collection
+				// Otherwise, for a top-level item in a library root or a collection
 				// containing the item, the item has to be added
 				else if (item.isTopLevelItem()) {
 					// Root view
-					let add = (collectionTreeRow.isLibrary() || collectionTreeRow.isGroup())
+					let add = collectionTreeRow.isLibrary(true)
 						&& collectionTreeRow.ref.libraryID == item.libraryID;
 					// Collection containing item
 					if (!add && collectionTreeRow.isCollection()) {
@@ -687,15 +673,10 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 					}
 					if (add) {
 						//most likely, the note or attachment's parent was removed.
-						this._addRow(
-							this._rows,
-							new Zotero.ItemTreeRow(item, 0, false),
-							this.rowCount
-						);
-						this.rowCount++;
-						this._treebox.rowCountChanged(this.rowCount-1,1);
+						let beforeRow = this.rowCount;
+						this._addRow(new Zotero.ItemTreeRow(item, 0, false), beforeRow);
 						madeChanges = true;
-						sort = true;
+						sort = id;
 					}
 				}
 			}
@@ -756,13 +737,8 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 					&& this._itemRowMap[item.id] == null
 					// Regular item or standalone note/attachment
 					&& item.isTopLevelItem()) {
-					this._addRow(
-						this._rows,
-						new Zotero.ItemTreeRow(item, 0, false),
-						this.rowCount
-					);
-					this.rowCount++;
-					this._treebox.rowCountChanged(this.rowCount-1,1);
+					let beforeRow = this.rowCount;
+					this._addRow(new Zotero.ItemTreeRow(item, 0, false), beforeRow);
 					madeChanges = true;
 				}
 			}
@@ -1234,13 +1210,10 @@ Zotero.ItemTreeView.prototype.toggleOpenState = Zotero.Promise.coroutine(functio
 		for (let i = 0; i < newRows.length; i++) {
 			count++;
 			this._addRow(
-				this._rows,
 				new Zotero.ItemTreeRow(newRows[i], level + 1, false),
 				row + i + 1
 			);
 		}
-		this.rowCount += count;
-		this._treebox.rowCountChanged(row + 1, count);
 	}
 	
 	this._rows[row].isOpen = true;
@@ -1270,11 +1243,11 @@ Zotero.ItemTreeView.prototype._closeContainer = function (row, skipItemMapRefres
 	
 	// Remove child rows
 	while ((row + 1 < this._rows.length) && (this.getLevel(row + 1) > level)) {
-		this._removeRow(row+1);
+		// Skip the map update here and just refresh the whole map below,
+		// since we might be removing multiple rows
+		this._removeRow(row + 1, true);
 		count--;
 	}
-	// Mark as removed from the end of the row's children
-	this._treebox.rowCountChanged(row + 1 + Math.abs(count), count);
 	
 	this._rows[row].isOpen = false;
 	
@@ -1895,26 +1868,61 @@ Zotero.ItemTreeView.prototype.setFilter = Zotero.Promise.coroutine(function* (ty
 
 
 /**
- * Add a tree row into a given array
+ * Add a tree row to the main array, update the row count, tell the treebox that the row count
+ * changed, and update the row map
  *
  * @param {Array} newRows - Array to operate on
  * @param {Zotero.ItemTreeRow} itemTreeRow
  * @param {Number} beforeRow - Row index to insert new row before
  */
-Zotero.ItemTreeView.prototype._addRow = function (newRows, itemTreeRow, beforeRow) {
-	newRows.splice(beforeRow, 0, itemTreeRow);
+Zotero.ItemTreeView.prototype._addRow = function (itemTreeRow, beforeRow) {
+	this._addRowToArray(this._rows, itemTreeRow, beforeRow);
+	this.rowCount++;
+	this._treebox.rowCountChanged(beforeRow, 1);
+	// Increment all rows in map at or above insertion point
+	for (let i in this._itemRowMap) {
+		if (this._itemRowMap[j] >= beforeRow) {
+			this._itemRowMap[j]++
+		}
+	}
+	// Add new row to map
+	this._itemRowMap[itemTreeRow.id] = beforeRow;
 }
 
 
 /**
- * Remove a row from the main rows array
+ * Add a tree row into a given array
+ *
+ * @param {Array} array - Array to operate on
+ * @param {Zotero.ItemTreeRow} itemTreeRow
+ * @param {Number} beforeRow - Row index to insert new row before
  */
-Zotero.ItemTreeView.prototype._removeRow = function (row) {
+Zotero.ItemTreeView.prototype._addRowToArray = function (array, itemTreeRow, beforeRow) {
+	array.splice(beforeRow, 0, itemTreeRow);
+}
+
+
+
+/**
+ * Remove a row from the main array, decrement the row count, tell the treebox that the row
+ * count changed, delete the row from the map, and optionally update all rows above it in the map
+ */
+Zotero.ItemTreeView.prototype._removeRow = function (row, skipItemMapUpdate) {
+	var id = this._rows[row].id;
 	this._rows.splice(row, 1);
 	this.rowCount--;
-	if (this.selection.isSelected(row)) {
-		this.selection.toggleSelect(row);
+	this._treebox.rowCountChanged(row + 1, -1);
+	delete this._itemRowMap[id];
+	if (!skipItemMapUpdate) {
+		for (let i in this._itemRowMap) {
+			if (this._itemRowMap[i] > row) {
+				this._itemRowMap[i]--;
+			}
+		}
 	}
+	/*if (this.selection.isSelected(row)) {
+		this.selection.toggleSelect(row);
+	}*/
 }
 
 /*
