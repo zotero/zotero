@@ -655,8 +655,9 @@ Zotero.Utilities = {
 			// Check if we have nested arrays
 			if (array1[i] instanceof Array && array2[i] instanceof Array) {
 				// Recurse into the nested arrays
-				if (!array1[i].compare(array2[i]))
+				if (!this.arrayEquals(array1[i], array2[i])) {
 					return false;
+				}
 			}
 			else if (array1[i] != array2[i]) {
 				// Warning - two different object instances will never be equal: {x:20} != {x:20}
