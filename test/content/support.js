@@ -48,16 +48,7 @@ var loadZoteroPane = Zotero.Promise.coroutine(function* () {
 	// there or it should be good enough here.
 	yield Zotero.Promise.delay(52);
 	
-	var zp = win.ZoteroPane;
-	var cv = zp.collectionsView;
-	var resolve1, resolve2;
-	var promise1 = new Zotero.Promise(() => resolve1 = arguments[0]);
-	var promise2 = new Zotero.Promise(() => resolve2 = arguments[0]);
-	cv.addEventListener('load', () => resolve1())
-	yield promise1;
-	cv.selection.select(0);
-	zp.addEventListener('itemsLoaded', () => resolve2());
-	yield promise2;
+	yield waitForItemsLoad(win, 0);
 	
 	return win;
 });
@@ -83,6 +74,22 @@ function waitForWindow(uri) {
 	}};
 	Services.ww.registerNotification(winobserver);
 	return deferred.promise;
+}
+
+var waitForItemsLoad = function (win, collectionRowToSelect) {
+	var resolve;
+	var promise = new Zotero.Promise(() => resolve = arguments[0]);
+	var zp = win.ZoteroPane;
+	var cv = zp.collectionsView;
+	cv.addEventListener('load', function () {
+		if (collectionRowToSelect !== undefined) {
+			cv.selection.select(collectionRowToSelect);
+		}
+		zp.addEventListener('itemsLoaded', function () {
+			resolve();
+		});
+	});
+	return promise;
 }
 
 /**

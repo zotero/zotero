@@ -34,4 +34,50 @@ describe("ZoteroPane", function() {
 			assert.equal(item.getField('title'), value);
 		})
 	});
+	
+	describe("#itemSelected()", function () {
+		it("should update the item count", function* () {
+			var collection = new Zotero.Collection;
+			collection.name = "Count Test";
+			var id = yield collection.save();
+			yield waitForItemsLoad(win);
+			
+			// Unselected, with no items in view
+			assert.equal(
+				doc.getElementById('zotero-item-pane-message').value,
+				Zotero.getString('pane.item.unselected.zero', 0)
+			);
+			
+			// Unselected, with one item in view
+			var item = new Zotero.Item('newspaperArticle');
+			item.setCollections([id]);
+			var itemID1 = yield item.save({
+				skipSelect: true
+			});
+			assert.equal(
+				doc.getElementById('zotero-item-pane-message').value,
+				Zotero.getString('pane.item.unselected.singular', 1)
+			);
+			
+			// Unselected, with multiple items in view
+			var item = new Zotero.Item('audioRecording');
+			item.setCollections([id]);
+			var itemID2 = yield item.save({
+				skipSelect: true
+			});
+			assert.equal(
+				doc.getElementById('zotero-item-pane-message').value,
+				Zotero.getString('pane.item.unselected.plural', 2)
+			);
+			
+			// Multiple items selected
+			var promise = zp.itemsView._getItemSelectedPromise();
+			zp.itemsView.rememberSelection([itemID1, itemID2]);
+			yield promise;
+			assert.equal(
+				doc.getElementById('zotero-item-pane-message').value,
+				Zotero.getString('pane.item.selected.multiple', 2)
+			);
+		})
+	})
 })

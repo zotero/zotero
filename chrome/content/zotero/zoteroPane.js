@@ -1226,10 +1226,14 @@ var ZoteroPane = new function()
 	
 	
 	/**
-	 * @return {Promise}
+	 * @return {Promise<Boolean>} - Promise that resolves to true if an item was selected,
+	 *                              or false if not (used for tests, though there could possibly
+	 *                              be a better test for whether the item pane changed)
 	 */
 	this.itemSelected = function (event) {
 		return Zotero.spawn(function* () {
+			yield Zotero.DB.waitForTransaction();
+			
 			var selectedItems = this.itemsView.getSelectedItems();
 			
 			// Check if selection has actually changed. The onselect event that calls this
@@ -1237,12 +1241,10 @@ var ZoteroPane = new function()
 			// such as whenever selectEventsSuppressed is set to false.
 			var ids = selectedItems.map(item => item.id);
 			ids.sort();
-			if (Zotero.Utilities.arrayEquals(_lastSelectedItems, ids)) {
+			if (ids.length && Zotero.Utilities.arrayEquals(_lastSelectedItems, ids)) {
 				return false;
 			}
 			_lastSelectedItems = ids;
-			
-			yield Zotero.DB.waitForTransaction();
 			
 			if (!this.itemsView) {
 				Zotero.debug("Items view not available in itemSelected", 2);
@@ -1405,6 +1407,8 @@ var ZoteroPane = new function()
 					}
 					
 					this.setItemPaneMessage(msg);
+					
+					return false;
 				}
 			}
 			
@@ -1424,7 +1428,7 @@ var ZoteroPane = new function()
 			}
 			throw e;
 		}.bind(this));
-	};
+	}
 	
 	
 	/**
