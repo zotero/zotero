@@ -4074,7 +4074,12 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 			break;
 		
 		case 'filename':
-			this.attachmentFilename = val;
+			if (val === "") {
+				Zotero.logError("Ignoring empty attachment filename in item JSON");
+			}
+			else {
+				this.attachmentFilename = val;
+			}
 			break;
 		
 		case 'path':
