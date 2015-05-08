@@ -4011,7 +4011,9 @@ Zotero.Item.prototype.isCollection = function() {
 
 
 Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
-	yield this.loadAllData();
+	if (this._identified) {
+		yield this.loadAllData();
+	}
 	
 	this.setType(Zotero.ItemTypes.getID(json.itemType));
 	
