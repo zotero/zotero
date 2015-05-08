@@ -584,7 +584,7 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) 
 			Zotero.debug(e2, 1);
 		})
 		.then(function() {
-			if (options.errorHandler(e)) {
+			if (options.errorHandler) {
 				options.errorHandler(e);
 			}
 			else {
