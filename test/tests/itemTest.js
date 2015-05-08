@@ -242,6 +242,53 @@ describe("Zotero.Item", function () {
 		})
 	});
 	
+	describe("#setCreators", function () {
+		it("should accept an array of creators in API JSON format", function* () {
+			var creators = [
+				{
+					firstName: "First",
+					lastName: "Last",
+					creatorType: "author"
+				},
+				{
+					name: "Test Name",
+					creatorType: "editor"
+				}
+			];
+			
+			var item = new Zotero.Item("journalArticle");
+			item.setCreators(creators);
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			yield item.loadCreators();
+			assert.sameDeepMembers(item.getCreatorsJSON(), creators);
+		})
+		
+		it("should accept an array of creators in internal format", function* () {
+			var creators = [
+				{
+					firstName: "First",
+					lastName: "Last",
+					fieldMode: 0,
+					creatorTypeID: 1
+				},
+				{
+					firstName: "",
+					lastName: "Test Name",
+					fieldMode: 1,
+					creatorTypeID: 2
+				}
+			];
+			
+			var item = new Zotero.Item("journalArticle");
+			item.setCreators(creators);
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			yield item.loadCreators();
+			assert.sameDeepMembers(item.getCreators(), creators);
+		})
+	})
+	
 	describe("#attachmentCharset", function () {
 		it("should get and set a value", function* () {
 			var charset = 'utf-8';

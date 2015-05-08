@@ -175,6 +175,7 @@ Zotero.Creators = new function() {
 			switch (field) {
 			case 'firstName':
 			case 'lastName':
+				if (val === undefined) continue;
 				cleanedData[field] = val.trim().normalize();
 				break;
 			
@@ -184,9 +185,9 @@ Zotero.Creators = new function() {
 			}
 		}
 		
-		// Handle API JSON format
+		// Handle API JSON .name
 		if (data.name !== undefined) {
-			cleanedData.lastName = data.name.trim();
+			cleanedData.lastName = data.name.trim().normalize();
 			cleanedData.fieldMode = 1;
 		}
 		

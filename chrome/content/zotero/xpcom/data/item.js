@@ -974,6 +974,11 @@ Zotero.Item.prototype.getCreatorsJSON = function () {
  *                   </ul>
  */
 Zotero.Item.prototype.setCreator = function (orderIndex, data) {
+	var itemTypeID = this._itemTypeID;
+	if (!itemTypeID) {
+		throw new Error('Item type must be set before setting creators');
+	}
+	
 	this._requireData('creators');
 	
 	data = Zotero.Creators.cleanData(data);
@@ -983,7 +988,6 @@ Zotero.Item.prototype.setCreator = function (orderIndex, data) {
 	}
 	
 	// If creatorTypeID isn't valid for this type, use the primary type
-	var itemTypeID = this._itemTypeID;
 	if (!data.creatorTypeID || !Zotero.CreatorTypes.isValidForItemType(data.creatorTypeID, itemTypeID)) {
 		var msg = "Creator type '" + Zotero.CreatorTypes.getName(data.creatorTypeID) + "' "
 			+ "isn't valid for " + Zotero.ItemTypes.getName(itemTypeID)
@@ -4022,7 +4026,6 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 		case 'key':
 		case 'version':
 		case 'itemType':
-		case 'creators':
 		case 'note':
 		// Use?
 		case 'md5':
