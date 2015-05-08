@@ -198,7 +198,9 @@ Zotero.ItemFields = new function() {
 	 */
 	function getItemTypeFields(itemTypeID) {
 		if (!itemTypeID) {
-			throw new Error("Invalid item type id '" + itemTypeID + "'");
+			let e = new Error("Invalid item type id '" + itemTypeID + "'");
+			e.name = "ZoteroUnknownTypeError";
+			throw e;
 		}
 		
 		if (!_itemTypeFieldsLoaded) {
