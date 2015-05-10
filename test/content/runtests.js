@@ -53,9 +53,12 @@ function Reporter(runner) {
 
 	runner.on('fail', function(test, err){
 		failed++;
-		dump("\r"+indent()+Mocha.reporters.Base.symbols.err+" "+test.title+"\n"+
-		     indent()+"  "+err.toString()+" at\n"+
-		     indent()+"    "+err.stack.replace("\n", "\n"+indent()+"    ", "g"));
+		dump("\r" + indent()
+			// Dark red X for errors
+			+ "\033[31;40m" + Mocha.reporters.Base.symbols.err + "\033[0m"
+			+ " " + test.title + "\n"
+			+ indent() + "  " + err.toString() + " at\n"
+			+ indent() + "    " + err.stack.replace("\n", "\n" + indent() + "    ", "g"));
 	});
 
 	runner.on('end', function() {
