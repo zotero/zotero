@@ -169,50 +169,48 @@ Zotero.Relations = function () {
 	 * @param {String} prefix
 	 * @param {String[]} ignorePredicates
 	 */
-	this.eraseByURIPrefix = function (prefix, ignorePredicates) {
-		return Zotero.DB.executeTransaction(function* () {
-			prefix = prefix + '%';
-			var sql = "SELECT ROWID FROM relations WHERE (subject LIKE ? OR object LIKE ?)";
-			var params = [prefix, prefix];
-			if (ignorePredicates) {
-				for each(var ignorePredicate in ignorePredicates) {
-					sql += " AND predicate != ?";
-					params.push(ignorePredicate);
-				}
+	this.eraseByURIPrefix = Zotero.Promise.coroutine(function* (prefix, ignorePredicates) {
+		Zotero.DB.requireTransaction();
+		prefix = prefix + '%';
+		var sql = "SELECT ROWID FROM relations WHERE (subject LIKE ? OR object LIKE ?)";
+		var params = [prefix, prefix];
+		if (ignorePredicates) {
+			for each(var ignorePredicate in ignorePredicates) {
+				sql += " AND predicate != ?";
+				params.push(ignorePredicate);
 			}
-			var ids = yield Zotero.DB.columnQueryAsync(sql, params);
-			
-			for (let i=0; i<ids.length; i++) {
-				let relation = this.get(ids[i]);
-				yield relation.load();
-				yield relation.erase();
-			}
-		}.bind(this));
-	}
+		}
+		var ids = yield Zotero.DB.columnQueryAsync(sql, params);
+		
+		for (let i=0; i<ids.length; i++) {
+			let relation = this.get(ids[i]);
+			yield relation.load();
+			yield relation.erase();
+		}
+	});
 	
 	
 	/**
 	 * @return {Promise}
 	 */
-	this.eraseByURI = function (uri, ignorePredicates) {
-		return Zotero.DB.executeTransaction(function* () {
-			var sql = "SELECT ROWID FROM relations WHERE (subject=? OR object=?)";
-			var params = [uri, uri];
-			if (ignorePredicates) {
-				for each(var ignorePredicate in ignorePredicates) {
-					sql += " AND predicate != ?";
-					params.push(ignorePredicate);
-				}
+	this.eraseByURI = Zotero.Promise.coroutine(function* (uri, ignorePredicates) {
+		Zotero.DB.requireTransaction();
+		var sql = "SELECT ROWID FROM relations WHERE (subject=? OR object=?)";
+		var params = [uri, uri];
+		if (ignorePredicates) {
+			for each(var ignorePredicate in ignorePredicates) {
+				sql += " AND predicate != ?";
+				params.push(ignorePredicate);
 			}
-			var ids = yield Zotero.DB.columnQueryAsync(sql, params);
-			
-			for (let i=0; i<ids.length; i++) {
-				let relation = this.get(ids[i]);
-				yield relation.load();
-				yield relation.erase();
-			}
-		}.bind(this));
-	}
+		}
+		var ids = yield Zotero.DB.columnQueryAsync(sql, params);
+		
+		for (let i=0; i<ids.length; i++) {
+			let relation = this.get(ids[i]);
+			yield relation.load();
+			yield relation.erase();
+		}
+	});
 	
 	
 	this.purge = Zotero.Promise.coroutine(function* () {

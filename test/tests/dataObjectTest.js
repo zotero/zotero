@@ -6,7 +6,7 @@ describe("Zotero.DataObject", function() {
 	describe("#loadAllData()", function () {
 		it("should load data on a regular item", function* () {
 			var item = new Zotero.Item('book');
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			yield item.loadAllData();
 			assert.throws(item.getNote.bind(item), 'getNote() can only be called on notes and attachments');
@@ -14,7 +14,7 @@ describe("Zotero.DataObject", function() {
 		
 		it("should load data on an attachment item", function* () {
 			var item = new Zotero.Item('attachment');
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			yield item.loadAllData();
 			assert.equal(item.getNote(), '');
@@ -22,7 +22,7 @@ describe("Zotero.DataObject", function() {
 		
 		it("should load data on a note item", function* () {
 			var item = new Zotero.Item('note');
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			yield item.loadAllData();
 			assert.equal(item.getNote(), '');
@@ -35,7 +35,7 @@ describe("Zotero.DataObject", function() {
 			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType('collection');
 			var obj = new Zotero.Collection;
 			obj.name = "Test";
-			var id = yield obj.save();
+			var id = yield obj.saveTx();
 			var { libraryID, key } = objectsClass.getLibraryAndKeyFromID(id);
 			assert.typeOf(key, 'string');
 			assert.equal(objectsClass.getIDFromLibraryAndKey(libraryID, key), id);
@@ -44,7 +44,7 @@ describe("Zotero.DataObject", function() {
 			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType('search');
 			var obj = new Zotero.Search;
 			obj.name = "Test";
-			var id = yield obj.save();
+			var id = yield obj.saveTx();
 			var { libraryID, key } = objectsClass.getLibraryAndKeyFromID(id);
 			assert.typeOf(key, 'string');
 			assert.equal(objectsClass.getIDFromLibraryAndKey(libraryID, key), id);
@@ -52,7 +52,7 @@ describe("Zotero.DataObject", function() {
 			// Item
 			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType('item');
 			var obj = new Zotero.Item('book');
-			var id = yield obj.save();
+			var id = yield obj.saveTx();
 			var { libraryID, key } = objectsClass.getLibraryAndKeyFromID(id);
 			assert.typeOf(key, 'string');
 			assert.equal(objectsClass.getIDFromLibraryAndKey(libraryID, key), id);

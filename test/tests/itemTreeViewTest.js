@@ -7,7 +7,7 @@ describe("Zotero.ItemTreeView", function() {
 		itemsView = win.ZoteroPane.itemsView;
 		
 		var item = new Zotero.Item('book');
-		existingItemID = yield item.save();
+		existingItemID = yield item.saveTx();
 	});
 	after(function () {
 		win.close();
@@ -47,7 +47,7 @@ describe("Zotero.ItemTreeView", function() {
 			
 			// Create item
 			var item = new Zotero.Item('book');
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			
 			// New item should be selected
 			var selected = itemsView.getSelectedItems();
@@ -71,7 +71,7 @@ describe("Zotero.ItemTreeView", function() {
 			
 			// Create item with skipNotifier flag
 			var item = new Zotero.Item('book');
-			var id = yield item.save({
+			var id = yield item.saveTx({
 				skipNotifier: true
 			});
 			
@@ -96,7 +96,7 @@ describe("Zotero.ItemTreeView", function() {
 			
 			// Create item with skipSelect flag
 			var item = new Zotero.Item('book');
-			var id = yield item.save({
+			var id = yield item.saveTx({
 				skipSelect: true
 			});
 			
@@ -114,7 +114,7 @@ describe("Zotero.ItemTreeView", function() {
 		it("shouldn't select a modified item", function* () {
 			// Create item
 			var item = new Zotero.Item('book');
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			
 			itemsView.selection.clearSelection();
@@ -124,7 +124,7 @@ describe("Zotero.ItemTreeView", function() {
 			
 			// Modify item
 			item.setField('title', 'no select on modify');
-			yield item.save();
+			yield item.saveTx();
 			
 			// itemSelected should have been called once (from 'selectEventsSuppressed = false'
 			// in notify()) as a no-op
@@ -138,7 +138,7 @@ describe("Zotero.ItemTreeView", function() {
 		it("should maintain selection on a selected modified item", function* () {
 			// Create item
 			var item = new Zotero.Item('book');
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			
 			yield itemsView.selectItem(id);
@@ -151,7 +151,7 @@ describe("Zotero.ItemTreeView", function() {
 			
 			// Modify item
 			item.setField('title', 'maintain selection on modify');
-			yield item.save();
+			yield item.saveTx();
 			
 			// itemSelected should have been called once (from 'selectEventsSuppressed = false'
 			// in notify()) as a no-op

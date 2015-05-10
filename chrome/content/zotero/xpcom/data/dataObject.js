@@ -547,10 +547,18 @@ Zotero.DataObject.prototype.editCheck = function () {
  *                                     TRUE on item update, or FALSE if item was unchanged
  */
 Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) {
+	options = options || {};
 	var env = {
-		options: options || {},
+		options: options,
 		transactionOptions: {}
 	};
+	
+	if (!env.options.tx && !Zotero.DB.inTransaction()) {
+		Zotero.logError("save() called on Zotero." + this._ObjectType + " without a wrapping "
+			+ "transaction -- use saveTx() instead");
+		Zotero.debug((new Error).stack, 2);
+		env.options.tx = true;
+	}
 	
 	var proceed = yield this._initSave(env);
 	if (!proceed) return false;
@@ -562,7 +570,7 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) 
 		Zotero.debug('Updating database with new ' + this._objectType + ' data', 4);
 	}
 	
-	return Zotero.DB.executeTransaction(function* () {
+	try {
 		if (Zotero.DataObject.prototype._finalizeSave == this._finalizeSave) {
 			throw new Error("_finalizeSave not implement for Zotero." + this._ObjectType);
 		}
@@ -574,26 +582,48 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) 
 		if (!env.isNew) {
 			env.changed = this._previousData;
 		}
-		yield this._saveData(env);
-		yield Zotero.DataObject.prototype._finalizeSave.call(this, env);
-		return this._finalizeSave(env);
-	}.bind(this), env.transactionOptions)
-	.catch(e => {
+		
+		// Create transaction
+		if (env.options.tx) {
+			let result = yield Zotero.DB.executeTransaction(function* () {
+				yield this._saveData(env);
+				yield Zotero.DataObject.prototype._finalizeSave.call(this, env);
+				return this._finalizeSave(env);
+			}.bind(this), env.transactionOptions);
+			return result;
+		}
+		// Use existing transaction
+		else {
+			Zotero.DB.requireTransaction();
+			yield this._saveData(env);
+			yield Zotero.DataObject.prototype._finalizeSave.call(this, env);
+			return this._finalizeSave(env);
+		}
+	}
+	catch(e) {
 		return this._recoverFromSaveError(env, e)
 		.catch(function(e2) {
 			Zotero.debug(e2, 1);
 		})
 		.then(function() {
-			if (options.errorHandler) {
-				options.errorHandler(e);
+			if (env.options.errorHandler) {
+				env.options.errorHandler(e);
 			}
 			else {
 				Zotero.debug(e, 1);
 			}
 			throw e;
 		})
-	});
+	}
 });
+
+
+Zotero.DataObject.prototype.saveTx = function (options) {
+	options = options || {};
+	options.tx = true;
+	return this.save(options);
+}
+
 
 Zotero.DataObject.prototype.hasChanged = function() {
 	Zotero.debug(this._changed);
@@ -618,9 +648,15 @@ Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 	}
 	
 	// Undo registerIdentifiers() on failure
-	env.transactionOptions.onRollback = function () {
+	var func = function () {
 		this.ObjectsClass.unload(env.id);
 	}.bind(this);
+	if (env.options.tx) {
+		env.transactionOptions.onRollback = func;
+	}
+	else {
+		Zotero.DB.addCurrentCallback("rollback", func);
+	}
 	
 	return true;
 });
@@ -653,11 +689,9 @@ Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* () {
 	
 	Zotero.debug('Deleting ' + this.objectType + ' ' + this.id);
 	
-	yield Zotero.DB.executeTransaction(function* () {
-		yield this._eraseData(env);
-		yield this._erasePreCommit(env);
-	}.bind(this));
-	
+	Zotero.DB.requireTransaction();
+	yield this._eraseData(env);
+	yield this._erasePreCommit(env);
 	return this._erasePostCommit(env);
 });
 

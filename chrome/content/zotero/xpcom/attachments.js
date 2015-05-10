@@ -45,7 +45,7 @@ Zotero.Attachments = new function(){
 			throw ("'" + file.leafName + "' must be a file in Zotero.Attachments.importFromFile()");
 		}
 		
-		var itemID, newFile;
+		var itemID, newFile, contentType;
 		yield Zotero.DB.executeTransaction(function* () {
 			// Create a new attachment
 			var attachmentItem = new Zotero.Item('attachment');
@@ -73,15 +73,15 @@ Zotero.Attachments = new function(){
 			// Copy file to unique filename, which automatically shortens long filenames
 			newFile = Zotero.File.copyToUnique(file, newFile);
 			
-			var contentType = yield Zotero.MIME.getMIMETypeFromFile(newFile);
+			contentType = yield Zotero.MIME.getMIMETypeFromFile(newFile);
 			
 			attachmentItem.attachmentContentType = contentType;
 			attachmentItem.attachmentPath = this.getPath(newFile, this.LINK_MODE_IMPORTED_FILE);
 			yield attachmentItem.save();
-			
-			// Determine charset and build fulltext index
-			yield _postProcessFile(itemID, newFile, contentType);
 		}.bind(this))
+		.then(function () {
+			return _postProcessFile(itemID, newFile, contentType);
+		})
 		.catch(function (e) {
 			Zotero.debug(e, 1);
 			var msg = "Failed importing file " + file.path;
@@ -112,21 +112,21 @@ Zotero.Attachments = new function(){
 		
 		var title = file.leafName;
 		var contentType = yield Zotero.MIME.getMIMETypeFromFile(file);
+		var itemID;
 		
 		return Zotero.DB.executeTransaction(function* () {
-			var itemID = yield _addToDB({
+			itemID = yield _addToDB({
 				file: file,
 				title: title,
 				linkMode: this.LINK_MODE_LINKED_FILE,
 				contentType: contentType,
 				parentItemID: parentItemID
 			});
-			
-			// Determine charset and build fulltext index
-			yield _postProcessFile(itemID, file, contentType);
-			
-			return itemID;
-		}.bind(this));
+		}.bind(this))
+		.then(function () {
+			return _postProcessFile(itemID, file, contentType);
+		})
+		.then(() => itemID);
 	});
 	
 	
@@ -148,7 +148,7 @@ Zotero.Attachments = new function(){
 			throw new Error("parentItemID not provided");
 		}
 		
-		var destDir;
+		var itemID, destDir, newFile;
 		yield Zotero.DB.executeTransaction(function* () {
 			// Create a new attachment
 			var attachmentItem = new Zotero.Item('attachment');
@@ -164,7 +164,7 @@ Zotero.Attachments = new function(){
 			// DEBUG: this should probably insert access date too so as to
 			// create a proper item, but at the moment this is only called by
 			// translate.js, which sets the metadata fields itself
-			var itemID = yield attachmentItem.save();
+			itemID = yield attachmentItem.save();
 			attachmentItem = yield Zotero.Items.getAsync(itemID)
 			
 			destDir = this.getStorageDirectory(attachmentItem);
@@ -172,15 +172,15 @@ Zotero.Attachments = new function(){
 			file.parent.copyTo(storageDir, destDir.leafName);
 			
 			// Point to copied file
-			var newFile = destDir.clone();
+			newFile = destDir.clone();
 			newFile.append(file.leafName);
 			
 			attachmentItem.attachmentPath = this.getPath(newFile, this.LINK_MODE_IMPORTED_URL);
 			yield attachmentItem.save();
-			
-			// Determine charset and build fulltext index
-			yield _postProcessFile(itemID, newFile, contentType);
 		}.bind(this))
+		.then(function () {
+			return _postProcessFile(itemID, newFile, contentType);
+		})
 		.catch(function (e) {
 			Zotero.debug(e, 1);
 			
@@ -1130,7 +1130,7 @@ Zotero.Attachments = new function(){
 		if (parentItemID) {
 			newAttachment.parentID = parentItemID;
 		}
-		yield newAttachment.save();
+		yield newAttachment.saveTx();
 		
 		// Copy over files if they exist
 		if (newAttachment.isImportedAttachment() && attachment.getFile()) {
@@ -1362,7 +1362,7 @@ Zotero.Attachments = new function(){
 						var item = yield Zotero.Items.getAsync(itemID);
 						charset = yield Zotero.CharacterSets.add(charset);
 						item.attachmentCharset = charset;
-						yield item.save();
+						yield item.saveTx();
 						
 						if (disabled) {
 							Zotero.Notifier.enable();

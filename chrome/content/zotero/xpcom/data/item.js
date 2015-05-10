@@ -1173,6 +1173,11 @@ Zotero.Item.prototype.isEditable = function() {
 }
 
 Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
+	// Sanity check
+	if (!Zotero.DB.inTransaction()) {
+		throw new Error("Not in transaction saving item " + this.libraryKey);
+	}
+	
 	var isNew = env.isNew;
 	var options = env.options;
 	
@@ -1739,6 +1744,11 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			yield parentItem.reload(['primaryData', 'childItems'], true);
 			parentItem.clearBestAttachmentState();
 		}
+	}
+	
+	// Sanity check
+	if (!Zotero.DB.inTransaction()) {
+		throw new Error("Not in transaction saving item " + this.libraryKey);
 	}
 });
 

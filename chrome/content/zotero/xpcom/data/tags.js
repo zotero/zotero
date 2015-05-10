@@ -76,29 +76,29 @@ Zotero.Tags = new function() {
 	/**
 	 * Returns the tagID matching given fields, or creates a new tag and returns its id
 	 *
+	 * @requireTransaction
 	 * @param {Number} libraryID
 	 * @param {String} name - Tag data in API JSON format
 	 * @param {Boolean} [create=false] - If no matching tag, create one
 	 * @return {Promise<Integer>} tagID
 	 */
-	this.getIDFromName = Zotero.Promise.method(function (libraryID, name, create) {
+	this.getIDFromName = Zotero.Promise.coroutine(function* (libraryID, name, create) {
+		Zotero.DB.requireTransaction();
 		data = this.cleanData({
 			tag: name
 		});
-		return Zotero.DB.executeTransaction(function* () {
-			var sql = "SELECT tagID FROM tags WHERE libraryID=? AND name=?";
-			var id = yield Zotero.DB.valueQueryAsync(sql, [libraryID, data.tag]);
-			if (!id && create) {
-				id = yield Zotero.ID.get('tags');
-				let sql = "INSERT INTO tags (tagID, libraryID, name) VALUES (?, ?, ?)";
-				let insertID = yield Zotero.DB.queryAsync(sql, [id, libraryID, data.tag]);
-				if (!id) {
-					id = insertID;
-				}
-				_cacheTag(libraryID, id, data.tag);
+		var sql = "SELECT tagID FROM tags WHERE libraryID=? AND name=?";
+		var id = yield Zotero.DB.valueQueryAsync(sql, [libraryID, data.tag]);
+		if (!id && create) {
+			id = yield Zotero.ID.get('tags');
+			let sql = "INSERT INTO tags (tagID, libraryID, name) VALUES (?, ?, ?)";
+			let insertID = yield Zotero.DB.queryAsync(sql, [id, libraryID, data.tag]);
+			if (!id) {
+				id = insertID;
 			}
-			return id;
-		});
+			_cacheTag(libraryID, id, data.tag);
+		}
+		return id;
 	});
 	
 	

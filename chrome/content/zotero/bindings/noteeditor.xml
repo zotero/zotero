@@ -239,7 +239,7 @@
 								
 								let changed = this.item.setNote(noteField.value);
 								if (changed && this.saveOnEdit) {
-									yield this.item.save();
+									yield this.item.saveTx();
 								}
 								return;
 							}
@@ -254,7 +254,7 @@
 								item.parentKey = this.parentItem.key;
 							}
 							if (this.saveOnEdit) {
-								var id = yield item.save();
+								var id = yield item.saveTx();
 								
 								if (!this.parentItem && this.collection) {
 									this.collection.addItem(id);

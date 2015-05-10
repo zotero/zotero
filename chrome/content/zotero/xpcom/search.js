@@ -947,7 +947,7 @@ Zotero.Search.idsToTempTable = function (ids) {
 		yield Zotero.DB.queryAsync(sql);
 		
 		return tmpTable;
-	}, { exclusive: true });
+	});
 }
 
 

@@ -70,31 +70,31 @@ Zotero.Creators = new function() {
 	/**
 	 * Returns the creatorID matching given fields, or creates a new creator and returns its id
 	 *
+	 * @requireTransaction
 	 * @param {Object} data  Creator data in API JSON format
 	 * @param {Boolean} [create=false]  If no matching creator, create one
 	 * @return {Promise<Integer>}  creatorID
 	 */
-	this.getIDFromData = Zotero.Promise.method(function (data, create) {
+	this.getIDFromData = Zotero.Promise.coroutine(function* (data, create) {
+		Zotero.DB.requireTransaction();
 		data = this.cleanData(data);
-		return Zotero.DB.executeTransaction(function* () {
-			var sql = "SELECT creatorID FROM creators WHERE "
-				+ "firstName=? AND lastName=? AND fieldMode=?";
-			var id = yield Zotero.DB.valueQueryAsync(
-				sql, [data.firstName, data.lastName, data.fieldMode]
+		var sql = "SELECT creatorID FROM creators WHERE "
+			+ "firstName=? AND lastName=? AND fieldMode=?";
+		var id = yield Zotero.DB.valueQueryAsync(
+			sql, [data.firstName, data.lastName, data.fieldMode]
+		);
+		if (!id && create) {
+			id = yield Zotero.ID.get('creators');
+			let sql = "INSERT INTO creators (creatorID, firstName, lastName, fieldMode) "
+				+ "VALUES (?, ?, ?, ?)";
+			let insertID = yield Zotero.DB.queryAsync(
+				sql, [id, data.firstName, data.lastName, data.fieldMode]
 			);
-			if (!id && create) {
-				id = yield Zotero.ID.get('creators');
-				let sql = "INSERT INTO creators (creatorID, firstName, lastName, fieldMode) "
-					+ "VALUES (?, ?, ?, ?)";
-				let insertID = yield Zotero.DB.queryAsync(
-					sql, [id, data.firstName, data.lastName, data.fieldMode]
-				);
-				if (!id) {
-					id = insertID;
-				}
+			if (!id) {
+				id = insertID;
 			}
-			return id;
-		});
+		}
+		return id;
 	});
 	
 	

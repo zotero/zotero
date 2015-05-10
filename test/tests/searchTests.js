@@ -3,7 +3,7 @@ describe("Zotero.Search", function() {
 		it("should fail without a name", function* () {
 			var s = new Zotero.Search;
 			s.addCondition('title', 'is', 'test');
-			var e = yield getPromiseError(s.save());
+			var e = yield getPromiseError(s.saveTx());
 			assert.ok(e);
 			assert.equal(e.constructor.name, Error.prototype.constructor.name); // TEMP: Error mismatch
 			assert.equal(e.message, "Name not provided for saved search");
@@ -14,7 +14,7 @@ describe("Zotero.Search", function() {
 			var s = new Zotero.Search;
 			s.name = "Test";
 			s.addCondition('title', 'is', 'test');
-			var id = yield s.save();
+			var id = yield s.saveTx();
 			assert.typeOf(id, 'number');
 			
 			// Check saved search
@@ -40,14 +40,14 @@ describe("Zotero.Search", function() {
 			s.libraryID = Zotero.Libraries.userLibraryID;
 			s.name = "Test";
 			s.addCondition('title', 'is', 'test');
-			var id = yield s.save();
+			var id = yield s.saveTx();
 			assert.typeOf(id, 'number');
 			
 			// Add condition
 			s = yield Zotero.Searches.getAsync(id);
 			yield s.loadConditions();
 			s.addCondition('title', 'contains', 'foo');
-			var saved = yield s.save();
+			var saved = yield s.saveTx();
 			assert.isTrue(saved);
 			
 			// Check saved search
@@ -64,14 +64,14 @@ describe("Zotero.Search", function() {
 			s.name = "Test";
 			s.addCondition('title', 'is', 'test');
 			s.addCondition('title', 'contains', 'foo');
-			var id = yield s.save();
+			var id = yield s.saveTx();
 			assert.typeOf(id, 'number');
 			
 			// Remove condition
 			s = yield Zotero.Searches.getAsync(id);
 			yield s.loadConditions();
 			s.removeCondition(0);
-			var saved = yield s.save();
+			var saved = yield s.saveTx();
 			assert.isTrue(saved);
 			
 			// Check saved search

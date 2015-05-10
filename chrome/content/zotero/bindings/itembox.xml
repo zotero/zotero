@@ -1109,7 +1109,7 @@
 						this.item.setType(itemTypeID);
 						
 						if (this.saveOnEdit) {
-							this.item.save();
+							this.item.saveTx();
 						}
 						else {
 							this.refresh();
@@ -1357,7 +1357,7 @@
 						return;
 					}
 					this.item.removeCreator(index);
-					this.item.save();
+					this.item.saveTx();
 				]]>
 				</body>
 			</method>
@@ -1766,7 +1766,7 @@
 						}
 						
 						if (this.saveOnEdit) {
-							yield this.item.save();
+							yield this.item.saveTx();
 						}
 						
 						var val = this.item.getCreator(creatorIndex);
@@ -1915,7 +1915,7 @@
 					return Zotero.spawn(function* () {
 						this.item.setField(field, value);
 						if (save) {
-							yield this.item.save();
+							yield this.item.saveTx();
 						}
 					}, this);
 				]]></body>
@@ -2034,14 +2034,14 @@
 						}
 						this.item.removeCreator(index);
 						if (this.saveOnEdit && !skipSave) {
-							return this.item.save();
+							return this.item.saveTx();
 						}
 						return;
 					}
 					
 					var changed = this.item.setCreator(index, fields);
 					if (changed && this.saveOnEdit && !skipSave) {
-						return this.item.save();
+						return this.item.saveTx();
 					}
 				}.bind(this));
 				]]></body>
@@ -2091,7 +2091,7 @@
 					this.item.setCreator(newIndex, a);
 					this.item.setCreator(index, b);
 					if (this.saveOnEdit) {
-						return this.item.save();
+						return this.item.saveTx();
 					}
 				}.bind(this));
 				]]>

@@ -6,7 +6,7 @@ describe("Zotero.Collection", function() {
 			var name = "Test";
 			var collection = new Zotero.Collection;
 			collection.name = name;
-			var id = yield collection.save();
+			var id = yield collection.saveTx();
 			collection = yield Zotero.Collections.getAsync(id);
 			assert.equal(collection.name, name);
 		});
@@ -18,7 +18,7 @@ describe("Zotero.Collection", function() {
 			var collection = new Zotero.Collection
 			collection.version = version;
 			collection.name = "Test";
-			var id = yield collection.save();
+			var id = yield collection.saveTx();
 			collection = yield Zotero.Collections.getAsync(id);
 			assert.equal(collection.version, version);
 		});
@@ -28,13 +28,13 @@ describe("Zotero.Collection", function() {
 		it("should set parent collection for new collections", function* () {
 			var parentCol = new Zotero.Collection
 			parentCol.name = "Parent";
-			var parentID = yield parentCol.save();
+			var parentID = yield parentCol.saveTx();
 			var {libraryID, key: parentKey} = Zotero.Collections.getLibraryAndKeyFromID(parentID);
 			
 			var col = new Zotero.Collection
 			col.name = "Child";
 			col.parentKey = parentKey;
-			var id = yield col.save();
+			var id = yield col.saveTx();
 			col = yield Zotero.Collections.getAsync(id);
 			assert.equal(col.parentKey, parentKey);
 		});
@@ -43,25 +43,25 @@ describe("Zotero.Collection", function() {
 			// Create initial parent collection
 			var parentCol = new Zotero.Collection
 			parentCol.name = "Parent";
-			var parentID = yield parentCol.save();
+			var parentID = yield parentCol.saveTx();
 			var {libraryID, key: parentKey} = Zotero.Collections.getLibraryAndKeyFromID(parentID);
 			
 			// Create subcollection
 			var col = new Zotero.Collection
 			col.name = "Child";
 			col.parentKey = parentKey;
-			var id = yield col.save();
+			var id = yield col.saveTx();
 			col = yield Zotero.Collections.getAsync(id);
 			
 			// Create new parent collection
 			var newParentCol = new Zotero.Collection
 			newParentCol.name = "New Parent";
-			var newParentID = yield newParentCol.save();
+			var newParentID = yield newParentCol.saveTx();
 			var {libraryID, key: newParentKey} = Zotero.Collections.getLibraryAndKeyFromID(newParentID);
 			
 			// Change parent collection
 			col.parentKey = newParentKey;
-			yield col.save();
+			yield col.saveTx();
 			col = yield Zotero.Collections.getAsync(id);
 			assert.equal(col.parentKey, newParentKey);
 		});
@@ -70,14 +70,14 @@ describe("Zotero.Collection", function() {
 			// Create initial parent collection
 			var parentCol = new Zotero.Collection
 			parentCol.name = "Parent";
-			var parentID = yield parentCol.save();
+			var parentID = yield parentCol.saveTx();
 			var {libraryID, key: parentKey} = Zotero.Collections.getLibraryAndKeyFromID(parentID);
 			
 			// Create subcollection
 			var col = new Zotero.Collection
 			col.name = "Child";
 			col.parentKey = parentKey;
-			var id = yield col.save();
+			var id = yield col.saveTx();
 			col = yield Zotero.Collections.getAsync(id);
 			
 			// Set to existing parent
@@ -88,11 +88,11 @@ describe("Zotero.Collection", function() {
 		it("should not resave a collection with no parent if set to false", function* () {
 			var col = new Zotero.Collection
 			col.name = "Test";
-			var id = yield col.save();
+			var id = yield col.saveTx();
 			col = yield Zotero.Collections.getAsync(id);
 			
 			col.parentKey = false;
-			var ret = yield col.save();
+			var ret = yield col.saveTx();
 			assert.isFalse(ret);
 		});
 	})

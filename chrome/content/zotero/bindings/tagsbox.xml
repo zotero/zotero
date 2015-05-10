@@ -333,7 +333,7 @@
 								if (tagData) {
 									let item = document.getBindingParent(this).item
 									item.removeTag(tagName);
-									yield item.save()
+									yield item.saveTx()
 								}
 								
 								// Return focus to items pane
@@ -682,13 +682,13 @@
 								if (oldValue !== value) {
 									// The existing textbox will be removed in notify()
 									this.item.replaceTag(oldValue, value);
-									yield this.item.save();
+									yield this.item.saveTx();
 								}
 							}
 							// Existing tag cleared
 							else {
 								this.item.removeTag(oldValue);
-								yield this.item.save();
+								yield this.item.saveTx();
 							}
 						}
 						// Multiple tags
@@ -710,7 +710,7 @@
 							}
 							
 							this.item.addTags(tags);
-							yield this.item.save();
+							yield this.item.saveTx();
 							
 							if (lastTag) {
 								this._lastTabIndex = this.item.getTags().length;
@@ -724,7 +724,7 @@
 							// if it doesn't already exist.
 							row.parentNode.removeChild(row);
 							this.item.addTag(value);
-							yield this.item.save();
+							yield this.item.saveTx();
 						}
 					}.bind(this));
 				]]></body>

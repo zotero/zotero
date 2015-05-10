@@ -24,7 +24,7 @@ describe("Zotero.Attachments", function() {
 			
 			// Create parent item
 			var item = new Zotero.Item('book');
-			var parentItemID = yield item.save();
+			var parentItemID = yield item.saveTx();
 			
 			// Create attachment and compare content
 			var itemID = yield Zotero.Attachments.importFromFile(tmpFile, parentItemID);
@@ -43,7 +43,7 @@ describe("Zotero.Attachments", function() {
 			
 			// Create parent item
 			var item = new Zotero.Item('book');
-			var parentItemID = yield item.save();
+			var parentItemID = yield item.saveTx();
 			
 			// Create attachment and compare content
 			var itemID = yield Zotero.Attachments.importFromFile(file, parentItemID);

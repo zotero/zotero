@@ -39,7 +39,7 @@ describe("ZoteroPane", function() {
 		it("should update the item count", function* () {
 			var collection = new Zotero.Collection;
 			collection.name = "Count Test";
-			var id = yield collection.save();
+			var id = yield collection.saveTx();
 			yield waitForItemsLoad(win);
 			
 			// Unselected, with no items in view
@@ -51,7 +51,7 @@ describe("ZoteroPane", function() {
 			// Unselected, with one item in view
 			var item = new Zotero.Item('newspaperArticle');
 			item.setCollections([id]);
-			var itemID1 = yield item.save({
+			var itemID1 = yield item.saveTx({
 				skipSelect: true
 			});
 			assert.equal(
@@ -62,7 +62,7 @@ describe("ZoteroPane", function() {
 			// Unselected, with multiple items in view
 			var item = new Zotero.Item('audioRecording');
 			item.setCollections([id]);
-			var itemID2 = yield item.save({
+			var itemID2 = yield item.saveTx({
 				skipSelect: true
 			});
 			assert.equal(

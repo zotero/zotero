@@ -26,7 +26,7 @@ describe("Zotero.CollectionTreeView", function() {
 			// Create collection
 			var collection = new Zotero.Collection;
 			collection.name = "Select new collection";
-			var id = yield collection.save();
+			var id = yield collection.saveTx();
 			
 			// New collection should be selected
 			var selected = collectionsView.getSelectedCollection(true);
@@ -39,7 +39,7 @@ describe("Zotero.CollectionTreeView", function() {
 			// Create collection with skipNotifier flag
 			var collection = new Zotero.Collection;
 			collection.name = "No select on skipNotifier";
-			var id = yield collection.save({
+			var id = yield collection.saveTx({
 				skipNotifier: true
 			});
 			
@@ -53,7 +53,7 @@ describe("Zotero.CollectionTreeView", function() {
 			// Create collection with skipSelect flag
 			var collection = new Zotero.Collection;
 			collection.name = "No select on skipSelect";
-			var id = yield collection.save({
+			var id = yield collection.saveTx({
 				skipSelect: true
 			});
 			
@@ -65,13 +65,13 @@ describe("Zotero.CollectionTreeView", function() {
 			// Create collection
 			var collection = new Zotero.Collection;
 			collection.name = "No select on modify";
-			var id = yield collection.save();
+			var id = yield collection.saveTx();
 			collection = yield Zotero.Collections.getAsync(id);
 			
 			resetSelection();
 			
 			collection.name = "No select on modify 2";
-			yield collection.save();
+			yield collection.saveTx();
 			
 			// Modified collection should not be selected
 			assert.equal(collectionsView.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
@@ -81,14 +81,14 @@ describe("Zotero.CollectionTreeView", function() {
 			// Create collection
 			var collection = new Zotero.Collection;
 			collection.name = "Reselect on modify";
-			var id = yield collection.save();
+			var id = yield collection.saveTx();
 			collection = yield Zotero.Collections.getAsync(id);
 			
 			var selected = collectionsView.getSelectedCollection(true);
 			assert.equal(selected, id);
 			
 			collection.name = "Reselect on modify 2";
-			yield collection.save();
+			yield collection.saveTx();
 			
 			// Modified collection should still be selected
 			selected = collectionsView.getSelectedCollection(true);
@@ -98,13 +98,13 @@ describe("Zotero.CollectionTreeView", function() {
 		it("should add a saved search after collections", function* () {
 			var collection = new Zotero.Collection;
 			collection.name = "Test";
-			var collectionID = yield collection.save();
+			var collectionID = yield collection.saveTx();
 			var cv = win.ZoteroPane.collectionsView;
 			
 			var search = new Zotero.Search;
 			search.name = "A Test Search";
 			search.addCondition('title', 'contains', 'test');
-			var searchID = yield search.save();
+			var searchID = yield search.saveTx();
 			
 			var collectionRow = cv._rowMap["C" + collectionID];
 			var searchRow = cv._rowMap["S" + searchID];

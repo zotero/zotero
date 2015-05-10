@@ -36,7 +36,7 @@ describe("Zotero.Item", function () {
 			var fieldID = Zotero.ItemFields.getID(field);
 			var item = new Zotero.Item('book');
 			item.setField(field, 'Foo');
-			id = yield item.save();
+			id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			
 			item.setField(field, "");
@@ -57,7 +57,7 @@ describe("Zotero.Item", function () {
 			assert.ok(item._changed.itemData[fieldID]);
 			assert.ok(item.hasChanged());
 			
-			yield item.save();
+			yield item.saveTx();
 			assert.isFalse(item.getField(fieldID));
 		})
 		
@@ -70,7 +70,7 @@ describe("Zotero.Item", function () {
 		it("should save version as object version", function* () {
 			var item = new Zotero.Item('book');
 			item.setField("version", 1);
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			assert.equal(item.getField("version"), 1);
 		});
@@ -78,7 +78,7 @@ describe("Zotero.Item", function () {
 		it("should save versionNumber for computerProgram", function () {
 			var item = new Zotero.Item('computerProgram');
 			item.setField("versionNumber", "1.0");
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			assert.equal(item.getField("versionNumber"), "1.0");
 		});
@@ -89,7 +89,7 @@ describe("Zotero.Item", function () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			assert.equal(item.dateModified, dateModified);
 		})
@@ -98,7 +98,7 @@ describe("Zotero.Item", function () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
-			var id = yield item.save({
+			var id = yield item.saveTx({
 				skipDateModifiedUpdate: true
 			});
 			item = yield Zotero.Items.getAsync(id);
@@ -109,13 +109,13 @@ describe("Zotero.Item", function () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			
 			// Save again without changing Date Modified
 			yield item.loadItemData();
 			item.setField('title', 'Test');
-			yield item.save()
+			yield item.saveTx()
 			
 			assert.closeTo(Zotero.Date.sqlToDate(item.dateModified, true).getTime(), Date.now(), 1000);
 		})
@@ -124,20 +124,20 @@ describe("Zotero.Item", function () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			
 			// Set Date Modified to existing value
 			yield item.loadItemData();
 			item.setField('title', 'Test');
 			item.dateModified = dateModified;
-			yield item.save()
+			yield item.saveTx()
 			assert.closeTo(Zotero.Date.sqlToDate(item.dateModified, true).getTime(), Date.now(), 1000);
 		})
 		
 		it("should use current time if Date Modified is not given when skipDateModifiedUpdate is set for a new item", function* () {
 			var item = new Zotero.Item('book');
-			var id = yield item.save({
+			var id = yield item.saveTx({
 				skipDateModifiedUpdate: true
 			});
 			item = yield Zotero.Items.getAsync(id);
@@ -148,13 +148,13 @@ describe("Zotero.Item", function () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			
 			// Resave with skipDateModifiedUpdate
 			yield item.loadItemData();
 			item.setField('title', 'Test');
-			yield item.save({
+			yield item.saveTx({
 				skipDateModifiedUpdate: true
 			})
 			assert.equal(item.dateModified, dateModified);
@@ -164,11 +164,11 @@ describe("Zotero.Item", function () {
 	describe("#parentID", function () {
 		it("should create a child note", function* () {
 			var item = new Zotero.Item('book');
-			var parentItemID = yield item.save();
+			var parentItemID = yield item.saveTx();
 			
 			item = new Zotero.Item('note');
 			item.parentID = parentItemID;
-			var childItemID = yield item.save();
+			var childItemID = yield item.saveTx();
 			
 			item = yield Zotero.Items.getAsync(childItemID);
 			assert.ok(item.parentID);
@@ -198,7 +198,7 @@ describe("Zotero.Item", function () {
 			var item = new Zotero.Item('attachment');
 			item.attachmentLinkMode = 'linked_url';
 			item.url = "https://www.zotero.org/";
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			
 			item.parentKey = false;
@@ -207,15 +207,15 @@ describe("Zotero.Item", function () {
 		
 		it("should move a top-level note under another item", function* () {
 			var noteItem = new Zotero.Item('note');
-			var id = yield noteItem.save()
+			var id = yield noteItem.saveTx()
 			noteItem = yield Zotero.Items.getAsync(id);
 			
 			var item = new Zotero.Item('book');
-			id = yield item.save();
+			id = yield item.saveTx();
 			var { libraryID, key } = Zotero.Items.getLibraryAndKeyFromID(id);
 			
 			noteItem.parentKey = key;
-			yield noteItem.save();
+			yield noteItem.saveTx();
 			
 			assert.isFalse(noteItem.isTopLevelItem());
 		})
@@ -224,19 +224,19 @@ describe("Zotero.Item", function () {
 			// Create a collection
 			var collection = new Zotero.Collection;
 			collection.name = "Test";
-			var collectionID = yield collection.save();
+			var collectionID = yield collection.saveTx();
 			
 			// Create a top-level note and add it to a collection
 			var noteItem = new Zotero.Item('note');
 			noteItem.addToCollection(collectionID);
-			var id = yield noteItem.save()
+			var id = yield noteItem.saveTx()
 			noteItem = yield Zotero.Items.getAsync(id);
 			
 			var item = new Zotero.Item('book');
-			id = yield item.save();
+			id = yield item.saveTx();
 			var { libraryID, key } = Zotero.Items.getLibraryAndKeyFromID(id);
 			noteItem.parentKey = key;
-			yield noteItem.save();
+			yield noteItem.saveTx();
 			
 			assert.isFalse(noteItem.isTopLevelItem());
 		})
@@ -258,7 +258,7 @@ describe("Zotero.Item", function () {
 			
 			var item = new Zotero.Item("journalArticle");
 			item.setCreators(creators);
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			yield item.loadCreators();
 			assert.sameDeepMembers(item.getCreatorsJSON(), creators);
@@ -282,7 +282,7 @@ describe("Zotero.Item", function () {
 			
 			var item = new Zotero.Item("journalArticle");
 			item.setCreators(creators);
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			yield item.loadCreators();
 			assert.sameDeepMembers(item.getCreators(), creators);
@@ -295,7 +295,7 @@ describe("Zotero.Item", function () {
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
 			item.attachmentCharset = charset;
-			var itemID = yield item.save();
+			var itemID = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(itemID);
 			assert.equal(item.attachmentCharset, charset);
 		})
@@ -305,7 +305,7 @@ describe("Zotero.Item", function () {
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
 			item.attachmentCharset = charset;
-			var itemID = yield item.save();
+			var itemID = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(itemID);
 			
 			// Set charset to same value
@@ -320,20 +320,20 @@ describe("Zotero.Item", function () {
 			
 			// Create parent item
 			var item = new Zotero.Item("book");
-			var parentItemID = yield item.save();
+			var parentItemID = yield item.saveTx();
 			
 			// Create attachment item
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
 			item.parentID = parentItemID;
-			var itemID = yield item.save();
+			var itemID = yield item.saveTx();
 			
 			// Should be empty when unset
 			assert.equal(item.attachmentFilename, '');
 			
 			// Set filename
 			item.attachmentFilename = filename;
-			yield item.save();
+			yield item.saveTx();
 			item = yield Zotero.Items.getAsync(itemID);
 			
 			// Check filename
@@ -358,7 +358,7 @@ describe("Zotero.Item", function () {
 			];
 			var item = new Zotero.Item('journalArticle');
 			item.setTags(tags);
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			yield item.loadTags();
 			assert.sameDeepMembers(item.getTags(tags), tags);
@@ -375,7 +375,7 @@ describe("Zotero.Item", function () {
 			];
 			var item = new Zotero.Item('journalArticle');
 			item.setTags(tags);
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			yield item.loadTags();
 			item.setTags(tags);
@@ -393,11 +393,11 @@ describe("Zotero.Item", function () {
 			];
 			var item = new Zotero.Item('journalArticle');
 			item.setTags(tags);
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			yield item.loadTags();
 			item.setTags(tags.slice(0));
-			yield item.save();
+			yield item.saveTx();
 			assert.sameDeepMembers(item.getTags(tags), tags.slice(0));
 		})
 	})

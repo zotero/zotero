@@ -403,25 +403,25 @@ Zotero.Fulltext = new function(){
 	/**
 	 * Index multiple words at once
 	 *
+	 * @requireTransaction
 	 * @param {Number} itemID
 	 * @param {Array<string>} words
 	 * @return {Promise}
 	 */
-	function indexWords(itemID, words) {
+	var indexWords = Zotero.Promise.coroutine(function* (itemID, words) {
+		Zotero.DB.requireTransaction();
 		let chunk;
-		return Zotero.DB.executeTransaction(function* () {
-			yield Zotero.DB.queryAsync("DELETE FROM indexing.fulltextWords");
-			while (words.length > 0) {
-				chunk = words.splice(0, 100);
-				Zotero.DB.queryAsync('INSERT INTO indexing.fulltextWords (word) ' + ['SELECT ?' for (word of chunk)].join(' UNION '), chunk);
-			}
-			yield Zotero.DB.queryAsync('INSERT OR IGNORE INTO fulltextWords (word) SELECT word FROM indexing.fulltextWords');
-			yield Zotero.DB.queryAsync('DELETE FROM fulltextItemWords WHERE itemID = ?', [itemID]);
-			yield Zotero.DB.queryAsync('INSERT OR IGNORE INTO fulltextItemWords (wordID, itemID) SELECT wordID, ? FROM fulltextWords JOIN indexing.fulltextWords USING(word)', [itemID]);
-			yield Zotero.DB.queryAsync("REPLACE INTO fulltextItems (itemID, version) VALUES (?,?)", [itemID, 0]);
-			yield Zotero.DB.queryAsync("DELETE FROM indexing.fulltextWords");
-		}.bind(this));
-	}
+		yield Zotero.DB.queryAsync("DELETE FROM indexing.fulltextWords");
+		while (words.length > 0) {
+			chunk = words.splice(0, 100);
+			Zotero.DB.queryAsync('INSERT INTO indexing.fulltextWords (word) ' + ['SELECT ?' for (word of chunk)].join(' UNION '), chunk);
+		}
+		yield Zotero.DB.queryAsync('INSERT OR IGNORE INTO fulltextWords (word) SELECT word FROM indexing.fulltextWords');
+		yield Zotero.DB.queryAsync('DELETE FROM fulltextItemWords WHERE itemID = ?', [itemID]);
+		yield Zotero.DB.queryAsync('INSERT OR IGNORE INTO fulltextItemWords (wordID, itemID) SELECT wordID, ? FROM fulltextWords JOIN indexing.fulltextWords USING(word)', [itemID]);
+		yield Zotero.DB.queryAsync("REPLACE INTO fulltextItems (itemID, version) VALUES (?,?)", [itemID, 0]);
+		yield Zotero.DB.queryAsync("DELETE FROM indexing.fulltextWords");
+	});
 	
 	
 	/**
@@ -559,15 +559,13 @@ Zotero.Fulltext = new function(){
 			}
 		}
 		
-		yield Zotero.DB.executeTransaction(function* () {
-			yield indexString(text, charset, itemID);
-			
-			// Record the number of characters indexed (unless we're indexing a (PDF) cache file,
-			// in which case the stats are coming from elsewhere)
-			if (!isCacheFile) {
-				yield setChars(itemID, { indexed: text.length, total: totalChars });
-			}
-		});
+		yield indexString(text, charset, itemID);
+		
+		// Record the number of characters indexed (unless we're indexing a (PDF) cache file,
+		// in which case the stats are coming from elsewhere)
+		if (!isCacheFile) {
+			yield setChars(itemID, { indexed: text.length, total: totalChars });
+		}
 		
 		return true;
 	}.bind(this));
@@ -690,10 +688,8 @@ Zotero.Fulltext = new function(){
 			return false;
 		}
 		
-		yield Zotero.DB.executeTransaction(function* () {
-			yield indexFile(cacheFilePath, 'text/plain', 'utf-8', itemID, true, true);
-			yield setPages(itemID, { indexed: pagesIndexed, total: totalPages });
-		});
+		yield indexFile(cacheFilePath, 'text/plain', 'utf-8', itemID, true, true);
+		yield setPages(itemID, { indexed: pagesIndexed, total: totalPages });
 		
 		return true;
 	});
@@ -827,7 +823,9 @@ Zotero.Fulltext = new function(){
 					+ libraryKey, 2);
 				
 				// Delete rows for items that weren't supposed to be indexed
-				yield this.clearItemWords(itemID);
+				yield Zotero.DB.executeTransaction(function* () {
+					yield this.clearItemWords(itemID);
+				}.bind(this));
 				continue;
 			}
 			
@@ -1291,16 +1289,18 @@ Zotero.Fulltext = new function(){
 	});
 	
 	
+	/**
+	 * @requireTransaction
+	 */
 	this.clearItemWords = Zotero.Promise.coroutine(function* (itemID, skipCacheClear) {
-		var indexed = yield Zotero.DB.executeTransaction(function* () {
-			var sql = "SELECT rowid FROM fulltextItems WHERE itemID=? LIMIT 1";
-			var indexed = yield Zotero.DB.valueQueryAsync(sql, itemID);
-			if (indexed) {
-				yield Zotero.DB.queryAsync("DELETE FROM fulltextItemWords WHERE itemID=?", itemID);
-				yield Zotero.DB.queryAsync("DELETE FROM fulltextItems WHERE itemID=?", itemID);
-			}
-			return indexed;
-		}.bind(this));
+		Zotero.DB.requireTransaction();
+		
+		var sql = "SELECT rowid FROM fulltextItems WHERE itemID=? LIMIT 1";
+		var indexed = yield Zotero.DB.valueQueryAsync(sql, itemID);
+		if (indexed) {
+			yield Zotero.DB.queryAsync("DELETE FROM fulltextItemWords WHERE itemID=?", itemID);
+			yield Zotero.DB.queryAsync("DELETE FROM fulltextItems WHERE itemID=?", itemID);
+		}
 		
 		if (indexed) {
 			Zotero.Prefs.set('purge.fulltext', true);

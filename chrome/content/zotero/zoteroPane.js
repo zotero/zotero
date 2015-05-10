@@ -740,8 +740,6 @@ var ZoteroPane = new function()
 	 */
 	this.newItem = Zotero.Promise.coroutine(function* (typeID, data, row, manual)
 	{
-		yield Zotero.DB.waitForTransaction();
-		
 		if ((row === undefined || row === null) && this.collectionsView.selection) {
 			row = this.collectionsView.selection.currentIndex;
 			
@@ -810,8 +808,6 @@ var ZoteroPane = new function()
 	
 	
 	this.newCollection = Zotero.Promise.coroutine(function* (parentKey) {
-		yield Zotero.DB.waitForTransaction();
-		
 		if (!this.canEditLibrary()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -847,7 +843,7 @@ var ZoteroPane = new function()
 		collection.libraryID = libraryID;
 		collection.name = newName.value;
 		collection.parentKey = parentKey;
-		return collection.save();
+		return collection.saveTx();
 	});
 	
 	
@@ -1233,6 +1229,15 @@ var ZoteroPane = new function()
 	this.itemSelected = function (event) {
 		return Zotero.spawn(function* () {
 			yield Zotero.DB.waitForTransaction();
+			
+			// Don't select item until items list has loaded
+			//
+			// This avoids an error if New Item is used while the pane is first loading.
+			var deferred = Zotero.Promise.defer();
+			this.itemsView.addEventListener('load', function () {
+				deferred.resolve();
+			});
+			yield deferred.promise;
 			
 			var selectedItems = this.itemsView.getSelectedItems();
 			
@@ -1863,7 +1868,7 @@ var ZoteroPane = new function()
 				
 				if (result && newName.value) {
 					row.ref.name = newName.value;
-					row.ref.save();
+					row.ref.saveTx();
 				}
 			}
 			else {
@@ -3055,8 +3060,6 @@ var ZoteroPane = new function()
 	 * @return {Promise}
 	 */
 	this.newNote = Zotero.Promise.coroutine(function* (popup, parentKey, text, citeURI) {
-		yield Zotero.DB.waitForTransaction();
-		
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -3081,7 +3084,7 @@ var ZoteroPane = new function()
 			if (parentKey) {
 				item.parentKey = parentKey;
 			}
-			var itemID = yield item.save();
+			var itemID = yield item.saveTx();
 			
 			if (!parentKey && this.itemsView && this.collectionsView.selectedTreeRow.isCollection()) {
 				yield this.collectionsView.selectedTreeRow.ref.addItem(itemID);
@@ -3146,7 +3149,7 @@ var ZoteroPane = new function()
 			var note = items[0].getNote()
 			
 			items[0].setNote(note + text);
-			yield items[0].save();
+			yield items[0].saveTx();
 			
 			var noteElem = document.getElementById('zotero-note-editor')
 			noteElem.focus();
@@ -3537,7 +3540,7 @@ var ZoteroPane = new function()
 						item.setField('title', attachmentItem.getField('title'));
 						item.setField('url', attachmentItem.getField('url'));
 						item.setField('accessDate', attachmentItem.getField('accessDate'));
-						yield item.save();
+						yield item.saveTx();
 					}
 				}
 			}
@@ -4106,7 +4109,7 @@ var ZoteroPane = new function()
 			}
 			
 			item.setField('title', newName);
-			yield item.save();
+			yield item.saveTx();
 		}
 		
 		return true;
