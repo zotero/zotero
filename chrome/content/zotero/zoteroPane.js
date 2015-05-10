@@ -1814,7 +1814,7 @@ var ZoteroPane = new function()
 		yield Zotero.DB.executeTransaction(function* () {
 			for (let i=0; i<items.length; i++) {
 				items[i].deleted = false;
-				items[i].save({
+				yield items[i].save({
 					skipDateModifiedUpdate: true
 				});
 			}
