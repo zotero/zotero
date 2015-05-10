@@ -430,6 +430,7 @@ Zotero.ItemTreeView._haveCachedFields = false;
  */
 Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (action, type, ids, extraData)
 {
+	Zotero.debug("Yielding for refresh promise"); // TEMP
 	yield this._refreshPromise;
 	
 	if (!this._treebox || !this._treebox.treeBody) {
@@ -937,6 +938,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	}
 	this.selection.selectEventsSuppressed = false;
 	if (madeChanges) {
+		Zotero.debug("Yielding for select promise"); // TEMP
 		yield promise;
 	}
 });
