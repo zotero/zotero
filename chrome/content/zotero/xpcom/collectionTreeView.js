@@ -2141,9 +2141,11 @@ Zotero.CollectionTreeCache = {
 	"clear": Zotero.Promise.coroutine(function* () {
 		this.lastTreeRow = null;
 		this.lastSearch = null;
-		yield Zotero.DB.waitForTransaction();
 		if(this.lastTempTable) {
-			yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS " + this.lastTempTable);
+			// Drop the last temp table when we can. We don't wait on this because it can cause a
+			// deadlock: this waits on open transactions, but a transaction could be waiting on
+			// ItemTreeView::notify(), which waits on ItemTreeView::refresh(), which calls this.
+			Zotero.DB.queryTx("DROP TABLE IF EXISTS " + this.lastTempTable).done();
 		}
 		this.lastTempTable = null;
 		this.lastResults = null;

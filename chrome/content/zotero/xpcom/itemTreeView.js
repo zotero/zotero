@@ -51,6 +51,8 @@ Zotero.ItemTreeView = function (collectionTreeRow, sourcesOnly) {
 	this._cellTextCache = {};
 	this._itemImages = {};
 	
+	this._refreshPromise = Zotero.Promise.resolve();
+	
 	this._unregisterID = Zotero.Notifier.registerObserver(
 		this, ['item', 'collection-item', 'item-tag', 'share-items', 'bucket'], 'itemTreeView'
 	);
@@ -289,114 +291,133 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 		return false;
 	}
 	
-	for (let i=0; i<visibleFields.length; i++) {
-		let field = visibleFields[i];
-		switch (field) {
-			case 'hasAttachment':
-				// Needed by item.getBestAttachments(), called by getBestAttachmentStateAsync()
-				field = 'url';
-				break;
+	var resolve, reject;
+	this._refreshPromise = new Zotero.Promise(function () {
+		resolve = arguments[0];
+		reject = arguments[1];
+	});
+	
+	try {
+		for (let i=0; i<visibleFields.length; i++) {
+			let field = visibleFields[i];
+			switch (field) {
+				case 'hasAttachment':
+					// Needed by item.getBestAttachments(), called by getBestAttachmentStateAsync()
+					field = 'url';
+					break;
+				
+				case 'numNotes':
+					continue;
+				
+				case 'year':
+					field = 'date';
+					break;
+				
+				case 'itemType':
+					field = 'itemTypeID';
+					break;
+			}
+			if (cacheFields.indexOf(field) == -1) {
+				cacheFields = cacheFields.concat(field);
+			}
+		}
+		
+		yield Zotero.Items.cacheFields(this.collectionTreeRow.ref.libraryID, cacheFields);
+		Zotero.ItemTreeView._haveCachedFields = true;
+		
+		Zotero.CollectionTreeCache.clear();
+		
+		if (!this.selection.selectEventsSuppressed) {
+			var unsuppress = this.selection.selectEventsSuppressed = true;
+			//this._treebox.beginUpdateBatch();
+		}
+		var savedSelection = this.getSelectedItems(true);
+		var savedOpenState = this._saveOpenState();
+		
+		var oldCount = this.rowCount;
+		var newSearchItemIDs = {};
+		var newSearchParentIDs = {};
+		var newCellTextCache = {};
+		var newSearchMode = this.collectionTreeRow.isSearchMode();
+		var newRows = [];
+		var newItems = yield this.collectionTreeRow.getItems();
+		
+		var added = 0;
+		
+		for (let i=0, len=newItems.length; i < len; i++) {
+			let item = newItems[i];
 			
-			case 'numNotes':
+			// Only add regular items if sourcesOnly is set
+			if (this._sourcesOnly && !item.isRegularItem()) {
 				continue;
+			}
 			
-			case 'year':
-				field = 'date';
-				break;
-			
-			case 'itemType':
-				field = 'itemTypeID';
-				break;
-		}
-		if (cacheFields.indexOf(field) == -1) {
-			cacheFields = cacheFields.concat(field);
-		}
-	}
-	
-	yield Zotero.Items.cacheFields(this.collectionTreeRow.ref.libraryID, cacheFields);
-	Zotero.ItemTreeView._haveCachedFields = true;
-	
-	Zotero.CollectionTreeCache.clear();
-	
-	if (!this.selection.selectEventsSuppressed) {
-		var unsuppress = this.selection.selectEventsSuppressed = true;
-		//this._treebox.beginUpdateBatch();
-	}
-	var savedSelection = this.getSelectedItems(true);
-	var savedOpenState = this._saveOpenState();
-	
-	var oldCount = this.rowCount;
-	var newSearchItemIDs = {};
-	var newSearchParentIDs = {};
-	var newCellTextCache = {};
-	var newSearchMode = this.collectionTreeRow.isSearchMode();
-	var newRows = [];
-	var newItems = yield this.collectionTreeRow.getItems();
-	
-	var added = 0;
-	
-	for (let i=0, len=newItems.length; i < len; i++) {
-		let item = newItems[i];
-		
-		// Only add regular items if sourcesOnly is set
-		if (this._sourcesOnly && !item.isRegularItem()) {
-			continue;
+			// Don't add child items directly (instead mark their parents for
+			// inclusion below)
+			let parentItemID = item.parentItemID;
+			if (parentItemID) {
+				newSearchParentIDs[parentItemID] = true;
+			}
+			// Add top-level items
+			else {
+				yield item.loadItemData();
+				yield item.loadCollections();
+				
+				this._addRowToArray(
+					newRows,
+					new Zotero.ItemTreeRow(item, 0, false),
+					added++
+				);
+			}
+			newSearchItemIDs[item.id] = true;
 		}
 		
-		// Don't add child items directly (instead mark their parents for
-		// inclusion below)
-		let parentItemID = item.parentItemID;
-		if (parentItemID) {
-			newSearchParentIDs[parentItemID] = true;
+		// Add parents of matches if not matches themselves
+		for (let id in newSearchParentIDs) {
+			if (!newSearchItemIDs[id]) {
+				let item = yield Zotero.Items.getAsync(id);
+				this._addRowToArray(
+					newRows,
+					new Zotero.ItemTreeRow(item, 0, false),
+					added++
+				);
+			}
 		}
-		// Add top-level items
-		else {
-			yield item.loadItemData();
-			yield item.loadCollections();
-			
-			this._addRowToArray(
-				newRows,
-				new Zotero.ItemTreeRow(item, 0, false),
-				added++
-			);
+		
+		this._rows = newRows;
+		this.rowCount = this._rows.length;
+		var diff = this.rowCount - oldCount;
+		if (diff != 0) {
+			this._treebox.rowCountChanged(0, diff);
 		}
-		newSearchItemIDs[item.id] = true;
-	}
-	
-	// Add parents of matches if not matches themselves
-	for (let id in newSearchParentIDs) {
-		if (!newSearchItemIDs[id]) {
-			let item = yield Zotero.Items.getAsync(id);
-			this._addRowToArray(
-				newRows,
-				new Zotero.ItemTreeRow(item, 0, false),
-				added++
-			);
+		this._refreshItemRowMap();
+		
+		this._searchMode = newSearchMode;
+		this._searchItemIDs = newSearchItemIDs; // items matching the search
+		this._searchParentIDs = newSearchParentIDs;
+		this._cellTextCache = {};
+		
+		yield this.rememberOpenState(savedOpenState);
+		yield this.rememberSelection(savedSelection);
+		yield this.expandMatchParents();
+		if (unsuppress) {
+			// This causes a problem with the row count being wrong between views
+			//this._treebox.endUpdateBatch();
+			this.selection.selectEventsSuppressed = false;
 		}
+		
+		setTimeout(function () {
+			resolve();
+		});
 	}
-	
-	this._rows = newRows;
-	this.rowCount = this._rows.length;
-	var diff = this.rowCount - oldCount;
-	if (diff != 0) {
-		this._treebox.rowCountChanged(0, diff);
-	}
-	this._refreshItemRowMap();
-	
-	this._searchMode = newSearchMode;
-	this._searchItemIDs = newSearchItemIDs; // items matching the search
-	this._searchParentIDs = newSearchParentIDs;
-	this._cellTextCache = {};
-	
-	yield this.rememberOpenState(savedOpenState);
-	yield this.rememberSelection(savedSelection);
-	yield this.expandMatchParents();
-	if (unsuppress) {
-		// This causes a problem with the row count being wrong between views
-		//this._treebox.endUpdateBatch();
-		this.selection.selectEventsSuppressed = false;
+	catch (e) {
+		setTimeout(function () {
+			reject(e);
+		});
+		throw e;
 	}
 }));
+
 
 /**
  * Generator used internally for refresh
@@ -409,6 +430,8 @@ Zotero.ItemTreeView._haveCachedFields = false;
  */
 Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (action, type, ids, extraData)
 {
+	yield this._refreshPromise;
+	
 	if (!this._treebox || !this._treebox.treeBody) {
 		Components.utils.reportError("Treebox didn't exist in itemTreeView.notify()");
 		return;
