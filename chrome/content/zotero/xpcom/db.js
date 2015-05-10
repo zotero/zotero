@@ -501,7 +501,7 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 					this._callbacks.begin[i]();
 				}
 			}
-			var conn = yield this._getConnectionAsync(options);
+			var conn = this._getConnection(options) || (yield this._getConnectionAsync(options));
 			var result = yield conn.executeTransaction(func);
 			Zotero.debug("Committed async DB transaction", 5);
 			this._inTransaction = false;
@@ -1110,6 +1110,16 @@ Zotero.DBConnection.prototype.getSQLDataType = function(value) {
 // Private methods
 //
 /////////////////////////////////////////////////////////////////
+
+Zotero.DBConnection.prototype._getConnection = function (options) {
+	if (this._backupPromise && this._backupPromise.isPending() && (!options || !options.inBackup)) {
+		return false;
+	}
+	if (this._connectionAsync === false) {
+		throw new Error("Database permanently closed; not re-opening");
+	}
+	return this._connectionAsync || false;
+}
 
 /*
  * Retrieve a link to the data store asynchronously
