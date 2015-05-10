@@ -699,6 +699,15 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params, options) {
 };
 
 
+Zotero.DBConnection.prototype.queryTx = function (sql, params, options) {
+	return this.executeTransaction(function* () {
+		options = options || {};
+		delete options.tx;
+		return this.queryAsync(sql, params, options);
+	}.bind(this));
+};
+
+
 /**
  * @param {String} sql  SQL statement to run
  * @param {Array|String|Integer} [params]  SQL parameters to bind
