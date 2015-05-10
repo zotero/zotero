@@ -35,47 +35,54 @@
     // Set BackstagePass (which contains .Error, etc.) as global object
     self = this;
     
+	// We need to maintain references to running nsITimers. Otherwise, they can
+	// get garbage collected before they fire. Also, we might need to cancel them.
+    var _runningTimers = {};
+    
     // Provide an implementation of setTimeout
-    self.setTimeout = new function() {
-        // We need to maintain references to running nsITimers. Otherwise, they can
-        // get garbage collected before they fire.
-        var _runningTimers = [];
-        
-        return function setTimeout(func, ms) {
-            var useMethodjit = Components.utils.methodjit;
-            var timer = Components.classes["@mozilla.org/timer;1"]
-            .createInstance(Components.interfaces.nsITimer);
-            timer.initWithCallback({"notify":function() {
-                // Remove timer from array so it can be garbage collected
-                _runningTimers.splice(_runningTimers.indexOf(timer), 1);
-                
-                // Execute callback function
-                try {
-                    func();
-                } catch(err) {
-                    // Rethrow errors that occur so that they appear in the error
-                    // console with the appropriate name and line numbers. While the
-                    // the errors appear without this, the line numbers get eaten.
-                    var scriptError = Components.classes["@mozilla.org/scripterror;1"]
-                        .createInstance(Components.interfaces.nsIScriptError);
-                    scriptError.init(
-                        err.message || err.toString(),
-                        err.fileName || err.filename || null,
-                        null,
-                        err.lineNumber || null,
-                        null,
-                        scriptError.errorFlag,
-                        'component javascript'
-                        );
-                    Components.classes["@mozilla.org/consoleservice;1"]
-                        .getService(Components.interfaces.nsIConsoleService)
-                        .logMessage(scriptError);
-                    self.debug(err.stack, 1);
-                }
-            }}, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-            _runningTimers.push(timer);
-        }
+    self.setTimeout = function (func, ms) {
+    	var id = Math.floor(Math.random() * (1000000000000 - 1)) + 1
+		var useMethodjit = Components.utils.methodjit;
+		var timer = Components.classes["@mozilla.org/timer;1"]
+			.createInstance(Components.interfaces.nsITimer);
+		timer.initWithCallback({"notify":function() {
+			// Remove timer from object so it can be garbage collected
+			delete _runningTimers[id];
+			
+			// Execute callback function
+			try {
+				func();
+			} catch(err) {
+				// Rethrow errors that occur so that they appear in the error
+				// console with the appropriate name and line numbers. While the
+				// the errors appear without this, the line numbers get eaten.
+				var scriptError = Components.classes["@mozilla.org/scripterror;1"]
+					.createInstance(Components.interfaces.nsIScriptError);
+				scriptError.init(
+					err.message || err.toString(),
+					err.fileName || err.filename || null,
+					null,
+					err.lineNumber || null,
+					null,
+					scriptError.errorFlag,
+					'component javascript'
+					);
+				Components.classes["@mozilla.org/consoleservice;1"]
+					.getService(Components.interfaces.nsIConsoleService)
+					.logMessage(scriptError);
+				self.debug(err.stack, 1);
+			}
+		}}, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+		_runningTimers[id] = timer;
+		return id;
     };
+    self.clearTimeout = function (id) {
+    	var timer = _runningTimers[id];
+    	if (timer) {
+    		timer.cancel();
+    	}
+    	delete _runningTimers[id];
+    }
     
     self.debug = function (msg) {
         dump(msg + "\n\n");
