@@ -423,7 +423,8 @@ Zotero.DataObject.prototype.reload = Zotero.Promise.coroutine(function* (dataTyp
 	if (dataTypes && dataTypes.length) {
 		for (let i=0; i<dataTypes.length; i++) {
 			let dataType = dataTypes[i];
-			if (!this._loaded[dataType] || (!reloadUnchanged && !this._changed[dataType])) {
+			if (!this._loaded[dataType] || this._skipDataTypeLoad[dataType]
+					|| (!reloadUnchanged && !this._changed[dataType])) {
 				continue;
 			}
 			yield this._loadDataType(dataType, true);
