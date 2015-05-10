@@ -103,6 +103,17 @@ Zotero.LibraryTreeView.prototype = {
 	*/
 	_removeRow: function (row, skipMapUpdate) {
 		var id = this._rows[row].id;
+		
+		var lastRow = row == this.rowCount - 1;
+		if (lastRow && this.selection.isSelected(row)) {
+			// Deslect removed row
+			this.selection.toggleSelect(row);
+			// If no other rows selected, select row before
+			if (this.selection.count == 0 && row !== 0) {
+				this.selection.toggleSelect(row - 1);
+			}
+		}
+		
 		this._rows.splice(row, 1);
 		this.rowCount--;
 		this._treebox.rowCountChanged(row + 1, -1);
