@@ -2173,7 +2173,7 @@ var ZoteroPane = new function()
 			show = [m.emptyTrash];
 		}
 		else if (itemGroup.isGroup()) {
-			show = [m.newCollection, m.newSavedSearch, m.sep1, m.showDuplicates, m.showUnfiled];
+			show = [m.newCollection, m.newSavedSearch, m.sep1, m.showDuplicates, m.showUnfiled, m.sep2, m.exportFile];
 		}
 		else if (itemGroup.isDuplicates() || itemGroup.isUnfiled()) {
 			show = [
