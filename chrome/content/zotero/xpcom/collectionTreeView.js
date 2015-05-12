@@ -107,9 +107,13 @@ Zotero.CollectionTreeView.prototype.setTree = Zotero.Promise.coroutine(function*
 		}
 		this.selection.currentColumn = this._treebox.columns.getFirstColumn();
 		
-		var row = yield this.getLastViewedRow();
-		this.selection.select(row);
-		this._treebox.ensureRowIsVisible(row);
+		var lastViewedID = Zotero.Prefs.get('lastViewedFolder');
+		if (lastViewedID) {
+			yield this.selectByID(lastViewedID);
+		}
+		else {
+			this.selection.select(0);
+		}
 		
 		yield this._runListeners('load');
 		this._initialized = true;
@@ -820,6 +824,10 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 	id = ('' + id).substr(1);
 	
 	switch (type) {
+	case 'L':
+		this.selectLibrary(id);
+		return;
+	
 	case 'C':
 		var found = yield this.expandToCollection(id);
 		break;
@@ -931,79 +939,6 @@ Zotero.CollectionTreeView.prototype.selectTrash = Zotero.Promise.coroutine(funct
 	}
 	
 	return false;
-});
-
-
-/**
- * Select the last-viewed source
- */
-Zotero.CollectionTreeView.prototype.getLastViewedRow = Zotero.Promise.coroutine(function* () {
-	var lastViewedFolder = Zotero.Prefs.get('lastViewedFolder');
-	var matches = lastViewedFolder.match(/^([A-Z])([G0-9]+)?$/);
-	var select = 0;
-	if (matches) {
-		if (matches[1] == 'C') {
-			if (this._rowMap["C" + matches[2]]) {
-				select = this._rowMap["C" + matches[2]];
-			}
-			// Search recursively
-			else {
-				var path = [];
-				var failsafe = 10; // Only go up ten levels
-				var lastCol = matches[2];
-				do {
-					failsafe--;
-					var col = yield Zotero.Collections.getAsync(lastCol);
-					if (!col) {
-						var msg = "Last-viewed collection not found";
-						Zotero.debug(msg);
-						path = [];
-						break;
-					}
-					var par = col.parentID;
-					if (!par) {
-						var msg = "Parent collection not found in "
-							+ "Zotero.CollectionTreeView.setTree()";
-						Zotero.debug(msg, 1);
-						Components.utils.reportError(msg);
-						path = [];
-						break;
-					}
-					lastCol = par;
-					path.push(lastCol);
-				}
-				while (!this._rowMap["C" + lastCol] && failsafe > 0)
-				if (path.length) {
-					for (var i=path.length-1; i>=0; i--) {
-						var id = path[i];
-						var row = this._rowMap["C" + id];
-						if (!row) {
-							var msg = "Collection not found in tree in "
-								+ "Zotero.CollectionTreeView.setTree()";
-							Zotero.debug(msg, 1);
-							Components.utils.reportError(msg);
-							break;
-						}
-						if (!this.isContainerOpen(row)) {
-							yield this.toggleOpenState(row);
-							if (this._rowMap["C" + matches[2]]) {
-								select = this._rowMap["C" + matches[2]];
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-		else {
-			var id = matches[1] + (matches[2] ? matches[2] : "");
-			if (this._rowMap[id]) {
-				select = this._rowMap[id];
-			}
-		}
-	}
-	
-	return select;
 });
 
 
