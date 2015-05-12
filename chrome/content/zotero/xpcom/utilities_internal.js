@@ -436,23 +436,30 @@ Zotero.Utilities.Internal = {
 	/**
 	 * A generator that yields promises that delay for the given intervals
 	 *
-	 * @param {Array<Integer>} intervals An array of intervals in milliseconds
-	 * @param {Boolean} [finite=FALSE] If TRUE, repeat the last interval forever
+	 * @param {Array<Integer>} intervals - An array of intervals in milliseconds
+	 * @param {Integer} [maxTime] - Total time to wait in milliseconds, after which the delaying
+	 *                              promise will return false. Before maxTime has elapsed, or if
+	 *                              maxTime isn't specified, the promises will yield true.
 	 */
-	"delayGenerator": function (intervals, finite) {
+	"delayGenerator": function (intervals, maxTime) {
+		var totalTime = 0;
 		var lastInterval = intervals[intervals.length - 1];
 		while (true) {
 			let interval = intervals.shift();
 			if (interval) {
-				lastInterval = interval;
-				yield Zotero.Promise.delay(interval);
+				delay = lastInterval = interval;
 			}
-			else if (finite) {
-				yield Zotero.Promise.delay(lastInterval);
+			else if (infinite) {
+				delay = lastInterval;
 			}
 			else {
 				break;
 			}
+			
+			totalTime += delay;
+			
+			Zotero.debug("Delaying " + delay + " ms");
+			yield Zotero.Promise.delay(delay).return(!maxTime || totalTime <= maxTime);
 		}
 	},
 	
