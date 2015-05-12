@@ -207,6 +207,7 @@ describe("Zotero.Utilities", function() {
 			
 			let cslJSONNote = Zotero.Utilities.itemToCSLJSON(note);
 			assert.equal(cslJSONNote.type, 'article', 'note is exported as "article"');
+			assert.equal(cslJSONNote.title, note.getNoteTitle(), 'note title is set to Zotero pseudo-title');
 		});
 		it("should convert standalone attachments to expected format", function() {
 			let file = getTestDataDirectory();

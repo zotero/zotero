@@ -1597,6 +1597,11 @@ Zotero.Utilities = {
 			}
 		}
 		
+		// Special mapping for note title
+		if (zoteroItem.itemType == 'note' && zoteroItem.note) {
+			cslItem.title = Zotero.Notes.noteToTitle(zoteroItem.note);
+		}
+		
 		// extract PMID
 		var extra = zoteroItem.extra;
 		if(typeof extra === "string") {
