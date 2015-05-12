@@ -100,11 +100,15 @@ if(ZoteroUnit.tests) {
 		}
 	} else {
 		var specifiedTests = ZoteroUnit.tests.split(",");
-		for(var test of specifiedTests) {
-			var fname = test+".js",
-			    file = testDirectory.clone();
+		for (let test of specifiedTests) {
+			// Allow foo, fooTest, fooTest.js, and tests/fooTest.js
+			test = test.replace(/\.js$/, "");
+			test = test.replace(/Test$/, "");
+			test = test.replace(/^tests[/\\]/, "");
+			let fname = test + "Test.js";
+			let file = testDirectory.clone();
 			file.append(fname);
-			if(!file.exists()) {
+			if (!file.exists()) {
 				dump("Invalid test file "+test+"\n");
 				run = false;
 				quit(true);
