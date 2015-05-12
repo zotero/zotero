@@ -84,8 +84,27 @@ describe("Zotero.Item", function () {
 		});
 	})
 	
+	describe("#dateAdded", function () {
+		it("should use current time if value was not given for a new item", function* () {
+			var item = new Zotero.Item('book');
+			var id = yield item.saveTx();
+			item = yield Zotero.Items.getAsync(id);
+			
+			assert.closeTo(Zotero.Date.sqlToDate(item.dateAdded, true).getTime(), Date.now(), 1000);
+		})
+		
+		it("should use given value for a new item", function* () {
+			var dateAdded = "2015-05-05 17:18:12";
+			var item = new Zotero.Item('book');
+			item.dateAdded = dateAdded;
+			var id = yield item.saveTx();
+			item = yield Zotero.Items.getAsync(id);
+			assert.equal(item.dateAdded, dateAdded);
+		})
+	})
+	
 	describe("#dateModified", function () {
-		it("should use given Date Modified for a new item", function* () {
+		it("should use given value for a new item", function* () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
@@ -94,7 +113,7 @@ describe("Zotero.Item", function () {
 			assert.equal(item.dateModified, dateModified);
 		})
 		
-		it("should use given Date Modified when skipDateModifiedUpdate is set for a new item", function* () {
+		it("should use given value when skipDateModifiedUpdate is set for a new item", function* () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
@@ -105,7 +124,7 @@ describe("Zotero.Item", function () {
 			assert.equal(item.dateModified, dateModified);
 		})
 		
-		it("should use current time if Date Modified was not given for an existing item", function* () {
+		it("should use current time if value was not given for an existing item", function* () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
@@ -120,7 +139,7 @@ describe("Zotero.Item", function () {
 			assert.closeTo(Zotero.Date.sqlToDate(item.dateModified, true).getTime(), Date.now(), 1000);
 		})
 		
-		it("should use current time if the existing Date Modified value was given for an existing item", function* () {
+		it("should use current time if the existing value was given for an existing item", function* () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
@@ -135,7 +154,7 @@ describe("Zotero.Item", function () {
 			assert.closeTo(Zotero.Date.sqlToDate(item.dateModified, true).getTime(), Date.now(), 1000);
 		})
 		
-		it("should use current time if Date Modified is not given when skipDateModifiedUpdate is set for a new item", function* () {
+		it("should use current time if value is not given when skipDateModifiedUpdate is set for a new item", function* () {
 			var item = new Zotero.Item('book');
 			var id = yield item.saveTx({
 				skipDateModifiedUpdate: true
@@ -144,7 +163,7 @@ describe("Zotero.Item", function () {
 			assert.closeTo(Zotero.Date.sqlToDate(item.dateModified, true).getTime(), Date.now(), 1000);
 		})
 		
-		it("should keep original Date Modified when skipDateModifiedUpdate is set for an existing item", function* () {
+		it("should keep original value when skipDateModifiedUpdate is set for an existing item", function* () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;

@@ -126,7 +126,8 @@ Zotero.defineProperty(Zotero.Item.prototype, 'itemTypeID', {
 	get: function() this._itemTypeID
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'dateAdded', {
-	get: function() this._dateAdded
+	get: function() this._dateAdded,
+	set: function(val) this.setField('dateAdded', val)
 });
 Zotero.defineProperty(Zotero.Item.prototype, 'dateModified', {
 	get: function() this._dateModified,
