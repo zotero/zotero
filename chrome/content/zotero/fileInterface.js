@@ -76,6 +76,10 @@ Zotero_File_Exporter.prototype.save = function() {
 			translation.setCollection(this.collection);
 		} else if(this.items) {
 			translation.setItems(this.items);
+		} else if(this.libraryID === undefined) {
+			throw new Error('No export configured');
+		} else {
+			translation.setLibraryID(this.libraryID);
 		}
 		
 		translation.setLocation(fp.file);
@@ -129,7 +133,11 @@ var Zotero_File_Interface = new function() {
 	 */
 	function exportFile() {
 		var exporter = new Zotero_File_Exporter();
-		exporter.name = Zotero.getString("pane.collections.library");
+		exporter.libraryID = ZoteroPane_Local.getSelectedLibraryID();
+		if (exporter.libraryID === false) {
+			throw new Error('No library selected');
+		}
+		exporter.name = Zotero.Libraries.getName(exporter.libraryID);
 		exporter.save();
 	}
 	
