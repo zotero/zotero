@@ -57,7 +57,6 @@ pref("extensions.zotero.backup.interval", 1440);
 pref("extensions.zotero.lastCreatorFieldMode",0);
 pref("extensions.zotero.lastAbstractExpand",0);
 pref("extensions.zotero.lastRenameAssociatedFile", false);
-pref("extensions.zotero.lastViewedFolder", 'L');
 pref("extensions.zotero.lastLongTagMode", 0);
 pref("extensions.zotero.lastLongTagDelimiter", ";");
 
