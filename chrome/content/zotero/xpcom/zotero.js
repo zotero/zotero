@@ -1424,9 +1424,17 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		if (opts) {
 			if (opts.lazy && d.get) {
 				let getter = d.get;
+				d.configurable = true; // Make sure we can change the property later
 				d.get = function() {
-					var val = getter.call(this);
-					this[prop] = val; // Replace getter with value
+					let val = getter.call(this);
+					
+					// Redefine getter on this object as non-writable value
+					delete d.set;
+					delete d.get;
+					d.writable = false;
+					d.value = val;
+					Object.defineProperty(this, prop, d);
+					
 					return val;
 				}
 			}
