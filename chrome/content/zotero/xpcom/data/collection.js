@@ -105,7 +105,10 @@ Zotero.Collection.prototype._set = function (field, value) {
 	
 	if (this['_' + field] != value) {
 		this._markFieldChange(field, this['_' + field]);
-		this._changed.primaryData = true;
+		if (!this._changed.primaryData) {
+			this._changed.primaryData = {};
+		}
+		this._changed.primaryData[field] = true;
 		
 		switch (field) {
 			default:
@@ -286,51 +289,35 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 	var options = env.options;
 
 	var collectionID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('collections');
-	var libraryID = env.libraryID = this.libraryID || Zotero.Libraries.userLibraryID;
-	var key = env.key = this._key = this.key ? this.key : this._generateKey();
-	var libraryType = env.libraryType = Zotero.Libraries.getType(libraryID);
 	
 	Zotero.debug("Saving collection " + this.id);
 	
-	var columns = [
-		'collectionID',
+	env.sqlColumns.push(
 		'collectionName',
-		'parentCollectionID',
-		'libraryID',
-		'key',
-		'version',
-		'synced'
-	];
-	var sqlValues = [
-		collectionID ? { int: collectionID } : null,
+		'parentCollectionID'
+	);
+	env.sqlValues.push(
 		{ string: this.name },
-		env.parent ? env.parent : null,
-		this.libraryID,
-		key,
-		this.version ? this.version : 0,
-		this.synced ? 1 : 0
-	];
-	if (isNew || !options.skipClientDateModified) {
-		columns.push('clientDateModified');
-		sqlValues.push(Zotero.DB.transactionDateTime);
-	}
+		env.parent ? env.parent : null
+	);
 	
 	if (isNew) {
-		let placeholders = columns.map(function () '?').join();
-		let sql = "INSERT INTO collections (" + columns.join(', ') + ") "
+		env.sqlColumns.unshift('collectionID');
+		env.sqlValues.unshift(collectionID ? { int: collectionID } : null);
+		
+		let placeholders = env.sqlColumns.map(function () '?').join();
+		let sql = "INSERT INTO collections (" + env.sqlColumns.join(', ') + ") "
 			+ "VALUES (" + placeholders + ")";
-		var insertID = yield Zotero.DB.queryAsync(sql, sqlValues);
+		var insertID = yield Zotero.DB.queryAsync(sql, env.sqlValues);
 		if (!collectionID) {
 			collectionID = env.id = insertID;
 		}
 	}
 	else {
-		columns.shift();
-		sqlValues.push(sqlValues.shift());
 		let sql = 'UPDATE collections SET '
-			+ columns.map(function (x) x + '=?').join(', ')
-			+ ' WHERE collectionID=?';
-		yield Zotero.DB.queryAsync(sql, sqlValues);
+			+ env.sqlColumns.map(function (x) x + '=?').join(', ') + ' WHERE collectionID=?';
+		env.sqlValues.push(collectionID ? { int: collectionID } : null);
+		yield Zotero.DB.queryAsync(sql, env.sqlValues);
 	}
 	
 	if (this._changed.parentKey) {

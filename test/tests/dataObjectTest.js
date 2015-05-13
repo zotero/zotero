@@ -29,6 +29,62 @@ describe("Zotero.DataObject", function() {
 		})
 	})
 	
+	describe("#synced", function () {
+		it("should be set to false after creating item", function* () {
+			var item = new Zotero.Item("book");
+			var id = yield item.saveTx();
+			item = yield Zotero.Items.getAsync(id);
+			assert.isFalse(item.synced);
+			yield Zotero.Items.erase(id);
+		});
+		
+		it("should be set to true when changed", function* () {
+			var item = new Zotero.Item("book");
+			var id = yield item.saveTx();
+			item = yield Zotero.Items.getAsync(id);
+			
+			item.synced = 1;
+			yield item.save();
+			assert.ok(item.synced);
+			
+			yield Zotero.Items.erase(id);
+		});
+		
+		it("should be set to false after modifying item", function* () {
+			var item = new Zotero.Item("book");
+			var id = yield item.saveTx();
+			item = yield Zotero.Items.getAsync(id);
+			
+			item.synced = 1;
+			yield item.save();
+			
+			yield item.loadItemData();
+			item.setField('title', 'test');
+			yield item.save();
+			assert.isFalse(item.synced);
+			
+			yield Zotero.Items.erase(id);
+		});
+		
+		it("should be unchanged if skipSyncedUpdate passed", function* () {
+			var item = new Zotero.Item("book");
+			var id = yield item.saveTx();
+			item = yield Zotero.Items.getAsync(id);
+			
+			item.synced = 1;
+			yield item.save();
+			
+			yield item.loadItemData();
+			item.setField('title', 'test');
+			yield item.save({
+				skipSyncedUpdate: true
+			});
+			assert.ok(item.synced);
+			
+			yield Zotero.Items.erase(id);
+		});
+	})
+	
 	describe("#save()", function () {
 		it("should add new identifiers to cache", function* () {
 			// Collection

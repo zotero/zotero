@@ -1181,14 +1181,13 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	
 	var isNew = env.isNew;
 	var options = env.options;
+	var libraryType = env.libraryType = Zotero.Libraries.getType(env.libraryID);
 	
 	var itemTypeID = this.itemTypeID;
 	if (!itemTypeID) {
 		throw new Error("Item type must be set before saving");
 	}
 	
-	var sqlColumns = [];
-	var sqlValues = [];
 	var reloadParentChildItems = {};
 	
 	//
@@ -1196,26 +1195,14 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	//
 	// If available id value, use it -- otherwise we'll use autoincrement
 	var itemID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('items');
-	var libraryID = env.libraryID = this.libraryID || Zotero.Libraries.userLibraryID;
-	var key = env.key = this._key = this.key ? this.key : this._generateKey();
-	var libraryType = env.libraryType = Zotero.Libraries.getType(libraryID);
 	
-	sqlColumns.push(
+	env.sqlColumns.push(
 		'itemTypeID',
-		'dateAdded',
-		'libraryID',
-		'key',
-		'version',
-		'synced'
+		'dateAdded'
 	);
-	
-	sqlValues.push(
+	env.sqlValues.push(
 		{ int: itemTypeID },
-		this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime,
-		this.libraryID,
-		key,
-		this.version ? this.version : 0,
-		this.synced ? 1 : 0
+		this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime
 	);
 	
 	// If a new item and Date Modified hasn't been provided, or an existing item and
@@ -1224,29 +1211,24 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	if (!this.dateModified
 			|| ((!this._changed.primaryData || !this._changed.primaryData.dateModified)
 				&& !options.skipDateModifiedUpdate)) {
-		sqlColumns.push('dateModified');
-		sqlValues.push(Zotero.DB.transactionDateTime);
+		env.sqlColumns.push('dateModified');
+		env.sqlValues.push(Zotero.DB.transactionDateTime);
 	}
 	// Otherwise, if a new Date Modified was provided, use that. (This would also work when
 	// skipDateModifiedUpdate was passed and there's an existing value, but in that case we
 	// can just not change the field at all.)
 	else if (this._changed.primaryData && this._changed.primaryData.dateModified) {
-		sqlColumns.push('dateModified');
-		sqlValues.push(this.dateModified);
-	}
-	
-	if (isNew || !options.skipClientDateModifiedUpdate) {
-		sqlColumns.push('clientDateModified');
-		sqlValues.push(Zotero.DB.transactionDateTime);
+		env.sqlColumns.push('dateModified');
+		env.sqlValues.push(this.dateModified);
 	}
 	
 	if (isNew) {
-		sqlColumns.unshift('itemID');
-		sqlValues.unshift(parseInt(itemID));
+		env.sqlColumns.unshift('itemID');
+		env.sqlValues.unshift(parseInt(itemID));
 		
-		let sql = "INSERT INTO items (" + sqlColumns.join(", ") + ") "
-			+ "VALUES (" + sqlValues.map(function () "?").join() + ")";
-		var insertID = yield Zotero.DB.queryAsync(sql, sqlValues);
+		let sql = "INSERT INTO items (" + env.sqlColumns.join(", ") + ") "
+			+ "VALUES (" + env.sqlValues.map(function () "?").join() + ")";
+		var insertID = yield Zotero.DB.queryAsync(sql, env.sqlValues);
 		if (!itemID) {
 			itemID = env.id = insertID;
 		}
@@ -1256,9 +1238,9 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		}
 	}
 	else {
-		let sql = "UPDATE items SET " + sqlColumns.join("=?, ") + "=? WHERE itemID=?";
-		sqlValues.push(parseInt(itemID));
-		yield Zotero.DB.queryAsync(sql, sqlValues);
+		let sql = "UPDATE items SET " + env.sqlColumns.join("=?, ") + "=? WHERE itemID=?";
+		env.sqlValues.push(parseInt(itemID));
+		yield Zotero.DB.queryAsync(sql, env.sqlValues);
 		
 		if (!env.options.skipNotifier) {
 			Zotero.Notifier.trigger('modify', 'item', itemID, env.notifierData);

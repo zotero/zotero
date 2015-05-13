@@ -145,48 +145,32 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	var options = env.options;
 	
 	var searchID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('savedSearches');
-	var libraryID = env.libraryID = this.libraryID || Zotero.Libraries.userLibraryID;
-	var key = env.key = this._key = this.key ? this.key : this._generateKey();
-	var libraryType = env.libraryType = Zotero.Libraries.getType(libraryID);
 	
-	var columns = [
-		'savedSearchID',
+	env.sqlColumns.push(
 		'savedSearchName',
-		'libraryID',
-		'key',
-		'version',
-		'synced'
-	];
-	var placeholders = columns.map(function () '?').join();
-	var sqlValues = [
-		searchID ? { int: searchID } : null,
-		{ string: this.name },
-		this.libraryID,
-		key,
-		this.version ? this.version : 0,
-		this.synced ? 1 : 0
-	];
-	if (isNew || !options.skipClientDateModified) {
-		columns.push('clientDateModified');
-		sqlValues.push(Zotero.DB.transactionDateTime);
-	}
+		'savedSearchID'
+	);
+	env.sqlValues.push(
+		{ string: this.name }
+	);
 	
 	if (isNew) {
-		let placeholders = columns.map(function () '?').join();
-		let sql = "INSERT INTO savedSearches (" + columns.join(', ') + ") "
+		env.sqlColumns.unshift('savedSearchID');
+		env.sqlValues.unshift(searchID ? { int: searchID } : null);
+		
+		let placeholders = env.sqlColumns.map(function () '?').join();
+		let sql = "INSERT INTO savedSearches (" + env.sqlColumns.join(', ') + ") "
 			+ "VALUES (" + placeholders + ")";
-		var insertID = yield Zotero.DB.queryAsync(sql, sqlValues);
+		var insertID = yield Zotero.DB.queryAsync(sql, env.sqlValues);
 		if (!searchID) {
 			searchID = env.id = insertID;
 		}
 	}
 	else {
-		columns.shift();
-		sqlValues.push(sqlValues.shift());
 		let sql = 'UPDATE savedSearches SET '
-			+ columns.map(function (x) x + '=?').join(', ')
-			+ ' WHERE savedSearchID=?';
-		yield Zotero.DB.queryAsync(sql, sqlValues);
+			+ env.sqlColumns.map(function (x) x + '=?').join(', ') + ' WHERE savedSearchID=?';
+		env.sqlValues.push(searchID ? { int: searchID } : null);
+		yield Zotero.DB.queryAsync(sql, env.sqlValues);
 	}
 	
 	if (!isNew) {

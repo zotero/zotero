@@ -587,6 +587,7 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) 
 		// Create transaction
 		if (env.options.tx) {
 			let result = yield Zotero.DB.executeTransaction(function* () {
+				Zotero.DataObject.prototype._saveData.call(this, env);
 				yield this._saveData(env);
 				yield Zotero.DataObject.prototype._finalizeSave.call(this, env);
 				return this._finalizeSave(env);
@@ -596,6 +597,7 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) 
 		// Use existing transaction
 		else {
 			Zotero.DB.requireTransaction();
+			Zotero.DataObject.prototype._saveData.call(this, env);
 			yield this._saveData(env);
 			yield Zotero.DataObject.prototype._finalizeSave.call(this, env);
 			return this._finalizeSave(env);
@@ -662,8 +664,38 @@ Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 	return true;
 });
 
-Zotero.DataObject.prototype._saveData = function () {
-	throw new Error("_saveData is an abstract method");
+Zotero.DataObject.prototype._saveData = function (env) {
+	var libraryID = env.libraryID = this.libraryID || Zotero.Libraries.userLibraryID;
+	var key = env.key = this._key = this.key ? this.key : this._generateKey();
+	
+	env.sqlColumns = [
+		'libraryID',
+		'key'
+	];
+	env.sqlValues = [
+		libraryID,
+		key
+	];
+	
+	if (this._changed.primaryData && this._changed.primaryData.version) {
+		env.sqlColumns.push('version');
+		env.sqlValues.push(this.version || 0);
+	}
+	
+	if (this._changed.primaryData && this._changed.primaryData.synced) {
+		env.sqlColumns.push('synced');
+		env.sqlValues.push(this.synced ? 1 : 0);
+	}
+	// Set synced to 0 by default
+	else if (!env.isNew && !env.options.skipSyncedUpdate) {
+		env.sqlColumns.push('synced');
+		env.sqlValues.push(0);
+	}
+	
+	if (env.isNew || !env.options.skipClientDateModified) {
+		env.sqlColumns.push('clientDateModified');
+		env.sqlValues.push(Zotero.DB.transactionDateTime);
+	}
 };
 
 Zotero.DataObject.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
