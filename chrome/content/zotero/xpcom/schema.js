@@ -2269,10 +2269,9 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("DROP TABLE itemsOld");
 				yield Zotero.DB.queryAsync("DROP TABLE tagsOld");
 			}
-			
-			yield _updateDBVersion('userdata', toVersion);
-			
-			return true;
 		}
+		
+		yield _updateDBVersion('userdata', toVersion);
+		return true;
 	});
 }
