@@ -2323,12 +2323,7 @@ Zotero.Prefs = new function(){
 	
 	
 	this.clear = function (pref) {
-		try {
-			this.prefBranch.clearUserPref(pref);
-		}
-		catch (e) {
-			throw ("Invalid preference '" + pref + "'");
-		}
+		this.prefBranch.clearUserPref(pref);
 	}
 	
 	
