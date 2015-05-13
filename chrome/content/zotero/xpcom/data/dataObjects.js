@@ -530,6 +530,8 @@ Zotero.DataObjects.prototype._diffCreators = function (data1, data2) {
 }
 
 Zotero.DataObjects.prototype._diffCollections = function (data1, data2) {
+	// Child items shouldn't have collections properties, but just in case one does
+	if (!data2) return false;
 	if (data1.length != data2.length) return false;
 	let c1 = data1.concat();
 	let c2 = data2.concat();

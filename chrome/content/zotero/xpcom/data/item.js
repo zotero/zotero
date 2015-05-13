@@ -4216,10 +4216,12 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options) {
 	}
 	
 	// Collections
-	yield this.loadCollections();
-	obj.collections = this.getCollections().map(function (id) {
-		return this.ContainerObjectsClass.getLibraryAndKeyFromID(id).key;
-	}.bind(this));
+	if (this.isTopLevelItem()) {
+		yield this.loadCollections();
+		obj.collections = this.getCollections().map(function (id) {
+			return this.ContainerObjectsClass.getLibraryAndKeyFromID(id).key;
+		}.bind(this));
+	}
 	
 	// Relations
 	yield this.loadRelations();
