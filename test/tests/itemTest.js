@@ -420,4 +420,58 @@ describe("Zotero.Item", function () {
 			assert.sameDeepMembers(item.getTags(tags), tags.slice(0));
 		})
 	})
+	
+	describe("#toJSON()", function () {
+		it("should output only fields with values in default mode", function* () {
+			var itemType = "book";
+			var title = "Test";
+			
+			var item = new Zotero.Item(itemType);
+			item.setField("title", title);
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			var json = yield item.toJSON();
+			
+			assert.equal(json.itemType, itemType);
+			assert.equal(json.title, title);
+			assert.isUndefined(json.date);
+			assert.isUndefined(json.numPages);
+		})
+		
+		it("should output all fields in 'full' mode", function* () {
+			var itemType = "book";
+			var title = "Test";
+			
+			var item = new Zotero.Item(itemType);
+			item.setField("title", title);
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			var json = yield item.toJSON({ mode: 'full' });
+			assert.equal(json.title, title);
+			assert.equal(json.date, "");
+			assert.equal(json.numPages, "");
+		})
+		
+		it("should output only fields that differ in 'patch' mode", function* () {
+			var itemType = "book";
+			var title = "Test";
+			var date = "2015-05-12";
+			
+			var item = new Zotero.Item(itemType);
+			item.setField("title", title);
+			var id = yield item.save();
+			item = yield Zotero.Items.getAsync(id);
+			var patchBase = yield item.toJSON();
+			
+			item.setField("date", date);
+			yield item.save();
+			var json = yield item.toJSON({
+				patchBase: patchBase
+			})
+			assert.isUndefined(json.itemType);
+			assert.isUndefined(json.title);
+			assert.equal(json.date, date);
+			assert.isUndefined(json.numPages);
+		})
+	})
 });

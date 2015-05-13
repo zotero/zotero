@@ -4138,12 +4138,9 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 
 /**
  * @param {Object} options
- * @param {Object} patchBase
  */
-Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patchBase) {
-	if (this.hasChanged()) {
-		throw new Error("Cannot generate JSON from changed item");
-	}
+Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options) {
+	options = options || {};
 	
 	if (options) {
 		var mode = options.mode;
@@ -4153,12 +4150,18 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 	}
 	
 	if (mode == 'patch') {
-		if (!patchBase) {
+		if (!options.patchBase) {
 			throw new Error("Cannot use patch mode if patchBase not provided");
 		}
 	}
-	else if (patchBase) {
-		Zotero.debug("Zotero.Item.toJSON: ignoring provided patchBase in " + mode + " mode", 2);
+	else if (options.patchBase) {
+		if (options.mode) {
+			Zotero.debug("Zotero.Item.toJSON: ignoring provided patchBase in " + mode + " mode", 2);
+		}
+		// If patchBase provided and no explicit mode, use 'patch'
+		else {
+			mode = 'patch';
+		}
 	}
 	
 	var obj = {};
@@ -4254,7 +4257,7 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 	obj.dateModified = Zotero.Date.sqlToISO8601(this.dateModified);
 	
 	if (mode == 'patch') {
-		for (let i in patchBase) {
+		for (let i in options.patchBase) {
 			switch (i) {
 			case 'key':
 			case 'version':
@@ -4263,7 +4266,7 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 			}
 			
 			if (i in obj) {
-				if (obj[i] === patchBase[i]) {
+				if (obj[i] === options.patchBase[i]) {
 					delete obj[i];
 				}
 			}
@@ -4277,12 +4280,12 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options, patc
 });
 
 
-Zotero.Item.prototype.toResponseJSON = Zotero.Promise.coroutine(function* (options, patchBase) {
+Zotero.Item.prototype.toResponseJSON = Zotero.Promise.coroutine(function* (options) {
 	var json = {
 		key: this.key,
 		version: this.version,
 		meta: {},
-		data: yield this.toJSON(options, patchBase)
+		data: yield this.toJSON(options)
 	};
 	
 	// TODO: library block?
