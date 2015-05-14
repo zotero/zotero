@@ -543,7 +543,9 @@ Zotero.DataObjects.prototype._diffCollections = function (data1, data2) {
 Zotero.DataObjects.prototype._diffTags = function (data1, data2) {
 	if (data1.length != data2.length) return false;
 	for (let i = 0; i < data1.length; i++) {
-		if (c1.tag !== c2.tag || (c1.type || 0) !== (c2.type || 0)) {
+		let t1 = data1[i];
+		let t2 = data2[i];
+		if (t1.tag !== t2.tag || (t1.type || 0) !== (t2.type || 0)) {
 			return false;
 		}
 	}

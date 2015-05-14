@@ -66,5 +66,45 @@ describe("Zotero.DataObjects", function() {
 			var diff = Zotero.Items.diff(json1, json2);
 			assert.isFalse(diff);
 		})
+		
+		it("should show tags of different types as different", function* () {
+			var json1 = {
+				tags: [
+					{
+						tag: "Foo"
+					}
+				]
+			};
+			var json2 = {
+				tags: [
+					{
+						tag: "Foo",
+						type: 1
+					}
+				]
+			};
+			var diff = Zotero.Items.diff(json1, json2);
+			assert.isFalse(diff);
+		})
+		
+		it("should not show manual tags as different without 'type' property", function* () {
+			var json1 = {
+				tags: [
+					{
+						tag: "Foo"
+					}
+				]
+			};
+			var json2 = {
+				tags: [
+					{
+						tag: "Foo",
+						type: 0
+					}
+				]
+			};
+			var diff = Zotero.Items.diff(json1, json2);
+			assert.isFalse(diff);
+		})
 	})
 })
