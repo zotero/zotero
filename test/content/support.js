@@ -419,25 +419,13 @@ function generateCiteProcJSExportData(currentData) {
 		let zItem = Zotero.Items.get(items[itemName].id);
 		cslExportData[itemName] = Zotero.Cite.System.prototype.retrieveItem(zItem);
 		
-		// Don't replace id as long as it follows expected format
 		if (!currentData || !currentData[itemName]) continue;
 		
-		// For simplicity, be more lenient than for item key
-		let idRe = /^http:\/\/zotero\.org\/users\/local\/\w{8}\/items\/\w{8}$/;
-		for (let field in cslExportData[itemName]) {
-			let oldVal = currentData[itemName][field];
-			if (!oldVal) continue;
-			
-			let val = cslExportData[itemName][field];
-			switch (field) {
-				case 'id':
-					if (!idRe.test(oldVal) || !idRe.test(val)) continue;
-				break;
-				default:
-					continue;
-			}
-			
-			cslExportData[itemName][field] = oldVal;
+		// Don't replace id as long as it follows expected format
+		if (Number.isInteger(currentData[itemName].id)
+			&& Number.isInteger(cslExportData[itemName].id)
+		) {
+			cslExportData[itemName].id = currentData[itemName].id;
 		}
 	}
 	

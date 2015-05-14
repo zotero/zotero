@@ -524,6 +524,9 @@ Zotero.Cite.System.prototype = {
 		
 		var cslItem = Zotero.Utilities.itemToCSLJSON(zoteroItem);
 		
+		// TEMP: citeproc-js currently expects the id property to be the item DB id
+		cslItem.id = zoteroItem.id;
+		
 		if (!Zotero.Prefs.get("export.citePaperJournalArticleURL")) {
 			var itemType = Zotero.ItemTypes.getName(zoteroItem.itemTypeID);
 			// don't return URL or accessed information for journal articles if a
