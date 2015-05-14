@@ -56,6 +56,14 @@ Zotero_Preferences.Proxies = {
 	
 	
 	/**
+	 * Enables UI buttons when proxy is selected
+	 */
+	enableProxyButtons: function () {
+		document.getElementById('proxyTree-edit').disabled = false;
+		document.getElementById('proxyTree-delete').disabled = false;
+	},
+	
+	/**
 	 * Adds a proxy to the proxy pane
 	 */
 	showProxyEditor: function (index) {
@@ -138,6 +146,7 @@ Zotero_Preferences.Proxies = {
 		}
 		
 		document.getElementById('proxyTree').currentIndex = -1;
+		document.getElementById('proxyTree-edit').disabled = true;
 		document.getElementById('proxyTree-delete').disabled = true;
 		document.getElementById('zotero-proxies-transparent').checked = Zotero.Prefs.get("proxies.transparent");
 		document.getElementById('zotero-proxies-autoRecognize').checked = Zotero.Prefs.get("proxies.autoRecognize");
