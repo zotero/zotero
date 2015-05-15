@@ -23,7 +23,12 @@
     
     ***** END LICENSE BLOCK *****
 -->
-<!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+<!DOCTYPE window [
+  <!ENTITY % prefWindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+  %prefWindow;
+  <!ENTITY % common SYSTEM "chrome://zotero/locale/zotero.dtd">
+  %common;
+]>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<prefpane id="zotero-prefpane-export"
@@ -51,8 +56,8 @@
 			<menulist id="zotero-quickCopy-menu"/>
 			
 			<hbox align="center">
-				<label id="zotero-quickCopy-locale-menu-label" value="&zotero.preferences.quickCopy.locale;" control="zotero-quickCopy-locale-menu"/>
-				<menulist id="zotero-quickCopy-locale-menu"/>
+				<label id="zotero-quickCopy-locale-menu-label" value="&zotero.bibliography.locale.label;" control="zotero-quickCopy-locale-menu"/>
+				<menulist id="zotero-quickCopy-locale-menu" oncommand="Zotero_Preferences.Export._lastSelectedLocale = this.value"/>
 				
 				<separator orient="vertical" width="15px"/>
 				

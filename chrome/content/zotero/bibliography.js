@@ -34,8 +34,7 @@
 
 var Zotero_File_Interface_Bibliography = new function() {
 	var _io, _saveStyle;
-	var selectedLocale = "";
-	var defaultStyleLocale = "";
+	var lastSelectedLocale; // Only changes when explicitly selected
 	
 	/*
 	 * Initialize some variables and prepare event listeners for when chrome is done
@@ -57,18 +56,18 @@ var Zotero_File_Interface_Bibliography = new function() {
 		}
 		
 		var listbox = document.getElementById("style-listbox");
-		var styles = Zotero.Styles.getVisible();
 		
-		// if no style is set, get the last style used
+		// if no style is requested, get the last style used
 		if(!_io.style) {
 			_io.style = Zotero.Prefs.get("export.lastStyle");
 			_saveStyle = true;
 		}
 		
 		// add styles to list
+		var styles = Zotero.Styles.getVisible();
 		var index = 0;
 		var nStyles = styles.length;
-		var selectIndex = -1;
+		var selectIndex = null;
 		for(var i=0; i<nStyles; i++) {
 			var itemNode = document.createElement("listitem");
 			itemNode.setAttribute("value", styles[i].styleID);
@@ -81,16 +80,23 @@ var Zotero_File_Interface_Bibliography = new function() {
 			index++;
 		}
 		
-		if (selectIndex < 1) {
+		let requestedLocale;
+		if (selectIndex === null) {
+			// Requested style not found in list, pre-select first style
 			selectIndex = 0;
+		} else {
+			requestedLocale = _io.locale;
+		}
+		
+		let style = styles[selectIndex];
+		lastSelectedLocale = Zotero.Prefs.get("export.lastLocale");
+		if (requestedLocale && style && !style.locale) {
+			// pre-select supplied locale
+			lastSelectedLocale = requestedLocale;
 		}
 		
 		// add locales to list
-		if(!_io.locale) {
-			_io.locale = Zotero.Prefs.get("export.lastLocale");
-		}
-		var menulist = document.getElementById("locale-menu");
-		selectedLocale = Zotero.Styles.populateLocaleList(menulist, _io.locale);
+		Zotero.Styles.populateLocaleList(document.getElementById("locale-menu"));
 		
 		// Has to be async to work properly
 		window.setTimeout(function () {
@@ -161,7 +167,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	 * Called when locale is changed
 	 */
 	this.localeChanged = function (selectedValue) {
-		selectedLocale = selectedValue;
+		lastSelectedLocale = selectedValue;
 	};
 
 	/*
@@ -219,39 +225,17 @@ var Zotero_File_Interface_Bibliography = new function() {
 	 * Update locale menulist when style is changed
 	 */
 	function updateLocaleMenu(selectedStyle) {
-		// For styles with a default-locale, disable locale menulist and show locale
-		var menulist = document.getElementById("locale-menu");
-		
-		// If not null, then menulist is extended with the default-locale value
-		// of the previously selected style
-		if (defaultStyleLocale) {
-			// Reset menulist
-			menulist.removeItemAt(0);
-			defaultStyleLocale = "";
-		}
-		
-		if (selectedStyle.locale) {
-			defaultStyleLocale = selectedStyle.locale;
-			
-			//add default-locale to menulist
-			let localeLabel = defaultStyleLocale;
-			if (Zotero.Styles.locales[defaultStyleLocale] !== undefined) {
-				localeLabel = Zotero.Styles.locales[defaultStyleLocale];
-			}
-			
-			menulist.insertItemAt(0, localeLabel, defaultStyleLocale);
-			menulist.selectedIndex = 0;
-			menulist.disabled = true;
-		} else {
-			menulist.value = selectedLocale;
-			menulist.disabled = false;
-		}
+		Zotero.Styles.updateLocaleList(
+			document.getElementById("locale-menu"),
+			selectedStyle,
+			lastSelectedLocale
+		);
 	}
 
 	this.acceptSelection = function () {
 		// collect code
-		_io.style = document.getElementById("style-listbox").selectedItem.value;
-		_io.locale = document.getElementById("locale-menu").selectedItem.value;
+		_io.style = document.getElementById("style-listbox").value;
+		_io.locale = document.getElementById("locale-menu").value;
 		if(document.getElementById("output-method-radio")) {
 			// collect settings
 			_io.mode = document.getElementById("output-mode-radio").selectedItem.id;
@@ -280,6 +264,6 @@ var Zotero_File_Interface_Bibliography = new function() {
 		}
 		
 		// save locale
-		Zotero.Prefs.set("export.lastLocale", selectedLocale);
+		Zotero.Prefs.set("export.lastLocale", lastSelectedLocale);
 	};
 }

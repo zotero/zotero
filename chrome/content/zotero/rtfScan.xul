@@ -92,7 +92,7 @@
 		<groupbox>
 			<hbox align="center">
 				<caption label="&zotero.bibliography.locale.label;"/>
-				<menulist id="locale-menu" oncommand="Zotero_File_Interface_Bibliography.localeChanged(this.selectedItem.value)"/>
+				<menulist id="locale-menu" oncommand="Zotero_File_Interface_Bibliography.localeChanged(this.value)"/>
 			</hbox>
 		</groupbox>
 		<groupbox>

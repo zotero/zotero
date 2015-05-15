@@ -30,11 +30,10 @@ var Zotero_CSL_Preview = new function() {
 	this.generateBibliography = generateBibliography;
 	
 	function init() { 
-		//refresh();
-		var quickCopyLocale = Zotero.Prefs.get("export.quickCopy.locale");
 		var menulist = document.getElementById("locale-menu");
 		
-		Zotero.Styles.populateLocaleList(menulist, quickCopyLocale);
+		Zotero.Styles.populateLocaleList(menulist);
+		menulist.value = Zotero.Prefs.get('export.lastLocale');;
 		
 		var iframe = document.getElementById('zotero-csl-preview-box');
 		iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p>' + Zotero.getString('styles.preview.instructions') + '</p></body></html>';
@@ -91,8 +90,7 @@ var Zotero_CSL_Preview = new function() {
 			return '';
 		}
 		
-		var locale = document.getElementById("locale-menu").selectedItem.value;
-		
+		var locale = document.getElementById("locale-menu").value;
 		var styleEngine = style.getCiteProc(locale);
 		
 		// Generate multiple citations
