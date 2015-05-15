@@ -107,10 +107,11 @@ ConcurrentCaller.prototype.fcall = function (func) {
 		return deferred.promise;
 	}
 	
-	this._log("Running function (" + this._numRunning + " current < " + this._numConcurrent + " max)");
+	this._numRunning++;
 	
 	// Otherwise run it now
-	this._numRunning++;
+	this._log("Running function (" + this._numRunning + "/" + this._numConcurrent + ")");
+	
 	return this._onFunctionDone(Promise.try(func));
 }
 
