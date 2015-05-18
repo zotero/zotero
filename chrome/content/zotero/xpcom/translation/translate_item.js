@@ -661,12 +661,6 @@ Zotero.Translate.ItemSaver.prototype = {
 	},
 	
 	"_saveNotes":function(item, parentID) {
-		// This can result in a lot of notes being attached if notes is set to string
-		if (typeof item.notes == 'string') {
-			Zotero.debug("WARNING: item.notes set to string. Should be an array");
-			item.notes = [item.notes];
-		}
-		
 		for(var i=0; i<item.notes.length; i++) {
 			var note = item.notes[i];
 			if(!note) continue;
@@ -712,11 +706,6 @@ Zotero.Translate.ItemSaver.prototype = {
 			var tagsToAdd = {};
 			tagsToAdd[0] = []; // user tags
 			tagsToAdd[1] = []; // automatic tags
-			
-			if (typeof item.tags == 'string') {
-				Zotero.debug("WARNING: item.tags set to string. Should be an array");
-				item.tags = [item.tags];
-			}
 			
 			for(var i=0; i<item.tags.length; i++) {
 				var tag = item.tags[i];

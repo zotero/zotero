@@ -88,7 +88,7 @@ Zotero.Translate.Sandbox = {
 				Zotero.debug("Translate: WARNING: Zotero.Item#complete() called after Zotero.done(); please fix your code", 2);
 			}
 				
-			const allowedObjects = ["complete", "attachments", "seeAlso", "creators", "tags", "notes"];
+			const allowedArrays = ["attachments", "seeAlso", "creators", "tags", "notes"];
 			
 			delete item.complete;
 			for(var i in item) {
@@ -101,14 +101,13 @@ Zotero.Translate.Sandbox = {
 				
 				var type = typeof val;
 				var isObject = type === "object" || type === "xml" || type === "function",
-					shouldBeObject = allowedObjects.indexOf(i) !== -1;
-				if(isObject && !shouldBeObject) {
+					shouldBeArray = allowedArrays.indexOf(i) !== -1;
+				if(isObject && !shouldBeArray) {
 					// Convert things that shouldn't be objects to objects
 					translate._debug("Translate: WARNING: typeof "+i+" is "+type+"; converting to string");
 					item[i] = val.toString();
-				} else if(shouldBeObject && !isObject) {
-					translate._debug("Translate: WARNING: typeof "+i+" is "+type+"; converting to array");
-					item[i] = [val];
+				} else if(shouldBeArray && !Array.isArray(val)) {
+					throw new Error("Translate: Zotero.Item::" + i + " must be an array");
 				} else if(type === "string") {
 					// trim strings
 					item[i] = val.trim();
@@ -686,7 +685,7 @@ Zotero.Translate.Sandbox = {
 				}
 				
 				// refuse to save very long tags
-				if(item.tags) {
+				if(item.tags && Array.isArray(item.tags)) {
 					for(var i=0; i<item.tags.length; i++) {
 						var tag = item.tags[i];
 							tagString = typeof tag === "string" ? tag :
@@ -1594,13 +1593,13 @@ Zotero.Translate.Base.prototype = {
 		const createArrays = "['creators', 'notes', 'tags', 'seeAlso', 'attachments']";
 		var src = "var Zotero = {};"+
 		"Zotero.Item = function (itemType) {"+
-				"const createArrays = "+createArrays+";"+
-				"this.itemType = itemType;"+
-				"for(var i=0, n=createArrays.length; i<n; i++) {"+
-					"this[createArrays[i]] = [];"+
-				"}"+
+			"const createArrays = "+createArrays+";"+
+			"this.itemType = itemType;"+
+			"for(var i=0, n=createArrays.length; i<n; i++) {"+
+				"this[createArrays[i]] = [];"+
+			"}"+
 		"};";
-		
+			
 		if(this instanceof Zotero.Translate.Export || this instanceof Zotero.Translate.Import) {
 			src += "Zotero.Collection = function () {};"+
 			"Zotero.Collection.prototype.complete = function() { Zotero._collectionDone(this); };";
@@ -1610,25 +1609,25 @@ Zotero.Translate.Base.prototype = {
 			// workaround for inadvertant attempts to pass E4X back from sandbox
 			src += "Zotero.Item.prototype.complete = function() { "+
 					"for(var key in this) {"+
-					"if("+createArrays+".indexOf(key) !== -1) {"+
-						"for each(var item in this[key]) {"+
-							"for(var key2 in item) {"+
-								"if(typeof item[key2] === 'xml') {"+
-									"item[key2] = item[key2].toString();"+
-								"}"+
+				"if("+createArrays+".indexOf(key) !== -1) {"+
+					"for each(var item in this[key]) {"+
+						"for(var key2 in item) {"+
+							"if(typeof item[key2] === 'xml') {"+
+								"item[key2] = item[key2].toString();"+
 							"}"+
 						"}"+
-					"} else if(typeof this[key] === 'xml') {"+
-						"this[key] = this[key].toString();"+
 					"}"+
-				"}";
+				"} else if(typeof this[key] === 'xml') {"+
+					"this[key] = this[key].toString();"+
+				"}"+
+			"}";
 		} else {
 			src += "Zotero.Item.prototype.complete = function() { ";
 		}
-		
+			
 		src += "Zotero._itemDone(this);"+
 		"}";
-
+		
 		this._sandboxManager.eval(src);
 		this._sandboxManager.importObject(this.Sandbox, this);
 		this._sandboxManager.importObject({"Utilities":new Zotero.Utilities.Translate(this)});
