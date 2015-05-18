@@ -257,7 +257,7 @@ Zotero.Translate.Sandbox = {
 						try {
 							item = item.wrappedJSObject ? item.wrappedJSObject : item;
 							if(arg1 == "itemDone") {
-								item.complete = translate._sandboxZotero.Item.prototype.complete;
+								item.complete = translate._sandboxZotero.Item._complete;
 							} else if(arg1 == "translators" && Zotero.isFx && !Zotero.isBookmarklet) {
 								var translators = new translate._sandboxManager.sandbox.Array();
 								translators = translators.wrappedJSObject || translators;
@@ -1598,17 +1598,15 @@ Zotero.Translate.Base.prototype = {
 			"for(var i=0, n=createArrays.length; i<n; i++) {"+
 				"this[createArrays[i]] = [];"+
 			"}"+
+			"this.complete = Zotero.Item._complete"+
 		"};";
 			
-		if(this instanceof Zotero.Translate.Export || this instanceof Zotero.Translate.Import) {
-			src += "Zotero.Collection = function () {};"+
-			"Zotero.Collection.prototype.complete = function() { Zotero._collectionDone(this); };";
-		}
+		// Define complete on object, not class prototype, so we can delete it later
+		src += "Zotero.Item._complete = function() { ";
 		
 		if(Zotero.isFx && !Zotero.isBookmarklet) {
 			// workaround for inadvertant attempts to pass E4X back from sandbox
-			src += "Zotero.Item.prototype.complete = function() { "+
-					"for(var key in this) {"+
+			src += "for(var key in this) {"+
 				"if("+createArrays+".indexOf(key) !== -1) {"+
 					"for each(var item in this[key]) {"+
 						"for(var key2 in item) {"+
@@ -1621,13 +1619,16 @@ Zotero.Translate.Base.prototype = {
 					"this[key] = this[key].toString();"+
 				"}"+
 			"}";
-		} else {
-			src += "Zotero.Item.prototype.complete = function() { ";
 		}
 			
 		src += "Zotero._itemDone(this);"+
-		"}";
+			"};"; // Close Zotero.Item._complete()
 		
+		if(this instanceof Zotero.Translate.Export || this instanceof Zotero.Translate.Import) {
+			src += "Zotero.Collection = function () {};"+
+			"Zotero.Collection.prototype.complete = function() { Zotero._collectionDone(this); };";
+		}
+
 		this._sandboxManager.eval(src);
 		this._sandboxManager.importObject(this.Sandbox, this);
 		this._sandboxManager.importObject({"Utilities":new Zotero.Utilities.Translate(this)});
