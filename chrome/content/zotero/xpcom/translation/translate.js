@@ -592,8 +592,8 @@ Zotero.Translate.Sandbox = {
 				
 				if (!item.title && item.shortTitle) item.title = item.shortTitle;
 				
-				if(!item.title && item.title !== '') {
-					translate.complete(false, new Error("No title specified for item"));
+				if(!item.title && !(item.creators.length && item.creators[0].lastName)) {
+					translate.complete(false, new Error("No title or creator specified for item"));
 					return;
 				}
 				
