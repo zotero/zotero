@@ -140,6 +140,16 @@ Zotero.Creators = new function() {
 	});
 	
 	
+	this.equals = function (data1, data2) {
+		data1 = this.cleanData(data1);
+		data2 = this.cleanData(data2);
+		return data1.lastName === data2.lastName
+			&& data1.firstName === data2.firstName
+			&& data1.fieldMode === data2.fieldMode
+			&& data1.creatorTypeID === data2.creatorTypeID;
+	},
+	
+	
 	this.cleanData = function (data) {
 		// Validate data
 		if (data.name === undefined && data.lastName === undefined) {

@@ -818,6 +818,17 @@ Zotero.Tags = new function() {
 	}
 	
 	
+	/**
+	 * Compare two API JSON tag objects
+	 */
+	this.equals = function (data1, data2) {
+		data1 = this.cleanData(data1);
+		data2 = this.cleanData(data2);
+		return data1.tag === data2.tag
+			&& ((!data1.type && !data2.type) || data1.type === data2.type);
+	},
+	
+	
 	this.cleanData = function (data) {
 		// Validate data
 		if (data.tag === undefined) {
