@@ -156,6 +156,35 @@
 			<property name="noteField" onget="return this._id('noteField')" readonly="true"/>
 			<property name="value" onget="return this._id('noteField').value;" onset="this._id('noteField').value = val;"/>
 			
+			<constructor>
+			<![CDATA[
+				this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'noteeditor');
+			]]>
+			</constructor>
+			
+			<destructor>
+			<![CDATA[
+				Zotero.Notifier.unregisterObserver(this._notifierID);
+			]]>
+			</destructor>
+			
+			<method name="notify">
+				<parameter name="event"/>
+				<parameter name="type"/>
+				<parameter name="ids"/>
+				<body><![CDATA[
+					if (event != 'modify' || !this.item || !this.item.id) return;
+					for (let i = 0; i < ids.length; i++) {
+						let id = ids[i];
+						if (id != this.item.id) {
+							continue;
+						}
+						this.refresh();
+						break;
+					}
+				]]></body>
+			</method>
+			
 			<method name="refresh">
 				<body><![CDATA[
 					return Zotero.spawn(function* () {
