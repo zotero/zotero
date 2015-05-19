@@ -1381,7 +1381,15 @@ Zotero.Utilities = {
 		}
 		
 		var isArray = objType == '[object Array]'
-		var dumpedText = isArray ? '[' : objType + ' {';
+		if (isArray) {
+			var dumpedText = '[';
+		}
+		else if (objType == '[object Object]') {
+			var dumpedText = '{';
+		}
+		else {
+			var dumpedText = objType + ' {';
+		}
 		for (var prop in obj) {
 			dumpedText += '\n' + level_padding + JSON.stringify(prop) + ": ";
 			
