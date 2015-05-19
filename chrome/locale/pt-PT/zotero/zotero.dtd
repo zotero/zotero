@@ -126,6 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Maiúsculas Iniciais de Título">
 <!ENTITY zotero.item.textTransform.sentencecase "Caixa da frase">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
+<!ENTITY zotero.item.viewOnline "View Online">
+<!ENTITY zotero.item.copyAsURL "Copy as URL">
 
 <!ENTITY zotero.toolbar.newNote "Nova Nota">
 <!ENTITY zotero.toolbar.note.standalone "Nova Nota Isolada">

@@ -92,8 +92,8 @@
 <!ENTITY zotero.items.menu.duplicateItem "Seçili Eseri Çoğalt">
 <!ENTITY zotero.items.menu.mergeItems "Eserleri Birleştir...">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Eserin hangi sürümünün asıl eser olarak kullanılacağını seç:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Eserin diğer sürümlerinden hangi alanların tutulacağını seç:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Eserin hangi versiyonunun asıl eser olarak kullanılacağını seç:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Eserin diğer versiyonlarından hangi alanların tutulacağını seç:">
 
 <!ENTITY zotero.toolbar.newItem.label "Yeni Eser">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Başka türler">
@@ -126,6 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Başlık Biçimi">
 <!ENTITY zotero.item.textTransform.sentencecase "Cümle Biçimi">
 <!ENTITY zotero.item.creatorTransform.nameSwap "İlk ve Soyadları Takas Et">
+<!ENTITY zotero.item.viewOnline "View Online">
+<!ENTITY zotero.item.copyAsURL "Copy as URL">
 
 <!ENTITY zotero.toolbar.newNote "Yeni Not">
 <!ENTITY zotero.toolbar.note.standalone "Yeni Bağımsız Not">

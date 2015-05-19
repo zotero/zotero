@@ -126,6 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Velká Písmena">
 <!ENTITY zotero.item.textTransform.sentencecase "Velké první písmeno">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Zaměnit křestní jména / přijmení">
+<!ENTITY zotero.item.viewOnline "View Online">
+<!ENTITY zotero.item.copyAsURL "Copy as URL">
 
 <!ENTITY zotero.toolbar.newNote "Nová poznámka">
 <!ENTITY zotero.toolbar.note.standalone "Nová samostatná poznámka">

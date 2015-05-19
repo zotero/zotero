@@ -81,7 +81,7 @@
 
 
 <!ENTITY zotero.preferences.prefpane.search "Wyszukiwanie">
-<!ENTITY zotero.preferences.search.fulltextCache "Bufor wyszukiwań typu &quot;full-text&quot;">
+<!ENTITY zotero.preferences.search.fulltextCache "Bufor wyszukiwań pełnotekstowych">
 <!ENTITY zotero.preferences.search.pdfIndexing "Indeksowanie plików PDF">
 <!ENTITY zotero.preferences.search.indexStats "Statystyki indeksowania">
 
@@ -167,7 +167,7 @@
 <!ENTITY zotero.preferences.locate.description "Opis">
 <!ENTITY zotero.preferences.locate.name "Nazwa">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Silnik wyszukiwania rozszerza możliwości menu wyszukiwania w panelu informacji. Włączając silniki wyszukiwania na poniższej liście, zostaną one dodane do rozwijanego i mogą zostać użyte do wyszukiwania zasobów z twojej biblioteki w sieci internet.">
-<!ENTITY zotero.preferences.locate.addDescription "Aby dodać silnik wyszukiwania, którego nie ma na liście, odwiedź określony silnik wyszukiwania w przeglądarce i wybierz 'Dodaj' na pasku wyszukiwania Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "Aby dodać silnik wyszukiwania, którego nie ma na liście, odwiedź określony silnik wyszukiwania w przeglądarce i wybierz &quot;Dodaj&quot; na pasku wyszukiwania Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Przywróć domyślne">
 
 <!ENTITY zotero.preferences.charset "Kodowanie znaków">
@@ -177,7 +177,7 @@
 <!ENTITY zotero.preferences.dataDir "Miejsce przechowywania:">
 <!ENTITY zotero.preferences.dataDir.useProfile "Użyj katalogu profilu">
 <!ENTITY zotero.preferences.dataDir.custom "Określ katalog:">
-<!ENTITY zotero.preferences.dataDir.choose "Przeglądaj">
+<!ENTITY zotero.preferences.dataDir.choose "Przeglądaj...">
 <!ENTITY zotero.preferences.dataDir.reveal "Wyświetl katalog bazy danych">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Katalog podstawowy załączników">
@@ -188,9 +188,9 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Konserwacja bazy danych">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Sprawdź spójność bazy danych">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Resetuj translatory i style...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Resetuj translatory...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Resetuj style...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Przywróć translatory i style...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Przywróć translatory...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Przywróć style...">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Logowanie informacji debugowania">
 <!ENTITY zotero.preferences.debugOutputLogging.message "Informacje debugowania mogą pomóć programistom Zotero wykryć problemy w Zotero. Zapisywanie informacji debugowania spowalnia pracę Zotero, więc zwykle powinno sie zostawić tą opcję wyłączoną, chyba że programista Zotero zażądał takiej informacji.">
