@@ -493,41 +493,51 @@ Zotero.Translate.ItemSaver.prototype = {
 			if(attachment.snapshot === false || !this._saveFiles) {
 				// if snapshot is explicitly set to false, attach as link
 				attachment.linkMode = "linked_url";
+				let url, mimeType;
 				if(attachment.document) {
-					yield Zotero.Attachments.linkFromURL({
-						url: attachment.document.location.href,
-						parentItemID: parentID,
-						contentType: attachment.mimeType ? attachment.mimeType : attachment.document.contentType,
-						title: title
-					})
-					.catch(function (e) {
-						Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
-						attachmentCallback(attachment, false, e);
-					});
-					
-					attachmentCallback(attachment, 100);
-					
-					return true;
+					url = attachment.document.location.href;
+					mimeType = attachment.mimeType ? attachment.mimeType : attachment.document.contentType;
 				} else {
-					if(!attachment.mimeType || !title) {
-						Zotero.debug("Translate: Either mimeType or title is missing; attaching file will be slower", 3);
-					}
-					
-					yield Zotero.Attachments.linkFromURL({
-						url: attachment.url,
-						parentItemID: parentID,
-						contentType: attachment.mimeType ? attachment.mimeType : undefined,
-						title: title
-					})
-					.catch(function (e) {
-						Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
-						attachmentCallback(attachment, false, e);
-					});
-					
-					attachmentCallback(attachment, 100);
-					
-					return true;
+					url = attachment.url
+					mimeType = attachment.mimeType ? attachment.mimeType : undefined;
 				}
+				
+				if(!mimeType || !title) {
+					Zotero.debug("Translate: Either mimeType or title is missing; attaching link to URL will be slower", 3);
+				}
+				
+				let cleanURI = Zotero.Attachments.cleanAttachmentURI(url);
+				if (!cleanURI) {
+					let e = "Translate: Invalid attachment URL specified <" + url + ">";
+					Zotero.debug(e, 2);
+					attachmentCallback(attachment, false, e);
+					return false;
+				}
+				url = Components.classes["@mozilla.org/network/io-service;1"]
+					.getService(Components.interfaces.nsIIOService)
+					.newURI(cleanURI, null, null); // This cannot fail, since we check above
+				
+				// Only HTTP/HTTPS links are allowed
+				if(url.scheme != "http" && url.scheme != "https") {
+					let e = "Translate: " + url.scheme + " protocol is not allowed for attachments from translators.";
+					Zotero.debug(e, 2);
+					attachmentCallback(attachment, false, e);
+					return false;
+				}
+				
+				yield Zotero.Attachments.linkFromURL({
+					url: cleanURI,
+					parentItemID: parentID,
+					contentType: mimeType,
+					title: title
+				})
+				.catch(function (e) {
+					Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
+					attachmentCallback(attachment, false, e);
+				});
+					
+				attachmentCallback(attachment, 100);
+				
 				return true;
 			} else {
 				// if snapshot is not explicitly set to false, retrieve snapshot
