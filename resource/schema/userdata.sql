@@ -297,7 +297,7 @@ CREATE TABLE syncCache (
     syncObjectTypeID INT NOT NULL,
     version INT NOT NULL,
     data TEXT,
-    PRIMARY KEY (libraryID, key, syncObjectTypeID),
+    PRIMARY KEY (libraryID, key, syncObjectTypeID, version),
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE,
     FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)
 );
