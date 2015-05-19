@@ -413,6 +413,13 @@
 								label.setAttribute("isButton", true);
 								label.setAttribute("onclick", "ZoteroPane_Local.loadURI('" + doi + "', event)");
 								label.setAttribute("tooltiptext", Zotero.getString('locate.online.tooltip'));
+								valueElement.setAttribute('contextmenu', 'zotero-doi-menu');
+								
+								var openURLMenuItem = document.getElementById('zotero-doi-menu-view-online');
+								openURLMenuItem.setAttribute("oncommand", "ZoteroPane_Local.loadURI('" + doi + "', event)");
+								
+								var copyMenuItem = document.getElementById('zotero-doi-menu-copy');
+								copyMenuItem.setAttribute("oncommand", "Zotero.Utilities.Internal.copyTextToClipboard('" + doi + "')");
 							}
 						}
 						else if (fieldName == 'abstractNote') {
@@ -2478,6 +2485,10 @@
 							return !hideTransforms;">
 						<menuitem label="&zotero.item.creatorTransform.nameSwap;"
 							oncommand="document.getBindingParent(this).swapNames();"/>
+					</menupopup>
+					<menupopup id="zotero-doi-menu">
+						<menuitem id="zotero-doi-menu-view-online" label="&zotero.item.viewOnline;"/>
+						<menuitem id="zotero-doi-menu-copy" label="&zotero.item.copyAsURL;"/>
 					</menupopup>
 					<zoteroguidancepanel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
 				</popupset>
