@@ -185,9 +185,9 @@ Zotero.HTTP = new function() {
 			}
 			
 			if(success) {
+				Zotero.debug("HTTP " + method + " " + dispURL
+					+ " succeeded with " + xmlhttp.status);
 				if (options.debug) {
-					Zotero.debug("HTTP " + method + " " + dispURL
-						+ " succeeded with " + xmlhttp.status);
 					Zotero.debug(xmlhttp.responseText);
 				}
 				deferred.resolve(xmlhttp);
