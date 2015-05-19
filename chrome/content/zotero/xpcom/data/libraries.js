@@ -70,6 +70,11 @@ Zotero.Libraries = new function () {
 	}
 	
 	
+	this.getAll = function () {
+		return [for (x of Object.keys(_libraryData)) parseInt(x)]
+	}
+	
+	
 	this.add = Zotero.Promise.coroutine(function* (libraryID, type) {
 		switch (type) {
 			case 'group':
