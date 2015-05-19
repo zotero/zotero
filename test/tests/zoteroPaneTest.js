@@ -36,7 +36,7 @@ describe("ZoteroPane", function() {
 	});
 	
 	describe("#itemSelected()", function () {
-		it("should update the item count", function* () {
+		it.skip("should update the item count", function* () {
 			var collection = new Zotero.Collection;
 			collection.name = "Count Test";
 			var id = yield collection.saveTx();
