@@ -92,6 +92,11 @@ Zotero.MIME = new function(){
 		'application/x-javascript': true
 	};
 	
+	var _webPageTypes = [
+		'text/html',
+		'application/xhtml+xml'
+	]
+	
 	// MIME types handled natively by Gecko
 	// DEBUG: There's definitely a better way of getting these
 	var _nativeMIMETypes = {
@@ -122,6 +127,9 @@ Zotero.MIME = new function(){
 		return mimeType.substr(0, 5) == 'text/' || _textTypes[mimeType];
 	}
 	
+	this.isWebPageType = function(mimeType) {
+		return _webPageTypes.indexOf(mimeType) != -1;
+	}
 	
 	/*
 	 * Our own wrapper around the MIME service's getPrimaryExtension() that
