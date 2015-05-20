@@ -520,18 +520,15 @@
 }
 
 /* Sync error icon */
-#zotero-tb-sync-error, #zotero-tb-sync-error[mode=warning]
-{
+#zotero-tb-sync-error {
 	list-style-image: url(chrome://zotero/skin/error.png);
 }
 
-#zotero-tb-sync-error[mode=error]
-{
-	list-style-image: url(chrome://zotero/skin/exclamation.png);
+#zotero-tb-sync-error[state=warning] {
+	list-style-image: url(chrome://zotero/skin/warning.png);
 }
 
-#zotero-tb-sync-error[mode=upgrade]
-{
+#zotero-tb-sync-error[state=upgrade] {
 	list-style-image: url(chrome://zotero/skin/bell_error.png);
 }
 
