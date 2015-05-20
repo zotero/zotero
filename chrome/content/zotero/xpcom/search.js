@@ -92,25 +92,28 @@ Zotero.Search.prototype._set = function (field, value) {
 		return this._setIdentifier(field, value);
 	}
 	
-	switch (field) {
-	case 'name':
-		value = value.trim().normalize();
-		break;
-	
-	case 'version':
-		value = parseInt(value);
-		break;
-	
-	case 'synced':
-		value = !!value;
-		break;
-	}
-	
 	this._requireData('primaryData');
+	
+	switch (field) {
+		case 'name':
+			value = value.trim().normalize();
+			break;
+		
+		case 'version':
+			value = parseInt(value);
+			break;
+		
+		case 'synced':
+			value = !!value;
+			break;
+	}
 	
 	if (this['_' + field] != value) {
 		this._markFieldChange(field, this['_' + field]);
-		this._changed.primaryData = true;
+		if (!this._changed.primaryData) {
+			this._changed.primaryData = {};
+		}
+		this._changed.primaryData[field] = true;
 		
 		switch (field) {
 			default:
@@ -119,13 +122,12 @@ Zotero.Search.prototype._set = function (field, value) {
 	}
 }
 
-
 Zotero.Search.prototype.loadFromRow = function (row) {
 	this._id = row.savedSearchID;
-	this._libraryID = row.libraryID;
+	this._libraryID = parseInt(row.libraryID);
 	this._key = row.key;
 	this._name = row.name;
-	this._version = row.version;
+	this._version = parseInt(row.version);
 	this._synced = !!row.synced;
 	
 	this._loaded.primaryData = true;
@@ -147,8 +149,7 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	var searchID = env.id = this._id = this.id ? this.id : yield Zotero.ID.get('savedSearches');
 	
 	env.sqlColumns.push(
-		'savedSearchName',
-		'savedSearchID'
+		'savedSearchName'
 	);
 	env.sqlValues.push(
 		{ string: this.name }
@@ -249,6 +250,25 @@ Zotero.Search.prototype.clone = function (libraryID) {
 	
 	return s;
 };
+
+
+Zotero.Search.prototype._eraseData = Zotero.Promise.coroutine(function* () {
+	Zotero.DB.requireTransaction();
+	
+	var notifierData = {};
+	notifierData[this.id] = {
+		libraryID: this.libraryID,
+		key: this.key
+	};
+	
+	var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
+	yield Zotero.DB.queryAsync(sql, this.id);
+	
+	var sql = "DELETE FROM savedSearches WHERE savedSearchID=?";
+	yield Zotero.DB.queryAsync(sql, this.id);
+	
+	Zotero.Notifier.trigger('delete', 'search', this.id, notifierData);
+});
 
 
 Zotero.Search.prototype.addCondition = function (condition, operator, value, required) {
@@ -1690,29 +1710,13 @@ Zotero.Searches = function() {
 	 */
 	this.erase = Zotero.Promise.coroutine(function* (ids) {
 		ids = Zotero.flattenArguments(ids);
-		var notifierData = {};
 		
 		yield Zotero.DB.executeTransaction(function* () {
 			for (let i=0; i<ids.length; i++) {
-				let id = ids[i];
-				var search = new Zotero.Search;
-				search.id = id;
-				yield search.loadPrimaryData();
-				yield search.loadConditions();
-				notifierData[id] = {
-					libraryID: this.libraryID,
-					old: search.serialize() // TODO: replace with toJSON()
-				};
-				
-				var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
-				yield Zotero.DB.queryAsync(sql, id);
-				
-				var sql = "DELETE FROM savedSearches WHERE savedSearchID=?";
-				yield Zotero.DB.queryAsync(sql, id);
+				let search = yield Zotero.Searches.getAsync(ids[i]);
+				yield search.erase();
 			}
 		}.bind(this));
-		
-		Zotero.Notifier.trigger('delete', 'search', ids, notifierData);
 	});
 	
 	

@@ -209,7 +209,7 @@ Zotero.Collections = function() {
 			}
 			
 			this.unload(ids);
-		});
+		}.bind(this));
 	};
 	
 	Zotero.DataObjects.call(this);

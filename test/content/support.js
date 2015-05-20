@@ -145,6 +145,37 @@ function waitForCallback(cb, interval, timeout) {
 	return deferred.promise;
 }
 
+//
+// Data objects
+//
+function createUnsavedDataObject(objectType, params) {
+	params = params || {};
+	if (objectType == 'item') {
+		var param = 'book';
+	}
+	var obj = new Zotero[Zotero.Utilities.capitalize(objectType)](param);
+	switch (objectType) {
+	case 'collection':
+	case 'search':
+		obj.name = params.name !== undefined ? params.name : "Test";
+		break;
+	}
+	if (params.version !== undefined) {
+		obj.version = params.version
+	}
+	if (params.synced !== undefined) {
+		obj.synced = params.synced
+	}
+	return obj;
+}
+
+var createDataObject = Zotero.Promise.coroutine(function* (objectType, params, saveOptions) {
+	var obj = createUnsavedDataObject(objectType, params);
+	var id = yield obj.saveTx(saveOptions);
+	var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
+	return objectsClass.getAsync(id);
+});
+
 /**
  * Return a promise for the error thrown by a promise, or false if none
  */

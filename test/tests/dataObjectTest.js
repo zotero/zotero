@@ -29,13 +29,32 @@ describe("Zotero.DataObject", function() {
 		})
 	})
 	
+	describe("#version", function () {
+		it("should be set to 0 after creating object", function* () {
+			for (let type of types) {
+				let obj = yield createDataObject(type);
+				assert.equal(obj.version, 0);
+				yield obj.eraseTx();
+			}
+		})
+		
+		it("should be set after creating object", function* () {
+			for (let type of types) {
+				Zotero.logError(type);
+				let obj = yield createDataObject(type, { version: 1234 });
+				assert.equal(obj.version, 1234, type + " version mismatch");
+				yield obj.eraseTx();
+			}
+		})
+	})
+	
 	describe("#synced", function () {
 		it("should be set to false after creating item", function* () {
 			var item = new Zotero.Item("book");
 			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			assert.isFalse(item.synced);
-			yield Zotero.Items.erase(id);
+			item.eraseTx();
 		});
 		
 		it("should be set to true when changed", function* () {
@@ -44,10 +63,10 @@ describe("Zotero.DataObject", function() {
 			item = yield Zotero.Items.getAsync(id);
 			
 			item.synced = 1;
-			yield item.save();
+			yield item.saveTx();
 			assert.ok(item.synced);
 			
-			yield Zotero.Items.erase(id);
+			item.eraseTx();
 		});
 		
 		it("should be set to false after modifying item", function* () {
@@ -56,14 +75,14 @@ describe("Zotero.DataObject", function() {
 			item = yield Zotero.Items.getAsync(id);
 			
 			item.synced = 1;
-			yield item.save();
+			yield item.saveTx();
 			
 			yield item.loadItemData();
 			item.setField('title', 'test');
-			yield item.save();
+			yield item.saveTx();
 			assert.isFalse(item.synced);
 			
-			yield Zotero.Items.erase(id);
+			item.eraseTx();
 		});
 		
 		it("should be unchanged if skipSyncedUpdate passed", function* () {
@@ -72,16 +91,16 @@ describe("Zotero.DataObject", function() {
 			item = yield Zotero.Items.getAsync(id);
 			
 			item.synced = 1;
-			yield item.save();
+			yield item.saveTx();
 			
 			yield item.loadItemData();
 			item.setField('title', 'test');
-			yield item.save({
+			yield item.saveTx({
 				skipSyncedUpdate: true
 			});
 			assert.ok(item.synced);
 			
-			yield Zotero.Items.erase(id);
+			item.eraseTx();
 		});
 	})
 	

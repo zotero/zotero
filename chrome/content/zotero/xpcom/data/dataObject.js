@@ -714,19 +714,44 @@ Zotero.DataObject.prototype._recoverFromSaveError = Zotero.Promise.coroutine(fun
 /**
  * Delete object from database
  */
-Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* () {
-	var env = {};
+Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* (options) {
+	options = options || {};
+	var env = {
+		options: options
+	};
+	
+	if (!env.options.tx && !Zotero.DB.inTransaction()) {
+		Zotero.logError("erase() called on Zotero." + this._ObjectType + " without a wrapping "
+			+ "transaction -- use eraseTx() instead");
+		Zotero.debug((new Error).stack, 2);
+		env.options.tx = true;
+	}
 	
 	var proceed = yield this._eraseInit(env);
 	if (!proceed) return false;
 	
 	Zotero.debug('Deleting ' + this.objectType + ' ' + this.id);
 	
-	Zotero.DB.requireTransaction();
-	yield this._eraseData(env);
-	yield this._erasePreCommit(env);
-	return this._erasePostCommit(env);
+	if (env.options.tx) {
+		return Zotero.DB.executeTransaction(function* () {
+			yield this._eraseData(env);
+			yield this._erasePreCommit(env);
+			return this._erasePostCommit(env);
+		}.bind(this))
+	}
+	else {
+		Zotero.DB.requireTransaction();
+		yield this._eraseData(env);
+		yield this._erasePreCommit(env);
+		return this._erasePostCommit(env);
+	}
 });
+
+Zotero.DataObject.prototype.eraseTx = function (options) {
+	options = options || {};
+	options.tx = true;
+	return this.erase(options);
+};
 
 Zotero.DataObject.prototype._eraseInit = function(env) {
 	if (!this.id) return Zotero.Promise.resolve(false);

@@ -1174,10 +1174,7 @@ Zotero.Item.prototype.isEditable = function() {
 }
 
 Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
-	// Sanity check
-	if (!Zotero.DB.inTransaction()) {
-		throw new Error("Not in transaction saving item " + this.libraryKey);
-	}
+	Zotero.DB.requireTransaction();
 	
 	var isNew = env.isNew;
 	var options = env.options;
@@ -1729,10 +1726,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		}
 	}
 	
-	// Sanity check
-	if (!Zotero.DB.inTransaction()) {
-		throw new Error("Not in transaction saving item " + this.libraryKey);
-	}
+	Zotero.DB.requireTransaction();
 });
 
 Zotero.Item.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
@@ -3919,6 +3913,8 @@ Zotero.Item.prototype._eraseInit = Zotero.Promise.coroutine(function* (env) {
 });
 
 Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
+	Zotero.DB.requireTransaction();
+	
 	// Remove item from parent collections
 	var parentCollectionIDs = this.collections;
 	if (parentCollectionIDs) {

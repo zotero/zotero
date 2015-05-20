@@ -590,72 +590,70 @@ Zotero.Collection.prototype.clone = function (includePrimary, newCollection) {
 /**
 * Deletes collection and all descendent collections (and optionally items)
 **/
-Zotero.Collection.prototype.erase = function(deleteItems) {
-	var collections = [this.id];
-	var notifierData = {};
+Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (deleteItems) {
+	Zotero.DB.requireTransaction();
 	
-	return Zotero.DB.executeTransaction(function* () {
-		var descendents = yield this.getDescendents(false, null, true);
-		var items = [];
-		notifierData[this.id] = {
-			libraryID: this.libraryID,
-			key: this.key
-		};
-		
-		var del = [];
-		for(var i=0, len=descendents.length; i<len; i++) {
-			// Descendent collections
-			if (descendents[i].type == 'collection') {
-				collections.push(descendents[i].id);
-				var c = yield this.ObjectsClass.getAsync(descendents[i].id);
-				if (c) {
-					notifierData[c.id] = {
-						libraryID: c.libraryID,
-						key: c.key
-					};
-				}
-			}
-			// Descendent items
-			else {
-				// Delete items from DB
-				if (deleteItems) {
-					del.push(descendents[i].id);
-				}
+	var collections = [this.id];
+	
+	var descendents = yield this.getDescendents(false, null, true);
+	var items = [];
+	
+	var notifierData = {};
+	notifierData[this.id] = {
+		libraryID: this.libraryID,
+		key: this.key
+	};
+	
+	var del = [];
+	for(var i=0, len=descendents.length; i<len; i++) {
+		// Descendent collections
+		if (descendents[i].type == 'collection') {
+			collections.push(descendents[i].id);
+			var c = yield this.ObjectsClass.getAsync(descendents[i].id);
+			if (c) {
+				notifierData[c.id] = {
+					libraryID: c.libraryID,
+					key: c.key
+				};
 			}
 		}
-		if (del.length) {
-			yield this.ChildObjects.trash(del);
+		// Descendent items
+		else {
+			// Delete items from DB
+			if (deleteItems) {
+				del.push(descendents[i].id);
+			}
 		}
-		
-		// Remove relations
-		var uri = Zotero.URI.getCollectionURI(this);
-		yield Zotero.Relations.eraseByURI(uri);
-		
-		var placeholders = collections.map(function () '?').join();
-		
-		// Remove item associations for all descendent collections
-		yield Zotero.DB.queryAsync('DELETE FROM collectionItems WHERE collectionID IN '
-			+ '(' + placeholders + ')', collections);
-		
-		// Remove parent definitions first for FK check
-		yield Zotero.DB.queryAsync('UPDATE collections SET parentCollectionID=NULL '
-			+ 'WHERE parentCollectionID IN (' + placeholders + ')', collections);
-		
-		// And delete all descendent collections
-		yield Zotero.DB.queryAsync ('DELETE FROM collections WHERE collectionID IN '
-			+ '(' + placeholders + ')', collections);
-		
-		// TODO: Update member items
-	}.bind(this))
-	.then(() => {
-		// Clear deleted collection from internal memory
-		this.ObjectsClass.unload(collections);
-		//return Zotero.Collections.reloadAll();
-	})
-	.then(function () {
-		Zotero.Notifier.trigger('delete', 'collection', collections, notifierData);
-	});
-}
+	}
+	if (del.length) {
+		yield this.ChildObjects.trash(del);
+	}
+	
+	// Remove relations
+	var uri = Zotero.URI.getCollectionURI(this);
+	yield Zotero.Relations.eraseByURI(uri);
+	
+	var placeholders = collections.map(function () '?').join();
+	
+	// Remove item associations for all descendent collections
+	yield Zotero.DB.queryAsync('DELETE FROM collectionItems WHERE collectionID IN '
+		+ '(' + placeholders + ')', collections);
+	
+	// Remove parent definitions first for FK check
+	yield Zotero.DB.queryAsync('UPDATE collections SET parentCollectionID=NULL '
+		+ 'WHERE parentCollectionID IN (' + placeholders + ')', collections);
+	
+	// And delete all descendent collections
+	yield Zotero.DB.queryAsync ('DELETE FROM collections WHERE collectionID IN '
+		+ '(' + placeholders + ')', collections);
+	
+	// TODO: Update member items
+	// Clear deleted collection from internal memory
+	this.ObjectsClass.unload(collections);
+	//return Zotero.Collections.reloadAll();
+	
+	Zotero.Notifier.trigger('delete', 'collection', collections, notifierData);
+});
 
 
 Zotero.Collection.prototype.isCollection = function() {
