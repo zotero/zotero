@@ -257,15 +257,6 @@
 							// Update note
 							var noteField = this._id('noteField');
 							if (this.item) {
-								// If note is reselected automatically after save
-								// from external note window, don't overwrite content
-								//
-								// TODO: use clientDateModified instead
-								if (this.item.getField('dateModified') != this._mtime) {
-									Zotero.debug("Note has already been changed", 4);
-									return;
-								}
-								
 								let changed = this.item.setNote(noteField.value);
 								if (changed && this.saveOnEdit) {
 									yield this.item.saveTx();
