@@ -2787,11 +2787,11 @@ var ZoteroPane = new function()
 			}
 			
 			//Special treatment for zotero links
-			if (uri.match(/(^zotero\:\/\/)((open-pdf)|(select))/)) {
-				var ioservice = Components.classes["@mozilla.org/network/io-service;1"]
+			if (uri.match(/^zotero\:\/\/(open-pdf|select)/)) {
+				let ioservice = Components.classes["@mozilla.org/network/io-service;1"]
 					  .getService(Components.interfaces.nsIIOService);
-				var zoteroLink = ioservice.newURI(uri, null, null);
-				var openZoteroLink = Components.classes["@mozilla.org/network/protocol;1?name=zotero"]
+				let zoteroLink = ioservice.newURI(uri, null, null);
+				openZoteroLink = Components.classes["@mozilla.org/network/protocol;1?name=zotero"]
 						.getService(Components.interfaces.nsIProtocolHandler).newChannel(zoteroLink);
 				return;
 			}
