@@ -259,7 +259,9 @@ Zotero.DataObjectUtilities = {
 			
 			// All remaining fields don't exist in data1
 			
-			if (data2[field] === false || data2[field] === "") {
+			let val = data2[field];
+			if (val === false || val === ""
+					|| (typeof val == 'object' && Object.keys(val).length == 0)) {
 				continue;
 			}
 			
@@ -351,10 +353,38 @@ Zotero.DataObjectUtilities = {
 	},
 	
 	_relationsDiff: function (data1, data2) {
-		if (!data1.length && !data2.length) {
-			return [];
+		data2 = data2 || {};
+		var changeset = [];
+		for (let pred in data1) {
+			let vals1 = typeof data1[pred] == 'string' ? [data1[pred]] : data1[pred];
+			let vals2 = (!data2[pred] || data2[pred] === '')
+				? []
+				: typeof data2[pred] == 'string' ? [data2[pred]] : data2[pred];
+			
+			var removed = Zotero.Utilities.arrayDiff(vals1, vals2);
+			for (let i = 0; i < removed.length; i++) {
+				changeset.push({
+					field: "relations",
+					op: "property-member-remove",
+					value: {
+						key: pred,
+						value: removed[i]
+					}
+				});
+			}
+			let added = Zotero.Utilities.arrayDiff(vals2, vals1);
+			for (let i = 0; i < added.length; i++) {
+				changeset.push({
+					field: "relations",
+					op: "property-member-add",
+					value: {
+						key: pred,
+						value: added[i]
+					}
+				});
+			}
 		}
-		throw new Error("Unimplemented");
+		return changeset;
 	},
 	
 	
@@ -385,10 +415,6 @@ Zotero.DataObjectUtilities = {
 					throw new Error("Unimplemented");
 					break;
 				
-				case 'relations':
-					throw new Error("Unimplemented");
-					break;
-				
 				case 'tags':
 					let found = false;
 					for (let i = 0; i < json[c.field].length; i++) {
@@ -403,7 +429,7 @@ Zotero.DataObjectUtilities = {
 					break;
 					
 				default:
-					throw new Error("Unexpected field");
+					throw new Error("Unexpected field '" + c.field + "'");
 				}
 			}
 			else if (c.op == 'member-remove') {
@@ -430,12 +456,67 @@ Zotero.DataObjectUtilities = {
 					break;
 					
 				default:
-					throw new Error("Unexpected field");
+					throw new Error("Unexpected field '" + c.field + "'");
 				}
 			}
-			// TODO: properties
+			else if (c.op == 'property-member-add') {
+				switch (c.field) {
+				case 'relations':
+					let obj = json[c.field];
+					let prop = c.value.key;
+					let val = c.value.value;
+					if (!obj) {
+						obj = json[c.field] = {};
+					}
+					if (!obj[prop]) {
+						obj[prop] = [];
+					}
+					// Convert string to array
+					if (typeof obj[prop] == 'string') {
+						obj[prop] = [obj[prop]];
+					}
+					if (obj[prop].indexOf(val) == -1) {
+						obj[prop].push(val);
+					}
+					break;
+					
+				default:
+					throw new Error("Unexpected field '" + c.field + "'");
+				}
+			}
+			else if (c.op == 'property-member-remove') {
+				switch (c.field) {
+				case 'relations':
+					let obj = json[c.field];
+					let prop = c.value.key;
+					let val = c.value.value;
+					if (!obj || !obj[prop]) {
+						continue;
+					}
+					if (typeof obj[prop] == 'string') {
+						// If propetty was the specified string, remove property
+						if (obj[prop] === val) {
+							delete obj[prop];
+						}
+						continue;
+					}
+					let pos = obj[prop].indexOf(val);
+					if (pos == -1) {
+						continue;
+					}
+					obj[prop].splice(pos, 1);
+					// If no more members in property array, remove property
+					if (obj[prop].length == 0) {
+						delete obj[prop];
+					}
+					break;
+					
+				default:
+					throw new Error("Unexpected field '" + c.field + "'");
+				}
+			}
 			else {
-				throw new Error("Unimplemented");
+				throw new Error("Unexpected change operation '" + c.op + "'");
 			}
 		}
 	}
