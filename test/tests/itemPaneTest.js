@@ -14,7 +14,6 @@ describe("Item pane", function () {
 		it("should refresh on item update", function* () {
 			var item = new Zotero.Item('book');
 			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
 			var label = doc.getAnonymousNodes(itemBox)[0].getElementsByAttribute('fieldname', 'title')[1];
@@ -34,8 +33,6 @@ describe("Item pane", function () {
 		it("should refresh on note update", function* () {
 			var item = new Zotero.Item('note');
 			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
-			
 			
 			// Wait for the editor
 			var noteBox = doc.getElementById('zotero-note-editor');

@@ -7,6 +7,7 @@ describe("Zotero.Collection", function() {
 			var collection = new Zotero.Collection;
 			collection.name = name;
 			var id = yield collection.saveTx();
+			assert.equal(collection.name, name);
 			collection = yield Zotero.Collections.getAsync(id);
 			assert.equal(collection.name, name);
 		});
@@ -19,6 +20,7 @@ describe("Zotero.Collection", function() {
 			collection.version = version;
 			collection.name = "Test";
 			var id = yield collection.saveTx();
+			assert.equal(collection.version, version);
 			collection = yield Zotero.Collections.getAsync(id);
 			assert.equal(collection.version, version);
 		});
@@ -35,6 +37,7 @@ describe("Zotero.Collection", function() {
 			col.name = "Child";
 			col.parentKey = parentKey;
 			var id = yield col.saveTx();
+			assert.equal(col.parentKey, parentKey);
 			col = yield Zotero.Collections.getAsync(id);
 			assert.equal(col.parentKey, parentKey);
 		});
@@ -51,7 +54,6 @@ describe("Zotero.Collection", function() {
 			col.name = "Child";
 			col.parentKey = parentKey;
 			var id = yield col.saveTx();
-			col = yield Zotero.Collections.getAsync(id);
 			
 			// Create new parent collection
 			var newParentCol = new Zotero.Collection
@@ -62,6 +64,7 @@ describe("Zotero.Collection", function() {
 			// Change parent collection
 			col.parentKey = newParentKey;
 			yield col.saveTx();
+			assert.equal(col.parentKey, newParentKey);
 			col = yield Zotero.Collections.getAsync(id);
 			assert.equal(col.parentKey, newParentKey);
 		});
@@ -78,7 +81,6 @@ describe("Zotero.Collection", function() {
 			col.name = "Child";
 			col.parentKey = parentKey;
 			var id = yield col.saveTx();
-			col = yield Zotero.Collections.getAsync(id);
 			
 			// Set to existing parent
 			col.parentKey = parentKey;
@@ -89,7 +91,6 @@ describe("Zotero.Collection", function() {
 			var col = new Zotero.Collection
 			col.name = "Test";
 			var id = yield col.saveTx();
-			col = yield Zotero.Collections.getAsync(id);
 			
 			col.parentKey = false;
 			var ret = yield col.saveTx();

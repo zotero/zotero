@@ -109,6 +109,7 @@ describe("Zotero.Item", function () {
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
 			var id = yield item.saveTx();
+			assert.equal(item.dateModified, dateModified);
 			item = yield Zotero.Items.getAsync(id);
 			assert.equal(item.dateModified, dateModified);
 		})
@@ -120,6 +121,7 @@ describe("Zotero.Item", function () {
 			var id = yield item.saveTx({
 				skipDateModifiedUpdate: true
 			});
+			assert.equal(item.dateModified, dateModified);
 			item = yield Zotero.Items.getAsync(id);
 			assert.equal(item.dateModified, dateModified);
 		})

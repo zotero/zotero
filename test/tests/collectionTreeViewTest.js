@@ -66,7 +66,6 @@ describe("Zotero.CollectionTreeView", function() {
 			var collection = new Zotero.Collection;
 			collection.name = "No select on modify";
 			var id = yield collection.saveTx();
-			collection = yield Zotero.Collections.getAsync(id);
 			
 			resetSelection();
 			
@@ -82,7 +81,6 @@ describe("Zotero.CollectionTreeView", function() {
 			var collection = new Zotero.Collection;
 			collection.name = "Reselect on modify";
 			var id = yield collection.saveTx();
-			collection = yield Zotero.Collections.getAsync(id);
 			
 			var selected = collectionsView.getSelectedCollection(true);
 			assert.equal(selected, id);

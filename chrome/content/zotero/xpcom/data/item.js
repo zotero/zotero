@@ -178,8 +178,12 @@ Zotero.Item.prototype.isPrimaryField = function (fieldName) {
 	return this.ObjectsClass.isPrimaryField(fieldName);
 }
 
-Zotero.Item.prototype._get = function (fieldName) {
+Zotero.Item.prototype._get = function () {
 	throw new Error("_get is not valid for items");
+}
+
+Zotero.Item.prototype._set = function () {
+	throw new Error("_set is not valid for items");
 }
 
 Zotero.Item.prototype._setParentKey = function() {
@@ -207,11 +211,7 @@ Zotero.Item.prototype._setParentKey = function() {
  * @return {String} Value as string or empty string if value is not present
  */
 Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped) {
-	// We don't allow access after saving to force use of the centrally cached
-	// object, but we make an exception for the id
-	if (field != 'id') {
-		this._disabledCheck();
-	}
+	if (field != 'id') this._disabledCheck();
 	
 	//Zotero.debug('Requesting field ' + field + ' for item ' + this._id, 4);
 	
@@ -694,11 +694,11 @@ Zotero.Item.prototype.getFieldsNotInType = function (itemTypeID, allowBaseConver
  * Field can be passed as fieldID or fieldName
  */
 Zotero.Item.prototype.setField = function(field, value, loadIn) {
+	this._disabledCheck();
+	
 	if (typeof value == 'string') {
 		value = value.trim().normalize();
 	}
-	
-	this._disabledCheck();
 	
 	//Zotero.debug("Setting field '" + field + "' to '" + value + "' (loadIn: " + (loadIn ? 'true' : 'false') + ") for item " + this.id + " ");
 	
@@ -1730,21 +1730,16 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 });
 
 Zotero.Item.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
-	// New items have to be reloaded via Zotero.Items.get(), so mark them as disabled
-	if (env.isNew) {
-		var id = this.id;
-		this._disabled = true;
-		return id;
+	if (!env.skipCache) {
+		// Always reload primary data. DataObject.reload() only reloads changed data types, so
+		// it won't reload, say, dateModified and firstCreator if only creator data was changed
+		// and not primaryData.
+		yield this.loadPrimaryData(true);
+		yield this.reload();
+		this._clearChanged();
 	}
 	
-	// Always reload primary data. DataObject.reload() only reloads changed data types, so
-	// it won't reload, say, dateModified and firstCreator if only creator data was changed
-	// and not primaryData.
-	yield this.loadPrimaryData(true);
-	yield this.reload();
-	this._clearChanged();
-	
-	return true;
+	return env.isNew ? this.id : true;
 });
 
 /**
@@ -4806,13 +4801,4 @@ Zotero.Item.prototype._getOldCreators = function () {
 		oldCreators[i] = old;
 	}
 	return oldCreators;
-}
-
-
-Zotero.Item.prototype._disabledCheck = function () {
-	if (this._disabled) {
-		var msg = "New Zotero.Item objects shouldn't be accessed after save -- use Zotero.Items.get()";
-		Zotero.debug(msg, 2, true);
-		Components.utils.reportError(msg);
-	}
 }

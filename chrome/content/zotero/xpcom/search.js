@@ -87,40 +87,6 @@ Zotero.defineProperty(Zotero.Search.prototype, 'conditions', {
 	get: function() this.getConditions()
 });
 
-Zotero.Search.prototype._set = function (field, value) {
-	if (field == 'id' || field == 'libraryID' || field == 'key') {
-		return this._setIdentifier(field, value);
-	}
-	
-	this._requireData('primaryData');
-	
-	switch (field) {
-		case 'name':
-			value = value.trim().normalize();
-			break;
-		
-		case 'version':
-			value = parseInt(value);
-			break;
-		
-		case 'synced':
-			value = !!value;
-			break;
-	}
-	
-	if (this['_' + field] != value) {
-		this._markFieldChange(field, this['_' + field]);
-		if (!this._changed.primaryData) {
-			this._changed.primaryData = {};
-		}
-		this._changed.primaryData[field] = true;
-		
-		switch (field) {
-			default:
-				this['_' + field] = value;
-		}
-	}
-}
 
 Zotero.Search.prototype.loadFromRow = function (row) {
 	this._id = row.savedSearchID;
@@ -205,31 +171,26 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 });
 
 Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
-	var isNew = env.isNew;
-	if (isNew) {
+	if (env.isNew) {
 		Zotero.Notifier.trigger('add', 'search', this.id, env.notifierData);
 	}
 	else if (!env.options.skipNotifier) {
 		Zotero.Notifier.trigger('modify', 'search', this.id, env.notifierData);
 	}
 	
-	if (isNew && Zotero.Libraries.isGroupLibrary(this.libraryID)) {
+	if (env.isNew && Zotero.Libraries.isGroupLibrary(this.libraryID)) {
 		var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
 		var group = yield Zotero.Groups.get(groupID);
 		group.clearSearchCache();
 	}
 	
-	if (isNew) {
-		var id = this.id;
-		this._disabled = true;
-		return id;
+	if (!env.skipCache) {
+		yield this.loadPrimaryData(true);
+		yield this.reload();
+		this._clearChanged();
 	}
 	
-	yield this.loadPrimaryData(true);
-	yield this.reload();
-	this._clearChanged();
-	
-	return isNew ? this.id : true;
+	return env.isNew ? this.id : true;
 });
 
 

@@ -82,40 +82,6 @@ Zotero.defineProperty(Zotero.Collection.prototype, 'parent', {
 	}
 });
 
-Zotero.Collection.prototype._set = function (field, value) {
-	if (field == 'id' || field == 'libraryID' || field == 'key') {
-		return this._setIdentifier(field, value);
-	}
-	
-	this._requireData('primaryData');
-	
-	switch (field) {
-		case 'name':
-			value = value.trim().normalize();
-			break;
-		
-		case 'version':
-			value = parseInt(value);
-			break;
-		
-		case 'synced':
-			value = !!value;
-			break;
-	}
-	
-	if (this['_' + field] != value) {
-		this._markFieldChange(field, this['_' + field]);
-		if (!this._changed.primaryData) {
-			this._changed.primaryData = {};
-		}
-		this._changed.primaryData[field] = true;
-		
-		switch (field) {
-			default:
-				this['_' + field] = value;
-		}
-	}
-}
 
 Zotero.Collection.prototype.getID = function() {
 	Zotero.debug('Collection.getID() deprecated -- use Collection.id');
@@ -340,15 +306,14 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 });
 
 Zotero.Collection.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
-	var isNew = env.isNew;
-	if (isNew && Zotero.Libraries.isGroupLibrary(this.libraryID)) {
+	if (env.isNew && Zotero.Libraries.isGroupLibrary(this.libraryID)) {
 		var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
 		var group = Zotero.Groups.get(groupID);
 		group.clearCollectionCache();
 	}
 	
 	if (!env.options.skipNotifier) {
-		if (isNew) {
+		if (env.isNew) {
 			Zotero.Notifier.trigger('add', 'collection', this.id, env.notifierData);
 		}
 		else  {
@@ -361,17 +326,12 @@ Zotero.Collection.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
 		this.ObjectsClass.refreshChildCollections(env.parentIDs);
 	}
 	
-	// New collections have to be reloaded via Zotero.Collections.get(), so mark them as disabled
-	if (isNew) {
-		var id = this.id;
-		this._disabled = true;
-		return id;
+	if (!env.skipCache) {
+		yield this.reload();
+		this._clearChanged();
 	}
 	
-	yield this.reload();
-	this._clearChanged();
-	
-	return true;
+	return env.isNew ? this.id : true;
 });
 
 

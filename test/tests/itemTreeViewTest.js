@@ -115,7 +115,6 @@ describe("Zotero.ItemTreeView", function() {
 			// Create item
 			var item = new Zotero.Item('book');
 			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
 			
 			itemsView.selection.clearSelection();
 			assert.lengthOf(itemsView.getSelectedItems(), 0);
@@ -139,7 +138,6 @@ describe("Zotero.ItemTreeView", function() {
 			// Create item
 			var item = new Zotero.Item('book');
 			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
 			
 			yield itemsView.selectItem(id);
 			var selected = itemsView.getSelectedItems(true);

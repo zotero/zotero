@@ -50,6 +50,9 @@ Zotero.DataObject = function () {
 	this._parentID = null;
 	this._parentKey = null;
 	
+	// Set in dataObjects.js
+	this._inCache = false;
+	
 	this._loaded = {};
 	this._skipDataTypeLoad = {};
 	this._markAllDataTypeLoadStates(false);
@@ -90,11 +93,51 @@ Zotero.defineProperty(Zotero.DataObject.prototype, 'ObjectsClass', {
 
 
 Zotero.DataObject.prototype._get = function (field) {
+	if (field != 'id') this._disabledCheck();
+	
 	if (this['_' + field] !== null) {
 		return this['_' + field];
 	}
 	this._requireData('primaryData');
 	return null;
+}
+
+
+Zotero.DataObject.prototype._set = function (field, value) {
+	this._disabledCheck();
+	
+	if (field == 'id' || field == 'libraryID' || field == 'key') {
+		return this._setIdentifier(field, value);
+	}
+	
+	this._requireData('primaryData');
+	
+	switch (field) {
+		case 'name':
+			value = value.trim().normalize();
+			break;
+		
+		case 'version':
+			value = parseInt(value);
+			break;
+		
+		case 'synced':
+			value = !!value;
+			break;
+	}
+	
+	if (this['_' + field] != value) {
+		this._markFieldChange(field, this['_' + field]);
+		if (!this._changed.primaryData) {
+			this._changed.primaryData = {};
+		}
+		this._changed.primaryData[field] = true;
+		
+		switch (field) {
+			default:
+				this['_' + field] = value;
+		}
+	}
 }
 
 
@@ -544,6 +587,14 @@ Zotero.DataObject.prototype.editCheck = function () {
 /**
  * Save changes to database
  *
+ * @params {Object} [options]
+ * @params {Boolean} [options.skipCache] - Don't save add new object to the cache; if set, object
+ *                                         is disabled after save
+ * @params {Boolean} [options.skipDateModifiedUpdate]
+ * @params {Boolean} [options.skipClientDateModifiedUpdate]
+ * @params {Boolean} [options.skipNotifier] - Don't trigger Zotero.Notifier events
+ * @params {Boolean} [options.skipSelect] - Don't select object automatically in trees
+ * @params {Boolean} [options.skipSyncedUpdate] - Don't automatically set 'synced' to false
  * @return {Promise<Integer|Boolean>}  Promise for itemID of new item,
  *                                     TRUE on item update, or FALSE if item was unchanged
  */
@@ -650,7 +701,7 @@ Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 		return false;
 	}
 	
-	// Undo registerIdentifiers() on failure
+	// Undo registerObject() on failure
 	var func = function () {
 		this.ObjectsClass.unload(env.id);
 	}.bind(this);
@@ -699,9 +750,18 @@ Zotero.DataObject.prototype._saveData = function (env) {
 };
 
 Zotero.DataObject.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
-	// Register this object's identifiers in Zotero.DataObjects
 	if (env.isNew) {
-		this.ObjectsClass.registerIdentifiers(env.id, env.libraryID, env.key);
+		if (!env.skipCache) {
+			// Register this object's identifiers in Zotero.DataObjects
+			this.ObjectsClass.registerObject(this);
+		}
+		// If object isn't being reloaded, disable it, since its data may be out of date
+		else {
+			this._disabled = true;
+		}
+	}
+	else if (env.skipCache) {
+		Zotero.logError("skipCache is only for new objects");
 	}
 });
 
@@ -777,4 +837,11 @@ Zotero.DataObject.prototype._erasePostCommit = function(env) {
  */
 Zotero.DataObject.prototype._generateKey = function () {
 	return Zotero.Utilities.generateObjectKey();
+}
+
+Zotero.DataObject.prototype._disabledCheck = function () {
+	if (this._disabled) {
+		Zotero.logError(this._ObjectType + " is disabled -- "
+			+ "use Zotero." + this._ObjectTypePlural  + ".getAsync()");
+	}
 }

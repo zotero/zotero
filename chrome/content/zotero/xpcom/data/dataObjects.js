@@ -395,13 +395,19 @@ Zotero.DataObjects.prototype.reloadAll = function (libraryID) {
 }
 
 
-Zotero.DataObjects.prototype.registerIdentifiers = function (id, libraryID, key) {
+Zotero.DataObjects.prototype.registerObject = function (obj) {
+	var id = obj.id;
+	var libraryID = obj.libraryID;
+	var key = obj.key;
+	
 	Zotero.debug("Registering " + this._ZDO_object + " " + id + " as " + libraryID + "/" + key);
 	if (!this._objectIDs[libraryID]) {
 		this._objectIDs[libraryID] = {};
 	}
 	this._objectIDs[libraryID][key] = id;
 	this._objectKeys[id] = [libraryID, key];
+	this._objectCache[id] = obj;
+	obj._inCache = true;
 }
 
 
@@ -521,6 +527,7 @@ Zotero.DataObjects.prototype._load = Zotero.Promise.coroutine(function* (library
 					obj.loadFromRow(rowObj, true);
 					if (!options || !options.noCache) {
 						this._objectCache[id] = obj;
+						obj._inCache = true;
 					}
 				}
 				loaded[id] = obj;

@@ -13,12 +13,10 @@ describe("Zotero.DataObjectUtilities", function() {
 				yield Zotero.DB.executeTransaction(function* () {
 					var item = new Zotero.Item('book');
 					id1 = yield item.save();
-					item = yield Zotero.Items.getAsync(id1);
 					json1 = yield item.toJSON();
 					
 					var item = new Zotero.Item('book');
 					id2 = yield item.save();
-					item = yield Zotero.Items.getAsync(id2);
 					json2 = yield item.toJSON();
 				});
 				
