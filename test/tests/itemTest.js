@@ -73,6 +73,7 @@ describe("Zotero.Item", function () {
 			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			assert.equal(item.getField("version"), 1);
+			assert.equal(item.version, 1);
 		});
 		
 		it("should save versionNumber for computerProgram", function () {
