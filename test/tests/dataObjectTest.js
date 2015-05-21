@@ -50,7 +50,7 @@ describe("Zotero.DataObject", function() {
 			var item = new Zotero.Item("book");
 			var id = yield item.saveTx();
 			assert.isFalse(item.synced);
-			item.eraseTx();
+			yield item.eraseTx();
 		});
 		
 		it("should be set to true when changed", function* () {
@@ -61,7 +61,7 @@ describe("Zotero.DataObject", function() {
 			yield item.saveTx();
 			assert.ok(item.synced);
 			
-			item.eraseTx();
+			yield item.eraseTx();
 		});
 		
 		it("should be set to false after modifying item", function* () {
@@ -76,7 +76,7 @@ describe("Zotero.DataObject", function() {
 			yield item.saveTx();
 			assert.isFalse(item.synced);
 			
-			item.eraseTx();
+			yield item.eraseTx();
 		});
 		
 		it("should be unchanged if skipSyncedUpdate passed", function* () {
@@ -93,7 +93,7 @@ describe("Zotero.DataObject", function() {
 			});
 			assert.ok(item.synced);
 			
-			item.eraseTx();
+			yield item.eraseTx();
 		});
 	})
 	
