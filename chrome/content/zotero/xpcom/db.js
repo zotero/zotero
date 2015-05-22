@@ -606,14 +606,8 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params, options) {
 	.then(function (c) {
 		conn = c;
 		[sql, params] = self.parseQueryAndParams(sql, params);
-		if (Zotero.Debug.enabled && (!options || options.debug === undefined || options.debug === true)) {
-			Zotero.debug(sql, 5);
-			for each(let param in params) {
-				let paramType = typeof param;
-				let msg = "Binding parameter of type " + paramType + ": ";
-				msg += paramType == 'string' ? "'" + param + "'" : param;
-				Zotero.debug(msg, 5);
-			}
+		if (Zotero.Debug.enabled) {
+			self.logQuery(sql, params, options);
 		}
 		if (options && options.onRow) {
 			// Errors in onRow don't stop the query unless StopIteration is thrown
@@ -715,13 +709,7 @@ Zotero.DBConnection.prototype.valueQueryAsync = function (sql, params) {
 	.then(function (conn) {
 		[sql, params] = self.parseQueryAndParams(sql, params);
 		if (Zotero.Debug.enabled) {
-			Zotero.debug(sql, 5);
-			for each(let param in params) {
-				let paramType = typeof param;
-				let msg = "Binding parameter of type " + paramType + ": ";
-				msg += paramType == 'string' ? "'" + param + "'" : param;
-				Zotero.debug(msg, 5);
-			}
+			self.logQuery(sql, params);
 		}
 		return conn.executeCached(sql, params);
 	})
@@ -767,13 +755,7 @@ Zotero.DBConnection.prototype.columnQueryAsync = function (sql, params) {
 		conn = c;
 		[sql, params] = self.parseQueryAndParams(sql, params);
 		if (Zotero.Debug.enabled) {
-			Zotero.debug(sql, 5);
-			for each(let param in params) {
-				let paramType = typeof param;
-				let msg = "Binding parameter of type " + paramType + ": ";
-				msg += paramType == 'string' ? "'" + param + "'" : param;
-				Zotero.debug(msg, 5);
-			}
+			self.logQuery(sql, params);
 		}
 		return conn.executeCached(sql, params);
 	})
@@ -795,6 +777,26 @@ Zotero.DBConnection.prototype.columnQueryAsync = function (sql, params) {
 		}
 	});
 };
+
+
+Zotero.DBConnection.prototype.logQuery = function (sql, params, options) {
+	var msg = sql;
+	if (params.length && (!options || options.debug === undefined || options.debug === true)) {
+		msg += " [";
+		for (let i = 0; i < params.length; i++) {
+			let param = params[i];
+			let paramType = typeof param;
+			if (paramType == 'string') {
+				msg += "'" + param + "', ";
+			}
+			else {
+				msg += param + ", ";
+			}
+		}
+		msg = msg.substr(0, msg.length - 2) + "]";
+	}
+	Zotero.debug(msg, 5);
+}
 
 
 Zotero.DBConnection.prototype.tableExists = function (table) {
