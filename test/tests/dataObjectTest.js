@@ -37,7 +37,6 @@ describe("Zotero.DataObject", function() {
 		
 		it("should be set after creating object", function* () {
 			for (let type of types) {
-				Zotero.logError(type);
 				let obj = yield createDataObject(type, { version: 1234 });
 				assert.equal(obj.version, 1234, type + " version mismatch");
 				yield obj.eraseTx();
@@ -124,6 +123,52 @@ describe("Zotero.DataObject", function() {
 			var { libraryID, key } = objectsClass.getLibraryAndKeyFromID(id);
 			assert.typeOf(key, 'string');
 			assert.equal(objectsClass.getIDFromLibraryAndKey(libraryID, key), id);
+		})
+	})
+	
+	describe("#updateVersion()", function() {
+		it("should update the object version", function* () {
+			for (let type of types) {
+				let obj = yield createDataObject(type);
+				assert.equal(obj.version, 0);
+				
+				yield obj.updateVersion(1234);
+				assert.equal(obj.version, 1234);
+				assert.isFalse(obj.hasChanged());
+				
+				obj.synced = true;
+				assert.ok(obj.hasChanged());
+				yield obj.updateVersion(1235);
+				assert.equal(obj.version, 1235);
+				assert.ok(obj.hasChanged());
+				
+				yield obj.eraseTx();
+			}
+		})
+	})
+	
+	describe("#updateSynced()", function() {
+		it("should update the object sync status", function* () {
+			for (let type of types) {
+				let obj = yield createDataObject(type);
+				assert.isFalse(obj.synced);
+				
+				yield obj.updateSynced(false);
+				assert.isFalse(obj.synced);
+				assert.isFalse(obj.hasChanged());
+				
+				yield obj.updateSynced(true);
+				assert.ok(obj.synced);
+				assert.isFalse(obj.hasChanged());
+				
+				obj.version = 1234;
+				assert.ok(obj.hasChanged());
+				yield obj.updateSynced(false);
+				assert.isFalse(obj.synced);
+				assert.ok(obj.hasChanged());
+				
+				yield obj.eraseTx();
+			}
 		})
 	})
 })

@@ -171,9 +171,8 @@ function createUnsavedDataObject(objectType, params) {
 
 var createDataObject = Zotero.Promise.coroutine(function* (objectType, params, saveOptions) {
 	var obj = createUnsavedDataObject(objectType, params);
-	var id = yield obj.saveTx(saveOptions);
-	var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
-	return objectsClass.getAsync(id);
+	yield obj.saveTx(saveOptions);
+	return obj;
 });
 
 /**

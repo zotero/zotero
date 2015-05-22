@@ -35,7 +35,7 @@ Zotero.Utilities.Internal = {
 	 *
 	 * @param {Array} arr
 	 * @param {Integer} chunkSize
-	 * @param {Function} func
+	 * @param {Function} func - A promise-returning function
 	 * @return {Array} The return values from the successive runs
 	 */
 	"forEachChunkAsync": Zotero.Promise.coroutine(function* (arr, chunkSize, func) {

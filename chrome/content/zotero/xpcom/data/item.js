@@ -1742,17 +1742,6 @@ Zotero.Item.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
 	return env.isNew ? this.id : true;
 });
 
-/**
- * Used by sync code
- */
-Zotero.Item.prototype.updateClientDateModified = function () {
-	if (!this.id) {
-		throw ("Cannot update clientDateModified of unsaved item in Zotero.Item.updateClientDateModified()");
-	}
-	var sql = "UPDATE items SET clientDateModified=? WHERE itemID=?";
-	Zotero.DB.query(sql, [Zotero.DB.transactionDateTime, this.id]);
-}
-
 
 Zotero.Item.prototype.isRegularItem = function() {
 	return !(this.isNote() || this.isAttachment());

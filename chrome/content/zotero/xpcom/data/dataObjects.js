@@ -127,9 +127,10 @@ Zotero.DataObjects.prototype.get = function (ids) {
  * Retrieves (and loads, if necessary) one or more items
  *
  * @param {Array|Integer} ids  An individual object id or an array of object ids
- * @param {Object} options  'noCache': Don't cache loaded objects
- * @return {Zotero.[Object]|Array<Zotero.[Object]>} A Zotero.[Object], if a scalar id was passed;
- *                                          otherwise, an array of Zotero.[Object]
+ * @param {Object} [options]
+ * @param {Boolean} [options.noCache=false] - Don't add object to cache after loading
+ * @return {Zotero.DataObject|Zotero.DataObject[]} - A data object, if a scalar id was passed;
+ *                                                   otherwise, an array of data objects
  */
 Zotero.DataObjects.prototype.getAsync = Zotero.Promise.coroutine(function* (ids, options) {
 	var toLoad = [];
@@ -253,6 +254,8 @@ Zotero.DataObjects.prototype.getByLibraryAndKey = function (libraryID, key, opti
  *
  * @param {Integer} - libraryID
  * @param {String} - key
+ * @param {Object} [options]
+ * @param {Boolean} [options.noCache=false] - Don't add object to cache after loading
  * @return {Promise<Zotero.DataObject>} - Promise for a data object, or FALSE if not found
  */
 Zotero.DataObjects.prototype.getByLibraryAndKeyAsync = Zotero.Promise.coroutine(function* (libraryID, key, options) {
@@ -287,7 +290,7 @@ Zotero.DataObjects.prototype.getIDFromLibraryAndKey = function (libraryID, key) 
 }
 
 
-Zotero.DataObjects.prototype.getOlder = function (libraryID, date) {
+Zotero.DataObjects.prototype.getOlder = Zotero.Promise.method(function (libraryID, date) {
 	if (!date || date.constructor.name != 'Date') {
 		throw ("date must be a JS Date in "
 			+ "Zotero." + this._ZDO_Objects + ".getOlder()")
@@ -295,11 +298,11 @@ Zotero.DataObjects.prototype.getOlder = function (libraryID, date) {
 	
 	var sql = "SELECT ROWID FROM " + this._ZDO_table
 		+ " WHERE libraryID=? AND clientDateModified<?";
-	return Zotero.DB.columnQuery(sql, [libraryID, Zotero.Date.dateToSQL(date, true)]);
-}
+	return Zotero.DB.columnQueryAsync(sql, [libraryID, Zotero.Date.dateToSQL(date, true)]);
+});
 
 
-Zotero.DataObjects.prototype.getNewer = function (libraryID, date, ignoreFutureDates) {
+Zotero.DataObjects.prototype.getNewer = Zotero.Promise.method(function (libraryID, date, ignoreFutureDates) {
 	if (!date || date.constructor.name != 'Date') {
 		throw ("date must be a JS Date in "
 			+ "Zotero." + this._ZDO_Objects + ".getNewer()")
@@ -310,8 +313,8 @@ Zotero.DataObjects.prototype.getNewer = function (libraryID, date, ignoreFutureD
 	if (ignoreFutureDates) {
 		sql += " AND clientDateModified<=CURRENT_TIMESTAMP";
 	}
-	return Zotero.DB.columnQuery(sql, [libraryID, Zotero.Date.dateToSQL(date, true)]);
-}
+	return Zotero.DB.columnQueryAsync(sql, [libraryID, Zotero.Date.dateToSQL(date, true)]);
+});
 
 
 /**
@@ -428,6 +431,61 @@ Zotero.DataObjects.prototype.unload = function () {
 		delete this._objectCache[id];
 	}
 }
+
+
+/**
+ * Set the version of objects, efficiently
+ *
+ * @param {Integer[]} ids - Ids of objects to update
+ * @param {Boolean} synced
+ */
+Zotero.DataObjects.prototype.updateVersion = Zotero.Promise.method(function (ids, version) {
+	if (version != parseInt(version)) {
+		throw new Error("'version' must be an integer");
+	}
+	version = parseInt(version);
+	
+	let sql = "UPDATE " + this.table + " SET version=" + version + " "
+		+ "WHERE " + this.idColumn + " IN (";
+	return Zotero.Utilities.Internal.forEachChunkAsync(
+		ids, Zotero.DB.MAX_BOUND_PARAMETERS, Zotero.Promise.coroutine(function* (chunk) {
+			yield Zotero.DB.queryAsync(sql + chunk.map(() => '?').join(', ') + ')', chunk);
+			// Update the internal 'version' property of any loaded objects
+			for (let i = 0; i < chunk.length; i++) {
+				let id = chunk[i];
+				let obj = this._objectCache[id];
+				if (obj) {
+					obj.updateVersion(version, true);
+				}
+			}
+		}.bind(this))
+	);
+});
+
+
+/**
+ * Set the sync state of objects, efficiently
+ *
+ * @param {Integer[]} ids - Ids of objects to update
+ * @param {Boolean} synced
+ */
+Zotero.DataObjects.prototype.updateSynced = Zotero.Promise.method(function (ids, synced) {
+	let sql = "UPDATE " + this.table + " SET synced=" + (synced ? 1 : 0) + " "
+		+ "WHERE " + this.idColumn + " IN (";
+	return Zotero.Utilities.Internal.forEachChunkAsync(
+		ids, Zotero.DB.MAX_BOUND_PARAMETERS, Zotero.Promise.coroutine(function* (chunk) {
+			yield Zotero.DB.queryAsync(sql + chunk.map(() => '?').join(', ') + ')', chunk);
+			// Update the internal 'synced' property of any loaded objects
+			for (let i = 0; i < chunk.length; i++) {
+				let id = chunk[i];
+				let obj = this._objectCache[id];
+				if (obj) {
+					obj.updateSynced(!!synced, true);
+				}
+			}
+		}.bind(this))
+	);
+});
 
 
 Zotero.DataObjects.prototype.isEditable = function (obj) {

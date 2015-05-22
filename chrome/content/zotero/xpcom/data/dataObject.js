@@ -772,6 +772,74 @@ Zotero.DataObject.prototype._recoverFromSaveError = Zotero.Promise.coroutine(fun
 
 
 /**
+ * Update object version, efficiently
+ *
+ * Used by sync code
+ *
+ * @param {Integer} version
+ * @param {Boolean} [skipDB=false]
+ */
+Zotero.DataObject.prototype.updateVersion = Zotero.Promise.coroutine(function* (version, skipDB) {
+	if (!this.id) {
+		throw new Error("Cannot update version of unsaved " + this._objectType);
+	}
+	if (version != parseInt(version)) {
+		throw new Error("'version' must be an integer");
+	}
+	
+	this._version = parseInt(version);
+	
+	if (!skipDB) {
+		var cl = this.ObjectsClass;
+		var sql = "UPDATE " + cl.table + " SET version=? WHERE " + cl.idColumn + "=?";
+		yield Zotero.DB.queryAsync(sql, [parseInt(version), this.id]);
+	}
+	
+	if (this._changed.primaryData && this._changed.primaryData.version) {
+		if (Objects.keys(this._changed.primaryData).length == 1) {
+			delete this._changed.primaryData;
+		}
+		else {
+			delete this._changed.primaryData.version;
+		}
+	}
+});
+
+/**
+ * Update object sync status, efficiently
+ *
+ * Used by sync code
+ *
+ * @param {Boolean} synced
+ * @param {Boolean} [skipDB=false]
+ */
+Zotero.DataObject.prototype.updateSynced = Zotero.Promise.coroutine(function* (synced, skipDB) {
+	if (!this.id) {
+		throw new Error("Cannot update sync status of unsaved " + this._objectType);
+	}
+	if (typeof synced != 'boolean') {
+		throw new Error("'synced' must be a boolean");
+	}
+	
+	this._synced = synced;
+	
+	if (!skipDB) {
+		var cl = this.ObjectsClass;
+		var sql = "UPDATE " + cl.table + " SET synced=? WHERE " + cl.idColumn + "=?";
+		yield Zotero.DB.queryAsync(sql, [synced ? 1 : 0, this.id]);
+	}
+	
+	if (this._changed.primaryData && this._changed.primaryData.synced) {
+		if (Objects.keys(this._changed.primaryData).length == 1) {
+			delete this._changed.primaryData;
+		}
+		else {
+			delete this._changed.primaryData.synced;
+		}
+	}
+});
+
+/**
  * Delete object from database
  */
 Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* (options) {
