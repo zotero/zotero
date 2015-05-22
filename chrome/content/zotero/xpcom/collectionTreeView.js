@@ -71,7 +71,6 @@ Object.defineProperty(Zotero.CollectionTreeView.prototype, "selectedTreeRow", {
 });
 
 
-
 /*
  *  Called by the tree itself
  */
@@ -248,6 +247,29 @@ Zotero.CollectionTreeView.prototype.reload = function()
 	}.bind(this));
 }
 
+
+/**
+ * Select a row and wait for its items view to be created
+ *
+ * Note that this doesn't wait for the items view to be loaded. For that, add a 'load' event
+ * listener to the items view.
+ *
+ * @param {Integer} row
+ * @return {Promise}
+ */
+Zotero.CollectionTreeView.prototype.selectWait = Zotero.Promise.method(function (row) {
+	if (this.selection.selectEventsSuppressed) {
+		this.selection.select(row);
+		return;
+	}
+	var deferred = Zotero.Promise.defer();
+	this.addEventListener('select', () => deferred.resolve());
+	this.selection.select(row);
+	return deferred.promise;
+});
+
+
+
 /*
  *  Called by Zotero.Notifier on any changes to collections in the data layer
  */
@@ -389,7 +411,10 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 		}
 	}
 	
+	var deferred = Zotero.Promise.defer();
+	this.addEventListener('select', () => deferred.resolve());
 	this.selection.selectEventsSuppressed = false;
+	return deferred.promise;
 });
 
 /**
@@ -823,7 +848,7 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 	
 	switch (type) {
 	case 'L':
-		this.selectLibrary(id);
+		yield this.selectLibrary(id);
 		return;
 	
 	case 'C':
@@ -841,14 +866,14 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 	}
 	var row = this._rowMap[type + id];
 	this._treebox.ensureRowIsVisible(row);
-	this.selection.select(row);
+	yield this.selectWait(row);
 });
 
 
 /**
  * @param	{Integer}		libraryID		Library to select
  */
-Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
+Zotero.CollectionTreeView.prototype.selectLibrary = Zotero.Promise.coroutine(function* (libraryID) {
 	if (Zotero.suppressUIUpdates) {
 		Zotero.debug("UI updates suppressed -- not changing library selection");
 		return false;
@@ -857,7 +882,7 @@ Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
 	// Select local library
 	if (!libraryID) {
 		this._treebox.ensureRowIsVisible(0);
-		this.selection.select(0);
+		yield this.selectWait(0);
 		return true;
 	}
 	
@@ -874,12 +899,12 @@ Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
 	var row = this._rowMap['L' + libraryID];
 	if (row !== undefined) {
 		this._treebox.ensureRowIsVisible(row);
-		this.selection.select(row);
+		this.selectWait(row);
 		return true;
 	}
 	
 	return false;
-}
+});
 
 
 Zotero.CollectionTreeView.prototype.selectCollection = function (id) {

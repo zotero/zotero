@@ -1107,110 +1107,127 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.onCollectionSelected = Zotero.Promise.coroutine(function* () {
-		var collectionTreeRow = this.getCollectionTreeRow();
-		if (!collectionTreeRow) {
-			return;
-		}
-		
-		if (this.itemsView && this.itemsView.collectionTreeRow == collectionTreeRow) {
-			Zotero.debug("Collection selection hasn't changed");
-			return;
-		}
-		
-		if (this.itemsView) {
-			this.itemsView.unregister();
-			document.getElementById('zotero-items-tree').view = this.itemsView = null;
-		}
-		
-		if (this.collectionsView.selection.count != 1) {
-			return;
-		}
-		
-		// Clear quick search and tag selector when switching views
-		document.getElementById('zotero-tb-search').value = "";
-		
-		// XBL functions might not yet be available
-		var tagSelector = document.getElementById('zotero-tag-selector');
-		if (tagSelector.clearAll) {
-			tagSelector.clearAll();
-		}
-		
-		// Not necessary with seltype="cell", which calls nsITreeView::isSelectable()
-		/*if (collectionTreeRow.isSeparator()) {
-			document.getElementById('zotero-items-tree').view = this.itemsView = null;
-			return;
-		}*/
-		
-		collectionTreeRow.setSearch('');
-		collectionTreeRow.setTags(getTagSelection());
-		
-		// Enable or disable toolbar icons and menu options as necessary
-		const disableIfNoEdit = [
-			"cmd_zotero_newCollection",
-			"cmd_zotero_newSavedSearch",
-			"zotero-tb-add",
-			"cmd_zotero_newItemFromCurrentPage",
-			"zotero-tb-lookup",
-			"cmd_zotero_newStandaloneNote",
-			"zotero-tb-note-add",
-			"zotero-tb-attachment-add"
-		];
-		for(var i=0; i<disableIfNoEdit.length; i++) {
-			var el = document.getElementById(disableIfNoEdit[i]);
-			
-			// If a trash is selected, new collection depends on the
-			// editability of the library
-			if (collectionTreeRow.isTrash() &&
-					disableIfNoEdit[i] == 'cmd_zotero_newCollection') {
-				var overrideEditable = Zotero.Libraries.isEditable(collectionTreeRow.ref.libraryID);
-			}
-			else {
-				var overrideEditable = false;
+	this.onCollectionSelected = function () {
+		return Zotero.spawn(function* () {
+			var collectionTreeRow = this.getCollectionTreeRow();
+			if (!collectionTreeRow) {
+				return;
 			}
 			
-			if (collectionTreeRow.editable || overrideEditable) {
-				if(el.hasAttribute("disabled")) el.removeAttribute("disabled");
-			} else {
-				el.setAttribute("disabled", "true");
+			if (this.itemsView && this.itemsView.collectionTreeRow == collectionTreeRow) {
+				Zotero.debug("Collection selection hasn't changed");
+				return;
 			}
-		}
-		
-		this.itemsView = new Zotero.ItemTreeView(collectionTreeRow);
-		this.itemsView.onError = function () {
-			ZoteroPane_Local.displayErrorMessage();
-		};
-		// If any queued load listeners, set them to run when the tree is ready
-		if (this._listeners.itemsLoaded) {
-			let listener;
-			while (listener = this._listeners.itemsLoaded.shift()) {
-				this.itemsView.addEventListener('load', listener);
+			
+			if (this.itemsView) {
+				// Wait for existing items view to finish loading before unloading it
+				//
+				// TODO: Cancel loading
+				let deferred = Zotero.Promise.defer();
+				this.itemsView.addEventListener('load', function () {
+					deferred.resolve();
+				});
+				if (deferred.promise.isPending()) {
+					Zotero.debug("Waiting for items view " + this.itemsView.id + " to finish loading");
+				}
+				yield deferred.promise;
+				
+				this.itemsView.unregister();
+				document.getElementById('zotero-items-tree').view = this.itemsView = null;
 			}
-		}
-		this.itemsView.addEventListener('load', this.setTagScope);
-		document.getElementById('zotero-items-tree').view = this.itemsView;
-		
-		// Add events to treecolpicker to update menu before showing/hiding
-		try {
-			let treecols = document.getElementById('zotero-items-columns-header');
-			let treecolpicker = treecols.boxObject.firstChild.nextSibling;
-			let menupopup = treecolpicker.boxObject.firstChild.nextSibling;
-			let attr = menupopup.getAttribute('onpopupshowing');
-			if (attr.indexOf('Zotero') == -1) {
-				menupopup.setAttribute('onpopupshowing', 'ZoteroPane.itemsView.onColumnPickerShowing(event);')
-					// Keep whatever else is there
-					+ ' ' + attr;
-				menupopup.setAttribute('onpopuphidden', 'ZoteroPane.itemsView.onColumnPickerHidden(event);')
-					// Keep whatever else is there
-					+ ' ' + menupopup.getAttribute('onpopuphidden');
+			
+			if (this.collectionsView.selection.count != 1) {
+				return;
 			}
-		}
-		catch (e) {
-			Zotero.debug(e);
-		}
-		
-		Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
-	});
+			
+			// Clear quick search and tag selector when switching views
+			document.getElementById('zotero-tb-search').value = "";
+			
+			// XBL functions might not yet be available
+			var tagSelector = document.getElementById('zotero-tag-selector');
+			if (tagSelector.clearAll) {
+				tagSelector.clearAll();
+			}
+			
+			// Not necessary with seltype="cell", which calls nsITreeView::isSelectable()
+			/*if (collectionTreeRow.isSeparator()) {
+				document.getElementById('zotero-items-tree').view = this.itemsView = null;
+				return;
+			}*/
+			
+			collectionTreeRow.setSearch('');
+			collectionTreeRow.setTags(getTagSelection());
+			
+			// Enable or disable toolbar icons and menu options as necessary
+			const disableIfNoEdit = [
+				"cmd_zotero_newCollection",
+				"cmd_zotero_newSavedSearch",
+				"zotero-tb-add",
+				"cmd_zotero_newItemFromCurrentPage",
+				"zotero-tb-lookup",
+				"cmd_zotero_newStandaloneNote",
+				"zotero-tb-note-add",
+				"zotero-tb-attachment-add"
+			];
+			for(var i=0; i<disableIfNoEdit.length; i++) {
+				var el = document.getElementById(disableIfNoEdit[i]);
+				
+				// If a trash is selected, new collection depends on the
+				// editability of the library
+				if (collectionTreeRow.isTrash() &&
+						disableIfNoEdit[i] == 'cmd_zotero_newCollection') {
+					var overrideEditable = Zotero.Libraries.isEditable(collectionTreeRow.ref.libraryID);
+				}
+				else {
+					var overrideEditable = false;
+				}
+				
+				if (collectionTreeRow.editable || overrideEditable) {
+					if(el.hasAttribute("disabled")) el.removeAttribute("disabled");
+				} else {
+					el.setAttribute("disabled", "true");
+				}
+			}
+			
+			this.itemsView = new Zotero.ItemTreeView(collectionTreeRow);
+			this.itemsView.onError = function () {
+				ZoteroPane_Local.displayErrorMessage();
+			};
+			// If any queued load listeners, set them to run when the tree is ready
+			if (this._listeners.itemsLoaded) {
+				let listener;
+				while (listener = this._listeners.itemsLoaded.shift()) {
+					this.itemsView.addEventListener('load', listener);
+				}
+			}
+			this.itemsView.addEventListener('load', this.setTagScope);
+			document.getElementById('zotero-items-tree').view = this.itemsView;
+			
+			// Add events to treecolpicker to update menu before showing/hiding
+			try {
+				let treecols = document.getElementById('zotero-items-columns-header');
+				let treecolpicker = treecols.boxObject.firstChild.nextSibling;
+				let menupopup = treecolpicker.boxObject.firstChild.nextSibling;
+				let attr = menupopup.getAttribute('onpopupshowing');
+				if (attr.indexOf('Zotero') == -1) {
+					menupopup.setAttribute('onpopupshowing', 'ZoteroPane.itemsView.onColumnPickerShowing(event);')
+						// Keep whatever else is there
+						+ ' ' + attr;
+					menupopup.setAttribute('onpopuphidden', 'ZoteroPane.itemsView.onColumnPickerHidden(event);')
+						// Keep whatever else is there
+						+ ' ' + menupopup.getAttribute('onpopuphidden');
+				}
+			}
+			catch (e) {
+				Zotero.debug(e);
+			}
+			
+			Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
+		}, this)
+		.finally(function () {
+			return this.collectionsView.onSelect();
+		}.bind(this));
+	};
 	
 	
 	this.getCollectionTreeRow = function () {
@@ -1419,19 +1436,8 @@ var ZoteroPane = new function()
 			
 			return true;
 		}, this)
-		.then(function (result) {
-			// See note in itemTreeView.js::selectItem()
-			if (this.itemsView && this.itemsView._itemSelectedPromiseResolver) {
-				this.itemsView._itemSelectedPromiseResolver.resolve();
-			}
-			return result;
-		}.bind(this))
-		.catch(function (e) {
-			Zotero.debug(e, 1);
-			if (this.itemsView && this.itemsView._itemSelectedPromiseResolver) {
-				this.itemsView._itemSelectedPromiseResolver.reject(e);
-			}
-			throw e;
+		.finally(function () {
+			return this.itemsView.onSelect();
 		}.bind(this));
 	}
 	
@@ -2052,11 +2058,11 @@ var ZoteroPane = new function()
 						if (!selected) {
 							if (item.deleted) {
 								Zotero.debug("Item is deleted; switching to trash");
-								self.collectionsView.selectTrash(item.libraryID);
+								yield self.collectionsView.selectTrash(item.libraryID);
 							}
 							else {
 								Zotero.debug("Item was not selected; switching to library");
-								self.collectionsView.selectLibrary(item.libraryID);
+								yield self.collectionsView.selectLibrary(item.libraryID);
 							}
 							yield self.itemsView.selectItem(itemID, expand);
 						}
@@ -2071,12 +2077,12 @@ var ZoteroPane = new function()
 				// If in a different library
 				if (item.libraryID != currentLibraryID) {
 					Zotero.debug("Library ID differs; switching library");
-					self.collectionsView.selectLibrary(item.libraryID);
+					yield self.collectionsView.selectLibrary(item.libraryID);
 				}
 				// Force switch to library view
 				else if (!self.collectionsView.selectedTreeRow.isLibrary() && inLibrary) {
 					Zotero.debug("Told to select in library; switching to library");
-					self.collectionsView.selectLibrary(item.libraryID);
+					yield self.collectionsView.selectLibrary(item.libraryID);
 				}
 			}
 			catch (e) {

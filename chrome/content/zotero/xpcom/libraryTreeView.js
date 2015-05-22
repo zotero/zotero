@@ -26,10 +26,14 @@
 Zotero.LibraryTreeView = function () {
 	this._initialized = false;
 	this._listeners = {
-		load: []
+		load: [],
+		select: []
 	};
 	this._rows = [];
 	this._rowMap = {};
+	
+	this.id = Zotero.Utilities.randomString();
+	Zotero.debug("Creating " + this.type + "s view with id " + this.id);
 };
 
 Zotero.LibraryTreeView.prototype = {
@@ -43,10 +47,17 @@ Zotero.LibraryTreeView.prototype = {
 				this._listeners[event].push(listener);
 			}
 		}
+		else {
+			if (!this._listeners[event]) {
+				this._listeners[event] = [];
+			}
+			this._listeners[event].push(listener);
+		}
 	},
 	
 	
 	_runListeners: Zotero.Promise.coroutine(function* (event) {
+		if (!this._listeners[event]) return;
 		var listener;
 		while (listener = this._listeners[event].shift()) {
 			yield Zotero.Promise.resolve(listener());
@@ -55,10 +66,30 @@ Zotero.LibraryTreeView.prototype = {
 	
 	
 	/**
-	 * Returns a reference to the tree row at a given row
+	 * Return a reference to the tree row at a given row
+	 *
+	 * @return {Zotero.CollectionTreeRow|Zotero.ItemTreeRow}
 	 */
 	getRow: function(row) {
 		return this._rows[row];
+	},
+	
+	
+	/**
+	 * Return the index of the row with a given ID (e.g., "C123" for collection 123)
+	 *
+	 * @param {String} - Row id
+	 * @return {Integer}
+	 */
+	getRowByID: function (id) {
+		var type = id[0];
+		id = ('' + id).substr(1);
+		return this._rowMap[type + id];
+	},
+	
+	
+	onSelect: function () {
+		return this._runListeners('select');
 	},
 	
 	

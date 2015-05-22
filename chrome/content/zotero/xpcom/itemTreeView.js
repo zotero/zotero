@@ -68,7 +68,7 @@ Zotero.ItemTreeView.prototype.type = 'item';
 Zotero.ItemTreeView.prototype.setTree = Zotero.serial(Zotero.Promise.coroutine(function* (treebox)
 {
 	try {
-		Zotero.debug("Setting item tree");
+		Zotero.debug("Setting tree for items view " + this.id);
 		var start = Date.now();
 		// Try to set the window document if not yet set
 		if (treebox && !this._ownerDocument) {
@@ -256,7 +256,7 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.serial(Zotero.Promise.coroutine(f
 			this.collectionTreeRow.itemToSelect = null;
 		}
 		
-		Zotero.debug("Set tree in "+(Date.now()-start)+" ms");
+		Zotero.debug("Set tree for items view " + this.id + " in " + (Date.now() - start) + " ms");
 		
 		this._initialized = true;
 		yield this._runListeners('load');
@@ -434,7 +434,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	yield this._refreshPromise;
 	
 	if (!this._treebox || !this._treebox.treeBody) {
-		Components.utils.reportError("Treebox didn't exist in itemTreeView.notify()");
+		Zotero.debug("Treebox didn't exist in itemTreeView.notify()");
 		return;
 	}
 	
@@ -934,12 +934,13 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	
 	//this._treebox.endUpdateBatch();
 	if (madeChanges) {
-		var promise = this._getItemSelectedPromise();
+		var deferred = Zotero.Promise.defer();
+		this.addEventListener('select', () => deferred.resolve());
 	}
 	this.selection.selectEventsSuppressed = false;
 	if (madeChanges) {
 		Zotero.debug("Yielding for select promise"); // TEMP
-		yield promise;
+		return deferred.promise;
 	}
 });
 
@@ -1630,6 +1631,12 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 		return false;
 	}
 	
+	var selected = this.getSelectedItems(true);
+	if (selected.length == 1 && selected[0] == id) {
+		Zotero.debug("Item " + id + " is already selected");
+		return;
+	}
+	
 	var row = this._rowMap[id];
 	
 	// Get the row of the parent, if there is one
@@ -1674,17 +1681,20 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 		row = this._rowMap[id];
 	}
 	
-	// This function calls nsITreeSelection.select(), which triggers the <tree>'s 'onselect'
-	// attribute, which calls ZoteroPane.itemSelected(), which calls ZoteroItemPane.viewItem(),
-	// which refreshes the itembox. But since the 'onselect' doesn't handle promises,
-	// itemSelected() isn't waited for and 'yield selectItem(itemID)' continues before the
-	// itembox has been refreshed. To get around this, we make a promise resolver that's
-	// triggered by itemSelected() when it's done.
-	if (!this.selection.selectEventsSuppressed) {
-		var itemSelectedPromise = this._getItemSelectedPromise(id);
+	// this.selection.select() triggers the <tree>'s 'onselect' attribute, which calls
+	// ZoteroPane.itemSelected(), which calls ZoteroItemPane.viewItem(), which refreshes the
+	// itembox. But since the 'onselect' doesn't handle promises, itemSelected() isn't waited for
+	// here, which means that 'yield selectItem(itemID)' continues before the itembox has been
+	// refreshed. To get around this, we wait for a select event that's triggered by
+	// itemSelected() when it's done.
+	if (this.selection.selectEventsSuppressed) {
+		this.selection.select(row);
 	}
-	
-	this.selection.select(row);
+	else {
+		var deferred = Zotero.Promise.defer();
+		this.addEventListener('select', () => deferred.resolve());
+		this.selection.select(row);
+	}
 	
 	// If |expand|, open row if container
 	if (expand && this.isContainer(row) && !this.isContainerOpen(row)) {
@@ -1692,8 +1702,8 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 	}
 	this.selection.select(row);
 	
-	if (!this.selection.selectEventsSuppressed) {
-		yield itemSelectedPromise;
+	if (deferred) {
+		yield deferred.promise;
 	}
 	
 	// We aim for a row 5 below the target row, since ensureRowIsVisible() does
@@ -1716,23 +1726,6 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 	
 	return true;
 });
-
-
-Zotero.ItemTreeView.prototype._getItemSelectedPromise = function (itemID) {
-	if (itemID) {
-		var selected = this.getSelectedItems(true);
-		var alreadySelected = selected.length == 1 && selected[0] == itemID;
-		if (alreadySelected) {
-			return Zotero.Promise.resolve();
-		}
-	}
-	return new Zotero.Promise(function () {
-		this._itemSelectedPromiseResolver = {
-			resolve: arguments[0],
-			reject: arguments[1]
-		};
-	}.bind(this));
-}
 
 
 /**
