@@ -19,6 +19,39 @@ describe("Zotero.CollectionTreeView", function() {
 		assert.equal(collectionsView.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
 	}
 	
+	describe("collapse/expand", function () {
+		it("should close and open My Library repeatedly", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var cv = collectionsView;
+			cv.selectLibrary(libraryID);
+			var row = cv.selection.currentIndex;
+			
+			cv.collapseLibrary(libraryID);
+			var nextRow = cv.getRow(row + 1);
+			assert.equal(cv.selection.currentIndex, row);
+			assert.ok(nextRow.isSeparator());
+			assert.isFalse(cv.isContainerOpen(row));
+			
+			yield cv.expandLibrary(libraryID);
+			nextRow = cv.getRow(row + 1);
+			assert.equal(cv.selection.currentIndex, row);
+			assert.ok(!nextRow.isSeparator());
+			assert.ok(cv.isContainerOpen(row));
+			
+			cv.collapseLibrary(libraryID);
+			nextRow = cv.getRow(row + 1);
+			assert.equal(cv.selection.currentIndex, row);
+			assert.ok(nextRow.isSeparator());
+			assert.isFalse(cv.isContainerOpen(row));
+			
+			yield cv.expandLibrary(libraryID);
+			nextRow = cv.getRow(row + 1);
+			assert.equal(cv.selection.currentIndex, row);
+			assert.ok(!nextRow.isSeparator());
+			assert.ok(cv.isContainerOpen(row));
+		})
+	})
+	
 	describe("#notify()", function () {
 		it("should select a new collection", function* () {
 			resetSelection();

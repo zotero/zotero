@@ -686,8 +686,7 @@ Zotero.CollectionTreeView.prototype.toggleOpenState = Zotero.Promise.coroutine(f
 	this.rowCount += count;
 	this._treebox.rowCountChanged(row + 1, count);
 	
-	// Toggle container open value
-	this._rows[row][1] = true;
+	this._rows[row].isOpen = true;
 	this._treebox.invalidateRow(row);
 	this._refreshRowMap();
 });
@@ -698,16 +697,15 @@ Zotero.CollectionTreeView.prototype._closeContainer = function (row) {
 	
 	var count = 0;
 	var level = this.getLevel(row);
+	var nextRow = row + 1;
 	
 	// Remove child rows
-	while ((row + 1 < this._rows.length) && (this.getLevel(row + 1) > level)) {
-		this._removeRow(row + 1);
+	while ((nextRow < this._rows.length) && (this.getLevel(nextRow) > level)) {
+		this._removeRow(nextRow);
 		count--;
 	}
-	// Mark as removed from the end of the row's children
-	this._treebox.rowCountChanged(row + 1 + Math.abs(count), count);
 	
-	this._rows[row][1] = false;
+	this._rows[row].isOpen = false;
 	this._treebox.invalidateRow(row);
 	this._refreshRowMap();
 }
@@ -766,7 +764,7 @@ Zotero.CollectionTreeView.prototype.expandLibrary = Zotero.Promise.coroutine(fun
 
 Zotero.CollectionTreeView.prototype.collapseLibrary = function (libraryID) {
 	var row = this._rowMap['L' + libraryID]
-	if (!row) {
+	if (row === undefined) {
 		return false;
 	}
 	this._closeContainer(row);
