@@ -2513,6 +2513,10 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 		}
 	}
 	
+	// TEMP
+	Zotero.debug("TEMP: Skipping Quick Copy");
+	return;
+	
 	// Get Quick Copy format for current URL
 	var url = this._ownerDocument.defaultView.content && this._ownerDocument.defaultView.content.location ?
 				this._ownerDocument.defaultView.content.location.href : null;
