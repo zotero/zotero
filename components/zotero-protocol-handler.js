@@ -596,7 +596,7 @@ function ZoteroProtocolHandler() {
 						// FIXME: Hack to exclude group libraries for now
 						var search = new Zotero.Search();
 						search.setScope(s);
-						var groups = yield Zotero.Groups.getAll();
+						var groups = Zotero.Groups.getAll();
 						for each(var group in groups) {
 							search.addCondition('libraryID', 'isNot', group.libraryID);
 						}

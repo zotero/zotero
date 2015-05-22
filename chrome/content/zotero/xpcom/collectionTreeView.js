@@ -200,7 +200,7 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 	);
 	
 	// Add groups
-	var groups = yield Zotero.Groups.getAll();
+	var groups = Zotero.Groups.getAll();
 	if (groups.length) {
 		this._addRowToArray(
 			newRows,

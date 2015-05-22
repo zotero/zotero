@@ -95,8 +95,9 @@
 					menupopup.appendChild(menuitem);
 					
 					// Add groups
-					for (let i = 0; i < this.groups.length; i++) {
-						let group = this.groups[i];
+					var groups = Zotero.Groups.getAll();
+					for (let i = 0; i < groups.length; i++) {
+						let group = groups[i];
 						let menuitem = document.createElement('menuitem');
 						menuitem.setAttribute('label', group.name);
 						menuitem.setAttribute('libraryID', group.libraryID);

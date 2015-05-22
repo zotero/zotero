@@ -287,7 +287,7 @@ Zotero.Group.prototype.save = function () {
 		throw (e);
 	}
 	
-	//Zotero.Groups.reload(this.id);
+	Zotero.Groups.register(this);
 	
 	Zotero.Notifier.trigger('add', 'group', this.id);
 }
@@ -369,6 +369,7 @@ Zotero.Group.prototype.erase = Zotero.Promise.coroutine(function* () {
 		Zotero.Notifier.enable();
 	}
 	
+	Zotero.Groups.unregister(this.id);
 	Zotero.Notifier.trigger('delete', 'group', this.id, notifierData);
 });
 
@@ -391,7 +392,7 @@ Zotero.Group.prototype.serialize = function() {
 
 
 Zotero.Group.prototype._requireLoad = function () {
-	if (!this._loaded) {
+	if (!this._loaded && Zotero.Groups.exists(this.id)) {
 		throw new Error("Group has not been loaded");
 	}
 }

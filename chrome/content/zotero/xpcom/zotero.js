@@ -604,7 +604,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				Zotero.Collections.init();
 				Zotero.Items.init();
 				yield Zotero.Searches.init();
-				Zotero.Groups.init();
+				yield Zotero.Groups.init();
 				
 				yield Zotero.QuickCopy.init();
 				

@@ -27,39 +27,38 @@
 Zotero.Groups = new function () {
 	this.__defineGetter__('addGroupURL', function () ZOTERO_CONFIG.WWW_BASE_URL + 'groups/new/');
 	
+	var _cache = {};
 	var _groupIDsByLibraryID = {};
 	var _libraryIDsByGroupID = {};
 	
 	
-	this.init = function () {
-		_loadIDs();
+	this.init = Zotero.Promise.coroutine(function* () {
+		yield _load();
+	});
+	
+	/**
+	 * @param {Integer} id - Group id
+	 * @return {Zotero.Group}
+	 */
+	this.get = function (id) {
+		if (!id) throw new Error("groupID not provided");
+		return _cache[id] ? _cache[id] : false;
 	}
 	
-	this.get = Zotero.Promise.coroutine(function* (id) {
-		if (!id) {
-			throw new Error("groupID not provided");
-		}
-		var group = new Zotero.Group;
-		group.id = id;
-		if (!(yield group.load())) {
-			return false;
-		}
-		return group;
-	});
 	
-	
-	this.getAll = Zotero.Promise.coroutine(function* () {
-		var groups = [];
-		var sql = "SELECT groupID FROM groups ORDER BY name COLLATE locale";
-		var groupIDs = yield Zotero.DB.columnQueryAsync(sql);
-		if (!groupIDs.length) {
-			return groups;
-		}
-		for each(var groupID in groupIDs) {
-			groups.push(this.get(groupID));
-		}
-		return Zotero.Promise.all(groups);
-	});
+	/**
+	 * Get all groups, sorted by name
+	 *
+	 * @return {Zotero.Group[]}
+	 */
+	this.getAll = function () {
+		var groups = [for (id of Object.keys(_cache)) _cache[id]];
+		var collation = Zotero.getLocaleCollation();
+		groups.sort(function(a, b) {
+			return collation.compareString(1, a.name, b.name);
+		});
+		return groups;
+	}
 	
 	
 	this.getByLibraryID = function (libraryID) {
@@ -91,15 +90,32 @@ Zotero.Groups = new function () {
 	}
 	
 	
-	function _loadIDs() {
-		var sql = "SELECT libraryID, groupID FROM groups";
-		return Zotero.DB.queryAsync(sql)
-		.then(function (rows) {
-			for (let i=0; i<rows.length; i++) {
-				let row = rows[i];
-				_groupIDsByLibraryID[row.libraryID] = row.groupID;
-				_libraryIDsByGroupID[row.groupID] = row.libraryID;
-			}
-		}.bind(this));
+	this.register = function (group) {
+		_libraryIDsByGroupID[group.id] = group.libraryID;
+		_groupIDsByLibraryID[group.libraryID] = group.id;
+		_cache[group.id] = group;
 	}
+	
+	
+	this.unregister = function (id) {
+		var libraryID = _libraryIDsByGroupID[groupID];
+		delete _groupIDsByLibraryID[libraryID];
+		delete _libraryIDsByGroupID[groupID];
+		delete _cache[id];
+	}
+	
+	
+	var _load = Zotero.Promise.coroutine(function* () {
+		var sql = "SELECT libraryID, groupID FROM groups";
+		var rows = yield Zotero.DB.queryAsync(sql)
+		for (let i=0; i<rows.length; i++) {
+			let row = rows[i];
+			_groupIDsByLibraryID[row.libraryID] = row.groupID;
+			_libraryIDsByGroupID[row.groupID] = row.libraryID;
+			let group = new Zotero.Group;
+			group.id = row.groupID;
+			yield group.load();
+			_cache[row.groupID] = group;
+		}
+	});
 }
