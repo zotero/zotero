@@ -1,7 +1,7 @@
 describe("Support Functions for Unit Testing", function() {
 	describe("resetDB", function() {
 		it("should restore the DB to factory settings", function* () {
-			this.timeout(45000);
+			this.timeout(60000);
 			yield Zotero.Items.erase(1);
 			assert.isFalse(yield Zotero.Items.getAsync(1));
 			yield resetDB();
