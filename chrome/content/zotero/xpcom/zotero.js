@@ -2061,11 +2061,11 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		// TEMP: Disabled until we have async DB (and maybe SQLite FTS)
 		//Zotero.Fulltext.purgeUnusedWords();
 		yield Zotero.DB.executeTransaction(function* () {
-			yield Zotero.Items.purge();
+			return Zotero.Items.purge();
 		});
 		// DEBUG: this might not need to be permanent
 		yield Zotero.DB.executeTransaction(function* () {
-			yield Zotero.Relations.purge();
+			return Zotero.Relations.purge();
 		});
 	});
 	

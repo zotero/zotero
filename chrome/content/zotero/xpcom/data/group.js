@@ -333,11 +333,11 @@ Zotero.Group.prototype.erase = Zotero.Promise.coroutine(function* () {
 		sql = "DELETE FROM libraries WHERE libraryID=?";
 		yield Zotero.DB.queryAsync(sql, this.libraryID)
 		
-		yield Zotero.purgeDataObjects();
-		
 		Zotero.Groups.unregister(this.id);
 		Zotero.Notifier.trigger('delete', 'group', this.id, notifierData);
 	}.bind(this));
+	
+	yield Zotero.purgeDataObjects();
 });
 
 

@@ -370,61 +370,61 @@ Zotero.Tags = new function() {
 			tagIDs = Zotero.flattenArguments(tagIDs);
 		}
 		
-		yield Zotero.DB.executeTransaction(function* () {
-			yield Zotero.Tags.load(libraryID);
-			
-			// Use given tags, as long as they're orphaned
-			if (tagIDs) {
-				let sql = "CREATE TEMPORARY TABLE tagDelete (tagID INT PRIMARY KEY)";
-				yield Zotero.DB.queryAsync(sql);
-				for (let i=0; i<tagIDs.length; i++) {
-					yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO tagDelete VALUES (?)", tagIDs[i]);
-				}
-				sql = "SELECT * FROM tagDelete WHERE tagID NOT IN (SELECT tagID FROM itemTags)";
-				var toDelete = yield Zotero.DB.columnQueryAsync(sql);
+		Zotero.DB.requireTransaction();
+		
+		yield Zotero.Tags.load(libraryID);
+		
+		// Use given tags, as long as they're orphaned
+		if (tagIDs) {
+			let sql = "CREATE TEMPORARY TABLE tagDelete (tagID INT PRIMARY KEY)";
+			yield Zotero.DB.queryAsync(sql);
+			for (let i=0; i<tagIDs.length; i++) {
+				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO tagDelete VALUES (?)", tagIDs[i]);
 			}
-			// Look for orphaned tags
-			else {
-				var sql = "CREATE TEMPORARY TABLE tagDelete AS "
-					+ "SELECT tagID FROM tags WHERE tagID "
-					+ "NOT IN (SELECT tagID FROM itemTags)";
-				yield Zotero.DB.queryAsync(sql);
-				
-				sql = "CREATE INDEX tagDelete_tagID ON tagDelete(tagID)";
-				yield Zotero.DB.queryAsync(sql);
-				
-				sql = "SELECT * FROM tagDelete";
-				var toDelete = yield Zotero.DB.columnQueryAsync(sql);
-				
-				if (!toDelete) {
-					sql = "DROP TABLE tagDelete";
-					return Zotero.DB.queryAsync(sql);
-				}
-			}
-			
-			notifierData = {};
-			for (let i=0; i<toDelete.length; i++) {
-				let id = toDelete[i];
-				if (_tagNamesByID[id]) {
-					notifierData[id] = {
-						old: {
-							libraryID: libraryID,
-							tag: _tagNamesByID[id]
-						}
-					};
-				}
-			}
-			
-			_unload(libraryID, toDelete);
-			
-			sql = "DELETE FROM tags WHERE tagID IN (SELECT tagID FROM tagDelete);";
+			sql = "SELECT * FROM tagDelete WHERE tagID NOT IN (SELECT tagID FROM itemTags)";
+			var toDelete = yield Zotero.DB.columnQueryAsync(sql);
+		}
+		// Look for orphaned tags
+		else {
+			var sql = "CREATE TEMPORARY TABLE tagDelete AS "
+				+ "SELECT tagID FROM tags WHERE tagID "
+				+ "NOT IN (SELECT tagID FROM itemTags)";
 			yield Zotero.DB.queryAsync(sql);
 			
-			sql = "DROP TABLE tagDelete";
+			sql = "CREATE INDEX tagDelete_tagID ON tagDelete(tagID)";
 			yield Zotero.DB.queryAsync(sql);
 			
-			Zotero.Notifier.trigger('delete', 'tag', toDelete, notifierData);
-		}.bind(this));
+			sql = "SELECT * FROM tagDelete";
+			var toDelete = yield Zotero.DB.columnQueryAsync(sql);
+			
+			if (!toDelete) {
+				sql = "DROP TABLE tagDelete";
+				return Zotero.DB.queryAsync(sql);
+			}
+		}
+		
+		notifierData = {};
+		for (let i=0; i<toDelete.length; i++) {
+			let id = toDelete[i];
+			if (_tagNamesByID[id]) {
+				notifierData[id] = {
+					old: {
+						libraryID: libraryID,
+						tag: _tagNamesByID[id]
+					}
+				};
+			}
+		}
+		
+		_unload(libraryID, toDelete);
+		
+		sql = "DELETE FROM tags WHERE tagID IN (SELECT tagID FROM tagDelete);";
+		yield Zotero.DB.queryAsync(sql);
+		
+		sql = "DROP TABLE tagDelete";
+		yield Zotero.DB.queryAsync(sql);
+		
+		Zotero.Notifier.trigger('delete', 'tag', toDelete, notifierData);
 		
 		Zotero.Prefs.set('purge.tags', false);
 	});
