@@ -2052,14 +2052,21 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	 * Clear entries that no longer exist from various tables
 	 */
 	this.purgeDataObjects = Zotero.Promise.coroutine(function* (skipStoragePurge) {
-		yield Zotero.Creators.purge();
-		yield Zotero.Tags.purge();
+		yield Zotero.DB.executeTransaction(function* () {
+			return Zotero.Creators.purge();
+		});
+		yield Zotero.DB.executeTransaction(function* () {
+			return Zotero.Tags.purge();
+		});
 		// TEMP: Disabled until we have async DB (and maybe SQLite FTS)
 		//Zotero.Fulltext.purgeUnusedWords();
-		yield Zotero.Items.purge();
+		yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.Items.purge();
+		});
 		// DEBUG: this might not need to be permanent
-		yield Zotero.Relations.purge();
-		yield Zotero.CharacterSets.purge();
+		yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.Relations.purge();
+		});
 	});
 	
 	

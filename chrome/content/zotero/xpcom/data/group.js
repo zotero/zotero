@@ -219,7 +219,7 @@ Zotero.Group.prototype.hasItem = function (item) {
 }
 
 
-Zotero.Group.prototype.save = function () {
+Zotero.Group.prototype.save = Zotero.Promise.coroutine(function* () {
 	if (!this.id) {
 		throw ("ID not set in Zotero.Group.save()");
 	}
@@ -233,14 +233,12 @@ Zotero.Group.prototype.save = function () {
 		return false;
 	}
 	
-	Zotero.DB.beginTransaction();
-	
-	var isNew = !this.exists();
-	
-	try {
+	yield Zotero.DB.executeTransaction(function* () {
+		var isNew = !this.exists();
+		
 		Zotero.debug("Saving group " + this.id);
 		
-		var columns = [
+		var sqlColumns = [
 			'groupID',
 			'libraryID',
 			'name',
@@ -249,7 +247,6 @@ Zotero.Group.prototype.save = function () {
 			'filesEditable',
 			'version'
 		];
-		var placeholders = columns.map(function () '?').join();
 		var sqlValues = [
 			this.id,
 			this.libraryID,
@@ -265,80 +262,57 @@ Zotero.Group.prototype.save = function () {
 				Zotero.Libraries.add(this.libraryID, 'group');
 			}
 			
-			var sql = "INSERT INTO groups (" + columns.join(', ') + ") "
-						+ "VALUES (" + placeholders.join(', ') + ")";
-			Zotero.DB.query(sql, sqlValues);
+			var sql = "INSERT INTO groups (" + sqlColumns.join(', ') + ") "
+						+ "VALUES (" + sqlColumns.map(() => '?').join(', ') + ")";
+			yield Zotero.DB.queryAsync(sql, sqlValues);
 		}
 		else {
-			columns.shift();
+			sqlColumns.shift();
 			sqlValues.shift();
 			
 			var sql = "UPDATE groups SET "
-				+ columns.map(function (val) val + '=?').join(', ')
+				+ sqlColumns.map(function (val) val + '=?').join(', ')
 				+ " WHERE groupID=?";
 			sqlValues.push(this.id);
-			Zotero.DB.query(sql, sqlValues);
+			yield Zotero.DB.queryAsync(sql, sqlValues);
 		}
-		
-		Zotero.DB.commitTransaction();
-	}
-	catch (e) {
-		Zotero.DB.rollbackTransaction();
-		throw (e);
-	}
+	}.bind(this));
 	
 	Zotero.Groups.register(this);
-	
 	Zotero.Notifier.trigger('add', 'group', this.id);
-}
+});
 
 
 /**
 * Deletes group and all descendant objects
 **/
 Zotero.Group.prototype.erase = Zotero.Promise.coroutine(function* () {
-	// Don't send notifications for items and other groups objects that are deleted,
-	// since we're really only removing the group from the client
-	var notifierDisabled = Zotero.Notifier.disable();
-	
 	yield Zotero.DB.executeTransaction(function* () {
+		var notifierData = {};
+		notifierData[this.id] = this.serialize(); // TODO: Replace with JSON
+		
 		var sql, ids, obj;
 		
 		// Delete items
-		sql = "SELECT itemID FROM items WHERE libraryID=?";
-		ids = yield Zotero.DB.columnQueryAsync(sql, this.libraryID);
-		yield Zotero.Items.erase(ids);
-		
-		// Delete collections
-		sql = "SELECT collectionID FROM collections WHERE libraryID=?";
-		ids = yield Zotero.DB.columnQueryAsync(sql, this.libraryID);
-		for each(var id in ids) {
-			obj = yield Zotero.Collections.getAsync(id);
-			// Subcollections might've already been deleted
-			if (obj) {
-				yield obj.erase();
+		var types = ['item', 'collection', 'search'];
+		for (let type of types) {
+			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+			let sql = "SELECT " + objectsClass.idColumn + " FROM " + objectsClass.table
+				+ " WHERE libraryID=?";
+			ids = yield Zotero.DB.columnQueryAsync(sql, this.libraryID);
+			for (let i = 0; i < ids.length; i++) {
+				let id = ids[i];
+				let obj = yield Zotero.Items.getAsync(id, { noCache: true });
+				yield obj.erase({
+					skipNotifier: true
+				});
 			}
 		}
 		
-		// Delete creators
-		sql = "SELECT creatorID FROM creators WHERE libraryID=?";
-		ids = yield Zotero.DB.columnQueryAsync(sql, this.libraryID);
-		for (let i=0; i<ids.length; i++) {
-			obj = yield Zotero.Creators.getAsync(ids[i]);
-			yield obj.erase();
-		}
-		
-		// Delete saved searches
-		sql = "SELECT savedSearchID FROM savedSearches WHERE libraryID=?";
-		ids = yield Zotero.DB.columnQueryAsync(sql, this.libraryID);
-		if (ids) {
-			yield Zotero.Searches.erase(ids);
-		}
-		
-		// Delete tags
+		/*// Delete tags
 		sql = "SELECT tagID FROM tags WHERE libraryID=?";
 		ids = yield Zotero.DB.columnQueryAsync(sql, this.libraryID);
-		yield Zotero.Tags.erase(ids);
+		yield Zotero.Tags.erase(ids);*/
 		
 		// Delete delete log entries
 		sql = "DELETE FROM syncDeleteLog WHERE libraryID=?";
@@ -361,16 +335,9 @@ Zotero.Group.prototype.erase = Zotero.Promise.coroutine(function* () {
 		
 		yield Zotero.purgeDataObjects();
 		
-		var notifierData = {};
-		notifierData[this.id] = this.serialize();
+		Zotero.Groups.unregister(this.id);
+		Zotero.Notifier.trigger('delete', 'group', this.id, notifierData);
 	}.bind(this));
-	
-	if (notifierDisabled) {
-		Zotero.Notifier.enable();
-	}
-	
-	Zotero.Groups.unregister(this.id);
-	Zotero.Notifier.trigger('delete', 'group', this.id, notifierData);
 });
 
 

@@ -213,7 +213,7 @@ Zotero.Search.prototype.clone = function (libraryID) {
 };
 
 
-Zotero.Search.prototype._eraseData = Zotero.Promise.coroutine(function* () {
+Zotero.Search.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	Zotero.DB.requireTransaction();
 	
 	var notifierData = {};
@@ -228,7 +228,9 @@ Zotero.Search.prototype._eraseData = Zotero.Promise.coroutine(function* () {
 	var sql = "DELETE FROM savedSearches WHERE savedSearchID=?";
 	yield Zotero.DB.queryAsync(sql, this.id);
 	
-	Zotero.Notifier.trigger('delete', 'search', this.id, notifierData);
+	if (!env.skipNotifier) {
+		Zotero.Notifier.trigger('delete', 'search', this.id, notifierData);
+	}
 });
 
 

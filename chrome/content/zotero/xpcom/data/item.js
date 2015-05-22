@@ -3970,7 +3970,9 @@ Zotero.Item.prototype._erasePreCommit = Zotero.Promise.coroutine(function* (env)
 	
 	this.ObjectsClass.unload(this.id);
 	
-	Zotero.Notifier.trigger('delete', 'item', this.id, env.deletedItemNotifierData);
+	if (!env.skipNotifier) {
+		Zotero.Notifier.trigger('delete', 'item', this.id, env.deletedItemNotifierData);
+	}
 	
 	Zotero.Prefs.set('purge.items', true);
 	Zotero.Prefs.set('purge.creators', true);

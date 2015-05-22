@@ -183,7 +183,7 @@ Zotero.Relations = function () {
 		var ids = yield Zotero.DB.columnQueryAsync(sql, params);
 		
 		for (let i=0; i<ids.length; i++) {
-			let relation = this.get(ids[i]);
+			let relation = yield this.getAsync(ids[i]);
 			yield relation.load();
 			yield relation.erase();
 		}
@@ -206,7 +206,7 @@ Zotero.Relations = function () {
 		var ids = yield Zotero.DB.columnQueryAsync(sql, params);
 		
 		for (let i=0; i<ids.length; i++) {
-			let relation = this.get(ids[i]);
+			let relation = yield this.getAsync(ids[i]);
 			yield relation.load();
 			yield relation.erase();
 		}
@@ -214,6 +214,8 @@ Zotero.Relations = function () {
 	
 	
 	this.purge = Zotero.Promise.coroutine(function* () {
+		Zotero.DB.requireTransaction();
+		
 		Zotero.debug("Purging relations");
 		var t = new Date;
 		var sql = "SELECT subject FROM relations WHERE predicate != ? "
@@ -221,21 +223,19 @@ Zotero.Relations = function () {
 		var uris = yield Zotero.DB.columnQueryAsync(sql, [this.deletedItemPredicate, this.deletedItemPredicate]);
 		if (uris) {
 			var prefix = Zotero.URI.defaultPrefix;
-			yield Zotero.DB.executeTransaction(function* () {
-				for each(var uri in uris) {
-					// Skip URIs that don't begin with the default prefix,
-					// since they don't correspond to local items
-					if (uri.indexOf(prefix) == -1) {
-						continue;
-					}
-					if (uri.indexOf("/items/") != -1 && !Zotero.URI.getURIItemID(uri)) {
-						yield this.eraseByURI(uri);
-					}
-					if (uri.indexOf("/collections/") != -1 && !Zotero.URI.getURICollectionID(uri)) {
-						yield this.eraseByURI(uri);
-					}
+			for each(var uri in uris) {
+				// Skip URIs that don't begin with the default prefix,
+				// since they don't correspond to local items
+				if (uri.indexOf(prefix) == -1) {
+					continue;
 				}
-			}.bind(this));
+				if (uri.indexOf("/items/") != -1 && !Zotero.URI.getURIItemID(uri)) {
+					yield this.eraseByURI(uri);
+				}
+				if (uri.indexOf("/collections/") != -1 && !Zotero.URI.getURICollectionID(uri)) {
+					yield this.eraseByURI(uri);
+				}
+			}
 			Zotero.debug("Purged relations in " + ((new Date) - t) + "ms");
 		}
 	});

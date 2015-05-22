@@ -608,6 +608,8 @@ Zotero.Items = function() {
 	 * Purge unused data values
 	 */
 	this.purge = Zotero.Promise.coroutine(function* () {
+		Zotero.DB.requireTransaction();
+		
 		if (!Zotero.Prefs.get('purge.items')) {
 			return;
 		}

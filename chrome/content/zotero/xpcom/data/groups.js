@@ -97,11 +97,11 @@ Zotero.Groups = new function () {
 	}
 	
 	
-	this.unregister = function (id) {
+	this.unregister = function (groupID) {
 		var libraryID = _libraryIDsByGroupID[groupID];
 		delete _groupIDsByLibraryID[libraryID];
 		delete _libraryIDsByGroupID[groupID];
-		delete _cache[id];
+		delete _cache[groupID];
 	}
 	
 	

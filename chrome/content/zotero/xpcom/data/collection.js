@@ -550,8 +550,10 @@ Zotero.Collection.prototype.clone = function (includePrimary, newCollection) {
 /**
 * Deletes collection and all descendent collections (and optionally items)
 **/
-Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (deleteItems) {
+Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	Zotero.DB.requireTransaction();
+	
+	var includeItems = env.options.deleteItems;
 	
 	var collections = [this.id];
 	
@@ -612,7 +614,9 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (del
 	this.ObjectsClass.unload(collections);
 	//return Zotero.Collections.reloadAll();
 	
-	Zotero.Notifier.trigger('delete', 'collection', collections, notifierData);
+	if (!env.skipNotifier) {
+		Zotero.Notifier.trigger('delete', 'collection', collections, notifierData);
+	}
 });
 
 
