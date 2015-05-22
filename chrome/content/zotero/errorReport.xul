@@ -33,7 +33,7 @@
 				
 				Zotero.getSystemInfo(function(info) {
 					var errorDataText = errorData.length
-						? data.errorData.join('\n')
+						? data.errorData.join('\n\n')
 						: Zotero.getString('errorReport.noErrorsLogged', Zotero.appName);
 					
 					diagnosticInfo = info;
