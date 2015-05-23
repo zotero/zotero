@@ -58,7 +58,6 @@ var ZoteroPane = new function()
 	this.clearItemsPaneMessage = clearItemsPaneMessage;
 	this.contextPopupShowing = contextPopupShowing;
 	this.openNoteWindow = openNoteWindow;
-	this.addAttachmentFromDialog = addAttachmentFromDialog;
 	this.viewSelectedAttachment = viewSelectedAttachment;
 	this.showAttachmentNotFoundDialog = showAttachmentNotFoundDialog;
 	this.reportErrors = reportErrors;
@@ -3227,8 +3226,7 @@ var ZoteroPane = new function()
 	});
 	
 	
-	function addAttachmentFromDialog(link, id)
-	{
+	this.addAttachmentFromDialog = Zotero.Promise.coroutine(function* (link, parentItemID) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -3265,25 +3263,33 @@ var ZoteroPane = new function()
 		
 		if(fp.show() == nsIFilePicker.returnOK)
 		{
+			if (!parentItemID) {
+				var collection = this.getSelectedCollection();
+			}
+			
 			var files = fp.files;
 			while (files.hasMoreElements()){
 				var file = files.getNext();
 				file.QueryInterface(Components.interfaces.nsILocalFile);
-				var attachmentID;
-				if(link)
-					attachmentID = Zotero.Attachments.linkFromFile(file, id);
-				else
-					attachmentID = Zotero.Attachments.importFromFile(file, id, libraryID);
-			
-				if(attachmentID && !id)
-				{
-					var c = this.getSelectedCollection();
-					if(c)
-						c.addItem(attachmentID);
+				let attachmentID;
+				if (link) {
+					attachmentID = yield Zotero.Attachments.linkFromFile({
+						file: file,
+						parentItemID: parentItemID,
+						collections: collection ? [collection] : undefined
+					});
+				}
+				else {
+					attachmentID = yield Zotero.Attachments.importFromFile({
+						file: file,
+						libraryID: libraryID,
+						parentItemID: parentItemID,
+						collections: collection ? [collection] : undefined
+					});
 				}
 			}
 		}
-	}
+	});
 	
 	
 	this.addItemFromPage = function (itemType, saveSnapshot, row) {
@@ -3398,7 +3404,7 @@ var ZoteroPane = new function()
 				let item = yield Zotero.Attachments.importFromDocument({
 					libraryID: libraryID,
 					document: doc,
-					parentCollectionIDs: [collectionID]
+					collections: [collectionID]
 				});
 				
 				yield this.selectItem(item.id);

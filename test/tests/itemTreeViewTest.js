@@ -162,4 +162,38 @@ describe("Zotero.ItemTreeView", function() {
 			assert.equal(selected[0], id);
 		});
 	})
+	
+	describe("#drop()", function () {
+		it("should create a top-level attachment when a file is dragged", function* () {
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			
+			var deferred = Zotero.Promise.defer();
+			itemsView.addEventListener('select', () => deferred.resolve());
+			
+			itemsView.drop(0, -1, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: {
+					contains: function (type) {
+						return type == 'application/x-moz-file';
+					}
+				},
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			})
+			
+			yield deferred.promise;
+			var items = itemsView.getSelectedItems();
+			var path = yield items[0].getFilePathAsync();
+			assert.equal(
+				(yield Zotero.File.getBinaryContentsAsync(path)),
+				(yield Zotero.File.getBinaryContentsAsync(file))
+			);
+		})
+	});
 })

@@ -2135,7 +2135,7 @@ Zotero.Item.prototype.getFile = function () {
 			try {
 				var file = Components.classes["@mozilla.org/file/local;1"].
 					createInstance(Components.interfaces.nsILocalFile);
-				file.persistentDescriptor = row.path;
+				file.persistentDescriptor = path;
 			}
 			catch (e) {
 				Zotero.debug('Invalid persistent descriptor', 2);
@@ -2153,7 +2153,7 @@ Zotero.Item.prototype.getFile = function () {
 			createInstance(Components.interfaces.nsILocalFile);
 		
 		try {
-			file.persistentDescriptor = row.path;
+			file.persistentDescriptor = path;
 		}
 		catch (e) {
 			// See if this is an old relative path (deprecated)
@@ -2161,7 +2161,7 @@ Zotero.Item.prototype.getFile = function () {
 			try {
 				var refDir = (row.linkMode == this.LINK_MODE_LINKED_FILE)
 					? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
-				file.setRelativeDescriptor(refDir, row.path);
+				file.setRelativeDescriptor(refDir, path);
 			}
 			catch (e) {
 				Zotero.debug('Invalid relative descriptor', 2);
@@ -2177,8 +2177,7 @@ Zotero.Item.prototype.getFile = function () {
 /**
  * Get the absolute file path for the attachment
  *
- * @return {Promise<string|false>} - A promise for either the absolute file path of the attachment
- *                                    or false for invalid paths
+ * @return {string|false} - The absolute file path of the attachment, or false for invalid paths
  */
 Zotero.Item.prototype.getFilePath = function () {
 	if (!this.isAttachment()) {

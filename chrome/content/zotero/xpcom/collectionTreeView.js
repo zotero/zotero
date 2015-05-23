@@ -2007,29 +2007,28 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 					// Otherwise file, so fall through
 				}
 				
-				yield Zotero.DB.executeTransaction(function* () {
-					if (dropEffect == 'link') {
-						var itemID = yield Zotero.Attachments.linkFromFile(file);
-					}
-					else {
-						var itemID = yield Zotero.Attachments.importFromFile(file, false, targetLibraryID);
-						// If moving, delete original file
-						if (dragData.dropEffect == 'move') {
-							try {
-								file.remove(false);
-							}
-							catch (e) {
-								Components.utils.reportError("Error deleting original file " + file.path + " after drag");
-							}
+				if (dropEffect == 'link') {
+					var itemID = yield Zotero.Attachments.linkFromFile({
+						file: file,
+						collections: [parentCollectionID]
+					});
+				}
+				else {
+					var itemID = yield Zotero.Attachments.importFromFile({
+						file: file,
+						libraryID: targetLibraryID,
+						collections: [parentCollectionID]
+					});
+					// If moving, delete original file
+					if (dragData.dropEffect == 'move') {
+						try {
+							file.remove(false);
+						}
+						catch (e) {
+							Components.utils.reportError("Error deleting original file " + file.path + " after drag");
 						}
 					}
-					if (parentCollectionID) {
-						var col = yield Zotero.Collections.getAsync(parentCollectionID);
-						if (col) {
-							col.addItem(itemID);
-						}
-					}
-				});
+				}
 			}
 		}
 		finally {

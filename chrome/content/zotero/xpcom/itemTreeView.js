@@ -3014,8 +3014,8 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 		var parentItemID = false;
 		var parentCollectionID = false;
 		
-		var treerow = this.getRow(row);
 		if (orient == 0) {
+			let treerow = this.getRow(row);
 			parentItemID = treerow.ref.id
 		}
 		else if (collectionTreeRow.isCollection()) {
@@ -3073,29 +3073,30 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 					// Otherwise file, so fall through
 				}
 				
-				yield Zotero.DB.executeTransaction(function* () {
-					if (dropEffect == 'link') {
-						var itemID = yield Zotero.Attachments.linkFromFile(file, parentItemID);
-					}
-					else {
-						var itemID = yield Zotero.Attachments.importFromFile(file, parentItemID, targetLibraryID);
-						// If moving, delete original file
-						if (dragData.dropEffect == 'move') {
-							try {
-								file.remove(false);
-							}
-							catch (e) {
-								Components.utils.reportError("Error deleting original file " + file.path + " after drag");
-							}
+				if (dropEffect == 'link') {
+					var itemID = yield Zotero.Attachments.linkFromFile({
+						file: file,
+						parentItemID: parentItemID,
+						collections: parentCollectionID ? [parentCollectionID] : undefined
+					});
+				}
+				else {
+					var itemID = yield Zotero.Attachments.importFromFile({
+						file: file,
+						libraryID: targetLibraryID,
+						parentItemID: parentItemID,
+						collections: parentCollectionID ? [parentCollectionID] : undefined
+					});
+					// If moving, delete original file
+					if (dragData.dropEffect == 'move') {
+						try {
+							file.remove(false);
+						}
+						catch (e) {
+							Components.utils.reportError("Error deleting original file " + file.path + " after drag");
 						}
 					}
-					if (parentCollectionID) {
-						var col = yield Zotero.Collections.getAsync(parentCollectionID);
-						if (col) {
-							yield col.addItem(itemID);
-						}
-					}
-				});
+				}
 			}
 		}
 		finally {

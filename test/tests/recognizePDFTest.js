@@ -19,12 +19,14 @@ describe.skip("PDF Recognition", function() {
 		win.close();
 	});
 
-	it("should recognize a PDF with a DOI", function() {
+	it("should recognize a PDF with a DOI", function* () {
 		this.timeout(30000);
 		// Import the PDF
 		var testdir = getTestDataDirectory();
 		testdir.append("recognizePDF_test_DOI.pdf");
-		var id = Zotero.Attachments.importFromFile(testdir);
+		var id = yield Zotero.Attachments.importFromFile({
+			file: testdir
+		});
 
 		// Recognize the PDF
 		win.ZoteroPane.selectItem(id);
@@ -37,14 +39,16 @@ describe.skip("PDF Recognition", function() {
 		});
 	});
 
-	it("should recognize a PDF without a DOI", function() {
+	it("should recognize a PDF without a DOI", function* () {
 		if (Zotero.noUserInput) this.skip(); // CAPTCHAs make this fail
 		
 		this.timeout(30000);
 		// Import the PDF
 		var testdir = getTestDataDirectory();
 		testdir.append("recognizePDF_test_GS.pdf");
-		var id = Zotero.Attachments.importFromFile(testdir);
+		var id = yield Zotero.Attachments.importFromFile({
+			file: testdir
+		});
 
 		// Recognize the PDF
 		win.ZoteroPane.selectItem(id);

@@ -27,10 +27,50 @@ describe("Zotero.Attachments", function() {
 			var parentItemID = yield item.saveTx();
 			
 			// Create attachment and compare content
-			var itemID = yield Zotero.Attachments.importFromFile(tmpFile, parentItemID);
+			var itemID = yield Zotero.Attachments.importFromFile({
+				file: tmpFile,
+				parentItemID: parentItemID
+			});
 			var item = yield Zotero.Items.getAsync(itemID);
 			var storedFile = item.getFile();
 			assert.equal((yield Zotero.File.getContentsAsync(storedFile)), contents);
+			
+			// Clean up
+			yield Zotero.Items.erase(itemID);
+		});
+		
+		it("should create a top-level attachment from a PNG file", function* () {
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var contents = yield Zotero.File.getBinaryContentsAsync(file);
+			
+			// Create attachment and compare content
+			var itemID = yield Zotero.Attachments.importFromFile({
+				file: file
+			});
+			var item = yield Zotero.Items.getAsync(itemID);
+			var storedFile = item.getFile();
+			assert.equal((yield Zotero.File.getBinaryContentsAsync(storedFile)), contents);
+			
+			// Clean up
+			yield Zotero.Items.erase(itemID);
+		});
+		
+		it("should create a top-level attachment from a PNG file in a collection", function* () {
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var contents = yield Zotero.File.getBinaryContentsAsync(file);
+			
+			var collection = yield createDataObject('collection');
+			
+			// Create attachment and compare content
+			var itemID = yield Zotero.Attachments.importFromFile({
+				file: file,
+				collections: [collection.id]
+			});
+			var item = yield Zotero.Items.getAsync(itemID);
+			var storedFile = item.getFile();
+			assert.equal((yield Zotero.File.getBinaryContentsAsync(storedFile)), contents);
 			
 			// Clean up
 			yield Zotero.Items.erase(itemID);
@@ -46,7 +86,10 @@ describe("Zotero.Attachments", function() {
 			var parentItemID = yield item.saveTx();
 			
 			// Create attachment and compare content
-			var itemID = yield Zotero.Attachments.importFromFile(file, parentItemID);
+			var itemID = yield Zotero.Attachments.importFromFile({
+				file: file,
+				parentItemID: parentItemID
+			});
 			var item = yield Zotero.Items.getAsync(itemID);
 			var storedFile = item.getFile();
 			assert.equal((yield Zotero.File.getBinaryContentsAsync(storedFile)), contents);

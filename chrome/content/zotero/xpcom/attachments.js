@@ -34,15 +34,29 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
+	 * @param {Object} options
+	 * @param {nsIFile} [options.file] - File to add
+	 * @param {Integer} [options.libraryID]
+	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
+	 * @param {Integer[]} [options.collections] - Collection keys or ids to add new item to
 	 * @return {Promise}
 	 */
-	this.importFromFile = Zotero.Promise.coroutine(function* (file, parentItemID, libraryID) {
+	this.importFromFile = Zotero.Promise.coroutine(function* (options) {
 		Zotero.debug('Importing attachment from file');
+		
+		var libraryID = options.libraryID;
+		var file = options.file;
+		var parentItemID = options.parentItemID;
+		var collections = options.collections;
 		
 		var newName = Zotero.File.getValidFileName(file.leafName);
 		
 		if (!file.isFile()) {
-			throw ("'" + file.leafName + "' must be a file in Zotero.Attachments.importFromFile()");
+			throw new Error("'" + file.leafName + "' must be a file");
+		}
+		
+		if (parentItemID && collections) {
+			throw new Error("parentItemID and collections cannot both be provided");
 		}
 		
 		var itemID, newFile, contentType;
@@ -60,11 +74,14 @@ Zotero.Attachments = new function(){
 			attachmentItem.setField('title', newName);
 			attachmentItem.parentID = parentItemID;
 			attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_FILE;
+			if (collections) {
+				attachmentItem.setCollections(collections);
+			}
 			itemID = yield attachmentItem.save();
 			attachmentItem = yield Zotero.Items.getAsync(itemID);
 			
 			// Create directory for attachment files within storage directory
-			var destDir = yield this.createDirectoryForItem(attachmentItem);
+			destDir = yield this.createDirectoryForItem(attachmentItem);
 			
 			// Point to copied file
 			newFile = destDir.clone();
@@ -105,28 +122,34 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
+	 * @param {nsIFile} [options.file]
+	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
+	 * @param {Integer[]} [options.collections] - Collection keys or ids to add new item to
 	 * @return {Promise}
 	 */
-	this.linkFromFile = Zotero.Promise.coroutine(function* (file, parentItemID) {
+	this.linkFromFile = Zotero.Promise.coroutine(function* (options) {
 		Zotero.debug('Linking attachment from file');
+		
+		var file = options.file;
+		var parentItemID = options.parentItemID;
+		var collections = options.collections;
+		
+		if (parentItemID && collections) {
+			throw new Error("parentItemID and collections cannot both be provided");
+		}
 		
 		var title = file.leafName;
 		var contentType = yield Zotero.MIME.getMIMETypeFromFile(file);
-		var itemID;
-		
-		return Zotero.DB.executeTransaction(function* () {
-			itemID = yield _addToDB({
-				file: file,
-				title: title,
-				linkMode: this.LINK_MODE_LINKED_FILE,
-				contentType: contentType,
-				parentItemID: parentItemID
-			});
-		}.bind(this))
-		.then(function () {
-			return _postProcessFile(itemID, file, contentType);
-		})
-		.then(() => itemID);
+		var itemID = yield _addToDB({
+			file: file,
+			title: title,
+			linkMode: this.LINK_MODE_LINKED_FILE,
+			contentType: contentType,
+			parentItemID: parentItemID,
+			collections: collections
+		});
+		yield _postProcessFile(itemID, file, contentType);
+		return itemID;
 	});
 	
 	
@@ -202,7 +225,7 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * @param {Object} options - 'url', 'parentItemID', 'parentCollectionIDs', 'title',
+	 * @param {Object} options - 'url', 'parentItemID', 'collections', 'title',
 	 *                           'fileBaseName', 'contentType', 'cookieSandbox'
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
@@ -212,17 +235,14 @@ Zotero.Attachments = new function(){
 		var libraryID = options.libraryID;
 		var url = options.url;
 		var parentItemID = options.parentItemID;
-		var parentCollectionIDs = options.parentCollectionIDs;
+		var collections = options.collections;
 		var title = options.title;
 		var fileBaseName = options.forceFileBaseName;
 		var contentType = options.contentType;
 		var cookieSandbox = options.cookieSandbox;
 		
-		if (parentItemID && parentCollectionIDs) {
-			let msg = "parentCollectionIDs is ignored when parentItemID is set in Zotero.Attachments.importFromURL()";
-			Zotero.debug(msg, 2);
-			Components.utils.reportError(msg);
-			parentCollectionIDs = undefined;
+		if (parentItemID && collections) {
+			throw new Error("parentItemID and collections cannot both be provided");
 		}
 		
 		// Throw error on invalid URLs
@@ -246,7 +266,7 @@ Zotero.Attachments = new function(){
 						document: browser.contentDocument,
 						parentItemID: parentItemID,
 						title: title,
-						parentCollectionIDs: parentCollectionIDs
+						collections: collections
 					})
 					.then(function (attachmentItem) {
 						Zotero.Browser.deleteHiddenBrowser(browser);
@@ -329,6 +349,9 @@ Zotero.Attachments = new function(){
 				attachmentItem.parentID = parentItemID;
 				attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
 				attachmentItem.attachmentContentType = contentType;
+				if (collections) {
+					attachmentItem.setCollections(collections);
+				}
 				var itemID = yield attachmentItem.save();
 				
 				// Create a new folder for this item in the storage directory
@@ -343,15 +366,6 @@ Zotero.Attachments = new function(){
 					destFile, Zotero.Attachments.LINK_MODE_IMPORTED_URL
 				);
 				yield attachmentItem.save();
-				
-				// Add to collections
-				if (parentCollectionIDs) {
-					var ids = Zotero.flattenArguments(parentCollectionIDs);
-					for (let i=0; i<ids.length; i++) {
-						let col = yield Zotero.Collections.getAsync(ids[i]);
-						yield col.addItem(itemID);
-					}
-				}
 			}.bind(this))
 			.catch(function (e) {
 				Zotero.debug(e, 1);
@@ -482,7 +496,7 @@ Zotero.Attachments = new function(){
 	/**
 	 * TODO: what if called on file:// document?
 	 *
-	 * @param {Object} options - 'document', 'parentItemID', 'parentCollectionIDs'
+	 * @param {Object} options - 'document', 'parentItemID', 'collections'
 	 * @return {Promise}
 	 */
 	this.linkFromDocument = Zotero.Promise.coroutine(function* (options) {
@@ -490,13 +504,10 @@ Zotero.Attachments = new function(){
 		
 		var document = options.document;
 		var parentItemID = options.parentItemID;
-		var parentCollectionIDs = options.parentCollectionIDs;
+		var collections = options.collections;
 		
-		if (parentItemID && parentCollectionIDs) {
-			let msg = "parentCollectionIDs is ignored when parentItemID is set in Zotero.Attachments.linkFromDocument()";
-			Zotero.debug(msg, 2);
-			Components.utils.reportError(msg);
-			parentCollectionIDs = undefined;
+		if (parentItemID && collections) {
+			throw new Error("parentItemID and collections cannot both be provided");
 		}
 		
 		var url = document.location.href;
@@ -511,17 +522,9 @@ Zotero.Attachments = new function(){
 				linkMode: this.LINK_MODE_LINKED_URL,
 				contentType: contentType,
 				charset: document.characterSet,
-				parentItemID: parentItemID
+				parentItemID: parentItemID,
+				collections: collections
 			});
-			
-			// Add to collections
-			if (parentCollectionIDs) {
-				var ids = Zotero.flattenArguments(parentCollectionIDs);
-				for (let i=0; i<ids.length; i++) {
-					let col = yield Zotero.Collections.getAsync(id);
-					yield col.addItem(itemID);
-				}
-			}
 		}.bind(this));
 		
 		// Run the indexer asynchronously
@@ -542,7 +545,7 @@ Zotero.Attachments = new function(){
 	/**
 	 * Save a snapshot -- uses synchronous WebPageDump or asynchronous saveURI()
 	 *
-	 * @param {Object} options - 'libraryID', 'document', 'parentItemID', 'forceTitle', 'parentCollectionIDs'
+	 * @param {Object} options - 'libraryID', 'document', 'parentItemID', 'forceTitle', 'collections'
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
 	this.importFromDocument = Zotero.Promise.coroutine(function* (options) {
@@ -552,13 +555,10 @@ Zotero.Attachments = new function(){
 		var document = options.document;
 		var parentItemID = options.parentItemID;
 		var title = options.title;
-		var parentCollectionIDs = options.parentCollectionIDs;
+		var collections = options.collections;
 		
-		if (parentItemID && parentCollectionIDs) {
-			var msg = "parentCollectionIDs is ignored when parentItemID is set in Zotero.Attachments.importFromDocument()";
-			Zotero.debug(msg, 2);
-			Components.utils.reportError(msg);
-			parentCollectionIDs = undefined;
+		if (parentItemID && collections) {
+			throw new Error("parentItemID and parentCollectionIDs cannot both be provided");
 		}
 		
 		var url = document.location.href;
@@ -644,6 +644,9 @@ Zotero.Attachments = new function(){
 			attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
 			attachmentItem.attachmentCharset = document.characterSet;
 			attachmentItem.attachmentContentType = contentType;
+			if (collections) {
+				attachmentItem.setCollections(collections);
+			}
 			var itemID = yield attachmentItem.save();
 			
 			// Create a new folder for this item in the storage directory
@@ -657,15 +660,6 @@ Zotero.Attachments = new function(){
 				destFile, Zotero.Attachments.LINK_MODE_IMPORTED_URL
 			);
 			yield attachmentItem.save();
-			
-			// Add to collections
-			if (parentCollectionIDs) {
-				let ids = Zotero.flattenArguments(parentCollectionIDs);
-				for (let i=0; i<ids.length; i++) {
-					let col = yield Zotero.Collections.getAsync(ids[i]);
-					yield col.addItem(itemID);
-				}
-			}
 		}.bind(this))
 		.catch(function (e) {
 			Zotero.debug(e, 1);
@@ -1286,6 +1280,7 @@ Zotero.Attachments = new function(){
 		var contentType = options.contentType;
 		var charset = options.charset;
 		var parentItemID = options.parentItemID;
+		var collections = options.collections;
 		
 		return Zotero.DB.executeTransaction(function* () {
 			var attachmentItem = new Zotero.Item('attachment');
@@ -1312,6 +1307,9 @@ Zotero.Attachments = new function(){
 			attachmentItem.attachmentLinkMode = linkMode;
 			attachmentItem.attachmentContentType = contentType;
 			attachmentItem.attachmentCharset = charset;
+			if (collections) {
+				attachmentItem.setCollections(collections);
+			}
 			yield attachmentItem.save();
 			
 			return attachmentItem.id;

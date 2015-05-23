@@ -255,6 +255,9 @@ Zotero.File = new function(){
 	 * @return {Promise} A promise that is resolved with the contents of the source
 	 */
 	this.getBinaryContentsAsync = function (source, maxLength) {
+		if (typeof source == 'string') {
+			source = this.pathToFile(source);
+		}
 		var deferred = Zotero.Promise.defer();
 		NetUtil.asyncFetch(source, function(inputStream, status) {
 			if (!Components.isSuccessCode(status)) {
