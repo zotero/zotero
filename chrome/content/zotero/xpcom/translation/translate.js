@@ -114,6 +114,17 @@ Zotero.Translate.Sandbox = {
 					item[i] = val.trim();
 				}
 			}
+
+			// Clean empty creators
+			if (item.creators) {
+				for (var i=0; i<item.creators.length; i++) {
+					var creator = item.creators[i];
+					if (!creator.firstName && !creator.lastName) {
+						item.creators.splice(i, 1);
+						i--;
+					}
+				}
+			}
 			
 			// if we're not supposed to save the item or we're in a child translator,
 			// just return the item array

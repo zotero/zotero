@@ -39,7 +39,7 @@ Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType, d
 		this._libraryID = libraryID;
 	}
 	
-	this._saveFiles = !(attachmentMode === 0);
+	this.attachmentMode = attachmentMode;
 	
 	// If group filesEditable==false, don't save attachments
 	if (typeof this._libraryID == 'number') {
@@ -49,7 +49,7 @@ Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType, d
 				var groupID = Zotero.Groups.getGroupIDFromLibraryID(this._libraryID);
 				var group = Zotero.Groups.get(groupID);
 				if (!group.filesEditable) {
-					this._saveFiles = false;
+					this.attachmentMode = Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE;
 				}
 				break;
 		}
@@ -90,80 +90,73 @@ Zotero.Translate.ItemSaver.prototype = {
 	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
 	 */
 	"saveItems":function(items, callback, attachmentCallback) {
-		// if no open transaction, open a transaction and add a timer call to close it
-		var openedTransaction = false;
-		if(!Zotero.DB.transactionInProgress()) {
-			Zotero.DB.beginTransaction();
-			openedTransaction = true;
-		}
-		
-		try {
-			var newItems = [];
-			for each(var item in items) {
-				// Get typeID, defaulting to "webpage"
-				var newItem;
-				var type = (item.itemType ? item.itemType : "webpage");
-				
-				if(type == "note") {			// handle notes differently
-					newItem = new Zotero.Item('note');
-					newItem.libraryID = this._libraryID;
-					if(item.note) newItem.setNote(item.note);
-					var myID = newItem.save();
-					newItem = Zotero.Items.get(myID);
-				} else {
-					if(type == "attachment") {	// handle attachments differently
-						newItem = this._saveAttachment(item, null, attachmentCallback);
-						if(!newItem) continue;
-						var myID = newItem.id;
-					} else {
-						var typeID = Zotero.ItemTypes.getID(type);
-						newItem = new Zotero.Item(typeID);
-						newItem._libraryID = this._libraryID;
+		Zotero.DB.executeTransaction(function* () {
+			try {
+				var newItems = [];
+				for each(var item in items) {
+					// Get typeID, defaulting to "webpage"
+					var newItem;
+					var type = (item.itemType ? item.itemType : "webpage");
 					
-						this._saveFields(item, newItem);
-						
-						// handle creators
-						if(item.creators) {
-							this._saveCreators(item, newItem);
-						}
-						
-						// save item
+					if(type == "note") {			// handle notes differently
+						newItem = new Zotero.Item('note');
+						newItem.libraryID = this._libraryID;
+						if(item.note) newItem.setNote(item.note);
 						var myID = newItem.save();
 						newItem = Zotero.Items.get(myID);
-						
-						// handle notes
-						if(item.notes) {
-							this._saveNotes(item, myID);
-						}
-					
-						// handle attachments
-						if(item.attachments) {
-							for(var i=0; i<item.attachments.length; i++) {
-								var newAttachment = this._saveAttachment(item.attachments[i], myID, attachmentCallback);
-								if(typeof newAttachment === "object") {
-									this._saveTags(item.attachments[i], newAttachment);
+					} else {
+						if(type == "attachment") {	// handle attachments differently
+							newItem = this._saveAttachment(item, null, attachmentCallback);
+							if(!newItem) continue;
+							var myID = newItem.id;
+						} else {
+							var typeID = Zotero.ItemTypes.getID(type);
+							newItem = new Zotero.Item(typeID);
+							newItem._libraryID = this._libraryID;
+
+							this._saveFields(item, newItem);
+
+							// handle creators
+							if(item.creators) {
+								newItem.setCreators(item.creators);
+							}
+
+							// save item
+							var myID = yield newItem.save();
+							newItem = yield Zotero.Items.getAsync(myID);
+
+							// handle notes
+							if(item.notes) {
+								this._saveNotes(item, myID);
+							}
+
+							// handle attachments
+							if(item.attachments) {
+								for(var i=0; i<item.attachments.length; i++) {
+									var newAttachment = this._saveAttachment(item.attachments[i], myID, attachmentCallback);
+									if(typeof newAttachment === "object") {
+										this._saveTags(item.attachments[i], newAttachment);
+									}
 								}
 							}
 						}
 					}
+
+					if(item.itemID) this._IDMap[item.itemID] = myID;
+
+					// handle see also
+					this._saveTags(item, newItem);
+
+					// add to new item list
+					newItem = Zotero.Items.get(myID);
+					newItems.push(newItem);
 				}
 				
-				if(item.itemID) this._IDMap[item.itemID] = myID;
-				
-				// handle see also
-				this._saveTags(item, newItem);
-				
-				// add to new item list
-				newItem = Zotero.Items.get(myID);
-				newItems.push(newItem);
+				callback(true, newItems);
+			} catch(e) {
+				callback(false, e);
 			}
-			
-			if(openedTransaction) Zotero.DB.commitTransaction();
-			callback(true, newItems);
-		} catch(e) {
-			if(openedTransaction) Zotero.DB.rollbackTransaction();
-			callback(false, e);
-		}
+		}.bind(this));
 	},
 	
 	"saveCollection":function(collection) {
@@ -222,9 +215,9 @@ Zotero.Translate.ItemSaver.prototype = {
 	"_saveAttachment": function(attachment, parentID, attachmentCallback) {
 		// determine whether to save files and attachments
 		let attachmentPromise;
-		if (attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD) {
+		if (this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD) {
 			attachmentPromise = this._saveAttachmentDownload.apply(this, arguments);
-		} else if (attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE) {
+		} else if (this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE) {
 			attachmentPromise = this._saveAttachmentFile.apply(this, arguments);
 		} else {
 			Zotero.debug('Translate: Ignoring attachment due to ATTACHMENT_MODE_IGNORE');
@@ -509,7 +502,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		// Commit to saving
 		attachmentCallback(attachment, 0);
 		
-		if(attachment.snapshot === false || !this._saveFiles) {
+		if(attachment.snapshot === false || this.attachmentMode === Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE) {
 			// if snapshot is explicitly set to false, attach as link
 			attachment.linkMode = "linked_url";
 			let url, mimeType;
@@ -614,62 +607,6 @@ Zotero.Translate.ItemSaver.prototype = {
 					Zotero.debug("Translate: Discarded field "+field+" for item: field not valid for type "+item.itemType, 3);
 				}
 			}
-		}
-	},
-	
-	"_saveCreators":function(item, newItem) {
-		var creatorIndex = 0;
-		for(var i=0; i<item.creators.length; i++) {
-			var creator = item.creators[i];
-			
-			if(!creator.firstName && !creator.lastName) {
-				Zotero.debug("Translate: Silently dropping empty creator");
-				continue;
-			}
-			
-			// try to assign correct creator type
-			var creatorTypeID = 1;
-			if(creator.creatorType) {
-				try {
-					var creatorTypeID = Zotero.CreatorTypes.getID(creator.creatorType);
-				} catch(e) {
-					Zotero.debug("Translate: Invalid creator type "+creator.creatorType+" for creator index "+j, 2);
-				}
-			}
-			
-			// Single-field mode
-			if (creator.fieldMode && creator.fieldMode == 1) {
-				var fields = {
-					lastName: creator.lastName,
-					fieldMode: 1
-				};
-			}
-			// Two-field mode
-			else {
-				var fields = {
-					firstName: creator.firstName,
-					lastName: creator.lastName
-				};
-			}
-			
-			var creator = null;
-			var creatorDataID = Zotero.Creators.getDataID(fields);
-			if(creatorDataID) {
-				var linkedCreators = Zotero.Creators.getCreatorsWithData(creatorDataID, this._libraryID);
-				if (linkedCreators) {
-					// TODO: support identical creators via popup? ugh...
-					var creatorID = linkedCreators[0];
-					creator = Zotero.Creators.get(creatorID);
-				}
-			}
-			if(!creator) {
-				creator = new Zotero.Creator;
-				creator.libraryID = this._libraryID;
-				creator.setFields(fields);
-				var creatorID = creator.save();
-			}
-			
-			newItem.setCreator(creatorIndex++, creator, creatorTypeID);
 		}
 	},
 	
