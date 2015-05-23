@@ -30,7 +30,7 @@ Zotero.Fulltext = new function(){
 	this.pdfInfoIsRegistered = pdfInfoIsRegistered;
 	this.isCachedMIMEType = isCachedMIMEType;
 	
-	this.__defineGetter__("pdfToolsDownloadBaseURL", function() { return 'https://www.zotero.org/download/xpdf/'; });
+	this.pdfToolsDownloadBaseURL = 'https://www.zotero.org/download/xpdf/';
 	this.__defineGetter__("pdfToolsName", function() { return 'Xpdf'; });
 	this.__defineGetter__("pdfToolsURL", function() { return 'http://www.foolabs.com/xpdf/'; });
 	this.__defineGetter__("pdfConverterName", function() { return 'pdftotext'; });
@@ -132,129 +132,99 @@ Zotero.Fulltext = new function(){
 	/*
 	 * Download and install latest PDF tool
 	 */
-	this.downloadPDFTool = function (tool, version, callback) {
-		try {
-			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-				.getService(Components.interfaces.nsIIOService);
-			
-			if (tool == 'converter') {
-				var fileName = this.pdfConverterFileName;
+	this.downloadPDFTool = Zotero.Promise.coroutine(function* (tool, version) {
+		var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+			.getService(Components.interfaces.nsIIOService);
+		
+		if (tool == 'converter') {
+			var fileName = this.pdfConverterFileName;
+		}
+		else {
+			var fileName = this.pdfInfoFileName;
+		}
+		
+		var spec = this.pdfToolsDownloadBaseURL + version + "/" + fileName;
+		var uri = ioService.newURI(spec, null, null);
+		var tmpFile = OS.Path.join(Zotero.getTempDirectory().path, fileName);
+		
+		yield Zotero.File.download(uri, tmpFile);
+		
+		var fileInfo = yield OS.File.stat(tmpFile);
+		
+		// Delete if too small, since a 404 might not be detected above
+		if (fileInfo.size < 50000) {
+			let msg = tmpFile + " is too small -- deleting";
+			Zotero.logError(msg);
+			try {
+				yield OS.File.remove(tmpFile);
 			}
-			else {
-				var fileName = this.pdfInfoFileName;
+			catch (e) {
+				Zotero.logError(e);
 			}
-			
-			var spec = this.pdfToolsDownloadBaseURL + version + "/" + fileName;
-			var uri = ioService.newURI(spec, null, null);
-			
-			var file = Zotero.getTempDirectory();
-			file.append(fileName);
-			
-			Components.utils.import("resource://gre/modules/NetUtil.jsm");
-			Components.utils.import("resource://gre/modules/FileUtils.jsm");
-			
-			Zotero.debug("Saving " + uri.spec + " to " + file.path);
-			NetUtil.asyncFetch(uri, function (is, status) {
-				if (!Components.isSuccessCode(status)) {
-					Zotero.debug(status, 1);
-					Components.utils.reportError(status);
-					if (callback) {
-						callback(false);
-					}
-					return;
-				}
-				
-				Zotero.File.putContentsAsync(file, is)
-				.then(function () {
-					// Delete if too small, since a 404 might not be detected above
-					if (file.fileSize < 50000) {
-						var msg = file.path + " is too small -- deleting";
-						Zotero.debug(msg, 1);
-						Components.utils.reportError(msg);
-						try {
-							file.remove(false);
-						}
-						catch (e) {
-							Zotero.debug(e, 1);
-							Components.utils.reportError(e);
-						}
-						if (callback) {
-							callback(false);
-						}
-						return;
-					}
-					
-					var scriptExt = _getScriptExtension();
-					// On Windows, write out script to hide pdftotext console window
-					// TEMP: disabled
-					if (false && tool == 'converter') {
-						if (Zotero.isWin) {
-							var content = Zotero.File.getContentsFromURL('resource://zotero/hide.' + scriptExt);
-							var scriptFile = Zotero.getTempDirectory();
-							scriptFile.append('pdftotext.' + scriptExt);
-							Zotero.File.putContents(scriptFile, content);
-						}
-					}
-					// Write out output redirection script for pdfinfo
-					// TEMP: disabled on Windows
-					else if (!Zotero.isWin && tool == 'info') {
-						var content = Zotero.File.getContentsFromURL('resource://zotero/redirect.' + scriptExt);
-						var scriptFile = Zotero.getTempDirectory();
-						scriptFile.append('pdfinfo.' + scriptExt);
-						Zotero.File.putContents(scriptFile, content);
-					}
-					
-					// Set permissions to 755
-					if (Zotero.isMac) {
-						file.permissions = 33261;
-						if (scriptFile) {
-							scriptFile.permissions = 33261;
-						}
-					}
-					else if (Zotero.isLinux) {
-						file.permissions = 493;
-						if (scriptFile) {
-							scriptFile.permissions = 493;
-						}
-					}
-					
-					var destDir = Zotero.getZoteroDirectory()
-					// Move redirect script and executable into data dir
-					if (scriptFile) {
-						scriptFile.moveTo(destDir, null);
-					}
-					file.moveTo(destDir, null);
-					
-					// Write the version number to a file
-					var versionFile = destDir.clone();
-					versionFile.append(fileName + '.version');
-					// TEMP
-					if (Zotero.isWin) {
-						version = '3.02a';
-					}
-					Zotero.File.putContents(versionFile, version + '');
-					
-					Zotero.Fulltext.registerPDFTool(tool);
-					
-					if (callback) {
-						callback(true);
-					}
-				})
-				.catch(function (e) {
-					Zotero.debug(e, 1);
-					Components.utils.reportError(e);
-					callback(false);
-				});
+			throw new Error(msg);
+		}
+		
+		var scriptExt = _getScriptExtension();
+		// On Windows, write out script to hide pdftotext console window
+		// TEMP: disabled
+		if (false && tool == 'converter') {
+			if (Zotero.isWin) {
+				let content = yield Zotero.File.getContentsFromURLAsync(
+					'resource://zotero/hide.' + scriptExt
+				);
+				var tmpScriptFile = OS.Path.join(
+					Zotero.getTempDirectory().path,
+					'pdftotext.' + scriptExt
+				);
+				yield Zotero.File.putContentsAsync(tmpScriptFile, content);
+			}
+		}
+		// Write out output redirection script for pdfinfo
+		// TEMP: disabled on Windows
+		else if (!Zotero.isWin && tool == 'info') {
+			let content = yield Zotero.File.getContentsFromURLAsync(
+				'resource://zotero/redirect.' + scriptExt
+			);
+			var tmpScriptFile = OS.Path.join(
+				Zotero.getTempDirectory().path,
+				'pdfinfo.' + scriptExt
+			);
+			yield Zotero.File.putContentsAsync(tmpScriptFile, content);
+		}
+		
+		// Set permissions to 755
+		if (Zotero.isMac || Zotero.isLinux) {
+			yield OS.File.setPermissions(tmpFile, {
+				unixMode: 0o755
 			});
-		}
-		catch (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
-			if (callback) {
-				callback(false);
+			if (tmpScriptFile) {
+				yield OS.File.setPermissions(tmpScriptFile, {
+					unixMode: 0o755
+				});
 			}
 		}
-	};
+		
+		var destDir = Zotero.getZoteroDirectory()
+		// Move redirect script and executable into data dir
+		if (tmpScriptFile) {
+			yield OS.File.move(
+				tmpScriptFile,
+				OS.Path.join(destDir.path, OS.Path.basename(tmpScriptFile))
+			);
+		}
+		yield OS.File.move(tmpFile, OS.Path.join(destDir.path, fileName));
+		
+		// Write the version number to a file
+		var versionFile = destDir.clone();
+		versionFile.append(fileName + '.version');
+		// TEMP
+		if (Zotero.isWin) {
+			version = '3.02a';
+		}
+		yield Zotero.File.putContentsAsync(versionFile, version + '');
+		
+		yield Zotero.Fulltext.registerPDFTool(tool);
+	});
 	
 	
 	/*

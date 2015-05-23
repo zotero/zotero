@@ -355,7 +355,7 @@ Zotero.File = new function(){
 			));
 		}
 		
-		// Create a stream for async stream copying
+		// Convert text data to stream
 		if(!(data instanceof Components.interfaces.nsIInputStream)) {
 			var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
 					createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
@@ -363,9 +363,9 @@ Zotero.File = new function(){
 			data = converter.convertToInputStream(data);
 		}
 		
-		var deferred = Zotero.Promise.defer(),
-			ostream = FileUtils.openSafeFileOutputStream(path);
-		NetUtil.asyncCopy(data, ostream, function(inputStream, status) {
+		var deferred = Zotero.Promise.defer();
+		var os = FileUtils.openSafeFileOutputStream(new FileUtils.File(path));
+		NetUtil.asyncCopy(data, os, function(inputStream, status) {
 			if (!Components.isSuccessCode(status)) {
 				deferred.reject(new Components.Exception("File write operation failed", status));
 				return;
@@ -374,6 +374,23 @@ Zotero.File = new function(){
 		});
 		return deferred.promise;
 	};
+	
+	
+	this.download = Zotero.Promise.coroutine(function* (uri, path) {
+		var msg = "Saving " + (uri.spec ? uri.spec : uri) + " to " + (path.path ? path.path : path);
+		
+		var deferred = Zotero.Promise.defer();
+		NetUtil.asyncFetch(uri, function (is, status, request) {
+			if (!Components.isSuccessCode(status)) {
+				Zotero.logError(status);
+				deferred.reject(new Error("Download failed with status " + status));
+				return;
+			}
+			deferred.resolve(is);
+		});
+		var is = yield deferred.promise;
+		yield Zotero.File.putContentsAsync(path, is);
+	});
 	
 	
 	/**
