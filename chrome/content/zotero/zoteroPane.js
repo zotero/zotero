@@ -2296,9 +2296,6 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isTrash()) {
 			show = [m.emptyTrash];
 		}
-		else if (collectionTreeRow.isGroup()) {
-			show = [m.newCollection, m.newSavedSearch, m.sep1, m.showDuplicates, m.showUnfiled, m.sep2, m.exportFile];
-		}
 		else if (collectionTreeRow.isDuplicates() || collectionTreeRow.isUnfiled()) {
 			show = [
 				m.deleteCollection
@@ -2314,10 +2311,20 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isBucket()) {
 			show = [m.refreshCommonsBucket];
 		}
+		else if (collectionTreeRow.isPublications()) {
+			show = [m.exportFile];
+		}
 		// Library
-		else
-		{
-			show = [m.newCollection, m.newSavedSearch, m.sep1, m.showDuplicates, m.showUnfiled, m.sep2, m.exportFile];
+		else {
+			show = [
+				m.newCollection,
+				m.newSavedSearch,
+				m.sep1,
+				m.showDuplicates,
+				m.showUnfiled,
+				m.sep2,
+				m.exportFile
+			];
 		}
 		
 		// Disable some actions if user doesn't have write access
