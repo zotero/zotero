@@ -165,6 +165,25 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		this.initializationPromise = this.initializationDeferred.promise;
 		this.locked = true;
 		
+		// Add a function to Zotero.Promise to check whether a value is still defined, and if not
+		// to throw a specific error that's ignored by the unhandled rejection handler in
+		// bluebird.js. This allows for easily cancelling promises when they're no longer
+		// needed, for example after a view is destroyed.
+		//
+		// Example usage:
+		//
+		// getAsync.tap(() => Zotero.Promise.check(this.win))
+		//
+		// If this.win is cleaned up while getAsync() is being resolved, subsequent lines won't
+		// be run, and nothing will be logged to the console.
+		this.Promise.check = function (val) {
+			if (!val && val !== 0) {
+				let e = new Error;
+				e.name = "ZoteroPromiseInterrupt";
+				throw e;
+			}
+		};
+		
 		// Load in the preferences branch for the extension
 		Zotero.Prefs.init();
 		Zotero.Debug.init(options && options.forceDebugLog);

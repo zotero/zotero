@@ -91,12 +91,16 @@
     Promise = e();
     // TEMP: Only turn on if debug logging enabled?
     Promise.longStackTraces();
-    Promise.onPossiblyUnhandledRejection(function(error) {
+    Promise.onPossiblyUnhandledRejection(function (e, promise) {
+		if (e.name == 'ZoteroPromiseInterrupt') {
+			return;
+		}
+    	
 		// Ignore some errors during tests
-		if (error.message && error.message.indexOf(' -- ignore') != -1) return;
+		if (e.message && e.message.indexOf(' -- ignore') != -1) return;
 		
-        self.debug('Unhandled rejection:\n\n' + error.stack);
-        throw error;
+        self.debug('Unhandled rejection:\n\n' + e.stack);
+        throw e;
     });
     return;
     
