@@ -126,6 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Initiales En Majuscules">
 <!ENTITY zotero.item.textTransform.sentencecase "Lettre capitale en début de phrase">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Inverser prénom/nom">
+<!ENTITY zotero.item.viewOnline "View Online">
+<!ENTITY zotero.item.copyAsURL "Copy as URL">
 
 <!ENTITY zotero.toolbar.newNote "Nouvelle note">
 <!ENTITY zotero.toolbar.note.standalone "Nouvelle note indépendante">

@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "進階">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "檔案與資料夾">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "快捷鍵">
 
 <!ENTITY zotero.preferences.prefpane.locate "查詢">
 <!ENTITY zotero.preferences.locate.locateEngineManager "論文查詢引擎管理器">
@@ -201,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "提交到 Zotero 伺服器">
 
 <!ENTITY zotero.preferences.openAboutConfig "開啟 about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
+<!ENTITY zotero.preferences.openCSLEdit "開啟文獻格式編輯器">
+<!ENTITY zotero.preferences.openCSLPreview "預覽文獻格式">
 <!ENTITY zotero.preferences.openAboutMemory "開啟 about:memory">

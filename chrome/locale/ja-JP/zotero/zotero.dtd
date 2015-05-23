@@ -126,6 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "各単語の先頭を大文字に">
 <!ENTITY zotero.item.textTransform.sentencecase "各文の先頭を大文字に">
 <!ENTITY zotero.item.creatorTransform.nameSwap "姓と名を置き替える">
+<!ENTITY zotero.item.viewOnline "View Online">
+<!ENTITY zotero.item.copyAsURL "Copy as URL">
 
 <!ENTITY zotero.toolbar.newNote "新しいメモ">
 <!ENTITY zotero.toolbar.note.standalone "新しく独立メモを作成">

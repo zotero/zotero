@@ -126,6 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Μορφή γραμμάτων τίτλου">
 <!ENTITY zotero.item.textTransform.sentencecase "Μορφή γραμμάτων πρότασης">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Εναλλαγή πρώτου ονόματος/επιθέτου">
+<!ENTITY zotero.item.viewOnline "View Online">
+<!ENTITY zotero.item.copyAsURL "Copy as URL">
 
 <!ENTITY zotero.toolbar.newNote "Νέα σημείωση">
 <!ENTITY zotero.toolbar.note.standalone "Νέα αυτόνομη σημείωση">

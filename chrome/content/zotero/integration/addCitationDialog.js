@@ -115,7 +115,7 @@ var Zotero_Citation_Dialog = new function () {
 		var i = 0;
 		for(var value in locators) {
 			var locator = locators[value];
-			var locatorLabel = locator[0].toUpperCase()+locator.substr(1);
+			var locatorLabel = Zotero.getString('citation.locator.'+locator.replace(/\s/g,''));
 			// add to list of labels
 			var child = document.createElement("menuitem");
 			child.setAttribute("value", value);

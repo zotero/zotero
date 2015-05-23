@@ -2080,17 +2080,23 @@ Zotero.Translate.Export.prototype.Sandbox = Zotero.Translate.Sandbox._inheritFro
  * @param {Zotero.Item[]} items
  */
 Zotero.Translate.Export.prototype.setItems = function(items) {
-	this._items = items;
-	delete this._collection;
+	this._export = {type: 'items', items: items};
 }
 
 /**
- * Sets the collection to be exported (overrides setItems)
+ * Sets the group to be exported (overrides setItems/setCollection)
+ * @param {Zotero.Group[]} group
+ */
+Zotero.Translate.Export.prototype.setLibraryID = function(libraryID) {
+	this._export = {type: 'library', id: libraryID};
+}
+
+/**
+ * Sets the collection to be exported (overrides setItems/setGroup)
  * @param {Zotero.Collection[]} collection
  */
 Zotero.Translate.Export.prototype.setCollection = function(collection) {
-	this._collection = collection;
-	delete this._items;
+	this._export = {type: 'collection', collection: collection};
 }
 
 /**
@@ -2157,15 +2163,21 @@ Zotero.Translate.Export.prototype._prepareTranslation = function() {
 	this._itemGetter = new Zotero.Translate.ItemGetter();
 	var configOptions = this._translatorInfo.configOptions || {},
 		getCollections = configOptions.getCollections || false;
-	if(this._collection) {
-		this._itemGetter.setCollection(this._collection, getCollections);
-		delete this._collection;
-	} else if(this._items) {
-		this._itemGetter.setItems(this._items);
-		delete this._items;
-	} else {
-		this._itemGetter.setAll(getCollections);
+	switch (this._export.type) {
+		case 'collection':
+			this._itemGetter.setCollection(this._export.collection, getCollections);
+			break;
+		case 'items':
+			this._itemGetter.setItems(this._export.items);
+			break;
+		case 'library':
+			this._itemGetter.setAll(this._export.id, getCollections);
+			break;
+		default:
+			throw new Error('No export set up');
+			break;
 	}
+	delete this._export;
 	
 	// export file data, if requested
 	if(this._displayOptions["exportFileData"]) {

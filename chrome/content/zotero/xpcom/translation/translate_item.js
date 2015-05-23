@@ -736,11 +736,11 @@ Zotero.Translate.ItemGetter.prototype = {
 		this.numItems = this._itemsLeft.length;
 	},
 	
-	"setAll":function(getChildCollections) {
-		this._itemsLeft = Zotero.Items.getAll(0, true);
+	"setAll": function (libraryID, getChildCollections) {
+		this._itemsLeft = Zotero.Items.getAll(libraryID, true);
 		
 		if(getChildCollections) {
-			this._collectionsLeft = Zotero.getCollections();
+			this._collectionsLeft = Zotero.getCollections(null, true, libraryID);
 		}
 		
 		this.numItems = this._itemsLeft.length;

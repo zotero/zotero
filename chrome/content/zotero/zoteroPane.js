@@ -2297,7 +2297,7 @@ var ZoteroPane = new function()
 			show = [m.emptyTrash];
 		}
 		else if (collectionTreeRow.isGroup()) {
-			show = [m.newCollection, m.newSavedSearch, m.sep1, m.showDuplicates, m.showUnfiled];
+			show = [m.newCollection, m.newSavedSearch, m.sep1, m.showDuplicates, m.showUnfiled, m.sep2, m.exportFile];
 		}
 		else if (collectionTreeRow.isDuplicates() || collectionTreeRow.isUnfiled()) {
 			show = [

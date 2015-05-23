@@ -126,6 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "글차 첫머리는 대문자">
 <!ENTITY zotero.item.textTransform.sentencecase "문장 첫머리는 대문자">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
+<!ENTITY zotero.item.viewOnline "View Online">
+<!ENTITY zotero.item.copyAsURL "Copy as URL">
 
 <!ENTITY zotero.toolbar.newNote "새 노트">
 <!ENTITY zotero.toolbar.note.standalone "새로운 독립 노트">

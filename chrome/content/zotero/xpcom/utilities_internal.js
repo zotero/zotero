@@ -55,6 +55,16 @@ Zotero.Utilities.Internal = {
 	}),
 	
 	
+	/**
+	 * Copy a text string to the clipboard
+	 */
+	"copyTextToClipboard":function(str) {
+		Components.classes["@mozilla.org/widget/clipboardhelper;1"]
+			.getService(Components.interfaces.nsIClipboardHelper)
+			.copyString(str);
+	},
+	
+	
 	 /*
 	 * Adapted from http://developer.mozilla.org/en/docs/nsICryptoHash
 	 *

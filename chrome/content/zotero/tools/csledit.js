@@ -64,7 +64,7 @@ var Zotero_CSL_Editor = new function() {
 		var locators = Zotero.Cite.labels;
 		for each(var type in locators) {
 			var locator = type;
-			locator = locator[0].toUpperCase()+locator.substr(1);
+			locator = Zotero.getString('citation.locator.'+locator.replace(/\s/g,''));
 			pageList.appendItem(locator, type);
 		}
 		

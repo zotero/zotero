@@ -126,6 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Alle woorden (Elke Eerste Letter)">
 <!ENTITY zotero.item.textTransform.sentencecase "Eerste woord (van een zin)">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Draai Voor-/Achter- namen om">
+<!ENTITY zotero.item.viewOnline "View Online">
+<!ENTITY zotero.item.copyAsURL "Copy as URL">
 
 <!ENTITY zotero.toolbar.newNote "Nieuwe aantekening">
 <!ENTITY zotero.toolbar.note.standalone "Nieuwe zelfstandige aantekening">

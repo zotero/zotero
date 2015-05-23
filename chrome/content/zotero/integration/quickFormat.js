@@ -79,8 +79,7 @@ var Zotero_QuickFormat = new function () {
 			var menu = document.getElementById("locator-label");
 			var labelList = document.getElementById("locator-label-popup");
 			for each(var locator in locators) {
-				// TODO localize
-				var locatorLabel = locator[0].toUpperCase()+locator.substr(1);
+				var locatorLabel = Zotero.getString('citation.locator.'+locator.replace(/\s/g,''));
 				
 				// add to list of labels
 				var child = document.createElement("menuitem");

@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avançado">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Arquivos e Pastas">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Atalhos">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localizar">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gerenciador dos mecanismos de pesquisa de artigos">
@@ -201,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Enviar ao servidor Zotero">
 
 <!ENTITY zotero.preferences.openAboutConfig "Abrir about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
+<!ENTITY zotero.preferences.openCSLEdit "Abrir editor de estilos">
+<!ENTITY zotero.preferences.openCSLPreview "Abrir visualização de estilos">
 <!ENTITY zotero.preferences.openAboutMemory "Abrir about:memory">

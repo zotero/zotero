@@ -27,7 +27,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "antes de continuar">
 <!ENTITY zotero.upgrade.upgradeInProgress "Por favor, aguarde o término do processo de atualização. Isso pode levar alguns minutos.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Seu banco de dados Zotero foi atualizado com sucesso.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "Por favor, leia">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Por favor, veja">
 <!ENTITY zotero.upgrade.changeLogLink "o registro de mudanças">
 <!ENTITY zotero.upgrade.changeLogAfterLink "para descobrir o que há de novo.">
 
@@ -60,8 +60,8 @@
 <!ENTITY zotero.items.libraryCatalog_column "Catálogo de biblioteca">
 <!ENTITY zotero.items.callNumber_column "Núm. chamada">
 <!ENTITY zotero.items.rights_column "Direitos">
-<!ENTITY zotero.items.dateAdded_column "Adicionado em">
-<!ENTITY zotero.items.dateModified_column "Modificação em">
+<!ENTITY zotero.items.dateAdded_column "Data de adição">
+<!ENTITY zotero.items.dateModified_column "Data de modificação">
 <!ENTITY zotero.items.extra_column "Extra">
 <!ENTITY zotero.items.archive_column "Arquivo">
 <!ENTITY zotero.items.archiveLocation_column "Localização no arquivo">
@@ -86,19 +86,19 @@
 <!ENTITY zotero.items.menu.attach.link "Anexar link para página corrente">
 <!ENTITY zotero.items.menu.attach.link.uri "Anexar endereço para URI...">
 <!ENTITY zotero.items.menu.attach.file "Anexar cópia armazenada de arquivo...">
-<!ENTITY zotero.items.menu.attach.fileLink "Anexar link para arquivo...">
+<!ENTITY zotero.items.menu.attach.fileLink "Anexar link ao arquivo...">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restaurar para biblioteca">
-<!ENTITY zotero.items.menu.duplicateItem "Duplicar item selecionado">
-<!ENTITY zotero.items.menu.mergeItems "Fundir ítens...">
+<!ENTITY zotero.items.menu.restoreToLibrary "Restaurar para a biblioteca">
+<!ENTITY zotero.items.menu.duplicateItem "Duplicar item">
+<!ENTITY zotero.items.menu.mergeItems "Fundir itens...">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Escolha a versão do ítem para usar como elemento principal:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Selecione campos para evitar outras versões do ítem:">
 
-<!ENTITY zotero.toolbar.newItem.label "Confirmar">
+<!ENTITY zotero.toolbar.newItem.label "Novo item">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mais">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Criar novo item da página corrente">
-<!ENTITY zotero.toolbar.lookup.label "Adicionar item segundo identificador">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Criar novo item de página Web a partir da página atual">
+<!ENTITY zotero.toolbar.lookup.label "Adicionar item(ns) segundo identificador">
 <!ENTITY zotero.toolbar.removeItem.label "Remover item...">
 <!ENTITY zotero.toolbar.newCollection.label "Nova coleção...">
 <!ENTITY zotero.toolbar.newGroup "New Group...">
@@ -126,6 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Iniciais Em Maiúsculo">
 <!ENTITY zotero.item.textTransform.sentencecase "Maiúscula no início da frase">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
+<!ENTITY zotero.item.viewOnline "View Online">
+<!ENTITY zotero.item.copyAsURL "Copy as URL">
 
 <!ENTITY zotero.toolbar.newNote "Nova nota">
 <!ENTITY zotero.toolbar.note.standalone "Nova nota standalone">

@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Sudėtingiau">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Failai ir katalogai">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Spartieji klavišai">
 
 <!ENTITY zotero.preferences.prefpane.locate "Rasti vietą">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Straipsnių paieškos variklių tvarkytuvė">
@@ -201,6 +201,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Išsiųsti į Zotero serverį">
 
 <!ENTITY zotero.preferences.openAboutConfig "Atverti about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
+<!ENTITY zotero.preferences.openCSLEdit "Atverti stilių rengyklę">
+<!ENTITY zotero.preferences.openCSLPreview "Stilių peržiūra">
 <!ENTITY zotero.preferences.openAboutMemory "Atverti about:memory">

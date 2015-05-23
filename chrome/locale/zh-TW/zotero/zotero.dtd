@@ -6,8 +6,8 @@
 <!ENTITY zotero.general.delete "刪除">
 <!ENTITY zotero.general.ok "確定">
 <!ENTITY zotero.general.cancel "取消">
-<!ENTITY zotero.general.refresh "Refresh">
-<!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.refresh "重新整理">
+<!ENTITY zotero.general.saveAs "另存新檔...">
 
 <!ENTITY zotero.errorReport.title "Zotero 錯誤報告">
 <!ENTITY zotero.errorReport.unrelatedMessages "這可能包括無關於 Zotero 的訊息。">
@@ -125,7 +125,9 @@
 <!ENTITY zotero.item.textTransform "轉換文字">
 <!ENTITY zotero.item.textTransform.titlecase "標題大小寫">
 <!ENTITY zotero.item.textTransform.sentencecase "句首字母大小寫">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
+<!ENTITY zotero.item.creatorTransform.nameSwap "互換西方語言方式的名/姓">
+<!ENTITY zotero.item.viewOnline "View Online">
+<!ENTITY zotero.item.copyAsURL "Copy as URL">
 
 <!ENTITY zotero.toolbar.newNote "新增筆記">
 <!ENTITY zotero.toolbar.note.standalone "新增獨立筆記">
@@ -287,6 +289,6 @@
 <!ENTITY zotero.downloadManager.saveToLibrary.description "附件檔不能被存到目前選定的文獻庫。這個項目會被改存到您的文獻庫。">
 <!ENTITY zotero.downloadManager.noPDFTools.description "要使用這個功能，得先至 Zotero 的偏好設定之搜尋框，安裝 PDF 工具。">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
+<!ENTITY zotero.attachLink.title "附加連結到 URI…">
+<!ENTITY zotero.attachLink.label.link "連結：">
+<!ENTITY zotero.attachLink.label.title "標題：">

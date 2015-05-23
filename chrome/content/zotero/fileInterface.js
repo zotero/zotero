@@ -41,15 +41,45 @@ var Zotero_File_Exporter = function() {
  * Performs the actual export operation
  **/
 Zotero_File_Exporter.prototype.save = function() {
-	var translation = new Zotero.Translate.Export(),
-		me = this;
-	translation.getTranslators().then(function(translators) {
-		// present options dialog
-		var io = {translators:translators}
-		window.openDialog("chrome://zotero/content/exportOptions.xul",
-			"_blank", "chrome,modal,centerscreen,resizable=no", io);
-		if(!io.selectedTranslator) {
-			return false;
+	var translation = new Zotero.Translate.Export();
+	var translators = translation.getTranslators();
+	
+	// present options dialog
+	var io = {translators:translators}
+	window.openDialog("chrome://zotero/content/exportOptions.xul",
+		"_blank", "chrome,modal,centerscreen,resizable=no", io);
+	if(!io.selectedTranslator) {
+		return false;
+	}
+	
+	const nsIFilePicker = Components.interfaces.nsIFilePicker;
+	var fp = Components.classes["@mozilla.org/filepicker;1"]
+			.createInstance(nsIFilePicker);
+	fp.init(window, Zotero.getString("fileInterface.export"), nsIFilePicker.modeSave);
+	
+	// set file name and extension
+	if(io.displayOptions.exportFileData) {
+		// if the result will be a folder, don't append any extension or use
+		// filters
+		fp.defaultString = this.name;
+		fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
+	} else {
+		// if the result will be a file, append an extension and use filters
+		fp.defaultString = this.name+(io.selectedTranslator.target ? "."+io.selectedTranslator.target : "");
+		fp.defaultExtension = io.selectedTranslator.target;
+		fp.appendFilter(io.selectedTranslator.label, "*."+(io.selectedTranslator.target ? io.selectedTranslator.target : "*"));
+	}
+	
+	var rv = fp.show();
+	if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
+		if(this.collection) {
+			translation.setCollection(this.collection);
+		} else if(this.items) {
+			translation.setItems(this.items);
+		} else if(this.libraryID === undefined) {
+			throw new Error('No export configured');
+		} else {
+			translation.setLibraryID(this.libraryID);
 		}
 		
 		const nsIFilePicker = Components.interfaces.nsIFilePicker;
@@ -130,7 +160,11 @@ var Zotero_File_Interface = new function() {
 	 */
 	function exportFile() {
 		var exporter = new Zotero_File_Exporter();
-		exporter.name = Zotero.getString("pane.collections.library");
+		exporter.libraryID = ZoteroPane_Local.getSelectedLibraryID();
+		if (exporter.libraryID === false) {
+			throw new Error('No library selected');
+		}
+		exporter.name = Zotero.Libraries.getName(exporter.libraryID);
 		exporter.save();
 	}
 	

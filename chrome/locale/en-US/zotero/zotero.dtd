@@ -128,6 +128,8 @@
 <!ENTITY zotero.item.textTransform.titlecase			"Title Case">
 <!ENTITY zotero.item.textTransform.sentencecase			"Sentence case">
 <!ENTITY zotero.item.creatorTransform.nameSwap      	"Swap First/Last Names">
+<!ENTITY zotero.item.viewOnline							"View Online">
+<!ENTITY zotero.item.copyAsURL							"Copy as URL">
 
 <!ENTITY zotero.toolbar.newNote				"New Note">
 <!ENTITY zotero.toolbar.note.standalone				"New Standalone Note">
@@ -190,9 +192,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label				"Keep Sources Sorted">
 
-<!ENTITY zotero.citation.page							"Page">
-<!ENTITY zotero.citation.paragraph						"Paragraph">
-<!ENTITY zotero.citation.line							"Line">
 <!ENTITY zotero.citation.suppressAuthor.label			"Suppress Author">
 <!ENTITY zotero.citation.prefix.label					"Prefix:">
 <!ENTITY zotero.citation.suffix.label					"Suffix:">
