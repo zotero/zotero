@@ -227,10 +227,10 @@
 						var tagsToggleBox = this.id('tags-toggle');
 						
 						var tagColors = yield Zotero.Tags.getColors(this.libraryID)
-							.tap(() => Zotero.Promise.check(this.item));
+							.tap(() => Zotero.Promise.check(this.mode));
 						if (fetch || this._dirty) {
 							this._tags = yield Zotero.Tags.getAll(this.libraryID, this._types)
-								.tap(() => Zotero.Promise.check(this.item));
+								.tap(() => Zotero.Promise.check(this.mode));
 							
 							// Remove children
 							tagsToggleBox.textContent = "";

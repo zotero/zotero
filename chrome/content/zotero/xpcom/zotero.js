@@ -168,14 +168,14 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		// Add a function to Zotero.Promise to check whether a value is still defined, and if not
 		// to throw a specific error that's ignored by the unhandled rejection handler in
 		// bluebird.js. This allows for easily cancelling promises when they're no longer
-		// needed, for example after a view is destroyed.
+		// needed, for example after a binding is destroyed.
 		//
 		// Example usage:
 		//
-		// getAsync.tap(() => Zotero.Promise.check(this.win))
+		// getAsync.tap(() => Zotero.Promise.check(this.mode))
 		//
-		// If this.win is cleaned up while getAsync() is being resolved, subsequent lines won't
-		// be run, and nothing will be logged to the console.
+		// If the binding is destroyed while getAsync() is being resolved and this.mode no longer
+		// exists, subsequent lines won't be run, and nothing will be logged to the console.
 		this.Promise.check = function (val) {
 			if (!val && val !== 0) {
 				let e = new Error;
