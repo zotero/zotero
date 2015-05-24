@@ -4284,11 +4284,11 @@ Zotero.Item.prototype.toResponseJSON = Zotero.Promise.coroutine(function* (optio
  * Load in the field data from the database
  */
 Zotero.Item.prototype.loadItemData = Zotero.Promise.coroutine(function* (reload) {
-	Zotero.debug("Loading item data for item " + this.libraryKey);
-	
 	if (this._loaded.itemData && !reload) {
 		return;
 	}
+	
+	Zotero.debug("Loading item data for item " + this.libraryKey);
 	
 	if (!this.id) {
 		throw ('ItemID not set for object before attempting to load data');
