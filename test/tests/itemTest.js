@@ -424,6 +424,23 @@ describe("Zotero.Item", function () {
 		})
 	})
 	
+	describe("#clone()", function () {
+		// TODO: Expand to other data
+		it("should copy creators", function* () {
+			var item = new Zotero.Item('book');
+			item.setCreators([
+				{
+					firstName: "A",
+					lastName: "Test",
+					creatorType: 'author'
+				}
+			]);
+			yield item.save();
+			var newItem = yield item.clone();
+			assert.sameDeepMembers(item.getCreators(), newItem.getCreators());
+		})
+	})
+	
 	describe("#toJSON()", function () {
 		it("should output only fields with values in default mode", function* () {
 			var itemType = "book";

@@ -3829,7 +3829,7 @@ Zotero.Item.prototype.clone = Zotero.Promise.coroutine(function* (libraryID, ski
 	// Regular item
 	if (this.isRegularItem()) {
 		yield this.loadCreators();
-		newItem.setCreators(newItem.getCreators());
+		newItem.setCreators(this.getCreators());
 	}
 	else {
 		yield this.loadNote();
