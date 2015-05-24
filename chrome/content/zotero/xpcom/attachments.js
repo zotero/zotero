@@ -1128,9 +1128,9 @@ Zotero.Attachments = new function(){
 		
 		// Copy over files if they exist
 		if (newAttachment.isImportedAttachment() && attachment.getFile()) {
-			var dir = Zotero.Attachments.getStorageDirectory(attachment);
-			var newDir = yield Zotero.Attachments.createDirectoryForItem(newAttachment);
-			Zotero.File.copyDirectory(dir, newDir);
+			let dir = Zotero.Attachments.getStorageDirectory(attachment);
+			let newDir = yield Zotero.Attachments.createDirectoryForItem(newAttachment);
+			yield Zotero.File.copyDirectory(dir, newDir);
 		}
 		
 		yield newAttachment.addLinkedItem(attachment);

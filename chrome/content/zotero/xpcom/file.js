@@ -583,18 +583,26 @@ Zotero.File = new function(){
 	
 	/**
 	 * Copies all files from dir into newDir
+	 *
+	 * @param {String|nsIFile} source - Source directory
+	 * @param {String|nsIFile} target - Target directory
 	 */
-	this.copyDirectory = function (dir, newDir) {
-		if (!dir.exists()) {
-			throw ("Directory doesn't exist in Zotero.File.copyDirectory()");
-		}
-		var otherFiles = dir.directoryEntries;
-		while (otherFiles.hasMoreElements()) {
-			var file = otherFiles.getNext();
-			file.QueryInterface(Components.interfaces.nsIFile);
-			file.copyTo(newDir, null);
-		}
-	}
+	this.copyDirectory = Zotero.Promise.coroutine(function* (source, target) {
+		if (source instanceof Ci.nsIFile) source = source.path;
+		if (target instanceof Ci.nsIFile) target = target.path;
+		
+		yield OS.File.makeDir(target, {
+			ignoreExisting: true,
+			unixMode: 0o755
+		});
+		
+		return this.iterateDirectory(source, function* (iterator) {
+			while (true) {
+				let entry = yield iterator.next();
+				yield OS.File.copy(entry.path, OS.Path.join(target, entry.name));
+			}
+		})
+	});
 	
 	
 	this.createDirectoryIfMissing = function (dir) {
