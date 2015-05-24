@@ -59,6 +59,7 @@ var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browser
  * @property {Object} hiddenPrefs Hidden preferences configurable through about:config
  * @property {Boolean} inRepository Whether the translator may be found in the repository
  * @property {String} lastUpdated SQL-style date and time of translator's last update
+ * @property {Object} metadata - Metadata block as object
  * @property {String} code The executable JavaScript for the translator
  * @property {Boolean} cacheCode Whether to cache code for this session (non-connector only)
  * @property {String} [path] File path corresponding to this translator (non-connector only)
@@ -129,6 +130,11 @@ Zotero.Translator.prototype.init = function(info) {
 	} else if(this.hasOwnProperty("code")) {
 		delete this.code;
 	}
+	// Save a copy of the metadata block
+	delete info.path;
+	delete info.code;
+	this.metadata = info;
+
 }
 
 /**
@@ -192,6 +198,7 @@ Zotero.Translator.prototype.logError = function(message, type, line, lineNumber,
 		var ios = Components.classes["@mozilla.org/network/io-service;1"].
 			getService(Components.interfaces.nsIIOService);
 		Zotero.log(message, type ? type : "error", ios.newFileURI(file).spec);
+		Zotero.debug(message, 1);
 	} else {
 		Zotero.logError(message);
 	}

@@ -663,6 +663,7 @@ Zotero.Schema = new function(){
 		//
 		var sql = "SELECT version FROM version WHERE schema=?";
 		var lastModTime = yield Zotero.DB.valueQueryAsync(sql, mode);
+		var cache = {};
 		
 		// XPI installation
 		if (!isUnpacked) {
@@ -880,6 +881,9 @@ Zotero.Schema = new function(){
 						else if (mode == 'translators') {
 							newObj = yield Zotero.Translators.loadFromFile(entry.path);
 						}
+						else {
+							throw new Error("Invalid mode '" + mode + "'");
+						}
 						let existingObj = Zotero[Mode].get(newObj[modeType + "ID"]);
 						if (!existingObj) {
 							Zotero.debug("Installing " + modeType + " '" + newObj[titleField] + "'");
@@ -902,19 +906,16 @@ Zotero.Schema = new function(){
 						}
 						
 						try {
-							let destFile = OS.Path.join(destDir, fileName);
+							let destFile;
+							if (!existingObj || !existingObj.hidden) {
+								destFile = OS.Path.join(destDir, fileName);
+							}
+							else {
+								destFile = OS.Path.join(hiddenDir, fileName)
+							}
 							
 							try {
-								if (!existingObj || !existingObj.hidden) {
-									yield OS.File.copy(entry.path, destFile, {
-										noOverwrite: true
-									});
-								}
-								else {
-									yield OS.File.copy(entry.path, OS.Path.join(hiddenDir, fileName), {
-										noOverwrite: true
-									});
-								}
+								yield OS.File.copy(entry.path, destFile, { noOverwrite: true });
 							}
 							catch (e) {
 								if (e instanceof OS.File.Error && e.becauseExists) {
@@ -923,16 +924,15 @@ Zotero.Schema = new function(){
 										+ "'" + fileName + "'";
 									Zotero.debug(msg, 1);
 									Components.utils.reportError(msg);
-									if (!existingObj || !existingObj.hidden) {
-										yield OS.File.copy(entry.path, destFile);
-									}
-									else {
-										yield OS.File.copy(entry.path, OS.Path.join(hiddenDir, fileName));
-									}
+									yield OS.File.copy(entry.path, destFile);
 								}
 								else {
 									throw e;
 								}
+							}
+							
+							if (mode == 'translators') {
+								cache[fileName] = newObj.metadata;
 							}
 						}
 						catch (e) {
@@ -956,7 +956,7 @@ Zotero.Schema = new function(){
 			}
 		});
 		
-		yield Zotero[Mode].reinit();
+		yield Zotero[Mode].reinit(cache);
 		
 		return true;
 	});

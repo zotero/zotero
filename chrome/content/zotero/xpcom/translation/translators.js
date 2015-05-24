@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+"use strict";
+
 // Enumeration of types of translators
 const TRANSLATOR_TYPES = {"import":1, "export":2, "web":4, "search":8};
 
@@ -36,8 +38,11 @@ Zotero.Translators = new function() {
 	
 	/**
 	 * Initializes translator cache, loading all translator metadata into memory
+	 *
+	 * @param {Object} [memCache] - Translator metadata keyed by filename, if already available
+	 *                              (e.g., in updateBundledFiles()), to avoid unnecesary file reads
 	 */
-	this.reinit = Zotero.Promise.coroutine(function* () {
+	this.reinit = Zotero.Promise.coroutine(function* (memCache) {
 		Zotero.debug("Initializing translators");
 		var start = new Date;
 		_initialized = true;
@@ -76,7 +81,14 @@ Zotero.Translators = new function() {
 						lastModifiedTime = (yield OS.File.stat(path)).lastModificationDate.getTime();
 					}
 					
-					var dbCacheEntry = false;
+					// Check passed cache for metadata
+					let memCacheJSON = false;
+					if (memCache && memCache[fileName]) {
+						memCacheJSON = memCache[fileName];
+					}
+					
+					// Check DB cache
+					let dbCacheEntry = false;
 					if (dbCache[fileName]) {
 						filesInCache[fileName] = true;
 						if (dbCache[fileName].lastModifiedTime == lastModifiedTime) {
@@ -85,8 +97,10 @@ Zotero.Translators = new function() {
 					}
 					
 					// Get JSON from cache if possible
-					if(dbCacheEntry) {
-						var translator = Zotero.Translators.load(dbCacheEntry.metadataJSON, path);
+					if (memCacheJSON || dbCacheEntry) {
+						var translator = Zotero.Translators.load(
+							memCacheJSON || dbCacheEntry.metadataJSON, path
+						);
 					}
 					// Otherwise, load from file
 					else {
@@ -175,9 +189,13 @@ Zotero.Translators = new function() {
 
 	/**
 	 * Loads a translator from JSON, with optional code
+	 *
+	 * @param {String|Object} json - Metadata JSON
+	 * @param {String} path
+	 * @param {String} [code]
 	 */
 	this.load = function (json, path, code) {
-		var info = JSON.parse(json);
+		var info = typeof json == 'string' ? JSON.parse(json) : json;
 		info.path = path;
 		info.code = code;
 		return new Zotero.Translator(info);
