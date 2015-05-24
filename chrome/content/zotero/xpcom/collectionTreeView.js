@@ -108,9 +108,9 @@ Zotero.CollectionTreeView.prototype.setTree = Zotero.Promise.coroutine(function*
 		
 		var lastViewedID = Zotero.Prefs.get('lastViewedFolder');
 		if (lastViewedID) {
-			yield this.selectByID(lastViewedID);
+			var selected = yield this.selectByID(lastViewedID);
 		}
-		else {
+		if (!selected) {
 			this.selection.select(0);
 		}
 		
@@ -849,7 +849,7 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 	switch (type) {
 	case 'L':
 		yield this.selectLibrary(id);
-		return;
+		return true;
 	
 	case 'C':
 		var found = yield this.expandToCollection(id);
@@ -862,11 +862,13 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 	}
 	
 	if (!found) {
-		return;
+		return false;
 	}
 	var row = this._rowMap[type + id];
 	this._treebox.ensureRowIsVisible(row);
 	yield this.selectWait(row);
+	
+	return true;
 });
 
 
