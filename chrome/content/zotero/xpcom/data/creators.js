@@ -28,7 +28,7 @@ Zotero.Creators = new function() {
 	this.fields = ['firstName', 'lastName', 'fieldMode'];
 	this.totes = 0;
 	
-	var _creatorCache = {};
+	var _cache = {};
 	
 	/*
 	 * Returns creator data in internal format for a given creatorID
@@ -38,8 +38,8 @@ Zotero.Creators = new function() {
 			throw new Error("creatorID not provided");
 		}
 		
-		if (_creatorCache[creatorID]) {
-			return this.cleanData(_creatorCache[creatorID]);
+		if (_cache[creatorID]) {
+			return this.cleanData(_cache[creatorID]);
 		}
 		
 		var sql = "SELECT * FROM creators WHERE creatorID=?";
@@ -47,7 +47,7 @@ Zotero.Creators = new function() {
 		if (!row) {
 			throw new Error("Creator " + creatorID + " not found");
 		}
-		return _creatorCache[creatorID] = this.cleanData({
+		return _cache[creatorID] = this.cleanData({
 			firstName: row.firstName, // avoid "DB column 'name' not found" warnings from the DB row Proxy
 			lastName: row.lastName,
 			fieldMode: row.fieldMode
@@ -128,7 +128,7 @@ Zotero.Creators = new function() {
 		if (toDelete.length) {
 			// Clear creator entries in internal array
 			for (let i=0; i<toDelete.length; i++) {
-				delete _creatorCache[toDelete[i]];
+				delete _cache[toDelete[i]];
 			}
 			
 			var sql = "DELETE FROM creators WHERE creatorID NOT IN "

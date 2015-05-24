@@ -76,7 +76,6 @@ const xpcomFilesLocal = [
 	'data/groups',
 	'data/itemFields',
 	'data/libraries',
-	'data/relation',
 	'data/relations',
 	'data/tags',
 	'db',

@@ -262,6 +262,8 @@ describe("Zotero.CollectionTreeView", function() {
 			assert.equal(itemsView.rowCount, 1);
 			var treeRow = itemsView.getRow(0);
 			assert.equal(treeRow.ref.id, ids[0]);
+			
+			yield group.erase();
 		})
 	})
 })

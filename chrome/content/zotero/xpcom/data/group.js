@@ -301,34 +301,22 @@ Zotero.Group.prototype.erase = Zotero.Promise.coroutine(function* () {
 			ids = yield Zotero.DB.columnQueryAsync(sql, this.libraryID);
 			for (let i = 0; i < ids.length; i++) {
 				let id = ids[i];
-				let obj = yield Zotero.Items.getAsync(id, { noCache: true });
+				let obj = yield objectsClass.getAsync(id, { noCache: true });
+				// Descendent object may have already been deleted
+				if (!obj) {
+					continue;
+				}
 				yield obj.erase({
 					skipNotifier: true
 				});
 			}
 		}
 		
-		/*// Delete tags
-		sql = "SELECT tagID FROM tags WHERE libraryID=?";
-		ids = yield Zotero.DB.columnQueryAsync(sql, this.libraryID);
-		yield Zotero.Tags.erase(ids);*/
-		
-		// Delete delete log entries
-		sql = "DELETE FROM syncDeleteLog WHERE libraryID=?";
-		yield Zotero.DB.queryAsync(sql, this.libraryID);
-		
 		var prefix = "groups/" + this.id;
 		yield Zotero.Relations.eraseByURIPrefix(Zotero.URI.defaultPrefix + prefix);
 		
-		// Delete settings
-		sql = "DELETE FROM syncedSettings WHERE libraryID=?";
-		yield Zotero.DB.queryAsync(sql, this.libraryID);
-		
-		// Delete group
-		sql = "DELETE FROM groups WHERE groupID=?";
-		yield Zotero.DB.queryAsync(sql, this.id)
-		
-		// Delete library
+		// Delete library row, which deletes from tags, syncDeleteLog, syncedSettings, and groups
+		// tables via cascade. If any of those gain caching, they should be deleted separately.
 		sql = "DELETE FROM libraries WHERE libraryID=?";
 		yield Zotero.DB.queryAsync(sql, this.libraryID)
 		
