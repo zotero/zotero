@@ -1562,7 +1562,11 @@
 							}
 						}
 						
-						Zotero.debug(comment);
+						// No result selected
+						if (!comment) {
+							return;
+						}
+						
 						var [creatorID, numFields] = comment.split('-');
 						
 						// If result uses two fields, save both
