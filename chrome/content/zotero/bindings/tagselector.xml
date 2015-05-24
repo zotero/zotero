@@ -226,9 +226,11 @@
 						var emptyRegular = true;
 						var tagsToggleBox = this.id('tags-toggle');
 						
-						var tagColors = yield Zotero.Tags.getColors(this.libraryID);
+						var tagColors = yield Zotero.Tags.getColors(this.libraryID)
+							.tap(() => Zotero.Promise.check(this.item));
 						if (fetch || this._dirty) {
-							this._tags = yield Zotero.Tags.getAll(this.libraryID, this._types);
+							this._tags = yield Zotero.Tags.getAll(this.libraryID, this._types)
+								.tap(() => Zotero.Promise.check(this.item));
 							
 							// Remove children
 							tagsToggleBox.textContent = "";

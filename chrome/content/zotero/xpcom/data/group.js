@@ -52,7 +52,6 @@ Zotero.Group.prototype.__defineGetter__('objectType', function () { return 'grou
 Zotero.Group.prototype.__defineGetter__('id', function () { return this._get('id'); });
 Zotero.Group.prototype.__defineSetter__('id', function (val) { this._set('id', val); });
 Zotero.Group.prototype.__defineGetter__('libraryID', function () { return this._get('libraryID'); });
-Zotero.Group.prototype.__defineSetter__('libraryID', function (val) { return this._set('libraryID', val); });
 Zotero.Group.prototype.__defineGetter__('name', function () { return this._get('name'); });
 Zotero.Group.prototype.__defineSetter__('name', function (val) { this._set('name', val); });
 Zotero.Group.prototype.__defineGetter__('description', function () { return this._get('description'); });
@@ -221,11 +220,7 @@ Zotero.Group.prototype.hasItem = function (item) {
 
 Zotero.Group.prototype.save = Zotero.Promise.coroutine(function* () {
 	if (!this.id) {
-		throw ("ID not set in Zotero.Group.save()");
-	}
-	
-	if (!this.libraryID) {
-		throw ("libraryID not set in Zotero.Group.save()");
+		throw new Error("Group id not set");
 	}
 	
 	if (!this._changed) {
@@ -240,7 +235,6 @@ Zotero.Group.prototype.save = Zotero.Promise.coroutine(function* () {
 		
 		var sqlColumns = [
 			'groupID',
-			'libraryID',
 			'name',
 			'description',
 			'editable',
@@ -249,7 +243,6 @@ Zotero.Group.prototype.save = Zotero.Promise.coroutine(function* () {
 		];
 		var sqlValues = [
 			this.id,
-			this.libraryID,
 			this.name,
 			this.description,
 			this.editable ? 1 : 0,
@@ -258,28 +251,34 @@ Zotero.Group.prototype.save = Zotero.Promise.coroutine(function* () {
 		];
 		
 		if (isNew) {
-			if (!Zotero.Libraries.exists(this.libraryID)) {
-				Zotero.Libraries.add(this.libraryID, 'group');
-			}
+			var { id: libraryID } = yield Zotero.Libraries.add('group');
+			sqlColumns.push('libraryID');
+			sqlValues.push(libraryID);
 			
-			var sql = "INSERT INTO groups (" + sqlColumns.join(', ') + ") "
+			let sql = "INSERT INTO groups (" + sqlColumns.join(', ') + ") "
 						+ "VALUES (" + sqlColumns.map(() => '?').join(', ') + ")";
 			yield Zotero.DB.queryAsync(sql, sqlValues);
 		}
 		else {
 			sqlColumns.shift();
-			sqlValues.shift();
+			sqlValues.push(sqlValues.shift());
 			
-			var sql = "UPDATE groups SET "
-				+ sqlColumns.map(function (val) val + '=?').join(', ')
+			let sql = "UPDATE groups SET " + sqlColumns.map(function (val) val + '=?').join(', ')
 				+ " WHERE groupID=?";
-			sqlValues.push(this.id);
 			yield Zotero.DB.queryAsync(sql, sqlValues);
 		}
+		
+		if (isNew) {
+			Zotero.DB.addCurrentCallback("commit", Zotero.Promise.coroutine(function* () {
+				yield this.load();
+				Zotero.Groups.register(this)
+			}.bind(this)));
+			Zotero.Notifier.trigger('add', 'group', this.id);
+		}
+		else {
+			Zotero.Notifier.trigger('modify', 'group', this.id);
+		}
 	}.bind(this));
-	
-	Zotero.Groups.register(this);
-	Zotero.Notifier.trigger('add', 'group', this.id);
 });
 
 

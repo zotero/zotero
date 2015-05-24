@@ -75,23 +75,26 @@ Zotero.Libraries = new function () {
 	}
 	
 	
-	this.add = Zotero.Promise.coroutine(function* (libraryID, type) {
+	this.add = Zotero.Promise.coroutine(function* (type) {
+		Zotero.DB.requireTransaction();
+		
 		switch (type) {
 			case 'group':
 				break;
 			
 			default:
-				throw new Error("Invalid library type '" + type + "' in Zotero.Libraries.add()");
+				throw new Error("Invalid library type '" + type + "'");
 		}
+		
+		var libraryID = yield Zotero.ID.get('libraries');
 		
 		var sql = "INSERT INTO libraries (libraryID, libraryType) VALUES (?, ?)";
 		yield Zotero.DB.queryAsync(sql, [libraryID, type]);
 		
 		// Re-fetch from DB to get auto-filled defaults
 		var sql = "SELECT * FROM libraries WHERE libraryID=?";
-		var row = Zotero.DB.rowQueryAsync(sql, [libraryID]);
-		_libraryData[row.libraryID] = parseDBRow(row);
-		return row;
+		var row = yield Zotero.DB.rowQueryAsync(sql, [libraryID]);
+		return _libraryData[row.libraryID] = parseDBRow(row);
 	});
 	
 	
@@ -210,6 +213,7 @@ Zotero.Libraries = new function () {
 	
 	function parseDBRow(row) {
 		return {
+			id: row.libraryID,
 			type: row.libraryType,
 			version: row.version,
 			lastSyncTime: row.lastsync != 0 ? new Date(row.lastsync * 1000) : false

@@ -209,5 +209,59 @@ describe("Zotero.CollectionTreeView", function() {
 			var treeRow = itemsView.getRow(0);
 			assert.equal(treeRow.ref.id, item.id);
 		})
+		
+		it("should add an item to a library", function* () {
+			var group = new Zotero.Group;
+			group.id = 75161251;
+			group.name = "Test";
+			group.description = "";
+			group.editable = true;
+			group.filesEditable = true;
+			group.version = 1234;
+			yield group.save();
+			
+			var item = yield createDataObject('item', false, {
+				skipSelect: true
+			});
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var attachmentID = yield Zotero.Attachments.importFromFile({
+				file: file,
+				parentItemID: item.id
+			});
+			
+			var row = collectionsView.getRowByID("L" + group.libraryID);
+			
+			// Simulate a drag and drop
+			var stub = sinon.stub(Zotero.DragDrop, "getDragTarget");
+			stub.returns(collectionsView.getRow(row));
+			collectionsView.drop(row, 0, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				mozSourceNode: win.document.getElementById('zotero-items-tree'),
+				types: {
+					contains: function (type) {
+						return type == 'zotero/item';
+					}
+				},
+				getData: function (type) {
+					if (type == 'zotero/item') {
+						return "" + item.id;
+					}
+				}
+			});
+			
+			// Add observer to wait for collection add
+			var ids = yield waitForItemEvent("add");
+			
+			stub.restore();
+			yield collectionsView.selectLibrary(group.libraryID);
+			yield waitForItemsLoad(win);
+			
+			var itemsView = win.ZoteroPane.itemsView
+			assert.equal(itemsView.rowCount, 1);
+			var treeRow = itemsView.getRow(0);
+			assert.equal(treeRow.ref.id, ids[0]);
+		})
 	})
 })

@@ -1115,6 +1115,8 @@ Zotero.Attachments = new function(){
 			throw ("Attachment is already in library " + libraryID);
 		}
 		
+		Zotero.DB.requireTransaction();
+		
 		attachment.loadItemData();
 		var newAttachment = yield attachment.clone(libraryID);
 		if (attachment.isImportedAttachment()) {
@@ -1124,7 +1126,7 @@ Zotero.Attachments = new function(){
 		if (parentItemID) {
 			newAttachment.parentID = parentItemID;
 		}
-		yield newAttachment.saveTx();
+		yield newAttachment.save();
 		
 		// Copy over files if they exist
 		if (newAttachment.isImportedAttachment() && attachment.getFile()) {
