@@ -159,7 +159,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		}.bind(this));
 	},
 	
-	"saveCollection":function(collection) {
+	"saveCollection": Zotero.Promise.coroutine(function* (collection) {
 		var collectionsToProcess = [collection];
 		var parentIDs = [null];
 		var topLevelCollection;
@@ -168,7 +168,14 @@ Zotero.Translate.ItemSaver.prototype = {
 			var collection = collectionsToProcess.shift();
 			var parentID = parentIDs.shift();
 			
-			var newCollection = Zotero.Collections.add(collection.name, parentID);
+			var newCollection = new Zotero.Collection;
+			newCollection.libraryID = this._libraryID;
+			newCollection.name = collection.name;
+			if (parentID) {
+				newCollection.parentID = parentID;
+			}
+			yield newCollection.save();
+			
 			if(parentID === null) topLevelCollection = newCollection;
 			
 			this.newCollections.push(newCollection.id);
@@ -193,12 +200,12 @@ Zotero.Translate.ItemSaver.prototype = {
 			
 			if(toAdd.length) {
 				Zotero.debug("Translate: Adding " + toAdd, 5);
-				newCollection.addItems(toAdd);
+				yield newCollection.addItems(toAdd);
 			}
 		}
 		
 		return topLevelCollection;
-	},
+	}),
 	
 	/**
 	 * Saves a translator attachment to the database
@@ -717,7 +724,7 @@ Zotero.Translate.ItemGetter.prototype = {
 		
 		if(getChildCollections) {
 			// get child collections
-			this._collectionsLeft = Zotero.getCollections(collection.id, true);
+			this._collectionsLeft = Zotero.getCollections(collection.id, true); // TODO: Replace with Zotero.Collections.getByParent()
 			
 			// get items in child collections
 			for each(var collection in this._collectionsLeft) {
@@ -740,7 +747,7 @@ Zotero.Translate.ItemGetter.prototype = {
 		this._itemsLeft = Zotero.Items.getAll(libraryID, true);
 		
 		if(getChildCollections) {
-			this._collectionsLeft = Zotero.getCollections(null, true, libraryID);
+			this._collectionsLeft = Zotero.getCollections(null, true, libraryID); // TODO: Replace with Zotero.Collections.getByLibrary()
 		}
 		
 		this.numItems = this._itemsLeft.length;

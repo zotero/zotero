@@ -1028,7 +1028,6 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 	var treeRow = rows[row];
 	var level = rows[row].level;
 	var isLibrary = treeRow.isLibrary(true);
-	var isGroup = treeRow.isGroup();
 	var isCollection = treeRow.isCollection();
 	var libraryID = treeRow.ref.libraryID;
 	
@@ -1036,12 +1035,11 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 		return false;
 	}
 	
-	if (isGroup) {
-		var group = yield Zotero.Groups.getByLibraryID(libraryID);
-		var collections = yield group.getCollections();
+	if (isLibrary) {
+		var collections = yield Zotero.Collections.getByLibrary(libraryID, treeRow.ref.id);
 	}
-	else {
-		var collections = yield Zotero.Collections.getByParent(libraryID, treeRow.ref.id);
+	else if (isCollection) {
+		var collections = yield Zotero.Collections.getByParent(treeRow.ref.id);
 	}
 	
 	if (isLibrary) {

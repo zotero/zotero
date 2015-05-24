@@ -440,7 +440,7 @@
 							var rows = [];
 							
 							var libraryID = this.parent.search.libraryID;
-							var cols = Zotero.getCollections(false, true, libraryID);
+							var cols = Zotero.getCollections(false, true, libraryID); // TODO: Replace with Zotero.Collections.getByLibrary()
 							for (var i in cols) {
 								// Indent subcollections
 								var indent = '';

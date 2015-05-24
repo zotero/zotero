@@ -53,43 +53,47 @@ Zotero.Collections = function() {
 	this._primaryDataSQLFrom = "FROM collections O "
 			+ "LEFT JOIN collections CP ON (O.parentCollectionID=CP.collectionID)";
 	
+	
 	/**
-	* Add new collection to DB and return Collection object
-	*
-	* _name_ is non-empty string
-	* _parent_ is optional collectionID -- creates root collection by default
-	*
-	* Returns true on success; false on error
-	**/
-	this.add = function (name, parent) {
-		var col = new Zotero.Collection;
-		col.name = name;
-		col.parent = parent;
-		var id = col.save();
-		return this.getAsync(id);
+	 * Get collections within a library
+	 *
+	 * Either libraryID or parentID must be provided
+	 *
+	 * @param {Integer} libraryID
+	 * @param {Boolean} [recursive=false]
+	 * @return {Promise<Zotero.Collection[]>}
+	 */
+	this.getByLibrary = function (libraryID, recursive) {
+		return _getByContainer(libraryID, null, recursive);
 	}
 	
 	
-	/*
-	 * Zotero.getCollections(parent)
+	/**
+	 * Get collections that are subcollection of a given collection
 	 *
-	 * Returns an array of all collections are children of a collection
-	 * as Zotero.Collection instances
-	 *
-	 * Takes parent collectionID as optional parameter;
-	 * by default, returns root collections
+	 * @param {Integer} parentCollectionID
+	 * @param {Boolean} [recursive=false]
+	 * @return {Promise<Zotero.Collection[]>}
 	 */
-	this.getByParent = Zotero.Promise.coroutine(function* (libraryID, parentID, recursive) {
+	this.getByParent = function (parentCollectionID, recursive) {
+		return _getByContainer(null, parentCollectionID, recursive);
+	}
+	
+	
+	var _getByContainer = Zotero.Promise.coroutine(function* (libraryID, parentID, recursive) {
 		let children;
 		
 		if (parentID) {
-			let parent = yield this.getAsync(parentID);
+			let parent = yield Zotero.Collections.getAsync(parentID);
 			yield parent.loadChildCollections();
 			children = parent.getChildCollections();
 		} else if (libraryID) {
-			children = yield this.getCollectionsInLibrary(libraryID);
+			let sql = "SELECT collectionID AS id FROM collections "
+				+ "WHERE libraryID=? AND parentCollectionID IS NULL";
+			let ids = yield Zotero.DB.columnQueryAsync(sql, [libraryID]);
+			children = yield this.getAsync(ids);
 		} else {
-			throw new Error("Either library ID or parent collection ID must be provided to getNumCollectionsByParent");
+			throw new Error("Either library ID or parent collection ID must be provided");
 		}
 		
 		if (!children.length) {
@@ -106,7 +110,7 @@ Zotero.Collections = function() {
 			var obj = children[i];
 			toReturn.push(obj);
 			
-			var desc = obj.getDescendents(false, 'collection');
+			var desc = yield obj.getDescendents(false, 'collection');
 			for (var j in desc) {
 				var obj2 = yield this.getAsync(desc[j]['id']);
 				if (!obj2) {
@@ -126,18 +130,7 @@ Zotero.Collections = function() {
 		}
 		
 		return toReturn;
-	});
-	
-	
-	this.getCollectionsInLibrary = Zotero.Promise.coroutine(function* (libraryID) {
-		let sql = "SELECT collectionID AS id FROM collections C "
-			+ "WHERE libraryID=? AND parentCollectionId IS NULL";
-		let ids = yield Zotero.DB.queryAsync(sql, [libraryID]);
-		let collections = yield this.getAsync(ids.map(function(row) row.id));
-		if (!collections.length) return collections;
-		
-		return collections.sort(function (a, b) Zotero.localeCompare(a.name, b.name));
-	});
+	}.bind(this));
 	
 	
 	this.getCollectionsContainingItems = function (itemIDs, asIDs) {

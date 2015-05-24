@@ -285,7 +285,7 @@ var Zotero_File_Interface = new function() {
 				var leafName = translation.location.leafName;
 				var collectionName = (translation.location.isDirectory() || leafName.indexOf(".") === -1 ? leafName
 					: leafName.substr(0, leafName.lastIndexOf(".")));
-				var allCollections = Zotero.getCollections();
+				var allCollections = Zotero.getCollections(); // TODO: Replace with Zotero.Collections.getBy*
 				for(var i=0; i<allCollections.length; i++) {
 					if(allCollections[i].name == collectionName) {
 						collectionName += " "+(new Date()).toLocaleString();
@@ -298,7 +298,7 @@ var Zotero_File_Interface = new function() {
 			
 			if(createNewCollection) {
 				// Create a new collection to take imported items
-				importCollection = Zotero.Collections.add(collectionName);
+				importCollection = Zotero.Collections.add(collectionName); // TODO: Fix
 			} else {
 				// Import into currently selected collection
 				try {

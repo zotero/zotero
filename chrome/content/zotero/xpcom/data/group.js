@@ -182,34 +182,6 @@ Zotero.Group.prototype.clearSearchCache = function () {
 	this._hasSearches = null;
 }
 
-/**
- * Returns collections of this group
- *
- * @param	{Boolean}		asIDs				Return as collectionIDs
- * @return	{Zotero.Collection[]}				Array of Zotero.Collection instances
- */
-Zotero.Group.prototype.getCollections = Zotero.Promise.coroutine(function* (parent) {
-	var sql = "SELECT collectionID FROM collections WHERE libraryID=? AND "
-				+ "parentCollectionID " + (parent ? '=' + parent : 'IS NULL');
-	var ids = yield Zotero.DB.columnQueryAsync(sql, this.libraryID);
-	
-	// Return Zotero.Collection objects
-	var objs = [];
-	for each(var id in ids) {
-		var col = yield Zotero.Collections.getAsync(id);
-		objs.push(col);
-	}
-	
-	// Do proper collation sort
-	var collation = Zotero.getLocaleCollation();
-	objs.sort(function (a, b) {
-		return collation.compareString(1, a.name, b.name);
-	});
-	
-	return objs;
-});
-
-
 Zotero.Group.prototype.hasItem = function (item) {
 	if (!(item instanceof Zotero.Item)) {
 		throw new Error("item must be a Zotero.Item");

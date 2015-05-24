@@ -146,16 +146,11 @@ Zotero.Collection.prototype.hasChildItems = function() {
 /**
  * Returns subcollections of this collection
  *
- * @param	bool		asIDs		Return as collectionIDs
- * @return	array				Array of Zotero.Collection instances
- *									or collectionIDs, or FALSE if none
+ * @param {Boolean} [asIDs=false] Return as collectionIDs
+ * @return {Zotero.Collection[]|Integer[]}
  */
 Zotero.Collection.prototype.getChildCollections = function (asIDs) {
 	this._requireData('childCollections');
-	
-	if (this._childCollections.length == 0) {
-		return false;
-	}
 	
 	// Return collectionIDs
 	if (asIDs) {
@@ -681,13 +676,12 @@ Zotero.Collection.prototype.toJSON = function (options, patch) {
  *											nodes instead of flat array
  * @param	{String}	[type]				'item', 'collection', or NULL for both
  * @param	{Boolean}	[includeDeletedItems=false]		Include items in Trash
- * @return	{Object[]}			Array of objects with 'id', 'key',
- *								'type' ('item' or 'collection'), 'parent',
- *								and, if collection, 'name' and the nesting 'level'
+ * @return	{Promise<Object[]>} - A promise for an array of objects with 'id', 'key',
+ *   'type' ('item' or 'collection'), 'parent', and, if collection, 'name' and the nesting 'level'
  */
 Zotero.Collection.prototype.getChildren = Zotero.Promise.coroutine(function* (recursive, nested, type, includeDeletedItems, level) {
 	if (!this.id) {
-		throw ('Zotero.Collection.getChildren() cannot be called on an unsaved item');
+		throw new Error('Cannot be called on an unsaved item');
 	}
 	
 	var toReturn = [];

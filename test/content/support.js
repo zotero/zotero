@@ -160,12 +160,12 @@ function createUnsavedDataObject(objectType, params) {
 		obj.name = params.name !== undefined ? params.name : "Test";
 		break;
 	}
-	if (params.version !== undefined) {
-		obj.version = params.version
-	}
-	if (params.synced !== undefined) {
-		obj.synced = params.synced
-	}
+	var allowedParams = ['parentID', 'parentKey', 'synced', 'version'];
+	allowedParams.forEach(function (param) {
+		if (params[param] !== undefined) {
+			obj[param] = params[param];
+		}
+	})
 	return obj;
 }
 

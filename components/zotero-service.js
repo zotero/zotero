@@ -61,7 +61,6 @@ const xpcomFilesLocal = [
 	'attachments',
 	'cite',
 	'cookieSandbox',
-	'data_access',
 	'data/dataObject',
 	'data/dataObjects',
 	'data/dataObjectUtilities',
