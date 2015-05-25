@@ -23,7 +23,10 @@
     
     ***** END LICENSE BLOCK *****
 -->
-<!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+<!DOCTYPE prefwindow [
+	<!ENTITY % preferencesDTD SYSTEM "chrome://zotero/locale/preferences.dtd"> %preferencesDTD;
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+]>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<prefpane id="zotero-prefpane-export">
@@ -34,6 +37,7 @@
 				<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings"/>
 				<tree flex="1" id="quickCopy-siteSettings" hidecolumnpicker="true" rows="6" seltype="single"
 						ondblclick="Zotero_Preferences.Export.showQuickCopySiteEditor(this.currentIndex)"
+						onselect="Zotero_Preferences.Export.enableQuickCopySiteButtons()"
 						onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { Zotero_Preferences.Export.deleteSelectedQuickCopySite(); }">
 					<treecols>
 						<treecol id="quickCopy-urlColumn" label="&zotero.preferences.quickCopy.siteEditor.domainPath;" flex="1"/>
@@ -43,9 +47,13 @@
 					<treechildren id="quickCopy-siteSettings-rows"/>
 				</tree>
 				<separator class="thin"/>
-				<hbox pack="end">
-					<button label="-" onclick="Zotero_Preferences.Export.deleteSelectedQuickCopySite()"/>
-					<button label="+" onclick="Zotero_Preferences.Export.showQuickCopySiteEditor()"/>
+				<hbox>
+					<button disabled="true" id="quickCopy-edit" label="&zotero.general.edit;"
+						onclick="Zotero_Preferences.Export.showQuickCopySiteEditor(document.getElementById('quickCopy-siteSettings').currentIndex)"/>
+					<spacer flex="1"/>
+					<button disabled="true" id="quickCopy-delete" label="-" onclick="Zotero_Preferences.Export.deleteSelectedQuickCopySite()"/>
+					<button label="+"
+						onclick="Zotero_Preferences.Export.showQuickCopySiteEditor()"/>
 				</hbox>
 			</vbox>
 		</groupbox>
