@@ -848,8 +848,8 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 	
 	switch (type) {
 	case 'L':
-		yield this.selectLibrary(id);
-		return true;
+		var found = yield this.selectLibrary(id);
+		break;
 	
 	case 'C':
 		var found = yield this.expandToCollection(id);
@@ -858,6 +858,10 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 	case 'S':
 		var search = yield Zotero.Searches.getAsync(id);
 		var found = yield this.expandLibrary(search.libraryID);
+		break;
+	
+	case 'T':
+		var found = yield this.selectTrash(id);
 		break;
 	}
 	
@@ -927,29 +931,18 @@ Zotero.CollectionTreeView.prototype.selectTrash = Zotero.Promise.coroutine(funct
 	
 	// Check if trash is already selected
 	if (this.selection.currentIndex != -1) {
-		let itemGroup = this._getItemAtRow(this.selection.currentIndex);
+		let itemGroup = this.getRow(this.selection.currentIndex);
 		if (itemGroup.isTrash() && itemGroup.ref.libraryID == libraryID) {
 			this._treebox.ensureRowIsVisible(this.selection.currentIndex);
 			return true;
 		}
 	}
 	
-	// If in My Library and it's collapsed, open it
-	if (!libraryID && !this.isContainerOpen(0)) {
-		yield this.toggleOpenState(0);
-	}
-	
 	// Find library trash
 	for (let i = 0; i < this.rowCount; i++) {
-		let itemGroup = this._getItemAtRow(i);
+		let itemGroup = this.getRow(i);
 		
-		// If group header is closed, open it
-		if (itemGroup.isHeader() && itemGroup.ref.id == 'group-libraries-header'
-				&& !this.isContainerOpen(i)) {
-			yield this.toggleOpenState(i);
-			continue;
-		}
-		
+		// If library is closed, open it
 		if (itemGroup.isLibrary(true) && itemGroup.ref.libraryID == libraryID
 				&& !this.isContainerOpen(i)) {
 			yield this.toggleOpenState(i);

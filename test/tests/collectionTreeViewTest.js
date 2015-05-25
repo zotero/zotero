@@ -56,6 +56,16 @@ describe("Zotero.CollectionTreeView", function() {
 		})
 	})
 	
+	describe("#selectByID", function () {
+		it("should select the trash", function* () {
+			yield collectionsView.selectByID("T1");
+			var row = collectionsView.selection.currentIndex;
+			var treeRow = collectionsView.getRow(row);
+			assert.ok(treeRow.isTrash());
+			assert.equal(treeRow.ref.libraryID, Zotero.Libraries.userLibraryID);
+		})
+	})
+	
 	describe("#notify()", function () {
 		it("should select a new collection", function* () {
 			// Create collection
