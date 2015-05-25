@@ -262,6 +262,9 @@ Zotero.CollectionTreeView.prototype.selectWait = Zotero.Promise.method(function 
 		this.selection.select(row);
 		return;
 	}
+	if (this.selection.currentIndex == row) {
+		return;
+	};
 	var deferred = Zotero.Promise.defer();
 	this.addEventListener('select', () => deferred.resolve());
 	this.selection.select(row);

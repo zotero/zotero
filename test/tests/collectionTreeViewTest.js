@@ -49,13 +49,22 @@ describe("Zotero.CollectionTreeView", function() {
 		})
 	})
 	
-	describe("#selectByID", function () {
+	describe("#selectByID()", function () {
 		it("should select the trash", function* () {
 			yield collectionsView.selectByID("T1");
 			var row = collectionsView.selection.currentIndex;
 			var treeRow = collectionsView.getRow(row);
 			assert.ok(treeRow.isTrash());
 			assert.equal(treeRow.ref.libraryID, Zotero.Libraries.userLibraryID);
+		})
+	})
+	
+	describe("#selectWait()", function () {
+		it("shouldn't hang if row is already selected", function* () {
+			var row = collectionsView.getRowByID("T" + Zotero.Libraries.userLibraryID);
+			collectionsView.selection.select(row);
+			yield Zotero.Promise.delay(50);
+			yield collectionsView.selectWait(row);
 		})
 	})
 	

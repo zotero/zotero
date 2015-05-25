@@ -1,9 +1,10 @@
 describe("Zotero.Items", function () {
-	var win, collectionsView;
+	var win, collectionsView, zp;
 	
 	before(function* () {
 		win = yield loadZoteroPane();
 		collectionsView = win.ZoteroPane.collectionsView;
+		zp = win.ZoteroPane;
 	})
 	beforeEach(function () {
 		return selectLibrary(win);
@@ -36,7 +37,7 @@ describe("Zotero.Items", function () {
 			assert.isFalse(yield Zotero.Items.getAsync(id1));
 			assert.isFalse(yield Zotero.Items.getAsync(id2));
 			assert.isFalse(yield Zotero.Items.getAsync(id3));
-			assert.equal(win.ZoteroPane.itemsView.rowCount, 0);
+			assert.equal(zp.itemsView.rowCount, 0);
 		})
 	})
 });

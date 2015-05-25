@@ -68,7 +68,7 @@ Zotero.ItemTreeView.prototype.type = 'item';
 Zotero.ItemTreeView.prototype.setTree = Zotero.serial(Zotero.Promise.coroutine(function* (treebox)
 {
 	try {
-		Zotero.debug("Setting tree for items view " + this.id);
+		Zotero.debug("Setting tree for " + this.collectionTreeRow.id + " items view " + this.id);
 		var start = Date.now();
 		// Try to set the window document if not yet set
 		if (treebox && !this._ownerDocument) {
