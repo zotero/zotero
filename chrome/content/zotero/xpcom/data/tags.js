@@ -252,7 +252,7 @@ Zotero.Tags = new function() {
 			yield Zotero.Utilities.Internal.forEachChunkAsync(
 				oldItemIDs,
 				Zotero.DB.MAX_BOUND_PARAMETERS - 2,
-				Zotero.Promise.coroutine(function* (chunk) {
+				function* (chunk) {
 					let placeholders = chunk.map(function () '?').join(',');
 					
 					// This is ugly, but it's much faster than doing replaceTag() for each item
@@ -265,7 +265,7 @@ Zotero.Tags = new function() {
 					yield Zotero.DB.queryAsync(sql, [Zotero.DB.transactionDateTime].concat(chunk));
 					
 					yield Zotero.Items.reload(oldItemIDs, ['tags'], true);
-				})
+				}
 			);
 			
 			var notifierData = {};
@@ -331,7 +331,7 @@ Zotero.Tags = new function() {
 			yield Zotero.Utilities.Internal.forEachChunkAsync(
 				Zotero.Utilities.arrayUnique(oldItemIDs),
 				Zotero.DB.MAX_BOUND_PARAMETERS - 1,
-				Zotero.Promise.coroutine(function* (chunk) {
+				function* (chunk) {
 					let placeholders = chunk.map(function () '?').join(',');
 					
 					sql = 'UPDATE items SET clientDateModified=? '
@@ -339,7 +339,7 @@ Zotero.Tags = new function() {
 					yield Zotero.DB.queryAsync(sql, [Zotero.DB.transactionDateTime].concat(chunk));
 					
 					yield Zotero.Items.reload(oldItemIDs, ['tags']);
-				})
+				}
 			);
 		}.bind(this));
 		
