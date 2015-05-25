@@ -76,6 +76,11 @@ function waitForWindow(uri) {
 	return deferred.promise;
 }
 
+var selectLibrary = Zotero.Promise.coroutine(function* (win) {
+	yield win.ZoteroPane.collectionsView.selectLibrary(Zotero.Libraries.userLibraryID);
+	yield waitForItemsLoad(win);
+});
+
 var waitForItemsLoad = function (win, collectionRowToSelect) {
 	var resolve;
 	var promise = new Zotero.Promise(() => resolve = arguments[0]);
@@ -151,7 +156,7 @@ function waitForCallback(cb, interval, timeout) {
 function createUnsavedDataObject(objectType, params) {
 	params = params || {};
 	if (objectType == 'item') {
-		var param = 'book';
+		var param = params.itemType || 'book';
 	}
 	var obj = new Zotero[Zotero.Utilities.capitalize(objectType)](param);
 	switch (objectType) {

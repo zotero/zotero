@@ -3,21 +3,14 @@
 describe("Zotero.CollectionTreeView", function() {
 	var win, collectionsView;
 	
-	// Select library
-	// TODO: Add a selectCollection() function and select a collection instead
-	var resetSelection = Zotero.Promise.coroutine(function* () {
-		yield collectionsView.selectLibrary(Zotero.Libraries.userLibraryID);
-		yield waitForItemsLoad(win);
-		assert.equal(collectionsView.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
-	});
-	
 	// Load Zotero pane and select library
 	before(function* () {
 		win = yield loadZoteroPane();
 		collectionsView = win.ZoteroPane.collectionsView;
 	});
 	beforeEach(function () {
-		return resetSelection();
+		// TODO: Add a selectCollection() function and select a collection instead?
+		return selectLibrary(win);
 	})
 	after(function () {
 		win.close();
@@ -108,7 +101,7 @@ describe("Zotero.CollectionTreeView", function() {
 			collection.name = "No select on modify";
 			var id = yield collection.saveTx();
 			
-			yield resetSelection();
+			yield selectLibrary(win);
 			
 			collection.name = "No select on modify 2";
 			yield collection.saveTx();

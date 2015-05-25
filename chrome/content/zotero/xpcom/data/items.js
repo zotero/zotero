@@ -102,9 +102,8 @@ Zotero.Items = function() {
 	/**
 	 * Return items marked as deleted
 	 *
-	 * @param {Integer}  libraryID
-	 * @param {Boolean}  asIDs			Return itemIDs instead of
-	 *											Zotero.Item objects
+	 * @param {Integer} libraryID - Library to search
+	 * @param {Boolean} [asIDs] - Return itemIDs instead of Zotero.Item objects
 	 * @return {Zotero.Item[]|Integer[]}
 	 */
 	this.getDeleted = Zotero.Promise.coroutine(function* (libraryID, asIDs, days) {
@@ -113,7 +112,6 @@ Zotero.Items = function() {
 		if (days) {
 			sql += " AND dateDeleted<=DATE('NOW', '-" + parseInt(days) + " DAYS')";
 		}
-		
 		var ids = yield Zotero.DB.columnQueryAsync(sql, [libraryID]);
 		if (!ids.length) {
 			return [];
@@ -500,24 +498,27 @@ Zotero.Items = function() {
 	
 	
 	/**
-	 * @param	{Integer}	days	Only delete items deleted more than this many days ago
+	 * @param {Integer} libraryID - Library to delete from
+	 * @param {Integer} [days] - Only delete items deleted more than this many days ago
+	 * @param {Integer} [limit]
 	 */
 	this.emptyTrash = Zotero.Promise.coroutine(function* (libraryID, days, limit) {
+		if (!libraryID) {
+			throw new Error("Library ID not provided");
+		}
+		
 		var t = new Date();
 		
 		var deletedIDs = [];
 		
-		yield Zotero.DB.executeTransaction(function* () {
-			deletedIDs = yield this.getDeleted(libraryID, true, days);
-			if (deletedIDs.length) {
-				if (limit) {
-					deletedIDs = deletedIDs.slice(0, limit - 1)
-				}
-				yield this.erase(deletedIDs);
+		deletedIDs = yield this.getDeleted(libraryID, true, days);
+		if (deletedIDs.length) {
+			yield Zotero.Utilities.Internal.forEachChunkAsync(deletedIDs, 50, function* (chunk) {
+				yield this.erase(chunk);
 				Zotero.Notifier.trigger('refresh', 'trash', libraryID);
-			}
-		}.bind(this));
-			
+			}.bind(this));
+		}
+		
 		if (deletedIDs.length) {
 			Zotero.debug("Emptied " + deletedIDs.length + " item(s) from trash in " + (new Date() - t) + " ms");
 		}
@@ -547,7 +548,7 @@ Zotero.Items = function() {
 					// TODO: increase number after dealing with slow
 					// tag.getLinkedItems() call during deletes
 					var num = 10;
-					this.emptyTrash(null, days, num)
+					this.emptyTrash(Zotero.Libraries.userLibraryID, days, num)
 					.then(deleted => {
 						if (!deleted) {
 							this._emptyTrashTimer = null;

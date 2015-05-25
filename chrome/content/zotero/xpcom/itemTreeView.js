@@ -603,15 +603,12 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			}
 			
 			if (rows.length > 0) {
+				// Child items might have been added more than once
+				rows = Zotero.Utilities.arrayUnique(rows);
 				rows.sort(function(a,b) { return a-b });
 				
-				for(var i=0, len=rows.length; i<len; i++)
-				{
-					var row = rows[i];
-					if(row != null)
-					{
-						this._removeRow(row-i);
-					}
+				for (let i = rows.length - 1; i >= 0; i--) {
+					this._removeRow(rows[i]);
 				}
 				
 				madeChanges = true;
