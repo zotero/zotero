@@ -78,10 +78,12 @@
 						var r = "";
 						
 						if (this.item) {
-							yield this.item.loadRelations();
+							yield this.item.loadRelations()
+								.tap(() => Zotero.Promise.check(this.item));
 							var related = this.item.relatedItems;
 							if (related) {
-								related = yield Zotero.Items.getAsync(related);
+								related = yield Zotero.Items.getAsync(related)
+									.tap(() => Zotero.Promise.check(this.item));
 								for(var i = 0; i < related.length; i++) {
 									r = r + related[i].getDisplayTitle() + ", ";
 								}
@@ -106,10 +108,12 @@
 							rows.removeChild(rows.firstChild);
 						
 						if (this.item) {
-							yield this.item.loadRelations();
+							yield this.item.loadRelations()
+								.tap(() => Zotero.Promise.check(this.item));
 							var related = this.item.relatedItems;
 							if (related) {
-								related = yield Zotero.Items.getAsync(related);
+								related = yield Zotero.Items.getAsync(related)
+									.tap(() => Zotero.Promise.check(this.item));
 								for (var i = 0; i < related.length; i++) {
 									var icon= document.createElement("image");
 									icon.className = "zotero-box-icon";
