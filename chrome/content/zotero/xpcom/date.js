@@ -544,6 +544,29 @@ Zotero.Date = new function(){
 		return false;
 	}
 	
+	
+	this.sqlToISO8601 = function (sqlDate) {
+		var date = sqlDate.substr(0, 10);
+		var matches = date.match(/^([0-9]{4})\-([0-9]{2})\-([0-9]{2})/);
+		if (!matches) {
+			return false;
+		}
+		date = matches[1];
+		// Drop parts for reduced precision
+		if (matches[2] !== "00") {
+			date += "-" + matches[2];
+			if (matches[3] !== "00") {
+				date += "-" + matches[3];
+			}
+		}
+		var time = sqlDate.substr(11);
+		// TODO: validate times
+		if (time) {
+			date += "T" + time + "Z";
+		}
+		return date;
+	}
+	
 	function strToMultipart(str){
 		if (!str){
 			return '';

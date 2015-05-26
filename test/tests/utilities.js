@@ -172,4 +172,105 @@ describe("Zotero.Utilities", function() {
 			assert.equal(cleanISSN('<b>ISSN</b>:1234\xA0-\t5679(print)\n<b>eISSN (electronic)</b>:0028-0836'), '1234-5679');
 		});
 	});
+	describe("itemToCSLJSON", function() {
+		it("should accept Zotero.Item and Zotero export item format", function() {
+			let data = populateDBWithSampleData(loadSampleData('journalArticle'));
+			let item = Zotero.Items.get(data.journalArticle.id);
+			
+			let fromZoteroItem;
+			try {
+				fromZoteroItem = Zotero.Utilities.itemToCSLJSON(item);
+			} catch(e) {
+				assert.fail(e, null, 'accepts Zotero Item');
+			}
+			assert.isObject(fromZoteroItem, 'converts Zotero Item to object');
+			assert.isNotNull(fromZoteroItem, 'converts Zotero Item to non-null object');
+			
+			
+			let fromExportItem;
+			try {
+				fromExportItem = Zotero.Utilities.itemToCSLJSON(
+					Zotero.Utilities.Internal.itemToExportFormat(item)
+				);
+			} catch(e) {
+				assert.fail(e, null, 'accepts Zotero export item');
+			}
+			assert.isObject(fromExportItem, 'converts Zotero export item to object');
+			assert.isNotNull(fromExportItem, 'converts Zotero export item to non-null object');
+			
+			assert.deepEqual(fromZoteroItem, fromExportItem, 'conversion from Zotero Item and from export item are the same');
+		});
+		it("should convert standalone notes to expected format", function() {
+			let note = new Zotero.Item('note');
+			note.setNote('Some note longer than 50 characters, which will become the title.');
+			note = Zotero.Items.get(note.save());
+			
+			let cslJSONNote = Zotero.Utilities.itemToCSLJSON(note);
+			assert.equal(cslJSONNote.type, 'article', 'note is exported as "article"');
+			assert.equal(cslJSONNote.title, note.getNoteTitle(), 'note title is set to Zotero pseudo-title');
+		});
+		it("should convert standalone attachments to expected format", function() {
+			let file = getTestDataDirectory();
+			file.append("empty.pdf");
+			
+			let attachment = Zotero.Items.get(Zotero.Attachments.importFromFile(file));
+			attachment.setField('title', 'Empty');
+			attachment.setField('accessDate', '2001-02-03 12:13:14');
+			attachment.setField('url', 'http://example.com');
+			attachment.setNote('Note');
+			
+			attachment.save();
+			
+			cslJSONAttachment = Zotero.Utilities.itemToCSLJSON(attachment);
+			assert.equal(cslJSONAttachment.type, 'article', 'attachment is exported as "article"');
+			assert.equal(cslJSONAttachment.title, 'Empty', 'attachment title is correct');
+			assert.deepEqual(cslJSONAttachment.accessed, {"date-parts":[["2001",2,3]]}, 'attachment access date is mapped correctly');
+		});
+		it("should refuse to convert unexpected item types", function() {
+			let data = populateDBWithSampleData(loadSampleData('journalArticle'));
+			let item = Zotero.Items.get(data.journalArticle.id);
+			
+			let exportFormat = Zotero.Utilities.Internal.itemToExportFormat(item);
+			exportFormat.itemType = 'foo';
+			
+			assert.throws(Zotero.Utilities.itemToCSLJSON.bind(Zotero.Utilities, exportFormat), /^Unexpected Zotero Item type ".*"$/, 'throws an error when trying to map invalid item types');
+		});
+		it("should map additional fields from Extra field", function() {
+			let item = new Zotero.Item('journalArticle');
+			item.setField('extra', 'PMID: 12345\nPMCID:123456');
+			item = Zotero.Items.get(item.save());
+			
+			let cslJSON = Zotero.Utilities.itemToCSLJSON(item);
+			
+			assert.equal(cslJSON.PMID, '12345', 'PMID from Extra is mapped to PMID');
+			assert.equal(cslJSON.PMCID, '123456', 'PMCID from Extra is mapped to PMCID');
+			
+			item.setField('extra', 'PMID: 12345');
+			item.save();
+			cslJSON = Zotero.Utilities.itemToCSLJSON(item);
+			
+			assert.equal(cslJSON.PMID, '12345', 'single-line entry is extracted correctly');
+			
+			item.setField('extra', 'some junk: note\nPMID: 12345\nstuff in-between\nPMCID: 123456\nlast bit of junk!');
+			item.save();
+			cslJSON = Zotero.Utilities.itemToCSLJSON(item);
+			
+			assert.equal(cslJSON.PMID, '12345', 'PMID from mixed Extra field is mapped to PMID');
+			assert.equal(cslJSON.PMCID, '123456', 'PMCID from mixed Extra field is mapped to PMCID');
+			
+			item.setField('extra', 'a\n PMID: 12345\nfoo PMCID: 123456');
+			item.save();
+			cslJSON = Zotero.Utilities.itemToCSLJSON(item);
+			
+			assert.isUndefined(cslJSON.PMCID, 'field label must not be preceded by other text');
+			assert.isUndefined(cslJSON.PMID, 'field label must not be preceded by a space');
+			assert.equal(cslJSON.note, 'a\n PMID: 12345\nfoo PMCID: 123456', 'note is left untouched if nothing is extracted');
+			
+			item.setField('extra', 'something\npmid: 12345\n');
+			item.save();
+			cslJSON = Zotero.Utilities.itemToCSLJSON(item);
+			
+			assert.isUndefined(cslJSON.PMID, 'field labels are case-sensitive');
+		});
+	});
 });

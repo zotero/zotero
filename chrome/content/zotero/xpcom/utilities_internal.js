@@ -220,7 +220,6 @@ Zotero.Utilities.Internal = {
 		return s;
 	},
 	
-	
 	/**
 	 * Display a prompt from an error with custom buttons and a callback
 	 */
@@ -367,6 +366,139 @@ Zotero.Utilities.Internal = {
 		while(childWindow.parent !== childWindow) {
 			childWindow = childWindow.parent;
 			if(childWindow === parentWindow) return true;
+		}
+	},
+	
+	/**
+	 * Converts Zotero.Item to a format expected by translators
+	 * This is mostly the Zotero web API item JSON format, but with an attachments
+	 * and notes arrays and optional compatibility mappings for older translators.
+	 * 
+	 * @param {Zotero.Item} zoteroItem
+	 * @param {Boolean} legacy Add mappings for legacy (pre-4.0.27) translators
+	 * @return {Object}
+	 */
+	"itemToExportFormat": new function() {
+		return function(zoteroItem, legacy) {
+			var item = zoteroItem.toJSON();
+			item.uri = Zotero.URI.getItemURI(zoteroItem);
+			delete item.key;
+			
+			if (!zoteroItem.isAttachment() && !zoteroItem.isNote()) {
+				// Include attachments
+				item.attachments = [];
+				let attachments = zoteroItem.getAttachments();
+				for (let i=0; i<attachments.length; i++) {
+					let zoteroAttachment = Zotero.Items.get(attachments[i]),
+						attachment = zoteroAttachment.toJSON();
+					if (legacy) addCompatibilityMappings(attachment, zoteroAttachment);
+					
+					item.attachments.push(attachment);
+				}
+				
+				// Include notes
+				item.notes = [];
+				let notes = zoteroItem.getNotes();
+				for (let i=0; i<notes.length; i++) {
+					let zoteroNote = Zotero.Items.get(notes[i]),
+						note = zoteroNote.toJSON();
+					if (legacy) addCompatibilityMappings(note, zoteroNote);
+					
+					item.notes.push(note);
+				}
+			}
+			
+			if (legacy) addCompatibilityMappings(item, zoteroItem);
+			
+			return item;
+		}
+		
+		function addCompatibilityMappings(item, zoteroItem) {
+			item.uniqueFields = {};
+			
+			// Meaningless local item ID, but some older export translators depend on it
+			item.itemID = zoteroItem.id;
+			item.key = zoteroItem.key; // CSV translator exports this
+			
+			// "version" is expected to be a field for "computerProgram", which is now
+			// called "versionNumber"
+			delete item.version;
+			if (item.versionNumber) {
+				item.version = item.uniqueFields.version = item.versionNumber;
+				delete item.versionNumber;
+			}
+			
+			// SQL instead of ISO-8601
+			item.dateAdded = zoteroItem.dateAdded;
+			item.dateModified = zoteroItem.dateModified;
+			if (item.accessDate) {
+				item.accessDate = zoteroItem.getField('accessDate');
+			}
+			
+			// Map base fields
+			for (let field in item) {
+				let id = Zotero.ItemFields.getID(field);
+				if (!id || !Zotero.ItemFields.isValidForType(id, zoteroItem.itemTypeID)) {
+					 continue;
+				}
+				
+				let baseField = Zotero.ItemFields.getName(
+					Zotero.ItemFields.getBaseIDFromTypeAndField(item.itemType, field)
+				);
+				
+				if (!baseField || baseField == field) {
+					item.uniqueFields[field] = item[field];
+				} else {
+					item[baseField] = item[field];
+					item.uniqueFields[baseField] = item[field];
+				}
+			}
+			
+			// Add various fields for compatibility with translators pre-4.0.27
+			item.itemID = zoteroItem.id;
+			item.libraryID = zoteroItem.libraryID;
+			
+			// Creators
+			if (item.creators) {
+				for (let i=0; i<item.creators.length; i++) {
+					let creator = item.creators[i];
+					
+					if (creator.name) {
+						creator.fieldMode = 1;
+						creator.lastName = creator.name;
+						delete creator.name;
+					}
+					
+					// Old format used to supply creatorID (the database ID), but no
+					// translator ever used it
+				}
+			}
+			
+			if (!zoteroItem.isRegularItem()) {
+				item.sourceItemKey = item.parentItem;
+			}
+			
+			// Tags
+			for (let i=0; i<item.tags.length; i++) {
+				if (!item.tags[i].type) {
+					item.tags[i].type = 0;
+				}
+				// No translator ever used "primary", "fields", or "linkedItems" objects
+			}
+			
+			// "related" was never used (array of itemIDs)
+			
+			// seeAlso was always present, but it was always an empty array.
+			// Zotero RDF translator pretended to use it
+			item.seeAlso = [];
+			
+			// Fix linkMode
+			if (zoteroItem.isAttachment()) {
+				item.linkMode = zoteroItem.attachmentLinkMode;
+				item.mimeType = item.contentType;
+			}
+			
+			return item;
 		}
 	},
 	

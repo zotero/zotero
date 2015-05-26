@@ -1,23 +1,88 @@
-Components.utils.import("resource://gre/modules/FileUtils.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm");
-Components.utils.import("resource://zotero/q.js");
 var EventUtils = Components.utils.import("resource://zotero-unit/EventUtils.jsm");
 
 var ZoteroUnit = Components.classes["@mozilla.org/commandlinehandler/general-startup;1?type=zotero-unit"].
-	             getService(Components.interfaces.nsISupports).
-	             wrappedJSObject;
+                 getService(Components.interfaces.nsISupports).
+                 wrappedJSObject;
+
 var dump = ZoteroUnit.dump;
 
 function quit(failed) {
 	// Quit with exit status
 	if(!failed) {
-		OS.File.writeAtomic(FileUtils.getFile("ProfD", ["success"]).path, Uint8Array(0));
+		OS.File.writeAtomic(OS.Path.join(OS.Constants.Path.profileDir, "success"), new Uint8Array(0));
 	}
 	if(!ZoteroUnit.noquit) {
 		Components.classes['@mozilla.org/toolkit/app-startup;1'].
 		getService(Components.interfaces.nsIAppStartup).
 		quit(Components.interfaces.nsIAppStartup.eForceQuit);
 	}
+}
+
+if (ZoteroUnit.makeTestData) {
+	let dataPath = getTestDataDirectory().path;
+	
+	Zotero.Prefs.set("export.citePaperJournalArticleURL", true);
+	
+	let dataFiles = [
+		{
+			name: 'allTypesAndFields',
+			func: generateAllTypesAndFieldsData
+		},
+		{
+			name: 'itemJSON',
+			func: generateItemJSONData,
+			args: [null]
+		},
+		{
+			name: 'citeProcJSExport',
+			func: generateCiteProcJSExportData
+		},
+		{
+			name: 'translatorExportLegacy',
+			func: generateTranslatorExportData,
+			args: [true]
+		},
+		{
+			name: 'translatorExport',
+			func: generateTranslatorExportData,
+			args: [false]
+		}
+	];
+	let p = Q.resolve();
+	for (let i=0; i<dataFiles.length; i++) {
+		let first = !i;
+		let params = dataFiles[i];
+		
+		p = p.then(function() {
+			// Make sure to not run next loop if previous fails
+			return Q.try(function() {
+				if (!first) dump('\n');
+				dump('Generating data for ' + params.name + '...');
+				
+				let filePath = OS.Path.join(dataPath, params.name + '.js');
+				
+				return Q.resolve(OS.File.exists(filePath))
+				.then(function(exists) {
+					let currentData;
+					if (exists) {
+						currentData = loadSampleData(params.name);
+					}
+					
+					let args = params.args || [];
+					args.push(currentData);
+					let str = stableStringify(params.func.apply(null, args));
+				
+					return OS.File.writeAtomic(OS.Path.join(dataPath, params.name + '.js'), str);
+				});
+			})
+			.then(function() { dump("done."); })
+			.catch(function(e) { dump("failed!"); throw e })
+		});
+	}
+	
+	p.catch(function(e) { dump('\n'); dump(Zotero.Utilities.varDump(e)) })
+	.finally(function() { quit(false) });
 }
 
 function Reporter(runner) {
@@ -40,7 +105,7 @@ function Reporter(runner) {
 	});
 
 	runner.on('pending', function(test){
-		dump(indent()+"pending  -"+test.title);
+		dump("\r"+indent()+"pending  -"+test.title+"\n");
 	});
 
 	runner.on('pass', function(test){
@@ -71,8 +136,8 @@ var assert = chai.assert,
     expect = chai.expect;
 
 // Set up tests to run
-var run = true;
-if(ZoteroUnit.tests) {
+var run = ZoteroUnit.runTests;
+if(run && ZoteroUnit.tests) {
 	var testDirectory = getTestDataDirectory().parent,
 	    testFiles = [];
 	if(ZoteroUnit.tests == "all") {
