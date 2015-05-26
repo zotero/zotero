@@ -145,6 +145,21 @@ Zotero_Preferences.Export = {
 		checkbox.disabled = mode != 'bibliography';
 	},
 	
+	/**
+	 * Disables UI buttons when no site-specific quick copy entries are selected
+	 */
+	disableQuickCopySiteButtons: function () {
+		document.getElementById('quickCopy-edit').disabled = true;
+		document.getElementById('quickCopy-delete').disabled = true;
+	},
+	
+	/**
+	 * Enables UI buttons when a site-specific quick copy entry is selected
+	 */
+	enableQuickCopySiteButtons: function () {
+		document.getElementById('quickCopy-edit').disabled = false;
+		document.getElementById('quickCopy-delete').disabled = false;
+	},
 	
 	showQuickCopySiteEditor: function (index) {
 		var treechildren = document.getElementById('quickCopy-siteSettings-rows');
@@ -212,6 +227,8 @@ Zotero_Preferences.Export = {
 			treeitem.appendChild(treerow);
 			treechildren.appendChild(treeitem);
 		}
+		
+		this.disableQuickCopySiteButtons();
 	},
 	
 	
