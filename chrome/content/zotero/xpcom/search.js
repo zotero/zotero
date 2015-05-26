@@ -2300,7 +2300,6 @@ Zotero.SearchConditions = new function(){
 			return Zotero.getString('searchConditions.' + str)
 		}
 		catch (e) {
-			Zotero.debug("String not found for searchConditions." + str, 2);
 			return Zotero.ItemFields.getLocalizedString(null, str);
 		}
 	}
