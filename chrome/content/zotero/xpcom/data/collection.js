@@ -321,6 +321,10 @@ Zotero.Collection.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
 	
 	if (!env.skipCache) {
 		yield this.reload();
+		// If new, there's no other data we don't have, so we can mark everything as loaded
+		if (env.isNew) {
+			this._markAllDataTypeLoadStates(true);
+		}
 		this._clearChanged();
 	}
 	

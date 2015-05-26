@@ -187,6 +187,10 @@ Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env)
 	if (!env.skipCache) {
 		yield this.loadPrimaryData(true);
 		yield this.reload();
+		// If new, there's no other data we don't have, so we can mark everything as loaded
+		if (env.isNew) {
+			this._markAllDataTypeLoadStates(true);
+		}
 		this._clearChanged();
 	}
 	
