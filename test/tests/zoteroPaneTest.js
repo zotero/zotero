@@ -35,6 +35,16 @@ describe("ZoteroPane", function() {
 		})
 	});
 	
+	describe("#newNote()", function () {
+		it("should create a child note and select it", function* () {
+			var item = yield createDataObject('item');
+			var noteID = yield zp.newNote(false, item.key, "Test");
+			var selected = zp.itemsView.getSelectedItems(true);
+			assert.lengthOf(selected, 1);
+			assert.equal(selected, noteID);
+		})
+	})
+	
 	describe("#itemSelected()", function () {
 		it.skip("should update the item count", function* () {
 			var collection = new Zotero.Collection;

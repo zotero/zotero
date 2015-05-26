@@ -2050,43 +2050,45 @@ var ZoteroPane = new function()
 		var self = this;
 		var deferred = Zotero.Promise.defer();
 		this.collectionsView.addEventListener('load', function () {
-			try {
-				self.addEventListener('itemsLoaded', function () {
-					Zotero.spawn(function* () {
-						var selected = yield self.itemsView.selectItem(itemID, expand);
-						if (!selected) {
-							if (item.deleted) {
-								Zotero.debug("Item is deleted; switching to trash");
-								yield self.collectionsView.selectTrash(item.libraryID);
+			Zotero.spawn(function* () {
+				try {
+					self.addEventListener('itemsLoaded', function () {
+						Zotero.spawn(function* () {
+							var selected = yield self.itemsView.selectItem(itemID, expand);
+							if (!selected) {
+								if (item.deleted) {
+									Zotero.debug("Item is deleted; switching to trash");
+									yield self.collectionsView.selectTrash(item.libraryID);
+								}
+								else {
+									Zotero.debug("Item was not selected; switching to library");
+									yield self.collectionsView.selectLibrary(item.libraryID);
+								}
+								yield self.itemsView.selectItem(itemID, expand);
 							}
-							else {
-								Zotero.debug("Item was not selected; switching to library");
-								yield self.collectionsView.selectLibrary(item.libraryID);
-							}
-							yield self.itemsView.selectItem(itemID, expand);
-						}
-						deferred.resolve(true);
-					})
-					.catch(function(e) {
-						deferred.reject(e);
+							deferred.resolve(true);
+						})
+						.catch(function(e) {
+							deferred.reject(e);
+						});
 					});
-				});
-				
-				var currentLibraryID = self.getSelectedLibraryID();
-				// If in a different library
-				if (item.libraryID != currentLibraryID) {
-					Zotero.debug("Library ID differs; switching library");
-					yield self.collectionsView.selectLibrary(item.libraryID);
+					
+					var currentLibraryID = self.getSelectedLibraryID();
+					// If in a different library
+					if (item.libraryID != currentLibraryID) {
+						Zotero.debug("Library ID differs; switching library");
+						yield self.collectionsView.selectLibrary(item.libraryID);
+					}
+					// Force switch to library view
+					else if (!self.collectionsView.selectedTreeRow.isLibrary() && inLibrary) {
+						Zotero.debug("Told to select in library; switching to library");
+						yield self.collectionsView.selectLibrary(item.libraryID);
+					}
 				}
-				// Force switch to library view
-				else if (!self.collectionsView.selectedTreeRow.isLibrary() && inLibrary) {
-					Zotero.debug("Told to select in library; switching to library");
-					yield self.collectionsView.selectLibrary(item.libraryID);
+				catch (e) {
+					deferred.reject(e);
 				}
-			}
-			catch (e) {
-				deferred.reject(e);
-			}
+			})
 		});
 		
 		// open Zotero pane
@@ -3069,45 +3071,16 @@ var ZoteroPane = new function()
 	}
 	
 	/**
-	 * @return {Promise}
+	 * @return {Promise<Integer|null|false>} - The id of the new note in non-popup mode, null in
+	 *     popup mode (where a note isn't created immediately), or false if library isn't editable
 	 */
 	this.newNote = Zotero.Promise.coroutine(function* (popup, parentKey, text, citeURI) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
-			return;
+			return false;
 		}
 		
-		if (!popup) {
-			if (!text) {
-				text = '';
-			}
-			text = text.trim();
-			
-			if (text) {
-				text = '<blockquote'
-						+ (citeURI ? ' cite="' + citeURI + '"' : '')
-						+ '>' + Zotero.Utilities.text2html(text) + "</blockquote>";
-			}
-			
-			var item = new Zotero.Item('note');
-			item.libraryID = this.getSelectedLibraryID();
-			item.setNote(text);
-			Zotero.debug(parentKey);
-			if (parentKey) {
-				item.parentKey = parentKey;
-			}
-			var itemID = yield item.saveTx();
-			
-			if (!parentKey && this.itemsView && this.collectionsView.selectedTreeRow.isCollection()) {
-				yield this.collectionsView.selectedTreeRow.ref.addItem(itemID);
-			}
-			
-			yield this.selectItem(itemID);
-			
-			document.getElementById('zotero-note-editor').focus();
-		}
-		else
-		{
+		if (popup) {
 			// TODO: _text_
 			var c = this.getSelectedCollection();
 			if (c) {
@@ -3116,7 +3089,37 @@ var ZoteroPane = new function()
 			else {
 				this.openNoteWindow(null, null, parentKey);
 			}
+			return null;
 		}
+		
+		if (!text) {
+			text = '';
+		}
+		text = text.trim();
+		
+		if (text) {
+			text = '<blockquote'
+					+ (citeURI ? ' cite="' + citeURI + '"' : '')
+					+ '>' + Zotero.Utilities.text2html(text) + "</blockquote>";
+		}
+		
+		var item = new Zotero.Item('note');
+		item.libraryID = this.getSelectedLibraryID();
+		item.setNote(text);
+		if (parentKey) {
+			item.parentKey = parentKey;
+		}
+		var itemID = yield item.saveTx();
+		
+		if (!parentKey && this.itemsView && this.collectionsView.selectedTreeRow.isCollection()) {
+			yield this.collectionsView.selectedTreeRow.ref.addItem(itemID);
+		}
+		
+		yield this.selectItem(itemID);
+		
+		document.getElementById('zotero-note-editor').focus();
+		
+		return itemID;
 	});
 	
 	
