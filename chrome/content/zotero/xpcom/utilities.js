@@ -1362,9 +1362,8 @@ Zotero.Utilities = {
 			
 			return header + ': '
 				+ (obj.message ? ('' + obj.message).replace(/^/gm, level_padding).trim() : '')
-				+ '\n' + level_padding + "===== Stack Trace =====\n"
-				+ (obj.stack ? obj.stack.trim().replace(/^(?=.)/gm, level_padding) : '')
-				+ '\n' + level_padding + "=======================";
+				+ '\n\n'
+				+ (obj.stack ? obj.stack.trim().replace(/^(?=.)/gm, level_padding) : '');
 		}
 		
 		// Only dump single level for nsIDOMNode objects (including document)
