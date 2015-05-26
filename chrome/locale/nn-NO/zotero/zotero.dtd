@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Hald på sortering av kjeldene">
 
-<!ENTITY zotero.citation.page "Side">
-<!ENTITY zotero.citation.paragraph "Avsnitt">
-<!ENTITY zotero.citation.line "Linje">
 <!ENTITY zotero.citation.suppressAuthor.label "Utelat forfattar">
 <!ENTITY zotero.citation.prefix.label "Prefiks:">
 <!ENTITY zotero.citation.suffix.label "Suffiks:">

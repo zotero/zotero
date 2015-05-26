@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "以得更多資訊。">
 <!ENTITY zotero.preferences.proxies.transparent "啟用代理伺服器轉導向">
 <!ENTITY zotero.preferences.proxies.autoRecognize "自動識別接受透過代理伺服器的資源">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "停用代理伺服器轉導向，若我的網域名稱含 ">
 <!ENTITY zotero.preferences.proxies.configured "已設定的代理伺服器">
 <!ENTITY zotero.preferences.proxies.hostname "主機名稱">

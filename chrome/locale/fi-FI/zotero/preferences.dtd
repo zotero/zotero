@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "lisätietoja.">
 <!ENTITY zotero.preferences.proxies.transparent "Käytä välityspalvelinta uudelleenohjaukseen">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Tunnista välitetyt resurssit automaattisesti">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Poista käytöstä välitetty uudelleenohjaus, kun palvelinnimessä on">
 <!ENTITY zotero.preferences.proxies.configured "Konfiguroidut välityspalvelimet">
 <!ENTITY zotero.preferences.proxies.hostname "Palvelimen nimi">

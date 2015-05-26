@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "kjer najdete več informacij.">
 <!ENTITY zotero.preferences.proxies.transparent "Omogoči preusmeritev posredovalnih strežnikov">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Samodejno prepoznaj posredovane vire">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Onemogoči preusmerjanje s posredovanjem, če ime moje domene vsebuje">
 <!ENTITY zotero.preferences.proxies.configured "Nastavljeni posredovalni strežniki">
 <!ENTITY zotero.preferences.proxies.hostname "Ime gostitelja">

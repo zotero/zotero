@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "សម្រាប់ព័ត៌មានបន្ថែម។">
 <!ENTITY zotero.preferences.proxies.transparent "អាចប្តូរទិសសិទ្ធិប្រទាន">
 <!ENTITY zotero.preferences.proxies.autoRecognize "ប្រភពសិទ្ធិប្រទានដែលទទួលស្គាល់ដោយស្វ័យប្រវត្តិ">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "សិទ្ធិប្រទានមិនអាចប្តូរទិសបាន កាលណាឈ្មោះដែនរបស់ខ្ញុំមាននៅក្នុង">
 <!ENTITY zotero.preferences.proxies.configured "សិទ្ធិប្រទានដែលបានកំណត់រចនាសម្ព័ន្ធ">
 <!ENTITY zotero.preferences.proxies.hostname "ឈ្មោះម៉ាស៊ីន">

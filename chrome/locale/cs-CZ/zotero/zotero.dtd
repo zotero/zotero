@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Ponechat zdroje seřazené">
 
-<!ENTITY zotero.citation.page "Stránka">
-<!ENTITY zotero.citation.paragraph "Odstavec">
-<!ENTITY zotero.citation.line "Řádek">
 <!ENTITY zotero.citation.suppressAuthor.label "Potlačit autora">
 <!ENTITY zotero.citation.prefix.label "Předpona:">
 <!ENTITY zotero.citation.suffix.label "Přípona:">

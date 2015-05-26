@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "สำหรับข้อมูลเพิ่มเติม">
 <!ENTITY zotero.preferences.proxies.transparent "เปิดการเปลี่ยนทิศทางพร็อกซี่">
 <!ENTITY zotero.preferences.proxies.autoRecognize "จดจำพร็อกซี่โดยอัตโนมัติ">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "เลิกใช้การเปลี่ยนทิศทางพร็อกซี่เมื่อชื่อโดเมนมีคำว่า">
 <!ENTITY zotero.preferences.proxies.configured "ติดตั้งค่าพร็อกซี่">
 <!ENTITY zotero.preferences.proxies.hostname "ชื่อแม่ข่าย">

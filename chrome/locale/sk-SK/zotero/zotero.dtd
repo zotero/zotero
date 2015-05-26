@@ -126,8 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Prvé Veľké">
 <!ENTITY zotero.item.textTransform.sentencecase "Prvé veľké písmeno vo vete">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Vymeniť meno/priezvisko">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.viewOnline "Zobraziť online">
+<!ENTITY zotero.item.copyAsURL "Kopírovať ako URL">
 
 <!ENTITY zotero.toolbar.newNote "Nová poznámka">
 <!ENTITY zotero.toolbar.note.standalone "Nová samostatná poznámka">
@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Zachovať zoradenie zdrojov">
 
-<!ENTITY zotero.citation.page "Strana">
-<!ENTITY zotero.citation.paragraph "Odstavec">
-<!ENTITY zotero.citation.line "Riadok">
 <!ENTITY zotero.citation.suppressAuthor.label "Vynechaj autora">
 <!ENTITY zotero.citation.prefix.label "Predpona:">
 <!ENTITY zotero.citation.suffix.label "Prípona:">

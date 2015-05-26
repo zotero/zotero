@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link " 获取更多的信息.">
 <!ENTITY zotero.preferences.proxies.transparent "启用代理转接">
 <!ENTITY zotero.preferences.proxies.autoRecognize "自动识别代理的资源">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "禁用代理转接, 当域名包含">
 <!ENTITY zotero.preferences.proxies.configured "已设置的代理">
 <!ENTITY zotero.preferences.proxies.hostname "域名">

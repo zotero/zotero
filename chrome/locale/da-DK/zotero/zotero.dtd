@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Sorter kilder">
 
-<!ENTITY zotero.citation.page "Side">
-<!ENTITY zotero.citation.paragraph "Afsnit">
-<!ENTITY zotero.citation.line "Linie">
 <!ENTITY zotero.citation.suppressAuthor.label "Undertryk forfatter/ophav">
 <!ENTITY zotero.citation.prefix.label "Præfiks:">
 <!ENTITY zotero.citation.suffix.label "Suffiks:">

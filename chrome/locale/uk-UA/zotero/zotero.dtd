@@ -126,8 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Кожне Слово з Заголовної Букви">
 <!ENTITY zotero.item.textTransform.sentencecase "Як у реченні">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Поміняти місцями ім'я та прізвище">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.viewOnline "Дивитись онлайн">
+<!ENTITY zotero.item.copyAsURL "Копіювати у вигляді URL">
 
 <!ENTITY zotero.toolbar.newNote "Нова примітка">
 <!ENTITY zotero.toolbar.note.standalone "Нова окрема примітка">
@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Підтримувати джерела відсортованими">
 
-<!ENTITY zotero.citation.page "Сторінка">
-<!ENTITY zotero.citation.paragraph "Параграф">
-<!ENTITY zotero.citation.line "Рядок">
 <!ENTITY zotero.citation.suppressAuthor.label "Прибрати автора">
 <!ENTITY zotero.citation.prefix.label "Префікс">
 <!ENTITY zotero.citation.suffix.label "Суфікс">

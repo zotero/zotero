@@ -126,8 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Initiales En Majuscules">
 <!ENTITY zotero.item.textTransform.sentencecase "Lettre capitale en début de phrase">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Inverser prénom/nom">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.viewOnline "Afficher en ligne">
+<!ENTITY zotero.item.copyAsURL "Copier comme un lien">
 
 <!ENTITY zotero.toolbar.newNote "Nouvelle note">
 <!ENTITY zotero.toolbar.note.standalone "Nouvelle note indépendante">
@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Conserver les sources en ordre alphabétique">
 
-<!ENTITY zotero.citation.page "Page">
-<!ENTITY zotero.citation.paragraph "Paragraphe">
-<!ENTITY zotero.citation.line "Ligne">
 <!ENTITY zotero.citation.suppressAuthor.label "Supprimer l'auteur">
 <!ENTITY zotero.citation.prefix.label "Préfixe :">
 <!ENTITY zotero.citation.suffix.label "Suffixe :">

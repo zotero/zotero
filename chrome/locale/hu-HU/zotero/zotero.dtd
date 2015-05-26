@@ -7,7 +7,7 @@
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Mégse">
 <!ENTITY zotero.general.refresh "Refresh">
-<!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.saveAs "Mentés másként…">
 
 <!ENTITY zotero.errorReport.title "Zotero hibajelentés">
 <!ENTITY zotero.errorReport.unrelatedMessages "Tartalmazhat a Zotero-tól független üzeneteket.">
@@ -127,7 +127,7 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Mondatkezdő">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
 <!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.copyAsURL "Másolás URL-ként">
 
 <!ENTITY zotero.toolbar.newNote "Új jegyzet">
 <!ENTITY zotero.toolbar.note.standalone "Új önálló jegyzet">
@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Források sorbarendezése">
 
-<!ENTITY zotero.citation.page "Oldal">
-<!ENTITY zotero.citation.paragraph "Bekezdés">
-<!ENTITY zotero.citation.line "Sor">
 <!ENTITY zotero.citation.suppressAuthor.label "Szerző figyelmen kívül hagyása">
 <!ENTITY zotero.citation.prefix.label "Előtag:">
 <!ENTITY zotero.citation.suffix.label "Utótag:">

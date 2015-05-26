@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "aby uzyskać więcej informacji.">
 <!ENTITY zotero.preferences.proxies.transparent "Niewidocznie przekierowuj żądania za pomocą poprzednio używanych serwerów proxy">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Automatycznie rozpoznaj zasoby proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Wyłącz przekierowanie proxy jeśli moja nazwa domeny zawiera ">
 <!ENTITY zotero.preferences.proxies.configured "Skonfigurowane serwery proxy">
 <!ENTITY zotero.preferences.proxies.hostname "Nazwa hosta">

@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Giữ thứ tự sắp xếp của các Tài liệu nguồn">
 
-<!ENTITY zotero.citation.page "Trang">
-<!ENTITY zotero.citation.paragraph "Đoạn văn">
-<!ENTITY zotero.citation.line "Dòng">
 <!ENTITY zotero.citation.suppressAuthor.label "Bỏ tên Tác giả">
 <!ENTITY zotero.citation.prefix.label "Tiền tố:">
 <!ENTITY zotero.citation.suffix.label "Hậu tố">

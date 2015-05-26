@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "원본 정렬 유지">
 
-<!ENTITY zotero.citation.page "페이지">
-<!ENTITY zotero.citation.paragraph "단락">
-<!ENTITY zotero.citation.line "행">
 <!ENTITY zotero.citation.suppressAuthor.label "저자 숨기기">
 <!ENTITY zotero.citation.prefix.label "접두사:">
 <!ENTITY zotero.citation.suffix.label "접미사:">

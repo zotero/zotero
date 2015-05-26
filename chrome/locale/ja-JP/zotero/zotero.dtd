@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "参考文献の順序を維持">
 
-<!ENTITY zotero.citation.page "ページ">
-<!ENTITY zotero.citation.paragraph "段落">
-<!ENTITY zotero.citation.line "行">
 <!ENTITY zotero.citation.suppressAuthor.label "著者名の非表示">
 <!ENTITY zotero.citation.prefix.label "接頭辞:">
 <!ENTITY zotero.citation.suffix.label "接尾辞:">

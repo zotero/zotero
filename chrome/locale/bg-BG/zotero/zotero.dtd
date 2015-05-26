@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Запазва подредбата на източниците">
 
-<!ENTITY zotero.citation.page "Страница">
-<!ENTITY zotero.citation.paragraph "Параграф">
-<!ENTITY zotero.citation.line "Ред">
 <!ENTITY zotero.citation.suppressAuthor.label "Скрива автора">
 <!ENTITY zotero.citation.prefix.label "Представка:">
 <!ENTITY zotero.citation.suffix.label "Надставка:">

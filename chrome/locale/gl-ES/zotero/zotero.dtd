@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Manter as fontes ordenadas">
 
-<!ENTITY zotero.citation.page "Páxina">
-<!ENTITY zotero.citation.paragraph "Parágrafo">
-<!ENTITY zotero.citation.line "Liña">
 <!ENTITY zotero.citation.suppressAuthor.label "Eliminar o autor">
 <!ENTITY zotero.citation.prefix.label "Prefixo:">
 <!ENTITY zotero.citation.suffix.label "Sufixo:">

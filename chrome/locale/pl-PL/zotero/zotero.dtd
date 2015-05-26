@@ -126,8 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Kapitaliki">
 <!ENTITY zotero.item.textTransform.sentencecase "Jak w zdaniu">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Zamień imię i nazwisko">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.viewOnline "Pokaż online">
+<!ENTITY zotero.item.copyAsURL "Kopiuj jako URL">
 
 <!ENTITY zotero.toolbar.newNote "Nowa notatka">
 <!ENTITY zotero.toolbar.note.standalone "Nowa osobna notatka">
@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Zachowuj źródło posortowane">
 
-<!ENTITY zotero.citation.page "Strona">
-<!ENTITY zotero.citation.paragraph "Rozdział">
-<!ENTITY zotero.citation.line "Wiersz">
 <!ENTITY zotero.citation.suppressAuthor.label "Ukryj autora">
 <!ENTITY zotero.citation.prefix.label "Prefiks:">
 <!ENTITY zotero.citation.suffix.label "Sufiks:">

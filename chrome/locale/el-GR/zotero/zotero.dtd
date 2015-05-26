@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Διατήρηση της ταξινόμησης των πηγών">
 
-<!ENTITY zotero.citation.page "Σελίδα">
-<!ENTITY zotero.citation.paragraph "Παράγραφος">
-<!ENTITY zotero.citation.line "Γραμμή">
 <!ENTITY zotero.citation.suppressAuthor.label "Σύμπτυξη συγγραφέα">
 <!ENTITY zotero.citation.prefix.label "Πρόθεμα:">
 <!ENTITY zotero.citation.suffix.label "Επίθημα:">

@@ -126,8 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Başlık Biçimi">
 <!ENTITY zotero.item.textTransform.sentencecase "Cümle Biçimi">
 <!ENTITY zotero.item.creatorTransform.nameSwap "İlk ve Soyadları Takas Et">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.viewOnline "Çevrimiçi Göster">
+<!ENTITY zotero.item.copyAsURL "URL'i Kopyala">
 
 <!ENTITY zotero.toolbar.newNote "Yeni Not">
 <!ENTITY zotero.toolbar.note.standalone "Yeni Bağımsız Not">
@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Kaynakları Sıralı Tut">
 
-<!ENTITY zotero.citation.page "Sayfa">
-<!ENTITY zotero.citation.paragraph "Paragraf">
-<!ENTITY zotero.citation.line "Satır">
 <!ENTITY zotero.citation.suppressAuthor.label "Yazarı Sakla">
 <!ENTITY zotero.citation.prefix.label "Önek:">
 <!ENTITY zotero.citation.suffix.label "Sonek:">

@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Obdrži vire razvrščene">
 
-<!ENTITY zotero.citation.page "Stran">
-<!ENTITY zotero.citation.paragraph "Odstavek">
-<!ENTITY zotero.citation.line "Vrstica">
 <!ENTITY zotero.citation.suppressAuthor.label "Prikrij avtorja">
 <!ENTITY zotero.citation.prefix.label "Predpona:">
 <!ENTITY zotero.citation.suffix.label "Pripona:">

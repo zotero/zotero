@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Поддерживать источники отсортированными">
 
-<!ENTITY zotero.citation.page "Страница">
-<!ENTITY zotero.citation.paragraph "Параграф">
-<!ENTITY zotero.citation.line "Строка">
 <!ENTITY zotero.citation.suppressAuthor.label "Убрать автора">
 <!ENTITY zotero.citation.prefix.label "Префикс:">
 <!ENTITY zotero.citation.suffix.label "Суффикс:">

@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Bronnen gesorteerd houden">
 
-<!ENTITY zotero.citation.page "Pagina">
-<!ENTITY zotero.citation.paragraph "Paragraaf">
-<!ENTITY zotero.citation.line "Regel">
 <!ENTITY zotero.citation.suppressAuthor.label "Auteur weglaten">
 <!ENTITY zotero.citation.prefix.label "Voorvoegsel:">
 <!ENTITY zotero.citation.suffix.label "Achtervoegsel:">
