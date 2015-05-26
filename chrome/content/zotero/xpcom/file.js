@@ -377,7 +377,8 @@ Zotero.File = new function(){
 	
 	
 	this.download = Zotero.Promise.coroutine(function* (uri, path) {
-		var msg = "Saving " + (uri.spec ? uri.spec : uri) + " to " + (path.path ? path.path : path);
+		Zotero.debug("Saving " + (uri.spec ? uri.spec : uri)
+			+ " to " + (path.path ? path.path : path));			
 		
 		var deferred = Zotero.Promise.defer();
 		NetUtil.asyncFetch(uri, function (is, status, request) {

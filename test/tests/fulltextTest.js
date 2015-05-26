@@ -11,7 +11,7 @@ describe("Zotero.Fulltext", function () {
 		it("should install the PDF tools", function* () {
 			var version = "3.04";
 			var dataDir = Zotero.getZoteroDirectory().path;
-			var execFileName = 'pdfinfo-' + Zotero.platform;
+			var execFileName = Zotero.Fulltext.pdfInfoFileName;
 			var execContents = new Array(50001).join('a');
 			var execPath = OS.Path.join(dataDir, execFileName);
 			var versionFileName = execFileName + '.version';
