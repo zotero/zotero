@@ -72,7 +72,8 @@ Zotero_Preferences.Proxies = {
 	showProxyEditor: function (index) {
 		if(index == -1) return;
 		window.openDialog('chrome://zotero/content/preferences/proxyEditor.xul',
-			"zotero-preferences-proxyEditor", "chrome, modal", index !== undefined ? this._proxies[index] : null);
+			"zotero-preferences-proxyEditor", "chrome,modal,centerscreen",
+			index !== undefined ? this._proxies[index] : null);
 		this.refreshProxyList();
 	},
 	

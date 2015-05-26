@@ -177,7 +177,8 @@ Zotero_Preferences.Export = {
 		}
 		
 		var io = {domain: domain, format: format, ok: false};
-		window.openDialog('chrome://zotero/content/preferences/quickCopySiteEditor.xul', "zotero-preferences-quickCopySiteEditor", "chrome, modal", io);
+		window.openDialog('chrome://zotero/content/preferences/quickCopySiteEditor.xul',
+			"zotero-preferences-quickCopySiteEditor", "chrome,modal,centerscreen", io);
 		
 		if (!io.ok) {
 			return;
