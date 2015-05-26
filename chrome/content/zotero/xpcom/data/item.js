@@ -3327,11 +3327,6 @@ Zotero.Item.prototype.addTag = function (name, type) {
 }
 
 
-Zotero.Item.prototype.addTags = function (tags) {
-	throw new Error("Unimplemented");
-}
-
-
 /**
  * Replace an existing tag with a new manual tag
  *
