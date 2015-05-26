@@ -1844,6 +1844,9 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			let items = yield Zotero.Items.getAsync(ids);
 			let io = yield this._treebox.treeBody.ownerDocument.defaultView.ZoteroPane
 				.showPublicationsWizard(items);
+			if (!io) {
+				return;
+			}
 			copyOptions.childNotes = io.includeNotes;
 			copyOptions.childFileAttachments = io.includeFiles;
 			copyOptions.childLinks = true;
