@@ -132,7 +132,7 @@
 							if (!this._scope[tag.tag]) {
 								this._scope[tag.tag] = [];
 							}
-							this._scope[tag.tag].push(tag.type);
+							this._scope[tag.tag].push(tag.type || 0);
 						}
 					}
 					else {
@@ -174,7 +174,11 @@
 				<![CDATA[
 					this._initialized = true;
 					this.selection = {};
-					this._notifierID = Zotero.Notifier.registerObserver(this, ['collection-item', 'item-tag', 'tag', 'setting'], 'tagSelector');
+					this._notifierID = Zotero.Notifier.registerObserver(
+						this,
+						['collection-item', 'item', 'item-tag', 'tag', 'setting'],
+						'tagSelector'
+					);
 				]]>
 				</body>
 			</method>
@@ -455,9 +459,29 @@
 						this.id('no-tags-deck').selectedIndex = 1;
 						
 						Zotero.debug("Loaded tag selector in " + (new Date - t) + " ms");
+						
+						var event = new Event('refresh');
+						this.dispatchEvent(event);
 					}, this);
 				]]>
 				</body>
+			</method>
+			
+			
+			<method name="getVisible">
+				<body><![CDATA[
+					var tagsBox = this.id('tags-toggle');
+					var labels = tagsBox.getElementsByTagName('label');
+					var visible = [];
+					for (let i = 0; i < labels.length; i++){
+						let label = labels[i];
+						if (label.getAttribute('hidden') != 'true'
+								 && label.getAttribute('inScope') == 'true') {
+							visible.push(label.value);
+						}
+					}
+					return visible;
+				]]></body>
 			</method>
 			
 			
@@ -522,10 +546,15 @@
 							}
 						}
 						
+						// Ignore item events other than 'trash'
+						if (type == 'item' && event != 'trash') {
+							return;
+						}
+						
 						var selectionChanged = false;
 						
 						// If a selected tag no longer exists, deselect it
-						if (event == 'delete' || event == 'modify') {
+						if (event == 'delete' || event == 'trash' || event == 'modify') {
 							// TODO: necessary, or just use notifier value?
 							this._tags = yield Zotero.Tags.getAll(this.libraryID, this._types);
 							

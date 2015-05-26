@@ -3,7 +3,6 @@
 describe("Zotero.CollectionTreeView", function() {
 	var win, collectionsView;
 	
-	// Load Zotero pane and select library
 	before(function* () {
 		win = yield loadZoteroPane();
 		collectionsView = win.ZoteroPane.collectionsView;
@@ -140,13 +139,13 @@ describe("Zotero.CollectionTreeView", function() {
 			var collection = new Zotero.Collection;
 			collection.name = "Test";
 			var collectionID = yield collection.saveTx();
-			var cv = win.ZoteroPane.collectionsView;
 			
 			var search = new Zotero.Search;
 			search.name = "A Test Search";
 			search.addCondition('title', 'contains', 'test');
 			var searchID = yield search.saveTx();
 			
+			var cv = win.ZoteroPane.collectionsView;
 			var collectionRow = cv._rowMap["C" + collectionID];
 			var searchRow = cv._rowMap["S" + searchID];
 			var duplicatesRow = cv._rowMap["D" + Zotero.Libraries.userLibraryID];

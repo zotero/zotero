@@ -53,7 +53,8 @@ Zotero.CollectionTreeView = function()
 			'trash',
 			'bucket'
 		],
-		'collectionTreeView'
+		'collectionTreeView',
+		25
 	);
 	this._containerState = {};
 	this._duplicateLibraries = [];
@@ -2091,7 +2092,7 @@ Zotero.CollectionTreeCache = {
 	"lastSearch":null,
 	"lastResults":null,
 	
-	"clear": Zotero.Promise.coroutine(function* () {
+	"clear": function () {
 		this.lastTreeRow = null;
 		this.lastSearch = null;
 		if(this.lastTempTable) {
@@ -2102,7 +2103,7 @@ Zotero.CollectionTreeCache = {
 		}
 		this.lastTempTable = null;
 		this.lastResults = null;
-	})
+	}
 };
 
 Zotero.CollectionTreeRow = function(type, ref, level, isOpen)
@@ -2306,8 +2307,8 @@ Zotero.CollectionTreeRow.prototype.getItems = Zotero.Promise.coroutine(function*
 });
 
 Zotero.CollectionTreeRow.prototype.getSearchResults = Zotero.Promise.coroutine(function* (asTempTable) {
-	if(Zotero.CollectionTreeCache.lastTreeRow !== this) {
-		yield Zotero.CollectionTreeCache.clear();
+	if (Zotero.CollectionTreeCache.lastTreeRow && Zotero.CollectionTreeCache.lastTreeRow !== this) {
+		Zotero.CollectionTreeCache.clear();
 	}
 	
 	if(!Zotero.CollectionTreeCache.lastResults) {
@@ -2332,7 +2333,7 @@ Zotero.CollectionTreeRow.prototype.getSearchResults = Zotero.Promise.coroutine(f
  */
 Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(function* () {
 	if(Zotero.CollectionTreeCache.lastTreeRow !== this) {
-		yield Zotero.CollectionTreeCache.clear();
+		Zotero.CollectionTreeCache.clear();
 	}
 	
 	if(Zotero.CollectionTreeCache.lastSearch) {
@@ -2417,15 +2418,15 @@ Zotero.CollectionTreeRow.prototype.getChildTags = Zotero.Promise.coroutine(funct
 });
 
 
-Zotero.CollectionTreeRow.prototype.setSearch = Zotero.Promise.coroutine(function* (searchText) {
-	yield Zotero.CollectionTreeCache.clear();
+Zotero.CollectionTreeRow.prototype.setSearch = function (searchText) {
+	Zotero.CollectionTreeCache.clear();
 	this.searchText = searchText;
-});
+}
 
-Zotero.CollectionTreeRow.prototype.setTags = Zotero.Promise.coroutine(function* (tags) {
-	yield Zotero.CollectionTreeCache.clear();
+Zotero.CollectionTreeRow.prototype.setTags = function (tags) {
+	Zotero.CollectionTreeCache.clear();
 	this.tags = tags;
-});
+}
 
 /*
  * Returns TRUE if saved search, quicksearch or tag filter

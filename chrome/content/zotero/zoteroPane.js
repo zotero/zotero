@@ -1128,8 +1128,8 @@ var ZoteroPane = new function()
 				});
 				if (deferred.promise.isPending()) {
 					Zotero.debug("Waiting for items view " + this.itemsView.id + " to finish loading");
+					yield deferred.promise;
 				}
-				yield deferred.promise;
 				
 				this.itemsView.unregister();
 				document.getElementById('zotero-items-tree').view = this.itemsView = null;

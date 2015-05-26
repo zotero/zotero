@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+"use strict";
+
 Zotero.Notifier = new function(){
 	var _observers = {};
 	var _disabled = false;
@@ -35,9 +37,6 @@ Zotero.Notifier = new function(){
 	var _locked = false;
 	var _queue = [];
 	
-	this.registerObserver = registerObserver;
-	this.unregisterObserver = unregisterObserver;
-	this.untrigger = untrigger;
 	this.begin = begin;
 	this.reset = reset;
 	this.disable = disable;
@@ -45,13 +44,13 @@ Zotero.Notifier = new function(){
 	this.isEnabled = isEnabled;
 	
 	
-	function registerObserver(ref, types, id) {
+	this.registerObserver = function (ref, types, id, priority) {
 		if (types){
 			types = Zotero.flattenArguments(types);
 			
 			for (var i=0; i<types.length; i++){
 				if (_types.indexOf(types[i]) == -1){
-					throw new Error('Invalid type ' + types[i] + ' in registerObserver()');
+					throw new Error("Invalid type '" + types[i] + "'");
 				}
 			}
 		}
@@ -70,16 +69,23 @@ Zotero.Notifier = new function(){
 		}
 		while (_observers[hash]);
 		
-		Zotero.debug('Registering observer for '
-			+ (types ? '[' + types.join() + ']' : 'all types')
-			+ ' in notifier with hash ' + hash + "'", 4);
-		_observers[hash] = {ref: ref, types: types};
+		var msg = "Registering observer '" + hash + "' for "
+			+ (types ? '[' + types.join() + ']' : 'all types');
+		if (priority) {
+			msg += " with priority " + priority;
+		}
+		Zotero.debug(msg);
+		_observers[hash] = {
+			ref: ref,
+			types: types,
+			priority: priority || false
+		};
 		return hash;
 	}
 	
-	function unregisterObserver(hash){
-		Zotero.debug("Unregistering observer in notifier with hash '" + hash + "'", 4);
-		delete _observers[hash];
+	this.unregisterObserver = function (id) {
+		Zotero.debug("Unregistering observer in notifier with id '" + id + "'", 4);
+		delete _observers[id];
 	}
 	
 	/**
@@ -116,7 +122,7 @@ Zotero.Notifier = new function(){
 		Zotero.debug("Notifier.trigger('" + event + "', '" + type + "', " + '[' + ids.join() + '], ' + extraData + ')'
 			+ (queue ? " queued" : " called " + "[observers: " + Object.keys(_observers).length + "]"));
 		if (extraData) {
-			Zotero.debug("EXTRA DATA:");
+			Zotero.debug("Extra data:");
 			Zotero.debug(extraData);
 		}
 		
@@ -138,7 +144,6 @@ Zotero.Notifier = new function(){
 			
 			// Merge extraData keys
 			if (extraData) {
-				Zotero.debug("ADDING EXTRA DATA");
 				// If just a single id, extra data can be keyed by id or passed directly
 				if (ids.length == 1) {
 					let id = ids[0];
@@ -159,25 +164,24 @@ Zotero.Notifier = new function(){
 			return true;
 		}
 		
-		for (var i in _observers){
-			Zotero.debug("Calling notify() with " + event + "/" + type + " on observer with hash '" + i + "'", 4);
+		var order = _getObserverOrder(type);
+		for (let id of order) {
+			Zotero.debug("Calling notify() with " + event + "/" + type
+				+ " on observer with id '" + id + "'", 4);
 			
-			if (!_observers[i]) {
+			if (!_observers[id]) {
 				Zotero.debug("Observer no longer exists");
 				continue;
 			}
 			
-			// Find observers that handle notifications for this type (or all types)
-			if (!_observers[i].types || _observers[i].types.indexOf(type)!=-1){
-				// Catch exceptions so all observers get notified even if
-				// one throws an error
-				try {
-					yield Zotero.Promise.resolve(_observers[i].ref.notify(event, type, ids, extraData));
-				}
-				catch (e) {
-					Zotero.debug(e);
-					Components.utils.reportError(e);
-				}
+			// Catch exceptions so all observers get notified even if
+			// one throws an error
+			try {
+				yield Zotero.Promise.resolve(_observers[id].ref.notify(event, type, ids, extraData));
+			}
+			catch (e) {
+				Zotero.debug(e);
+				Components.utils.reportError(e);
 			}
 		}
 		
@@ -185,7 +189,33 @@ Zotero.Notifier = new function(){
 	});
 	
 	
-	function untrigger(event, type, ids) {
+	/**
+	 * Get order of observer by priority, with lower numbers having higher priority.
+	 * If an observer doesn't have a priority, sort it last.
+	 */
+	function _getObserverOrder(type) {
+		var order = [];
+		for (let i in _observers) {
+			// Skip observers that don't handle notifications for this type (or all types)
+			if (_observers[i].types && _observers[i].types.indexOf(type) == -1) {
+				continue;
+			}
+			order.push({
+				id: i,
+				priority: _observers[i].priority || false
+			});
+		}
+		order.sort((a, b) => {
+			if (a.priority === false && b.priority === false) return 0;
+			if (a.priority === false) return 1;
+			if (b.priority === false) return -1;
+			return a.priority - b.priority;
+		});
+		return order.map(o => o.id);
+	}
+	
+	
+	this.untrigger = function (event, type, ids) {
 		if (!_inTransaction) {
 			throw ("Zotero.Notifier.untrigger() called with no active event queue")
 		}

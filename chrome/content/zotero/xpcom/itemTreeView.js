@@ -54,7 +54,10 @@ Zotero.ItemTreeView = function (collectionTreeRow, sourcesOnly) {
 	this._refreshPromise = Zotero.Promise.resolve();
 	
 	this._unregisterID = Zotero.Notifier.registerObserver(
-		this, ['item', 'collection-item', 'item-tag', 'share-items', 'bucket'], 'itemTreeView'
+		this,
+		['item', 'collection-item', 'item-tag', 'share-items', 'bucket'],
+		'itemTreeView',
+		50
 	);
 }
 
@@ -277,7 +280,7 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.serial(Zotero.Promise.coroutine(f
  *  (doesn't call the tree.invalidate methods, etc.)
  */
 Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(function* () {
-	Zotero.debug('Refreshing items list');
+	Zotero.debug('Refreshing items list for ' + this.id);
 	//if(!Zotero.ItemTreeView._haveCachedFields) yield Zotero.Promise.resolve();
 	
 	var cacheFields = ['title', 'date'];
@@ -455,6 +458,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	var collectionTreeRow = this.collectionTreeRow;
 	
 	var madeChanges = false;
+	var refreshed = false;
 	var sort = false;
 	
 	var savedSelection = this.getSelectedItems(true);
@@ -495,16 +499,19 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		if (type == 'share-items') {
 			if (collectionTreeRow.isShare()) {
 				yield this.refresh();
+				refreshed = true;
 			}
 		}
 		else if (type == 'bucket') {
 			if (collectionTreeRow.isBucket()) {
 				yield this.refresh();
+				refreshed = true;
 			}
 		}
 		else if (type == 'publications') {
 			if (collectionTreeRow.isPublications()) {
 				yield this.refresh();
+				refreshed = true;
 			}
 		}
 		// If refreshing a single item, clear caches and then unselect and reselect row
@@ -567,6 +574,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		if (collectionTreeRow.isDuplicates()) {
 			previousRow = this._rowMap[ids[0]];
 			yield this.refresh();
+			refreshed = true;
 			madeChanges = true;
 			sort = true;
 		}
@@ -630,6 +638,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		if (collectionTreeRow.isTrash() || collectionTreeRow.isSearch())
 		{
 			yield this.refresh();
+			refreshed = true;
 			madeChanges = true;
 			sort = true;
 		}
@@ -741,6 +750,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		// In some modes, just re-run search
 		if (collectionTreeRow.isSearch() || collectionTreeRow.isTrash() || collectionTreeRow.isUnfiled()) {
 			yield this.refresh();
+			refreshed = true;
 			madeChanges = true;
 			sort = true;
 		}
@@ -792,6 +802,11 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	
 	if(madeChanges)
 	{
+		// If we made individual changes, we have to clear the cache
+		if (!refreshed) {
+			Zotero.CollectionTreeCache.clear();
+		}
+		
 		var singleSelect = false;
 		// If adding a single top-level item and this is the active window, select it
 		if (action == 'add' && activeWindow) {
@@ -1819,7 +1834,6 @@ Zotero.ItemTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(functio
 			ids.push(this.getRow(j).id);
 	}
 	
-	Zotero.CollectionTreeCache.clear();
 	var collectionTreeRow = this.collectionTreeRow;
 	
 	if (collectionTreeRow.isBucket()) {
@@ -1867,8 +1881,6 @@ Zotero.ItemTreeView.prototype.setFilter = Zotero.Promise.coroutine(function* (ty
 	
 	//this._treebox.endUpdateBatch();
 	this.selection.selectEventsSuppressed = false;
-	
-	yield this._runListeners('load');
 });
 
 
