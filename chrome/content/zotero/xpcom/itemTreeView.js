@@ -363,9 +363,6 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 			}
 			// Add top-level items
 			else {
-				yield item.loadItemData();
-				yield item.loadCollections();
-				
 				this._addRowToArray(
 					newRows,
 					new Zotero.ItemTreeRow(item, 0, false),
