@@ -98,8 +98,6 @@ Zotero.Collection.prototype.getName = function() {
  * Populate collection data from a database row
  */
 Zotero.Collection.prototype.loadFromRow = function(row) {
-	Zotero.debug("Loading collection from row");
-	
 	for each(let col in this.ObjectsClass.primaryFields) {
 		if (row[col] === undefined) {
 			Zotero.debug('Skipping missing collection field ' + col);
