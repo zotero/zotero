@@ -126,8 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Engelsk Titelskrivning">
 <!ENTITY zotero.item.textTransform.sentencecase "Vanlig versalisering">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Skifta för-/efternamn">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.viewOnline "Visa online">
+<!ENTITY zotero.item.copyAsURL "Kopiera som URL">
 
 <!ENTITY zotero.toolbar.newNote "Ny anteckning">
 <!ENTITY zotero.toolbar.note.standalone "Ny fristående anteckning">
@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Håll källor sorterade">
 
-<!ENTITY zotero.citation.page "Sida">
-<!ENTITY zotero.citation.paragraph "Stycke">
-<!ENTITY zotero.citation.line "Rad">
 <!ENTITY zotero.citation.suppressAuthor.label "Dölj författare">
 <!ENTITY zotero.citation.prefix.label "Prefix:">
 <!ENTITY zotero.citation.suffix.label "Suffix:">

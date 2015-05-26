@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Hoida allikad sorteeritud">
 
-<!ENTITY zotero.citation.page "Lehekülg">
-<!ENTITY zotero.citation.paragraph "Paragrahv">
-<!ENTITY zotero.citation.line "Rida">
 <!ENTITY zotero.citation.suppressAuthor.label "Peida autor">
 <!ENTITY zotero.citation.prefix.label "Prefiks:">
 <!ENTITY zotero.citation.suffix.label "Sufiks:">

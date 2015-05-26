@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "คงการจัดเรียงแหล่งที่มา">
 
-<!ENTITY zotero.citation.page "หน้า">
-<!ENTITY zotero.citation.paragraph "ย่อหน้า">
-<!ENTITY zotero.citation.line "เส้น">
 <!ENTITY zotero.citation.suppressAuthor.label "ละผู้แต่ง">
 <!ENTITY zotero.citation.prefix.label "เติมหน้า:">
 <!ENTITY zotero.citation.suffix.label "เติมท้าย:">

@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link ".">
 <!ENTITY zotero.preferences.proxies.transparent "Automaticky přesměrovávat požadavky skrz dříve použité proxy servery.">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Automaticky rozpoznávat proxované zdroje">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Vypnout proxy přesměrování, pokud má doména obsahuje ">
 <!ENTITY zotero.preferences.proxies.configured "Nastavené proxy servery">
 <!ENTITY zotero.preferences.proxies.hostname "Hostname">

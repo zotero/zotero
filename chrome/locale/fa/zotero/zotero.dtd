@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "مرتب نگه داشتن منابع">
 
-<!ENTITY zotero.citation.page "صفحه">
-<!ENTITY zotero.citation.paragraph "پاراگراف">
-<!ENTITY zotero.citation.line "خط">
 <!ENTITY zotero.citation.suppressAuthor.label "حذف نام نویسنده">
 <!ENTITY zotero.citation.prefix.label "پیشوند:">
 <!ENTITY zotero.citation.suffix.label "پسوند:">

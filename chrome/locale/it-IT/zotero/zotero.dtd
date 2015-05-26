@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Mantieni l&apos;ordinamento delle fonti">
 
-<!ENTITY zotero.citation.page "Pagina">
-<!ENTITY zotero.citation.paragraph "Capoverso">
-<!ENTITY zotero.citation.line "Riga">
 <!ENTITY zotero.citation.suppressAuthor.label "Ometti autore">
 <!ENTITY zotero.citation.prefix.label "Prefisso:">
 <!ENTITY zotero.citation.suffix.label "Suffisso:">

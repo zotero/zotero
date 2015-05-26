@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Raða uppruna">
 
-<!ENTITY zotero.citation.page "Blaðsíða">
-<!ENTITY zotero.citation.paragraph "Málsgrein">
-<!ENTITY zotero.citation.line "Lína">
 <!ENTITY zotero.citation.suppressAuthor.label "Fela höfund">
 <!ENTITY zotero.citation.prefix.label "Forskeyti:">
 <!ENTITY zotero.citation.suffix.label "Viðskeyti:">

@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "untuk informasi lebih lanjut.">
 <!ENTITY zotero.preferences.proxies.transparent "Aktifkan pengalihan proksi">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Kenali secara automatis sumber-sumber yang terproksi">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Nonaktifkan pengalihan proksi ketika nama domain saya mengandung">
 <!ENTITY zotero.preferences.proxies.configured "Proksi Terkonfigurasi">
 <!ENTITY zotero.preferences.proxies.hostname "Nama Host">

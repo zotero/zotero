@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link ".">
 <!ENTITY zotero.preferences.proxies.transparent "Pidada meeles prokside kaudu kasutatavad allikad">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Tuvastada prokside kaudu külastatavad lehed automaatselt">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Proksile ümbersuunamine peatada, kui domeeninimi sisaldab ">
 <!ENTITY zotero.preferences.proxies.configured "Konfigureeritud proksid">
 <!ENTITY zotero.preferences.proxies.hostname "Hostinimi">

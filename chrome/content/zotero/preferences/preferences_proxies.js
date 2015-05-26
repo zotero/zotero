@@ -40,6 +40,7 @@ Zotero_Preferences.Proxies = {
 		var transparent = document.getElementById('zotero-proxies-transparent').checked;
 		Zotero.Prefs.set("proxies.transparent", transparent);
 		Zotero.Prefs.set("proxies.autoRecognize", document.getElementById('zotero-proxies-autoRecognize').checked);	
+		Zotero.Prefs.set("proxies.showRedirectNotification", document.getElementById('zotero-proxies-showRedirectNotification').checked);
 		Zotero.Prefs.set("proxies.disableByDomainString", document.getElementById('zotero-proxies-disableByDomain-textbox').value);
 		Zotero.Prefs.set("proxies.disableByDomain", document.getElementById('zotero-proxies-disableByDomain-checkbox').checked &&
 				document.getElementById('zotero-proxies-disableByDomain-textbox').value != "");
@@ -50,8 +51,10 @@ Zotero_Preferences.Proxies = {
 			document.getElementById('proxyTree-delete').disabled =
 			document.getElementById('proxyTree').disabled = 
 			document.getElementById('zotero-proxies-autoRecognize').disabled = 
+			document.getElementById('zotero-proxies-showRedirectNotification').disabled = 
 			document.getElementById('zotero-proxies-disableByDomain-checkbox').disabled = 
-			document.getElementById('zotero-proxies-disableByDomain-textbox').disabled = !transparent;
+			document.getElementById('zotero-proxies-disableByDomain-textbox').disabled = 
+			!transparent;
 	},
 	
 	
@@ -69,7 +72,8 @@ Zotero_Preferences.Proxies = {
 	showProxyEditor: function (index) {
 		if(index == -1) return;
 		window.openDialog('chrome://zotero/content/preferences/proxyEditor.xul',
-			"zotero-preferences-proxyEditor", "chrome, modal", index !== undefined ? this._proxies[index] : null);
+			"zotero-preferences-proxyEditor", "chrome,modal,centerscreen",
+			index !== undefined ? this._proxies[index] : null);
 		this.refreshProxyList();
 	},
 	
@@ -150,6 +154,7 @@ Zotero_Preferences.Proxies = {
 		document.getElementById('proxyTree-delete').disabled = true;
 		document.getElementById('zotero-proxies-transparent').checked = Zotero.Prefs.get("proxies.transparent");
 		document.getElementById('zotero-proxies-autoRecognize').checked = Zotero.Prefs.get("proxies.autoRecognize");
+		document.getElementById('zotero-proxies-showRedirectNotification').checked = Zotero.Prefs.get("proxies.showRedirectNotification");
 		document.getElementById('zotero-proxies-disableByDomain-checkbox').checked = Zotero.Prefs.get("proxies.disableByDomain");
 		document.getElementById('zotero-proxies-disableByDomain-textbox').value = Zotero.Prefs.get("proxies.disableByDomainString");
 	}

@@ -126,8 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "標題大小寫">
 <!ENTITY zotero.item.textTransform.sentencecase "句首字母大小寫">
 <!ENTITY zotero.item.creatorTransform.nameSwap "互換西方語言方式的名/姓">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.viewOnline "線上檢視">
+<!ENTITY zotero.item.copyAsURL "複製成 URL">
 
 <!ENTITY zotero.toolbar.newNote "新增筆記">
 <!ENTITY zotero.toolbar.note.standalone "新增獨立筆記">
@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "令來源保持排序">
 
-<!ENTITY zotero.citation.page "頁">
-<!ENTITY zotero.citation.paragraph "段落">
-<!ENTITY zotero.citation.line "行">
 <!ENTITY zotero.citation.suppressAuthor.label "不顯示作者">
 <!ENTITY zotero.citation.prefix.label "前綴：">
 <!ENTITY zotero.citation.suffix.label "後綴：">

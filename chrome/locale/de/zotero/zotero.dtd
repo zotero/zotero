@@ -126,8 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "englische Titel-Großschreibung">
 <!ENTITY zotero.item.textTransform.sentencecase "englische Satz-Großschreibung">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Vorname/Nachname tauschen">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.viewOnline "Online anzeigen">
+<!ENTITY zotero.item.copyAsURL "Als URL kopieren">
 
 <!ENTITY zotero.toolbar.newNote "Neue Notiz">
 <!ENTITY zotero.toolbar.note.standalone "Neue eigenständige Notiz">
@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Quellen sortiert halten">
 
-<!ENTITY zotero.citation.page "Seite">
-<!ENTITY zotero.citation.paragraph "Absatz">
-<!ENTITY zotero.citation.line "Zeile">
 <!ENTITY zotero.citation.suppressAuthor.label "Autor unterdrücken">
 <!ENTITY zotero.citation.prefix.label "Präfix:">
 <!ENTITY zotero.citation.suffix.label "Suffix:">

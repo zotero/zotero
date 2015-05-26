@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Šaltinius automatiškai rikiuoti">
 
-<!ENTITY zotero.citation.page "Puslapis">
-<!ENTITY zotero.citation.paragraph "Pastraipa">
-<!ENTITY zotero.citation.line "Eilutė">
 <!ENTITY zotero.citation.suppressAuthor.label "Nerodyti autoriaus">
 <!ENTITY zotero.citation.prefix.label "Priešdėlis:">
 <!ENTITY zotero.citation.suffix.label "Priesaga:">

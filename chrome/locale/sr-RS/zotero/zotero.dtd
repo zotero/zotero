@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Држи изворе поредане">
 
-<!ENTITY zotero.citation.page "Страна">
-<!ENTITY zotero.citation.paragraph "Параграф">
-<!ENTITY zotero.citation.line "Ред">
 <!ENTITY zotero.citation.suppressAuthor.label "Потисни аутора">
 <!ENTITY zotero.citation.prefix.label "Префикс:">
 <!ENTITY zotero.citation.suffix.label "Суфикс:">

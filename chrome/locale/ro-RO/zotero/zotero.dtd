@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Păstrează sursele sortate">
 
-<!ENTITY zotero.citation.page "Pagină">
-<!ENTITY zotero.citation.paragraph "Paragraf">
-<!ENTITY zotero.citation.line "Linie">
 <!ENTITY zotero.citation.suppressAuthor.label "Suprimă autor">
 <!ENTITY zotero.citation.prefix.label "Prefix:">
 <!ENTITY zotero.citation.suffix.label "Sufix:">

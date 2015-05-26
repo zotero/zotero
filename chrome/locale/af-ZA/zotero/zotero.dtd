@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Hou bronne gesorteer">
 
-<!ENTITY zotero.citation.page "Bladsy">
-<!ENTITY zotero.citation.paragraph "Paragraaf">
-<!ENTITY zotero.citation.line "Lyn">
 <!ENTITY zotero.citation.suppressAuthor.label "Onderdruk outeur">
 <!ENTITY zotero.citation.prefix.label "Voorvoegsel:">
 <!ENTITY zotero.citation.suffix.label "Agtervoegsel:">

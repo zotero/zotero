@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "保持源分类">
 
-<!ENTITY zotero.citation.page "页">
-<!ENTITY zotero.citation.paragraph "段">
-<!ENTITY zotero.citation.line "行">
 <!ENTITY zotero.citation.suppressAuthor.label "略去作者">
 <!ENTITY zotero.citation.prefix.label "前缀:">
 <!ENTITY zotero.citation.suffix.label "后缀:">

@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "បែងចែកប្រភពតាមប្រភេទ">
 
-<!ENTITY zotero.citation.page "ទំព័រ">
-<!ENTITY zotero.citation.paragraph "កថាខណ្ឌ">
-<!ENTITY zotero.citation.line "បន្ទាត់">
 <!ENTITY zotero.citation.suppressAuthor.label "អ្នកនិពន្ធ">
 <!ENTITY zotero.citation.prefix.label "បុព្វបទ:">
 <!ENTITY zotero.citation.suffix.label "បច្ច័យ:">

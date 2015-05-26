@@ -189,9 +189,6 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Tetap Urutkan Sumber-sumber">
 
-<!ENTITY zotero.citation.page "Halaman">
-<!ENTITY zotero.citation.paragraph "Paragraf">
-<!ENTITY zotero.citation.line "Garis">
 <!ENTITY zotero.citation.suppressAuthor.label "Sembunyikan Nama Penulis">
 <!ENTITY zotero.citation.prefix.label "Prefiks:">
 <!ENTITY zotero.citation.suffix.label "Sufiks:">

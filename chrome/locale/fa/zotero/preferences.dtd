@@ -144,6 +144,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "را ببینید.">
 <!ENTITY zotero.preferences.proxies.transparent "فعال کردن هدایت به پیشکار">
 <!ENTITY zotero.preferences.proxies.autoRecognize "به خاطر سپردن منابعی که نیاز به پیشکار دارند به صورت خودکار">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "غیرفعال کردن هدایت به پیشکار در زمانی که نام دامنه شامل این عبارت باشد ">
 <!ENTITY zotero.preferences.proxies.configured "پیشکارهای تنظیم شده">
 <!ENTITY zotero.preferences.proxies.hostname "نام میزبان">
