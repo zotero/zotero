@@ -36,6 +36,7 @@ Zotero.ItemFields = new function() {
 	var _baseMappedFields = [];
 	var _typeFieldIDsByBase = {};
 	var _typeFieldNamesByBase = {};
+	var _baseFieldIDsByTypeAndField = {};
 	
 	// Privileged methods
 	this.getName = getName;
@@ -288,13 +289,13 @@ Zotero.ItemFields = new function() {
 		var typeFieldID = this.getID(typeField);
 		
 		if (!itemTypeID) {
-			throw ("Invalid item type '" + itemType + "' in ItemFields.getBaseIDFromTypeAndField()");
+			throw new Error("Invalid item type '" + itemType + "'");
 		}
 		
 		_fieldCheck(typeField, 'getBaseIDFromTypeAndField');
 		
 		if (!this.isValidForType(typeFieldID, itemTypeID)) {
-			throw ("'" + typeField + "' is not a valid field for '" + itemType + "' in ItemFields.getBaseIDFromTypeAndField()");
+			throw new Error("'" + typeField + "' is not a valid field for '" + itemType + "'");
 		}
 		
 		// If typeField is already a base field, just return that
@@ -302,8 +303,8 @@ Zotero.ItemFields = new function() {
 			return typeFieldID;
 		}
 		
-		return Zotero.DB.valueQuery("SELECT baseFieldID FROM baseFieldMappingsCombined "
-			+ "WHERE itemTypeID=? AND fieldID=?", [itemTypeID, typeFieldID]);
+		if (!_baseFieldIDsByTypeAndField[itemTypeID]) return false;
+		return _baseFieldIDsByTypeAndField[itemTypeID][typeFieldID] || false;
 	}
 	
 	
@@ -466,16 +467,25 @@ Zotero.ItemFields = new function() {
 		}
 		_baseTypeFields = fields;
 		
-		var sql = "SELECT baseFieldID, fieldID, fieldName "
+		var sql = "SELECT itemTypeID, baseFieldID, fieldID, fieldName "
 			+ "FROM baseFieldMappingsCombined JOIN fieldsCombined USING (fieldID)";
 		var rows = yield Zotero.DB.queryAsync(sql);
-		for each(var row in rows) {
+		for (let i = 0; i < rows.length; i++) {
+			let row = rows[i];
+			// Type fields by base
 			if (!_typeFieldIDsByBase[row['baseFieldID']]) {
 				_typeFieldIDsByBase[row['baseFieldID']] = [];
 				_typeFieldNamesByBase[row['baseFieldID']] = [];
 			}
 			_typeFieldIDsByBase[row['baseFieldID']].push(row['fieldID']);
 			_typeFieldNamesByBase[row['baseFieldID']].push(row['fieldName']);
+			
+			// Base fields by type and field
+			if (!_baseFieldIDsByTypeAndField[row.itemTypeID]) {
+				_baseFieldIDsByTypeAndField[row.itemTypeID] = {};
+			}
+			_baseFieldIDsByTypeAndField[row.itemTypeID][row.fieldID] = row.baseFieldID;
+			
 		}
 		
 		// Get all fields mapped to base types
