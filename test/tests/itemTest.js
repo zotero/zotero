@@ -311,6 +311,91 @@ describe("Zotero.Item", function () {
 		})
 	})
 	
+	describe("#getAttachments()", function () {
+		it("#should return child attachments", function* () {
+			var item = yield createDataObject('item');
+			var attachment = new Zotero.Item("attachment");
+			attachment.parentID = item.id;
+			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			yield attachment.saveTx();
+			
+			var attachments = item.getAttachments();
+			assert.lengthOf(attachments, 1);
+			assert.equal(attachments[0], attachment.id);
+		})
+		
+		it("#should ignore trashed child attachments by default", function* () {
+			var item = yield createDataObject('item');
+			var attachment = new Zotero.Item("attachment");
+			attachment.parentID = item.id;
+			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			attachment.deleted = true;
+			yield attachment.saveTx();
+			
+			var attachments = item.getAttachments();
+			assert.lengthOf(attachments, 0);
+		})
+		
+		it("#should include trashed child attachments if includeTrashed=true", function* () {
+			var item = yield createDataObject('item');
+			var attachment = new Zotero.Item("attachment");
+			attachment.parentID = item.id;
+			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			attachment.deleted = true;
+			yield attachment.saveTx();
+			
+			var attachments = item.getAttachments(true);
+			assert.lengthOf(attachments, 1);
+			assert.equal(attachments[0], attachment.id);
+		})
+		
+		it("#should return an empty array for an item with no attachments", function* () {
+			var item = yield createDataObject('item');
+			assert.lengthOf(item.getAttachments(), 0);
+		})
+	})
+	
+	describe("#getNotes()", function () {
+		it("#should return child notes", function* () {
+			var item = yield createDataObject('item');
+			var note = new Zotero.Item("note");
+			note.parentID = item.id;
+			yield note.saveTx();
+			
+			var notes = item.getNotes();
+			assert.lengthOf(notes, 1);
+			assert.equal(notes[0], note.id);
+		})
+		
+		it("#should ignore trashed child notes by default", function* () {
+			var item = yield createDataObject('item');
+			var note = new Zotero.Item("note");
+			note.parentID = item.id;
+			note.deleted = true;
+			yield note.saveTx();
+			
+			var notes = item.getNotes();
+			assert.lengthOf(notes, 0);
+		})
+		
+		it("#should include trashed child notes if includeTrashed=true", function* () {
+			var item = yield createDataObject('item');
+			var note = new Zotero.Item("note");
+			note.parentID = item.id;
+			note.deleted = true;
+			yield note.saveTx();
+			
+			var notes = item.getNotes(true);
+			assert.lengthOf(notes, 1);
+			assert.equal(notes[0], note.id);
+		})
+		
+		it("#should return an empty array for an item with no notes", function* () {
+			var item = yield createDataObject('item');
+			assert.lengthOf(item.getNotes(), 0);
+		})
+	})
+	
 	describe("#attachmentCharset", function () {
 		it("should get and set a value", function* () {
 			var charset = 'utf-8';

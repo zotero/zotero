@@ -1970,6 +1970,10 @@ Zotero.Item.prototype.getNotes = function(includeTrashed) {
 	
 	this._requireData('childItems');
 	
+	if (!this._notes) {
+		return [];
+	}
+	
 	var sortChronologically = Zotero.Prefs.get('sortNotesChronologically');
 	var cacheKey = (sortChronologically ? "chronological" : "alphabetical")
 		+ 'With' + (includeTrashed ? '' : 'out') + 'Trashed';
@@ -3111,6 +3115,10 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 	}
 	
 	this._requireData('childItems');
+	
+	if (!this._attachments) {
+		return [];
+	}
 	
 	var cacheKey = (Zotero.Prefs.get('sortAttachmentsChronologically') ? 'chronological' : 'alphabetical')
 		+ 'With' + (includeTrashed ? '' : 'out') + 'Trashed';
