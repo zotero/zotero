@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+"use strict";
+
 // Exclusive locking mode (default) prevents access to Zotero database while Zotero is open
 // and speeds up DB access (http://www.sqlite.org/pragma.html#pragma_locking_mode).
 // Normal mode is more convenient for development, but risks database corruption, particularly if
@@ -122,7 +124,7 @@ Zotero.DBConnection.prototype.getAsyncStatement = Zotero.Promise.coroutine(funct
 });
 
 
-Zotero.DBConnection.prototype.parseQueryAndParams = function (sql, params, options) {
+Zotero.DBConnection.prototype.parseQueryAndParams = function (sql, params) {
 	// If single scalar value, wrap in an array
 	if (!Array.isArray(params)) {
 		if (typeof params == 'string' || typeof params == 'number' || params === null) {
@@ -138,31 +140,43 @@ Zotero.DBConnection.prototype.parseQueryAndParams = function (sql, params, optio
 	}
 	
 	// Find placeholders
-	var placeholderRE = /\s*[=,(]\s*\?/g;
-	
 	if (params.length) {
-		if (options && options.checkParams) {
-			let matches = sql.match(placeholderRE);
-			
-			if (!matches) {
-				throw new Error("Parameters provided for query without placeholders "
-					+ "[QUERY: " + sql + "]");
+		let matches = sql.match(/\?\d*/g);
+		if (!matches) {
+			throw new Error("Parameters provided for query without placeholders "
+				+ "[QUERY: " + sql + "]");
+		}
+		else {
+			// Count numbered parameters (?1) properly
+			let num = 0;
+			let numbered = {};
+			for (let i = 0; i < matches.length; i++) {
+				let match = matches[i];
+				if (match == '?') {
+					num++;
+				}
+				else {
+					numbered[match] = true;
+				}
 			}
-			else if (matches.length != params.length) {
+			num += Object.keys(numbered).length;
+			
+			if (params.length != num) {
 				throw new Error("Incorrect number of parameters provided for query "
-					+ "(" + params.length + ", expecting " + matches.length + ") "
+					+ "(" + params.length + ", expecting " + num + ") "
 					+ "[QUERY: " + sql + "]");
 			}
 		}
 		
 		// First, determine the type of query using first word
-		var matches = sql.match(/^[^\s\(]*/);
-		var queryMethod = matches[0].toLowerCase();
+		let queryMethod = sql.match(/^[^\s\(]*/)[0].toLowerCase();
 		
 		// Reset lastIndex, since regexp isn't recompiled dynamically
-		placeholderRE.lastIndex = 0;
-		var lastNullParamIndex = -1;
+		let placeholderRE = /\s*[=,(]\s*\?/g;
 		for (var i=0; i<params.length; i++) {
+			// Find index of this parameter, skipping previous ones
+			matches = placeholderRE.exec(sql);
+			
 			if (typeof params[i] == 'boolean') {
 				throw new Error("Invalid boolean parameter " + i + " '" + params[i] + "' "
 					+ "[QUERY: " + sql + "]");
@@ -193,23 +207,17 @@ Zotero.DBConnection.prototype.parseQueryAndParams = function (sql, params, optio
 			//
 			// Replace NULL bound parameters with hard-coded NULLs
 			//
-			
-			// Find index of this parameter, skipping previous ones
-			do {
-				var matches = placeholderRE.exec(sql);
-				lastNullParamIndex++;
-			}
-			while (lastNullParamIndex < i);
-			lastNullParamIndex = i;
-			
 			if (!matches) {
 				throw new Error("Null parameter provided for a query without placeholders "
 					+ "-- use false or undefined [QUERY: " + sql + "]");
 			}
 			
-			if (matches[0].indexOf('=') == -1) {
-				// mozStorage supports null bound parameters in value lists (e.g., "(?,?)") natively
-				continue;
+			if (matches[0].trim().indexOf('=') == -1) {
+				if (queryMethod == 'select') {
+					throw new Error("NULL cannot be used for parenthesized placeholders "
+						+ "in SELECT queries [QUERY: " + sql + "]");
+				}
+				var repl = matches[0].replace('?', 'NULL');
 			}
 			else if (queryMethod == 'select') {
 				var repl = ' IS NULL';
@@ -226,14 +234,12 @@ Zotero.DBConnection.prototype.parseQueryAndParams = function (sql, params, optio
 			
 			params.splice(i, 1);
 			i--;
-			lastNullParamIndex--;
-			continue;
 		}
 		if (!params.length) {
 			params = [];
 		}
 	}
-	else if (options && options.checkParams && placeholderRE.test(sql)) {
+	else if (/\?/g.test(sql)) {
 		throw new Error("Parameters not provided for query containing placeholders "
 			+ "[QUERY: " + sql + "]");
 	}
