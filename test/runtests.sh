@@ -101,6 +101,9 @@ if [ "$SKIP_BUNDLED" = true ]; then
 	FX_ARGS="$FX_ARGS -ZoteroSkipBundledFiles"
 fi
 
+# Clean up on exit
+trap "{ rm -rf \"$PROFILE\"; }" EXIT
+
 makePath FX_PROFILE "$PROFILE"
 MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$FX_EXECUTABLE" -profile "$FX_PROFILE" \
     -chrome chrome://zotero-unit/content/runtests.html -test "$TESTS" $FX_ARGS
@@ -109,6 +112,4 @@ MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$FX_EXECUTABLE" -profile "$FX_PROFILE" \
 test -e "$PROFILE/success"
 STATUS=$?
 
-# Clean up
-rm -rf "$PROFILE"
 exit $STATUS
