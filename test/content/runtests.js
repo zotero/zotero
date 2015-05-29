@@ -22,7 +22,7 @@ function quit(failed) {
 }
 
 function Reporter(runner) {
-	var indents = 0, passed = 0, failed = 0;
+	var indents = 0, passed = 0, failed = 0, aborted = false;
 
 	function indent() {
 		return Array(indents).join('  ');
@@ -61,10 +61,16 @@ function Reporter(runner) {
 			+ " " + test.title + "\n"
 			+ indent() + "  " + err.toString() + " at\n"
 			+ indent() + "    " + err.stack.replace("\n", "\n" + indent() + "    ", "g"));
+		
+		if (ZoteroUnit.bail) {
+			aborted = true;
+			runner.abort();
+		}
 	});
 
 	runner.on('end', function() {
-		dump(passed+"/"+(passed+failed)+" tests passed.\n");
+		dump(passed + "/" + (passed + failed) + " tests passed"
+			+ (aborted ? " -- aborting" : "") + "\n");
 		quit(failed != 0);
 	});
 }

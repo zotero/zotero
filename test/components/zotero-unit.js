@@ -33,6 +33,7 @@ ZoteroUnit.prototype = {
 	handle:function(cmdLine) {
 		this.tests = cmdLine.handleFlagWithParam("test", false);
 		this.noquit = cmdLine.handleFlag("noquit", false);
+		this.bail = cmdLine.handleFlag("bail", false);
 	},
 
 	dump:function(x) {

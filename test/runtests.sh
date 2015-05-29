@@ -29,13 +29,14 @@ Options
  -x FX_EXECUTABLE    path to Firefox executable (default: $FX_EXECUTABLE)
  -d                  enable debug logging
  -c                  open JavaScript console and don't quit on completion
+ -f                  stop after first test failure
  -b                  skip bundled translator/style installation
  TESTS               set of tests to run (default: all)
 DONE
 	exit 1
 }
 
-while getopts "x:dcb" opt; do
+while getopts "x:dcfb" opt; do
 	case $opt in
 		x)
 			FX_EXECUTABLE="$OPTARG"
@@ -46,6 +47,9 @@ while getopts "x:dcb" opt; do
         c)
             FX_ARGS="-jsconsole -noquit"
             ;;
+		f)
+			STOP_ON_FAILURE=true
+			;;
         b)
         	SKIP_BUNDLED=true
         	;;
@@ -99,6 +103,10 @@ fi
 
 if [ "$SKIP_BUNDLED" = true ]; then
 	FX_ARGS="$FX_ARGS -ZoteroSkipBundledFiles"
+fi
+
+if [ "$STOP_ON_FAILURE" = true ]; then
+	FX_ARGS="$FX_ARGS -bail"
 fi
 
 # Clean up on exit
