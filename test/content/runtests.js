@@ -13,9 +13,11 @@ function quit(failed) {
 		OS.File.writeAtomic(FileUtils.getFile("ProfD", ["success"]).path, new Uint8Array(0));
 	}
 	if(!ZoteroUnit.noquit) {
-		Components.classes['@mozilla.org/toolkit/app-startup;1'].
-		getService(Components.interfaces.nsIAppStartup).
-		quit(Components.interfaces.nsIAppStartup.eForceQuit);
+		setTimeout(function () {
+			Components.classes['@mozilla.org/toolkit/app-startup;1']
+				.getService(Components.interfaces.nsIAppStartup)
+				.quit(Components.interfaces.nsIAppStartup.eForceQuit);
+		}, 250);
 	}
 }
 
