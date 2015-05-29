@@ -70,7 +70,11 @@ function Reporter(runner) {
 }
 
 // Setup Mocha
-mocha.setup({ui:"bdd", reporter:Reporter});
+mocha.setup({
+	ui: "bdd",
+	reporter: Reporter,
+	timeout: 5000
+});
 
 // Enable Bluebird generator support in Mocha
 (function () {
