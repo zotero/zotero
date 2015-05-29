@@ -136,8 +136,6 @@ describe("Zotero.DB", function() {
 	
 	describe("#executeTransaction()", function () {
 		it("should serialize concurrent transactions", Zotero.Promise.coroutine(function* () {
-			this.timeout(1000);
-			
 			var resolve1, resolve2, reject1, reject2;
 			var promise1 = new Promise(function (resolve, reject) {
 				resolve1 = resolve;
