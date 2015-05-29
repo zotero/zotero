@@ -3246,6 +3246,7 @@ var ZoteroPane = new function()
 		if (link) {
 			if (collectionTreeRow.isWithinGroup()) {
 				Zotero.alert(null, "", "Linked files cannot be added to group libraries.");
+				return;
 			}
 			else if (collectionTreeRow.isPublications()) {
 				Zotero.alert(
@@ -3253,8 +3254,8 @@ var ZoteroPane = new function()
 					Zotero.getString('general.error'),
 					Zotero.getString('publications.error.linkedFilesCannotBeAdded')
 				);
+				return;
 			}
-			return;
 		}
 		
 		// TODO: disable in menu

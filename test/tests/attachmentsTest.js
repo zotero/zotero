@@ -98,4 +98,23 @@ describe("Zotero.Attachments", function() {
 			yield Zotero.Items.erase(itemID);
 		});
 	})
+	
+	describe("#linkToFile()", function () {
+		it("should link to a file in My Library", function* () {
+			var item = yield createDataObject('item');
+			
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var attachment = yield Zotero.Attachments.linkFromFile({
+				file: file,
+				parentItemID: item.id
+			});
+			
+			assert.equal(attachment.getFilePath(), file.path);
+		})
+		
+		it.skip("should throw an error for a non-user library", function* () {
+			// Should create a group library for use by all tests
+		})
+	})
 })

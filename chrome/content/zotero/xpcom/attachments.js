@@ -122,10 +122,10 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * @param {nsIFile} [options.file]
+	 * @param {nsIFile} [options.file] - File to link to
 	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
 	 * @param {Integer[]} [options.collections] - Collection keys or ids to add new item to
-	 * @return {Promise}
+	 * @return {Promise<Zotero.Item>}
 	 */
 	this.linkFromFile = Zotero.Promise.coroutine(function* (options) {
 		Zotero.debug('Linking attachment from file');
@@ -140,7 +140,7 @@ Zotero.Attachments = new function(){
 		
 		var title = file.leafName;
 		var contentType = yield Zotero.MIME.getMIMETypeFromFile(file);
-		var itemID = yield _addToDB({
+		var item = yield _addToDB({
 			file: file,
 			title: title,
 			linkMode: this.LINK_MODE_LINKED_FILE,
@@ -148,8 +148,8 @@ Zotero.Attachments = new function(){
 			parentItemID: parentItemID,
 			collections: collections
 		});
-		yield _postProcessFile(itemID, file, contentType);
-		return itemID;
+		yield _postProcessFile(item.id, file, contentType);
+		return item;
 	});
 	
 	
@@ -482,14 +482,13 @@ Zotero.Attachments = new function(){
 			contentType = 'application/pdf';
 		}
 		
-		var itemID = yield _addToDB({
+		return _addToDB({
 			url: url,
 			title: title,
 			linkMode: this.LINK_MODE_LINKED_URL,
 			contentType: contentType,
 			parentItemID: parentItemID
 		});
-		return Zotero.Items.get(itemID);
 	});
 	
 	
@@ -514,9 +513,8 @@ Zotero.Attachments = new function(){
 		var title = document.title; // TODO: don't use Mozilla-generated title for images, etc.
 		var contentType = document.contentType;
 		
-		var itemID;
-		yield Zotero.DB.executeTransaction(function* () {
-			itemID = yield _addToDB({
+		var item = yield Zotero.DB.executeTransaction(function* () {
+			return _addToDB({
 				url: url,
 				title: title,
 				linkMode: this.LINK_MODE_LINKED_URL,
@@ -534,11 +532,11 @@ Zotero.Attachments = new function(){
 				//Zotero.Fulltext.indexItems([itemID]);
 			}
 			else if (Zotero.MIME.isTextType(document.contentType)) {
-				Zotero.Fulltext.indexDocument(document, itemID);
+				Zotero.Fulltext.indexDocument(document, item.id);
 			}
 		}, 50);
 		
-		return Zotero.Items.get(itemID);
+		return item;
 	});
 	
 	
@@ -721,17 +719,6 @@ Zotero.Attachments = new function(){
 			throw e;
 		}
 	}
-	
-	
-	/*
-	 * Create a new attachment with a missing file
-	 */
-	this.createMissingAttachment = Zotero.Promise.coroutine(function* (options) {
-		if (options.linkMode == this.LINK_MODE_LINKED_URL) {
-			throw new Error('Cannot create missing linked URLs');
-		}
-		return _addToDB(options);
-	});
 	
 	
 	/*
@@ -1272,7 +1259,7 @@ Zotero.Attachments = new function(){
 	 * Create a new item of type 'attachment' and add to the itemAttachments table
 	 *
 	 * @param {Object} options - 'file', 'url', 'title', 'linkMode', 'contentType', 'charsetID', 'parentItemID'
-	 * @return {Promise<Number>} Returns a promise for the itemID of the new attachment
+	 * @return {Promise<Zotero.Item>} - A promise for the new attachment
 	 */
 	function _addToDB(options) {
 		var file = options.file;
@@ -1289,7 +1276,8 @@ Zotero.Attachments = new function(){
 			if (parentItemID) {
 				let {libraryID: parentLibraryID, key: parentKey} =
 					Zotero.Items.getLibraryAndKeyFromID(parentItemID);
-				if (parentLibraryID && linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				if (parentLibraryID != Zotero.Libraries.userLibraryID
+						&& linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 					throw new Error("Cannot save linked file in non-local library");
 				}
 				attachmentItem.libraryID = parentLibraryID;
@@ -1314,7 +1302,7 @@ Zotero.Attachments = new function(){
 			}
 			yield attachmentItem.save();
 			
-			return attachmentItem.id;
+			return attachmentItem;
 		}.bind(this));
 	}
 	
