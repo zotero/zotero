@@ -119,11 +119,20 @@ Zotero.Notifier = new function(){
 		
 		var queue = _inTransaction && !force;
 		
-		Zotero.debug("Notifier.trigger('" + event + "', '" + type + "', " + '[' + ids.join() + '], ' + extraData + ')'
-			+ (queue ? " queued" : " called " + "[observers: " + Object.keys(_observers).length + "]"));
-		if (extraData) {
-			Zotero.debug("Extra data:");
-			Zotero.debug(extraData);
+		if (Zotero.Debug.enabled) {
+			Zotero.debug("Notifier.trigger("
+				+ "'" + event + "', "
+				+ "'" + type + "', "
+				+ "[" + ids.join() + "]"
+				+ (extraData ? ", " + extraData : "")
+				+ ")"
+				+ (queue
+					? " queued"
+					: " called " + "[observers: " + _countObserversForType(type) + "]")
+			);
+			if (extraData) {
+				Zotero.debug(extraData);
+			}
 		}
 		
 		// Merge with existing queue
@@ -212,6 +221,19 @@ Zotero.Notifier = new function(){
 			return a.priority - b.priority;
 		});
 		return order.map(o => o.id);
+	}
+	
+	
+	function _countObserversForType(type) {
+		var num = 0;
+		for (let i in _observers) {
+			// Skip observers that don't handle notifications for this type (or all types)
+			if (_observers[i].types && _observers[i].types.indexOf(type) == -1) {
+				continue;
+			}
+			num++;
+		}
+		return num;
 	}
 	
 	
