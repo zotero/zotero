@@ -3080,14 +3080,14 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 				}
 				
 				if (dropEffect == 'link') {
-					var itemID = yield Zotero.Attachments.linkFromFile({
+					yield Zotero.Attachments.linkFromFile({
 						file: file,
 						parentItemID: parentItemID,
 						collections: parentCollectionID ? [parentCollectionID] : undefined
 					});
 				}
 				else {
-					var itemID = yield Zotero.Attachments.importFromFile({
+					yield Zotero.Attachments.importFromFile({
 						file: file,
 						libraryID: targetLibraryID,
 						parentItemID: parentItemID,

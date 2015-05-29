@@ -3282,16 +3282,15 @@ var ZoteroPane = new function()
 			while (files.hasMoreElements()){
 				var file = files.getNext();
 				file.QueryInterface(Components.interfaces.nsILocalFile);
-				let attachmentID;
 				if (link) {
-					attachmentID = yield Zotero.Attachments.linkFromFile({
+					yield Zotero.Attachments.linkFromFile({
 						file: file,
 						parentItemID: parentItemID,
 						collections: collection ? [collection] : undefined
 					});
 				}
 				else {
-					attachmentID = yield Zotero.Attachments.importFromFile({
+					yield Zotero.Attachments.importFromFile({
 						file: file,
 						libraryID: libraryID,
 						parentItemID: parentItemID,

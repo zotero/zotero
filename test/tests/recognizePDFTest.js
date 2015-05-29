@@ -24,12 +24,12 @@ describe.skip("PDF Recognition", function() {
 		// Import the PDF
 		var testdir = getTestDataDirectory();
 		testdir.append("recognizePDF_test_DOI.pdf");
-		var id = yield Zotero.Attachments.importFromFile({
+		var item = yield Zotero.Attachments.importFromFile({
 			file: testdir
 		});
 
 		// Recognize the PDF
-		win.ZoteroPane.selectItem(id);
+		win.ZoteroPane.selectItem(item.id);
 		win.Zotero_RecognizePDF.recognizeSelected();
 
 		return waitForItemEvent("add").then(function(ids) {
@@ -46,12 +46,12 @@ describe.skip("PDF Recognition", function() {
 		// Import the PDF
 		var testdir = getTestDataDirectory();
 		testdir.append("recognizePDF_test_GS.pdf");
-		var id = yield Zotero.Attachments.importFromFile({
+		var item = yield Zotero.Attachments.importFromFile({
 			file: testdir
 		});
 
 		// Recognize the PDF
-		win.ZoteroPane.selectItem(id);
+		win.ZoteroPane.selectItem(item.id);
 		win.Zotero_RecognizePDF.recognizeSelected();
 
 		return waitForItemEvent("add").then(function(ids) {

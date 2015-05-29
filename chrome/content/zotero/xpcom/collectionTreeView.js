@@ -2008,13 +2008,13 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 				}
 				
 				if (dropEffect == 'link') {
-					var itemID = yield Zotero.Attachments.linkFromFile({
+					yield Zotero.Attachments.linkFromFile({
 						file: file,
 						collections: [parentCollectionID]
 					});
 				}
 				else {
-					var itemID = yield Zotero.Attachments.importFromFile({
+					yield Zotero.Attachments.importFromFile({
 						file: file,
 						libraryID: targetLibraryID,
 						collections: [parentCollectionID]

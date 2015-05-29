@@ -27,16 +27,15 @@ describe("Zotero.Attachments", function() {
 			var parentItemID = yield item.saveTx();
 			
 			// Create attachment and compare content
-			var itemID = yield Zotero.Attachments.importFromFile({
+			var item = yield Zotero.Attachments.importFromFile({
 				file: tmpFile,
 				parentItemID: parentItemID
 			});
-			var item = yield Zotero.Items.getAsync(itemID);
 			var storedFile = item.getFile();
 			assert.equal((yield Zotero.File.getContentsAsync(storedFile)), contents);
 			
 			// Clean up
-			yield Zotero.Items.erase(itemID);
+			yield Zotero.Items.erase(item.id);
 		});
 		
 		it("should create a top-level attachment from a PNG file", function* () {
@@ -45,15 +44,14 @@ describe("Zotero.Attachments", function() {
 			var contents = yield Zotero.File.getBinaryContentsAsync(file);
 			
 			// Create attachment and compare content
-			var itemID = yield Zotero.Attachments.importFromFile({
+			var item = yield Zotero.Attachments.importFromFile({
 				file: file
 			});
-			var item = yield Zotero.Items.getAsync(itemID);
 			var storedFile = item.getFile();
 			assert.equal((yield Zotero.File.getBinaryContentsAsync(storedFile)), contents);
 			
 			// Clean up
-			yield Zotero.Items.erase(itemID);
+			yield Zotero.Items.erase(item.id);
 		});
 		
 		it("should create a top-level attachment from a PNG file in a collection", function* () {
@@ -64,16 +62,15 @@ describe("Zotero.Attachments", function() {
 			var collection = yield createDataObject('collection');
 			
 			// Create attachment and compare content
-			var itemID = yield Zotero.Attachments.importFromFile({
+			var item = yield Zotero.Attachments.importFromFile({
 				file: file,
 				collections: [collection.id]
 			});
-			var item = yield Zotero.Items.getAsync(itemID);
 			var storedFile = item.getFile();
 			assert.equal((yield Zotero.File.getBinaryContentsAsync(storedFile)), contents);
 			
 			// Clean up
-			yield Zotero.Items.erase(itemID);
+			yield Zotero.Items.erase(item.id);
 		});
 		
 		it("should create a child attachment from a PNG file", function* () {
@@ -86,16 +83,15 @@ describe("Zotero.Attachments", function() {
 			var parentItemID = yield item.saveTx();
 			
 			// Create attachment and compare content
-			var itemID = yield Zotero.Attachments.importFromFile({
+			var item = yield Zotero.Attachments.importFromFile({
 				file: file,
 				parentItemID: parentItemID
 			});
-			var item = yield Zotero.Items.getAsync(itemID);
 			var storedFile = item.getFile();
 			assert.equal((yield Zotero.File.getBinaryContentsAsync(storedFile)), contents);
 			
 			// Clean up
-			yield Zotero.Items.erase(itemID);
+			yield Zotero.Items.erase(item.id);
 		});
 	})
 	

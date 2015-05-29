@@ -236,7 +236,7 @@ describe("Zotero.CollectionTreeView", function() {
 			});
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var attachmentID = yield Zotero.Attachments.importFromFile({
+			yield Zotero.Attachments.importFromFile({
 				file: file,
 				parentItemID: item.id
 			});
