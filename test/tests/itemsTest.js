@@ -14,6 +14,9 @@ describe("Zotero.Items", function () {
 	})
 	
 	describe("#emptyTrash()", function () {
+		before(() => Zotero.Debug.init(true))
+		after(() => Zotero.Debug.init())
+		
 		it("should delete items in the trash", function* () {
 			var item1 = createUnsavedDataObject('item');
 			item1.setField('title', 'a');
