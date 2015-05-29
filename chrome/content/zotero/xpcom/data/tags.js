@@ -274,7 +274,7 @@ Zotero.Tags = new function() {
 					tag: oldName
 				}
 			};
-			Zotero.Notifier.trigger(
+			Zotero.Notifier.queue(
 				'modify',
 				'item-tag',
 				oldItemIDs.map(function (itemID) itemID + '-' + newName),
@@ -425,7 +425,7 @@ Zotero.Tags = new function() {
 		sql = "DROP TABLE tagDelete";
 		yield Zotero.DB.queryAsync(sql);
 		
-		Zotero.Notifier.trigger('delete', 'tag', toDelete, notifierData);
+		Zotero.Notifier.queue('delete', 'tag', toDelete, notifierData);
 		
 		Zotero.Prefs.set('purge.tags', false);
 	});
@@ -610,7 +610,7 @@ Zotero.Tags = new function() {
 			};
 			
 			if (affectedItems.length) {
-				Zotero.Notifier.trigger('redraw', 'item', affectedItems, { column: 'title' });
+				yield Zotero.Notifier.trigger('redraw', 'item', affectedItems, { column: 'title' });
 			}
 		}
 	});

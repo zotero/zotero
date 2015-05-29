@@ -88,6 +88,7 @@ Zotero.Notifier = new function(){
 		delete _observers[id];
 	}
 	
+	
 	/**
 	* Trigger a notification to the appropriate observers
 	*
@@ -106,71 +107,23 @@ Zotero.Notifier = new function(){
 	* - New events and types should be added to the order arrays in commit()
 	**/
 	this.trigger = Zotero.Promise.coroutine(function* (event, type, ids, extraData, force) {
+		if (_inTransaction && !force) {
+			return this.queue(event, type, ids, extraData);
+		}
+		
 		if (_disabled){
 			Zotero.debug("Notifications are disabled");
 			return false;
 		}
 		
-		if (_types && _types.indexOf(type) == -1){
-			throw ('Invalid type ' + type + ' in Notifier.trigger()');
+		if (_types && _types.indexOf(type) == -1) {
+			throw new Error("Invalid type '" + type + "'");
 		}
 		
 		ids = Zotero.flattenArguments(ids);
 		
-		var queue = _inTransaction && !force;
-		
 		if (Zotero.Debug.enabled) {
-			Zotero.debug("Notifier.trigger("
-				+ "'" + event + "', "
-				+ "'" + type + "', "
-				+ "[" + ids.join() + "]"
-				+ (extraData ? ", " + extraData : "")
-				+ ")"
-				+ (queue
-					? " queued"
-					: " called " + "[observers: " + _countObserversForType(type) + "]")
-			);
-			if (extraData) {
-				Zotero.debug(extraData);
-			}
-		}
-		
-		// Merge with existing queue
-		if (queue) {
-			if (!_queue[type]) {
-				_queue[type] = [];
-			}
-			if (!_queue[type][event]) {
-				_queue[type][event] = {};
-			}
-			if (!_queue[type][event].ids) {
-				_queue[type][event].ids = [];
-				_queue[type][event].data = {};
-			}
-			
-			// Merge ids
-			_queue[type][event].ids = _queue[type][event].ids.concat(ids);
-			
-			// Merge extraData keys
-			if (extraData) {
-				// If just a single id, extra data can be keyed by id or passed directly
-				if (ids.length == 1) {
-					let id = ids[0];
-					_queue[type][event].data[id] = extraData[id] ? extraData[id] : extraData;
-				}
-				// For multiple ids, check for data keyed by the id
-				else {
-					for (let i = 0; i < ids.length; i++) {
-						let id = ids[i];
-						if (extraData[id]) {
-							_queue[type][event].data[id] = extraData[id];
-						}
-					}
-				}
-			}
-			Zotero.debug(_queue[type][event]);
-			
-			return true;
+			_logTrigger(event, type, ids, extraData);
 		}
 		
 		var order = _getObserverOrder(type);
@@ -196,6 +149,89 @@ Zotero.Notifier = new function(){
 		
 		return true;
 	});
+	
+	
+	/**
+	 * Queue an event until the end of the current notifier transaction
+	 *
+	 * Takes the same parameters as trigger()
+	 *
+	 * @throws If a notifier transaction isn't currently open
+	 */
+	this.queue = function (event, type, ids, extraData) {
+		if (_disabled){
+			Zotero.debug("Notifications are disabled");
+			return false;
+		}
+		
+		if (_types && _types.indexOf(type) == -1) {
+			throw new Error("Invalid type '" + type + "'");
+		}
+		
+		ids = Zotero.flattenArguments(ids);
+		
+		if (Zotero.Debug.enabled) {
+			_logTrigger(event, type, ids, extraData, true);
+		}
+		
+		if (!_inTransaction) {
+			throw new Error("Can't queue event outside of a transaction");
+		}
+		
+		// Merge with existing queue
+		if (!_queue[type]) {
+			_queue[type] = [];
+		}
+		if (!_queue[type][event]) {
+			_queue[type][event] = {};
+		}
+		if (!_queue[type][event].ids) {
+			_queue[type][event].ids = [];
+			_queue[type][event].data = {};
+		}
+		
+		// Merge ids
+		_queue[type][event].ids = _queue[type][event].ids.concat(ids);
+		
+		// Merge extraData keys
+		if (extraData) {
+			// If just a single id, extra data can be keyed by id or passed directly
+			if (ids.length == 1) {
+				let id = ids[0];
+				_queue[type][event].data[id] = extraData[id] ? extraData[id] : extraData;
+			}
+			// For multiple ids, check for data keyed by the id
+			else {
+				for (let i = 0; i < ids.length; i++) {
+					let id = ids[i];
+					if (extraData[id]) {
+						_queue[type][event].data[id] = extraData[id];
+					}
+				}
+			}
+		}
+		Zotero.debug(_queue[type][event]);
+		
+		return true;
+	}
+	
+	
+	function _logTrigger(event, type, ids, extraData, queueing) {
+		Zotero.debug("Notifier.trigger("
+			+ "'" + event + "', "
+			+ "'" + type + "', "
+			+ "[" + ids.join() + "]"
+			+ (extraData ? ", " + extraData : "")
+			+ ")"
+			+ (queueing
+				? " queued "
+				: " called "
+			+ "[observers: " + _countObserversForType(type) + "]")
+		);
+		if (extraData) {
+			Zotero.debug(extraData);
+		}
+	}
 	
 	
 	/**

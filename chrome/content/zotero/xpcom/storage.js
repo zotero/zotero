@@ -1220,6 +1220,7 @@ Zotero.Sync.Storage = new function () {
 		var libraryID, key;
 		[libraryID, key] = libraryKey.split("/");
 		var item = Zotero.Items.getByLibraryAndKey(libraryID, key);
+		// TODO: yield or switch to queue
 		Zotero.Notifier.trigger('redraw', 'item', item.id, { column: "hasAttachment" });
 		
 		var parent = item.parentItemKey;

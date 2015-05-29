@@ -341,6 +341,7 @@ var Zotero_File_Interface = new function() {
 				Zotero.UnresponsiveScriptIndicator.enable();
 				
 				if(importCollection) {
+					// TODO: yield or change to .queue()
 					Zotero.Notifier.trigger('refresh', 'collection', importCollection.id);
 				}
 				if (!worked) {

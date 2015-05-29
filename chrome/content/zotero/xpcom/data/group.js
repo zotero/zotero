@@ -245,10 +245,10 @@ Zotero.Group.prototype.save = Zotero.Promise.coroutine(function* () {
 				yield this.load();
 				Zotero.Groups.register(this)
 			}.bind(this)));
-			Zotero.Notifier.trigger('add', 'group', this.id);
+			Zotero.Notifier.queue('add', 'group', this.id);
 		}
 		else {
-			Zotero.Notifier.trigger('modify', 'group', this.id);
+			Zotero.Notifier.queue('modify', 'group', this.id);
 		}
 	}.bind(this));
 });
@@ -293,7 +293,7 @@ Zotero.Group.prototype.erase = Zotero.Promise.coroutine(function* () {
 		yield Zotero.DB.queryAsync(sql, this.libraryID)
 		
 		Zotero.Groups.unregister(this.id);
-		Zotero.Notifier.trigger('delete', 'group', this.id, notifierData);
+		Zotero.Notifier.queue('delete', 'group', this.id, notifierData);
 	}.bind(this));
 	
 	yield Zotero.purgeDataObjects();

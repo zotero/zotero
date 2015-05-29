@@ -424,6 +424,8 @@ Zotero.Fulltext = new function(){
 			var sql = "REPLACE INTO fulltextContent (itemID, textContent) VALUES (?,?)";
 			Zotero.DB.query(sql, [itemID, {string:text}]);
 			*/
+			
+			Zotero.Notifier.queue('refresh', 'item', itemID);
 		}.bind(this));
 		
 		// If there's a processor cache file, delete it (whether or not we just used it)
@@ -432,8 +434,6 @@ Zotero.Fulltext = new function(){
 		if (cacheFile.exists()) {
 			cacheFile.remove(false);
 		}
-		
-		Zotero.Notifier.trigger('refresh', 'item', itemID);
 	}.bind(this));
 	
 	

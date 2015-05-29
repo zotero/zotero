@@ -292,7 +292,7 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 			));
 		}
 		if (!isNew) {
-			Zotero.Notifier.trigger('move', 'collection', this.id);
+			Zotero.Notifier.queue('move', 'collection', this.id);
 		}
 		env.parentIDs = parentIDs;
 	}
@@ -307,10 +307,10 @@ Zotero.Collection.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
 	
 	if (!env.options.skipNotifier) {
 		if (env.isNew) {
-			Zotero.Notifier.trigger('add', 'collection', this.id, env.notifierData);
+			Zotero.Notifier.queue('add', 'collection', this.id, env.notifierData);
 		}
 		else  {
-			Zotero.Notifier.trigger('modify', 'collection', this.id, env.notifierData);
+			Zotero.Notifier.queue('modify', 'collection', this.id, env.notifierData);
 		}
 	}
 	
@@ -611,7 +611,7 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 	//return Zotero.Collections.reloadAll();
 	
 	if (!env.skipNotifier) {
-		Zotero.Notifier.trigger('delete', 'collection', collections, notifierData);
+		Zotero.Notifier.queue('delete', 'collection', collections, notifierData);
 	}
 });
 

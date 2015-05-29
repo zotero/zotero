@@ -172,10 +172,10 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 
 Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
 	if (env.isNew) {
-		Zotero.Notifier.trigger('add', 'search', this.id, env.notifierData);
+		Zotero.Notifier.queue('add', 'search', this.id, env.notifierData);
 	}
 	else if (!env.options.skipNotifier) {
-		Zotero.Notifier.trigger('modify', 'search', this.id, env.notifierData);
+		Zotero.Notifier.queue('modify', 'search', this.id, env.notifierData);
 	}
 	
 	if (env.isNew && Zotero.Libraries.isGroupLibrary(this.libraryID)) {
@@ -233,7 +233,7 @@ Zotero.Search.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	yield Zotero.DB.queryAsync(sql, this.id);
 	
 	if (!env.skipNotifier) {
-		Zotero.Notifier.trigger('delete', 'search', this.id, notifierData);
+		Zotero.Notifier.queue('delete', 'search', this.id, notifierData);
 	}
 });
 

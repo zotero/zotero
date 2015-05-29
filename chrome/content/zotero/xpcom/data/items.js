@@ -485,7 +485,7 @@ Zotero.Items = function() {
 				let item = yield this.getAsync(id);
 				if (!item) {
 					Zotero.debug('Item ' + id + ' does not exist in Items.trash()!', 1);
-					Zotero.Notifier.trigger('delete', 'item', id);
+					Zotero.Notifier.queue('delete', 'item', id);
 					continue;
 				}
 				item.deleted = true;
@@ -515,7 +515,7 @@ Zotero.Items = function() {
 		if (deletedIDs.length) {
 			yield Zotero.Utilities.Internal.forEachChunkAsync(deletedIDs, 50, function* (chunk) {
 				yield this.erase(chunk);
-				Zotero.Notifier.trigger('refresh', 'trash', libraryID);
+				yield Zotero.Notifier.trigger('refresh', 'trash', libraryID);
 			}.bind(this));
 		}
 		

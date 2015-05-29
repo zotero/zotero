@@ -75,7 +75,7 @@ Zotero.SyncedSettings = (function () {
 				var sql = "DELETE FROM syncedSettings WHERE setting=? AND libraryID=?";
 				yield Zotero.DB.queryAsync(sql, [setting, libraryID]);
 				
-				Zotero.Notifier.trigger('delete', 'setting', [id], extraData);
+				yield Zotero.Notifier.trigger('delete', 'setting', [id], extraData);
 				return true;
 			}
 			
@@ -100,7 +100,7 @@ Zotero.SyncedSettings = (function () {
 					+ "(setting, libraryID, value, synced) VALUES (?, ?, ?, ?)";
 				yield Zotero.DB.queryAsync(sql, [setting, libraryID, JSON.stringify(value), synced]);
 			}
-			Zotero.Notifier.trigger(event, 'setting', [id], extraData);
+			yield Zotero.Notifier.trigger(event, 'setting', [id], extraData);
 			return true;
 		})
 	};
