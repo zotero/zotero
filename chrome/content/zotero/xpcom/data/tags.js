@@ -361,7 +361,7 @@ Zotero.Tags = new function() {
 	 * @param {Number|Number[]} [tagIDs] - tagID or array of tagIDs to purge
 	 * @return {Promise}
 	 */
-	this.purge = Zotero.Promise.coroutine(function* (libraryID, tagIDs) {
+	this.purge = Zotero.Promise.coroutine(function* (tagIDs) {
 		if (!tagIDs && !Zotero.Prefs.get('purge.tags')) {
 			return;
 		}
@@ -372,8 +372,6 @@ Zotero.Tags = new function() {
 		
 		Zotero.DB.requireTransaction();
 		
-		yield Zotero.Tags.load(libraryID);
-		
 		// Use given tags, as long as they're orphaned
 		if (tagIDs) {
 			let sql = "CREATE TEMPORARY TABLE tagDelete (tagID INT PRIMARY KEY)";
@@ -381,8 +379,9 @@ Zotero.Tags = new function() {
 			for (let i=0; i<tagIDs.length; i++) {
 				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO tagDelete VALUES (?)", tagIDs[i]);
 			}
-			sql = "SELECT * FROM tagDelete WHERE tagID NOT IN (SELECT tagID FROM itemTags)";
-			var toDelete = yield Zotero.DB.columnQueryAsync(sql);
+			sql = "SELECT tagID AS id, libraryID, name FROM tagDelete JOIN tags USING (tagID) "
+				+ "WHERE tagID NOT IN (SELECT tagID FROM itemTags)";
+			var toDelete = yield Zotero.DB.queryAsync(sql);
 		}
 		// Look for orphaned tags
 		else {
@@ -394,10 +393,10 @@ Zotero.Tags = new function() {
 			sql = "CREATE INDEX tagDelete_tagID ON tagDelete(tagID)";
 			yield Zotero.DB.queryAsync(sql);
 			
-			sql = "SELECT * FROM tagDelete";
+			sql = "SELECT tagID AS id, libraryID, name FROM tagDelete JOIN tags USING (tagID)";
 			var toDelete = yield Zotero.DB.columnQueryAsync(sql);
 			
-			if (!toDelete) {
+			if (!toDelete.length) {
 				sql = "DROP TABLE tagDelete";
 				return Zotero.DB.queryAsync(sql);
 			}
@@ -405,18 +404,20 @@ Zotero.Tags = new function() {
 		
 		notifierData = {};
 		for (let i=0; i<toDelete.length; i++) {
-			let id = toDelete[i];
-			if (_tagNamesByID[id]) {
-				notifierData[id] = {
-					old: {
-						libraryID: libraryID,
-						tag: _tagNamesByID[id]
-					}
-				};
+			let row = toDelete[i];
+			notifierData[row.id] = {
+				old: {
+					libraryID: row.libraryID,
+					tag: row.name
+				}
+			};
+			
+			// Clear cached values
+			delete _tagNamesByID[row.id];
+			if (_tagIDsByName[row.libraryID]) {
+				delete _tagIDsByName[row.libraryID]['_' + tagName];
 			}
 		}
-		
-		_unload(libraryID, toDelete);
 		
 		sql = "DELETE FROM tags WHERE tagID IN (SELECT tagID FROM tagDelete);";
 		yield Zotero.DB.queryAsync(sql);
@@ -879,25 +880,6 @@ Zotero.Tags = new function() {
 			_tagIDsByName[libraryID] = {};
 		}
 		_tagIDsByName[libraryID]['_' + name] = tagID;
-	}
-	
-	/**
-	 * Unload tags from caches
-	 *
-	 * @param {Number} libraryID
-	 * @param {Number|Array<Number>} ids One or more tagIDs
-	 */
-	function _unload(libraryID, ids) {
-		var ids = Zotero.flattenArguments(ids);
-		
-		for (let i=0; i<ids.length; i++) {
-			let id = ids[i];
-			let tagName = _tagNamesByID[id];
-			delete _tagNamesByID[id];
-			if (tagName && _tagIDsByName[libraryID]) {
-				delete _tagIDsByName[libraryID]['_' + tagName];
-			}
-		}
 	}
 }
 
