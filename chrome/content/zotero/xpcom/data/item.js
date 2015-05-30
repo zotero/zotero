@@ -1399,7 +1399,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 				if (changedCollections.length) {
 					let parentItem = yield this.ObjectsClass.getByLibraryAndKeyAsync(
 						this.libraryID, parentItemKey
-					)
+					);
 					for (let i=0; i<changedCollections.length; i++) {
 						yield parentItem.loadCollections();
 						parentItem.addToCollection(changedCollections[i]);
@@ -1622,19 +1622,27 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let toAdd = Zotero.Utilities.arrayDiff(newCollections, oldCollections);
 		let toRemove = Zotero.Utilities.arrayDiff(oldCollections, newCollections);
 		
-		for (let i=0; i<toAdd.length; i++) {
-			let collectionID = toAdd[i];
+		if (toAdd.length) {
+			for (let i=0; i<toAdd.length; i++) {
+				let collectionID = toAdd[i];
+				
+				let sql = "SELECT IFNULL(MAX(orderIndex)+1, 0) FROM collectionItems "
+					+ "WHERE collectionID=?";
+				let orderIndex = yield Zotero.DB.valueQueryAsync(sql, collectionID);
+				
+				sql = "INSERT OR IGNORE INTO collectionItems "
+					+ "(collectionID, itemID, orderIndex) VALUES (?, ?, ?)";
+				yield Zotero.DB.queryAsync(sql, [collectionID, this.id, orderIndex]);
+				
+				Zotero.Notifier.queue('add', 'collection-item', collectionID + '-' + this.id);
+			}
 			
-			let sql = "SELECT IFNULL(MAX(orderIndex)+1, 0) FROM collectionItems "
-				+ "WHERE collectionID=?";
-			let orderIndex = yield Zotero.DB.valueQueryAsync(sql, collectionID);
-			
-			sql = "INSERT OR IGNORE INTO collectionItems "
-				+ "(collectionID, itemID, orderIndex) VALUES (?, ?, ?)";
-			yield Zotero.DB.queryAsync(sql, [collectionID, this.id, orderIndex]);
-			
-			yield this.ContainerObjectsClass.refreshChildItems(collectionID);
-			Zotero.Notifier.queue('add', 'collection-item', collectionID + '-' + this.id);
+			// Add this item to any loaded collections' cached item lists after commit
+			Zotero.DB.addCurrentCallback("commit", function () {
+				for (let i = 0; i < toAdd.length; i++) {
+					this.ContainerObjectsClass.registerChildItem(toAdd[i], this.id);
+				}
+			}.bind(this));
 		}
 		
 		if (toRemove.length) {
@@ -1645,9 +1653,16 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			
 			for (let i=0; i<toRemove.length; i++) {
 				let collectionID = toRemove[i];
-				yield this.ContainerObjectsClass.refreshChildItems(collectionID);
+				
 				Zotero.Notifier.queue('remove', 'collection-item', collectionID + '-' + this.id);
 			}
+			
+			// Remove this item from any loaded collections' cached item lists after commit
+			Zotero.DB.addCurrentCallback("commit", function () {
+				for (let i = 0; i < toRemove.length; i++) {
+					this.ContainerObjectsClass.unregisterChildItem(toRemove[i], this.id);
+				}
+			}.bind(this));
 		}
 	}
 	

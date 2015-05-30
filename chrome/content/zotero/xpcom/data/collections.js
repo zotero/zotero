@@ -155,38 +155,32 @@ Zotero.Collections = function() {
 	}
 	
 	
-	/**
-	 * Invalidate child collection cache in specified collections, skipping any that aren't loaded
-	 *
-	 * @param	{Integer|Integer[]}	ids		One or more collectionIDs
-	 */
-	this.refreshChildCollections = Zotero.Promise.coroutine(function* (ids) {
-		ids = Zotero.flattenArguments(ids);
-		
-		for (let i=0; i<ids.length; i++) {
-			let id = ids[i];
-			if (this._objectCache[id]) {
-				yield this._objectCache[id]._refreshChildCollections();
-			}
+	this.registerChildCollection = function (collectionID, childCollectionID) {
+		if (this._objectCache[collectionID]) {
+			this._objectCache[collectionID]._registerChildCollection(childCollectionID);
 		}
-	});
+	}
 	
 	
-	/**
-	 * Invalidate child item cache in specified collections, skipping any that aren't loaded
-	 *
-	 * @param	{Integer|Integer[]}	ids		One or more itemIDs
-	 */
-	this.refreshChildItems = Zotero.Promise.coroutine(function* (ids) {
-		ids = Zotero.flattenArguments(ids);
-		
-		for (let i=0; i<ids.length; i++) {
-			let id = ids[i];
-			if (this._objectCache[id]) {
-				yield this._objectCache[id]._refreshChildItems();
-			}
+	this.unregisterChildCollection = function (collectionID, childCollectionID) {
+		if (this._objectCache[collectionID]) {
+			this._objectCache[collectionID]._unregisterChildCollection(childCollectionID);
 		}
-	});
+	}
+	
+	
+	this.registerChildItem = function (collectionID, itemID) {
+		if (this._objectCache[collectionID]) {
+			this._objectCache[collectionID]._registerChildItem(itemID);
+		}
+	}
+	
+	
+	this.unregisterChildItem = function (collectionID, itemID) {
+		if (this._objectCache[collectionID]) {
+			this._objectCache[collectionID]._unregisterChildItem(itemID);
+		}
+	}
 	
 	
 	this.erase = function(ids) {

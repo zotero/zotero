@@ -97,4 +97,65 @@ describe("Zotero.Collection", function() {
 			assert.isFalse(ret);
 		});
 	})
+	
+	describe("#getChildCollections()", function () {
+		it("should include child collections", function* () {
+			var collection1 = yield createDataObject('collection');
+			var collection2 = yield createDataObject('collection', { parentID: collection1.id });
+			yield collection1.saveTx();
+			
+			yield collection1.loadChildCollections();
+			var childCollections = collection1.getChildCollections();
+			assert.lengthOf(childCollections, 1);
+			assert.equal(childCollections[0].id, collection2.id);
+		})
+		
+		it("should not include collections that have been removed", function* () {
+			var collection1 = yield createDataObject('collection');
+			var collection2 = yield createDataObject('collection', { parentID: collection1.id });
+			yield collection1.saveTx();
+			
+			yield collection1.loadChildCollections();
+			
+			collection2.parentID = false;
+			yield collection2.save()
+			
+			var childCollections = collection1.getChildCollections();
+			assert.lengthOf(childCollections, 0);
+		})
+	})
+	
+	describe("#getChildItems()", function () {
+		it("should include child items", function* () {
+			var collection = yield createDataObject('collection');
+			var item = createUnsavedDataObject('item');
+			item.addToCollection(collection.key);
+			yield item.saveTx();
+			
+			yield collection.loadChildItems();
+			assert.lengthOf(collection.getChildItems(), 1);
+		})
+		
+		it("should not include items in trash by default", function* () {
+			var collection = yield createDataObject('collection');
+			var item = createUnsavedDataObject('item');
+			item.deleted = true;
+			item.addToCollection(collection.key);
+			yield item.saveTx();
+			
+			yield collection.loadChildItems();
+			assert.lengthOf(collection.getChildItems(), 0);
+		})
+		
+		it("should include items in trash if includeTrashed=true", function* () {
+			var collection = yield createDataObject('collection');
+			var item = createUnsavedDataObject('item');
+			item.deleted = true;
+			item.addToCollection(collection.key);
+			yield item.saveTx();
+			
+			yield collection.loadChildItems();
+			assert.lengthOf(collection.getChildItems(false, true), 1);
+		})
+	})
 })

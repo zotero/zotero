@@ -173,14 +173,14 @@ Zotero.Collection.prototype.getChildCollections = function (asIDs) {
  *
  * @param	{Boolean}	asIDs			Return as itemIDs
  * @param	{Boolean}	includeDeleted	Include items in Trash
- * @return	{Zotero.Item[]|Integer[]|FALSE}		Array of Zotero.Item instances or itemIDs,
- *												or FALSE if none
+ * @return {Zotero.Item[]|Integer[]} - Array of Zotero.Item instances or itemIDs,
+ *                                     or FALSE if none
  */
 Zotero.Collection.prototype.getChildItems = function (asIDs, includeDeleted) {
 	this._requireData('childItems');
 	
 	if (this._childItems.length == 0) {
-		return false;
+		return [];
 	}
 	
 	// Remove deleted items if necessary
@@ -280,21 +280,30 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 	}
 	
 	if (this._changed.parentKey) {
-		var parentIDs = [];
-		if (this.id && this._previousData.parentKey) {
-			parentIDs.push(this.ObjectsClass.getIDFromLibraryAndKey(
-				this.libraryID, this._previousData.parentKey
-			));
-		}
+		// Add this item to the parent's cached item lists after commit,
+		// if the parent was loaded
 		if (this.parentKey) {
-			parentIDs.push(this.ObjectsClass.getIDFromLibraryAndKey(
+			let parentCollectionID = this.ObjectsClass.getIDFromLibraryAndKey(
 				this.libraryID, this.parentKey
-			));
+			);
+			Zotero.DB.addCurrentCallback("commit", function () {
+				this.ObjectsClass.registerChildCollection(parentCollectionID, this.id);
+			}.bind(this));
 		}
+		// Remove this from the previous parent's cached collection lists after commit,
+		// if the parent was loaded
+		else if (!isNew && this._previousData.parentKey) {
+			let parentCollectionID = this.ObjectsClass.getIDFromLibraryAndKey(
+				this.libraryID, this._previousData.parentKey
+			);
+			Zotero.DB.addCurrentCallback("commit", function () {
+				this.ObjectsClass.unregisterChildCollection(parentCollectionID, this.id);
+			}.bind(this));
+		}
+		
 		if (!isNew) {
 			Zotero.Notifier.queue('move', 'collection', this.id);
 		}
-		env.parentIDs = parentIDs;
 	}
 });
 
@@ -312,11 +321,6 @@ Zotero.Collection.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
 		else  {
 			Zotero.Notifier.queue('modify', 'collection', this.id, env.notifierData);
 		}
-	}
-	
-	// Invalidate cached child collections
-	if (env.parentIDs) {
-		this.ObjectsClass.refreshChildCollections(env.parentIDs);
 	}
 	
 	if (!env.skipCache) {
@@ -866,7 +870,7 @@ Zotero.Collection.prototype.loadChildItems = Zotero.Promise.coroutine(function* 
 	this._childItems = [];
 	
 	if (ids) {
-		var items = yield this.ChildObjects.getAsync(ids)
+		var items = yield this.ChildObjects.getAsync(ids);
 		if (items) {
 			this._childItems = items;
 		}
@@ -878,31 +882,60 @@ Zotero.Collection.prototype.loadChildItems = Zotero.Promise.coroutine(function* 
 
 
 /**
- * Invalidate child collection cache, if collections are loaded
- *
- * Note: This is called by Zotero.Collections.refreshChildCollections()
- *
- * @private
- * @return {Promise}
+ * Add a collection to the cached child collections list if loaded
  */
-Zotero.Collection.prototype._refreshChildCollections = Zotero.Promise.coroutine(function* () {
-	yield this.reloadHasChildCollections();
+Zotero.Collection.prototype._registerChildCollection = function (collectionID) {
 	if (this._loaded.childCollections) {
-		return this.loadChildCollections(true);
+		let collection = this.ObjectsClass.get(collectionID);
+		if (collection) {
+			this._hasChildCollections = true;
+			this._childCollections.push(collection);
+		}
 	}
-});;
+}
 
 
 /**
- * Invalidate child item cache, if items are loaded
- *
- * Note: This is called by Zotero.Collections.refreshChildItems()
- *
- * @private
+ * Remove a collection from the cached child collections list if loaded
  */
-Zotero.Collection.prototype._refreshChildItems = Zotero.Promise.coroutine(function* () {
-	yield this.reloadHasChildItems();
-	if (this._loaded.childItems) {
-		return this.loadChildItems(true);
+Zotero.Collection.prototype._unregisterChildCollection = function (collectionID) {
+	if (this._loaded.childCollections) {
+		for (let i = 0; i < this._childCollections.length; i++) {
+			if (this._childCollections[i].id == collectionID) {
+				this._childCollections.splice(i, 1);
+				break;
+			}
+		}
+		this._hasChildCollections = this._childCollections.length > 0;
 	}
-});
+}
+
+
+/**
+ * Add an item to the cached child items list if loaded
+ */
+Zotero.Collection.prototype._registerChildItem = function (itemID) {
+	if (this._loaded.childItems) {
+		let item = this.ChildObjects.get(itemID);
+		if (item) {
+			this._hasChildItems = true;
+			this._childItems.push(item);
+		}
+	}
+}
+
+
+/**
+ * Remove an item from the cached child items list if loaded
+ */
+Zotero.Collection.prototype._unregisterChildItem = function (itemID) {
+	if (this._loaded.childItems) {
+		for (let i = 0; i < this._childItems.length; i++) {
+			if (this._childItems[i].id == itemID) {
+				this._childItems.splice(i, 1);
+				break;
+			}
+		}
+		this._hasChildItems = this._childItems.length > 0;
+	}
+}
