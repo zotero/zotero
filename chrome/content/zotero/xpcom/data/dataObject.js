@@ -142,22 +142,12 @@ Zotero.DataObject.prototype._set = function (field, value) {
 
 
 Zotero.DataObject.prototype._setIdentifier = function (field, value) {
-	// If primary data is loaded, the only allowed identifier change is libraryID
-	// (allowed mainly for the library switcher in the advanced search window),
-	// and then only for unsaved objects (i.e., those without an id or key)
-	if (this._loaded.primaryData) {
-		if (field != 'libraryID' || this._id || this._key) {
-			throw new Error("Cannot set " + field + " after object is already loaded");
-		}
-	}
-	
 	switch (field) {
 	case 'id':
 		if (this._key) {
 			throw new Error("Cannot set id if key is already set");
 		}
 		value = Zotero.DataObjectUtilities.checkDataID(value);
-		this._identified = true;
 		break;
 		
 	case 'libraryID':
@@ -172,11 +162,27 @@ Zotero.DataObject.prototype._setIdentifier = function (field, value) {
 			throw new Error("Cannot set key if id is already set");
 		}
 		value = Zotero.DataObjectUtilities.checkKey(value);
-		this._identified = true;
 	}
 	
 	if (value === this['_' + field]) {
 		return;
+	}
+	
+	// If primary data is loaded, the only allowed identifier change is libraryID, and then only
+	// for unidentified objects, and then only either if a libraryID isn't yet set (because
+	// primary data gets marked as loaded when fields are set for new items, but some methods
+	// (setCollections(), save()) automatically set the user library ID after that if none is
+	// specified), or for searches (for the sake of the library switcher in the advanced search
+	// window, though that could probably be rewritten)
+	if (this._loaded.primaryData) {
+		if (!(!this._identified && field == 'libraryID'
+				&& (!this._libraryID || this._objectType == 'search'))) {
+			throw new Error("Cannot change " + field + " after object is already loaded");
+		}
+	}
+	
+	if (field == 'id' || field == 'key') {
+		this._identified = true;
 	}
 	
 	this['_' + field] = value;
@@ -624,7 +630,7 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options) 
 	
 	try {
 		if (Zotero.DataObject.prototype._finalizeSave == this._finalizeSave) {
-			throw new Error("_finalizeSave not implement for Zotero." + this._ObjectType);
+			throw new Error("_finalizeSave not implemented for Zotero." + this._ObjectType);
 		}
 		
 		env.notifierData = {};
@@ -687,7 +693,7 @@ Zotero.DataObject.prototype.hasChanged = function() {
 Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 	// Default to user library if not specified
 	if (this.libraryID === null) {
-		this.libraryID = Zotero.Libraries.userLibraryID;
+		this._libraryID = Zotero.Libraries.userLibraryID;
 	}
 	
 	env.isNew = !this.id;

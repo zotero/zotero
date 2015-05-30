@@ -183,6 +183,26 @@ describe("Zotero.Item", function () {
 		})
 	})
 	
+	describe("#deleted", function () {
+		it("should be set to true after save", function* () {
+			var item = yield createDataObject('item');
+			item.deleted = true;
+			yield item.saveTx();
+			assert.ok(item.deleted);
+		})
+		
+		it("should be set to false after save", function* () {
+			var collection = yield createDataObject('collection');
+			var item = createUnsavedDataObject('item');
+			item.deleted = true;
+			yield item.saveTx();
+			
+			item.deleted = false;
+			yield item.saveTx();
+			assert.isFalse(item.deleted);
+		})
+	})
+	
 	describe("#parentID", function () {
 		it("should create a child note", function* () {
 			var item = new Zotero.Item('book');

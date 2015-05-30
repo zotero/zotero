@@ -315,137 +315,64 @@ Zotero.Item.prototype.loadFromRow = function(row, reload) {
 }
 
 Zotero.Item.prototype._parseRowData = function(row) {
-	if (false) {
-		var primaryFields = this.ObjectsClass.primaryFields;
-		for (let i=0; i<primaryFields.length; i++) {
-			if (primaryFields[i] === undefined) {
-				Zotero.debug('Skipping missing field ' + primaryFields[i]);
-				continue;
-			}
+	var primaryFields = this.ObjectsClass.primaryFields;
+	for (let i=0; i<primaryFields.length; i++) {
+		let col = primaryFields[i];
+		
+		if (row[col] === undefined) {
+			Zotero.debug('Skipping missing field ' + col);
+			continue;
 		}
 		
-		if (row.itemID !== undefined) {
-			this._id = parseInt(row.itemID);
-		}
-		if (row.itemTypeID !== undefined) {
-			this._id = parseInt(row.itemTypeID);
-		}
-		if (row.libraryID !== undefined) {
-			this._libraryID = parseInt(row.libraryID);
-		}
-		if (row.key !== undefined) {
-			this._key = row.key;
-		}
-		if (row.dateAdded !== undefined) {
-			this._dateAdded = row.dateAdded;
-		}
-		if (row.dateModified !== undefined) {
-			this._dateModified = row.dateModified;
-		}
-		if (row.version !== undefined) {
-			this._version = parseInt(row.version);
-		}
-		if (row.numNotes !== undefined) {
-			this._numNotes = parseInt(row.numNotes);
-		}
-		if (row.numNotesTrashed !== undefined) {
-			this._numNotesTrashed = parseInt(row.numNotesTrashed);
-		}
-		if (row.numNotesEmbedded !== undefined) {
-			this._numNotesEmbedded = parseInt(row.numNotesEmbedded);
-		}
-		if (row.numNotesEmbeddedTrashed !== undefined) {
-			this._numNotesEmbeddedTrashed = parseInt(row.numNotesEmbeddedTrashed);
-		}
-		if (row.numAttachments !== undefined) {
-			this._numAttachments = parseInt(row.numAttachments);
-		}
-		if (row.numAttachmentsTrashed !== undefined) {
-			this._numAttachmentsTrashed = parseInt(row.numAttachmentsTrashed);
-		}
-		if (row.parentKey !== undefined) {
-			this._parentKey = row.parentKey || false;
-		}
-		if (row.parentID !== undefined) {
-			this._parentID = row.parentID ? parseInt(row.parentID) : false;
-		}
-		if (row.synced !== undefined) {
-			this._synced = !!row.synced;
-		}
-		if (row.firstCreator !== undefined) {
-			this._firstCreator = row.firstCreator ? row.firstCreator : '';
-		}
-		if (row.sortCreator !== undefined) {
-			this._sortCreator = row.sortCreator ? row.sortCreator : '';
-		}
-		if (row.attachmentCharset !== undefined) {
-			this._attachmentCharset = row.attachmentCharset ? row.attachmentCharset : null;
-		}
-		if (row.attachmentLinkMode !== undefined) {
-			this._attachmentLinkMode = parseInt(row.attachmentLinkMode);
-		}
-		if (row.attachmentContentType !== undefined) {
-			this._attachmentContentType = row.attachmentContentType ? row.attachmentContentType : '';
-		}
-		if (row.attachmentPath !== undefined) {
-			this._attachmentPath = row.attachmentPath ? row.attachmentPath : '';
-		}
-		if (row.attachmentSyncState !== undefined) {
-			this._attachmentSyncState = parseInt(row.attachmentSyncState);
-		}
-	}
-	else {
-		var primaryFields = this.ObjectsClass.primaryFields;
-		for (let i=0; i<primaryFields.length; i++) {
-			let col = primaryFields[i];
+		let val = row[col];
+		
+		//Zotero.debug("Setting field '" + col + "' to '" + val + "' for item " + this.id);
+		
+		switch (col) {
+			// Unchanged
+			case 'itemID':
+				col = 'id';
+				break;
+				
+			case 'libraryID':
+				break;
 			
-			if (row[col] === undefined) {
-				Zotero.debug('Skipping missing field ' + col);
-				continue;
-			}
+			// Integer or 0
+			case 'version':
+			case 'numNotes':
+			case 'numNotesTrashed':
+			case 'numNotesEmbedded':
+			case 'numNotesEmbeddedTrashed':
+			case 'numAttachments':
+			case 'numAttachmentsTrashed':
+				val = val ? parseInt(val) : 0;
+				break;
 			
-			let val = row[col];
+			// Value or false
+			case 'parentKey':
+				val = val || false;
+				break;
 			
-			//Zotero.debug("Setting field '" + col + "' to '" + val + "' for item " + this.id);
-			switch (col) {
-				case 'itemID':
-					this._id = val;
-					break;
+			// Integer or false if falsy
+			case 'parentID':
+				val = val ? parseInt(val) : false;
+				break;
+			
+			case 'attachmentLinkMode':
+				val = val !== null ? parseInt(val) : false;
+				break;
+			
+			// Boolean
+			case 'synced':
+			case 'deleted':
+				val = !!val;
+				break;
 				
-				case 'libraryID':
-					this['_' + col] = val;
-					break;
-				
-				case 'version':
-				case 'numNotes':
-				case 'numNotesTrashed':
-				case 'numNotesEmbedded':
-				case 'numNotesEmbeddedTrashed':
-				case 'numAttachments':
-				case 'numAttachmentsTrashed':
-					this['_' + col] = val ? parseInt(val) : 0;
-					break;
-				
-				case 'parentKey':
-					this['_parentKey'] = val || false;
-					break;
-				
-				case 'parentID':
-					this['_' + col] = val ? parseInt(val) : false;
-					break;
-				
-				case 'attachmentLinkMode':
-					this['_' + col] = val !== null ? parseInt(val) : false;
-					break;
-				
-				case 'synced':
-					this['_synced'] = !!val;
-					break;
-					
-				default:
-					this['_' + col] = val ? val : '';
-			}
+			default:
+				val = val ? val : '';
 		}
+		
+		this['_' + col] = val;
 	}
 }
 
@@ -3436,6 +3363,10 @@ Zotero.Item.prototype.getCollections = function () {
  * @param {Array<String|Integer>} collectionIDsOrKeys Collection ids or keys
  */
 Zotero.Item.prototype.setCollections = function (collectionIDsOrKeys) {
+	if (!this.libraryID) {
+		this.libraryID = Zotero.Libraries.userLibraryID;
+	}
+	
 	this._requireData('collections');
 	
 	if (!collectionIDsOrKeys) {
@@ -3469,6 +3400,10 @@ Zotero.Item.prototype.setCollections = function (collectionIDsOrKeys) {
  * @param {Number} collectionID
  */
 Zotero.Item.prototype.addToCollection = function (collectionIDOrKey) {
+	if (!this.libraryID) {
+		this.libraryID = Zotero.Libraries.userLibraryID;
+	}
+	
 	var collectionID = parseInt(collectionIDOrKey) == collectionIDOrKey
 			? parseInt(collectionIDOrKey)
 			: this.ContainerObjectsClass.getIDFromLibraryAndKey(this.libraryID, collectionIDOrKey)
@@ -3494,6 +3429,10 @@ Zotero.Item.prototype.addToCollection = function (collectionIDOrKey) {
  * @param {Number} collectionID
  */
 Zotero.Item.prototype.removeFromCollection = function (collectionIDOrKey) {
+	if (!this.libraryID) {
+		this.libraryID = Zotero.Libraries.userLibraryID;
+	}
+	
 	var collectionID = parseInt(collectionIDOrKey) == collectionIDOrKey
 			? parseInt(collectionIDOrKey)
 			: this.ContainerObjectsClass.getIDFromLibraryAndKey(this.libraryID, collectionIDOrKey)
