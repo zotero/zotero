@@ -291,10 +291,9 @@ Zotero.Translate.ItemSaver.prototype = {
 					delete attachment.path;
 				}
 			} else {
-				let myID;
 				if (attachment.url) {
 					attachment.linkMode = "imported_url";
-					myID = yield Zotero.Attachments.importSnapshotFromFile({
+					newItem = yield Zotero.Attachments.importSnapshotFromFile({
 						file: file,
 						url: attachment.url,
 						title: attachment.title,
@@ -305,13 +304,12 @@ Zotero.Translate.ItemSaver.prototype = {
 				}
 				else {
 					attachment.linkMode = "imported_file";
-					myID = yield Zotero.Attachments.importFromFile({
+					newItem = yield Zotero.Attachments.importFromFile({
 						file: file,
 						parentItemID: parentID
 					});
 				}
 				done = true;
-				newItem = yield Zotero.Items.getAsync(myID);
 			}
 		}
 		
