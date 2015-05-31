@@ -530,21 +530,30 @@ var Zotero_Browser = new function() {
 			menuitem.setAttribute("tooltiptext", Zotero.getString("locate.libraryLookup.tooltip"));
 			menuitem.setAttribute("image", "chrome://zotero/skin/locate-library-lookup.png");
 			menuitem.setAttribute("class", "menuitem-iconic");
-			menuitem.addEventListener("command", _constructLookupFunction(tab, function(event, obj) {
-				var urls = [];
-				for (let i = 0; i < obj.newItems.length; i++) {
-					var url = Zotero.OpenURL.resolve(obj.newItems[i]);
-					if(url) urls.push(url);
-				}
-				ZoteroPane.loadURI(urls, event);
-			}), false);
-			popup.appendChild(menuitem);		
+			menuitem.addEventListener("command",
+				function (event) {
+					_constructLookupFunction(tab, function(event_param, obj) {
+						var urls = [];
+						for (let i = 0; i < obj.newItems.length; i++) {
+							var url = Zotero.OpenURL.resolve(obj.newItems[i]);
+							if(url) urls.push(url);
+						}
+						ZoteroPane.loadURI(urls, event_param);
+					}, event);
+				},
+			false);
+
+			popup.appendChild(menuitem);
 			
 			var locateEngines = Zotero.LocateManager.getVisibleEngines();
 			Zotero_LocateMenu.addLocateEngines(popup, locateEngines,
-				_constructLookupFunction(tab, function(e, obj) {
-					Zotero_LocateMenu.locateItem(e, obj.newItems);
-				}), true);
+				function (event) {
+					_constructLookupFunction(tab, function(event_param, obj) {
+						Zotero_LocateMenu.locateItem(event_param, obj.newItems);
+					}, event);
+				},
+			true);
+
 		}
 		else {
 			let webPageIcon = tab.getCaptureIcon(Zotero.hiDPI);
@@ -714,25 +723,24 @@ var Zotero_Browser = new function() {
 	//
 	//////////////////////////////////////////////////////////////////////////////
 	
-	function _constructLookupFunction(tab, success) {
-		return function(e) {
-			tab.page.translate.setTranslator(tab.page.translators[0]);
-			tab.page.translate.clearHandlers("done");
-			tab.page.translate.clearHandlers("itemDone");
-			tab.page.translate.setHandler("done", function(obj, status) {
-				if(status) {
-					success(e, obj);
-					Zotero_Browser.progress.close();
-				} else {
-					Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.lookup.error"));
-					Zotero_Browser.progress.startCloseTimer(8000);
-				}
-			});
-			
-			Zotero_Browser.progress.show();
-			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.lookup.performing"));
-			tab.page.translate.translate(false);
-		}
+	function _constructLookupFunction(tab, success, event) {
+		tab.page.translate.setTranslator(tab.page.translators[0]);
+		tab.page.translate.clearHandlers("done");
+		tab.page.translate.clearHandlers("itemDone");
+		tab.page.translate.setHandler("done", function(obj, status) {
+			if(status) {
+				success(event, obj);
+				Zotero_Browser.progress.close();
+			} else {
+				Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.lookup.error"));
+				Zotero_Browser.progress.startCloseTimer(8000);
+			}
+		});
+		
+		Zotero_Browser.progress.show();
+		Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.lookup.performing"));
+		tab.page.translate.translate(false);
+		event.stopPropagation();
 	}
 	
 	/*
