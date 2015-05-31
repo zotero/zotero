@@ -144,10 +144,16 @@ Zotero.DataObject.prototype._set = function (field, value) {
 Zotero.DataObject.prototype._setIdentifier = function (field, value) {
 	switch (field) {
 	case 'id':
+		value = Zotero.DataObjectUtilities.checkDataID(value);
+		if (this._id) {
+			if (value === this._id) {
+				return;
+			}
+			throw new Error("ID cannot be changed");
+		}
 		if (this._key) {
 			throw new Error("Cannot set id if key is already set");
 		}
-		value = Zotero.DataObjectUtilities.checkDataID(value);
 		break;
 		
 	case 'libraryID':
@@ -158,10 +164,16 @@ Zotero.DataObject.prototype._setIdentifier = function (field, value) {
 		if (this._libraryID === null) {
 			throw new Error("libraryID must be set before key");
 		}
+		value = Zotero.DataObjectUtilities.checkKey(value);
+		if (this._key) {
+			if (value === this._key) {
+				return;
+			}
+			throw new Error("Key cannot be changed");
+		}
 		if (this._id) {
 			throw new Error("Cannot set key if id is already set");
 		}
-		value = Zotero.DataObjectUtilities.checkKey(value);
 	}
 	
 	if (value === this['_' + field]) {
