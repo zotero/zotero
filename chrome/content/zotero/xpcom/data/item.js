@@ -4960,7 +4960,7 @@ Zotero.Item.prototype.toJSON = function(options) {
 	
 	let obj = {
 		key: this.key || false,
-		version: 1,
+		version: 0,
 		itemType: Zotero.ItemTypes.getName(this.itemTypeID),
 		tags: [],
 		collections: [],
@@ -4976,10 +4976,6 @@ Zotero.Item.prototype.toJSON = function(options) {
 				// Changed in API v3 to avoid clash with 'version' above
 				// Remove this after https://github.com/zotero/zotero/issues/670
 				name = 'versionNumber';
-			}
-			
-			if (name == 'accessDate') {
-				val = Zotero.Date.dateToISO(Zotero.Date.sqlToDate(val));
 			}
 			
 			obj[name] = val;
@@ -5084,6 +5080,7 @@ Zotero.Item.prototype.toJSON = function(options) {
 	
 	obj.dateAdded = Zotero.Date.sqlToISO8601(this.dateAdded);
 	obj.dateModified = Zotero.Date.sqlToISO8601(this.dateModified);
+	if (obj.accessDate) obj.accessDate = Zotero.Date.sqlToISO8601(obj.accessDate);
 	
 	if (mode == 'patch') {
 		// For "patch" mode, remove fields that have the same values

@@ -373,15 +373,7 @@ function generateItemJSONData(options, currentData) {
 	for (let itemName in items) {
 		let zItem = Zotero.Items.get(items[itemName].id);
 		jsonData[itemName] = zItem.toJSON(options);
-		
-		// Adjut accessDate so that it doesn't depend on computer time zone
-		// Effectively, assume that current time zone is UTC
-		if (jsonData[itemName].accessDate) {
-			let date = Zotero.Date.isoToDate(jsonData[itemName].accessDate);
-			date.setUTCMinutes(date.getUTCMinutes() - date.getTimezoneOffset());
-			jsonData[itemName].accessDate = Zotero.Date.dateToISO(date);
-		}
-		
+
 		// Don't replace some fields that _always_ change (e.g. item keys)
 		// as long as it follows expected format
 		// This makes it easier to generate more meaningful diffs
