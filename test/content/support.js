@@ -415,14 +415,6 @@ function generateTranslatorExportData(legacy, currentData) {
 		itemGetter._itemsLeft = [zItem];
 		translatorExportData[itemName] = itemGetter.nextItem();
 		
-		// Adjut ISO accessDate so that it doesn't depend on computer time zone
-		// Effectively, assume that current time zone is UTC
-		if (!legacy && translatorExportData[itemName].accessDate) {
-			let date = Zotero.Date.isoToDate(translatorExportData[itemName].accessDate);
-			date.setUTCMinutes(date.getUTCMinutes() - date.getTimezoneOffset());
-			translatorExportData[itemName].accessDate = Zotero.Date.dateToISO(date);
-		}
-		
 		// Don't replace some fields that _always_ change (e.g. item keys)
 		if (!currentData || !currentData[itemName]) continue;
 		

@@ -1,7 +1,7 @@
 {
 	"artwork": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"artworkMedium": "Medium",
@@ -41,7 +41,7 @@
 	"audioRecording": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -95,7 +95,7 @@
 	},
 	"bill": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"billNumber": "3",
 		"code": "Code",
@@ -141,7 +141,7 @@
 	},
 	"blogPost": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"blogTitle": "Publication title",
 		"collections": [],
@@ -182,7 +182,7 @@
 	"book": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -243,7 +243,7 @@
 	"bookSection": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -309,7 +309,7 @@
 	},
 	"case": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"caseName": "Title",
 		"collections": [],
@@ -354,7 +354,7 @@
 	"computerProgram": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -398,7 +398,7 @@
 		"DOI": "10.1234/example.doi",
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -458,7 +458,7 @@
 	"dictionaryEntry": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -519,7 +519,7 @@
 	},
 	"document": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -572,7 +572,7 @@
 	},
 	"email": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"collections": [],
 		"creators": [
@@ -611,7 +611,7 @@
 	"encyclopediaArticle": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -672,7 +672,7 @@
 	},
 	"film": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -723,7 +723,7 @@
 	},
 	"forumPost": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"collections": [],
 		"creators": [
@@ -758,7 +758,7 @@
 	},
 	"hearing": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"collections": [],
 		"committee": "Committee",
@@ -795,7 +795,7 @@
 	},
 	"instantMessage": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"collections": [],
 		"creators": [
@@ -833,7 +833,7 @@
 	},
 	"interview": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -883,7 +883,7 @@
 		"DOI": "10.1234/example.doi",
 		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -943,7 +943,7 @@
 	},
 	"letter": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -987,7 +987,7 @@
 	"magazineArticle": {
 		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -1038,7 +1038,7 @@
 	},
 	"manuscript": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -1084,7 +1084,7 @@
 	"map": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -1133,7 +1133,7 @@
 	"newspaperArticle": {
 		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -1185,7 +1185,7 @@
 	},
 	"patent": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"applicationNumber": "Application number",
 		"assignee": "Assignee",
 		"attachments": [],
@@ -1234,7 +1234,7 @@
 	},
 	"podcast": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"audioFileType": "Medium",
 		"collections": [],
@@ -1275,7 +1275,7 @@
 	},
 	"presentation": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"collections": [],
 		"creators": [
@@ -1311,7 +1311,7 @@
 	},
 	"radioBroadcast": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -1374,7 +1374,7 @@
 	},
 	"report": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -1427,7 +1427,7 @@
 	},
 	"statute": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"code": "Code",
 		"codeNumber": "Code number",
@@ -1467,7 +1467,7 @@
 	},
 	"thesis": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -1508,7 +1508,7 @@
 	},
 	"tvBroadcast": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -1572,7 +1572,7 @@
 	"videoRecording": {
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
@@ -1631,7 +1631,7 @@
 	},
 	"webpage": {
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13T19:59:58Z",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"collections": [],
 		"creators": [
