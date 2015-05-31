@@ -34,6 +34,7 @@ ZoteroUnit.prototype = {
 		this.tests = cmdLine.handleFlagWithParam("test", false);
 		this.noquit = cmdLine.handleFlag("noquit", false);
 		this.bail = cmdLine.handleFlag("bail", false);
+		this.grep = cmdLine.handleFlagWithParam("grep", false);
 	},
 
 	dump:function(x) {

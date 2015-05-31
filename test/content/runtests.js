@@ -79,7 +79,8 @@ function Reporter(runner) {
 mocha.setup({
 	ui: "bdd",
 	reporter: Reporter,
-	timeout: 5000
+	timeout: 5000,
+	grep: ZoteroUnit.grep
 });
 
 // Enable Bluebird generator support in Mocha

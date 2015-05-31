@@ -30,13 +30,14 @@ Options
  -d                  enable debug logging
  -c                  open JavaScript console and don't quit on completion
  -f                  stop after first test failure
+ -g                  only run tests matching the given pattern (grep)
  -b                  skip bundled translator/style installation
  TESTS               set of tests to run (default: all)
 DONE
 	exit 1
 }
 
-while getopts "x:dcfb" opt; do
+while getopts "x:dcfg:b" opt; do
 	case $opt in
 		x)
 			FX_EXECUTABLE="$OPTARG"
@@ -45,13 +46,16 @@ while getopts "x:dcfb" opt; do
             DEBUG=true
             ;;
         c)
-            FX_ARGS="-jsconsole -noquit"
+            FX_ARGS="$FX_ARGS -jsconsole -noquit"
             ;;
 		f)
-			STOP_ON_FAILURE=true
+			FX_ARGS="$FX_ARGS -bail"
+			;;
+		g)
+			GREP="$OPTARG"
 			;;
         b)
-        	SKIP_BUNDLED=true
+        	FX_ARGS="$FX_ARGS -ZoteroSkipBundledFiles"
         	;;
 		*)
 			usage
@@ -101,20 +105,12 @@ if [ "$TRAVIS" = true ]; then
 	FX_ARGS="$FX_ARGS --ZoteroNoUserInput"
 fi
 
-if [ "$SKIP_BUNDLED" = true ]; then
-	FX_ARGS="$FX_ARGS -ZoteroSkipBundledFiles"
-fi
-
-if [ "$STOP_ON_FAILURE" = true ]; then
-	FX_ARGS="$FX_ARGS -bail"
-fi
-
 # Clean up on exit
 trap "{ rm -rf \"$PROFILE\"; }" EXIT
 
 makePath FX_PROFILE "$PROFILE"
 MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$FX_EXECUTABLE" -profile "$FX_PROFILE" \
-    -chrome chrome://zotero-unit/content/runtests.html -test "$TESTS" $FX_ARGS
+    -chrome chrome://zotero-unit/content/runtests.html -test "$TESTS" -grep "$GREP" $FX_ARGS
 
 # Check for success
 test -e "$PROFILE/success"
