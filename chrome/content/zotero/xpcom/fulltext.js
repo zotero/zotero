@@ -606,7 +606,7 @@ Zotero.Fulltext = new function(){
 			
 			try {
 				proc.runw(true, args, args.length);
-				var totalPages = this.getTotalPagesFromFile(itemID);
+				var totalPages = getTotalPagesFromFile(itemID);
 			}
 			catch (e) {
 				Components.utils.reportError(e);
@@ -1296,11 +1296,12 @@ Zotero.Fulltext = new function(){
 	/**
 	 * Gets the number of pages from the PDF info cache file
 	 *
+	 * @private
 	 * @return {Promise}
 	 */
 	var getTotalPagesFromFile = Zotero.Promise.coroutine(function* (itemID) {
 		var file = Zotero.Attachments.getStorageDirectoryByID(itemID);
-		file.append(this.pdfInfoCacheFile);
+		file.append(Zotero.Fulltext.pdfInfoCacheFile);
 		if (!file.exists()) {
 			return false;
 		}
