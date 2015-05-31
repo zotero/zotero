@@ -242,3 +242,16 @@ function resetDB() {
 		return Zotero.Schema.schemaUpdatePromise;
 	});
 }
+
+
+/**
+ * Imports an attachment from a test file.
+ * @param {string} filename - The filename to import (in data directory)
+ * @return {Promise<Zotero.Item>}
+ */
+function importFileAttachment(filename) {
+	let testfile = getTestDataDirectory();
+	filename.split('/').forEach((part) => testfile.append(part));
+	return Zotero.Attachments.importFromFile({file: testfile});
+}
+

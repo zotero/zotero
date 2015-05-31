@@ -83,4 +83,68 @@ describe("Zotero.Search", function() {
 			assert.propertyVal(conditions[0], 'value', 'foo')
 		});
 	});
+
+	describe("#search()", function () {
+		let win;
+		let fooItem;
+		let foobarItem;
+
+		before(function* () {
+			// Hidden browser, which requires a browser window, needed for charset detection
+			// (until we figure out a better way)
+			win = yield loadBrowserWindow();
+			fooItem = yield importFileAttachment("search/foo.html");
+			foobarItem = yield importFileAttachment("search/foobar.html");
+		});
+
+		after(function* () {
+			if (win) {
+				win.close();
+			}
+			yield fooItem.erase();
+			yield foobarItem.erase();
+		});
+
+		it("should return matches with full-text conditions", function* () {
+			let s = new Zotero.Search();
+			s.addCondition('fulltextWord', 'contains', 'foo');
+			let matches = yield s.search();
+			assert.lengthOf(matches, 2);
+			assert.sameMembers(matches, [fooItem.id, foobarItem.id]);
+		});
+
+		it("should not return non-matches with full-text conditions", function* () {
+			let s = new Zotero.Search();
+			s.addCondition('fulltextWord', 'contains', 'baz');
+			let matches = yield s.search();
+			assert.lengthOf(matches, 0);
+		});
+
+		it("should return matches for full-text conditions in ALL mode", function* () {
+			let s = new Zotero.Search();
+			s.addCondition('joinMode', 'all');
+			s.addCondition('fulltextWord', 'contains', 'foo');
+			s.addCondition('fulltextWord', 'contains', 'bar');
+			let matches = yield s.search();
+			assert.deepEqual(matches, [foobarItem.id]);
+		});
+
+		it("should not return non-matches for full-text conditions in ALL mode", function* () {
+			let s = new Zotero.Search();
+			s.addCondition('joinMode', 'all');
+			s.addCondition('fulltextWord', 'contains', 'mjktkiuewf');
+			s.addCondition('fulltextWord', 'contains', 'zijajkvudk');
+			let matches = yield s.search();
+			assert.lengthOf(matches, 0);
+		});
+
+		it("should return a match that satisfies only one of two full-text condition in ANY mode", function* () {
+			let s = new Zotero.Search();
+			s.addCondition('joinMode', 'any');
+			s.addCondition('fulltextWord', 'contains', 'bar');
+			s.addCondition('fulltextWord', 'contains', 'baz');
+			let matches = yield s.search();
+			assert.deepEqual(matches, [foobarItem.id]);
+		});
+	});
 });
