@@ -43,6 +43,12 @@ Zotero.DataObjectUtilities = {
 		return intValue;
 	},
 	
+	
+	generateKey: function () {
+		return Zotero.Utilities.generateObjectKey();
+	},
+	
+	
 	"checkKey": function(key) {
 		if (!key) return null;
 		if (!Zotero.Utilities.isValidObjectKey(key)) {
