@@ -209,7 +209,7 @@ Zotero.File = new function(){
 		}
 		
 		var options = {
-			charset: charset ? Zotero.CharacterSets.getName(charset) : "UTF-8",
+			charset: charset ? charset : "UTF-8",
 			// This doesn't seem to work -- reading an image file still throws NS_ERROR_ILLEGAL_INPUT
 			replacement: "\uFFFD"
 		};
