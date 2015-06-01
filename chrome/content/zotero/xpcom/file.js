@@ -340,27 +340,18 @@ Zotero.File = new function(){
 			path = path.path;
 		}
 		
-		if (typeof data == 'string' && (!charset || charset.toLowerCase() == 'utf-8')) {
-			let encoder = new TextEncoder();
-			let array = encoder.encode(data);
+		if (typeof data == 'string') {
 			return Zotero.Promise.resolve(OS.File.writeAtomic(
 				path,
-				array,
+				data,
 				{
 					tmpPath: OS.Path.join(
 						Zotero.getTempDirectory().path,
 						OS.Path.basename(path) + ".tmp"
-					)
+					),
+					encoding: charset ? charset.toLowerCase() : 'utf-8'
 				}
 			));
-		}
-		
-		// Convert text data to stream
-		if(!(data instanceof Components.interfaces.nsIInputStream)) {
-			var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
-					createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-			converter.charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
-			data = converter.convertToInputStream(data);
 		}
 		
 		var deferred = Zotero.Promise.defer();
