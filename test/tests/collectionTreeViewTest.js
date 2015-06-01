@@ -48,6 +48,27 @@ describe("Zotero.CollectionTreeView", function() {
 		})
 	})
 	
+	describe("#expandToCollection()", function () {
+		it("should expand a collection to a subcollection", function* () {
+			var cv = collectionsView;
+			var collection1 = yield createDataObject('collection');
+			var collection2 = createUnsavedDataObject('collection');
+			collection2.parentID = collection1.id;
+			yield collection2.save({
+				skipSelect: true
+			});
+			var row = cv.getRowIndexByID("C" + collection1.id);
+			assert.isFalse(cv.isContainerOpen(row));
+			
+			yield cv.expandToCollection(collection2.id);
+			
+			// Make sure parent row position hasn't changed
+			assert.equal(cv.getRowIndexByID("C" + collection1.id), row);
+			// Parent should have been opened
+			assert.isTrue(cv.isContainerOpen(row));
+		})
+	})
+	
 	describe("#selectByID()", function () {
 		it("should select the trash", function* () {
 			yield collectionsView.selectByID("T1");
@@ -60,7 +81,7 @@ describe("Zotero.CollectionTreeView", function() {
 	
 	describe("#selectWait()", function () {
 		it("shouldn't hang if row is already selected", function* () {
-			var row = collectionsView.getRowByID("T" + Zotero.Libraries.userLibraryID);
+			var row = collectionsView.getRowIndexByID("T" + Zotero.Libraries.userLibraryID);
 			collectionsView.selection.select(row);
 			yield Zotero.Promise.delay(50);
 			yield collectionsView.selectWait(row);
@@ -175,7 +196,7 @@ describe("Zotero.CollectionTreeView", function() {
 			var item = yield createDataObject('item', false, {
 				skipSelect: true
 			});
-			var row = collectionsView.getRowByID("C" + collection.id);
+			var row = collectionsView.getRowIndexByID("C" + collection.id);
 			
 			// Add observer to wait for collection add
 			var deferred = Zotero.Promise.defer();
@@ -241,7 +262,7 @@ describe("Zotero.CollectionTreeView", function() {
 				parentItemID: item.id
 			});
 			
-			var row = collectionsView.getRowByID("L" + group.libraryID);
+			var row = collectionsView.getRowIndexByID("L" + group.libraryID);
 			
 			// Simulate a drag and drop
 			var stub = sinon.stub(Zotero.DragDrop, "getDragTarget");

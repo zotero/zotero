@@ -820,9 +820,9 @@ Zotero.CollectionTreeView.prototype.expandToCollection = Zotero.Promise.coroutin
 		return true;
 	}
 	var path = [];
-	var parent;
-	while (parent = col.parentID) {
-		path.unshift(parent);
+	var parentID;
+	while (parentID = col.parentID) {
+		path.unshift(parentID);
 		col = yield Zotero.Collections.getAsync(parentID);
 	}
 	for each(var id in path) {
