@@ -1342,8 +1342,9 @@ Zotero.Attachments = new function(){
 						var disabled = Zotero.Notifier.disable();
 						
 						var item = yield Zotero.Items.getAsync(itemID);
-						charset = yield Zotero.CharacterSets.add(charset);
-						item.attachmentCharset = charset;
+						if (yield Zotero.CharacterSets.add(charset)) {
+							item.attachmentCharset = charset;
+						}
 						yield item.saveTx();
 						
 						if (disabled) {

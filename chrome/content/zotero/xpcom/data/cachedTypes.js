@@ -35,12 +35,18 @@
  *
  * And the following properties:
  *
- *	this._typeDesc = 'c';
+ *	this._typeDesc = '';
+ *	this._typeDescPlural = '';
  *	this._idCol = '';
  *	this._nameCol = '';
  *	this._table = '';
- *	this._ignoreCase = false;
- * 
+ *
+ * Optional properties:
+ *
+ *  this._allowAdd: Allow new types to be added via .add(name)
+ *	this._ignoreCase: Ignore case when looking for types, and add new types as lowercase
+ *
+ * And add .init() to zotero.js
  */
 Zotero.CachedTypes = function() {
 	this._types = null;
@@ -52,11 +58,9 @@ Zotero.CachedTypes = function() {
 	this._idCol = '';
 	this._nameCol = '';
 	this._table = '';
+	this._allowAdd = false;
 	this._ignoreCase = false;
 	this._hasCustom = false;
-	
-	this.getName = getName;
-	this.getID = getID;
 	
 	
 	this.init = Zotero.Promise.coroutine(function* () {
@@ -70,10 +74,10 @@ Zotero.CachedTypes = function() {
 	});
 	
 	
-	function getName(idOrName) {
+	this.getName = function (idOrName) {
 		if (!this._types) {
 			throw new Zotero.Exception.UnloadedDataException(
-				this._typeDesc[0].toUpperCase() + this._typeDesc.substr(1) + " data not yet loaded"
+				Zotero.Utilities.capitalize(this._typeDesc) + " data not yet loaded"
 			);
 		}
 		
@@ -83,8 +87,7 @@ Zotero.CachedTypes = function() {
 		}
 		
 		if (!this._types['_' + idOrName]) {
-			Zotero.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
-			Zotero.debug((new Error()).stack, 1);
+			Zotero.debug('Unknown ' + this._typeDesc + ' ' + idOrName, 1);
 			return '';
 		}
 		
@@ -92,10 +95,10 @@ Zotero.CachedTypes = function() {
 	}
 	
 	
-	function getID(idOrName) {
+	this.getID = function (idOrName) {
 		if (!this._types) {
 			throw new Zotero.Exception.UnloadedDataException(
-				this._typeDesc[0].toUpperCase() + this._typeDesc.substr(1) + " data not yet loaded"
+				Zotero.Utilities.capitalize(this._typeDesc) + " data not yet loaded"
 			);
 		}
 		
@@ -105,7 +108,7 @@ Zotero.CachedTypes = function() {
 		}
 		
 		if (!this._types['_' + idOrName]) {
-			Zotero.debug('Invalid ' + this._typeDesc + ' ' + idOrName, 1);
+			Zotero.debug('Unknown ' + this._typeDesc + ' ' + idOrName, 1);
 			return false;
 		}
 		
@@ -113,10 +116,10 @@ Zotero.CachedTypes = function() {
 	}
 	
 	
-	this.getTypes = function () {
+	this.getAll = this.getTypes = function () {
 		if (!this._typesArray) {
 			throw new Zotero.Exception.UnloadedDataException(
-				this._typeDesc[0].toUpperCase() + this._typeDesc.substr(1) + " data not yet loaded"
+				Zotero.Utilities.capitalize(this._typeDesc) + " data not yet loaded"
 			);
 		}
 		return this._typesArray;
@@ -126,6 +129,55 @@ Zotero.CachedTypes = function() {
 	// Currently used only for item types
 	this.isCustom = function (idOrName) {
 		return this._types['_' + idOrName] && this._types['_' + idOrName].custom ? this._types['_' + idOrName].custom : false;
+	}
+	
+	
+	/**
+	 * Add a new type to the data and return its id. If the type already exists, return its id.
+	 *
+	 * @param {String} name - Type name to add
+	 * @return {Integer|False} - The type id (new or existing), or false if invalid type name
+	 */
+	this.add = Zotero.Promise.coroutine(function* (name) {
+		if (!this._allowAdd) {
+			throw new Error("New " + this._typeDescPlural + " cannot be added");
+		}
+		
+		if (typeof name != 'string' || name === "") {
+			throw new Error("'name' must be a string");
+		}
+		
+		var id = this.getID(name);
+		if (id) {
+			return id;
+		}
+		
+		if (this._ignoreCase) {
+			name = name.toLowerCase();
+		}
+		
+		var allow = this._valueCheck(name);
+		if (!allow) {
+			return false;
+		}
+		
+		var sql = "INSERT INTO " + this._table + " (" + this._nameCol + ") VALUES (?)";
+		yield Zotero.DB.queryAsync(sql, name);
+		
+		sql = "SELECT " + this._idCol + " FROM " + this._table + " WHERE " + this._nameCol + "=?";
+		var id = yield Zotero.DB.valueQueryAsync(sql, name);
+		
+		this._cacheTypeData({
+			id: id,
+			name: name
+		});
+		
+		return id;
+	});
+	
+	
+	this._valueCheck = function (name) {
+		return true;
 	}
 	
 	
@@ -171,6 +223,7 @@ Zotero.CreatorTypes = new function() {
 	this.isValidForItemType = isValidForItemType;
 	
 	this._typeDesc = 'creator type';
+	this._typeDescPlural = 'creator types';
 	this._idCol = 'creatorTypeID';
 	this._nameCol = 'creatorType';
 	this._table = 'creatorTypes';
@@ -279,11 +332,10 @@ Zotero.ItemTypes = new function() {
 	Zotero.CachedTypes.apply(this, arguments);
 	this.constructor.prototype = new Zotero.CachedTypes();
 	
-	this.getImageSrc = getImageSrc;
-	
 	this.customIDOffset = 10000;
 	
 	this._typeDesc = 'item type';
+	this._typeDescPlural = 'item types';
 	this._idCol = 'itemTypeID';
 	this._nameCol = 'typeName';
 	this._table = 'itemTypesCombined';
@@ -388,7 +440,7 @@ Zotero.ItemTypes = new function() {
 		return Zotero.getString("itemTypes." + typeName);
 	}
 	
-	function getImageSrc(itemType) {
+	this.getImageSrc = function (itemType) {
 		var suffix = Zotero.hiDPI ? "@2x" : "";
 		
 		if (this.isCustom(itemType)) {
@@ -460,6 +512,7 @@ Zotero.FileTypes = new function() {
 	this.constructor.prototype = new Zotero.CachedTypes();
 	
 	this._typeDesc = 'file type';
+	this._typeDescPlural = 'file types';
 	this._idCol = 'fileTypeID';
 	this._nameCol = 'fileType';
 	this._table = 'fileTypes';
@@ -480,52 +533,21 @@ Zotero.CharacterSets = new function() {
 	this.constructor.prototype = new Zotero.CachedTypes();
 	
 	this._typeDesc = 'character set';
+	this._typeDescPlural = 'character sets';
 	this._idCol = 'charsetID';
 	this._nameCol = 'charset';
 	this._table = 'charsets';
 	this._ignoreCase = true;
-	
-	this.getAll = getAll;
-	
-	function getAll() {
-		return this.getTypes();
-	}
+	this._allowAdd = true;
 	
 	
-	/**
-	 * @param {String} name - Type name to add
-	 * @return {Integer|False} - The type id (new or existing), or false if invalid type name
-	 */
-	this.add = Zotero.Promise.coroutine(function* (name) {
-		if (typeof name != 'string' || name === "") {
-			return false;
-		}
-		
-		var id = this.getID(name);
-		if (id) {
-			return id;
-		}
-		
-		name = name.toLowerCase();
-		
+	this._valueCheck = function (name) {
 		// Don't allow too-long or non-ASCII names
 		if (name.length > 50 || !name.match(/^[a-z0-9\-_]+$/)) {
 			return false;
 		}
-		
-		var sql = "INSERT INTO " + this._table + " (" + this._nameCol + ") VALUES (?)";
-		yield Zotero.DB.queryAsync(sql, name);
-		
-		sql = "SELECT " + this._idCol + " FROM " + this._table + " WHERE " + this._nameCol + "=?";
-		var id = yield Zotero.DB.valueQueryAsync(sql, name);
-		
-		this._cacheTypeData({
-			id: id,
-			name: name
-		});
-		
-		return id;
-	});
+		return true;
+	}
 	
 	
 	/**

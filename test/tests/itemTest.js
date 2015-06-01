@@ -423,8 +423,22 @@ describe("Zotero.Item", function () {
 			item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
 			item.attachmentCharset = charset;
 			var itemID = yield item.saveTx();
+			assert.equal(item.attachmentCharset, charset);
 			item = yield Zotero.Items.getAsync(itemID);
 			assert.equal(item.attachmentCharset, charset);
+		})
+		
+		it("should not allow a numerical value", function* () {
+			var charset = 1;
+			var item = new Zotero.Item("attachment");
+			try {
+				item.attachmentCharset = charset;
+			}
+			catch (e) {
+				assert.equal(e.message, "Character set must be a string")
+				return;
+			}
+			assert.fail("Numerical charset was allowed");
 		})
 		
 		it("should not be marked as changed if not changed", function* () {

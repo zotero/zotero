@@ -1463,7 +1463,9 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			+ "contentType, charsetID, path, syncState) VALUES (?,?,?,?,?,?,?)";
 		let linkMode = this.attachmentLinkMode;
 		let contentType = this.attachmentContentType;
-		let charsetID = yield Zotero.CharacterSets.add(this.attachmentCharset);
+		let charsetID = this.attachmentCharset
+			? (yield Zotero.CharacterSets.add(this.attachmentCharset))
+			: null;
 		let path = this.attachmentPath;
 		let syncState = this.attachmentSyncState;
 		
@@ -2732,11 +2734,9 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentCharset', {
 		}
 		
 		if (typeof val == 'number') {
-			oldVal = Zotero.CharacterSets.getID(this.attachmentCharset);
+			throw new Error("Character set must be a string");
 		}
-		else {
-			oldVal = this.attachmentCharset;
-		}
+		oldVal = this.attachmentCharset;
 		
 		if (!val) {
 			val = "";
