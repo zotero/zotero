@@ -1,18 +1,9 @@
 describe("Zotero.Fulltext", function () {
 	describe("#downloadPDFTool()", function () {
-		var originalBaseURL;
-		before(function* () {
-			originalBaseURL = Zotero.Fulltext.pdfToolsDownloadBaseURL;
-		})
-		after(function () {
-			Zotero.Fulltext.pdfToolsDownloadBaseURL = originalBaseURL;
-		})
-		
 		it("should install the PDF tools", function* () {
 			var version = "3.04";
 			var dataDir = Zotero.getZoteroDirectory().path;
 			var execFileName = Zotero.Fulltext.pdfInfoFileName;
-			var execContents = new Array(50001).join('a');
 			var execPath = OS.Path.join(dataDir, execFileName);
 			var versionFileName = execFileName + '.version';
 			var versionPath = OS.Path.join(dataDir, versionFileName);
@@ -20,6 +11,9 @@ describe("Zotero.Fulltext", function () {
 			var scriptPath = OS.Path.join(dataDir, 'pdfinfo.' + scriptExt);
 			var scriptContents = yield Zotero.File.getContentsFromURLAsync(
 				'resource://zotero/redirect.' + scriptExt
+			);
+			var cacheExecPath = OS.Path.join(
+				getTestDataDirectory().path, "pdf", version, execFileName
 			);
 			
 			// Delete existing files
@@ -36,23 +30,12 @@ describe("Zotero.Fulltext", function () {
 			}
 			catch (e) {}
 			
-			var tmpDir = Zotero.getTempDirectory();
-			// Create temp version directory
-			var tmpVersionDir = OS.Path.join(tmpDir.path, version);
-			yield OS.File.makeDir(tmpVersionDir);
-			// Create dummy executable file to download
-			var tmpExecPath = OS.Path.join(tmpVersionDir, execFileName);
-			yield Zotero.File.putContentsAsync(tmpExecPath, execContents);
-			
-			// Override the download URL with a file URL for the temp directory
-			Zotero.Fulltext.pdfToolsDownloadBaseURL = OS.Path.toFileURI(tmpDir.path) + "/";
-			
 			yield Zotero.Fulltext.downloadPDFTool('info', version);
 			
 			assert.ok(Zotero.Fulltext.pdfInfoIsRegistered());
 			assert.equal(
-				(yield Zotero.File.getContentsAsync(execPath)),
-				execContents
+				(yield Zotero.File.getBinaryContentsAsync(cacheExecPath)),
+				(yield Zotero.File.getBinaryContentsAsync(execPath))
 			);
 			assert.equal((yield OS.File.stat(execPath)).unixMode, 0o755);
 			assert.equal(
@@ -65,7 +48,8 @@ describe("Zotero.Fulltext", function () {
 			);
 			assert.equal((yield OS.File.stat(scriptPath)).unixMode, 0o755);
 			
-			yield OS.File.removeDir(tmpVersionDir);
+			yield Zotero.Fulltext.uninstallPDFTools();
+			assert.isFalse(Zotero.Fulltext.pdfInfoIsRegistered());
 		})
 	})
 })

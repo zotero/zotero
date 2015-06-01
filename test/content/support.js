@@ -55,17 +55,24 @@ var loadZoteroPane = Zotero.Promise.coroutine(function* () {
 });
 
 /**
- * Waits for a window with a specific URL to open. Returns a promise for the window.
+ * Waits for a window with a specific URL to open. Returns a promise for the window, and
+ * optionally passes the window to a callback immediately for use with modal dialogs,
+ * which prevent async code from continuing
  */
-function waitForWindow(uri) {
+function waitForWindow(uri, callback) {
 	var deferred = Zotero.Promise.defer();
 	Components.utils.import("resource://gre/modules/Services.jsm");
 	var loadobserver = function(ev) {
 		ev.originalTarget.removeEventListener("load", loadobserver, false);
-		if(ev.target.location == uri) {
+		if(ev.target.location.href == uri) {
 			Services.ww.unregisterNotification(winobserver);
-			deferred.resolve(ev.target.docShell.QueryInterface(Components.interfaces.nsIInterfaceRequestor).
-				             getInterface(Components.interfaces.nsIDOMWindow));
+			var win = ev.target.docShell
+				.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+				.getInterface(Components.interfaces.nsIDOMWindow);
+			if (callback) {
+				callback(win);
+			}
+			deferred.resolve(win);
 		}
 	};
 	var winobserver = {"observe":function(subject, topic, data) {
@@ -190,31 +197,23 @@ function getPromiseError(promise) {
 
 /**
  * Ensures that the PDF tools are installed, or installs them if not.
- * Returns a promise.
+ *
+ * @return {Promise}
  */
-function installPDFTools() {
+var installPDFTools = Zotero.Promise.coroutine(function* () {
 	if(Zotero.Fulltext.pdfConverterIsRegistered() && Zotero.Fulltext.pdfInfoIsRegistered()) {
-		return Zotero.Promise.resolve(true);
+		return;
 	}
+	var version = yield Zotero.Fulltext.getLatestPDFToolsVersion();
+	yield Zotero.Fulltext.downloadPDFTool('info', version);
+	yield Zotero.Fulltext.downloadPDFTool('converter', version);
+});
 
-	// Begin install procedure
-	return loadWindow("chrome://zotero/content/preferences/preferences.xul", {
-		pane: 'zotero-prefpane-search',
-		action: 'pdftools-install'
-	}).then(function(win) {
-		// Wait for confirmation dialog
-		return waitForWindow("chrome://global/content/commonDialog.xul").then(function(dlg) {
-			// Accept confirmation dialog
-			dlg.document.documentElement.acceptDialog();
-
-			// Wait for install to finish
-			return waitForCallback(function() {
-				return Zotero.Fulltext.pdfConverterIsRegistered() && Zotero.Fulltext.pdfInfoIsRegistered();
-			}, 500, 30000).finally(function() {
-				win.close();
-			});
-		});
-	});
+/**
+ * @return {Promise}
+ */
+function uninstallPDFTools() {
+	return Zotero.Fulltext.removePDFTools();
 }
 
 /**

@@ -13,7 +13,8 @@ var ZOTERO_CONFIG = {
 	PREF_BRANCH: 'extensions.zotero.',
 	BOOKMARKLET_ORIGIN: 'https://www.zotero.org',
 	HTTP_BOOKMARKLET_ORIGIN: 'http://www.zotero.org',
-	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/'
+	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
+	PDF_TOOLS_URL: "https://www.zotero.org/download/xpdf/"
 };
 
 EXPORTED_SYMBOLS = ["ZOTERO_CONFIG"];

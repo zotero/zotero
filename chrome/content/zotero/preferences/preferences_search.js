@@ -162,21 +162,8 @@ Zotero_Preferences.Search = {
 	 * if a newer version is available
 	 */
 	checkPDFToolsDownloadVersion: Zotero.Promise.coroutine(function* () {
-		var url = Zotero.Fulltext.pdfToolsDownloadBaseURL + 'latest.json';
-		
-		// Find latest version for this platform
 		try {
-			var xmlhttp = yield Zotero.HTTP.request("GET", url, { successCodes: [200, 404] });
-			
-			if (xmlhttp.status == 404) {
-				throw 404;
-			}
-			
-			var platform = Zotero.platform.replace(/\s/g, '-');
-			var json = JSON.parse(xmlhttp.responseText);
-			var latestVersion = json[platform] || json['default'];
-			
-			Zotero.debug("Latest PDF tools version for " + platform + " is " + latestVersion);
+			var latestVersion = yield Zotero.Fulltext.getLatestPDFToolsVersion();
 			
 			var converterIsRegistered = Zotero.Fulltext.pdfConverterIsRegistered();
 			var infoIsRegistered = Zotero.Fulltext.pdfInfoIsRegistered();
@@ -189,7 +176,6 @@ Zotero_Preferences.Search = {
 				var infoVersionAvailable = !infoIsRegistered
 					|| Zotero.Fulltext.pdfInfoVersion != '3.02a';
 				var bothAvailable = converterVersionAvailable && infoVersionAvailable;
-				latestVersion = "3.02a";
 			}
 			// Install if not installed, version unknown, outdated, or
 			// Xpdf 3.02/3.04 (to upgrade to Poppler),

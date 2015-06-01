@@ -30,7 +30,7 @@ Zotero.Fulltext = new function(){
 	this.pdfInfoIsRegistered = pdfInfoIsRegistered;
 	this.isCachedMIMEType = isCachedMIMEType;
 	
-	this.pdfToolsDownloadBaseURL = 'https://www.zotero.org/download/xpdf/';
+	this.pdfToolsDownloadBaseURL = ZOTERO_CONFIG.PDF_TOOLS_URL;
 	this.__defineGetter__("pdfToolsName", function() { return 'Xpdf'; });
 	this.__defineGetter__("pdfToolsURL", function() { return 'http://www.foolabs.com/xpdf/'; });
 	this.__defineGetter__("pdfConverterName", function() { return 'pdftotext'; });
@@ -127,6 +127,25 @@ Zotero.Fulltext = new function(){
 		if (cc>= 0xFF60 && cc <= 0xFF9F) { return kWbClassHWKatakanaLetter; }
 		return kWbClassAlphaLetter;
 	}
+	
+	
+	this.getLatestPDFToolsVersion = Zotero.Promise.coroutine(function* () {
+		if (Zotero.isWin) {
+			return "3.02a";
+		}
+		
+		// Find latest version for this platform
+		var url = Zotero.Fulltext.pdfToolsDownloadBaseURL + 'latest.json';
+		var xmlhttp = yield Zotero.HTTP.request("GET", url, { responseType: "json" });
+		var json = xmlhttp.response;
+		
+		var platform = Zotero.platform.replace(/\s/g, '-');
+		var version = json[platform] || json['default'];
+		
+		Zotero.debug("Latest PDF tools version for " + platform + " is " + version);
+		
+		return version;
+	});
 	
 	
 	/*
@@ -325,6 +344,35 @@ Zotero.Fulltext = new function(){
 		Zotero.debug(toolName + ' version ' + version + ' registered');
 		
 		return true;
+	});
+	
+	
+	/**
+	 * Unregister and delete PDF tools
+	 *
+	 * Used only for tests
+	 */
+	this.uninstallPDFTools = Zotero.Promise.coroutine(function* () {
+		Zotero.debug("Uninstalling PDF tools");
+		
+		var dataDir = Zotero.getZoteroDirectory().path;
+		yield Zotero.File.removeIfExists(OS.Path.join(dataDir, _pdfConverterFileName));
+		yield Zotero.File.removeIfExists(OS.Path.join(dataDir, _pdfInfoFileName));
+		if (_pdfConverter) {
+			yield Zotero.File.removeIfExists(_pdfConverter.path);
+			yield Zotero.File.removeIfExists(_pdfConverter.path + ".version");
+		}
+		if (_pdfInfo) {
+			yield Zotero.File.removeIfExists(_pdfInfo.path);
+			yield Zotero.File.removeIfExists(_pdfInfo.path + ".version");
+		}
+		if (_pdfConverterScript) yield Zotero.File.removeIfExists(_pdfConverterScript.path);
+		if (_pdfInfoScript) yield Zotero.File.removeIfExists(_pdfInfoScript.path);
+		
+		_pdfConverter = null;
+		_pdfInfo = null;
+		_pdfInfoScript = null;
+		_pdfInfoScript = null;
 	});
 	
 	
