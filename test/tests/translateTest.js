@@ -404,7 +404,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 				for (let i=0; i<attachments.length; i++) {
 					let attachment = attachments[i];
 					attachment.setField('accessDate', '2001-02-03 12:13:14');
-					attachment.attachmentCharset = Zotero.CharacterSets.getID('utf-8');
+					attachment.attachmentCharset = 'utf-8';
 					attachment.setField('url', 'http://example.com');
 					attachment.setNote('note');
 				
@@ -536,7 +536,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 							.createInstance(Components.interfaces.nsILocalFile);
 						attachmentFile.initWithPath(attachment.localPath);
 						assert.isTrue(attachmentFile.exists(), prefix + 'localPath points to a file' + suffix);
-						assert.isTrue(attachmentFile.equals(attachments[j].getFile(null, true)), prefix + 'localPath points to the correct file' + suffix);
+						assert.isTrue(attachmentFile.equals(attachments[j].getFile()), prefix + 'localPath points to the correct file' + suffix);
 						
 						assert.equal(attachment.filename, 'empty.pdf', prefix + 'filename is correct' + suffix);
 						assert.equal(attachment.defaultPath, 'files/' + attachments[j].id + '/' + attachment.filename, prefix + 'defaultPath is correct' + suffix);
