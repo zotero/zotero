@@ -556,10 +556,16 @@ Zotero.DataObject.prototype._markAllDataTypeLoadStates = function (loaded) {
  */
 Zotero.DataObject.prototype._markFieldChange = function (field, oldValue) {
 	// Only save if object already exists and field not already changed
-	if (!this.id || typeof this._previousData[field] != 'undefined') {
+	if (!this.id || this._previousData[field] !== undefined) {
 		return;
 	}
-	this._previousData[field] = oldValue;
+	if (Array.isArray(oldValue)) {
+		this._previousData[field] = [];
+		Object.assign(this._previousData[field], oldValue)
+	}
+	else {
+		this._previousData[field] = oldValue;
+	}
 }
 
 /**
