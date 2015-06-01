@@ -1,16 +1,16 @@
-Components.utils.import("resource://gre/modules/FileUtils.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm");
 var EventUtils = Components.utils.import("resource://zotero-unit/EventUtils.jsm");
 
 var ZoteroUnit = Components.classes["@mozilla.org/commandlinehandler/general-startup;1?type=zotero-unit"].
-	             getService(Components.interfaces.nsISupports).
-	             wrappedJSObject;
+                 getService(Components.interfaces.nsISupports).
+                 wrappedJSObject;
+
 var dump = ZoteroUnit.dump;
 
 function quit(failed) {
 	// Quit with exit status
 	if(!failed) {
-		OS.File.writeAtomic(FileUtils.getFile("ProfD", ["success"]).path, new Uint8Array(0));
+		OS.File.writeAtomic(OS.Path.join(OS.Constants.Path.profileDir, "success"), new Uint8Array(0));
 	}
 	if(!ZoteroUnit.noquit) {
 		setTimeout(function () {
@@ -19,6 +19,69 @@ function quit(failed) {
 				.quit(Components.interfaces.nsIAppStartup.eForceQuit);
 		}, 250);
 	}
+}
+
+if (ZoteroUnit.makeTestData) {
+	let dataPath = getTestDataDirectory().path;
+	
+	Zotero.Prefs.set("export.citePaperJournalArticleURL", true);
+	
+	let dataFiles = [
+		{
+			name: 'allTypesAndFields',
+			func: generateAllTypesAndFieldsData
+		},
+		{
+			name: 'itemJSON',
+			func: generateItemJSONData,
+			args: [null]
+		},
+		// {
+		// 	name: 'citeProcJSExport',
+		// 	func: generateCiteProcJSExportData
+		// },
+		{
+			name: 'translatorExportLegacy',
+			func: generateTranslatorExportData,
+			args: [true]
+		},
+		{
+			name: 'translatorExport',
+			func: generateTranslatorExportData,
+			args: [false]
+		}
+	];
+	Zotero.Promise.coroutine(function* () {
+		yield Zotero.initializationPromise;
+		for (let i=0; i<dataFiles.length; i++) {
+			let first = !i;
+			let params = dataFiles[i];
+
+			// Make sure to not run next loop if previous fails
+			if (!first) dump('\n');
+			dump('Generating data for ' + params.name + '...');
+
+			let filePath = OS.Path.join(dataPath, params.name + '.js');
+			let exists = yield OS.File.exists(filePath);
+			let currentData;
+			if (exists) {
+				currentData = loadSampleData(params.name);
+			}
+
+			let args = params.args || [];
+			args.push(currentData);
+			let newData = params.func.apply(null, args);
+			if (newData instanceof Zotero.Promise) {
+				newData = yield newData;
+			}
+			let str = stableStringify(newData);
+
+			yield OS.File.writeAtomic(OS.Path.join(dataPath, params.name + '.js'), str);
+			dump("done.");
+		}
+	})()
+	.catch(function(e) { dump('\n'); dump(Zotero.Utilities.varDump(e)) })
+	.finally(function() { quit(false) });
 }
 
 function Reporter(runner) {
@@ -41,7 +104,7 @@ function Reporter(runner) {
 	});
 
 	runner.on('pending', function(test){
-		dump(indent()+"pending  -"+test.title);
+		dump("\r"+indent()+"pending  -"+test.title+"\n");
 	});
 
 	runner.on('pass', function(test){
@@ -75,6 +138,21 @@ function Reporter(runner) {
 	});
 }
 
+// Monkey-patch Mocha to check instanceof Error using compartent-local
+// Error object
+Mocha.Runner.prototype.fail = function(test, err){
+	++this.failures;
+	test.state = 'failed';
+
+	if ('string' == typeof err) {
+		err = new Error('the string "' + err + '" was thrown, throw an Error :)');
+	} else if (!(err instanceof Components.utils.getGlobalForObject(err).Error)) {
+		err = new Error('the ' + Mocha.utils.type(err) + ' ' + Mocha.utils.stringify(err) + ' was thrown, throw an Error :)');
+	}
+
+	this.emit('fail', test, err);
+};
+
 // Setup Mocha
 mocha.setup({
 	ui: "bdd",
@@ -99,8 +177,8 @@ var assert = chai.assert,
     expect = chai.expect;
 
 // Set up tests to run
-var run = true;
-if(ZoteroUnit.tests) {
+var run = ZoteroUnit.runTests;
+if(run && ZoteroUnit.tests) {
 	var testDirectory = getTestDataDirectory().parent,
 	    testFiles = [];
 	if(ZoteroUnit.tests == "all") {

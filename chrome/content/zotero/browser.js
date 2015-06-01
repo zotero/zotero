@@ -723,6 +723,7 @@ var Zotero_Browser = new function() {
 			Zotero_Browser.progress.show();
 			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.lookup.performing"));
 			tab.page.translate.translate(false);
+			e.stopPropagation();
 		}
 	}
 	

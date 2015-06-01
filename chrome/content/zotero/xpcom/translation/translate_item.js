@@ -83,7 +83,8 @@ Zotero.Translate.ItemSaver.prototype = {
 	 * @param items Items in Zotero.Item.toArray() format
 	 * @param {Function} callback A callback to be executed when saving is complete. If saving
 	 *    succeeded, this callback will be passed true as the first argument and a list of items
-	 *    saved as the second. If saving failed, the callback will be passed false as the first
+	 *    saved as the second. If
+	  saving failed, the callback will be passed false as the first
 	 *    argument and an error object as the second
 	 * @param {Function} [attachmentCallback] A callback that receives information about attachment
 	 *     save progress. The callback will be called as attachmentCallback(attachment, false, error)
@@ -700,9 +701,10 @@ Zotero.Translate.ItemSaver.prototype = {
 }
 
 Zotero.Translate.ItemGetter = function() {
-	this._itemsLeft = null;
+	this._itemsLeft = [];
 	this._collectionsLeft = null;
 	this._exportFileDirectory = null;
+	this.legacy = false;
 };
 
 Zotero.Translate.ItemGetter.prototype = {
@@ -782,14 +784,9 @@ Zotero.Translate.ItemGetter.prototype = {
 	/**
 	 * Converts an attachment to array format and copies it to the export folder if desired
 	 */
-	"_attachmentToArray":function(attachment) {
-		var attachmentArray = this._itemToArray(attachment);
+	"_attachmentToArray":Zotero.Promise.coroutine(function* (attachment) {
+		var attachmentArray = yield Zotero.Utilities.Internal.itemToExportFormat(attachment, this.legacy);
 		var linkMode = attachment.attachmentLinkMode;
-		
-		// Get mime type
-		attachmentArray.mimeType = attachmentArray.uniqueFields.mimeType = attachment.attachmentMIMEType;
-		// Get charset
-		attachmentArray.charset = attachmentArray.uniqueFields.charset = attachment.attachmentCharset;
 		if(linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
 			var attachFile = attachment.getFile();
 			attachmentArray.localPath = attachFile.path;
@@ -800,7 +797,7 @@ Zotero.Translate.ItemGetter.prototype = {
 				// Add path and filename if not an internet link
 				var attachFile = attachment.getFile();
 				if(attachFile) {
-					attachmentArray.defaultPath = "files/" + attachmentArray.itemID + "/" + attachFile.leafName;
+					attachmentArray.defaultPath = "files/" + attachment.id + "/" + attachFile.leafName;
 					attachmentArray.filename = attachFile.leafName;
 					
 					/**
@@ -914,59 +911,28 @@ Zotero.Translate.ItemGetter.prototype = {
 			}
 		}
 		
-		attachmentArray.itemType = "attachment";
-		
 		return attachmentArray;
-	},
-		
-	/**
-	 * Converts an item to array format
-	 */
-	"_itemToArray":function(returnItem) {
-		// TODO use Zotero.Item#serialize()
-		var returnItemArray = returnItem.toArray();
-		
-		// Remove SQL date from multipart dates
-		if (returnItemArray.date) {
-			returnItemArray.date = Zotero.Date.multipartToStr(returnItemArray.date);
-		}
-		
-		var returnItemArray = Zotero.Utilities.itemToExportFormat(returnItemArray);
-		
-		// TODO: Change tag.tag references in translators to tag.name
-		// once translators are 1.5-only
-		// TODO: Preserve tag type?
-		if (returnItemArray.tags) {
-			for (var i in returnItemArray.tags) {
-				returnItemArray.tags[i].tag = returnItemArray.tags[i].fields.name;
-			}
-		}
-		
-		// add URI
-		returnItemArray.uri = Zotero.URI.getItemURI(returnItem);
-		
-		return returnItemArray;
-	},
+	}),
 	
 	/**
 	 * Retrieves the next available item
 	 */
-	"nextItem":function() {
+	"nextItem":Zotero.Promise.coroutine(function* () {
 		while(this._itemsLeft.length != 0) {
 			var returnItem = this._itemsLeft.shift();
 			// export file data for single files
 			if(returnItem.isAttachment()) {		// an independent attachment
-				var returnItemArray = this._attachmentToArray(returnItem);
+				var returnItemArray = yield this._attachmentToArray(returnItem);
 				if(returnItemArray) return returnItemArray;
 			} else {
-				var returnItemArray = this._itemToArray(returnItem);
+				var returnItemArray = yield Zotero.Utilities.Internal.itemToExportFormat(returnItem, this.legacy);
 				
 				// get attachments, although only urls will be passed if exportFileData is off
-				returnItemArray.attachments = new Array();
+				returnItemArray.attachments = [];
 				var attachments = returnItem.getAttachments();
 				for each(var attachmentID in attachments) {
-					var attachment = Zotero.Items.get(attachmentID);
-					var attachmentInfo = this._attachmentToArray(attachment);
+					var attachment = yield Zotero.Items.getAsync(attachmentID);
+					var attachmentInfo = yield this._attachmentToArray(attachment);
 					
 					if(attachmentInfo) {
 						returnItemArray.attachments.push(attachmentInfo);
@@ -977,7 +943,7 @@ Zotero.Translate.ItemGetter.prototype = {
 			}
 		}
 		return false;
-	},
+	}),
 	
 	"nextCollection":function() {
 		if(!this._collectionsLeft || this._collectionsLeft.length == 0) return false;

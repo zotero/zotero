@@ -510,12 +510,6 @@ Zotero.Cite.System.prototype = {
 					return embeddedCitation;
 				}
 			}
-		} else {
-			// is an item ID
-			//if(this._cache[item]) return this._cache[item];
-			try {
-				zoteroItem = Zotero.Items.get(item);
-			} catch(e) {}
 		}
 
 		if(!zoteroItem) {
@@ -523,6 +517,9 @@ Zotero.Cite.System.prototype = {
 		}
 		
 		var cslItem = Zotero.Utilities.itemToCSLJSON(zoteroItem);
+		
+		// TEMP: citeproc-js currently expects the id property to be the item DB id
+		cslItem.id = zoteroItem.id;
 		
 		if (!Zotero.Prefs.get("export.citePaperJournalArticleURL")) {
 			var itemType = Zotero.ItemTypes.getName(zoteroItem.itemTypeID);

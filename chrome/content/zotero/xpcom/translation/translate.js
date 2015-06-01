@@ -2161,6 +2161,10 @@ Zotero.Translate.Export.prototype._prepareTranslation = function() {
 	
 	// initialize ItemGetter
 	this._itemGetter = new Zotero.Translate.ItemGetter();
+	
+	// Toggle legacy mode for translators pre-4.0.27
+	this._itemGetter.legacy = Services.vc.compare('4.0.27', this._translatorInfo.minVersion) > 0;
+	
 	var configOptions = this._translatorInfo.configOptions || {},
 		getCollections = configOptions.getCollections || false;
 	switch (this._export.type) {

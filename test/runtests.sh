@@ -15,48 +15,60 @@ function makePath {
 }
 
 DEBUG=false
-if [ "`uname`" == "Darwin" ]; then
-	FX_EXECUTABLE="/Applications/Firefox.app/Contents/MacOS/firefox"
-else
-	FX_EXECUTABLE="firefox"
+if [ -z "$FX_EXECUTABLE" ]; then
+	if [ "`uname`" == "Darwin" ]; then
+		FX_EXECUTABLE="/Applications/Firefox.app/Contents/MacOS/firefox"
+	else
+		FX_EXECUTABLE="firefox"
+	fi
 fi
+
 FX_ARGS=""
 
 function usage {
 	cat >&2 <<DONE
-Usage: $0 [-x FX_EXECUTABLE] [TESTS...]
+Usage: $0 [option] [TESTS...]
 Options
- -x FX_EXECUTABLE    path to Firefox executable (default: $FX_EXECUTABLE)
- -d                  enable debug logging
+ -b                  skip bundled translator/style installation
  -c                  open JavaScript console and don't quit on completion
+ -d LEVEL            enable debug logging
  -f                  stop after first test failure
  -g                  only run tests matching the given pattern (grep)
+ -t                  generate test data and quit
+ -x FX_EXECUTABLE    path to Firefox executable (default: $FX_EXECUTABLE)
  -b                  skip bundled translator/style installation
  TESTS               set of tests to run (default: all)
 DONE
 	exit 1
 }
 
-while getopts "x:dcfg:b" opt; do
+while getopts "bcd:fg:tx:" opt; do
 	case $opt in
-		x)
-			FX_EXECUTABLE="$OPTARG"
+        b)
+        	FX_ARGS="$FX_ARGS -ZoteroSkipBundledFiles"
+        	;;
+		c)
+			FX_ARGS="$FX_ARGS -jsconsole -noquit"
 			;;
 		d)
-            DEBUG=true
-            ;;
-        c)
-            FX_ARGS="$FX_ARGS -jsconsole -noquit"
-            ;;
+			DEBUG=true
+			DEBUG_LEVEL="$OPTARG"
+			;;
 		f)
 			FX_ARGS="$FX_ARGS -bail"
 			;;
 		g)
+			FX_ARGS="$FX_ARGS -makeTestData"
+			;;
+		g)
 			GREP="$OPTARG"
 			;;
-        b)
-        	FX_ARGS="$FX_ARGS -ZoteroSkipBundledFiles"
-        	;;
+		t)
+			FX_ARGS="$FX_ARGS -makeTestData"
+			;;
+		x)
+			FX_EXECUTABLE="$OPTARG"
+			;;
 		*)
 			usage
 			;;
@@ -90,6 +102,7 @@ user_pref("extensions.autoDisableScopes", 0);
 user_pref("browser.uitour.enabled", false);
 user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("extensions.zotero.debug.log", $DEBUG);
+user_pref("extensions.zotero.debug.level", $DEBUG_LEVEL);
 user_pref("extensions.zotero.debug.time", $DEBUG);
 user_pref("extensions.zotero.firstRunGuidance", false);
 user_pref("extensions.zotero.firstRun2", false);
@@ -101,8 +114,9 @@ if [ -z $IS_CYGWIN ]; then
 	echo "`MOZ_NO_REMOTE=1 NO_EM_RESTART=1 \"$FX_EXECUTABLE\" -v`"
 fi
 
+
 if [ "$TRAVIS" = true ]; then
-	FX_ARGS="$FX_ARGS --ZoteroNoUserInput"
+	FX_ARGS="$FX_ARGS -ZoteroNoUserInput"
 fi
 
 # Clean up on exit
