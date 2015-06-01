@@ -61,7 +61,7 @@ const CSL_TEXT_MAPPINGS = {
 	"number-of-volumes":["numberOfVolumes"],
 	"number-of-pages":["numPages"],	
 	"edition":["edition"],
-	"version":["version"],
+	"version":["versionNumber"],
 	"section":["section", "committee"],
 	"genre":["type", "programmingLanguage"],
 	"source":["libraryCatalog"],
@@ -133,7 +133,10 @@ const CSL_TYPE_MAPPINGS = {
 	'tvBroadcast':"broadcast",
 	'radioBroadcast':"broadcast",
 	'podcast':"song",			// ??
-	'computerProgram':"book"		// ??
+	'computerProgram':"book",		// ??
+	'document':"article",
+	'note':"article",
+	'attachment':"article"
 };
 
 /**
@@ -1426,49 +1429,6 @@ Zotero.Utilities = {
 	},
 	
 	/**
-	 * Adds all fields to an item in toArray() format and adds a unique (base) fields to 
-	 * uniqueFields array
-	 */
-	"itemToExportFormat":function(item) {
-		const CREATE_ARRAYS = ['creators', 'notes', 'tags', 'seeAlso', 'attachments'];
-		for(var i=0; i<CREATE_ARRAYS.length; i++) {
-			var createArray = CREATE_ARRAYS[i];
-			if(!item[createArray]) item[createArray] = [];
-		}
-		
-		item.uniqueFields = {};
-		
-		// get base fields, not just the type-specific ones
-		var itemTypeID = (item.itemTypeID ? item.itemTypeID : Zotero.ItemTypes.getID(item.itemType));
-		var allFields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
-		for(var i in allFields) {
-			var field = allFields[i];
-			var fieldName = Zotero.ItemFields.getName(field);
-			
-			if(item[fieldName] !== undefined) {
-				var baseField = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, field);
-				
-				var baseName = null;
-				if(baseField && baseField != field) {
-					baseName = Zotero.ItemFields.getName(baseField);
-				}
-				
-				if(baseName) {
-					item[baseName] = item[fieldName];
-					item.uniqueFields[baseName] = item[fieldName];
-				} else {
-					item.uniqueFields[fieldName] = item[fieldName];
-				}
-			}
-		}
-		
-		// preserve notes
-		if(item.note) item.uniqueFields.note = item.note;
-		
-		return item;
-	},
-	
-	/**
 	 * Converts an item from toArray() format to an array of items in
 	 * the content=json format used by the server
 	 */
@@ -1607,14 +1567,19 @@ Zotero.Utilities = {
 	 */
 	"itemToCSLJSON":function(zoteroItem) {
 		if (zoteroItem instanceof Zotero.Item) {
-			zoteroItem = zoteroItem.toArray();
+			return Zotero.Utilities.Internal.itemToExportFormat(zoteroItem).
+			       then(Zotero.Utilities.itemToCSLJSON);
 		}
 		
-		var cslType = CSL_TYPE_MAPPINGS[zoteroItem.itemType] || "article";
+		var cslType = CSL_TYPE_MAPPINGS[zoteroItem.itemType];
+		if (!cslType) {
+			throw new Error('Unexpected Zotero Item type "' + zoteroItem.itemType + '"');
+		}
+		
 		var itemTypeID = Zotero.ItemTypes.getID(zoteroItem.itemType);
 		
 		var cslItem = {
-			'id':zoteroItem.itemID,
+			'id':zoteroItem.uri,
 			'type':cslType
 		};
 		
@@ -1628,11 +1593,13 @@ Zotero.Utilities = {
 				if(field in zoteroItem) {
 					value = zoteroItem[field];
 				} else {
+					if (field == 'versionNumber') field = 'version'; // Until https://github.com/zotero/zotero/issues/670
 					var fieldID = Zotero.ItemFields.getID(field),
-						baseMapping;
-					if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)
-							&& (baseMapping = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, fieldID))) {
-						value = zoteroItem[Zotero.ItemTypes.getName(baseMapping)];
+						typeFieldID;
+					if(fieldID
+						&& (typeFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID))
+					) {
+						value = zoteroItem[Zotero.ItemFields.getName(typeFieldID)];
 					}
 				}
 				
@@ -1656,30 +1623,39 @@ Zotero.Utilities = {
 		}
 		
 		// separate name variables
-		var author = Zotero.CreatorTypes.getName(Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID));
-		var creators = zoteroItem.creators;
-		for(var i=0; i<creators.length; i++) {
-			var creator = creators[i];
-			var creatorType = creator.creatorType;
-			if(creatorType == author) {
-				creatorType = "author";
-			}
-			
-			creatorType = CSL_NAMES_MAPPINGS[creatorType];
-			if(!creatorType) continue;
-			
-			var nameObj = {'family':creator.lastName, 'given':creator.firstName};
-			
-			if(cslItem[creatorType]) {
-				cslItem[creatorType].push(nameObj);
-			} else {
-				cslItem[creatorType] = [nameObj];
+		if (zoteroItem.type != "attachment" && zoteroItem.type != "note") {
+			var author = Zotero.CreatorTypes.getName(Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID));
+			var creators = zoteroItem.creators;
+			for(var i=0; creators && i<creators.length; i++) {
+				var creator = creators[i];
+				var creatorType = creator.creatorType;
+				if(creatorType == author) {
+					creatorType = "author";
+				}
+				
+				creatorType = CSL_NAMES_MAPPINGS[creatorType];
+				if(!creatorType) continue;
+				
+				var nameObj = {'family':creator.lastName, 'given':creator.firstName};
+				
+				if(cslItem[creatorType]) {
+					cslItem[creatorType].push(nameObj);
+				} else {
+					cslItem[creatorType] = [nameObj];
+				}
 			}
 		}
 		
 		// get date variables
 		for(var variable in CSL_DATE_MAPPINGS) {
 			var date = zoteroItem[CSL_DATE_MAPPINGS[variable]];
+			if (!date) {
+				var typeSpecificFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, CSL_DATE_MAPPINGS[variable]);
+				if (typeSpecificFieldID) {
+					date = zoteroItem[Zotero.ItemFields.getName(typeSpecificFieldID)];
+				}
+			}
+			
 			if(date) {
 				var dateObj = Zotero.Date.strToDate(date);
 				// otherwise, use date-parts
@@ -1705,7 +1681,12 @@ Zotero.Utilities = {
 				}
 			}
 		}
-
+		
+		// Special mapping for note title
+		if (zoteroItem.itemType == 'note' && zoteroItem.note) {
+			cslItem.title = Zotero.Notes.noteToTitle(zoteroItem.note);
+		}
+		
 		// extract PMID
 		var extra = zoteroItem.extra;
 		if(typeof extra === "string") {

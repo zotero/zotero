@@ -4181,6 +4181,7 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options) {
 	
 	obj.dateAdded = Zotero.Date.sqlToISO8601(this.dateAdded);
 	obj.dateModified = Zotero.Date.sqlToISO8601(this.dateModified);
+	if (obj.accessDate) obj.accessDate = Zotero.Date.sqlToISO8601(obj.accessDate);
 	
 	if (mode == 'patch') {
 		for (let i in options.patchBase) {
