@@ -58,9 +58,6 @@ while getopts "bcd:fg:tx:" opt; do
 			FX_ARGS="$FX_ARGS -bail"
 			;;
 		g)
-			FX_ARGS="$FX_ARGS -makeTestData"
-			;;
-		g)
 			GREP="$OPTARG"
 			;;
 		t)
