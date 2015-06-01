@@ -543,6 +543,51 @@ describe("Zotero.Item", function () {
 		})
 	})
 	
+	describe("#addTag", function () {
+		it("should add a tag", function* () {
+			var item = createUnsavedDataObject('item');
+			item.addTag('a');
+			yield item.saveTx();
+			var tags = item.getTags();
+			assert.deepEqual(tags, [{ tag: 'a' }]);
+		})
+		
+		it("should add two tags", function* () {
+			var item = createUnsavedDataObject('item');
+			item.addTag('a');
+			item.addTag('b');
+			yield item.saveTx();
+			var tags = item.getTags();
+			assert.sameDeepMembers(tags, [{ tag: 'a' }, { tag: 'b' }]);
+		})
+		
+		it("should add two tags of different types", function* () {
+			var item = createUnsavedDataObject('item');
+			item.addTag('a');
+			item.addTag('b', 1);
+			yield item.saveTx();
+			var tags = item.getTags();
+			assert.sameDeepMembers(tags, [{ tag: 'a' }, { tag: 'b', type: 1 }]);
+		})
+		
+		it("should add a tag to an existing item", function* () {
+			var item = yield createDataObject('item');
+			item.addTag('a');
+			yield item.saveTx();
+			var tags = item.getTags();
+			assert.deepEqual(tags, [{ tag: 'a' }]);
+		})
+		
+		it("should add two tags to an existing item", function* () {
+			var item = yield createDataObject('item');
+			item.addTag('a');
+			item.addTag('b');
+			yield item.saveTx();
+			var tags = item.getTags();
+			assert.sameDeepMembers(tags, [{ tag: 'a' }, { tag: 'b' }]);
+		})
+	})
+	
 	describe("#clone()", function () {
 		// TODO: Expand to other data
 		it("should copy creators", function* () {
