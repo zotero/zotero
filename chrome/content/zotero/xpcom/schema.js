@@ -1469,7 +1469,7 @@ Zotero.Schema = new function(){
 			});
 			yield _updateDBVersion('compatibility', _maxCompatibility);
 			
-			var sql = "INSERT INTO libraries (libraryID, libraryType, editable, filesEditable) "
+			var sql = "INSERT INTO libraries (libraryID, type, editable, filesEditable) "
 				+ "VALUES "
 				+ "(?, 'user', 1, 1), "
 				+ "(4, 'publications', 1, 1)"
@@ -1943,9 +1943,9 @@ Zotero.Schema = new function(){
 				yield _updateDBVersion('compatibility', 1);
 				
 				yield Zotero.DB.queryAsync("ALTER TABLE libraries RENAME TO librariesOld");
-				yield Zotero.DB.queryAsync("CREATE TABLE libraries (\n    libraryID INTEGER PRIMARY KEY,\n    libraryType TEXT NOT NULL,\n    editable INT NOT NULL,\n    filesEditable INT NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    lastsync INT NOT NULL DEFAULT 0\n)");
-				yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, libraryType, editable, filesEditable) VALUES (1, 'user', 1, 1)");
-				yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, libraryType, editable, filesEditable) VALUES (4, 'publications', 1, 1)");
+				yield Zotero.DB.queryAsync("CREATE TABLE libraries (\n    libraryID INTEGER PRIMARY KEY,\n    type TEXT NOT NULL,\n    editable INT NOT NULL,\n    filesEditable INT NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    lastsync INT NOT NULL DEFAULT 0\n)");
+				yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, type, editable, filesEditable) VALUES (1, 'user', 1, 1)");
+				yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, type, editable, filesEditable) VALUES (4, 'publications', 1, 1)");
 				yield Zotero.DB.queryAsync("INSERT INTO libraries SELECT libraryID, libraryType, editable, filesEditable, 0, 0 FROM librariesOld JOIN groups USING (libraryID)");
 				
 				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO syncObjectTypes VALUES (7, 'setting')");
@@ -2271,6 +2271,10 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("DROP TABLE itemsOld");
 				yield Zotero.DB.queryAsync("DROP TABLE tagsOld");
 				yield Zotero.DB.queryAsync("DROP TABLE librariesOld");
+				
+				// Feeds
+				yield Zotero.DB.queryAsync("CREATE TABLE feeds (\n    libraryID INTEGER PRIMARY KEY,\n    name TEXT NOT NULL,\n    url TEXT NOT NULL UNIQUE,\n    lastUpdate TIMESTAMP,\n    lastCheck TIMESTAMP,\n    lastCheckError TEXT,\n    cleanupAfter INT,\n    refreshInterval INT,\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
+				yield Zotero.DB.queryAsync("CREATE TABLE feedItems (\n    itemID INTEGER PRIMARY KEY,\n    guid TEXT NOT NULL UNIQUE,\n    readTime TIMESTAMP,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n)");
 			}
 		}
 		

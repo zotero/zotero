@@ -89,7 +89,16 @@ Zotero.DataObjectUtilities = {
 	
 	
 	"getObjectTypePlural": function(objectType) {
-		return objectType == 'search' ? 'searches' : objectType + 's';
+		switch(objectType) {
+			case 'search':
+				return 'searches';
+			break;
+			case 'library':
+				return 'libraries';
+			break;
+			default:
+				return objectType + 's';
+		}
 	},
 	
 	

@@ -256,16 +256,15 @@ var getGroup = Zotero.Promise.method(function () {
 });
 
 
-var createGroup = Zotero.Promise.coroutine(function* (props) {
-	props = props || {};
+var createGroup = Zotero.Promise.coroutine(function* (props = {}) {
 	var group = new Zotero.Group;
 	group.id = props.id || Zotero.Utilities.rand(10000, 1000000);
 	group.name = props.name || "Test " + Zotero.Utilities.randomString();
 	group.description = props.description || "";
-	group.editable = props.editable || true;
-	group.filesEditable = props.filesEditable || true;
-	group.version = props.version || Zotero.Utilities.rand(1000, 10000);
-	yield group.save();
+	group.editable = props.editable === undefined ? true : props.editable;
+	group.filesEditable = props.filesEditable === undefined ? true : props.filesEditable;
+	group.version = props.version === undefined ? Zotero.Utilities.rand(1000, 10000) : props.version;
+	yield group.saveTx();
 	return group;
 });
 
@@ -292,15 +291,24 @@ function createUnsavedDataObject(objectType, params = {}) {
 		throw new Error("Object type not provided");
 	}
 	
-	if (objectType == 'item') {
-		var param = params.itemType || 'book';
+	var allowedParams = ['libraryID', 'parentID', 'parentKey', 'synced', 'version'];
+	
+	var itemType;
+	if (objectType == 'item' || objectType == 'feedItem') {
+		itemType = params.itemType || 'book';
+		allowedParams.push('dateAdded', 'dateModified');
 	}
-	var obj = new Zotero[Zotero.Utilities.capitalize(objectType)](param);
-	if (params.libraryID) {
-		obj.libraryID = params.libraryID;
+	
+	if (objectType == 'feedItem') {
+		params.guid = params.guid || Zotero.randomString();
+		allowedParams.push('guid');
 	}
+	
+	var obj = new Zotero[Zotero.Utilities.capitalize(objectType)](itemType);
+	
 	switch (objectType) {
 	case 'item':
+	case 'feedItem':
 		if (params.title !== undefined || params.setTitle) {
 			obj.setField('title', params.title !== undefined ? params.title : Zotero.Utilities.randomString());
 		}
@@ -311,21 +319,19 @@ function createUnsavedDataObject(objectType, params = {}) {
 		obj.name = params.name !== undefined ? params.name : Zotero.Utilities.randomString();
 		break;
 	}
-	var allowedParams = ['parentID', 'parentKey', 'synced', 'version'];
-	if (objectType == 'item') {
-		allowedParams.push('dateAdded', 'dateModified');
-	}
-	allowedParams.forEach(function (param) {
-		if (params[param] !== undefined) {
-			obj[param] = params[param];
-		}
-	})
+	
+	Zotero.Utilities.assignProps(obj, params, allowedParams);
+	
 	return obj;
 }
 
 var createDataObject = Zotero.Promise.coroutine(function* (objectType, params = {}, saveOptions) {
 	var obj = createUnsavedDataObject(objectType, params);
-	yield obj.saveTx(saveOptions);
+	if (objectType == 'feedItem') {
+		yield obj.forceSaveTx(saveOptions);
+	} else {
+		yield obj.saveTx(saveOptions);
+	}
 	return obj;
 });
 

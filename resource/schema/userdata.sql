@@ -205,6 +205,25 @@ CREATE TABLE collectionRelations (
 CREATE INDEX collectionRelations_predicateID ON collectionRelations(predicateID);
 CREATE INDEX collectionRelations_object ON collectionRelations(object);
 
+CREATE TABLE feeds (
+    libraryID INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    url TEXT NOT NULL UNIQUE,
+    lastUpdate TIMESTAMP,
+    lastCheck TIMESTAMP,
+    lastCheckError TEXT,
+    cleanupAfter INT,
+    refreshInterval INT,
+    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
+);
+
+CREATE TABLE feedItems (
+    itemID INTEGER PRIMARY KEY,
+    guid TEXT NOT NULL UNIQUE,
+    readTime TIMESTAMP,
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE
+);
+
 CREATE TABLE savedSearches (
     savedSearchID INTEGER PRIMARY KEY,
     savedSearchName TEXT NOT NULL,
@@ -238,11 +257,11 @@ CREATE INDEX deletedItems_dateDeleted ON deletedItems(dateDeleted);
 
 CREATE TABLE libraries (
     libraryID INTEGER PRIMARY KEY,
-    libraryType TEXT NOT NULL,
+    type TEXT NOT NULL,
     editable INT NOT NULL,
     filesEditable INT NOT NULL,
     version INT NOT NULL DEFAULT 0,
-    lastsync INT NOT NULL DEFAULT 0
+    lastSync INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE users (

@@ -24,49 +24,135 @@
 */
 
 Zotero.Libraries = new function () {
-	let _libraryData = {},
-		_userLibraryID,
-		_publicationsLibraryID,
-		_libraryDataLoaded = false;
-	
+	let _userLibraryID;
 	Zotero.defineProperty(this, 'userLibraryID', {
 		get: function() { 
-			if (!_libraryDataLoaded) {
+			if (_userLibraryID === undefined) {
 				throw new Error("Library data not yet loaded");
 			}
 			return _userLibraryID;
 		}
 	});
 	
+	let _publicationsLibraryID;
 	Zotero.defineProperty(this, 'publicationsLibraryID', {
 		get: function() {
-			if (!_libraryDataLoaded) {
+			if (_publicationsLibraryID === undefined) {
 				throw new Error("Library data not yet loaded");
 			}
 			return _publicationsLibraryID;
 		}
 	});
 	
+	/**
+	 * Manage cache
+	 */
+	this._cache = null;
+	
+	this._makeCache = function() {
+		return {};
+	}
+	
+	this.register = function(library) {
+		if (!this._cache) throw new Error("Zotero.Libraries cache is not initialized");
+		Zotero.debug("Zotero.Libraries: Registering library " + library.libraryID, 5);
+		this._addToCache(this._cache, library);
+	};
+	
+	this._addToCache = function(cache, library) {
+		if (!library.libraryID) throw new Error("Cannot register an unsaved library");
+		cache[library.libraryID] = library;
+	}
+	
+	this.unregister = function(libraryID) {
+		if (!this._cache) throw new Error("Zotero.Libraries cache is not initialized");
+		Zotero.debug("Zotero.Libraries: Unregistering library " + libraryID, 5);
+		delete this._cache[libraryID];
+	};
+	
+	/**
+	 * Loads all libraries from DB. Groups, Feeds, etc. should not maintain an
+	 * independent cache.
+	 */
 	this.init = Zotero.Promise.coroutine(function* () {
-		// Library data
-		var sql = "SELECT * FROM libraries";
-		var rows = yield Zotero.DB.queryAsync(sql);
+		let specialLoading = ['feed', 'group'];
+		
+		// Invalidate caches until we're done loading everything
+		let libTypes = ['library'].concat(specialLoading);
+		let newCaches = {};
+		for (let i=0; i<libTypes.length; i++) {
+			let objs = Zotero.DataObjectUtilities.getObjectsClassForObjectType(libTypes[i]);
+			delete objs._cache;
+			
+			newCaches[libTypes[i]] = objs._makeCache();
+		}
+		
+		let sql = Zotero.Library._rowSQL
+			// Exclude libraries that require special loading
+			+ " WHERE type NOT IN "
+			+ "(" + Array(specialLoading.length).fill('?').join(',') + ")";
+		let rows = yield Zotero.DB.queryAsync(sql, specialLoading);
+		
 		for (let i=0; i<rows.length; i++) {
 			let row = rows[i];
-			_libraryData[row.libraryID] = parseDBRow(row);
-			if (row.libraryType == 'user') {
-				_userLibraryID = row.libraryID;
+			
+			let library;
+			switch (row._libraryType) {
+				case 'user':
+				case 'publications':
+					library = new Zotero.Library();
+					library._loadDataFromRow(row); // Does not call save()
+					break;
+				default:
+					throw new Error('Unhandled library type "' + row._libraryType + '"');
 			}
-			else if (row.libraryType == 'publications') {
-				_publicationsLibraryID = row.libraryID;
+			
+			if (library.libraryType == 'user') {
+				_userLibraryID = library.libraryID;
+			}
+			else if (library.libraryType == 'publications') {
+				_publicationsLibraryID = library.libraryID;
+			}
+			
+			this._addToCache(newCaches.library, library);
+		}
+		
+		// Load other libraries
+		for (let i=0; i<specialLoading.length; i++) {
+			let libType = specialLoading[i];
+			let LibType = Zotero.Utilities.capitalize(libType);
+			
+			let libs = yield Zotero.DB.queryAsync(Zotero[LibType]._rowSQL);
+			for (let j=0; j<libs.length; j++) {
+				let lib = new Zotero[LibType]();
+				lib._loadDataFromRow(libs[j]);
+				
+				this._addToCache(newCaches.library, lib);
+				Zotero[lib._ObjectTypePlural]._addToCache(newCaches[libType], lib);
 			}
 		}
-		_libraryDataLoaded = true;
+		
+		// Set new caches
+		for (let libType in newCaches) {
+			Zotero.DataObjectUtilities.getObjectsClassForObjectType(libType)
+				._cache = newCaches[libType];
+		}
 	});
 	
+	/**
+	 * @param {Integer} libraryID
+	 * @return {Boolean}
+	 */
+	this.exists = function(libraryID) {
+		if (!this._cache) throw new Error("Zotero.Libraries cache is not initialized");
+		return this._cache[libraryID] !== undefined;
+	}
 	
-	this.exists = function (libraryID) {
-		return _libraryData[libraryID] !== undefined;
+	
+	this._ensureExists = function(libraryID) {
+		if (!this.exists(libraryID)) {
+			throw new Error("Invalid library ID " + libraryID);
+		}
 	}
 	
 	
@@ -74,166 +160,171 @@ Zotero.Libraries = new function () {
 	 * @return {Integer[]} - All library IDs
 	 */
 	this.getAll = function () {
-		return [for (x of Object.keys(_libraryData)) parseInt(x)]
+		if (!this._cache) throw new Error("Zotero.Libraries cache is not initialized");
+		return Object.keys(this._cache).map(v => parseInt(v));
 	}
 	
 	
 	/**
-	 * @param {String} type - Library type
-	 * @param {Boolean} editable
-	 * @param {Boolean} filesEditable
+	 * Get an existing library
+	 *
+	 * @param {Integer} libraryID
+	 * @return {Zotero.Library[] | Zotero.Library}
 	 */
-	this.add = Zotero.Promise.coroutine(function* (type, editable, filesEditable) {
-		Zotero.DB.requireTransaction();
-		
-		switch (type) {
-			case 'group':
-				break;
-			
-			default:
-				throw new Error("Invalid library type '" + type + "'");
-		}
-		
-		var libraryID = yield Zotero.ID.get('libraries');
-		
-		var sql = "INSERT INTO libraries (libraryID, libraryType, editable, filesEditable) "
-			+ "VALUES (?, ?, ?, ?)";
-		var params = [
-			libraryID,
-			type,
-			editable ? 1 : 0,
-			filesEditable ? 1 : 0
-		];
-		yield Zotero.DB.queryAsync(sql, params);
-		
-		// Re-fetch from DB to get auto-filled defaults
-		var sql = "SELECT * FROM libraries WHERE libraryID=?";
-		var row = yield Zotero.DB.rowQueryAsync(sql, [libraryID]);
-		return _libraryData[row.libraryID] = parseDBRow(row);
-	});
-	
-	
-	this.getName = function (libraryID) {
-		var type = this.getType(libraryID);
-		switch (type) {
-			case 'user':
-				return Zotero.getString('pane.collections.library');
-			
-			case 'publications':
-				return Zotero.getString('pane.collections.publications');
-			
-			case 'group':
-				var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
-				var group = Zotero.Groups.get(groupID);
-				return group.name;
-			
-			default:
-				throw new Error("Unsupported library type '" + type + "' in Zotero.Libraries.getName()");
-		}
-	}
-	
-	
-	this.getType = function (libraryID) {
-		if (!this.exists(libraryID)) {
-			throw new Error("Library data not loaded for library " + libraryID);
-		}
-		return _libraryData[libraryID].type;
+	this.get = function(libraryID) {
+		return this._cache[libraryID] || false;
 	}
 	
 	
 	/**
+	 * @deprecated
+	 */
+	this.getName = function (libraryID) {
+		Zotero.debug("Zotero.Libraries.getName() is deprecated. Use Zotero.Library.prototype.name instead");
+		this._ensureExists(libraryID);
+		return Zotero.Libraries.get(libraryID).name;
+	}
+	
+	
+	/**
+	 * @deprecated
+	 */
+	this.getType = function (libraryID) {
+		Zotero.debug("Zotero.Libraries.getType() is deprecated. Use Zotero.Library.prototype.libraryType instead");
+		this._ensureExists(libraryID);
+		return Zotero.Libraries.get(libraryID).libraryType;
+	}
+	
+	
+	/**
+	 * @deprecated
+	 * 
 	 * @param {Integer} libraryID
 	 * @return {Integer}
 	 */
 	this.getVersion = function (libraryID) {
-		if (!this.exists(libraryID)) {
-			throw new Error("Library data not loaded for library " + libraryID);
-		}
-		return _libraryData[libraryID].version;
+		Zotero.debug("Zotero.Libraries.getVersion() is deprecated. Use Zotero.Library.prototype.version instead");
+		this._ensureExists(libraryID);
+		return Zotero.Libraries.get(libraryID).version;
 	}
 	
 	
 	/**
+	 * @deprecated
+	 *
 	 * @param {Integer} libraryID
-	 * @param {Integer} version - Library version, or -1 to indicate that a full sync is required
+	 * @param {Integer} version
 	 * @return {Promise}
 	 */
-	this.setVersion = Zotero.Promise.coroutine(function* (libraryID, version) {
-		version = parseInt(version);
-		var sql = "UPDATE libraries SET version=? WHERE libraryID=?";
-		yield Zotero.DB.queryAsync(sql, [version, libraryID]);
-		_libraryData[libraryID].version = version;
+	this.setVersion = Zotero.Promise.method(function(libraryID, version) {
+		Zotero.debug("Zotero.Libraries.setVersion() is deprecated. Use Zotero.Library.prototype.version instead");
+		this._ensureExists(libraryID);
+		
+		let library = Zotero.Libraries.get(libraryID);
+		library.version = version;
+		return library.saveTx();
 	});
 	
-	
+	/**
+	 * @deprecated
+	 */
 	this.getLastSyncTime = function (libraryID) {
-		return _libraryData[libraryID].lastSyncTime;
+		Zotero.debug("Zotero.Libraries.getLastSyncTime() is deprecated. Use Zotero.Library.prototype.lastSync instead");
+		this._ensureExists(libraryID);
+		return Zotero.Libraries.get(libraryID).lastSync;
 	};
 	
 	
 	/**
+	 * @deprecated
+	 * 
 	 * @param {Integer} libraryID
+	 * @param {Date} lastSyncTime
 	 * @return {Promise}
-     */
-	this.updateLastSyncTime = function (libraryID) {
-		var d = new Date();
-		_libraryData[libraryID].lastSyncTime = d;
-		return Zotero.DB.queryAsync(
-			"UPDATE libraries SET lastsync=? WHERE libraryID=?",
-			[Math.round(d.getTime() / 1000), libraryID]
-		);
+	 */
+	this.setLastSyncTime = Zotero.Promise.method(function (libraryID, lastSyncTime) {
+		Zotero.debug("Zotero.Libraries.setLastSyncTime() is deprecated. Use Zotero.Library.prototype.lastSync instead");
+		this._ensureExists(libraryID);
+		
+		let library = Zotero.Libraries.get(libraryID);
+		library.lastSync = lastSyncTime;
+		return library.saveTx();
+	});
+	
+	/**
+	 * @deprecated
+	 */
+	this.isEditable = function (libraryID) {
+		Zotero.debug("Zotero.Libraries.isEditable() is deprecated. Use Zotero.Library.prototype.editable instead");
+		this._ensureExists(libraryID);
+		return Zotero.Libraries.get(libraryID).editable;
+	}
+	
+	/**
+	 * @deprecated
+	 *
+	 * @return {Promise}
+	 */
+	this.setEditable = Zotero.Promise.method(function(libraryID, editable) {
+		Zotero.debug("Zotero.Libraries.setEditable() is deprecated. Use Zotero.Library.prototype.editable instead");
+		this._ensureExists(libraryID);
+		
+		let library = Zotero.Libraries.get(libraryID);
+		library.editable = editable;
+		return library.saveTx();
+	});
+	
+	/**
+	 * @deprecated
+	 */
+	this.isFilesEditable = function (libraryID) {
+		Zotero.debug("Zotero.Libraries.isFilesEditable() is deprecated. Use Zotero.Library.prototype.filesEditable instead");
+		this._ensureExists(libraryID);
+		return Zotero.Libraries.get(libraryID).filesEditable;
 	};
 	
-	this.isEditable = function (libraryID) {
-		return _libraryData[libraryID].editable;
-	}
-	
 	/**
+	 * @deprecated
+	 * 
 	 * @return {Promise}
 	 */
-	this.setEditable = function (libraryID, editable) {
-		if (editable == this.isEditable(libraryID)) {
-			return Zotero.Promise.resolve();
-		}
-		_libraryData[libraryID].editable = !!editable;
-		return Zotero.DB.queryAsync(
-			"UPDATE libraries SET editable=? WHERE libraryID=?", [editable ? 1 : 0, libraryID]
-		);
-	}
-	
-	this.isFilesEditable = function (libraryID) {
-		return _libraryData[libraryID].filesEditable;
-	}
-	
-	/**
-	 * @return {Promise}
-	 */
-	this.setFilesEditable = function (libraryID, filesEditable) {
-		if (filesEditable == this.isFilesEditable(libraryID)) {
-			return Zotero.Promise.resolve();
-		}
-		_libraryData[libraryID].filesEditable = !!filesEditable;
-		return Zotero.DB.queryAsync(
-			"UPDATE libraries SET filesEditable=? WHERE libraryID=?", [filesEditable ? 1 : 0, libraryID]
-		);
-	}
-	
-	this.isGroupLibrary = function (libraryID) {
-		if (!_libraryDataLoaded) {
-			throw new Error("Library data not yet loaded");
-		}
+	this.setFilesEditable = Zotero.Promise.coroutine(function* (libraryID, filesEditable) {
+		Zotero.debug("Zotero.Libraries.setFilesEditable() is deprecated. Use Zotero.Library.prototype.filesEditable instead");
+		this._ensureExists(libraryID);
 		
-		return this.getType(libraryID) == 'group';
+		let library = Zotero.Libraries.get(libraryID);
+		library.filesEditable = filesEditable;
+		return library.saveTx();
+	});
+	
+	/**
+	 * @deprecated
+	 */
+	this.isGroupLibrary = function (libraryID) {
+		Zotero.debug("Zotero.Libraries.isGroupLibrary() is deprecated. Use Zotero.Library.prototype.isGroup instead");
+		this._ensureExists(libraryID);
+		return !!Zotero.Libraries.get(libraryID).isGroup;
 	}
 	
-	function parseDBRow(row) {
-		return {
-			id: row.libraryID,
-			type: row.libraryType,
-			editable: !!row.editable,
-			filesEditable: !!row.filesEditable,
-			version: row.version,
-			lastSyncTime: row.lastsync != 0 ? new Date(row.lastsync * 1000) : false
-		};
+	/**
+	 * @deprecated
+	 */
+	this.hasTrash = function (libraryID) {
+		Zotero.debug("Zotero.Libraries.hasTrash() is deprecated. Use Zotero.Library.prototype.hasTrash instead");
+		this._ensureExists(libraryID);
+		return Zotero.Libraries.get(libraryID).hasTrash;
 	}
+	
+	/**
+	 * @deprecated
+	 */
+	this.updateLastSyncTime = Zotero.Promise.method(function(libraryID) {
+		Zotero.debug("Zotero.Libraries.updateLastSyncTime() is deprecated. Use Zotero.Library.prototype.updateLastSyncTime instead");
+		this._ensureExists(libraryID);
+		
+		let library = Zotero.Libraries.get(libraryID);
+		library.updateLastSyncTime();
+		return library.saveTx()
+			.return();
+	})
 }

@@ -99,6 +99,8 @@ Zotero.Items = function() {
 		+ "LEFT JOIN deletedItems DI ON (O.itemID=DI.itemID) "
 		+ "LEFT JOIN charsets CS ON (IA.charsetID=CS.charsetID)";
 	
+	this._relationsTable = "itemRelations";
+	
 	/**
 	 * Return items marked as deleted
 	 *
@@ -505,7 +507,7 @@ Zotero.Items = function() {
 				}
 				
 				if (!item.isEditable()) {
-					throw new Error(item._ObjectType + " (" + item.id + ") is not editable");
+					throw new Error(item._ObjectType + " " + item.libraryKey + " is not editable");
 				}
 				
 				if (!Zotero.Libraries.hasTrash(item.libraryID)) {

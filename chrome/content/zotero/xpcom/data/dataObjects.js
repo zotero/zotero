@@ -51,8 +51,6 @@ Zotero.DataObjects = function () {
 		this.ObjectClass = Zotero[this._ZDO_Object];
 	}
 	
-	this.primaryDataSQLFrom = " " + this._primaryDataSQLFrom + " " + this._primaryDataSQLWhere;
-	
 	this._objectCache = {};
 	this._objectKeys = {};
 	this._objectIDs = {};
@@ -74,6 +72,13 @@ Zotero.defineProperty(Zotero.DataObjects.prototype, 'primaryFields', {
 	get: function () Object.keys(this._primaryDataSQLParts)
 }, {lazy: true});
 
+Zotero.defineProperty(Zotero.DataObjects.prototype, "_primaryDataSQLWhere", {
+	value: "WHERE 1"
+});
+
+Zotero.defineProperty(Zotero.DataObjects.prototype, 'primaryDataSQLFrom', {
+	get: function() " " + this._primaryDataSQLFrom + " " + this._primaryDataSQLWhere
+}, {lateInit: true});
 
 Zotero.DataObjects.prototype.init = function() {
 	return this._loadIDsAndKeys();
@@ -394,6 +399,17 @@ Zotero.DataObjects.prototype.registerObject = function (obj) {
 	obj._inCache = true;
 }
 
+Zotero.DataObjects.prototype.dropDeadObjectsFromCache = function() {
+	let ids = [];
+	for (let libraryID in this._objectIDs) {
+		if (Zotero.Libraries.exists(libraryID)) continue;
+		for (let key in this._objectIDs[libraryID]) {
+			ids.push(this._objectIDs[libraryID][key]);
+		}
+	}
+	
+	this.unload(ids);
+}
 
 /**
  * Clear object from internal array
@@ -507,8 +523,6 @@ Zotero.defineProperty(Zotero.DataObjects.prototype, "primaryDataSQL", {
 	}
 }, {lazy: true});
 
-Zotero.DataObjects.prototype._primaryDataSQLWhere = "WHERE 1";
-
 Zotero.DataObjects.prototype.getPrimaryDataSQLPart = function (part) {
 	var sql = this._primaryDataSQLParts[part];
 	if (!sql) {
@@ -590,7 +604,7 @@ Zotero.DataObjects.prototype._load = Zotero.Promise.coroutine(function* (library
 				}
 				// Object doesn't exist -- create new object and stuff in cache
 				else {
-					obj = new Zotero[this._ZDO_Object];
+					obj = this._getObjectForRow(rowObj);
 					obj.loadFromRow(rowObj, true);
 					if (!options || !options.noCache) {
 						this.registerObject(obj);
@@ -624,6 +638,9 @@ Zotero.DataObjects.prototype._load = Zotero.Promise.coroutine(function* (library
 	return loaded;
 });
 
+Zotero.DataObjects.prototype._getObjectForRow = function(row) {
+	return new Zotero[this._ZDO_Object];
+};
 
 Zotero.DataObjects.prototype._loadIDsAndKeys = Zotero.Promise.coroutine(function* () {
 	var sql = "SELECT ROWID AS id, libraryID, key FROM " + this._ZDO_table;

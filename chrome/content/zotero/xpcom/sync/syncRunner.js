@@ -429,7 +429,7 @@ Zotero.Sync.Runner_Module = function () {
 			}
 			group.version = info.version;
 			group.fromJSON(info.data, Zotero.Users.getCurrentUserID());
-			yield group.save();
+			yield group.saveTx();
 			
 			// Add group to library list
 			libraries.push(group.libraryID);

@@ -30,52 +30,55 @@ Zotero.Users = new function () {
 	var _localUserKey;
 	
 	this.init = Zotero.Promise.coroutine(function* () {
-		var sql = "SELECT value FROM settings WHERE setting='account' AND key='userID'";
-		_userID = yield Zotero.DB.valueQueryAsync(sql);
+		let sql = "SELECT key, value FROM settings WHERE setting='account'";
+		let rows = yield Zotero.DB.queryAsync(sql);
 		
-		if (_userID) {
-			sql = "SELECT value FROM settings WHERE setting='account' AND key='libraryID'";
-			_libraryID = yield Zotero.DB.valueQueryAsync(sql);
-			
-			sql = "SELECT value FROM settings WHERE setting='account' AND key='username'";
-			_username = yield Zotero.DB.valueQueryAsync(sql);
+		let settings = {};
+		for (let i=0; i<rows.length; i++) {
+			settings[rows[i].key] = rows[i].value;
 		}
-		// If we don't have a global user id, generate a local user key
-		else {
-			sql = "SELECT value FROM settings WHERE setting='account' AND key='localUserKey'";
-			let key = yield Zotero.DB.valueQueryAsync(sql);
-			// Generate a local user key if we don't have one
-			if (!key) {
-				key = Zotero.randomString(8);
-				sql = "INSERT INTO settings VALUES ('account', 'localUserKey', ?)";
-				yield Zotero.DB.queryAsync(sql, key);
-			}
+		
+		if (settings.userID) {
+			_userID = settings.userID;
+			_libraryID = settings.libraryID;
+			_username = settings.username;
+		}
+		
+		if (settings.localUserKey) {
+			_localUserKey = settings.localUserKey;
+		} else {
+			let key = Zotero.randomString(8);
+			
+			sql = "INSERT INTO settings VALUES ('account', 'localUserKey', ?)";
+			yield Zotero.DB.queryAsync(sql, key);
+			
 			_localUserKey = key;
 		}
 	});
 	
 	
-	this.getCurrentUserID = () => _userID;
-	this.setCurrentUserID = function (val) {
+	this.getCurrentUserID = function() { return _userID };
+	this.setCurrentUserID = Zotero.Promise.coroutine(function* (val) {
 		val = parseInt(val);
-		_userID = val;
+		if (!(val > 0)) throw new Error("userID must be a positive integer");
+		
 		var sql = "REPLACE INTO settings VALUES ('account', 'userID', ?)";
-		return Zotero.DB.queryAsync(sql, val);
-	};
+		yield Zotero.DB.queryAsync(sql, val);
+		_userID = val;
+	});
 	
 	
 	this.getCurrentUsername = () => _username;
-	this.setCurrentUsername = function (val) {
-		_username = val;
+	this.setCurrentUsername = Zotero.Promise.coroutine(function* (val) {
+		if (!val || typeof val != 'string') throw new Error('username must be a non-empty string');
+		
 		var sql = "REPLACE INTO settings VALUES ('account', 'username', ?)";
-		return Zotero.DB.queryAsync(sql, val);
-	};
+		yield Zotero.DB.queryAsync(sql, val);
+		_username = val;
+	});
 	
 	
 	this.getLocalUserKey = function () {
-		if (!_localUserKey) {
-			throw new Error("Local user key not available");
-		}
 		return _localUserKey;
 	};
 };

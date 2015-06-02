@@ -303,7 +303,7 @@ describe("Zotero.Sync.Runner", function () {
 			yield Zotero.DB.queryAsync(
 				"UPDATE groups SET version=0 WHERE groupID IN (?, ?)", [group1.id, group2.id]
 			);
-			yield Zotero.Groups.init();
+			yield Zotero.Libraries.init();
 			group1 = Zotero.Groups.get(group1.id);
 			group2 = Zotero.Groups.get(group2.id);
 			
@@ -443,7 +443,7 @@ describe("Zotero.Sync.Runner", function () {
 				skipBundledFiles: true
 			});
 			
-			yield Zotero.Groups.init();
+			yield Zotero.Libraries.init();
 		})
 		after(function* () {
 			this.timeout(60000);

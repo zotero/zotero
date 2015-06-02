@@ -742,6 +742,21 @@ Zotero.Utilities = {
 		return retValues;
 	},
 	
+	/**
+	 * Assign properties to an object
+	 *
+	 * @param {Object} target
+	 * @param {Object} source
+	 * @param {String[]} [props] Properties to assign. Assign all otherwise
+	 */
+	"assignProps": function(target, source, props) {
+		if (!props) props = Object.keys(source);
+		
+		for (var i=0; i<props.length; i++) {
+			if (source[props[i]] === undefined) continue;
+			target[props[i]] = source[props[i]];
+		}
+	},
 	
 	/**
 	 * Generate a random integer between min and max inclusive
