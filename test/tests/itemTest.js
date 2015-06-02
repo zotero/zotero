@@ -1,64 +1,114 @@
 describe("Zotero.Item", function () {
 	describe("#getField()", function () {
-		it("should return false for valid unset fields on unsaved items", function () {
+		it("should return an empty string for valid unset fields on unsaved items", function () {
 			var item = new Zotero.Item('book');
-			assert.equal(item.getField('rights'), false);
+			assert.strictEqual(item.getField('rights'), "");
 		});
 		
-		it("should return false for valid unset fields on unsaved items after setting on another field", function () {
+		it("should return an empty string for valid unset fields on unsaved items after setting on another field", function () {
 			var item = new Zotero.Item('book');
 			item.setField('title', 'foo');
-			assert.equal(item.getField('rights'), false);
+			assert.strictEqual(item.getField('rights'), "");
 		});
 		
-		it("should return false for invalid unset fields on unsaved items after setting on another field", function () {
+		it("should return an empty string for invalid unset fields on unsaved items after setting on another field", function () {
 			var item = new Zotero.Item('book');
 			item.setField('title', 'foo');
-			assert.equal(item.getField('invalid'), false);
+			assert.strictEqual(item.getField('invalid'), "");
 		});
 	});
 	
 	describe("#setField", function () {
 		it("should throw an error if item type isn't set", function () {
 			var item = new Zotero.Item;
-			assert.throws(item.setField.bind(item, 'title', 'test'), "Item type must be set before setting field data");
+			assert.throws(() => item.setField('title', 'test'), "Item type must be set before setting field data");
 		})
 		
 		it("should mark a field as changed", function () {
 			var item = new Zotero.Item('book');
 			item.setField('title', 'Foo');
-			assert.ok(item._changed.itemData[Zotero.ItemFields.getID('title')]);
-			assert.ok(item.hasChanged());
+			assert.isTrue(item._changed.itemData[Zotero.ItemFields.getID('title')]);
+			assert.isTrue(item.hasChanged());
 		})
 		
-		it("should clear an existing field set to a falsy value", function* () {
+		it('should clear an existing field when ""/null/false is passed', function* () {
 			var field = 'title';
+			var val = 'foo';
 			var fieldID = Zotero.ItemFields.getID(field);
 			var item = new Zotero.Item('book');
-			item.setField(field, 'Foo');
-			id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
+			item.setField(field, val);
+			yield item.saveTx();
 			
 			item.setField(field, "");
 			assert.ok(item._changed.itemData[fieldID]);
-			assert.ok(item.hasChanged());
+			assert.isTrue(item.hasChanged());
+			
+			// Reset to original value
 			yield item.reload();
-			
 			assert.isFalse(item.hasChanged());
+			assert.equal(item.getField(field), val);
 			
+			// false
 			item.setField(field, false);
 			assert.ok(item._changed.itemData[fieldID]);
-			assert.ok(item.hasChanged());
+			assert.isTrue(item.hasChanged());
+			
+			// Reset to original value
 			yield item.reload();
-			
 			assert.isFalse(item.hasChanged());
+			assert.equal(item.getField(field), val);
 			
+			// null
 			item.setField(field, null);
 			assert.ok(item._changed.itemData[fieldID]);
-			assert.ok(item.hasChanged());
+			assert.isTrue(item.hasChanged());
 			
 			yield item.saveTx();
-			assert.isFalse(item.getField(fieldID));
+			assert.equal(item.getField(field), "");
+		})
+		
+		it('should clear a field set to 0 when a ""/null/false is passed', function* () {
+			var field = 'title';
+			var val = 0;
+			var fieldID = Zotero.ItemFields.getID(field);
+			var item = new Zotero.Item('book');
+			item.setField(field, val);
+			yield item.saveTx();
+			
+			assert.strictEqual(item.getField(field), val);
+			
+			// ""
+			item.setField(field, "");
+			assert.ok(item._changed.itemData[fieldID]);
+			assert.isTrue(item.hasChanged());
+			
+			// Reset to original value
+			yield item.reload();
+			assert.isFalse(item.hasChanged());
+			assert.strictEqual(item.getField(field), val);
+			
+			// False
+			item.setField(field, false);
+			assert.ok(item._changed.itemData[fieldID]);
+			assert.isTrue(item.hasChanged());
+			
+			// Reset to original value
+			yield item.reload();
+			assert.isFalse(item.hasChanged());
+			assert.strictEqual(item.getField(field), val);
+			
+			// null
+			item.setField(field, null);
+			assert.ok(item._changed.itemData[fieldID]);
+			assert.isTrue(item.hasChanged());
+			
+			yield item.saveTx();
+			assert.strictEqual(item.getField(field), "");
+		})
+		
+		it("should throw if value is undefined", function () {
+			var item = new Zotero.Item('book');
+			assert.throws(() => item.setField('title'), "Value cannot be undefined");
 		})
 		
 		it("should not mark an empty field set to an empty string as changed", function () {

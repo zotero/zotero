@@ -269,7 +269,7 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 		);
 	}
 	
-	value = value ? value : '';
+	value = (value !== null && value !== false) ? value : '';
 	
 	if (!unformatted) {
 		// Multipart date fields
@@ -618,6 +618,10 @@ Zotero.Item.prototype.getFieldsNotInType = function (itemTypeID, allowBaseConver
  */
 Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	this._disabledCheck();
+	
+	if (value === undefined) {
+		throw new Error("Value cannot be undefined");
+	}
 	
 	if (typeof value == 'string') {
 		value = value.trim().normalize();
