@@ -191,12 +191,25 @@ var createGroup = Zotero.Promise.coroutine(function* (props) {
 // Data objects
 //
 function createUnsavedDataObject(objectType, params) {
+	if (!objectType) {
+		throw new Error("Object type not provided");
+	}
+	
 	params = params || {};
 	if (objectType == 'item') {
 		var param = params.itemType || 'book';
 	}
 	var obj = new Zotero[Zotero.Utilities.capitalize(objectType)](param);
+	if (params.libraryID) {
+		obj.libraryID = params.libraryID;
+	}
 	switch (objectType) {
+	case 'item':
+		if (params.title) {
+			obj.setField('title', params.title);
+		}
+		break;
+	
 	case 'collection':
 	case 'search':
 		obj.name = params.name !== undefined ? params.name : "Test";
