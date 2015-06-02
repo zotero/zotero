@@ -189,6 +189,7 @@ if(run && ZoteroUnit.tests) {
 				testFiles.push(file.leafName);
 			}
 		}
+		testFiles.sort();
 	} else {
 		var specifiedTests = ZoteroUnit.tests.split(",");
 		for (let test of specifiedTests) {
