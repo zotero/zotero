@@ -528,14 +528,16 @@ Zotero.DataObject.prototype._addLinkedObject = Zotero.Promise.coroutine(function
 	if (this.libraryID == userLibraryID || object.libraryID != userLibraryID) {
 		this.addRelation(predicate, objectURI);
 		yield this.save({
-			skipDateModifiedUpdate: true
+			skipDateModifiedUpdate: true,
+			skipSelect: true
 		});
 	}
 	else {
 		yield object.loadRelations();
 		object.addRelation(predicate, thisURI);
 		yield object.save({
-			skipDateModifiedUpdate: true
+			skipDateModifiedUpdate: true,
+			skipSelect: true
 		});
 	}
 	

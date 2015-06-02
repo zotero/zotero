@@ -909,7 +909,7 @@ Zotero.CollectionTreeView.prototype.selectLibrary = Zotero.Promise.coroutine(fun
 	var row = this._rowMap['L' + libraryID];
 	if (row !== undefined) {
 		this._treebox.ensureRowIsVisible(row);
-		this.selectWait(row);
+		yield this.selectWait(row);
 		return true;
 	}
 	
@@ -1621,7 +1621,9 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 				yield linkedItem.loadCollections();
 				linkedItem.setCollections();
 				linkedItem.deleted = false;
-				yield linkedItem.save();
+				yield linkedItem.save({
+					skipSelect: true
+				});
 			}
 			return linkedItem.id;
 			
@@ -1691,7 +1693,9 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			}
 		}
 		
-		var newItemID = yield newItem.save();
+		var newItemID = yield newItem.save({
+			skipSelect: true
+		});
 		
 		// Record link
 		yield newItem.addLinkedItem(item);
@@ -1710,7 +1714,9 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			for each(var note in notes) {
 				let newNote = yield note.clone(targetLibraryID);
 				newNote.parentID = newItemID;
-				yield newNote.save()
+				yield newNote.save({
+					skipSelect: true
+				})
 				
 				yield newNote.addLinkedItem(note);
 			}

@@ -95,21 +95,20 @@ var selectLibrary = Zotero.Promise.coroutine(function* (win, libraryID) {
 	yield waitForItemsLoad(win);
 });
 
-var waitForItemsLoad = function (win, collectionRowToSelect) {
-	var resolve;
-	var promise = new Zotero.Promise(() => resolve = arguments[0]);
+var waitForItemsLoad = Zotero.Promise.coroutine(function* (win, collectionRowToSelect) {
 	var zp = win.ZoteroPane;
 	var cv = zp.collectionsView;
-	cv.addEventListener('load', function () {
-		if (collectionRowToSelect !== undefined) {
-			cv.selection.select(collectionRowToSelect);
-		}
-		zp.addEventListener('itemsLoaded', function () {
-			resolve();
-		});
-	});
-	return promise;
-}
+	
+	var deferred = Zotero.Promise.defer();
+	cv.addEventListener('load', () => deferred.resolve());
+	yield deferred.promise;
+	if (collectionRowToSelect !== undefined) {
+		yield cv.selectWait(collectionRowToSelect);
+	}
+	deferred = Zotero.Promise.defer();
+	zp.itemsView.addEventListener('load', () => deferred.resolve());
+	return deferred.promise;
+});
 
 /**
  * Waits for a single item event. Returns a promise for the item ID(s).

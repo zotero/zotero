@@ -54,7 +54,7 @@ describe("Zotero.CollectionTreeView", function() {
 			var collection1 = yield createDataObject('collection');
 			var collection2 = createUnsavedDataObject('collection');
 			collection2.parentID = collection1.id;
-			yield collection2.save({
+			yield collection2.saveTx({
 				skipSelect: true
 			});
 			var row = cv.getRowIndexByID("C" + collection1.id);
@@ -279,6 +279,7 @@ describe("Zotero.CollectionTreeView", function() {
 			var ids = yield drop("C" + collection.id, [item.id], deferred.promise);
 			
 			Zotero.Notifier.unregisterObserver(observerID);
+			
 			yield collectionsView.selectCollection(collection.id);
 			yield waitForItemsLoad(win);
 			
@@ -289,7 +290,7 @@ describe("Zotero.CollectionTreeView", function() {
 		})
 		
 		it("should copy an item with an attachment to a group", function* () {
-			var group = yield getGroup();
+			var group = yield createGroup();
 			
 			var item = yield createDataObject('item', false, { skipSelect: true });
 			var file = getTestDataDirectory();
@@ -310,15 +311,27 @@ describe("Zotero.CollectionTreeView", function() {
 			yield collectionsView.selectLibrary(group.libraryID);
 			yield waitForItemsLoad(win);
 			
-			var itemsView = win.ZoteroPane.itemsView
+			// Check parent
+			var itemsView = win.ZoteroPane.itemsView;
 			assert.equal(itemsView.rowCount, 1);
 			var treeRow = itemsView.getRow(0);
 			assert.equal(treeRow.ref.libraryID, group.libraryID);
 			assert.equal(treeRow.ref.id, ids[0]);
-			
 			// New item should link back to original
 			var linked = yield item.getLinkedItem(group.libraryID);
 			assert.equal(linked.id, treeRow.ref.id);
+			
+			// Check attachment
+			assert.isTrue(itemsView.isContainer(0));
+			yield itemsView.toggleOpenState(0);
+			assert.equal(itemsView.rowCount, 2);
+			treeRow = itemsView.getRow(1);
+			assert.equal(treeRow.ref.id, ids[1]);
+			// New attachment should link back to original
+			linked = yield attachment.getLinkedItem(group.libraryID);
+			assert.equal(linked.id, treeRow.ref.id);
+			
+			yield group.erase()
 		})
 		
 		it("should not copy an item or its attachment to a group twice", function* () {
@@ -334,7 +347,7 @@ describe("Zotero.CollectionTreeView", function() {
 			});
 			var attachmentTitle = Zotero.Utilities.randomString();
 			attachment.setField('title', attachmentTitle);
-			yield attachment.save();
+			yield attachment.saveTx();
 			
 			var ids = yield drop("L" + group.libraryID, [item.id]);
 			assert.isFalse(yield canDrop("L" + group.libraryID, [item.id]));
@@ -350,7 +363,7 @@ describe("Zotero.CollectionTreeView", function() {
 			var droppedItem = yield item.getLinkedItem(group.libraryID);
 			droppedItem.setCollections([collection.id]);
 			droppedItem.deleted = true;
-			yield droppedItem.save();
+			yield droppedItem.saveTx();
 			
 			// Add observer to wait for collection add
 			var deferred = Zotero.Promise.defer();

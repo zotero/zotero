@@ -1123,9 +1123,7 @@ var ZoteroPane = new function()
 				//
 				// TODO: Cancel loading
 				let deferred = Zotero.Promise.defer();
-				this.itemsView.addEventListener('load', function () {
-					deferred.resolve();
-				});
+				this.itemsView.addEventListener('load', () => deferred.resolve());
 				if (deferred.promise.isPending()) {
 					Zotero.debug("Waiting for items view " + this.itemsView.id + " to finish loading");
 					yield deferred.promise;
@@ -1192,13 +1190,6 @@ var ZoteroPane = new function()
 			this.itemsView.onError = function () {
 				ZoteroPane_Local.displayErrorMessage();
 			};
-			// If any queued load listeners, set them to run when the tree is ready
-			if (this._listeners.itemsLoaded) {
-				let listener;
-				while (listener = this._listeners.itemsLoaded.shift()) {
-					this.itemsView.addEventListener('load', listener);
-				}
-			}
 			this.itemsView.addEventListener('load', this.setTagScope);
 			document.getElementById('zotero-items-tree').view = this.itemsView;
 			
@@ -2047,81 +2038,48 @@ var ZoteroPane = new function()
 			throw new Error("Collections view not loaded");
 		}
 		
-		var self = this;
+		var cv = this.collectionsView;
+		
 		var deferred = Zotero.Promise.defer();
-		this.collectionsView.addEventListener('load', function () {
-			Zotero.spawn(function* () {
-				try {
-					self.addEventListener('itemsLoaded', function () {
-						Zotero.spawn(function* () {
-							var selected = yield self.itemsView.selectItem(itemID, expand);
-							if (!selected) {
-								if (item.deleted) {
-									Zotero.debug("Item is deleted; switching to trash");
-									yield self.collectionsView.selectTrash(item.libraryID);
-								}
-								else {
-									Zotero.debug("Item was not selected; switching to library");
-									yield self.collectionsView.selectLibrary(item.libraryID);
-								}
-								yield self.itemsView.selectItem(itemID, expand);
-							}
-							deferred.resolve(true);
-						})
-						.catch(function(e) {
-							deferred.reject(e);
-						});
-					});
-					
-					var currentLibraryID = self.getSelectedLibraryID();
-					// If in a different library
-					if (item.libraryID != currentLibraryID) {
-						Zotero.debug("Library ID differs; switching library");
-						yield self.collectionsView.selectLibrary(item.libraryID);
-					}
-					// Force switch to library view
-					else if (!self.collectionsView.selectedTreeRow.isLibrary() && inLibrary) {
-						Zotero.debug("Told to select in library; switching to library");
-						yield self.collectionsView.selectLibrary(item.libraryID);
-					}
-				}
-				catch (e) {
-					deferred.reject(e);
-				}
-			})
-		});
+		cv.addEventListener('load', () => deferred.resolve());
+		yield deferred.promise;
+		
+		var currentLibraryID = this.getSelectedLibraryID();
+		// If in a different library
+		if (item.libraryID != currentLibraryID) {
+			Zotero.debug("Library ID differs; switching library");
+			yield cv.selectLibrary(item.libraryID);
+		}
+		// Force switch to library view
+		else if (!cv.selectedTreeRow.isLibrary() && inLibrary) {
+			Zotero.debug("Told to select in library; switching to library");
+			yield cv.selectLibrary(item.libraryID);
+		}
+		
+		deferred = Zotero.Promise.defer();
+		this.itemsView.addEventListener('load', () => deferred.resolve());
+		yield deferred.promise;
+		
+		var selected = yield this.itemsView.selectItem(itemID, expand);
+		if (!selected) {
+			if (item.deleted) {
+				Zotero.debug("Item is deleted; switching to trash");
+				yield cv.selectTrash(item.libraryID);
+			}
+			else {
+				Zotero.debug("Item was not selected; switching to library");
+				yield cv.selectLibrary(item.libraryID);
+			}
+			
+			deferred = Zotero.Promise.defer();
+			this.itemsView.addEventListener('load', () => deferred.resolve());
+			yield deferred.promise;
+			
+			yield this.itemsView.selectItem(itemID, expand);
+		}
 		
 		// open Zotero pane
 		this.show();
-		
-		return deferred.promise;
-	});
-	
-	
-	this.addEventListener = function (event, listener) {
-		if (event == 'itemsLoaded') {
-			if (this.itemsView) {
-				this.itemsView.addEventListener('load', listener);
-			}
-			else {
-				if (!this._listeners.itemsLoaded) {
-					this._listeners.itemsLoaded = [];
-				}
-				this._listeners.itemsLoaded.push(listener);
-			}
-		}
-	};
-	
-	
-	this._runListeners = Zotero.Promise.coroutine(function* (event) {
-		if (!this._listeners[event]) {
-			return;
-		}
-		
-		var listener;
-		while (listener = this._listeners[event].shift()) {
-			yield Zotero.Promise.resolve(listener());
-		}
 	});
 	
 	

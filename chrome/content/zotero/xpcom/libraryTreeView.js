@@ -41,7 +41,7 @@ Zotero.LibraryTreeView.prototype = {
 		if (event == 'load') {
 			// If already initialized run now
 			if (this._initialized) {
-				listener();
+				listener.call(this);
 			}
 			else {
 				this._listeners[event].push(listener);
@@ -60,7 +60,7 @@ Zotero.LibraryTreeView.prototype = {
 		if (!this._listeners[event]) return;
 		var listener;
 		while (listener = this._listeners[event].shift()) {
-			yield Zotero.Promise.resolve(listener());
+			yield Zotero.Promise.resolve(listener.call(this));
 		}
 	}),
 	
