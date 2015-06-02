@@ -126,6 +126,44 @@ describe("Zotero.DataObject", function() {
 		})
 	})
 	
+	describe("#erase()", function () {
+		it("shouldn't trigger notifier if skipNotifier is passed", function* () {
+			let observerIDs = [];
+			let promises = [];
+			for (let type of types) {
+				let obj = yield createDataObject(type);
+				// For items, test automatic child item deletion
+				if (type == 'item') {
+					yield createDataObject(type, { itemType: 'note', parentID: obj.id });
+				}
+				
+				let deferred = Zotero.Promise.defer();
+				promises.push(deferred.promise);
+				observerIDs.push(Zotero.Notifier.registerObserver(
+					{
+						notify: function (event) {
+							if (event == 'delete') {
+								deferred.reject("Notifier called for erase on " + type);
+							}
+						}
+					},
+					type,
+					'test'
+				));
+				yield obj.eraseTx({
+					skipNotifier: true
+				});
+			}
+			yield Zotero.Promise.all(promises)
+				// Give notifier time to trigger
+				.timeout(100).catch(Zotero.Promise.TimeoutError, (e) => {})
+			
+			for (let id of observerIDs) {
+				Zotero.Notifier.unregisterObserver(id);
+			}
+		})
+	})
+	
 	describe("#updateVersion()", function() {
 		it("should update the object version", function* () {
 			for (let type of types) {

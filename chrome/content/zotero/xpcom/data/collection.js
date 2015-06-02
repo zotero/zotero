@@ -611,7 +611,7 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 	this.ObjectsClass.unload(collections);
 	//return Zotero.Collections.reloadAll();
 	
-	if (!env.skipNotifier) {
+	if (!env.options.skipNotifier) {
 		Zotero.Notifier.queue('delete', 'collection', collections, notifierData);
 	}
 });

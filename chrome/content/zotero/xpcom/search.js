@@ -232,7 +232,7 @@ Zotero.Search.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	var sql = "DELETE FROM savedSearches WHERE savedSearchID=?";
 	yield Zotero.DB.queryAsync(sql, this.id);
 	
-	if (!env.skipNotifier) {
+	if (!env.options.skipNotifier) {
 		Zotero.Notifier.queue('delete', 'search', this.id, notifierData);
 	}
 });

@@ -3762,7 +3762,11 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 		let toDelete = yield Zotero.DB.columnQueryAsync(sql, [this.id]);
 		for (let i=0; i<toDelete.length; i++) {
 			let obj = yield this.ObjectsClass.getAsync(toDelete[i]);
-			yield obj.erase();
+			// Copy all options other than 'tx', which would cause a deadlock
+			let options = {};
+			Object.assign(options, env.options);
+			delete options.tx;
+			yield obj.erase(options);
 		}
 	}
 	
@@ -3788,7 +3792,7 @@ Zotero.Item.prototype._erasePreCommit = Zotero.Promise.coroutine(function* (env)
 	
 	this.ObjectsClass.unload(this.id);
 	
-	if (!env.skipNotifier) {
+	if (!env.options.skipNotifier) {
 		Zotero.Notifier.queue('delete', 'item', this.id, env.deletedItemNotifierData);
 	}
 	
