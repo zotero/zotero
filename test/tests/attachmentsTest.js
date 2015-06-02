@@ -1,12 +1,10 @@
 describe("Zotero.Attachments", function() {
 	var win;
 	
-	before(function () {
+	before(function* () {
 		// Hidden browser, which requires a browser window, needed for charset detection
 		// (until we figure out a better way)
-		if (!Zotero.isStandalone) {
-			return loadBrowserWindow().then(window => win = window);
-		}
+		win = yield loadBrowserWindow();
 	});
 	after(function () {
 		if (win) {
