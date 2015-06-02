@@ -89,8 +89,9 @@ function waitForWindow(uri, callback) {
 	return deferred.promise;
 }
 
-var selectLibrary = Zotero.Promise.coroutine(function* (win) {
-	yield win.ZoteroPane.collectionsView.selectLibrary(Zotero.Libraries.userLibraryID);
+var selectLibrary = Zotero.Promise.coroutine(function* (win, libraryID) {
+	libraryID = libraryID || Zotero.Libraries.userLibraryID;
+	yield win.ZoteroPane.collectionsView.selectLibrary(libraryID);
 	yield waitForItemsLoad(win);
 });
 

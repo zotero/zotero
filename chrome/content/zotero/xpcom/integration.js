@@ -3118,7 +3118,7 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
 		
 		// Follow merged item relations until we find an item or hit a dead end
 		while (!zoteroItem) {
-			var relations = Zotero.Relations.getByURIs(uri, Zotero.Relations.deletedItemPredicate);
+			var relations = Zotero.Relations.getByURIs(uri, Zotero.Relations.replacedItemPredicate);
 			// No merged items found
 			if(!relations.length) {
 				break;

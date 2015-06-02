@@ -171,4 +171,111 @@ describe("Zotero.DataObject", function() {
 			}
 		})
 	})
+	
+	describe("Relations", function () {
+		var types = ['collection', 'item'];
+		
+		function makeObjectURI(objectType) {
+			var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
+			return 'http://zotero.org/groups/1/' + objectTypePlural + '/'
+				+ Zotero.Utilities.generateObjectKey();
+		}
+		
+		describe("#addRelation()", function () {
+			it("should add a relation to an object", function* () {
+				for (let type of types) {
+					let predicate = 'owl:sameAs';
+					let object = makeObjectURI(type);
+					let obj = createUnsavedDataObject(type);
+					obj.addRelation(predicate, object);
+					yield obj.saveTx();
+					var relations = obj.getRelations();
+					assert.property(relations, predicate);
+					assert.include(relations[predicate], object);
+				}
+			})
+		})
+		
+		describe("#removeRelation()", function () {
+			it("should remove a relation from an object", function* () {
+				for (let type of types) {
+					let predicate = 'owl:sameAs';
+					let object = makeObjectURI(type);
+					let obj = createUnsavedDataObject(type);
+					obj.addRelation(predicate, object);
+					yield obj.saveTx();
+					
+					obj.removeRelation(predicate, object);
+					yield obj.saveTx();
+					
+					assert.lengthOf(Object.keys(obj.getRelations()), 0);
+				}
+			})
+		})
+		
+		describe("#hasRelation()", function () {
+			it("should return true if an object has a given relation", function* () {
+				for (let type of types) {
+					let predicate = 'owl:sameAs';
+					let object = makeObjectURI(type);
+					let obj = createUnsavedDataObject(type);
+					obj.addRelation(predicate, object);
+					yield obj.saveTx();
+					assert.ok(obj.hasRelation(predicate, object));
+				}
+			})
+		})
+		
+		describe("#_getLinkedObject()", function () {
+			it("should return a linked object in another library", function* () {
+				var group = yield getGroup();
+				var item1 = yield createDataObject('item');
+				var item2 = yield createDataObject('item', { libraryID: group.libraryID });
+				var item2URI = Zotero.URI.getItemURI(item2);
+				
+				yield item2.addLinkedItem(item1);
+				var linkedItem = yield item1.getLinkedItem(item2.libraryID);
+				assert.equal(linkedItem.id, item2.id);
+			})
+			
+			it("shouldn't return reverse linked objects by default", function* () {
+				var group = yield getGroup();
+				var item1 = yield createDataObject('item');
+				var item1URI = Zotero.URI.getItemURI(item1);
+				var item2 = yield createDataObject('item', { libraryID: group.libraryID });
+				
+				yield item2.addLinkedItem(item1);
+				var linkedItem = yield item2.getLinkedItem(item1.libraryID);
+				assert.isFalse(linkedItem);
+			})
+			
+			it("should return reverse linked objects with bidirectional flag", function* () {
+				var group = yield getGroup();
+				var item1 = yield createDataObject('item');
+				var item1URI = Zotero.URI.getItemURI(item1);
+				var item2 = yield createDataObject('item', { libraryID: group.libraryID });
+				
+				yield item2.addLinkedItem(item1);
+				var linkedItem = yield item2.getLinkedItem(item1.libraryID, true);
+				assert.equal(linkedItem.id, item1.id);
+			})
+		})
+		
+		describe("#_addLinkedObject()", function () {
+			it("should add an owl:sameAs relation", function* () {
+				var group = yield getGroup();
+				var item1 = yield createDataObject('item');
+				var dateModified = item1.getField('dateModified');
+				var item2 = yield createDataObject('item', { libraryID: group.libraryID });
+				var item2URI = Zotero.URI.getItemURI(item2);
+				
+				yield item2.addLinkedItem(item1);
+				var preds = item1.getRelationsByPredicate(Zotero.Relations.linkedObjectPredicate);
+				assert.include(preds, item2URI);
+				
+				// Make sure Date Modified hasn't changed
+				assert.equal(item1.getField('dateModified'), dateModified);
+			})
+		})
+	})
 })

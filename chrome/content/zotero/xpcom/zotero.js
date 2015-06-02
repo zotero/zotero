@@ -592,8 +592,9 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				yield Zotero.ItemTypes.init();
 				yield Zotero.ItemFields.init();
 				yield Zotero.CreatorTypes.init();
-				yield Zotero.CharacterSets.init();
 				yield Zotero.FileTypes.init();
+				yield Zotero.CharacterSets.init();
+				yield Zotero.RelationPredicates.init();
 				
 				Zotero.locked = false;
 				

@@ -126,6 +126,17 @@ CREATE TABLE tags (
     UNIQUE (libraryID, name)
 );
 
+CREATE TABLE itemRelations (
+    itemID INT NOT NULL,
+    predicateID INT NOT NULL,
+    object TEXT NOT NULL,
+    PRIMARY KEY (itemID, predicateID, object),
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
+    FOREIGN KEY (predicateID) REFERENCES relationPredicates(predicateID) ON DELETE CASCADE
+);
+CREATE INDEX itemRelations_predicateID ON itemRelations(predicateID);
+CREATE INDEX itemRelations_object ON itemRelations(object);
+
 CREATE TABLE itemTags (
     itemID INT NOT NULL,
     tagID INT NOT NULL,
@@ -191,6 +202,17 @@ CREATE TABLE collectionItems (
 );
 CREATE INDEX collectionItems_itemID ON collectionItems(itemID);
 
+CREATE TABLE collectionRelations (
+    collectionID INT NOT NULL,
+    predicateID INT NOT NULL,
+    object TEXT NOT NULL,
+    PRIMARY KEY (collectionID, predicateID, object),
+    FOREIGN KEY (collectionID) REFERENCES collections(collectionID) ON DELETE CASCADE,
+    FOREIGN KEY (predicateID) REFERENCES relationPredicates(predicateID) ON DELETE CASCADE
+);
+CREATE INDEX collectionRelations_predicateID ON collectionRelations(predicateID);
+CREATE INDEX collectionRelations_object ON collectionRelations(object);
+
 CREATE TABLE savedSearches (
     savedSearchID INTEGER PRIMARY KEY,
     savedSearchName TEXT NOT NULL,
@@ -221,17 +243,6 @@ CREATE TABLE deletedItems (
     FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE
 );
 CREATE INDEX deletedItems_dateDeleted ON deletedItems(dateDeleted);
-
-CREATE TABLE relations (
-    libraryID INT NOT NULL,
-    subject TEXT NOT NULL,
-    predicate TEXT NOT NULL,
-    object TEXT NOT NULL,
-    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (subject, predicate, object),
-    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
-);
-CREATE INDEX relations_object ON relations(object);
 
 CREATE TABLE libraries (
     libraryID INTEGER PRIMARY KEY,
@@ -368,6 +379,10 @@ CREATE TABLE proxyHosts (
 );
 CREATE INDEX proxyHosts_proxyID ON proxyHosts(proxyID);
 
+CREATE TABLE relationPredicates (
+    predicateID INTEGER PRIMARY KEY,
+    predicate TEXT UNIQUE
+);
 
 -- These shouldn't be used yet
 CREATE TABLE customItemTypes (

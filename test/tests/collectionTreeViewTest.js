@@ -189,14 +189,79 @@ describe("Zotero.CollectionTreeView", function() {
 	})
 	
 	describe("#drop()", function () {
+		/**
+		 * Simulate a drag and drop
+		 *
+		 * @param {String} targetRowID - Tree row id (e.g., "L123")
+		 * @param {Integer[]} itemIDs
+		 * @param {Promise} [promise] - If a promise is provided, it will be waited for and its
+		 *                              value returned after the drag. Otherwise, an item 'add'
+		 *                              event will be waited for, and the added ids will be
+		 *                              returned.
+		 */
+		var drop = Zotero.Promise.coroutine(function* (targetRowID, itemIDs, promise) {
+			var row = collectionsView.getRowIndexByID(targetRowID);
+			
+			var stub = sinon.stub(Zotero.DragDrop, "getDragTarget");
+			stub.returns(collectionsView.getRow(row));
+			if (!promise) {
+				promise = waitForItemEvent("add");
+			}
+			yield collectionsView.drop(row, 0, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				mozSourceNode: win.document.getElementById('zotero-items-tree'),
+				types: {
+					contains: function (type) {
+						return type == 'zotero/item';
+					}
+				},
+				getData: function (type) {
+					if (type == 'zotero/item') {
+						return itemIDs.join(",");
+					}
+				}
+			});
+			
+			// Add observer to wait for add
+			var result = yield promise;
+			stub.restore();
+			return result;
+		});
+		
+		
+		var canDrop = Zotero.Promise.coroutine(function* (targetRowID, itemIDs) {
+			var row = collectionsView.getRowIndexByID(targetRowID);
+			
+			var stub = sinon.stub(Zotero.DragDrop, "getDragTarget");
+			stub.returns(collectionsView.getRow(row));
+			var dt = {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				mozSourceNode: win.document.getElementById('zotero-items-tree'),
+				types: {
+					contains: function (type) {
+						return type == 'zotero/item';
+					}
+				},
+				getData: function (type) {
+					if (type == 'zotero/item') {
+						return itemIDs.join(",");
+					}
+				}
+			};
+			var canDrop = collectionsView.canDropCheck(row, 0, dt);
+			if (canDrop) {
+				canDrop = yield collectionsView.canDropCheckAsync(row, 0, dt);
+			}
+			stub.restore();
+			return canDrop;
+		});
+		
+		
 		it("should add an item to a collection", function* () {
-			var collection = yield createDataObject('collection', false, {
-				skipSelect: true
-			});
-			var item = yield createDataObject('item', false, {
-				skipSelect: true
-			});
-			var row = collectionsView.getRowIndexByID("C" + collection.id);
+			var collection = yield createDataObject('collection', false, { skipSelect: true });
+			var item = yield createDataObject('item', false, { skipSelect: true });
 			
 			// Add observer to wait for collection add
 			var deferred = Zotero.Promise.defer();
@@ -211,27 +276,8 @@ describe("Zotero.CollectionTreeView", function() {
 				}
 			}, 'collection-item', 'test');
 			
-			// Simulate a drag and drop
-			var stub = sinon.stub(Zotero.DragDrop, "getDragTarget");
-			stub.returns(collectionsView.getRow(row));
-			collectionsView.drop(row, 0, {
-				dropEffect: 'copy',
-				effectAllowed: 'copy',
-				mozSourceNode: win.document.getElementById('zotero-items-tree'),
-				types: {
-					contains: function (type) {
-						return type == 'zotero/item';
-					}
-				},
-				getData: function (type) {
-					if (type == 'zotero/item') {
-						return "" + item.id;
-					}
-				}
-			})
+			var ids = yield drop("C" + collection.id, [item.id], deferred.promise);
 			
-			yield deferred.promise;
-			stub.restore();
 			Zotero.Notifier.unregisterObserver(observerID);
 			yield collectionsView.selectCollection(collection.id);
 			yield waitForItemsLoad(win);
@@ -242,60 +288,87 @@ describe("Zotero.CollectionTreeView", function() {
 			assert.equal(treeRow.ref.id, item.id);
 		})
 		
-		it("should add an item to a library", function* () {
-			var group = new Zotero.Group;
-			group.id = 75161251;
-			group.name = "Test";
-			group.description = "";
-			group.editable = true;
-			group.filesEditable = true;
-			group.version = 1234;
-			yield group.save();
+		it("should copy an item with an attachment to a group", function* () {
+			var group = yield getGroup();
 			
-			var item = yield createDataObject('item', false, {
-				skipSelect: true
-			});
+			var item = yield createDataObject('item', false, { skipSelect: true });
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			yield Zotero.Attachments.importFromFile({
+			var attachment = yield Zotero.Attachments.importFromFile({
 				file: file,
 				parentItemID: item.id
 			});
 			
-			var row = collectionsView.getRowIndexByID("L" + group.libraryID);
+			// Hack to unload relations to test proper loading
+			//
+			// Probably need a better method for this
+			item._loaded.relations = false;
+			attachment._loaded.relations = false;
 			
-			// Simulate a drag and drop
-			var stub = sinon.stub(Zotero.DragDrop, "getDragTarget");
-			stub.returns(collectionsView.getRow(row));
-			collectionsView.drop(row, 0, {
-				dropEffect: 'copy',
-				effectAllowed: 'copy',
-				mozSourceNode: win.document.getElementById('zotero-items-tree'),
-				types: {
-					contains: function (type) {
-						return type == 'zotero/item';
-					}
-				},
-				getData: function (type) {
-					if (type == 'zotero/item') {
-						return "" + item.id;
-					}
-				}
-			});
+			var ids = yield drop("L" + group.libraryID, [item.id]);
 			
-			// Add observer to wait for collection add
-			var ids = yield waitForItemEvent("add");
-			
-			stub.restore();
 			yield collectionsView.selectLibrary(group.libraryID);
 			yield waitForItemsLoad(win);
 			
 			var itemsView = win.ZoteroPane.itemsView
 			assert.equal(itemsView.rowCount, 1);
 			var treeRow = itemsView.getRow(0);
+			assert.equal(treeRow.ref.libraryID, group.libraryID);
 			assert.equal(treeRow.ref.id, ids[0]);
 			
-			yield group.erase();
+			// New item should link back to original
+			var linked = yield item.getLinkedItem(group.libraryID);
+			assert.equal(linked.id, treeRow.ref.id);
+		})
+		
+		it("should not copy an item or its attachment to a group twice", function* () {
+			var group = yield getGroup();
+			
+			var itemTitle = Zotero.Utilities.randomString();
+			var item = yield createDataObject('item', false, { skipSelect: true });
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var attachment = yield Zotero.Attachments.importFromFile({
+				file: file,
+				parentItemID: item.id
+			});
+			var attachmentTitle = Zotero.Utilities.randomString();
+			attachment.setField('title', attachmentTitle);
+			yield attachment.save();
+			
+			var ids = yield drop("L" + group.libraryID, [item.id]);
+			assert.isFalse(yield canDrop("L" + group.libraryID, [item.id]));
+		})
+		
+		it("should remove a linked, trashed item in a group from the trash and collections", function* () {
+			var group = yield getGroup();
+			var collection = yield createDataObject('collection', { libraryID: group.libraryID });
+			
+			var item = yield createDataObject('item', false, { skipSelect: true });
+			var ids = yield drop("L" + group.libraryID, [item.id]);
+			
+			var droppedItem = yield item.getLinkedItem(group.libraryID);
+			droppedItem.setCollections([collection.id]);
+			droppedItem.deleted = true;
+			yield droppedItem.save();
+			
+			// Add observer to wait for collection add
+			var deferred = Zotero.Promise.defer();
+			var observerID = Zotero.Notifier.registerObserver({
+				notify: function (event, type, ids) {
+					if (event == 'refresh' && type == 'trash' && ids[0] == group.libraryID) {
+						setTimeout(function () {
+							deferred.resolve();
+						});
+					}
+				}
+			}, 'trash', 'test');
+			var ids = yield drop("L" + group.libraryID, [item.id], deferred.promise);
+			Zotero.Notifier.unregisterObserver(observerID);
+			
+			assert.isFalse(droppedItem.deleted);
+			// Should be removed from collections when removed from trash
+			assert.lengthOf(droppedItem.getCollections(), 0);
 		})
 	})
 })

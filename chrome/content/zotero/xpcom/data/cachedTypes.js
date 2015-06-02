@@ -560,3 +560,16 @@ Zotero.CharacterSets = new function() {
 	};
 }
 
+
+Zotero.RelationPredicates = new function () {
+	Zotero.CachedTypes.apply(this, arguments);
+	this.constructor.prototype = new Zotero.CachedTypes();
+	
+	this._typeDesc = 'relation predicate';
+	this._typeDescPlural = 'relation predicates';
+	this._idCol = 'predicateID';
+	this._nameCol = 'predicate';
+	this._table = 'relationPredicates';
+	this._ignoreCase = false;
+	this._allowAdd = true;
+}

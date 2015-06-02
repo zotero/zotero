@@ -111,9 +111,9 @@ customcolorpicker[type=button] {
 	-moz-binding: url(chrome://zotero/content/bindings/customcolorpicker.xml#custom-colorpicker-button);
 }
 
-seealsobox
+relatedbox
 {
-	-moz-binding: url('chrome://zotero/content/bindings/relatedbox.xml#seealso-box');
+	-moz-binding: url('chrome://zotero/content/bindings/relatedbox.xml#related-box');
 	-moz-user-focus: ignore;
 }
 

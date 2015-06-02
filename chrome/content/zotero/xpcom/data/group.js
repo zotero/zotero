@@ -284,9 +284,6 @@ Zotero.Group.prototype.erase = Zotero.Promise.coroutine(function* () {
 			}
 		}
 		
-		var prefix = "groups/" + this.id;
-		yield Zotero.Relations.eraseByURIPrefix(Zotero.URI.defaultPrefix + prefix);
-		
 		// Delete library row, which deletes from tags, syncDeleteLog, syncedSettings, and groups
 		// tables via cascade. If any of those gain caching, they should be deleted separately.
 		sql = "DELETE FROM libraries WHERE libraryID=?";

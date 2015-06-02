@@ -1938,8 +1938,6 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("INSERT INTO libraries VALUES (1, 'user')");
 				yield Zotero.DB.queryAsync("INSERT INTO libraries VALUES (2, 'publications')");
 				
-				let oldUserLibraryID = yield Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='account' AND key='libraryID'");
-				
 				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO syncObjectTypes VALUES (7, 'setting')");
 				yield Zotero.DB.queryAsync("DELETE FROM version WHERE schema IN ('userdata2', 'userdata3')");
 				
@@ -2152,12 +2150,6 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS itemAttachments_syncState");
 				yield Zotero.DB.queryAsync("CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState)");
 				
-				yield Zotero.DB.queryAsync("ALTER TABLE itemSeeAlso RENAME TO itemSeeAlsoOld");
-				yield Zotero.DB.queryAsync("CREATE TABLE itemSeeAlso (\n    itemID INT NOT NULL,\n    linkedItemID INT NOT NULL,\n    PRIMARY KEY (itemID, linkedItemID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,\n    FOREIGN KEY (linkedItemID) REFERENCES items(itemID) ON DELETE CASCADE\n)");
-				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO itemSeeAlso SELECT * FROM itemSeeAlsoOld");
-				yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS itemSeeAlso_linkedItemID");
-				yield Zotero.DB.queryAsync("CREATE INDEX itemSeeAlso_linkedItemID ON itemSeeAlso(linkedItemID)");
-				
 				yield Zotero.DB.queryAsync("ALTER TABLE collectionItems RENAME TO collectionItemsOld");
 				yield Zotero.DB.queryAsync("CREATE TABLE collectionItems (\n    collectionID INT NOT NULL,\n    itemID INT NOT NULL,\n    orderIndex INT NOT NULL DEFAULT 0,\n    PRIMARY KEY (collectionID, itemID),\n    FOREIGN KEY (collectionID) REFERENCES collections(collectionID) ON DELETE CASCADE,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n)");
 				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO collectionItems SELECT * FROM collectionItemsOld");
@@ -2175,12 +2167,7 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS deletedItems_dateDeleted");
 				yield Zotero.DB.queryAsync("CREATE INDEX deletedItems_dateDeleted ON deletedItems(dateDeleted)");
 				
-				yield Zotero.DB.queryAsync("UPDATE relations SET libraryID=1 WHERE libraryID=?", oldUserLibraryID);
-				yield Zotero.DB.queryAsync("ALTER TABLE relations RENAME TO relationsOld");
-				yield Zotero.DB.queryAsync("CREATE TABLE relations (\n    libraryID INT NOT NULL,\n    subject TEXT NOT NULL,\n    predicate TEXT NOT NULL,\n    object TEXT NOT NULL,\n    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    PRIMARY KEY (subject, predicate, object),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
-				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO relations SELECT * FROM relationsOld");
-				yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS relations_object");
-				yield Zotero.DB.queryAsync("CREATE INDEX relations_object ON relations(object)");
+				yield _migrateUserData_80_relations();
 				
 				yield Zotero.DB.queryAsync("ALTER TABLE groups RENAME TO groupsOld");
 				yield Zotero.DB.queryAsync("CREATE TABLE groups (\n    groupID INTEGER PRIMARY KEY,\n    libraryID INT NOT NULL UNIQUE,\n    name TEXT NOT NULL,\n    description TEXT NOT NULL,\n    editable INT NOT NULL,\n    filesEditable INT NOT NULL,\n    version INT NOT NULL,\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
@@ -2256,9 +2243,7 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("DROP TABLE itemCreatorsOld");
 				yield Zotero.DB.queryAsync("DROP TABLE itemDataOld");
 				yield Zotero.DB.queryAsync("DROP TABLE itemNotesOld");
-				yield Zotero.DB.queryAsync("DROP TABLE itemSeeAlsoOld");
 				yield Zotero.DB.queryAsync("DROP TABLE itemTagsOld");
-				yield Zotero.DB.queryAsync("DROP TABLE relationsOld");
 				yield Zotero.DB.queryAsync("DROP TABLE savedSearchesOld");
 				yield Zotero.DB.queryAsync("DROP TABLE storageDeleteLogOld");
 				yield Zotero.DB.queryAsync("DROP TABLE syncDeleteLogOld");
@@ -2273,5 +2258,204 @@ Zotero.Schema = new function(){
 		
 		yield _updateDBVersion('userdata', toVersion);
 		return true;
+	});
+	
+	
+	//
+	// Longer functions for specific upgrade steps
+	//
+	var _migrateUserData_80_relations = Zotero.Promise.coroutine(function* () {
+		yield Zotero.DB.queryAsync("CREATE TABLE relationPredicates (\n    predicateID INTEGER PRIMARY KEY,\n    predicate TEXT UNIQUE\n)");
+		
+		yield Zotero.DB.queryAsync("CREATE TABLE collectionRelations (\n    collectionID INT NOT NULL,\n    predicateID INT NOT NULL,\n    object TEXT NOT NULL,\n    PRIMARY KEY (collectionID, predicateID, object),\n    FOREIGN KEY (collectionID) REFERENCES collections(collectionID) ON DELETE CASCADE,\n    FOREIGN KEY (predicateID) REFERENCES relationPredicates(predicateID) ON DELETE CASCADE\n)");
+		yield Zotero.DB.queryAsync("CREATE INDEX collectionRelations_predicateID ON collectionRelations(predicateID)");
+		yield Zotero.DB.queryAsync("CREATE INDEX collectionRelations_object ON collectionRelations(object);");
+		yield Zotero.DB.queryAsync("CREATE TABLE itemRelations (\n    itemID INT NOT NULL,\n    predicateID INT NOT NULL,\n    object TEXT NOT NULL,\n    PRIMARY KEY (itemID, predicateID, object),\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,\n    FOREIGN KEY (predicateID) REFERENCES relationPredicates(predicateID) ON DELETE CASCADE\n)");
+		yield Zotero.DB.queryAsync("CREATE INDEX itemRelations_predicateID ON itemRelations(predicateID)");
+		yield Zotero.DB.queryAsync("CREATE INDEX itemRelations_object ON itemRelations(object);");
+		
+		yield Zotero.DB.queryAsync("UPDATE relations SET subject=object, predicate='dc:replaces', object=subject WHERE predicate='dc:isReplacedBy'");
+		
+		var start = 0;
+		var limit = 100;
+		var collectionSQL = "INSERT OR IGNORE INTO collectionRelations (collectionID, predicateID, object) VALUES ";
+		var itemSQL = "INSERT OR IGNORE INTO itemRelations (itemID, predicateID, object) VALUES ";
+		//                  1        2                1         2       3                    4
+		var objectRE = /(?:(users)\/(\d+|local\/\w+)|(groups)\/(\d+))\/(collections|items)\/([A-Z0-9]{8})/;
+		//                1        2                1         2               3
+		var itemRE = /(?:(users)\/(\d+|local\/\w+)|(groups)\/(\d+))\/items\/([A-Z0-9]{8})/;
+		var report = "";
+		var groupLibraryIDMap = {};
+		var resolveLibrary = Zotero.Promise.coroutine(function* (usersOrGroups, id) {
+			if (usersOrGroups == 'users') return 1;
+			if (groupLibraryIDMap[id] !== undefined) return groupLibraryIDMap[id];
+			return groupLibraryIDMap[id] = (yield Zotero.DB.valueQueryAsync("SELECT libraryID FROM groups WHERE libraryID=?", id));
+		});
+		var predicateMap = {};
+		var resolvePredicate = Zotero.Promise.coroutine(function* (predicate) {
+			if (predicateMap[predicate]) return predicateMap[predicate];
+			yield Zotero.DB.queryAsync("INSERT INTO relationPredicates (predicateID, predicate) VALUES (NULL, ?)", predicate);
+			return predicateMap[predicate] = Zotero.DB.valueQueryAsync("SELECT predicateID FROM relationPredicates WHERE predicate=?", predicate);
+		});
+		while (true) {
+			let rows = yield Zotero.DB.queryAsync("SELECT subject, predicate, object FROM relations LIMIT ?, ?", [start, limit]);
+			if (!rows.length) {
+				break;
+			}
+			
+			let collectionRels = [];
+			let itemRels = [];
+			
+			for (let i = 0; i < rows.length; i++) {
+				let row = rows[i];
+				let concat = row.subject + " - " + row.predicate + " - " + row.object;
+				
+				try {
+					switch (row.predicate) {
+					case 'owl:sameAs':
+						let subjectMatch = row.subject.match(objectRE);
+						let objectMatch = row.object.match(objectRE);
+						if (!subjectMatch && !objectMatch) {
+							Zotero.logError("No match for relation subject or object: " + concat);
+							report += concat + "\n";
+							continue;
+						}
+						// Remove empty captured groups
+						subjectMatch = subjectMatch ? subjectMatch.filter(x => x) : false;
+						objectMatch = objectMatch ? objectMatch.filter(x => x) : false;
+						let subjectLibraryID = false;
+						let subjectType = false;
+						let subject = false;
+						let objectLibraryID = false;
+						let objectType = false;
+						let object = false;
+						if (subjectMatch) {
+							subjectLibraryID = (yield resolveLibrary(subjectMatch[1], subjectMatch[2])) || false;
+							subjectType = subjectMatch[3];
+						}
+						if (objectMatch) {
+							objectLibraryID = (yield resolveLibrary(objectMatch[1], objectMatch[2])) || false;
+							objectType = objectMatch[3];
+						}
+						// Use subject if it's a user library or it isn't but neither is object, and if object can be found
+						if (subjectLibraryID && (subjectLibraryID == 1 || objectLibraryID != 1)) {
+							let key = subjectMatch[4];
+							if (subjectType == 'collection') {
+								let collectionID = yield Zotero.DB.valueQueryAsync("SELECT collectionID FROM collections WHERE libraryID=? AND key=?", [subjectLibraryID, key]);
+								if (collectionID) {
+									collectionRels.push([collectionID, row.predicate, row.object]);
+									continue;
+								}
+							}
+							else {
+								let itemID = yield Zotero.DB.valueQueryAsync("SELECT itemID FROM items WHERE libraryID=? AND key=?", [subjectLibraryID, key]);
+								if (itemID) {
+									itemRels.push([itemID, row.predicate, row.object]);
+									continue;
+								}
+							}
+						}
+						
+						// Otherwise use object if it can be found
+						if (objectLibraryID) {
+							let key = objectMatch[4];
+							if (objectType == 'collection') {
+								let collectionID = yield Zotero.DB.valueQueryAsync("SELECT collectionID FROM collections WHERE libraryID=? AND key=?", [objectLibraryID, key]);
+								if (collectionID) {
+									collectionRels.push([collectionID, row.predicate, row.subject]);
+									continue;
+								}
+							}
+							else {
+								let itemID = yield Zotero.DB.valueQueryAsync("SELECT itemID FROM items WHERE libraryID=? AND key=?", [objectLibraryID, key]);
+								if (itemID) {
+									itemRels.push([itemID, row.predicate, row.subject]);
+									continue;
+								}
+							}
+							Zotero.logError("Neither subject nor object found: " + concat);
+							report += concat + "\n";
+						}
+						break;
+					
+					case 'dc:replaces':
+						let match = row.subject.match(itemRE);
+						if (!match) {
+							Zotero.logError("Unrecognized subject: " + concat);
+							report += concat + "\n";
+							continue;
+						}
+						// Remove empty captured groups
+						match = match.filter(x => x);
+						let libraryID;
+						// Users
+						if (match[1] == 'users') {
+							let itemID = yield Zotero.DB.valueQueryAsync("SELECT itemID FROM items WHERE libraryID=? AND key=?", [1, match[3]]);
+							if (!itemID) {
+								Zotero.logError("Subject not found: " + concat);
+								report += concat + "\n";
+								continue;
+							}
+							itemRels.push([itemID, row.predicate, row.object]);
+						}
+						// Groups
+						else {
+							let itemID = yield Zotero.DB.valueQueryAsync("SELECT itemID FROM items JOIN groups USING (libraryID) WHERE groupID=? AND key=?", [match[2], match[3]]);
+							if (!itemID) {
+								Zotero.logError("Subject not found: " + concat);
+								report += concat + "\n";
+								continue;
+							}
+							itemRels.push([itemID, row.predicate, row.object]);
+						}
+						break;
+					
+					default:
+						Zotero.logError("Unknown predicate '" + row.predicate + "': " + concat);
+						report += concat + "\n";
+						continue;
+					}
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+			
+			if (collectionRels.length) {
+				for (let i = 0; i < collectionRels.length; i++) {
+					collectionRels[i][1] = yield resolvePredicate(collectionRels[i][1]);
+				}
+				yield Zotero.DB.queryAsync(collectionSQL + collectionRels.map(() => "(?, ?, ?)").join(", "), collectionRels.reduce((x, y) => x.concat(y)));
+			}
+			if (itemRels.length) {
+				for (let i = 0; i < itemRels.length; i++) {
+					itemRels[i][1] = yield resolvePredicate(itemRels[i][1]);
+				}
+				yield Zotero.DB.queryAsync(itemSQL + itemRels.map(() => "(?, ?, ?)").join(", "), itemRels.reduce((x, y) => x.concat(y)));
+			}
+			
+			start += limit;
+		}
+		if (report.length) {
+			report = "Removed relations:\n\n" + report;
+			Zotero.debug(report);
+		}
+		yield Zotero.DB.queryAsync("DROP TABLE relations");
+		
+		//
+		// Migrate related items
+		//
+		// If no user id and no local key, create a local key
+		if (!(yield Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='account' AND key='userID'"))
+				&& !(yield Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='account' AND key='localUserKey'"))) {
+			yield Zotero.DB.queryAsync("INSERT INTO settings (setting, key, value) VALUES ('account', 'localUserKey', ?)", Zotero.randomString(8));
+		}
+		var predicateID = predicateMap["dc:relation"];
+		if (!predicateID) {
+			yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO relationPredicates VALUES (NULL, 'dc:relation')");
+			predicateID = yield Zotero.DB.valueQueryAsync("SELECT predicateID FROM relationPredicates WHERE predicate=?", 'dc:relation');
+		}
+		yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO itemRelations SELECT ISA.itemID, " + predicateID + ", 'http://zotero.org/' || (CASE WHEN G.libraryID IS NULL THEN 'users/' || IFNULL((SELECT value FROM settings WHERE setting='account' AND key='userID'), (SELECT value FROM settings WHERE setting='account' AND key='localUserKey')) ELSE 'groups/' || G.groupID END) || '/' || I.key FROM itemSeeAlso ISA JOIN items I ON (ISA.linkedItemID=I.itemID) LEFT JOIN groups G USING (libraryID)");
+		yield Zotero.DB.queryAsync("DROP TABLE itemSeeAlso");
 	});
 }

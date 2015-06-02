@@ -29,7 +29,7 @@
 <bindings 	xmlns="http://www.mozilla.org/xbl"
 			xmlns:xbl="http://www.mozilla.org/xbl"
 			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<binding id="seealso-box">
+	<binding id="related-box">
 		<implementation>
 			<!-- Modes are predefined settings groups for particular tasks -->
 			<field name="_mode">"view"</field>
@@ -67,7 +67,7 @@
 				<setter>
 					<![CDATA[
 						this.itemRef = val;
-						this.reload();
+						this.refresh();
 					]]>
 				</setter>
 			</property>
@@ -80,12 +80,12 @@
 						if (this.item) {
 							yield this.item.loadRelations()
 								.tap(() => Zotero.Promise.check(this.item));
-							var related = this.item.relatedItems;
-							if (related) {
-								related = yield Zotero.Items.getAsync(related)
+							var keys = this.item.relatedItems;
+							if (keys.length) {
+								let items = yield Zotero.Items.getAsync(keys)
 									.tap(() => Zotero.Promise.check(this.item));
-								for(var i = 0; i < related.length; i++) {
-									r = r + related[i].getDisplayTitle() + ", ";
+								for (let item of items) {
+									r = r + item.getDisplayTitle() + ", ";
 								}
 								r = r.substr(0,r.length-2);
 							}
@@ -96,87 +96,117 @@
 				]]>
 				</getter>
 			</property>
-			<method name="reload">
+			
+			<constructor>
+			<![CDATA[
+				this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'relatedbox');
+			]]>
+			</constructor>
+			
+			<destructor>
+			<![CDATA[
+				Zotero.Notifier.unregisterObserver(this._notifierID);
+			]]>
+			</destructor>
+			
+			<method name="notify">
+				<parameter name="event"/>
+				<parameter name="type"/>
+				<parameter name="ids"/>
+				<parameter name="extraData"/>
+				<body><![CDATA[
+					if (event != 'modify' || !this.item || !this.item.id) return;
+					for (let i = 0; i < ids.length; i++) {
+						let id = ids[i];
+						if (id != this.item.id) {
+							continue;
+						}
+						this.refresh();
+						break;
+					}
+				]]></body>
+			</method>
+			
+			<method name="refresh">
 				<body>
 				<![CDATA[
 					return Zotero.spawn(function* () {
 						var addButton = this.id('addButton');
 						addButton.hidden = !this.editable;
 						
-						var rows = this.id('seeAlsoRows');
+						var rows = this.id('relatedRows');
 						while(rows.hasChildNodes())
 							rows.removeChild(rows.firstChild);
 						
 						if (this.item) {
 							yield this.item.loadRelations()
 								.tap(() => Zotero.Promise.check(this.item));
-							var related = this.item.relatedItems;
-							if (related) {
-								related = yield Zotero.Items.getAsync(related)
+							var relatedKeys = this.item.relatedItems;
+							for (var i = 0; i < relatedKeys.length; i++) {
+								let key = relatedKeys[i];
+								let relatedItem =
+									yield Zotero.Items.getByLibraryAndKeyAsync(
+										this.item.libraryID, key
+									)
 									.tap(() => Zotero.Promise.check(this.item));
-								for (var i = 0; i < related.length; i++) {
-									var icon= document.createElement("image");
-									icon.className = "zotero-box-icon";
-									var type = Zotero.ItemTypes.getName(related[i].itemTypeID);
-									if (type=='attachment')
-									{
-										switch (related[i].getAttachmentLinkMode())
-										{
-											case Zotero.Attachments.LINK_MODE_LINKED_URL:
-												type += '-web-link';
-												break;
-											
-											case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
-												type += '-snapshot';
-												break;
-											
-											case Zotero.Attachments.LINK_MODE_LINKED_FILE:
-												type += '-link';
-												break;
-											
-											case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
-												type += '-file';
-												break;
-										}
+								let id = relatedItem.id;
+								yield relatedItem.loadItemData()
+									.tap(() => Zotero.Promise.check(this.item));
+								let icon = document.createElement("image");
+								icon.className = "zotero-box-icon";
+								let type = Zotero.ItemTypes.getName(relatedItem.itemTypeID);
+								if (type=='attachment')
+								{
+									switch (relatedItem.attaachmentLinkMode) {
+										case Zotero.Attachments.LINK_MODE_LINKED_URL:
+											type += '-web-link';
+											break;
+										
+										case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
+											type += '-snapshot';
+											break;
+										
+										case Zotero.Attachments.LINK_MODE_LINKED_FILE:
+											type += '-link';
+											break;
+										
+										case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
+											type += '-file';
+											break;
 									}
-									icon.setAttribute('src','chrome://zotero/skin/treeitem-' + type + '.png');
-							
-									var label = document.createElement("label");
-									label.className = "zotero-box-label";
-									label.setAttribute('value', related[i].getDisplayTitle());
-									label.setAttribute('crop','end');
-									label.setAttribute('flex','1');
-									
-									var box = document.createElement('box');
-									box.setAttribute('onclick',
-										"document.getBindingParent(this).showItem('" + related[i].id + "')");
-									box.setAttribute('class','zotero-clicky');
-									box.setAttribute('flex','1');
-									box.appendChild(icon);
-									box.appendChild(label);
-									
-									if (this.editable) {
-										var remove = document.createElement("label");
-										remove.setAttribute('value','-');
-										remove.setAttribute('onclick',
-											"document.getBindingParent(this).remove('" + related[i].id + "');");
-										remove.setAttribute('class','zotero-clicky zotero-clicky-minus');
-									}
-									
-									var row = document.createElement("row");
-									row.appendChild(box);
-									if (this.editable) {
-										row.appendChild(remove);
-									}
-									row.setAttribute('id', 'seealso-' + related[i].id);
-									rows.appendChild(row);		
 								}
-								this.updateCount(related.length);
+								icon.setAttribute('src','chrome://zotero/skin/treeitem-' + type + '.png');
+						
+								var label = document.createElement("label");
+								label.className = "zotero-box-label";
+								label.setAttribute('value', relatedItem.getDisplayTitle());
+								label.setAttribute('crop','end');
+								label.setAttribute('flex','1');
+								
+								var box = document.createElement('box');
+								box.setAttribute('onclick',
+									"document.getBindingParent(this).showItem('" + id + "')");
+								box.setAttribute('class','zotero-clicky');
+								box.setAttribute('flex','1');
+								box.appendChild(icon);
+								box.appendChild(label);
+								
+								if (this.editable) {
+									var remove = document.createElement("label");
+									remove.setAttribute('value','-');
+									remove.setAttribute('onclick',
+										"document.getBindingParent(this).remove('" + id + "');");
+									remove.setAttribute('class','zotero-clicky zotero-clicky-minus');
+								}
+								
+								var row = document.createElement("row");
+								row.appendChild(box);
+								if (this.editable) {
+									row.appendChild(remove);
+								}
+								rows.appendChild(row);
 							}
-							else
-							{
-								this.updateCount();
-							}
+							this.updateCount(relatedKeys.length);
 						}
 					}, this);
 				]]>
@@ -190,22 +220,37 @@
 						window.openDialog('chrome://zotero/content/selectItemsDialog.xul', '',
 								'chrome,dialog=no,modal,centerscreen,resizable=yes', io);
 						
-						if(io.dataOut) {
-							if (io.dataOut.length) {
-								var relItem = yield Zotero.Items.getAsync(io.dataOut[0]);
-								if (relItem.libraryID != this.item.libraryID) {
-									// FIXME
-									var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-															.getService(Components.interfaces.nsIPromptService);
-									ps.alert(null, "", "You cannot relate items in different libraries in this Zotero release.");
-									return;
+						if (!io.dataOut || !io.dataOut.length) {
+							return;
+						}
+						var relItems = yield Zotero.Items.getAsync(io.dataOut);
+						if (!relItems.length) {
+							return;
+						}
+						
+						if (relItems[0].libraryID != this.item.libraryID) {
+							// FIXME
+							var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+													.getService(Components.interfaces.nsIPromptService);
+							ps.alert(null, "", "You cannot relate items in different libraries.");
+							return;
+						}
+						yield Zotero.DB.executeTransaction(function* () {
+							for (let relItem of relItems) {
+								yield this.item.loadRelations();
+								if (this.item.addRelatedItem(relItem)) {
+									yield this.item.save({
+										skipDateModifiedUpdate: true
+									});
+								}
+								yield relItem.loadRelations();
+								if (relItem.addRelatedItem(this.item)) {
+									yield relItem.save({
+										skipDateModifiedUpdate: true
+									});
 								}
 							}
-							for(var i = 0; i < io.dataOut.length; i++) {
-								this.item.addRelatedItem(io.dataOut[i]);
-							}
-							yield this.item.save();
-						}
+						}.bind(this));
 					}, this);
 				]]></body>
 			</method>
@@ -213,17 +258,23 @@
 				<parameter name="id"/>
 				<body><![CDATA[
 					return Zotero.spawn(function* () {
-						if(id) {
-							// TODO: set attribute on reload to determine
-							// which of these is necessary
-							this.item.removeRelatedItem(id);
-							yield this.item.save();
-							
-							var item = yield Zotero.Items.getAsync(id);
-							item.removeRelatedItem(this.item.id);
-							yield item.save();
+						var item = yield Zotero.Items.getAsync(id);
+						if (item) {
+							yield Zotero.DB.executeTransaction(function* () {
+								if (this.item.removeRelatedItem(item)) {
+									yield this.item.save({
+										skipDateModifiedUpdate: true
+									});
+								}
+								yield item.loadRelations();
+								if (item.removeRelatedItem(this.item)) {
+									yield item.save({
+										skipDateModifiedUpdate: true
+									});
+								}
+							}.bind(this));
 						}
-					});
+					}, this);
 				]]></body>
 			</method>
 			<method name="showItem">
@@ -282,7 +333,7 @@
 								str += 'plural';
 								break;
 						}
-						this.id('seeAlsoNum').value = Zotero.getString(str, [count]);
+						this.id('relatedNum').value = Zotero.getString(str, [count]);
 					]]>
 				</body>
 			</method>
@@ -298,7 +349,7 @@
 		<content>
 			<xul:vbox xbl:inherits="flex" class="zotero-box">
 				<xul:hbox align="center">
-					<xul:label id="seeAlsoNum"/>
+					<xul:label id="relatedNum"/>
 					<xul:button id="addButton" label="&zotero.item.add;"
 						oncommand="this.parentNode.parentNode.parentNode.add();"/>
 				</xul:hbox>
@@ -307,7 +358,7 @@
 						<xul:column flex="1"/>
 						<xul:column/>
 					</xul:columns>
-					<xul:rows id="seeAlsoRows"/>
+					<xul:rows id="relatedRows"/>
 				</xul:grid>
 			</xul:vbox>
 		</content>

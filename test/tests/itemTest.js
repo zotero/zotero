@@ -588,6 +588,37 @@ describe("Zotero.Item", function () {
 		})
 	})
 	
+	//
+	// Relations and related items
+	//
+	describe("#addRelatedItem", function () {
+		it("#should add a dc:relation relation to an item", function* () {
+			var item1 = yield createDataObject('item');
+			var item2 = yield createDataObject('item');
+			item1.addRelatedItem(item2);
+			yield item1.save();
+			
+			var rels = item1.getRelationsByPredicate(Zotero.Relations.relatedItemPredicate);
+			assert.lengthOf(rels, 1);
+			assert.equal(rels[0], Zotero.URI.getItemURI(item2));
+		})
+		
+		it("#should throw an error for a relation in a different library", function* () {
+			var group = yield getGroup();
+			var item1 = yield createDataObject('item');
+			var item2 = yield createDataObject('item', { libraryID: group.libraryID });
+			try {
+				item1.addRelatedItem(item2)
+			}
+			catch (e) {
+				assert.ok(e);
+				assert.equal(e.message, "Cannot relate item to an item in a different library");
+				return;
+			}
+			assert.fail("addRelatedItem() allowed for an item in a different library");
+		})
+	})
+	
 	describe("#clone()", function () {
 		// TODO: Expand to other data
 		it("should copy creators", function* () {

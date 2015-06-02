@@ -23,74 +23,63 @@
     ***** END LICENSE BLOCK *****
 */
 
+"use strict";
+
 Zotero.Relations = new function () {
 	Zotero.defineProperty(this, 'relatedItemPredicate', {value: 'dc:relation'});
 	Zotero.defineProperty(this, 'linkedObjectPredicate', {value: 'owl:sameAs'});
-	Zotero.defineProperty(this, 'deletedItemPredicate', {value: 'dc:isReplacedBy'});
+	Zotero.defineProperty(this, 'replacedItemPredicate', {value: 'dc:replaces'});
 	
 	this._namespaces = {
 		dc: 'http://purl.org/dc/elements/1.1/',
 		owl: 'http://www.w3.org/2002/07/owl#'
 	};
 	
+	var _types = ['collection', 'item'];
+	
 	
 	/**
-	 * @return	{Object[]}
+	 * Get the data objects that are subjects with the given predicate and object
+	 *
+	 * @param {String} objectType - Type of relation to search for (e.g., 'item')
+	 * @param {String} predicate
+	 * @param {String} object
+	 * @return {Promise<Zotero.DataObject[]>}
 	 */
-	this.getByURIs = Zotero.Promise.coroutine(function* (subject, predicate, object) {
+	this.getByPredicateAndObject = Zotero.Promise.coroutine(function* (objectType, predicate, object) {
+		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		if (predicate) {
 			predicate = this._getPrefixAndValue(predicate).join(':');
 		}
-		
-		if (!subject && !predicate && !object) {
-			throw new Error("No values provided");
-		}
-		
-		var sql = "SELECT ROWID FROM relations WHERE 1";
-		var params = [];
-		if (subject) {
-			sql += " AND subject=?";
-			params.push(subject);
-		}
-		if (predicate) {
-			sql += " AND predicate=?";
-			params.push(predicate);
-		}
-		if (object) {
-			sql += " AND object=?";
-			params.push(object);
-		}
-		var rows = yield Zotero.DB.columnQueryAsync(sql, params);
+		var sql = "SELECT " + objectsClass.idColumn + " FROM " + objectType + "Relations "
+			+ "JOIN relationPredicates USING (predicateID) WHERE predicate=? AND object=?";
+		var ids = yield Zotero.DB.columnQueryAsync(sql, [predicate, object]);
+		return yield objectsClass.getAsync(ids, { noCache: true });
+	});
+	
+	
+	/**
+	 * Get the data objects that are subjects with the given predicate and object
+	 *
+	 * @param {String} objectType - Type of relation to search for (e.g., 'item')
+	 * @param {String} object
+	 * @return {Promise<Object[]>} - Promise for an object with a Zotero.DataObject as 'subject'
+	 *                               and a predicate string as 'predicate'
+	 */
+	this.getByObject = Zotero.Promise.coroutine(function* (objectType, object) {
+		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
+		var sql = "SELECT " + objectsClass.idColumn + " AS id, predicate "
+			+ "FROM " + objectType + "Relations JOIN relationPredicates USING (predicateID) "
+			+ "WHERE object=?";
 		var toReturn = [];
-		for (let i=0; i<rows.length; i++) {
-			let row = rows[i];
+		var rows = yield Zotero.DB.queryAsync(sql, object);
+		for (let i = 0; i < rows.length; i++) {
 			toReturn.push({
-				subject: row.subject,
-				predicate: row.predicate,
-				object: row.object
+				subject: yield objectsClass.getAsync(rows[i].id, { noCache: true }),
+				predicate: rows[i].predicate
 			});
 		}
 		return toReturn;
-	});
-	
-	
-	this.getSubject = Zotero.Promise.coroutine(function* (subject, predicate, object) {
-		var subjects = [];
-		var relations = yield this.getByURIs(subject, predicate, object);
-		for each(var relation in relations) {
-			subjects.push(relation.subject);
-		}
-		return subjects;
-	});
-	
-	
-	this.getObject = Zotero.Promise.coroutine(function* (subject, predicate, object) {
-		var objects = [];
-		var relations = yield this.getByURIs(subject, predicate, object);
-		for each(var relation in relations) {
-			objects.push(relation.object);
-		}
-		return objects;
 	});
 	
 	
@@ -118,103 +107,52 @@ Zotero.Relations = new function () {
 					+ "object=REPLACE(object, 'zotero.org/users/" + fromUserID + "', "
 						+ "'zotero.org/users/" + toUserID + "') "
 						+ "WHERE predicate IN (?, ?)";
-			yield Zotero.DB.queryAsync(sql, [this.linkedObjectPredicate, this.deletedItemPredicate]);
+			yield Zotero.DB.queryAsync(sql, [this.linkedObjectPredicate, this.replacedItemPredicate]);
 		}.bind(this));
 	});
 	
 	
-	this.add = Zotero.Promise.coroutine(function* (libraryID, subject, predicate, object) {
-		predicate = this._getPrefixAndValue(predicate).join(':');
-		var sql = "INSERT INTO relations (libraryID, subject, predicate, object) "
-			+ "VALUES (?, ?, ?, ?)";
-		yield Zotero.DB.queryAsync(sql, [libraryID, subject, predicate, object]);
-	});
-	
-	
-	/**
-	 * Copy relations from one object to another within the same library
-	 */
-	this.copyURIs = Zotero.Promise.coroutine(function* (libraryID, fromURI, toURI) {
-		var rels = yield this.getByURIs(fromURI);
-		for each(var rel in rels) {
-			yield this.add(libraryID, toURI, rel.predicate, rel.object);
-		}
-		
-		var rels = yield this.getByURIs(false, false, fromURI);
-		for each(var rel in rels) {
-			yield this.add(libraryID, rel.subject, rel.predicate, toURI);
-		}
-	});
-	
-	
-	/**
-	 * Deletes relations directly from the DB by URI prefix
-	 *
-	 * This does not update associated objects.
-	 *
-	 * @param {String} prefix
-	 * @param {String[]} ignorePredicates
-	 */
-	this.eraseByURIPrefix = Zotero.Promise.method(function (prefix, ignorePredicates) {
-		prefix = prefix + '%';
-		var sql = "DELETE FROM relations WHERE (subject LIKE ? OR object LIKE ?)";
-		var params = [prefix, prefix];
-		if (ignorePredicates) {
-			for each(var ignorePredicate in ignorePredicates) {
-				sql += " AND predicate != ?";
-				params.push(ignorePredicate);
-			}
-		}
-		yield Zotero.DB.queryAsync(sql, params);
-	});
-	
-	
-	/**
-	 * Deletes relations directly from the DB by URI prefix
-	 *
-	 * This does not update associated objects.
-	 *
-	 * @return {Promise}
-	 */
-	this.eraseByURI = Zotero.Promise.coroutine(function* (uri, ignorePredicates) {
-		var sql = "DELETE FROM relations WHERE (subject=? OR object=?)";
-		var params = [uri, uri];
-		if (ignorePredicates) {
-			for each(var ignorePredicate in ignorePredicates) {
-				sql += " AND predicate != ?";
-				params.push(ignorePredicate);
-			}
-		}
-		yield Zotero.DB.queryAsync(sql, params);
-	});
-	
-	
 	this.purge = Zotero.Promise.coroutine(function* () {
-		Zotero.DB.requireTransaction();
-		
 		Zotero.debug("Purging relations");
+		
+		Zotero.DB.requireTransaction();
 		var t = new Date;
-		var sql = "SELECT subject FROM relations WHERE predicate != ? "
-				+ "UNION SELECT object FROM relations WHERE predicate != ?";
-		var uris = yield Zotero.DB.columnQueryAsync(sql, [this.deletedItemPredicate, this.deletedItemPredicate]);
-		if (uris) {
-			var prefix = Zotero.URI.defaultPrefix;
-			for each(var uri in uris) {
-				// Skip URIs that don't begin with the default prefix,
-				// since they don't correspond to local items
-				if (uri.indexOf(prefix) == -1) {
-					continue;
+		let prefix = Zotero.URI.defaultPrefix;
+		var types = ['collection', 'item'];
+		for (let type of types) {
+			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+			let getFunc = "getURI" + Zotero.Utilities.capitalize(type);
+			let objects = {};
+			
+			// Get all object URIs except merge-tracking ones
+			let sql = "SELECT " + objectsClass.idColumn + " AS id, predicate, object "
+				+ "FROM " + type + "Relations "
+				+ "JOIN relationPredicates USING (predicateID) WHERE predicate != ?";
+			let rows = yield Zotero.DB.queryAsync(sql, [this.replacedItemPredicate]);
+			for (let i = 0; i < rows.length; i++) {
+				let row = rows[i];
+				let uri = row.object;
+				// Erase Zotero URIs of this type that don't resolve to a local object
+				//
+				// TODO: Check for replaced-item relations and update relation rather than
+				// removing
+				if (uri.indexOf(prefix) != -1
+						&& uri.indexOf("/" + type + "s/") != -1
+						&& !Zotero.URI[getFunc](uri)) {
+					if (!objects[row.id]) {
+						objects[row.id] = yield objectsClass.getAsync(row.id, { noCache: true });
+					}
+					objects[row.id].removeRelation(row.predicate, uri);
 				}
-				if (uri.indexOf("/items/") != -1 && !Zotero.URI.getURIItemID(uri)) {
-					yield this.eraseByURI(uri);
-				}
-				if (uri.indexOf("/collections/") != -1 && !Zotero.URI.getURICollectionID(uri)) {
-					yield this.eraseByURI(uri);
+				for (let i in objects) {
+					yield objects[i].save();
 				}
 			}
+			
 			Zotero.debug("Purged relations in " + ((new Date) - t) + "ms");
 		}
 	});
+	
 	
 	this._getPrefixAndValue = function(uri) {
 		var [prefix, value] = uri.split(':');

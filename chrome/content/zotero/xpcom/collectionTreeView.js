@@ -1507,7 +1507,7 @@ Zotero.CollectionTreeView.prototype.canDropCheckAsync = Zotero.Promise.coroutine
 				
 				// Cross-library drag
 				if (treeRow.ref.libraryID != item.libraryID) {
-					let linkedItem = yield item.getLinkedItem(treeRow.ref.libraryID);
+					let linkedItem = yield item.getLinkedItem(treeRow.ref.libraryID, true);
 					if (linkedItem && !linkedItem.deleted) {
 						// For drag to root, skip if linked item exists
 						if (treeRow.isLibrary(true)) {
@@ -1613,18 +1613,13 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		var targetLibraryType = Zotero.Libraries.getType(targetLibraryID);
 		
 		// Check if there's already a copy of this item in the library
-		var linkedItem = yield item.getLinkedItem(targetLibraryID);
+		var linkedItem = yield item.getLinkedItem(targetLibraryID, true);
 		if (linkedItem) {
-			// If linked item is in the trash, undelete it
+			// If linked item is in the trash, undelete it and remove it from collections
+			// (since it shouldn't be restored to previous collections)
 			if (linkedItem.deleted) {
-				yield linkedItems.loadCollections();
-				// Remove from any existing collections, or else when it gets
-				// undeleted it would reappear in those collections
-				var collectionIDs = linkedItem.getCollections();
-				for each(var collectionID in collectionIDs) {
-					var col = yield Zotero.Collections.getAsync(collectionID);
-					col.removeItem(linkedItem.id);
-				}
+				yield linkedItem.loadCollections();
+				linkedItem.setCollections();
 				linkedItem.deleted = false;
 				yield linkedItem.save();
 			}

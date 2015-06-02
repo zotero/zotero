@@ -40,7 +40,8 @@ Zotero.extendClass(Zotero.DataObject, Zotero.Collection);
 Zotero.Collection.prototype._objectType = 'collection';
 Zotero.Collection.prototype._dataTypes = Zotero.Collection._super.prototype._dataTypes.concat([
 	'childCollections',
-	'childItems'
+	'childItems',
+	'relations'
 ]);
 
 Zotero.defineProperty(Zotero.Collection.prototype, 'ChildObjects', {
@@ -388,7 +389,7 @@ Zotero.Collection.prototype.addItems = Zotero.Promise.coroutine(function* (itemI
  *
  * @return {Promise}
  */
-Zotero.Collection.prototype.removeItem = function (itemIDs) {
+Zotero.Collection.prototype.removeItem = function (itemID) {
 	return this.removeItems([itemID]);
 }
 
@@ -591,10 +592,6 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 		yield this.ChildObjects.trash(del);
 	}
 	
-	// Remove relations
-	var uri = Zotero.URI.getCollectionURI(this);
-	yield Zotero.Relations.eraseByURI(uri);
-	
 	var placeholders = collections.map(function () '?').join();
 	
 	// Remove item associations for all descendent collections
@@ -785,29 +782,20 @@ Zotero.Collection.prototype.getDescendents = function (nested, type, includeDele
 /**
  * Return a collection in the specified library equivalent to this collection
  */
-Zotero.Collection.prototype.getLinkedCollection = function (libraryID) {
-	return this._getLinkedObject(libraryID);
-};
+Zotero.Collection.prototype.getLinkedCollection = function (libraryID, bidrectional) {
+	return this._getLinkedObject(libraryID, bidrectional);
+}
 
+
+/**
+ * Add a linked-object relation pointing to the given collection
+ *
+ * Does not require a separate save()
+ */
 Zotero.Collection.prototype.addLinkedCollection = Zotero.Promise.coroutine(function* (collection) {
-	var url1 = Zotero.URI.getCollectionURI(this);
-	var url2 = Zotero.URI.getCollectionURI(collection);
-	var predicate = Zotero.Relations.linkedObjectPredicate;
-	if ((yield Zotero.Relations.getByURIs(url1, predicate, url2)).length
-			|| (yield Zotero.Relations.getByURIs(url2, predicate, url1)).length) {
-		Zotero.debug(this._ObjectTypePlural + " " + this.key + " and " + collection.key + " are already linked");
-		return false;
-	}
-	
-	// If both group libraries, store relation with source group.
-	// Otherwise, store with personal library.
-	var userLibraryID = Zotero.Libraries.userLibraryID;
-	var libraryID = (this.libraryID != userLibraryID && collection.libraryID != userLibraryID)
-		? this.libraryID
-		: Zotero.Libraries.userLibraryID;
-	
-	yield Zotero.Relations.add(libraryID, url1, predicate, url2);
+	return this._addLinkedObject(collection);
 });
+
 
 //
 // Private methods
