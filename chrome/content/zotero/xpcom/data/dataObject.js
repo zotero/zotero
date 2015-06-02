@@ -89,6 +89,10 @@ Zotero.defineProperty(Zotero.DataObject.prototype, 'parentID', {
 	set: function(v) this._setParentID(v)
 });
 
+Zotero.defineProperty(Zotero.DataObject.prototype, '_canHaveParent', {
+	value: true
+});
+
 Zotero.defineProperty(Zotero.DataObject.prototype, 'ObjectsClass', {
 	get: function() this._ObjectsClass
 });
@@ -241,7 +245,7 @@ Zotero.DataObject.prototype._setParentID = function (id) {
 
 
 Zotero.DataObject.prototype._getParentKey = function () {
-	if (this._objectType == 'search') {
+	if (!this._canHaveParent) {
 		return undefined;
 	}
 	return this._parentKey ? this._parentKey : false
@@ -254,8 +258,8 @@ Zotero.DataObject.prototype._getParentKey = function () {
  * @return {Boolean} True if changed, false if stayed the same
  */
 Zotero.DataObject.prototype._setParentKey = function(key) {
-	if (this._objectType == 'search') {
-		throw new Error("Cannot set parent key for search");
+	if (!this._canHaveParent) {
+		throw new Error("Cannot set parent key for " + this._objectType);
 	}
 	
 	key = Zotero.DataObjectUtilities.checkKey(key) || false;
