@@ -221,7 +221,17 @@ Zotero.File = new function(){
 			}
 			
 			try {
-				var bytesToFetch = inputStream.available();
+				try {
+					var bytesToFetch = inputStream.available();
+				}
+				catch (e) {
+					// The stream is closed automatically when end-of-file is reached,
+					// so this throws for empty files
+					if (e.name == "NS_BASE_STREAM_CLOSED") {
+						deferred.resolve("");
+					}
+				}
+				
 				if (maxLength && maxLength < bytesToFetch) {
 					bytesToFetch = maxLength;
 				}

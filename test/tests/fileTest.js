@@ -1,4 +1,11 @@
 describe("Zotero.File", function () {
+	describe("#getContentsAsync()", function () {
+		it("should handle an empty file", function* () {
+			var path = OS.Path.join(getTestDataDirectory().path, "empty");
+			assert.equal((yield Zotero.File.getContentsAsync(path)), "");
+		})
+	})
+	
 	describe("#copyDirectory()", function () {
 		it("should copy all files within a directory", function* () {
 			var tmpDir = Zotero.getTempDirectory().path;
