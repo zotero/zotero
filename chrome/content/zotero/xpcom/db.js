@@ -686,7 +686,9 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params, options) {
 		if (e.errors && e.errors[0]) {
 			var eStr = e + "";
 			eStr = eStr.indexOf("Error: ") == 0 ? eStr.substr(7): e;
-			throw new Error(eStr + ' [QUERY: ' + sql + '] [ERROR: ' + e.errors[0].message + ']');
+			throw new Error(eStr + ' [QUERY: ' + sql + '] '
+				+ (params ? '[PARAMS: ' + params.join(', ') + '] ' : '')
+				+ '[ERROR: ' + e.errors[0].message + ']');
 		}
 		else {
 			throw e;
@@ -726,7 +728,9 @@ Zotero.DBConnection.prototype.valueQueryAsync = function (sql, params) {
 		if (e.errors && e.errors[0]) {
 			var eStr = e + "";
 			eStr = eStr.indexOf("Error: ") == 0 ? eStr.substr(7): e;
-			throw new Error(eStr + ' [QUERY: ' + sql + '] [ERROR: ' + e.errors[0].message + ']');
+			throw new Error(eStr + ' [QUERY: ' + sql + '] '
+				+ (params ? '[PARAMS: ' + params.join(', ') + '] ' : '')
+				+ '[ERROR: ' + e.errors[0].message + ']');
 		}
 		else {
 			throw e;
@@ -776,7 +780,9 @@ Zotero.DBConnection.prototype.columnQueryAsync = function (sql, params) {
 		if (e.errors && e.errors[0]) {
 			var eStr = e + "";
 			eStr = eStr.indexOf("Error: ") == 0 ? eStr.substr(7): e;
-			throw new Error(eStr + ' [QUERY: ' + sql + '] [ERROR: ' + e.errors[0].message + ']');
+			throw new Error(eStr + ' [QUERY: ' + sql + '] '
+				+ (params ? '[PARAMS: ' + params.join(', ') + '] ' : '')
+				+ '[ERROR: ' + e.errors[0].message + ']');
 		}
 		else {
 			throw e;
