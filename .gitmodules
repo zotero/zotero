@@ -13,3 +13,6 @@
 [submodule "test/resource/mocha"]
 	path = test/resource/mocha
 	url = https://github.com/mochajs/mocha.git
+[submodule "test/resource/chai-as-promised"]
+	path = test/resource/chai-as-promised
+	url = https://github.com/domenic/chai-as-promised.git
