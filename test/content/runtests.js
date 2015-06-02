@@ -117,6 +117,21 @@ function Reporter(runner) {
 	});
 
 	runner.on('fail', function(test, err){
+		// Strip Chai lines from stack trace
+		err.stack = err.stack.replace(/.+zotero-unit\/chai.+\n/g, "");
+		// Strip "From previous event:" block if it's all internals
+		var re = /\s*From previous event:(.|\n)+/;
+		var matches = re.exec(err.stack);
+		if (matches) {
+			err.stack = err.stack.substr(0, matches.index);
+			var previous = matches[0].split(/\n/)
+				.filter(line => line.indexOf('zotero-unit/') == -1).join('\n');
+			if (previous.trim() != "From previous event:") {
+				err.stack += previous;
+			}
+		}
+		err.stack += "\n";
+		
 		failed++;
 		dump("\r" + indent()
 			// Dark red X for errors
