@@ -110,8 +110,7 @@ describe("Zotero.Items", function () {
 			assert.isFalse(yield Zotero.Items.getAsync(id2));
 			assert.isFalse(yield Zotero.Items.getAsync(id3));
 			
-			// TEMP: This is failing on Travis due to a race condition
-			//assert.equal(zp.itemsView.rowCount, 0)
+			assert.equal(zp.itemsView.rowCount, 0)
 		})
 	})
 });
