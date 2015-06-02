@@ -163,6 +163,30 @@ function waitForCallback(cb, interval, timeout) {
 	return deferred.promise;
 }
 
+
+/**
+ * Get a default group used by all tests that want one, creating one if necessary
+ */
+var getGroup = Zotero.lazy(function () {
+	return createGroup({
+		name: "My Group"
+	});
+});
+
+
+var createGroup = Zotero.Promise.coroutine(function* (props) {
+	props = props || {};
+	var group = new Zotero.Group;
+	group.id = Zotero.Utilities.rand(10000, 1000000);
+	group.name = props.name || "Test " + Zotero.Utilities.randomString();
+	group.description = props.description || "";
+	group.editable = props.editable || true;
+	group.filesEditable = props.filesEditable || true;
+	group.version = props.version || Zotero.Utilities.rand(1000, 10000);
+	yield group.save();
+	return group;
+});
+
 //
 // Data objects
 //
