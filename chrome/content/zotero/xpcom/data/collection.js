@@ -583,8 +583,6 @@ Zotero.Collection.prototype.clone = function (includePrimary, newCollection) {
 Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	Zotero.DB.requireTransaction();
 	
-	var includeItems = env.options.deleteItems;
-	
 	var collections = [this.id];
 	
 	var descendents = yield this.getDescendents(false, null, true);
@@ -606,7 +604,7 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 		// Descendent items
 		else {
 			// Delete items from DB
-			if (deleteItems) {
+			if (env.options.deleteItems) {
 				del.push(descendents[i].id);
 			}
 		}
