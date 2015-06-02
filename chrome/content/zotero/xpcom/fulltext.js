@@ -654,7 +654,7 @@ Zotero.Fulltext = new function(){
 			
 			try {
 				proc.runw(true, args, args.length);
-				var totalPages = getTotalPagesFromFile(itemID);
+				var totalPages = yield getTotalPagesFromFile(itemID);
 			}
 			catch (e) {
 				Components.utils.reportError(e);
