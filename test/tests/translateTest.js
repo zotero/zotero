@@ -377,6 +377,12 @@ describe("Zotero.Translate.ItemGetter", function() {
 				}
 			}
 		}));
+		
+		// TEMP
+		describe("failure debugging", function () {
+		before(() => Zotero.Debug.init(true))
+		after(() => Zotero.Debug.init())
+		
 		it('should return stored/linked file and URI attachments in expected format', Zotero.Promise.coroutine(function* () {
 			this.timeout(60000);
 			let file = getTestDataDirectory();
@@ -585,5 +591,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 				}
 			}
 		}));
+		
+		})
 	});
 });
