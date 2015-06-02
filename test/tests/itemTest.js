@@ -1,17 +1,17 @@
 describe("Zotero.Item", function () {
 	describe("#getField()", function () {
-		it("should return false for valid unset fields on unsaved items", function* () {
+		it("should return false for valid unset fields on unsaved items", function () {
 			var item = new Zotero.Item('book');
 			assert.equal(item.getField('rights'), false);
 		});
 		
-		it("should return false for valid unset fields on unsaved items after setting on another field", function* () {
+		it("should return false for valid unset fields on unsaved items after setting on another field", function () {
 			var item = new Zotero.Item('book');
 			item.setField('title', 'foo');
 			assert.equal(item.getField('rights'), false);
 		});
 		
-		it("should return false for invalid unset fields on unsaved items after setting on another field", function* () {
+		it("should return false for invalid unset fields on unsaved items after setting on another field", function () {
 			var item = new Zotero.Item('book');
 			item.setField('title', 'foo');
 			assert.equal(item.getField('invalid'), false);
@@ -19,7 +19,7 @@ describe("Zotero.Item", function () {
 	});
 	
 	describe("#setField", function () {
-		it("should throw an error if item type isn't set", function* () {
+		it("should throw an error if item type isn't set", function () {
 			var item = new Zotero.Item;
 			assert.throws(item.setField.bind(item, 'title', 'test'), "Item type must be set before setting field data");
 		})
@@ -31,7 +31,7 @@ describe("Zotero.Item", function () {
 			assert.ok(item.hasChanged());
 		})
 		
-		it("should clear an existing field set to a falsy value", function () {
+		it("should clear an existing field set to a falsy value", function* () {
 			var field = 'title';
 			var fieldID = Zotero.ItemFields.getID(field);
 			var item = new Zotero.Item('book');
@@ -76,7 +76,7 @@ describe("Zotero.Item", function () {
 			assert.equal(item.version, 1);
 		});
 		
-		it("should save versionNumber for computerProgram", function () {
+		it("should save versionNumber for computerProgram", function* () {
 			var item = new Zotero.Item('computerProgram');
 			item.setField("versionNumber", "1.0");
 			var id = yield item.saveTx();

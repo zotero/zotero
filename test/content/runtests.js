@@ -138,7 +138,7 @@ function Reporter(runner) {
 	});
 }
 
-// Monkey-patch Mocha to check instanceof Error using compartent-local
+// Monkey-patch Mocha to check instanceof Error using compartment-local
 // Error object
 Mocha.Runner.prototype.fail = function(test, err){
 	++this.failures;
@@ -168,6 +168,8 @@ mocha.setup({
 	Runnable.prototype.run = function (fn) {
 		if (this.fn.constructor.name === 'GeneratorFunction') {
 			this.fn = Zotero.Promise.coroutine(this.fn);
+		} else if (typeof this.fn == 'function' && this.fn.isGenerator()) {
+			throw new Error("Attempting to use a legacy generator in Mocha test");
 		}
 		return run.call(this, fn);
 	};
