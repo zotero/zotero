@@ -334,19 +334,21 @@ Zotero.Utilities.Internal = {
 	 * @param {String[]} args Arguments given
 	 * @return {Promise} Promise resolved to true if command succeeds, or an error otherwise
 	 */
-	"exec":function(cmd, args) {
+	"exec": Zotero.Promise.method(function (cmd, args) {
 		if (typeof cmd == 'string') {
 			Components.utils.import("resource://gre/modules/FileUtils.jsm");
 			cmd = new FileUtils.File(cmd);
 		}
 		
 		if(!cmd.isExecutable()) {
-			return Zotero.Promise.reject(cmd.path+" is not an executable");
+			throw new Error(cmd.path + " is not an executable");
 		}
 		
 		var proc = Components.classes["@mozilla.org/process/util;1"].
 				createInstance(Components.interfaces.nsIProcess);
 		proc.init(cmd);
+		
+		Zotero.debug("Running " + cmd.path + " " + args.map(arg => "'" + arg + "'").join(" "));
 		
 		var deferred = Zotero.Promise.defer();
 		proc.runwAsync(args, args.length, {"observe":function(subject, topic) {
@@ -360,7 +362,7 @@ Zotero.Utilities.Internal = {
 		}});
 		
 		return deferred.promise;
-	},
+	}),
 
 	/**
 	 * Get string data from the clipboard

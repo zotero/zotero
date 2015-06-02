@@ -624,17 +624,10 @@ Zotero.Fulltext = new function(){
 		
 		// Modified 3.02 version that can output a text file directly
 		if (_pdfInfo && _pdfInfoVersion.startsWith('3.02')) {
-			var args = [filePath, infoFilePath];
-			
-			Zotero.debug("Running " + _pdfInfo.path + ' '
-				+ args.map(arg => "'" + arg + "'").join(' '));
-			
-			var proc = Components.classes["@mozilla.org/process/util;1"]
-				.createInstance(Components.interfaces.nsIProcess);
-			proc.init(_pdfInfo);
+			let args = [filePath, infoFilePath];
 			
 			try {
-				proc.runw(true, args, args.length);
+				yield Zotero.Utilities.Internal.exec(_pdfInfo, args);
 				var totalPages = yield getTotalPagesFromFile(itemID);
 			}
 			catch (e) {
@@ -643,17 +636,10 @@ Zotero.Fulltext = new function(){
 		}
 		// Use redirection script
 		else if (_pdfInfoScript) {
-			var args = [_pdfInfo.path, filePath, infoFilePath];
-			
-			Zotero.debug("Running " + _pdfInfoScript.path + ' '
-				+ args.map(arg => "'" + arg + "'").join(' '));
-			
-			var proc = Components.classes["@mozilla.org/process/util;1"]
-				.createInstance(Components.interfaces.nsIProcess);
-			proc.init(_pdfInfoScript);
+			let args = [_pdfInfo.path, filePath, infoFilePath];
 			
 			try {
-				proc.runw(true, args, args.length);
+				yield Zotero.Utilities.Internal.exec(_pdfInfoScript, args);
 				var totalPages = yield getTotalPagesFromFile(itemID);
 			}
 			catch (e) {
@@ -666,8 +652,6 @@ Zotero.Fulltext = new function(){
 			Zotero.debug(this.pdfInfoName + " is not available");
 		}
 		
-		var proc = Components.classes["@mozilla.org/process/util;1"]
-			.createInstance(Components.interfaces.nsIProcess);
 		var {exec, args} = this.getPDFConverterExecAndArgs();
 		args.push('-enc', 'UTF-8', '-nopgbrk');
 		
@@ -682,11 +666,8 @@ Zotero.Fulltext = new function(){
 		}
 		args.push(filePath, cacheFilePath);
 		
-		Zotero.debug("Running " + exec.path + " " + args.map(arg => "'" + arg + "'").join(" "));
-		
 		try {
-			proc.init(exec);
-			proc.runw(true, args, args.length);
+			yield Zotero.Utilities.Internal.exec(exec, args);
 		}
 		catch (e) {
 			Components.utils.reportError(e);
