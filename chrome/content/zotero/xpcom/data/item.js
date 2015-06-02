@@ -3820,6 +3820,7 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 		switch (field) {
 		case 'key':
 		case 'version':
+		case 'synced':
 		case 'itemType':
 		case 'note':
 		// Use?
