@@ -4,6 +4,22 @@ describe("Zotero.File", function () {
 			var path = OS.Path.join(getTestDataDirectory().path, "empty");
 			assert.equal((yield Zotero.File.getContentsAsync(path)), "");
 		})
+		
+		it("should handle an extended character", function* () {
+			var contents = yield Zotero.File.getContentsAsync(
+				OS.Path.join(getTestDataDirectory().path, "utf8Char.txt")
+			);
+			assert.lengthOf(contents, 3);
+			assert.equal(contents, "A\u72acB");
+		})
+		
+		it("should handle an invalid character", function* () {
+			var contents = yield Zotero.File.getContentsAsync(
+				OS.Path.join(getTestDataDirectory().path, "invalidChar.txt")
+			);
+			assert.lengthOf(contents, 3);
+			assert.equal(contents, "A\uFFFDB");
+		})
 	})
 	
 	describe("#copyDirectory()", function () {
