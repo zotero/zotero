@@ -1,3 +1,5 @@
+"use strict";
+
 describe("Zotero.Item", function () {
 	describe("#getField()", function () {
 		it("should return an empty string for valid unset fields on unsaved items", function () {
@@ -642,7 +644,7 @@ describe("Zotero.Item", function () {
 	// Relations and related items
 	//
 	describe("#addRelatedItem", function () {
-		it("#should add a dc:relation relation to an item", function* () {
+		it("should add a dc:relation relation to an item", function* () {
 			var item1 = yield createDataObject('item');
 			var item2 = yield createDataObject('item');
 			item1.addRelatedItem(item2);
@@ -653,7 +655,18 @@ describe("Zotero.Item", function () {
 			assert.equal(rels[0], Zotero.URI.getItemURI(item2));
 		})
 		
-		it("#should throw an error for a relation in a different library", function* () {
+		it("should allow an unsaved item to be related to an item in the user library", function* () {
+			var item1 = yield createDataObject('item');
+			var item2 = createUnsavedDataObject('item');
+			item2.addRelatedItem(item1);
+			yield item2.saveTx();
+			
+			var rels = item2.getRelationsByPredicate(Zotero.Relations.relatedItemPredicate);
+			assert.lengthOf(rels, 1);
+			assert.equal(rels[0], Zotero.URI.getItemURI(item1));
+		})
+		
+		it("should throw an error for a relation in a different library", function* () {
 			var group = yield getGroup();
 			var item1 = yield createDataObject('item');
 			var item2 = yield createDataObject('item', { libraryID: group.libraryID });

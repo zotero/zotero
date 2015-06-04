@@ -1035,6 +1035,10 @@ Zotero.Item.prototype.addRelatedItem = function (item) {
 		return false;
 	}
 	
+	if (!this.libraryID) {
+		this.libraryID = Zotero.Libraries.userLibraryID;
+	}
+	
 	if (item.libraryID != this.libraryID) {
 		throw new Error("Cannot relate item to an item in a different library");
 	}
