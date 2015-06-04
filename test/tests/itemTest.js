@@ -739,4 +739,15 @@ describe("Zotero.Item", function () {
 			assert.isUndefined(json.numPages);
 		})
 	})
+
+	describe("#fromJSON()", function () {
+		it("should map a base field to an item-specific field", function* () {
+			var item = new Zotero.Item("bookSection");
+			yield item.fromJSON({
+				"itemType":"bookSection",
+				"publicationTitle":"Publication Title"
+			});
+			assert.equal(item.getField("bookTitle"), "Publication Title");
+		});
+	});
 });

@@ -3816,7 +3816,8 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 		yield this.loadAllData();
 	}
 	
-	this.setType(Zotero.ItemTypes.getID(json.itemType));
+	let itemTypeID = Zotero.ItemTypes.getID(json.itemType);
+	this.setType(itemTypeID);
 	
 	var isValidForType = {};
 	var setFields = {};
@@ -3895,8 +3896,10 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 		
 		// Item fields
 		default:
+			let fieldID = Zotero.ItemFields.getID(field);
 			isValidForType[field] = Zotero.ItemFields.isValidForType(
-				Zotero.ItemFields.getID(field), this.itemTypeID
+				Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID) || fieldID,
+				this.itemTypeID
 			);
 			if (!isValidForType[field]) {
 				Zotero.logError("Discarding unknown JSON field " + field);
