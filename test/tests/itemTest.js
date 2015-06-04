@@ -646,7 +646,7 @@ describe("Zotero.Item", function () {
 			var item1 = yield createDataObject('item');
 			var item2 = yield createDataObject('item');
 			item1.addRelatedItem(item2);
-			yield item1.save();
+			yield item1.saveTx();
 			
 			var rels = item1.getRelationsByPredicate(Zotero.Relations.relatedItemPredicate);
 			assert.lengthOf(rels, 1);
@@ -680,7 +680,7 @@ describe("Zotero.Item", function () {
 					creatorType: 'author'
 				}
 			]);
-			yield item.save();
+			yield item.saveTx();
 			var newItem = yield item.clone();
 			assert.sameDeepMembers(item.getCreators(), newItem.getCreators());
 		})
@@ -693,7 +693,7 @@ describe("Zotero.Item", function () {
 			
 			var item = new Zotero.Item(itemType);
 			item.setField("title", title);
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			var json = yield item.toJSON();
 			
@@ -709,7 +709,7 @@ describe("Zotero.Item", function () {
 			
 			var item = new Zotero.Item(itemType);
 			item.setField("title", title);
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			var json = yield item.toJSON({ mode: 'full' });
 			assert.equal(json.title, title);
@@ -724,12 +724,12 @@ describe("Zotero.Item", function () {
 			
 			var item = new Zotero.Item(itemType);
 			item.setField("title", title);
-			var id = yield item.save();
+			var id = yield item.saveTx();
 			item = yield Zotero.Items.getAsync(id);
 			var patchBase = yield item.toJSON();
 			
 			item.setField("date", date);
-			yield item.save();
+			yield item.saveTx();
 			var json = yield item.toJSON({
 				patchBase: patchBase
 			})
