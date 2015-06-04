@@ -191,6 +191,16 @@ Zotero.DataObjects.prototype.getAsync = Zotero.Promise.coroutine(function* (ids,
 
 
 /**
+ * Get all loaded objects
+ *
+ * @return {Zotero.DataObject[]}
+ */
+Zotero.DataObjects.prototype.getLoaded = function () {
+	return Object.keys(this._objectCache).map(id => this._objectCache[id]);
+}
+
+
+/**
  * @deprecated - use .libraryKey
  */
 Zotero.DataObjects.prototype.makeLibraryKeyHash = function (libraryID, key) {

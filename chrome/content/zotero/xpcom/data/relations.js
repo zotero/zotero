@@ -83,32 +83,27 @@ Zotero.Relations = new function () {
 	});
 	
 	
-	this.updateUser = Zotero.Promise.coroutine(function* (fromUserID, fromLibraryID, toUserID, toLibraryID) {
+	this.updateUser = Zotero.Promise.coroutine(function* (toUserID) {
+		var fromUserID = Zotero.Users.getCurrentUserID();
 		if (!fromUserID) {
-			throw ("Invalid source userID " + fromUserID + " in Zotero.Relations.updateUserID");
-		}
-		if (!fromLibraryID) {
-			throw ("Invalid source libraryID " + fromLibraryID + " in Zotero.Relations.updateUserID");
+			fromUserID = "local/" + Zotero.Users.getLocalUserKey();
 		}
 		if (!toUserID) {
-			throw ("Invalid target userID " + toUserID + " in Zotero.Relations.updateUserID");
+			throw new Error("Invalid target userID " + toUserID);
 		}
-		if (!toLibraryID) {
-			throw ("Invalid target libraryID " + toLibraryID + " in Zotero.Relations.updateUserID");
-		}
-		
-		yield Zotero.DB.executeTransaction(function* () {
-			var sql = "UPDATE relations SET libraryID=? WHERE libraryID=?";
-			yield Zotero.DB.queryAsync(sql, [toLibraryID, fromLibraryID]);
+		Zotero.DB.requireTransaction();
+		for (let type of _types) {
+			var sql = "UPDATE " + type + "Relations SET "
+				+ "object=REPLACE(object, 'zotero.org/users/" + fromUserID + "', "
+				+ "'zotero.org/users/" + toUserID + "')";
+			yield Zotero.DB.queryAsync(sql);
 			
-			sql = "UPDATE relations SET "
-					+ "subject=REPLACE(subject, 'zotero.org/users/" + fromUserID + "', "
-						+ "'zotero.org/users/" + toUserID + "'), "
-					+ "object=REPLACE(object, 'zotero.org/users/" + fromUserID + "', "
-						+ "'zotero.org/users/" + toUserID + "') "
-						+ "WHERE predicate IN (?, ?)";
-			yield Zotero.DB.queryAsync(sql, [this.linkedObjectPredicate, this.replacedItemPredicate]);
-		}.bind(this));
+			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+			var objects = objectsClass.getLoaded();
+			for (let object of objects) {
+				yield object.reload(['relations'], true);
+			}
+		}
 	});
 	
 	
@@ -118,8 +113,7 @@ Zotero.Relations = new function () {
 		Zotero.DB.requireTransaction();
 		var t = new Date;
 		let prefix = Zotero.URI.defaultPrefix;
-		var types = ['collection', 'item'];
-		for (let type of types) {
+		for (let type of _types) {
 			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
 			let getFunc = "getURI" + Zotero.Utilities.capitalize(type);
 			let objects = {};
