@@ -7,10 +7,7 @@ describe("Search Preferences", function () {
 				action: 'pdftools-install'
 			});
 				// Wait for confirmation dialog
-			yield waitForWindow("chrome://global/content/commonDialog.xul", function (dialog) {
-				// Accept confirmation dialog
-				dialog.document.documentElement.acceptDialog();
-			});
+			yield waitForDialog();
 			
 			// Wait for install to finish
 			yield waitForCallback(function() {

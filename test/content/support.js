@@ -75,7 +75,18 @@ function waitForWindow(uri, callback) {
 				.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
 				.getInterface(Components.interfaces.nsIDOMWindow);
 			if (callback) {
-				callback(win);
+				try {
+					// If callback is a promise, wait for it
+					let maybePromise = callback(win);
+					if (maybePromise && maybePromise.then) {
+						maybePromise.then(() => deferred.resolve(win)).catch(e => deferred.reject(e));
+						return;
+					}
+				}
+				catch (e) {
+					deferred.reject(e);
+					return;
+				}
 			}
 			deferred.resolve(win);
 		}
@@ -87,6 +98,57 @@ function waitForWindow(uri, callback) {
 	}};
 	Services.ww.registerNotification(winobserver);
 	return deferred.promise;
+}
+
+/**
+ * Wait for an alert or confirmation dialog to pop up and then close it
+ *
+ * @param {Function} [onOpen] - Function that is passed the dialog once it is opened.
+ *                              Can be used to make assertions on the dialog contents
+ *                              (e.g., with dialog.document.documentElement.textContent)
+ * @param {String} [button='accept'] - Button in dialog to press (e.g., 'cancel', 'extra1')
+ * @return {Promise}
+ */
+function waitForDialog(onOpen, button='accept') {
+	return waitForWindow("chrome://global/content/commonDialog.xul", Zotero.Promise.method(function (dialog, deferred) {
+		var failure = false;
+		if (onOpen) {
+			try {
+				onOpen(dialog);
+			}
+			catch (e) {
+				failure = e;
+			}
+		}
+		if (button == 'accept') {
+			let deferred = Zotero.Promise.defer();
+			function acceptWhenEnabled() {
+				// Handle delayed accept buttons
+				if (dialog.document.documentElement.getButton('accept').disabled) {
+					setTimeout(function () {
+						acceptWhenEnabled();
+					}, 250);
+				}
+				else {
+					dialog.document.documentElement.acceptDialog();
+					if (failure) {
+						deferred.reject(failure);
+					}
+					else {
+						deferred.resolve();
+					}
+				}
+			}
+			acceptWhenEnabled();
+			return deferred.promise;
+		}
+		else {
+			dialog.document.documentElement.getButton(button).click();
+			if (failure) {
+				throw failure;
+			}
+		}
+	}))
 }
 
 var selectLibrary = Zotero.Promise.coroutine(function* (win, libraryID) {
