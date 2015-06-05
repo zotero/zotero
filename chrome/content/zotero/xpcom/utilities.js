@@ -1553,7 +1553,12 @@ Zotero.Utilities = {
 			creatorType = CSL_NAMES_MAPPINGS[creatorType];
 			if(!creatorType) continue;
 			
-			var nameObj = {'family':creator.lastName, 'given':creator.firstName};
+			var nameObj;
+			if (creator.lastName || creator.firstName) {
+				nameObj = {'family': creator.lastName, 'given': creator.firstName};
+			} else if (creator.name) {
+				nameObj = {'literal': creator.name};
+			}
 			
 			if(cslItem[creatorType]) {
 				cslItem[creatorType].push(nameObj);
