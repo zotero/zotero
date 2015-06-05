@@ -201,7 +201,7 @@ Zotero.Attachments = new function(){
 	
 	function importFromURL(url, sourceItemID, forceTitle, forceFileBaseName, parentCollectionIDs,
 			mimeType, libraryID, callback, cookieSandbox) {
-		Zotero.debug('Importing attachment from URL');
+		Zotero.debug('Importing attachment from URL ' + url);
 		
 		if (sourceItemID && parentCollectionIDs) {
 			var msg = "parentCollectionIDs is ignored when sourceItemID is set in Zotero.Attachments.importFromURL()";
