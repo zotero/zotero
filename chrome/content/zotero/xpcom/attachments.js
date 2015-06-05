@@ -187,6 +187,7 @@ Zotero.Attachments = new function(){
 			// translate.js, which sets the metadata fields itself
 			itemID = yield attachmentItem.save();
 			
+			var storageDir = Zotero.getStorageDirectory();
 			destDir = this.getStorageDirectory(attachmentItem);
 			yield _moveOrphanedDirectory(destDir);
 			file.parent.copyTo(storageDir, destDir.leafName);
