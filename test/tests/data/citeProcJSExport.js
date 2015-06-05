@@ -17,7 +17,8 @@
 			{
 				"family": "artistLast",
 				"given": "artistFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"dimensions": "Artwork size",
@@ -58,7 +59,8 @@
 			{
 				"family": "performerLast",
 				"given": "performerFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"collection-title": "Series title",
@@ -108,7 +110,8 @@
 			{
 				"family": "sponsorLast",
 				"given": "sponsorFirst"
-			}
+			},
+			{}
 		],
 		"authority": "Legislative body",
 		"chapter-number": "Session",
@@ -150,7 +153,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"container-title": "Publication title",
 		"genre": "Type",
@@ -189,7 +193,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"collection-editor": [
@@ -255,7 +260,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"collection-editor": [
@@ -325,7 +331,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"authority": "Court",
 		"container-title": "Reporter",
@@ -368,7 +375,8 @@
 			{
 				"family": "programmerLast",
 				"given": "programmerFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"collection-title": "Series title",
@@ -414,7 +422,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"collection-editor": [
@@ -479,7 +488,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"collection-editor": [
@@ -545,7 +555,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"editor": [
@@ -600,7 +611,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"id": 48,
 		"issued": {
@@ -643,7 +655,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"collection-editor": [
@@ -709,7 +722,8 @@
 			{
 				"family": "directorLast",
 				"given": "directorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"dimensions": "1:22:33",
@@ -749,7 +763,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"container-title": "Publication title",
 		"genre": "Type",
@@ -785,7 +800,8 @@
 			{
 				"family": "contributorLast",
 				"given": "contributorFirst"
-			}
+			},
+			{}
 		],
 		"authority": "Legislative body",
 		"chapter-number": "Session",
@@ -829,7 +845,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"id": 53,
 		"issued": {
@@ -871,7 +888,8 @@
 			{
 				"family": "intervieweeLast",
 				"given": "intervieweeFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"id": 54,
@@ -924,7 +942,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"collection-title": "Series title",
@@ -986,7 +1005,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"genre": "Type",
@@ -1032,7 +1052,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"container-title": "Publication title",
@@ -1086,7 +1107,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"event-place": "Place",
@@ -1135,7 +1157,8 @@
 			{
 				"family": "cartographerLast",
 				"given": "cartographerFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"collection-editor": [
@@ -1187,7 +1210,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"container-title": "Publication title",
@@ -1241,7 +1265,8 @@
 			{
 				"family": "inventorLast",
 				"given": "inventorFirst"
-			}
+			},
+			{}
 		],
 		"authority": "Issuing authority",
 		"call-number": "Application number",
@@ -1294,7 +1319,8 @@
 			{
 				"family": "podcasterLast",
 				"given": "podcasterFirst"
-			}
+			},
+			{}
 		],
 		"collection-title": "Series title",
 		"dimensions": "1:22:33",
@@ -1323,7 +1349,8 @@
 			{
 				"family": "presenterLast",
 				"given": "presenterFirst"
-			}
+			},
+			{}
 		],
 		"event": "Meeting name",
 		"event-place": "Place",
@@ -1363,7 +1390,8 @@
 			{
 				"family": "directorLast",
 				"given": "directorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"container-title": "Publication title",
@@ -1408,7 +1436,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"collection-editor": [
@@ -1463,7 +1492,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"chapter-number": "Session",
 		"container-title": "Code",
@@ -1506,7 +1536,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"event-place": "Place",
@@ -1549,7 +1580,8 @@
 			{
 				"family": "directorLast",
 				"given": "directorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"container-title": "Publication title",
@@ -1595,7 +1627,8 @@
 			{
 				"family": "directorLast",
 				"given": "directorFirst"
-			}
+			},
+			{}
 		],
 		"call-number": "Call number",
 		"collection-title": "Series title",
@@ -1639,7 +1672,8 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
-			}
+			},
+			{}
 		],
 		"container-title": "Publication title",
 		"genre": "Type",
