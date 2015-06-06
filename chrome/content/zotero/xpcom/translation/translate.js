@@ -666,6 +666,9 @@ Zotero.Translate.Sandbox = {
 					
 					if(attachment.url) {
 						// Remap attachment (but not link) URLs
+						// TODO: provide both proxied and un-proxied URLs (also for documents)
+						//   because whether the attachment is attached as link or file
+						//   depends on Zotero preferences as well.
 						attachment.url = translate.resolveURL(attachment.url, attachment.snapshot === false);
 					}
 				}
@@ -1237,34 +1240,49 @@ Zotero.Translate.Base.prototype = {
 	 * @private
 	 */
 	"resolveURL":function(url, dontUseProxy) {
-		const hostPortRe = /^((?:http|https|ftp):)\/\/([^\/]+)/i;
-		// resolve local URL
-		var resolved = "";
+		Zotero.debug("Translate: resolving URL " + url);
+		
+		const hostPortRe = /^([A-Z][-A-Z0-9+.]*):\/\/[^\/]+/i;
+		const allowedSchemes = ['http', 'https', 'ftp'];
+		
+		var m = url.match(hostPortRe),
+			resolved;
+		if (!m) {
+			// Convert relative URLs to absolute
+			if(Zotero.isFx && this.location) {
+				resolved = Components.classes["@mozilla.org/network/io-service;1"].
+					getService(Components.interfaces.nsIIOService).
+					newURI(this.location, "", null).resolve(url);
+			} else if(Zotero.isNode && this.location) {
+				resolved = require('url').resolve(this.location, url);
+			} else if (this.document) {
+				var a = this.document.createElement('a');
+				a.href = url;
+				resolved = a.href;
+			} else if (url.indexOf('//') == 0) {
+				// Protocol-relative URL with no associated web page
+				// Use HTTP by default
+				resolved = 'http:' + url;
+			} else {
+				throw new Error('Cannot resolve relative URL without an associated web page: ' + url);
+			}
+		} else if (allowedSchemes.indexOf(m[1].toLowerCase()) == -1) {
+			Zotero.debug("Translate: unsupported scheme " + m[1]);
+			return url;
+		} else {
+			resolved = url;
+		}
+		
+		Zotero.debug("Translate: resolved to " + resolved);
 		
 		// convert proxy to proper if applicable
-		if(hostPortRe.test(url)) {
-			if(this.translator && this.translator[0]
-					&& this.translator[0].properToProxy && !dontUseProxy) {
-				resolved = this.translator[0].properToProxy(url);
-			} else {
-				resolved = url;
+		if(!dontUseProxy && this.translator && this.translator[0]
+				&& this.translator[0].properToProxy) {
+			var proxiedURL = this.translator[0].properToProxy(resolved);
+			if (proxiedURL != resolved) {
+				Zotero.debug("Translate: proxified to " + proxiedURL);
 			}
-		} else if(Zotero.isFx && this.location) {
-			resolved = Components.classes["@mozilla.org/network/io-service;1"].
-				getService(Components.interfaces.nsIIOService).
-				newURI(this.location, "", null).resolve(url);
-		} else if(Zotero.isNode && this.location) {
-			resolved = require('url').resolve(this.location, url);
-		} else if (this.document) {
-			var a = this.document.createElement('a');
-			a.href = url;
-			resolved = a.href;
-		} else if (url.indexOf('//') == 0) {
-			// Protocol-relative URL with no associated web page
-			// Use HTTP by default
-			resolved = 'http:' + url;
-		} else {
-			throw new Error('Cannot resolve relative URL without an associated web page: ' + url);
+			resolved = proxiedURL;
 		}
 		
 		/*var m = hostPortRe.exec(resolved);
