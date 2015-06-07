@@ -3,7 +3,7 @@
 		"DOI": "10.1234/example.doi",
 		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
-		"accessDate": "1997-06-13 23:59:58",
+		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",

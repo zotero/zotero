@@ -107,7 +107,6 @@ Zotero.Translate.ItemSaver.prototype = {
 								seeAlso:item.seeAlso,
 								id:item.itemID || item.id
 							};
-							if (item.version) item.versionNumber = item.version;
 							newItem.fromJSON(this._deleteIrrelevantFields(item));
 
 							// save item

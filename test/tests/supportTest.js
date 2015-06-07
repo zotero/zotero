@@ -41,7 +41,9 @@ describe("Support Functions for Unit Testing", function() {
 					if (skipFields.indexOf(prop) != -1) continue;
 					
 					// Using base-mapped fields
-					assert.equal(item[prop], zItem.getField(prop, false, true), 'inserted item property has the same value as sample data');
+					let field = zItem.getField(prop, false, true);
+					if (prop === "accessDate") field = Zotero.Date.sqlToISO8601(field);
+					assert.equal(field, item[prop], 'inserted item property has the same value as sample data');
 				}
 				
 				if (item.creators) {

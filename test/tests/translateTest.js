@@ -183,6 +183,16 @@ describe("Zotero.Translate", function() {
 			assert.deepEqual(savedItems, trueItems, "saved items match inputs");
 		});
 
+		it('should accept deprecated SQL accessDates', function* () {
+			let myItem = {
+				"itemType":"webpage",
+				"title":"Test Item",
+				"accessDate":"2015-01-02 03:04:05"
+			}
+			let newItems = yield saveItemsThroughTranslator("import", [myItem]);
+			assert.equal(newItems[0].getField("accessDate"), "2015-01-02 03:04:05");
+		});
+
 		it('should save tags', function* () {
 			let myItem = {
 				"itemType":"book",
@@ -390,6 +400,19 @@ describe("Zotero.Translate", function() {
 			assert.equal(newItems.length, 1);
 			assert.equal(newItems[0].getField("title"), "Container Item");
 			assert.equal(newItems[0].getAttachments().length, 0);
+		});
+
+		it('web translators should set accessDate to current date', function* () {
+			let myItem = {
+				"itemType":"webpage",
+				"title":"Test Item",
+				"url":"http://www.zotero.org/"
+			};
+			let newItems = yield saveItemsThroughTranslator("web", [myItem]);
+			let currentDate = new Date();
+			let delta = currentDate - Zotero.Date.sqlToDate(newItems[0].getField("accessDate"), true);
+			assert.isAbove(delta, -500);
+			assert.isBelow(delta, 5000);
 		});
 
 		it('web translators should save attachments', function* () {

@@ -411,7 +411,7 @@ function generateAllTypesAndFieldsData() {
 	let specialValues = {
 		date: '1999-12-31',
 		filingDate: '2000-01-02',
-		accessDate: '1997-06-13 23:59:58',
+		accessDate: '1997-06-13T23:59:58',
 		number: 3,
 		numPages: 4,
 		issue: 5,
@@ -482,29 +482,8 @@ function populateDBWithSampleData(data) {
 	return Zotero.DB.executeTransaction(function* () {
 		for (let itemName in data) {
 			let item = data[itemName];
-			let zItem = new Zotero.Item(item.itemType);
-			for (let itemField in item) {
-				if (itemField == 'itemType') continue;
-				
-				if (itemField == 'creators') {
-					zItem.setCreators(item[itemField]);
-					continue;
-				}
-				
-				if (itemField == 'tags') {
-					// Must save item first
-					continue;
-				}
-				
-				zItem.setField(itemField, item[itemField]);
-			}
-			
-			if (item.tags && item.tags.length) {
-				for (let i=0; i<item.tags.length; i++) {
-					zItem.addTag(item.tags[i].tag, item.tags[i].type);
-				}
-			}
-
+			let zItem = new Zotero.Item;
+			zItem.fromJSON(item);
 			item.id = yield zItem.save();
 		}
 

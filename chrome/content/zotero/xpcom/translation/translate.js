@@ -174,6 +174,18 @@ Zotero.Translate.Sandbox = {
 					}
 				}
 			}
+
+			if (item.version) {
+				translate._debug("Translate: item.version is deprecated; set item.versionNumber instead");
+				item.versionNumber = item.version;
+			}
+
+			if (item.accessDate) {
+				if (Zotero.Date.isSQLDateTime(item.accessDate)) {
+					translate._debug("Translate: Passing accessDate as SQL is deprecated; pass an ISO 8601 date instead");
+					item.accessDate = Zotero.Date.sqlToISO8601(item.accessDate);
+				}
+			}
 		
 			// Fire itemSaving event
 			translate._runHandler("itemSaving", item);
@@ -581,13 +593,13 @@ Zotero.Translate.Sandbox = {
 				}
 				
 				// automatically set library catalog
-				if(item.libraryCatalog === undefined) {
+				if(item.libraryCatalog === undefined && item.itemType != "webpage") {
 					item.libraryCatalog = translate.translator[0].label;
 				}
 							
 				// automatically set access date if URL is set
 				if(item.url && typeof item.accessDate == 'undefined') {
-					item.accessDate = "CURRENT_TIMESTAMP";
+					item.accessDate = Zotero.Date.dateToISO(new Date());
 				}
 				
 				//consider type-specific "title" alternatives
