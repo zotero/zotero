@@ -411,7 +411,7 @@ function generateAllTypesAndFieldsData() {
 	let specialValues = {
 		date: '1999-12-31',
 		filingDate: '2000-01-02',
-		accessDate: '1997-06-13T23:59:58',
+		accessDate: '1997-06-13T23:59:58Z',
 		number: 3,
 		numPages: 4,
 		issue: 5,
