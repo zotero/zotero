@@ -234,7 +234,7 @@ Zotero.Attachments = new function(){
 		var parentItemID = options.parentItemID;
 		var collections = options.collections;
 		var title = options.title;
-		var fileBaseName = options.forceFileBaseName;
+		var fileBaseName = options.fileBaseName;
 		var contentType = options.contentType;
 		var cookieSandbox = options.cookieSandbox;
 		
@@ -280,9 +280,9 @@ Zotero.Attachments = new function(){
 		
 		// Save using remote web browser persist
 		var externalHandlerImport = Zotero.Promise.coroutine(function* (contentType) {
-			if (forceFileBaseName) {
+			if (fileBaseName) {
 				let ext = _getExtensionFromURL(url, contentType);
-				var fileName = forceFileBaseName + (ext != '' ? '.' + ext : '');
+				var fileName = fileBaseName + (ext != '' ? '.' + ext : '');
 			}
 			else {
 				var fileName = _getFileNameFromURL(url, contentType);
@@ -305,19 +305,19 @@ Zotero.Attachments = new function(){
 			// Save to temp dir
 			var deferred = Zotero.Promise.defer();
 			wbp.progressListener = new Zotero.WebProgressFinishListener(function() {
-				if (contentType == 'application/pdf' &&
-						Zotero.MIME.sniffForMIMEType(str) != 'application/pdf') {
-					let errString = "Downloaded PDF did not have MIME type "
-						+ "'application/pdf' in Attachments.importFromURL()";
-					Zotero.debug(errString, 2);
-					Zotero.File.getSample(tmpFile)
-					.then(function (sample) {
+				Zotero.File.getSample(tmpFile)
+				.then(function (sample) {
+					if (contentType == 'application/pdf' &&
+							Zotero.MIME.sniffForMIMEType(sample) != 'application/pdf') {
+						let errString = "Downloaded PDF did not have MIME type "
+							+ "'application/pdf' in Attachments.importFromURL()";
+						Zotero.debug(errString, 2);
 						Zotero.debug(sample, 3);
 						deferred.reject(new Error(errString));
-					});
-					return;
-				}
-				deferred.resolve();
+					} else {
+						deferred.resolve();
+					}
+				});
 			});
 				
 			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
@@ -390,7 +390,7 @@ Zotero.Attachments = new function(){
 			}, 1000);
 			
 			return attachmentItem;
-		});
+		}.bind(this));
 		
 		var process = function (contentType, hasNativeHandler) {
 			// If we can load this natively, use a hidden browser
@@ -676,14 +676,16 @@ Zotero.Attachments = new function(){
 		// We don't have any way of knowing that the file is flushed to disk,
 		// so we just wait a second before indexing and hope for the best.
 		// We'll index it later if it fails. (This may not be necessary.)
-		setTimeout(function () {
-			if (contentType == 'application/pdf') {
+		if (contentType == 'application/pdf') {
+			setTimeout(function () {
 				Zotero.Fulltext.indexPDF(file.path, attachmentItem.id);
-			}
-			else if (Zotero.MIME.isTextType(contentType)) {
-				Zotero.Fulltext.indexDocument(document, attachmentItem.id);
-			}
-		}, 1000);
+			}, 1000);
+		}
+		else if (Zotero.MIME.isTextType(contentType)) {
+			// Index document immediately, so that browser object can't
+			// be removed before indexing completes
+			yield Zotero.Fulltext.indexDocument(document, attachmentItem.id);
+		}
 		
 		return attachmentItem;
 	});
