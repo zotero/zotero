@@ -32,7 +32,7 @@ Zotero.HTTP = new function() {
 			Zotero.debug(e, 1);
 		}
 	};
-	
+	this.UnexpectedStatusException.prototype = Object.create(Error.prototype);
 	this.UnexpectedStatusException.prototype.toString = function() {
 		return this.message;
 	};
@@ -44,6 +44,7 @@ Zotero.HTTP = new function() {
 	this.BrowserOfflineException = function() {
 		this.message = "XMLHttpRequest could not complete because the browser is offline";
 	};
+	this.BrowserOfflineException.prototype = Object.create(Error.prototype);
 	this.BrowserOfflineException.prototype.toString = function() {
 		return this.message;
 	};
