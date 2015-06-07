@@ -19,11 +19,13 @@ Zotero.HTTP = new function() {
 		// Password also shows up in channel.name (nsIRequest.name), but that's
 		// read-only and has to be handled in Zotero.varDump()
 		try {
-			if (xmlhttp.channel.URI.password) {
-				xmlhttp.channel.URI.password = "********";
-			}
-			if (xmlhttp.channel.URI.spec) {
-				xmlhttp.channel.URI.spec = xmlhttp.channel.URI.spec.replace(/key=[^&]+&?/, "key=********");
+			if (xmlhttp.channel) {
+				if (xmlhttp.channel.URI.password) {
+					xmlhttp.channel.URI.password = "********";
+				}
+				if (xmlhttp.channel.URI.spec) {
+					xmlhttp.channel.URI.spec = xmlhttp.channel.URI.spec.replace(/key=[^&]+&?/, "key=********");
+				}
 			}
 		}
 		catch (e) {
@@ -113,8 +115,13 @@ Zotero.HTTP = new function() {
 		
 		var deferred = Zotero.Promise.defer();
 		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-					.createInstance();
+		if (!this.mock) {
+			var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+				.createInstance();
+		}
+		else {
+			var xmlhttp = new this.mock;
+		}
 		// Prevent certificate/authentication dialogs from popping up
 		if (!options.foreground) {
 			xmlhttp.mozBackgroundRequest = true;
