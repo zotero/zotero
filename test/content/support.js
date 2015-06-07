@@ -229,8 +229,13 @@ function waitForCallback(cb, interval, timeout) {
 /**
  * Get a default group used by all tests that want one, creating one if necessary
  */
-var getGroup = Zotero.lazy(function () {
-	return createGroup({
+var _defaultGroup;
+var getGroup = Zotero.Promise.method(function () {
+	// Cleared in resetDB()
+	if (_defaultGroup) {
+		return _defaultGroup;
+	}
+	return _defaultGroup = createGroup({
 		name: "My Group"
 	});
 });
@@ -239,7 +244,7 @@ var getGroup = Zotero.lazy(function () {
 var createGroup = Zotero.Promise.coroutine(function* (props) {
 	props = props || {};
 	var group = new Zotero.Group;
-	group.id = Zotero.Utilities.rand(10000, 1000000);
+	group.id = props.id || Zotero.Utilities.rand(10000, 1000000);
 	group.name = props.name || "Test " + Zotero.Utilities.randomString();
 	group.description = props.description || "";
 	group.editable = props.editable || true;
@@ -363,6 +368,7 @@ function resetDB() {
 	var db = Zotero.getZoteroDatabase();
 	return Zotero.reinit(function() {
 		db.remove(false);
+		_defaultGroup = null;
 	}).then(function() {
 		return Zotero.Schema.schemaUpdatePromise;
 	});

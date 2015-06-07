@@ -7,7 +7,9 @@ describe("Zotero.Groups", function () {
 			}
 			finally {
 				if (group) {
-					yield group.erase();
+					yield Zotero.DB.executeTransaction(function* () {
+						return group.erase();
+					})
 				}
 			}
 		})

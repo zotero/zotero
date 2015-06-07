@@ -1465,8 +1465,11 @@ Zotero.Schema = new function(){
 			});
 			yield _updateDBVersion('compatibility', _maxCompatibility);
 			
-			yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, libraryType) VALUES (?, 'user')", userLibraryID);
-			yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, libraryType) VALUES (2, 'publications')");
+			var sql = "INSERT INTO libraries (libraryID, libraryType, editable, filesEditable) "
+				+ "VALUES "
+				+ "(?, 'user', 1, 1), "
+				+ "(2, 'publications', 1, 1)"
+			yield Zotero.DB.queryAsync(sql, userLibraryID);
 			
 			if (!Zotero.Schema.skipDefaultData) {
 				// Quick Start Guide web page item
@@ -1935,14 +1938,15 @@ Zotero.Schema = new function(){
 			if (i == 80) {
 				yield _updateDBVersion('compatibility', 1);
 				
-				yield Zotero.DB.queryAsync("INSERT INTO libraries VALUES (1, 'user')");
-				yield Zotero.DB.queryAsync("INSERT INTO libraries VALUES (2, 'publications')");
+				yield Zotero.DB.queryAsync("ALTER TABLE libraries RENAME TO librariesOld");
+				yield Zotero.DB.queryAsync("CREATE TABLE libraries (\n    libraryID INTEGER PRIMARY KEY,\n    libraryType TEXT NOT NULL,\n    editable INT NOT NULL,\n    filesEditable INT NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    lastsync INT NOT NULL DEFAULT 0\n)");
+				yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, libraryType, editable, filesEditable) VALUES (1, 'user', 1, 1)");
+				yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, libraryType, editable, filesEditable) VALUES (2, 'publications', 1, 1)");
+				yield Zotero.DB.queryAsync("INSERT INTO libraries SELECT libraryID, libraryType, editable, filesEditable, 0, 0 FROM librariesOld JOIN groups USING (libraryID)");
 				
 				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO syncObjectTypes VALUES (7, 'setting')");
 				yield Zotero.DB.queryAsync("DELETE FROM version WHERE schema IN ('userdata2', 'userdata3')");
 				
-				yield Zotero.DB.queryAsync("ALTER TABLE libraries ADD COLUMN version INT NOT NULL DEFAULT 0");
-				yield Zotero.DB.queryAsync("ALTER TABLE libraries ADD COLUMN lastsync INT NOT NULL DEFAULT 0");
 				yield Zotero.DB.queryAsync("CREATE TABLE syncCache (\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    syncObjectTypeID INT NOT NULL,\n    version INT NOT NULL,\n    data TEXT,\n    PRIMARY KEY (libraryID, key, syncObjectTypeID, version),\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE,\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)\n)");
 				
 				yield Zotero.DB.queryAsync("DROP TABLE translatorCache");
@@ -2170,8 +2174,8 @@ Zotero.Schema = new function(){
 				yield _migrateUserData_80_relations();
 				
 				yield Zotero.DB.queryAsync("ALTER TABLE groups RENAME TO groupsOld");
-				yield Zotero.DB.queryAsync("CREATE TABLE groups (\n    groupID INTEGER PRIMARY KEY,\n    libraryID INT NOT NULL UNIQUE,\n    name TEXT NOT NULL,\n    description TEXT NOT NULL,\n    editable INT NOT NULL,\n    filesEditable INT NOT NULL,\n    version INT NOT NULL,\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
-				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO groups SELECT groupID, libraryID, name, description, editable, filesEditable, 0 FROM groupsOld");
+				yield Zotero.DB.queryAsync("CREATE TABLE groups (\n    groupID INTEGER PRIMARY KEY,\n    libraryID INT NOT NULL UNIQUE,\n    name TEXT NOT NULL,\n    description TEXT NOT NULL,\n    version INT NOT NULL,\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE\n)");
+				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO groups SELECT groupID, libraryID, name, description, 0 FROM groupsOld");
 				
 				yield Zotero.DB.queryAsync("ALTER TABLE groupItems RENAME TO groupItemsOld");
 				yield Zotero.DB.queryAsync("CREATE TABLE groupItems (\n    itemID INTEGER PRIMARY KEY,\n    createdByUserID INT,\n    lastModifiedByUserID INT,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,\n    FOREIGN KEY (createdByUserID) REFERENCES users(userID) ON DELETE SET NULL,\n    FOREIGN KEY (lastModifiedByUserID) REFERENCES users(userID) ON DELETE SET NULL\n)");
@@ -2253,6 +2257,7 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("DROP TABLE creatorData");
 				yield Zotero.DB.queryAsync("DROP TABLE itemsOld");
 				yield Zotero.DB.queryAsync("DROP TABLE tagsOld");
+				yield Zotero.DB.queryAsync("DROP TABLE librariesOld");
 			}
 		}
 		

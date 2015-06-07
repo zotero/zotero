@@ -1874,6 +1874,7 @@ Zotero.Sync.Storage = new function () {
 				);
 				
 				if (index == 0) {
+					// TODO: transaction
 					group.erase();
 					Zotero.Sync.Server.resetClient();
 					Zotero.Sync.Storage.resetAllSyncStates();

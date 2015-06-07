@@ -247,6 +247,8 @@ CREATE INDEX deletedItems_dateDeleted ON deletedItems(dateDeleted);
 CREATE TABLE libraries (
     libraryID INTEGER PRIMARY KEY,
     libraryType TEXT NOT NULL,
+    editable INT NOT NULL,
+    filesEditable INT NOT NULL,
     version INT NOT NULL DEFAULT 0,
     lastsync INT NOT NULL DEFAULT 0
 );
@@ -261,8 +263,6 @@ CREATE TABLE groups (
     libraryID INT NOT NULL UNIQUE,
     name TEXT NOT NULL,
     description TEXT NOT NULL,
-    editable INT NOT NULL,
-    filesEditable INT NOT NULL,
     version INT NOT NULL,
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );

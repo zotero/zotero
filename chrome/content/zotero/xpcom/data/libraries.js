@@ -70,13 +70,24 @@ Zotero.Libraries = new function () {
 	}
 	
 	
+	/**
+	 * @return {Integer[]} - All library IDs
+	 */
 	this.getAll = function () {
 		return [for (x of Object.keys(_libraryData)) parseInt(x)]
 	}
 	
 	
-	this.add = Zotero.Promise.coroutine(function* (type) {
+	/**
+	 * @param {String} type - Library type
+	 * @param {Object} [options] - Library properties to set
+	 * @param {Boolean} [options.editable]
+	 * @param {Boolean} [options.filesEditable]
+	 */
+	this.add = Zotero.Promise.coroutine(function* (type, options) {
 		Zotero.DB.requireTransaction();
+		
+		options = options || {};
 		
 		switch (type) {
 			case 'group':
@@ -88,8 +99,18 @@ Zotero.Libraries = new function () {
 		
 		var libraryID = yield Zotero.ID.get('libraries');
 		
-		var sql = "INSERT INTO libraries (libraryID, libraryType) VALUES (?, ?)";
-		yield Zotero.DB.queryAsync(sql, [libraryID, type]);
+		var sql = "INSERT INTO libraries (libraryID, libraryType";
+		var params = [libraryID, type];
+		if (options.editable) {
+			sql += ", editable";
+			params.push(options.editable ? 1 : 0);
+			if (options.filesEditable) {
+				sql += ", filesEditable";
+				params.push(options.filesEditable ? 1 : 0);
+			}
+		}
+		sql += ") VALUES (" + params.map(p => "?").join(", ") + ")";
+		yield Zotero.DB.queryAsync(sql, params);
 		
 		// Re-fetch from DB to get auto-filled defaults
 		var sql = "SELECT * FROM libraries WHERE libraryID=?";
@@ -159,48 +180,48 @@ Zotero.Libraries = new function () {
 	/**
 	 * @param {Integer} libraryID
 	 * @param {Date} lastSyncTime
+	 * @return {Promise}
      */
 	this.setLastSyncTime = function (libraryID, lastSyncTime) {
 		var lastSyncTime = Math.round(lastSyncTime.getTime() / 1000);
-		return Zotero.DB.valueQueryAsync(
+		_libraryData[libraryID].lastSyncTime = lastSyncTime;
+		return Zotero.DB.queryAsync(
 			"UPDATE libraries SET lastsync=? WHERE libraryID=?", [lastSyncTime, libraryID]
 		);
 	};
 	
-	
 	this.isEditable = function (libraryID) {
-		var type = this.getType(libraryID);
-		switch (type) {
-			case 'user':
-			case 'publications':
-				return true;
-			
-			case 'group':
-				var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
-				var group = Zotero.Groups.get(groupID);
-				return group.editable;
-			
-			default:
-				throw new Error("Unsupported library type '" + type + "' in Zotero.Libraries.getName()");
-		}
+		return _libraryData[libraryID].editable;
 	}
 	
+	/**
+	 * @return {Promise}
+	 */
+	this.setEditable = function (libraryID, editable) {
+		if (editable == this.isEditable(libraryID)) {
+			return Zotero.Promise.resolve();
+		}
+		_libraryData[libraryID].editable = !!editable;
+		return Zotero.DB.queryAsync(
+			"UPDATE libraries SET editable=? WHERE libraryID=?", [editable ? 1 : 0, libraryID]
+		);
+	}
 	
 	this.isFilesEditable = function (libraryID) {
-		var type = this.getType(libraryID);
-		switch (type) {
-			case 'user':
-			case 'publications':
-				return true;
-			
-			case 'group':
-				var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
-				var group = Zotero.Groups.get(groupID);
-				return group.filesEditable;
-			
-			default:
-				throw new Error("Unsupported library type '" + type + "' in Zotero.Libraries.getName()");
+		return _libraryData[libraryID].filesEditable;
+	}
+	
+	/**
+	 * @return {Promise}
+	 */
+	this.setFilesEditable = function (libraryID, filesEditable) {
+		if (filesEditable == this.isFilesEditable(libraryID)) {
+			return Zotero.Promise.resolve();
 		}
+		_libraryData[libraryID].filesEditable = !!filesEditable;
+		return Zotero.DB.queryAsync(
+			"UPDATE libraries SET filesEditable=? WHERE libraryID=?", [filesEditable ? 1 : 0, libraryID]
+		);
 	}
 	
 	this.isGroupLibrary = function (libraryID) {
@@ -215,6 +236,8 @@ Zotero.Libraries = new function () {
 		return {
 			id: row.libraryID,
 			type: row.libraryType,
+			editable: row.editable,
+			filesEditable: row.filesEditable,
 			version: row.version,
 			lastSyncTime: row.lastsync != 0 ? new Date(row.lastsync * 1000) : false
 		};
