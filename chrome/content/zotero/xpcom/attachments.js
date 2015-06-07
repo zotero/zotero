@@ -258,6 +258,13 @@ Zotero.Attachments = new function(){
 			var browser = Zotero.HTTP.processDocuments(
 				url,
 				function() {
+					let channel = browser.docShell.currentDocumentChannel;
+					if (channel && (channel instanceof Components.interfaces.nsIHttpChannel)) {
+						if (channel.responseStatus < 200 || channel.responseStatus >= 400) {
+							deferred.reject(new Error("Invalid response "+channel.responseStatus+" "+channel.responseStatusText+" for '"+url+"'"));
+							return;
+						}
+					}
 					return Zotero.Attachments.importFromDocument({
 						libraryID: libraryID,
 						document: browser.contentDocument,
