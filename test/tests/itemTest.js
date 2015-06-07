@@ -754,6 +754,57 @@ describe("Zotero.Item", function () {
 	})
 
 	describe("#fromJSON()", function () {
+		it("should accept ISO 8601 dates", function* () {
+			var json = {
+				itemType: "journalArticle",
+				accessDate: "2015-06-07T20:56:00Z",
+				dateAdded: "2015-06-07T20:57:00Z",
+				dateModified: "2015-06-07T20:58:00Z",
+			};
+			var item = new Zotero.Item;
+			yield item.fromJSON(json);
+			assert.equal(item.getField('accessDate'), '2015-06-07 20:56:00');
+			assert.equal(item.dateAdded, '2015-06-07 20:57:00');
+			assert.equal(item.dateModified, '2015-06-07 20:58:00');
+		})
+		
+		it("should ignore non–ISO 8601 dates", function* () {
+			var json = {
+				itemType: "journalArticle",
+				accessDate: "2015-06-07 20:56:00",
+				dateAdded: "2015-06-07 20:57:00",
+				dateModified: "2015-06-07 20:58:00",
+			};
+			var item = new Zotero.Item;
+			yield item.fromJSON(json);
+			assert.strictEqual(item.getField('accessDate'), '');
+			// DEBUG: Should these be null, or empty string like other fields from getField()?
+			assert.isNull(item.dateAdded);
+			assert.isNull(item.dateModified);
+		})
+		
+		it("should set creators", function* () {
+			var json = {
+				itemType: "journalArticle",
+				creators: [
+					{
+						firstName: "First",
+						lastName: "Last",
+						creatorType: "author"
+					},
+					{
+						name: "Test Name",
+						creatorType: "editor"
+					}
+				]
+			};
+			
+			var item = new Zotero.Item;
+			yield item.fromJSON(json);
+			var id = yield item.saveTx();
+			assert.sameDeepMembers(item.getCreatorsJSON(), json.creators);
+		})
+		
 		it("should map a base field to an item-specific field", function* () {
 			var item = new Zotero.Item("bookSection");
 			yield item.fromJSON({

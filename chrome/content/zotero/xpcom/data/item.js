@@ -3841,9 +3841,22 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 		case 'mtime':
 			break;
 		
+		case 'accessDate':
 		case 'dateAdded':
 		case 'dateModified':
-			this[field] = Zotero.Date.dateToSQL(Zotero.Date.isoToDate(val), true);
+			let d = Zotero.Date.isoToDate(val);
+			if (!d) {
+				Zotero.logError("Discarding invalid " + field + " '" + val
+					+ "' for item " + this.libraryKey);
+				continue;
+			}
+			val = Zotero.Date.dateToSQL(d, true);
+			if (field == 'accessDate') {
+				this.setField(field, val);
+			}
+			else {
+				this[field] = val;
+			}
 			break;
 		
 		case 'parentItem':

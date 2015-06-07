@@ -195,10 +195,11 @@ Zotero.Date = new function(){
 	 * Adapted from http://delete.me.uk/2005/03/iso8601.html (AFL-licensed)
 	 *
 	 * @param	{String}		isoDate		ISO 8601 date
-	 * @return	{Date}					JS Date
+	 * @return {Date|False} - JS Date, or false if not a valid date
 	 */
 	this.isoToDate = function (isoDate) {
 		var d = isoDate.match(_re8601);
+		if (!d) return false;
 		
 		var offset = 0;
 		var date = new Date(d[1], 0, 1);
