@@ -66,7 +66,7 @@ Zotero.Users = new function () {
 	
 	this.getCurrentUsername = () => _username;
 	this.setCurrentUsername = function (val) {
-		_userID = val;
+		_username = val;
 		var sql = "REPLACE INTO settings VALUES ('account', 'username', ?)";
 		return Zotero.DB.queryAsync(sql, val);
 	};
