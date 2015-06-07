@@ -1,4 +1,550 @@
+new function() {
 Components.utils.import("resource://gre/modules/osfile.jsm");
+
+/**
+ * Build a dummy translator that can be passed to Zotero.Translate
+ */
+function buildDummyTranslator(translatorType, code) {
+	let info = {
+		"translatorID":"dummy-translator",
+		"translatorType":1, // import
+		"label":"Dummy Translator",
+		"creator":"Simon Kornblith",
+		"target":"",
+		"priority":100,
+		"browserSupport":"g",
+		"inRepository":false,
+		"lastUpdated":"0000-00-00 00:00:00",
+	};
+	let translator = new Zotero.Translator(info);
+	translator.code = code;
+	return translator;
+}
+
+/**
+ * Create a new translator that saves the specified items
+ * @param {String} translatorType - "import" or "web"
+ * @param {Object} items - items as translator JSON
+ */
+function saveItemsThroughTranslator(translatorType, items) {
+	let tyname;
+	if (translatorType == "web") {
+		tyname = "Web";
+	} else if (translatorType == "import") {
+		tyname = "Import";
+	} else {
+		throw new Error("invalid translator type "+translatorType);
+	}
+
+	let translate = new Zotero.Translate[tyname]();
+	let browser;
+	if (translatorType == "web") {
+		browser = Zotero.Browser.createHiddenBrowser();
+		translate.setDocument(browser.contentDocument);
+	} else if (translatorType == "import") {
+		translate.setString("");
+	}
+	translate.setTranslator(buildDummyTranslator(translatorType == "web" ? 4 : 1,
+		"function detectWeb() {}\n"+
+		"function do"+tyname+"() {\n"+
+		"	var json = JSON.parse('"+JSON.stringify(items).replace(/'/g, "\'")+"');\n"+
+		"	for (var i=0; i<json.length; i++) {"+
+		"		var item = new Zotero.Item;\n"+
+		"		for (var field in json[i]) { item[field] = json[i][field]; }\n"+
+		"		item.complete();\n"+
+		"	}\n"+
+		"}"));
+	return translate.translate().then(function(items) {
+		if (browser) Zotero.Browser.deleteHiddenBrowser(browser);
+		return items;
+	});
+}
+
+/**
+ * Convert an array of items to an object in which they are indexed by
+ * their display titles
+ */
+var itemsArrayToObject = Zotero.Promise.coroutine(function* itemsArrayToObject(items) {
+	var obj = {};
+	for (let item of items) {
+		obj[yield item.loadDisplayTitle(true)] = item;
+	}
+	return obj;
+});
+
+const TEST_TAGS = [
+	"manual tag as string",
+	{"tag":"manual tag as object"},
+	{"tag":"manual tag as object with type", "type":0},
+	{"tag":"automatic tag as object", "type":1},
+	{"name":"tag in name property"}
+];
+
+/**
+ * Check that tags match expected values, if TEST_TAGS is passed as test array
+ */
+function checkTestTags(newItem, web) {
+	assert.equal(newItem.getTagType("manual tag as string"), web ? 1 : 0);
+	assert.equal(newItem.getTagType("manual tag as object"), web ? 1 : 0);
+	assert.equal(newItem.getTagType("manual tag as object with type"), web ? 1 : 0);
+	assert.equal(newItem.getTagType("automatic tag as object"), 1);
+	assert.equal(newItem.getTagType("tag in name property"), web ? 1 : 0);
+}
+
+/**
+ * Get included test snapshot file
+ * @returns {nsIFile}
+ */
+function getTestSnapshot() {
+	let snapshot = getTestDataDirectory();
+	snapshot.append("snapshot");
+	snapshot.append("index.html");
+	return snapshot;
+}
+
+/**
+ * Get included test snapshot file
+ * @returns {nsIFile}
+ */
+function getTestPDF() {
+	let testPDF = getTestDataDirectory();
+	testPDF.append("empty.pdf");
+	return testPDF;
+}
+
+/**
+ * Set up endpoints for testing attachment saving
+ * This must happen immediately before the test, since Zotero might get
+ * restarted by resetDB(), which would erase our registered endpoints.
+ */
+function setupAttachmentEndpoints() {
+	var SnapshotTest = function() {};
+	Zotero.Server.Endpoints["/test/translate/test.html"] = SnapshotTest;
+	SnapshotTest.prototype = {
+		"supportedMethods":["GET"],
+		"init":function(data, sendResponseCallback) {
+			Zotero.File.getBinaryContentsAsync(getTestSnapshot()).then(function (data) {
+				sendResponseCallback(200, "text/html", data);
+			});
+		}
+	}
+	var PDFTest = function() {};
+	Zotero.Server.Endpoints["/test/translate/test.pdf"] = PDFTest;
+	PDFTest.prototype = {
+		"supportedMethods":["GET"],
+		"init":function(data, sendResponseCallback) {
+			Zotero.File.getBinaryContentsAsync(getTestPDF()).then(function (data) {
+				sendResponseCallback(200, "application/pdf", data);
+			});
+		}
+	}
+	var NonExistentTest = function() {};
+	Zotero.Server.Endpoints["/test/translate/does_not_exist.html"] = NonExistentTest;
+	NonExistentTest.prototype = {
+		"supportedMethods":["GET"],
+		"init":function(data, sendResponseCallback) {
+			sendResponseCallback(404, "text/html", "File does not exist");
+		}
+	}
+}
+
+describe("Zotero.Translate", function() {
+	let win;
+	before(function* () {
+		setupAttachmentEndpoints();
+		win = yield loadBrowserWindow();
+	});
+	after(function () {
+		win.close();
+	});
+
+	describe("Zotero.Item", function() {
+		it('should save ordinary fields and creators', function* () {
+			let data = loadSampleData('allTypesAndFields');
+			let trueItems = loadSampleData('itemJSON');
+			let saveItems = [];
+			for (let itemType in data) {
+				saveItems.push(data[itemType]);
+				let trueItem = trueItems[itemType];
+				delete trueItem.dateAdded;
+				delete trueItem.dateModified;
+				delete trueItem.key;
+			}
+
+			let newItems = yield saveItemsThroughTranslator("import", saveItems);
+			let savedItems = {};
+			for (let i=0; i<newItems.length; i++) {
+				let savedItem = yield newItems[i].toJSON();
+				savedItems[Zotero.ItemTypes.getName(newItems[i].itemTypeID)] = savedItem;
+				delete savedItem.dateAdded;
+				delete savedItem.dateModified;
+				delete savedItem.key;
+			}
+			assert.deepEqual(savedItems, trueItems, "saved items match inputs");
+		});
+
+		it('should save tags', function* () {
+			let myItem = {
+				"itemType":"book",
+				"title":"Test Item",
+				"tags":TEST_TAGS
+			};
+			checkTestTags((yield saveItemsThroughTranslator("import", [myItem]))[0]);
+		});
+
+		it('should save notes', function* () {
+			let myItems = [
+				{
+					"itemType":"book",
+					"title":"Test Item",
+					"notes":[
+						"1 note as string",
+							{
+								"note":"2 note as object",
+								"tags":TEST_TAGS
+							}
+					]
+				},
+				{
+					"itemType":"note",
+					"note":"standalone note",
+					"tags":TEST_TAGS
+				}
+			];
+
+			let newItems = yield itemsArrayToObject(yield saveItemsThroughTranslator("import", myItems));
+			let noteIDs = newItems["Test Item"].getNotes();
+			let note1 = yield Zotero.Items.getAsync(noteIDs[0]);
+			assert.equal(Zotero.ItemTypes.getName(note1.itemTypeID), "note");
+			assert.equal(note1.getNote(), "1 note as string");
+			let note2 = yield Zotero.Items.getAsync(noteIDs[1]);
+			assert.equal(Zotero.ItemTypes.getName(note2.itemTypeID), "note");
+			assert.equal(note2.getNote(), "2 note as object");
+			checkTestTags(note2);
+			let note3 = newItems["standalone note"];
+			assert.equal(note3.getNote(), "standalone note");
+			checkTestTags(note3);
+		});
+
+		it('should save collections', function* () {
+			let translate = new Zotero.Translate.Import();
+			translate.setString("");
+			translate.setTranslator(buildDummyTranslator(4,
+				'function detectWeb() {}\n'+
+				'function doImport() {\n'+
+				'	var item1 = new Zotero.Item("book");\n'+
+				'   item1.title = "Not in Collection";\n'+
+				'   item1.complete();\n'+
+				'	var item2 = new Zotero.Item("book");\n'+
+				'   item2.id = 1;\n'+
+				'   item2.title = "In Parent Collection";\n'+
+				'   item2.complete();\n'+
+				'	var item3 = new Zotero.Item("book");\n'+
+				'   item3.id = 2;\n'+
+				'   item3.title = "In Child Collection";\n'+
+				'   item3.complete();\n'+
+				'	var collection = new Zotero.Collection();\n'+
+				'	collection.name = "Parent Collection";\n'+
+				'	collection.children = [{"id":1}, {"type":"collection", "name":"Child Collection", "children":[{"id":2}]}];\n'+
+				'	collection.complete();\n'+
+				'}'));
+			let newItems = yield translate.translate();
+			assert.equal(newItems.length, 3);
+			newItems = yield itemsArrayToObject(newItems);
+			assert.equal(newItems["Not in Collection"].getCollections().length, 0);
+
+			let parentCollection = newItems["In Parent Collection"].getCollections();
+			assert.equal(parentCollection.length, 1);
+			parentCollection = (yield Zotero.Collections.getAsync(parentCollection))[0];
+			assert.equal(parentCollection.name, "Parent Collection");
+			assert.isTrue(parentCollection.hasChildCollections());
+
+			let childCollection = newItems["In Child Collection"].getCollections();
+			assert.equal(childCollection.length, 1);
+			childCollection = (yield Zotero.Collections.getAsync(childCollection[0]));
+			assert.equal(childCollection.name, "Child Collection");
+			let parentChildren = parentCollection.getChildCollections();
+			assert.equal(parentChildren.length, 1);
+			assert.equal(parentChildren[0], childCollection);
+		});
+
+		it('import translators should save attachments', function* () {
+			let emptyPDF = getTestPDF().path;
+			let snapshot = getTestSnapshot().path;
+			let myItems = [
+				{
+					"itemType":"attachment",
+					"path":emptyPDF,
+					"title":"Empty PDF",
+					"note":"attachment note",
+					"tags":TEST_TAGS
+				},
+				{
+					"itemType":"attachment",
+					"url":"http://www.zotero.org/",
+					"title":"Link to zotero.org",
+					"note":"attachment 2 note",
+					"tags":TEST_TAGS
+				}
+			];
+			let childAttachments = myItems.slice();
+			childAttachments.push({
+				"itemType":"attachment",
+				"path":snapshot,
+				"url":"http://www.example.com/",
+				"title":"Snapshot",
+				"note":"attachment 3 note",
+				"tags":TEST_TAGS
+			});
+			myItems.push({
+				"itemType":"book",
+				"title":"Container Item",
+				"attachments":childAttachments
+			});
+
+			let newItems = yield itemsArrayToObject(yield saveItemsThroughTranslator("import", myItems));
+			let containedAttachments = yield Zotero.Items.getAsync(newItems["Container Item"].getAttachments());
+			assert.equal(containedAttachments.length, 3);
+
+			for (let savedAttachments of [[newItems["Empty PDF"], newItems["Link to zotero.org"]],
+				                          [containedAttachments[0], containedAttachments[1]]]) {
+				assert.equal(savedAttachments[0].getField("title"), "Empty PDF");
+				assert.equal(savedAttachments[0].getNote(), "attachment note");
+				assert.equal(savedAttachments[0].attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_FILE);
+				checkTestTags(savedAttachments[0]);
+
+				assert.equal(savedAttachments[1].getField("title"), "Link to zotero.org");
+				assert.equal(savedAttachments[1].getField("url"), "http://www.zotero.org/");
+				assert.equal(savedAttachments[1].getNote(), "attachment 2 note");
+				assert.equal(savedAttachments[1].attachmentLinkMode, Zotero.Attachments.LINK_MODE_LINKED_URL);
+				checkTestTags(savedAttachments[1]);
+			}
+
+			assert.equal(containedAttachments[2].getField("title"), "Snapshot");
+			assert.equal(containedAttachments[2].getField("url"), "http://www.example.com/");
+			assert.equal(containedAttachments[2].getNote(), "attachment 3 note");
+			assert.equal(containedAttachments[2].attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
+			checkTestTags(containedAttachments[2]);
+		});
+
+		it('import translators should save missing snapshots as links', function* () {
+			let missingFile = getTestDataDirectory();
+			missingFile.append("missing");
+			assert.isFalse(missingFile.exists());
+			missingFile = missingFile.path;
+			let myItems = [
+				{
+					"itemType":"book",
+					"title":"Container Item",
+					"attachments":[
+						{
+							"itemType":"attachment",
+							"path":missingFile,
+							"url":"http://www.example.com/",
+							"title":"Snapshot with missing file",
+							"note":"attachment note",
+							"tags":TEST_TAGS
+						}
+					]
+				}
+			];
+
+			let newItems = yield saveItemsThroughTranslator("import", myItems);
+			assert.equal(newItems.length, 1);
+			assert.equal(newItems[0].getField("title"), "Container Item");
+			let containedAttachments = yield Zotero.Items.getAsync(newItems[0].getAttachments());
+			assert.equal(containedAttachments.length, 1);
+
+			assert.equal(containedAttachments[0].getField("title"), "Snapshot with missing file");
+			assert.equal(containedAttachments[0].getField("url"), "http://www.example.com/");
+			assert.equal(containedAttachments[0].getNote(), "attachment note");
+			assert.equal(containedAttachments[0].attachmentLinkMode, Zotero.Attachments.LINK_MODE_LINKED_URL);
+			checkTestTags(containedAttachments[0]);
+		});
+
+		it('import translators should ignore missing file attachments', function* () {
+			let missingFile = getTestDataDirectory();
+			missingFile.append("missing");
+			assert.isFalse(missingFile.exists());
+			missingFile = missingFile.path;
+			let myItems = [
+				{
+					"itemType":"attachment",
+					"path":missingFile,
+					"title":"Missing file"
+				},
+				{
+					"itemType":"book",
+					"title":"Container Item",
+					"attachments":[
+						{
+							"itemType":"attachment",
+							"path":missingFile,
+							"title":"Missing file"
+						}
+					]
+				}
+			];
+
+			let newItems = yield saveItemsThroughTranslator("import", myItems);
+			assert.equal(newItems.length, 1);
+			assert.equal(newItems[0].getField("title"), "Container Item");
+			assert.equal(newItems[0].getAttachments().length, 0);
+		});
+
+		it('web translators should save attachments', function* () {
+			let myItems = [
+				{
+					"itemType":"book",
+					"title":"Container Item",
+					"attachments":[
+						{
+							"url":"http://www.zotero.org/",
+							"title":"Link to zotero.org",
+							"note":"attachment note",
+							"tags":TEST_TAGS,
+							"snapshot":false
+						},
+						{
+							"url":"http://127.0.0.1:23119/test/translate/test.html",
+							"title":"Test Snapshot",
+							"note":"attachment 2 note",
+							"tags":TEST_TAGS
+						},
+						{
+							"url":"http://127.0.0.1:23119/test/translate/test.pdf",
+							"title":"Test PDF",
+							"note":"attachment 3 note",
+							"tags":TEST_TAGS
+						}
+					]
+				}
+			];
+
+			let newItems = yield saveItemsThroughTranslator("web", myItems);
+			assert.equal(newItems.length, 1);
+			let containedAttachments = yield itemsArrayToObject(yield Zotero.Items.getAsync(newItems[0].getAttachments()));
+
+			let link = containedAttachments["Link to zotero.org"];
+			assert.equal(link.getField("url"), "http://www.zotero.org/");
+			assert.equal(link.getNote(), "attachment note");
+			assert.equal(link.attachmentLinkMode, Zotero.Attachments.LINK_MODE_LINKED_URL);
+			checkTestTags(link, true);
+
+			let snapshot = containedAttachments["Test Snapshot"];
+			assert.equal(snapshot.getField("url"), "http://127.0.0.1:23119/test/translate/test.html");
+			assert.equal(snapshot.getNote(), "attachment 2 note");
+			assert.equal(snapshot.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
+			assert.equal(snapshot.attachmentContentType, "text/html");
+			checkTestTags(snapshot, true);
+
+			let pdf = containedAttachments["Test PDF"];
+			assert.equal(pdf.getField("url"), "http://127.0.0.1:23119/test/translate/test.pdf");
+			assert.equal(pdf.getNote(), "attachment 3 note");
+			assert.equal(pdf.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
+			assert.equal(pdf.attachmentContentType, "application/pdf");
+			checkTestTags(pdf, true);
+		});
+
+		it('web translators should save attachment from document', function* () {
+			let deferred = Zotero.Promise.defer();
+			let browser = Zotero.HTTP.processDocuments("http://127.0.0.1:23119/test/translate/test.html",
+				                                       function (doc) { deferred.resolve(doc) }, undefined,
+				                                       undefined, true);
+			let doc = yield deferred.promise;
+
+			let translate = new Zotero.Translate.Web();
+			translate.setDocument(doc);
+			translate.setTranslator(buildDummyTranslator(4,
+				'function detectWeb() {}\n'+
+				'function doWeb(doc) {\n'+
+				'	var item = new Zotero.Item("book");\n'+
+				'	item.title = "Container Item";\n'+
+				'	item.attachments = [{\n'+
+				'		"document":doc,\n'+
+				'		"title":"Snapshot from Document",\n'+
+				'		"note":"attachment note",\n'+
+				'		"tags":'+JSON.stringify(TEST_TAGS)+'\n'+
+				'	}];\n'+
+				'	item.complete();\n'+
+				'}'));
+			let newItems = yield translate.translate();
+			assert.equal(newItems.length, 1);
+			let containedAttachments = yield Zotero.Items.getAsync(newItems[0].getAttachments());
+			assert.equal(containedAttachments.length, 1);
+
+			let snapshot = containedAttachments[0];
+			assert.equal(snapshot.getField("url"), "http://127.0.0.1:23119/test/translate/test.html");
+			assert.equal(snapshot.getNote(), "attachment note");
+			assert.equal(snapshot.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
+			assert.equal(snapshot.attachmentContentType, "text/html");
+			checkTestTags(snapshot, true);
+
+			Zotero.Browser.deleteHiddenBrowser(browser);
+		});
+
+		it('web translators should ignore attachments that return error codes', function* () {
+			this.timeout(60000);
+			let myItems = [
+				{
+					"itemType":"book",
+					"title":"Container Item",
+					"attachments":[
+						{
+							"url":"http://127.0.0.1:23119/test/translate/does_not_exist.html",
+							"title":"Non-Existent HTML"
+						},
+						{
+							"url":"http://127.0.0.1:23119/test/translate/does_not_exist.pdf",
+							"title":"Non-Existent PDF"
+						}
+					]
+				}
+			];
+
+			let newItems = yield saveItemsThroughTranslator("web", myItems);
+			assert.equal(newItems.length, 1);
+			let containedAttachments = yield Zotero.Items.getAsync(newItems[0].getAttachments());
+			assert.equal(containedAttachments.length, 0);
+		});
+
+		it('web translators should save PDFs only if the content type matches', function* () {
+			this.timeout(60000);
+			let myItems = [
+				{
+					"itemType":"book",
+					"title":"Container Item",
+					"attachments":[
+						{
+							"url":"http://127.0.0.1:23119/test/translate/test.html",
+							"mimeType":"application/pdf",
+							"title":"Test PDF with wrong mime type"
+						},
+						{
+							"url":"http://127.0.0.1:23119/test/translate/test.pdf",
+							"mimeType":"application/pdf",
+							"title":"Test PDF",
+							"note":"attachment note",
+							"tags":TEST_TAGS
+						}
+					]
+				}
+			];
+
+			let newItems = yield saveItemsThroughTranslator("web", myItems);
+			assert.equal(newItems.length, 1);
+			let containedAttachments = yield Zotero.Items.getAsync(newItems[0].getAttachments());
+			assert.equal(containedAttachments.length, 1);
+
+			let pdf = containedAttachments[0];
+			assert.equal(pdf.getField("title"), "Test PDF");
+			assert.equal(pdf.getField("url"), "http://127.0.0.1:23119/test/translate/test.pdf");
+			assert.equal(pdf.getNote(), "attachment note");
+			assert.equal(pdf.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_URL);
+			checkTestTags(pdf, true);
+		});
+	});
+});
 
 describe("Zotero.Translate.ItemGetter", function() {
 	describe("nextItem", function() {
@@ -380,9 +926,8 @@ describe("Zotero.Translate.ItemGetter", function() {
 		
 		it('should return stored/linked file and URI attachments in expected format', Zotero.Promise.coroutine(function* () {
 			this.timeout(60000);
-			let file = getTestDataDirectory();
+			let file = getTestPDF();
 			let item, relatedItem;
-			file.append("empty.pdf");
 			
 			yield Zotero.DB.executeTransaction(function* () {
 				item = new Zotero.Item('journalArticle');
@@ -588,3 +1133,4 @@ describe("Zotero.Translate.ItemGetter", function() {
 		}));
 	});
 });
+}
