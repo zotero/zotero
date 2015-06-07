@@ -42,6 +42,7 @@ DONE
 	exit 1
 }
 
+DEBUG_LEVEL=0
 while getopts "bcd:fg:tx:" opt; do
 	case $opt in
         b)
