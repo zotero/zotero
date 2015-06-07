@@ -312,26 +312,24 @@ Zotero.Attachments = new function(){
 			// Save to temp dir
 			var deferred = Zotero.Promise.defer();
 			wbp.progressListener = new Zotero.WebProgressFinishListener(function() {
-				Zotero.File.getSample(tmpFile)
-				.then(function (sample) {
-					if (contentType == 'application/pdf' &&
-							Zotero.MIME.sniffForMIMEType(sample) != 'application/pdf') {
-						let errString = "Downloaded PDF did not have MIME type "
-							+ "'application/pdf' in Attachments.importFromURL()";
-						Zotero.debug(errString, 2);
-						Zotero.debug(sample, 3);
-						deferred.reject(new Error(errString));
-					} else {
-						deferred.resolve();
-					}
-				});
+				deferred.resolve();
 			});
 				
 			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
 				.createInstance(Components.interfaces.nsIURL);
 			nsIURL.spec = url;
 			Zotero.Utilities.Internal.saveURI(wbp, nsIURL, tmpFile);
+
 			yield deferred.promise;
+			let sample = yield Zotero.File.getSample(tmpFile);
+			if (contentType == 'application/pdf' &&
+					Zotero.MIME.sniffForMIMEType(sample) != 'application/pdf') {
+				let errString = "Downloaded PDF did not have MIME type "
+					+ "'application/pdf' in Attachments.importFromURL()";
+				Zotero.debug(errString, 2);
+				Zotero.debug(sample, 3);
+				throw(new Error(errString));
+			}
 			
 			// Create DB item
 			var attachmentItem;
