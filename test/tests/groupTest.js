@@ -10,6 +10,26 @@ describe("Zotero.Group", function () {
 			}.bind(this));
 			assert.isFalse(Zotero.Groups.exists(id));
 		})
+		
+		it("should provide libraryID in extraData", function* () {
+			var group = yield createGroup();
+			var libraryID = group.libraryID;
+			
+			var deferred = Zotero.Promise.defer();
+			var observerID = Zotero.Notifier.registerObserver({
+				notify: function (event, type, ids, extraData) {
+					deferred.resolve(extraData[ids[0]]);
+				}
+			}, ['group'], "test");
+			try {
+				yield group.eraseTx();
+				let extraData = yield deferred.promise;
+				assert.equal(extraData.libraryID, libraryID);
+			}
+			finally {
+				Zotero.Notifier.unregisterObserver(observerID);
+			}
+		})
 	})
 	
 	describe("#fromJSON()", function () {

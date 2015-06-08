@@ -260,6 +260,8 @@ Zotero.Group.prototype.save = Zotero.Promise.coroutine(function* () {
 * Deletes group and all descendant objects
 **/
 Zotero.Group.prototype.erase = Zotero.Promise.coroutine(function* () {
+	Zotero.debug("Removing group " + this.id);
+	
 	Zotero.DB.requireTransaction();
 	
 	// Delete items
@@ -291,7 +293,11 @@ Zotero.Group.prototype.erase = Zotero.Promise.coroutine(function* () {
 		Zotero.Groups.unregister(this.id);
 		//yield Zotero.purgeDataObjects();
 	}.bind(this))
-	Zotero.Notifier.queue('delete', 'group', this.id);
+	var notifierData = {};
+	notifierData[this.id] = {
+		libraryID: this.libraryID
+	};
+	Zotero.Notifier.queue('delete', 'group', this.id, notifierData);
 });
 
 
