@@ -69,7 +69,7 @@ Zotero.Notifier = new function(){
 		}
 		while (_observers[hash]);
 		
-		var msg = "Registering observer '" + hash + "' for "
+		var msg = "Registering notifier observer '" + hash + "' for "
 			+ (types ? '[' + types.join() + ']' : 'all types');
 		if (priority) {
 			msg += " with priority " + priority;
@@ -84,7 +84,7 @@ Zotero.Notifier = new function(){
 	}
 	
 	this.unregisterObserver = function (id) {
-		Zotero.debug("Unregistering observer in notifier with id '" + id + "'", 4);
+		Zotero.debug("Unregistering notifier observer in notifier with id '" + id + "'", 4);
 		delete _observers[id];
 	}
 	
@@ -210,7 +210,6 @@ Zotero.Notifier = new function(){
 				}
 			}
 		}
-		Zotero.debug(_queue[type][event]);
 		
 		return true;
 	}
@@ -221,16 +220,13 @@ Zotero.Notifier = new function(){
 			+ "'" + event + "', "
 			+ "'" + type + "', "
 			+ "[" + ids.join() + "]"
-			+ (extraData ? ", " + extraData : "")
+			+ (extraData ? ", " + JSON.stringify(extraData) : "")
 			+ ")"
 			+ (queueing
 				? " queued "
 				: " called "
 			+ "[observers: " + _countObserversForType(type) + "]")
 		);
-		if (extraData) {
-			Zotero.debug(extraData);
-		}
 	}
 	
 	
@@ -315,7 +311,7 @@ Zotero.Notifier = new function(){
 			//Zotero.debug("Notifier queue already open", 4);
 		}
 		else {
-			Zotero.debug("Beginning Notifier event queue");
+			Zotero.debug("Beginning notifier event queue");
 			_inTransaction = true;
 		}
 		
@@ -386,7 +382,7 @@ Zotero.Notifier = new function(){
 		reset();
 		
 		if (totals) {
-			Zotero.debug("Committing Notifier event queue" + totals);
+			Zotero.debug("Committing notifier event queue" + totals);
 			
 			for (var type in runQueue) {
 				for (var event in runQueue[type]) {
@@ -409,7 +405,7 @@ Zotero.Notifier = new function(){
 	 * Reset the event queue
 	 */
 	function reset() {
-		Zotero.debug("Resetting Notifier event queue");
+		Zotero.debug("Resetting notifier event queue");
 		_locked = false;
 		_queue = [];
 		_inTransaction = false;
