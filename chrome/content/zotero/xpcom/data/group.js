@@ -295,6 +295,13 @@ Zotero.Group.prototype.erase = Zotero.Promise.coroutine(function* () {
 });
 
 
+Zotero.Group.prototype.eraseTx = function () {
+	return Zotero.DB.executeTransaction(function* () {
+		return this.erase();
+	}.bind(this));
+}
+
+
 Zotero.Group.prototype.fromJSON = function (json, userID) {
 	this._requireLoad();
 	
