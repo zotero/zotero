@@ -2209,7 +2209,8 @@ Zotero.CollectionTreeRow.prototype.isShare = function()
 
 // Special
 Zotero.CollectionTreeRow.prototype.isWithinGroup = function () {
-	return this.ref && Zotero.Libraries.getType(this.ref.libraryID) == 'group';
+	return this.ref && !this.isHeader()
+		&& Zotero.Libraries.getType(this.ref.libraryID) == 'group';
 }
 
 Zotero.CollectionTreeRow.prototype.isWithinEditableGroup = function () {
