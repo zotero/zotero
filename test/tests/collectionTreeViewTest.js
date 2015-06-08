@@ -1,11 +1,11 @@
 "use strict";
 
 describe("Zotero.CollectionTreeView", function() {
-	var win, collectionsView, cv;
+	var win, cv;
 	
 	before(function* () {
 		win = yield loadZoteroPane();
-		cv = collectionsView = win.ZoteroPane.collectionsView;
+		cv = win.ZoteroPane.collectionsView;
 	});
 	beforeEach(function () {
 		// TODO: Add a selectCollection() function and select a collection instead?
@@ -69,9 +69,9 @@ describe("Zotero.CollectionTreeView", function() {
 	
 	describe("#selectByID()", function () {
 		it("should select the trash", function* () {
-			yield collectionsView.selectByID("T1");
-			var row = collectionsView.selection.currentIndex;
-			var treeRow = collectionsView.getRow(row);
+			yield cv.selectByID("T1");
+			var row = cv.selection.currentIndex;
+			var treeRow = cv.getRow(row);
 			assert.ok(treeRow.isTrash());
 			assert.equal(treeRow.ref.libraryID, Zotero.Libraries.userLibraryID);
 		})
@@ -79,10 +79,10 @@ describe("Zotero.CollectionTreeView", function() {
 	
 	describe("#selectWait()", function () {
 		it("shouldn't hang if row is already selected", function* () {
-			var row = collectionsView.getRowIndexByID("T" + Zotero.Libraries.userLibraryID);
-			collectionsView.selection.select(row);
+			var row = cv.getRowIndexByID("T" + Zotero.Libraries.userLibraryID);
+			cv.selection.select(row);
 			yield Zotero.Promise.delay(50);
-			yield collectionsView.selectWait(row);
+			yield cv.selectWait(row);
 		})
 	})
 	
@@ -94,7 +94,7 @@ describe("Zotero.CollectionTreeView", function() {
 			var id = yield collection.saveTx();
 			
 			// New collection should be selected
-			var selected = collectionsView.getSelectedCollection(true);
+			var selected = cv.getSelectedCollection(true);
 			assert.equal(selected, id);
 		});
 		
@@ -107,7 +107,7 @@ describe("Zotero.CollectionTreeView", function() {
 			});
 			
 			// Library should still be selected
-			assert.equal(collectionsView.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
+			assert.equal(cv.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
 		});
 		
 		it("shouldn't select a new collection if skipSelect is passed", function* () {
@@ -119,7 +119,7 @@ describe("Zotero.CollectionTreeView", function() {
 			});
 			
 			// Library should still be selected
-			assert.equal(collectionsView.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
+			assert.equal(cv.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
 		});
 		
 		it("shouldn't select a modified collection", function* () {
@@ -134,7 +134,7 @@ describe("Zotero.CollectionTreeView", function() {
 			yield collection.saveTx();
 			
 			// Modified collection should not be selected
-			assert.equal(collectionsView.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
+			assert.equal(cv.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
 		});
 		
 		it("should reselect a selected modified collection", function* () {
@@ -143,14 +143,14 @@ describe("Zotero.CollectionTreeView", function() {
 			collection.name = "Reselect on modify";
 			var id = yield collection.saveTx();
 			
-			var selected = collectionsView.getSelectedCollection(true);
+			var selected = cv.getSelectedCollection(true);
 			assert.equal(selected, id);
 			
 			collection.name = "Reselect on modify 2";
 			yield collection.saveTx();
 			
 			// Modified collection should still be selected
-			selected = collectionsView.getSelectedCollection(true);
+			selected = cv.getSelectedCollection(true);
 			assert.equal(selected, id);
 		});
 		
@@ -227,14 +227,14 @@ describe("Zotero.CollectionTreeView", function() {
 		 *                              returned.
 		 */
 		var drop = Zotero.Promise.coroutine(function* (targetRowID, itemIDs, promise) {
-			var row = collectionsView.getRowIndexByID(targetRowID);
+			var row = cv.getRowIndexByID(targetRowID);
 			
 			var stub = sinon.stub(Zotero.DragDrop, "getDragTarget");
-			stub.returns(collectionsView.getRow(row));
+			stub.returns(cv.getRow(row));
 			if (!promise) {
 				promise = waitForItemEvent("add");
 			}
-			yield collectionsView.drop(row, 0, {
+			yield cv.drop(row, 0, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
 				mozSourceNode: win.document.getElementById('zotero-items-tree'),
@@ -258,10 +258,10 @@ describe("Zotero.CollectionTreeView", function() {
 		
 		
 		var canDrop = Zotero.Promise.coroutine(function* (targetRowID, itemIDs) {
-			var row = collectionsView.getRowIndexByID(targetRowID);
+			var row = cv.getRowIndexByID(targetRowID);
 			
 			var stub = sinon.stub(Zotero.DragDrop, "getDragTarget");
-			stub.returns(collectionsView.getRow(row));
+			stub.returns(cv.getRow(row));
 			var dt = {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
@@ -277,9 +277,9 @@ describe("Zotero.CollectionTreeView", function() {
 					}
 				}
 			};
-			var canDrop = collectionsView.canDropCheck(row, 0, dt);
+			var canDrop = cv.canDropCheck(row, 0, dt);
 			if (canDrop) {
-				canDrop = yield collectionsView.canDropCheckAsync(row, 0, dt);
+				canDrop = yield cv.canDropCheckAsync(row, 0, dt);
 			}
 			stub.restore();
 			return canDrop;
@@ -307,7 +307,7 @@ describe("Zotero.CollectionTreeView", function() {
 			
 			Zotero.Notifier.unregisterObserver(observerID);
 			
-			yield collectionsView.selectCollection(collection.id);
+			yield cv.selectCollection(collection.id);
 			yield waitForItemsLoad(win);
 			
 			var itemsView = win.ZoteroPane.itemsView
@@ -335,7 +335,7 @@ describe("Zotero.CollectionTreeView", function() {
 			
 			var ids = yield drop("L" + group.libraryID, [item.id]);
 			
-			yield collectionsView.selectLibrary(group.libraryID);
+			yield cv.selectLibrary(group.libraryID);
 			yield waitForItemsLoad(win);
 			
 			// Check parent
