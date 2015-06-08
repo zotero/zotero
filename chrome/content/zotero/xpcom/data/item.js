@@ -3743,7 +3743,9 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	}
 	
 	var parentItem = this.parentKey;
-	parentItem = parentItem ? this.ObjectsClass.getByLibraryAndKey(this.libraryID, parentItem) : null;
+	parentItem = parentItem
+		? (yield this.ObjectsClass.getByLibraryAndKeyAsync(this.libraryID, parentItem))
+		: null;
 	
 	// // Delete associated attachment files
 	if (this.isAttachment()) {

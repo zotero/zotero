@@ -1,11 +1,11 @@
 "use strict";
 
 describe("Zotero.CollectionTreeView", function() {
-	var win, collectionsView;
+	var win, collectionsView, cv;
 	
 	before(function* () {
 		win = yield loadZoteroPane();
-		collectionsView = win.ZoteroPane.collectionsView;
+		cv = collectionsView = win.ZoteroPane.collectionsView;
 	});
 	beforeEach(function () {
 		// TODO: Add a selectCollection() function and select a collection instead?
@@ -18,7 +18,6 @@ describe("Zotero.CollectionTreeView", function() {
 	describe("collapse/expand", function () {
 		it("should close and open My Library repeatedly", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
-			var cv = collectionsView;
 			yield cv.selectLibrary(libraryID);
 			var row = cv.selection.currentIndex;
 			
@@ -50,7 +49,6 @@ describe("Zotero.CollectionTreeView", function() {
 	
 	describe("#expandToCollection()", function () {
 		it("should expand a collection to a subcollection", function* () {
-			var cv = collectionsView;
 			var collection1 = yield createDataObject('collection');
 			var collection2 = createUnsavedDataObject('collection');
 			collection2.parentID = collection1.id;
@@ -166,7 +164,6 @@ describe("Zotero.CollectionTreeView", function() {
 			search.addCondition('title', 'contains', 'test');
 			var searchID = yield search.saveTx();
 			
-			var cv = win.ZoteroPane.collectionsView;
 			var collectionRow = cv._rowMap["C" + collectionID];
 			var searchRow = cv._rowMap["S" + searchID];
 			var duplicatesRow = cv._rowMap["D" + Zotero.Libraries.userLibraryID];
@@ -184,6 +181,36 @@ describe("Zotero.CollectionTreeView", function() {
 			else {
 				var trashRow = cv._rowMap["T" + Zotero.Libraries.userLibraryID];
 				assert.isBelow(searchRow, trashRow);
+			}
+		})
+		
+		it("should remove a group and all children", function* () {
+			// Make sure Group Libraries separator and header exist already,
+			// since otherwise they'll interfere with the count
+			yield getGroup();
+			
+			var originalRowCount = cv.rowCount;
+			
+			var group = yield createGroup();
+			yield createDataObject('collection', { libraryID: group.libraryID });
+			var c = yield createDataObject('collection', { libraryID: group.libraryID });
+			yield createDataObject('collection', { libraryID: group.libraryID, parentID: c.id });
+			yield createDataObject('collection', { libraryID: group.libraryID });
+			yield createDataObject('collection', { libraryID: group.libraryID });
+			
+			// Group, collections, and trash
+			assert.equal(cv.rowCount, originalRowCount + 7);
+			
+			var spy = sinon.spy(cv, "refresh");
+			try {
+				yield group.eraseTx();
+				
+				assert.equal(cv.rowCount, originalRowCount);
+				// Make sure the tree wasn't refreshed
+				sinon.assert.notCalled(spy);
+			}
+			finally {
+				spy.restore();
 			}
 		})
 	})

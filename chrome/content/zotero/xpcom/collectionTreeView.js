@@ -305,44 +305,41 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 	if (action == 'delete') {
 		var selectedIndex = this.selection.count ? this.selection.currentIndex : 0;
 		
-		//Since a delete involves shifting of rows, we have to do it in order
-		
-		//sort the ids by row
-		var rows = [];
-		for (var i in ids)
-		{
-			switch (type)
-			{
+		// Since a delete involves shifting of rows, we have to do it in reverse order
+		let rows = [];
+		for (let i = 0; i < ids.length; i++) {
+			let id = ids[i];
+			switch (type) {
 				case 'collection':
-					if (typeof this._rowMap['C' + ids[i]] != 'undefined') {
-						rows.push(this._rowMap['C' + ids[i]]);
+					if (this._rowMap['C' + id] !== undefined) {
+						rows.push(this._rowMap['C' + id]);
 					}
 					break;
 				
 				case 'search':
-					if (typeof this._rowMap['S' + ids[i]] != 'undefined') {
-						rows.push(this._rowMap['S' + ids[i]]);
+					if (this._rowMap['S' + id] !== undefined) {
+						rows.push(this._rowMap['S' + id]);
 					}
 					break;
 				
 				case 'group':
-					// For now, just reload if a group is removed, since otherwise
-					// we'd have to remove collections too
-					yield this.reload();
-					this.rememberSelection(savedSelection);
+					let row = this.getRowIndexByID("L" + extraData[id].libraryID);
+					let groupLevel = this.getLevel(row);
+					do {
+						rows.push(row);
+						row++;
+					}
+					while (row < this.rowCount && this.getLevel(row) > groupLevel);
 					break;
 			}
 		}
 		
-		if(rows.length > 0)
-		{
+		if (rows.length > 0) {
 			rows.sort(function(a,b) { return a-b });
 			
-			for(var i=0, len=rows.length; i<len; i++)
-			{
-				var row = rows[i];
+			for (let i = rows.length - 1; i >= 0; i--) {
+				let row = rows[i];
 				this._removeRow(row);
-				this._treebox.rowCountChanged(row, -1);
 			}
 			
 			this._refreshRowMap();
