@@ -204,4 +204,14 @@ Zotero.Debug = new function () {
 		}
 		return str.substr(1);
 	};
+	
+	
+	/**
+	 * Strip Bluebird lines from a stack trace
+	 *
+	 * @param {String} stack
+	 */
+	this.filterStack = function (stack) {
+		return stack.split(/\n/).filter(line => line.indexOf('zotero/bluebird') == -1).join('\n');
+	}
 }

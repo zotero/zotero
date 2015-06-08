@@ -584,8 +584,10 @@ Zotero.DBConnection.prototype.waitForTransaction = function () {
 	if (!this._inTransaction) {
 		return Zotero.Promise.resolve().cancellable();
 	}
-	Zotero.debug("Waiting for transaction to finish");
-	Zotero.debug((new Error).stack);
+	if (Zotero.Debug.enabled) {
+		Zotero.debug("Waiting for transaction to finish", 5);
+		Zotero.debug(Zotero.Debug.filterStack((new Error).stack), 6);
+	}
 	return this._transactionPromise;
 };
 
