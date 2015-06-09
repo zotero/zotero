@@ -51,7 +51,7 @@ Zotero.Tags = new function() {
 			throw new Error("tagID not provided");
 		}
 		if (_tagNamesByID[tagID]) {
-			return _tagNamesByID[tagID].name;
+			return _tagNamesByID[tagID];
 		}
 		_requireLoad(libraryID);
 		return false;
@@ -394,7 +394,7 @@ Zotero.Tags = new function() {
 			yield Zotero.DB.queryAsync(sql);
 			
 			sql = "SELECT tagID AS id, libraryID, name FROM tagDelete JOIN tags USING (tagID)";
-			var toDelete = yield Zotero.DB.columnQueryAsync(sql);
+			var toDelete = yield Zotero.DB.queryAsync(sql);
 			
 			if (!toDelete.length) {
 				sql = "DROP TABLE tagDelete";
@@ -402,9 +402,11 @@ Zotero.Tags = new function() {
 			}
 		}
 		
+		var ids = [];
 		notifierData = {};
 		for (let i=0; i<toDelete.length; i++) {
 			let row = toDelete[i];
+			ids.push(row.id);
 			notifierData[row.id] = {
 				old: {
 					libraryID: row.libraryID,
@@ -415,7 +417,7 @@ Zotero.Tags = new function() {
 			// Clear cached values
 			delete _tagNamesByID[row.id];
 			if (_tagIDsByName[row.libraryID]) {
-				delete _tagIDsByName[row.libraryID]['_' + tagName];
+				delete _tagIDsByName[row.libraryID]['_' + row.name];
 			}
 		}
 		
@@ -425,7 +427,7 @@ Zotero.Tags = new function() {
 		sql = "DROP TABLE tagDelete";
 		yield Zotero.DB.queryAsync(sql);
 		
-		Zotero.Notifier.queue('delete', 'tag', toDelete, notifierData);
+		Zotero.Notifier.queue('delete', 'tag', ids, notifierData);
 		
 		Zotero.Prefs.set('purge.tags', false);
 	});
