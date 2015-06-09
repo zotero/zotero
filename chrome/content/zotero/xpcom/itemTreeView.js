@@ -459,7 +459,7 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 	var sort = false;
 	
 	var savedSelection = this.getSelectedItems(true);
-	var previousRow = false;
+	var previousFirstRow = this._rowMap[ids[0]];
 	
 	// Redraw the tree (for tag color and progress changes)
 	if (action == 'redraw') {
@@ -569,7 +569,6 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		// On a delete in duplicates mode, just refresh rather than figuring
 		// out what to remove
 		if (collectionTreeRow.isDuplicates()) {
-			previousRow = this._rowMap[ids[0]];
 			yield this.refresh();
 			refreshed = true;
 			madeChanges = true;
@@ -879,10 +878,6 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		}
 		else
 		{
-			if (previousRow === false) {
-				previousRow = this._rowMap[ids[0]];
-			}
-			
 			if (sort) {
 				yield this.sort(typeof sort == 'number' ? sort : false);
 			}
@@ -894,9 +889,9 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			if (action == 'remove' || action == 'trash' || action == 'delete') {
 				// In duplicates view, select the next set on delete
 				if (collectionTreeRow.isDuplicates()) {
-					if (this._rows[previousRow]) {
+					if (this._rows[previousFirstRow]) {
 						// Mirror ZoteroPane.onTreeMouseDown behavior
-						var itemID = this._rows[previousRow].ref.id;
+						var itemID = this._rows[previousFirstRow].ref.id;
 						var setItemIDs = collectionTreeRow.ref.getSetItemsByItemID(itemID);
 						this.selectItems(setItemIDs);
 					}
@@ -905,17 +900,17 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 					// If this was a child item and the next item at this
 					// position is a top-level item, move selection one row
 					// up to select a sibling or parent
-					if (ids.length == 1 && previousRow > 0) {
-						var previousItem = yield Zotero.Items.getAsync(ids[0]);
+					if (ids.length == 1 && previousFirstRow > 0) {
+						let previousItem = yield Zotero.Items.getAsync(ids[0]);
 						if (previousItem && !previousItem.isTopLevelItem()) {
-							if (this._rows[previousRow] && this.getLevel(previousRow) == 0) {
-								previousRow--;
+							if (this._rows[previousFirstRow] && this.getLevel(previousFirstRow) == 0) {
+								previousFirstRow--;
 							}
 						}
 					}
 					
-					if (this._rows[previousRow]) {
-						this.selection.select(previousRow);
+					if (previousFirstRow !== undefined && this._rows[previousFirstRow]) {
+						this.selection.select(previousFirstRow);
 					}
 					// If no item at previous position, select last item in list
 					else if (this._rows[this._rows.length - 1]) {

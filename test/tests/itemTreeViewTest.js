@@ -1,14 +1,19 @@
 describe("Zotero.ItemTreeView", function() {
-	var win, itemsView, existingItemID;
+	var win, zp, itemsView, existingItemID;
 	
 	// Load Zotero pane and select library
 	before(function* () {
 		win = yield loadZoteroPane();
-		itemsView = win.ZoteroPane.itemsView;
+		zp = win.ZoteroPane;
 		
 		var item = new Zotero.Item('book');
 		existingItemID = yield item.saveTx();
 	});
+	beforeEach(function* () {
+		yield zp.collectionsView.selectLibrary();
+		yield waitForItemsLoad(win)
+		itemsView = zp.itemsView;
+	})
 	after(function () {
 		win.close();
 	});
@@ -161,6 +166,33 @@ describe("Zotero.ItemTreeView", function() {
 			assert.lengthOf(selected, 1);
 			assert.equal(selected[0], id);
 		});
+		
+		it("should reselect the same row when an item is removed", function* () {
+			var collection = yield createDataObject('collection');
+			yield waitForItemsLoad(win);
+			itemsView = zp.itemsView;
+			
+			var items = [];
+			var num = 10;
+			for (let i = 0; i < num; i++) {
+				let item = createUnsavedDataObject('item');
+				item.addToCollection(collection.id);
+				yield item.saveTx();
+				items.push(item);
+			}
+			yield Zotero.Promise.delay(2000);
+			assert.equal(itemsView.rowCount, num);
+			
+			// Select the third item in the list
+			itemsView.selection.select(2);
+			var treeRow = itemsView.getRow(2);
+			yield treeRow.ref.eraseTx();
+			
+			// Selection should stay on third row
+			assert.equal(itemsView.selection.currentIndex, 2);
+			
+			yield Zotero.Items.erase(items.map(item => item.id));
+		})
 	})
 	
 	describe("#drop()", function () {
