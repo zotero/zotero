@@ -1282,6 +1282,10 @@ var ZoteroPane = new function()
 			}
 			
 			var collectionTreeRow = this.getCollectionTreeRow();
+			// I don't think this happens in normal usage, but it can happen during tests
+			if (!collectionTreeRow) {
+				return false;
+			}
 			
 			// Single item selected
 			if (this.itemsView.selection.count == 1 && this.itemsView.selection.currentIndex != -1)

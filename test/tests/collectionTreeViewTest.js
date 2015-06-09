@@ -1,11 +1,12 @@
 "use strict";
 
 describe("Zotero.CollectionTreeView", function() {
-	var win, cv;
+	var win, zp, cv;
 	
 	before(function* () {
 		win = yield loadZoteroPane();
-		cv = win.ZoteroPane.collectionsView;
+		zp = win.ZoteroPane;
+		cv = zp.collectionsView;
 	});
 	beforeEach(function () {
 		// TODO: Add a selectCollection() function and select a collection instead?
@@ -137,7 +138,7 @@ describe("Zotero.CollectionTreeView", function() {
 			assert.equal(cv.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
 		});
 		
-		it("should reselect a selected modified collection", function* () {
+		it("should maintain selection on a selected modified collection", function* () {
 			// Create collection
 			var collection = new Zotero.Collection;
 			collection.name = "Reselect on modify";
@@ -153,6 +154,56 @@ describe("Zotero.CollectionTreeView", function() {
 			selected = cv.getSelectedCollection(true);
 			assert.equal(selected, id);
 		});
+		
+		it("should re-sort a modified collection", function* () {
+			var prefix = Zotero.Utilities.randomString() + " ";
+			var collectionA = yield createDataObject('collection', { name: prefix + "A" });
+			var collectionB = yield createDataObject('collection', { name: prefix + "B" });
+			
+			var aRow = cv.getRowIndexByID("C" + collectionA.id);
+			var aRowOriginal = aRow;
+			var bRow = cv.getRowIndexByID("C" + collectionB.id);
+			assert.equal(bRow, aRow + 1);
+			
+			collectionA.name = prefix + "C";
+			yield collectionA.saveTx();
+			
+			var aRow = cv.getRowIndexByID("C" + collectionA.id);
+			var bRow = cv.getRowIndexByID("C" + collectionB.id);
+			assert.equal(bRow, aRowOriginal);
+			assert.equal(aRow, bRow + 1);
+		})
+		
+		it("should re-sort a modified search", function* () {
+			var prefix = Zotero.Utilities.randomString() + " ";
+			var searchA = yield createDataObject('search', { name: prefix + "A" });
+			var searchB = yield createDataObject('search', { name: prefix + "B" });
+			
+			var aRow = cv.getRowIndexByID("S" + searchA.id);
+			var aRowOriginal = aRow;
+			var bRow = cv.getRowIndexByID("S" + searchB.id);
+			assert.equal(bRow, aRow + 1);
+			
+			searchA.name = prefix + "C";
+			yield searchA.saveTx();
+			
+			var aRow = cv.getRowIndexByID("S" + searchA.id);
+			var bRow = cv.getRowIndexByID("S" + searchB.id);
+			assert.equal(bRow, aRowOriginal);
+			assert.equal(aRow, bRow + 1);
+		})
+		
+		it("shouldn't refresh the items list when a collection is modified", function* () {
+			var collection = yield createDataObject('collection');
+			yield waitForItemsLoad(win);
+			var itemsView = zp.itemsView;
+			
+			collection.name = "New Name";
+			yield collection.saveTx();
+			
+			yield waitForItemsLoad(win);
+			assert.equal(zp.itemsView, itemsView);
+		})
 		
 		it("should add a saved search after collections", function* () {
 			var collection = new Zotero.Collection;

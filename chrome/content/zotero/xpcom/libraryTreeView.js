@@ -138,7 +138,7 @@ Zotero.LibraryTreeView.prototype = {
 		
 		var lastRow = row == this.rowCount - 1;
 		if (lastRow && this.selection.isSelected(row)) {
-			// Deslect removed row
+			// Deselect removed row
 			this.selection.toggleSelect(row);
 			// If no other rows selected, select row before
 			if (this.selection.count == 0 && row !== 0) {
