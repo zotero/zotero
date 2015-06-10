@@ -192,6 +192,10 @@ Zotero.Group.prototype.save = Zotero.Promise.coroutine(function* () {
 		throw new Error("Group id not set");
 	}
 	
+	if (!this.name) {
+		throw new Error("Group name not set");
+	}
+	
 	if (!this._changed) {
 		Zotero.debug("Group " + this.id + " has not changed");
 		return false;
@@ -319,14 +323,14 @@ Zotero.Group.prototype.fromJSON = function (json, userID) {
 	if (userID) {
 		// If user is owner or admin, make library editable, and make files editable unless they're
 		// disabled altogether
-		if (json.owner == userID || json.admins.indexOf(userID) != -1) {
+		if (json.owner == userID || (json.admins && json.admins.indexOf(userID) != -1)) {
 			editable = true;
 			if (json.fileEditing != 'none') {
 				filesEditable = true;
 			}
 		}
 		// If user is member, make library and files editable if they're editable by all members
-		else if (json.members.indexOf(userID) != -1) {
+		else if (json.members && json.members.indexOf(userID) != -1) {
 			if (json.libraryEditing == 'members') {
 				editable = true;
 				if (json.fileEditing == 'members') {

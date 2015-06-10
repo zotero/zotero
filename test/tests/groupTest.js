@@ -133,7 +133,7 @@ describe("Zotero.Group", function () {
 				owner: 1,
 				libraryEditing: 'members',
 				fileEditing: 'none',
-				admins: [2],
+				// No admins
 				members: [3]
 			}, 3);
 			assert.isTrue(group.editable);
