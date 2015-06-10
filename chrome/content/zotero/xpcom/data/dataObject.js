@@ -1175,9 +1175,13 @@ Zotero.DataObject.prototype._initErase = function (env) {
 		key: this.key
 	};
 	
+	if (!env.options.skipEditCheck) this.editCheck();
+	
 	if (env.options.skipDeleteLog) {
 		env.notifierData[this.id].skipDeleteLog = true;
 	}
+	
+	return Zotero.Promise.resolve(true);
 };
 
 Zotero.DataObject.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env) {
