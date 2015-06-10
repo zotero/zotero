@@ -120,17 +120,17 @@ function waitForDialog(onOpen, button='accept') {
 				failure = e;
 			}
 		}
-		if (button == 'accept') {
+		if (button != 'cancel') {
 			let deferred = Zotero.Promise.defer();
 			function acceptWhenEnabled() {
-				// Handle delayed accept buttons
-				if (dialog.document.documentElement.getButton('accept').disabled) {
+				// Handle delayed buttons
+				if (dialog.document.documentElement.getButton(button).disabled) {
 					setTimeout(function () {
 						acceptWhenEnabled();
 					}, 250);
 				}
 				else {
-					dialog.document.documentElement.acceptDialog();
+					dialog.document.documentElement.getButton(button).click();
 					if (failure) {
 						deferred.reject(failure);
 					}
