@@ -503,6 +503,15 @@ Zotero.Items = function() {
 					Zotero.Notifier.queue('delete', 'item', id);
 					continue;
 				}
+				
+				if (!item.isEditable()) {
+					throw new Error(item._ObjectType + " (" + item.id + ") is not editable");
+				}
+				
+				if (!Zotero.Libraries.hasTrash(item.libraryID)) {
+					throw new Error(Zotero.Libraries.getName(item.libraryID) + " does not have Trash");
+				}
+				
 				item.deleted = true;
 				yield item.save({
 					skipDateModifiedUpdate: true
