@@ -160,6 +160,7 @@ describe("Zotero.Translate", function() {
 
 	describe("Zotero.Item", function() {
 		it('should save ordinary fields and creators', function* () {
+			this.timeout(10000);
 			let data = loadSampleData('allTypesAndFields');
 			let trueItems = loadSampleData('itemJSON');
 			let saveItems = [];
