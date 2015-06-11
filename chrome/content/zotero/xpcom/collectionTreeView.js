@@ -114,6 +114,7 @@ Zotero.CollectionTreeView.prototype.setTree = Zotero.Promise.coroutine(function*
 		if (!selected) {
 			this.selection.select(0);
 		}
+		this.selection.selectEventsSuppressed = false;
 		
 		yield this._runListeners('load');
 		this._initialized = true;
@@ -129,9 +130,10 @@ Zotero.CollectionTreeView.prototype.setTree = Zotero.Promise.coroutine(function*
 });
 
 
-/*
- *  Reload the rows from the data access methods
- *  (doesn't call the tree.invalidate methods, etc.)
+/**
+ *  Rebuild the tree from the data access methods and clear the selection
+ *
+ *  Calling code must invalidate the tree, restore the selection, and unsuppress selection events
  */
 Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function* ()
 {
@@ -225,6 +227,7 @@ Zotero.CollectionTreeView.prototype.refresh = Zotero.Promise.coroutine(function*
 		}
 	}
 	
+	this.selection.selectEventsSuppressed = true;
 	this.selection.clearSelection();
 	this._rows = newRows;
 	this.rowCount = this._rows.length;
