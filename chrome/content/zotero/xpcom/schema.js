@@ -1470,7 +1470,7 @@ Zotero.Schema = new function(){
 			var sql = "INSERT INTO libraries (libraryID, libraryType, editable, filesEditable) "
 				+ "VALUES "
 				+ "(?, 'user', 1, 1), "
-				+ "(2, 'publications', 1, 1)"
+				+ "(4, 'publications', 1, 1)"
 			yield Zotero.DB.queryAsync(sql, userLibraryID);
 			
 			if (!Zotero.Schema.skipDefaultData) {
@@ -1943,7 +1943,7 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("ALTER TABLE libraries RENAME TO librariesOld");
 				yield Zotero.DB.queryAsync("CREATE TABLE libraries (\n    libraryID INTEGER PRIMARY KEY,\n    libraryType TEXT NOT NULL,\n    editable INT NOT NULL,\n    filesEditable INT NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    lastsync INT NOT NULL DEFAULT 0\n)");
 				yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, libraryType, editable, filesEditable) VALUES (1, 'user', 1, 1)");
-				yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, libraryType, editable, filesEditable) VALUES (2, 'publications', 1, 1)");
+				yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, libraryType, editable, filesEditable) VALUES (4, 'publications', 1, 1)");
 				yield Zotero.DB.queryAsync("INSERT INTO libraries SELECT libraryID, libraryType, editable, filesEditable, 0, 0 FROM librariesOld JOIN groups USING (libraryID)");
 				
 				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO syncObjectTypes VALUES (7, 'setting')");
