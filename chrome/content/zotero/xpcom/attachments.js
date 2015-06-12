@@ -540,7 +540,7 @@ Zotero.Attachments = new function(){
 			mimeType = "application/pdf";
 		}
 		
-		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
+		var charsetID = Zotero.CharacterSets.getID('utf-8'); // WPD will output UTF-8
 		
 		if (!forceTitle) {
 			// Remove e.g. " - Scaled (-17%)" from end of images saved from links,
