@@ -1099,6 +1099,7 @@ Zotero.Utilities = {
 	 * @return {String[]} Creator types
 	 */
 	"getCreatorsForType":function(type) {
+		if(type === "attachment" || type === "note") return [];
 		var types = Zotero.CreatorTypes.getTypesForItemType(Zotero.ItemTypes.getID(type));
 		var cleanTypes = new Array();
 		for(var i=0; i<types.length; i++) {
