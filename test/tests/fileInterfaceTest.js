@@ -11,6 +11,7 @@ describe("Zotero_File_Interface", function() {
     });
 
     it('should import a file into a collection', function* () {
+        this.timeout(10000);
         let testFile = getTestDataDirectory();
         testFile.append("allTypesAndFields.js");
         yield win.Zotero_File_Interface.importFile(testFile);
