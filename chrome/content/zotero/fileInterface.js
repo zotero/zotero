@@ -631,10 +631,10 @@ Zotero_File_Interface.Progress = new function() {
 	this.close = close;
 	
 	function show(headline) {
-		//Zotero.showZoteroPaneProgressMeter(headline);
+		Zotero.showZoteroPaneProgressMeter(headline);
 	}
 	
 	function close() {
-		//Zotero.hideZoteroPaneOverlays();
+		Zotero.hideZoteroPaneOverlays();
 	}
 }
