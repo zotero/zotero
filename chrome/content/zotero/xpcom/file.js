@@ -160,7 +160,10 @@ Zotero.File = new function(){
 			throw new Error("File is not an nsIInputStream or nsIFile");
 		}
 		
-		charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
+		if (charset) {
+			charset = Zotero.CharacterSets.toLabel(charset, true)
+		}
+		charset = charset || "UTF-8";
 		
 		var blockSize = maxLength ? Math.min(maxLength, 524288) : 524288;
 		

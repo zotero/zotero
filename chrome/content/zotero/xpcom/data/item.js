@@ -1442,7 +1442,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let linkMode = this.attachmentLinkMode;
 		let contentType = this.attachmentContentType;
 		let charsetID = this.attachmentCharset
-			? (yield Zotero.CharacterSets.add(this.attachmentCharset))
+			? Zotero.CharacterSets.getID(this.attachmentCharset)
 			: null;
 		let path = this.attachmentPath;
 		let syncState = this.attachmentSyncState;
@@ -2652,6 +2652,9 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentCharset', {
 		}
 		oldVal = this.attachmentCharset;
 		
+		if (val) {
+			val = Zotero.CharacterSets.toCanonical(val);
+		}
 		if (!val) {
 			val = "";
 		}

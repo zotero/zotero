@@ -634,9 +634,6 @@ Zotero.Items = function() {
 					+ "(SELECT valueID FROM itemData)";
 		yield Zotero.DB.queryAsync(sql);
 		
-		// Purge unused charsetIDs (if attachments were deleted)
-		yield Zotero.CharacterSets.purge();
-		
 		Zotero.Prefs.set('purge.items', false)
 	});
 	

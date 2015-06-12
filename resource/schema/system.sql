@@ -23,8 +23,6 @@
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
 
-PRAGMA defer_foreign_keys = true;
-
 -- Valid item types ("book," "journalArticle," etc.)
 DROP TABLE IF EXISTS itemTypes;
 CREATE TABLE itemTypes (
@@ -125,6 +123,13 @@ CREATE TABLE baseFieldMappingsCombined (
 );
 CREATE INDEX baseFieldMappingsCombined_baseFieldID ON baseFieldMappingsCombined(baseFieldID);
 CREATE INDEX baseFieldMappingsCombined_fieldID ON baseFieldMappingsCombined(fieldID);
+
+DROP TABLE IF EXISTS charsets;
+CREATE TABLE charsets (
+    charsetID INTEGER PRIMARY KEY,
+    charset TEXT UNIQUE
+);
+CREATE INDEX charsets_charset ON charsets(charset);
 
 DROP TABLE IF EXISTS fileTypes;
 CREATE TABLE fileTypes (
@@ -1132,6 +1137,46 @@ INSERT INTO itemTypeCreatorTypes VALUES(36,3,0);
 INSERT INTO itemTypeCreatorTypes VALUES(36,4,0);
 INSERT INTO itemTypeCreatorTypes VALUES(36,5,0);
 
+INSERT INTO "charsets" VALUES (1, "utf-8");
+INSERT INTO "charsets" VALUES (2, "big5");
+INSERT INTO "charsets" VALUES (3, "euc-jp");
+INSERT INTO "charsets" VALUES (4, "euc-kr");
+INSERT INTO "charsets" VALUES (5, "gb18030");
+INSERT INTO "charsets" VALUES (6, "gbk");
+INSERT INTO "charsets" VALUES (7, "ibm866");
+INSERT INTO "charsets" VALUES (8, "iso-2022-jp");
+INSERT INTO "charsets" VALUES (9, "iso-8859-2");
+INSERT INTO "charsets" VALUES (10, "iso-8859-3");
+INSERT INTO "charsets" VALUES (11, "iso-8859-4");
+INSERT INTO "charsets" VALUES (12, "iso-8859-5");
+INSERT INTO "charsets" VALUES (13, "iso-8859-6");
+INSERT INTO "charsets" VALUES (14, "iso-8859-7");
+INSERT INTO "charsets" VALUES (15, "iso-8859-8");
+INSERT INTO "charsets" VALUES (16, "iso-8859-8-i");
+INSERT INTO "charsets" VALUES (17, "iso-8859-10");
+INSERT INTO "charsets" VALUES (18, "iso-8859-13");
+INSERT INTO "charsets" VALUES (19, "iso-8859-14");
+INSERT INTO "charsets" VALUES (20, "iso-8859-15");
+INSERT INTO "charsets" VALUES (21, "iso-8859-16");
+INSERT INTO "charsets" VALUES (22, "koi8-r");
+INSERT INTO "charsets" VALUES (23, "koi8-u");
+INSERT INTO "charsets" VALUES (24, "macintosh");
+INSERT INTO "charsets" VALUES (25, "replacement");
+INSERT INTO "charsets" VALUES (26, "shift_jis");
+INSERT INTO "charsets" VALUES (27, "utf-16be");
+INSERT INTO "charsets" VALUES (28, "utf-16le");
+INSERT INTO "charsets" VALUES (29, "windows-874");
+INSERT INTO "charsets" VALUES (30, "windows-1250");
+INSERT INTO "charsets" VALUES (31, "windows-1251");
+INSERT INTO "charsets" VALUES (32, "windows-1252");
+INSERT INTO "charsets" VALUES (33, "windows-1253");
+INSERT INTO "charsets" VALUES (34, "windows-1254");
+INSERT INTO "charsets" VALUES (35, "windows-1255");
+INSERT INTO "charsets" VALUES (36, "windows-1256");
+INSERT INTO "charsets" VALUES (37, "windows-1257");
+INSERT INTO "charsets" VALUES (38, "windows-1258");
+INSERT INTO "charsets" VALUES (39, "x-mac-cyrillic");
+INSERT INTO "charsets" VALUES (40, "x-user-defined");
 
 INSERT INTO "fileTypes" VALUES(1, 'webpage');
 INSERT INTO "fileTypes" VALUES(2, 'image');
@@ -1186,5 +1231,3 @@ INSERT INTO "syncObjectTypes" VALUES(4, 'search');
 INSERT INTO "syncObjectTypes" VALUES(5, 'tag');
 INSERT INTO "syncObjectTypes" VALUES(6, 'relation');
 INSERT INTO "syncObjectTypes" VALUES(7, 'setting');
-
-PRAGMA defer_foreign_keys = false;

@@ -538,26 +538,7 @@ Zotero.CharacterSets = new function() {
 	this._nameCol = 'charset';
 	this._table = 'charsets';
 	this._ignoreCase = true;
-	this._allowAdd = true;
 	
-	
-	this._valueCheck = function (name) {
-		// Don't allow too-long or non-ASCII names
-		if (name.length > 50 || !name.match(/^[a-z0-9\-_]+$/)) {
-			return false;
-		}
-		return true;
-	}
-	
-	
-	/**
-	 * @return {Promise}
-	 */
-	this.purge = function () {
-		var sql = "DELETE FROM " + this._table + " WHERE " + this._idCol + " NOT IN "
-			+ "(SELECT " + this._idCol + " FROM itemAttachments)";
-		return Zotero.DB.queryAsync(sql);
-	};
 	
 	// Converts charset label to charset name
 	// https://encoding.spec.whatwg.org/#names-and-labels

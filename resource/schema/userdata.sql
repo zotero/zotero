@@ -49,12 +49,6 @@ CREATE TABLE syncedSettings (
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
 
-CREATE TABLE charsets (
-    charsetID INTEGER PRIMARY KEY,
-    charset TEXT UNIQUE
-);
-CREATE INDEX charsets_charset ON charsets(charset);
-
 -- Primary data applicable to all items
 CREATE TABLE items (
     itemID INTEGER PRIMARY KEY,

@@ -1347,16 +1347,13 @@ Zotero.Attachments = new function(){
 			.then(function () {
 				return Zotero.spawn(function* () {
 					if (charset) {
-						var disabled = Zotero.Notifier.disable();
-						
-						var item = yield Zotero.Items.getAsync(itemID);
-						if (yield Zotero.CharacterSets.add(charset)) {
+						charset = Zotero.CharacterSets.toCanonical(charset);
+						if (charset) {
+							let item = yield Zotero.Items.getAsync(itemID);
 							item.attachmentCharset = charset;
-						}
-						yield item.saveTx();
-						
-						if (disabled) {
-							Zotero.Notifier.enable();
+							yield item.saveTx({
+								skipNotifier: true
+							});
 						}
 					}
 					

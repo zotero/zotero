@@ -7,15 +7,33 @@ describe("Zotero.File", function () {
 		
 		it("should handle an extended character", function* () {
 			var contents = yield Zotero.File.getContentsAsync(
-				OS.Path.join(getTestDataDirectory().path, "utf8Char.txt")
+				OS.Path.join(getTestDataDirectory().path, "charsets", "utf8.txt")
 			);
 			assert.lengthOf(contents, 3);
 			assert.equal(contents, "A\u72acB");
 		})
 		
+		it("should handle an extended Windows-1252 character", function* () {
+			var contents = yield Zotero.File.getContentsAsync(
+				OS.Path.join(getTestDataDirectory().path, "charsets", "windows1252.txt"),
+				"windows-1252"
+			);
+			assert.lengthOf(contents, 1);
+			assert.equal(contents, "\u00E9");
+		})
+		
+		it("should handle a GBK character", function* () {
+			var contents = yield Zotero.File.getContentsAsync(
+				OS.Path.join(getTestDataDirectory().path, "charsets", "gbk.txt"),
+				"gbk"
+			);
+			assert.lengthOf(contents, 1);
+			assert.equal(contents, "\u4e02");
+		})
+		
 		it("should handle an invalid character", function* () {
 			var contents = yield Zotero.File.getContentsAsync(
-				OS.Path.join(getTestDataDirectory().path, "invalidChar.txt")
+				OS.Path.join(getTestDataDirectory().path, "charsets", "invalid.txt")
 			);
 			assert.lengthOf(contents, 3);
 			assert.equal(contents, "A\uFFFDB");
