@@ -561,12 +561,6 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 	var descendents = yield this.getDescendents(false, null, true);
 	var items = [];
 	
-	var notifierData = {};
-	notifierData[this.id] = {
-		libraryID: this.libraryID,
-		key: this.key
-	};
-	
 	var del = [];
 	for(var i=0, len=descendents.length; i<len; i++) {
 		// Descendent collections
@@ -574,7 +568,7 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 			collections.push(descendents[i].id);
 			var c = yield this.ObjectsClass.getAsync(descendents[i].id);
 			if (c) {
-				notifierData[c.id] = {
+				env.notifierData[c.id] = {
 					libraryID: c.libraryID,
 					key: c.key
 				};
@@ -607,13 +601,7 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 		+ '(' + placeholders + ')', collections);
 	
 	// TODO: Update member items
-	// Clear deleted collection from internal memory
-	this.ObjectsClass.unload(collections);
-	//return Zotero.Collections.reloadAll();
-	
-	if (!env.options.skipNotifier) {
-		Zotero.Notifier.queue('delete', 'collection', collections, notifierData);
-	}
+	env.deletedObjectIDs = collections;
 });
 
 

@@ -42,7 +42,19 @@ describe("Zotero.DataObjects", function () {
 				assert.isFalse(libraryKey);
 			}
 		});
-	});
+	})
+	
+	describe("#exists()", function () {
+		it("should return false after object is deleted", function* () {
+			for (let type of types) {
+				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+				let obj = yield createDataObject(type);
+				let id = obj.id;
+				yield obj.eraseTx();
+				assert.isFalse(objectsClass.exists(id), type + " does not exist");
+			}
+		})
+	})
 	
 	describe("#_setIdentifier", function () {
 		it("should not allow an id change", function* () {

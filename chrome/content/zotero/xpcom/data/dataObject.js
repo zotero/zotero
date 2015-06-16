@@ -1127,23 +1127,20 @@ Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* (options)
 		env.options.tx = true;
 	}
 	
-	var proceed = yield this._eraseInit(env);
-	if (!proceed) return false;
-	
 	Zotero.debug('Deleting ' + this.objectType + ' ' + this.id);
 	
 	if (env.options.tx) {
 		return Zotero.DB.executeTransaction(function* () {
+			Zotero.DataObject.prototype._initErase.call(this, env);
 			yield this._eraseData(env);
-			yield this._erasePreCommit(env);
-			return this._erasePostCommit(env);
+			Zotero.DataObject.prototype._finalizeErase.call(this, env);
 		}.bind(this))
 	}
 	else {
 		Zotero.DB.requireTransaction();
+		Zotero.DataObject.prototype._initErase.call(this, env);
 		yield this._eraseData(env);
-		yield this._erasePreCommit(env);
-		return this._erasePostCommit(env);
+		Zotero.DataObject.prototype._finalizeErase.call(this, env);
 	}
 });
 
@@ -1153,23 +1150,28 @@ Zotero.DataObject.prototype.eraseTx = function (options) {
 	return this.erase(options);
 };
 
-Zotero.DataObject.prototype._eraseInit = function(env) {
-	if (!this.id) return Zotero.Promise.resolve(false);
+Zotero.DataObject.prototype._initErase = function (env) {
+	env.notifierData = {};
+	env.notifierData[this.id] = {
+		libraryID: this.libraryID,
+		key: this.key
+	};
+};
+
+Zotero.DataObject.prototype._finalizeErase = function (env) {
+	Zotero.DB.addCurrentCallback("commit", function () {
+		this.ObjectsClass.unload(env.deletedObjectIDs || this.id);
+	}.bind(this));
 	
-	return Zotero.Promise.resolve(true);
-};
-
-Zotero.DataObject.prototype._eraseData = function(env) {
-	throw new Error("Zotero.DataObject.prototype._eraseData is an abstract method");
-};
-
-Zotero.DataObject.prototype._erasePreCommit = function(env) {
-	return Zotero.Promise.resolve();
-};
-
-Zotero.DataObject.prototype._erasePostCommit = function(env) {
-	return Zotero.Promise.resolve();
-};
+	if (!env.options.skipNotifier) {
+		Zotero.Notifier.queue(
+			'delete',
+			this._objectType,
+			Object.keys(env.notifierData).map(id => parseInt(id)),
+			env.notifierData
+		);
+	}
+}
 
 /**
  * Generates data object key

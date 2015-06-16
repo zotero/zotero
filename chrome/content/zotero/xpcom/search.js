@@ -220,21 +220,11 @@ Zotero.Search.prototype.clone = function (libraryID) {
 Zotero.Search.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	Zotero.DB.requireTransaction();
 	
-	var notifierData = {};
-	notifierData[this.id] = {
-		libraryID: this.libraryID,
-		key: this.key
-	};
-	
 	var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
 	yield Zotero.DB.queryAsync(sql, this.id);
 	
 	var sql = "DELETE FROM savedSearches WHERE savedSearchID=?";
 	yield Zotero.DB.queryAsync(sql, this.id);
-	
-	if (!env.options.skipNotifier) {
-		Zotero.Notifier.queue('delete', 'search', this.id, notifierData);
-	}
 });
 
 

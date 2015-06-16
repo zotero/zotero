@@ -3720,19 +3720,6 @@ Zotero.Item.prototype.copy = Zotero.Promise.coroutine(function* () {
 });;
 
 
-Zotero.Item.prototype._eraseInit = Zotero.Promise.coroutine(function* (env) {
-	var proceed = yield Zotero.Item._super.prototype._eraseInit.apply(this, arguments);
-	if (!proceed) return false;
-	
-	env.deletedItemNotifierData = {};
-	env.deletedItemNotifierData[this.id] = {
-		libraryID: this.libraryID,
-		key: this.key
-	};
-	
-	return true;
-});
-
 Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	Zotero.DB.requireTransaction();
 	
@@ -3792,21 +3779,11 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 		//Zotero.Fulltext.clearItemContent(this.id);
 	}
 	
-	env.parentItem = parentItem;
-});
-
-Zotero.Item.prototype._erasePreCommit = Zotero.Promise.coroutine(function* (env) {
 	yield Zotero.DB.queryAsync('DELETE FROM items WHERE itemID=?', this.id);
 	
-	if (env.parentItem) {
-		yield env.parentItem.reload(['primaryData', 'childItems'], true);
-		env.parentItem.clearBestAttachmentState();
-	}
-	
-	this.ObjectsClass.unload(this.id);
-	
-	if (!env.options.skipNotifier) {
-		Zotero.Notifier.queue('delete', 'item', this.id, env.deletedItemNotifierData);
+	if (parentItem) {
+		yield parentItem.reload(['primaryData', 'childItems'], true);
+		parentItem.clearBestAttachmentState();
 	}
 	
 	Zotero.Prefs.set('purge.items', true);
