@@ -31,6 +31,9 @@ Zotero.SyncedSettings = (function () {
 	// Public methods
 	//
 	var module = {
+		idColumn: "setting",
+		table: "syncedSettings",
+		
 		get: Zotero.Promise.coroutine(function* (libraryID, setting) {
 			var sql = "SELECT value FROM syncedSettings WHERE setting=? AND libraryID=?";
 			var json = yield Zotero.DB.valueQueryAsync(sql, [setting, libraryID]);

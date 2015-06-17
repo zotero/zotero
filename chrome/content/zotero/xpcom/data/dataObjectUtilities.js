@@ -69,6 +69,8 @@ Zotero.DataObjectUtilities = {
 	
 	
 	"getObjectsClassForObjectType": function(objectType) {
+		if (objectType == 'setting') objectType = 'syncedSetting';
+		
 		var objectTypePlural = this.getObjectTypePlural(objectType);
 		var className = objectTypePlural[0].toUpperCase() + objectTypePlural.substr(1);
 		return Zotero[className]
