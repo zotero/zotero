@@ -561,7 +561,7 @@ Zotero.Tags = new function() {
 			return Zotero.SyncedSettings.set(libraryID, 'tagColors', tagColors);
 		}
 		else {
-			return Zotero.SyncedSettings.set(libraryID, 'tagColors');
+			return Zotero.SyncedSettings.clear(libraryID, 'tagColors');
 		}
 	});
 	

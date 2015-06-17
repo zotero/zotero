@@ -40,8 +40,11 @@ Zotero.SyncedSettings = (function () {
 			return JSON.parse(json);
 		}),
 		
-		
 		set: Zotero.Promise.coroutine(function* (libraryID, setting, value, version, synced) {
+			if (typeof value == undefined) {
+				throw new Error("Value not provided");
+			}
+			
 			// TODO: get rid of this once we have proper affected rows handling
 			var sql = "SELECT value FROM syncedSettings WHERE setting=? AND libraryID=?";
 			var currentValue = yield Zotero.DB.valueQueryAsync(sql, [setting, libraryID]);
@@ -50,11 +53,11 @@ Zotero.SyncedSettings = (function () {
 			// missing setting (FALSE as returned by valueQuery())
 			// and a FALSE setting (FALSE as returned by JSON.parse())
 			var hasCurrentValue = currentValue !== false;
-			var hasValue = typeof value != 'undefined';
 			
 			currentValue = JSON.parse(currentValue);
 			
-			if ((!hasCurrentValue && !hasValue) || value === currentValue) {
+			// Value hasn't changed
+			if (value === currentValue) {
 				return false;
 			}
 			
@@ -69,17 +72,6 @@ Zotero.SyncedSettings = (function () {
 					value: currentValue
 				};
 			}
-			
-			// Clear
-			if (typeof value == 'undefined') {
-				var sql = "DELETE FROM syncedSettings WHERE setting=? AND libraryID=?";
-				yield Zotero.DB.queryAsync(sql, [setting, libraryID]);
-				
-				yield Zotero.Notifier.trigger('delete', 'setting', [id], extraData);
-				return true;
-			}
-			
-			// Set/update
 			
 			if (currentValue === false) {
 				var event = 'add';
@@ -101,6 +93,36 @@ Zotero.SyncedSettings = (function () {
 				yield Zotero.DB.queryAsync(sql, [setting, libraryID, JSON.stringify(value), synced]);
 			}
 			yield Zotero.Notifier.trigger(event, 'setting', [id], extraData);
+			return true;
+		}),
+		
+		clear: Zotero.Promise.coroutine(function* (libraryID, setting, options) {
+			options = options || {};
+			
+			// TODO: get rid of this once we have proper affected rows handling
+			var sql = "SELECT value FROM syncedSettings WHERE setting=? AND libraryID=?";
+			var currentValue = yield Zotero.DB.valueQueryAsync(sql, [setting, libraryID]);
+			if (currentValue === false) {
+				return false;
+			}
+			
+			var id = libraryID + '/' + setting;
+			
+			var extraData = {};
+			extraData[id] = {
+				changed: {}
+			};
+			extraData[id].changed = {
+				value: currentValue
+			};
+			if (options.skipDeleteLog) {
+				extraData[id].skipDeleteLog = true;
+			}
+			
+			var sql = "DELETE FROM syncedSettings WHERE setting=? AND libraryID=?";
+			yield Zotero.DB.queryAsync(sql, [setting, libraryID]);
+			
+			yield Zotero.Notifier.trigger('delete', 'setting', [id], extraData);
 			return true;
 		})
 	};

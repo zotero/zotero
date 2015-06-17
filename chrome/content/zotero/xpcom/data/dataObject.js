@@ -1113,6 +1113,9 @@ Zotero.DataObject.prototype.updateSynced = Zotero.Promise.coroutine(function* (s
 
 /**
  * Delete object from database
+ *
+ * @param {Object} [options]
+ * @param {Boolean} [options.skipDeleteLog] - Don't add to sync delete log
  */
 Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* (options) {
 	options = options || {};
@@ -1156,6 +1159,10 @@ Zotero.DataObject.prototype._initErase = function (env) {
 		libraryID: this.libraryID,
 		key: this.key
 	};
+	
+	if (env.options.skipDeleteLog) {
+		env.notifierData[this.id].skipDeleteLog = true;
+	}
 };
 
 Zotero.DataObject.prototype._finalizeErase = function (env) {
