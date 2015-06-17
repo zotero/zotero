@@ -349,7 +349,7 @@ Zotero.Tags = new function() {
 		// be removed if the tag is just removed from all items without
 		// being explicitly deleted.
 		for (let i=0; i<deletedNames.length; i++) {
-			this.setColor(libraryID, deletedNames[i], false);
+			yield this.setColor(libraryID, deletedNames[i], false);
 		}
 	});
 	
@@ -606,10 +606,16 @@ Zotero.Tags = new function() {
 			// Get all items linked to previous or current tag colors
 			var tagNames = tagColors.concat(previousTagColors).map(function (val) val.name);
 			tagNames = Zotero.Utilities.arrayUnique(tagNames);
-			for (let i=0; i<tagNames.length; i++) {
-				let tagID = this.getID(libraryID, tagNames[i]);
-				affectedItems = affectedItems.concat(yield this.getTagItems(tagID));
-			};
+			if (tagNames.length) {
+				yield Zotero.Tags.load(libraryID);
+				for (let i=0; i<tagNames.length; i++) {
+					let tagID = this.getID(libraryID, tagNames[i]);
+					// Colored tags may not exist
+					if (tagID) {
+						affectedItems = affectedItems.concat(yield this.getTagItems(tagID));
+					}
+				};
+			}
 			
 			if (affectedItems.length) {
 				yield Zotero.Notifier.trigger('redraw', 'item', affectedItems, { column: 'title' });
