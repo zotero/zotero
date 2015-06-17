@@ -812,14 +812,14 @@ Zotero.DataObject.prototype.editCheck = function () {
 /**
  * Save changes to database
  *
- * @params {Object} [options]
- * @params {Boolean} [options.skipCache] - Don't save add new object to the cache; if set, object
+ * @param {Object} [options]
+ * @param {Boolean} [options.skipCache] - Don't save add new object to the cache; if set, object
  *                                         is disabled after save
- * @params {Boolean} [options.skipDateModifiedUpdate]
- * @params {Boolean} [options.skipClientDateModifiedUpdate]
- * @params {Boolean} [options.skipNotifier] - Don't trigger Zotero.Notifier events
- * @params {Boolean} [options.skipSelect] - Don't select object automatically in trees
- * @params {Boolean} [options.skipSyncedUpdate] - Don't automatically set 'synced' to false
+ * @param {Boolean} [options.skipDateModifiedUpdate]
+ * @param {Boolean} [options.skipClientDateModifiedUpdate]
+ * @param {Boolean} [options.skipNotifier] - Don't trigger Zotero.Notifier events
+ * @param {Boolean} [options.skipSelect] - Don't select object automatically in trees
+ * @param {Boolean} [options.skipSyncedUpdate] - Don't automatically set 'synced' to false
  * @return {Promise<Integer|Boolean>}  Promise for itemID of new item,
  *                                     TRUE on item update, or FALSE if item was unchanged
  */
