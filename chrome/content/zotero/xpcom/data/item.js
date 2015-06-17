@@ -3802,6 +3802,10 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 		yield this.loadAllData();
 	}
 	
+	if (!json.itemType && !this._itemTypeID) {
+		throw new Error("itemType property not provided");
+	}
+	
 	let itemTypeID = Zotero.ItemTypes.getID(json.itemType);
 	this.setType(itemTypeID);
 	
