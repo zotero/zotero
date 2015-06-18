@@ -96,11 +96,11 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParams, 
 			if (searchParams.fieldMode == 2) {
 				var sql = "SELECT DISTINCT CASE fieldMode WHEN 1 THEN lastName "
 					+ "WHEN 0 THEN firstName || ' ' || lastName END AS val, NULL AS comment "
-					+ "FROM creators NATURAL JOIN creatorData WHERE CASE fieldMode "
-					+ "WHEN 1 THEN lastName "
-					+ "WHEN 0 THEN firstName || ' ' || lastName END "
-					+ "LIKE ? ";
-				var sqlParams = [searchString + '%'];
+					+ "FROM creators NATURAL JOIN creatorData "
+					+ "WHERE CASE fieldMode "
+					+ "WHEN 1 THEN lastName LIKE ? "
+					+ "WHEN 0 THEN (firstName || ' ' || lastName LIKE ?) OR (lastName LIKE ?) END "
+				var sqlParams = [searchString + '%', searchString + '%', searchString + '%'];
 				if (typeof searchParams.libraryID != 'undefined') {
 					sql += " AND libraryID=?";
 					sqlParams.push(searchParams.libraryID);
