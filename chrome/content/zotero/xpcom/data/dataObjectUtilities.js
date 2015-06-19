@@ -25,6 +25,15 @@
 
 
 Zotero.DataObjectUtilities = {
+	/**
+	 * Get an array of all DataObject types
+	 *
+	 * @return {String[]}
+	 */
+	getTypes: function () {
+		return ['collection', 'search', 'item'];
+	},
+	
 	"checkLibraryID": function (libraryID) {
 		if (!libraryID) {
 			throw new Error("libraryID not provided");
