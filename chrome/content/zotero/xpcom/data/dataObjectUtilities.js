@@ -401,6 +401,22 @@ Zotero.DataObjectUtilities = {
 				});
 			}
 		}
+		for (let pred in data2) {
+			// Property in first object have already been handled
+			if (data1[pred]) continue;
+			
+			let vals = typeof data2[pred] == 'string' ? [data2[pred]] : data2[pred];
+			for (let i = 0; i < vals.length; i++) {
+				changeset.push({
+					field: "relations",
+					op: "property-member-add",
+					value: {
+						key: pred,
+						value: vals[i]
+					}
+				});
+			}
+		}
 		return changeset;
 	},
 	
