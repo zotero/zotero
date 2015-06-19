@@ -645,18 +645,15 @@ Zotero.Collection.prototype.fromJSON = Zotero.Promise.coroutine(function* (json)
 });
 
 
-Zotero.Collection.prototype.toJSON = function (options, patch) {
+Zotero.Collection.prototype.toJSON = Zotero.Promise.coroutine(function* (options) {
 	var obj = {};
-	if (options && options.includeKey) {
-		obj.collectionKey = this.key;
-	}
-	if (options && options.includeVersion) {
-		obj.collectionVersion = this.version;
-	}
+	obj.key = this.key;
+	obj.version = this.version;
 	obj.name = this.name;
 	obj.parentCollection = this.parentKey ? this.parentKey : false;
+	obj.relations = {}; // TEMP
 	return obj;
-}
+});
 
 
 /**

@@ -772,22 +772,6 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 });
 
 
-Zotero.Search.prototype.serialize = function() {
-	var obj = {
-		primary: {
-			id: this.id,
-			libraryID: this.libraryID,
-			key: this.key
-		},
-		fields: {
-			name: this.name,
-		},
-		conditions: this.getConditions()
-	};
-	return obj;
-}
-
-
 Zotero.Search.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 	yield this.loadAllData();
 	
@@ -804,6 +788,17 @@ Zotero.Search.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 			condition.value
 		);
 	}
+});
+
+
+Zotero.Search.prototype.toJSON = Zotero.Promise.coroutine(function* (options) {
+	var obj = {};
+	obj.key = this.key;
+	obj.version = this.version;
+	obj.name = this.name;
+	yield this.loadConditions();
+	obj.conditions = this.getConditions();
+	return obj;
 });
 
 
