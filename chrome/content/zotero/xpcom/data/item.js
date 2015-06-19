@@ -5011,7 +5011,7 @@ Zotero.Item.prototype.toJSON = function(options) {
 		
 		// Notes and embedded attachment notes
 		let note = this.getNote();
-		if (note !== "" || mode == 'full') {
+		if (note !== "" || mode == 'full' || (mode == 'new' && this.isNote())) {
 			obj.note = note;
 		}
 	}
