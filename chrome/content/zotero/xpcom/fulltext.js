@@ -109,7 +109,7 @@ Zotero.Fulltext = new function(){
 		this.decoder = Components.classes["@mozilla.org/intl/utf8converterservice;1"].
 			getService(Components.interfaces.nsIUTF8ConverterService);
 
-		var platform = Zotero.platform.replace(' ', '-');
+		var platform = Zotero.platform.replace(/ /g, '-');
 		_pdfConverterFileName = this.pdfConverterName + '-' + platform;
 		_pdfInfoFileName = this.pdfInfoName + '-' + platform;
 		if (Zotero.isWin) {
