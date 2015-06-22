@@ -2741,7 +2741,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		if(typeof(resource) == "string") return resource;
 		
 		const rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-		var values = this.getTargets(resource, rdf + 'value');
+		var values = this.getStatementsMatching(resource, rdf + 'value');
 		if(values && values.length) return this.getResourceURI(values[0]);
 		
 		if(resource.uri) return resource.uri;
