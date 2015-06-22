@@ -413,6 +413,10 @@ Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
 	var translate = Zotero.Translate.newInstance(this.type);
 	
 	if(this.type === "web") {
+		if (!this.translator.webRegexp && this.translator.target) {
+			this.translator.webRegexp = new RegExp(this.translator.target, 'i');
+		}
+		
 		if (!this.translator.webRegexp) {
 			this._debug(this, "TranslatorTester: Web translator missing target regexp");
 		} else {
