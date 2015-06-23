@@ -116,6 +116,23 @@ describe("Zotero.ItemTreeView", function() {
 			assert.equal(selected[0], existingItemID);
 		});
 		
+		it("shouldn't change selection outside of trash if new trashed item is created with skipSelect", function* () {
+			yield selectLibrary(win);
+			yield waitForItemsLoad(win);
+			
+			itemsView.selection.clearSelection();
+			
+			var item = createUnsavedDataObject('item');
+			item.deleted = true;
+			var id = yield item.saveTx({
+				skipSelect: true
+			});
+			
+			// Nothing should be selected
+			selected = itemsView.getSelectedItems(true);
+			assert.lengthOf(selected, 0);
+		})
+		
 		it("shouldn't select a modified item", function* () {
 			// Create item
 			var item = new Zotero.Item('book');

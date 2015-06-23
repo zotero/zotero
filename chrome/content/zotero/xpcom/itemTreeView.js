@@ -823,14 +823,14 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 			}
 		}
 		
+		if (sort) {
+			yield this.sort(typeof sort == 'number' ? sort : false);
+		}
+		else {
+			this._refreshItemRowMap();
+		}
+		
 		if (singleSelect) {
-			if (sort) {
-				yield this.sort(typeof sort == 'number' ? sort : false);
-			}
-			else {
-				this._refreshItemRowMap();
-			}
-			
 			if (!extraData[singleSelect] || !extraData[singleSelect].skipSelect) {
 				// Reset to Info tab
 				this._ownerDocument.getElementById('zotero-view-tabbox').selectedIndex = 0;
@@ -841,17 +841,12 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		else if (action == 'modify' && ids.length == 1 &&
 				savedSelection.length == 1 && savedSelection[0] == ids[0]) {
 			// If the item no longer matches the search term, clear the search
+			// DEBUG: Still needed/wanted? (and search is async, so doesn't work anyway,
+			// here or above)
 			if (quicksearch && this._rowMap[ids[0]] == undefined) {
 				Zotero.debug('Selected item no longer matches quicksearch -- clearing');
 				quicksearch.value = '';
 				quicksearch.doCommand();
-			}
-			
-			if (sort) {
-				yield this.sort(typeof sort == 'number' ? sort : false);
-			}
-			else {
-				this._refreshItemRowMap();
 			}
 			
 			if (activeWindow) {
@@ -861,16 +856,8 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 				yield this.rememberSelection(savedSelection);
 			}
 		}
-		else
-		{
-			if (sort) {
-				yield this.sort(typeof sort == 'number' ? sort : false);
-			}
-			else {
-				this._refreshItemRowMap();
-			}
-			
-			// On removal of a row, select item at previous position
+		// On removal of a row, select item at previous position
+		else if (savedSelection.length) {
 			if (action == 'remove' || action == 'trash' || action == 'delete') {
 				// In duplicates view, select the next set on delete
 				if (collectionTreeRow.isDuplicates()) {
