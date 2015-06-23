@@ -370,7 +370,7 @@ Zotero.DataObjects.prototype.getUnwrittenData = function (libraryID) {
 Zotero.DataObjects.prototype.reload = Zotero.Promise.coroutine(function* (ids, dataTypes, reloadUnchanged) {
 	ids = Zotero.flattenArguments(ids);
 	
-	Zotero.debug('Reloading ' + (dataTypes ? dataTypes + ' for ' : '')
+	Zotero.debug('Reloading ' + (dataTypes ? '[' + dataTypes.join(', ') + '] for ' : '')
 		+ this._ZDO_objects + ' ' + ids);
 	
 	for (let i=0; i<ids.length; i++) {

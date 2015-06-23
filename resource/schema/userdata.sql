@@ -115,9 +115,7 @@ CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState);
 
 CREATE TABLE tags (
     tagID INTEGER PRIMARY KEY,
-    libraryID INT NOT NULL,
-    name TEXT NOT NULL,
-    UNIQUE (libraryID, name)
+    name TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE itemRelations (

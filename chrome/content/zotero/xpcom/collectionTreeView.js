@@ -2398,10 +2398,8 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	}
 	
 	if (this.tags){
-		for (var tag in this.tags){
-			if (this.tags[tag]){
-				s2.addCondition('tag', 'is', tag);
-			}
+		for (let tag of this.tags) {
+			s2.addCondition('tag', 'is', tag);
 		}
 	}
 	
@@ -2456,9 +2454,7 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function() {
 	}
 	
 	// Tag filter
-	if (this.tags) {
-		for (var i in this.tags) {
-			return true;
-		}
+	if (this.tags && this.tags.size) {
+		return true;
 	}
 }

@@ -1054,20 +1054,15 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function getTagSelection () {
+	function getTagSelection() {
 		var tagSelector = document.getElementById('zotero-tag-selector');
-		return tagSelector.selection ? tagSelector.selection : {};
+		return tagSelector.selection ? tagSelector.selection : new Set();
 	}
 	
 	
-	this.clearTagSelection = Zotero.Promise.coroutine(function* () {
-		if (Zotero.Utilities.isEmpty(getTagSelection())) {
-			return false;
-		}
-		var tagSelector = document.getElementById('zotero-tag-selector');
-		yield tagSelector.clearAll();
-		return true;
-	});
+	this.clearTagSelection = function () {
+		document.getElementById('zotero-tag-selector').deselectAll();
+	}
 	
 	
 	/*
@@ -1142,8 +1137,8 @@ var ZoteroPane = new function()
 			
 			// XBL functions might not yet be available
 			var tagSelector = document.getElementById('zotero-tag-selector');
-			if (tagSelector.clearAll) {
-				tagSelector.clearAll();
+			if (tagSelector.deselectAll) {
+				tagSelector.deselectAll();
 			}
 			
 			// Not necessary with seltype="cell", which calls nsITreeView::isSelectable()

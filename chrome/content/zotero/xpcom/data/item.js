@@ -1495,21 +1495,33 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		
 		for (let i=0; i<toAdd.length; i++) {
 			let tag = toAdd[i];
-			let tagID = yield Zotero.Tags.getIDFromName(this.libraryID, tag.tag, true);
+			let tagID = yield Zotero.Tags.getID(tag.tag, true);
+			let tagType = tag.type ? tag.type : 0;
 			// "OR REPLACE" allows changing type
 			let sql = "INSERT OR REPLACE INTO itemTags (itemID, tagID, type) VALUES (?, ?, ?)";
-			yield Zotero.DB.queryAsync(sql, [this.id, tagID, tag.type ? tag.type : 0]);
-			Zotero.Notifier.queue('add', 'item-tag', this.id + '-' + tag.tag);
+			yield Zotero.DB.queryAsync(sql, [this.id, tagID, tagType]);
+			
+			let notifierData = {};
+			notifierData[this.id + '-' + tagID] = {
+				libraryID: this.libraryID,
+				tag: tag.tag,
+				type: tagType
+			};
+			Zotero.Notifier.queue('add', 'item-tag', this.id + '-' + tagID, notifierData);
 		}
 		
 		if (toRemove.length) {
-			yield Zotero.Tags.load(this.libraryID);
 			for (let i=0; i<toRemove.length; i++) {
 				let tag = toRemove[i];
-				let tagID = Zotero.Tags.getID(this.libraryID, tag.tag);
+				let tagID = yield Zotero.Tags.getID(tag.tag);
 				let sql = "DELETE FROM itemTags WHERE itemID=? AND tagID=? AND type=?";
 				yield Zotero.DB.queryAsync(sql, [this.id, tagID, tag.type ? tag.type : 0]);
-				Zotero.Notifier.queue('remove', 'item-tag', this.id + '-' + tag.tag);
+				let notifierData = {};
+				notifierData[this.id + '-' + tagID] = {
+					libraryID: this.libraryID,
+					tag: tag.tag
+				};
+				Zotero.Notifier.queue('remove', 'item-tag', this.id + '-' + tagID, notifierData);
 			}
 			Zotero.Prefs.set('purge.tags', true);
 		}
@@ -3426,8 +3438,9 @@ Zotero.Item.prototype.getImageSrcWithTags = Zotero.Promise.coroutine(function* (
 	var colorData = [];
 	for (let i=0; i<tags.length; i++) {
 		let tag = tags[i];
-		if (tagColors[tag.tag]) {
-			colorData.push(tagColors[tag.tag]);
+		let data = tagColors.get(tag.tag);
+		if (data) {
+			colorData.push(data);
 		}
 	}
 	if (!colorData.length) {

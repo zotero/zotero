@@ -24,13 +24,14 @@
 */
 
 "use strict";
-var _io;
 
 var Zotero_Tag_Color_Chooser = new function() {
+	var _io;
+	
 	this.init = function () {
 		var dialog = document.getElementById('tag-color-chooser');
 		
-		return Zotero.spawn(function* () {
+		try {
 			// Set font size from pref
 			Zotero.setFontSize(document.getElementById("tag-color-chooser-container"));
 			
@@ -40,6 +41,7 @@ var Zotero_Tag_Color_Chooser = new function() {
 			}
 			if (typeof _io.libraryID == 'undefined') throw new Error("libraryID not set");
 			if (typeof _io.name == 'undefined' || _io.name === "") throw new Error("name not set");
+			if (_io.tagColors === undefined) throw new Error("tagColors not provided");
 			
 			window.sizeToContent();
 			
@@ -58,8 +60,8 @@ var Zotero_Tag_Color_Chooser = new function() {
 			var maxTags = document.getElementById('max-tags');
 			maxTags.value = Zotero.getString('tagColorChooser.maxTags', Zotero.Tags.MAX_COLORED_TAGS);
 			
-			var tagColors = yield Zotero.Tags.getColors(_io.libraryID);
-			var colorData = tagColors[_io.name];
+			var tagColors = _io.tagColors;
+			var colorData = tagColors.get(_io.name);
 			
 			// Color
 			if (colorData) {
@@ -68,11 +70,7 @@ var Zotero_Tag_Color_Chooser = new function() {
 			}
 			else {
 				// Get unused color at random
-				var usedColors = [];
-				for (var i in tagColors) {
-					usedColors.push(tagColors[i].color);
-				}
-				
+				var usedColors = [for (x of tagColors.values()) x.color];
 				var unusedColors = Zotero.Utilities.arrayDiff(
 					colorPicker.colors, usedColors
 				);
@@ -82,7 +80,7 @@ var Zotero_Tag_Color_Chooser = new function() {
 			}
 			colorPicker.setAttribute('disabled', 'false');
 			
-			var numColors = Object.keys(tagColors).length;
+			var numColors = tagColors.size;
 			var max = colorData ? numColors : numColors + 1;
 			
 			// Position
@@ -106,14 +104,13 @@ var Zotero_Tag_Color_Chooser = new function() {
 			
 			this.onPositionChange();
 			window.sizeToContent();
-		}.bind(this))
-		.catch(function (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
+		}
+		catch (e) {
+			Zotero.logError(e);
 			if (dialog.cancelDialog) {
 				dialog.cancelDialog();
 			}
-		});
+		}
 	};
 	
 	

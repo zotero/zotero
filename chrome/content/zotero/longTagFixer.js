@@ -180,6 +180,7 @@ var Zotero_Long_Tag_Fixer = new function () {
 				}
 				
 				// Remove old tags
+				// TODO: Update
 				Zotero.Tags.erase(oldTagIDs);
 				Zotero.Tags.purge();
 				Zotero.DB.commitTransaction();

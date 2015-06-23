@@ -108,6 +108,7 @@ Zotero.SyncedSettings = (function () {
 			if (currentValue === false) {
 				return false;
 			}
+			currentValue = JSON.parse(currentValue);
 			
 			var id = libraryID + '/' + setting;
 			

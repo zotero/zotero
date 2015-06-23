@@ -2122,11 +2122,11 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("CREATE INDEX savedSearches_synced ON savedSearches(synced)");
 				
 				yield Zotero.DB.queryAsync("ALTER TABLE tags RENAME TO tagsOld");
-				yield Zotero.DB.queryAsync("CREATE TABLE tags (\n    tagID INTEGER PRIMARY KEY,\n    libraryID INT NOT NULL,\n    name TEXT NOT NULL,\n    UNIQUE (libraryID, name)\n)");
-				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO tags SELECT tagID, IFNULL(libraryID, 1), name FROM tagsOld");
+				yield Zotero.DB.queryAsync("CREATE TABLE tags (\n    tagID INTEGER PRIMARY KEY,\n    name TEXT NOT NULL UNIQUE\n)");
+				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO tags SELECT tagID, name FROM tagsOld");
 				yield Zotero.DB.queryAsync("ALTER TABLE itemTags RENAME TO itemTagsOld");
 				yield Zotero.DB.queryAsync("CREATE TABLE itemTags (\n    itemID INT NOT NULL,\n    tagID INT NOT NULL,\n    type INT NOT NULL,\n    PRIMARY KEY (itemID, tagID),\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,\n    FOREIGN KEY (tagID) REFERENCES tags(tagID) ON DELETE CASCADE\n)");
-				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO itemTags SELECT itemID, T.tagID, TOld.type FROM itemTagsOld ITO JOIN tagsOld TOld USING (tagID) JOIN tags T ON (IFNULL(TOld.libraryID, 1)=T.libraryID AND TOld.name=T.name COLLATE BINARY)");
+				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO itemTags SELECT itemID, T.tagID, TOld.type FROM itemTagsOld ITO JOIN tagsOld TOld USING (tagID) JOIN tags T ON (TOld.name=T.name COLLATE BINARY)");
 				yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS itemTags_tagID");
 				yield Zotero.DB.queryAsync("CREATE INDEX itemTags_tagID ON itemTags(tagID)");
 				

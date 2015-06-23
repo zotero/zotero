@@ -8,7 +8,7 @@ describe("Zotero.Tags", function () {
 			item.addTag(tagName);
 			yield item.saveTx();
 			
-			assert.typeOf(Zotero.Tags.getID(Zotero.Libraries.userLibraryID, tagName), "number");
+			assert.typeOf((yield Zotero.Tags.getID(tagName)), "number");
 		})
 	})
 	
@@ -19,32 +19,49 @@ describe("Zotero.Tags", function () {
 			item.addTag(tagName);
 			yield item.saveTx();
 			
-			var tagID = Zotero.Tags.getID(Zotero.Libraries.userLibraryID, tagName);
-			assert.equal(Zotero.Tags.getName(Zotero.Libraries.userLibraryID, tagID), tagName);
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var tagID = yield Zotero.Tags.getID(tagName);
+			assert.equal((yield Zotero.Tags.getName(tagID)), tagName);
+		})
+	})
+	
+	describe("#removeFromLibrary()", function () {
+		it("should reload tags of associated items", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			var tagName = Zotero.Utilities.randomString();
+			var item = createUnsavedDataObject('item');
+			item.addTag(tagName);
+			yield item.saveTx();
+			assert.lengthOf(item.getTags(), 1);
+			
+			var tagID = yield Zotero.Tags.getID(tagName);
+			yield Zotero.Tags.removeFromLibrary(libraryID, tagID);
+			assert.lengthOf(item.getTags(), 0);
 		})
 	})
 	
 	describe("#purge()", function () {
 		it("should remove orphaned tags", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
+			
 			var tagName = Zotero.Utilities.randomString();
 			var item = createUnsavedDataObject('item');
 			item.addTag(tagName);
 			yield item.saveTx();
 			
-			var tagID = Zotero.Tags.getID(libraryID, tagName);
+			var tagID = yield Zotero.Tags.getID(tagName);
 			assert.typeOf(tagID, "number");
 			
 			yield item.eraseTx();
 			
-			assert.equal(Zotero.Tags.getName(libraryID, tagID), tagName);
+			assert.equal((yield Zotero.Tags.getName(tagID)), tagName);
 			
 			yield Zotero.DB.executeTransaction(function* () {
 				yield Zotero.Tags.purge();
 			});
 			
-			yield Zotero.Tags.load(libraryID);
-			assert.isFalse(Zotero.Tags.getName(libraryID, tagID));
+			assert.isFalse(yield Zotero.Tags.getName(tagID));
 		})
 	})
 })

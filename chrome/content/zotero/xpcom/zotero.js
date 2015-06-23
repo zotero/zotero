@@ -2092,7 +2092,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	this.reloadDataObjects = function () {
 		return Zotero.Promise.all([
-			Zotero.Tags.reloadAll(),
 			Zotero.Collections.reloadAll(),
 			Zotero.Creators.reloadAll(),
 			Zotero.Items.reloadAll()

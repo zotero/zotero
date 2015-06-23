@@ -166,42 +166,30 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 			
 			event.preventDefault();
 			
-			Zotero.Promise.try(function () {
+			Zotero.spawn(function* () {
 				if (coloredTagsRE.test(key)) {
 					let libraryID = self.collectionTreeRow.ref.libraryID;
 					let position = parseInt(key) - 1;
-					return Zotero.Tags.getColorByPosition(libraryID, position)
-					.then(function (colorData) {
-						// If a color isn't assigned to this number or any
-						// other numbers, allow key navigation
-						if (!colorData) {
-							return Zotero.Tags.getColors(libraryID)
-							.then(function (colors) {
-								return !Object.keys(colors).length;
-							});
-						}
-						
-						var items = self.getSelectedItems();
-						return Zotero.Tags.toggleItemsListTags(libraryID, items, colorData.name)
-						.then(function () {
-							return false;
-						});
-					});
-				}
-				return true;
-			})
-			// We have to disable key navigation on the tree in order to
-			// keep it from acting on the 1-6 keys used for colored tags.
-			// To allow navigation with other keys, we temporarily enable
-			// key navigation and recreate the keyboard event. Since
-			// that will trigger this listener again, we set a flag to
-			// ignore the event, and then clear the flag above when the
-			// event comes in. I see no way this could go wrong...
-			.then(function (resend) {
-				if (!resend) {
+					let colorData = yield Zotero.Tags.getColorByPosition(libraryID, position);
+					// If a color isn't assigned to this number or any
+					// other numbers, allow key navigation
+					if (!colorData) {
+						let colors = yield Zotero.Tags.getColors(libraryID);
+						return !colors.size;
+					}
+					
+					var items = self.getSelectedItems();
+					yield Zotero.Tags.toggleItemsListTags(libraryID, items, colorData.name);
 					return;
 				}
 				
+				// We have to disable key navigation on the tree in order to
+				// keep it from acting on the 1-6 keys used for colored tags.
+				// To allow navigation with other keys, we temporarily enable
+				// key navigation and recreate the keyboard event. Since
+				// that will trigger this listener again, we set a flag to
+				// ignore the event, and then clear the flag above when the
+				// event comes in. I see no way this could go wrong...
 				tree.disableKeyNavigation = false;
 				self._skipKeyPress = true;
 				var nsIDWU = Components.interfaces.nsIDOMWindowUtils;
@@ -230,10 +218,8 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 				tree.disableKeyNavigation = true;
 			})
 			.catch(function (e) {
-				Zotero.debug(e, 1);
-				Components.utils.reportError(e);
+				Zotero.logError(e);
 			})
-			.done();
 		};
 		// Store listener so we can call removeEventListener() in ItemTreeView.unregister()
 		this.listener = listener;

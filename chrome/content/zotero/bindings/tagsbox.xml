@@ -117,7 +117,9 @@
 					this.mode = this.getAttribute('mode');
 				}
 				
-				this._notifierID = Zotero.Notifier.registerObserver(this, ['item-tag', 'setting']);
+				this._notifierID = Zotero.Notifier.registerObserver(
+					this, ['item-tag', 'setting'], 'tagsbox'
+				);
 			]]>
 			</constructor>
 			
@@ -134,73 +136,72 @@
 				<parameter name="type"/>
 				<parameter name="ids"/>
 				<parameter name="extraData"/>
-				<body>
-				<![CDATA[
-					if (type == 'setting') {
-						if (ids.some(function (val) val.split("/")[1] == 'tagColors') && this.item) {
-							this.reload();
+				<body><![CDATA[
+					return Zotero.spawn(function* () {
+						if (type == 'setting') {
+							if (ids.some(function (val) val.split("/")[1] == 'tagColors') && this.item) {
+								return this.reload();
+							}
 						}
-						return;
-					}
-					else if (type == 'item-tag') {
-						let itemID, tagName;
-						
-						for (let i=0; i<ids.length; i++) {
-							[itemID, tagName] = ids[i].match(/^([0-9]+)-(.+)/).slice(1);
-							if (!this.item || itemID != this.item.id) {
-								continue;
+						else if (type == 'item-tag') {
+							let itemID, tagID;
+							
+							for (let i=0; i<ids.length; i++) {
+								[itemID, tagID] = ids[i].split('-').map(x => parseInt(x));
+								if (!this.item || itemID != this.item.id) {
+									continue;
+								}
+								let data = extraData[ids[i]];
+								let tagName = data.tag;
+								
+								if (event == 'add') {
+									var newTabIndex = this.add(tagName);
+									if (newTabIndex == -1) {
+										return;
+									}
+									if (this._tabDirection == -1) {
+										if (this._lastTabIndex > newTabIndex) {
+											this._lastTabIndex++;
+										}
+									}
+									else if (this._tabDirection == 1) {
+										if (this._lastTabIndex > newTabIndex) {
+											this._lastTabIndex++;
+										}
+									}
+								}
+								else if (event == 'modify') {
+									let oldTagName = data.old.tag;
+									this.remove(oldTagName);
+									this.add(tagName);
+								}
+								else if (event == 'remove') {
+									var oldTabIndex = this.remove(tagName);
+									if (oldTabIndex == -1) {
+										return;
+									}
+									if (this._tabDirection == -1) {
+										if (this._lastTabIndex > oldTabIndex) {
+											this._lastTabIndex--;
+										}
+									}
+									else if (this._tabDirection == 1) {
+										if (this._lastTabIndex >= oldTabIndex) {
+											this._lastTabIndex--;
+										}
+									}
+								}
 							}
 							
-							if (event == 'add') {
-								var newTabIndex = this.add(tagName);
-								if (newTabIndex == -1) {
-									return;
-								}
-								if (this._tabDirection == -1) {
-									if (this._lastTabIndex > newTabIndex) {
-										this._lastTabIndex++;
-									}
-								}
-								else if (this._tabDirection == 1) {
-									if (this._lastTabIndex > newTabIndex) {
-										this._lastTabIndex++;
-									}
-								}
-							}
-							else if (event == 'modify') {
-								Zotero.debug("EXTRA");
-								Zotero.debug(extraData);
-								let oldTagName = extraData[tagName].old.tag;
-								this.remove(oldTagName);
-								this.add(tagName);
-							}
-							else if (event == 'remove') {
-								var oldTabIndex = this.remove(tagName);
-								if (oldTabIndex == -1) {
-									return;
-								}
-								if (this._tabDirection == -1) {
-									if (this._lastTabIndex > oldTabIndex) {
-										this._lastTabIndex--;
-									}
-								}
-								else if (this._tabDirection == 1) {
-									if (this._lastTabIndex >= oldTabIndex) {
-										this._lastTabIndex--;
-									}
-								}
+							this.updateCount();
+						}
+						else if (type == 'tag') {
+							if (event == 'modify') {
+								return this.reload();
 							}
 						}
-						
-						this.updateCount();
-					}
-					else if (type == 'tag') {
-						if (event == 'modify') {
-							this.reload();
-						}
-					}
-				]]>
-				</body>
+					}.bind(this));
+				]]></body>
 			</method>
 			
 			
@@ -235,6 +236,9 @@
 						
 						this._reloading = false;
 						this._focusField();
+						
+						var event = new Event('refresh');
+						this.dispatchEvent(event);
 					}, this);
 				]]></body>
 			</method>
@@ -388,13 +392,10 @@
 					}
 					
 					// Tag color
-					let color = this._tagColors[valueText];
-					if (color) {
-						valueElement.setAttribute(
-							'style',
-							'color:' + this._tagColors[valueText].color + '; '
-								+ 'font-weight: bold'
-						);
+					var colorData = this._tagColors.get(valueText);
+					if (colorData) {
+						valueElement.style.color = colorData.color;
+						valueElement.style.fontWeight = 'bold';
 					}
 					
 					return valueElement;
@@ -522,12 +523,10 @@
 								yield this.blurHandler(target);
 								
 								if (focusField) {
-									Zotero.debug("FOCUSING FIELD");
 									this._focusField();
 								}
 								// Return focus to items pane
 								else {
-									Zotero.debug("FOCUSING ITEM PANE");
 									var tree = document.getElementById('zotero-items-tree');
 									if (tree) {
 										tree.focus();
@@ -757,8 +756,6 @@
 			<method name="add">
 				<parameter name="tagName"/>
 				<body><![CDATA[
-					Zotero.debug("ADDING ROW WITH " + tagName);
-					
 					var rowsElement = this.id('tagRows');
 					var rows = rowsElement.childNodes;
 					
@@ -766,7 +763,6 @@
 					var row = false;
 					for (let i=0; i<rows.length; i++) {
 						if (rows[i].getAttribute('tagName') === tagName) {
-							Zotero.debug("FOUND ROW with " + tagName);
 							return rows[i].getAttribute('ztabindex');
 						}
 					}
@@ -835,18 +831,12 @@
 			<method name="remove">
 				<parameter name="tagName"/>
 				<body><![CDATA[
-					Zotero.debug("REMOVING ROW WITH " + tagName);
-					
 					var rowsElement = this.id('tagRows');
 					var rows = rowsElement.childNodes;
 					var removed = false;
 					var oldTabIndex = -1;
 					for (var i=0; i<rows.length; i++) {
 						let value = rows[i].getAttribute('tagName');
-						Zotero.debug("-=-=");
-						Zotero.debug(value);
-						Zotero.debug(tagName);
-						Zotero.debug(value === tagName);
 						if (value === tagName) {
 							oldTabIndex = i + 1;
 							removed = true;
@@ -1010,9 +1000,7 @@
 			<method name="scrollToTop">
 				<body>
 				<![CDATA[
-					Zotero.debug('SCROLL TO TOP');
 					if (!this._activeScrollbox) {
-						Zotero.debug('NO');
 						return;
 					}
 					var sbo = this._activeScrollbox.boxObject;

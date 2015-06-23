@@ -6,41 +6,51 @@ groupbox
 	padding: 1px 1px 0;
 }
 
-#tags-toggle
-{
+#tags-deck {
+	-moz-box-flex: 1;
+}
+
+#tags-deck > box {
+	-moz-box-align: center;
+	-moz-box-pack: center;
+}
+
+#tags-box {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	align-content: flex-start;
 	overflow-x: hidden;
 	overflow-y: auto;
-	display: block; /* allow labels to wrap instead of all being in one line */
 	background-color: -moz-field;
 }
 
-checkbox
-{
-	margin: .75em 0 .4em;
-}
-
-#tags-toggle label
-{
+#tags-box button {
 	margin: .15em .05em .15em .3em !important;
 	padding: 0 .25em 0 .25em !important;
-	-moz-user-focus: ignore;
 	max-width: 250px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	background-color: transparent;
+	text-align: left;
+	white-space: nowrap;
 	border: 1px solid transparent; /* always include border so height is same as zotero-clicky */
+	-moz-appearance: none;
+	-moz-padding-start: 0 !important;
+	-moz-padding-end: 0 !important;
+	-moz-user-focus: ignore;
 }
 
 /* Visible out-of-scope tags should be grey */
-#tags-toggle label[inScope=false]:not([hasColor=true])
-{
+#tags-box button[inScope=false]:not([hasColor=true]) {
 	color: #666 !important;
 }
 
-#tags-toggle label[inScope=false][hasColor=true]
-{
+#tags-box button[inScope=false][hasColor=true] {
 	opacity: .6;
 }
 
-#tags-toggle label[draggedOver="true"]
-{
+#tags-box button[draggedOver="true"] {
 	color: white !important;
 	background: #666;
 }

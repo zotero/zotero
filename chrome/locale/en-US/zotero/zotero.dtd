@@ -142,11 +142,8 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay			"No tags to display">
 <!ENTITY zotero.tagSelector.loadingTags            "Loading tags…">
-<!ENTITY zotero.tagSelector.filter					"Filter:">
 <!ENTITY zotero.tagSelector.showAutomatic			"Show Automatic">
 <!ENTITY zotero.tagSelector.displayAllInLibrary	"Display All Tags in This Library">
-<!ENTITY zotero.tagSelector.selectVisible			"Select Visible">
-<!ENTITY zotero.tagSelector.clearVisible				"Deselect Visible">
 <!ENTITY zotero.tagSelector.clearAll					"Deselect All">
 <!ENTITY zotero.tagSelector.assignColor              "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag				"Rename Tag…">
