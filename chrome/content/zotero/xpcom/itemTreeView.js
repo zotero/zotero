@@ -917,10 +917,6 @@ Zotero.ItemTreeView.prototype.notify = Zotero.Promise.coroutine(function* (actio
 		yield this.selectItem(selectItem);
 	}*/
 	
-	if (Zotero.suppressUIUpdates) {
-		yield this.rememberSelection(savedSelection);
-	}
-	
 	//this._treebox.endUpdateBatch();
 	if (madeChanges) {
 		var deferred = Zotero.Promise.defer();
@@ -1601,12 +1597,6 @@ Zotero.ItemTreeView.prototype.sort = Zotero.Promise.coroutine(function* (itemID)
  *  Select an item
  */
 Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (id, expand, noRecurse) {
-	// Don't change selection if UI updates are disabled (e.g., during sync)
-	if (Zotero.suppressUIUpdates) {
-		Zotero.debug("Sync is running; not selecting item");
-		return false;
-	}
-	
 	// If no row map, we're probably in the process of switching collections,
 	// so store the item to select on the item group for later
 	if (!this._rowMap) {

@@ -873,11 +873,6 @@ Zotero.CollectionTreeView.prototype.expandToCollection = Zotero.Promise.coroutin
 ///
 ////////////////////////////////////////////////////////////////////////////////
 Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(function* (id) {
-	if (Zotero.suppressUIUpdates) {
-		Zotero.debug("UI updates suppressed -- not changing selection");
-		return false;
-	}
-	
 	var type = id[0];
 	id = ('' + id).substr(1);
 	
@@ -922,11 +917,6 @@ Zotero.CollectionTreeView.prototype.restoreSelection = Zotero.Promise.coroutine(
  * @param	{Integer}		libraryID		Library to select
  */
 Zotero.CollectionTreeView.prototype.selectLibrary = Zotero.Promise.coroutine(function* (libraryID) {
-	if (Zotero.suppressUIUpdates) {
-		Zotero.debug("UI updates suppressed -- not changing library selection");
-		return false;
-	}
-	
 	// Select local library
 	if (!libraryID) {
 		this._treebox.ensureRowIsVisible(0);
@@ -966,11 +956,6 @@ Zotero.CollectionTreeView.prototype.selectSearch = function (id) {
 
 
 Zotero.CollectionTreeView.prototype.selectTrash = Zotero.Promise.coroutine(function* (libraryID) {
-	if (Zotero.suppressUIUpdates) {
-		Zotero.debug("UI updates suppressed -- not changing library selection");
-		return false;
-	}
-	
 	// Check if trash is already selected
 	if (this.selection.currentIndex != -1) {
 		let itemGroup = this.getRow(this.selection.currentIndex);

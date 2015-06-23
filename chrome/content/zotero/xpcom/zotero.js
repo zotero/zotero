@@ -99,11 +99,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	});
 	
 	/**
-	 * @property	{Boolean}	suppressUIUpdates	Don't update UI on Notifier triggers
-	 */
-	this.suppressUIUpdates = false;
-	
-	/**
 	 * @property	{Boolean}	closing		True if the application is closing.
 	 */
 	this.closing = false;
