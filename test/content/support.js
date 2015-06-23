@@ -74,21 +74,24 @@ function waitForWindow(uri, callback) {
 			var win = ev.target.docShell
 				.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
 				.getInterface(Components.interfaces.nsIDOMWindow);
-			if (callback) {
-				try {
-					// If callback is a promise, wait for it
-					let maybePromise = callback(win);
-					if (maybePromise && maybePromise.then) {
-						maybePromise.then(() => deferred.resolve(win)).catch(e => deferred.reject(e));
+			// Give window code time to run on load
+			setTimeout(function () {
+				if (callback) {
+					try {
+						// If callback is a promise, wait for it
+						let maybePromise = callback(win);
+						if (maybePromise && maybePromise.then) {
+							maybePromise.then(() => deferred.resolve(win)).catch(e => deferred.reject(e));
+							return;
+						}
+					}
+					catch (e) {
+						deferred.reject(e);
 						return;
 					}
 				}
-				catch (e) {
-					deferred.reject(e);
-					return;
-				}
-			}
-			deferred.resolve(win);
+				deferred.resolve(win);
+			});
 		}
 	};
 	var winobserver = {"observe":function(subject, topic, data) {
@@ -109,8 +112,8 @@ function waitForWindow(uri, callback) {
  * @param {String} [button='accept'] - Button in dialog to press (e.g., 'cancel', 'extra1')
  * @return {Promise}
  */
-function waitForDialog(onOpen, button='accept') {
-	return waitForWindow("chrome://global/content/commonDialog.xul", Zotero.Promise.method(function (dialog, deferred) {
+function waitForDialog(onOpen, button='accept', url) {
+	return waitForWindow(url || "chrome://global/content/commonDialog.xul", Zotero.Promise.method(function (dialog, deferred) {
 		var failure = false;
 		if (onOpen) {
 			try {
