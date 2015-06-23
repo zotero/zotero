@@ -888,7 +888,7 @@ Zotero.Search.idsToTempTable = function (ids) {
 	var tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
 	
 	return Zotero.DB.executeTransaction(function* () {
-		var sql = "CREATE TEMPORARY TABLE " + tmpTable + " (itemID INT)";
+		var sql = "CREATE TEMPORARY TABLE " + tmpTable + " (itemID INTEGER PRIMARY KEY)";
 		yield Zotero.DB.queryAsync(sql);
 		
 		var ids2 = ids ? ids.concat() : [];
@@ -898,9 +898,6 @@ Zotero.Search.idsToTempTable = function (ids) {
 				+ chunk.map(function () "SELECT ?").join(" UNION ");
 			yield Zotero.DB.queryAsync(sql, chunk, { debug: false });
 		}
-		
-		var sql = "CREATE INDEX " + tmpTable + "_itemID ON " + tmpTable + "(itemID)";
-		yield Zotero.DB.queryAsync(sql);
 		
 		return tmpTable;
 	});
@@ -996,18 +993,13 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	}
 	
 	// Exclude deleted items (and their child items) by default
-	sql += " WHERE itemID " + (deleted ? "" : "NOT ") + "IN "
-			+ "("
-				+ "SELECT itemID FROM deletedItems "
-				+ "UNION "
-				+ "SELECT itemID FROM itemNotes "
+	sql += " WHERE itemID " + (deleted ? "" : "NOT ") + "IN (SELECT itemID FROM deletedItems) "
+		+ "AND itemID " + (deleted ? "" : "NOT ") + "IN (SELECT itemID FROM itemNotes "
 				+ "WHERE parentItemID IS NOT NULL AND "
-				+ "parentItemID IN (SELECT itemID FROM deletedItems) "
-				+ "UNION "
-				+ "SELECT itemID FROM itemAttachments "
+				+ "parentItemID IN (SELECT itemID FROM deletedItems)) "
+		+ "AND itemID " + (deleted ? "" : "NOT ") + "IN (SELECT itemID FROM itemAttachments "
 				+ "WHERE parentItemID IS NOT NULL AND "
-				+ "parentItemID IN (SELECT itemID FROM deletedItems) "
-			+ ")";
+				+ "parentItemID IN (SELECT itemID FROM deletedItems))";
 	
 	if (noChildren){
 		sql += " AND (itemID NOT IN (SELECT itemID FROM itemNotes "
