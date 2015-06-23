@@ -139,7 +139,12 @@ Zotero.Notifier = new function(){
 			// Catch exceptions so all observers get notified even if
 			// one throws an error
 			try {
+				let t = new Date;
 				yield Zotero.Promise.resolve(_observers[id].ref.notify(event, type, ids, extraData));
+				t = new Date - t;
+				if (t > 5) {
+					Zotero.debug(id + " observer finished in " + t + " ms");
+				}
 			}
 			catch (e) {
 				Zotero.debug(e);
