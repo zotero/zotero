@@ -107,6 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Περιοχή/Διαδρομή">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(π.χ. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Μορφή παραγόμενου αρχείου">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Απενεργοποίηση της Γρήγορης αντιγραφής όταν σύρονται περισσότερα από">
 
 <!ENTITY zotero.preferences.prefpane.cite "Παράθεση/Παραπομπή">

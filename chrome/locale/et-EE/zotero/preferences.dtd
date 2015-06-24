@@ -107,6 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domeen/aadress">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(nt wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Väljundformaat">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Peatada kiirkopeerimine juhul kui lohistatakse rohkem kui">
 
 <!ENTITY zotero.preferences.prefpane.cite "Viitamine">

@@ -107,6 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Домен/путь">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(например wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Выходной формат">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Выключить быстрое копирование при перетаскивании более">
 
 <!ENTITY zotero.preferences.prefpane.cite "Цитирование">

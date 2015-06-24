@@ -165,6 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Opret bibliografien">
 <!ENTITY zotero.bibliography.style.label "Reference-stil:">
+<!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Outputtilstand:">
 <!ENTITY zotero.bibliography.bibliography "Litteraturliste">
 <!ENTITY zotero.bibliography.outputMethod "Outputmetode:">

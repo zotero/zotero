@@ -165,6 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "إنشاء ببليوجرافية">
 <!ENTITY zotero.bibliography.style.label "نمط الاستشهاد:">
+<!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "وضع المخرجات:">
 <!ENTITY zotero.bibliography.bibliography "ببليوجرافية">
 <!ENTITY zotero.bibliography.outputMethod "Output Method:">

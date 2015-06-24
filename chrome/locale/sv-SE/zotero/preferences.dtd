@@ -107,6 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domän/sökväg">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(t.ex. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Utdataformat">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Stäng av snabbkopiering om fler än ... filer är markerade.">
 
 <!ENTITY zotero.preferences.prefpane.cite "Källhänvisa">

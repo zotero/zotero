@@ -107,6 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Sritis/kelias">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(pvz., vikipedija.lt)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Išvedimo formatas">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Neleisti greitai kopijuoti, jei tempiama daugiau kaip">
 
 <!ENTITY zotero.preferences.prefpane.cite "Citavimas">

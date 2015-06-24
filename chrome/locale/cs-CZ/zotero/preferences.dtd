@@ -107,6 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Doména/Cesta">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(např. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Výstupní formát">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Vypnout Rychlé kopírování, pokud je označeno více než">
 
 <!ENTITY zotero.preferences.prefpane.cite "Citování">

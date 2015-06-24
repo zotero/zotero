@@ -107,6 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "網域/路徑">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(例如 wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "輸出格式">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "拖放超過多少項目時，停用快速複製：">
 
 <!ENTITY zotero.preferences.prefpane.cite "引用">

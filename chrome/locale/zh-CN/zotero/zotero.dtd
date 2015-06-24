@@ -126,8 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "标题大写">
 <!ENTITY zotero.item.textTransform.sentencecase "句首大写">
 <!ENTITY zotero.item.creatorTransform.nameSwap "交换 首/尾 名称">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.viewOnline "在线查看">
+<!ENTITY zotero.item.copyAsURL "复制为 URL">
 
 <!ENTITY zotero.toolbar.newNote "新建笔记">
 <!ENTITY zotero.toolbar.note.standalone "新建独立笔记">
@@ -165,6 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "创建引文目录">
 <!ENTITY zotero.bibliography.style.label "引文样式:">
+<!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "输出模式:">
 <!ENTITY zotero.bibliography.bibliography "引文目录">
 <!ENTITY zotero.bibliography.outputMethod "输出方法:">

@@ -107,6 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "دامنه/مسیر">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(مثال: wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "قالب خروجی">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "غیر فعال کردن رونوشت سریع در زمان کشیدن بیش از ">
 
 <!ENTITY zotero.preferences.prefpane.cite "یادکرد">

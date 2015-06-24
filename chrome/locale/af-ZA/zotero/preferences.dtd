@@ -107,6 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domein/pad">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(bv wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Afvoerformaat">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Disable Quick Copy when dragging more than">
 
 <!ENTITY zotero.preferences.prefpane.cite "Cite">
