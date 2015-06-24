@@ -2039,7 +2039,7 @@ Zotero.Integration.Session.prototype.setData = function(data, resetStyle) {
 		try {
 			var getStyle = Zotero.Styles.get(data.style.styleID);
 			data.style.hasBibliography = getStyle.hasBibliography;
-			this.style = getStyle.getCiteProc(data.prefs.automaticJournalAbbreviations);
+			this.style = getStyle.getCiteProc(data.locale, data.prefs.automaticJournalAbbreviations);
 			this.style.setOutputFormat("rtf");
 			this.styleClass = getStyle.class;
 			this.dateModified = new Object();
@@ -2069,6 +2069,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 	
 	if(this.data) {
 		io.style = this.data.style.styleID;
+		io.locale = this.data.locale;
 		io.useEndnotes = this.data.prefs.noteType == 0 ? 0 : this.data.prefs.noteType-1;
 		io.fieldType = this.data.prefs.fieldType;
 		io.primaryFieldType = primaryFieldType;
@@ -2091,13 +2092,19 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		var data = new Zotero.Integration.DocumentData();
 		data.sessionID = oldData.sessionID;
 		data.style.styleID = io.style;
+		data.locale = io.locale;
 		data.prefs.fieldType = io.fieldType;
 		data.prefs.storeReferences = io.storeReferences;
 		data.prefs.automaticJournalAbbreviations = io.automaticJournalAbbreviations;
 
+		var localeChanged = false;
+		if (!oldData.locale || (oldData.locale != io.locale)) {
+			localeChanged = true;
+		}
+
 		me.setData(data, oldData && 
-		oldData.prefs.automaticJournalAbbreviations !=
-		data.prefs.automaticJournalAbbreviations);
+		(oldData.prefs.automaticJournalAbbreviations !=
+		data.prefs.automaticJournalAbbreviations || localeChanged));
 
 		// need to do this after setting the data so that we know if it's a note style
 		me.data.prefs.noteType = me.style && me.styleClass == "note" ? io.useEndnotes+1 : 0;

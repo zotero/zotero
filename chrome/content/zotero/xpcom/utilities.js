@@ -413,19 +413,20 @@ Zotero.Utilities = {
 	},
 
 	/**
-	 * Encode special XML/HTML characters<br/>
-	 * <br/>
-	 * Certain entities can be inserted manually:<br/>
-	 * <pre> &lt;ZOTEROBREAK/&gt; =&gt; &lt;br/&gt;
-	 * &lt;ZOTEROHELLIP/&gt; =&gt; &amp;#8230;</pre>
-	 * @type String
+	 * Encode special XML/HTML characters
+	 * Certain entities can be inserted manually:
+	 *   <ZOTEROBREAK/> => <br/>
+	 *   <ZOTEROHELLIP/> => &#8230;
+	 *
+	 * @param {String} str
+	 * @return {String}
 	 */
-	 "htmlSpecialChars":function(/**String*/ str) {
-		if (typeof str != 'string') str = str.toString();
-		
-		if (!str) {
-			return '';
+	"htmlSpecialChars":function(str) {
+		if (str && typeof str != 'string') {
+			str = str.toString();
 		}
+		
+		if (!str) return '';
 		
 		return str
 			.replace(/&/g, '&amp;')

@@ -56,6 +56,8 @@
 					<menuitem value="numeric" label="&styles.preview.citationFormat.numeric;"/>
 				</menupopup>
 			</menulist>
+			
+			<menulist id="locale-menu" oncommand="Zotero.Prefs.set('export.lastLocale', this.value); Zotero_CSL_Preview.refresh()"/>
 		</hbox>
 		<iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em; background:white;" overflow="auto" type="content"/>
 	</vbox>

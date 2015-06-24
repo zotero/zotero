@@ -1866,24 +1866,27 @@ var ZoteroPane = new function()
 		}
 		
 		var url = (window.content && window.content.location ? window.content.location.href : null);
-		var [mode, format] = Zotero.QuickCopy.getFormatFromURL(url).split('=');
-		var [mode, contentType] = mode.split('/');
+		var format = Zotero.QuickCopy.getFormatFromURL(url);
+		format = Zotero.QuickCopy.unserializeSetting(format);
 		
-		if (mode == 'bibliography') {
+		// determine locale preference
+		var locale = format.locale ? format.locale : Zotero.Prefs.get('export.quickCopy.locale');
+		
+		if (format.mode == 'bibliography') {
 			if (asCitations) {
-				Zotero_File_Interface.copyCitationToClipboard(items, format, contentType == 'html');
+				Zotero_File_Interface.copyCitationToClipboard(items, format.id, locale, format.contentType == 'html');
 			}
 			else {
-				Zotero_File_Interface.copyItemsToClipboard(items, format, contentType == 'html');
+				Zotero_File_Interface.copyItemsToClipboard(items, format.id, locale, format.contentType == 'html');
 			}
 		}
-		else if (mode == 'export') {
+		else if (format.mode == 'export') {
 			// Copy citations doesn't work in export mode
 			if (asCitations) {
 				return;
 			}
 			else {
-				Zotero_File_Interface.exportItemsToClipboard(items, format);
+				Zotero_File_Interface.exportItemsToClipboard(items, format.id);
 			}
 		}
 	}
