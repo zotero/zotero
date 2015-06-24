@@ -2810,7 +2810,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 							}
 						}
 						
-						parentDir.copyTo(destDir, newName ? newName : dirName);
+						parentDir.copyToFollowingLinks(destDir, newName ? newName : dirName);
 						
 						// Store nsIFile
 						if (useTemp) {
@@ -2851,7 +2851,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 							}
 						}
 						
-						file.copyTo(destDir, newName ? newName : null);
+						file.copyToFollowingLinks(destDir, newName ? newName : null);
 						
 						// Store nsIFile
 						if (useTemp) {
@@ -3219,6 +3219,14 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient, dataTransfer) {
 						var itemID = Zotero.Attachments.linkFromFile(file, sourceItemID);
 					}
 					else {
+						if (file.leafName.endsWith(".lnk")) {
+							let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+							   .getService(Components.interfaces.nsIWindowMediator);
+							let win = wm.getMostRecentWindow("navigator:browser");
+							win.ZoteroPane.displayCannotAddShortcutMessage(file.path);
+							Zotero.DB.commitTransaction();
+							continue;
+						}
 						var itemID = Zotero.Attachments.importFromFile(file, sourceItemID, targetLibraryID);
 						// If moving, delete original file
 						if (dragData.dropEffect == 'move') {

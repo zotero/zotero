@@ -426,7 +426,7 @@ Zotero.File = new function(){
 		newFile.remove(null);
 		
 		// Copy file to unique name
-		file.copyTo(newFile.parent, newName);
+		file.copyToFollowingLinks(newFile.parent, newName);
 		return newFile;
 	}
 	
@@ -442,7 +442,7 @@ Zotero.File = new function(){
 		while (otherFiles.hasMoreElements()) {
 			var file = otherFiles.getNext();
 			file.QueryInterface(Components.interfaces.nsIFile);
-			file.copyTo(newDir, null);
+			file.copyToFollowingLinks(newDir, null);
 		}
 	}
 	
@@ -505,6 +505,8 @@ Zotero.File = new function(){
 			// Strip characters not valid in XML, since they won't sync and they're probably unwanted
 			fileName = fileName.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/g, '');
 		}
+		// Don't allow hidden files
+		fileName = fileName.replace(/^\./, '');
 		// Don't allow blank or illegal filenames
 		if (!fileName || fileName == '.' || fileName == '..') {
 			fileName = '_';

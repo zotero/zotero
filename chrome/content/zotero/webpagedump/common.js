@@ -644,7 +644,7 @@ var wpdCommon = {
 
 		aDir.initWithPath(destdir);
 
-		aFile.copyTo(aDir, destfile);
+		aFile.copyToFollowingLinks(aDir, destfile);
 		return true; // Added by Dan S. for Zotero
 	},
 

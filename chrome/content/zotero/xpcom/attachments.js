@@ -55,6 +55,10 @@ Zotero.Attachments = new function(){
 			throw ("'" + file.leafName + "' must be a file in Zotero.Attachments.importFromFile()");
 		}
 		
+		if (file.leafName.endsWith(".lnk")) {
+			throw new Error("Cannot add Windows shortcut");
+		}
+		
 		Zotero.DB.beginTransaction();
 		
 		try {
@@ -165,7 +169,7 @@ Zotero.Attachments = new function(){
 			var storageDir = Zotero.getStorageDirectory();
 			var destDir = this.getStorageDirectory(itemID);
 			_moveOrphanedDirectory(destDir);
-			file.parent.copyTo(storageDir, destDir.leafName);
+			file.parent.copyToFollowingLinks(storageDir, destDir.leafName);
 			
 			// Point to copied file
 			var newFile = destDir.clone();

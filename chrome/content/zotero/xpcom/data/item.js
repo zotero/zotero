@@ -2863,6 +2863,11 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			if (Zotero.isWin || path.indexOf('/') != -1) {
 				path = Zotero.File.getValidFileName(path, true);
 			}
+			// Ignore .zotero* files that were relinked before we started blocking them
+			if (path.startsWith(".zotero")) {
+				Zotero.debug("Ignoring attachment file " + path, 2);
+				return false;
+			}
 			var file = Zotero.Attachments.getStorageDirectory(this.id);
 			file.QueryInterface(Components.interfaces.nsILocalFile);
 			file.setRelativeDescriptor(file, path);
@@ -3109,15 +3114,47 @@ Zotero.Item.prototype.relinkAttachmentFile = function(file, skipItemUpdate) {
 		throw('Cannot relink linked URL in Zotero.Items.relinkAttachmentFile()');
 	}
 	
+	if (file.leafName.endsWith(".lnk")) {
+		throw new Error("Cannot relink to Windows shortcut");
+	}
+	
 	var newName = Zotero.File.getValidFileName(file.leafName);
 	if (!newName) {
 		throw ("No valid characters in filename after filtering in Zotero.Item.relinkAttachmentFile()");
 	}
 	
-	// Rename file to filtered name if necessary
-	if (file.leafName != newName) {
-		Zotero.debug("Renaming file '" + file.leafName + "' to '" + newName + "'");
-		file.moveTo(null, newName);
+	try {
+		// If selected file isn't in the attachment's storage directory,
+		// copy it in and use that one instead
+		var storageDir = Zotero.Attachments.getStorageDirectory(this.id);
+		if (this.isImportedAttachment() && !file.parent.equals(storageDir)) {
+			// If file with same name already exists in the storage directory,
+			// move it out of the way
+			let targetFile = storageDir.clone();
+			targetFile.append(newName);
+			let renamedFile;
+			if (targetFile.exists()) {
+				renamedFile = targetFile.clone();
+				renamedFile.moveTo(null, newName + ".bak");
+			}
+			
+			Zotero.File.copyToUnique(file, targetFile);
+			file = targetFile;
+			
+			// Delete backup file
+			if (renamedFile) {
+				renamedFile.remove(false);
+			}
+		}
+		// Rename file to filtered name if necessary
+		else if (file.leafName != newName) {
+			Zotero.debug("Renaming file '" + file.leafName + "' to '" + newName + "'");
+			file.moveTo(null, newName);
+		}
+	}
+	catch (e) {
+		Zotero.logError(e);
+		return false;
 	}
 	
 	var path = Zotero.Attachments.getPath(file, linkMode);
@@ -3128,7 +3165,7 @@ Zotero.Item.prototype.relinkAttachmentFile = function(file, skipItemUpdate) {
 		skipClientDateModifiedUpdate: skipItemUpdate
 	});
 	
-	return false;
+	return true;
 }
 
 
@@ -3342,7 +3379,8 @@ Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
 	
 	var sql = "SELECT path FROM itemAttachments WHERE itemID=?";
 	var path = Zotero.DB.valueQuery(sql, this.id);
-	if (!path) {
+	// Ignore .zotero* files that were relinked before we started blocking them
+	if (!path || path.startsWith('.zotero')) {
 		path = '';
 	}
 	this._attachmentPath = path;

@@ -3116,8 +3116,16 @@ var ZoteroPane = new function()
 				var attachmentID;
 				if(link)
 					attachmentID = Zotero.Attachments.linkFromFile(file, id);
-				else
+				else {
+					if (file.leafName.endsWith(".lnk")) {
+						let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						.getService(Components.interfaces.nsIWindowMediator);
+						let win = wm.getMostRecentWindow("navigator:browser");
+						win.ZoteroPane.displayCannotAddShortcutMessage(file.path);
+						continue;
+					}
 					attachmentID = Zotero.Attachments.importFromFile(file, id, libraryID);
+				}
 			
 				if(attachmentID && !id)
 				{
@@ -3757,6 +3765,16 @@ var ZoteroPane = new function()
 	}
 	
 	
+	// TODO: Figure out a functioning way to get the original path and just copy the real file
+	this.displayCannotAddShortcutMessage = function (path) {
+		Zotero.alert(
+			null,
+			Zotero.getString("general.error"),
+			Zotero.getString("file.error.cannotAddShortcut") + (path ? "\n\n" + path : "")
+		);
+	}
+	
+	
 	function showAttachmentNotFoundDialog(itemID, noLocate) {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
@@ -3951,25 +3969,43 @@ var ZoteroPane = new function()
 			throw('Item ' + itemID + ' not found in ZoteroPane_Local.relinkAttachment()');
 		}
 		
-		var nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-					.createInstance(nsIFilePicker);
-		fp.init(window, Zotero.getString('pane.item.attachments.select'), nsIFilePicker.modeOpen);
-		
-		
-		var file = item.getFile(false, true);
-		var dir = Zotero.File.getClosestDirectory(file);
-		if (dir) {
-			dir.QueryInterface(Components.interfaces.nsILocalFile);
-			fp.displayDirectory = dir;
-		}
-		
-		fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
-		
-		if (fp.show() == nsIFilePicker.returnOK) {
-			var file = fp.file;
-			file.QueryInterface(Components.interfaces.nsILocalFile);
-			item.relinkAttachmentFile(file);
+		while (true) {
+			var nsIFilePicker = Components.interfaces.nsIFilePicker;
+			var fp = Components.classes["@mozilla.org/filepicker;1"]
+						.createInstance(nsIFilePicker);
+			fp.init(window, Zotero.getString('pane.item.attachments.select'), nsIFilePicker.modeOpen);
+			
+			
+			var file = item.getFile(false, true);
+			var dir = Zotero.File.getClosestDirectory(file);
+			if (dir) {
+				dir.QueryInterface(Components.interfaces.nsILocalFile);
+				fp.displayDirectory = dir;
+			}
+			
+			fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
+			
+			if (fp.show() == nsIFilePicker.returnOK) {
+				let file = fp.file;
+				file.QueryInterface(Components.interfaces.nsILocalFile);
+				
+				// Disallow hidden files
+				// TODO: Display a message
+				if (file.leafName.startsWith('.')) {
+					continue;
+				}
+				
+				// Disallow Windows shortcuts
+				if (file.leafName.endsWith(".lnk")) {
+					this.displayCannotAddShortcutMessage(file.path);
+					continue;
+				}
+				
+				item.relinkAttachmentFile(file);
+				break;
+			}
+			
+			break;
 		}
 	}
 	

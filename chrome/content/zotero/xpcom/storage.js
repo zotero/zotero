@@ -1486,6 +1486,10 @@ Zotero.Sync.Storage = new function () {
 		if (!file) {
 			throw ("Empty path for item " + item.key + " in " + funcName);
 		}
+		// Don't save Windows aliases
+		if (file.leafName.endsWith('.lnk')) {
+			return false;
+		}
 		
 		var fileName = file.leafName;
 		var renamed = false;
@@ -1899,8 +1903,9 @@ Zotero.Sync.Storage = new function () {
 			params.push(Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD);
 		}
 		sql += ") "
-			// Skip attachments with empty path, which can't be saved
-			+ "AND path!=''";
+			// Skip attachments with empty path, which can't be saved, and files with .zotero*
+			// paths, which have somehow ended up in some users' libraries
+			+ "AND path!='' AND path NOT LIKE 'storage:.zotero%'";
 		var itemIDs = Zotero.DB.columnQuery(sql, params);
 		if (!itemIDs) {
 			return [];
