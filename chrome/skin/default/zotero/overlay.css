@@ -1,13 +1,3 @@
-#zotero-status-image {
-	width: 16px;
-	height: 16px;
-	margin-right: 3px;
-}
-
-#zotero-status-image:not(.translate):not(:hover) {
-	filter: grayscale(100%);
-}
-
 #zotero-pane
 {
 	min-height: 32px; /* must match value in ZoteroPane.updateTagSelectorSize() */

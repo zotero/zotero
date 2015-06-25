@@ -441,14 +441,6 @@ var Zotero_Browser = new function() {
 				button.tooltipText = tooltiptext;
 				if (state == tab.CAPTURE_STATE_TRANSLATABLE) {
 					button.classList.add('translate');
-					
-					// Show guidance panel if necessary
-					if (inToolbar) {
-						button.addEventListener("load", function() {
-							document.getElementById("zotero-status-image-guidance").show();
-						});
-					}
-					// TODO: Different guidance for web pages?
 				}
 				else {
 					button.classList.remove('translate');

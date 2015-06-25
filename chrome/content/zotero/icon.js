@@ -61,9 +61,10 @@ CustomizableUI.addListener({
 			var shortcut = Zotero.getString(
 					Zotero.isMac ? "general.keys.cmdShift" : "general.keys.ctrlShift"
 				) + Zotero.Prefs.get("keys.openZotero");
-			document.getElementById("zotero-toolbar-button-guidance").show(
-				null, Zotero.getString(property, shortcut)
-			);
+			document.getElementById("zotero-main-button-guidance").show({
+				text: Zotero.getString(property, shortcut)
+			});
+			document.getElementById("zotero-save-button-guidance").show();
 		}
 		else if (id == getSingleID('save')) {
 			Zotero_Browser.updateStatus();

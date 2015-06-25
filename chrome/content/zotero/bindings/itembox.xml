@@ -1874,10 +1874,14 @@
 					if(field === 'creator') {
 						// Reset creator mode settings here so that flex attribute gets reset
 						this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
-						
+						Zotero.debug("HERE");
 						if(Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
+						Zotero.debug("YES");
 							var creatorTypeLabels = document.getAnonymousNodes(this)[0].getElementsByClassName("creator-type-label");
-							document.getElementById("zotero-author-guidance").show(creatorTypeLabels[creatorTypeLabels.length-1]);
+							Zotero.debug(creatorTypeLabels[creatorTypeLabels.length-1] + "");
+							document.getElementById("zotero-author-guidance").show({
+								forEl: creatorTypeLabels[creatorTypeLabels.length-1]
+							});
 						}
 					}
 					
