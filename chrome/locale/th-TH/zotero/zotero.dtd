@@ -165,6 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "สร้างบรรณานุกรม">
 <!ENTITY zotero.bibliography.style.label "รูปแบบการอ้างอิง:">
+<!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Output Mode:">
 <!ENTITY zotero.bibliography.bibliography "Bibliography">
 <!ENTITY zotero.bibliography.outputMethod "Output Method:">

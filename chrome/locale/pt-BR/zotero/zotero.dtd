@@ -125,34 +125,34 @@
 <!ENTITY zotero.item.textTransform "Transformar o texto">
 <!ENTITY zotero.item.textTransform.titlecase "Iniciais Em Maiúsculo">
 <!ENTITY zotero.item.textTransform.sentencecase "Maiúscula no início da frase">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Trocar Primeiro/Último Nomes">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Inverter Primeiro/Último Nomes">
 <!ENTITY zotero.item.viewOnline "Ver Online">
 <!ENTITY zotero.item.copyAsURL "Copiar como URL">
 
 <!ENTITY zotero.toolbar.newNote "Nova nota">
 <!ENTITY zotero.toolbar.note.standalone "Nova nota standalone">
 <!ENTITY zotero.toolbar.note.child "Adicionar nota filha">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
+<!ENTITY zotero.toolbar.lookup "Procurar por identificador...">
 <!ENTITY zotero.toolbar.attachment.linked "Link para arquivo...">
 <!ENTITY zotero.toolbar.attachment.add "Armazenar copiar de arquivo...">
-<!ENTITY zotero.toolbar.attachment.weblink "Salvar link para página corrente">
-<!ENTITY zotero.toolbar.attachment.snapshot "Gerar imagem da página corrente">
+<!ENTITY zotero.toolbar.attachment.weblink "Salvar link para página atual">
+<!ENTITY zotero.toolbar.attachment.snapshot "Gerar imagem da página atual">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Não mostrar tags">
 <!ENTITY zotero.tagSelector.filter "Filtro:">
-<!ENTITY zotero.tagSelector.showAutomatic "Show automatic">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
+<!ENTITY zotero.tagSelector.showAutomatic "Mostrar automaticamente">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Mostrar todos os rótulos nessa biblioteca">
 <!ENTITY zotero.tagSelector.selectVisible "Marcar visíveis">
 <!ENTITY zotero.tagSelector.clearVisible "Desmarcar visíveis">
 <!ENTITY zotero.tagSelector.clearAll "Desmarcar tudo">
 <!ENTITY zotero.tagSelector.assignColor "Atribuir cor...">
-<!ENTITY zotero.tagSelector.renameTag "Renomear tag...">
-<!ENTITY zotero.tagSelector.deleteTag "Apagar tag...">
+<!ENTITY zotero.tagSelector.renameTag "Renomear rótulo...">
+<!ENTITY zotero.tagSelector.deleteTag "Apagar rótulo...">
 
 <!ENTITY zotero.tagColorChooser.title "Escolha um rótulo de cor e posição">
 <!ENTITY zotero.tagColorChooser.color "Cor:">
 <!ENTITY zotero.tagColorChooser.position "Posição:">
-<!ENTITY zotero.tagColorChooser.setColor "Estabeleça a cor">
+<!ENTITY zotero.tagColorChooser.setColor "Configurar a cor">
 <!ENTITY zotero.tagColorChooser.removeColor "Remover a cor">
 
 <!ENTITY zotero.lookup.description "Inserir ISBN, DOI, ou PMID para buscar na caixa abaixo">
@@ -163,8 +163,9 @@
 <!ENTITY zotero.selectitems.cancel.label "Cancelar">
 <!ENTITY zotero.selectitems.select.label "Confirmar">
 
-<!ENTITY zotero.bibliography.title "Criar bibliografia">
+<!ENTITY zotero.bibliography.title "Criar Citação/Bibliografia">
 <!ENTITY zotero.bibliography.style.label "Estilo de citação:">
+<!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Modo de saída:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografia">
 <!ENTITY zotero.bibliography.outputMethod "Método de saída:">
@@ -176,7 +177,7 @@
 <!ENTITY zotero.integration.docPrefs.title "Preferências do documento">
 <!ENTITY zotero.integration.addEditCitation.title "Adicionar/Modificar citação">
 <!ENTITY zotero.integration.editBibliography.title "Editar bibliografia">
-<!ENTITY zotero.integration.quickFormatDialog.title "Formato de citação">
+<!ENTITY zotero.integration.quickFormatDialog.title "Formatar citação rapidamente">
 
 <!ENTITY zotero.progress.title "Progresso">
 
@@ -224,7 +225,7 @@
 <!ENTITY zotero.integration.showEditor.label "Mostrar editor">
 <!ENTITY zotero.integration.classicView.label "Visão clássica">
 
-<!ENTITY zotero.integration.references.label "eferências na bibliografia">
+<!ENTITY zotero.integration.references.label "Referências na Bibliografia">
 
 <!ENTITY zotero.sync.button "Sincronizar com o servidor Zotero">
 <!ENTITY zotero.sync.error "Erro de sincronização">
@@ -232,15 +233,15 @@
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "O seguinte marcador em sua biblioteca Zotero é longo demais para ser sincronizado com o servidor:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "O seguinte rótulo em sua biblioteca Zotero é longo demais para ser sincronizado com o servidor:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Marcadores sincronizados devem ter menos de 256 caracteres.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Você pode dividir o marcador em marcadores múltiplos, editar o marcador manualmente para torná-lo mais curto, ou excluí-lo">
 <!ENTITY zotero.sync.longTagFixer.split "Dividir">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Dividir no">
 <!ENTITY zotero.sync.longTagFixer.character "caractere">
 <!ENTITY zotero.sync.longTagFixer.characters "caracteres">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Marcadores desmarcados não serão salvos.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "O marcador será excluído de todos os itens.">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Rótulos desmarcados não serão salvos.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "O rótulo será excluído de todos os itens.">
 
 <!ENTITY zotero.merge.title "Conflito de resolução">
 <!ENTITY zotero.merge.of "de">
@@ -252,17 +253,17 @@
 <!ENTITY zotero.proxy.recognized.disable.label "Não redirecionar automaticamente os pedidos através de proxies previamente reconhecidas">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorar">
 
-<!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
+<!ENTITY zotero.recognizePDF.recognizing.label "Recuperando Metadata...">
 <!ENTITY zotero.recognizePDF.cancel.label "Cancelar">
 <!ENTITY zotero.recognizePDF.pdfName.label "Nome do PDF">
-<!ENTITY zotero.recognizePDF.itemName.label "Nome do documento">
+<!ENTITY zotero.recognizePDF.itemName.label "Nome do item">
 
-<!ENTITY zotero.rtfScan.title "Análise do arquivo RTF">
+<!ENTITY zotero.rtfScan.title "Análise de arquivo RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Cancelar">
 <!ENTITY zotero.rtfScan.citation.label "Citação">
-<!ENTITY zotero.rtfScan.itemName.label "Nome do documento">
+<!ENTITY zotero.rtfScan.itemName.label "Nome do item">
 <!ENTITY zotero.rtfScan.unmappedCitations.label "Citações não mapeadas">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Citação ambiguas">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Citações ambiguas">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Citações mapeadas">
 <!ENTITY zotero.rtfScan.introPage.label "Introdução">
 <!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">

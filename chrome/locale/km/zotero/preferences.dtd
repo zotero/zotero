@@ -107,6 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "វិស័យ/ផ្លូវ">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(ឧទាហរណ៍ៈ wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "ទម្រង់ទិន្នផល">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "ចម្លងលឿនមិនអាចដំណើរការបាន នៅពេលទាញយកឯកសារច្រើនជាង">
 
 <!ENTITY zotero.preferences.prefpane.cite "អាគតដ្ឋាន">

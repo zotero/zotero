@@ -165,6 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Crear bibliografía">
 <!ENTITY zotero.bibliography.style.label "Estilo de cita:">
+<!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Modo de salida:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografía">
 <!ENTITY zotero.bibliography.outputMethod "Método de salida:">

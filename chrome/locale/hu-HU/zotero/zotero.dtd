@@ -165,6 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Bibliográfia létrehozása">
 <!ENTITY zotero.bibliography.style.label "Hivatkozási stílus:">
+<!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Kimeneti mód:">
 <!ENTITY zotero.bibliography.bibliography "Bibliográfia">
 <!ENTITY zotero.bibliography.outputMethod "Kimeneti metódus:">

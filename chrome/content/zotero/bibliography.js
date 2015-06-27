@@ -34,16 +34,13 @@
 
 var Zotero_File_Interface_Bibliography = new function() {
 	var _io, _saveStyle;
-	
-	this.init = init;
-	this.styleChanged = styleChanged;
-	this.acceptSelection = acceptSelection;
+	var lastSelectedLocale; // Only changes when explicitly selected
 	
 	/*
 	 * Initialize some variables and prepare event listeners for when chrome is done
 	 * loading
 	 */
-	function init() {
+	this.init = function () {
 		// Set font size from pref
 		// Affects bibliography.xul and integrationDocPrefs.xul
 		var bibContainer = document.getElementById("zotero-bibliography-container");
@@ -59,18 +56,18 @@ var Zotero_File_Interface_Bibliography = new function() {
 		}
 		
 		var listbox = document.getElementById("style-listbox");
-		var styles = Zotero.Styles.getVisible();
 		
-		// if no style is set, get the last style used
+		// if no style is requested, get the last style used
 		if(!_io.style) {
 			_io.style = Zotero.Prefs.get("export.lastStyle");
 			_saveStyle = true;
 		}
 		
 		// add styles to list
+		var styles = Zotero.Styles.getVisible();
 		var index = 0;
 		var nStyles = styles.length;
-		var selectIndex = -1;
+		var selectIndex = null;
 		for(var i=0; i<nStyles; i++) {
 			var itemNode = document.createElement("listitem");
 			itemNode.setAttribute("value", styles[i].styleID);
@@ -83,14 +80,29 @@ var Zotero_File_Interface_Bibliography = new function() {
 			index++;
 		}
 		
-		if (selectIndex < 1) {
+		let requestedLocale;
+		if (selectIndex === null) {
+			// Requested style not found in list, pre-select first style
 			selectIndex = 0;
+		} else {
+			requestedLocale = _io.locale;
 		}
+		
+		let style = styles[selectIndex];
+		lastSelectedLocale = Zotero.Prefs.get("export.lastLocale");
+		if (requestedLocale && style && !style.locale) {
+			// pre-select supplied locale
+			lastSelectedLocale = requestedLocale;
+		}
+		
+		// add locales to list
+		Zotero.Styles.populateLocaleList(document.getElementById("locale-menu"));
 		
 		// Has to be async to work properly
 		window.setTimeout(function () {
 			listbox.ensureIndexIsVisible(selectIndex);
 			listbox.selectedIndex = selectIndex;
+			Zotero_File_Interface_Bibliography.styleChanged();
 		}, 0);
 		
 		// ONLY FOR bibliography.xul: export options
@@ -149,22 +161,24 @@ var Zotero_File_Interface_Bibliography = new function() {
 		
 		// set style to false, in case this is cancelled
 		_io.style = false;
-	}
-	
+	};
+
+	/*
+	 * Called when locale is changed
+	 */
+	this.localeChanged = function (selectedValue) {
+		lastSelectedLocale = selectedValue;
+	};
+
 	/*
 	 * Called when style is changed
 	 */
-	function styleChanged(index) {
-		// When called from init(), selectedItem isn't yet set
-		if (index != undefined) {
-			var selectedItem = document.getElementById("style-listbox").getItemAtIndex(index);
-		}
-		else {
-			var selectedItem = document.getElementById("style-listbox").selectedItem;
-		}
+	this.styleChanged = function () {
+		var selectedItem = document.getElementById("style-listbox").selectedItem;
+		var selectedStyle = selectedItem.getAttribute('value');
+		var selectedStyleObj = Zotero.Styles.get(selectedStyle);
 		
-		var selectedStyle = selectedItem.getAttribute('value'),
-			selectedStyleObj = Zotero.Styles.get(selectedStyle);
+		updateLocaleMenu(selectedStyleObj);
 		
 		//
 		// For integrationDocPrefs.xul
@@ -195,20 +209,33 @@ var Zotero_File_Interface_Bibliography = new function() {
 		
 		// Change label to "Citation" or "Note" depending on style class
 		if(document.getElementById("citations")) {
+			let label = "";
 			if(Zotero.Styles.get(selectedStyle).class == "note") {
-				var label = Zotero.getString('citation.notes');
+				label = Zotero.getString('citation.notes');
 			} else {
-				var label = Zotero.getString('citation.citations');
+				label = Zotero.getString('citation.citations');
 			}
 			document.getElementById("citations").label = label;
 		}
 
 		window.sizeToContent();
+	};
+
+	/*
+	 * Update locale menulist when style is changed
+	 */
+	function updateLocaleMenu(selectedStyle) {
+		Zotero.Styles.updateLocaleList(
+			document.getElementById("locale-menu"),
+			selectedStyle,
+			lastSelectedLocale
+		);
 	}
 
-	function acceptSelection() {
+	this.acceptSelection = function () {
 		// collect code
-		_io.style = document.getElementById("style-listbox").selectedItem.value;
+		_io.style = document.getElementById("style-listbox").value;
+		_io.locale = document.getElementById("locale-menu").value;
 		if(document.getElementById("output-method-radio")) {
 			// collect settings
 			_io.mode = document.getElementById("output-mode-radio").selectedItem.id;
@@ -235,5 +262,8 @@ var Zotero_File_Interface_Bibliography = new function() {
 		if(_saveStyle) {
 			Zotero.Prefs.set("export.lastStyle", _io.style);
 		}
-	}
+		
+		// save locale
+		Zotero.Prefs.set("export.lastLocale", lastSelectedLocale);
+	};
 }

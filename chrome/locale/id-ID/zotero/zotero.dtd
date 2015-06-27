@@ -165,6 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Buat Bibliografi">
 <!ENTITY zotero.bibliography.style.label "Gaya Sitasi:">
+<!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Mode Keluaran:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografi">
 <!ENTITY zotero.bibliography.outputMethod "Metode keluaran:">

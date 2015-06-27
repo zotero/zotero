@@ -199,7 +199,7 @@ var wpdDOMSaver = {
 			// Changed by Dan for Zotero
 			"script": true, // no scripts
 
-			"encodeUTF8": false, // write the DOM Tree as UTF-8 and change the charset entry of the document
+			"encodeUTF8": true, // write the DOM Tree as UTF-8 and change the charset entry of the document
 			"metainfo": true, // include meta tags with URL and date/time information
 			"metacharset": false // if the meta charset is defined inside html override document charset
 			//"xtagging"    : true      // include a x tag around each word

@@ -54,7 +54,9 @@ Zotero.Attachments = new function(){
 		if (!file.isFile()) {
 			throw new Error("'" + file.leafName + "' must be a file");
 		}
-		
+		if (file.leafName.endsWith(".lnk")) {
+			throw new Error("Cannot add Windows shortcut");
+		}
 		if (parentItemID && collections) {
 			throw new Error("parentItemID and collections cannot both be provided");
 		}
@@ -227,7 +229,7 @@ Zotero.Attachments = new function(){
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
 	this.importFromURL = Zotero.Promise.coroutine(function* (options) {
-		Zotero.debug('Importing attachment from URL');
+		Zotero.debug('Importing attachment from URL ' + url);
 		
 		var libraryID = options.libraryID;
 		var url = options.url;
@@ -641,7 +643,7 @@ Zotero.Attachments = new function(){
 			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
 			attachmentItem.parentID = parentItemID;
 			attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
-			attachmentItem.attachmentCharset = document.characterSet;
+			attachmentItem.attachmentCharset = 'utf-8'; // WPD will output UTF-8
 			attachmentItem.attachmentContentType = contentType;
 			if (collections) {
 				attachmentItem.setCollections(collections);

@@ -89,7 +89,12 @@
 			<caption label="&zotero.bibliography.style.label;"/>
 			<listbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()" flex="1"/>
 		</groupbox>
-		
+		<groupbox>
+			<hbox align="center">
+				<caption label="&zotero.bibliography.locale.label;"/>
+				<menulist id="locale-menu" oncommand="Zotero_File_Interface_Bibliography.localeChanged(this.value)"/>
+			</hbox>
+		</groupbox>
 		<groupbox>
 			<caption label="&zotero.integration.prefs.displayAs.label;"/>
 			<radiogroup id="displayAs" orient="horizontal">

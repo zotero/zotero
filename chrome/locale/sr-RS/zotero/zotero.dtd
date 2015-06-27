@@ -165,6 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Направи библиографију">
 <!ENTITY zotero.bibliography.style.label "Стил цитата:">
+<!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Output Mode:">
 <!ENTITY zotero.bibliography.bibliography "Bibliography">
 <!ENTITY zotero.bibliography.outputMethod "Output Method:">

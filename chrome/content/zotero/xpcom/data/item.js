@@ -358,6 +358,13 @@ Zotero.Item.prototype._parseRowData = function(row) {
 				val = val !== null ? parseInt(val) : false;
 				break;
 			
+			case 'attachmentPath':
+				// Ignore .zotero* files that were relinked before we started blocking them
+				if (!val || val.startsWith('.zotero')) {
+					val = '';
+				}
+				break;
+			
 			// Boolean
 			case 'synced':
 			case 'deleted':
@@ -2230,6 +2237,11 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* (ski
 			if (Zotero.isWin || path.indexOf('/') != -1) {
 				path = Zotero.File.getValidFileName(path, true);
 			}
+			// Ignore .zotero* files that were relinked before we started blocking them
+			if (path.startsWith(".zotero")) {
+				Zotero.debug("Ignoring attachment file " + path, 2);
+				return false;
+			}
 			var file = Zotero.Attachments.getStorageDirectory(this);
 			file.QueryInterface(Components.interfaces.nsILocalFile);
 			file.setRelativeDescriptor(file, path);
@@ -2496,26 +2508,56 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 	}
 	
 	var fileName = OS.Path.basename(path);
-	
+	if (fileName.endsWith(".lnk")) {
+		throw new Error("Cannot relink to Windows shortcut");
+	}
 	var newName = Zotero.File.getValidFileName(fileName);
 	if (!newName) {
 		throw new Error("No valid characters in filename after filtering");
 	}
 	
-	// Rename file to filtered name if necessary
-	if (fileName != newName) {
-		Zotero.debug("Renaming file '" + fileName + "' to '" + newName + "'");
-		OS.File.move(path, OS.Path.join(OS.Path.dirname(path), newName), { noOverwrite: true });
+	var newPath = OS.Path.join(OS.Path.dirname(path), newName);
+	
+	try {
+		// If selected file isn't in the attachment's storage directory,
+		// copy it in and use that one instead
+		var storageDir = Zotero.Attachments.getStorageDirectory(this.id).path;
+		if (this.isImportedAttachment() && OS.Path.dirname(path) != storageDir) {
+			// If file with same name already exists in the storage directory,
+			// move it out of the way
+			let deleteBackup = false;;
+			if (yield OS.File.exists(newPath)) {
+				deleteBackup = true;
+				yield OS.File.move(newPath, newPath + ".bak");
+			}
+			
+			let newFile = Zotero.File.copyToUnique(path, newPath);
+			newPath = newFile.path;
+			
+			// Delete backup file
+			if (deleteBackup) {
+				yield OS.File.remove(newPath + ".bak");
+			}
+		}
+		// Rename file to filtered name if necessary
+		else if (fileName != newName) {
+			Zotero.debug("Renaming file '" + fileName + "' to '" + newName + "'");
+			OS.File.move(path, newPath, { noOverwrite: true });
+		}
+	}
+	catch (e) {
+		Zotero.logError(e);
+		return false;
 	}
 	
-	this.attachmentPath = Zotero.Attachments.getPath(file, linkMode);
+	this.attachmentPath = Zotero.Attachments.getPath(Zotero.File.pathToFile(newPath), linkMode);
 	
 	yield this.save({
 		skipDateModifiedUpdate: true,
 		skipClientDateModifiedUpdate: skipItemUpdate
 	});
 	
-	return false;
+	return true;
 });
 
 
@@ -4010,7 +4052,7 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options) {
 		// Notes and embedded attachment notes
 		yield this.loadNote();
 		let note = this.getNote();
-		if (note !== "" || mode == 'full') {
+		if (note !== "" || mode == 'full' || (mode == 'new' && this.isNote())) {
 			obj.note = note;
 		}
 		

@@ -165,6 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Skapa citering/källförteckning">
 <!ENTITY zotero.bibliography.style.label "Referensstil">
+<!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Utmatningsläge">
 <!ENTITY zotero.bibliography.bibliography "Källförteckning">
 <!ENTITY zotero.bibliography.outputMethod "Utmatningsmetod">
@@ -200,9 +201,9 @@
 <!ENTITY zotero.richText.superscript.label "Upphöjd">
 <!ENTITY zotero.richText.subscript.label "Nedsänkt">
 
-<!ENTITY zotero.annotate.toolbar.add.label "Lägg till anteckning">
-<!ENTITY zotero.annotate.toolbar.collapse.label "Göm alla anteckningar">
-<!ENTITY zotero.annotate.toolbar.expand.label "Visa alla anteckningar">
+<!ENTITY zotero.annotate.toolbar.add.label "Lägg till kommentar">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Göm alla kommentarer">
+<!ENTITY zotero.annotate.toolbar.expand.label "Visa alla kommentarer">
 <!ENTITY zotero.annotate.toolbar.highlight.label "Framhäv text">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Sluta framhäv text">
 

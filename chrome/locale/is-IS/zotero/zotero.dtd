@@ -165,6 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Skapa tilvísun/heimildaskrá">
 <!ENTITY zotero.bibliography.style.label "Tegund tilvísunar:">
+<!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Útskriftarhamur:">
 <!ENTITY zotero.bibliography.bibliography "Heimildaskrá">
 <!ENTITY zotero.bibliography.outputMethod "Útskriftaraðferð:">

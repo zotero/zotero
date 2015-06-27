@@ -49,9 +49,12 @@
 		
 		<stack id="zotero-pane-stack" persist="savedHeight" savedHeight="300" hidden="true"/>
 		
-		<zoteroguidancepanel id="zotero-toolbar-button-guidance" about="toolbarButton" for="zotero-toolbar-main-button"
-			position="bottomcenter topleft" delay="2000" foregroundonly="true"/>
-		<zoteroguidancepanel id="zotero-status-image-guidance" about="saveIcon" for="zotero-toolbar-save-button" x="17"/>
+		<zoteroguidancepanel id="zotero-main-button-guidance" about="toolbarButton" for="zotero-toolbar-main-button"
+			position="bottomcenter topleft" delay="2000" foregroundonly="true" noautohide="true"
+			hideonpagechange="true" forward="zotero-save-button-guidance"/>
+		<zoteroguidancepanel id="zotero-save-button-guidance" about="saveButton" for="zotero-toolbar-save-button"
+			position="bottomcenter topleft" x="-8" delay="2000" foregroundonly="true" noautohide="true"
+			hideonpagechange="true"/>
 		
 		<!-- Annotation Toolbar -->
 		<toolbar id="zotero-annotate-tb" crop="end" insertbefore="content" hidden="true">

@@ -165,6 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Luo kirjallisuusluettelo">
 <!ENTITY zotero.bibliography.style.label "Sitaattityyli:">
+<!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Luettelotyyppi:">
 <!ENTITY zotero.bibliography.bibliography "Lähdeluettelo">
 <!ENTITY zotero.bibliography.outputMethod "Vientitapa:">

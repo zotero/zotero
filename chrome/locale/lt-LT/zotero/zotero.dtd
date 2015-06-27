@@ -165,6 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Sukurti citavimą/bibliografiją">
 <!ENTITY zotero.bibliography.style.label "Citavimo stilius:">
+<!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Išvedimo veiksena:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografija">
 <!ENTITY zotero.bibliography.outputMethod "Išvedimo būdas:">

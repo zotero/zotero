@@ -1925,24 +1925,27 @@ var ZoteroPane = new function()
 		}
 		
 		var url = (window.content && window.content.location ? window.content.location.href : null);
-		var [mode, format] = (yield Zotero.QuickCopy.getFormatFromURL(url)).split('=');
-		var [mode, contentType] = mode.split('/');
+		var format = Zotero.QuickCopy.getFormatFromURL(url);
+		format = Zotero.QuickCopy.unserializeSetting(format);
 		
-		if (mode == 'bibliography') {
+		// determine locale preference
+		var locale = format.locale ? format.locale : Zotero.Prefs.get('export.quickCopy.locale');
+		
+		if (format.mode == 'bibliography') {
 			if (asCitations) {
-				Zotero_File_Interface.copyCitationToClipboard(items, format, contentType == 'html');
+				Zotero_File_Interface.copyCitationToClipboard(items, format.id, locale, format.contentType == 'html');
 			}
 			else {
-				Zotero_File_Interface.copyItemsToClipboard(items, format, contentType == 'html');
+				Zotero_File_Interface.copyItemsToClipboard(items, format.id, locale, format.contentType == 'html');
 			}
 		}
-		else if (mode == 'export') {
+		else if (format.mode == 'export') {
 			// Copy citations doesn't work in export mode
 			if (asCitations) {
 				return;
 			}
 			else {
-				Zotero_File_Interface.exportItemsToClipboard(items, format);
+				Zotero_File_Interface.exportItemsToClipboard(items, format.id);
 			}
 		}
 	}
@@ -3239,6 +3242,7 @@ var ZoteroPane = new function()
 			while (files.hasMoreElements()){
 				var file = files.getNext();
 				file.QueryInterface(Components.interfaces.nsILocalFile);
+				var attachmentID;
 				if (link) {
 					yield Zotero.Attachments.linkFromFile({
 						file: file,
@@ -3247,6 +3251,13 @@ var ZoteroPane = new function()
 					});
 				}
 				else {
+					if (file.leafName.endsWith(".lnk")) {
+						let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						.getService(Components.interfaces.nsIWindowMediator);
+						let win = wm.getMostRecentWindow("navigator:browser");
+						win.ZoteroPane.displayCannotAddShortcutMessage(file.path);
+						continue;
+					}
 					yield Zotero.Attachments.importFromFile({
 						file: file,
 						libraryID: libraryID,
@@ -3910,6 +3921,16 @@ var ZoteroPane = new function()
 	}
 	
 	
+	// TODO: Figure out a functioning way to get the original path and just copy the real file
+	this.displayCannotAddShortcutMessage = function (path) {
+		Zotero.alert(
+			null,
+			Zotero.getString("general.error"),
+			Zotero.getString("file.error.cannotAddShortcut") + (path ? "\n\n" + path : "")
+		);
+	}
+	
+	
 	function showAttachmentNotFoundDialog(itemID, noLocate) {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
@@ -4106,25 +4127,43 @@ var ZoteroPane = new function()
 			throw('Item ' + itemID + ' not found in ZoteroPane_Local.relinkAttachment()');
 		}
 		
-		var nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-					.createInstance(nsIFilePicker);
-		fp.init(window, Zotero.getString('pane.item.attachments.select'), nsIFilePicker.modeOpen);
-		
-		
-		var file = item.getFile(false, true);
-		var dir = Zotero.File.getClosestDirectory(file);
-		if (dir) {
-			dir.QueryInterface(Components.interfaces.nsILocalFile);
-			fp.displayDirectory = dir;
-		}
-		
-		fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
-		
-		if (fp.show() == nsIFilePicker.returnOK) {
-			var file = fp.file;
-			file.QueryInterface(Components.interfaces.nsILocalFile);
-			item.relinkAttachmentFile(file);
+		while (true) {
+			var nsIFilePicker = Components.interfaces.nsIFilePicker;
+			var fp = Components.classes["@mozilla.org/filepicker;1"]
+						.createInstance(nsIFilePicker);
+			fp.init(window, Zotero.getString('pane.item.attachments.select'), nsIFilePicker.modeOpen);
+			
+			
+			var file = item.getFile(false, true);
+			var dir = Zotero.File.getClosestDirectory(file);
+			if (dir) {
+				dir.QueryInterface(Components.interfaces.nsILocalFile);
+				fp.displayDirectory = dir;
+			}
+			
+			fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
+			
+			if (fp.show() == nsIFilePicker.returnOK) {
+				let file = fp.file;
+				file.QueryInterface(Components.interfaces.nsILocalFile);
+				
+				// Disallow hidden files
+				// TODO: Display a message
+				if (file.leafName.startsWith('.')) {
+					continue;
+				}
+				
+				// Disallow Windows shortcuts
+				if (file.leafName.endsWith(".lnk")) {
+					this.displayCannotAddShortcutMessage(file.path);
+					continue;
+				}
+				
+				item.relinkAttachmentFile(file);
+				break;
+			}
+			
+			break;
 		}
 	});
 	

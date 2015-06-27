@@ -27,39 +27,32 @@ var Zotero_CSL_Editor = new function() {
 	this.init = init;
 	this.handleKeyPress = handleKeyPress;
 	this.loadCSL = loadCSL;
-	this.generateBibliography = generateBibliography;
-	this.refresh = refresh;
 	function init() {
-		var cslList = document.getElementById('zotero-csl-list');
-		if (cslList.getAttribute('initialized') == 'true') {
-			if (currentStyle) {
-				loadCSL(currentStyle);
-				refresh();
-			}
-			return;
-		}
+		Zotero.Styles.populateLocaleList(document.getElementById("locale-menu"));
 		
-		var rawDefaultStyle = Zotero.Prefs.get('export.quickCopy.setting');
-		var defaultStyle = Zotero.QuickCopy.stripContentType(rawDefaultStyle);
+		var cslList = document.getElementById('zotero-csl-list');
+		cslList.removeAllItems();
+		
+		var lastStyle = Zotero.Prefs.get('export.lastStyle');
 		
 		var styles = Zotero.Styles.getAll();
 		var currentStyle = null;
-		var listPos = 0;
 		for each(var style in styles) {
 			if (style.source) {
 				continue;
 			}
 			var item = cslList.appendItem(style.title, style.styleID);
-			if (!currentStyle || defaultStyle == ('bibliography=' + style.styleID)) {
-				currentStyle = style.styleID;
-				cslList.selectedIndex = listPos;
+			if (!currentStyle && lastStyle == style.styleID) {
+				currentStyle = style;
+				cslList.selectedItem = item;
 			}
-			listPos += 1;
 		}
+		
 		if (currentStyle) {
-			loadCSL(currentStyle);
-			refresh();
+			// Call asynchronously, see note in Zotero.Styles
+			window.setTimeout(this.onStyleSelected.bind(this, currentStyle.styleID), 1);
 		}
+		
 		var pageList = document.getElementById('zotero-csl-page-type');
 		var locators = Zotero.Cite.labels;
 		for each(var type in locators) {
@@ -69,13 +62,25 @@ var Zotero_CSL_Editor = new function() {
 		}
 		
 		pageList.selectedIndex = 0;
-		cslList.setAttribute('initialized', true);
 	}
-	function refresh() {
-		var editor = document.getElementById('zotero-csl-editor');
-		generateBibliography(editor.value);
-
+	
+	this.onStyleSelected = function(styleID) {
+		Zotero.Prefs.set('export.lastStyle', styleID);
+		let style = Zotero.Styles.get(styleID);
+		Zotero.Styles.updateLocaleList(
+			document.getElementById("locale-menu"),
+			style,
+			Zotero.Prefs.get('export.lastLocale')
+		);
+		
+		loadCSL(style.styleID);
+		this.refresh();
 	}
+	
+	this.refresh = function() {
+		this.generateBibliography(this.loadStyleFromEditor());
+	}
+	
 	this.save = function() {
 		var editor = document.getElementById('zotero-csl-editor');
 		var style = editor.value;
@@ -120,20 +125,52 @@ var Zotero_CSL_Editor = new function() {
 		document.getElementById('zotero-csl-list').value = cslID;
 	}
 	
+	this.loadStyleFromEditor = function() {
+		var styleObject;
+		try {
+			styleObject = new Zotero.Style(
+				document.getElementById('zotero-csl-editor').value
+			);
+		} catch(e) {
+			document.getElementById('zotero-csl-preview-box')
+				.contentDocument.documentElement.innerHTML = '<div>'
+					+ Zotero.getString('styles.editor.warning.parseError')
+					+ '</div><div>' + e + '</div>';
+			throw e;
+		}
+		
+		return styleObject;
+	}
 	
-	function generateBibliography(str) {
-		var editor = document.getElementById('zotero-csl-editor')
+	this.onStyleModified = function(str) {
+		document.getElementById('zotero-csl-list').selectedIndex = -1;
+		
+		let styleObject = this.loadStyleFromEditor();
+		
+		Zotero.Styles.updateLocaleList(
+			document.getElementById("locale-menu"),
+			styleObject,
+			Zotero.Prefs.get('export.lastLocale')
+		);
+		Zotero_CSL_Editor.generateBibliography(styleObject);
+	}
+	
+	this.generateBibliography = function(style) {
 		var iframe = document.getElementById('zotero-csl-preview-box');
 		
 		var items = Zotero.getActiveZoteroPane().getSelectedItems();
 		if (items.length == 0) {
-			iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">' + Zotero.getString('styles.editor.warning.noItems') + '</p></body></html>';
+			iframe.contentDocument.documentElement.innerHTML =
+				'<html><head><title></title></head><body><p style="color: red">'
+				+ Zotero.getString('styles.editor.warning.noItems')
+				+ '</p></body></html>';
 			return;
 		}
-		var styleObject, styleEngine;
+		
+		var selectedLocale = document.getElementById("locale-menu").value;
+		var styleEngine;
 		try {
-			styleObject = new Zotero.Style(str);
-			styleEngine = styleObject.getCiteProc();
+			styleEngine = style.getCiteProc(style.locale || selectedLocale);
 		} catch(e) {
 			iframe.contentDocument.documentElement.innerHTML = '<div>' + Zotero.getString('styles.editor.warning.parseError') + '</div><div>'+e+'</div>';
 			throw e;

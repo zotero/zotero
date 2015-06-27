@@ -165,6 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Verwijzing/Bibliografie aanmaken">
 <!ENTITY zotero.bibliography.style.label "Citeerstijl:">
+<!ENTITY zotero.bibliography.locale.label "Language:">
 <!ENTITY zotero.bibliography.outputMode "Weergavemodus:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografie">
 <!ENTITY zotero.bibliography.outputMethod "Weergavemethode:">

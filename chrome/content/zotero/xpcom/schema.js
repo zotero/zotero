@@ -1035,7 +1035,7 @@ Zotero.Schema = new function(){
 			}
 			
 			// Send list of installed styles
-			var styles = yield Zotero.Styles.getAll();
+			var styles = Zotero.Styles.getAll();
 			var styleTimestamps = [];
 			for (var id in styles) {
 				var updated = Zotero.Date.sqlToDate(styles[id].updated);

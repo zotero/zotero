@@ -51,6 +51,14 @@ Zotero.Styles = new function() {
 		var start = new Date;
 		_initialized = true;
 		
+		// Upgrade style locale prefs for 4.0.27
+		var bibliographyLocale = Zotero.Prefs.get("export.bibliographyLocale");
+		if (bibliographyLocale) {
+			Zotero.Prefs.set("export.lastLocale", bibliographyLocale);
+			Zotero.Prefs.set("export.quickCopy.locale", bibliographyLocale);
+			Zotero.Prefs.clear("export.bibliographyLocale");
+		}
+		
 		_styles = {};
 		_visibleStyles = [];
 		this.lastCSL = null;
@@ -65,8 +73,33 @@ Zotero.Styles = new function() {
 			num += yield _readStylesFromDirectory(hiddenDir, true);
 		}
 		
+		// Sort visible styles by title
+		_visibleStyles.sort(function(a, b) {
+			return a.title.localeCompare(b.title);
+		})
+		// .. and freeze, so they can be returned directly
+		_visibleStyles = Object.freeze(_visibleStyles);
+		
 		Zotero.debug("Cached " + num + " styles in " + (new Date - start) + " ms");
 		
+		// load available CSL locales
+		var localeFile = {};
+		var locales = {};
+		var primaryDialects = {};
+		var localesLocation = "chrome://zotero/content/locale/csl/locales.json";
+		localeFile = JSON.parse(yield Zotero.File.getContentsFromURLAsync(localesLocation));
+		
+		primaryDialects = localeFile["primary-dialects"];
+		
+		// only keep localized language name
+		for (let locale in localeFile["language-names"]) {
+			locales[locale] = localeFile["language-names"][locale][0];
+		}
+		
+		this.locales = locales;
+		this.primaryDialects = primaryDialects;
+		
+		// Load renamed styles
 		_renamedStyles = {};
 		yield Zotero.HTTP.request(
 			"GET",
@@ -161,24 +194,25 @@ Zotero.Styles = new function() {
 	
 	/**
 	 * Gets all visible styles
-	 * @return {Promise<Zotero.Style[]>} A promise for an array of Zotero.Style objects
+	 * @return {Zotero.Style[]} - An immutable array of Zotero.Style objects
 	 */
 	this.getVisible = function () {
-		return this.init().then(function () {
-			return _visibleStyles.slice(0);
-		});
+		if (!_initialized) {
+			throw new Zotero.Exception.UnloadedDataException("Styles not yet loaded", 'styles');
+		}
+		return _visibleStyles; // Immutable
 	}
 	
 	/**
 	 * Gets all styles
 	 *
-	 * @return {Promise<Object>} A promise for an object with style IDs for keys and
-	 *                           Zotero.Style objects for values
+	 * @return {Object} - An object with style IDs for keys and Zotero.Style objects for values
 	 */
 	this.getAll = function () {
-		return this.init().then(function () {
-			return _styles;
-		});
+		if (!_initialized) {
+			throw new Zotero.Exception.UnloadedDataException("Styles not yet loaded", 'styles');
+		}
+		return _styles;
 	}
 	
 	/**
@@ -313,7 +347,7 @@ Zotero.Styles = new function() {
 		
 		// also look for an existing style with the same title
 		if(!existingFile) {
-			let styles = yield Zotero.Styles.getAll();
+			let styles = Zotero.Styles.getAll();
 			for (let i in styles) {
 				let existingStyle = styles[i];
 				if(title === existingStyle.title) {
@@ -415,6 +449,104 @@ Zotero.Styles = new function() {
 			}
 		}
 	});
+	
+	/**
+	 * Populate menulist with locales
+	 * 
+	 * @param {xul:menulist} menulist
+	 * @return {Promise}
+	 */
+	this.populateLocaleList = function (menulist) {
+		if (!_initialized) {
+			throw new Zotero.Exception.UnloadedDataException("Styles not yet loaded", 'styles');
+		}
+		
+		// Reset menulist
+		menulist.selectedItem = null;
+		menulist.removeAllItems();
+		
+		let fallbackLocale = Zotero.Styles.primaryDialects[Zotero.locale]
+			|| Zotero.locale;
+		
+		let menuLocales = Zotero.Utilities.deepCopy(Zotero.Styles.locales);
+		let menuLocalesKeys = Object.keys(menuLocales).sort();
+		
+		// Make sure that client locale is always available as a choice
+		if (fallbackLocale && !(fallbackLocale in menuLocales)) {
+			menuLocales[fallbackLocale] = fallbackLocale;
+			menuLocalesKeys.unshift(fallbackLocale);
+		}
+		
+		for (let i=0; i<menuLocalesKeys.length; i++) {
+			menulist.appendItem(menuLocales[menuLocalesKeys[i]], menuLocalesKeys[i]);
+		}
+	}
+	
+	/**
+	 * Update locale list state based on style selection.
+	 *   For styles that do not define a locale, enable the list and select a
+	 *     preferred locale.
+	 *   For styles that define a locale, disable the list and select the
+	 *     specified locale. If the locale does not exist, it is added to the list.
+	 *   If null is passed instead of style, the list and its label are disabled,
+	 *    and set to blank value.
+	 * 
+	 * Note: Do not call this function synchronously immediately after
+	 *   populateLocaleList. The menulist items are added, but the values are not
+	 *   yet set.
+	 * 
+	 * @param {xul:menulist} menulist Menulist object that will be manipulated
+	 * @param {Zotero.Style} style Currently selected style
+	 * @param {String} prefLocale Preferred locale if not overridden by the style
+	 * 
+	 * @return {String} The locale that was selected
+	 */
+	this.updateLocaleList = function (menulist, style, prefLocale) {
+		if (!_initialized) {
+			throw new Zotero.Exception.UnloadedDataException("Styles not yet loaded", 'styles');
+		}
+		
+		// Remove any nodes that were manually added to menulist
+		let availableLocales = [];
+		for (let i=0; i<menulist.itemCount; i++) {
+			let item = menulist.getItemAtIndex(i);
+			if (item.getAttributeNS('zotero:', 'customLocale')) {
+				menulist.removeItemAt(i);
+				i--;
+				continue;
+			}
+			
+			availableLocales.push(item.value);
+		}
+		
+		if (!style) {
+			// disable menulist and label
+			menulist.disabled = true;
+			if (menulist.labelElement) menulist.labelElement.disabled = true;
+			
+			// set node to blank node
+			// If we just set value to "", the internal label is collapsed and the dropdown list becomes shorter
+			let blankListNode = menulist.appendItem('', '');
+			blankListNode.setAttributeNS('zotero:', 'customLocale', true);
+			
+			menulist.selectedItem = blankListNode;
+			return menulist.value;
+		}
+		
+		menulist.disabled = !!style.locale;
+		if (menulist.labelElement) menulist.labelElement.disabled = false;
+		
+		let selectLocale = style.locale || prefLocale || Zotero.locale;
+		selectLocale = Zotero.Styles.primaryDialects[selectLocale] || selectLocale;
+		
+		// Make sure the locale we want to select is in the menulist
+		if (availableLocales.indexOf(selectLocale) == -1) {
+			let customLocale = menulist.insertItemAt(0, selectLocale, selectLocale);
+			customLocale.setAttributeNS('zotero:', 'customLocale', true);
+		}
+		
+		return menulist.value = selectLocale;
+	}
 }
 
 /**
@@ -495,10 +627,10 @@ Zotero.Style = function (style, path) {
 
 /**
  * Get a citeproc-js CSL.Engine instance
- * @param {Boolean} useAutomaticJournalAbbreviations Whether to automatically abbreviate titles
+ * @param {String} locale Locale code
+ * @param {Boolean} automaticJournalAbbreviations Whether to automatically abbreviate titles
  */
-Zotero.Style.prototype.getCiteProc = function(automaticJournalAbbreviations) {
-	var locale = Zotero.Prefs.get('export.bibliographyLocale');
+Zotero.Style.prototype.getCiteProc = function(locale, automaticJournalAbbreviations) {
 	if(!locale) {
 		var locale = Zotero.locale;
 		if(!locale) {
@@ -652,7 +784,7 @@ Zotero.Style.prototype.remove = Zotero.Promise.coroutine(function* () {
 	
 	// make sure no styles depend on this one
 	var dependentStyles = false;
-	var styles = yield Zotero.Styles.getAll();
+	var styles = Zotero.Styles.getAll();
 	for (let i in styles) {
 		let style = styles[i];
 		if(style.source == this.styleID) {
@@ -678,7 +810,7 @@ Zotero.Style.prototype.remove = Zotero.Promise.coroutine(function* () {
 			var deleteSource = true;
 			
 			// check to see if any other styles depend on the hidden one
-			let styles = yield Zotero.Styles.getAll();
+			let styles = Zotero.Styles.getAll();
 			for (let i in styles) {
 				let style = styles[i];
 				if(style.source == this.source && style.styleID != this.styleID) {

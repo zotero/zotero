@@ -2490,12 +2490,12 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 		event.dataTransfer.setData("text/plain", text);
 	}
 	
+	format = Zotero.QuickCopy.unserializeSetting(format);
 	try {
-		var [mode, ] = format.split('=');
-		if (mode == 'export') {
+		if (format.mode == 'export') {
 			Zotero.QuickCopy.getContentFromItems(items, format, exportCallback);
 		}
-		else if (mode.indexOf('bibliography') == 0) {
+		else if (format.mode == 'bibliography') {
 			var content = Zotero.QuickCopy.getContentFromItems(items, format, null, event.shiftKey);
 			if (content) {
 				if (content.html) {
@@ -2505,12 +2505,12 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 			}
 		}
 		else {
-			Components.utils.reportError("Invalid Quick Copy mode '" + mode + "'");
+			Components.utils.reportError("Invalid Quick Copy mode");
 		}
 	}
 	catch (e) {
 		Zotero.debug(e);
-		Components.utils.reportError(e + " with format '" + format + "'");
+		Components.utils.reportError(e + " with '" + format.id + "'");
 	}
 };
 
@@ -2631,7 +2631,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 							}
 						}
 						
-						parentDir.copyTo(destDir, newName ? newName : dirName);
+						parentDir.copyToFollowingLinks(destDir, newName ? newName : dirName);
 						
 						// Store nsIFile
 						if (useTemp) {
@@ -2672,7 +2672,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 							}
 						}
 						
-						file.copyTo(destDir, newName ? newName : null);
+						file.copyToFollowingLinks(destDir, newName ? newName : null);
 						
 						// Store nsIFile
 						if (useTemp) {
@@ -3044,6 +3044,13 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 					});
 				}
 				else {
+					if (file.leafName.endsWith(".lnk")) {
+						let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						   .getService(Components.interfaces.nsIWindowMediator);
+						let win = wm.getMostRecentWindow("navigator:browser");
+						win.ZoteroPane.displayCannotAddShortcutMessage(file.path);
+						continue;
+					}
 					yield Zotero.Attachments.importFromFile({
 						file: file,
 						libraryID: targetLibraryID,

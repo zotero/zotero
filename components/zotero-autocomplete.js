@@ -99,10 +99,9 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 					sql += "JOIN itemCreators USING (creatorID) JOIN items USING (itemID) ";
 				}
 				sql += "WHERE CASE fieldMode "
-					+ "WHEN 1 THEN lastName "
-					+ "WHEN 0 THEN firstName || ' ' || lastName END "
-					+ "LIKE ? ";
-				var sqlParams = [searchString + '%'];
+					+ "WHEN 1 THEN lastName LIKE ? "
+					+ "WHEN 0 THEN (firstName || ' ' || lastName LIKE ?) OR (lastName LIKE ?) END "
+				var sqlParams = [searchString + '%', searchString + '%', searchString + '%'];
 				if (searchParams.libraryID !== undefined) {
 					sql += " AND libraryID=?";
 					sqlParams.push(searchParams.libraryID);

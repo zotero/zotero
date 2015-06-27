@@ -30,7 +30,10 @@ var Zotero_CSL_Preview = new function() {
 	this.generateBibliography = generateBibliography;
 	
 	function init() { 
-		//refresh();
+		var menulist = document.getElementById("locale-menu");
+		
+		Zotero.Styles.populateLocaleList(menulist);
+		menulist.value = Zotero.Prefs.get('export.lastLocale');;
 		
 		var iframe = document.getElementById('zotero-csl-preview-box');
 		iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p>' + Zotero.getString('styles.preview.instructions') + '</p></body></html>';
@@ -86,7 +89,9 @@ var Zotero_CSL_Preview = new function() {
 			Zotero.debug("CSL IGNORE: citation format is " + style.categories);
 			return '';
 		}
-		var styleEngine = style.getCiteProc();
+		
+		var locale = document.getElementById("locale-menu").value;
+		var styleEngine = style.getCiteProc(locale);
 		
 		// Generate multiple citations
 		var citations = styleEngine.previewCitationCluster(
