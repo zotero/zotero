@@ -537,6 +537,16 @@ var Zotero_Browser = new function() {
 				_constructLookupFunction(tab, function(e, obj) {
 					Zotero_LocateMenu.locateItem(e, obj.newItems);
 				}), true);
+				
+			menuitem = document.createElement("menuitem");
+			menuitem.setAttribute("label", "Save to Zotero as Web Page (with snapshot)");
+			menuitem.setAttribute("class", "menuitem-iconic");
+			menuitem.addEventListener("command", function (event) {
+				ZoteroPane.addItemFromPage('temporaryPDFHack', !Zotero.Prefs.get('automaticSnapshots') );
+				event.stopPropagation();
+			}); 
+			popup.appendChild(menuitem);
+			
 		}
 		else {
 			let webPageIcon = tab.getCaptureIcon(Zotero.hiDPI);
