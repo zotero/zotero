@@ -5,17 +5,8 @@
 	width: 32px;
 }
 
-#zotero-toolbar-save-button-single[cui-areatype="toolbar"] .toolbarbutton-icon {
-	width: 30px;
-}
-
-#zotero-toolbar-main-button[cui-areatype="toolbar"] .toolbarbutton-icon,
-#zotero-toolbar-save-button[cui-areatype="toolbar"] .toolbarbutton-icon {
+#zotero-toolbar-main-button[cui-areatype="toolbar"] .toolbarbutton-icon {
 	width: 28px;
-}
-
-#zotero-toolbar-main-button[cui-areatype="toolbar"] {
-	margin-right: -1px !important;
 }
 
 #zotero-toolbar-main-button[cui-areatype="toolbar"] .toolbarbutton-icon {
@@ -51,26 +42,25 @@
 	margin-bottom: 11px;
 }
 
-
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > separator,
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button:not([disabled]) > .toolbarbutton-menubutton-dropmarker::before {
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > separator,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-save-button:not([disabled]) > .toolbarbutton-menubutton-dropmarker::before {
 	display: none;
 }
 
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-main-button .toolbarbutton-icon,
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button:not([disabled]) .toolbarbutton-icon,
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button:not([disabled]) .dropmarker-icon {
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-main-button .toolbarbutton-icon,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-save-button:not([disabled]) .toolbarbutton-icon,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-save-button:not([disabled]) .dropmarker-icon {
 	border-color: var(--toolbarbutton-hover-bordercolor) !important;
 }
 
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-main-button:not(:active) .toolbarbutton-icon,
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover:not([disabled]) > #zotero-toolbar-save-button:not(:active) .toolbarbutton-icon,
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover:not([disabled]) > #zotero-toolbar-save-button:not(:active) .dropmarker-icon {
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-main-button:not(:active) .toolbarbutton-icon,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover:not([disabled]) > #zotero-toolbar-save-button:not(:active) .toolbarbutton-icon,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover:not([disabled]) > #zotero-toolbar-save-button:not(:active) .dropmarker-icon {
 	background: var(--toolbarbutton-hover-background);
 }
 
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button .toolbarbutton-icon,
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button .dropmarker-icon {
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-save-button .toolbarbutton-icon,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-save-button .dropmarker-icon {
 	box-shadow: none;
 }
 
@@ -78,33 +68,55 @@
  There are two hover effects: when the toolbaritem is hovered over, and when the button is hovered over.
  This applies the latter (and may not be right on different versions of Windows).
 */
-#zotero-toolbar-buttons[cui-areatype="toolbar"] > #zotero-toolbar-main-button:hover:not(:active):not([disabled]) > .toolbarbutton-icon,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]) > #zotero-toolbar-main-button:hover:not(:active):not([disabled]) > .toolbarbutton-icon,
 /*
  The dropmarker doesn't honor :hover, so instead of showing the hover effect for each segment individually, do the
  menu-button parts together, which at least looks like a choice.
 */
-#zotero-toolbar-buttons[cui-areatype="toolbar"] > #zotero-toolbar-save-button:hover .toolbarbutton-menubutton-button .toolbarbutton-icon,
-#zotero-toolbar-buttons[cui-areatype="toolbar"] > #zotero-toolbar-save-button:hover:not(:active):not([disabled]) .toolbarbutton-menubutton-dropmarker .dropmarker-icon {
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]) > #zotero-toolbar-save-button:hover .toolbarbutton-menubutton-button .toolbarbutton-icon,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]) > #zotero-toolbar-save-button:hover:not(:active):not([disabled]) .toolbarbutton-menubutton-dropmarker .dropmarker-icon {
     background-color: hsla(210,48%,96%,.75) !important;
 }
-#zotero-toolbar-buttons[cui-areatype="toolbar"] > #zotero-toolbar-main-button:hover > .toolbarbutton-icon,
-#zotero-toolbar-buttons[cui-areatype="toolbar"] > #zotero-toolbar-save-button:hover:not([disabled]) .toolbarbutton-menubutton-button .toolbarbutton-icon,
-#zotero-toolbar-buttons[cui-areatype="toolbar"] > #zotero-toolbar-save-button:hover:not([disabled]) .toolbarbutton-menubutton-dropmarker .dropmarker-icon {
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]) > #zotero-toolbar-main-button:hover > .toolbarbutton-icon,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]) > #zotero-toolbar-save-button:hover:not([disabled]) .toolbarbutton-menubutton-button .toolbarbutton-icon,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]) > #zotero-toolbar-save-button:hover:not([disabled]) .toolbarbutton-menubutton-dropmarker .dropmarker-icon {
     border-color: hsla(210,54%,20%,.3) hsla(210,54%,20%,.35) hsla(210,54%,20%,.4) !important;
     box-shadow: 0 0 1px hsla(210,54%,20%,.03),
                 0 0 2px hsla(210,54%,20%,.1) !important;
 }
 
-#zotero-toolbar-buttons[cui-areatype="toolbar"] > #zotero-toolbar-save-button:hover:active:not([open]):not([disabled]) .toolbarbutton-menubutton-button .toolbarbutton-icon,
-#zotero-toolbar-buttons[cui-areatype="toolbar"] > #zotero-toolbar-save-button:hover[open]:not([disabled]) .toolbarbutton-menubutton-dropmarker .dropmarker-icon {
-  background: var(--toolbarbutton-active-background);
-  border-color: var(--toolbarbutton-active-bordercolor);
-  box-shadow: var(--toolbarbutton-active-boxshadow);
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]) > #zotero-toolbar-save-button:hover:active:not([open]):not([disabled]) .toolbarbutton-menubutton-button .toolbarbutton-icon,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]) > #zotero-toolbar-save-button:hover[open]:not([disabled]) .toolbarbutton-menubutton-dropmarker .dropmarker-icon {
+  background: var(--toolbarbutton-active-background) !important;
+  border-color: var(--toolbarbutton-active-bordercolor) !important;
+  box-shadow: var(--toolbarbutton-active-boxshadow) !important;
   transition-duration: 10ms;
 }
 
 #zotero-toolbar-save-button[cui-areatype="toolbar"] > menupopup {
 	margin-top: -5px;
+}
+
+/* Alterations for overflow panel */
+#zotero-toolbar-main-button-single[overflowedItem=true] .toolbarbutton-icon {
+	width: 16px;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] {
+	margin-left: 0px !important;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-main-button {
+	padding-left: 0;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-main-button .toolbarbutton-icon {
+	width: 26px;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-save-button .toolbarbutton-icon {
+	margin-left: 1px;
+	padding-right: 0 !important;
 }
 /* End toolbar buttons */
 

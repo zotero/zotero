@@ -71,6 +71,18 @@ CustomizableUI.addListener({
 		}
 	},
 	
+	onWidgetOverflow: function (node, container) {
+		if (node.id == comboButtonsID) {
+			node.classList.add("toolbarbutton-1");
+		}
+	},
+	
+	onWidgetUnderflow: function (node, container) {
+		if (node.id == comboButtonsID) {
+			node.classList.remove("toolbarbutton-1");
+		}
+	},
+	
 	onWidgetRemoved: function (id, area) {
 		if (id == comboButtonsID) {
 			var item = document.getElementById(id);
@@ -135,7 +147,11 @@ CustomizableUI.createWidget({
 				item.appendChild(document.createElementNS(kNSXUL, "separator"));
 			}
 			let button = document.createElementNS(kNSXUL, "toolbarbutton");
-			if (attribs.name == 'save') {
+			if (attribs.name == 'main') {
+				button.setAttribute('label', Zotero.clientName);
+			}
+			else if (attribs.name == 'save') {
+				button.setAttribute('label', Zotero.getString('ingester.saveToZotero'));
 				button.setAttribute('disabled', 'true');
 				button.setAttribute('type', 'menu-button');
 				let menupopup = document.createElementNS(kNSXUL, "menupopup");

@@ -52,6 +52,66 @@ toolbarpaletteitem[place="palette"] #zotero-toolbar-buttons #zotero-toolbar-save
 	display:none;
 }
 
+/* Alterations for overflow panel */
+#zotero-toolbar-main-button-single[overflowedItem=true] .toolbarbutton-text,
+#zotero-toolbar-save-button-single[overflowedItem=true] .toolbarbutton-text {
+	margin-left: 2px !important;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] {
+	margin: 6px 4px;
+	max-height: 36px;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true]:not(:hover) {
+	border: 1px solid transparent;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-main-button .toolbarbutton-text {
+	display: none;
+	margin-left: 1px;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-main-button {
+	min-width: unset;
+	max-width: 30px;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-main-button:hover {
+	background: unset;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-save-button::before {
+  content: "";
+  display: -moz-box;
+  width: 1px;
+  height: 18px;
+  -moz-margin-end: 0px;
+  background-image: linear-gradient(hsla(210,54%,20%,.2) 0, hsla(210,54%,20%,.2) 18px);
+  background-clip: padding-box;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 1px 18px;
+  box-shadow: 0 0 0 1px hsla(0,0%,100%,.2);
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-save-button {
+	max-width: unset;
+	margin: 0 0 0 -1px !important;
+	background: unset;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-save-button toolbarbutton {
+	margin-left: 8px;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker,
+#zotero-toolbar-save-button-single[overflowedItem=true] > .toolbarbutton-menubutton-dropmarker {
+	padding-left: 3px;
+	padding-right: 6px;
+}
+
+
 /* Show webpage icon in gray when no translators */
 #zotero-toolbar-save-button:not(.translate),
 #zotero-toolbar-save-button-single:not(.translate),

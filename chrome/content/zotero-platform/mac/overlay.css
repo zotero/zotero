@@ -40,8 +40,9 @@
 	padding-right: 1px;
 }
 
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-button,
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker {
+/* Recreate standard hover effect (except in overflow list) */
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-button,
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker {
 	border-width: 1px;
 	border-style: solid;
 	border-color: var(--toolbarbutton-hover-bordercolor) !important;
@@ -50,34 +51,38 @@
 	border-bottom-left-radius: 0;
 }
 
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker::before {
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker::before {
 	background: none;
 }
 
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-button {
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-button {
 	border-right: 1px solid transparent;
 }
 
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker {
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker {
 	border-left: 1px solid transparent;
 }
 
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > .toolbarbutton-menubutton-dropmarker {
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > .toolbarbutton-menubutton-dropmarker {
 	background: inherit;
 }
 
-#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-dropmarker:hover {
+#zotero-toolbar-save-button[cui-areatype="toolbar"]:not([overflowedItem=true]) > .toolbarbutton-menubutton-dropmarker:hover {
 	background: var(--toolbarbutton-hover-background);
 }
 
 #zotero-toolbar-main-button[cui-areatype="toolbar"] {
 	border-right: 1px solid transparent;
 }
-#zotero-toolbar-save-button[cui-areatype="toolbar"]:hover {
+#zotero-toolbar-save-button[cui-areatype="toolbar"]:not([overflowedItem=true]):hover {
 	border-left: 0 solid transparent;
 }
-#zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-button {
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-button {
 	border-left: 1px solid transparent;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] {
+	margin-left: 3px !important;
 }
 
 /* Necessary in Fx36 to keep 32px icons from being rendered at full size */
