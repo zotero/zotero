@@ -203,7 +203,7 @@ Zotero.Translators = new function() {
 					} else {
 						// in Firefox, push the converterFunction
 						converterFunctions.push(new function() {
-							var re = new RegExp('^https?://(?:[^/]\\.)?'+Zotero.Utilities.quotemeta(properHosts[j-1])+'/', "gi");
+							var re = new RegExp('^https?://(?:[^/]\\.)?'+Zotero.Utilities.quotemeta(properHosts[j-1])+'(?=/)', "gi");
 							var proxyHost = proxyHosts[j-1].replace(/\$/g, "$$$$");
 							return function(uri) { return uri.replace(re, "$&."+proxyHost) };
 						});
