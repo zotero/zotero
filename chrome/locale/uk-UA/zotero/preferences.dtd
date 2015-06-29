@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Домен/шлях">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(наприклад, wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Формат виводу">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Мова">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Включити швидке копіювання при перетаскуванні більш ніж">
 
 <!ENTITY zotero.preferences.prefpane.cite "Цитування">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "для додаткової інформації.">
 <!ENTITY zotero.preferences.proxies.transparent "Використати перенаправлення">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Автоматично розпізнвати проксі, що використовується">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Показувати сповіщення при перенаправленні через проксі-сервер">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Відключити перенаправлення, коли моє доменне ім'я містить">
 <!ENTITY zotero.preferences.proxies.configured "Налаштовані проксі">
 <!ENTITY zotero.preferences.proxies.hostname "Ім'я хоста">

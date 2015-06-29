@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Bibliyografya Oluştur">
 <!ENTITY zotero.bibliography.style.label "Gönderme Stili:">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "Dil:">
 <!ENTITY zotero.bibliography.outputMode "Çıktı Biçimi">
 <!ENTITY zotero.bibliography.bibliography "Bibliyografya">
 <!ENTITY zotero.bibliography.outputMethod "Çıktı Metodu:">

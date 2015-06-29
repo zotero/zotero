@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Etki alanı/Yol">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(ör. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Çıktı Biçimi">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Dil">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Bu kadardan daha fazla sürüklendiğinde Çabuk Kopyalamayı seçilemez kıl:">
 
 <!ENTITY zotero.preferences.prefpane.cite "Gönderme Yapmak">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "bakınız.">
 <!ENTITY zotero.preferences.proxies.transparent "Vekil sunucu kaynaklarını kendiliğinden hatırla">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Vekil sunuculu kaynakları kendiliğinden tanı">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Bir vekil sunucu aracılığıyla yönlendirirken mesaj göster.">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Etki alanı adı bunları içeriyorsa vekil sunucuya yönlendirme: ">
 <!ENTITY zotero.preferences.proxies.configured "Ayarlanmış Vekil Sunucular">
 <!ENTITY zotero.preferences.proxies.hostname "Ana Sunucu">

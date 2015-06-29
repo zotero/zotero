@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Literaturverzeichnis erstellen">
 <!ENTITY zotero.bibliography.style.label "Zitierstil:">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "Sprache:">
 <!ENTITY zotero.bibliography.outputMode "Ausgabemodus:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografie">
 <!ENTITY zotero.bibliography.outputMethod "Ausgabemethode:">

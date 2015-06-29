@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "建立參考文獻條/表">
 <!ENTITY zotero.bibliography.style.label "引用文獻條之樣式：">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "語言：">
 <!ENTITY zotero.bibliography.outputMode "＊輸出模式:">
 <!ENTITY zotero.bibliography.bibliography "參考文獻表">
 <!ENTITY zotero.bibliography.outputMethod "＊輸出方法:">
