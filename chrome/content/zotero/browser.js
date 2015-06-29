@@ -807,7 +807,6 @@ Zotero_Browser.Tab.prototype.clear = function() {
 Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
 	if (doc instanceof HTMLDocument) {
 		if (doc.documentURI.startsWith("about:")) {
-			this.page.saveEnabled = false;
 			return;
 		}
 		
