@@ -64,6 +64,16 @@
 	box-shadow: none;
 }
 
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-main-button .toolbarbutton-icon {
+	border-top-right-radius: 0px !important;
+	border-bottom-right-radius: 0px !important;
+}
+
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-save-button .toolbarbutton-icon {
+	border-top-left-radius: 0px !important;
+	border-bottom-left-radius: 0px !important;
+}
+
 /*
  There are two hover effects: when the toolbaritem is hovered over, and when the button is hovered over.
  This applies the latter (and may not be right on different versions of Windows).
