@@ -97,12 +97,14 @@
 }
 
 /* Alterations for overflow panel */
-#zotero-toolbar-main-button-single[overflowedItem=true] .toolbarbutton-icon {
+#zotero-toolbar-main-button-single[overflowedItem=true] .toolbarbutton-icon,
+#zotero-toolbar-save-button-single[overflowedItem=true] .toolbarbutton-icon {
 	width: 16px;
 }
 
 #zotero-toolbar-buttons[overflowedItem=true] {
 	margin-left: 0px !important;
+	margin-bottom: 0px !important;
 }
 
 #zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-main-button {
@@ -116,6 +118,7 @@
 #zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-save-button .toolbarbutton-icon {
 	margin-left: 1px;
 	padding-right: 0 !important;
+	width: 22px !important;
 }
 /* End toolbar buttons */
 
