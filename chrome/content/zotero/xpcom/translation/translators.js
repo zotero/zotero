@@ -368,38 +368,46 @@ Zotero.Translators = new function() {
 	
 	/**
 	 * @param	{String}		metadata
-	 * @param	{String}		metadata.translatorID		Translator GUID
-	 * @param	{Integer}		metadata.translatorType		See TRANSLATOR_TYPES in translate.js
-	 * @param	{String}		metadata.label				Translator title
-	 * @param	{String}		metadata.creator			Translator author
-	 * @param	{String|Null}	metadata.target				Target regexp
-	 * @param	{String|Null}	metadata.minVersion
-	 * @param	{String}		metadata.maxVersion
-	 * @param	{String|undefined}	metadata.configOptions
-	 * @param	{String|undefined}	metadata.displayOptions
-	 * @param	{Integer}		metadata.priority
-	 * @param	{String}		metadata.browserSupport
-	 * @param	{Boolean}		metadata.inRepository
-	 * @param	{String}		metadata.lastUpdated		SQL date
+	 *   @param	{String}		metadata.translatorID		Translator GUID
+	 *   @param	{Integer}		metadata.translatorType		See TRANSLATOR_TYPES in translate.js
+	 *   @param	{String}		metadata.label				Translator title
+	 *   @param	{String}		metadata.creator			Translator author
+	 *   @param	{String|Null}	metadata.target				Target regexp
+	 *   @param	{String|Null}	metadata.minVersion
+	 *   @param	{String}		metadata.maxVersion
+	 *   @param	{String|undefined}	metadata.configOptions
+	 *   @param	{String|undefined}	metadata.displayOptions
+	 *   @param	{Integer}		metadata.priority
+	 *   @param	{String}		metadata.browserSupport
+	 *   @param	{Boolean}		metadata.inRepository
+	 *   @param	{String}		metadata.lastUpdated		SQL date
 	 * @param	{String}		code
+	 * @param	{Object}		options
+	 *   @param	{Boolean}		options.sameFile		Write to an existing file.
+	 *     Do not try to create new file from label
 	 * @return	{Promise<nsIFile>}
 	 */
-	this.save = Zotero.Promise.coroutine(function* (metadata, code) {
+	this.save = Zotero.Promise.coroutine(function* (metadata, code, options) {
+		options = options || {};
+		
 		if (!metadata.translatorID) {
 			throw ("metadata.translatorID not provided in Zotero.Translators.save()");
 		}
 		
 		if (!metadata.translatorType) {
-			var found = false;
-			for (let type in TRANSLATOR_TYPES) {
-				if (metadata.translatorType & TRANSLATOR_TYPES[type]) {
-					found = true;
-					break;
-				}
+			throw ("metadata.translatorType not provided in Zotero.Translators.save()");
+		}
+		
+		// Validate translator type
+		var found = false;
+		for (let type in TRANSLATOR_TYPES) {
+			if (metadata.translatorType & TRANSLATOR_TYPES[type]) {
+				found = true;
+				break;
 			}
-			if (!found) {
-				throw ("Invalid translatorType '" + metadata.translatorType + "' in Zotero.Translators.save()");
-			}
+		}
+		if (!found) {
+			throw ("Invalid translatorType '" + metadata.translatorType + "' in Zotero.Translators.save()");
 		}
 		
 		if (!metadata.label) {
@@ -418,23 +426,45 @@ Zotero.Translators = new function() {
 			throw new Error("code not provided");
 		}
 		
-		var fileName = Zotero.Translators.getFileNameFromLabel(
-			metadata.label, metadata.translatorID
-		);
-		var destFile = OS.Path.join(Zotero.getTranslatorsDirectory().path, fileName);
-		
 		// JSON.stringify has the benefit of indenting JSON
 		var metadataJSON = JSON.stringify(metadata, null, "\t");
-		
-		var str = metadataJSON + "\n\n" + code,
-			translator;
+		var str = metadataJSON + "\n\n" + code;
 		
 		var translator = Zotero.Translators.get(metadata.translatorID);
-		var sameFile = translator && destFile == translator.path;
-		if (sameFile) return;
 		
-		var exists = yield OS.File.exists(destFile);
-		if (exists) {
+		var sameFile = false,
+			fileName, destFile;
+		if (translator && options.sameFile) {
+			// Re-use existing file
+			sameFile = true;
+			destFile = translator.path;
+			fileName = OS.Path.basename(destFile);
+		} else {
+			// Generate new file with acceptable file name
+			fileName = Zotero.Translators.getFileNameFromLabel(
+				metadata.label, metadata.translatorID
+			);
+			destFile = OS.Path.join(Zotero.getTranslatorsDirectory().path, fileName);
+			
+			sameFile = translator && destFile == translator.path;
+		}
+		
+		if (!sameFile && translator) {
+			// Renaming file. Make sure to remove old file
+			try {
+				yield OS.File.remove(translator.path);
+			} catch(e) {
+				if (e instanceof OS.File.Error) {
+					Zotero.debug('Error while removing old translator file '
+						+ translator.path, 1);
+					Zotero.debug(e,1);
+				} else {
+					throw e;
+				}
+			}
+		}
+		
+		if (!sameFile && (yield OS.File.exists(destFile))) {
 			var msg = "Overwriting translator with same filename '"
 				+ fileName + "'";
 			Zotero.debug(msg, 1);
