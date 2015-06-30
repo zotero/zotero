@@ -17,6 +17,9 @@
 			{
 				"family": "artistLast",
 				"given": "artistFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -58,6 +61,9 @@
 			{
 				"family": "performerLast",
 				"given": "performerFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -108,6 +114,9 @@
 			{
 				"family": "sponsorLast",
 				"given": "sponsorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"authority": "Legislative body",
@@ -150,6 +159,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"container-title": "Publication title",
@@ -189,6 +201,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -255,6 +270,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -325,6 +343,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"authority": "Court",
@@ -368,6 +389,9 @@
 			{
 				"family": "programmerLast",
 				"given": "programmerFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -414,6 +438,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -479,6 +506,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -545,6 +575,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -600,6 +633,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"id": 48,
@@ -643,6 +679,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -709,6 +748,9 @@
 			{
 				"family": "directorLast",
 				"given": "directorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -749,6 +791,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"container-title": "Publication title",
@@ -785,6 +830,9 @@
 			{
 				"family": "contributorLast",
 				"given": "contributorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"authority": "Legislative body",
@@ -829,6 +877,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"id": 53,
@@ -871,6 +922,9 @@
 			{
 				"family": "intervieweeLast",
 				"given": "intervieweeFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -924,6 +978,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -986,6 +1043,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -1032,6 +1092,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -1086,6 +1149,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -1135,6 +1201,9 @@
 			{
 				"family": "cartographerLast",
 				"given": "cartographerFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -1187,6 +1256,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -1241,6 +1313,9 @@
 			{
 				"family": "inventorLast",
 				"given": "inventorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"authority": "Issuing authority",
@@ -1294,6 +1369,9 @@
 			{
 				"family": "podcasterLast",
 				"given": "podcasterFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"collection-title": "Series title",
@@ -1323,6 +1401,9 @@
 			{
 				"family": "presenterLast",
 				"given": "presenterFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"event": "Meeting name",
@@ -1363,6 +1444,9 @@
 			{
 				"family": "directorLast",
 				"given": "directorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -1408,6 +1492,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -1463,6 +1550,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"chapter-number": "Session",
@@ -1506,6 +1596,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -1549,6 +1642,9 @@
 			{
 				"family": "directorLast",
 				"given": "directorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -1595,6 +1691,9 @@
 			{
 				"family": "directorLast",
 				"given": "directorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"call-number": "Call number",
@@ -1639,6 +1738,9 @@
 			{
 				"family": "authorLast",
 				"given": "authorFirst"
+			},
+			{
+				"literal": "Institutional Author"
 			}
 		],
 		"container-title": "Publication title",
