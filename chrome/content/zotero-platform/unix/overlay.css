@@ -11,7 +11,7 @@
 	width: 28px;
 }
 
-#zotero-toolbar-main-button[cui-areatype="toolbar"] {
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]) #zotero-toolbar-main-button {
 	margin-right: -1px;
 }
 
@@ -46,7 +46,7 @@
 	margin-bottom: 0;
 }
 
-#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-dropmarker .dropmarker-icon {
+#zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]) #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker .dropmarker-icon {
 	padding-left: 14px !important;
 	padding-right: 3px !important;
 }
@@ -105,10 +105,12 @@
 #zotero-toolbar-buttons[overflowedItem=true] {
 	margin-left: 0px !important;
 	margin-bottom: 0px !important;
+	margin-right: 0 !important;
 }
 
 #zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-main-button {
 	padding-left: 0;
+	padding-right: 5px;
 }
 
 #zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-main-button .toolbarbutton-icon {
@@ -119,6 +121,20 @@
 	margin-left: 1px;
 	padding-right: 0 !important;
 	width: 22px !important;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-save-button .toolbarbutton-menubutton-button {
+	margin-left: 0;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-save-button .toolbarbutton-menubutton-dropmarker {
+	margin: 0;
+	margin-right: 2px !important;
+	padding-right: 5px;
+}
+
+#zotero-toolbar-buttons[overflowedItem=true] > separator {
+	display: none;
 }
 /* End toolbar buttons */
 
