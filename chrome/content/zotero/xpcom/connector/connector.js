@@ -222,7 +222,7 @@ Zotero.Connector = new function() {
 	 */
 	this.setCookiesThenSaveItems = function(data, callback, tab) {
 		if(Zotero.isFx && !Zotero.isBookmarklet && data.uri) {
-			var host = Services.ios.newURI(data.uri, null, null).host;
+			var host = Services.io.newURI(data.uri, null, null).host;
 			var cookieEnum = Services.cookies.getCookiesFromHost(host);
 			var cookieHeader = '';
 			while(cookieEnum.hasMoreElements()) {
