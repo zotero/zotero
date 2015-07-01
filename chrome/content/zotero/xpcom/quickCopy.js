@@ -111,10 +111,12 @@ Zotero.QuickCopy = new function() {
 			var urlHostPort = nsIURI.hostPort;
 			var urlPath = nsIURI.path;
 		}
-		catch (e) {
+		catch (e) {}
+		
+		// Skip about:, chrome:, etc.
+		if (!urlHostPort) {
 			return quickCopyPref;
 		}
-		
 		
 		var matches = [];
 		
