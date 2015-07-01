@@ -438,7 +438,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 					}
 					
 					// save snapshot
-					if(filesEditable) {
+					if (filesEditable && !data.skipSnapshot) {
 						Zotero.Attachments.importFromDocument(doc, itemID);
 					}
 					
