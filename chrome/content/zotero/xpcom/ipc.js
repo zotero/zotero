@@ -260,11 +260,12 @@ Zotero.IPC = new function() {
 						instancePipeOpen = true;
 					}
 					
-					// Try to write to the pipe once a ms for 100 ms
-					var timeout = Date.now()+100, wroteToPipe;
+					// Try to write to the pipe once a ms for 1000 ms
+					var timeout = Date.now()+1000, wroteToPipe;
 					do {
 						wroteToPipe = Zotero.IPC.safePipeWrite(pipe, msg+"\n");
 					} while(Date.now() < timeout && !wroteToPipe);
+					if (wroteToPipe) Zotero.debug('IPC: Pipe took '+(Date.now()-(timeout-1000))+' ms to become available');
 					success = success || wroteToPipe;
 					defunct = !wroteToPipe;
 				}
