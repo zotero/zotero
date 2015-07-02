@@ -256,7 +256,9 @@ Zotero.IPC = new function() {
 					// make sure instance pipe is open and accepting input, so that we can receive
 					// a response to whatever we're sending
 					if(!instancePipeOpen && _instancePipe.exists()) {
+						var time = Date.now();
 						Zotero.IPC.safePipeWrite(_instancePipe, "test\n", true);
+						Zotero.debug("IPC: Pipe took "+(Date.now() - time)+" ms to receive a cross-thread write");
 						instancePipeOpen = true;
 					}
 					
