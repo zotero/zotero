@@ -26,6 +26,10 @@
  * Toolbar icons
  *
  */
+#zotero-toolbar-buttons[cui-areatype=toolbar] {
+	height: 24px;
+}
+
 #zotero-toolbar-main-button,
 #zotero-toolbar-main-button-single {
 	list-style-image: url("chrome://zotero/skin/zotero-z-32px-australis.svg");
@@ -53,28 +57,29 @@ toolbarpaletteitem[place="palette"] #zotero-toolbar-buttons #zotero-toolbar-save
 }
 
 /* Alterations for overflow panel */
+#zotero-toolbar-buttons[overflowedItem=true] {
+	padding: 0 6px;
+	height: 36px;
+}
+
 #zotero-toolbar-main-button-single[overflowedItem=true] .toolbarbutton-text,
 #zotero-toolbar-save-button-single[overflowedItem=true] .toolbarbutton-text {
 	margin-left: 2px !important;
-}
-
-#zotero-toolbar-buttons[overflowedItem=true] {
-	margin: 6px 4px;
-	max-height: 36px;
 }
 
 #zotero-toolbar-buttons[overflowedItem=true]:not(:hover) {
 	border: 1px solid transparent;
 }
 
+#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-main-button {
+	min-width: unset;
+	margin-right: 8px;
+	padding: 0;
+}
+
 #zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-main-button .toolbarbutton-text {
 	display: none;
 	margin-left: 1px;
-}
-
-#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-main-button {
-	min-width: unset;
-	max-width: 30px;
 }
 
 #zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-main-button:hover {

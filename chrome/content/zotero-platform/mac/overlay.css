@@ -2,6 +2,14 @@
  As of Fx36, the built-in Mac styles don't properly handle a menu-button within a combined
  button, so we need this ungodly mess.
 */
+/* Necessary to keep 32px icons from being rendered at full size */
+#zotero-toolbar-main-button[cui-areatype="toolbar"] > .toolbarbutton-icon,
+#zotero-toolbar-main-button-single[cui-areatype="toolbar"] > .toolbarbutton-icon,
+#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-button > .toolbarbutton-icon,
+#zotero-toolbar-save-button-single[cui-areatype="toolbar"] > .toolbarbutton-menubutton-button > .toolbarbutton-icon {
+	height: 16px;
+}
+
 #zotero-toolbar-buttons[cui-areatype="toolbar"] > separator,
 #zotero-toolbar-save-button[cui-areatype="toolbar"]:not(:hover) > .toolbarbutton-menubutton-dropmarker::before,
 #zotero-toolbar-buttons[cui-areatype="toolbar"]:hover > #zotero-toolbar-save-button {
@@ -9,12 +17,7 @@
 }
 
 #zotero-toolbar-save-button[cui-areatype="toolbar"] {
-	margin-top: 3px !important;
-	margin-bottom: 3px !important;
-	border-right: 0;
-	border-width: 1px;
-	border-style: solid;
-	border-color: transparent;
+	border: 0;
 }
 
 #zotero-toolbar-main-button[cui-areatype="toolbar"] {
@@ -26,8 +29,6 @@
 }
 
 #zotero-toolbar-save-button[cui-areatype="toolbar"] {
-	margin-top: 3px;
-	margin-bottom: 3px;
 	margin-left: -1px;
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
@@ -40,7 +41,9 @@
 	padding-right: 1px;
 }
 
-/* Recreate standard hover effect (except in overflow list) */
+/*
+ * Recreate standard hover effect (except in overflow list)
+ */
 #zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-button,
 #zotero-toolbar-buttons[cui-areatype="toolbar"]:not([overflowedItem=true]):hover > #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker {
 	border-width: 1px;
@@ -81,17 +84,17 @@
 	border-left: 1px solid transparent;
 }
 
+/*
+ * Alterations for overflow menu
+ */
 #zotero-toolbar-buttons[overflowedItem=true] {
-	margin-left: 3px !important;
+	margin: 6px 4px 0;
 }
 
-/* Necessary in Fx36 to keep 32px icons from being rendered at full size */
-#zotero-toolbar-main-button[cui-areatype="toolbar"] > .toolbarbutton-icon,
-#zotero-toolbar-main-button-single[cui-areatype="toolbar"] > .toolbarbutton-icon,
-#zotero-toolbar-save-button[cui-areatype="toolbar"] > .toolbarbutton-menubutton-button > .toolbarbutton-icon,
-#zotero-toolbar-save-button-single[cui-areatype="toolbar"] > .toolbarbutton-menubutton-button > .toolbarbutton-icon {
-	width: 16px;
+#zotero-toolbar-buttons[overflowedItem=true] #zotero-toolbar-main-button {
+	max-width: 16px;
 }
+
 /* End toolbar icons */
 
 #zotero-splitter
