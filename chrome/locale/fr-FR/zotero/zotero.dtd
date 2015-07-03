@@ -97,7 +97,7 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Nouveau document">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Plus">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Créer un nouveau document à partir de la page courante">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Créer un document Page Web à partir de la page courante">
 <!ENTITY zotero.toolbar.lookup.label "Ajouter un document par son identifiant">
 <!ENTITY zotero.toolbar.removeItem.label "Supprimer le document…">
 <!ENTITY zotero.toolbar.newCollection.label "Nouvelle collection…">
