@@ -109,27 +109,33 @@ Zotero.QuickCopy = new function() {
 			// Accessing some properties may throw for URIs that do not support those
 			// parts. E.g. hostPort throws NS_ERROR_FAILURE for about:blank
 			var urlHostPort = nsIURI.hostPort;
-			var urlPath = nsIURI.path;
+			var urlPath = nsIURI.path || '/';
 		}
-		catch (e) {}
+		catch (e) {
+			return quickCopyPref;
+		}
 		
 		// Skip about:, chrome:, etc.
-		if (!urlHostPort) {
+		if (!urlHostPort || (nsIURI.scheme != 'http' && nsIURI.scheme != 'https')) {
 			return quickCopyPref;
 		}
 		
 		var matches = [];
 		
+		// Grab all entries that may match the from DB. No need to be strict here
 		var sql = "SELECT key AS domainPath, value AS format FROM settings "
 			+ "WHERE setting='quickCopySite' AND (key LIKE ? OR key LIKE ?)";
-		var urlDomain = urlHostPort.match(/[^\.]+\.[^\.]+$/);
+		
+		var urlDomain = urlHostPort.match(/(?:[^.]+\.)?[^.]+$/); // Use up to two highest-level domain parts
 		var rows = Zotero.DB.query(sql, ['%' + urlDomain[0] + '%', '/%']);
+		var matchHostPort = '.' + urlHostPort.toLowerCase() + '/'; // To avoid matching against substrings
 		for (let i = 0; i < rows.length; i++) {
 			let row = rows[i];
-			let domain = row.domainPath.split('/',1)[0];
+			let domain = row.domainPath.split('/',1)[0].toLowerCase();
 			let path = row.domainPath.substr(domain.length) || '/';
-			let re = new RegExp('(^|[./])' + Zotero.Utilities.quotemeta(domain) + '$', 'i');
-			if (re.test(urlHostPort) && urlPath.indexOf(path) === 0) {
+			if (matchHostPort.indexOf('.' + domain + '/') != -1
+				&& urlPath.indexOf(path) === 0
+			) {
 				matches.push({
 					format: JSON.stringify(this.unserializeSetting(row.format)),
 					domainLength: domain.length,
@@ -138,8 +144,10 @@ Zotero.QuickCopy = new function() {
 			}
 		}
 		
+		if (!matches.length) return quickCopyPref;
+		
 		// Give priority to longer domains, then longer paths
-		var sort = function(a, b) {
+		matches.sort(function(a, b) {
 			if (a.domainLength > b.domainLength) {
 				return -1;
 			}
@@ -154,15 +162,10 @@ Zotero.QuickCopy = new function() {
 				return 1;
 			}
 			
-			return -1;
-		};
+			return 0;
+		});
 		
-		if (matches.length) {
-			matches.sort(sort);
-			return matches[0].format;
-		} else {
-			return quickCopyPref;
-		}
+		return matches[0].format;
 	};
 	
 	
