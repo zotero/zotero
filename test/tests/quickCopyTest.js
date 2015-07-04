@@ -21,6 +21,10 @@ describe("Zotero.QuickCopy", function() {
 			assert.deepEqual(Zotero.QuickCopy.getFormatFromURL('http://foo/'), quickCopyPref);
 		})
 		
+		it("should handle a domain with a trailing period", function () {
+			assert.deepEqual(Zotero.QuickCopy.getFormatFromURL('http://foo.com.'), quickCopyPref);
+		})
+		
 		it("should handle an about: URL", function () {
 			assert.deepEqual(Zotero.QuickCopy.getFormatFromURL('about:blank'), quickCopyPref);
 		})

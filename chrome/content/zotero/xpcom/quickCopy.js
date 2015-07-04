@@ -123,7 +123,8 @@ Zotero.QuickCopy = new function() {
 		
 		var sql = "SELECT key AS domainPath, value AS format FROM settings "
 			+ "WHERE setting='quickCopySite' AND (key LIKE ? OR key LIKE ?)";
-		var urlDomain = urlHostPort.match(/(?:[^\.]+\.)?[^\.]+$/);
+		// Match last one or two sections of domain, not counting trailing period
+		var urlDomain = urlHostPort.match(/(?:[^.]+\.)?[^.]+(?=\.?$)/);
 		// Hopefully can't happen, but until we're sure
 		if (!urlDomain) {
 			Zotero.logError("Quick Copy host '" + urlHostPort + "' not matched");
