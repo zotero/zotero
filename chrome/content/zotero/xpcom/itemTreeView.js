@@ -3213,23 +3213,36 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient, dataTransfer) {
 					// Otherwise file, so fall through
 				}
 				
+				// Resolve symbolik links
+				var moveFile = dragData.dropEffect == 'move';
+				if (file.isSymlink()) {
+					var linkPath = file.path;
+					file = Zotero.File.getTargetFile(file);
+					
+					if (!file.exists()) {
+						Zotero.alert(
+							null,
+							Zotero.getString('dragAndDrop.invalidLink.title'),
+							Zotero.getString('dragAndDrop.invalidLink.text', linkPath)
+						);
+						continue;
+					}
+					
+					// Never move file if importing via shortcut, since we would end up
+					// moving the target file and not the shortcut
+					moveFile = false; 
+				}
+				
 				try {
 					Zotero.DB.beginTransaction();
+					
 					if (dropEffect == 'link') {
 						var itemID = Zotero.Attachments.linkFromFile(file, sourceItemID);
 					}
 					else {
-						if (file.leafName.endsWith(".lnk")) {
-							let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-							   .getService(Components.interfaces.nsIWindowMediator);
-							let win = wm.getMostRecentWindow("navigator:browser");
-							win.ZoteroPane.displayCannotAddShortcutMessage(file.path);
-							Zotero.DB.commitTransaction();
-							continue;
-						}
 						var itemID = Zotero.Attachments.importFromFile(file, sourceItemID, targetLibraryID);
 						// If moving, delete original file
-						if (dragData.dropEffect == 'move') {
+						if (moveFile) {
 							try {
 								file.remove(false);
 							}

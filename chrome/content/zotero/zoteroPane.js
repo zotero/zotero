@@ -3117,16 +3117,10 @@ var ZoteroPane = new function()
 				var file = files.getNext();
 				file.QueryInterface(Components.interfaces.nsILocalFile);
 				var attachmentID;
-				if(link)
+				if(link) {
 					attachmentID = Zotero.Attachments.linkFromFile(file, id);
+				}
 				else {
-					if (file.leafName.endsWith(".lnk")) {
-						let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						.getService(Components.interfaces.nsIWindowMediator);
-						let win = wm.getMostRecentWindow("navigator:browser");
-						win.ZoteroPane.displayCannotAddShortcutMessage(file.path);
-						continue;
-					}
 					attachmentID = Zotero.Attachments.importFromFile(file, id, libraryID);
 				}
 			
@@ -3768,17 +3762,6 @@ var ZoteroPane = new function()
 		ps.alert(null, "", Zotero.getString('save.error.cannotAddFilesToCollection'));
 	}
 	
-	
-	// TODO: Figure out a functioning way to get the original path and just copy the real file
-	this.displayCannotAddShortcutMessage = function (path) {
-		Zotero.alert(
-			null,
-			Zotero.getString("general.error"),
-			Zotero.getString("file.error.cannotAddShortcut") + (path ? "\n\n" + path : "")
-		);
-	}
-	
-	
 	function showAttachmentNotFoundDialog(itemID, noLocate) {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
@@ -3996,12 +3979,6 @@ var ZoteroPane = new function()
 				// Disallow hidden files
 				// TODO: Display a message
 				if (file.leafName.startsWith('.')) {
-					continue;
-				}
-				
-				// Disallow Windows shortcuts
-				if (file.leafName.endsWith(".lnk")) {
-					this.displayCannotAddShortcutMessage(file.path);
 					continue;
 				}
 				
