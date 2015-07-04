@@ -119,7 +119,15 @@
 								self.removeEventListener("popupshown", popupShownListener);
 								
 								let appcontent = document.getElementById('appcontent');
-								let pageHideListener = function () {
+								let pageHideListener = function (event) {
+									var doc = event.originalTarget;
+									if(!(doc instanceof HTMLDocument)) return;
+									
+									var rootDoc = doc.defaultView.top.document;
+									// Don't hide when frames and special URLs are unloaded
+									if (rootDoc != doc || !rootDoc.location.href.startsWith('http')) {
+										return;
+									}
 									appcontent.removeEventListener("pagehide", pageHideListener);
 									self.hide();
 								};
