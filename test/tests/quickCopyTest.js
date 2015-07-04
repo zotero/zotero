@@ -5,8 +5,12 @@ describe("Zotero.QuickCopy", function() {
 	// TODO: These should set site-specific prefs and test the actual response against it,
 	// but that will need to wait for 5.0. For now, just make sure they don't fail.
 	describe("#getFormatFromURL()", function () {
-		it("should handle a domain", function () {
+		it("should handle an HTTP URL", function () {
 			assert.deepEqual(Zotero.QuickCopy.getFormatFromURL('http://foo.com/'), quickCopyPref);
+		})
+		
+		it("should handle an HTTPS URL", function () {
+			assert.deepEqual(Zotero.QuickCopy.getFormatFromURL('https://foo.com/'), quickCopyPref);
 		})
 		
 		it("should handle a domain and path", function () {
