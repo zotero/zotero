@@ -115,7 +115,7 @@ Zotero.QuickCopy = new function() {
 		catch (e) {}
 		
 		// Skip non-HTTP URLs
-		if (!/^https?$/.test(nsIURI.scheme)) {
+		if (!nsIURI || !/^https?$/.test(nsIURI.scheme)) {
 			return quickCopyPref;
 		}
 		
