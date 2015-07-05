@@ -10,6 +10,7 @@ stack {
 }
 
 *[anonid=nav-buttons] > toolbarbutton {
+	-moz-appearance: none; /* Necessary on Linux for button to be shown */
 	width: 22px;
 	height: 22px;
 	border: 1px solid lightgray;
