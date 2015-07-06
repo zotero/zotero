@@ -47,12 +47,6 @@ CustomizableUI.addListener({
 				return;
 			}
 			
-			var item = document.getElementById(id);
-			// Element may not exist yet if it was added to the panel
-			if (item) {
-				updateItemForArea(item, area);
-			}
-			
 			var isUpgrade = false;
 			try {
 				isUpgrade = Zotero.Prefs.get("firstRunGuidanceShown.saveIcon");
@@ -61,13 +55,24 @@ CustomizableUI.addListener({
 			var shortcut = Zotero.getString(
 					Zotero.isMac ? "general.keys.cmdShift" : "general.keys.ctrlShift"
 				) + Zotero.Prefs.get("keys.openZotero");
-			document.getElementById("zotero-main-button-guidance").show({
-				text: Zotero.getString(property, shortcut)
-			});
-			document.getElementById("zotero-save-button-guidance").show();
+			
+			let widget = CustomizableUI.getWidget(id);
+			for (let instance of widget.instances) {
+				let doc = instance.node.ownerDocument;
+				
+				updateItemForArea(instance.node, area);
+				
+				doc.getElementById("zotero-main-button-guidance").show({
+					text: Zotero.getString(property, shortcut)
+				});
+				doc.getElementById("zotero-save-button-guidance").show();
+			}
 		}
 		else if (id == getSingleID('save')) {
-			Zotero_Browser.updateStatus();
+			let widget = CustomizableUI.getWidget(id);
+			for (let instance of widget.instances) {
+				instance.node.ownerDocument.defaultView.Zotero_Browser.updateStatus();
+			}
 		}
 	},
 	
@@ -83,18 +88,6 @@ CustomizableUI.addListener({
 		}
 	},
 	
-	onWidgetRemoved: function (id, area) {
-		if (id == comboButtonsID) {
-			var item = document.getElementById(id);
-			updateItemForArea(item, null);
-		}
-		// Clear dynamic image from save icon and revert to CSS
-		else if (id == getSingleID('save')) {
-			let button = document.getElementById(id);
-			button.image = "";
-		}
-	},
-	
 	// Save icon in panel isn't in DOM until menu is shown once and therefore isn't updated
 	// on page loads, so update the icon status when the panel is first shown so that it
 	// doesn't remain disabled
@@ -102,17 +95,21 @@ CustomizableUI.addListener({
 		if (area == CustomizableUI.AREA_PANEL) {
 			var placement = CustomizableUI.getPlacementOfWidget(comboButtonsID)
 			var update = false;
+			let singleID = getSingleID('save');
 			if (placement && placement.area == CustomizableUI.AREA_PANEL) {
 				update = true;
 			}
 			else {
-				placement = CustomizableUI.getPlacementOfWidget(getSingleID('save'));
+				placement = CustomizableUI.getPlacementOfWidget(singleID);
 				if (placement && placement.area == CustomizableUI.AREA_PANEL) {
 					update = true;
 				}
 			}
 			if (update) {
-				Zotero_Browser.updateStatus();
+				let widget = CustomizableUI.getWidget(singleID);
+				for (let instance of widget.instances) {
+					instance.node.ownerDocument.defaultView.Zotero_Browser.updateStatus();
+				}
 			}
 		}
 	}
@@ -176,7 +173,7 @@ CustomizableUI.createWidget({
 	tooltiptext: getTooltipText('main'),
 	defaultArea: false,
 	onCommand: function (event) {
-		ZoteroOverlay.toggleDisplay();
+		event.target.ownerDocument.defaultView.ZoteroOverlay.toggleDisplay();
 	}
 });
 
@@ -187,7 +184,7 @@ CustomizableUI.createWidget({
 	tooltiptext: getTooltipText('save'),
 	defaultArea: false,
 	onCommand: function (event) {
-		Zotero_Browser.scrapeThisPage(null, event);
+		event.target.ownerDocument.defaultView.Zotero_Browser.scrapeThisPage(null, event);
 	},
 	onCreated: function (button) {
 		const kNSXUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
