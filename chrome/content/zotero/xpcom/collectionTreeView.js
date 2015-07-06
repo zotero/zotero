@@ -653,7 +653,12 @@ Zotero.CollectionTreeView.prototype.collapseLibrary = function(self) {
 	
 	var found = false;
 	for (var i=self.rowCount-1; i>=0; i--) {
-		if (self._getItemAtRow(i).ref.libraryID !== selectedLibraryID) {
+		let rowLibraryID = self._getItemAtRow(i).ref.libraryID;
+		// TEMP: Remove in 5.0 when we can just compare libraryIDs without worrying about null
+		if (rowLibraryID === 0) {
+			rowLibraryID = null;
+		}
+		if (rowLibraryID !== selectedLibraryID) {
 			// Once we've moved beyond the original library, stop looking
 			if (found) {
 				break;
@@ -1013,9 +1018,7 @@ Zotero.CollectionTreeView.prototype._expandRow = function (row, forceOpen) {
 	// Unfiled items
 	if (showUnfiled) {
 		var s = new Zotero.Search;
-		if (isGroup) {
-			s.libraryID = libraryID;
-		}
+		s.libraryID = intLibraryID;
 		s.name = Zotero.getString('pane.collections.unfiled');
 		s.addCondition('libraryID', 'is', libraryID);
 		s.addCondition('unfiled', 'true');
