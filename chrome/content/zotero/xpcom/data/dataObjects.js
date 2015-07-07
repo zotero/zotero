@@ -129,8 +129,8 @@ Zotero.DataObjects.prototype.get = function (ids) {
  * @param {Array|Integer} ids  An individual object id or an array of object ids
  * @param {Object} [options]
  * @param {Boolean} [options.noCache=false] - Don't add object to cache after loading
- * @return {Zotero.DataObject|Zotero.DataObject[]} - A data object, if a scalar id was passed;
- *                                                   otherwise, an array of data objects
+ * @return {Promise<Zotero.DataObject|Zotero.DataObject[]>} - A promise for either a data object,
+ *     if a scalar id was passed, or an array of data objects, if an array of ids was passed
  */
 Zotero.DataObjects.prototype.getAsync = Zotero.Promise.coroutine(function* (ids, options) {
 	var toLoad = [];
