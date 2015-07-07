@@ -44,12 +44,9 @@ var Zotero_Browser = new function() {
 	this.toggleMode = toggleMode;
 	this.toggleCollapsed = toggleCollapsed;
 	this.chromeLoad = chromeLoad;
-	this.contentLoad = contentLoad;
 	this.itemUpdated = itemUpdated;
-	this.contentHide = contentHide;
 	this.tabClose = tabClose;
 	this.resize = resize;
-	this.updateStatus = updateStatus;
 	
 	this.tabbrowser = null;
 	this.appcontent = null;
@@ -243,6 +240,7 @@ var Zotero_Browser = new function() {
 		gBrowser.tabContainer.addEventListener("TabSelect",
 			function(e) {
 				//Zotero.debug("TabSelect");
+				// Note: async
 				Zotero_Browser.updateStatus();
 			}, false);
 		// this is for pageshow, for updating the status of the book icon
@@ -284,7 +282,11 @@ var Zotero_Browser = new function() {
 	 * An event handler called when a new document is loaded. Creates a new document
 	 * object, and updates the status of the capture icon
 	 */
-	function contentLoad(event) {
+	var contentLoad = Zotero.Promise.coroutine(function* (event) {
+		if (Zotero.Schema.schemaUpdatePromise.isPending()) {
+			yield Zotero.Schema.schemaUpdatePromise;
+		}
+		
 		var doc = event.originalTarget;
 		var isHTML = doc instanceof HTMLDocument;
 		var rootDoc = (doc instanceof HTMLDocument ? doc.defaultView.top.document : doc);
@@ -352,12 +354,12 @@ var Zotero_Browser = new function() {
 				contentWin.haveZoteroEventListener = true;
 			}
 		}
-	}
+	});
 
 	/*
 	 * called to unregister Zotero icon, etc.
 	 */
-	function contentHide(event) {
+	this.contentHide = function (event) {
 		var doc = event.originalTarget;
 		if(!(doc instanceof HTMLDocument)) return;
 	
@@ -377,7 +379,8 @@ var Zotero_Browser = new function() {
 		
 		// update status
 		if(Zotero_Browser.tabbrowser.selectedBrowser == browser) {
-			updateStatus();
+			// Note: async
+			this.updateStatus();
 		}
 	}
 	
@@ -425,7 +428,11 @@ var Zotero_Browser = new function() {
 	 * Updates the status of the capture icon to reflect the scrapability or lack
 	 * thereof of the current page
 	 */
-	function updateStatus() {
+	this.updateStatus = Zotero.Promise.coroutine(function* () {
+		if (Zotero.Schema.schemaUpdatePromise.isPending()) {
+			yield Zotero.Schema.schemaUpdatePromise;
+		}
+		
 		if (!Zotero_Browser.tabbrowser) return;
 		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
 		
@@ -455,7 +462,7 @@ var Zotero_Browser = new function() {
 		} else {
 			document.getElementById('zotero-annotate-tb').hidden = true;
 		}
-	}
+	});
 	
 	function getSaveButtons() {
 		Components.utils.import("resource:///modules/CustomizableUI.jsm");
@@ -1011,6 +1018,7 @@ Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, transla
 	
 	if(!translators || !translators.length) Zotero.debug("Translate: No translators found");
 	
+	// Note: async
 	Zotero_Browser.updateStatus();
 }
 

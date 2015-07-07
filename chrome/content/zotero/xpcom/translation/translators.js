@@ -39,13 +39,12 @@ Zotero.Translators = new function() {
 	/**
 	 * Initializes translator cache, loading all translator metadata into memory
 	 *
-	 * @param {Object} [memCache] - Translator metadata keyed by filename, if already available
-	 *                              (e.g., in updateBundledFiles()), to avoid unnecesary file reads
+	 * @param {Object} [options.metadataCache] - Translator metadata keyed by filename, if already
+	 *     available (e.g., in updateBundledFiles()), to avoid unnecesary file reads
 	 */
-	this.reinit = Zotero.Promise.coroutine(function* (memCache) {
+	this.reinit = Zotero.Promise.coroutine(function* (options = {}) {
 		Zotero.debug("Initializing translators");
 		var start = new Date;
-		_initialized = true;
 		
 		_cache = {"import":[], "export":[], "web":[], "search":[]};
 		_translators = {};
@@ -83,8 +82,8 @@ Zotero.Translators = new function() {
 					
 					// Check passed cache for metadata
 					let memCacheJSON = false;
-					if (memCache && memCache[fileName]) {
-						memCacheJSON = memCache[fileName];
+					if (options.metadataCache && options.metadataCache[fileName]) {
+						memCacheJSON = options.metadataCache[fileName];
 					}
 					
 					// Check DB cache
@@ -182,6 +181,8 @@ Zotero.Translators = new function() {
 		for(var type in _cache) {
 			_cache[type].sort(cmp);
 		}
+		
+		_initialized = true;
 		
 		Zotero.debug("Cached " + numCached + " translators in " + ((new Date) - start) + " ms");
 	});

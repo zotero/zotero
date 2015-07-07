@@ -958,7 +958,9 @@ Zotero.Schema = new function(){
 			}
 		});
 		
-		yield Zotero[Mode].reinit(cache);
+		yield Zotero[Mode].reinit({
+			metadataCache: cache
+		});
 		
 		return true;
 	});
