@@ -144,6 +144,7 @@ const ZoteroStandalone = new function() {
 	 * Called before standalone window is closed
 	 */
 	this.onUnload = function() {
+		ZoteroPane.destroy();
 		goQuitApplication();
 	}
 }
