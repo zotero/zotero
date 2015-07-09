@@ -84,7 +84,7 @@
         <menuitem id="menu_preferences"
 				label="&preferencesCmdMac.label;"
 				key="key_preferencesCmdMac"
-				oncommand="ZoteroPane.openPreferences();"/>
+				oncommand="Components.classes['@mozilla.org/appshell/window-mediator;1'].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow('navigator:browser').ZoteroPane.openPreferences();"/>
         <menuitem id="menu_mac_services"
 				label="&servicesMenuMac.label;"/>
         <menuitem id="menu_mac_hide_app"
