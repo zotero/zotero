@@ -36,11 +36,11 @@
 	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
 ]>
 
-<window id="main-window" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"> 
+<window id="main-window" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
 	<commandset id="mainCommandSet">
 		<!--FILE-->
 		<command id="cmd_quitApplication" oncommand="goQuitApplication();"/>
-		<command id="cmd_close" oncommand="window.close();"/>
 	</commandset>
 	
 	<keyset id="mainKeyset">
@@ -49,7 +49,12 @@
 
 	<menubar id="main-menubar">
 		<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
-			<menupopup id="menu_FilePopup"/>
+			<menupopup id="menu_FilePopup">
+                <menuitem id="aboutName"
+                          accesskey="&aboutProduct.accesskey;"
+                          label="&aboutProduct.label;"
+                          oncommand="Components.classes['@mozilla.org/appshell/window-mediator;1'].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow('navigator:browser').ZoteroPane.openAboutDialog();"/>
+            </menupopup>
 		</menu>
 	</menubar>
 </window>
