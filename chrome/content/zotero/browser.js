@@ -531,18 +531,15 @@ var Zotero_Browser = new function() {
 		});
 		popup.appendChild(menuitem);
 		
-		// TEMP: Requires a new Standalone build
-		if (!Zotero.isConnector) {
-			menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("label", Zotero.getString('ingester.saveToZoteroAsWebPageWithoutSnapshot'));
-			menuitem.setAttribute("image", webPageIcon);
-			menuitem.setAttribute("class", "menuitem-iconic");
-			menuitem.addEventListener("command", function (event) {
-				Zotero_Browser.saveAsWebPage(false);
-				event.stopPropagation();
-			});
-			popup.appendChild(menuitem);
-		}
+		menuitem = document.createElement("menuitem");
+		menuitem.setAttribute("label", Zotero.getString('ingester.saveToZoteroAsWebPageWithoutSnapshot'));
+		menuitem.setAttribute("image", webPageIcon);
+		menuitem.setAttribute("class", "menuitem-iconic");
+		menuitem.addEventListener("command", function (event) {
+			Zotero_Browser.saveAsWebPage(false);
+			event.stopPropagation();
+		});
+		popup.appendChild(menuitem);
 		
 		if (captureState == tab.CAPTURE_STATE_TRANSLATABLE) {
 			popup.appendChild(document.createElement("menuseparator"));
