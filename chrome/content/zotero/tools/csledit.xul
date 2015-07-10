@@ -47,7 +47,7 @@
 			<menulist id="zotero-csl-page-type" style="min-height: 1.6em; min-width: 50px" oncommand="Zotero_CSL_Editor.refresh()" />
 			<label value=":" />
 			<textbox size="5" id="preview-pages" type="timed" timeout="250" oncommand="Zotero_CSL_Editor.refresh()"/>
-			<checkbox oncommand="Zotero_CSL_Editor.refresh()" id="preview-suppress-author" label="&styles.editor.suppressAuthor;" />
+			<checkbox oncommand="Zotero_CSL_Editor.refresh()" id="preview-suppress-author" label="&zotero.citation.suppressAuthor.label;" />
 			<label value="&styles.editor.citePosition;" />
 			<menulist id="zotero-ref-position" oncommand="Zotero_CSL_Editor.refresh()">
 				<menupopup>
