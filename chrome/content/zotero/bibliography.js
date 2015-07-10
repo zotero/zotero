@@ -235,7 +235,10 @@ var Zotero_File_Interface_Bibliography = new function() {
 	this.acceptSelection = function () {
 		// collect code
 		_io.style = document.getElementById("style-listbox").value;
-		_io.locale = document.getElementById("locale-menu").value;
+		
+		let localeMenu = document.getElementById("locale-menu");
+		_io.locale = localeMenu.disabled ? undefined : localeMenu.value;
+		
 		if(document.getElementById("output-method-radio")) {
 			// collect settings
 			_io.mode = document.getElementById("output-mode-radio").selectedItem.id;
