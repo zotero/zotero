@@ -88,7 +88,7 @@ Zotero.Integration = new function() {
 			sharedPipe.append(".zoteroIntegrationPipe_"+logname);
 			
 			if(sharedPipe.exists()) {
-				if(_deletePipe(sharedPipe) && sharedDir.isWritable()) {
+				if(this.deletePipe(sharedPipe) && sharedDir.isWritable()) {
 					pipe = sharedPipe;
 				}
 			} else if(sharedDir.isWritable()) {
@@ -104,36 +104,44 @@ Zotero.Integration = new function() {
 			pipe.append(".zoteroIntegrationPipe");
 		
 			// destroy old pipe, if one exists
-			if(!_deletePipe(pipe)) return;
+			if(!this.deletePipe(pipe)) return;
 		}
 		
 		// try to initialize pipe
 		try {
-			Zotero.IPC.Pipe.initPipeListener(pipe, function(string) {						
-				if(string != "") {
-					// exec command if possible
-					var parts = string.match(/^([^ \n]*) ([^ \n]*)(?: ([^\n]*))?\n?$/);
-					if(parts) {
-						var agent = parts[1].toString();
-						var cmd = parts[2].toString();
-						var document = parts[3] ? parts[3].toString() : null;
-						Zotero.Integration.execCommand(agent, cmd, document);
-					} else {
-						Components.utils.reportError("Zotero: Invalid integration input received: "+string);
-					}
-				}
-			});
+			this.initPipe(pipe);
 		} catch(e) {
 			Zotero.logError(e);
 		}
 		
 		Q.delay(1000).then(_checkPluginVersions);
 	}
+
+	/**
+	 * Begin listening for integration commands on the given pipe
+	 * @param {String} pipe The path to the pipe
+	 */
+	this.initPipe = function(pipe) {
+		Zotero.IPC.Pipe.initPipeListener(pipe, function(string) {
+			if(string != "") {
+				// exec command if possible
+				var parts = string.match(/^([^ \n]*) ([^ \n]*)(?: ([^\n]*))?\n?$/);
+				if(parts) {
+					var agent = parts[1].toString();
+					var cmd = parts[2].toString();
+					var document = parts[3] ? parts[3].toString() : null;
+					Zotero.Integration.execCommand(agent, cmd, document);
+				} else {
+					Components.utils.reportError("Zotero: Invalid integration input received: "+string);
+				}
+			}
+		});
+	}
 	
 	/**
 	 * Deletes a defunct pipe on OS X
 	 */
-	function _deletePipe(pipe) {
+	this.deletePipe = function(pipe) {
 		try {
 			if(pipe.exists()) {
 				Zotero.IPC.safePipeWrite(pipe, "Zotero shutdown\n");
