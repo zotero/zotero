@@ -166,26 +166,31 @@ Zotero.Proxies = new function() {
 			
 			// IP update interval is every 15 minutes
 			if((now - Zotero.Proxies.lastIPCheck) > 900000) {
-				Zotero.debug("Proxies: Retrieving IPs");
-				var ips = Zotero.Proxies.DNS.getIPs();
-				var ipString = ips.join(",");
-				if(ipString != Zotero.Proxies.lastIPs) {				
-					// if IPs have changed, run reverse lookup
-					Zotero.Proxies.lastIPs = ipString;
-					// TODO IPv6
-					var domains = [Zotero.Proxies.DNS.reverseLookup(ip) for each(ip in ips) if(ip.indexOf(":") == -1)];
-					
+				var notificationCallbacks = channel.notificationCallbacks;
+				Zotero.Proxies.DNS.getHostnames().then(function (hosts) {
 					// if domains necessitate disabling, disable them
-					Zotero.Proxies.disabledByDomain = domains.join(",").indexOf(Zotero.Proxies.disableByDomain) != -1;			
-				}
+					Zotero.Proxies.disabledByDomain = false;
+					for (var host of hosts) {
+						Zotero.Proxies.disabledByDomain = host.toLowerCase().indexOf(Zotero.Proxies.disableByDomain) != -1;
+						if (Zotero.Proxies.disabledByDomain) return;
+					}
+					_maybeRedirect(channel, notificationCallbacks, proxied);
+				}, function(e) {
+					_maybeRedirect(channel, notificationCallbacks, proxied);
+				});
+				Zotero.Proxies.lastIPCheck = now;
+				return;
 			}
 			
-			Zotero.Proxies.lastIPCheck = now;
 			if(Zotero.Proxies.disabledByDomain) return;
 		}
 		
+		_maybeRedirect(channel, channel.notificationCallbacks, proxied);
+	}
+
+	function _maybeRedirect(channel, notificationCallbacks, proxied) {
 		// try to find a corresponding browser object
-		var bw = _getBrowserAndWindow(channel.notificationCallbacks);
+		var bw = _getBrowserAndWindow(notificationCallbacks);
 		if(!bw) return;
 		var browser = bw[0];
 		var window = bw[1];
@@ -918,106 +923,20 @@ Zotero.Proxies.Detectors.Juniper = function(channel) {
 Zotero.Proxies.DNS = new function() {
 	var _callbacks = [];
 	
-	this.getIPs = function() {
-		var dns = Components.classes["@mozilla.org/network/dns-service;1"]
-		                    .getService(Components.interfaces.nsIDNSService);
-		myHostName = dns.myHostName;
-		try {
-			var record = dns.resolve(myHostName, null);
-		} catch(e) {
-			return [];
-		}
-		
-		// get IPs
-		var ips = [];
-		while(record.hasMore()) {
-			ips.push(record.getNextAddrAsString());
-		}
-		
-		return ips;
-	}
-	
-	this.reverseLookup = function(ip) {
-		Zotero.debug("Proxies: Performing reverse lookup for IP "+ip);
-		
-		// build DNS query
-		var bytes = Zotero.randomString(2)+"\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00";
-		
-		var ipParts = ip.split(".");
-		ipParts.reverse();
-		for each(var ipPart in ipParts) {
-			bytes += String.fromCharCode(ipPart.length);
-			bytes += ipPart;
-		}
-		for each(var subdomain in ["in-addr", "arpa"]) {
-			bytes += String.fromCharCode(subdomain.length);
-			bytes += subdomain;
-		}
-		bytes += "\x00\x00\x0c\x00\x01";
-		
-		var sts = Components.classes["@mozilla.org/network/socket-transport-service;1"]
-							.getService(Components.interfaces.nsISocketTransportService);
-		var transport = sts.createTransport(["udp"], 1, "8.8.8.8", 53, null);
-		var rawinStream = transport.openInputStream(Components.interfaces.nsITransport.OPEN_BLOCKING, null, null);
-		var rawoutStream = transport.openOutputStream(Components.interfaces.nsITransport.OPEN_BLOCKING, null, null);
-		
-		var outStream = Components.classes["@mozilla.org/binaryoutputstream;1"]
-								  .createInstance(Components.interfaces.nsIBinaryOutputStream);
-		outStream.setOutputStream(rawoutStream);
-		outStream.writeBytes(bytes, bytes.length);
-		outStream.close();
-		
-		Zotero.debug("Proxies: Sent reverse lookup request");
-		
-		var inStream = Components.classes["@mozilla.org/binaryinputstream;1"]
-								 .createInstance(Components.interfaces.nsIBinaryInputStream);
-		var sinStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
-								 .createInstance(Components.interfaces.nsIScriptableInputStream);
-		inStream.setInputStream(rawinStream);
-		sinStream.init(rawinStream);
-		
-		var stuff = inStream.read32();
-		var qdCount = inStream.read16();
-		var anCount = inStream.read16();
-		var nsCount = inStream.read16();
-		var arCount = inStream.read16();
-		
-		// read queries back out
-		for(var i=0; i<qdCount; i++) {
-			var len = inStream.read8();
-			while(len != 0) {
-				sinStream.read(len);
-				len = inStream.read8();
-			}
-			inStream.read16();	// QTYPE
-			inStream.read16();	// QCLASS
-		}
-		
-		// get reverse lookup domains
-		var domain = [];
-		if(anCount == 1) {
-			inStream.read16();	// HOST
-			inStream.read16();	// TYPE
-			inStream.read16();	// CLASS
-			inStream.read32();	// TTL
-			var rdLength = inStream.read16();		// RDLENGTH
-			var bc = 0;
-			domain = [];
-			while(bc < rdLength) {
-				bc += 1;
-				if(bc > rdLength) break;
-				var len = inStream.read8();
-				bc += len;
-				if(bc > rdLength) break;
-				domain.push(sinStream.read(len));
-			}
-			domain.pop();
-		}
-		
-		domain = domain.join(".").toLowerCase();
-		Zotero.debug("Proxies: "+ip+" PTR "+domain);
-		
-		inStream.close();
-		return domain;
+	this.getHostnames = function() {
+		if (!Zotero.isWin && !Zotero.isMac && !Zotero.isLinux) return Q([]);
+		var deferred = Q.defer();
+		var worker = new ChromeWorker("chrome://zotero/content/xpcom/dns_worker.js");
+		Zotero.debug("Proxies.DNS: Performing reverse lookup");
+		worker.onmessage = function(e) {
+			Zotero.debug("Proxies.DNS: Got hostnames "+e.data);
+		    deferred.resolve(e.data);
+		};
+		worker.onerror = function(e) {
+			Zotero.debug("Proxies.DNS: Reverse lookup failed");
+			deferred.reject(e.message);
+		};
+		worker.postMessage(Zotero.isWin ? "win" : Zotero.isMac ? "mac" : Zotero.isLinux ? "linux" : "unix");
+		return deferred.promise;
 	}
 };
