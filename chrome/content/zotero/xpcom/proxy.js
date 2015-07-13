@@ -175,6 +175,8 @@ Zotero.Proxies = new function() {
 						if (Zotero.Proxies.disabledByDomain) return;
 					}
 					_maybeRedirect(channel, notificationCallbacks, proxied);
+				}, function(e) {
+					_maybeRedirect(channel, notificationCallbacks, proxied);
 				});
 				Zotero.Proxies.lastIPCheck = now;
 				return;
@@ -922,6 +924,7 @@ Zotero.Proxies.DNS = new function() {
 	var _callbacks = [];
 	
 	this.getHostnames = function() {
+		if (!Zotero.isWin && !Zotero.isMac && !Zotero.isLinux) return Q([]);
 		var deferred = Q.defer();
 		var worker = new ChromeWorker("chrome://zotero/content/xpcom/dns_worker.js");
 		Zotero.debug("Proxies.DNS: Performing reverse lookup");
