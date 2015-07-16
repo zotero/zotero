@@ -64,6 +64,11 @@ Zotero_Ingester_Interface_SelectItems.init = function() {
 		itemNode.setAttribute("checked", checked);
 		listbox.appendChild(itemNode);
 	}
+	
+	// Check item if there is only one
+	if (listbox.itemCount === 1) {
+		listbox.getItemAtIndex(0).setAttribute("checked", true);
+	}
 }
 
 /**
