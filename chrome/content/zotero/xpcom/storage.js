@@ -1078,7 +1078,9 @@ Zotero.Sync.Storage = new function () {
 							// This can happen if a path is too long on Windows,
 							// e.g. a file is being accessed on a VM through a share
 							// (and probably in other cases).
-							|| (e.winLastError && e.winLastError == 3))) {
+							|| (e.winLastError && e.winLastError == 3)
+							// Handle long filenames on OS X/Linux
+							|| (e.unixErrno && e.unixErrno == 63))) {
 						Zotero.debug("Marking attachment " + lk + " as missing");
 						updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
 						return;
