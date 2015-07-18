@@ -1000,13 +1000,14 @@ Zotero.Sync.Storage = new function () {
 							Zotero.debug("Remote mod time for item " + lk + " is " + itemModTimes[item.id]);
 							
 							// Ignore attachments whose stored mod times haven't changed
-							if (row.storageModTime == itemModTimes[id]) {
+							if (row.storageModTime == itemModTimes[item.id]) {
 								Zotero.debug("Storage mod time (" + row.storageModTime + ") "
 									+ "hasn't changed for item " + lk);
 								return;
 							}
 							
-							Zotero.debug("Marking attachment " + lk + " for download");
+							Zotero.debug("Marking attachment " + lk + " for download "
+								+ "(stored mtime: " + itemModTimes[item.id] + ")");
 							updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD;
 						}
 						
