@@ -34,6 +34,8 @@
 		</resources>
 		
 		<implementation>
+			<property name="panel" onget="return document.getAnonymousNodes(this)[0]"/>
+			
 			<!--
 			  @param {Object} [options]
 			  @param {String} [options.text] - Text to use in place of firstRunGuidance.<about>
@@ -77,8 +79,7 @@
 					
 					var x = this.getAttribute("x"),
 						y = this.getAttribute("y"),
-						position = this.getAttribute("position"),
-						panel = document.getAnonymousNodes(this)[0];
+						position = this.getAttribute("position");
 					
 					if (!useLastText) {
 						if (!text) {
@@ -119,7 +120,15 @@
 								self.removeEventListener("popupshown", popupShownListener);
 								
 								let appcontent = document.getElementById('appcontent');
-								let pageHideListener = function () {
+								let pageHideListener = function (event) {
+									var doc = event.originalTarget;
+									if(!(doc instanceof HTMLDocument)) return;
+									
+									var rootDoc = doc.defaultView.top.document;
+									// Don't hide when frames and special URLs are unloaded
+									if (rootDoc != doc || !rootDoc.location.href.startsWith('http')) {
+										return;
+									}
 									appcontent.removeEventListener("pagehide", pageHideListener);
 									self.hide();
 								};
@@ -129,7 +138,7 @@
 						}
 						
 						self.hidden = false;
-						panel.openPopup(forEl, position ? position : "after_start",
+						self.panel.openPopup(forEl, position ? position : "after_start",
 							x ? parseInt(x, 10) : 0, y ? parseInt(y, 10) : 0, false, false, null);
 						if (pref) {
 							Zotero.Prefs.set(pref, true);
@@ -142,12 +151,13 @@
 						f();
 					}
 
-					if (this.hasAttribute("noautohide")) {
+					if (this.getAttribute("noautohide") == 'true'
+							&& !this.hasAttribute('forward')) {
 						let listener = function () {
-							panel.removeEventListener("click", listener);
-							panel.hidePopup();
-						};
-						panel.addEventListener("click", listener);
+							this.panel.removeEventListener("click", listener);
+							this.panel.hidePopup();
+						}.bind(this);
+						this.panel.addEventListener("click", listener);
 					}
 				]]>
 				</body>
@@ -174,8 +184,18 @@
 					var nextElem = document.getElementById(nextID);
 					button = this.id(dir + '-button');
 					button.hidden = false;
+					var target;
+					// If there's a forward action and no back action, the whole panel triggers
+					// the forward in noautohide mode
+					if (dir == 'forward' && !this.hasAttribute('back')
+							&& this.getAttribute('noautohide') == 'true') {
+						target = this.panel;
+					}
+					else {
+						target = button;
+					}
 					var listener = function (event) {
-						button.removeEventListener("click", listener);
+						target.removeEventListener("click", listener);
 						this.hide();
 						var data = {
 							force: true
@@ -189,7 +209,7 @@
 						nextElem.show(data);
 						event.stopPropagation();
 					}.bind(this);
-					button.addEventListener("click", listener);
+					target.addEventListener("click", listener);
 				]]></body>
 			</method>
 			

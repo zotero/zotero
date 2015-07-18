@@ -443,7 +443,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 					}
 					
 					// save snapshot
-					if(filesEditable) {
+					if (filesEditable && !data.skipSnapshot) {
 						// TODO: async
 						Zotero.Attachments.importFromDocument({
 							document: doc,

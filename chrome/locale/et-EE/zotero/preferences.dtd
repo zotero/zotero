@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domeen/aadress">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(nt wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Väljundformaat">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Keel">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Peatada kiirkopeerimine juhul kui lohistatakse rohkem kui">
 
 <!ENTITY zotero.preferences.prefpane.cite "Viitamine">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link ".">
 <!ENTITY zotero.preferences.proxies.transparent "Pidada meeles prokside kaudu kasutatavad allikad">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Tuvastada prokside kaudu külastatavad lehed automaatselt">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Teate näitamine, kui toimub ligipääs proxy kaudu">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Proksile ümbersuunamine peatada, kui domeeninimi sisaldab ">
 <!ENTITY zotero.preferences.proxies.configured "Konfigureeritud proksid">
 <!ENTITY zotero.preferences.proxies.hostname "Hostinimi">
@@ -162,7 +162,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Täpsemalt">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Failid ja kataloogid">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Kiirvaliku klahvid">
 
 <!ENTITY zotero.preferences.prefpane.locate "Otsing">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikli otsingumootori haldaja">
@@ -203,6 +203,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Saata Zotero serverisse">
 
 <!ENTITY zotero.preferences.openAboutConfig "Avada about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
+<!ENTITY zotero.preferences.openCSLEdit "Avada stiilide redaktor">
+<!ENTITY zotero.preferences.openCSLPreview "Avada stiilide eelvaade">
 <!ENTITY zotero.preferences.openAboutMemory "Avada about:memory">

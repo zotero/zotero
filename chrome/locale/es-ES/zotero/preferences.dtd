@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Dominio/ruta">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(p.ej. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Formato de salida">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Idioma">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Desactivar Copia rápida cuando arrastre más de">
 
 <!ENTITY zotero.preferences.prefpane.cite "Citar">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "para mayor información.">
 <!ENTITY zotero.preferences.proxies.transparent "Habilitar el redireccionamiento del servidor proxy">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Automáticamente reconocer recursos proxificados">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Mostrar notificación al redirigir a través de un servidor proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Deshabilitar el redireccionamiento del servidor proxy cuando el nombre del dominio contenga">
 <!ENTITY zotero.preferences.proxies.configured "Servidores proxies configurados">
 <!ENTITY zotero.preferences.proxies.hostname "Nombre del sistema">

@@ -88,7 +88,7 @@ Zotero.Integration = new function() {
 			sharedPipe.append(".zoteroIntegrationPipe_"+logname);
 			
 			if(sharedPipe.exists()) {
-				if(_deletePipe(sharedPipe) && sharedDir.isWritable()) {
+				if(this.deletePipe(sharedPipe) && sharedDir.isWritable()) {
 					pipe = sharedPipe;
 				}
 			} else if(sharedDir.isWritable()) {
@@ -104,36 +104,44 @@ Zotero.Integration = new function() {
 			pipe.append(".zoteroIntegrationPipe");
 		
 			// destroy old pipe, if one exists
-			if(!_deletePipe(pipe)) return;
+			if(!this.deletePipe(pipe)) return;
 		}
 		
 		// try to initialize pipe
 		try {
-			Zotero.IPC.Pipe.initPipeListener(pipe, function(string) {						
-				if(string != "") {
-					// exec command if possible
-					var parts = string.match(/^([^ \n]*) ([^ \n]*)(?: ([^\n]*))?\n?$/);
-					if(parts) {
-						var agent = parts[1].toString();
-						var cmd = parts[2].toString();
-						var document = parts[3] ? parts[3].toString() : null;
-						Zotero.Integration.execCommand(agent, cmd, document);
-					} else {
-						Components.utils.reportError("Zotero: Invalid integration input received: "+string);
-					}
-				}
-			});
+			this.initPipe(pipe);
 		} catch(e) {
 			Zotero.logError(e);
 		}
 		
 		Zotero.Promise.delay(1000).then(_checkPluginVersions);
 	}
+
+	/**
+	 * Begin listening for integration commands on the given pipe
+	 * @param {String} pipe The path to the pipe
+	 */
+	this.initPipe = function(pipe) {
+		Zotero.IPC.Pipe.initPipeListener(pipe, function(string) {
+			if(string != "") {
+				// exec command if possible
+				var parts = string.match(/^([^ \n]*) ([^ \n]*)(?: ([^\n]*))?\n?$/);
+				if(parts) {
+					var agent = parts[1].toString();
+					var cmd = parts[2].toString();
+					var document = parts[3] ? parts[3].toString() : null;
+					Zotero.Integration.execCommand(agent, cmd, document);
+				} else {
+					Components.utils.reportError("Zotero: Invalid integration input received: "+string);
+				}
+			}
+		});
+	}
 	
 	/**
 	 * Deletes a defunct pipe on OS X
 	 */
-	function _deletePipe(pipe) {
+	this.deletePipe = function(pipe) {
 		try {
 			if(pipe.exists()) {
 				Zotero.IPC.safePipeWrite(pipe, "Zotero shutdown\n");
@@ -2029,7 +2037,7 @@ Zotero.Integration.Session.prototype.resetRequest = function(doc) {
  * @param data {Zotero.Integration.DocumentData}
  * @param resetStyle {Boolean} Whether to force the style to be reset
  *     regardless of whether it has changed. This is desirable if the
- *     automaticJournalAbbreviations has changed.
+ *     automaticJournalAbbreviations or locale has changed.
  */
 Zotero.Integration.Session.prototype.setData = function(data, resetStyle) {
 	var oldStyle = (this.data && this.data.style ? this.data.style : false);
@@ -2039,7 +2047,7 @@ Zotero.Integration.Session.prototype.setData = function(data, resetStyle) {
 		try {
 			var getStyle = Zotero.Styles.get(data.style.styleID);
 			data.style.hasBibliography = getStyle.hasBibliography;
-			this.style = getStyle.getCiteProc(data.locale, data.prefs.automaticJournalAbbreviations);
+			this.style = getStyle.getCiteProc(data.style.locale, data.prefs.automaticJournalAbbreviations);
 			this.style.setOutputFormat("rtf");
 			this.styleClass = getStyle.class;
 			this.dateModified = new Object();
@@ -2069,7 +2077,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 	
 	if(this.data) {
 		io.style = this.data.style.styleID;
-		io.locale = this.data.locale;
+		io.locale = this.data.style.locale;
 		io.useEndnotes = this.data.prefs.noteType == 0 ? 0 : this.data.prefs.noteType-1;
 		io.fieldType = this.data.prefs.fieldType;
 		io.primaryFieldType = primaryFieldType;
@@ -2092,19 +2100,17 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		var data = new Zotero.Integration.DocumentData();
 		data.sessionID = oldData.sessionID;
 		data.style.styleID = io.style;
-		data.locale = io.locale;
+		data.style.locale = io.locale;
 		data.prefs.fieldType = io.fieldType;
 		data.prefs.storeReferences = io.storeReferences;
 		data.prefs.automaticJournalAbbreviations = io.automaticJournalAbbreviations;
-
-		var localeChanged = false;
-		if (!oldData.locale || (oldData.locale != io.locale)) {
-			localeChanged = true;
-		}
-
-		me.setData(data, oldData && 
-		(oldData.prefs.automaticJournalAbbreviations !=
-		data.prefs.automaticJournalAbbreviations || localeChanged));
+		
+		var forceStyleReset = oldData
+			&& (
+				oldData.prefs.automaticJournalAbbreviations != data.prefs.automaticJournalAbbreviations
+				|| oldData.style.locale != io.locale
+			);
+		me.setData(data, forceStyleReset);
 
 		// need to do this after setting the data so that we know if it's a note style
 		me.data.prefs.noteType = me.style && me.styleClass == "note" ? io.useEndnotes+1 : 0;
@@ -2986,6 +2992,7 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
 		'zotero-version="'+Zotero.Utilities.htmlSpecialChars(Zotero.version)+'">'+
 			'<session id="'+Zotero.Utilities.htmlSpecialChars(this.sessionID)+'"/>'+
 		'<style id="'+Zotero.Utilities.htmlSpecialChars(this.style.styleID)+'" '+
+			(this.style.locale ? 'locale="' + Zotero.Utilities.htmlSpecialChars(this.style.locale) + '" ': '') +
 			'hasBibliography="'+(this.style.hasBibliography ? "1" : "0")+'" '+
 			'bibliographyStyleHasBeenSet="'+(this.style.bibliographyStyleHasBeenSet ? "1" : "0")+'"/>'+
 		(prefs ? '<prefs>'+prefs+'</prefs>' : '<prefs/>')+'</data>';
@@ -3001,6 +3008,7 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 	
 	this.sessionID = Zotero.Utilities.xpathText(doc, '/data/session[1]/@id');
 	this.style = {"styleID":Zotero.Utilities.xpathText(doc, '/data/style[1]/@id'),
+		"locale":Zotero.Utilities.xpathText(doc, '/data/style[1]/@locale'),
 		"hasBibliography":(Zotero.Utilities.xpathText(doc, '/data/style[1]/@hasBibliography') == 1),
 		"bibliographyStyleHasBeenSet":(Zotero.Utilities.xpathText(doc, '/data/style[1]/@bibliographyStyleHasBeenSet') == 1)};
 	this.prefs = {};

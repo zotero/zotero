@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Skapa citering/källförteckning">
 <!ENTITY zotero.bibliography.style.label "Referensstil">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "Språk:">
 <!ENTITY zotero.bibliography.outputMode "Utmatningsläge">
 <!ENTITY zotero.bibliography.bibliography "Källförteckning">
 <!ENTITY zotero.bibliography.outputMethod "Utmatningsmetod">

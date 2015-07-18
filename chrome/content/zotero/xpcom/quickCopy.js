@@ -113,14 +113,18 @@ Zotero.QuickCopy = new function() {
 		
 		var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 			.getService(Components.interfaces.nsIIOService);
+		var nsIURI;
 		try {
-			var nsIURI = ioService.newURI(url, null, null);
+			nsIURI = ioService.newURI(url, null, null);
 			// Accessing some properties may throw for URIs that do not support those
 			// parts. E.g. hostPort throws NS_ERROR_FAILURE for about:blank
 			var urlHostPort = nsIURI.hostPort;
 			var urlPath = nsIURI.path;
 		}
-		catch (e) {
+		catch (e) {}
+		
+		// Skip non-HTTP URLs
+		if (!nsIURI || !/^https?$/.test(nsIURI.scheme)) {
 			return quickCopyPref;
 		}
 		
@@ -129,7 +133,13 @@ Zotero.QuickCopy = new function() {
 		}
 		
 		var matches = [];
-		var urlDomain = urlHostPort.match(/[^\.]+\.[^\.]+$/);
+		// Match last one or two sections of domain, not counting trailing period
+		var urlDomain = urlHostPort.match(/(?:[^.]+\.)?[^.]+(?=\.?$)/);
+		// Hopefully can't happen, but until we're sure
+		if (!urlDomain) {
+			Zotero.logError("Quick Copy host '" + urlHostPort + "' not matched");
+			return quickCopyPref;
+		}
 		for (let i=0; i<_siteSettings.length; i++) {
 			let row = _siteSettings[i];
 			

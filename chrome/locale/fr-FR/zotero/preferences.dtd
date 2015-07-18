@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domaine/Chemin">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(ex. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Format de sortie">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Langue">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Désactiver la copie rapide lorsqu'on fait glisser plus de">
 
 <!ENTITY zotero.preferences.prefpane.cite "Citer">
@@ -140,12 +140,12 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Serveurs mandataires">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Options des serveurs mandataires">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero redirigera les requêtes de manière transparente à travers les serveurs mandataires enregistrés. Consultez la">
-<!ENTITY zotero.preferences.proxies.desc_link "documentation concernant les serveurs mandataires">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero redirigera automatiquement les requêtes via les serveurs mandataires (proxy) enregistrés. Consultez la">
+<!ENTITY zotero.preferences.proxies.desc_link "documentation relative aux serveurs mandataires">
 <!ENTITY zotero.preferences.proxies.desc_after_link "pour plus d'information.">
 <!ENTITY zotero.preferences.proxies.transparent "Activer la redirection par un serveur mandataire (proxy)">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Reconnaître automatiquement les ressources passant par un serveur mandataire">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Afficher une notification lors d'une redirection par un serveur mandataire">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Désactiver la redirection par un serveur mandataire lorsque mon nom de domaine contient ">
 <!ENTITY zotero.preferences.proxies.configured "Serveurs mandataires configurés">
 <!ENTITY zotero.preferences.proxies.hostname "Adresse Internet">

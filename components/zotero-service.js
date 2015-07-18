@@ -226,6 +226,7 @@ function makeZoteroContext(isConnector) {
 	
 	// Load CiteProc into Zotero.CiteProc namespace
 	zContext.Zotero.CiteProc = {"Zotero":zContext.Zotero};
+	subscriptLoader.loadSubScript("chrome://zotero/content/xpcom/citeproc-prereqs.js", zContext.Zotero.CiteProc);
 	subscriptLoader.loadSubScript("chrome://zotero/content/xpcom/citeproc.js", zContext.Zotero.CiteProc);
 	
 	// Load XRegExp object into Zotero.XRegExp

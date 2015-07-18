@@ -2227,7 +2227,7 @@ Zotero.Prefs = new function(){
 		if (!fromVersion) {
 			fromVersion = 0;
 		}
-		var toVersion = 1;
+		var toVersion = 2;
 		if (fromVersion < toVersion) {
 			for (var i = fromVersion + 1; i <= toVersion; i++) {
 				switch (i) {
@@ -2243,6 +2243,14 @@ Zotero.Prefs = new function(){
 								this.set('sync.storage.downloadMode.groups', 'on-sync');
 							}
 						}
+						break;
+					
+					case 2:
+						// Re-show saveButton guidance panel (and clear old saveIcon pref).
+						// The saveButton guidance panel initially could auto-hide too easily.
+						this.clear('firstRunGuidanceShown.saveIcon');
+						this.clear('firstRunGuidanceShown.saveButton');
+						break;
 				}
 			}
 			this.set('prefVersion', toVersion);

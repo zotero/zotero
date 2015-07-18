@@ -63,7 +63,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Ladda ner filer">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "vid synkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "efter behov">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Genom att använda Zotero Storage går du med på tjänstens">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Genom att använda Zotero Storage godtar du tjänstens">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "avtalsvillkor">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Följande åtgärder är endast till för sällsynta, särskilda situationer och ska inte användas för vanlig felsökning. I många fall kan en återställning istället orsaka nya problem. Se">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Återställningsalternativ för synkronisering">
@@ -96,7 +96,7 @@
 <!ENTITY zotero.preferences.prefpane.export "Exportera">
 
 <!ENTITY zotero.preferences.citationOptions.caption "Inställningar för källhänvisningar">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Länka till papperstidningars webbsida i källförteckningen">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Ta med URL:er för forskningsartiklar i källförteckningen">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "När detta är bortvalt lägger Zotero bara till webblänken om artikeln inte har ett sidintervall specificerat.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Snabbkopiera">
@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domän/sökväg">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(t.ex. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Utdataformat">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Språk">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Stäng av snabbkopiering om fler än ... filer är markerade.">
 
 <!ENTITY zotero.preferences.prefpane.cite "Källhänvisa">
@@ -145,16 +145,16 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "för mer information.">
 <!ENTITY zotero.preferences.proxies.transparent "Kom ihåg tidigare proxyservrar automatiskt">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Upptäck proxytjänster automatiskt">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Visa meddelande vid omdirigering via en proxy.">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Inaktivera proxy-omdirigering när mitt domännamn innehåller">
 <!ENTITY zotero.preferences.proxies.configured "Inställda proxyservrar">
-<!ENTITY zotero.preferences.proxies.hostname "Hostnamn">
+<!ENTITY zotero.preferences.proxies.hostname "Värdnamn">
 <!ENTITY zotero.preferences.proxies.scheme "Inställningar">
 
 <!ENTITY zotero.preferences.proxies.multiSite "Multisajt">
 <!ENTITY zotero.preferences.proxies.autoAssociate "Associera nya värdar automatiskt">
 <!ENTITY zotero.preferences.proxies.variables "Du kan använda följande inställningar för din proxyserver:">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Proxysajtens hostnamn (t.ex., www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Proxysajtens värdnamn (t.ex., www.zotero.org)">
 <!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Sökvägen till proxysidan utan föregående / (t.ex., about/index.html)">
 <!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Mappnamnet (t.ex., about/)">
 <!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Filnamnet (t.ex., index.html)">

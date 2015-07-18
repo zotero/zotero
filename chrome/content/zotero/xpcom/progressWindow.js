@@ -106,9 +106,8 @@ Zotero.ProgressWindowSet = new function() {
  *
  * Pass the active window into the constructor
  */
-Zotero.ProgressWindow = function(_window){
+Zotero.ProgressWindow = function(_window = null) {
 	var self = this,
-		_window = null,
 		_progressWindow = null,
 		_windowLoaded = false,
 		_windowLoading = false,

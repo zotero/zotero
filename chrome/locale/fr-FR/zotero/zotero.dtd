@@ -97,7 +97,7 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Nouveau document">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Plus">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Créer un nouveau document à partir de la page courante">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Créer un document Page Web à partir de la page courante">
 <!ENTITY zotero.toolbar.lookup.label "Ajouter un document par son identifiant">
 <!ENTITY zotero.toolbar.removeItem.label "Supprimer le document…">
 <!ENTITY zotero.toolbar.newCollection.label "Nouvelle collection…">
@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Créer une citation/bibliographie">
 <!ENTITY zotero.bibliography.style.label "Style de citation :">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "Langue :">
 <!ENTITY zotero.bibliography.outputMode "Mode de création :">
 <!ENTITY zotero.bibliography.bibliography "Bibliographie">
 <!ENTITY zotero.bibliography.outputMethod "Méthode de création :">

@@ -33,8 +33,11 @@
 // Used by rtfScan.xul, integrationDocPrefs.xul, and bibliography.xul
 
 var Zotero_File_Interface_Bibliography = new function() {
-	var _io, _saveStyle;
-	var lastSelectedLocale; // Only changes when explicitly selected
+	var _io;
+	
+	// Only changes when explicitly selected
+	var lastSelectedStyle,
+		lastSelectedLocale;
 	
 	/*
 	 * Initialize some variables and prepare event listeners for when chrome is done
@@ -60,7 +63,6 @@ var Zotero_File_Interface_Bibliography = new function() {
 		// if no style is requested, get the last style used
 		if(!_io.style) {
 			_io.style = Zotero.Prefs.get("export.lastStyle");
-			_saveStyle = true;
 		}
 		
 		// add styles to list
@@ -175,8 +177,8 @@ var Zotero_File_Interface_Bibliography = new function() {
 	 */
 	this.styleChanged = function () {
 		var selectedItem = document.getElementById("style-listbox").selectedItem;
-		var selectedStyle = selectedItem.getAttribute('value');
-		var selectedStyleObj = Zotero.Styles.get(selectedStyle);
+		lastSelectedStyle = selectedItem.getAttribute('value');
+		var selectedStyleObj = Zotero.Styles.get(lastSelectedStyle);
 		
 		updateLocaleMenu(selectedStyleObj);
 		
@@ -210,7 +212,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		// Change label to "Citation" or "Note" depending on style class
 		if(document.getElementById("citations")) {
 			let label = "";
-			if(Zotero.Styles.get(selectedStyle).class == "note") {
+			if(Zotero.Styles.get(lastSelectedStyle).class == "note") {
 				label = Zotero.getString('citation.notes');
 			} else {
 				label = Zotero.getString('citation.citations');
@@ -235,7 +237,10 @@ var Zotero_File_Interface_Bibliography = new function() {
 	this.acceptSelection = function () {
 		// collect code
 		_io.style = document.getElementById("style-listbox").value;
-		_io.locale = document.getElementById("locale-menu").value;
+		
+		let localeMenu = document.getElementById("locale-menu");
+		_io.locale = localeMenu.disabled ? undefined : localeMenu.value;
+		
 		if(document.getElementById("output-method-radio")) {
 			// collect settings
 			_io.mode = document.getElementById("output-mode-radio").selectedItem.id;
@@ -249,7 +254,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		if(document.getElementById("displayAs")) {
 			var automaticJournalAbbreviationsEl = document.getElementById("automaticJournalAbbreviations-checkbox");
 			_io.automaticJournalAbbreviations = automaticJournalAbbreviationsEl.checked;
-			if(!automaticJournalAbbreviationsEl.hidden && _saveStyle) {
+			if(!automaticJournalAbbreviationsEl.hidden && lastSelectedStyle) {
 				Zotero.Prefs.set("cite.automaticJournalAbbreviations", _io.automaticJournalAbbreviations);
 			}
 			_io.useEndnotes = document.getElementById("displayAs").selectedIndex;
@@ -257,13 +262,13 @@ var Zotero_File_Interface_Bibliography = new function() {
 			_io.storeReferences = document.getElementById("storeReferences").checked;
 		}
 		
-		// save style (this happens only for "Export Bibliography," or Word
-		// integration when no bibliography style was previously selected)
-		if(_saveStyle) {
+		// remember style and locale if user selected these explicitly
+		if(lastSelectedStyle) {
 			Zotero.Prefs.set("export.lastStyle", _io.style);
 		}
 		
-		// save locale
-		Zotero.Prefs.set("export.lastLocale", lastSelectedLocale);
+		if (lastSelectedLocale) {
+			Zotero.Prefs.set("export.lastLocale", lastSelectedLocale);
+		}
 	};
 }

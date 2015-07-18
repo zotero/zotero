@@ -722,7 +722,10 @@ var Zotero_RecognizePDF = new function() {
 				throw new Zotero.Exception.Alert('recognizePDF.stopped');
 			}
 			
+			Zotero.debug("RecognizePDF: (" + xmlhttp.status + ") Got page with title " + xmlhttp.response.title);
+			
 			if(Zotero.Utilities.xpath(xmlhttp.response, "//form[@action='Captcha']").length) {
+				Zotero.debug("RecognizePDF: Found CAPTCHA on page.");
 				return _solveCaptcha(xmlhttp, tries);
 			}
 			return xmlhttp;
@@ -742,19 +745,24 @@ var Zotero_RecognizePDF = new function() {
 				throw new Zotero.Exception.Alert('recognizePDF.stopped');
 			}
 			
+			Zotero.debug("RecognizePDF: Checking for CAPTCHA on Google Scholar error page (" + e.status + ")");
+			
 			// Check for captcha on error page
 			if(e instanceof Zotero.HTTP.UnexpectedStatusException
 				&& (e.status == 403 || e.status == 503) && e.xmlhttp.response) {
 				if(_extractCaptchaFormData(e.xmlhttp.response)) {
+					Zotero.debug("RecognizePDF: CAPTCHA found");
 					return _solveCaptcha(e.xmlhttp, tries);
 				} else if(!dontClearCookies && e.xmlhttp.channel) { // Make sure we can obtain original URL
 					// AFAICT, for 403 errors, GS just says "sorry, try later",
 					// but if you clear cookies, you get a CAPTCHA
+					Zotero.debug("RecognizePDF: No CAPTCHA detected on page. Clearing cookies.");
 					if(!_clearGSCookies(e.xmlhttp.channel.originalURI.host)) {
 						//user said no or no cookies removed
 						throw new Zotero.Exception.Alert('recognizePDF.limit');
 					}
 					// Redo GET request
+					Zotero.debug("RecognizePDF: Reloading page after clearing cookies.");
 					return Zotero.HTTP.promise("GET", e.xmlhttp.channel.originalURI.spec, {"responseType":"document"})
 						.then(function(xmlhttp) {
 							return _checkCaptchaOK(xmlhttp, tries);
@@ -809,6 +817,7 @@ var Zotero_RecognizePDF = new function() {
 				throw new Zotero.Exception.Alert('recognizePDF.limit');
 			}
 			
+			Zotero.debug('RecognizePDF: User entered "' + io.dataOut.captcha + '" for CAPTCHA');
 			formData.input.captcha = io.dataOut.captcha;
 			var url = '', prop;
 			for(prop in formData.input) {

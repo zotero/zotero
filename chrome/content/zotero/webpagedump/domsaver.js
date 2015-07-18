@@ -639,7 +639,8 @@ var wpdDOMSaver = {
 		if (medium != "" && medium.indexOf("screen") < 0 && medium.indexOf("all") < 0) {
 			return "";
 		}
-		if (aCSS.href != null && aCSS.href.indexOf("chrome") == 0) return "";
+		// Disabled by Dan S. to fix CSS on snapshots of Reader View
+		//if (aCSS.href != null && aCSS.href.indexOf("chrome") == 0) return "";
 		var flag = "";
 
 		// Added by Dan S. for Zotero

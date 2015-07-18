@@ -472,6 +472,16 @@ function generateAllTypesAndFieldsData() {
 				lastName: typeName + 'Last'
 			});
 		}
+		
+		// Also add a single-field mode author, which is valid for all types
+		let primaryCreatorType = Zotero.CreatorTypes.getName(
+			Zotero.CreatorTypes.getPrimaryIDForType(itemTypes[i].id)
+		);
+		creators.push({
+			creatorType: primaryCreatorType,
+			lastName: 'Institutional Author',
+			fieldMode: 1
+		});
 	}
 	
 	return data;

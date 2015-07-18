@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "網域/路徑">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(例如 wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "輸出格式">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "語言">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "拖放超過多少項目時，停用快速複製：">
 
 <!ENTITY zotero.preferences.prefpane.cite "引用">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "以得更多資訊。">
 <!ENTITY zotero.preferences.proxies.transparent "啟用代理伺服器轉導向">
 <!ENTITY zotero.preferences.proxies.autoRecognize "自動識別接受透過代理伺服器的資源">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "當由伺服器重新導向時顯示通知訊息">
 <!ENTITY zotero.preferences.proxies.disableByDomain "停用代理伺服器轉導向，若我的網域名稱含 ">
 <!ENTITY zotero.preferences.proxies.configured "已設定的代理伺服器">
 <!ENTITY zotero.preferences.proxies.hostname "主機名稱">

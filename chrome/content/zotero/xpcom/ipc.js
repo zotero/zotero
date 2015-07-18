@@ -24,7 +24,7 @@
 */
 
 Zotero.IPC = new function() {
-	var _libc, _libcPath, _instancePipe, _user32, open, write, close, instancePipeOpen;
+	var _libc, _libcPath, _instancePipe, _user32, open, write, close;
 	
 	/**
 	 * Initialize pipe for communication with connector
@@ -253,18 +253,12 @@ Zotero.IPC = new function() {
 				}
 				
 				if(!defunct) {
-					// make sure instance pipe is open and accepting input, so that we can receive
-					// a response to whatever we're sending
-					if(!instancePipeOpen && _instancePipe.exists()) {
-						Zotero.IPC.safePipeWrite(_instancePipe, "test\n", true);
-						instancePipeOpen = true;
-					}
-					
-					// Try to write to the pipe once a ms for 100 ms
-					var timeout = Date.now()+100, wroteToPipe;
+					// Try to write to the pipe for 100 ms
+					var time = Date.now(), timeout = time+100, wroteToPipe;
 					do {
 						wroteToPipe = Zotero.IPC.safePipeWrite(pipe, msg+"\n");
 					} while(Date.now() < timeout && !wroteToPipe);
+					if (wroteToPipe) Zotero.debug('IPC: Pipe took '+(Date.now()-time)+' ms to become available');
 					success = success || wroteToPipe;
 					defunct = !wroteToPipe;
 				}
