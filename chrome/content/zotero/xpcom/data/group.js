@@ -221,11 +221,7 @@ Zotero.Group.prototype.save = Zotero.Promise.coroutine(function* () {
 		
 		if (isNew) {
 			let { id: libraryID } = yield Zotero.Libraries.add(
-				'group',
-				{
-					editable: this.editable,
-					filesEditable: this.filesEditable
-				}
+				'group', this.editable, this.filesEditable
 			);
 			sqlColumns.push('libraryID');
 			sqlValues.push(libraryID);

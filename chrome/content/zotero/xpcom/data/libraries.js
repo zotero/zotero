@@ -80,14 +80,11 @@ Zotero.Libraries = new function () {
 	
 	/**
 	 * @param {String} type - Library type
-	 * @param {Object} [options] - Library properties to set
-	 * @param {Boolean} [options.editable]
-	 * @param {Boolean} [options.filesEditable]
+	 * @param {Boolean} editable
+	 * @param {Boolean} filesEditable
 	 */
-	this.add = Zotero.Promise.coroutine(function* (type, options) {
+	this.add = Zotero.Promise.coroutine(function* (type, editable, filesEditable) {
 		Zotero.DB.requireTransaction();
-		
-		options = options || {};
 		
 		switch (type) {
 			case 'group':
@@ -99,17 +96,14 @@ Zotero.Libraries = new function () {
 		
 		var libraryID = yield Zotero.ID.get('libraries');
 		
-		var sql = "INSERT INTO libraries (libraryID, libraryType";
-		var params = [libraryID, type];
-		if (options.editable) {
-			sql += ", editable";
-			params.push(options.editable ? 1 : 0);
-			if (options.filesEditable) {
-				sql += ", filesEditable";
-				params.push(options.filesEditable ? 1 : 0);
-			}
-		}
-		sql += ") VALUES (" + params.map(p => "?").join(", ") + ")";
+		var sql = "INSERT INTO libraries (libraryID, libraryType, editable, filesEditable) "
+			+ "VALUES (?, ?, ?, ?)";
+		var params = [
+			libraryID,
+			type,
+			editable ? 1 : 0,
+			filesEditable ? 1 : 0
+		];
 		yield Zotero.DB.queryAsync(sql, params);
 		
 		// Re-fetch from DB to get auto-filled defaults
@@ -236,8 +230,8 @@ Zotero.Libraries = new function () {
 		return {
 			id: row.libraryID,
 			type: row.libraryType,
-			editable: row.editable,
-			filesEditable: row.filesEditable,
+			editable: !!row.editable,
+			filesEditable: !!row.filesEditable,
 			version: row.version,
 			lastSyncTime: row.lastsync != 0 ? new Date(row.lastsync * 1000) : false
 		};
