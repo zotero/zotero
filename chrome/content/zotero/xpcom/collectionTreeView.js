@@ -431,12 +431,10 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 				}
 				
 				break;
-				
+			
 			case 'group':
 				yield this.reload();
-				// Groups can only be created during sync
-				let libraryID = Zotero.Groups.getLibraryIDFromGroupID(id);
-				yield this.selectByID("L" + libraryID);
+				yield this.restoreSelection(currentTreeRow);
 				break;
 		}
 	}

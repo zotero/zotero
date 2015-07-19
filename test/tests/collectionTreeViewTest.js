@@ -235,6 +235,12 @@ describe("Zotero.CollectionTreeView", function() {
 			}
 		})
 		
+		it("shouldn't select a new group", function* () {
+			var group = yield createGroup();
+			// Library should still be selected
+			assert.equal(cv.getSelectedLibraryID(), Zotero.Libraries.userLibraryID);
+		})
+		
 		it("should remove a group and all children", function* () {
 			// Make sure Group Libraries separator and header exist already,
 			// since otherwise they'll interfere with the count
