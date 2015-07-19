@@ -128,7 +128,7 @@ Zotero.DataObject.prototype._set = function (field, value) {
 			break;
 	}
 	
-	if (this['_' + field] != value) {
+	if (this['_' + field] != value || field == 'synced') {
 		this._markFieldChange(field, this['_' + field]);
 		if (!this._changed.primaryData) {
 			this._changed.primaryData = {};
@@ -905,8 +905,14 @@ Zotero.DataObject.prototype.saveTx = function (options) {
 
 
 Zotero.DataObject.prototype.hasChanged = function() {
-	Zotero.debug(this._changed);
-	return !!Object.keys(this._changed).filter(dataType => this._changed[dataType]).length
+	var changed = Object.keys(this._changed).filter(dataType => this._changed[dataType]);
+	if (changed.length == 1
+			&& changed[0] == 'primaryData'
+			&& this._changed.primaryData.synced
+			&& this._previousData.synced == this._synced) {
+		return false;
+	}
+	return !!changed.length;
 }
 
 Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env) {

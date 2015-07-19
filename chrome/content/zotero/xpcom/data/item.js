@@ -685,7 +685,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		*/
 		
 		// If field value has changed
-		if (this['_' + field] != value) {
+		if (this['_' + field] != value || field == 'synced') {
 			Zotero.debug("Field '" + field + "' has changed from '" + this['_' + field] + "' to '" + value + "'", 4);
 			
 			// Save a copy of the field before modifying

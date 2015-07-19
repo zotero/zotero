@@ -45,54 +45,131 @@ describe("Zotero.DataObject", function() {
 	})
 	
 	describe("#synced", function () {
-		it("should be set to false after creating item", function* () {
-			var item = new Zotero.Item("book");
-			var id = yield item.saveTx();
-			assert.isFalse(item.synced);
-			yield item.eraseTx();
+		it("should be set to false after creating object", function* () {
+			for (let type of types) {
+				var obj = createUnsavedDataObject(type);
+				var id = yield obj.saveTx();
+				assert.isFalse(obj.synced);
+				yield obj.eraseTx();
+			}
 		});
 		
-		it("should be set to true when changed", function* () {
-			var item = new Zotero.Item("book");
-			var id = yield item.saveTx();
-			
-			item.synced = 1;
-			yield item.saveTx();
-			assert.ok(item.synced);
-			
-			yield item.eraseTx();
+		it("should be set to false after modifying object", function* () {
+			for (let type of types) {
+				var obj = createUnsavedDataObject(type);
+				var id = yield obj.saveTx();
+				
+				obj.synced = true;
+				yield obj.saveTx();
+				
+				if (type == 'item') {
+					yield obj.loadItemData();
+					obj.setField('title', Zotero.Utilities.randomString());
+				}
+				else {
+					obj.name = Zotero.Utilities.randomString();
+				}
+				yield obj.saveTx();
+				assert.isFalse(obj.synced);
+				
+				yield obj.eraseTx();
+			}
 		});
 		
-		it("should be set to false after modifying item", function* () {
-			var item = new Zotero.Item("book");
-			var id = yield item.saveTx();
-			
-			item.synced = 1;
-			yield item.saveTx();
-			
-			yield item.loadItemData();
-			item.setField('title', 'test');
-			yield item.saveTx();
-			assert.isFalse(item.synced);
-			
-			yield item.eraseTx();
+		it("should be changed to true explicitly with no other changes", function* () {
+			for (let type of types) {
+				var obj = createUnsavedDataObject(type);
+				var id = yield obj.saveTx();
+				
+				obj.synced = true;
+				yield obj.saveTx();
+				assert.isTrue(obj.synced);
+				
+				yield obj.eraseTx();
+			}
 		});
+		
+		it("should be changed to true explicitly with other field changes", function* () {
+			for (let type of types) {
+				var obj = createUnsavedDataObject(type);
+				var id = yield obj.saveTx();
+				
+				if (type == 'item') {
+					obj.setField('title', Zotero.Utilities.randomString());
+				}
+				else {
+					obj.name = Zotero.Utilities.randomString();
+				}
+				obj.synced = true;
+				yield obj.saveTx();
+				assert.isTrue(obj.synced);
+				
+				yield obj.eraseTx();
+			}
+		});
+		
+		it("should remain at true if set explicitly", function* () {
+			for (let type of types) {
+				var obj = createUnsavedDataObject(type);
+				obj.synced = true;
+				var id = yield obj.saveTx();
+				assert.isTrue(obj.synced);
+				
+				if (type == 'item') {
+					obj.setField('title', 'test');
+				}
+				else {
+					obj.name = Zotero.Utilities.randomString();
+				}
+				obj.synced = true;
+				yield obj.saveTx();
+				assert.isTrue(obj.synced);
+				
+				yield obj.eraseTx();
+			}
+		});
+		
+		it("shouldn't cause a save if unchanged and nothing else changed", function* () {
+			for (let type of types) {
+				var obj = createUnsavedDataObject(type);
+				obj.synced = true;
+				var id = yield obj.saveTx();
+				assert.isTrue(obj.synced);
+				
+				obj.synced = true;
+				assert.isFalse(obj.hasChanged(), type + " shouldn't be changed");
+				
+				var obj = createUnsavedDataObject(type);
+				obj.synced = false;
+				var id = yield obj.saveTx();
+				assert.isFalse(obj.synced);
+				obj.synced = false;
+				assert.isFalse(obj.hasChanged(), type + " shouldn't be changed");
+			}
+		})
 		
 		it("should be unchanged if skipSyncedUpdate passed", function* () {
-			var item = new Zotero.Item("book");
-			var id = yield item.saveTx();
-			
-			item.synced = 1;
-			yield item.saveTx();
-			
-			yield item.loadItemData();
-			item.setField('title', 'test');
-			yield item.saveTx({
-				skipSyncedUpdate: true
-			});
-			assert.ok(item.synced);
-			
-			yield item.eraseTx();
+			for (let type of types) {
+				var obj = createUnsavedDataObject(type);
+				var id = yield obj.saveTx();
+				
+				obj.synced = 1;
+				yield obj.saveTx();
+				
+				if (type == 'item') {
+					yield obj.loadItemData();
+					obj.setField('title', Zotero.Utilities.randomString());
+				}
+				else {
+					obj.name = Zotero.Utilities.randomString();
+				}
+				yield obj.saveTx({
+					skipSyncedUpdate: true
+				});
+				assert.ok(obj.synced);
+				
+				yield obj.eraseTx();
+			}
 		});
 	})
 	
