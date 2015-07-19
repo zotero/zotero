@@ -528,10 +528,10 @@ Zotero.Items = function() {
 		
 		deletedIDs = yield this.getDeleted(libraryID, true, days);
 		if (deletedIDs.length) {
-			yield Zotero.Utilities.Internal.forEachChunkAsync(deletedIDs, 50, function* (chunk) {
+			yield Zotero.Utilities.Internal.forEachChunkAsync(deletedIDs, 50, Zotero.Promise.coroutine(function* (chunk) {
 				yield this.erase(chunk);
 				yield Zotero.Notifier.trigger('refresh', 'trash', libraryID);
-			}.bind(this));
+			}.bind(this)));
 		}
 		
 		if (deletedIDs.length) {

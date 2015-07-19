@@ -460,7 +460,7 @@ Zotero.DataObjects.prototype.updateVersion = Zotero.Promise.method(function (ids
 	return Zotero.Utilities.Internal.forEachChunkAsync(
 		ids,
 		Zotero.DB.MAX_BOUND_PARAMETERS,
-		function* (chunk) {
+		Zotero.Promise.coroutine(function* (chunk) {
 			yield Zotero.DB.queryAsync(sql + chunk.map(() => '?').join(', ') + ')', chunk);
 			// Update the internal 'version' property of any loaded objects
 			for (let i = 0; i < chunk.length; i++) {
@@ -470,7 +470,7 @@ Zotero.DataObjects.prototype.updateVersion = Zotero.Promise.method(function (ids
 					obj.updateVersion(version, true);
 				}
 			}
-		}.bind(this)
+		}.bind(this))
 	);
 });
 
@@ -487,7 +487,7 @@ Zotero.DataObjects.prototype.updateSynced = Zotero.Promise.method(function (ids,
 	return Zotero.Utilities.Internal.forEachChunkAsync(
 		ids,
 		Zotero.DB.MAX_BOUND_PARAMETERS,
-		function* (chunk) {
+		Zotero.Promise.coroutine(function* (chunk) {
 			yield Zotero.DB.queryAsync(sql + chunk.map(() => '?').join(', ') + ')', chunk);
 			// Update the internal 'synced' property of any loaded objects
 			for (let i = 0; i < chunk.length; i++) {
@@ -497,7 +497,7 @@ Zotero.DataObjects.prototype.updateSynced = Zotero.Promise.method(function (ids,
 					obj.updateSynced(!!synced, true);
 				}
 			}
-		}.bind(this)
+		}.bind(this))
 	);
 });
 

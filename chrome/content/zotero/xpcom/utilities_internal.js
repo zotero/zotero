@@ -35,8 +35,7 @@ Zotero.Utilities.Internal = {
 	 *
 	 * @param {Array} arr
 	 * @param {Integer} chunkSize
-	 * @param {Function|GeneratorFunction} func - A promise-returning function or a
-	 *                                            promise-yielding generator
+	 * @param {Function} func - A promise-returning function
 	 * @return {Array} The return values from the successive runs
 	 */
 	"forEachChunkAsync": Zotero.Promise.coroutine(function* (arr, chunkSize, func) {
@@ -44,8 +43,6 @@ Zotero.Utilities.Internal = {
 		var tmpArray = arr.concat();
 		var num = arr.length;
 		var done = 0;
-		
-		func = Zotero.Promise.coroutine(func);
 		
 		do {
 			var chunk = tmpArray.splice(0, chunkSize);
