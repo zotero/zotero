@@ -186,13 +186,16 @@ ZoteroContext.prototype = {
 	 * then reinitializes Zotero. Returns a promise that is resolved
 	 * when this process completes.
 	 */
-	"reinit":function(cb, isConnector) {
+	"reinit":function(cb, isConnector, options = {}) {
 		Services.obs.notifyObservers(zContext.Zotero, "zotero-before-reload", isConnector ? "connector" : "full");
 		return zContext.Zotero.shutdown().then(function() {
 			return cb ? cb() : false;
 		}).finally(function() {
 			makeZoteroContext(isConnector);
-			zContext.Zotero.init(zInitOptions);
+			var o = {};
+			Object.assign(o, zInitOptions);
+			Object.assign(o, options);
+			zContext.Zotero.init(o);
 		});
 	}
 };

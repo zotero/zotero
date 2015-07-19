@@ -366,13 +366,16 @@ var getTempDirectory = Zotero.Promise.coroutine(function* getTempDirectory() {
 /**
  * Resets the Zotero DB and restarts Zotero. Returns a promise resolved
  * when this finishes.
+ *
+ * @param {Object} [options] - Initialization options, as passed to Zotero.init(), overriding
+ *                             any that were set at startup
  */
-function resetDB() {
+function resetDB(options = {}) {
 	var db = Zotero.getZoteroDatabase();
 	return Zotero.reinit(function() {
 		db.remove(false);
 		_defaultGroup = null;
-	}).then(function() {
+	}, false, options).then(function() {
 		return Zotero.Schema.schemaUpdatePromise;
 	});
 }
