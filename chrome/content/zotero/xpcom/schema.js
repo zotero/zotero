@@ -1475,7 +1475,7 @@ Zotero.Schema = new function(){
 				+ "(4, 'publications', 1, 1)"
 			yield Zotero.DB.queryAsync(sql, userLibraryID);
 			
-			if (!Zotero.Schema.skipDefaultData) {
+			/*if (!Zotero.Schema.skipDefaultData) {
 				// Quick Start Guide web page item
 				var sql = "INSERT INTO items VALUES(1, 13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 'ABCD2345', 0, 0)";
 				yield Zotero.DB.queryAsync(sql, userLibraryID);
@@ -1503,7 +1503,7 @@ Zotero.Schema = new function(){
 					+ '<p>' + Zotero.getString('install.quickStartGuide.message.thanks') + '</p></div>';
 				var sql = "INSERT INTO itemNotes VALUES (2, 1, ?, ?)";
 				yield Zotero.DB.queryAsync(sql, [welcomeMsg, welcomeTitle]);
-			}
+			}*/
 			
 			self.dbInitialized = true;
 		})
