@@ -1,182 +1,239 @@
 "use strict";
 
 describe("Zotero.DataObjectUtilities", function() {
-	// This is mostly covered by syncLocal::_reconcileChanges() tests, but we test some
-	// additional things here
 	describe("#diff()", function () {
-		//
-		// Fields
-		//
-		describe("fields", function () {
-			it("should not show empty items as different", function* () {
-				var id1, id2, json1, json2;
-				yield Zotero.DB.executeTransaction(function* () {
-					var item = new Zotero.Item('book');
-					id1 = yield item.save();
-					json1 = yield item.toJSON();
+		// This is mostly covered by syncLocal::_reconcileChanges() tests, but we test some
+		// additional things here
+		describe("items", function () {
+			//
+			// Fields
+			//
+			describe("fields", function () {
+				it("should not show empty items as different", function* () {
+					var id1, id2, json1, json2;
+					yield Zotero.DB.executeTransaction(function* () {
+						var item = new Zotero.Item('book');
+						id1 = yield item.save();
+						json1 = yield item.toJSON();
+						
+						var item = new Zotero.Item('book');
+						id2 = yield item.save();
+						json2 = yield item.toJSON();
+					});
 					
-					var item = new Zotero.Item('book');
-					id2 = yield item.save();
-					json2 = yield item.toJSON();
-				});
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					assert.lengthOf(changes, 0);
+					
+					yield Zotero.Items.erase(id1, id2);
+				})
 				
-				var changes = Zotero.DataObjectUtilities.diff(json1, json2);
-				assert.lengthOf(changes, 0);
+				it("should not show empty strings as different", function () {
+					var json1 = {
+						title: ""
+					};
+					var json2 = {
+						title: ""
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					assert.lengthOf(changes, 0);
+				})
 				
-				yield Zotero.Items.erase(id1, id2);
+				it("should not show empty string and undefined as different", function () {
+					var json1 = {
+						title: ""
+					};
+					var json2 = {
+						place: ""
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					assert.lengthOf(changes, 0);
+				})
 			})
 			
-			it("should not show empty strings as different", function () {
-				var json1 = {
-					title: ""
-				};
-				var json2 = {
-					title: ""
-				};
-				var changes = Zotero.DataObjectUtilities.diff(json1, json2);
-				assert.lengthOf(changes, 0);
-			})
-			
-			it("should not show empty string and undefined as different", function () {
-				var json1 = {
-					title: ""
-				};
-				var json2 = {
-					place: ""
-				};
-				var changes = Zotero.DataObjectUtilities.diff(json1, json2);
-				assert.lengthOf(changes, 0);
-			})
-		})
+			//
+			// Creators
+			//
+			describe("creators", function () {
+				it("should not show identical creators as different", function () {
+					var json1 = {
+						creators: [
+							{
+								name: "Center for History and New Media",
+								creatorType: "author"
+							}
+						]
+					};
+					var json2 = {
+						creators: [
+							{
+								creatorType: "author",
+								name: "Center for History and New Media"
+							}
+						]
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					assert.lengthOf(changes, 0);
+				})
+				
+				it("should not show an empty creators array and a missing one as different", function () {
+					var json1 = {
+						creators: []
+					};
+					var json2 = {};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					assert.lengthOf(changes, 0);
+					
+					var json1 = {};
+					var json2 = {
+						creators: []
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					assert.lengthOf(changes, 0);
 		
-		//
-		// Creators
-		//
-		describe("creators", function () {
-			it("should not show identical creators as different", function () {
-				var json1 = {
-					creators: [
-						{
-							name: "Center for History and New Media",
-							creatorType: "author"
-						}
-					]
-				};
-				var json2 = {
-					creators: [
-						{
-							creatorType: "author",
-							name: "Center for History and New Media"
-						}
-					]
-				};
-				var changes = Zotero.DataObjectUtilities.diff(json1, json2);
-				assert.lengthOf(changes, 0);
+				})
 			})
 			
-			it("should not show an empty creators array and a missing one as different", function () {
-				var json1 = {
-					creators: []
-				};
-				var json2 = {};
-				var changes = Zotero.DataObjectUtilities.diff(json1, json2);
-				assert.lengthOf(changes, 0);
-				
-				var json1 = {};
-				var json2 = {
-					creators: []
-				};
-				var changes = Zotero.DataObjectUtilities.diff(json1, json2);
-				assert.lengthOf(changes, 0);
-	
-			})
-		})
-		
-		//
-		// Relations
-		//
-		describe("relations", function () {
-			it("should not show an empty relations object and a missing one as different", function () {
-				var json1 = {
-					relations: {}
-				};
-				var json2 = {
-				};
-				var changes = Zotero.DataObjectUtilities.diff(json1, json2);
-				Zotero.debug(changes);
-				assert.lengthOf(changes, 0);
-				
-				var json1 = {};
-				var json2 = {
-					relations: {}
-				};
-				var changes = Zotero.DataObjectUtilities.diff(json1, json2);
-				Zotero.debug(changes);
-				assert.lengthOf(changes, 0);
-			})
-		})
-		
-		//
-		// Tags
-		//
-		describe("tags", function () {
-			it("should not show manual tags with or without 'type' property as different", function () {
-				var json1 = {
-					tags: [
-						{
-							tag: "Foo"
-						}
-					]
-				};
-				var json2 = {
-					tags: [
-						{
-							tag: "Foo",
-							type: 0
-						}
-					]
-				};
-				var changes = Zotero.DataObjectUtilities.diff(json1, json2);
-				assert.lengthOf(changes, 0);
+			//
+			// Relations
+			//
+			describe("relations", function () {
+				it("should not show an empty relations object and a missing one as different", function () {
+					var json1 = {
+						relations: {}
+					};
+					var json2 = {
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					Zotero.debug(changes);
+					assert.lengthOf(changes, 0);
+					
+					var json1 = {};
+					var json2 = {
+						relations: {}
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					Zotero.debug(changes);
+					assert.lengthOf(changes, 0);
+				})
 			})
 			
-			it("should show tags of different types as different", function () {
-				var json1 = {
-					tags: [
-						{
-							tag: "Foo"
-						}
-					]
-				};
-				var json2 = {
-					tags: [
-						{
-							tag: "Foo",
-							type: 1
-						}
-					]
-				};
-				var changes = Zotero.DataObjectUtilities.diff(json1, json2);
-				assert.sameDeepMembers(
-					changes,
-					[
-						{
-							field: "tags",
-							op: "member-remove",
-							value: {
+			//
+			// Tags
+			//
+			describe("tags", function () {
+				it("should not show manual tags with or without 'type' property as different", function () {
+					var json1 = {
+						tags: [
+							{
 								tag: "Foo"
 							}
-						},
-						{
-							field: "tags",
-							op: "member-add",
-							value: {
+						]
+					};
+					var json2 = {
+						tags: [
+							{
+								tag: "Foo",
+								type: 0
+							}
+						]
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					assert.lengthOf(changes, 0);
+				})
+				
+				it("should show tags of different types as different", function () {
+					var json1 = {
+						tags: [
+							{
+								tag: "Foo"
+							}
+						]
+					};
+					var json2 = {
+						tags: [
+							{
 								tag: "Foo",
 								type: 1
 							}
-						}
-					]
-				);
+						]
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					assert.sameDeepMembers(
+						changes,
+						[
+							{
+								field: "tags",
+								op: "member-remove",
+								value: {
+									tag: "Foo"
+								}
+							},
+							{
+								field: "tags",
+								op: "member-add",
+								value: {
+									tag: "Foo",
+									type: 1
+								}
+							}
+						]
+					);
+				})
+			})
+		})
+		
+		//
+		// Searches
+		//
+		//
+		// Search conditions
+		//
+		describe("searches", function () {
+			describe("conditions", function () {
+				it("should not show an empty conditions object and a missing one as different", function () {
+					var json1 = {
+						conditions: {}
+					};
+					var json2 = {
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					Zotero.debug(changes);
+					assert.lengthOf(changes, 0);
+					
+					var json1 = {};
+					var json2 = {
+						conditions: {}
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					Zotero.debug(changes);
+					assert.lengthOf(changes, 0);
+				})
+				
+				/*it("should not show an empty conditions object and a missing one as different", function () {
+					var json1 = {
+						conditions: []
+					};
+					var json2 = {
+						conditions: [
+							{
+								condition: 'title',
+								operator: 'contains',
+								value: 'test'
+							}
+						]
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					Zotero.debug(changes);
+					assert.lengthOf(changes, 0);
+					
+					var json1 = {};
+					var json2 = {
+						conditions: {}
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					Zotero.debug(changes);
+					assert.lengthOf(changes, 0);
+				})*/
 			})
 		})
 	})
@@ -536,6 +593,90 @@ describe("Zotero.DataObjectUtilities", function() {
 				];
 				Zotero.DataObjectUtilities.applyChanges(json, changes);
 				assert.lengthOf(json.tags, 0);
+			})
+		})
+		
+		
+		//
+		// Search conditions
+		//
+		describe("conditions", function () {
+			it("should add a condition", function () {
+				var json = {
+					conditions: [
+						{
+							condition: "title",
+							op: "contains",
+							value: "A"
+						}
+					]
+				};
+				var changes = [
+					{
+						field: "conditions",
+						op: "member-add",
+						value: {
+							condition: "title",
+							op: "contains",
+							value: "B"
+						}
+					}
+				];
+				Zotero.DataObjectUtilities.applyChanges(json, changes);
+				assert.sameDeepMembers(
+					json.conditions,
+					[
+						{
+							condition: "title",
+							op: "contains",
+							value: "A"
+						},
+						{
+							condition: "title",
+							op: "contains",
+							value: "B"
+						}
+					]
+				);
+			})
+			
+			it("should remove a condition", function () {
+				var json = {
+					conditions: [
+						{
+							condition: "title",
+							op: "contains",
+							value: "A"
+						},
+						{
+							condition: "title",
+							op: "contains",
+							value: "B"
+						}
+					]
+				};
+				var changes = [
+					{
+						field: "conditions",
+						op: "member-remove",
+						value: {
+							condition: "title",
+							op: "contains",
+							value: "B"
+						}
+					}
+				];
+				Zotero.DataObjectUtilities.applyChanges(json, changes);
+				assert.sameDeepMembers(
+					json.conditions,
+					[
+						{
+							condition: "title",
+							op: "contains",
+							value: "A"
+						}
+					]
+				);
 			})
 		})
 	})

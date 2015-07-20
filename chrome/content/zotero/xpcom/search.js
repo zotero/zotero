@@ -2286,6 +2286,16 @@ Zotero.SearchConditions = new function(){
 	}
 	
 	
+	/**
+	 * Compare two API JSON condition objects
+	 */
+	this.equals = function (data1, data2) {
+		return data1.condition === data2.condition
+			&& data1.operator === data2.operator
+			&& data1.value === data2.value;
+	}
+	
+	
 	/*
 	 * Parses a search into words and "double-quoted phrases"
 	 *
