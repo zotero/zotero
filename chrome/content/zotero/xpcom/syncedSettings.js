@@ -43,7 +43,24 @@ Zotero.SyncedSettings = (function () {
 			return JSON.parse(json);
 		}),
 		
-		set: Zotero.Promise.coroutine(function* (libraryID, setting, value, version, synced) {
+		/**
+		 * Used by sync and tests
+		 *
+		 * @return {Object} - Object with 'synced' and 'version' properties
+		 */
+		getMetadata: Zotero.Promise.coroutine(function* (libraryID, setting) {
+			var sql = "SELECT * FROM syncedSettings WHERE setting=? AND libraryID=?";
+			var row = yield Zotero.DB.rowQueryAsync(sql, [setting, libraryID]);
+			if (!row) {
+				return false;
+			}
+			return {
+				synced: !!row.synced,
+				version: row.version
+			};
+		}),
+		
+		set: Zotero.Promise.coroutine(function* (libraryID, setting, value, version = 0, synced) {
 			if (typeof value == undefined) {
 				throw new Error("Value not provided");
 			}
@@ -87,13 +104,18 @@ Zotero.SyncedSettings = (function () {
 			synced = synced ? 1 : 0;
 			
 			if (hasCurrentValue) {
-				var sql = "UPDATE syncedSettings SET value=?, synced=? WHERE setting=? AND libraryID=?";
-				yield Zotero.DB.queryAsync(sql, [JSON.stringify(value), synced, setting, libraryID]);
+				var sql = "UPDATE syncedSettings SET value=?, version=?, synced=? "
+					+ "WHERE setting=? AND libraryID=?";
+				yield Zotero.DB.queryAsync(
+					sql, [JSON.stringify(value), version, synced, setting, libraryID]
+				);
 			}
 			else {
 				var sql = "INSERT INTO syncedSettings "
-					+ "(setting, libraryID, value, synced) VALUES (?, ?, ?, ?)";
-				yield Zotero.DB.queryAsync(sql, [setting, libraryID, JSON.stringify(value), synced]);
+					+ "(setting, libraryID, value, version, synced) VALUES (?, ?, ?, ?, ?)";
+				yield Zotero.DB.queryAsync(
+					sql, [setting, libraryID, JSON.stringify(value), version, synced]
+				);
 			}
 			yield Zotero.Notifier.trigger(event, 'setting', [id], extraData);
 			return true;

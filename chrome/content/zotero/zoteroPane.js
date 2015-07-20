@@ -183,7 +183,7 @@ var ZoteroPane = new function()
 				if (index == 0) {
 					Zotero.Sync.Server.sync({
 						onSuccess: function () {
-							Zotero.Sync.Runner.setSyncIcon();
+							Zotero.Sync.Runner.updateIcons();
 							
 							ps.alert(
 								null,
@@ -436,7 +436,7 @@ var ZoteroPane = new function()
 		//
 		// We don't bother setting an error state at open
 		if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
-			Zotero.Sync.Runner.setSyncIcon('animate');
+			Zotero.Sync.Runner.updateIcons('animate');
 		}
 		
 		return true;
@@ -3969,7 +3969,7 @@ var ZoteroPane = new function()
 							+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
 		
 		// Warning
-		if (e.errorMode == 'warning') {
+		if (e.errorType == 'warning') {
 			var title = Zotero.getString('general.warning');
 			
 			// If secondary button not specified, just use an alert
@@ -3996,7 +3996,7 @@ var ZoteroPane = new function()
 			}
 		}
 		// Error
-		else if (e.errorMode == 'error') {
+		else if (e.errorType == 'error') {
 			var title = Zotero.getString('general.error');
 			
 			// If secondary button is explicitly null, just use an alert
@@ -4031,7 +4031,7 @@ var ZoteroPane = new function()
 			}
 		}
 		// Upgrade
-		else if (e.errorMode == 'upgrade') {
+		else if (e.errorType == 'upgrade') {
 			ps.alert(null, "", e.message);
 		}
 	};

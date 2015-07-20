@@ -328,36 +328,6 @@ Zotero.DataObjects.prototype.getNewer = Zotero.Promise.method(function (libraryI
 
 
 /**
- * @param {Integer} libraryID
- * @return {Promise} A promise for an array of object ids
- */
-Zotero.DataObjects.prototype.getUnsynced = function (libraryID) {
-	var sql = "SELECT " + this._ZDO_id + " FROM " + this._ZDO_table
-		+ " WHERE libraryID=? AND synced=0";
-	return Zotero.DB.columnQueryAsync(sql, [libraryID]);
-}
-
-
-/**
- * Get JSON from the sync cache that hasn't yet been written to the
- * main object tables
- *
- * @param {Integer} libraryID
- * @return {Promise} A promise for an array of JSON objects
- */
-Zotero.DataObjects.prototype.getUnwrittenData = function (libraryID) {
-	var sql = "SELECT data FROM syncCache SC "
-		+ "LEFT JOIN " + this._ZDO_table + " "
-		+ "USING (libraryID) "
-		+ "WHERE SC.libraryID=? AND "
-		+ "syncObjectTypeID IN (SELECT syncObjectTypeID FROM "
-		+ "syncObjectTypes WHERE name='" + this._ZDO_object + "') "
-		+ "AND IFNULL(O.version, 0) < SC.version";
-	return Zotero.DB.columnQueryAsync(sql, [libraryID]);
-}
-
-
-/**
  * Reload loaded data of loaded objects
  *
  * @param {Array|Number} ids - An id or array of ids

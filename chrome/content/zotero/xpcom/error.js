@@ -25,7 +25,6 @@
 
 
 Zotero.Error = function (message, error, data) {
-	this.name = "Zotero Error";
 	this.message = message;
 	this.data = data;
 	if (parseInt(error) == error) {
@@ -35,8 +34,8 @@ Zotero.Error = function (message, error, data) {
 		this.error = Zotero.Error["ERROR_" + error] ? Zotero.Error["ERROR_" + error] : 0;
 	}
 }
-Zotero.Error.prototype = new Error;
-
+Zotero.Error.prototype = Object.create(Error.prototype);
+Zotero.Error.prototype.name = "Zotero Error";
 
 Zotero.Error.ERROR_UNKNOWN = 0;
 Zotero.Error.ERROR_MISSING_OBJECT = 1;
@@ -50,10 +49,6 @@ Zotero.Error.ERROR_INVALID_ITEM_TYPE = 8;
 Zotero.Error.ERROR_USER_NOT_AVAILABLE = 9;
 //Zotero.Error.ERROR_SYNC_EMPTY_RESPONSE_FROM_SERVER = 6;
 //Zotero.Error.ERROR_SYNC_INVALID_RESPONSE_FROM_SERVER = 7;
-
-Zotero.Error.prototype.toString = function () {
-	return this.message;
-}
 
 /**
  * Namespace for runtime exceptions

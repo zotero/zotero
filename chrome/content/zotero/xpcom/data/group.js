@@ -188,13 +188,9 @@ Zotero.Group.prototype.hasItem = function (item) {
 
 
 Zotero.Group.prototype.save = Zotero.Promise.coroutine(function* () {
-	if (!this.id) {
-		throw new Error("Group id not set");
-	}
-	
-	if (!this.name) {
-		throw new Error("Group name not set");
-	}
+	if (!this.id) throw new Error("Group id not set");
+	if (!this.name) throw new Error("Group name not set");
+	if (!this.version) throw new Error("Group version not set");
 	
 	if (!this._changed) {
 		Zotero.debug("Group " + this.id + " has not changed");

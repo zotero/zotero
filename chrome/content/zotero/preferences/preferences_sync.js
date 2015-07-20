@@ -373,7 +373,7 @@ Zotero_Preferences.Sync = {
 								available to the custom callbacks
 								
 								onSuccess: function () {
-									Zotero.Sync.Runner.setSyncIcon();
+									Zotero.Sync.Runner.updateIcons();
 									ps.alert(
 										null,
 										"Restore Completed",

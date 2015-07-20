@@ -325,7 +325,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 								dialogButtonCallback: buttonCallback
 							}
 						);
-						e.errorMode = 'warning';
+						e.errorType = 'warning';
 						Zotero.debug(e, 2);
 						Components.utils.reportError(e);
 						throw e;

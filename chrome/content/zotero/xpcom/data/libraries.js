@@ -155,7 +155,7 @@ Zotero.Libraries = new function () {
 	
 	/**
 	 * @param {Integer} libraryID
-	 * @param {Integer} version
+	 * @param {Integer} version - Library version, or -1 to indicate that a full sync is required
 	 * @return {Promise}
 	 */
 	this.setVersion = Zotero.Promise.coroutine(function* (libraryID, version) {
@@ -173,14 +173,14 @@ Zotero.Libraries = new function () {
 	
 	/**
 	 * @param {Integer} libraryID
-	 * @param {Date} lastSyncTime
 	 * @return {Promise}
      */
-	this.setLastSyncTime = function (libraryID, lastSyncTime) {
-		var lastSyncTime = Math.round(lastSyncTime.getTime() / 1000);
-		_libraryData[libraryID].lastSyncTime = lastSyncTime;
+	this.updateLastSyncTime = function (libraryID) {
+		var d = new Date();
+		_libraryData[libraryID].lastSyncTime = d;
 		return Zotero.DB.queryAsync(
-			"UPDATE libraries SET lastsync=? WHERE libraryID=?", [lastSyncTime, libraryID]
+			"UPDATE libraries SET lastsync=? WHERE libraryID=?",
+			[Math.round(d.getTime() / 1000), libraryID]
 		);
 	};
 	

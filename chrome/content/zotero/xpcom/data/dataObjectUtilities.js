@@ -26,12 +26,28 @@
 
 Zotero.DataObjectUtilities = {
 	/**
-	 * Get an array of all DataObject types
+	 * Get all DataObject types
 	 *
-	 * @return {String[]}
+	 * @return {String[]} - An array of DataObject types
 	 */
 	getTypes: function () {
 		return ['collection', 'search', 'item'];
+	},
+	
+	/**
+	 * Get DataObject types that are valid for a given library
+	 *
+	 * @param {Integer} libraryID
+	 * @return {String[]} - An array of DataObject types
+	 */
+	getTypesForLibrary: function (libraryID) {
+		switch (Zotero.Libraries.getType(libraryID)) {
+		case 'publications':
+			return ['item'];
+		
+		default:
+			return this.getTypes();
+		}
 	},
 	
 	"checkLibraryID": function (libraryID) {

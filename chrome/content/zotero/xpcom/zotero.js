@@ -604,8 +604,9 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				
 				Zotero.Notifier.registerObserver(Zotero.Tags, 'setting');
 				
-				Zotero.Sync.init();
-				Zotero.Sync.Runner.init();
+				yield Zotero.Sync.Data.Local.init();
+				yield Zotero.Sync.Data.Utilities.init();
+				Zotero.Sync.EventListeners.init();
 				
 				Zotero.MIMETypeHandler.init();
 				yield Zotero.Proxies.init();

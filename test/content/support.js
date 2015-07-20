@@ -627,3 +627,40 @@ function importFileAttachment(filename) {
 	filename.split('/').forEach((part) => testfile.append(part));
 	return Zotero.Attachments.importFromFile({file: testfile});
 }
+
+
+/**
+ * Sets the fake XHR server to response to a given response
+ *
+ * @param {Object} server - Sinon FakeXMLHttpRequest server
+ * @param {Object|String} response - Dot-separated path to predefined response in responses
+ *                                   object (e.g., keyInfo.fullAccess) or a JSON object
+ *                                   that defines the response
+ * @param {Object} responses - Predefined responses
+ */
+function setHTTPResponse(server, baseURL, response, responses) {
+	if (typeof response == 'string') {
+		let [topic, key] = response.split('.');
+		if (!responses[topic]) {
+			throw new Error("Invalid topic");
+		}
+		if (!responses[topic][key]) {
+			throw new Error("Invalid response key");
+		}
+		response = responses[topic][key];
+	}
+	
+	var responseArray = [response.status || 200, {}, ""];
+	if (response.json) {
+		responseArray[1]["Content-Type"] = "application/json";
+		responseArray[2] = JSON.stringify(response.json);
+	}
+	else {
+		responseArray[1]["Content-Type"] = "text/plain";
+		responseArray[2] = response.text || "";
+	}
+	for (let i in response.headers) {
+		responseArray[1][i] = response.headers[i];
+	}
+	server.respondWith(response.method, baseURL + response.url, responseArray);
+}

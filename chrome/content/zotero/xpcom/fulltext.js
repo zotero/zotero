@@ -863,6 +863,8 @@ Zotero.Fulltext = new function(){
 	 * @return {String}  PHP-formatted POST data for items not yet downloaded
 	 */
 	this.getUndownloadedPostData = Zotero.Promise.coroutine(function* () {
+		// TODO: Redo for API syncing
+		
 		// On upgrade, get all content
 		var sql = "SELECT value FROM settings WHERE setting='fulltext' AND key='downloadAll'";
 		if (yield Zotero.DB.valueQueryAsync(sql)) {
