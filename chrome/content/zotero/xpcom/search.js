@@ -2260,7 +2260,9 @@ Zotero.SearchConditions = new function(){
 		}
 		
 		if (!_conditions[condition]){
-			throw new Error("Invalid condition '" + condition + "' in hasOperator()");
+			var e = new Error("Invalid condition '" + condition + "' in hasOperator()");
+			e.name = "ZoteroUnknownFieldError";
+			throw e;
 		}
 		
 		if (!operator && typeof _conditions[condition]['operators'] == 'undefined'){

@@ -265,7 +265,8 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 	// Zotero.Items.cacheFields()) or item data has to be loaded
 	if (this._identified && value === null && !this._loaded.itemData) {
 		throw new Zotero.Exception.UnloadedDataException(
-			"Item data not loaded and field '" + field + "' not set", "itemData"
+			"Item data not loaded and field '" + field + "' not set for item " +  this.libraryKey,
+			"itemData"
 		);
 	}
 	
@@ -3350,9 +3351,16 @@ Zotero.Item.prototype.setCollections = function (collectionIDsOrKeys) {
 	
 	// Convert any keys to ids
 	var collectionIDs = collectionIDsOrKeys.map(function (val) {
-		return parseInt(val) == val
-			? parseInt(val)
-			: this.ContainerObjectsClass.getIDFromLibraryAndKey(this.libraryID, val);
+		if (parseInt(val) == val) {
+			return parseInt(val);
+		}
+		var id = this.ContainerObjectsClass.getIDFromLibraryAndKey(this.libraryID, val);
+		if (!id) {
+			let e = new Error("Collection " + val + " not found for item " + this.libraryKey);
+			e.name = "ZoteroObjectNotFoundError";
+			throw e;
+		}
+		return id;
 	}.bind(this));
 	collectionIDs = Zotero.Utilities.arrayUnique(collectionIDs);
 	
@@ -3889,13 +3897,15 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 		case 'accessDate':
 		case 'dateAdded':
 		case 'dateModified':
-			let d = Zotero.Date.isoToDate(val);
-			if (!d) {
-				Zotero.logError("Discarding invalid " + field + " '" + val
-					+ "' for item " + this.libraryKey);
-				continue;
+			if (val) {
+				let d = Zotero.Date.isoToDate(val);
+				if (!d) {
+					Zotero.logError("Discarding invalid " + field + " '" + val
+						+ "' for item " + this.libraryKey);
+					continue;
+				}
+				val = Zotero.Date.dateToSQL(d, true);
 			}
-			val = Zotero.Date.dateToSQL(d, true);
 			if (field == 'accessDate') {
 				this.setField(field, val);
 			}
@@ -3945,7 +3955,7 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 		
 		case 'filename':
 			if (val === "") {
-				Zotero.logError("Ignoring empty attachment filename in item JSON");
+				Zotero.logError("Ignoring empty attachment filename in JSON for item " + this.libraryKey);
 			}
 			else {
 				this.attachmentFilename = val;
@@ -3964,7 +3974,7 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 				this.itemTypeID
 			);
 			if (!isValidForType[field]) {
-				Zotero.logError("Discarding unknown JSON field " + field);
+				Zotero.logError("Discarding unknown JSON field " + field + " for item " + this.libraryKey);
 				continue;
 			}
 			this.setField(field, json[field]);
