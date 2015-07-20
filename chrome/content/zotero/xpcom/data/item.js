@@ -1082,6 +1082,13 @@ Zotero.Item.prototype.isEditable = function() {
 	return true;
 }
 
+Zotero.Item.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
+	if (!this.itemTypeID) {
+		throw new Error("Item type must be set before saving");
+	}
+	return Zotero.Item._super.prototype._initSave.apply(this, arguments);
+})
+
 Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	Zotero.DB.requireTransaction();
 	
@@ -1090,9 +1097,6 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	var libraryType = env.libraryType = Zotero.Libraries.getType(env.libraryID);
 	
 	var itemTypeID = this.itemTypeID;
-	if (!itemTypeID) {
-		throw new Error("Item type must be set before saving");
-	}
 	
 	var reloadParentChildItems = {};
 	

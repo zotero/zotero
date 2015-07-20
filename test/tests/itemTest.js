@@ -682,6 +682,15 @@ describe("Zotero.Item", function () {
 		})
 	})
 	
+	describe("#save()", function () {
+		it("should throw an error for an empty item without an item type", function* () {
+			var item = new Zotero.Item;
+			var e = yield getPromiseError(item.saveTx());
+			assert.ok(e);
+			assert.equal(e.message, "Item type must be set before saving");
+		})
+	})
+	
 	describe("#clone()", function () {
 		// TODO: Expand to other data
 		it("should copy creators", function* () {
