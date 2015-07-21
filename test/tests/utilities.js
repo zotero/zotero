@@ -272,5 +272,89 @@ describe("Zotero.Utilities", function() {
 			
 			assert.isUndefined(cslJSON.PMID, 'field labels are case-sensitive');
 		});
+		it("should parse particles in creator names", function() {
+			let creators = [
+				{
+					// No particles
+					firstName: 'John',
+					lastName: 'Smith',
+					creatorType: 'author',
+					expect: {
+						given: 'John',
+						family: 'Smith'
+					}
+				},
+				{
+					// dropping and non-dropping
+					firstName: 'Jean de',
+					lastName: 'la Fontaine',
+					creatorType: 'author',
+					expect: {
+						given: 'Jean',
+						"dropping-particle": 'de',
+						"non-dropping-particle": 'la',
+						family: 'Fontaine'
+					}
+				},
+				{
+					// only non-dropping
+					firstName: 'Vincent',
+					lastName: 'van Gogh',
+					creatorType: 'author',
+					expect: {
+						given: 'Vincent',
+						"non-dropping-particle": 'van',
+						family: 'Gogh'
+					}
+				},
+				{
+					// only dropping
+					firstName: 'Alexander von',
+					lastName: 'Humboldt',
+					creatorType: 'author',
+					expect: {
+						given: 'Alexander',
+						"dropping-particle": 'von',
+						family: 'Humboldt'
+					}
+				},
+				{
+					// institutional author
+					lastName: 'Jean de la Fontaine',
+					creatorType: 'author',
+					fieldMode: 1,
+					expect: {
+						literal: 'Jean de la Fontaine'
+					}
+				},
+				{
+					// protected last name
+					firstName: 'Jean de',
+					lastName: '"la Fontaine"',
+					creatorType: 'author',
+					expect: {
+						given: 'Jean de',
+						family: 'la Fontaine'
+					}
+				}
+			];
+			
+			let data = populateDBWithSampleData({
+				item: {
+					itemType: 'journalArticle',
+					creators: creators
+				}
+			});
+				
+			let item = Zotero.Items.get(data.item.id);
+			let cslCreators = Zotero.Utilities.itemToCSLJSON(item).author;
+			
+			assert.deepEqual(cslCreators[0], creators[0].expect, 'simple name is not parsed');
+			assert.deepEqual(cslCreators[1], creators[1].expect, 'name with dropping and non-dropping particles is parsed');
+			assert.deepEqual(cslCreators[2], creators[2].expect, 'name with only non-dropping particle is parsed');
+			assert.deepEqual(cslCreators[3], creators[3].expect, 'name with only dropping particle is parsed');
+			assert.deepEqual(cslCreators[4], creators[4].expect, 'institutional author is not parsed');
+			assert.deepEqual(cslCreators[5], creators[5].expect, 'protected last name prevents parsing');
+		});
 	});
 });
