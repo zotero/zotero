@@ -762,15 +762,25 @@ Zotero.Sync.Storage.ZFS = (function () {
 					return false;
 				}
 				
+				var file = item.getFile();
+				
 				if (!info) {
 					Zotero.debug("Remote file not found for item " + item.libraryID + "/" + item.key);
+					// Reset sync state if a remotely missing file exists locally.
+					// I'm not sure how this can happen, but otherwise it results in
+					// a file marked as TO_DOWNLOAD never being uploaded.
+					if (file && file.exists()) {
+						Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD);
+						return {
+							localChanges: true
+						};
+					}
 					return false;
 				}
 				
 				var syncModTime = info.mtime;
 				var syncHash = info.hash;
 				
-				var file = item.getFile();
 				// Skip download if local file exists and matches mod time
 				if (file && file.exists()) {
 					if (syncModTime == file.lastModifiedTime) {

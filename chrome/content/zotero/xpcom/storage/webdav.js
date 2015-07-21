@@ -853,15 +853,25 @@ Zotero.Sync.Storage.WebDAV = (function () {
 					return false;
 				}
 				
+				var file = item.getFile();
+				
 				if (!mdate) {
 					Zotero.debug("Remote file not found for item " + Zotero.Items.getLibraryKeyHash(item));
+					// Reset sync state if a remotely missing file exists locally.
+					// I'm not sure how this can happen, but otherwise it results in
+					// a file marked as TO_DOWNLOAD never being uploaded.
+					if (file && file.exists()) {
+						Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD);
+						return {
+							localChanges: true
+						};
+					}
 					return false;
 				}
 				
 				var syncModTime = mdate.getTime();
 				
 				// Skip download if local file exists and matches mod time
-				var file = item.getFile();
 				if (file && file.exists() && syncModTime == file.lastModifiedTime) {
 					Zotero.debug("File mod time matches remote file -- skipping download");
 					
