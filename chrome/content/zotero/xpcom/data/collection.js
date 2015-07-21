@@ -690,17 +690,21 @@ Zotero.Collection.prototype.getChildren = Zotero.Promise.coroutine(function* (re
 	
 	// 0 == collection
 	// 1 == item
-	var sql = 'SELECT collectionID AS id, '
+	var sql = 'SELECT collectionID AS id, collectionName AS name, '
 		+ "0 AS type, collectionName AS collectionName, key "
 		+ 'FROM collections WHERE parentCollectionID=?1';
 	if (!type || type == 'item') {
-		sql += ' UNION SELECT itemID AS id, 1 AS type, NULL AS collectionName, key '
+		sql += ' UNION SELECT itemID AS id, NULL AS name, 1 AS type, NULL AS collectionName, key '
 				+ 'FROM collectionItems JOIN items USING (itemID) WHERE collectionID=?1';
 		if (!includeDeletedItems) {
 			sql += " AND itemID NOT IN (SELECT itemID FROM deletedItems)";
 		}
 	}
 	var children = yield Zotero.DB.queryAsync(sql, this.id);
+	children.sort(function (a, b) {
+		if (a.name === null || b.name === null) return 0;
+		return Zotero.localeCompare(a.name, b.name)
+	});
 	
 	for(var i=0, len=children.length; i<len; i++) {
 		// This seems to not work without parseInt() even though
