@@ -534,7 +534,6 @@ Zotero.DataObjects.prototype._load = Zotero.Promise.coroutine(function* (library
 		return loaded;
 	}
 	
-	// getPrimaryDataSQL() should use "O" for the primary table alias
 	var sql = this.primaryDataSQL;
 	var params = [];
 	if (libraryID !== false) {
@@ -551,7 +550,7 @@ Zotero.DataObjects.prototype._load = Zotero.Promise.coroutine(function* (library
 		params,
 		{
 			onRow: function (row) {
-				var id = row.getResultByIndex(this._ZDO_id);
+				var id = row.getResultByName(this._ZDO_id);
 				var columns = Object.keys(this._primaryDataSQLParts);
 				var rowObj = {};
 				for (let i=0; i<columns.length; i++) {

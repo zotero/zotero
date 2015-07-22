@@ -4008,32 +4008,11 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 /**
  * @param {Object} options
  */
-Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options) {
-	options = options || {};
+Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options = {}) {
+	var env = this._preToJSON(options);
+	var mode = env.mode;
 	
-	if (options) {
-		var mode = options.mode;
-	}
-	else {
-		var mode = 'new';
-	}
-	
-	if (mode == 'patch') {
-		if (!options.patchBase) {
-			throw new Error("Cannot use patch mode if patchBase not provided");
-		}
-	}
-	else if (options.patchBase) {
-		if (options.mode) {
-			Zotero.debug("Zotero.Item.toJSON: ignoring provided patchBase in " + mode + " mode", 2);
-		}
-		// If patchBase provided and no explicit mode, use 'patch'
-		else {
-			mode = 'patch';
-		}
-	}
-	
-	var obj = {};
+	var obj = env.obj = {};
 	obj.key = this.key;
 	obj.version = this.version;
 	obj.itemType = Zotero.ItemTypes.getName(this.itemTypeID);
@@ -4106,39 +4085,12 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options) {
 	obj.dateModified = Zotero.Date.sqlToISO8601(this.dateModified);
 	if (obj.accessDate) obj.accessDate = Zotero.Date.sqlToISO8601(obj.accessDate);
 	
-	if (mode == 'patch') {
-		for (let i in options.patchBase) {
-			switch (i) {
-			case 'key':
-			case 'version':
-			case 'dateModified':
-				continue;
-			}
-			
-			if (i in obj) {
-				if (obj[i] === options.patchBase[i]) {
-					delete obj[i];
-				}
-			}
-			else {
-				obj[i] = '';
-			}
-		}
-	}
-	
-	return obj;
+	return this._postToJSON(env);
 });
 
 
-Zotero.Item.prototype.toResponseJSON = Zotero.Promise.coroutine(function* (options) {
-	var json = {
-		key: this.key,
-		version: this.version,
-		meta: {},
-		data: yield this.toJSON(options)
-	};
-	
-	// TODO: library block?
+Zotero.Item.prototype.toResponseJSON = Zotero.Promise.coroutine(function* (options = {}) {
+	var json = yield this.constructor._super.prototype.toResponseJSON.apply(this, options);
 	
 	// creatorSummary
 	var firstCreator = this.getField('firstCreator');

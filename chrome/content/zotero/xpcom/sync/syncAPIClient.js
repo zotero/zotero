@@ -269,8 +269,6 @@ Zotero.Sync.APIClient.prototype = {
 	
 	
 	uploadObjects: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, objectType, method, version, objects) {
-		throw new Error("Uploading disabled");
-		
 		if (method != 'POST' && method != 'PATCH') {
 			throw new Error("Invalid method '" + method + "'");
 		}

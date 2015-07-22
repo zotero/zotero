@@ -709,56 +709,96 @@ describe("Zotero.Item", function () {
 	})
 	
 	describe("#toJSON()", function () {
-		it("should output only fields with values in default mode", function* () {
-			var itemType = "book";
-			var title = "Test";
-			
-			var item = new Zotero.Item(itemType);
-			item.setField("title", title);
-			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
-			var json = yield item.toJSON();
-			
-			assert.equal(json.itemType, itemType);
-			assert.equal(json.title, title);
-			assert.isUndefined(json.date);
-			assert.isUndefined(json.numPages);
-		})
-		
-		it("should output all fields in 'full' mode", function* () {
-			var itemType = "book";
-			var title = "Test";
-			
-			var item = new Zotero.Item(itemType);
-			item.setField("title", title);
-			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
-			var json = yield item.toJSON({ mode: 'full' });
-			assert.equal(json.title, title);
-			assert.equal(json.date, "");
-			assert.equal(json.numPages, "");
-		})
-		
-		it("should output only fields that differ in 'patch' mode", function* () {
-			var itemType = "book";
-			var title = "Test";
-			var date = "2015-05-12";
-			
-			var item = new Zotero.Item(itemType);
-			item.setField("title", title);
-			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
-			var patchBase = yield item.toJSON();
-			
-			item.setField("date", date);
-			yield item.saveTx();
-			var json = yield item.toJSON({
-				patchBase: patchBase
+		describe("default mode", function () {
+			it("should output only fields with values", function* () {
+				var itemType = "book";
+				var title = "Test";
+				
+				var item = new Zotero.Item(itemType);
+				item.setField("title", title);
+				var id = yield item.saveTx();
+				item = yield Zotero.Items.getAsync(id);
+				var json = yield item.toJSON();
+				
+				assert.equal(json.itemType, itemType);
+				assert.equal(json.title, title);
+				assert.isUndefined(json.date);
+				assert.isUndefined(json.numPages);
 			})
-			assert.isUndefined(json.itemType);
-			assert.isUndefined(json.title);
-			assert.equal(json.date, date);
-			assert.isUndefined(json.numPages);
+		})
+		
+		describe("'full' mode", function () {
+			it("should output all fields", function* () {
+				var itemType = "book";
+				var title = "Test";
+				
+				var item = new Zotero.Item(itemType);
+				item.setField("title", title);
+				var id = yield item.saveTx();
+				item = yield Zotero.Items.getAsync(id);
+				var json = yield item.toJSON({ mode: 'full' });
+				assert.equal(json.title, title);
+				assert.equal(json.date, "");
+				assert.equal(json.numPages, "");
+			})
+		})
+		
+		describe("'patch' mode", function () {
+			it("should output only fields that differ", function* () {
+				var itemType = "book";
+				var title = "Test";
+				var date = "2015-05-12";
+				
+				var item = new Zotero.Item(itemType);
+				item.setField("title", title);
+				var id = yield item.saveTx();
+				item = yield Zotero.Items.getAsync(id);
+				var patchBase = yield item.toJSON();
+				
+				item.setField("date", date);
+				yield item.saveTx();
+				var json = yield item.toJSON({
+					patchBase: patchBase
+				})
+				assert.isUndefined(json.itemType);
+				assert.isUndefined(json.title);
+				assert.equal(json.date, date);
+				assert.isUndefined(json.numPages);
+				assert.isUndefined(json.deleted);
+				assert.isUndefined(json.creators);
+				assert.isUndefined(json.relations);
+				assert.isUndefined(json.tags);
+			})
+			
+			it("should include changed 'deleted' field", function* () {
+				// True to false
+				var item = new Zotero.Item('book');
+				item.deleted = true;
+				var id = yield item.saveTx();
+				item = yield Zotero.Items.getAsync(id);
+				var patchBase = yield item.toJSON();
+				
+				item.deleted = false;
+				var json = yield item.toJSON({
+					patchBase: patchBase
+				})
+				assert.isUndefined(json.title);
+				assert.isFalse(json.deleted);
+				
+				// False to true
+				var item = new Zotero.Item('book');
+				item.deleted = false;
+				var id = yield item.saveTx();
+				item = yield Zotero.Items.getAsync(id);
+				var patchBase = yield item.toJSON();
+				
+				item.deleted = true;
+				var json = yield item.toJSON({
+					patchBase: patchBase
+				})
+				assert.isUndefined(json.title);
+				assert.isTrue(json.deleted);
+			})
 		})
 	})
 

@@ -122,38 +122,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 	})
 	
 	describe("Syncing", function () {
-		it("should perform a sync for a new library", function* () {
+		it("should download items into a new library", function* () {
 			({ engine, client, caller } = yield setup());
-			
-			server.respond(function (req) {
-				if (req.method == "POST" && req.url == baseURL + "users/1/items") {
-					let ifUnmodifiedSince = req.requestHeaders["If-Unmodified-Since-Version"];
-					if (ifUnmodifiedSince == 0) {
-						req.respond(412, {}, "Library has been modified since specified version");
-						return;
-					}
-					
-					if (ifUnmodifiedSince == 3) {
-						let json = JSON.parse(req.requestBody);
-						req.respond(
-							200,
-							{
-								"Content-Type": "application/json",
-								"Last-Modified-Version": 3
-							},
-							JSON.stringify({
-								success: {
-									"0": json[0].key,
-									"1": json[1].key
-								},
-								unchanged: {},
-								failed: {}
-							})
-						);
-						return;
-					}
-				}
-			})
 			
 			var headers = {
 				"Last-Modified-Version": 3
@@ -278,6 +248,251 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.equal(obj.getField('title'), 'A');
 			assert.equal(obj.version, 3);
 			assert.isTrue(obj.synced);
+		})
+		
+		it("should upload new full items and subsequent patches", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var lastLibraryVersion = 5;
+			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			
+			var types = Zotero.DataObjectUtilities.getTypes();
+			var objects = {};
+			var objectResponseJSON = {};
+			var objectVersions = {};
+			for (let type of types) {
+				objects[type] = [yield createDataObject(type, { setTitle: true })];
+				objectVersions[type] = {};
+				objectResponseJSON[type] = yield Zotero.Promise.all(objects[type].map(o => o.toResponseJSON()));
+			}
+			
+			server.respond(function (req) {
+				if (req.method == "POST") {
+					assert.equal(
+						req.requestHeaders["If-Unmodified-Since-Version"], lastLibraryVersion
+					);
+					
+					for (let type of types) {
+						let typePlural = Zotero.DataObjectUtilities.getObjectTypePlural(type);
+						if (req.url == baseURL + "users/1/" + typePlural) {
+							let json = JSON.parse(req.requestBody);
+							assert.lengthOf(json, 1);
+							assert.equal(json[0].key, objects[type][0].key);
+							assert.equal(json[0].version, 0);
+							if (type == 'item') {
+								assert.equal(json[0].title, objects[type][0].getField('title'));
+							}
+							else {
+								assert.equal(json[0].name, objects[type][0].name);
+							}
+							let objectJSON = objectResponseJSON[type][0];
+							objectJSON.version = ++lastLibraryVersion;
+							objectJSON.data.version = lastLibraryVersion;
+							req.respond(
+								200,
+								{
+									"Content-Type": "application/json",
+									"Last-Modified-Version": lastLibraryVersion
+								},
+								JSON.stringify({
+									successful: {
+										"0": objectJSON
+									},
+									unchanged: {},
+									failed: {}
+								})
+							);
+							objectVersions[type][objects[type][0].key] = lastLibraryVersion;
+							return;
+						}
+					}
+				}
+			})
+			
+			yield engine.start();
+			
+			assert.equal(Zotero.Libraries.getVersion(libraryID), lastLibraryVersion);
+			for (let type of types) {
+				// Make sure objects were set to the correct version and marked as synced
+				assert.lengthOf((yield Zotero.Sync.Data.Local.getUnsynced(libraryID, type)), 0);
+				let key = objects[type][0].key;
+				let version = objects[type][0].version;
+				assert.equal(version, objectVersions[type][key]);
+				// Make sure uploaded objects were added to cache
+				let cached = yield Zotero.Sync.Data.Local.getCacheObject(type, libraryID, key, version);
+				assert.typeOf(cached, 'object');
+				assert.equal(cached.key, key);
+				assert.equal(cached.version, version);
+				
+				yield modifyDataObject(objects[type][0]);
+			}
+			
+			({ engine, client, caller } = yield setup());
+			
+			server.respond(function (req) {
+				if (req.method == "POST") {
+					assert.equal(
+						req.requestHeaders["If-Unmodified-Since-Version"], lastLibraryVersion
+					);
+					
+					for (let type of types) {
+						let typePlural = Zotero.DataObjectUtilities.getObjectTypePlural(type);
+						if (req.url == baseURL + "users/1/" + typePlural) {
+							let json = JSON.parse(req.requestBody);
+							assert.lengthOf(json, 1);
+							let j = json[0];
+							let o = objects[type][0];
+							assert.equal(j.key, o.key);
+							assert.equal(j.version, objectVersions[type][o.key]);
+							if (type == 'item') {
+								assert.equal(j.title, o.getField('title'));
+							}
+							else {
+								assert.equal(j.name, o.name);
+							}
+							
+							// Verify PATCH semantics instead of POST (i.e., only changed fields)
+							let changedFieldsExpected = ['key', 'version'];
+							if (type == 'item') {
+								changedFieldsExpected.push('title', 'dateModified');
+							}
+							else {
+								changedFieldsExpected.push('name');
+							}
+							let changedFields = Object.keys(j);
+							assert.lengthOf(
+								changedFields, changedFieldsExpected.length, "same " + type + " length"
+							);
+							assert.sameMembers(
+								changedFields, changedFieldsExpected, "same " + type + " members"
+							);
+							let objectJSON = objectResponseJSON[type][0];
+							objectJSON.version = ++lastLibraryVersion;
+							objectJSON.data.version = lastLibraryVersion;
+							req.respond(
+								200,
+								{
+									"Content-Type": "application/json",
+									"Last-Modified-Version": lastLibraryVersion
+								},
+								JSON.stringify({
+									successful: {
+										"0": objectJSON
+									},
+									unchanged: {},
+									failed: {}
+								})
+							);
+							objectVersions[type][o.key] = lastLibraryVersion;
+							return;
+						}
+					}
+				}
+			})
+			
+			yield engine.start();
+			
+			assert.equal(Zotero.Libraries.getVersion(libraryID), lastLibraryVersion);
+			for (let type of types) {
+				// Make sure objects were set to the correct version and marked as synced
+				assert.lengthOf((yield Zotero.Sync.Data.Local.getUnsynced(libraryID, type)), 0);
+				let o = objects[type][0];
+				let key = o.key;
+				let version = o.version;
+				assert.equal(version, objectVersions[type][key]);
+				// Make sure uploaded objects were added to cache
+				let cached = yield Zotero.Sync.Data.Local.getCacheObject(type, libraryID, key, version);
+				assert.typeOf(cached, 'object');
+				assert.equal(cached.key, key);
+				assert.equal(cached.version, version);
+				
+				switch (type) {
+				case 'collection':
+					assert.isFalse(cached.data.parentCollection);
+					break;
+				
+				case 'item':
+					assert.equal(cached.data.dateAdded, Zotero.Date.sqlToISO8601(o.dateAdded));
+					break;
+				
+				case 'search':
+					assert.typeOf(cached.data.conditions, 'object');
+					break;
+				}
+			}
+		})
+		
+		it("should update local objects with remotely saved version after uploading if necessary", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var lastLibraryVersion = 5;
+			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			
+			var types = Zotero.DataObjectUtilities.getTypes();
+			var objects = {};
+			var objectResponseJSON = {};
+			var objectNames = {};
+			for (let type of types) {
+				objects[type] = [yield createDataObject(type, { setTitle: true })];
+				objectNames[type] = {};
+				objectResponseJSON[type] = yield Zotero.Promise.all(objects[type].map(o => o.toResponseJSON()));
+			}
+			
+			server.respond(function (req) {
+				if (req.method == "POST") {
+					assert.equal(
+						req.requestHeaders["If-Unmodified-Since-Version"], lastLibraryVersion
+					);
+					
+					for (let type of types) {
+						let typePlural = Zotero.DataObjectUtilities.getObjectTypePlural(type);
+						if (req.url == baseURL + "users/1/" + typePlural) {
+							let key = objects[type][0].key;
+							let objectJSON = objectResponseJSON[type][0];
+							objectJSON.version = ++lastLibraryVersion;
+							objectJSON.data.version = lastLibraryVersion;
+							let prop = type == 'item' ? 'title' : 'name';
+							objectNames[type][key] = objectJSON.data[prop] = Zotero.Utilities.randomString();
+							req.respond(
+								200,
+								{
+									"Content-Type": "application/json",
+									"Last-Modified-Version": lastLibraryVersion
+								},
+								JSON.stringify({
+									successful: {
+										"0": objectJSON
+									},
+									unchanged: {},
+									failed: {}
+								})
+							);
+							return;
+						}
+					}
+				}
+			})
+			
+			yield engine.start();
+			
+			assert.equal(Zotero.Libraries.getVersion(libraryID), lastLibraryVersion);
+			for (let type of types) {
+				// Make sure local objects were updated with new metadata and marked as synced
+				assert.lengthOf((yield Zotero.Sync.Data.Local.getUnsynced(libraryID, type)), 0);
+				let o = objects[type][0];
+				let key = o.key;
+				let version = o.version;
+				let name = objectNames[type][key];
+				if (type == 'item') {
+					yield o.loadItemData();
+					assert.equal(name, o.getField('title'));
+				}
+				else {
+					assert.equal(name, o.name);
+				}
+			}
 		})
 		
 		it("should make only one request if in sync", function* () {

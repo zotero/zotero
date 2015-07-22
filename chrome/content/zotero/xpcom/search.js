@@ -822,15 +822,24 @@ Zotero.Search.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 	}
 });
 
+Zotero.Collection.prototype.toResponseJSON = Zotero.Promise.coroutine(function* (options = {}) {
+	var json = yield this.constructor._super.prototype.toResponseJSON.apply(this, options);
+	return json;
+});
 
-Zotero.Search.prototype.toJSON = Zotero.Promise.coroutine(function* (options) {
-	var obj = {};
+
+Zotero.Search.prototype.toJSON = Zotero.Promise.coroutine(function* (options = {}) {
+	var env = this._preToJSON(options);
+	var mode = env.mode;
+	
+	var obj = env.obj = {};
 	obj.key = this.key;
 	obj.version = this.version;
 	obj.name = this.name;
 	yield this.loadConditions();
 	obj.conditions = this.getConditions();
-	return obj;
+	
+	return this._postToJSON(env);
 });
 
 

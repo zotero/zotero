@@ -260,12 +260,24 @@ var createGroup = Zotero.Promise.coroutine(function* (props) {
 //
 // Data objects
 //
-function createUnsavedDataObject(objectType, params) {
+/**
+ * @param {String} objectType - 'collection', 'item', 'search'
+ * @param {Object} [params]
+ * @param {Integer} [params.libraryID]
+ * @param {String} [params.itemType] - Item type
+ * @param {String} [params.title] - Item title
+ * @param {Boolean} [params.setTitle] - Assign a random item title
+ * @param {String} [params.name] - Collection/search name
+ * @param {Integer} [params.parentID]
+ * @param {String} [params.parentKey]
+ * @param {Boolean} [params.synced]
+ * @param {Integer} [params.version]
+ */
+function createUnsavedDataObject(objectType, params = {}) {
 	if (!objectType) {
 		throw new Error("Object type not provided");
 	}
 	
-	params = params || {};
 	if (objectType == 'item') {
 		var param = params.itemType || 'book';
 	}
@@ -275,14 +287,14 @@ function createUnsavedDataObject(objectType, params) {
 	}
 	switch (objectType) {
 	case 'item':
-		if (params.title) {
-			obj.setField('title', params.title);
+		if (params.title !== undefined || params.setTitle) {
+			obj.setField('title', params.title !== undefined ? params.title : Zotero.Utilities.randomString());
 		}
 		break;
 	
 	case 'collection':
 	case 'search':
-		obj.name = params.name !== undefined ? params.name : "Test";
+		obj.name = params.name !== undefined ? params.name : Zotero.Utilities.randomString();
 		break;
 	}
 	var allowedParams = ['parentID', 'parentKey', 'synced', 'version'];
@@ -294,10 +306,30 @@ function createUnsavedDataObject(objectType, params) {
 	return obj;
 }
 
-var createDataObject = Zotero.Promise.coroutine(function* (objectType, params, saveOptions) {
+var createDataObject = Zotero.Promise.coroutine(function* (objectType, params = {}, saveOptions) {
 	var obj = createUnsavedDataObject(objectType, params);
 	yield obj.saveTx(saveOptions);
 	return obj;
+});
+
+function getNameProperty(objectType) {
+	return objectType == 'item' ? 'title' : 'name';
+}
+
+var modifyDataObject = Zotero.Promise.coroutine(function* (obj, params = {}) {
+	switch (obj.objectType) {
+	case 'item':
+		yield obj.loadItemData();
+		obj.setField(
+			'title',
+			params.title !== undefined ? params.title : Zotero.Utilities.randomString()
+		);
+		break;
+	
+	default:
+		obj.name = params.name !== undefined ? params.name : Zotero.Utilities.randomString();
+	}
+	return obj.saveTx();
 });
 
 /**

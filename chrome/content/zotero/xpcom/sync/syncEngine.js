@@ -550,9 +550,8 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 		let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 		let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		
-		let ids = objectIDs[objectType];
 		let queue = [];
-		for (let id of ids) {
+		for (let id of objectIDs[objectType]) {
 			queue.push({
 				id: id,
 				json: null,
@@ -604,26 +603,53 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 				Zotero.debug(json);
 				
 				libraryVersion = json.libraryVersion;
-				yield Zotero.Libraries.setVersion(this.libraryID, json.libraryVersion);
 				
-				// Mark successful and unchanged objects as synced with new version
-				var toRemove = [];
-				for (let state of ['success', 'unchanged']) {
+				// Mark successful and unchanged objects as synced with new version,
+				// and save uploaded JSON to cache
+				let ids = [];
+				let toSave = [];
+				let toCache = [];
+				for (let state of ['successful', 'unchanged']) {
 					for (let index in json.results[state]) {
-						let key = json.results[state][index];
+						let current = json.results[state][index];
+						// 'successful' includes objects, not keys
+						let key = state == 'successful' ? current.key : current;
+						
 						if (key != batch[index].key) {
 							throw new Error("Key mismatch (" + key + " != " + batch[index].key + ")");
 						}
-						let obj = yield objectsClass.getByLibraryAndKeyAsync(
-							this.libraryID, key, { noCache: true }
-						);
-						obj.version = json.libraryVersion;
-						yield Zotero.Sync.Data.Local.markObjectAsSynced(obj)
+						
+						let obj = objectsClass.getByLibraryAndKey(this.libraryID, key, { noCache: true })
+						ids.push(obj.id);
+						
+						if (state == 'successful') {
+							// Update local object with saved data if necessary
+							yield obj.fromJSON(current.data);
+							toSave.push(obj);
+							toCache.push(current);
+						}
+						else {
+							let j = yield obj.toJSON();
+							j.version = json.libraryVersion;
+							toCache.push(j);
+						}
+						
 						numSuccessful++;
 						// Remove from batch to mark as successful
 						delete batch[index];
 					}
 				}
+				yield Zotero.Sync.Data.Local.saveCacheObjects(
+					objectType, this.libraryID, toCache
+				);
+				yield Zotero.DB.executeTransaction(function* () {
+					for (let i = 0; i < toSave.length; i++) {
+						yield toSave[i].save();
+					}
+					yield Zotero.Libraries.setVersion(this.libraryID, json.libraryVersion);
+					objectsClass.updateVersion(ids, json.libraryVersion);
+					objectsClass.updateSynced(ids, true);
+				}.bind(this));
 				
 				// Handle failed objects
 				for (let index in json.results.failed) {

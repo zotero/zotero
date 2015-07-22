@@ -101,6 +101,42 @@ Zotero.DataObjectUtilities = {
 		return Zotero[className]
 	},
 	
+	
+	patch: function (base, obj) {
+		var target = {};
+		Object.assign(target, obj);
+		
+		for (let i in base) {
+			switch (i) {
+			case 'key':
+			case 'version':
+			case 'dateModified':
+				continue;
+			}
+			
+			// If field from base exists in the new version, delete it if it's the same
+			if (i in target) {
+				if (!this._fieldChanged(i, base[i], target[i])) {
+					delete target[i];
+				}
+			}
+			// If field from base doesn't exist in new version, clear it
+			else {
+				switch (i) {
+				case 'deleted':
+					target[i] = false;
+					break;
+				
+				default:
+					target[i] = '';
+				}
+			}
+		}
+		
+		return target;
+	},
+	
+	
 	/**
 	 * Determine whether two API JSON objects are equivalent
 	 *
@@ -129,24 +165,9 @@ Zotero.DataObjectUtilities = {
 				continue;
 			}
 			
-			let changed;
-			
-			switch (field) {
-			case 'creators':
-			case 'collections':
-			case 'tags':
-			case 'relations':
-				changed = this["_" + field + "Changed"](val1, val2);
-				if (changed) {
-					return true;
-				}
-				break;
-			
-			default:
-				changed = val1 !== val2;
-				if (changed) {
-					return true;
-				}
+			let changed = this._fieldChanged(field, val1, val2);
+			if (changed) {
+				return true;
 			}
 			
 			skipFields[field] = true;
@@ -168,6 +189,20 @@ Zotero.DataObjectUtilities = {
 		}
 		
 		return false;
+	},
+	
+	_fieldChanged: function (fieldName, field1, field2) {
+		switch (fieldName) {
+		case 'collections':
+		case 'conditions':
+		case 'creators':
+		case 'tags':
+		case 'relations':
+			return this["_" + fieldName + "Changed"](field1, field2);
+		
+		default:
+			return field1 !== field2;
+		}
 	},
 	
 	_creatorsChanged: function (data1, data2) {

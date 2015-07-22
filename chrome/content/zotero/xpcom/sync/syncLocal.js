@@ -159,6 +159,27 @@ Zotero.Sync.Data.Local = {
 			throw new Error("'json' must be an array");
 		}
 		
+		if (!jsonArray.length) {
+			Zotero.debug("No " + Zotero.DataObjectUtilities.getObjectTypePlural(objectType)
+				+ " to save to sync cache");
+			return;
+		}
+		
+		jsonArray = jsonArray.map(o => {
+			if (o.key === undefined) {
+				throw new Error("Missing 'key' property in JSON");
+			}
+			if (o.version === undefined) {
+				throw new Error("Missing 'version' property in JSON");
+			}
+			// If direct data object passed, wrap in fake response object
+			return o.data === undefined ? {
+				key: o.key,
+				version: o.version,
+				data: o
+			} : o;
+		});
+		
 		Zotero.debug("Saving to sync cache:");
 		Zotero.debug(jsonArray);
 		
@@ -174,12 +195,6 @@ Zotero.Sync.Data.Local = {
 					var params = [];
 					for (let i = 0; i < chunk.length; i++) {
 						let o = chunk[i];
-						if (o.key === undefined) {
-							throw new Error("Missing 'key' property in JSON");
-						}
-						if (o.version === undefined) {
-							throw new Error("Missing 'version' property in JSON");
-						}
 						params.push(libraryID, o.key, syncObjectTypeID, o.version, JSON.stringify(o));
 					}
 					return Zotero.DB.queryAsync(

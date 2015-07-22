@@ -1190,6 +1190,47 @@ Zotero.DataObject.prototype._finalizeErase = function (env) {
 	}
 }
 
+
+Zotero.DataObject.prototype.toResponseJSON = Zotero.Promise.coroutine(function* (options) {
+	// TODO: library block?
+	
+	return {
+		key: this.key,
+		version: this.version,
+		meta: {},
+		data: yield this.toJSON(options)
+	};
+});
+
+
+Zotero.DataObject.prototype._preToJSON = function (options) {
+	var env = { options };
+	env.mode = options.mode || 'new';
+	if (env.mode == 'patch') {
+		if (!options.patchBase) {
+			throw new Error("Cannot use patch mode if patchBase not provided");
+		}
+	}
+	else if (options.patchBase) {
+		if (options.mode) {
+			Zotero.debug("Zotero.Item.toJSON: ignoring provided patchBase in " + env.mode + " mode", 2);
+		}
+		// If patchBase provided and no explicit mode, use 'patch'
+		else {
+			env.mode = 'patch';
+		}
+	}
+	return env;
+}
+
+Zotero.DataObject.prototype._postToJSON = function (env) {
+	if (env.mode == 'patch') {
+		env.obj = Zotero.DataObjectUtilities.patch(env.options.patchBase, env.obj);
+	}
+	return env.obj;
+}
+
+
 /**
  * Generates data object key
  * @return {String} key

@@ -678,14 +678,43 @@ Zotero.Collection.prototype.fromJSON = Zotero.Promise.coroutine(function* (json)
 });
 
 
-Zotero.Collection.prototype.toJSON = Zotero.Promise.coroutine(function* (options) {
-	var obj = {};
+Zotero.Collection.prototype.toResponseJSON = Zotero.Promise.coroutine(function* (options = {}) {
+	var json = yield this.constructor._super.prototype.toResponseJSON.apply(this, options);
+	
+	// TODO: library block?
+	
+	// creatorSummary
+	var firstCreator = this.getField('firstCreator');
+	if (firstCreator) {
+		json.meta.creatorSummary = firstCreator;
+	}
+	// parsedDate
+	var parsedDate = Zotero.Date.multipartToSQL(this.getField('date', true, true));
+	if (parsedDate) {
+		// 0000?
+		json.meta.parsedDate = parsedDate;
+	}
+	// numChildren
+	if (this.isRegularItem()) {
+		json.meta.numChildren = this.numChildren();
+	}
+	return json;
+})
+
+
+Zotero.Collection.prototype.toJSON = Zotero.Promise.coroutine(function* (options = {}) {
+	var env = this._preToJSON(options);
+	var mode = env.mode;
+	
+	var obj = env.obj = {};
 	obj.key = this.key;
 	obj.version = this.version;
+	
 	obj.name = this.name;
 	obj.parentCollection = this.parentKey ? this.parentKey : false;
 	obj.relations = {}; // TEMP
-	return obj;
+	
+	return this._postToJSON(env);
 });
 
 
