@@ -3240,7 +3240,7 @@ var ZoteroPane = new function()
 				//
 				//
 				
-				if (!this.canEditFiles(row)) {
+				if (row && !this.canEditFiles(row)) {
 					this.displayCannotEditLibraryFilesMessage();
 					return;
 				}
