@@ -55,7 +55,7 @@ var Zotero_Browser = new function() {
 	this.appcontent = null;
 	this.isScraping = false;
 	
-	var _browserData = new Object();
+	var _browserData = new WeakMap();
 	var _attachmentsMap = new WeakMap();
 	
 	var _blacklist = [
@@ -158,9 +158,10 @@ var Zotero_Browser = new function() {
 	this.scrapeThisPage = function (translator, event) {
 		// Perform translation
 		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
-		if(tab.page.translators && tab.page.translators.length) {
-			tab.page.translate.setTranslator(translator || tab.page.translators[0]);
-			Zotero_Browser.performTranslation(tab.page.translate);
+		var page = tab.getPageObject();
+		if(page.translators && page.translators.length) {
+			page.translate.setTranslator(translator || page.translators[0]);
+			Zotero_Browser.performTranslation(page.translate);
 		}
 		else {
 			this.saveAsWebPage(
@@ -205,7 +206,8 @@ var Zotero_Browser = new function() {
 		
 		// make sure annotation action is toggled
 		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
-		if(tab.page && tab.page.annotations && tab.page.annotations.clearAction) tab.page.annotations.clearAction();
+		var page = tab.getPageObject();
+		if(page && page.annotations && page.annotations.clearAction) page.annotations.clearAction();
 		
 		if(!toggleTool) return;
 		
@@ -229,7 +231,7 @@ var Zotero_Browser = new function() {
 	 */
 	function toggleCollapsed() {
 		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
-		tab.page.annotations.toggleCollapsed();
+		tab.getPageObject().annotations.toggleCollapsed();
 	}
 	
 	/*
@@ -332,16 +334,19 @@ var Zotero_Browser = new function() {
 			if(annotationID) {
 				if(Zotero.Annotate.isAnnotated(annotationID)) {
 					//window.alert(Zotero.getString("annotations.oneWindowWarning"));
-				} else if(!tab.page.annotations) {
-					// enable annotation
-					tab.page.annotations = new Zotero.Annotations(Zotero_Browser, browser, annotationID);
-					var saveAnnotations = function() {
-						tab.page.annotations.save();
-						tab.page.annotations = undefined;
-					};
-					browser.contentWindow.addEventListener('beforeunload', saveAnnotations, false);
-					browser.contentWindow.addEventListener('close', saveAnnotations, false);
-					tab.page.annotations.load();
+				} else {
+					var page = tab.getPageObject();
+					if(!page.annotations) {
+						// enable annotation
+						page.annotations = new Zotero.Annotations(Zotero_Browser, browser, annotationID);
+						var saveAnnotations = function() {
+							page.annotations.save();
+							page.annotations = undefined;
+						};
+						browser.contentWindow.addEventListener('beforeunload', saveAnnotations, false);
+						browser.contentWindow.addEventListener('close', saveAnnotations, false);
+						page.annotations.load();
+					}
 				}
 			}
 		}
@@ -372,8 +377,11 @@ var Zotero_Browser = new function() {
 		
 		var tab = _getTabObject(browser);
 		if(!tab) return;
-		
-		if(doc == tab.page.document || doc == rootDoc) {
+
+		var page = tab.getPageObject();
+		if(!page) return;
+
+		if(doc == page.document || doc == rootDoc) {
 			// clear translator only if the page on which the pagehide event was called is
 			// either the page to which the translator corresponded, or the root document
 			// (the second check is probably paranoid, but won't hurt)
@@ -394,7 +402,7 @@ var Zotero_Browser = new function() {
 			var rootDoc = (doc instanceof HTMLDocument ? doc.defaultView.top.document : doc);
 			var browser = Zotero_Browser.tabbrowser.getBrowserForDocument(rootDoc);
 			var tab = _getTabObject(browser);
-			if(doc == tab.page.document || doc == rootDoc) tab.clear();
+			if(doc == tab.getPageObject().document || doc == rootDoc) tab.clear();
 			tab.detectTranslators(rootDoc, doc);
 		} catch(e) {
 			Zotero.debug(e);
@@ -408,7 +416,8 @@ var Zotero_Browser = new function() {
 		// Save annotations when closing a tab, since the browser is already
 		// gone from tabbrowser by the time contentHide() gets called
 		var tab = _getTabObject(event.target);
-		if(tab.page && tab.page.annotations) tab.page.annotations.save();
+		var page = tab.getPageObject();
+		if(page && page.annotations) page.annotations.save();
 		tab.clear();
 		
 		// To execute if document object does not exist
@@ -421,9 +430,10 @@ var Zotero_Browser = new function() {
 	 */
 	function resize(event) {
 		var tab = _getTabObject(this.tabbrowser.selectedBrowser);
-		if(!tab.page.annotations) return;
+		var page = tab.getPageObject();
+		if(!page.annotations) return;
 		
-		tab.page.annotations.refresh();
+		page.annotations.refresh();
 	}
 	
 	/*
@@ -454,7 +464,8 @@ var Zotero_Browser = new function() {
 		}
 		
 		// set annotation bar status
-		if(tab.page.annotations && tab.page.annotations.annotations.length) {
+		var page = tab.getPageObject();
+		if(page.annotations && page.annotations.annotations.length) {
 			document.getElementById('zotero-annotate-tb').hidden = false;
 			toggleMode();
 		} else {
@@ -501,7 +512,7 @@ var Zotero_Browser = new function() {
 		var tab = _getTabObject(this.tabbrowser.selectedBrowser);
 		var captureState = tab.getCaptureState();
 		if (captureState == tab.CAPTURE_STATE_TRANSLATABLE) {
-			let translators = tab.page.translators;
+			let translators = tab.getPageObject().translators;
 			for (var i=0, n = translators.length; i < n; i++) {
 				let translator = translators[i];
 				
@@ -705,10 +716,11 @@ var Zotero_Browser = new function() {
 	
 	function _constructLookupFunction(tab, success) {
 		return function(e) {
-			tab.page.translate.setTranslator(tab.page.translators[0]);
-			tab.page.translate.clearHandlers("done");
-			tab.page.translate.clearHandlers("itemDone");
-			tab.page.translate.setHandler("done", function(obj, status) {
+			var page = tab.getPageObject();
+			page.translate.setTranslator(page.translators[0]);
+			page.translate.clearHandlers("done");
+			page.translate.clearHandlers("itemDone");
+			page.translate.setHandler("done", function(obj, status) {
 				if(status) {
 					success(e, obj);
 					Zotero_Browser.progress.close();
@@ -720,7 +732,7 @@ var Zotero_Browser = new function() {
 			
 			Zotero_Browser.progress.show();
 			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.lookup.performing"));
-			tab.page.translate.translate(false);
+			page.translate.translate(false);
 			e.stopPropagation();
 		}
 	}
@@ -730,10 +742,12 @@ var Zotero_Browser = new function() {
 	 */
 	function _getTabObject(browser) {
 		if(!browser) return false;
-		if(!browser.zoteroBrowserData) {
-			browser.zoteroBrowserData = new Zotero_Browser.Tab(browser);
+		var obj = _browserData.get(browser);
+		if(!obj) {
+			obj = new Zotero_Browser.Tab(browser);
+			_browserData.set(browser, obj);
 		}
-		return browser.zoteroBrowserData;
+		return obj;
 	}
 	
 	/**
@@ -746,7 +760,7 @@ var Zotero_Browser = new function() {
 			// ignore click if it's on an existing annotation
 			if(e.target.getAttribute("zotero-annotation")) return;
 			
-			var annotation = tab.page.annotations.createAnnotation();
+			var annotation = tab.getPageObject().annotations.createAnnotation();
 			annotation.initWithEvent(e);
 			
 			// disable add mode, now that we've used it
@@ -760,9 +774,9 @@ var Zotero_Browser = new function() {
 			if(selection.isCollapsed) return;
 			
 			if(type == "highlight") {
-	 			tab.page.annotations.highlight(selection.getRangeAt(0));
+				tab.getPageObject().annotations.highlight(selection.getRangeAt(0));
 			} else if(type == "unhighlight") {
-	 			tab.page.annotations.unhighlight(selection.getRangeAt(0));
+				tab.getPageObject().annotations.unhighlight(selection.getRangeAt(0));
 			}
 			
 			selection.removeAllRanges();
@@ -783,19 +797,33 @@ var Zotero_Browser = new function() {
 
 Zotero_Browser.Tab = function(browser) {
 	this.browser = browser;
-	this.page = new Object();
+	this.wm = new WeakMap();
 }
 
 Zotero_Browser.Tab.prototype.CAPTURE_STATE_DISABLED = 0;
 Zotero_Browser.Tab.prototype.CAPTURE_STATE_GENERIC = 1;
 Zotero_Browser.Tab.prototype.CAPTURE_STATE_TRANSLATABLE = 2;
 
+/**
+ * Gets page-specific information (stored in WeakMap to prevent holding
+ * a reference to translate)
+ */
+Zotero_Browser.Tab.prototype.getPageObject = function() {
+	var doc = this.browser.contentWindow;
+	if(!doc) return null;
+	var obj = this.wm.get(doc);
+	if(!obj) {
+		obj = {};
+		this.wm.set(doc, obj);
+	}
+	return obj;
+}
+
 /*
- * clears page-specific information
+ * Removes page-specific information from WeakMap
  */
 Zotero_Browser.Tab.prototype.clear = function() {
-	delete this.page;
-	this.page = new Object();
+	this.wm.delete(this.browser.contentWindow);
 }
 
 /*
@@ -876,10 +904,11 @@ Zotero_Browser.Tab.prototype._attemptLocalFileImport = function(doc) {
 
 
 Zotero_Browser.Tab.prototype.getCaptureState = function () {
-	if (!this.page.saveEnabled) {
+	var page = this.getPageObject();
+	if (!page.saveEnabled) {
 		return this.CAPTURE_STATE_DISABLED;
 	}
-	if (this.page.translators && this.page.translators.length) {
+	if (page.translators && page.translators.length) {
 		return this.CAPTURE_STATE_TRANSLATABLE;
 	}
 	return this.CAPTURE_STATE_GENERIC;
@@ -894,7 +923,7 @@ Zotero_Browser.Tab.prototype.getCaptureIcon = function (hiDPI) {
 	
 	switch (this.getCaptureState()) {
 	case this.CAPTURE_STATE_TRANSLATABLE:
-		var itemType = this.page.translators[0].itemType;
+		var itemType = this.getPageObject().translators[0].itemType;
 		return (itemType === "multiple"
 				? "chrome://zotero/skin/treesource-collection" + suffix + ".png"
 				: Zotero.ItemTypes.getImageSrc(itemType));
@@ -918,10 +947,11 @@ Zotero_Browser.Tab.prototype.getCaptureTooltip = function() {
 	
 	case this.CAPTURE_STATE_TRANSLATABLE:
 		var text = Zotero.getString('ingester.saveToZotero');
-		if (this.page.translators[0].itemType == 'multiple') {
+		var translator = this.getPageObject().translators[0];
+		if (translator.itemType == 'multiple') {
 			text += '…';
 		}
-		text += ' (' + this.page.translators[0].label + ')';
+		text += ' (' + translator.label + ')';
 		break;
 	
 	// TODO: Different captions for images, PDFs, etc.?
@@ -976,44 +1006,45 @@ Zotero_Browser.Tab.prototype._selectItems = function(obj, itemList, callback) {
  * called when translators are available
  */
 Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, translators) {
-	this.page.saveEnabled = true;
+	var page = this.getPageObject();
+	page.saveEnabled = true;
 	
 	if(translators && translators.length) {
 		//see if we should keep the previous set of translators
 		if(//we already have a translator for part of this page
-			this.page.translators && this.page.translators.length && this.page.document.location
+			page.translators && page.translators.length && page.document.location
 			//and the page is still there
-			&& this.page.document.defaultView && !this.page.document.defaultView.closed
+			&& page.document.defaultView && !page.document.defaultView.closed
 			//this set of translators is not targeting the same URL as a previous set of translators,
 			// because otherwise we want to use the newer set,
 			// but only if it's not in a subframe of the previous set
-			&& (this.page.document.location.href != translate.document.location.href ||
-				Zotero.Utilities.Internal.isIframeOf(translate.document.defaultView, this.page.document.defaultView))
+			&& (page.document.location.href != translate.document.location.href ||
+				Zotero.Utilities.Internal.isIframeOf(translate.document.defaultView, page.document.defaultView))
 				//the best translator we had was of higher priority than the new set
-			&& (this.page.translators[0].priority < translators[0].priority
+			&& (page.translators[0].priority < translators[0].priority
 				//or the priority was the same, but...
-				|| (this.page.translators[0].priority == translators[0].priority
+				|| (page.translators[0].priority == translators[0].priority
 					//the previous set of translators targets the top frame or the current one does not either
-					&& (this.page.document.defaultView == this.page.document.defaultView.top
-						|| translate.document.defaultView !== this.page.document.defaultView.top)
+					&& (page.document.defaultView == page.document.defaultView.top
+						|| translate.document.defaultView !== page.document.defaultView.top)
 			))
 		) {
 			Zotero.debug("Translate: a better translator was already found for this page");
 			return; //keep what we had
 		} else {
 			this.clear(); //clear URL bar icon
-			this.page.saveEnabled = true;
+			page = this.getPageObject();
+			page.saveEnabled = true;
 		}
 		
 		Zotero.debug("Translate: found translators for page\n"
 			+ "Best translator: " + translators[0].label + " with priority " + translators[0].priority);
-		
-		this.page.translate = translate;
-		this.page.translators = translators;
-		this.page.document = translate.document;
+		page.translate = translate;
+		page.translators = translators;
+		page.document = translate.document;
 	
-		this.page.translate.clearHandlers("select");
-		this.page.translate.setHandler("select", this._selectItems);
+		translate.clearHandlers("select");
+		translate.setHandler("select", this._selectItems);
 	} else if(translate.type != "import" && translate.document.documentURI.length > 7
 			&& translate.document.documentURI.substr(0, 7) == "file://") {
 		this._attemptLocalFileImport(translate.document);
