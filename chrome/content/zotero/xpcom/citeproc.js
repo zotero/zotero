@@ -80,7 +80,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.1.39",
+    PROCESSOR_VERSION: "1.1.45",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -398,7 +398,7 @@ var CSL = {
         ret[ret.length - 1] += str;
         return ret;
     },
-    SKIP_WORDS: ["about","above","across","afore","after","against","along","alongside","amid","amidst","among","amongst","anenst","apropos","apud","around","as","aside","astride","at","athwart","atop","barring","before","behind","below","beneath","beside","besides","between","beyond","but","by","circa","despite","down","during","except","for","forenenst","from","given","in","inside","into","lest","like","modulo","near","next","notwithstanding","of","off","on","onto","out","over","per","plus","pro","qua","sans","since","than","through"," thru","throughout","thruout","till","to","toward","towards","under","underneath","until","unto","up","upon","versus","vs.","v.","vs","v","via","vis-Ã -vis","with","within","without","according to","ahead of","apart from","as for","as of","as per","as regards","aside from","back to","because of","close to","due to","except for","far from","inside of","instead of","near to","next to","on to","out from","out of","outside of","prior to","pursuant to","rather than","regardless of","such as","that of","up to","where as","or", "yet", "so", "for", "and", "nor", "a", "an", "the", "de", "d'", "von", "van", "c", "et", "ca"],
+    SKIP_WORDS: ["about","above","across","afore","after","against","along","alongside","amid","amidst","among","amongst","anenst","apropos","apud","around","as","aside","astride","at","athwart","atop","barring","before","behind","below","beneath","beside","besides","between","beyond","but","by","circa","despite","down","during","except","for","forenenst","from","given","in","inside","into","lest","like","modulo","near","next","notwithstanding","of","off","on","onto","out","over","per","plus","pro","qua","sans","since","than","through"," thru","throughout","thruout","till","to","toward","towards","under","underneath","until","unto","up","upon","versus","vs.","v.","vs","v","via","vis-à-vis","with","within","without","according to","ahead of","apart from","as for","as of","as per","as regards","aside from","back to","because of","close to","due to","except for","far from","inside of","instead of","near to","next to","on to","out from","out of","outside of","prior to","pursuant to","rather than","regardless of","such as","that of","up to","where as","or", "yet", "so", "for", "and", "nor", "a", "an", "the", "de", "d'", "von", "van", "c", "et", "ca"],
     FORMAT_KEY_SEQUENCE: [
         "@strip-periods",
         "@font-style",
@@ -465,7 +465,7 @@ var CSL = {
         "lt-LT":"Lithuanian",
         "lv-LV":"Latvian",
         "mn-MN":"Mongolian",
-        "nb-NO":"Norwegian (BokmÃ¥l)",
+        "nb-NO":"Norwegian (Bokmål)",
         "nl-NL":"Dutch",
         "nn-NO":"Norwegian (Nynorsk)",
         "pl-PL":"Polish",
@@ -995,7 +995,7 @@ CSL.DateParser = function () {
     jiymatcher = "(?:" + jiymatchstring + ")(?:[0-9]+)";
     jiymatcher = new RegExp(jiymatcher, "g");
     jmd = /(\u6708|\u5E74)/g;
-    jy = /\u65E5/;
+    jy = /\u65E5/g;
     jr = /\u301c/g;
     yearlast = "(?:[?0-9]{1,2}%%NUMD%%){0,2}[?0-9]{4}(?![0-9])";
     yearfirst = "[?0-9]{4}(?:%%NUMD%%[?0-9]{1,2}){0,2}(?![0-9])";
@@ -1117,11 +1117,11 @@ CSL.DateParser = function () {
         m = txt.match(jmd);
         if (m) {
             txt = txt.replace(/\s+/, "", "g");
-            txt = txt.replace(jy, "", "g");
-            txt = txt.replace(jmd, "-", "g");
-            txt = txt.replace(jr, "/", "g");
-            txt = txt.replace("-/", "/", "g");
-            txt = txt.replace(/-$/,"", "g");
+            txt = txt.replace(jy, "");
+            txt = txt.replace(jmd, "-");
+            txt = txt.replace(jr, "/");
+            txt = txt.replace(/\-\//g, "/");
+            txt = txt.replace(/-$/g,"");
             slst = txt.split(jiysplitter);
             lst = [];
             mm = txt.match(jiymatcher);
@@ -1430,6 +1430,7 @@ CSL.Engine = function (sys, style, lang, forceLang) {
         this.opt.development_extensions.rtl_support = true;
         this.opt.development_extensions.expect_and_symbol_form = true;
         this.opt.development_extensions.require_explicit_legal_case_title_short = true;
+        this.opt.development_extensions.force_jurisdiction = true;
     }
     if (lang) {
         lang = lang.replace("_", "-");
@@ -1877,6 +1878,11 @@ CSL.Engine.prototype.retrieveItem = function (id) {
         }
     }
     var isLegalType = ["bill","legal_case","legislation","gazette","regulation"].indexOf(Item.type) > -1;
+    if (this.opt.development_extensions.force_jurisdiction && isLegalType) {
+        if (!Item.jurisdiction) {
+            Item.jurisdiction = "us";
+        }
+    }
     if (!isLegalType && Item.title && this.sys.getAbbreviation) {
         var noHints = false;
         if (!Item.jurisdiction) {
@@ -2174,7 +2180,7 @@ CSL.Engine.prototype.getCitationLabel = function (Item) {
                 if (m) {
                     myname = myname.slice(m[1].length);
                 }
-                myname = myname.replace(CSL.ROMANESQUE_NOT_REGEXP, "", "g");
+                myname = myname.replace(CSL.ROMANESQUE_NOT_REGEXP, "");
                 if (!myname) {
                     break;
                 }
@@ -2933,7 +2939,7 @@ CSL.Output.Queue.adjust = function (punctInQuote) {
         }
     }
     PUNCT_OR_SPACE[" "] = true;
-    PUNCT_OR_SPACE["Â "] = true;
+    PUNCT_OR_SPACE[" "] = true;
     var RtoL_MAP = {};
     for (var key in LtoR_MAP) {
         for (var subkey in LtoR_MAP[key]) {
@@ -3204,7 +3210,7 @@ CSL.Output.Queue.adjust = function (punctInQuote) {
                             }
                         }
                     }
-                    if (childStrings.suffix.slice(-1) === "Â " && parentStrings.suffix.slice(0,1) === " ") {
+                    if (childStrings.suffix.slice(-1) === " " && parentStrings.suffix.slice(0,1) === " ") {
                         parentStrings.suffix = parentStrings.suffix.slice(1);
                     }
                     if (PUNCT_OR_SPACE[childStrings.suffix.slice(0,1)]) {
@@ -3443,6 +3449,8 @@ CSL.Engine.Opt = function () {
     this.development_extensions.expect_and_symbol_form = false;
     this.development_extensions.require_explicit_legal_case_title_short = false;
     this.development_extensions.spoof_institutional_affiliations = false;
+    this.development_extensions.force_jurisdiction = false;
+    this.development_extensions.parse_names = true;
 };
 CSL.Engine.Tmp = function () {
     this.names_max = new CSL.Stack();
@@ -7747,7 +7755,7 @@ CSL.NameOutput.prototype._renderPersonalName = function (v, name, slot, pos, i, 
 };
 CSL.NameOutput.prototype._isRomanesque = function (name) {
     var ret = 2;
-    if (!name.family.replace('"', '', 'g').match(CSL.ROMANESQUE_REGEXP)) {
+    if (!name.family.replace(/\"/g, '').match(CSL.ROMANESQUE_REGEXP)) {
         ret = 0;
     }
     if (!ret && name.given && name.given.match(CSL.STARTSWITH_ROMANESQUE_REGEXP)) {
@@ -7810,7 +7818,7 @@ CSL.NameOutput.prototype._renderOnePersonalName = function (value, pos, i, j) {
         if (["Lord", "Lady"].indexOf(name.given) > -1) {
             sort_sep = ", ";
         }
-        if (["always", "display-and-sort"].indexOf(this.state.opt["demote-non-dropping-particle"]) > -1 && !has_hyphenated_non_dropping_particle) {
+        if (["always", "display-and-sort"].indexOf(this.state.opt["demote-non-dropping-particle"]) > -1) {
             second = this._join([given, dropping_particle], (name["comma-dropping-particle"] + " "));
             second = this._join([second, non_dropping_particle], " ");
             if (second && this.given) {
@@ -8051,34 +8059,11 @@ CSL.NameOutput.prototype._parseName = function (name) {
     } else {
         noparse = false;
     }
-    if (!name["non-dropping-particle"] && name.family && !noparse && name.given) {
-        if (!name["static-particles"]) {
-            CSL.parseParticles(name, true);
-        }
-    }
-    if (!name.suffix && name.given) {
-        m = name.given.match(/(\s*,!*\s*)/);
-        if (m) {
-            idx = name.given.indexOf(m[1]);
-            var possible_suffix = name.given.slice(idx + m[1].length);
-            var possible_comma = name.given.slice(idx, idx + m[1].length).replace(/\s*/g, "");
-            if (possible_suffix.length <= 3) {
-                if (possible_comma.length === 2) {
-                    name["comma-suffix"] = true;
-                }
-                name.suffix = possible_suffix;
-            } else if (!name["dropping-particle"] && name.given) {
-                name["dropping-particle"] = possible_suffix;
-                name["comma-dropping-particle"] = ",";
+    if (this.state.opt.development_extensions.parse_names) {
+        if (!name["non-dropping-particle"] && name.family && !noparse && name.given) {
+            if (!name["static-particles"]) {
+                CSL.parseParticles(name, true);
             }
-            name.given = name.given.slice(0, idx);
-        }
-    }
-    if (!name["dropping-particle"] && name.given) {
-        m = name.given.match(/(\s+)([a-z][ \'\u2019a-z]*)$/);
-        if (m) {
-            name.given = name.given.slice(0, (m[1].length + m[2].length) * -1);
-            name["dropping-particle"] = m[2];
         }
     }
 };
@@ -10898,12 +10883,8 @@ CSL.Transform = function (state) {
         if (["archive"].indexOf(myabbrev_family) > -1) {
             myabbrev_family = "collection-title";
         }
-        if (variable === "jurisdiction" && basevalue && state.sys.getHumanForm) {
-            var jcode = basevalue;
+        if (variable === "jurisdiction" && basevalue && state.sys.suppressJurisdictions) {
             basevalue = state.sys.getHumanForm(basevalue);
-            if (state.sys.suppressJurisdictions) {
-                basevalue = state.sys.suppressJurisdictions(jcode,basevalue);
-            }
         }
         value = "";
         if (state.sys.getAbbreviation) {
@@ -10990,6 +10971,9 @@ CSL.Transform = function (state) {
         if (!ret.name && use_default) {
             ret = {name:Item[field], usedOrig:true, locale:getFieldLocale(Item,field)};
         }
+        if (field === 'jurisdiction') {
+            ret.name = state.sys.suppressJurisdictions(Item[field], ret.name);
+        }
         return ret;
     }
     function loadAbbreviation(jurisdiction, category, orig, itemType, noHints) {
@@ -11050,6 +11034,14 @@ CSL.Transform = function (state) {
             }
         }
         return false;
+    }
+    var suppressJurisdictions;
+    if (state.sys.suppressJurisdictions) {
+        suppressJurisdictions = state.sys.suppressJurisdictions;
+    } else {
+        suppressJurisdictions = function(codeStr, humanStr) {
+            return humanStr;
+        }
     }
     function getOutputFunction(variables, myabbrev_family, abbreviation_fallback, alternative_varname, transform_fallback) {
         var localesets;
@@ -12497,7 +12489,7 @@ CSL.Util.PageRangeMangler.getFunction = function (state, rangeType) {
         } else {
             ret = [lst[0]];
             for (pos = 1, len = lst.length; pos < len; pos += 1) {
-                ret.push(m[pos - 1].replace(/\s*\-\s*/, "-", "g"));
+                ret.push(m[pos - 1].replace(/\s*\-\s*/g, "-"));
                 ret.push(lst[pos]);
             }
         }
@@ -12521,7 +12513,7 @@ CSL.Util.PageRangeMangler.getFunction = function (state, rangeType) {
                 }
             }
             if ("string" === typeof lst[pos]) {
-                lst[pos] = lst[pos].replace("-", range_delimiter, "g");
+                lst[pos] = lst[pos].replace(/\-/g, range_delimiter);
             }
         }
         return lst;
@@ -12720,7 +12712,7 @@ CSL.Util.FlipFlopper.prototype.init = function (str, blob) {
 };
 CSL.Util.FlipFlopper.prototype._normalizeString = function (str) {
     var i, ilen;
-    str = str.replace(/\s+'\s+/g," â€™ ");
+    str = str.replace(/\s+'\s+/g," ’ ");
     if (str.indexOf(this.quotechars[0]) > -1) {
         for (i = 0, ilen = 2; i < ilen; i += 1) {
             if (this.quotechars[i + 2]) {
@@ -13148,7 +13140,7 @@ CSL.Output.Formats.prototype.html = {
         return text.replace(/&/g, "&#38;")
             .replace(/</g, "&#60;")
             .replace(/>/g, "&#62;")
-            .replace("  ", "&#160; ", "g")
+            .replace(/\s\s/g, "\u00A0 ")
             .replace(CSL.SUPERSCRIPTS_REGEXP,
                      function(aChar) {
                          return "<sup>" + CSL.SUPERSCRIPTS[aChar] + "</sup>";
@@ -13364,7 +13356,7 @@ CSL.Output.Formats.prototype.rtf = {
         return str+"\\tab ";
     },
     "@display/right-inline": function (state, str) {
-        return str+"\\line\r\n";
+        return str+"\r\n";
     },
     "@display/indent": function (state, str) {
         return "\n\\tab "+str+"\\line\r\n";
@@ -13773,7 +13765,7 @@ CSL.Registry.NameReg = function (state) {
         if (!str) {
             str = "";
         }
-        return str.replace(".", " ", "g").replace(/\s+/g, " ").replace(/\s+$/,"");
+        return str.replace(/\./g, " ").replace(/\s+/g, " ").replace(/\s+$/,"");
     };
     set_keys = function (state, itemid, nameobj) {
         pkey = strip_periods(nameobj.family);
@@ -14388,26 +14380,58 @@ CSL.Engine.prototype.retrieveAllStyleModules = function (jurisdictionList) {
 }
 CSL.parseParticles = function(){
     var PARTICLES = [
+        ["al-", [[[0,1], null],[null,[0,1]]]],
+        ["at-", [[[0,1], null],[null,[0,1]]]],
+        ["ath-", [[[0,1], null],[null,[0,1]]]],
+        ["aṯ-", [[[0,1], null],[null,[0,1]]]],
+        ["ad-", [[[0,1], null],[null,[0,1]]]],
+        ["adh-", [[[0,1], null],[null,[0,1]]]],
+        ["aḏ-", [[[0,1], null],[null,[0,1]]]],
+        ["ar-", [[[0,1], null],[null,[0,1]]]],
+        ["az-", [[[0,1], null],[null,[0,1]]]],
+        ["as-", [[[0,1], null],[null,[0,1]]]],
+        ["ash-", [[[0,1], null],[null,[0,1]]]],
+        ["aš-", [[[0,1], null],[null,[0,1]]]],
+        ["aṣ-", [[[0,1], null],[null,[0,1]]]],
+        ["aḍ-", [[[0,1], null],[null,[0,1]]]],
+        ["aṭ-", [[[0,1], null],[null,[0,1]]]],
+        ["aẓ-", [[[0,1], null],[null,[0,1]]]],
+        ["an-", [[[0,1], null],[null,[0,1]]]],
+        ["et-", [[[0,1], null],[null,[0,1]]]],
+        ["eth-", [[[0,1], null],[null,[0,1]]]],
+        ["eṯ-", [[[0,1], null],[null,[0,1]]]],
+        ["ed-", [[[0,1], null],[null,[0,1]]]],
+        ["edh-", [[[0,1], null],[null,[0,1]]]],
+        ["eḏ-", [[[0,1], null],[null,[0,1]]]],
+        ["er-", [[[0,1], null],[null,[0,1]]]],
+        ["ez-", [[[0,1], null],[null,[0,1]]]],
+        ["es-", [[[0,1], null],[null,[0,1]]]],
+        ["esh-", [[[0,1], null],[null,[0,1]]]],
+        ["eš-", [[[0,1], null],[null,[0,1]]]],
+        ["eṣ-", [[[0,1], null],[null,[0,1]]]],
+        ["eḍ-", [[[0,1], null],[null,[0,1]]]],
+        ["eṭ-", [[[0,1], null],[null,[0,1]]]],
+        ["eẓ-", [[[0,1], null],[null,[0,1]]]],
+        ["el-", [[[0,1], null],[null,[0,1]]]],
+        ["en-", [[[0,1], null],[null,[0,1]]]],
         ["'s-", [[[0,1], null]]],
         ["'t", [[[0,1], null]]],
-        ["abbÃ© d'", [[[0,2], null]]],
         ["af", [[[0,1], null]]],
         ["al", [[[0,1], null]]],
-        ["al-", [[[0,1], null]],[[null,[0,1]]]],
         ["auf den", [[[0,2], null]]],
-        ["auf der", [[[0,1], null]]],
-        ["aus der", [[[0,1], null]]],
+        ["auf der", [[[0,2], null]]],
+        ["aus der", [[[0,2], null]]],
         ["aus'm", [[null, [0,1]]]],
         ["ben", [[null, [0,1]]]],
         ["bin", [[null, [0,1]]]],
-        ["d'", [[[0,1], null]],[[null,[0,1]]]],
+        ["d'", [[[0,1], null],[null,[0,1]]]],
         ["da", [[null, [0,1]]]],
         ["dall'", [[null, [0,1]]]],
         ["das", [[[0,1], null]]],
         ["de", [[null, [0,1]],[[0,1],null]]],
-        ["de la", [[[0,1], [1,2]]]],
-        ["de las", [[[0,1], [1,2]]]],
-        ["de li", [[[0,1], null]]],
+        ["de la", [[null, [0,2]], [[0,1], [1,2]]]],
+        ["de las", [[null, [0,2]], [[0,1], [1,2]]]],
+        ["de li", [[[0,2], null]]],
         ["de'", [[[0,1], null]]],
         ["degli", [[[0,1], null]]],
         ["dei", [[[0,1], null]]],
@@ -14426,7 +14450,7 @@ CSL.parseParticles = function(){
         ["il", [[[0,1], null]]],
         ["in 't", [[[0,2], null]]],
         ["in de", [[[0,2], null]]],
-        ["in der", [[[0,1], null]]],
+        ["in der", [[[0,2], null]]],
         ["in het", [[[0,2], null]]],
         ["lo", [[[0,1], null]]],
         ["les", [[[0,1], null]]],
@@ -14456,15 +14480,15 @@ CSL.parseParticles = function(){
         ["vander", [[null, [0,1]]]],
         ["vd", [[null, [0,1]]]],
         ["ver", [[null, [0,1]]]],
-        ["von", [[[0,1], null]],[[null,[0,1]]]],
+        ["von", [[[0,1], null],[null,[0,1]]]],
         ["von der", [[[0,2], null]]],
         ["von dem",[[[0,2], null]]],
-        ["von und zu", [[[0,1], null]]],
+        ["von und zu", [[[0,3], null]]],
         ["von zu", [[[0,2], null]]],
         ["v.", [[[0,1], null]]],
         ["v", [[[0,1], null]]],
         ["vom", [[[0,1], null]]],
-        ["vom und zum", [[[0,1], null]]],
+        ["vom und zum", [[[0,3], null]]],
         ["z", [[[0,1], null]]],
         ["ze", [[[0,1], null]]],
         ["zum", [[[0,1], null]]],
@@ -14629,7 +14653,7 @@ CSL.parseParticles = function(){
                     var pSet = pInfo[i];
                     if (!result.family.str) result.family.str = "";
                     if (!result.given.str) result.given.str = "";
-                    if (result.given.str === pSet.strings[0] && result.family.str === pSet.strings[1]) {
+                    if (result.given.str.toLowerCase() === pSet.strings[0] && result.family.str.toLowerCase() === pSet.strings[1]) {
                         break;
                     }
                 }
@@ -14639,6 +14663,24 @@ CSL.parseParticles = function(){
                 if (pSet.positions[1] !== null) {
                     name["non-dropping-particle"] = particles.slice(pSet.positions[1][0], pSet.positions[1][1]).join(" ");
                 }
+            }
+        }
+        if (!name.suffix && name.given) {
+            m = name.given.match(/(\s*,!*\s*)/);
+            if (m) {
+                idx = name.given.indexOf(m[1]);
+                var possible_suffix = name.given.slice(idx + m[1].length);
+                var possible_comma = name.given.slice(idx, idx + m[1].length).replace(/\s*/g, "");
+                if (possible_suffix.length <= 3) {
+                    if (possible_comma.length === 2) {
+                        name["comma-suffix"] = true;
+                    }
+                    name.suffix = possible_suffix;
+                } else if (!name["dropping-particle"] && name.given) {
+                    name["dropping-particle"] = possible_suffix;
+                    name["comma-dropping-particle"] = ",";
+                }
+                name.given = name.given.slice(0, idx);
             }
         }
         if (normalizeApostrophe) {
