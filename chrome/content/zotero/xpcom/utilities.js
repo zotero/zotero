@@ -506,7 +506,7 @@ Zotero.Utilities = {
 		str = str.replace(/([^">])(https?:\/\/[^\s]+)(\s|$)/g, '$1<a href="$2">$2</a>$3');
 		
 		// DOI
-		str = str.replace(/(doi:[ ]*)(10\.[^\s]+[0-9a-zA-Z])/g, '$1<a href="https://dx.doi.org/$2">$2</a>');
+		str = str.replace(/(doi:[ ]*)(10\.[^\s]+[0-9a-zA-Z])/g, '$1<a href="https://doi.org/$2">$2</a>');
 		return str;
 	},
 	
