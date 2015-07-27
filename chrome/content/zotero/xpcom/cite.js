@@ -529,13 +529,11 @@ Zotero.Cite.System.prototype = {
 		
 		if (!Zotero.Prefs.get("export.citePaperJournalArticleURL")) {
 			var itemType = Zotero.ItemTypes.getName(zoteroItem.itemTypeID);
-			// don't return URL or accessed information for journal articles if a
-			// pages field exists
+			// don't return URL for journal articles if a pages field exists
 			if (["journalArticle", "newspaperArticle", "magazineArticle"].indexOf(itemType) !== -1
 				&& zoteroItem.getField("pages")
 			) {
 				delete cslItem.URL;
-				delete cslItem.accessed;
 			}
 		}
 		
