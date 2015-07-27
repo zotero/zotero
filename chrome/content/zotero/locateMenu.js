@@ -410,7 +410,7 @@ var Zotero_LocateMenu = new function() {
 			if(doi && typeof doi === "string") {
 				doi = Zotero.Utilities.cleanDOI(doi);
 				if(doi) {
-					return "http://dx.doi.org/" + encodeURIComponent(doi);
+					return "https://dx.doi.org/" + encodeURIComponent(doi);
 				}
 			}
 			
