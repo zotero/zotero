@@ -1555,7 +1555,25 @@ Zotero.Utilities = {
 			
 			var nameObj;
 			if (creator.lastName || creator.firstName) {
-				nameObj = {'family': creator.lastName, 'given': creator.firstName};
+				nameObj = {
+					family: creator.lastName || '',
+					given: creator.firstName || ''
+				};
+				
+				// Parse name particles
+				// Replicate citeproc-js logic for what should be parsed so we don't
+				// break current behavior.
+				if (nameObj.family && nameObj.given) {
+					// Don't parse if last name is quoted
+					if (nameObj.family.length > 1
+						&& nameObj.family.charAt(0) == '"'
+						&& nameObj.family.charAt(nameObj.family.length - 1) == '"'
+					) {
+						nameObj.family = nameObj.family.substr(1, nameObj.family.length - 2);
+					} else {
+						Zotero.CiteProc.CSL.parseParticles(nameObj, true);
+					}
+				}
 			} else if (creator.name) {
 				nameObj = {'literal': creator.name};
 			}
