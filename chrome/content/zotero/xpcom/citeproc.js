@@ -80,7 +80,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.1.45",
+    PROCESSOR_VERSION: "1.1.46",
     CONDITION_LEVEL_TOP: 1,
     CONDITION_LEVEL_BOTTOM: 2,
     PLAIN_HYPHEN_REGEX: /(?:[^\\]-|\u2013)/,
@@ -10883,9 +10883,6 @@ CSL.Transform = function (state) {
         if (["archive"].indexOf(myabbrev_family) > -1) {
             myabbrev_family = "collection-title";
         }
-        if (variable === "jurisdiction" && basevalue && state.sys.suppressJurisdictions) {
-            basevalue = state.sys.getHumanForm(basevalue);
-        }
         value = "";
         if (state.sys.getAbbreviation) {
             var jurisdiction = state.transform.loadAbbreviation(Item.jurisdiction, myabbrev_family, basevalue, Item.type, noHints);
@@ -12714,19 +12711,27 @@ CSL.Util.FlipFlopper.prototype._normalizeString = function (str) {
     var i, ilen;
     str = str.replace(/\s+'\s+/g," ’ ");
     if (str.indexOf(this.quotechars[0]) > -1) {
-        for (i = 0, ilen = 2; i < ilen; i += 1) {
-            if (this.quotechars[i + 2]) {
-                str = str.replace(this.quotechars[i + 2], this.quotechars[0]);
+        var oldStr = null;
+        while (str !== oldStr) {
+            oldStr = str;
+            for (i = 0, ilen = 2; i < ilen; i += 1) {
+                if (this.quotechars[i + 2]) {
+                    str = str.replace(this.quotechars[i + 2], this.quotechars[0]);
+                }
             }
         }
     }
     if (str.indexOf(this.quotechars[1]) > -1) {
-        for (i = 0, ilen = 2; i < ilen; i += 1) {
-            if (this.quotechars[i + 4]) {
-                if (i === 0) {
-                    str = str.replace(this.quotechars[i + 4], " " + this.quotechars[1]);
-                } else {
-                    str = str.replace(this.quotechars[i + 4], this.quotechars[1]);
+        var oldStr = null;
+        while (str !== oldStr) {
+            oldStr = str;
+            for (i = 0, ilen = 2; i < ilen; i += 1) {
+                if (this.quotechars[i + 4]) {
+                    if (i === 0) {
+                        str = str.replace(this.quotechars[i + 4], " " + this.quotechars[1]);
+                    } else {
+                        str = str.replace(this.quotechars[i + 4], this.quotechars[1]);
+                    }
                 }
             }
         }
