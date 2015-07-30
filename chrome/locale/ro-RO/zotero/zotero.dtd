@@ -6,8 +6,8 @@
 <!ENTITY zotero.general.delete "Ștergere">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Anulare">
-<!ENTITY zotero.general.refresh "Refresh">
-<!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.refresh "Reîmprospătare">
+<!ENTITY zotero.general.saveAs "Salvare ca...">
 
 <!ENTITY zotero.errorReport.title "Raportul de erori Zotero">
 <!ENTITY zotero.errorReport.unrelatedMessages "Aceasta ar putea include mesaje fără legătură cu Zotero.">
@@ -125,9 +125,9 @@
 <!ENTITY zotero.item.textTransform "Transformă text">
 <!ENTITY zotero.item.textTransform.titlecase "Litere de Titlu">
 <!ENTITY zotero.item.textTransform.sentencecase "Majusculă ca la propoziție">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Schimbă Prenume/Nume">
+<!ENTITY zotero.item.viewOnline "Vezi online">
+<!ENTITY zotero.item.copyAsURL "Copiază ca URL">
 
 <!ENTITY zotero.toolbar.newNote "Notă nouă">
 <!ENTITY zotero.toolbar.note.standalone "Notă independentă nouă">
@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Creează citare/bibliografie">
 <!ENTITY zotero.bibliography.style.label "Stil de citare:">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "Limbă:">
 <!ENTITY zotero.bibliography.outputMode "Mod de ieșire:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografie">
 <!ENTITY zotero.bibliography.outputMethod "Metodă de ieșire:">
@@ -287,6 +287,6 @@
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Anexele nu pot fi salvate în biblioteca selectată. Această înregistrare va fi salvată în schimb în biblioteca ta.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Pentru a folosi această facilitate, trebuie să instalezi mai întâi uneletele PDF în preferințele Zotero.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
+<!ENTITY zotero.attachLink.title "Anexează link la URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
+<!ENTITY zotero.attachLink.label.title "Titlu:">

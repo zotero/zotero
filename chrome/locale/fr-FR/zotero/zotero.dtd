@@ -188,7 +188,7 @@
 <!ENTITY zotero.charset.label "Encodage des caractères">
 <!ENTITY zotero.moreEncodings.label "Plus d'encodages">
 
-<!ENTITY zotero.citation.keepSorted.label "Conserver les sources en ordre alphabétique">
+<!ENTITY zotero.citation.keepSorted.label "Trier les sources automatiquement">
 
 <!ENTITY zotero.citation.suppressAuthor.label "Supprimer l'auteur">
 <!ENTITY zotero.citation.prefix.label "Préfixe :">

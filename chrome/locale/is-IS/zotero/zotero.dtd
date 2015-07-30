@@ -6,8 +6,8 @@
 <!ENTITY zotero.general.delete "Eyða">
 <!ENTITY zotero.general.ok "Í lagi">
 <!ENTITY zotero.general.cancel "Hætta við">
-<!ENTITY zotero.general.refresh "Refresh">
-<!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.refresh "Endurnýja">
+<!ENTITY zotero.general.saveAs "Vista sem...">
 
 <!ENTITY zotero.errorReport.title "Zotero villutilkynning">
 <!ENTITY zotero.errorReport.unrelatedMessages "Hér gætu einnig verið skilaboð ótengd Zotero.">
@@ -84,7 +84,7 @@
 <!ENTITY zotero.items.menu.attach "Sækja viðhengi">
 <!ENTITY zotero.items.menu.attach.snapshot "Hengja við flýtimynd af síðunni sem nú er opin">
 <!ENTITY zotero.items.menu.attach.link "Hengja slóð við síðuna sem nú er opin">
-<!ENTITY zotero.items.menu.attach.link.uri "Hengja við slóð á URL">
+<!ENTITY zotero.items.menu.attach.link.uri "Hengja slóð á URI...">
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
 <!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
 
@@ -125,9 +125,9 @@
 <!ENTITY zotero.item.textTransform "Varpa texta">
 <!ENTITY zotero.item.textTransform.titlecase "Stafagerð titils">
 <!ENTITY zotero.item.textTransform.sentencecase "Stafagerð setninga">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Skipta á for-/eftirnafni">
+<!ENTITY zotero.item.viewOnline "Skoða nettengt">
+<!ENTITY zotero.item.copyAsURL "Afrita sem URL">
 
 <!ENTITY zotero.toolbar.newNote "Ný athugasemd">
 <!ENTITY zotero.toolbar.note.standalone "Ný sjálfstæð athugasemd">
@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Skapa tilvísun/heimildaskrá">
 <!ENTITY zotero.bibliography.style.label "Tegund tilvísunar:">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "Tungumál:">
 <!ENTITY zotero.bibliography.outputMode "Útskriftarhamur:">
 <!ENTITY zotero.bibliography.bibliography "Heimildaskrá">
 <!ENTITY zotero.bibliography.outputMethod "Útskriftaraðferð:">
@@ -287,6 +287,6 @@
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Ekki er hægt að vista viðhengi í því safni sem nú er valið. Þessi færsla verður vistuð í þínu safni í staðinn.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Til að nota þessa aðgerð verður þú fyrst að setja upp PDF verkfæri í leitarrúðunni í Zotero kjörstillingum.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
+<!ENTITY zotero.attachLink.title "Hengja slóð á URI">
+<!ENTITY zotero.attachLink.label.link "Slóð:">
+<!ENTITY zotero.attachLink.label.title "Titill:">

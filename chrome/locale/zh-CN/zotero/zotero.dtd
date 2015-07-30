@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "创建引文目录">
 <!ENTITY zotero.bibliography.style.label "引文样式:">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "语言：">
 <!ENTITY zotero.bibliography.outputMode "输出模式:">
 <!ENTITY zotero.bibliography.bibliography "引文目录">
 <!ENTITY zotero.bibliography.outputMethod "输出方法:">

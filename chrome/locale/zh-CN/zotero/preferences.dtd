@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "域/路径">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(例如 wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "输出格式">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "语言">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "禁用便捷复制, 当拖动项超过">
 
 <!ENTITY zotero.preferences.prefpane.cite "引用">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link " 获取更多的信息.">
 <!ENTITY zotero.preferences.proxies.transparent "启用代理转接">
 <!ENTITY zotero.preferences.proxies.autoRecognize "自动识别代理的资源">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "当通过代理重定向时显示通知">
 <!ENTITY zotero.preferences.proxies.disableByDomain "禁用代理转接, 当域名包含">
 <!ENTITY zotero.preferences.proxies.configured "已设置的代理">
 <!ENTITY zotero.preferences.proxies.hostname "域名">

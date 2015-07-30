@@ -25,7 +25,7 @@
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapportera felaktiga källfångare">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillåt zotero.org att justera innehåll beroende på installerad Zoteroversion">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Visa för zotero.org vilken version av programmet jag använder">
-<!ENTITY zotero.preferences.parseRISRefer "Använd Zotero för att ladda ner BibTeX/RIS/Refer-filer">
+<!ENTITY zotero.preferences.parseRISRefer "Använd Zotero för nedladdade BibTeX/RIS/Refer-filer">
 <!ENTITY zotero.preferences.automaticSnapshots "Ta automatiskt lokala kopior när källor skapas av hemsidor">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Bifoga automatiskt associerade PDF:er och andra filer när källor sparas">
 <!ENTITY zotero.preferences.automaticTags "Lägg automatiskt till etiketter med nyckelord och ämnesord">

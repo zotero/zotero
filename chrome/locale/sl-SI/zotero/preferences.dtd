@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domena/pot">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(npr. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Izhodna oblika">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Jezik">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Onemogoči Hitro kopiranje ob vleki več kot">
 
 <!ENTITY zotero.preferences.prefpane.cite "Citiraj">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "kjer najdete več informacij.">
 <!ENTITY zotero.preferences.proxies.transparent "Omogoči preusmeritev posredovalnih strežnikov">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Samodejno prepoznaj posredovane vire">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Pokaži obvestilo ob preusmerjanju prek posredniškega strežnika">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Onemogoči preusmerjanje s posredovanjem, če ime moje domene vsebuje">
 <!ENTITY zotero.preferences.proxies.configured "Nastavljeni posredovalni strežniki">
 <!ENTITY zotero.preferences.proxies.hostname "Ime gostitelja">
