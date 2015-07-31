@@ -89,12 +89,43 @@ Zotero.defineProperty(Zotero.Search.prototype, 'conditions', {
 
 
 Zotero.Search.prototype.loadFromRow = function (row) {
-	this._id = row.savedSearchID;
-	this._libraryID = parseInt(row.libraryID);
-	this._key = row.key;
-	this._name = row.name;
-	this._version = parseInt(row.version);
-	this._synced = !!row.synced;
+	var primaryFields = this._ObjectsClass.primaryFields;
+	for (let i=0; i<primaryFields.length; i++) {
+		let col = primaryFields[i];
+		try {
+			var val = row[col];
+		}
+		catch (e) {
+			Zotero.debug('Skipping missing ' + this._objectType + ' field ' + col);
+			continue;
+		}
+		
+		switch (col) {
+		case this._ObjectsClass.idColumn:
+			col = 'id';
+			break;
+		
+		// Integer
+		case 'libraryID':
+			val = parseInt(val);
+			break;
+		
+		// Integer or 0
+		case 'version':
+			val = val ? parseInt(val) : 0;
+			break;
+		
+		// Boolean
+		case 'synced':
+			val = !!val;
+			break;
+		
+		default:
+			val = val || '';
+		}
+		
+		this['_' + col] = val;
+	}
 	
 	this._loaded.primaryData = true;
 	this._clearChanged('primaryData');
@@ -140,33 +171,35 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		yield Zotero.DB.queryAsync(sql, env.sqlValues);
 	}
 	
-	if (!isNew) {
-		var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
-		yield Zotero.DB.queryAsync(sql, this.id);
-	}
-	
-	var i = 0;
-	var sql = "INSERT INTO savedSearchConditions "
-		+ "(savedSearchID, searchConditionID, condition, operator, value, required) "
-		+ "VALUES (?,?,?,?,?,?)";
-	for (let id in this._conditions) {
-		let condition = this._conditions[id];
+	if (this._changed.conditions) {
+		if (!isNew) {
+			var sql = "DELETE FROM savedSearchConditions WHERE savedSearchID=?";
+			yield Zotero.DB.queryAsync(sql, this.id);
+		}
 		
-		// Convert condition and mode to "condition[/mode]"
-		let conditionString = condition.mode ?
-			condition.condition + '/' + condition.mode :
-			condition.condition
-		
-		var sqlParams = [
-			searchID,
-			i,
-			conditionString,
-			condition.operator ? condition.operator : null,
-			condition.value ? condition.value : null,
-			condition.required ? 1 : null
-		];
-		yield Zotero.DB.queryAsync(sql, sqlParams);
-		i++;
+		var i = 0;
+		var sql = "INSERT INTO savedSearchConditions "
+			+ "(savedSearchID, searchConditionID, condition, operator, value, required) "
+			+ "VALUES (?,?,?,?,?,?)";
+		for (let id in this._conditions) {
+			let condition = this._conditions[id];
+			
+			// Convert condition and mode to "condition[/mode]"
+			let conditionString = condition.mode ?
+				condition.condition + '/' + condition.mode :
+				condition.condition
+			
+			var sqlParams = [
+				searchID,
+				i,
+				conditionString,
+				condition.operator ? condition.operator : null,
+				condition.value ? condition.value : null,
+				condition.required ? 1 : null
+			];
+			yield Zotero.DB.queryAsync(sql, sqlParams);
+			i++;
+		}
 	}
 });
 
@@ -185,7 +218,6 @@ Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env)
 	}
 	
 	if (!env.skipCache) {
-		yield this.loadPrimaryData(true);
 		yield this.reload();
 		// If new, there's no other data we don't have, so we can mark everything as loaded
 		if (env.isNew) {
@@ -824,11 +856,9 @@ Zotero.Search.prototype.getSQLParams = Zotero.Promise.coroutine(function* () {
 
 
 Zotero.Search.prototype.loadConditions = Zotero.Promise.coroutine(function* (reload) {
-	Zotero.debug("Loading conditions for search " + this.libraryKey);
+	if (this._loaded.conditions && !reload) return;
 	
-	if (this._loaded.conditions && !reload) {
-		return;
-	}
+	Zotero.debug("Loading conditions for search " + this.libraryKey);
 	
 	if (!this.id) {
 		throw new Error('ID not set for object before attempting to load conditions');
@@ -876,6 +906,7 @@ Zotero.Search.prototype.loadConditions = Zotero.Promise.coroutine(function* (rel
 	}
 	
 	this._loaded.conditions = true;
+	this._clearChanged('conditions');
 });
 
 

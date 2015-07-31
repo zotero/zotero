@@ -99,24 +99,57 @@ Zotero.Collection.prototype.getName = function() {
  * Populate collection data from a database row
  */
 Zotero.Collection.prototype.loadFromRow = function(row) {
-	for each(let col in this.ObjectsClass.primaryFields) {
-		if (row[col] === undefined) {
-			Zotero.debug('Skipping missing collection field ' + col);
+	var primaryFields = this._ObjectsClass.primaryFields;
+	for (let i=0; i<primaryFields.length; i++) {
+		let col = primaryFields[i];
+		try {
+			var val = row[col];
 		}
+		catch (e) {
+			Zotero.debug('Skipping missing ' + this._objectType + ' field ' + col);
+			continue;
+		}
+		
+		switch (col) {
+		case this._ObjectsClass.idColumn:
+			col = 'id';
+			break;
+		
+		// Integer
+		case 'libraryID':
+			val = parseInt(val);
+			break;
+		
+		// Integer or 0
+		case 'version':
+			val = val ? parseInt(val) : 0;
+			break;
+		
+		// Value or false
+		case 'parentKey':
+			val = val || false;
+			break;
+		
+		// Integer or false if falsy
+		case 'parentID':
+			val = val ? parseInt(val) : false;
+			break;
+		
+		// Boolean
+		case 'synced':
+		case 'hasChildCollections':
+		case 'hasChildItems':
+			val = !!val;
+			break;
+		
+		default:
+			val = val || '';
+		}
+		
+		this['_' + col] = val;
 	}
 	
-	this._id = row.collectionID;
-	this._libraryID = parseInt(row.libraryID);
-	this._key = row.key;
-	this._name = row.name;
-	this._parentID = row.parentID || false;
-	this._parentKey = row.parentKey || false;
-	this._version = parseInt(row.version);
-	this._synced = !!row.synced;
-	
-	this._hasChildCollections = !!row.hasChildCollections;
 	this._childCollectionsLoaded = false;
-	this._hasChildItems = !!row.hasChildItems;
 	this._childItemsLoaded = false;
 	
 	this._loaded.primaryData = true;
@@ -288,7 +321,7 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 				this.libraryID, this.parentKey
 			);
 			Zotero.DB.addCurrentCallback("commit", function () {
-				this.ObjectsClass.registerChildCollection(parentCollectionID, this.id);
+				this.ObjectsClass.registerChildCollection(parentCollectionID, collectionID);
 			}.bind(this));
 		}
 		// Remove this from the previous parent's cached collection lists after commit,
@@ -298,12 +331,12 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 				this.libraryID, this._previousData.parentKey
 			);
 			Zotero.DB.addCurrentCallback("commit", function () {
-				this.ObjectsClass.unregisterChildCollection(parentCollectionID, this.id);
+				this.ObjectsClass.unregisterChildCollection(parentCollectionID, collectionID);
 			}.bind(this));
 		}
 		
 		if (!isNew) {
-			Zotero.Notifier.queue('move', 'collection', this.id);
+			Zotero.Notifier.queue('move', 'collection', collectionID);
 		}
 	}
 });

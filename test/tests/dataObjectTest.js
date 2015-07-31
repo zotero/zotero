@@ -3,26 +3,18 @@
 describe("Zotero.DataObject", function() {
 	var types = ['collection', 'item', 'search'];
 	
-	describe("#loadAllData()", function () {
-		it("should load data on a regular item", function* () {
-			var item = new Zotero.Item('book');
-			var id = yield item.saveTx();
-			yield item.loadAllData();
-			assert.throws(item.getNote.bind(item), 'getNote() can only be called on notes and attachments');
-		})
-		
-		it("should load data on an attachment item", function* () {
-			var item = new Zotero.Item('attachment');
-			var id = yield item.saveTx();
-			yield item.loadAllData();
-			assert.equal(item.getNote(), '');
-		})
-		
-		it("should load data on a note item", function* () {
-			var item = new Zotero.Item('note');
-			var id = yield item.saveTx();
-			yield item.loadAllData();
-			assert.equal(item.getNote(), '');
+	describe("#key", function () {
+		it("shouldn't update .loaded on get if unset", function* () {
+			for (let type of types) {
+				if (type == 'item') {
+					var param = 'book';
+				}
+				let obj = new Zotero[Zotero.Utilities.capitalize(type)](param);
+				obj.libraryID = Zotero.Libraries.userLibraryID;
+				assert.isNull(obj.key);
+				assert.isFalse(obj._loaded.primaryData);
+				obj.key = Zotero.DataObjectUtilities.generateKey();
+			}
 		})
 	})
 	
@@ -171,6 +163,53 @@ describe("Zotero.DataObject", function() {
 				yield obj.eraseTx();
 			}
 		});
+	})
+	
+	describe("#loadPrimaryData()", function () {
+		it("should load unloaded primary data if partially set", function* () {
+			var objs = {};
+			for (let type of types) {
+				let obj = createUnsavedDataObject(type);
+				yield obj.save({
+					skipCache: true
+				});
+				objs[type] = {
+					key: obj.key,
+					version: obj.version
+				};
+			}
+			
+			for (let type of types) {
+				let obj = new Zotero[Zotero.Utilities.capitalize(type)];
+				obj.libraryID = Zotero.Libraries.userLibraryID;
+				obj.key = objs[type].key;
+				yield obj.loadPrimaryData();
+				assert.equal(obj.version, objs[type].version);
+			}
+		})
+	})
+	
+	describe("#loadAllData()", function () {
+		it("should load data on a regular item", function* () {
+			var item = new Zotero.Item('book');
+			var id = yield item.saveTx();
+			yield item.loadAllData();
+			assert.throws(item.getNote.bind(item), 'getNote() can only be called on notes and attachments');
+		})
+		
+		it("should load data on an attachment item", function* () {
+			var item = new Zotero.Item('attachment');
+			var id = yield item.saveTx();
+			yield item.loadAllData();
+			assert.equal(item.getNote(), '');
+		})
+		
+		it("should load data on a note item", function* () {
+			var item = new Zotero.Item('note');
+			var id = yield item.saveTx();
+			yield item.loadAllData();
+			assert.equal(item.getNote(), '');
+		})
 	})
 	
 	describe("#save()", function () {

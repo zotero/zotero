@@ -316,22 +316,25 @@ Zotero.Item.prototype._parseRowData = function(row) {
 	for (let i=0; i<primaryFields.length; i++) {
 		let col = primaryFields[i];
 		
-		if (row[col] === undefined) {
+		try {
+			var val = row[col];
+		}
+		catch (e) {
 			Zotero.debug('Skipping missing field ' + col);
 			continue;
 		}
 		
-		let val = row[col];
-		
 		//Zotero.debug("Setting field '" + col + "' to '" + val + "' for item " + this.id);
 		
 		switch (col) {
+			// Skip
+			case 'libraryID':
+			case 'itemTypeID':
+				break;
+			
 			// Unchanged
 			case 'itemID':
 				col = 'id';
-				break;
-				
-			case 'libraryID':
 				break;
 			
 			// Integer or 0
@@ -665,15 +668,15 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 				
 				value = Zotero.Date.dateToSQL(date, true);
 				break;
-
+			
 			case 'version':
 				value = parseInt(value);
 				break;
-
+			
 			case 'synced':
 				value = !!value;
 				break;
-				
+			
 			default:
 				throw new Error('Primary field ' + field + ' cannot be changed in Zotero.Item.setField()');
 			
@@ -686,27 +689,27 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		*/
 		
 		// If field value has changed
-		if (this['_' + field] != value || field == 'synced') {
-			Zotero.debug("Field '" + field + "' has changed from '" + this['_' + field] + "' to '" + value + "'", 4);
-			
-			// Save a copy of the field before modifying
-			this._markFieldChange(field, this['_' + field]);
-			
-			if (field == 'itemTypeID') {
-				this.setType(value, loadIn);
-			}
-			else {
-				
-				this['_' + field] = value;
-				
-				if (!this._changed.primaryData) {
-					this._changed.primaryData = {};
-				}
-				this._changed.primaryData[field] = true;
-			}
+		if (this['_' + field] === value && field != 'synced') {
+			Zotero.debug("Field '" + field + "' has not changed", 4);
+			return false;
+		}
+		
+		Zotero.debug("Field '" + field + "' has changed from '" + this['_' + field] + "' to '" + value + "'", 4);
+		
+		// Save a copy of the field before modifying
+		this._markFieldChange(field, this['_' + field]);
+		
+		if (field == 'itemTypeID') {
+			this.setType(value, loadIn);
 		}
 		else {
-			Zotero.debug("Field '" + field + "' has not changed", 4);
+			
+			this['_' + field] = value;
+			
+			if (!this._changed.primaryData) {
+				this._changed.primaryData = {};
+			}
+			this._changed.primaryData[field] = true;
 		}
 		return true;
 	}

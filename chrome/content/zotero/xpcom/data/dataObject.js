@@ -100,7 +100,9 @@ Zotero.DataObject.prototype._get = function (field) {
 	if (this['_' + field] !== null) {
 		return this['_' + field];
 	}
-	this._requireData('primaryData');
+	if (field != 'libraryID' && field != 'key' && field != 'id') {
+		this._requireData('primaryData');
+	}
 	return null;
 }
 
@@ -769,6 +771,19 @@ Zotero.DataObject.prototype._markFieldChange = function (field, oldValue) {
 	}
 }
 
+
+Zotero.DataObject.prototype.hasChanged = function() {
+	var changed = Object.keys(this._changed).filter(dataType => this._changed[dataType]);
+	if (changed.length == 1
+			&& changed[0] == 'primaryData'
+			&& this._changed.primaryData.synced
+			&& this._previousData.synced == this._synced) {
+		return false;
+	}
+	return !!changed.length;
+}
+
+
 /**
  * Clears log of changed values
  * @param {String} [dataType] data type/field to clear. Defaults to clearing everything
@@ -903,17 +918,6 @@ Zotero.DataObject.prototype.saveTx = function (options) {
 	return this.save(options);
 }
 
-
-Zotero.DataObject.prototype.hasChanged = function() {
-	var changed = Object.keys(this._changed).filter(dataType => this._changed[dataType]);
-	if (changed.length == 1
-			&& changed[0] == 'primaryData'
-			&& this._changed.primaryData.synced
-			&& this._previousData.synced == this._synced) {
-		return false;
-	}
-	return !!changed.length;
-}
 
 Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 	// Default to user library if not specified

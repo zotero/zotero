@@ -277,8 +277,8 @@ Zotero.DataObjects.prototype.getByLibraryAndKeyAsync = Zotero.Promise.coroutine(
 });
 
 
-Zotero.DataObjects.prototype.exists = function (itemID) {
-	return !!this.getLibraryAndKeyFromID(itemID);
+Zotero.DataObjects.prototype.exists = function (id) {
+	return !!this.getLibraryAndKeyFromID(id);
 }
 
 
@@ -383,7 +383,8 @@ Zotero.DataObjects.prototype.registerObject = function (obj) {
 	var libraryID = obj.libraryID;
 	var key = obj.key;
 	
-	Zotero.debug("Registering " + this._ZDO_object + " " + id + " as " + libraryID + "/" + key);
+	Zotero.debug("Registering " + this._ZDO_object + " " + id
+		+ " as " + libraryID + "/" + key);
 	if (!this._objectIDs[libraryID]) {
 		this._objectIDs[libraryID] = {};
 	}
@@ -568,8 +569,7 @@ Zotero.DataObjects.prototype._load = Zotero.Promise.coroutine(function* (library
 					obj = new Zotero[this._ZDO_Object];
 					obj.loadFromRow(rowObj, true);
 					if (!options || !options.noCache) {
-						this._objectCache[id] = obj;
-						obj._inCache = true;
+						this.registerObject(obj);
 					}
 				}
 				loaded[id] = obj;
