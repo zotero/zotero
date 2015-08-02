@@ -121,25 +121,6 @@ describe("Zotero.DataObject", function() {
 			}
 		});
 		
-		it("shouldn't cause a save if unchanged and nothing else changed", function* () {
-			for (let type of types) {
-				var obj = createUnsavedDataObject(type);
-				obj.synced = true;
-				var id = yield obj.saveTx();
-				assert.isTrue(obj.synced);
-				
-				obj.synced = true;
-				assert.isFalse(obj.hasChanged(), type + " shouldn't be changed");
-				
-				var obj = createUnsavedDataObject(type);
-				obj.synced = false;
-				var id = yield obj.saveTx();
-				assert.isFalse(obj.synced);
-				obj.synced = false;
-				assert.isFalse(obj.hasChanged(), type + " shouldn't be changed");
-			}
-		})
-		
 		it("should be unchanged if skipSyncedUpdate passed", function* () {
 			for (let type of types) {
 				var obj = createUnsavedDataObject(type);
@@ -209,6 +190,42 @@ describe("Zotero.DataObject", function() {
 			var id = yield item.saveTx();
 			yield item.loadAllData();
 			assert.equal(item.getNote(), '');
+		})
+	})
+	
+	
+	describe("#hasChanged()", function () {
+		it("should return false if 'synced' was set but unchanged and nothing else changed", function* () {
+			for (let type of types) {
+				// True
+				var obj = createUnsavedDataObject(type);
+				obj.synced = true;
+				var id = yield obj.saveTx();
+				assert.isTrue(obj.synced);
+				
+				obj.synced = true;
+				assert.isFalse(obj.hasChanged(), type + " shouldn't be changed");
+				
+				// False
+				var obj = createUnsavedDataObject(type);
+				obj.synced = false;
+				var id = yield obj.saveTx();
+				assert.isFalse(obj.synced);
+				obj.synced = false;
+				assert.isFalse(obj.hasChanged(), type + " shouldn't be changed");
+			}
+		})
+		
+		it("should return true if 'synced' was set but unchanged and another primary field changed", function* () {
+			for (let type of types) {
+				let obj = createUnsavedDataObject(type);
+				obj.synced = true;
+				yield obj.saveTx();
+				
+				obj.synced = true;
+				obj.version = 1234;
+				assert.isTrue(obj.hasChanged());
+			}
 		})
 	})
 	

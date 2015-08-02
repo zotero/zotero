@@ -776,6 +776,7 @@ Zotero.DataObject.prototype.hasChanged = function() {
 	var changed = Object.keys(this._changed).filter(dataType => this._changed[dataType]);
 	if (changed.length == 1
 			&& changed[0] == 'primaryData'
+			&& Object.keys(this._changed.primaryData).length == 1
 			&& this._changed.primaryData.synced
 			&& this._previousData.synced == this._synced) {
 		return false;
