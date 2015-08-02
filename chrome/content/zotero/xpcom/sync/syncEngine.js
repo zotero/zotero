@@ -918,8 +918,8 @@ Zotero.Sync.Data.Engine.prototype._upgradeCheck = Zotero.Promise.coroutine(funct
  * missing or outdated and not up-to-date in the sync cache, download them. If any local objects
  * are marked as synced but aren't available remotely, mark them as unsynced for later uploading.
  *
- * (Technically this isn't a _full_ sync on its own, because settings aren't downloaded here and
- * objects are only flagged for later upload.)
+ * (Technically this isn't a full sync on its own, because objects are only flagged for later
+ * upload.)
  *
  * @param {Object[]} [versionResults] - Objects returned from getVersions(), keyed by objectType
  * @return {Promise<Integer>} - Promise for the library version after syncing
@@ -929,6 +929,7 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 	
 	var gen;
 	var lastLibraryVersion;
+	var remoteDeleted;
 	
 	loop:
 	while (true) {
@@ -1030,14 +1031,19 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 			let syncedKeys = yield Zotero.Sync.Data.Local.getSynced(this.libraryID, objectType);
 			let remoteMissing = Zotero.Utilities.arrayDiff(syncedKeys, Object.keys(results.versions));
 			if (remoteMissing.length) {
-				Zotero.debug("Marking remotely missing synced " + objectTypePlural + " as unsynced");
+				Zotero.debug("Checking remotely missing synced " + objectTypePlural);
 				Zotero.debug(remoteMissing);
 				
-				// TODO: Check remote deleted
-				// If remote delete log doesn't go back far enough, add to recovered items?
-				// Do we care about local timestamp of last edit?
+				// Check remotely deleted objects
+				if (!remoteDeleted) {
+					let results = yield this.apiClient.getDeleted(
+						this.libraryType, this.libraryTypeID
+					);
+					remoteDeleted = results.deleted;
+				}
 				
-				let ids = [];
+				let toDelete = [];
+				let toUpload = [];
 				for (let key of remoteMissing) {
 					let id = objectsClass.getIDFromLibraryAndKey(this.libraryID, key);
 					if (!id) {
@@ -1045,11 +1051,25 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 							+ " not found to mark as unsynced");
 						continue;
 					}
-					ids.push(id);
+					if (remoteDeleted[objectTypePlural].indexOf(key) != -1) {
+						toDelete.push(id);
+						continue;
+					}
+					toUpload.push(id);
 				}
-				// Reset version, since old version will no longer match remote
-				yield objectsClass.updateVersion(ids, 0);
-				yield objectsClass.updateSynced(ids, false);
+				// Delete local objects that were deleted remotely
+				if (toDelete.length) {
+					Zotero.debug("Deleting remotely deleted synced " + objectTypePlural);
+					yield objectsClass.erase(toDelete, { skipDeleteLog: true });
+				}
+				// For remotely missing objects that exist locally, reset version, since old
+				// version will no longer match remote, and mark for upload
+				if (toUpload.length) {
+					Zotero.debug("Marking remotely missing synced " + objectTypePlural
+						+ " as unsynced");
+					yield objectsClass.updateVersion(toUpload, 0);
+					yield objectsClass.updateSynced(toUpload, false);
+				}
 			}
 			
 			// Process newly cached objects

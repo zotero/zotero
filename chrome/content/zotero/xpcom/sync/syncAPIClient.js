@@ -117,6 +117,10 @@ Zotero.Sync.APIClient.prototype = {
 	}),
 	
 	
+	/**
+	 * @return {Object|false} - An object with 'libraryVersion' and a 'deleted' array, or
+	 *     false if 'since' is earlier than the beginning of the delete log
+	 */
 	getDeleted: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, since) {
 		var params = {
 			target: "deleted",
@@ -125,7 +129,11 @@ Zotero.Sync.APIClient.prototype = {
 			since: since || 0
 		};
 		var uri = this._buildRequestURI(params);
-		var xmlhttp = yield this._makeRequest("GET", uri);
+		var xmlhttp = yield this._makeRequest("GET", uri, { successCodes: [200, 409] });
+		if (xmlhttp.status == 409) {
+			Zotero.debug(`'since' value '${since}' is earlier than the beginning of the delete log`);
+			return false;
+		}
 		var libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
 		if (!libraryVersion) {
 			throw new Error("Last-Modified-Version not provided");

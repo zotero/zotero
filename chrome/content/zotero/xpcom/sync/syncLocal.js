@@ -387,7 +387,7 @@ Zotero.Sync.Data.Local = {
 							isNewObject = true;
 							
 							// Check if object has been deleted locally
-							if (yield this._objectInDeleteLog(objectType, libraryID, objectKey)) {
+							if (yield this.objectInDeleteLog(objectType, libraryID, objectKey)) {
 								switch (objectType) {
 								case 'item':
 									throw new Error("Unimplemented");
@@ -701,7 +701,7 @@ Zotero.Sync.Data.Local = {
 	/**
 	 * @return {Promise<Boolean>}
 	 */
-	_objectInDeleteLog: Zotero.Promise.coroutine(function* (objectType, libraryID, key) {
+	objectInDeleteLog: Zotero.Promise.coroutine(function* (objectType, libraryID, key) {
 		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
 		var sql = "SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID=? AND key=? "
 			+ "AND syncObjectTypeID=?";

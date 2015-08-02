@@ -661,16 +661,16 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.isFalse(Zotero.Items.exists(itemID));
 			
 			// Make sure objects weren't added to sync delete log
-			assert.isFalse(yield Zotero.Sync.Data.Local._objectInDeleteLog(
+			assert.isFalse(yield Zotero.Sync.Data.Local.objectInDeleteLog(
 				'setting', userLibraryID, 'tagColors'
 			));
-			assert.isFalse(yield Zotero.Sync.Data.Local._objectInDeleteLog(
+			assert.isFalse(yield Zotero.Sync.Data.Local.objectInDeleteLog(
 				'collection', userLibraryID, collectionKey
 			));
-			assert.isFalse(yield Zotero.Sync.Data.Local._objectInDeleteLog(
+			assert.isFalse(yield Zotero.Sync.Data.Local.objectInDeleteLog(
 				'search', userLibraryID, searchKey
 			));
-			assert.isFalse(yield Zotero.Sync.Data.Local._objectInDeleteLog(
+			assert.isFalse(yield Zotero.Sync.Data.Local.objectInDeleteLog(
 				'item', userLibraryID, itemKey
 			));
 		})
@@ -853,7 +853,6 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var userLibraryID = Zotero.Libraries.userLibraryID;
 			({ engine, client, caller } = yield setup());
 			
-			yield Zotero.Items.erase([1, 2], { skipDeleteLog: true });
 			var types = Zotero.DataObjectUtilities.getTypes();
 			var objects = {};
 			var objectJSON = {};
@@ -862,7 +861,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			}
 			
 			for (let type of types) {
-				// Create objects with outdated versions, which should be updated
+				// Create object with outdated version, which should be updated
 				let obj = createUnsavedDataObject(type);
 				obj.synced = true;
 				obj.version = 5;
@@ -875,7 +874,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 					name: Zotero.Utilities.randomString()
 				}));
 				
-				// Create JSON for objects that exist remotely and not locally,
+				// Create JSON for object that exists remotely and not locally,
 				// which should be downloaded
 				objectJSON[type].push(makeJSONFunctions[type]({
 					key: Zotero.DataObjectUtilities.generateKey(),
@@ -883,8 +882,16 @@ describe("Zotero.Sync.Data.Engine", function () {
 					name: Zotero.Utilities.randomString()
 				}));
 				
-				// Create objects marked as synced that don't exist remotely,
+				// Create object marked as synced that doesn't exist remotely,
 				// which should be flagged for upload
+				obj = createUnsavedDataObject(type);
+				obj.synced = true;
+				obj.version = 10;
+				yield obj.saveTx();
+				objects[type].push(obj);
+				
+				// Create object marked as synced that doesn't exist remotely but is in the
+				// remote delete log, which should be deleted locally
 				obj = createUnsavedDataObject(type);
 				obj.synced = true;
 				obj.version = 10;
@@ -912,15 +919,17 @@ describe("Zotero.Sync.Data.Engine", function () {
 					}
 				}
 			});
+			let deletedJSON = {};
 			for (let type of types) {
-				var suffix = type == 'item' ? '&includeTrashed=1' : '';
+				let suffix = type == 'item' ? '&includeTrashed=1' : '';
+				let plural = Zotero.DataObjectUtilities.getObjectTypePlural(type);
 				
 				var json = {};
 				json[objectJSON[type][0].key] = objectJSON[type][0].version;
 				json[objectJSON[type][1].key] = objectJSON[type][1].version;
 				setResponse({
 					method: "GET",
-					url: "users/1/" + Zotero.DataObjectUtilities.getObjectTypePlural(type)
+					url: "users/1/" + plural
 						+ "?format=versions" + suffix,
 					status: 200,
 					headers: headers,
@@ -929,7 +938,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 				
 				setResponse({
 					method: "GET",
-					url: "users/1/" + Zotero.DataObjectUtilities.getObjectTypePlural(type)
+					url: "users/1/" + plural
 						+ "?format=json"
 						+ "&" + type + "Key=" + objectJSON[type][0].key + "%2C" + objectJSON[type][1].key
 						+ suffix,
@@ -937,7 +946,16 @@ describe("Zotero.Sync.Data.Engine", function () {
 					headers: headers,
 					json: objectJSON[type]
 				});
+				
+				deletedJSON[plural] = [objects[type][2].key];
 			}
+			setResponse({
+				method: "GET",
+				url: "users/1/deleted?since=0",
+				status: 200,
+				headers: headers,
+				json: deletedJSON
+			});
 			yield engine._fullSync();
 			
 			// Check settings
@@ -963,6 +981,12 @@ describe("Zotero.Sync.Data.Engine", function () {
 				// JSON objects 2 should be marked as unsynced, with their version reset to 0
 				assert.equal(objects[type][1].version, 0);
 				assert.isFalse(objects[type][1].synced);
+				
+				// JSON objects 3 should be deleted and not in the delete log
+				assert.isFalse(objectsClass.getByLibraryAndKey(userLibraryID, objects[type][2].key));
+				assert.isFalse(yield Zotero.Sync.Data.Local.objectInDeleteLog(
+					type, userLibraryID, objects[type][2].key
+				));
 			}
 		})
 	})
