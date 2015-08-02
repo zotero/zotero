@@ -182,23 +182,6 @@ Zotero.Collections = function() {
 		}
 	}
 	
-	
-	this.erase = function(ids) {
-		ids = Zotero.flattenArguments(ids);
-		
-		return Zotero.DB.executeTransaction(function* () {
-			for each(var id in ids) {
-				var collection = yield this.getAsync(id);
-				if (collection) {
-					yield collection.erase();
-				}
-				collection = undefined;
-			}
-			
-			this.unload(ids);
-		}.bind(this));
-	};
-	
 	Zotero.DataObjects.call(this);
 	
 	return this;

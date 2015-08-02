@@ -518,6 +518,31 @@ Zotero.DataObjects.prototype.getPrimaryDataSQLPart = function (part) {
 }
 
 
+/**
+ * Delete one or more objects from the database and caches
+ *
+ * @param {Integer|Integer[]} ids - Object ids
+ * @param {Object} [options] - See Zotero.DataObject.prototype.erase
+ * @return {Promise}
+ */
+Zotero.DataObjects.prototype.erase = Zotero.Promise.coroutine(function* (ids, options = {}) {
+	ids = Zotero.flattenArguments(ids);
+	yield Zotero.DB.executeTransaction(function* () {
+		for (let i = 0; i < ids.length; i++) {
+			let obj = yield this.getAsync(ids[i]);
+			if (!obj) {
+				continue;
+			}
+			yield obj.erase(options);
+		}
+		this.unload(ids);
+	}.bind(this));
+});
+
+
+
+
+
 Zotero.DataObjects.prototype._load = Zotero.Promise.coroutine(function* (libraryID, ids, options) {
 	var loaded = {};
 	

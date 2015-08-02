@@ -598,29 +598,6 @@ Zotero.Items = function() {
 	
 	
 	/**
-	 * Delete item(s) from database and clear from internal array
-	 *
-	 * @param {Integer|Integer[]} ids - Item ids
-	 * @return {Promise}
-	 */
-	this.erase = function (ids) {
-		return Zotero.DB.executeTransaction(function* () {
-			ids = Zotero.flattenArguments(ids);
-			
-			for (let i=0; i<ids.length; i++) {
-				let id = ids[i];
-				let item = yield this.getAsync(id);
-				if (!item) {
-					Zotero.debug('Item ' + id + ' does not exist in Items.erase()!', 1);
-					continue;
-				}
-				yield item.erase(); // calls unload()
-			}
-		}.bind(this));
-	};
-	
-	
-	/**
 	 * Purge unused data values
 	 */
 	this.purge = Zotero.Promise.coroutine(function* () {

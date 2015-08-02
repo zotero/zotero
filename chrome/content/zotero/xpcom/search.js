@@ -1689,21 +1689,6 @@ Zotero.Searches = function() {
 	});
 	
 	
-	/*
-	 * Delete a given saved search from the DB
-	 */
-	this.erase = Zotero.Promise.coroutine(function* (ids) {
-		ids = Zotero.flattenArguments(ids);
-		
-		yield Zotero.DB.executeTransaction(function* () {
-			for (let i=0; i<ids.length; i++) {
-				let search = yield Zotero.Searches.getAsync(ids[i]);
-				yield search.erase();
-			}
-		}.bind(this));
-	});
-	
-	
 	this.getPrimaryDataSQL = function () {
 		// This should be the same as the query in Zotero.Search.loadPrimaryData(),
 		// just without a specific savedSearchID
