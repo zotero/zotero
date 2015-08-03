@@ -1667,7 +1667,7 @@ Zotero.Utilities = {
 		for(var variable in CSL_TEXT_MAPPINGS) {
 			if(variable in cslItem) {
 				var textMappings = CSL_TEXT_MAPPINGS[variable];
-				for(var i in textMappings) {
+				for(var i=0; i<textMappings.length; i++) {
 					var field = textMappings[i],
 						fieldID = Zotero.ItemFields.getID(field);
 					if(Zotero.ItemFields.isBaseField(fieldID)) {
