@@ -1668,8 +1668,13 @@ Zotero.Utilities = {
 			if(variable in cslItem) {
 				var textMappings = CSL_TEXT_MAPPINGS[variable];
 				for(var i=0; i<textMappings.length; i++) {
-					var field = textMappings[i],
-						fieldID = Zotero.ItemFields.getID(field);
+					var field = textMappings[i];
+					
+					// Until 5.0, use version instead of versionNumber
+					if (field == 'versionNumber') field = 'version';
+					
+					var fieldID = Zotero.ItemFields.getID(field);
+
 					if(Zotero.ItemFields.isBaseField(fieldID)) {
 						var newFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID);
 						if(newFieldID) fieldID = newFieldID;
