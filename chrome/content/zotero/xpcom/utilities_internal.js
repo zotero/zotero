@@ -414,8 +414,6 @@ Zotero.Utilities.Internal = {
 		}
 		
 		function addCompatibilityMappings(item, zoteroItem) {
-			item.uniqueFields = {};
-			
 			// Meaningless local item ID, but some older export translators depend on it
 			item.itemID = zoteroItem.id;
 			item.key = zoteroItem.key; // CSV translator exports this
@@ -424,7 +422,7 @@ Zotero.Utilities.Internal = {
 			// called "versionNumber"
 			delete item.version;
 			if (item.versionNumber) {
-				item.version = item.uniqueFields.version = item.versionNumber;
+				item.version = item.versionNumber;
 				delete item.versionNumber;
 			}
 			
@@ -433,25 +431,6 @@ Zotero.Utilities.Internal = {
 			item.dateModified = zoteroItem.dateModified;
 			if (item.accessDate) {
 				item.accessDate = zoteroItem.getField('accessDate');
-			}
-			
-			// Map base fields
-			for (let field in item) {
-				let id = Zotero.ItemFields.getID(field);
-				if (!id || !Zotero.ItemFields.isValidForType(id, zoteroItem.itemTypeID)) {
-					 continue;
-				}
-				
-				let baseField = Zotero.ItemFields.getName(
-					Zotero.ItemFields.getBaseIDFromTypeAndField(item.itemType, field)
-				);
-				
-				if (!baseField || baseField == field) {
-					item.uniqueFields[field] = item[field];
-				} else {
-					item[baseField] = item[field];
-					item.uniqueFields[baseField] = item[field];
-				}
 			}
 			
 			// Add various fields for compatibility with translators pre-4.0.27
@@ -496,6 +475,32 @@ Zotero.Utilities.Internal = {
 			if (zoteroItem.isAttachment()) {
 				item.linkMode = zoteroItem.attachmentLinkMode;
 				item.mimeType = item.contentType;
+			}
+			
+			// Map base fields
+			item.uniqueFields = {};
+			for (let field in item) {
+				// Attachment/note special fields
+				if (field == 'note' || field == 'mimeType' || field == 'charset') {
+					item.uniqueFields[field] = item[field];
+					continue;
+				}
+				
+				let id = Zotero.ItemFields.getID(field);
+				if (!id || !Zotero.ItemFields.isValidForType(id, zoteroItem.itemTypeID)) {
+					 continue;
+				}
+				
+				let baseField = Zotero.ItemFields.getName(
+					Zotero.ItemFields.getBaseIDFromTypeAndField(item.itemType, field)
+				);
+				
+				if (!baseField || baseField == field) {
+					item.uniqueFields[field] = item[field];
+				} else {
+					item[baseField] = item[field];
+					item.uniqueFields[baseField] = item[field];
+				}
 			}
 			
 			return item;
