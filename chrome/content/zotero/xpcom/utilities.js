@@ -1611,7 +1611,7 @@ Zotero.Utilities = {
 					cslItem[variable] = {"date-parts":[dateParts]};
 					
 					// if no month, use season as month
-					if(dateObj.part && !dateObj.month) {
+					if(dateObj.part && dateObj.month === undefined) {
 						cslItem[variable].season = dateObj.part;
 					}
 				} else {

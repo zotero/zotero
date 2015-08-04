@@ -1347,8 +1347,7 @@
 					1,
 					2
 				]
-			],
-			"season": "2000-01-02"
+			]
 		},
 		"title": "Title",
 		"type": "patent"
