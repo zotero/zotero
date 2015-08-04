@@ -99,6 +99,7 @@ const CSL_DATE_MAPPINGS = {
 
 /*
  * Mappings for types
+ * Also see itemFromCSLJSON
  */
 const CSL_TYPE_MAPPINGS = {
 	'book':"book",
@@ -1645,14 +1646,44 @@ Zotero.Utilities = {
 	 * @param {Object} cslItem
 	 */
 	"itemFromCSLJSON":function(item, cslItem) {
-		var isZoteroItem = item instanceof Zotero.Item, zoteroType;
+		var isZoteroItem = item instanceof Zotero.Item,
+			zoteroType;
 		
-		for(var type in CSL_TYPE_MAPPINGS) {
-			if(CSL_TYPE_MAPPINGS[type] == cslItem.type) {
-				zoteroType = type;
-				break;
+		// Some special cases to help us map item types correctly
+		// This ensures that we don't lose data on import. The fields
+		// we check are incompatible with the alternative item types
+		if (cslItem.type == 'book') {
+			zoteroType = 'book';
+			if (cslItem.version) {
+				zoteroType = 'computerProgram';
+			}
+		} else if (cslItem.type == 'bill') {
+			zoteroType = 'bill';
+			if (cslItem.publisher || cslItem['number-of-volumes']) {
+				zoteroType = 'hearing';
+			}
+		} else if (cslItem.type == 'song') {
+			zoteroType = 'audioRecording';
+			if (cslItem.number) {
+				zoteroType = 'podcast';
+			}
+		} else if (cslItem.type == 'motion_picture') {
+			zoteroType = 'film';
+			if (cslItem['collection-title'] || cslItem['publisher-place']
+				|| cslItem['event-place'] || cslItem.volume
+				|| cslItem['number-of-volumes'] || cslItem.ISBN
+			) {
+				zoteroType = 'videoRecording';
+			}
+		} else {
+			for(var type in CSL_TYPE_MAPPINGS) {
+				if(CSL_TYPE_MAPPINGS[type] == cslItem.type) {
+					zoteroType = type;
+					break;
+				}
 			}
 		}
+		
 		if(!zoteroType) zoteroType = "document";
 		
 		var itemTypeID = Zotero.ItemTypes.getID(zoteroType);
@@ -1682,10 +1713,12 @@ Zotero.Utilities = {
 					
 					if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
 						if(isZoteroItem) {
-							item.setField(fieldID, cslItem[variable], true);
+							item.setField(fieldID, cslItem[variable]);
 						} else {
 							item[field] = cslItem[variable];
 						}
+						
+						break;
 					}
 				}
 			}
