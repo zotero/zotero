@@ -221,7 +221,7 @@ describe("Zotero.Utilities", function() {
 			
 			attachment.save();
 			
-			cslJSONAttachment = Zotero.Utilities.itemToCSLJSON(attachment);
+			let cslJSONAttachment = Zotero.Utilities.itemToCSLJSON(attachment);
 			assert.equal(cslJSONAttachment.type, 'article', 'attachment is exported as "article"');
 			assert.equal(cslJSONAttachment.title, 'Empty', 'attachment title is correct');
 			assert.deepEqual(cslJSONAttachment.accessed, {"date-parts":[["2001",2,3]]}, 'attachment access date is mapped correctly');
@@ -355,6 +355,64 @@ describe("Zotero.Utilities", function() {
 			assert.deepEqual(cslCreators[3], creators[3].expect, 'name with only dropping particle is parsed');
 			assert.deepEqual(cslCreators[4], creators[4].expect, 'institutional author is not parsed');
 			assert.deepEqual(cslCreators[5], creators[5].expect, 'protected last name prevents parsing');
+		});
+	});
+	describe("itemFromCSLJSON", function() {
+		it("should stably perform itemToCSLJSON -> itemFromCSLJSON -> itemToCSLJSON", function() {
+			let data = loadSampleData('citeProcJSExport');
+			
+			Zotero.DB.beginTransaction();
+			
+			for (let i in data) {
+				let item = data[i];
+				
+				let zItem = new Zotero.Item();
+				Zotero.Utilities.itemFromCSLJSON(zItem, item);
+				zItem = Zotero.Items.get(zItem.save());
+				
+				let newItem = Zotero.Utilities.itemToCSLJSON(zItem);
+				
+				delete newItem.id;
+				delete item.id;
+				
+				assert.deepEqual(newItem, item, i + ' export -> import -> export is stable');
+			}
+			
+			Zotero.DB.commitTransaction();
+			
+		});
+		it("should import exported standalone note", function() {
+			let note = new Zotero.Item('note');
+			note.setNote('Some note longer than 50 characters, which will become the title.');
+			note = Zotero.Items.get(note.save());
+			
+			let jsonNote = Zotero.Utilities.itemToCSLJSON(note);
+			
+			let zItem = new Zotero.Item();
+			Zotero.Utilities.itemFromCSLJSON(zItem, jsonNote);
+			zItem = Zotero.Items.get(zItem.save());
+			
+			assert.equal(zItem.getField('title'), jsonNote.title, 'title imported correctly');
+		});
+		it("should import exported standalone attachment", function() {
+			let file = getTestDataDirectory();
+			file.append("empty.pdf");
+			
+			let attachment = Zotero.Items.get(Zotero.Attachments.importFromFile(file));
+			attachment.setField('title', 'Empty');
+			attachment.setField('accessDate', '2001-02-03 12:13:14');
+			attachment.setField('url', 'http://example.com');
+			attachment.setNote('Note');
+			
+			attachment.save();
+			
+			let jsonAttachment = Zotero.Utilities.itemToCSLJSON(attachment);
+			
+			let zItem = new Zotero.Item();
+			Zotero.Utilities.itemFromCSLJSON(zItem, jsonAttachment);
+			zItem = Zotero.Items.get(zItem.save());
+			
+			assert.equal(zItem.getField('title'), jsonAttachment.title, 'title imported correctly');
 		});
 	});
 });

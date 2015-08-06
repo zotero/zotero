@@ -330,6 +330,8 @@ Zotero.Date = new function(){
 				}
 				
 				if(date.month) date.month--;		// subtract one for JS style
+				else delete date.month;
+				
 				Zotero.debug("DATE: retrieved with algorithms: "+JSON.stringify(date));
 				
 				parts.push(
@@ -369,7 +371,7 @@ Zotero.Date = new function(){
 		}
 		
 		// MONTH
-		if(!date.month) {
+		if(date.month === undefined) {
 			// compile month regular expression
 			var months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul',
 				'aug', 'sep', 'oct', 'nov', 'dec'];

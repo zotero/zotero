@@ -99,6 +99,7 @@ const CSL_DATE_MAPPINGS = {
 
 /*
  * Mappings for types
+ * Also see itemFromCSLJSON
  */
 const CSL_TYPE_MAPPINGS = {
 	'book':"book",
@@ -1611,7 +1612,7 @@ Zotero.Utilities = {
 					cslItem[variable] = {"date-parts":[dateParts]};
 					
 					// if no month, use season as month
-					if(dateObj.part && !dateObj.month) {
+					if(dateObj.part && dateObj.month === undefined) {
 						cslItem[variable].season = dateObj.part;
 					}
 				} else {
@@ -1645,14 +1646,44 @@ Zotero.Utilities = {
 	 * @param {Object} cslItem
 	 */
 	"itemFromCSLJSON":function(item, cslItem) {
-		var isZoteroItem = item instanceof Zotero.Item, zoteroType;
+		var isZoteroItem = item instanceof Zotero.Item,
+			zoteroType;
 		
-		for(var type in CSL_TYPE_MAPPINGS) {
-			if(CSL_TYPE_MAPPINGS[type] == cslItem.type) {
-				zoteroType = type;
-				break;
+		// Some special cases to help us map item types correctly
+		// This ensures that we don't lose data on import. The fields
+		// we check are incompatible with the alternative item types
+		if (cslItem.type == 'book') {
+			zoteroType = 'book';
+			if (cslItem.version) {
+				zoteroType = 'computerProgram';
+			}
+		} else if (cslItem.type == 'bill') {
+			zoteroType = 'bill';
+			if (cslItem.publisher || cslItem['number-of-volumes']) {
+				zoteroType = 'hearing';
+			}
+		} else if (cslItem.type == 'song') {
+			zoteroType = 'audioRecording';
+			if (cslItem.number) {
+				zoteroType = 'podcast';
+			}
+		} else if (cslItem.type == 'motion_picture') {
+			zoteroType = 'film';
+			if (cslItem['collection-title'] || cslItem['publisher-place']
+				|| cslItem['event-place'] || cslItem.volume
+				|| cslItem['number-of-volumes'] || cslItem.ISBN
+			) {
+				zoteroType = 'videoRecording';
+			}
+		} else {
+			for(var type in CSL_TYPE_MAPPINGS) {
+				if(CSL_TYPE_MAPPINGS[type] == cslItem.type) {
+					zoteroType = type;
+					break;
+				}
 			}
 		}
+		
 		if(!zoteroType) zoteroType = "document";
 		
 		var itemTypeID = Zotero.ItemTypes.getID(zoteroType);
@@ -1667,9 +1698,14 @@ Zotero.Utilities = {
 		for(var variable in CSL_TEXT_MAPPINGS) {
 			if(variable in cslItem) {
 				var textMappings = CSL_TEXT_MAPPINGS[variable];
-				for(var i in textMappings) {
-					var field = textMappings[i],
-						fieldID = Zotero.ItemFields.getID(field);
+				for(var i=0; i<textMappings.length; i++) {
+					var field = textMappings[i];
+					
+					// Until 5.0, use version instead of versionNumber
+					if (field == 'versionNumber') field = 'version';
+					
+					var fieldID = Zotero.ItemFields.getID(field);
+
 					if(Zotero.ItemFields.isBaseField(fieldID)) {
 						var newFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID);
 						if(newFieldID) fieldID = newFieldID;
@@ -1677,10 +1713,12 @@ Zotero.Utilities = {
 					
 					if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
 						if(isZoteroItem) {
-							item.setField(fieldID, cslItem[variable], true);
+							item.setField(fieldID, cslItem[variable]);
 						} else {
 							item[field] = cslItem[variable];
 						}
+						
+						break;
 					}
 				}
 			}
