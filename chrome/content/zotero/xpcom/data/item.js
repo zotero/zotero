@@ -2879,7 +2879,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentSyncState', {
  */
 Zotero.defineProperty(Zotero.Item.prototype, 'attachmentModificationTime', {
 	get: Zotero.Promise.coroutine(function* () {
-		if (!this.isAttachment()) {
+		if (!this.isFileAttachment()) {
 			return undefined;
 		}
 		
@@ -2892,7 +2892,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentModificationTime', {
 			return undefined;
 		}
 		
-		var fmtime = OS.File.stat(path).lastModificationDate;
+		var fmtime = ((yield OS.File.stat(path)).lastModificationDate).getTime();
 		
 		if (fmtime < 1) {
 			Zotero.debug("File mod time " + fmtime + " is less than 1 -- interpreting as 1", 2);
@@ -4039,10 +4039,22 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options = {})
 		
 		// Attachment fields
 		if (this.isAttachment()) {
-			obj.linkMode = this.attachmentLinkMode;
+			let linkMode = this.attachmentLinkMode;
+			obj.linkMode = Zotero.Attachments.linkModeToName(linkMode);
 			obj.contentType = this.attachmentContentType;
 			obj.charset = this.attachmentCharset;
-			obj.path = this.attachmentPath;
+			
+			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				obj.path = this.attachmentPath;
+			}
+			else {
+				obj.filename = this.attachmentFilename;
+			}
+			
+			if (this.isFileAttachment()) {
+				obj.md5 = this.attachmentHash;
+				obj.mtime = yield this.attachmentModificationTime;
+			}
 		}
 		
 		// Notes and embedded attachment notes
@@ -4051,8 +4063,6 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options = {})
 		if (note !== "" || mode == 'full' || (mode == 'new' && this.isNote())) {
 			obj.note = note;
 		}
-		
-		// TODO: md5, hash?
 	}
 	
 	// Tags

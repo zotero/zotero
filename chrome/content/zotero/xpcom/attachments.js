@@ -1397,4 +1397,29 @@ Zotero.Attachments = new function(){
 		}
 		return false;
 	}
+	
+	
+	this.linkModeToName = function (linkMode) {
+		switch (linkMode) {
+		case this.LINK_MODE_IMPORTED_FILE:
+			return 'imported_file';
+		case this.LINK_MODE_IMPORTED_URL:
+			return 'imported_url';
+		case this.LINK_MODE_LINKED_FILE:
+			return 'linked_file';
+		case this.LINK_MODE_LINKED_URL:
+			return 'linked_url';
+		default:
+			throw new Error(`Invalid link mode ${linkMode}`);
+		}
+	}
+	
+	
+	this.linkModeFromName = function (linkModeName) {
+		var prop = "LINK_MODE_" + linkModeName.toUpperCase();
+		if (this[prop] !== undefined) {
+			return this[prop];
+		}
+		throw new Error(`Invalid link mode name '${linkModeName}'`);
+	}
 }

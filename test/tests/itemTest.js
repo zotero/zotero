@@ -800,6 +800,21 @@ describe("Zotero.Item", function () {
 				assert.isTrue(json.deleted);
 			})
 		})
+		
+		// TODO: Expand to all fields
+		it("should handle attachment fields", function* () {
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var item = yield Zotero.Attachments.importFromFile({
+				file: file
+			});
+			var json = yield item.toJSON();
+			assert.equal(json.linkMode, 'imported_file');
+			assert.equal(json.filename, 'test.png');
+			assert.isUndefined(json.path);
+			assert.equal(json.md5, '93da8f1e5774c599f0942dcecf64b11c');
+			assert.typeOf(json.mtime, 'number');
+		})
 	})
 
 	describe("#fromJSON()", function () {
