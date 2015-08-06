@@ -102,8 +102,13 @@ describe("Zotero.Sync.Data.Local", function() {
 				// Select local object
 				mergeGroup.leftpane.click();
 				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
-				assert.isTrue(wizard.getButton('next').hidden);
-				assert.isFalse(wizard.getButton('finish').hidden);
+				if (Zotero.isMac) {
+					assert.isTrue(wizard.getButton('next').hidden);
+					assert.isFalse(wizard.getButton('finish').hidden);
+				}
+				else {
+					// TODO
+				}
 				wizard.getButton('finish').click();
 			})
 			yield Zotero.Sync.Data.Local.processSyncCacheForObjectType(
@@ -185,8 +190,13 @@ describe("Zotero.Sync.Data.Local", function() {
 				);
 				resolveAll.click();
 				
-				assert.isTrue(wizard.getButton('next').hidden);
-				assert.isFalse(wizard.getButton('finish').hidden);
+				if (Zotero.isMac) {
+					assert.isTrue(wizard.getButton('next').hidden);
+					assert.isFalse(wizard.getButton('finish').hidden);
+				}
+				else {
+					// TODO
+				}
 				wizard.getButton('finish').click();
 			})
 			yield Zotero.Sync.Data.Local.processSyncCacheForObjectType(
