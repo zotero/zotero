@@ -222,6 +222,7 @@ Zotero.Sync.Data.Local = {
 		
 		Zotero.debug("Processing " + objectTypePlural + " in sync cache for " + libraryName);
 		
+		var conflicts = [];
 		var numSaved = 0;
 		var numSkipped = 0;
 		
@@ -340,18 +341,6 @@ Zotero.Sync.Data.Local = {
 									continue;
 								}
 								
-								// Ignore conflicts from Quick Start Guide, and just use remote version
-								/*if (objectType == 'item'
-										&& jsonDataLocal.key == "ABCD2345"
-										&& jsonDataLocal.url.indexOf('quick_start_guide') != -1
-										&& jsonData.url.indexOf('quick_start_guide') != -1) {
-									Zotero.debug("Ignoring conflict for item '" + jsonData.title + "' "
-										+ "-- using remote version");
-									let saved = yield this._saveObjectFromJSON(obj, jsonData, options);
-									if (saved) numSaved++;
-									continue;
-								}*/
-								
 								// If no conflicts, apply remote changes automatically
 								if (!result.conflicts.length) {
 									Zotero.DataObjectUtilities.applyChanges(
@@ -362,21 +351,17 @@ Zotero.Sync.Data.Local = {
 									continue;
 								}
 								
-								Zotero.debug('======DIFF========');
-								Zotero.debug(cachedJSON);
-								Zotero.debug(jsonDataLocal);
-								Zotero.debug(jsonData);
-								Zotero.debug(result);
-								throw new Error("Conflict");
+								if (objectType != 'item') {
+									throw new Error(`Unexpected conflict on ${objectType} object`);
+								}
 								
-								
-								// TODO
-								
-								// reconcile changes automatically if we can
-								
-								// if we can't:
-								// if it's a search or collection, use most recent version
-								// if it's an item, 
+								conflicts.push({
+									left: jsonDataLocal,
+									right: jsonData,
+									changes: result.changes,
+									conflicts: result.conflicts
+								});
+								continue;
 							}
 							
 							let saved = yield this._saveObjectFromJSON(obj, jsonData, options);
@@ -387,11 +372,20 @@ Zotero.Sync.Data.Local = {
 							isNewObject = true;
 							
 							// Check if object has been deleted locally
-							if (yield this.objectInDeleteLog(objectType, libraryID, objectKey)) {
+							let dateDeleted = yield this.getDateDeleted(
+								objectType, libraryID, objectKey
+							);
+							if (dateDeleted) {
 								switch (objectType) {
 								case 'item':
-									throw new Error("Unimplemented");
-									break;
+									conflicts.push({
+										left: {
+											deleted: true,
+											dateDeleted: Zotero.Date.dateToSQL(dateDeleted, true)
+										},
+										right: jsonData
+									});
+									continue;
 								
 								// Auto-restore some locally deleted objects that have changed remotely
 								case 'collection':
@@ -433,12 +427,104 @@ Zotero.Sync.Data.Local = {
 			yield this.processSyncCacheForObjectType(libraryID, objectType, options);
 		}
 		
+		if (conflicts.length) {
+			conflicts.sort(function (a, b) {
+				var d1 = a.left.dateDeleted || a.left.dateModified;
+				var d2 = b.left.dateDeleted || b.left.dateModified;
+				if (d1 > d2) {
+					return 1
+				}
+				if (d1 < d2) {
+					return -1;
+				}
+				return 0;
+			})
+			
+			var mergeData = this.resolveConflicts(conflicts);
+			if (mergeData) {
+				let mergeOptions = {};
+				Object.assign(mergeOptions, options);
+				// Tell _saveObjectFromJSON not to save with 'synced' set to true
+				mergeOptions.saveAsChanged = true;
+				let concurrentObjects = 50;
+				yield Zotero.Utilities.Internal.forEachChunkAsync(
+					mergeData,
+					concurrentObjects,
+					function (chunk) {
+						return Zotero.DB.executeTransaction(function* () {
+							for (let json of chunk) {
+								let obj = yield objectsClass.getByLibraryAndKeyAsync(
+									libraryID, json.key, { noCache: true }
+								);
+								// Update object with merge data
+								if (obj) {
+									if (json.deleted) {
+										yield obj.erase();
+									}
+									else {
+										yield this._saveObjectFromJSON(obj, json, mergeOptions);
+									}
+								}
+								// Recreate deleted object
+								else if (!json.deleted) {
+									obj = new Zotero[ObjectType];
+									obj.libraryID = libraryID;
+									obj.key = json.key;
+									yield obj.loadPrimaryData();
+									
+									let saved = yield this._saveObjectFromJSON(obj, json, options, {
+										// Don't cache new items immediately, which skips reloading after save
+										skipCache: true
+									});
+								}
+							}
+						}.bind(this));
+					}.bind(this)
+				);
+			}
+		}
+		
 		data = yield this._getUnwrittenData(libraryID, objectType);
 		Zotero.debug("Skipping " + data.length + " "
 			+ (data.length == 1 ? objectType : objectTypePlural)
 			+ " in sync cache");
 		return data;
 	}),
+	
+	
+	resolveConflicts: function (conflicts) {
+		var io = {
+			dataIn: {
+				captions: [
+					Zotero.getString('sync.conflict.localItem'),
+					Zotero.getString('sync.conflict.remoteItem'),
+					Zotero.getString('sync.conflict.mergedItem')
+				],
+				conflicts
+			}
+		};
+		
+		var url = 'chrome://zotero/content/merge.xul';
+		
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+		   .getService(Components.interfaces.nsIWindowMediator);
+		var lastWin = wm.getMostRecentWindow("navigator:browser");
+		if (lastWin) {
+			lastWin.openDialog(url, '', 'chrome,modal,centerscreen', io);
+		}
+		else {
+			// When using nsIWindowWatcher, the object has to be wrapped here
+			// https://developer.mozilla.org/en-US/docs/Working_with_windows_in_chrome_code#Example_5_Using_nsIWindowWatcher_for_passing_an_arbritrary_JavaScript_object
+			io.wrappedJSObject = io;
+			let ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+				.getService(Components.interfaces.nsIWindowWatcher);
+			ww.openWindow(null, url, '', 'chrome,modal,centerscreen,dialog', io);
+		}
+		if (io.error) {
+			throw io.error;
+		}
+		return io.dataOut;
+	},
 	
 	
 	//
@@ -460,8 +546,10 @@ Zotero.Sync.Data.Local = {
 	_saveObjectFromJSON: Zotero.Promise.coroutine(function* (obj, json, options) {
 		try {
 			yield obj.fromJSON(json);
-			obj.version = json.version;
-			obj.synced = true;
+			if (!options.saveAsChanged) {
+				obj.version = json.version;
+				obj.synced = true;
+			}
 			Zotero.debug("SAVING " + json.key + " WITH SYNCED");
 			Zotero.debug(obj.version);
 			yield obj.save({
@@ -699,14 +787,14 @@ Zotero.Sync.Data.Local = {
 	
 	
 	/**
-	 * @return {Promise<Boolean>}
+	 * @return {Promise<Date|false>}
 	 */
-	objectInDeleteLog: Zotero.Promise.coroutine(function* (objectType, libraryID, key) {
+	getDateDeleted: Zotero.Promise.coroutine(function* (objectType, libraryID, key) {
 		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
-		var sql = "SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID=? AND key=? "
+		var sql = "SELECT dateDeleted FROM syncDeleteLog WHERE libraryID=? AND key=? "
 			+ "AND syncObjectTypeID=?";
-		var count = yield Zotero.DB.valueQueryAsync(sql, [libraryID, key, syncObjectTypeID]);
-		return !!count;
+		var date = yield Zotero.DB.valueQueryAsync(sql, [libraryID, key, syncObjectTypeID]);
+		return date ? Zotero.Date.sqlToDate(date, true) : false;
 	}),
 	
 	

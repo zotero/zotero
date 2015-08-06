@@ -309,6 +309,7 @@ CREATE TABLE syncDeleteLog (
     syncObjectTypeID INT NOT NULL,
     libraryID INT NOT NULL,
     key TEXT NOT NULL,
+    dateDeleted TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     synced INT NOT NULL DEFAULT 0,
     UNIQUE (syncObjectTypeID, libraryID, key),
     FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID),
@@ -319,6 +320,7 @@ CREATE INDEX syncDeleteLog_synced ON syncDeleteLog(synced);
 CREATE TABLE storageDeleteLog (
     libraryID INT NOT NULL,
     key TEXT NOT NULL,
+    dateDeleted TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     synced INT NOT NULL DEFAULT 0,
     PRIMARY KEY (libraryID, key),
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE

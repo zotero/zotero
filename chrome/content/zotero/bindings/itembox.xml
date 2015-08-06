@@ -82,19 +82,6 @@
 							this.blurHandler = this.hideEditor;
 							break;
 						
-						case 'merge':
-							this.clickByItem = true;
-							break;
-						
-						case 'mergeedit':
-							this.clickable = true;
-							this.editable = true;
-							this.saveOnEdit = false;
-							this.showTypeMenu = true;
-							this.clickHandler = this.showEditor;
-							this.blurHandler = this.hideEditor;
-							break;
-						
 						case 'fieldmerge':
 							this.hideEmptyFields = true;
 							this._fieldAlternatives = {};
@@ -1909,9 +1896,7 @@
 					if(field === 'creator') {
 						// Reset creator mode settings here so that flex attribute gets reset
 						this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
-						Zotero.debug("HERE");
 						if(Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
-						Zotero.debug("YES");
 							var creatorTypeLabels = document.getAnonymousNodes(this)[0].getElementsByClassName("creator-type-label");
 							Zotero.debug(creatorTypeLabels[creatorTypeLabels.length-1] + "");
 							document.getElementById("zotero-author-guidance").show({

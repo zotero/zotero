@@ -68,21 +68,15 @@ zoteromergegroup {
 	overflow-y: auto;
 }
 
-zoteromergepane #trash-box, zoteromergepane #delete-box {
+zoteromergepane *[anonid="delete-box"] {
 	min-width: 15em;
 	-moz-box-align: center;
 	-moz-box-pack: center;
-	font-weight: bold;
 }
 
 zoteromergepane[selected=true] groupbox caption {
 	color: red;
 	font-weight: bold;
-}
-
-zoteromergepane[id=leftpane]:not([selected=true]):hover groupbox caption,
-zoteromergepane[id=rightpane]:not([selected=true]):hover groupbox caption {
-	/* font-weight: bold; */
 }
 
 hbox:not([mergetype=note]) zoteromergepane:active[id=leftpane] groupbox caption,

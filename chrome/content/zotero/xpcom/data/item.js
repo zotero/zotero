@@ -631,7 +631,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	this._disabledCheck();
 	
 	if (value === undefined) {
-		throw new Error("Value cannot be undefined");
+		throw new Error(`'${field}' value cannot be undefined`);
 	}
 	
 	if (typeof value == 'string') {

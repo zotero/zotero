@@ -110,7 +110,7 @@ describe("Zotero.Item", function () {
 		
 		it("should throw if value is undefined", function () {
 			var item = new Zotero.Item('book');
-			assert.throws(() => item.setField('title'), "Value cannot be undefined");
+			assert.throws(() => item.setField('title'), "'title' value cannot be undefined");
 		})
 		
 		it("should not mark an empty field set to an empty string as changed", function () {

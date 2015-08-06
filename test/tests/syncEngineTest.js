@@ -661,16 +661,16 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.isFalse(Zotero.Items.exists(itemID));
 			
 			// Make sure objects weren't added to sync delete log
-			assert.isFalse(yield Zotero.Sync.Data.Local.objectInDeleteLog(
+			assert.isFalse(yield Zotero.Sync.Data.Local.getDateDeleted(
 				'setting', userLibraryID, 'tagColors'
 			));
-			assert.isFalse(yield Zotero.Sync.Data.Local.objectInDeleteLog(
+			assert.isFalse(yield Zotero.Sync.Data.Local.getDateDeleted(
 				'collection', userLibraryID, collectionKey
 			));
-			assert.isFalse(yield Zotero.Sync.Data.Local.objectInDeleteLog(
+			assert.isFalse(yield Zotero.Sync.Data.Local.getDateDeleted(
 				'search', userLibraryID, searchKey
 			));
-			assert.isFalse(yield Zotero.Sync.Data.Local.objectInDeleteLog(
+			assert.isFalse(yield Zotero.Sync.Data.Local.getDateDeleted(
 				'item', userLibraryID, itemKey
 			));
 		})
@@ -984,7 +984,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 				
 				// JSON objects 3 should be deleted and not in the delete log
 				assert.isFalse(objectsClass.getByLibraryAndKey(userLibraryID, objects[type][2].key));
-				assert.isFalse(yield Zotero.Sync.Data.Local.objectInDeleteLog(
+				assert.isFalse(yield Zotero.Sync.Data.Local.getDateDeleted(
 					type, userLibraryID, objects[type][2].key
 				));
 			}

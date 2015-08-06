@@ -76,17 +76,6 @@
 							this.displayRelated = true;
 							break;
 						
-						case 'merge':
-							this.displayButton = true;
-							break;
-						
-						case 'mergeedit':
-							// Not currently implemented
-							// (editing works, but value isn't saved)
-							//this.editable = true;
-							this.keyDownHandler = this.handleKeyDown;
-							break;
-						
 						default:
 							throw ("Invalid mode '" + val + "' in noteeditor.xml");
 					}
@@ -111,24 +100,20 @@
 			
 			<field name="_item"/>
 			<property name="item" onget="return this._item;">
-				<setter>
-				<![CDATA[
-					Zotero.spawn(function* () {
-						this._item = val;
-						// TODO: use clientDateModified instead
-						this._mtime = val.getField('dateModified');
-						
-						var parentKey = this.item.parentKey;
-						if (parentKey) {
-							this.parentItem = Zotero.Items.getByLibraryAndKey(this.item.libraryID, parentKey);
-						}
-						
-						this._id('links').item = this.item;
-						
-						yield this.refresh();
-					}, this);
-				]]>
-				</setter>
+				<setter><![CDATA[
+					this._item = val;
+					// TODO: use clientDateModified instead
+					this._mtime = val.getField('dateModified');
+					
+					var parentKey = this.item.parentKey;
+					if (parentKey) {
+						this.parentItem = Zotero.Items.getByLibraryAndKey(this.item.libraryID, parentKey);
+					}
+					
+					this._id('links').item = this.item;
+					
+					this.refresh();
+				]]></setter>
 			</property>
 			
 			<property name="linksOnTop">
@@ -187,61 +172,58 @@
 			
 			<method name="refresh">
 				<body><![CDATA[
-					return Zotero.spawn(function* () {
-						Zotero.debug('Refreshing note editor');
-						
-						var textbox = this._id('noteField');
-						var textboxReadOnly = this._id('noteFieldReadOnly');
-						var button = this._id('goButton');
-						
-						if (this.editable) {
-							textbox.hidden = false;
-							textboxReadOnly.hidden = true;
-						}
-						else {
-							textbox.hidden = true;
-							textboxReadOnly.hidden = false;
-							textbox = textboxReadOnly;
-						}
-						
-						//var scrollPos = textbox.inputField.scrollTop;
-						if (this.item) {
-							yield this.item.loadNote();
-							textbox.value = this.item.getNote();
-						}
-						else {
-							textbox.value = '';
-						}
-						//textbox.inputField.scrollTop = scrollPos;
-						
-						this._id('linksbox').hidden = !(this.displayTags && this.displayRelated);
-						
-						if (this.keyDownHandler) {
-							textbox.setAttribute('onkeydown',
-								'document.getBindingParent(this).handleKeyDown(event)');
-						}
-						else {
-							textbox.removeAttribute('onkeydown');
-						}
-						
-						if (this.commandHandler) {
-							textbox.setAttribute('oncommand',
-								'document.getBindingParent(this).commandHandler()');
-						}
-						else {
-							textbox.removeAttribute('oncommand');
-						}
-						
-						if (this.displayButton) {
-							button.label = this.buttonCaption;
-							button.hidden = false;
-							button.setAttribute('oncommand',
-								'document.getBindingParent(this).clickHandler(this)');
-						}
-						else {
-							button.hidden = true;
-						}
-					}, this);
+					Zotero.debug('Refreshing note editor');
+					
+					var textbox = this._id('noteField');
+					var textboxReadOnly = this._id('noteFieldReadOnly');
+					var button = this._id('goButton');
+					
+					if (this.editable) {
+						textbox.hidden = false;
+						textboxReadOnly.hidden = true;
+					}
+					else {
+						textbox.hidden = true;
+						textboxReadOnly.hidden = false;
+						textbox = textboxReadOnly;
+					}
+					
+					//var scrollPos = textbox.inputField.scrollTop;
+					if (this.item) {
+						textbox.value = this.item.getNote();
+					}
+					else {
+						textbox.value = '';
+					}
+					//textbox.inputField.scrollTop = scrollPos;
+					
+					this._id('linksbox').hidden = !(this.displayTags && this.displayRelated);
+					
+					if (this.keyDownHandler) {
+						textbox.setAttribute('onkeydown',
+							'document.getBindingParent(this).handleKeyDown(event)');
+					}
+					else {
+						textbox.removeAttribute('onkeydown');
+					}
+					
+					if (this.commandHandler) {
+						textbox.setAttribute('oncommand',
+							'document.getBindingParent(this).commandHandler()');
+					}
+					else {
+						textbox.removeAttribute('oncommand');
+					}
+					
+					if (this.displayButton) {
+						button.label = this.buttonCaption;
+						button.hidden = false;
+						button.setAttribute('oncommand',
+							'document.getBindingParent(this).clickHandler(this)');
+					}
+					else {
+						button.hidden = true;
+					}
 				]]></body>
 			</method>
 			

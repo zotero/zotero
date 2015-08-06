@@ -27,13 +27,6 @@ var noteEditor;
 var notifierUnregisterID;
 
 function onLoad() {
-	Zotero.spawn(function* () {
-		Zotero.debug('=-=-=');
-		var bar = yield Zotero.Promise.delay(1000).return('DONE');
-		Zotero.debug(bar);
-		Zotero.debug('-----');
-	});
-	
 	noteEditor = document.getElementById('zotero-note-editor');
 	noteEditor.mode = 'edit';
 	noteEditor.focus();

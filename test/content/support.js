@@ -86,6 +86,8 @@ function waitForWindow(uri, callback) {
 						}
 					}
 					catch (e) {
+						Zotero.logError(e);
+						win.close();
 						deferred.reject(e);
 						return;
 					}
@@ -113,7 +115,7 @@ function waitForWindow(uri, callback) {
  * @return {Promise}
  */
 function waitForDialog(onOpen, button='accept', url) {
-	return waitForWindow(url || "chrome://global/content/commonDialog.xul", Zotero.Promise.method(function (dialog, deferred) {
+	return waitForWindow(url || "chrome://global/content/commonDialog.xul", Zotero.Promise.method(function (dialog) {
 		var failure = false;
 		if (onOpen) {
 			try {
@@ -272,6 +274,8 @@ var createGroup = Zotero.Promise.coroutine(function* (props) {
  * @param {String} [params.parentKey]
  * @param {Boolean} [params.synced]
  * @param {Integer} [params.version]
+ * @param {Integer} [params.dateAdded] - Allowed for items
+ * @param {Integer} [params.dateModified] - Allowed for items
  */
 function createUnsavedDataObject(objectType, params = {}) {
 	if (!objectType) {
@@ -298,6 +302,9 @@ function createUnsavedDataObject(objectType, params = {}) {
 		break;
 	}
 	var allowedParams = ['parentID', 'parentKey', 'synced', 'version'];
+	if (objectType == 'item') {
+		allowedParams.push('dateAdded', 'dateModified');
+	}
 	allowedParams.forEach(function (param) {
 		if (params[param] !== undefined) {
 			obj[param] = params[param];
@@ -316,7 +323,7 @@ function getNameProperty(objectType) {
 	return objectType == 'item' ? 'title' : 'name';
 }
 
-var modifyDataObject = Zotero.Promise.coroutine(function* (obj, params = {}) {
+var modifyDataObject = Zotero.Promise.coroutine(function* (obj, params = {}, saveOptions) {
 	switch (obj.objectType) {
 	case 'item':
 		yield obj.loadItemData();
@@ -329,7 +336,7 @@ var modifyDataObject = Zotero.Promise.coroutine(function* (obj, params = {}) {
 	default:
 		obj.name = params.name !== undefined ? params.name : Zotero.Utilities.randomString();
 	}
-	return obj.saveTx();
+	return obj.saveTx(saveOptions);
 });
 
 /**
