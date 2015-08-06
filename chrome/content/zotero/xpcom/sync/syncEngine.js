@@ -325,6 +325,7 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 				let objectType = Zotero.DataObjectUtilities.getObjectTypeSingular(objectTypePlural);
 				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 				let toDelete = [];
+				let conflicts = [];
 				for (let key of results.deleted[objectTypePlural]) {
 					// TODO: Remove from request?
 					if (objectType == 'tag') {
@@ -357,11 +358,55 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 					}
 					// Conflict resolution
 					else if (objectType == 'item') {
-						throw new Error("Unimplemented: delete conflict");
+						conflicts.push({
+							left: yield obj.toJSON(),
+							right: {
+								deleted: true
+							}
+						});
 					}
 					
 					// Ignore deletion if collection/search changed locally
 				}
+				
+				if (conflicts.length) {
+					conflicts.sort(function (a, b) {
+						var d1 = a.left.dateModified;
+						var d2 = b.left.dateModified;
+						if (d1 > d2) {
+							return 1
+						}
+						if (d1 < d2) {
+							return -1;
+						}
+						return 0;
+					});
+					var mergeData = Zotero.Sync.Data.Local.resolveConflicts(conflicts);
+					if (mergeData) {
+						let concurrentObjects = 50;
+						yield Zotero.Utilities.Internal.forEachChunkAsync(
+							mergeData,
+							concurrentObjects,
+							function (chunk) {
+								return Zotero.DB.executeTransaction(function* () {
+									for (let json of chunk) {
+										if (!json.deleted) continue;
+										let obj = yield objectsClass.getByLibraryAndKeyAsync(
+											this.libraryID, json.key, { noCache: true }
+										);
+										if (!obj) {
+											Zotero.logError("Remotely deleted " + objectType
+												+ " didn't exist after conflict resolution");
+											continue;
+										}
+										yield obj.erase();
+									}
+								}.bind(this));
+							}.bind(this)
+						);
+					}
+				}
+				
 				if (toDelete.length) {
 					yield Zotero.DB.executeTransaction(function* () {
 						for (let obj of toDelete) {

@@ -741,6 +741,88 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.ok(Zotero.Collections.exists(collectionID));
 			assert.ok(Zotero.Searches.exists(searchID));
 		})
+		
+		it("should show conflict resolution window for conflicting remote deletions", function* () {
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			yield Zotero.Libraries.setVersion(userLibraryID, 5);
+			({ engine, client, caller } = yield setup());
+			
+			// Create local unsynced items
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'A');
+			item.synced = false;
+			var itemID1 = yield item.saveTx({ skipSyncedUpdate: true });
+			var itemKey1 = item.key;
+			
+			item = createUnsavedDataObject('item');
+			item.setField('title', 'B');
+			item.synced = false;
+			var itemID2 = yield item.saveTx({ skipSyncedUpdate: true });
+			var itemKey2 = item.key;
+			
+			var headers = {
+				"Last-Modified-Version": 6
+			};
+			setResponse({
+				method: "GET",
+				url: "users/1/settings?since=5",
+				status: 200,
+				headers: headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/collections?format=versions&since=5",
+				status: 200,
+				headers: headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/searches?format=versions&since=5",
+				status: 200,
+				headers: headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/items?format=versions&since=5&includeTrashed=1",
+				status: 200,
+				headers: headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/deleted?since=5",
+				status: 200,
+				headers: headers,
+				json: {
+					settings: [],
+					collections: [],
+					searches: [],
+					items: [itemKey1, itemKey2]
+				}
+			});
+			
+			waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+				var doc = dialog.document;
+				var wizard = doc.documentElement;
+				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				
+				// 1 (accept remote deletion)
+				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+				mergeGroup.rightpane.click();
+				wizard.getButton('next').click();
+				
+				// 2 (ignore remote deletion)
+				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+				wizard.getButton('finish').click();
+			})
+			yield engine._startDownload();
+			
+			assert.isFalse(Zotero.Items.exists(itemID1));
+			assert.isTrue(Zotero.Items.exists(itemID2));
+		})
 	})
 	
 	describe("#_upgradeCheck()", function () {
