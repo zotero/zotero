@@ -295,6 +295,21 @@ describe("Zotero.DataObject", function() {
 				Zotero.Notifier.unregisterObserver(id);
 			}
 		})
+		
+		it("should delete object versions from sync cache", function* () {
+			for (let type of types) {
+				let obj = yield createDataObject(type);
+				let libraryID = obj.libraryID;
+				let key = obj.key;
+				let json = yield obj.toJSON();
+				yield Zotero.Sync.Data.Local.saveCacheObjects(type, libraryID, [json]);
+				yield obj.eraseTx();
+				let versions = yield Zotero.Sync.Data.Local.getCacheObjectVersions(
+					type, libraryID, key
+				);
+				assert.lengthOf(versions, 0);
+			}
+		})
 	})
 	
 	describe("#updateVersion()", function() {

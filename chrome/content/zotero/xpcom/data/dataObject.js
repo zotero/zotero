@@ -1154,7 +1154,7 @@ Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* (options)
 		Zotero.DB.requireTransaction();
 		Zotero.DataObject.prototype._initErase.call(this, env);
 		yield this._eraseData(env);
-		Zotero.DataObject.prototype._finalizeErase.call(this, env);
+		yield Zotero.DataObject.prototype._finalizeErase.call(this, env);
 	}
 });
 
@@ -1176,7 +1176,10 @@ Zotero.DataObject.prototype._initErase = function (env) {
 	}
 };
 
-Zotero.DataObject.prototype._finalizeErase = function (env) {
+Zotero.DataObject.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env) {
+	// Delete versions from sync cache
+	yield Zotero.Sync.Data.Local.deleteCacheObject(this.objectType, this._libraryID, this._key);
+	
 	Zotero.DB.addCurrentCallback("commit", function () {
 		this.ObjectsClass.unload(env.deletedObjectIDs || this.id);
 	}.bind(this));
@@ -1189,7 +1192,7 @@ Zotero.DataObject.prototype._finalizeErase = function (env) {
 			env.notifierData
 		);
 	}
-}
+});
 
 
 Zotero.DataObject.prototype.toResponseJSON = Zotero.Promise.coroutine(function* (options) {

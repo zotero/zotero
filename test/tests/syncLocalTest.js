@@ -204,7 +204,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			var type = 'item';
 			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
 			
-			// Create object in cache
+			// Create object, generate JSON, and delete
 			var obj = yield createDataObject(type, { version: 10 });
 			var jsonData = yield obj.toJSON();
 			var key = jsonData.key = obj.key;
@@ -214,15 +214,13 @@ describe("Zotero.Sync.Data.Local", function() {
 				version: jsonData.version,
 				data: jsonData
 			};
-			yield Zotero.Sync.Data.Local.saveCacheObjects(type, libraryID, [json]);
+			// Delete object locally
+			yield obj.eraseTx();
 			
 			// Create new version in cache, simulating a download
 			json.version = jsonData.version = 15;
 			jsonData.title = Zotero.Utilities.randomString();
 			yield Zotero.Sync.Data.Local.saveCacheObjects(type, libraryID, [json]);
-			
-			// Delete object locally
-			yield obj.eraseTx();
 			
 			waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
 				var doc = dialog.document;
@@ -243,13 +241,13 @@ describe("Zotero.Sync.Data.Local", function() {
 			assert.isFalse(obj);
 		})
 		
-		it("should handle restore locally deleted item", function* () {
+		it("should restore locally deleted item", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
 			var type = 'item';
 			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
 			
-			// Create object in cache
+			// Create object, generate JSON, and delete
 			var obj = yield createDataObject(type, { version: 10 });
 			var jsonData = yield obj.toJSON();
 			var key = jsonData.key = obj.key;
@@ -259,15 +257,12 @@ describe("Zotero.Sync.Data.Local", function() {
 				version: jsonData.version,
 				data: jsonData
 			};
-			yield Zotero.Sync.Data.Local.saveCacheObjects(type, libraryID, [json]);
+			yield obj.eraseTx();
 			
 			// Create new version in cache, simulating a download
 			json.version = jsonData.version = 15;
 			jsonData.title = Zotero.Utilities.randomString();
 			yield Zotero.Sync.Data.Local.saveCacheObjects(type, libraryID, [json]);
-			
-			// Delete object locally
-			yield obj.eraseTx();
 			
 			waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
 				var doc = dialog.document;

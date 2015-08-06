@@ -492,6 +492,14 @@ Zotero.Sync.Data.Local = {
 	}),
 	
 	
+	deleteCacheObject: function (objectType, libraryID, key) {
+		var sql = "DELETE FROM syncCache WHERE libraryID=? AND key=? "
+			+ "AND syncObjectTypeID IN (SELECT syncObjectTypeID FROM "
+			+ "syncObjectTypes WHERE name=?)";;
+		return Zotero.DB.queryAsync(sql, [libraryID, key, objectType]);
+	},
+	
+	
 	resolveConflicts: function (conflicts) {
 		var io = {
 			dataIn: {
