@@ -1294,6 +1294,7 @@ var ZoteroPane = new function()
 					var clearUndo = noteEditor.item ? noteEditor.item.id != item.id : false;
 					
 					noteEditor.parent = null;
+					yield item.loadNote();
 					noteEditor.item = item;
 					
 					// If loading new or different note, disable undo while we repopulate the text field
