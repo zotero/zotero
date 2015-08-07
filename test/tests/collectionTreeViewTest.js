@@ -415,9 +415,7 @@ describe("Zotero.CollectionTreeView", function() {
 			linked = yield attachment.getLinkedItem(group.libraryID);
 			assert.equal(linked.id, treeRow.ref.id);
 			
-			yield Zotero.DB.executeTransaction(function* () {
-				return group.erase();
-			})
+			return group.eraseTx();
 		})
 		
 		it("should not copy an item or its attachment to a group twice", function* () {

@@ -2364,7 +2364,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 			s.addCondition('deleted', 'true');
 		}
 		else {
-			throw new Error('Invalid search mode in Zotero.CollectionTreeRow.getSearchObject()');
+			throw new Error('Invalid search mode ' + this.type);
 		}
 	}
 	

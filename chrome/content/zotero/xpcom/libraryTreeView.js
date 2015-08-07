@@ -140,9 +140,22 @@ Zotero.LibraryTreeView.prototype = {
 		if (lastRow && this.selection.isSelected(row)) {
 			// Deselect removed row
 			this.selection.toggleSelect(row);
-			// If no other rows selected, select row before
+			// If no other rows selected, select first selectable row before
 			if (this.selection.count == 0 && row !== 0) {
-				this.selection.toggleSelect(row - 1);
+				let previous = row;
+				while (true) {
+					previous--;
+					// Should ever happen
+					if (previous < 0) {
+						break;
+					}
+					if (!this.isSelectable(previous)) {
+						continue;
+					}
+					
+					this.selection.toggleSelect(previous);
+					break;
+				}
 			}
 		}
 		
