@@ -51,7 +51,9 @@ var Zotero_QuickFormat = new function () {
 			io = window.arguments[0].wrappedJSObject;
 			
 			// Only hide chrome on Windows or Mac
-			if(Zotero.isMac || Zotero.isWin) {
+			if(Zotero.isMac) {
+				document.documentElement.setAttribute("drawintitlebar", true);
+			} else if(Zotero.isWin) {
 				document.documentElement.setAttribute("hidechrome", true);
 			}
 			

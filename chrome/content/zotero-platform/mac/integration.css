@@ -20,23 +20,21 @@ body[multiline="true"] {
 #quick-format-search[multiline="true"] {
 	padding: 1px 2px 0 18px;
 	border: 1px solid rgba(0, 0, 0, 0.5);
-	border-radius: 10px;
 	-moz-appearance: none;
 }
 
 #quick-format-search:not([multiline="true"]) {
-	height: 22px !important;
+	padding-top: 2.5px;
+	height: 30px !important;
 }
 
 #quick-format-entry {
 	background: -moz-linear-gradient(-90deg, rgb(243,123,119) 0, rgb(180,47,38) 50%, rgb(156,36,27) 50%);
-	-moz-border-radius:15px;
-	border-radius:15px;
-	padding: 10px;
+	padding: 15px;
 }
 
 #zotero-icon {
-	margin: -1px 0 0 -13px;
+	margin: -2.5px 0 1px -13px;
 }
 
 #quick-format-search[multiline="true"] #zotero-icon {
@@ -94,4 +92,8 @@ panel button:hover:active {
 
 panel button:-moz-focusring {
   box-shadow: 0 0 1px -moz-mac-focusring inset, 0 0 4px 1px -moz-mac-focusring, 0 0 2px 1px -moz-mac-focusring;
+}
+
+body {
+	font-size: 13px;
 }
