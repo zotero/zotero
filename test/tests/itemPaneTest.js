@@ -29,6 +29,22 @@ describe("Item pane", function () {
 		})
 	})
 	
+	describe("Attachment pane", function () {
+		it("should refresh on file rename", function* () {
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var item = yield Zotero.Attachments.importFromFile({
+				file: file
+			});
+			var newName = 'test2.png';
+			yield item.renameAttachmentFile(newName);
+			
+			var itemBox = doc.getElementById('zotero-attachment-box');
+			var label = itemBox._id('fileName');
+			assert.equal(label.value, newName);
+		})
+	})
+	
 	describe("Note pane", function () {
 		it("should refresh on note update", function* () {
 			var item = new Zotero.Item('note');

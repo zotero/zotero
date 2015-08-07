@@ -135,7 +135,35 @@
 			</property>
 			
 			
-			<!-- Private properties -->
+			<!-- Methods -->
+			
+			<constructor>
+			<![CDATA[
+				this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentbox');
+			]]>
+			</constructor>
+			
+			<destructor>
+			<![CDATA[
+				Zotero.Notifier.unregisterObserver(this._notifierID);
+			]]>
+			</destructor>
+			
+			<method name="notify">
+				<parameter name="event"/>
+				<parameter name="type"/>
+				<parameter name="ids"/>
+				<body><![CDATA[
+					if (event != 'modify' || !this.item || !this.item.id) return;
+					for (let i = 0; i < ids.length; i++) {
+						if (ids[i] != this.item.id) {
+							continue;
+						}
+						this.refresh();
+						break;
+					}
+				]]></body>
+			</method>
 			
 			<method name="refresh">
 				<body><![CDATA[

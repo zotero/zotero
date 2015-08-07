@@ -2434,7 +2434,7 @@ Zotero.Item.prototype.fileExistsCached = function () {
  * false		Attachment file not found
  */
 Zotero.Item.prototype.renameAttachmentFile = Zotero.Promise.coroutine(function* (newName, overwrite) {
-	var origPath = yield this.getFilePath();
+	var origPath = yield this.getFilePathAsync();
 	if (!origPath) {
 		Zotero.debug("Attachment file not found in renameAttachmentFile()", 2);
 		return false;
@@ -2442,19 +2442,18 @@ Zotero.Item.prototype.renameAttachmentFile = Zotero.Promise.coroutine(function* 
 	
 	try {
 		var origName = OS.Path.basename(origPath);
-		var origModDate = yield OS.File.stat(origPath).lastModificationDate;
+		var origModDate = (yield OS.File.stat(origPath)).lastModificationDate;
 		
 		newName = Zotero.File.getValidFileName(newName);
 		
-		var destPath = OS.Path.join(OS.Path.dirname(origPath), newName);
-		var destName = OS.Path.basename(destPath);
-		
 		// Ignore if no change
-		//
-		// Note: Just comparing origName to newName isn't reliable
-		if (origFileName === destName) {
+		if (origName === newName) {
+			Zotero.debug("Filename has not changed");
 			return true;
 		}
+		
+		var destPath = OS.Path.join(OS.Path.dirname(origPath), newName);
+		var destName = OS.Path.basename(destPath);
 		
 		// Update mod time and clear hash so the file syncs
 		// TODO: use an integer counter instead of mod time for change detection
@@ -2475,8 +2474,8 @@ Zotero.Item.prototype.renameAttachmentFile = Zotero.Promise.coroutine(function* 
 		yield this.relinkAttachmentFile(destPath);
 		
 		yield Zotero.DB.executeTransaction(function* () {
-			Zotero.Sync.Storage.setSyncedHash(this.id, null, false);
-			Zotero.Sync.Storage.setSyncState(this.id, Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD);
+			yield Zotero.Sync.Storage.setSyncedHash(this.id, null, false);
+			yield Zotero.Sync.Storage.setSyncState(this.id, Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD);
 		}.bind(this));
 		
 		return true;
@@ -2529,7 +2528,7 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 	try {
 		// If selected file isn't in the attachment's storage directory,
 		// copy it in and use that one instead
-		var storageDir = Zotero.Attachments.getStorageDirectory(this.id).path;
+		var storageDir = Zotero.Attachments.getStorageDirectory(this).path;
 		if (this.isImportedAttachment() && OS.Path.dirname(path) != storageDir) {
 			// If file with same name already exists in the storage directory,
 			// move it out of the way
@@ -2560,7 +2559,7 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 	
 	this.attachmentPath = Zotero.Attachments.getPath(Zotero.File.pathToFile(newPath), linkMode);
 	
-	yield this.save({
+	yield this.saveTx({
 		skipDateModifiedUpdate: true,
 		skipClientDateModifiedUpdate: skipItemUpdate
 	});

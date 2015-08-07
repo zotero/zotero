@@ -539,6 +539,28 @@ describe("Zotero.Item", function () {
 		});
 	})
 	
+	describe("#renameAttachmentFile()", function () {
+		it("should rename an attached file", function* () {
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var item = yield Zotero.Attachments.importFromFile({
+				file: file
+			});
+			var newName = 'test2.png';
+			yield item.renameAttachmentFile(newName);
+			assert.equal(item.attachmentFilename, newName);
+			var path = yield item.getFilePathAsync();
+			assert.equal(OS.Path.basename(path), newName)
+			yield OS.File.exists(path);
+			
+			assert.equal(
+				(yield Zotero.Sync.Storage.getSyncState(item.id)),
+				Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD
+			);
+			assert.isNull(yield Zotero.Sync.Storage.getSyncedHash(item.id));
+		})
+	})
+	
 	describe("#setTags", function () {
 		it("should save an array of tags in API JSON format", function* () {
 			var tags = [
