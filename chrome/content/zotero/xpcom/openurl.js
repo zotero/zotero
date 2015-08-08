@@ -203,25 +203,16 @@ Zotero.OpenURL = new function() {
 			}
 		}
 		
-		if(item.creators && item.creators.length) {
-			// encode first author as first and last
-			var firstCreator = item.creators[0];
-			if(item.itemType == "patent") {
-				_mapTag(firstCreator.firstName, "invfirst");
-				_mapTag(firstCreator.lastName, "invlast");
-			} else {
-				if(firstCreator.isInstitution) {
-					_mapTag(firstCreator.lastName, "aucorp");
-				} else {
-					_mapTag(firstCreator.firstName, "aufirst");
-					_mapTag(firstCreator.lastName, "aulast");
-				}
-			}
-			
-			// encode subsequent creators as au
-			for(var i=0; i<item.creators.length; i++) {
-				_mapTag((item.creators[i].firstName ? item.creators[i].firstName+" " : "")+
-					item.creators[i].lastName, (item.itemType == "patent" ? "inventor" : "au"));
+		// only export authors (more general primaryCreators)
+		// other creator types cannot correctly export to COinS
+		var itemTypeID = Zotero.ItemTypes.getID(item.itemType);
+		var primaryCreator = Zotero.CreatorTypes.getName(Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID));
+		for(var i=0; i<item.creators.length; i++) {
+			var creator = item.creators[i];
+			if(creator.creatorType == primaryCreator) {
+				var tag = item.itemType == "patent" ? "inventor" : "au";
+				var value = creator.lastName + (creator.firstName ? ", " + creator.firstName : "");
+				_mapTag(value, tag);
 			}
 		}
 		
