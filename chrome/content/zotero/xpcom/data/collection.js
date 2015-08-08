@@ -326,7 +326,7 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 		}
 		// Remove this from the previous parent's cached collection lists after commit,
 		// if the parent was loaded
-		else if (!isNew && this._previousData.parentKey) {
+		if (!isNew && this._previousData.parentKey) {
 			let parentCollectionID = this.ObjectsClass.getIDFromLibraryAndKey(
 				this.libraryID, this._previousData.parentKey
 			);

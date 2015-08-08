@@ -98,6 +98,29 @@ describe("Zotero.Collection", function() {
 		});
 	})
 	
+	describe("#hasChildCollections()", function () {
+		it("should be false if child made top-level", function* () {
+			var collection1 = yield createDataObject('collection');
+			var collection2 = yield createDataObject('collection', { parentID: collection1.id });
+			
+			assert.isTrue(collection1.hasChildCollections());
+			collection2.parentKey = false;
+			yield collection2.saveTx();
+			assert.isFalse(collection1.hasChildCollections());
+		})
+		
+		it("should be false if child moved to another collection", function* () {
+			var collection1 = yield createDataObject('collection');
+			var collection2 = yield createDataObject('collection', { parentID: collection1.id });
+			var collection3 = yield createDataObject('collection');
+			
+			assert.isTrue(collection1.hasChildCollections());
+			collection2.parentKey = collection3.key;
+			yield collection2.saveTx();
+			assert.isFalse(collection1.hasChildCollections());
+		})
+	})
+	
 	describe("#getChildCollections()", function () {
 		it("should include child collections", function* () {
 			var collection1 = yield createDataObject('collection');
