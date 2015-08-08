@@ -334,10 +334,6 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 				this.ObjectsClass.unregisterChildCollection(parentCollectionID, collectionID);
 			}.bind(this));
 		}
-		
-		if (!isNew) {
-			Zotero.Notifier.queue('move', 'collection', collectionID);
-		}
 	}
 });
 

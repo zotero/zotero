@@ -131,10 +131,12 @@ Zotero.LibraryTreeView.prototype = {
 	
 	/**
 	* Remove a row from the main array, decrement the row count, tell the treebox that the row
-	* count changed, delete the row from the map, and optionally update all rows above it in the map
+	* count changed, update the parent isOpen if necessary, delete the row from the map, and
+	* optionally update all rows above it in the map
 	*/
 	_removeRow: function (row, skipMapUpdate) {
 		var id = this._rows[row].id;
+		var level = this.getLevel(row);
 		
 		var lastRow = row == this.rowCount - 1;
 		if (lastRow && this.selection.isSelected(row)) {
@@ -161,7 +163,19 @@ Zotero.LibraryTreeView.prototype = {
 		
 		this._rows.splice(row, 1);
 		this.rowCount--;
-		this._treebox.rowCountChanged(row + 1, -1);
+		// According to the example on https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeBoxObject#rowCountChanged
+		// this should start at row + 1 ("rowCountChanged(rowIndex+1, -1);"), but that appears to
+		// just be wrong. A negative count indicates removed rows, but the index should still
+		// start at the place where the removals begin, not after it going backward.
+		this._treebox.rowCountChanged(row, -1);
+		// Update isOpen if parent and no siblings
+		if (row != 0
+				&& this.getLevel(row - 1) < level
+				&& this._rows[row]
+				&& this.getLevel(row) != level) {
+			this._rows[row - 1].isOpen = false;
+			this._treebox.invalidateRow(row - 1);
+		}
 		delete this._rowMap[id];
 		if (!skipMapUpdate) {
 			for (let i in this._rowMap) {

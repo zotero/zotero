@@ -181,13 +181,23 @@ var waitForItemsLoad = Zotero.Promise.coroutine(function* (win, collectionRowToS
  * Waits for a single item event. Returns a promise for the item ID(s).
  */
 function waitForItemEvent(event) {
+	return waitForNotifierEvent(event, 'item').then(x => x.ids);
+}
+
+/**
+ * Wait for a single notifier event and return a promise for the data
+ */
+function waitForNotifierEvent(event, type) {
 	var deferred = Zotero.Promise.defer();
 	var notifierID = Zotero.Notifier.registerObserver({notify:function(ev, type, ids, extraData) {
 		if(ev == event) {
 			Zotero.Notifier.unregisterObserver(notifierID);
-			deferred.resolve(ids);
+			deferred.resolve({
+				ids: ids,
+				extraData: extraData
+			});
 		}
-	}}, ["item"]);
+	}}, [type]);
 	return deferred.promise;
 }
 

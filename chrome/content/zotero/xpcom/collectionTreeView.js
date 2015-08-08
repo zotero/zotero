@@ -366,18 +366,14 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 			this.selection.select(selectedIndex)
 		}
 	}
-	else if(action == 'move')
-	{
-		yield this.reload();
-		yield this.restoreSelection(currentTreeRow);
-	}
 	else if (action == 'modify') {
 		let row;
 		let id = ids[0];
+		let rowID = "C" + id;
 		
 		switch (type) {
 		case 'collection':
-			row = this.getRowIndexByID("C" + id);
+			row = this.getRowIndexByID(rowID);
 			if (row !== false) {
 				// TODO: Only move if name changed
 				let reopen = this.isContainerOpen(row);
@@ -386,10 +382,15 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 				}
 				this._removeRow(row);
 				yield this._addSortedRow('collection', id);
-				if (reopen) {
-					yield this.toggleOpenState(row);
+				if (!extraData[id].skipSelect) {
+					yield this.selectByID(currentTreeRow.id);
+					if (reopen) {
+						let newRow = this.getRowIndexByID(rowID);
+						if (!this.isContainerOpen(newRow)) {
+							yield this.toggleOpenState(newRow);
+						}
+					}
 				}
-				yield this.restoreSelection(currentTreeRow);
 			}
 			break;
 		
@@ -399,13 +400,13 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 				// TODO: Only move if name changed
 				this._removeRow(row);
 				yield this._addSortedRow('search', id);
-				yield this.restoreSelection(currentTreeRow);
+				yield this.selectByID(currentTreeRow.id);
 			}
 			break;
 		
 		default:
 			yield this.reload();
-			yield this.restoreSelection(currentTreeRow);
+			yield this.selectByID(currentTreeRow.id);
 			break;
 		}
 	}
@@ -434,7 +435,7 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 			
 			case 'group':
 				yield this.reload();
-				yield this.restoreSelection(currentTreeRow);
+				yield this.selectByID(currentTreeRow.id);
 				break;
 		}
 	}
@@ -451,7 +452,7 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
  * This only adds a row if it would be visible without opening any containers
  *
  * @param {String} objectType
- * @param {Integer} id
+ * @param {Integer} id - collectionID
  * @return {Integer|false} - Index at which the row was added, or false if it wasn't added
  */
 Zotero.CollectionTreeView.prototype._addSortedRow = Zotero.Promise.coroutine(function* (objectType, id) {
@@ -902,13 +903,6 @@ Zotero.CollectionTreeView.prototype.selectByID = Zotero.Promise.coroutine(functi
 	
 	return true;
 });
-
-
-Zotero.CollectionTreeView.prototype.restoreSelection = Zotero.Promise.coroutine(function* (collectionTreeRow) {
-	yield this.selectByID(collectionTreeRow.id);
-	// Swap back in the previous tree row to avoid reselection and subsequent items view refresh
-	this._rows[this.selection.currentIndex] = collectionTreeRow;
-})
 
 
 /**
@@ -1817,7 +1811,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		// Collection drag within a library
 		else {
 			droppedCollection.parentID = targetCollectionID;
-			yield droppedCollection.save();
+			yield droppedCollection.saveTx();
 		}
 	}
 	else if (dataType == 'zotero/item') {
@@ -2302,7 +2296,7 @@ Zotero.CollectionTreeRow.prototype.getItems = Zotero.Promise.coroutine(function*
 });
 
 Zotero.CollectionTreeRow.prototype.getSearchResults = Zotero.Promise.coroutine(function* (asTempTable) {
-	if (Zotero.CollectionTreeCache.lastTreeRow && Zotero.CollectionTreeCache.lastTreeRow !== this) {
+	if (Zotero.CollectionTreeCache.lastTreeRow && Zotero.CollectionTreeCache.lastTreeRow.id !== this.id) {
 		Zotero.CollectionTreeCache.clear();
 	}
 	
@@ -2327,7 +2321,7 @@ Zotero.CollectionTreeRow.prototype.getSearchResults = Zotero.Promise.coroutine(f
  * This accounts for the collection, saved search, quicksearch, tags, etc.
  */
 Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(function* () {
-	if(Zotero.CollectionTreeCache.lastTreeRow !== this) {
+	if (Zotero.CollectionTreeCache.lastTreeRow && Zotero.CollectionTreeCache.lastTreeRow.id !== this.id) {
 		Zotero.CollectionTreeCache.clear();
 	}
 	

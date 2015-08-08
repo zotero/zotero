@@ -1108,7 +1108,7 @@ var ZoteroPane = new function()
 				return;
 			}
 			
-			if (this.itemsView && this.itemsView.collectionTreeRow == collectionTreeRow) {
+			if (this.itemsView && this.itemsView.collectionTreeRow.id == collectionTreeRow.id) {
 				Zotero.debug("Collection selection hasn't changed");
 				return;
 			}
