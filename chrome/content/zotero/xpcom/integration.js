@@ -1768,7 +1768,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field) {
 			io);
 		} else {
 			var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
-				? 'popup' : 'alwaysRaised')
+				? 'popup' : 'alwaysRaised')+',resizable=false';
 			Zotero.Integration.displayDialog(me._doc,
 			'chrome://zotero/content/integration/quickFormat.xul', mode, io);
 		}
