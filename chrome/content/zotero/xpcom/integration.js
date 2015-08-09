@@ -2824,7 +2824,7 @@ Zotero.Integration.Session.prototype.previewCitation = function(citation) {
 	var citationsPre, citationsPost, citationIndices;
 	[citationsPre, citationsPost, citationIndices] = this._getPrePost(citation.properties.zoteroIndex);
 	try {
-		return this.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
+		return this.style.previewCitationCluster(citation, citationsPre, citationsPost, "html");
 	} catch(e) {
 		throw e;
 	}
