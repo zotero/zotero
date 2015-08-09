@@ -111,4 +111,18 @@ describe("Zotero.Attachments", function() {
 			// Should create a group library for use by all tests
 		})
 	})
+	
+	describe("#getTotalFileSize", function () {
+		it("should return the size for a single-file attachment", function* () {
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			
+			// Create attachment and compare content
+			var item = yield Zotero.Attachments.importFromFile({
+				file: file
+			});
+			
+			assert.equal((yield Zotero.Attachments.getTotalFileSize(item)), file.fileSize);
+		})
+	})
 })

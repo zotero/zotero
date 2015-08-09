@@ -1050,15 +1050,13 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * @param	{Zotero.Item}	item
-	 * @param	{Boolean}		[skipHidden=FALSE]	Don't count hidden files
-	 * @return	{Integer}							Total file size in bytes
+	 * @param {Zotero.Item} item
+	 * @param {Boolean} [skipHidden=true] - Don't count hidden files
+	 * @return {Promise<Integer>} - Promise for the total file size in bytes
 	 */
-	this.getTotalFileSize = function (item, skipHidden) {
-		var funcName = "Zotero.Attachments.getTotalFileSize()";
-		
+	this.getTotalFileSize = Zotero.Promise.coroutine(function* (item, skipHidden = true) {
 		if (!item.isAttachment()) {
-			throw ("Item is not an attachment in " + funcName);
+			throw new Error("Item is not an attachment");
 		}
 		
 		var linkMode = item.attachmentLinkMode;
@@ -1069,31 +1067,37 @@ Zotero.Attachments = new function(){
 				break;
 			
 			default:
-				throw ("Invalid attachment link mode in " + funcName);
+				throw new Error("Invalid attachment link mode");
 		}
 		
-		var file = item.getFile();
-		if (!file) {
-			throw ("File not found in " + funcName);
+		var path = yield item.getFilePathAsync();
+		if (!path) {
+			throw new Error("File not found");
 		}
 		
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-			return item.fileSize;
+			return (yield OS.File.stat(path)).size;
 		}
 		
-		var parentDir = file.parent;
-		var files = parentDir.directoryEntries;
 		var size = 0;
-		while (files.hasMoreElements()) {
-			file = files.getNext();
-			file.QueryInterface(Components.interfaces.nsIFile);
-			if (skipHidden && file.leafName.indexOf('.') == 0) {
-				continue;
-			}
-			size += file.fileSize;
+		var parent = OS.Path.dirname(path);
+		let iterator = new OS.File.DirectoryIterator(parent);
+		try {
+			yield iterator.forEach(function (entry) {
+				if (skipHidden && entry.name.startsWith('.')) {
+					return;
+				}
+				return OS.File.stat(entry.path)
+				.then(function (info) {
+					size += info.size;
+				});
+			})
+		}
+		finally {
+			iterator.close();
 		}
 		return size;
-	}
+	});
 	
 	
 	/**
