@@ -1001,18 +1001,9 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	/**
-	 * Returns the number of files in the attachment directory
-	 *
-	 * Only counts if MIME type is text/html
-	 *
-	 * @param	{Zotero.Item}	item	Attachment item
-	 */
-	this.getNumFiles = function (item) {
-		var funcName = "Zotero.Attachments.getNumFiles()";
-		
+	this.hasMultipleFiles = Zotero.Promise.coroutine(function* (item) {
 		if (!item.isAttachment()) {
-			throw ("Item is not an attachment in " + funcName);
+			throw new Error("Item is not an attachment");
 		}
 		
 		var linkMode = item.attachmentLinkMode;
@@ -1022,31 +1013,90 @@ Zotero.Attachments = new function(){
 				break;
 			
 			default:
-				throw ("Invalid attachment link mode in " + funcName);
+				throw new Error("Invalid attachment link mode");
+		}
+		
+		if (item.attachmentContentType != 'text/html') {
+			return false;
+		}
+		
+		var path = yield item.getFilePathAsync();
+		if (!path) {
+			throw new Error("File not found");
+		}
+		
+		var numFiles = 0;
+		var parent = OS.Path.dirname(path);
+		var iterator = new OS.File.DirectoryIterator(parent);
+		try {
+			while (true) {
+				let entry = yield iterator.next();
+				if (entry.name.startsWith('.')) {
+					continue;
+				}
+				numFiles++;
+				if (numFiles > 1) {
+					break;
+				}
+			}
+		}
+		catch (e) {
+			iterator.close();
+			if (e != StopIteration) {
+				throw e;
+			}
+		}
+		return numFiles > 1;
+	});
+	
+	
+	/**
+	 * Returns the number of files in the attachment directory
+	 *
+	 * Only counts if MIME type is text/html
+	 *
+	 * @param	{Zotero.Item}	item	Attachment item
+	 */
+	this.getNumFiles = Zotero.Promise.coroutine(function* (item) {
+		if (!item.isAttachment()) {
+			throw new Error("Item is not an attachment");
+		}
+		
+		var linkMode = item.attachmentLinkMode;
+		switch (linkMode) {
+			case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
+			case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
+				break;
+			
+			default:
+				throw new Error("Invalid attachment link mode");
 		}
 		
 		if (item.attachmentContentType != 'text/html') {
 			return 1;
 		}
 		
-		var file = item.getFile();
-		if (!file) {
-			throw ("File not found in " + funcName);
+		var path = yield item.getFilePathAsync();
+		if (!path) {
+			throw new Error("File not found");
 		}
 		
 		var numFiles = 0;
-		var parentDir = file.parent;
-		var files = parentDir.directoryEntries;
-		while (files.hasMoreElements()) {
-			file = files.getNext();
-			file.QueryInterface(Components.interfaces.nsIFile);
-			if (file.leafName.indexOf('.') == 0) {
-				continue;
-			}
-			numFiles++;
+		var parent = OS.Path.dirname(path);
+		var iterator = new OS.File.DirectoryIterator(parent);
+		try {
+			yield iterator.forEach(function (entry) {
+				if (entry.name.startsWith('.')) {
+					return;
+				}
+				numFiles++;
+			})
+		}
+		finally {
+			iterator.close();
 		}
 		return numFiles;
-	}
+	});
 	
 	
 	/**

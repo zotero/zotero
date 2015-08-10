@@ -125,4 +125,49 @@ describe("Zotero.Attachments", function() {
 			assert.equal((yield Zotero.Attachments.getTotalFileSize(item)), file.fileSize);
 		})
 	})
+	
+	describe("#hasMultipleFiles and #getNumFiles()", function () {
+		it("should return false and 1 for a single file", function* () {
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			
+			// Create attachment and compare content
+			var item = yield Zotero.Attachments.importFromFile({
+				file: file
+			});
+			
+			assert.isFalse(yield Zotero.Attachments.hasMultipleFiles(item));
+			assert.equal((yield Zotero.Attachments.getNumFiles(item)), 1);
+		})
+		
+		it("should return false and 1 for single HTML file with hidden file", function* () {
+			var file = getTestDataDirectory();
+			file.append('test.html');
+			
+			// Create attachment and compare content
+			var item = yield Zotero.Attachments.importFromFile({
+				file: file
+			});
+			var path = OS.Path.join(OS.Path.dirname(item.getFilePath()), '.zotero-ft-cache');
+			yield Zotero.File.putContentsAsync(path, "");
+			
+			assert.isFalse(yield Zotero.Attachments.hasMultipleFiles(item));
+			assert.equal((yield Zotero.Attachments.getNumFiles(item)), 1);
+		})
+		
+		it("should return true and 2 for multiple files", function* () {
+			var file = getTestDataDirectory();
+			file.append('test.html');
+			
+			// Create attachment and compare content
+			var item = yield Zotero.Attachments.importFromFile({
+				file: file
+			});
+			var path = OS.Path.join(OS.Path.dirname(item.getFilePath()), 'test.png');
+			yield Zotero.File.putContentsAsync(path, "");
+			
+			assert.isTrue(yield Zotero.Attachments.hasMultipleFiles(item));
+			assert.equal((yield Zotero.Attachments.getNumFiles(item)), 2);
+		})
+	})
 })
