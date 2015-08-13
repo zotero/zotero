@@ -227,7 +227,7 @@ var Zotero_QuickFormat = new function () {
 			var prevNode = node.previousSibling;
 			if(prevNode && prevNode.citationItem && prevNode.citationItem.locator) {
 				prevNode.citationItem.locator += str;
-				prevNode.value = _buildBubbleString(prevNode.citationItem);
+				prevNode.textContent = _buildBubbleString(prevNode.citationItem);
 				node.nodeValue = "";
 				_clearEntryList();
 				return;
@@ -244,7 +244,7 @@ var Zotero_QuickFormat = new function () {
 					var prevNode = node.previousSibling;
 					if(prevNode && prevNode.citationItem) {
 						prevNode.citationItem.locator = m[2];
-						prevNode.value = _buildBubbleString(prevNode.citationItem);
+						prevNode.textContent = _buildBubbleString(prevNode.citationItem);
 						node.nodeValue = "";
 						_clearEntryList();
 						return;
@@ -1237,7 +1237,7 @@ var Zotero_QuickFormat = new function () {
 		} else {
 			delete panelRefersToBubble.citationItem["suppress-author"];
 		}
-		panelRefersToBubble.value = _buildBubbleString(panelRefersToBubble.citationItem);
+		panelRefersToBubble.textContent = _buildBubbleString(panelRefersToBubble.citationItem);
 	};
 	
 	/**
