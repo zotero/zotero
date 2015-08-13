@@ -239,3 +239,7 @@ richlistitem[selected="true"] {
 panel button .button-text {
 	margin: 0 !important;
 }
+
+#quick-format-dialog {
+	width: 600px;
+}

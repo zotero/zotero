@@ -758,7 +758,7 @@ var Zotero_QuickFormat = new function () {
 		if(qfe.scrollHeight > 30) {
 			qfe.setAttribute("multiline", true);
 			qfs.setAttribute("multiline", true);
-			qfs.style.height = (4+qfe.scrollHeight)+"px";
+			qfs.style.height = ((Zotero.isMac ? 6 : 4)+qfe.scrollHeight)+"px";
 			window.sizeToContent();
 		} else {
 			delete qfs.style.height;
