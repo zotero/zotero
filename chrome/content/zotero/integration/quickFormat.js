@@ -1084,7 +1084,7 @@ var Zotero_QuickFormat = new function () {
 				selection.addRange(nodeRange);
 			}
 
-		} else if(keyCode === event.DOM_VK_UP) {
+		} else if(keyCode === event.DOM_VK_UP && referencePanel.state === "open") {
 			var selectedItem = referenceBox.selectedItem;
 
 			var previousSibling;
@@ -1104,9 +1104,9 @@ var Zotero_QuickFormat = new function () {
 					visibleItem = visibleItem.previousSibling;
 				}
 				referenceBox.ensureElementIsVisible(visibleItem);
-				event.preventDefault();
 			};
-		} else if(keyCode === event.DOM_VK_DOWN) {
+			event.preventDefault();
+		} else if(keyCode === event.DOM_VK_DOWN && referencePanel.state === "open") {
 			if((Zotero.isMac ? event.metaKey : event.ctrlKey)) {
 				// If meta key is held down, show the citation properties panel
 				var bubble = _getSelectedBubble();
@@ -1126,8 +1126,8 @@ var Zotero_QuickFormat = new function () {
 				if(nextSibling){
 					referenceBox.selectedItem = nextSibling;
 					referenceBox.ensureElementIsVisible(nextSibling);
-					event.preventDefault();
 				};
+				event.preventDefault();
 			}
 		} else {
 			_resetSearchTimer();
