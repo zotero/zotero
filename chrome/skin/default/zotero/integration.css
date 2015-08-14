@@ -207,11 +207,6 @@ richlistitem[selected="true"] {
 	margin: 0;
 }
 
-#zotero-icon .toolbarbutton-menu-dropmarker {
-	margin-left: 0;
-	padding-left: 0;
-}
-
 #citation-properties #suppress-author {
 	-moz-user-focus: normal;
 }
