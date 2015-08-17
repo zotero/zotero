@@ -1106,14 +1106,14 @@ var Zotero_QuickFormat = new function () {
 				referenceBox.ensureElementIsVisible(visibleItem);
 			};
 			event.preventDefault();
-		} else if(keyCode === event.DOM_VK_DOWN && referencePanel.state === "open") {
+		} else if(keyCode === event.DOM_VK_DOWN) {
 			if((Zotero.isMac ? event.metaKey : event.ctrlKey)) {
 				// If meta key is held down, show the citation properties panel
 				var bubble = _getSelectedBubble();
 
 				if(bubble) _showCitationProperties(bubble);
 				event.preventDefault();
-			} else {
+			} else if (referencePanel.state === "open") {
 				var selectedItem = referenceBox.selectedItem;
 				var nextSibling;
 				
