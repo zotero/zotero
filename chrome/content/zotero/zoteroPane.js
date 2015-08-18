@@ -1983,7 +1983,9 @@ var ZoteroPane = new function()
 			Zotero.debug("Told to select in library; switching to library");
 			this.collectionsView.selectLibrary(item.libraryID);
 		}
-		
+		// Focus the items column before selecting the item.
+		document.getElementById('zotero-items-tree').focus();
+
 		var selected = this.itemsView.selectItem(itemID, expand);
 		if (!selected) {
 			if (item.deleted) {
