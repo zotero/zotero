@@ -64,7 +64,7 @@
 <!ENTITY zotero.items.dateModified_column "Módosítás dátuma">
 <!ENTITY zotero.items.extra_column "Extra">
 <!ENTITY zotero.items.archive_column "Archívum">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.archiveLocation_column "Pontos lelőhely">
 <!ENTITY zotero.items.place_column "Hely">
 <!ENTITY zotero.items.volume_column "Kötet">
 <!ENTITY zotero.items.edition_column "Kiadás">
@@ -125,8 +125,8 @@
 <!ENTITY zotero.item.textTransform "Szöveg átalakítása">
 <!ENTITY zotero.item.textTransform.titlecase "Szókezdő">
 <!ENTITY zotero.item.textTransform.sentencecase "Mondatkezdő">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
-<!ENTITY zotero.item.viewOnline "View Online">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Keresztnév/Vezetéknév felcserélése">
+<!ENTITY zotero.item.viewOnline "Online megtekintés">
 <!ENTITY zotero.item.copyAsURL "Másolás URL-ként">
 
 <!ENTITY zotero.toolbar.newNote "Új jegyzet">
