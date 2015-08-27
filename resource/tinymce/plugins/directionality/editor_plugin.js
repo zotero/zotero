@@ -1,1 +1,85 @@
-(function(){tinymce.create("tinymce.plugins.Directionality",{init:function(b,c){var d=this;d.editor=b;function a(e){var h=b.dom,g,f=b.selection.getSelectedBlocks();if(f.length){g=h.getAttrib(f[0],"dir");tinymce.each(f,function(i){if(!h.getParent(i.parentNode,"*[dir='"+e+"']",h.getRoot())){if(g!=e){h.setAttrib(i,"dir",e)}else{h.setAttrib(i,"dir",null)}}});b.nodeChanged()}}b.addCommand("mceDirectionLTR",function(){a("ltr")});b.addCommand("mceDirectionRTL",function(){a("rtl")});b.addButton("ltr",{title:"directionality.ltr_desc",cmd:"mceDirectionLTR"});b.addButton("rtl",{title:"directionality.rtl_desc",cmd:"mceDirectionRTL"});b.onNodeChange.add(d._nodeChange,d)},getInfo:function(){return{longname:"Directionality",author:"Moxiecode Systems AB",authorurl:"http://tinymce.moxiecode.com",infourl:"http://wiki.moxiecode.com/index.php/TinyMCE:Plugins/directionality",version:tinymce.majorVersion+"."+tinymce.minorVersion}},_nodeChange:function(b,a,e){var d=b.dom,c;e=d.getParent(e,d.isBlock);if(!e){a.setDisabled("ltr",1);a.setDisabled("rtl",1);return}c=d.getAttrib(e,"dir");a.setActive("ltr",c=="ltr");a.setDisabled("ltr",0);a.setActive("rtl",c=="rtl");a.setDisabled("rtl",0)}});tinymce.PluginManager.add("directionality",tinymce.plugins.Directionality)})();
+/**
+ * editor_plugin_src.js
+ *
+ * Copyright 2009, Moxiecode Systems AB
+ * Released under LGPL License.
+ *
+ * License: http://tinymce.moxiecode.com/license
+ * Contributing: http://tinymce.moxiecode.com/contributing
+ */
+
+(function() {
+	tinymce.create('tinymce.plugins.Directionality', {
+		init : function(ed, url) {
+			var t = this;
+
+			t.editor = ed;
+
+			function setDir(dir) {
+				var dom = ed.dom, curDir, blocks = ed.selection.getSelectedBlocks();
+
+				if (blocks.length) {
+					curDir = dom.getAttrib(blocks[0], "dir");
+
+					tinymce.each(blocks, function(block) {
+						// Add dir to block if the parent block doesn't already have that dir
+						if (!dom.getParent(block.parentNode, "*[dir='" + dir + "']", dom.getRoot())) {
+							if (curDir != dir) {
+								dom.setAttrib(block, "dir", dir);
+							} else {
+								dom.setAttrib(block, "dir", null);
+							}
+						}
+					});
+
+					ed.nodeChanged();
+				}
+			}
+
+			ed.addCommand('mceDirectionLTR', function() {
+				setDir("ltr");
+			});
+
+			ed.addCommand('mceDirectionRTL', function() {
+				setDir("rtl");
+			});
+
+			ed.addButton('ltr', {title : 'directionality.ltr_desc', cmd : 'mceDirectionLTR'});
+			ed.addButton('rtl', {title : 'directionality.rtl_desc', cmd : 'mceDirectionRTL'});
+
+			ed.onNodeChange.add(t._nodeChange, t);
+		},
+
+		getInfo : function() {
+			return {
+				longname : 'Directionality',
+				author : 'Moxiecode Systems AB',
+				authorurl : 'http://tinymce.moxiecode.com',
+				infourl : 'http://wiki.moxiecode.com/index.php/TinyMCE:Plugins/directionality',
+				version : tinymce.majorVersion + "." + tinymce.minorVersion
+			};
+		},
+
+		// Private methods
+
+		_nodeChange : function(ed, cm, n) {
+			var dom = ed.dom, dir;
+
+			n = dom.getParent(n, dom.isBlock);
+			if (!n) {
+				cm.setDisabled('ltr', 1);
+				cm.setDisabled('rtl', 1);
+				return;
+			}
+
+			dir = dom.getAttrib(n, 'dir');
+			cm.setActive('ltr', dir == "ltr");
+			cm.setDisabled('ltr', 0);
+			cm.setActive('rtl', dir == "rtl");
+			cm.setDisabled('rtl', 0);
+		}
+	});
+
+	// Register plugin
+	tinymce.PluginManager.add('directionality', tinymce.plugins.Directionality);
+})();
