@@ -468,10 +468,13 @@ Zotero.Translate.ItemSaver.prototype = {
 								doc = (new DOMParser()).parseFromString(result, "text/html");
 							} catch(e) {}
 							
-							// If DOMParser fails, use document.implementation.createHTMLDocument
+							// If DOMParser fails, use document.implementation.createHTMLDocument,
+							// as documented at https://developer.mozilla.org/en-US/docs/Web/API/DOMParser
 							if(!doc) {
 								doc = document.implementation.createHTMLDocument("");
 								var docEl = doc.documentElement;
+								// AMO reviewer: This code is not run in Firefox, and the document
+								// is never rendered anyway
 								docEl.innerHTML = result;
 								if(docEl.children.length === 1 && docEl.firstElementChild === "html") {
 									doc.replaceChild(docEl.firstElementChild, docEl);
