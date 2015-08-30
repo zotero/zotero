@@ -1885,7 +1885,7 @@
 					// a refresh), close it manually
 					if (textbox && textbox.parentNode) {
 						elem = this.createValueElement(
-							this.item.getField(fieldName),
+							newVal,
 							fieldName,
 							tabindex
 						);
