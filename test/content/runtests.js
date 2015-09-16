@@ -95,7 +95,7 @@ function Reporter(runner) {
 
 	runner.on('suite', function(suite){
 		++indents;
-		dump(indent()+suite.title+"\n");
+		dump("\r"+indent()+suite.title+"\n");
 	});
 
 	runner.on('suite end', function(suite){
@@ -117,28 +117,29 @@ function Reporter(runner) {
 	});
 
 	runner.on('fail', function(test, err){
-		// Strip Chai lines from stack trace
-		err.stack = err.stack.replace(/.+zotero-unit\/chai.+\n/g, "");
+		// Remove internal code references
+		err.stack = err.stack.replace(/.+(?:zotero-unit\/|\/Task\.jsm|\/bluebird\.js).+\n?/g, "");
+		
 		// Strip "From previous event:" block if it's all internals
-		var re = /\s*From previous event:(.|\n)+/;
-		var matches = re.exec(err.stack);
-		if (matches) {
-			err.stack = err.stack.substr(0, matches.index);
-			var previous = matches[0].split(/\n/)
-				.filter(line => line.indexOf('zotero-unit/') == -1).join('\n');
-			if (previous.trim() != "From previous event:") {
-				err.stack += previous;
-			}
+		if (err.stack.indexOf('From previous event:') != -1) {
+			err.stack = err.stack
+				// Drop first line, because it contains the error message
+				.replace(/^.+\n/, '')
+				// Drop "From previous event:" labels for empty blocks
+				.replace(/.*From previous event:.*(?:\n(?=\s*From previous event:)|\s*$)/g, '');
 		}
-		err.stack += "\n";
+		
+		// Make sure there's a blank line after all stack traces
+		err.stack = err.stack.replace(/\s*$/, '\n\n');
 		
 		failed++;
-		dump("\r" + indent()
+		let indentStr = indent();
+		dump("\r" + indentStr
 			// Dark red X for errors
 			+ "\033[31;40m" + Mocha.reporters.Base.symbols.err + "\033[0m"
 			+ " " + test.title + "\n"
-			+ indent() + "  " + err.toString() + " at\n"
-			+ indent() + "    " + err.stack.replace("\n", "\n" + indent() + "    ", "g"));
+			+ indentStr + "  " + err.toString() + " at\n"
+			+ err.stack.replace(/^/gm, indentStr + "    "));
 		
 		if (ZoteroUnit.bail) {
 			aborted = true;
