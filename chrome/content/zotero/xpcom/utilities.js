@@ -1346,7 +1346,7 @@ Zotero.Utilities = {
 		//Special handling for Error or Exception
 		var isException = Zotero.isFx && !Zotero.isBookmarklet && obj instanceof Components.interfaces.nsIException;
 		var isError = obj instanceof Error;
-		if (!isException && !isError && obj.constructor && obj.stack) {
+		if (!isException && !isError && constructor in obj && stack in obj) {
 			switch (obj.constructor.name) {
 				case 'Error':
 				case 'EvalError':
