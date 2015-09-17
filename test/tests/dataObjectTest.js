@@ -6,13 +6,14 @@ describe("Zotero.DataObject", function() {
 	describe("#key", function () {
 		it("shouldn't update .loaded on get if unset", function* () {
 			for (let type of types) {
+				let param;
 				if (type == 'item') {
-					var param = 'book';
+					param = 'book';
 				}
 				let obj = new Zotero[Zotero.Utilities.capitalize(type)](param);
 				obj.libraryID = Zotero.Libraries.userLibraryID;
-				assert.isNull(obj.key);
-				assert.isFalse(obj._loaded.primaryData);
+				assert.isNull(obj.key, 'key is null for ' + type);
+				assert.isFalse(obj._loaded.primaryData, 'primary data not loaded for ' + type);
 				obj.key = Zotero.DataObjectUtilities.generateKey();
 			}
 		})
