@@ -148,9 +148,11 @@ describe("Zotero.Sync.Runner", function () {
 	//
 	// Tests
 	//
-	before(function () {
+	let win;
+	before(function* () {
 		userLibraryID = Zotero.Libraries.userLibraryID;
 		publicationsLibraryID = Zotero.Libraries.publicationsLibraryID;
+		win = yield loadBrowserWindow();
 	})
 	beforeEach(function* () {
 		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
@@ -169,6 +171,9 @@ describe("Zotero.Sync.Runner", function () {
 	})
 	after(function () {
 		Zotero.HTTP.mock = null;
+		if (win) {
+			win.close();
+		}
 	})
 	
 	describe("#checkAccess()", function () {
