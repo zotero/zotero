@@ -318,14 +318,17 @@ Zotero.Fulltext = new function(){
 			if (version.startsWith('3.02')) break;
 			
 			var script = Zotero.getZoteroDirectory();
-			script.append('pdfinfo.' + _getScriptExtension())
-			// The redirection script is necessary to run pdfinfo
-			if (!script.exists()) {
-				Zotero.debug(script.leafName + " not found -- PDF statistics disabled");
-				return false;
+			// TEMP: disabled on Win
+			if (!Zotero.isWin) {
+				script.append('pdfinfo.' + _getScriptExtension())
+				// The redirection script is necessary to run pdfinfo
+				if (!script.exists()) {
+					Zotero.debug(script.leafName + " not found -- PDF statistics disabled");
+					return false;
+				}
+				Zotero.debug(toolName + " redirection script registered");
+				_pdfInfoScript = script;
 			}
-			Zotero.debug(toolName + " redirection script registered");
-			_pdfInfoScript = script;
 			break;
 		}
 		
@@ -356,8 +359,6 @@ Zotero.Fulltext = new function(){
 		Zotero.debug("Uninstalling PDF tools");
 		
 		var dataDir = Zotero.getZoteroDirectory().path;
-		yield Zotero.File.removeIfExists(OS.Path.join(dataDir, _pdfConverterFileName));
-		yield Zotero.File.removeIfExists(OS.Path.join(dataDir, _pdfInfoFileName));
 		if (_pdfConverter) {
 			yield Zotero.File.removeIfExists(_pdfConverter.path);
 			yield Zotero.File.removeIfExists(_pdfConverter.path + ".version");
@@ -371,7 +372,6 @@ Zotero.Fulltext = new function(){
 		
 		_pdfConverter = null;
 		_pdfInfo = null;
-		_pdfInfoScript = null;
 		_pdfInfoScript = null;
 	});
 	

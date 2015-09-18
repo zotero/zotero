@@ -1,6 +1,8 @@
 "use strict";
 
 describe("Zotero.Sync.Runner", function () {
+	Components.utils.import("resource://zotero/config.js");
+	
 	var apiKey = Zotero.Utilities.randomString(24);
 	var baseURL = "http://local.zotero/";
 	var userLibraryID, publicationsLibraryID, runner, caller, server, client, stub, spy;

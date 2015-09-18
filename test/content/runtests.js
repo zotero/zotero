@@ -245,21 +245,18 @@ if(run) {
 			//
 			// To reset, delete test/tests/data/pdf/ directory
 			var cachePDFTools = Zotero.Promise.coroutine(function* () {
-				Components.utils.import("resource://zotero/config.js");
-				var baseURL = ZOTERO_CONFIG.PDF_TOOLS_URL;
-				
 				var path = OS.Path.join(getTestDataDirectory().path, 'pdf');
 				yield OS.File.makeDir(path, { ignoreExisting: true });
 				
+				var baseURL = Zotero.Fulltext.pdfToolsDownloadBaseURL;
+				// Point full-text code to the cache directory, so downloads come from there
+				Zotero.Fulltext.pdfToolsDownloadBaseURL = OS.Path.toFileURI(path) + "/";
+				
 				// Get latest tools version for the current platform
-				var latestPath = OS.Path.join(path, "latest.json");
-				var xmlhttp = yield Zotero.HTTP.request("GET", baseURL + "latest.json");
-				var json = xmlhttp.responseText;
-				yield Zotero.File.putContentsAsync(latestPath, json);
-				json = JSON.parse(json);
+				yield Zotero.File.download(baseURL + 'latest.json', OS.Path.join(path, 'latest.json'));
 				
 				var platform = Zotero.platform.replace(/\s/g, '-');
-				var version = json[platform] || json['default'];
+				var version = yield Zotero.Fulltext.getLatestPDFToolsVersion();
 				
 				// Create version directory (e.g., data/pdf/3.04) and download tools to it if
 				// they don't exist
@@ -270,14 +267,11 @@ if(run) {
 				if (!(yield OS.File.exists(execPath))) {
 					yield Zotero.File.download(baseURL + version + "/" + fileName, execPath);
 				}
-				fileName = "pdftotext-" + platform;
+				fileName = "pdftotext-" + platform + (Zotero.isWin ? ".exe" : "");;
 				execPath = OS.Path.join(path, version, fileName);
 				if (!(yield OS.File.exists(execPath))) {
 					yield Zotero.File.download(baseURL + version + "/" + fileName, execPath);
 				}
-				
-				// Point full-text code to the cache directory, so downloads come from there
-				Zotero.Fulltext.pdfToolsDownloadBaseURL = OS.Path.toFileURI(path) + "/";
 			});
 			
 			try {

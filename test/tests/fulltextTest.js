@@ -1,7 +1,7 @@
 describe("Zotero.Fulltext", function () {
 	describe("#downloadPDFTool()", function () {
 		it("should install the PDF tools", function* () {
-			var version = "3.04";
+			var version = Zotero.isWin ? '3.02a' : '3.04';
 			var dataDir = Zotero.getZoteroDirectory().path;
 			var execFileName = Zotero.Fulltext.pdfInfoFileName;
 			var execPath = OS.Path.join(dataDir, execFileName);
@@ -37,16 +37,22 @@ describe("Zotero.Fulltext", function () {
 				(yield Zotero.File.getBinaryContentsAsync(cacheExecPath)),
 				(yield Zotero.File.getBinaryContentsAsync(execPath))
 			);
-			assert.equal((yield OS.File.stat(execPath)).unixMode, 0o755);
+			if (!Zotero.isWin) {
+				assert.equal((yield OS.File.stat(execPath)).unixMode, 0o755);
+			}
 			assert.equal(
 				(yield Zotero.File.getContentsAsync(versionPath)),
 				version
 			);
-			assert.equal(
-				(yield Zotero.File.getContentsAsync(scriptPath)),
-				scriptContents
-			);
-			assert.equal((yield OS.File.stat(scriptPath)).unixMode, 0o755);
+			
+			//Temp: disabled on Windows
+			if (!Zotero.isWin) {
+				assert.equal(
+					(yield Zotero.File.getContentsAsync(scriptPath)),
+					scriptContents
+				);
+				assert.equal((yield OS.File.stat(scriptPath)).unixMode, 0o755);
+			}
 			
 			yield Zotero.Fulltext.uninstallPDFTools();
 			assert.isFalse(Zotero.Fulltext.pdfInfoIsRegistered());
