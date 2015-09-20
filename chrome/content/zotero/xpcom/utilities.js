@@ -914,6 +914,8 @@ Zotero.Utilities = {
 	},
 	
 	"capitalize": function (str) {
+		if (typeof str != 'string') throw new Error("Argument must be a string");
+		if (!str) return str; // Empty string
 		return str[0].toUpperCase() + str.substr(1);
 	},
 	
