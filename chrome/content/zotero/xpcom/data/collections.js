@@ -53,6 +53,7 @@ Zotero.Collections = function() {
 	this._primaryDataSQLFrom = "FROM collections O "
 			+ "LEFT JOIN collections CP ON (O.parentCollectionID=CP.collectionID)";
 	
+	this._relationsTable = "collectionRelations";
 	
 	/**
 	 * Get collections within a library

@@ -1,13 +1,54 @@
 "use strict";
 
 describe("Zotero.Group", function () {
+	describe("#constructor()", function() {
+		it("should accept required parameters", function* () {
+			let group = new Zotero.Group();
+			yield assert.isRejected(group.saveTx(), "fails without required parameters");
+			
+			let groupID = Zotero.Utilities.rand(10000, 1000000);
+			let groupName = "Test " + Zotero.Utilities.randomString();
+			let groupVersion = Zotero.Utilities.rand(10000, 1000000);
+			group = new Zotero.Group({
+				groupID: groupID,
+				name: groupName,
+				description: "",
+				version:groupVersion,
+				editable: true,
+				filesEditable: true
+			});
+			yield assert.isFulfilled(group.saveTx(), "saves given required parameters");
+			
+			assert.isTrue(Zotero.Libraries.exists(group.libraryID));
+			assert.equal(group, Zotero.Groups.get(group.groupID));
+			
+			assert.equal(group.name, groupName);
+			assert.equal(group.groupID, groupID);
+			assert.equal(group.version, groupVersion);
+		});
+	});
+	
+	describe("#version", function() {
+		it("should be settable to increasing values", function() {
+			let library = new Zotero.Group();
+			assert.throws(() => library.version = -1);
+			assert.throws(() => library.version = "a");
+			assert.throws(() => library.version = 1.1);
+			assert.doesNotThrow(() => library.version = 0);
+			assert.doesNotThrow(() => library.version = 5);
+		});
+		it("should not be possible to decrement", function() {
+			let library = new Zotero.Group();
+			library.version = 5;
+			assert.throws(() => library.version = 0);
+		});
+	});
+	
 	describe("#erase()", function () {
 		it("should unregister group", function* () {
 			var group = yield createGroup();
 			var id = group.id;
-			yield Zotero.DB.executeTransaction(function* () {
-				return group.erase()
-			}.bind(this));
+			yield group.eraseTx();
 			assert.isFalse(Zotero.Groups.exists(id));
 		})
 		

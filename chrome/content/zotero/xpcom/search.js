@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Search = function() {
+Zotero.Search = function(params = {}) {
 	Zotero.Search._super.apply(this);
 	
 	this._name = null;
@@ -35,6 +35,8 @@ Zotero.Search = function() {
 	this._maxSearchConditionID = -1;
 	this._conditions = {};
 	this._hasPrimaryConditions = false;
+	
+	Zotero.Utilities.assignProps(this, params, ['name', 'libraryID']);
 }
 
 Zotero.extendClass(Zotero.DataObject, Zotero.Search);
@@ -85,6 +87,9 @@ Zotero.defineProperty(Zotero.Search.prototype, 'synced', {
 });
 Zotero.defineProperty(Zotero.Search.prototype, 'conditions', {
 	get: function() this.getConditions()
+});
+Zotero.defineProperty(Zotero.Search.prototype, '_canHaveParent', {
+	value: false
 });
 
 
@@ -205,6 +210,9 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 
 Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
 	if (env.isNew) {
+		// Update library searches status
+		yield Zotero.Libraries.get(this.libraryID).updateSearches();
+		
 		Zotero.Notifier.queue('add', 'search', this.id, env.notifierData);
 	}
 	else if (!env.options.skipNotifier) {
@@ -257,6 +265,13 @@ Zotero.Search.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	
 	var sql = "DELETE FROM savedSearches WHERE savedSearchID=?";
 	yield Zotero.DB.queryAsync(sql, this.id);
+});
+
+Zotero.Search.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env) {
+	yield Zotero.Search._super.prototype._finalizeErase.call(this, env);
+	
+	// Update library searches status
+	yield Zotero.Libraries.get(this.libraryID).updateSearches();
 });
 
 

@@ -2,6 +2,7 @@ describe("Zotero.Items", function () {
 	var win, collectionsView, zp;
 	
 	before(function* () {
+		this.timeout(10000);
 		win = yield loadZoteroPane();
 		collectionsView = win.ZoteroPane.collectionsView;
 		zp = win.ZoteroPane;
@@ -114,4 +115,28 @@ describe("Zotero.Items", function () {
 			//assert.equal(zp.itemsView.rowCount, 0)
 		})
 	})
+	
+	describe("#getAsync()", function() {
+		it("should return Zotero.Item for item ID", function* () {
+			let item = new Zotero.Item('journalArticle');
+			let id = yield item.saveTx();
+			item = yield Zotero.Items.getAsync(id);
+			assert.notOk(item.isFeedItem);
+			assert.instanceOf(item, Zotero.Item);
+			assert.notInstanceOf(item, Zotero.FeedItem);
+		});
+		it("should return Zotero.FeedItem for feed item ID", function* () {
+			let feed = new Zotero.Feed({ name: 'foo', url: 'http://www.' + Zotero.randomString() + '.com' });
+			yield feed.saveTx();
+			
+			let feedItem = new Zotero.FeedItem('journalArticle', { guid: Zotero.randomString() });
+			feedItem.libraryID = feed.libraryID;
+			let id = yield feedItem.forceSaveTx();
+			
+			feedItem = yield Zotero.Items.getAsync(id);
+			
+			assert.isTrue(feedItem.isFeedItem);
+			assert.instanceOf(feedItem, Zotero.FeedItem);
+		});
+	});
 });

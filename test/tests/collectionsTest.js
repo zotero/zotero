@@ -61,4 +61,15 @@ describe("Zotero.Collections", function () {
 			assert.includeMembers(cols.map(col => col.id), [col3.id, col4.id]);
 		})
 	})
+	
+	describe("#getAsync()", function() {
+		it("should return a collection item for a collection ID", function* () {
+			let collection = new Zotero.Collection({ name: 'foo' });
+			collection = yield Zotero.Collections.getAsync(yield collection.saveTx());
+			
+			assert.notOk(collection.isFeed);
+			assert.instanceOf(collection, Zotero.Collection);
+			assert.notInstanceOf(collection, Zotero.Feed);
+		});
+	});
 })

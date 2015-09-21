@@ -99,6 +99,8 @@ Zotero.Items = function() {
 		+ "LEFT JOIN deletedItems DI ON (O.itemID=DI.itemID) "
 		+ "LEFT JOIN charsets CS ON (IA.charsetID=CS.charsetID)";
 	
+	this._relationsTable = "itemRelations";
+	
 	/**
 	 * Return items marked as deleted
 	 *
@@ -503,6 +505,15 @@ Zotero.Items = function() {
 					Zotero.Notifier.queue('delete', 'item', id);
 					continue;
 				}
+				
+				if (!item.isEditable()) {
+					throw new Error(item._ObjectType + " " + item.libraryKey + " is not editable");
+				}
+				
+				if (!Zotero.Libraries.hasTrash(item.libraryID)) {
+					throw new Error(Zotero.Libraries.getName(item.libraryID) + " does not have Trash");
+				}
+				
 				item.deleted = true;
 				yield item.save({
 					skipDateModifiedUpdate: true

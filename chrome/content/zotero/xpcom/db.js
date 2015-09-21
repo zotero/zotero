@@ -673,15 +673,9 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params, options) {
 			return rows;
 		}
 		else {
-			if (op == 'insert' || op == 'replace') {
-				return conn.lastInsertRowID;
-			}
-			else if (op == 'create') {
-				return true;
-			}
-			else {
-				return conn.affectedRows;
-			}
+			// lastInsertRowID is unreliable for async queries, so we don't bother
+			// returning it for SELECT and REPLACE queries
+			return;
 		}
 	})
 	.catch(function (e) {

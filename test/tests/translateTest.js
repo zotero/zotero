@@ -47,7 +47,7 @@ function saveItemsThroughTranslator(translatorType, items) {
 	translate.setTranslator(buildDummyTranslator(translatorType == "web" ? 4 : 1,
 		"function detectWeb() {}\n"+
 		"function do"+tyname+"() {\n"+
-		"	var json = JSON.parse('"+JSON.stringify(items).replace(/'/g, "\'")+"');\n"+
+		"	var json = JSON.parse('"+JSON.stringify(items).replace(/['\\]/g, "\\$&")+"');\n"+
 		"	for (var i=0; i<json.length; i++) {"+
 		"		var item = new Zotero.Item;\n"+
 		"		for (var field in json[i]) { item[field] = json[i][field]; }\n"+

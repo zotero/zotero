@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Collection = function() {
+Zotero.Collection = function(params = {}) {
 	Zotero.Collection._super.apply(this);
 	
 	this._name = null;
@@ -33,6 +33,9 @@ Zotero.Collection = function() {
 	
 	this._hasChildItems = false;
 	this._childItems = [];
+	
+	Zotero.Utilities.assignProps(this, params, ['name', 'libraryID', 'parentID',
+		'parentKey', 'lastSync']);
 }
 
 Zotero.extendClass(Zotero.DataObject, Zotero.Collection);
@@ -244,7 +247,7 @@ Zotero.Collection.prototype.getChildItems = function (asIDs, includeDeleted) {
 
 Zotero.Collection.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 	if (!this.name) {
-		throw new Error('Collection name is empty');
+		throw new Error(this._ObjectType + ' name is empty');
 	}
 	
 	var proceed = yield Zotero.Collection._super.prototype._initSave.apply(this, arguments);
@@ -338,12 +341,6 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 });
 
 Zotero.Collection.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
-	if (env.isNew && Zotero.Libraries.isGroupLibrary(this.libraryID)) {
-		var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
-		var group = Zotero.Groups.get(groupID);
-		group.clearCollectionCache();
-	}
-	
 	if (!env.options.skipNotifier) {
 		if (env.isNew) {
 			Zotero.Notifier.queue('add', 'collection', this.id, env.notifierData);
@@ -360,6 +357,10 @@ Zotero.Collection.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
 			this._markAllDataTypeLoadStates(true);
 		}
 		this._clearChanged();
+	}
+	
+	if (env.isNew) {
+		yield Zotero.Libraries.get(this.libraryID).updateCollections();
 	}
 	
 	return env.isNew ? this.id : true;
@@ -583,8 +584,6 @@ Zotero.Collection.prototype.clone = function (includePrimary, newCollection) {
 Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	Zotero.DB.requireTransaction();
 	
-	var includeItems = env.options.deleteItems;
-	
 	var collections = [this.id];
 	
 	var descendents = yield this.getDescendents(false, null, true);
@@ -606,13 +605,25 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 		// Descendent items
 		else {
 			// Delete items from DB
-			if (deleteItems) {
+			if (env.options.deleteItems) {
 				del.push(descendents[i].id);
 			}
 		}
 	}
 	if (del.length) {
-		yield this.ChildObjects.trash(del);
+		if (Zotero.Libraries.hasTrash(this.libraryID)) {
+			yield this.ChildObjects.trash(del);
+		} else {
+			Zotero.debug(Zotero.Libraries.getName(this.libraryID) + " library does not have trash. "
+				+ this.ChildObjects._ZDO_Objects + " will be erased");
+			let options = {};
+			Object.assign(options, env.options);
+			options.tx = false;
+			for (let i=0; i<del.length; i++) {
+				let obj = yield this.ChildObjects.getAsync(del[i]);
+				yield obj.erase(options);
+			}
+		}
 	}
 	
 	var placeholders = collections.map(function () '?').join();
@@ -633,6 +644,11 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 	env.deletedObjectIDs = collections;
 });
 
+Zotero.Collection.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env) {
+	yield Zotero.Collection._super.prototype._finalizeErase.call(this, env);
+	
+	yield Zotero.Libraries.get(this.libraryID).updateCollections();
+});
 
 Zotero.Collection.prototype.isCollection = function() {
 	return true;

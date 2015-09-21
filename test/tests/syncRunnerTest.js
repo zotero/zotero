@@ -1,6 +1,8 @@
 "use strict";
 
 describe("Zotero.Sync.Runner", function () {
+	Components.utils.import("resource://zotero/config.js");
+	
 	var apiKey = Zotero.Utilities.randomString(24);
 	var baseURL = "http://local.zotero/";
 	var userLibraryID, publicationsLibraryID, runner, caller, server, client, stub, spy;
@@ -146,9 +148,11 @@ describe("Zotero.Sync.Runner", function () {
 	//
 	// Tests
 	//
-	before(function () {
+	let win;
+	before(function* () {
 		userLibraryID = Zotero.Libraries.userLibraryID;
 		publicationsLibraryID = Zotero.Libraries.publicationsLibraryID;
+		win = yield loadBrowserWindow();
 	})
 	beforeEach(function* () {
 		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
@@ -167,6 +171,9 @@ describe("Zotero.Sync.Runner", function () {
 	})
 	after(function () {
 		Zotero.HTTP.mock = null;
+		if (win) {
+			win.close();
+		}
 	})
 	
 	describe("#checkAccess()", function () {
@@ -303,7 +310,7 @@ describe("Zotero.Sync.Runner", function () {
 			yield Zotero.DB.queryAsync(
 				"UPDATE groups SET version=0 WHERE groupID IN (?, ?)", [group1.id, group2.id]
 			);
-			yield Zotero.Groups.init();
+			yield Zotero.Libraries.init();
 			group1 = Zotero.Groups.get(group1.id);
 			group2 = Zotero.Groups.get(group2.id);
 			
@@ -443,7 +450,7 @@ describe("Zotero.Sync.Runner", function () {
 				skipBundledFiles: true
 			});
 			
-			yield Zotero.Groups.init();
+			yield Zotero.Libraries.init();
 		})
 		after(function* () {
 			this.timeout(60000);

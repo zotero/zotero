@@ -89,6 +89,10 @@ Zotero.defineProperty(Zotero.DataObject.prototype, 'parentID', {
 	set: function(v) this._setParentID(v)
 });
 
+Zotero.defineProperty(Zotero.DataObject.prototype, '_canHaveParent', {
+	value: true
+});
+
 Zotero.defineProperty(Zotero.DataObject.prototype, 'ObjectsClass', {
 	get: function() this._ObjectsClass
 });
@@ -241,7 +245,7 @@ Zotero.DataObject.prototype._setParentID = function (id) {
 
 
 Zotero.DataObject.prototype._getParentKey = function () {
-	if (this._objectType == 'search') {
+	if (!this._canHaveParent) {
 		return undefined;
 	}
 	return this._parentKey ? this._parentKey : false
@@ -254,8 +258,8 @@ Zotero.DataObject.prototype._getParentKey = function () {
  * @return {Boolean} True if changed, false if stayed the same
  */
 Zotero.DataObject.prototype._setParentKey = function(key) {
-	if (this._objectType == 'search') {
-		throw new Error("Cannot set parent key for search");
+	if (!this._canHaveParent) {
+		throw new Error("Cannot set parent key for " + this._objectType);
 	}
 	
 	key = Zotero.DataObjectUtilities.checkKey(key) || false;
@@ -607,7 +611,7 @@ Zotero.DataObject.prototype.loadPrimaryData = Zotero.Promise.coroutine(function*
 
 
 Zotero.DataObject.prototype.loadRelations = Zotero.Promise.coroutine(function* (reload) {
-	if (this._objectType != 'collection' && this._objectType != 'item') {
+	if (!this.ObjectsClass._relationsTable) {
 		throw new Error("Relations not supported for " + this._objectTypePlural);
 	}
 	
@@ -619,7 +623,7 @@ Zotero.DataObject.prototype.loadRelations = Zotero.Promise.coroutine(function* (
 	
 	this._requireData('primaryData');
 	
-	var sql = "SELECT predicate, object FROM " + this._objectType + "Relations "
+	var sql = "SELECT predicate, object FROM " + this.ObjectsClass._relationsTable + " "
 		+ "JOIN relationPredicates USING (predicateID) "
 		+ "WHERE " + this.ObjectsClass.idColumn + "=?";
 	var rows = yield Zotero.DB.queryAsync(sql, this.id);
@@ -932,6 +936,11 @@ Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 		this.editCheck();
 	}
 	
+	let targetLib = Zotero.Libraries.get(this.libraryID);
+	if (!targetLib.isChildObjectAllowed(this._objectType)) {
+		throw new Error("Cannot add " + this._objectType + " to a " + targetLib.libraryType + " library");
+	}
+	
 	if (!this.hasChanged()) {
 		Zotero.debug(this._ObjectType + ' ' + this.id + ' has not changed', 4);
 		return false;
@@ -1141,20 +1150,21 @@ Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* (options)
 		env.options.tx = true;
 	}
 	
+	let proceed = yield this._initErase(env);
+	if (!proceed) return false;
+	
 	Zotero.debug('Deleting ' + this.objectType + ' ' + this.id);
 	
 	if (env.options.tx) {
 		return Zotero.DB.executeTransaction(function* () {
-			Zotero.DataObject.prototype._initErase.call(this, env);
 			yield this._eraseData(env);
-			Zotero.DataObject.prototype._finalizeErase.call(this, env);
+			yield this._finalizeErase(env);
 		}.bind(this))
 	}
 	else {
 		Zotero.DB.requireTransaction();
-		Zotero.DataObject.prototype._initErase.call(this, env);
 		yield this._eraseData(env);
-		yield Zotero.DataObject.prototype._finalizeErase.call(this, env);
+		yield this._finalizeErase(env);
 	}
 });
 
@@ -1164,17 +1174,21 @@ Zotero.DataObject.prototype.eraseTx = function (options) {
 	return this.erase(options);
 };
 
-Zotero.DataObject.prototype._initErase = function (env) {
+Zotero.DataObject.prototype._initErase = Zotero.Promise.method(function (env) {
 	env.notifierData = {};
 	env.notifierData[this.id] = {
 		libraryID: this.libraryID,
 		key: this.key
 	};
 	
+	if (!env.options.skipEditCheck) this.editCheck();
+	
 	if (env.options.skipDeleteLog) {
 		env.notifierData[this.id].skipDeleteLog = true;
 	}
-};
+	
+	return true;
+});
 
 Zotero.DataObject.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env) {
 	// Delete versions from sync cache
