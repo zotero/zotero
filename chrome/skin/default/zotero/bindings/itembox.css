@@ -154,3 +154,9 @@ row > vbox > description
 	margin: 0;
 	padding: 0;
 }
+
+menuitem.menu-heading {
+    margin-left: -1em;
+    font-weight: bold;
+    color: #444444;
+}

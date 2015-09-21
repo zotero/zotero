@@ -1919,5 +1919,17 @@ Zotero.Utilities = {
 	 * Provides unicode support and other additional features for regular expressions
 	 * See https://github.com/slevithan/xregexp for usage
 	 */
-	 "XRegExp": XRegExp
+	 "XRegExp": XRegExp,
+
+	"nameParticleParse":function(str){
+		var particleSpecs;
+		if (!particleSpecs) {
+			var PARTICLES = Zotero.CiteProc.CSL.ParticleList;
+			var particleSpecs = {};
+			for (var i=0,ilen=PARTICLES.length;i<ilen;i++) {
+				particleSpecs[PARTICLES[i][0]] = PARTICLES[i][1];
+			}
+		}
+		return particleSpecs[str];
+	}
 }

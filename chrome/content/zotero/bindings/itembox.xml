@@ -1661,6 +1661,511 @@
 			</method>
 			
 			
+			<method name="getNameParticleVariants">
+			  <parameter name="lastNameValue"/>
+			  <parameter name="firstNameValue"/>
+			  <body>
+				<![CDATA[
+					function splitParticles(nameValue, firstNameFlag, caseOverride) {
+						// Parse particles out from name fields.
+						// * nameValue (string) is the field content to be parsed.
+						// * firstNameFlag (boolean) parse trailing particles
+						//	 (default is to parse leading particles)
+						// * caseOverride (boolean) include all but one word in particle set
+						//	 (default is to include only words with lowercase first char)
+						// Returns an array with:
+						// * (boolean) flag indicating whether a particle was found
+						// * (string) the name after removal of particles
+						// * (array) the list of particles found
+						var origNameValue = nameValue;
+						nameValue = caseOverride ? nameValue.toLowerCase() : nameValue;
+						var particleList = [];
+						var apostrophe;
+						if (firstNameFlag) {
+							apostrophe ="\u02bb";
+							nameValue = nameValue.split("").reverse().join("");
+						} else {
+							apostrophe ="-\u2019";
+						}
+						var rex = new RegExp("^([^ ]+[" + apostrophe + " \'] *)(.+)$");
+						var m = nameValue.match(rex);
+						while (m) {
+							var m1 = firstNameFlag ? m[1].split("").reverse().join("") : m[1];
+							var firstChar = m ? m1 : false;
+							var firstChar = firstChar ? m1.replace(/^[-\'\u02bb\u2019\s]*(.).*$/, "$1") : false;
+							var hasParticle = firstChar ? firstChar.toUpperCase() !== firstChar : false;
+							if (!hasParticle) break;
+							if (firstNameFlag) {
+								particleList.push(origNameValue.slice(m1.length * -1));
+								origNameValue = origNameValue.slice(0,m1.length * -1);
+							} else {
+								particleList.push(origNameValue.slice(0,m1.length));
+								origNameValue = origNameValue.slice(m1.length);
+							}
+							//particleList.push(m1);
+							nameValue = m[2];
+							m = nameValue.match(rex);
+						}
+						if (firstNameFlag) {
+							nameValue = nameValue.split("").reverse().join("");
+							particleList.reverse();
+							for (var i=1,ilen=particleList.length;i<ilen;i++) {
+								if (particleList[i].slice(0, 1) == " ") {
+									particleList[i-1] += " ";
+								}
+							}
+							for (var i=0,ilen=particleList.length;i<ilen;i++) {
+								if (particleList[i].slice(0, 1) == " ") {
+									particleList[i] = particleList[i].slice(1);
+								}
+							}
+
+
+							nameValue = origNameValue.slice(0, nameValue.length);
+						} else {
+							nameValue = origNameValue.slice(nameValue.length * -1);
+						}
+						return [hasParticle, nameValue, particleList];
+					}
+					
+					function makeUppercase(str) {
+						// Set the first case-sensitive character in a string to uppercase
+						// * str (string) the string to modify
+						// Returns the modified string
+						for (var i=0,ilen=str.length;i<ilen;i++) {
+							var strChar = str.slice(i,i+1);
+							if (strChar.toUpperCase()  !== strChar) {
+								str = str.slice(0, i) + strChar.toUpperCase() + str.slice(i+1);
+								break;
+							}
+						}
+						return str;
+					}
+					
+					function addTerminalSpace(particles) {
+						// Adds a space to the last term in an array, if its last character is not space, apostrophe, or hyphen.
+						// * particles (array)
+						// Returns undefined. The array is modified in place.
+						// This function is idempotent.
+						if (particles.length && ["-", "'", "\u2019", " "].indexOf(particles.slice(-1)[0].slice(-1)) == -1) {
+							particles[particles.length-1] = particles.slice(-1)[0] + " ";
+						}
+					}
+					
+					function joinParticles(sets, forceLowerCase) {
+						// Joins particle arrays into a single array
+						// (A particle array is an array of strings)
+						// * sets (array) an array of particle arrays
+						// Returns a single array. Particle arrays given as input are unaffected.
+						var particles = [];
+						for (var i=0,ilen=sets.length;i<ilen;i++) {
+							particles[i] = sets[i].slice();
+						}
+						for (var i=particles.length-1;i>0;i--) {
+							addTerminalSpace(particles[i-1]);
+							particles[i-1] = particles[i-1].concat(particles[i]);
+						}
+						if (particles.length == 0) {
+							return [];
+						} else {
+							if (forceLowerCase) {
+								return [particle.toLowerCase() for (particle of particles[0])];
+							} else {
+								return particles[0];
+							}
+						}
+					}
+					
+					// Last-name quote validation
+					// (1) lastName must either have quotes start and end, or none at either end.
+					var mQuoted = lastNameValue.match(/^(?:\".*\")$/);
+					var mUnquoted = lastNameValue.match(/^(?:[^\"].*[^\"])$/);
+					if (!mQuoted && !mUnquoted) return false;
+					
+					
+					// Normalize
+					// (2) Strip quotes from lastName, eliminate duplicate spaces on both fields
+					if (mQuoted) {
+						lastNameValue = lastNameValue.slice(1,-1);
+					}
+					lastNameValue = lastNameValue.replace(/  */g, " ");
+					firstNameValue = firstNameValue.replace(/  */g, " ");
+					
+					// (3) Split particle arrays from fields and compose as an array
+					var [hasLastParticle, lastNameValue, lastParticles] = splitParticles(lastNameValue);
+					var [hasFirstParticle, firstNameValue, firstParticles] = splitParticles(firstNameValue, true);
+					var coreParticles = joinParticles([firstParticles, lastParticles], true);
+					
+					// (4) Split particle arrays from respective fields with caseOverride option
+					var [dummy, lastNameValue, lastExtras] = splitParticles(lastNameValue, false, true);
+					var [dummy, firstNameValue, firstExtras] = splitParticles(firstNameValue, true, true);
+					
+					// (5) Compose particle and name data for each possible set of particles
+					var particleSets = [];
+					var lastExtrasOrig = lastExtras.slice();
+					var firstExtrasOrig = firstExtras.slice();
+					while (true) {
+						particleSets.push({
+							firstRemainder: firstExtrasOrig.slice(0, firstExtrasOrig.length-firstExtras.length),
+							lastRemainder: lastExtrasOrig.slice(lastExtras.length),
+							particles: joinParticles([firstExtras, coreParticles, lastExtras], true)
+						});
+						while (lastExtras.length) {
+							lastExtras.pop();
+							particleSets.push({
+								firstRemainder: firstExtrasOrig.slice(0, firstExtrasOrig.length-firstExtras.length),
+								lastRemainder: lastExtrasOrig.slice(lastExtras.length),
+								particles: joinParticles([firstExtras, coreParticles, lastExtras], true)
+							});
+						}
+						if (!firstExtras.length) break;
+						lastExtras = lastExtrasOrig.slice();
+						firstExtras.pop();
+					}
+					
+					// (6) Sort particle sets in descending order of list length
+					particleSets.sort(function(a,b){
+						if (a.particles.length < b.particles.length) {
+							return 1;
+						} else if (a.particles.length > b.particles.length) {
+							return -1;
+						} else {
+							return 0;
+						}
+					});
+					
+					// (7) Try data against list of known particles
+					var particles = coreParticles;
+					var particleSpec = false;
+					for (var i=0,ilen=particleSets.length;i<ilen;i++) {
+						var tryParticles = particleSets[i].particles;
+						var tryParticleSpec = Zotero.Utilities.nameParticleParse(tryParticles.join("").trim());
+						if (tryParticleSpec) {
+							particles = tryParticles;
+							particleSpec = tryParticleSpec;
+							firstNameValue = joinParticles([[firstNameValue],particleSets[i].firstRemainder]).join("");
+							lastNameValue = joinParticles([particleSets[i].lastRemainder,[lastNameValue]]).join("");
+							break;
+						}
+					}
+					if (!particleSpec) {
+						firstNameValue = joinParticles([[firstNameValue],firstExtrasOrig]).join("");
+						lastNameValue = joinParticles([lastExtrasOrig,[lastNameValue]]).join("");
+					}
+					
+					// Content of the particles array will be:
+					//
+					// * If a list match is found above, the matched particles PLUS a particleSpec 
+					//   describing possible field allocations
+					//
+					// * Otherwise if core (lowercase) particles are found, the lowercase particles
+					//   with a null particleSpec
+					//
+					// * Otherwise an empty array.
+					
+					
+					// (8) Generate a list of all plausible uses of the particles to be fitted
+					//	 (first/last allocation, upper- and lower-casing, and quoted status)
+					
+					// There are four possible states for each particle:
+					//
+					// 1. Last-name field, lowercase
+					// 2. Last-name field, uppercase
+					// 3. First-name field, lowercase
+					// 4. first-name field, uppercase [assumed to be not desired]
+					//
+					// In addition, last-name field may be quoted or unquoted
+					
+					
+					// (9) Express particle states as a base-4 integer, one byte per particle
+					var base4max = ["0" for (i in particles)];
+					base4max = "1" + base4max.join("");
+					var combos = [];
+					for (i=0,ilen=parseInt(base4max, 4);i<ilen;i++) {
+						combos.push(i.toString(4));
+					};
+					// Pad the 4-byte integer strings
+					for (var i=0,ilen=combos.length;i<ilen;i++) {
+						while (combos[i].length < (base4max.length-1)) {
+							combos[i] = "0" + combos[i];
+						}
+					}
+					// Drop meaningless field states (1 or 0 following 2 or 3)
+					for (var i=combos.length-1;i>-1;i--) {
+						if (combos[i].match(/[2,3].*[0,1]/)) {
+							combos = combos.slice(0,i).concat(combos.slice(i+1));
+						}
+					}
+					// Drop all uppercase dropping particles (3) [see above]
+					for (var i=combos.length-1;i>-1;i--) {
+						if (combos[i].match(/3/)) {
+							combos = combos.slice(0,i).concat(combos.slice(i+1));
+						}
+					}
+					// Uppercase adjustments
+					if (!particleSpec) {
+						// Drop all uppercase options if unspecified particles
+						for (var i=combos.length-1;i>-1;i--) {
+							if (combos[i].match(/1/)) {
+								combos = combos.slice(0,i).concat(combos.slice(i+1));
+							}
+						}
+					} else {
+						// Among uppercase variants, allow only (a) first-only uppercase; or (b) all-uppercase.
+						for (var i=combos.length-1;i>-1;i--) {
+							if (combos[i].match(/1/)) {
+								if (combos[i].match(/^11*$/)) continue;
+								if (combos[i].match(/^10*$/)) continue;
+								combos = combos.slice(0,i).concat(combos.slice(i+1));
+							}
+						}
+					}
+
+					// (10) Add quote state, only where last-name field has leading lowercase particle
+					if (combos.length > 1) {
+						for (var i=combos.length-1;i>-1;i--) {
+							if (combos[i].slice(0, 1) === "0") {
+								combos = combos.slice(0, i).concat(["0" + combos[i], "1" + combos[i]]).concat(combos.slice(i+1));
+							} else {
+								combos[i] = "0" + combos[i];
+							}
+						}
+						// Add category sort key
+						for (var i=combos.length-1;i>-1;i--) {
+							// 4 is non-dropping
+							// 5 is dropping
+							// 6 is no particles
+							// 7 is fixed surname
+							if (combos[i].slice(0, 1) == 1) {
+								combos[i] = "7" + combos[i];
+							} else if (combos[i].match(/^.1[0-1]*$/)) {
+								combos[i] = "6" + combos[i];
+							} else if (combos[i].match(/^.0/)) {
+								combos[i] = "4" + combos[i];
+							} else {
+								combos[i] = "5" + combos[i];
+							}
+						}
+						
+						// (11) Group non-dropping, dropping, and fixed-name states
+						combos.sort(function(a,b){
+							a = parseInt(a.replace(/[23]/, "0"));
+							b = parseInt(b.replace(/[23]/, "0"));
+							if (a > b) {
+								return 1;
+							} else if (a < b) {
+								return -1;
+							} else {
+								return 0;
+							}
+						});
+					}
+					
+					
+					// (12) Express the states as particle lists
+					var lastCategory = null;
+					var particleSets = [];
+					for (var i=0,ilen=combos.length;i<ilen;i++) {
+						var useMe = true;
+						var lastParticleSet = [];
+						var firstParticleSet = [];
+						var useQuotes = parseInt(combos[i].slice(1, 2));
+						var m = combos[i].slice(2).match(/^([0-1]*)(.*)$/);
+						if (m[1]) {
+							var lastSpec = m[1].split("");
+						} else {
+							var lastSpec = [];
+						}
+						if (m[2]) {
+							var firstSpec = m[2].split("");
+						} else {
+							var firstSpec = [];
+						}
+						for (var j=0,jlen=firstSpec.length;j<jlen;j++) {
+							var particle = particles[j];
+							if (firstSpec[j] == 3) {
+								particle = makeUppercase(particle);
+							}
+							firstParticleSet.push(particle);
+						}
+						for (var j=0,jlen=lastSpec.length;j<jlen;j++) {
+							var pos = firstParticleSet.length + j;
+							var particle = particles[pos];
+							if (lastSpec[j] == 1) {
+								particle = makeUppercase(particle);
+							}
+							lastParticleSet.push(particle);
+						}
+						
+						// If particleSpec exists, skip known particle sets with an unknown field allocation pattern
+						if (particleSpec) {
+							useMe = false;
+							for (var j=particleSpec.length-1;j>-1;j--) {
+								var spec = particleSpec[j];
+								var firstLen = spec[0] ? spec[0][1] - spec[0][0] : 0;
+								var lastLen = spec[1] ? spec[1][1] - spec[1][0] : 0;
+								if (firstParticleSet.length === firstLen && lastParticleSet.length === lastLen) {
+									useMe = true;
+									break;
+								}
+							}
+						}
+						if (!useMe) continue;
+						
+						// If heading transition, add the heading
+						if (combos[i].slice(0, 1) > 3) {
+							var category = combos[i].slice(0, 1);
+							if (category != lastCategory) {
+								switch (category) {
+								case "4":
+									particleSets.push([Zotero.getString('pane.item.creatorTransform.nonDroppingParticle')]);
+									break;
+								case "5":
+									particleSets.push([Zotero.getString('pane.item.creatorTransform.droppingParticle')]);
+									break;
+								case "6":
+									particleSets.push([Zotero.getString('pane.item.creatorTransform.noParticle')]);
+									break;
+								case "7":
+									particleSets.push([Zotero.getString('pane.item.creatorTransform.fixedSurname')]);
+									break;
+								}
+							}
+							lastCategory = category;
+						}
+						
+						var fieldLastNameValue = joinParticles([lastParticleSet, [lastNameValue]]).join("").trim();
+						var fieldFirstNameValue = joinParticles([[firstNameValue], firstParticleSet]).join("").trim();
+						
+						var citeVisual = fieldLastNameValue;
+						if (useQuotes) {
+							var lastVisual = fieldLastNameValue;
+							var firstVisual = joinParticles([[firstNameValue], firstParticleSet]).join("");
+							fieldLastNameValue = '"' + fieldLastNameValue + '"';
+						} else {
+							var lastVisual = lastNameValue;
+							var pos = lastSpec.indexOf("1");
+							if (pos > -1) {
+								lastVisual = joinParticles([lastParticleSet.slice(pos), [lastVisual]]).join("");
+								lastParticleSet = lastParticleSet.slice(0, pos);
+							}
+							var firstVisual = joinParticles([[firstNameValue], firstParticleSet, lastParticleSet]).join("");
+						}
+						// \u274a = stylized hoshijirushi
+						// \u274b = stylized hoshijirushi simple bold
+						// \u2749 = stylized hoshijirushi bolder styled-er
+						// \uff0a = asterisk
+						// \u205c = komejirushi
+						// \u2733 = sans serif stylized asterisk;
+						// \u2b24 = big black circle;
+						// \u25cf = black circle;
+						// \u2b1c = big white square;
+						// \u2b04 = double arrow;
+						composedVisual = "(" + citeVisual + ") \u274b " + [lastVisual, firstVisual].join(", ");
+						
+						particleSets.push([fieldLastNameValue, fieldFirstNameValue, composedVisual]);
+					}
+					
+					// (13) Voilà
+					return particleSets;
+				]]>
+			  </body>
+			</method>
+
+
+			<method name="checkNameParticleVariants">
+			  <parameter name="menuNode"/>
+			  <parameter name="popupNode"/>
+			  <body>
+				<![CDATA[
+					var lastNameValue = popupNode.parentNode.firstChild.value;
+					var firstNameValue = popupNode.parentNode.lastChild.value;
+					if (lastNameValue === this._defaultLastName) {
+						lastNameValue = '';
+					}
+					if (firstNameValue === this._defaultFirstName) {
+						firstNameValue = '';
+					}
+					var variants = this.getNameParticleVariants(lastNameValue, firstNameValue);
+					return [lastNameValue, firstNameValue, variants];
+				]]>
+			  </body>
+			</method>
+
+
+			<method name="setNameParticleVariant">
+			  <parameter name="menuNode"/>
+			  <parameter name="popupNode"/>
+			  <parameter name="lastNameValue"/>
+			  <parameter name="firstNameValue"/>
+			  <parameter name="variants"/>
+			  <body>
+				<![CDATA[
+					for (var i=0,ilen=menuNode.childNodes.length;i<ilen;i++) {
+						menuNode.removeChild(menuNode.childNodes[0]);
+					}
+					var saveOnEdit = variants ? true : false;
+					if (saveOnEdit) {
+						var row = Zotero.getAncestorByTagName(popupNode, 'row');
+						var fields = this.getCreatorFields(row);
+						var fieldName = popupNode.getAttribute("fieldname");
+						var [field, creatorIndex, creatorField] = fieldName.split('-');
+						var langTag = row.firstChild.getAttribute('zlang');
+						var isMulti = row.parentNode.classList.contains('multi');
+					} else {
+						var [lastNameValue, firstNameValue, variants] = this.checkNameParticleVariants(menuNode, popupNode);
+					}
+					var lnNode = popupNode.parentNode.firstChild;
+					var fnNode = popupNode.parentNode.lastChild;
+					
+					for (var i=0,ilen=variants.length;i<ilen;i++) {
+						var menuitem = document.createElement('menuitem');
+						if (variants[i].length === 1) {
+							menuitem.setAttribute('label', variants[i][0]);
+							menuitem.setAttribute('class', 'menu-heading');
+							menuNode.appendChild(menuitem);
+							menuitem.disabled = true;
+							continue;
+						}
+						menuitem.setAttribute('label', variants[i][2]);
+						var setNamesHandler;
+						if (saveOnEdit) {
+							setNamesHandler = function(lnNode, fnNode, lnVal, fnVal) {
+								return function() {
+									fields.lastName = lnVal;
+									fields.firstName = fnVal;
+									document.getBindingParent(this).saveOnEdit = true;
+									document.getBindingParent(this).modifyCreator(creatorIndex, fields, null, langTag, isMulti);
+									// Save happens, but does not always update UI for some reason
+									lnNode.value = lnVal;
+									lnNode.setAttribute('value', lnVal);
+									fnNode.value = fnVal;
+									fnNode.setAttribute('value', fnVal);
+								}
+							}(lnNode, fnNode, variants[i][0], variants[i][1]);
+						} else {
+							setNamesHandler = function(lnNode, fnNode, lnVal, fnVal) {
+								return function() {
+									lnNode.value = lnVal;
+									lnNode.setAttribute('value', lnVal);
+									fnNode.value = fnVal;
+									fnNode.setAttribute('value', fnVal);
+								}
+							}(lnNode, fnNode, variants[i][0], variants[i][1]);
+						}
+						menuitem.addEventListener('command', setNamesHandler);
+						menuNode.appendChild(menuitem);
+					}
+					if (variants.length) {
+						return true;
+					} else {
+						return false;
+					}
+				]]>
+			  </body>
+			</method>
+			
+			
 			<method name="itemTypeMenuTab">
 				<parameter name="event"/>
 				<body>
@@ -2486,9 +2991,24 @@
 								var fieldMode = item.getCreator(index).ref.fieldMode;
 							}
 							var hideTransforms = !exists || !!fieldMode;
+							if (!hideTransforms) {
+								var [lastNameValue, firstNameValue, variants] = document.getBindingParent(this).checkNameParticleVariants(this, document.popupNode);
+								var particlesMenuNode = document.getElementById('name-particles-menu');
+								if (variants.length > 1) {
+									particlesMenuNode.disabled = false;
+									document.getBindingParent(this).setNameParticleVariant(particlesMenuNode.firstChild, document.popupNode, lastNameValue, firstNameValue, variants);
+								} else {
+									particlesMenuNode.disabled = true;
+								}
+							}
 							return !hideTransforms;">
 						<menuitem label="&zotero.item.creatorTransform.nameSwap;"
 							oncommand="document.getBindingParent(this).swapNames();"/>
+						<menu id="name-particles-menu" label="&zotero.item.creatorTransform.nameParticles;">
+						  <menupopup>
+							<menuitem label="Hello"/>
+						  </menupopup>
+						</menu>
 					</menupopup>
 					<menupopup id="zotero-doi-menu">
 						<menuitem id="zotero-doi-menu-view-online" label="&zotero.item.viewOnline;"/>
