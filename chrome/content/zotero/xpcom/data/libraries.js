@@ -203,9 +203,9 @@ Zotero.Libraries = new function () {
 	 * @return {Integer}
 	 */
 	this.getVersion = function (libraryID) {
-		Zotero.debug("Zotero.Libraries.getVersion() is deprecated. Use Zotero.Library.prototype.version instead");
+		Zotero.debug("Zotero.Libraries.getVersion() is deprecated. Use Zotero.Library.prototype.libraryVersion instead");
 		this._ensureExists(libraryID);
-		return Zotero.Libraries.get(libraryID).version;
+		return Zotero.Libraries.get(libraryID).libraryVersion;
 	}
 	
 	
@@ -217,11 +217,11 @@ Zotero.Libraries = new function () {
 	 * @return {Promise}
 	 */
 	this.setVersion = Zotero.Promise.method(function(libraryID, version) {
-		Zotero.debug("Zotero.Libraries.setVersion() is deprecated. Use Zotero.Library.prototype.version instead");
+		Zotero.debug("Zotero.Libraries.setVersion() is deprecated. Use Zotero.Library.prototype.libraryVersion instead");
 		this._ensureExists(libraryID);
 		
 		let library = Zotero.Libraries.get(libraryID);
-		library.version = version;
+		library.libraryVersion = version;
 		return library.saveTx();
 	});
 	
