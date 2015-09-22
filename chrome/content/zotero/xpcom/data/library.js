@@ -102,10 +102,32 @@ Zotero.defineProperty(Zotero.Library.prototype, 'libraryID', {
 Zotero.defineProperty(Zotero.Library.prototype, 'id', {
 	get: function() this.libraryID,
 	set: function(val) this.libraryID = val
-});
+});
 Zotero.defineProperty(Zotero.Library.prototype, 'libraryType', {
 	get: function() this._get('_libraryType'),
 	set: function(v) this._set('_libraryType', v)
+});
+
+/**
+ * Get the library-type-specific id for the library (e.g., userID for user library,
+ * groupID for group library)
+ *
+ * @property
+ */
+Zotero.defineProperty(Zotero.Library.prototype, 'libraryTypeID', {
+	get: function () {
+		switch (this._libraryType) {
+		case 'user':
+		case 'publications':
+			return Zotero.Users.getCurrentUserID();
+		
+		case 'group':
+			return Zotero.Groups.getGroupIDFromLibraryID(this._libraryID);
+		
+		default:
+			throw new Error(`Cannot return library type id for ${this._libraryType} library`);
+		}
+	}
 });
 
 Zotero.defineProperty(Zotero.Library.prototype, 'libraryVersion', {

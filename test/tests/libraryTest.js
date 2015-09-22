@@ -34,6 +34,14 @@ describe("Zotero.Library", function() {
 		});
 	});
 	
+	describe("#libraryTypeID", function () {
+		it("should return a group id for a group", function* () {
+			let library = yield createGroup();
+			assert.typeOf(library.libraryTypeID, 'number');
+			assert.equal(library.libraryTypeID, library.groupID);
+		})
+	})
+	
 	describe("#libraryVersion", function() {
 		it("should be settable to increasing values", function() {
 			let library = new Zotero.Library();
