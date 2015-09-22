@@ -48,6 +48,8 @@ Zotero.Sync.Data.Engine = function (options) {
 	
 	this.apiClient = options.apiClient;
 	this.libraryID = options.libraryID;
+	this.library = Zotero.Libraries.get(options.libraryID);
+	// TODO: Remove
 	this.libraryName = Zotero.Libraries.getName(options.libraryID);
 	this.libraryType = Zotero.Libraries.getType(options.libraryID);
 	switch (this.libraryType) {
@@ -691,7 +693,8 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 					for (let i = 0; i < toSave.length; i++) {
 						yield toSave[i].save();
 					}
-					yield Zotero.Libraries.setVersion(this.libraryID, json.libraryVersion);
+					this.library.libraryVersion = json.libraryVersion;
+					yield this.library.save();
 					objectsClass.updateVersion(ids, json.libraryVersion);
 					objectsClass.updateSynced(ids, true);
 				}.bind(this));
@@ -940,7 +943,8 @@ Zotero.Sync.Data.Engine.prototype._upgradeCheck = Zotero.Promise.coroutine(funct
 		}
 		
 		// Mark library as requiring full sync
-		yield Zotero.Libraries.setVersion(this.libraryID, -1);
+		this.library.libraryVersion = -1;
+		yield this.library.save();
 		
 		// If this is the last classic sync library, delete old timestamps
 		if (!(yield Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM libraries WHERE version=0"))) {
