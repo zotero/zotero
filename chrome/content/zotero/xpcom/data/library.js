@@ -34,8 +34,18 @@ Zotero.Library = function(params = {}) {
 	this._hasCollections = null;
 	this._hasSearches = null;
 	
-	Zotero.Utilities.assignProps(this, params, ['libraryType', 'editable',
-		'filesEditable', 'libraryVersion', 'lastSync']);
+	Zotero.Utilities.assignProps(
+		this,
+		params,
+		[
+			'libraryType',
+			'editable',
+			'filesEditable',
+			'libraryVersion',
+			'lastSync',
+			'lastStorageSync'
+		]
+	);
 	
 	// Return a proxy so that we can disable the object once it's deleted
 	return new Proxy(this, {
@@ -53,7 +63,9 @@ Zotero.Library = function(params = {}) {
  */
 // DB columns
 Zotero.defineProperty(Zotero.Library, '_dbColumns', {
-	value: Object.freeze(['type', 'editable', 'filesEditable', 'version', 'lastSync'])
+	value: Object.freeze([
+		'type', 'editable', 'filesEditable', 'version', 'lastSync', 'lastStorageSync'
+	])
 });
 
 // Converts DB column name to (internal) object property
@@ -138,6 +150,12 @@ Zotero.defineProperty(Zotero.Library.prototype, 'libraryVersion', {
 Zotero.defineProperty(Zotero.Library.prototype, 'lastSync', {
 	get: function() this._get('_libraryLastSync')
 });
+
+Zotero.defineProperty(Zotero.Library.prototype, 'lastStorageSync', {
+	get: function () this._get('_libraryLastStorageSync'),
+	set: function (v) this._set('_libraryLastStorageSync', v)
+});
+
 
 Zotero.defineProperty(Zotero.Library.prototype, 'name', {
 	get: function() {
@@ -233,6 +251,7 @@ Zotero.Library.prototype._set = function(prop, val) {
 			if (val != -1 && val < this._libraryVersion) throw new Error(prop + ' cannot decrease');
 			
 			break;
+		
 		case '_libraryLastSync':
 			if (!val) {
 				val = false;
@@ -242,6 +261,18 @@ Zotero.Library.prototype._set = function(prop, val) {
 				// Storing to DB will drop milliseconds, so, for consistency, we drop it now
 				val = new Date(Math.floor(val.getTime()/1000) * 1000);
 			}
+			break;
+		
+		case '_libraryLastStorageSync':
+			if (parseInt(val) != val) {
+				Zotero.debug(val);
+				throw new Error("timestamp must be an integer");
+			}
+			if (val > 9999999999) {
+				Zotero.debug(val);
+				throw new Error("timestamp must be in seconds");
+			}
+			val = parseInt(val);
 			break;
 	}
 	
@@ -267,7 +298,8 @@ Zotero.Library.prototype._loadDataFromRow = function(row) {
 	this._libraryEditable = !!row._libraryEditable;
 	this._libraryFilesEditable = !!row._libraryFilesEditable;
 	this._libraryVersion = row._libraryVersion;
-	this._libraryLastSync =  row._libraryLastSync != 0 ? new Date(row._libraryLastSync * 1000) : false;
+	this._libraryLastSync =  row._libraryLastSync !== 0 ? new Date(row._libraryLastSync * 1000) : false;
+	this._libraryLastStorageSync = row._libraryLastStorageSync || false;
 	
 	this._hasCollections = !!row.hasCollections;
 	this._hasSearches = !!row.hasSearches;
@@ -391,8 +423,7 @@ Zotero.Library.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 				// convert to integer
 				val = val ? Math.floor(val.getTime() / 1000) : 0;
 			}
-			
-			if (typeof val == 'boolean') {
+			else if (typeof val == 'boolean') {
 				val = val ? 1 : 0;
 			}
 			

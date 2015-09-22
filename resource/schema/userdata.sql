@@ -261,7 +261,8 @@ CREATE TABLE libraries (
     editable INT NOT NULL,
     filesEditable INT NOT NULL,
     version INT NOT NULL DEFAULT 0,
-    lastSync INT NOT NULL DEFAULT 0
+    lastSync INT NOT NULL DEFAULT 0,
+    lastStorageSync INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE users (

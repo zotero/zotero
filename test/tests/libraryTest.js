@@ -63,6 +63,26 @@ describe("Zotero.Library", function() {
 		});
 	});
 	
+	describe("#lastStorageSync", function () {
+		it("should set and get a time in seconds", function* () {
+			var library = yield createGroup();
+			var time = Math.round(new Date().getTime() / 1000);
+			library.lastStorageSync = time;
+			yield library.saveTx();
+			
+			var dbTime = yield Zotero.DB.valueQueryAsync(
+				"SELECT lastStorageSync FROM libraries WHERE libraryID=?", library.libraryID
+			);
+			assert.equal(dbTime, time);
+			assert.equal(library.lastStorageSync, time);
+		});
+		
+		it("should throw if setting time in milliseconds", function* () {
+			var library = Zotero.Libraries.userLibrary;
+			assert.throws(() => library.lastStorageSync = new Date().getTime(), "timestamp must be in seconds");
+		})
+	})
+	
 	describe("#editable", function() {
 		it("should return editable status", function() {
 			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
