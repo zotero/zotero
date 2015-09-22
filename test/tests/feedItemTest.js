@@ -94,7 +94,7 @@ describe("Zotero.FeedItem", function () {
 		it("should require edit check override", function* () {
 			let feedItem = new Zotero.FeedItem('book', { guid: Zotero.randomString() });
 			feedItem.libraryID = feed.libraryID;
-			yield assert.isRejected(feedItem.saveTx(), /^Error: Cannot edit feedItem in read-only Zotero library$/);
+			yield assert.isRejected(feedItem.saveTx(), /^Error: Cannot edit feedItem in read-only library/);
 		});
 		it("should require feed being set", function* () {
 			let feedItem = new Zotero.FeedItem('book', { guid: Zotero.randomString() });
@@ -172,7 +172,7 @@ describe("Zotero.FeedItem", function () {
 		it("should require edit check override to erase", function* () {
 			let feedItem = yield createDataObject('feedItem', { libraryID });
 			
-			yield assert.isRejected(feedItem.eraseTx(), /^Error: Cannot edit feedItem in read-only Zotero library$/);
+			yield assert.isRejected(feedItem.eraseTx(), /^Error: Cannot edit feedItem in read-only library/);
 		});
 	});
 });

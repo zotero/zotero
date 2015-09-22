@@ -824,8 +824,9 @@ Zotero.DataObject.prototype.editCheck = function () {
 		throw new Error(this._ObjectTypePlural + " cannot be added to My Publications");
 	}
 	
-	if (!Zotero.Sync.Server.updatesInProgress && !Zotero.Sync.Storage.updatesInProgress && !this.isEditable()) {
-		throw ("Cannot edit " + this._objectType + " in read-only Zotero library");
+	if (!this.isEditable()) {
+		throw new Error("Cannot edit " + this._objectType + " in read-only library "
+			+ Zotero.Libraries.getName(this.libraryID));
 	}
 }
 

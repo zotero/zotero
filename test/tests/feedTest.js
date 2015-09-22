@@ -63,7 +63,7 @@ describe("Zotero.Feed", function() {
 			let feed = yield createFeed();
 			let feedItem = new Zotero.FeedItem('book', { guid: Zotero.randomString() });
 			feedItem.libraryID = feed.libraryID;
-			yield assert.isRejected(feedItem.saveTx(), /^Error: Cannot edit feedItem in read-only Zotero library$/);
+			yield assert.isRejected(feedItem.saveTx(), /^Error: Cannot edit feedItem in read-only library/);
 			yield assert.isFulfilled(feedItem.saveTx({ skipEditCheck: true }));
 		});
 	});
