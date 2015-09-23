@@ -31,7 +31,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 	var _cachedCredentials = false;
 	
 	var _loginManagerHost = 'chrome://zotero';
-	var _loginManagerURL = 'Zotero Storage Server';
+	var _loginManagerURL = '/';
 	
 	var _lastSyncIDLength = 30;
 	
@@ -699,7 +699,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			Zotero.debug('Getting WebDAV password');
 			var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 									.getService(Components.interfaces.nsILoginManager);
-			var logins = loginManager.findLogins({}, _loginManagerHost, _loginManagerURL, null);
+			var logins = loginManager.findLogins({}, _loginManagerHost, "", null);
 			
 			// Find user from returned array of nsILoginInfo objects
 			for (var i = 0; i < logins.length; i++) {
@@ -722,7 +722,7 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			
 			var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 									.getService(Components.interfaces.nsILoginManager);
-			var logins = loginManager.findLogins({}, _loginManagerHost, _loginManagerURL, null);
+			var logins = loginManager.findLogins({}, _loginManagerHost, "", null);
 			
 			for (var i = 0; i < logins.length; i++) {
 				Zotero.debug('Clearing WebDAV passwords');
@@ -731,7 +731,6 @@ Zotero.Sync.Storage.WebDAV = (function () {
 			}
 			
 			if (password) {
-				Zotero.debug(_loginManagerURL);
 				var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
 					Components.interfaces.nsILoginInfo, "init");
 				var loginInfo = new nsLoginInfo(_loginManagerHost, _loginManagerURL,

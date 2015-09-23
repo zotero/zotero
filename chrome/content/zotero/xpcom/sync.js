@@ -1235,7 +1235,7 @@ Zotero.Sync.Server = new function () {
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 								.getService(Components.interfaces.nsILoginManager);
 		try {
-			var logins = loginManager.findLogins({}, _loginManagerHost, _loginManagerURL, null);
+			var logins = loginManager.findLogins({}, _loginManagerHost, "", null);
 		}
 		catch (e) {
 			Zotero.debug(e);
@@ -1273,7 +1273,7 @@ Zotero.Sync.Server = new function () {
 		
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 								.getService(Components.interfaces.nsILoginManager);
-		var logins = loginManager.findLogins({}, _loginManagerHost, _loginManagerURL, null);
+		var logins = loginManager.findLogins({}, _loginManagerHost, "", null);
 		for (var i = 0; i < logins.length; i++) {
 			Zotero.debug('Clearing Zotero sync credentials');
 			loginManager.removeLogin(logins[i]);
@@ -1332,7 +1332,7 @@ Zotero.Sync.Server = new function () {
 	this.apiVersion = 9;
 	
 	var _loginManagerHost = 'chrome://zotero';
-	var _loginManagerURL = 'Zotero Sync Server';
+	var _loginManagerURL = '/';
 	
 	var _serverURL = ZOTERO_CONFIG.SYNC_URL;
 	
