@@ -1235,7 +1235,7 @@ Zotero.Sync.Server = new function () {
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 								.getService(Components.interfaces.nsILoginManager);
 		try {
-			var logins = loginManager.findLogins({}, _loginManagerHost, "", null);
+			var logins = loginManager.findLogins({}, _loginManagerHost, null, _loginManagerRealm);
 		}
 		catch (e) {
 			Zotero.debug(e);
@@ -1265,6 +1265,18 @@ Zotero.Sync.Server = new function () {
 			}
 		}
 		
+		// Pre-4.0.28.5 format, broken for findLogins and removeLogin in Fx41,
+		var logins = loginManager.findLogins({}, _loginManagerHost, "", null);
+		for (var i = 0; i < logins.length; i++) {
+			if (logins[i].username == username
+					&& logins[i].formSubmitURL == "Zotero Sync Server") {
+				_cachedCredentials = {
+					username: username,
+					password: logins[i].password
+				};
+				return logins[i].password;
+			}
+		}
 		return '';
 	});
 	
@@ -1273,10 +1285,28 @@ Zotero.Sync.Server = new function () {
 		
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 								.getService(Components.interfaces.nsILoginManager);
-		var logins = loginManager.findLogins({}, _loginManagerHost, "", null);
+		
+		var logins = loginManager.findLogins({}, _loginManagerHost, null, _loginManagerRealm);
 		for (var i = 0; i < logins.length; i++) {
 			Zotero.debug('Clearing Zotero sync credentials');
-			loginManager.removeLogin(logins[i]);
+			if (logins[i].httpRealm == _loginManagerRealm) {
+				loginManager.removeLogin(logins[i]);
+			}
+			break;
+		}
+		
+		// Pre-4.0.28.5 format, broken for findLogins in Fx41
+		logins = loginManager.findLogins({}, _loginManagerHost, "", null);
+		for (var i = 0; i < logins.length; i++) {
+			Zotero.debug('Clearing old Zotero sync credentials');
+			if (logins[i].formSubmitURL == "Zotero Sync Server") {
+				try {
+					loginManager.removeLogin(logins[i]);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
 			break;
 		}
 		
@@ -1292,12 +1322,11 @@ Zotero.Sync.Server = new function () {
 		}
 		
 		if (password) {
+			Zotero.debug('Setting Zotero sync password');
 			var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
 				Components.interfaces.nsILoginInfo, "init");
-			
-			Zotero.debug('Setting Zotero sync password');
-			var loginInfo = new nsLoginInfo(_loginManagerHost, _loginManagerURL,
-				null, username, password, "", "");
+			var loginInfo = new nsLoginInfo(_loginManagerHost, null,
+				_loginManagerRealm, username, password, "", "");
 			loginManager.addLogin(loginInfo);
 			_cachedCredentials = {
 				username: username,
@@ -1332,7 +1361,7 @@ Zotero.Sync.Server = new function () {
 	this.apiVersion = 9;
 	
 	var _loginManagerHost = 'chrome://zotero';
-	var _loginManagerURL = '/';
+	var _loginManagerRealm = 'Zotero Sync Server';
 	
 	var _serverURL = ZOTERO_CONFIG.SYNC_URL;
 	
