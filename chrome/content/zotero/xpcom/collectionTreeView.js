@@ -384,10 +384,17 @@ Zotero.CollectionTreeView.prototype.setHighlightedRows = function (ids) {
 	this._highlightedRows = {};
 	this._treebox.invalidate();
 	
+	var scrolled = false;
 	for each(var id in ids) {
+		let row = this._collectionRowMap[id];
 		this.expandToCollection(id);
-		this._highlightedRows[this._collectionRowMap[id]] = true;
-		this._treebox.invalidateRow(this._collectionRowMap[id]);
+		// TODO: Scroll a little above or below
+		if (!scrolled) {
+			this._treebox.ensureRowIsVisible(row);
+			scrolled = true;
+		}
+		this._highlightedRows[row] = true;
+		this._treebox.invalidateRow(row);
 	}
 }
 
