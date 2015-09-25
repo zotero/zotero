@@ -1,9 +1,9 @@
-<!ENTITY styles.preview "Zotero Style Preview">
+<!ENTITY styles.preview "Xem trước kiểu trích dẫn của Zotero">
 
-<!ENTITY styles.preview.citationFormat "Citation Format:">
-<!ENTITY styles.preview.citationFormat.all "all">
-<!ENTITY styles.preview.citationFormat.author "author">
-<!ENTITY styles.preview.citationFormat.authorDate "author-date">
-<!ENTITY styles.preview.citationFormat.label "label">
-<!ENTITY styles.preview.citationFormat.note "note">
-<!ENTITY styles.preview.citationFormat.numeric "numeric">
+<!ENTITY styles.preview.citationFormat "Định dạng trích dẫn:">
+<!ENTITY styles.preview.citationFormat.all "tất cả">
+<!ENTITY styles.preview.citationFormat.author "tác giả">
+<!ENTITY styles.preview.citationFormat.authorDate "tác giả-ngày">
+<!ENTITY styles.preview.citationFormat.label "nhãn">
+<!ENTITY styles.preview.citationFormat.note "ghi chú">
+<!ENTITY styles.preview.citationFormat.numeric "số">

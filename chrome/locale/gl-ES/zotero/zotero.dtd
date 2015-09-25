@@ -99,7 +99,7 @@
 <!ENTITY zotero.toolbar.moreItemTypes.label "Máis">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Crear un novo elemento a partir da páxina actual">
 <!ENTITY zotero.toolbar.lookup.label "Engadir un elemento polo identificador">
-<!ENTITY zotero.toolbar.removeItem.label "Eliminar o elemento...">
+<!ENTITY zotero.toolbar.removeItem.label "Eliminar...">
 <!ENTITY zotero.toolbar.newCollection.label "Colección nova">
 <!ENTITY zotero.toolbar.newGroup "Grupo novo...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Subcolección nova">

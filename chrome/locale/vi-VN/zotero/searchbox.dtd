@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "Tên:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "Tìm trong thư viện:">
 
 <!ENTITY zotero.search.joinMode.prefix "Tìm các biểu ghi thỏa mãn">
 <!ENTITY zotero.search.joinMode.any "một trong">
