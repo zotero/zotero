@@ -1042,7 +1042,7 @@ Zotero.Integration.Document.prototype.addCitation = function() {
 		return (new Zotero.Integration.Fields(me._session, me._doc)).addEditCitation(null);
 	});
 }
-	
+
 /**
  * Edits the citation at the cursor position.
  * @return {Promise}
@@ -1050,12 +1050,24 @@ Zotero.Integration.Document.prototype.addCitation = function() {
 Zotero.Integration.Document.prototype.editCitation = function() {
 	var me = this;
 	return this._getSession(true, false).then(function() {
-		var field = me._doc.cursorInField(me._session.data.prefs['fieldType'])
+		var field = me._doc.cursorInField(me._session.data.prefs['fieldType']);
 		if(!field) {
 			throw new Zotero.Exception.Alert("integration.error.notInCitation", [],
 				"integration.error.title");
 		}
 		
+		return (new Zotero.Integration.Fields(me._session, me._doc)).addEditCitation(field);
+	});
+}
+
+/**
+ * Edits the citation at the cursor position if one exists, or else adds a new one.
+ * @return {Promise}
+ */
+Zotero.Integration.Document.prototype.addEditCitation = function() {
+	var me = this;
+	return this._getSession(false, false).then(function() {
+		var field = me._doc.cursorInField(me._session.data.prefs['fieldType']);
 		return (new Zotero.Integration.Fields(me._session, me._doc)).addEditCitation(field);
 	});
 }
