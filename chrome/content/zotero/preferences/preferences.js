@@ -41,8 +41,20 @@ var Zotero_Preferences = {
 			var io = window.arguments[0];
 			
 			if(io.pane) {
+				let tabIndex = io.tabIndex;
 				var pane = document.getElementById(io.pane);
 				document.getElementById('zotero-prefs').showPane(pane);
+				// Select tab within pane
+				if (tabIndex !== undefined) {
+					if (pane.loaded) {
+						document.getElementsByTagName('tabbox')[0].selectedIndex = tabIndex;
+					}
+					else {
+						pane.addEventListener('paneload', function () {
+							document.getElementsByTagName('tabbox')[0].selectedIndex = tabIndex;
+						})
+					}
+				}
 			}
 		} else if(document.location.hash == "#cite") {
 			document.getElementById('zotero-prefs').showPane(document.getElementById("zotero-prefpane-cite"));
