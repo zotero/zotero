@@ -426,6 +426,9 @@ var getTempDirectory = Zotero.Promise.coroutine(function* getTempDirectory() {
  *                             any that were set at startup
  */
 function resetDB(options = {}) {
+	if (options.thisArg) {
+		options.thisArg.timeout(60000);
+	}
 	var db = Zotero.getZoteroDatabase();
 	return Zotero.reinit(function() {
 		db.remove(false);

@@ -108,8 +108,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 	// Tests
 	//
 	beforeEach(function* () {
-		this.timeout(60000);
 		yield resetDB({
+			thisArg: this,
 			skipBundledFiles: true
 		});
 		
@@ -119,8 +119,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 		yield Zotero.Users.setCurrentUsername("testuser");
 	})
 	after(function* () {
-		this.timeout(60000);
-		yield resetDB();
+		yield resetDB({
+			thisArg: this
+		});
 	})
 	
 	describe("Syncing", function () {

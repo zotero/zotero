@@ -1,8 +1,9 @@
 describe("Support Functions for Unit Testing", function() {
 	describe("resetDB", function() {
 		it("should restore the DB to factory settings", function* () {
-			this.timeout(60000);
-			yield resetDB();
+			yield resetDB({
+				thisArg: this
+			});
 			assert.equal((yield Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM items")), 0);
 		});
 	});

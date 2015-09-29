@@ -445,16 +445,17 @@ describe("Zotero.Sync.Runner", function () {
 	
 	describe("#sync()", function () {
 		before(function* () {
-			this.timeout(60000);
 			yield resetDB({
+				thisArg: this,
 				skipBundledFiles: true
 			});
 			
 			yield Zotero.Libraries.init();
 		})
 		after(function* () {
-			this.timeout(60000);
-			yield resetDB();
+			yield resetDB({
+				thisArg: this
+			});
 		})
 		
 		it("should perform a sync across all libraries", function* () {
