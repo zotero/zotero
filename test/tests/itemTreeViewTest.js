@@ -1,3 +1,5 @@
+"use strict";
+
 describe("Zotero.ItemTreeView", function() {
 	var win, zp, itemsView, existingItemID;
 	
@@ -129,7 +131,7 @@ describe("Zotero.ItemTreeView", function() {
 			});
 			
 			// Nothing should be selected
-			selected = itemsView.getSelectedItems(true);
+			var selected = itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 0);
 		})
 		
