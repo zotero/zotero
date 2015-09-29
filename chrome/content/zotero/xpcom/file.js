@@ -643,26 +643,14 @@ Zotero.File = new function(){
 	 * Check whether a directory is an ancestor directory of another directory/file
 	 */
 	this.directoryContains = function (dir, file) {
-		if (!dir.isDirectory()) {
-			throw new Error("dir must be a directory");
-		}
+		if (typeof dir != 'string') throw new Error("dir must be a string");
+		if (typeof file != 'string') throw new Error("file must be a string");
 		
-		if (dir.exists()) {
-			dir.normalize();
-		}
-		if (file.exists()) {
-			file.normalize();
-		}
+		dir = OS.Path.normalize(dir);
+		file = OS.Path.normalize(file);
 		
-		if (!dir.path) {
-			throw new Error("dir.path is empty");
-		}
-		if (!file.path) {
-			throw new Error("file.path is empty");
-		}
-		
-		return file.path.indexOf(dir.path) == 0;
-	}
+		return file.startsWith(dir);
+	};
 	
 	
 	/**

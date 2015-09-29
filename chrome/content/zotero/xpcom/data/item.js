@@ -1462,22 +1462,8 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let path = this.attachmentPath;
 		let syncState = this.attachmentSyncState;
 		
-		if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-			if (libraryType == 'publications') {
-				throw new Error("Linked files cannot be added to My Publications");
-			}
-			
-			// Save attachment within attachment base directory as relative path
-			if (Zotero.Prefs.get('saveRelativeAttachmentPath')) {
-				path = Zotero.Attachments.getBaseDirectoryRelativePath(path);
-			}
-			// If possible, convert relative path to absolute
-			else {
-				let file = Zotero.Attachments.resolveRelativePath(path);
-				if (file) {
-					path = file.persistentDescriptor;
-				}
-			}
+		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE && libraryType != 'user') {
+			throw new Error("Linked files can only be added to user library");
 		}
 		
 		let params = [
@@ -1958,109 +1944,15 @@ Zotero.Item.prototype.numAttachments = function(includeTrashed) {
 }
 
 
-/**
- * Get an nsILocalFile for the attachment, or false for invalid paths
- *
- * Note: This no longer checks whether a file exists
- *
- * @return {nsILocalFile|false}  An nsIFile, or false for invalid paths
- */
 Zotero.Item.prototype.getFile = function () {
-	if (arguments.length) {
-		Zotero.debug("WARNING: Zotero.Item.prototype.getFile() no longer takes any arguments");
-	}
+	Zotero.debug("Zotero.Item.prototype.getFile() is deprecated -- use getFilePath[Async]()", 2);
 	
-	if (!this.isAttachment()) {
-		throw new Error("getFile() can only be called on attachment items");
+	var path = this.getFilePath();
+	if (path) {
+		return Zotero.File.pathToFile(path);
 	}
-	
-	var linkMode = this.attachmentLinkMode;
-	var path = this.attachmentPath;
-	
-	// No associated files for linked URLs
-	if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-		return false;
-	}
-	
-	if (!path) {
-		Zotero.debug("Attachment path is empty", 2);
-		return false;
-	}
-	
-	// Imported file with relative path
-	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
-			linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
-		try {
-			if (path.indexOf("storage:") == -1) {
-				Zotero.debug("Invalid attachment path '" + path + "'", 2);
-				throw ('Invalid path');
-			}
-			// Strip "storage:"
-			path = path.substr(8);
-			// setRelativeDescriptor() silently uses the parent directory on Windows
-			// if the filename contains certain characters, so strip them —
-			// but don't skip characters outside of XML range, since they may be
-			// correct in the opaque relative descriptor string
-			//
-			// This is a bad place for this, since the change doesn't make it
-			// back up to the sync server, but we do it to make sure we don't
-			// accidentally use the parent dir. Syncing to OS X, which doesn't
-			// exhibit this bug, will properly correct such filenames in
-			// storage.js and propagate the change
-			if (Zotero.isWin) {
-				path = Zotero.File.getValidFileName(path, true);
-			}
-			var file = Zotero.Attachments.getStorageDirectory(this);
-			file.QueryInterface(Components.interfaces.nsILocalFile);
-			file.setRelativeDescriptor(file, path);
-		}
-		catch (e) {
-			Zotero.debug(e);
-			
-			// See if this is a persistent path
-			// (deprecated for imported attachments)
-			Zotero.debug('Trying as persistent descriptor');
-			
-			try {
-				var file = Components.classes["@mozilla.org/file/local;1"].
-					createInstance(Components.interfaces.nsILocalFile);
-				file.persistentDescriptor = path;
-			}
-			catch (e) {
-				Zotero.debug('Invalid persistent descriptor', 2);
-				return false;
-			}
-		}
-	}
-	// Linked file with relative path
-	else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE &&
-			path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0) {
-		var file = Zotero.Attachments.resolveRelativePath(path);
-	}
-	else {
-		var file = Components.classes["@mozilla.org/file/local;1"].
-			createInstance(Components.interfaces.nsILocalFile);
-		
-		try {
-			file.persistentDescriptor = path;
-		}
-		catch (e) {
-			// See if this is an old relative path (deprecated)
-			Zotero.debug('Invalid persistent descriptor -- trying relative');
-			try {
-				var refDir = (row.linkMode == this.LINK_MODE_LINKED_FILE)
-					? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
-				file.setRelativeDescriptor(refDir, path);
-			}
-			catch (e) {
-				Zotero.debug('Invalid relative descriptor', 2);
-				return false;
-			}
-		}
-	}
-	
-	return file;
-};
+	return false;
+}
 
 
 /**
@@ -2083,112 +1975,66 @@ Zotero.Item.prototype.getFilePath = function () {
 	
 	if (!path) {
 		Zotero.debug("Attachment path is empty", 2);
-		if (!skipExistsCheck) {
-			this._updateAttachmentStates(false);
-		}
+		this._updateAttachmentStates(false);
 		return false;
 	}
 	
 	// Imported file with relative path
 	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
 			linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
-		try {
-			if (path.indexOf("storage:") == -1) {
-				Zotero.debug("Invalid attachment path '" + path + "'", 2);
-				throw ('Invalid path');
-			}
-			// Strip "storage:"
-			var path = path.substr(8);
-			// setRelativeDescriptor() silently uses the parent directory on Windows
-			// if the filename contains certain characters, so strip them —
-			// but don't skip characters outside of XML range, since they may be
-			// correct in the opaque relative descriptor string
-			//
-			// This is a bad place for this, since the change doesn't make it
-			// back up to the sync server, but we do it to make sure we don't
-			// accidentally use the parent dir. Syncing to OS X, which doesn't
-			// exhibit this bug, will properly correct such filenames in
-			// storage.js and propagate the change
-			if (Zotero.isWin) {
-				path = Zotero.File.getValidFileName(path, true);
-			}
-			var file = Zotero.Attachments.getStorageDirectory(this);
-			file.QueryInterface(Components.interfaces.nsILocalFile);
-			file.setRelativeDescriptor(file, path);
+		if (path.indexOf("storage:") == -1) {
+			Zotero.debug("Invalid attachment path '" + path + "'", 2);
+			throw new Error("Invalid path");
 		}
-		catch (e) {
-			Zotero.debug(e);
-			
-			// See if this is a persistent path
-			// (deprecated for imported attachments)
-			Zotero.debug('Trying as persistent descriptor');
-			
-			try {
-				var file = Components.classes["@mozilla.org/file/local;1"].
-					createInstance(Components.interfaces.nsILocalFile);
-				file.persistentDescriptor = path;
-				
-				// If valid, convert this to a relative descriptor in the background
-				OS.File.exists(file.path)
-				.then(function (exists) {
-					if (exists) {
-						return Zotero.DB.queryAsync(
-							"UPDATE itemAttachments SET path=? WHERE itemID=?",
-							["storage:" + file.leafName, this._id]
-						);
-					}
-				});
-			}
-			catch (e) {
-				Zotero.debug('Invalid persistent descriptor', 2);
-				this._updateAttachmentStates(false);
-				return false;
-			}
-		}
-	}
-	// Linked file with relative path
-	else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE &&
-			path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0) {
-		var file = Zotero.Attachments.resolveRelativePath(path);
-		if (!file) {
-			this._updateAttachmentStates(false);
+		// Strip "storage:"
+		path = path.substr(8);
+		
+		// Ignore .zotero* files that were relinked before we started blocking them
+		if (path.startsWith(".zotero")) {
+			Zotero.debug("Ignoring attachment file " + path, 2);
 			return false;
 		}
-	}
-	else {
-		var file = Components.classes["@mozilla.org/file/local;1"].
-			createInstance(Components.interfaces.nsILocalFile);
 		
+		return OS.Path.join(
+			OS.Path.normalize(Zotero.Attachments.getStorageDirectory(this).path), path
+		);
+	}
+	
+	// Linked file with relative path
+	if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE &&
+			path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0) {
+		path = Zotero.Attachments.resolveRelativePath(path);
+		if (!path) {
+			this._updateAttachmentStates(false);
+		}
+		return path;
+	}
+	
+	// Old-style OS X persistent descriptor (Base64-encoded opaque alias record)
+	//
+	// These should only exist if they weren't converted in the 80 DB upgrade step because
+	// the file couldn't be found.
+	if (Zotero.isMac && path.startsWith('AAAA')) {
+		let file = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
 		try {
 			file.persistentDescriptor = path;
 		}
 		catch (e) {
-			// See if this is an old relative path (deprecated)
-			Zotero.debug('Invalid persistent descriptor -- trying relative');
-			try {
-				var refDir = (linkMode == this.LINK_MODE_LINKED_FILE)
-					? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
-				file.setRelativeDescriptor(refDir, path);
-				// If valid, convert this to a persistent descriptor in the background
-				OS.File.exists(file.path)
-				.then(function (exists) {
-					if (exists) {
-						return Zotero.DB.queryAsync(
-							"UPDATE itemAttachments SET path=? WHERE itemID=?",
-							[file.persistentDescriptor, this._id]
-						);
-					}
-				});
-			}
-			catch (e) {
-				Zotero.debug('Invalid relative descriptor', 2);
-				this._updateAttachmentStates(false);
-				return false;
-			}
+			this._updateAttachmentStates(false);
+			return false;
 		}
+		
+		// If valid, convert this to a regular string in the background
+		Zotero.DB.queryAsync(
+			"UPDATE itemAttachments SET path=? WHERE itemID=?",
+			[file.leafName, this._id]
+		);
+		
+		return file.path;
 	}
 	
-	return file.path;
+	return path;
 };
 
 
@@ -2196,9 +2042,9 @@ Zotero.Item.prototype.getFilePath = function () {
  * Get the absolute path for the attachment, if it exists
  *
  * @return {Promise<String|false>} - A promise for either the absolute path of the attachment
- *                                    or false for invalid paths or if the file doesn't exist
+ *                                   or false for invalid paths or if the file doesn't exist
  */
-Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* (skipExistsCheck) {
+Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 	if (!this.isAttachment()) {
 		throw new Error("getFilePathAsync() can only be called on attachment items");
 	}
@@ -2213,125 +2059,93 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* (ski
 	
 	if (!path) {
 		Zotero.debug("Attachment path is empty", 2);
-		if (!skipExistsCheck) {
-			this._updateAttachmentStates(false);
-		}
+		this._updateAttachmentStates(false);
 		return false;
 	}
 	
 	// Imported file with relative path
 	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
 			linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
-		try {
-			if (path.indexOf("storage:") == -1) {
-				Zotero.debug("Invalid attachment path '" + path + "'", 2);
-				throw ('Invalid path');
-			}
-			// Strip "storage:"
-			var path = path.substr(8);
-			// setRelativeDescriptor() silently uses the parent directory on Windows
-			// if the filename contains certain characters, so strip them —
-			// but don't skip characters outside of XML range, since they may be
-			// correct in the opaque relative descriptor string
-			//
-			// This is a bad place for this, since the change doesn't make it
-			// back up to the sync server, but we do it to make sure we don't
-			// accidentally use the parent dir. Syncing to OS X, which doesn't
-			// exhibit this bug, will properly correct such filenames in
-			// storage.js and propagate the change
-			//
-			// The one exception on other platforms is '/', which is interpreted
-			// as a directory by setRelativeDescriptor, so strip in that case too.
-			if (Zotero.isWin || path.indexOf('/') != -1) {
-				path = Zotero.File.getValidFileName(path, true);
-			}
-			// Ignore .zotero* files that were relinked before we started blocking them
-			if (path.startsWith(".zotero")) {
-				Zotero.debug("Ignoring attachment file " + path, 2);
-				return false;
-			}
-			var file = Zotero.Attachments.getStorageDirectory(this);
-			file.QueryInterface(Components.interfaces.nsILocalFile);
-			file.setRelativeDescriptor(file, path);
+		if (path.indexOf("storage:") == -1) {
+			Zotero.debug("Invalid attachment path '" + path + "'", 2);
+			throw new Error("Invalid path");
 		}
-		catch (e) {
-			Zotero.debug(e);
-			
-			// See if this is a persistent path
-			// (deprecated for imported attachments)
-			Zotero.debug('Trying as persistent descriptor');
-			
-			try {
-				var file = Components.classes["@mozilla.org/file/local;1"].
-					createInstance(Components.interfaces.nsILocalFile);
-				file.persistentDescriptor = path;
-				
-				// If valid, convert this to a relative descriptor
-				if (!skipExistsCheck && file.exists()) {
-					yield Zotero.DB.queryAsync("UPDATE itemAttachments SET path=? WHERE itemID=?",
-						["storage:" + file.leafName, this._id]);
-				}
-			}
-			catch (e) {
-				Zotero.debug('Invalid persistent descriptor', 2);
-				if (!skipExistsCheck) {
-					this._updateAttachmentStates(false);
-				}
-				return false;
-			}
+		
+		// Strip "storage:"
+		path = path.substr(8);
+		
+		// Ignore .zotero* files that were relinked before we started blocking them
+		if (path.startsWith(".zotero")) {
+			Zotero.debug("Ignoring attachment file " + path, 2);
+			return false;
 		}
-	}
-	// Linked file with relative path
-	else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE &&
-			path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0) {
-		var file = Zotero.Attachments.resolveRelativePath(path);
-		if (!skipExistsCheck && !file) {
+		
+		path = OS.Path.join(
+			OS.Path.normalize(Zotero.Attachments.getStorageDirectory(this).path), path
+		);
+		
+		if (!(yield OS.File.exists(path))) {
+			Zotero.debug("Attachment file '" + path + "' not found", 2);
 			this._updateAttachmentStates(false);
 			return false;
 		}
-	}
-	else {
-		var file = Components.classes["@mozilla.org/file/local;1"].
-			createInstance(Components.interfaces.nsILocalFile);
 		
+		return path;
+	}
+	
+	// Linked file with relative path
+	if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE &&
+			path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) == 0) {
+		path = Zotero.Attachments.resolveRelativePath(path);
+		if (!path) {
+			this._updateAttachmentStates(false);
+			return false;
+		}
+		if (!(yield OS.File.exists(path))) {
+			Zotero.debug("Attachment file '" + path + "' not found", 2);
+			this._updateAttachmentStates(false);
+			return false;
+		}
+		return path;
+	}
+	
+	// Old-style OS X persistent descriptor (Base64-encoded opaque alias record)
+	//
+	// These should only exist if they weren't converted in the 80 DB upgrade step because
+	// the file couldn't be found
+	if (Zotero.isMac && path.startsWith('AAAA')) {
+		let file = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
 		try {
 			file.persistentDescriptor = path;
 		}
 		catch (e) {
-			// See if this is an old relative path (deprecated)
-			Zotero.debug('Invalid persistent descriptor -- trying relative');
-			try {
-				var refDir = (linkMode == this.LINK_MODE_LINKED_FILE)
-					? Zotero.getZoteroDirectory() : Zotero.getStorageDirectory();
-				file.setRelativeDescriptor(refDir, path);
-				// If valid, convert this to a persistent descriptor
-				if (!skipExistsCheck && file.exists()) {
-					yield Zotero.DB.queryAsync("UPDATE itemAttachments SET path=? WHERE itemID=?",
-						[file.persistentDescriptor, this._id]);
-				}
-			}
-			catch (e) {
-				Zotero.debug('Invalid relative descriptor', 2);
-				if (!skipExistsCheck) {
-					this._updateAttachmentStates(false);
-				}
-				return false;
-			}
+			this._updateAttachmentStates(false);
+			return false;
 		}
+		
+		// If valid, convert this to a regular string
+		yield Zotero.DB.queryAsync(
+			"UPDATE itemAttachments SET path=? WHERE itemID=?",
+			[file.leafName, this._id]
+		);
+		
+		if (!(yield OS.File.exists(file.path))) {
+			Zotero.debug("Attachment file '" + file.path + "' not found", 2);
+			this._updateAttachmentStates(false);
+			return false;
+		}
+		
+		return file.path;
 	}
 	
-	var path = file.path;
-	
-	if (!skipExistsCheck && !(yield OS.File.exists(path))) {
+	if (!(yield OS.File.exists(path))) {
 		Zotero.debug("Attachment file '" + path + "' not found", 2);
 		this._updateAttachmentStates(false);
 		return false;
 	}
 	
-	if (!skipExistsCheck) {
-		this._updateAttachmentStates(true);
-	}
-	return file.path;
+	return path;
 });
 
 
@@ -2557,7 +2371,7 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 		return false;
 	}
 	
-	this.attachmentPath = Zotero.Attachments.getPath(Zotero.File.pathToFile(newPath), linkMode);
+	this.attachmentPath = newPath;
 	
 	yield this.saveTx({
 		skipDateModifiedUpdate: true,
@@ -2769,6 +2583,12 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentFilename', {
 });
 
 
+/**
+ * Returns raw attachment path string as stored in DB
+ * (e.g., "storage:foo.pdf", "attachments:foo/bar.pdf", "/Users/foo/Desktop/bar.pdf")
+ *
+ * Can be set as absolute path or prefixed string ("storage:foo.pdf")
+ */
 Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
 	get: function() {
 		if (!this.isAttachment()) {
@@ -2778,15 +2598,51 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
 	},
 	set: function(val) {
 		if (!this.isAttachment()) {
-			throw (".attachmentPath can only be set for attachment items");
+			throw new Error(".attachmentPath can only be set for attachment items");
 		}
 		
-		if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-			throw ('attachmentPath cannot be set for link attachments');
+		if (typeof val != 'string') {
+			throw new Error(".attachmentPath must be a string");
+		}
+		
+		var linkMode = this.attachmentLinkMode;
+		if (linkMode === null) {
+			throw new Error("Link mode must be set before setting attachment path");
+		}
+		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+			throw new Error('attachmentPath cannot be set for link attachments');
 		}
 		
 		if (!val) {
 			val = '';
+		}
+		
+		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+			if (this._libraryID) {
+				let libraryType = Zotero.Libraries.get(this._libraryID).libraryType;
+				if (libraryType != 'user') {
+					throw new Error("Linked files can only be added to user library");
+				}
+			}
+			
+			// If base directory is enabled, save attachment within as relative path
+			if (Zotero.Prefs.get('saveRelativeAttachmentPath')) {
+				val = Zotero.Attachments.getBaseDirectoryRelativePath(val);
+			}
+			// Otherwise, convert relative path to absolute if possible
+			else {
+				val = Zotero.Attachments.resolveRelativePath(val) || val;
+			}
+		}
+		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
+				linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
+			if (!val.startsWith('storage:')) {
+				let storagePath = Zotero.Attachments.getStorageDirectory(this).path;
+				if (!val.startsWith(storagePath)) {
+					throw new Error("Imported file path must be within storage directory");
+				}
+				val = 'storage:' + OS.Path.basename(val);
+			}
 		}
 		
 		if (val == this.attachmentPath) {
@@ -2797,26 +2653,10 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
 			this._changed.attachmentData = {};
 		}
 		this._changed.attachmentData.path = true;
+		
 		this._attachmentPath = val;
 	}
 });
-
-
-/**
- * Force an update of the attachment path and resave the item
- *
- * This is used when changing the attachment base directory, since relative
- * path handling is done on item save.
- */
-Zotero.Item.prototype.updateAttachmentPath = function () {
-	if (!this._changed.attachmentData) {
-		this._changed.attachmentData = {};
-	}
-	this._changed.attachmentData.path = true;
-	this.save({
-		skipDateModifiedUpdate: true
-	});
-};
 
 
 Zotero.defineProperty(Zotero.Item.prototype, 'attachmentSyncState', {

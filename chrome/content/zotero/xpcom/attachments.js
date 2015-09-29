@@ -94,7 +94,7 @@ Zotero.Attachments = new function(){
 			contentType = yield Zotero.MIME.getMIMETypeFromFile(newFile);
 			
 			attachmentItem.attachmentContentType = contentType;
-			attachmentItem.attachmentPath = this.getPath(newFile, this.LINK_MODE_IMPORTED_FILE);
+			attachmentItem.attachmentPath = newFile.path;
 			yield attachmentItem.save();
 		}.bind(this))
 		.then(function () {
@@ -198,7 +198,7 @@ Zotero.Attachments = new function(){
 			newFile = destDir.clone();
 			newFile.append(file.leafName);
 			
-			attachmentItem.attachmentPath = this.getPath(newFile, this.LINK_MODE_IMPORTED_URL);
+			attachmentItem.attachmentPath = newFile.path;
 			yield attachmentItem.save();
 		}.bind(this))
 		.then(function () {
@@ -365,9 +365,7 @@ Zotero.Attachments = new function(){
 				destFile.append(fileName);
 				
 				// Refetch item to update path
-				attachmentItem.attachmentPath = Zotero.Attachments.getPath(
-					destFile, Zotero.Attachments.LINK_MODE_IMPORTED_URL
-				);
+				attachmentItem.attachmentPath = destFile.path;
 				yield attachmentItem.save();
 			}.bind(this))
 			.catch(function (e) {
@@ -656,9 +654,7 @@ Zotero.Attachments = new function(){
 			var destFile = destDir.clone();
 			destFile.append(fileName);
 			
-			attachmentItem.attachmentPath = this.getPath(
-				destFile, Zotero.Attachments.LINK_MODE_IMPORTED_URL
-			);
+			attachmentItem.attachmentPath = destFile.path;
 			yield attachmentItem.save();
 		}.bind(this))
 		.catch(function (e) {
@@ -883,27 +879,12 @@ Zotero.Attachments = new function(){
 	});
 	
 	
-	/*
-	 * Gets a relative descriptor for imported attachments and a persistent
-	 * descriptor for files outside the storage directory
-	 */
-	this.getPath = function (file, linkMode) {
-		file.QueryInterface(Components.interfaces.nsILocalFile);
-		if (linkMode == self.LINK_MODE_IMPORTED_URL ||
-				linkMode == self.LINK_MODE_IMPORTED_FILE) {
-			var fileName = file.getRelativeDescriptor(file.parent);
-			return 'storage:' + fileName;
-		}
-		return file.persistentDescriptor;
-	}
-	
-	
 	/**
-	 * If file is within the attachment base directory, return a relative
+	 * If path is within the attachment base directory, return a relative
 	 * path prefixed by BASE_PATH_PLACEHOLDER. Otherwise, return unchanged.
 	 */
 	this.getBaseDirectoryRelativePath = function (path) {
-		if (!path || path.indexOf(this.BASE_PATH_PLACEHOLDER) == 0) {
+		if (!path || path.startsWith(this.BASE_PATH_PLACEHOLDER)) {
 			return path;
 		}
 		
@@ -912,55 +893,24 @@ Zotero.Attachments = new function(){
 			return path;
 		}
 		
-		// Get nsIFile for base directory
-		var baseDir = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
-		try {
-			baseDir.persistentDescriptor = basePath;
-		}
-		catch (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
-			return path;
-		}
-		
-		if (!baseDir.exists()) {
-			Zotero.debug("Base directory '" + baseDir.path + "' doesn't exist", 2);
-			return path;
-		}
-		
-		// Get nsIFile for file
-		var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
-		try {
-			attachmentFile.persistentDescriptor = path;
-		}
-		catch (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
-			return path;
-		}
-		
-		if (Zotero.File.directoryContains(baseDir, attachmentFile)) {
-			path = this.BASE_PATH_PLACEHOLDER
-				+ attachmentFile.getRelativeDescriptor(baseDir);
+		if (Zotero.File.directoryContains(basePath, path)) {
+			basePath = OS.Path.normalize(basePath);
+			path = OS.Path.normalize(path);
+			path = this.BASE_PATH_PLACEHOLDER + path.substr(basePath.length + 1)
 		}
 		
 		return path;
-	}
+	};
 	
 	
 	/**
-	 * Get a file from this path, if we can
+	 * Get an absolute path from this base-dir relative path, if we can
 	 *
-	 * @param {String} path Absolute path or relative path prefixed
-	 * by BASE_PATH_PLACEHOLDER
-	 * @param {Boolean} asFile Return nsIFile instead of path
-	 * @return {String|nsIFile|FALSE} Persistent descriptor string, file,
-	 * of FALSE if no path
+	 * @param {String} path - Absolute path or relative path prefixed by BASE_PATH_PLACEHOLDER
+	 * @return {String|false} - Absolute path, or FALSE if no path
 	 */
 	this.resolveRelativePath = function (path) {
-		if (path.indexOf(Zotero.Attachments.BASE_PATH_PLACEHOLDER) != 0) {
+		if (!path.startsWith(Zotero.Attachments.BASE_PATH_PLACEHOLDER)) {
 			return false;
 		}
 		
@@ -970,34 +920,10 @@ Zotero.Attachments = new function(){
 			return false;
 		}
 		
-		// Get file from base directory
-		var baseDir = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
-		try {
-			baseDir.persistentDescriptor = basePath;
-		}
-		catch (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
-			Zotero.debug("Invalid base attachment path -- can't resolve'" + row.path + "'", 2);
-			return false;
-		}
-		
-		// Get file from relative path
-		var relativePath = path.substr(
-			Zotero.Attachments.BASE_PATH_PLACEHOLDER.length
+		return OS.Path.join(
+			OS.Path.normalize(basePath),
+			path.substr(Zotero.Attachments.BASE_PATH_PLACEHOLDER.length)
 		);
-		var file = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
-		try {
-			file.setRelativeDescriptor(baseDir, relativePath);
-		}
-		catch (e) {
-			Zotero.debug("Invalid relative descriptor '" + relativePath + "'", 2);
-			return false;
-		}
-		
-		return file;
 	}
 	
 	
@@ -1346,15 +1272,14 @@ Zotero.Attachments = new function(){
 				attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
 			}
 			
-			// Get path
-			if (file) {
-				attachmentItem.attachmentPath = Zotero.Attachments.getPath(file, linkMode);
-			}
-			
 			attachmentItem.parentID = parentItemID;
 			attachmentItem.attachmentLinkMode = linkMode;
 			attachmentItem.attachmentContentType = contentType;
 			attachmentItem.attachmentCharset = charset;
+			if (file) {
+				attachmentItem.attachmentPath = file.path;
+			}
+			
 			if (collections) {
 				attachmentItem.setCollections(collections);
 			}

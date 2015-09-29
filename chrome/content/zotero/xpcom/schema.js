@@ -2162,6 +2162,8 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("DROP INDEX IF EXISTS itemAttachments_syncState");
 				yield Zotero.DB.queryAsync("CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState)");
 				
+				yield _migrateUserData_80_filePaths();
+				
 				yield Zotero.DB.queryAsync("ALTER TABLE collectionItems RENAME TO collectionItemsOld");
 				yield Zotero.DB.queryAsync("CREATE TABLE collectionItems (\n    collectionID INT NOT NULL,\n    itemID INT NOT NULL,\n    orderIndex INT NOT NULL DEFAULT 0,\n    PRIMARY KEY (collectionID, itemID),\n    FOREIGN KEY (collectionID) REFERENCES collections(collectionID) ON DELETE CASCADE,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n)");
 				yield Zotero.DB.queryAsync("INSERT OR IGNORE INTO collectionItems SELECT * FROM collectionItemsOld");
@@ -2286,6 +2288,75 @@ Zotero.Schema = new function(){
 	//
 	// Longer functions for specific upgrade steps
 	//
+	
+	/**
+	 * Convert Mozilla-specific relative descriptors below storage and base directories to UTF-8
+	 * paths using '/' separators
+	 */
+	var _migrateUserData_80_filePaths = Zotero.Promise.coroutine(function* () {
+		var rows = yield Zotero.DB.queryAsync("SELECT itemID, libraryID, key, linkMode, path FROM items JOIN itemAttachments USING (itemID) WHERE path != ''");
+		var tmpDirFile = Zotero.getTempDirectory();
+		var tmpFilePath = OS.Path.normalize(tmpDirFile.path);
+		
+		for (let i = 0; i < rows.length; i++) {
+			let row = rows[i];
+			let libraryKey = row.libraryID + "/" + row.key;
+			let path = row.path;
+			let prefix = path.match(/^(attachments|storage):/);
+			if (prefix) {
+				prefix = prefix[0];
+				let relPath = path.substr(prefix.length)
+				let file = tmpDirFile.clone();
+				file.setRelativeDescriptor(file, relPath);
+				path = OS.Path.normalize(file.path);
+				
+				// setRelativeDescriptor() silently uses the parent directory on Windows
+				// if the filename contains certain characters, so strip them —
+				// but don't skip characters outside of XML range, since they may be
+				// correct in the opaque relative descriptor string
+				//
+				// This is a bad place for this, since the change doesn't make it
+				// back up to the sync server, but we do it to make sure we don't
+				// accidentally use the parent dir.
+				if (path == tmpFilePath) {
+					file.setRelativeDescriptor(file, Zotero.File.getValidFileName(relPath, true));
+					path = OS.Path.normalize(file.path);
+					if (path == tmpFilePath) {
+						Zotero.logError("Cannot fix relative descriptor for item " + libraryKey + " -- not converting path");
+						continue;
+					}
+					else {
+						Zotero.logError("Filtered relative descriptor for item " + libraryKey);
+					}
+				}
+				
+				// Normalize path, and then convert '\' to '/'. As long as normalize() is run on the
+				// path before use, it doesn't matter which separator it uses, but we might as well
+				// be consistent.
+				path = path.replace(/\\/g, '/');
+				if (!path.startsWith(tmpFilePath)) {
+					Zotero.logError(path + " does not start with temp path -- not converting relative path for item " + libraryKey);
+					continue;
+				}
+				path = prefix + path.substr(tmpFilePath.length + 1);
+			}
+			else {
+				let file = Components.classes["@mozilla.org/file/local;1"]
+					.createInstance(Components.interfaces.nsILocalFile);
+				try {
+					file.persistentDescriptor = path;
+				}
+				catch (e) {
+					Zotero.logError("Invalid persistent descriptor for item " + libraryKey + " -- not converting path");
+					continue;
+				}
+				path = file.path;
+			}
+			
+			yield Zotero.DB.queryAsync("UPDATE itemAttachments SET path=? WHERE itemID=?", [path, row.itemID]);
+		}
+	})
+	
 	var _migrateUserData_80_relations = Zotero.Promise.coroutine(function* () {
 		yield Zotero.DB.queryAsync("CREATE TABLE relationPredicates (\n    predicateID INTEGER PRIMARY KEY,\n    predicate TEXT UNIQUE\n)");
 		
