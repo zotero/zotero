@@ -151,11 +151,6 @@ Zotero.defineProperty(Zotero.Library.prototype, 'lastSync', {
 	get: function() this._get('_libraryLastSync')
 });
 
-Zotero.defineProperty(Zotero.Library.prototype, 'lastStorageSync', {
-	get: function () this._get('_libraryLastStorageSync'),
-	set: function (v) this._set('_libraryLastStorageSync', v)
-});
-
 
 Zotero.defineProperty(Zotero.Library.prototype, 'name', {
 	get: function() {
@@ -177,7 +172,7 @@ Zotero.defineProperty(Zotero.Library.prototype, 'hasTrash', {
 
 // Create other accessors
 (function() {
-	let accessors = ['editable', 'filesEditable'];
+	let accessors = ['editable', 'filesEditable', 'lastStorageSync'];
 	for (let i=0; i<accessors.length; i++) {
 		let prop = Zotero.Library._colToProp(accessors[i]);
 		Zotero.defineProperty(Zotero.Library.prototype, accessors[i], {
@@ -188,12 +183,12 @@ Zotero.defineProperty(Zotero.Library.prototype, 'hasTrash', {
 })()
 
 Zotero.Library.prototype._isValidProp = function(prop) {
-	let preffix = '_library';
-	if (prop.indexOf(preffix) !== 0 || prop.length == preffix.length) {
+	let prefix = '_library';
+	if (prop.indexOf(prefix) !== 0 || prop.length == prefix.length) {
 		return false;
 	}
 	
-	let col = prop.substr(preffix.length);
+	let col = prop.substr(prefix.length);
 	col = col.charAt(0).toLowerCase() + col.substr(1);
 	
 	return Zotero.Library._dbColumns.indexOf(col) != -1;
