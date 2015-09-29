@@ -154,7 +154,8 @@
 								readonly="true"
 								flex="1"
 								tabindex="-1"/>
-							<button label="&zotero.preferences.attachmentBaseDir.selectBasePath;"
+							<button id="baseAttachmentPathButton"
+								label="&zotero.preferences.attachmentBaseDir.selectBasePath;"
 								oncommand="Zotero_Preferences.Attachment_Base_Directory.choosePath()"/>
 						</hbox>
 						
