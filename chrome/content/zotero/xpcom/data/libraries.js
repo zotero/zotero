@@ -34,10 +34,9 @@ Zotero.Libraries = new function () {
 		}
 	});
 	
-	let _userLibrary;
 	Zotero.defineProperty(this, 'userLibrary', {
 		get: function () {
-			return _userLibrary || (_userLibrary = Zotero.Libraries.get(this.userLibraryID));
+			return Zotero.Libraries.get(_userLibraryID);
 		}
 	})
 	
