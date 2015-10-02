@@ -97,6 +97,13 @@ var ZoteroPane = new function()
 	 * Called when the window containing Zotero pane is open
 	 */
 	function init() {
+		// Fix window without menubar/titlebar when Standalone is closed in full-screen mode
+		// in OS X 10.11
+		if (Zotero.isMac && Zotero.isStandalone
+				&& window.document.documentElement.getAttribute('sizemode') == 'fullscreen') {
+			window.document.documentElement.setAttribute('sizemode', 'normal');
+		}
+		
 		// Set "Report Errors..." label via property rather than DTD entity,
 		// since we need to reference it in script elsewhere
 		document.getElementById('zotero-tb-actions-reportErrors').setAttribute('label',
