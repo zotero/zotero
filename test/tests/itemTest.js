@@ -616,6 +616,57 @@ describe("Zotero.Item", function () {
 		})
 	})
 	
+	
+	describe("#getBestAttachmentState()", function () {
+		it("should cache state for an existing file", function* () {
+			var parentItem = yield createDataObject('item');
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var childItem = yield Zotero.Attachments.importFromFile({
+				file,
+				parentItemID: parentItem.id
+			});
+			yield parentItem.getBestAttachmentState();
+			assert.equal(parentItem.getBestAttachmentStateCached(), 1);
+		})
+		
+		it("should cache state for a missing file", function* () {
+			var parentItem = yield createDataObject('item');
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var childItem = yield Zotero.Attachments.importFromFile({
+				file,
+				parentItemID: parentItem.id
+			});
+			let path = yield childItem.getFilePathAsync();
+			yield OS.File.remove(path);
+			yield parentItem.getBestAttachmentState();
+			assert.equal(parentItem.getBestAttachmentStateCached(), -1);
+		})
+	})
+	
+	
+	describe("#fileExists()", function () {
+		it("should cache state for an existing file", function* () {
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var item = yield Zotero.Attachments.importFromFile({ file });
+			yield item.fileExists();
+			assert.equal(item.fileExistsCached(), true);
+		})
+		
+		it("should cache state for a missing file", function* () {
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var item = yield Zotero.Attachments.importFromFile({ file });
+			let path = yield item.getFilePathAsync();
+			yield OS.File.remove(path);
+			yield item.fileExists();
+			assert.equal(item.fileExistsCached(), false);
+		})
+	})
+	
+	
 	describe("#setTags", function () {
 		it("should save an array of tags in API JSON format", function* () {
 			var tags = [

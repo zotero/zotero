@@ -2090,6 +2090,7 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 			return false;
 		}
 		
+		this._updateAttachmentStates(true);
 		return path;
 	}
 	
@@ -2215,10 +2216,6 @@ Zotero.Item.prototype.getFilename = function () {
  * This is updated only initially and on subsequent getFilePathAsync() calls.
  */
 Zotero.Item.prototype.fileExists = Zotero.Promise.coroutine(function* () {
-	if (this._fileExists !== null) {
-		return this._fileExists;
-	}
-	
 	if (!this.isAttachment()) {
 		throw new Error("Zotero.Item.fileExists() can only be called on attachment items");
 	}
