@@ -2054,6 +2054,7 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 	
 	// No associated files for linked URLs
 	if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+		this._updateAttachmentStates(false);
 		return false;
 	}
 	
@@ -2137,6 +2138,8 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 			return false;
 		}
 		
+		this._updateAttachmentStates(true);
+		
 		return file.path;
 	}
 	
@@ -2145,6 +2148,8 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 		this._updateAttachmentStates(false);
 		return false;
 	}
+	
+	this._updateAttachmentStates(true);
 	
 	return path;
 });
