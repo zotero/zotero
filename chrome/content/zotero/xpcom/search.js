@@ -819,9 +819,12 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 });
 
 
-Zotero.Search.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
-	yield this.loadAllData();
-	
+/**
+ * Populate the object's data from an API JSON data object
+ *
+ * If this object is identified (has an id or library/key), loadAllData() must have been called.
+ */
+Zotero.Search.prototype.fromJSON = function (json) {
 	if (!json.name) {
 		throw new Error("'name' property not provided for search");
 	}
@@ -835,7 +838,7 @@ Zotero.Search.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 			condition.value
 		);
 	}
-});
+}
 
 Zotero.Collection.prototype.toResponseJSON = Zotero.Promise.coroutine(function* (options = {}) {
 	var json = yield this.constructor._super.prototype.toResponseJSON.apply(this, options);

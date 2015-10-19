@@ -3708,11 +3708,12 @@ Zotero.Item.prototype.isCollection = function() {
 }
 
 
-Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
-	if (this._identified) {
-		yield this.loadAllData();
-	}
-	
+/**
+ * Populate the object's data from an API JSON data object
+ *
+ * If this object is identified (has an id or library/key), loadAllData() must have been called.
+ */
+Zotero.Item.prototype.fromJSON = function (json) {
 	if (!json.itemType && !this._itemTypeID) {
 		throw new Error("itemType property not provided");
 	}
@@ -3843,7 +3844,7 @@ Zotero.Item.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
 		let note = json.note;
 		this.setNote(note !== undefined ? note : "");
 	}
-});
+}
 
 
 /**

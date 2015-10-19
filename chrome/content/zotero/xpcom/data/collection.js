@@ -676,9 +676,12 @@ Zotero.Collection.prototype.serialize = function(nested) {
 }
 
 
-Zotero.Collection.prototype.fromJSON = Zotero.Promise.coroutine(function* (json) {
-	yield this.loadAllData();
-	
+/**
+ * Populate the object's data from an API JSON data object
+ *
+ * If this object is identified (has an id or library/key), loadAllData() must have been called.
+ */
+Zotero.Collection.prototype.fromJSON = function (json) {
 	if (!json.name) {
 		throw new Error("'name' property not provided for collection");
 	}
@@ -687,7 +690,7 @@ Zotero.Collection.prototype.fromJSON = Zotero.Promise.coroutine(function* (json)
 	
 	// TODO
 	//this.setRelations(json.relations);
-});
+}
 
 
 Zotero.Collection.prototype.toResponseJSON = Zotero.Promise.coroutine(function* (options = {}) {

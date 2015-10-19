@@ -954,7 +954,7 @@ describe("Zotero.Item", function () {
 				dateModified: "2015-06-07T20:58:00Z",
 			};
 			var item = new Zotero.Item;
-			yield item.fromJSON(json);
+			item.fromJSON(json);
 			assert.equal(item.getField('accessDate'), '2015-06-07 20:56:00');
 			assert.equal(item.dateAdded, '2015-06-07 20:57:00');
 			assert.equal(item.dateModified, '2015-06-07 20:58:00');
@@ -968,7 +968,7 @@ describe("Zotero.Item", function () {
 				dateModified: "2015-06-07 20:58:00",
 			};
 			var item = new Zotero.Item;
-			yield item.fromJSON(json);
+			item.fromJSON(json);
 			assert.strictEqual(item.getField('accessDate'), '');
 			// DEBUG: Should these be null, or empty string like other fields from getField()?
 			assert.isNull(item.dateAdded);
@@ -992,14 +992,14 @@ describe("Zotero.Item", function () {
 			};
 			
 			var item = new Zotero.Item;
-			yield item.fromJSON(json);
+			item.fromJSON(json);
 			var id = yield item.saveTx();
 			assert.sameDeepMembers(item.getCreatorsJSON(), json.creators);
 		})
 		
 		it("should map a base field to an item-specific field", function* () {
 			var item = new Zotero.Item("bookSection");
-			yield item.fromJSON({
+			item.fromJSON({
 				"itemType":"bookSection",
 				"publicationTitle":"Publication Title"
 			});
