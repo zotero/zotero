@@ -88,6 +88,7 @@ user_pref("extensions.zotero.debug.time", $DEBUG);
 user_pref("extensions.zotero.firstRunGuidance", false);
 user_pref("extensions.zotero.firstRun2", false);
 user_pref("extensions.zotero.reportTranslationFailure", false);
+user_pref("xpinstall.signatures.required", false);
 EOF
 
 # -v flag on Windows makes Firefox process hang
