@@ -75,7 +75,7 @@ Zotero.DataObjectUtilities = {
 	
 	
 	"checkKey": function(key) {
-		if (!key) return null;
+		if (!key && key !== 0) return null;
 		if (!Zotero.Utilities.isValidObjectKey(key)) {
 			throw new Error("key is not valid");
 		}
