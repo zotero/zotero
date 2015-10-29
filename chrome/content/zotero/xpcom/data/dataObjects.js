@@ -142,7 +142,11 @@ Zotero.DataObjects.prototype.getAsync = Zotero.Promise.coroutine(function* (ids,
 	var toReturn = [];
 	
 	if (!ids) {
-		throw new Error("No arguments provided to " + this._ZDO_Objects + ".get()");
+		throw new Error("No arguments provided");
+	}
+	
+	if (options && typeof options != 'object') {
+		throw new Error(`'options' must be an object, ${typeof options} given`);
 	}
 	
 	if (Array.isArray(ids)) {
@@ -388,8 +392,7 @@ Zotero.DataObjects.prototype.registerObject = function (obj) {
 	var libraryID = obj.libraryID;
 	var key = obj.key;
 	
-	Zotero.debug("Registering " + this._ZDO_object + " " + id
-		+ " as " + libraryID + "/" + key);
+	//Zotero.debug("Registering " + this._ZDO_object + " " + id + " as " + libraryID + "/" + key);
 	if (!this._objectIDs[libraryID]) {
 		this._objectIDs[libraryID] = {};
 	}
@@ -438,7 +441,7 @@ Zotero.DataObjects.prototype.unload = function () {
  */
 Zotero.DataObjects.prototype.updateVersion = Zotero.Promise.method(function (ids, version) {
 	if (version != parseInt(version)) {
-		throw new Error("'version' must be an integer");
+		throw new Error("'version' must be an integer ('" + version + "' given)");
 	}
 	version = parseInt(version);
 	
