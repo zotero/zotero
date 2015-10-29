@@ -35,7 +35,7 @@ Zotero.Attachments = new function(){
 	
 	/**
 	 * @param {Object} options
-	 * @param {nsIFile} [options.file] - File to add
+	 * @param {nsIFile|String} [options.file] - File to add
 	 * @param {Integer} [options.libraryID]
 	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
 	 * @param {Integer[]} [options.collections] - Collection keys or ids to add new item to
@@ -45,15 +45,12 @@ Zotero.Attachments = new function(){
 		Zotero.debug('Importing attachment from file');
 		
 		var libraryID = options.libraryID;
-		var file = options.file;
+		var file = Zotero.File.pathToFile(options.file);
 		var parentItemID = options.parentItemID;
 		var collections = options.collections;
 		
 		var newName = Zotero.File.getValidFileName(file.leafName);
 		
-		if (!file.isFile()) {
-			throw new Error("'" + file.leafName + "' must be a file");
-		}
 		if (file.leafName.endsWith(".lnk")) {
 			throw new Error("Cannot add Windows shortcut");
 		}
@@ -98,7 +95,7 @@ Zotero.Attachments = new function(){
 			yield attachmentItem.save();
 		}.bind(this))
 		.then(function () {
-			return _postProcessFile(attachmentItem.id, newFile, contentType);
+			return _postProcessFile(attachmentItem, newFile, contentType);
 		})
 		.catch(function (e) {
 			Zotero.logError(e);
@@ -148,7 +145,7 @@ Zotero.Attachments = new function(){
 			parentItemID: parentItemID,
 			collections: collections
 		});
-		yield _postProcessFile(item.id, file, contentType);
+		yield _postProcessFile(item, file, contentType);
 		return item;
 	});
 	
@@ -160,7 +157,7 @@ Zotero.Attachments = new function(){
 	this.importSnapshotFromFile = Zotero.Promise.coroutine(function* (options) {
 		Zotero.debug('Importing snapshot from file');
 		
-		var file = options.file;
+		var file = Zotero.File.pathToFile(options.file);
 		var url = options.url;
 		var title = options.title;
 		var contentType = options.contentType;
@@ -202,7 +199,7 @@ Zotero.Attachments = new function(){
 			yield attachmentItem.save();
 		}.bind(this))
 		.then(function () {
-			return _postProcessFile(itemID, newFile, contentType);
+			return _postProcessFile(attachmentItem, newFile, contentType, charset);
 		})
 		.catch(function (e) {
 			Zotero.logError(e);
@@ -229,8 +226,6 @@ Zotero.Attachments = new function(){
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
 	this.importFromURL = Zotero.Promise.coroutine(function* (options) {
-		Zotero.debug('Importing attachment from URL ' + url);
-		
 		var libraryID = options.libraryID;
 		var url = options.url;
 		var parentItemID = options.parentItemID;
@@ -239,6 +234,8 @@ Zotero.Attachments = new function(){
 		var fileBaseName = options.fileBaseName;
 		var contentType = options.contentType;
 		var cookieSandbox = options.cookieSandbox;
+		
+		Zotero.debug('Importing attachment from URL ' + url);
 		
 		if (parentItemID && collections) {
 			throw new Error("parentItemID and collections cannot both be provided");
@@ -1064,9 +1061,20 @@ Zotero.Attachments = new function(){
 					return;
 				}
 				return OS.File.stat(entry.path)
-				.then(function (info) {
-					size += info.size;
-				});
+				.then(
+					function (info) {
+						size += info.size;
+					},
+					function (e) {
+						// Can happen if there's a symlink to a missing file
+						if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+							return;
+						}
+						else {
+							throw e;
+						}
+					}
+				);
 			})
 		}
 		finally {
@@ -1298,57 +1306,80 @@ Zotero.Attachments = new function(){
 	 *
 	 * @return {Promise}
 	 */
-	var _postProcessFile = Zotero.Promise.coroutine(function* (itemID, file, contentType) {
+	var _postProcessFile = Zotero.Promise.coroutine(function* (item, file, contentType) {
 		// Don't try to process if MIME type is unknown
 		if (!contentType) {
 			return;
 		}
 		
-		// MIME types that get cached by the fulltext indexer can just be
-		// indexed directly
+		// Items with content types that get cached by the fulltext indexer can just be indexed,
+		// since a charset isn't necessary
 		if (Zotero.Fulltext.isCachedMIMEType(contentType)) {
-			return Zotero.Fulltext.indexItems([itemID]);
+			return Zotero.Fulltext.indexItems([item.id]);
 		}
 		
+		// Ignore non-text types
 		var ext = Zotero.File.getExtension(file);
 		if (!Zotero.MIME.hasInternalHandler(contentType, ext) || !Zotero.MIME.isTextType(contentType)) {
 			return;
 		}
 		
+		// If the charset is already set, index item directly
+		if (item.attachmentCharset) {
+			return Zotero.Fulltext.indexItems([item.id]);
+		}
+		
+		// Otherwise, load in a hidden browser to get the charset, and then index the document
 		var deferred = Zotero.Promise.defer();
 		var browser = Zotero.Browser.createHiddenBrowser();
 		
-		var callback = function(charset, args) {
-			// ignore spurious about:blank loads
-			if(browser.contentDocument.location.href == "about:blank") return;
-			
-			// Since the callback can be called during an import process that uses
-			// Zotero.wait(), wait until we're unlocked
-			Zotero.unlockPromise
-			.then(function () {
-				return Zotero.spawn(function* () {
-					if (charset) {
-						charset = Zotero.CharacterSets.toCanonical(charset);
-						if (charset) {
-							let item = yield Zotero.Items.getAsync(itemID);
-							item.attachmentCharset = charset;
-							yield item.saveTx({
-								skipNotifier: true
-							});
-						}
-					}
-					
-					// Chain fulltext indexer inside the charset callback,
-					// since it's asynchronous and a prerequisite
-					yield Zotero.Fulltext.indexDocument(browser.contentDocument, itemID);
+		if (item.attachmentCharset) {
+			var onpageshow = function(){
+				// ignore spurious about:blank loads
+				if(browser.contentDocument.location.href == "about:blank") return;
+				
+				browser.removeEventListener("pageshow", onpageshow, false);
+				
+				Zotero.Fulltext.indexDocument(browser.contentDocument, itemID)
+				.then(deferred.resolve, deferred.reject)
+				.finally(function () {
 					Zotero.Browser.deleteHiddenBrowser(browser);
-					
-					deferred.resolve();
 				});
-			});
-		};
-		
-		Zotero.File.addCharsetListener(browser, callback, itemID);
+			};
+			browser.addEventListener("pageshow", onpageshow, false);
+		}
+		else {
+			let callback = function(charset, args) {
+				// ignore spurious about:blank loads
+				if(browser.contentDocument.location.href == "about:blank") return;
+				
+				// Since the callback can be called during an import process that uses
+				// Zotero.wait(), wait until we're unlocked
+				Zotero.unlockPromise
+				.then(function () {
+					return Zotero.spawn(function* () {
+						if (charset) {
+							charset = Zotero.CharacterSets.toCanonical(charset);
+							if (charset) {
+								item.attachmentCharset = charset;
+								yield item.saveTx({
+									skipNotifier: true
+								});
+							}
+						}
+						
+						yield Zotero.Fulltext.indexDocument(browser.contentDocument, item.id);
+						Zotero.Browser.deleteHiddenBrowser(browser);
+						
+						deferred.resolve();
+					});
+				})
+				.catch(function (e) {
+					deferred.reject(e);
+				});
+			};
+			Zotero.File.addCharsetListener(browser, callback, item.id);
+		}
 		
 		var url = Components.classes["@mozilla.org/network/protocol;1?name=file"]
 					.getService(Components.interfaces.nsIFileProtocolHandler)
