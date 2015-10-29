@@ -1979,6 +1979,11 @@ Zotero.Item.prototype.getFilePath = function () {
 		return false;
 	}
 	
+	if (!this._identified) {
+		Zotero.debug("Can't get file path for unsaved file");
+		return false;
+	}
+	
 	// Imported file with relative path
 	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
 			linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
@@ -2560,11 +2565,15 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentFilename', {
 		if (!this.isAttachment()) {
 			return undefined;
 		}
-		var file = this.getFile();
-		if (!file) {
+		var path = this.attachmentPath;
+		if (!path) {
 			return '';
 		}
-		return file.leafName;
+		var prefixedPath = path.match(/^(?:attachments|storage):(.+)$/);
+		if (prefixedPath) {
+			return prefixedPath[1];
+		}
+		return OS.Path.basename(path);
 	},
 	set: function (val) {
 		if (!this.isAttachment()) {
@@ -2655,7 +2664,6 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
 			this._changed.attachmentData = {};
 		}
 		this._changed.attachmentData.path = true;
-		
 		this._attachmentPath = val;
 	}
 });
