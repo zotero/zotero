@@ -76,13 +76,11 @@ Zotero.HTTP = new function() {
 	 *         <li>successCodes - HTTP status codes that are considered successful, or FALSE to allow all</li>
 	 *     </ul>
 	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
-	 * @return {Promise} A promise resolved with the XMLHttpRequest object if the request
-	 *     succeeds, or rejected if the browser is offline or a non-2XX status response
+	 * @return {Promise<XMLHttpRequest>} A promise resolved with the XMLHttpRequest object if the
+	 *     request succeeds, or rejected if the browser is offline or a non-2XX status response
 	 *     code is received (or a code not in options.successCodes if provided).
 	 */
-	this.request = function (method, url, options) {
-		options = options || {};
-		
+	this.request = Zotero.Promise.coroutine(function* (method, url, options = {}) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
 			var dispURL = this.getDisplayURI(url).spec;
@@ -95,7 +93,7 @@ Zotero.HTTP = new function() {
 		// Don't display API key in console
 		dispURL = dispURL.replace(/key=[^&]+&?/, "").replace(/\?$/, "");
 		
-		if (options.body) {
+		if (options.body && typeof options.body == 'string') {
 			var bodyStart = options.body.substr(0, 1024);
 			// Don't display sync password or session id in console
 			bodyStart = bodyStart.replace(/password=[^&]+/, 'password=********');
@@ -110,11 +108,8 @@ Zotero.HTTP = new function() {
 		}
 		
 		if (this.browserIsOffline()) {
-			return Zotero.Promise.try(function() {
-				Zotero.debug("HTTP " + method + " " + dispURL + " failed: "
-					+ "Browser is offline");
-				throw new this.BrowserOfflineException();
-			});
+			Zotero.debug("HTTP " + method + " " + dispURL + " failed: Browser is offline");
+			throw new this.BrowserOfflineException();
 		}
 		
 		var deferred = Zotero.Promise.defer();
@@ -125,6 +120,11 @@ Zotero.HTTP = new function() {
 		}
 		else {
 			var xmlhttp = new this.mock;
+			// Add a dummy overrideMimeType() if it's not mocked
+			// https://github.com/cjohansen/Sinon.JS/issues/559
+			if (!xmlhttp.overrideMimeType) {
+				xmlhttp.overrideMimeType = function () {};
+			}
 		}
 		// Prevent certificate/authentication dialogs from popping up
 		if (!options.foreground) {
@@ -172,7 +172,17 @@ Zotero.HTTP = new function() {
 			headers["Content-Type"] = "application/x-www-form-urlencoded";
 		}
 		if (options.debug) {
-			Zotero.debug(headers);
+			if (headers["Zotero-API-Key"]) {
+				let dispHeaders = {};
+				Object.assign(dispHeaders, headers);
+				if (dispHeaders["Zotero-API-Key"]) {
+					dispHeaders["Zotero-API-Key"] = "[Not shown]";
+				}
+				Zotero.debug(dispHeaders);
+			}
+			else {
+				Zotero.debug(headers);
+			}
 		}
 		for (var header in headers) {
 			xmlhttp.setRequestHeader(header, headers[header]);
@@ -220,7 +230,7 @@ Zotero.HTTP = new function() {
 		xmlhttp.send(options.body || null);
 		
 		return deferred.promise;
-	};
+	});
 	
 	/**
 	 * Send an HTTP GET request via XMLHTTPRequest
