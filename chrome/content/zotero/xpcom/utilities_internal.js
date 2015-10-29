@@ -307,21 +307,25 @@ Zotero.Utilities.Internal = {
 	/**
 	 * saveURI wrapper function
 	 * @param {nsIWebBrowserPersist} nsIWebBrowserPersist
-	 * @param {nsIURI} source URL
-	 * @param {nsISupports} target file
+	 * @param {nsIURI} uri URL
+	 * @param {nsIFile|string path} target file
+	 * @param {Object} [headers]
 	 */
-	saveURI: function (wbp, source, target) {
+	saveURI: function (wbp, uri, target, headers) {
 		// Handle gzip encoding
 		wbp.persistFlags |= Ci.nsIWebBrowserPersist.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
 		
-		// Firefox 35 and below
-		try {
-			wbp.saveURI(source, null, null, null, null, target, null);
+		if (typeof uri == 'string') {
+			uri = Services.io.newURI(uri, null, null);
 		}
-		// Firefox 36+ needs one more parameter
-		catch (e if e.name === "NS_ERROR_XPC_NOT_ENOUGH_ARGS") {
-			wbp.saveURI(source, null, null, null, null, null, target, null);
+		
+		target = Zotero.File.pathToFile(target);
+		
+		if (headers) {
+			headers = Object.keys(headers).map(x => x + ": " + headers[x]).join("\r\n") + "\r\n";
 		}
+		
+		wbp.saveURI(uri, null, null, null, null, headers, target, null);
 	},
 	
 	
