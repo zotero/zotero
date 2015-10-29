@@ -2751,10 +2751,10 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentModificationTime', {
  * Note: This is the hash of the file itself, not the last-known hash
  * of the file on the storage server as stored in the database
  *
- * @return	{String}		MD5 hash of file as hex string
+ * @return {Promise<String>} - MD5 hash of file as hex string
  */
 Zotero.defineProperty(Zotero.Item.prototype, 'attachmentHash', {
-	get: function () {
+	get: Zotero.Promise.coroutine(function* () {
 		if (!this.isAttachment()) {
 			return undefined;
 		}
@@ -2763,13 +2763,13 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentHash', {
 			return undefined;
 		}
 		
-		var file = this.getFile();
-		if (!file) {
+		var path = yield this.getFilePathAsync();
+		if (!path) {
 			return undefined;
 		}
 		
-		return Zotero.Utilities.Internal.md5(file) || undefined;
-	}
+		return Zotero.Utilities.Internal.md5Async(path);
+	})
 });
 
 
@@ -3894,7 +3894,7 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options = {})
 			}
 			
 			if (this.isFileAttachment()) {
-				obj.md5 = this.attachmentHash;
+				obj.md5 = yield this.attachmentHash;
 				obj.mtime = yield this.attachmentModificationTime;
 			}
 		}
