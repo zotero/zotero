@@ -15,7 +15,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 		server = sinon.fakeServer.create();
 		server.autoRespond = true;
 		
-		Components.utils.import("resource://zotero/concurrent-caller.js");
+		Components.utils.import("resource://zotero/concurrentCaller.js");
 		var caller = new ConcurrentCaller(1);
 		caller.setLogger(msg => Zotero.debug(msg));
 		caller.stopOnError = true;

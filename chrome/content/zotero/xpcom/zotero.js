@@ -1707,7 +1707,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 	
 	
 	this.serial = function (fn) {
-		Components.utils.import("resource://zotero/concurrent-caller.js");
+		Components.utils.import("resource://zotero/concurrentCaller.js");
 		var caller = new ConcurrentCaller(1);
 		caller.setLogger(Zotero.debug);
 		return function () {

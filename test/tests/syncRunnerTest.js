@@ -114,7 +114,7 @@ describe("Zotero.Sync.Runner", function () {
 			apiKey: apiKey
 		});
 		
-		Components.utils.import("resource://zotero/concurrent-caller.js");
+		Components.utils.import("resource://zotero/concurrentCaller.js");
 		var caller = new ConcurrentCaller(1);
 		caller.setLogger(msg => Zotero.debug(msg));
 		caller.stopOnError = true;
