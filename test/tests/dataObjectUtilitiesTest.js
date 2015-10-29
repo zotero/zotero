@@ -1,6 +1,17 @@
 "use strict";
 
 describe("Zotero.DataObjectUtilities", function() {
+	describe("#patch()", function () {
+		it("should omit 'collections' if it doesn't exist", function* () {
+			var patchBase = {
+				collections: ['AAAAAAAA']
+			};
+			var obj = {};
+			obj = Zotero.DataObjectUtilities.patch(patchBase, obj);
+			assert.notProperty(obj, 'collections');
+		})
+	})
+	
 	describe("#diff()", function () {
 		// This is mostly covered by syncLocal::_reconcileChanges() tests, but we test some
 		// additional things here

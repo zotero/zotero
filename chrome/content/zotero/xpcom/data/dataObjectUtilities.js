@@ -132,6 +132,11 @@ Zotero.DataObjectUtilities = {
 			// If field from base doesn't exist in new version, clear it
 			else {
 				switch (i) {
+				// When changing an item from top-level to child, the collections property is
+				// no valid, so it doesn't need to be cleared
+				case 'collections':
+					break;
+				
 				case 'deleted':
 					target[i] = false;
 					break;
