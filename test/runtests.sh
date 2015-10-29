@@ -107,6 +107,7 @@ user_pref("extensions.zotero.firstRun2", false);
 user_pref("extensions.zotero.reportTranslationFailure", false);
 user_pref("extensions.zotero.httpServer.enabled", true);
 user_pref("extensions.zotero.backup.numBackups", 0);
+user_pref("xpinstall.signatures.required", false);
 EOF
 
 # -v flag on Windows makes Firefox process hang
