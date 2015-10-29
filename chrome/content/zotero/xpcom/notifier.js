@@ -128,8 +128,8 @@ Zotero.Notifier = new function(){
 		
 		var order = _getObserverOrder(type);
 		for (let id of order) {
-			Zotero.debug("Calling notify() with " + event + "/" + type
-				+ " on observer with id '" + id + "'", 4);
+			//Zotero.debug("Calling notify() with " + event + "/" + type
+			//	+ " on observer with id '" + id + "'", 5);
 			
 			if (!_observers[id]) {
 				Zotero.debug("Observer no longer exists");
@@ -143,12 +143,11 @@ Zotero.Notifier = new function(){
 				yield Zotero.Promise.resolve(_observers[id].ref.notify(event, type, ids, extraData));
 				t = new Date - t;
 				if (t > 5) {
-					Zotero.debug(id + " observer finished in " + t + " ms");
+					//Zotero.debug(id + " observer finished in " + t + " ms", 5);
 				}
 			}
 			catch (e) {
-				Zotero.debug(e);
-				Components.utils.reportError(e);
+				Zotero.logError(e);
 			}
 		}
 		
@@ -316,7 +315,7 @@ Zotero.Notifier = new function(){
 			//Zotero.debug("Notifier queue already open", 4);
 		}
 		else {
-			Zotero.debug("Beginning notifier event queue");
+			//Zotero.debug("Beginning notifier event queue");
 			_inTransaction = true;
 		}
 		
@@ -410,7 +409,7 @@ Zotero.Notifier = new function(){
 	 * Reset the event queue
 	 */
 	function reset() {
-		Zotero.debug("Resetting notifier event queue");
+		//Zotero.debug("Resetting notifier event queue");
 		_locked = false;
 		_queue = [];
 		_inTransaction = false;
