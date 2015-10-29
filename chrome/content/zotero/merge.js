@@ -47,13 +47,20 @@ var Zotero_Merge_Window = new function () {
 		
 		_wizard.getButton('cancel').setAttribute('label', Zotero.getString('sync.cancel'));
 		
-		_io = window.arguments[0].wrappedJSObject;
+		_io = window.arguments[0];
+		// Not totally clear when this is necessary
+		if (window.arguments[0].wrappedJSObject) {
+			_io = window.arguments[0].wrappedJSObject;
+		}
 		_conflicts = _io.dataIn.conflicts;
 		if (!_conflicts.length) {
 			// TODO: handle no conflicts
 			return;
 		}
 		
+		if (_io.dataIn.type) {
+			_mergeGroup.type = _io.dataIn.type;
+		}
 		_mergeGroup.leftCaption = _io.dataIn.captions[0];
 		_mergeGroup.rightCaption = _io.dataIn.captions[1];
 		_mergeGroup.mergeCaption = _io.dataIn.captions[2];
@@ -240,7 +247,7 @@ var Zotero_Merge_Window = new function () {
 		}
 		// Apply changes from each side and pick most recent version for conflicting fields
 		var mergeInfo = {
-			data: {} 
+			data: {}
 		};
 		Object.assign(mergeInfo.data, _conflicts[pos].left)
 		Zotero.DataObjectUtilities.applyChanges(mergeInfo.data, _conflicts[pos].changes);
@@ -251,7 +258,9 @@ var Zotero_Merge_Window = new function () {
 		else {
 			var side = 1;
 		}
-		Zotero.DataObjectUtilities.applyChanges(mergeInfo.data, _conflicts[pos].conflicts.map(x => x[side]));
+		Zotero.DataObjectUtilities.applyChanges(
+			mergeInfo.data, _conflicts[pos].conflicts.map(x => x[side])
+		);
 		mergeInfo.selected = side ? 'right' : 'left';
 		return mergeInfo;
 	}
@@ -284,13 +293,22 @@ var Zotero_Merge_Window = new function () {
 	
 	
 	function _updateResolveAllCheckbox() {
-		if (_mergeGroup.rightpane.getAttribute("selected") == 'true') {
-			var label = 'resolveAllRemoteFields';
+		if (_mergeGroup.type == 'file') {
+			if (_mergeGroup.rightpane.getAttribute("selected") == 'true') {
+				var label = 'resolveAllRemote';
+			}
+			else {
+				var label = 'resolveAllLocal';
+			}
 		}
 		else {
-			var label = 'resolveAllLocalFields';
+			if (_mergeGroup.rightpane.getAttribute("selected") == 'true') {
+				var label = 'resolveAllRemoteFields';
+			}
+			else {
+				var label = 'resolveAllLocalFields';
+			}
 		}
-		// TODO: files
 		_resolveAllCheckbox.label = Zotero.getString('sync.conflict.' + label);
 	}
 	

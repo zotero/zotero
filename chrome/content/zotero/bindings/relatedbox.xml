@@ -109,6 +109,7 @@
 			]]>
 			</destructor>
 			
+			<!-- TODO: Asyncify -->
 			<method name="notify">
 				<parameter name="event"/>
 				<parameter name="type"/>

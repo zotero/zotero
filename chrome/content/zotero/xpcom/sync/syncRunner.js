@@ -29,16 +29,36 @@ if (!Zotero.Sync) {
 	Zotero.Sync = {};
 }
 
-Zotero.Sync.Runner_Module = function () {
+// Initialized as Zotero.Sync.Runner in zotero.js
+Zotero.Sync.Runner_Module = function (options = {}) {
+	const stopOnError = true;
+	
 	Zotero.defineProperty(this, 'background', { get: () => _background });
 	Zotero.defineProperty(this, 'lastSyncStatus', { get: () => _lastSyncStatus });
 	
-	const stopOnError = true;
+	this.baseURL = options.baseURL || ZOTERO_CONFIG.API_URL;
+	this.apiVersion = options.apiVersion || ZOTERO_CONFIG.API_VERSION;
+	this.apiKey = options.apiKey || Zotero.Sync.Data.Local.getAPIKey();
+	
+	Components.utils.import("resource://zotero/concurrentCaller.js");
+	this.caller = new ConcurrentCaller(4);
+	this.caller.setLogger(msg => Zotero.debug(msg));
+	this.caller.stopOnError = stopOnError;
+	this.caller.onError = function (e) {
+		this.addError(e);
+		if (e.fatal) {
+			this.caller.stop();
+			throw e;
+		}
+	}.bind(this);
 	
 	var _autoSyncTimer;
 	var _background;
 	var _firstInSession = true;
 	var _syncInProgress = false;
+	
+	var _syncEngines = [];
+	var _storageEngines = [];
 	
 	var _lastSyncStatus;
 	var _currentSyncStatusLabel;
@@ -46,17 +66,25 @@ Zotero.Sync.Runner_Module = function () {
 	var _errors = [];
 	
 	
+	this.getAPIClient = function () {
+		return new Zotero.Sync.APIClient({
+			baseURL: this.baseURL,
+			apiVersion: this.apiVersion,
+			apiKey: this.apiKey,
+			caller: this.caller
+		});
+	}
+	
+	
 	/**
 	 * Begin a sync session
 	 *
-	 * @param {Object} [options]
-	 * @param {String} [apiKey]
-	 * @param {Boolean} [background=false] - Whether this is a background request, which prevents
-	 *                                       some alerts from being shown
-	 * @param {String} [baseURL]
-	 * @param {Integer[]} [libraries] - IDs of libraries to sync
-	 * @param {Function} [onError] - Function to pass errors to instead of handling internally
-	 *                               (used for testing)
+	 * @param {Object}    [options]
+	 * @param {Boolean}   [options.background=false]  Whether this is a background request, which
+	 *                                                prevents some alerts from being shown
+	 * @param {Integer[]} [options.libraries]         IDs of libraries to sync
+	 * @param {Function}  [options.onError]           Function to pass errors to instead of
+	 *                                                handling internally (used for testing)
 	 */
 	this.sync = Zotero.Promise.coroutine(function* (options = {}) {
 		// Clear message list
@@ -84,14 +112,13 @@ Zotero.Sync.Runner_Module = function () {
 		// Purge deleted objects so they don't cause sync errors (e.g., long tags)
 		yield Zotero.purgeDataObjects(true);
 		
-		options.apiKey = options.apiKey || Zotero.Prefs.get('devAPIKey');
-		if (!options.apiKey) {
-			let msg = "API key not provided";
+		if (!this.apiKey) {
+			let msg = "API key not set";
 			let e = new Zotero.Error(msg, 0, { dialogButtonText: null })
 			this.updateIcons(e);
+			_syncInProgress = false;
 			return false;
 		}
-		options.baseURL = options.baseURL || ZOTERO_CONFIG.API_URL;
 		if (_firstInSession) {
 			options.firstInSession = true;
 			_firstInSession = false;
@@ -102,66 +129,45 @@ Zotero.Sync.Runner_Module = function () {
 		this.updateIcons('animate');
 		
 		try {
-			Components.utils.import("resource://zotero/concurrent-caller.js");
-			var caller = new ConcurrentCaller(4); // TEMP: one for now
-			caller.setLogger(msg => Zotero.debug(msg));
-			caller.stopOnError = stopOnError;
-			caller.onError = function (e) {
-				this.addError(e);
-				if (e.fatal) {
-					caller.stop();
-					throw e;
-				}
-			}.bind(this);
+			let client = this.getAPIClient();
 			
-			// TODO: Use a single client for all operations?
-			var client = new Zotero.Sync.APIClient({
-				baseURL: options.baseURL,
-				apiVersion: ZOTERO_CONFIG.API_VERSION,
-				apiKey: options.apiKey,
-				concurrentCaller: caller,
-				background: options.background
-			});
-			
-			var keyInfo = yield this.checkAccess(client, options);
+			let keyInfo = yield this.checkAccess(client, options);
 			if (!keyInfo) {
-				this.stop();
+				this.end();
 				Zotero.debug("Syncing cancelled");
 				return false;
 			}
 			
-			var libraries = yield this.checkLibraries(client, options, keyInfo, libraries);
-			
-			for (let libraryID of libraries) {
-				try {
-					let engine = new Zotero.Sync.Data.Engine({
-						libraryID: libraryID,
-						apiClient: client,
-						setStatus: this.setSyncStatus.bind(this),
-						stopOnError: stopOnError,
-						onError: this.addError.bind(this)
-					});
-					yield engine.start();
-				}
-				catch (e) {
-					Zotero.debug("Sync failed for library " + libraryID);
-					Zotero.debug(e, 1);
-					Components.utils.reportError(e);
-					this.checkError(e);
+			let engineOptions = {
+				apiClient: client,
+				caller: this.caller,
+				setStatus: this.setSyncStatus.bind(this),
+				stopOnError,
+				onError: function (e) {
 					if (options.onError) {
 						options.onError(e);
 					}
 					else {
-						this.addError(e);
+						this.addError.bind(this);
 					}
-					if (stopOnError || e.fatal) {
-						caller.stop();
-						break;
-					}
-				}
-			}
+				}.bind(this),
+				background: _background,
+				firstInSession: _firstInSession
+			};
 			
-			yield Zotero.Sync.Data.Local.updateLastSyncTime();
+			let nextLibraries = yield this.checkLibraries(
+				client, options, keyInfo, options.libraries
+			);
+			// Sync data, files, and then any data that needs to be uploaded
+			let attempt = 1;
+			while (nextLibraries.length) {
+				if (attempt > 3) {
+					throw new Error("Too many sync attempts -- stopping");
+				}
+				nextLibraries = yield _doDataSync(nextLibraries, engineOptions);
+				nextLibraries = yield _doFileSync(nextLibraries, engineOptions);
+				attempt++;
+			}
 		}
 		catch (e) {
 			if (options.onError) {
@@ -171,62 +177,19 @@ Zotero.Sync.Runner_Module = function () {
 				this.addError(e);
 			}
 		}
-		
-		this.stop();
+		finally {
+			this.end();
+		}
 		
 		Zotero.debug("Done syncing");
 		
+		/*if (results.changesMade) {
+			Zotero.debug("Changes made during file sync "
+				+ "-- performing additional data sync");
+			this.sync(options);
+		}*/
+		
 		return;
-		
-		var storageSync = function () {
-			Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.syncingFiles'));
-			
-			Zotero.Sync.Storage.sync(options)
-			.then(function (results) {
-				Zotero.debug("File sync is finished");
-				
-				if (results.errors.length) {
-					Zotero.debug(results.errors, 1);
-					for each(var e in results.errors) {
-						Components.utils.reportError(e);
-					}
-					Zotero.Sync.Runner.setErrors(results.errors);
-					return;
-				}
-				
-				if (results.changesMade) {
-					Zotero.debug("Changes made during file sync "
-						+ "-- performing additional data sync");
-					Zotero.Sync.Server.sync(finalCallbacks);
-				}
-				else {
-					Zotero.Sync.Runner.stop();
-				}
-			})
-			.catch(function (e) {
-				Zotero.debug("File sync failed", 1);
-				Zotero.Sync.Runner.error(e);
-			})
-			.done();
-		};
-		
-		Zotero.Sync.Server.sync({
-			// Sync 1 success
-			onSuccess: storageSync,
-			
-			// Sync 1 skip
-			onSkip: storageSync,
-			
-			// Sync 1 stop
-			onStop: function () {
-				Zotero.Sync.Runner.stop();
-			},
-			
-			// Sync 1 error
-			onError: function (e) {
-				Zotero.Sync.Runner.error(e);
-			}
-		});
 	});
 	
 	
@@ -242,8 +205,9 @@ Zotero.Sync.Runner_Module = function () {
 		}
 		
 		// Sanity check
-		if (!json.userID) throw new Error("userID not found in response");
-		if (!json.username) throw new Error("username not found in response");
+		if (!json.userID) throw new Error("userID not found in key response");
+		if (!json.username) throw new Error("username not found in key response");
+		if (!json.access) throw new Error("'access' not found in key response");
 		
 		// Make sure user hasn't changed, and prompt to update database if so
 		if (!(yield this.checkUser(json.userID, json.username))) {
@@ -446,8 +410,6 @@ Zotero.Sync.Runner_Module = function () {
 	 *
 	 * @param	{Integer}	userID			New userID
 	 * @param	{Integer}	libraryID		New libraryID
-	 * @param	{Integer}	noServerData	The server account is empty — this is
-	 * 											the account after a server clear
 	 * @return {Boolean} - True to continue, false to cancel
 	 */
 	this.checkUser = Zotero.Promise.coroutine(function* (userID, username) {
@@ -544,7 +506,154 @@ Zotero.Sync.Runner_Module = function () {
 	});
 	
 	
+	var _doDataSync = Zotero.Promise.coroutine(function* (libraries, options, skipUpdateLastSyncTime) {
+		var successfulLibraries = [];
+		for (let libraryID of libraries) {
+			try {
+				let opts = {};
+				Object.assign(opts, options);
+				opts.libraryID = libraryID;
+				
+				let engine = new Zotero.Sync.Data.Engine(opts);
+				yield engine.start();
+				successfulLibraries.push(libraryID);
+			}
+			catch (e) {
+				Zotero.debug("Sync failed for library " + libraryID);
+				Zotero.logError(e);
+				this.checkError(e);
+				if (options.onError) {
+					options.onError(e);
+				}
+				else {
+					this.addError(e);
+				}
+				if (stopOnError || e.fatal) {
+					Zotero.debug("Stopping on error", 1);
+					options.caller.stop();
+					break;
+				}
+			}
+		}
+		// Update last-sync time if any libraries synced
+		// TEMP: Do we want to show updated time if some libraries haven't synced?
+		if (!libraries.length || successfulLibraries.length) {
+			yield Zotero.Sync.Data.Local.updateLastSyncTime();
+		}
+		return successfulLibraries;
+	}.bind(this));
+	
+	
+	var _doFileSync = Zotero.Promise.coroutine(function* (libraries, options) {
+		Zotero.debug("Starting file syncing");
+		this.setSyncStatus(Zotero.getString('sync.status.syncingFiles'));
+		let librariesToSync = [];
+		for (let libraryID of libraries) {
+			try {
+				let opts = {};
+				Object.assign(opts, options);
+				opts.libraryID = libraryID;
+				
+				let tries = 3;
+				while (true) {
+					if (tries == 0) {
+						throw new Error("Too many file sync attempts for library " + libraryID);
+					}
+					tries--;
+					let engine = new Zotero.Sync.Storage.Engine(opts);
+					let results = yield engine.start();
+					if (results.syncRequired) {
+						librariesToSync.push(libraryID);
+					}
+					else if (results.fileSyncRequired) {
+						Zotero.debug("Another file sync required -- restarting");
+						continue;
+					}
+					break;
+				}
+			}
+			catch (e) {
+				Zotero.debug("File sync failed for library " + libraryID);
+				Zotero.debug(e, 1);
+				Components.utils.reportError(e);
+				this.checkError(e);
+				if (options.onError) {
+					options.onError(e);
+				}
+				else {
+					this.addError(e);
+				}
+				if (stopOnError || e.fatal) {
+					options.caller.stop();
+					break;
+				}
+			}
+		}
+		Zotero.debug("Done with file syncing");
+		return librariesToSync;
+	}.bind(this));
+	
+	
+	/**
+	 * Download a single file on demand (not within a sync process)
+	 */
+	this.downloadFile = Zotero.Promise.coroutine(function* (item, requestCallbacks) {
+		if (Zotero.HTTP.browserIsOffline()) {
+			Zotero.debug("Browser is offline", 2);
+			return false;
+		}
+		
+		// TEMP
+		var options = {};
+		
+		var itemID = item.id;
+		var modeClass = Zotero.Sync.Storage.Local.getClassForLibrary(item.libraryID);
+		var controller = new modeClass({
+			apiClient: this.getAPIClient()
+		});
+		
+		// TODO: verify WebDAV on-demand?
+		if (!controller.verified) {
+			Zotero.debug("File syncing is not active for item's library -- skipping download");
+			return false;
+		}
+		
+		if (!item.isImportedAttachment()) {
+			throw new Error("Not an imported attachment");
+		}
+		
+		if (yield item.getFilePathAsync()) {
+			Zotero.debug("File already exists -- replacing");
+		}
+		
+		// TODO: start sync icon?
+		// TODO: create queue for cancelling
+		
+		if (!requestCallbacks) {
+			requestCallbacks = {};
+		}
+		var onStart = function (request) {
+			return controller.downloadFile(request);
+		};
+		var request = new Zotero.Sync.Storage.Request({
+			type: 'download',
+			libraryID: item.libraryID,
+			name: item.libraryKey,
+			onStart: requestCallbacks.onStart
+				? [onStart, requestCallbacks.onStart]
+				: [onStart]
+		});
+		return request.start();
+	});
+	
+	
 	this.stop = function () {
+		_syncEngines.forEach(engine => engine.stop());
+		_storageEngines.forEach(engine => engine.stop());
+	}
+	
+	
+	this.end = function () {
 		this.updateIcons(_errors);
 		_errors = [];
 		_syncInProgress = false;
@@ -669,7 +778,6 @@ Zotero.Sync.Runner_Module = function () {
 		if (libraryID) {
 			e.libraryID = libraryID;
 		}
-		Zotero.logError(e);
 		_errors.push(this.parseError(e));
 	}
 	
@@ -1027,7 +1135,8 @@ Zotero.Sync.Runner_Module = function () {
 		var lastSyncTime = Zotero.Sync.Data.Local.getLastSyncTime();
 		if (!lastSyncTime) {
 			try {
-				lastSyncTime = Zotero.Sync.Data.Local.getLastClassicSyncTime()
+				lastSyncTime = Zotero.Sync.Data.Local.getLastClassicSyncTime();
+				Zotero.debug(lastSyncTime);
 			}
 			catch (e) {
 				Zotero.debug(e, 2);
@@ -1052,5 +1161,3 @@ Zotero.Sync.Runner_Module = function () {
 		_currentLastSyncLabel.hidden = false;
 	}
 }
-
-Zotero.Sync.Runner = new Zotero.Sync.Runner_Module;

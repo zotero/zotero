@@ -19,28 +19,20 @@ describe("Zotero.Sync.Data.Engine", function () {
 		var caller = new ConcurrentCaller(1);
 		caller.setLogger(msg => Zotero.debug(msg));
 		caller.stopOnError = true;
-		caller.onError = function (e) {
-			Zotero.logError(e);
-			if (options.onError) {
-				options.onError(e);
-			}
-			if (e.fatal) {
-				caller.stop();
-				throw e;
-			}
-		};
 		
+		Components.utils.import("resource://zotero/config.js");
 		var client = new Zotero.Sync.APIClient({
-			baseURL: baseURL,
+			baseURL,
 			apiVersion: options.apiVersion || ZOTERO_CONFIG.API_VERSION,
-			apiKey: apiKey,
-			concurrentCaller: caller,
+			apiKey,
+			caller,
 			background: options.background || true
 		});
 		
 		var engine = new Zotero.Sync.Data.Engine({
 			apiClient: client,
-			libraryID: options.libraryID || Zotero.Libraries.userLibraryID
+			libraryID: options.libraryID || Zotero.Libraries.userLibraryID,
+			stopOnError: true
 		});
 		
 		return { engine, client, caller };

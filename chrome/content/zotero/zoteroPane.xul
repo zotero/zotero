@@ -195,9 +195,10 @@
 					</hbox>
 					<hbox align="center" pack="end">
 						<hbox id="zotero-tb-sync-progress-box" hidden="true" align="center">
+							<!-- TODO: localize -->
 							<toolbarbutton id="zotero-tb-sync-storage-cancel"
-								tooltiptext="Cancel Storage Sync"
-								oncommand="Zotero.Sync.Storage.QueueManager.cancel()"/>
+								tooltiptext="Stop sync"
+								oncommand="Zotero.Sync.Runner.stop()"/>
 							<progressmeter id="zotero-tb-sync-progress" mode="determined"
 								value="0" tooltip="zotero-tb-sync-progress-tooltip">
 							</progressmeter>

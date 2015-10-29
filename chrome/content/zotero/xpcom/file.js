@@ -48,7 +48,7 @@ Zotero.File = new function(){
 		else if (pathOrFile instanceof Ci.nsIFile) {
 			return pathOrFile;
 		}
-		throw new Error('Unexpected value provided to Zotero.File.pathToFile() (' + pathOrFile + ')');
+		throw new Error("Unexpected value '" + pathOrFile + "'");
 	}
 	
 	
@@ -348,7 +348,7 @@ Zotero.File = new function(){
 	 * @param {String} [charset] - The character set; defaults to UTF-8
 	 * @return {Promise} - A promise that is resolved when the file has been written
 	 */
-	this.putContentsAsync = function putContentsAsync(path, data, charset) {
+	this.putContentsAsync = function (path, data, charset) {
 		if (path instanceof Ci.nsIFile) {
 			path = path.path;
 		}
@@ -424,18 +424,17 @@ Zotero.File = new function(){
 	 * iterator when done
 	 *
 	 * The DirectoryInterator is passed as the first parameter to the generator.
-	 * A StopIteration error will be caught automatically.
 	 *
 	 * Zotero.File.iterateDirectory(path, function* (iterator) {
 	 *    while (true) {
 	 *        var entry = yield iterator.next();
 	 *        [...]
 	 *    }
-	 * }).done()
+	 * })
 	 *
 	 * @return {Promise}
 	 */
-	this.iterateDirectory = function iterateDirectory(path, generator) {
+	this.iterateDirectory = function (path, generator) {
 		var iterator = new OS.File.DirectoryIterator(path);
 		return Zotero.Promise.coroutine(generator)(iterator)
 		.catch(function (e) {
@@ -470,6 +469,8 @@ Zotero.File = new function(){
 	
 	
 	this.createShortened = function (file, type, mode, maxBytes) {
+		file = this.pathToFile(file);
+		
 		if (!maxBytes) {
 			maxBytes = 255;
 		}
@@ -575,6 +576,8 @@ Zotero.File = new function(){
 			}
 			break;
 		}
+		
+		return file.leafName;
 	}
 	
 	
@@ -902,29 +905,28 @@ Zotero.File = new function(){
 	
 	
 	this.checkFileAccessError = function (e, file, operation) {
+		var str = 'file.accessError.';
 		if (file) {
-			var str = Zotero.getString('file.accessError.theFile', file.path);
+			str += 'theFile'
 		}
 		else {
-			var str = Zotero.getString('file.accessError.aFile');
+			str += 'aFile'
 		}
+		str += 'CannotBe';
 		
 		switch (operation) {
 			case 'create':
-				var opWord = Zotero.getString('file.accessError.created');
-				break;
-				
-			case 'update':
-				var opWord = Zotero.getString('file.accessError.updated');
+				str += 'Created';
 				break;
 				
 			case 'delete':
-				var opWord = Zotero.getString('file.accessError.deleted');
+				str += 'Deleted';
 				break;
 				
 			default:
-				var opWord = Zotero.getString('file.accessError.updated');
+				str += 'Updated';
 		}
+		str = Zotero.getString(str, file.path ? file.path : undefined);
 		
 		Zotero.debug(file.path);
 		Zotero.debug(e, 1);
@@ -961,5 +963,65 @@ Zotero.File = new function(){
 		}
 		
 		throw (e);
+	}
+	
+	
+	this.checkPathAccessError = function (e, path, operation) {
+		var str = 'file.accessError.';
+		if (path) {
+			str += 'theFile'
+		}
+		else {
+			str += 'aFile'
+		}
+		str += 'CannotBe';
+		
+		switch (operation) {
+			case 'create':
+				str += 'Created';
+				break;
+				
+			case 'delete':
+				str += 'Deleted';
+				break;
+				
+			default:
+				str += 'Updated';
+		}
+		str = Zotero.getString(str, path ? path : undefined);
+		
+		Zotero.debug(path);
+		Zotero.debug(e, 1);
+		Components.utils.reportError(e);
+		
+		// TODO: Check for specific errors?
+		if (e instanceof OS.File.Error) {
+			let checkFileWindows = Zotero.getString('file.accessError.message.windows');
+			let checkFileOther = Zotero.getString('file.accessError.message.other');
+			var msg = str + "\n\n"
+					+ (Zotero.isWin ? checkFileWindows : checkFileOther)
+					+ "\n\n"
+					+ Zotero.getString('file.accessError.restart');
+			
+			var e = new Zotero.Error(
+				msg,
+				0,
+				{
+					dialogButtonText: Zotero.getString('file.accessError.showParentDir'),
+					dialogButtonCallback: function () {
+						try {
+							file.parent.QueryInterface(Components.interfaces.nsILocalFile);
+							file.parent.reveal();
+						}
+						// Unsupported on some platforms
+						catch (e2) {
+							Zotero.launchFile(file.parent);
+						}
+					}
+				}
+			);
+		}
+		
+		throw e;
 	}
 }

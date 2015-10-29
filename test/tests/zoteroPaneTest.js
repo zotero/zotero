@@ -1,3 +1,5 @@
+"use strict";
+
 describe("ZoteroPane", function() {
 	var win, doc, zp;
 	
@@ -88,6 +90,98 @@ describe("ZoteroPane", function() {
 				doc.getElementById('zotero-item-pane-message').value,
 				Zotero.getString('pane.item.selected.multiple', 2)
 			);
+		})
+	})
+	
+	describe("#viewAttachment", function () {
+		Components.utils.import("resource://zotero-unit/httpd.js");
+		var apiKey = Zotero.Utilities.randomString(24);
+		var port = 16213;
+		var baseURL = `http://localhost:${port}/`;
+		var server;
+		var responses = {};
+		
+		var setup = Zotero.Promise.coroutine(function* (options = {}) {
+			server = sinon.fakeServer.create();
+			server.autoRespond = true;
+		});
+		
+		function setResponse(response) {
+			setHTTPResponse(server, baseURL, response, responses);
+		}
+		
+		before(function () {
+			Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
+			
+			Zotero.Sync.Runner.apiKey = apiKey;
+			Zotero.Sync.Runner.baseURL = baseURL;
+		})
+		beforeEach(function* () {
+			this.httpd = new HttpServer();
+			this.httpd.start(port);
+			
+			yield Zotero.Users.setCurrentUserID(1);
+			yield Zotero.Users.setCurrentUsername("testuser");
+		})
+		afterEach(function* () {
+			var defer = new Zotero.Promise.defer();
+			this.httpd.stop(() => defer.resolve());
+			yield defer.promise;
+		})
+		
+		it("should download an attachment on-demand", function* () {
+			yield setup();
+			Zotero.Sync.Storage.Local.downloadAsNeeded(Zotero.Libraries.userLibraryID, true);
+			
+			var item = new Zotero.Item("attachment");
+			item.attachmentLinkMode = 'imported_file';
+			item.attachmentPath = 'storage:test.txt';
+			// TODO: Test binary data
+			var text = Zotero.Utilities.randomString();
+			yield item.saveTx();
+			yield Zotero.Sync.Storage.Local.setSyncState(
+				item.id, Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD
+			);
+			
+			var mtime = "1441252524000";
+			var md5 = Zotero.Utilities.Internal.md5(text)
+			
+			var newStorageSyncTime = Math.round(new Date().getTime() / 1000);
+			setResponse({
+				method: "GET",
+				url: "users/1/laststoragesync",
+				status: 200,
+				text: "" + newStorageSyncTime
+			});
+			var s3Path = `pretend-s3/${item.key}`;
+			this.httpd.registerPathHandler(
+				`/users/1/items/${item.key}/file`,
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 302, "Found");
+						response.setHeader("Zotero-File-Modification-Time", mtime, false);
+						response.setHeader("Zotero-File-MD5", md5, false);
+						response.setHeader("Zotero-File-Compressed", "No", false);
+						response.setHeader("Location", baseURL + s3Path, false);
+					}
+				}
+			);
+			this.httpd.registerPathHandler(
+				"/" + s3Path,
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.write(text);
+					}
+				}
+			);
+			
+			yield zp.viewAttachment(item.id);
+			
+			assert.equal((yield item.attachmentHash), md5);
+			assert.equal((yield item.attachmentModificationTime), mtime);
+			var path = yield item.getFilePathAsync();
+			assert.equal((yield Zotero.File.getContentsAsync(path)), text);
 		})
 	})
 })

@@ -50,7 +50,6 @@ Zotero.Item = function(itemTypeOrID) {
 	this._attachmentLinkMode = null;
 	this._attachmentContentType = null;
 	this._attachmentPath = null;
-	this._attachmentSyncState = null;
 	
 	// loadCreators
 	this._creators = [];
@@ -1453,14 +1452,13 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	
 	if (this._changed.attachmentData) {
 		let sql = "REPLACE INTO itemAttachments (itemID, parentItemID, linkMode, "
-			+ "contentType, charsetID, path, syncState) VALUES (?,?,?,?,?,?,?)";
+			+ "contentType, charsetID, path) VALUES (?,?,?,?,?,?)";
 		let linkMode = this.attachmentLinkMode;
 		let contentType = this.attachmentContentType;
 		let charsetID = this.attachmentCharset
 			? Zotero.CharacterSets.getID(this.attachmentCharset)
 			: null;
 		let path = this.attachmentPath;
-		let syncState = this.attachmentSyncState;
 		
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE && libraryType != 'user') {
 			throw new Error("Linked files can only be added to user library");
@@ -1472,8 +1470,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			{ int: linkMode },
 			contentType ? { string: contentType } : null,
 			charsetID ? { int: charsetID } : null,
-			path ? { string: path } : null,
-			syncState ? { int: syncState } : 0
+			path ? { string: path } : null
 		];
 		yield Zotero.DB.queryAsync(sql, params);
 		
@@ -2295,8 +2292,10 @@ Zotero.Item.prototype.renameAttachmentFile = Zotero.Promise.coroutine(function* 
 		yield this.relinkAttachmentFile(destPath);
 		
 		yield Zotero.DB.executeTransaction(function* () {
-			yield Zotero.Sync.Storage.setSyncedHash(this.id, null, false);
-			yield Zotero.Sync.Storage.setSyncState(this.id, Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD);
+			yield Zotero.Sync.Storage.Local.setSyncedHash(this.id, null, false);
+			yield Zotero.Sync.Storage.Local.setSyncState(
+				this.id, Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD
+			);
 		}.bind(this));
 		
 		return true;
@@ -2317,11 +2316,10 @@ Zotero.Item.prototype.renameAttachmentFile = Zotero.Promise.coroutine(function* 
 
 /**
  * @param {string} path  File path
- * @param {Boolean} [skipItemUpdate] Don't update attachment item mod time,
- *                                   so that item doesn't sync. Used when a file
- *                                   needs to be renamed to be accessible but the
- *                                   user doesn't have access to modify the
- *                                   attachment metadata
+ * @param {Boolean} [skipItemUpdate] Don't update attachment item mod time, so that item doesn't
+ *     sync. Used when a file needs to be renamed to be accessible but the user doesn't have
+ *     access to modify the attachment metadata. This also allows a save when the library is
+ *     read-only.
  */
 Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* (path, skipItemUpdate) {
 	if (path instanceof Components.interfaces.nsIFile) {
@@ -2382,7 +2380,8 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 	
 	yield this.saveTx({
 		skipDateModifiedUpdate: true,
-		skipClientDateModifiedUpdate: skipItemUpdate
+		skipClientDateModifiedUpdate: skipItemUpdate,
+		skipEditCheck: skipItemUpdate
 	});
 	
 	return true;
@@ -3605,9 +3604,6 @@ Zotero.Item.prototype.clone = Zotero.Promise.coroutine(function* (libraryID, ski
 			if (sameLibrary) {
 				if (this.attachmentPath) {
 					newItem.attachmentPath = this.attachmentPath;
-				}
-				if (this.attachmentSyncState) {
-					newItem.attachmentSyncState = this.attachmentSyncState;
 				}
 			}
 		}

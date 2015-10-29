@@ -76,7 +76,13 @@ Zotero.Sync.Data.Engine = function (options) {
 		onError: this.onError
 	}
 	
-	this.syncCachePromise = Zotero.Promise.resolve().bind(this);
+	Components.utils.import("resource://zotero/concurrentCaller.js");
+	this.syncCacheProcessor = new ConcurrentCaller({
+		id: "Sync Cache Processor",
+		numConcurrent: 1,
+		logger: Zotero.debug,
+		stopOnError: this.stopOnError
+	});
 };
 
 Zotero.Sync.Data.Engine.prototype.UPLOAD_RESULT_SUCCESS = 1;
@@ -167,12 +173,8 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 		}
 	}
 	
-	// TEMP: make more reliable
-	while (this.syncCachePromise.isPending()) {
-		Zotero.debug("Waiting for sync cache to be processed");
-		yield this.syncCachePromise;
-		yield Zotero.Promise.delay(50);
-	}
+	Zotero.debug("Waiting for sync cache to be processed");
+	yield this.syncCacheProcessor.wait();
 	
 	yield Zotero.Libraries.updateLastSyncTime(this.libraryID);
 	
@@ -286,12 +288,7 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 		}
 		
 		// Wait for sync process to clear
-		// TEMP: make more reliable
-		while (this.syncCachePromise.isPending()) {
-			Zotero.debug("Waiting for sync cache to be processed");
-			yield this.syncCachePromise;
-			yield Zotero.Promise.delay(50);
-		}
+		yield this.syncCacheProcessor.wait();
 		
 		//
 		// Get deleted objects
@@ -671,7 +668,8 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 						
 						if (state == 'successful') {
 							// Update local object with saved data if necessary
-							yield obj.fromJSON(current.data);
+							yield obj.loadAllData();
+							obj.fromJSON(current.data);
 							toSave.push(obj);
 							toCache.push(current);
 						}
@@ -701,8 +699,11 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 				
 				// Handle failed objects
 				for (let index in json.results.failed) {
-					let e = json.results.failed[index];
-					Zotero.logError(e.message);
+					let { code, message } = json.results.failed[index];
+					e = new Error(message);
+					e.name = "ZoteroUploadObjectError";
+					e.code = code;
+					Zotero.logError(e);
 					
 					// This shouldn't happen, because the upload request includes a library
 					// version and should prevent an outdated upload before the object version is
@@ -711,12 +712,11 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 						return this.UPLOAD_RESULT_OBJECT_CONFLICT;
 					}
 					
-					if (this.stopOnError) {
-						Zotero.debug("WE FAILED!!!");
-						throw new Error(e.message);
-					}
 					if (this.onError) {
-						this.onError(e.message);
+						this.onError(e);
+					}
+					if (this.stopOnError) {
+						throw new Error(e);
 					}
 					batch[index].tries++;
 					// Mark 400 errors as permanently failed
@@ -990,7 +990,7 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 			this._failedCheck();
 			
 			let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
-			let ObjectType = objectType[0].toUpperCase() + objectType.substr(1);
+			let ObjectType = Zotero.Utilities.capitalize(objectType);
 			
 			// TODO: localize
 			this.setStatus("Updating " + objectTypePlural + " in " + this.libraryName);
@@ -1037,8 +1037,7 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 			let cacheVersions = yield Zotero.Sync.Data.Local.getLatestCacheObjectVersions(
 				this.libraryID, objectType
 			);
-			// Queue objects that are out of date or don't exist locally and aren't up-to-date
-			// in the cache
+			// Queue objects that are out of date or don't exist locally
 			for (let key in results.versions) {
 				let version = results.versions[key];
 				let obj = yield objectsClass.getByLibraryAndKeyAsync(this.libraryID, key, {
@@ -1060,12 +1059,12 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 				}
 				
 				if (obj) {
-					Zotero.debug(Zotero.Utilities.capitalize(objectType) + " " + obj.libraryKey
+					Zotero.debug(ObjectType + " " + obj.libraryKey
 						+ " is older than version in sync cache");
 				}
 				else {
-					Zotero.debug(Zotero.Utilities.capitalize(objectType) + " "
-						+ this.libraryID + "/" + key + " in sync cache not found locally");
+					Zotero.debug(ObjectType + " " + this.libraryID + "/" + key
+						+ " in sync cache not found locally");
 				}
 				
 				toDownload.push(key);
@@ -1127,7 +1126,7 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 		break;
 	}
 	
-	yield this.syncCachePromise;
+	yield this.syncCacheProcessor.wait();
 	
 	yield Zotero.Libraries.setVersion(this.libraryID, lastLibraryVersion);
 	
@@ -1145,20 +1144,19 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
  * @param {String} objectType
  */
 Zotero.Sync.Data.Engine.prototype._processCache = function (objectType) {
-	var self = this;
-	this.syncCachePromise = this.syncCachePromise.then(function () {
-		self._failedCheck();
+	this.syncCacheProcessor.start(function () {
+		this._failedCheck();
 		return Zotero.Sync.Data.Local.processSyncCacheForObjectType(
-			self.libraryID, objectType, self.options
+			this.libraryID, objectType, this.options
 		)
 		.catch(function (e) {
 			Zotero.logError(e);
-			if (self.stopOnError) {
+			if (this.stopOnError) {
 				Zotero.debug("WE FAILED!!!");
-				self.failed = e;
+				this.failed = e;
 			}
-		});
-	})
+		}.bind(this));
+	}.bind(this))
 }
 
 

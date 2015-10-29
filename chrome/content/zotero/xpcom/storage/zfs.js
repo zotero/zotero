@@ -24,605 +24,874 @@
 */
 
 
-Zotero.Sync.Storage.ZFS = (function () {
-	var _rootURI;
-	var _userURI;
-	var _headers = {
-		"Zotero-API-Version" : ZOTERO_CONFIG.API_VERSION
-	};
-	var _cachedCredentials = false;
-	var _s3Backoff = 1;
-	var _s3ConsecutiveFailures = 0;
-	var _maxS3Backoff = 60;
-	var _maxS3ConsecutiveFailures = 5;
+Zotero.Sync.Storage.ZFS_Module = function (options) {
+	this.options = options;
+	this.apiClient = options.apiClient;
+	
+	this._s3Backoff = 1;
+	this._s3ConsecutiveFailures = 0;
+	this._maxS3Backoff = 60;
+	this._maxS3ConsecutiveFailures = 5;
+};
+Zotero.Sync.Storage.ZFS_Module.prototype = {
+	name: "ZFS",
+	verified: true,
 	
 	/**
-	 * Get file metadata on storage server
-	 *
-	 * @param	{Zotero.Item}	item
-	 * @param	{Function}		callback		Callback f(item, etag)
+	 * @return {Promise} A promise for the last sync time
 	 */
-	function getStorageFileInfo(item, request) {
-		var funcName = "Zotero.Sync.Storage.ZFS.getStorageFileInfo()";
+	getLastSyncTime: Zotero.Promise.coroutine(function* (libraryID) {
+		var params = this._getRequestParams(libraryID, "laststoragesync");
+		var uri = this.apiClient.buildRequestURI(params);
 		
-		return Zotero.HTTP.promise("GET", getItemInfoURI(item),
-			{
-				successCodes: [200, 404],
-				headers: _headers,
-				requestObserver: function (xmlhttp) {
-					request.setChannel(xmlhttp.channel);
-				}
-			})
-			.then(function (req) {
-				if (req.status == 404) {
-					return false;
-				}
-				
-				var info = {};
-				info.hash = req.getResponseHeader('ETag');
-				if (!info.hash) {
-					var msg = "Hash not found in info response in " + funcName
-								+ " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
-					Zotero.debug(msg, 1);
-					Zotero.debug(req.status);
-					Zotero.debug(req.responseText);
-					Components.utils.reportError(msg);
-					try {
-						Zotero.debug(req.getAllResponseHeaders());
-					}
-					catch (e) {
-						Zotero.debug("Response headers unavailable");
-					}
-					var msg = Zotero.getString('sync.storage.error.zfs.restart', Zotero.appName);
-					throw msg;
-				}
-				info.filename = req.getResponseHeader('X-Zotero-Filename');
-				var mtime = req.getResponseHeader('X-Zotero-Modification-Time');
-				info.mtime = parseInt(mtime);
-				info.compressed = req.getResponseHeader('X-Zotero-Compressed') == 'Yes';
-				Zotero.debug(info);
-				
-				return info;
-			})
-			.catch(function (e) {
-				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					if (e.xmlhttp.status == 0) {
-						var msg = "Request cancelled getting storage file info";
-					}
-					else {
-						var msg = "Unexpected status code " + e.xmlhttp.status
-							+ " getting storage file info for item " + item.libraryKey;
-					}
-					Zotero.debug(msg, 1);
-					Zotero.debug(e.xmlhttp.responseText);
-					Components.utils.reportError(msg);
-					throw new Error(Zotero.Sync.Storage.defaultError);
-				}
-				
-				throw e;
-			});
-	}
+		try {
+			let req = yield this.apiClient.makeRequest(
+				"GET", uri, { successCodes: [200, 404], debug: true }
+			);
+			
+			// Not yet synced
+			if (req.status == 404) {
+				Zotero.debug("No last sync time for library " + libraryID);
+				return null;
+			}
+			
+			let ts = req.responseText;
+			let date = new Date(ts * 1000);
+			Zotero.debug("Last successful ZFS sync for library " + libraryID + " was " + date);
+			return ts;
+		}
+		catch (e) {
+			Zotero.logError(e);
+			throw e;
+		}
+	}),
+	
+	
+	setLastSyncTime: Zotero.Promise.coroutine(function* (libraryID) {
+		var params = this._getRequestParams(libraryID, "laststoragesync");
+		var uri = this.apiClient.buildRequestURI(params);
+		
+		try {
+			var req = yield this.apiClient.makeRequest(
+				"POST", uri, { successCodes: [200, 404], debug: true }
+			);
+		}
+		catch (e) {
+			var msg = "Unexpected status code " + e.xmlhttp.status + " setting last file sync time";
+			Zotero.logError(e);
+			throw new Error(Zotero.Sync.Storage.defaultError);
+		}
+		
+		// Not yet synced
+		//
+		// TODO: Don't call this at all if no files uploaded
+		if (req.status == 404) {
+			return;
+		}
+		
+		var time = req.responseText;
+		if (parseInt(time) != time) {
+			Zotero.logError(`Unexpected response ${time} setting last file sync time`);
+			throw new Error(Zotero.Sync.Storage.defaultError);
+		}
+		return parseInt(time);
+	}),
 	
 	
 	/**
-	 * Upload the file to the server
+	 * Begin download process for individual file
 	 *
-	 * @param	{Object}		Object with 'request' property
-	 * @return	{void}
+	 * @param {Zotero.Sync.Storage.Request} request
+	 * @return {Promise<Boolean>} - True if file download, false if not
 	 */
-	function processUploadFile(data) {
-		/*
-		updateSizeMultiplier(
-			(100 - Zotero.Sync.Storage.compressionTracker.ratio) / 100
-		);
-		*/
+	downloadFile: Zotero.Promise.coroutine(function* (request) {
+		var item = Zotero.Sync.Storage.Utilities.getItemFromRequest(request);
+		if (!item) {
+			throw new Error("Item '" + request.name + "' not found");
+		}
 		
-		var request = data.request;
-		var item = Zotero.Sync.Storage.getItemFromRequestName(request.name);
-		return getStorageFileInfo(item, request)
-			.then(function (info) {
-				if (request.isFinished()) {
-					Zotero.debug("Upload request '" + request.name
-						+ "' is no longer running after getting file info");
-					return false;
-				}
-				
-				// Check for conflict
-				if (Zotero.Sync.Storage.getSyncState(item.id)
-						!= Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD) {
-					if (info) {
-						// Remote mod time
-						var mtime = info.mtime;
-						// Local file time
-						var fmtime = item.attachmentModificationTime;
-						
-						var same = false;
-						var useLocal = false;
-						if (fmtime == mtime) {
-							same = true;
-							Zotero.debug("File mod time matches remote file -- skipping upload");
-						}
-						// Allow floored timestamps for filesystems that don't support
-						// millisecond precision (e.g., HFS+)
-						else if (Math.floor(mtime / 1000) * 1000 == fmtime || Math.floor(fmtime / 1000) * 1000 == mtime) {
-							same = true;
-							Zotero.debug("File mod times are within one-second precision (" + fmtime + " ≅ " + mtime + ") "
-								+ "-- skipping upload");
-						}
-						// Allow timestamp to be exactly one hour off to get around
-						// time zone issues -- there may be a proper way to fix this
-						else if (Math.abs(fmtime - mtime) == 3600000
-								// And check with one-second precision as well
-								|| Math.abs(fmtime - Math.floor(mtime / 1000) * 1000) == 3600000
-								|| Math.abs(Math.floor(fmtime / 1000) * 1000 - mtime) == 3600000) {
-							same = true;
-							Zotero.debug("File mod time (" + fmtime + ") is exactly one hour off remote file (" + mtime + ") "
-								+ "-- assuming time zone issue and skipping upload");
-						}
-						// Ignore maxed-out 32-bit ints, from brief problem after switch to 32-bit servers
-						else if (mtime == 2147483647) {
-							Zotero.debug("Remote mod time is invalid -- uploading local file version");
-							useLocal = true;
-						}
-						
-						if (same) {
-							Zotero.debug(Zotero.Sync.Storage.getSyncedModificationTime(item.id));
-							
-							Zotero.DB.beginTransaction();
-							var syncState = Zotero.Sync.Storage.getSyncState(item.id);
-							//Zotero.Sync.Storage.setSyncedModificationTime(item.id, fmtime, true);
-							Zotero.Sync.Storage.setSyncedModificationTime(item.id, fmtime);
-							Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
-							Zotero.DB.commitTransaction();
-							return {
-								localChanges: true,
-								remoteChanges: false
-							};
-						}
-						
-						var smtime = Zotero.Sync.Storage.getSyncedModificationTime(item.id);
-						if (!useLocal && smtime != mtime) {
-							Zotero.debug("Conflict -- last synced file mod time "
-								+ "does not match time on storage server"
-								+ " (" + smtime + " != " + mtime + ")");
-							return {
-								localChanges: false,
-								remoteChanges: false,
-								conflict: {
-									local: { modTime: fmtime },
-									remote: { modTime: mtime }
-								}
-							};
-						}
-					}
-					else {
-						Zotero.debug("Remote file not found for item " + item.libraryID + "/" + item.key);
-					}
-				}
-				
-				return getFileUploadParameters(
-					item,
-					function (item, target, uploadKey, params) {
-						return postFile(request, item, target, uploadKey, params);
-					},
-					function () {
-						updateItemFileInfo(item);
-						return {
-							localChanges: true,
-							remoteChanges: false
-						};
-					}
-				);
+		var path = item.getFilePath();
+		if (!path) {
+			Zotero.debug(`Cannot download file for attachment ${item.libraryKey} with no path`);
+			return new Zotero.Sync.Storage.Result;
+		}
+		
+		var destPath = OS.Path.join(Zotero.getTempDirectory().path, item.key + '.tmp');
+		
+		// saveURI() below appears not to create empty files for Content-Length: 0,
+		// so we create one here just in case, which also lets us check file access
+		try {
+			let file = yield OS.File.open(destPath, {
+				truncate: true
 			});
-	}
-	
-	
-	/**
-	 * Get mod time of file on storage server
-	 *
-	 * @param	{Zotero.Item}					item
-	 * @param	{Function}		uploadCallback					Callback f(request, item, target, params)
-	 * @param	{Function}		existsCallback					Callback f() to call when file already exists
-	 *																on server and uploading isn't necessary
-	 */
-	function getFileUploadParameters(item, uploadCallback, existsCallback) {
-		var funcName = "Zotero.Sync.Storage.ZFS.getFileUploadParameters()";
-		
-		var uri = getItemURI(item);
-		
-		if (Zotero.Attachments.getNumFiles(item) > 1) {
-			var file = Zotero.getTempDirectory();
-			var filename = item.key + '.zip';
-			file.append(filename);
-			uri.spec = uri.spec;
-			var zip = true;
+			file.close();
 		}
-		else {
-			var file = item.getFile();
-			var filename = file.leafName;
-			var zip = false;
+		catch (e) {
+			Zotero.File.checkFileAccessError(e, destPath, 'create');
 		}
-		
-		var mtime = item.attachmentModificationTime;
-		var hash = Zotero.Utilities.Internal.md5(file);
-		
-		var body = "md5=" + hash + "&filename=" + encodeURIComponent(filename)
-					+ "&filesize=" + file.fileSize + "&mtime=" + mtime;
-		if (zip) {
-			body += "&zip=1";
-		}
-		
-		return Zotero.HTTP.promise("POST", uri, { body: body, headers: _headers, debug: true })
-			.then(function (req) {
-				if (!req.responseXML) {
-					throw new Error("Invalid response retrieving file upload parameters");
-				}
-				
-				var rootTag = req.responseXML.documentElement.tagName;
-				
-				if (rootTag != 'upload' && rootTag != 'exists') {
-					throw new Error("Invalid response retrieving file upload parameters");
-				}
-				
-				// File was already available, so uploading isn't required
-				if (rootTag == 'exists') {
-					return existsCallback();
-				}
-				
-				var url = req.responseXML.getElementsByTagName('url')[0].textContent;
-				var uploadKey = req.responseXML.getElementsByTagName('key')[0].textContent;
-				var params = {}, p = '';
-				var paramNodes = req.responseXML.getElementsByTagName('params')[0].childNodes;
-				for (var i = 0; i < paramNodes.length; i++) {
-					params[paramNodes[i].tagName] = paramNodes[i].textContent;
-				}
-				return uploadCallback(item, url, uploadKey, params);
-			})
-			.catch(function (e) {
-				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					if (e.status == 413) {
-						var retry = e.xmlhttp.getResponseHeader('Retry-After');
-						if (retry) {
-							var minutes = Math.round(retry / 60);
-							var e = new Zotero.Error(
-								Zotero.getString('sync.storage.error.zfs.tooManyQueuedUploads', minutes),
-								"ZFS_UPLOAD_QUEUE_LIMIT"
-							);
-							throw e;
-						}
-						
-						var text, buttonText = null, buttonCallback;
-						
-						// Group file
-						if (item.libraryID) {
-							var group = Zotero.Groups.getByLibraryID(item.libraryID);
-							text = Zotero.getString('sync.storage.error.zfs.groupQuotaReached1', group.name) + "\n\n"
-									+ Zotero.getString('sync.storage.error.zfs.groupQuotaReached2');
-						}
-						// Personal file
-						else {
-							text = Zotero.getString('sync.storage.error.zfs.personalQuotaReached1') + "\n\n"
-									+ Zotero.getString('sync.storage.error.zfs.personalQuotaReached2');
-							buttonText = Zotero.getString('sync.storage.openAccountSettings');
-							buttonCallback = function () {
-								var url = "https://www.zotero.org/settings/storage";
-								
-								var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-											.getService(Components.interfaces.nsIWindowMediator);
-								var win = wm.getMostRecentWindow("navigator:browser");
-								win.ZoteroPane.loadURI(url);
-							}
-						}
-						
-						text += "\n\n" + filename + " (" + Math.round(file.fileSize / 1024) + "KB)";
-						
-						var e = new Zotero.Error(
-							Zotero.getString('sync.storage.error.zfs.fileWouldExceedQuota', filename),
-							"ZFS_OVER_QUOTA",
-							{
-								dialogText: text,
-								dialogButtonText: buttonText,
-								dialogButtonCallback: buttonCallback
-							}
-						);
-						e.errorType = 'warning';
-						Zotero.debug(e, 2);
-						Components.utils.reportError(e);
-						throw e;
-					}
-					else if (e.status == 403) {
-						var groupID = Zotero.Groups.getGroupIDFromLibraryID(item.libraryID);
-						var e = new Zotero.Error(
-							"File editing denied for group",
-							"ZFS_FILE_EDITING_DENIED",
-							{
-								groupID: groupID
-							}
-						);
-						throw e;
-					}
-					else if (e.status == 404) {
-						Components.utils.reportError("Unexpected status code 404 in " + funcName
-									 + " (" + Zotero.Items.getLibraryKeyHash(item) + ")");
-						if (Zotero.Prefs.get('sync.debugNoAutoResetClient')) {
-							Components.utils.reportError("Skipping automatic client reset due to debug pref");
-							return;
-						}
-						if (!Zotero.Sync.Server.canAutoResetClient) {
-							Components.utils.reportError("Client has already been auto-reset -- manual sync required");
-							return;
-						}
-						Zotero.Sync.Server.resetClient();
-						Zotero.Sync.Server.canAutoResetClient = false;
-						throw new Error(Zotero.Sync.Storage.defaultError);
-					}
-					
-					var msg = "Unexpected status code " + e.status + " in " + funcName
-								 + " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
-					Zotero.debug(msg, 1);
-					Zotero.debug(e.xmlhttp.getAllResponseHeaders());
-					Components.utils.reportError(msg);
-					throw new Error(Zotero.Sync.Storage.defaultError);
-				}
-				
-				throw e;
-			});
-	}
-	
-	
-	function postFile(request, item, url, uploadKey, params) {
-		if (request.isFinished()) {
-			Zotero.debug("Upload request " + request.name + " is no longer running after getting upload parameters");
-			return false;
-		}
-		
-		var file = getUploadFile(item);
-		
-		// TODO: make sure this doesn't appear in file
-		var boundary = "---------------------------" + Math.random().toString().substr(2);
-		
-		var mis = Components.classes["@mozilla.org/io/multiplex-input-stream;1"]
-					.createInstance(Components.interfaces.nsIMultiplexInputStream);
-		
-		// Add parameters
-		for (var key in params) {
-			var storage = Components.classes["@mozilla.org/storagestream;1"]
-							.createInstance(Components.interfaces.nsIStorageStream);
-			storage.init(4096, 4294967295, null); // PR_UINT32_MAX
-			var out = storage.getOutputStream(0);
-			
-			var conv = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
-							.createInstance(Components.interfaces.nsIConverterOutputStream);
-			conv.init(out, null, 4096, "?");
-			
-			var str = "--" + boundary + '\r\nContent-Disposition: form-data; name="' + key + '"'
-						+ '\r\n\r\n' + params[key] + '\r\n';
-			conv.writeString(str);
-			conv.close();
-			
-			var instr = storage.newInputStream(0);
-			mis.appendStream(instr);
-		}
-		
-		// Add file
-		var sis = Components.classes["@mozilla.org/io/string-input-stream;1"]
-					.createInstance(Components.interfaces.nsIStringInputStream);
-		var str = "--" + boundary + '\r\nContent-Disposition: form-data; name="file"\r\n\r\n';
-		sis.setData(str, -1);
-		mis.appendStream(sis);
-		
-		var fis = Components.classes["@mozilla.org/network/file-input-stream;1"]
-					.createInstance(Components.interfaces.nsIFileInputStream);
-		fis.init(file, 0x01, 0, Components.interfaces.nsIFileInputStream.CLOSE_ON_EOF
-			| Components.interfaces.nsIFileInputStream.REOPEN_ON_REWIND);
-		
-		var bis = Components.classes["@mozilla.org/network/buffered-input-stream;1"]
-					.createInstance(Components.interfaces.nsIBufferedInputStream)
-		bis.init(fis, 64 * 1024);
-		mis.appendStream(bis);
-		
-		// End request
-		var sis = Components.classes["@mozilla.org/io/string-input-stream;1"]
-					.createInstance(Components.interfaces.nsIStringInputStream);
-		var str = "\r\n--" + boundary + "--";
-		sis.setData(str, -1);
-		mis.appendStream(sis);
-		
-		
-	/*	var cstream = Components.classes["@mozilla.org/intl/converter-input-stream;1"].
-		createInstance(Components.interfaces.nsIConverterInputStream);
-		cstream.init(mis, "UTF-8", 0, 0); // you can use another encoding here if you wish
-		
-		let (str = {}) {
-			cstream.readString(-1, str); // read the whole file and put it in str.value
-			data = str.value;
-		}
-		cstream.close(); // this closes fstream
-		alert(data);
-	*/	
-		
-		var ios = Components.classes["@mozilla.org/network/io-service;1"].
-					getService(Components.interfaces.nsIIOService);
-		var uri = ios.newURI(url, null, null);
-		var channel = ios.newChannelFromURI(uri);
-		
-		channel.QueryInterface(Components.interfaces.nsIUploadChannel);
-		channel.setUploadStream(mis, "multipart/form-data", -1);
-		channel.QueryInterface(Components.interfaces.nsIHttpChannel);
-		channel.requestMethod = 'POST';
-		channel.allowPipelining = false;
-		channel.setRequestHeader('Keep-Alive', '', false);
-		channel.setRequestHeader('Connection', '', false);
-		channel.setRequestHeader("Content-Type", "multipart/form-data; boundary=" + boundary, false);
-		//channel.setRequestHeader('Date', date, false);
-		
-		request.setChannel(channel);
 		
 		var deferred = Zotero.Promise.defer();
+		var requestData = {item};
 		
 		var listener = new Zotero.Sync.Storage.StreamListener(
 			{
-				onProgress: function (a, b, c) {
-					request.onProgress(a, b, c);
+				onStart: function (req) {
+					if (request.isFinished()) {
+						Zotero.debug("Download request " + request.name
+							+ " stopped before download started -- closing channel");
+						req.cancel(Components.results.NS_BINDING_ABORTED);
+						deferred.resolve(false);
+					}
 				},
-				onStop: function (httpRequest, status, response, data) {
-					data.request.setChannel(false);
+				onChannelRedirect: Zotero.Promise.coroutine(function* (oldChannel, newChannel, flags) {
+					// These will be used in processDownload() if the download succeeds
+					oldChannel.QueryInterface(Components.interfaces.nsIHttpChannel);
 					
-					// For timeouts and failures from S3, which happen intermittently,
-					// wait a little and try again
-					let timeoutMessage = "Your socket connection to the server was not read from or "
-						+ "written to within the timeout period.";
-					if (status == 0 || (status == 400 && response.indexOf(timeoutMessage) != -1)) {
-						if (_s3ConsecutiveFailures >= _maxS3ConsecutiveFailures) {
-							Zotero.debug(_s3ConsecutiveFailures
-								+ " consecutive S3 failures -- aborting", 1);
-							_s3ConsecutiveFailures = 0;
+					Zotero.debug("CHANNEL HERE FOR " + item.libraryKey + " WITH " + oldChannel.status);
+					Zotero.debug(oldChannel.URI.spec);
+					Zotero.debug(newChannel.URI.spec);
+					
+					var header;
+					try {
+						header = "Zotero-File-Modification-Time";
+						requestData.mtime = oldChannel.getResponseHeader(header);
+						header = "Zotero-File-MD5";
+						requestData.md5 = oldChannel.getResponseHeader(header);
+						header = "Zotero-File-Compressed";
+						requestData.compressed = oldChannel.getResponseHeader(header) == 'Yes';
+					}
+					catch (e) {
+						deferred.reject(new Error(`${header} header not set in file request for ${item.libraryKey}`));
+						return false;
+					}
+					
+					if (!(yield OS.File.exists(path))) {
+						return true;
+					}
+					
+					var updateHash = false;
+					var fileModTime = yield item.attachmentModificationTime;
+					if (requestData.mtime == fileModTime) {
+						Zotero.debug("File mod time matches remote file -- skipping download of "
+							+ item.libraryKey);
+					}
+					// If not compressed, check hash, in case only timestamp changed
+					else if (!requestData.compressed && (yield item.attachmentHash) == requestData.md5) {
+						Zotero.debug("File hash matches remote file -- skipping download of "
+							+ item.libraryKey);
+						updateHash = true;
+					}
+					else {
+						return true;
+					}
+					
+					// Update local metadata and stop request, skipping file download
+					yield Zotero.DB.executeTransaction(function* () {
+						if (updateHash) {
+							yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, requestData.md5);
 						}
-						else {
-							let libraryKey = Zotero.Items.getLibraryKeyHash(item);
-							let msg = "S3 returned " + status
-								+ " (" + libraryKey + ") -- retrying upload"
-							Components.utils.reportError(msg);
-							Zotero.debug(msg, 1);
-							Zotero.debug(response, 1);
-							if (_s3Backoff < _maxS3Backoff) {
-								_s3Backoff *= 2;
-							}
-							_s3ConsecutiveFailures++;
-							Zotero.debug("Delaying " + libraryKey + " upload for "
-								+ _s3Backoff + " seconds", 2);
-							Q.delay(_s3Backoff * 1000)
-							.then(function () {
-								deferred.resolve(postFile(request, item, url, uploadKey, params));
-							});
+						yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
+							item.id, requestData.mtime
+						);
+						yield Zotero.Sync.Storage.Local.setSyncState(
+							item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
+						);
+					});
+					return false;
+				}),
+				onProgress: function (a, b, c) {
+					request.onProgress(a, b, c)
+				},
+				onStop: function (req, status, res) {
+					request.setChannel(false);
+					
+					if (status != 200) {
+						if (status == 404) {
+							Zotero.debug("Remote file not found for item " + item.libraryKey);
+							deferred.resolve(new Zotero.Sync.Storage.Result);
 							return;
 						}
+						
+						// If S3 connection is interrupted, delay and retry, or bail if too many
+						// consecutive failures
+						if (status == 0) {
+							if (this._s3ConsecutiveFailures < this._maxS3ConsecutiveFailures) {
+								let libraryKey = item.libraryKey;
+								let msg = "S3 returned 0 for " + libraryKey + " -- retrying download"
+								Components.utils.reportError(msg);
+								Zotero.debug(msg, 1);
+								if (this._s3Backoff < this._maxS3Backoff) {
+									this._s3Backoff *= 2;
+								}
+								this._s3ConsecutiveFailures++;
+								Zotero.debug("Delaying " + libraryKey + " download for "
+									+ this._s3Backoff + " seconds", 2);
+								Zotero.Promise.delay(this._s3Backoff * 1000)
+								.then(function () {
+									deferred.resolve(this._downloadFile(request));
+								});
+								return;
+							}
+							
+							Zotero.debug(this._s3ConsecutiveFailures
+								+ " consecutive S3 failures -- aborting", 1);
+							this._s3ConsecutiveFailures = 0;
+						}
+						
+						var msg = "Unexpected status code " + status + " for GET " + uri;
+						Zotero.debug(msg, 1);
+						Components.utils.reportError(msg);
+						// Output saved content, in case an error was captured
+						try {
+							let sample = Zotero.File.getContents(destPath, null, 4096);
+							if (sample) {
+								Zotero.debug(sample, 1);
+							}
+						}
+						catch (e) {
+							Zotero.debug(e, 1);
+						}
+						deferred.reject(new Error(Zotero.Sync.Storage.defaultError));
+						return;
 					}
 					
-					deferred.resolve(onUploadComplete(httpRequest, status, response, data));
-				},
-				onCancel: function (httpRequest, status, data) {
-					onUploadCancel(httpRequest, status, data)
-					deferred.resolve(false);
-				},
-				request: request,
-				item: item,
-				uploadKey: uploadKey,
-				streams: [mis]
+					// Don't try to process if the request has been cancelled
+					if (request.isFinished()) {
+						Zotero.debug("Download request " + request.name
+							+ " is no longer running after file download", 2);
+						deferred.resolve(false);
+						return;
+					}
+					
+					Zotero.debug("Finished download of " + destPath);
+					
+					try {
+						deferred.resolve(
+							Zotero.Sync.Storage.Local.processDownload(requestData)
+						);
+					}
+					catch (e) {
+						Zotero.debug("REJECTING");
+						deferred.reject(e);
+					}
+				}.bind(this),
+				onCancel: function (req, status) {
+					Zotero.debug("Request cancelled");
+					if (deferred.promise.isPending()) {
+						deferred.resolve(false);
+					}
+				}
 			}
 		);
-		channel.notificationCallbacks = listener;
 		
-		var dispURI = uri.clone();
-		if (dispURI.password) {
-			dispURI.password = '********';
-		}
-		Zotero.debug("HTTP POST of " + file.leafName + " to " + dispURI.spec);
+		var params = this._getRequestParams(item.libraryID, `items/${item.key}/file`);
+		var uri = this.apiClient.buildRequestURI(params);
+		var headers = this.apiClient.getHeaders();
 		
-		channel.asyncOpen(listener, null);
+		Zotero.debug('Saving ' + uri);
+		const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
+		var wbp = Components
+			.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+			.createInstance(nsIWBP);
+		wbp.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
+		wbp.progressListener = listener;
+		Zotero.Utilities.Internal.saveURI(wbp, uri, destPath, headers);
 		
 		return deferred.promise;
-	}
+	}),
 	
 	
-	function onUploadComplete(httpRequest, status, response, data) {
-		return Q.try(function () {
-			var request = data.request;
-			var item = data.item;
-			var uploadKey = data.uploadKey;
-			
-			Zotero.debug("Upload of attachment " + item.key
-				+ " finished with status code " + status);
-			
-			Zotero.debug(response);
-			
-			switch (status) {
-				case 201:
-					// Decrease backoff delay on successful upload
-					if (_s3Backoff > 1) {
-						_s3Backoff /= 2;
-					}
-					// And reset consecutive failures
-					_s3ConsecutiveFailures = 0;
-					break;
-				
-				case 500:
-					throw new Error("File upload failed. Please try again.");
-				
-				default:
-					var msg = "Unexpected file upload status " + status
-						+ " in Zotero.Sync.Storage.ZFS.onUploadComplete()"
-						+ " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
-					Zotero.debug(msg, 1);
-					Components.utils.reportError(msg);
-					Components.utils.reportError(response);
-					throw new Error(Zotero.Sync.Storage.defaultError);
+	uploadFile: Zotero.Promise.coroutine(function* (request) {
+		var item = Zotero.Sync.Storage.Utilities.getItemFromRequest(request);
+		if (yield Zotero.Attachments.hasMultipleFiles(item)) {
+			let created = yield Zotero.Sync.Storage.Utilities.createUploadFile(request);
+			if (!created) {
+				return new Zotero.Sync.Storage.Result;
 			}
-			
-			var uri = getItemURI(item);
-			var body = "update=" + uploadKey + "&mtime=" + item.attachmentModificationTime;
-			
-			// Register upload on server
-			return Zotero.HTTP.promise("POST", uri, { body: body, headers: _headers, successCodes: [204] })
-				.then(function (req) {
-					updateItemFileInfo(item);
-					return {
-						localChanges: true,
-						remoteChanges: true
-					};
-				})
-				.catch(function (e) {
-					var msg = "Unexpected file registration status " + e.status
-						+ " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
-					Zotero.debug(msg, 1);
-					Zotero.debug(e.xmlhttp.responseText);
-					Zotero.debug(e.xmlhttp.getAllResponseHeaders());
-					Components.utils.reportError(msg);
-					Components.utils.reportError(e.xmlhttp.responseText);
-					throw new Error(Zotero.Sync.Storage.defaultError);
-				});
-		});
-	}
+			return this._processUploadFile(request);
+		}
+		return this._processUploadFile(request);
+	}),
 	
 	
-	function updateItemFileInfo(item) {
-		// Mark as changed locally
-		Zotero.DB.beginTransaction();
-		Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
-		
-		// Store file mod time
-		var mtime = item.attachmentModificationTime;
-		Zotero.Sync.Storage.setSyncedModificationTime(item.id, mtime, true);
-		
-		// Store file hash of individual files
-		if (Zotero.Attachments.getNumFiles(item) == 1) {
-			var hash = item.attachmentHash;
-			Zotero.Sync.Storage.setSyncedHash(item.id, hash);
+	/**
+	 * Remove all synced files from the server
+	 */
+	purgeDeletedStorageFiles: Zotero.Promise.coroutine(function* () {
+		var sql = "SELECT value FROM settings WHERE setting=? AND key=?";
+		var values = yield Zotero.DB.columnQueryAsync(sql, ['storage', 'zfsPurge']);
+		if (!values) {
+			return false;
 		}
 		
-		Zotero.DB.commitTransaction();
+		Zotero.debug("Unlinking synced files on ZFS");
+		
+		var uri = this.userURI;
+		uri.spec += "removestoragefiles?";
+		// Unused
+		for each(var value in values) {
+			switch (value) {
+				case 'user':
+					uri.spec += "user=1&";
+					break;
+				
+				case 'group':
+					uri.spec += "group=1&";
+					break;
+				
+				default:
+					throw new Error("Invalid zfsPurge value '" + value + "'");
+			}
+		}
+		uri.spec = uri.spec.substr(0, uri.spec.length - 1);
+		
+		yield Zotero.HTTP.request("POST", uri, "");
+		
+		var sql = "DELETE FROM settings WHERE setting=? AND key=?";
+		yield Zotero.DB.queryAsync(sql, ['storage', 'zfsPurge']);
+	}),
+	
+	
+	//
+	// Private methods
+	//
+	_getRequestParams: function (libraryID, target) {
+		var library = Zotero.Libraries.get(libraryID);
+		return {
+			libraryType: library.libraryType,
+			libraryTypeID: library.libraryTypeID,
+			target
+		};
+	},
+	
+	
+	/**
+	 * Get authorization from API for uploading file
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {Object|String} - Object with upload params or 'exists'
+	 */
+	_getFileUploadParameters: Zotero.Promise.coroutine(function* (item) {
+		var funcName = "Zotero.Sync.Storage.ZFS._getFileUploadParameters()";
+		
+		var path = item.getFilePath();
+		var filename = OS.Path.basename(path);
+		var zip = yield Zotero.Attachments.hasMultipleFiles(item);
+		if (zip) {
+			var uploadPath = OS.Path.join(Zotero.getTempDirectory().path, item.key + '.zip');
+		}
+		else {
+			var uploadPath = path;
+		}
+		
+		var params = this._getRequestParams(item.libraryID, `items/${item.key}/file`);
+		var uri = this.apiClient.buildRequestURI(params);
+		
+		// TODO: One-step uploads
+		/*var headers = {
+			"Content-Type": "application/json"
+		};
+		var storedHash = yield Zotero.Sync.Storage.Local.getSyncedHash(item.id);
+		//var storedModTime = yield Zotero.Sync.Storage.getSyncedModificationTime(item.id);
+		if (storedHash) {
+			headers["If-Match"] = storedHash;
+		}
+		else {
+			headers["If-None-Match"] = "*";
+		}
+		var mtime = yield item.attachmentModificationTime;
+		var hash = Zotero.Utilities.Internal.md5(file);
+		var json = {
+			md5: hash,
+			mtime,
+			filename,
+			size: file.fileSize
+		};
+		var charset = item.attachmentCharset;
+		var contentType = item.attachmentContentType;
+		if (charset) {
+			json.charset = charset;
+		}
+		if (contentType) {
+			json.contentType = contentType;
+		}
+		if (zip) {
+			json.zip = true;
+		}
 		
 		try {
-			if (Zotero.Attachments.getNumFiles(item) > 1) {
+			var req = yield this.apiClient.makeRequest(
+				"POST", uri, { body: JSON.stringify(json), headers, debug: true }
+			);
+		}*/
+		
+		var headers = {
+			"Content-Type": "application/x-www-form-urlencoded"
+		};
+		var storedHash = yield Zotero.Sync.Storage.Local.getSyncedHash(item.id);
+		//var storedModTime = yield Zotero.Sync.Storage.getSyncedModificationTime(item.id);
+		if (storedHash) {
+			headers["If-Match"] = storedHash;
+		}
+		else {
+			headers["If-None-Match"] = "*";
+		}
+		
+		// Build POST body
+		var mtime = yield item.attachmentModificationTime;
+		var params = {
+			md5: yield item.attachmentHash,
+			mtime,
+			filename,
+			filesize: (yield OS.File.stat(uploadPath)).size
+		};
+		var charset = item.attachmentCharset;
+		var contentType = item.attachmentContentType;
+		if (charset) {
+			params.charset = charset;
+		}
+		if (contentType) {
+			params.contentType = contentType;
+		}
+		if (zip) {
+			params.zipMD5 = yield Zotero.Utilities.Internal.md5Async(uploadPath);
+			params.zipFilename = OS.Path.basename(uploadPath);
+		}
+		var body = [];
+		for (let i in params) {
+			body.push(i + "=" + encodeURIComponent(params[i]));
+		}
+		body = body.join('&');
+		
+		try {
+			var req = yield this.apiClient.makeRequest(
+				"POST",
+				uri,
+				{
+					body,
+					headers,
+					// This should include all errors in _handleUploadAuthorizationFailure()
+					successCodes: [200, 201, 204, 403, 404, 412, 413],
+					debug: true
+				}
+			);
+		}
+		catch (e) {
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+				let msg = "Unexpected status code " + e.status + " in " + funcName
+					 + " (" + item.libraryKey + ")";
+				Zotero.logError(msg);
+				Zotero.debug(e.xmlhttp.getAllResponseHeaders());
+				throw new Error(Zotero.Sync.Storage.defaultError);
+			}
+			throw e;
+		}
+		
+		var result = yield this._handleUploadAuthorizationFailure(req, item);
+		if (result instanceof Zotero.Sync.Storage.Result) {
+			return result;
+		}
+		
+		try {
+			var json = JSON.parse(req.responseText);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			Zotero.debug(req.responseText, 1);
+		}
+		if (!json) {
+			 throw new Error("Invalid response retrieving file upload parameters");
+		}
+		
+		if (!json.uploadKey && !json.exists) {
+			throw new Error("Invalid response retrieving file upload parameters");
+		}
+		
+		if (json.exists) {
+			let version = req.getResponseHeader('Last-Modified-Version');
+			if (!version) {
+				throw new Error("Last-Modified-Version not provided");
+			}
+			json.version = version;
+		}
+		
+		Zotero.debug('=-=-=--=');
+		Zotero.debug(json);
+		
+		// TEMP
+		//
+		// Passed through to _updateItemFileInfo()
+		json.mtime = mtime;
+		json.md5 = params.md5;
+		if (storedHash) {
+			json.storedHash = storedHash;
+		}
+		
+		return json;
+	}),
+	
+	
+	/**
+	 * Handle known errors from upload authorization request
+	 *
+	 * These must be included in successCodes in _getFileUploadParameters()
+	 */
+	_handleUploadAuthorizationFailure: Zotero.Promise.coroutine(function* (req, item) {
+		//
+		// These must be included in successCodes above.
+		// TODO: 429?
+		if (req.status == 403) {
+			let groupID = Zotero.Groups.getGroupIDFromLibraryID(item.libraryID);
+			let e = new Zotero.Error(
+				"File editing denied for group",
+				"ZFS_FILE_EDITING_DENIED",
+				{
+					groupID: groupID
+				}
+			);
+			throw e;
+		}
+		else if (req.status == 404) {
+			Components.utils.reportError("Unexpected status code 404 in upload authorization "
+				+ "request (" + item.libraryKey + ")");
+			if (Zotero.Prefs.get('sync.debugNoAutoResetClient')) {
+				Components.utils.reportError("Skipping automatic client reset due to debug pref");
+			}
+			if (!Zotero.Sync.Server.canAutoResetClient) {
+				Components.utils.reportError("Client has already been auto-reset -- manual sync required");
+			}
+			
+			// TODO: Make an API request to fix this
+			
+			throw new Error(Zotero.Sync.Storage.defaultError);
+		}
+		else if (req.status == 412) {
+			Zotero.debug("412 BUT WE'RE COOL");
+			let version = req.getResponseHeader('Last-Modified-Version');
+			if (!version) {
+				throw new Error("Last-Modified-Version header not provided");
+			}
+			if (version > item.version) {
+				return new Zotero.Sync.Storage.Result({
+					syncRequired: true
+				});
+			}
+			if (version < item.version) {
+				throw new Error("Last-Modified-Version is lower than item version "
+					+ `(${version} < ${item.version})`);
+			}
+			
+			// Get updated item metadata
+			let library = Zotero.Libraries.get(item.libraryID);
+			let json = yield this.apiClient.downloadObjects(
+				library.libraryType,
+				library.libraryTypeID,
+				'item',
+				[item.key]
+			)[0];
+			if (!Array.isArray(json)) {
+				Zotero.logError(json);
+				throw new Error(Zotero.Sync.Storage.defaultError);
+			}
+			if (json.length > 1) {
+				throw new Error("More than one result for item lookup");
+			}
+			
+			yield Zotero.Sync.Data.Local.saveCacheObjects('item', item.libraryID, json);
+			json = json[0];
+			
+			if (json.data.version > item.version) {
+				return new Zotero.Sync.Storage.Result({
+					syncRequired: true
+				});
+			}
+			
+			let fileHash = yield item.attachmentHash;
+			let fileModTime = yield item.attachmentModificationTime;
+			
+			Zotero.debug("MD5");
+			Zotero.debug(json.data.md5);
+			Zotero.debug(fileHash);
+			
+			if (json.data.md5 == fileHash) {
+				yield Zotero.DB.executeTransaction(function* () {
+					yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
+						item.id, fileModTime
+					);
+					yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, fileHash);
+					yield Zotero.Sync.Storage.Local.setSyncState(
+						item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
+					);
+				});
+				return new Zotero.Sync.Storage.Result;
+			}
+			
+			yield Zotero.Sync.Storage.Local.setSyncState(
+				item.id, Zotero.Sync.Storage.SYNC_STATE_IN_CONFLICT
+			);
+			return new Zotero.Sync.Storage.Result({
+				fileSyncRequired: true
+			});
+		}
+		else if (req.status == 413) {
+			let retry = req.getResponseHeader('Retry-After');
+			if (retry) {
+				let minutes = Math.round(retry / 60);
+				throw new Zotero.Error(
+					Zotero.getString('sync.storage.error.zfs.tooManyQueuedUploads', minutes),
+					"ZFS_UPLOAD_QUEUE_LIMIT"
+				);
+			}
+			
+			let text, buttonText = null, buttonCallback;
+			
+			// Group file
+			if (item.libraryID) {
+				var group = Zotero.Groups.getByLibraryID(item.libraryID);
+				text = Zotero.getString('sync.storage.error.zfs.groupQuotaReached1', group.name) + "\n\n"
+						+ Zotero.getString('sync.storage.error.zfs.groupQuotaReached2');
+			}
+			// Personal file
+			else {
+				text = Zotero.getString('sync.storage.error.zfs.personalQuotaReached1') + "\n\n"
+						+ Zotero.getString('sync.storage.error.zfs.personalQuotaReached2');
+				buttonText = Zotero.getString('sync.storage.openAccountSettings');
+				buttonCallback = function () {
+					var url = "https://www.zotero.org/settings/storage";
+					
+					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								.getService(Components.interfaces.nsIWindowMediator);
+					var win = wm.getMostRecentWindow("navigator:browser");
+					win.ZoteroPane.loadURI(url);
+				}
+			}
+			
+			text += "\n\n" + filename + " (" + Math.round(file.fileSize / 1024) + "KB)";
+			
+			let e = new Zotero.Error(
+				Zotero.getString('sync.storage.error.zfs.fileWouldExceedQuota', filename),
+				"ZFS_OVER_QUOTA",
+				{
+					dialogText: text,
+					dialogButtonText: buttonText,
+					dialogButtonCallback: buttonCallback
+				}
+			);
+			e.errorType = 'warning';
+			Zotero.debug(e, 2);
+			Components.utils.reportError(e);
+			throw e;
+		}
+	}),
+	
+	
+	/**
+	 * Given parameters from authorization, upload file to S3
+	 */
+	_uploadFile: Zotero.Promise.coroutine(function* (request, item, params) {
+		if (request.isFinished()) {
+			Zotero.debug("Upload request " + request.name + " is no longer running after getting "
+				+ "upload parameters");
+			return new Zotero.Sync.Storage.Result;
+		}
+		
+		var file = yield this._getUploadFile(item);
+		
+		Components.utils.importGlobalProperties(["File"]);
+		file = File(file);
+		
+		var blob = new Blob([params.prefix, file, params.suffix]);
+		
+		try {
+			var req = yield Zotero.HTTP.request(
+				"POST",
+				params.url,
+				{
+					headers: {
+						"Content-Type": params.contentType
+					},
+					body: blob,
+					requestObserver: function (req) {
+						request.setChannel(req.channel);
+						req.upload.addEventListener("progress", function (event) {
+							if (event.lengthComputable) {
+								request.onProgress(event.loaded, event.total);
+							}
+						});
+					},
+					debug: true,
+					successCodes: [201]
+				}
+			);
+		}
+		catch (e) {
+			// For timeouts and failures from S3, which happen intermittently,
+			// wait a little and try again
+			let timeoutMessage = "Your socket connection to the server was not read from or "
+				+ "written to within the timeout period.";
+			if (e.status == 0
+					|| (e.status == 400 && e.xmlhttp.responseText.indexOf(timeoutMessage) != -1)) {
+				if (this._s3ConsecutiveFailures >= this._maxS3ConsecutiveFailures) {
+					Zotero.debug(this._s3ConsecutiveFailures
+						+ " consecutive S3 failures -- aborting", 1);
+					this._s3ConsecutiveFailures = 0;
+				}
+				else {
+					let msg = "S3 returned " + e.status + " (" + item.libraryKey + ") "
+						+ "-- retrying upload"
+					Zotero.logError(msg);
+					Zotero.debug(e.xmlhttp.responseText, 1);
+					if (this._s3Backoff < this._maxS3Backoff) {
+						this._s3Backoff *= 2;
+					}
+					this._s3ConsecutiveFailures++;
+					Zotero.debug("Delaying " + item.libraryKey + " upload for "
+						+ this._s3Backoff + " seconds", 2);
+					yield Zotero.Promise.delay(this._s3Backoff * 1000);
+					return this._uploadFile(request, item, params);
+				}
+			}
+			else if (e.status == 500) {
+				// TODO: localize
+				throw new Error("File upload failed. Please try again.");
+			}
+			else {
+				Zotero.logError(`Unexpected file upload status ${e.status} (${item.libraryKey})`);
+				Zotero.debug(e, 1);
+				Components.utils.reportError(e.xmlhttp.responseText);
+				throw new Error(Zotero.Sync.Storage.defaultError);
+			}
+			
+			// TODO: Detect cancel?
+			//onUploadCancel(httpRequest, status, data)
+			//deferred.resolve(false);
+		}
+		
+		request.setChannel(false);
+		return this._onUploadComplete(req, request, item, params);
+	}),
+	
+	
+	/**
+	 * Post-upload file registration with API
+	 */
+	_onUploadComplete: Zotero.Promise.coroutine(function* (req, request, item, params) {
+		var uploadKey = params.uploadKey;
+		
+		Zotero.debug("Upload of attachment " + item.key + " finished with status code " + req.status);
+		Zotero.debug(req.responseText);
+		
+		// Decrease backoff delay on successful upload
+		if (this._s3Backoff > 1) {
+			this._s3Backoff /= 2;
+		}
+		// And reset consecutive failures
+		this._s3ConsecutiveFailures = 0;
+		
+		var requestParams = this._getRequestParams(item.libraryID, `items/${item.key}/file`);
+		var uri = this.apiClient.buildRequestURI(requestParams);
+		var headers = {
+			"Content-Type": "application/x-www-form-urlencoded"
+		};
+		if (params.storedHash) {
+			headers["If-Match"] = params.storedHash;
+		}
+		else {
+			headers["If-None-Match"] = "*";
+		}
+		var body = "upload=" + uploadKey;
+		
+		// Register upload on server
+		try {
+			req = yield this.apiClient.makeRequest(
+				"POST",
+				uri,
+				{
+					body,
+					headers,
+					successCodes: [204],
+					requestObserver: function (xmlhttp) {
+						request.setChannel(xmlhttp.channel);
+					}
+				}
+			);
+		}
+		catch (e) {
+			let msg = `Unexpected file registration status ${e.status} (${item.libraryKey})`;
+			Zotero.logError(msg);
+			Zotero.logError(e.xmlhttp.responseText);
+			Zotero.debug(e.xmlhttp.getAllResponseHeaders());
+			throw new Error(Zotero.Sync.Storage.defaultError);
+		}
+		
+		var version = req.getResponseHeader('Last-Modified-Version');
+		if (!version) {
+			throw new Error("Last-Modified-Version not provided");
+		}
+		params.version = version;
+		
+		yield this._updateItemFileInfo(item, params);
+		
+		return new Zotero.Sync.Storage.Result({
+			localChanges: true,
+			remoteChanges: true
+		});
+	}),
+	
+	
+	/**
+	 * Update the local attachment item with the mtime and hash of the uploaded file and the
+	 * library version returned by the upload request, and save a modified version of the item
+	 * to the sync cache
+	 */
+	_updateItemFileInfo: Zotero.Promise.coroutine(function* (item, params) {
+		// Mark as in-sync
+		yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.Sync.Storage.Local.setSyncState(
+				item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
+			);
+			
+			// Store file mod time and hash
+			yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, params.mtime);
+			yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, params.md5);
+			// Update sync cache with new file metadata and version from server
+			var json = yield Zotero.Sync.Data.Local.getCacheObject(
+				'item', item.libraryID, item.key, item.version
+			);
+			if (json) {
+				json.version = params.version;
+				json.data.version = params.version;
+				json.data.mtime = params.mtime;
+				json.data.md5 = params.md5;
+				yield Zotero.Sync.Data.Local.saveCacheObject('item', item.libraryID, json);
+			}
+			// Update item with new version from server
+			yield Zotero.Items.updateVersion([item.id], params.version);
+			
+			// TODO: Can filename, contentType, and charset change the attachment item?
+		});
+		
+		try {
+			if (yield Zotero.Attachments.hasMultipleFiles(item)) {
 				var file = Zotero.getTempDirectory();
 				file.append(item.key + '.zip');
-				file.remove(false);
+				yield OS.File.remove(file.path);
 			}
 		}
 		catch (e) {
 			Components.utils.reportError(e);
 		}
-	}
+	}),
 	
 	
-	function onUploadCancel(httpRequest, status, data) {
+	_onUploadCancel: Zotero.Promise.coroutine(function* (httpRequest, status, data) {
 		var request = data.request;
 		var item = data.item;
 		
 		Zotero.debug("Upload of attachment " + item.key + " cancelled with status code " + status);
 		
 		try {
-			if (Zotero.Attachments.getNumFiles(item) > 1) {
+			if (yield Zotero.Attachments.hasMultipleFiles(item)) {
 				var file = Zotero.getTempDirectory();
 				file.append(item.key + '.zip');
 				file.remove(false);
@@ -631,40 +900,11 @@ Zotero.Sync.Storage.ZFS = (function () {
 		catch (e) {
 			Components.utils.reportError(e);
 		}
-	}
+	}),
 	
 	
-	/**
-	 * Get the storage URI for an item
-	 *
-	 * @inner
-	 * @param	{Zotero.Item}
-	 * @return	{nsIURI}					URI of file on storage server
-	 */
-	function getItemURI(item) {
-		var uri = Zotero.Sync.Storage.ZFS.rootURI;
-		// Be sure to mirror parameter changes to getItemInfoURI() below
-		uri.spec += Zotero.URI.getItemPath(item) + '/file?auth=1&iskey=1&version=1';
-		return uri;
-	}
-	
-	
-	/**
-	 * Get the storage info URI for an item
-	 *
-	 * @inner
-	 * @param	{Zotero.Item}
-	 * @return	{nsIURI}					URI of file on storage server with info flag
-	 */
-	function getItemInfoURI(item) {
-		var uri = Zotero.Sync.Storage.ZFS.rootURI;
-		uri.spec += Zotero.URI.getItemPath(item) + '/file?auth=1&iskey=1&version=1&info=1';
-		return uri;
-	}
-	
-	
-	function getUploadFile(item) {
-		if (Zotero.Attachments.getNumFiles(item) > 1) {
+	_getUploadFile: Zotero.Promise.coroutine(function* (item) {
+		if (yield Zotero.Attachments.hasMultipleFiles(item)) {
 			var file = Zotero.getTempDirectory();
 			var filename = item.key + '.zip';
 			file.append(filename);
@@ -673,500 +913,169 @@ Zotero.Sync.Storage.ZFS = (function () {
 			var file = item.getFile();
 		}
 		return file;
-	}
+	}),
 	
-	
-	//
-	// Public methods (called via Zotero.Sync.Storage.ZFS)
-	//
-	var obj = new Zotero.Sync.Storage.Mode;
-	obj.name = "ZFS";
-	
-	Object.defineProperty(obj, "includeUserFiles", {
-		get: function () {
-			return Zotero.Prefs.get("sync.storage.enabled") && Zotero.Prefs.get("sync.storage.protocol") == 'zotero';
-		}
-	});
-	
-	Object.defineProperty(obj, "includeGroupFiles", {
-		get: function () {
-			return Zotero.Prefs.get("sync.storage.groups.enabled");
-		}
-	});
-	
-	obj._verified = true;
-	
-	Object.defineProperty(obj, "rootURI", {
-		get: function () {
-			if (!_rootURI) {
-				this._init();
-			}
-			return _rootURI.clone();
-		}
-	});
-	
-	Object.defineProperty(obj, "userURI", {
-		get: function () {
-			if (!_userURI) {
-				this._init();
-			}
-			return _userURI.clone();
-		}
-	});
-	
-	
-	obj._init = function () {
-		_rootURI = false;
-		_userURI = false;
-		
-		var url = ZOTERO_CONFIG.API_URL;
-		var username = Zotero.Sync.Server.username;
-		var password = Zotero.Sync.Server.password;
-		
-		var ios = Components.classes["@mozilla.org/network/io-service;1"].
-					getService(Components.interfaces.nsIIOService);
-		var uri = ios.newURI(url, null, null);
-		uri.username = encodeURIComponent(username);
-		uri.password = encodeURIComponent(password);
-		_rootURI = uri;
-		
-		uri = uri.clone();
-		uri.spec += 'users/' + Zotero.Users.getCurrentUserID() + '/';
-		_userURI = uri;
-	};
-	
-	obj.clearCachedCredentials = function() {
-		_rootURI = _userURI = undefined;
-		_cachedCredentials = false;
-	};
 	
 	/**
-	 * Begin download process for individual file
+	 * Get attachment item metadata on storage server
 	 *
-	 * @param	{Zotero.Sync.Storage.Request}	[request]
+	 * @param {Zotero.Item} item
+	 * @param {Zotero.Sync.Storage.Request} request
+	 * @return {Promise<Object>|false} - Promise for object with 'hash', 'filename', 'mtime',
+	 *                                   'compressed', or false if item not found
 	 */
-	obj._downloadFile = function (request) {
-		var item = Zotero.Sync.Storage.getItemFromRequestName(request.name);
-		if (!item) {
-			throw new Error("Item '" + request.name + "' not found");
-		}
+	_getStorageFileInfo: Zotero.Promise.coroutine(function* (item, request) {
+		var funcName = "Zotero.Sync.Storage.ZFS._getStorageFileInfo()";
 		
-		var self = this;
+		var params = this._getRequestParams(item.libraryID, `items/${item.key}/file`);
+		var uri = this.apiClient.buildRequestURI(params);
 		
-		// Retrieve file info from server to store locally afterwards
-		return getStorageFileInfo(item, request)
-			.then(function (info) {
-				if (!request.isRunning()) {
-					Zotero.debug("Download request '" + request.name
-						+ "' is no longer running after getting remote file info");
-					return false;
-				}
-				
-				if (!info) {
-					Zotero.debug("Remote file not found for item " + item.libraryID + "/" + item.key);
-					return false;
-				}
-				
-				var syncModTime = info.mtime;
-				var syncHash = info.hash;
-				
-				var file = item.getFile();
-				// Skip download if local file exists and matches mod time
-				if (file && file.exists()) {
-					if (syncModTime == file.lastModifiedTime) {
-						Zotero.debug("File mod time matches remote file -- skipping download");
-						
-						Zotero.DB.beginTransaction();
-						var syncState = Zotero.Sync.Storage.getSyncState(item.id);
-						//var updateItem = syncState != 1;
-						var updateItem = false;
-						Zotero.Sync.Storage.setSyncedModificationTime(item.id, syncModTime, updateItem);
-						Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
-						Zotero.DB.commitTransaction();
-						return {
-							localChanges: true,
-							remoteChanges: false
-						};
-					}
-					// If not compressed, check hash, in case only timestamp changed
-					else if (!info.compressed && item.attachmentHash == syncHash) {
-						Zotero.debug("File hash matches remote file -- skipping download");
-						
-						Zotero.DB.beginTransaction();
-						var syncState = Zotero.Sync.Storage.getSyncState(item.id);
-						//var updateItem = syncState != 1;
-						var updateItem = false;
-						if (!info.compressed) {
-							Zotero.Sync.Storage.setSyncedHash(item.id, syncHash, false);
-						}
-						Zotero.Sync.Storage.setSyncedModificationTime(item.id, syncModTime, updateItem);
-						Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
-						Zotero.DB.commitTransaction();
-						return {
-							localChanges: true,
-							remoteChanges: false
-						};
+		try {
+			let req = yield this.apiClient.makeRequest(
+				"GET",
+				uri,
+				{
+					successCodes: [200, 404],
+					requestObserver: function (xmlhttp) {
+						request.setChannel(xmlhttp.channel);
 					}
 				}
-				
-				var destFile = Zotero.getTempDirectory();
-				if (info.compressed) {
-					destFile.append(item.key + '.zip.tmp');
-				}
-				else {
-					destFile.append(item.key + '.tmp');
-				}
-				
-				if (destFile.exists()) {
-					try {
-						destFile.remove(false);
-					}
-					catch (e) {
-						Zotero.File.checkFileAccessError(e, destFile, 'delete');
-					}
-				}
-				
-				// saveURI() below appears not to create empty files for Content-Length: 0,
-				// so we create one here just in case
+			);
+			if (req.status == 404) {
+				return new Zotero.Sync.Storage.Result;
+			}
+			
+			let info = {};
+			info.hash = req.getResponseHeader('ETag');
+			if (!info.hash) {
+				let msg = `Hash not found in info response in ${funcName} (${item.libraryKey})`;
+				Zotero.debug(msg, 1);
+				Zotero.debug(req.status);
+				Zotero.debug(req.responseText);
+				Components.utils.reportError(msg);
 				try {
-					destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+					Zotero.debug(req.getAllResponseHeaders());
 				}
 				catch (e) {
-					Zotero.File.checkFileAccessError(e, destFile, 'create');
+					Zotero.debug("Response headers unavailable");
 				}
-				
-				var deferred = Zotero.Promise.defer();
-				
-				var listener = new Zotero.Sync.Storage.StreamListener(
-					{
-						onStart: function (request, data) {
-							if (data.request.isFinished()) {
-								Zotero.debug("Download request " + data.request.name
-									+ " stopped before download started -- closing channel");
-								request.cancel(0x804b0002); // NS_BINDING_ABORTED
-								deferred.resolve(false);
-							}
-						},
-						onProgress: function (a, b, c) {
-							request.onProgress(a, b, c)
-						},
-						onStop: function (request, status, response, data) {
-							data.request.setChannel(false);
-							
-							if (status != 200) {
-								if (status == 404) {
-									deferred.resolve(false);
-									return;
-								}
-								
-								if (status == 0) {
-									if (_s3ConsecutiveFailures >= _maxS3ConsecutiveFailures) {
-										Zotero.debug(_s3ConsecutiveFailures
-											+ " consecutive S3 failures -- aborting", 1);
-										_s3ConsecutiveFailures = 0;
-									}
-									else {
-										let libraryKey = Zotero.Items.getLibraryKeyHash(item);
-										let msg = "S3 returned " + status
-											+ " (" + libraryKey + ") -- retrying download"
-										Components.utils.reportError(msg);
-										Zotero.debug(msg, 1);
-										if (_s3Backoff < _maxS3Backoff) {
-											_s3Backoff *= 2;
-										}
-										_s3ConsecutiveFailures++;
-										Zotero.debug("Delaying " + libraryKey + " download for "
-											+ _s3Backoff + " seconds", 2);
-										Q.delay(_s3Backoff * 1000)
-										.then(function () {
-											deferred.resolve(self._downloadFile(data.request));
-										});
-										return;
-									}
-								}
-								
-								var msg = "Unexpected status code " + status
-									+ " for request " + data.request.name
-									+ " in Zotero.Sync.Storage.ZFS.downloadFile()";
-								Zotero.debug(msg, 1);
-								Components.utils.reportError(msg);
-								// Ignore files not found in S3
-								try {
-									Zotero.debug(Zotero.File.getContents(destFile, null, 4096), 1);
-								}
-								catch (e) {
-									Zotero.debug(e, 1);
-								}
-								deferred.reject(Zotero.Sync.Storage.defaultError);
-								return;
-							}
-							
-							// Don't try to process if the request has been cancelled
-							if (data.request.isFinished()) {
-								Zotero.debug("Download request " + data.request.name
-									+ " is no longer running after file download", 2);
-								deferred.resolve(false);
-								return;
-							}
-							
-							Zotero.debug("Finished download of " + destFile.path);
-							
-							try {
-								deferred.resolve(Zotero.Sync.Storage.processDownload(data));
-							}
-							catch (e) {
-								deferred.reject(e);
-							}
-						},
-						onCancel: function (request, status, data) {
-							Zotero.debug("Request cancelled");
-							deferred.resolve(false);
-						},
-						request: request,
-						item: item,
-						compressed: info.compressed,
-						syncModTime: syncModTime,
-						syncHash: syncHash
-					}
-				);
-				
-				var uri = getItemURI(item);
-				
-				// Don't display password in console
-				var disp = uri.clone();
-				if (disp.password) {
-					disp.password = "********";
-				}
-				Zotero.debug('Saving ' + disp.spec + ' with saveURI()');
-				const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-				var wbp = Components
-					.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-					.createInstance(nsIWBP);
-				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
-				wbp.progressListener = listener;
-				Zotero.Utilities.Internal.saveURI(wbp, uri, destFile);
-				
-				return deferred.promise;
-			});
-	};
-	
-	
-	obj._uploadFile = function (request) {
-		var item = Zotero.Sync.Storage.getItemFromRequestName(request.name);
-		if (Zotero.Attachments.getNumFiles(item) > 1) {
-			var deferred = Zotero.Promise.defer();
-			var created = Zotero.Sync.Storage.createUploadFile(
-				request,
-				function (data) {
-					if (!data) {
-						deferred.resolve(false);
-						return;
-					}
-					deferred.resolve(processUploadFile(data));
-				}
-			);
-			if (!created) {
-				return Zotero.Promise.resolve(false);
+				let e = Zotero.getString('sync.storage.error.zfs.restart', Zotero.appName);
+				throw new Error(e);
 			}
-			return deferred.promise;
-		}
-		else {
-			return processUploadFile({ request: request });
-		}
-	};
-	
-	
-	/**
-	 * @return {Promise} A promise for the last sync time
-	 */
-	obj._getLastSyncTime = function (libraryID) {
-		var lastSyncURI = this._getLastSyncURI(libraryID);
-		
-		var self = this;
-		return Zotero.Promise.try(function () {
-			// Cache the credentials at the root
-			return self._cacheCredentials();
-		})
-		.then(function () {
-			return Zotero.HTTP.promise("GET", lastSyncURI,
-				{ headers: _headers, successCodes: [200, 404], debug: true });
-		})
-		.then(function (req) {
-			// Not yet synced
-			if (req.status == 404) {
-				Zotero.debug("No last sync time for library " + libraryID);
-				return null;
-			}
+			info.filename = req.getResponseHeader('X-Zotero-Filename');
+			let mtime = req.getResponseHeader('X-Zotero-Modification-Time');
+			info.mtime = parseInt(mtime);
+			info.compressed = req.getResponseHeader('X-Zotero-Compressed') == 'Yes';
+			Zotero.debug(info);
 			
-			var ts = req.responseText;
-			var date = new Date(ts * 1000);
-			Zotero.debug("Last successful ZFS sync for library "
-				+ libraryID + " was " + date);
-			return ts;
-		})
-		.catch(function (e) {
+			return info;
+		}
+		catch (e) {
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-				if (e.status == 401 || e.status == 403) {
-					Zotero.debug("Clearing ZFS authentication credentials", 2);
-					_cachedCredentials = false;
-				}
-				
-				return Zotero.Promise.reject(e);
-			}
-			// TODO: handle browser offline exception
-			else {
-				throw e;
-			}
-		});
-	};
-	
-	
-	obj._setLastSyncTime = function (libraryID, localLastSyncTime) {
-		if (localLastSyncTime) {
-			var sql = "REPLACE INTO version VALUES (?, ?)";
-			Zotero.DB.query(
-				sql, ['storage_zfs_' + libraryID, { int: localLastSyncTime }]
-			);
-			return;
-		}
-		
-		var lastSyncURI = this._getLastSyncURI(libraryID);
-		
-		return Zotero.HTTP.promise("POST", lastSyncURI, { headers: _headers, successCodes: [200, 404], debug: true })
-			.then(function (req) {
-				// Not yet synced
-				//
-				// TODO: Don't call this at all if no files uploaded
-				if (req.status == 404) {
-					return;
-				}
-				
-				var ts = req.responseText;
-				
-				var sql = "REPLACE INTO version VALUES (?, ?)";
-				Zotero.DB.query(
-					sql, ['storage_zfs_' + libraryID, { int: ts }]
-				);
-			})
-			.catch(function (e) {
-				var msg = "Unexpected status code " + e.xmlhttp.status
-					+ " setting last file sync time";
-				Zotero.debug(msg, 1);
-				Components.utils.reportError(msg);
-				throw new Error(Zotero.Sync.Storage.defaultError);
-			});
-	};
-	
-	
-	obj._getLastSyncURI = function (libraryID) {
-		if (libraryID === Zotero.Libraries.userLibraryID) {
-			var lastSyncURI = this.userURI;
-		}
-		else if (libraryID) {
-			var ios = Components.classes["@mozilla.org/network/io-service;1"].
-			getService(Components.interfaces.nsIIOService);
-			var uri = ios.newURI(Zotero.URI.getLibraryURI(libraryID), null, null);
-			var path = uri.path;
-			// We don't want the user URI, but it already has the right domain
-			// and credentials, so just start with that and replace the path
-			var lastSyncURI = this.userURI;
-			lastSyncURI.path = path + "/";
-		}
-		else {
-			throw new Error("libraryID not specified");
-		}
-		lastSyncURI.spec += "laststoragesync";
-		return lastSyncURI;
-	}
-	
-	
-	obj._cacheCredentials = function () {
-		if (_cachedCredentials) {
-			Zotero.debug("ZFS credentials are already cached");
-			return Zotero.Promise.resolve();
-		}
-		
-		var uri = this.rootURI;
-		// TODO: move to root uri
-		uri.spec += "?auth=1";
-		
-		return Zotero.HTTP.promise("GET", uri, { headers: _headers }).
-			then(function (req) {
-				Zotero.debug("Credentials are cached");
-				_cachedCredentials = true;
-			})
-			.catch(function (e) {
-				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					if (e.status == 401) {
-						var msg = "File sync login failed\n\n"
-							+ "Check your username and password in the Sync "
-							+ "pane of the Zotero preferences.";
-						throw (msg);
-					}
-					
-					var msg = "Unexpected status code " + e.status + " "
-						+ "caching ZFS credentials";
-					Zotero.debug(msg, 1);
-					throw (msg);
+				if (e.xmlhttp.status == 0) {
+					var msg = "Request cancelled getting storage file info";
 				}
 				else {
-					throw (e);
+					var msg = "Unexpected status code " + e.xmlhttp.status
+						+ " getting storage file info for item " + item.libraryKey;
 				}
-			});
-	};
+				Zotero.debug(msg, 1);
+				Zotero.debug(e.xmlhttp.responseText);
+				Components.utils.reportError(msg);
+				throw new Error(Zotero.Sync.Storage.defaultError);
+			}
+			
+			throw e;
+		}
+	}),
 	
 	
 	/**
-	 * Remove all synced files from the server
+	 * Upload the file to the server
+	 *
+	 * @param {Zotero.Sync.Storage.Request} request
+	 * @return {Promise}
 	 */
-	obj._purgeDeletedStorageFiles = function () {
-		return Zotero.Promise.try(function () {
-			// Cache the credentials at the root
-			return this._cacheCredentials();
-		}.bind(this))
-		then(function () {
-			// If we don't have a user id we've never synced and don't need to bother
-			if (!Zotero.Users.getCurrentUserID()) {
-				return false;
-			}
-			
-			var sql = "SELECT value FROM settings WHERE setting=? AND key=?";
-			var values = Zotero.DB.columnQuery(sql, ['storage', 'zfsPurge']);
-			if (!values) {
-				return false;
-			}
-			
-			// TODO: promisify
-			
-			Zotero.debug("Unlinking synced files on ZFS");
-			
-			var uri = this.userURI;
-			uri.spec += "removestoragefiles?";
-			// Unused
-			for each(var value in values) {
-				switch (value) {
-					case 'user':
-						uri.spec += "user=1&";
-						break;
-					
-					case 'group':
-						uri.spec += "group=1&";
-						break;
-					
-					default:
-						throw "Invalid zfsPurge value '" + value
-							+ "' in ZFS purgeDeletedStorageFiles()";
+	_processUploadFile: Zotero.Promise.coroutine(function* (request) {
+		/*
+		updateSizeMultiplier(
+			(100 - Zotero.Sync.Storage.compressionTracker.ratio) / 100
+		);
+		*/
+		
+		var item = Zotero.Sync.Storage.Utilities.getItemFromRequest(request);
+		
+		
+		/*var info = yield this._getStorageFileInfo(item, request);
+		
+		if (request.isFinished()) {
+			Zotero.debug("Upload request '" + request.name
+				+ "' is no longer running after getting file info");
+			return false;
+		}
+		
+		// Check for conflict
+		if ((yield Zotero.Sync.Storage.Local.getSyncState(item.id))
+				!= Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD) {
+			if (info) {
+				// Local file time
+				var fmtime = yield item.attachmentModificationTime;
+				// Remote mod time
+				var mtime = info.mtime;
+				
+				var useLocal = false;
+				var same = !(yield Zotero.Sync.Storage.checkFileModTime(item, fmtime, mtime));
+				
+				// Ignore maxed-out 32-bit ints, from brief problem after switch to 32-bit servers
+				if (!same && mtime == 2147483647) {
+					Zotero.debug("Remote mod time is invalid -- uploading local file version");
+					useLocal = true;
+				}
+				
+				if (same) {
+					yield Zotero.DB.executeTransaction(function* () {
+						yield Zotero.Sync.Storage.setSyncedModificationTime(item.id, fmtime);
+						yield Zotero.Sync.Storage.setSyncState(
+							item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
+						);
+					});
+					return {
+						localChanges: true,
+						remoteChanges: false
+					};
+				}
+				
+				let smtime = yield Zotero.Sync.Storage.getSyncedModificationTime(item.id);
+				if (!useLocal && smtime != mtime) {
+					Zotero.debug("Conflict -- last synced file mod time "
+						+ "does not match time on storage server"
+						+ " (" + smtime + " != " + mtime + ")");
+					return {
+						localChanges: false,
+						remoteChanges: false,
+						conflict: {
+							local: { modTime: fmtime },
+							remote: { modTime: mtime }
+						}
+					};
 				}
 			}
-			uri.spec = uri.spec.substr(0, uri.spec.length - 1);
-			
-			return Zotero.HTTP.promise("POST", uri, "")
-			.then(function (req) {
-				var sql = "DELETE FROM settings WHERE setting=? AND key=?";
-				Zotero.DB.query(sql, ['storage', 'zfsPurge']);
+			else {
+				Zotero.debug("Remote file not found for item " + item.libraryKey);
+			}
+		}*/
+		
+		var result = yield this._getFileUploadParameters(item);
+		if (result.exists) {
+			yield this._updateItemFileInfo(item, result);
+			return new Zotero.Sync.Storage.Result({
+				localChanges: true,
+				remoteChanges: true
 			});
-		}.bind(this));
-	};
-	
-	return obj;
-}());
+		}
+		else if (result instanceof Zotero.Sync.Storage.Result) {
+			return result;
+		}
+		return this._uploadFile(request, item, result);
+	})
+}

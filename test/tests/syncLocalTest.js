@@ -4,7 +4,7 @@ describe("Zotero.Sync.Data.Local", function() {
 	describe("#processSyncCacheForObjectType()", function () {
 		var types = Zotero.DataObjectUtilities.getTypes();
 		
-		it("should update local version number if remote version is identical", function* () {
+		it("should update local version number and mark as synced if remote version is identical", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
 			for (let type of types) {
@@ -24,10 +24,166 @@ describe("Zotero.Sync.Data.Local", function() {
 				yield Zotero.Sync.Data.Local.processSyncCacheForObjectType(
 					libraryID, type, { stopOnError: true }
 				);
-				assert.equal(
-					objectsClass.getByLibraryAndKey(libraryID, obj.key).version, 10
-				);
+				let localObj = objectsClass.getByLibraryAndKey(libraryID, obj.key);
+				assert.equal(localObj.version, 10);
+				assert.isTrue(localObj.synced);
 			}
+		})
+		
+		it("should keep local item changes while applying non-conflicting remote changes", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			var type = 'item';
+			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+			let obj = yield createDataObject(type, { version: 5 });
+			let data = yield obj.toJSON();
+			yield Zotero.Sync.Data.Local.saveCacheObjects(
+				type, libraryID, [data]
+			);
+			
+			// Change local title
+			yield modifyDataObject(obj)
+			var changedTitle = obj.getField('title');
+			
+			// Save remote version to cache without title but with changed place
+			data.key = obj.key;
+			data.version = 10;
+			var changedPlace = data.place = 'New York';
+			let json = {
+				key: obj.key,
+				version: 10,
+				data: data
+			};
+			yield Zotero.Sync.Data.Local.saveCacheObjects(
+				type, libraryID, [json]
+			);
+			
+			yield Zotero.Sync.Data.Local.processSyncCacheForObjectType(
+				libraryID, type, { stopOnError: true }
+			);
+			assert.equal(obj.version, 10);
+			assert.equal(obj.getField('title'), changedTitle);
+			assert.equal(obj.getField('place'), changedPlace);
+		})
+		
+		it("should mark new attachment items for download", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			Zotero.Sync.Storage.Local.setModeForLibrary(libraryID, 'zfs');
+			
+			var key = Zotero.DataObjectUtilities.generateKey();
+			var version = 10;
+			var json = {
+				key,
+				version,
+				data: {
+					key,
+					version,
+					itemType: 'attachment',
+					linkMode: 'imported_file',
+					md5: '57f8a4fda823187b91e1191487b87fe6',
+					mtime: 1442261130615
+				}
+			};
+			
+			yield Zotero.Sync.Data.Local.saveCacheObjects(
+				'item', Zotero.Libraries.userLibraryID, [json]
+			);
+			yield Zotero.Sync.Data.Local.processSyncCacheForObjectType(
+				libraryID, 'item', { stopOnError: true }
+			);
+			var id = Zotero.Items.getIDFromLibraryAndKey(libraryID, key);
+			assert.equal(
+				(yield Zotero.Sync.Storage.Local.getSyncState(id)),
+				Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD
+			);
+		})
+		
+		it("should mark updated attachment items for download", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			Zotero.Sync.Storage.Local.setModeForLibrary(libraryID, 'zfs');
+			
+			var item = yield importFileAttachment('test.png');
+			item.version = 5;
+			item.synced = true;
+			yield item.saveTx();
+			
+			// Set file as synced
+			yield Zotero.DB.executeTransaction(function* () {
+				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
+					item.id, (yield item.attachmentModificationTime)
+				);
+				yield Zotero.Sync.Storage.Local.setSyncedHash(
+					item.id, (yield item.attachmentHash)
+				);
+				yield Zotero.Sync.Storage.Local.setSyncState(
+					item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
+				);
+			});
+			
+			// Simulate download of version with updated attachment
+			var json = yield item.toResponseJSON();
+			json.version = 10;
+			json.data.version = 10;
+			json.data.md5 = '57f8a4fda823187b91e1191487b87fe6';
+			json.data.mtime = new Date().getTime() + 10000;
+			yield Zotero.Sync.Data.Local.saveCacheObjects(
+				'item', Zotero.Libraries.userLibraryID, [json]
+			);
+			
+			yield Zotero.Sync.Data.Local.processSyncCacheForObjectType(
+				libraryID, 'item', { stopOnError: true }
+			);
+			
+			assert.equal(
+				(yield Zotero.Sync.Storage.Local.getSyncState(item.id)),
+				Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD
+			);
+		})
+		
+		it("should ignore attachment metadata when resolving metadata conflict", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			Zotero.Sync.Storage.Local.setModeForLibrary(libraryID, 'zfs');
+			
+			var item = yield importFileAttachment('test.png');
+			item.version = 5;
+			yield item.saveTx();
+			var json = yield item.toResponseJSON();
+			yield Zotero.Sync.Data.Local.saveCacheObjects('item', libraryID, [json]);
+			
+			// Set file as synced
+			yield Zotero.DB.executeTransaction(function* () {
+				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
+					item.id, (yield item.attachmentModificationTime)
+				);
+				yield Zotero.Sync.Storage.Local.setSyncedHash(
+					item.id, (yield item.attachmentHash)
+				);
+				yield Zotero.Sync.Storage.Local.setSyncState(
+					item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
+				);
+			});
+			
+			// Modify title locally, leaving item unsynced
+			var newTitle = Zotero.Utilities.randomString();
+			item.setField('title', newTitle);
+			yield item.saveTx();
+			
+			// Simulate download of version with original title but updated attachment
+			json.version = 10;
+			json.data.version = 10;
+			json.data.md5 = '57f8a4fda823187b91e1191487b87fe6';
+			json.data.mtime = new Date().getTime() + 10000;
+			yield Zotero.Sync.Data.Local.saveCacheObjects('item', libraryID, [json]);
+			
+			yield Zotero.Sync.Data.Local.processSyncCacheForObjectType(
+				libraryID, 'item', { stopOnError: true }
+			);
+			
+			assert.equal(item.getField('title'), newTitle);
+			assert.equal(
+				(yield Zotero.Sync.Storage.Local.getSyncState(item.id)),
+				Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD
+			);
 		})
 	})
 	
@@ -232,7 +388,10 @@ describe("Zotero.Sync.Data.Local", function() {
 			jsonData.title = Zotero.Utilities.randomString();
 			yield Zotero.Sync.Data.Local.saveCacheObjects(type, libraryID, [json]);
 			
+			var windowOpened = false;
 			waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+				windowOpened = true;
+				
 				var doc = dialog.document;
 				var wizard = doc.documentElement;
 				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
@@ -240,12 +399,14 @@ describe("Zotero.Sync.Data.Local", function() {
 				// Remote version should be selected by default
 				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
 				assert.ok(mergeGroup.leftpane.pane.onclick);
+				// Select local deleted version
 				mergeGroup.leftpane.pane.click();
 				wizard.getButton('finish').click();
 			})
 			yield Zotero.Sync.Data.Local.processSyncCacheForObjectType(
 				libraryID, type, { stopOnError: true }
 			);
+			assert.isTrue(windowOpened);
 			
 			obj = objectsClass.getByLibraryAndKey(libraryID, key);
 			assert.isFalse(obj);
@@ -825,15 +986,28 @@ describe("Zotero.Sync.Data.Local", function() {
 				assert.sameDeepMembers(
 					result.conflicts,
 					[
-						{
-							field: "place",
-							op: "delete"
-						},
-						{
-							field: "date",
-							op: "add",
-							value: "2015-05-15"
-						}
+						[
+							{
+								field: "place",
+								op: "add",
+								value: "Place"
+							},
+							{
+								field: "place",
+								op: "delete"
+							}
+						],
+						[
+							{
+								field: "date",
+								op: "delete"
+							},
+							{
+								field: "date",
+								op: "add",
+								value: "2015-05-15"
+							}
+						]
 					]
 				);
 			})
@@ -1294,6 +1468,70 @@ describe("Zotero.Sync.Data.Local", function() {
 				);
 				assert.lengthOf(result.conflicts, 0);
 			})
+		})
+	})
+	
+	
+	describe("#reconcileChangesWithoutCache()", function () {
+		it("should return conflict for conflicting fields", function () {
+			var json1 = {
+				key: "AAAAAAAA",
+				version: 1234,
+				title: "Title 1",
+				pages: 10,
+				dateModified: "2015-05-14 14:12:34"
+			};
+			var json2 = {
+				key: "AAAAAAAA",
+				version: 1235,
+				title: "Title 2",
+				place: "New York",
+				dateModified: "2015-05-14 13:45:12"
+			};
+			var ignoreFields = ['dateAdded', 'dateModified'];
+			var result = Zotero.Sync.Data.Local._reconcileChangesWithoutCache(
+				'item', json1, json2, ignoreFields
+			);
+			assert.lengthOf(result.changes, 0);
+			assert.sameDeepMembers(
+				result.conflicts,
+				[
+					[
+						{
+							field: "title",
+							op: "add",
+							value: "Title 1"
+						},
+						{
+							field: "title",
+							op: "add",
+							value: "Title 2"
+						}
+					],
+					[
+						{
+							field: "pages",
+							op: "add",
+							value: 10
+						},
+						{
+							field: "pages",
+							op: "delete"
+						}
+					],
+					[
+						{
+							field: "place",
+							op: "delete"
+						},
+						{
+							field: "place",
+							op: "add",
+							value: "New York"
+						}
+					]
+				]
+			);
 		})
 	})
 })

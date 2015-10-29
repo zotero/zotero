@@ -1488,43 +1488,6 @@ Zotero.Sync.Server = new function () {
 
 
 
-Zotero.BufferedInputListener = function (callback) {
-	this._callback = callback;
-}
-
-Zotero.BufferedInputListener.prototype = {
-	binaryInputStream: null,
-	size: 0,
-	data: '',
-	
-	onStartRequest: function(request, context) {},
-	
-	onStopRequest: function(request, context, status) {
-		this.binaryInputStream.close();
-		delete this.binaryInputStream;
-		
-		this._callback(this.data);
-	},
-	
-	onDataAvailable: function(request, context, inputStream, offset, count) {
-		this.size += count;
-		
-		this.binaryInputStream = Components.classes["@mozilla.org/binaryinputstream;1"]
-			.createInstance(Components.interfaces.nsIBinaryInputStream)
-		this.binaryInputStream.setInputStream(inputStream);
-		this.data += this.binaryInputStream.readBytes(this.binaryInputStream.available());
-	},
-	
-	QueryInterface: function (iid) {
-		if (iid.equals(Components.interfaces.nsISupports)
-			   || iid.equals(Components.interfaces.nsIStreamListener)) {
-			return this;
-		}
-		throw Components.results.NS_ERROR_NO_INTERFACE;
-	}
-}
-
-
 Zotero.Sync.Server.Data = new function() {
 	var _noMergeTypes = ['search'];
 	

@@ -28,6 +28,8 @@ if (!Zotero.Sync.Data) {
 }
 
 Zotero.Sync.Data.Local = {
+	_loginManagerHost: 'https://api.zotero.org',
+	_loginManagerRealm: 'Zotero Web API',
 	_lastSyncTime: null,
 	_lastClassicSyncTime: null,
 	
@@ -37,6 +39,71 @@ Zotero.Sync.Data.Local = {
 			yield this._loadLastClassicSyncTime();
 		}
 	}),
+	
+	
+	getAPIKey: function () {
+		var apiKey = Zotero.Prefs.get('devAPIKey');
+		if (apiKey) {
+			return apiKey;
+		}
+		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
+			.getService(Components.interfaces.nsILoginManager);
+		var logins = loginManager.findLogins(
+			{}, this._loginManagerHost, null, this._loginManagerRealm
+		);
+		// Get API from returned array of nsILoginInfo objects
+		if (logins.length) {
+			return logins[0].password;
+		}
+		if (!apiKey) {
+			let username = Zotero.Prefs.get('sync.server.username');
+			if (username) {
+				let password = Zotero.Sync.Data.Local.getLegacyPassword(username);
+				if (!password) {
+					return false;
+				}
+				throw new Error("Unimplemented");
+				// Get API key from server
+				
+				// Store API key
+				
+				// Remove old logins and username pref
+			}
+		}
+		return apiKey;
+	},
+	
+	
+	setAPIKey: function (apiKey) {
+		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
+			.getService(Components.interfaces.nsILoginManager);
+		var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
+				Components.interfaces.nsILoginInfo, "init");
+		var loginInfo = new nsLoginInfo(
+			this._loginManagerHost,
+			null,
+			this._loginManagerRealm,
+			'API Key',
+			apiKey,
+			"",
+			""
+		);
+		loginManager.addLogin(loginInfo);
+	},
+	
+	
+	getLegacyPassword: function (username) {
+		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
+			.getService(Components.interfaces.nsILoginManager);
+		var logins = loginManager.findLogins({}, "chrome://zotero", "Zotero Storage Server", null);
+		// Find user from returned array of nsILoginInfo objects
+		for (let login of logins) {
+			if (login.username == username) {
+				return login.password;
+			}
+		}
+		return false;
+	},
 	
 	
 	getLastSyncTime: function () {
@@ -86,7 +153,7 @@ Zotero.Sync.Data.Local = {
 		var sql = "SELECT " + objectsClass.idColumn + " FROM " + objectsClass.table
 			+ " WHERE libraryID=? AND synced=0";
 		
-		// RETRIEVE PARENT DOWN? EVEN POSSIBLE?
+		// TODO: RETRIEVE PARENT DOWN? EVEN POSSIBLE?
 		// items via parent
 		// collections via getDescendents?
 		
@@ -154,6 +221,35 @@ Zotero.Sync.Data.Local = {
 	}),
 	
 	
+	getCacheObjects: Zotero.Promise.coroutine(function* (objectType, libraryID, keyVersionPairs) {
+		if (!keyVersionPairs.length) return [];
+		var sql = "SELECT data FROM syncCache SC JOIN (SELECT "
+			+ keyVersionPairs.map(function (pair) {
+				Zotero.DataObjectUtilities.checkKey(pair[0]);
+				return "'" + pair[0] + "' AS key, " + parseInt(pair[1]) + " AS version";
+			}).join(" UNION SELECT ")
+			+ ") AS pairs ON (pairs.key=SC.key AND pairs.version=SC.version) "
+			+ "WHERE libraryID=? AND "
+			+ "syncObjectTypeID IN (SELECT syncObjectTypeID FROM syncObjectTypes WHERE name=?)";
+		var rows = yield Zotero.DB.columnQueryAsync(sql, [libraryID, objectType]);
+		return rows.map(row => JSON.parse(row));
+	}),
+	
+	
+	saveCacheObject: Zotero.Promise.coroutine(function* (objectType, libraryID, json) {
+		json = this._checkCacheJSON(json);
+		
+		Zotero.debug("Saving to sync cache:");
+		Zotero.debug(json);
+		
+		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
+		var sql = "INSERT OR REPLACE INTO syncCache "
+			+ "(libraryID, key, syncObjectTypeID, version, data) VALUES (?, ?, ?, ?, ?)";
+		var params = [libraryID, json.key, syncObjectTypeID, json.version, JSON.stringify(json)];
+		return Zotero.DB.queryAsync(sql, params);
+	}),
+	
+	
 	saveCacheObjects: Zotero.Promise.coroutine(function* (objectType, libraryID, jsonArray) {
 		if (!Array.isArray(jsonArray)) {
 			throw new Error("'json' must be an array");
@@ -165,20 +261,7 @@ Zotero.Sync.Data.Local = {
 			return;
 		}
 		
-		jsonArray = jsonArray.map(o => {
-			if (o.key === undefined) {
-				throw new Error("Missing 'key' property in JSON");
-			}
-			if (o.version === undefined) {
-				throw new Error("Missing 'version' property in JSON");
-			}
-			// If direct data object passed, wrap in fake response object
-			return o.data === undefined ? {
-				key: o.key,
-				version: o.version,
-				data: o
-			} : o;
-		});
+		jsonArray = jsonArray.map(json => this._checkCacheJSON(json));
 		
 		Zotero.debug("Saving to sync cache:");
 		Zotero.debug(jsonArray);
@@ -206,6 +289,22 @@ Zotero.Sync.Data.Local = {
 	}),
 	
 	
+	_checkCacheJSON: function (json) {
+		if (json.key === undefined) {
+			throw new Error("Missing 'key' property in JSON");
+		}
+		if (json.version === undefined) {
+			throw new Error("Missing 'version' property in JSON");
+		}
+		// If direct data object passed, wrap in fake response object
+		return json.data === undefined ? {
+			key: json.key,
+			version: json.version,
+			data: json
+		} :  json;
+	},
+	
+	
 	processSyncCache: Zotero.Promise.coroutine(function* (libraryID, options) {
 		for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(libraryID)) {
 			yield this.processSyncCacheForObjectType(libraryID, objectType, options);
@@ -213,8 +312,7 @@ Zotero.Sync.Data.Local = {
 	}),
 	
 	
-	processSyncCacheForObjectType: Zotero.Promise.coroutine(function* (libraryID, objectType, options) {
-		options = options || {};
+	processSyncCacheForObjectType: Zotero.Promise.coroutine(function* (libraryID, objectType, options = {}) {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 		var ObjectType = Zotero.Utilities.capitalize(objectType);
@@ -227,7 +325,6 @@ Zotero.Sync.Data.Local = {
 		var numSkipped = 0;
 		
 		var data = yield this._getUnwrittenData(libraryID, objectType);
-		
 		if (!data.length) {
 			Zotero.debug("No unwritten " + objectTypePlural + " in sync cache");
 			return;
@@ -260,9 +357,9 @@ Zotero.Sync.Data.Local = {
 					for (let i = 0; i < chunk.length; i++) {
 						let json = chunk[i];
 						let jsonData = json.data;
-						let isNewObject;
 						let objectKey = json.key;
 						
+						Zotero.debug(`Processing ${objectType} ${libraryID}/${objectKey}`);
 						Zotero.debug(json);
 						
 						if (!jsonData) {
@@ -302,26 +399,22 @@ Zotero.Sync.Data.Local = {
 							}*/
 						}
 						
+						let isNewObject = false;
+						let skipCache = false;
 						let obj = yield objectsClass.getByLibraryAndKeyAsync(
 							libraryID, objectKey, { noCache: true }
 						);
 						if (obj) {
 							Zotero.debug("Matching local " + objectType + " exists", 4);
-							isNewObject = false;
 							
-							// Local object has not been modified since last sync
-							if (obj.synced) {
-								// Overwrite local below
-							}
-							else {
+							// Local object has been modified since last sync
+							if (!obj.synced) {
 								Zotero.debug("Local " + objectType + " " + obj.libraryKey
 										+ " has been modified since last sync", 4);
 								
 								let cachedJSON = yield this.getCacheObject(
 									objectType, obj.libraryID, obj.key, obj.version
 								);
-								Zotero.debug("GOT CACHED");
-								Zotero.debug(cachedJSON);
 								
 								let jsonDataLocal = yield obj.toJSON();
 								
@@ -333,42 +426,51 @@ Zotero.Sync.Data.Local = {
 									['dateAdded', 'dateModified']
 								);
 								
-								// If no changes, update local version and keep as unsynced
+								// If no changes, update local version number and mark as synced
 								if (!result.changes.length && !result.conflicts.length) {
-									Zotero.debug("No remote changes to apply to local " + objectType
-										+ " " + obj.libraryKey);
-									yield obj.updateVersion(json.version);
+									Zotero.debug("No remote changes to apply to local "
+										+ objectType + " " + obj.libraryKey);
+									obj.version = json.version;
+									obj.synced = true;
+									yield obj.save();
+									continue;
+								}
+								
+								if (result.conflicts.length) {
+									if (objectType != 'item') {
+										throw new Error(`Unexpected conflict on ${objectType} object`);
+									}
+									Zotero.debug("Conflict!");
+									conflicts.push({
+										left: jsonDataLocal,
+										right: jsonData,
+										changes: result.changes,
+										conflicts: result.conflicts
+									});
 									continue;
 								}
 								
 								// If no conflicts, apply remote changes automatically
-								if (!result.conflicts.length) {
-									Zotero.DataObjectUtilities.applyChanges(
-										jsonData, result.changes
-									);
-									let saved = yield this._saveObjectFromJSON(obj, jsonData, options);
-									if (saved) numSaved++;
-									continue;
-								}
-								
-								if (objectType != 'item') {
-									throw new Error(`Unexpected conflict on ${objectType} object`);
-								}
-								
-								conflicts.push({
-									left: jsonDataLocal,
-									right: jsonData,
-									changes: result.changes,
-									conflicts: result.conflicts
-								});
-								continue;
+								Zotero.debug(`Applying remote changes to ${objectType} `
+									+ obj.libraryKey);
+								Zotero.debug(result.changes);
+								Zotero.DataObjectUtilities.applyChanges(
+									jsonDataLocal, result.changes
+								);
+								// Transfer properties that aren't in the changeset
+								['version', 'dateAdded', 'dateModified'].forEach(x => {
+									if (jsonDataLocal[x] !== jsonData[x]) {
+										Zotero.debug(`Applying remote '${x}' value`);
+									}
+									jsonDataLocal[x] = jsonData[x];
+								})
+								jsonData = jsonDataLocal;
 							}
-							
-							let saved = yield this._saveObjectFromJSON(obj, jsonData, options);
-							if (saved) numSaved++;
 						}
 						// Object doesn't exist locally
 						else {
+							Zotero.debug(ObjectType + " doesn't exist locally");
+							
 							isNewObject = true;
 							
 							// Check if object has been deleted locally
@@ -376,6 +478,8 @@ Zotero.Sync.Data.Local = {
 								objectType, libraryID, objectKey
 							);
 							if (dateDeleted) {
+								Zotero.debug(ObjectType + " was deleted locally");
+								
 								switch (objectType) {
 								case 'item':
 									conflicts.push({
@@ -410,24 +514,30 @@ Zotero.Sync.Data.Local = {
 							obj.key = objectKey;
 							yield obj.loadPrimaryData();
 							
-							let saved = yield this._saveObjectFromJSON(obj, jsonData, options, {
-								// Don't cache new items immediately, which skips reloading after save
-								skipCache: true
-							});
-							if (saved) numSaved++;
+							// Don't cache new items immediately, which skips reloading after save
+							skipCache = true;
+						}
+						
+						let saved = yield this._saveObjectFromJSON(
+							obj, jsonData, options, { skipCache }
+						);
+						// Mark updated attachments for download
+						if (saved && objectType == 'item' && obj.isImportedAttachment()) {
+							yield this._checkAttachmentForDownload(
+								obj, jsonData.mtime, isNewObject
+							);
+						}
+						
+						if (saved) {
+							numSaved++;
 						}
 					}
 				}.bind(this));
 			}.bind(this)
 		);
 		
-		// Keep retrying if we skipped any, as long as we're still making progress
-		if (numSkipped && numSaved != 0) {
-			Zotero.debug("More " + objectTypePlural + " in cache -- continuing");
-			yield this.processSyncCacheForObjectType(libraryID, objectType, options);
-		}
-		
 		if (conflicts.length) {
+			// Sort conflicts by local Date Modified/Deleted
 			conflicts.sort(function (a, b) {
 				var d1 = a.left.dateDeleted || a.left.dateModified;
 				var d2 = b.left.dateDeleted || b.left.dateModified;
@@ -442,6 +552,7 @@ Zotero.Sync.Data.Local = {
 			
 			var mergeData = this.resolveConflicts(conflicts);
 			if (mergeData) {
+				Zotero.debug("Processing resolved conflicts");
 				let mergeOptions = {};
 				Object.assign(mergeOptions, options);
 				// Tell _saveObjectFromJSON not to save with 'synced' set to true
@@ -484,11 +595,55 @@ Zotero.Sync.Data.Local = {
 			}
 		}
 		
+		// Keep retrying if we skipped any, as long as we're still making progress
+		if (numSkipped && numSaved != 0) {
+			Zotero.debug("More " + objectTypePlural + " in cache -- continuing");
+			return this.processSyncCacheForObjectType(libraryID, objectType, options);
+		}
+		
 		data = yield this._getUnwrittenData(libraryID, objectType);
-		Zotero.debug("Skipping " + data.length + " "
-			+ (data.length == 1 ? objectType : objectTypePlural)
-			+ " in sync cache");
-		return data;
+		if (data.length) {
+			Zotero.debug(`Skipping ${data.length} `
+				+ (data.length == 1 ? objectType : objectTypePlural)
+				+ " in sync cache");
+		}
+	}),
+	
+	
+	_checkAttachmentForDownload: Zotero.Promise.coroutine(function* (item, mtime, isNewObject) {
+		var markToDownload = false;
+		if (!isNewObject) {
+			// Convert previously used Unix timestamps to ms-based timestamps
+			if (mtime < 10000000000) {
+				Zotero.debug("Converting Unix timestamp '" + mtime + "' to ms");
+				mtime = mtime * 1000;
+			}
+			var fmtime = null;
+			try {
+				fmtime = yield item.attachmentModificationTime;
+			}
+			catch (e) {
+				// This will probably fail later too, but ignore it for now
+				Zotero.logError(e);
+			}
+			if (fmtime) {
+				let state = Zotero.Sync.Storage.Local.checkFileModTime(item, fmtime, mtime);
+				if (state !== false) {
+					markToDownload = true;
+				}
+			}
+			else {
+				markToDownload = true;
+			}
+		}
+		else {
+			markToDownload = true;
+		}
+		if (markToDownload) {
+			yield Zotero.Sync.Storage.Local.setSyncState(
+				item.id, Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD
+			);
+		}
 	}),
 	
 	
@@ -501,6 +656,8 @@ Zotero.Sync.Data.Local = {
 	
 	
 	resolveConflicts: function (conflicts) {
+		Zotero.debug("Showing conflict resolution window");
+		
 		var io = {
 			dataIn: {
 				captions: [
@@ -511,9 +668,7 @@ Zotero.Sync.Data.Local = {
 				conflicts
 			}
 		};
-		
 		var url = 'chrome://zotero/content/merge.xul';
-		
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 		   .getService(Components.interfaces.nsIWindowMediator);
 		var lastWin = wm.getMostRecentWindow("navigator:browser");
@@ -553,7 +708,8 @@ Zotero.Sync.Data.Local = {
 	
 	_saveObjectFromJSON: Zotero.Promise.coroutine(function* (obj, json, options) {
 		try {
-			yield obj.fromJSON(json);
+			yield obj.loadAllData();
+			obj.fromJSON(json);
 			if (!options.saveAsChanged) {
 				obj.version = json.version;
 				obj.synced = true;
@@ -610,6 +766,11 @@ Zotero.Sync.Data.Local = {
 		
 		var changeset1 = Zotero.DataObjectUtilities.diff(originalJSON, currentJSON, ignoreFields);
 		var changeset2 = Zotero.DataObjectUtilities.diff(originalJSON, newJSON, ignoreFields);
+		
+		Zotero.debug("CHANGESET1");
+		Zotero.debug(changeset1);
+		Zotero.debug("CHANGESET2");
+		Zotero.debug(changeset2);
 		
 		var conflicts = [];
 		
@@ -725,27 +886,43 @@ Zotero.Sync.Data.Local = {
 		var conflicts = [];
 		
 		for (let i = 0; i < changeset.length; i++) {
-			let c = changeset[i];
+			let c2 = changeset[i];
 			
 			// Member changes are additive only, so ignore removals
-			if (c.op.endsWith('-remove')) {
+			if (c2.op.endsWith('-remove')) {
 				continue;
 			}
 			
 			// Record member changes
-			if (c.op.startsWith('member-') || c.op.startsWith('property-member-')) {
-				changes.push(c);
+			if (c2.op.startsWith('member-') || c2.op.startsWith('property-member-')) {
+				changes.push(c2);
 				continue;
 			}
 			
 			// Automatically apply remote changes for non-items, even if in conflict
 			if (objectType != 'item') {
-				changes.push(c);
+				changes.push(c2);
 				continue;
 			}
 			
 			// Field changes are conflicts
-			conflicts.push(c);
+			//
+			// Since we don't know what changed, use only 'add' and 'delete'
+			if (c2.op == 'modify') {
+				c2.op = 'add';
+			}
+			let val = currentJSON[c2.field];
+			let c1 = {
+				field: c2.field,
+				op: val !== undefined ? 'add' : 'delete'
+			};
+			if (val !== undefined) {
+				c1.value = val;
+			}
+			if (c2.op == 'modify') {
+				c2.op = 'add';
+			}
+			conflicts.push([c1, c2]);
 		}
 		
 		return { changes, conflicts };

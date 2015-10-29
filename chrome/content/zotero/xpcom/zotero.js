@@ -607,6 +607,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				yield Zotero.Sync.Data.Local.init();
 				yield Zotero.Sync.Data.Utilities.init();
 				Zotero.Sync.EventListeners.init();
+				Zotero.Sync.Runner = new Zotero.Sync.Runner_Module;
 				
 				Zotero.MIMETypeHandler.init();
 				yield Zotero.Proxies.init();
@@ -2705,6 +2706,9 @@ Zotero.Browser = new function() {
 			var win = Services.wm.getMostRecentWindow("navigator:browser");
 			if(!win) {
 				var win = Services.ww.activeWindow;
+			}
+			if (!win) {
+				throw new Error("Parent window not available for hidden browser");
 			}
 		}
 		

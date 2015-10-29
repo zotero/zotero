@@ -537,6 +537,10 @@ describe("Zotero.Item", function () {
 			file.append(filename);
 			assert.equal(item.getFilePath(), file.path);
 		});
+		
+		it.skip("should get and set a filename for a base-dir-relative file", function* () {
+			
+		})
 	})
 	
 	describe("#attachmentPath", function () {
@@ -608,11 +612,13 @@ describe("Zotero.Item", function () {
 			assert.equal(OS.Path.basename(path), newName)
 			yield OS.File.exists(path);
 			
+			// File should be flagged for upload
+			// DEBUG: Is this necessary?
 			assert.equal(
-				(yield Zotero.Sync.Storage.getSyncState(item.id)),
+				(yield Zotero.Sync.Storage.Local.getSyncState(item.id)),
 				Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD
 			);
-			assert.isNull(yield Zotero.Sync.Storage.getSyncedHash(item.id));
+			assert.isNull(yield Zotero.Sync.Storage.Local.getSyncedHash(item.id));
 		})
 	})
 	

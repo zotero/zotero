@@ -71,6 +71,7 @@
 					
 					switch (val) {
 						case 'view':
+						case 'merge':
 							break;
 						
 						case 'edit':
@@ -99,10 +100,9 @@
 			
 			<field name="_item"/>
 			<property name="item" onget="return this._item;">
-				<setter>
-				<![CDATA[
+				<setter><![CDATA[
 					if (!(val instanceof Zotero.Item)) {
-						throw ("<zoteroitembox>.item must be a Zotero.Item");
+						throw new Error("'item' must be a Zotero.Item");
 					}
 					
 					// When changing items, reset truncation of creator list
@@ -112,8 +112,7 @@
 					
 					this._item = val;
 					this.refresh();
-				]]>
-				</setter>
+				]]></setter>
 			</property>
 			
 			<!-- .ref is an alias for .item -->

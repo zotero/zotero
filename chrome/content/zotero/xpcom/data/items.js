@@ -84,8 +84,7 @@ Zotero.Items = function() {
 				attachmentCharset: "CS.charset AS attachmentCharset",
 				attachmentLinkMode: "IA.linkMode AS attachmentLinkMode",
 				attachmentContentType: "IA.contentType AS attachmentContentType",
-				attachmentPath: "IA.path AS attachmentPath",
-				attachmentSyncState: "IA.syncState AS attachmentSyncState"
+				attachmentPath: "IA.path AS attachmentPath"
 			};
 		}
 	}, {lazy: true});

@@ -28,14 +28,15 @@ if (!Zotero.Sync) {
 }
 
 Zotero.Sync.APIClient = function (options) {
-	this.baseURL = options.baseURL;
-	this.apiKey = options.apiKey;
-	this.concurrentCaller = options.concurrentCaller;
+	if (!options.baseURL) throw new Error("baseURL not set");
+	if (!options.apiVersion) throw new Error("apiVersion not set");
+	if (!options.apiKey) throw new Error("apiKey not set");
+	if (!options.caller) throw new Error("caller not set");
 	
-	if (options.apiVersion == undefined) {
-		throw new Error("options.apiVersion not set");
-	}
+	this.baseURL = options.baseURL;
 	this.apiVersion = options.apiVersion;
+	this.apiKey = options.apiKey;
+	this.caller = options.caller;
 }
 
 Zotero.Sync.APIClient.prototype = {
@@ -44,7 +45,7 @@ Zotero.Sync.APIClient.prototype = {
 	
 	getKeyInfo: Zotero.Promise.coroutine(function* () {
 		var uri = this.baseURL + "keys/" + this.apiKey;
-		var xmlhttp = yield this._makeRequest("GET", uri, { successCodes: [200, 404] });
+		var xmlhttp = yield this.makeRequest("GET", uri, { successCodes: [200, 404] });
 		if (xmlhttp.status == 404) {
 			return false;
 		}
@@ -63,7 +64,7 @@ Zotero.Sync.APIClient.prototype = {
 		if (!userID) throw new Error("User ID not provided");
 		
 		var uri = this.baseURL + "users/" + userID + "/groups?format=versions";
-		var xmlhttp = yield this._makeRequest("GET", uri);
+		var xmlhttp = yield this.makeRequest("GET", uri);
 		return this._parseJSON(xmlhttp.responseText);
 	}),
 	
@@ -76,7 +77,7 @@ Zotero.Sync.APIClient.prototype = {
 		if (!groupID) throw new Error("Group ID not provided");
 		
 		var uri = this.baseURL + "groups/" + groupID;
-		var xmlhttp = yield this._makeRequest("GET", uri, { successCodes: [200, 404] });
+		var xmlhttp = yield this.makeRequest("GET", uri, { successCodes: [200, 404] });
 		if (xmlhttp.status == 404) {
 			return false;
 		}
@@ -93,7 +94,7 @@ Zotero.Sync.APIClient.prototype = {
 		if (since) {
 			params.since = since;
 		}
-		var uri = this._buildRequestURI(params);
+		var uri = this.buildRequestURI(params);
 		var options = {
 			successCodes: [200, 304]
 		};
@@ -102,7 +103,7 @@ Zotero.Sync.APIClient.prototype = {
 				"If-Modified-Since-Version": since
 			};
 		}
-		var xmlhttp = yield this._makeRequest("GET", uri, options);
+		var xmlhttp = yield this.makeRequest("GET", uri, options);
 		if (xmlhttp.status == 304) {
 			return false;
 		}
@@ -128,8 +129,8 @@ Zotero.Sync.APIClient.prototype = {
 			libraryTypeID: libraryTypeID,
 			since: since || 0
 		};
-		var uri = this._buildRequestURI(params);
-		var xmlhttp = yield this._makeRequest("GET", uri, { successCodes: [200, 409] });
+		var uri = this.buildRequestURI(params);
+		var xmlhttp = yield this.makeRequest("GET", uri, { successCodes: [200, 409] });
 		if (xmlhttp.status == 409) {
 			Zotero.debug(`'since' value '${since}' is earlier than the beginning of the delete log`);
 			return false;
@@ -154,7 +155,7 @@ Zotero.Sync.APIClient.prototype = {
 	 * @param {String} libraryType  'user' or 'group'
 	 * @param {Integer} libraryTypeID  userID or groupID
 	 * @param {String} objectType  'item', 'collection', 'search'
-	 * @param {Object} queryParams  Query parameters (see _buildRequestURI())
+	 * @param {Object} queryParams  Query parameters (see buildRequestURI())
 	 * @return {Promise<Object>|FALSE} Object with 'libraryVersion' and 'results'
 	 */
 	getVersions: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, objectType, queryParams, libraryVersion) {
@@ -176,7 +177,7 @@ Zotero.Sync.APIClient.prototype = {
 		}
 		
 		// TODO: Use pagination
-		var uri = this._buildRequestURI(params);
+		var uri = this.buildRequestURI(params);
 		
 		var options = {
 			successCodes: [200, 304]
@@ -186,7 +187,7 @@ Zotero.Sync.APIClient.prototype = {
 				"If-Modified-Since-Version": libraryVersion
 			};
 		}
-		var xmlhttp = yield this._makeRequest("GET", uri, options);
+		var xmlhttp = yield this.makeRequest("GET", uri, options);
 		if (xmlhttp.status == 304) {
 			return false;
 		}
@@ -256,10 +257,10 @@ Zotero.Sync.APIClient.prototype = {
 		if (objectType == 'item') {
 			params.includeTrashed = 1;
 		}
-		var uri = this._buildRequestURI(params);
+		var uri = this.buildRequestURI(params);
 		
 		return [
-			this._makeRequest("GET", uri)
+			this.makeRequest("GET", uri)
 			.then(function (xmlhttp) {
 				return this._parseJSON(xmlhttp.responseText)
 			}.bind(this))
@@ -294,9 +295,9 @@ Zotero.Sync.APIClient.prototype = {
 			libraryType: libraryType,
 			libraryTypeID: libraryTypeID
 		};
-		var uri = this._buildRequestURI(params);
+		var uri = this.buildRequestURI(params);
 		
-		var xmlhttp = yield this._makeRequest(method, uri, {
+		var xmlhttp = yield this.makeRequest(method, uri, {
 			headers: {
 				"If-Unmodified-Since-Version": version
 			},
@@ -319,7 +320,7 @@ Zotero.Sync.APIClient.prototype = {
 	}),
 	
 	
-	_buildRequestURI: function (params) {
+	buildRequestURI: function (params) {
 		var uri = this.baseURL;
 		
 		switch (params.libraryType) {
@@ -330,6 +331,10 @@ Zotero.Sync.APIClient.prototype = {
 		default:
 			uri += params.libraryType + 's/' + params.libraryTypeID;
 			break;
+		}
+		
+		if (params.target === undefined) {
+			throw new Error("'target' not provided");
 		}
 		
 		uri += "/" + params.target;
@@ -382,30 +387,33 @@ Zotero.Sync.APIClient.prototype = {
 	},
 	
 	
-	_makeRequest: function (method, uri, options) {
-		if (!options) {
-			options = {};
+	getHeaders: function (headers = {}) {
+		headers["Zotero-API-Version"] = this.apiVersion;
+		if (this.apiKey) {
+			headers["Zotero-API-Key"] = this.apiKey;
 		}
-		if (!options.headers) {
-			options.headers = {};
-		}
-		options.headers["Zotero-API-Version"] = this.apiVersion;
+		return headers;
+	},
+	
+	
+	makeRequest: function (method, uri, options = {}) {
+		options.headers = this.getHeaders(options.headers);
 		options.dontCache = true;
 		options.foreground = !options.background;
 		options.responseType = options.responseType || 'text';
-		if (this.apiKey) {
-			options.headers.Authorization = "Bearer " + this.apiKey;
-		}
-		var self = this;
-		return this.concurrentCaller.fcall(function () {
-			return Zotero.HTTP.request(method, uri, options)
-			.catch(function (e) {
-				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					self._checkResponse(e.xmlhttp);
-				}
+		return this.caller.start(Zotero.Promise.coroutine(function* () {
+			try {
+				var xmlhttp = yield Zotero.HTTP.request(method, uri, options);
+				this._checkBackoff(xmlhttp);
+				return xmlhttp;
+			}
+			catch (e) {
+				/*if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+					this._checkRetry(e.xmlhttp);
+				}*/
 				throw e;
-			});
-		});
+			}
+		}.bind(this)));
 	},
 	
 	
@@ -422,21 +430,6 @@ Zotero.Sync.APIClient.prototype = {
 	},
 	
 	
-	_checkResponse: function (xmlhttp) {
-		this._checkBackoff(xmlhttp);
-		this._checkAuth(xmlhttp);
-	},
-	
-	
-	_checkAuth: function (xmlhttp) {
-		if (xmlhttp.status == 403) {
-			var e = new Zotero.Error(Zotero.getString('sync.error.invalidLogin'), "INVALID_SYNC_LOGIN");
-			e.fatal = true;
-			throw e;
-		}
-	},
-	
-	
 	_checkBackoff: function (xmlhttp) {
 		var backoff = xmlhttp.getResponseHeader("Backoff");
 		if (backoff) {
@@ -444,7 +437,7 @@ Zotero.Sync.APIClient.prototype = {
 			if (backoff > 3600) {
 				// TODO: Update status?
 				
-				this.concurrentCaller.pause(backoff * 1000);
+				this.caller.pause(backoff * 1000);
 			}
 		}
 	}

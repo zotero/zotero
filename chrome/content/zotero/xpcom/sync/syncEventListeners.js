@@ -39,10 +39,9 @@ Zotero.Sync.EventListeners.ChangeListener = new function () {
 		
 		var syncSQL = "REPLACE INTO syncDeleteLog (syncObjectTypeID, libraryID, key, synced) "
 			+ "VALUES (?, ?, ?, 0)";
+		var storageSQL = "REPLACE INTO storageDeleteLog VALUES (?, ?, 0)";
 		
-		if (type == 'item' && Zotero.Sync.Storage.WebDAV.includeUserFiles) {
-			var storageSQL = "REPLACE INTO storageDeleteLog VALUES (?, ?, 0)";
-		}
+		var storageForLibrary = {};
 		
 		return Zotero.DB.executeTransaction(function* () {
 			for (let i = 0; i < ids.length; i++) {
@@ -74,18 +73,25 @@ Zotero.Sync.EventListeners.ChangeListener = new function () {
 						key
 					]
 				);
-				if (storageSQL && oldItem.itemType == 'attachment' &&
-						[
-							Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
-							Zotero.Attachments.LINK_MODE_IMPORTED_URL
-						].indexOf(oldItem.linkMode) != -1) {
-					yield Zotero.DB.queryAsync(
-						storageSQL,
-						[
-							libraryID,
-							key
-						]
-					);
+				
+				if (type == 'item') {
+					if (storageForLibrary[libraryID] === undefined) {
+						storageForLibrary[libraryID] =
+							Zotero.Sync.Storage.Local.getModeForLibrary(libraryID) == 'webdav';
+					}
+					if (storageForLibrary[libraryID] && oldItem.itemType == 'attachment' &&
+							[
+								Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+								Zotero.Attachments.LINK_MODE_IMPORTED_URL
+							].indexOf(oldItem.linkMode) != -1) {
+						yield Zotero.DB.queryAsync(
+							storageSQL,
+							[
+								libraryID,
+								key
+							]
+						);
+					}
 				}
 			}
 		});
@@ -215,3 +221,23 @@ Zotero.Sync.EventListeners.progressListener = {
 		
 	}
 };
+
+
+Zotero.Sync.EventListeners.StorageFileOpenListener = {
+	init: function () {
+		Zotero.Notifier.registerObserver(this, ['file'], 'storageFileOpen');
+	},
+	
+	notify: function (event, type, ids, extraData) {
+		if (event == 'open' && type == 'file') {
+			let timestamp = new Date().getTime();
+			
+			for (let i = 0; i < ids.length; i++) {
+				Zotero.Sync.Storage.Local.uploadCheckFiles.push({
+					itemID: ids[i],
+					timestamp: timestamp
+				});
+			}
+		}
+	}
+}

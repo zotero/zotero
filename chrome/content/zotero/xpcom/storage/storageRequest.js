@@ -27,15 +27,25 @@
 /**
  * Transfer request for storage sync
  *
- * @param  {String}    name     Identifier for request (e.g., "[libraryID]/[key]")
- * @param  {Function}  onStart  Callback to run when request starts
+ * @param {Object} options
+ * @param {String} options.type
+ * @param {Integer} options.libraryID
+ * @param {String} options.name - Identifier for request (e.g., "[libraryID]/[key]")
+ * @param {Function|Function[]} [options.onStart]
+ * @param {Function|Function[]} [options.onProgress]
+ * @param {Function|Function[]} [options.onStop]
  */
-Zotero.Sync.Storage.Request = function (name, callbacks) {
-	Zotero.debug("Initializing request '" + name + "'");
+Zotero.Sync.Storage.Request = function (options) {
+	if (!options.type) throw new Error("type must be provided");
+	if (!options.libraryID) throw new Error("libraryID must be provided");
+	if (!options.name) throw new Error("name must be provided");
+	['type', 'libraryID', 'name'].forEach(x => this[x] = options[x]);
 	
-	this.callbacks = ['onStart', 'onProgress'];
+	Zotero.debug(`Initializing ${this.type} request ${this.name}`);
 	
-	this.name = name;
+	this.callbacks = ['onStart', 'onProgress', 'onStop'];
+	
+	this.Type = Zotero.Utilities.capitalize(this.type);
 	this.channel = null;
 	this.queue = null;
 	this.progress = 0;
@@ -48,17 +58,10 @@ Zotero.Sync.Storage.Request = function (name, callbacks) {
 	this._remaining = null;
 	this._maxSize = null;
 	this._finished = false;
-	this._forceFinish = false;
-	this._changesMade = false;
 	
-	for (var func in callbacks) {
-		if (this.callbacks.indexOf(func) !== -1) {
-			// Stuff all single functions into arrays
-			this['_' + func] = typeof callbacks[func] === 'function' ? [callbacks[func]] : callbacks[func];
-		}
-		else {
-			throw new Error("Invalid handler '" + func + "'");
-		}
+	for (let name of this.callbacks) {
+		if (!options[name]) continue;
+		this['_' + name] = Array.isArray(options[name]) ? options[name] : [options[name]];
 	}
 }
 
@@ -99,11 +102,6 @@ Zotero.Sync.Storage.Request.prototype.importCallbacks = function (request) {
 }
 
 
-Zotero.Sync.Storage.Request.prototype.__defineGetter__('promise', function () {
-	return this._deferred.promise;
-});
-
-
 Zotero.Sync.Storage.Request.prototype.__defineGetter__('percentage', function () {
 	if (this._finished) {
 		return 100;
@@ -142,7 +140,7 @@ Zotero.Sync.Storage.Request.prototype.__defineGetter__('remaining', function () 
 	}
 	
 	if (!this.progressMax) {
-		if (this.queue.type == 'upload' && this._maxSize) {
+		if (this.type == 'upload' && this._maxSize) {
 			return Math.round(Zotero.Sync.Storage.compressionTracker.ratio * this._maxSize);
 		}
 		
@@ -175,72 +173,47 @@ Zotero.Sync.Storage.Request.prototype.setChannel = function (channel) {
 }
 
 
-Zotero.Sync.Storage.Request.prototype.start = function () {
-	if (!this.queue) {
-		throw ("Request " + this.name + " must be added to a queue before starting");
-	}
-	
-	Zotero.debug("Starting " + this.queue.name + " request " + this.name);
+Zotero.Sync.Storage.Request.prototype.start = Zotero.Promise.coroutine(function* () {
+	Zotero.debug("Starting " + this.type + " request " + this.name);
 	
 	if (this._running) {
-		throw new Error("Request " + this.name + " already running");
+		throw new Error(this.type + " request " + this.name + " already running");
+	}
+	
+	if (!this._onStart) {
+		throw new Error("onStart not provided -- nothing to do!");
 	}
 	
 	this._running = true;
-	this.queue.activeRequests++;
 	
-	if (this.queue.type == 'download') {
-		Zotero.Sync.Storage.setItemDownloadPercentage(this.name, 0);
-	}
-	
-	var self = this;
-	
-	// this._onStart is an array of promises returning changesMade.
+	// this._onStart is an array of promises for objects of result flags, which are combined
+	// into a single object here
 	//
 	// The main sync logic is triggered here.
-	
-	Zotero.Promise.all([f(this) for each(f in this._onStart)])
-	.then(function (results) {
-		return {
-			localChanges: results.some(function (val) val && val.localChanges == true),
-			remoteChanges: results.some(function (val) val && val.remoteChanges == true),
-			conflict: results.reduce(function (prev, cur) {
-				return prev.conflict ? prev : cur;
-			}).conflict
-		};
-	})
-	.then(function (results) {
-		Zotero.debug(results);
+	try {
+		var results = yield Zotero.Promise.all(this._onStart.map(f => f(this)));
 		
-		if (results.localChanges) {
-			Zotero.debug("Changes were made by " + self.queue.name
-				+ " request " + self.name);
-		}
-		else {
-			Zotero.debug("No changes were made by " + self.queue.name
-				+ " request " + self.name);
-		}
+		var result = new Zotero.Sync.Storage.Result;
+		result.updateFromResults(results);
 		
-		// This promise updates localChanges/remoteChanges on the queue
-		self._deferred.resolve(results);
-	})
-	.catch(function (e) {
-		if (self._stopping) {
-			Zotero.debug("Skipping error for stopping request " + self.name);
-			return;
+		Zotero.debug(this.Type + " request " + this.name + " finished");
+		Zotero.debug(result + "");
+		
+		return result;
+	}
+	catch (e) {
+		Zotero.logError(this.Type + " request " + this.name + " failed");
+		throw e;
+	}
+	finally {
+		this._finished = true;
+		this._running = false;
+		
+		if (this._onStop) {
+			this._onStop.forEach(x => x());
 		}
-		Zotero.debug(self.queue.Type + " request " + self.name + " failed");
-		self._deferred.reject(e);
-	})
-	// Finish the request (and in turn the queue, if this is the last request)
-	.finally(function () {
-		if (!self._finished) {
-			self._finish();
-		}
-	});
-	
-	return this._deferred.promise;
-}
+	}
+});
 
 
 Zotero.Sync.Storage.Request.prototype.isRunning = function () {
@@ -263,7 +236,7 @@ Zotero.Sync.Storage.Request.prototype.isFinished = function () {
  * @param	{Integer}		progressMax		Max progress value for this request
  *												(usually total bytes)
  */
-Zotero.Sync.Storage.Request.prototype.onProgress = function (channel, progress, progressMax) {
+Zotero.Sync.Storage.Request.prototype.onProgress = function (progress, progressMax) {
 	//Zotero.debug(progress + "/" + progressMax + " for request " + this.name);
 	
 	if (!this._running) {
@@ -271,10 +244,6 @@ Zotero.Sync.Storage.Request.prototype.onProgress = function (channel, progress, 
 				+ "Zotero.Sync.Storage.Request.onProgress() "
 				+ "(" + progress + "/" + progressMax + ")", 2);
 		return;
-	}
-	
-	if (!this.channel) {
-		this.channel = channel;
 	}
 	
 	// Workaround for invalid progress values (possibly related to
@@ -292,9 +261,8 @@ Zotero.Sync.Storage.Request.prototype.onProgress = function (channel, progress, 
 	
 	this.progress = progress;
 	this.progressMax = progressMax;
-	this.queue.updateProgress();
 	
-	if (this.queue.type == 'download') {
+	if (this.type == 'download') {
 		Zotero.Sync.Storage.setItemDownloadPercentage(this.name, this.percentage);
 	}
 	
@@ -310,59 +278,15 @@ Zotero.Sync.Storage.Request.prototype.onProgress = function (channel, progress, 
  * Stop the request's underlying network request, if there is one
  */
 Zotero.Sync.Storage.Request.prototype.stop = function (force) {
-	if (force) {
-		this._forceFinish = true;
-	}
-	
 	if (this.channel && this.channel.isPending()) {
 		this._stopping = true;
 		
 		try {
-			Zotero.debug("Stopping request '" + this.name + "'");
+			Zotero.debug(`Stopping ${this.type} request '${this.name} '`);
 			this.channel.cancel(0x804b0002); // NS_BINDING_ABORTED
 		}
 		catch (e) {
-			Zotero.debug(e);
+			Zotero.debug(e, 1);
 		}
-	}
-	else {
-		this._finish();
-	}
-}
-
-
-/**
- * Mark request as finished and notify queue that it's done
- */
-Zotero.Sync.Storage.Request.prototype._finish = function () {
-	// If an error occurred, we wait to finish the request, since doing
-	// so might end the queue before the error flag has been set on the queue.
-	// When the queue's error handler stops the queue, it stops the request
-	// with stop(true) to force the finish to occur, allowing the queue's
-	// promise to be rejected with the error.
-	if (!this._forceFinish && this._deferred.promise.isRejected()) {
-		return;
-	}
-	
-	Zotero.debug("Finishing " + this.queue.name + " request '" + this.name + "'");
-	this._finished = true;
-	var active = this._running;
-	this._running = false;
-	
-	Zotero.Sync.Storage.setItemDownloadPercentage(this.name, false);
-	
-	if (active) {
-		this.queue.activeRequests--;
-	}
-	// TEMP: mechanism for failures?
-	try {
-		this.queue.finishedRequests++;
-		this.queue.updateProgress();
-	}
-	catch (e) {
-		Zotero.debug(e, 1);
-		Components.utils.reportError(e);
-		this._deferred.reject(e);
-		throw e;
 	}
 }

@@ -57,6 +57,7 @@
 					Zotero.debug("Setting mode to '" + val + "'");
 					
 					this.editable = false;
+					this.synchronous = false;
 					this.displayURL = false;
 					this.displayFileName = false;
 					this.clickableLink = false;
@@ -93,6 +94,7 @@
 							break;
 						
 						case 'merge':
+							this.synchronous = true;
 							this.displayURL = true;
 							this.displayFileName = true;
 							this.displayAccessed = true;
@@ -102,6 +104,7 @@
 							break;
 						
 						case 'mergeedit':
+							this.synchronous = true;
 							this.editable = true;
 							this.displayURL = true;
 							this.displayFileName = true;
@@ -109,6 +112,13 @@
 							this.displayNote = true;
 							// Notes aren't currently editable in mergeedit pane
 							this.displayNoteIfEmpty = false;
+							this.displayDateModified = true;
+							break;
+						
+						case 'filemerge':
+							this.synchronous = true;
+							this.displayURL = true;
+							this.displayFileName = true;
 							this.displayDateModified = true;
 							break;
 						
@@ -123,17 +133,15 @@
 			</property>
 			
 			<field name="_item"/>
-			<property name="item"
-				onget="return this._item;"
-				onset="this._item = val; this.refresh();">
+			<property name="item" onget="return this._item;">
+				<setter><![CDATA[
+					if (!(val instanceof Zotero.Item)) {
+						throw new Error("'item' must be a Zotero.Item");
+					}
+					this._item = val;
+					this.refresh();
+				]]></setter>
 			</property>
-			
-			<!-- .ref is an alias for .item -->
-			<property name="ref"
-				onget="return this._item;"
-				onset="this._item = val; this.refresh();">
-			</property>
-			
 			
 			<!-- Methods -->
 			
@@ -167,125 +175,122 @@
 			
 			<method name="refresh">
 				<body><![CDATA[
-					Zotero.spawn(function* () {
-						Zotero.debug('Refreshing attachment box');
+					Zotero.debug('Refreshing attachment box');
+					
+					var attachmentBox = document.getAnonymousNodes(this)[0];
+					var title = this._id('title');
+					var fileNameRow = this._id('fileNameRow');
+					var urlField = this._id('url');
+					var accessed = this._id('accessedRow');
+					var pagesRow = this._id('pagesRow');
+					var dateModifiedRow = this._id('dateModifiedRow');
+					var indexStatusRow = this._id('indexStatusRow');
+					var selectButton = this._id('select-button');
+					
+					// DEBUG: this is annoying -- we really want to use an abstracted
+					// version of createValueElement() from itemPane.js
+					// (ideally in an XBL binding)
+					
+					// Wrap title to multiple lines if necessary
+					while (title.hasChildNodes()) {
+						title.removeChild(title.firstChild);
+					}
+					var val = this.item.getField('title');
+					
+					if (typeof val != 'string') {
+						val += "";
+					}
+					
+					var firstSpace = val.indexOf(" ");
+					// Crop long uninterrupted text
+					if ((firstSpace == -1 && val.length > 29 ) || firstSpace > 29) {
+						title.setAttribute('crop', 'end');
+						title.setAttribute('value', val);
+					}
+					// Create a <description> element, essentially
+					else {
+						title.removeAttribute('value');
+						title.appendChild(document.createTextNode(val));
+					}
+					
+					if (this.editable) {
+						title.className = 'zotero-clicky';
 						
-						yield Zotero.Promise.all([this.item.loadItemData(), this.item.loadNote()])
-							.tap(() => Zotero.Promise.check(this.item));
+						// For the time being, use a silly little popup
+						title.addEventListener('click', this.editTitle, false);
+					}
+					
+					var isImportedURL = this.item.attachmentLinkMode ==
+											Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+					
+					// Metadata for URL's
+					if (this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL
+							|| isImportedURL) {
 						
-						var attachmentBox = document.getAnonymousNodes(this)[0];
-						var title = this._id('title');
-						var fileNameRow = this._id('fileNameRow');
-						var urlField = this._id('url');
-						var accessed = this._id('accessedRow');
-						var pagesRow = this._id('pagesRow');
-						var dateModifiedRow = this._id('dateModifiedRow');
-						var indexStatusRow = this._id('indexStatusRow');
-						var selectButton = this._id('select-button');
-						
-						// DEBUG: this is annoying -- we really want to use an abstracted
-						// version of createValueElement() from itemPane.js
-						// (ideally in an XBL binding)
-						
-						// Wrap title to multiple lines if necessary
-						while (title.hasChildNodes()) {
-							title.removeChild(title.firstChild);
-						}
-						var val = this.item.getField('title');
-						
-						if (typeof val != 'string') {
-							val += "";
-						}
-						
-						var firstSpace = val.indexOf(" ");
-						// Crop long uninterrupted text
-						if ((firstSpace == -1 && val.length > 29 ) || firstSpace > 29) {
-							title.setAttribute('crop', 'end');
-							title.setAttribute('value', val);
-						}
-						// Create a <description> element, essentially
-						else {
-							title.removeAttribute('value');
-							title.appendChild(document.createTextNode(val));
-						}
-						
-						if (this.editable) {
-							title.className = 'zotero-clicky';
-							
-							// For the time being, use a silly little popup
-							title.addEventListener('click', this.editTitle, false);
-						}
-						
-						var isImportedURL = this.item.attachmentLinkMode ==
-												Zotero.Attachments.LINK_MODE_IMPORTED_URL;
-						
-						// Metadata for URL's
-						if (this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL
-								|| isImportedURL) {
-							
-							// URL
-							if (this.displayURL) {
-								var urlSpec = this.item.getField('url');
-								urlField.setAttribute('value', urlSpec);
-								urlField.setAttribute('hidden', false);
-								if (this.clickableLink) {
-									 urlField.onclick = function (event) {
-										ZoteroPane_Local.loadURI(this.value, event)
-									};
-									urlField.className = 'zotero-text-link';
-								}
-								else {
-									urlField.className = '';
-								}
-								urlField.hidden = false;
+						// URL
+						if (this.displayURL) {
+							var urlSpec = this.item.getField('url');
+							urlField.setAttribute('value', urlSpec);
+							urlField.setAttribute('hidden', false);
+							if (this.clickableLink) {
+								 urlField.onclick = function (event) {
+									ZoteroPane_Local.loadURI(this.value, event)
+								};
+								urlField.className = 'zotero-text-link';
 							}
 							else {
-								urlField.hidden = true;
+								urlField.className = '';
 							}
-							
-							// Access date
-							if (this.displayAccessed) {
-								this._id("accessed-label").value = Zotero.getString('itemFields.accessDate')
-									+ Zotero.getString('punctuation.colon');
-								this._id("accessed").value = Zotero.Date.sqlToDate(
-										this.item.getField('accessDate'), true
-									).toLocaleString();
-								accessed.hidden = false;
-							}
-							else {
-								accessed.hidden = true;
-							}
+							urlField.hidden = false;
 						}
-						// Metadata for files
 						else {
 							urlField.hidden = true;
-							accessed.hidden = true;
 						}
 						
-						if (this.item.attachmentLinkMode
-									!= Zotero.Attachments.LINK_MODE_LINKED_URL
-								&& this.displayFileName) {
-							var fileName = this.item.getFilename();
-							
-							if (fileName) {
-								this._id("fileName-label").value = Zotero.getString('pane.item.attachments.filename')
-									+ Zotero.getString('punctuation.colon');
-								this._id("fileName").value = fileName;
-								fileNameRow.hidden = false;
-							}
-							else {
-								fileNameRow.hidden = true;
-							}
+						// Access date
+						if (this.displayAccessed) {
+							this._id("accessed-label").value = Zotero.getString('itemFields.accessDate')
+								+ Zotero.getString('punctuation.colon');
+							this._id("accessed").value = Zotero.Date.sqlToDate(
+									this.item.getField('accessDate'), true
+								).toLocaleString();
+							accessed.hidden = false;
+						}
+						else {
+							accessed.hidden = true;
+						}
+					}
+					// Metadata for files
+					else {
+						urlField.hidden = true;
+						accessed.hidden = true;
+					}
+					
+					if (this.item.attachmentLinkMode
+								!= Zotero.Attachments.LINK_MODE_LINKED_URL
+							&& this.displayFileName) {
+						var fileName = this.item.attachmentFilename;
+						
+						if (fileName) {
+							this._id("fileName-label").value = Zotero.getString('pane.item.attachments.filename')
+								+ Zotero.getString('punctuation.colon');
+							this._id("fileName").value = fileName;
+							fileNameRow.hidden = false;
 						}
 						else {
 							fileNameRow.hidden = true;
 						}
-						
-						// Page count
-						if (this.displayPages) {
-							var pages = yield Zotero.Fulltext.getPages(this.item.id)
-								.tap(() => Zotero.Promise.check(this.item));
-							var pages = pages ? pages.total : null;
+					}
+					else {
+						fileNameRow.hidden = true;
+					}
+					
+					// Page count
+					if (this.displayPages) {
+						Zotero.Fulltext.getPages(this.item.id)
+						.tap(() => Zotero.Promise.check(this.item))
+						.then(function (pages) {
+							pages = pages ? pages.total : null;
 							if (pages) {
 								this._id("pages-label").value = Zotero.getString('itemFields.pages')
 									+ Zotero.getString('punctuation.colon');
@@ -295,77 +300,85 @@
 							else {
 								pagesRow.hidden = true;
 							}
-						}
-						else {
-							pagesRow.hidden = true;
-						}
-						
-						if (this.displayDateModified) {
-							this._id("dateModified-label").value = Zotero.getString('itemFields.dateModified')
-								+ Zotero.getString('punctuation.colon');
-							var mtime = yield this.item.attachmentModificationTime
-								.tap(() => Zotero.Promise.check(this.item));
-							if (mtime) {
-								this._id("dateModified").value = new Date(mtime).toLocaleString();
-							}
-							// Use the item's mod time as a backup (e.g., when sync
-							// passes in the mod time for the nonexistent remote file)
-							else {
-								this._id("dateModified").value = Zotero.Date.sqlToDate(
-									this.item.getField('dateModified'), true
-								).toLocaleString();
-							}
+						});
+					}
+					else {
+						pagesRow.hidden = true;
+					}
+					
+					if (this.displayDateModified) {
+						this._id("dateModified-label").value = Zotero.getString('itemFields.dateModified')
+							+ Zotero.getString('punctuation.colon');
+						// Conflict resolution uses a modal window, so promises won't work, but
+						// the sync process passes in the file mod time as dateModified
+						if (this.synchronous) {
+							this._id("dateModified").value = Zotero.Date.sqlToDate(
+								this.item.getField('dateModified'), true
+							).toLocaleString();
 							dateModifiedRow.hidden = false;
 						}
 						else {
-							dateModifiedRow.hidden = true;
+							this.item.attachmentModificationTime
+							.tap(() => Zotero.Promise.check(this._id))
+							.then(function (mtime) {
+								if (!this._id) return;
+								if (mtime) {
+									this._id("dateModified").value = new Date(mtime).toLocaleString();
+								}
+								dateModifiedRow.hidden = false;
+							});
 						}
-						
-						// Full-text index information
-						if (this.displayIndexed) {
-							yield this.updateItemIndexedState()
-								.tap(() => Zotero.Promise.check(this.item));
+					}
+					else {
+						dateModifiedRow.hidden = true;
+					}
+					
+					// Full-text index information
+					if (this.displayIndexed) {
+						this.updateItemIndexedState()
+						.tap(() => Zotero.Promise.check(this.item))
+						.then(function () {
 							indexStatusRow.hidden = false;
-						}
-						else {
-							indexStatusRow.hidden = true;
-						}
-						
-						// Note editor
-						var noteEditor = this._id('attachment-note-editor');
-						if (this.displayNote) {
-							if (this.displayNoteIfEmpty || this.item.getNote() != '') {
-								Zotero.debug("setting links on top");
-								noteEditor.linksOnTop = true;
-								noteEditor.hidden = false;
-								
-								// Don't make note editable (at least for now)
-								if (this.mode == 'merge' || this.mode == 'mergeedit') {
-									noteEditor.mode = 'merge';
-									noteEditor.displayButton = false;
-								}
-								else {
-									noteEditor.mode = this.mode;
-								}
-								noteEditor.parent = null;
-								noteEditor.item = this.item;
-							}
-						}
-						else {
-							noteEditor.hidden = true;
-						}
+						});
+					}
+					else {
+						indexStatusRow.hidden = true;
+					}
+					
+					// Note editor
+					var noteEditor = this._id('attachment-note-editor');
+					if (this.displayNote) {
+						if (this.displayNoteIfEmpty || this.item.getNote() != '') {
+							Zotero.debug("setting links on top");
+							noteEditor.linksOnTop = true;
+							noteEditor.hidden = false;
 							
+							// Don't make note editable (at least for now)
+							if (this.mode == 'merge' || this.mode == 'mergeedit') {
+								noteEditor.mode = 'merge';
+								noteEditor.displayButton = false;
+							}
+							else {
+								noteEditor.mode = this.mode;
+							}
+							noteEditor.parent = null;
+							noteEditor.item = this.item;
+						}
+					}
+					else {
+						noteEditor.hidden = true;
+					}
 						
-						if (this.displayButton) {
-							selectButton.label = this.buttonCaption;
-							selectButton.hidden = false;
-							selectButton.setAttribute('oncommand',
-								'document.getBindingParent(this).clickHandler(this)');
-						}
-						else {
-							selectButton.hidden = true;
-						}
-					}, this);
+					
+					if (this.displayButton) {
+						selectButton.label = this.buttonCaption;
+						selectButton.hidden = false;
+						selectButton.setAttribute('oncommand',
+							'document.getBindingParent(this).clickHandler(this)');
+					}
+					else {
+						selectButton.hidden = true;
+					}
 				]]></body>
 			</method>
 			

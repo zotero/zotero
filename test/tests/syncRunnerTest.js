@@ -5,7 +5,7 @@ describe("Zotero.Sync.Runner", function () {
 	
 	var apiKey = Zotero.Utilities.randomString(24);
 	var baseURL = "http://local.zotero/";
-	var userLibraryID, publicationsLibraryID, runner, caller, server, client, stub, spy;
+	var userLibraryID, publicationsLibraryID, runner, caller, server, stub, spy;
 	
 	var responses = {
 		keyInfo: {
@@ -129,15 +129,7 @@ describe("Zotero.Sync.Runner", function () {
 			}
 		};
 		
-		var client = new Zotero.Sync.APIClient({
-			baseURL: baseURL,
-			apiVersion: options.apiVersion || ZOTERO_CONFIG.API_VERSION,
-			apiKey: apiKey,
-			concurrentCaller: caller,
-			background: options.background || true
-		});
-		
-		return { runner, caller, client };
+		return { runner, caller };
 	})
 	
 	function setResponse(response) {
@@ -160,7 +152,7 @@ describe("Zotero.Sync.Runner", function () {
 		server = sinon.fakeServer.create();
 		server.autoRespond = true;
 		
-		({ runner, caller, client } = yield setup());
+		({ runner, caller } = yield setup());
 		
 		yield Zotero.Users.setCurrentUserID(1);
 		yield Zotero.Users.setCurrentUsername("A");
@@ -180,7 +172,7 @@ describe("Zotero.Sync.Runner", function () {
 		it("should check key access", function* () {
 			spy = sinon.spy(runner, "checkUser");
 			setResponse('keyInfo.fullAccess');
-			var json = yield runner.checkAccess(client);
+			var json = yield runner.checkAccess(runner.getAPIClient());
 			sinon.assert.calledWith(spy, 1, "Username");
 			var compare = {};
 			Object.assign(compare, responses.keyInfo.fullAccess.json);
@@ -216,7 +208,7 @@ describe("Zotero.Sync.Runner", function () {
 			
 			setResponse('userGroups.groupVersions');
 			var libraries = yield runner.checkLibraries(
-				client, false, responses.keyInfo.fullAccess.json
+				runner.getAPIClient(), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 4);
 			assert.sameMembers(
@@ -240,19 +232,25 @@ describe("Zotero.Sync.Runner", function () {
 			
 			setResponse('userGroups.groupVersions');
 			var libraries = yield runner.checkLibraries(
-				client, false, responses.keyInfo.fullAccess.json, [userLibraryID]
+				runner.getAPIClient(), false, responses.keyInfo.fullAccess.json, [userLibraryID]
 			);
 			assert.lengthOf(libraries, 1);
 			assert.sameMembers(libraries, [userLibraryID]);
 			
 			var libraries = yield runner.checkLibraries(
-				client, false, responses.keyInfo.fullAccess.json, [userLibraryID, publicationsLibraryID]
+				runner.getAPIClient(),
+				false,
+				responses.keyInfo.fullAccess.json,
+				[userLibraryID, publicationsLibraryID]
 			);
 			assert.lengthOf(libraries, 2);
 			assert.sameMembers(libraries, [userLibraryID, publicationsLibraryID]);
 			
 			var libraries = yield runner.checkLibraries(
-				client, false, responses.keyInfo.fullAccess.json, [group1.libraryID]
+				runner.getAPIClient(),
+				false,
+				responses.keyInfo.fullAccess.json,
+				[group1.libraryID]
 			);
 			assert.lengthOf(libraries, 1);
 			assert.sameMembers(libraries, [group1.libraryID]);
@@ -277,7 +275,7 @@ describe("Zotero.Sync.Runner", function () {
 			setResponse('groups.ownerGroup');
 			setResponse('groups.memberGroup');
 			var libraries = yield runner.checkLibraries(
-				client, false, responses.keyInfo.fullAccess.json
+				runner.getAPIClient(), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 4);
 			assert.sameMembers(
@@ -318,7 +316,7 @@ describe("Zotero.Sync.Runner", function () {
 			setResponse('groups.ownerGroup');
 			setResponse('groups.memberGroup');
 			var libraries = yield runner.checkLibraries(
-				client,
+				runner.getAPIClient(),
 				false,
 				responses.keyInfo.fullAccess.json,
 				[group1.libraryID, group2.libraryID]
@@ -339,7 +337,7 @@ describe("Zotero.Sync.Runner", function () {
 			setResponse('groups.ownerGroup');
 			setResponse('groups.memberGroup');
 			var libraries = yield runner.checkLibraries(
-				client, false, responses.keyInfo.fullAccess.json
+				runner.getAPIClient(), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 4);
 			var groupData1 = responses.groups.ownerGroup;
@@ -370,7 +368,7 @@ describe("Zotero.Sync.Runner", function () {
 				assert.include(text, group1.name);
 			});
 			var libraries = yield runner.checkLibraries(
-				client, false, responses.keyInfo.fullAccess.json
+				runner.getAPIClient(), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 3);
 			assert.sameMembers(libraries, [userLibraryID, publicationsLibraryID, group2.libraryID]);
@@ -388,7 +386,7 @@ describe("Zotero.Sync.Runner", function () {
 				assert.include(text, group.name);
 			}, "extra1");
 			var libraries = yield runner.checkLibraries(
-				client, false, responses.keyInfo.fullAccess.json
+				runner.getAPIClient(), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 3);
 			assert.sameMembers(libraries, [userLibraryID, publicationsLibraryID, group.libraryID]);
@@ -405,7 +403,7 @@ describe("Zotero.Sync.Runner", function () {
 				assert.include(text, group.name);
 			}, "cancel");
 			var libraries = yield runner.checkLibraries(
-				client, false, responses.keyInfo.fullAccess.json
+				runner.getAPIClient(), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 0);
 			assert.isTrue(Zotero.Groups.exists(groupData.json.id));
@@ -656,6 +654,11 @@ describe("Zotero.Sync.Runner", function () {
 				Zotero.Libraries.getVersion(Zotero.Groups.getLibraryIDFromGroupID(2694172)),
 				20
 			);
+			
+			// Last sync time should be within the last second
+			var lastSyncTime = Zotero.Sync.Data.Local.getLastSyncTime();
+			assert.isAbove(lastSyncTime, new Date().getTime() - 1000);
+			assert.isBelow(lastSyncTime, new Date().getTime());
 		})
 	})
 })

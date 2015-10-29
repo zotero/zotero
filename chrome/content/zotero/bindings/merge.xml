@@ -99,9 +99,11 @@
 					}
 					
 					// Check for note or attachment
-					this.type = this._getTypeFromObject(
-						this._data.left.deleted ?  this._data.right : this._data.left
-					);
+					if (!this.type) {
+						this.type = this._getTypeFromObject(
+							this._data.left.deleted ?  this._data.right : this._data.left
+						);
+					}
 					
 					var showButton = this.type != 'item';
 					
@@ -109,7 +111,6 @@
 					this._rightpane.showButton = showButton;
 					this._leftpane.data = this._data.left;
 					this._rightpane.data = this._data.right;
-					this._mergepane.type = this.type;
 					this._mergepane.data = this._data.merge;
 					
 					if (this._data.selected == 'left') {
@@ -313,6 +314,7 @@
 							break;
 						
 						case 'attachment':
+						case 'file':
 							elementName = 'zoteroattachmentbox';
 							break;
 						
@@ -320,13 +322,8 @@
 							elementName = 'zoteronoteeditor';
 							break;
 						
-						case 'file':
-							elementName = 'zoterostoragefilebox';
-							break;
-						
 						default:
-							throw ("Object type '" + this.type
-								+ "' not supported in <zoteromergepane>.ref");
+							throw new Error("Object type '" + this.type + "' not supported");
 					}
 					
 					var objbox = document.createElement(elementName);
@@ -342,8 +339,7 @@
 					
 					objbox.setAttribute("anonid", "objectbox");
 					objbox.setAttribute("flex", "1");
-					
-					objbox.mode = 'view';
+					objbox.mode = this.type == 'file' ? 'filemerge' : 'merge';
 					
 					var button = this._id('choose-button');
 					if (this.showButton) {
@@ -363,7 +359,7 @@
 					// Create item from JSON for metadata box
 					var item = new Zotero.Item(val.itemType);
 					item.fromJSON(val);
-					objbox.ref = item;
+					objbox.item = item;
 				]]>
 				</setter>
 			</property>

@@ -1325,6 +1325,7 @@ var ZoteroPane = new function()
 				else if (item.isAttachment()) {
 					var attachmentBox = document.getElementById('zotero-attachment-box');
 					attachmentBox.mode = this.collectionsView.editable ? 'edit' : 'view';
+					yield item.loadNote();
 					attachmentBox.item = item;
 					
 					document.getElementById('zotero-item-pane-content').selectedIndex = 3;
@@ -3692,38 +3693,41 @@ var ZoteroPane = new function()
 				}
 			}
 			else {
-				if (!item.isImportedAttachment() || !Zotero.Sync.Storage.downloadAsNeeded(item.libraryID)) {
+				if (!item.isImportedAttachment()
+						|| !Zotero.Sync.Storage.Local.downloadAsNeeded(item.libraryID)) {
 					this.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
 					return;
 				}
 				
 				let downloadedItem = item;
-				yield Zotero.Sync.Storage.downloadFile(
-					downloadedItem,
-					{
-						onProgress: function (progress, progressMax) {}
-					}
-				)
-				.then(function () {
-					if (!downloadedItem.getFile()) {
-						ZoteroPane_Local.showAttachmentNotFoundDialog(downloadedItem.id, noLocateOnMissing);
-						return;
-					}
-					
-					// check if unchanged?
-					// maybe not necessary, since we'll get an error if there's an error
-					
-					
-					Zotero.Notifier.trigger('redraw', 'item', []);
-					Zotero.debug('downloaded');
-					Zotero.debug(downloadedItem.id);
-					return ZoteroPane_Local.viewAttachment(downloadedItem.id, event, false, forceExternalViewer);
-				})
-				.catch(function (e) {
+				try {
+					yield Zotero.Sync.Runner.downloadFile(
+						downloadedItem,
+						{
+							onProgress: function (progress, progressMax) {}
+						}
+					);
+				}
+				catch (e) {
 					// TODO: show error somewhere else
 					Zotero.debug(e, 1);
 					ZoteroPane_Local.syncAlert(e);
-				});
+					return;
+				}
+				
+				if (!(yield downloadedItem.getFilePathAsync())) {
+					ZoteroPane_Local.showAttachmentNotFoundDialog(downloadedItem.id, noLocateOnMissing);
+					return;
+				}
+				
+				// check if unchanged?
+				// maybe not necessary, since we'll get an error if there's an error
+				
+				
+				Zotero.Notifier.trigger('redraw', 'item', []);
+				Zotero.debug('downloaded');
+				Zotero.debug(downloadedItem.id);
+				return ZoteroPane_Local.viewAttachment(downloadedItem.id, event, false, forceExternalViewer);
 			}
 		}
 	});
@@ -3962,7 +3966,7 @@ var ZoteroPane = new function()
 	
 	
 	this.syncAlert = function (e) {
-		e = Zotero.Sync.Runner.parseSyncError(e);
+		e = Zotero.Sync.Runner.parseError(e);
 		
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 					.getService(Components.interfaces.nsIPromptService);
