@@ -654,6 +654,105 @@ Zotero.File = new function(){
 	
 	
 	/**
+	 * @param {String} dirPath - Directory containing files to add to ZIP
+	 * @param {String} zipPath - ZIP file to create
+	 * @param {nsIRequestObserver} [observer]
+	 * @return {Promise}
+	 */
+	this.zipDirectory = Zotero.Promise.coroutine(function* (dirPath, zipPath, observer) {
+		var zw = Components.classes["@mozilla.org/zipwriter;1"]
+			.createInstance(Components.interfaces.nsIZipWriter);
+		zw.open(this.pathToFile(zipPath), 0x04 | 0x08 | 0x20); // open rw, create, truncate
+		var entries = yield _zipDirectory(dirPath, dirPath, zw);
+		if (entries.length == 0) {
+			Zotero.debug('No files to add -- removing ZIP file');
+			zw.close();
+			zipPath.remove(null);
+			return false;
+		}
+		
+		Zotero.debug(`Creating ${OS.Path.basename(zipPath)} with ${entries.length} file(s)`);
+		
+		var context = {
+			zipWriter: zw,
+			entries
+		};
+		
+		var deferred = Zotero.Promise.defer();
+		zw.processQueue(
+			{
+				onStartRequest: function (request, ctx) {
+					try {
+						if (observer && observer.onStartRequest) {
+							observer.onStartRequest(request, context);
+						}
+					}
+					catch (e) {
+						deferred.reject(e);
+					}
+				},
+				onStopRequest: function (request, ctx, status) {
+					try {
+						if (observer && observer.onStopRequest) {
+							observer.onStopRequest(request, context, status);
+						}
+					}
+					catch (e) {
+						deferred.reject(e);
+						return;
+					}
+					finally {
+						zw.close();
+					}
+					deferred.resolve(true);
+				}
+			},
+			{}
+		);
+		return deferred.promise;
+	});
+	
+	
+	var _zipDirectory = Zotero.Promise.coroutine(function* (rootPath, path, zipWriter) {
+		var entries = [];
+		let iterator;
+		try {
+			iterator = new OS.File.DirectoryIterator(path);
+			yield iterator.forEach(Zotero.Promise.coroutine(function* (entry) {
+				if (entry.isSymLink) {
+					Zotero.debug("Skipping symlink " + entry.name);
+					return;
+				}
+				if (entry.isDir) {
+					entries.concat(yield _zipDirectory(rootPath, path, zipWriter));
+					return;
+				}
+				if (entry.name.startsWith('.')) {
+					Zotero.debug('Skipping file ' + entry.name);
+					return;
+				}
+				
+				zipWriter.addEntryFile(
+					// Add relative path
+					entry.path.substr(rootPath.length + 1),
+					Components.interfaces.nsIZipWriter.COMPRESSION_DEFAULT,
+					Zotero.File.pathToFile(entry.path),
+					true
+				);
+				entries.push({
+					name: entry.name,
+					path: entry.path
+				});
+			}));
+		}
+		finally {
+			iterator.close();
+		}
+		return entries;
+	});
+	
+	
+	/**
 	 * Strip potentially invalid characters
 	 *
 	 * See http://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
