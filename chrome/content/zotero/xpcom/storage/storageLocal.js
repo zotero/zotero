@@ -67,7 +67,7 @@ Zotero.Sync.Storage.Local = {
 	 */
 	downloadOnSync: function (libraryID, enable) {
 		var pref = this._getDownloadPrefFromLibrary(libraryID);
-		var val = 'on-demand';
+		var val = 'on-sync';
 		if (enable) {
 			Zotero.Prefs.set(pref, val);
 			return;
