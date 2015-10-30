@@ -3934,7 +3934,7 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options = {})
 	// Deleted
 	let deleted = this.deleted;
 	if (deleted || mode == 'full') {
-		obj.deleted = deleted;
+		obj.deleted = deleted ? 1 : 0;
 	}
 	
 	obj.dateAdded = Zotero.Date.sqlToISO8601(this.dateAdded);

@@ -859,6 +859,20 @@ describe("Zotero.Item", function () {
 				assert.isUndefined(json.date);
 				assert.isUndefined(json.numPages);
 			})
+			
+			it("should output 'deleted' as 1", function* () {
+				var itemType = "book";
+				var title = "Test";
+				
+				var item = new Zotero.Item(itemType);
+				item.setField("title", title);
+				item.deleted = true;
+				var id = yield item.saveTx();
+				item = yield Zotero.Items.getAsync(id);
+				var json = yield item.toJSON();
+				
+				assert.strictEqual(json.deleted, 1);
+			})
 		})
 		
 		describe("'full' mode", function () {
@@ -931,7 +945,7 @@ describe("Zotero.Item", function () {
 					patchBase: patchBase
 				})
 				assert.isUndefined(json.title);
-				assert.isTrue(json.deleted);
+				assert.strictEqual(json.deleted, 1);
 			})
 		})
 		
