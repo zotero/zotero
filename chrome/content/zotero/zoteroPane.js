@@ -1325,6 +1325,7 @@ var ZoteroPane = new function()
 				else if (item.isAttachment()) {
 					var attachmentBox = document.getElementById('zotero-attachment-box');
 					attachmentBox.mode = this.collectionsView.editable ? 'edit' : 'view';
+					yield item.loadItemData();
 					yield item.loadNote();
 					attachmentBox.item = item;
 					
