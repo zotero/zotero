@@ -94,8 +94,9 @@ var Zotero_LocateMenu = new function() {
 	 * Clear the bottom part of the context menu and add locate options
 	 * @param {menupopup} menu The menu to add context menu items to
 	 * @param {Boolean} showIcons Whether menu items should have associated icons
+	 * @return {Promise}
 	 */
-	this.buildContextMenu = function(menu, showIcons) {
+	this.buildContextMenu = Zotero.Promise.coroutine(function* (menu, showIcons) {
 		// get selected items
 		var selectedItems = _getSelectedItems();
 		
@@ -103,7 +104,7 @@ var Zotero_LocateMenu = new function() {
 		if(!selectedItems.length || selectedItems.length > 20) return;
 		
 		// add view options
-		_addViewOptions(menu, selectedItems, showIcons);
+		yield _addViewOptions(menu, selectedItems, showIcons);
 		
 		/*// look for locate engines
 		var availableEngines = _getAvailableLocateEngines(selectedItems);
@@ -119,7 +120,7 @@ var Zotero_LocateMenu = new function() {
 			submenu.appendChild(submenuPopup);
 			menu.appendChild(submenu);
 		}*/
-	}
+	});
 	
 	function _addViewOption(selectedItems, optionName, optionObject, showIcons) {
 		var menuitem = _createMenuItem(Zotero.getString("locate."+optionName+".label"),

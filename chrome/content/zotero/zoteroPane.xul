@@ -258,7 +258,7 @@
 					<menuitem label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.createCommonsBucket();"/><!--TODO localize -->
 					<menuitem label="Refresh" oncommand="ZoteroPane_Local.refreshCommonsBucket();"/><!--TODO localize -->
 				</menupopup>
-				<menupopup id="zotero-itemmenu" onpopupshowing="ZoteroPane_Local.buildItemContextMenu();">
+				<menupopup id="zotero-itemmenu">
 					<!-- Keep order in sync with buildItemContextMenu -->
 					<menuitem class="menuitem-iconic zotero-menuitem-show-in-library" label="&zotero.items.menu.showInLibrary;" oncommand="ZoteroPane_Local.selectItem(this.parentNode.getAttribute('itemID'), true)"/>
 					<menuseparator/>
@@ -340,7 +340,7 @@
 					<deck id="zotero-items-pane-content" selectedIndex="0" flex="1">
 						<!-- Key navigation is handled by listener in itemTreeView.js -->
 						<tree 
-							id="zotero-items-tree" context="zotero-itemmenu"
+							id="zotero-items-tree"
 							enableColumnDrag="true"
 							disableKeyNavigation="true"
 							onfocus="if (ZoteroPane_Local.itemsView.rowCount &amp;&amp; !ZoteroPane_Local.itemsView.selection.count) { ZoteroPane_Local.itemsView.selection.select(0); }"

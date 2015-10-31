@@ -2591,7 +2591,7 @@ var ZoteroPane = new function()
 		}
 		
 		// add locate menu options
-		Zotero_LocateMenu.buildContextMenu(menu, true);
+		yield Zotero_LocateMenu.buildContextMenu(menu, true);
 	});
 	
 	
@@ -2625,12 +2625,25 @@ var ZoteroPane = new function()
 				}
 			}
 		}
-		
-		// Automatically select all equivalent items when clicking on an item
-		// in duplicates view
 		else if (tree.id == 'zotero-items-tree') {
+			// Show context menu once it's ready
+			if (event.button == 2) {
+				// Allow item to be selected first
+				setTimeout(function () {
+					ZoteroPane_Local.buildItemContextMenu()
+					.then(function () {
+						document.getElementById('zotero-itemmenu').openPopup(
+							null, null, event.clientX, event.clientY, true, false, event
+						);
+					})
+				});
+				return;
+			}
+			
 			let collectionTreeRow = ZoteroPane_Local.getCollectionTreeRow();
 			
+			// Automatically select all equivalent items when clicking on an item
+			// in duplicates view
 			if (collectionTreeRow.isDuplicates()) {
 				// Trigger only on primary-button single clicks without modifiers
 				// (so that items can still be selected and deselected manually)
