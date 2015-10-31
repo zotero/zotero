@@ -1054,10 +1054,14 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 				if (cacheVersion == version) {
 					continue;
 				}
+				// This should never happen, but recover if it does
 				if (cacheVersion > version) {
-					throw new Error("Sync cache had later version than remote for "
-						+ objectType + + this.libraryID + "/" + key
-						+ "(" + cacheVersion + " > " + version + ")");
+					Zotero.logError("Sync cache had later version than remote for "
+						+ objectType + " " + this.libraryID + "/" + key
+						+ " (" + cacheVersion + " > " + version + ") -- deleting");
+					yield Zotero.Sync.Data.Local.deleteCacheObjectVersions(
+						objectType, this.libraryID, key, cacheVersion, cacheVersion
+					);
 				}
 				
 				if (obj) {

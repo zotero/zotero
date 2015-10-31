@@ -521,11 +521,18 @@ Zotero.Sync.Data.Local = {
 						let saved = yield this._saveObjectFromJSON(
 							obj, jsonData, options, { skipCache }
 						);
-						// Mark updated attachments for download
-						if (saved && objectType == 'item' && obj.isImportedAttachment()) {
-							yield this._checkAttachmentForDownload(
-								obj, jsonData.mtime, isNewObject
+						if (saved) {
+							// Delete older versions of the item in the cache
+							yield this.deleteCacheObjectVersions(
+								objectType, libraryID, jsonData.key, null, jsonData.version - 1
 							);
+							
+							// Mark updated attachments for download
+							if (objectType == 'item' && obj.isImportedAttachment()) {
+								yield this._checkAttachmentForDownload(
+									obj, jsonData.mtime, isNewObject
+								);
+							}
 						}
 						
 						if (saved) {
@@ -647,11 +654,35 @@ Zotero.Sync.Data.Local = {
 	}),
 	
 	
-	deleteCacheObject: function (objectType, libraryID, key) {
+	/**
+	 * Delete one or more versions of an object from the sync cache
+	 *
+	 * @param {String} objectType
+	 * @param {Integer} libraryID
+	 * @param {String} key
+	 * @param {Integer} [minVersion]
+	 * @param {Integer} [maxVersion]
+	 */
+	deleteCacheObjectVersions: function (objectType, libraryID, key, minVersion, maxVersion) {
 		var sql = "DELETE FROM syncCache WHERE libraryID=? AND key=? "
 			+ "AND syncObjectTypeID IN (SELECT syncObjectTypeID FROM "
-			+ "syncObjectTypes WHERE name=?)";;
-		return Zotero.DB.queryAsync(sql, [libraryID, key, objectType]);
+			+ "syncObjectTypes WHERE name=?)";
+		var params = [libraryID, key, objectType];
+		if (minVersion && minVersion == maxVersion) {
+			sql += " AND version=?";
+			params.push(minVersion);
+		}
+		else {
+			if (minVersion) {
+				sql += " AND version>=?";
+				params.push(minVersion);
+			}
+			if (maxVersion) {
+				sql += " AND version<=?";
+				params.push(maxVersion);
+			}
+		}
+		return Zotero.DB.queryAsync(sql, params);
 	},
 	
 	

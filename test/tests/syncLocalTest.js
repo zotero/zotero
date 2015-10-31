@@ -34,7 +34,6 @@ describe("Zotero.Sync.Data.Local", function() {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
 			var type = 'item';
-			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
 			let obj = yield createDataObject(type, { version: 5 });
 			let data = yield obj.toJSON();
 			yield Zotero.Sync.Data.Local.saveCacheObjects(
@@ -64,6 +63,43 @@ describe("Zotero.Sync.Data.Local", function() {
 			assert.equal(obj.version, 10);
 			assert.equal(obj.getField('title'), changedTitle);
 			assert.equal(obj.getField('place'), changedPlace);
+		})
+		
+		it("should delete older versions in sync cache after processing", function* () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			for (let type of types) {
+				let obj = yield createDataObject(type, { version: 5 });
+				let data = yield obj.toJSON();
+				yield Zotero.Sync.Data.Local.saveCacheObjects(
+					type, libraryID, [data]
+				);
+			}
+			
+			for (let type of types) {
+				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+				
+				let obj = yield createDataObject(type, { version: 10 });
+				let data = yield obj.toJSON();
+				yield Zotero.Sync.Data.Local.saveCacheObjects(
+					type, libraryID, [data]
+				);
+				yield Zotero.Sync.Data.Local.processSyncCacheForObjectType(
+					libraryID, type, { stopOnError: true }
+				);
+				
+				let localObj = objectsClass.getByLibraryAndKey(libraryID, obj.key);
+				assert.equal(localObj.version, 10);
+				
+				let versions = yield Zotero.Sync.Data.Local.getCacheObjectVersions(
+					type, libraryID, obj.key
+				);
+				assert.sameMembers(
+					versions,
+					[10],
+					"should have only latest version of " + type + " in cache"
+				);
+			}
 		})
 		
 		it("should mark new attachment items for download", function* () {
@@ -200,8 +236,6 @@ describe("Zotero.Sync.Data.Local", function() {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
 			var type = 'item';
-			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
-			
 			var objects = [];
 			var values = [];
 			var dateAdded = Date.now() - 86400000;
@@ -279,7 +313,6 @@ describe("Zotero.Sync.Data.Local", function() {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
 			var type = 'item';
-			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
 			
 			var objects = [];
 			var values = [];
