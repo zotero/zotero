@@ -14,7 +14,7 @@ matrix:
 notifications:
     email: false
 install:
-    - wget -r -l1 -np -nd -R "index.html*" "http://ftp.mozilla.org/pub/firefox/releases/latest${FX_PATH_SUFFIX}/linux-x86_64/en-US/?F=0&P=*.tar.*"
+    - wget `curl -s "http://ftp.mozilla.org/pub/firefox/releases/latest${FX_PATH_SUFFIX}/linux-x86_64/en-US/" | grep .tar. | tail -n 1 | sed -E 's/.+(\/pub\/[^"]+).+/http:\/\/ftp.mozilla.org\1/g'`
     - tar -xf firefox-*.tar.*
 before_script:
     - export DISPLAY=:99.0
