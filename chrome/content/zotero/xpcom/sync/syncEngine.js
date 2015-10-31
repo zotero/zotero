@@ -663,7 +663,9 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 							throw new Error("Key mismatch (" + key + " != " + batch[index].key + ")");
 						}
 						
-						let obj = objectsClass.getByLibraryAndKey(this.libraryID, key, { noCache: true })
+						let obj = yield objectsClass.getByLibraryAndKeyAsync(
+							this.libraryID, key, { noCache: true }
+						)
 						ids.push(obj.id);
 						
 						if (state == 'successful') {
