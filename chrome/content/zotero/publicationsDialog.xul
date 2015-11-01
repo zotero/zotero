@@ -60,9 +60,9 @@
 	
 	<wizardpage pageid="choose-sharing" label="&zotero.publications.sharing.title;"
 			onpageshow="Zotero_Publications_Dialog.updatePage()">
-		<vbox id="use-rights">
-			<checkbox id="use-rights-checkbox"
-					oncommand="Zotero_Publications_Dialog.updateUseRights(this.checked)"/>
+		<vbox id="keep-rights">
+			<checkbox id="keep-rights-checkbox"
+					oncommand="Zotero_Publications_Dialog.updateKeepRights(this.checked)"/>
 			<separator/>
 		</vbox>
 		<vbox id="choose-sharing-options">

@@ -1672,7 +1672,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		
 		// Set Rights field for My Publications
 		if (options.license) {
-			if (!options.useRights || !newItem.getField('rights')) {
+			if (!options.keepRights || !newItem.getField('rights')) {
 				newItem.setField('rights', options.licenseName);
 			}
 		}
@@ -1836,7 +1836,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			copyOptions.childFileAttachments = io.includeFiles;
 			copyOptions.childLinks = true;
 			copyOptions.tags = true; // TODO: add checkbox
-			['useRights', 'license', 'licenseName'].forEach(function (field) {
+			['keepRights', 'license', 'licenseName'].forEach(function (field) {
 				copyOptions[field] = io[field];
 			});
 		}

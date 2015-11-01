@@ -31,7 +31,7 @@ var Zotero_Publications_Dialog = new function () {
 	var _hasRights = null;
 	var _includeFiles = true;
 	var _includeNotes = true;
-	var _useRights = true;
+	var _keepRights = true;
 	var _shareSettings = {
 		sharing: 'reserved', // 'reserved', 'cc', 'cc0'
 		adaptations: 'no',
@@ -50,7 +50,7 @@ var Zotero_Publications_Dialog = new function () {
 				_hasFiles = _io.hasFiles;
 				_hasNotes = _io.hasNotes;
 				_hasRights = _io.hasRights;
-				if (_hasRights == 'none') _useRights = false;
+				if (_hasRights == 'none') _keepRights = false;
 				delete _io.hasFiles;
 				delete _io.hasNotes;
 				delete _io.hasRights;
@@ -98,20 +98,20 @@ var Zotero_Publications_Dialog = new function () {
 			}
 		}
 		else if (pageid == 'choose-sharing') {
-			let useRightsBox = document.getElementById('use-rights');
-			let useRightsCheckbox = document.getElementById('use-rights-checkbox');
+			let keepRightsBox = document.getElementById('keep-rights');
+			let keepRightsCheckbox = document.getElementById('keep-rights-checkbox');
 			if (_hasRights == 'none') {
-				useRightsBox.hidden = true;
+				keepRightsBox.hidden = true;
 				document.getElementById('sharing-radiogroup').focus();
 			}
 			else {
-				let str = 'publications.sharing.useRightsField';
+				let str = 'publications.sharing.keepRightsField';
 				if (_hasRights == 'some') {
 					str += 'WhereAvailable';
 				}
-				useRightsCheckbox.label = Zotero.getString(str);
-				useRightsCheckbox.checked = _useRights;
-				this.updateUseRights(useRightsCheckbox.checked);
+				keepRightsCheckbox.label = Zotero.getString(str);
+				keepRightsCheckbox.checked = _keepRights;
+				this.updateKeepRights(keepRightsCheckbox.checked);
 			}
 		}
 		// Select appropriate radio button from current license
@@ -145,7 +145,7 @@ var Zotero_Publications_Dialog = new function () {
 				// items, go to license chooser next
 				(currentPage.pageid == 'choose-sharing'
 					&& _shareSettings.sharing == 'cc'
-					&& !(_hasRights == 'all' && _useRights))) {
+					&& !(_hasRights == 'all' && _keepRights))) {
 			this.lastPage = false;
 			finishButton.hidden = true;
 			nextButton.hidden = false;
@@ -177,11 +177,11 @@ var Zotero_Publications_Dialog = new function () {
 	/**
 	 * Update rights setting from checkbox and hide sharing setting if necessary
 	 */
-	this.updateUseRights = function (useRights) {
-		_useRights = useRights;
+	this.updateKeepRights = function (keepRights) {
+		_keepRights = keepRights;
 		
 		// If all items have rights and we're using them, the sharing page is the last page
-		document.getElementById('choose-sharing-options').hidden = _hasRights == 'all' && useRights;
+		document.getElementById('choose-sharing-options').hidden = _hasRights == 'all' && keepRights;
 		this.updateNextButton();
 	}
 	
@@ -211,7 +211,7 @@ var Zotero_Publications_Dialog = new function () {
 	this.onFinish = function () {
 		_io.includeFiles = document.getElementById('include-files').checked;
 		_io.includeNotes = document.getElementById('include-notes').checked;
-		_io.useRights = _useRights;
+		_io.keepRights = _keepRights;
 		_io.license = _license;
 		_io.licenseName = _getLicenseName(_license);
 	}
