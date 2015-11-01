@@ -62,12 +62,10 @@ describe("Zotero.Sync.Storage.Engine", function () {
 	before(function* () {
 	})
 	beforeEach(function* () {
-		Zotero.debug("BEFORE HERE");
 		yield resetDB({
 			thisArg: this,
 			skipBundledFiles: true
 		});
-		Zotero.debug("DONE RESET");
 		win = yield loadZoteroPane();
 		
 		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
@@ -82,7 +80,6 @@ describe("Zotero.Sync.Storage.Engine", function () {
 		Zotero.Sync.Storage.Local.downloadOnSync(
 			Zotero.Libraries.userLibraryID, true
 		);
-		Zotero.debug("DONE BEFORE");
 	})
 	afterEach(function* () {
 		var defer = new Zotero.Promise.defer();

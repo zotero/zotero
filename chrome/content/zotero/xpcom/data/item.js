@@ -2175,8 +2175,8 @@ Zotero.Item.prototype._updateAttachmentStates = function (exists) {
 	// standalone attachment was modified locally and remotely was changed
 	// into a child attachment
 	catch (e) {
-		Zotero.logError("Attachment parent doesn't exist for source key "
-			+ "in Zotero.Item.updateAttachmentStates()");
+		Zotero.logError(`Attachment parent ${this.libraryID}/${parentKey} doesn't exist for `
+			+ "source key in Zotero.Item.updateAttachmentStates()");
 		return;
 	}
 	
@@ -2185,13 +2185,14 @@ Zotero.Item.prototype._updateAttachmentStates = function (exists) {
 	}
 	catch (e) {
 		if (e instanceof Zotero.Exception.UnloadedDataException) {
-			Zotero.logError("Attachment parent not yet loaded in Zotero.Item.updateAttachmentStates()");
+			Zotero.logError(`Attachment parent ${this.libraryID}/${parentKey} not yet loaded in `
+				+ "Zotero.Item.updateAttachmentStates()");
 			return;
 		}
 		throw e;
 	}
 	if (!item) {
-		Zotero.logError("Attachment parent doesn't exist");
+		Zotero.logError(`Attachment parent ${this.libraryID}/${parentKey} doesn't exist`);
 		return;
 	}
 	item.clearBestAttachmentState();
