@@ -33,7 +33,7 @@ var Zotero_Publications_Dialog = new function () {
 	var _includeNotes = true;
 	var _useRights = true;
 	var _shareSettings = {
-		sharing: 'cc',
+		sharing: 'reserved', // 'reserved', 'cc', 'cc0'
 		adaptations: 'no',
 		commercial: 'yes'
 	};

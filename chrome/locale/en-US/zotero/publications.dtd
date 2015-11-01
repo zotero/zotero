@@ -6,7 +6,7 @@
 <!ENTITY zotero.publications.authorship.checkbox "I created this work and have the rights to distribute included files and notes.">
 
 <!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
-<!ENTITY zotero.publications.sharing.text "You can license work you place in My Publications under a Creative Commons license, dedicate it to the public domain, or reserve all rights. In all cases, the work will be made publicly available via zotero.org.">
+<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
 <!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
 <!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
 <!ENTITY zotero.publications.sharing.cc0 "Yes, and place my work in the public domain">

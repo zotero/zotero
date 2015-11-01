@@ -72,9 +72,9 @@
 			<separator class="thin"/>
 			<radiogroup id="sharing-radiogroup"
 					oncommand="Zotero_Publications_Dialog.updateSharing(this.selectedItem.id)">
+				<radio id="sharing-reserved" label="&zotero.publications.sharing.reserved;"/>
 				<radio id="sharing-cc" label="&zotero.publications.sharing.cc;"/>
 				<radio id="sharing-cc0" label="&zotero.publications.sharing.cc0;"/>
-				<radio id="sharing-reserved" label="&zotero.publications.sharing.reserved;"/>
 			</radiogroup>
 			
 			<groupbox class="license-info"/>
