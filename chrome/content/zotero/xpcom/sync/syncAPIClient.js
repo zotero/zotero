@@ -345,7 +345,7 @@ Zotero.Sync.APIClient.prototype = {
 			headers: {
 				"If-Unmodified-Since-Version": libraryVersion
 			},
-			successCodes: [204]
+			successCodes: [204, 412]
 		});
 		// Avoid logging error from Zotero.HTTP.request() in ConcurrentCaller
 		if (xmlhttp.status == 412) {
