@@ -82,9 +82,11 @@ Zotero.LibraryTreeView.prototype = {
 	 * @return {Integer}
 	 */
 	getRowIndexByID: function (id) {
-		// FIXME: Should work for itemIDs too
-		var type = id[0];
-		id = ('' + id).substr(1);
+		var type = "";
+		if (this.type != 'item') {
+			var type = id[0];
+			id = ('' + id).substr(1);
+		}
 		return this._rowMap[type + id];
 	},
 	

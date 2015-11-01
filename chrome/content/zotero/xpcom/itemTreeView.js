@@ -3083,6 +3083,7 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 ////////////////////////////////////////////////////////////////////////////////
 
 Zotero.ItemTreeView.prototype.isSeparator = function(row) 						{ return false; }
+Zotero.ItemTreeView.prototype.isSelectable = function (row, col) { return true; }
 Zotero.ItemTreeView.prototype.getRowProperties = function(row, prop) {}
 Zotero.ItemTreeView.prototype.getColumnProperties = function(col, prop) {}
 Zotero.ItemTreeView.prototype.getCellProperties = function(row, col, prop) {

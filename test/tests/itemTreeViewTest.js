@@ -20,6 +20,14 @@ describe("Zotero.ItemTreeView", function() {
 		win.close();
 	});
 	
+	it("shouldn't show items in trash", function* () {
+		var item = yield createDataObject('item', { title: "foo" });
+		var itemID = item.id;
+		item.deleted = true;
+		yield item.saveTx();
+		assert.notOk(itemsView.getRowIndexByID(itemID));
+	})
+	
 	describe("#selectItem()", function () {
 		/**
 		 * Make sure that selectItem() doesn't hang if the pane's item-select handler is never

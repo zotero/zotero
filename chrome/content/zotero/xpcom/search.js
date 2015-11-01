@@ -1051,12 +1051,14 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	}
 	
 	// Exclude deleted items (and their child items) by default
+	let not = deleted ? "" : "NOT ";
+	let op = deleted ? "OR" : "AND";
 	sql += " WHERE ("
-		+ "itemID " + (deleted ? "" : "NOT ") + "IN (SELECT itemID FROM deletedItems) "
-		+ "OR itemID " + (deleted ? "" : "NOT ") + "IN (SELECT itemID FROM itemNotes "
+		+ `itemID ${not} IN (SELECT itemID FROM deletedItems) `
+		+ `${op} itemID ${not}IN (SELECT itemID FROM itemNotes `
 				+ "WHERE parentItemID IS NOT NULL AND "
 				+ "parentItemID IN (SELECT itemID FROM deletedItems)) "
-		+ "OR itemID " + (deleted ? "" : "NOT ") + "IN (SELECT itemID FROM itemAttachments "
+		+ `${op} itemID ${not}IN (SELECT itemID FROM itemAttachments `
 				+ "WHERE parentItemID IS NOT NULL AND "
 				+ "parentItemID IN (SELECT itemID FROM deletedItems))"
 		+ ")";
