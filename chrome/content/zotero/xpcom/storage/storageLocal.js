@@ -7,7 +7,7 @@ Zotero.Sync.Storage.Local = {
 	},
 	
 	getModeForLibrary: function (libraryID) {
-		var libraryType = Zotero.Libraries.getType(libraryID);
+		var libraryType = Zotero.Libraries.get(libraryID).libraryType;
 		switch (libraryType) {
 		case 'user':
 		case 'publications':
@@ -22,7 +22,7 @@ Zotero.Sync.Storage.Local = {
 	},
 	
 	setModeForLibrary: function (libraryID, mode) {
-		var libraryType = Zotero.Libraries.getType(libraryID);
+		var libraryType = Zotero.Libraries.get(libraryID).libraryType;
 		
 		if (libraryType != 'user') {
 			throw new Error(`Cannot set storage mode for ${libraryType} library`);

@@ -41,7 +41,7 @@ Zotero.DataObjectUtilities = {
 	 * @return {String[]} - An array of DataObject types
 	 */
 	getTypesForLibrary: function (libraryID) {
-		switch (Zotero.Libraries.getType(libraryID)) {
+		switch (Zotero.Libraries.get(libraryID).libraryType) {
 		case 'publications':
 			return ['item'];
 		

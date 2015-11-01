@@ -243,7 +243,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		else {
 			// Check access to specified libraries
 			for (let libraryID of libraries) {
-				let type = Zotero.Libraries.getType(libraryID);
+				let type = Zotero.Libraries.get(libraryID).libraryType;
 				if (type == 'user' || type == 'publications') {
 					if (!access.user || !access.user.library) {
 						// TODO: Alert
@@ -306,7 +306,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			remotelyMissingGroups = Zotero.Utilities.arrayDiff(
 				syncAllLibraries
 					? Zotero.Groups.getAll().map(g => g.id)
-					: libraries.filter(id => Zotero.Libraries.getType(id) == 'group')
+					: libraries.filter(id => Zotero.Libraries.get(id).libraryType == 'group')
 						.map(id => Zotero.Groups.getGroupIDFromLibraryID(id)),
 				remoteGroupIDs
 			).map(id => Zotero.Groups.get(id));

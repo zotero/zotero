@@ -1097,7 +1097,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	
 	var isNew = env.isNew;
 	var options = env.options;
-	var libraryType = env.libraryType = Zotero.Libraries.getType(env.libraryID);
+	var libraryType = env.libraryType = Zotero.Libraries.get(env.libraryID).libraryType;
 	
 	var itemTypeID = this.itemTypeID;
 	

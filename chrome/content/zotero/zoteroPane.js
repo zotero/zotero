@@ -1878,7 +1878,7 @@ var ZoteroPane = new function()
 				// Promises don't work in the modal dialog, so get the group name here, if
 				// applicable, and pass it in. We only need the group that this search belongs
 				// to, if any, since the library drop-down is disabled for saved searches.
-				if (Zotero.Libraries.getType(s.libraryID) == 'group') {
+				if (Zotero.Libraries.get(s.libraryID).libraryType == 'group') {
 					groups.push(yield Zotero.Groups.getByLibraryID(s.libraryID));
 				}
 				var io = {

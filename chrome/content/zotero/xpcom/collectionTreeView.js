@@ -1594,7 +1594,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments')
 	};
 	var copyItem = Zotero.Promise.coroutine(function* (item, targetLibraryID, options) {
-		var targetLibraryType = Zotero.Libraries.getType(targetLibraryID);
+		var targetLibraryType = Zotero.Libraries.get(targetLibraryID).libraryType;
 		
 		// Check if there's already a copy of this item in the library
 		var linkedItem = yield item.getLinkedItem(targetLibraryID, true);
@@ -2197,7 +2197,7 @@ Zotero.CollectionTreeRow.prototype.isShare = function()
 // Special
 Zotero.CollectionTreeRow.prototype.isWithinGroup = function () {
 	return this.ref && !this.isHeader()
-		&& Zotero.Libraries.getType(this.ref.libraryID) == 'group';
+		&& Zotero.Libraries.get(this.ref.libraryID).libraryType == 'group';
 }
 
 Zotero.CollectionTreeRow.prototype.isWithinEditableGroup = function () {
@@ -2220,7 +2220,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('editable', function () {
 		return this.ref.editable;
 	}
 	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled()) {
-		var type = Zotero.Libraries.getType(libraryID);
+		var type = Zotero.Libraries.get(libraryID).libraryType;
 		if (type == 'group') {
 			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
 			var group = Zotero.Groups.get(groupID);
@@ -2243,7 +2243,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('filesEditable', function ()
 		return this.ref.filesEditable;
 	}
 	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled()) {
-		var type = Zotero.Libraries.getType(libraryID);
+		var type = Zotero.Libraries.get(libraryID).libraryType;
 		if (type == 'group') {
 			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
 			var group = Zotero.Groups.get(groupID);
