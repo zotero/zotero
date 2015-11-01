@@ -375,6 +375,7 @@ Zotero.QuickCopy = new function() {
 				var style = Zotero.Styles.get(format.id);
 				var cslEngine = style.getCiteProc(locale);
  				var html = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html");
+				cslEngine = style.getCiteProc(locale);
 				var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text");
 			}
 			

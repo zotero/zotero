@@ -439,6 +439,7 @@ var Zotero_File_Interface = new function() {
 		
 		// add text (or HTML source)
 		if(!asHTML) {
+			cslEngine = style.getCiteProc(locale);
 			var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text", asCitations);
 		}
 		var str = Components.classes["@mozilla.org/supports-string;1"].
