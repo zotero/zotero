@@ -310,7 +310,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.equal(Zotero.Libraries.getVersion(libraryID), lastLibraryVersion);
 			for (let type of types) {
 				// Make sure objects were set to the correct version and marked as synced
-				assert.lengthOf((yield Zotero.Sync.Data.Local.getUnsynced(libraryID, type)), 0);
+				assert.lengthOf((yield Zotero.Sync.Data.Local.getUnsynced(type, libraryID)), 0);
 				let key = objects[type][0].key;
 				let version = objects[type][0].version;
 				assert.equal(version, objectVersions[type][key]);
@@ -391,7 +391,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.equal(Zotero.Libraries.getVersion(libraryID), lastLibraryVersion);
 			for (let type of types) {
 				// Make sure objects were set to the correct version and marked as synced
-				assert.lengthOf((yield Zotero.Sync.Data.Local.getUnsynced(libraryID, type)), 0);
+				assert.lengthOf((yield Zotero.Sync.Data.Local.getUnsynced(type, libraryID)), 0);
 				let o = objects[type][0];
 				let key = o.key;
 				let version = o.version;
@@ -475,7 +475,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.equal(Zotero.Libraries.getVersion(libraryID), lastLibraryVersion);
 			for (let type of types) {
 				// Make sure local objects were updated with new metadata and marked as synced
-				assert.lengthOf((yield Zotero.Sync.Data.Local.getUnsynced(libraryID, type)), 0);
+				assert.lengthOf((yield Zotero.Sync.Data.Local.getUnsynced(type, libraryID)), 0);
 				let o = objects[type][0];
 				let key = o.key;
 				let version = o.version;
@@ -488,6 +488,66 @@ describe("Zotero.Sync.Data.Engine", function () {
 					assert.equal(name, o.name);
 				}
 			}
+		})
+		
+		it("should upload local deletions", function* () {
+			var { engine, client, caller } = yield setup();
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var lastLibraryVersion = 5;
+			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			
+			var types = Zotero.DataObjectUtilities.getTypes();
+			var objects = {};
+			for (let type of types) {
+				let obj1 = yield createDataObject(type);
+				let obj2 = yield createDataObject(type);
+				objects[type] = [obj1.key, obj2.key];
+				yield obj1.eraseTx();
+				yield obj2.eraseTx();
+			}
+			
+			var count = types.length;
+			
+			server.respond(function (req) {
+				if (req.method == "DELETE") {
+					assert.equal(
+						req.requestHeaders["If-Unmodified-Since-Version"], lastLibraryVersion
+					);
+					
+					// TODO: Settings?
+					
+					// Data objects
+					for (let type of types) {
+						let typePlural = Zotero.DataObjectUtilities.getObjectTypePlural(type);
+						if (req.url.startsWith(baseURL + "users/1/" + typePlural)) {
+							let matches = req.url.match(new RegExp("\\?" + type + "Key=(.+)"));
+							let keys = decodeURIComponent(matches[1]).split(',');
+							assert.sameMembers(keys, objects[type]);
+							req.respond(
+								204,
+								{
+									"Last-Modified-Version": ++lastLibraryVersion
+								}
+							);
+							count--;
+							return;
+						}
+					}
+				}
+			})
+			
+			yield engine.start();
+			
+			assert.equal(count, 0);
+			for (let type of types) {
+				yield assert.eventually.lengthOf(
+					Zotero.Sync.Data.Local.getDeleted(type, libraryID), 0
+				);
+			}
+			assert.equal(
+				Zotero.Libraries.get(libraryID).libraryVersion,
+				lastLibraryVersion
+			);
 		})
 		
 		it("should make only one request if in sync", function* () {
@@ -911,10 +971,10 @@ describe("Zotero.Sync.Data.Engine", function () {
 			// Objects 1 should be marked as synced, with versions from the server
 			// Objects 2 should be marked as unsynced
 			for (let type of types) {
-				var synced = yield Zotero.Sync.Data.Local.getSynced(userLibraryID, type);
+				var synced = yield Zotero.Sync.Data.Local.getSynced(type, userLibraryID);
 				assert.deepEqual(synced, [objects[type][0].key]);
 				assert.equal(objects[type][0].version, 10);
-				var unsynced = yield Zotero.Sync.Data.Local.getUnsynced(userLibraryID, type);
+				var unsynced = yield Zotero.Sync.Data.Local.getUnsynced(type, userLibraryID);
 				assert.deepEqual(unsynced, [objects[type][1].id]);
 				
 				assert.equal(versionResults[type].libraryVersion, headers["Last-Modified-Version"]);

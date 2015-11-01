@@ -134,10 +134,11 @@ Zotero.Sync.Data.Local = {
 	
 	
 	/**
+	 * @param {String} objectType
 	 * @param {Integer} libraryID
 	 * @return {Promise<String[]>} - A promise for an array of object keys
 	 */
-	getSynced: function (libraryID, objectType) {
+	getSynced: function (objectType, libraryID) {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		var sql = "SELECT key FROM " + objectsClass.table + " WHERE libraryID=? AND synced=1";
 		return Zotero.DB.columnQueryAsync(sql, [libraryID]);
@@ -145,10 +146,11 @@ Zotero.Sync.Data.Local = {
 	
 	
 	/**
+	 * @param {String} objectType
 	 * @param {Integer} libraryID
 	 * @return {Promise<Integer[]>} - A promise for an array of object ids
 	 */
-	getUnsynced: Zotero.Promise.coroutine(function* (libraryID, objectType) {
+	getUnsynced: Zotero.Promise.coroutine(function* (objectType, libraryID) {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		var sql = "SELECT " + objectsClass.idColumn + " FROM " + objectsClass.table
 			+ " WHERE libraryID=? AND synced=0";
@@ -170,7 +172,7 @@ Zotero.Sync.Data.Local = {
 	 * @return {Promise<Object>} - A promise for an object with object keys as keys and versions
 	 *                             as properties
 	 */
-	getLatestCacheObjectVersions: Zotero.Promise.coroutine(function* (libraryID, objectType) {
+	getLatestCacheObjectVersions: Zotero.Promise.coroutine(function* (objectType, libraryID) {
 		var sql = "SELECT key, version FROM syncCache WHERE libraryID=? AND "
 			+ "syncObjectTypeID IN (SELECT syncObjectTypeID FROM "
 			+ "syncObjectTypes WHERE name=?) ORDER BY version";
@@ -494,10 +496,10 @@ Zotero.Sync.Data.Local = {
 								// Auto-restore some locally deleted objects that have changed remotely
 								case 'collection':
 								case 'search':
-									yield this._removeObjectFromDeleteLog(
+									yield this.removeObjectsFromDeleteLog(
 										objectType,
 										libraryID,
-										objectKey
+										[objectKey]
 									);
 									
 									throw new Error("Unimplemented");
@@ -1015,11 +1017,32 @@ Zotero.Sync.Data.Local = {
 	
 	
 	/**
+	 * @return {Promise<String[]>} - Promise for array of keys
+	 */
+	getDeleted: Zotero.Promise.coroutine(function* (objectType, libraryID) {
+		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
+		var sql = "SELECT key FROM syncDeleteLog WHERE libraryID=? AND syncObjectTypeID=?";
+		return Zotero.DB.columnQueryAsync(sql, [libraryID, syncObjectTypeID]);
+	}),
+	
+	
+	/**
 	 * @return {Promise}
 	 */
-	_removeObjectFromDeleteLog: function (objectType, libraryID, key) {
+	removeObjectsFromDeleteLog: function (objectType, libraryID, keys) {
 		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
-		var sql = "DELETE FROM syncDeleteLog WHERE libraryID=? AND key=? AND syncObjectTypeID=?";
-		return Zotero.DB.queryAsync(sql, [libraryID, key, syncObjectTypeID]);
+		var sql = "DELETE FROM syncDeleteLog WHERE libraryID=? AND syncObjectTypeID=? AND key IN (";
+		return Zotero.DB.executeTransaction(function* () {
+			return Zotero.Utilities.Internal.forEachChunkAsync(
+				keys,
+				Zotero.DB.MAX_BOUND_PARAMETERS - 2,
+				Zotero.Promise.coroutine(function* (chunk) {
+					var params = [libraryID, syncObjectTypeID].concat(chunk);
+					return Zotero.DB.queryAsync(
+						sql + Array(chunk.length).fill('?').join(',') + ")", params
+					);
+				})
+			);
+		}.bind(this));
 	}
 }

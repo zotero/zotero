@@ -67,6 +67,7 @@ Zotero.Sync.Data.Engine = function (options) {
 	this.stopOnError = options.stopOnError;
 	this.requests = [];
 	this.uploadBatchSize = 25;
+	this.uploadDeletionBatchSize = 50;
 	
 	this.failed = false;
 	
@@ -567,21 +568,39 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 	
 	var uploadNeeded = false;
 	var objectIDs = {};
+	var objectDeletions = {};
 	
 	// Get unsynced local objects for each object type
 	for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(this.libraryID)) {
 		let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 		
-		let ids = yield Zotero.Sync.Data.Local.getUnsynced(this.libraryID, objectType);
-		if (!ids.length) {
-			Zotero.debug("No " + objectTypePlural + " to upload in " + this.libraryName);
-			continue;
+		// New/modified objects
+		let ids = yield Zotero.Sync.Data.Local.getUnsynced(objectType, this.libraryID);
+		if (ids.length) {
+			Zotero.debug(ids.length + " "
+				+ (ids.length == 1 ? objectType : objectTypePlural)
+				+ " to upload in library " + this.libraryID);
+			objectIDs[objectType] = ids;
 		}
-		Zotero.debug(ids.length + " "
-			+ (ids.length == 1 ? objectType : objectTypePlural)
-			+ " to upload in library " + this.libraryID);
-		objectIDs[objectType] = ids;
-		uploadNeeded = true;
+		else {
+			Zotero.debug("No " + objectTypePlural + " to upload in " + this.libraryName);
+		}
+		
+		// Deleted objects
+		let keys = yield Zotero.Sync.Data.Local.getDeleted(objectType, this.libraryID);
+		if (keys.length) {
+			Zotero.debug(`${keys.length} ${objectType} deletion`
+				+ (keys.length == 1 ? '' : 's')
+				+ ` to upload in ${this.libraryName}`);
+			objectDeletions[objectType] = keys;
+		}
+		else {
+			Zotero.debug(`No ${objectType} deletions to upload in ${this.libraryName}`);
+		}
+		
+		if (ids.length || keys.length) {
+			uploadNeeded = true;
+		}
 	}
 	
 	if (!uploadNeeded) {
@@ -589,192 +608,271 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 	}
 	
 	Zotero.debug(JSON.stringify(objectIDs));
-	
 	for (let objectType in objectIDs) {
-		let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
-		let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
-		
-		let queue = [];
-		for (let id of objectIDs[objectType]) {
-			queue.push({
-				id: id,
-				json: null,
-				tries: 0,
-				failed: false
-			});
+		libraryVersion = yield this._uploadObjects(
+			objectType, objectIDs[objectType], libraryVersion
+		);
+	}
+	
+	Zotero.debug(JSON.stringify(objectDeletions));
+	for (let objectType in objectDeletions) {
+		libraryVersion = yield this._uploadDeletions(
+			objectType, objectDeletions[objectType], libraryVersion
+		);
+	}
+	
+	return this.UPLOAD_RESULT_SUCCESS;
+});
+
+
+Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(function* (objectType, ids, libraryVersion) {
+	let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
+	let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
+	
+	let queue = [];
+	for (let id of ids) {
+		queue.push({
+			id: id,
+			json: null,
+			tries: 0,
+			failed: false
+		});
+	}
+	
+	let failureDelayGenerator = null;
+	
+	while (queue.length) {
+		// Get a slice of the queue and generate JSON for objects if necessary
+		let batch = [];
+		let numSkipped = 0;
+		for (let i = 0; i < queue.length && queue.length < this.uploadBatchSize; i++) {
+			let o = queue[i];
+			// Skip requests that failed with 4xx
+			if (o.failed) {
+				numSkipped++;
+				continue;
+			}
+			if (!o.json) {
+				o.json = yield this._getJSONForObject(objectType, o.id);
+			}
+			batch.push(o.json);
 		}
 		
-		let failureDelayGenerator = null;
+		// No more non-failed requests
+		if (!batch.length) {
+			break;
+		}
 		
-		while (queue.length) {
-			// Get a slice of the queue and generate JSON for objects if necessary
-			let batch = [];
-			for (let i = 0; i < queue.length && queue.length < this.uploadBatchSize; i++) {
-				let o = queue[i];
-				// Skip requests that failed with 4xx
-				if (o.failed) {
+		// Remove selected and skipped objects from queue
+		queue.splice(0, batch.length + numSkipped);
+		
+		Zotero.debug("UPLOAD BATCH:");
+		Zotero.debug(batch);
+		
+		let numSuccessful = 0;
+		try {
+			let json = yield this.apiClient.uploadObjects(
+				this.libraryType,
+				this.libraryTypeID,
+				"POST",
+				libraryVersion,
+				objectType,
+				batch
+			);
+			
+			Zotero.debug('======');
+			Zotero.debug(json);
+			
+			libraryVersion = json.libraryVersion;
+			
+			// Mark successful and unchanged objects as synced with new version,
+			// and save uploaded JSON to cache
+			let ids = [];
+			let toSave = [];
+			let toCache = [];
+			for (let state of ['successful', 'unchanged']) {
+				for (let index in json.results[state]) {
+					let current = json.results[state][index];
+					// 'successful' includes objects, not keys
+					let key = state == 'successful' ? current.key : current;
+					
+					if (key != batch[index].key) {
+						throw new Error("Key mismatch (" + key + " != " + batch[index].key + ")");
+					}
+					
+					let obj = yield objectsClass.getByLibraryAndKeyAsync(
+						this.libraryID, key, { noCache: true }
+					)
+					ids.push(obj.id);
+					
+					if (state == 'successful') {
+						// Update local object with saved data if necessary
+						yield obj.loadAllData();
+						obj.fromJSON(current.data);
+						toSave.push(obj);
+						toCache.push(current);
+					}
+					else {
+						let j = yield obj.toJSON();
+						j.version = json.libraryVersion;
+						toCache.push(j);
+					}
+					
+					numSuccessful++;
+					// Remove from batch to mark as successful
+					delete batch[index];
+				}
+			}
+			yield Zotero.Sync.Data.Local.saveCacheObjects(
+				objectType, this.libraryID, toCache
+			);
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let i = 0; i < toSave.length; i++) {
+					yield toSave[i].save();
+				}
+				this.library.libraryVersion = json.libraryVersion;
+				yield this.library.save();
+				objectsClass.updateVersion(ids, json.libraryVersion);
+				objectsClass.updateSynced(ids, true);
+			}.bind(this));
+			
+			// Handle failed objects
+			for (let index in json.results.failed) {
+				let { code, message } = json.results.failed[index];
+				e = new Error(message);
+				e.name = "ZoteroUploadObjectError";
+				e.code = code;
+				Zotero.logError(e);
+				
+				// This shouldn't happen, because the upload request includes a library
+				// version and should prevent an outdated upload before the object version is
+				// checked. If it does, we need to do a full sync.
+				if (e.code == 412) {
+					return this.UPLOAD_RESULT_OBJECT_CONFLICT;
+				}
+				
+				if (this.onError) {
+					this.onError(e);
+				}
+				if (this.stopOnError) {
+					throw new Error(e);
+				}
+				batch[index].tries++;
+				// Mark 400 errors as permanently failed
+				if (e.code >= 400 && e.code < 500) {
+					batch[index].failed = true;
+				}
+				// 500 errors should stay in queue and be retried
+			}
+			
+			// Add failed objects back to end of queue
+			var numFailed = 0;
+			for (let o of batch) {
+				if (o !== undefined) {
+					queue.push(o);
+					// TODO: Clear JSON?
+					numFailed++;
+				}
+			}
+			Zotero.debug("Failed: " + numFailed, 2);
+		}
+		catch (e) {
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+				if (e.status == 412) {
+					return this.UPLOAD_RESULT_LIBRARY_CONFLICT;
+				}
+				
+				// On 5xx, delay and retry
+				if (e.status >= 500 && e.status <= 600) {
+					if (!failureDelayGenerator) {
+						// Keep trying for up to an hour
+						failureDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
+							Zotero.Sync.Data.failureDelayIntervals, 60 * 60 * 1000
+						);
+					}
+					let keepGoing = yield failureDelayGenerator.next();
+					if (!keepGoing) {
+						Zotero.logError("Failed too many times");
+						throw e;
+					}
 					continue;
 				}
-				if (!o.json) {
-					o.json = yield this._getJSONForObject(objectType, o.id);
-				}
-				batch.push(o.json);
 			}
+			throw e;
+		}
+		// If we didn't make any progress, bail
+		if (!numSuccessful) {
+			throw new Error("Made no progress during upload -- stopping");
+		}
+	}
+	Zotero.debug("Done uploading " + objectTypePlural + " in library " + this.libraryID);
+	
+	return libraryVersion;
+})
+
+
+Zotero.Sync.Data.Engine.prototype._uploadDeletions = Zotero.Promise.coroutine(function* (objectType, keys, libraryVersion) {
+	let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
+	let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
+	
+	let failureDelayGenerator = null;
+	
+	while (keys.length) {
+		try {
+			let batch = keys.slice(0, this.uploadDeletionBatchSize);
+			libraryVersion = yield this.apiClient.uploadDeletions(
+				this.libraryType,
+				this.libraryTypeID,
+				libraryVersion,
+				objectType,
+				batch
+			);
+			keys.splice(0, batch.length);
 			
-			// No more non-failed requests
-			if (!batch.length) {
-				break;
-			}
+			// Update library version
+			this.library.libraryVersion = libraryVersion;
+			yield this.library.saveTx();
 			
-			// Remove selected and skipped objects from queue
-			queue.splice(0, batch.length);
-			
-			Zotero.debug("UPLOAD BATCH:");
-			Zotero.debug(batch);
-			
-			let numSuccessful = 0;
-			try {
-				let json = yield this.apiClient.uploadObjects(
-					this.libraryType,
-					this.libraryTypeID,
-					objectType,
-					"POST",
-					libraryVersion,
-					batch
-				);
-				
-				Zotero.debug('======');
-				Zotero.debug(json);
-				
-				libraryVersion = json.libraryVersion;
-				
-				// Mark successful and unchanged objects as synced with new version,
-				// and save uploaded JSON to cache
-				let ids = [];
-				let toSave = [];
-				let toCache = [];
-				for (let state of ['successful', 'unchanged']) {
-					for (let index in json.results[state]) {
-						let current = json.results[state][index];
-						// 'successful' includes objects, not keys
-						let key = state == 'successful' ? current.key : current;
-						
-						if (key != batch[index].key) {
-							throw new Error("Key mismatch (" + key + " != " + batch[index].key + ")");
-						}
-						
-						let obj = yield objectsClass.getByLibraryAndKeyAsync(
-							this.libraryID, key, { noCache: true }
-						)
-						ids.push(obj.id);
-						
-						if (state == 'successful') {
-							// Update local object with saved data if necessary
-							yield obj.loadAllData();
-							obj.fromJSON(current.data);
-							toSave.push(obj);
-							toCache.push(current);
-						}
-						else {
-							let j = yield obj.toJSON();
-							j.version = json.libraryVersion;
-							toCache.push(j);
-						}
-						
-						numSuccessful++;
-						// Remove from batch to mark as successful
-						delete batch[index];
-					}
+			// Remove successful deletions from delete log
+			yield Zotero.Sync.Data.Local.removeObjectsFromDeleteLog(
+				objectType, this.libraryID, batch
+			);
+		}
+		catch (e) {
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+				if (e.status == 412) {
+					return this.UPLOAD_RESULT_LIBRARY_CONFLICT;
 				}
-				yield Zotero.Sync.Data.Local.saveCacheObjects(
-					objectType, this.libraryID, toCache
-				);
-				yield Zotero.DB.executeTransaction(function* () {
-					for (let i = 0; i < toSave.length; i++) {
-						yield toSave[i].save();
-					}
-					this.library.libraryVersion = json.libraryVersion;
-					yield this.library.save();
-					objectsClass.updateVersion(ids, json.libraryVersion);
-					objectsClass.updateSynced(ids, true);
-				}.bind(this));
 				
-				// Handle failed objects
-				for (let index in json.results.failed) {
-					let { code, message } = json.results.failed[index];
-					e = new Error(message);
-					e.name = "ZoteroUploadObjectError";
-					e.code = code;
-					Zotero.logError(e);
-					
-					// This shouldn't happen, because the upload request includes a library
-					// version and should prevent an outdated upload before the object version is
-					// checked. If it does, we need to do a full sync.
-					if (e.code == 412) {
-						return this.UPLOAD_RESULT_OBJECT_CONFLICT;
-					}
-					
+				// On 5xx, delay and retry
+				if (e.status >= 500 && e.status <= 600) {
 					if (this.onError) {
 						this.onError(e);
 					}
 					if (this.stopOnError) {
 						throw new Error(e);
 					}
-					batch[index].tries++;
-					// Mark 400 errors as permanently failed
-					if (e.code >= 400 && e.code < 500) {
-						batch[index].failed = true;
-					}
-					// 500 errors should stay in queue and be retried
-				}
-				
-				// Add failed objects back to end of queue
-				Zotero.debug("ADDING BACK FAILED");
-				Zotero.debug(batch);
-				var numFailed = 0;
-				for (let o of batch) {
-					if (o !== undefined) {
-						queue.push(o);
-						// TODO: Clear JSON?
-						numFailed++;
-					}
-				}
-				Zotero.debug(queue);
-				Zotero.debug("Failed: " + numFailed, 2);
-			}
-			catch (e) {
-				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					if (e.status == 412) {
-						return this.UPLOAD_RESULT_LIBRARY_CONFLICT;
-					}
 					
-					// On 5xx, delay and retry
-					if (e.status >= 500 && e.status <= 600) {
-						if (!failureDelayGenerator) {
-							// Keep trying for up to an hour
-							failureDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
-								Zotero.Sync.Data.failureDelayIntervals, 60 * 60 * 1000
-							);
-						}
-						let keepGoing = yield failureDelayGenerator.next();
-						if (!keepGoing) {
-							Zotero.logError("Failed too many times");
-							throw e;
-						}
-						continue;
+					if (!failureDelayGenerator) {
+						// Keep trying for up to an hour
+						failureDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
+							Zotero.Sync.Data.failureDelayIntervals, 60 * 60 * 1000
+						);
 					}
+					let keepGoing = yield failureDelayGenerator.next();
+					if (!keepGoing) {
+						Zotero.logError("Failed too many times");
+						throw e;
+					}
+					continue;
 				}
-				throw e;
 			}
-			// If we didn't make any progress, bail
-			if (!numSuccessful) {
-				throw new Error("Made no progress during upload -- stopping");
-			}
+			throw e;
 		}
-		Zotero.debug("Done uploading " + objectTypePlural + " in library " + this.libraryID);
 	}
+	Zotero.debug(`Done uploading ${objectType} deletions in ${this.libraryName}`);
 	
-	return this.UPLOAD_RESULT_SUCCESS;
+	return libraryVersion;
 });
 
 
@@ -1037,7 +1135,7 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 			let toDownload = [];
 			let cacheVersions = yield Zotero.Sync.Data.Local.getLatestCacheObjectVersions(
-				this.libraryID, objectType
+				objectType, this.libraryID
 			);
 			// Queue objects that are out of date or don't exist locally
 			for (let key in results.versions) {
@@ -1082,7 +1180,7 @@ Zotero.Sync.Data.Engine.prototype._fullSync = Zotero.Promise.coroutine(function*
 			}
 			
 			// Mark synced objects that don't exist remotely as unsynced
-			let syncedKeys = yield Zotero.Sync.Data.Local.getSynced(this.libraryID, objectType);
+			let syncedKeys = yield Zotero.Sync.Data.Local.getSynced(objectType, this.libraryID);
 			let remoteMissing = Zotero.Utilities.arrayDiff(syncedKeys, Object.keys(results.versions));
 			if (remoteMissing.length) {
 				Zotero.debug("Checking remotely missing synced " + objectTypePlural);

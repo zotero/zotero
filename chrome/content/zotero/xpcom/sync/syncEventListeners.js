@@ -37,9 +37,9 @@ Zotero.Sync.EventListeners.ChangeListener = new function () {
 			return;
 		}
 		
-		var syncSQL = "REPLACE INTO syncDeleteLog (syncObjectTypeID, libraryID, key, synced) "
-			+ "VALUES (?, ?, ?, 0)";
-		var storageSQL = "REPLACE INTO storageDeleteLog VALUES (?, ?, 0)";
+		var syncSQL = "REPLACE INTO syncDeleteLog (syncObjectTypeID, libraryID, key) "
+			+ "VALUES (?, ?, ?)";
+		var storageSQL = "REPLACE INTO storageDeleteLog (libraryID, key) VALUES (?, ?)";
 		
 		var storageForLibrary = {};
 		
