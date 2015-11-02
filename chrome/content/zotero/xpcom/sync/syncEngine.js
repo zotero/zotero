@@ -604,18 +604,26 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 		return this.UPLOAD_RESULT_NOTHING_TO_UPLOAD;
 	}
 	
-	Zotero.debug(JSON.stringify(objectIDs));
-	for (let objectType in objectIDs) {
-		libraryVersion = yield this._uploadObjects(
-			objectType, objectIDs[objectType], libraryVersion
-		);
+	try {
+		Zotero.debug(JSON.stringify(objectIDs));
+		for (let objectType in objectIDs) {
+			libraryVersion = yield this._uploadObjects(
+				objectType, objectIDs[objectType], libraryVersion
+			);
+		}
+		
+		Zotero.debug(JSON.stringify(objectDeletions));
+		for (let objectType in objectDeletions) {
+			libraryVersion = yield this._uploadDeletions(
+				objectType, objectDeletions[objectType], libraryVersion
+			);
+		}
 	}
-	
-	Zotero.debug(JSON.stringify(objectDeletions));
-	for (let objectType in objectDeletions) {
-		libraryVersion = yield this._uploadDeletions(
-			objectType, objectDeletions[objectType], libraryVersion
-		);
+	catch (e) {
+		if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status == 412) {
+			return this.UPLOAD_RESULT_LIBRARY_CONFLICT;
+		}
+		throw e;
 	}
 	
 	return this.UPLOAD_RESULT_SUCCESS;
@@ -776,7 +784,7 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 		catch (e) {
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
 				if (e.status == 412) {
-					return this.UPLOAD_RESULT_LIBRARY_CONFLICT;
+					throw e;
 				}
 				
 				// On 5xx, delay and retry
@@ -838,7 +846,7 @@ Zotero.Sync.Data.Engine.prototype._uploadDeletions = Zotero.Promise.coroutine(fu
 		catch (e) {
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
 				if (e.status == 412) {
-					return this.UPLOAD_RESULT_LIBRARY_CONFLICT;
+					throw e;
 				}
 				
 				// On 5xx, delay and retry
