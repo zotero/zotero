@@ -28,7 +28,7 @@ if (!Zotero.Sync.Data) {
 }
 
 Zotero.Sync.Data.Local = {
-	_loginManagerHost: 'https://api.zotero.org',
+	_loginManagerHost: 'chrome://zotero',
 	_loginManagerRealm: 'Zotero Web API',
 	_lastSyncTime: null,
 	_lastClassicSyncTime: null,
@@ -42,41 +42,25 @@ Zotero.Sync.Data.Local = {
 	
 	
 	getAPIKey: function () {
-		var apiKey = Zotero.Prefs.get('devAPIKey');
-		if (apiKey) {
-			return apiKey;
-		}
-		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
-			.getService(Components.interfaces.nsILoginManager);
-		var logins = loginManager.findLogins(
-			{}, this._loginManagerHost, null, this._loginManagerRealm
-		);
-		// Get API from returned array of nsILoginInfo objects
-		if (logins.length) {
-			return logins[0].password;
-		}
-		if (!apiKey) {
-			let username = Zotero.Prefs.get('sync.server.username');
-			if (username) {
-				let password = Zotero.Sync.Data.Local.getLegacyPassword(username);
-				if (!password) {
-					return false;
-				}
-				throw new Error("Unimplemented");
-				// Get API key from server
-				
-				// Store API key
-				
-				// Remove old logins and username pref
-			}
-		}
-		return apiKey;
+		Zotero.debug("Getting API key");
+		var login = this._getAPIKeyLoginInfo();
+		return login ? login.password : "";
 	},
 	
 	
 	setAPIKey: function (apiKey) {
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 			.getService(Components.interfaces.nsILoginManager);
+		
+		var oldLoginInfo = this._getAPIKeyLoginInfo();
+		
+		// Clear old login
+		if (oldLoginInfo && (!apiKey || apiKey === "")) {
+			Zotero.debug("Clearing old API key");
+			loginManager.removeLogin(oldLoginInfo);
+			return;
+		}
+		
 		var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
 				Components.interfaces.nsILoginInfo, "init");
 		var loginInfo = new nsLoginInfo(
@@ -85,10 +69,53 @@ Zotero.Sync.Data.Local = {
 			this._loginManagerRealm,
 			'API Key',
 			apiKey,
-			"",
-			""
+			'',
+			''
 		);
-		loginManager.addLogin(loginInfo);
+		if (!oldLoginInfo) {
+			Zotero.debug("Setting API key");
+			loginManager.addLogin(loginInfo);
+		}
+		else {
+			Zotero.debug("Replacing API key");
+			loginManager.modifyLogin(oldLoginInfo, loginInfo);
+		}
+	},
+	
+	
+	/**
+	 * @return {nsILoginInfo|false}
+	 */
+	_getAPIKeyLoginInfo: function () {
+		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
+			.getService(Components.interfaces.nsILoginManager);
+		try {
+			var logins = loginManager.findLogins(
+				{},
+				this._loginManagerHost,
+				null,
+				this._loginManagerRealm
+			);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			if (Zotero.isStandalone) {
+				var msg = Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"
+					+ Zotero.getString('sync.error.loginManagerCorrupted2', [Zotero.appName, Zotero.appName]);
+			}
+			else {
+				var msg = Zotero.getString('sync.error.loginManagerInaccessible') + "\n\n"
+					+ Zotero.getString('sync.error.checkMasterPassword', Zotero.appName) + "\n\n"
+					+ Zotero.getString('sync.error.corruptedLoginManager', Zotero.appName);
+			}
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+				.getService(Components.interfaces.nsIPromptService);
+			ps.alert(null, Zotero.getString('general.error'), msg);
+			return false;
+		}
+		
+		// Get API from returned array of nsILoginInfo objects
+		return logins.length ? logins[0] : false;
 	},
 	
 	
@@ -104,6 +131,7 @@ Zotero.Sync.Data.Local = {
 			var logins = loginManager.findLogins({}, loginManagerHost, null, loginManagerRealm);
 		}
 		catch (e) {
+			Zotero.logError(e);
 			return '';
 		}
 		

@@ -63,6 +63,7 @@
 								</columns>
 								
 								<rows>
+									<!--
 									<row>
 										<label value="&zotero.preferences.sync.username;"/>
 										<textbox preference="pref-sync-username"
@@ -73,16 +74,27 @@
 										<textbox id="sync-password" type="password"
 											onchange="Zotero.Sync.Server.password = this.value"/>
 									</row>
+									-->
+									<row>
+										<label value="API Key (temp)"/>
+										<textbox id="sync-api-key" maxlength="24" size="25"
+											onchange="Zotero.Sync.Data.Local.setAPIKey(this.value)"/>
+									</row>
 									<row>
 										<box/>
-										<checkbox label="&zotero.preferences.sync.syncAutomatically;" preference="pref-sync-autosync"/>
+										<!--<checkbox label="&zotero.preferences.sync.syncAutomatically;" preference="pref-sync-autosync"/>-->
+										<checkbox label="&zotero.preferences.sync.syncAutomatically;"
+											disabled="true"/>
 									</row>
 									<row>
 										<box/>
 										<vbox>
-											<checkbox label="&zotero.preferences.sync.syncFullTextContent;"
+											<!--<checkbox label="&zotero.preferences.sync.syncFullTextContent;"
 												preference="pref-sync-fulltext-enabled"
-												tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"/>
+												tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"/>-->
+											<checkbox label="&zotero.preferences.sync.syncFullTextContent;"
+												tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"
+												disabled="true"/>
 										</vbox>
 									</row>
 									<!--
@@ -124,7 +136,7 @@
 									oncommand="Zotero_Preferences.Sync.updateStorageSettings(null, this.value)">
 								<menupopup>
 									<menuitem label="Zotero" value="zotero"/>
-									<menuitem label="WebDAV" value="webdav"/>
+									<menuitem label="WebDAV" value="webdav" disabled="true"/><!-- TEMP -->
 								</menupopup>
 							</menulist>
 						</hbox>

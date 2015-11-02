@@ -29,11 +29,13 @@ Zotero_Preferences.Sync = {
 	init: function () {
 		this.updateStorageSettings(null, null, true);
 		
-		document.getElementById('sync-password').value = Zotero.Sync.Server.password;
-		var pass = Zotero.Sync.Storage.WebDAV.password;
-		if (pass) {
-			document.getElementById('storage-password').value = pass;
-		}
+		document.getElementById('sync-api-key').value = Zotero.Sync.Data.Local.getAPIKey();
+		
+		// TEMP: Disabled
+		//var pass = Zotero.Sync.Storage.WebDAV.password;
+		//if (pass) {
+		//	document.getElementById('storage-password').value = pass;
+		//}
 	},
 	
 	updateStorageSettings: function (enabled, protocol, skipWarnings) {

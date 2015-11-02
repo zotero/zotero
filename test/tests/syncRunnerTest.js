@@ -109,10 +109,7 @@ describe("Zotero.Sync.Runner", function () {
 		yield Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='account'");
 		yield Zotero.Users.init();
 		
-		var runner = new Zotero.Sync.Runner_Module({
-			baseURL: baseURL,
-			apiKey: apiKey
-		});
+		var runner = new Zotero.Sync.Runner_Module({ baseURL, apiKey });
 		
 		Components.utils.import("resource://zotero/concurrentCaller.js");
 		var caller = new ConcurrentCaller(1);
@@ -172,7 +169,7 @@ describe("Zotero.Sync.Runner", function () {
 		it("should check key access", function* () {
 			spy = sinon.spy(runner, "checkUser");
 			setResponse('keyInfo.fullAccess');
-			var json = yield runner.checkAccess(runner.getAPIClient());
+			var json = yield runner.checkAccess(runner.getAPIClient({ apiKey }));
 			sinon.assert.calledWith(spy, 1, "Username");
 			var compare = {};
 			Object.assign(compare, responses.keyInfo.fullAccess.json);
@@ -208,7 +205,7 @@ describe("Zotero.Sync.Runner", function () {
 			
 			setResponse('userGroups.groupVersions');
 			var libraries = yield runner.checkLibraries(
-				runner.getAPIClient(), false, responses.keyInfo.fullAccess.json
+				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 4);
 			assert.sameMembers(
@@ -232,13 +229,16 @@ describe("Zotero.Sync.Runner", function () {
 			
 			setResponse('userGroups.groupVersions');
 			var libraries = yield runner.checkLibraries(
-				runner.getAPIClient(), false, responses.keyInfo.fullAccess.json, [userLibraryID]
+				runner.getAPIClient({ apiKey }),
+				false,
+				responses.keyInfo.fullAccess.json,
+				[userLibraryID]
 			);
 			assert.lengthOf(libraries, 1);
 			assert.sameMembers(libraries, [userLibraryID]);
 			
 			var libraries = yield runner.checkLibraries(
-				runner.getAPIClient(),
+				runner.getAPIClient({ apiKey }),
 				false,
 				responses.keyInfo.fullAccess.json,
 				[userLibraryID, publicationsLibraryID]
@@ -247,7 +247,7 @@ describe("Zotero.Sync.Runner", function () {
 			assert.sameMembers(libraries, [userLibraryID, publicationsLibraryID]);
 			
 			var libraries = yield runner.checkLibraries(
-				runner.getAPIClient(),
+				runner.getAPIClient({ apiKey }),
 				false,
 				responses.keyInfo.fullAccess.json,
 				[group1.libraryID]
@@ -275,7 +275,7 @@ describe("Zotero.Sync.Runner", function () {
 			setResponse('groups.ownerGroup');
 			setResponse('groups.memberGroup');
 			var libraries = yield runner.checkLibraries(
-				runner.getAPIClient(), false, responses.keyInfo.fullAccess.json
+				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 4);
 			assert.sameMembers(
@@ -316,7 +316,7 @@ describe("Zotero.Sync.Runner", function () {
 			setResponse('groups.ownerGroup');
 			setResponse('groups.memberGroup');
 			var libraries = yield runner.checkLibraries(
-				runner.getAPIClient(),
+				runner.getAPIClient({ apiKey }),
 				false,
 				responses.keyInfo.fullAccess.json,
 				[group1.libraryID, group2.libraryID]
@@ -337,7 +337,7 @@ describe("Zotero.Sync.Runner", function () {
 			setResponse('groups.ownerGroup');
 			setResponse('groups.memberGroup');
 			var libraries = yield runner.checkLibraries(
-				runner.getAPIClient(), false, responses.keyInfo.fullAccess.json
+				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 4);
 			var groupData1 = responses.groups.ownerGroup;
@@ -368,7 +368,7 @@ describe("Zotero.Sync.Runner", function () {
 				assert.include(text, group1.name);
 			});
 			var libraries = yield runner.checkLibraries(
-				runner.getAPIClient(), false, responses.keyInfo.fullAccess.json
+				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 3);
 			assert.sameMembers(libraries, [userLibraryID, publicationsLibraryID, group2.libraryID]);
@@ -386,7 +386,7 @@ describe("Zotero.Sync.Runner", function () {
 				assert.include(text, group.name);
 			}, "extra1");
 			var libraries = yield runner.checkLibraries(
-				runner.getAPIClient(), false, responses.keyInfo.fullAccess.json
+				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 3);
 			assert.sameMembers(libraries, [userLibraryID, publicationsLibraryID, group.libraryID]);
@@ -403,7 +403,7 @@ describe("Zotero.Sync.Runner", function () {
 				assert.include(text, group.name);
 			}, "cancel");
 			var libraries = yield runner.checkLibraries(
-				runner.getAPIClient(), false, responses.keyInfo.fullAccess.json
+				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 0);
 			assert.isTrue(Zotero.Groups.exists(groupData.json.id));
@@ -632,8 +632,6 @@ describe("Zotero.Sync.Runner", function () {
 			});
 			
 			yield runner.sync({
-				baseURL: baseURL,
-				apiKey: apiKey,
 				onError: e => { throw e },
 			});
 			

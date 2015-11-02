@@ -38,7 +38,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	
 	this.baseURL = options.baseURL || ZOTERO_CONFIG.API_URL;
 	this.apiVersion = options.apiVersion || ZOTERO_CONFIG.API_VERSION;
-	this.apiKey = options.apiKey || Zotero.Sync.Data.Local.getAPIKey();
+	
+	// Allows tests to set apiKey in options or as property, overriding login manager
+	var _apiKey = options.apiKey;
+	Zotero.defineProperty(this, 'apiKey', { set: val => _apiKey = val });
 	
 	Components.utils.import("resource://zotero/concurrentCaller.js");
 	this.caller = new ConcurrentCaller(4);
@@ -66,11 +69,15 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _errors = [];
 	
 	
-	this.getAPIClient = function () {
+	this.getAPIClient = function (options = {}) {
+		if (!options.apiKey) {
+			throw new Error("apiKey not provided");
+		}
+		
 		return new Zotero.Sync.APIClient({
 			baseURL: this.baseURL,
 			apiVersion: this.apiVersion,
-			apiKey: this.apiKey,
+			apiKey: options.apiKey,
 			caller: this.caller
 		});
 	}
@@ -112,7 +119,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		// Purge deleted objects so they don't cause sync errors (e.g., long tags)
 		yield Zotero.purgeDataObjects(true);
 		
-		if (!this.apiKey) {
+		var apiKey = yield _getAPIKey();
+		if (!apiKey) {
 			let msg = "API key not set";
 			let e = new Zotero.Error(msg, 0, { dialogButtonText: null })
 			this.updateIcons(e);
@@ -129,7 +137,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		this.updateIcons('animate');
 		
 		try {
-			let client = this.getAPIClient();
+			let client = this.getAPIClient({ apiKey });
 			
 			let keyInfo = yield this.checkAccess(client, options);
 			if (!keyInfo) {
@@ -603,13 +611,19 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			return false;
 		}
 		
+		var apiKey = yield _getAPIKey();
+		if (!apiKey) {
+			Zotero.debug("API key not set -- skipping download");
+			return false;
+		}
+		
 		// TEMP
 		var options = {};
 		
 		var itemID = item.id;
 		var modeClass = Zotero.Sync.Storage.Local.getClassForLibrary(item.libraryID);
 		var controller = new modeClass({
-			apiClient: this.getAPIClient()
+			apiClient: this.getAPIClient({apiKey })
 		});
 		
 		// TODO: verify WebDAV on-demand?
@@ -1160,4 +1174,33 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		_currentLastSyncLabel.value = Zotero.getString('sync.status.lastSync') + " " + msg;
 		_currentLastSyncLabel.hidden = false;
 	}
+	
+	
+	var _getAPIKey = Zotero.Promise.coroutine(function* () {
+		// Set as .apiKey on Runner in tests
+		return _apiKey
+			// Set in login manager
+			|| Zotero.Sync.Data.Local.getAPIKey()
+			// Fallback to old username/password
+			|| (yield _getAPIKeyFromLogin());
+	})
+	
+	
+	var _getAPIKeyFromLogin = Zotero.Promise.coroutine(function* () {
+		var apiKey = "";
+		let username = Zotero.Prefs.get('sync.server.username');
+		if (username) {
+			let password = Zotero.Sync.Data.Local.getLegacyPassword(username);
+			if (!password) {
+				return "";
+			}
+			throw new Error("Unimplemented");
+			// Get API key from server
+			
+			// Store API key
+			
+			// Remove old logins and username pref
+		}
+		return apiKey;
+	})
 }
