@@ -126,8 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Velike Začetnice">
 <!ENTITY zotero.item.textTransform.sentencecase "Kot v stavku">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Zamenjaj ime/priimek">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.viewOnline "Pokaži na spletu">
+<!ENTITY zotero.item.copyAsURL "Kopiraj kot URL">
 
 <!ENTITY zotero.toolbar.newNote "Nova opomba">
 <!ENTITY zotero.toolbar.note.standalone "Nova samostojna opomba">
@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Ustvari bibliografijo">
 <!ENTITY zotero.bibliography.style.label "Slog navajanja:">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "Jezik:">
 <!ENTITY zotero.bibliography.outputMode "Izhodni način:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografija">
 <!ENTITY zotero.bibliography.outputMethod "Izhodna metoda:">

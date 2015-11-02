@@ -7,8 +7,8 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Geral">
 
-<!ENTITY zotero.preferences.userInterface "Interface do usuário">
-<!ENTITY zotero.preferences.showIn "Abrir Zotero em:">
+<!ENTITY zotero.preferences.userInterface "Interface de usuário">
+<!ENTITY zotero.preferences.showIn "Abrir o Zotero em:">
 <!ENTITY zotero.preferences.showIn.browserPane "Painel do navegador">
 <!ENTITY zotero.preferences.showIn.separateTab "Aba separada">
 <!ENTITY zotero.preferences.showIn.appTab "Aba de aplicativo">
@@ -26,7 +26,7 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Permitir que zotero.org personalize o conteúdo baseado em sua versão atual do Zotero">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Se marcado, a versão atual do Zotero será adicionada às requisições HTTP feitas a zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Usar Zotero para arquivos BibTeX/RIS/Refer baixados">
-<!ENTITY zotero.preferences.automaticSnapshots "Gerar imagens automaticamente ao criar itens de página web">
+<!ENTITY zotero.preferences.automaticSnapshots "Salvar instantâneos automaticamente ao criar itens de páginas web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Associar PDFs e outros arquivos automaticamente ao salvar itens">
 <!ENTITY zotero.preferences.automaticTags "Marcar automaticamente itens com palavras-chaves e cabeçalhos de assunto">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Remover automaticamente itens na lixeira deletados há mais de">
@@ -35,18 +35,18 @@
 <!ENTITY zotero.preferences.groups "Grupos">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Ao copiar itens entre bibliotecas, incluir:">
 <!ENTITY zotero.preferences.groups.childNotes "notas associadas">
-<!ENTITY zotero.preferences.groups.childFiles "cópias instantâneas e arquivos importados associados">
+<!ENTITY zotero.preferences.groups.childFiles "instantâneos e arquivos importados associados">
 <!ENTITY zotero.preferences.groups.childLinks "links associados">
 <!ENTITY zotero.preferences.groups.tags "etiquetas">
 
 <!ENTITY zotero.preferences.openurl.caption "Abrir URL">
 
-<!ENTITY zotero.preferences.openurl.search "Procurar resolvedores">
+<!ENTITY zotero.preferences.openurl.search "Pesquisar por resolvedores">
 <!ENTITY zotero.preferences.openurl.custom "Personalizar...">
 <!ENTITY zotero.preferences.openurl.server "Resolvedor:">
 <!ENTITY zotero.preferences.openurl.version "Versão:">
 
-<!ENTITY zotero.preferences.prefpane.sync "Sincronizar">
+<!ENTITY zotero.preferences.prefpane.sync "Sincronização">
 <!ENTITY zotero.preferences.sync.username "Usuário:">
 <!ENTITY zotero.preferences.sync.password "Senha:">
 <!ENTITY zotero.preferences.sync.syncServer "Servidor de sincronização Zotero">
@@ -54,7 +54,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Esqueceu a senha?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizar automaticamente">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sincronizar todo o conteúdo do texto">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "O Zotero pode sincronizar todo o conteúdo dos textos dos arquivos em sua biblioteca Zotero com zotero.org e outros dispositivos relacionados, permitindo que você procure facilmente seus arquivos onde quer que esteja. O conteúdo completo dos textos de seus arquivos não será compartilhado publicamente.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "O Zotero pode sincronizar o texto completo dos arquivos em suas bibliotecas Zotero com o zotero.org e outros dispositivos associados, permitindo que você pesquise facilmente seus arquivos onde quer que esteja. O conteúdo dos textos de seus arquivos não será compartilhado publicamente.">
 <!ENTITY zotero.preferences.sync.about "Sobre a sincronização">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sincronização de arquivo">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Endereço:">
@@ -80,7 +80,7 @@
 <!ENTITY zotero.preferences.sync.reset.button "Reconfigurar...">
 
 
-<!ENTITY zotero.preferences.prefpane.search "Procurar">
+<!ENTITY zotero.preferences.prefpane.search "Pesquisa">
 <!ENTITY zotero.preferences.search.fulltextCache "Cache de texto completo">
 <!ENTITY zotero.preferences.search.pdfIndexing "Indexação de PDF">
 <!ENTITY zotero.preferences.search.indexStats "Estatísticas de indexação">
@@ -93,7 +93,7 @@
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Máximo de caracteres a indexar por arquivo:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Máximo de páginas a indexar por arquivo:">
 
-<!ENTITY zotero.preferences.prefpane.export "Exportar">
+<!ENTITY zotero.preferences.prefpane.export "Exportação">
 
 <!ENTITY zotero.preferences.citationOptions.caption "Opções de citação">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Incluir endereços eletrônicos de artigos impressos na referência">
@@ -107,10 +107,10 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domínio / Caminho">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(p.ex. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Formato de saída">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Idioma">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Desabilitar cópia rápida ao arrastar mais que">
 
-<!ENTITY zotero.preferences.prefpane.cite "Citar">
+<!ENTITY zotero.preferences.prefpane.cite "Citação">
 <!ENTITY zotero.preferences.cite.styles "Estilos">
 <!ENTITY zotero.preferences.cite.wordProcessors "Processadores de texto">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Nenhum plug-in de processador de texto está instalado.">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "para maiores informações.">
 <!ENTITY zotero.preferences.proxies.transparent "Habilitar redirecionamento de proxy">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Reconhecer automaticamente as fontes com proxy">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Exibir notificação quando redirecionar através de um proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Desabilitar redirecionamento por proxy quando meu nome de domínio conter">
 <!ENTITY zotero.preferences.proxies.configured "Proxies configurados">
 <!ENTITY zotero.preferences.proxies.hostname "Nome do host">
@@ -165,11 +165,11 @@
 <!ENTITY zotero.preferences.advanced.keys "Atalhos">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localizar">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Gerenciador dos mecanismos de pesquisa de artigos">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Gerenciador dos mecanismos de procura de artigos">
 <!ENTITY zotero.preferences.locate.description "Descrição">
 <!ENTITY zotero.preferences.locate.name "Nome">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Um mecanismo de busca aumenta a capacidade do menu Localizar do painel de informação. Ativando os mecanismos de busca na lista abaixo, eles serão adicionados ao menu e podem ser utilizados para localizar fontes da sua biblioteca na web.">
-<!ENTITY zotero.preferences.locate.addDescription "Para adicionar um Mecanismo de Pesquisa que não esteja na lista, visite o mecanismo de pesquisa desejado no navegador de internet e selecione &#34;Adicionar&#34; do menu Localizar do Zotero.">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "Um Mecanismo de Procura amplia as capacidades do menu Localizar do Painel de Informações. Ativando os mecanismos de busca na lista abaixo, eles serão adicionados ao menu e podem ser utilizados para localizar recursos da sua biblioteca na web.">
+<!ENTITY zotero.preferences.locate.addDescription "Para adicionar um Mecanismo de Procura que não esteja na lista, visite o mecanismo de pesquisa desejado no seu navegador web e selecione &#34;Adicionar&#34; no menu Localizar do Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restabelecer padrões">
 
 <!ENTITY zotero.preferences.charset "Codificação de caracteres">

@@ -470,7 +470,7 @@ Zotero.Translate.Sandbox = {
 		 */
 		"selectItems":function(translate, items, callback) {
 			function transferObject(obj) {
-				return Zotero.isFx ? translate._sandboxManager.copyObject(obj) : obj;
+				return Zotero.isFx && !Zotero.isBookmarklet ? translate._sandboxManager.copyObject(obj) : obj;
 			}
 			
 			if(Zotero.Utilities.isEmpty(items)) {
@@ -519,6 +519,10 @@ Zotero.Translate.Sandbox = {
 						};
 					}
 					
+					if(Zotero.isFx && !Zotero.isBookmarklet) {
+						items = Components.utils.cloneInto(items, {});
+					}
+
 					var returnValue = translate._runHandler("select", items, newCallback);
 					if(returnValue !== undefined) {
 						// handler may have returned a value, which makes callback unnecessary

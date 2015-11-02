@@ -244,7 +244,7 @@
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Lipik kustutatakse kõigilt kirjetelt.">
 
 <!ENTITY zotero.merge.title "Konflikti lahendamine">
-<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.of " ">
 <!ENTITY zotero.merge.deleted "Kustututatud">
 
 <!ENTITY zotero.proxy.recognized.title "Proksi omaks võetud.">

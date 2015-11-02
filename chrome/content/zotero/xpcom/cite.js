@@ -81,8 +81,15 @@ Zotero.Cite = {
 		}
 		
 		var styleClass = cslEngine.opt.class;
-		var citations = [cslEngine.appendCitationCluster({"citationItems":[{"id":item.id}], "properties":{}}, true)[0][1]
-			for each(item in items)];
+		var citations=[];
+		for (var i=0, ilen=items.length; i<ilen; i++) {
+			var item = items[i];
+			var outList = cslEngine.appendCitationCluster({"citationItems":[{"id":item.id}], "properties":{}}, true);
+			for (var j=0, jlen=outList.length; j<jlen; j++) {
+				var citationPos = outList[j][0];
+				citations[citationPos] = outList[j][1];
+			}
+		}
 		
 		if(styleClass == "note") {
 			if(format == "html") {

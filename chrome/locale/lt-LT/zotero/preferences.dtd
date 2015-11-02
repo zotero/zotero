@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Sritis/kelias">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(pvz., vikipedija.lt)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Išvedimo formatas">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Kalba">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Neleisti greitai kopijuoti, jei tempiama daugiau kaip">
 
 <!ENTITY zotero.preferences.prefpane.cite "Citavimas">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link ".">
 <!ENTITY zotero.preferences.proxies.transparent "Įgalinti įgaliotojo serverio nukreipimą">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Automatiškai aptikti įgaliotųjų serverių šaltinius">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Rodyti perspėjimą kai nukreipiama per proxy serverį">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Uždrauti įgaliotojo serverio nukreipimą, jei mano srities pavadinime yra">
 <!ENTITY zotero.preferences.proxies.configured "Sukonfigūruoti įgaliotieji serveriai">
 <!ENTITY zotero.preferences.proxies.hostname "Serveris">

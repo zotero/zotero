@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domeniu/Cale">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(ex. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Stil de formatare">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Limbă">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Dezactivează Copierea rapidă în timpul tragerii a mai mult de">
 
 <!ENTITY zotero.preferences.prefpane.cite "Citează">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "pentru mai multe informații.">
 <!ENTITY zotero.preferences.proxies.transparent "Reamintește automat resursele proxy">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Recunoaște automat resursele proxy">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Afișează notificările la redirecționarea printr-un proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Dezactivează redirectarea proxy când numele meu de domeniu conține ">
 <!ENTITY zotero.preferences.proxies.configured "Servere proxy configurate">
 <!ENTITY zotero.preferences.proxies.hostname "Nume gazdă">
@@ -162,7 +162,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avansate">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Fișiere și dosare">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Scurtături">
 
 <!ENTITY zotero.preferences.prefpane.locate "Localizează">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Manager pentru motorul de căutare a articolelor">
@@ -203,6 +203,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Trimitere către serverul Zotero">
 
 <!ENTITY zotero.preferences.openAboutConfig "Deschide about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
+<!ENTITY zotero.preferences.openCSLEdit "Deschide Editorul de stil">
+<!ENTITY zotero.preferences.openCSLPreview "Deschide Previzualizare stil">
 <!ENTITY zotero.preferences.openAboutMemory "Deschide about:memory">

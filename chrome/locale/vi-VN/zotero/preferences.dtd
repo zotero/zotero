@@ -1,79 +1,79 @@
 <!ENTITY zotero.preferences.title "Các tùy chọn của Zotero">
 
 <!ENTITY zotero.preferences.default "Mặc định:">
-<!ENTITY zotero.preferences.items "items">
+<!ENTITY zotero.preferences.items "các mục">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Settings">
+<!ENTITY zotero.preferences.settings "Các thiết lập">
 
 <!ENTITY zotero.preferences.prefpane.general "Các tùy chọn chung">
 
 <!ENTITY zotero.preferences.userInterface "Giao diện người dùng">
-<!ENTITY zotero.preferences.showIn "Load Zotero in:">
-<!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
-<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn "Nạp Zotero vào:">
+<!ENTITY zotero.preferences.showIn.browserPane "Khung trình duyệt">
+<!ENTITY zotero.preferences.showIn.separateTab "Phân cách">
+<!ENTITY zotero.preferences.showIn.appTab "Ứng dụng">
 <!ENTITY zotero.preferences.fontSize "Cỡ chữ:">
 <!ENTITY zotero.preferences.fontSize.small "Nhỏ">
 <!ENTITY zotero.preferences.fontSize.medium "Trung bình">
 <!ENTITY zotero.preferences.fontSize.large "Lớn">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
-<!ENTITY zotero.preferences.fontSize.notes "Note font size:">
+<!ENTITY zotero.preferences.fontSize.xlarge "Rất lớn">
+<!ENTITY zotero.preferences.fontSize.notes "Cỡ chữ ghi chú:">
 
 <!ENTITY zotero.preferences.miscellaneous "Các tùy chọn khác">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
+<!ENTITY zotero.preferences.autoUpdate "Tự động kiểm tra cập nhật Bộ chuyển và Kiểu trích dẫn">
 <!ENTITY zotero.preferences.updateNow "Cập nhật ngay bây giờ">
 <!ENTITY zotero.preferences.reportTranslationFailure "Báo cáo các bộ biến đổi bị hỏng">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Cho phép zotero.org điều chỉnh nội dung dựa trên phiên bản Zotero hiện tại">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Nếu cho phép, phiên bản Zotero hiện tại sẽ được gộp vào các yêu cầu HTTP gửi tới zotero.org">
+<!ENTITY zotero.preferences.parseRISRefer "Dùng Zotero để tải xuống các tập tin Bib TeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "Tự động tạo bản lưu khi tạo biểu ghi từ các trang web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Tự động đính kèm các tập tin PDF và các tập tin liên đới khác khi lưu dữ các biểu ghi">
 <!ENTITY zotero.preferences.automaticTags "Tự động dùng các từ khóa và các tiêu đề, mục đề để gắn thẻ cho các biểu ghi">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Tự động loại bỏ các mục trong Thùng rác đã xóa hơn">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ngày trước đây">
 
-<!ENTITY zotero.preferences.groups "Groups">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "When copying items between libraries, include:">
-<!ENTITY zotero.preferences.groups.childNotes "child notes">
-<!ENTITY zotero.preferences.groups.childFiles "child snapshots and imported files">
-<!ENTITY zotero.preferences.groups.childLinks "child links">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups "Các nhóm">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "Thông tin của mục được sao chép giữa các thư viện:">
+<!ENTITY zotero.preferences.groups.childNotes "các ghi chú con">
+<!ENTITY zotero.preferences.groups.childFiles "các snapshot và tập tin được nhập khẩu">
+<!ENTITY zotero.preferences.groups.childLinks "các liên kết con">
+<!ENTITY zotero.preferences.groups.tags "các tag">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
-<!ENTITY zotero.preferences.openurl.search "Tìm kiếm các resolver">
+<!ENTITY zotero.preferences.openurl.search "Tìm kiếm các bộ phân giải">
 <!ENTITY zotero.preferences.openurl.custom "Tùy biến...">
-<!ENTITY zotero.preferences.openurl.server "Resolver:">
+<!ENTITY zotero.preferences.openurl.server "Bộ phân giải:">
 <!ENTITY zotero.preferences.openurl.version "Phiên bản:">
 
-<!ENTITY zotero.preferences.prefpane.sync "Sync">
-<!ENTITY zotero.preferences.sync.username "Username:">
-<!ENTITY zotero.preferences.sync.password "Password:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero Sync Server">
-<!ENTITY zotero.preferences.sync.createAccount "Create Account">
-<!ENTITY zotero.preferences.sync.lostPassword "Lost Password?">
-<!ENTITY zotero.preferences.sync.syncAutomatically "Sync automatically">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
-<!ENTITY zotero.preferences.sync.about "About Syncing">
-<!ENTITY zotero.preferences.sync.fileSyncing "File Syncing">
+<!ENTITY zotero.preferences.prefpane.sync "Đồng bộ">
+<!ENTITY zotero.preferences.sync.username "Tên người dùng:">
+<!ENTITY zotero.preferences.sync.password "Mật khẩu:">
+<!ENTITY zotero.preferences.sync.syncServer "Máy chủ đồng bộ Zotero">
+<!ENTITY zotero.preferences.sync.createAccount "Tạo tài khoản">
+<!ENTITY zotero.preferences.sync.lostPassword "Quên mật khẩu?">
+<!ENTITY zotero.preferences.sync.syncAutomatically "Tự động đồng bộ">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Đồng bộ nội dung full-text">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero có thể đồng bộ nội dung full-text của các tập tin trong các thư viện Zotero của bạn với zotero.org và các thiết bị có liên kết khác, cho phép bạn dễ dàng tìm kiếm các tập tin của bạn khi bạn cần. Chỉ riêng bạn thấy được nội dung full-text của các tập tin của bạn.">
+<!ENTITY zotero.preferences.sync.about "Về đồng bộ">
+<!ENTITY zotero.preferences.sync.fileSyncing "Đồng bộ tập tin">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Sync attachment files in group libraries using Zotero storage">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "terms and conditions">
-<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
-<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync with Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local Zotero data with data from the sync server, ignoring sync history.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Erase all local Zotero data and restore from the sync server.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Erase all server data and overwrite with local Zotero data.">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Đồng bộ các tập tin đính kèm trong Thư viện của tôi bằng">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Đồng bộ các tập tin đính kèm trong thư viện nhóm bằng vùng lưu trữ của Zotero">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Tải các tập tin xuống">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "vào lúc đồng bộ">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "khi cần thiết">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Bằng cách dùng vùng lưu trữ của Zotero, bạn chấp nhận ràng buộc bởi">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "các điều khoản và điều kiện">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Các hoạt động sau chỉ dùng trong vài tình huống đặc biệt và nói chung không nên thường dùng để khắc phục lỗi. Trong nhiều trường hợp, việc thiết lập lại sẽ sinh thêm các vấn đề khác. Hãy xem">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Các chọn lựa thiết lập lại đồng bộ">
+<!ENTITY zotero.preferences.sync.reset.warning3 "để có thêm thông tin.">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Đồng bộ toàn bộ với máy chủ Zotero">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Trộn dữ liệu Zotero cục bộ với dữ liệu từ máy chủ đồng bộ, bỏ qua lịch sử đồng bộ.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Phục hồi từ máy chủ Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Xóa toàn bộ dữ liệu Zotero cục bộ và phục hồi từ máy chủ đồng bộ.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Lưu lên máy chủ Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Xóa toàn bộ dữ liệu trên máy chủ và ghi đè bằng dữ liệu cục bộ.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reset File Sync History">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Force checking of the storage server for all local attachment files.">
 <!ENTITY zotero.preferences.sync.reset "Reset">

@@ -693,9 +693,6 @@ Zotero.Tags = new function() {
 			let ios = Components.classes['@mozilla.org/network/io-service;1']
 				.getService(Components.interfaces["nsIIOService"]);
 			let uri = ios.newURI(extraImage, null, null);
-			uri = Components.classes['@mozilla.org/chrome/chrome-registry;1']
-				.getService(Components.interfaces["nsIChromeRegistry"])
-				.convertChromeURL(uri);
 			
 			var img = new win.Image();
 			img.src = uri.spec;

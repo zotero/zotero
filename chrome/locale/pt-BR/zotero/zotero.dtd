@@ -1,6 +1,6 @@
 <!ENTITY zotero.general.optional "(Opcional)">
 <!ENTITY zotero.general.note "Nota:">
-<!ENTITY zotero.general.selectAll "Marcar tudo">
+<!ENTITY zotero.general.selectAll "Selecionar tudo">
 <!ENTITY zotero.general.deselectAll "Desmarcar tudo">
 <!ENTITY zotero.general.edit "Editar">
 <!ENTITY zotero.general.delete "Excluir">
@@ -43,13 +43,13 @@
 <!ENTITY zotero.tabs.related.label "Relacionados">
 <!ENTITY zotero.notes.separate "Editar em uma janela separada">
 
-<!ENTITY zotero.toolbar.duplicate.label "Mostrar duplicações">
-<!ENTITY zotero.collections.showUnfiledItems "Mostrar itens sem coleções">
+<!ENTITY zotero.toolbar.duplicate.label "Exibir duplicações">
+<!ENTITY zotero.collections.showUnfiledItems "Exibir itens sem coleções">
 
 <!ENTITY zotero.items.itemType "Tipo do item">
 <!ENTITY zotero.items.type_column "Tipo de item">
 <!ENTITY zotero.items.title_column "Título">
-<!ENTITY zotero.items.creator_column "Criador">
+<!ENTITY zotero.items.creator_column "Autor">
 <!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Ano">
 <!ENTITY zotero.items.publisher_column "Editor">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.items.menu.showInLibrary "Mostrar na biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Adicionar nota">
 <!ENTITY zotero.items.menu.attach "Adicionar anexo">
-<!ENTITY zotero.items.menu.attach.snapshot "Anexar instantâneo de página atual">
+<!ENTITY zotero.items.menu.attach.snapshot "Anexar instantâneo da página atual">
 <!ENTITY zotero.items.menu.attach.link "Anexar link para a página atual">
 <!ENTITY zotero.items.menu.attach.link.uri "Anexar endereço para URI...">
 <!ENTITY zotero.items.menu.attach.file "Anexar cópia armazenada do arquivo...">
@@ -123,25 +123,25 @@
 <!ENTITY zotero.item.add "Adicionar">
 <!ENTITY zotero.item.attachment.file.show "Exibir o arquivo">
 <!ENTITY zotero.item.textTransform "Transformar o texto">
-<!ENTITY zotero.item.textTransform.titlecase "Iniciais Em Maiúsculo">
-<!ENTITY zotero.item.textTransform.sentencecase "Maiúscula no início da frase">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Inverter Primeiro/Último Nomes">
+<!ENTITY zotero.item.textTransform.titlecase "Iniciais em maiúsculas">
+<!ENTITY zotero.item.textTransform.sentencecase "Início da frase em maiúscula">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Inverter primeiro/último nomes">
 <!ENTITY zotero.item.viewOnline "Ver Online">
 <!ENTITY zotero.item.copyAsURL "Copiar como URL">
 
 <!ENTITY zotero.toolbar.newNote "Nova nota">
 <!ENTITY zotero.toolbar.note.standalone "Nova nota standalone">
 <!ENTITY zotero.toolbar.note.child "Adicionar nota filha">
-<!ENTITY zotero.toolbar.lookup "Procurar por identificador...">
+<!ENTITY zotero.toolbar.lookup "Procurar pelo identificador...">
 <!ENTITY zotero.toolbar.attachment.linked "Link para arquivo...">
 <!ENTITY zotero.toolbar.attachment.add "Armazenar copiar de arquivo...">
 <!ENTITY zotero.toolbar.attachment.weblink "Salvar link para página atual">
-<!ENTITY zotero.toolbar.attachment.snapshot "Gerar imagem da página atual">
+<!ENTITY zotero.toolbar.attachment.snapshot "Gerar instantâneo da página atual">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Não mostrar tags">
 <!ENTITY zotero.tagSelector.filter "Filtro:">
-<!ENTITY zotero.tagSelector.showAutomatic "Mostrar automaticamente">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Mostrar todos os rótulos nessa biblioteca">
+<!ENTITY zotero.tagSelector.showAutomatic "Exibir automaticamente">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Mostrar todas as etiquetas dessa biblioteca">
 <!ENTITY zotero.tagSelector.selectVisible "Marcar visíveis">
 <!ENTITY zotero.tagSelector.clearVisible "Desmarcar visíveis">
 <!ENTITY zotero.tagSelector.clearAll "Desmarcar tudo">
@@ -156,7 +156,7 @@
 <!ENTITY zotero.tagColorChooser.removeColor "Remover a cor">
 
 <!ENTITY zotero.lookup.description "Inserir ISBN, DOI, ou PMID para buscar na caixa abaixo">
-<!ENTITY zotero.lookup.button.search "Procurar">
+<!ENTITY zotero.lookup.button.search "Pesquisar">
 
 <!ENTITY zotero.selectitems.title "Selecionar itens">
 <!ENTITY zotero.selectitems.intro.label "Selecionar itens que gostaria de adicionar a sua biblioteca">
@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Criar Citação/Bibliografia">
 <!ENTITY zotero.bibliography.style.label "Estilo de citação:">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "Idioma:">
 <!ENTITY zotero.bibliography.outputMode "Modo de saída:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografia">
 <!ENTITY zotero.bibliography.outputMethod "Método de saída:">

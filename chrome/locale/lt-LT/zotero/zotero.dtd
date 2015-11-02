@@ -126,8 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Antraštės raidžių lygis">
 <!ENTITY zotero.item.textTransform.sentencecase "Sakinio pavidalu">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Sukeisti vardus ir pavardes">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.viewOnline "Rodyti Internete">
+<!ENTITY zotero.item.copyAsURL "Kopijuoti URL">
 
 <!ENTITY zotero.toolbar.newNote "Nauja pastaba">
 <!ENTITY zotero.toolbar.note.standalone "Nauja nesusieta pastaba">
@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Sukurti citavimą/bibliografiją">
 <!ENTITY zotero.bibliography.style.label "Citavimo stilius:">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "Kalba:">
 <!ENTITY zotero.bibliography.outputMode "Išvedimo veiksena:">
 <!ENTITY zotero.bibliography.bibliography "Bibliografija">
 <!ENTITY zotero.bibliography.outputMethod "Išvedimo būdas:">

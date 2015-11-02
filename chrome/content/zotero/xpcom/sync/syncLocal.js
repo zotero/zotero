@@ -93,16 +93,36 @@ Zotero.Sync.Data.Local = {
 	
 	
 	getLegacyPassword: function (username) {
+		var loginManagerHost = 'chrome://zotero';
+		var loginManagerRealm = 'Zotero Sync Server';
+		
+		Zotero.debug('Getting Zotero sync password');
+		
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 			.getService(Components.interfaces.nsILoginManager);
-		var logins = loginManager.findLogins({}, "chrome://zotero", "Zotero Storage Server", null);
+		try {
+			var logins = loginManager.findLogins({}, loginManagerHost, null, loginManagerRealm);
+		}
+		catch (e) {
+			return '';
+		}
+		
 		// Find user from returned array of nsILoginInfo objects
-		for (let login of logins) {
-			if (login.username == username) {
-				return login.password;
+		for (let i = 0; i < logins.length; i++) {
+			if (logins[i].username == username) {
+				return logins[i].password;
 			}
 		}
-		return false;
+		
+		// Pre-4.0.28.5 format, broken for findLogins and removeLogin in Fx41,
+		var logins = loginManager.findLogins({}, loginManagerHost, "", null);
+		for (let i = 0; i < logins.length; i++) {
+			if (logins[i].username == username
+					&& logins[i].formSubmitURL == "Zotero Sync Server") {
+				return logins[i].password;
+			}
+		}
+		return '';
 	},
 	
 	

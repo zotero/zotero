@@ -1042,7 +1042,7 @@ Zotero.Integration.Document.prototype.addCitation = function() {
 		return (new Zotero.Integration.Fields(me._session, me._doc)).addEditCitation(null);
 	});
 }
-	
+
 /**
  * Edits the citation at the cursor position.
  * @return {Promise}
@@ -1050,12 +1050,24 @@ Zotero.Integration.Document.prototype.addCitation = function() {
 Zotero.Integration.Document.prototype.editCitation = function() {
 	var me = this;
 	return this._getSession(true, false).then(function() {
-		var field = me._doc.cursorInField(me._session.data.prefs['fieldType'])
+		var field = me._doc.cursorInField(me._session.data.prefs['fieldType']);
 		if(!field) {
 			throw new Zotero.Exception.Alert("integration.error.notInCitation", [],
 				"integration.error.title");
 		}
 		
+		return (new Zotero.Integration.Fields(me._session, me._doc)).addEditCitation(field);
+	});
+}
+
+/**
+ * Edits the citation at the cursor position if one exists, or else adds a new one.
+ * @return {Promise}
+ */
+Zotero.Integration.Document.prototype.addEditCitation = function() {
+	var me = this;
+	return this._getSession(false, false).then(function() {
+		var field = me._doc.cursorInField(me._session.data.prefs['fieldType']);
 		return (new Zotero.Integration.Fields(me._session, me._doc)).addEditCitation(field);
 	});
 }
@@ -1584,6 +1596,10 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 					var plainCitation = field.getText();
 					if(plainCitation !== citation.properties.plainCitation) {
 						// Citation manually modified; ask user if they want to save changes
+						Zotero.debug("[_updateDocument] Attempting to update manually modified citation.\n"
+							+ "Original: " + citation.properties.plainCitation + "\n"
+							+ "Current:  " + plainCitation
+						);
 						field.select();
 						var result = this._doc.displayAlert(
 							Zotero.getString("integration.citationChanged")+"\n\n"+Zotero.getString("integration.citationChanged.description"), 
@@ -1726,6 +1742,11 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field) {
 						|| (citation.properties.plainCitation
 							&& field.getText() !== citation.properties.plainCitation)) {
 					this._doc.activate();
+					Zotero.debug("[addEditCitation] Attempting to update manually modified citation.\n"
+						+ "citation.properties.dontUpdate: " + citation.properties.dontUpdate + "\n"
+						+ "Original: " + citation.properties.plainCitation + "\n"
+						+ "Current:  " + field.getText()
+					);
 					if(!this._doc.displayAlert(Zotero.getString("integration.citationChanged.edit"),
 							Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
 							Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL)) {
@@ -1759,7 +1780,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field) {
 			io);
 		} else {
 			var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
-				? 'popup' : 'alwaysRaised')
+				? 'popup' : 'alwaysRaised')+',resizable=false';
 			Zotero.Integration.displayDialog(me._doc,
 			'chrome://zotero/content/integration/quickFormat.xul', mode, io);
 		}

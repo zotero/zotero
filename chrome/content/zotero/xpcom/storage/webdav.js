@@ -37,7 +37,7 @@ Zotero.Sync.Storage.WebDAV_Module.prototype = {
 	_cachedCredentials: false,
 	
 	_loginManagerHost: 'chrome://zotero',
-	_loginManagerURL: 'Zotero Storage Server',
+	_loginManagerRealm: 'Zotero Storage Server',
 	
 	_lastSyncIDLength: 30,
 	
@@ -65,11 +65,20 @@ Zotero.Sync.Storage.WebDAV_Module.prototype = {
 		Zotero.debug('Getting WebDAV password');
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 								.getService(Components.interfaces.nsILoginManager);
-		var logins = loginManager.findLogins({}, this._loginManagerHost, this._loginManagerURL, null);
 		
+		var logins = loginManager.findLogins({}, _loginManagerHost, null, _loginManagerRealm);
 		// Find user from returned array of nsILoginInfo objects
 		for (var i = 0; i < logins.length; i++) {
 			if (logins[i].username == username) {
+				return logins[i].password;
+			}
+		}
+		
+		// Pre-4.0.28.5 format, broken for findLogins and removeLogin in Fx41
+		logins = loginManager.findLogins({}, "chrome://zotero", "", null);
+		for (var i = 0; i < logins.length; i++) {
+			if (logins[i].username == username
+					&& logins[i].formSubmitURL == "Zotero Storage Server") {
 				return logins[i].password;
 			}
 		}
@@ -88,20 +97,36 @@ Zotero.Sync.Storage.WebDAV_Module.prototype = {
 		
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 								.getService(Components.interfaces.nsILoginManager);
-		var logins = loginManager.findLogins({}, this._loginManagerHost, this._loginManagerURL, null);
-		
+		var logins = loginManager.findLogins({}, _loginManagerHost, null, _loginManagerRealm);
 		for (var i = 0; i < logins.length; i++) {
 			Zotero.debug('Clearing WebDAV passwords');
-			loginManager.removeLogin(logins[i]);
+			if (logins[i].httpRealm == _loginManagerRealm) {
+				loginManager.removeLogin(logins[i]);
+			}
+			break;
+		}
+		
+		// Pre-4.0.28.5 format, broken for findLogins and removeLogin in Fx41
+		logins = loginManager.findLogins({}, _loginManagerHost, "", null);
+		for (var i = 0; i < logins.length; i++) {
+			Zotero.debug('Clearing old WebDAV passwords');
+			if (logins[i].formSubmitURL == "Zotero Storage Server") {
+				try {
+					loginManager.removeLogin(logins[i]);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
 			break;
 		}
 		
 		if (password) {
-			Zotero.debug(this._loginManagerURL);
+			Zotero.debug('Setting WebDAV password');
 			var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
 				Components.interfaces.nsILoginInfo, "init");
-			var loginInfo = new nsLoginInfo(this._loginManagerHost, this._loginManagerURL,
-				null, username, password, "", "");
+			var loginInfo = new nsLoginInfo(_loginManagerHost, null,
+				_loginManagerRealm, username, password, "", "");
 			loginManager.addLogin(loginInfo);
 		}
 	},

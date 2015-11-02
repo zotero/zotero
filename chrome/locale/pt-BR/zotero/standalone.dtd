@@ -3,9 +3,9 @@
 <!ENTITY servicesMenuMac.label "Serviços">
 <!ENTITY hideThisAppCmdMac.label "Esconder &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Esconder os outros">
+<!ENTITY hideOtherAppsCmdMac.label "Ocultar os outros">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "Mostrar tudo">
+<!ENTITY showAllAppsCmdMac.label "Exibir tudo">
 <!ENTITY quitApplicationCmdMac.label "Sair do Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 

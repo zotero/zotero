@@ -78,6 +78,13 @@ var ZoteroPane = new function()
 	function init() {
 		Zotero.debug("Initializing Zotero pane");
 		
+		// Fix window without menubar/titlebar when Standalone is closed in full-screen mode
+		// in OS X 10.11
+		if (Zotero.isMac && Zotero.isStandalone
+				&& window.document.documentElement.getAttribute('sizemode') == 'fullscreen') {
+			window.document.documentElement.setAttribute('sizemode', 'normal');
+		}
+		
 		// Set "Report Errors..." label via property rather than DTD entity,
 		// since we need to reference it in script elsewhere
 		document.getElementById('zotero-tb-actions-reportErrors').setAttribute('label',
@@ -2065,6 +2072,9 @@ var ZoteroPane = new function()
 		this.itemsView.addEventListener('load', () => deferred.resolve());
 		yield deferred.promise;
 		
+		// Focus the items column before selecting the item.
+		document.getElementById('zotero-items-tree').focus();
+		
 		var selected = yield this.itemsView.selectItem(itemID, expand);
 		if (!selected) {
 			if (item.deleted) {
@@ -3384,7 +3394,7 @@ var ZoteroPane = new function()
 				//
 				//
 				
-				if (!this.canEditFiles(row)) {
+				if (row && !this.canEditFiles(row)) {
 					this.displayCannotEditLibraryFilesMessage();
 					return;
 				}

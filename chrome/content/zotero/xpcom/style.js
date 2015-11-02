@@ -691,12 +691,17 @@ Zotero.Style.prototype.getCiteProc = function(locale, automaticJournalAbbreviati
 	}
 	
 	try {
-		return new Zotero.CiteProc.CSL.Engine(
+		var citeproc = new Zotero.CiteProc.CSL.Engine(
 			new Zotero.Cite.System(automaticJournalAbbreviations),
 			xml,
 			locale,
 			overrideLocale
 		);
+		
+		// Don't try to parse author names. We parse them in itemToCSLJSON
+		citeproc.opt.development_extensions.parse_names = false;
+		
+		return citeproc;
 	} catch(e) {
 		Zotero.logError(e);
 		throw e;

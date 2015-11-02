@@ -51,7 +51,9 @@ var Zotero_QuickFormat = new function () {
 			io = window.arguments[0].wrappedJSObject;
 			
 			// Only hide chrome on Windows or Mac
-			if(Zotero.isMac || Zotero.isWin) {
+			if(Zotero.isMac) {
+				document.documentElement.setAttribute("drawintitlebar", true);
+			} else if(Zotero.isWin) {
 				document.documentElement.setAttribute("hidechrome", true);
 			}
 			
@@ -78,7 +80,7 @@ var Zotero_QuickFormat = new function () {
 			var locators = Zotero.Cite.labels;
 			var menu = document.getElementById("locator-label");
 			var labelList = document.getElementById("locator-label-popup");
-			for each(var locator in locators) {
+			for(var locator of locators) {
 				var locatorLabel = Zotero.getString('citation.locator.'+locator.replace(/\s/g,''));
 				
 				// add to list of labels
@@ -225,7 +227,7 @@ var Zotero_QuickFormat = new function () {
 			var prevNode = node.previousSibling;
 			if(prevNode && prevNode.citationItem && prevNode.citationItem.locator) {
 				prevNode.citationItem.locator += str;
-				prevNode.value = _buildBubbleString(prevNode.citationItem);
+				prevNode.textContent = _buildBubbleString(prevNode.citationItem);
 				node.nodeValue = "";
 				_clearEntryList();
 				return;
@@ -242,7 +244,7 @@ var Zotero_QuickFormat = new function () {
 					var prevNode = node.previousSibling;
 					if(prevNode && prevNode.citationItem) {
 						prevNode.citationItem.locator = m[2];
-						prevNode.value = _buildBubbleString(prevNode.citationItem);
+						prevNode.textContent = _buildBubbleString(prevNode.citationItem);
 						node.nodeValue = "";
 						_clearEntryList();
 						return;
@@ -265,7 +267,7 @@ var Zotero_QuickFormat = new function () {
 			if(year) str += " "+year;
 			
 			var s = new Zotero.Search();
-			str = str.replace(" & ", " ", "g").replace(" and ", " ", "g");
+			str = str.replace(/ (?:&|and) /g, " ", "g");
 			if(charRe.test(str)) {
 				Zotero.debug("QuickFormat: QuickSearch: "+str);
 				s.addCondition("quicksearch-titleCreatorYear", "contains", str);
@@ -302,7 +304,7 @@ var Zotero_QuickFormat = new function () {
 					for(var i=0, iCount=citedItems.length; i<iCount; i++) {
 						// Generate a string to search for each item
 						var item = citedItems[i],
-							itemStr = [creator.ref.firstName+" "+creator.ref.lastName for each(creator in item.getCreators())];
+							itemStr = [creator.ref.firstName+" "+creator.ref.lastName for (creator of item.getCreators())];
 						itemStr = itemStr.concat([item.getField("title"), item.getField("date", true, true).substr(0, 4)]).join(" ");
 						
 						// See if words match
@@ -395,7 +397,7 @@ var Zotero_QuickFormat = new function () {
 		// Also take into account items cited in this citation. This means that the sorting isn't
 		// exactly by # of items cited from each library, but maybe it's better this way.
 		_updateCitationObject();
-		for each(var citationItem in io.citation.citationItems) {
+		for(var citationItem of io.citation.citationItems) {
 			var citedItem = Zotero.Cite.getItem(citationItem.id);
 			if(!citedItem.cslItemID) {
 				var libraryID = citedItem.libraryID;
@@ -756,7 +758,7 @@ var Zotero_QuickFormat = new function () {
 		if(qfe.scrollHeight > 30) {
 			qfe.setAttribute("multiline", true);
 			qfs.setAttribute("multiline", true);
-			qfs.style.height = (4+qfe.scrollHeight)+"px";
+			qfs.style.height = ((Zotero.isMac ? 6 : 4)+qfe.scrollHeight)+"px";
 			window.sizeToContent();
 		} else {
 			delete qfs.style.height;
@@ -784,7 +786,7 @@ var Zotero_QuickFormat = new function () {
 			if(!panelFrameHeight) {
 				panelFrameHeight = referencePanel.boxObject.height - referencePanel.clientHeight;
 				var computedStyle = window.getComputedStyle(referenceBox, null);
-				for each(var attr in ["border-top-width", "border-bottom-width"]) {
+				for(var attr of ["border-top-width", "border-bottom-width"]) {
 					var val = computedStyle.getPropertyValue(attr);
 					if(val) {
 						var m = pixelRe.exec(val);
@@ -939,7 +941,7 @@ var Zotero_QuickFormat = new function () {
 		if(item.id) {
 			var libraryName = item.libraryID ? Zotero.Libraries.getName(item.libraryID)
 							: Zotero.getString('pane.collections.library');
-			panelLibraryLink.textContent = Zotero.getString("integration.openInLibrary", libraryName);
+			panelLibraryLink.label = Zotero.getString("integration.openInLibrary", libraryName);
 		}
 
 		target.setAttribute("selected", "true");
@@ -1082,7 +1084,7 @@ var Zotero_QuickFormat = new function () {
 				selection.addRange(nodeRange);
 			}
 
-		} else if(keyCode === event.DOM_VK_UP) {
+		} else if(keyCode === event.DOM_VK_UP && referencePanel.state === "open") {
 			var selectedItem = referenceBox.selectedItem;
 
 			var previousSibling;
@@ -1102,8 +1104,8 @@ var Zotero_QuickFormat = new function () {
 					visibleItem = visibleItem.previousSibling;
 				}
 				referenceBox.ensureElementIsVisible(visibleItem);
-				event.preventDefault();
 			};
+			event.preventDefault();
 		} else if(keyCode === event.DOM_VK_DOWN) {
 			if((Zotero.isMac ? event.metaKey : event.ctrlKey)) {
 				// If meta key is held down, show the citation properties panel
@@ -1111,7 +1113,7 @@ var Zotero_QuickFormat = new function () {
 
 				if(bubble) _showCitationProperties(bubble);
 				event.preventDefault();
-			} else {
+			} else if (referencePanel.state === "open") {
 				var selectedItem = referenceBox.selectedItem;
 				var nextSibling;
 				
@@ -1124,8 +1126,8 @@ var Zotero_QuickFormat = new function () {
 				if(nextSibling){
 					referenceBox.selectedItem = nextSibling;
 					referenceBox.ensureElementIsVisible(nextSibling);
-					event.preventDefault();
 				};
+				event.preventDefault();
 			}
 		} else {
 			_resetSearchTimer();
@@ -1235,7 +1237,7 @@ var Zotero_QuickFormat = new function () {
 		} else {
 			delete panelRefersToBubble.citationItem["suppress-author"];
 		}
-		panelRefersToBubble.value = _buildBubbleString(panelRefersToBubble.citationItem);
+		panelRefersToBubble.textContent = _buildBubbleString(panelRefersToBubble.citationItem);
 	};
 	
 	/**

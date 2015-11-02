@@ -1,9 +1,9 @@
-<!ENTITY styles.preview "Zotero Style Preview">
+<!ENTITY styles.preview "Ukážka štýlu Zotero">
 
-<!ENTITY styles.preview.citationFormat "Citation Format:">
-<!ENTITY styles.preview.citationFormat.all "all">
-<!ENTITY styles.preview.citationFormat.author "author">
-<!ENTITY styles.preview.citationFormat.authorDate "author-date">
-<!ENTITY styles.preview.citationFormat.label "label">
-<!ENTITY styles.preview.citationFormat.note "note">
-<!ENTITY styles.preview.citationFormat.numeric "numeric">
+<!ENTITY styles.preview.citationFormat "Formát citácie:">
+<!ENTITY styles.preview.citationFormat.all "všetky">
+<!ENTITY styles.preview.citationFormat.author "autor">
+<!ENTITY styles.preview.citationFormat.authorDate "autor-dátum">
+<!ENTITY styles.preview.citationFormat.label "etiketa">
+<!ENTITY styles.preview.citationFormat.note "poznámka">
+<!ENTITY styles.preview.citationFormat.numeric "číselná">

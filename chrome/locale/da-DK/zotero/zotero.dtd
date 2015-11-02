@@ -126,8 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "Betydende ord med stort ">
 <!ENTITY zotero.item.textTransform.sentencecase "Første bogstav med stort">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Ombyt fornavn/efternavn">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.viewOnline "Vis online">
+<!ENTITY zotero.item.copyAsURL "Kopiér som URL">
 
 <!ENTITY zotero.toolbar.newNote "Ny note">
 <!ENTITY zotero.toolbar.note.standalone "Ny selvstændig note">
@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Opret bibliografien">
 <!ENTITY zotero.bibliography.style.label "Reference-stil:">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "Sprog:">
 <!ENTITY zotero.bibliography.outputMode "Outputtilstand:">
 <!ENTITY zotero.bibliography.bibliography "Litteraturliste">
 <!ENTITY zotero.bibliography.outputMethod "Outputmetode:">

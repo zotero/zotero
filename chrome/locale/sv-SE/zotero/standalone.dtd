@@ -43,7 +43,7 @@
 <!ENTITY copyCmd.label "Kopiera">
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.accesskey "C">
-<!ENTITY copyCitationCmd.label "Kopiera citering">
+<!ENTITY copyCitationCmd.label "Kopiera referens">
 <!ENTITY copyBibliographyCmd.label "Kopiera källförteckning">
 <!ENTITY pasteCmd.label "Klistra in">
 <!ENTITY pasteCmd.key "V">

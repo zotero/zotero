@@ -95,7 +95,7 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Eksport">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Valgmuligheder for hensvisninger">
+<!ENTITY zotero.preferences.citationOptions.caption "Valgmuligheder for henvisninger">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Medtag URL'er for trykte artikler i referencer">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Når denne mulighed er valgt fra, medtager Zotero kun URL'er for artikler i tidsskrifter, blade og aviser hvis der ikke er anført sidetal (første og sidste side).">
 
@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domæne/Sti">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(dvs. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output-format">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Sprog">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Slå Quick Copy fra hvis du trækker mere end">
 
 <!ENTITY zotero.preferences.prefpane.cite "Henvis">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "for nærmere oplysninger.">
 <!ENTITY zotero.preferences.proxies.transparent "Send forespørgsler gennem tidligere anvendte proxyer">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Anerkend automatisk ressourcer i proxyer">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Giv besked, når der omdirigeres gennem en proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Slå automatisk brug af proxyer fra når domænenavnet indeholder ">
 <!ENTITY zotero.preferences.proxies.configured "Konfigurerede proxyer">
 <!ENTITY zotero.preferences.proxies.hostname "Værtsnavn">
@@ -162,7 +162,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avanceret">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Filer og mapper">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Genvejstaster">
 
 <!ENTITY zotero.preferences.prefpane.locate "Lokaliser">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Håndtering af søgemaskiner for artikler">
