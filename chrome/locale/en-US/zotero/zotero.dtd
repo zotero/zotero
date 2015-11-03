@@ -130,6 +130,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap      	"Swap First/Last Names">
 <!ENTITY zotero.item.viewOnline							"View Online">
 <!ENTITY zotero.item.copyAsURL							"Copy as URL">
+<!ENTITY zotero.item.deletePermanently                 "Delete Permanently…">
 
 <!ENTITY zotero.toolbar.newNote				"New Note">
 <!ENTITY zotero.toolbar.note.standalone				"New Standalone Note">

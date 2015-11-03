@@ -36,10 +36,15 @@
 	margin-left: 5px;
 }
 
-/* Restore button in trash view */
-#zotero-item-restore-button-holder
-{
+/* Restore/Delete buttons in trash view */
+#zotero-item-top-buttons-holder {
 	-moz-appearance: toolbar;
+	-moz-box-pack: center;
+	min-height: 3em;
+}
+
+#zotero-item-top-buttons-holder > button {
+	-moz-box-flex: 1
 }
 
 /* Merge pane in duplicates view */

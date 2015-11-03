@@ -1271,14 +1271,14 @@ var ZoteroPane = new function()
 				return false;
 			}
 			
-			// Display restore button if items selected in Trash
+			// Display restore/delete buttons if items selected in Trash
 			if (this.itemsView.selection.count) {
-				document.getElementById('zotero-item-restore-button').hidden
+				document.getElementById('zotero-item-top-buttons-holder').hidden
 					= !this.getCollectionTreeRow().isTrash()
 						|| _nonDeletedItemsSelected(this.itemsView);
 			}
 			else {
-				document.getElementById('zotero-item-restore-button').hidden = true;
+				document.getElementById('zotero-item-top-buttons-holder').hidden = true;
 			}
 			
 			var tabs = document.getElementById('zotero-view-tabbox');
