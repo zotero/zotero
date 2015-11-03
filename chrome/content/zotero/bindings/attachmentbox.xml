@@ -300,7 +300,7 @@
 							else {
 								pagesRow.hidden = true;
 							}
-						});
+						}.bind(this));
 					}
 					else {
 						pagesRow.hidden = true;
@@ -321,12 +321,11 @@
 							this.item.attachmentModificationTime
 							.tap(() => Zotero.Promise.check(this._id))
 							.then(function (mtime) {
-								if (!this._id) return;
 								if (mtime) {
 									this._id("dateModified").value = new Date(mtime).toLocaleString();
 								}
 								dateModifiedRow.hidden = false;
-							});
+							}.bind(this));
 						}
 					}
 					else {
