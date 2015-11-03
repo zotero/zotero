@@ -486,8 +486,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		
 		yield Zotero.DB.executeTransaction(function* () {
 			if (lastUserID != userID) {
-				yield Zotero.Users.setCurrentUserID(userID);
-				
 				if (lastUserID) {
 					// Delete all local groups if changing users
 					for (let group of groups) {
@@ -495,14 +493,15 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					}
 					
 					// Update relations pointing to the old library to point to this one
-					yield Zotero.Relations.updateUser(lastUserID, userID);
+					yield Zotero.Relations.updateUser(userID);
 				}
 				// Replace local user key with libraryID, in case duplicates were
 				// merged before the first sync
 				else {
-					let repl = "local/" + Zotero.Users.getLocalUserKey();
-					yield Zotero.Relations.updateUser(repl, userID);
+					yield Zotero.Relations.updateUser(userID);
 				}
+				
+				yield Zotero.Users.setCurrentUserID(userID);
 			}
 			
 			if (lastUsername != username) {

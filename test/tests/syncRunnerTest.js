@@ -439,6 +439,28 @@ describe("Zotero.Sync.Runner", function () {
 			assert.equal(Zotero.Users.getCurrentUserID(), 1);
 			assert.equal(Zotero.Users.getCurrentUsername(), "A");
 		})
+		
+		it("should update local relations when syncing for the first time", function* () {
+			yield resetDB({
+				thisArg: this,
+				skipBundledFiles: true
+			});
+			
+			var item1 = yield createDataObject('item');
+			var item2 = yield createDataObject(
+				'item', { libraryID: Zotero.Libraries.publicationsLibraryID }
+			);
+			
+			yield item1.addLinkedItem(item2);
+			
+			var cont = yield runner.checkUser(1, "A");
+			assert.isTrue(cont);
+			
+			var json = yield item1.toJSON();
+			var uri = json.relations[Zotero.Relations.linkedObjectPredicate][0];
+			assert.notInclude(uri, 'users/local');
+			assert.include(uri, 'users/1/publications');
+		})
 	})
 	
 	describe("#sync()", function () {

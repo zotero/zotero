@@ -262,7 +262,7 @@ Zotero.URI = new function () {
 	 */
 	this.getURILibrary = function (libraryURI) {
 		let library = this._getURIObjectLibrary(libraryURI);
-		return libraryID ? library.libraryID : false;
+		return library ? library.id : false;
 	}
 	
 	
