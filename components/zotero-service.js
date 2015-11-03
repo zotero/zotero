@@ -56,6 +56,7 @@ const xpcomFilesAll = [
 const xpcomFilesLocal = [
 	'libraryTreeView',
 	'collectionTreeView',
+	'collectionTreeRow',
 	'annotate',
 	'api',
 	'attachments',
