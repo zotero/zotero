@@ -33,10 +33,12 @@
 	
 	<vbox id="zotero-item-pane" zotero-persist="width">
 		<!-- Trash -->
-		<vbox id="zotero-item-restore-button-holder">
+		<hbox id="zotero-item-top-buttons-holder" hidden="true">
 			<button id="zotero-item-restore-button" label="&zotero.items.menu.restoreToLibrary;"
-				oncommand="ZoteroPane_Local.restoreSelectedItems()" hidden="true"/>
-		</vbox>
+				oncommand="ZoteroPane_Local.restoreSelectedItems()"/>
+			<button id="zotero-item-delete-button" label="&zotero.item.deletePermanently;"
+				oncommand="ZoteroPane_Local.deleteSelectedItems()"/>
+		</hbox>
 		
 		<!-- Commons -->
 		<button id="zotero-item-show-original" label="Show Original"

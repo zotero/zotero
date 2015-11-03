@@ -1169,19 +1169,25 @@ var ZoteroPane = new function()
 				"zotero-tb-attachment-add"
 			];
 			for(var i=0; i<disableIfNoEdit.length; i++) {
-				var el = document.getElementById(disableIfNoEdit[i]);
+				let command = disableIfNoEdit[i];
+				var el = document.getElementById(command);
 				
 				// If a trash is selected, new collection depends on the
 				// editability of the library
 				if (collectionTreeRow.isTrash() &&
-						disableIfNoEdit[i] == 'cmd_zotero_newCollection') {
+						command == 'cmd_zotero_newCollection') {
 					var overrideEditable = Zotero.Libraries.isEditable(collectionTreeRow.ref.libraryID);
 				}
 				else {
 					var overrideEditable = false;
 				}
 				
-				if (collectionTreeRow.editable || overrideEditable) {
+				// Don't allow normal buttons in My Pubications, because things need to
+				// be dragged and go through the wizard
+				let forceDisable = collectionTreeRow.isPublications()
+					&& command != 'zotero-tb-note-add';
+				
+				if ((collectionTreeRow.editable || overrideEditable) && !forceDisable) {
 					if(el.hasAttribute("disabled")) el.removeAttribute("disabled");
 				} else {
 					el.setAttribute("disabled", "true");
@@ -2344,8 +2350,9 @@ var ZoteroPane = new function()
 			'sep2',
 			'duplicateItem',
 			'deleteItem',
-			'deleteFromLibrary',
 			'restoreToLibrary',
+			'moveToTrash',
+			'deleteFromLibrary',
 			'mergeItems',
 			'sep3',
 			'exportItems',
@@ -2377,11 +2384,17 @@ var ZoteroPane = new function()
 		}
 		
 		var collectionTreeRow = this.getCollectionTreeRow();
+		var isTrash = collectionTreeRow.isTrash();
 		
-		if(collectionTreeRow.isTrash()) {
-			show.push(m.restoreToLibrary);
-		} else {
+		if (isTrash) {
 			show.push(m.deleteFromLibrary);
+			show.push(m.restoreToLibrary);
+		}
+		else if (collectionTreeRow.isPublications()) {
+			show.push(m.deleteFromLibrary);
+		}
+		else {
+			show.push(m.moveToTrash);
 		}
 		
 		show.push(m.sep3, m.exportItems, m.createBib, m.loadReport);
@@ -2463,7 +2476,7 @@ var ZoteroPane = new function()
 						}
 					}
 					if (hasImportedAttachment) {
-						disable.push(m.deleteFromLibrary, m.createParent, m.renameAttachments);
+						disable.push(m.moveToTrash, m.createParent, m.renameAttachments);
 					}
 				}
 			}
@@ -2475,53 +2488,50 @@ var ZoteroPane = new function()
 				menu.setAttribute('itemID', item.id);
 				menu.setAttribute('itemKey', item.key);
 				
-				// Show in Library
-				if (!collectionTreeRow.isLibrary() && !collectionTreeRow.isWithinGroup()) {
-					show.push(m.showInLibrary, m.sep1);
-				}
-				
-				// Disable actions in the trash
-				if (collectionTreeRow.isTrash()) {
-					disable.push(m.deleteItem);
-				}
-				
-				if (item.isRegularItem()) {
-					show.push(m.addNote, m.addAttachments, m.sep2);
-				}
-				
-				if (item.isAttachment()) {
-					var showSep4 = false;
-					
-					if (Zotero_RecognizePDF.canRecognize(item)) {
-						show.push(m.recognizePDF);
-						showSep4 = true;
+				if (!isTrash) {
+					// Show in Library
+					if (!collectionTreeRow.isLibrary(true)) {
+						show.push(m.showInLibrary, m.sep1);
 					}
 					
-					// Allow parent item creation for standalone attachments
-					if (item.isTopLevelItem()) {
-						show.push(m.createParent);
-						showSep4 = true;
+					if (item.isRegularItem()) {
+						show.push(m.addNote, m.addAttachments, m.sep2);
 					}
 					
-					// Attachment rename option
-					if (!item.isTopLevelItem() && item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
-						show.push(m.renameAttachments);
-						showSep4 = true;
+					if (item.isAttachment()) {
+						var showSep4 = false;
+						
+						if (Zotero_RecognizePDF.canRecognize(item)) {
+							show.push(m.recognizePDF);
+							showSep4 = true;
+						}
+						
+						// Allow parent item creation for standalone attachments
+						if (item.isTopLevelItem()) {
+							show.push(m.createParent);
+							showSep4 = true;
+						}
+						
+						// Attachment rename option
+						if (!item.isTopLevelItem() && item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
+							show.push(m.renameAttachments);
+							showSep4 = true;
+						}
+						
+						// If not linked URL, show reindex line
+						if (Zotero.Fulltext.pdfConverterIsRegistered()
+								&& (yield Zotero.Fulltext.canReindex(item))) {
+							show.push(m.reindexItem);
+							showSep4 = true;
+						}
+						
+						if (showSep4) {
+							show.push(m.sep4);
+						}
 					}
-					
-					// If not linked URL, show reindex line
-					if (Zotero.Fulltext.pdfConverterIsRegistered()
-							&& (yield Zotero.Fulltext.canReindex(item))) {
-						show.push(m.reindexItem);
-						showSep4 = true;
+					else {
+						show.push(m.duplicateItem);
 					}
-					
-					if (showSep4) {
-						show.push(m.sep4);
-					}
-				}
-				else {
-					show.push(m.duplicateItem);
 				}
 				
 				// Update attachment submenu
@@ -2530,7 +2540,7 @@ var ZoteroPane = new function()
 				
 				// Block certain actions on files if no access
 				if (item.isImportedAttachment() && !collectionTreeRow.filesEditable) {
-					[m.deleteFromLibrary, m.createParent, m.renameAttachments].forEach(function (x) {
+					[m.moveToTrash, m.createParent, m.renameAttachments].forEach(function (x) {
 						disable.push(x);
 					});
 				}
@@ -2545,21 +2555,30 @@ var ZoteroPane = new function()
 			}
 			
 			disable.push(m.showInLibrary, m.duplicateItem, m.deleteItem,
-				m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
+				m.moveToTrash, m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
 		}
 		
-		// TODO: implement menu for remote items
-		if (!collectionTreeRow.editable) {
-			for (var i in m) {
+		if (!collectionTreeRow.editable || collectionTreeRow.isPublications()) {
+			for (let i in m) {
 				// Still show export/bib/report for non-editable views
-				// (other than Commons buckets, which aren't real items)
-				if (!collectionTreeRow.isBucket()) {
+				switch (i) {
+					case 'exportItems':
+					case 'createBib':
+					case 'loadReport':
+						continue;
+				}
+				if (isTrash) {
 					switch (i) {
-						case 'exportItems':
-						case 'createBib':
-						case 'loadReport':
-						case 'restoreToLibrary':
-							continue;
+					case 'restoreToLibrary':
+					case 'deleteFromLibrary':
+						continue;
+					}
+				}
+				else if (collectionTreeRow.isPublications()) {
+					switch (i) {
+					case 'addNote':
+					case 'deleteFromLibrary':
+						continue;
 					}
 				}
 				disable.push(m[i]);
@@ -2573,8 +2592,9 @@ var ZoteroPane = new function()
 			show.push(m.deleteItem);
 		}
 		
-		// Plural if necessary
-		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
+		// Set labels, plural if necessary
+		menu.childNodes[m.moveToTrash].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
+		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.delete' + multiple));
 		menu.childNodes[m.exportItems].setAttribute('label', Zotero.getString('pane.items.menu.export' + multiple));
 		menu.childNodes[m.createBib].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
 		menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
