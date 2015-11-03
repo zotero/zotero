@@ -768,7 +768,7 @@ Zotero.Fulltext = new function(){
 				}
 			}
 			let libraryKey = libraryID + "/" + item.key;
-			let mimeType = item.attachmentMIMEType;
+			let mimeType = item.attachmentContentType;
 			if (isCachedMIMEType(mimeType) || Zotero.MIME.isTextType(mimeType)) {
 				try {
 					let cacheFile = this.getItemCacheFile(item);
@@ -795,7 +795,7 @@ Zotero.Fulltext = new function(){
 						text = yield Zotero.File.getContentsAsync(file, item.attachmentCharset);
 						
 						// If HTML, convert to plain text first, and cache the result
-						if (item.attachmentMIMEType == 'text/html') {
+						if (item.attachmentContentType == 'text/html') {
 							let obj = yield convertItemHTMLToText(
 								itemID,
 								text,
@@ -1226,7 +1226,7 @@ Zotero.Fulltext = new function(){
 			
 			let itemID = item.id;
 			let content;
-			let mimeType = item.attachmentMIMEType;
+			let mimeType = item.attachmentContentType;
 			let maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
 			let binaryMode = mode && mode.indexOf('Binary') != -1;
 			
@@ -1366,7 +1366,7 @@ Zotero.Fulltext = new function(){
 	 */
 	var getTotalCharsFromFile = Zotero.Promise.coroutine(function* (itemID) {
 		var item = yield Zotero.Items.getAsync(itemID);
-		switch (item.attachmentMIMEType) {
+		switch (item.attachmentContentType) {
 			case 'application/pdf':
 				var file = Zotero.Attachments.getStorageDirectory(item);
 				file.append(this.pdfConverterCacheFile);
@@ -1430,7 +1430,7 @@ Zotero.Fulltext = new function(){
 		}
 		
 		var itemID = item.id;
-		switch (item.attachmentMIMEType) {
+		switch (item.attachmentContentType) {
 			// Use pages for PDFs
 			case 'application/pdf':
 				var pages = yield this.getPages(itemID);
