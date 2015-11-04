@@ -163,11 +163,21 @@ Zotero.Libraries = new function () {
 	
 	
 	/**
-	 * @return {Integer[]} - All library IDs
+	 * @return {Zotero.Library[]} - All libraries
 	 */
 	this.getAll = function () {
 		if (!this._cache) throw new Error("Zotero.Libraries cache is not initialized");
-		return Object.keys(this._cache).map(v => parseInt(v));
+		var libraries = Object.keys(this._cache).map(v => Zotero.Libraries.get(parseInt(v)));
+		var collation = Zotero.getLocaleCollation();
+		// Sort My Library, My Publications, then others by name
+		libraries.sort(function (a, b) {
+			if (a.libraryID == _userLibraryID) return -1;
+			if (b.libraryID == _userLibraryID) return 1;
+			if (a.libraryID == _publicationsLibraryID) return -1;
+			if (b.libraryID == _publicationsLibraryID) return 1;
+			return collation.compareString(1, a.name, b.name);
+		}.bind(this))
+		return libraries;
 	}
 	
 	

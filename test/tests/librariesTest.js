@@ -23,39 +23,53 @@ describe("Zotero.Libraries", function() {
 	});
 	
 	describe("#getAll()", function() {
-		it("should return an array of valid library IDs", function() {
-			let ids = Zotero.Libraries.getAll();
-			assert.isArray(ids);
-			assert(ids.reduce(function(res, id) { return res && Number.isInteger(id) && id > 0 }, true), "All IDs are positive integers");
+		it("should return an array of Zotero.Library instances", function() {
+			let libraries = Zotero.Libraries.getAll();
+			assert.isArray(libraries);
+			assert(libraries.every(library => library instanceof Zotero.Library));
 		})
-		it("should return all library IDs", function* () {
+		
+		it("should return all libraries in sorted order", function* () {
 			// Add/remove a few group libraries beforehand to ensure that data is kept in sync
 			let library = yield createGroup();
 			let tempLib = yield createGroup();
 			yield tempLib.eraseTx();
 			
-			let dbIDs = yield Zotero.DB.columnQueryAsync("SELECT libraryID FROM libraries");
-			let ids = Zotero.Libraries.getAll();
-			assert.sameMembers(dbIDs, ids);
+			var libraries = Zotero.Libraries.getAll();
+			var ids = libraries.map(library => library.libraryID);
+			var dbIDs = yield Zotero.DB.columnQueryAsync("SELECT libraryID FROM libraries");
+			assert.sameMembers(ids, dbIDs);
 			assert.equal(dbIDs.length, ids.length, "returns correct number of IDs");
+			
+			// Check sort
+			assert.equal(ids[0], Zotero.Libraries.userLibraryID);
+			assert.equal(ids[1], Zotero.Libraries.publicationsLibraryID);
+			
+			var last = "";
+			var collation = Zotero.getLocaleCollation();
+			for (let i = 2; i < libraries.length; i++) {
+				let current = libraries[i].name;
+				assert.isAbove(
+					collation.compareString(1, current, last),
+					0,
+					`'${current}' should sort after '${last}'`
+				);
+				last = current;
+			}
 			
 			// remove left-over library
 			yield library.eraseTx();
 		});
-		it("should return a deep copy of ID array", function() {
-			let ids = Zotero.Libraries.getAll();
-			ids.push(-1);
-			assert.notDeepEqual(ids, Zotero.Libraries.getAll());
-		});
 	});
+	
 	describe("#exists()", function() {
 		it("should return true for all existing IDs", function() {
-			let ids = Zotero.Libraries.getAll();
+			let ids = Zotero.Libraries.getAll().map(library => library.libraryID);
 			assert.isTrue(ids.reduce(function(res, id) { return res && Zotero.Libraries.exists(id) }, true));
 		});
 		it("should return false for a non-existing ID", function() {
 			assert.isFalse(Zotero.Libraries.exists(-1), "returns boolean false for a negative ID");
-			let badID = Zotero.Libraries.getAll().sort().pop() + 1;
+			let badID = Zotero.Libraries.getAll().map(library => library.libraryID).sort().pop() + 1;
 			assert.isFalse(Zotero.Libraries.exists(badID), "returns boolean false for a non-existent positive ID");
 		});
 	});
