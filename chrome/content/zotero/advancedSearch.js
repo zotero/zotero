@@ -138,7 +138,9 @@ var ZoteroAdvancedSearch = new function() {
 	
 	this.onLibraryChange = function (libraryID) {
 		_libraryID = libraryID;
-		document.getElementById('zotero-search-save').disabled = !Zotero.Libraries.isEditable(libraryID);
+		var library = Zotero.Libraries.get(libraryID);
+		var isEditable = library.editable && library.libraryType != 'publications';
+		document.getElementById('zotero-search-save').disabled = !isEditable;
 	}
 	
 	
