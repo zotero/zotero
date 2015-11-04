@@ -181,10 +181,7 @@
 									onsyncfrompreference="return Zotero_Preferences.Advanced.getDataDirPath();"
 									readonly="true" flex="1"/>
 								<button label="&zotero.preferences.dataDir.choose;"
-									oncommand="var file = Zotero.chooseZoteroDirectory(true);
-										if (!file) {
-											event.stopPropagation();
-										}"/>
+									oncommand="return Zotero_Preferences.Advanced.chooseDataDir(event)"/>
 							</hbox>
 						</radiogroup>
 						
