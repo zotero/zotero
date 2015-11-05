@@ -214,9 +214,16 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 	// DOI
 	var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND fieldID=? AND value LIKE '10\\.%' "
+				+ "WHERE libraryID=? AND fieldID=? AND value LIKE ? "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
-	var rows = yield Zotero.DB.queryAsync(sql, [this._libraryID, Zotero.ItemFields.getID('DOI')]);
+	var rows = yield Zotero.DB.queryAsync(
+		sql,
+		[
+			this._libraryID,
+			Zotero.ItemFields.getID('DOI'),
+			'10.%'
+		]
+	);
 	var doiCache = {};
 	if (rows.length) {
 		let newRows = [];
