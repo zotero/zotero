@@ -438,7 +438,10 @@ Zotero.OpenURL = new function() {
 				} else if(key == "rft.appldate") {
 					item.date = value;
 				}
-			} else if(format == "info:ofi/fmt:kev:mtx:dc") {
+			} else {
+				// The following keys are technically only valid in Dublin Core
+				// (i.e., format == "info:ofi/fmt:kev:mtx:dc") but in practice
+				// 'format' is not always set
 				if(key == "rft.identifier") {
 					if(value.length > 8) {	// we could check length separately for
 											// each type, but all of these identifiers
