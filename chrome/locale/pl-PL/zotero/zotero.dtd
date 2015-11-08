@@ -1,5 +1,5 @@
 <!ENTITY zotero.general.optional "(Opcjonalne)">
-<!ENTITY zotero.general.note "Notatka:">
+<!ENTITY zotero.general.note "Uwaga:">
 <!ENTITY zotero.general.selectAll "Zaznacz wszystkie">
 <!ENTITY zotero.general.deselectAll "Odznacz wszystkie">
 <!ENTITY zotero.general.edit "Edytuj">
@@ -131,10 +131,10 @@
 
 <!ENTITY zotero.toolbar.newNote "Nowa notatka">
 <!ENTITY zotero.toolbar.note.standalone "Nowa osobna notatka">
-<!ENTITY zotero.toolbar.note.child "Nowa potomna notatka">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
-<!ENTITY zotero.toolbar.attachment.linked "Odnośnik do pliku">
-<!ENTITY zotero.toolbar.attachment.add "Zapisz kopię pliku">
+<!ENTITY zotero.toolbar.note.child "Dodaj notatkę potomną">
+<!ENTITY zotero.toolbar.lookup "Wyszukaj za pomocą identyfikatora...">
+<!ENTITY zotero.toolbar.attachment.linked "Odnośnik do pliku...">
+<!ENTITY zotero.toolbar.attachment.add "Zapisz kopię pliku...">
 <!ENTITY zotero.toolbar.attachment.weblink "Zapisz odnośnik do aktywnej strony">
 <!ENTITY zotero.toolbar.attachment.snapshot "Zrób zrzut ekranu aktywnej strony">
 
@@ -146,8 +146,8 @@
 <!ENTITY zotero.tagSelector.clearVisible "Odznacz widoczne">
 <!ENTITY zotero.tagSelector.clearAll "Odznacz wszystkie">
 <!ENTITY zotero.tagSelector.assignColor "Przypisz kolor...">
-<!ENTITY zotero.tagSelector.renameTag "Zmień nazwę etykiety">
-<!ENTITY zotero.tagSelector.deleteTag "Usuń etykietę">
+<!ENTITY zotero.tagSelector.renameTag "Zmień nazwę etykiety...">
+<!ENTITY zotero.tagSelector.deleteTag "Usuń etykietę...">
 
 <!ENTITY zotero.tagColorChooser.title "Wybierz kolor i pozycję etykiety">
 <!ENTITY zotero.tagColorChooser.color "Kolor:">
@@ -155,7 +155,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Ustaw kolor">
 <!ENTITY zotero.tagColorChooser.removeColor "Usuń kolor">
 
-<!ENTITY zotero.lookup.description "Wprowadź ISBN, DOI lub PMID aby wyszukać w oknie poniżej.">
+<!ENTITY zotero.lookup.description "Aby wyszukać, wprowadź w oknie poniżej ISBN, DOI lub PMID.">
 <!ENTITY zotero.lookup.button.search "Wyszukiwanie">
 
 <!ENTITY zotero.selectitems.title "Zaznacz elementy">
@@ -181,14 +181,14 @@
 
 <!ENTITY zotero.progress.title "Postęp">
 
-<!ENTITY zotero.exportOptions.title "Eksportuj">
+<!ENTITY zotero.exportOptions.title "Eksportuj...">
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Opcje translacji">
 
 <!ENTITY zotero.charset.label "Kodowanie znaków">
 <!ENTITY zotero.moreEncodings.label "Więcej kodowań">
 
-<!ENTITY zotero.citation.keepSorted.label "Zachowuj źródło posortowane">
+<!ENTITY zotero.citation.keepSorted.label "Zachowuj źródła posortowane">
 
 <!ENTITY zotero.citation.suppressAuthor.label "Ukryj autora">
 <!ENTITY zotero.citation.prefix.label "Prefiks:">
@@ -208,8 +208,8 @@
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Zdejmij wyróżnienie">
 
 <!ENTITY zotero.integration.prefs.displayAs.label "Wyświetl cytowania jako:">
-<!ENTITY zotero.integration.prefs.footnotes.label "Przypis dolny">
-<!ENTITY zotero.integration.prefs.endnotes.label "Przypis końcowy">
+<!ENTITY zotero.integration.prefs.footnotes.label "Przypisy dolne">
+<!ENTITY zotero.integration.prefs.endnotes.label "Przypisy końcowe">
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Używany format:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Zakładki">

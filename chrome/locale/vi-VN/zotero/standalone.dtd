@@ -29,7 +29,7 @@
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Edit">
+<!ENTITY editMenu.label "Chỉnh sửa">
 <!ENTITY editMenu.accesskey "E">
 <!ENTITY undoCmd.label "Undo">
 <!ENTITY undoCmd.key "Z">
@@ -48,10 +48,10 @@
 <!ENTITY pasteCmd.label "Paste">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Delete">
+<!ENTITY deleteCmd.label "Xóa">
 <!ENTITY deleteCmd.key "D">
 <!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Select All">
+<!ENTITY selectAllCmd.label "Chạn tất cả">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
 <!ENTITY preferencesCmd.label "Preferences">
