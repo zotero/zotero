@@ -31,6 +31,7 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/publicationsDialog.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/publicationsDialog.css"?>
 
 <wizard id="zotero-publications-wizard" title="&zotero.publications.my_publications;"
 		width="600"

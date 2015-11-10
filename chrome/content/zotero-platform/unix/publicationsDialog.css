@@ -1,0 +1,4 @@
+/* There's an ugly horizontal scrollbar on linux in some steps of the wizard, which this fixes */
+.wizard-page-box {
+  margin: 10px 40px;
+}
