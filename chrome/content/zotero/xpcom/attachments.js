@@ -221,7 +221,7 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * @param {Object} options - 'url', 'parentItemID', 'collections', 'title',
+	 * @param {Object} options - 'libraryID', 'url', 'parentItemID', 'collections', 'title',
 	 *                           'fileBaseName', 'contentType', 'cookieSandbox'
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
@@ -247,8 +247,7 @@ Zotero.Attachments = new function(){
 		var urlRe = /^https?:\/\/[^\s]*$/;
 		var matches = urlRe.exec(url);
 		if (!matches) {
-			Components.utils.reportError("Invalid URL '" + url + "' in Zotero.Attachments.importFromURL()");
-			return false;
+			throw new Error("Invalid URL '" + url + "'");
 		}
 		
 		// Save using a hidden browser
