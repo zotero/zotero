@@ -68,9 +68,9 @@ ConcurrentCaller = function (options = {}) {
 	
 	this.stopOnError = options.stopOnError || false;
 	this.onError = options.onError || null;
+	this.numConcurrent = options.numConcurrent;
 	
 	this._id = options.id;
-	this._numConcurrent = options.numConcurrent;
 	this._numRunning = 0;
 	this._queue = [];
 	this._logger = options.logger || null;
@@ -105,8 +105,8 @@ ConcurrentCaller.prototype.pause = function (ms) {
  * Add a task to the queue without starting it
  *
  * @param {Function|Function[]} - One or more functions to run
- * @return {Promise[]} - An array of promises for passed functions, resolved once the queue is
- *                       empty
+ * @return {Promise[]} - An array of promises for passed functions, resolved once they have all
+ *     finished (even if other functions are still running)
  */
 ConcurrentCaller.prototype.add = function (func) {
 	if (Array.isArray(func)) {
@@ -114,7 +114,7 @@ ConcurrentCaller.prototype.add = function (func) {
 		for (let i = 0; i < func.length; i++) {
 			promises.push(this.start(func[i]));
 		}
-		return this._deferred.promise.return(promises);
+		return Promise.settle(promises);
 	}
 	
 	if (!this._deferred || !this._deferred.promise.isPending()) {
@@ -126,20 +126,20 @@ ConcurrentCaller.prototype.add = function (func) {
 		func: Promise.method(func),
 		deferred: deferred
 	});
-	return this._deferred.promise.return(deferred.promise);
+	return deferred.promise;
 }
 
 
 /**
  * @param {Function|Function[]} - One or more functions to run
- * @return {Promise[]} - An array of promises for passed functions, resolved once the queue is
- *                       empty
+ * @return {Promise[]} - An array of promises for passed functions, resolved once they have all
+ *     finished (even if other functions are still running)
  */
 ConcurrentCaller.prototype.start = function (func) {
 	var promise = this.add(func);
 	var run = this._processNext();
 	if (!run) {
-		this._log("Already at " + this._numConcurrent + " -- queueing for later");
+		this._log("Already at " + this.numConcurrent + " -- queueing for later");
 	}
 	return promise;
 }
@@ -187,7 +187,7 @@ ConcurrentCaller.prototype.stop = function () {
 
 
 ConcurrentCaller.prototype._processNext = function () {
-	if (this._numRunning >= this._numConcurrent) {
+	if (this._numRunning >= this.numConcurrent) {
 		return false;
 	}
 	
@@ -205,7 +205,7 @@ ConcurrentCaller.prototype._processNext = function () {
 	}
 	
 	this._log("Running function ("
-		+ this._numRunning + "/" + this._numConcurrent + " running, "
+		+ this._numRunning + "/" + this.numConcurrent + " running, "
 		+ this._queue.length + " queued)");
 	
 	this._numRunning++;
@@ -213,7 +213,7 @@ ConcurrentCaller.prototype._processNext = function () {
 		this._numRunning--;
 		
 		this._log("Done with function ("
-			+ this._numRunning + "/" + this._numConcurrent + " running, "
+			+ this._numRunning + "/" + this.numConcurrent + " running, "
 			+ this._queue.length + " queued)");
 		
 		this._waitForPause().bind(this).then(function () {
@@ -225,7 +225,7 @@ ConcurrentCaller.prototype._processNext = function () {
 	.catch(function (e) {
 		this._numRunning--;
 		
-		this._log("Error in function (" + this._numRunning + "/" + this._numConcurrent + ", "
+		this._log("Error in function (" + this._numRunning + "/" + this.numConcurrent + ", "
 			+ this._queue.length + " in queue)");
 		
 		if (this.onError) {
@@ -234,7 +234,12 @@ ConcurrentCaller.prototype._processNext = function () {
 		
 		if (this.stopOnError && this._queue.length) {
 			this._log("Stopping on error: " + e);
+			this._oldQueue = this._queue;
 			this._queue = [];
+			for (let o of this._oldQueue) {
+				//this._log("Rejecting promise");
+				o.deferred.reject();
+			}
 		}
 		
 		this._waitForPause().bind(this).then(function () {
