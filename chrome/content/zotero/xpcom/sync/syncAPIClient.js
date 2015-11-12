@@ -89,9 +89,9 @@ Zotero.Sync.APIClient.prototype = {
 	
 	getSettings: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, since) {
 		var params = {
-			target: "settings",
 			libraryType: libraryType,
-			libraryTypeID: libraryTypeID
+			libraryTypeID: libraryTypeID,
+			target: "settings"
 		};
 		if (since) {
 			params.since = since;

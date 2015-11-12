@@ -49,16 +49,7 @@ Zotero.Sync.Data.Engine = function (options) {
 	this.apiClient = options.apiClient;
 	this.libraryID = options.libraryID;
 	this.library = Zotero.Libraries.get(options.libraryID);
-	switch (this.library.libraryType) {
-	case 'user':
-	case 'publications':
-		this.libraryTypeID = Zotero.Users.getCurrentUserID();
-		break;
-	
-	case 'group':
-		this.libraryTypeID = Zotero.Groups.getGroupIDFromLibraryID(options.libraryID);
-		break;
-	}
+	this.libraryTypeID = this.library.libraryTypeID;
 	this.setStatus = options.setStatus || function () {};
 	this.onError = options.onError || function (e) {};
 	this.stopOnError = options.stopOnError;

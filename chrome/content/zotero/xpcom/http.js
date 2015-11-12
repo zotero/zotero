@@ -219,9 +219,7 @@ Zotero.HTTP = new function() {
 				var msg = "HTTP " + method + " " + dispURL + " failed: "
 					+ "Unexpected status code " + xmlhttp.status;
 				Zotero.debug(msg, 1);
-				if (options.debug) {
-					Zotero.debug(xmlhttp.responseText);
-				}
+				Zotero.debug(xmlhttp.responseText, 1);
 				deferred.reject(new Zotero.HTTP.UnexpectedStatusException(xmlhttp, msg));
 			}
 		};

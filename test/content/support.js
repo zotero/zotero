@@ -380,7 +380,7 @@ var installPDFTools = Zotero.Promise.coroutine(function* () {
  * @return {Promise}
  */
 function uninstallPDFTools() {
-	return Zotero.Fulltext.removePDFTools();
+	return Zotero.Fulltext.uninstallPDFTools();
 }
 
 /**

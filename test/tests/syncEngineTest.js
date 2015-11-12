@@ -9,9 +9,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 	
 	var responses = {};
 	
-	var setup = Zotero.Promise.coroutine(function* (options) {
-		options = options || {};
-		
+	var setup = Zotero.Promise.coroutine(function* (options = {}) {
 		server = sinon.fakeServer.create();
 		server.autoRespond = true;
 		
@@ -20,7 +18,6 @@ describe("Zotero.Sync.Data.Engine", function () {
 		caller.setLogger(msg => Zotero.debug(msg));
 		caller.stopOnError = true;
 		
-		Components.utils.import("resource://zotero/config.js");
 		var client = new Zotero.Sync.APIClient({
 			baseURL,
 			apiVersion: options.apiVersion || ZOTERO_CONFIG.API_VERSION,

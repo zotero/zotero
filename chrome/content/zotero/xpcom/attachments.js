@@ -1298,6 +1298,8 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
+	 * If necessary/possible, detect the file charset and index the file
+	 *
 	 * Since we have to load the content into the browser to get the
 	 * character set (at least until we figure out a better way to get
 	 * at the native detectors), we create the item above and update
