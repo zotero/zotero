@@ -198,56 +198,29 @@ Zotero_Preferences.Advanced = {
 	
 	onDataDirUpdate: function (event) {
 		var radiogroup = document.getElementById('dataDir');
-		var path = document.getElementById('dataDirPath');
 		var useDataDir = Zotero.Prefs.get('useDataDir');
+		var newUseDataDir = radiogroup.selectedIndex == 1;
 		
-		// If triggered from the Choose button, don't show the dialog, since
-		// Zotero.chooseZoteroDirectory() (called below due to the radio button
-		// change) shows its own
-		if (event.originalTarget && event.originalTarget.tagName == 'button') {
-			return true;
+		if (newUseDataDir == useDataDir && !useDataDir) {
+			return;
 		}
-		
-		// If changing from default to custom
-		if (!useDataDir) {
-			event.stopPropagation();
-			var file = Zotero.chooseZoteroDirectory(true, false, function () {
-				Zotero_Preferences.openURL('http://zotero.org/support/zotero_data');
-			});
-			radiogroup.selectedIndex = file ? 1 : 0;
-			return !!file;
-		}
-		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
-		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
-			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
-		var app = Zotero.appName;
-		var index = ps.confirmEx(window,
-			Zotero.getString('general.restartRequired'),
-			Zotero.getString('general.restartRequiredForChange', app) + '\n\n'
-				+ Zotero.getString('dataDir.moveFilesToNewLocation', app),
-			buttonFlags,
-			Zotero.getString('general.quitApp', app),
-			null,
-			Zotero.getString('general.moreInformation'),
-			null, {});
-		
-		if (index == 0) {
-			useDataDir = !!radiogroup.selectedIndex;
-			// quit() is asynchronous, but set this here just in case
-			Zotero.Prefs.set('useDataDir', useDataDir);
-			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
-					.getService(Components.interfaces.nsIAppStartup);
-			appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
-		}
-		else if (index == 2) {
+
+		// This call shows a filepicker if needed,
+		// forces a restart if required
+		// and does nothing if cancel was pressed
+		Zotero.chooseZoteroDirectory(true, !newUseDataDir, function () {
 			Zotero_Preferences.openURL('http://zotero.org/support/zotero_data');
-		}
-		
+		});
+		useDataDir = Zotero.Prefs.get('useDataDir');
 		radiogroup.selectedIndex = useDataDir ? 1 : 0;
+		
 		return useDataDir;
+	},
+	
+	
+	chooseDataDir: function(event) {
+		document.getElementById('dataDir').selectedIndex = 1;
+		//this.onDataDirUpdate(event);
 	},
 	
 	

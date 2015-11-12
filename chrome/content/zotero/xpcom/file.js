@@ -1024,4 +1024,9 @@ Zotero.File = new function(){
 		
 		throw e;
 	}
+
+
+	this.isDropboxDirectory = function(path) {
+		return path.toLowerCase().indexOf('dropbox') != -1;
+	}
 }

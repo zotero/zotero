@@ -210,6 +210,10 @@ var ZoteroOverlay = new function()
 			// Make visible
 			ZoteroPane.makeVisible();
 			
+			// Warn about unsafe data directory on first display
+			let dataDir = Zotero.getZoteroDirectory();
+			Zotero.checkForUnsafeDataDirectory(dataDir.path);
+
 			// Make sure tags splitter isn't missing for people upgrading from <2.0b7
 			document.getElementById('zotero-tags-splitter').collapsed = false;
 		} else {

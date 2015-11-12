@@ -381,7 +381,9 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 					return false;
 				}
 			}
-			
+			if(Zotero.isStandalone) {
+				Zotero.checkForUnsafeDataDirectory(dataDir.path);
+			}
 			// Register shutdown handler to call Zotero.shutdown()
 			var _shutdownObserver = {observe:function() { Zotero.shutdown().done() }};
 			Services.obs.addObserver(_shutdownObserver, "quit-application", false);
@@ -1066,56 +1068,50 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				var fp = Components.classes["@mozilla.org/filepicker;1"]
 							.createInstance(nsIFilePicker);
 				fp.init(win, Zotero.getString('dataDir.selectDir'), nsIFilePicker.modeGetFolder);
+				fp.displayDirectory = Zotero.getZoteroDirectory();
 				fp.appendFilters(nsIFilePicker.filterAll);
 				if (fp.show() == nsIFilePicker.returnOK) {
 					var file = fp.file;
-					
-					if (file.directoryEntries.hasMoreElements()) {
-						var dbfile = file.clone();
+					let dialogText = '';
+					let dialogTitle = '';
+
+					// In dropbox folder
+					if (Zotero.File.isDropboxDirectory(file.path)) {
+						dialogTitle = Zotero.getString('general.warning');
+						dialogText = Zotero.getString('dataDir.unsafeLocation.selected.dropbox') + "\n\n"
+								+ Zotero.getString('dataDir.unsafeLocation.selected.useAnyway');
+					}
+					else if (file.directoryEntries.hasMoreElements()) {
+						let dbfile = file.clone();
 						dbfile.append('zotero.sqlite');
 						
 						// Warn if non-empty and no zotero.sqlite
 						if (!dbfile.exists()) {
-							var buttonFlags = ps.STD_YES_NO_BUTTONS;
-							if (moreInfoCallback) {
-								buttonFlags += ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
-							}
-							var index = ps.confirmEx(null,
-								Zotero.getString('dataDir.selectedDirNonEmpty.title'),
-								Zotero.getString('dataDir.selectedDirNonEmpty.text'),
-								buttonFlags,
-								null,
-								null,
-								moreInfoCallback ? Zotero.getString('general.help') : null,
-								null, {});
-							
-							// Not OK -- return to file picker
-							if (index == 1) {
-								continue;
-							}
-							else if (index == 2) {
-								setTimeout(function () {
-									moreInfoCallback();
-								}, 1);
-								return false;
-							}
+							dialogTitle = Zotero.getString('dataDir.selectedDirNonEmpty.title');
+							dialogText = Zotero.getString('dataDir.selectedDirNonEmpty.text');
 						}
 					}
+					// Directory empty
 					else {
-						var buttonFlags = ps.STD_YES_NO_BUTTONS;
+						dialogTitle = Zotero.getString('dataDir.selectedDirEmpty.title');
+						dialogText = Zotero.getString('dataDir.selectedDirEmpty.text', Zotero.appName) + '\n\n'
+								+ Zotero.getString('dataDir.selectedDirEmpty.useNewDir');
+					}
+					// Warning dialog to be displayed
+					if(dialogText !== '') {
+						let buttonFlags = ps.STD_YES_NO_BUTTONS;
 						if (moreInfoCallback) {
 							buttonFlags += ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
 						}
-						var index = ps.confirmEx(null,
-							Zotero.getString('dataDir.selectedDirEmpty.title'),
-							Zotero.getString('dataDir.selectedDirEmpty.text', Zotero.appName) + '\n\n'
-								+ Zotero.getString('dataDir.selectedDirEmpty.useNewDir'),
+						let index = ps.confirmEx(null,
+							dialogTitle,
+							dialogText,
 							buttonFlags,
 							null,
 							null,
 							moreInfoCallback ? Zotero.getString('general.moreInformation') : null,
 							null, {});
-						
+
 						// Not OK -- return to file picker
 						if (index == 1) {
 							continue;
@@ -1127,8 +1123,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 							return false;
 						}
 					}
-					
-					
+
 					// Set new data directory
 					Zotero.Prefs.set('dataDir', file.persistentDescriptor);
 					Zotero.Prefs.set('lastDataDir', file.path);
@@ -1156,11 +1151,40 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			forceQuitNow ? null : Zotero.getString('general.restartLater'),
 			null, null, {});
 		
-		if (index == 0) {
+		if (forceQuitNow || index == 0) {
 			Services.startup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
 		}
 		
 		return useProfileDir ? true : file;
+	}
+
+
+	this.warnOnUnsafeDataDir = true;
+	this.checkForUnsafeDataDirectory = function (path) {
+		if (this.warnOnUnsafeDataDir && Zotero.File.isDropboxDirectory(path)
+				&& Zotero.Prefs.get('warnOnUnsafeDataDir')) {
+			
+			this.warnOnUnsafeDataDir = false;
+			let check = {value: false};
+			let index = Services.prompt.confirmEx(
+				null,
+				Zotero.getString('general.warning'),
+				Zotero.getString('dataDir.unsafeLocation.existing.dropbox') + "\n\n"
+					+ Zotero.getString('dataDir.unsafeLocation.existing.chooseDifferent'),
+				Services.prompt.STD_YES_NO_BUTTONS,
+				null, null, null,
+				Zotero.getString('general.dontShowWarningAgain'),
+				check
+			);
+
+			// Yes - display dialog.
+			if (index == 0) {
+				Zotero.chooseZoteroDirectory(true);
+			}
+			if (check.value) {
+				Zotero.Prefs.set('warnOnUnsafeDataDir', false);
+			}
+		}
 	}
 	
 	
