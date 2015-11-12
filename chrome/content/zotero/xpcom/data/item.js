@@ -3819,12 +3819,18 @@ Zotero.Item.prototype.fromJSON = function (json) {
 		// Item fields
 		default:
 			let fieldID = Zotero.ItemFields.getID(field);
+			if (!fieldID) {
+				Zotero.logError("Discarding unknown JSON field " + field + " for item "
+					+ this.libraryKey);
+				continue;
+			}
 			isValidForType[field] = Zotero.ItemFields.isValidForType(
 				Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID) || fieldID,
 				this.itemTypeID
 			);
 			if (!isValidForType[field]) {
-				Zotero.logError("Discarding unknown JSON field " + field + " for item " + this.libraryKey);
+				Zotero.logError("Discarding invalid field " + field + " for type " + itemTypeID
+					+ " for item " + this.libraryKey);
 				continue;
 			}
 			this.setField(field, json[field]);

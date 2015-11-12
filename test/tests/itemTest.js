@@ -966,6 +966,17 @@ describe("Zotero.Item", function () {
 	})
 
 	describe("#fromJSON()", function () {
+		it("should ignore unknown fields", function* () {
+			var json = {
+				itemType: "journalArticle",
+				title: "Test",
+				foo: "Invalid"
+			};
+			var item = new Zotero.Item;
+			item.fromJSON(json);
+			assert.equal(item.getField('title'), 'Test');
+		})
+		
 		it("should accept ISO 8601 dates", function* () {
 			var json = {
 				itemType: "journalArticle",
