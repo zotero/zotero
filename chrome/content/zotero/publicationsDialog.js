@@ -129,9 +129,7 @@ var Zotero_Publications_Dialog = new function () {
 		var wizard = document.getElementById('zotero-publications-wizard');
 		var currentPage = wizard.currentPage;
 		var nextPage = wizard.wizardPages[wizard.pageIndex + 1];
-		var pageid = wizard.currentPage.pageid;
 		var nextButton = wizard.getButton('next');
-		var finishButton = wizard.getButton('finish');
 		
 		// Require authorship checkbox on first page to be checked to advance
 		wizard.canAdvance = document.getElementById('confirm-authorship-checkbox').checked;
@@ -147,8 +145,6 @@ var Zotero_Publications_Dialog = new function () {
 					&& _shareSettings.sharing == 'cc'
 					&& !(_hasRights == 'all' && _keepRights))) {
 			this.lastPage = false;
-			finishButton.hidden = true;
-			nextButton.hidden = false;
 			nextButton.label = Zotero.getString(
 				'publications.buttons.next',
 				Zotero.getString('publications.buttons.' + nextPage.pageid)
@@ -157,8 +153,10 @@ var Zotero_Publications_Dialog = new function () {
 		// Otherwise this is the last page
 		else {
 			this.lastPage = true;
-			nextButton.hidden = true;
-			finishButton.hidden = false;
+			// Due to issues with linux not handling finish button hiding correctly
+			// we just set the next button label to be the one for the finish button
+			// and leave visibility handling up to mr wizard
+			nextButton.label = Zotero.getString('publications.buttons.addToMyPublications');
 		}
 	}
 	
