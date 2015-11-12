@@ -37,6 +37,8 @@ Zotero.Sync.APIClient = function (options) {
 	this.apiVersion = options.apiVersion;
 	this.apiKey = options.apiKey;
 	this.caller = options.caller;
+	
+	this.failureDelayIntervals = [2500, 5000, 10000, 20000, 40000, 60000, 120000, 240000, 300000];
 }
 
 Zotero.Sync.APIClient.prototype = {
@@ -437,25 +439,50 @@ Zotero.Sync.APIClient.prototype = {
 	},
 	
 	
-	makeRequest: function (method, uri, options = {}) {
+	makeRequest: Zotero.Promise.coroutine(function* (method, uri, options = {}) {
 		options.headers = this.getHeaders(options.headers);
 		options.dontCache = true;
 		options.foreground = !options.background;
 		options.responseType = options.responseType || 'text';
-		return this.caller.start(Zotero.Promise.coroutine(function* () {
-			try {
-				var xmlhttp = yield Zotero.HTTP.request(method, uri, options);
-				this._checkBackoff(xmlhttp);
-				return xmlhttp;
+		var tries = 0;
+		var failureDelayGenerator = null;
+		while (true) {
+			var result = yield this.caller.start(Zotero.Promise.coroutine(function* () {
+				try {
+					var xmlhttp = yield Zotero.HTTP.request(method, uri, options);
+					this._checkBackoff(xmlhttp);
+					return xmlhttp;
+				}
+				catch (e) {
+					tries++;
+					if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+						//this._checkRetry(e.xmlhttp);
+						
+						if (e.is5xx()) {
+							Zotero.logError(e);
+							if (!failureDelayGenerator) {
+								// Keep trying for up to an hour
+								failureDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
+									this.failureDelayIntervals, 60 * 60 * 1000
+								);
+							}
+							let keepGoing = yield failureDelayGenerator.next();
+							if (!keepGoing) {
+								Zotero.logError("Failed too many times");
+								throw lastError;
+							}
+							return false;
+						}
+					}
+					throw e;
+				}
+			}.bind(this)));
+			
+			if (result) {
+				return result;
 			}
-			catch (e) {
-				/*if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					this._checkRetry(e.xmlhttp);
-				}*/
-				throw e;
-			}
-		}.bind(this)));
-	},
+		}
+	}),
 	
 	
 	_parseJSON: function (json) {

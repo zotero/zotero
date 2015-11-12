@@ -36,6 +36,9 @@ Zotero.HTTP = new function() {
 	this.UnexpectedStatusException.prototype.is4xx = function () {
 		return this.status >= 400 && this.status < 500;
 	}
+	this.UnexpectedStatusException.prototype.is5xx = function () {
+		return this.status >= 500 && this.status < 600;
+	}
 	this.UnexpectedStatusException.prototype.toString = function() {
 		return this.message;
 	};
