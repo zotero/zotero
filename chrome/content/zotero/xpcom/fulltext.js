@@ -54,6 +54,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	const kWbClassHWKatakanaLetter = 6;
 	const kWbClassThaiLetter =       7;
 
+	
 	var _pdfConverterVersion = null;
 	var _pdfConverterFileName = null;
 	var _pdfConverterScript = null; // nsIFile of hidden window script on Windows
@@ -68,6 +69,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	var _processorTimer = null;
 	var _processorBlacklist = {};
 	var _upgradeCheck = true;
+	var _syncLibraryVersion = 0;
 	
 	const SYNC_STATE_UNSYNCED = 0;
 	const SYNC_STATE_IN_SYNC = 1;
@@ -77,7 +79,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	this.init = Zotero.Promise.coroutine(function* () {
 		yield Zotero.DB.queryAsync("ATTACH ':memory:' AS 'indexing'");
 		yield Zotero.DB.queryAsync('CREATE TABLE indexing.fulltextWords (word NOT NULL)');
-
+		
 		this.decoder = Components.classes["@mozilla.org/intl/utf8converterservice;1"].
 			getService(Components.interfaces.nsIUTF8ConverterService);
 
@@ -99,6 +101,40 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		
 		this.startContentProcessor();
 		Zotero.addShutdownListener(this.stopContentProcessor.bind(this));
+	});
+	
+	
+	this.getLibraryVersion = function (libraryID) {
+		return Zotero.DB.valueQueryAsync(
+			"SELECT version FROM version WHERE schema=?", "fulltext_" + libraryID
+		)
+	};
+	
+	
+	this.setLibraryVersion = Zotero.Promise.coroutine(function* (libraryID, version) {
+		yield Zotero.DB.queryAsync(
+			"REPLACE INTO version VALUES (?, ?)", ["fulltext_" + libraryID, version]
+		);
+	});
+	
+	
+	this.clearLibraryVersion = function (libraryID) {
+		return Zotero.DB.queryAsync("DELETE FROM version WHERE schema=?", "fulltext" + libraryID);
+	};
+	
+	
+	this.getItemVersion = Zotero.Promise.coroutine(function* (itemID) {
+		return Zotero.DB.valueQueryAsync(
+			"SELECT version FROM fulltextItems WHERE itemID=?", itemID
+		)
+	});
+	
+	
+	this.setItemSynced = Zotero.Promise.coroutine(function* (itemID, version) {
+		return Zotero.DB.queryAsync(
+			"UPDATE fulltextItems SET synced=?, version=? WHERE itemID=?",
+			[SYNC_STATE_IN_SYNC, version, itemID]
+		);
 	});
 	
 	
@@ -555,8 +591,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			return false;
 		}
 		
-		if (!charset){
-			Zotero.debug("Text file didn't have charset in indexFile()", 1);
+		if (!charset) {
+			Zotero.logError(`Item ${itemID} didn't have a charset`);
 			return false;
 		}
 		
@@ -694,6 +730,9 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	});
 	
 	
+	/**
+	 * @param {Integer[]|Integer} items - One or more itemIDs
+	 */
 	this.indexItems = Zotero.Promise.coroutine(function* (items, complete, ignoreErrors) {
 		if (!Array.isArray(items)) {
 			items = [items];
@@ -707,11 +746,13 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 				continue;
 			}
 			
+			Zotero.debug("Indexing item " + item.libraryKey);
 			let itemID = item.id;
 			
 			var path = yield item.getFilePathAsync();
 			if (!path) {
-				Zotero.debug("No file to index for item " + itemID + " in Fulltext.indexItems()");
+				Zotero.debug("No file to index for item " + item.libraryKey
+					+ " in Zotero.FullText.indexItems()");
 				continue;
 			}
 			
@@ -720,9 +761,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 					yield indexFile(path, item.attachmentContentType, item.attachmentCharset, itemID, complete);
 				}
 				catch (e) {
-					Zotero.debug(e, 1);
 					Components.utils.reportError("Error indexing " + path);
-					Components.utils.reportError(e);
+					Zotero.logError(e);
 				}
 			}
 			else {
@@ -738,82 +778,74 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	/**
 	 * Get content and stats that haven't yet been synced
 	 *
-	 * @param {Integer} maxChars  Maximum total characters to include.
-	 *                            The total can go over this if there's a
-	 *                            single large item.
+	 * @param {Integer} libraryID
+	 * @param {Integer} numItems
 	 * @return {Promise<Array<Object>>}
 	 */
-	this.getUnsyncedContent = Zotero.Promise.coroutine(function* (maxChars) {
+	this.getUnsyncedContent = Zotero.Promise.coroutine(function* (libraryID, numItems) {
 		var maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
-		var first = true;
-		var chars = 0;
+		
 		var contentItems = [];
 		var sql = "SELECT itemID, indexedChars, totalChars, indexedPages, totalPages "
-			+ "FROM fulltextItems JOIN items USING (itemID) WHERE synced=" + SYNC_STATE_UNSYNCED
-			+ " ORDER BY clientDateModified DESC";
-		var rows = yield Zotero.DB.queryAsync(sql) || [];
-		var libraryIsEditable = {};
-		var skips = 0;
-		var maxSkips = 5;
-		for each (let row in rows) {
-			let text;
+			+ "FROM fulltextItems FI JOIN items I USING (itemID) WHERE libraryID=? AND "
+			+ "FI.synced=? AND I.synced=1 ORDER BY clientDateModified DESC";
+		var params = [libraryID, SYNC_STATE_UNSYNCED];
+		if (numItems) {
+			sql += " LIMIT ?";
+			params.push(numItems);
+		}
+		var rows = yield Zotero.DB.queryAsync(sql, params);
+		for (let i = 0; i < rows.length; i++) {
+			let row = rows[i];
+			let content;
 			let itemID = row.itemID;
 			let item = yield Zotero.Items.getAsync(itemID);
-			let libraryID = item.libraryID;
-			// Don't send full-text in read-only libraries
-			if (libraryID && libraryIsEditable[libraryID] === undefined) {
-				libraryIsEditable[libraryID] = Zotero.Libraries.isEditable(libraryID);
-				if (!libraryIsEditable[libraryID]) {
-					continue;
-				}
-			}
-			let libraryKey = libraryID + "/" + item.key;
-			let mimeType = item.attachmentContentType;
-			if (isCachedMIMEType(mimeType) || Zotero.MIME.isTextType(mimeType)) {
+			let libraryKey = item.libraryKey;
+			let contentType = item.attachmentContentType;
+			if (isCachedMIMEType(contentType) || Zotero.MIME.isTextType(contentType)) {
 				try {
 					let cacheFile = this.getItemCacheFile(item);
 					if (cacheFile.exists()) {
-						Zotero.debug("Adding full-text content from cache "
+						Zotero.debug("Getting full-text content from cache "
 							+ "file for item " + libraryKey);
-						text = yield Zotero.File.getContentsAsync(cacheFile);
+						content = yield Zotero.File.getContentsAsync(cacheFile);
 					}
 					else {
-						if (!Zotero.MIME.isTextType(mimeType)) {
+						if (!Zotero.MIME.isTextType(contentType)) {
 							Zotero.debug("Full-text content cache file doesn't exist for item "
 								+ libraryKey, 2);
 							continue;
 						}
 						
-						let file = item.getFile();
-						if (!file) {
+						let path = yield item.getFilePathAsync();
+						if (!path) {
 							Zotero.debug("File doesn't exist getting full-text content for item "
 								+ libraryKey, 2);
 							continue;
 						}
 						
-						Zotero.debug("Adding full-text content from file for item " + libraryKey);
-						text = yield Zotero.File.getContentsAsync(file, item.attachmentCharset);
+						Zotero.debug("Getting full-text content from file for item " + libraryKey);
+						content = yield Zotero.File.getContentsAsync(path, item.attachmentCharset);
 						
 						// If HTML, convert to plain text first, and cache the result
 						if (item.attachmentContentType == 'text/html') {
 							let obj = yield convertItemHTMLToText(
 								itemID,
-								text,
+								content,
 								// Include in the cache file only as many characters as we
 								// indexed previously
 								row.indexedChars
 							);
-							text = obj.text;
+							content = obj.text;
 						}
 						else {
 							// Include only as many characters as we've indexed
-							text = text.substr(0, row.indexedChars);
+							content = content.substr(0, row.indexedChars);
 						}
 					}
 				}
 				catch (e) {
-					Zotero.debug(e, 1);
-					Components.utils.reportError(e);
+					Zotero.logError(e);
 					continue;
 				}
 			}
@@ -828,32 +860,15 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 				continue;
 			}
 			
-			// If this isn't the first item and it would put us over the limit,
-			// skip it
-			if (!first && maxChars && ((chars + text.length) > maxChars)) {
-				// Don't try more than maxSkips times to fill up to the limit
-				skips++;
-				if (skips == maxSkips) {
-					break;
-				}
-				continue;
-			}
-			chars += text.length;
-			first = false;
-			
 			contentItems.push({
 				libraryID: item.libraryID,
 				key: item.key,
-				text: text,
+				content,
 				indexedChars: row.indexedChars ? row.indexedChars : 0,
 				totalChars: row.totalChars ? row.totalChars : 0,
 				indexedPages: row.indexedPages ? row.indexedPages : 0,
 				totalPages: row.totalPages ? row.totalPages : 0
 			});
-			
-			if (maxChars && chars > maxChars) {
-				break;
-			}
 		}
 		return contentItems;
 	});
@@ -901,63 +916,56 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	/**
 	 * Save full-text content and stats to a cache file
 	 *
+	 * @param {Integer} libraryID
+	 * @param {String} key - Item key
+	 * @param {Object} data
+	 * @param {String} data.content
+	 * @param {Integer} [data.indexedChars]
+	 * @param {Integer} [data.totalChars]
+	 * @param {Integer} [data.indexedPages]
+	 * @param {Integer} [data.totalPages]
+	 * @param {Integer} version
 	 * @return {Promise}
 	 */
-	this.setItemContent = Zotero.Promise.coroutine(function* (libraryID, key, text, stats, version) {
+	this.setItemContent = Zotero.Promise.coroutine(function* (libraryID, key, data, version) {
 		var libraryKey = libraryID + "/" + key;
 		var item = Zotero.Items.getByLibraryAndKey(libraryID, key);
 		if (!item) {
 			let msg = "Item " + libraryKey + " not found setting full-text content";
-			Zotero.debug(msg, 1);
-			Components.utils.reportError(msg);
+			Zotero.logError(msg);
 			return;
 		}
 		var itemID = item.id;
+		var currentVersion = this.getItemVersion(itemID)
 		
-		var currentVersion = yield Zotero.DB.valueQueryAsync(
-			"SELECT version FROM fulltextItems WHERE itemID=?", itemID
-		);
+		var processorCacheFile = this.getItemProcessorCacheFile(item);
+		var itemCacheFile = this.getItemCacheFile(item);
 		
-		if (text !== '') {
-			var processorCacheFile = this.getItemProcessorCacheFile(item);
-			var itemCacheFile = this.getItemCacheFile(item);
-			
-			// If a storage directory doesn't exist, create it
-			if (!processorCacheFile.parent.exists()) {
-				yield Zotero.Attachments.createDirectoryForItem(item);
-			}
-			
-			// If the local version of the content is already up to date and cached, skip
-			if (currentVersion && currentVersion == version && itemCacheFile.exists()) {
-				Zotero.debug("Current full-text content version matches remote for item "
-					+ libraryKey + " -- skipping");
-				var synced = SYNC_STATE_IN_SYNC;
-			}
-			// If the local version is 0 but the text matches, just update the version
-			else if (currentVersion == 0 && itemCacheFile.exists()
-					&& (yield Zotero.File.getContentsAsync(itemCacheFile)) == text) {
-				Zotero.debug("Current full-text content matches remote for item "
-					+ libraryKey + " -- updating version");
-				var synced = SYNC_STATE_IN_SYNC;
-				yield Zotero.DB.queryAsync("UPDATE fulltextItems SET version=? WHERE itemID=?", [version, itemID]);
-			}
-			else {
-				Zotero.debug("Writing full-text content and data for item " + libraryKey
-					+ " to " + processorCacheFile.path);
-				yield Zotero.File.putContentsAsync(processorCacheFile, JSON.stringify({
-					indexedChars: stats.indexedChars,
-					totalChars: stats.totalChars,
-					indexedPages: stats.indexedPages,
-					totalPages: stats.totalPages,
-					version: version,
-					text: text
-				}));
-				var synced = SYNC_STATE_TO_PROCESS;
-			}
+		// If a storage directory doesn't exist, create it
+		if (!processorCacheFile.parent.exists()) {
+			yield Zotero.Attachments.createDirectoryForItem(item);
+		}
+		
+		// If the local version is 0 but the text matches, just update the version
+		if (currentVersion == 0 && itemCacheFile.exists()
+				&& (yield Zotero.File.getContentsAsync(itemCacheFile)) == text) {
+			Zotero.debug("Current full-text content matches remote for item "
+				+ libraryKey + " -- updating version");
+			var synced = SYNC_STATE_IN_SYNC;
+			yield Zotero.DB.queryAsync("UPDATE fulltextItems SET version=? WHERE itemID=?", [version, itemID]);
 		}
 		else {
-			Zotero.debug("Marking full-text content for download for item " + libraryKey);
-			var synced = SYNC_STATE_TO_DOWNLOAD;
+			Zotero.debug("Writing full-text content and data for item " + libraryKey
+				+ " to " + processorCacheFile.path);
+			yield Zotero.File.putContentsAsync(processorCacheFile, JSON.stringify({
+				indexedChars: data.indexedChars,
+				totalChars: data.totalChars,
+				indexedPages: data.indexedPages,
+				totalPages: data.totalPages,
+				version: version,
+				text: data.content
+			}));
+			var synced = SYNC_STATE_TO_PROCESS;
 		}
 		
 		// If indexed previously, update the sync state
@@ -970,11 +978,6 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 				"REPLACE INTO fulltextItems (itemID, version, synced) VALUES (?, 0, ?)",
 				[itemID, synced]
 			);
-		}
-		
-		if (_upgradeCheck) {
-			yield Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='fulltext' AND key='downloadAll'");
-			_upgradeCheck = false;
 		}
 		
 		this.startContentProcessor();

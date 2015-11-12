@@ -290,14 +290,15 @@ CREATE TABLE groupItems (
 
 CREATE TABLE fulltextItems (
     itemID INTEGER PRIMARY KEY,
-    version INT,
     indexedPages INT,
     totalPages INT,
     indexedChars INT,
     totalChars INT,
-    synced INT DEFAULT 0,
+    version INT NOT NULL DEFAULT 0,
+    synced INT NOT NULL DEFAULT 0,
     FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE
 );
+CREATE INDEX fulltextItems_synced ON fulltextItems(synced);
 CREATE INDEX fulltextItems_version ON fulltextItems(version);
 
 CREATE TABLE fulltextWords (

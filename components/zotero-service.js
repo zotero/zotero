@@ -104,6 +104,7 @@ const xpcomFilesLocal = [
 	'sync/syncAPIClient',
 	'sync/syncEngine',
 	'sync/syncEventListeners',
+	'sync/syncFullTextEngine',
 	'sync/syncLocal',
 	'sync/syncRunner',
 	'sync/syncUtilities',

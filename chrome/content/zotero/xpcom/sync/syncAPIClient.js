@@ -359,6 +359,77 @@ Zotero.Sync.APIClient.prototype = {
 	}),
 	
 	
+	getFullTextVersions: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, since) {
+		var params = {
+			libraryType: libraryType,
+			libraryTypeID: libraryTypeID,
+			target: "fulltext"
+		};
+		if (since) {
+			params.since = since;
+		}
+		
+		// TODO: Use pagination
+		var uri = this.buildRequestURI(params);
+		
+		var xmlhttp = yield this.makeRequest("GET", uri);
+		var libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
+		if (!libraryVersion) {
+			throw new Error("Last-Modified-Version not provided");
+		}
+		return {
+			libraryVersion: libraryVersion,
+			versions: this._parseJSON(xmlhttp.responseText)
+		};
+	}),
+	
+	
+	getFullTextForItem: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, itemKey) {
+		var params = {
+			libraryType: libraryType,
+			libraryTypeID: libraryTypeID,
+			target: `items/${itemKey}/fulltext`
+		};
+		var uri = this.buildRequestURI(params);
+		var xmlhttp = yield this.makeRequest("GET", uri);
+		var version = xmlhttp.getResponseHeader('Last-Modified-Version');
+		if (!version) {
+			throw new Error("Last-Modified-Version not provided");
+		}
+		return {
+			version,
+			data: this._parseJSON(xmlhttp.responseText)
+		};
+	}),
+	
+	
+	setFullTextForItem: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, itemKey, data) {
+		var params = {
+			libraryType: libraryType,
+			libraryTypeID: libraryTypeID,
+			target: `items/${itemKey}/fulltext`
+		};
+		var uri = this.buildRequestURI(params);
+		var xmlhttp = yield this.makeRequest(
+			"PUT",
+			uri,
+			{
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(data),
+				successCodes: [204],
+				debug: true
+			}
+		);
+		var libraryVersion = xmlhttp.getResponseHeader('Last-Modified-Version');
+		if (!libraryVersion) {
+			throw new Error("Last-Modified-Version not provided");
+		}
+		return libraryVersion;
+	}),
+	
+	
 	buildRequestURI: function (params) {
 		var uri = this.baseURL;
 		

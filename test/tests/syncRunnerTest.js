@@ -478,7 +478,7 @@ describe("Zotero.Sync.Runner", function () {
 			});
 		})
 		
-		it("should perform a sync across all libraries", function* () {
+		it("should perform a sync across all libraries and update library versions", function* () {
 			yield Zotero.Users.setCurrentUserID(1);
 			yield Zotero.Users.setCurrentUsername("A");
 			
@@ -651,6 +651,43 @@ describe("Zotero.Sync.Runner", function () {
 					"Last-Modified-Version": 20
 				},
 				json: []
+			});
+			// Full-text syncing
+			setResponse({
+				method: "GET",
+				url: "users/1/fulltext",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 5
+				},
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/publications/fulltext",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 10
+				},
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "groups/1623562/fulltext",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 15
+				},
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "groups/2694172/fulltext",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 20
+				},
+				json: {}
 			});
 			
 			yield runner.sync({

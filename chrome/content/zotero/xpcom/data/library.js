@@ -517,6 +517,8 @@ Zotero.Library.prototype._initErase = Zotero.Promise.method(function(env) {
 
 Zotero.Library.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	yield Zotero.DB.queryAsync("DELETE FROM libraries WHERE libraryID=?", this.libraryID);
+	// TODO: Emit event so this doesn't have to be here
+	yield Zotero.Fulltext.clearLibraryVersion(this.libraryID);
 });
 
 Zotero.Library.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env) {

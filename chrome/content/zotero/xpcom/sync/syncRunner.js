@@ -163,18 +163,32 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				firstInSession: _firstInSession
 			};
 			
-			let nextLibraries = yield this.checkLibraries(
+			let librariesToSync = yield this.checkLibraries(
 				client, options, keyInfo, options.libraries
 			);
-			// Sync data, files, and then any data that needs to be uploaded
+			// Sync data and files, and then repeat if necessary
 			let attempt = 1;
+			let nextLibraries = librariesToSync.concat();
+			let resyncLibraries = [];
 			while (nextLibraries.length) {
 				if (attempt > 3) {
 					throw new Error("Too many sync attempts -- stopping");
 				}
-				nextLibraries = yield _doDataSync(nextLibraries, engineOptions);
-				nextLibraries = yield _doFileSync(nextLibraries, engineOptions);
+				nextLibraries = yield _doDataSync(
+					resyncLibraries.length ? resyncLibraries : nextLibraries,
+					engineOptions
+				);
+				resyncLibraries = yield _doFileSync(nextLibraries, engineOptions);
+				if (!resyncLibraries.length) {
+					break;
+				}
 				attempt++;
+			}
+			
+			// Sync full-text content in libraries with successful data sync. Full-text syncing
+			// still happens for libraries with failed file syncs.
+			if (nextLibraries.length) {
+				yield _doFullTextSync(nextLibraries, engineOptions);
 			}
 		}
 		catch (e) {
@@ -513,6 +527,14 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	});
 	
 	
+	/**
+	 * Run sync engine for passed libraries
+	 *
+	 * @param {Integer[]} libraries
+	 * @param {Object} options
+	 * @param {Boolean} skipUpdateLastSyncTime
+	 * @return {Integer[]} - Array of libraryIDs that completed successfully
+	 */
 	var _doDataSync = Zotero.Promise.coroutine(function* (libraries, options, skipUpdateLastSyncTime) {
 		var successfulLibraries = [];
 		for (let libraryID of libraries) {
@@ -551,10 +573,13 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	}.bind(this));
 	
 	
+	/**
+	 * @return {Integer[]} - Array of libraries that need data syncing again
+	 */
 	var _doFileSync = Zotero.Promise.coroutine(function* (libraries, options) {
 		Zotero.debug("Starting file syncing");
 		this.setSyncStatus(Zotero.getString('sync.status.syncingFiles'));
-		let librariesToSync = [];
+		var resyncLibraries = []
 		for (let libraryID of libraries) {
 			try {
 				let opts = {};
@@ -570,7 +595,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					let engine = new Zotero.Sync.Storage.Engine(opts);
 					let results = yield engine.start();
 					if (results.syncRequired) {
-						librariesToSync.push(libraryID);
+						resyncLibraries.push(libraryID);
 					}
 					else if (results.fileSyncRequired) {
 						Zotero.debug("Another file sync required -- restarting");
@@ -581,8 +606,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 			catch (e) {
 				Zotero.debug("File sync failed for library " + libraryID);
-				Zotero.debug(e, 1);
-				Components.utils.reportError(e);
+				Zotero.logError(e);
 				this.checkError(e);
 				if (options.onError) {
 					options.onError(e);
@@ -597,7 +621,41 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			}
 		}
 		Zotero.debug("Done with file syncing");
-		return librariesToSync;
+		return resyncLibraries;
+	}.bind(this));
+	
+	
+	var _doFullTextSync = Zotero.Promise.coroutine(function* (libraries, options) {
+		if (!Zotero.Prefs.get("sync.fulltext.enabled")) return;
+		
+		Zotero.debug("Starting full-text syncing");
+		this.setSyncStatus(Zotero.getString('sync.status.syncingFullText'));
+		for (let libraryID of libraries) {
+			try {
+				let opts = {};
+				Object.assign(opts, options);
+				opts.libraryID = libraryID;
+				
+				let engine = new Zotero.Sync.Data.FullTextEngine(opts);
+				yield engine.start();
+			}
+			catch (e) {
+				Zotero.debug("Full-text sync failed for library " + libraryID);
+				Zotero.logError(e);
+				this.checkError(e);
+				if (options.onError) {
+					options.onError(e);
+				}
+				else {
+					this.addError(e);
+				}
+				if (stopOnError || e.fatal) {
+					options.caller.stop();
+					break;
+				}
+			}
+		}
+		Zotero.debug("Done with full-text syncing");
 	}.bind(this));
 	
 	
