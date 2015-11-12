@@ -158,9 +158,10 @@ Zotero.Sync.APIClient.prototype = {
 	 * @param {Integer} libraryTypeID  userID or groupID
 	 * @param {String} objectType  'item', 'collection', 'search'
 	 * @param {Object} queryParams  Query parameters (see buildRequestURI())
-	 * @return {Promise<Object>|FALSE} Object with 'libraryVersion' and 'results'
+	 * @return {Promise<Object>|false} - Object with 'libraryVersion' and 'results', or false if
+	 *     nothing changed since specified library version
 	 */
-	getVersions: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, objectType, queryParams, libraryVersion) {
+	getVersions: Zotero.Promise.coroutine(function* (libraryType, libraryTypeID, objectType, queryParams) {
 		var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 		
 		var params = {
@@ -184,11 +185,6 @@ Zotero.Sync.APIClient.prototype = {
 		var options = {
 			successCodes: [200, 304]
 		};
-		if (libraryVersion) {
-			options.headers = {
-				"If-Modified-Since-Version": libraryVersion
-			};
-		}
 		var xmlhttp = yield this.makeRequest("GET", uri, options);
 		if (xmlhttp.status == 304) {
 			return false;
