@@ -297,6 +297,7 @@ Zotero.Sync.APIClient.prototype = {
 		
 		var xmlhttp = yield this.makeRequest(method, uri, {
 			headers: {
+				"Content-Type": "application/json",
 				"If-Unmodified-Since-Version": libraryVersion
 			},
 			body: json,
