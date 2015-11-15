@@ -3115,11 +3115,10 @@ var ZoteroPane = new function()
 		if (parentKey) {
 			item.parentKey = parentKey;
 		}
-		var itemID = yield item.saveTx();
-		
-		if (!parentKey && this.itemsView && this.collectionsView.selectedTreeRow.isCollection()) {
-			yield this.collectionsView.selectedTreeRow.ref.addItem(itemID);
+		else if (this.collectionsView.selectedTreeRow.isCollection()) {
+			item.addToCollection(this.collectionsView.selectedTreeRow.ref.id);
 		}
+		var itemID = yield item.saveTx();
 		
 		yield this.selectItem(itemID);
 		
@@ -3181,13 +3180,14 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.createItemAndNoteFromSelectedText = function (event) {
+	this.createItemAndNoteFromSelectedText = Zotero.Promise.coroutine(function* (event) {
 		var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString();
 		var uri = event.currentTarget.ownerDocument.popupNode.ownerDocument.location.href;
-		var itemID = ZoteroPane.addItemFromPage();
-		var {libraryID, key} = Zotero.Items.getLibraryAndKeyFromID(itemID);
-		ZoteroPane.newNote(false, key, str, uri)
-	};
+		var item = yield ZoteroPane.addItemFromPage();
+		if (item) {
+			return ZoteroPane.newNote(false, item.key, str, uri)
+		}
+	});
 	
 	
 	
@@ -3316,28 +3316,33 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.addItemFromPage = function (itemType, saveSnapshot, row) {
-		return Zotero.Promise.try(function () {
-			if(Zotero.isConnector) {
-				// In connector, save page via Zotero Standalone
-				var doc = window.content.document;
-				Zotero.Connector.callMethod("saveSnapshot", {"url":doc.location.toString(),
-					"cookie":doc.cookie, "html":doc.documentElement.innerHTML,
-					"skipSnapshot": saveSnapshot === false || (saveSnapshot === true ? false : undefined)},
-				function(returnValue, status) {
-					_showPageSaveStatus(doc.title);
-				});
-				return;
-			}
-			
-			if ((row || (this.collectionsView && this.collectionsView.selection)) && !this.canEdit(row)) {
-				this.displayCannotEditLibraryMessage();
-				return;
-			}
-			
-			return this.addItemFromDocument(window.content.document, itemType, saveSnapshot, row);
-		}.bind(this));
-	}
+	/**
+	 * @return {Promise<Zotero.Item>|false}
+	 */
+	this.addItemFromPage = Zotero.Promise.method(function (itemType, saveSnapshot, row) {
+		if(Zotero.isConnector) {
+			// In connector, save page via Zotero Standalone
+			var doc = window.content.document;
+			Zotero.Connector.callMethod("saveSnapshot", {"url":doc.location.toString(),
+				"cookie":doc.cookie, "html":doc.documentElement.innerHTML,
+				"skipSnapshot": saveSnapshot === false || (saveSnapshot === true ? false : undefined)},
+			function(returnValue, status) {
+				_showPageSaveStatus(doc.title);
+			});
+			return false;
+		}
+		
+		if (!row && this.collectionsView && this.collectionsView.selection) {
+			row = this.collectionsView.selection.currentIndex;
+		}
+		
+		if (!this.canEdit(row)) {
+			this.displayCannotEditLibraryMessage();
+			return false;
+		}
+		
+		return this.addItemFromDocument(window.content.document, itemType, saveSnapshot, row);
+	});
 	
 	/**
 	 * Shows progress dialog for a webpage/snapshot save request
@@ -3356,6 +3361,7 @@ var ZoteroPane = new function()
 	 * @param	{String|Integer}	[itemType='webpage']	Item type id or name
 	 * @param	{Boolean}			[saveSnapshot]			Force saving or non-saving of a snapshot,
 	 *														regardless of automaticSnapshots pref
+	 * @return {Promise<Zotero.Item>|false}
 	 */
 	this.addItemFromDocument = Zotero.Promise.coroutine(function* (doc, itemType, saveSnapshot, row) {
 		_showPageSaveStatus(doc.title);
@@ -3399,7 +3405,7 @@ var ZoteroPane = new function()
 				
 				if (row && !this.canEdit(row)) {
 					this.displayCannotEditLibraryMessage();
-					return;
+					return false;
 				}
 				
 				if (row !== undefined) {
@@ -3416,7 +3422,7 @@ var ZoteroPane = new function()
 				
 				if (row && !this.canEditFiles(row)) {
 					this.displayCannotEditLibraryFilesMessage();
-					return;
+					return false;
 				}
 				
 				if (collectionTreeRow && collectionTreeRow.isCollection()) {
@@ -3433,7 +3439,7 @@ var ZoteroPane = new function()
 				});
 				
 				yield this.selectItem(item.id);
-				return;
+				return false;
 			}
 		}
 		
@@ -3467,7 +3473,7 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		return item.id;
+		return item;
 	});
 	
 	

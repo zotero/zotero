@@ -1600,7 +1600,7 @@ Zotero.ItemTreeView.prototype.selectItem = Zotero.Promise.coroutine(function* (i
 	var selected = this.getSelectedItems(true);
 	if (selected.length == 1 && selected[0] == id) {
 		Zotero.debug("Item " + id + " is already selected");
-		return;
+		return true;
 	}
 	
 	var row = this._rowMap[id];

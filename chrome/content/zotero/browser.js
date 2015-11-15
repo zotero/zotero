@@ -150,29 +150,34 @@ var Zotero_Browser = new function() {
 	 *
 	 * @param {String} [translator]
 	 * @param {Event} [event]
+	 * @return {Promise}
 	 */
-	this.scrapeThisPage = function (translator, event) {
+	this.scrapeThisPage = Zotero.Promise.coroutine(function* (translator, event) {
 		// Perform translation
 		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
 		var page = tab.getPageObject();
 		if(page.translators && page.translators.length) {
 			page.translate.setTranslator(translator || page.translators[0]);
-			Zotero_Browser.performTranslation(page.translate); // TODO: async
+			yield Zotero_Browser.performTranslation(page.translate);
 		}
 		else {
-			this.saveAsWebPage(
+			yield this.saveAsWebPage(
 				(event && event.shiftKey) ? !Zotero.Prefs.get('automaticSnapshots') : null
 			);
 		}
-	}
+	});
 	
-	// Keep in sync with cmd_zotero_newItemFromCurrentPage
+	/**
+	 * Keep in sync with cmd_zotero_newItemFromCurrentPage
+	 *
+	 * @return {Promise}
+	 */
 	this.saveAsWebPage = function (includeSnapshots) {
 		// DEBUG: Possible to just trigger command directly with event? Assigning it to the
 		// command property of the icon doesn't seem to work, and neither does goDoCommand()
 		// from chrome://global/content/globalOverlay.js. Getting the command by id and
 		// running doCommand() works but doesn't pass the event.
-		ZoteroPane.addItemFromPage('temporaryPDFHack', includeSnapshots);
+		return ZoteroPane.addItemFromPage('temporaryPDFHack', includeSnapshots);
 	}
 	
 	/*
@@ -655,6 +660,8 @@ var Zotero_Browser = new function() {
 		translate.clearHandlers("itemDone");
 		translate.clearHandlers("attachmentProgress");
 		
+		var deferred = Zotero.Promise.defer();
+		
 		translate.setHandler("done", function(obj, returnValue) {		
 			if(!returnValue) {
 				Zotero_Browser.progress.show();
@@ -669,6 +676,8 @@ var Zotero_Browser = new function() {
 				Zotero_Browser.progress.startCloseTimer();
 			}
 			Zotero_Browser.isScraping = false;
+			
+			deferred.resolve();
 		});
 		
 		translate.setHandler("itemDone", function(obj, dbItem, item) {
@@ -682,11 +691,6 @@ var Zotero_Browser = new function() {
 					new Zotero_Browser.progress.ItemProgress(
 						Zotero.Utilities.determineAttachmentIcon(attachment),
 						attachment.title, itemProgress));
-			}
-			
-			// add item to collection, if one was specified
-			if(collection) {
-				collection.addItem(dbItem.id);
 			}
 		});
 		
@@ -702,7 +706,12 @@ var Zotero_Browser = new function() {
 			}
 		});
 		
-		translate.translate(libraryID);
+		translate.translate({
+			libraryID,
+			collections: collection ? [collection.id] : false
+		});
+		
+		return deferred.promise;
 	});
 	
 	

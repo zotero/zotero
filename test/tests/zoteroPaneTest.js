@@ -45,6 +45,15 @@ describe("ZoteroPane", function() {
 			assert.lengthOf(selected, 1);
 			assert.equal(selected, noteID);
 		})
+		
+		it("should create a standalone note within a collection and select it", function* () {
+			var collection = yield createDataObject('collection');
+			var noteID = yield zp.newNote(false, false, "Test");
+			assert.equal(zp.collectionsView.getSelectedCollection(), collection);
+			var selected = zp.itemsView.getSelectedItems(true);
+			assert.lengthOf(selected, 1);
+			assert.equal(selected, noteID);
+		})
 	})
 	
 	describe("#itemSelected()", function () {

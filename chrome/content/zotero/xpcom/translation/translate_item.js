@@ -45,6 +45,8 @@ Zotero.Translate.ItemSaver = function(options) {
 		this._libraryID = options.libraryID;
 	}
 	
+	this._collections = options.collections || false;
+	
 	// If group filesEditable==false, don't save attachments
 	this.attachmentMode = Zotero.Libraries.isFilesEditable(this._libraryID) ? options.attachmentMode :
 	                      Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE;
@@ -108,7 +110,11 @@ Zotero.Translate.ItemSaver.prototype = {
 								id:item.itemID || item.id
 							};
 							newItem.fromJSON(this._deleteIrrelevantFields(item));
-
+							
+							if (this._collections) {
+								newItem.setCollections(this._collections);
+							}
+							
 							// save item
 							myID = yield newItem.save();
 
@@ -595,6 +601,9 @@ Zotero.Translate.ItemSaver.prototype = {
 			this._handleRelated(note, myNote);
 		} else {
 			myNote.setNote(note);
+		}
+		if (this._collections) {
+			myNote.setCollections(this._collections);
 		}
 		yield myNote.save();
 		return myNote;

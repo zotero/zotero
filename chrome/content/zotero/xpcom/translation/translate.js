@@ -512,7 +512,11 @@ Zotero.Translate.Sandbox = {
 						var newCallback = function(selectedItems) {
 							callbackExecuted = true;
 							if(haveAsyncHandler) {
-								translate.translate(translate._libraryID, translate._saveAttachments, selectedItems);
+								translate.translate({
+									libraryID: translate._libraryID,
+									saveAttachments: translate._saveAttachments,
+									selectedItems
+								});
 							} else {
 								returnedItems = transferObject(selectedItems);
 							}
@@ -1182,16 +1186,24 @@ Zotero.Translate.Base.prototype = {
 	 * @returns {Promise}                                       Promise resolved with saved items
 	 *                                                          when translation complete
 	 */
-	"translate":function(libraryID, saveAttachments) {		// initialize properties specific to each translation
+	"translate": function (options = {}, ...args) {		// initialize properties specific to each translation
+		if (typeof options == 'number') {
+			Zotero.debug("Translate: translate() now takes an object -- update your code", 2);
+			options = {
+				libraryID: options,
+				saveAttachments: args[0],
+				selectedItems: args[1]
+			};
+		}
+		
 		if(!this.translator || !this.translator.length) {
-			var args = arguments;
 			Zotero.debug("Translate: translate called without specifying a translator. Running detection first.");
 			this.setHandler('translators', function(me, translators) {
 				if(!translators.length) {
 					me.complete(false, "Could not find an appropriate translator");
 				} else {
 					me.setTranslator(translators);
-					Zotero.Translate.Base.prototype.translate.apply(me, args);
+					Zotero.Translate.Base.prototype.translate.call(me, options);
 				}
 			});
 			this.getTranslators();
@@ -1200,8 +1212,9 @@ Zotero.Translate.Base.prototype = {
 		
 		this._currentState = "translate";
 		
-		this._libraryID = libraryID;
-		this._saveAttachments = saveAttachments === undefined || saveAttachments;
+		this._libraryID = options.libraryID;
+		this._collections = options.collections;
+		this._saveAttachments = options.saveAttachments === undefined || options.saveAttachments;
 		this._savingAttachments = [];
 		this._savingItems = 0;
 		this._waitingForSave = false;
@@ -1849,6 +1862,7 @@ Zotero.Translate.Web.prototype._getParameters = function() {
 Zotero.Translate.Web.prototype._prepareTranslation = function() {
 	this._itemSaver = new Zotero.Translate.ItemSaver({
 		"libraryID":this._libraryID,
+		"collections": this._collections,
 		"attachmentMode":Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_DOWNLOAD" : "ATTACHMENT_MODE_IGNORE")],
 		"forceTagType":1,
 		"cookieSandbox":this._cookieSandbox,
@@ -1860,9 +1874,17 @@ Zotero.Translate.Web.prototype._prepareTranslation = function() {
 /**
  * Overload translate to set selectedItems
  */
-Zotero.Translate.Web.prototype.translate = function(libraryID, saveAttachments, selectedItems) {
-	this._selectedItems = selectedItems;
-	return Zotero.Translate.Base.prototype.translate.apply(this, [libraryID, saveAttachments]);
+Zotero.Translate.Web.prototype.translate = function (options = {}, ...args) {
+	if (typeof options == 'number') {
+		Zotero.debug("Translate: translate() now takes an object -- update your code", 2);
+		options = {
+			libraryID: options,
+			saveAttachments: args[0],
+			selectedItems: args[1]
+		};
+	}
+	this._selectedItems = options.selectedItems;
+	return Zotero.Translate.Base.prototype.translate.call(this, options);
 }
 
 /**
@@ -2161,6 +2183,7 @@ Zotero.Translate.Import.prototype._prepareTranslation = function() {
 
 	this._itemSaver = new Zotero.Translate.ItemSaver({
 		"libraryID":this._libraryID,
+		"collections": this._collections,
 		"attachmentMode":Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_FILE" : "ATTACHMENT_MODE_IGNORE")],
 		"baseURI":baseURI
 	});
@@ -2411,7 +2434,10 @@ Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
 		if(error) Zotero.debug(this._generateErrorString(error), 3);
 		if(this.translator.length > 1) {
 			this.translator.shift();
-			this.translate(this._libraryID, this._saveAttachments);
+			this.translate({
+				libraryID: this._libraryID,
+				saveAttachments: this._saveAttachments
+			});
 			return;
 		} else {
 			error = "No items returned from any translator";
