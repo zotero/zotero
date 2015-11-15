@@ -44,8 +44,10 @@ function loadBrowserWindow() {
 /**
  * Loads a Zotero pane in a new window and selects My Library. Returns the containing window.
  */
-var loadZoteroPane = Zotero.Promise.coroutine(function* () {
-	var win = yield loadBrowserWindow();
+var loadZoteroPane = Zotero.Promise.coroutine(function* (win) {
+	if (!win) {
+		var win = yield loadBrowserWindow();
+	}
 	Zotero.Prefs.clear('lastViewedFolder');
 	win.ZoteroOverlay.toggleDisplay(true);
 	
