@@ -8,7 +8,8 @@ describe("Zotero.Sync.Storage.Local", function () {
 	});
 	beforeEach(function* () {
 		yield resetDB({
-			thisArg: this
+			thisArg: this,
+			skipBundledFiles: true
 		})
 	})
 	after(function () {
