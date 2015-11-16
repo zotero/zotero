@@ -3075,6 +3075,37 @@ Zotero.ItemTreeView.prototype.drop = Zotero.Promise.coroutine(function* (row, or
 	}
 });
 
+// Prompt about invalid drag item on unsuccessful drag
+Zotero.ItemTreeView.prototype.onDragEnd = function(event) {
+	if(event.dataTransfer.dropEffect != "none") {
+		return;
+	}
+		
+	var target = event.target;
+	if (target.tagName != 'treechildren') {
+		return;
+	}
+	
+	event = Zotero.DragDrop.currentEvent;
+	var tree = event.target.parentNode;
+	let row = {}, col = {}, obj = {};
+	tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
+	var view = tree.ownerDocument.defaultView.ZoteroPane.collectionsView;
+	var treeRow = view.getRow(row.value);
+	
+	// Zotero items in My Pubs only
+	if(tree.id == 'zotero-collections-tree' && treeRow.isPublications()) {
+		// Due to a really bizzare bug, the alert needs to be displayed async
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=100180
+		setTimeout(function() { 
+			Services.prompt.alert(null,
+			Zotero.getString('drag.invalid.title'),
+			Zotero.getString('drag.publications.onlyTopLevel')) 
+		}, 50);
+	}
+	
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
