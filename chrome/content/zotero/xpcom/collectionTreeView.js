@@ -662,6 +662,9 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 	
 	switch (collectionType) {
 		case 'library':
+			if(! treeRow.editable) {
+				return "chrome://zotero/skin/treesource-" + collectionType + "-readonly" + suffix + ".png"
+			}
 			break;
 		
 		case 'trash':
@@ -684,6 +687,9 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 			break;
 		
 		case 'collection':
+			if(! treeRow.editable && ! Zotero.isMac) {
+				return "chrome://zotero/skin/treesource-" + collectionType + "-readonly" + suffix + ".png"
+			}
 		case 'search':
 			if (Zotero.isMac) {
 				return "chrome://zotero-platform/content/treesource-" + collectionType + ".png";
