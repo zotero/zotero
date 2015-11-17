@@ -625,6 +625,47 @@ Zotero.Items = function() {
 	});
 	
 	
+	/**
+	 * Returns an array of items with groups of child items replaced with parents
+	 * where possible.
+	 * @return {Array<Zotero.Item>}
+	 */
+	this.replaceChildren = function(items) {
+		var parents = {}, itemMap = {};
+		for (let item of items) {
+			itemMap[item.id] = item;
+			if (item.parentID) {
+				// Found a new parent
+				if (! parents[item.parentID]) {
+					parents[item.parentID] = [this.get(item.parentID), []]
+				}
+				let parent = parents[item.parentID];
+				// Track all child items of a parent
+				parent[1].push(item);
+			}
+		}
+		for (let id in parents) {
+			// If all children of a parent already in items OR
+			// parent itself is already in the array
+			// replace with just the parent and remove the children.
+			let parent = parents[id];
+			if(parent[0].numChildren() == parent[1].length || itemMap[parent[0].id]) {
+				for (let i of parent[1]) {
+					delete itemMap[i.id];
+				}
+				itemMap[parent[0].id] = parent[0];
+			}
+		}
+		// This is unfortunately 90x (!) faster than any of ES6 syntactic sugar
+		let result = [];
+		for (let id in itemMap) {
+			result.push(itemMap[id])
+		}
+			
+		return result;	
+	}
+	
+	
 	this._postLoad = function (libraryID, ids) {
 		if (!ids) {
 			if (!this._cachedFields[libraryID]) {
