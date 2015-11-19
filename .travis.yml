@@ -3,20 +3,18 @@ language: cpp
 compiler:
     - gcc
 env:
-    - FX_PATH_SUFFIX=""
-    - FX_PATH_SUFFIX="-esr"
-    - FX_PATH_SUFFIX="-beta"
-#    - FX_PATH_SUFFIX="-prior-esr"
+    - FX_CHANNEL=""
+    - FX_CHANNEL="-esr"
+    - FX_CHANNEL="-beta"
 matrix:
     fast_finish: true
     allow_failures:
-        - env: FX_PATH_SUFFIX="-beta"
-        - env: FX_PATH_SUFFIX="-prior-esr"
+        - env: FX_CHANNEL="-beta"
 notifications:
     email: false
 install:
-    - wget `curl -s "http://ftp.mozilla.org/pub/firefox/releases/latest${FX_PATH_SUFFIX}/linux-x86_64/en-US/" | grep .tar. | tail -n 1 | sed -E 's/.+(\/pub\/[^"]+).+/http:\/\/ftp.mozilla.org\1/g'`
-    - tar -xf firefox-*.tar.*
+    - wget -O tarball "https://download.mozilla.org/?product=firefox${FX_CHANNEL}-latest&os=linux64&lang=en-US"
+    - tar xf tarball
 before_script:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
