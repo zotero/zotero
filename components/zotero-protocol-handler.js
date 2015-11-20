@@ -1149,17 +1149,13 @@ function AsyncChannel(uri, gen) {
 }
 
 AsyncChannel.prototype = {
-	asyncOpen: function (streamListener, context) {
+	asyncOpen: Zotero.Promise.coroutine(function* (streamListener, context) {
 		if (this.loadGroup) this.loadGroup.addRequest(this, null);
 		
 		var channel = this;
 		
 		var resolve;
 		var reject;
-		var promise = new Zotero.Promise(function () {
-			resolve = arguments[0];
-			reject = arguments[1];
-		});
 		
 		var listenerWrapper = {
 			onStartRequest: function (request, context) {
@@ -1194,10 +1190,10 @@ AsyncChannel.prototype = {
 			uri2.spec = uri2.scheme + '://' + matches[1] + '/' + (matches[2] ? matches[2] : '');
 			var data = Zotero.File.getContentsFromURL(uri2.spec);
 		}
-		Zotero.Promise.try(function () {
-			return data ? data : Zotero.spawn(channel._generator, channel);
-		})
-		.then(function (data) {
+		try {
+			if (!data) {
+				data = yield Zotero.spawn(channel._generator, channel)
+			}
 			if (typeof data == 'string') {
 				Zotero.debug("AsyncChannel: Got string from generator");
 				
@@ -1210,7 +1206,6 @@ AsyncChannel.prototype = {
 				listenerWrapper.onDataAvailable(this, context, inputStream, 0, data.length);
 				
 				listenerWrapper.onStopRequest(this, context, this.status);
-				return promise;
 			}
 			// If an async input stream is given, pass the data asynchronously to the stream listener
 			else if (data instanceof Ci.nsIAsyncInputStream) {
@@ -1219,7 +1214,6 @@ AsyncChannel.prototype = {
 				var pump = Cc["@mozilla.org/network/input-stream-pump;1"].createInstance(Ci.nsIInputStreamPump);
 				pump.init(data, -1, -1, 0, 0, true);
 				pump.asyncRead(listenerWrapper, context);
-				return promise;
 			}
 			else if (data instanceof Ci.nsIFile || data instanceof Ci.nsIURI) {
 				if (data instanceof Ci.nsIFile) {
@@ -1229,10 +1223,14 @@ AsyncChannel.prototype = {
 				else {
 					Zotero.debug("AsyncChannel: Got URI from generator");
 				}
-				
+
 				let uri = data;
 				uri.QueryInterface(Ci.nsIURL);
 				this.contentType = Zotero.MIME.getMIMETypeFromExtension(uri.fileExtension);
+				if (!this.contentType) {
+					let sample = yield Zotero.File.getSample(data);
+					this.contentType = Zotero.MIME.getMIMETypeFromData(sample);
+				}
 				
 				Components.utils.import("resource://gre/modules/NetUtil.jsm");
 				NetUtil.asyncFetch(data, function (inputStream, status) {
@@ -1250,7 +1248,6 @@ AsyncChannel.prototype = {
 					}
 					listenerWrapper.onStopRequest(channel, context, status);
 				});
-				return promise;
 			}
 			else if (data === undefined) {
 				this.cancel(0x804b0002); // BINDING_ABORTED
@@ -1258,25 +1255,22 @@ AsyncChannel.prototype = {
 			else {
 				throw new Error("Invalid return type (" + typeof data + ") from generator passed to AsyncChannel");
 			}
-		}.bind(this))
-		.then(function () {
+			
 			if (this._isPending) {
 				Zotero.debug("AsyncChannel request succeeded in " + (new Date - t) + " ms");
 				channel._isPending = false;
 			}
-		})
-		.catch(function (e) {
+		} catch (e) {
 			Zotero.debug(e, 1);
 			if (channel._isPending) {
 				streamListener.onStopRequest(channel, context, Components.results.NS_ERROR_FAILURE);
 				channel._isPending = false;
 			}
 			throw e;
-		})
-		.finally(function () {
+		} finally {
 			if (channel.loadGroup) channel.loadGroup.removeRequest(channel, null, 0);
-		});
-	},
+		}
+	}),
 	
 	// nsIRequest
 	isPending: function () {
