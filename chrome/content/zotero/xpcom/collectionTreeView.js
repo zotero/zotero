@@ -662,7 +662,7 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 	
 	switch (collectionType) {
 		case 'library':
-			if(! treeRow.editable) {
+			if (!treeRow.editable) {
 				return "chrome://zotero/skin/treesource-" + collectionType + "-readonly" + suffix + ".png"
 			}
 			break;
@@ -1370,7 +1370,7 @@ Zotero.CollectionTreeView.prototype.canDropCheck = function (row, orient, dataTr
 		if (dataType == 'zotero/item') {
 			var ids = data;
 			var items = Zotero.Items.get(ids);
-			items = Zotero.Items.replaceChildren(items);
+			items = Zotero.Items.keepParents(items);
 			var skip = true;
 			for each(var item in items) {
 				// Can only drag top-level items
@@ -1857,7 +1857,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		
 		if (targetTreeRow.isPublications()) {
 			let items = yield Zotero.Items.getAsync(ids);
-			items = Zotero.Items.replaceChildren(items);
+			items = Zotero.Items.keepParents(items);
 			let io = yield this._treebox.treeBody.ownerDocument.defaultView.ZoteroPane
 				.showPublicationsWizard(items);
 			if (!io) {
@@ -1874,7 +1874,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		
 		yield Zotero.DB.executeTransaction(function* () {
 			var items = yield Zotero.Items.getAsync(ids);
-			items = Zotero.Items.replaceChildren(items);
+			items = Zotero.Items.keepParents(items);
 			if (!items) {
 				return;
 			}
