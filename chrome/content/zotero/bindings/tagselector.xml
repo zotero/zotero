@@ -934,13 +934,16 @@
 							}
 						}
 						*/
-						
+
+						// Store the event, because drop event does not have shiftKey attribute set
+						Zotero.DragDrop.currentEvent = event;
 						event.target.setAttribute('draggedOver', true);
 						event.preventDefault();
-						event.effectAllowed = event.dropEffect = "link";
+						event.dataTransfer.dropEffect = "copy";
 					}
 					
 					this.onDragExit = function (event) {
+						Zotero.DragDrop.currentEvent = null;
 						event.target.setAttribute('draggedOver', false);
 					}
 					
@@ -962,7 +965,11 @@
 							
 							for (let i=0; i<items.length; i++) {
 								let item = items[i];
-								item.addTag(value);
+								if (Zotero.DragDrop.currentEvent.shiftKey) {
+									item.removeTag(value);
+								} else {
+									item.addTag(value);
+								}
 								yield item.save();
 							}
 						}.bind(this));
