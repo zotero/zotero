@@ -403,28 +403,35 @@ Zotero.Styles = new function() {
 			}
 		});
 		
-		// User wants to install/update
-		if(source && !_styles[source]) {
-			// Need to fetch source
-			if(source.substr(0, 7) === "http://" || source.substr(0, 8) === "https://") {
-				try {
-					let xmlhttp = yield Zotero.HTTP.request("GET", source);
-					yield _install(xmlhttp.responseText, origin, true);
-				}
-				catch (e) {
-					if (typeof e === "object" && e instanceof Zotero.Exception.Alert) {
-						throw new Zotero.Exception.Alert(
-							"styles.installSourceError",
-							[origin, source],
-							"styles.install.title",
-							e
-						);
+		// For dependent style, check if independent-parent is installed,
+		// otherwise try to install it
+		if (source) {
+			var httpRegex = new RegExp("/^https?:\/\//i");
+			var httpSource = source.replace(httpRegex,"http://");
+			var httpsSource = source.replace(httpRegex,"https://");
+		
+			if (!_styles[httpSource] || !_styles[httpsSource]) {
+				// Need to fetch source
+				if (source.match(httpRegex)) {
+					try {
+						let xmlhttp = yield Zotero.HTTP.request("GET", source);
+						yield _install(xmlhttp.responseText, origin, true);
 					}
-					throw e;
+					catch (e) {
+						if (typeof e === "object" && e instanceof Zotero.Exception.Alert) {
+							throw new Zotero.Exception.Alert(
+								"styles.installSourceError",
+								[origin, source],
+								"styles.install.title",
+								e
+							);
+						}
+						throw e;
+					}
+				} else {
+					throw new Zotero.Exception.Alert("styles.installSourceError", [origin, source],
+						"styles.install.title", "Source CSL URI is invalid");
 				}
-			} else {
-				throw new Zotero.Exception.Alert("styles.installSourceError", [origin, source],
-					"styles.install.title", "Source CSL URI is invalid");
 			}
 		}
 		
