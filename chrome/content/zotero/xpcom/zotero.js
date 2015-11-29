@@ -2772,8 +2772,9 @@ Zotero.UnresponsiveScriptIndicator = new function() {
 Zotero.WebProgressFinishListener = function(onFinish) {
 	this.onStateChange = function(wp, req, stateFlags, status) {
 		//Zotero.debug('onStageChange: ' + stateFlags);
-		if ((stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP)
-				&& (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK)) {
+		if (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP
+				&& stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_REQUEST
+				&& stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK) {
 			onFinish();
 		}
 	}
