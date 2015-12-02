@@ -118,6 +118,30 @@ grid row hbox:first-child
 	margin-right: 10px;
 }
 
+#zotero-prefpane-sync #sync-status-indicator
+{
+	width: 1.5em;
+	height: 1.7em;
+	margin-top: 0.4em;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+#zotero-prefpane-sync #sync-status-indicator[verified=true]
+{
+	background-image: url("chrome://zotero/skin/tick.png")
+}
+
+#zotero-prefpane-sync #sync-status-indicator[verified=false]
+{
+	background-image: url("chrome://zotero/skin/cross.png")
+}
+
+#zotero-prefpane-sync #sync-status-indicator[animated]
+{
+	background-image: url("chrome://zotero/skin/arrow_rotate_animated.png")
+}
+
 .storage-settings-download-options
 {
 	margin-left: 40px;

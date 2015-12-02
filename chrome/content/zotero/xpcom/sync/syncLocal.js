@@ -55,9 +55,11 @@ Zotero.Sync.Data.Local = {
 		var oldLoginInfo = this._getAPIKeyLoginInfo();
 		
 		// Clear old login
-		if (oldLoginInfo && (!apiKey || apiKey === "")) {
-			Zotero.debug("Clearing old API key");
-			loginManager.removeLogin(oldLoginInfo);
+		if ((!apiKey || apiKey === "")) {
+			if (oldLoginInfo) {
+				Zotero.debug("Clearing old API key");
+				loginManager.removeLogin(oldLoginInfo);
+			}
 			return;
 		}
 		
@@ -151,6 +153,31 @@ Zotero.Sync.Data.Local = {
 			}
 		}
 		return '';
+	},
+	
+	
+	removeLegacyLogins: function () {
+		var loginManagerHost = 'chrome://zotero';
+		var loginManagerRealm = 'Zotero Sync Server';
+		
+		Zotero.debug('Removing legacy Zotero sync credentials (api key acquired)');
+		
+		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
+			.getService(Components.interfaces.nsILoginManager);
+		try {
+			var logins = loginManager.findLogins({}, loginManagerHost, null, loginManagerRealm);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return '';
+		}
+		
+		// Remove all legacy users
+		for (let login of logins) {
+			loginManager.removeLogin(login);
+		}
+		// Remove the legacy pref
+		Zotero.Pref.clear('sync.server.username');
 	},
 	
 	

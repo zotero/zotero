@@ -47,216 +47,240 @@
 		<tabbox>
 			<tabs>
 				<tab label="&zotero.preferences.settings;"/>
-				<tab label="&zotero.preferences.sync.reset;"/>
+				<tab id="sync-reset-tab" label="&zotero.preferences.sync.reset;" disabled="true"/>
 			</tabs>
 			
 			<tabpanels>
 				<tabpanel orient="vertical">
-					<groupbox>
-						<caption label="&zotero.preferences.sync.syncServer;"/>
-						
-						<hbox>
-							<grid>
+					<vbox id="sync-unauthorized">
+						<groupbox>
+							<caption label="&zotero.preferences.sync.syncServer;"/>
+
+							<hbox>
+								<grid>
+									<columns>
+										<column/>
+										<column/>
+									</columns>
+
+									<rows>
+										<row>
+											<label value="&zotero.preferences.sync.username;"/>
+											<textbox id="sync-username-textbox"
+												preference="pref-sync-username"
+												onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event);"/>
+										</row>
+										<row>
+											<label value="&zotero.preferences.sync.password;"/>
+											<textbox id="sync-password" type="password"
+												onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event);"/>
+										</row>
+										<vbox align="center">
+											<hbox align="baseline">
+												<button id="sync-auth-button"
+													label="&zotero.preferences.sync.setUpSync;"
+													oncommand="Zotero_Preferences.Sync.linkAccount(event)"
+													disabled="true"/>
+												<label id="sync-status-indicator"/>
+											</hbox>
+										</vbox>
+									</rows>
+								</grid>
+								<vbox style="width:2em"/>
+								<vbox>
+									<label class="zotero-text-link" value="&zotero.preferences.sync.createAccount;" href="http://zotero.org/user/register"/>
+									<separator class="thin"/>
+									<label class="zotero-text-link" value="&zotero.preferences.sync.lostPassword;" href="http://zotero.org/user/lostpassword"/>
+									<separator class="thin"/>
+									<label class="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
+								</vbox>
+							</hbox>
+						</groupbox>
+					</vbox>
+
+					<vbox id="sync-authorized" hidden="true">
+						<groupbox>
+							<caption label="&zotero.preferences.sync.syncServer;"/>
+
+							<hbox>
+								<grid>
+									<columns>
+										<column/>
+										<column/>
+									</columns>
+
+									<rows>
+										<row>
+											<label value="&zotero.preferences.sync.username;"/>
+											<label id="sync-username" value="Username"/>
+										</row>
+										<row>
+											<box/>
+											<button label="&zotero.preferences.sync.unlinkAccount;"
+													oncommand="Zotero_Preferences.Sync.unlinkAccount()"/>
+										</row>
+										<!--
+										<row>
+											<box/>
+											<button label="Access Control" oncommand="Zotero.alert('Not implemented');"/>
+										</row>
+										-->
+										<row>
+											<box/>
+											<checkbox label="&zotero.preferences.sync.syncAutomatically;"
+													  disabled="true"/>
+										</row>
+										<row>
+											<box/>
+											<checkbox label="&zotero.preferences.sync.syncFullTextContent;"
+													  tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"
+													  disabled="true"/>
+										</row>
+									</rows>
+								</grid>
+								<vbox>
+									<label class="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
+								</vbox>
+							</hbox>
+
+						</groupbox>
+
+						<groupbox id="storage-settings">
+							<caption label="&zotero.preferences.sync.fileSyncing;"/>
+
+							<!-- My Library -->
+							<hbox>
+								<checkbox label="&zotero.preferences.sync.fileSyncing.myLibrary;"
+										preference="pref-storage-enabled"
+										oncommand="Zotero_Preferences.Sync.updateStorageSettings(this.checked, null)"/>
+								<menulist id="storage-protocol" class="storage-personal"
+										style="margin-left: .5em"
+										preference="pref-storage-protocol"
+										oncommand="Zotero_Preferences.Sync.updateStorageSettings(null, this.value)">
+									<menupopup>
+										<menuitem label="Zotero" value="zotero"/>
+										<menuitem label="WebDAV" value="webdav" disabled="true"/><!-- TEMP -->
+									</menupopup>
+								</menulist>
+							</hbox>
+
+							<stack id="storage-webdav-settings" style="margin-top: .5em; margin-bottom: .8em; border: 1px gray solid; border-radius: 3px">
+							<!-- Background shading -->
+							<box style="background: black; opacity:.03"/>
+
+							<grid style="padding: .7em .4em .7em 0">
 								<columns>
 									<column/>
-									<column/>
+									<column flex="1"/>
 								</columns>
-								
+
 								<rows>
-									<!--
+									<row>
+										<label value="&zotero.preferences.sync.fileSyncing.url;"/>
+										<hbox>
+											<menulist id="storage-url-prefix"
+													preference="pref-storage-scheme"
+													onsynctopreference="Zotero_Preferences.Sync.unverifyStorageServer()"
+													style="padding: 0; width: 7em">
+												<menupopup>
+													<menuitem label="https" value="https" style="padding: 0"/>
+													<menuitem label="http" value="http" style="padding: 0"/>
+												</menupopup>
+											</menulist>
+											<label value="://"/>
+											<textbox id="storage-url" flex="1"
+												preference="pref-storage-url"
+												onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) {
+													this.blur();
+													setTimeout(Zotero_Preferences.Sync.verifyStorageServer, 1);
+												}"
+												onchange="Zotero_Preferences.Sync.unverifyStorageServer();
+													this.value = this.value.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, '');
+													Zotero.Prefs.set('sync.storage.url', this.value)"/>
+											<label value="/zotero/"/>
+										</hbox>
+									</row>
 									<row>
 										<label value="&zotero.preferences.sync.username;"/>
-										<textbox preference="pref-sync-username"
-											onchange="this.value = this.value.trim(); Zotero.Prefs.set('sync.server.username', this.value); var pass = document.getElementById('sync-password'); if (pass.value) { Zotero.Sync.Server.password = pass.value; }"/>
+										<hbox>
+											<textbox id="storage-username"
+												preference="pref-storage-username"
+												onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) {
+													this.blur();
+													setTimeout(Zotero_Preferences.Sync.verifyStorageServer, 1); }"
+												onchange="Zotero_Preferences.Sync.unverifyStorageServer();
+													Zotero.Prefs.set('sync.storage.username', this.value);
+													var pass = document.getElementById('storage-password');
+													if (pass.value) {
+														Zotero.Sync.Storage.WebDAV.password = pass.value;
+													}"/>
+										</hbox>
 									</row>
 									<row>
 										<label value="&zotero.preferences.sync.password;"/>
-										<textbox id="sync-password" type="password"
-											onchange="Zotero.Sync.Server.password = this.value"/>
+										<hbox>
+											<textbox id="storage-password" flex="0" type="password"
+												onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) {
+													this.blur();
+													setTimeout(Zotero_Preferences.Sync.verifyStorageServer, 1);
+												}"
+												onchange="Zotero_Preferences.Sync.unverifyStorageServer();
+													Zotero.Sync.Storage.WebDAV.password = this.value;"/>
+										</hbox>
 									</row>
-									-->
-									<row>
-										<label value="API Key (temp)"/>
-										<textbox id="sync-api-key" maxlength="24" size="25"
-											onchange="Zotero.Sync.Data.Local.setAPIKey(this.value)"/>
-									</row>
-									<row>
-										<box/>
-										<!--<checkbox label="&zotero.preferences.sync.syncAutomatically;" preference="pref-sync-autosync"/>-->
-										<checkbox label="&zotero.preferences.sync.syncAutomatically;"
-											disabled="true"/>
-									</row>
-									<row>
-										<box/>
-										<vbox>
-											<!--<checkbox label="&zotero.preferences.sync.syncFullTextContent;"
-												preference="pref-sync-fulltext-enabled"
-												tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"/>-->
-											<checkbox label="&zotero.preferences.sync.syncFullTextContent;"
-												tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"
-												disabled="true"/>
-										</vbox>
-									</row>
-									<!--
 									<row>
 										<box/>
 										<hbox>
-											<button label="Verify login"
-												oncommand="alert('Unimplemented')"/>
+											<button id="storage-verify" label="Verify Server"
+												oncommand="Zotero_Preferences.Sync.verifyStorageServer()"/>
+											<button id="storage-abort" label="Stop" hidden="true"/>
+											<progressmeter id="storage-progress" hidden="true"
+												mode="undetermined"/>
 										</hbox>
 									</row>
-									-->
 								</rows>
 							</grid>
-							
-							<hbox style="width:2em"/>
-							
-							<vbox>
-								<label class="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
-								<separator class="thin"/>
-								<label class="zotero-text-link" value="&zotero.preferences.sync.createAccount;" href="http://zotero.org/user/register"/>
-								<separator class="thin"/>
-								<label class="zotero-text-link" value="&zotero.preferences.sync.lostPassword;" href="http://zotero.org/user/lostpassword"/>
-							</vbox>
-						</hbox>
-					</groupbox>
-					
-					
-					<groupbox id="storage-settings">
-						<caption label="&zotero.preferences.sync.fileSyncing;"/>
-						
-						<!-- My Library -->
-						<hbox>
-							<checkbox label="&zotero.preferences.sync.fileSyncing.myLibrary;"
-									preference="pref-storage-enabled"
-									oncommand="Zotero_Preferences.Sync.updateStorageSettings(this.checked, null)"/>
-							<menulist id="storage-protocol" class="storage-personal"
-									style="margin-left: .5em"
-									preference="pref-storage-protocol"
-									oncommand="Zotero_Preferences.Sync.updateStorageSettings(null, this.value)">
-								<menupopup>
-									<menuitem label="Zotero" value="zotero"/>
-									<menuitem label="WebDAV" value="webdav" disabled="true"/><!-- TEMP -->
-								</menupopup>
-							</menulist>
-						</hbox>
-						
-						<stack id="storage-webdav-settings" style="margin-top: .5em; margin-bottom: .8em; border: 1px gray solid; border-radius: 3px">
-						<!-- Background shading -->
-						<box style="background: black; opacity:.03"/>
-						
-						<grid style="padding: .7em .4em .7em 0">
-							<columns>
-								<column/>
-								<column flex="1"/>
-							</columns>
-							
-							<rows>
-								<row>
-									<label value="&zotero.preferences.sync.fileSyncing.url;"/>
-									<hbox>
-										<menulist id="storage-url-prefix"
-												preference="pref-storage-scheme"
-												onsynctopreference="Zotero_Preferences.Sync.unverifyStorageServer()"
-												style="padding: 0; width: 7em">
-											<menupopup>
-												<menuitem label="https" value="https" style="padding: 0"/>
-												<menuitem label="http" value="http" style="padding: 0"/>
-											</menupopup>
-										</menulist>
-										<label value="://"/>
-										<textbox id="storage-url" flex="1"
-											preference="pref-storage-url"
-											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) {
-												this.blur();
-												setTimeout(Zotero_Preferences.Sync.verifyStorageServer, 1);
-											}"
-											onchange="Zotero_Preferences.Sync.unverifyStorageServer();
-												this.value = this.value.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, '');
-												Zotero.Prefs.set('sync.storage.url', this.value)"/>
-										<label value="/zotero/"/>
-									</hbox>
-								</row>
-								<row>
-									<label value="&zotero.preferences.sync.username;"/>
-									<hbox>
-										<textbox id="storage-username"
-											preference="pref-storage-username"
-											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) {
-												this.blur();
-												setTimeout(Zotero_Preferences.Sync.verifyStorageServer, 1); }"
-											onchange="Zotero_Preferences.Sync.unverifyStorageServer();
-												Zotero.Prefs.set('sync.storage.username', this.value);
-												var pass = document.getElementById('storage-password');
-												if (pass.value) {
-													Zotero.Sync.Storage.WebDAV.password = pass.value;
-												}"/>
-									</hbox>
-								</row>
-								<row>
-									<label value="&zotero.preferences.sync.password;"/>
-									<hbox>
-										<textbox id="storage-password" flex="0" type="password"
-											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) {
-												this.blur();
-												setTimeout(Zotero_Preferences.Sync.verifyStorageServer, 1);
-											}"
-											onchange="Zotero_Preferences.Sync.unverifyStorageServer();
-												Zotero.Sync.Storage.WebDAV.password = this.value;"/>
-									</hbox>
-								</row>
-								<row>
-									<box/>
-									<hbox>
-										<button id="storage-verify" label="Verify Server"
-											oncommand="Zotero_Preferences.Sync.verifyStorageServer()"/>
-										<button id="storage-abort" label="Stop" hidden="true"/>
-										<progressmeter id="storage-progress" hidden="true"
-											mode="undetermined"/>
-									</hbox>
-								</row>
-							</rows>
-						</grid>
-						
-						</stack>
-						
-						<hbox class="storage-settings-download-options" align="center">
-							<label value="&zotero.preferences.sync.fileSyncing.download;"/>
-							<menulist class="storage-personal" preference="pref-storage-downloadMode-personal" style="margin-left: 0">
-								<menupopup>
-									<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
-									<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
-								</menupopup>
-							</menulist>
-						</hbox>
-						
-						<separator id="storage-separator" class="thin"/>
-						
-						<!-- Group Libraries -->
-						<checkbox label="&zotero.preferences.sync.fileSyncing.groups;"
-								preference="pref-group-storage-enabled"
-									oncommand="Zotero_Preferences.Sync.updateStorageSettingsGroups(this.checked)"/>
-						
-						<hbox class="storage-settings-download-options" align="center">
-							<label value="&zotero.preferences.sync.fileSyncing.download;"/>
-							<menulist class="storage-groups" preference="pref-storage-downloadMode-groups" style="margin-left: 0">
-								<menupopup>
-									<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
-									<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
-								</menupopup>
-							</menulist>
-						</hbox>
-						
-						<separator class="thin"/>
-						
-						<vbox>
-							<hbox id="storage-terms" style="margin-top: .4em; display: block" align="center">
-								<label>&zotero.preferences.sync.fileSyncing.tos1;</label>
-								<label class="zotero-text-link" href="https://www.zotero.org/support/terms/terms_of_service" value="&zotero.preferences.sync.fileSyncing.tos2;"/>
-								<label>&zotero.preferences.period;</label>
+
+							</stack>
+
+							<hbox class="storage-settings-download-options" align="center">
+								<label value="&zotero.preferences.sync.fileSyncing.download;"/>
+								<menulist class="storage-personal" preference="pref-storage-downloadMode-personal" style="margin-left: 0">
+									<menupopup>
+										<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
+										<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
+									</menupopup>
+								</menulist>
 							</hbox>
-						</vbox>
-					</groupbox>
+
+							<separator id="storage-separator" class="thin"/>
+
+							<!-- Group Libraries -->
+							<checkbox label="&zotero.preferences.sync.fileSyncing.groups;"
+									preference="pref-group-storage-enabled"
+										oncommand="Zotero_Preferences.Sync.updateStorageSettingsGroups(this.checked)"/>
+
+							<hbox class="storage-settings-download-options" align="center">
+								<label value="&zotero.preferences.sync.fileSyncing.download;"/>
+								<menulist class="storage-groups" preference="pref-storage-downloadMode-groups" style="margin-left: 0">
+									<menupopup>
+										<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
+										<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
+									</menupopup>
+								</menulist>
+							</hbox>
+
+							<separator class="thin"/>
+
+							<vbox>
+								<hbox id="storage-terms" style="margin-top: .4em; display: block" align="center">
+									<label>&zotero.preferences.sync.fileSyncing.tos1;</label>
+									<label class="zotero-text-link" href="https://www.zotero.org/support/terms/terms_of_service" value="&zotero.preferences.sync.fileSyncing.tos2;"/>
+									<label>&zotero.preferences.period;</label>
+								</hbox>
+							</vbox>
+						</groupbox>
+					</vbox>
 				</tabpanel>
 				
 				<tabpanel id="zotero-reset" orient="vertical">
