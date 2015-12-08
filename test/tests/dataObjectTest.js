@@ -232,31 +232,23 @@ describe("Zotero.DataObject", function() {
 	
 	describe("#save()", function () {
 		it("should add new identifiers to cache", function* () {
-			// Collection
-			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType('collection');
-			var obj = new Zotero.Collection;
-			obj.name = "Test";
-			var id = yield obj.saveTx();
-			var { libraryID, key } = objectsClass.getLibraryAndKeyFromID(id);
-			assert.typeOf(key, 'string');
-			assert.equal(objectsClass.getIDFromLibraryAndKey(libraryID, key), id);
-			
-			// Search
-			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType('search');
-			var obj = new Zotero.Search;
-			obj.name = "Test";
-			var id = yield obj.saveTx();
-			var { libraryID, key } = objectsClass.getLibraryAndKeyFromID(id);
-			assert.typeOf(key, 'string');
-			assert.equal(objectsClass.getIDFromLibraryAndKey(libraryID, key), id);
-			
-			// Item
-			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType('item');
-			var obj = new Zotero.Item('book');
-			var id = yield obj.saveTx();
-			var { libraryID, key } = objectsClass.getLibraryAndKeyFromID(id);
-			assert.typeOf(key, 'string');
-			assert.equal(objectsClass.getIDFromLibraryAndKey(libraryID, key), id);
+			for (let type of types) {
+				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+				let obj = createUnsavedDataObject(type);
+				let id = yield obj.saveTx();
+				let { libraryID, key } = objectsClass.getLibraryAndKeyFromID(id);
+				assert.typeOf(key, 'string');
+				assert.equal(objectsClass.getIDFromLibraryAndKey(libraryID, key), id);
+			}
+		})
+		
+		it("should reset changed state on objects", function* () {
+			for (let type of types) {
+				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+				let obj = createUnsavedDataObject(type);
+				yield obj.saveTx();
+				assert.isFalse(obj.hasChanged());
+			}
 		})
 	})
 	
