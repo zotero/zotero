@@ -128,10 +128,12 @@ describe("Zotero.Fulltext", function () {
 			
 			var data = yield Zotero.FullText.getUnsyncedContent(Zotero.Libraries.userLibraryID);
 			assert.lengthOf(data, 3);
-			for (let i = toSync.length - 1; i >= 0 ; i--) {
-				assert.equal(data[i].content, toSync[i].content);
-				assert.equal(data[i].indexedChars, toSync[i].indexedChars);
-				assert.equal(data[i].indexedPages, toSync[i].indexedPages);
+			let contents = toSync.map(x => x.content);
+			for (let d of data) {
+				let pos = contents.indexOf(d.content);
+				assert.isAbove(pos, -1);
+				assert.equal(d.indexedChars, toSync[pos].indexedChars);
+				assert.equal(d.indexedPages, toSync[pos].indexedPages);
 			}
 		})
 	})
