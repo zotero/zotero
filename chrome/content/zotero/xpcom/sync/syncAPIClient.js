@@ -524,6 +524,7 @@ Zotero.Sync.APIClient.prototype = {
 				catch (e) {
 					tries++;
 					if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+						this._checkConnection(e.xmlhttp, e.channel);
 						//this._checkRetry(e.xmlhttp);
 						
 						if (e.is5xx()) {
@@ -563,6 +564,70 @@ Zotero.Sync.APIClient.prototype = {
 			throw e;
 		}
 		return json;
+	},
+	
+	
+	/**
+	 * Check connection for certificate errors, interruptions, and empty responses and
+	 * throw an appropriate error
+	 */
+	_checkConnection: function (xmlhttp, channel) {
+		const Ci = Components.interfaces;
+		
+		if (!xmlhttp.responseText) {
+			let msg = null;
+			let dialogButtonText = null;
+			let dialogButtonCallback = null;
+			
+			// Check SSL cert
+			if (channel) {
+				let secInfo = channel.securityInfo;
+				if (secInfo instanceof Ci.nsITransportSecurityInfo) {
+					secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
+					if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE)
+							== Ci.nsIWebProgressListener.STATE_IS_INSECURE) {
+						let url = channel.name;
+						let ios = Components.classes["@mozilla.org/network/io-service;1"]
+							.getService(Components.interfaces.nsIIOService);
+						try {
+							var uri = ios.newURI(url, null, null);
+							var host = uri.host;
+						}
+						catch (e) {
+							Zotero.debug(e);
+						}
+						let kbURL = 'https://www.zotero.org/support/kb/ssl_certificate_error';
+						msg = Zotero.getString('sync.storage.error.webdav.sslCertificateError', host);
+						dialogButtonText = Zotero.getString('general.moreInformation');
+						dialogButtonCallback = function () {
+							let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								.getService(Components.interfaces.nsIWindowMediator);
+							let win = wm.getMostRecentWindow("navigator:browser");
+							win.ZoteroPane.loadURI(kbURL, { metaKey: true, shiftKey: true });
+						};
+					}
+					else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN)
+							== Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
+						msg = Zotero.getString('sync.error.sslConnectionError');
+					}
+				}
+			}
+			if (!msg && xmlhttp.status === 0) {
+				msg = Zotero.getString('sync.error.checkConnection');
+			}
+			if (!msg) {
+				msg = Zotero.getString('sync.error.emptyResponseServer')
+					+ Zotero.getString('general.tryAgainLater');
+			}
+			throw new Zotero.Error(
+				msg,
+				0,
+				{
+					dialogButtonText,
+					dialogButtonCallback
+				}
+			);
+		}
 	},
 	
 	

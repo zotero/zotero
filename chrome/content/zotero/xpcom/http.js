@@ -12,6 +12,7 @@ Zotero.HTTP = new function() {
 	this.UnexpectedStatusException = function(xmlhttp, msg) {
 		this.xmlhttp = xmlhttp;
 		this.status = xmlhttp.status;
+		this.channel = xmlhttp.channel;
 		this.message = msg;
 		
 		// Hide password from debug output

@@ -754,40 +754,7 @@ Zotero.Sync.Server = new function () {
 	
 	
 	function _checkResponse(xmlhttp, noReloadOnFailure) {
-		if (!xmlhttp.responseText) {
-			var channel = xmlhttp.channel;
-			// Check SSL cert
-			if (channel) {
-				var secInfo = channel.securityInfo;
-				if (secInfo instanceof Ci.nsITransportSecurityInfo) {
-					secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
-					if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE) == Ci.nsIWebProgressListener.STATE_IS_INSECURE) {
-						var url = channel.name;
-						var ios = Components.classes["@mozilla.org/network/io-service;1"].
-									getService(Components.interfaces.nsIIOService);
-						try {
-							var uri = ios.newURI(url, null, null);
-							var host = uri.host;
-						}
-						catch (e) {
-							Zotero.debug(e);
-						}
-						var kbURL = 'https://zotero.org/support/kb/ssl_certificate_error';
-						_error(Zotero.getString('sync.storage.error.webdav.sslCertificateError', host) + "\n\n"
-							+ Zotero.getString('general.seeForMoreInformation', kbURL),
-							false, noReloadOnFailure);
-					}
-					else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN) == Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
-						_error(Zotero.getString('sync.error.sslConnectionError'), false, noReloadOnFailure);
-					}
-				}
-			}
-			if (xmlhttp.status === 0) {
-				_error(Zotero.getString('sync.error.checkConnection'), false, noReloadOnFailure);
-			}
-			_error(Zotero.getString('sync.error.emptyResponseServer') + Zotero.getString('general.tryAgainLater'),
-				false, noReloadOnFailure);
-		}
+		
 		
 		if (!xmlhttp.responseXML || !xmlhttp.responseXML.childNodes[0] ||
 				xmlhttp.responseXML.childNodes[0].tagName != 'response' ||

@@ -710,7 +710,7 @@ function setHTTPResponse(server, baseURL, response, responses) {
 		response = responses[topic][key];
 	}
 	
-	var responseArray = [response.status || 200, {}, ""];
+	var responseArray = [response.status !== undefined ? response.status : 200, {}, ""];
 	if (response.json) {
 		responseArray[1]["Content-Type"] = "application/json";
 		responseArray[2] = JSON.stringify(response.json);
