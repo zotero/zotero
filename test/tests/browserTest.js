@@ -2,14 +2,20 @@
 
 describe("Zotero_Browser", function () {
 	var win;
+	
 	before(function* () {
 		win = yield loadBrowserWindow();
 	});
+	
 	after(function* () {
 		win.close();
 	});
 	
-	it("should save webpage item to current collection", function* () {
+	afterEach(function () {
+		Zotero.ProgressWindowSet.closeAll();
+	})
+	
+	it("should save webpage to current collection", function* () {
 		var uri = OS.Path.join(getTestDataDirectory().path, "snapshot", "index.html");
 		var deferred = Zotero.Promise.defer();
 		win.addEventListener('pageshow', () => deferred.resolve());
@@ -28,7 +34,7 @@ describe("Zotero_Browser", function () {
 		assert.isTrue(collection.hasItem(items[0].id));
 	})
 	
-	it("should save journalArticle to current collection", function* () {
+	it("should save journal article to current collection", function* () {
 		var uri = OS.Path.join(
 			getTestDataDirectory().path, "metadata", "journalArticle-single.html"
 		);
@@ -47,5 +53,47 @@ describe("Zotero_Browser", function () {
 		assert.lengthOf(items, 1);
 		assert.equal(Zotero.ItemTypes.getName(items[0].itemTypeID), 'journalArticle');
 		assert.isTrue(collection.hasItem(items[0].id));
+	})
+	
+	it("shouldn't save webpage to My Publications", function* () {
+		var uri = OS.Path.join(getTestDataDirectory().path, "snapshot", "index.html");
+		var deferred = Zotero.Promise.defer();
+		win.addEventListener('pageshow', () => deferred.resolve());
+		win.loadURI(uri);
+		yield deferred.promise;
+		
+		yield loadZoteroPane(win);
+		yield selectLibrary(win, Zotero.Libraries.publicationsLibraryID);
+		
+		var promise = waitForDialog(function (dialog) {
+			assert.include(
+				dialog.document.documentElement.textContent,
+				Zotero.getString('save.error.cannotAddToMyPublications')
+			);
+		});
+		yield win.Zotero_Browser.scrapeThisPage();
+		yield promise;
+	})
+	
+	it("shouldn't save journal article to My Publications", function* () {
+		var uri = OS.Path.join(
+			getTestDataDirectory().path, "metadata", "journalArticle-single.html"
+		);
+		var deferred = Zotero.Promise.defer();
+		win.addEventListener('pageshow', () => deferred.resolve());
+		win.loadURI(uri);
+		yield deferred.promise;
+		
+		yield loadZoteroPane(win);
+		yield selectLibrary(win, Zotero.Libraries.publicationsLibraryID);
+		
+		var promise = waitForDialog(function (dialog) {
+			assert.include(
+				dialog.document.documentElement.textContent,
+				Zotero.getString('save.error.cannotAddToMyPublications')
+			);
+		}, false, 'chrome://zotero/content/progressWindow.xul');
+		yield win.Zotero_Browser.scrapeThisPage();
+		yield promise;
 	})
 })

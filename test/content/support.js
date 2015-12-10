@@ -127,7 +127,12 @@ function waitForDialog(onOpen, button='accept', url) {
 				failure = e;
 			}
 		}
-		if (button != 'cancel') {
+		if (button === false) {
+			if (failure) {
+				throw failure;
+			}
+		}
+		else if (button != 'cancel') {
 			let deferred = Zotero.Promise.defer();
 			function acceptWhenEnabled() {
 				// Handle delayed buttons

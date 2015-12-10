@@ -3341,6 +3341,12 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
+		var collectionTreeRow = this.collectionsView.getRow(row);
+		if (collectionTreeRow.isPublications()) {
+			this.displayCannotAddToMyPublicationsMessage();
+			return false;
+		}
+		
 		return this.addItemFromDocument(window.content.document, itemType, saveSnapshot, row);
 	});
 	
@@ -3974,6 +3980,13 @@ var ZoteroPane = new function()
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
 		ps.alert(null, "", Zotero.getString('save.error.cannotAddFilesToCollection'));
+	}
+	
+	
+	this.displayCannotAddToMyPublicationsMessage = function () {
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService);
+		ps.alert(null, "", Zotero.getString('save.error.cannotAddToMyPublications'));
 	}
 	
 	

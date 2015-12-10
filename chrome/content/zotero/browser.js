@@ -631,6 +631,15 @@ var Zotero_Browser = new function() {
 			}
 		}
 		
+		if (libraryID === Zotero.Libraries.publicationsLibraryID) {
+			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+			var desc = Zotero.getString('save.error.cannotAddToMyPublications');
+			Zotero_Browser.progress.addDescription(desc);
+			Zotero_Browser.progress.show();
+			Zotero_Browser.progress.startCloseTimer(8000);
+			return;
+		}
+		
 		if(Zotero.isConnector) {
 			Zotero.Connector.callMethod("getSelectedCollection", {}, function(response, status) {
 				if(status !== 200) {

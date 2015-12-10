@@ -98,6 +98,11 @@ Zotero.ProgressWindowSet = new function() {
 			_progressWindows[i].instance.startCloseTimer(null, true);
 		}
 	}
+	
+	
+	this.closeAll = function () {
+		_progressWindows.forEach(pw => pw.instance.close());
+	}
 }
 
 

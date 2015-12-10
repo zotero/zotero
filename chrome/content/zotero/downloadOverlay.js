@@ -64,14 +64,14 @@ var Zotero_DownloadOverlay = new function() {
 		var libraryID, collection;
 		try {
 			let itemGroup = win.ZoteroPane.getCollectionTreeRow();
-			if (itemGroup.filesEditable) {
+			if (itemGroup.filesEditable && !itemGroup.isPublications()) {
 				libraryID = win.ZoteroPane.getSelectedLibraryID();
 				collection = win.ZoteroPane.getSelectedCollection();
 			}
 			// TODO: Just show an error instead?
 			else {
 				Zotero.debug("Cannot save files to library " + itemGroup.ref.libraryID
-					+ " -- saving to personal library instead", 2);
+					+ " -- saving to My Library instead", 2);
 				libraryID = Zotero.Libraries.userLibraryID;
 			}
 		} catch(e) {
@@ -98,7 +98,7 @@ var Zotero_DownloadOverlay = new function() {
 				url,
 				collections: collection ? [collection.id] : [],
 				contentType
-			})
+			});
 		}
 		catch (e) {
 			if (!win) return;
@@ -112,7 +112,11 @@ var Zotero_DownloadOverlay = new function() {
 		
 		progressWin.addLines([item.getDisplayTitle()], [item.getImageSrc()]);
 		progressWin.startCloseTimer();
-		if(collection) collection.addItem(item.id);
+		if (collection) {
+			yield collection.addItem(item.id);
+		}
+		
+		yield win.ZoteroPane.selectItem(item.id);
 		
 		if(recognizePDF) {
 			var timer = Components.classes["@mozilla.org/timer;1"]
