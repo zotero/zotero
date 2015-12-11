@@ -43,6 +43,12 @@ Zotero.Users = new function () {
 			_libraryID = settings.libraryID;
 			_username = settings.username;
 		}
+		// Clear old values when reinitializing for tests
+		else {
+			_userID = undefined;
+			_libraryID = undefined;
+			_username = undefined;
+		}
 		
 		if (settings.localUserKey) {
 			_localUserKey = settings.localUserKey;
