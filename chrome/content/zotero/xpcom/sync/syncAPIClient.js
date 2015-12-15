@@ -30,7 +30,6 @@ if (!Zotero.Sync) {
 Zotero.Sync.APIClient = function (options) {
 	if (!options.baseURL) throw new Error("baseURL not set");
 	if (!options.apiVersion) throw new Error("apiVersion not set");
-	if (!options.apiKey) throw new Error("apiKey not set");
 	if (!options.caller) throw new Error("caller not set");
 	
 	this.baseURL = options.baseURL;
@@ -45,9 +44,9 @@ Zotero.Sync.APIClient.prototype = {
 	MAX_OBJECTS_PER_REQUEST: 100,
 	
 	
-	getKeyInfo: Zotero.Promise.coroutine(function* () {
+	getKeyInfo: Zotero.Promise.coroutine(function* (options={}) {
 		var uri = this.baseURL + "keys/" + this.apiKey;
-		var xmlhttp = yield this.makeRequest("GET", uri, { successCodes: [200, 404] });
+		var xmlhttp = yield this.makeRequest("GET", uri, Object.assign(options, { successCodes: [200, 404] }));
 		if (xmlhttp.status == 404) {
 			return false;
 		}
@@ -430,6 +429,52 @@ Zotero.Sync.APIClient.prototype = {
 	}),
 	
 	
+	createAPIKeyFromCredentials: Zotero.Promise.coroutine(function* (username, password) {
+		var body = JSON.stringify({
+			username,
+			password,
+			name: "Automatic Zotero Client Key",
+			access: {
+				user: {
+					library: true,
+					notes: true,
+					write: true,
+					files: true
+				},
+				groups: {
+					all: {
+						library: true,
+						write: true
+					}
+				}
+			}
+		});
+		var headers = {
+			"Content-Type": "application/json"
+		};
+		var uri = this.baseURL + "keys";
+		var response = yield this.makeRequest("POST", uri, {
+			body, headers, successCodes: [201, 403], noAPIKey: true
+		});
+		if (response.status == 403) {
+			return false;
+		}
+		
+		var json = this._parseJSON(response.responseText);
+		if (!json.key) {
+			throw new Error('json.key not present in POST /keys response')
+		}
+
+		return json;
+	}),
+
+
+	// Deletes current API key
+	deleteAPIKey: Zotero.Promise.coroutine(function* () {
+		yield this.makeRequest("DELETE", this.baseURL + "keys/" + this.apiKey);
+	}),
+	
+	
 	buildRequestURI: function (params) {
 		var uri = this.baseURL;
 		
@@ -508,6 +553,9 @@ Zotero.Sync.APIClient.prototype = {
 	
 	
 	makeRequest: Zotero.Promise.coroutine(function* (method, uri, options = {}) {
+		if (!this.apiKey && !options.noAPIKey) {
+			throw new Error('API key not set');
+		}
 		options.headers = this.getHeaders(options.headers);
 		options.dontCache = true;
 		options.foreground = !options.background;

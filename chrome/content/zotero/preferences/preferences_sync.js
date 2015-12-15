@@ -24,19 +24,232 @@
 */
 
 "use strict";
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 Zotero_Preferences.Sync = {
-	init: function () {
+	init: Zotero.Promise.coroutine(function* () {
 		this.updateStorageSettings(null, null, true);
-		
-		document.getElementById('sync-api-key').value = Zotero.Sync.Data.Local.getAPIKey();
-		
+
+		var username = Zotero.Users.getCurrentUsername() || "";
+		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
+		this.displayFields(apiKey ? username : "");
+		if (apiKey) {
+			try {
+				var keyInfo = yield Zotero.Sync.Runner.checkAccess(
+					Zotero.Sync.Runner.getAPIClient({apiKey}),
+					{timeout: 5000}
+				);
+				this.displayFields(keyInfo.username);
+			}
+			catch (e) {
+				// API key wrong/invalid
+				if (!(e instanceof Zotero.HTTP.UnexpectedStatusException) &&
+					!(e instanceof Zotero.HTTP.TimeoutException)) {
+					Zotero.alert(
+						window,
+						Zotero.getString('general.error'),
+						Zotero.getString('sync.error.apiKeyInvalid', Zotero.clientName)
+					);
+					this.unlinkAccount(false);
+				}
+				else {
+					throw e;
+				}
+			}
+		}
+
+
 		// TEMP: Disabled
 		//var pass = Zotero.Sync.Storage.WebDAV.password;
 		//if (pass) {
 		//	document.getElementById('storage-password').value = pass;
 		//}
+	}),
+
+	displayFields: function (username) {
+		document.getElementById('sync-unauthorized').hidden = !!username;
+		document.getElementById('sync-authorized').hidden = !username;
+		document.getElementById('sync-reset-tab').disabled = !username;
+		document.getElementById('sync-username').value = username;
+		document.getElementById('sync-password').value = '';
+		document.getElementById('sync-username-textbox').value = Zotero.Prefs.get('sync.server.username');
+
+		var img = document.getElementById('sync-status-indicator');
+		img.removeAttribute('verified');
+		img.removeAttribute('animated');
 	},
+
+
+	credentialsKeyPress: function (event) {
+		var username = document.getElementById('sync-username-textbox');
+		username.value = username.value.trim();
+		var password = document.getElementById('sync-password');
+
+		var syncAuthButton = document.getElementById('sync-auth-button');
+
+		syncAuthButton.setAttribute('disabled', 'true');
+
+		// When using backspace, the value is not updated until after the keypress event
+		setTimeout(function() {
+			if (username.value.length && password.value.length) {
+				syncAuthButton.setAttribute('disabled', 'false');
+			}
+		});
+
+		if (event.keyCode == 13) {
+			Zotero_Preferences.Sync.linkAccount(event);
+		}
+	},
+
+
+	linkAccount: Zotero.Promise.coroutine(function* (event) {
+		var username = document.getElementById('sync-username-textbox').value;
+		var password = document.getElementById('sync-password').value;
+
+		if (!username.length || !password.length) {
+			this.updateSyncIndicator();
+			return;
+		}
+
+		// Try to acquire API key with current credentials
+		this.updateSyncIndicator('animated');
+		var json = yield Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
+		this.updateSyncIndicator();
+
+		// Invalid credentials
+		if (!json) {
+			Zotero.alert(window,
+				Zotero.getString('general.error'),
+				Zotero.getString('sync.error.invalidLogin')
+			);
+			return;
+		}
+
+		if (!(yield this.checkUser(json.userID, json.username))) {
+			// createAPIKeyFromCredentials will have created an API key,
+			// but user decided not to use it, so we remove it here.
+			Zotero.Sync.Runner.deleteAPIKey();
+			return;
+		}
+
+		this.displayFields(json.username);
+	}),
+
+	/**
+	 * Updates the auth indicator icon, depending on status
+	 * @param {string} status
+	 */
+	updateSyncIndicator: function (status) {
+		var img = document.getElementById('sync-status-indicator');
+		
+		img.removeAttribute('animated');
+		if (status == 'animated') {
+			img.setAttribute('animated', true);
+		}
+	},
+
+	unlinkAccount: Zotero.Promise.coroutine(function* (showAlert=true) {
+		if (showAlert) {
+			if (!Services.prompt.confirm(
+				null,
+				Zotero.getString('general.warning'),
+				Zotero.getString('sync.unlinkWarning', Zotero.clientName)
+			)) {
+				return;
+			}
+		}
+
+		this.displayFields();
+		yield Zotero.Sync.Runner.deleteAPIKey();
+	}),
+
+
+	/**
+	 * Make sure we're syncing with the same account we used last time, and prompt if not.
+	 * If user accepts, change the current user, delete existing groups, and update relation
+	 * URIs to point to the new user's library.
+	 *
+	 * @param	{Integer}	userID			New userID
+	 * @param	{Integer}	libraryID		New libraryID
+	 * @return {Boolean} - True to continue, false to cancel
+	 */
+	checkUser: Zotero.Promise.coroutine(function* (userID, username) {
+		var lastUserID = Zotero.Users.getCurrentUserID();
+		var lastUsername = Zotero.Users.getCurrentUsername();
+
+		if (lastUserID && lastUserID != userID) {
+			var groups = Zotero.Groups.getAll();
+
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+				.getService(Components.interfaces.nsIPromptService);
+			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+				+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
+				+ ps.BUTTON_POS_1_DEFAULT
+				+ ps.BUTTON_DELAY_ENABLE;
+
+			var msg = Zotero.getString('sync.lastSyncWithDifferentAccount', [lastUsername, username]);
+			var syncButtonText = Zotero.getString('sync.sync');
+
+			msg += " " + Zotero.getString('sync.localDataWillBeCombined', username);
+			// If there are local groups belonging to the previous user,
+			// we need to remove them
+			if (groups.length) {
+				msg += " " + Zotero.getString('sync.localGroupsWillBeRemoved1');
+				var syncButtonText = Zotero.getString('sync.removeGroupsAndSync');
+			}
+			msg += "\n\n" + Zotero.getString('sync.avoidCombiningData', lastUsername);
+
+			var index = ps.confirmEx(
+				null,
+				Zotero.getString('general.warning'),
+				msg,
+				buttonFlags,
+				syncButtonText,
+				null,
+				Zotero.getString('sync.openSyncPreferences'),
+				null, {}
+			);
+
+			if (index > 0) {
+				if (index == 2) {
+					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+							   .getService(Components.interfaces.nsIWindowMediator);
+					var lastWin = wm.getMostRecentWindow("navigator:browser");
+					lastWin.ZoteroPane.openPreferences('zotero-prefpane-sync');
+				}
+				return false;
+			}
+		}
+
+		yield Zotero.DB.executeTransaction(function* () {
+			if (lastUserID != userID) {
+				if (lastUserID) {
+					// Delete all local groups if changing users
+					for (let group of groups) {
+						yield group.erase();
+					}
+
+					// Update relations pointing to the old library to point to this one
+					yield Zotero.Relations.updateUser(userID);
+				}
+				// Replace local user key with libraryID, in case duplicates were
+				// merged before the first sync
+				else {
+					yield Zotero.Relations.updateUser(userID);
+				}
+
+				yield Zotero.Users.setCurrentUserID(userID);
+			}
+
+			if (lastUsername != username) {
+				yield Zotero.Users.setCurrentUsername(username);
+			}
+		})
+
+		return true;
+	}),
+
 	
 	updateStorageSettings: function (enabled, protocol, skipWarnings) {
 		if (enabled === null) {

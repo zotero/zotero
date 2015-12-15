@@ -49,7 +49,9 @@
 <!ENTITY zotero.preferences.prefpane.sync							"Sync">
 <!ENTITY zotero.preferences.sync.username							"Username:">
 <!ENTITY zotero.preferences.sync.password							"Password:">
-<!ENTITY zotero.preferences.sync.syncServer						"Zotero Sync Server">
+<!ENTITY zotero.preferences.sync.syncServer						"Zotero Data Sync">
+<!ENTITY zotero.preferences.sync.setUpSync							"Set Up Syncing">
+<!ENTITY zotero.preferences.sync.unlinkAccount						"Unlink Account...">
 <!ENTITY zotero.preferences.sync.createAccount						"Create Account">
 <!ENTITY zotero.preferences.sync.lostPassword						"Lost Password?">
 <!ENTITY zotero.preferences.sync.syncAutomatically					"Sync automatically">

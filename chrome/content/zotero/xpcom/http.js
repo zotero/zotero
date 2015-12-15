@@ -55,7 +55,15 @@ Zotero.HTTP = new function() {
 	this.BrowserOfflineException.prototype.toString = function() {
 		return this.message;
 	};
-	
+
+	this.TimeoutException = function(ms) {
+		this.message = "XMLHttpRequest has timed out after " + ms + "ms";
+	};
+	this.TimeoutException.prototype = Object.create(Error.prototype);
+	this.TimeoutException.prototype.toString = function() {
+		return this.message;
+	};
+
 	this.promise = function () {
 		Zotero.debug("Zotero.HTTP.promise() is deprecated -- use Zotero.HTTP.request()", 2);
 		return this.request.apply(this, arguments);
@@ -74,6 +82,7 @@ Zotero.HTTP = new function() {
 	 *         <li>dontCache - If set, specifies that the request should not be fulfilled from the cache</li>
 	 *         <li>foreground - Make a foreground request, showing certificate/authentication dialogs if necessary</li>
 	 *         <li>headers - HTTP headers to include in the request</li>
+	 *         <li>timeout - Request timeout specified in milliseconds
 	 *         <li>requestObserver - Callback to receive XMLHttpRequest after open()</li>
 	 *         <li>responseType - The type of the response. See XHR 2 documentation for legal values</li>
 	 *         <li>responseCharset - The charset the response should be interpreted as</li>
@@ -191,7 +200,16 @@ Zotero.HTTP = new function() {
 		for (var header in headers) {
 			xmlhttp.setRequestHeader(header, headers[header]);
 		}
-		
+
+		// Set timeout
+		if (options.timeout) {
+			xmlhttp.timeout = options.timeout;
+		}
+
+		xmlhttp.ontimeout = function() {
+			deferred.reject(new Zotero.HTTP.TimeoutException(options.timeout));
+		};
+
 		xmlhttp.onloadend = function() {
 			var status = xmlhttp.status;
 			

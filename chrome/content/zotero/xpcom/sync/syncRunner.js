@@ -68,12 +68,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _currentLastSyncLabel;
 	var _errors = [];
 	
-	
+
 	this.getAPIClient = function (options = {}) {
-		if (!options.apiKey) {
-			throw new Error("apiKey not provided");
-		}
-		
+
 		return new Zotero.Sync.APIClient({
 			baseURL: this.baseURL,
 			apiVersion: this.apiVersion,
@@ -218,8 +215,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	/**
 	 * Check key for current user info and return access info
 	 */
-	this.checkAccess = Zotero.Promise.coroutine(function* (client, options) {
-		var json = yield client.getKeyInfo();
+	this.checkAccess = Zotero.Promise.coroutine(function* (client, options={}) {
+		var json = yield client.getKeyInfo(options);
 		Zotero.debug(json);
 		if (!json) {
 			// TODO: Nicer error message
@@ -230,11 +227,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		if (!json.userID) throw new Error("userID not found in key response");
 		if (!json.username) throw new Error("username not found in key response");
 		if (!json.access) throw new Error("'access' not found in key response");
-		
-		// Make sure user hasn't changed, and prompt to update database if so
-		if (!(yield this.checkUser(json.userID, json.username))) {
-			return false;
-		}
 		
 		return json;
 	});
@@ -422,108 +414,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		}
 		
 		return [...new Set(libraries)];
-	});
-	
-	
-	/**
-	 * Make sure we're syncing with the same account we used last time, and prompt if not.
-	 * If user accepts, change the current user, delete existing groups, and update relation
-	 * URIs to point to the new user's library.
-	 *
-	 * @param	{Integer}	userID			New userID
-	 * @param	{Integer}	libraryID		New libraryID
-	 * @return {Boolean} - True to continue, false to cancel
-	 */
-	this.checkUser = Zotero.Promise.coroutine(function* (userID, username) {
-		var lastUserID = Zotero.Users.getCurrentUserID();
-		var lastUsername = Zotero.Users.getCurrentUsername();
-		
-		// TEMP: Remove? No way to determine this quickly currently.
-		var noServerData = false;
-		
-		if (lastUserID && lastUserID != userID) {
-			var groups = Zotero.Groups.getAll();
-			
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-				.getService(Components.interfaces.nsIPromptService);
-			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
-				+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
-				+ ps.BUTTON_POS_1_DEFAULT
-				+ ps.BUTTON_DELAY_ENABLE;
-			
-			var msg = Zotero.getString('sync.lastSyncWithDifferentAccount', [lastUsername, username]);
-			
-			if (!noServerData) {
-				msg += " " + Zotero.getString('sync.localDataWillBeCombined', username);
-				// If there are local groups belonging to the previous user,
-				// we need to remove them
-				if (groups.length) {
-					msg += " " + Zotero.getString('sync.localGroupsWillBeRemoved1');
-				}
-				msg += "\n\n" + Zotero.getString('sync.avoidCombiningData', lastUsername);
-				var syncButtonText = Zotero.getString('sync.sync');
-			}
-			else if (groups.length) {
-				msg += " " + Zotero.getString('sync.localGroupsWillBeRemoved2', [username, lastUsername]);
-				var syncButtonText = Zotero.getString('sync.removeGroupsAndSync');
-			}
-			// If there are no local groups and the server is empty,
-			// don't bother prompting
-			else {
-				var noPrompt = true;
-			}
-			
-			if (!noPrompt) {
-				var index = ps.confirmEx(
-					null,
-					Zotero.getString('general.warning'),
-					msg,
-					buttonFlags,
-					syncButtonText,
-					null,
-					Zotero.getString('sync.openSyncPreferences'),
-					null, {}
-				);
-				
-				if (index > 0) {
-					if (index == 2) {
-						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								   .getService(Components.interfaces.nsIWindowMediator);
-						var lastWin = wm.getMostRecentWindow("navigator:browser");
-						lastWin.ZoteroPane.openPreferences('zotero-prefpane-sync');
-					}
-					return false;
-				}
-			}
-		}
-		
-		yield Zotero.DB.executeTransaction(function* () {
-			if (lastUserID != userID) {
-				if (lastUserID) {
-					// Delete all local groups if changing users
-					for (let group of groups) {
-						yield group.erase();
-					}
-					
-					// Update relations pointing to the old library to point to this one
-					yield Zotero.Relations.updateUser(userID);
-				}
-				// Replace local user key with libraryID, in case duplicates were
-				// merged before the first sync
-				else {
-					yield Zotero.Relations.updateUser(userID);
-				}
-				
-				yield Zotero.Users.setCurrentUserID(userID);
-			}
-			
-			if (lastUsername != username) {
-				yield Zotero.Users.setCurrentUsername(username);
-			}
-		})
-		
-		return true;
 	});
 	
 	
@@ -1191,7 +1081,33 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			_updateSyncStatusLabel();
 		}
 	}
-	
+
+
+	this.createAPIKeyFromCredentials = Zotero.Promise.coroutine(function* (username, password) {
+		var client = this.getAPIClient();
+		var json = yield client.createAPIKeyFromCredentials(username, password);
+		if (!json) {
+			return false;
+		}
+
+		// Sanity check
+		if (!json.userID) throw new Error("userID not found in key response");
+		if (!json.username) throw new Error("username not found in key response");
+		if (!json.access) throw new Error("'access' not found in key response");
+
+		Zotero.Sync.Data.Local.setAPIKey(json.key);
+
+		return json;
+	})
+
+
+	this.deleteAPIKey = Zotero.Promise.coroutine(function* (){
+		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
+		var client = this.getAPIClient({apiKey});
+		Zotero.Sync.Data.Local.setAPIKey();
+		yield client.deleteAPIKey();
+	})
+
 	
 	function _updateSyncStatusLabel() {
 		if (_lastSyncStatus) {
@@ -1244,20 +1160,20 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	
 	
 	var _getAPIKeyFromLogin = Zotero.Promise.coroutine(function* () {
-		var apiKey = "";
+		var apiKey;
 		let username = Zotero.Prefs.get('sync.server.username');
 		if (username) {
+			// Check for legacy password if no password set in current session
+			// and no API keys stored yet
 			let password = Zotero.Sync.Data.Local.getLegacyPassword(username);
 			if (!password) {
 				return "";
 			}
-			throw new Error("Unimplemented");
-			// Get API key from server
-			
-			// Store API key
-			
-			// Remove old logins and username pref
+
+			apiKey = yield Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
+			Zotero.Sync.Data.Local.removeLegacyLogins();
+			return apiKey;
 		}
-		return apiKey;
+		return "";
 	})
 }

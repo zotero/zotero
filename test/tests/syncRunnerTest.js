@@ -167,10 +167,8 @@ describe("Zotero.Sync.Runner", function () {
 	
 	describe("#checkAccess()", function () {
 		it("should check key access", function* () {
-			spy = sinon.spy(runner, "checkUser");
 			setResponse('keyInfo.fullAccess');
 			var json = yield runner.checkAccess(runner.getAPIClient({ apiKey }));
-			sinon.assert.calledWith(spy, 1, "Username");
 			var compare = {};
 			Object.assign(compare, responses.keyInfo.fullAccess.json);
 			delete compare.key;
@@ -409,60 +407,7 @@ describe("Zotero.Sync.Runner", function () {
 			assert.isTrue(Zotero.Groups.exists(groupData.json.id));
 		})
 	})
-	
-	describe("#checkUser()", function () {
-		it("should prompt for user update and perform on accept", function* () {
-			waitForDialog(function (dialog) {
-				var text = dialog.document.documentElement.textContent;
-				var matches = text.match(/'[^']*'/g);
-				assert.equal(matches.length, 4);
-				assert.equal(matches[0], "'A'");
-				assert.equal(matches[1], "'B'");
-				assert.equal(matches[2], "'B'");
-				assert.equal(matches[3], "'A'");
-			});
-			var cont = yield runner.checkUser(2, "B");
-			assert.isTrue(cont);
-			
-			assert.equal(Zotero.Users.getCurrentUserID(), 2);
-			assert.equal(Zotero.Users.getCurrentUsername(), "B");
-		})
-		
-		it("should prompt for user update and cancel", function* () {
-			yield Zotero.Users.setCurrentUserID(1);
-			yield Zotero.Users.setCurrentUsername("A");
-			
-			waitForDialog(false, 'cancel');
-			var cont = yield runner.checkUser(2, "B");
-			assert.isFalse(cont);
-			
-			assert.equal(Zotero.Users.getCurrentUserID(), 1);
-			assert.equal(Zotero.Users.getCurrentUsername(), "A");
-		})
-		
-		it("should update local relations when syncing for the first time", function* () {
-			yield resetDB({
-				thisArg: this,
-				skipBundledFiles: true
-			});
-			
-			var item1 = yield createDataObject('item');
-			var item2 = yield createDataObject(
-				'item', { libraryID: Zotero.Libraries.publicationsLibraryID }
-			);
-			
-			yield item1.addLinkedItem(item2);
-			
-			var cont = yield runner.checkUser(1, "A");
-			assert.isTrue(cont);
-			
-			var json = yield item1.toJSON();
-			var uri = json.relations[Zotero.Relations.linkedObjectPredicate][0];
-			assert.notInclude(uri, 'users/local');
-			assert.include(uri, 'users/1/publications');
-		})
-	})
-	
+
 	describe("#sync()", function () {
 		before(function* () {
 			yield resetDB({
@@ -717,5 +662,70 @@ describe("Zotero.Sync.Runner", function () {
 			assert.isAbove(lastSyncTime, new Date().getTime() - 1000);
 			assert.isBelow(lastSyncTime, new Date().getTime());
 		})
+	})
+	
+	describe("#createAPIKeyFromCredentials()", function() {
+		var data = {
+			name: "Automatic Zotero Client Key",
+			username: "Username",
+			access: {
+				user: {
+					library: true,
+					files: true,
+					notes: true,
+					write: true
+				},
+				groups: {
+					all: {
+						library: true,
+						write: true
+					}
+				}
+			}
+		};
+		var correctPostData = Object.assign({password: 'correctPassword'}, data);
+		var incorrectPostData = Object.assign({password: 'incorrectPassword'}, data);
+		var responseData = Object.assign({userID: 1, key: apiKey}, data);
+
+		it("should return json with key when credentials valid", function* () {
+			server.respond(function (req) {
+				if (req.method == "POST") {
+					var json = JSON.parse(req.requestBody);
+					assert.deepEqual(json, correctPostData);
+					req.respond(201, {}, JSON.stringify(responseData));
+				}
+			});
+
+			var json = yield runner.createAPIKeyFromCredentials('Username', 'correctPassword');
+			assert.equal(json.key, apiKey);
+		});
+
+		it("should return false when credentials invalid", function* () {
+			server.respond(function (req) {
+				if (req.method == "POST") {
+					var json = JSON.parse(req.requestBody);
+					assert.deepEqual(json, incorrectPostData);
+					req.respond(403);
+				}
+			});
+
+			var key = yield runner.createAPIKeyFromCredentials('Username', 'incorrectPassword');
+			assert.isFalse(key);
+		});
+	});
+
+	describe("#deleteAPIKey()", function() {
+		it("should send DELETE request with correct key", function* (){
+			Zotero.Sync.Data.Local.setAPIKey(apiKey);
+
+			server.respond(function (req) {
+				if (req.method == "DELETE") {
+					assert.equal(req.url, baseURL + "keys/" + apiKey);
+				}
+				req.respond(204);
+			});
+
+			yield runner.deleteAPIKey();
+		});
 	})
 })
