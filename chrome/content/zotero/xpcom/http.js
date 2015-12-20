@@ -109,6 +109,7 @@ Zotero.HTTP = new function() {
 		if (options.body && typeof options.body == 'string') {
 			var bodyStart = options.body.substr(0, 1024);
 			// Don't display sync password or session id in console
+			bodyStart = bodyStart.replace(/password":"[^"]+/, 'password":"********');
 			bodyStart = bodyStart.replace(/password=[^&]+/, 'password=********');
 			bodyStart = bodyStart.replace(/sessionid=[^&]+/, 'sessionid=********');
 			
