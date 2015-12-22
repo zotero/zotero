@@ -3905,8 +3905,8 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options = {})
 			}
 			
 			if (this.isFileAttachment()) {
-				obj.md5 = yield this.attachmentHash;
-				obj.mtime = yield this.attachmentModificationTime;
+				obj.mtime = (yield this.attachmentModificationTime) || null;
+				obj.md5 = (yield this.attachmentHash) || null;
 			}
 		}
 		

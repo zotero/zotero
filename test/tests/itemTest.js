@@ -873,6 +873,18 @@ describe("Zotero.Item", function () {
 				
 				assert.strictEqual(json.deleted, 1);
 			})
+			
+			it("should output unset storage properties as null", function* () {
+				var item = new Zotero.Item('attachment');
+				item.attachmentLinkMode = 'imported_file';
+				item.fileName = 'test.txt';
+				var id = yield item.saveTx();
+				var json = yield item.toJSON();
+				
+				Zotero.debug(json);
+				assert.isNull(json.mtime);
+				assert.isNull(json.md5);
+			})
 		})
 		
 		describe("'full' mode", function () {
