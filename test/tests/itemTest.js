@@ -616,7 +616,7 @@ describe("Zotero.Item", function () {
 			// DEBUG: Is this necessary?
 			assert.equal(
 				(yield Zotero.Sync.Storage.Local.getSyncState(item.id)),
-				Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD
+				Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD
 			);
 			assert.isNull(yield Zotero.Sync.Storage.Local.getSyncedHash(item.id));
 		})
@@ -874,6 +874,49 @@ describe("Zotero.Item", function () {
 				assert.strictEqual(json.deleted, 1);
 			})
 			
+			it("should output attachment fields from file", function* () {
+				var file = getTestDataDirectory();
+				file.append('test.png');
+				var item = yield Zotero.Attachments.importFromFile({ file });
+				
+				yield Zotero.DB.executeTransaction(function* () {
+					yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
+						item.id, new Date().getTime()
+					);
+					yield Zotero.Sync.Storage.Local.setSyncedHash(
+						item.id, 'b32e33f529942d73bea4ed112310f804'
+					);
+				});
+				
+				var json = yield item.toJSON();
+				assert.equal(json.linkMode, 'imported_file');
+				assert.equal(json.filename, 'test.png');
+				assert.isUndefined(json.path);
+				assert.equal(json.mtime, (yield item.attachmentModificationTime));
+				assert.equal(json.md5, (yield item.attachmentHash));
+			})
+			
+			it("should output synced storage values with .syncedStorageProperties", function* () {
+				var item = new Zotero.Item('attachment');
+				item.attachmentLinkMode = 'imported_file';
+				item.fileName = 'test.txt';
+				yield item.saveTx();
+				
+				var mtime = new Date().getTime();
+				var md5 = 'b32e33f529942d73bea4ed112310f804';
+				
+				yield Zotero.DB.executeTransaction(function* () {
+					yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, mtime);
+					yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, md5);
+				});
+				
+				var json = yield item.toJSON({
+					syncedStorageProperties: true
+				});
+				assert.equal(json.mtime, mtime);
+				assert.equal(json.md5, md5);
+			})
+			
 			it("should output unset storage properties as null", function* () {
 				var item = new Zotero.Item('attachment');
 				item.attachmentLinkMode = 'imported_file';
@@ -881,7 +924,6 @@ describe("Zotero.Item", function () {
 				var id = yield item.saveTx();
 				var json = yield item.toJSON();
 				
-				Zotero.debug(json);
 				assert.isNull(json.mtime);
 				assert.isNull(json.md5);
 			})
@@ -959,21 +1001,6 @@ describe("Zotero.Item", function () {
 				assert.isUndefined(json.title);
 				assert.strictEqual(json.deleted, 1);
 			})
-		})
-		
-		// TODO: Expand to all fields
-		it("should handle attachment fields", function* () {
-			var file = getTestDataDirectory();
-			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({
-				file: file
-			});
-			var json = yield item.toJSON();
-			assert.equal(json.linkMode, 'imported_file');
-			assert.equal(json.filename, 'test.png');
-			assert.isUndefined(json.path);
-			assert.equal(json.md5, '93da8f1e5774c599f0942dcecf64b11c');
-			assert.typeOf(json.mtime, 'number');
 		})
 	})
 

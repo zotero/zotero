@@ -114,10 +114,6 @@
 								label="Search for Shared Libraries" oncommand="Zotero.Zeroconf.findInstances()"/>
 							<menuseparator id="zotero-tb-actions-plugins-separator"/>
 							<menuitem id="zotero-tb-actions-timeline" label="&zotero.toolbar.timeline.label;" command="cmd_zotero_createTimeline"/>
-							<menuseparator hidden="true" id="zotero-tb-actions-sync-separator"/>
-							<menuitem hidden="true" label="WebDAV Sync Debugging" disabled="true"/>
-							<menuitem hidden="true" label="  Purge Deleted Storage Files" oncommand="Zotero.Sync.Storage.purgeDeletedStorageFiles('webdav', function(results) { Zotero.debug(results); })"/>
-							<menuitem hidden="true"  label="  Purge Orphaned Storage Files" oncommand="Zotero.Sync.Storage.purgeOrphanedStorageFiles('webdav', function(results) { Zotero.debug(results); })"/>
 							<menuseparator id="zotero-tb-actions-separator"/>
 							<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;"
 								oncommand="ZoteroPane_Local.openPreferences()"/>

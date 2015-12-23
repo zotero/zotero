@@ -724,8 +724,14 @@ function setHTTPResponse(server, baseURL, response, responses) {
 		responseArray[1]["Content-Type"] = "text/plain";
 		responseArray[2] = response.text || "";
 	}
+	
+	if (!response.headers) {
+		response.headers = {};
+	}
+	response.headers["Fake-Server-Match"] = 1;
 	for (let i in response.headers) {
 		responseArray[1][i] = response.headers[i];
 	}
+	
 	server.respondWith(response.method, baseURL + response.url, responseArray);
 }

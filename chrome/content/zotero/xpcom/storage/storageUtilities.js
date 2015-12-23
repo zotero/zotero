@@ -2,10 +2,10 @@ Zotero.Sync.Storage.Utilities = {
 	getClassForMode: function (mode) {
 		switch (mode) {
 		case 'zfs':
-			return Zotero.Sync.Storage.ZFS_Module;
+			return Zotero.Sync.Storage.Mode.ZFS;
 		
 		case 'webdav':
-			return Zotero.Sync.Storage.WebDAV_Module;
+			return Zotero.Sync.Storage.Mode.WebDAV;
 		
 		default:
 			throw new Error("Invalid storage mode '" + mode + "'");

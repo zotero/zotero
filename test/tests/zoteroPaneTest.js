@@ -148,9 +148,7 @@ describe("ZoteroPane", function() {
 			// TODO: Test binary data
 			var text = Zotero.Utilities.randomString();
 			yield item.saveTx();
-			yield Zotero.Sync.Storage.Local.setSyncState(
-				item.id, Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD
-			);
+			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "to_download");
 			
 			var mtime = "1441252524000";
 			var md5 = Zotero.Utilities.Internal.md5(text)

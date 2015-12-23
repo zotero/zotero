@@ -31,9 +31,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield Zotero.DB.executeTransaction(function* () {
 				yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, hash);
 				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, mtime);
-				yield Zotero.Sync.Storage.Local.setSyncState(
-					item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
-				);
+				yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
 			});
 			
 			// Update mtime and contents
@@ -50,7 +48,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 			assert.equal(changed, true);
 			assert.equal(
 				(yield Zotero.Sync.Storage.Local.getSyncState(item.id)),
-				Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD
+				Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD
 			);
 		})
 		
@@ -64,9 +62,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield Zotero.DB.executeTransaction(function* () {
 				yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, hash);
 				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, mtime);
-				yield Zotero.Sync.Storage.Local.setSyncState(
-					item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
-				);
+				yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
 			});
 			
 			var libraryID = Zotero.Libraries.userLibraryID;
@@ -76,7 +72,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield item.eraseTx();
 			
 			assert.isFalse(changed);
-			assert.equal(syncState, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
+			assert.equal(syncState, Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC);
 		})
 		
 		it("should skip a file if mod time has changed but contents haven't", function* () {
@@ -91,9 +87,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield Zotero.DB.executeTransaction(function* () {
 				yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, hash);
 				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, mtime);
-				yield Zotero.Sync.Storage.Local.setSyncState(
-					item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
-				);
+				yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
 			});
 			
 			// Update mtime, but not contents
@@ -109,7 +103,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield item.eraseTx();
 			
 			assert.isFalse(changed);
-			assert.equal(syncState, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
+			assert.equal(syncState, Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC);
 			assert.equal(syncedModTime, newModTime);
 		})
 	})
@@ -217,12 +211,8 @@ describe("Zotero.Sync.Storage.Local", function () {
 			json3.mtime = now - 20000;
 			yield Zotero.Sync.Data.Local.saveCacheObjects('item', libraryID, [json1, json3]);
 			
-			yield Zotero.Sync.Storage.Local.setSyncState(
-				item1.id, Zotero.Sync.Storage.SYNC_STATE_IN_CONFLICT
-			);
-			yield Zotero.Sync.Storage.Local.setSyncState(
-				item3.id, Zotero.Sync.Storage.SYNC_STATE_IN_CONFLICT
-			);
+			yield Zotero.Sync.Storage.Local.setSyncState(item1.id, "in_conflict");
+			yield Zotero.Sync.Storage.Local.setSyncState(item3.id, "in_conflict");
 			
 			var conflicts = yield Zotero.Sync.Storage.Local.getConflicts(libraryID);
 			assert.lengthOf(conflicts, 2);
@@ -269,10 +259,10 @@ describe("Zotero.Sync.Storage.Local", function () {
 			yield Zotero.Sync.Data.Local.saveCacheObjects('item', libraryID, [json1, json3]);
 			
 			yield Zotero.Sync.Storage.Local.setSyncState(
-				item1.id, Zotero.Sync.Storage.SYNC_STATE_IN_CONFLICT
+				item1.id, "in_conflict"
 			);
 			yield Zotero.Sync.Storage.Local.setSyncState(
-				item3.id, Zotero.Sync.Storage.SYNC_STATE_IN_CONFLICT
+				item3.id, "in_conflict"
 			);
 			
 			var promise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
@@ -317,11 +307,11 @@ describe("Zotero.Sync.Storage.Local", function () {
 			
 			yield assert.eventually.equal(
 				Zotero.Sync.Storage.Local.getSyncState(item1.id),
-				Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD
+				Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_UPLOAD
 			);
 			yield assert.eventually.equal(
 				Zotero.Sync.Storage.Local.getSyncState(item3.id),
-				Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD
+				Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_DOWNLOAD
 			);
 		})
 	})

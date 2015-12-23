@@ -62,6 +62,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	
 	var _syncEngines = [];
 	var _storageEngines = [];
+	var _storageControllers = {};
 	
 	var _lastSyncStatus;
 	var _currentSyncStatusLabel;
@@ -476,6 +477,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				Object.assign(opts, options);
 				opts.libraryID = libraryID;
 				
+				let mode = Zotero.Sync.Storage.Local.getModeForLibrary(libraryID);
+				opts.controller = this.getStorageController(mode, opts);
+				
 				let tries = 3;
 				while (true) {
 					if (tries == 0) {
@@ -547,6 +551,25 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		}
 		Zotero.debug("Done with full-text syncing");
 	}.bind(this));
+	
+	
+	/**
+	 * Get a storage controller for a given mode ('zfs', 'webdav'),
+	 * caching it if necessary
+	 */
+	this.getStorageController = function (mode, options) {
+		if (_storageControllers[mode]) {
+			return _storageControllers[mode];
+		}
+		var modeClass = Zotero.Sync.Storage.Utilities.getClassForMode(mode);
+		return _storageControllers[mode] = new modeClass(options);
+	},
+	
+	
+	// TODO: Call on API key change
+	this.resetStorageController = function (mode) {
+		delete _storageControllers[mode];
+	},
 	
 	
 	/**

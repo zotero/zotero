@@ -28,11 +28,17 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 
 Zotero_Preferences.Sync = {
 	init: Zotero.Promise.coroutine(function* () {
-		this.updateStorageSettings(null, null, true);
+		this.updateStorageSettingsUI();
 
 		var username = Zotero.Users.getCurrentUsername() || "";
 		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
 		this.displayFields(apiKey ? username : "");
+		
+		var pass = Zotero.Sync.Runner.getStorageController('webdav').password;
+		if (pass) {
+			document.getElementById('storage-password').value = pass;
+		}
+		
 		if (apiKey) {
 			try {
 				var keyInfo = yield Zotero.Sync.Runner.checkAccess(
@@ -57,13 +63,6 @@ Zotero_Preferences.Sync = {
 				}
 			}
 		}
-
-
-		// TEMP: Disabled
-		//var pass = Zotero.Sync.Storage.WebDAV.password;
-		//if (pass) {
-		//	document.getElementById('storage-password').value = pass;
-		//}
 	}),
 
 	displayFields: function (username) {
@@ -249,17 +248,13 @@ Zotero_Preferences.Sync = {
 
 		return true;
 	}),
-
 	
-	updateStorageSettings: function (enabled, protocol, skipWarnings) {
-		if (enabled === null) {
-			enabled = document.getElementById('pref-storage-enabled').value;
-		}
+	
+	updateStorageSettingsUI: Zotero.Promise.coroutine(function* () {
+		this.unverifyStorageServer();
 		
-		var oldProtocol = document.getElementById('pref-storage-protocol').value;
-		if (protocol === null) {
-			protocol = oldProtocol;
-		}
+		var protocol = document.getElementById('pref-storage-protocol').value;
+		var enabled = document.getElementById('pref-storage-enabled').value;
 		
 		var storageSettings = document.getElementById('storage-settings');
 		var protocolMenu = document.getElementById('storage-protocol');
@@ -275,66 +270,13 @@ Zotero_Preferences.Sync = {
 			sep.hidden = true;
 		}
 		
-		var menulists = storageSettings.getElementsByTagName('menulist');
-		for each(var menulist in menulists) {
-			if (menulist.className == 'storage-personal') {
-				menulist.disabled = !enabled;
-			}
+		var menulists = document.querySelectorAll('#storage-settings menulist.storage-personal');
+		for (let menulist of menulists) {
+			menulist.disabled = !enabled;
 		}
 		
-		if (!skipWarnings) {
-			// WARN if going between
-		}
-		
-		if (oldProtocol == 'zotero' && protocol == 'webdav') {
-			var sql = "SELECT COUNT(*) FROM version WHERE schema LIKE 'storage_zfs%'";
-			if (Zotero.DB.valueQuery(sql)) {
-				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
-				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-									+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-									+ ps.BUTTON_DELAY_ENABLE;
-				var account = Zotero.Sync.Server.username;
-				var index = ps.confirmEx(
-					null,
-					Zotero.getString('zotero.preferences.sync.purgeStorage.title'),
-					Zotero.getString('zotero.preferences.sync.purgeStorage.desc'),
-					buttonFlags,
-					Zotero.getString('zotero.preferences.sync.purgeStorage.confirmButton'),
-					Zotero.getString('zotero.preferences.sync.purgeStorage.cancelButton'), null, null, {}
-				);
-				
-				if (index == 0) {
-					var sql = "INSERT OR IGNORE INTO settings VALUES (?,?,?)";
-					Zotero.DB.query(sql, ['storage', 'zfsPurge', 'user']);
-					
-					Zotero.Sync.Storage.ZFS.purgeDeletedStorageFiles()
-					.then(function () {
-						ps.alert(
-							null,
-							Zotero.getString("general.success"),
-							"Attachment files from your personal library have been removed from the Zotero servers."
-						);
-					})
-					.catch(function (e) {
-						Zotero.debug(e, 1);
-						Components.utils.reportError(e);
-						
-						ps.alert(
-							null,
-							Zotero.getString("general.error"),
-							"An error occurred. Please try again later."
-						);
-					});
-				}
-			}
-		}
-		
-		var self = this;
-		setTimeout(function () {
-			self.updateStorageTerms();
-		}, 1)
-	},
+		this.updateStorageTerms();
+	}),
 	
 	
 	updateStorageSettingsGroups: function (enabled) {
@@ -364,14 +306,90 @@ Zotero_Preferences.Sync = {
 	},
 	
 	
-	unverifyStorageServer: function () {
-		Zotero.Prefs.set('sync.storage.verified', false);
-		Zotero.Sync.Storage.WebDAV.clearCachedCredentials();
-		Zotero.Sync.Storage.resetAllSyncStates(null, true, false);
-	},
+	onStorageSettingsKeyPress: Zotero.Promise.coroutine(function* (event) {
+		if (event.keyCode == 13) {
+			yield this.onStorageSettingsChange();
+			yield this.verifyStorageServer();
+		}
+	}),
 	
 	
-	verifyStorageServer: function () {
+	onStorageSettingsChange: Zotero.Promise.coroutine(function* () {
+		// Clean URL
+		var urlPref = document.getElementById('pref-storage-url');
+		urlPref.value = urlPref.value.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, '');
+		
+		var oldProtocol = document.getElementById('pref-storage-protocol').value;
+		var oldEnabled = document.getElementById('pref-storage-enabled').value;
+		
+		yield Zotero.Promise.delay(1);
+		
+		var newProtocol = document.getElementById('pref-storage-protocol').value;
+		var newEnabled = document.getElementById('pref-storage-enabled').value;
+		
+		if (oldProtocol != newProtocol) {
+			yield Zotero.Sync.Storage.Local.resetModeSyncStates(oldProtocol);
+		}
+		
+		if (oldProtocol == 'webdav') {
+			this.unverifyStorageServer();
+			Zotero.Sync.Runner.resetStorageController(oldProtocol);
+			
+			var username = document.getElementById('storage-username').value;
+			var password = document.getElementById('storage-password').value;
+			if (username) {
+				Zotero.Sync.Runner.getStorageController('webdav').password = password;
+			}
+		}
+		
+		if (oldProtocol == 'zotero' && newProtocol == 'webdav') {
+			var sql = "SELECT COUNT(*) FROM settings "
+				+ "WHERE schema='storage' AND key='zfsPurge' AND value='user'";
+			if (!Zotero.DB.valueQueryAsync(sql)) {
+				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+					.getService(Components.interfaces.nsIPromptService);
+				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
+					+ ps.BUTTON_DELAY_ENABLE;
+				var account = Zotero.Sync.Server.username;
+				var index = ps.confirmEx(
+					null,
+					Zotero.getString('zotero.preferences.sync.purgeStorage.title'),
+					Zotero.getString('zotero.preferences.sync.purgeStorage.desc'),
+					buttonFlags,
+					Zotero.getString('zotero.preferences.sync.purgeStorage.confirmButton'),
+					Zotero.getString('zotero.preferences.sync.purgeStorage.cancelButton'), null, null, {}
+				);
+				
+				if (index == 0) {
+					var sql = "INSERT OR IGNORE INTO settings VALUES (?,?,?)";
+					yield Zotero.DB.queryAsync(sql, ['storage', 'zfsPurge', 'user']);
+					
+					try {
+						yield Zotero.Sync.Storage.ZFS.purgeDeletedStorageFiles();
+						ps.alert(
+							null,
+							Zotero.getString("general.success"),
+							"Attachment files from your personal library have been removed from the Zotero servers."
+						);
+					}
+					catch (e) {
+						Zotero.logError(e);
+						ps.alert(
+							null,
+							Zotero.getString("general.error"),
+							"An error occurred. Please try again later."
+						);
+					}
+				}
+			}
+		}
+		
+		this.updateStorageSettingsUI();
+	}),
+	
+	
+	verifyStorageServer: Zotero.Promise.coroutine(function* () {
 		Zotero.debug("Verifying storage");
 		
 		var verifyButton = document.getElementById("storage-verify");
@@ -385,78 +403,56 @@ Zotero_Preferences.Sync = {
 		abortButton.hidden = false;
 		progressMeter.hidden = false;
 		
+		var success = false;
 		var request = null;
-		var onDone = false;
 		
-		Zotero.Sync.Storage.WebDAV.checkServer()
-		// Get the XMLHttpRequest for possible cancelling
-		.progress(function (obj) {
-			request = obj.xmlhttp;
-		})
-		.finally(function () {
+		var controller = Zotero.Sync.Runner.getStorageController('webdav');
+		
+		try {
+			yield controller.checkServer({
+				// Get the XMLHttpRequest for possible cancelling
+				onRequest: r => request = r
+			})
+			
+			success = true;
+		}
+		catch (e) {
+			if (e instanceof controller.VerificationError) {
+				switch (e.error) {
+				case "NO_URL":
+					urlField.focus();
+					break;
+				
+				case "NO_USERNAME":
+					usernameField.focus();
+					break;
+				
+				case "NO_PASSWORD":
+				case "AUTH_FAILED":
+					passwordField.focus();
+					break;
+				}
+			}
+			success = yield controller.handleVerificationError(e);
+		}
+		finally {
 			verifyButton.hidden = false;
 			abortButton.hidden = true;
 			progressMeter.hidden = true;
-		})
-		.spread(function (uri, status) {
-			switch (status) {
-				case Zotero.Sync.Storage.ERROR_NO_URL:
-					onDone = function () {
-						urlField.focus();
-					};
-					break;
-				
-				case Zotero.Sync.Storage.ERROR_NO_USERNAME:
-					onDone = function () {
-						usernameField.focus();
-					};
-					break;
-				
-				case Zotero.Sync.Storage.ERROR_NO_PASSWORD:
-				case Zotero.Sync.Storage.ERROR_AUTH_FAILED:
-					onDone = function () {
-						passwordField.focus();
-					};
-					break;
-			}
+		}
+		
+		if (success) {
+			Zotero.debug("WebDAV verification succeeded");
 			
-			return Zotero.Sync.Storage.WebDAV.checkServerCallback(uri, status, window);
-		})
-		.then(function (success) {
-			if (success) {
-				Zotero.debug("WebDAV verification succeeded");
-				
-				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-					.getService(Components.interfaces.nsIPromptService);
-				promptService.alert(
-					window,
-					Zotero.getString('sync.storage.serverConfigurationVerified'),
-					Zotero.getString('sync.storage.fileSyncSetUp')
-				);
-				Zotero.Prefs.set("sync.storage.verified", true);
-			}
-			else {
-				Zotero.debug("WebDAV verification failed");
-				if (onDone) {
-					setTimeout(function () {
-						onDone();
-					}, 1);
-				}
-			}
-		})
-		.catch(function (e) {
-			Zotero.debug("WebDAV verification failed");
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
-			Zotero.Utilities.Internal.errorPrompt(Zotero.getString('general.error'), e);
-			
-			if (onDone) {
-				setTimeout(function () {
-					onDone();
-				}, 1);
-			}
-		})
-		.done();
+			Zotero.alert(
+				window,
+				Zotero.getString('sync.storage.serverConfigurationVerified'),
+				Zotero.getString('sync.storage.fileSyncSetUp')
+			);
+		}
+		else {
+			Zotero.logError("WebDAV verification failed");
+		}
 		
 		abortButton.onclick = function () {
 			if (request) {
@@ -468,6 +464,12 @@ Zotero_Preferences.Sync = {
 				progressMeter.hidden = true;
 			}
 		}
+	}),
+	
+	
+	unverifyStorageServer: function () {
+		Zotero.debug("Unverifying storage");
+		Zotero.Prefs.set('sync.storage.verified', false);
 	},
 	
 	

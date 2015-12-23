@@ -1657,7 +1657,7 @@ Zotero.Sync.Server.Data = new function() {
 						// Mark new attachments for download
 						if (isNewObject) {
 							obj.attachmentSyncState =
-								Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
+								Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD;
 						}
 						// Set existing attachments for mtime update check
 						else {

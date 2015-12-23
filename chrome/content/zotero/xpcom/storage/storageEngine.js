@@ -32,31 +32,29 @@ if (!Zotero.Sync.Storage) {
  * An Engine manages file sync processes for a given library
  *
  * @param {Object} options
- * @param {Zotero.Sync.APIClient} options.apiClient
  * @param {Integer} options.libraryID
+ * @param {Object} options.controller - Storage controller instance (ZFS_Controller/WebDAV_Controller)
  * @param {Function} [onError] - Function to run on error
  * @param {Boolean} [stopOnError]
  */
 Zotero.Sync.Storage.Engine = function (options) {
-	if (options.apiClient == undefined) {
-		throw new Error("options.apiClient not set");
-	}
 	if (options.libraryID == undefined) {
 		throw new Error("options.libraryID not set");
 	}
+	if (options.controller == undefined) {
+		throw new Error("options.controller not set");
+	}
 	
-	this.apiClient = options.apiClient;
 	this.background = options.background;
 	this.firstInSession = options.firstInSession;
 	this.lastFullFileCheck = options.lastFullFileCheck;
 	this.libraryID = options.libraryID;
 	this.library = Zotero.Libraries.get(options.libraryID);
+	this.controller = options.controller;
 	
 	this.local = Zotero.Sync.Storage.Local;
 	this.utils = Zotero.Sync.Storage.Utilities;
-	this.mode = this.local.getModeForLibrary(this.libraryID);
-	var modeClass = this.utils.getClassForMode(this.mode);
-	this.controller = new modeClass(options);
+	
 	this.setStatus = options.setStatus || function () {};
 	this.onError = options.onError || function (e) {};
 	this.stopOnError = options.stopOnError || false;
@@ -87,12 +85,37 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	Zotero.debug("Starting file sync for " + this.library.name);
 	
 	if (!this.controller.verified) {
-		Zotero.debug(`${this.mode} file sync is not active`);
+		Zotero.debug(`${this.controller.name} file sync is not active -- verifying`);
 		
-		throw new Error("Storage mode verification not implemented");
-		
-		// TODO: Check server
+		try {
+			yield this.controller.checkServer();
+		}
+		catch (e) {
+			let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+			   .getService(Components.interfaces.nsIWindowMediator);
+			let lastWin = wm.getMostRecentWindow("navigator:browser");
+			
+			let success = yield this.controller.handleVerificationError(e, lastWin, true);
+			if (!success) {
+				Zotero.debug(this.controller.name + " verification failed", 2);
+				
+				throw new Zotero.Error(
+					Zotero.getString('sync.storage.error.verificationFailed', this.controller.name),
+					0,
+					{
+						dialogButtonText: Zotero.getString('sync.openSyncPreferences'),
+						dialogButtonCallback: function () {
+							let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+									   .getService(Components.interfaces.nsIWindowMediator);
+							let lastWin = wm.getMostRecentWindow("navigator:browser");
+							lastWin.ZoteroPane.openPreferences('zotero-prefpane-sync');
+						}
+					}
+				);
+			}
+		}
 	}
+	
 	if (this.controller.cacheCredentials) {
 		yield this.controller.cacheCredentials();
 	}
@@ -101,7 +124,10 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	var lastSyncTime = null;
 	var downloadAll = this.local.downloadOnSync(libraryID);
 	if (downloadAll) {
-		lastSyncTime = yield this.controller.getLastSyncTime(libraryID);
+		if (!this.library.storageDownloadNeeded) {
+			this.library.storageVersion = this.library.libraryVersion;
+			yield this.library.saveTx();
+		}
 	}
 	
 	// Check for updated files to upload
@@ -131,18 +157,11 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	
 	var downloadForced = yield this.local.checkForForcedDownloads(libraryID);
 	
-	// If we don't have any forced downloads, we can skip downloads if the last sync time hasn't
-	// changed or doesn't exist on the server (meaning there are no files)
+	// If we don't have any forced downloads, we can skip downloads if no storage metadata has
+	// changed (meaning nothing else has uploaded files since the last successful file sync)
 	if (downloadAll && !downloadForced) {
-		if (lastSyncTime) {
-			if (this.library.lastStorageSync == lastSyncTime) {
-				Zotero.debug("Last " + this.mode.toUpperCase() + " sync id hasn't changed for "
-					+ this.library.name + " -- skipping file downloads");
-				downloadAll = false;
-			}
-		}
-		else {
-			Zotero.debug(`No last ${this.mode} sync time for ${this.library.name}`
+		if (this.library.storageVersion == this.library.libraryVersion) {
+			Zotero.debug("No remote storage changes for " + this.library.name
 				+ " -- skipping file downloads");
 			downloadAll = false;
 		}
@@ -189,6 +208,7 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	}
 	
 	// Process the results
+	var downloadSuccessful = false;
 	var changes = new Zotero.Sync.Storage.Result;
 	for (let type of ['download', 'upload']) {
 		let results = yield promises[type];
@@ -202,32 +222,33 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 				}
 			}
 		}
-		
 		Zotero.debug(`File ${type} sync finished for ${this.library.name}`);
 		
 		changes.updateFromResults(results.filter(p => p.isFulfilled()).map(p => p.value()));
-	}
-	
-	// If files were uploaded, update the remote last-sync time
-	if (changes.remoteChanges) {
-		lastSyncTime = yield this.controller.setLastSyncTime(libraryID);
-		if (!lastSyncTime) {
-			throw new Error("Last sync time not set after sync");
+		
+		if (type == 'download' && results.every(p => !p.isRejected())) {
+			downloadSuccessful = true;
 		}
 	}
 	
-	// If there's a remote last-sync time from either the check before downloads or when it
-	// was changed after uploads, store that locally so we know we can skip download checks
-	// next time
-	if (lastSyncTime) {
-		this.library.lastStorageSync = lastSyncTime;
+	if (downloadSuccessful) {
+		this.library.storageDownloadNeeded = false;
+		this.library.storageVersion = this.library.libraryVersion;
 		yield this.library.saveTx();
 	}
 	
-	// If WebDAV sync, purge deleted and orphaned files
-	if (this.mode == 'webdav') {
+	// For ZFS, this purges all files on server based on flag set when switching from ZFS
+	// to WebDAV in prefs. For WebDAV, this purges locally deleted files on server.
+	try {
+		yield this.controller.purgeDeletedStorageFiles(libraryID);
+	}
+	catch (e) {
+		Zotero.logError(e);
+	}
+	
+	// If WebDAV sync, purge orphaned files
+	if (this.controller.mode == 'webdav') {
 		try {
-			yield this.controller.purgeDeletedStorageFiles(libraryID);
 			yield this.controller.purgeOrphanedStorageFiles(libraryID);
 		}
 		catch (e) {
@@ -253,16 +274,16 @@ Zotero.Sync.Storage.Engine.prototype.stop = function () {
 
 Zotero.Sync.Storage.Engine.prototype.queueItem = Zotero.Promise.coroutine(function* (item) {
 	switch (yield this.local.getSyncState(item.id)) {
-		case Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD:
-		case Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD:
+		case Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD:
+		case Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_DOWNLOAD:
 			var type = 'download';
 			var onStart = Zotero.Promise.method(function (request) {
 				return this.controller.downloadFile(request);
 			}.bind(this));
 			break;
 		
-		case Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD:
-		case Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD:
+		case Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD:
+		case Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_UPLOAD:
 			var type = 'upload';
 			var onStart = Zotero.Promise.method(function (request) {
 				return this.controller.uploadFile(request);

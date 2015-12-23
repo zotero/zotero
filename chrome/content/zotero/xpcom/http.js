@@ -636,74 +636,6 @@ Zotero.HTTP = new function() {
 	this.WebDAV = {};
 	
 	/**
-	* Send a WebDAV PROP* request via XMLHTTPRequest
-	*
-	* Returns false if browser is offline
-	*
-	* @param		{String}		method			PROPFIND or PROPPATCH
-	* @param		{nsIURI}		uri
-	* @param		{String}		body				XML string
-	* @param		{Function}	callback
-	* @param		{Object}		requestHeaders	e.g. { Depth: 0 }
-	*/
-	this.WebDAV.doProp = function (method, uri, body, callback, requestHeaders) {
-		switch (method) {
-			case 'PROPFIND':
-			case 'PROPPATCH':
-				break;
-			
-			default:
-				throw ("Invalid method '" + method
-					+ "' in Zotero.HTTP.doProp");
-		}
-		
-		if (requestHeaders && requestHeaders.depth != undefined) {
-			var depth = requestHeaders.depth;
-		}
-		
-		// Don't display password in console
-		var disp = Zotero.HTTP.getDisplayURI(uri);
-		
-		var bodyStart = body.substr(0, 1024);
-		Zotero.debug("HTTP " + method + " "
-			+ (depth != undefined ? "(depth " + depth + ") " : "")
-			+ (body.length > 1024 ?
-				bodyStart + "... (" + body.length + " chars)" : bodyStart)
-			+ " to " + disp.spec);
-		
-		if (Zotero.HTTP.browserIsOffline()) {
-			Zotero.debug("Browser is offline", 2);
-			return false;
-		}
-		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-						.createInstance();
-		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open(method, uri.spec, true);
-		
-		if (requestHeaders) {
-			for (var header in requestHeaders) {
-				xmlhttp.setRequestHeader(header, requestHeaders[header]);
-			}
-		}
-		
-		xmlhttp.setRequestHeader("Content-Type", 'text/xml; charset="utf-8"');
-		
-		var useMethodjit = Components.utils.methodjit;
-		/** @ignore */
-		xmlhttp.onreadystatechange = function() {
-			// XXX Remove when we drop support for Fx <24
-			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
-			_stateChange(xmlhttp, callback);
-		};
-		
-		xmlhttp.send(body);
-		return xmlhttp;
-	}
-	
-	
-	/**
 	 * Send a WebDAV MKCOL request via XMLHTTPRequest
 	 *
 	 * @param	{nsIURI}		url
@@ -732,49 +664,6 @@ Zotero.HTTP = new function() {
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(null);
-		return xmlhttp;
-	}
-	
-	
-	/**
-	 * Send a WebDAV PUT request via XMLHTTPRequest
-	 *
-	 * @param	{nsIURI}		url
-	 * @param	{String}		body			String body to PUT
-	 * @param	{Function}	onDone
-	 * @return	{XMLHTTPRequest}
-	 */
-	this.WebDAV.doPut = function (uri, body, callback) {
-		// Don't display password in console
-		var disp = Zotero.HTTP.getDisplayURI(uri);
-		
-		var bodyStart = "'" + body.substr(0, 1024) + "'";
-		Zotero.debug("HTTP PUT "
-			+ (body.length > 1024 ?
-				bodyStart + "... (" + body.length + " chars)" : bodyStart)
-			+ " to " + disp.spec);
-		
-		if (Zotero.HTTP.browserIsOffline()) {
-			return false;
-		}
-		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-					.createInstance();
-		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open("PUT", uri.spec, true);
-		// Some servers (e.g., Jungle Disk DAV) return a 200 response code
-		// with Content-Length: 0, which triggers a "no element found" error
-		// in Firefox, so we override to text
-		xmlhttp.overrideMimeType("text/plain");
-		var useMethodjit = Components.utils.methodjit;
-		/** @ignore */
-		xmlhttp.onreadystatechange = function() {
-			// XXX Remove when we drop support for Fx <24
-			if(useMethodjit !== undefined) Components.utils.methodjit = useMethodjit;
-			_stateChange(xmlhttp, callback);
-		};
-		xmlhttp.send(body);
 		return xmlhttp;
 	}
 	

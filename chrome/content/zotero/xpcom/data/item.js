@@ -2294,9 +2294,7 @@ Zotero.Item.prototype.renameAttachmentFile = Zotero.Promise.coroutine(function* 
 		
 		yield Zotero.DB.executeTransaction(function* () {
 			yield Zotero.Sync.Storage.Local.setSyncedHash(this.id, null, false);
-			yield Zotero.Sync.Storage.Local.setSyncState(
-				this.id, Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD
-			);
+			yield Zotero.Sync.Storage.Local.setSyncState(this.id, "to_upload");
 		}.bind(this));
 		
 		return true;
@@ -2692,11 +2690,12 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentSyncState', {
 		}
 		
 		switch (val) {
-			case Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD:
-			case Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD:
-			case Zotero.Sync.Storage.SYNC_STATE_IN_SYNC:
-			case Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD:
-			case Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD:
+			case Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD:
+			case Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD:
+			case Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC:
+			case Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_UPLOAD:
+			case Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_DOWNLOAD:
+			case Zotero.Sync.Storage.Local.SYNC_STATE_IN_CONFLICT:
 				break;
 				
 			default:
@@ -3670,6 +3669,9 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 				Components.utils.reportError(e);
 			}
 		}
+		
+		// Zotero.Sync.EventListeners.ChangeListener needs to know if this was a storage file
+		env.notifierData[this.id].storageDeleteLog = this.isImportedAttachment();
 	}
 	// Regular item
 	else {
@@ -3905,8 +3907,14 @@ Zotero.Item.prototype.toJSON = Zotero.Promise.coroutine(function* (options = {})
 			}
 			
 			if (this.isFileAttachment()) {
-				obj.mtime = (yield this.attachmentModificationTime) || null;
-				obj.md5 = (yield this.attachmentHash) || null;
+				if (options.syncedStorageProperties) {
+					obj.mtime = yield Zotero.Sync.Storage.Local.getSyncedModificationTime(this.id);
+					obj.md5 = yield Zotero.Sync.Storage.Local.getSyncedHash(this.id);
+				}
+				else {
+					obj.mtime = (yield this.attachmentModificationTime) || null;
+					obj.md5 = (yield this.attachmentHash) || null;
+				}
 			}
 		}
 		

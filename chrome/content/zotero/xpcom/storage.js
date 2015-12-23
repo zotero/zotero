@@ -25,34 +25,6 @@
 
 
 Zotero.Sync.Storage = new function () {
-	//
-	// Constants
-	//
-	this.SYNC_STATE_TO_UPLOAD = 0;
-	this.SYNC_STATE_TO_DOWNLOAD = 1;
-	this.SYNC_STATE_IN_SYNC = 2;
-	this.SYNC_STATE_FORCE_UPLOAD = 3;
-	this.SYNC_STATE_FORCE_DOWNLOAD = 4;
-	this.SYNC_STATE_IN_CONFLICT = 5;
-	
-	this.SUCCESS = 1;
-	this.ERROR_NO_URL = -1;
-	this.ERROR_NO_USERNAME = -2;
-	this.ERROR_NO_PASSWORD = -3;
-	this.ERROR_OFFLINE = -4;
-	this.ERROR_UNREACHABLE = -5;
-	this.ERROR_SERVER_ERROR = -6;
-	this.ERROR_NOT_DAV = -7;
-	this.ERROR_BAD_REQUEST = -8;
-	this.ERROR_AUTH_FAILED = -9;
-	this.ERROR_FORBIDDEN = -10;
-	this.ERROR_PARENT_DIR_NOT_FOUND = -11;
-	this.ERROR_ZOTERO_DIR_NOT_FOUND = -12;
-	this.ERROR_ZOTERO_DIR_NOT_WRITABLE = -13;
-	this.ERROR_NOT_ALLOWED = -14;
-	this.ERROR_UNKNOWN = -15;
-	this.ERROR_FILE_MISSING_AFTER_UPLOAD = -16;
-	this.ERROR_NONEXISTENT_FILE_NOT_MISSING = -17;
 	
 	// TEMP
 	this.__defineGetter__("defaultError", function () Zotero.getString('sync.storage.error.default', Zotero.appName));
@@ -111,40 +83,6 @@ Zotero.Sync.Storage = new function () {
 	}
 	
 	
-	this.checkServerPromise = function (mode) {
-		return mode.checkServer()
-		.spread(function (uri, status) {
-			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						   .getService(Components.interfaces.nsIWindowMediator);
-			var lastWin = wm.getMostRecentWindow("navigator:browser");
-			
-			var success = mode.checkServerCallback(uri, status, lastWin, true);
-			if (!success) {
-				Zotero.debug(mode.name + " verification failed");
-				
-				var e = new Zotero.Error(
-					Zotero.getString('sync.storage.error.verificationFailed', mode.name),
-					0,
-					{
-						dialogButtonText: Zotero.getString('sync.openSyncPreferences'),
-						dialogButtonCallback: function () {
-							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-									   .getService(Components.interfaces.nsIWindowMediator);
-							var lastWin = wm.getMostRecentWindow("navigator:browser");
-							lastWin.ZoteroPane.openPreferences('zotero-prefpane-sync');
-						}
-					}
-				);
-				throw e;
-			}
-		})
-		.then(function () {
-			Zotero.debug(mode.name + " file sync is successfully set up");
-			Zotero.Prefs.set("sync.storage.verified", true);
-		});
-	}
-	
-	
 	this.getItemDownloadImageNumber = function (item) {
 		var numImages = 64;
 		
@@ -189,57 +127,6 @@ Zotero.Sync.Storage = new function () {
 			Zotero.Notifier.trigger('redraw', 'item', parentItem.id, { column: "hasAttachment" });
 		}
 	}
-	
-	
-	this.resetAllSyncStates = function (syncState, includeUserFiles, includeGroupFiles) {
-		if (!includeUserFiles && !includeGroupFiles) {
-			includeUserFiles = true;
-			includeGroupFiles = true;
-		}
-		
-		if (!syncState) {
-			syncState = this.SYNC_STATE_TO_UPLOAD;
-		}
-		
-		switch (syncState) {
-			case this.SYNC_STATE_TO_UPLOAD:
-			case this.SYNC_STATE_TO_DOWNLOAD:
-			case this.SYNC_STATE_IN_SYNC:
-				break;
-			
-			default:
-				throw ("Invalid sync state '" + syncState + "' in "
-					+ "Zotero.Sync.Storage.resetAllSyncStates()");
-		}
-		
-		//var sql = "UPDATE itemAttachments SET syncState=?, storageModTime=NULL, storageHash=NULL";
-		var sql = "UPDATE itemAttachments SET syncState=?";
-		var params = [syncState];
-		if (includeUserFiles && !includeGroupFiles) {
-			sql += " WHERE itemID IN (SELECT itemID FROM items WHERE libraryID = ?)";
-			params.push(Zotero.Libraries.userLibraryID);
-		}
-		else if (!includeUserFiles && includeGroupFiles) {
-			sql += " WHERE itemID IN (SELECT itemID FROM items WHERE libraryID != ?)";
-			params.push(Zotero.Libraries.userLibraryID);
-		}
-		Zotero.DB.query(sql, [syncState]);
-		
-		var sql = "DELETE FROM version WHERE schema LIKE 'storage_%'";
-		Zotero.DB.query(sql);
-	}
-	
-	
-	
-	
-
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	function error(e) {

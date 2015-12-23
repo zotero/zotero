@@ -235,15 +235,6 @@ var ZoteroPane = new function()
 			catch (e) {}
 		}
 		
-		// Hide sync debugging menu by default
-		if (Zotero.Prefs.get('sync.debugMenu')) {
-			var sep = document.getElementById('zotero-tb-actions-sync-separator');
-			sep.hidden = false;
-			sep.nextSibling.hidden = false;
-			sep.nextSibling.nextSibling.hidden = false;
-			sep.nextSibling.nextSibling.nextSibling.hidden = false;
-		}
-		
 		if (Zotero.openPane) {
 			Zotero.openPane = false;
 			setTimeout(function () {

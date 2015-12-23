@@ -23,8 +23,11 @@
     ***** END LICENSE BLOCK *****
 */
 
+if (!Zotero.Sync.Storage.Mode) {
+	Zotero.Sync.Storage.Mode = {};
+}
 
-Zotero.Sync.Storage.ZFS_Module = function (options) {
+Zotero.Sync.Storage.Mode.ZFS = function (options) {
 	this.options = options;
 	this.apiClient = options.apiClient;
 	
@@ -33,76 +36,17 @@ Zotero.Sync.Storage.ZFS_Module = function (options) {
 	this._maxS3Backoff = 60;
 	this._maxS3ConsecutiveFailures = 5;
 };
-Zotero.Sync.Storage.ZFS_Module.prototype = {
+Zotero.Sync.Storage.Mode.ZFS.prototype = {
+	mode: "zfs",
 	name: "ZFS",
 	verified: true,
-	
-	/**
-	 * @return {Promise} A promise for the last sync time
-	 */
-	getLastSyncTime: Zotero.Promise.coroutine(function* (libraryID) {
-		var params = this._getRequestParams(libraryID, "laststoragesync");
-		var uri = this.apiClient.buildRequestURI(params);
-		
-		try {
-			let req = yield this.apiClient.makeRequest(
-				"GET", uri, { successCodes: [200, 404], debug: true }
-			);
-			
-			// Not yet synced
-			if (req.status == 404) {
-				Zotero.debug("No last sync time for library " + libraryID);
-				return null;
-			}
-			
-			let ts = req.responseText;
-			let date = new Date(ts * 1000);
-			Zotero.debug("Last successful ZFS sync for library " + libraryID + " was " + date);
-			return ts;
-		}
-		catch (e) {
-			Zotero.logError(e);
-			throw e;
-		}
-	}),
-	
-	
-	setLastSyncTime: Zotero.Promise.coroutine(function* (libraryID) {
-		var params = this._getRequestParams(libraryID, "laststoragesync");
-		var uri = this.apiClient.buildRequestURI(params);
-		
-		try {
-			var req = yield this.apiClient.makeRequest(
-				"POST", uri, { successCodes: [200, 404], debug: true }
-			);
-		}
-		catch (e) {
-			var msg = "Unexpected status code " + e.xmlhttp.status + " setting last file sync time";
-			Zotero.logError(e);
-			throw new Error(Zotero.Sync.Storage.defaultError);
-		}
-		
-		// Not yet synced
-		//
-		// TODO: Don't call this at all if no files uploaded
-		if (req.status == 404) {
-			return;
-		}
-		
-		var time = req.responseText;
-		if (parseInt(time) != time) {
-			Zotero.logError(`Unexpected response ${time} setting last file sync time`);
-			throw new Error(Zotero.Sync.Storage.defaultError);
-		}
-		return parseInt(time);
-	}),
 	
 	
 	/**
 	 * Begin download process for individual file
 	 *
 	 * @param {Zotero.Sync.Storage.Request} request
-	 * @return {Promise<Boolean>} - True if file download, false if not
+	 * @return {Promise<Zotero.Sync.Storage.Result>}
 	 */
 	downloadFile: Zotero.Promise.coroutine(function* (request) {
 		var item = Zotero.Sync.Storage.Utilities.getItemFromRequest(request);
@@ -140,7 +84,7 @@ Zotero.Sync.Storage.ZFS_Module.prototype = {
 						Zotero.debug("Download request " + request.name
 							+ " stopped before download started -- closing channel");
 						req.cancel(Components.results.NS_BINDING_ABORTED);
-						deferred.resolve(false);
+						deferred.resolve(new Zotero.Sync.Storage.Result);
 					}
 				},
 				onChannelRedirect: Zotero.Promise.coroutine(function* (oldChannel, newChannel, flags) {
@@ -193,9 +137,7 @@ Zotero.Sync.Storage.ZFS_Module.prototype = {
 						yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
 							item.id, requestData.mtime
 						);
-						yield Zotero.Sync.Storage.Local.setSyncState(
-							item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
-						);
+						yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
 					});
 					return false;
 				}),
@@ -259,7 +201,7 @@ Zotero.Sync.Storage.ZFS_Module.prototype = {
 					if (request.isFinished()) {
 						Zotero.debug("Download request " + request.name
 							+ " is no longer running after file download", 2);
-						deferred.resolve(false);
+						deferred.resolve(new Zotero.Sync.Storage.Result);
 						return;
 					}
 					
@@ -271,14 +213,13 @@ Zotero.Sync.Storage.ZFS_Module.prototype = {
 						);
 					}
 					catch (e) {
-						Zotero.debug("REJECTING");
 						deferred.reject(e);
 					}
 				}.bind(this),
 				onCancel: function (req, status) {
 					Zotero.debug("Request cancelled");
 					if (deferred.promise.isPending()) {
-						deferred.resolve(false);
+						deferred.resolve(new Zotero.Sync.Storage.Result);
 					}
 				}
 			}
@@ -290,8 +231,7 @@ Zotero.Sync.Storage.ZFS_Module.prototype = {
 		
 		Zotero.debug('Saving ' + uri);
 		const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-		var wbp = Components
-			.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+		var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
 			.createInstance(nsIWBP);
 		wbp.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
 		wbp.progressListener = listener;
@@ -308,7 +248,6 @@ Zotero.Sync.Storage.ZFS_Module.prototype = {
 			if (!created) {
 				return new Zotero.Sync.Storage.Result;
 			}
-			return this._processUploadFile(request);
 		}
 		return this._processUploadFile(request);
 	}),
@@ -327,23 +266,7 @@ Zotero.Sync.Storage.ZFS_Module.prototype = {
 		Zotero.debug("Unlinking synced files on ZFS");
 		
 		var uri = this.userURI;
-		uri.spec += "removestoragefiles?";
-		// Unused
-		for each(var value in values) {
-			switch (value) {
-				case 'user':
-					uri.spec += "user=1&";
-					break;
-				
-				case 'group':
-					uri.spec += "group=1&";
-					break;
-				
-				default:
-					throw new Error("Invalid zfsPurge value '" + value + "'");
-			}
-		}
-		uri.spec = uri.spec.substr(0, uri.spec.length - 1);
+		uri.spec += "removestoragefiles";
 		
 		yield Zotero.HTTP.request("POST", uri, "");
 		
@@ -438,10 +361,9 @@ Zotero.Sync.Storage.ZFS_Module.prototype = {
 		}
 		
 		// Build POST body
-		var mtime = yield item.attachmentModificationTime;
 		var params = {
+			mtime: yield item.attachmentModificationTime,
 			md5: yield item.attachmentHash,
-			mtime,
 			filename,
 			filesize: (yield OS.File.stat(uploadPath)).size
 		};
@@ -521,7 +443,7 @@ Zotero.Sync.Storage.ZFS_Module.prototype = {
 		// TEMP
 		//
 		// Passed through to _updateItemFileInfo()
-		json.mtime = mtime;
+		json.mtime = params.mtime;
 		json.md5 = params.md5;
 		if (storedHash) {
 			json.storedHash = storedHash;
@@ -619,16 +541,12 @@ Zotero.Sync.Storage.ZFS_Module.prototype = {
 						item.id, fileModTime
 					);
 					yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, fileHash);
-					yield Zotero.Sync.Storage.Local.setSyncState(
-						item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
-					);
+					yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
 				});
 				return new Zotero.Sync.Storage.Result;
 			}
 			
-			yield Zotero.Sync.Storage.Local.setSyncState(
-				item.id, Zotero.Sync.Storage.SYNC_STATE_IN_CONFLICT
-			);
+			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_conflict");
 			return new Zotero.Sync.Storage.Result({
 				fileSyncRequired: true
 			});
@@ -847,9 +765,7 @@ Zotero.Sync.Storage.ZFS_Module.prototype = {
 	_updateItemFileInfo: Zotero.Promise.coroutine(function* (item, params) {
 		// Mark as in-sync
 		yield Zotero.DB.executeTransaction(function* () {
-			yield Zotero.Sync.Storage.Local.setSyncState(
-				item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
-			);
+			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
 			
 			// Store file mod time and hash
 			yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, params.mtime);
@@ -1016,7 +932,7 @@ Zotero.Sync.Storage.ZFS_Module.prototype = {
 		
 		// Check for conflict
 		if ((yield Zotero.Sync.Storage.Local.getSyncState(item.id))
-				!= Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD) {
+				!= Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_UPLOAD) {
 			if (info) {
 				// Local file time
 				var fmtime = yield item.attachmentModificationTime;
@@ -1036,7 +952,7 @@ Zotero.Sync.Storage.ZFS_Module.prototype = {
 					yield Zotero.DB.executeTransaction(function* () {
 						yield Zotero.Sync.Storage.setSyncedModificationTime(item.id, fmtime);
 						yield Zotero.Sync.Storage.setSyncState(
-							item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
+							item.id, Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC
 						);
 					});
 					return {

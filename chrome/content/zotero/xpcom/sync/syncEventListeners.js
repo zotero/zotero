@@ -43,58 +43,55 @@ Zotero.Sync.EventListeners.ChangeListener = new function () {
 		
 		var storageForLibrary = {};
 		
-		return Zotero.DB.executeTransaction(function* () {
-			for (let i = 0; i < ids.length; i++) {
-				let id = ids[i];
-				
-				if (extraData[id] && extraData[id].skipDeleteLog) {
-					continue;
-				}
-				
-				var libraryID, key;
-				if (type == 'setting') {
-					[libraryID, key] = ids[i].split("/");
-				}
-				else {
-					let d = extraData[ids[i]];
-					libraryID = d.libraryID;
-					key = d.key;
-				}
-				
-				if (!key) {
-					throw new Error("Key not provided in notifier object");
-				}
-				
-				yield Zotero.DB.queryAsync(
-					syncSQL,
-					[
-						syncObjectTypeID,
-						libraryID,
-						key
-					]
-				);
-				
-				if (type == 'item') {
-					if (storageForLibrary[libraryID] === undefined) {
-						storageForLibrary[libraryID] =
-							Zotero.Sync.Storage.Local.getModeForLibrary(libraryID) == 'webdav';
-					}
-					if (storageForLibrary[libraryID] && oldItem.itemType == 'attachment' &&
-							[
-								Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
-								Zotero.Attachments.LINK_MODE_IMPORTED_URL
-							].indexOf(oldItem.linkMode) != -1) {
+		return Zotero.Utilities.Internal.forEachChunkAsync(
+			ids,
+			100,
+			function (chunk) {
+				return Zotero.DB.executeTransaction(function* () {
+					for (let id of chunk) {
+						if (extraData[id] && extraData[id].skipDeleteLog) {
+							continue;
+						}
+						
+						if (type == 'setting') {
+							var [libraryID, key] = id.split("/");
+						}
+						else {
+							var { libraryID, key } = extraData[id];
+						}
+						
+						if (!key) {
+							throw new Error("Key not provided in notifier object");
+						}
+						
 						yield Zotero.DB.queryAsync(
-							storageSQL,
+							syncSQL,
 							[
+								syncObjectTypeID,
 								libraryID,
 								key
 							]
 						);
+						
+						if (type == 'item') {
+							if (storageForLibrary[libraryID] === undefined) {
+								storageForLibrary[libraryID] =
+									Zotero.Sync.Storage.Local.getModeForLibrary(libraryID) == 'webdav';
+							}
+							if (storageForLibrary[libraryID] && extraData[id].storageDeleteLog) {
+								yield Zotero.DB.queryAsync(
+									storageSQL,
+									[
+										libraryID,
+										key
+									]
+								);
+							}
+						}
 					}
-				}
+				});
 			}
-		});
+		);
 	});
 }
 

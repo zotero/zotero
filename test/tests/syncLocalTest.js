@@ -149,7 +149,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			var id = Zotero.Items.getIDFromLibraryAndKey(libraryID, key);
 			assert.equal(
 				(yield Zotero.Sync.Storage.Local.getSyncState(id)),
-				Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD
+				Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
 			);
 		})
 		
@@ -170,9 +170,7 @@ describe("Zotero.Sync.Data.Local", function() {
 				yield Zotero.Sync.Storage.Local.setSyncedHash(
 					item.id, (yield item.attachmentHash)
 				);
-				yield Zotero.Sync.Storage.Local.setSyncState(
-					item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
-				);
+				yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
 			});
 			
 			// Simulate download of version with updated attachment
@@ -191,7 +189,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			
 			assert.equal(
 				(yield Zotero.Sync.Storage.Local.getSyncState(item.id)),
-				Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD
+				Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
 			);
 		})
 		
@@ -213,9 +211,7 @@ describe("Zotero.Sync.Data.Local", function() {
 				yield Zotero.Sync.Storage.Local.setSyncedHash(
 					item.id, (yield item.attachmentHash)
 				);
-				yield Zotero.Sync.Storage.Local.setSyncState(
-					item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
-				);
+				yield Zotero.Sync.Storage.Local.setSyncState(item.id, "in_sync");
 			});
 			
 			// Modify title locally, leaving item unsynced
@@ -237,7 +233,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			assert.equal(item.getField('title'), newTitle);
 			assert.equal(
 				(yield Zotero.Sync.Storage.Local.getSyncState(item.id)),
-				Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD
+				Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
 			);
 		})
 	})

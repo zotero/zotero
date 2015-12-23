@@ -1,4 +1,14 @@
 Zotero.Sync.Storage.Local = {
+	//
+	// Constants
+	//
+	SYNC_STATE_TO_UPLOAD: 0,
+	SYNC_STATE_TO_DOWNLOAD: 1,
+	SYNC_STATE_IN_SYNC: 2,
+	SYNC_STATE_FORCE_UPLOAD: 3,
+	SYNC_STATE_FORCE_DOWNLOAD: 4,
+	SYNC_STATE_IN_CONFLICT: 5,
+	
 	lastFullFileCheck: {},
 	uploadCheckFiles: [],
 	
@@ -101,7 +111,7 @@ Zotero.Sync.Storage.Local = {
 			libraryID,
 			Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
 			Zotero.Attachments.LINK_MODE_IMPORTED_URL,
-			Zotero.Sync.Storage.SYNC_STATE_IN_SYNC,
+			this.SYNC_STATE_IN_SYNC,
 			minTime
 		];
 		var itemIDs = yield Zotero.DB.columnQueryAsync(sql, params);
@@ -174,8 +184,8 @@ Zotero.Sync.Storage.Local = {
 			let params = [
 				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
 				Zotero.Attachments.LINK_MODE_IMPORTED_URL,
-				Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD,
-				Zotero.Sync.Storage.SYNC_STATE_IN_SYNC
+				this.SYNC_STATE_TO_UPLOAD,
+				this.SYNC_STATE_IN_SYNC
 			];
 			if (libraryID !== false) {
 				sql += " AND libraryID=?";
@@ -251,7 +261,7 @@ Zotero.Sync.Storage.Local = {
 		var path = item.getFilePath();
 		if (!path) {
 			Zotero.debug("Marking pathless attachment " + lk + " as in-sync");
-			return Zotero.Sync.Storage.SYNC_STATE_IN_SYNC;
+			return this.SYNC_STATE_IN_SYNC;
 		}
 		var fileName = OS.Path.basename(path);
 		var file;
@@ -272,7 +282,7 @@ Zotero.Sync.Storage.Local = {
 			// If file is already marked for upload, skip check. Even if the file was changed
 			// both locally and remotely, conflicts are checked at upload time, so we don't need
 			// to worry about it here.
-			if ((yield this.getSyncState(item.id)) == Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD) {
+			if ((yield this.getSyncState(item.id)) == this.SYNC_STATE_TO_UPLOAD) {
 				Zotero.debug("File is already marked for upload");
 				return false;
 			}
@@ -296,7 +306,7 @@ Zotero.Sync.Storage.Local = {
 				
 				Zotero.debug(`Marking attachment ${lk} for download (stored mtime: ${mtime})`);
 				// DEBUG: Always set here, or allow further steps?
-				return Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD;
+				return this.SYNC_STATE_FORCE_DOWNLOAD;
 			}
 			
 			var same = !this.checkFileModTime(item, fmtime, mtime);
@@ -330,7 +340,7 @@ Zotero.Sync.Storage.Local = {
 			// Mark file for upload
 			Zotero.debug("Marking attachment " + lk + " as changed "
 				+ "(" + mtime + " != " + fmtime + ")");
-			return Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD;
+			return this.SYNC_STATE_TO_UPLOAD;
 		}
 		catch (e) {
 			if (e instanceof OS.File.Error &&
@@ -342,7 +352,7 @@ Zotero.Sync.Storage.Local = {
 					// Handle long filenames on OS X/Linux
 					|| (e.unixErrno && e.unixErrno == 63))) {
 				Zotero.debug("Marking attachment " + lk + " as missing");
-				return Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
+				return this.SYNC_STATE_TO_DOWNLOAD;
 			}
 			
 			if (e instanceof OS.File.Error) {
@@ -372,7 +382,7 @@ Zotero.Sync.Storage.Local = {
 	 * @return {Boolean} - True if file modification time differs from remote mod time,
 	 *                     false otherwise
 	 */
-	checkFileModTime(item, fmtime, mtime) {
+	checkFileModTime: function (item, fmtime, mtime) {
 		var libraryKey = item.libraryKey;
 		
 		if (fmtime == mtime) {
@@ -406,7 +416,7 @@ Zotero.Sync.Storage.Local = {
 		var sql = "SELECT COUNT(*) FROM items JOIN itemAttachments USING (itemID) "
 			+ "WHERE libraryID=? AND syncState=?";
 		return !!(yield Zotero.DB.valueQueryAsync(
-			sql, [libraryID, Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD]
+			sql, [libraryID, this.SYNC_STATE_FORCE_DOWNLOAD]
 		));
 	}),
 	
@@ -420,10 +430,10 @@ Zotero.Sync.Storage.Local = {
 	getFilesToDownload: function (libraryID, forcedOnly) {
 		var sql = "SELECT itemID FROM itemAttachments JOIN items USING (itemID) "
 					+ "WHERE libraryID=? AND syncState IN (?";
-		var params = [libraryID, Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD];
+		var params = [libraryID, this.SYNC_STATE_FORCE_DOWNLOAD];
 		if (!forcedOnly) {
 			sql += ",?";
-			params.push(Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD);
+			params.push(this.SYNC_STATE_TO_DOWNLOAD);
 		}
 		sql += ") "
 			// Skip attachments with empty path, which can't be saved, and files with .zotero*
@@ -444,8 +454,8 @@ Zotero.Sync.Storage.Local = {
 			+ "WHERE libraryID=? AND syncState IN (?,?) AND linkMode IN (?,?)";
 		var params = [
 			libraryID,
-			Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD,
-			Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD,
+			this.SYNC_STATE_TO_UPLOAD,
+			this.SYNC_STATE_FORCE_UPLOAD,
 			Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
 			Zotero.Attachments.LINK_MODE_IMPORTED_URL
 		];
@@ -473,17 +483,22 @@ Zotero.Sync.Storage.Local = {
 	
 	
 	/**
-	 * @param	{Integer}		itemID
-	 * @param	{Integer}		syncState		Constant from Zotero.Sync.Storage
+	 * @param {Integer} itemID
+	 * @param {Integer|String} syncState - Zotero.Sync.Storage.Local.SYNC_STATE_* or last part
+	 *     as string (e.g., "TO_UPLOAD")
 	 */
 	setSyncState: Zotero.Promise.method(function (itemID, syncState) {
+		if (typeof syncState == 'string') {
+			syncState = this["SYNC_STATE_" + syncState.toUpperCase()];
+		}
+		
 		switch (syncState) {
-			case Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD:
-			case Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD:
-			case Zotero.Sync.Storage.SYNC_STATE_IN_SYNC:
-			case Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD:
-			case Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD:
-			case Zotero.Sync.Storage.SYNC_STATE_IN_CONFLICT:
+			case this.SYNC_STATE_TO_UPLOAD:
+			case this.SYNC_STATE_TO_DOWNLOAD:
+			case this.SYNC_STATE_IN_SYNC:
+			case this.SYNC_STATE_FORCE_UPLOAD:
+			case this.SYNC_STATE_FORCE_DOWNLOAD:
+			case this.SYNC_STATE_IN_CONFLICT:
 				break;
 			
 			default:
@@ -492,6 +507,14 @@ Zotero.Sync.Storage.Local = {
 		
 		var sql = "UPDATE itemAttachments SET syncState=? WHERE itemID=?";
 		return Zotero.DB.valueQueryAsync(sql, [syncState, itemID]);
+	}),
+	
+	
+	resetModeSyncStates: Zotero.Promise.coroutine(function* (mode) {
+		var sql = "UPDATE itemAttachments SET syncState=? "
+			+ "WHERE itemID IN (SELECT itemID FROM items WHERE libraryID=?)";
+		var params = [this.SYNC_STATE_TO_UPLOAD, Zotero.Libraries.userLibraryID];
+		yield Zotero.DB.queryAsync(sql, params);
 	}),
 	
 	
@@ -513,7 +536,7 @@ Zotero.Sync.Storage.Local = {
 	/**
 	 * @param {Integer} itemID
 	 * @param {Integer} mtime - File modification time as timestamp in ms
-	 * @param {Boolean} [updateItem=FALSE] - Update clientDateModified field of attachment item
+	 * @param {Boolean} [updateItem=FALSE] - Mark attachment item as unsynced
 	 */
 	setSyncedModificationTime: Zotero.Promise.coroutine(function* (itemID, mtime, updateItem) {
 		if (mtime < 0) {
@@ -528,9 +551,8 @@ Zotero.Sync.Storage.Local = {
 		yield Zotero.DB.queryAsync(sql, [mtime, itemID]);
 		
 		if (updateItem) {
-			// Update item date modified so the new mod time will be synced
-			let sql = "UPDATE items SET clientDateModified=? WHERE itemID=?";
-			yield Zotero.DB.queryAsync(sql, [Zotero.DB.transactionDateTime, itemID]);
+			let item = yield Zotero.Items.getAsync(itemID);
+			yield item.updateSynced(false);
 		}
 	}),
 	
@@ -553,8 +575,7 @@ Zotero.Sync.Storage.Local = {
 	/**
 	 * @param	{Integer}	itemID
 	 * @param	{String}	hash				File hash
-	 * @param	{Boolean}	[updateItem=FALSE]	Update dateModified field of
-	 *												attachment item
+	 * @param {Boolean} [updateItem=FALSE] - Mark attachment item as unsynced
 	 */
 	setSyncedHash: Zotero.Promise.coroutine(function* (itemID, hash, updateItem) {
 		if (hash !== null && hash.length != 32) {
@@ -567,9 +588,8 @@ Zotero.Sync.Storage.Local = {
 		yield Zotero.DB.queryAsync(sql, [hash, itemID]);
 		
 		if (updateItem) {
-			// Update item date modified so the new mod time will be synced
-			var sql = "UPDATE items SET clientDateModified=? WHERE itemID=?";
-			yield Zotero.DB.queryAsync(sql, [Zotero.DB.transactionDateTime, itemID]);
+			let item = yield Zotero.Items.getAsync(itemID);
+			yield item.updateSynced(false);
 		}
 	}),
 	
@@ -658,7 +678,7 @@ Zotero.Sync.Storage.Local = {
 		
 		yield Zotero.DB.executeTransaction(function* () {
 			yield this.setSyncedHash(item.id, md5);
-			yield this.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
+			yield this.setSyncState(item.id, this.SYNC_STATE_IN_SYNC);
 			yield this.setSyncedModificationTime(item.id, mtime);
 		}.bind(this));
 		
@@ -998,7 +1018,7 @@ Zotero.Sync.Storage.Local = {
 			sql,
 			[
 				{ int: libraryID },
-				Zotero.Sync.Storage.SYNC_STATE_IN_CONFLICT
+				this.SYNC_STATE_IN_CONFLICT
 			]
 		);
 		var keyVersionPairs = rows.map(function (row) {
@@ -1073,16 +1093,16 @@ Zotero.Sync.Storage.Local = {
 				let mtime = io.dataOut[i].dateModified;
 				// Local
 				if (mtime == conflict.left.dateModified) {
-					syncState = Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD;
+					syncState = this.SYNC_STATE_FORCE_UPLOAD;
 				}
 				// Remote
 				else {
-					syncState = Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD;
+					syncState = this.SYNC_STATE_FORCE_DOWNLOAD;
 				}
 				let itemID = Zotero.Items.getIDFromLibraryAndKey(libraryID, conflict.left.key);
 				yield Zotero.Sync.Storage.Local.setSyncState(itemID, syncState);
 			}
-		});
+		}.bind(this));
 		return true;
 	})
 }

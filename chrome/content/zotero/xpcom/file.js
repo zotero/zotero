@@ -666,11 +666,11 @@ Zotero.File = new function(){
 		var zw = Components.classes["@mozilla.org/zipwriter;1"]
 			.createInstance(Components.interfaces.nsIZipWriter);
 		zw.open(this.pathToFile(zipPath), 0x04 | 0x08 | 0x20); // open rw, create, truncate
-		var entries = yield _zipDirectory(dirPath, dirPath, zw);
+		var entries = yield _addZipEntries(dirPath, dirPath, zw);
 		if (entries.length == 0) {
 			Zotero.debug('No files to add -- removing ZIP file');
 			zw.close();
-			zipPath.remove(null);
+			yield OS.File.remove(zipPath);
 			return false;
 		}
 		
@@ -716,7 +716,7 @@ Zotero.File = new function(){
 	});
 	
 	
-	var _zipDirectory = Zotero.Promise.coroutine(function* (rootPath, path, zipWriter) {
+	var _addZipEntries = Zotero.Promise.coroutine(function* (rootPath, path, zipWriter) {
 		var entries = [];
 		let iterator;
 		try {
@@ -727,7 +727,7 @@ Zotero.File = new function(){
 					return;
 				}
 				if (entry.isDir) {
-					entries.concat(yield _zipDirectory(rootPath, path, zipWriter));
+					entries.concat(yield _addZipEntries(rootPath, path, zipWriter));
 					return;
 				}
 				if (entry.name.startsWith('.')) {

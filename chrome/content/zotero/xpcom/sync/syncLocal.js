@@ -478,6 +478,7 @@ Zotero.Sync.Data.Local = {
 						
 						let isNewObject = false;
 						let skipCache = false;
+						let storageDetailsChanged = false;
 						let obj = yield objectsClass.getByLibraryAndKeyAsync(
 							libraryID, objectKey, { noCache: true }
 						);
@@ -495,12 +496,22 @@ Zotero.Sync.Data.Local = {
 								
 								let jsonDataLocal = yield obj.toJSON();
 								
+								// For items, check if mtime or file hash changed in metadata,
+								// which would indicate that a remote storage sync took place and
+								// a download is needed
+								if (objectType == 'item' && obj.isImportedAttachment()) {
+									if (jsonDataLocal.mtime != jsonData.mtime
+											|| jsonDataLocal.md5 != jsonData.md5) {
+										storageDetailsChanged = true;
+									}
+								}
+								
 								let result = this._reconcileChanges(
 									objectType,
 									cachedJSON.data,
 									jsonDataLocal,
 									jsonData,
-									['dateAdded', 'dateModified']
+									['mtime', 'md5', 'dateAdded', 'dateModified']
 								);
 								
 								// If no changes, update local version number and mark as synced
@@ -510,6 +521,15 @@ Zotero.Sync.Data.Local = {
 									obj.version = json.version;
 									obj.synced = true;
 									yield obj.save();
+									
+									if (objectType == 'item') {
+										yield this._onItemProcessed(
+											obj,
+											jsonData,
+											isNewObject,
+											storageDetailsChanged
+										);
+									}
 									continue;
 								}
 								
@@ -599,15 +619,12 @@ Zotero.Sync.Data.Local = {
 							obj, jsonData, options, { skipCache }
 						);
 						if (saved) {
-							// Delete older versions of the item in the cache
-							yield this.deleteCacheObjectVersions(
-								objectType, libraryID, jsonData.key, null, jsonData.version - 1
-							);
-							
-							// Mark updated attachments for download
-							if (objectType == 'item' && obj.isImportedAttachment()) {
-								yield this._checkAttachmentForDownload(
-									obj, jsonData.mtime, isNewObject
+							if (objectType == 'item') {
+								yield this._onItemProcessed(
+									obj,
+									jsonData,
+									isNewObject,
+									storageDetailsChanged
 								);
 							}
 						}
@@ -694,6 +711,27 @@ Zotero.Sync.Data.Local = {
 	}),
 	
 	
+	_onItemProcessed: Zotero.Promise.coroutine(function* (item, jsonData, isNewObject, storageDetailsChanged) {
+		// Delete older versions of the item in the cache
+		yield this.deleteCacheObjectVersions(
+			'item', item.libraryID, jsonData.key, null, jsonData.version - 1
+		);
+		
+		// Mark updated attachments for download
+		if (item.isImportedAttachment()) {
+			// If storage changes were made (attachment mtime or hash), mark
+			// library as requiring download
+			if (isNewObject || storageDetailsChanged) {
+				Zotero.Libraries.get(item.libraryID).storageDownloadNeeded = true;
+			}
+			
+			yield this._checkAttachmentForDownload(
+				item, jsonData.mtime, isNewObject
+			);
+		}
+	}),
+	
+	
 	_checkAttachmentForDownload: Zotero.Promise.coroutine(function* (item, mtime, isNewObject) {
 		var markToDownload = false;
 		if (!isNewObject) {
@@ -724,9 +762,7 @@ Zotero.Sync.Data.Local = {
 			markToDownload = true;
 		}
 		if (markToDownload) {
-			yield Zotero.Sync.Storage.Local.setSyncState(
-				item.id, Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD
-			);
+			yield Zotero.Sync.Storage.Local.setSyncState(item.id, "to_download");
 		}
 	}),
 	

@@ -709,9 +709,12 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 						toCache.push(current);
 					}
 					else {
-						let j = yield obj.toJSON();
-						j.version = json.libraryVersion;
-						toCache.push(j);
+						// This won't reflect the actual version of the item on the server, but
+						// it will guarantee that the item won't be redownloaded unnecessarily
+						// in the case of a full sync, because the version will be higher than
+						// whatever version is on the server.
+						batch[index].version = json.libraryVersion
+						toCache.push(batch[index]);
 					}
 					
 					numSuccessful++;
@@ -891,6 +894,7 @@ Zotero.Sync.Data.Engine.prototype._getJSONForObject = function (objectType, id) 
 			includeKey: true,
 			includeVersion: true, // DEBUG: remove?
 			includeDate: true,
+			syncedStorageProperties: true,
 			patchBase: cacheObj ? cacheObj.data : false
 		});
 	});

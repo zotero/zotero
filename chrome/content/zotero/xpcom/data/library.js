@@ -33,6 +33,7 @@ Zotero.Library = function(params = {}) {
 	
 	this._hasCollections = null;
 	this._hasSearches = null;
+	this._storageDownloadNeeded = false;
 	
 	Zotero.Utilities.assignProps(
 		this,
@@ -42,8 +43,8 @@ Zotero.Library = function(params = {}) {
 			'editable',
 			'filesEditable',
 			'libraryVersion',
+			'storageVersion',
 			'lastSync',
-			'lastStorageSync'
 		]
 	);
 	
@@ -64,7 +65,7 @@ Zotero.Library = function(params = {}) {
 // DB columns
 Zotero.defineProperty(Zotero.Library, '_dbColumns', {
 	value: Object.freeze([
-		'type', 'editable', 'filesEditable', 'version', 'lastSync', 'lastStorageSync'
+		'type', 'editable', 'filesEditable', 'version', 'storageVersion', 'lastSync'
 	])
 });
 
@@ -172,7 +173,7 @@ Zotero.defineProperty(Zotero.Library.prototype, 'hasTrash', {
 
 // Create other accessors
 (function() {
-	let accessors = ['editable', 'filesEditable', 'lastStorageSync'];
+	let accessors = ['editable', 'filesEditable', 'storageVersion'];
 	for (let i=0; i<accessors.length; i++) {
 		let prop = Zotero.Library._colToProp(accessors[i]);
 		Zotero.defineProperty(Zotero.Library.prototype, accessors[i], {
@@ -181,6 +182,11 @@ Zotero.defineProperty(Zotero.Library.prototype, 'hasTrash', {
 		})
 	}
 })()
+
+Zotero.defineProperty(Zotero.Library.prototype, 'storageDownloadNeeded', {
+	get: function () { return this._storageDownloadNeeded; },
+	set: function (val) { this._storageDownloadNeeded = !!val; },
+})
 
 Zotero.Library.prototype._isValidProp = function(prop) {
 	let prefix = '_library';
@@ -235,8 +241,10 @@ Zotero.Library.prototype._set = function(prop, val) {
 			val = !!val;
 			break;
 		case '_libraryVersion':
-			let newVal = Number.parseInt(val, 10);
-			if (newVal != val) throw new Error(prop + ' must be an integer');
+			var newVal = Number.parseInt(val, 10);
+			if (newVal != val) {
+				throw new Error(`${prop} must be an integer (${typeof val} '${val}' given)`);
+			}
 			val = newVal
 			
 			// Allow -1 to indicate that a full sync is needed
@@ -245,6 +253,17 @@ Zotero.Library.prototype._set = function(prop, val) {
 			// Ensure that it is never decreasing, unless it is being set to -1
 			if (val != -1 && val < this._libraryVersion) throw new Error(prop + ' cannot decrease');
 			
+			break;
+		
+		case '_libraryStorageVersion':
+			var newVal = parseInt(val);
+			if (newVal != val) {
+				throw new Error(`${prop} must be an integer (${typeof val} '${val}' given)`);
+			}
+			val = newVal;
+			
+			// Ensure that it is never decreasing
+			if (val < this._libraryStorageVersion) throw new Error(prop + ' cannot decrease');
 			break;
 		
 		case '_libraryLastSync':
@@ -256,18 +275,6 @@ Zotero.Library.prototype._set = function(prop, val) {
 				// Storing to DB will drop milliseconds, so, for consistency, we drop it now
 				val = new Date(Math.floor(val.getTime()/1000) * 1000);
 			}
-			break;
-		
-		case '_libraryLastStorageSync':
-			if (parseInt(val) != val) {
-				Zotero.debug(val);
-				throw new Error("timestamp must be an integer");
-			}
-			if (val > 9999999999) {
-				Zotero.debug(val);
-				throw new Error("timestamp must be in seconds");
-			}
-			val = parseInt(val);
 			break;
 	}
 	
@@ -293,8 +300,8 @@ Zotero.Library.prototype._loadDataFromRow = function(row) {
 	this._libraryEditable = !!row._libraryEditable;
 	this._libraryFilesEditable = !!row._libraryFilesEditable;
 	this._libraryVersion = row._libraryVersion;
+	this._libraryStorageVersion = row._libraryStorageVersion;
 	this._libraryLastSync =  row._libraryLastSync !== 0 ? new Date(row._libraryLastSync * 1000) : false;
-	this._libraryLastStorageSync = row._libraryLastStorageSync || false;
 	
 	this._hasCollections = !!row.hasCollections;
 	this._hasSearches = !!row.hasSearches;
@@ -394,7 +401,7 @@ Zotero.Library.prototype._initSave = Zotero.Promise.method(function(env) {
 		Zotero.Libraries._ensureExists(this._libraryID);
 		
 		if (!Object.keys(this._changed).length) {
-			Zotero.debug("No data changed in " + this._objectType + " " + this.id + ". Not saving.", 4);
+			Zotero.debug(`No data changed in ${this._objectType} ${this.id} -- not saving`, 4);
 			return false;
 		}
 	}

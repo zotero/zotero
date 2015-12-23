@@ -107,11 +107,6 @@ describe("Zotero.Sync.Data.Engine", function () {
 		yield Zotero.Users.setCurrentUserID(1);
 		yield Zotero.Users.setCurrentUsername("testuser");
 	})
-	after(function* () {
-		yield resetDB({
-			thisArg: this
-		});
-	})
 	
 	describe("Syncing", function () {
 		it("should download items into a new library", function* () {
@@ -413,6 +408,70 @@ describe("Zotero.Sync.Data.Engine", function () {
 					break;
 				}
 			}
+		})
+		
+		it("should upload synced storage properties", function* () {
+			({ engine, client, caller } = yield setup());
+			
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var lastLibraryVersion = 2;
+			yield Zotero.Libraries.setVersion(libraryID, lastLibraryVersion);
+			
+			var item = new Zotero.Item('attachment');
+			item.attachmentLinkMode = 'imported_file';
+			item.attachmentFilename = 'test1.txt';
+			yield item.saveTx();
+			
+			var mtime = new Date().getTime();
+			var md5 = '57f8a4fda823187b91e1191487b87fe6';
+			
+			yield Zotero.DB.executeTransaction(function* () {
+				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, mtime);
+				yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, md5);
+			});
+			
+			var itemResponseJSON = yield item.toResponseJSON();
+			itemResponseJSON.version = itemResponseJSON.data.version = lastLibraryVersion;
+			itemResponseJSON.data.mtime = mtime;
+			itemResponseJSON.data.md5 = md5;
+			
+			server.respond(function (req) {
+				if (req.method == "POST") {
+					if (req.url == baseURL + "users/1/items") {
+						let json = JSON.parse(req.requestBody);
+						assert.lengthOf(json, 1);
+						let itemJSON = json[0];
+						assert.equal(itemJSON.key, item.key);
+						assert.equal(itemJSON.version, 0);
+						assert.equal(itemJSON.mtime, mtime);
+						assert.equal(itemJSON.md5, md5);
+						req.respond(
+							200,
+							{
+								"Content-Type": "application/json",
+								"Last-Modified-Version": lastLibraryVersion
+							},
+							JSON.stringify({
+								successful: {
+									"0": itemResponseJSON
+								},
+								unchanged: {},
+								failed: {}
+							})
+						);
+						return;
+					}
+				}
+			})
+			
+			yield engine.start();
+			
+			// Check data in cache
+			var json = yield Zotero.Sync.Data.Local.getCacheObject(
+				'item', libraryID, item.key, lastLibraryVersion
+			);
+			assert.equal(json.data.mtime, mtime);
+			assert.equal(json.data.md5, md5);
 		})
 		
 		it("should update local objects with remotely saved version after uploading if necessary", function* () {

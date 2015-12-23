@@ -34,8 +34,7 @@
 			<preference id="pref-sync-username" name="extensions.zotero.sync.server.username" type="unichar" instantApply="true"/>
 			<preference id="pref-sync-fulltext-enabled" name="extensions.zotero.sync.fulltext.enabled" type="bool"/>
 			<preference id="pref-storage-enabled" name="extensions.zotero.sync.storage.enabled" type="bool"/>
-			<preference id="pref-storage-protocol" name="extensions.zotero.sync.storage.protocol" type="string"
-				onchange="Zotero_Preferences.Sync.unverifyStorageServer()"/>
+			<preference id="pref-storage-protocol" name="extensions.zotero.sync.storage.protocol" type="string"/>
 			<preference id="pref-storage-scheme" name="extensions.zotero.sync.storage.scheme" type="string" instantApply="true"/>
 			<preference id="pref-storage-url" name="extensions.zotero.sync.storage.url" type="string"/>
 			<preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string"/>
@@ -152,14 +151,14 @@
 							<hbox>
 								<checkbox label="&zotero.preferences.sync.fileSyncing.myLibrary;"
 										preference="pref-storage-enabled"
-										oncommand="Zotero_Preferences.Sync.updateStorageSettings(this.checked, null)"/>
+										oncommand="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
 								<menulist id="storage-protocol" class="storage-personal"
 										style="margin-left: .5em"
 										preference="pref-storage-protocol"
-										oncommand="Zotero_Preferences.Sync.updateStorageSettings(null, this.value)">
+										oncommand="Zotero_Preferences.Sync.onStorageSettingsChange()">
 									<menupopup>
 										<menuitem label="Zotero" value="zotero"/>
-										<menuitem label="WebDAV" value="webdav" disabled="true"/><!-- TEMP -->
+										<menuitem label="WebDAV" value="webdav"/>
 									</menupopup>
 								</menulist>
 							</hbox>
@@ -190,13 +189,8 @@
 											<label value="://"/>
 											<textbox id="storage-url" flex="1"
 												preference="pref-storage-url"
-												onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) {
-													this.blur();
-													setTimeout(Zotero_Preferences.Sync.verifyStorageServer, 1);
-												}"
-												onchange="Zotero_Preferences.Sync.unverifyStorageServer();
-													this.value = this.value.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, '');
-													Zotero.Prefs.set('sync.storage.url', this.value)"/>
+												onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
+												onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
 											<label value="/zotero/"/>
 										</hbox>
 									</row>
@@ -205,27 +199,16 @@
 										<hbox>
 											<textbox id="storage-username"
 												preference="pref-storage-username"
-												onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) {
-													this.blur();
-													setTimeout(Zotero_Preferences.Sync.verifyStorageServer, 1); }"
-												onchange="Zotero_Preferences.Sync.unverifyStorageServer();
-													Zotero.Prefs.set('sync.storage.username', this.value);
-													var pass = document.getElementById('storage-password');
-													if (pass.value) {
-														Zotero.Sync.Storage.WebDAV.password = pass.value;
-													}"/>
+												onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
+												onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
 										</hbox>
 									</row>
 									<row>
 										<label value="&zotero.preferences.sync.password;"/>
 										<hbox>
 											<textbox id="storage-password" flex="0" type="password"
-												onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) {
-													this.blur();
-													setTimeout(Zotero_Preferences.Sync.verifyStorageServer, 1);
-												}"
-												onchange="Zotero_Preferences.Sync.unverifyStorageServer();
-													Zotero.Sync.Storage.WebDAV.password = this.value;"/>
+												onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
+												onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
 										</hbox>
 									</row>
 									<row>
