@@ -497,7 +497,11 @@ Zotero.Utilities.Internal = {
 				item.linkMode = zoteroItem.attachmentLinkMode;
 				item.mimeType = item.contentType;
 			}
-			
+			// preserve notes
+			if(item.note) { 
+				item.uniqueFields.note = item.note;
+			}
+
 			return item;
 		}
 	},
