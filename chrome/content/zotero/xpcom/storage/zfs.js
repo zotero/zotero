@@ -256,7 +256,9 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 	/**
 	 * Remove all synced files from the server
 	 */
-	purgeDeletedStorageFiles: Zotero.Promise.coroutine(function* () {
+	purgeDeletedStorageFiles: Zotero.Promise.coroutine(function* (libraryID) {
+		if (libraryID != Zotero.Libraries.userLibraryID) return;
+		
 		var sql = "SELECT value FROM settings WHERE setting=? AND key=?";
 		var values = yield Zotero.DB.columnQueryAsync(sql, ['storage', 'zfsPurge']);
 		if (!values) {
@@ -265,8 +267,8 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		
 		Zotero.debug("Unlinking synced files on ZFS");
 		
-		var uri = this.userURI;
-		uri.spec += "removestoragefiles";
+		var params = this._getRequestParams(libraryID, "removestoragefiles");
+		var uri = this.apiClient.buildRequestURI(params);
 		
 		yield Zotero.HTTP.request("POST", uri, "");
 		
