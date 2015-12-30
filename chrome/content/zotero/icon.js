@@ -25,6 +25,7 @@
 
 "use strict";
 
+Components.utils.import("resource://zotero/config.js");
 Components.utils.import("resource:///modules/CustomizableUI.jsm");
 
 var comboButtonsID = 'zotero-toolbar-buttons';
@@ -119,8 +120,8 @@ CustomizableUI.addListener({
 CustomizableUI.createWidget({
 	id: comboButtonsID,
 	type: 'custom',
-	label: 'Zotero',
-	tooltiptext: "Zotero",
+	label: ZOTERO_CONFIG.CLIENT_NAME,
+	tooltiptext: ZOTERO_CONFIG.CLIENT_NAME,
 	defaultArea: CustomizableUI.AREA_NAVBAR,
 	onBuild: function (document) {
 		const kNSXUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";

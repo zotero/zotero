@@ -40,10 +40,14 @@ var ZoteroOverlay = new function()
 		zoteroSplitter = document.getElementById('zotero-splitter');
 		
 		var self = this;
+		var iconLoaded = false;
 		
 		Zotero.Promise.try(function () {
-			if (!Zotero || Zotero.skipLoading) {
-				throw true;
+			if (!Zotero) {
+				throw new Error("No Zotero object");
+			}
+			if (Zotero.skipLoading) {
+				throw new Error("Skipping loading");
 			}
 			return Zotero.Promise.all([Zotero.initializationPromise, Zotero.unlockPromise]);
 		})
@@ -51,7 +55,7 @@ var ZoteroOverlay = new function()
 			Zotero.debug("Initializing overlay");
 			
 			if (Zotero.skipLoading) {
-				throw true;
+				throw new Error("Skipping loading");
 			}
 			
 			ZoteroPane_Overlay = ZoteroPane;
@@ -94,6 +98,7 @@ var ZoteroOverlay = new function()
 			
 			// Add toolbar icon
 			try {
+				iconLoaded = true;
 				Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
 			}
 			catch (e) {
@@ -134,6 +139,17 @@ var ZoteroOverlay = new function()
 		})
 		.catch(function (e) {
 			Zotero.debug(e, 1);
+			
+			// Add toolbar icon if still necessary
+			if (!iconLoaded) {
+				try {
+					Services.scriptloader.loadSubScript("chrome://zotero/content/icon.js", {}, "UTF-8");
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+			
 			throw e;
 		});
 	}

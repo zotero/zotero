@@ -106,8 +106,13 @@ Zotero.Schema = new function(){
 		}
 		
 		if (compatibility > _maxCompatibility) {
-			throw new Error("Database is incompatible this Zotero version "
-				+ "(" + compatibility + " > "  + _maxCompatibility + ")");
+			let dbClientVersion = yield Zotero.DB.valueQueryAsync(
+				"SELECT value FROM settings "
+				+ "WHERE setting='client' AND key='lastCompatibleVersion'"
+			);
+			let msg = "Database is incompatible with this Zotero version "
+				+ `(${compatibility} > ${_maxCompatibility})`
+			throw new Zotero.DB.IncompatibleVersionException(msg, dbClientVersion);
 		}
 		
 		var schemaVersion = yield _getSchemaSQLVersion('userdata');
@@ -1554,6 +1559,19 @@ Zotero.Schema = new function(){
 	}
 	
 	
+	var _updateCompatibility = Zotero.Promise.coroutine(function* (version) {
+		if (version > _maxCompatibility) {
+			throw new Error("Can't set compatibility greater than _maxCompatibility");
+		}
+		
+		yield Zotero.DB.queryAsync(
+			"REPLACE INTO settings VALUES (?, ?, ?)",
+			['client', 'lastCompatibleVersion', Zotero.version]
+		);
+		yield _updateDBVersion('compatibility', version);
+	});
+	
+	
 	/**
 	 * Process the response from the repository
 	 *
@@ -1944,7 +1962,7 @@ Zotero.Schema = new function(){
 		// previous revision to that one.
 		for (let i = fromVersion + 1; i <= toVersion; i++) {
 			if (i == 80) {
-				yield _updateDBVersion('compatibility', 1);
+				yield _updateCompatibility(1);
 				
 				yield Zotero.DB.queryAsync("ALTER TABLE libraries RENAME TO librariesOld");
 				yield Zotero.DB.queryAsync("CREATE TABLE libraries (\n    libraryID INTEGER PRIMARY KEY,\n    type TEXT NOT NULL,\n    editable INT NOT NULL,\n    filesEditable INT NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    lastSync INT NOT NULL DEFAULT 0,\n    lastStorageSync INT NOT NULL DEFAULT 0\n)");
@@ -2282,7 +2300,7 @@ Zotero.Schema = new function(){
 			}
 			
 			if (i == 81) {
-				yield _updateDBVersion('compatibility', 2);
+				yield _updateCompatibility(2);
 				
 				yield Zotero.DB.queryAsync("ALTER TABLE libraries RENAME TO librariesOld");
 				yield Zotero.DB.queryAsync("CREATE TABLE libraries (\n    libraryID INTEGER PRIMARY KEY,\n    type TEXT NOT NULL,\n    editable INT NOT NULL,\n    filesEditable INT NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    storageVersion INT NOT NULL DEFAULT 0,\n    lastSync INT NOT NULL DEFAULT 0\n)");
