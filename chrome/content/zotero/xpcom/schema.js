@@ -117,26 +117,30 @@ Zotero.Schema = new function(){
 			yield Zotero.DB.backupDatabase(userdata, true);
 		}
 		
-		var updated = yield Zotero.DB.executeTransaction(function* (conn) {
-			yield Zotero.DB.queryAsync("PRAGMA defer_foreign_keys = true");
-			
-			var updated = yield _updateSchema('system');
-			
-			// Update custom tables if they exist so that changes are in
-			// place before user data migration
-			if (Zotero.DB.tableExists('customItemTypes')) {
-				yield _updateCustomTables(updated);
-			}
-			updated = yield _migrateUserDataSchema(userdata);
-			yield _updateSchema('triggers');
-			
-			// Populate combined tables for custom types and fields -- this is likely temporary
-			//
-			// We do this again in case custom fields were changed during user data migration
-			yield _updateCustomTables()
-			
-			return updated;
-		}.bind(this));
+		yield Zotero.DB.queryAsync("PRAGMA foreign_keys = false");
+		try {
+			var updated = yield Zotero.DB.executeTransaction(function* (conn) {
+				var updated = yield _updateSchema('system');
+				
+				// Update custom tables if they exist so that changes are in
+				// place before user data migration
+				if (Zotero.DB.tableExists('customItemTypes')) {
+					yield _updateCustomTables(updated);
+				}
+				updated = yield _migrateUserDataSchema(userdata);
+				yield _updateSchema('triggers');
+				
+				// Populate combined tables for custom types and fields -- this is likely temporary
+				//
+				// We do this again in case custom fields were changed during user data migration
+				yield _updateCustomTables()
+				
+				return updated;
+			}.bind(this));
+		}
+		finally {
+			yield Zotero.DB.queryAsync("PRAGMA foreign_keys = true");
+		}
 		
 		if (updated) {
 			// Upgrade seems to have been a success -- delete any previous backups
