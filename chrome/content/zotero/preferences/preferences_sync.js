@@ -76,6 +76,8 @@ Zotero_Preferences.Sync = {
 		var img = document.getElementById('sync-status-indicator');
 		img.removeAttribute('verified');
 		img.removeAttribute('animated');
+		
+		window.sizeToContent();
 	},
 
 
@@ -276,6 +278,8 @@ Zotero_Preferences.Sync = {
 		}
 		
 		this.updateStorageTerms();
+		
+		window.sizeToContent();
 	}),
 	
 	
