@@ -1156,6 +1156,10 @@ AsyncChannel.prototype = {
 		
 		var resolve;
 		var reject;
+		var promise = new Zotero.Promise(function () {
+			resolve = arguments[0];
+			reject = arguments[1];
+		});
 		
 		var listenerWrapper = {
 			onStartRequest: function (request, context) {
@@ -1260,6 +1264,8 @@ AsyncChannel.prototype = {
 				Zotero.debug("AsyncChannel request succeeded in " + (new Date - t) + " ms");
 				channel._isPending = false;
 			}
+			
+			return promise;
 		} catch (e) {
 			Zotero.debug(e, 1);
 			if (channel._isPending) {
