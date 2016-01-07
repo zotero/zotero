@@ -539,7 +539,8 @@ Zotero.Sync.Storage.Local = {
 	 * @param {Boolean} [updateItem=FALSE] - Mark attachment item as unsynced
 	 */
 	setSyncedModificationTime: Zotero.Promise.coroutine(function* (itemID, mtime, updateItem) {
-		if (mtime < 0) {
+		mtime = parseInt(mtime)
+		if (isNaN(mtime) || mtime < 0) {
 			Components.utils.reportError("Invalid file mod time " + mtime
 				+ " in Zotero.Storage.setSyncedModificationTime()");
 			mtime = 0;

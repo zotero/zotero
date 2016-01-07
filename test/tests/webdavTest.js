@@ -461,21 +461,27 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			item.synced = true;
 			yield item.saveTx();
 			
+			var syncedModTime = Date.now() - 10000;
+			var syncedHash = "3a2f092dd62178eb8bbfda42e07e64da";
+			
 			yield Zotero.DB.executeTransaction(function* () {
 				// Set an mtime in the past
-				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
-					item.id,
-					new Date(Date.now() - 10000)
-				);
+				yield Zotero.Sync.Storage.Local.setSyncedModificationTime(item.id, syncedModTime);
 				// And a different hash
-				yield Zotero.Sync.Storage.Local.setSyncedHash(
-					item.id, "3a2f092dd62178eb8bbfda42e07e64da"
-				);
+				yield Zotero.Sync.Storage.Local.setSyncedHash(item.id, syncedHash);
 			});
 			
 			var mtime = yield item.attachmentModificationTime;
 			var hash = yield item.attachmentHash;
 			
+			setResponse({
+				method: "GET",
+				url: `zotero/${item.key}.prop`,
+				text: '<properties version="1">'
+					+ `<mtime>${syncedModTime}</mtime>`
+					+ `<hash>${syncedHash}</hash>`
+					+ '</properties>'
+			});
 			setResponse({
 				method: "DELETE",
 				url: `zotero/${item.key}.prop`,
@@ -493,7 +499,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			});
 			
 			var result = yield engine.start();
-			assertRequestCount(3);
+			assertRequestCount(4);
 			
 			assert.isTrue(result.localChanges);
 			assert.isTrue(result.remoteChanges);

@@ -1188,7 +1188,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			yield this._deleteStorageFiles([item.key + ".prop"]).catch(function (e) {
 				Zotero.logError(e);
 			});
-			throw new Error(Zotero.Sync.Storage.WebDAV.defaultError);
+			throw new Error(Zotero.Sync.Storage.Mode.WebDAV.defaultError);
 		}
 		
 		return { mtime, md5 };
