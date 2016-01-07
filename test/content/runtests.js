@@ -136,7 +136,7 @@ function Reporter(runner) {
 		let indentStr = indent();
 		dump("\r" + indentStr
 			// Dark red X for errors
-			+ "\033[31;40m" + Mocha.reporters.Base.symbols.err + "\033[0m"
+			+ "\033[31;40m" + Mocha.reporters.Base.symbols.err + " [FAIL]\033[0m"
 			+ " " + test.title + "\n"
 			+ indentStr + "  " + err.toString() + " at\n"
 			+ err.stack.replace(/^/gm, indentStr + "    "));
