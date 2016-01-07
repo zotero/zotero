@@ -136,14 +136,20 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		
 		try {
 			let client = this.getAPIClient({ apiKey });
-			
 			let keyInfo = yield this.checkAccess(client, options);
-			if (!keyInfo) {
+			
+			let emptyLibraryContinue = yield this.checkEmptyLibrary(keyInfo);
+			if (!emptyLibraryContinue) {
 				this.end();
-				Zotero.debug("Syncing cancelled");
+				Zotero.debug("Syncing cancelled because user library is empty");
 				return false;
 			}
-			
+
+			if (!Zotero.Users.getCurrentUserID()) {
+				Zotero.Users.setCurrentUserID(keyInfo.userID);
+				Zotero.Users.setCurrentUsername(keyInfo.username);
+			}
+
 			let engineOptions = {
 				apiClient: client,
 				caller: this.caller,
@@ -230,6 +236,45 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		if (!json.access) throw new Error("'access' not found in key response");
 		
 		return json;
+	});
+
+
+	// Prompt if library empty and there is no userID stored
+	this.checkEmptyLibrary = Zotero.Promise.coroutine(function* (keyInfo) {
+		let library = Zotero.Libraries.userLibrary;
+		let userID = Zotero.Users.getCurrentUserID();
+
+		if (!userID) {
+			let hasItems = yield library.hasItems();
+			if (!hasItems) {
+				let ps = Services.prompt;
+				let index = ps.confirmEx(
+					null,
+					Zotero.getString('general.warning'),
+					Zotero.getString('sync.warning.emptyLibrary', [keyInfo.username, Zotero.clientName]) + "\n\n"
+						+ Zotero.getString('sync.warning.existingDataElsewhere', Zotero.clientName),
+					(ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING) 
+						+ (ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL)
+						+ (ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING),
+					Zotero.getString('sync.sync'),
+					null, 
+					Zotero.getString('dataDir.changeDataDirectory'), 
+					null, {}
+				);
+				if (index == 1) {
+					return false;
+				}
+				else if (index == 2) {
+					var win = Services.wm.getMostRecentWindow("navigator:browser");
+					win.openDialog("chrome://zotero/content/preferences/preferences.xul", null, null, {
+						pane: 'zotero-prefpane-advanced',
+						tabIndex: 1
+					});
+					return false;
+				}
+			}
+		}
+		return true;
 	});
 	
 	

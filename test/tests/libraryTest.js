@@ -256,6 +256,39 @@ describe("Zotero.Library", function() {
 			assert.isFalse(library.hasSearches());
 		})
 	});
+	describe("#hasItems()", function() {
+		it("should throw if called before saving a library", function* () {
+			let library = new Zotero.Library();
+			try {
+				yield library.hasItems();
+				assert.isFalse(true, "Library#hasItems did not throw an error");
+			} catch (e) {
+				assert.ok(e);
+			}
+		});
+		it("should stay up to date as items are added and removed", function* () {
+			let library = yield createGroup({ editable: true });
+			let libraryID = library.libraryID;
+			var hasItems = yield library.hasItems();
+			assert.isFalse(hasItems);
+
+			let i1 = yield createDataObject('item', { libraryID });
+			hasItems = yield library.hasItems();
+			assert.isTrue(hasItems);
+
+			let i2 = yield createDataObject('item', { libraryID });
+			hasItems = yield library.hasItems();
+			assert.isTrue(hasItems);
+
+			yield i1.eraseTx();
+			hasItems = yield library.hasItems();
+			assert.isTrue(hasItems);
+
+			yield i2.eraseTx();
+			hasItems = yield library.hasItems();
+			assert.isFalse(hasItems);
+		});
+	});
 	describe("#updateLastSyncTime()", function() {
 		it("should set sync time to current time", function* () {
 			let group = yield createGroup();

@@ -30,7 +30,7 @@ Zotero_Preferences.Sync = {
 	init: Zotero.Promise.coroutine(function* () {
 		this.updateStorageSettingsUI();
 
-		var username = Zotero.Users.getCurrentUsername() || "";
+		var username = Zotero.Users.getCurrentUsername() || Zotero.Prefs.get('sync.server.username') || " ";
 		var apiKey = Zotero.Sync.Data.Local.getAPIKey();
 		this.displayFields(apiKey ? username : "");
 		
@@ -46,6 +46,7 @@ Zotero_Preferences.Sync = {
 					{timeout: 5000}
 				);
 				this.displayFields(keyInfo.username);
+				Zotero.Users.setCurrentUsername(keyInfo.username);
 			}
 			catch (e) {
 				// API key wrong/invalid

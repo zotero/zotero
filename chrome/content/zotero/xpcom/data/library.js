@@ -567,6 +567,15 @@ Zotero.Library.prototype.updateSearches = Zotero.Promise.coroutine(function* () 
 	this._hasSearches = !!(yield Zotero.DB.valueQueryAsync(sql, this.libraryID));
 });
 
+Zotero.Library.prototype.hasItems = Zotero.Promise.coroutine(function* () {
+	if (!this.id) {
+		throw new Error("Library is not saved yet");
+	}
+	let sql = 'SELECT COUNT(*)>0 FROM items WHERE libraryID=?';
+
+	return Zotero.DB.valueQueryAsync(sql, this.libraryID);
+});
+
 Zotero.Library.prototype.hasItem = function (item) {
 	if (!(item instanceof Zotero.Item)) {
 		throw new Error("item must be a Zotero.Item");
