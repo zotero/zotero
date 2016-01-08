@@ -120,7 +120,7 @@ Zotero.Connector_Types = new function() {
 			this.getPrimaryIDForType = function(idOrName) {
 				var itemType = itemTypes[idOrName];
 				if(!itemType) return false;
-				return itemTypes[3]/* creatorTypes */[0];
+				return itemType[3]/* creatorTypes */[0];
 			};
 		}
 		
