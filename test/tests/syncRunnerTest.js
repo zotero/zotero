@@ -417,11 +417,6 @@ describe("Zotero.Sync.Runner", function () {
 			
 			yield Zotero.Libraries.init();
 		})
-		after(function* () {
-			yield resetDB({
-				thisArg: this
-			});
-		})
 		
 		it("should perform a sync across all libraries and update library versions", function* () {
 			yield Zotero.Users.setCurrentUserID(1);
