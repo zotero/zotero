@@ -1172,101 +1172,34 @@ Zotero.Schema = new function(){
 			return false;
 		}
 		
-		// There should be an equivalent SELECT COUNT(*) statement for every
-		// statement run by the DB Repair Tool
+		// Check foreign keys
+		var rows = yield Zotero.DB.queryAsync("PRAGMA foreign_key_check");
+		if (rows.length && !fix) {
+			let suffix1 = rows.length == 1 ? '' : 's';
+			let suffix2 = rows.length == 1 ? 's' : '';
+			Zotero.debug(`Found ${rows.length} row${suffix1} that violate${suffix2} foreign key constraints`, 1);
+			return false;
+		}
+		// If fixing, delete rows that violate FK constraints
+		for (let row of rows) {
+			try {
+				yield Zotero.DB.queryAsync(`DELETE FROM ${row.table} WHERE ROWID=?`, row.rowid);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+		
+		
+		// For non-foreign key checks, there should be an equivalent entry for every statement
+		// run by the DB Repair Tool. Repair entry (second position) can be either a string or
+		// an array with multiple statements.
 		var queries = [
-			[
-				"SELECT COUNT(*) FROM annotations WHERE itemID NOT IN (SELECT itemID FROM items)",
-				"DELETE FROM annotations WHERE itemID NOT IN (SELECT itemID FROM items)"
-			],
-			[
-				"SELECT COUNT(*) FROM collectionItems WHERE itemID NOT IN (SELECT itemID FROM items)",
-				"DELETE FROM collectionItems WHERE itemID NOT IN (SELECT itemID FROM items)"
-			],
-			[
-				"SELECT COUNT(*) FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items)",
-				"DELETE FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items)"
-			],
-			[
-				"SELECT COUNT(*) FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM items)",
-				"DELETE FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM items)",
-			],
-			[
-				"SELECT COUNT(*) FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM fulltextItems)",
-				"DELETE FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM fulltextItems)",
-			],
-			[
-				"SELECT COUNT(*) FROM highlights WHERE itemID NOT IN (SELECT itemID FROM items)",
-				"DELETE FROM highlights WHERE itemID NOT IN (SELECT itemID FROM items)",
-			],
-			[
-				"SELECT COUNT(*) FROM itemAttachments WHERE itemID NOT IN (SELECT itemID FROM items)",
-				"DELETE FROM itemAttachments WHERE itemID NOT IN (SELECT itemID FROM items)",
-			],
-			[
-				"SELECT COUNT(*) FROM itemCreators WHERE itemID NOT IN (SELECT itemID FROM items)",
-				"DELETE FROM itemCreators WHERE itemID NOT IN (SELECT itemID FROM items)",
-			],
-			[
-				"SELECT COUNT(*) FROM itemData WHERE itemID NOT IN (SELECT itemID FROM items)",
-				"DELETE FROM itemData WHERE itemID NOT IN (SELECT itemID FROM items)",
-			],
-			[
-				"SELECT COUNT(*) FROM itemNotes WHERE itemID NOT IN (SELECT itemID FROM items)",
-				"DELETE FROM itemNotes WHERE itemID NOT IN (SELECT itemID FROM items)",
-			],
-			[
-				"SELECT COUNT(*) FROM itemSeeAlso WHERE itemID NOT IN (SELECT itemID FROM items)",
-				"DELETE FROM itemSeeAlso WHERE itemID NOT IN (SELECT itemID FROM items)",
-			],
-			[
-				"SELECT COUNT(*) FROM itemSeeAlso WHERE linkedItemID NOT IN (SELECT itemID FROM items)",
-				"DELETE FROM itemSeeAlso WHERE linkedItemID NOT IN (SELECT itemID FROM items)",
-			],
-			[
-				"SELECT COUNT(*) FROM itemTags WHERE itemID NOT IN (SELECT itemID FROM items)",
-				"DELETE FROM itemTags WHERE itemID NOT IN (SELECT itemID FROM items)",
-			],
-			[
-				"SELECT COUNT(*) FROM itemTags WHERE tagID NOT IN (SELECT tagID FROM tags)",
-				"DELETE FROM itemTags WHERE tagID NOT IN (SELECT tagID FROM tags)",
-			],
-			[
-				"SELECT COUNT(*) FROM savedSearchConditions WHERE savedSearchID NOT IN (select savedSearchID FROM savedSearches)",
-				"DELETE FROM savedSearchConditions WHERE savedSearchID NOT IN (select savedSearchID FROM savedSearches)",
-			],
+			// Can't be a FK with itemTypesCombined
 			[
 				"SELECT COUNT(*) FROM items WHERE itemTypeID IS NULL",
 				"DELETE FROM items WHERE itemTypeID IS NULL",
 			],
-			
-			
-			[
-				"SELECT COUNT(*) FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)",
-				"DELETE FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)",
-			],
-			[
-				"SELECT COUNT(*) FROM fulltextItemWords WHERE wordID NOT IN (SELECT wordID FROM fulltextWords)",
-				"DELETE FROM fulltextItemWords WHERE wordID NOT IN (SELECT wordID FROM fulltextWords)",
-			],
-			[
-				"SELECT COUNT(*) FROM collectionItems WHERE collectionID NOT IN (SELECT collectionID FROM collections)",
-				"DELETE FROM collectionItems WHERE collectionID NOT IN (SELECT collectionID FROM collections)",
-			],
-			[
-				"SELECT COUNT(*) FROM itemCreators WHERE creatorID NOT IN (SELECT creatorID FROM creators)",
-				"DELETE FROM itemCreators WHERE creatorID NOT IN (SELECT creatorID FROM creators)",
-			],
-			[
-				"SELECT COUNT(*) FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM fieldsCombined)",
-				"DELETE FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM fieldsCombined)",
-			],
-			[
-				"SELECT COUNT(*) FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)",
-				"DELETE FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)",
-			],
-			
-			
 			// Attachments row with itemTypeID != 14
 			[
 				"SELECT COUNT(*) FROM itemAttachments JOIN items USING (itemID) WHERE itemTypeID != 14",
@@ -1292,41 +1225,6 @@ Zotero.Schema = new function(){
 				"UPDATE itemNotes SET parentItemID=NULL WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (1,14))",
 			],
 			
-			// Wrong library tags
-			[
-				"SELECT COUNT(*) FROM tags NATURAL JOIN itemTags JOIN items USING (itemID) WHERE "
-					+ "IFNULL(tags.libraryID, " + userLibraryID + ") != IFNULL(items.libraryID, " + userLibraryID + ")",
-				[
-					"CREATE TEMPORARY TABLE tmpWrongLibraryTags AS "
-						+ "SELECT itemTags.ROWID AS tagRowID, tagID, name, itemID, "
-						+ "IFNULL(tags.libraryID, " + userLibraryID + ") AS tagLibraryID, "
-						+ "IFNULL(items.libraryID, " + userLibraryID + ") AS itemLibraryID "
-						+ "FROM tags NATURAL JOIN itemTags JOIN items USING (itemID) "
-						+ "WHERE IFNULL(tags.libraryID, " + userLibraryID + ") != IFNULL(items.libraryID, " + userLibraryID + ")",
-					"DELETE FROM itemTags WHERE ROWID IN (SELECT tagRowID FROM tmpWrongLibraryTags)",
-					"DROP TABLE tmpWrongLibraryTags"
-				]
-			],
-			[
-				"SELECT COUNT(*) FROM itemTags WHERE tagID IS NULL",
-				"DELETE FROM itemTags WHERE tagID IS NULL",
-			],
-			[
-				"SELECT COUNT(*) FROM itemAttachments WHERE charsetID='NULL'",
-				"UPDATE itemAttachments SET charsetID=NULL WHERE charsetID='NULL'",
-			],
-			
-			// Reported by one user
-			// http://forums.zotero.org/discussion/19347/continual-synching-error-message/
-			// TODO: check 'libraries', not 'groups', but first add a
-			// migration step to delete 'libraries' rows not in 'groups'
-			//"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM libraries)"
-			[
-				"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != " + userLibraryID + " AND libraryID NOT IN (SELECT libraryID FROM groups)",
-				"DELETE FROM syncDeleteLog WHERE libraryID != " + userLibraryID + " AND libraryID NOT IN (SELECT libraryID FROM libraries)",
-			],
-			
-			
 			// Delete empty creators
 			// This may cause itemCreator gaps, but that's better than empty creators
 			[
@@ -1337,22 +1235,16 @@ Zotero.Schema = new function(){
 			// Non-attachment items in the full-text index
 			[
 				"SELECT COUNT(*) FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=14)",
-				[
-					"DELETE FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=14)",
-					"SELECT 1"
-				]
+				"DELETE FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=14)"
 			],
+			// Full-text items must be attachments
 			[
 				"SELECT COUNT(*) FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=14)",
 				"DELETE FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=14)"
-			],
-			[
-				"SELECT COUNT(*) FROM syncedSettings WHERE libraryID != " + userLibraryID + " AND libraryID NOT IN (SELECT libraryID FROM libraries)",
-				"DELETE FROM syncedSettings WHERE libraryID != " + userLibraryID + " AND libraryID NOT IN (SELECT libraryID FROM libraries)"
 			]
 		];
 		
-		for each(var sql in queries) {
+		for (let sql of queries) {
 			let errorsFound = yield Zotero.DB.valueQueryAsync(sql[0]);
 			if (!errorsFound) {
 				continue;
@@ -1368,15 +1260,14 @@ Zotero.Schema = new function(){
 					}
 					// Multiple queries
 					else {
-						for each(var s in sql[1]) {
+						for (let s of sql[1]) {
 							yield Zotero.DB.queryAsync(s);
 						}
 					}
 					continue;
 				}
 				catch (e) {
-					Zotero.debug(e);
-					Components.utils.reportError(e);
+					Zotero.logError(e);
 				}
 			}
 			
@@ -1964,6 +1855,9 @@ Zotero.Schema = new function(){
 			if (i == 80) {
 				yield _updateCompatibility(1);
 				
+				// Delete 'libraries' rows not in 'groups', which shouldn't exist
+				yield Zotero.DB.queryAsync("DELETE FROM libraries WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM groups)");
+				
 				yield Zotero.DB.queryAsync("ALTER TABLE libraries RENAME TO librariesOld");
 				yield Zotero.DB.queryAsync("CREATE TABLE libraries (\n    libraryID INTEGER PRIMARY KEY,\n    type TEXT NOT NULL,\n    editable INT NOT NULL,\n    filesEditable INT NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    lastSync INT NOT NULL DEFAULT 0,\n    lastStorageSync INT NOT NULL DEFAULT 0\n)");
 				yield Zotero.DB.queryAsync("INSERT INTO libraries (libraryID, type, editable, filesEditable) VALUES (1, 'user', 1, 1)");
@@ -2306,7 +2200,6 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("CREATE TABLE libraries (\n    libraryID INTEGER PRIMARY KEY,\n    type TEXT NOT NULL,\n    editable INT NOT NULL,\n    filesEditable INT NOT NULL,\n    version INT NOT NULL DEFAULT 0,\n    storageVersion INT NOT NULL DEFAULT 0,\n    lastSync INT NOT NULL DEFAULT 0\n)");
 				yield Zotero.DB.queryAsync("INSERT INTO libraries SELECT libraryID, type, editable, filesEditable, version, 0, lastSync FROM librariesOld");
 				yield Zotero.DB.queryAsync("DROP TABLE librariesOld");
-				yield Zotero.DB.queryAsync("PRAGMA foreign_keys = ON");
 				
 				yield Zotero.DB.queryAsync("DELETE FROM version WHERE schema LIKE ?", "storage_%");
 			}
