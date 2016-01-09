@@ -941,7 +941,7 @@ Zotero.Search.prototype.loadConditions = Zotero.Promise.coroutine(function* (rel
  * Batch insert
  */
 Zotero.Search.idsToTempTable = function (ids) {
-	const N_COMBINED_INSERTS = 128;
+	const N_COMBINED_INSERTS = 1000;
 	
 	var tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
 	
@@ -952,9 +952,9 @@ Zotero.Search.idsToTempTable = function (ids) {
 		var ids2 = ids ? ids.concat() : [];
 		while (ids2.length) {
 			let chunk = ids2.splice(0, N_COMBINED_INSERTS);
-			let sql = 'INSERT INTO ' + tmpTable + ' '
-				+ chunk.map(function () "SELECT ?").join(" UNION ");
-			yield Zotero.DB.queryAsync(sql, chunk, { debug: false });
+			let sql = 'INSERT INTO ' + tmpTable + ' VALUES '
+				+ chunk.map((x) => "(" + parseInt(x) + ")").join(", ");
+			yield Zotero.DB.queryAsync(sql, false, { debug: false });
 		}
 		
 		return tmpTable;
