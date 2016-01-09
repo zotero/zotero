@@ -788,8 +788,9 @@ Zotero.DBConnection.prototype.columnQueryAsync = function (sql, params) {
 
 
 Zotero.DBConnection.prototype.logQuery = function (sql, params, options) {
+	if (options && options.debug === false) return;
 	var msg = sql;
-	if (params.length && (!options || options.debug === undefined || options.debug === true)) {
+	if (params.length) {
 		msg += " [";
 		for (let i = 0; i < params.length; i++) {
 			let param = params[i];
