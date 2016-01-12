@@ -1729,7 +1729,7 @@
 							this._addCreatorRow = false;
 							
 							//Filter out bad names
-							var nameArray = [tempName for each(tempName in rawNameArray) if(tempName)];
+							var nameArray = rawNameArray.filter(name => name);
 							
 							//If not adding names at the end of the creator list, make new creator 
 							//entries and then shift down existing creators.

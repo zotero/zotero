@@ -1554,7 +1554,7 @@ Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, fo
 Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, forceBibliography,
 		ignoreCitationChanges) {
 	if(this.progressCallback) {
-		var nFieldUpdates = [i for(i in this._session.updateIndices)].length;
+		var nFieldUpdates = Object.keys(this._session.updateIndices).length;
 		if(this._session.bibliographyHasChanged || forceBibliography) {
 			nFieldUpdates += this._bibliographyFields.length*5;
 		}
@@ -1989,11 +1989,13 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	 */
 	"_getItems":function() {
 		var citationsByItemID = this._session.citationsByItemID;
-		var ids = [itemID for(itemID in citationsByItemID)
-			if(citationsByItemID[itemID] && citationsByItemID[itemID].length
+		var ids = Object.keys(citationsByItemID).filter(itemID => {
+			return citationsByItemID[itemID]
+				&& citationsByItemID[itemID].length
 				// Exclude the present item
 				&& (citationsByItemID[itemID].length > 1
-					|| citationsByItemID[itemID][0].properties.zoteroIndex !== this._fieldIndex))];
+					|| citationsByItemID[itemID][0].properties.zoteroIndex !== this._fieldIndex);
+		});
 		
 		// Sort all previously cited items at top, and all items cited later at bottom
 		var fieldIndex = this._fieldIndex;
@@ -2565,7 +2567,7 @@ Zotero.Integration.Session.prototype.getBibliography = function() {
 Zotero.Integration.Session.prototype.updateUncitedItems = function() {
 	// There appears to be a bug somewhere here.
 	if(Zotero.Debug.enabled) Zotero.debug("Integration: style.updateUncitedItems("+this.uncitedItems.toSource()+")");
-	this.style.updateUncitedItems([parseInt(i) for(i in this.uncitedItems)]);
+	this.style.updateUncitedItems(Object.keys(this.uncitedItems).map(i => parseInt(i)));
 }
 
 /**
@@ -2662,9 +2664,9 @@ Zotero.Integration.Session.prototype._updateCitations = function() {
 	
 	if(Zotero.Debug.enabled) {
 		Zotero.debug("Integration: Indices of new citations");
-		Zotero.debug([key for(key in this.newIndices)]);
+		Zotero.debug(Object.keys(this.newIndices));
 		Zotero.debug("Integration: Indices of updated citations");
-		Zotero.debug([key for(key in this.updateIndices)]);
+		Zotero.debug(Object.keys(this.updateIndices));
 	}
 	
 	
@@ -2818,8 +2820,9 @@ Zotero.Integration.Session.prototype.getBibliographyData = function() {
 	}
 	
 	// look for custom bibliography entries
-	bibliographyData.custom = [[this.uriMap.getURIsForItemID(id), this.customBibliographyText[id]]
-		for(id in this.customBibliographyText)];
+	bibliographyData.custom = Object.keys(this.customBibliographyText)
+		.map(id => [this.uriMap.getURIsForItemID(id), this.customBibliographyText[id]]);
+	
 	
 	if(bibliographyData.uncited || bibliographyData.custom) {
 		return JSON.stringify(bibliographyData);

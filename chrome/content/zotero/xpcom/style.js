@@ -581,10 +581,10 @@ Zotero.Style = function(arg) {
 		
 		//In CSL 0.8.1, the "term" attribute on cs:category stored both
 		//citation formats and fields.
-		this.categories = [category.getAttribute("term")
-		for each(category in Zotero.Utilities.xpath(doc,
-			'/csl:style/csl:info[1]/csl:category', Zotero.Styles.ns))
-			if(category.hasAttribute("term"))];
+		this.categories = Zotero.Utilities.xpath(
+			doc, '/csl:style/csl:info[1]/csl:category', Zotero.Styles.ns)
+		.filter(category => category.hasAttribute("term"))
+		.map(category => category.getAttribute("term"));
 	} else {
 		//CSL 1.0 introduced a dedicated "citation-format" attribute on cs:category 
 		this.categories = Zotero.Utilities.xpathText(doc,

@@ -95,13 +95,17 @@ var Zotero_CSL_Preview = new function() {
 		
 		// Generate multiple citations
 		var citations = styleEngine.previewCitationCluster(
-		{"citationItems":[{"id":item.id} for each(item in items)], "properties":{}},
-		[], [], "html");
+			{
+				citationItems: items.map(item => ({ id: item.id })),
+				properties: {}
+			},
+			[], [], "html"
+		);
 		
 		// Generate bibliography
 		var bibliography = '';
 		if(style.hasBibliography) {
-			styleEngine.updateItems([item.id for each(item in items)]);
+			styleEngine.updateItems(items.map(item => item.id));
 			bibliography = Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
 		}
 		

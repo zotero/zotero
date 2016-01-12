@@ -73,7 +73,7 @@ Zotero.Cite = {
 	 */
 	"makeFormattedBibliographyOrCitationList":function(cslEngine, items, format, asCitationList) {
 		cslEngine.setOutputFormat(format);
-		cslEngine.updateItems([item.id for each(item in items)]);
+		cslEngine.updateItems(items.map(item => item.id));
 		 		
 		if(!asCitationList) {
 			var bibliography = Zotero.Cite.makeFormattedBibliography(cslEngine, format);
@@ -297,7 +297,7 @@ Zotero.Cite = {
 		var slashIndex;
 		
 		if(id instanceof Array) {
-			return [Zotero.Cite.getItem(anId) for each(anId in id)];
+			return id.map(anId => Zotero.Cite.getItem(anId));
 		} else if(typeof id === "string" && (slashIndex = id.indexOf("/")) !== -1) {		
 			var sessionID = id.substr(0, slashIndex),
 				session = Zotero.Integration.sessions[sessionID],

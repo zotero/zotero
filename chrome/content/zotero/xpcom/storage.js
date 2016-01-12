@@ -1840,8 +1840,9 @@ Zotero.Sync.Storage = new function () {
 		var itemIDs = Zotero.DB.columnQuery(sql, params) || [];
 		
 		// Get files by open time
-		_uploadCheckFiles.filter(function (x) x.timestamp >= minTime);
-		itemIDs = itemIDs.concat([x.itemID for each(x in _uploadCheckFiles)])
+		itemIDs = itemIDs.concat(
+			_uploadCheckFiles.filter(item => item.timestamp >= minTime).map(item => item.id)
+		);
 		
 		return Zotero.Utilities.arrayUnique(itemIDs);
 	}

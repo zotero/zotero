@@ -96,7 +96,11 @@ Zotero.Utilities.Internal = {
 		}
 		
 		// convert the binary hash data to a hex string.
-		return [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
+		var hexStr;
+		for (let i = 0; i < hash.length; i++) {
+			hexStr += toHexString(hash.charCodeAt(i));
+		}
+		return hexStr;
 	},
 	
 	
@@ -138,10 +142,11 @@ Zotero.Utilities.Internal = {
 						}
 						// Hex string
 						else {
-							deferred.resolve(
-								[toHexString(hash.charCodeAt(i))
-									for (i in hash)].join("")
-							);
+							let hexStr;
+							for (let i = 0; i < hash.length; i++) {
+								hexStr += toHexString(hash.charCodeAt(i));
+							}
+							deferred.resolve(hexStr);
 						}
 					}
 				},

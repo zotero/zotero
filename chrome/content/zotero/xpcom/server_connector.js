@@ -509,7 +509,7 @@ Zotero.Server.Connector.Progress.prototype = {
 	 */
 	"init":function(data, sendResponseCallback) {
 		sendResponseCallback(200, "application/json",
-			JSON.stringify([Zotero.Server.Connector.AttachmentProgressManager.getProgressForID(id) for each(id in data)]));
+			JSON.stringify(data.map(id => Zotero.Server.Connector.AttachmentProgressManager.getProgressForID(id))));
 	}
 };
 

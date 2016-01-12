@@ -50,8 +50,8 @@ Zotero.Proxies = new function() {
 			var me = this;
 			Zotero.MIMETypeHandler.addObserver(function(ch) { me.observe(ch) });
 			
-			var rows = Zotero.DB.query("SELECT * FROM proxies");
-			Zotero.Proxies.proxies = [new Zotero.Proxy(row) for each(row in rows)];
+			var rows = Zotero.DB.query("SELECT * FROM proxies") || [];
+			Zotero.Proxies.proxies = rows.map(row => new Zotero.Proxy(row));
 			
 			for each(var proxy in Zotero.Proxies.proxies) {
 				for each(var host in proxy.hosts) {

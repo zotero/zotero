@@ -2428,7 +2428,7 @@ Zotero.ItemTreeView.prototype.onColumnPickerShowing = function (event) {
 		moreMenuPopup.setAttribute('anonid', id + '-popup');
 		
 		let treecols = menupopup.parentNode.parentNode;
-		let subs = [x.getAttribute('label') for (x of treecols.getElementsByAttribute('submenu', 'true'))];
+		let subs = treecols.getElementsByAttribute('submenu', 'true').map(x => x.getAttribute('label'));
 		
 		var moreItems = [];
 		

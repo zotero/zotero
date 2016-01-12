@@ -434,7 +434,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		try {
 			var messages = {};
 			cs.getMessageArray(messages, {});
-			_startupErrors = [msg for each(msg in messages.value) if(_shouldKeepError(msg))];
+			_startupErrors = Object.keys(messages.value).map(i => messages[i])
+				.filter(msg => _shouldKeepError(msg));
 		} catch(e) {
 			Zotero.logError(e);
 		}

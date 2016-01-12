@@ -199,7 +199,7 @@ Zotero.Sync.Storage.Request.prototype.start = function () {
 	//
 	// The main sync logic is triggered here.
 	
-	Q.all([f(this) for each(f in this._onStart)])
+	Q.all(this._onStart.map(f => f(this)))
 	.then(function (results) {
 		return {
 			localChanges: results.some(function (val) val && val.localChanges == true),

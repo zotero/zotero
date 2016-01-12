@@ -231,7 +231,7 @@ To add a new preference:
 				hidden = false;
 			}
 			
-			[engine.hidden = hidden for each(engine in Zotero.LocateManager.getEngines())];
+			Zotero.LocateManager.getEngines().forEach(engine => engine.hidden = hidden);
 
 			refreshLocateEnginesList();
 		}

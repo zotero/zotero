@@ -446,7 +446,7 @@ Zotero.Fulltext = new function(){
 		Zotero.DB.query("DELETE FROM indexing.fulltextWords");
 		while (words.length > 0) {
 			chunk = words.splice(0, 100);
-			Zotero.DB.query('INSERT INTO indexing.fulltextWords (word) ' + ['SELECT ?' for (word of chunk)].join(' UNION '), chunk);
+			Zotero.DB.query('INSERT INTO indexing.fulltextWords (word) ' + chunk.map(x => 'SELECT ?').join(' UNION '), chunk);
 		}
 		Zotero.DB.query('INSERT OR IGNORE INTO fulltextWords (word) SELECT word FROM indexing.fulltextWords');
 		Zotero.DB.query('DELETE FROM fulltextItemWords WHERE itemID = ?', [itemID]);

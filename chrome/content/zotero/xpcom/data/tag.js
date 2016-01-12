@@ -224,7 +224,7 @@ Zotero.Tag.prototype.getLinkedItems = function (asIDs) {
 	}
 	
 	// Return Zotero.Item objects
-	return [item for each(item in this._linkedItems)];
+	return Object.keys(this._linkedItems).map(id => this._linkedItems[id]);
 }
 
 

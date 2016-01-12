@@ -188,7 +188,7 @@ Zotero.Translators = new function() {
 	 */
 	this.getAll = function() {
 		if(!_initialized) this.init();
-		return [translator for each(translator in _translators)];
+		return Object.keys(_translators).map(i => _translators[i]);
 	}
 	
 	/**
