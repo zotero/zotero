@@ -7,6 +7,9 @@ var ZoteroUnit = Components.classes["@mozilla.org/commandlinehandler/general-sta
 
 var dump = ZoteroUnit.dump;
 
+// Mocha HTML reporter doesn't show deepEqual diffs, so we change this.
+chai.config.truncateThreshold = 0
+
 function quit(failed) {
 	// Quit with exit status
 	if(!failed) {

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		 xmlns:dc="http://purl.org/dc/elements/1.1/"
+		 xmlns="http://purl.org/rss/1.0/"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xmlns:prism="http://prismstandard.org/namespaces/1.2/basic/"
+		 xmlns:dcterms="http://purl.org/dc/terms/"
+		 xsi:schemaLocation="http://www.w3.org/1999/02/22-rdf-syntax-ns# uri:atypon.com:cms:schema:rdf.xsd">
+	<channel rdf:about="http://www.example.com/feed.rss">
+		<title>Feed</title>
+		<description>Feed Description</description>
+		<link>http://www.example.com/feed.rss</link>
+		<dc:publisher>Publisher</dc:publisher>
+		<dc:language>en</dc:language>
+		<dc:rights>©2016 Published by Publisher</dc:rights>
+		<dc:creator>Feed Author</dc:creator>
+		<prism:publicationName>Publication</prism:publicationName>
+		<prism:issn>0000-0000</prism:issn>
+		<prism:publicationDate>2016-01-07-08:00</prism:publicationDate>
+		<prism:copyright>©2016 Published by Publisher</prism:copyright>
+		<prism:rightsAgent>rights@example.com</prism:rightsAgent>
+		<ttl>60</ttl>
+		<items>
+			<rdf:Seq>
+				<rdf:li rdf:resource="http://www.example.com/item1"/>
+				<rdf:li rdf:resource="http://www.example.com/item2"/>
+				<rdf:li rdf:resource="http://www.example.com/item3"/>
+			</rdf:Seq>
+		</items>
+	</channel>
+	<item rdf:about="http://www.example.com/item1">
+		<title>Title 1</title>
+		<link>http://www.example.com/item1</link>
+		<description>Description 1</description>
+		<language>en</language>
+		<startPage>10</startPage>
+		<endPage>20</endPage>
+		<dc:title>Title 1</dc:title>
+		<dc:creator>Author1 A.T. Rohtua, Author2 A. Auth, Author3 Autho</dc:creator>
+		<dc:contributor>Contributor1 A.T. Rotubirtnoc, Contributor2 C. Contrib, Contributor3 Contr</dc:contributor>
+		<dc:publisher>Publisher</dc:publisher>
+		<dc:source>Feed</dc:source>
+		<dc:date>2016-01-07</dc:date>
+		<dc:doi>10.1000/182</dc:doi>
+		<prism:issn>0000-0000</prism:issn>
+		<prism:publicationName>Publication</prism:publicationName>
+		<prism:publicationDate>2016-01-07</prism:publicationDate>
+		<prism:section>Article</prism:section>
+	</item>
+	<item rdf:about="http://www.example.com/item2">
+		<title>Title 2</title>
+		<link>http://www.example.com/item2</link>
+		<description>Description 2</description>
+		<language>en</language>
+		<startPage>10</startPage>
+		<endPage>20</endPage>
+		<dc:title>Title 2</dc:title>
+		<dc:creator>Author1 A.T. Rohtua, Author2 A. Auth, Author3 Autho</dc:creator>
+		<dc:contributor>Contributor1 A.T. Rotubirtnoc, Contributor2 C. Contrib, Contributor3 Contr</dc:contributor>
+		<dc:publisher>Publisher</dc:publisher>
+		<dc:source>Feed</dc:source>
+		<dc:date>2016-01-07</dc:date>
+		<dc:doi>10.1000/182</dc:doi>
+		<prism:issn>0000-0000</prism:issn>
+		<prism:publicationName>Publication</prism:publicationName>
+		<prism:publicationDate>2016-01-07</prism:publicationDate>
+		<prism:section>Article</prism:section>
+	</item>
+	<item rdf:about="http://www.example.com/item3">
+		<title>Title 3</title>
+		<link>http://www.example.com/item3</link>
+		<description>Description 3</description>
+		<language>en</language>
+		<pubType>Some Publication</pubType>
+		<startPage>10</startPage>
+		<endPage>20</endPage>
+		<dc:title>Title 3</dc:title>
+		<dc:creator>Author1 A.T. Rohtua, Author2 A. Auth, Author3 Autho</dc:creator>
+		<dc:contributor>Contributor1 A.T. Rotubirtnoc, Contributor2 C. Contrib, Contributor3 Contr</dc:contributor>
+		<dc:publisher>Publisher</dc:publisher>
+		<dc:source>Feed</dc:source>
+		<dc:date>2016-01-07</dc:date>
+		<dc:doi>10.1000/182</dc:doi>
+		<prism:issn>0000-0000</prism:issn>
+		<prism:publicationName>Publication</prism:publicationName>
+		<prism:publicationDate>2016-01-07</prism:publicationDate>
+		<prism:section>Article</prism:section>
+	</item>
+</rdf:RDF>

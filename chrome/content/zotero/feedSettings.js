@@ -118,7 +118,7 @@ var Zotero_Feed_Settings = new function() {
 		document.documentElement.getButton('accept').disabled = true;
 	};
 	
-	this.validateUrl = function() {
+	this.validateUrl = Zotero.Promise.coroutine(function* () {
 		if (feedReader) {
 			feedReader.terminate();
 			feedReader = null;
@@ -128,36 +128,37 @@ var Zotero_Feed_Settings = new function() {
 		urlTainted = false;
 		if (!url) return;
 		
-		let fr = feedReader = new Zotero.FeedReader(url);
-		fr.feedProperties
-			.then( feed => {
-				if (feedReader !== fr || urlTainted) return;
-				
-				let title = document.getElementById('feed-title');
-				if (!data.url && feed.title) {
-					title.value = feed.title;
-				}
-				
-				let ttl = document.getElementById('feed-ttl');
-				if (!data.url && feed.ttl) {
-					ttl.value = Math.floor(feed.ttl / 60) || 1;
-				}
-				
-				document.getElementById('feed-url').value = url;
-				
-				urlIsValid = true;
-				title.disabled = false;
-				ttl.disabled = false;
-				document.getElementById('feed-cleanAfter').disabled = false;
-				document.documentElement.getButton('accept').disabled = false;
-			})
-			.catch( e => {
-				Zotero.debug(e);
-			})
-			.finally( () => {
-				if (feedReader === fr) feedReader = null;
-			});
-	};
+		try {
+			let fr = feedReader = new Zotero.FeedReader(url);
+			yield fr.process();
+			let feed = fr.feedProperties;
+			if (feedReader !== fr || urlTainted) return;
+			
+			let title = document.getElementById('feed-title');
+			if (!data.url && feed.title) {
+				title.value = feed.title;
+			}
+			
+			let ttl = document.getElementById('feed-ttl');
+			if (!data.url && feed.ttl) {
+				ttl.value = Math.floor(feed.ttl / 60) || 1;
+			}
+			
+			document.getElementById('feed-url').value = url;
+			
+			urlIsValid = true;
+			title.disabled = false;
+			ttl.disabled = false;
+			document.getElementById('feed-cleanAfter').disabled = false;
+			document.documentElement.getButton('accept').disabled = false;
+		}
+		catch (e) {
+			Zotero.debug(e);
+		}
+		finally {
+			if (feedReader === fr) feedReader = null;
+		}
+	});
 	
 	this.accept = function() {
 		data.url = document.getElementById('feed-url').value;

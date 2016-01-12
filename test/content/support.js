@@ -435,6 +435,10 @@ function getTestDataDirectory() {
 	       QueryInterface(Components.interfaces.nsIFileURL).file;
 }
 
+function getTestDataItemUrl(path) {
+	return OS.Path.join("resource://zotero-unit-tests/data", path);
+}
+
 /**
  * Returns an absolute path to an empty temporary directory
  * (i.e., test/tests/data)
