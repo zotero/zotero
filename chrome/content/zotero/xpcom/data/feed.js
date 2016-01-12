@@ -325,6 +325,7 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 	yield this.clearExpiredItems();
 	try {
 		let fr = new Zotero.FeedReader(this.url);
+		yield fr.process();
 		let itemIterator = new fr.ItemIterator();
 		let item, toAdd = [], processedGUIDs = [];
 		while (item = yield itemIterator.next().value) {
