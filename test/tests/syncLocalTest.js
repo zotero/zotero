@@ -20,6 +20,70 @@ describe("Zotero.Sync.Data.Local", function() {
 		})
 	})
 	
+	
+	describe("#getLatestCacheObjectVersions", function () {
+		before(function* () {
+			yield Zotero.Sync.Data.Local.saveCacheObjects(
+				'item',
+				Zotero.Libraries.userLibraryID,
+				[
+					{
+						key: 'AAAAAAAA',
+						version: 2,
+						title: "A2"
+					},
+					{
+						key: 'AAAAAAAA',
+						version: 1,
+						title: "A1"
+					},
+					{
+						key: 'BBBBBBBB',
+						version: 1,
+						title: "B1"
+					},
+					{
+						key: 'BBBBBBBB',
+						version: 2,
+						title: "B2"
+					},
+					{
+						key: 'CCCCCCCC',
+						version: 3,
+						title: "C"
+					}
+				]
+			);
+		})
+		
+		it("should return latest version of all objects if no keys passed", function* () {
+			var versions = yield Zotero.Sync.Data.Local.getLatestCacheObjectVersions(
+				'item',
+				Zotero.Libraries.userLibraryID
+			);
+			var keys = Object.keys(versions);
+			assert.lengthOf(keys, 3);
+			assert.sameMembers(keys, ['AAAAAAAA', 'BBBBBBBB', 'CCCCCCCC']);
+			assert.equal(versions.AAAAAAAA, 2);
+			assert.equal(versions.BBBBBBBB, 2);
+			assert.equal(versions.CCCCCCCC, 3);
+		})
+		
+		it("should return latest version of objects with passed keys", function* () {
+			var versions = yield Zotero.Sync.Data.Local.getLatestCacheObjectVersions(
+				'item',
+				Zotero.Libraries.userLibraryID,
+				['AAAAAAAA', 'CCCCCCCC']
+			);
+			var keys = Object.keys(versions);
+			assert.lengthOf(keys, 2);
+			assert.sameMembers(keys, ['AAAAAAAA', 'CCCCCCCC']);
+			assert.equal(versions.AAAAAAAA, 2);
+			assert.equal(versions.CCCCCCCC, 3);
+		})
+	})
+	
+	
 	describe("#processSyncCacheForObjectType()", function () {
 		var types = Zotero.DataObjectUtilities.getTypes();
 		

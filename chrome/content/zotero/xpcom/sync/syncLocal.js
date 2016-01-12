@@ -247,16 +247,33 @@ Zotero.Sync.Data.Local = {
 	 * @return {Promise<Object>} - A promise for an object with object keys as keys and versions
 	 *                             as properties
 	 */
-	getLatestCacheObjectVersions: Zotero.Promise.coroutine(function* (objectType, libraryID) {
-		var sql = "SELECT key, version FROM syncCache WHERE libraryID=? AND "
-			+ "syncObjectTypeID IN (SELECT syncObjectTypeID FROM "
-			+ "syncObjectTypes WHERE name=?) ORDER BY version";
-		var rows = yield Zotero.DB.queryAsync(sql, [libraryID, objectType]);
+	getLatestCacheObjectVersions: Zotero.Promise.coroutine(function* (objectType, libraryID, keys=[]) {
 		var versions = {};
-		for (let i = 0; i < rows.length; i++) {
-			let row = rows[i];
-			versions[row.key] = row.version;
-		}
+		
+		yield Zotero.Utilities.Internal.forEachChunkAsync(
+			keys,
+			Zotero.DB.MAX_BOUND_PARAMETERS - 2,
+			Zotero.Promise.coroutine(function* (chunk) {
+				// The MAX(version) ensures we get the data from the most recent version of the object,
+				// thanks to SQLite 3.7.11 (http://www.sqlite.org/releaselog/3_7_11.html)
+				var sql = "SELECT key, MAX(version) AS version FROM syncCache "
+					+ "WHERE libraryID=? AND "
+					+ "syncObjectTypeID IN (SELECT syncObjectTypeID FROM syncObjectTypes WHERE name=?) ";
+				var params = [libraryID, objectType]
+				if (chunk.length) {
+					sql += "AND key IN (" + chunk.map(key => '?').join(', ') + ") ";
+					params = params.concat(chunk);
+				}
+				sql += "GROUP BY libraryID, key";
+				var rows = yield Zotero.DB.queryAsync(sql, params);
+				
+				for (let i = 0; i < rows.length; i++) {
+					let row = rows[i];
+					versions[row.key] = row.version;
+				}
+			})
+		);
+		
 		return versions;
 	}),
 	

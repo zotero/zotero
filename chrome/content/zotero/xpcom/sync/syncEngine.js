@@ -256,15 +256,15 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 				+ " modified since last check");
 			
 			let keys = [];
+			let versions = yield Zotero.Sync.Data.Local.getLatestCacheObjectVersions(
+				objectType, this.libraryID, Object.keys(results.versions)
+			);
 			for (let key in results.versions) {
 				// Skip objects that are already up-to-date in the sync cache. Generally all returned
 				// objects should have newer version numbers, but there are some situations, such as
 				// full syncs or interrupted syncs, where we may get versions for objects that are
 				// already up-to-date locally.
-				let version = yield Zotero.Sync.Data.Local.getLatestCacheObjectVersion(
-					objectType, this.libraryID, key
-				);
-				if (version == results.versions[key]) {
+				if (versions[key] == results.versions[key]) {
 					Zotero.debug("Skipping up-to-date " + objectType + " " + this.libraryID + "/" + key);
 					continue;
 				}
