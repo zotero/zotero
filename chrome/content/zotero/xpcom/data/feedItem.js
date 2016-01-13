@@ -89,6 +89,32 @@ Zotero.FeedItem.prototype.setField = function(field, value) {
 	return Zotero.FeedItem._super.prototype.setField.apply(this, arguments);
 }
 
+Zotero.FeedItem.prototype.fromJSON = function(json) {
+	// Handle weird formats in feedItems
+	let dateFields = ['accessDate', 'dateAdded', 'dateModified'];
+	for (let dateField of dateFields) {
+		let val = json[dateField];
+		if (val) {
+			let d = new Date(val);
+			if (isNaN(d.getTime())) {
+				d = Zotero.Date.sqlToDate(val, true);
+			}
+			if (!d || isNaN(d.getTime())) {
+				d = Zotero.Date.strToDate(val);
+				d = new Date(d.year, d.month, d.day);
+				Zotero.debug(dateField + " " + JSON.stringify(d), 1);
+			}
+			if (!d) {
+				Zotero.logError("Discarding invalid " + field + " '" + val
+					+ "' for item " + this.libraryKey);
+				delete json[dateField];
+				continue;
+			}
+			json[dateField] = d.toISOString();
+		}
+	}
+	Zotero.FeedItem._super.prototype.fromJSON.apply(this, arguments);
+}
 
 Zotero.FeedItem.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 	if (!this.guid) {
@@ -124,6 +150,11 @@ Zotero.FeedItem.prototype.forceSaveTx = function(options) {
 	return this.saveTx(newOptions);
 }
 
+Zotero.FeedItem.prototype.save = function(options = {}) {
+	options.skipDateModifiedUpdate = true;
+	return Zotero.FeedItem._super.prototype.save.apply(this, arguments)
+}
+
 Zotero.FeedItem.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	yield Zotero.FeedItem._super.prototype._saveData.apply(this, arguments);
 	
@@ -138,12 +169,12 @@ Zotero.FeedItem.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 Zotero.FeedItem.prototype.toggleRead = Zotero.Promise.coroutine(function* (state) {
 	state = state !== undefined ? !!state : !this.isRead;
 	let changed = this.isRead != state;
-	this.isRead = state;
 	if (changed) {
-		yield this.save({skipEditCheck: true, skipDateModifiedUpdate: true});
+		this.isRead = state;
+		yield this.saveTx({skipEditCheck: true, skipDateModifiedUpdate: true});
 		
 		let feed = Zotero.Feeds.get(this.libraryID);
-		feed.updateUnreadCount();
+		yield feed.updateUnreadCount();
 	}
 });
 

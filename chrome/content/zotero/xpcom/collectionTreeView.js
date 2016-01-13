@@ -490,8 +490,12 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 				
 				break;
 			
-			case 'feed':
 			case 'group':
+				yield this.reload();
+				yield this.selectByID(currentTreeRow.id);
+				break;
+				
+			case 'feed':
 				yield this.reload();
 				yield this.selectByID("L" + id);
 				break;
@@ -789,9 +793,6 @@ Zotero.CollectionTreeView.prototype.isContainerEmpty = function(row)
 				&& this._duplicateLibraries.indexOf(libraryID) == -1
 				&& this._unfiledLibraries.indexOf(libraryID) == -1
 				&& this.hideSources.indexOf('trash') != -1;
-	}
-	if (treeRow.isFeed()) {
-		return false; // If it's shown, it has something
 	}
 	if (treeRow.isCollection()) {
 		return !treeRow.ref.hasChildCollections();
@@ -1107,6 +1108,7 @@ Zotero.CollectionTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(f
 			yield treeRow.ref.eraseTx({
 				deleteItems: true
 			});
+		}
 		if (treeRow.isCollection() || treeRow.isFeed()) {
 			yield treeRow.ref.erase(deleteItems);
 		}
@@ -1139,7 +1141,7 @@ Zotero.CollectionTreeView.prototype._expandRow = Zotero.Promise.coroutine(functi
 	var isCollection = treeRow.isCollection();
 	var libraryID = treeRow.ref.libraryID;
 	
-	if (treeRow.isPublications()) {
+	if (treeRow.isPublications() || treeRow.isFeed()) {
 		return false;
 	}
 	
@@ -1335,7 +1337,7 @@ Zotero.CollectionTreeView.prototype._rememberOpenStates = Zotero.Promise.corouti
 		var open = this.isContainerOpen(i);
 		
 		// Collections and feeds default to closed
-		if (!open && treeRow.isCollection() && treeRow.isFeed()) {
+		if (!open && treeRow.isCollection() || treeRow.isFeed()) {
 			delete state[treeRow.id];
 			continue;
 		}
@@ -1431,6 +1433,11 @@ Zotero.CollectionTreeView.prototype.canDropCheck = function (row, orient, dataTr
 		
 		if (!treeRow.editable) {
 			Zotero.debug("Drop target not editable");
+			return false;
+		}
+		
+		if (treeRow.isFeed()) {
+			Zotero.debug("Cannot drop into feeds");
 			return false;
 		}
 		

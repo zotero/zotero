@@ -1,12 +1,12 @@
 describe("Zotero.FeedItem", function () {
 	let feed, libraryID;
 	before(function* () {
-		feed = new Zotero.Feed({ name: 'Test ' + Zotero.randomString(), url: 'http://' + Zotero.randomString() + '.com/' });
+		feed = yield createFeed({ name: 'Test ' + Zotero.randomString(), url: 'http://' + Zotero.randomString() + '.com/' });
 		yield feed.saveTx();
 		libraryID = feed.libraryID;
 	});
 	after(function() {
-		return feed.eraseTx();
+		return clearFeeds();
 	});
 	
 	it("should be an instance of Zotero.Item", function() {
@@ -89,6 +89,22 @@ describe("Zotero.FeedItem", function () {
 			readTime = Zotero.Date.sqlToDate(readTime, true).getTime();
 			assert.closeTo(readTime, expectedTimestamp, 2000, 'read timestamp is correct in the DB');
 		});
+	});
+	describe("#fromJSON()", function() {
+		it("should attempt to parse non ISO-8601 dates", function* () {
+			var json = {
+				itemType: "journalArticle",
+				accessDate: "2015-06-07 20:56:00",
+				dateAdded: "18-20 June 2015", // magically parsed by `new Date()`
+				dateModified: "07/06/2015", // US
+			};
+			var item = new Zotero.FeedItem;
+			item.fromJSON(json);
+			assert.strictEqual(item.getField('accessDate'), '2015-06-07 20:56:00');
+			assert.strictEqual(item.getField('dateAdded'), '2015-06-18 20:00:00');
+			// sets a timezone specific hour when new Date parses from strings without hour specified.
+			assert.strictEqual(item.getField('dateModified'), Zotero.Date.dateToSQL(new Date(2015, 6, 6), true)); 
+		})
 	});
 	describe("#save()", function() {
 		it("should require edit check override", function* () {
@@ -173,6 +189,35 @@ describe("Zotero.FeedItem", function () {
 			let feedItem = yield createDataObject('feedItem', { libraryID });
 			
 			yield assert.isRejected(feedItem.eraseTx(), /^Error: Cannot edit feedItem in read-only library/);
+		});
+	});
+	
+	describe("#toggleRead()", function() {
+		it('should toggle state', function* () {
+			feed = yield createFeed();
+			
+			let item = yield createDataObject('feedItem', { guid: Zotero.randomString(), libraryID: feed.id });
+			item.isRead = false;
+			yield item.forceSaveTx();
+			
+			yield item.toggleRead();
+			assert.isTrue(item.isRead, "item is toggled to read state");
+		});
+		it('should save if specified state is different from current', function* (){
+			feed = yield createFeed();
+
+			let item = yield createDataObject('feedItem', { guid: Zotero.randomString(), libraryID: feed.id });
+			item.isRead = false;
+			yield item.forceSaveTx();
+			sinon.spy(item, 'save');
+
+			yield item.toggleRead(true);
+			assert.isTrue(item.save.called, "item was saved on toggle read");
+			
+			item.save.reset();
+			
+			yield item.toggleRead(true);
+			assert.isFalse(item.save.called, "item was not saved on toggle read to same state");
 		});
 	});
 });

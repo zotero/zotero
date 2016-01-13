@@ -93,9 +93,9 @@ var Zotero_Feed_Settings = new function() {
 		}
 		document.getElementById('feed-ttl').value = ttl;
 		
-		let cleanAfter = data.cleanAfter;
-		if (cleanAfter === undefined) cleanAfter = 2;
-		document.getElementById('feed-cleanAfter').value = cleanAfter;
+		let cleanupAfter = data.cleanupAfter;
+		if (cleanupAfter === undefined) cleanupAfter = 2;
+		document.getElementById('feed-cleanupAfter').value = cleanupAfter;
 		
 		if (data.url && !data.urlIsValid) {
 			this.validateUrl();
@@ -114,7 +114,7 @@ var Zotero_Feed_Settings = new function() {
 		urlIsValid = false;
 		document.getElementById('feed-title').disabled = true;
 		document.getElementById('feed-ttl').disabled = true;
-		document.getElementById('feed-cleanAfter').disabled = true;
+		document.getElementById('feed-cleanupAfter').disabled = true;
 		document.documentElement.getButton('accept').disabled = true;
 	};
 	
@@ -132,6 +132,8 @@ var Zotero_Feed_Settings = new function() {
 			let fr = feedReader = new Zotero.FeedReader(url);
 			yield fr.process();
 			let feed = fr.feedProperties;
+			// Prevent progress if textbox changes triggered another call to
+			// validateUrl / invalidateUrl (old session)
 			if (feedReader !== fr || urlTainted) return;
 			
 			let title = document.getElementById('feed-title');
@@ -149,7 +151,7 @@ var Zotero_Feed_Settings = new function() {
 			urlIsValid = true;
 			title.disabled = false;
 			ttl.disabled = false;
-			document.getElementById('feed-cleanAfter').disabled = false;
+			document.getElementById('feed-cleanupAfter').disabled = false;
 			document.documentElement.getButton('accept').disabled = false;
 		}
 		catch (e) {
@@ -164,7 +166,7 @@ var Zotero_Feed_Settings = new function() {
 		data.url = document.getElementById('feed-url').value;
 		data.title = document.getElementById('feed-title').value;
 		data.ttl = document.getElementById('feed-ttl').value * 60;
-		data.cleanAfter = document.getElementById('feed-cleanAfter').value * 1;
+		data.cleanupAfter = document.getElementById('feed-cleanupAfter').value * 1;
 		return true;
 	};
 	

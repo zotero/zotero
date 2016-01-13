@@ -1,24 +1,7 @@
 describe("Zotero.Feed", function() {
-	let createFeed = Zotero.Promise.coroutine(function* (props = {}) {
-		let feed = new Zotero.Feed({
-			name: props.name || 'Test ' + Zotero.randomString(),
-			url: props.url || 'http://www.' + Zotero.randomString() + '.com',
-			refreshInterval: props.refreshInterval,
-			cleanupAfter: props.cleanupAfter
-		});
-		
-		yield feed.saveTx();
-		return feed;
-	});
-	
 	// Clean up after after tests
 	after(function* () {
-		let feeds = Zotero.Feeds.getAll();
-		yield Zotero.DB.executeTransaction(function* () {
-			for (let i=0; i<feeds.length; i++) {
-				yield feeds[i].erase();
-			}
-		});
+		yield clearFeeds();
 	});
 	
 	it("should be an instance of Zotero.Library", function() {
@@ -93,7 +76,7 @@ describe("Zotero.Feed", function() {
 				name: 'Test ' + Zotero.randomString(),
 				url: 'http://' + Zotero.randomString() + '.com/',
 				refreshInterval: 30,
-				cleanupAfter: 2
+				cleanupAfter: 1
 			};
 			
 			let feed = yield createFeed(props);
@@ -176,6 +159,157 @@ describe("Zotero.Feed", function() {
 			yield feed.eraseTx();
 			
 			assert.notOk(yield Zotero.FeedItems.getAsync(feedItem.id));
+		});
+	});
+	
+	describe("#clearExpiredItems()", function() {
+		var feed, expiredFeedItem, readFeedItem, feedItem, feedItemIDs;
+		
+		before(function* (){
+			feed = yield createFeed({cleanupAfter: 1});
+			
+			expiredFeedItem = yield createDataObject('feedItem', { libraryID: feed.libraryID });
+			// Read 2 days ago
+			expiredFeedItem.isRead = true;
+			expiredFeedItem._feedItemReadTime = Zotero.Date.dateToSQL(
+					new Date(Date.now() - 2 * 24*60*60*1000), true);
+			yield expiredFeedItem.forceSaveTx();
+			
+			readFeedItem = yield createDataObject('feedItem', { libraryID: feed.libraryID });
+			readFeedItem.isRead = true;
+			yield readFeedItem.forceSaveTx();
+			
+			feedItem = yield createDataObject('feedItem', { libraryID: feed.libraryID });
+			
+			feedItemIDs = yield Zotero.FeedItems.getAll(feed.libraryID).map((row) => row.id);
+			
+			assert.include(feedItemIDs, feedItem.id, "feed contains unread feed item");
+			assert.include(feedItemIDs, readFeedItem.id, "feed contains read feed item");
+			assert.include(feedItemIDs, expiredFeedItem.id, "feed contains expired feed item");
+			
+			yield feed.clearExpiredItems();
+			
+			feedItemIDs = yield Zotero.FeedItems.getAll(feed.libraryID).map((row) => row.id);
+		});
+	
+		it('should clear expired items', function() {
+			assert.notInclude(feedItemIDs, expiredFeedItem.id, "feed no longer contain expired feed item");	
+		});
+		
+		it('should not clear read items that have not expired yet', function() {
+			assert.include(feedItemIDs, readFeedItem.id, "feed still contains new feed item");
+		})
+		
+		it('should not clear unread items', function() {
+			assert.include(feedItemIDs, feedItem.id, "feed still contains new feed item");
+		});
+	});
+	
+	describe('#updateFeed()', function() {
+		var feedUrl = getTestDataItemUrl("feed.rss");
+		var modifiedFeedUrl = getTestDataItemUrl("feedModified.rss");
+		
+		afterEach(function* () {
+			yield clearFeeds();
+		});
+		
+		it('should schedule next feed check', function* () {
+			let scheduleNextFeedCheck = sinon.stub(Zotero.Feeds, 'scheduleNextFeedCheck');
+			
+			let feed = yield createFeed();
+			feed._feedUrl = feedUrl;
+			yield feed.updateFeed();
+			assert.equal(scheduleNextFeedCheck.called, true);
+			
+			scheduleNextFeedCheck.restore();
+		});
+		
+		it('should add new feed items', function* () {
+			let feed = yield createFeed();
+			feed._feedUrl = feedUrl;
+			yield feed.updateFeed();
+			
+			let feedItems = yield Zotero.FeedItems.getAll(feed.id);
+			assert.equal(feedItems.length, 4);
+		});
+		
+		it('should set lastCheck and lastUpdated values', function* () {
+			let feed = yield createFeed();
+			feed._feedUrl = feedUrl;
+			
+			assert.notOk(feed.lastCheck);
+			assert.notOk(feed.lastUpdate);
+			
+			yield feed.updateFeed();
+			
+			assert.ok(feed.lastCheck >= Zotero.Date.dateToSQL(new Date(Date.now() - 1000*60), true));
+			assert.ok(feed.lastUpdate >= Zotero.Date.dateToSQL(new Date(Date.now() - 1000*60), true));
+		});
+		it('should update modified items and set unread', function* () {
+			let feed = yield createFeed();
+			feed._feedUrl = feedUrl;
+			yield feed.updateFeed();
+
+			let feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573");
+			feedItem.isRead = true;
+			yield feedItem.forceSaveTx();
+			feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573");
+			assert.isTrue(feedItem.isRead);
+			
+			let oldDateModified = feedItem.dateModified;
+			
+			feed._feedUrl = modifiedFeedUrl;
+			yield feed.updateFeed();
+			
+			feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573");
+			
+			assert.notEqual(oldDateModified, feedItem.dateModified);
+			assert.isFalse(feedItem.isRead)
+		});
+		it('should skip items that are not modified', function* () {
+			let feed = yield createFeed();
+			feed._feedUrl = feedUrl;
+			yield feed.updateFeed();
+
+			let feedItems = yield Zotero.FeedItems.getAll(feed.id);
+			let datesAdded = [], datesModified = [];
+			for(let feedItem of feedItems) {
+				datesAdded.push(feedItem.dateAdded);
+				datesModified.push(feedItem.dateModified);
+			}
+			
+			feed._feedUrl = modifiedFeedUrl;
+			yield feed.updateFeed();
+			
+			feedItems = yield Zotero.FeedItems.getAll(feed.id);
+			
+			let changedCount = 0;
+			for (let i = 0; i < feedItems.length; i++) {
+				assert.equal(feedItems[i].dateAdded, datesAdded[i]);
+				if (feedItems[i].dateModified != datesModified[i]) {
+					changedCount++;
+				}
+			}
+			
+			assert.equal(changedCount, 1);
+		});
+		it('should update unread count', function* () {
+			let feed = yield createFeed();
+			feed._feedUrl = feedUrl;
+			yield feed.updateFeed();
+			
+			assert.equal(feed.unreadCount, 4);
+
+			let feedItems = yield Zotero.FeedItems.getAll(feed.id);
+			for (let feedItem of feedItems) {
+				feedItem.isRead = true;
+				yield feedItem.forceSaveTx();
+			}
+			
+			feed._feedUrl = modifiedFeedUrl;
+			yield feed.updateFeed();
+			
+			assert.equal(feed.unreadCount, 1);
 		});
 	});
 	

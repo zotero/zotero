@@ -188,7 +188,7 @@ Zotero.URI = new function () {
 			return path;
 		}
 		
-		if (obj instanceof Zotero.Item || obj instanceof Zotero.Feed) {
+		if (obj instanceof Zotero.Item) {
 			return path + '/items/' + obj.key;
 		}
 		

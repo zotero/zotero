@@ -40,9 +40,9 @@
 					<label value="&zotero.feedSettings.refresh.label2;" control="feed-ttl"/>
 				</hbox>
 				<hbox align="center">
-					<label value="&zotero.feedSettings.cleanAfter.label1;" control="feed-cleanAfter"/>
-					<textbox id="feed-cleanAfter" type="number" min="0" increment="1" size="2"/>
-					<label value="&zotero.feedSettings.cleanAfter.label2;" control="feed-cleanAfter"/>
+					<label value="&zotero.feedSettings.cleanupAfter.label1;" control="feed-cleanupAfter"/>
+					<textbox id="feed-cleanupAfter" type="number" min="0" increment="1" size="2"/>
+					<label value="&zotero.feedSettings.cleanupAfter.label2;" control="feed-cleanupAfter"/>
 				</hbox>
 			</vbox>
 		</vbox>

@@ -35,6 +35,7 @@
  * http://rss.sciencedirect.com/publication/science/20925212
  * http://www.ncbi.nlm.nih.gov/entrez/eutils/erss.cgi?rss_guid=1fmfIeN4X5Q8HemTZD5Rj6iu6-FQVCn7xc7_IPIIQtS1XiD9bf
  * http://export.arxiv.org/rss/astro-ph
+ * http://fhs.dukejournals.org/rss_feeds/recent.xml TODO: refreshing unreads all items
  */
 
 /**
@@ -104,7 +105,6 @@ Zotero.FeedReader = function(url) {
 		
 		this._feedProperties = info;
 		this._feed = feed;
-		return info;
 	}.bind(this)).then(function(){
 		let items = this._feed.items;
 		if (items && items.length) {
@@ -119,9 +119,11 @@ Zotero.FeedReader = function(url) {
 				this._feedItems.push(Zotero.Promise.defer()); // Push a new deferred promise so an iterator has something to return
 				lastItem.resolve(feedItem);
 			}
-
-		this._feedProcessed.resolve();
 		}
+		this._feedProcessed.resolve();
+	}.bind(this)).catch(function(e) {
+		Zotero.debug("Feed processing failed " + e.message);
+		this._feedProcessed.reject(e);
 	}.bind(this)).finally(function() {
 		// Make sure the last promise gets resolved to null
 		let lastItem = this._feedItems[this._feedItems.length - 1];
@@ -229,6 +231,10 @@ Zotero.defineProperty(Zotero.FeedReader.prototype, 'ItemIterator', {
 			};
 		};
 		
+		iterator.prototype.last = function() {
+			return items[items.length-1];
+		}
+		
 		return iterator;
 	}
 }, {lazy: true});
@@ -304,7 +310,8 @@ Zotero.FeedReader._processCreators = function(feedEntry, field, role) {
 				names.push(name);
 			}
 		}
-	} catch(e) {
+	} 
+	catch(e) {
 		if (e.result != Components.results.NS_ERROR_FAILURE) throw e;
 		
 		if (field != 'authors') return [];
@@ -372,20 +379,21 @@ Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
 	if (feedEntry.updated) item.dateModified = new Date(feedEntry.updated);
 	
 	if (feedEntry.published) {
-		let date = new Date(feedEntry.published);
+		var date = new Date(feedEntry.published);
 		
 		if (!date.getUTCSeconds() && !(date.getUTCHours() && date.getUTCMinutes())) {
 			// There was probably no time, but there may have been a a date range,
 			// so something could have ended up in the hour _or_ minute field
-			item.date = getFeedField(feedEntry, null, 'pubDate')
+			date = getFeedField(feedEntry, 'pubDate')
 				/* In case it was magically pulled from some other field */
 				|| ( date.getUTCFullYear() + '-'
 					+ (date.getUTCMonth() + 1) + '-'
 					+  date.getUTCDate() );
-		} else {
-			item.date = Zotero.FeedReader._formatDate(date);
-			// Add time zone
+		} 
+		else {
+			date = Zotero.Date.dateToSQL(date, true);
 		}
+		item.dateAdded = date;
 		
 		if (!item.dateModified) {
 			items.dateModified = date;
@@ -395,15 +403,15 @@ Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
 	if (!item.dateModified) {
 		// When there's no reliable modification date, we can assume that item doesn't get updated
 		Zotero.debug("FeedReader: Feed item missing a modification date (" + item.guid + ")");
+	} else {
+		// Convert date modified to string, since those are directly comparable
+		item.dateModified = Zotero.Date.dateToSQL(item.dateModified, true);
 	}
 	
-	if (!item.date && item.dateModified) {
+	if (!item.dateAdded && item.dateModified) {
 		// Use lastModified date
-		item.date = Zotero.FeedReader._formatDate(item.dateModified);
+		item.dateAdded = item.dateModified;
 	}
-	
-	// Convert date modified to string, since those are directly comparable
-	if (item.dateModified) item.dateModified = Zotero.Date.dateToSQL(item.dateModified, true);
 	
 	if (feedEntry.rights) item.rights = Zotero.FeedReader._getRichText(feedEntry.rights, 'rights');
 	
@@ -421,7 +429,7 @@ Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
 	
 	/** Done with basic metadata, now look for better data **/
 	
-	let date = Zotero.FeedReader._getFeedField(feedEntry, 'publicationDate', 'prism')
+	date = Zotero.FeedReader._getFeedField(feedEntry, 'publicationDate', 'prism')
 		|| Zotero.FeedReader._getFeedField(feedEntry, 'date', 'dc');
 	if (date) item.date = date;
 	
@@ -498,13 +506,6 @@ Zotero.FeedReader._getRichText = function(feedText, field) {
 	let domFragment = feedText.createDocumentFragment(domDiv);
 	return Zotero.Utilities.dom2text(domFragment, field);
 };
-
-/*
- * Format JS date as SQL date
- */
-Zotero.FeedReader._formatDate = function(date) {
-	return Zotero.Date.dateToSQL(date, true);
-}
 
 /*
  * Get field value from feed entry by namespace:fieldName

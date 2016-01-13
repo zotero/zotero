@@ -30,6 +30,10 @@ describe("Zotero.FeedReader", function () {
 		language: 'en'
 	};
 
+	after(function* () {
+		yield clearFeeds();
+	});
+
 	describe('FeedReader()', function () {
 		it('should throw if url not provided', function() {
 			assert.throw(() => new Zotero.FeedReader())
@@ -108,7 +112,7 @@ describe("Zotero.FeedReader", function () {
 				abstractNote: 'How do Americans get ready to work with Russians aboard the International Space Station? They take a crash course in culture, language and protocol at Russia\'s Star City.',
 				url: 'http://liftoff.msfc.nasa.gov/news/2003/news-starcity.asp',
 				dateModified: '2003-06-03 09:39:21',
-				date: '2003-06-03 09:39:21',
+				dateAdded: '2003-06-03 09:39:21',
 				creators: [{
 					firstName: '',
 					lastName: 'editor@example.com',
@@ -127,12 +131,13 @@ describe("Zotero.FeedReader", function () {
 		});
 		
 		it('should parse items correctly for a detailed feed', function* () {
-			let expected = { guid: 'http://www.example.com/item1',
+			let expected = {
+				guid: 'http://www.example.com/item1',
 				title: 'Title 1',
 				abstractNote: 'Description 1',
 				url: 'http://www.example.com/item1',
 				dateModified: '2016-01-07 00:00:00',
-				date: '2016-01-07',
+				dateAdded: '2016-01-07 00:00:00',
 				creators: [
 					{ firstName: 'Author1 A. T.', lastName: 'Rohtua', creatorType: 'author' },
 					{ firstName: 'Author2 A.', lastName: 'Auth', creatorType: 'author' },
@@ -141,6 +146,7 @@ describe("Zotero.FeedReader", function () {
 					{ firstName: 'Contributor2 C.', lastName: 'Contrib', creatorType: 'contributor' },
 					{ firstName: 'Contributor3', lastName: 'Contr', creatorType: 'contributor' }
 				],
+				date: '2016-01-07',
 				publicationTitle: 'Publication',
 				ISSN: '0000-0000',
 				publisher: 'Publisher',

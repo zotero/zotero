@@ -104,19 +104,27 @@ Zotero.FeedItems = new Proxy(function() {
 		
 		if (state == undefined) {
 			// If state undefined, toggle read if at least one unread
-			state = true;
+			state = false;
 			for (let item of items) {
-				if (item.isRead) {
-					state = false;
+				if (!item.isRead) {
+					state = true;
 					break;
 				}
 			}
 		}
 		
-		for (let i=0; i<items.length; i++) {
-			items[i].toggleRead(state);
-		}
+		yield Zotero.DB.executeTransaction(function() {
+			for (let i=0; i<items.length; i++) {
+				items[i].isRead = state;
+				yield items[i].save({skipEditCheck: true});
+			}
+		})
 	});
+	
+	this.forceErase = function(ids, options = {}) {
+		options.skipEditCheck = true;
+		return this.erase(ids, options);
+	};
 	
 	return this;
 }.call({}),

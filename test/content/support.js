@@ -305,6 +305,24 @@ var createGroup = Zotero.Promise.coroutine(function* (props = {}) {
 	return group;
 });
 
+var createFeed = Zotero.Promise.coroutine(function* (props = {}) {
+	var feed = new Zotero.Feed;
+	feed.name = props.name || "Test " + Zotero.Utilities.randomString();
+	feed.description = props.description || "";
+	feed.url = props.url || 'http://www.' + Zotero.Utilities.randomString() + '.com/feed.rss';
+	feed.refreshInterval = props.refreshInterval || 12;
+	feed.cleanupAfter = props.cleanupAfter || 2;
+	yield feed.saveTx();
+	return feed;
+});
+
+var clearFeeds = Zotero.Promise.coroutine(function* () {
+	let feeds = Zotero.Feeds.getAll();
+	for (let i=0; i<feeds.length; i++) {
+		yield feeds[i].eraseTx();
+	}
+});
+
 //
 // Data objects
 //
