@@ -1,11 +1,10 @@
 describe("Zotero.FeedItems", function () {
 	let feed;
-	before(function() {
-		feed = new Zotero.Feed({ name: 'foo', url: 'http://' + Zotero.randomString() + '.com' });
-		return feed.saveTx();
+	before(function* () {
+		feed = yield createFeed({ name: 'foo', url: 'http://' + Zotero.randomString() + '.com' });
 	});
 	after(function() {
-		return feed.eraseTx();
+		return clearFeeds();
 	});
 	
 	describe("#getIDFromGUID()", function() {
@@ -33,6 +32,66 @@ describe("Zotero.FeedItems", function () {
 		it("should return false for non-existent GUID", function* () {
 			let feedItem = yield Zotero.FeedItems.getAsyncByGUID(Zotero.randomString());
 			assert.isFalse(feedItem);
+		});
+	});
+	describe("#toggleReadByID()", function() {
+		var save, feed, items, ids;
+		
+		before(function() {
+			save = sinon.spy(Zotero.FeedItem.prototype, 'save');
+		});
+		
+		beforeEach(function* (){
+			feed = yield createFeed();
+
+			items = [];
+			for (let i = 0; i < 10; i++) {
+				let item = yield createDataObject('feedItem', { guid: Zotero.randomString(), libraryID: feed.id });
+				item.isRead = true;
+				yield item.forceSaveTx();
+				items.push(item);
+			}
+			ids = Array.map(items, (i) => i.id);
+		});
+		
+		after(function() {
+			save.restore();
+		});
+		
+		afterEach(function* () {
+			save.reset();
+			
+			yield clearFeeds();
+		});
+	
+		it('should toggle all items read if at least one unread', function* () {
+			items[0].isRead = false;
+			yield items[0].forceSaveTx();
+			
+			yield Zotero.FeedItems.toggleReadByID(ids);
+			
+			for(let i = 0; i < 10; i++) {
+				assert.isTrue(save.thisValues[i].isRead, "#toggleRead called with true");
+			}
+		});
+
+		it('should toggle all items unread if all read', function* () {
+			yield Zotero.FeedItems.toggleReadByID(ids);
+
+			for(let i = 0; i < 10; i++) {
+				assert.isFalse(save.thisValues[i].isRead, "#toggleRead called with false");
+			}
+		});
+
+		it('should toggle all items unread if unread state specified', function* () {
+			items[0].isRead = false;
+			yield items[0].forceSaveTx();
+
+			yield Zotero.FeedItems.toggleReadByID(ids, false);
+
+			for(let i = 0; i < 10; i++) {
+				assert.isFalse(save.thisValues[i].isRead, "#toggleRead called with true");
+			}
 		});
 	});
 });

@@ -118,8 +118,8 @@ Zotero.Feeds = new function() {
 		Zotero.debug("Scheduling next feed update.");
 		let sql = "SELECT ( CASE "
 			+ "WHEN lastCheck IS NULL THEN 0 "
-			+ "ELSE julianday(lastCheck, 'utc') + (refreshInterval/1440.0) - julianday('now', 'utc') "
-			+ "END ) * 1440 AS nextCheck "
+			+ "ELSE strftime('%s', lastCheck) + refreshInterval*3600 - strftime('%s', 'now') "
+			+ "END ) AS nextCheck "
 			+ "FROM feeds WHERE refreshInterval IS NOT NULL "
 			+ "ORDER BY nextCheck ASC LIMIT 1";
 		var nextCheck = yield Zotero.DB.valueQueryAsync(sql);
@@ -130,9 +130,9 @@ Zotero.Feeds = new function() {
 		}
 
 		if (nextCheck !== false) {
-			nextCheck = nextCheck > 0 ? Math.ceil(nextCheck * 60000) : 0;
-			Zotero.debug("Next feed check in " + nextCheck/60000 + " minutes");
-			this._nextFeedCheck = Zotero.Promise.delay(nextCheck).cancellable();
+			nextCheck = nextCheck > 0 ? nextCheck * 1000 : 0;
+			Zotero.debug("Next feed check in " + nextCheck / 60000 + " minutes");
+			this._nextFeedCheck = Zotero.Promise.delay(nextCheck);
 			Zotero.Promise.all([this._nextFeedCheck, globalFeedCheckDelay])
 			.then(() => {
 				globalFeedCheckDelay = Zotero.Promise.delay(60000); // Don't perform auto-updates more than once per minute
@@ -157,16 +157,12 @@ Zotero.Feeds = new function() {
 				+ "OR (julianday(lastCheck, 'utc') + (refreshInterval/1440.0) - julianday('now', 'utc')) <= 0 )";
 		let needUpdate = (yield Zotero.DB.queryAsync(sql)).map(row => row.id);
 		Zotero.debug("Running update for feeds: " + needUpdate.join(', '));
-		let feeds = Zotero.Libraries.get(needUpdate);
-		let updatePromises = [];
-		for (let i=0; i<feeds.length; i++) {
-			updatePromises.push(feeds[i]._updateFeed());
+		for (let i=0; i<needUpdate.length; i++) {
+			let feed = Zotero.Feeds.get(needUpdate[i]);
+			yield feed._updateFeed();
 		}
 		
-		return Zotero.Promise.settle(updatePromises)
-		.then(() => {
-			Zotero.debug("All feed updates done.");
-			this.scheduleNextFeedCheck()
-		});
+		Zotero.debug("All feed updates done.");
+		this.scheduleNextFeedCheck();
 	});
 }

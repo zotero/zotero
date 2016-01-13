@@ -860,8 +860,8 @@ var ZoteroPane = new function()
 			feed.url = data.url;
 			feed.name = data.title;
 			feed.refreshInterval = data.ttl;
-			feed.cleanupAfter = data.cleanAfter;
-			yield feed.save({skipEditCheck: true});
+			feed.cleanupAfter = data.cleanupAfter;
+			yield feed.saveTx();
 			yield feed.updateFeed();
 		}
 	});
@@ -1927,7 +1927,7 @@ var ZoteroPane = new function()
 		feed.name = data.title;
 		feed.refreshInterval = data.ttl;
 		feed.cleanupAfter = data.cleanAfter;
-		yield feed.save({skipEditCheck: true});
+		yield feed.saveTx();
 	});
 	
 	this.refreshFeed = function() {
@@ -4285,8 +4285,7 @@ var ZoteroPane = new function()
 		}
 		
 		let feedItem;
-		itemReadTimeout = Zotero.FeedItems.getAsync(feedItemID)
-		.cancellable()
+		itemReadTimeout = Zotero.FeedItems.getAsync(feedItemID) 
 		.then(function(newFeedItem) {
 			if (!newFeedItem) {
 				throw new Zotero.Promise.CancellationError('Not a FeedItem');

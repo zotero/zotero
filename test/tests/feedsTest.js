@@ -1,25 +1,9 @@
 describe("Zotero.Feeds", function () {
-	let createFeed = Zotero.Promise.coroutine(function* (props = {}) {
-		let feed = new Zotero.Feed({
-			name: props.name || 'Test ' + Zotero.randomString(),
-			url: props.url || 'http://www.' + Zotero.randomString() + '.com',
-			refreshInterval: props.refreshInterval,
-			cleanupAfter: props.cleanupAfter
-		});
-		
-		yield feed.saveTx();
-		return feed;
-	});
 	
-	let clearFeeds = Zotero.Promise.coroutine(function* () {
-		let feeds = Zotero.Feeds.getAll();
-		yield Zotero.DB.executeTransaction(function* () {
-			for (let i=0; i<feeds.length; i++) {
-				yield feeds[i].erase();
-			}
-		});
+	after(function* () {
+		yield clearFeeds();
 	});
-	
+
 	describe("#haveFeeds()", function() {
 		it("should return false for a DB without feeds", function* () {
 			yield clearFeeds();
@@ -56,4 +40,83 @@ describe("Zotero.Feeds", function () {
 			assert.sameMembers(feeds, [feed1, feed2]);
 		});
 	});
+	describe('#updateFeeds', function() {
+		var freshFeed, recentFeed, oldFeed;
+		var _updateFeed;
+	
+		before(function* () {
+			yield clearFeeds();
+		
+			sinon.stub(Zotero.Feeds, 'scheduleNextFeedCheck');
+			_updateFeed = sinon.stub(Zotero.Feed.prototype, '_updateFeed').resolves();
+			let url = getTestDataItemUrl("feed.rss");
+			
+			freshFeed = yield createFeed({refreshInterval: 2});
+			freshFeed._feedUrl = url;
+			freshFeed.lastCheck = null;
+			yield freshFeed.saveTx();
+			
+			recentFeed = yield createFeed({refreshInterval: 2});
+			recentFeed._feedUrl = url;
+			recentFeed.lastCheck = Zotero.Date.dateToSQL(new Date(), true);
+			yield recentFeed.saveTx();
+			
+			oldFeed = yield createFeed({refreshInterval: 2});
+			oldFeed._feedUrl = url;
+			oldFeed.lastCheck = Zotero.Date.dateToSQL(new Date(Date.now() - 1000*60*60*6), true);
+			yield oldFeed.saveTx();
+			
+			yield Zotero.Feeds.updateFeeds();
+			assert.isTrue(_updateFeed.called);
+		});
+		
+		after(function() {
+			Zotero.Feeds.scheduleNextFeedCheck.restore();
+			_updateFeed.restore();
+		});
+		
+		it('should update feeds that have never been updated', function() {
+			for (var feed of _updateFeed.thisValues) {
+				if (feed.id == freshFeed.id) {
+					break;
+				}
+			}
+			assert.isTrue(feed._updateFeed.called);
+		});
+		it('should update feeds that need updating since last check', function() {
+			for (var feed of _updateFeed.thisValues) {
+				if (feed.id == oldFeed.id) {
+					break;
+				}
+			}
+			assert.isTrue(feed._updateFeed.called);
+		});
+		it("should not update feeds that don't need updating", function() {
+			for (var feed of _updateFeed.thisValues) {
+				if (feed.id != recentFeed.id) {
+					break;
+				}
+				// should never reach
+				assert.isOk(null, "does not update feed that did not need updating")
+			}
+		});
+	});
+	describe('#scheduleNextFeedCheck()', function() {
+		it('schedules next feed check', function* () {
+			sinon.spy(Zotero.Feeds, 'scheduleNextFeedCheck');
+			sinon.spy(Zotero.Promise, 'delay');
+			
+			yield clearFeeds();
+			let feed = yield createFeed({refreshInterval: 1});
+			feed._set('_feedLastCheck', Zotero.Date.dateToSQL(new Date(), true));
+			yield feed.saveTx();
+
+			yield Zotero.Feeds.scheduleNextFeedCheck();
+			
+			assert.equal(Zotero.Promise.delay.args[0][0], 1000*60*60);
+			
+			Zotero.Feeds.scheduleNextFeedCheck.restore();
+			Zotero.Promise.delay.restore();
+		});
+	})
 })

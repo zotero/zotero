@@ -36,33 +36,15 @@ var Zotero_Feed_Settings = new function() {
 		urlTainted = false;
 	
 	let cleanURL = function(url) {
-		url = url.trim();
-		if (!url) return;
-		
-		let ios = Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService);
-		
-		let cleanUrl;
-		try {
-			let uri = ios.newURI(url, null, null);
-			if (uri.scheme != 'http' && uri.scheme != 'https') {
+		let cleanUrl = Zotero.Utilities.cleanURL(url, true);
+
+		if (cleanUrl) {
+			if (/^https?:\/\/[^\/\s]+\/\S/.test(cleanUrl)) {
+				return cleanUrl;
+			} else {
 				Zotero.debug(uri.scheme + " is not a supported protocol for feeds.");
 			}
-			
-			cleanUrl = uri.spec;
-		} catch (e) {
-			if (e.result == Components.results.NS_ERROR_MALFORMED_URI) {
-				// Assume it's a URL missing "http://" part
-				try {
-					cleanUrl = ios.newURI('http://' + url, null, null).spec;
-				} catch (e) {}
-			}
-			throw e;
 		}
-		
-		if (!cleanUrl) return;
-		
-		if (/^https?:\/\/[^\/\s]+\/\S/.test(cleanUrl)) return cleanUrl;
 	};
 	
 	this.init = function() {
@@ -93,9 +75,9 @@ var Zotero_Feed_Settings = new function() {
 		}
 		document.getElementById('feed-ttl').value = ttl;
 		
-		let cleanAfter = data.cleanAfter;
-		if (cleanAfter === undefined) cleanAfter = 2;
-		document.getElementById('feed-cleanAfter').value = cleanAfter;
+		let cleanupAfter = data.cleanupAfter;
+		if (cleanupAfter === undefined) cleanupAfter = 2;
+		document.getElementById('feed-cleanupAfter').value = cleanupAfter;
 		
 		if (data.url && !data.urlIsValid) {
 			this.validateUrl();
@@ -114,7 +96,7 @@ var Zotero_Feed_Settings = new function() {
 		urlIsValid = false;
 		document.getElementById('feed-title').disabled = true;
 		document.getElementById('feed-ttl').disabled = true;
-		document.getElementById('feed-cleanAfter').disabled = true;
+		document.getElementById('feed-cleanupAfter').disabled = true;
 		document.documentElement.getButton('accept').disabled = true;
 	};
 	
@@ -132,6 +114,8 @@ var Zotero_Feed_Settings = new function() {
 			let fr = feedReader = new Zotero.FeedReader(url);
 			yield fr.process();
 			let feed = fr.feedProperties;
+			// Prevent progress if textbox changes triggered another call to
+			// validateUrl / invalidateUrl (old session)
 			if (feedReader !== fr || urlTainted) return;
 			
 			let title = document.getElementById('feed-title');
@@ -149,7 +133,7 @@ var Zotero_Feed_Settings = new function() {
 			urlIsValid = true;
 			title.disabled = false;
 			ttl.disabled = false;
-			document.getElementById('feed-cleanAfter').disabled = false;
+			document.getElementById('feed-cleanupAfter').disabled = false;
 			document.documentElement.getButton('accept').disabled = false;
 		}
 		catch (e) {
@@ -164,7 +148,7 @@ var Zotero_Feed_Settings = new function() {
 		data.url = document.getElementById('feed-url').value;
 		data.title = document.getElementById('feed-title').value;
 		data.ttl = document.getElementById('feed-ttl').value * 60;
-		data.cleanAfter = document.getElementById('feed-cleanAfter').value * 1;
+		data.cleanupAfter = document.getElementById('feed-cleanupAfter').value * 1;
 		return true;
 	};
 	

@@ -292,6 +292,13 @@ describe("Zotero.CollectionTreeView", function() {
 				spy.restore();
 			}
 		})
+		
+		it("should select a new feed", function* () {
+			var feed = yield createFeed();
+			// Library should still be selected
+			assert.equal(cv.getSelectedLibraryID(), feed.id);
+		})
+		
 	})
 	
 	describe("#drop()", function () {

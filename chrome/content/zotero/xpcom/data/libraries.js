@@ -298,7 +298,7 @@ Zotero.Libraries = new function () {
 		this._ensureExists(libraryID);
 		return Zotero.Libraries.get(libraryID).filesEditable;
 	};
-
+	
 	/**
 	 * @deprecated
 	 * 

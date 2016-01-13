@@ -98,6 +98,7 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 		}
 		
 		this._treebox = treebox;
+		this.setSortColumn();
 		
 		if (this._ownerDocument.defaultView.ZoteroPane_Local) {
 			this._ownerDocument.defaultView.ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
@@ -257,6 +258,48 @@ Zotero.ItemTreeView.prototype.setTree = Zotero.Promise.coroutine(function* (tree
 		throw e;
 	}
 });
+
+
+Zotero.ItemTreeView.prototype.setSortColumn = function() {
+	var dir, col, currentCol, currentDir;
+	
+	for (let i=0, len=this._treebox.columns.count; i<len; i++) {
+		let column = this._treebox.columns.getColumnAt(i);
+		if (column.element.getAttribute('sortActive')) {
+			currentCol = column;
+			currentDir = column.element.getAttribute('sortDirection');
+			column.element.removeAttribute('sortActive');
+			column.element.removeAttribute('sortDirection');
+			break;
+		}
+	}
+	
+	let colId = Zotero.Prefs.get('itemTree.sortColumnId');
+	// Restore previous sort setting (feed -> non-feed)
+	if (! this.collectionTreeRow.isFeed() && colId) {
+		col = this._treebox.columns.getNamedColumn(colId);
+		dir = Zotero.Prefs.get('itemTree.sortDirection');
+		Zotero.Prefs.clear('itemTree.sortColumnId');
+		Zotero.Prefs.clear('itemTree.sortDirection');
+	// Sort Feeds by dateAdded (anything -> feed)
+	} else if (this.collectionTreeRow.isFeed()) {
+		col = this._treebox.columns.getNamedColumn("zotero-items-column-dateAdded");
+		dir = 'descending';
+		// No previous sort setting stored, so store it (non-feed -> feed)
+		if (!colId && currentCol) {
+			Zotero.Prefs.set('itemTree.sortColumnId', currentCol.id);
+			Zotero.Prefs.set('itemTree.sortDirection', currentDir);
+		}
+	// Retain current sort setting (non-feed -> non-feed)
+	} else {
+		col = currentCol;
+		dir = currentDir;
+	}
+	if (col) {
+		col.element.setAttribute('sortActive', true);
+		col.element.setAttribute('sortDirection', dir);
+	}
+}
 
 
 /**
