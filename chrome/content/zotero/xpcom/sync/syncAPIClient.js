@@ -170,6 +170,10 @@ Zotero.Sync.APIClient.prototype = {
 			format: 'versions'
 		};
 		if (queryParams) {
+			if (queryParams.top) {
+				params.target += "/top";
+				delete queryParams.top;
+			}
 			for (let i in queryParams) {
 				params[i] = queryParams[i];
 			}

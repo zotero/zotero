@@ -453,7 +453,8 @@ Zotero.Sync.Data.Local = {
 						let jsonData = json.data;
 						let objectKey = json.key;
 						
-						Zotero.debug(`Processing ${objectType} ${libraryID}/${objectKey}`);
+						Zotero.debug(`Processing ${objectType} ${libraryID}/${objectKey} `
+							+ "from sync cache");
 						Zotero.debug(json);
 						
 						if (!jsonData) {

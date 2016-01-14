@@ -215,64 +215,33 @@ Zotero.Sync.Data.Engine.prototype._startDownload = Zotero.Promise.coroutine(func
 			this._failedCheck();
 			this._processCache(objectType);
 			
-			let objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
-			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
-			
-			// Get versions of all objects updated remotely since the current local library version
-			Zotero.debug("Checking for updated " + objectTypePlural + " in " + this.library.name);
-			let results = yield this.apiClient.getVersions(
-				this.library.libraryType,
-				this.libraryTypeID,
-				objectType,
-				libraryVersion ? { since: libraryVersion } : undefined
-			);
-			
-			Zotero.debug("VERSIONS:");
-			Zotero.debug(JSON.stringify(results));
-			
-			if (lastLibraryVersion) {
-				// If something else modified the remote library while we were getting updates,
-				// wait for increasing amounts of time before trying again, and then start from
-				// the beginning
-				if (lastLibraryVersion != results.libraryVersion) {
-					Zotero.logError("Library version changed since last download -- restarting sync");
-					let keepGoing = yield gen.next();
-					if (!keepGoing) {
-						throw new Error("Could not update " + this.library.name + " -- library in use");
+			// For items, fetch top-level items first
+			//
+			// The next run will then see the same items in the non-top versions request,
+			// but they'll have been downloaded already and will be skipped.
+			if (objectType == 'item') {
+				let result = yield this._downloadUpdatedObjects(
+					objectType,
+					libraryVersion,
+					lastLibraryVersion,
+					gen,
+					{
+						top: true
 					}
+				);
+				if (result == -1) {
 					continue loop;
 				}
 			}
-			else {
-				lastLibraryVersion = results.libraryVersion;
-			}
 			
-			var numObjects = Object.keys(results.versions).length;
-			if (!numObjects) {
-				Zotero.debug("No " + objectTypePlural + " modified remotely since last check");
-				continue;
-			}
-			Zotero.debug(numObjects + " " + (numObjects == 1 ? objectType : objectTypePlural)
-				+ " modified since last check");
-			
-			let keys = [];
-			let versions = yield Zotero.Sync.Data.Local.getLatestCacheObjectVersions(
-				objectType, this.libraryID, Object.keys(results.versions)
+			let result = yield this._downloadUpdatedObjects(
+				objectType,
+				libraryVersion,
+				lastLibraryVersion,
+				gen
 			);
-			for (let key in results.versions) {
-				// Skip objects that are already up-to-date in the sync cache. Generally all returned
-				// objects should have newer version numbers, but there are some situations, such as
-				// full syncs or interrupted syncs, where we may get versions for objects that are
-				// already up-to-date locally.
-				if (versions[key] == results.versions[key]) {
-					Zotero.debug("Skipping up-to-date " + objectType + " " + this.libraryID + "/" + key);
-					continue;
-				}
-				keys.push(key);
-			}
-			
-			if (keys.length) {
-				yield this._downloadObjects(objectType, keys);
+			if (result == -1) {
+				continue loop;
 			}
 		}
 		
@@ -458,6 +427,76 @@ Zotero.Sync.Data.Engine.prototype._downloadSettings = Zotero.Promise.coroutine(f
 	}
 	return results.libraryVersion;
 })
+
+
+/**
+ * @return {Boolean|Integer} - True if objects downloaded, false if none, or -1 to restart sync
+ *     if library version has changed
+ */
+Zotero.Sync.Data.Engine.prototype._downloadUpdatedObjects = Zotero.Promise.coroutine(function* (objectType, libraryVersion, lastLibraryVersion, delayGenerator, options = {}) {
+	var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
+	
+	// Get versions of all objects updated remotely since the current local library version
+	Zotero.debug("Checking for updated " + objectTypePlural + " in " + this.library.name);
+	var queryParams = {};
+	if (libraryVersion) {
+		queryParams.since = libraryVersion;
+	}
+	if (options.top) {
+		queryParams.top = true;
+	}
+	var results = yield this.apiClient.getVersions(
+		this.library.libraryType,
+		this.libraryTypeID,
+		objectType,
+		queryParams
+	);
+	
+	Zotero.debug("VERSIONS:");
+	Zotero.debug(JSON.stringify(results));
+	
+	// If something else modified the remote library while we were getting updates,
+	// wait for increasing amounts of time before trying again, and then start from
+	// the beginning
+	if (lastLibraryVersion != results.libraryVersion) {
+		Zotero.logError("Library version changed since last download -- restarting sync");
+		let keepGoing = yield delayGenerator.next();
+		if (!keepGoing) {
+			throw new Error("Could not update " + this.library.name + " -- library in use");
+		}
+		return -1;
+	}
+	
+	var numObjects = Object.keys(results.versions).length;
+	if (!numObjects) {
+		Zotero.debug("No " + objectTypePlural + " modified remotely since last check");
+		return false;
+	}
+	Zotero.debug(numObjects + " " + (numObjects == 1 ? objectType : objectTypePlural)
+		+ " modified since last check");
+	
+	let keys = [];
+	let versions = yield Zotero.Sync.Data.Local.getLatestCacheObjectVersions(
+		objectType, this.libraryID, Object.keys(results.versions)
+	);
+	for (let key in results.versions) {
+		// Skip objects that are already up-to-date in the sync cache. Generally all returned
+		// objects should have newer version numbers, but there are some situations, such as
+		// full syncs or interrupted syncs, where we may get versions for objects that are
+		// already up-to-date locally.
+		if (versions[key] == results.versions[key]) {
+			Zotero.debug("Skipping up-to-date " + objectType + " " + this.libraryID + "/" + key);
+			continue;
+		}
+		keys.push(key);
+	}
+	if (!keys.length) {
+		return false;
+	}
+	
+	yield this._downloadObjects(objectType, keys);
+	return true;
+});
 
 
 Zotero.Sync.Data.Engine.prototype._downloadObjects = Zotero.Promise.coroutine(function* (objectType, keys) {

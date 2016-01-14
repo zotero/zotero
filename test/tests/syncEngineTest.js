@@ -152,11 +152,21 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: "users/1/items?format=versions&includeTrashed=1",
+				url: "users/1/items/top?format=versions&includeTrashed=1",
 				status: 200,
 				headers: headers,
 				json: {
 					"AAAAAAAA": 3
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/items?format=versions&includeTrashed=1",
+				status: 200,
+				headers: headers,
+				json: {
+					"AAAAAAAA": 3,
+					"BBBBBBBB": 3
 				}
 			});
 			setResponse({
@@ -201,6 +211,21 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
+				url: "users/1/items?format=json&itemKey=BBBBBBBB&includeTrashed=1",
+				status: 200,
+				headers: headers,
+				json: [
+					makeItemJSON({
+						key: "BBBBBBBB",
+						version: 3,
+						itemType: "note",
+						parentItem: "AAAAAAAA",
+						note: "This is a note."
+					})
+				]
+			});
+			setResponse({
+				method: "GET",
 				url: "users/1/deleted?since=0",
 				status: 200,
 				headers: headers,
@@ -233,6 +258,13 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			obj = yield Zotero.Items.getByLibraryAndKeyAsync(userLibraryID, "AAAAAAAA");
 			assert.equal(obj.getField('title'), 'A');
+			assert.equal(obj.version, 3);
+			assert.isTrue(obj.synced);
+			var parentItemID = obj.id;
+			
+			obj = yield Zotero.Items.getByLibraryAndKeyAsync(userLibraryID, "BBBBBBBB");
+			assert.equal(obj.getNote(), 'This is a note.');
+			assert.equal(obj.parentItemID, parentItemID);
 			assert.equal(obj.version, 3);
 			assert.isTrue(obj.synced);
 		})
@@ -682,6 +714,15 @@ describe("Zotero.Sync.Data.Engine", function () {
 			json[objects.item.key] = 5;
 			setResponse({
 				method: "GET",
+				url: "users/1/items/top?format=versions&includeTrashed=1",
+				status: 200,
+				headers: headers,
+				json: json
+			});
+			json = {};
+			json[objects.item.key] = 5;
+			setResponse({
+				method: "GET",
 				url: "users/1/items?format=versions&includeTrashed=1",
 				status: 200,
 				headers: headers,
@@ -747,6 +788,13 @@ describe("Zotero.Sync.Data.Engine", function () {
 			setResponse({
 				method: "GET",
 				url: "users/1/items?format=versions&since=5&includeTrashed=1",
+				status: 200,
+				headers: headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/items/top?format=versions&since=5&includeTrashed=1",
 				status: 200,
 				headers: headers,
 				json: {}
@@ -828,6 +876,13 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			setResponse({
 				method: "GET",
+				url: "users/1/items/top?format=versions&since=5&includeTrashed=1",
+				status: 200,
+				headers: headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
 				url: "users/1/items?format=versions&since=5&includeTrashed=1",
 				status: 200,
 				headers: headers,
@@ -891,6 +946,13 @@ describe("Zotero.Sync.Data.Engine", function () {
 			setResponse({
 				method: "GET",
 				url: "users/1/searches?format=versions&since=5",
+				status: 200,
+				headers: headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/items/top?format=versions&since=5&includeTrashed=1",
 				status: 200,
 				headers: headers,
 				json: {}
