@@ -121,7 +121,7 @@ Zotero.HTTP = new function() {
 			Zotero.debug("HTTP " + method + " " + dispURL);
 		}
 		
-		if (this.browserIsOffline()) {
+		if (url.startsWith('http') && this.browserIsOffline()) {
 			Zotero.debug("HTTP " + method + " " + dispURL + " failed: Browser is offline");
 			throw new this.BrowserOfflineException();
 		}
