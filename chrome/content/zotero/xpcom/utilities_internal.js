@@ -96,7 +96,7 @@ Zotero.Utilities.Internal = {
 		}
 		
 		// convert the binary hash data to a hex string.
-		var hexStr;
+		var hexStr = "";
 		for (let i = 0; i < hash.length; i++) {
 			hexStr += toHexString(hash.charCodeAt(i));
 		}
