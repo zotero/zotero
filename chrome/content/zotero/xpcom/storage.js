@@ -1841,7 +1841,7 @@ Zotero.Sync.Storage = new function () {
 		
 		// Get files by open time
 		itemIDs = itemIDs.concat(
-			_uploadCheckFiles.filter(item => item.timestamp >= minTime).map(item => item.id)
+			_uploadCheckFiles.filter(file => file.timestamp >= minTime).map(file => file.itemID)
 		);
 		
 		return Zotero.Utilities.arrayUnique(itemIDs);
