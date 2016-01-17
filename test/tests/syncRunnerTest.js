@@ -456,6 +456,15 @@ describe("Zotero.Sync.Runner", function () {
 			});
 			setResponse({
 				method: "GET",
+				url: "users/1/items/top?format=versions&includeTrashed=1",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 5
+				},
+				json: []
+			});
+			setResponse({
+				method: "GET",
 				url: "users/1/items?format=versions&includeTrashed=1",
 				status: 200,
 				headers: {
@@ -476,6 +485,15 @@ describe("Zotero.Sync.Runner", function () {
 			setResponse({
 				method: "GET",
 				url: "users/1/publications/settings",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 10
+				},
+				json: []
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/publications/items/top?format=versions&includeTrashed=1",
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 10
@@ -530,6 +548,15 @@ describe("Zotero.Sync.Runner", function () {
 			});
 			setResponse({
 				method: "GET",
+				url: "groups/1623562/items/top?format=versions&includeTrashed=1",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 15
+				},
+				json: []
+			});
+			setResponse({
+				method: "GET",
 				url: "groups/1623562/items?format=versions&includeTrashed=1",
 				status: 200,
 				headers: {
@@ -568,6 +595,15 @@ describe("Zotero.Sync.Runner", function () {
 			setResponse({
 				method: "GET",
 				url: "groups/2694172/searches?format=versions",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 20
+				},
+				json: []
+			});
+			setResponse({
+				method: "GET",
+				url: "groups/2694172/items/top?format=versions&includeTrashed=1",
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 20

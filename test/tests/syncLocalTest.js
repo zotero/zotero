@@ -23,6 +23,11 @@ describe("Zotero.Sync.Data.Local", function() {
 	
 	describe("#getLatestCacheObjectVersions", function () {
 		before(function* () {
+			yield resetDB({
+				thisArg: this,
+				skipBundledFiles: true
+			});
+			
 			yield Zotero.Sync.Data.Local.saveCacheObjects(
 				'item',
 				Zotero.Libraries.userLibraryID,
@@ -86,6 +91,13 @@ describe("Zotero.Sync.Data.Local", function() {
 	
 	describe("#processSyncCacheForObjectType()", function () {
 		var types = Zotero.DataObjectUtilities.getTypes();
+		
+		before(function* () {
+			yield resetDB({
+				thisArg: this,
+				skipBundledFiles: true
+			});
+		})
 		
 		it("should update local version number and mark as synced if remote version is identical", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
