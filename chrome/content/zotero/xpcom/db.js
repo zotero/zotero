@@ -72,13 +72,12 @@ Zotero.DBConnection = function(dbName) {
 	// Private members
 	this._dbName = dbName;
 	this._shutdown = false;
-	this._connectionAsync = null;
+	this._connection = null;
 	this._transactionID = null;
 	this._transactionDate = null;
 	this._lastTransactionDate = null;
 	this._transactionRollback = false;
 	this._transactionNestingLevel = 0;
-	this._asyncTransactionNestingLevel = 0;
 	this._callbacks = {
 		begin: [],
 		commit: [],
@@ -89,7 +88,6 @@ Zotero.DBConnection = function(dbName) {
 		}
 	};
 	this._dbIsCorrupt = null
-	this._self = this;
 	
 	this._transactionPromise = null;
 }
@@ -610,16 +608,13 @@ Zotero.DBConnection.prototype.requireTransaction = function () {
  *                         rows are Proxy objects that return values from the
  *                         underlying mozIStorageRows based on column names.
  */
-Zotero.DBConnection.prototype.queryAsync = function (sql, params, options) {
-	let conn;
-	let self = this;
-	let onRow = null;
-	return this._getConnectionAsync(options)
-	.then(function (c) {
-		conn = c;
-		[sql, params] = self.parseQueryAndParams(sql, params);
+Zotero.DBConnection.prototype.queryAsync = Zotero.Promise.coroutine(function* (sql, params, options) {
+	try {
+		let onRow = null;
+		let conn = this._getConnection(options) || (yield this._getConnectionAsync(options));
+		[sql, params] = this.parseQueryAndParams(sql, params);
 		if (Zotero.Debug.enabled) {
-			self.logQuery(sql, params, options);
+			this.logQuery(sql, params, options);
 		}
 		if (options && options.onRow) {
 			// Errors in onRow don't stop the query unless StopIteration is thrown
@@ -638,11 +633,9 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params, options) {
 				}
 			}
 		}
-		return conn.executeCached(sql, params, onRow);
-	})
-	.then(function (rows) {
+		let rows = yield conn.executeCached(sql, params, onRow);
 		// Parse out the SQL command being used
-		var op = sql.match(/^[^a-z]*[^ ]+/i);
+		let op = sql.match(/^[^a-z]*[^ ]+/i);
 		if (op) {
 			op = op.toString().toLowerCase();
 		}
@@ -681,8 +674,8 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params, options) {
 			// returning it for SELECT and REPLACE queries
 			return;
 		}
-	})
-	.catch(function (e) {
+	}
+	catch (e) {
 		if (e.errors && e.errors[0]) {
 			var eStr = e + "";
 			eStr = eStr.indexOf("Error: ") == 0 ? eStr.substr(7): e;
@@ -693,8 +686,8 @@ Zotero.DBConnection.prototype.queryAsync = function (sql, params, options) {
 		else {
 			throw e;
 		}
-	});
-};
+	}
+});
 
 
 Zotero.DBConnection.prototype.queryTx = function (sql, params, options) {
@@ -711,20 +704,17 @@ Zotero.DBConnection.prototype.queryTx = function (sql, params, options) {
  * @param {Array|String|Integer} [params]  SQL parameters to bind
  * @return {Promise<Array|Boolean>}  A promise for either the value or FALSE if no result
  */
-Zotero.DBConnection.prototype.valueQueryAsync = function (sql, params) {
-	let self = this;
-	return this._getConnectionAsync()
-	.then(function (conn) {
-		[sql, params] = self.parseQueryAndParams(sql, params);
+Zotero.DBConnection.prototype.valueQueryAsync = Zotero.Promise.coroutine(function* (sql, params, options = {}) {
+	try {
+		let conn = this._getConnection(options) || (yield this._getConnectionAsync(options));
+		[sql, params] = this.parseQueryAndParams(sql, params);
 		if (Zotero.Debug.enabled) {
-			self.logQuery(sql, params);
+			this.logQuery(sql, params);
 		}
-		return conn.executeCached(sql, params);
-	})
-	.then(function (rows) {
+		let rows = yield conn.executeCached(sql, params);
 		return rows.length ? rows[0].getResultByIndex(0) : false;
-	})
-	.catch(function (e) {
+	}
+	catch (e) {
 		if (e.errors && e.errors[0]) {
 			var eStr = e + "";
 			eStr = eStr.indexOf("Error: ") == 0 ? eStr.substr(7): e;
@@ -735,8 +725,8 @@ Zotero.DBConnection.prototype.valueQueryAsync = function (sql, params) {
 		else {
 			throw e;
 		}
-	});
-};
+	}
+});
 
 
 /**
@@ -757,26 +747,21 @@ Zotero.DBConnection.prototype.rowQueryAsync = function (sql, params) {
  * @param {Array|String|Integer} [params] SQL parameters to bind
  * @return {Promise<Array>}  A promise for an array of values in the column
  */
-Zotero.DBConnection.prototype.columnQueryAsync = function (sql, params) {
-	let conn;
-	let self = this;
-	return this._getConnectionAsync().
-	then(function (c) {
-		conn = c;
-		[sql, params] = self.parseQueryAndParams(sql, params);
+Zotero.DBConnection.prototype.columnQueryAsync = Zotero.Promise.coroutine(function* (sql, params, options = {}) {
+	try {
+		let conn = this._getConnection(options) || (yield this._getConnectionAsync(options));
+		[sql, params] = this.parseQueryAndParams(sql, params);
 		if (Zotero.Debug.enabled) {
-			self.logQuery(sql, params);
+			this.logQuery(sql, params);
 		}
-		return conn.executeCached(sql, params);
-	})
-	.then(function (rows) {
+		let rows = yield conn.executeCached(sql, params);
 		var column = [];
 		for (let i=0, len=rows.length; i<len; i++) {
 			column.push(rows[i].getResultByIndex(0));
 		}
 		return column;
-	})
-	.catch(function (e) {
+	}
+	catch (e) {
 		if (e.errors && e.errors[0]) {
 			var eStr = e + "";
 			eStr = eStr.indexOf("Error: ") == 0 ? eStr.substr(7): e;
@@ -787,8 +772,8 @@ Zotero.DBConnection.prototype.columnQueryAsync = function (sql, params) {
 		else {
 			throw e;
 		}
-	});
-};
+	}
+});
 
 
 Zotero.DBConnection.prototype.logQuery = function (sql, params, options) {
@@ -916,11 +901,11 @@ Zotero.DBConnection.prototype.checkException = function (e) {
  *     allowing code to re-open the database again
  */
 Zotero.DBConnection.prototype.closeDatabase = Zotero.Promise.coroutine(function* (permanent) {
-	if (this._connectionAsync) {
+	if (this._connection) {
 		Zotero.debug("Closing database");
-		yield this._connectionAsync.close();
-		this._connectionAsync = undefined;
-		this._connectionAsync = permanent ? false : null;
+		yield this._connection.close();
+		this._connection = undefined;
+		this._connection = permanent ? false : null;
 		Zotero.debug("Database closed");
 	}
 });
@@ -1135,10 +1120,10 @@ Zotero.DBConnection.prototype._getConnection = function (options) {
 	if (this._backupPromise && this._backupPromise.isPending() && (!options || !options.inBackup)) {
 		return false;
 	}
-	if (this._connectionAsync === false) {
+	if (this._connection === false) {
 		throw new Error("Database permanently closed; not re-opening");
 	}
-	return this._connectionAsync || false;
+	return this._connection || false;
 }
 
 /*
@@ -1151,10 +1136,10 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 		yield this._backupPromise;
 	}
 	
-	if (this._connectionAsync) {
-		return this._connectionAsync;
+	if (this._connection) {
+		return this._connection;
 	}
-	else if (this._connectionAsync === false) {
+	else if (this._connection === false) {
 		throw new Error("Database permanently closed; not re-opening");
 	}
 	
@@ -1176,7 +1161,7 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 				name: 'NS_ERROR_FILE_CORRUPTED'
 			};
 		}
-		this._connectionAsync = yield Zotero.Promise.resolve(this.Sqlite.openConnection({
+		this._connection = yield Zotero.Promise.resolve(this.Sqlite.openConnection({
 			path: file.path
 		}));
 	}
@@ -1195,7 +1180,7 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 				
 				// Create new main database
 				var file = Zotero.getZoteroDatabase(this._dbName);
-				this._connectionAsync = store.openDatabase(file);
+				this._connection = store.openDatabase(file);
 				
 				if (corruptMarker.exists()) {
 					corruptMarker.remove(null);
@@ -1213,7 +1198,7 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 			// Test the backup file
 			try {
 				Zotero.debug("Asynchronously opening DB connection");
-				this._connectionAsync = yield Zotero.Promise.resolve(this.Sqlite.openConnection({
+				this._connection = yield Zotero.Promise.resolve(this.Sqlite.openConnection({
 					path: backupFile.path
 				}));
 			}
@@ -1221,7 +1206,7 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 			catch (e) {
 				// Create new main database
 				var file = Zotero.getZoteroDatabase(this._dbName);
-				this._connectionAsync = yield Zotero.Promise.resolve(this.Sqlite.openConnection({
+				this._connection = yield Zotero.Promise.resolve(this.Sqlite.openConnection({
 					path: file.path
 				}));
 				
@@ -1234,7 +1219,7 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 				break catchBlock;
 			}
 			
-			this._connectionAsync = undefined;
+			this._connection = undefined;
 			
 			// Copy backup file to main DB file
 			this._debug("Restoring database '" + this._dbName + "' from backup file", 1);
@@ -1249,7 +1234,7 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 			// Open restored database
 			var file = Zotero.getZoteroDirectory();
 			file.append(fileName);
-			this._connectionAsync = yield Zotero.Promise.resolve(this.Sqlite.openConnection({
+			this._connection = yield Zotero.Promise.resolve(this.Sqlite.openConnection({
 				path: file.path
 			}));
 			this._debug('Database restored', 1);
@@ -1292,7 +1277,7 @@ Zotero.DBConnection.prototype._getConnectionAsync = Zotero.Promise.coroutine(fun
 	idleService.addIdleObserver(this, 60);
 	idleService = null;
 	
-	return this._connectionAsync;
+	return this._connection;
 });
 
 

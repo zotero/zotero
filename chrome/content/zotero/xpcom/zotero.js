@@ -833,7 +833,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 		}
 	}
 	
-	this.shutdown = function() {
+	this.shutdown = Zotero.Promise.coroutine(function* () {
 		Zotero.debug("Shutting down Zotero");
 		
 		try {
@@ -841,7 +841,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			Zotero.closing = true;
 			
 			// run shutdown listener
-			for each(var listener in _shutdownListeners) {
+			for (let listener of _shutdownListeners) {
 				try {
 					listener();
 				} catch(e) {
@@ -852,20 +852,18 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			// remove temp directory
 			Zotero.removeTempDirectory();
 			
-			if (Zotero.DB && Zotero.DB._connectionAsync) {
+			if (Zotero.DB) {
 				// close DB
-				return Zotero.DB.closeDatabase(true).then(function() {				
-					// broadcast that DB lock has been released
-					Zotero.IPC.broadcast("lockReleased");
-				});
+				yield Zotero.DB.closeDatabase(true)
+				
+				// broadcast that DB lock has been released
+				Zotero.IPC.broadcast("lockReleased");
 			}
-			
-			return Zotero.Promise.resolve();
 		} catch(e) {
-			Zotero.debug(e);
-			return Zotero.Promise.reject(e);
+			Zotero.logError(e);
+			throw e;
 		}
-	}
+	});
 	
 	
 	function getProfileDirectory(){
