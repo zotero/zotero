@@ -776,7 +776,7 @@ Zotero.DBConnection.prototype.columnQueryAsync = Zotero.Promise.coroutine(functi
 });
 
 
-Zotero.DBConnection.prototype.logQuery = function (sql, params, options) {
+Zotero.DBConnection.prototype.logQuery = function (sql, params = [], options) {
 	if (options && options.debug === false) return;
 	var msg = sql;
 	if (params.length) {

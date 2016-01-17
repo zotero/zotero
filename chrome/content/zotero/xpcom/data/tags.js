@@ -101,37 +101,36 @@ Zotero.Tags = new function() {
 	 *
 	 * @param {Zotero.Search} search
 	 * @param {Array} [types] Array of tag types to fetch
-	 * @param {String|Promise<String>} [tmpTable] Temporary table with items to use
+	 * @return {Promise<Object>}  Promise for object with tag data in API JSON format, keyed by tagID
 	 */
 	this.getAllWithinSearch = Zotero.Promise.coroutine(function* (search, types) {
-		// Save search results to temporary table, if one isn't provided
-		var tmpTable = yield search.search(true);
-		if (!tmpTable) {
-			return {};
-		}
-		return this.getAllWithinSearchResults(tmpTable, types);
+		var ids = yield search.search();
+		return this.getAllWithinItemsList(ids, types);
 	});
 	
 	
-	/**
-	 * Get all tags within the items of a temporary table of search results
-	 *
-	 * @param {String} tmpTable  Temporary table with items to use
-	 * @param {Array} [types]  Array of tag types to fetch
-	 * @return {Promise<Object>}  Promise for object with tag data in API JSON format, keyed by tagID
-	 */
-	this.getAllWithinSearchResults = Zotero.Promise.coroutine(function* (tmpTable, types) {
-		var sql = "SELECT DISTINCT name AS tag, type FROM itemTags "
-			+ "JOIN tags USING (tagID) WHERE itemID IN "
-			+ "(SELECT itemID FROM " + tmpTable + ") ";
-		if (types) {
-			sql += "AND type IN (" + types.join() + ") ";
+	this.getAllWithinItemsList = Zotero.Promise.coroutine(function* (ids, types) {
+		if (!Array.isArray(ids)) {
+			throw new Error("ids must be an array");
 		}
-		var rows = yield Zotero.DB.queryAsync(sql);
+		if (!ids.length) {
+			return {};
+		}
 		
-		if(!tmpTable) {
-			yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
+		var prefix = "SELECT DISTINCT name AS tag, type FROM itemTags "
+			+ "JOIN tags USING (tagID) WHERE itemID IN "
+			+ "(";
+		var suffix = ") ";
+		if (types) {
+			suffix += "AND type IN (" + types.join() + ") ";
 		}
+		// Don't include ids in debug output
+		Zotero.DB.logQuery(`${prefix}[...${ids.length}]${suffix}`);
+		var rows = yield Zotero.DB.queryAsync(
+			prefix + ids.map(id => parseInt(id)).join(",") + suffix,
+			false,
+			{ debug: false }
+		);
 		
 		return rows.map((row) => this.cleanData(row));
 	});
