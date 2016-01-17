@@ -319,6 +319,9 @@ function createUnsavedDataObject(objectType, params = {}) {
 		if (params.title !== undefined || params.setTitle) {
 			obj.setField('title', params.title !== undefined ? params.title : Zotero.Utilities.randomString());
 		}
+		if (params.collections !== undefined) {
+			obj.setCollections(params.collections);
+		}
 		break;
 	
 	case 'collection':

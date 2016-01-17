@@ -13,6 +13,31 @@ describe("Zotero.Collection", function() {
 		});
 	})
 	
+	describe("#erase()", function () {
+		it("should delete a collection but not its descendant item by default", function* () {
+			var collection = yield createDataObject('collection');
+			var item = yield createDataObject('item', { collections: [collection.id] });
+			assert.isTrue(collection.hasItem(item.id));
+			
+			yield collection.eraseTx();
+			
+			assert.isFalse((yield Zotero.Items.getAsync(item.id)).deleted);
+		})
+		
+		it("should delete a collection and trash its descendant items with deleteItems: true", function* () {
+			var collection = yield createDataObject('collection');
+			var item1 = yield createDataObject('item', { collections: [collection.id] });
+			var item2 = yield createDataObject('item', { collections: [collection.id] });
+			assert.isTrue(collection.hasItem(item1.id));
+			assert.isTrue(collection.hasItem(item2.id));
+			
+			yield collection.eraseTx({ deleteItems: true });
+			
+			assert.isTrue((yield Zotero.Items.getAsync(item1.id)).deleted);
+			assert.isTrue((yield Zotero.Items.getAsync(item2.id)).deleted);
+		})
+	})
+	
 	describe("#version", function () {
 		it("should set object version", function* () {
 			var version = 100;

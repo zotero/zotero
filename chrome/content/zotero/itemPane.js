@@ -179,7 +179,7 @@ var ZoteroItemPane = new function() {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
 		if (ps.confirm(null, '', Zotero.getString('pane.item.notes.delete.confirm'))) {
-			Zotero.Items.trash(id);
+			Zotero.Items.trashTx(id);
 		}
 	}
 	

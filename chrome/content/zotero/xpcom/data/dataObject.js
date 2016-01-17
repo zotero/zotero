@@ -1136,13 +1136,15 @@ Zotero.DataObject.prototype.updateSynced = Zotero.Promise.coroutine(function* (s
  * Delete object from database
  *
  * @param {Object} [options]
+ * @param {Boolean} [options.deleteItems] - Move descendant items to trash (Collection only)
  * @param {Boolean} [options.skipDeleteLog] - Don't add to sync delete log
  */
-Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* (options) {
-	options = options || {};
-	var env = {
-		options: options
-	};
+Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* (options = {}) {
+	if (!options || typeof options != 'object') {
+		throw new Error("'options' must be an object");
+	}
+	
+	var env = { options };
 	
 	if (!env.options.tx && !Zotero.DB.inTransaction()) {
 		Zotero.logError("erase() called on Zotero." + this._ObjectType + " without a wrapping "

@@ -35,7 +35,7 @@ describe("Zotero.DataObjectUtilities", function() {
 					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
 					assert.lengthOf(changes, 0);
 					
-					yield Zotero.Items.erase(id1, id2);
+					yield Zotero.Items.erase([id1, id2]);
 				})
 				
 				it("should not show empty strings as different", function () {

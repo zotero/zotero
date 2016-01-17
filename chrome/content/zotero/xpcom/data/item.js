@@ -148,6 +148,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'parentItemKey', {
 	set: function(val) this.parentKey = val
 });
 
+
 Zotero.defineProperty(Zotero.Item.prototype, 'firstCreator', {
 	get: function() this._firstCreator
 });

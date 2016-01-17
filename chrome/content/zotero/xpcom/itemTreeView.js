@@ -1797,7 +1797,7 @@ Zotero.ItemTreeView.prototype.deleteSelection = Zotero.Promise.coroutine(functio
 		Zotero.Items.erase(ids);
 	}
 	else if (collectionTreeRow.isLibrary(true) || force) {
-		Zotero.Items.trash(ids);
+		Zotero.Items.trashTx(ids);
 	}
 	else if (collectionTreeRow.isCollection()) {
 		collectionTreeRow.ref.removeItems(ids);

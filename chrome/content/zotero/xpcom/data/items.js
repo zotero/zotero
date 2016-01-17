@@ -492,32 +492,39 @@ Zotero.Items = function() {
 	};
 	
 	
-	this.trash = function (ids) {
+	this.trash = Zotero.Promise.coroutine(function* (ids) {
+		Zotero.DB.requireTransaction();
+		
 		ids = Zotero.flattenArguments(ids);
 		
-		return Zotero.DB.executeTransaction(function* () {
-			for (let i=0; i<ids.length; i++) {
-				let id = ids[i];
-				let item = yield this.getAsync(id);
-				if (!item) {
-					Zotero.debug('Item ' + id + ' does not exist in Items.trash()!', 1);
-					Zotero.Notifier.queue('delete', 'item', id);
-					continue;
-				}
-				
-				if (!item.isEditable()) {
-					throw new Error(item._ObjectType + " " + item.libraryKey + " is not editable");
-				}
-				
-				if (!Zotero.Libraries.hasTrash(item.libraryID)) {
-					throw new Error(Zotero.Libraries.getName(item.libraryID) + " does not have Trash");
-				}
-				
-				item.deleted = true;
-				yield item.save({
-					skipDateModifiedUpdate: true
-				});
+		for (let i=0; i<ids.length; i++) {
+			let id = ids[i];
+			let item = yield this.getAsync(id);
+			if (!item) {
+				Zotero.debug('Item ' + id + ' does not exist in Items.trash()!', 1);
+				Zotero.Notifier.queue('delete', 'item', id);
+				continue;
 			}
+			
+			if (!item.isEditable()) {
+				throw new Error(item._ObjectType + " " + item.libraryKey + " is not editable");
+			}
+			
+			if (!Zotero.Libraries.hasTrash(item.libraryID)) {
+				throw new Error(Zotero.Libraries.getName(item.libraryID) + " does not have Trash");
+			}
+			
+			item.deleted = true;
+			yield item.save({
+				skipDateModifiedUpdate: true
+			});
+		}
+	});
+	
+	
+	this.trashTx = function (ids) {
+		return Zotero.DB.executeTransaction(function* () {
+			return this.trash(ids);
 		}.bind(this));
 	}
 	
