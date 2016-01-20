@@ -345,7 +345,7 @@ Zotero.DBConnection.prototype.rollbackAllTransactions = function () {
 Zotero.DBConnection.prototype.getColumns = function (table) {
 	return Zotero.DB.queryAsync("PRAGMA table_info(" + table + ")")
 	.then(function (rows) {
-		return [row.name for each (row in rows)];
+		return rows.map(row => row.name);
 	})
 	.catch(function (e) {
 		this._debug(e, 1);

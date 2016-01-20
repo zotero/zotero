@@ -1861,7 +1861,7 @@ Zotero.Item.prototype.getNotes = function(includeTrashed) {
 			return collation.compareString(1, aTitle, bTitle);
 		});
 	}
-	var ids = [row.itemID for (row of rows)];
+	var ids = rows.map(row => row.itemID);
 	this._notes[cacheKey] = ids;
 	return ids;
 }
@@ -2907,7 +2907,7 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 		var collation = Zotero.getLocaleCollation();
 		rows.sort(function (a, b) collation.compareString(1, a.title, b.title));
 	}
-	var ids = [row.itemID for (row of rows)];
+	var ids = rows.map(row => row.itemID);
 	this._attachments[cacheKey] = ids;
 	return ids;
 }
