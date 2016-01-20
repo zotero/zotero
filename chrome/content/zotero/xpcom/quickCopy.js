@@ -383,14 +383,18 @@ Zotero.QuickCopy = new function() {
 			// Copy citations if shift key pressed
 			if (modified) {
 				var csl = Zotero.Styles.get(format.id).getCiteProc(locale);
-				csl.updateItems([item.id for each(item in items)]);
-				var citation = {citationItems:[{id:item.id} for each(item in items)], properties:{}};
+				csl.updateItems(items.map(item => item.id));
+				var citation = {
+					citationItems: items.map(item => item.id),
+					properties: {}
+				};
 				var html = csl.previewCitationCluster(citation, [], [], "html"); 
 				var text = csl.previewCitationCluster(citation, [], [], "text"); 
 			} else {
 				var style = Zotero.Styles.get(format.id);
 				var cslEngine = style.getCiteProc(locale);
  				var html = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html");
+				cslEngine = style.getCiteProc(locale);
 				var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text");
 			}
 			

@@ -99,7 +99,7 @@ var Zotero_Bibliography_Dialog = new function () {
 			_addButton.disabled = true;
 			_removeButton.disabled = false;
 			_updateRevertButtonStatus();
-			[_itemList.toggleItemSelection(item) for each(item in itemsToSelect)];
+			itemsToSelect.forEach(item => _itemList.toggleItemSelection(item));
 			_itemList.ensureIndexIsVisible(itemsToSelect[0]);
 		}
 		_suppressAllSelectEvents = false;

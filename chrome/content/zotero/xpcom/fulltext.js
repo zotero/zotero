@@ -468,7 +468,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		yield Zotero.DB.queryAsync("DELETE FROM indexing.fulltextWords");
 		while (words.length > 0) {
 			chunk = words.splice(0, 100);
-			Zotero.DB.queryAsync('INSERT INTO indexing.fulltextWords (word) ' + ['SELECT ?' for (word of chunk)].join(' UNION '), chunk);
+			yield Zotero.DB.queryAsync('INSERT INTO indexing.fulltextWords (word) ' + chunk.map(x => 'SELECT ?').join(' UNION '), chunk);
 		}
 		yield Zotero.DB.queryAsync('INSERT OR IGNORE INTO fulltextWords (word) SELECT word FROM indexing.fulltextWords');
 		yield Zotero.DB.queryAsync('DELETE FROM fulltextItemWords WHERE itemID = ?', [itemID]);

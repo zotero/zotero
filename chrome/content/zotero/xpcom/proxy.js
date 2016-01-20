@@ -51,7 +51,9 @@ Zotero.Proxies = new function() {
 			Zotero.MIMETypeHandler.addObserver(function(ch) { me.observe(ch) });
 			
 			var rows = yield Zotero.DB.queryAsync("SELECT * FROM proxies");
-			Zotero.Proxies.proxies = [(yield this.newProxyFromRow(row)) for each(row in rows)];
+			Zotero.Proxies.proxies = yield Zotero.Promise.all(
+				rows.map(row => this.newProxyFromRow(row))
+			);
 			
 			for each(var proxy in Zotero.Proxies.proxies) {
 				for each(var host in proxy.hosts) {
@@ -741,7 +743,9 @@ Zotero.Proxy.prototype._loadFromRow = Zotero.Promise.coroutine(function* (row) {
 	this.multiHost = !!row.multiHost;
 	this.autoAssociate = !!row.autoAssociate;
 	this.scheme = row.scheme;
-	this.hosts = Zotero.DB.columnQueryAsync("SELECT hostname FROM proxyHosts WHERE proxyID = ? ORDER BY hostname", row.proxyID);
+	this.hosts = yield Zotero.DB.columnQueryAsync(
+		"SELECT hostname FROM proxyHosts WHERE proxyID = ? ORDER BY hostname", row.proxyID
+	);
 	this.compileRegexp();
 });
 

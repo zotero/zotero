@@ -409,7 +409,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 			try {
 				var messages = {};
 				Services.console.getMessageArray(messages, {});
-				_startupErrors = [msg for each(msg in messages.value) if(_shouldKeepError(msg))];
+				_startupErrors = Object.keys(messages.value).map(i => messages[i])
+					.filter(msg => _shouldKeepError(msg));
 			} catch(e) {
 				Zotero.logError(e);
 			}
@@ -2822,8 +2823,9 @@ Zotero.UnresponsiveScriptIndicator = new function() {
 Zotero.WebProgressFinishListener = function(onFinish) {
 	this.onStateChange = function(wp, req, stateFlags, status) {
 		//Zotero.debug('onStageChange: ' + stateFlags);
-		if ((stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP)
-				&& (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK)) {
+		if (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP
+				&& stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_REQUEST
+				&& stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK) {
 			onFinish();
 		}
 	}

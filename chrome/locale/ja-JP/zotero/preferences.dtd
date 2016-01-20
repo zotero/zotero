@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "ドメイン／パス">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "（例：wikipedia.org）">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "出力形式">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "言語">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "アイテム数が右の値より大きい時はドラッグ時のクイックコピーを無効化する:">
 
 <!ENTITY zotero.preferences.prefpane.cite "引用">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "をご覧ください。">
 <!ENTITY zotero.preferences.proxies.transparent "プロキシ転送を有効化する">
 <!ENTITY zotero.preferences.proxies.autoRecognize "自動的にプロキシ・リソースを認識する">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "プロキシを通じて転送するときに通知を表示する">
 <!ENTITY zotero.preferences.proxies.disableByDomain "私のドメイン名が次を含むときは、プロキシ転送を無効化する: ">
 <!ENTITY zotero.preferences.proxies.configured "設定済みのプロキシ">
 <!ENTITY zotero.preferences.proxies.hostname "ホスト名">

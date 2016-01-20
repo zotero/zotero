@@ -528,7 +528,7 @@ var Zotero_RTFScan = new function() {
 		}
 		Zotero.debug(cslCitations);
 		
-		itemIDs = [itemID for(itemID in itemIDs)];
+		itemIDs = Object.keys(itemIDs);
 		Zotero.debug(itemIDs);
 		
 		// prepare the list of rendered citations

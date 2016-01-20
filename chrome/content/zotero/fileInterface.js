@@ -346,7 +346,7 @@ var Zotero_File_Interface = new function() {
 		// Add items to import collection
 		if(importCollection) {
 			yield Zotero.DB.executeTransaction(function* () {
-				yield importCollection.addItems([item.id for (item of translation.newItems)]);
+				yield importCollection.addItems(translation.newItems.map(item => item.id));
 				for(let i=0; i<translation.newCollections.length; i++) {
 					let collection = translation.newCollections[i];
 					collection.parent = importCollection.id;
@@ -427,6 +427,7 @@ var Zotero_File_Interface = new function() {
 		
 		// add text (or HTML source)
 		if(!asHTML) {
+			cslEngine = style.getCiteProc(locale);
 			var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text", asCitations);
 		}
 		var str = Components.classes["@mozilla.org/supports-string;1"].
@@ -454,7 +455,10 @@ var Zotero_File_Interface = new function() {
 							   getService(Components.interfaces.nsIClipboard);
 		
 		var style = Zotero.Styles.get(style).getCiteProc(locale);
-		var citation = {"citationItems":[{id:item.id} for each(item in items)], properties:{}};
+		var citation = {
+			citationItems: items.map(item => ({ id: item.id })),
+			properties: {}
+		};
 		
 		// add HTML
 		var bibliography = style.previewCitationCluster(citation, [], [], "html");

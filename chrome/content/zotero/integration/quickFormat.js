@@ -303,9 +303,13 @@ var Zotero_QuickFormat = new function () {
 						citedItemsMatchingSearch = [];
 					for(var i=0, iCount=citedItems.length; i<iCount; i++) {
 						// Generate a string to search for each item
-						var item = citedItems[i],
-							itemStr = [creator.ref.firstName+" "+creator.ref.lastName for (creator of item.getCreators())];
-						itemStr = itemStr.concat([item.getField("title"), item.getField("date", true, true).substr(0, 4)]).join(" ");
+						let item = citedItems[i];
+						let itemStr = item.getCreators()
+							.map(creator => {
+								creator.ref.firstName + " " + creator.ref.lastName
+							})
+							.concat([item.getField("title"), item.getField("date", true, true).substr(0, 4)])
+							.join(" ");
 						
 						// See if words match
 						for(var j=0, jCount=splits.length; j<jCount; j++) {
