@@ -142,7 +142,7 @@ Zotero.Utilities.Internal = {
 						}
 						// Hex string
 						else {
-							let hexStr;
+							let hexStr = "";
 							for (let i = 0; i < hash.length; i++) {
 								hexStr += toHexString(hash.charCodeAt(i));
 							}
