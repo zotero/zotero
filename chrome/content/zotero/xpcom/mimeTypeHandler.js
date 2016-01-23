@@ -345,7 +345,7 @@ Zotero.MIMETypeHandler = new function () {
 			Zotero.debug(e);
 		}
 		
-		if (!handled) {
+		if (handled === false) {
 			// handle using nsIExternalHelperAppService
 			var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"].
 				getService(Components.interfaces.nsIExternalHelperAppService);
