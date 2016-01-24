@@ -1387,7 +1387,7 @@ Zotero.Sync.Server = new function () {
 	};
 	
 	function login() {
-		var url = Zotero.Prefs.get('sync.server.url') + "/login";
+		var url = Zotero.Prefs.get('sync.server.scheme') + "://" + Zotero.Prefs.get('sync.server.url') + "/login";
 		
 		var username = Zotero.Sync.Server.username;
 		if (!username) {
@@ -1514,7 +1514,7 @@ Zotero.Sync.Server = new function () {
 		}
 		
 		// Get updated data
-		var url = Zotero.Prefs.get('sync.server.url') + '/updated';
+		var url = Zotero.Prefs.get('sync.server.scheme') + "://" + Zotero.Prefs.get('sync.server.url') + '/updated';
 		var lastsync = Zotero.Sync.Server.lastRemoteSyncTime;
 		if (!lastsync) {
 			lastsync = 1;
@@ -1705,7 +1705,7 @@ Zotero.Sync.Server = new function () {
 						
 						Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.uploadingData'));
 						
-						var url = Zotero.Prefs.get('sync.server.url') + '/upload';
+						var url = Zotero.Prefs.get('sync.server.scheme') + "://" + Zotero.Prefs.get('sync.server.url') + '/upload';
 						var body = _apiVersionComponent
 									+ '&' + Zotero.Sync.Server.sessionIDComponent
 									+ '&updateKey=' + updateKey
@@ -1735,7 +1735,7 @@ Zotero.Sync.Server = new function () {
 									case 'queued':
 										Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.uploadAccepted'));
 										
-										var url = Zotero.Prefs.get('sync.server.url') + '/uploadstatus';
+										var url = Zotero.Prefs.get('sync.server.scheme') + "://" + Zotero.Prefs.get('sync.server.url') + '/uploadstatus';
 										var body = _apiVersionComponent
 													+ '&' + Zotero.Sync.Server.sessionIDComponent;
 										Zotero.HTTP.doPost(url, body, function (xmlhttp) {
@@ -1900,7 +1900,7 @@ Zotero.Sync.Server = new function () {
 			return;
 		}
 		
-		var url = Zotero.Prefs.get('sync.server.url') + "/clear";
+		var url = Zotero.Prefs.get('sync.server.scheme') + "://" + Zotero.Prefs.get('sync.server.url') + "/clear";
 		var body = _apiVersionComponent
 					+ '&' + Zotero.Sync.Server.sessionIDComponent;
 		
@@ -1964,7 +1964,7 @@ Zotero.Sync.Server = new function () {
 	
 	
 	function logout(callback) {
-		var url = Zotero.Prefs.get('sync.server.url') + "/logout";
+		var url = Zotero.Prefs.get('sync.server.scheme') + "://" + Zotero.Prefs.get('sync.server.url') + "/logout";
 		var body = _apiVersionComponent
 					+ '&' + Zotero.Sync.Server.sessionIDComponent;
 		
