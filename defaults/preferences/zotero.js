@@ -132,6 +132,7 @@ pref("extensions.zotero.annotations.warnOnClose", true);
 
 // Sync
 pref("extensions.zotero.sync.autoSync", true);
+pref("extensions.zotero.sync.server.url", "https://sync.zotero.org");
 pref("extensions.zotero.sync.server.username", '');
 pref("extensions.zotero.sync.server.compressData", true);
 pref("extensions.zotero.sync.storage.enabled", true);

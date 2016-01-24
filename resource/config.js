@@ -7,7 +7,6 @@ var ZOTERO_CONFIG = {
 	BASE_URI: 'http://zotero.org/',
 	WWW_BASE_URL: 'https://www.zotero.org/',
 	PROXY_AUTH_URL: 'https://s3.amazonaws.com/zotero.org/proxy-auth',
-	SYNC_URL: 'https://sync.zotero.org/',
 	API_URL: 'https://api.zotero.org/',
 	API_VERSION: 2,
 	PREF_BRANCH: 'extensions.zotero.',
