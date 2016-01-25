@@ -63,7 +63,6 @@ describe("Sync Preferences", function () {
 				Zotero.alert.restore();
 				getAPIKeyFromCredentialsStub.restore();
 				deleteAPIKey.restore();
-				win.close();
 			});
 
 			it("should set API key and display full controls with correct credentials", function* () {
