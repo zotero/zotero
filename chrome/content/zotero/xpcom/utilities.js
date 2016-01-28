@@ -252,6 +252,38 @@ Zotero.Utilities = {
 		var x = x.replace(/^[\x00-\x27\x29-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F\s]+/, "");
 		return x.replace(/[\x00-\x28\x2A-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F\s]+$/, "");
 	},
+
+	/**
+	 * Cleans a http url string
+	 * @param url {String}
+	 * @params tryHttp {Boolean} Attempt prepending 'http://' to the url
+	 * @returns {String}
+	 */
+	cleanURL: function(url, tryHttp=false) {
+		url = url.trim();
+		if (!url) return false;
+		
+		var ios = Components.classes["@mozilla.org/network/io-service;1"]
+			.getService(Components.interfaces.nsIIOService);
+		try {
+			return ios.newURI(url, null, null).spec; // Valid URI if succeeds
+		} catch (e) {
+			if (e instanceof Components.Exception
+				&& e.result == Components.results.NS_ERROR_MALFORMED_URI
+			) {
+				if (tryHttp && /\w\.\w/.test(url)) {
+					// Assume it's a URL missing "http://" part
+					try {
+						return ios.newURI('http://' + url, null, null).spec;
+					} catch (e) {}
+				}
+				
+				Zotero.debug('cleanURL: Invalid URI: ' + url, 2);
+				return false;
+			}
+			throw e;
+		}
+	},
 	
 	/**
 	 * Eliminates HTML tags, replacing &lt;br&gt;s with newlines

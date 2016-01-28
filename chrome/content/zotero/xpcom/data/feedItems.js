@@ -95,6 +95,7 @@ Zotero.FeedItems = new Proxy(function() {
 	});
 	
 	this.toggleReadByID = Zotero.Promise.coroutine(function* (ids, state) {
+		var feedsToUpdate = new Set();
 		if (!Array.isArray(ids)) {
 			if (typeof ids != 'string') throw new Error('ids must be a string or array in Zotero.FeedItems.toggleReadByID');
 			
@@ -117,8 +118,13 @@ Zotero.FeedItems = new Proxy(function() {
 			for (let i=0; i<items.length; i++) {
 				items[i].isRead = state;
 				yield items[i].save({skipEditCheck: true});
+				feedsToUpdate.add(items[i].libraryID);
 			}
-		})
+		});
+		for (let feedID of feedsToUpdate) {
+			let feed = Zotero.Feeds.get(feedID);
+			yield feed.updateUnreadCount();
+		}
 	});
 	
 	this.forceErase = function(ids, options = {}) {

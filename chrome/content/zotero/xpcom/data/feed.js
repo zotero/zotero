@@ -350,13 +350,13 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 			) {
 				Zotero.debug("Item modification date before last update date (" + this.lastCheck + ")");
 				Zotero.debug(item);
-				// Handle last item rejection to avoid unhandled rejection errors
-				itemIterator.last().catch((e) => {});
 				// We can stop now
 				fr.terminate();
 				break;
 			}
 			
+			// Append id at the end to prevent same item collisions from different feeds
+			item.guid += ":" + this.id;
 			if (processedGUIDs.indexOf(item.guid) != -1) {
 				Zotero.debug("Feed item " + item.guid + " already processed from feed.");
 				continue;
@@ -401,18 +401,16 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 		}
 		this._set('_feedLastCheckError', e.message || 'Error processing feed');
 	}
-	finally {
-		if (toAdd.length) {
-			Zotero.DB.executeTransaction(function* () {
-				// Save in reverse order
-				for (let i=toAdd.length-1; i>=0; i--) {
-					// Saving currently has to happen sequentially so as not to violate the
-					// unique constraints in itemDataValues (FIXME)
-					yield toAdd[i].save({skipEditCheck: true});
-				}
-			});
-			this._set('_feedLastUpdate', Zotero.Date.dateToSQL(new Date(), true));
-		}
+	if (toAdd.length) {
+		yield Zotero.DB.executeTransaction(function* () {
+			// Save in reverse order
+			for (let i=toAdd.length-1; i>=0; i--) {
+				// Saving currently has to happen sequentially so as not to violate the
+				// unique constraints in itemDataValues (FIXME)
+				yield toAdd[i].save({skipEditCheck: true});
+			}
+		});
+		this._set('_feedLastUpdate', Zotero.Date.dateToSQL(new Date(), true));
 	}
 	this._set('_feedLastCheck', Zotero.Date.dateToSQL(new Date(), true));
 	yield this.saveTx();
