@@ -103,7 +103,21 @@ Zotero.Translators = new function() {
 					}
 					// Otherwise, load from file
 					else {
-						var translator = yield Zotero.Translators.loadFromFile(path);
+						try {
+							var translator = yield Zotero.Translators.loadFromFile(path);
+						}
+						catch (e) {
+							Zotero.logError(e);
+							
+							// If translator file is invalid, delete it and clear the cache entry
+							// so that the translator is reinstalled the next time it's updated.
+							//
+							// TODO: Reinstall the correct translator immediately
+							yield OS.File.remove(path);
+							let sql = "DELETE FROM translatorCache WHERE fileName=?";
+							yield Zotero.DB.queryAsync(sql, fileName);
+							continue;
+						}
 					}
 					
 					// When can this happen?
