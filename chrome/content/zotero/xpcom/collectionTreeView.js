@@ -1471,6 +1471,10 @@ Zotero.CollectionTreeView.prototype.canDropCheck = function (row, orient, dataTr
 						Zotero.debug("Top-level attachments and notes cannot be added to My Publications");
 						return false;
 					}
+					if(item instanceof Zotero.FeedItem) {
+						Zotero.debug("FeedItems cannot be added to My Publications");
+						return false;
+					}
 					skip = false;
 					continue;
 				}
@@ -1933,8 +1937,25 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 			return;
 		}
 		
+		var items = yield Zotero.Items.getAsync(ids);
+		if (!items) {
+			return;
+		}
+		
+		if (items[0] instanceof Zotero.FeedItem) {
+			if (!(targetTreeRow.isCollection() || targetTreeRow.isLibrary() || targetTreeRow.isGroup())) {
+				return;
+			}
+			
+			let promises = [];
+			for (let item of items) {
+				// No transaction, because most time is spent traversing urls
+				promises.push(item.translate(targetLibraryID, targetCollectionID))
+			}
+			return Zotero.Promise.all(promises);	
+		}
+		
 		if (targetTreeRow.isPublications()) {
-			let items = yield Zotero.Items.getAsync(ids);
 			let io = this._treebox.treeBody.ownerDocument.defaultView
 				.ZoteroPane.showPublicationsWizard(items);
 			if (!io) {
@@ -1950,11 +1971,6 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		}
 		
 		yield Zotero.DB.executeTransaction(function* () {
-			var items = yield Zotero.Items.getAsync(ids);
-			if (!items) {
-				return;
-			}
-			
 			var newItems = [];
 			var newIDs = [];
 			var toMove = [];

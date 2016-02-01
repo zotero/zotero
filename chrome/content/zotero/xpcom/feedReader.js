@@ -35,7 +35,7 @@
  * http://rss.sciencedirect.com/publication/science/20925212
  * http://www.ncbi.nlm.nih.gov/entrez/eutils/erss.cgi?rss_guid=1fmfIeN4X5Q8HemTZD5Rj6iu6-FQVCn7xc7_IPIIQtS1XiD9bf
  * http://export.arxiv.org/rss/astro-ph
- * http://fhs.dukejournals.org/rss_feeds/recent.xml TODO: refreshing unreads all items
+ * http://fhs.dukejournals.org/rss_feeds/recent.xml
  */
 
 /**

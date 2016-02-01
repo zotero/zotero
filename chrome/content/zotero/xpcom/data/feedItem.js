@@ -207,9 +207,9 @@ Zotero.FeedItem.prototype.forceEraseTx = function(options) {
  * in the library
  * @param libraryID {int} save item in library
  * @param collectionID {int} add item to collection
- * @return {Promise<FeedItem>} translated feed item
+ * @return {Promise<FeedItem|Item>} translated feed item
  */
-Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (libaryID, collectionID) {
+Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (libraryID, collectionID) {
 	let deferred = Zotero.Promise.defer();
 	let error = function(e) { Zotero.debug(e, 1); deferred.reject(e); };
 	
@@ -237,6 +237,12 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (libary
 	translate.setTranslator(translators[0]);
 
 	deferred = Zotero.Promise.defer();
+	
+	if (libraryID) {
+		return translate.translate({libraryID, collections: collectionID ? [collectionID] : false})
+			.then(items => items ? items[0] : false);
+	}
+	
 	// Clear these to prevent saving
 	translate.clearHandlers('itemDone');
 	translate.clearHandlers('itemsDone');
@@ -253,7 +259,10 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (libary
 	for (let field of deleteFields) {
 		delete itemData[field];
 	}
+	// TODO: handle no items like the ones in french history studies feed
 	// set new translated data for item
 	this.fromJSON(itemData);
 	this.forceSaveTx();
+	
+	return this;
 });
