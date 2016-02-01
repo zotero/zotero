@@ -869,7 +869,7 @@ Zotero.Sync.Storage.ZFS = (function () {
 									return;
 								}
 								
-								if (status == 0) {
+								if (status == 0 || status == 500 || status == 503) {
 									if (_s3ConsecutiveFailures >= _maxS3ConsecutiveFailures) {
 										Zotero.debug(_s3ConsecutiveFailures
 											+ " consecutive S3 failures -- aborting", 1);
@@ -920,6 +920,13 @@ Zotero.Sync.Storage.ZFS = (function () {
 							}
 							
 							Zotero.debug("Finished download of " + destFile.path);
+							
+							// Decrease backoff delay on successful download
+							if (_s3Backoff > 1) {
+								_s3Backoff /= 2;
+							}
+							// And reset consecutive failures
+							_s3ConsecutiveFailures = 0;
 							
 							try {
 								deferred.resolve(Zotero.Sync.Storage.processDownload(data));
