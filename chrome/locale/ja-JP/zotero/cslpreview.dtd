@@ -1,9 +1,9 @@
-<!ENTITY styles.preview "Zotero Style Preview">
+<!ENTITY styles.preview "Zotero スタイルプレビュー">
 
-<!ENTITY styles.preview.citationFormat "Citation Format:">
-<!ENTITY styles.preview.citationFormat.all "all">
-<!ENTITY styles.preview.citationFormat.author "author">
-<!ENTITY styles.preview.citationFormat.authorDate "author-date">
-<!ENTITY styles.preview.citationFormat.label "label">
-<!ENTITY styles.preview.citationFormat.note "note">
-<!ENTITY styles.preview.citationFormat.numeric "numeric">
+<!ENTITY styles.preview.citationFormat "引用形式:">
+<!ENTITY styles.preview.citationFormat.all "すべて">
+<!ENTITY styles.preview.citationFormat.author "著者">
+<!ENTITY styles.preview.citationFormat.authorDate "著者-日付">
+<!ENTITY styles.preview.citationFormat.label "ラベル">
+<!ENTITY styles.preview.citationFormat.note "メモ">
+<!ENTITY styles.preview.citationFormat.numeric "数字">

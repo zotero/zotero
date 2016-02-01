@@ -12,12 +12,12 @@
 
 <!ENTITY fileMenu.label "ملف">
 <!ENTITY fileMenu.accesskey "م">
-<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.label "حفظ...">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "ضبط الصفحة...">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.label "طباعة...">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "إغلاق">
@@ -54,7 +54,7 @@
 <!ENTITY selectAllCmd.label "تحديد الكل">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "ح">
-<!ENTITY preferencesCmd.label "Preferences">
+<!ENTITY preferencesCmd.label "تفضيلات">
 <!ENTITY preferencesCmd.accesskey "ي">
 <!ENTITY preferencesCmdUnix.label "تفضيلات">
 <!ENTITY preferencesCmdUnix.accesskey "ف">

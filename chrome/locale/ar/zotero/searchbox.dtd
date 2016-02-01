@@ -1,6 +1,6 @@
 <!ENTITY zotero.search.name "الإسم:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
+<!ENTITY zotero.search.searchInLibrary "البحث في المكتبة:">
 
 <!ENTITY zotero.search.joinMode.prefix "طابق">
 <!ENTITY zotero.search.joinMode.any "أيّاً من">

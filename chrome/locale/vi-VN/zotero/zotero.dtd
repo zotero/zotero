@@ -73,39 +73,39 @@
 <!ENTITY zotero.items.series_column "Tùng thư">
 <!ENTITY zotero.items.seriesTitle_column "Tiêu đề tùng thư">
 <!ENTITY zotero.items.court_column "Court">
-<!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "System">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.medium_column "Định dạng">
+<!ENTITY zotero.items.genre_column "Thể loại">
+<!ENTITY zotero.items.system_column "Hệ thống">
+<!ENTITY zotero.items.moreColumns.label "Thêm cột">
+<!ENTITY zotero.items.restoreColumnOrder.label "Phục hồi thứ tự cột">
 
 <!ENTITY zotero.items.menu.showInLibrary "Hiển thị trong Thư viện">
 <!ENTITY zotero.items.menu.attach.note "Tạo một Ghi chép">
-<!ENTITY zotero.items.menu.attach "Add Attachment">
+<!ENTITY zotero.items.menu.attach "Thêm tệp đính kèm">
 <!ENTITY zotero.items.menu.attach.snapshot "Đính kèm Bản lưu trang Web của Trang hiện tại">
 <!ENTITY zotero.items.menu.attach.link "Đính kèm Đường dẫn tới Trang hiện tại">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
-<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
-<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+<!ENTITY zotero.items.menu.attach.link.uri "Đính kèm liên kết tới URI...">
+<!ENTITY zotero.items.menu.attach.file "Đính kèm bản sao đã lưu của tệp...">
+<!ENTITY zotero.items.menu.attach.fileLink "Đính kèm liên kết đến tệp...">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
-<!ENTITY zotero.items.menu.duplicateItem "Sao chép Biểu ghi vừa chọn">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+<!ENTITY zotero.items.menu.restoreToLibrary "Phục hồi vào thư viện">
+<!ENTITY zotero.items.menu.duplicateItem "Nhân đôi mục chọn">
+<!ENTITY zotero.items.menu.mergeItems "Ghộp các mục...">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Chọn phiên bản của mục đề dùng như mục mẫu:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
 
-<!ENTITY zotero.toolbar.newItem.label "Biểu ghi mới">
+<!ENTITY zotero.toolbar.newItem.label "Tạo mục mới">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Khác">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Tạo một Biểu ghi mới cho Trang hiện tại">
-<!ENTITY zotero.toolbar.lookup.label "Add Item(s) by Identifier">
-<!ENTITY zotero.toolbar.removeItem.label "Xóa biểu ghi...">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Tạo một mục trang web mới cho Trang web hiện tại">
+<!ENTITY zotero.toolbar.lookup.label "Thêm các mục bằng định danh">
+<!ENTITY zotero.toolbar.removeItem.label "Xóa mục...">
 <!ENTITY zotero.toolbar.newCollection.label "Bộ sưu tập mới...">
-<!ENTITY zotero.toolbar.newGroup "New Group...">
+<!ENTITY zotero.toolbar.newGroup "Nhóm mới...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Bô sưu tập con mới...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Tìm kiếm Định sẵn mới...">
-<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
-<!ENTITY zotero.toolbar.tagSelector.label "Hiển thị/Dấu Bộ-lọc-thẻ">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Tìm kiếm mới...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Dọn thùng rác">
+<!ENTITY zotero.toolbar.tagSelector.label "Hiện/Dấu bộ lọc tag">
 <!ENTITY zotero.toolbar.actions.label "Hành động">
 <!ENTITY zotero.toolbar.import.label "Nhập khẩu...">
 <!ENTITY zotero.toolbar.importFromClipboard "Nhập từ Clipboard">
@@ -113,10 +113,10 @@
 <!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
 <!ENTITY zotero.toolbar.timeline.label "Tạo Tuyến thời gian">
 <!ENTITY zotero.toolbar.preferences.label "Tùy chọn...">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
+<!ENTITY zotero.toolbar.supportAndDocumentation "Hộ trợ và Tài liệu">
 <!ENTITY zotero.toolbar.about.label "Giới thiệu về Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Tìm kiếm Nâng cao">
-<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
+<!ENTITY zotero.toolbar.tab.tooltip "Chế độ tab lật">
 <!ENTITY zotero.toolbar.openURL.label "Định vị">
 <!ENTITY zotero.toolbar.openURL.tooltip "Tìm trong thư viện cục bộ của bạn">
 
@@ -124,16 +124,16 @@
 <!ENTITY zotero.item.attachment.file.show "Hiện thị Tập tin">
 <!ENTITY zotero.item.textTransform "Biến đổi Văn bản">
 <!ENTITY zotero.item.textTransform.titlecase "Viết hoa đầu từ">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.textTransform.sentencecase "Viết hoa đầu câu">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Hoán chuyên tên và họ">
+<!ENTITY zotero.item.viewOnline "Xem trực tuyến">
+<!ENTITY zotero.item.copyAsURL "Sao chép thành URL">
 
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newNote "Ghi chú mới">
 <!ENTITY zotero.toolbar.note.standalone "Ghi chép Độc lập mới">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
-<!ENTITY zotero.toolbar.attachment.linked "Đường dẫn tới Tập tin...">
+<!ENTITY zotero.toolbar.note.child "Thêm một ghi chú con">
+<!ENTITY zotero.toolbar.lookup "Tìm theo định danh...">
+<!ENTITY zotero.toolbar.attachment.linked "Liên kết tới Tập tin...">
 <!ENTITY zotero.toolbar.attachment.add "Tạo một Bản lưu của Tập tin...">
 <!ENTITY zotero.toolbar.attachment.weblink "Lưu Đường dẫn tới Trang hiện tại">
 <!ENTITY zotero.toolbar.attachment.snapshot "Tạo Bản lưu trang Web của Trang hiện tại">
