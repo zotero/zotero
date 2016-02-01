@@ -640,6 +640,14 @@ var Zotero_Browser = new function() {
 			return;
 		}
 		
+		if (Zotero.Feeds.get(libraryID)) {
+			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+			Zotero_Browser.progress.addDescription(Zotero.getString('save.error.cannotAddToFeed'));
+			Zotero_Browser.progress.show();
+			Zotero_Browser.progress.startCloseTimer(8000);
+			return;
+		}
+		
 		if(Zotero.isConnector) {
 			Zotero.Connector.callMethod("getSelectedCollection", {}, function(response, status) {
 				if(status !== 200) {

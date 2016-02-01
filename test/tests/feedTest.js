@@ -250,10 +250,10 @@ describe("Zotero.Feed", function() {
 			feed._feedUrl = feedUrl;
 			yield feed.updateFeed();
 
-			let feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573");
+			let feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573:"+feed.id);
 			feedItem.isRead = true;
 			yield feedItem.forceSaveTx();
-			feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573");
+			feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573:"+feed.id);
 			assert.isTrue(feedItem.isRead);
 			
 			let oldDateModified = feedItem.dateModified;
@@ -261,7 +261,7 @@ describe("Zotero.Feed", function() {
 			feed._feedUrl = modifiedFeedUrl;
 			yield feed.updateFeed();
 			
-			feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573");
+			feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573:"+feed.id);
 			
 			assert.notEqual(oldDateModified, feedItem.dateModified);
 			assert.isFalse(feedItem.isRead)

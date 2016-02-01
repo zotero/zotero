@@ -1377,7 +1377,7 @@ var ZoteroPane = new function()
 					
 					if (item.isFeedItem) {
 						item.translate();
-						this.startItemReadTimeout.bind(this, item.id);
+						this.startItemReadTimeout(item.id);
 					}
 				}
 			}

@@ -68,6 +68,10 @@ Zotero.defineProperty(Zotero.DataObjects.prototype, 'table', {
 	get: function() this._ZDO_table
 });
 
+Zotero.defineProperty(Zotero.DataObjects.prototype, 'relationsTable', {
+	get: function() this._ZDO_object + 'Relations'
+});
+
 Zotero.defineProperty(Zotero.DataObjects.prototype, 'primaryFields', {
 	get: function () Object.keys(this._primaryDataSQLParts)
 }, {lazy: true});

@@ -219,8 +219,8 @@ Zotero.Relations = new function () {
 			
 			// Get all object URIs except merge-tracking ones
 			let sql = "SELECT " + objectsClass.idColumn + " AS id, predicate, object "
-				+ "FROM " + type + "Relations "
-				+ "JOIN relationPredicates USING (predicateID) WHERE predicate != ?";
+				+ "FROM " + objectsClass.relationsTable
+				+ " JOIN relationPredicates USING (predicateID) WHERE predicate != ?";
 			let rows = yield Zotero.DB.queryAsync(sql, [this.replacedItemPredicate]);
 			for (let i = 0; i < rows.length; i++) {
 				let row = rows[i];

@@ -194,9 +194,7 @@ describe("Zotero.FeedItem", function () {
 	
 	describe("#toggleRead()", function() {
 		it('should toggle state', function* () {
-			feed = yield createFeed();
-			
-			let item = yield createDataObject('feedItem', { guid: Zotero.randomString(), libraryID: feed.id });
+			let item = yield createDataObject('feedItem', { libraryID });
 			item.isRead = false;
 			yield item.forceSaveTx();
 			
@@ -204,9 +202,7 @@ describe("Zotero.FeedItem", function () {
 			assert.isTrue(item.isRead, "item is toggled to read state");
 		});
 		it('should save if specified state is different from current', function* (){
-			feed = yield createFeed();
-
-			let item = yield createDataObject('feedItem', { guid: Zotero.randomString(), libraryID: feed.id });
+			let item = yield createDataObject('feedItem', { libraryID });
 			item.isRead = false;
 			yield item.forceSaveTx();
 			sinon.spy(item, 'save');
@@ -218,6 +214,38 @@ describe("Zotero.FeedItem", function () {
 			
 			yield item.toggleRead(true);
 			assert.isFalse(item.save.called, "item was not saved on toggle read to same state");
+		});
+	});
+	
+	describe('#translate()', function() {
+		before(function* () {
+			// Needs an open window to be able to create a hidden window for translation
+			yield loadBrowserWindow();
+		});
+		it('translates and saves items', function* () {
+			var feedItem = yield createDataObject('feedItem', {libraryID});
+			var url = getTestDataItemUrl('metadata/journalArticle-single.html');
+			feedItem.setField('url', url);
+			yield feedItem.forceSaveTx();
+			
+			yield feedItem.translate();
+			
+			assert.equal(feedItem.getField('title'), 'Scarcity or Abundance? Preserving the Past in a Digital Era');
+		});
+		it('translates and saves items to corresponding library and collection', function* () {
+			let group = yield createGroup();
+			let collection = yield createDataObject('collection', {libraryID: group.libraryID});
+			
+			var feedItem = yield createDataObject('feedItem', {libraryID});
+			var url = getTestDataItemUrl('metadata/journalArticle-single.html');
+			feedItem.setField('url', url);
+			yield feedItem.forceSaveTx();
+			
+			yield feedItem.translate(group.libraryID, collection.id);
+			
+			let item = collection.getChildItems(false, false)[0];
+						
+			assert.equal(item.getField('title'), 'Scarcity or Abundance? Preserving the Past in a Digital Era');	
 		});
 	});
 });
