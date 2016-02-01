@@ -33,9 +33,9 @@ Zotero.FeedItem = function(itemTypeOrID, params = {}) {
 	this._feedItemReadTime = null;
 	
 	Zotero.Utilities.assignProps(this, params, ['guid']);
-}
+};
 
-Zotero.extendClass(Zotero.Item, Zotero.FeedItem)
+Zotero.extendClass(Zotero.Item, Zotero.FeedItem);
 
 Zotero.FeedItem.prototype._objectType = 'feedItem';
 Zotero.FeedItem.prototype._containerObject = 'feed';
@@ -69,6 +69,22 @@ Zotero.defineProperty(Zotero.FeedItem.prototype, 'isRead', {
 		}
 	}
 });
+//
+//Zotero.defineProperty(Zotero.FeedItem.prototype, 'isTranslated', {
+//	get: function() {
+//		return !!this._feedItemTranslationTime;
+//	}, 
+//	set: function(state) {
+//		if (state != !!this._feedItemTranslationTime) {
+//			if (state) {
+//				this._feedItemTranslationTime = Zotero.Date.dateToSQL(new Date(), true);
+//			} else {
+//				this._feedItemTranslationTime = null;
+//			}
+//			this._changed.feedItemData = true;
+//		}
+//	}
+//});
 
 Zotero.FeedItem.prototype.loadPrimaryData = Zotero.Promise.coroutine(function* (reload, failOnMissing) {
 	if (this.guid && !this.id) {
@@ -183,4 +199,61 @@ Zotero.FeedItem.prototype.forceEraseTx = function(options) {
 	Object.assign(newOptions, options || {});
 	newOptions.skipEditCheck = true;
 	return this.eraseTx(newOptions);
-}
+};
+
+/**
+ * Uses the item url to translate an existing feed item.
+ * If libraryID empty, overwrites feed item, otherwise saves
+ * in the library
+ * @param libraryID {int} save item in library
+ * @param collectionID {int} add item to collection
+ * @return {Promise<FeedItem>} translated feed item
+ */
+Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (libaryID, collectionID) {
+	let deferred = Zotero.Promise.defer();
+	let error = function(e) { Zotero.debug(e, 1); deferred.reject(e); };
+	
+	// Load document
+	let hiddenBrowser = Zotero.HTTP.processDocuments(
+		this.getField('url'), 
+		(item) => deferred.resolve(item),
+		()=>{}, error, true
+	);
+	let doc = yield deferred.promise;
+
+	// Set translate document
+	let translate = new Zotero.Translate.Web();
+	translate.setDocument(doc);
+	
+	// Load translators
+	deferred = Zotero.Promise.defer();
+	translate.setHandler('translators', (me, translators) => deferred.resolve(translators));
+	translate.getTranslators();
+	let translators = yield deferred.promise;
+	if (! translators || !translators.length) {
+		Zotero.debug("No translators detected for FeedItem " + this.id + " with url " + this.getField('url'), 2);
+		throw new Zotero.Error("No translators detected for FeedItem " + this.id + " with url " + this.getField('url'))
+	}
+	translate.setTranslator(translators[0]);
+
+	deferred = Zotero.Promise.defer();
+	// Clear these to prevent saving
+	translate.clearHandlers('itemDone');
+	translate.clearHandlers('itemsDone');
+	translate.setHandler('error', error);
+	translate.setHandler('itemDone', (_, items) => deferred.resolve(items));
+	
+	translate.translate({libraryID: false, saveAttachments: false});
+	
+	let itemData = yield deferred.promise;
+	Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+	
+	// clean itemData
+	const deleteFields = ['attachments', 'notes', 'id', 'itemID', 'path', 'seeAlso', 'version', 'dateAdded', 'dateModified'];
+	for (let field of deleteFields) {
+		delete itemData[field];
+	}
+	// set new translated data for item
+	this.fromJSON(itemData);
+	this.forceSaveTx();
+});
