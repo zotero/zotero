@@ -114,13 +114,13 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 		Zotero.debug(stateFlags);
 		Zotero.debug(status);
 		
-		if ((stateFlags & Components.interfaces.nsIWebProgressListener.STATE_START)
-				&& (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK)) {
-			this._onStart(request);
-		}
-		else if ((stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP)
-				&& (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK)) {
-			this._onStop(request, status);
+		if (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_REQUEST) {
+			if (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_START) {
+                this._onStart(request);
+            }
+            else if (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP) {
+                this._onStop(request, status);
+            }
 		}
 	},
 	
