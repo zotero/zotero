@@ -262,7 +262,7 @@ Zotero.HTTP = new function() {
 	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
 	 * @return {XMLHttpRequest} The XMLHttpRequest object if the request was sent, or
 	 *     false if the browser is offline
-	 * @deprecated Use {@link Zotero.HTTP.promise}
+	 * @deprecated Use {@link Zotero.HTTP.request}
 	 */
 	this.doGet = function(url, onDone, responseCharset, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
@@ -323,7 +323,7 @@ Zotero.HTTP = new function() {
 	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
 	 * @return {XMLHttpRequest} The XMLHttpRequest object if the request was sent, or
 	 *     false if the browser is offline
-	 * @deprecated Use {@link Zotero.HTTP.promise}
+	 * @deprecated Use {@link Zotero.HTTP.request}
 	 */
 	this.doPost = function(url, body, onDone, headers, responseCharset, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
@@ -407,7 +407,7 @@ Zotero.HTTP = new function() {
 	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
 	 * @return {XMLHttpRequest} The XMLHttpRequest object if the request was sent, or
 	 *     false if the browser is offline
-	 * @deprecated Use {@link Zotero.HTTP.promise}
+	 * @deprecated Use {@link Zotero.HTTP.request}
 	 */
 	this.doHead = function(url, onDone, requestHeaders, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
@@ -466,7 +466,7 @@ Zotero.HTTP = new function() {
 	 * @param	{nsIURI}		url
 	 * @param	{Function}	onDone
 	 * @return	{XMLHTTPRequest}
-	 * @deprecated Use {@link Zotero.HTTP.promise}
+	 * @deprecated Use {@link Zotero.HTTP.request}
 	 */
 	this.doOptions = function (uri, callback) {
 		// Don't display password in console
