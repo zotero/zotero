@@ -19,7 +19,7 @@
 <!ENTITY pageSetupCmd.accesskey "U">
 <!ENTITY printCmd.label "Imprimir...">
 <!ENTITY printCmd.key "P">
-<!ENTITY printCmd.accesskey "U">
+<!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "Fechar">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">

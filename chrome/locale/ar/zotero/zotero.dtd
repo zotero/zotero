@@ -4,13 +4,13 @@
 <!ENTITY zotero.general.deselectAll "إلغاء تحديد الكل">
 <!ENTITY zotero.general.edit "تحرير">
 <!ENTITY zotero.general.delete "حذف">
-<!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
-<!ENTITY zotero.general.refresh "Refresh">
-<!ENTITY zotero.general.saveAs "Save As…">
+<!ENTITY zotero.general.ok "موافق">
+<!ENTITY zotero.general.cancel "الغاء">
+<!ENTITY zotero.general.refresh "اعادة تحميل">
+<!ENTITY zotero.general.saveAs "حفظ باسم...">
 
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.unrelatedMessages "This may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.title "تقرير خطأ لزوتيرو">
+<!ENTITY zotero.errorReport.unrelatedMessages "قد يتضمن هذا على رسائل ليس لها علاقة بزوتيرو.">
 <!ENTITY zotero.errorReport.submissionInProgress "برجاء الانتظار لحين الانتهاء من ارسال التقرير عن الخطأ.">
 <!ENTITY zotero.errorReport.submitted "تم ارسال التقرير عن الخطأ.">
 <!ENTITY zotero.errorReport.reportID "رقم التقرير:">
@@ -47,7 +47,7 @@
 <!ENTITY zotero.collections.showUnfiledItems "عرض العناصر غير المصنفة">
 
 <!ENTITY zotero.items.itemType "نوع العنصر">
-<!ENTITY zotero.items.type_column "Item Type">
+<!ENTITY zotero.items.type_column "نوع العنصر">
 <!ENTITY zotero.items.title_column "العنوان">
 <!ENTITY zotero.items.creator_column "المؤلف">
 <!ENTITY zotero.items.date_column "التاريخ">
@@ -62,22 +62,22 @@
 <!ENTITY zotero.items.rights_column "الملكية الفكرية">
 <!ENTITY zotero.items.dateAdded_column "تاريخ الإضافة">
 <!ENTITY zotero.items.dateModified_column "تاريخ التعديل">
-<!ENTITY zotero.items.extra_column "Extra">
+<!ENTITY zotero.items.extra_column "معلومات إضافية">
 <!ENTITY zotero.items.archive_column "الارشيف">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
+<!ENTITY zotero.items.archiveLocation_column "الموقع في الأرشيف">
 <!ENTITY zotero.items.place_column "مكان">
 <!ENTITY zotero.items.volume_column "صوت">
 <!ENTITY zotero.items.edition_column "طبعة">
 <!ENTITY zotero.items.pages_column "صفحات">
-<!ENTITY zotero.items.issue_column "Issue">
-<!ENTITY zotero.items.series_column "Series">
-<!ENTITY zotero.items.seriesTitle_column "Series Title">
-<!ENTITY zotero.items.court_column "Court">
-<!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "System">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.issue_column "العدد">
+<!ENTITY zotero.items.series_column "السلسلة">
+<!ENTITY zotero.items.seriesTitle_column "عنوان السلسلة">
+<!ENTITY zotero.items.court_column "المحكمة">
+<!ENTITY zotero.items.medium_column "الوسيط/الصيغة">
+<!ENTITY zotero.items.genre_column "عام">
+<!ENTITY zotero.items.system_column "نظام">
+<!ENTITY zotero.items.moreColumns.label "المزيد من الاعمدة">
+<!ENTITY zotero.items.restoreColumnOrder.label "استعادة ترتيب الاعمدة">
 
 <!ENTITY zotero.items.menu.showInLibrary "عرض في المكتبة">
 <!ENTITY zotero.items.menu.attach.note "اضافة ملاحظة">
@@ -93,13 +93,13 @@
 <!ENTITY zotero.items.menu.mergeItems "دمج العناصر...">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "اختار اصدارة العنصر المناسبة لاستخدامه كعنصر رئيسي:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "اختار الحقول المراد الابقاء عليها من الاصدارات الاخرى للعنصر:">
 
 <!ENTITY zotero.toolbar.newItem.label "عنصر جديد">
 <!ENTITY zotero.toolbar.moreItemTypes.label "المزيد">
 <!ENTITY zotero.toolbar.newItemFromPage.label "إنشاء عنصر جديد من الصفحة الحالية">
 <!ENTITY zotero.toolbar.lookup.label "إضافة العنصر بواسطة معرف">
-<!ENTITY zotero.toolbar.removeItem.label "حذف العنصر...">
+<!ENTITY zotero.toolbar.removeItem.label "ازالة العنصر...">
 <!ENTITY zotero.toolbar.newCollection.label "مجموعة عناصر جديدة...">
 <!ENTITY zotero.toolbar.newGroup "مجموعة مشاركة جديدة...">
 <!ENTITY zotero.toolbar.newSubcollection.label "مجموعة عناصر فرعية جديدة...">
@@ -125,9 +125,9 @@
 <!ENTITY zotero.item.textTransform "تغيير حالة النص">
 <!ENTITY zotero.item.textTransform.titlecase "حرف كبير في بداية كل كلمة">
 <!ENTITY zotero.item.textTransform.sentencecase "حالة الجملة">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.creatorTransform.nameSwap "تبديل الاسم الاول/اللقب">
+<!ENTITY zotero.item.viewOnline "العرض على الانترنت">
+<!ENTITY zotero.item.copyAsURL "نسخ كمسار انترنت">
 
 <!ENTITY zotero.toolbar.newNote "ملاحظة جديدة">
 <!ENTITY zotero.toolbar.note.standalone "ملاحظة جديدة مستقلة بذاتها">
@@ -145,15 +145,15 @@
 <!ENTITY zotero.tagSelector.selectVisible "تحديد العناصر الظاهرة">
 <!ENTITY zotero.tagSelector.clearVisible "إلغاء تحديد العناصر الظاهرة">
 <!ENTITY zotero.tagSelector.clearAll "إلغاء تحديد الكل">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
+<!ENTITY zotero.tagSelector.assignColor "تخصيص اللون...">
 <!ENTITY zotero.tagSelector.renameTag "تغيير اسم الوسم...">
 <!ENTITY zotero.tagSelector.deleteTag "حذف الوسم...">
 
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
+<!ENTITY zotero.tagColorChooser.title "اختار لون وموقع الوسم">
 <!ENTITY zotero.tagColorChooser.color "لون:">
-<!ENTITY zotero.tagColorChooser.position "Position:">
+<!ENTITY zotero.tagColorChooser.position "المكان:">
 <!ENTITY zotero.tagColorChooser.setColor "ضبط اللون">
-<!ENTITY zotero.tagColorChooser.removeColor "حذف اللون">
+<!ENTITY zotero.tagColorChooser.removeColor "ازالة اللون">
 
 <!ENTITY zotero.lookup.description "ادخل الترقيم الدولي الموحد للكتاب او معرف مقالات الميدلاين او معرف الوثيقة الرقمية.">
 <!ENTITY zotero.lookup.button.search "بحث">
@@ -165,10 +165,10 @@
 
 <!ENTITY zotero.bibliography.title "إنشاء ببليوجرافية">
 <!ENTITY zotero.bibliography.style.label "نمط الاستشهاد:">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "اللغة">
 <!ENTITY zotero.bibliography.outputMode "وضع المخرجات:">
 <!ENTITY zotero.bibliography.bibliography "ببليوجرافية">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
+<!ENTITY zotero.bibliography.outputMethod "طريقة الاخراج:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "حفظ كملف  RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "حفظ كملف  HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "نسخ للحافظة">
@@ -177,7 +177,7 @@
 <!ENTITY zotero.integration.docPrefs.title "تفضيلات المستند">
 <!ENTITY zotero.integration.addEditCitation.title "اضافة/تحرير استشهاد مرجعي">
 <!ENTITY zotero.integration.editBibliography.title "تحرير ببليوجرافية">
-<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
+<!ENTITY zotero.integration.quickFormatDialog.title "صياغة سريعة للاستشهاد">
 
 <!ENTITY zotero.progress.title "التقدم">
 
@@ -213,11 +213,11 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "الصياغة باستخدام:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "الاشارات المرجعية">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "الاشارات المرجعية هي خاصية متاحة عبر مايكروسوفت وورد و اوبن اوفيس ولكنها قد تكون عرضة للتغيير الغير مقصود. ولأسباب تتعلق &#xA;بالتوافق، فالاستشهادات المرجعية لا يمكن ادراجها في الحواشي السفلية او التعليقات الختامية عند تحديد هذا الخيار.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "الاشارات المرجعية هي خاصية متاحة عبر مايكروسوفت وورد و اوبن اوفيس، ولكنها قد تكون عرضة للتغيير الغير مقصود. ولأسباب تتعلق &#xA; بالتوافق، فالاستشهادات المرجعية لا يمكن ادراجها في الحواشي السفلية او التعليقات الختامية عند تحديد هذا الخيار.">
 
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Automatically abbreviate journal titles">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "MEDLINE journal abbreviations will be automatically generated using journal titles. The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "اختصر عناوين الدوريات تلقائيا">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "سيتم الاختصار التلقائي وفق اختصارات دورية MEDLINE وذلك باستخدام عناوين الدوريات. وسيتم تجاهل حقل &quot;اختصار الدورية&quot;.">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "تخزين المراجع في الوثيقة">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
@@ -244,7 +244,7 @@
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "سيتم حذف الوسم من جميع العناصر.">
 
 <!ENTITY zotero.merge.title "Conflict Resolution">
-<!ENTITY zotero.merge.of "of">
+<!ENTITY zotero.merge.of "من">
 <!ENTITY zotero.merge.deleted "محذوف">
 
 <!ENTITY zotero.proxy.recognized.title "التعرف على الوكيل">
@@ -285,8 +285,8 @@
 
 <!ENTITY zotero.downloadManager.label "احفظ في زوتيرو">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Search pane of the Zotero preferences.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "لاستخدام هذه الخاصية، يجب تنصيب اداة PDF والموجودة في تبويب البحث بتفضيلات زوتيرو.">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
+<!ENTITY zotero.attachLink.title "ارفاق رابط لمحتوى على الانترنت">
+<!ENTITY zotero.attachLink.label.link "رابط:">
+<!ENTITY zotero.attachLink.label.title "عنوان:">

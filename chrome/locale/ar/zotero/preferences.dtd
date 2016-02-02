@@ -16,16 +16,16 @@
 <!ENTITY zotero.preferences.fontSize.small "صغير">
 <!ENTITY zotero.preferences.fontSize.medium "متوسط">
 <!ENTITY zotero.preferences.fontSize.large "كبير">
-<!ENTITY zotero.preferences.fontSize.xlarge "كبير الحجم">
+<!ENTITY zotero.preferences.fontSize.xlarge "كبير جدا">
 <!ENTITY zotero.preferences.fontSize.notes "حجم خط الملاحظات:">
 
 <!ENTITY zotero.preferences.miscellaneous "أخرى">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
+<!ENTITY zotero.preferences.autoUpdate "التأكد التلقائي من وجود مترجمات مواقع محدثة">
 <!ENTITY zotero.preferences.updateNow "التحديث الآن">
 <!ENTITY zotero.preferences.reportTranslationFailure "الإبلاغ عن مترجمات مواقع معطلة">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "السماح لموقع زوتيرو بتخصيص المحتوى بناء على الاصدار الحالي لزوتيرو">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "السماح لموقع زوتيرو بالتعرف على الاصدار الحالي لزوتيرو">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "استخدم زوتيرو لتحميل انواع ملفات  BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "أخذ لقطات تلقائية عند إنشاء العناصر من صفحات الويب">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "الارفاق التلقائي لملفات PDF والملفات الاخرى عند اضافة عنصر جديد من صفحة ويب">
 <!ENTITY zotero.preferences.automaticTags "اضف اوسمة  تلقائية للعناصر بالكلمات المفتاحية ورؤوس الموضوعات">
@@ -53,8 +53,8 @@
 <!ENTITY zotero.preferences.sync.createAccount "تسجيل اشتراك جديد">
 <!ENTITY zotero.preferences.sync.lostPassword "نسيت كلمة المرور؟">
 <!ENTITY zotero.preferences.sync.syncAutomatically "التزامن التلقائي">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "مزامنة محتوى النص الكامل">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "يمكن لبرنامج زوتيرو مزامنة محتوى النص الكامل للملفات في مكتبات زوتيرو الخاصة بك مع موقع zotero.org والاجهزة الاخرى المتصلة، لتسمح لك بالبحث بملفاتك في اي مكان. لن يتم مشاركة محتوى النص الكامل لملفاتك مع العامة.">
 <!ENTITY zotero.preferences.sync.about "نبذة عن التزامن">
 <!ENTITY zotero.preferences.sync.fileSyncing "تزامن الملفات">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "الرابط:">
@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "نطاق الانترنت/المسار">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(مثال: wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "صياغة المخرجات">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "اللغة">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "تعطيل النسخ السريع عند السحب بالماوس لأكثر من">
 
 <!ENTITY zotero.preferences.prefpane.cite "استشهاد">
@@ -116,7 +116,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "الوظائف الاضافية لمعالجات النصوص غير مثبته حالياً">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "أحصل على الوظائف الاضافية لمعالجات النصوص...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "استخدم المربع الحواري التقليدي لاضافة استشهاد">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "مدير الانماط">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "اسم النمط">
@@ -125,12 +125,12 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "احصل على انماط اضافية...">
 
 <!ENTITY zotero.preferences.keys.openZotero "فتح/إغلاق نافذة زوتيرو">
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "احفظ في زوتيرو (ايقونة شريط العنوان)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "التنشيط لوضع ملء الشاشة">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "ركز على جزء المكتبات">
 <!ENTITY zotero.preferences.keys.quicksearch "البحث السريع">
-<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
-<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.newItem "انشئ عنصر جديد">
+<!ENTITY zotero.preferences.keys.newNote "انشئ ملاحظة جديدة">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "تنشيط محدد الأوسمة">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "نسخ استشهادات العنصر المختار للحافظة">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "انسخ العناصر المحددة للحافظة">
@@ -145,7 +145,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "لمزيد من المعلومات.">
 <!ENTITY zotero.preferences.proxies.transparent "اعادة التوجيه عن طريق الوكلاء المستخدمين مسبقا">
 <!ENTITY zotero.preferences.proxies.autoRecognize "التعرف التلقائي على الوكلاء">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "اظهر اشعار عند اعادة التوجيه عبر خادم وسيط">
 <!ENTITY zotero.preferences.proxies.disableByDomain "تعطيل اعادة توجيه الوكيل عندما يحتوي اسم النطاق على ">
 <!ENTITY zotero.preferences.proxies.configured "الوكلاء المخزنين">
 <!ENTITY zotero.preferences.proxies.hostname "المضيف">
@@ -162,7 +162,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "متقدم">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "الملفات والمجلدات">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "اختصارات">
 
 <!ENTITY zotero.preferences.prefpane.locate "تحديد موقع المقتنى">
 <!ENTITY zotero.preferences.locate.locateEngineManager "إدارة محرك البحث">
@@ -182,11 +182,11 @@
 <!ENTITY zotero.preferences.dataDir.choose "اختر...">
 <!ENTITY zotero.preferences.dataDir.reveal "عرض مجلد البيانات">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "المجلد الرئيسي للمرفقات المرتبطة">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "الفهرس الرئيسي:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "اختار...">
-<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "حول الى مسارات مطلقة">
 
 <!ENTITY zotero.preferences.dbMaintenance "صيانة قاعدة البيانات">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "التأكد من سلامة قاعدة البيانات">
@@ -203,6 +203,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "ارسال سجل الاخطاء لخادم زوتيرو">
 
 <!ENTITY zotero.preferences.openAboutConfig "فتح about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open Style Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open Style Preview">
-<!ENTITY zotero.preferences.openAboutMemory "Open about:memory">
+<!ENTITY zotero.preferences.openCSLEdit "افتح محرر الانماط">
+<!ENTITY zotero.preferences.openCSLPreview "افتح عرض النمط">
+<!ENTITY zotero.preferences.openAboutMemory "افتح about:memory">

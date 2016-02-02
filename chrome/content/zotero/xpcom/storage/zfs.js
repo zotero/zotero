@@ -156,7 +156,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 						
 						// If S3 connection is interrupted, delay and retry, or bail if too many
 						// consecutive failures
-						if (status == 0) {
+						if (status == 0 || status == 500 || status == 503) {
 							if (this._s3ConsecutiveFailures < this._maxS3ConsecutiveFailures) {
 								let libraryKey = item.libraryKey;
 								let msg = "S3 returned 0 for " + libraryKey + " -- retrying download"

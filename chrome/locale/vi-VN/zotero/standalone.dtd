@@ -89,7 +89,7 @@
 <!ENTITY helpMac.commandkey "?">
 <!ENTITY aboutProduct.label "About &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "Support and Documentation">
+<!ENTITY productHelp.label "Hộ trợ và Tài liệu">
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Troubleshooting Information">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">

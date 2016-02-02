@@ -27,7 +27,7 @@
  * Handles UI for lookup panel
  * @namespace
  */
-const Zotero_Lookup = new function () {
+var Zotero_Lookup = new function () {
 	/**
 	 * Performs a lookup by DOI, PMID, or ISBN
 	 */

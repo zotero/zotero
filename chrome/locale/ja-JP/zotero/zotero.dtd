@@ -126,8 +126,8 @@
 <!ENTITY zotero.item.textTransform.titlecase "各単語の先頭を大文字に">
 <!ENTITY zotero.item.textTransform.sentencecase "各文の先頭を大文字に">
 <!ENTITY zotero.item.creatorTransform.nameSwap "姓と名を置き替える">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
+<!ENTITY zotero.item.viewOnline "オンラインで閲覧する">
+<!ENTITY zotero.item.copyAsURL "URLとしてコピーする">
 
 <!ENTITY zotero.toolbar.newNote "新しいメモ">
 <!ENTITY zotero.toolbar.note.standalone "新しく独立メモを作成">
@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "出典表記／参考文献目録を作成">
 <!ENTITY zotero.bibliography.style.label "引用スタイル:">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "言語:">
 <!ENTITY zotero.bibliography.outputMode "出力モード:">
 <!ENTITY zotero.bibliography.bibliography "参考文献目録">
 <!ENTITY zotero.bibliography.outputMethod "出力方法:">
