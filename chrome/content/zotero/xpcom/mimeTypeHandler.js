@@ -320,7 +320,7 @@ Zotero.MIMETypeHandler = new function () {
 	/**
 	 * Called when the request is done
 	 */
-	_StreamListener.prototype.onStopRequest = function(channel, context, status) {
+	_StreamListener.prototype.onStopRequest = Zotero.Promise.coroutine(function* (channel, context, status) {
 		Zotero.debug("charset is " + channel.contentCharset);
 		
 		var inputStream = this._storageStream.newInputStream(0);
@@ -337,34 +337,39 @@ Zotero.MIMETypeHandler = new function () {
 		convStream.close();
 		inputStream.close();
 		
-		var me = this;
-		Zotero.Promise.resolve(
-				_typeHandlers[this._contentType](readString, (this._request.name ? this._request.name : null),
+		var handled = false;
+		try {
+			handled = _typeHandlers[this._contentType](
+				readString,
+				this._request.name ? this._request.name : null,
 				this._contentType,
-				channel)
-		)
-		.catch(function(e) {
-			Zotero.debug(e, 2);
+				channel
+			);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		
+		if (handled === false) {
+			// Handle using nsIExternalHelperAppService
+			let externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"]
+				.getService(Components.interfaces.nsIExternalHelperAppService);
+			let frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+				.getService(Components.interfaces.nsIWindowWatcher).activeWindow;
 			
-			// if there was an error, handle using nsIExternalHelperAppService
-			var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"].
-				getService(Components.interfaces.nsIExternalHelperAppService);
-			var frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
-				getService(Components.interfaces.nsIWindowWatcher).activeWindow;
-			
-			var inputStream = me._storageStream.newInputStream(0);
-			var streamListener = externalHelperAppService.doContent(me._contentType, me._request, frontWindow, null);
+			let inputStream = this._storageStream.newInputStream(0);
+			let streamListener = externalHelperAppService.doContent(
+				this._contentType, this._request, frontWindow, null
+			);
 			if (streamListener) {
 				streamListener.onStartRequest(channel, context);
-				streamListener.onDataAvailable(me._request, context, inputStream, 0, me._storageStream.length);
+				streamListener.onDataAvailable(
+					this._request, context, inputStream, 0, this._storageStream.length
+				);
 				streamListener.onStopRequest(channel, context, status);
 			}
-			
-			// then throw our error
-			throw e;
-		})
-		.finally(function() {
-			me._storageStream.close();
-		});;
-	}
+		}
+		
+		this._storageStream.close();
+	});
 }
