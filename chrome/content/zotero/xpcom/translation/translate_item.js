@@ -81,84 +81,82 @@ Zotero.Translate.ItemSaver.prototype = {
 	 *     save progress. The callback will be called as attachmentCallback(attachment, false, error)
 	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
 	 */
-	"saveItems":function(items, callback, attachmentCallback) {
-		Zotero.spawn(function* () {
-			try {
-				let newItems = [], standaloneAttachments = [];
-				yield (Zotero.DB.executeTransaction(function* () {
-					for (let iitem=0; iitem<items.length; iitem++) {
-						let item = items[iitem], newItem, myID;
-						// Type defaults to "webpage"
-						let type = (item.itemType ? item.itemType : "webpage");
+	"saveItems": Zotero.Promise.coroutine(function* (items, callback, attachmentCallback) {
+		try {
+			let newItems = [], standaloneAttachments = [];
+			yield Zotero.DB.executeTransaction(function* () {
+				for (let iitem=0; iitem<items.length; iitem++) {
+					let item = items[iitem], newItem, myID;
+					// Type defaults to "webpage"
+					let type = (item.itemType ? item.itemType : "webpage");
+					
+					if (type == "note") {				// handle notes differently
+						newItem = yield this._saveNote(item);
+					} else if (type == "attachment") {	// handle attachments differently
+						standaloneAttachments.push(iitem);
+						continue;
+					} else {
+						newItem = new Zotero.Item(type);
+						newItem.libraryID = this._libraryID;
+						if(item.tags) item.tags = this._cleanTags(item.tags);
+
+						// Need to handle these specially. Put them in a separate object to
+						// avoid a warning from fromJSON()
+						let specialFields = {
+							attachments:item.attachments,
+							notes:item.notes,
+							seeAlso:item.seeAlso,
+							id:item.itemID || item.id
+						};
+						newItem.fromJSON(this._deleteIrrelevantFields(item));
 						
-						if (type == "note") {				// handle notes differently
-							newItem = yield this._saveNote(item);
-						} else if (type == "attachment") {	// handle attachments differently
-							standaloneAttachments.push(iitem);
-							continue;
-						} else {
-							newItem = new Zotero.Item(type);
-							newItem.libraryID = this._libraryID;
-							if(item.tags) item.tags = this._cleanTags(item.tags);
+						if (this._collections) {
+							newItem.setCollections(this._collections);
+						}
+						
+						// save item
+						myID = yield newItem.save();
 
-							// Need to handle these specially. Put them in a separate object to
-							// avoid a warning from fromJSON()
-							let specialFields = {
-								attachments:item.attachments,
-								notes:item.notes,
-								seeAlso:item.seeAlso,
-								id:item.itemID || item.id
-							};
-							newItem.fromJSON(this._deleteIrrelevantFields(item));
-							
-							if (this._collections) {
-								newItem.setCollections(this._collections);
+						// handle notes
+						if (specialFields.notes) {
+							for (let i=0; i<specialFields.notes.length; i++) {
+								yield this._saveNote(specialFields.notes[i], myID);
 							}
-							
-							// save item
-							myID = yield newItem.save();
-
-							// handle notes
-							if (specialFields.notes) {
-								for (let i=0; i<specialFields.notes.length; i++) {
-									yield this._saveNote(specialFields.notes[i], myID);
-								}
-							}
-
-							// handle attachments
-							if (specialFields.attachments) {
-								for (let i=0; i<specialFields.attachments.length; i++) {
-									let attachment = specialFields.attachments[i];
-									// Don't wait for the promise to resolve, since we want to
-									// signal completion as soon as the items are saved
-									this._saveAttachment(attachment, myID, attachmentCallback);
-								}
-								// Restore the attachments field, since we use it later in
-								// translation
-								item.attachments = specialFields.attachments;
-							}
-
-							// handle see also
-							this._handleRelated(specialFields, newItem);
 						}
 
-						// add to new item list
-						newItems.push(newItem);
+						// handle attachments
+						if (specialFields.attachments) {
+							for (let i=0; i<specialFields.attachments.length; i++) {
+								let attachment = specialFields.attachments[i];
+								// Don't wait for the promise to resolve, since we want to
+								// signal completion as soon as the items are saved
+								this._saveAttachment(attachment, myID, attachmentCallback);
+							}
+							// Restore the attachments field, since we use it later in
+							// translation
+							item.attachments = specialFields.attachments;
+						}
+
+						// handle see also
+						this._handleRelated(specialFields, newItem);
 					}
-				}.bind(this)));
 
-				// Handle standalone attachments outside of the transaction
-				for (let iitem of standaloneAttachments) {
-					let newItem = yield this._saveAttachment(items[iitem], null, attachmentCallback);
-					if (newItem) newItems.push(newItem);
+					// add to new item list
+					newItems.push(newItem);
 				}
+			}.bind(this));
 
-				callback(true, newItems);
-			} catch(e) {
-				callback(false, e);
+			// Handle standalone attachments outside of the transaction
+			for (let iitem of standaloneAttachments) {
+				let newItem = yield this._saveAttachment(items[iitem], null, attachmentCallback);
+				if (newItem) newItems.push(newItem);
 			}
-		}, this);
-	},
+
+			callback(true, newItems);
+		} catch(e) {
+			callback(false, e);
+		}
+	}),
 	
 	"saveCollections": Zotero.Promise.coroutine(function* (collections) {
 		var collectionsToProcess = collections.slice();
