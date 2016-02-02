@@ -211,7 +211,8 @@ var Zotero_RecognizePDF = new function() {
 			}
 		});*/
 		var newItems = yield translate.translate({
-			libraryID
+			libraryID,
+			saveAttachments: false
 		});
 		if (newItems.length) {
 			return newItems[0];
@@ -394,6 +395,7 @@ var Zotero_RecognizePDF = new function() {
 					}
 					
 					// put new item in same collections as the old one
+					yield item.loadCollections();
 					let itemCollections = item.getCollections();
 					for (let i = 0; i < itemCollections.length; i++) {
 						let collection = yield Zotero.Collections.getAsync(itemCollections[i]);
@@ -598,8 +600,8 @@ var Zotero_RecognizePDF = new function() {
 				}
 				
 				item.deferred.resolve(
-					Zotero.Promise.try(getGoodLines, item.lines)
-					.then(function(lines) {
+					Zotero.Promise.try(function () {
+						var lines = getGoodLines(item.lines);
 						return queryGoogle(lines, item.libraryID, 3); // Try querying 3 times
 					})
 					.finally(function() { _processQueue(true); })
@@ -703,13 +705,15 @@ var Zotero_RecognizePDF = new function() {
 			}
 			Zotero.HTTP.lastGoogleScholarQueryTime = Date.now();
 			try {
-				try {
-					let xmlhttp = yield Zotero.HTTP.promise("GET", url, {"responseType":"document"});
-				}
-				catch (e) {
-					yield _checkCaptchaError(e, 3);
-				}
-				xmlhttp = yield _checkCaptchaOK(xmlhttp, 3);
+				let xmlhttp = yield Zotero.HTTP.request("GET", url, { "responseType": "document" })
+					.then(
+						function (xmlhttp) {
+							return _checkCaptchaOK(xmlhttp, 3);
+						},
+						function (e) {
+							return _checkCaptchaError(e, 3);
+						}
+					);
 				
 				let doc = xmlhttp.response,
 					deferred = Zotero.Promise.defer(),
@@ -768,7 +772,7 @@ var Zotero_RecognizePDF = new function() {
 		 *                  in order to get CAPTCHA to show up
 		 * @return {Promise} A promise resolved when PDF metadata has been retrieved
 		 */
-		function _checkCaptchaError(e, tries, dontClearCookies) {
+		var _checkCaptchaError = Zotero.Promise.coroutine(function* (e, tries, dontClearCookies) {
 			if(stopCheckCallback && stopCheckCallback()) {
 				throw new Zotero.Exception.Alert('recognizePDF.stopped');
 			}
@@ -791,13 +795,17 @@ var Zotero_RecognizePDF = new function() {
 					}
 					// Redo GET request
 					Zotero.debug("RecognizePDF: Reloading page after clearing cookies.");
-					return Zotero.HTTP.promise("GET", e.xmlhttp.channel.originalURI.spec, {"responseType":"document"})
-						.then(function(xmlhttp) {
+					return Zotero.HTTP.request(
+						"GET", e.xmlhttp.channel.originalURI.spec, { "responseType": "document" }
+					)
+					.then(
+						function (xmlhttp) {
 							return _checkCaptchaOK(xmlhttp, tries);
 						},
-						function(e) {
+						function (e) {
 							return _checkCaptchaError(e, tries, true); // Don't try this again
-						});
+						}
+					);
 				}
 				
 				Zotero.debug("RecognizePDF: Google Scholar returned an unexpected page"
@@ -805,7 +813,7 @@ var Zotero_RecognizePDF = new function() {
 				throw new Zotero.Exception.Alert('recognizePDF.limit');
 			}
 			throw e;
-		}
+		});
 		
 		/**
 		 * Prompt user to enter CPATCHA
