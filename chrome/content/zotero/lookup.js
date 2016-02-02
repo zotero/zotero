@@ -141,7 +141,7 @@ var Zotero_Lookup = new function () {
 						if(collection) collection.addItem(item.id);
 					});
 					
-					translate.translate(libraryID);
+					translate.translate({ libraryID });
 				});
 			})(item);
 		}

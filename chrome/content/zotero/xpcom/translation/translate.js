@@ -1196,6 +1196,9 @@ Zotero.Translate.Base.prototype = {
 			};
 		}
 		
+		var me = this;
+		var deferred = Zotero.Promise.defer()
+		
 		if(!this.translator || !this.translator.length) {
 			Zotero.debug("Translate: translate called without specifying a translator. Running detection first.");
 			this.setHandler('translators', function(me, translators) {
@@ -1203,11 +1206,11 @@ Zotero.Translate.Base.prototype = {
 					me.complete(false, "Could not find an appropriate translator");
 				} else {
 					me.setTranslator(translators);
-					Zotero.Translate.Base.prototype.translate.call(me, options);
+					deferred.resolve(Zotero.Translate.Base.prototype.translate.call(me, options));
 				}
 			});
 			this.getTranslators();
-			return;
+			return deferred.promise;
 		}
 		
 		this._currentState = "translate";
@@ -1220,8 +1223,7 @@ Zotero.Translate.Base.prototype = {
 		this._waitingForSave = false;
 
 		// Attach handlers for promise
-		var me = this,
-		    deferred = Zotero.Promise.defer();
+		var me = this;
 		var doneHandler = function (obj, returnValue) {
 			if (returnValue) deferred.resolve(me.newItems);
 			me.removeHandler("done", doneHandler);
@@ -1235,7 +1237,6 @@ Zotero.Translate.Base.prototype = {
 		this.setHandler("done", doneHandler);
 		this.setHandler("error", errorHandler);
 		
-		var me = this;
 		if(typeof this.translator[0] === "object") {
 			// already have a translator object, so use it
 			this._loadTranslator(this.translator[0]).then(function() { me._translateTranslatorLoaded() });
@@ -2428,8 +2429,11 @@ Zotero.Translate.Search.prototype.setTranslator = function(translator) {
  * translation fails
  */
 Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
-	if(this._currentState == "translate" && (!this.newItems || !this.newItems.length)
-		&& this.translator.length) { //length is 0 only when translate was called without translators
+	if(this._currentState == "translate"
+			&& (!this.newItems || !this.newItems.length)
+			&& !this._savingItems
+			//length is 0 only when translate was called without translators
+			&& this.translator.length) {
 		Zotero.debug("Translate: Could not find a result using "+this.translator[0].label, 3);
 		if(error) Zotero.debug(this._generateErrorString(error), 3);
 		if(this.translator.length > 1) {
