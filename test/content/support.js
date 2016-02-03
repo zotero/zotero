@@ -97,6 +97,9 @@ function waitForWindow(uri, callback) {
 				deferred.resolve(win);
 			});
 		}
+		else {
+			Zotero.debug(`Ignoring window ${uri} in waitForWindow()`);
+		}
 	};
 	var winobserver = {"observe":function(subject, topic, data) {
 		if(topic != "domwindowopened") return;
