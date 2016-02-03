@@ -618,7 +618,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		var file = yield this._getUploadFile(item);
 		
 		Components.utils.importGlobalProperties(["File"]);
-		file = File(file);
+		file = new File(file);
 		
 		var blob = new Blob([params.prefix, file, params.suffix]);
 		
