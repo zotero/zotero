@@ -90,7 +90,8 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 		var engine = new Zotero.Sync.Storage.Engine({
 			libraryID: options.libraryID || Zotero.Libraries.userLibraryID,
 			controller: new Zotero.Sync.Storage.Mode.ZFS({
-				apiClient: client
+				apiClient: client,
+				maxS3ConsecutiveFailures: 2
 			}),
 			stopOnError: true
 		});

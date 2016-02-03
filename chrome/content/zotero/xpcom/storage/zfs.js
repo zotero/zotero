@@ -34,7 +34,8 @@ Zotero.Sync.Storage.Mode.ZFS = function (options) {
 	this._s3Backoff = 1;
 	this._s3ConsecutiveFailures = 0;
 	this._maxS3Backoff = 60;
-	this._maxS3ConsecutiveFailures = 5;
+	this._maxS3ConsecutiveFailures = options.maxS3ConsecutiveFailures !== undefined
+		? options.maxS3ConsecutiveFailures : 5;
 };
 Zotero.Sync.Storage.Mode.ZFS.prototype = {
 	mode: "zfs",
@@ -157,7 +158,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 						// If S3 connection is interrupted, delay and retry, or bail if too many
 						// consecutive failures
 						if (status == 0 || status == 500 || status == 503) {
-							if (this._s3ConsecutiveFailures < this._maxS3ConsecutiveFailures) {
+							if (++this._s3ConsecutiveFailures < this._maxS3ConsecutiveFailures) {
 								let libraryKey = item.libraryKey;
 								let msg = "S3 returned 0 for " + libraryKey + " -- retrying download"
 								Components.utils.reportError(msg);
@@ -165,13 +166,12 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 								if (this._s3Backoff < this._maxS3Backoff) {
 									this._s3Backoff *= 2;
 								}
-								this._s3ConsecutiveFailures++;
 								Zotero.debug("Delaying " + libraryKey + " download for "
 									+ this._s3Backoff + " seconds", 2);
 								Zotero.Promise.delay(this._s3Backoff * 1000)
 								.then(function () {
-									deferred.resolve(this._downloadFile(request));
-								});
+									deferred.resolve(this.downloadFile(request));
+								}.bind(this));
 								return;
 							}
 							
