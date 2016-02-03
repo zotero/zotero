@@ -1393,7 +1393,8 @@ Zotero.Utilities = {
 		
 		// Only dump single level for nsIDOMNode objects (including document)
 		if (Zotero.isFx && !Zotero.isBookmarklet
-			&& obj instanceof Components.interfaces.nsIDOMNode
+			&& (obj instanceof Components.interfaces.nsIDOMNode
+				|| obj instanceof Components.interfaces.nsIDOMWindow)
 		) {
 			level = maxLevel;
 		}
