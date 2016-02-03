@@ -341,9 +341,11 @@ Zotero_Preferences.Attachment_Base_Directory = {
 	
 	changePath: Zotero.Promise.coroutine(function* (basePath) {
 		// Find all current attachments with relative attachment paths
-		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=? AND path LIKE '"
-			+ Zotero.Attachments.BASE_PATH_PLACEHOLDER  + "%'";
-		var params = [Zotero.Attachments.LINK_MODE_LINKED_FILE];
+		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=? AND path LIKE ?";
+		var params = [
+			Zotero.Attachments.LINK_MODE_LINKED_FILE,
+			Zotero.Attachments.BASE_PATH_PLACEHOLDER + "%"
+		];
 		var oldRelativeAttachmentIDs = yield Zotero.DB.columnQueryAsync(sql, params);
 		
 		//Find all attachments on the new base path
@@ -483,9 +485,11 @@ Zotero_Preferences.Attachment_Base_Directory = {
 	
 	clearPath: Zotero.Promise.coroutine(function* () {
 		// Find all current attachments with relative paths
-		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=? AND path LIKE '"
-			+ Zotero.Attachments.BASE_PATH_PLACEHOLDER  + "%'";
-		var params = [Zotero.Attachments.LINK_MODE_LINKED_FILE];
+		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=? AND path LIKE ?";
+		var params = [
+			Zotero.Attachments.LINK_MODE_LINKED_FILE,
+			Zotero.Attachments.BASE_PATH_PLACEHOLDER + "%"
+		];
 		var relativeAttachmentIDs = yield Zotero.DB.columnQueryAsync(sql, params);
 		
 		// Prompt for confirmation

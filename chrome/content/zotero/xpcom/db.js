@@ -369,12 +369,9 @@ Zotero.DBConnection.prototype.getNextName = Zotero.Promise.coroutine(function* (
 		[libraryID, table, field, name] = [null, libraryID, table, field];
 	}
 	
-	var sql = "SELECT SUBSTR(" + field + ", " + (name.length + 1) + ") "
-				+ "FROM " + table + " "
-				+ "WHERE libraryID=? AND "
-				+ field + " LIKE '" + name + "%' "
-				+ " ORDER BY " + field;
-	var params = [libraryID];
+	var sql = "SELECT SUBSTR(" + field + ", " + (name.length + 1) + ") FROM " + table
+		+ " WHERE libraryID=? AND " + field + " LIKE ? ORDER BY " + field;
+	var params = [libraryID, name + "%"];
 	var suffixes = yield this.columnQueryAsync(sql, params);
 	suffixes.filter(function (x) x.match(/^( [0-9]+)?$/));
 	

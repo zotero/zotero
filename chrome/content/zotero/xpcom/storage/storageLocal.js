@@ -438,7 +438,8 @@ Zotero.Sync.Storage.Local = {
 		sql += ") "
 			// Skip attachments with empty path, which can't be saved, and files with .zotero*
 			// paths, which have somehow ended up in some users' libraries
-			+ "AND path!='' AND path NOT LIKE 'storage:.zotero%'";
+			+ "AND path!='' AND path NOT LIKE ?";
+		params.push('storage:.zotero%');
 		return Zotero.DB.columnQueryAsync(sql, params);
 	},
 	

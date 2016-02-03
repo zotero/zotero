@@ -56,6 +56,16 @@ describe("ZoteroPane", function() {
 		})
 	})
 	
+	describe("#newCollection()", function () {
+		it("should create a collection", function* () {
+			var promise = waitForDialog();
+			var id = yield zp.newCollection();
+			yield promise;
+			var collection = Zotero.Collections.get(id);
+			assert.isTrue(collection.name.startsWith(Zotero.getString('pane.collections.untitled')));
+		});
+	});
+	
 	describe("#itemSelected()", function () {
 		it.skip("should update the item count", function* () {
 			var collection = new Zotero.Collection;
