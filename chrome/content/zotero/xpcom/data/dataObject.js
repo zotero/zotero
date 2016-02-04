@@ -1227,6 +1227,10 @@ Zotero.DataObject.prototype.toResponseJSON = Zotero.Promise.coroutine(function* 
 
 
 Zotero.DataObject.prototype._preToJSON = function (options) {
+	if (!this._id) {
+		throw new Error(`${this._ObjectType} must be saved before running toJSON()`);
+	}
+	
 	var env = { options };
 	env.mode = options.mode || 'new';
 	if (env.mode == 'patch') {
