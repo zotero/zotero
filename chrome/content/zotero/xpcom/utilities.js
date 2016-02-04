@@ -1586,7 +1586,8 @@ Zotero.Utilities = {
 	/**
 	 * Converts an item from toArray() format to citeproc-js JSON
 	 * @param {Zotero.Item} zoteroItem
-	 * @return {Object} The CSL item
+	 * @return {Object|Promise<Object>} A CSL item, or a promise for a CSL item if a Zotero.Item
+	 *     is passed
 	 */
 	"itemToCSLJSON":function(zoteroItem) {
 		if (zoteroItem instanceof Zotero.Item) {
@@ -1836,8 +1837,8 @@ Zotero.Utilities = {
 				
 				var nameMappings = cslItem[CSL_NAMES_MAPPINGS[field]];
 				for(var i in nameMappings) {
-					var cslAuthor = nameMappings[i],
-						creator = isZoteroItem ? new Zotero.Creator() : {};
+					var cslAuthor = nameMappings[i];
+					let creator = {};
 					if(cslAuthor.family || cslAuthor.given) {
 						if(cslAuthor.family) creator.lastName = cslAuthor.family;
 						if(cslAuthor.given) creator.firstName = cslAuthor.given;
@@ -1847,9 +1848,10 @@ Zotero.Utilities = {
 					} else {
 						continue;
 					}
+					creator.creatorTypeID = creatorTypeID;
 					
 					if(isZoteroItem) {
-						item.setCreator(item.getCreators().length, creator, creatorTypeID);
+						item.setCreator(item.getCreators().length, creator);
 					} else {
 						creator.creatorType = Zotero.CreatorTypes.getName(creatorTypeID);
 						if(Zotero.isFx && !Zotero.isBookmarklet && Zotero.platformMajorVersion >= 32) {

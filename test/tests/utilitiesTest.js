@@ -272,7 +272,7 @@ describe("Zotero.Utilities", function() {
 			
 			assert.isUndefined(cslJSON.PMID, 'field labels are case-sensitive');
 		}));
-		it("should parse particles in creator names", function() {
+		it("should parse particles in creator names", function* () {
 			let creators = [
 				{
 					// No particles
@@ -339,7 +339,7 @@ describe("Zotero.Utilities", function() {
 				}
 			];
 			
-			let data = populateDBWithSampleData({
+			let data = yield populateDBWithSampleData({
 				item: {
 					itemType: 'journalArticle',
 					creators: creators
@@ -347,7 +347,7 @@ describe("Zotero.Utilities", function() {
 			});
 				
 			let item = Zotero.Items.get(data.item.id);
-			let cslCreators = Zotero.Utilities.itemToCSLJSON(item).author;
+			let cslCreators = (yield Zotero.Utilities.itemToCSLJSON(item)).author;
 			
 			assert.deepEqual(cslCreators[0], creators[0].expect, 'simple name is not parsed');
 			assert.deepEqual(cslCreators[1], creators[1].expect, 'name with dropping and non-dropping particles is parsed');
@@ -357,63 +357,52 @@ describe("Zotero.Utilities", function() {
 			assert.deepEqual(cslCreators[5], creators[5].expect, 'protected last name prevents parsing');
 		});
 	});
-	describe("itemFromCSLJSON", function() {
-		it("should stably perform itemToCSLJSON -> itemFromCSLJSON -> itemToCSLJSON", function() {
+	describe("itemFromCSLJSON", function () {
+		it("should stably perform itemToCSLJSON -> itemFromCSLJSON -> itemToCSLJSON", function* () {
 			let data = loadSampleData('citeProcJSExport');
 			
-			Zotero.DB.beginTransaction();
-			
 			for (let i in data) {
-				let item = data[i];
+				let json = data[i];
 				
-				let zItem = new Zotero.Item();
-				Zotero.Utilities.itemFromCSLJSON(zItem, item);
-				zItem = Zotero.Items.get(zItem.save());
+				let item = new Zotero.Item();
+				Zotero.Utilities.itemFromCSLJSON(item, json);
+				yield item.saveTx();
 				
-				let newItem = Zotero.Utilities.itemToCSLJSON(zItem);
+				let newJSON = yield Zotero.Utilities.itemToCSLJSON(item);
 				
-				delete newItem.id;
-				delete item.id;
+				delete newJSON.id;
+				delete json.id;
 				
-				assert.deepEqual(newItem, item, i + ' export -> import -> export is stable');
+				assert.deepEqual(newJSON, json, i + ' export -> import -> export is stable');
 			}
 			
-			Zotero.DB.commitTransaction();
-			
 		});
-		it("should import exported standalone note", function() {
+		it("should import exported standalone note", function* () {
 			let note = new Zotero.Item('note');
 			note.setNote('Some note longer than 50 characters, which will become the title.');
-			note = Zotero.Items.get(note.save());
+			yield note.saveTx();
 			
-			let jsonNote = Zotero.Utilities.itemToCSLJSON(note);
+			let jsonNote = yield Zotero.Utilities.itemToCSLJSON(note);
 			
-			let zItem = new Zotero.Item();
-			Zotero.Utilities.itemFromCSLJSON(zItem, jsonNote);
-			zItem = Zotero.Items.get(zItem.save());
+			let item = new Zotero.Item();
+			Zotero.Utilities.itemFromCSLJSON(item, jsonNote);
 			
-			assert.equal(zItem.getField('title'), jsonNote.title, 'title imported correctly');
+			assert.equal(item.getField('title'), jsonNote.title, 'title imported correctly');
 		});
-		it("should import exported standalone attachment", function() {
-			let file = getTestDataDirectory();
-			file.append("empty.pdf");
-			
-			let attachment = Zotero.Items.get(Zotero.Attachments.importFromFile(file));
+		it("should import exported standalone attachment", function* () {
+			let attachment = yield importFileAttachment("empty.pdf");
 			attachment.setField('title', 'Empty');
 			attachment.setField('accessDate', '2001-02-03 12:13:14');
 			attachment.setField('url', 'http://example.com');
 			attachment.setNote('Note');
+			yield attachment.saveTx();
 			
-			attachment.save();
+			let jsonAttachment = yield Zotero.Utilities.itemToCSLJSON(attachment);
 			
-			let jsonAttachment = Zotero.Utilities.itemToCSLJSON(attachment);
+			let item = new Zotero.Item();
+			Zotero.Utilities.itemFromCSLJSON(item, jsonAttachment);
 			
-			let zItem = new Zotero.Item();
-			Zotero.Utilities.itemFromCSLJSON(zItem, jsonAttachment);
-			zItem = Zotero.Items.get(zItem.save());
-			
-			assert.equal(zItem.getField('title'), jsonAttachment.title, 'title imported correctly');
+			assert.equal(item.getField('title'), jsonAttachment.title, 'title imported correctly');
 		});
->>>>>>> 4.0:test/tests/utilities.js
 	});
 });

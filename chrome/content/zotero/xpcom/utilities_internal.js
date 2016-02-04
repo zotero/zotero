@@ -608,15 +608,18 @@ Zotero.Utilities.Internal = {
 	 * 
 	 * @param {Zotero.Item} zoteroItem
 	 * @param {Boolean} legacy Add mappings for legacy (pre-4.0.27) translators
-	 * @return {Object}
+	 * @return {Promise<Object>}
 	 */
 	"itemToExportFormat": new function() {
 		return Zotero.Promise.coroutine(function* (zoteroItem, legacy) {
 			var item = yield zoteroItem.toJSON();
+			
 			item.uri = Zotero.URI.getItemURI(zoteroItem);
 			delete item.key;
 			
 			if (!zoteroItem.isAttachment() && !zoteroItem.isNote()) {
+				yield zoteroItem.loadChildItems();
+				
 				// Include attachments
 				item.attachments = [];
 				let attachments = zoteroItem.getAttachments();

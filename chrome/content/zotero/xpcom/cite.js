@@ -517,12 +517,19 @@ Zotero.Cite.System.prototype = {
 					return embeddedCitation;
 				}
 			}
+		} else {
+			// is an item ID
+			//if(this._cache[item]) return this._cache[item];
+			try {
+				zoteroItem = Zotero.Items.get(item);
+			} catch(e) {}
 		}
 
 		if(!zoteroItem) {
 			throw "Zotero.Cite.System.retrieveItem called on non-item "+item;
 		}
 		
+		throw new Error("Unimplemented");
 		var cslItem = Zotero.Utilities.itemToCSLJSON(zoteroItem);
 		
 		// TEMP: citeproc-js currently expects the id property to be the item DB id
