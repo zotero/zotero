@@ -1806,10 +1806,6 @@ Zotero.Utilities = {
 				var textMappings = CSL_TEXT_MAPPINGS[variable];
 				for(var i=0; i<textMappings.length; i++) {
 					var field = textMappings[i];
-					
-					// Until 5.0, use version instead of versionNumber
-					if (field == 'versionNumber') field = 'version';
-					
 					var fieldID = Zotero.ItemFields.getID(field);
 
 					if(Zotero.ItemFields.isBaseField(fieldID)) {
