@@ -289,7 +289,7 @@ Zotero.FeedReader._processCreators = function(feedEntry, field, role) {
 			let person = personArr.queryElementAt(i, Components.interfaces.nsIFeedPerson);
 			if (!person || !person.name) continue;
 			
-			let name = Zotero.Utilities.trimInternal(person.name);
+			let name = Zotero.Utilities.cleanTags(Zotero.Utilities.trimInternal(person.name));
 			if (!name) continue;
 			
 			let commas = name.split(',').length - 1,
@@ -336,6 +336,10 @@ Zotero.FeedReader._processCreators = function(feedEntry, field, role) {
 		if (!creator.firstName) {
 			creator.fieldMode = 1;
 		}
+		// Sometimes these end up empty when parsing really nasty HTML based fields, so just skip.
+		if (!creator.firstName && !creator.lastName) {
+			continue;
+		}
 		
 		creators.push(creator);
 	}
@@ -376,43 +380,6 @@ Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
 	
 	if (feedEntry.link) item.url = feedEntry.link.spec;
 	
-	if (feedEntry.updated) item.dateModified = new Date(feedEntry.updated);
-	
-	if (feedEntry.published) {
-		var date = new Date(feedEntry.published);
-		
-		if (!date.getUTCSeconds() && !(date.getUTCHours() && date.getUTCMinutes())) {
-			// There was probably no time, but there may have been a a date range,
-			// so something could have ended up in the hour _or_ minute field
-			date = getFeedField(feedEntry, 'pubDate')
-				/* In case it was magically pulled from some other field */
-				|| ( date.getUTCFullYear() + '-'
-					+ (date.getUTCMonth() + 1) + '-'
-					+  date.getUTCDate() );
-		} 
-		else {
-			date = Zotero.Date.dateToSQL(date, true);
-		}
-		item.dateAdded = date;
-		
-		if (!item.dateModified) {
-			items.dateModified = date;
-		}
-	}
-	
-	if (!item.dateModified) {
-		// When there's no reliable modification date, we can assume that item doesn't get updated
-		Zotero.debug("FeedReader: Feed item missing a modification date (" + item.guid + ")");
-	} else {
-		// Convert date modified to string, since those are directly comparable
-		item.dateModified = Zotero.Date.dateToSQL(item.dateModified, true);
-	}
-	
-	if (!item.dateAdded && item.dateModified) {
-		// Use lastModified date
-		item.dateAdded = item.dateModified;
-	}
-	
 	if (feedEntry.rights) item.rights = Zotero.FeedReader._getRichText(feedEntry.rights, 'rights');
 	
 	item.creators = Zotero.FeedReader._processCreators(feedEntry, 'authors', 'author');
@@ -429,8 +396,11 @@ Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
 	
 	/** Done with basic metadata, now look for better data **/
 	
-	date = Zotero.FeedReader._getFeedField(feedEntry, 'publicationDate', 'prism')
-		|| Zotero.FeedReader._getFeedField(feedEntry, 'date', 'dc');
+	let date = Zotero.FeedReader._getFeedField(feedEntry, 'publicationDate', 'prism')
+		|| Zotero.FeedReader._getFeedField(feedEntry, 'date', 'dc')
+		|| Zotero.FeedReader._getFeedField(feedEntry, 'pubDate') // RSS
+		|| Zotero.FeedReader._getFeedField(feedEntry, 'published') // Atom
+		|| Zotero.FeedReader._getFeedField(feedEntry, 'updated'); // Atom
 	if (date) item.date = date;
 	
 	let publicationTitle = Zotero.FeedReader._getFeedField(feedEntry, 'publicationName', 'prism')

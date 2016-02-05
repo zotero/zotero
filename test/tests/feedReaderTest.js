@@ -111,14 +111,13 @@ describe("Zotero.FeedReader", function () {
 				title: 'Star City',
 				abstractNote: 'How do Americans get ready to work with Russians aboard the International Space Station? They take a crash course in culture, language and protocol at Russia\'s Star City.',
 				url: 'http://liftoff.msfc.nasa.gov/news/2003/news-starcity.asp',
-				dateModified: '2003-06-03 09:39:21',
-				dateAdded: '2003-06-03 09:39:21',
 				creators: [{
 					firstName: '',
 					lastName: 'editor@example.com',
 					creatorType: 'author',
 					fieldMode: 1
 				}],
+				date: 'Tue, 03 Jun 2003 09:39:21 GMT',
 				language: 'en-us',
 				itemType: 'journalArticle'
 			};
@@ -136,8 +135,6 @@ describe("Zotero.FeedReader", function () {
 				title: 'Title 1',
 				abstractNote: 'Description 1',
 				url: 'http://www.example.com/item1',
-				dateModified: '2016-01-07 00:00:00',
-				dateAdded: '2016-01-07 00:00:00',
 				creators: [
 					{ firstName: 'Author1 A. T.', lastName: 'Rohtua', creatorType: 'author' },
 					{ firstName: 'Author2 A.', lastName: 'Auth', creatorType: 'author' },

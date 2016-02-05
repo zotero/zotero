@@ -31,6 +31,7 @@ Zotero.FeedItem = function(itemTypeOrID, params = {}) {
 	Zotero.FeedItem._super.call(this, itemTypeOrID);
 	
 	this._feedItemReadTime = null;
+	this._feedItemTranslatedTime = null;
 	
 	Zotero.Utilities.assignProps(this, params, ['guid']);
 };
@@ -70,21 +71,21 @@ Zotero.defineProperty(Zotero.FeedItem.prototype, 'isRead', {
 	}
 });
 //
-//Zotero.defineProperty(Zotero.FeedItem.prototype, 'isTranslated', {
-//	get: function() {
-//		return !!this._feedItemTranslationTime;
-//	}, 
-//	set: function(state) {
-//		if (state != !!this._feedItemTranslationTime) {
-//			if (state) {
-//				this._feedItemTranslationTime = Zotero.Date.dateToSQL(new Date(), true);
-//			} else {
-//				this._feedItemTranslationTime = null;
-//			}
-//			this._changed.feedItemData = true;
-//		}
-//	}
-//});
+Zotero.defineProperty(Zotero.FeedItem.prototype, 'isTranslated', {
+	get: function() {
+		return !!this._feedItemTranslatedTime;
+	}, 
+	set: function(state) {
+		if (state != !!this._feedItemTranslatedTime) {
+			if (state) {
+				this._feedItemTranslatedTime = Zotero.Date.dateToSQL(new Date(), true);
+			} else {
+				this._feedItemTranslatedTime = null;
+			}
+			this._changed.feedItemData = true;
+		}
+	}
+});
 
 Zotero.FeedItem.prototype.loadPrimaryData = Zotero.Promise.coroutine(function* (reload, failOnMissing) {
 	if (this.guid && !this.id) {
@@ -166,17 +167,12 @@ Zotero.FeedItem.prototype.forceSaveTx = function(options) {
 	return this.saveTx(newOptions);
 }
 
-Zotero.FeedItem.prototype.save = function(options = {}) {
-	options.skipDateModifiedUpdate = true;
-	return Zotero.FeedItem._super.prototype.save.apply(this, arguments)
-}
-
 Zotero.FeedItem.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	yield Zotero.FeedItem._super.prototype._saveData.apply(this, arguments);
 	
 	if (this._changed.feedItemData || env.isNew) {
-		var sql = "REPLACE INTO feedItems VALUES (?,?,?)";
-		yield Zotero.DB.queryAsync(sql, [env.id, this.guid, this._feedItemReadTime]);
+		var sql = "REPLACE INTO feedItems VALUES (?,?,?,?)";
+		yield Zotero.DB.queryAsync(sql, [env.id, this.guid, this._feedItemReadTime, this._feedItemTranslatedTime]);
 		
 		this._clearChanged('feedItemData');
 	}
@@ -262,6 +258,7 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	// TODO: handle no items like the ones in french history studies feed
 	// set new translated data for item
 	this.fromJSON(itemData);
+	this.isTranslated = true;
 	this.forceSaveTx();
 	
 	return this;
