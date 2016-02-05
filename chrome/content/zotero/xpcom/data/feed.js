@@ -343,11 +343,9 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 		let itemIterator = new fr.ItemIterator();
 		let item, processedGUIDs = [];
 		while (item = yield itemIterator.next().value) {
-			// NOTE: Might cause issues with feeds that set pubDate for publication date of the item
-			// rather than the date the item was added to the feed.
-			if (item.dateModified && this.lastUpdate
-				&& item.dateModified < this.lastUpdate
-			) {
+			// TODO: add a database column to feed for lastGUID so we have a good way to decide
+			// when to terminate item retrieval.
+			if (false) {
 				Zotero.debug("Item modification date before last update date (" + this.lastCheck + ")");
 				Zotero.debug(item);
 				// We can stop now
@@ -373,13 +371,6 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 				feedItem.libraryID = this.id;
 			} else {
 				Zotero.debug("Feed item " + item.guid + " already in library.");
-				
-				if (!item.dateModified || 
-					(feedItem.dateModified && feedItem.dateModified == item.dateModified)
-				) {
-					Zotero.debug("Modification date has not changed. Skipping update.");
-					continue;
-				}
 				Zotero.debug("Updating metadata");
 				yield feedItem.loadItemData();
 				yield feedItem.loadCreators();
@@ -388,7 +379,6 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 			
 			// Delete invalid data
 			delete item.guid;
-			delete item.dateAdded;
 			
 			feedItem.fromJSON(item);
 			toAdd.push(feedItem);

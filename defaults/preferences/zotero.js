@@ -62,6 +62,7 @@ pref("extensions.zotero.lastLongTagMode", 0);
 pref("extensions.zotero.lastLongTagDelimiter", ";");
 
 pref("extensions.zotero.fallbackSort", 'firstCreator,date,title,dateAdded');
+pref("extensions.zotero.feedSortAsc", false);
 pref("extensions.zotero.sortCreatorAsString", false);
 
 //Tag Cloud

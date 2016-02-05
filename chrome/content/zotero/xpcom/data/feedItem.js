@@ -166,11 +166,6 @@ Zotero.FeedItem.prototype.forceSaveTx = function(options) {
 	return this.saveTx(newOptions);
 }
 
-Zotero.FeedItem.prototype.save = function(options = {}) {
-	options.skipDateModifiedUpdate = true;
-	return Zotero.FeedItem._super.prototype.save.apply(this, arguments)
-}
-
 Zotero.FeedItem.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	yield Zotero.FeedItem._super.prototype._saveData.apply(this, arguments);
 	
