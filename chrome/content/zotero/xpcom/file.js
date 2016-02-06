@@ -204,7 +204,8 @@ Zotero.File = new function(){
 	 * @return {Promise} A promise that is resolved with the contents of the file
 	 */
 	this.getContentsAsync = function (source, charset, maxLength) {
-		Zotero.debug("Getting contents of " + source);
+		Zotero.debug("Getting contents of "
+			+ (source instanceof Components.interfaces.nsIFile ? source.path : source));
 		
 		// If path is given, convert to file:// URL
 		if (typeof source == 'string' && !source.match(/^file:/)) {
