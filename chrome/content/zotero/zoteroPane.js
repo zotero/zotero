@@ -1967,8 +1967,10 @@ var ZoteroPane = new function()
 	});
 	
 	
+	/**
+	 * Some keys trigger an immediate search
+	 */
 	this.handleSearchKeypress = function (textbox, event) {
-		// Events that turn find-as-you-type on
 		if (event.keyCode == event.DOM_VK_ESCAPE) {
 			textbox.value = '';
 			this.search();
@@ -1980,12 +1982,7 @@ var ZoteroPane = new function()
 	
 	
 	this.handleSearchInput = function (textbox, event) {
-		// This is the new length, except, it seems, when the change is a
-		// result of Undo or Redo
-		if (!textbox.value.length) {
-			this.search();
-		}
-		else if (textbox.value.indexOf('"') != -1) {
+		if (textbox.value.indexOf('"') != -1) {
 			this.setItemsPaneMessage(Zotero.getString('advancedSearchMode'));
 		}
 	}
