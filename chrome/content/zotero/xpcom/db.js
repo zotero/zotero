@@ -1298,3 +1298,9 @@ Zotero.DBConnection.prototype._getTypedValue = function (statement, i) {
 
 // Initialize main database connection
 Zotero.DB = new Zotero.DBConnection('zotero');
+
+Zotero.DB.IncompatibleVersionException = function (msg, dbClientVersion) {
+	this.message = msg;
+	this.dbClientVersion = dbClientVersion;
+}
+Zotero.DB.IncompatibleVersionException.prototype = Object.create(Error.prototype);

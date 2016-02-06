@@ -610,20 +610,23 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				var updated = Zotero.Schema.updateSchema();
 			}
 			catch (e) {
-				if (e.toString().match('newer than SQL file')) {
-					let versions = e.toString().match(/\((\d+) < (\d+)\)/);
+				if (e instanceof Zotero.DB.IncompatibleVersionException) {
 					let kbURL = "https://www.zotero.org/support/kb/newer_db_version";
-					let msg = Zotero.getString('startupError.zoteroVersionIsOlder') + " "
-						+ Zotero.getString('startupError.zoteroVersionIsOlder.upgrade') + "\n\n"
+					let msg = (e.dbClientVersion
+						? Zotero.getString('startupError.incompatibleDBVersion',
+							[Zotero.clientName, e.dbClientVersion])
+						: Zotero.getString('startupError.zoteroVersionIsOlder')) + "\n\n"
 						+ Zotero.getString('startupError.zoteroVersionIsOlder.current', Zotero.version)
-						+ (versions ? " (" + versions[1] + " < " + versions[2] + ")" : "") + "\n\n"
-						+ Zotero.getString('general.seeForMoreInformation', kbURL);
+							+ "\n\n"
+						+ Zotero.getString('startupError.zoteroVersionIsOlder.upgrade',
+							ZOTERO_CONFIG.DOMAIN_NAME);
 					Zotero.startupError = msg;
 					_startupErrorHandler = function() {
 						var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 							.getService(Components.interfaces.nsIPromptService);
 						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+							+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
 							+ ps.BUTTON_POS_0_DEFAULT;
 						
 						var index = ps.confirmEx(
@@ -632,10 +635,13 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 							Zotero.startupError,
 							buttonFlags,
 							Zotero.getString('general.checkForUpdate'),
-							null, null, null, {}
+							null,
+							Zotero.getString('general.moreInformation'),
+							null,
+							{}
 						);
 						
-						// "Check for updates" button
+						// "Check for Update" button
 						if(index === 0) {
 							if(Zotero.isStandalone) {
 								Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
@@ -679,6 +685,17 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 									}
 								);
 							}
+						}
+						// Load More Info page
+						else if (index == 2) {
+							let io = Components.classes['@mozilla.org/network/io-service;1']
+							.getService(Components.interfaces.nsIIOService);
+							let uri = io.newURI(kbURL, null, null);
+							let handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
+							.getService(Components.interfaces.nsIExternalProtocolService)
+							.getProtocolHandlerInfo('http');
+							handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
+							handler.launchWithURI(uri, null);
 						}
 					};
 				}

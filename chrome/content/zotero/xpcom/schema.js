@@ -1554,8 +1554,12 @@ Zotero.Schema = new function(){
 			return true;
 		}
 		
-		throw ("Zotero '" + schema + "' DB version (" + dbVersion
-			+ ") is newer than SQL file (" + schemaVersion + ")");
+		let dbClientVersion = Zotero.DB.valueQuery(
+			"SELECT value FROM settings WHERE setting='client' AND key='lastCompatibleVersion'"
+		);
+		let msg = "Database is incompatible with this Zotero version "
+			+ `(${schema}: ${schemaVersion} > ${dbVersion})`
+		throw new Zotero.DB.IncompatibleVersionException(msg, dbClientVersion);
 	}
 	
 	
@@ -1937,8 +1941,12 @@ Zotero.Schema = new function(){
 			return false;
 		}
 		else if (fromVersion > toVersion) {
-			throw new Error("Zotero user data DB version is newer than SQL file "
-				+ "(" + toVersion + " < " + fromVersion + ")");
+			let dbClientVersion = Zotero.DB.valueQuery(
+				"SELECT value FROM settings WHERE setting='client' AND key='lastCompatibleVersion'"
+			);
+			let msg = "Database is incompatible with this Zotero version "
+				+ `(user data: ${fromVersion} > ${toVersion})`
+			throw new Zotero.DB.IncompatibleVersionException(msg, dbClientVersion);
 		}
 		
 		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
