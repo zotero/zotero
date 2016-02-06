@@ -1037,8 +1037,6 @@ Zotero.ItemTreeView.prototype.getCellText = function (row, column)
 
 Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 {
-	var self = this;
-	
 	if(col.id == 'zotero-items-column-title')
 	{
 		// Get item type icon and tag swatches
@@ -1086,8 +1084,8 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 				item.getBestAttachmentState()
 				// Refresh cell when promise is fulfilled
 				.then(function (state) {
-					self._treebox.invalidateCell(row, col);
-				})
+					this._treebox.invalidateCell(row, col);
+				}.bind(this))
 				.done();
 			}
 		}
@@ -1103,10 +1101,12 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 			item.fileExists()
 			// Refresh cell when promise is fulfilled
 			.then(function (exists) {
-				self._treebox.invalidateCell(row, col);
-			});
+				this._treebox.invalidateCell(row, col);
+			}.bind(this));
 		}
 	}
+	
+	return "";
 }
 
 Zotero.ItemTreeView.prototype.isContainer = function(row)

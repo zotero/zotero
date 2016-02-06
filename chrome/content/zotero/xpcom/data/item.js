@@ -2081,6 +2081,7 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 		// Ignore .zotero* files that were relinked before we started blocking them
 		if (path.startsWith(".zotero")) {
 			Zotero.debug("Ignoring attachment file " + path, 2);
+			this._updateAttachmentStates(false);
 			return false;
 		}
 		
@@ -2111,6 +2112,8 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 			this._updateAttachmentStates(false);
 			return false;
 		}
+		
+		this._updateAttachmentStates(true);
 		return path;
 	}
 	
