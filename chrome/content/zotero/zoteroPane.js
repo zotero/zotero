@@ -45,8 +45,6 @@ var ZoteroPane = new function()
 	this.handleKeyUp = handleKeyUp;
 	this.setHighlightedRowsCallback = setHighlightedRowsCallback;
 	this.handleKeyPress = handleKeyPress;
-	this.handleSearchKeypress = handleSearchKeypress;
-	this.handleSearchInput = handleSearchInput;
 	this.getSelectedCollection = getSelectedCollection;
 	this.getSelectedSavedSearch = getSelectedSavedSearch;
 	this.getSelectedItems = getSelectedItems;
@@ -1962,45 +1960,33 @@ var ZoteroPane = new function()
 		var search = document.getElementById('zotero-tb-search');
 		if (search.value !== '') {
 			search.value = '';
-			yield ZoteroPane_Local.search();
+			yield this.search();
 			return true;
 		}
 		return false;
 	});
 	
 	
-	function handleSearchKeypress(textbox, event) {
+	this.handleSearchKeypress = function (textbox, event) {
 		// Events that turn find-as-you-type on
 		if (event.keyCode == event.DOM_VK_ESCAPE) {
 			textbox.value = '';
-			ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('searchInProgress'));
-			setTimeout(function () {
-				ZoteroPane_Local.search();
-				ZoteroPane_Local.clearItemsPaneMessage();
-			}, 1);
+			this.search();
 		}
 		else if (event.keyCode == event.DOM_VK_RETURN) {
-			ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('searchInProgress'));
-			setTimeout(function () {
-				ZoteroPane_Local.search(true);
-				ZoteroPane_Local.clearItemsPaneMessage();
-			}, 1);
+			this.search(true);
 		}
 	}
 	
 	
-	function handleSearchInput(textbox, event) {
+	this.handleSearchInput = function (textbox, event) {
 		// This is the new length, except, it seems, when the change is a
 		// result of Undo or Redo
 		if (!textbox.value.length) {
-			ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('searchInProgress'));
-			setTimeout(function () {
-				ZoteroPane_Local.search();
-				ZoteroPane_Local.clearItemsPaneMessage();
-			}, 1);
+			this.search();
 		}
 		else if (textbox.value.indexOf('"') != -1) {
-			ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('advancedSearchMode'));
+			this.setItemsPaneMessage(Zotero.getString('advancedSearchMode'));
 		}
 	}
 	
@@ -2016,8 +2002,10 @@ var ZoteroPane = new function()
 		if (!runAdvanced && search.value.indexOf('"') != -1) {
 			return;
 		}
+		this.setItemsPaneMessage(Zotero.getString('searchInProgress'));
 		var searchVal = search.value;
-		return this.itemsView.setFilter('search', searchVal);
+		yield this.itemsView.setFilter('search', searchVal);
+		this.clearItemsPaneMessage();
 	});
 	
 	
