@@ -58,6 +58,7 @@ Zotero_Preferences.Cite = {
 			treechildren.removeChild(treechildren.firstChild);
 		}
 		
+		yield Zotero.Styles.init();
 		var styles = Zotero.Styles.getVisible();
 		var selectIndex = false;
 		styles.forEach(function (style, i) {
