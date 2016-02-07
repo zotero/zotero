@@ -37,7 +37,7 @@ const ZoteroStandalone = new function() {
 			if(!Zotero) {
 				throw true;
 			}
-			if(Zotero.initializationZotero.Promise.isPending()) {
+			if(Zotero.initializationPromise.isPending()) {
 				Zotero.showZoteroPaneProgressMeter();
 			}
 			return Zotero.initializationPromise;
