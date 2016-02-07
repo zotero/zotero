@@ -1,10 +1,83 @@
 describe("Zotero.Fulltext", function () {
+	var win, pdfToolsVersion;
+	
+	before(function* () {
+		// Hidden browser, which requires a browser window, needed for charset detection
+		// (until we figure out a better way)
+		win = yield loadBrowserWindow();
+		
+		pdfToolsVersion = Zotero.isWin ? '3.02a' : '3.04';
+	});
+	after(function () {
+		if (win) {
+			win.close();
+		}
+	});
+	
+	describe("#indexItems()", function () {
+		before(function* () {
+			yield Zotero.Fulltext.downloadPDFTool('info', pdfToolsVersion);
+			yield Zotero.Fulltext.downloadPDFTool('converter', pdfToolsVersion);
+		});
+		
+		beforeEach(function () {
+			Zotero.Prefs.clear('fulltext.textMaxLength');
+			Zotero.Prefs.clear('fulltext.pdfMaxPages');
+		});
+		after(function () {
+			Zotero.Prefs.clear('fulltext.textMaxLength');
+			Zotero.Prefs.clear('fulltext.pdfMaxPages');
+		});
+		
+		it("should index a text file by default", function* () {
+			var item = yield importFileAttachment('test.txt');
+			assert.equal(
+				(yield Zotero.Fulltext.getIndexedState(item)),
+				Zotero.Fulltext.INDEX_STATE_INDEXED
+			);
+		})
+		
+		it("should skip indexing of a text file if fulltext.textMaxLength is 0", function* () {
+			Zotero.Prefs.set('fulltext.textMaxLength', 0);
+			var item = yield importFileAttachment('test.txt');
+			assert.equal(
+				(yield Zotero.Fulltext.getIndexedState(item)),
+				Zotero.Fulltext.INDEX_STATE_UNINDEXED
+			);
+		})
+		
+		it("should index a PDF by default", function* () {
+			var item = yield importFileAttachment('test.pdf');
+			assert.equal(
+				(yield Zotero.Fulltext.getIndexedState(item)),
+				Zotero.Fulltext.INDEX_STATE_INDEXED
+			);
+		})
+		
+		it("should skip indexing of a PDF if fulltext.textMaxLength is 0", function* () {
+			Zotero.Prefs.set('fulltext.textMaxLength', 0);
+			var item = yield importFileAttachment('test.pdf');
+			assert.equal(
+				(yield Zotero.Fulltext.getIndexedState(item)),
+				Zotero.Fulltext.INDEX_STATE_UNINDEXED
+			);
+		})
+		
+		it("should skip indexing of a PDF if fulltext.pdfMaxPages is 0", function* () {
+			Zotero.Prefs.set('fulltext.pdfMaxPages', 0);
+			var item = yield importFileAttachment('test.pdf');
+			assert.equal(
+				(yield Zotero.Fulltext.getIndexedState(item)),
+				Zotero.Fulltext.INDEX_STATE_UNINDEXED
+			);
+		})
+	})
+	
 	describe("#downloadPDFTool()", function () {
 		it("should install the PDF tools", function* () {
 			yield Zotero.Fulltext.uninstallPDFTools();
 			assert.isFalse(Zotero.Fulltext.pdfInfoIsRegistered());
 			
-			var version = Zotero.isWin ? '3.02a' : '3.04';
 			var dataDir = Zotero.getZoteroDirectory().path;
 			var execFileName = Zotero.Fulltext.pdfInfoFileName;
 			var execPath = OS.Path.join(dataDir, execFileName);
@@ -16,7 +89,7 @@ describe("Zotero.Fulltext", function () {
 				'resource://zotero/redirect.' + scriptExt
 			);
 			var cacheExecPath = OS.Path.join(
-				getTestDataDirectory().path, "pdf", version, execFileName
+				getTestDataDirectory().path, "pdf", pdfToolsVersion, execFileName
 			);
 			
 			// Delete existing files
@@ -33,7 +106,7 @@ describe("Zotero.Fulltext", function () {
 			}
 			catch (e) {}
 			
-			yield Zotero.Fulltext.downloadPDFTool('info', version);
+			yield Zotero.Fulltext.downloadPDFTool('info', pdfToolsVersion);
 			
 			assert.ok(Zotero.Fulltext.pdfInfoIsRegistered());
 			assert.equal(
@@ -45,7 +118,7 @@ describe("Zotero.Fulltext", function () {
 			}
 			assert.equal(
 				(yield Zotero.File.getContentsAsync(versionPath)),
-				version
+				pdfToolsVersion
 			);
 			
 			//Temp: disabled on Windows

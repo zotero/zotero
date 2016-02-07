@@ -549,6 +549,9 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		}
 		
 		var maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
+		if (!maxLength) {
+			return false;
+		}
 		var obj = yield convertItemHTMLToText(itemID, document.body.innerHTML, maxLength);
 		var text = obj.text;
 		var totalChars = obj.totalChars;
@@ -596,12 +599,17 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			return false;
 		}
 		
-		Zotero.debug('Indexing file ' + path);
+		var maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
+		if (!maxLength) {
+			return false;
+		}
+		if (complete) {
+			maxLength = null;
+		}
 		
+		Zotero.debug('Indexing file ' + path);
 		var text = yield Zotero.File.getContentsAsync(path, charset);
 		var totalChars = text.length;
-		var maxLength = complete ? false : Zotero.Prefs.get('fulltext.textMaxLength');
-		
 		if (contentType == 'text/html') {
 			let obj = yield convertItemHTMLToText(itemID, text, maxLength);
 			text = obj.text;
