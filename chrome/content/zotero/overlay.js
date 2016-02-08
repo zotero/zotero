@@ -287,8 +287,8 @@ var ZoteroOverlay = new function()
 	 */
 	this.toggleTab = function(setMode) {
 		var tab = this.findZoteroTab();
+		window.zoteroSavedCollectionSelection = ZoteroPane.collectionsView.selectedTreeRow.id;
 		window.zoteroSavedItemSelection = ZoteroPane.itemsView.saveSelection();
-		window.zoteroSavedCollectionSelection = ZoteroPane.collectionsView.saveSelection();
 		if(tab) {		// Zotero is running in a tab
 			if(setMode) return;
 			// if Zotero tab is the only tab, open the home page in a new tab

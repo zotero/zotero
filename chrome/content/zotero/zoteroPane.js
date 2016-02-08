@@ -377,20 +377,18 @@ var ZoteroPane = new function()
 		// restore saved row selection (for tab switching)
 		var containerWindow = (window.ZoteroTab ? window.ZoteroTab.containerWindow : window);
 		if(containerWindow.zoteroSavedCollectionSelection) {
-			yield this.collectionsView.rememberSelection(containerWindow.zoteroSavedCollectionSelection);
-			delete containerWindow.zoteroSavedCollectionSelection;
-		}
-		
-		// restore saved item selection (for tab switching)
-		if(containerWindow.zoteroSavedItemSelection) {
-			let self = this;
-			// hack to restore saved selection after itemTreeView finishes loading
-			window.setTimeout(function() {
-				if(containerWindow.zoteroSavedItemSelection) {
-					yield self.itemsView.rememberSelection(containerWindow.zoteroSavedItemSelection);
-					delete containerWindow.zoteroSavedItemSelection;
+			this.collectionsView.addEventListener('load', Zotero.Promise.coroutine(function* () {
+				yield this.collectionsView.selectByID(containerWindow.zoteroSavedCollectionSelection);
+				
+				if (containerWindow.zoteroSavedItemSelection) {
+					this.itemsView.addEventListener('load', function () {
+						this.itemsView.rememberSelection(containerWindow.zoteroSavedItemSelection);
+						delete containerWindow.zoteroSavedItemSelection;
+					}.bind(this));
 				}
-			}, 51);
+				
+				delete containerWindow.zoteroSavedCollectionSelection;
+			}.bind(this)));
 		}
 		
 		// Focus the quicksearch on pane open

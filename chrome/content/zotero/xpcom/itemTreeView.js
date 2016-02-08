@@ -923,6 +923,11 @@ Zotero.ItemTreeView.prototype.unregister = function()
 {
 	Zotero.Notifier.unregisterObserver(this._unregisterID);
 	if (this.listener) {
+		if (!this._treebox.treeBody) {
+			Zotero.debug("No more tree body in Zotero.ItemTreeView::unregister()");
+			this.listener = null;
+			return;
+		}
 		let tree = this._treebox.treeBody.parentNode;
 		tree.removeEventListener('keypress', this.listener, false);
 		this.listener = null;
