@@ -67,6 +67,8 @@ const ZoteroStandalone = new function() {
 			Services.obs.addObserver(gXPInstallObserver, "addon-install-complete", false);
 		})
 		.catch(function (e) {
+			try { Zotero.debug(e, 1); } catch (e) {}
+			Components.utils.reportError(e);
 			ZoteroPane.displayStartupError();
 			window.close();
 			return;
