@@ -206,8 +206,29 @@ Zotero.FeedItem.prototype.forceEraseTx = function(options) {
  * @return {Promise<FeedItem|Item>} translated feed item
  */
 Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (libraryID, collectionID) {
+	if (Zotero.locked) {
+		Zotero.debug('Zotero locked, skipping feed item translation');
+		return;
+	}
+
 	let deferred = Zotero.Promise.defer();
 	let error = function(e) { Zotero.debug(e, 1); deferred.reject(e); };
+	let translate = new Zotero.Translate.Web();
+	
+	if (libraryID) {
+		// Show progress notifications when scraping to a library
+		var win = Services.wm.getMostRecentWindow("navigator:browser");
+		translate.clearHandlers("done");
+		translate.clearHandlers("itemDone");
+		translate.setHandler("done", win.Zotero_Browser.progress.Translation.doneHandler);
+		translate.setHandler("itemDone", win.Zotero_Browser.progress.Translation.itemDoneHandler());
+		let collection;
+		if (collectionID) {
+			collection = yield Zotero.Collections.getAsync(collectionID);
+		}
+		win.Zotero_Browser.progress.show();
+		win.Zotero_Browser.progress.Translation.scrapingTo(libraryID, collection);
+	}
 	
 	// Load document
 	let hiddenBrowser = Zotero.HTTP.processDocuments(
@@ -218,7 +239,6 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	let doc = yield deferred.promise;
 
 	// Set translate document
-	let translate = new Zotero.Translate.Web();
 	translate.setDocument(doc);
 	
 	// Load translators
@@ -235,8 +255,10 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	deferred = Zotero.Promise.defer();
 	
 	if (libraryID) {
-		return translate.translate({libraryID, collections: collectionID ? [collectionID] : false})
+		let result = yield translate.translate({libraryID, collections: collectionID ? [collectionID] : false})
 			.then(items => items ? items[0] : false);
+		Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+		return result;
 	}
 	
 	// Clear these to prevent saving
@@ -254,9 +276,8 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	const deleteFields = ['attachments', 'notes', 'id', 'itemID', 'path', 'seeAlso', 'version', 'dateAdded', 'dateModified'];
 	for (let field of deleteFields) {
 		delete itemData[field];
-	}
-	// TODO: handle no items like the ones in french history studies feed
-	// set new translated data for item
+	}	
+	
 	this.fromJSON(itemData);
 	this.isTranslated = true;
 	this.forceSaveTx();
