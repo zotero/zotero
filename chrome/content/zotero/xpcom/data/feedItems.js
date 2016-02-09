@@ -40,6 +40,7 @@ Zotero.FeedItems = new Proxy(function() {
 			let obj = zi_primaryDataSQLParts.call(this);
 			obj.feedItemGUID = "FeI.guid AS feedItemGUID";
 			obj.feedItemReadTime = "FeI.readTime AS feedItemReadTime";
+			obj.feedItemTranslatedTime = "FeI.translatedTime AS feedItemTranslatedTime";
 			return obj;
 		}
 	}, {lazy: true});

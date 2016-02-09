@@ -289,7 +289,7 @@ Zotero.FeedReader._processCreators = function(feedEntry, field, role) {
 			let person = personArr.queryElementAt(i, Components.interfaces.nsIFeedPerson);
 			if (!person || !person.name) continue;
 			
-			let name = Zotero.Utilities.trimInternal(person.name);
+			let name = Zotero.Utilities.cleanTags(Zotero.Utilities.trimInternal(person.name));
 			if (!name) continue;
 			
 			let commas = name.split(',').length - 1,
@@ -335,6 +335,10 @@ Zotero.FeedReader._processCreators = function(feedEntry, field, role) {
 		);
 		if (!creator.firstName) {
 			creator.fieldMode = 1;
+		}
+		// Sometimes these end up empty when parsing really nasty HTML based fields, so just skip.
+		if (!creator.firstName && !creator.lastName) {
+			continue;
 		}
 		
 		creators.push(creator);

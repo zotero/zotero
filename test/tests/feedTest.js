@@ -206,8 +206,15 @@ describe("Zotero.Feed", function() {
 	});
 	
 	describe('#updateFeed()', function() {
+		var feed;
 		var feedUrl = getTestDataItemUrl("feed.rss");
 		var modifiedFeedUrl = getTestDataItemUrl("feedModified.rss");
+		
+		beforeEach(function* (){
+			feed = yield createFeed();
+			feed._feedUrl = feedUrl;
+			yield feed.updateFeed();
+		});
 		
 		afterEach(function* () {
 			yield clearFeeds();
@@ -225,15 +232,11 @@ describe("Zotero.Feed", function() {
 		});
 		
 		it('should add new feed items', function* () {
-			let feed = yield createFeed();
-			feed._feedUrl = feedUrl;
-			yield feed.updateFeed();
-			
 			let feedItems = yield Zotero.FeedItems.getAll(feed.id);
-			assert.equal(feedItems.length, 4);
+			assert.equal(feedItems.length, 3);
 		});
 		
-		it('should set lastCheck and lastUpdated values', function* () {
+		it('should set lastCheck, lastUpdated and lastGUID values', function* () {
 			let feed = yield createFeed();
 			feed._feedUrl = feedUrl;
 			
@@ -244,12 +247,9 @@ describe("Zotero.Feed", function() {
 			
 			assert.ok(feed.lastCheck >= Zotero.Date.dateToSQL(new Date(Date.now() - 1000*60), true));
 			assert.ok(feed.lastUpdate >= Zotero.Date.dateToSQL(new Date(Date.now() - 1000*60), true));
+			assert.equal(feed.lastGUID, 'http://liftoff.msfc.nasa.gov/2003/06/03.html#item573:'+feed.id);
 		});
 		it('should update modified items and set unread', function* () {
-			let feed = yield createFeed();
-			feed._feedUrl = feedUrl;
-			yield feed.updateFeed();
-
 			let feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573:"+feed.id);
 			feedItem.isRead = true;
 			yield feedItem.forceSaveTx();
@@ -266,41 +266,17 @@ describe("Zotero.Feed", function() {
 			assert.notEqual(oldDateModified, feedItem.getField('date'));
 			assert.isFalse(feedItem.isRead)
 		});
-		// TODO fix
-		it.skip('should skip items that are not modified', function* () {
-			let feed = yield createFeed();
-			feed._feedUrl = feedUrl;
-			yield feed.updateFeed();
-
-			let feedItems = yield Zotero.FeedItems.getAll(feed.id);
-			let datesAdded = [], datesModified = [];
-			for(let feedItem of feedItems) {
-				datesAdded.push(feedItem.dateAdded);
-				datesModified.push(feedItem.dateModified);
-			}
+		it('should skip items that are not modified', function* () {
+			let save = sinon.spy(Zotero.FeedItem.prototype, 'save');
 			
 			feed._feedUrl = modifiedFeedUrl;
 			yield feed.updateFeed();
 			
-			feedItems = yield Zotero.FeedItems.getAll(feed.id);
-			
-			let changedCount = 0;
-			for (let i = 0; i < feedItems.length; i++) {
-				assert.equal(feedItems[i].dateAdded, datesAdded[i]);
-				if (feedItems[i].dateModified != datesModified[i]) {
-					changedCount++;
-				}
-			}
-			
-			assert.equal(changedCount, 1);
+			assert.equal(save.thisValues[0].guid, "http://liftoff.msfc.nasa.gov/2003/06/03.html#item573:"+feed.id);
+			save.restore();
 		});
-		// TODO: fix
-		it.skip('should update unread count', function* () {
-			let feed = yield createFeed();
-			feed._feedUrl = feedUrl;
-			yield feed.updateFeed();
-			
-			assert.equal(feed.unreadCount, 4);
+		it('should update unread count', function* () {
+			assert.equal(feed.unreadCount, 3);
 
 			let feedItems = yield Zotero.FeedItems.getAll(feed.id);
 			for (let feedItem of feedItems) {
@@ -311,7 +287,22 @@ describe("Zotero.Feed", function() {
 			feed._feedUrl = modifiedFeedUrl;
 			yield feed.updateFeed();
 			
-			assert.equal(feed.unreadCount, 1);
+			assert.equal(feed.unreadCount, 2);
+		});
+		it('should not re-add deleted items, but add new ones', function* () {
+			let feedItems = yield Zotero.FeedItems.getAll(feed.id);
+			yield feedItems[1].forceEraseTx();
+			
+			feedItems = yield Zotero.FeedItems.getAll(feed.id);
+			for (let feedItem of feedItems) {
+				feedItem.isRead = true;
+				yield feedItem.forceSaveTx();
+			}
+			
+			feed._feedUrl = modifiedFeedUrl;
+			yield feed.updateFeed();
+			
+			assert.equal(feed.unreadCount, 2);	
 		});
 	});
 	

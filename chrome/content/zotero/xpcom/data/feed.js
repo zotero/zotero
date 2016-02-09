@@ -85,7 +85,7 @@ Zotero.defineProperty(Zotero.Feed, '_unreadCountSQL', {
 
 Zotero.defineProperty(Zotero.Feed, '_dbColumns', {
 	value: Object.freeze(['name', 'url', 'lastUpdate', 'lastCheck',
-		'lastCheckError', 'cleanupAfter', 'refreshInterval'])
+		'lastCheckError', 'lastGUID', 'cleanupAfter', 'refreshInterval'])
 });
 
 Zotero.defineProperty(Zotero.Feed, '_primaryDataSQLParts');
@@ -130,7 +130,7 @@ for (let i=0; i<accessors.length; i++) {
 		set: function(v) this._set(prop, v)
 	})
 }
-let getters = ['lastCheck', 'lastUpdate', 'lastCheckError'];
+let getters = ['lastCheck', 'lastUpdate', 'lastCheckError', 'lastGUID'];
 for (let i=0; i<getters.length; i++) {
 	let name = getters[i];
 	let prop = Zotero.Feed._colToProp(name);
@@ -212,6 +212,7 @@ Zotero.Feed.prototype._loadDataFromRow = function(row) {
 	this._feedLastCheckError = row._feedLastCheckError || null;
 	this._feedLastCheck = row._feedLastCheck || null;
 	this._feedLastUpdate = row._feedLastUpdate || null;
+	this._feedLastGUID = row._feedLastGUID || null;
 	this._feedCleanupAfter = parseInt(row._feedCleanupAfter) || null;
 	this._feedRefreshInterval = parseInt(row._feedRefreshInterval) || null;
 	this._feedUnreadCount = parseInt(row._feedUnreadCount);
@@ -328,6 +329,7 @@ Zotero.Feed.prototype.clearExpiredItems = Zotero.Promise.coroutine(function* () 
 
 Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 	var toAdd = [];
+	var createNew = true;
 	if (this._updating) {
 		return this._updating;
 	}
@@ -343,18 +345,16 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 		let itemIterator = new fr.ItemIterator();
 		let item, processedGUIDs = [];
 		while (item = yield itemIterator.next().value) {
-			// TODO: add a database column to feed for lastGUID so we have a good way to decide
+			// Append id at the end to prevent same item collisions from different feeds
 			// when to terminate item retrieval.
-			if (false) {
-				Zotero.debug("Item modification date before last update date (" + this.lastCheck + ")");
+			item.guid += ":" + this.id;
+			if (item.guid == this.lastGUID) {
+				Zotero.debug("Feed#update: last seen item reached (" + this.lastGUID + ")");
 				Zotero.debug(item);
-				// We can stop now
-				fr.terminate();
-				break;
+				// Don't create new items (expired and deleted), but update existing ones
+				createNew = false;
 			}
 			
-			// Append id at the end to prevent same item collisions from different feeds
-			item.guid += ":" + this.id;
 			if (processedGUIDs.indexOf(item.guid) != -1) {
 				Zotero.debug("Feed item " + item.guid + " already processed from feed.");
 				continue;
@@ -365,22 +365,29 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 			Zotero.debug(item, 5);
 			
 			let feedItem = yield Zotero.FeedItems.getAsyncByGUID(item.guid);
-			if (!feedItem) {
+			if (!feedItem && createNew) {
 				feedItem = new Zotero.FeedItem();
 				feedItem.guid = item.guid;
 				feedItem.libraryID = this.id;
-			} else {
+			} else if(! feedItem.isTranslated) {
 				Zotero.debug("Feed item " + item.guid + " already in library.");
 				Zotero.debug("Updating metadata");
 				yield feedItem.loadItemData();
 				yield feedItem.loadCreators();
-				feedItem.isRead = false;
+			} else {
+				// Either has been translated or beyond lastGUID
+				continue;
 			}
 			
 			// Delete invalid data
 			delete item.guid;
-			
 			feedItem.fromJSON(item);
+			
+			if (!feedItem.hasChanged()) {
+				Zotero.debug("Feed item " + feedItem.guid + " has not changed");
+				continue
+			}
+			feedItem.isRead = false;
 			toAdd.push(feedItem);
 		}
 	}
@@ -401,6 +408,7 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 			}
 		});
 		this._set('_feedLastUpdate', Zotero.Date.dateToSQL(new Date(), true));
+		this._set('_feedLastGUID', toAdd[0].guid);
 	}
 	this._set('_feedLastCheck', Zotero.Date.dateToSQL(new Date(), true));
 	yield this.saveTx();
