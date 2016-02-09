@@ -113,7 +113,8 @@ describe("Zotero.Feeds", function () {
 
 			yield Zotero.Feeds.scheduleNextFeedCheck();
 			
-			assert.equal(Zotero.Promise.delay.args[0][0], 1000*60*60);
+			// Allow a propagation delay of 5000ms
+			assert.isTrue(Zotero.Promise.delay.args[0][0] - 1000*60*60 <= 5000);
 			
 			Zotero.Feeds.scheduleNextFeedCheck.restore();
 			Zotero.Promise.delay.restore();

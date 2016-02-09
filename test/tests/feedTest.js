@@ -290,10 +290,10 @@ describe("Zotero.Feed", function() {
 			assert.equal(feed.unreadCount, 2);
 		});
 		it('should not re-add deleted items, but add new ones', function* () {
-			let feedItems = yield Zotero.FeedItems.getAll(feed.id);
-			yield feedItems[1].forceEraseTx();
+			let feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/05/20.html#item570:"+feed.id);
+			yield feedItem.forceEraseTx();
 			
-			feedItems = yield Zotero.FeedItems.getAll(feed.id);
+			let feedItems = yield Zotero.FeedItems.getAll(feed.id);
 			for (let feedItem of feedItems) {
 				feedItem.isRead = true;
 				yield feedItem.forceSaveTx();
