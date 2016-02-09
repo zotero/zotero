@@ -140,7 +140,7 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Brak etykiet do wyświetlenia">
 <!ENTITY zotero.tagSelector.filter "Filtr:">
-<!ENTITY zotero.tagSelector.showAutomatic "Wyświetl automatycznie">
+<!ENTITY zotero.tagSelector.showAutomatic "Wyświetl etykiety automatyczne">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Wyświetl wszystkie etykiety w tej bibliotece">
 <!ENTITY zotero.tagSelector.selectVisible "Zaznacz widoczne">
 <!ENTITY zotero.tagSelector.clearVisible "Odznacz widoczne">
@@ -241,7 +241,7 @@
 <!ENTITY zotero.sync.longTagFixer.character "znaku">
 <!ENTITY zotero.sync.longTagFixer.characters "znakach">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Niezaznaczone etykiety nie będą zachowane.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etykieta zostanie usunięte ze wszystkich elementów.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etykieta zostanie usunięta ze wszystkich elementów.">
 
 <!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.merge.of "z">
