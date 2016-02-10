@@ -247,6 +247,7 @@
 					<menuitem class="menuitem-iconic zotero-menuitem-show-duplicates" label="&zotero.toolbar.duplicate.label;" oncommand="ZoteroPane_Local.setVirtual(ZoteroPane_Local.getSelectedLibraryID(), 'duplicates', true)"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-show-unfiled" label="&zotero.collections.showUnfiledItems;" oncommand="ZoteroPane_Local.setVirtual(ZoteroPane_Local.getSelectedLibraryID(), 'unfiled', true)"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-edit-collection" oncommand="ZoteroPane_Local.editSelectedCollection();"/>
+					<menuitem class="menuitem-iconic zotero-menuitem-mark-read-feed" label="&zotero.toolbar.markFeedRead.label;" oncommand="ZoteroPane_Local.markFeedRead();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-edit-feed" label="&zotero.toolbar.editFeed.label;" oncommand="ZoteroPane_Local.editSelectedFeed();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-delete-collection" oncommand="ZoteroPane_Local.deleteSelectedCollection();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-move-to-trash" oncommand="ZoteroPane_Local.deleteSelectedCollection(true);"/>
@@ -275,6 +276,7 @@
 						</menupopup>
 					</menu>
 					<menuseparator/>
+					<menuitem class="menuitem-iconic zotero-menuitem-toggle-read-item" oncommand="ZoteroPane_Local.toggleSelectedItemsRead();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-duplicate-item" label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane_Local.duplicateSelectedItem().done();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-delete-collection" oncommand="ZoteroPane_Local.deleteSelectedItems();"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-restore-to-library" label="&zotero.items.menu.restoreToLibrary;" oncommand="ZoteroPane_Local.restoreSelectedItems();"/>

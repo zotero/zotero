@@ -2137,7 +2137,7 @@ Zotero.ItemTreeView.prototype.getSortFields = function () {
  */
 Zotero.ItemTreeView.prototype.getSortDirection = function() {
 	if (this.collectionTreeRow.isFeed) {
-		return Zotero.Prefs.get('feedSortAsc') ? 'asc' : 'desc';
+		return Zotero.Prefs.get('feedSortAsc') ? 'ascending' : 'descending';
 	}
 	var column = this._treebox.columns.getSortedColumn();
 	if (!column) {

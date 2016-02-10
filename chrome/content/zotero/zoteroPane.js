@@ -1911,6 +1911,19 @@ var ZoteroPane = new function()
 			}
 		}
 	});
+
+	this.toggleSelectedItemsRead = function() {
+		return Zotero.FeedItems.toggleReadByID(this.getSelectedItems(true));
+	};
+
+	this.markFeedRead = Zotero.Promise.coroutine(function* () {
+		if (!this.collectionsView.selection.count) return;
+
+		let feed = this.collectionsView.getRow(this.collectionsView.selection.currentIndex).ref;
+		let feedItemIDs = yield Zotero.FeedItems.getAll(feed.libraryID, true, false, true);
+		yield Zotero.FeedItems.toggleReadByID(feedItemIDs, true);
+	});
+
 	
 	this.editSelectedFeed = Zotero.Promise.coroutine(function* () {
 		if (!this.collectionsView.selection.count) return;
@@ -2216,6 +2229,7 @@ var ZoteroPane = new function()
 			"showDuplicates",
 			"showUnfiled",
 			"editSelectedCollection",
+			"markReadFeed",
 			"editSelectedFeed",
 			"deleteCollection",
 			"deleteCollectionAndItems",
@@ -2276,6 +2290,7 @@ var ZoteroPane = new function()
 			show = [
 				m.refreshFeed,
 				m.sep1,
+				m.markReadFeed,
 				m.editSelectedFeed,
 				m.deleteCollectionAndItems,
 				m.sep2,
@@ -2289,6 +2304,10 @@ var ZoteroPane = new function()
 				if (this.collectionsView.isContainerEmpty(this.collectionsView.selection.currentIndex)) {
 					disable.push(m.exportCollection);
 				}
+			}
+
+			if (collectionTreeRow.ref.unreadCount == 0) {
+				disable.push(m.markReadFeed);
 			}
 			
 			// Adjust labels
@@ -2394,6 +2413,7 @@ var ZoteroPane = new function()
 			'addNote',
 			'addAttachments',
 			'sep2',
+			'toggleRead',
 			'duplicateItem',
 			'deleteItem',
 			'restoreToLibrary',
@@ -2439,7 +2459,7 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isPublications()) {
 			show.push(m.deleteFromLibrary);
 		}
-		else {
+		else if (! collectionTreeRow.isFeed()) {
 			show.push(m.moveToTrash);
 		}
 		
@@ -2452,6 +2472,8 @@ var ZoteroPane = new function()
 				
 				var items = this.getSelectedItems();
 				var canMerge = true, canIndex = true, canRecognize = true, canRename = true;
+				var canMarkRead = collectionTreeRow.isFeed();
+				var markUnread = true;
 				
 				if (!Zotero.Fulltext.pdfConverterIsRegistered()) {
 					canIndex = false;
@@ -2459,7 +2481,7 @@ var ZoteroPane = new function()
 				
 				for (let i = 0; i < items.length; i++) {
 					let item = items[i];
-					if (canMerge && !item.isRegularItem() || collectionTreeRow.isDuplicates()) {
+					if (canMerge && !item.isRegularItem() || item.isFeedItem || collectionTreeRow.isDuplicates()) {
 						canMerge = false;
 					}
 					
@@ -2475,6 +2497,10 @@ var ZoteroPane = new function()
 					if (canRename && (!item.isAttachment() || item.isTopLevelItem() || item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL)) {
 						canRename = false;
 					}
+					
+					if(canMarkRead && markUnread && !item.isRead) {
+						markUnread = false;
+					}
 				}
 				
 				if (canMerge) {
@@ -2489,10 +2515,19 @@ var ZoteroPane = new function()
 					show.push(m.recognizePDF);
 				}
 				
+				if (canMarkRead) {
+					show.push(m.toggleRead);
+					if (markUnread) {
+						menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.collections.menu.toggleRead.markUnread'));
+					} else {
+						menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.collections.menu.toggleRead.markRead'));
+					}
+				}
+				
 				var canCreateParent = true;
 				for (let i = 0; i < items.length; i++) {
 					let item = items[i];
-					if (!item.isTopLevelItem() || !item.isAttachment()) {
+					if (!item.isTopLevelItem() || !item.isAttachment() || item.isFeedItem) {
 						canCreateParent = false;
 						break;
 					}
@@ -2540,7 +2575,7 @@ var ZoteroPane = new function()
 						show.push(m.showInLibrary, m.sep1);
 					}
 					
-					if (item.isRegularItem()) {
+					if (item.isRegularItem() && !item.isFeedItem) {
 						show.push(m.addNote, m.addAttachments, m.sep2);
 					}
 					
@@ -2573,6 +2608,14 @@ var ZoteroPane = new function()
 						
 						if (showSep4) {
 							show.push(m.sep4);
+						}
+					}
+					else if (item.isFeedItem) {
+						show.push(m.toggleRead);
+						if (item.isRead) {
+							menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.collections.menu.toggleRead.markUnread'));
+						} else {
+							menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.collections.menu.toggleRead.markRead'));
 						}
 					}
 					else {
