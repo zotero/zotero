@@ -51,50 +51,20 @@
     <style
        type="text/css"
        id="style6"><![CDATA[
-			polygon {
-				stroke: #000;
-			}
-			
-			/* Linux */
-			#s1 {
-				stop-color: #899199;
-			}
-			#s2 {
-				stop-color: #7f868d;
-			}
-			
-			/* Mac OS X (except Aqua on Snow Leopard) */
-			@media (-moz-mac-graphite-theme), (-moz-mac-lion-theme) {
-				polygon {
-					stroke: #4d4d4d;
-				}
-				#s1 {
-					stop-color: #4d4d4d;
-				}
-				#s2 {
-					stop-color: #4d4d4d;
-				}
-			}
-			
-			/* Windows Classic & Luna */
-			@media (-moz-windows-theme) {
-				#s1 {
-					stop-color: #899198;
-				}
-				#s2 {
-					stop-color: #737b82;
-				}
-			}
-			
-			/* Windows Aero */
-			@media (-moz-windows-theme: aero), (-moz-windows-theme: aero-lite) {
-				#s1 {
-					stop-color: #808c96;
-				}
-				#s2 {
-					stop-color: #78838d;
-				}
-			}
+          /*
+           * This file is used by the make-z-icons build script to generate platform-specific
+           * PNGs for the main toolbar button.
+           */
+          
+          polygon {
+             stroke: #000;
+          }
+          #s1 {
+             stop-color: #899199;
+          }
+          #s2 {
+             stop-color: #7f868d;
+          }
 		]]></style>
     <linearGradient
        x1="0"
