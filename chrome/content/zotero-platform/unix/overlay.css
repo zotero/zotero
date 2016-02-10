@@ -9,6 +9,14 @@
 /*
  * Nav bar
  */
+toolbar[id="nav-bar"] #zotero-toolbar-main-button .toolbarbutton-icon {
+	width: 28px;
+}
+
+toolbar[id="nav-bar"] #zotero-toolbar-save-button .toolbarbutton-icon {
+	width: 30px;
+}
+
 toolbar[id="nav-bar"] #zotero-toolbar-buttons #zotero-toolbar-main-button {
 	margin-right: -1px;
 	padding: 0; /* avoid shift on :active */

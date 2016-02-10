@@ -10,13 +10,23 @@
  * Nav bar
  */
 toolbar[id="nav-bar"] #zotero-toolbar-main-button .toolbarbutton-icon {
+	width: 30px; /* 16 + 1 + 1 + 6 + 6 */
 	padding-left: 6px !important;
 	padding-right: 6px !important;
 }
 
 toolbar[id="nav-bar"] #zotero-toolbar-save-button .toolbarbutton-icon {
+	width: 29px; /* 16 + 6 + 6 + 1 */
 	padding-left: 6px !important;
 	padding-right: 6px !important;
+}
+
+toolbar[id="nav-bar"] #zotero-toolbar-main-button-single .toolbarbutton-icon {
+	width: 32px;
+}
+
+toolbar[id="nav-bar"] #zotero-toolbar-save-button-single .toolbarbutton-icon {
+	width: 31px; /* Compensate for border on only one side */
 }
 
 toolbar[id="nav-bar"] #zotero-toolbar-buttons #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker .dropmarker-icon {
