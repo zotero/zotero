@@ -635,8 +635,10 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				
 				if (e instanceof Zotero.DB.IncompatibleVersionException) {
 					let kbURL = "https://www.zotero.org/support/kb/newer_db_version";
-					let msg = Zotero.getString('startupError.incompatibleDBVersion',
-							[Zotero.clientName, e.dbClientVersion]) + "\n\n"
+					let msg = (e.dbClientVersion
+						? Zotero.getString('startupError.incompatibleDBVersion',
+							[Zotero.clientName, e.dbClientVersion])
+						: Zotero.getString('startupError.zoteroVersionIsOlder')) + "\n\n"
 						+ Zotero.getString('startupError.zoteroVersionIsOlder.current', Zotero.version)
 							+ "\n\n"
 						+ Zotero.getString('startupError.zoteroVersionIsOlder.upgrade',

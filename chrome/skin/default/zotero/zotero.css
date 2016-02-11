@@ -32,12 +32,26 @@
 
 #zotero-toolbar-main-button,
 #zotero-toolbar-main-button-single {
-	list-style-image: url("chrome://zotero/skin/zotero-z-32px-australis.svg");
+	list-style-image: url("chrome://zotero-platform/content/zotero-z-16px-australis.png");
+}
+
+@media (min-resolution: 1.5dppx) {
+	#zotero-toolbar-main-button,
+	#zotero-toolbar-main-button-single {
+		list-style-image: url("chrome://zotero-platform/content/zotero-z-32px-australis.png");
+	}
 }
 
 #zotero-toolbar-save-button,
 #zotero-toolbar-save-button-single {
 	list-style-image: url("chrome://zotero/skin/treeitem-webpage.png");
+}
+
+#zotero-toolbar-main-button[cui-areatype="menu-panel"],
+#zotero-toolbar-main-button-single[cui-areatype="menu-panel"],
+toolbarpaletteitem[place="palette"] #zotero-toolbar-main-button,
+toolbarpaletteitem[place="palette"] #zotero-toolbar-main-button-single {
+	list-style-image: url("chrome://zotero/skin/zotero-z-32px-australis.svg");
 }
 
 #zotero-toolbar-save-button[cui-areatype="menu-panel"],
@@ -48,9 +62,6 @@ toolbarpaletteitem[place="palette"] #zotero-toolbar-save-button-single {
 }
 
 /* Show single icon for combo buttons in palette */
-toolbarpaletteitem[place="palette"] #zotero-toolbar-main-button {
-	list-style-image: url("chrome://zotero/skin/zotero-z-32px-australis.svg");
-}
 toolbarpaletteitem[place="palette"] #zotero-toolbar-buttons separator,
 toolbarpaletteitem[place="palette"] #zotero-toolbar-buttons #zotero-toolbar-save-button {
 	display:none;

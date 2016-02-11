@@ -9,29 +9,23 @@
 /*
  * Nav bar
  */
-toolbar[id="nav-bar"] #zotero-toolbar-main-button-single .toolbarbutton-icon,
-toolbar[id="nav-bar"] #zotero-toolbar-save-button-single .toolbarbutton-icon {
-	width: 32px;
+toolbar[id="nav-bar"] #zotero-toolbar-main-button .toolbarbutton-icon {
+	width: 28px;
 }
 
-toolbar[id="nav-bar"] #zotero-toolbar-main-button .toolbarbutton-icon,
 toolbar[id="nav-bar"] #zotero-toolbar-save-button .toolbarbutton-icon {
-	width: 28px;
+	width: 30px;
 }
 
 toolbar[id="nav-bar"] #zotero-toolbar-buttons #zotero-toolbar-main-button {
 	margin-right: -1px;
+	padding: 0; /* avoid shift on :active */
 }
 
 toolbar[id="nav-bar"] #zotero-toolbar-main-button .toolbarbutton-icon {
 	margin-left: 2px;
-	margin-right: -3px;
 	padding-left: 5px !important;
 	padding-right: 5px !important;
-}
-
-toolbar[id="nav-bar"] #zotero-toolbar-save-button .toolbarbutton-icon {
-	width: 30px !important;
 }
 
 toolbar[id="nav-bar"] #zotero-toolbar-save-button > .toolbarbutton-menubutton-button {
@@ -78,7 +72,6 @@ toolbar[id="nav-bar"] #zotero-toolbar-buttons > separator {
 	width: 1px;
 	height: 18px;
 	-moz-margin-end: -1px;
-	background-image: var(--toolbarbutton-combined-backgroundimage);
 	background-clip: padding-box;
 	background-position: center;
 	background-repeat: no-repeat;
@@ -162,10 +155,6 @@ toolbar:not([id="nav-bar"]) #zotero-toolbar-buttons separator {
 
 
 @media (min-resolution: 1.5dppx) {
-	#zotero-toolbar .toolbarbutton-icon {
-		width: 16px;
-	}
-	
 	#zotero-tb-sync > .toolbarbutton-icon {
 		width: 20px;
 	}

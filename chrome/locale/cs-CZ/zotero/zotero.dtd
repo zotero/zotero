@@ -165,7 +165,7 @@
 
 <!ENTITY zotero.bibliography.title "Vytvořit bibliografii">
 <!ENTITY zotero.bibliography.style.label "Citační styl:">
-<!ENTITY zotero.bibliography.locale.label "Language:">
+<!ENTITY zotero.bibliography.locale.label "Jazyk:">
 <!ENTITY zotero.bibliography.outputMode "Výstupní režim:">
 <!ENTITY zotero.bibliography.bibliography "Bibligrafie">
 <!ENTITY zotero.bibliography.outputMethod "Výstupní metoda:">

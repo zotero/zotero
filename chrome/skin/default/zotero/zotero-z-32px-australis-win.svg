@@ -13,7 +13,7 @@
    height="32px"
    id="svg2"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="zotero-z-32px-australis.svg">
+   sodipodi:docname="zotero-z-32px-australis-win.svg">
   <metadata
      id="metadata40">
     <rdf:RDF>
@@ -39,11 +39,11 @@
      inkscape:window-height="1087"
      id="namedview38"
      showgrid="false"
-     inkscape:zoom="1"
-     inkscape:cx="4.9830508"
-     inkscape:cy="16"
-     inkscape:window-x="587"
-     inkscape:window-y="200"
+     inkscape:zoom="11.313708"
+     inkscape:cx="6.7817267"
+     inkscape:cy="8.9289322"
+     inkscape:window-x="638"
+     inkscape:window-y="223"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg2" />
   <defs
@@ -51,50 +51,22 @@
     <style
        type="text/css"
        id="style6"><![CDATA[
-			polygon {
-				stroke: #000;
-			}
-			
-			/* Linux */
-			#s1 {
-				stop-color: #899199;
-			}
-			#s2 {
-				stop-color: #7f868d;
-			}
-			
-			/* Mac OS X (except Aqua on Snow Leopard) */
-			@media (-moz-mac-graphite-theme), (-moz-mac-lion-theme) {
-				polygon {
-					stroke: #4d4d4d;
-				}
-				#s1 {
-					stop-color: #4d4d4d;
-				}
-				#s2 {
-					stop-color: #4d4d4d;
-				}
-			}
-			
-			/* Windows Classic & Luna */
-			@media (-moz-windows-theme) {
-				#s1 {
-					stop-color: #899198;
-				}
-				#s2 {
-					stop-color: #737b82;
-				}
-			}
-			
-			/* Windows Aero */
-			@media (-moz-windows-theme: aero), (-moz-windows-theme: aero-lite) {
-				#s1 {
-					stop-color: #808c96;
-				}
-				#s2 {
-					stop-color: #78838d;
-				}
-			}
+          /*
+           * This file is used by the make-z-icons build script to generate platform-specific
+           * PNGs for the main toolbar button.
+           */
+          
+          polygon {
+             stroke: #000 !important;
+          }
+          /* These colors are different from the ones in the SVG, because Firefox's Windows
+          toolbar icons are shaded differently from in the palette, which the SVG is used for. */
+          #s1 {
+             stop-color: #66737f;
+          }
+          #s2 {
+             stop-color: #707f8c;
+          }
 		]]></style>
     <linearGradient
        x1="0"
@@ -180,8 +152,8 @@
     </filter>
   </defs>
   <polygon
-     points="10.8,1.467 -2.267,1.467 -2.267,-6 18.267,-6 18.267,3.333 7.066,14.533 18.267,14.533 18.267,22 -2.267,22 -2.267,14.533 "
-     style="fill:url(#lg);stroke:#4d4d4d;stroke-width:0.2;stroke-miterlimit:4;filter:url(#f)"
+     points="18.267,3.333 7.066,14.533 18.267,14.533 18.267,22 -2.267,22 -2.267,14.533 10.8,1.467 -2.267,1.467 -2.267,-6 18.267,-6 "
+     style="fill:url(#lg);stroke:#000000;stroke-width:0.64156199;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;filter:url(#f)"
      id="polygon36"
-     transform="matrix(1.1331719,0,0,1.1331719,-1.0653754,-1.0653766)" />
+     transform="matrix(1.1042352,0,0,1.1042352,-0.83388182,-0.83388292)" />
 </svg>

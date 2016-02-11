@@ -10,15 +10,15 @@
  * Nav bar
  */
 toolbar[id="nav-bar"] #zotero-toolbar-main-button .toolbarbutton-icon {
-	width: 28px; /* 16 + 1 + 1 + 5 + 5 */
-	padding-left: 5px !important;
-	padding-right: 5px !important;
+	width: 30px; /* 16 + 1 + 1 + 6 + 6 */
+	padding-left: 6px !important;
+	padding-right: 6px !important;
 }
 
 toolbar[id="nav-bar"] #zotero-toolbar-save-button .toolbarbutton-icon {
-	width: 28px; /* 16 + 6 + 5 + 1 */
+	width: 29px; /* 16 + 6 + 6 + 1 */
 	padding-left: 6px !important;
-	padding-right: 5px !important;
+	padding-right: 6px !important;
 }
 
 toolbar[id="nav-bar"] #zotero-toolbar-main-button-single .toolbarbutton-icon {
@@ -29,15 +29,6 @@ toolbar[id="nav-bar"] #zotero-toolbar-save-button-single .toolbarbutton-icon {
 	width: 31px; /* Compensate for border on only one side */
 }
 
-/* Fix size when dragged to nav bar in Customize mode */
-toolbar[id="nav-bar"] toolbarpaletteitem #zotero-toolbar-save-button .toolbarbutton-icon {
-	width: 29px;
-}
-
-toolbar[id="nav-bar"] #zotero-toolbar-buttons #zotero-toolbar-main-button {
-	margin-right: -1px;
-}
-
 toolbar[id="nav-bar"] #zotero-toolbar-buttons #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker .dropmarker-icon {
 	padding-left: 4px;
 	padding-right: 4px;
@@ -46,13 +37,13 @@ toolbar[id="nav-bar"] #zotero-toolbar-buttons #zotero-toolbar-save-button > .too
 toolbar[id="nav-bar"] #zotero-toolbar-buttons > separator {
 	margin-top: 11px;
 	margin-bottom: 11px;
-	-moz-margin-end: -3px;
+	-moz-margin-start: -1px !important;
+	-moz-margin-end: -3px !important;
 }
 
 toolbar[id="nav-bar"] #zotero-toolbar-buttons > separator,
 toolbar[id="nav-bar"] #zotero-toolbar-buttons > #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker::before {
 	width: 1px;
-	background-image: var(--toolbarbutton-combined-backgroundimage);
 }
 
 toolbar[id="nav-bar"] #zotero-toolbar-buttons > #zotero-toolbar-save-button > .toolbarbutton-menubutton-dropmarker::before {
