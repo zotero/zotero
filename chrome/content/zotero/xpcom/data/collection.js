@@ -210,8 +210,7 @@ Zotero.Collection.prototype.getChildCollections = function (asIDs) {
  *
  * @param	{Boolean}	asIDs			Return as itemIDs
  * @param	{Boolean}	includeDeleted	Include items in Trash
- * @return {Zotero.Item[]|Integer[]} - Array of Zotero.Item instances or itemIDs,
- *                                     or FALSE if none
+ * @return {Zotero.Item[]|Integer[]} - Array of Zotero.Item instances or itemIDs
  */
 Zotero.Collection.prototype.getChildItems = function (asIDs, includeDeleted) {
 	this._requireData('childItems');
@@ -923,7 +922,7 @@ Zotero.Collection.prototype.loadChildItems = Zotero.Promise.coroutine(function* 
 	
 	this._childItems = [];
 	
-	if (ids) {
+	if (ids.length) {
 		var items = yield this.ChildObjects.getAsync(ids);
 		if (items) {
 			this._childItems = items;
