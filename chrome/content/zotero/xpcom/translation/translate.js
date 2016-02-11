@@ -1259,10 +1259,7 @@ Zotero.Translate.Base.prototype = {
 		// set display options to default if they don't exist
 		if(!this._displayOptions) this._displayOptions = this._translatorInfo.displayOptions || {};
 		
-		// prepare translation
-		this.incrementAsyncProcesses("Zotero.Translate#prepareTranslation()");
 		yield this._prepareTranslation();
-		this.decrementAsyncProcesses("Zotero.Translate#prepareTranslation()");
 		
 		Zotero.debug("Translate: Beginning translation with "+this.translator[0].label);
 		
