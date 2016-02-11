@@ -512,17 +512,6 @@ var ZoteroPane = new function()
 				}
 				ZoteroPane_Local.collectionsView.setHighlightedRows();
 				return;
-			} else if (event.keyCode == event.DOM_VK_BACK_QUOTE) {
-				// Toggle read/unread
-				let row = this.collectionsView.getRow(this.collectionsView.selection.currentIndex);
-				if (!row || !row.isFeed()) return;
-				if(itemReadTimeout) {
-					itemReadTimeout.cancel();
-					itemReadTimeout = null;
-				}
-				
-				let itemIDs = this.getSelectedItems(true);
-				Zotero.FeedItems.toggleReadByID(itemIDs);
 			}
 		}
 	}
@@ -564,6 +553,11 @@ var ZoteroPane = new function()
 			event.preventDefault();
 			return;
 		}
+
+		var key = String.fromCharCode(event.which);
+		if (key) {
+			var command = Zotero.Keys.getCommand(key);
+		}
 		
 		if (from == 'zotero-collections-tree') {
 			if ((event.keyCode == event.DOM_VK_BACK_SPACE && Zotero.isMac) ||
@@ -577,7 +571,7 @@ var ZoteroPane = new function()
 		else if (from == 'zotero-items-tree') {
 			// Focus TinyMCE explicitly on tab key, since the normal focusing
 			// doesn't work right
-			if (!event.shiftKey && event.keyCode == event.DOM_VK_TAB) {
+			if (!event.shiftKey && event.keyCode == String.fromCharCode(event.which)) {
 				var deck = document.getElementById('zotero-item-pane-content');
 				if (deck.selectedPanel.id == 'zotero-view-note') {
 					setTimeout(function () {
@@ -607,12 +601,19 @@ var ZoteroPane = new function()
 				//event.stopPropagation();
 				return;
 			}
-		}
-		
-		var key = String.fromCharCode(event.which);
-		if (!key) {
-			Zotero.debug('No key');
-			return;
+			else if (command == 'toggleRead') {
+				// Toggle read/unread
+				let row = this.collectionsView.getRow(this.collectionsView.selection.currentIndex);
+				if (!row || !row.isFeed()) return;
+				if(itemReadTimeout) {
+					itemReadTimeout.cancel();
+					itemReadTimeout = null;
+				}
+
+				let itemIDs = this.getSelectedItems(true);
+				Zotero.FeedItems.toggleReadByID(itemIDs);
+				return;
+			}
 		}
 		
 		// Ignore modifiers other than Ctrl-Shift/Cmd-Shift
@@ -620,12 +621,16 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		var command = Zotero.Keys.getCommand(key);
+		if (!key) {
+			Zotero.debug('No key');
+			return;
+		}
+		
 		if (!command) {
 			return;
 		}
 		
-		Zotero.debug(command);
+		Zotero.debug('Keyboard shortcut: ', command);
 		
 		// Errors don't seem to make it out otherwise
 		try {
