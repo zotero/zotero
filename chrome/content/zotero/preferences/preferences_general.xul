@@ -43,6 +43,8 @@
 			<preference id="pref-groups-copyChildFileAttachments" name="extensions.zotero.groups.copyChildFileAttachments" type="bool"/>
 			<preference id="pref-groups-copyChildLinks" name="extensions.zotero.groups.copyChildLinks" type="bool"/>
 			<preference id="pref-groups-copyTags" name="extensions.zotero.groups.copyTags" type="bool"/>
+			
+			<preference id="pref-feeds-sortAsc" name="extensions.zotero.feeds.sortAsc" type="bool"/>
 		</preferences>
 		
 		<groupbox id="zotero-prefpane-general-groupbox">
@@ -127,6 +129,18 @@
 				<checkbox label="&zotero.preferences.groups.childFiles;" preference="pref-groups-copyChildFileAttachments"/>
 				<checkbox label="&zotero.preferences.groups.childLinks;" preference="pref-groups-copyChildLinks"/>
 				<checkbox label="&zotero.preferences.groups.tags;" preference="pref-groups-copyTags"/>
+			</vbox>
+		</groupbox>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.feeds;"/>
+			
+			<label value="&zotero.preferences.feeds.sorting;"/>
+			<vbox style="margin-left: 2em">
+				<radiogroup id="feed-sort" orient="horizontal" align="center" preference="pref-feeds-sortAsc">
+					<radio label="&zotero.preferences.feeds.sorting.newestFirst;" value="false"/>
+					<radio label="&zotero.preferences.feeds.sorting.oldestFirst;" value="true"/>
+				</radiogroup>
 			</vbox>
 		</groupbox>
 		

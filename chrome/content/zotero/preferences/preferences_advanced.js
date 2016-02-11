@@ -815,7 +815,10 @@ Zotero_Preferences.Keys = {
 		var rows = document.getElementById('zotero-prefpane-advanced-keys-tab').getElementsByTagName('row');
 		for (var i=0; i<rows.length; i++) {
 			// Display the appropriate modifier keys for the platform
-			rows[i].firstChild.nextSibling.value = Zotero.isMac ? Zotero.getString('general.keys.cmdShift') : Zotero.getString('general.keys.ctrlShift');
+			let label = rows[i].firstChild.nextSibling;
+			if (label.className == 'cmd-shift') {
+				label.value = Zotero.isMac ? Zotero.getString('general.keys.cmdShift') : Zotero.getString('general.keys.ctrlShift');
+			}
 		}
 		
 		var textboxes = document.getElementById('zotero-keys-rows').getElementsByTagName('textbox');
