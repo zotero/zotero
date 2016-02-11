@@ -103,8 +103,12 @@
 			<toolbar id="zotero-toolbar" class="toolbar toolbar-primary">
 				<hbox id="zotero-collections-toolbar" align="center">
 					<toolbarbutton id="zotero-tb-collection-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
-					<toolbarbutton id="zotero-tb-feed-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newFeed.label;" command="cmd_zotero_newFeed"/>
-					<toolbarbutton id="zotero-tb-group-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
+					<toolbarbutton id="zotero-tb-library-add-menu" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newLibrary.label;" type="menu">
+						<menupopup id="zotero-tb-library-add-popup">
+							<menuitem id="zotero-tb-group-add" label="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
+							<menuitem id="zotero-tb-feed-add" label="&zotero.toolbar.newFeed.label;" command="cmd_zotero_newFeed"/>
+						</menupopup>
+					</toolbarbutton>
 					<spacer flex="1"/>
 					<toolbarbutton id="zotero-tb-actions-menu" class="zotero-tb-button" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
 						<menupopup id="zotero-tb-actions-popup">

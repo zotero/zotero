@@ -284,12 +284,12 @@
 	list-style-image: url('chrome://zotero/skin/toolbar-collection-add.png');
 }
 
-#zotero-tb-feed-add, .zotero-menuitem-new-feed
+.zotero-menuitem-new-feed
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-feed-add.png');
 }
 
-#zotero-tb-group-add
+#zotero-tb-library-add-menu
 {
 	list-style-image: url('chrome://zotero/skin/group_add.png');
 }

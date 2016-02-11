@@ -103,6 +103,7 @@
 <!ENTITY zotero.toolbar.newItemFromPage.label			"Create Web Page Item from Current Page">
 <!ENTITY zotero.toolbar.lookup.label				"Add Item(s) by Identifier">
 <!ENTITY zotero.toolbar.removeItem.label				"Remove Item…">
+<!ENTITY zotero.toolbar.newLibrary.label			"New Library…">
 <!ENTITY zotero.toolbar.newCollection.label			"New Collection…">
 <!ENTITY zotero.toolbar.newFeed.label				"New Feed…">
 <!ENTITY zotero.toolbar.refreshFeed.label			"Refresh Feed">
