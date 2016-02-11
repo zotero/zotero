@@ -233,7 +233,7 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	// Load document
 	let hiddenBrowser = Zotero.HTTP.processDocuments(
 		this.getField('url'), 
-		(item) => deferred.resolve(item),
+		item => deferred.resolve(item),
 		()=>{}, error, true
 	);
 	let doc = yield deferred.promise;
@@ -246,9 +246,9 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	translate.setHandler('translators', (me, translators) => deferred.resolve(translators));
 	translate.getTranslators();
 	let translators = yield deferred.promise;
-	if (! translators || !translators.length) {
-		Zotero.debug("No translators detected for FeedItem " + this.id + " with url " + this.getField('url'), 2);
-		throw new Zotero.Error("No translators detected for FeedItem " + this.id + " with url " + this.getField('url'))
+	if (!translators || !translators.length) {
+		Zotero.debug("No translators detected for feed item " + this.id + " with URL " + this.getField('url'), 2);
+		throw new Zotero.Error("No translators detected for feed item " + this.id + " with URL " + this.getField('url'))
 	}
 	translate.setTranslator(translators[0]);
 
@@ -280,7 +280,7 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	
 	this.fromJSON(itemData);
 	this.isTranslated = true;
-	this.forceSaveTx();
+	yield this.forceSaveTx();
 	
 	return this;
 });

@@ -49,7 +49,7 @@ describe("Zotero.Feeds", function () {
 		
 			sinon.stub(Zotero.Feeds, 'scheduleNextFeedCheck');
 			_updateFeed = sinon.stub(Zotero.Feed.prototype, '_updateFeed').resolves();
-			let url = getTestDataItemUrl("feed.rss");
+			let url = getTestDataUrl("feed.rss");
 			
 			freshFeed = yield createFeed({refreshInterval: 2});
 			freshFeed._feedUrl = url;

@@ -453,8 +453,12 @@ function getTestDataDirectory() {
 	       QueryInterface(Components.interfaces.nsIFileURL).file;
 }
 
-function getTestDataItemUrl(path) {
-	return OS.Path.join("resource://zotero-unit-tests/data", path);
+function getTestDataUrl(path) {
+	path = path.split('/');
+	if (path[0].length == 0) {
+		path.splice(0, 1);
+	}
+	return "resource://zotero-unit-tests/data/" + path.join('/');
 }
 
 /**

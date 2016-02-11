@@ -79,8 +79,8 @@ Zotero.Feed._colToProp = function(c) {
 Zotero.extendClass(Zotero.Library, Zotero.Feed);
 
 Zotero.defineProperty(Zotero.Feed, '_unreadCountSQL', {
-	value: "(SELECT COUNT(*) FROM items I JOIN feedItems FeI USING (itemID)"
-			+ " WHERE I.libraryID=F.libraryID AND FeI.readTime IS NULL) AS _feedUnreadCount"
+	value: "(SELECT COUNT(*) FROM items I JOIN feedItems FI USING (itemID)"
+			+ " WHERE I.libraryID=F.libraryID AND FI.readTime IS NULL) AS _feedUnreadCount"
 });
 
 Zotero.defineProperty(Zotero.Feed, '_dbColumns', {
@@ -304,8 +304,7 @@ Zotero.Feed.prototype.getExpiredFeedItemIDs = Zotero.Promise.coroutine(function*
 		+ "WHERE I.libraryID=? "
 		+ "AND readTime IS NOT NULL "
 		+ "AND julianday('now', 'utc') - (julianday(readTime, 'utc') + ?) > 0";
-	let expiredIDs = yield Zotero.DB.queryAsync(sql, [this.id, {int: this.cleanupAfter}]);
-	return expiredIDs.map(row => row.id);
+	return Zotero.DB.columnQueryAsync(sql, [this.id, {int: this.cleanupAfter}]);
 });
 
 Zotero.Feed.prototype.clearExpiredItems = Zotero.Promise.coroutine(function* () {
@@ -322,7 +321,7 @@ Zotero.Feed.prototype.clearExpiredItems = Zotero.Promise.coroutine(function* () 
 			}
 		}
 	} catch(e) {
-		Zotero.debug("Error clearing expired feed items.");
+		Zotero.debug("Error clearing expired feed items");
 		Zotero.debug(e);
 	}
 });
@@ -356,7 +355,7 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 			}
 			
 			if (processedGUIDs.indexOf(item.guid) != -1) {
-				Zotero.debug("Feed item " + item.guid + " already processed from feed.");
+				Zotero.debug("Feed item " + item.guid + " already processed from feed");
 				continue;
 			}
 			processedGUIDs.push(item.guid);
@@ -369,8 +368,8 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 				feedItem = new Zotero.FeedItem();
 				feedItem.guid = item.guid;
 				feedItem.libraryID = this.id;
-			} else if(! feedItem.isTranslated) {
-				Zotero.debug("Feed item " + item.guid + " already in library.");
+			} else if(!feedItem.isTranslated) {
+				Zotero.debug("Feed item " + item.guid + " already in library");
 				Zotero.debug("Updating metadata");
 				yield feedItem.loadItemData();
 				yield feedItem.loadCreators();
@@ -402,8 +401,6 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 		yield Zotero.DB.executeTransaction(function* () {
 			// Save in reverse order
 			for (let i=toAdd.length-1; i>=0; i--) {
-				// Saving currently has to happen sequentially so as not to violate the
-				// unique constraints in itemDataValues (FIXME)
 				yield toAdd[i].save({skipEditCheck: true});
 			}
 		});

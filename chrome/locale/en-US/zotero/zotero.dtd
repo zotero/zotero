@@ -108,7 +108,7 @@
 <!ENTITY zotero.toolbar.newFeed.label				"New Feed…">
 <!ENTITY zotero.toolbar.refreshFeed.label			"Refresh Feed">
 <!ENTITY zotero.toolbar.editFeed.label				"Edit Feed…">
-<!ENTITY zotero.toolbar.markFeedRead.label				"Mark Feed Read">
+<!ENTITY zotero.toolbar.markFeedRead.label				"Mark Feed As Read">
 <!ENTITY zotero.toolbar.newGroup						"New Group…">
 <!ENTITY zotero.toolbar.newSubcollection.label			"New Subcollection…">
 <!ENTITY zotero.toolbar.newSavedSearch.label			"New Saved Search…">
@@ -262,11 +262,10 @@
 
 <!ENTITY zotero.feedSettings.title                      "Feed Settings">
 <!ENTITY zotero.feedSettings.saveButton.label           "Save">
-<!ENTITY zotero.feedSettings.url.label                  "URL">
-<!ENTITY zotero.feedSettings.title.label                "Title">
+<!ENTITY zotero.feedSettings.url.label                  "URL:">
+<!ENTITY zotero.feedSettings.title.label                "Title:">
 <!ENTITY zotero.feedSettings.refresh.label1             "Refresh Interval:">
 <!ENTITY zotero.feedSettings.refresh.label2             "hour(s)">
-<!ENTITY zotero.feedSettings.title.label                "Title">
 <!ENTITY zotero.feedSettings.cleanupAfter.label1         "Remove read articles after ">
 <!ENTITY zotero.feedSettings.cleanupAfter.label2         "day(s)">
 

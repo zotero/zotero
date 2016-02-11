@@ -36,31 +36,28 @@ var Zotero_Feed_Settings = new function() {
 		urlTainted = false;
 	
 	let cleanURL = function(url) {
-		let cleanUrl = Zotero.Utilities.cleanURL(url, true);
+		let cleanURL = Zotero.Utilities.cleanURL(url, true);
 
-		if (cleanUrl) {
-			if (/^https?:\/\/[^\/\s]+\/\S/.test(cleanUrl)) {
-				return cleanUrl;
+		if (cleanURL) {
+			if (/^https?:\/\/[^\/\s]+\/\S/.test(cleanURL)) {
+				return cleanURL;
 			} else {
-				Zotero.debug(uri.scheme + " is not a supported protocol for feeds.");
+				Zotero.debug(uri.scheme + " is not a supported protocol for feeds");
 			}
 		}
 	};
 	
-	this.init = function() {
+	this.init = Zotero.Promise.coroutine(function* () {
 		this.toggleAdvancedOptions(false);
 		
 		data = window.arguments[0];
 		
 		if (data.url) {
 			document.getElementById('feed-url').value = data.url;
-		}
-		
-		if (!data.url) {
-			this.invalidateUrl();
-		} else {
 			// Do not allow to change URL for existing feed
 			document.getElementById('feed-url').readOnly = true;
+		} else {
+			this.invalidateURL();
 		}
 		
 		if (data.title) {
@@ -71,20 +68,20 @@ var Zotero_Feed_Settings = new function() {
 		if (data.ttl !== undefined) {
 			ttl = Math.floor(data.ttl / 60);
 		} else {
-			ttl = 1;
+			ttl = Zotero.Prefs.get('feeds.defaultTTL');
 		}
 		document.getElementById('feed-ttl').value = ttl;
 		
 		let cleanupAfter = data.cleanupAfter;
-		if (cleanupAfter === undefined) cleanupAfter = 2;
+		if (cleanupAfter === undefined) cleanupAfter = Zotero.Prefs.get('feeds.defaultCleanupAfter');
 		document.getElementById('feed-cleanupAfter').value = cleanupAfter;
 		
 		if (data.url && !data.urlIsValid) {
-			this.validateUrl();
+			yield this.validateURL();
 		}
-	};
+	});
 	
-	this.invalidateUrl = function() {
+	this.invalidateURL = function() {
 		urlTainted = true;
 		if (feedReader) {
 			feedReader.terminate();
@@ -100,7 +97,7 @@ var Zotero_Feed_Settings = new function() {
 		document.documentElement.getButton('accept').disabled = true;
 	};
 	
-	this.validateUrl = Zotero.Promise.coroutine(function* () {
+	this.validateURL = Zotero.Promise.coroutine(function* () {
 		if (feedReader) {
 			feedReader.terminate();
 			feedReader = null;
@@ -111,11 +108,11 @@ var Zotero_Feed_Settings = new function() {
 		if (!url) return;
 		
 		try {
-			let fr = feedReader = new Zotero.FeedReader(url);
+			var fr = feedReader = new Zotero.FeedReader(url);
 			yield fr.process();
 			let feed = fr.feedProperties;
 			// Prevent progress if textbox changes triggered another call to
-			// validateUrl / invalidateUrl (old session)
+			// validateURL / invalidateURL (old session)
 			if (feedReader !== fr || urlTainted) return;
 			
 			let title = document.getElementById('feed-title');

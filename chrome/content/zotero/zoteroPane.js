@@ -1381,7 +1381,7 @@ var ZoteroPane = new function()
 					}
 					
 					if (item.isFeedItem) {
-						if (! item.isTranslated) {
+						if (!item.isTranslated) {
 							item.translate();
 						}
 						this.startItemReadTimeout(item.id);
@@ -2464,7 +2464,7 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isPublications()) {
 			show.push(m.deleteFromLibrary);
 		}
-		else if (! collectionTreeRow.isFeed()) {
+		else if (!collectionTreeRow.isFeed()) {
 			show.push(m.moveToTrash);
 		}
 		
@@ -2523,9 +2523,9 @@ var ZoteroPane = new function()
 				if (canMarkRead) {
 					show.push(m.toggleRead);
 					if (markUnread) {
-						menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.collections.menu.toggleRead.markUnread'));
+						menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.items.markAsUnread'));
 					} else {
-						menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.collections.menu.toggleRead.markRead'));
+						menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.items.markAsRead'));
 					}
 				}
 				

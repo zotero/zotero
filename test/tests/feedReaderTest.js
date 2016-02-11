@@ -2,9 +2,9 @@
 
 describe("Zotero.FeedReader", function () {
 	
-	var htmlUrl = getTestDataItemUrl("test.html");
+	var htmlUrl = getTestDataUrl("test.html");
 	
-	var feedUrl = getTestDataItemUrl("feed.rss");
+	var feedUrl = getTestDataUrl("feed.rss");
 	var feedInfo = {
 		title: 'Liftoff News',
 		subtitle: 'Liftoff to Space Exploration.',
@@ -18,7 +18,7 @@ describe("Zotero.FeedReader", function () {
 		language: 'en-us'
 	};
 	
-	var detailedFeedUrl = getTestDataItemUrl("feedDetailed.rss");
+	var detailedFeedUrl = getTestDataUrl("feedDetailed.rss");
 	var detailedFeedInfo = {
 		title: 'Feed',
 		subtitle: 'Feed Description',

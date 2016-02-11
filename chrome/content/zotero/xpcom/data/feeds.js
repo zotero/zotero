@@ -118,7 +118,7 @@ Zotero.Feeds = new function() {
 
 	let globalFeedCheckDelay = Zotero.Promise.resolve();
 	this.scheduleNextFeedCheck = Zotero.Promise.coroutine(function* () {
-		Zotero.debug("Scheduling next feed update.");
+		Zotero.debug("Scheduling next feed update");
 		let sql = "SELECT ( CASE "
 			+ "WHEN lastCheck IS NULL THEN 0 "
 			+ "ELSE strftime('%s', lastCheck) + refreshInterval*3600 - strftime('%s', 'now') "
@@ -149,7 +149,7 @@ Zotero.Feeds = new function() {
 				throw e;
 			});
 		} else {
-			Zotero.debug("No feeds with auto-update.");
+			Zotero.debug("No feeds with auto-update");
 		}
 	});
 	
@@ -165,7 +165,7 @@ Zotero.Feeds = new function() {
 			yield feed._updateFeed();
 		}
 		
-		Zotero.debug("All feed updates done.");
+		Zotero.debug("All feed updates done");
 		this.scheduleNextFeedCheck();
 	});
 }

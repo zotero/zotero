@@ -86,6 +86,10 @@ var ZoteroItemPane = new function() {
 		
 		_lastItem = item;
 		
+		// Hide for feed items
+		document.getElementById('zotero-editpane-tabs').setAttribute('hidden', item.isFeedItem);
+		document.getElementById('zotero-view-item').classList.add('no-tabs');
+		
 		if (index == 1) {
 			var editable = ZoteroPane_Local.canEdit();
 			_notesButton.hidden = !editable;

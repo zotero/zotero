@@ -52,41 +52,41 @@
 			
 			<!-- Regular item -->
 			<tabbox id="zotero-view-tabbox" flex="1" onselect="if (!ZoteroPane_Local.collectionsView.selection || event.originalTarget.localName != 'tabpanels') { return; }; ZoteroItemPane.viewItem(ZoteroPane_Local.getSelectedItems()[0], ZoteroPane_Local.collectionsView.editable ? 'edit' : 'view', this.selectedIndex)">
-				<tabs>
-					<tab label="&zotero.tabs.info.label;"/>
-					<tab label="&zotero.tabs.notes.label;"/>
-					<tab label="&zotero.tabs.tags.label;"/>
-					<tab label="&zotero.tabs.related.label;"/>
+				<tabs id="zotero-editpane-tabs">
+					<tab id="zotero-editpane-info-tab" label="&zotero.tabs.info.label;"/>
+					<tab id="zotero-editpane-notes-tab" label="&zotero.tabs.notes.label;"/>
+					<tab id="zotero-editpane-tags-tab" label="&zotero.tabs.tags.label;"/>
+					<tab id="zotero-editpane-related-tab" label="&zotero.tabs.related.label;"/>
 				</tabs>
-					<tabpanels id="zotero-view-item" flex="1">
-						<tabpanel>
-							<zoteroitembox id="zotero-editpane-item-box" flex="1"/>
-						</tabpanel>
-						
-						<tabpanel flex="1" orient="vertical">
-							<vbox flex="1" class="zotero-box">
-								<hbox align="center">
-									<label id="zotero-editpane-notes-label"/>
-									<button id="zotero-editpane-notes-add" label="&zotero.item.add;" oncommand="ZoteroItemPane.addNote(event.shiftKey);"/>
-								</hbox>
-								<grid flex="1">
-									<columns>
-										<column flex="1"/>
-										<column/>
-									</columns>
-									<rows id="zotero-editpane-dynamic-notes" flex="1"/>
-								</grid>
-							</vbox>
-						</tabpanel>
-						
-						<tabpanel>
-							<tagsbox id="zotero-editpane-tags" flex="1"/>
-						</tabpanel>
-						
-						<tabpanel>
-							<relatedbox id="zotero-editpane-related" flex="1"/>
-						</tabpanel>
-					</tabpanels>
+				<tabpanels id="zotero-view-item" flex="1">
+					<tabpanel>
+						<zoteroitembox id="zotero-editpane-item-box" flex="1"/>
+					</tabpanel>
+					
+					<tabpanel flex="1" orient="vertical">
+						<vbox flex="1" class="zotero-box">
+							<hbox align="center">
+								<label id="zotero-editpane-notes-label"/>
+								<button id="zotero-editpane-notes-add" label="&zotero.item.add;" oncommand="ZoteroItemPane.addNote(event.shiftKey);"/>
+							</hbox>
+							<grid flex="1">
+								<columns>
+									<column flex="1"/>
+									<column/>
+								</columns>
+								<rows id="zotero-editpane-dynamic-notes" flex="1"/>
+							</grid>
+						</vbox>
+					</tabpanel>
+					
+					<tabpanel>
+						<tagsbox id="zotero-editpane-tags" flex="1"/>
+					</tabpanel>
+					
+					<tabpanel>
+						<relatedbox id="zotero-editpane-related" flex="1"/>
+					</tabpanel>
+				</tabpanels>
 			</tabbox>
 			
 			<!-- Note item -->

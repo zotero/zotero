@@ -38,13 +38,13 @@ Zotero.FeedItems = new Proxy(function() {
 	Zotero.defineProperty(Zotero.Items, '_primaryDataSQLParts', {
 		get: function() {
 			let obj = zi_primaryDataSQLParts.call(this);
-			obj.feedItemGUID = "FeI.guid AS feedItemGUID";
-			obj.feedItemReadTime = "FeI.readTime AS feedItemReadTime";
-			obj.feedItemTranslatedTime = "FeI.translatedTime AS feedItemTranslatedTime";
+			obj.feedItemGUID = "FI.guid AS feedItemGUID";
+			obj.feedItemReadTime = "FI.readTime AS feedItemReadTime";
+			obj.feedItemTranslatedTime = "FI.translatedTime AS feedItemTranslatedTime";
 			return obj;
 		}
 	}, {lazy: true});
-	Zotero.Items._primaryDataSQLFrom += " LEFT JOIN feedItems FeI ON (FeI.itemID=O.itemID)";
+	Zotero.Items._primaryDataSQLFrom += " LEFT JOIN feedItems FI ON (FI.itemID=O.itemID)";
 	
 	let zi_getObjectForRow = Zotero.Items._getObjectForRow;
 	Zotero.Items._getObjectForRow = function(row) {

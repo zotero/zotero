@@ -689,6 +689,7 @@ Zotero.Attachments = new function(){
 	 * @deprecated Use Zotero.Utilities.cleanURL instead
 	 */
 	this.cleanAttachmentURI = function (uri, tryHttp) {
+		Zotero.debug("Zotero.Attachments.cleanAttachmentURI() is deprecated -- use Zotero.Utilities.cleanURL");
 		return Zotero.Utilities.cleanURL(uri, tryHttp);
 	}
 	

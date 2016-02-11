@@ -224,7 +224,7 @@ describe("Zotero.FeedItem", function () {
 		});
 		it('translates and saves items', function* () {
 			var feedItem = yield createDataObject('feedItem', {libraryID});
-			var url = getTestDataItemUrl('metadata/journalArticle-single.html');
+			var url = getTestDataUrl('metadata/journalArticle-single.html');
 			feedItem.setField('url', url);
 			yield feedItem.forceSaveTx();
 			
@@ -237,7 +237,7 @@ describe("Zotero.FeedItem", function () {
 			let collection = yield createDataObject('collection', {libraryID: group.libraryID});
 			
 			var feedItem = yield createDataObject('feedItem', {libraryID});
-			var url = getTestDataItemUrl('metadata/journalArticle-single.html');
+			var url = getTestDataUrl('metadata/journalArticle-single.html');
 			feedItem.setField('url', url);
 			yield feedItem.forceSaveTx();
 			

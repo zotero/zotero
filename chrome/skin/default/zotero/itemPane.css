@@ -25,6 +25,11 @@
 	padding: 1.5em .25em .25em;
 }
 
+#zotero-view-item.no-tabs
+{
+	padding: .25em .25em .25em;
+}
+
 #zotero-view-item > tabpanel > *
 {
 	overflow: auto;

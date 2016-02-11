@@ -207,8 +207,8 @@ describe("Zotero.Feed", function() {
 	
 	describe('#updateFeed()', function() {
 		var feed;
-		var feedUrl = getTestDataItemUrl("feed.rss");
-		var modifiedFeedUrl = getTestDataItemUrl("feedModified.rss");
+		var feedUrl = getTestDataUrl("feed.rss");
+		var modifiedFeedUrl = getTestDataUrl("feedModified.rss");
 		
 		beforeEach(function* (){
 			feed = yield createFeed();
