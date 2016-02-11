@@ -112,6 +112,32 @@ describe("Zotero.Attachments", function() {
 		})
 	})
 	
+	describe("#linkFromDocument", function () {
+		it("should add a link attachment for the current webpage", function* () {
+			var item = yield createDataObject('item');
+			
+			var uri = OS.Path.join(getTestDataDirectory().path, "snapshot", "index.html");
+			var deferred = Zotero.Promise.defer();
+			win.addEventListener('pageshow', () => deferred.resolve());
+			win.loadURI(uri);
+			yield deferred.promise;
+			
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var attachment = yield Zotero.Attachments.linkFromDocument({
+				document: win.content.document,
+				parentItemID: item.id
+			});
+			
+			assert.equal(attachment.getField('url'), "file://" + uri);
+			
+			// Check indexing
+			var matches = yield Zotero.Fulltext.findTextInItems([attachment.id], 'works');
+			assert.lengthOf(matches, 1);
+			assert.propertyVal(matches[0], 'id', attachment.id);
+		})
+	})
+	
 	describe("#getTotalFileSize", function () {
 		it("should return the size for a single-file attachment", function* () {
 			var file = getTestDataDirectory();

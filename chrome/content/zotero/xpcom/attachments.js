@@ -510,28 +510,23 @@ Zotero.Attachments = new function(){
 		var title = document.title; // TODO: don't use Mozilla-generated title for images, etc.
 		var contentType = document.contentType;
 		
-		var item = yield Zotero.DB.executeTransaction(function* () {
-			return _addToDB({
-				url: url,
-				title: title,
-				linkMode: this.LINK_MODE_LINKED_URL,
-				contentType: contentType,
-				charset: document.characterSet,
-				parentItemID: parentItemID,
-				collections: collections
-			});
-		}.bind(this));
+		var item = yield _addToDB({
+			url,
+			title,
+			linkMode: this.LINK_MODE_LINKED_URL,
+			contentType,
+			charset: document.characterSet,
+			parentItemID,
+			collections
+		});
 		
-		// Run the indexer asynchronously
-		setTimeout(function () {
-			if (Zotero.Fulltext.isCachedMIMEType(contentType)) {
-				// No file, so no point running the PDF indexer
-				//Zotero.Fulltext.indexItems([itemID]);
-			}
-			else if (Zotero.MIME.isTextType(document.contentType)) {
-				Zotero.Fulltext.indexDocument(document, item.id);
-			}
-		}, 50);
+		if (Zotero.Fulltext.isCachedMIMEType(contentType)) {
+			// No file, so no point running the PDF indexer
+			//Zotero.Fulltext.indexItems([itemID]);
+		}
+		else if (Zotero.MIME.isTextType(document.contentType)) {
+			yield Zotero.Fulltext.indexDocument(document, item.id);
+		}
 		
 		return item;
 	});
