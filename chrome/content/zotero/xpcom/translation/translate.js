@@ -370,7 +370,8 @@ Zotero.Translate.Sandbox = {
 				
 				var translator = translation.translator[0];
 				translator = typeof translator === "object" ? translator : Zotero.Translators.get(translator);
-				translation._loadTranslator(translator).then(function() {
+				translation._loadTranslator(translator)
+				.then(function() {
 					if(Zotero.isFx && !Zotero.isBookmarklet) {
 						// do same origin check
 						var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
@@ -392,7 +393,9 @@ Zotero.Translate.Sandbox = {
 						}
 					}
 					
-					translation._prepareTranslation();
+					return translation._prepareTranslation();
+				})
+				.then(function () {
 					setDefaultHandlers(translate, translation);
 					sandbox = translation._sandboxManager.sandbox;
 					if(!Zotero.Utilities.isEmpty(sandbox.exports)) {
@@ -1252,12 +1255,14 @@ Zotero.Translate.Base.prototype = {
 	/**
 	 * Called when translator has been retrieved and loaded
 	 */
-	"_translateTranslatorLoaded":function() {
+	"_translateTranslatorLoaded": Zotero.Promise.coroutine(function* () {
 		// set display options to default if they don't exist
 		if(!this._displayOptions) this._displayOptions = this._translatorInfo.displayOptions || {};
 		
 		// prepare translation
-		this._prepareTranslation();
+		this.incrementAsyncProcesses("Zotero.Translate#prepareTranslation()");
+		yield this._prepareTranslation();
+		this.decrementAsyncProcesses("Zotero.Translate#prepareTranslation()");
 		
 		Zotero.debug("Translate: Beginning translation with "+this.translator[0].label);
 		
@@ -1272,7 +1277,7 @@ Zotero.Translate.Base.prototype = {
 		}
 		
 		this.decrementAsyncProcesses("Zotero.Translate#translate()");
-	},
+	}),
 	
 	/**
 	 * Return the progress of the import operation, or null if progress cannot be determined
@@ -1773,7 +1778,7 @@ Zotero.Translate.Base.prototype = {
 	/**
 	 * No-op for preparing translation
 	 */
-	"_prepareTranslation":function() {}
+	"_prepareTranslation": function () { return Zotero.Promise.resolve(); }
 }
 
 /**
@@ -1860,7 +1865,7 @@ Zotero.Translate.Web.prototype._getParameters = function() {
 /**
  * Prepare translation
  */
-Zotero.Translate.Web.prototype._prepareTranslation = function() {
+Zotero.Translate.Web.prototype._prepareTranslation = Zotero.Promise.method(function () {
 	this._itemSaver = new Zotero.Translate.ItemSaver({
 		"libraryID":this._libraryID,
 		"collections": this._collections,
@@ -1870,7 +1875,7 @@ Zotero.Translate.Web.prototype._prepareTranslation = function() {
 		"baseURI":this.location
 	});
 	this.newItems = [];
-}
+});
 
 /**
  * Overload translate to set selectedItems
@@ -2171,7 +2176,7 @@ Zotero.Translate.Import.prototype._loadTranslatorPrepareIO = function(translator
 /**
  * Prepare translation
  */
-Zotero.Translate.Import.prototype._prepareTranslation = function() {
+Zotero.Translate.Import.prototype._prepareTranslation = Zotero.Promise.method(function () {
 	this._progress = undefined;
 	
 	var baseURI = null;
@@ -2190,7 +2195,7 @@ Zotero.Translate.Import.prototype._prepareTranslation = function() {
 	});
 	this.newItems = [];
 	this.newCollections = [];
-}
+});
 
 /**
  * Return the progress of the import operation, or null if progress cannot be determined
@@ -2296,7 +2301,7 @@ Zotero.Translate.Export.prototype.getTranslators = function() {
 /**
  * Does the actual export, after code has been loaded and parsed
  */
-Zotero.Translate.Export.prototype._prepareTranslation = function() {
+Zotero.Translate.Export.prototype._prepareTranslation = Zotero.Promise.coroutine(function* () {
 	this._progress = undefined;
 	
 	// initialize ItemGetter
@@ -2309,13 +2314,13 @@ Zotero.Translate.Export.prototype._prepareTranslation = function() {
 		getCollections = configOptions.getCollections || false;
 	switch (this._export.type) {
 		case 'collection':
-			this._itemGetter.setCollection(this._export.collection, getCollections);
+			yield this._itemGetter.setCollection(this._export.collection, getCollections);
 			break;
 		case 'items':
 			this._itemGetter.setItems(this._export.items);
 			break;
 		case 'library':
-			this._itemGetter.setAll(this._export.id, getCollections);
+			yield this._itemGetter.setAll(this._export.id, getCollections);
 			break;
 		default:
 			throw new Error('No export set up');
@@ -2344,7 +2349,7 @@ Zotero.Translate.Export.prototype._prepareTranslation = function() {
 	}
 	
 	this._sandboxManager.importObject(this._io);
-}
+});
 
 /**
  * Overload Zotero.Translate.Base#translate to make sure that

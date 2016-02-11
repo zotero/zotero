@@ -657,45 +657,36 @@ Zotero.Translate.ItemGetter.prototype = {
 		this.numItems = this._itemsLeft.length;
 	},
 	
-	"setCollection":function(collection, getChildCollections) {
+	"setCollection": Zotero.Promise.coroutine(function* (collection, getChildCollections) {
 		// get items in this collection
-		var haveItems = {};
-		this._itemsLeft = collection.getChildItems();
-		for each(var item in this._itemsLeft) haveItems[item.id] = true;
-		if(!this._itemsLeft) {
-			this._itemsLeft = [];
-		}
+		yield collection.loadChildItems();
+		var items = new Set(collection.getChildItems());
 		
 		if(getChildCollections) {
 			// get child collections
-			this._collectionsLeft = Zotero.getCollections(collection.id, true); // TODO: Replace with Zotero.Collections.getByParent()
+			this._collectionsLeft = yield Zotero.Collections.getByParent(collection.id, true);
 			
 			// get items in child collections
-			for each(var collection in this._collectionsLeft) {
+			for (let collection of this._collectionsLeft) {
+				yield collection.loadChildItems();
 				var childItems = collection.getChildItems();
-				if(childItems) {
-					for each(var item in childItems) {
-						if(!haveItems[item.id]) {
-							haveItems[item.id] = true;
-							this._itemsLeft.push(item);;
-						}
-					}
-				}
+				childItems.forEach(item => items.add(item));
 			}
 		}
 		
+		this._itemsLeft = Array.from(items.values);
 		this.numItems = this._itemsLeft.length;
-	},
+	}),
 	
-	"setAll": function (libraryID, getChildCollections) {
-		this._itemsLeft = Zotero.Items.getAll(libraryID, true);
+	"setAll": Zotero.Promise.coroutine(function* (libraryID, getChildCollections) {
+		this._itemsLeft = yield Zotero.Items.getAll(libraryID, true);
 		
 		if(getChildCollections) {
-			this._collectionsLeft = Zotero.getCollections(null, true, libraryID); // TODO: Replace with Zotero.Collections.getByLibrary()
+			this._collectionsLeft = yield Zotero.Collections.getByLibrary(libraryID, true);
 		}
 		
 		this.numItems = this._itemsLeft.length;
-	},
+	}),
 	
 	"exportFiles":function(dir, extension) {
 		// generate directory
