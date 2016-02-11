@@ -816,7 +816,7 @@ Zotero_Preferences.Keys = {
 		for (var i=0; i<rows.length; i++) {
 			// Display the appropriate modifier keys for the platform
 			let label = rows[i].firstChild.nextSibling;
-			if (label.className == 'cmd-shift') {
+			if (label.className == 'modifier') {
 				label.value = Zotero.isMac ? Zotero.getString('general.keys.cmdShift') : Zotero.getString('general.keys.ctrlShift');
 			}
 		}

@@ -682,10 +682,10 @@ describe("Zotero.CollectionTreeView", function() {
 			it('should add a translated feed item recovered from an URL', function* (){
 				var feed = yield createFeed();
 				var collection = yield createDataObject('collection', false, { skipSelect: true });
-				var url = getTestDataItemUrl('metadata/journalArticle-single.html');
+				var url = getTestDataUrl('metadata/journalArticle-single.html');
 				var feedItem = yield createDataObject('feedItem', {libraryID: feed.libraryID}, { skipSelect: true });
 				feedItem.setField('url', url);
-				yield feedItem.forceSaveTx();
+				yield feedItem.saveTx();
 				var translateFn = sinon.spy(feedItem, 'translate');
 				
 				// Add observer to wait for collection add

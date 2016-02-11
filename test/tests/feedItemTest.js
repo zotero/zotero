@@ -23,11 +23,11 @@ describe("Zotero.FeedItem", function () {
 		it("should accept required fields as arguments", function* () {
 			let guid = Zotero.randomString();
 			let feedItem = new Zotero.FeedItem();
-			yield assert.isRejected(feedItem.forceSaveTx());
+			yield assert.isRejected(feedItem.saveTx());
 			
 			feedItem = new Zotero.FeedItem('book', { guid });
 			feedItem.libraryID = libraryID;
-			yield assert.isFulfilled(feedItem.forceSaveTx());
+			yield assert.isFulfilled(feedItem.saveTx());
 			
 			assert.equal(feedItem.itemTypeID, Zotero.ItemTypes.getID('book'));
 			assert.equal(feedItem.guid, guid);
@@ -83,7 +83,7 @@ describe("Zotero.FeedItem", function () {
 			expectedTimestamp = Date.now();
 			feedItem.isRead = true;
 			yield Zotero.Promise.delay(2001);
-			yield feedItem.forceSaveTx();
+			yield feedItem.saveTx();
 			
 			readTime = yield Zotero.DB.valueQueryAsync('SELECT readTime FROM feedItems WHERE itemID=?', feedItem.id);
 			readTime = Zotero.Date.sqlToDate(readTime, true).getTime();
@@ -107,41 +107,36 @@ describe("Zotero.FeedItem", function () {
 		})
 	});
 	describe("#save()", function() {
-		it("should require edit check override", function* () {
-			let feedItem = new Zotero.FeedItem('book', { guid: Zotero.randomString() });
-			feedItem.libraryID = feed.libraryID;
-			yield assert.isRejected(feedItem.saveTx(), /^Error: Cannot edit feedItem in read-only library/);
-		});
 		it("should require feed being set", function* () {
 			let feedItem = new Zotero.FeedItem('book', { guid: Zotero.randomString() });
 			// Defaults to user library ID
-			yield assert.isRejected(feedItem.forceSaveTx(), /^Error: Cannot add /);
+			yield assert.isRejected(feedItem.saveTx(), /^Error: Cannot add /);
 		});
 		it("should require GUID being set", function* () {
 			let feedItem = new Zotero.FeedItem('book');
 			feedItem.libraryID = feed.libraryID;
-			yield assert.isRejected(feedItem.forceSaveTx(),  /^Error: GUID must be set before saving FeedItem$/);
+			yield assert.isRejected(feedItem.saveTx(),  /^Error: GUID must be set before saving FeedItem$/);
 		});
 		it("should require a unique GUID", function* () {
 			let guid = Zotero.randomString();
 			let feedItem1 = yield createDataObject('feedItem', { libraryID, guid });
 			
 			let feedItem2 = createUnsavedDataObject('feedItem', { libraryID, guid });
-			yield assert.isRejected(feedItem2.forceSaveTx());
+			yield assert.isRejected(feedItem2.saveTx());
 			
 			// But we should be able to save it after deleting the original feed
-			yield feedItem1.forceEraseTx();
-			yield assert.isFulfilled(feedItem2.forceSaveTx());
+			yield feedItem1.eraseTx();
+			yield assert.isFulfilled(feedItem2.saveTx());
 		});
 		it("should require item type being set", function* () {
 			let feedItem = new Zotero.FeedItem(null, { guid: Zotero.randomString() });
 			feedItem.libraryID = feed.libraryID;
-			yield assert.isRejected(feedItem.forceSaveTx(),  /^Error: Item type must be set before saving$/);
+			yield assert.isRejected(feedItem.saveTx(),  /^Error: Item type must be set before saving$/);
 		});
 		it("should save feed item", function* () {
 			let guid = Zotero.randomString();
 			let feedItem = createUnsavedDataObject('feedItem', { libraryID, guid });
-			yield assert.isFulfilled(feedItem.forceSaveTx());
+			yield assert.isFulfilled(feedItem.saveTx());
 			
 			feedItem = yield Zotero.FeedItems.getAsync(feedItem.id);
 			assert.ok(feedItem);
@@ -155,7 +150,7 @@ describe("Zotero.FeedItem", function () {
 				let feedItem = new Zotero.FeedItem(null, type, feed.libraryID);
 				feedItem.fromJSON(allTypesAndFields[type]);
 				
-				yield feedItem.forceSaveTx();
+				yield feedItem.saveTx();
 				
 				feedItems.push(feedItem);
 			}
@@ -172,7 +167,7 @@ describe("Zotero.FeedItem", function () {
 			let feedItem = yield createDataObject('feedItem', { libraryID });
 			
 			feedItem.setField('title', 'bar');
-			yield assert.isFulfilled(feedItem.forceSaveTx());
+			yield assert.isFulfilled(feedItem.saveTx());
 			assert.equal(feedItem.getField('title'), 'bar');
 		});
 	});
@@ -180,15 +175,22 @@ describe("Zotero.FeedItem", function () {
 		it("should erase an existing feed item", function* () {
 			let feedItem = yield createDataObject('feedItem', { libraryID });
 			
-			yield feedItem.forceEraseTx();
+			yield feedItem.eraseTx();
 			assert.isFalse(yield Zotero.FeedItems.getAsync(feedItem.id));
 			
-			//yield assert.isRejected(feedItem.forceEraseTx(), "does not allow erasing twice");
+			//yield assert.isRejected(feedItem.EraseTx(), "does not allow erasing twice");
 		});
-		it("should require edit check override to erase", function* () {
-			let feedItem = yield createDataObject('feedItem', { libraryID });
+		it("should remove synced setting if exists", function* () {
+			let item = yield createDataObject('feedItem', { libraryID });
 			
-			yield assert.isRejected(feedItem.eraseTx(), /^Error: Cannot edit feedItem in read-only library/);
+			yield item.toggleRead();
+			let syncedSettings = feed.getSyncedSettings();
+			assert.ok(syncedSettings.markedAsRead[item.guid]);
+			
+			yield item.eraseTx();
+			
+			syncedSettings = feed.getSyncedSettings();
+			assert.notOk(syncedSettings.markedAsRead[item.guid]);
 		});
 	});
 	
@@ -196,7 +198,7 @@ describe("Zotero.FeedItem", function () {
 		it('should toggle state', function* () {
 			let item = yield createDataObject('feedItem', { libraryID });
 			item.isRead = false;
-			yield item.forceSaveTx();
+			yield item.saveTx();
 			
 			yield item.toggleRead();
 			assert.isTrue(item.isRead, "item is toggled to read state");
@@ -204,7 +206,7 @@ describe("Zotero.FeedItem", function () {
 		it('should save if specified state is different from current', function* (){
 			let item = yield createDataObject('feedItem', { libraryID });
 			item.isRead = false;
-			yield item.forceSaveTx();
+			yield item.saveTx();
 			sinon.spy(item, 'save');
 
 			yield item.toggleRead(true);
@@ -215,6 +217,17 @@ describe("Zotero.FeedItem", function () {
 			yield item.toggleRead(true);
 			assert.isFalse(item.save.called, "item was not saved on toggle read to same state");
 		});
+		it('should set relevant synced settings', function* () {
+			let item = yield createDataObject('feedItem', { libraryID });
+			item.isRead = false;
+			yield item.saveTx();
+			
+			yield item.toggleRead();
+			
+			let feed = Zotero.Feeds.get(item.libraryID);
+			let syncedSettings = feed.getSyncedSettings();
+			assert.ok(syncedSettings.markedAsRead[item.guid], "item marked as read stored in synced settings");	
+		});
 	});
 	
 	describe('#translate()', function() {
@@ -224,9 +237,9 @@ describe("Zotero.FeedItem", function () {
 		});
 		it('translates and saves items', function* () {
 			var feedItem = yield createDataObject('feedItem', {libraryID});
-			var url = getTestDataItemUrl('metadata/journalArticle-single.html');
+			var url = getTestDataUrl('metadata/journalArticle-single.html');
 			feedItem.setField('url', url);
-			yield feedItem.forceSaveTx();
+			yield feedItem.saveTx();
 			
 			yield feedItem.translate();
 			
@@ -237,9 +250,9 @@ describe("Zotero.FeedItem", function () {
 			let collection = yield createDataObject('collection', {libraryID: group.libraryID});
 			
 			var feedItem = yield createDataObject('feedItem', {libraryID});
-			var url = getTestDataItemUrl('metadata/journalArticle-single.html');
+			var url = getTestDataUrl('metadata/journalArticle-single.html');
 			feedItem.setField('url', url);
-			yield feedItem.forceSaveTx();
+			yield feedItem.saveTx();
 			
 			yield feedItem.translate(group.libraryID, collection.id);
 			

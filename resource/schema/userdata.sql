@@ -203,7 +203,6 @@ CREATE TABLE feeds (
     lastUpdate TIMESTAMP,
     lastCheck TIMESTAMP,
     lastCheckError TEXT,
-    lastGUID TEXT,
     cleanupAfter INT,
     refreshInterval INT,
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE

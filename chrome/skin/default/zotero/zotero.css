@@ -450,6 +450,10 @@ label.zotero-text-link {
 	transform: none;
 }
 
+#zotero-feed-settings grid hbox:first-child {
+	-moz-box-pack: end;
+}
+
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.5dppx) {
 	#zotero-toolbar-save-button,#zotero-toolbar-save-button-single  { list-style-image: url("chrome://zotero/skin/treeitem-webpage@2x.png"); }

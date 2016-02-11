@@ -2,9 +2,9 @@
 
 describe("Zotero.FeedReader", function () {
 	
-	var htmlUrl = getTestDataItemUrl("test.html");
+	var htmlUrl = getTestDataUrl("test.html");
 	
-	var feedUrl = getTestDataItemUrl("feed.rss");
+	var feedUrl = getTestDataUrl("feed.rss");
 	var feedInfo = {
 		title: 'Liftoff News',
 		subtitle: 'Liftoff to Space Exploration.',
@@ -18,7 +18,7 @@ describe("Zotero.FeedReader", function () {
 		language: 'en-us'
 	};
 	
-	var detailedFeedUrl = getTestDataItemUrl("feedDetailed.rss");
+	var detailedFeedUrl = getTestDataUrl("feedDetailed.rss");
 	var detailedFeedInfo = {
 		title: 'Feed',
 		subtitle: 'Feed Description',
@@ -106,20 +106,15 @@ describe("Zotero.FeedReader", function () {
 		});
 		
 		it('should parse items correctly for a sparse feed', function* () {
-			let expected = {
-				guid: 'http://liftoff.msfc.nasa.gov/2003/06/03.html#item573',
+			let expected = { guid: 'http://liftoff.msfc.nasa.gov/2003/06/03.html#item573',
 				title: 'Star City',
 				abstractNote: 'How do Americans get ready to work with Russians aboard the International Space Station? They take a crash course in culture, language and protocol at Russia\'s Star City.',
 				url: 'http://liftoff.msfc.nasa.gov/news/2003/news-starcity.asp',
-				creators: [{
-					firstName: '',
-					lastName: 'editor@example.com',
-					creatorType: 'author',
-					fieldMode: 1
-				}],
+				creators: [{ firstName: '', lastName: 'editor@example.com', creatorType: 'author', fieldMode: 1 }],
 				date: 'Tue, 03 Jun 2003 09:39:21 GMT',
 				language: 'en-us',
-				itemType: 'journalArticle'
+				itemType: 'journalArticle',
+				enclosedItems: [{ url: 'http://www.example.com/example.pdf', contentType: 'application/pdf' }]
 			};
 		
 			let fr = new Zotero.FeedReader(feedUrl);
@@ -149,7 +144,8 @@ describe("Zotero.FeedReader", function () {
 				publisher: 'Publisher',
 				rights: '©2016 Published by Publisher',
 				language: 'en',
-				itemType: 'journalArticle'
+				itemType: 'journalArticle',
+				enclosedItems: []
 			};
 		
 			let fr = new Zotero.FeedReader(detailedFeedUrl);

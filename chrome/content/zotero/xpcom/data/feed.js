@@ -70,6 +70,8 @@ Zotero.Feed = function(params = {}) {
 	this._feedUnreadCount = null;
 	
 	this._updating = false;
+	this._syncedSettings = null;
+	this._previousURL = null;
 }
 
 Zotero.Feed._colToProp = function(c) {
@@ -79,13 +81,13 @@ Zotero.Feed._colToProp = function(c) {
 Zotero.extendClass(Zotero.Library, Zotero.Feed);
 
 Zotero.defineProperty(Zotero.Feed, '_unreadCountSQL', {
-	value: "(SELECT COUNT(*) FROM items I JOIN feedItems FeI USING (itemID)"
-			+ " WHERE I.libraryID=F.libraryID AND FeI.readTime IS NULL) AS _feedUnreadCount"
+	value: "(SELECT COUNT(*) FROM items I JOIN feedItems FI USING (itemID)"
+			+ " WHERE I.libraryID=F.libraryID AND FI.readTime IS NULL) AS _feedUnreadCount"
 });
 
 Zotero.defineProperty(Zotero.Feed, '_dbColumns', {
 	value: Object.freeze(['name', 'url', 'lastUpdate', 'lastCheck',
-		'lastCheckError', 'lastGUID', 'cleanupAfter', 'refreshInterval'])
+		'lastCheckError', 'cleanupAfter', 'refreshInterval'])
 });
 
 Zotero.defineProperty(Zotero.Feed, '_primaryDataSQLParts');
@@ -130,7 +132,7 @@ for (let i=0; i<accessors.length; i++) {
 		set: function(v) this._set(prop, v)
 	})
 }
-let getters = ['lastCheck', 'lastUpdate', 'lastCheckError', 'lastGUID'];
+let getters = ['lastCheck', 'lastUpdate', 'lastCheckError'];
 for (let i=0; i<getters.length; i++) {
 	let name = getters[i];
 	let prop = Zotero.Feed._colToProp(name);
@@ -179,6 +181,7 @@ Zotero.Feed.prototype._set = function (prop, val) {
 			if (uri.scheme !== 'http' && uri.scheme !== 'https') {
 				throw new Error(invalidUrlError);
 			}
+			this._previousURL = this.url;
 			break;
 		case '_feedRefreshInterval':
 		case '_feedCleanupAfter':
@@ -212,7 +215,6 @@ Zotero.Feed.prototype._loadDataFromRow = function(row) {
 	this._feedLastCheckError = row._feedLastCheckError || null;
 	this._feedLastCheck = row._feedLastCheck || null;
 	this._feedLastUpdate = row._feedLastUpdate || null;
-	this._feedLastGUID = row._feedLastGUID || null;
 	this._feedCleanupAfter = parseInt(row._feedCleanupAfter) || null;
 	this._feedRefreshInterval = parseInt(row._feedRefreshInterval) || null;
 	this._feedUnreadCount = parseInt(row._feedUnreadCount);
@@ -225,7 +227,7 @@ Zotero.Feed.prototype._reloadFromDB = Zotero.Promise.coroutine(function* () {
 });
 
 Zotero.defineProperty(Zotero.Feed.prototype, '_childObjectTypes', {
-	value: Object.freeze(['feedItem'])
+	value: Object.freeze(['feedItem', 'item'])
 });
 
 Zotero.Feed.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
@@ -285,17 +287,78 @@ Zotero.Feed.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 });
 
 Zotero.Feed.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
-	let changedURL = this._changed._feedUrl;
-	
 	yield Zotero.Feed._super.prototype._finalizeSave.apply(this, arguments);
 	
-	if (env.isNew) {
-		Zotero.Feeds.register(this);
-	} else if (changedURL) {
+	if (!env.isNew && this._previousURL) {
 		// Re-register library if URL changed
 		Zotero.Feeds.unregister(this.libraryID);
-		Zotero.Feeds.register(this);
+		
+		let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds') || {};
+		delete syncedFeeds[this._previousURL];
+		yield Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', syncedFeeds);
 	}
+	if (env.isNew || this._previousURL) {
+		Zotero.Feeds.register(this);
+		yield this.storeSyncedSettings();
+	}
+	this._previousURL = null;
+	
+});
+
+Zotero.Feed.prototype._finalizeErase = Zotero.Promise.coroutine(function* (){
+	let notifierData = {};
+	notifierData[this.libraryID] = {
+		libraryID: this.libraryID
+	};
+	Zotero.Notifier.trigger('delete', 'feed', this.id, notifierData);
+	Zotero.Feeds.unregister(this.libraryID);
+
+	let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds') || {};
+	delete syncedFeeds[this.url];
+	if (Object.keys(syncedFeeds).length == 0) {
+		yield Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, 'feeds');
+	} else {
+		yield Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', syncedFeeds);
+	}
+	
+	return Zotero.Feed._super.prototype._finalizeErase.apply(this, arguments);
+});
+
+Zotero.Feed.prototype.erase = Zotero.Promise.coroutine(function* (options = {}) {
+	let childItemIDs = yield Zotero.FeedItems.getAll(this.id, false, false, true);
+	yield Zotero.FeedItems.erase(childItemIDs);
+	
+	yield Zotero.Feed._super.prototype.erase.call(this, options);
+});
+
+Zotero.Feed.prototype.getSyncedSettings = function () {
+	if (!this._syncedSettings) {
+		let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds') || {};
+		this._syncedSettings = syncedFeeds[this.url];
+	}
+	if (!this._syncedSettings) {
+		this._syncedSettings = {
+			url: this.url,
+			name: this.name,
+			cleanupAfter: this.cleanupAfter,
+			refreshInterval: this.refreshInterval,
+			markedAsRead: {}
+		};
+	}
+	return this._syncedSettings;
+};
+
+Zotero.Feed.prototype.setSyncedSettings = Zotero.Promise.coroutine(function* (syncedSettings, store=false) {
+	this._syncedSettings = syncedSettings;
+	if (store) {
+		return this.storeSyncedSettings();
+	}
+});
+
+Zotero.Feed.prototype.storeSyncedSettings = Zotero.Promise.coroutine(function* () {
+	let syncedFeeds = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'feeds') || {};
+	syncedFeeds[this.url] = this.getSyncedSettings();
+	return Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', syncedFeeds);
 });
 
 Zotero.Feed.prototype.getExpiredFeedItemIDs = Zotero.Promise.coroutine(function* () {
@@ -304,32 +367,49 @@ Zotero.Feed.prototype.getExpiredFeedItemIDs = Zotero.Promise.coroutine(function*
 		+ "WHERE I.libraryID=? "
 		+ "AND readTime IS NOT NULL "
 		+ "AND julianday('now', 'utc') - (julianday(readTime, 'utc') + ?) > 0";
-	let expiredIDs = yield Zotero.DB.queryAsync(sql, [this.id, {int: this.cleanupAfter}]);
-	return expiredIDs.map(row => row.id);
+	return Zotero.DB.columnQueryAsync(sql, [this.id, {int: this.cleanupAfter}]);
 });
 
-Zotero.Feed.prototype.clearExpiredItems = Zotero.Promise.coroutine(function* () {
+/**
+ * Clearing conditions for an item:
+ * - Has been read at least feed.cleanupAfter earlier AND
+ * - Does not exist in the RSS feed anymore
+ * 
+ * If we clear items once they've been read, we may potentially end up
+ * with empty feeds for those that do not update very frequently.
+ */
+Zotero.Feed.prototype.clearExpiredItems = Zotero.Promise.coroutine(function* (itemsInFeedIDs) {
+	itemsInFeedIDs = itemsInFeedIDs || new Set();
 	try {
 		// Clear expired items
 		if (this.cleanupAfter) {
 			let expiredItems = yield this.getExpiredFeedItemIDs();
-			Zotero.debug("Cleaning up read feed items...");
-			if (expiredItems.length) {
-				Zotero.debug(expiredItems.join(', '));
-				yield Zotero.FeedItems.forceErase(expiredItems);
+			let toClear = expiredItems;
+			if (itemsInFeedIDs.size) {
+				toClear = [];
+				for (let id of expiredItems) {
+					if (!itemsInFeedIDs.has(id)) {
+						toClear.push(id);
+					}
+				}
+			}
+			Zotero.debug("Clearing up read feed items...");
+			if (toClear.length) {
+				Zotero.debug(toClear.join(', '));
+				yield Zotero.FeedItems.erase(toClear);
 			} else {
 				Zotero.debug("No expired feed items");
 			}
 		}
 	} catch(e) {
-		Zotero.debug("Error clearing expired feed items.");
+		Zotero.debug("Error clearing expired feed items");
 		Zotero.debug(e);
 	}
+	return this.storeSyncedSettings();
 });
 
 Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
-	var toAdd = [];
-	var createNew = true;
+	var toSave = [], attachmentsToAdd = [], feedItemIDs = new Set();
 	if (this._updating) {
 		return this._updating;
 	}
@@ -338,49 +418,59 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 	Zotero.Notifier.trigger('statusChanged', 'feed', this.id);
 	this._set('_feedLastCheckError', null);
 	
-	yield this.clearExpiredItems();
 	try {
 		let fr = new Zotero.FeedReader(this.url);
 		yield fr.process();
 		let itemIterator = new fr.ItemIterator();
-		let item, processedGUIDs = [];
+		let item, processedGUIDs = new Set();
 		while (item = yield itemIterator.next().value) {
-			// Append id at the end to prevent same item collisions from different feeds
-			// when to terminate item retrieval.
-			item.guid += ":" + this.id;
-			if (item.guid == this.lastGUID) {
-				Zotero.debug("Feed#update: last seen item reached (" + this.lastGUID + ")");
-				Zotero.debug(item);
-				// Don't create new items (expired and deleted), but update existing ones
-				createNew = false;
-			}
-			
-			if (processedGUIDs.indexOf(item.guid) != -1) {
-				Zotero.debug("Feed item " + item.guid + " already processed from feed.");
+			if (processedGUIDs.has(item.guid)) {
+				Zotero.debug("Feed item " + item.guid + " already processed from feed");
 				continue;
 			}
-			processedGUIDs.push(item.guid);
+			processedGUIDs.add(item.guid);
 			
-			Zotero.debug("New feed item retrieved:", 5);
+			Zotero.debug("Feed item retrieved:", 5);
 			Zotero.debug(item, 5);
 			
 			let feedItem = yield Zotero.FeedItems.getAsyncByGUID(item.guid);
-			if (!feedItem && createNew) {
+			if (feedItem) {
+				feedItemIDs.add(feedItem.id);
+			}
+			if (!feedItem) {
+				Zotero.debug("Creating new feed item " + item.guid);
 				feedItem = new Zotero.FeedItem();
 				feedItem.guid = item.guid;
 				feedItem.libraryID = this.id;
-			} else if(! feedItem.isTranslated) {
-				Zotero.debug("Feed item " + item.guid + " already in library.");
+			} else if (!feedItem.isTranslated) {
+				// TODO: maybe handle enclosed items on update better
+				item.enclosedItems = [];
+				
+				// TODO figure out a better GUID collision resolution system
+				// that works with sync.
+				if (feedItem.libraryID != this.libraryID) {
+					let otherFeed = Zotero.Feeds.get(feedItem.libraryID);
+					Zotero.debug("Feed item " + feedItem.url + " from " + this.url + 
+						" exists in a different feed " + otherFeed.url + ". Skipping");
+					continue;
+				}
+				
+				Zotero.debug("Feed item " + item.guid + " already in library");
 				Zotero.debug("Updating metadata");
-				yield feedItem.loadItemData();
-				yield feedItem.loadCreators();
 			} else {
-				// Either has been translated or beyond lastGUID
+				// Not new and has been translated
+				Zotero.debug("Feed item " + item.guid + " is not new and has already been translated. Skipping");
 				continue;
+			}
+			
+			for (let enclosedItem of item.enclosedItems) {
+				enclosedItem.parentItem = feedItem;
+				attachmentsToAdd.push(enclosedItem);
 			}
 			
 			// Delete invalid data
 			delete item.guid;
+			delete item.enclosedItems;
 			feedItem.fromJSON(item);
 			
 			if (!feedItem.hasChanged()) {
@@ -388,7 +478,7 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 				continue
 			}
 			feedItem.isRead = false;
-			toAdd.push(feedItem);
+			toSave.push(feedItem);
 		}
 	}
 	catch (e) {
@@ -398,18 +488,24 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 		}
 		this._set('_feedLastCheckError', e.message || 'Error processing feed');
 	}
-	if (toAdd.length) {
+	if (toSave.length) {
 		yield Zotero.DB.executeTransaction(function* () {
 			// Save in reverse order
-			for (let i=toAdd.length-1; i>=0; i--) {
-				// Saving currently has to happen sequentially so as not to violate the
-				// unique constraints in itemDataValues (FIXME)
-				yield toAdd[i].save({skipEditCheck: true});
+			for (let i=toSave.length-1; i>=0; i--) {
+				yield toSave[i].save();
 			}
+			
 		});
 		this._set('_feedLastUpdate', Zotero.Date.dateToSQL(new Date(), true));
-		this._set('_feedLastGUID', toAdd[0].guid);
 	}
+	for (let attachment of attachmentsToAdd) {
+		if (attachment.url.indexOf('pdf') != -1 || attachment.contentType.indexOf('pdf') != -1) {
+			attachment.parentItemID = attachment.parentItem.id;
+			attachment.title = Zotero.getString('fileTypes.pdf');
+			yield Zotero.Attachments.linkFromURL(attachment);
+		}
+	}
+	yield this.clearExpiredItems(feedItemIDs);
 	this._set('_feedLastCheck', Zotero.Date.dateToSQL(new Date(), true));
 	yield this.saveTx();
 	yield this.updateUnreadCount();
@@ -427,23 +523,6 @@ Zotero.Feed.prototype.updateFeed = Zotero.Promise.coroutine(function* () {
 	}
 });
 
-Zotero.Feed.prototype._finalizeErase = Zotero.Promise.coroutine(function* (){
-	let notifierData = {};
-	notifierData[this.libraryID] = {
-		libraryID: this.libraryID
-	};
-	Zotero.Notifier.trigger('delete', 'feed', this.id, notifierData);
-	Zotero.Feeds.unregister(this.libraryID);
-	return Zotero.Feed._super.prototype._finalizeErase.apply(this, arguments);
-});
-
-Zotero.Feed.prototype.erase = Zotero.Promise.coroutine(function* (options = {}) {
-	let childItemIDs = yield Zotero.FeedItems.getAll(this.id, false, false, true);
-	yield Zotero.FeedItems.forceErase(childItemIDs);
-	
-	yield Zotero.Feed._super.prototype.erase.call(this, options);
-});
-
 Zotero.Feed.prototype.updateUnreadCount = Zotero.Promise.coroutine(function* () {
 	let sql = "SELECT " + Zotero.Feed._unreadCountSQL
 		+ " FROM feeds F JOIN libraries L USING (libraryID)"
@@ -454,4 +533,10 @@ Zotero.Feed.prototype.updateUnreadCount = Zotero.Promise.coroutine(function* () 
 		this._feedUnreadCount = newCount;
 		Zotero.Notifier.trigger('unreadCountUpdated', 'feed', this.id);
 	}
+});
+
+Zotero.Feed.prototype.updateFromJSON = Zotero.Promise.coroutine(function* (json) {
+	yield this.updateFeed();
+	yield Zotero.FeedItems.markAsReadByGUID(Object.keys(json.markedAsRead));
+	yield this.updateUnreadCount();
 });

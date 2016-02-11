@@ -626,7 +626,8 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 				yield Zotero.Searches.init();
 				yield Zotero.Creators.init();
 				yield Zotero.Groups.init();
-				yield Zotero.Relations.init()
+				yield Zotero.Relations.init();
+				yield Zotero.Feeds.init();
 				
 				let libraryIDs = Zotero.Libraries.getAll().map(x => x.libraryID);
 				for (let libraryID of libraryIDs) {

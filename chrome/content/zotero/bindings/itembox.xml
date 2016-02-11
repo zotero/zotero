@@ -341,7 +341,7 @@
 							fieldNames.push(Zotero.ItemFields.getName(fields[i]));
 						}
 						
-						if (! (this.item instanceof Zotero.FeedItem)) {
+						if (!(this.item instanceof Zotero.FeedItem)) {
 							fieldNames.push("dateAdded", "dateModified");
 						}
 					}

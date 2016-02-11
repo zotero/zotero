@@ -724,11 +724,14 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 	switch (collectionType) {
 		case 'library':
 		case 'feed':
+			// Better alternative needed: https://github.com/zotero/zotero/pull/902#issuecomment-183185973
+			/*
 			if (treeRow.ref.updating) {
 				collectionType += '-updating';
 			} else if (treeRow.ref.lastCheckError) {
 				collectionType += '-error';
 			}
+			*/
 			break;
 		
 		case 'trash':
@@ -1337,7 +1340,7 @@ Zotero.CollectionTreeView.prototype._rememberOpenStates = Zotero.Promise.corouti
 		var open = this.isContainerOpen(i);
 		
 		// Collections and feeds default to closed
-		if (!open && treeRow.isCollection() || treeRow.isFeed()) {
+		if ((!open && treeRow.isCollection()) || treeRow.isFeed()) {
 			delete state[treeRow.id];
 			continue;
 		}
@@ -1938,7 +1941,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		}
 		
 		var items = yield Zotero.Items.getAsync(ids);
-		if (!items) {
+		if (items.length == 0) {
 			return;
 		}
 		

@@ -152,13 +152,13 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('editable', function () {
 	if (this.isTrash() || this.isShare() || this.isBucket()) {
 		return false;
 	}
+	if (this.isGroup() || this.isFeed()) {
+		return this.ref.editable;
+	}
 	if (!this.isWithinGroup() || this.isPublications()) {
 		return true;
 	}
 	var libraryID = this.ref.libraryID;
-	if (this.isGroup() || this.isFeed()) {
-		return this.ref.editable;
-	}
 	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled()) {
 		var type = Zotero.Libraries.get(libraryID).libraryType;
 		if (type == 'group') {

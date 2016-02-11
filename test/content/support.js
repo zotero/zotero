@@ -385,11 +385,7 @@ function createUnsavedDataObject(objectType, params = {}) {
 
 var createDataObject = Zotero.Promise.coroutine(function* (objectType, params = {}, saveOptions) {
 	var obj = createUnsavedDataObject(objectType, params);
-	if (objectType == 'feedItem') {
-		yield obj.forceSaveTx(saveOptions);
-	} else {
-		yield obj.saveTx(saveOptions);
-	}
+	yield obj.saveTx(saveOptions);
 	return obj;
 });
 
@@ -453,8 +449,12 @@ function getTestDataDirectory() {
 	       QueryInterface(Components.interfaces.nsIFileURL).file;
 }
 
-function getTestDataItemUrl(path) {
-	return OS.Path.join("resource://zotero-unit-tests/data", path);
+function getTestDataUrl(path) {
+	path = path.split('/');
+	if (path[0].length == 0) {
+		path.splice(0, 1);
+	}
+	return "resource://zotero-unit-tests/data/" + path.join('/');
 }
 
 /**
