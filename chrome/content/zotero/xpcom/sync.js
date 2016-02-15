@@ -1232,9 +1232,9 @@ Zotero.Sync.Server = new function () {
 		}
 		
 		Zotero.debug('Getting Zotero sync password');
-		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
-								.getService(Components.interfaces.nsILoginManager);
 		try {
+			var loginManager = Components.classes["@mozilla.org/login-manager;1"]
+									.getService(Components.interfaces.nsILoginManager);
 			var logins = loginManager.findLogins({}, _loginManagerHost, null, _loginManagerRealm);
 		}
 		catch (e) {
