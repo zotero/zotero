@@ -139,15 +139,6 @@ CREATE TABLE itemTags (
 );
 CREATE INDEX itemTags_tagID ON itemTags(tagID);
 
-CREATE TABLE itemSeeAlso (
-    itemID INT NOT NULL,
-    linkedItemID INT NOT NULL,
-    PRIMARY KEY (itemID, linkedItemID),
-    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
-    FOREIGN KEY (linkedItemID) REFERENCES items(itemID) ON DELETE CASCADE
-);
-CREATE INDEX itemSeeAlso_linkedItemID ON itemSeeAlso(linkedItemID);
-
 CREATE TABLE creators (
     creatorID INTEGER PRIMARY KEY,
     firstName TEXT,
