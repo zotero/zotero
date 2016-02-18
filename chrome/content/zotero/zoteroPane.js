@@ -1756,7 +1756,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		if (!this.canEdit()) {
+		if (!this.canEdit() && !collectionTreeRow.isFeed()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -2523,9 +2523,9 @@ var ZoteroPane = new function()
 				if (canMarkRead) {
 					show.push(m.toggleRead);
 					if (markUnread) {
-						menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.items.markAsUnread'));
+						menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.item.markAsUnread'));
 					} else {
-						menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.items.markAsRead'));
+						menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.item.markAsRead'));
 					}
 				}
 				
@@ -2618,9 +2618,9 @@ var ZoteroPane = new function()
 					else if (item.isFeedItem) {
 						show.push(m.toggleRead);
 						if (item.isRead) {
-							menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.collections.menu.toggleRead.markUnread'));
+							menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.item.markAsUnread'));
 						} else {
-							menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.collections.menu.toggleRead.markRead'));
+							menu.childNodes[m.toggleRead].setAttribute('label', Zotero.getString('pane.item.markAsRead'));
 						}
 					}
 					else {
@@ -2654,11 +2654,12 @@ var ZoteroPane = new function()
 		
 		if (!collectionTreeRow.editable || collectionTreeRow.isPublications()) {
 			for (let i in m) {
-				// Still show export/bib/report for non-editable views
+				// Still allow export/bib/report/read for non-editable views
 				switch (i) {
 					case 'exportItems':
 					case 'createBib':
 					case 'loadReport':
+					case 'toggleRead':
 						continue;
 				}
 				if (isTrash) {

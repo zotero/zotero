@@ -54,6 +54,10 @@ Zotero.Feeds = new function() {
 		cache.urlByLibraryID[feed.libraryID] = feed.url;
 	}
 	
+	this.init = function () {
+		return this.scheduleNextFeedCheck();
+	}
+	
 	this.unregister = function (libraryID) {
 		if (!this._cache) throw new Error("Zotero.Feeds cache is not initialized");
 		

@@ -131,7 +131,7 @@ describe("Zotero.Items", function () {
 			
 			let feedItem = new Zotero.FeedItem('journalArticle', { guid: Zotero.randomString() });
 			feedItem.libraryID = feed.libraryID;
-			let id = yield feedItem.forceSaveTx();
+			let id = yield feedItem.saveTx();
 			
 			feedItem = yield Zotero.Items.getAsync(id);
 			

@@ -385,11 +385,7 @@ function createUnsavedDataObject(objectType, params = {}) {
 
 var createDataObject = Zotero.Promise.coroutine(function* (objectType, params = {}, saveOptions) {
 	var obj = createUnsavedDataObject(objectType, params);
-	if (objectType == 'feedItem') {
-		yield obj.forceSaveTx(saveOptions);
-	} else {
-		yield obj.saveTx(saveOptions);
-	}
+	yield obj.saveTx(saveOptions);
 	return obj;
 });
 

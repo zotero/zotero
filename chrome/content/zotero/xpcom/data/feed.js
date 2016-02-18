@@ -225,7 +225,7 @@ Zotero.Feed.prototype._reloadFromDB = Zotero.Promise.coroutine(function* () {
 });
 
 Zotero.defineProperty(Zotero.Feed.prototype, '_childObjectTypes', {
-	value: Object.freeze(['feedItem'])
+	value: Object.freeze(['feedItem', 'item'])
 });
 
 Zotero.Feed.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
@@ -327,7 +327,7 @@ Zotero.Feed.prototype.clearExpiredItems = Zotero.Promise.coroutine(function* () 
 });
 
 Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
-	var toAdd = [];
+	var toAdd = [], attachmentsToAdd = [];
 	var createNew = true;
 	if (this._updating) {
 		return this._updating;
@@ -369,6 +369,9 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 				feedItem.guid = item.guid;
 				feedItem.libraryID = this.id;
 			} else if(!feedItem.isTranslated) {
+				// TODO: maybe handle enclosed items on update better
+				item.enclosedItems = [];
+				
 				Zotero.debug("Feed item " + item.guid + " already in library");
 				Zotero.debug("Updating metadata");
 				yield feedItem.loadItemData();
@@ -378,8 +381,14 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 				continue;
 			}
 			
+			for (let enclosedItem of item.enclosedItems) {
+				enclosedItem.parentItem = feedItem;
+				attachmentsToAdd.push(enclosedItem);
+			}
+			
 			// Delete invalid data
 			delete item.guid;
+			delete item.enclosedItems;
 			feedItem.fromJSON(item);
 			
 			if (!feedItem.hasChanged()) {
@@ -401,11 +410,19 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 		yield Zotero.DB.executeTransaction(function* () {
 			// Save in reverse order
 			for (let i=toAdd.length-1; i>=0; i--) {
-				yield toAdd[i].save({skipEditCheck: true});
+				yield toAdd[i].save();
 			}
+			
 		});
 		this._set('_feedLastUpdate', Zotero.Date.dateToSQL(new Date(), true));
 		this._set('_feedLastGUID', toAdd[0].guid);
+	}
+	for (let attachment of attachmentsToAdd) {
+		if (attachment.url.indexOf('pdf') != -1 || attachment.contentType.indexOf('pdf') != -1) {
+			attachment.parentItemID = attachment.parentItem.id;
+			attachment.title = Zotero.getString('fileTypes.pdf');
+			yield Zotero.Attachments.linkFromURL(attachment);
+		}
 	}
 	this._set('_feedLastCheck', Zotero.Date.dateToSQL(new Date(), true));
 	yield this.saveTx();

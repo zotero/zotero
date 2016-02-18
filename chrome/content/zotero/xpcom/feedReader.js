@@ -462,6 +462,8 @@ Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
 	
 	Zotero.FeedReader._guessItemType(item);
 	
+	item.enclosedItems = Zotero.FeedReader._getEnclosedItems(feedEntry);
+	
 	return item;
 }
 
@@ -500,4 +502,20 @@ Zotero.FeedReader._getFeedField = function(feedEntry, field, namespace) {
 	} catch(e) {}
 	
 	return;
+}
+
+Zotero.FeedReader._getEnclosedItems = function(feedEntry) {
+	var enclosedItems = [];
+	
+	if (feedEntry.enclosures) {
+		for (let i = 0; i < feedEntry.enclosures.length; i++) {
+			let elem = feedEntry.enclosures.queryElementAt(0, Components.interfaces.nsIPropertyBag2);
+			if (elem.get('url')) {
+				let enclosedItem = {url: elem.get('url'), contentType: elem.get('type') || ''};
+				enclosedItems.push(enclosedItem);
+			}
+		}
+	}
+	
+	return enclosedItems;
 }

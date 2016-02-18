@@ -14,7 +14,7 @@ describe("Zotero.FeedItems", function () {
 		});
 		it("should return feed item id from GUID", function* () {
 			let feedItem = yield createDataObject('feedItem', { libraryID: feed.libraryID });
-			yield feedItem.forceSaveTx();
+			yield feedItem.saveTx();
 			
 			let id2 = yield Zotero.FeedItems.getIDFromGUID(feedItem.guid);
 			assert.equal(id2, feedItem.id);
@@ -24,7 +24,7 @@ describe("Zotero.FeedItems", function () {
 		it("should return feed item from GUID", function* () {
 			let guid = Zotero.randomString();
 			let feedItem = yield createDataObject('feedItem', { guid, libraryID: feed.libraryID });
-			yield feedItem.forceSaveTx();
+			yield feedItem.saveTx();
 			
 			let feedItem2 = yield Zotero.FeedItems.getAsyncByGUID(guid);
 			assert.equal(feedItem2.id, feedItem.id);
@@ -48,7 +48,7 @@ describe("Zotero.FeedItems", function () {
 			for (let i = 0; i < 10; i++) {
 				let item = yield createDataObject('feedItem', { guid: Zotero.randomString(), libraryID: feed.id });
 				item.isRead = true;
-				yield item.forceSaveTx();
+				yield item.saveTx();
 				items.push(item);
 			}
 			ids = Array.map(items, (i) => i.id);
@@ -66,7 +66,7 @@ describe("Zotero.FeedItems", function () {
 	
 		it('should toggle all items read if at least one unread', function* () {
 			items[0].isRead = false;
-			yield items[0].forceSaveTx();
+			yield items[0].saveTx();
 			
 			yield Zotero.FeedItems.toggleReadByID(ids);
 			
@@ -85,7 +85,7 @@ describe("Zotero.FeedItems", function () {
 
 		it('should toggle all items unread if unread state specified', function* () {
 			items[0].isRead = false;
-			yield items[0].forceSaveTx();
+			yield items[0].saveTx();
 
 			yield Zotero.FeedItems.toggleReadByID(ids, false);
 

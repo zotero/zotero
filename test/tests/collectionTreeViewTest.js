@@ -685,7 +685,7 @@ describe("Zotero.CollectionTreeView", function() {
 				var url = getTestDataUrl('metadata/journalArticle-single.html');
 				var feedItem = yield createDataObject('feedItem', {libraryID: feed.libraryID}, { skipSelect: true });
 				feedItem.setField('url', url);
-				yield feedItem.forceSaveTx();
+				yield feedItem.saveTx();
 				var translateFn = sinon.spy(feedItem, 'translate');
 				
 				// Add observer to wait for collection add

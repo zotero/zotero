@@ -42,12 +42,11 @@ describe("Zotero.Feed", function() {
 			yield feed.saveTx();
 			assert.isFalse(feed.editable);
 		});
-		it("should not allow adding items without editCheck override", function* () {
+		it("should allow adding items without editCheck override", function* () {
 			let feed = yield createFeed();
 			let feedItem = new Zotero.FeedItem('book', { guid: Zotero.randomString() });
 			feedItem.libraryID = feed.libraryID;
-			yield assert.isRejected(feedItem.saveTx(), /^Error: Cannot edit feedItem in read-only library/);
-			yield assert.isFulfilled(feedItem.saveTx({ skipEditCheck: true }));
+			yield assert.isFulfilled(feedItem.saveTx());
 		});
 	});
 	
@@ -173,11 +172,11 @@ describe("Zotero.Feed", function() {
 			expiredFeedItem.isRead = true;
 			expiredFeedItem._feedItemReadTime = Zotero.Date.dateToSQL(
 					new Date(Date.now() - 2 * 24*60*60*1000), true);
-			yield expiredFeedItem.forceSaveTx();
+			yield expiredFeedItem.saveTx();
 			
 			readFeedItem = yield createDataObject('feedItem', { libraryID: feed.libraryID });
 			readFeedItem.isRead = true;
-			yield readFeedItem.forceSaveTx();
+			yield readFeedItem.saveTx();
 			
 			feedItem = yield createDataObject('feedItem', { libraryID: feed.libraryID });
 			
@@ -232,7 +231,7 @@ describe("Zotero.Feed", function() {
 		});
 		
 		it('should add new feed items', function* () {
-			let feedItems = yield Zotero.FeedItems.getAll(feed.id);
+			let feedItems = yield Zotero.FeedItems.getAll(feed.id, true);
 			assert.equal(feedItems.length, 3);
 		});
 		
@@ -252,8 +251,11 @@ describe("Zotero.Feed", function() {
 		it('should update modified items and set unread', function* () {
 			let feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573:"+feed.id);
 			feedItem.isRead = true;
-			yield feedItem.forceSaveTx();
+			Zotero.debug(feedItem.isRead, 1);
+			yield feedItem.saveTx();
+			Zotero.debug(feedItem.isRead, 1);
 			feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573:"+feed.id);
+			Zotero.debug(feedItem.isRead, 1);
 			assert.isTrue(feedItem.isRead);
 			
 			let oldDateModified = feedItem.getField('date');
@@ -281,7 +283,7 @@ describe("Zotero.Feed", function() {
 			let feedItems = yield Zotero.FeedItems.getAll(feed.id);
 			for (let feedItem of feedItems) {
 				feedItem.isRead = true;
-				yield feedItem.forceSaveTx();
+				yield feedItem.saveTx();
 			}
 			
 			feed._feedUrl = modifiedFeedUrl;
@@ -291,18 +293,24 @@ describe("Zotero.Feed", function() {
 		});
 		it('should not re-add deleted items, but add new ones', function* () {
 			let feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/05/20.html#item570:"+feed.id);
-			yield feedItem.forceEraseTx();
+			yield feedItem.eraseTx();
 			
 			let feedItems = yield Zotero.FeedItems.getAll(feed.id);
 			for (let feedItem of feedItems) {
 				feedItem.isRead = true;
-				yield feedItem.forceSaveTx();
+				yield feedItem.saveTx();
 			}
 			
 			feed._feedUrl = modifiedFeedUrl;
 			yield feed.updateFeed();
 			
 			assert.equal(feed.unreadCount, 2);	
+		});
+		it('should add a link to enclosed pdfs from <enclosure/> elements', function* () {
+			let feedItem = yield Zotero.FeedItems.getAsyncByGUID("http://liftoff.msfc.nasa.gov/2003/06/03.html#item573:"+feed.id);
+			let pdf = yield Zotero.Items.getAsync(feedItem.getAttachments()[0]);
+			
+			assert.equal(pdf.getField('url'), "http://www.example.com/example.pdf");
 		});
 	});
 	
@@ -311,11 +319,6 @@ describe("Zotero.Feed", function() {
 		before(function* () {
 			feed = yield createFeed();
 		})
-		it("should not allow adding regular items", function* () {
-			let item = new Zotero.Item('book');
-			item.libraryID = feed.libraryID;
-			yield assert.isRejected(item.saveTx({ skipEditCheck: true }), /^Error: Cannot add /);
-		});
 		it("should not allow adding collections", function* () {
 			let collection = new Zotero.Collection({ name: 'test', libraryID: feed.libraryID });
 			yield assert.isRejected(collection.saveTx({ skipEditCheck: true }), /^Error: Cannot add /);
@@ -327,7 +330,7 @@ describe("Zotero.Feed", function() {
 		it("should allow adding feed item", function* () {
 			let feedItem = new Zotero.FeedItem('book', { guid: Zotero.randomString() });
 			feedItem.libraryID = feed.libraryID;
-			yield assert.isFulfilled(feedItem.forceSaveTx());
+			yield assert.isFulfilled(feedItem.saveTx());
 		});
 	});
 })

@@ -757,9 +757,14 @@ Zotero.DataObject.prototype.isEditable = function () {
 
 
 Zotero.DataObject.prototype.editCheck = function () {
+	let library = Zotero.Libraries.get(this.libraryID);
 	if ((this._objectType == 'collection' || this._objectType == 'search')
-			&& Zotero.Libraries.get(this.libraryID).libraryType == 'publications') {
+			&& library.libraryType == 'publications') {
 		throw new Error(this._ObjectTypePlural + " cannot be added to My Publications");
+	}
+	
+	if (library.libraryType == 'feed') {
+		return;
 	}
 	
 	if (!this.isEditable()) {

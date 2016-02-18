@@ -160,13 +160,6 @@ Zotero.FeedItem.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 	return proceed;
 });
 
-Zotero.FeedItem.prototype.forceSaveTx = function(options) {
-	let newOptions = {};
-	Object.assign(newOptions, options || {});
-	newOptions.skipEditCheck = true;
-	return this.saveTx(newOptions);
-}
-
 Zotero.FeedItem.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	yield Zotero.FeedItem._super.prototype._saveData.apply(this, arguments);
 	
@@ -189,13 +182,6 @@ Zotero.FeedItem.prototype.toggleRead = Zotero.Promise.coroutine(function* (state
 		yield feed.updateUnreadCount();
 	}
 });
-
-Zotero.FeedItem.prototype.forceEraseTx = function(options) {
-	let newOptions = {};
-	Object.assign(newOptions, options || {});
-	newOptions.skipEditCheck = true;
-	return this.eraseTx(newOptions);
-};
 
 /**
  * Uses the item url to translate an existing feed item.
@@ -280,7 +266,7 @@ Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (librar
 	
 	this.fromJSON(itemData);
 	this.isTranslated = true;
-	yield this.forceSaveTx();
+	yield this.saveTx();
 	
 	return this;
 });
