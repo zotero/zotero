@@ -469,36 +469,40 @@ Zotero.CollectionTreeView.prototype.notify = Zotero.Promise.coroutine(function* 
 	}
 	else if(action == 'add')
 	{
-		// Multiple adds not currently supported
-		let id = ids[0];
-		let selectRow = !extraData[id] || !extraData[id].skipSelect;
+		// skipSelect isn't necessary if more than one object
+		let selectRow = ids.length == 1 && (!extraData[ids[0]] || !extraData[ids[0]].skipSelect);
 		
-		switch (type)
-		{
-			case 'collection':
-			case 'search':
-				yield this._addSortedRow(type, id);
-				
-				if (selectRow) {
-					if (type == 'collection') {
-						yield this.selectCollection(id);
+		for (let id of ids) {
+			switch (type) {
+				case 'collection':
+				case 'search':
+					yield this._addSortedRow(type, id);
+					
+					if (selectRow) {
+						if (type == 'collection') {
+							yield this.selectCollection(id);
+						}
+						else if (type == 'search') {
+							yield this.selectSearch(id);
+						}
 					}
-					else if (type == 'search') {
-						yield this.selectSearch(id);
+					
+					break;
+				
+				case 'group':
+					if (ids.length != 1) {
+						Zotero.logError("WARNING: Multiple groups shouldn't currently be added "
+							+ "together in collectionTreeView::notify()")
 					}
-				}
+					yield this.reload();
+					yield this.selectByID(currentTreeRow.id);
+					break;
 				
-				break;
-			
-			case 'group':
-				yield this.reload();
-				yield this.selectByID(currentTreeRow.id);
-				break;
-				
-			case 'feed':
-				yield this.reload();
-				yield this.selectByID("L" + id);
-				break;
+				case 'feed':
+					yield this.reload();
+					yield this.selectByID("L" + id);
+					break;
+			}
 		}
 	}
 	

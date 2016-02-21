@@ -215,6 +215,25 @@ describe("Zotero.CollectionTreeView", function() {
 			assert.equal(aRow, bRow + 1);
 		})
 		
+		
+		it("should add multiple collections", function* () {
+			var col1, col2;
+			yield Zotero.DB.executeTransaction(function* () {
+				col1 = createUnsavedDataObject('collection');
+				col2 = createUnsavedDataObject('collection');
+				yield col1.save();
+				yield col2.save();
+			});
+			
+			var aRow = cv.getRowIndexByID("C" + col1.id);
+			var bRow = cv.getRowIndexByID("C" + col2.id);
+			assert.isAbove(aRow, 0);
+			assert.isAbove(bRow, 0);
+			// skipSelect is implied for multiple collections, so library should still be selected
+			assert.equal(cv.selection.currentIndex, 0);
+		});
+		
+		
 		it("shouldn't refresh the items list when a collection is modified", function* () {
 			var collection = yield createDataObject('collection');
 			yield waitForItemsLoad(win);
