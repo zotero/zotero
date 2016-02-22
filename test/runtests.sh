@@ -34,16 +34,16 @@ Options
  -d LEVEL            enable debug logging
  -f                  stop after first test failure
  -g                  only run tests matching the given pattern (grep)
+ -h                  display this help
  -t                  generate test data and quit
  -x FX_EXECUTABLE    path to Firefox executable (default: $FX_EXECUTABLE)
- -b                  skip bundled translator/style installation
  TESTS               set of tests to run (default: all)
 DONE
 	exit 1
 }
 
 DEBUG_LEVEL=0
-while getopts "bcd:fg:tx:" opt; do
+while getopts "bcd:fg:htx:" opt; do
 	case $opt in
         b)
         	FX_ARGS="$FX_ARGS -ZoteroSkipBundledFiles"
@@ -60,6 +60,9 @@ while getopts "bcd:fg:tx:" opt; do
 			;;
 		g)
 			GREP="$OPTARG"
+			;;
+		h)
+			usage
 			;;
 		t)
 			FX_ARGS="$FX_ARGS -makeTestData"
